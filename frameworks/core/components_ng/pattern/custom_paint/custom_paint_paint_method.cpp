@@ -30,7 +30,12 @@
 #include "include/core/SkImage.h"
 #include "include/core/SkPoint.h"
 #include "include/core/SkSurface.h"
+#ifdef NEW_SKIA
+#include "include/core/SkColorFilter.h"
+#include "include/effects/SkImageFilters.h"
+#else
 #include "include/effects/SkBlurImageFilter.h"
+#endif
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkGradientShader.h"
 #include "include/utils/SkParsePath.h"
@@ -310,7 +315,8 @@ void CustomPaintPaintMethod::InitPaintBlend(SkPaint& paint)
         ConvertEnumToSkEnum(globalState_.GetType(), SK_BLEND_MODE_TABLE, BLEND_MODE_SIZE, SkBlendMode::kSrcOver));
 }
 
-SkPaint CustomPaintPaintMethod::GetStrokePaint()
+#ifndef NEW_SKIA
+void CustomPaintPaintMethod::GetStrokePaint(SkPaint& paint)
 {
     static const LinearEnumMapNode<LineJoinStyle, SkPaint::Join> skLineJoinTable[] = {
         { LineJoinStyle::MITER, SkPaint::Join::kMiter_Join },
@@ -322,7 +328,6 @@ SkPaint CustomPaintPaintMethod::GetStrokePaint()
         { LineCapStyle::ROUND, SkPaint::Cap::kRound_Cap },
         { LineCapStyle::SQUARE, SkPaint::Cap::kSquare_Cap },
     };
-    SkPaint paint;
     InitImagePaint(paint);
     paint.setColor(strokeState_.GetColor().GetValue());
     paint.setStyle(SkPaint::Style::kStroke_Style);
@@ -340,12 +345,10 @@ SkPaint CustomPaintPaintMethod::GetStrokePaint()
     if (globalState_.HasGlobalAlpha()) {
         paint.setAlphaf(globalState_.GetAlpha());
     }
-    return paint;
 }
 
 void CustomPaintPaintMethod::InitImagePaint(SkPaint& paint)
 {
-#ifndef NEW_SKIA
     if (smoothingEnabled_) {
         if (smoothingQuality_ == "low") {
             paint.setFilterQuality(SkFilterQuality::kLow_SkFilterQuality);
@@ -359,24 +362,60 @@ void CustomPaintPaintMethod::InitImagePaint(SkPaint& paint)
     } else {
         paint.setFilterQuality(SkFilterQuality::kNone_SkFilterQuality);
     }
+    ClearPaintImage(paint);
+    SetPaintImage(paint);
+}
 #else
+void CustomPaintPaintMethod::GetStrokePaint(SkPaint& paint, SkSamplingOptions& options)
+{
+    static const LinearEnumMapNode<LineJoinStyle, SkPaint::Join> skLineJoinTable[] = {
+        { LineJoinStyle::MITER, SkPaint::Join::kMiter_Join },
+        { LineJoinStyle::ROUND, SkPaint::Join::kRound_Join },
+        { LineJoinStyle::BEVEL, SkPaint::Join::kBevel_Join },
+    };
+    static const LinearEnumMapNode<LineCapStyle, SkPaint::Cap> skLineCapTable[] = {
+        { LineCapStyle::BUTT, SkPaint::Cap::kButt_Cap },
+        { LineCapStyle::ROUND, SkPaint::Cap::kRound_Cap },
+        { LineCapStyle::SQUARE, SkPaint::Cap::kSquare_Cap },
+    };
+    InitImagePaint(paint, options);
+    paint.setColor(strokeState_.GetColor().GetValue());
+    paint.setStyle(SkPaint::Style::kStroke_Style);
+    paint.setStrokeJoin(ConvertEnumToSkEnum(
+        strokeState_.GetLineJoin(), skLineJoinTable, ArraySize(skLineJoinTable), SkPaint::Join::kMiter_Join));
+    paint.setStrokeCap(ConvertEnumToSkEnum(
+        strokeState_.GetLineCap(), skLineCapTable, ArraySize(skLineCapTable), SkPaint::Cap::kButt_Cap));
+    paint.setStrokeWidth(static_cast<SkScalar>(strokeState_.GetLineWidth()));
+    paint.setStrokeMiter(static_cast<SkScalar>(strokeState_.GetMiterLimit()));
+
+    // set line Dash
+    UpdateLineDash(paint);
+
+    // set global alpha
+    if (globalState_.HasGlobalAlpha()) {
+        paint.setAlphaf(globalState_.GetAlpha());
+    }
+}
+
+void CustomPaintPaintMethod::InitImagePaint(SkPaint& paint, SkSamplingOptions& options)
+{
     if (smoothingEnabled_) {
         if (smoothingQuality_ == "low") {
-            options_ = SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone);
+            options = SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone);
         } else if (smoothingQuality_ == "medium") {
-            options_ = SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kLinear);
+            options = SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kLinear);
         } else if (smoothingQuality_ == "high") {
-            options_ = SkSamplingOptions(SkCubicResampler::Mitchell());
+            options = SkSamplingOptions(SkCubicResampler::Mitchell());
         } else {
             LOGE("Unsupported Quality type:%{public}s", smoothingQuality_.c_str());
         }
     } else {
-        options_ = SkSamplingOptions(SkFilterMode::kNearest, SkMipmapMode::kNone);
+        options = SkSamplingOptions(SkFilterMode::kNearest, SkMipmapMode::kNone);
     }
-#endif
     ClearPaintImage(paint);
     SetPaintImage(paint);
 }
+#endif
 
 void CustomPaintPaintMethod::InitImageCallbacks()
 {
@@ -482,7 +521,12 @@ void CustomPaintPaintMethod::FillRect(PaintWrapper* paintWrapper, const Rect& re
 {
     OffsetF offset = GetContentOffset(paintWrapper);
     SkPaint paint;
+#ifndef NEW_SKIA
     InitImagePaint(paint);
+#else
+    SkSamplingOptions options;
+    InitImagePaint(paint, options);
+#endif
     paint.setAntiAlias(antiAlias_);
     paint.setColor(fillState_.GetColor().GetValue());
     paint.setStyle(SkPaint::Style::kFill_Style);
@@ -493,10 +537,10 @@ void CustomPaintPaintMethod::FillRect(PaintWrapper* paintWrapper, const Rect& re
         path.addRect(skRect);
         PaintShadow(path, shadow_, skCanvas_.get());
     }
-    if (fillState_.GetGradient().IsValid()) {
+    if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
         UpdatePaintShader(offset, paint, fillState_.GetGradient());
     }
-    if (fillState_.GetPatternValue().IsValid()) {
+    if (fillState_.GetPatternValue().IsValid() && fillState_.GetPaintStyle() == PaintStyle::ImagePattern) {
         UpdatePaintShader(fillState_.GetPatternValue(), paint);
     }
     if (globalState_.HasGlobalAlpha()) {
@@ -510,7 +554,7 @@ void CustomPaintPaintMethod::FillRect(PaintWrapper* paintWrapper, const Rect& re
 #ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
 #else
-        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, SkSamplingOptions(), &cachePaint_);
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, options, &cachePaint_);
 #endif
         cacheBitmap_.eraseColor(0);
     }
@@ -519,7 +563,13 @@ void CustomPaintPaintMethod::FillRect(PaintWrapper* paintWrapper, const Rect& re
 void CustomPaintPaintMethod::StrokeRect(PaintWrapper* paintWrapper, const Rect& rect)
 {
     OffsetF offset = GetContentOffset(paintWrapper);
-    SkPaint paint = GetStrokePaint();
+    SkPaint paint;
+#ifndef NEW_SKIA
+    GetStrokePaint(paint);
+#else
+    SkSamplingOptions options;
+    GetStrokePaint(paint, options);
+#endif
     paint.setAntiAlias(antiAlias_);
     SkRect skRect = SkRect::MakeLTRB(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
         rect.Right() + offset.GetX(), offset.GetY() + rect.Bottom());
@@ -528,10 +578,10 @@ void CustomPaintPaintMethod::StrokeRect(PaintWrapper* paintWrapper, const Rect& 
         path.addRect(skRect);
         PaintShadow(path, shadow_, skCanvas_.get());
     }
-    if (strokeState_.GetGradient().IsValid()) {
+    if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
         UpdatePaintShader(offset, paint, strokeState_.GetGradient());
     }
-    if (strokeState_.GetPatternValue().IsValid()) {
+    if (strokeState_.GetPatternValue().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::ImagePattern) {
         UpdatePaintShader(strokeState_.GetPatternValue(), paint);
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
@@ -542,7 +592,7 @@ void CustomPaintPaintMethod::StrokeRect(PaintWrapper* paintWrapper, const Rect& 
 #ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
 #else
-        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, SkSamplingOptions(), &cachePaint_);
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, options, &cachePaint_);
 #endif
         cacheBitmap_.eraseColor(0);
     }
@@ -552,7 +602,12 @@ void CustomPaintPaintMethod::ClearRect(PaintWrapper* paintWrapper, const Rect& r
 {
     OffsetF offset = GetContentOffset(paintWrapper);
     SkPaint paint;
+#ifndef NEW_SKIA
     InitImagePaint(paint);
+#else
+    SkSamplingOptions options;
+    InitImagePaint(paint, options);
+#endif
     paint.setAntiAlias(antiAlias_);
     paint.setBlendMode(SkBlendMode::kClear);
     auto skRect = SkRect::MakeLTRB(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
@@ -598,17 +653,22 @@ void CustomPaintPaintMethod::Fill(PaintWrapper* paintWrapper)
 {
     OffsetF offset = GetContentOffset(paintWrapper);
     SkPaint paint;
+#ifndef NEW_SKIA
     InitImagePaint(paint);
+#else
+    SkSamplingOptions options;
+    InitImagePaint(paint, options);
+#endif
     paint.setAntiAlias(antiAlias_);
     paint.setColor(fillState_.GetColor().GetValue());
     paint.setStyle(SkPaint::Style::kFill_Style);
     if (HasShadow()) {
         PaintShadow(skPath_, shadow_, skCanvas_.get());
     }
-    if (fillState_.GetGradient().IsValid()) {
+    if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
         UpdatePaintShader(offset, paint, fillState_.GetGradient());
     }
-    if (fillState_.GetPatternValue().IsValid()) {
+    if (fillState_.GetPatternValue().IsValid() && fillState_.GetPaintStyle() == PaintStyle::ImagePattern) {
         UpdatePaintShader(fillState_.GetPatternValue(), paint);
     }
     if (globalState_.HasGlobalAlpha()) {
@@ -622,7 +682,7 @@ void CustomPaintPaintMethod::Fill(PaintWrapper* paintWrapper)
 #ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
 #else
-        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, SkSamplingOptions(), &cachePaint_);
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, options, &cachePaint_);
 #endif
         cacheBitmap_.eraseColor(0);
     }
@@ -640,17 +700,22 @@ void CustomPaintPaintMethod::Fill(PaintWrapper* paintWrapper, const RefPtr<Canva
 void CustomPaintPaintMethod::Path2DFill(const OffsetF& offset)
 {
     SkPaint paint;
+#ifndef NEW_SKIA
     InitImagePaint(paint);
+#else
+    SkSamplingOptions options;
+    InitImagePaint(paint, options);
+#endif
     paint.setAntiAlias(antiAlias_);
     paint.setColor(fillState_.GetColor().GetValue());
     paint.setStyle(SkPaint::Style::kFill_Style);
     if (HasShadow()) {
         PaintShadow(skPath2d_, shadow_, skCanvas_.get());
     }
-    if (fillState_.GetGradient().IsValid()) {
+    if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
         UpdatePaintShader(offset, paint, fillState_.GetGradient());
     }
-    if (fillState_.GetPatternValue().IsValid()) {
+    if (fillState_.GetPatternValue().IsValid() && fillState_.GetPaintStyle() == PaintStyle::ImagePattern) {
         UpdatePaintShader(fillState_.GetPatternValue(), paint);
     }
     if (globalState_.HasGlobalAlpha()) {
@@ -664,7 +729,7 @@ void CustomPaintPaintMethod::Path2DFill(const OffsetF& offset)
 #ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
 #else
-        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, SkSamplingOptions(), &cachePaint_);
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, options, &cachePaint_);
 #endif
         cacheBitmap_.eraseColor(0);
     }
@@ -673,15 +738,21 @@ void CustomPaintPaintMethod::Path2DFill(const OffsetF& offset)
 void CustomPaintPaintMethod::Stroke(PaintWrapper* paintWrapper)
 {
     OffsetF offset = GetContentOffset(paintWrapper);
-    SkPaint paint = GetStrokePaint();
+    SkPaint paint;
+#ifndef NEW_SKIA
+    GetStrokePaint(paint);
+#else
+    SkSamplingOptions options;
+    GetStrokePaint(paint, options);
+#endif
     paint.setAntiAlias(antiAlias_);
     if (HasShadow()) {
         PaintShadow(skPath_, shadow_, skCanvas_.get());
     }
-    if (strokeState_.GetGradient().IsValid()) {
+    if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
         UpdatePaintShader(offset, paint, strokeState_.GetGradient());
     }
-    if (strokeState_.GetPatternValue().IsValid()) {
+    if (strokeState_.GetPatternValue().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::ImagePattern) {
         UpdatePaintShader(strokeState_.GetPatternValue(), paint);
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
@@ -692,7 +763,7 @@ void CustomPaintPaintMethod::Stroke(PaintWrapper* paintWrapper)
 #ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
 #else
-        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, SkSamplingOptions(), &cachePaint_);
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, options, &cachePaint_);
 #endif
         cacheBitmap_.eraseColor(0);
     }
@@ -709,15 +780,21 @@ void CustomPaintPaintMethod::Stroke(PaintWrapper* paintWrapper, const RefPtr<Can
 
 void CustomPaintPaintMethod::Path2DStroke(const OffsetF& offset)
 {
-    SkPaint paint = GetStrokePaint();
+    SkPaint paint;
+#ifndef NEW_SKIA
+    GetStrokePaint(paint);
+#else
+    SkSamplingOptions options;
+    GetStrokePaint(paint, options);
+#endif
     paint.setAntiAlias(antiAlias_);
     if (HasShadow()) {
         PaintShadow(skPath2d_, shadow_, skCanvas_.get());
     }
-    if (strokeState_.GetGradient().IsValid()) {
+    if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
         UpdatePaintShader(offset, paint, strokeState_.GetGradient());
     }
-    if (strokeState_.GetPatternValue().IsValid()) {
+    if (strokeState_.GetPatternValue().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::ImagePattern) {
         UpdatePaintShader(strokeState_.GetPatternValue(), paint);
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
@@ -728,7 +805,7 @@ void CustomPaintPaintMethod::Path2DStroke(const OffsetF& offset)
 #ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
 #else
-        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, SkSamplingOptions(), &cachePaint_);
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, options, &cachePaint_);
 #endif
         cacheBitmap_.eraseColor(0);
     }
@@ -1181,7 +1258,11 @@ void CustomPaintPaintMethod::ClearPaintImage(SkPaint& paint)
     paint.setColorFilter(SkColorFilters::Matrix(matrix));
 #endif
     paint.setMaskFilter(SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 0));
+#ifdef NEW_SKIA
+    paint.setImageFilter(SkImageFilters::Blur(0, 0, nullptr));
+#else
     paint.setImageFilter(SkBlurImageFilter::Make(0, 0, nullptr));
+#endif
 }
 
 void CustomPaintPaintMethod::SetPaintImage(SkPaint& paint)
@@ -1309,21 +1390,21 @@ void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam, 
     float rad = 0.0f;
     if (percent.find("deg") != std::string::npos) {
         size_t index = percent.find("deg");
-        percent = percent.substr(0, index);
+        percent.resize(index);
         std::istringstream iss(percent);
         iss >> rad;
         rad = rad / HALF_CIRCLE_ANGLE * M_PI;
     }
     if (percent.find("turn") != std::string::npos) {
         size_t index = percent.find("turn");
-        percent = percent.substr(0, index);
+        percent.resize(index);
         std::istringstream iss(percent);
         iss >> rad;
         rad = rad * 2 * M_PI;
     }
     if (percent.find("rad") != std::string::npos) {
         size_t index = percent.find("rad");
-        percent = percent.substr(0, index);
+        percent.resize(index);
         std::istringstream iss(percent);
         iss >> rad;
     }
@@ -1429,7 +1510,11 @@ void CustomPaintPaintMethod::SetContrastFilter(const std::string& percent, SkPai
 // https://drafts.fxtf.org/filter-effects/#blurEquivalent
 void CustomPaintPaintMethod::SetBlurFilter(const std::string& percent, SkPaint& paint)
 {
+#ifdef NEW_SKIA
+    paint.setImageFilter(SkImageFilters::Blur(BlurStrToDouble(percent), BlurStrToDouble(percent), nullptr));
+#else
     paint.setImageFilter(SkBlurImageFilter::Make(BlurStrToDouble(percent), BlurStrToDouble(percent), nullptr));
+#endif
 }
 
 void CustomPaintPaintMethod::SetColorFilter(float matrix[20], SkPaint& paint)

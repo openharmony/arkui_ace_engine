@@ -64,8 +64,6 @@ void JSWaterFlowItem::JSBind(BindingTarget globalObj)
     JSClass<JSWaterFlowItem>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSWaterFlowItem>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
-    JSClass<JSWaterFlowItem>::Inherit<JSContainerBase>();
-    JSClass<JSWaterFlowItem>::Inherit<JSViewAbstract>();
-    JSClass<JSWaterFlowItem>::Bind<>(globalObj);
+    JSClass<JSWaterFlowItem>::InheritAndBind<JSContainerBase>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

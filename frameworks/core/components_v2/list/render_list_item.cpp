@@ -267,7 +267,7 @@ void RenderListItem::UpdateTouchRect()
 void RenderListItem::InitDragRecognizer()
 {
     if (!springController_) {
-        springController_ = AceType::MakeRefPtr<Animator>(context_);
+        springController_ = CREATE_ANIMATOR(context_);
     }
     if (dragDetector_) {
         return;

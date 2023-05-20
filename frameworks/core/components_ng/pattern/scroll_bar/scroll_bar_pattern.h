@@ -125,11 +125,22 @@ public:
     void SetOpacity(uint8_t value);
     void SendAccessibilityEvent(AccessibilityEventType eventType);
 
+    void SetChildOffset(float childOffset)
+    {
+        childOffset_ = childOffset;
+    };
+
+    float GetChildOffset() const
+    {
+        return childOffset_;
+    };
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void ValidateOffset(int32_t source);
+    void SetAccessibilityAction();
 
     RefPtr<Animator> scrollEndAnimator_;
     RefPtr<ScrollBarProxy> scrollBarProxy_;
@@ -141,6 +152,8 @@ private:
     float scrollableDistance_ = 0.0f;
     float controlDistance_ = 0.0f;
     float scrollOffset_ = 0.0f;
+
+    float childOffset_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG

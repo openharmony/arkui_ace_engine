@@ -40,16 +40,20 @@ void ProgressPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("scaleCount", std::to_string(GetScaleCount().value_or(progressTheme->GetScaleNumber())).c_str());
     json->Put("scaleWidth", (GetScaleWidth().value_or(progressTheme->GetScaleWidth()).ToString()).c_str());
     json->Put("color", (GetColor().value_or(progressTheme->GetTrackSelectedColor())).ColorToString().c_str());
-    if (GetProgressType().value_or(ProgressType::LINEAR) == ProgressType::CAPSULE) {
-        json->Put("backgroundColor",
-            (GetBackgroundColor().value_or(progressTheme->GetCapsuleBgColor())).ColorToString().c_str());
+    Color defaultBackgroundColor;
+    ProgressType progressType = GetProgressType().value_or(ProgressType::LINEAR);
+    if (progressType == ProgressType::CAPSULE) {
+        defaultBackgroundColor = progressTheme->GetCapsuleBgColor();
+    } else if (progressType == ProgressType::RING) {
+        defaultBackgroundColor = progressTheme->GetRingProgressBgColor();
     } else {
-        json->Put("backgroundColor",
-            (GetBackgroundColor().value_or(progressTheme->GetTrackBgColor())).ColorToString().c_str());
+        defaultBackgroundColor = progressTheme->GetTrackBgColor();
     }
+    json->Put("backgroundColor", (GetBackgroundColor().value_or(defaultBackgroundColor)).ColorToString().c_str());
     json->Put(
         "capsuleBorderColor", (GetBorderColor().value_or(progressTheme->GetBorderColor())).ColorToString().c_str());
     ToJsonValueForCapsule(json);
+    json->Put("progressGradientColor", ToJsonGradientColor().c_str());
 }
 
 std::string ProgressPaintProperty::ProgressOptions() const
@@ -71,22 +75,18 @@ void ProgressPaintProperty::ToJsonValueForCapsule(std::unique_ptr<JsonValue>& js
     auto capsuleStyle = JsonUtil::Create(false);
     auto fontStyle = JsonUtil::Create(false);
     auto font = JsonUtil::Create(false);
-    capsuleStyle->Put(
-        "borderWidth", (GetBorderWidth().value_or(progressTheme->GetBorderWidth())).ToString().c_str());
+    capsuleStyle->Put("borderWidth", (GetBorderWidth().value_or(progressTheme->GetBorderWidth())).ToString().c_str());
     capsuleStyle->Put(
         "borderColor", (GetBorderColor().value_or(progressTheme->GetBorderColor())).ColorToString().c_str());
-    capsuleStyle->Put(
-        "fontColor", (GetTextColor().value_or(progressTheme->GetTextColor())).ColorToString().c_str());
-    capsuleStyle->Put(
-        "content", (GetText().value_or("")).c_str());
-    capsuleStyle->Put(
-        "enableScanEffect", (GetEnableScanEffect().value_or(false)) ? "true" : "false");
-    font->Put(
-        "size", (GetTextSize().value_or(progressTheme->GetTextSize())).ToString().c_str());
+    capsuleStyle->Put("fontColor", (GetTextColor().value_or(progressTheme->GetTextColor())).ColorToString().c_str());
+    capsuleStyle->Put("content", (GetText().value_or("")).c_str());
+    capsuleStyle->Put("enableScanEffect", (GetEnableScanEffect().value_or(false)) ? "true" : "false");
+    font->Put("size", (GetTextSize().value_or(progressTheme->GetTextSize())).ToString().c_str());
     font->Put("style", GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
-        ? "FontStyle.Normal" : "FontStyle.Italic");
+                           ? "FontStyle.Normal"
+                           : "FontStyle.Italic");
     font->Put("weight", V2::ConvertWrapFontWeightToStirng(GetFontWeight().value_or(FontWeight::NORMAL)).c_str());
-    std::vector<std::string>  defaultFamily = { "Sans" };
+    std::vector<std::string> defaultFamily = { "Sans" };
     std::vector<std::string> fontFamilyVector = GetFontFamily().value_or(defaultFamily);
     if (fontFamilyVector.empty()) {
         fontFamilyVector = defaultFamily;
@@ -98,5 +98,37 @@ void ProgressPaintProperty::ToJsonValueForCapsule(std::unique_ptr<JsonValue>& js
     font->Put("family", fontFamily.c_str());
     capsuleStyle->Put("font", font);
     json->Put("capsuleStyle", capsuleStyle);
+}
+
+std::string ProgressPaintProperty::ToJsonGradientColor() const
+{
+    Gradient colors;
+    if (propGradientColor_.has_value()) {
+        colors = propGradientColor_.value();
+    } else {
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, "");
+        auto theme = pipelineContext->GetTheme<ProgressTheme>();
+        auto endColor = theme->GetRingProgressEndSideColor();
+        auto beginColor = theme->GetRingProgressBeginSideColor();
+        GradientColor gradientColorEnd;
+        gradientColorEnd.SetLinearColor(LinearColor(endColor));
+        gradientColorEnd.SetDimension(Dimension(0.0f));
+        colors.AddColor(gradientColorEnd);
+        GradientColor gradientColorBegin;
+        gradientColorBegin.SetLinearColor(LinearColor(beginColor));
+        gradientColorBegin.SetDimension(Dimension(1.0f));
+        colors.AddColor(gradientColorBegin);
+    }
+
+    auto jsonArray = JsonUtil::CreateArray(true);
+    for (size_t index = 0; index < colors.GetColors().size(); ++index) {
+        auto gradientColor = colors.GetColors()[index];
+        auto gradientColorJson = JsonUtil::Create(true);
+        gradientColorJson->Put("color", gradientColor.GetLinearColor().ToColor().ColorToString().c_str());
+        gradientColorJson->Put("offset", std::to_string(gradientColor.GetDimension().Value()).c_str());
+        jsonArray->Put(std::to_string(index).c_str(), gradientColorJson);
+    }
+    return jsonArray->ToString();
 }
 } // namespace OHOS::Ace::NG

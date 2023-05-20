@@ -208,10 +208,10 @@ bool SkiaImage::DrawWithRecordingCanvas(
     recordingCanvas->DrawImageWithParm(GetImage(), std::move(data), rsImageInfo, paint);
 #else
     // TODO:Haw to set SamplingOptions?
-    recordingCanvas->DrawImageWithParm(GetImage(), std::move(data), rsImageInfo, paint);
+    recordingCanvas->DrawImageWithParm(GetImage(), std::move(data), rsImageInfo, options, paint);
 #endif
     return true;
-#else
+#else // !ENABLE_ROSEN_BACKEND
     return false;
 #endif
 }

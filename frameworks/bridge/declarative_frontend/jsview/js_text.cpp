@@ -540,7 +540,7 @@ void JSText::JsDraggable(const JSCallbackInfo& info)
         LOGI("The info is wrong, it is supposed to be an boolean");
         return;
     }
-    TextModel::GetInstance()->SetDraggable(info[0]->IsBoolean());
+    TextModel::GetInstance()->SetDraggable(info[0]->ToBoolean());
 }
 
 void JSText::JsMenuOptionsExtension(const JSCallbackInfo& info)
@@ -599,9 +599,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("focusable", &JSText::JsFocusable);
     JSClass<JSText>::StaticMethod("draggable", &JSText::JsDraggable);
     JSClass<JSText>::StaticMethod("textMenuOptions", &JSText::JsMenuOptionsExtension);
-    JSClass<JSText>::Inherit<JSContainerBase>();
-    JSClass<JSText>::Inherit<JSViewAbstract>();
-    JSClass<JSText>::Bind<>(globalObj);
+    JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

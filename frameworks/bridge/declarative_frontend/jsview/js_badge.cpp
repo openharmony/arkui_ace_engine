@@ -17,13 +17,34 @@
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_trace.h"
-#include "core/components/badge/badge_component.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/badge/badge_view.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/pattern/badge/badge_model_ng.h"
+#include "frameworks/bridge/declarative_frontend/jsview/models/badge_model_impl.h"
+
+namespace OHOS::Ace {
+std::unique_ptr<BadgeModel> BadgeModel::instance_ = nullptr;
+std::mutex BadgeModel::mutex_;
+
+BadgeModel* BadgeModel::GetInstance()
+{
+    if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
+#ifdef NG_BUILD
+            instance_.reset(new NG::BadgeModelNG());
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::BadgeModelNG());
+            } else {
+                instance_.reset(new Framework::BadgeModelImpl());
+            }
+#endif
+        }
+    }
+    return instance_.get();
+}
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-
 void JSBadge::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -36,26 +57,15 @@ void JSBadge::Create(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        CreateNG(info);
-        return;
-    }
-
-    auto badge = AceType::MakeRefPtr<OHOS::Ace::BadgeComponent>();
-    SetDefaultTheme(badge);
-
-    auto obj = JSRef<JSObject>::Cast(info[0]);
-    SetCustomizedTheme(obj, badge);
-
-    ViewStackProcessor::GetInstance()->ClaimElementId(badge);
-    ViewStackProcessor::GetInstance()->Push(badge);
+    BadgeParameters badgeParameters = CreateBadgeParameters(info);
+    BadgeModel::GetInstance()->Create(badgeParameters);
 }
 
-void JSBadge::CreateNG(const JSCallbackInfo& info)
+BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
 {
     auto obj = JSRef<JSObject>::Cast(info[0]);
 
-    NG::BadgeView::BadgeParameters badgeParameters;
+    BadgeParameters badgeParameters;
     auto value = obj->GetProperty("value");
     if (!value->IsNull() && value->IsString()) {
         auto label = value->ToString();
@@ -90,13 +100,9 @@ void JSBadge::CreateNG(const JSCallbackInfo& info)
         CalcDimension badgeSize;
         if (ParseJsDimensionFp(badgeSizeValue, badgeSize)) {
             auto badgeTheme = GetTheme<BadgeTheme>();
-            if (!badgeTheme) {
-                LOGE("Get badge theme error");
-                return;
-            }
             if (badgeSize.IsNonNegative() && badgeSize.Unit() != DimensionUnit::PERCENT) {
                 badgeParameters.badgeCircleSize = badgeSize;
-            } else {
+            } else if (!badgeTheme) {
                 badgeParameters.badgeCircleSize = badgeTheme->GetBadgeCircleSize();
             }
         }
@@ -113,7 +119,7 @@ void JSBadge::CreateNG(const JSCallbackInfo& info)
             auto badgeTheme = GetTheme<BadgeTheme>();
             if (!badgeTheme) {
                 LOGW("Get badge theme error");
-                return;
+                return BadgeParameters();
             }
             badgeParameters.badgeBorderWidth = badgeTheme->GetBadgeBorderWidth();
         }
@@ -125,7 +131,7 @@ void JSBadge::CreateNG(const JSCallbackInfo& info)
             auto badgeTheme = GetTheme<BadgeTheme>();
             if (!badgeTheme) {
                 LOGW("Get badge theme error");
-                return;
+                return BadgeParameters();
             }
             badgeParameters.badgeBorderColor = badgeTheme->GetBadgeBorderColor();
         }
@@ -150,7 +156,7 @@ void JSBadge::CreateNG(const JSCallbackInfo& info)
         badgeParameters.badgeMaxCount = maxCount->ToNumber<int32_t>();
     }
 
-    NG::BadgeView::Create(badgeParameters);
+    return badgeParameters;
 }
 
 void JSBadge::JSBind(BindingTarget globalObj)
@@ -160,10 +166,7 @@ void JSBadge::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSBadge>::StaticMethod("create", &JSBadge::Create, opt);
 
-    JSClass<JSBadge>::Inherit<JSContainerBase>();
-    JSClass<JSBadge>::Inherit<JSViewAbstract>();
-
-    JSClass<JSBadge>::Bind(globalObj);
+    JSClass<JSBadge>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSBadge::SetDefaultTheme(OHOS::Ace::RefPtr<OHOS::Ace::BadgeComponent>& badge)
@@ -239,5 +242,4 @@ void JSBadge::SetCustomizedTheme(const JSRef<JSObject>& obj, OHOS::Ace::RefPtr<O
         badge->SetBadgeLabel(label);
     }
 }
-
 } // namespace OHOS::Ace::Framework

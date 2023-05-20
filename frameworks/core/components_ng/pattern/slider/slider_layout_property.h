@@ -64,9 +64,32 @@ public:
         json->Put("style",
             SLIDER_MODE_TO_STRING.at(static_cast<int32_t>(GetSliderMode().value_or(SliderModel::SliderMode::OUTSET)))
                 .c_str());
-        if (GetBlockSize().has_value()) {
-            json->Put("blockSize", GetBlockSize().value().ToString().c_str());
+        auto jsonValue = JsonUtil::Create(true);
+        if (jsonValue) {
+            if (GetBlockSize().has_value()) {
+                jsonValue->Put("width", GetBlockSize().value().Width().ToString().c_str());
+                jsonValue->Put("height", GetBlockSize().value().Height().ToString().c_str());
+            } else {
+                auto sliderMode = GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
+                auto themeBlockSize = sliderMode == SliderModelNG::SliderMode::OUTSET ? theme->GetOutsetBlockSize()
+                                                                                      : theme->GetInsetBlockSize();
+                jsonValue->Put("width", themeBlockSize.ToString().c_str());
+                jsonValue->Put("height", themeBlockSize.ToString().c_str());
+            }
+            json->Put("blockSize", jsonValue);
         }
+    }
+
+    SizeF GetBlockSizeValue(const SizeF& defaultValue)
+    {
+        auto& groupProperty = GetSliderLayoutStyle();
+        if (groupProperty) {
+            if (groupProperty->HasBlockSize()) {
+                return SizeF(groupProperty->GetBlockSizeValue().Width().ConvertToPx(),
+                    groupProperty->GetBlockSizeValue().Height().ConvertToPx());
+            }
+        }
+        return defaultValue;
     }
 
     ACE_DEFINE_PROPERTY_GROUP(SliderLayoutStyle, SliderLayoutStyle)
@@ -74,7 +97,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderLayoutStyle, Thickness, Dimension, PROPERTY_UPDATE_MEASURE)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderLayoutStyle, SliderMode, SliderModel::SliderMode, PROPERTY_UPDATE_MEASURE)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderLayoutStyle, Reverse, bool, PROPERTY_UPDATE_MEASURE)
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderLayoutStyle, BlockSize, SizeF, PROPERTY_UPDATE_MEASURE)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderLayoutStyle, BlockSize, SizeT<Dimension>, PROPERTY_UPDATE_MEASURE)
 private:
     ACE_DISALLOW_COPY_AND_MOVE(SliderLayoutProperty);
 };

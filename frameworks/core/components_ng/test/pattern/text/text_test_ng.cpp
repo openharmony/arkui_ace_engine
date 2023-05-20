@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -39,6 +40,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/adapter/txt_paragraph.h"
 #include "core/components_ng/render/paragraph.h"
+#include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_ng/test/pattern/text/mock/mock_txt_paragraph.h"
@@ -46,6 +48,7 @@
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #undef private
 #undef protected
+#include "core/components_ng/pattern/text/span_model_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -108,6 +111,7 @@ const Color TEXT_DECORATION_COLOR_VALUE = Color::FromRGB(255, 100, 100);
 const Ace::TextCase TEXT_CASE_VALUE = Ace::TextCase::LOWERCASE;
 const Dimension ADAPT_MAX_FONT_SIZE_VALUE = Dimension(200, DimensionUnit::PX);
 const Dimension LETTER_SPACING = Dimension(10, DimensionUnit::PX);
+const Dimension ADAPT_UPDATE_FONTSIZE_VALUE = Dimension(50, DimensionUnit::PX);
 const std::string ROOT_TAG("root");
 constexpr int32_t NODE_ID = 143;
 const Color FOREGROUND_COLOR_VALUE = Color::FOREGROUND;
@@ -123,6 +127,26 @@ DragDropBaseInfo OnDragStartFunction(const RefPtr<OHOS::Ace::DragEvent>&, const 
     return temp;
 };
 void OnDragDropFunction(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) {};
+
+void TestUpdateScenario(const RefPtr<TextPattern>& pattern)
+{
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateFontSize(ADAPT_UPDATE_FONTSIZE_VALUE);
+    pattern->BeforeCreateLayoutWrapper();
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    for (const auto& child : host->GetChildren()) {
+        auto spanNode = AceType::DynamicCast<SpanNode>(child);
+        ASSERT_NE(spanNode, nullptr);
+        auto inheritPropertyInfo = spanNode->CaculateInheritPropertyInfo();
+        auto iter = inheritPropertyInfo.find(PropertyInfo::FONTSIZE);
+        if (iter != inheritPropertyInfo.end()) {
+            EXPECT_EQ(spanNode->GetFontSize().value(), ADAPT_UPDATE_FONTSIZE_VALUE);
+        }
+    }
+}
 } // namespace
 
 struct TestProperty {
@@ -149,6 +173,7 @@ public:
     void SetUp() override;
     void TearDown() override;
     void InitTextObject();
+    RefPtr<SpanNode> CreateSpanNodeWithSetDefaultProperty(const std::string& content);
 
 protected:
     static RefPtr<FrameNode> CreateTextParagraph(const std::string& createValue, const TestProperty& testProperty);
@@ -170,6 +195,23 @@ void TextTestNg::TearDown()
 }
 
 void TextTestNg::InitTextObject() {}
+
+RefPtr<SpanNode> TextTestNg::CreateSpanNodeWithSetDefaultProperty(const std::string& content)
+{
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(content);
+    spanModelNG.SetFontSize(FONT_SIZE_VALUE);
+    spanModelNG.SetTextColor(TEXT_COLOR_VALUE);
+    spanModelNG.SetItalicFontStyle(ITALIC_FONT_STYLE_VALUE);
+    spanModelNG.SetFontWeight(FONT_WEIGHT_VALUE);
+    spanModelNG.SetFontFamily(FONT_FAMILY_VALUE);
+    spanModelNG.SetTextDecoration(TEXT_DECORATION_VALUE);
+    spanModelNG.SetTextDecorationColor(TEXT_DECORATION_COLOR_VALUE);
+    spanModelNG.SetTextCase(TEXT_CASE_VALUE);
+    spanModelNG.SetLetterSpacing(LETTER_SPACING);
+    spanModelNG.SetLineHeight(LINE_HEIGHT_VALUE);
+    return AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
+}
 
 RefPtr<FrameNode> TextTestNg::CreateTextParagraph(const std::string& createValue, const TestProperty& testProperty)
 {
@@ -2353,12 +2395,10 @@ HWTEST_F(TextTestNg, TextAccessibilityPropertyIsSelected001, TestSize.Level1)
     TextModelNG textModel;
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto textPattern = frameNode->GetPattern<TextPattern>();
-    ASSERT_NE(textPattern, nullptr);
     auto textAccessibilityProperty = frameNode->GetAccessibilityProperty<TextAccessibilityProperty>();
     ASSERT_NE(textAccessibilityProperty, nullptr);
     EXPECT_FALSE(textAccessibilityProperty->IsSelected());
-    textPattern->textSelector_.Update(0, TEXT_SIZE_INT);
+    textAccessibilityProperty->SetSelected(true);
     EXPECT_TRUE(textAccessibilityProperty->IsSelected());
 }
 
@@ -2421,11 +2461,8 @@ HWTEST_F(TextTestNg, TextAccessibilityPropertyGetSupportAction001, TestSize.Leve
     std::unordered_set<AceAction> supportAceActions = textAccessibilityProperty->GetSupportAction();
     uint64_t actions = 0, expectActions = 0;
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_COPY);
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SELECT);
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SET_SELECTION);
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_CLEAR_SELECTION);
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
     for (auto action : supportAceActions) {
         actions |= 1UL << static_cast<uint32_t>(action);
     }
@@ -2733,12 +2770,15 @@ HWTEST_F(TextTestNg, DragBase001, TestSize.Level1)
 {
     auto [frameNode, pattern] = Init();
 
-    // test CloseSelectOverlay should reset textSelector
+    // test ResetSelection should reset textSelector
     pattern->CreateHandles();
     pattern->textSelector_.Update(0, 20);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 20);
     pattern->CloseSelectOverlay();
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 20);
+    pattern->ResetSelection();
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
 
@@ -2752,5 +2792,176 @@ HWTEST_F(TextTestNg, DragBase001, TestSize.Level1)
 
     auto height = pattern->GetLineHeight();
     EXPECT_EQ(height, 20);
+}
+
+/**
+ * @tc.name: UpdateChildProperty001
+ * @tc.desc: test UpdateChildProperty function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, UpdateChildProperty001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.fontSizeValue = std::make_optional(FONT_SIZE_VALUE);
+    testProperty.textColorValue = std::make_optional(TEXT_COLOR_VALUE);
+    testProperty.italicFontStyleValue = std::make_optional(ITALIC_FONT_STYLE_VALUE);
+    testProperty.fontWeightValue = std::make_optional(FONT_WEIGHT_VALUE);
+    testProperty.textDecorationValue = std::make_optional(TEXT_DECORATION_VALUE);
+    testProperty.textDecorationColorValue = std::make_optional(TEXT_DECORATION_COLOR_VALUE);
+    testProperty.textCaseValue = std::make_optional(TEXT_CASE_VALUE);
+    testProperty.letterSpacing = std::make_optional(LETTER_SPACING);
+    testProperty.lineHeightValue = std::make_optional(LINE_HEIGHT_VALUE);
+    testProperty.fontFamilyValue = std::make_optional(FONT_FAMILY_VALUE);
+    /**
+     * @tc.steps: step1. create text FrameNode and SpanNode, Update parent FrameNode properties
+     * @tc.expected: Successfully created parent Node and child Node
+     */
+    auto host = CreateTextParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(host, nullptr);
+    SpanModelNG spanModelNG;
+    spanModelNG.Create("span1");
+    auto firstChild = ViewStackProcessor::GetInstance()->Finish();
+    spanModelNG.Create("span2");
+    auto secondChild = ViewStackProcessor::GetInstance()->Finish();
+
+    /**
+     * @tc.steps: step2. SpanNode mount to parent
+     */
+    host->AddChild(firstChild);
+    host->AddChild(secondChild);
+
+    /**
+     * @tc.steps: step3. called BeforeCreateLayoutWrapper function to UpdateChildProperty
+     * @tc.expected: child count is not empty, Child inherits parent property
+     */
+    auto pattern = host->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(host->GetChildren().size(), 2);
+    for (const auto& child : host->GetChildren()) {
+        auto spanNode = AceType::DynamicCast<SpanNode>(child);
+        ASSERT_NE(spanNode, nullptr);
+        EXPECT_EQ(spanNode->GetFontSize().value(), FONT_SIZE_VALUE);
+        EXPECT_EQ(spanNode->GetTextColor().value(), TEXT_COLOR_VALUE);
+        EXPECT_EQ(spanNode->GetItalicFontStyle().value(), ITALIC_FONT_STYLE_VALUE);
+        EXPECT_EQ(spanNode->GetFontWeight().value(), FONT_WEIGHT_VALUE);
+        EXPECT_EQ(spanNode->GetTextDecoration().value(), TEXT_DECORATION_VALUE);
+        EXPECT_EQ(spanNode->GetTextDecorationColor().value(), TEXT_DECORATION_COLOR_VALUE);
+        EXPECT_EQ(spanNode->GetTextCase().value(), TEXT_CASE_VALUE);
+        EXPECT_EQ(spanNode->GetLetterSpacing().value(), LETTER_SPACING);
+        EXPECT_EQ(spanNode->GetLineHeight().value(), LINE_HEIGHT_VALUE);
+        EXPECT_EQ(spanNode->GetFontFamily().value(), FONT_FAMILY_VALUE);
+    }
+
+    /**
+     * @tc.steps: step4. Update parent fontsize property, called BeforeCreateLayoutWrapper again
+     * @tc.expected: Child update fontsize property
+     */
+    TestUpdateScenario(pattern);
+}
+
+/**
+ * @tc.name: UpdateChildProperty002
+ * @tc.desc: test UpdateChildProperty function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, UpdateChildProperty002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    /**
+     * @tc.steps: step1. create text FrameNode and SpanNode, Update child FrameNode properties
+     * @tc.expected: Successfully created parent Node and child Node
+     */
+    auto host = CreateTextParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(host, nullptr);
+    auto firstChild = CreateSpanNodeWithSetDefaultProperty("SPANNODE");
+    auto secondChild = CreateSpanNodeWithSetDefaultProperty("spanNode");
+
+    /**
+     * @tc.steps: step2. SpanNode mount to parent
+     */
+    host->AddChild(firstChild);
+    host->AddChild(secondChild);
+
+    /**
+     * @tc.steps: step3. called BeforeCreateLayoutWrapper function to UpdateChildProperty
+     * @tc.expected: child count is not empty, Child use owner property
+     */
+    auto pattern = host->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(host->GetChildren().size(), 2);
+    for (const auto& child : host->GetChildren()) {
+        auto spanNode = AceType::DynamicCast<SpanNode>(child);
+        ASSERT_NE(spanNode, nullptr);
+        EXPECT_EQ(spanNode->GetFontSize().value(), FONT_SIZE_VALUE);
+        EXPECT_EQ(spanNode->GetTextColor().value(), TEXT_COLOR_VALUE);
+        EXPECT_EQ(spanNode->GetItalicFontStyle().value(), ITALIC_FONT_STYLE_VALUE);
+        EXPECT_EQ(spanNode->GetFontWeight().value(), FONT_WEIGHT_VALUE);
+        EXPECT_EQ(spanNode->GetTextDecoration().value(), TEXT_DECORATION_VALUE);
+        EXPECT_EQ(spanNode->GetTextDecorationColor().value(), TEXT_DECORATION_COLOR_VALUE);
+        EXPECT_EQ(spanNode->GetTextCase().value(), TEXT_CASE_VALUE);
+        EXPECT_EQ(spanNode->GetLetterSpacing().value(), LETTER_SPACING);
+        EXPECT_EQ(spanNode->GetLineHeight().value(), LINE_HEIGHT_VALUE);
+        EXPECT_EQ(spanNode->GetFontFamily().value(), FONT_FAMILY_VALUE);
+    }
+
+    /**
+     * @tc.steps: step4. Update parent fontsize property, called BeforeCreateLayoutWrapper again
+     * @tc.expected: Child use owner property
+     */
+    TestUpdateScenario(pattern);
+}
+
+/**
+ * @tc.name: PerformActionTest001
+ * @tc.desc: Text Accessibility PerformAction test Select ClearSelection and Copy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, PerformActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text, get text frameNode and pattern, set callback function.
+     * @tc.expected: FrameNode and pattern is not null, related function is called.
+     */
+    MockPipelineBase::GetCurrent()->rootNode_ =
+        FrameNode::CreateFrameNodeWithTree(V2::ROOT_ETS_TAG, 0, AceType::MakeRefPtr<RootPattern>());
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateCopyOption(CopyOptions::None);
+    textPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step2. Get text accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto textAccessibilityProperty = frameNode->GetAccessibilityProperty<TextAccessibilityProperty>();
+    ASSERT_NE(textAccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. When text CopyOptions is None, call the callback function in textAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    RectF rect(0.0f, 0.0f, 0.0f, 0.0f);
+    EXPECT_CALL(*(AceType::RawPtr(AceType::DynamicCast<MockRenderContext>(frameNode->renderContext_))),
+        GetPaintRectWithTransform())
+        .WillRepeatedly(Return(rect));
+    EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(1, TEXT_SIZE_INT));
+    EXPECT_TRUE(textAccessibilityProperty->ActActionClearSelection());
+    EXPECT_TRUE(textAccessibilityProperty->ActActionCopy());
+
+    /**
+     * @tc.steps: step4. When text CopyOptions is InApp, call the callback function in textAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    textLayoutProperty->UpdateCopyOption(CopyOptions::InApp);
+    EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(-1, -1));
+    EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(1, TEXT_SIZE_INT));
+    EXPECT_TRUE(textAccessibilityProperty->ActActionClearSelection());
+    EXPECT_TRUE(textAccessibilityProperty->ActActionCopy());
 }
 } // namespace OHOS::Ace::NG

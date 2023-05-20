@@ -266,9 +266,7 @@ void JSSpan::JSBind(BindingTarget globalObj)
     JSClass<JSSpan>::StaticMethod("remoteMessage", &JSSpan::JsRemoteMessage);
     JSClass<JSSpan>::StaticMethod("onClick", &JSSpan::JsOnClick);
     JSClass<JSSpan>::StaticMethod("lineHeight", &JSSpan::SetLineHeight, opt);
-    JSClass<JSSpan>::Inherit<JSContainerBase>();
-    JSClass<JSSpan>::Inherit<JSViewAbstract>();
-    JSClass<JSSpan>::Bind<>(globalObj);
+    JSClass<JSSpan>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSSpan::Create(const JSCallbackInfo& info)

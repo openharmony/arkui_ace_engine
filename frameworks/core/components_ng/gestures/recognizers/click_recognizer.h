@@ -58,6 +58,23 @@ public:
         onAccessibilityEventFunc_ = std::move(onAccessibilityEvent);
     }
 
+    int GetCount()
+    {
+        return count_;
+    }
+
+    GestureEventFunc GetTapActionFunc()
+    {
+        auto callback = [weak = WeakClaim(this)](GestureEvent& info) {
+            auto clickRecognizer = weak.Upgrade();
+            CHECK_NULL_VOID(clickRecognizer);
+            if (clickRecognizer->onAction_) {
+                (*(clickRecognizer->onAction_))(info);
+            }
+        };
+        return callback;
+    }
+
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;

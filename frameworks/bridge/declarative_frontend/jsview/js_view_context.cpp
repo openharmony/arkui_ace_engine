@@ -49,7 +49,7 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         if (!container->GetSettings().usingSharedRuntime) {
             return;
         }
-        if (!container->WindowIsShow()) {
+        if (!container->IsFRSCardContainer() && !container->WindowIsShow()) {
             return;
         }
         auto frontendType = context->GetFrontendType();
@@ -65,9 +65,7 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         context->PrepareOpenImplicitAnimation();
     });
     pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
-    if (!Container::IsCurrentUseNewPipeline()) {
-        pipelineContext->SetSyncAnimationOption(option);
-    }
+    pipelineContext->SetSyncAnimationOption(option);
     // Execute the function.
     JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
     jsAnimateToFunc->Call(info[1]);
@@ -80,7 +78,7 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         if (!container->GetSettings().usingSharedRuntime) {
             return;
         }
-        if (!container->WindowIsShow()) {
+        if (!container->IsFRSCardContainer() && !container->WindowIsShow()) {
             return;
         }
         auto frontendType = context->GetFrontendType();
@@ -95,9 +93,7 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         }
         context->PrepareCloseImplicitAnimation();
     });
-    if (!Container::IsCurrentUseNewPipeline()) {
-        pipelineContext->SetSyncAnimationOption(AnimationOption());
-    }
+    pipelineContext->SetSyncAnimationOption(AnimationOption());
     pipelineContext->CloseImplicitAnimation();
 }
 
@@ -106,15 +102,11 @@ void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOp
 {
     pipelineContext->FlushBuild();
     pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
-    if (!Container::IsCurrentUseNewPipeline()) {
-        pipelineContext->SetSyncAnimationOption(option);
-    }
+    pipelineContext->SetSyncAnimationOption(option);
     JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
     jsAnimateToFunc->Call(info[1]);
     pipelineContext->FlushBuild();
-    if (!Container::IsCurrentUseNewPipeline()) {
-        pipelineContext->SetSyncAnimationOption(AnimationOption());
-    }
+    pipelineContext->SetSyncAnimationOption(AnimationOption());
     pipelineContext->CloseImplicitAnimation();
 }
 
@@ -132,6 +124,11 @@ const AnimationOption JSViewContext::CreateAnimation(const std::unique_ptr<JsonV
     auto delay = animationArgs->GetInt("delay", 0);
     auto iterations = animationArgs->GetInt("iterations", 1);
     auto tempo = animationArgs->GetDouble("tempo", 1.0);
+    if (SystemProperties::GetRosenBackendEnabled() && NearZero(tempo)) {
+        // set duration to 0 to disable animation.
+        LOGI("tempo near 0, set duration to 0.");
+        duration = 0;
+    }
     auto direction = StringToAnimationDirection(animationArgs->GetString("playMode", "normal"));
     RefPtr<Curve> curve;
     auto curveArgs = animationArgs->GetValue("curve");

@@ -107,6 +107,11 @@ common_bin = [
     part_name = "flutter"
   },
   {
+    label = "//third_party/skia:new_skia"
+    subsystem_name = "thirdparty"
+    part_name = "third_party_skia"
+  },
+  {
     label = "//foundation/arkui/napi:ace_napi_ark"
     subsystem_name = "arkui"
     part_name = "napi"
@@ -115,6 +120,16 @@ common_bin = [
     label = "//arkcompiler/ets_runtime:libark_jsruntime"
     subsystem_name = "arkcompiler"
     part_name = "ets_runtime"
+  },
+  {
+    label = "//arkcompiler/toolchain/tooling:libark_ecma_debugger"
+    subsystem_name = "arkcompiler"
+    part_name = "toolchain"
+  },
+  {
+    label = "//arkcompiler/toolchain/inspector:ark_debugger"
+    subsystem_name = "arkcompiler"
+    part_name = "toolchain"
   },
   {
     label = "//third_party/openssl:libssl_shared"

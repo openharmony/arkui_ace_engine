@@ -19,13 +19,14 @@
 #include <list>
 
 #include "base/memory/ace_type.h"
+#include "base/utils/time_util.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
-#include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
+#include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -371,11 +372,40 @@ bool GestureEventHub::IsAllowedDrag(RefPtr<EventHub> eventHub)
     return true;
 }
 
+void GestureEventHub::StartDragTaskForWeb()
+{
+    auto startTime = std::chrono::high_resolution_clock::now();
+    auto timeElapsed = startTime - gestureInfoForWeb_.GetTimeStamp();
+    auto timeElapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(timeElapsed);
+    // 100 : 100ms
+    if (timeElapsedMs.count() > 100) {
+        LOGW("start drag task for web failed, not received this drag action gesture info");
+        return;
+    }
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskScheduler = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskScheduler);
+
+    taskScheduler->PostTask(
+        [weak = WeakClaim(this)]() {
+            LOGI("web drag task start");
+            auto gestureHub = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(gestureHub);
+            auto dragEventActuator = gestureHub->dragEventActuator_;
+            CHECK_NULL_VOID_NOLOG(dragEventActuator);
+            dragEventActuator->StartDragTaskForWeb(gestureHub->gestureInfoForWeb_);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
 void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 {
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
     if (!IsAllowedDrag(eventHub)) {
+        gestureInfoForWeb_ = info;
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -392,8 +422,15 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         dragDropProxy_ = nullptr;
     }
 #ifdef ENABLE_DRAG_FRAMEWORK
+    auto eventRet = event->GetResult();
+    if (eventRet == DragRet::DRAG_FAIL || eventRet == DragRet::DRAG_CANCEL) {
+        LOGI("HandleOnDragStart: User Set DRAG_FAIL or DRAG_CANCEL");
+        return;
+    }
     std::string udKey;
     auto unifiedData = event->GetData();
+    auto records = unifiedData->GetRecords();
+    int32_t recordsSize = std:min(records.size(), 1);
     SetDragData(unifiedData, udKey);
     auto udmfClient = UDMF::UdmfClient::GetInstance();
     UDMF::Summary summary;
@@ -405,7 +442,13 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     }
     dragDropManager->SetSummaryMap(summary.summary);
     CHECK_NULL_VOID(pixelMap_);
-    std::shared_ptr<Media::PixelMap> pixelMap = pixelMap_->GetPixelMapSharedPtr();
+    std::shared_ptr<Media::PixelMap> pixelMap;
+    if (dragDropInfo.pixelMap) {
+        pixelMap = dragDropInfo.pixelMap->GetPixelMapSharedPtr();
+    }
+    if (pixelMap == nullptr) {
+        pixelMap = pixelMap_->GetPixelMapSharedPtr();
+    }
     if (pixelMap->GetWidth() > Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH ||
         pixelMap->GetHeight() > Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) {
             float scaleWidth = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH) / pixelMap->GetWidth();
@@ -418,8 +461,8 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     uint32_t width = pixelMap->GetWidth();
     uint32_t height = pixelMap->GetHeight();
     DragData dragData {{pixelMap, width * PIXELMAP_WIDTH_RATE, height * PIXELMAP_HEIGHT_RATE}, {}, udKey,
-        static_cast<int32_t>(info.GetSourceDevice()), 1, info.GetPointerId(), info.GetScreenLocation().GetX(),
-        info.GetScreenLocation().GetY(), info.GetDeviceId(), true};
+        static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(),
+        info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY(), info.GetDeviceId(), true};
     ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData, GetDragCallback());
     if (ret != 0) {
         LOGE("InteractionManager: drag start error");
@@ -452,6 +495,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 
 void GestureEventHub::HandleOnDragUpdate(const GestureEvent& info)
 {
+    gestureInfoForWeb_ = info;
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->OnDragMove(info);
 }
@@ -544,22 +588,86 @@ OnAccessibilityEventFunc GestureEventHub::GetOnAccessibilityEventFunc()
 
 bool GestureEventHub::ActClick()
 {
-    CHECK_NULL_RETURN_NOLOG(clickEventActuator_, false);
-    auto click = clickEventActuator_->GetClickEvent();
-    CHECK_NULL_RETURN_NOLOG(click, true);
+    auto host = GetFrameNode();
+    CHECK_NULL_RETURN(host, false);
+    GestureEventFunc click;
     GestureEvent info;
-    click(info);
-    return true;
+    std::chrono::microseconds microseconds(GetMicroTickCount());
+    TimeStamp time(microseconds);
+    info.SetTimeStamp(time);
+    EventTarget clickEventTarget;
+    clickEventTarget.id = host->GetId();
+    clickEventTarget.type = host->GetTag();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto offset = geometryNode->GetFrameOffset();
+    auto size = geometryNode->GetFrameSize();
+    clickEventTarget.area.SetOffset(DimensionOffset(offset));
+    clickEventTarget.area.SetHeight(Dimension(size.Height()));
+    clickEventTarget.area.SetWidth(Dimension(size.Width()));
+    clickEventTarget.origin = DimensionOffset(host->GetOffsetRelativeToWindow() - offset);
+    info.SetTarget(clickEventTarget);
+    Offset globalOffset(offset.GetX(), offset.GetY());
+    info.SetGlobalLocation(globalOffset);
+    if (clickEventActuator_) {
+        click = clickEventActuator_->GetClickEvent();
+        CHECK_NULL_RETURN_NOLOG(click, true);
+        click(info);
+        return true;
+    }
+    RefPtr<ClickRecognizer> clickRecognizer;
+    for (auto gestureRecognizer : gestureHierarchy_) {
+        clickRecognizer = AceType::DynamicCast<ClickRecognizer>(gestureRecognizer);
+        if (clickRecognizer && clickRecognizer->GetFingers() == 1 && clickRecognizer->GetCount() == 1) {
+            click = clickRecognizer->GetTapActionFunc();
+            click(info);
+            host->OnAccessibilityEvent(AccessibilityEventType::CLICK);
+            return true;
+        }
+    }
+    return false;
 }
 
 bool GestureEventHub::ActLongClick()
 {
-    CHECK_NULL_RETURN_NOLOG(longPressEventActuator_, false);
-    auto click = longPressEventActuator_->GetGestureEventFunc();
-    CHECK_NULL_RETURN_NOLOG(click, true);
+    auto host = GetFrameNode();
+    CHECK_NULL_RETURN(host, false);
+    GestureEventFunc click;
     GestureEvent info;
-    click(info);
-    return true;
+    std::chrono::microseconds microseconds(GetMicroTickCount());
+    TimeStamp time(microseconds);
+    info.SetTimeStamp(time);
+    EventTarget longPressTarget;
+    longPressTarget.id = host->GetId();
+    longPressTarget.type = host->GetTag();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto offset = geometryNode->GetFrameOffset();
+    auto size = geometryNode->GetFrameSize();
+    longPressTarget.area.SetOffset(DimensionOffset(offset));
+    longPressTarget.area.SetHeight(Dimension(size.Height()));
+    longPressTarget.area.SetWidth(Dimension(size.Width()));
+    longPressTarget.origin = DimensionOffset(host->GetOffsetRelativeToWindow() - offset);
+    info.SetTarget(longPressTarget);
+    Offset globalOffset(offset.GetX(), offset.GetY());
+    info.SetGlobalLocation(globalOffset);
+    if (longPressEventActuator_) {
+        click = longPressEventActuator_->GetGestureEventFunc();
+        CHECK_NULL_RETURN_NOLOG(click, true);
+        click(info);
+        return true;
+    }
+    RefPtr<LongPressRecognizer> longPressRecognizer;
+    for (auto gestureRecognizer : gestureHierarchy_) {
+        longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(gestureRecognizer);
+        if (longPressRecognizer && longPressRecognizer->GetFingers() == 1) {
+            click = longPressRecognizer->GetLongPressActionFunc();
+            click(info);
+            host->OnAccessibilityEvent(AccessibilityEventType::LONG_PRESS);
+            return true;
+        }
+    }
+    return false;
 }
 
 std::string GestureEventHub::GetHitTestModeStr() const
@@ -651,8 +759,10 @@ OnDragCallback GestureEventHub::GetDragCallback()
 bool GestureEventHub::IsAccessibilityClickable()
 {
     bool ret = IsClickable();
+    RefPtr<ClickRecognizer> clickRecognizer;
     for (auto gestureRecognizer : gestureHierarchy_) {
-        if (AceType::DynamicCast<ClickRecognizer>(gestureRecognizer)) {
+        clickRecognizer = AceType::DynamicCast<ClickRecognizer>(gestureRecognizer);
+        if (clickRecognizer && clickRecognizer->GetFingers() == 1 && clickRecognizer->GetCount() == 1) {
             return true;
         }
     }
@@ -662,8 +772,10 @@ bool GestureEventHub::IsAccessibilityClickable()
 bool GestureEventHub::IsAccessibilityLongClickable()
 {
     bool ret = IsLongClickable();
+    RefPtr<LongPressRecognizer> longPressRecognizer;
     for (auto gestureRecognizer : gestureHierarchy_) {
-        if (AceType::DynamicCast<LongPressRecognizer>(gestureRecognizer)) {
+        longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(gestureRecognizer);
+        if (longPressRecognizer && longPressRecognizer->GetFingers() == 1) {
             return true;
         }
     }

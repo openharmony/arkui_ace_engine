@@ -99,7 +99,7 @@ VisualState JSViewStackProcessor::StringToVisualState(const std::string& stateSt
     if (stateString == "focused") {
         return VisualState::FOCUSED;
     }
-    if (stateString == "pressed") {
+    if (stateString == "pressed" || stateString == "clicked") {
         return VisualState::PRESSED;
     }
     if (stateString == "disabled") {

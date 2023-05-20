@@ -17,9 +17,6 @@
 
 #include "base/utils/utils.h"
 #include "core/components/checkable/checkable_theme.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/radio/radio_layout_algorithm.h"
 #include "core/components_ng/pattern/radio/radio_paint_property.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/property/property.h"
@@ -27,15 +24,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {
-constexpr int DEFAULT_RADIO_ANIMATION_DURATION = 300;
-constexpr float DEFAULT_MID_TIME_SLOT = 0.5;
-constexpr float DEFAULT_END_TIME_SLOT = 1.0;
-constexpr float DEFAULT_SHRINK_TIME_SLOT = 0.9;
-constexpr int FOR_HOTZONESIZE_CALCULATE_MULTIPLY_TWO = 2;
-} // namespace
-
 void RadioPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -94,6 +82,7 @@ void RadioPattern::OnModifyDone()
     layoutProperty->UpdateMargin(margin);
     hotZoneHorizontalPadding_ = radioTheme->GetHotZoneHorizontalPadding();
     hotZoneVerticalPadding_ = radioTheme->GetHotZoneVerticalPadding();
+    defaultPadding_ = radioTheme->GetDefaultPadding();
     InitClickEvent();
     InitTouchEvent();
     InitMouseEvent();
@@ -275,9 +264,7 @@ void RadioPattern::UpdateState()
          */
         if (check) {
             UpdateUIStatus(true);
-            if (!isFirstCreated_) {
-                PlayAnimation(true);
-            }
+            isOnAnimationFlag_ = true;
         } else {
             // If the radio is set to false, set isFirstCreated_ to false.
             isFirstCreated_ = false;
@@ -305,7 +292,7 @@ void RadioPattern::UpdateUncheckStatus(const RefPtr<FrameNode>& frameNode)
         auto radioEventHub = GetEventHub<RadioEventHub>();
         CHECK_NULL_VOID(radioEventHub);
         radioEventHub->UpdateChangeEvent(false);
-        PlayAnimation(false);
+        isOnAnimationFlag_ = false;
     }
     preCheck_ = false;
 }
@@ -332,139 +319,18 @@ void RadioPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bo
         CHECK_NULL_VOID(radioPaintProperty);
         radioPaintProperty->UpdateRadioCheck(check);
         if (!isGroupChanged_) {
-            PlayAnimation(false);
+            isOnAnimationFlag_ = false;
         }
     }
 
     if (!isFirstCreated_) {
         radioEventHub->UpdateChangeEvent(check);
     }
-    // If the radio is set to true at creation time, set isFirstCreated_ to false here.
-    isFirstCreated_ = false;
-}
-
-void RadioPattern::PlayAnimation(bool isOn)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (!onController_) {
-        onController_ = AceType::MakeRefPtr<Animator>(host->GetContext());
-        onController_->AddStopListener(Animator::StatusCallback([weak = AceType::WeakClaim(this)]() {
-            auto radio = weak.Upgrade();
-            if (radio) {
-                radio->UpdateUIStatus(true);
-            }
-        }));
-    }
-    if (!offController_) {
-        offController_ = AceType::MakeRefPtr<Animator>(host->GetContext());
-        offController_->AddStopListener(Animator::StatusCallback([weak = AceType::WeakClaim(this)]() {
-            auto radio = weak.Upgrade();
-            if (radio) {
-                radio->UpdateUIStatus(false);
-            }
-        }));
-    }
-    StopTranslateAnimation();
-    RefPtr<KeyframeAnimation<float>> shrinkEngine = AceType::MakeRefPtr<KeyframeAnimation<float>>();
-    RefPtr<KeyframeAnimation<float>> selectEngine = AceType::MakeRefPtr<KeyframeAnimation<float>>();
-    RefPtr<KeyframeAnimation<float>> selectRingEngine = AceType::MakeRefPtr<KeyframeAnimation<float>>();
-    onController_->ClearInterpolators();
-    offController_->ClearInterpolators();
-    auto shrinkFrameStart = AceType::MakeRefPtr<Keyframe<float>>(0.0, 1.0);
-    auto shrinkFrameMid = AceType::MakeRefPtr<Keyframe<float>>(DEFAULT_MID_TIME_SLOT, DEFAULT_SHRINK_TIME_SLOT);
-    auto shrinkFrameEnd = AceType::MakeRefPtr<Keyframe<float>>(DEFAULT_END_TIME_SLOT, 1.0);
-    shrinkEngine->AddKeyframe(shrinkFrameStart);
-    shrinkEngine->AddKeyframe(shrinkFrameMid);
-    shrinkEngine->AddKeyframe(shrinkFrameEnd);
-    shrinkEngine->SetCurve(Curves::FRICTION);
-    shrinkEngine->AddListener(Animation<float>::ValueCallback([weak = AceType::WeakClaim(this)](float value) {
-        auto radio = weak.Upgrade();
-        if (radio) {
-            radio->UpdateTotalScale(value);
-        }
-    }));
-
-    auto selectFrameStart = AceType::MakeRefPtr<Keyframe<float>>(0.0, isOn ? 0.0 : 0.5);
-    auto selectFrameMid = AceType::MakeRefPtr<Keyframe<float>>(DEFAULT_MID_TIME_SLOT, 0.0);
-    auto selectFrameEnd = AceType::MakeRefPtr<Keyframe<float>>(DEFAULT_END_TIME_SLOT, isOn ? 0.5 : 0.0);
-    selectEngine->AddKeyframe(selectFrameStart);
-    selectEngine->AddKeyframe(selectFrameMid);
-    selectEngine->AddKeyframe(selectFrameEnd);
-    selectEngine->SetCurve(Curves::FRICTION);
-    selectEngine->AddListener(Animation<float>::ValueCallback([weak = AceType::WeakClaim(this)](float value) {
-        auto radio = weak.Upgrade();
-        if (radio) {
-            radio->UpdatePointScale(value);
-        }
-    }));
-
-    auto selectRingFrameStart = AceType::MakeRefPtr<Keyframe<float>>(0.0, isOn ? 1.0 : 0.0);
-    auto selectRingFrameMid = AceType::MakeRefPtr<Keyframe<float>>(DEFAULT_MID_TIME_SLOT, 0.0);
-    auto selectRingFrameEnd = AceType::MakeRefPtr<Keyframe<float>>(DEFAULT_END_TIME_SLOT, isOn ? 0.0 : 1.0);
-    selectRingEngine->AddKeyframe(selectRingFrameStart);
-    selectRingEngine->AddKeyframe(selectRingFrameMid);
-    selectRingEngine->AddKeyframe(selectRingFrameEnd);
-    selectRingEngine->SetCurve(Curves::FRICTION);
-    selectRingEngine->AddListener(Animation<float>::ValueCallback([weak = AceType::WeakClaim(this)](float value) {
-        auto radio = weak.Upgrade();
-        if (radio) {
-            radio->UpdateRingPointScale(value);
-        }
-    }));
-
-    if (isOn) {
-        onController_->AddInterpolator(shrinkEngine);
-        onController_->AddInterpolator(selectEngine);
-        onController_->AddInterpolator(selectRingEngine);
-        onController_->SetDuration(DEFAULT_RADIO_ANIMATION_DURATION);
-        onController_->Play();
-    } else {
-        offController_->AddInterpolator(shrinkEngine);
-        offController_->AddInterpolator(selectEngine);
-        offController_->AddInterpolator(selectRingEngine);
-        offController_->SetDuration(DEFAULT_RADIO_ANIMATION_DURATION);
-        offController_->Play();
-    }
-}
-
-void RadioPattern::StopTranslateAnimation()
-{
-    if (offController_ && !offController_->IsStopped()) {
-        offController_->Stop();
-    }
-    if (onController_ && !onController_->IsStopped()) {
-        onController_->Stop();
-    }
 }
 
 void RadioPattern::UpdateUIStatus(bool check)
 {
     uiStatus_ = check ? UIStatus::SELECTED : UIStatus::UNSELECTED;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkNeedRenderOnly();
-}
-
-void RadioPattern::UpdateTotalScale(float scale)
-{
-    totalScale_ = scale;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkNeedRenderOnly();
-}
-
-void RadioPattern::UpdatePointScale(float scale)
-{
-    pointScale_ = scale;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkNeedRenderOnly();
-}
-
-void RadioPattern::UpdateRingPointScale(float scale)
-{
-    ringPointScale_ = scale;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkNeedRenderOnly();
@@ -548,12 +414,12 @@ bool RadioPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
 // Set the default hot zone for the component.
 void RadioPattern::AddHotZoneRect()
 {
-    hotZoneOffset_.SetX(offset_.GetX() - hotZoneHorizontalPadding_.ConvertToPx());
-    hotZoneOffset_.SetY(offset_.GetY() - hotZoneVerticalPadding_.ConvertToPx());
+    hotZoneOffset_.SetX(offset_.GetX() - defaultPadding_.ConvertToPx() - hotZoneHorizontalPadding_.ConvertToPx());
+    hotZoneOffset_.SetY(offset_.GetY() - defaultPadding_.ConvertToPx() - hotZoneVerticalPadding_.ConvertToPx());
     hotZoneSize_.SetWidth(
-        size_.Width() + FOR_HOTZONESIZE_CALCULATE_MULTIPLY_TWO * hotZoneHorizontalPadding_.ConvertToPx());
+        size_.Width() + 2 * (defaultPadding_.ConvertToPx() + hotZoneHorizontalPadding_.ConvertToPx()));
     hotZoneSize_.SetHeight(
-        size_.Height() + FOR_HOTZONESIZE_CALCULATE_MULTIPLY_TWO * hotZoneVerticalPadding_.ConvertToPx());
+        size_.Height() + 2 * (defaultPadding_.ConvertToPx() + hotZoneVerticalPadding_.ConvertToPx()));
     DimensionRect hotZoneRegion;
     hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize_.Width()), Dimension(hotZoneSize_.Height())));
     hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset_.GetX()), Dimension(hotZoneOffset_.GetY())));

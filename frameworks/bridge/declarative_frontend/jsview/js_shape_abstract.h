@@ -40,7 +40,7 @@ public:
     static void JsHeight(const JSCallbackInfo& info);
     static void JsSize(const JSCallbackInfo& info);
 
-    static void JSBind();
+    static void JSBind(BindingTarget globalObj);
 
     const RefPtr<BasicShape>& GetBasicShape() const
     {

@@ -228,9 +228,7 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("height", &JSGrid::JsGridHeight);
     JSClass<JSGrid>::StaticMethod("onItemDrop", &JSGrid::JsOnGridDrop);
     JSClass<JSGrid>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
-    JSClass<JSGrid>::Inherit<JSContainerBase>();
-    JSClass<JSGrid>::Inherit<JSViewAbstract>();
-    JSClass<JSGrid>::Bind<>(globalObj);
+    JSClass<JSGrid>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSGrid::SetScrollBar(int32_t displayMode)
@@ -252,8 +250,18 @@ void JSGrid::SetScrollBarWidth(const std::string& width)
     GridModel::GetInstance()->SetScrollBarWidth(width);
 }
 
-void JSGrid::SetCachedCount(int32_t cachedCount)
+void JSGrid::SetCachedCount(const JSCallbackInfo& info)
 {
+    int32_t cachedCount = 1;
+    auto jsValue = info[0];
+
+    if (!jsValue->IsUndefined() && jsValue->IsNumber()) {
+        ParseJsInt32(jsValue, cachedCount);
+        if (cachedCount < 0) {
+            cachedCount = 1;
+        }
+    }
+
     GridModel::GetInstance()->SetCachedCount(cachedCount);
 }
 

@@ -130,6 +130,8 @@ RefPtr<FrameNode> FrameNode::CreateFrameNode(
 void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
+    node->AttachToMainTree();
+    node->MarkModifyDone();
     node->UpdateLayoutPropertyFlag();
     auto layoutWrapper = node->CreateLayoutWrapper();
     CHECK_NULL_VOID(layoutWrapper);
@@ -198,6 +200,10 @@ void FrameNode::DumpInfo()
     if (layoutProperty_->GetMarginProperty()) {
         DumpLog::GetInstance().AddDesc(
             std::string("Margin: ").append(layoutProperty_->GetMarginProperty()->ToString().c_str()));
+    }
+    if (layoutProperty_->GetCalcLayoutConstraint()) {
+        DumpLog::GetInstance().AddDesc(std::string("User defined constraint: ")
+                                           .append(layoutProperty_->GetCalcLayoutConstraint()->ToString().c_str()));
     }
     DumpLog::GetInstance().AddDesc(std::string("compid: ").append(propInspectorId_.value_or("")));
     DumpLog::GetInstance().AddDesc(std::string("ContentConstraint: ")
@@ -309,14 +315,14 @@ void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const
 
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-    if (renderContext_) {
-        renderContext_->ToJsonValue(json);
-    }
     // scrollable in AccessibilityProperty
     ACE_PROPERTY_TO_JSON_VALUE(accessibilityProperty_, AccessibilityProperty);
     ACE_PROPERTY_TO_JSON_VALUE(layoutProperty_, LayoutProperty);
     ACE_PROPERTY_TO_JSON_VALUE(paintProperty_, PaintProperty);
     ACE_PROPERTY_TO_JSON_VALUE(pattern_, Pattern);
+    if (renderContext_) {
+        renderContext_->ToJsonValue(json);
+    }
     if (eventHub_) {
         eventHub_->ToJsonValue(json);
     }
@@ -325,6 +331,26 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     TouchToJsonValue(json);
     GeometryNodeToJsonValue(json);
     json->Put("id", propInspectorId_.value_or("").c_str());
+}
+
+void FrameNode::FromJson(const std::unique_ptr<JsonValue>& json)
+{
+    LOGD("UITree start decode accessibilityProperty");
+    accessibilityProperty_->FromJson(json);
+    LOGD("UITree start decode layoutProperty");
+    layoutProperty_->FromJson(json);
+    LOGD("UITree start decode paintProperty");
+    paintProperty_->FromJson(json);
+    LOGD("UITree start decode pattern");
+    pattern_->FromJson(json);
+    if (renderContext_) {
+        LOGD("UITree start decode renderContext");
+        renderContext_->FromJson(json);
+    }
+    if (eventHub_) {
+        LOGD("UITree start decode eventHub");
+        eventHub_->FromJson(json);
+    }
 }
 
 void FrameNode::OnAttachToMainTree(bool recursive)
@@ -353,7 +379,6 @@ void FrameNode::OnAttachToMainTree(bool recursive)
 
 void FrameNode::OnVisibleChange(bool isVisible)
 {
-    // notify transition
     pattern_->OnVisibleChange(isVisible);
     for (const auto& child : GetChildren()) {
         child->OnVisibleChange(isVisible);
@@ -392,7 +417,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
     if (geometryTransition != nullptr && geometryTransition->IsRunning()) {
-        geometryTransition->DidLayout(WeakClaim(this));
+        geometryTransition->DidLayout(dirty);
     } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
                (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
         if (pattern_->NeedOverridePaintRect()) {
@@ -442,8 +467,8 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     // update focus state
     auto focusHub = GetFocusHub();
     if (focusHub && focusHub->IsCurrentFocus()) {
-        focusHub->ClearFocusState();
-        focusHub->PaintFocusState();
+        focusHub->ClearFocusState(false);
+        focusHub->PaintFocusState(false);
     }
 
     // rebuild child render node.
@@ -563,40 +588,45 @@ double FrameNode::CalculateCurrentVisibleRatio(const RectF& visibleRect, const R
 void FrameNode::ProcessAllVisibleCallback(
     std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks, double currentVisibleRatio)
 {
+    bool isHandled = false;
     for (auto& nodeCallbackInfo : visibleAreaCallbacks) {
         auto callbackRatio = nodeCallbackInfo.first;
         auto callbackIsVisible = nodeCallbackInfo.second.isCurrentVisible;
         if (GreatNotEqual(currentVisibleRatio, callbackRatio) && !callbackIsVisible) {
-            OnVisibleAreaChangeCallback(nodeCallbackInfo.second, true, currentVisibleRatio);
+            OnVisibleAreaChangeCallback(nodeCallbackInfo.second, true, currentVisibleRatio, isHandled);
+            isHandled = true;
             continue;
         }
 
         if (LessNotEqual(currentVisibleRatio, callbackRatio) && callbackIsVisible) {
-            OnVisibleAreaChangeCallback(nodeCallbackInfo.second, false, currentVisibleRatio);
+            OnVisibleAreaChangeCallback(nodeCallbackInfo.second, false, currentVisibleRatio, isHandled);
+            isHandled = true;
             continue;
         }
 
         if (NearEqual(currentVisibleRatio, callbackRatio) && NearEqual(callbackRatio, VISIBLE_RATIO_MIN)) {
             if (callbackIsVisible) {
-                OnVisibleAreaChangeCallback(nodeCallbackInfo.second, false, VISIBLE_RATIO_MIN);
+                OnVisibleAreaChangeCallback(nodeCallbackInfo.second, false, VISIBLE_RATIO_MIN, isHandled);
             } else {
-                OnVisibleAreaChangeCallback(nodeCallbackInfo.second, true, VISIBLE_RATIO_MIN);
+                OnVisibleAreaChangeCallback(nodeCallbackInfo.second, true, VISIBLE_RATIO_MIN, isHandled);
             }
+            isHandled = true;
         } else if (NearEqual(currentVisibleRatio, callbackRatio) && NearEqual(callbackRatio, VISIBLE_RATIO_MAX)) {
             if (!callbackIsVisible) {
-                OnVisibleAreaChangeCallback(nodeCallbackInfo.second, true, VISIBLE_RATIO_MAX);
+                OnVisibleAreaChangeCallback(nodeCallbackInfo.second, true, VISIBLE_RATIO_MAX, isHandled);
             } else {
-                OnVisibleAreaChangeCallback(nodeCallbackInfo.second, false, VISIBLE_RATIO_MAX);
+                OnVisibleAreaChangeCallback(nodeCallbackInfo.second, false, VISIBLE_RATIO_MAX, isHandled);
             }
+            isHandled = true;
         }
     }
 }
 
 void FrameNode::OnVisibleAreaChangeCallback(
-    VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio)
+    VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio, bool isHandled)
 {
     callbackInfo.isCurrentVisible = visibleType;
-    if (callbackInfo.callback) {
+    if (callbackInfo.callback && !isHandled) {
         callbackInfo.callback(visibleType, currentVisibleRatio);
     }
 }
@@ -810,6 +840,11 @@ void FrameNode::UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapper>& self, b
 void FrameNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)
 {
     ACE_DCHECK(parent);
+    CHECK_NULL_VOID(layoutProperty_);
+    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
+    if (geometryTransition != nullptr && geometryTransition->IsNodeOutAndActive(WeakClaim(this))) {
+        return;
+    }
     auto layoutWrapper = CreateLayoutWrapper(forceMeasure, forceLayout);
     parent->AppendChild(layoutWrapper);
 }
@@ -874,7 +909,10 @@ void FrameNode::MarkModifyDone()
             // store distribute node
             pipeline->StoreNode(restoreId, AceType::WeakClaim(this));
             // restore distribute node info
-            pattern_->OnRestoreInfo(pipeline->GetRestoreInfo(restoreId));
+            std::string restoreInfo;
+            if (pipeline->GetRestoreInfo(restoreId, restoreInfo)) {
+                pattern_->OnRestoreInfo(restoreInfo);
+            }
         }
     }
     eventHub_->MarkModifyDone();
@@ -1454,6 +1492,21 @@ OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf) const
     return offset;
 }
 
+OffsetF FrameNode::GetPaintRectOffsetWithoutTransform(bool excludeSelf) const
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
+    OffsetF offset = excludeSelf ? OffsetF() : context->GetPaintRectWithoutTransform().GetOffset();
+    auto parent = GetAncestorNodeOfFrame();
+    while (parent) {
+        auto renderContext = parent->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, OffsetF());
+        offset += renderContext->GetPaintRectWithoutTransform().GetOffset();
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    return offset;
+}
+
 OffsetF FrameNode::GetPaintRectOffsetToPage() const
 {
     auto context = GetRenderContext();
@@ -1498,7 +1551,9 @@ void FrameNode::OnAccessibilityEvent(
         event.type = eventType;
         event.windowContentChangeTypes = windowsContentChangeType;
         event.nodeId = GetAccessibilityId();
-        PipelineContext::GetCurrentContext()->SendEventToAccessibility(event);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SendEventToAccessibility(event);
     }
 }
 
@@ -1511,7 +1566,9 @@ void FrameNode::OnAccessibilityEvent(
         event.nodeId = GetAccessibilityId();
         event.beforeText = beforeText;
         event.latestContent = latestContent;
-        PipelineContext::GetCurrentContext()->SendEventToAccessibility(event);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SendEventToAccessibility(event);
     }
 }
 
@@ -1549,19 +1606,22 @@ void FrameNode::RemoveLastHotZoneRect() const
     gestureHub->RemoveLastResponseRect();
 }
 
-bool FrameNode::OnRemoveFromParent()
+bool FrameNode::OnRemoveFromParent(bool allowTransition)
 {
     // kick out transition animation if needed, wont re-entry if already detached.
-    DetachFromMainTree();
+    DetachFromMainTree(!allowTransition);
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, false);
-    if (context->HasTransitionOutAnimation()) {
-        // pending remove, move self into disappearing children
+    if (!allowTransition || RemoveImmediately()) {
+        // directly remove, reset focusHub, parent and depth
+        if (auto focusHub = GetFocusHub()) {
+            focusHub->RemoveSelf();
+        }
+        ResetParent();
         return true;
-    } else {
-        // directly remove, reset parent and depth
-        return UINode::OnRemoveFromParent();
     }
+    // delayed remove, will move self into disappearing children
+    return false;
 }
 
 RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
@@ -1590,8 +1650,8 @@ RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
     return hitFrameNodes.rbegin()->second;
 }
 
-void FrameNode::CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
-    const std::function<void(float)>& onCallbackEvent)
+void FrameNode::CreateAnimatablePropertyFloat(
+    const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent)
 {
     auto context = GetRenderContext();
     CHECK_NULL_VOID(context);
@@ -1617,22 +1677,45 @@ void FrameNode::UpdateAnimatablePropertyFloat(const std::string& propertyName, f
     property->Set(value);
 }
 
-void FrameNode::OnAddDisappearingChild()
+void FrameNode::CreateAnimatableArithmeticProperty(const std::string& propertyName,
+    RefPtr<CustomAnimatableArithmetic>& value,
+    std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent)
 {
     auto context = GetRenderContext();
     CHECK_NULL_VOID(context);
-    context->UpdateFreeze(true);
+    auto iter = nodeAnimatablePropertyMap_.find(propertyName);
+    if (iter != nodeAnimatablePropertyMap_.end()) {
+        LOGW("AnimatableProperty already exists!");
+        return;
+    }
+    auto property = AceType::MakeRefPtr<NodeAnimatableArithmeticProperty>(value, std::move(onCallbackEvent));
+    context->AttachNodeAnimatableProperty(property);
+    nodeAnimatablePropertyMap_.emplace(propertyName, property);
 }
 
-void FrameNode::OnRemoveDisappearingChild()
+void FrameNode::UpdateAnimatableArithmeticProperty(const std::string& propertyName,
+    RefPtr<CustomAnimatableArithmetic>& value)
 {
-    auto context = GetRenderContext();
-    CHECK_NULL_VOID(context);
-    context->UpdateFreeze(false);
+    auto iter = nodeAnimatablePropertyMap_.find(propertyName);
+    if (iter == nodeAnimatablePropertyMap_.end()) {
+        LOGW("AnimatableProperty not exists!");
+        return;
+    }
+    auto property = AceType::DynamicCast<NodeAnimatableArithmeticProperty>(iter->second);
+    CHECK_NULL_VOID(property);
+    property->Set(value);
 }
 
 std::string FrameNode::ProvideRestoreInfo()
 {
     return pattern_->ProvideRestoreInfo();
+}
+
+bool FrameNode::RemoveImmediately() const
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, true);
+    // has transition out animation, need to wait for animation end
+    return !context->HasTransitionOutAnimation();
 }
 } // namespace OHOS::Ace::NG

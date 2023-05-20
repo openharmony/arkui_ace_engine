@@ -22,7 +22,6 @@
 #include <optional>
 
 #include "base/geometry/axis.h"
-#include "base/geometry/size.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/components/common/properties/clip_path.h"
@@ -62,7 +61,7 @@ public:
     virtual void SetBlockBorderWidth(const Dimension& value) = 0;
     virtual void SetStepColor(const Color& value) = 0;
     virtual void SetTrackBorderRadius(const Dimension& value) = 0;
-    virtual void SetBlockSize(const Size& value) = 0;
+    virtual void SetBlockSize(const Dimension& width, const Dimension& height) = 0;
     virtual void SetBlockType(BlockStyleType value) = 0;
     virtual void SetBlockImage(const std::string& value) = 0;
     virtual void SetBlockShape(const RefPtr<BasicShape>& value) = 0;

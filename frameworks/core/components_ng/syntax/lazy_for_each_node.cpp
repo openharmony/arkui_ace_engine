@@ -24,6 +24,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::NG {
 
@@ -66,7 +67,7 @@ void LazyForEachNode::UpdateLazyForEachItems(int32_t newStartIndex, int32_t newE
     // delete all.
     if (newIds.empty()) {
         // clean current children.
-        Clean(true);
+        Clean(true, true);
         builder_->Clean();
         startIndex_ = -1;
         endIndex_ = -1;
@@ -95,7 +96,7 @@ void LazyForEachNode::UpdateLazyForEachItems(int32_t newStartIndex, int32_t newE
         slot++;
     }
     while (static_cast<size_t>(slot) < GetChildren().size()) {
-        RemoveChild(GetLastChild());
+        RemoveChild(GetLastChild(), true);
     }
 
     // delete useless items.
@@ -135,7 +136,9 @@ void LazyForEachNode::PostIdleTask(std::list<int32_t>&& items)
             node->builder_->SetCacheItemInfo(*item, itemInfo.first);
             auto uiNode = itemInfo.second;
             if (uiNode) {
+                ViewStackProcessor::GetInstance()->SetPredict(true);
                 uiNode->Build();
+                ViewStackProcessor::GetInstance()->SetPredict(false);
             }
             item++;
         }

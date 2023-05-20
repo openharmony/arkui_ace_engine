@@ -175,7 +175,7 @@ RefPtr<BoxComponent> DialogComponent::BuildBox(bool& isLimit)
 void DialogComponent::BuildDialogTween(const RefPtr<TransitionComponent>& transition, bool isLimit, Edge margin)
 {
     auto dialogTween = AceType::MakeRefPtr<DialogTweenComponent>();
-    auto controller = AceType::MakeRefPtr<Animator>(context_);
+    auto controller = CREATE_ANIMATOR(context_);
     dialogTween->SetAnimator(controller);
     if (animator_) {
         animator_->AddProxyController(controller);
@@ -623,7 +623,7 @@ RefPtr<DialogComponent> DialogBuilder::Build(
     // Set buttons of dialog
     BuildButtons(themeManager, dialog, dialogProperties.buttons, dialogTheme, data);
     // Build DialogTween
-    auto controller = AceType::MakeRefPtr<Animator>(context);
+    auto controller = CREATE_ANIMATOR(context);
     dialog->SetAnimator(controller);
     dialog->SetAutoCancel(dialogProperties.autoCancel);
     dialog->SetData(data);

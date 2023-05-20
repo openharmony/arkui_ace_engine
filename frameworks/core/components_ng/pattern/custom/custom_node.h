@@ -64,6 +64,13 @@ public:
     }
     void FlushReload();
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        json->Put("viewKey", viewKey_.c_str());
+    }
+
+    void FromJson(const std::unique_ptr<JsonValue>& json) override {}
+
 private:
     std::string viewKey_;
     RenderFunction renderFunction_;

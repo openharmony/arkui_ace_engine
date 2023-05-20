@@ -18,6 +18,10 @@
 #include <dlfcn.h>
 #include <vector>
 
+#ifdef UICAST_COMPONENT_SUPPORTED
+#include "interfaces/inner_api/ace/uicast/uicast_subscriber.h"
+#endif
+
 namespace OHOS::Ace {
 
 using CreateCardFunc = UIContent* (*)(void*, void*, bool);
@@ -67,6 +71,9 @@ UIContent* CreateUIContent(void* context, void* runtime)
     if (content == nullptr) {
         dlclose(handle);
     }
+#ifdef UICAST_COMPONENT_SUPPORTED
+    UICastEventSubscribeProxy::GetInstance()->SubscribeStartEvent(content);
+#endif
 
     return content;
 }
@@ -88,6 +95,9 @@ UIContent* CreateUIContent(void* ability)
     if (content == nullptr) {
         dlclose(handle);
     }
+#ifdef UICAST_COMPONENT_SUPPORTED
+    UICastEventSubscribeProxy::GetInstance()->SubscribeStartEvent(content);
+#endif
 
     return content;
 }

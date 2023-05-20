@@ -52,6 +52,8 @@ public:
     MOCK_METHOD(uint32_t, GetWindowId, (), (const, override));
     MOCK_METHOD(void*, GetView, (), (const, override));
 
+    MOCK_METHOD(void, DumpHeapSnapshot, (bool isPrivate), (override));
+    MOCK_METHOD(void, TriggerGarbageCollection, (), (override));
     static RefPtr<MockContainer> container_;
 
 private:

@@ -21,13 +21,13 @@
 
 namespace OHOS::Ace::Framework {
 
-class JSNavDestination : public JSContainerBase, public JSNavigationStack {
+class JSNavDestination : public JSContainerBase {
 public:
     static void Create();
     static void Create(const JSCallbackInfo& info);
     static void SetHideTitleBar(bool hide);
     static void SetTitle(const JSCallbackInfo& info);
-    void SetOnShown(const JSCallbackInfo& info);
+    static void SetOnShown(const JSCallbackInfo& info);
     static void SetOnHidden(const JSCallbackInfo& info);
     static void SetOnBackPressed(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);

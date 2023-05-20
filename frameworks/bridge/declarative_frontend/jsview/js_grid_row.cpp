@@ -329,8 +329,7 @@ void JSGridRow::JSBind(BindingTarget globalObj)
     JSClass<JSGridRow>::StaticMethod("onBreakpointChange", &JSGridRow::JsBreakpointEvent);
     JSClass<JSGridRow>::StaticMethod("height", &JSGridRow::Height);
     JSClass<JSGridRow>::StaticMethod("alignItems", &JSGridRow::AlignItems);
-    JSClass<JSGridRow>::Inherit<JSContainerBase>();
-    JSClass<JSGridRow>::Bind<>(globalObj);
+    JSClass<JSGridRow>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -113,5 +113,18 @@ void AnimationUtils::StopAnimation(const std::shared_ptr<AnimationUtils::Animati
         }
         animation->animations_.clear();
     }
+}
+
+bool AnimationUtils::IsRunning(const std::shared_ptr<AnimationUtils::Animation>& animation)
+{
+    CHECK_NULL_RETURN(animation, false);
+    if (animation->animations_.size()) {
+        for (auto& ani : animation->animations_) {
+            if (ani->IsRunning()) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 } // namespace OHOS::Ace

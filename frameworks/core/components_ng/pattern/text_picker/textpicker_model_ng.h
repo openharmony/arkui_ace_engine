@@ -30,6 +30,7 @@ public:
     void SetValue(const std::string& value) override;
     void SetOnChange(OHOS::Ace::TextChangeEvent&& onChange) override {};
     void SetDefaultPickerItemHeight(const Dimension& value) override;
+    void SetCanLoop(const bool value) override;
     void SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme) override;
     void SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override;
     void SetNormalTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override;
@@ -58,7 +59,10 @@ public:
         return maxCount_;
     }
 
+    void SetHasSelectAttr(bool value) override;
     bool GetMultiOptions(std::vector<NG::TextCascadePickerOptions>& options) override;
+    void SetOnValueChangeEvent(TextCascadeValueChangeEvent&& onChange) override;
+    void SetOnSelectedChangeEvent(TextCascadeSelectedChangeEvent&& onChange) override;
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateButtonNode();

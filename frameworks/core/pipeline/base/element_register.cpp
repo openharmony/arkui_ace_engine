@@ -70,6 +70,18 @@ bool ElementRegister::Exists(ElementIdType elementId)
     return (itemMap_.find(elementId) != itemMap_.end());
 }
 
+void ElementRegister::UpdateRecycleElmtId(int32_t oldElmtId, int32_t newElmtId)
+{
+    if (!Exists(oldElmtId)) {
+        return;
+    }
+    auto node = GetNodeById(oldElmtId);
+    if (node) {
+        itemMap_.erase(oldElmtId);
+        AddReferenced(newElmtId, node);
+    }
+}
+
 bool ElementRegister::AddReferenced(ElementIdType elmtId, const WeakPtr<AceType>& referenced)
 {
     auto result = itemMap_.emplace(elmtId, referenced);
@@ -217,6 +229,15 @@ void ElementRegister::DumpGeometryTransition()
         } else {
             LOGD("GeometryTransition map item: id: %{public}s, %{public}s", itemId.c_str(), item->ToString().c_str());
             iter++;
+        }
+    }
+}
+
+void ElementRegister::ReSyncGeometryTransition()
+{
+    for (const auto& [itemId, item] : geometryTransitionMap_) {
+        if (item && item->IsInAndOutValid()) {
+            item->OnReSync();
         }
     }
 }

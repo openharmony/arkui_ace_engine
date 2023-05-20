@@ -296,7 +296,7 @@ bool SharedTransitionController::PrepareEachTransition(
         LOGE("Create animation failed. event: %{public}d, share id: %{public}s", event_, shareId.c_str());
         return false;
     }
-    auto tmp = AceType::MakeRefPtr<Animator>();
+    auto tmp = CREATE_ANIMATOR();
     if (!effect->ApplyAnimation(overlay, tmp, option, event_)) {
         LOGE("Apply animation failed. event: %{public}d, share id: %{public}s", event_, shareId.c_str());
         return false;

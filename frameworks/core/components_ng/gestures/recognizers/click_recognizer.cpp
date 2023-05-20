@@ -303,6 +303,10 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
             info.SetTiltY(touchPoint.tiltY.value());
         }
         info.SetSourceTool(touchPoint.sourceTool);
+#ifdef SECURITY_COMPONENT_ENABLE
+        info.SetDisplayX(touchPoint.screenX);
+        info.SetDisplayY(touchPoint.screenY);
+#endif
         (*onAction)(info);
     }
 }

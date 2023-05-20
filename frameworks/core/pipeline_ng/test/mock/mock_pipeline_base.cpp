@@ -114,6 +114,16 @@ SafeAreaEdgeInserts PipelineContext::GetCurrentViewSafeArea() const
 
 void PipelineContext::FlushBuild() {}
 
+void PipelineContext::FlushBuildFinishCallbacks()
+{
+    decltype(buildFinishCallbacks_) buildFinishCallbacks(std::move(buildFinishCallbacks_));
+    for (const auto& func : buildFinishCallbacks) {
+        if (func) {
+            func();
+        }
+    }
+}
+
 void PipelineContext::NotifyMemoryLevel(int32_t level) {}
 
 void PipelineContext::FlushMessages() {}
@@ -211,7 +221,10 @@ const RefPtr<StageManager>& PipelineContext::GetStageManager()
     return stageManager_;
 }
 
-void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback) {}
+void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback)
+{
+    buildFinishCallbacks_.emplace_back(std::move(callback));
+}
 
 const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
 {
@@ -263,10 +276,14 @@ std::unique_ptr<JsonValue> PipelineContext::GetStoredNodeInfo()
 
 void PipelineContext::StoreNode(int32_t restoreId, const WeakPtr<FrameNode>& node) {}
 
-std::string PipelineContext::GetRestoreInfo(int32_t restoreId)
+bool PipelineContext::GetRestoreInfo(int32_t restoreId, std::string& restoreInfo)
 {
-    return "";
+    return false;
 }
+
+void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode) {}
+
+void PipelineContext::ResetViewSafeArea() {}
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {

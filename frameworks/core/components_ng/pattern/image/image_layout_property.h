@@ -16,9 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_LAYOUT_PROPERTY_H
 
+#include "core/common/ace_application_info.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/image/image_source_info.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 class ImagePattern;
@@ -87,7 +89,39 @@ public:
             }
         }
         json->Put("src", src.c_str());
+        json->Put("rawSrc", propImageSourceInfo_->GetSrc().c_str());
+        json->Put("moduleName", propImageSourceInfo_->GetModuleName().c_str());
         ACE_PROPERTY_TO_JSON_VALUE(propImageSizeStyle_, ImageSizeStyle);
+    }
+
+    void FromJson(const std::unique_ptr<JsonValue>& json) override
+    {
+        static const std::unordered_map<std::string, ImageFit> uMap {
+            { "ImageFit.Fill", ImageFit::FILL },
+            { "ImageFit.Contain", ImageFit::CONTAIN },
+            { "ImageFit.Cover", ImageFit::COVER },
+            { "ImageFit.FitWidth", ImageFit::FITWIDTH },
+            { "ImageFit.FitHeight", ImageFit::FITHEIGHT },
+            { "ImageFit.None", ImageFit::NONE },
+            { "ImageFit.ScaleDown", ImageFit::SCALE_DOWN },
+        };
+
+        std::string src = json->GetString("rawSrc");
+        std::string bundleName = AceApplicationInfo::GetInstance().GetPackageName();
+        std::string moduleName = json->GetString("moduleName");
+        UpdateImageSourceInfo(ImageSourceInfo(src, bundleName, moduleName));
+        auto objectFit = json->GetString("objectFit");
+        UpdateImageFit(uMap.count(objectFit) ? uMap.at(objectFit) : ImageFit::COVER);
+        UpdateAutoResize(json->GetString("autoResize") == "true" ? true : false);
+        /* register image frame node to pipeline context to receive memory level notification and window state change
+         * notification */
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        pipeline->AddNodesToNotifyMemoryLevel(frameNode->GetId());
+        pipeline->AddWindowStateChangedCallback(frameNode->GetId());
+        LayoutProperty::FromJson(json);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageFit, ImageFit, PROPERTY_UPDATE_LAYOUT);

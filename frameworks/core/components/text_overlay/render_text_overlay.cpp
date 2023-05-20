@@ -1150,7 +1150,7 @@ void RenderTextOverlay::ProcessEndPointAnimation(double value)
 void RenderTextOverlay::BuildAndStartMoreButtonAnimation()
 {
     if (!controller_) {
-        controller_ = AceType::MakeRefPtr<Animator>(GetContext());
+        controller_ = CREATE_ANIMATOR(GetContext());
     }
     controller_->ClearInterpolators();
     controller_->ClearAllListeners();

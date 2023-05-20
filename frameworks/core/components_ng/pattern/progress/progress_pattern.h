@@ -21,17 +21,18 @@
 
 #include "base/geometry/dimension.h"
 #include "base/log/log_wrapper.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/progress/progress_accessibility_property.h"
 #include "core/components_ng/pattern/progress/progress_layout_algorithm.h"
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
+#include "core/components_ng/pattern/progress/progress_modifier.h"
 #include "core/components_ng/pattern/progress/progress_paint_method.h"
 #include "core/components_ng/pattern/progress/progress_paint_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/pattern/progress/progress_modifier.h"
-#include "core/components_ng/base/geometry_node.h"
 
 namespace OHOS::Ace::NG {
 // ProgressPattern is the base class for progress render node to perform paint progress.
@@ -50,6 +51,7 @@ public:
         if (!progressModifier_) {
             progressModifier_ = AceType::MakeRefPtr<ProgressModifier>();
         }
+        progressModifier_->SetVisible(visibilityProp_);
         return MakeRefPtr<ProgressPaintMethod>(progressType_, strokeWidth_, progressModifier_);
     }
 
@@ -90,6 +92,8 @@ public:
         return isTextFromUser_;
     }
 
+    void OnVisibleChange(bool isVisible) override;
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
@@ -97,6 +101,8 @@ private:
     void InitTouchEvent();
     void OnPress(const TouchEventInfo& info);
     void HandleEnabled();
+    void ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>& json) const;
+    static std::string ConvertProgressStatusToString(const ProgressStatus status);
 
     double strokeWidth_ = 2;
     RefPtr<ProgressModifier> progressModifier_;
@@ -106,6 +112,7 @@ private:
     Color borderColor_;
     Color fontColor_;
     bool isTextFromUser_ = false;
+    bool visibilityProp_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPattern);
 };

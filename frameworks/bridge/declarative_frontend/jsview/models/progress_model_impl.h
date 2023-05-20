@@ -39,6 +39,9 @@ public:
     void SetFontWeight(const FontWeight& value) override {}
     void SetFontFamily(const std::vector<std::string>& value) override {}
     void SetSweepingEffect(bool value) override {}
+    void SetGradientColor(const NG::Gradient& value) override {}
+    void SetPaintShadow(bool paintShadow) override {}
+    void SetProgressStatus(NG::ProgressStatus status) override {}
 };
 
 } // namespace OHOS::Ace::Framework

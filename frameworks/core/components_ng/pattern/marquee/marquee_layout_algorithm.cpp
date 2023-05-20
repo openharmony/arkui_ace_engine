@@ -25,6 +25,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr double MULTIPLE = 2.0;
+}
 void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
@@ -75,7 +78,7 @@ void MarqueeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto left = padding.left.value_or(0);
     auto top = padding.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);
-    auto align = Alignment::CENTER;
+    auto align = Alignment::CENTER_LEFT;
     if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }
@@ -85,9 +88,12 @@ void MarqueeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto textGeoNode = textNode->GetGeometryNode();
     CHECK_NULL_VOID(textGeoNode);
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        auto translate =
-            Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetMarginFrameSize(), align) + paddingOffset;
-        child->GetGeometryNode()->SetMarginFrameOffset(translate);
+        OffsetF translate;
+        translate.SetX((1.0 + align.GetHorizontal()) *
+                       (size.Width() - child->GetGeometryNode()->GetMarginFrameSize().Width()) / MULTIPLE);
+        translate.SetY((1.0 + align.GetVertical()) *
+                       (size.Height() - child->GetGeometryNode()->GetMarginFrameSize().Height()) / MULTIPLE);
+        child->GetGeometryNode()->SetMarginFrameOffset(translate + paddingOffset);
     }
 }
 } // namespace OHOS::Ace::NG

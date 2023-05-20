@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,14 +58,17 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
 
     // make toast node
     auto toastNode =
-        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, toastId, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+        FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, toastId, AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_RETURN(toastNode, nullptr);
     auto toastProperty = toastNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(toastProperty, nullptr);
     auto toastContext = toastNode->GetRenderContext();
     CHECK_NULL_RETURN(toastContext, nullptr);
+    auto toastAccessibilityProperty = toastNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_RETURN(toastAccessibilityProperty, nullptr);
+    toastAccessibilityProperty->SetText(message);
 
-    auto textNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, textId, AceType::MakeRefPtr<TextPattern>());
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, textId, AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textNode, nullptr);
     auto textlayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textlayoutProperty, nullptr);

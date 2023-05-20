@@ -72,8 +72,7 @@ void JSDataPanel::JSBind(BindingTarget globalObj)
     JSClass<JSDataPanel>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSDataPanel>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
-    JSClass<JSDataPanel>::Inherit<JSViewAbstract>();
-    JSClass<JSDataPanel>::Bind(globalObj);
+    JSClass<JSDataPanel>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSDataPanel::Create(const JSCallbackInfo& info)

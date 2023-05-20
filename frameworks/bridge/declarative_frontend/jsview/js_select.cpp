@@ -77,8 +77,7 @@ void JSSelect::Create(const JSCallbackInfo& info)
                 auto selectValue = indexObject->GetProperty("value");
                 auto selectIcon = indexObject->GetProperty("icon");
                 if (!ParseJsString(selectValue, value)) {
-                    LOGE("selectValue is null");
-                    return;
+                    LOGW("selectValue is null");
                 }
                 if (!ParseJsMedia(selectIcon, icon)) {
                     LOGI("selectIcon is null");
@@ -128,8 +127,7 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSSelect>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSSelect>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSSelect>::Inherit<JSViewAbstract>();
-    JSClass<JSSelect>::Bind(globalObj);
+    JSClass<JSSelect>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void ParseSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -158,8 +156,8 @@ void JSSelect::Selected(const JSCallbackInfo& info)
         value = info[0]->ToNumber<int32_t>();
     }
 
-    if (value <= 0) {
-        value = 0;
+    if (value < -1) {
+        value = -1;
     }
     if (info.Length() > 1 && info[1]->IsFunction()) {
         ParseSelectedObject(info, info[1]);
@@ -638,7 +636,7 @@ void JSSelect::SetSpace(const JSCallbackInfo& info)
         LOGI("JSSelect set space value is mull");
         value = selectTheme->GetContentSpinnerPadding();
     }
-    if (LessNotEqual(value.Value(), 0.0)) {
+    if (LessNotEqual(value.Value(), 0.0) || value.Unit() == DimensionUnit::PERCENT) {
         LOGI("JSSelect set space value is to small");
         value = selectTheme->GetContentSpinnerPadding();
     }

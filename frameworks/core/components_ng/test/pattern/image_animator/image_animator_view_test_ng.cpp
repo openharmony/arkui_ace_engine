@@ -22,8 +22,8 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "core/components_ng/pattern/image_animator/image_animator_pattern.h"
-#include "core/components_ng/pattern/image_animator/image_animator_view.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -34,13 +34,13 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr Animator::Status STATUS_DEFAULT = Animator::Status::IDLE;
-constexpr Animator::Status STATUS_START = Animator::Status::RUNNING;
-constexpr Animator::Status STATUS_STOPPED = Animator::Status::STOPPED;
-constexpr Animator::Status STATUS_PAUSED = Animator::Status::PAUSED;
+constexpr int32_t STATE_DEFAULT = 0;
+constexpr int32_t STATE_START = 1;
+constexpr int32_t STATE_PAUSED = 2;
+constexpr int32_t STATE_STOPPED = 3;
 constexpr int32_t DURATION_DEFAULT = 1000;
 constexpr int32_t ITERATION_DEFAULT = 1;
-constexpr FillMode FILLMODE_DEFAULT = FillMode::FORWARDS;
+constexpr int32_t FILLMODENG_DEFAULT = 1;
 constexpr int32_t PREDECODE_DEFAULT = 0;
 constexpr bool ISREVERSE_DEFAULT = false;
 constexpr bool ISREVERSE_BACKWARD = true;
@@ -87,10 +87,11 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest001, TestSize.Level1)
      * @tc.expected: step1. check frameNode exists and tag is correct.
      */
 
-    ImageAnimatorView imageAnimatorView;
-    imageAnimatorView.Create();
+    ImageAnimatorModelNG ImageAnimatorModelNG;
+    ImageAnimatorModelNG.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ANIMATOR_ETS_TAG);
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
 
     /**
      * @tc.steps: step2. get childNode of frameNode and its imageLayoutProperty.
@@ -100,7 +101,7 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest001, TestSize.Level1)
     auto childNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     EXPECT_TRUE(childNode != nullptr && childNode->GetTag() == V2::IMAGE_ETS_TAG);
     auto imageLayoutProperty = childNode->GetLayoutProperty<ImageLayoutProperty>();
-    EXPECT_TRUE(imageLayoutProperty != nullptr);
+    EXPECT_NE(imageLayoutProperty, nullptr);
 }
 
 /**
@@ -111,24 +112,24 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest001, TestSize.Level1)
 HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create imageAnimatorView.
+     * @tc.steps: step1. create ImageAnimatorModelTestNg.
      */
 
-    ImageAnimatorView imageAnimatorView;
-    imageAnimatorView.Create();
+    ImageAnimatorModelNG ImageAnimatorModelNG;
+    ImageAnimatorModelNG.Create();
 
     /**
      * @tc.steps: step2. set attributes into ImageAnimatorPattern.
      * @tc.expected: step2. related function is called.
      */
 
-    imageAnimatorView.SetStatus(STATUS_DEFAULT);
-    imageAnimatorView.SetDuration(DURATION_DEFAULT);
-    imageAnimatorView.SetIteration(ITERATION_DEFAULT);
-    imageAnimatorView.SetFillMode(FILLMODE_DEFAULT);
-    imageAnimatorView.SetPreDecode(PREDECODE_DEFAULT);
-    imageAnimatorView.SetIsReverse(ISREVERSE_DEFAULT);
-    imageAnimatorView.SetFixedSize(FIXEDSIZE_DEFAULT);
+    ImageAnimatorModelNG.SetState(STATE_DEFAULT);
+    ImageAnimatorModelNG.SetDuration(DURATION_DEFAULT);
+    ImageAnimatorModelNG.SetIteration(ITERATION_DEFAULT);
+    ImageAnimatorModelNG.SetFillMode(FILLMODENG_DEFAULT);
+    ImageAnimatorModelNG.SetPreDecode(PREDECODE_DEFAULT);
+    ImageAnimatorModelNG.SetIsReverse(ISREVERSE_DEFAULT);
+    ImageAnimatorModelNG.SetFixedSize(FIXEDSIZE_DEFAULT);
 
     /**
      * @tc.steps: step3. get ImageAnimatorPattern from frameNode.
@@ -136,10 +137,11 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest002, TestSize.Level1)
      */
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ANIMATOR_ETS_TAG);
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
     RefPtr<ImageAnimatorPattern> imageAnimatorPattern =
         AceType::DynamicCast<OHOS::Ace::NG::ImageAnimatorPattern>(frameNode->GetPattern());
-    EXPECT_TRUE(imageAnimatorPattern != nullptr);
+    EXPECT_NE(imageAnimatorPattern, nullptr);
 
     /**
      * @tc.steps: step4. get attributes from ImageAnimatorPattern by json.
@@ -164,11 +166,11 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest002, TestSize.Level1)
 HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest003, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create imageAnimatorView.
+     * @tc.steps: step1. create ImageAnimatorModelTestNg.
      */
 
-    ImageAnimatorView imageAnimatorView;
-    imageAnimatorView.Create();
+    ImageAnimatorModelNG ImageAnimatorModelNG;
+    ImageAnimatorModelNG.Create();
 
     /**
      * @tc.steps: step2. set image's attributes into ImageProperties and set ImageProperties into imageAnimatorView.
@@ -184,7 +186,7 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest003, TestSize.Level1)
     imageProperties.duration = IMAGE_DURATION;
     std::vector<ImageProperties> images;
     images.push_back(imageProperties);
-    imageAnimatorView.SetImages(std::move(images));
+    ImageAnimatorModelNG.SetImages(std::move(images));
 
     /**
      * @tc.steps: step3. get ImageAnimatorPattern from frameNode.
@@ -192,10 +194,11 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest003, TestSize.Level1)
      */
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ANIMATOR_ETS_TAG);
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
     RefPtr<ImageAnimatorPattern> imageAnimatorPattern =
         AceType::DynamicCast<OHOS::Ace::NG::ImageAnimatorPattern>(frameNode->GetPattern());
-    EXPECT_TRUE(imageAnimatorPattern != nullptr);
+    EXPECT_NE(imageAnimatorPattern, nullptr);
 
     /**
      * @tc.steps: step4. get image's attributes from ImageAnimatorPattern by json and splice json string with setting
@@ -226,11 +229,11 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest003, TestSize.Level1)
 HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest004, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create imageAnimatorView.
+     * @tc.steps: step1. create ImageAnimatorModelNG.
      */
 
-    ImageAnimatorView imageAnimatorView;
-    imageAnimatorView.Create();
+    ImageAnimatorModelNG ImageAnimatorModelNG;
+    ImageAnimatorModelNG.Create();
 
     /**
      * @tc.steps: step2. set image's attributes and imageAnimatorView's attributes.
@@ -246,10 +249,10 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest004, TestSize.Level1)
     imageProperties.duration = IMAGE_DURATION;
     std::vector<ImageProperties> images;
     images.push_back(imageProperties);
-    imageAnimatorView.SetImages(std::move(images));
-    imageAnimatorView.SetStatus(STATUS_START);
-    imageAnimatorView.SetIsReverse(ISREVERSE_DEFAULT);
-    imageAnimatorView.SetIteration(ITERATION_DEFAULT);
+    ImageAnimatorModelNG.SetImages(std::move(images));
+    ImageAnimatorModelNG.SetState(STATE_START);
+    ImageAnimatorModelNG.SetIsReverse(ISREVERSE_DEFAULT);
+    ImageAnimatorModelNG.SetIteration(ITERATION_DEFAULT);
 
     /**
      * @tc.steps: step3. set startEvent into eventHub.
@@ -258,12 +261,13 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest004, TestSize.Level1)
 
     bool startFlag = false;
     auto startEvent = [&startFlag]() { startFlag = !startFlag; };
-    imageAnimatorView.SetImageAnimatorEvent(startEvent, AnimatorEventType::ON_START);
+    ImageAnimatorModelNG.SetOnStart(std::move(startEvent));
     auto element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ANIMATOR_ETS_TAG);
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
     auto eventHub = frameNode->GetEventHub<NG::ImageAnimatorEventHub>();
-    EXPECT_TRUE(eventHub != nullptr);
+    EXPECT_NE(eventHub, nullptr);
 
     /**
      * @tc.steps: step4. use OnModifyDone to run Forward.
@@ -272,7 +276,7 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest004, TestSize.Level1)
 
     RefPtr<ImageAnimatorPattern> imageAnimatorPattern =
         AceType::DynamicCast<OHOS::Ace::NG::ImageAnimatorPattern>(frameNode->GetPattern());
-    EXPECT_TRUE(imageAnimatorPattern != nullptr);
+    EXPECT_NE(imageAnimatorPattern, nullptr);
     imageAnimatorPattern->AttachToFrameNode(frameNode);
     imageAnimatorPattern->OnModifyDone();
     EXPECT_TRUE(startFlag);
@@ -283,7 +287,7 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest004, TestSize.Level1)
      */
 
     ViewStackProcessor::GetInstance()->Push(element);
-    imageAnimatorView.SetIsReverse(ISREVERSE_BACKWARD);
+    ImageAnimatorModelNG.SetIsReverse(ISREVERSE_BACKWARD);
     imageAnimatorPattern->OnModifyDone();
     EXPECT_TRUE(!startFlag);
 }
@@ -296,11 +300,11 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest004, TestSize.Level1)
 HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest005, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create imageAnimatorView.
+     * @tc.steps: step1. create ImageAnimatorModelNG.
      */
 
-    ImageAnimatorView imageAnimatorView;
-    imageAnimatorView.Create();
+    ImageAnimatorModelNG ImageAnimatorModelNG;
+    ImageAnimatorModelNG.Create();
 
     /**
      * @tc.steps: step2. set image's attributes and imageAnimatorView's attributes.
@@ -316,9 +320,9 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest005, TestSize.Level1)
     imageProperties.duration = IMAGE_DURATION;
     std::vector<ImageProperties> images;
     images.push_back(imageProperties);
-    imageAnimatorView.SetImages(std::move(images));
-    imageAnimatorView.SetStatus(STATUS_PAUSED);
-    imageAnimatorView.SetIteration(ITERATION_DEFAULT);
+    ImageAnimatorModelNG.SetImages(std::move(images));
+    ImageAnimatorModelNG.SetState(STATE_PAUSED);
+    ImageAnimatorModelNG.SetIteration(ITERATION_DEFAULT);
 
     /**
      * @tc.steps: step3. set pauseEvent into eventHub.
@@ -327,11 +331,12 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest005, TestSize.Level1)
 
     bool pauseFlag = false;
     auto pauseEvent = [&pauseFlag]() { pauseFlag = !pauseFlag; };
-    imageAnimatorView.SetImageAnimatorEvent(pauseEvent, AnimatorEventType::ON_PAUSE);
+    ImageAnimatorModelNG.SetOnPause(std::move(pauseEvent));
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ANIMATOR_ETS_TAG);
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
     auto eventHub = frameNode->GetEventHub<NG::ImageAnimatorEventHub>();
-    EXPECT_TRUE(eventHub != nullptr);
+    EXPECT_NE(eventHub, nullptr);
 
     /**
      * @tc.steps: step4. use OnModifyDone to run pauseEvent.
@@ -354,11 +359,11 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest005, TestSize.Level1)
 HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest006, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create imageAnimatorView.
+     * @tc.steps: step1. create ImageAnimatorModelNG.
      */
 
-    ImageAnimatorView imageAnimatorView;
-    imageAnimatorView.Create();
+    ImageAnimatorModelNG ImageAnimatorModelNG;
+    ImageAnimatorModelNG.Create();
 
     /**
      * @tc.steps: step2. set image's attributes and imageAnimatorView's attributes.
@@ -374,10 +379,10 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest006, TestSize.Level1)
     imageProperties.duration = IMAGE_DURATION;
     std::vector<ImageProperties> images;
     images.push_back(imageProperties);
-    imageAnimatorView.SetImages(std::move(images));
-    imageAnimatorView.SetStatus(STATUS_START);
-    imageAnimatorView.SetIsReverse(ISREVERSE_DEFAULT);
-    imageAnimatorView.SetIteration(ITERATION_DEFAULT);
+    ImageAnimatorModelNG.SetImages(std::move(images));
+    ImageAnimatorModelNG.SetState(STATE_START);
+    ImageAnimatorModelNG.SetIsReverse(ISREVERSE_DEFAULT);
+    ImageAnimatorModelNG.SetIteration(ITERATION_DEFAULT);
 
     /**
      * @tc.steps: step3. set cancelEvent into eventHub.
@@ -386,12 +391,13 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest006, TestSize.Level1)
 
     bool cancelFlag = false;
     auto cancelEvent = [&cancelFlag]() { cancelFlag = !cancelFlag; };
-    imageAnimatorView.SetImageAnimatorEvent(cancelEvent, AnimatorEventType::ON_CANCEL);
+    ImageAnimatorModelNG.SetOnCancel(std::move(cancelEvent));
     auto element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ANIMATOR_ETS_TAG);
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
     auto eventHub = frameNode->GetEventHub<NG::ImageAnimatorEventHub>();
-    EXPECT_TRUE(eventHub != nullptr);
+    EXPECT_NE(eventHub, nullptr);
 
     /**
      * @tc.steps: step4. use OnModifyDone to set animator's status is RUNNING.
@@ -400,10 +406,10 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest006, TestSize.Level1)
 
     RefPtr<ImageAnimatorPattern> imageAnimatorPattern =
         AceType::DynamicCast<OHOS::Ace::NG::ImageAnimatorPattern>(frameNode->GetPattern());
-    EXPECT_TRUE(imageAnimatorPattern != nullptr);
+    EXPECT_NE(imageAnimatorPattern, nullptr);
     imageAnimatorPattern->AttachToFrameNode(frameNode);
     imageAnimatorPattern->OnModifyDone();
-    EXPECT_EQ(imageAnimatorPattern->animator_->GetStatus(), STATUS_START);
+    EXPECT_EQ(imageAnimatorPattern->animator_->GetStatus(), static_cast<Animator::Status>(STATE_START));
 
     /**
      * @tc.steps: step5. change imageAnimatorView's status and use OnModifyDone to run cancelEvent.
@@ -411,14 +417,15 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest006, TestSize.Level1)
      */
 
     ViewStackProcessor::GetInstance()->Push(element);
-    imageAnimatorView.SetStatus(STATUS_DEFAULT);
-    imageAnimatorView.SetFixedSize(FIXEDSIZE_CHANGED);
+    ImageAnimatorModelNG.SetState(STATE_DEFAULT);
+    ImageAnimatorModelNG.SetFixedSize(FIXEDSIZE_CHANGED);
     imageAnimatorPattern->OnModifyDone();
     EXPECT_TRUE(cancelFlag);
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    EXPECT_TRUE(imageFrameNode != nullptr && imageFrameNode->GetTag() == V2::IMAGE_ETS_TAG);
+    EXPECT_NE(imageFrameNode, nullptr);
+    EXPECT_EQ(imageFrameNode->GetTag(), V2::IMAGE_ETS_TAG);
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
-    EXPECT_TRUE(imageLayoutProperty != nullptr);
+    EXPECT_NE(imageLayoutProperty, nullptr);
     EXPECT_EQ(imageLayoutProperty->GetImageSourceInfoValue(), ImageSourceInfo(IMAGE_SRC_URL));
 }
 
@@ -430,11 +437,11 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest006, TestSize.Level1)
 HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest007, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create imageAnimatorView.
+     * @tc.steps: step1. create ImageAnimatorModelNG.
      */
 
-    ImageAnimatorView imageAnimatorView;
-    imageAnimatorView.Create();
+    ImageAnimatorModelNG ImageAnimatorModelNG;
+    ImageAnimatorModelNG.Create();
 
     /**
      * @tc.steps: step2. set image's attributes and imageAnimatorView's attributes.
@@ -450,10 +457,10 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest007, TestSize.Level1)
     imageProperties.duration = IMAGE_DURATION;
     std::vector<ImageProperties> images;
     images.push_back(imageProperties);
-    imageAnimatorView.SetImages(std::move(images));
-    imageAnimatorView.SetStatus(STATUS_START);
-    imageAnimatorView.SetIsReverse(ISREVERSE_DEFAULT);
-    imageAnimatorView.SetIteration(ITERATION_DEFAULT);
+    ImageAnimatorModelNG.SetImages(std::move(images));
+    ImageAnimatorModelNG.SetState(STATE_START);
+    ImageAnimatorModelNG.SetIsReverse(ISREVERSE_DEFAULT);
+    ImageAnimatorModelNG.SetIteration(ITERATION_DEFAULT);
 
     /**
      * @tc.steps: step3. set stoppedEvent and startEvent into eventHub.
@@ -462,15 +469,16 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest007, TestSize.Level1)
 
     bool stoppedFlag = false;
     auto stoppedEvent = [&stoppedFlag]() { stoppedFlag = !stoppedFlag; };
-    imageAnimatorView.SetImageAnimatorEvent(stoppedEvent, AnimatorEventType::ON_FINISH);
+    ImageAnimatorModelNG.SetOnFinish(std::move(stoppedEvent));
     bool startFlag = false;
     auto startEvent = [&startFlag]() { startFlag = !startFlag; };
-    imageAnimatorView.SetImageAnimatorEvent(startEvent, AnimatorEventType::ON_START);
+    ImageAnimatorModelNG.SetOnStart(std::move(startEvent));
     auto element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ANIMATOR_ETS_TAG);
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
     auto eventHub = frameNode->GetEventHub<NG::ImageAnimatorEventHub>();
-    EXPECT_TRUE(eventHub != nullptr);
+    EXPECT_NE(eventHub, nullptr);
 
     /**
      * @tc.steps: step4. use OnModifyDone to set animator's status is RUNNING.
@@ -479,7 +487,7 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest007, TestSize.Level1)
 
     RefPtr<ImageAnimatorPattern> imageAnimatorPattern =
         AceType::DynamicCast<OHOS::Ace::NG::ImageAnimatorPattern>(frameNode->GetPattern());
-    EXPECT_TRUE(imageAnimatorPattern != nullptr);
+    EXPECT_NE(imageAnimatorPattern, nullptr);
     imageAnimatorPattern->AttachToFrameNode(frameNode);
     imageAnimatorPattern->OnModifyDone();
     EXPECT_TRUE(startFlag);
@@ -490,7 +498,7 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest007, TestSize.Level1)
      */
 
     ViewStackProcessor::GetInstance()->Push(element);
-    imageAnimatorView.SetStatus(STATUS_STOPPED);
+    ImageAnimatorModelNG.SetState(STATE_STOPPED);
     imageAnimatorPattern->OnModifyDone();
     EXPECT_TRUE(stoppedFlag);
 }
@@ -503,11 +511,11 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest007, TestSize.Level1)
 HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest008, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create imageAnimatorView.
+     * @tc.steps: step1. create ImageAnimatorModelNG.
      */
 
-    ImageAnimatorView imageAnimatorView;
-    imageAnimatorView.Create();
+    ImageAnimatorModelNG ImageAnimatorModelNG;
+    ImageAnimatorModelNG.Create();
 
     /**
      * @tc.steps: step2. set image's attributes and imageAnimatorView's attributes.
@@ -523,10 +531,10 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest008, TestSize.Level1)
     imageProperties.duration = IMAGE_DURATION;
     std::vector<ImageProperties> images;
     images.push_back(imageProperties);
-    imageAnimatorView.SetImages(std::move(images));
-    imageAnimatorView.SetStatus(STATUS_START);
-    imageAnimatorView.SetIsReverse(ISREVERSE_DEFAULT);
-    imageAnimatorView.SetIteration(ITERATION_DEFAULT);
+    ImageAnimatorModelNG.SetImages(std::move(images));
+    ImageAnimatorModelNG.SetState(STATE_START);
+    ImageAnimatorModelNG.SetIsReverse(ISREVERSE_DEFAULT);
+    ImageAnimatorModelNG.SetIteration(ITERATION_DEFAULT);
 
     /**
      * @tc.steps: step3. set repeatEvent and repeatEvent into eventHub.
@@ -535,14 +543,15 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest008, TestSize.Level1)
 
     bool repeatFlag = false;
     auto repeatEvent = [&repeatFlag]() { repeatFlag = !repeatFlag; };
-    imageAnimatorView.SetImageAnimatorEvent(repeatEvent, AnimatorEventType::ON_REPEAT);
+    ImageAnimatorModelNG.SetOnRepeat(std::move(repeatEvent));
     auto element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ANIMATOR_ETS_TAG);
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
     auto eventHub = frameNode->GetEventHub<NG::ImageAnimatorEventHub>();
-    EXPECT_TRUE(eventHub != nullptr);
+    EXPECT_NE(eventHub, nullptr);
     auto repeatCallback = eventHub->GetRepeatEvent();
-    EXPECT_TRUE(repeatCallback != nullptr);
+    EXPECT_NE(repeatCallback, nullptr);
     repeatCallback();
     EXPECT_TRUE(repeatFlag);
 }
@@ -555,11 +564,11 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest008, TestSize.Level1)
 HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest009, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create imageAnimatorView.
+     * @tc.steps: step1. create ImageAnimatorModelNG.
      */
 
-    ImageAnimatorView imageAnimatorView;
-    imageAnimatorView.Create();
+    ImageAnimatorModelNG ImageAnimatorModelNG;
+    ImageAnimatorModelNG.Create();
 
     /**
      * @tc.steps: step2. set image's duration by zero and imageAnimatorView's attributes.
@@ -574,10 +583,10 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest009, TestSize.Level1)
     imageProperties.left = IMAGE_LEFT;
     std::vector<ImageProperties> images;
     images.push_back(imageProperties);
-    imageAnimatorView.SetImages(std::move(images));
-    imageAnimatorView.SetStatus(STATUS_START);
-    imageAnimatorView.SetIsReverse(ISREVERSE_DEFAULT);
-    imageAnimatorView.SetIteration(ITERATION_DEFAULT);
+    ImageAnimatorModelNG.SetImages(std::move(images));
+    ImageAnimatorModelNG.SetState(STATE_START);
+    ImageAnimatorModelNG.SetIsReverse(ISREVERSE_DEFAULT);
+    ImageAnimatorModelNG.SetIteration(ITERATION_DEFAULT);
 
     /**
      * @tc.steps: step3. get imageAnimatorPattern from frameNode.
@@ -586,12 +595,13 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest009, TestSize.Level1)
 
     auto element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ANIMATOR_ETS_TAG);
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
     auto eventHub = frameNode->GetEventHub<NG::ImageAnimatorEventHub>();
-    EXPECT_TRUE(eventHub != nullptr);
+    EXPECT_NE(eventHub, nullptr);
     RefPtr<ImageAnimatorPattern> imageAnimatorPattern =
         AceType::DynamicCast<OHOS::Ace::NG::ImageAnimatorPattern>(frameNode->GetPattern());
-    EXPECT_TRUE(imageAnimatorPattern != nullptr);
+    EXPECT_NE(imageAnimatorPattern, nullptr);
 
     /**
      * @tc.steps: step4. use OnModifyDone when image's duration is zero.
@@ -612,11 +622,11 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest009, TestSize.Level1)
 HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest010, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create imageAnimatorView.
+     * @tc.steps: step1. create ImageAnimatorModelTestNg.
      */
 
-    ImageAnimatorView imageAnimatorView;
-    imageAnimatorView.Create();
+    ImageAnimatorModelNG ImageAnimatorModelNG;
+    ImageAnimatorModelNG.Create();
 
     /**
      * @tc.steps: step2. set image's duration by zero and imageAnimatorView's attributes.
@@ -632,10 +642,10 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest010, TestSize.Level1)
     imageProperties.duration = IMAGE_DURATION;
     std::vector<ImageProperties> images;
     images.push_back(imageProperties);
-    imageAnimatorView.SetImages(std::move(images));
-    imageAnimatorView.SetStatus(STATUS_START);
-    imageAnimatorView.SetIsReverse(ISREVERSE_DEFAULT);
-    imageAnimatorView.SetIteration(ITERATION_DEFAULT);
+    ImageAnimatorModelNG.SetImages(std::move(images));
+    ImageAnimatorModelNG.SetState(STATE_START);
+    ImageAnimatorModelNG.SetIsReverse(ISREVERSE_DEFAULT);
+    ImageAnimatorModelNG.SetIteration(ITERATION_DEFAULT);
 
     /**
      * @tc.steps: step3. use OnModifyDone to set animator's status is RUNNING and Add listener into animator.
@@ -644,15 +654,16 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest010, TestSize.Level1)
 
     auto element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ANIMATOR_ETS_TAG);
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
     auto eventHub = frameNode->GetEventHub<NG::ImageAnimatorEventHub>();
-    EXPECT_TRUE(eventHub != nullptr);
+    EXPECT_NE(eventHub, nullptr);
     RefPtr<ImageAnimatorPattern> imageAnimatorPattern =
         AceType::DynamicCast<OHOS::Ace::NG::ImageAnimatorPattern>(frameNode->GetPattern());
-    EXPECT_TRUE(imageAnimatorPattern != nullptr);
+    EXPECT_NE(imageAnimatorPattern, nullptr);
     imageAnimatorPattern->AttachToFrameNode(frameNode);
     imageAnimatorPattern->OnModifyDone();
-    EXPECT_EQ(imageAnimatorPattern->animator_->GetStatus(), STATUS_START);
+    EXPECT_EQ(imageAnimatorPattern->animator_->GetStatus(), static_cast<Animator::Status>(STATE_START));
     EXPECT_TRUE(!imageAnimatorPattern->animator_->interpolators_.empty());
     /**
      * @tc.steps: step4. change fixedSize and use OnModifyDone to run listerner.
@@ -661,18 +672,19 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest010, TestSize.Level1)
      */
 
     ViewStackProcessor::GetInstance()->Push(element);
-    imageAnimatorView.SetStatus(STATUS_DEFAULT);
-    imageAnimatorView.SetFixedSize(FIXEDSIZE_CHANGED);
+    ImageAnimatorModelNG.SetState(STATE_DEFAULT);
+    ImageAnimatorModelNG.SetFixedSize(FIXEDSIZE_CHANGED);
     imageAnimatorPattern->OnModifyDone();
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    EXPECT_TRUE(imageFrameNode != nullptr && imageFrameNode->GetTag() == V2::IMAGE_ETS_TAG);
+    EXPECT_NE(imageFrameNode, nullptr);
+    EXPECT_EQ(imageFrameNode->GetTag(), V2::IMAGE_ETS_TAG);
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
-    EXPECT_TRUE(imageLayoutProperty != nullptr);
+    EXPECT_NE(imageLayoutProperty, nullptr);
     EXPECT_EQ(imageLayoutProperty->GetImageSourceInfoValue(), ImageSourceInfo(IMAGE_SRC_URL));
     EXPECT_EQ(imageLayoutProperty->GetMarginProperty()->left->ToString(), IMAGE_LEFT.ToString());
     EXPECT_EQ(imageLayoutProperty->GetMarginProperty()->top->ToString(), IMAGE_TOP.ToString());
     const auto& calcLayoutConstraint = imageLayoutProperty->GetCalcLayoutConstraint();
-    EXPECT_TRUE(calcLayoutConstraint != nullptr);
+    EXPECT_NE(calcLayoutConstraint, nullptr);
     EXPECT_EQ(calcLayoutConstraint->selfIdealSize->Width()->ToString(), IMAGE_WIDTH.ToString());
     EXPECT_EQ(calcLayoutConstraint->selfIdealSize->Height()->ToString(), IMAGE_HEIGHT.ToString());
     EXPECT_EQ(imageLayoutProperty->GetMeasureType(), MeasureType::MATCH_CONTENT);

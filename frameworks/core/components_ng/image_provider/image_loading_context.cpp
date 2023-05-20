@@ -86,22 +86,22 @@ void ImageLoadingContext::OnLoadSuccess()
     if (DynamicCast<StaticImageObject>(imageObj_)) {
         imageObj_->ClearData();
     }
-    if (notifiers_.loadSuccessNotifyTask_) {
-        notifiers_.loadSuccessNotifyTask_(src_);
+    if (notifiers_.onLoadSuccess_) {
+        notifiers_.onLoadSuccess_(src_);
     }
 }
 
 void ImageLoadingContext::OnLoadFail()
 {
-    if (notifiers_.loadFailNotifyTask_) {
-        notifiers_.loadFailNotifyTask_(src_);
+    if (notifiers_.onLoadFail_) {
+        notifiers_.onLoadFail_(src_);
     }
 }
 
 void ImageLoadingContext::OnDataReady()
 {
-    if (notifiers_.dataReadyNotifyTask_) {
-        notifiers_.dataReadyNotifyTask_(src_);
+    if (notifiers_.onDataReady_) {
+        notifiers_.onDataReady_(src_);
     }
 }
 

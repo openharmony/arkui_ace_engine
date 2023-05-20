@@ -48,7 +48,18 @@ void JSBlank::Create(const JSCallbackInfo& info)
 {
     CalcDimension blankMin;
     BlankModel::GetInstance()->Create();
-    if (info.Length() >= 1 && ParseJsDimensionVp(info[0], blankMin)) {
+    if (info.Length() < 1) {
+        LOGD("Blank min needs at least 1 param");
+        return;
+    }
+    if (info[0]->IsUndefined()) {
+        BlankModel::GetInstance()->SetBlankMin(blankMin);
+        return;
+    }
+    if (ParseJsDimensionVp(info[0], blankMin)) {
+        if (blankMin.IsNegative()) {
+            blankMin.SetValue(0.0);
+        }
         BlankModel::GetInstance()->SetBlankMin(blankMin);
     }
 }
@@ -80,7 +91,6 @@ void JSBlank::JSBind(BindingTarget globalObj)
     JSClass<JSBlank>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSBlank>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
-    JSClass<JSBlank>::Inherit<JSViewAbstract>();
-    JSClass<JSBlank>::Bind<>(globalObj);
+    JSClass<JSBlank>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

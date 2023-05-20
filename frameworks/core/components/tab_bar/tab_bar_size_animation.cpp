@@ -51,7 +51,7 @@ void TabBarSizeAnimation::Initialize(const WeakPtr<PipelineContext>& context)
     onBlurTranslate_ =
         AceType::MakeRefPtr<CurveAnimation<ItemAnimationProp>>(onFocusItem, onBlurItem, Curves::FRICTION);
     auto weak = AceType::WeakClaim(this);
-    controller_ = AceType::MakeRefPtr<Animator>(context);
+    controller_ = CREATE_ANIMATOR(context);
     onFocusTranslate_->AddListener(Animation<ItemAnimationProp>::ValueCallback([weak](ItemAnimationProp value) {
         auto tabBar = weak.Upgrade();
         if (tabBar) {

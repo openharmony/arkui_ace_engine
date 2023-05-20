@@ -110,8 +110,8 @@ void JSEllipse::JSBind(BindingTarget globalObj)
     JSClass<JSEllipse>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSEllipse>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
-    JSClass<JSEllipse>::Inherit<JSShapeAbstract>();
-    JSClass<JSEllipse>::Bind(globalObj, JSEllipse::ConstructorCallback, JSEllipse::DestructorCallback);
+    JSClass<JSEllipse>::InheritAndBind<JSShapeAbstract>(
+        globalObj, JSEllipse::ConstructorCallback, JSEllipse::DestructorCallback);
 }
 
 } // namespace OHOS::Ace::Framework

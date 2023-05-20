@@ -63,6 +63,11 @@ SrcType ImageSourceInfo::ResolveURIType(const std::string& uri)
     if (head == "http" || head == "https") {
         return SrcType::NETWORK;
     } else if (head == "file") {
+        if (IsUriOfDataAbilityEncoded(uri, "^file://media/.*/thumbnail/.*$")) {
+            return SrcType::DATA_ABILITY_DECODED;
+        } else if (IsUriOfDataAbilityEncoded(uri, "^file://media/.*")) {
+            return SrcType::DATA_ABILITY;
+        }
         return SrcType::FILE;
     } else if (head == "internal") {
         return SrcType::INTERNAL;
@@ -232,5 +237,10 @@ std::string ImageSourceInfo::GetKey() const
 bool ImageSourceInfo::SupportObjCache() const
 {
     return false;
+}
+
+const std::string& ImageSourceInfo::GetModuleName() const
+{
+    return moduleName_;
 }
 } // namespace OHOS::Ace

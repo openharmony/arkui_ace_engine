@@ -69,8 +69,7 @@ void JSPolygon::JSBind(BindingTarget globalObj)
     JSClass<JSPolygon>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSPolygon>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
 
-    JSClass<JSPolygon>::Inherit<JSShapeAbstract>();
-    JSClass<JSPolygon>::Bind(globalObj);
+    JSClass<JSPolygon>::InheritAndBind<JSShapeAbstract>(globalObj);
 }
 
 void JSPolygon::JsPoints(const JSCallbackInfo& info)

@@ -45,6 +45,7 @@ ohos_unittest("form_pattern_test_ng") {
     "$ace_root/frameworks/base/utils/base_id.cpp",
     "$ace_root/frameworks/base/utils/string_expression.cpp",
     "$ace_root/frameworks/base/utils/string_utils.cpp",
+    "$ace_root/frameworks/base/utils/time_util.cpp",
 
     # components
     "$ace_root/frameworks/core/components/common/layout/grid_column_info.cpp",
@@ -119,6 +120,8 @@ ohos_unittest("form_pattern_test_ng") {
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "$ace_root/test/unittest:ace_unittest_log",
     "$cjson_root:cjson_static",
+    "//foundation/graphic/graphic_2d:libsurface",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//third_party/googletest:gmock_main",
   ]
 
@@ -126,10 +129,7 @@ ohos_unittest("form_pattern_test_ng") {
     "//drivers/peripheral/display/interfaces/include",
     "//foundation/graphic/graphic_2d/interfaces/innerkits/surface",
   ]
-  deps += [
-    "//foundation/graphic/graphic_2d:libsurface",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-  ]
+
   if (is_ohos_standard_system) {
     external_deps = [
       "ability_base:want",
@@ -143,10 +143,9 @@ ohos_unittest("form_pattern_test_ng") {
       "ipc:ipc_core",
     ]
   }
-  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
-  configs += [
-    "$ace_root/../../graphic/graphic_2d/rosen/modules/render_service_base:export_config",
-    "$ace_root/../../graphic/graphic_2d/rosen/modules/render_service_client:render_service_client_config",
-    "$ace_flutter_engine_root/skia:skia_config",
+  configs = [
+    "$ace_root/test/unittest:ace_unittest_config",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:export_config",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:render_service_client_config",
   ]
 }

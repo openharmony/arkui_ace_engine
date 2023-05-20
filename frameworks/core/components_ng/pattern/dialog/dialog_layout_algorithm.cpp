@@ -18,6 +18,7 @@
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/device_config.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
@@ -30,6 +31,7 @@
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/base/constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -41,6 +43,7 @@ namespace {
 constexpr double DIALOG_HEIGHT_RATIO = 0.8;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_LANDSCAPE = 0.9;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_CAR = 0.95;
+constexpr int listPaddingHeight = 72;
 
 } // namespace
 
@@ -72,35 +75,76 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // childSize_ and childOffset_ is used in Layout.
     child->Measure(childLayoutConstraint);
 
-    RefPtr<LayoutWrapper> scroll;
-    float scrollHeight = 0.0f;
-    float scrollWidth = 0.0f;
     // scroll for alert
+    AnalysisHeightOfChild(layoutWrapper);
+}
+
+void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper)
+{
+    float scrollHeight = 0.0f;
+    float listHeight = 0.0f;
+    float restHeight = 0.0f;
+    float restWidth = 0.0f;
+    RefPtr<LayoutWrapper> scroll;
+    RefPtr<LayoutWrapper> list;
     for (const auto& children : layoutWrapper->GetAllChildrenWithBuild()) {
-        scrollWidth = children->GetGeometryNode()->GetMarginFrameSize().Width();
-        scrollHeight = children->GetGeometryNode()->GetMarginFrameSize().Height();
+        restWidth = children->GetGeometryNode()->GetMarginFrameSize().Width();
+        restHeight = children->GetGeometryNode()->GetMarginFrameSize().Height();
         for (const auto& grandson : children->GetAllChildrenWithBuild()) {
             if (grandson->GetHostTag() == V2::SCROLL_ETS_TAG) {
                 scroll = grandson;
+                scrollHeight = grandson->GetGeometryNode()->GetMarginFrameSize().Height();
+            } else if (grandson->GetHostTag() == V2::LIST_ETS_TAG) {
+                list = grandson;
+                listHeight = grandson->GetGeometryNode()->GetMarginFrameSize().Height();
             } else {
-                scrollHeight -= grandson->GetGeometryNode()->GetMarginFrameSize().Height();
+                restHeight -= grandson->GetGeometryNode()->GetMarginFrameSize().Height();
             }
         }
     }
-    if (scroll != nullptr) {
-        auto childConstraint = CreateScrollConstraint(layoutWrapper, scrollHeight, scrollWidth);
+
+    if (scroll != nullptr && list != nullptr) {
+        Distribute(scrollHeight, listHeight, restHeight);
+        auto childConstraint = CreateDialogChildConstraint(layoutWrapper, scrollHeight, restWidth);
         scroll->Measure(childConstraint);
+        childConstraint = CreateDialogChildConstraint(layoutWrapper, listHeight + listPaddingHeight, restWidth);
+        list->Measure(childConstraint);
+    } else {
+        if (scroll != nullptr) {
+            auto childConstraint =
+                CreateDialogChildConstraint(layoutWrapper, std::min(restHeight, scrollHeight), restWidth);
+            scroll->Measure(childConstraint);
+        }
+        if (list != nullptr) {
+            auto childConstraint = CreateDialogChildConstraint(
+                layoutWrapper, std::min(restHeight, listHeight + listPaddingHeight), restWidth);
+            list->Measure(childConstraint);
+        }
     }
 }
 
-LayoutConstraintF DialogLayoutAlgorithm::CreateScrollConstraint(
-    LayoutWrapper* layoutWrapper, float scrollHeight, float scrollWidth)
+void DialogLayoutAlgorithm::Distribute(float& scrollHeight, float& listHeight, float restHeight)
+{
+    if (scrollHeight + listHeight > restHeight) {
+        if (scrollHeight > restHeight / 2.0 && listHeight > restHeight / 2.0) {
+            scrollHeight = restHeight / 2.0;
+            listHeight = restHeight / 2.0;
+        } else if (scrollHeight > restHeight / 2.0) {
+            scrollHeight = restHeight - listHeight;
+        } else {
+            listHeight = restHeight - scrollHeight;
+        }
+    }
+}
+
+LayoutConstraintF DialogLayoutAlgorithm::CreateDialogChildConstraint(
+    LayoutWrapper* layoutWrapper, float Height, float Width)
 {
     auto childConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    childConstraint.maxSize.SetHeight(scrollHeight);
-    childConstraint.percentReference.SetHeight(scrollHeight);
-    childConstraint.maxSize.SetWidth(scrollWidth);
-    childConstraint.percentReference.SetWidth(scrollWidth);
+    childConstraint.maxSize.SetHeight(Height);
+    childConstraint.percentReference.SetHeight(Height);
+    childConstraint.maxSize.SetWidth(Width);
+    childConstraint.percentReference.SetWidth(Width);
     return childConstraint;
 }
 
@@ -204,7 +248,7 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(dialogProp);
     dialogOffset_ = dialogProp->GetDialogOffset().value_or(DimensionOffset());
     alignment_ = dialogProp->GetDialogAlignment().value_or(DialogAlignment::DEFAULT);
-    auto selfSize = frameNode->GetGeometryNode()->GetFrameSize();
+    auto selfSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
         return;
@@ -215,6 +259,12 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     UpdateTouchRegion();
     child->GetGeometryNode()->SetMarginFrameOffset(topLeftPoint_);
     child->Layout();
+    if (dialogProp->GetShowInSubWindowValue(false)) {
+        std::vector<Rect> rects;
+        auto rect = Rect(0.0f, 0.0f, selfSize.Width(), selfSize.Height());
+        rects.emplace_back(rect);
+        SubwindowManager::GetInstance()->SetHotAreas(rects);
+    }
 }
 
 OffsetF DialogLayoutAlgorithm::ComputeChildPosition(

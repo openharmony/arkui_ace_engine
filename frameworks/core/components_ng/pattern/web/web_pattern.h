@@ -22,6 +22,7 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "base/web/webview/ohos_nweb/include/nweb_handler.h"
 #include "core/components/web/web_property.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
@@ -34,7 +35,6 @@
 #include "core/components_ng/pattern/web/web_pattern_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/render_surface.h"
-#include "nweb_handler.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -298,7 +298,9 @@ public:
     }
     void OnCompleteSwapWithNewSize();
     void OnResizeNotWork();
-
+    bool OnBackPressed() const;
+    void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
+    bool NotifyStartDragTask();
 private:
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
@@ -356,7 +358,7 @@ private:
     void OnHorizontalScrollBarAccessEnabledUpdate(bool value);
     void OnVerticalScrollBarAccessEnabledUpdate(bool value);
     void OnScrollBarColorUpdate(const std::string& value);
-    
+
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
@@ -415,6 +417,7 @@ private:
     static bool ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>& touchInfos);
     void InitEnhanceSurfaceFlag();
     void UpdateBackgroundColorRightNow(int32_t color);
+    void UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -438,6 +441,7 @@ private:
     bool isUrlLoaded_ = false;
     std::queue<MouseClickInfo> doubleClickQueue_;
     bool isFullScreen_ = false;
+    std::shared_ptr<FullScreenEnterEvent> fullScreenExitHandler_ = nullptr;
     bool needOnFocus_ = false;
     Size drawSize_;
     Size drawSizeCache_;
@@ -458,6 +462,8 @@ private:
     int32_t parentNWebId_ = -1;
     bool isInWindowDrag_ = false;
     bool isWaiting_ = false;
+    bool isDisableDrag_ = false;
+    bool isMouseEvent_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG

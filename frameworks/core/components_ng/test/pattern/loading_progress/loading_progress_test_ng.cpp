@@ -136,6 +136,30 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LoadingProgressPatternTest002
+ * @tc.desc: Test LoadingProgress in visible scene.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest002, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+    loadingProgressPattern->CreateNodePaintMethod();
+    EXPECT_NE(loadingProgressPattern->loadingProgressModifier_, nullptr);
+    auto layoutProperty = loadingProgressPattern->GetLayoutProperty<LoadingProgressLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
+    EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isLoading_);
+    layoutProperty->UpdateVisibility(VisibleType::GONE);
+    EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
+    layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    EXPECT_TRUE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
+}
+
+/**
  * @tc.name: LoadingProgressPaintMethodTest001
  * @tc.desc: Test LoadingProgressPaintMethod function of loadingProgress.
  * @tc.type: FUNC

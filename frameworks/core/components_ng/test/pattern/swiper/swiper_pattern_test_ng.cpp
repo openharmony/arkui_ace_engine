@@ -108,17 +108,11 @@ HWTEST_F(SwiperPatternTestNg, SwiperEvent001, TestSize.Level1)
     pattern->HandleTouchEvent(touchEventInfo);
     EXPECT_FALSE(pattern->indicatorDoingAnimation_);
     const char* name = "HandleTouchDown";
-    pattern->controller_ = AceType::MakeRefPtr<Animator>(name);
-    pattern->controller_->status_ = Animator::Status::RUNNING;
-    pattern->springController_ = AceType::MakeRefPtr<Animator>(name);
-    pattern->springController_->status_ = Animator::Status::RUNNING;
     pattern->HandleTouchEvent(touchEventInfo);
     EXPECT_FALSE(pattern->indicatorDoingAnimation_);
 
     touchEventInfo.touches_.begin()->SetTouchType(TouchType::UP);
     pattern->HandleTouchEvent(touchEventInfo);
-    pattern->controller_ = nullptr;
-    pattern->springController_ = nullptr;
     touchEventInfo.touches_.begin()->SetTouchType(TouchType::CANCEL);
     pattern->HandleTouchEvent(touchEventInfo);
     touchEventInfo.touches_.begin()->SetTouchType(TouchType::MOVE);
@@ -140,14 +134,13 @@ HWTEST_F(SwiperPatternTestNg, SwiperEvent002, TestSize.Level1)
     stack->Push(swiperNode);
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
     auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
-    pattern->InitPanEvent(gestureEventHub);
+    pattern->InitPanEvent();
     EXPECT_EQ(pattern->direction_, Axis::HORIZONTAL);
     pattern->touchEvent_ = nullptr;
-    pattern->InitTouchEvent(gestureEventHub);
+    pattern->InitTouchEvent();
     TouchEventFunc callback = [](TouchEventInfo& info) {};
     pattern->touchEvent_ = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback));
-    pattern->InitTouchEvent(gestureEventHub);
+    pattern->InitTouchEvent();
     EXPECT_TRUE(pattern->touchEvent_);
 
     EXPECT_TRUE(pattern->panEvent_);
@@ -207,9 +200,6 @@ HWTEST_F(SwiperPatternTestNg, SwiperUtilsTest001, TestSize.Level1)
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(swiperLayoutAlgorithm));
     int32_t startIndex = 0;
     int32_t endIndex = 4;
-    swiperLayoutAlgorithm->startIndex_ = startIndex;
-    swiperLayoutAlgorithm->endIndex_ = endIndex;
-    swiperLayoutAlgorithm->currentIndex_ = 1;
     swiperLayoutAlgorithm->SetTotalCount(endIndex - startIndex);
     CreateChildWrapperAppendToHostWrapper(startIndex, endIndex, layoutWrapper);
     swiperLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
@@ -431,26 +421,6 @@ HWTEST_F(SwiperPatternTestNg, SwiperInit001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwiperInit002
- * @tc.desc: InitOnKeyEvent
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperPatternTestNg, SwiperInit002, TestSize.Level1)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto swiperNode =
-        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
-    stack->Push(swiperNode);
-    auto pattern = swiperNode->GetPattern<SwiperPattern>();
-    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
-    RefPtr<FocusHub> focusHub = AceType::MakeRefPtr<FocusHub>(eventHub, FocusType::DISABLE, false);
-    pattern->InitOnKeyEvent(focusHub);
-    KeyEvent event = KeyEvent();
-    event.action = KeyAction::DOWN;
-    EXPECT_FALSE(focusHub->onKeyEventInternal_(event));
-}
-
-/**
  * @tc.name: SwiperFunc001
  * @tc.desc: OnKeyEvent
  * @tc.type: FUNC
@@ -535,8 +505,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperFunc004, TestSize.Level1)
     stack->Push(swiperNode);
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
     auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
-    pattern->InitPanEvent(gestureEventHub);
+    pattern->InitPanEvent();
     EXPECT_EQ(pattern->direction_, Axis::HORIZONTAL);
 
     auto indicatorNode = FrameNode::GetOrCreateFrameNode(
@@ -550,21 +519,65 @@ HWTEST_F(SwiperPatternTestNg, SwiperFunc004, TestSize.Level1)
     gestureEvent.SetLocalLocation(Offset(0, 0));
     gestureEvent.inputEventType_ = InputEventType::TOUCH_SCREEN;
     pattern->panEvent_->actionUpdate_(gestureEvent);
-    EXPECT_EQ(pattern->currentOffset_, MAIN_DELTA);
 
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     swiperPaintProperty->propLoop_ = false;
-    EXPECT_TRUE(pattern->IsOutOfBoundary(MAIN_DELTA));
     swiperNode->geometryNode_->frame_.SetSize(SizeF(GEOMETRY_WIDTH, GEOMETRY_HEIGHT));
-    EXPECT_FALSE(pattern->IsOutOfBoundary(MAIN_DELTA));
     // Swiper has reached boundary.
     swiperNode->geometryNode_->frame_.SetSize(SizeF(0, 0));
     pattern->panEvent_->actionUpdate_(gestureEvent);
-    pattern->currentOffset_ = MAIN_DELTA;
     swiperPaintProperty->propEdgeEffect_ = EdgeEffect::FADE;
     pattern->panEvent_->actionUpdate_(gestureEvent);
-    pattern->currentOffset_ = MAIN_DELTA;
     swiperPaintProperty->propEdgeEffect_ = EdgeEffect::NONE;
     pattern->panEvent_->actionUpdate_(gestureEvent);
+}
+
+/**
+ * @tc.name: PerformActionTest001
+ * @tc.desc: Swiper Accessibility PerformAction test ScrollForward and ScrollBackward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, PerformActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper and initialize related properties.
+     */
+    SwiperModelNG swiperModelNG;
+    swiperModelNG.Create();
+
+    /**
+     * @tc.steps: step2. Get swiper frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto swiperPaintProperty = frameNode->GetPaintProperty<SwiperPaintProperty>();
+    ASSERT_NE(swiperPaintProperty, nullptr);
+    swiperPaintProperty->UpdateLoop(false);
+    swiperPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step3. Get swiper accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto swiperAccessibilityProperty = frameNode->GetAccessibilityProperty<SwiperAccessibilityProperty>();
+    ASSERT_NE(swiperAccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. When swiper is not scrollable, call the callback function in swiperAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(swiperAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(swiperAccessibilityProperty->ActActionScrollBackward());
+
+    /**
+     * @tc.steps: step5. When swiper is scrollable, call the callback function in swiperAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    swiperPaintProperty->UpdateLoop(true);
+    EXPECT_TRUE(swiperAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(swiperAccessibilityProperty->ActActionScrollBackward());
 }
 } // namespace OHOS::Ace::NG

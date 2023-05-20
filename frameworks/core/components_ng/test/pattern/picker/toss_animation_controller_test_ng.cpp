@@ -71,14 +71,27 @@ void TossAnimationControllerTestNg::TearDownTestSuite()
  */
 HWTEST_F(TossAnimationControllerTestNg, TossAnimationControllerTest001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create TossAnimationController instance.
+     */
     RefPtr<TossAnimationController> toss = AceType::MakeRefPtr<TossAnimationController>();
     toss->SetStart(YOFFSET_START1);
     toss->SetEnd(YOFFSET_END1);
     toss->timeEnd_ = toss->GetCurrentTime() + TIME_PLUS;
+    /**
+     * @tc.steps: step2. call Play function.
+     * @tc.expected: The return value is true.
+     */
     auto ret = toss->Play();
     EXPECT_EQ(toss->yStart_, YOFFSET_START1);
     EXPECT_EQ(toss->yEnd_, YOFFSET_END1);
     EXPECT_TRUE(ret);
+    auto column = AceType::MakeRefPtr<DatePickerColumnPattern>();
+    toss->SetColumn(column);
+    /**
+     * cover StopCallback callback
+    */
+    toss->toss_->controller_->NotifyStopListener();
 }
 
 /**
@@ -88,10 +101,17 @@ HWTEST_F(TossAnimationControllerTestNg, TossAnimationControllerTest001, TestSize
  */
 HWTEST_F(TossAnimationControllerTestNg, TossAnimationControllerTest002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create TossAnimationController instance.
+     */
     RefPtr<TossAnimationController> toss = AceType::MakeRefPtr<TossAnimationController>();
     toss->SetStart(YOFFSET_START1);
     toss->SetEnd(YOFFSET_END1);
     toss->timeEnd_ = toss->GetCurrentTime() + TIME_PLUS;
+    /**
+     * @tc.steps: step2. call Play function.
+     * @tc.expected: The return value is true.
+     */
     auto ret = toss->Play();
     EXPECT_EQ(toss->yStart_, YOFFSET_START1);
     EXPECT_EQ(toss->yEnd_, YOFFSET_END1);
@@ -103,6 +123,12 @@ HWTEST_F(TossAnimationControllerTestNg, TossAnimationControllerTest002, TestSize
     EXPECT_EQ(toss->yStart_, YOFFSET_START2);
     EXPECT_EQ(toss->yEnd_, YOFFSET_END2);
     EXPECT_TRUE(ret);
+    auto column = AceType::MakeRefPtr<DatePickerColumnPattern>();
+    toss->SetColumn(column);
+    /**
+     * cover PickerAnimation callback
+    */
+    toss->toss_->callback_(0.5);
 }
 
 /**

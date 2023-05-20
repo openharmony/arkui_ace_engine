@@ -32,6 +32,10 @@
 #include "core/components_ng/render/animation_utils.h"
 #include "core/image/image_provider.h"
 
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+#include "core/common/plugin_manager.h"
+#endif
+
 namespace OHOS::Ace {
 
 constexpr int32_t DEFAULT_VIEW_SCALE = 1;
@@ -95,6 +99,20 @@ RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
     auto currentContainer = Container::Current();
     CHECK_NULL_RETURN(currentContainer, nullptr);
     return currentContainer->GetPipelineContext();
+}
+
+RefPtr<ThemeManager> PipelineBase::CurrentThemeManager()
+{
+    auto pipelineContext = OHOS::Ace::PipelineBase::GetCurrentContext();
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+    if (Container::CurrentId() >= MIN_PLUGIN_SUBCONTAINER_ID) {
+        auto pluginContainer = PluginManager::GetInstance().GetPluginSubContainer(Container::CurrentId());
+        CHECK_NULL_RETURN(pluginContainer, nullptr);
+        pipelineContext = pluginContainer->GetPipelineContext();
+    }
+#endif
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    return pipelineContext->GetThemeManager();
 }
 
 uint64_t PipelineBase::GetTimeFromExternalTimer()

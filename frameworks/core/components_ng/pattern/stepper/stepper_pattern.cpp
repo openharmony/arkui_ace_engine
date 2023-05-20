@@ -70,6 +70,7 @@ void StepperPattern::OnModifyDone()
     UpdateOrCreateLeftButtonNode(index_);
     UpdateOrCreateRightButtonNode(index_);
     InitButtonClickEvent();
+    SetAccessibilityAction();
 }
 
 void StepperPattern::OnAttachToFrameNode()
@@ -546,8 +547,8 @@ void StepperPattern::HandlingLeftButtonClickEvent()
     CHECK_NULL_VOID(stepperHub);
     auto swiperNode =
         DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId())));
-    auto swiperAnimationController = swiperNode->GetPattern<SwiperPattern>()->GetController();
-    if (swiperAnimationController && !swiperAnimationController->IsStopped()) {
+    const auto& swiperAnimation = swiperNode->GetPattern<SwiperPattern>()->GetAnimation();
+    if (AnimationUtils::IsRunning(swiperAnimation)) {
         return;
     }
     auto swiperController = swiperNode->GetPattern<SwiperPattern>()->GetSwiperController();
@@ -564,8 +565,8 @@ void StepperPattern::HandlingRightButtonClickEvent()
     CHECK_NULL_VOID(stepperHub);
     auto swiperNode =
         DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId())));
-    auto swiperAnimationController = swiperNode->GetPattern<SwiperPattern>()->GetController();
-    if (swiperAnimationController && !swiperAnimationController->IsStopped()) {
+    const auto& swiperAnimation = swiperNode->GetPattern<SwiperPattern>()->GetAnimation();
+    if (AnimationUtils::IsRunning(swiperAnimation)) {
         return;
     }
     auto stepperItemNode = DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(static_cast<int32_t>(index_)));
@@ -596,4 +597,22 @@ int32_t StepperPattern::TotalCount() const
     return swiperNode->TotalChildCount() - 1;
 }
 
+void StepperPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandlingRightButtonClickEvent();
+    });
+
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandlingLeftButtonClickEvent();
+    });
+}
 } // namespace OHOS::Ace::NG

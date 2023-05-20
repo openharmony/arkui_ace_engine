@@ -14,6 +14,10 @@
  */
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 
+#include <unordered_map>
+
+#include "base/utils/string_utils.h"
+
 namespace OHOS::Ace::NG {
 const int32_t SwiperAnimationStyle::DEFAULT_INTERVAL = 3000;
 const int32_t SwiperAnimationStyle::DEFAULT_DURATION = 400;
@@ -32,5 +36,22 @@ void SwiperPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("effectMode", EDGE_EFFECT[static_cast<int32_t>(GetEdgeEffect().value_or(EdgeEffect::SPRING))]);
     json->Put("curve",
         GetCurve().has_value() ? Curves::ToString(GetCurve().value()).c_str() : Curves::DEFAULT_CURVE_NAME.c_str());
+}
+
+void SwiperPaintProperty::FromJson(const std::unique_ptr<JsonValue>& json)
+{
+    UpdateAutoPlay(json->GetBool("autoPlay"));
+    UpdateAutoPlayInterval(StringUtils::StringToInt(json->GetString("interval")));
+    UpdateLoop(json->GetBool("loop"));
+    UpdateDuration(StringUtils::StringToInt(json->GetString("duration")));
+    UpdateDisableSwipe(json->GetBool("disableSwipe"));
+    static const std::unordered_map<std::string, EdgeEffect> uMap {
+        { "EdgeEffect.Spring", EdgeEffect::SPRING },
+        { "EdgeEffect.Fade", EdgeEffect::FADE },
+        { "EdgeEffect.None", EdgeEffect::NONE },
+    };
+    auto effectMode = json->GetString("effectMode");
+    UpdateEdgeEffect(uMap.count(effectMode) ? uMap.at(effectMode) : EdgeEffect::SPRING);
+    PaintProperty::FromJson(json);
 }
 } // namespace OHOS::Ace::NG

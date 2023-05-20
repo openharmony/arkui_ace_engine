@@ -111,7 +111,8 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true };
+        // Video focus type is scope, it is a container, inner focus is on slider now.
+        return { FocusType::SCOPE, true };
     }
 
     void SetHiddenChangeEvent(HiddenChangeEvent&& hiddenChangeEvent)

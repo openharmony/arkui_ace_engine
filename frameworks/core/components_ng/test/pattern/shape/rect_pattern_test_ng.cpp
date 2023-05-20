@@ -57,6 +57,8 @@ public:
         LayoutConstraintF layoutConstraint;
         layoutConstraint.percentReference.SetWidth(WIDTH);
         layoutConstraint.percentReference.SetHeight(HEIGHT);
+        layoutConstraint.selfIdealSize.SetWidth(WIDTH);
+        layoutConstraint.selfIdealSize.SetHeight(HEIGHT);
         layoutProperty->UpdateLayoutConstraint(layoutConstraint);
         layoutProperty->UpdateContentConstraint();
         auto size = layoutAlgorithm->MeasureContent(layoutProperty->CreateContentConstraint(), nullptr);

@@ -32,6 +32,7 @@ constexpr int32_t IMAGE_INDEX = 1;
 constexpr int32_t CANCEL_IMAGE_INDEX = 2;
 constexpr int32_t CANCEL_BUTTON_INDEX = 3;
 constexpr int32_t BUTTON_INDEX = 4;
+constexpr int32_t DOUBLE = 2;
 
 // The focus state requires an 2vp inner stroke, which should be indented by 1vp when drawn.
 constexpr Dimension FOCUS_OFFSET = 1.0_vp;
@@ -392,40 +393,45 @@ void SearchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     float originY = 0.0f;
     float endX = 0.0f;
     float endY = 0.0f;
-    float radius = 0.0f;
+    float radiusTopLeft = 0.0f;
+    float radiusTopRight = 0.0f;
+    float radiusBottomLeft = 0.0f;
+    float radiusBottomRight = 0.0f;
     float focusOffset = FOCUS_OFFSET.ConvertToPx();
     if (focusChoice_ == FocusChoice::SEARCH) {
-        originX = searchOffset_.GetX() + focusOffset;
-        originY = searchOffset_.GetY() + focusOffset;
-        endX = searchSize_.Width() + originX - 2 * focusOffset;
-        endY = searchSize_.Height() + originY - 2 * focusOffset;
-        radius = searchSize_.Height() / 2.0 - focusOffset;
+        return;
     }
     if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
         originX = cancelButtonOffset_.GetX() + focusOffset;
         originY = cancelButtonOffset_.GetY() + focusOffset;
-        endX = cancelButtonSize_.Width() + originX - 2 * focusOffset;
-        endY = cancelButtonSize_.Height() + originY - 2 * focusOffset;
-        radius = cancelButtonSize_.Height() / 2.0 - focusOffset;
+        endX = cancelButtonSize_.Width() + originX - DOUBLE * focusOffset;
+        endY = cancelButtonSize_.Height() + originY - DOUBLE * focusOffset;
+        radiusTopLeft = cancelButtonSize_.Height() / DOUBLE - focusOffset;
+        radiusTopRight = cancelButtonSize_.Height() / DOUBLE - focusOffset;
+        radiusBottomLeft = cancelButtonSize_.Height() / DOUBLE - focusOffset;
+        radiusBottomRight = cancelButtonSize_.Height() / DOUBLE - focusOffset;
     }
     if (focusChoice_ == FocusChoice::SEARCH_BUTTON) {
         originX = buttonOffset_.GetX() + focusOffset;
         originY = buttonOffset_.GetY() + focusOffset;
-        endX = buttonSize_.Width() + originX - 2 * focusOffset;
-        endY = buttonSize_.Height() + originY - 2 * focusOffset;
-        radius = buttonSize_.Height() / 2.0 - focusOffset;
+        endX = buttonSize_.Width() + originX - DOUBLE * focusOffset;
+        endY = buttonSize_.Height() + originY - DOUBLE * focusOffset;
+        radiusTopLeft = buttonSize_.Height() / DOUBLE - focusOffset;
+        radiusTopRight = buttonSize_.Height() / DOUBLE - focusOffset;
+        radiusBottomLeft = buttonSize_.Height() / DOUBLE - focusOffset;
+        radiusBottomRight = buttonSize_.Height() / DOUBLE - focusOffset;
     }
 
     paintRect.SetRect({ originX, originY, endX - originX, endY - originY });
-    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, radius, radius);
-    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, radius, radius);
-    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, radius, radius);
-    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, radius, radius);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, radiusTopLeft, radiusTopLeft);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, radiusTopRight, radiusTopRight);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, radiusBottomLeft, radiusBottomLeft);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, radiusBottomRight, radiusBottomRight);
 }
 
 FocusPattern SearchPattern::GetFocusPattern() const
 {
-    return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
+    return { FocusType::NODE, true, FocusStyleType::MATCH_ACTIVE_CUSTOM_REGION };
 }
 
 void SearchPattern::RequestKeyboard()

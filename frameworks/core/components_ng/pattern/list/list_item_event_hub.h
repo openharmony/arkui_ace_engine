@@ -40,12 +40,78 @@ public:
         return onSelectEvent_;
     }
 
+    void SetStartOnDelete(OnDeleteEvent&& onDelete)
+    {
+        startOnDeleteEvent_ = std::move(onDelete);
+    }
+
+    const OnDeleteEvent& GetStartOnDelete() const
+    {
+        return startOnDeleteEvent_;
+    }
+
+    void SetEndOnDelete(OnDeleteEvent&& onDelete)
+    {
+        endOnDeleteEvent_ = std::move(onDelete);
+    }
+
+    const OnDeleteEvent& GetEndOnDelete() const
+    {
+        return endOnDeleteEvent_;
+    }
+
+    void SetOnEnterStartDeleteArea(OnEnterDeleteAreaEvent&& onEnterDeleteArea)
+    {
+        onEnterStartDeleteAreaEvent_ = std::move(onEnterDeleteArea);
+    }
+
+    const OnEnterDeleteAreaEvent& GetOnEnterStartDeleteArea() const
+    {
+        return onEnterStartDeleteAreaEvent_;
+    }
+
+    void SetOnEnterEndDeleteArea(OnEnterDeleteAreaEvent&& onEnterDeleteArea)
+    {
+        onEnterEndDeleteAreaEvent_ = std::move(onEnterDeleteArea);
+    }
+
+    const OnEnterDeleteAreaEvent& GetOnEnterEndDeleteArea() const
+    {
+        return onEnterEndDeleteAreaEvent_;
+    }
+
+    void SetOnExitStartDeleteArea(OnExitDeleteAreaEvent&& onExitDeleteArea)
+    {
+        onExitStartDeleteAreaEvent_ = std::move(onExitDeleteArea);
+    }
+
+    const OnExitDeleteAreaEvent& GetOnExitStartDeleteArea() const
+    {
+        return onExitStartDeleteAreaEvent_;
+    }
+
+    void SetOnExitEndDeleteArea(OnExitDeleteAreaEvent&& onExitDeleteArea)
+    {
+        onExitEndDeleteAreaEvent_ = std::move(onExitDeleteArea);
+    }
+
+    const OnExitDeleteAreaEvent& GetOnExitEndDeleteArea() const
+    {
+        return onExitEndDeleteAreaEvent_;
+    }
+
     int32_t GetIndex(const Point& point) const;
 
     std::string GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType drag) override;
 
 private:
     OnSelectFunc onSelectEvent_;
+    OnDeleteEvent startOnDeleteEvent_;
+    OnDeleteEvent endOnDeleteEvent_;
+    OnEnterDeleteAreaEvent onEnterStartDeleteAreaEvent_;
+    OnEnterDeleteAreaEvent onEnterEndDeleteAreaEvent_;
+    OnExitDeleteAreaEvent onExitStartDeleteAreaEvent_;
+    OnExitDeleteAreaEvent onExitEndDeleteAreaEvent_;
 };
 } // namespace OHOS::Ace::NG
 

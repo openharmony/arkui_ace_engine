@@ -115,7 +115,7 @@ void SvgAnimation::CreatePropertyAnimation(const T& originalValue, std::function
         }
         animator_->ClearInterpolators();
     } else {
-        animator_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
+        animator_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
         auto context = svgContext_.Upgrade();
         CHECK_NULL_VOID(context);
         context->AddAnimator(animator_->GetId(), animator_);

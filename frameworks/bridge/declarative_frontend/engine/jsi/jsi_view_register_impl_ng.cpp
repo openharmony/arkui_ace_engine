@@ -50,6 +50,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_rating.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroll.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_scroller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_stack.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_swiper.h"
@@ -59,6 +60,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_toggle.h"
+#include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #ifdef VIDEO_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_video.h"
 #endif
@@ -149,9 +151,9 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 
 void JsBindViews(BindingTarget globalObj)
 {
-    JSViewAbstract::JSBind();
+    JSViewAbstract::JSBind(globalObj);
     JSViewStackProcessor::JSBind(globalObj);
-    JSContainerBase::JSBind();
+    JSContainerBase::JSBind(globalObj);
     JSView::JSBind(globalObj);
     JSText::JSBind(globalObj);
     JSColumn::JSBind(globalObj);
@@ -184,6 +186,8 @@ void JsBindViews(BindingTarget globalObj)
     JSGridItem::JSBind(globalObj);
     JSSwiper::JSBind(globalObj);
     JSImageSpan::JSBind(globalObj);
+    JSScroller::JSBind(globalObj);
+    JSScrollBar::JSBind(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

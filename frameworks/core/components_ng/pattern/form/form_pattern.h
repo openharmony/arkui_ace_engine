@@ -44,6 +44,8 @@ public:
 
     void OnLoadEvent();
 
+    void HandleUnTrustForm();
+
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<FormLayoutProperty>();
@@ -70,6 +72,11 @@ public:
     {
         return isLoaded_;
     }
+
+    void SetIsUnTrust(bool isUnTrust)
+    {
+        isUnTrust_ = isUnTrust;
+    }
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -85,6 +92,7 @@ private:
     void FireOnLoadEvent() const;
     void FireOnErrorEvent(const std::string& code, const std::string& msg) const;
     void FireOnUninstallEvent(int64_t id) const;
+    void UpdateBackgroundColorWhenUnTrustForm();
 
     bool ISAllowUpdate() const;
     void EnableDrag();
@@ -97,6 +105,7 @@ private:
     RequestFormInfo cardInfo_;
     bool isLoaded_ = false;
     bool isVisible_ = true;
+    bool isUnTrust_ = false;
 };
 
 } // namespace NG

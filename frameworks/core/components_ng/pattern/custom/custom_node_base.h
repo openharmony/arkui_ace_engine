@@ -98,6 +98,41 @@ public:
         }
     }
 
+    void FireRecycleSelf()
+    {
+        if (recycleCustomNodeFunc_) {
+            recycleCustomNodeFunc_(AceType::Claim<CustomNodeBase>(this));
+        }
+    }
+
+    void SetRecycleFunction(std::function<void(RefPtr<CustomNodeBase>)>&& recycleCustomNode)
+    {
+        recycleCustomNodeFunc_ = std::move(recycleCustomNode);
+    }
+
+    void SetRecycleRenderFunc(std::function<void()>&& func)
+    {
+        recycleRenderFunc_ = std::move(func);
+    }
+
+    void FireRecycleRenderFunc()
+    {
+        if (recycleRenderFunc_) {
+            ACE_SCOPED_TRACE("CustomNode:BuildRecycle %s", GetJSViewName().c_str());
+            recycleRenderFunc_();
+            recycleRenderFunc_ = nullptr;
+        }
+    }
+
+    bool HasRecycleRenderFunc() {
+        return recycleRenderFunc_ != nullptr;
+    }
+
+    void ResetRecycle()
+    {
+        recycleRenderFunc_ = nullptr;
+    }
+
     void Reset()
     {
         updateFunc_ = nullptr;
@@ -129,6 +164,8 @@ private:
     std::function<void(bool)> reloadFunc_;
     std::function<void()> completeReloadFunc_;
     std::function<void(int32_t)> forceNodeUpdateFunc_;
+    std::function<void(RefPtr<CustomNodeBase>)> recycleCustomNodeFunc_;
+    std::function<void()> recycleRenderFunc_;
     bool needRebuild_ = false;
 
     std::string jsViewName_;

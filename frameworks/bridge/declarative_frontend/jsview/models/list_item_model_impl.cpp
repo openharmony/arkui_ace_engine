@@ -117,6 +117,10 @@ void ListItemModelImpl::SetSelectCallback(OnSelectFunc&& selectCallback)
     JSViewSetProperty(&V2::ListItemComponent::SetOnSelectId, std::move(selectCallback));
 }
 
+void ListItemModelImpl::SetDeleteArea(std::function<void()>&& builderAction, bool useDefaultDeleteAnimation,
+    OnDeleteEvent&& onDelete, OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
+    const Dimension& length, bool isStartArea) {};
+
 void ListItemModelImpl::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();

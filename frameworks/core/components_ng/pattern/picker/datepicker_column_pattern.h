@@ -85,6 +85,7 @@ public:
 
     uint32_t GetCurrentIndex() const
     {
+        // currentIndex_ is year/month/day information, for example month [0, 11] is Equivalent to [1, 12]
         return currentIndex_;
     }
 
@@ -221,6 +222,7 @@ private:
         uint32_t index, uint32_t showCount, bool isDown, double scale);
     void FlushAnimationTextProperties(bool isDown);
     Dimension LinearFontSize(const Dimension& startFontSize, const Dimension& endFontSize, double percent);
+    void SetAccessibilityAction();
     float localDownDistance_ = 0.0f;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;

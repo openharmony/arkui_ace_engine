@@ -89,4 +89,22 @@ HWTEST_F(OptionAccessibilityPropertyTestNg, OptionAccessibilityPropertyGetText00
     textLayoutProperty->UpdateContent(OPTION_TEST_TEXT);
     EXPECT_EQ(optionAccessibilityProperty_->GetText(), OPTION_TEST_TEXT);
 }
+
+
+/**
+ * @tc.name: OptionAccessibilityPropertyGetSupportAction001
+ * @tc.desc: Test GetSupportAction of option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionAccessibilityPropertyTestNg, OptionAccessibilityPropertyGetSupportAction001, TestSize.Level1)
+{
+    optionAccessibilityProperty_->ResetSupportAction();
+    std::unordered_set<AceAction> supportAceActions = optionAccessibilityProperty_->GetSupportAction();
+    uint64_t actions = 0, expectActions = 0;
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SELECT);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, expectActions);
+}
 } // namespace OHOS::Ace::NG

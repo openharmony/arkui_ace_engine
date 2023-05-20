@@ -134,7 +134,7 @@ HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg002
         EXPECT_EQ(paintMethod->fillState_.GetTextStyle().GetTextColor(), color);
     }
 
-    std::shared_ptr<Ace::Pattern> imagePattern;
+    std::shared_ptr<Ace::Pattern> imagePattern = std::make_shared<Ace::Pattern>();
     offscreenCanvasPattern->SetFillPattern(imagePattern);
     EXPECT_DOUBLE_EQ(paintMethod->fillState_.GetPattern().GetImageWidth(), DEFAULT_DOUBLE0);
     EXPECT_DOUBLE_EQ(paintMethod->fillState_.GetPattern().GetImageHeight(), DEFAULT_DOUBLE0);
@@ -212,7 +212,7 @@ HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg003
         EXPECT_EQ(paintMethod->strokeState_.GetColor(), color);
     }
 
-    std::shared_ptr<Ace::Pattern> imagePattern;
+    std::shared_ptr<Ace::Pattern> imagePattern = std::make_shared<Ace::Pattern>();
     offscreenCanvasPattern->SetStrokePattern(imagePattern);
     EXPECT_DOUBLE_EQ(paintMethod->strokeState_.GetPattern().GetImageWidth(), DEFAULT_DOUBLE0);
     EXPECT_DOUBLE_EQ(paintMethod->strokeState_.GetPattern().GetImageHeight(), DEFAULT_DOUBLE0);

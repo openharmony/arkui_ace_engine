@@ -73,7 +73,7 @@ void PageTransitionElement::PerformBuild()
 
     if (!controller_) {
         LOGD("create animator.");
-        controller_ = AceType::MakeRefPtr<Animator>(context_);
+        controller_ = CREATE_ANIMATOR(context_);
     }
     UpdateTransitionOption();
 

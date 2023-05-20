@@ -84,6 +84,8 @@ public:
 
     static RefPtr<PipelineBase> GetCurrentContext();
 
+    static RefPtr<ThemeManager> CurrentThemeManager();
+
     virtual void SetupRootElement() = 0;
 
     virtual uint64_t GetTimeFromExternalTimer();
@@ -754,7 +756,7 @@ public:
 
     virtual void FlushPipelineImmediately() = 0;
 
-    // for sync animation only
+    // get animateTo closure option
     AnimationOption GetSyncAnimationOption()
     {
         return animationOption_;
@@ -846,6 +848,8 @@ public:
     {
         return nullptr;
     }
+
+    virtual void ResetViewSafeArea() {}
 
 protected:
     void TryCallNextFrameLayoutCallback()

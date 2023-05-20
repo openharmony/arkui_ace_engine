@@ -42,6 +42,10 @@ constexpr uint32_t ITEM_HALF_WIDTH = 0;
 constexpr uint32_t ITEM_HALF_HEIGHT = 1;
 constexpr uint32_t SELECTED_ITEM_HALF_WIDTH = 2;
 constexpr uint32_t SELECTED_ITEM_HALF_HEIGHT = 3;
+constexpr float TOUCH_BOTTOM_CURVE_VELOCITY = 0.1f;
+constexpr float TOUCH_BOTTOM_CURVE_MASS = 0.2f;
+constexpr float TOUCH_BOTTOM_CURVE_STIFFNESS = 0.48f;
+constexpr float TOUCH_BOTTOM_CURVE_DAMPING = 1.0f;
 } // namespace
 
 void DotIndicatorModifier::onDraw(DrawingContext& context)
@@ -86,6 +90,9 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, const Conten
         rectHeight = contentProperty.indicatorPadding + selectedItemHeight + contentProperty.indicatorPadding;
     }
 
+    auto widthChangeValue = (backgroundWidthDilateRatio_->Get() - 1.0f) * rectWidth;
+    auto heightChangeValue = (1.0f - backgroundHeightDilateRatio_->Get()) * rectHeight;
+
     // Property to get the rectangle offset
     float rectLeft =
         axis_ == Axis::HORIZONTAL ? contentProperty.indicatorMargin.GetX() : contentProperty.indicatorMargin.GetY();
@@ -94,6 +101,15 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, const Conten
     // Adapter circle and rect
     float rectRight = rectLeft + (axis_ == Axis::HORIZONTAL ? rectWidth : rectHeight);
     float rectBottom = rectTop + (axis_ == Axis::HORIZONTAL ? rectHeight : rectWidth);
+    if (touchBottomType_ == TouchBottomType::START) {
+        rectLeft -= widthChangeValue;
+    }
+    if (touchBottomType_ == TouchBottomType::END) {
+        rectRight += widthChangeValue;
+    }
+    rectTop = rectTop + heightChangeValue * 0.5f;
+    rectBottom = rectBottom - heightChangeValue * 0.5f;
+    rectHeight -= heightChangeValue;
     // Paint background
     RSCanvas canvas = context.canvas;
     RSBrush brush;
@@ -186,28 +202,24 @@ void DotIndicatorModifier::PaintSelectedIndicator(RSCanvas& canvas, const Offset
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor(selectedColor_->Get()));
     canvas.AttachBrush(brush);
-    if (NearEqual(itemHalfSizes[SELECTED_ITEM_HALF_WIDTH], itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT]) && isCustomSize_) {
-        float customPointX = axis_ == Axis::HORIZONTAL ? center.GetX() : center.GetY();
-        float customPointY = axis_ == Axis::HORIZONTAL ? center.GetY() : center.GetX();
-        canvas.DrawCircle({ customPointX, customPointY }, itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT]);
+
+    float rectLeft = (axis_ == Axis::HORIZONTAL ? leftCenter.GetX() : leftCenter.GetY()) -
+                        itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+    float rectTop = (axis_ == Axis::HORIZONTAL ? leftCenter.GetY() : leftCenter.GetX()) -
+                    itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT];
+    float rectRight = (axis_ == Axis::HORIZONTAL ? rightCenter.GetX() : rightCenter.GetY()) +
+                        itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+    float rectBottom = (axis_ == Axis::HORIZONTAL ? rightCenter.GetY() : rightCenter.GetX()) +
+                        itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT];
+    float rectSelectedItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 2;
+    float rectSelectedItemHeight = itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] * 2;
+
+    if (rectSelectedItemHeight > rectSelectedItemWidth && !isCustomSize_) {
+        canvas.DrawRoundRect(
+            { { rectLeft, rectTop, rectRight, rectBottom }, rectSelectedItemWidth, rectSelectedItemWidth });
     } else {
-        float rectLeft = (axis_ == Axis::HORIZONTAL ? leftCenter.GetX() : leftCenter.GetY()) -
-            itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
-        float rectTop = (axis_ == Axis::HORIZONTAL ? leftCenter.GetY() : leftCenter.GetX()) -
-            itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT];
-        float rectRight = (axis_ == Axis::HORIZONTAL ? rightCenter.GetX() : rightCenter.GetY()) +
-            itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
-        float rectBottom = (axis_ == Axis::HORIZONTAL ? rightCenter.GetY() : rightCenter.GetX()) +
-            itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT];
-        float rectSelectedItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 2;
-        float rectSelectedItemHeight = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 2;
-        if (rectSelectedItemHeight > rectSelectedItemWidth && !isCustomSize_) {
-            canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom },
-                rectSelectedItemWidth, rectSelectedItemWidth });
-        } else {
-            canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom },
-                rectSelectedItemHeight, rectSelectedItemHeight });
-        }
+        canvas.DrawRoundRect(
+            { { rectLeft, rectTop, rectRight, rectBottom }, rectSelectedItemHeight, rectSelectedItemHeight });
     }
 }
 
@@ -249,6 +261,8 @@ void DotIndicatorModifier::UpdateShrinkPaintProperty(
     normalToHoverPointDilateRatio_->Set(1.0f);
     hoverToNormalPointDilateRatio_->Set(1.0f);
     longPointDilateRatio_->Set(1.0f);
+    backgroundWidthDilateRatio_->Set(1.0f);
+    backgroundHeightDilateRatio_->Set(1.0f);
 }
 
 void DotIndicatorModifier::UpdateDilatePaintProperty(
@@ -262,6 +276,8 @@ void DotIndicatorModifier::UpdateDilatePaintProperty(
     longPointLeftCenterX_->Set(longPointCenterX.first);
     longPointRightCenterX_->Set(longPointCenterX.second);
     itemHalfSizes_->Set(hoverItemHalfSizes);
+    backgroundWidthDilateRatio_->Set(1.0f);
+    backgroundHeightDilateRatio_->Set(1.0f);
 }
 
 void DotIndicatorModifier::UpdateBackgroundColor(const Color& backgroundColor)
@@ -429,5 +445,33 @@ void DotIndicatorModifier::UpdateAllPointCenterXAnimation(
         isForward ? LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY : LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY,
         CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING));
     AnimationUtils::Animate(longPointRightOption, [&]() { longPointRightCenterX_->Set(longPointCenterX.second); });
+}
+
+void DotIndicatorModifier::UpdateTouchBottomAnimation(TouchBottomType touchBottomType,
+    const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
+{
+    AnimationOption option;
+    option.SetDuration(POINT_HOVER_ANIMATION_DURATION);
+    option.SetCurve(AceType::MakeRefPtr<CubicCurve>(TOUCH_BOTTOM_CURVE_VELOCITY, TOUCH_BOTTOM_CURVE_MASS,
+        TOUCH_BOTTOM_CURVE_STIFFNESS, TOUCH_BOTTOM_CURVE_DAMPING));
+
+    auto backgroundWidthDilateRatio = 1.0f;
+    auto backgroundHeightDilateRatio = 1.0f;
+
+    if (touchBottomType != TouchBottomType::NONE) {
+        backgroundWidthDilateRatio = 1.225f - 0.0125f * vectorBlackPointCenterX_->Get().size();
+        backgroundHeightDilateRatio = 0.8f;
+    }
+    touchBottomType_ = touchBottomType;
+    AnimationUtils::Animate(option, [weak = WeakClaim(this), backgroundWidthDilateRatio, backgroundHeightDilateRatio,
+                                        vectorBlackPointCenterX, longPointCenterX]() {
+        auto modifier = weak.Upgrade();
+        CHECK_NULL_VOID(modifier);
+        modifier->backgroundWidthDilateRatio_->Set(backgroundWidthDilateRatio);
+        modifier->backgroundHeightDilateRatio_->Set(backgroundHeightDilateRatio);
+        modifier->vectorBlackPointCenterX_->Set(vectorBlackPointCenterX);
+        modifier->longPointLeftCenterX_->Set(longPointCenterX.first);
+        modifier->longPointRightCenterX_->Set(longPointCenterX.second);
+    });
 }
 } // namespace OHOS::Ace::NG

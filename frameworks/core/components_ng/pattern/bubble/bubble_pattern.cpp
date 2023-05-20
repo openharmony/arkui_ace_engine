@@ -19,6 +19,8 @@
 #include "base/subwindow/subwindow.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -109,12 +111,12 @@ void BubblePattern::HandleTouchEvent(const TouchEventInfo& info)
     }
     auto touchType = info.GetTouches().front().GetTouchType();
     auto clickPos = info.GetTouches().front().GetLocalLocation();
-    if (touchType == TouchType::UP) {
-        HandleTouchUp(clickPos);
+    if (touchType == TouchType::DOWN) {
+        HandleTouchDown(clickPos);
     }
 }
 
-void BubblePattern::HandleTouchUp(const Offset& clickPosition)
+void BubblePattern::HandleTouchDown(const Offset& clickPosition)
 {
     // TODO: need to check click position
     auto host = GetHost();
@@ -363,7 +365,8 @@ void BubblePattern::StartEnteringAnimation(std::function<void()> finish)
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateOpacity(VISIABLE_ALPHA);
         },
-        [weak = WeakClaim(this), finish]() {
+        [weak = WeakClaim(this), finish, id = Container::CurrentId()]() {
+            ContainerScope scope(id);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             if (pattern->transitionStatus_ != TransitionStatus::ENTERING) {
@@ -410,7 +413,8 @@ void BubblePattern::StartExitingAnimation(std::function<void()> finish)
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateOpacity(INVISIABLE_ALPHA);
         },
-        [weak = WeakClaim(this), finish]() {
+        [weak = WeakClaim(this), finish, id = Container::CurrentId()]() {
+            ContainerScope scope(id);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             if (pattern->transitionStatus_ != TransitionStatus::EXITING) {

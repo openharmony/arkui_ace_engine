@@ -69,6 +69,8 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
 
 void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 
+void ListPattern::FromJson(const std::unique_ptr<JsonValue>& json) {}
+
 void ListPattern::SetSwiperItem(WeakPtr<ListItemPattern> swiperItem) {}
 
 WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode)

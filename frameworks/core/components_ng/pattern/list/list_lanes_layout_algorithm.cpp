@@ -230,12 +230,6 @@ void ListLanesLayoutAlgorithm::CalculateLanes(const RefPtr<ListLayoutProperty>& 
 void ListLanesLayoutAlgorithm::ModifyLaneLength(std::optional<float>& minLaneLength,
     std::optional<float>& maxLaneLength, float crossSize)
 {
-    if (LessOrEqual(maxLaneLength.value(), 0.0)) {
-        maxLaneLength = crossSize;
-    }
-    if (LessOrEqual(minLaneLength.value(), 0.0)) {
-        minLaneLength = std::min(crossSize, maxLaneLength.value());
-    }
     if (GreatNotEqual(minLaneLength.value(), maxLaneLength.value())) {
         LOGI("minLaneLength: %{public}f is greater than maxLaneLength: %{public}f, assign minLaneLength to"
              " maxLaneLength",

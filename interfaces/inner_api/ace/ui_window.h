@@ -21,29 +21,21 @@
 #include "ui_content.h"
 
 namespace OHOS::Rosen {
-class RSSurfaceNode;
 class ISession;
 class ISessionStageStateListener;
-}
+} // namespace OHOS::Rosen
 
 namespace OHOS::Ace::NG {
-
 class ACE_EXPORT UIWindow {
 public:
-    static std::shared_ptr<UIWindow> CreateRootScene();
-
-    static std::shared_ptr<UIWindow> CreateWindowScene(const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<Rosen::ISession>& iSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
-
     static std::shared_ptr<UIWindow> CreateWindowExtension(const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<Rosen::ISession>& iSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
+        const sptr<Rosen::ISession>& iSession);
 
     virtual ~UIWindow() = default;
 
     virtual void LoadContent(const std::string& contentUrl, NativeEngine* engine, NativeValue* storage,
         AbilityRuntime::Context* context = nullptr) = 0;
 
-    // for lifecycle
     virtual void RegisterSessionStageStateListener(
         const std::shared_ptr<Rosen::ISessionStageStateListener>& listener) = 0;
 
@@ -51,8 +43,8 @@ public:
     virtual void Foreground() = 0;
     virtual void Background() = 0;
     virtual void Disconnect() = 0;
+    virtual void OnNewWant(const AAFwk::Want& want) = 0;
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_INTERFACE_INNER_API_UI_WINDOW_H

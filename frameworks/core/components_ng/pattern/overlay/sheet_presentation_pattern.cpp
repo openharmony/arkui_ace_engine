@@ -46,7 +46,7 @@ void SheetPresentationPattern::OnModifyDone()
     auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
-    if (sheetStyle.showDragIndicator.value()) {
+    if (sheetStyle.showDragBar.value()) {
         auto dragBar = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
         auto dragBarPattern = dragBar->GetPattern<SheetDragBarPattern>();
         CHECK_NULL_VOID(dragBarPattern);
@@ -76,12 +76,13 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapp
     InitialLayoutProps();
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(dirty->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, false);
-    auto showDragIndicator = layoutProperty->GetSheetStyleValue().showDragIndicator.value_or(true);
+    auto showDragIndicator = layoutProperty->GetSheetStyleValue().showDragBar.value_or(true);
     auto host = GetHost();
     auto sheetDragBar = DynamicCast<FrameNode>(host->GetFirstChild());
     auto sheetLayoutProperty = sheetDragBar->GetLayoutProperty();
     CHECK_NULL_RETURN(sheetDragBar, false);
     sheetLayoutProperty->UpdateVisibility(showDragIndicator ? VisibleType::VISIBLE : VisibleType::GONE);
+    sheetDragBar->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return true;
 }
 
@@ -196,8 +197,15 @@ void SheetPresentationPattern::InitialLayoutProps()
             height_ = largeHeight;
         }
     } else {
-        auto sheetHeight = sheetStyle.height->ConvertToPx();
+        double sheetHeight = 0.0;
+        if (sheetStyle.height->Unit() == DimensionUnit::PERCENT) {
+            sheetHeight = sheetStyle.height->ConvertToPxWithSize(pageHeight_);
+        } else {
+            sheetHeight = sheetStyle.height->ConvertToPx();
+        }
         if (sheetHeight > largeHeight) {
+            height_ = largeHeight;
+        } else if (sheetHeight < 0) {
             height_ = largeHeight;
         } else {
             height_ = sheetHeight;
@@ -224,23 +232,34 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn)
     } else {
         marginValue = pageHeight_;
     }
-    option.SetOnFinishEvent([weak = AceType::WeakClaim(this), marginValue, id = Container::CurrentId()]() {
-        ContainerScope scope(id);
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(context);
-        auto taskExecutor = context->GetTaskExecutor();
-        CHECK_NULL_VOID_NOLOG(taskExecutor);
-        taskExecutor->PostTask([weak, marginValue, id]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            auto layoutProperty = pattern->GetLayoutProperty<LinearLayoutProperty>();
-            CHECK_NULL_VOID(layoutProperty);
-            auto padding = layoutProperty->CreatePaddingAndBorder();
-            MarginProperty margin;
-            margin.top = CalcLength(marginValue + padding.top.value());
-            layoutProperty->UpdateMargin(margin);
-            pattern->SetIsAnimating(false);
-            pattern->SetCurrentOffset(0.0);
+    option.SetOnFinishEvent(
+        [weak = AceType::WeakClaim(this), marginValue, id = Container::CurrentId(), isTransitionIn]() {
+            ContainerScope scope(id);
+            auto context = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(context);
+            auto taskExecutor = context->GetTaskExecutor();
+            CHECK_NULL_VOID_NOLOG(taskExecutor);
+            taskExecutor->PostTask([weak, marginValue, id, isTransitionIn]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (isTransitionIn) {
+                    auto layoutProperty = pattern->GetLayoutProperty<LinearLayoutProperty>();
+                    CHECK_NULL_VOID(layoutProperty);
+                    auto padding = layoutProperty->CreatePaddingAndBorder();
+                    MarginProperty margin;
+                    margin.top = CalcLength(marginValue + padding.top.value());
+                    layoutProperty->UpdateMargin(margin);
+                    pattern->SetIsAnimating(false);
+                    pattern->SetCurrentOffset(0.0);
+                } else {
+                    auto context = PipelineContext::GetCurrentContext();
+                    CHECK_NULL_VOID(context);
+                    auto overlayManager = context->GetOverlayManager();
+                    CHECK_NULL_VOID(overlayManager);
+                    auto host = pattern->GetHost();
+                    CHECK_NULL_VOID(host);
+                    overlayManager->DestroySheet(host, pattern->GetTargetId());
+                }
             }, TaskExecutor::TaskType::UI);
         });
     if (isTransitionIn) {

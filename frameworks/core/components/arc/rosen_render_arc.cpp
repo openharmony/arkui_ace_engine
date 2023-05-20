@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,10 @@
 
 #include "core/components/arc/rosen_render_arc.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkMaskFilter.h"
 #include "include/core/SkPaint.h"
+#endif
 
 namespace OHOS::Ace {
 void RosenRenderArc::Paint(RenderContext& context, const Offset& offset)
@@ -38,6 +40,7 @@ void RosenRenderArc::Paint(RenderContext& context, const Offset& offset)
     }
 
     double widthHalf = width_ / ARC_RADIUS_TO_DIAMETER;
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setAntiAlias(true);
     paint.setColor(color_.GetValue());
@@ -66,5 +69,41 @@ void RosenRenderArc::Paint(RenderContext& context, const Offset& offset)
                 offset.GetY() + arcRadiusY_ * ARC_RADIUS_TO_DIAMETER),
             startAngle_ * 180.0 / M_PI, sweepAngle_ * 180.0 / M_PI, true, paint);
     }
+#else
+    if (!NearZero(width_)) {
+        RSPen pen;
+        pen.SetAntiAlias(true);
+        pen.SetColor(color_.GetValue());
+        pen.SetWidth(width_);
+        pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+
+        if (!NearZero(shadowWidth_)) {
+            RSFilter filter;
+            filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
+                RSBlurType::SOLID, static_cast<float>(shadowWidth_)));
+            pen.SetFilter(filter);
+        }
+        canvas->AttachPen(pen);
+        canvas->DrawArc(
+            RSRect(
+                offset.GetX() + widthHalf, offset.GetY() + widthHalf,
+                offset.GetX() + arcRadiusX_ * ARC_RADIUS_TO_DIAMETER - widthHalf,
+                offset.GetY() + arcRadiusY_ * ARC_RADIUS_TO_DIAMETER - widthHalf),
+            startAngle_ * 180.0 / M_PI, sweepAngle_ * 180.0 / M_PI);
+        canvas->DetachPen();
+    } else {
+        RSBrush brush;
+        brush.SetAntiAlias(true);
+        brush.SetColor(color_.GetValue());
+
+        canvas->AttachBrush(brush);
+        canvas->DrawPie(
+            RSRect(offset.GetX(), offset.GetY(),
+                offset.GetX() + arcRadiusX_ * ARC_RADIUS_TO_DIAMETER,
+                offset.GetY() + arcRadiusY_ * ARC_RADIUS_TO_DIAMETER),
+            startAngle_ * 180.0 / M_PI, sweepAngle_ * 180.0 / M_PI);
+        canvas->DetachBrush();
+    }
+#endif
 }
 } // namespace OHOS::Ace

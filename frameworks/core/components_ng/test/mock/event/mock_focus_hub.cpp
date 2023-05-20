@@ -32,4 +32,6 @@ bool FocusHub::RequestFocusImmediately()
 {
     return true;
 }
+
+void FocusHub::OnClick(const KeyEvent& event) {}
 } // namespace OHOS::Ace::NG

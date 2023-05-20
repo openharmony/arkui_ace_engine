@@ -33,7 +33,6 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/button/button_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
@@ -49,6 +48,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -121,6 +121,10 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
     CHECK_NULL_VOID(overlayManager);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (host->IsRemoving()) {
+        LOGI("Dialog already in close animation, no need to fire event again.");
+        return;
+    }
 
     auto hub = host->GetEventHub<DialogEventHub>();
     if (buttonIdx != -1) {
@@ -356,6 +360,20 @@ RefPtr<FrameNode> DialogPattern::CreateButton(const ButtonInfo& params, int32_t 
     } else {
         BindCloseCallBack(hub, -1);
     }
+
+    // register Register keyboard event
+    auto focusHub = buttonNode->GetOrCreateFocusHub();
+    auto onKeyEvent = [focusHub](const KeyEvent& event) -> bool {
+        if (event.action != KeyAction::DOWN) {
+            return false;
+        }
+        if (event.code == KeyCode::KEY_ENTER) {
+            focusHub->OnClick(event);
+            return true;
+        }
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 
     // add scale animation
     auto inputHub = buttonNode->GetOrCreateInputEventHub();

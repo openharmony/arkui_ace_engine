@@ -23,18 +23,17 @@
 #include "include/core/SkImage.h"
 
 #include "core/components_ng/image_provider/image_data.h"
-#include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/render/adapter/skia_image.h"
 
 namespace OHOS::Ace::NG {
 class AnimatedImage : public SkiaImage {
     DECLARE_ACE_TYPE(AnimatedImage, SkiaImage)
 public:
-    explicit AnimatedImage(std::unique_ptr<SkCodec> codec, const SizeF& size, const std::string& url);
+    AnimatedImage(std::unique_ptr<SkCodec> codec, std::string url);
 
     ~AnimatedImage() override = default;
 
-    static RefPtr<CanvasImage> Create(const RefPtr<ImageData>& data, const SizeF& size, const std::string& url);
+    static RefPtr<CanvasImage> Create(const RefPtr<ImageData>& data, const std::string& url);
 
     sk_sp<SkImage> GetImage() const override;
 
@@ -54,6 +53,8 @@ public:
     void ControlAnimation(bool play) override;
 
 private:
+    AnimatedImage(std::unique_ptr<SkCodec> codec, const SkISize& size, std::string key);
+
     void RenderFrame(uint32_t idx);
     void DecodeFrame(uint32_t idx);
 
@@ -73,7 +74,6 @@ private:
     std::unique_ptr<SkCodec> codec_;
 
     const std::string cacheKey_;
-    const SizeF size_;
 };
 } // namespace OHOS::Ace::NG
 

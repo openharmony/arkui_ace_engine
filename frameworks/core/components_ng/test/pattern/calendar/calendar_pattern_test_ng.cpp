@@ -37,7 +37,7 @@
 #include "core/components_ng/pattern/calendar/calendar_paint_method.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
-#include "core/components_ng/pattern/calendar/calendar_view.h"
+#include "core/components_ng/pattern/calendar/calendar_model_ng.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
@@ -122,29 +122,30 @@ RefPtr<FrameNode> CalendarPatternTestNg::CreateCalendarNode(TestProperty& testPr
 }
 
 /**
- * @tc.name: CalendarViewTest001
+ * @tc.name: CalendarModelNGTest001
  * @tc.desc: Create Calendar.
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPatternTestNg, CalendarViewTest001, TestSize.Level1)
+HWTEST_F(CalendarPatternTestNg, CalendarModelNGTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create Calendar
      *            case: property are all unset
      * @tc.expected: step1. Create Calendar successfully
      */
-    CalendarData calendarData;
-    CalendarView::Create(calendarData);
-    CurrentDayStyle dayStyle;
-    CalendarView::SetCurrentDayStyle(dayStyle);
-    NonCurrentDayStyle nonCurrentDayStyle;
-    CalendarView::SetNonCurrentDayStyle(nonCurrentDayStyle);
-    TodayStyle todayStyle;
-    CalendarView::SetTodayStyle(todayStyle);
-    WeekStyle weekStyle;
-    CalendarView::SetWeekStyle(weekStyle);
-    WorkStateStyle workStateStyle;
-    CalendarView::SetWorkStateStyle(workStateStyle);
+    CalendarModelData calendarData;
+    CalendarModelNG calendarModelNG;
+    calendarModelNG.Create(calendarData);
+    CurrentDayStyleData dayStyle;
+    calendarModelNG.SetCurrentDayStyle(dayStyle, dayStyle);
+    NonCurrentDayStyleData nonCurrentDayStyle;
+    calendarModelNG.SetNonCurrentDayStyle(nonCurrentDayStyle);
+    TodayStyleData todayStyle;
+    calendarModelNG.SetTodayStyle(todayStyle);
+    WeekStyleData weekStyle;
+    calendarModelNG.SetWeekStyle(weekStyle);
+    WorkStateStyleData workStateStyle;
+    calendarModelNG.SetWorkStateStyle(workStateStyle);
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_ETS_TAG);
@@ -159,65 +160,66 @@ HWTEST_F(CalendarPatternTestNg, CalendarViewTest001, TestSize.Level1)
      * @tc.expected: step2. Create Calendar successfully & properties are set successfully
      */
     // properties related with color are all set to COLOR_VALUE, related with size are all set to SIZE_VALUE
-    dayStyle.UpdateDayColor(COLOR_VALUE);
-    dayStyle.UpdateLunarColor(COLOR_VALUE);
-    dayStyle.UpdateMarkLunarColor(COLOR_VALUE);
-    dayStyle.UpdateDayFontSize(SIZE_VALUE);
-    dayStyle.UpdateLunarDayFontSize(SIZE_VALUE);
-    dayStyle.UpdateDayHeight(SIZE_VALUE);
-    dayStyle.UpdateDayWidth(SIZE_VALUE);
-    dayStyle.UpdateGregorianCalendarHeight(SIZE_VALUE);
-    dayStyle.UpdateDayYAxisOffset(SIZE_VALUE);
-    dayStyle.UpdateLunarDayYAxisOffset(SIZE_VALUE);
-    dayStyle.UpdateUnderscoreXAxisOffset(SIZE_VALUE);
-    dayStyle.UpdateUnderscoreYAxisOffset(SIZE_VALUE);
-    dayStyle.UpdateScheduleMarkerXAxisOffset(SIZE_VALUE);
-    dayStyle.UpdateScheduleMarkerYAxisOffset(SIZE_VALUE);
-    dayStyle.UpdateColSpace(SIZE_VALUE);
-    dayStyle.UpdateDailyFiveRowSpace(SIZE_VALUE);
-    dayStyle.UpdateDailySixRowSpace(SIZE_VALUE);
-    dayStyle.UpdateLunarHeight(SIZE_VALUE);
-    dayStyle.UpdateUnderscoreWidth(SIZE_VALUE);
-    dayStyle.UpdateUnderscoreLength(SIZE_VALUE);
-    dayStyle.UpdateScheduleMarkerRadius(SIZE_VALUE);
-    dayStyle.UpdateBoundaryRowOffset(SIZE_VALUE);
-    dayStyle.UpdateBoundaryColOffset(SIZE_VALUE);
+    dayStyle.dayColor = std::make_optional(COLOR_VALUE);
+    dayStyle.lunarColor = std::make_optional(COLOR_VALUE);
+    dayStyle.markLunarColor = std::make_optional(COLOR_VALUE);
+    dayStyle.dayFontSize = std::make_optional(SIZE_VALUE);
+    dayStyle.lunarDayFontSize = std::make_optional(SIZE_VALUE);
+    dayStyle.dayHeight = std::make_optional(SIZE_VALUE);
+    dayStyle.dayWidth = std::make_optional(SIZE_VALUE);
+    dayStyle.gregorianCalendarHeight = std::make_optional(SIZE_VALUE);
+    dayStyle.lunarHeight = std::make_optional(SIZE_VALUE);
+    dayStyle.dayYAxisOffset = std::make_optional(SIZE_VALUE);
+    dayStyle.lunarDayYAxisOffset = std::make_optional(SIZE_VALUE);
+    dayStyle.underscoreXAxisOffset = std::make_optional(SIZE_VALUE);
+    dayStyle.underscoreYAxisOffset = std::make_optional(SIZE_VALUE);
+    dayStyle.scheduleMarkerXAxisOffset = std::make_optional(SIZE_VALUE);
+    dayStyle.scheduleMarkerYAxisOffset = std::make_optional(SIZE_VALUE);
+    dayStyle.colSpace = std::make_optional(SIZE_VALUE);
+    dayStyle.dailyFiveRowSpace = std::make_optional(SIZE_VALUE);
+    dayStyle.dailySixRowSpace = std::make_optional(SIZE_VALUE);
+    dayStyle.underscoreWidth = std::make_optional(SIZE_VALUE);
+    dayStyle.underscoreLength = std::make_optional(SIZE_VALUE);
+    dayStyle.scheduleMarkerRadius = std::make_optional(SIZE_VALUE);
+    dayStyle.boundaryRowOffset = std::make_optional(SIZE_VALUE);
+    dayStyle.boundaryColOffset = std::make_optional(SIZE_VALUE);
+    dayStyle.touchCircleStrokeWidth = std::make_optional(SIZE_VALUE);
 
-    nonCurrentDayStyle.UpdateNonCurrentMonthDayColor(COLOR_VALUE);
-    nonCurrentDayStyle.UpdateNonCurrentMonthLunarColor(COLOR_VALUE);
-    nonCurrentDayStyle.UpdateNonCurrentMonthWorkDayMarkColor(COLOR_VALUE);
-    nonCurrentDayStyle.UpdateNonCurrentMonthOffDayMarkColor(COLOR_VALUE);
+    nonCurrentDayStyle.nonCurrentMonthDayColor = std::make_optional(COLOR_VALUE);
+    nonCurrentDayStyle.nonCurrentMonthLunarColor = std::make_optional(COLOR_VALUE);
+    nonCurrentDayStyle.nonCurrentMonthWorkDayMarkColor = std::make_optional(COLOR_VALUE);
+    nonCurrentDayStyle.nonCurrentMonthOffDayMarkColor = std::make_optional(COLOR_VALUE);
 
-    todayStyle.UpdateFocusedDayColor(COLOR_VALUE);
-    todayStyle.UpdateFocusedLunarColor(COLOR_VALUE);
-    todayStyle.UpdateFocusedAreaBackgroundColor(COLOR_VALUE);
-    todayStyle.UpdateFocusedAreaRadius(SIZE_VALUE);
+    todayStyle.focusedDayColor = std::make_optional(COLOR_VALUE);
+    todayStyle.focusedLunarColor = std::make_optional(COLOR_VALUE);
+    todayStyle.focusedAreaBackgroundColor = std::make_optional(COLOR_VALUE);
+    todayStyle.focusedAreaRadius = std::make_optional(SIZE_VALUE);
 
-    weekStyle.UpdateWeekColor(COLOR_VALUE);
-    weekStyle.UpdateWeekendDayColor(COLOR_VALUE);
-    weekStyle.UpdateWeekendLunarColor(COLOR_VALUE);
-    weekStyle.UpdateWeekFontSize(SIZE_VALUE);
-    weekStyle.UpdateWeekHeight(SIZE_VALUE);
-    weekStyle.UpdateWeekWidth(SIZE_VALUE);
-    weekStyle.UpdateWeekAndDayRowSpace(SIZE_VALUE);
+    weekStyle.weekColor = std::make_optional(COLOR_VALUE);
+    weekStyle.weekendDayColor = std::make_optional(COLOR_VALUE);
+    weekStyle.weekendLunarColor = std::make_optional(COLOR_VALUE);
+    weekStyle.weekFontSize = std::make_optional(SIZE_VALUE);
+    weekStyle.weekHeight = std::make_optional(SIZE_VALUE);
+    weekStyle.weekWidth = std::make_optional(SIZE_VALUE);
+    weekStyle.weekAndDayRowSpace = std::make_optional(SIZE_VALUE);
 
-    workStateStyle.UpdateWorkDayMarkColor(COLOR_VALUE);
-    workStateStyle.UpdateOffDayMarkColor(COLOR_VALUE);
-    workStateStyle.UpdateWorkDayMarkSize(SIZE_VALUE);
-    workStateStyle.UpdateOffDayMarkSize(SIZE_VALUE);
-    workStateStyle.UpdateWorkStateWidth(SIZE_VALUE);
-    workStateStyle.UpdateWorkStateHorizontalMovingDistance(SIZE_VALUE);
-    workStateStyle.UpdateWorkStateVerticalMovingDistance(SIZE_VALUE);
+    workStateStyle.workDayMarkColor = std::make_optional(COLOR_VALUE);
+    workStateStyle.offDayMarkColor = std::make_optional(COLOR_VALUE);
+    workStateStyle.workDayMarkSize = std::make_optional(SIZE_VALUE);
+    workStateStyle.offDayMarkSize = std::make_optional(SIZE_VALUE);
+    workStateStyle.workStateWidth = std::make_optional(SIZE_VALUE);
+    workStateStyle.workStateHorizontalMovingDistance = std::make_optional(SIZE_VALUE);
+    workStateStyle.workStateVerticalMovingDistance = std::make_optional(SIZE_VALUE);
 
     // case: controller is not null
     auto calendarControllerNg = AceType::MakeRefPtr<CalendarControllerNg>();
     calendarData.controller = calendarControllerNg;
-    CalendarView::Create(calendarData);
-    CalendarView::SetCurrentDayStyle(dayStyle);
-    CalendarView::SetNonCurrentDayStyle(nonCurrentDayStyle);
-    CalendarView::SetTodayStyle(todayStyle);
-    CalendarView::SetWeekStyle(weekStyle);
-    CalendarView::SetWorkStateStyle(workStateStyle);
+    calendarModelNG.Create(calendarData);
+    calendarModelNG.SetCurrentDayStyle(dayStyle, dayStyle);
+    calendarModelNG.SetNonCurrentDayStyle(nonCurrentDayStyle);
+    calendarModelNG.SetTodayStyle(todayStyle);
+    calendarModelNG.SetWeekStyle(weekStyle);
+    calendarModelNG.SetWorkStateStyle(workStateStyle);
     element = ViewStackProcessor::GetInstance()->Finish();
 
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_ETS_TAG);
@@ -288,7 +290,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarViewTest001, TestSize.Level1)
     EXPECT_EQ(calendarPaintProperty->GetWorkStateVerticalMovingDistanceValue(1.0_px), SIZE_VALUE);
 }
 
-HWTEST_F(CalendarPatternTestNg, CalendarViewTest002, TestSize.Level1)
+HWTEST_F(CalendarPatternTestNg, CalendarModelNGTest002, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     RefPtr<CalendarPattern> initPattern = AceType::MakeRefPtr<CalendarPattern>();
@@ -298,9 +300,10 @@ HWTEST_F(CalendarPatternTestNg, CalendarViewTest002, TestSize.Level1)
     obtainedMonth.year = YEAR_VALUE;
     obtainedMonth.month = MONTH_VALUE;
     obtainedMonth.firstDayIndex = FIRST_DAY_INDEX_VALUE;
-    CalendarView::SetCurrentData(obtainedMonth);
-    CalendarView::SetPreData(obtainedMonth);
-    CalendarView::SetNextData(obtainedMonth);
+    CalendarModelNG calendarModelNG;
+    calendarModelNG.SetCurrentData(obtainedMonth);
+    calendarModelNG.SetPreData(obtainedMonth);
+    calendarModelNG.SetNextData(obtainedMonth);
 
     CalendarDay calendarDay;
     calendarDay.index = INDEX_VALUE;
@@ -320,7 +323,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarViewTest002, TestSize.Level1)
     calendarMonth.year = YEAR_VALUE;
     calendarMonth.month = MONTH_VALUE;
     calendarDay.month = calendarMonth;
-    CalendarView::SetCalendarDay(calendarDay);
+    calendarModelNG.SetCalendarDay(calendarDay);
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNode()->GetPattern<CalendarPattern>();
 
     EXPECT_EQ(pattern->GetCurrentMonthData().year, YEAR_VALUE);
@@ -350,16 +353,17 @@ HWTEST_F(CalendarPatternTestNg, CalendarViewTest002, TestSize.Level1)
     EXPECT_EQ(pattern->GetCalendarDay().month.month, MONTH_VALUE);
 }
 
-HWTEST_F(CalendarPatternTestNg, CalendarViewTest003, TestSize.Level1)
+HWTEST_F(CalendarPatternTestNg, CalendarModelNGTest003, TestSize.Level1)
 {
-    CalendarData calendarData;
-    CalendarView::Create(calendarData);
-    CalendarView::SetShowLunar(false);
-    CalendarView::SetShowHoliday(false);
-    CalendarView::SetNeedSlide(true);
-    CalendarView::SetStartOfWeek(Week::Sun);
-    CalendarView::SetOffDays(OFF_DAYS_VALUE);
-    CalendarView::SetDirection(Axis::HORIZONTAL);
+    CalendarModelData calendarData;
+    CalendarModelNG calendarModelNG;
+    calendarModelNG.Create(calendarData);
+    calendarModelNG.SetShowLunar(false);
+    calendarModelNG.SetShowHoliday(false);
+    calendarModelNG.SetNeedSlide(true);
+    calendarModelNG.SetStartOfWeek(static_cast<int32_t>(Week::Sun));
+    calendarModelNG.SetOffDays(OFF_DAYS_VALUE);
+    calendarModelNG.SetDirection(static_cast<int32_t>(Axis::HORIZONTAL));
 
     auto* stack = ViewStackProcessor::GetInstance();
     auto swiperNode = stack->GetMainFrameNode()->GetFirstChild();
@@ -411,9 +415,10 @@ HWTEST_F(CalendarPatternTestNg, CalendarTest004, TestSize.Level1)
         days.emplace_back(std::move(day));
     }
     obtainedMonth.days = days;
-    CalendarView::SetCurrentData(obtainedMonth);
-    CalendarView::SetPreData(obtainedMonth);
-    CalendarView::SetNextData(obtainedMonth);
+    CalendarModelNG calendarModelNG;
+    calendarModelNG.SetCurrentData(obtainedMonth);
+    calendarModelNG.SetPreData(obtainedMonth);
+    calendarModelNG.SetNextData(obtainedMonth);
 
     CalendarDay calendarDay;
     calendarDay.index = INDEX_VALUE;
@@ -430,7 +435,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarTest004, TestSize.Level1)
     calendarMonth.year = JUMP_YEAR;
     calendarMonth.month = JUMP_MONTH;
     calendarDay.month = calendarMonth;
-    CalendarView::SetCalendarDay(calendarDay);
+    calendarModelNG.SetCalendarDay(calendarDay);
 
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNode()->GetPattern<CalendarPattern>();
     pattern->FireGoToRequestData(JUMP_YEAR, JUMP_MONTH, JUMP_DAY_FIRST);
@@ -508,9 +513,10 @@ HWTEST_F(CalendarPatternTestNg, CalendarTest005, TestSize.Level1)
     }
 
     obtainedMonth.days = days;
-    CalendarView::SetCurrentData(obtainedMonth);
-    CalendarView::SetPreData(obtainedMonth);
-    CalendarView::SetNextData(obtainedMonth);
+    CalendarModelNG calendarModelNG;
+    calendarModelNG.SetCurrentData(obtainedMonth);
+    calendarModelNG.SetPreData(obtainedMonth);
+    calendarModelNG.SetNextData(obtainedMonth);
 
     CalendarDay calendarDay;
     calendarDay.index = INDEX_VALUE;
@@ -527,7 +533,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarTest005, TestSize.Level1)
     calendarMonth.year = JUMP_YEAR;
     calendarMonth.month = JUMP_MONTH;
     calendarDay.month = calendarMonth;
-    CalendarView::SetCalendarDay(calendarDay);
+    calendarModelNG.SetCalendarDay(calendarDay);
 
     auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay);
     RSCanvas rsCanvas;
@@ -581,9 +587,10 @@ HWTEST_F(CalendarPatternTestNg, CalendarTest006, TestSize.Level1)
     }
 
     obtainedMonth.days = days;
-    CalendarView::SetCurrentData(obtainedMonth);
-    CalendarView::SetPreData(obtainedMonth);
-    CalendarView::SetNextData(obtainedMonth);
+    CalendarModelNG calendarModelNG;
+    calendarModelNG.SetCurrentData(obtainedMonth);
+    calendarModelNG.SetPreData(obtainedMonth);
+    calendarModelNG.SetNextData(obtainedMonth);
 
     CalendarDay calendarDay;
     calendarDay.index = INDEX_VALUE;
@@ -597,7 +604,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarTest006, TestSize.Level1)
     calendarMonth.year = JUMP_YEAR;
     calendarMonth.month = JUMP_MONTH;
     calendarDay.month = calendarMonth;
-    CalendarView::SetCalendarDay(calendarDay);
+    calendarModelNG.SetCalendarDay(calendarDay);
 
     auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay);
     RSCanvas rsCanvas;
@@ -635,12 +642,13 @@ HWTEST_F(CalendarPatternTestNg, CalendarTest007, TestSize.Level1)
     CurrentDayStyle dayStyle;
     dayStyle.UpdateDayColor(Color::BLACK);
 
-    CalendarData calendarData;
+    CalendarModelData calendarData;
     auto calendarControllerNg = AceType::MakeRefPtr<CalendarControllerNg>();
     calendarData.controller = calendarControllerNg;
-    CalendarView::Create(calendarData);
-    CalendarView::SetTodayStyle(todayStyle);
-    CalendarView::SetCurrentDayStyle(dayStyle);
+    CalendarModelNG calendarModelNG;
+    calendarModelNG.Create(calendarData);
+    calendarModelNG.SetTodayStyle(todayStyle);
+    calendarModelNG.SetCurrentDayStyle(dayStyle);
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
 
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_ETS_TAG);
@@ -670,9 +678,9 @@ HWTEST_F(CalendarPatternTestNg, CalendarTest007, TestSize.Level1)
     }
     obtainedMonth.days = days;
 
-    CalendarView::SetCurrentData(obtainedMonth);
-    CalendarView::SetPreData(obtainedMonth);
-    CalendarView::SetNextData(obtainedMonth);
+    calendarModelNG.SetCurrentData(obtainedMonth);
+    calendarModelNG.SetPreData(obtainedMonth);
+    calendarModelNG.SetNextData(obtainedMonth);
 
     CalendarDay calendarDay;
     calendarDay.index = INDEX_VALUE;
@@ -689,7 +697,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarTest007, TestSize.Level1)
     calendarMonth.year = JUMP_YEAR;
     calendarMonth.month = JUMP_MONTH;
     calendarDay.month = calendarMonth;
-    CalendarView::SetCalendarDay(calendarDay);
+    calendarModelNG.SetCalendarDay(calendarDay);
 
     auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay);
     RSCanvas rsCanvas;
@@ -752,9 +760,10 @@ HWTEST_F(CalendarPatternTestNg, CalendarTest008, TestSize.Level1)
     CalendarData calendarData;
     auto calendarControllerNg = AceType::MakeRefPtr<CalendarControllerNg>();
     calendarData.controller = calendarControllerNg;
-    CalendarView::Create(calendarData);
-    CalendarView::SetTodayStyle(todayStyle);
-    CalendarView::SetCurrentDayStyle(dayStyle);
+    CalendarModelNG calendarModel;
+    calendarModel.Create(calendarData);
+    calendarModel.SetTodayStyle(todayStyle);
+    calendarModel.SetCurrentDayStyle(dayStyle);
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
 
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_ETS_TAG);
@@ -1405,5 +1414,150 @@ HWTEST_F(CalendarPatternTestNg, CalendarPaintMethodTest004, TestSize.Level1)
     calendarDay.dayMark = WORK_DAY_MARK;
     calendarDay.touched = true;
     calendarPaintMethod.PaintDay(rsCanvas, Offset(OFFSET_X, OFFSET_Y), calendarDay, rsTextStyle);
+}
+
+/**
+ * @tc.name: CalendarPaintMethodTest005
+ * @tc.desc: Create calendar, and check today off or work status.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPatternTestNg, CalendarPaintMethodTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Calendar
+     * @tc.expected: step1. Create Calendar successfully.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
+
+    RefPtr<CalendarTheme> theme = MockPipelineBase::GetCurrent()->GetTheme<CalendarTheme>();
+    theme->GetCalendarTheme().workDayMarkColor = Color::RED;
+    theme->GetCalendarTheme().offDayMarkColor = Color::BLUE;
+
+    // Today style.
+    TodayStyle todayStyle;
+    Color focusedDayColor = Color::GREEN;
+    todayStyle.UpdateFocusedDayColor(focusedDayColor);
+    Color focusedLunarColor = Color::WHITE;
+    todayStyle.UpdateFocusedLunarColor(focusedLunarColor);
+    Color focusedAreaBackgroundColor = Color::BLUE;
+    todayStyle.UpdateFocusedAreaBackgroundColor(focusedAreaBackgroundColor);
+    Dimension focusedAreaRadius = Dimension(DEFAULT_FOCUS_RADIUS, DimensionUnit::VP);
+    todayStyle.UpdateFocusedAreaRadius(focusedAreaRadius);
+
+    // Day style of current month.
+    CalendarModelNG calendarModelNG;
+    CurrentDayStyle dayStyle;
+    dayStyle.UpdateDayColor(Color::BLACK);
+
+    CalendarData calendarData;
+    auto calendarControllerNg = AceType::MakeRefPtr<CalendarControllerNg>();
+    calendarData.controller = calendarControllerNg;
+    calendarModelNG.Create(calendarData);
+    calendarModelNG.SetTodayStyle(todayStyle);
+    calendarModelNG.SetCurrentDayStyle(dayStyle);
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_ETS_TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
+    auto swiperNode = frameNode->GetChildren().front();
+    auto calendarFrameNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildren().front());
+    auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
+
+    ObtainedMonth obtainedMonth;
+    obtainedMonth.year = JUMP_YEAR;
+    obtainedMonth.month = JUMP_MONTH;
+    obtainedMonth.firstDayIndex = FIRST_DAY_INDEX_VALUE;
+
+    // Add 31 days.
+    std::vector<CalendarDay> days;
+    for (int32_t i = 0; i < 31; i++) {
+        CalendarDay day;
+        day.index = i;
+        day.month.year = JUMP_YEAR;
+        day.month.month = JUMP_MONTH;
+        day.day = i + 1;
+        if (i == 0) {
+            day.focused = true;
+        }
+        // Saturday and Sunday set off days. Others set work days.
+        if ((i % 6 == 5) || (i % 6 == 0)) {
+            day.dayMark = "off";
+        } else {
+            day.dayMark = "work";
+        }
+        days.emplace_back(std::move(day));
+    }
+    obtainedMonth.days = days;
+
+    calendarModelNG.SetCurrentData(obtainedMonth);
+    calendarModelNG.SetPreData(obtainedMonth);
+    calendarModelNG.SetNextData(obtainedMonth);
+
+    CalendarDay calendarDay;
+    calendarDay.index = 0;
+    calendarDay.day = 1;
+    calendarDay.today = false;
+    calendarDay.focused = true;
+    calendarDay.touched = true;
+
+    /**
+     * @tc.steps: step2. Set the first day focused, check the first day text style.
+     * @tc.expected: step2. The text color is 0xffffffff.
+     */
+    CalendarMonth calendarMonth;
+    calendarMonth.year = JUMP_YEAR;
+    calendarMonth.month = JUMP_MONTH;
+    calendarDay.month = calendarMonth;
+    calendarModelNG.SetCalendarDay(calendarDay);
+
+    auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay);
+    RSCanvas rsCanvas;
+    paintMethod->SetCalendarTheme(calendarPaintProperty);
+
+    RSTextStyle workOffTextStyle;
+    /**
+     * @tc.steps: step3. Set the first day focused, check the offWork color.
+     * @tc.expected: step3. The focused text color is same as text color, expected 0xff00ff00.
+     */
+    paintMethod->SetOffWorkTextStyle(workOffTextStyle, obtainedMonth.days[0]);
+    EXPECT_EQ(workOffTextStyle.color_, RSColor(0xff00ff00));
+
+    /**
+     * @tc.steps: step4. Check the offWork color.
+     * @tc.expected: step4. The text color expected 0xffff0000, it is work.
+     */
+    paintMethod->SetOffWorkTextStyle(workOffTextStyle, obtainedMonth.days[2]);
+    EXPECT_EQ(workOffTextStyle.color_, RSColor(0xffff0000));
+
+    /**
+     * @tc.steps: step5. Check the offWork color.
+     * @tc.expected: step5. The text color expected 0xffff0000, it is off.
+     */
+    paintMethod->SetOffWorkTextStyle(workOffTextStyle, obtainedMonth.days[5]);
+    EXPECT_EQ(workOffTextStyle.color_, RSColor(0xff0000ff));
+
+    /**
+     * @tc.steps: step6. Check the offWork color.
+     * @tc.expected: step6. The text color expected 0xffff0000, it is off.
+     */
+    paintMethod->SetOffWorkTextStyle(workOffTextStyle, obtainedMonth.days[6]);
+    EXPECT_EQ(workOffTextStyle.color_, RSColor(0xff0000ff));
+
+    /**
+     * @tc.steps: step7. Check the offWork color.
+     * @tc.expected: step7. The text color expected 0xffff0000, it is work.
+     */
+    paintMethod->SetOffWorkTextStyle(workOffTextStyle, obtainedMonth.days[7]);
+    EXPECT_EQ(workOffTextStyle.color_, RSColor(0xffff0000));
+
+    /**
+     * @tc.steps: step8. Check the offWork color.
+     * @tc.expected: step8. The text color expected 0xffff0000, it is work.
+     */
+    paintMethod->SetOffWorkTextStyle(workOffTextStyle, obtainedMonth.days[9]);
+    EXPECT_EQ(workOffTextStyle.color_, RSColor(0xffff0000));
 }
 } // namespace OHOS::Ace::NG

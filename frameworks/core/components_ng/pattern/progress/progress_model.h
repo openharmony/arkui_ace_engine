@@ -23,6 +23,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_ng/property/gradient_property.h"
 
 namespace OHOS::Ace {
 
@@ -47,6 +48,10 @@ public:
     virtual void SetFontWeight(const FontWeight& value) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
     virtual void SetSweepingEffect(bool value) = 0;
+    virtual void SetGradientColor(const NG::Gradient& value) = 0;
+    virtual void SetPaintShadow(bool value) = 0;
+    virtual void SetProgressStatus(NG::ProgressStatus value) = 0;
+
 private:
     static std::unique_ptr<ProgressModel> instance_;
     static std::mutex mutex_;

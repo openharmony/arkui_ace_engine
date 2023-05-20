@@ -33,6 +33,7 @@ void ShapeAbstractModelNG::SetFill(const Color& color)
 {
     ACE_UPDATE_PAINT_PROPERTY(ShapePaintProperty, Fill, color);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
 }
 
 void ShapeAbstractModelNG::SetStrokeDashOffset(const Ace::Dimension& dashOffset)

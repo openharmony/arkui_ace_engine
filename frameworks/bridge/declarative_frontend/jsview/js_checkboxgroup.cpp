@@ -87,8 +87,7 @@ void JSCheckboxGroup::JSBind(BindingTarget globalObj)
     JSClass<JSCheckboxGroup>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSCheckboxGroup>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSCheckboxGroup>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSCheckboxGroup>::Inherit<JSViewAbstract>();
-    JSClass<JSCheckboxGroup>::Bind<>(globalObj);
+    JSClass<JSCheckboxGroup>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSCheckboxGroup::Create(const JSCallbackInfo& info)

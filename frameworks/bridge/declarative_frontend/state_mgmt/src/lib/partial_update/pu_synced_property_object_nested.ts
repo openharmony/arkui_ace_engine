@@ -68,7 +68,7 @@ class SynchedPropertyNesedObjectPU<C extends Object>
   }
   
   public getUnmonitored(): C {
-    // stateMgmtConsole.debug(`SynchedPropertyNesedObject[${this.id()}, '${this.info() || "unknown"}']: getUnmonitored returns '${JSON.stringify(this.wrappedValue_)}' .`);
+    stateMgmtConsole.debug(`SynchedPropertyNesedObject[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored.`);
     // unmonitored get access , no call to otifyPropertyRead !
     return this.obsObject_;
   }
@@ -76,7 +76,6 @@ class SynchedPropertyNesedObjectPU<C extends Object>
   // get 'read through` from the ObservedProperty
   public get(): C {
     stateMgmtConsole.debug(`SynchedPropertyNesedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: get`)
-    // this.notifyPropertyRead();
     this.notifyPropertyHasBeenReadPU()
     return this.obsObject_;
   }
@@ -84,11 +83,11 @@ class SynchedPropertyNesedObjectPU<C extends Object>
   // set 'writes through` to the ObservedProperty
   public set(newValue: C): void {
     if (this.obsObject_ == newValue) {
-      stateMgmtConsole.debug(`SynchedPropertyNesedObjectPu[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
+      stateMgmtConsole.debug(`SynchedPropertyNesedObjectPu[${this.id__()}IP, '${this.info() || "unknown"}']: set @ObjectLink with unchanged value - nothing to do.`);
       return;
     }
 
-    stateMgmtConsole.debug(`SynchedPropertyNesedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
+    stateMgmtConsole.debug(`SynchedPropertyNesedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: set: @ObjectLink set to new value: .`);
 
     // unsubscribe from the old value ObservedObject
     ObservedObject.removeOwningProperty(this.obsObject_, this);

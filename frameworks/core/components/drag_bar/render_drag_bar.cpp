@@ -65,10 +65,10 @@ constexpr double OPACITY_DEFAULT = 0.2;
 void RenderDragBar::Update(const RefPtr<Component>& component)
 {
     if (!animator_) {
-        animator_ = AceType::MakeRefPtr<Animator>(GetContext());
+        animator_ = CREATE_ANIMATOR(GetContext());
     }
     if (!barTouchController_) {
-        barTouchController_ = AceType::MakeRefPtr<Animator>(GetContext());
+        barTouchController_ = CREATE_ANIMATOR(GetContext());
         auto touchAnimation = AceType::MakeRefPtr<CurveAnimation<double>>(1.0, SCALE_ICON, Curves::SHARP);
         touchAnimation->AddListener([weak = AceType::WeakClaim(this)](double value) {
             auto dragBar = weak.Upgrade();
@@ -83,12 +83,12 @@ void RenderDragBar::Update(const RefPtr<Component>& component)
         barTouchController_->SetFillMode(FillMode::FORWARDS);
     }
     if (!barRangeController_) {
-        barRangeController_ = AceType::MakeRefPtr<Animator>(GetContext());
+        barRangeController_ = CREATE_ANIMATOR(GetContext());
         barRangeController_->SetFillMode(FillMode::FORWARDS);
         barRangeController_->SetDuration(RESET_DURATION);
     }
     if (!barStyleController_) {
-        barStyleController_ = AceType::MakeRefPtr<Animator>(GetContext());
+        barStyleController_ = CREATE_ANIMATOR(GetContext());
         barStyleController_->SetFillMode(FillMode::FORWARDS);
         barStyleController_->SetDuration(STYLE_DURATION);
     }

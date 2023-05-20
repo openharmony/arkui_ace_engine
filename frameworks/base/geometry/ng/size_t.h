@@ -112,14 +112,9 @@ public:
     void MinusPadding(const std::optional<T>& left, const std::optional<T>& right, const std::optional<T>& top,
         const std::optional<T>& bottom)
     {
-        T tempWidth = width_ - left.value_or(0) - right.value_or(0);
-        if (NonNegative(tempWidth)) {
-            width_ = tempWidth;
-        }
-        T tempHeight = height_ - top.value_or(0) - bottom.value_or(0);
-        if (NonNegative(tempHeight)) {
-            height_ = tempHeight;
-        }
+        T zero = 0;
+        width_ = std::max(width_ - left.value_or(0) - right.value_or(0), zero);
+        height_ = std::max(height_ - top.value_or(0) - bottom.value_or(0), zero);
     }
 
     void AddPadding(const std::optional<T>& left, const std::optional<T>& right, const std::optional<T>& top,

@@ -525,7 +525,7 @@ static napi_value JSCreate(napi_env env, napi_callback_info info)
     LOGI("JsAnimator: JSCreate");
     auto option = std::make_shared<AnimatorOption>();
     ParseAnimatorOption(env, info, option);
-    auto animator = AceType::MakeRefPtr<Animator>();
+    auto animator = CREATE_ANIMATOR();
     animator->AttachSchedulerOnContainer();
     AnimatorResult* animatorResult = new AnimatorResult(animator, option);
     napi_value jsAnimator = nullptr;

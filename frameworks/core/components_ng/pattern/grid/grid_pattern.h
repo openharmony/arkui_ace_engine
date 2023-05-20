@@ -174,13 +174,16 @@ private:
     WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
     std::pair<int32_t, int32_t> GetNextIndexByStep(
         int32_t curMainIndex, int32_t curCrossIndex, int32_t curMainSpan, int32_t curCrossSpan, FocusStep step);
-    WeakPtr<FocusHub> SearchFocusableChildInCross(int32_t mainIndex, int32_t crossIndex, int32_t maxCrossCount);
+    WeakPtr<FocusHub> SearchFocusableChildInCross(int32_t tarMainIndex, int32_t tarCrossIndex, int32_t maxCrossCount,
+        int32_t curMainIndex = -1, int32_t curCrossIndex = -1);
     WeakPtr<FocusHub> GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarCrossIndex);
+    std::unordered_set<int32_t> GetFocusableChildCrossIndexesAt(int32_t tarMainIndex);
     void ScrollToFocusNode(const WeakPtr<FocusHub>& focusNode);
     void FlushCurrentFocus();
     void FlushFocusOnScroll(const GridLayoutInfo& gridLayoutInfo);
+    std::pair<bool, bool> IsFirstOrLastFocusableChild(int32_t curMainIndex, int32_t curCrossIndex);
     std::pair<FocusStep, FocusStep> GetFocusSteps(
-        int32_t curCrossIndex, int32_t curMaxCrossCount, FocusStep step) const;
+        int32_t curMainIndex, int32_t curCrossIndex, FocusStep step);
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
@@ -193,6 +196,7 @@ private:
     void MultiSelectWithoutKeyboard(const RectF& selectedZone);
     void UpdateScrollBarOffset() override;
     void UpdateRectOfDraggedInItem(int32_t insertIndex);
+    void SetAccessibilityAction();
 
     GridLayoutInfo gridLayoutInfo_;
     RefPtr<GridPositionController> positionController_;

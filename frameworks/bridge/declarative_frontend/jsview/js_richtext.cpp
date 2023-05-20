@@ -61,8 +61,7 @@ void JSRichText::JSBind(BindingTarget globalObj)
     JSClass<JSRichText>::StaticMethod("create", &JSRichText::Create);
     JSClass<JSRichText>::StaticMethod("onStart", &JSRichText::OnStart);
     JSClass<JSRichText>::StaticMethod("onComplete", &JSRichText::OnComplete);
-    JSClass<JSRichText>::Inherit<JSViewAbstract>();
-    JSClass<JSRichText>::Bind<>(globalObj);
+    JSClass<JSRichText>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSRichText::OnStart(const JSCallbackInfo& info)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,11 @@
 
 #include "core/components/drag_bar/rosen_render_drag_bar.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkPath.h"
+#endif
 
 #include "base/log/log.h"
 #include "base/utils/utils.h"
@@ -51,6 +53,7 @@ void RosenRenderDragBar::Paint(RenderContext& context, const Offset& offset)
         return;
     }
 
+#ifndef USE_ROSEN_DRAWING
     SkPaint skPaint;
     skPaint.setAntiAlias(true);
     if (mouseState_ == MouseState::HOVER) {
@@ -82,6 +85,40 @@ void RosenRenderDragBar::Paint(RenderContext& context, const Offset& offset)
         canvas->translate(-translate.Width(), -translate.Height());
     }
     canvas->drawPath(path, skPaint);
+#else
+    RSPen pen;
+    pen.SetAntiAlias(true);
+    if (mouseState_ == MouseState::HOVER) {
+        auto size = Size(NormalizeToPx(PAINT_WIDTH), NormalizeToPx(PAINT_HEIGHT));
+        auto alignOffset = Alignment::GetAlignPosition(GetLayoutSize(), size, Alignment::CENTER);
+        RosenUniversalPainter::DrawHoverBackground(
+            canvas, Rect(offset + alignOffset, size), HOVER_COLOR, NormalizeToPx(HOVER_RADIUS));
+    }
+    pen.SetAlpha(alpha_ * opacity_);
+    auto theme = GetTheme<DragBarTheme>();
+    if (theme) {
+        barColor_ = theme->GetBarColor();
+    }
+    pen.SetColor(barColor_.GetValue());
+    pen.SetWidth(barWidth_ * scaleY_ * scaleWidth_);
+    pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+    Offset totalOffset = offset + iconOffset_ + dragOffset_;
+    RSRecordingPath path;
+    path.MoveTo(static_cast<RSScalar>(barLeftPoint_.GetX() * scaleX_ + totalOffset.GetX()),
+        static_cast<RSScalar>(barLeftPoint_.GetY() * scaleY_ + totalOffset.GetY()));
+    path.LineTo(static_cast<RSScalar>(barCenterPoint_.GetX() * scaleX_ + totalOffset.GetX()),
+        static_cast<RSScalar>(barCenterPoint_.GetY() * scaleY_ + totalOffset.GetY()));
+    path.LineTo(static_cast<RSScalar>(barRightPoint_.GetX() * scaleX_ + totalOffset.GetX()),
+        static_cast<RSScalar>(barRightPoint_.GetY() * scaleY_ + totalOffset.GetY()));
+    if (!NearEqual(scaleIcon_, 1.0)) {
+        canvas->Scale(scaleIcon_, scaleIcon_);
+        Size translate = GetLayoutSize() * ((scaleIcon_ - 1.0) / 2.0);
+        canvas->Translate(-translate.Width(), -translate.Height());
+    }
+    canvas->AttachPen(pen);
+    canvas->DrawPath(path);
+    canvas->DetachPen();
+#endif
 }
 
 } // namespace OHOS::Ace
