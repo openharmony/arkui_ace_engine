@@ -136,4 +136,3 @@ void ImageModifier::UpdatePaintConfig(float ratio)
     }
 }
 } // namespace OHOS::Ace::NG
-

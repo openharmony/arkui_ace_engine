@@ -551,7 +551,7 @@ HWTEST_F(ImageTestNg, ImagePaintMethod002, TestSize.Level1)
     pattern->imageModifier_ = AceType::MakeRefPtr<ImageModifier>();
     ImagePaintMethod imagePaintMethod(pattern->image_, pattern->imageModifier_, true);
     /**
-     * @tc.steps: step3. ImagePaintMethod GetContentDrawFunction.
+     * @tc.steps: step3. ImagePaintMethod UpdateContentModifier.
      */
     auto renderProps = pattern->GetPaintProperty<ImageRenderProperty>();
     ASSERT_NE(renderProps, nullptr);
@@ -562,10 +562,9 @@ HWTEST_F(ImageTestNg, ImagePaintMethod002, TestSize.Level1)
     geometryNode->SetFrameOffset(OffsetF(WIDTH, HEIGHT));
     geometryNode->SetContentSize(SizeF(WIDTH, HEIGHT));
     PaintWrapper paintWrapper(frameNode->GetRenderContext(), geometryNode, renderProps);
-    auto paintMethod = imagePaintMethod.GetContentDrawFunction(&paintWrapper);
+    imagePaintMethod.UpdateContentModifier(&paintWrapper);
 
     ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
-    ASSERT_NE(paintMethod, nullptr);
     auto config = *imagePaintMethod.canvasImage_->paintConfig_;
     EXPECT_EQ(config.imageRepeat_, ImageRepeat::REPEAT_X);
     EXPECT_TRUE(config.borderRadiusXY_ != nullptr);
@@ -577,7 +576,7 @@ HWTEST_F(ImageTestNg, ImagePaintMethod002, TestSize.Level1)
      */
     borderRadius.SetRadius(Dimension(RADIUS_EXTREME));
     frameNode->GetRenderContext()->UpdateBorderRadius(borderRadius);
-    paintMethod = imagePaintMethod.GetContentDrawFunction(&paintWrapper);
+    imagePaintMethod.UpdateContentModifier(&paintWrapper);
     config = *imagePaintMethod.canvasImage_->paintConfig_;
     EXPECT_NE(config.borderRadiusXY_->at(0).GetX(), RADIUS_EXTREME);
     EXPECT_EQ(config.borderRadiusXY_->at(0).GetX(), WIDTH / 2);
@@ -1508,7 +1507,8 @@ HWTEST_F(ImageTestNg, ImageModifier001, TestSize.Level1)
     PaintWrapper paintWrapper(nullptr, geometryNode, imageRenderProperty);
     imagePaintMethod.UpdateContentModifier(&paintWrapper);
     /**
-     * @tc.steps: step3. Check the imageModifier member variable value
+     * @tc.steps: step3. Get imageModifier member variable value
+     * @tc.expected: Check imageModifier member variable value
      */
     auto imageModifier = imagePaintMethod.imageModifier_;
     ASSERT_NE(imageModifier, nullptr);
@@ -1526,12 +1526,19 @@ HWTEST_F(ImageTestNg, ImageModifier001, TestSize.Level1)
  */
 HWTEST_F(ImageTestNg, ImageModifier002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create ImageModifier and CanvasImage;
+     */
     RefPtr<ImageModifier> imageMoidifier = AceType::MakeRefPtr<ImageModifier>();
     RefPtr<CanvasImage> canvasImage = AceType::MakeRefPtr<MockCanvasImage>();
     canvasImage->SetPaintConfig(ImagePaintConfig());
     auto config = canvasImage->GetPaintConfig();
     config.dstRect_ = RectF(0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT);
     config.srcRect_ = RectF(0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT);
+    /**
+     * @tc.steps: step2. UpdateImageData and UpdatePaintConfig
+     * @tc.expected: Check dstRect and srcRect value
+     */
     SizeF contentSize(WIDTH, HEIGHT);
     OffsetF offset(WIDTH, HEIGHT);
     auto canvas = AceType::WeakClaim(AceType::RawPtr(canvasImage));
@@ -1570,21 +1577,23 @@ HWTEST_F(ImageTestNg, ImageModifier003, TestSize.Level1)
     ASSERT_NE(imagePaintMethod.imageModifier_, nullptr);
     /**
      * @tc.steps: step3. ImageModifier onDraw
+     * @tc.expected: CanvasImage isDrawAnimate member variable
      */
     Testing::MockCanvas canvas;
     DrawingContext context { canvas, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
-    imagePaintMethod.imageModifier_->onDraw(context);
-    imagePaintMethod.imageModifier_->isFirst_ = false;
-    imagePaintMethod.imageModifier_->onDraw(context);
-    imagePaintMethod.imageModifier_->isFirst_ = true;
-    imagePaintMethod.imageModifier_->onDraw(context);
     auto imageCanvas = imagePaintMethod.imageModifier_->canvasImage_.Upgrade();
     ASSERT_NE(imageCanvas, nullptr);
+    imagePaintMethod.imageModifier_->isFirst_ = true;
+    imagePaintMethod.imageModifier_->onDraw(context);
+    EXPECT_EQ(imageCanvas->isDrawAnimate_, false);
+    imagePaintMethod.imageModifier_->isFirst_ = false;
     auto paintConfig = imageCanvas->GetPaintConfig();
     paintConfig.isSvg_ = true;
     imagePaintMethod.imageModifier_->onDraw(context);
+    EXPECT_EQ(imageCanvas->isDrawAnimate_, false);
     paintConfig.isSvg_ = false;
     imagePaintMethod.imageModifier_->onDraw(context);
+    EXPECT_EQ(imageCanvas->isDrawAnimate_, false);
 }
 
 /**
@@ -1615,7 +1624,8 @@ HWTEST_F(ImageTestNg, ImageModifier004, TestSize.Level1)
     imagePaintMethod.UpdateContentModifier(&paintWrapper);
     ASSERT_NE(imagePaintMethod.imageModifier_, nullptr);
     /**
-     * @tc.steps: step3. Test ImageModifier SetImageFit and Modify
+     * @tc.steps: step3. ImageModifier Set ImageFit and Modify
+     * @tc.expected: Attach Property value
      */
     Testing::MockCanvas canvas;
     imagePaintMethod.imageModifier_->SetImageFit(ImageFit::FILL);

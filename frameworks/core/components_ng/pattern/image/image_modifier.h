@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DATA_PANEL_IMAGE_MODIFIER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DATA_PANEL_IMAGE_MODIFIER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_IMAGE_IMAGE_MODIFIER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_IMAGE_IMAGE_MODIFIER_H
 
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
@@ -26,7 +26,7 @@
 namespace OHOS::Ace::NG {
 constexpr float ANIMATION_END = 1.0f; // The image animation end with 1.0
 constexpr uint32_t TWICE = 2;         // use to calculate image new width and height
-constexpr double EPSILON = 0.0001;   // use to judge the end of action
+constexpr double EPSILON = 0.0001;    // use to judge the end of action
 
 class ImageModifier : public ContentModifier {
     DECLARE_ACE_TYPE(ImageModifier, ContentModifier);
@@ -60,5 +60,4 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(ImageModifier);
 };
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DATA_PANEL_DATA_PANEL_MODIFIER_H
-
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_IMAGE_IMAGE_MODIFIER_H
