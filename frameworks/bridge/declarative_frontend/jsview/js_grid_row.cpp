@@ -274,7 +274,7 @@ void JSGridRow::Create(const JSCallbackInfo& info)
 
 void JSGridRow::JsBreakpointEvent(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
         LOGW("No breakpoint event info.");
         return;
     }
