@@ -46,6 +46,9 @@ declare_args() {
 
   # Disable in OH Core
   ace_engine_standard_fonts_enable = true
+
+  # Sanitize debug
+  ace_sanitize_debug = false
 }
 
 enable_dump_drawcmd = false
