@@ -364,7 +364,7 @@ HWTEST_F(TabsTestNg, TabsModelMeasure002, TestSize.Level1)
     RefPtr<GeometryNode> swiperGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> swiperLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(swiperNode, swiperGeometryNode, swiperNode->GetLayoutProperty());
-    
+
     auto swipeLayoutAlgorithm = swiperNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
     ASSERT_NE(swipeLayoutAlgorithm, nullptr);
     swiperLayoutWrapper->SetLayoutAlgorithm(
@@ -374,13 +374,13 @@ HWTEST_F(TabsTestNg, TabsModelMeasure002, TestSize.Level1)
     swiperLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(SWIPER_WIDTH)));
     layoutWrapper.AppendChild(swiperLayoutWrapper);
-    
+
     auto dividerNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_DIVIDER_INDEX));
     ASSERT_NE(dividerNode, nullptr);
     RefPtr<GeometryNode> dividerGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> dividerLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(dividerNode, dividerGeometryNode, dividerNode->GetLayoutProperty());
-    
+
     auto dividerLayoutAlgorithm = dividerNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
     ASSERT_NE(dividerLayoutAlgorithm, nullptr);
     dividerLayoutWrapper->SetLayoutAlgorithm(
@@ -390,7 +390,7 @@ HWTEST_F(TabsTestNg, TabsModelMeasure002, TestSize.Level1)
     dividerLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(0.0f)));
     layoutWrapper.AppendChild(dividerLayoutWrapper);
-    
+
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
     ASSERT_NE(tabBarNode, nullptr);
     RefPtr<GeometryNode> tabbarGeometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -482,7 +482,7 @@ HWTEST_F(TabsTestNg, TabsModelMeasure003, TestSize.Level1)
     RefPtr<GeometryNode> swiperGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> swiperLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(swiperNode, swiperGeometryNode, swiperNode->GetLayoutProperty());
-    
+
     auto swipeLayoutAlgorithm = swiperNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
     ASSERT_NE(swipeLayoutAlgorithm, nullptr);
     swiperLayoutWrapper->SetLayoutAlgorithm(
@@ -497,7 +497,7 @@ HWTEST_F(TabsTestNg, TabsModelMeasure003, TestSize.Level1)
     RefPtr<GeometryNode> dividerGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> dividerLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(dividerNode, dividerGeometryNode, dividerNode->GetLayoutProperty());
-    
+
     auto dividerLayoutAlgorithm = dividerNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
     ASSERT_NE(dividerLayoutAlgorithm, nullptr);
     dividerLayoutWrapper->SetLayoutAlgorithm(
@@ -522,7 +522,7 @@ HWTEST_F(TabsTestNg, TabsModelMeasure003, TestSize.Level1)
     tabBarLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(TABBAR_WIDTH), CalcLength(FIRST_ITEM_WIDTH)));
     layoutWrapper.AppendChild(tabBarLayoutWrapper);
-    
+
     tabsLayoutAlgorithm->Measure(&layoutWrapper);
     tabsLayoutAlgorithm->Layout(&layoutWrapper);
 
@@ -656,7 +656,7 @@ HWTEST_F(TabsTestNg, TabsModelMeasure004, TestSize.Level1)
     RefPtr<GeometryNode> dividerGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> dividerLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(dividerNode, dividerGeometryNode, dividerNode->GetLayoutProperty());
-    
+
     auto dividerLayoutAlgorithm = dividerNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
     ASSERT_NE(dividerLayoutAlgorithm, nullptr);
     dividerLayoutWrapper->SetLayoutAlgorithm(
@@ -1116,7 +1116,7 @@ HWTEST_F(TabsTestNg, TabContentModelAddTabBarItem001, TestSize.Level1)
     tabContentModel2.SetSelectedMode(selectedMode);
     auto tabContentFrameNode2 = AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(tabContentFrameNode2, nullptr);
-    EXPECT_EQ(tabContentFrameNode2->GetTag(), V2::TAB_CONTENT_ITEM_ETS_TAG);;
+    EXPECT_EQ(tabContentFrameNode2->GetTag(), V2::TAB_CONTENT_ITEM_ETS_TAG);
     auto tabContentPattern2 = tabContentFrameNode2->GetPattern<TabContentPattern>();
     ASSERT_NE(tabContentPattern2, nullptr);
     tabContentFrameNode2->MountToParent(swiperNode);
@@ -1791,7 +1791,6 @@ HWTEST_F(TabsTestNg, TabBarPatternGetSelectedMode001, TestSize.Level1)
     EXPECT_EQ(mode, selectedMode);
 }
 
-
 /**
  * @tc.name: TabBarModifierSetIndicator001
  * @tc.desc: test SetIndicator
@@ -2348,10 +2347,14 @@ HWTEST_F(TabsTestNg, TabsModelSetBarOverlap001, TestSize.Level1)
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
     auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
 
     auto layoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-   
+    auto barPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
+    ASSERT_NE(barPaintProperty, nullptr);
+
     /**
      * @tc.steps: steps2. SetBarOverlap true
      * @tc.expected: steps2. Check the BarOverlap property value
@@ -2362,9 +2365,7 @@ HWTEST_F(TabsTestNg, TabsModelSetBarOverlap001, TestSize.Level1)
     tabsModel.SetBarOverlap(false);
     EXPECT_FALSE(layoutProperty->GetBarOverlap().value());
 
-    auto tabsRenderContext = tabsNode->GetRenderContext();
-    ASSERT_NE(tabsRenderContext, nullptr);
-    tabsRenderContext->UpdateBackgroundColor(Color::RED);
+    barPaintProperty->UpdateBarBackgroundColor(Color::RED);
 
     tabsModel.SetBarOverlap(true);
     EXPECT_TRUE(layoutProperty->GetBarOverlap().value());
@@ -2909,6 +2910,39 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayoutMask002, TestSize.Level1)
     tabBarLayoutAlgorithm->LayoutMask(&layoutWrapper);
     EXPECT_EQ(tabBarLayoutProperty->GetSelectedMask().value_or(-1), -1);
     EXPECT_EQ(tabBarLayoutProperty->GetUnselectedMask().value_or(-1), -1);
+}
+
+/**
+ * @tc.name: TabsModelSetBarBackgroundColor001
+ * @tc.desc: test SetBarBackgroundColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsModelSetBarBackgroundColor001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+
+    auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
+    ASSERT_NE(tabBarPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: steps2. SetBarBackgroundColor true
+     * @tc.expected: steps2. Check the BarBarBackgroundColor property value
+     */
+    Color color = Color::RED;
+    tabsModel.SetBarBackgroundColor(color);
+    EXPECT_EQ(tabBarPaintProperty->GetBarBackgroundColor().value_or(Color::BLACK), color);
 }
 
 /**
