@@ -31,7 +31,7 @@ bool ShapePainter::SetPen(RSPen& pen, const ShapePaintProperty& shapePaintProper
         }
         pen.SetWidth(static_cast<RSScalar>(shapePaintProperty.GetStrokeWidthValue().ConvertToPx()));
     } else {
-        pen.SetWidth(static_cast<RSScalar>(shapePaintProperty.STOKE_WIDTH_DEFAULT.ConvertToPx()));
+        pen.SetWidth(static_cast<RSScalar>(shapePaintProperty.STROKE_WIDTH_DEFAULT.ConvertToPx()));
     }
 
     if (shapePaintProperty.HasAntiAlias()) {

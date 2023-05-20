@@ -171,7 +171,7 @@ void SwitchPattern::PlayTranslateAnimation(float startPos, float endPos)
     if (!controller_) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        controller_ = AceType::MakeRefPtr<Animator>(pipeline);
+        controller_ = CREATE_ANIMATOR(pipeline);
     }
     controller_->ClearStopListeners();
     controller_->ClearInterpolators();

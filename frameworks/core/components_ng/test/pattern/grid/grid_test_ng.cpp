@@ -22,21 +22,22 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/offset.h"
 #include "base/utils/utils.h"
+#define protected public
 #define private public
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/button/button_view.h"
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-
-#define protected public
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -97,6 +98,11 @@ public:
 void GridTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
+    // set buttonTheme to themeManager before using themeManager to get buttonTheme
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
 }
 
 void GridTestNg::TearDownTestSuite()
@@ -166,7 +172,8 @@ void GridTestNg::CreateGridItemWithButton(int32_t number)
         gridItemModel.Create();
         SetHeight(Dimension(DEFAULT_ITEM_HEIGHT));
         {
-            ButtonView::Create("Button");
+            ButtonModelNG buttonModelNG;
+            buttonModelNG.CreateWithLabel("label");
             ViewStackProcessor::GetInstance()->Pop();
         }
         ViewStackProcessor::GetInstance()->Pop();
@@ -180,7 +187,8 @@ void GridTestNg::CreateHorizontalGridItemWithButton(int32_t number)
         gridItemModel.Create();
         SetWidth(Dimension(DEFAULT_ITEM_WIDTH));
         {
-            ButtonView::Create("Button");
+            ButtonModelNG buttonModelNG;
+            buttonModelNG.CreateWithLabel("label");
             ViewStackProcessor::GetInstance()->Pop();
         }
         ViewStackProcessor::GetInstance()->Pop();
@@ -2678,5 +2686,99 @@ HWTEST_F(GridTestNg, PositionControllerCoverage001, TestSize.Level1)
     controller->GetCurrentOffset();
 
     EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: PerformActionTest001
+ * @tc.desc: GirdItem Accessibility PerformAction test Select and ClearSelection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, PerformActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create girdItem and initialize related properties.
+     */
+    GridItemModelNG gridItemModelNG;
+    gridItemModelNG.Create();
+
+    /**
+     * @tc.steps: step2. Get girdItem frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto gridItemPattern = frameNode->GetPattern<GridItemPattern>();
+    ASSERT_NE(gridItemPattern, nullptr);
+    gridItemPattern->selectable_ = false;
+    gridItemPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step3. Get girdItem accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto gridItemAccessibilityProperty = frameNode->GetAccessibilityProperty<GridItemAccessibilityProperty>();
+    ASSERT_NE(gridItemAccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. When girdItem is not Selectable, call the callback function in gridItemAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(gridItemAccessibilityProperty->ActActionSelect());
+    EXPECT_TRUE(gridItemAccessibilityProperty->ActActionClearSelection());
+
+    /**
+     * @tc.steps: step5. When girdItem is Selectable, call the callback function in gridItemAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    gridItemPattern->selectable_ = true;
+    EXPECT_TRUE(gridItemAccessibilityProperty->ActActionSelect());
+    EXPECT_TRUE(gridItemAccessibilityProperty->ActActionClearSelection());
+}
+
+/**
+ * @tc.name: PerformActionTest002
+ * @tc.desc: Gird Accessibility PerformAction test ScrollForward and ScrollBackward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, PerformActionTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create gird and initialize related properties.
+     */
+    GridModelNG gridModelNG;
+    gridModelNG.Create(nullptr, nullptr);
+
+    /**
+     * @tc.steps: step2. Get gird frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto gridPattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(gridPattern, nullptr);
+    gridPattern->isConfigScrollable_ = false;
+    gridPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step3. Get gird accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto gridAccessibilityProperty = frameNode->GetAccessibilityProperty<GridAccessibilityProperty>();
+    ASSERT_NE(gridAccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. When gird is not Scrollable, call the callback function in gridAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(gridAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(gridAccessibilityProperty->ActActionScrollBackward());
+
+    /**
+     * @tc.steps: step5. When gird is Scrollable, call the callback function in gridAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    gridPattern->isConfigScrollable_ = true;
+    EXPECT_TRUE(gridAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(gridAccessibilityProperty->ActActionScrollBackward());
 }
 } // namespace OHOS::Ace::NG

@@ -57,7 +57,7 @@ public:
 
 private:
     const std::map<Rosen::SizeChangeReason, Rosen::WindowSizeChangeReason> SESSION_TO_WINDOW_MAP {
-        { Rosen::SizeChangeReason::SHOW, Rosen::WindowSizeChangeReason::UNDEFINED },
+        { Rosen::SizeChangeReason::UNDEFINED, Rosen::WindowSizeChangeReason::UNDEFINED },
         { Rosen::SizeChangeReason::HIDE, Rosen::WindowSizeChangeReason::HIDE },
         { Rosen::SizeChangeReason::MAXIMIZE, Rosen::WindowSizeChangeReason::MAXIMIZE },
         { Rosen::SizeChangeReason::RECOVER, Rosen::WindowSizeChangeReason::RECOVER },
@@ -193,8 +193,7 @@ void WindowPattern::UpdateViewportConfig(const Rect& rect, Rosen::WindowSizeChan
     ViewportConfig config;
     config.SetPosition(rect.Left(), rect.Top());
     config.SetSize(rect.Width(), rect.Height());
-    constexpr float density = 1.5; // to get display density
-    config.SetDensity(density);
+    config.SetDensity(displayDensity_);
     CHECK_NULL_VOID(uiContent_);
     uiContent_->UpdateViewportConfig(config, reason);
 }

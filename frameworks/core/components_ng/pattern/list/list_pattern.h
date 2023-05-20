@@ -86,6 +86,8 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
+    void FromJson(const std::unique_ptr<JsonValue>& json) override;
+
     bool UpdateCurrentOffset(float offset, int32_t source) override;
 
     int32_t GetStartIndex() const
@@ -159,7 +161,7 @@ public:
 
     float GetTotalOffset() const
     {
-        return estimateOffset_ - currentOffset_;
+        return currentOffset_;
     }
 
     // scroller
@@ -224,6 +226,7 @@ private:
     void MultiSelectWithoutKeyboard(const RectF& selectedZone);
 
     void DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper);
+    void SetAccessibilityAction();
 
     RefPtr<ListContentModifier> listContentModifier_;
 
@@ -235,7 +238,6 @@ private:
     float startMainPos_;
     float endMainPos_;
     bool isInitialized_ = false;
-    float estimateOffset_ = 0.0f;
     float currentOffset_ = 0.0f;
     float spaceWidth_ = 0.0f;
     float contentMainSize_ = 0.0f;

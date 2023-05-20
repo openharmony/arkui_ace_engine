@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,10 @@
 #include "core/components/swiper/rosen_render_swiper.h"
 
 #include "render_service_client/core/ui/rs_node.h"
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkPaint.h"
 #include "include/effects/SkGradientShader.h"
+#endif
 
 #include "base/utils/system_properties.h"
 #include "core/components/align/render_align.h"
@@ -85,13 +87,24 @@ void RosenRenderSwiper::PaintFade(RenderContext& context, const Offset& offset)
     if (canvas == nullptr) {
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     canvas->save();
     canvas->translate(offset.GetX(), offset.GetY());
     PaintShadow(canvas, offset);
     canvas->restore();
+#else
+    canvas->Save();
+    canvas->Translate(offset.GetX(), offset.GetY());
+    PaintShadow(canvas, offset);
+    canvas->Restore();
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderSwiper::PaintShadow(SkCanvas* canvas, const Offset& offset)
+#else
+void RosenRenderSwiper::PaintShadow(RSCanvas* canvas, const Offset& offset)
+#endif
 {
     static constexpr double FADE_MAX_DISTANCE = 2000.0f;
     static constexpr double FADE_MAX_TRANSLATE = 40.0f;
@@ -142,6 +155,7 @@ void RosenRenderSwiper::PaintShadow(SkCanvas* canvas, const Offset& offset)
     }
 
     Offset center = Offset(centerX, centerY);
+#ifndef USE_ROSEN_DRAWING
     SkPaint painter;
     painter.setColor(fadeColor_.GetValue());
     painter.setAlphaf(FADE_ALPHA);
@@ -151,6 +165,19 @@ void RosenRenderSwiper::PaintShadow(SkCanvas* canvas, const Offset& offset)
     } else {
         canvas->drawCircle(center.GetX() + fadeTranslate, center.GetY(), radius, painter);
     }
+#else
+    RSPen pen;
+    pen.SetColor(fadeColor_.GetValue());
+    pen.SetAlphaF(FADE_ALPHA);
+    pen.SetBlendMode(RSBlendMode::SRC_OVER);
+    canvas->AttachPen(pen);
+    if (isVertical) {
+        canvas->DrawCircle(RSPoint(center.GetX(), center.GetY() + fadeTranslate), radius);
+    } else {
+        canvas->DrawCircle(RSPoint(center.GetX() + fadeTranslate, center.GetY()), radius);
+    }
+    canvas->DetachPen();
+#endif
 }
 
 void RosenRenderSwiper::UpdateIndicator()
@@ -251,6 +278,7 @@ void RosenRenderSwiper::CanvasDrawIndicator(RenderContext& context, const Offset
         return;
     }
 
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setAntiAlias(true);
     IndicatorProperties indicatorProperties = PrepareIndicatorProperties();
@@ -274,6 +302,35 @@ void RosenRenderSwiper::CanvasDrawIndicator(RenderContext& context, const Offset
             center += indicatorProperties.selectedPaddingEnd;
         }
     }
+#else
+    RSPen pen;
+    pen.SetAntiAlias(true);
+
+    IndicatorProperties indicatorProperties = PrepareIndicatorProperties();
+    Offset center = indicatorPosition_ + indicatorProperties.centerPadding;
+    double targetIndex = currentIndex_;
+    if (needReverse_) {
+        targetIndex = itemCount_ - currentIndex_ - 1;
+    }
+    for (int32_t i = 0; i < itemCount_; i++) {
+        if (i != targetIndex) {
+            center += indicatorProperties.normalPaddingStart;
+            pen.SetColor(indicatorProperties.normalColor);
+            canvas->AttachPen(pen);
+            canvas->DrawCircle(RSPoint(center.GetX() + offset.GetX(), center.GetY() + offset.GetY()),
+                indicatorProperties.normalPointRadius);
+            center += indicatorProperties.normalPaddingEnd;
+        } else {
+            center += indicatorProperties.selectedPaddingStart;
+            pen.SetColor(indicatorProperties.selectedColor);
+            canvas->AttachPen(pen);
+            canvas->DrawCircle(RSPoint(center.GetX() + offset.GetX(), center.GetY() + offset.GetY()),
+                indicatorProperties.selectedPointRadius);
+            center += indicatorProperties.selectedPaddingEnd;
+        }
+        canvas->DetachPen();
+    }
+#endif
 }
 
 RosenRenderSwiper::IndicatorProperties RosenRenderSwiper::PrepareIndicatorProperties() const
@@ -304,6 +361,7 @@ void RosenRenderSwiper::PaintMask(RenderContext& context, const Offset& offset) 
         return;
     }
 
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setAntiAlias(true);
     canvas->save();
@@ -349,6 +407,52 @@ void RosenRenderSwiper::PaintMask(RenderContext& context, const Offset& offset) 
                              offset.GetY() + GetLayoutSize().Height() },
             paint);
     }
+#else
+    RSPen pen;
+    pen.SetAntiAlias(true);
+    canvas->Save();
+
+    std::vector<GradientColor> gradientColors = std::vector<GradientColor>(GRADIENT_COLOR_SIZE);
+    gradientColors[0].SetColor(Color(0x00000000));
+    gradientColors[1].SetColor(Color(0xff000000));
+    gradientColors[2].SetColor(Color(0xff000000));
+    std::vector<RSPoint> pts = { RSPoint(0.0f, 0.0f), RSPoint(0.0f, 0.0f) };
+    if (axis_ == Axis::HORIZONTAL) {
+        pts.at(0) = RSPoint(static_cast<RSScalar>(offset.GetX()),
+            static_cast<RSScalar>(offset.GetY() + indicatorPosition_.GetY() - NormalizeToPx(9.0_vp)));
+        pts.at(1) = RSPoint(static_cast<RSScalar>(offset.GetX()),
+            static_cast<RSScalar>(offset.GetY() + indicatorPosition_.GetY() + NormalizeToPx(15.0_vp)));
+    } else {
+        pts.at(0) = RSPoint(
+            static_cast<RSScalar>(offset.GetX() + indicatorPosition_.GetX() - NormalizeToPx(9.0_vp)),
+            static_cast<RSScalar>(offset.GetY()));
+        pts.at(1) = RSPoint(
+            static_cast<RSScalar>(offset.GetX() + indicatorPosition_.GetX() + NormalizeToPx(15.0_vp)),
+            static_cast<RSScalar>(offset.GetY()));
+    }
+    LOGD("gradient--beginPoint x: %{public}f, y: %{public}f", pts.at(0).GetX(), pts.at(0).GetY());
+    LOGD("gradient--endPoint x: %{public}f, y: %{public}f", pts.at(1).GetX(), pts.at(1).GetY());
+    std::vector<RSColorQuad> colors;
+    for (uint32_t i = 0; i < gradientColors.size(); ++i) {
+        const auto& gradientColor = gradientColors[i];
+        colors.at(i) = gradientColor.GetColor().GetValue();
+    }
+    const std::vector<RSScalar> pos = { 0.0f, 0.75f, 1.0f };
+
+    pen.SetShaderEffect(RSShaderEffect::CreateLinearGradient(
+        pts.at(0), pts.at(1), colors, pos, RSTileMode::CLAMP));
+    canvas->AttachPen(pen);
+    if (axis_ == Axis::HORIZONTAL) {
+        canvas->DrawRect(RSRect(offset.GetX(),
+            offset.GetY() + indicatorPosition_.GetY() - NormalizeToPx(9.0_vp), offset.GetX() + GetLayoutSize().Width(),
+            offset.GetY() + indicatorPosition_.GetY() + NormalizeToPx(15.0_vp)));
+    } else {
+        canvas->DrawRect(RSRect(offset.GetX() + indicatorPosition_.GetX() - NormalizeToPx(9.0_vp),
+            offset.GetY(), offset.GetX() + indicatorPosition_.GetX() + NormalizeToPx(15.0_vp),
+            offset.GetY() + GetLayoutSize().Height()));
+    }
+    canvas->DetachPen();
+#endif
 }
 
 void RosenRenderSwiper::DrawIndicator(RenderContext& context, const Offset& offset)
@@ -379,6 +483,7 @@ void RosenRenderSwiper::DrawIndicatorBackground(RenderContext& context, const Of
         return;
     }
 
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setAntiAlias(true);
 
@@ -392,6 +497,23 @@ void RosenRenderSwiper::DrawIndicatorBackground(RenderContext& context, const Of
         radius, radius);
     rRect.offset(position.GetX() + offset.GetX(), position.GetY() + offset.GetY());
     canvas->drawRRect(rRect, paint);
+#else
+    RSPen pen;
+    pen.SetAntiAlias(true);
+
+    pen.SetColor(swiperIndicatorData_.indicatorPaintData.color.GetValue());
+    pen.SetAlphaF(opacityValue_);
+    Offset position = swiperIndicatorData_.indicatorPaintData.position;
+    double radius = swiperIndicatorData_.indicatorPaintData.radius;
+    RSRoundRect rRect(
+        RSRect(0, 0, static_cast<RSScalar>(swiperIndicatorData_.indicatorPaintData.width),
+            static_cast<RSScalar>(swiperIndicatorData_.indicatorPaintData.height)),
+        radius, radius);
+    rRect.Offset(position.GetX() + offset.GetX(), position.GetY() + offset.GetY());
+    canvas->AttachPen(pen);
+    canvas->DrawRoundRect(rRect);
+    canvas->DetachPen();
+#endif
 }
 
 void RosenRenderSwiper::DrawIndicatorFocus(RenderContext& context, const Offset& offset)
@@ -407,6 +529,7 @@ void RosenRenderSwiper::DrawIndicatorFocus(RenderContext& context, const Offset&
     double focusHeight = swiperIndicatorData_.indicatorPaintData.height + NormalizeToPx(INDICATOR_FOCUS_OFFSET_Y * 2);
     double focusRadius = focusHeight / 2;
 
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setColor(INDICATOR_FOCUS_COLOR);
     paint.setStyle(SkPaint::Style::kStroke_Style);
@@ -417,6 +540,18 @@ void RosenRenderSwiper::DrawIndicatorFocus(RenderContext& context, const Offset&
     rRect.offset(position.GetX() + offset.GetX() + NormalizeToPx(INDICATOR_FOCUS_OFFSET_X),
         position.GetY() + offset.GetY() - NormalizeToPx(INDICATOR_FOCUS_OFFSET_Y));
     canvas->drawRRect(rRect, paint);
+#else
+    RSPen pen;
+    pen.SetColor(INDICATOR_FOCUS_COLOR);
+    pen.SetWidth(NormalizeToPx(INDICATOR_FOCUS_WIDTH));
+    pen.SetAntiAlias(true);
+    RSRoundRect rRect(RSRect(0, 0, focusWidth, focusHeight), focusRadius, focusRadius);
+    rRect.Offset(position.GetX() + offset.GetX() + NormalizeToPx(INDICATOR_FOCUS_OFFSET_X),
+        position.GetY() + offset.GetY() - NormalizeToPx(INDICATOR_FOCUS_OFFSET_Y));
+    canvas->AttachPen(pen);
+    canvas->DrawRoundRect(rRect);
+    canvas->DetachPen();
+#endif
 }
 
 void RosenRenderSwiper::DrawIndicatorHoverBackground(RenderContext& context, const Offset& offset)
@@ -427,6 +562,7 @@ void RosenRenderSwiper::DrawIndicatorHoverBackground(RenderContext& context, con
         return;
     }
 
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setAntiAlias(true);
 
@@ -440,6 +576,22 @@ void RosenRenderSwiper::DrawIndicatorHoverBackground(RenderContext& context, con
         radius, radius);
     rRect.offset(position.GetX() + offset.GetX(), position.GetY() + offset.GetY());
     canvas->drawRRect(rRect, paint);
+#else
+    RSPen pen;
+    pen.SetAntiAlias(true);
+
+    pen.SetColor(INDICATOR_HOVER_COLOR);
+
+    Offset position = swiperIndicatorData_.indicatorPaintData.position;
+    double radius = swiperIndicatorData_.indicatorPaintData.radius;
+    RSRoundRect rRect(RSRect(0, 0, swiperIndicatorData_.indicatorPaintData.width,
+                                        swiperIndicatorData_.indicatorPaintData.height),
+        radius, radius);
+    rRect.Offset(position.GetX() + offset.GetX(), position.GetY() + offset.GetY());
+    canvas->AttachPen(pen);
+    canvas->DrawRoundRect(rRect);
+    canvas->DetachPen();
+#endif
 }
 
 void RosenRenderSwiper::DrawIndicatorItems(RenderContext& context, const Offset& offset)
@@ -450,6 +602,7 @@ void RosenRenderSwiper::DrawIndicatorItems(RenderContext& context, const Offset&
         return;
     }
 
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setAntiAlias(true);
 
@@ -477,6 +630,40 @@ void RosenRenderSwiper::DrawIndicatorItems(RenderContext& context, const Offset&
 
     paint.setColor(indicator_->GetSelectedColor().GetValue());
     canvas->drawRRect(rRect, paint);
+#else
+    RSPen pen;
+    pen.SetAntiAlias(true);
+
+    InitMoveRange();
+    IndicatorOffsetInfo pointInfo;
+    RSRoundRect rRect;
+    GetRRect(rRect, pointInfo.focusStart, pointInfo.focusEnd, offset);
+
+    for (int32_t i = 0; i < itemCount_; i++) {
+        // calculate point offset
+        pointInfo.animationMove.Reset();
+        GetIndicatorPointMoveOffset(i, pointInfo.animationMove);
+        pointInfo.center = swiperIndicatorData_.indicatorItemData[i].center + indicatorPosition_;
+
+        // hide point of indicator
+        if (HideIndicatorPoint(i, pointInfo, offset)) {
+            continue;
+        }
+        // paint point of indicator, and point adsorbent
+        pen.SetColor(indicator_->GetColor().GetValue());
+        canvas->AttachPen(pen);
+        canvas->DrawCircle(
+            RSPoint(pointInfo.center.GetX() + offset.GetX() - pointInfo.animationMove.GetX(),
+                pointInfo.center.GetY() + offset.GetY() - pointInfo.animationMove.GetY()),
+            swiperIndicatorData_.indicatorItemData[i].radius);
+        canvas->DetachPen();
+    }
+
+    pen.SetColor(indicator_->GetSelectedColor().GetValue());
+    canvas->AttachPen(pen);
+    canvas->DrawRoundRect(rRect);
+    canvas->DetachPen();
+#endif
 }
 
 void RosenRenderSwiper::GetIndicatorPointMoveOffset(int32_t index, Offset& animationMove)
@@ -499,7 +686,12 @@ void RosenRenderSwiper::GetIndicatorPointMoveOffset(int32_t index, Offset& anima
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderSwiper::GetRRect(SkRRect& rRect, double& startOffset, double& endOffset, const Offset& offset)
+#else
+void RosenRenderSwiper::GetRRect(
+    RSRoundRect& rRect, double& startOffset, double& endOffset, const Offset& offset)
+#endif
 {
     // calculate focus move distance
     double tailOffset =
@@ -518,12 +710,21 @@ void RosenRenderSwiper::GetRRect(SkRRect& rRect, double& startOffset, double& en
     // paint focus of indicator
     Offset position = swiperIndicatorData_.indicatorItemData[moveStartIndex_].position + indicatorPosition_;
     double radius = swiperIndicatorData_.indicatorItemData[moveStartIndex_].radius;
+#ifndef USE_ROSEN_DRAWING
     auto rectWH = SkRect::MakeWH(
         swiperIndicatorData_.indicatorItemData[moveStartIndex_].width + focusStretch.GetX(),
         swiperIndicatorData_.indicatorItemData[moveStartIndex_].height + focusStretch.GetY());
     rRect.setRectXY(rectWH, radius, radius);
     rRect.offset(
         position.GetX() + offset.GetX() + focusMove.GetX(), position.GetY() + offset.GetY() + focusMove.GetY());
+#else
+    auto rectWH =
+        RSRect(0, 0, swiperIndicatorData_.indicatorItemData[moveStartIndex_].width + focusStretch.GetX(),
+            swiperIndicatorData_.indicatorItemData[moveStartIndex_].height + focusStretch.GetY());
+    rRect = RSRoundRect(rectWH, radius, radius);
+    rRect.Offset(
+        position.GetX() + offset.GetX() + focusMove.GetX(), position.GetY() + offset.GetY() + focusMove.GetY());
+#endif
 
     // rrect range
     if (axis_ == Axis::HORIZONTAL) {

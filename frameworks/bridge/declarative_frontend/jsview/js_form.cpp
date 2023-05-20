@@ -258,8 +258,7 @@ void JSForm::JSBind(BindingTarget globalObj)
     JSClass<JSForm>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSForm>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
 
-    JSClass<JSForm>::Inherit<JSViewAbstract>();
-    JSClass<JSForm>::Bind<>(globalObj);
+    JSClass<JSForm>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

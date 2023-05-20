@@ -209,7 +209,7 @@ const RefPtr<UINode>& NavigationStack::Get(const std::string& name)
 
 const RefPtr<UINode>& NavigationStack::GetPre(const std::string& name)
 {
-    if (navPathList_.empty()) {
+    if (navPathList_.empty() || navPathList_.size() == 1) {
         return nullptr;
     }
     auto it = navPathList_.rbegin();
@@ -221,6 +221,7 @@ const RefPtr<UINode>& NavigationStack::GetPre(const std::string& name)
     if (it == navPathList_.rend() - 1) {
         return nullptr;
     } else {
+        ++it;
         return (*it).second;
     }
 }

@@ -41,6 +41,8 @@ template("ace_base_source_set") {
       "geometry/transform_util.cpp",
       "image/pixel_map.cpp",
       "json/json_util.cpp",
+      "json/node_object.cpp",
+      "json/uobject.cpp",
       "log/ace_performance_check.cpp",
       "log/ace_scoring_log.cpp",
       "log/ace_trace.cpp",

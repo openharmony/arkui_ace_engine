@@ -74,8 +74,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, Text, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, EnableScanEffect, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, FontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, FontFamily, std::vector<std::string>,
-        PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        ProgressPaintDate, FontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, ItalicFontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, TextColor, Color, PROPERTY_UPDATE_MEASURE);
 

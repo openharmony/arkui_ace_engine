@@ -126,7 +126,7 @@ void ProgressPattern::OnPress(const TouchEventInfo& info)
     CHECK_NULL_VOID(textHost);
     auto textLayoutProperty = textHost->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    
+
     if (touchType == TouchType::DOWN) {
         backgroundColor_ = paintProperty->GetBackgroundColor().value_or(theme->GetCapsuleBgColor());
         selectColor_ = paintProperty->GetColor().value_or(theme->GetCapsuleSelectColor());
@@ -162,9 +162,13 @@ void ProgressPattern::OnModifyDone()
         HandleEnabled();
         InitTouchEvent();
     }
+}
 
-    auto visibilityProp = progressLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE);
-    visibilityProp_ = visibilityProp;
+void ProgressPattern::OnVisibleChange(bool isVisible)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    visibilityProp_ = isVisible;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

@@ -78,8 +78,7 @@ void JSSlider::JSBind(BindingTarget globalObj)
     JSClass<JSSlider>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSSlider>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSlider>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
-    JSClass<JSSlider>::Inherit<JSViewAbstract>();
-    JSClass<JSSlider>::Bind(globalObj);
+    JSClass<JSSlider>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 double GetStep(double step, double max, double min)
@@ -112,7 +111,8 @@ void ParseSliderValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& chan
 
 void JSSlider::Create(const JSCallbackInfo& info)
 {
-    double value = 0; // value:Current progress value. The default value is 0.
+    static const double valueMin = -1000000.0f;
+    double value = valueMin; // value:Current progress value. The default value is min.
     double min = 0;   // min:Set the minimum value. The default value is 0.
     double max = 100; // max:Set the maximum value. The default value is 100.
     double step = 1;  // step:Sets the sliding jump value of the slider. The default value is 1.

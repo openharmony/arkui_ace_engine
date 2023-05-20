@@ -230,7 +230,7 @@ void FlutterRenderSlider::OnMouseHoverEnterTest()
 {
     ResetController(controllerExit_);
     if (!controllerEnter_) {
-        controllerEnter_ = AceType::MakeRefPtr<Animator>(context_);
+        controllerEnter_ = CREATE_ANIMATOR(context_);
     }
     colorAnimationEnter_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
     CreateColorAnimation(colorAnimationEnter_, Color::TRANSPARENT, Color::FromRGBO(0, 0, 0, 0.05), true);
@@ -242,7 +242,7 @@ void FlutterRenderSlider::OnMouseHoverExitTest()
 {
     ResetController(controllerEnter_);
     if (!controllerExit_) {
-        controllerExit_ = AceType::MakeRefPtr<Animator>(context_);
+        controllerExit_ = CREATE_ANIMATOR(context_);
     }
     colorAnimationExit_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
     auto renderBlock = AceType::DynamicCast<RenderBlock>(block_);

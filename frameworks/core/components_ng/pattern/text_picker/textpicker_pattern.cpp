@@ -585,12 +585,16 @@ bool TextPickerPattern::HandleDirectionKey(KeyCode code)
     if (code == KeyCode::KEY_DPAD_UP) {
         textPickerColumnPattern->SetCurrentIndex((totalOptionCount + currernIndex - 1) % totalOptionCount);
         FlushOptions();
+        textPickerColumnPattern->HandleChangeCallback(false, true);
+        textPickerColumnPattern->HandleEventCallback(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return true;
     }
     if (code == KeyCode::KEY_DPAD_DOWN) {
         textPickerColumnPattern->SetCurrentIndex((totalOptionCount + currernIndex + 1) % totalOptionCount);
         FlushOptions();
+        textPickerColumnPattern->HandleChangeCallback(true, true);
+        textPickerColumnPattern->HandleEventCallback(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return true;
     }
@@ -638,12 +642,14 @@ std::string TextPickerPattern::GetSelectedObject(bool isColumnChange, int32_t st
         CHECK_NULL_RETURN(currentNode, "");
         auto textPickerColumnPattern = currentNode->GetPattern<TextPickerColumnPattern>();
         CHECK_NULL_RETURN(textPickerColumnPattern, "");
+        auto value = textPickerColumnPattern->GetOption(textPickerColumnPattern->GetSelected());
+        auto index = textPickerColumnPattern->GetSelected();
         if (isColumnChange) {
-            auto value = textPickerColumnPattern->GetCurrentText();
-            auto index = textPickerColumnPattern->GetCurrentIndex();
-            values.emplace_back(value);
-            indexs.emplace_back(index);
+            value = textPickerColumnPattern->GetCurrentText();
+            index = textPickerColumnPattern->GetCurrentIndex();
         }
+        values.emplace_back(value);
+        indexs.emplace_back(index);
     }
 
     auto context = host->GetContext();

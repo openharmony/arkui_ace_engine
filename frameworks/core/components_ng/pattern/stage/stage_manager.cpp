@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,8 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/log/ace_performance_check.h"
 #include "base/memory/referenced.h"
+#include "base/utils/system_properties.h"
+#include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
 #include "core/common/container.h"
@@ -54,7 +56,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
                 CHECK_NULL_VOID(page);
                 auto context = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(context);
-                context->SetIsNeedShowFocus(false);
+                context->SetIsFocusActive(false);
                 auto pageFocusHub = page->GetFocusHub();
                 CHECK_NULL_VOID(pageFocusHub);
                 pageFocusHub->SetParentFocusable(false);
@@ -91,7 +93,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             pageFocusHub->RequestFocus();
             auto context = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(context);
-            context->SetIsNeedShowFocus(false);
+            context->SetIsFocusActive(false);
         });
 }
 } // namespace
@@ -140,6 +142,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
 {
     CHECK_NULL_RETURN(stageNode_, false);
     CHECK_NULL_RETURN(node, false);
+    int64_t startTime = GetSysTimestamp();
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_RETURN(pipeline, false);
     StopPageTransition();
@@ -161,14 +164,22 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     node->MountToParent(stageNode_);
     // then build the total child.
     node->Build();
-    // performance check get child count.
-    CheckNodeCountAndDepth(node);
     stageNode_->RebuildRenderContextTree();
     FirePageShow(node, needTransition ? PageTransitionType::ENTER_PUSH : PageTransitionType::NONE);
 
     auto pagePattern = node->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
     stagePattern_->currentPageIndex_ = pagePattern->GetPageInfo()->GetPageId();
+    if (SystemProperties::IsPerformanceCheckEnabled()) {
+        // After completing layout tasks at all nodes on the page, perform performance testing and management
+        pipeline->AddAfterLayoutTask([weakStage = WeakClaim(this), weakNode = WeakPtr<FrameNode>(node), startTime]() {
+            auto stage = weakStage.Upgrade();
+            CHECK_NULL_VOID(stage);
+            auto pageNode = weakNode.Upgrade();
+            int64_t endTime = GetSysTimestamp();
+            stage->PerformanceCheck(pageNode, endTime - startTime);
+        });
+    }
     if (needTransition) {
         pipeline->AddAfterLayoutTask([weakStage = WeakClaim(this), weakIn = WeakPtr<FrameNode>(node),
                                          weakOut = WeakPtr<FrameNode>(outPageNode)]() {
@@ -190,18 +201,11 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     return true;
 }
 
-void StageManager::CheckNodeCountAndDepth(const RefPtr<FrameNode>& pageNode)
+void StageManager::PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout)
 {
-    CHECK_PERFORMANCE_CHECK_ENABLED();
-    std::unordered_map<CheckNodeInfo, int32_t, CheckHashFunc> nodeMap;
-    std::unordered_map<CheckNodeInfo, int32_t, CheckHashFunc> itemMap;
-    auto node = AceType::DynamicCast<UINode>(pageNode);
-    int32_t count = -2;
-    int32_t maxDepth = -(node->GetDepth() + 1);
-    node->GetAllChildCount(count, nodeMap, itemMap);
-    node->GetChildMaxDepth(maxDepth);
-    PERFORMANCE_CHECK_NODE_COUNT_AND_DEPTH(count, maxDepth, nodeMap);
-    PERFORMANCE_CHECK_FOR_EACH_ITEMS_COUNT(itemMap);
+    PerformanceCheckNodeMap nodeMap;
+    pageNode->GetPerformanceCheckData(nodeMap);
+    AceScopedPerformanceCheck::RecordPerformanceCheckData(nodeMap, vsyncTimeout);
 }
 
 bool StageManager::PopPage(bool needShowNext, bool needTransition)
@@ -382,7 +386,7 @@ void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType t
 
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID_NOLOG(context);
-    context->SetIsNeedShowFocus(false);
+    context->SetIsFocusActive(false);
 }
 
 void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType)
@@ -410,7 +414,14 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
 
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID_NOLOG(context);
-    context->SetIsNeedShowFocus(false);
+    context->SetIsFocusActive(false);
+#ifdef UICAST_COMPONENT_SUPPORTED
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto distributedUI = container->GetDistributedUI();
+    CHECK_NULL_VOID(distributedUI);
+    distributedUI->OnPageChanged(node->GetPageId());
+#endif
 }
 
 RefPtr<FrameNode> StageManager::GetLastPage()
@@ -422,6 +433,19 @@ RefPtr<FrameNode> StageManager::GetLastPage()
         return nullptr;
     }
     return DynamicCast<FrameNode>(children.back());
+}
+
+RefPtr<FrameNode> StageManager::GetPageById(int32_t pageId)
+{
+    CHECK_NULL_RETURN(stageNode_, nullptr);
+    const auto& children = stageNode_->GetChildren();
+    for (const auto& child : children) {
+        if (child->GetPageId() == pageId) {
+            return DynamicCast<FrameNode>(child);
+        }
+    }
+    LOGD("UITree page not found. %{public}d", pageId);
+    return nullptr;
 }
 
 void StageManager::ReloadStage()

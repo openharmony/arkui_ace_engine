@@ -175,11 +175,13 @@ void Animator::Pause() {}
 
 void Animator::Resume()
 {
+    status_ = Status::RUNNING;
     isResume_ = true;
 }
 
 void Animator::Stop()
 {
+    status_ = Status::STOPPED;
     isBothBackwards = false;
 }
 

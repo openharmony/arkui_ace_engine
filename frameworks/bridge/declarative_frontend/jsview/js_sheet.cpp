@@ -35,8 +35,7 @@ void JSSheet::JSBind(BindingTarget globalObj)
     JSClass<JSSheet>::Declare("Sheet");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSSheet>::StaticMethod("create", &JSSheet::Create, opt);
-    JSClass<JSSheet>::Inherit<JSViewAbstract>();
-    JSClass<JSSheet>::Bind(globalObj);
+    JSClass<JSSheet>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

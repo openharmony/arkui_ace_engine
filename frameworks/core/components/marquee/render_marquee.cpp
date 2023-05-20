@@ -259,7 +259,7 @@ void RenderMarquee::Update(const RefPtr<Component>& component)
         GetPlayerCtr(component, context->GetIsDeclarative(), playStatus);
     }
     if (!controller_) {
-        controller_ = AceType::MakeRefPtr<Animator>(GetContext());
+        controller_ = CREATE_ANIMATOR(GetContext());
         auto weak = AceType::WeakClaim(this);
         controller_->AddStartListener(Animator::StatusCallback([weak]() {
             auto marquee = weak.Upgrade();

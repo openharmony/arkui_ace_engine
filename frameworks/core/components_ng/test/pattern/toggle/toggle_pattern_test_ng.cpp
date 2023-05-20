@@ -562,7 +562,7 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0010, TestSize.Level1)
     switchPattern->HandleDragEnd();
     switchPattern->isOn_ = true;
     switchPattern->HandleDragEnd();
-    switchPattern->controller_ = AccessibilityManager::MakeRefPtr<Animator>();
+    switchPattern->controller_ = CREATE_ANIMATOR();
     switchPattern->controller_->status_ = Animator::Status::RUNNING;
     switchPattern->OnClick();
 }
@@ -1205,5 +1205,167 @@ HWTEST_F(TogglePatternTestNg, ToggleModelTest003, TestSize.Level1)
     toggleModelNG.Create(TOGGLE_TYPE[1], IS_ON);
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
     toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+}
+
+/**
+ * @tc.name: TogglePatternTest0018
+ * @tc.desc: Test toggle PlayTranslateAnimation callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TogglePatternTestNg, TogglePatternTest0018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(switchFrameNode, nullptr);
+
+    auto pattern = switchFrameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call method PlayTranslateAnimation.
+     */
+    pattern->PlayTranslateAnimation(0.0f, 0.8f);
+    /**
+     * @tc.steps: step3. call the translate callback.
+     */
+    auto& interpolators_ = pattern->controller_->interpolators_;
+    for (auto& interpolator : interpolators_) {
+        interpolator->OnInitNotify(0.4f, false);
+    }
+    /**
+     * @tc.steps: step4. call the NotifyStopListener.
+    */
+    pattern->controller_->NotifyStopListener();
+    /**
+     * cover changeFlag_ == true branch.
+    */
+    pattern->changeFlag_ = true;
+    pattern->currentOffset_ = 0.0f;
+    pattern->controller_->NotifyStopListener();
+    /**
+     * cover isOn_ == false branch.
+    */
+    pattern->isOn_ = false;
+    pattern->controller_->NotifyStopListener();
+    pattern->isOn_ = false;
+    pattern->changeFlag_ = false;
+    pattern->controller_->NotifyStopListener();
+}
+
+/**
+ * @tc.name: TogglePatternTest0019
+ * @tc.desc: Test toggle HandleDragEnd.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TogglePatternTestNg, TogglePatternTest0019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    geometryNode->SetContentSize(SizeF(SWITCH_WIDTH, SWITCH_HEIGHT));
+    /**
+     * @tc.steps: step2. call function HandleDragEnd.
+     */
+    pattern->HandleDragEnd();
+    EXPECT_TRUE(pattern->changeFlag_);
+    /**
+     * cover isOn_ == false branch.
+    */
+    pattern->isOn_ = false;
+    pattern->HandleDragEnd();
+    EXPECT_FALSE(pattern->changeFlag_);
+}
+
+/**
+ * @tc.name: ToggleModelTest004
+ * @tc.desc: Test checkbox create twice.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TogglePatternTestNg, ToggleModelTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create the first checkbox.
+     */
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[0], IS_ON);
+    auto checkboxNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(checkboxNode, nullptr);
+    EXPECT_EQ(checkboxNode->GetId(), 100);
+    /**
+     * @tc.steps: step2. create the second checkbox.
+     */
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    toggleModelNG.Create(TOGGLE_TYPE[0], IS_ON);
+}
+
+/**
+ * @tc.name: ToggleModelTest005
+ * @tc.desc: Test ToggleButton create twice.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TogglePatternTestNg, ToggleModelTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create the first ToggleButton.
+     */
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[1], IS_ON);
+    auto buttonNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(buttonNode, nullptr);
+    EXPECT_EQ(buttonNode->GetId(), 100);
+    /**
+     * @tc.steps: step2. create the second ToggleButton.
+     */
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    toggleModelNG.Create(TOGGLE_TYPE[1], IS_ON);
+}
+
+/**
+ * @tc.name: ToggleModelTest006
+ * @tc.desc: Test OnChangeEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TogglePatternTestNg, ToggleModelTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. generate ChangeEvent.
+     */
+    ChangeEvent changeEvent;
+    /**
+     * @tc.steps: step2. create checkbox toggle and trigger OnChangeEvent.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[0], IS_ON);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    toggleModelNG.OnChangeEvent(std::move(changeEvent));
+    /**
+     * @tc.steps: step3. create ToggleButton and trigger OnChangeEvent.
+     */
+    ToggleModelNG toggleModelNG2;
+    toggleModelNG2.Create(TOGGLE_TYPE[1], IS_ON);
+    frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    toggleModelNG2.OnChangeEvent(std::move(changeEvent));
+    /**
+     * @tc.steps: step4. create switch toggle and trigger OnChangeEvent.
+     */
+    ToggleModelNG toggleModelNG3;
+    toggleModelNG3.Create(TOGGLE_TYPE[2], IS_ON);
+    frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    toggleModelNG3.OnChangeEvent(std::move(changeEvent));
 }
 } // namespace OHOS::Ace::NG

@@ -117,6 +117,13 @@ void NavDestinationPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
+    auto navDestinationPattern = hostNode->GetPattern<NavDestinationPattern>();
+    if (hostNode->GetInspectorId().has_value()) {
+        navDestinationPattern->SetName(hostNode->GetInspectorIdValue());
+    } else {
+        auto id = GetHost()->GetId();
+        navDestinationPattern->SetName(std::to_string(id));
+    }
     MountTitleBar(hostNode);
 }
 

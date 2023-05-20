@@ -1276,9 +1276,9 @@ HWTEST_F(SearchTestNg, SearchChangeEventHub001, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     eventHub->AttachHost(frameNode);
     eventHub->UpdateChangeEvent("");
-    ASSERT_NE(eventHub->changeEvent_, nullptr);
-    eventHub->changeEvent_ = nullptr;
+    ASSERT_NE(eventHub->onValueChangeEvent_, nullptr);
+    eventHub->onValueChangeEvent_ = nullptr;
     eventHub->UpdateChangeEvent("");
-    EXPECT_EQ(eventHub->changeEvent_, nullptr);
+    EXPECT_EQ(eventHub->onValueChangeEvent_, nullptr);
 }
 } // namespace OHOS::Ace::NG

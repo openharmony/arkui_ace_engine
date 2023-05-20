@@ -442,7 +442,7 @@ void SelectElement::CreateColorAnimation(RefPtr<KeyframeAnimation<Color>>& anima
 void SelectElement::PlayEventEffectAnimation(bool isDown, const Color& endColor)
 {
     if (!eventEffectController_) {
-        eventEffectController_ = AceType::MakeRefPtr<Animator>(context_);
+        eventEffectController_ = CREATE_ANIMATOR(context_);
     }
     if (!eventEffectController_->IsStopped()) {
         eventEffectController_->Stop();

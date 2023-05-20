@@ -269,51 +269,51 @@ void JSTabContent::GetFontContent(const JSRef<JSVal> font, LabelStyle& labelStyl
 
 void JSTabContent::SetLabelStyle(const JSRef<JSVal>& info)
 {
-    if (!info->IsObject()) {
-        LOGE("info not is Object");
-        return;
-    }
-    
     LabelStyle labelStyle;
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info);
-    JSRef<JSVal> overflowValue = obj->GetProperty("overflow");
-    if (!overflowValue->IsNull() && overflowValue->IsNumber()) {
-        auto overflow = overflowValue->ToNumber<int32_t>();
-        if (overflow >= 0 &&
-            overflow < static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
-            labelStyle.textOverflow = TEXT_OVERFLOWS[overflow];
+    if (!info->IsObject()) {
+        LOGW("info not is Object");
+    } else {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info);
+        JSRef<JSVal> overflowValue = obj->GetProperty("overflow");
+        if (!overflowValue->IsNull() && overflowValue->IsNumber()) {
+            auto overflow = overflowValue->ToNumber<int32_t>();
+            if (overflow >= 0 &&
+                overflow < static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
+                labelStyle.textOverflow = TEXT_OVERFLOWS[overflow];
+            }
         }
-    }
 
-    JSRef<JSVal> maxLines = obj->GetProperty("maxLines");
-    if (!maxLines->IsNull() && maxLines->IsNumber()) {
-        labelStyle.maxLines = maxLines->ToNumber<int32_t>();
-    }
-
-    JSRef<JSVal> minFontSizeValue = obj->GetProperty("minFontSize");
-    CalcDimension minFontSize;
-    if (ParseJsDimensionFp(minFontSizeValue, minFontSize)) {
-        labelStyle.minFontSize = minFontSize;
-    }
-
-    JSRef<JSVal> maxFontSizeValue = obj->GetProperty("maxFontSize");
-    CalcDimension maxFontSize;
-    if (ParseJsDimensionFp(maxFontSizeValue, maxFontSize)) {
-        labelStyle.maxFontSize = maxFontSize;
-    }
-
-    JSRef<JSVal> heightAdaptivePolicyValue = obj->GetProperty("heightAdaptivePolicy");
-    if (!heightAdaptivePolicyValue->IsNull() && heightAdaptivePolicyValue->IsNumber()) {
-        auto heightAdaptivePolicy = heightAdaptivePolicyValue->ToNumber<int32_t>();
-        if (heightAdaptivePolicy >= 0 && heightAdaptivePolicy < static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICIES.size())) {
-            labelStyle.heightAdaptivePolicy = HEIGHT_ADAPTIVE_POLICIES[heightAdaptivePolicy];
+        JSRef<JSVal> maxLines = obj->GetProperty("maxLines");
+        if (!maxLines->IsNull() && maxLines->IsNumber()) {
+            labelStyle.maxLines = maxLines->ToNumber<int32_t>();
         }
-    }
 
-    JSRef<JSVal> font = obj->GetProperty("font");
-    if (!font->IsNull() && font->IsObject()) {
-        TextStyle textStyle;
-        GetFontContent(font, labelStyle);
+        JSRef<JSVal> minFontSizeValue = obj->GetProperty("minFontSize");
+        CalcDimension minFontSize;
+        if (ParseJsDimensionFp(minFontSizeValue, minFontSize)) {
+            labelStyle.minFontSize = minFontSize;
+        }
+
+        JSRef<JSVal> maxFontSizeValue = obj->GetProperty("maxFontSize");
+        CalcDimension maxFontSize;
+        if (ParseJsDimensionFp(maxFontSizeValue, maxFontSize)) {
+            labelStyle.maxFontSize = maxFontSize;
+        }
+
+        JSRef<JSVal> heightAdaptivePolicyValue = obj->GetProperty("heightAdaptivePolicy");
+        if (!heightAdaptivePolicyValue->IsNull() && heightAdaptivePolicyValue->IsNumber()) {
+            auto heightAdaptivePolicy = heightAdaptivePolicyValue->ToNumber<int32_t>();
+            if (heightAdaptivePolicy >= 0 &&
+                heightAdaptivePolicy < static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICIES.size())) {
+                labelStyle.heightAdaptivePolicy = HEIGHT_ADAPTIVE_POLICIES[heightAdaptivePolicy];
+            }
+        }
+
+        JSRef<JSVal> font = obj->GetProperty("font");
+        if (!font->IsNull() && font->IsObject()) {
+            TextStyle textStyle;
+            GetFontContent(font, labelStyle);
+        }
     }
     CompleteParameters(labelStyle);
     TabContentModel::GetInstance()->SetLabelStyle(labelStyle);
@@ -379,7 +379,7 @@ void JSTabContent::SetSubTabBarStyle(const JSRef<JSObject>& paramObject)
         SetBoard(boardParam);
     }
     JSRef<JSVal> labelStyleParam = paramObject->GetProperty("labelStyle");
-    if (!boardParam->IsUndefined()) {
+    if (!labelStyleParam->IsUndefined()) {
         SetLabelStyle(labelStyleParam);
     }
     TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
@@ -403,8 +403,7 @@ void JSTabContent::JSBind(BindingTarget globalObj)
     JSClass<JSTabContent>::StaticMethod("height", &JSTabContent::SetTabContentHeight);
     JSClass<JSTabContent>::StaticMethod("size", &JSTabContent::SetTabContentSize);
     JSClass<JSTabContent>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
-    JSClass<JSTabContent>::Inherit<JSContainerBase>();
-    JSClass<JSTabContent>::Bind<>(globalObj);
+    JSClass<JSTabContent>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

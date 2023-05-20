@@ -17,10 +17,13 @@
 #include <utility>
 
 #include "include/codec/SkCodec.h"
+#include "include/core/SkBitmap.h"
 #include "include/core/SkGraphics.h"
+#include "include/core/SkImage.h"
 
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
+#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
 #include "core/components_ng/image_provider/image_object.h"
@@ -36,35 +39,59 @@
 namespace OHOS::Ace::NG {
 namespace {
 
-sk_sp<SkImage> ApplySizeToSkImage(const std::unique_ptr<SkCodec>& codec, int32_t width, int32_t height)
+sk_sp<SkImage> ForceResizeImage(const sk_sp<SkImage>& image, const SkImageInfo& info)
 {
     ACE_FUNCTION_TRACE();
-    auto info = codec->getInfo();
-    info.makeWH(width, height);
-
     SkBitmap bitmap;
     bitmap.allocPixels(info);
 
-    auto res = codec->getPixels(info, bitmap.getPixels(), bitmap.rowBytes(), nullptr);
-    CHECK_NULL_RETURN(res == SkCodec::kSuccess, {});
+#ifdef NEW_SKIA
+    auto res = image->scalePixels(
+        bitmap.pixmap(), SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone), SkImage::kDisallow_CachingHint);
+#else
+    auto res = image->scalePixels(bitmap.pixmap(), kLow_SkFilterQuality, SkImage::kDisallow_CachingHint);
+#endif
+    CHECK_NULL_RETURN(res, image);
 
     bitmap.setImmutable();
     return SkImage::MakeFromBitmap(bitmap);
 }
 
-sk_sp<SkImage> ResizeSkImage(const sk_sp<SkData>& data, const SizeF& resizeTarget, bool forceResize)
+sk_sp<SkImage> ResizeSkImage(const sk_sp<SkData>& data, const SizeF& targetSize, bool forceResize)
 {
-    auto width = std::lround(resizeTarget.Width());
-    auto height = std::lround(resizeTarget.Height());
+    auto encodedImage = SkImage::MakeFromEncoded(data);
+    CHECK_NULL_RETURN_NOLOG(targetSize.IsPositive(), encodedImage);
+
+    auto width = std::lround(targetSize.Width());
+    auto height = std::lround(targetSize.Height());
 
     auto codec = SkCodec::MakeFromData(data);
     CHECK_NULL_RETURN(codec, {});
     auto info = codec->getInfo();
 
-    if ((info.width() > width && info.height() > height) || forceResize) {
-        return ApplySizeToSkImage(codec, width, height);
+    // sourceSize is set by developer, then we will force scaling to [TargetSize] using SkImage::scalePixels,
+    // this method would succeed even if the codec doesn't support that size.
+    if (forceResize) {
+        info = info.makeWH(width, height);
+        return ForceResizeImage(encodedImage, info);
     }
-    return SkImage::MakeFromEncoded(data);
+
+    if ((info.width() > width && info.height() > height)) {
+        // If the image is larger than the target size, we will scale it down to the target size.
+        // TargetSize might not be compatible with the codec, so we find the closest size supported by the codec
+        auto scale = std::max(static_cast<float>(width) / info.width(), static_cast<float>(height) / info.height());
+        auto idealSize = codec->getScaledDimensions(scale);
+        LOGD("targetSize = %{public}s, idealSize: %{public}dx%{public}d", targetSize.ToString().c_str(),
+            idealSize.width(), idealSize.height());
+
+        info = info.makeWH(idealSize.width(), idealSize.height());
+        SkBitmap bitmap;
+        bitmap.allocPixels(info);
+        auto res = codec->getPixels(info, bitmap.getPixels(), bitmap.rowBytes());
+        CHECK_NULL_RETURN(res == SkCodec::kSuccess, encodedImage);
+        return SkImage::MakeFromBitmap(bitmap);
+    }
+    return encodedImage;
 }
 } // namespace
 
@@ -103,7 +130,9 @@ void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& objWp, const Wea
     }
 
     if (sync) {
-        ImageProvider::MakeCanvasImageHelper(obj, targetSize, forceResize, true);
+        if (!MakeCanvasImageHelper(objWp, targetSize, forceResize, true)) {
+            FailCallback(key, "Make CanvasImage failed.");
+        }
     } else {
         std::scoped_lock<std::mutex> lock(taskMtx_);
         // wrap with [CancelableCallback] and record in [tasks_] map
@@ -117,6 +146,68 @@ void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& objWp, const Wea
         ImageUtils::PostToBg(task);
     }
 }
+
+namespace {
+RefPtr<CanvasImage> QueryCompressedCache(const sk_sp<SkData>& skData, const std::string& key, const SizeF& imageSize)
+{
+    // create encoded SkImage to use its uniqueId
+    auto image = SkImage::MakeFromEncoded(skData);
+    auto canvasImage = AceType::DynamicCast<SkiaImage>(CanvasImage::Create(&image));
+
+    auto cachedData = ImageLoader::LoadImageDataFromFileCache(key, ".astc");
+    CHECK_NULL_RETURN_NOLOG(cachedData, {});
+    // round width and height to nearest int
+    int32_t dstWidth = std::lround(imageSize.Width());
+    int32_t dstHeight = std::lround(imageSize.Height());
+
+    auto skiaImageData = AceType::DynamicCast<SkiaImageData>(cachedData);
+    CHECK_NULL_RETURN(skiaImageData, {});
+    auto stripped = ImageCompressor::StripFileHeader(skiaImageData->GetSkData());
+    LOGI("use astc cache %{public}s %{public}d×%{public}d", key.c_str(), dstWidth, dstHeight);
+    canvasImage->SetCompressData(stripped, dstWidth, dstHeight);
+    canvasImage->ReplaceSkImage(nullptr);
+    return canvasImage;
+}
+
+void TryCompress(const RefPtr<SkiaImage>& image, const std::string& key)
+{
+#ifdef UPLOAD_GPU_DISABLED
+    // If want to dump draw command or gpu disabled, should use CPU image.
+    return false;
+#else
+    // decode image to texture if not decoded
+    auto skImage = image->GetImage();
+    CHECK_NULL_VOID(skImage);
+    auto rasterizedImage = skImage->makeRasterImage();
+    CHECK_NULL_VOID(rasterizedImage);
+    ACE_DCHECK(!rasterizedImage->isTextureBacked());
+    SkPixmap pixmap;
+    CHECK_NULL_VOID(rasterizedImage->peekPixels(&pixmap));
+    auto width = pixmap.width();
+    auto height = pixmap.height();
+    // try compress image
+    if (ImageCompressor::GetInstance()->CanCompress()) {
+        auto compressData = ImageCompressor::GetInstance()->GpuCompress(key, pixmap, width, height);
+        ImageCompressor::GetInstance()->WriteToFile(key, compressData, { width, height });
+        if (compressData) {
+            // replace skImage of [CanvasImage] with [rasterizedImage]
+            image->SetCompressData(compressData, width, height);
+            image->ReplaceSkImage(nullptr);
+        } else {
+            image->ReplaceSkImage(rasterizedImage);
+        }
+        auto taskExecutor = Container::CurrentTaskExecutor();
+        auto releaseTask = ImageCompressor::GetInstance()->ScheduleReleaseTask();
+        if (taskExecutor) {
+            taskExecutor->PostDelayedTask(releaseTask, TaskExecutor::TaskType::UI, ImageCompressor::releaseTimeMs);
+        } else {
+            ImageUtils::PostToBg(std::move(releaseTask));
+        }
+    }
+    SkGraphics::PurgeResourceCache();
+#endif
+}
+} // namespace
 
 bool ImageProvider::MakeCanvasImageHelper(
     const WeakPtr<ImageObject>& objWp, const SizeF& targetSize, bool forceResize, bool sync)
@@ -132,84 +223,25 @@ bool ImageProvider::MakeCanvasImageHelper(
     CHECK_NULL_RETURN(skData, false);
 
     auto key = ImageUtils::GenerateImageKey(obj->GetSourceInfo(), targetSize);
-    auto compressFileData = ImageLoader::LoadImageDataFromFileCache(key, ".astc");
-    sk_sp<SkImage> image;
-    if (!compressFileData && targetSize.IsPositive()) {
-        image = ResizeSkImage(skData, targetSize, forceResize);
-    } else {
-        image = SkImage::MakeFromEncoded(skData);
+    // check compressed image cache
+    {
+        auto image = QueryCompressedCache(skData, key, targetSize);
+        if (image) {
+            LOGD("QueryCompressedCache hit: %{public}s", obj->GetSourceInfo().ToString().c_str());
+            SuccessCallback(image, key, sync);
+            return true;
+        }
     }
+
+    auto image = ResizeSkImage(skData, targetSize, forceResize);
     CHECK_NULL_RETURN(image, false);
-    auto canvasImage = NG::CanvasImage::Create(&image);
+    auto canvasImage = CanvasImage::Create(&image);
 
-    CacheCanvasImage(canvasImage, key);
-
-    // upload texture, compress with GPU
-    if (!TryCompress(canvasImage, key, targetSize, compressFileData, sync)) {
-        SuccessCallback(canvasImage, key, sync);
-    }
-    return true;
-}
-
-bool ImageProvider::TryCompress(const RefPtr<CanvasImage>& image, const std::string& key, const SizeF& resizeTarget,
-    const RefPtr<ImageData>& data, bool syncLoad)
-{
-#ifdef UPLOAD_GPU_DISABLED
-    // If want to dump draw command or gpu disabled, should use CPU image.
-    return false;
-#else
-    auto skiaCanvasImage = DynamicCast<SkiaImage>(image);
-    CHECK_NULL_RETURN(skiaCanvasImage, false);
-    // use compress cache
-    if (data) {
-        int32_t dstWidth = static_cast<int32_t>(resizeTarget.Width() + 0.5);
-        int32_t dstHeight = static_cast<int32_t>(resizeTarget.Height() + 0.5);
-
-        auto skiaImageData = DynamicCast<SkiaImageData>(data);
-        CHECK_NULL_RETURN(skiaImageData, false);
-        auto skData = skiaImageData->GetSkData();
-        auto stripped = ImageCompressor::StripFileHeader(skData);
-        LOGI("use astc cache %{public}s %{public}d×%{public}d", key.c_str(), dstWidth, dstHeight);
-        skiaCanvasImage->SetCompressData(stripped, dstWidth, dstHeight);
-        skiaCanvasImage->ReplaceSkImage(nullptr);
-        SuccessCallback(skiaCanvasImage, key, syncLoad);
-        return true;
-    }
-    CHECK_NULL_RETURN(ImageCompressor::GetInstance()->CanCompress(), false);
-
-    // create compressed texture
-    auto skImage = skiaCanvasImage->GetImage();
-    CHECK_NULL_RETURN(skImage, false);
-    auto rasterizedImage = skImage->makeRasterImage();
-    CHECK_NULL_RETURN(rasterizedImage, false);
-    ACE_DCHECK(!rasterizedImage->isTextureBacked());
-    SkPixmap pixmap;
-    CHECK_NULL_RETURN(rasterizedImage->peekPixels(&pixmap), false);
-    int32_t width = static_cast<int32_t>(pixmap.width());
-    int32_t height = static_cast<int32_t>(pixmap.height());
     if (ImageCompressor::GetInstance()->CanCompress()) {
-        auto compressData = ImageCompressor::GetInstance()->GpuCompress(key, pixmap, width, height);
-        ImageCompressor::GetInstance()->WriteToFile(key, compressData, { width, height });
-        if (compressData) {
-            // replace skImage of [CanvasImage] with [rasterizedImage]
-            skiaCanvasImage->SetCompressData(compressData, width, height);
-            skiaCanvasImage->ReplaceSkImage(nullptr);
-        } else {
-            skiaCanvasImage->ReplaceSkImage(rasterizedImage);
-        }
-        auto taskExecutor = Container::CurrentTaskExecutor();
-        auto releaseTask = ImageCompressor::GetInstance()->ScheduleReleaseTask();
-        if (taskExecutor) {
-            taskExecutor->PostDelayedTask(releaseTask, TaskExecutor::TaskType::UI, ImageCompressor::releaseTimeMs);
-        } else {
-            ImageUtils::PostToBg(std::move(releaseTask));
-        }
+        TryCompress(DynamicCast<SkiaImage>(canvasImage), key);
     }
-    SuccessCallback(skiaCanvasImage, key, syncLoad);
-    // Trigger purge cpu bitmap resource, after image upload to gpu.
-    SkGraphics::PurgeResourceCache();
+    SuccessCallback(canvasImage, key, sync);
     return true;
-#endif
 }
 
 void ImageProvider::CacheCanvasImage(const RefPtr<CanvasImage>& canvasImage, const std::string& key)

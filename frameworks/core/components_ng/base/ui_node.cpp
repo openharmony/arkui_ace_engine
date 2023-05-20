@@ -23,6 +23,7 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "core/common/container.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -39,10 +40,27 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
         row_ = pos.first;
         col_ = pos.second;
     }
+#ifdef UICAST_COMPONENT_SUPPORTED
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto distributedUI = container->GetDistributedUI();
+    CHECK_NULL_VOID(distributedUI);
+    distributedUI->AddNewNode(nodeId_);
+#endif
 }
 
 UINode::~UINode()
 {
+#ifdef UICAST_COMPONENT_SUPPORTED
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto distributedUI = container->GetDistributedUI();
+    CHECK_NULL_VOID(distributedUI);
+    if (hostPageId_ == distributedUI->GetCurrentPageId()) {
+        distributedUI->AddDeletedNode(nodeId_);
+    }
+#endif
+
     if (!removeSilently_) {
         ElementRegister::GetInstance()->RemoveItem(nodeId_);
     } else {
@@ -71,7 +89,7 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently)
     DoAddChild(it, child, silently);
 }
 
-std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child)
+std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child, bool allowTransition)
 {
     CHECK_NULL_RETURN(child, children_.end());
 
@@ -83,13 +101,13 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
     // If the child is undergoing a disappearing transition, rather than simply removing it, we should move it to the
     // disappearing children. This ensures that the child remains alive and the tree hierarchy is preserved until the
     // transition has finished. We can then perform the necessary cleanup after the transition is complete.
-    if ((*iter)->OnRemoveFromParent()) {
-        // move child into disappearing children, skip syncing render tree
-        AddDisappearingChild(child, std::distance(children_.begin(), iter));
-    } else {
-        // remove the child and sync render tree
+    if ((*iter)->OnRemoveFromParent(allowTransition)) {
+        // OnRemoveFromParent returns true means the child can be removed from tree immediately.
         RemoveDisappearingChild(child);
         MarkNeedSyncRenderTree();
+    } else {
+        // else move child into disappearing children, skip syncing render tree
+        AddDisappearingChild(child, std::distance(children_.begin(), iter));
     }
     auto result = children_.erase(iter);
     return result;
@@ -149,28 +167,26 @@ void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& n
     DoAddChild(iter, newNode);
 }
 
-void UINode::Clean(bool cleanDirectly)
+void UINode::Clean(bool cleanDirectly, bool allowTransition)
 {
     bool needSyncRenderTree = false;
     int32_t index = 0;
     for (const auto& child : children_) {
+        // traverse down the child subtree to mark removing and find needs to hold subtree, if found add it to pending
         if (!cleanDirectly && child->MarkRemoving()) {
-            // pending remove child is removed from tree but not cleaned completely, we'll keep reference of it
-            // and hold its tree integrity temporarily for transition use, of course the pending remove tree is
-            // unavailable for ui operations but some nodes in the tree may also be marked dirty as needed to
-            // perform transition's layout.
             ElementRegister::GetInstance()->AddPendingRemoveNode(child);
-            LOGD("GeometryTransition: pending remove child: %{public}d, parent: %{public}d", child->GetId(), GetId());
         }
         // If the child is undergoing a disappearing transition, rather than simply removing it, we should move it to
         // the disappearing children. This ensures that the child remains alive and the tree hierarchy is preserved
         // until the transition has finished. We can then perform the necessary cleanup after the transition is
         // complete.
-        if (child->OnRemoveFromParent()) {
-            AddDisappearingChild(child, index);
-        } else {
+        if (child->OnRemoveFromParent(allowTransition)) {
+            // OnRemoveFromParent returns true means the child can be removed from tree immediately.
             RemoveDisappearingChild(child);
             needSyncRenderTree = true;
+        } else {
+            // else move child into disappearing children, skip syncing render tree
+            AddDisappearingChild(child, index);
         }
         ++index;
     }
@@ -192,19 +208,22 @@ void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot, bool sile
     }
 }
 
-bool UINode::OnRemoveFromParent()
+bool UINode::OnRemoveFromParent(bool allowTransition)
 {
-    DetachFromMainTree();
-    auto* frame = AceType::DynamicCast<FrameNode>(this);
-    if (frame) {
-        auto focusHub = frame->GetFocusHub();
-        if (focusHub) {
-            focusHub->RemoveSelf();
-        }
+    // The recursive flag will used by RenderContext, if recursive flag is false,
+    // it may trigger transition
+    DetachFromMainTree(!allowTransition);
+    if (allowTransition && !RemoveImmediately()) {
+        return false;
     }
+    ResetParent();
+    return true;
+}
+
+void UINode::ResetParent()
+{
     parent_.Reset();
     depth_ = -1;
-    return false;
 }
 
 void UINode::DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently)
@@ -494,52 +513,38 @@ int32_t UINode::TotalChildCount() const
     return count;
 }
 
-void UINode::GetAllChildCount(int32_t& count, CheckNodeMap& nodeMap, CheckNodeMap& itemMap)
+void UINode::GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap)
 {
-    count++;
     // record current node
-    CheckNodeInfo node;
-    node.col = col_;
-    node.row = row_;
-    node.tag = tag_;
-    nodeMap.insert(std::make_pair(node, children_.size()));
-    if (tag_ == V2::JS_FOR_EACH_ETS_TAG) {
+    auto parent = GetParent();
+    if (parent && parent->GetTag() == V2::JS_FOR_EACH_ETS_TAG) {
+        // At this point, all of the children_ belong to the child nodes of syntaxItem
         for (const auto& child : children_) {
-            // get syntax item's children
-            GetSyntaxItemTag(child, itemMap);
+            PerformanceCheckNode node;
+            node.pageDepth = child->GetDepth();
+            node.childrenSize = child->GetChildren().size();
+            node.codeCol = child->GetCol();
+            node.codeRow = child->GetRow();
+            node.layoutTime = child->GetLayoutTime();
+            node.flexLayouts = child->GetFlexLayouts();
+            node.nodeTag = child->GetTag();
+            node.isForEachItem = true;
+            nodeMap.insert({ child->GetId(), node });
         }
+    } else {
+        PerformanceCheckNode node;
+        node.pageDepth = depth_;
+        node.childrenSize = children_.size();
+        node.codeCol = col_;
+        node.codeRow = row_;
+        node.nodeTag = tag_;
+        node.layoutTime = layoutTime_;
+        node.flexLayouts = flexLayouts_;
+        nodeMap.insert({ nodeId_, node });
     }
     for (const auto& child : children_) {
         // recursion children
-        child->GetAllChildCount(count, nodeMap, itemMap);
-    }
-}
-
-void UINode::GetSyntaxItemTag(const RefPtr<UINode>& sytaxItem, CheckNodeMap& itemMap)
-{
-    auto itemChildren = sytaxItem->GetChildren();
-    for (const auto& child : itemChildren) {
-        auto iter = itemMap.find({ child->GetRow(), child->GetCol(), child->GetTag() });
-        if (iter != itemMap.end()) {
-            iter->second++;
-        } else {
-            CheckNodeInfo node;
-            node.col = child->GetCol();
-            node.row = child->GetRow();
-            node.tag = child->GetTag();
-            itemMap.insert(std::make_pair(node, 1));
-        }
-    }
-}
-
-void UINode::GetChildMaxDepth(int32_t& maxDepth)
-{
-    for (const auto& child : children_) {
-        auto depth = child->GetDepth();
-        if (depth > maxDepth) {
-            maxDepth = depth;
-        }
-        child->GetChildMaxDepth(maxDepth);
+        child->GetPerformanceCheckData(nodeMap);
     }
 }
 
@@ -698,5 +703,11 @@ void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<Frame
     for (const auto& [child, index] : disappearingChildren_) {
         child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList, index);
     }
+}
+
+bool UINode::RemoveImmediately() const
+{
+    return std::all_of(
+        children_.begin(), children_.end(), [](const auto& child) { return child->RemoveImmediately(); });
 }
 } // namespace OHOS::Ace::NG

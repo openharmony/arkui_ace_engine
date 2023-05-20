@@ -1449,6 +1449,8 @@ HWTEST_F(ImageTestNg, CopyOption001, TestSize.Level1)
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     gestureHub->ActLongClick();
     EXPECT_TRUE(pattern->selectOverlay_);
+
+    // close selectOverlay
     gestureHub->ActClick();
     EXPECT_FALSE(pattern->selectOverlay_);
 
@@ -1459,6 +1461,21 @@ HWTEST_F(ImageTestNg, CopyOption001, TestSize.Level1)
     pattern->SetCopyOption(CopyOptions::Distributed);
     frameNode->MarkModifyDone();
     EXPECT_TRUE(gestureHub->longPressEventActuator_->longPressEvent_);
+
+    // should close selectOverlay when pattern is deleted
+    gestureHub->ActLongClick();
+    pattern->OnDetachFromFrameNode(AceType::RawPtr(frameNode));
+    EXPECT_FALSE(pattern->selectOverlay_);
+
+    gestureHub->ActLongClick();
+    EXPECT_TRUE(pattern->selectOverlay_);
+
+    // shouldn't close selectOverlay when VisibleChange(true) triggers
+    pattern->OnVisibleChange(true);
+    EXPECT_TRUE(pattern->selectOverlay_);
+
+    pattern->OnVisibleChange(false);
+    EXPECT_FALSE(pattern->selectOverlay_);
 }
 
 /**

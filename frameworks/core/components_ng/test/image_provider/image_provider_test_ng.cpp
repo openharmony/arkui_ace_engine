@@ -215,6 +215,46 @@ HWTEST_F(ImageProviderTestNg, ImageProviderTestNg006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ImageProviderTestNg007
+ * @tc.desc: Test Cancel task
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, ImageProviderTestNg007, TestSize.Level1)
+{
+    EXPECT_CALL(*g_loader, LoadImageData).Times(1);
+    auto src = ImageSourceInfo(SRC_JPG);
+    // create 2 repeated tasks
+    std::vector<RefPtr<ImageLoadingContext>> contexts(2);
+    for (auto& ctx : contexts) {
+        ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr));
+        ctx->LoadImageData();
+    }
+    {
+        std::scoped_lock<std::mutex> lock(ImageProvider::taskMtx_);
+        EXPECT_EQ(ImageProvider::tasks_.size(), (size_t)1);
+        auto it = ImageProvider::tasks_.find(src.GetKey());
+        EXPECT_NE(it, ImageProvider::tasks_.end());
+        // set impl_ to false to force successful cancellation
+        it->second.bgTask_.impl_ = nullptr;
+    }
+
+    for (auto& ctx : contexts) {
+        // nullify ctx to trigger task cancel
+        ctx = nullptr;
+    }
+    // check task is successfully canceled
+    {
+        std::scoped_lock<std::mutex> lock(ImageProvider::taskMtx_);
+        EXPECT_EQ(ImageProvider::tasks_.size(), (size_t)0);
+    }
+    WaitForAsyncTasks();
+    {
+        std::scoped_lock<std::mutex> lock(ImageProvider::taskMtx_);
+        EXPECT_EQ(ImageProvider::tasks_.size(), (size_t)0);
+    }
+}
+
+/**
  * @tc.name: RoundUp001
  * @tc.desc: Test RoundUp with invalid input (infinite loop)
  * @tc.type: FUNC

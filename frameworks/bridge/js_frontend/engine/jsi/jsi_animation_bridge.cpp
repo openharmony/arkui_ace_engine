@@ -455,7 +455,7 @@ void JsiAnimationBridge::JsCreateAnimation(const RefPtr<JsAcePage>& page, const 
     if (tweenOption.IsValid()) {
         domNode->SetCustomAnimationStyleUpdate(true);
     }
-    RefPtr<Animator> animator = AceType::MakeRefPtr<Animator>();
+    RefPtr<Animator> animator = CREATE_ANIMATOR();
     auto tweenComponent = domNode->GetTweenComponent();
     if (!tweenComponent) {
         tweenComponent = AceType::MakeRefPtr<TweenComponent>(

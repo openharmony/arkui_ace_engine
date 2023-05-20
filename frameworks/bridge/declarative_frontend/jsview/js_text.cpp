@@ -599,9 +599,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("focusable", &JSText::JsFocusable);
     JSClass<JSText>::StaticMethod("draggable", &JSText::JsDraggable);
     JSClass<JSText>::StaticMethod("textMenuOptions", &JSText::JsMenuOptionsExtension);
-    JSClass<JSText>::Inherit<JSContainerBase>();
-    JSClass<JSText>::Inherit<JSViewAbstract>();
-    JSClass<JSText>::Bind<>(globalObj);
+    JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

@@ -41,7 +41,7 @@ namespace OHOS::Ace::NG {
 
 DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
 {
-    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+    return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
@@ -55,12 +55,11 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
         LOGD("Image Data Ready %{private}s", sourceInfo.ToString().c_str());
         pattern->OnImageDataReady();
     };
-    return task;
 }
 
 LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
 {
-    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+    return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
@@ -74,12 +73,11 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
         LOGI("Image Load Success %{private}s", sourceInfo.ToString().c_str());
         pattern->OnImageLoadSuccess();
     };
-    return task;
 }
 
 LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
 {
-    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+    return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
@@ -92,7 +90,6 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
         }
         pattern->OnImageLoadFail();
     };
-    return task;
 }
 
 void ImagePattern::PrepareAnimation()
@@ -305,7 +302,7 @@ void ImagePattern::OnModifyDone()
 
 DataReadyNotifyTask ImagePattern::CreateDataReadyCallbackForAlt()
 {
-    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+    return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
@@ -333,12 +330,11 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallbackForAlt()
         pattern->altLoadingCtx_->MakeCanvasImageIfNeed(
             geometryNode->GetContentSize(), true, imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER));
     };
-    return task;
 }
 
 LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
 {
-    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+    return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         CHECK_NULL_VOID(pattern->altLoadingCtx_);
@@ -359,7 +355,6 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         pattern->SetImagePaintConfig(pattern->altImage_, *pattern->altSrcRect_, *pattern->altDstRect_,
             pattern->altLoadingCtx_->GetSourceInfo().IsSvg());
     };
-    return task;
 }
 
 void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
@@ -422,7 +417,9 @@ void ImagePattern::OnWindowShow()
 
 void ImagePattern::OnVisibleChange(bool visible)
 {
-    CloseSelectOverlay();
+    if (!visible) {
+        CloseSelectOverlay();
+    }
     CHECK_NULL_VOID_NOLOG(image_);
     // control svg / gif animation
     image_->ControlAnimation(visible);
@@ -444,6 +441,8 @@ void ImagePattern::OnAttachToFrameNode()
 
 void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    CloseSelectOverlay();
+
     auto id = frameNode->GetId();
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_VOID_NOLOG(pipeline);

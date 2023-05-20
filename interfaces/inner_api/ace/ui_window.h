@@ -18,25 +18,19 @@
 
 #include <refbase.h>
 
+#include "macros.h"
 #include "ui_content.h"
 
 namespace OHOS::Rosen {
-class RSSurfaceNode;
 class ISession;
 class ISessionStageStateListener;
-}
+} // namespace OHOS::Rosen
 
 namespace OHOS::Ace::NG {
-
-class ACE_EXPORT UIWindow {
+class ACE_EXPORT_WITH_PREVIEW UIWindow {
 public:
-    static std::shared_ptr<UIWindow> CreateRootScene();
-
-    static std::shared_ptr<UIWindow> CreateWindowScene(const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<Rosen::ISession>& iSession);
-
-    static std::shared_ptr<UIWindow> CreateWindowExtension(const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<Rosen::ISession>& iSession);
+    static std::shared_ptr<UIWindow> CreateWindowExtension(
+        const std::shared_ptr<AbilityRuntime::Context>& context, const sptr<Rosen::ISession>& iSession);
 
     virtual ~UIWindow() = default;
 
@@ -52,7 +46,6 @@ public:
     virtual void Disconnect() = 0;
     virtual void OnNewWant(const AAFwk::Want& want) = 0;
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_INTERFACE_INNER_API_UI_WINDOW_H

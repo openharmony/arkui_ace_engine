@@ -52,6 +52,7 @@
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
 #include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/select/select_model.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -333,8 +334,8 @@ void NavigationView::Create()
     // content node
     if (!navigationGroupNode->GetContentNode()) {
         int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG, contentNodeId,
-            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto contentNode = FrameNode::GetOrCreateFrameNode(
+            V2::NAVIGATION_CONTENT_ETS_TAG, contentNodeId, []() { return AceType::MakeRefPtr<StackPattern>(); });
         navigationGroupNode->AddChild(contentNode);
         navigationGroupNode->SetContentNode(contentNode);
     }
@@ -384,6 +385,10 @@ void NavigationView::SetTitle(const std::string& title, bool hasSubTitle)
         // if no subtitle, title's maxLine = 2. if has subtitle, title's maxLine = 1.
         if (!hasSubTitle) {
             if (navBarNode->GetSubtitle()) {
+                auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+                CHECK_NULL_VOID(titleBarNode);
+                titleBarNode->RemoveChild(navBarNode->GetSubtitle());
+                titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
                 navBarNode->SetSubtitle(nullptr);
             }
             titleProperty->UpdateMaxLines(2);

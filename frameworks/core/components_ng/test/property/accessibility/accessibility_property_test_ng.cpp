@@ -65,4 +65,108 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest001, TestSize.Lev
     actions = props.GetSupportAction();
     EXPECT_EQ(actions.size(), ARRAY_SIZE);
 }
+
+/**
+ * @tc.name: AccessibilityPropertyTest002
+ * @tc.desc: Set action and execute it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. actions is empty
+     * @tc.expected: act every action return false
+     */
+    AccessibilityProperty props;
+    EXPECT_FALSE(props.ActActionClearSelection());
+    EXPECT_FALSE(props.ActActionCopy());
+    EXPECT_FALSE(props.ActActionCut());
+    EXPECT_FALSE(props.ActActionMoveText(1, true));
+    EXPECT_FALSE(props.ActActionPaste());
+    EXPECT_FALSE(props.ActActionScrollBackward());
+    EXPECT_FALSE(props.ActActionScrollForward());
+    EXPECT_FALSE(props.ActActionSelect());
+    EXPECT_FALSE(props.ActActionSetSelection(0, 1));
+    EXPECT_FALSE(props.ActActionSetText("abc"));
+
+    /**
+     * @tc.steps: step2. Set action functions
+     * @tc.expected: act every action return true
+     */
+    props.SetActionClearSelection([]() {});
+    EXPECT_TRUE(props.ActActionClearSelection());
+    props.SetActionCopy([]() {});
+    EXPECT_TRUE(props.ActActionCopy());
+    props.SetActionCut([]() {});
+    EXPECT_TRUE(props.ActActionCut());
+    props.SetActionMoveText([](int32_t moveUnit, bool forward) {});
+    EXPECT_TRUE(props.ActActionMoveText(1, true));
+    props.SetActionPaste([]() {});
+    EXPECT_TRUE(props.ActActionPaste());
+    props.SetActionScrollBackward([]() {});
+    EXPECT_TRUE(props.ActActionScrollBackward());
+    props.SetActionScrollForward([]() {});
+    EXPECT_TRUE(props.ActActionScrollForward());
+    props.SetActionSelect([]() {});
+    EXPECT_TRUE(props.ActActionSelect());
+    props.SetActionSetSelection([](int32_t start, int32_t end) {});
+    EXPECT_TRUE(props.ActActionSetSelection(0, 1));
+    props.SetActionSetText([](std::string text) {});
+    EXPECT_TRUE(props.ActActionSetText("abc"));
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest003
+ * @tc.desc: Set and get accessibility property.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set accessibility property value
+     * @tc.expected: Get default property value
+     */
+    AccessibilityProperty props;
+    props.SetText("test");
+    EXPECT_EQ(props.GetText(), "test");
+    auto json = std::make_unique<JsonValue>();
+    props.ToJsonValue(json);
+    EXPECT_FALSE(json->GetBool("scrollable", false));
+    EXPECT_FALSE(props.IsCheckable());
+    EXPECT_FALSE(props.IsChecked());
+    EXPECT_FALSE(props.IsSelected());
+    EXPECT_FALSE(props.IsPassword());
+    EXPECT_FALSE(props.IsEditable());
+    EXPECT_FALSE(props.IsMultiLine());
+    EXPECT_FALSE(props.IsDeletable());
+
+    EXPECT_FALSE(props.IsHint());
+    EXPECT_FALSE(props.IsScrollable());
+    EXPECT_EQ(props.GetCurrentIndex(), -1);
+    EXPECT_EQ(props.GetBeginIndex(), -1);
+    EXPECT_EQ(props.GetEndIndex(), -1);
+    EXPECT_FALSE(props.HasRange());
+    EXPECT_EQ(props.GetAccessibilityValue().min, 0.0);
+    EXPECT_EQ(props.GetAccessibilityValue().current, 0.0);
+    EXPECT_EQ(props.GetAccessibilityValue().max, 0.0);
+    EXPECT_EQ(props.GetHintText(), "");
+    EXPECT_EQ(props.GetTextLengthLimit(), -1);
+    EXPECT_EQ(props.GetCollectionInfo().columns, 0);
+    EXPECT_EQ(props.GetCollectionInfo().rows, 0);
+    EXPECT_EQ(props.GetCollectionInfo().selectMode, 0);
+    EXPECT_EQ(props.GetCollectionItemInfo().column, 0);
+    EXPECT_EQ(props.GetCollectionItemInfo().columnSpan, 0);
+    EXPECT_EQ(props.GetCollectionItemInfo().row, 0);
+    EXPECT_EQ(props.GetCollectionItemInfo().rowSpan, 0);
+    EXPECT_FALSE(props.GetCollectionItemInfo().heading);
+    EXPECT_EQ(props.GetErrorText(), "");
+    EXPECT_EQ(props.GetTextSelectionStart(), 0);
+    EXPECT_EQ(props.GetTextSelectionEnd(), 0);
+    EXPECT_EQ(props.GetTextInputType(), AceTextCategory::INPUT_TYPE_DEFAULT);
+    EXPECT_EQ(props.GetCollectionItemCounts(), 0);
+    EXPECT_TRUE(props.GetContentInvalid());
+    props.ResetSupportAction();
+    auto actions = props.GetSupportAction();
+    EXPECT_EQ(actions.size(), 0);
+}
 } // namespace OHOS::Ace::NG

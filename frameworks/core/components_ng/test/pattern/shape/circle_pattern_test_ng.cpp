@@ -17,6 +17,7 @@
 
 #include "gtest/gtest.h"
 
+#include "include/core/SkCanvas.h"
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -51,6 +52,8 @@ class CirclePatternTestNg : public BaseShapePatternTestNg {
         LayoutConstraintF layoutConstraint;
         layoutConstraint.percentReference.SetWidth(WIDTH);
         layoutConstraint.percentReference.SetHeight(HEIGHT);
+        layoutConstraint.selfIdealSize.SetWidth(WIDTH);
+        layoutConstraint.selfIdealSize.SetHeight(HEIGHT);
         layoutProperty->UpdateLayoutConstraint(layoutConstraint);
         layoutProperty->UpdateContentConstraint();
         auto size = layoutAlgorithm->MeasureContent(layoutProperty->CreateContentConstraint(), nullptr);

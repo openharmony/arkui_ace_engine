@@ -274,7 +274,7 @@ void JSGridRow::Create(const JSCallbackInfo& info)
 
 void JSGridRow::JsBreakpointEvent(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
         LOGW("No breakpoint event info.");
         return;
     }
@@ -329,8 +329,7 @@ void JSGridRow::JSBind(BindingTarget globalObj)
     JSClass<JSGridRow>::StaticMethod("onBreakpointChange", &JSGridRow::JsBreakpointEvent);
     JSClass<JSGridRow>::StaticMethod("height", &JSGridRow::Height);
     JSClass<JSGridRow>::StaticMethod("alignItems", &JSGridRow::AlignItems);
-    JSClass<JSGridRow>::Inherit<JSContainerBase>();
-    JSClass<JSGridRow>::Bind<>(globalObj);
+    JSClass<JSGridRow>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

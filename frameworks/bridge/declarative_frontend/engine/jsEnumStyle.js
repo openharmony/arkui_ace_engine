@@ -254,13 +254,6 @@ var TextDecorationType;
   TextDecorationType[TextDecorationType["LineThrough"] = 3] = "LineThrough";
 })(TextDecorationType || (TextDecorationType = {}));
 
-var ClickEffectLevel;
-(function (ClickEffectLevel) {
-  ClickEffectLevel[ClickEffectLevel["LIGHT"] = 0] = "LIGHT";
-  ClickEffectLevel[ClickEffectLevel["MIDDLE"] = 1] = "MIDDLE";
-  ClickEffectLevel[ClickEffectLevel["HEAVY"] = 2] = "HEAVY";
-})(ClickEffectLevel || (ClickEffectLevel= {}));
-
 var TextCase;
 (function (TextCase) {
   TextCase[TextCase["Normal"] = 0] = "Normal";
@@ -963,6 +956,7 @@ var BlurStyle;
   BlurStyle[BlurStyle["BACKGROUND_REGULAR"] = 5] = "BACKGROUND_REGULAR";
   BlurStyle[BlurStyle["BACKGROUND_THICK"] = 6] = "BACKGROUND_THICK";
   BlurStyle[BlurStyle["BACKGROUND_ULTRA_THICK"] = 7] = "BACKGROUND_ULTRA_THICK";
+  BlurStyle[BlurStyle["NONE"] = 0] = "NONE";
 })(BlurStyle || (BlurStyle = {}));
 
 var ThemeColorMode;

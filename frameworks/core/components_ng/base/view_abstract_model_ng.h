@@ -131,6 +131,11 @@ public:
         ViewAbstract::SetBackgroundBlurStyle(bgBlurStyle);
     }
 
+    void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) override
+    {
+        ViewAbstract::SetForegroundBlurStyle(fgBlurStyle);
+    }
+    
     void SetSphericalEffect(double radio) override
     {
         ViewAbstract::SetSphericalEffect(radio);
@@ -475,6 +480,11 @@ public:
         ViewAbstract::SetFlexShrink(value);
     }
 
+    void ResetFlexShrink() override
+    {
+        ViewAbstract::ResetFlexShrink();
+    }
+
     void SetFlexGrow(float value) override
     {
         ViewAbstract::SetFlexGrow(value);
@@ -577,11 +587,6 @@ public:
     void SetHueRotate(float value) override
     {
         ViewAbstract::SetHueRotate(value);
-    }
-
-    void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override
-    {
-        ViewAbstract::SetClickEffectLevel(level, scaleValue);
     }
 
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override

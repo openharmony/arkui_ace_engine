@@ -210,7 +210,7 @@ void RenderRefresh::Initialize()
         });
     }
     if (!animator_) {
-        animator_ = AceType::MakeRefPtr<Animator>(GetContext());
+        animator_ = CREATE_ANIMATOR(GetContext());
     }
     if (!refreshController_) {
         refreshController_ = AceType::MakeRefPtr<RefreshController>();

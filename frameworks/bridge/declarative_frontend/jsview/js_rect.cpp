@@ -312,8 +312,8 @@ void JSRect::JSBind(BindingTarget globalObj)
     JSClass<JSRect>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSRect>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
 
-    JSClass<JSRect>::Inherit<JSShapeAbstract>();
-    JSClass<JSRect>::Bind(globalObj, JSRect::ConstructorCallback, JSRect::DestructorCallback);
+    JSClass<JSRect>::InheritAndBind<JSShapeAbstract>(
+        globalObj, JSRect::ConstructorCallback, JSRect::DestructorCallback);
 }
 
 } // namespace OHOS::Ace::Framework

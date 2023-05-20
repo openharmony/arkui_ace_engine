@@ -161,7 +161,7 @@ void ProgressModifier::StartCapsuleSweepingAnimation(float value)
     } else {
         curLength = (value / maxValue_->Get()) * contentSize_->Get().Height() + SWEEP_WIDTH.ConvertToPx();
     }
-    
+
     if (!isSweeping_ && sweepEffect_->Get() && isVisible_) {
         StartCapsuleSweepingAnimationImpl(curLength);
     } else if (!sweepEffect_->Get() || !isVisible_) {
@@ -186,12 +186,12 @@ void ProgressModifier::StartCapsuleSweepingAnimationImpl(float value)
     isSweeping_ = true;
     sweepingDate_->Set(0.0f);
     AnimationOption option = AnimationOption();
-    auto motion =
-        AceType::MakeRefPtr<ResponsiveSpringMotion>(SWEEPING_MOTION_RESPONSE, SWEEPING_MOTION_DAMPING_RATIO);
+    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(SWEEPING_MOTION_RESPONSE, SWEEPING_MOTION_DAMPING_RATIO);
     option.SetCurve(motion);
     option.SetIteration(-1);
 
-    AnimationUtils::Animate(option,
+    AnimationUtils::Animate(
+        option,
         [value, id = Container::CurrentId(), weak = WeakClaim(this)]() {
             ContainerScope scope(id);
             auto modifier = weak.Upgrade();
@@ -302,7 +302,8 @@ void ProgressModifier::StartRingLoadingHeadAnimation()
     optionHead.SetDuration(LOADING_ANIMATION_DURATION);
     optionHead.SetCurve(curveHead);
     optionHead.SetIteration(isFormRender ? 1 : -1);
-    AnimationUtils::Animate(optionHead,
+    AnimationUtils::Animate(
+        optionHead,
         [&]() { trailingHeadDate_->Set(ANGLE_360); },
         nullptr,
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
@@ -316,8 +317,7 @@ void ProgressModifier::StartRingLoadingHeadAnimation()
                     ContainerScope scope(id);
                     auto modifier = weak.Upgrade();
                     CHECK_NULL_VOID(modifier);
-                    if (static_cast<ProgressStatus>(
-                        modifier->progressStatus_->Get()) == ProgressStatus::PROGRESSING) {
+                    if (static_cast<ProgressStatus>(modifier->progressStatus_->Get()) == ProgressStatus::PROGRESSING) {
                         modifier->StopRingLoadingHeadAnimation();
                     }
                 },
@@ -335,7 +335,8 @@ void ProgressModifier::StartRingLoadingTailAnimation()
     optionTail.SetDuration(LOADING_ANIMATION_DURATION);
     optionTail.SetCurve(curveTail);
     optionTail.SetIteration(isFormRender ? 1 : -1);
-    AnimationUtils::Animate(optionTail,
+    AnimationUtils::Animate(
+        optionTail,
         [&]() { trailingTailDate_->Set(ANGLE_360); },
         nullptr,
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
@@ -349,8 +350,7 @@ void ProgressModifier::StartRingLoadingTailAnimation()
                     ContainerScope scope(id);
                     auto modifier = weak.Upgrade();
                     CHECK_NULL_VOID(modifier);
-                    if (static_cast<ProgressStatus>(modifier->progressStatus_->Get()) ==
-                        ProgressStatus::PROGRESSING) {
+                    if (static_cast<ProgressStatus>(modifier->progressStatus_->Get()) == ProgressStatus::PROGRESSING) {
                         modifier->StopRingLoadingTailAnimation();
                         if (GreatOrEqual(modifier->valueBackup_, 0.0f)) {
                             modifier->SetValue(modifier->valueBackup_);
@@ -420,11 +420,11 @@ void ProgressModifier::StartRingSweepingAnimationImpl(float date)
     bool isFormRender = context->IsFormRender();
     isSweeping_ = true;
     AnimationOption option = AnimationOption();
-    auto motion =
-            AceType::MakeRefPtr<ResponsiveSpringMotion>(SWEEPING_MOTION_RESPONSE, SWEEPING_MOTION_DAMPING_RATIO);
+    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(SWEEPING_MOTION_RESPONSE, SWEEPING_MOTION_DAMPING_RATIO);
     option.SetCurve(motion);
     option.SetIteration(isFormRender ? 1 : -1);
-    AnimationUtils::Animate(option,
+    AnimationUtils::Animate(
+        option,
         [&]() { sweepingDate_->Set(date); },
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
@@ -528,12 +528,12 @@ void ProgressModifier::StartLinearSweepingAnimationImpl(float date)
     isSweeping_ = true;
     sweepingDate_->Set(0.0f);
     AnimationOption option = AnimationOption();
-    auto motion =
-        AceType::MakeRefPtr<ResponsiveSpringMotion>(SWEEPING_MOTION_RESPONSE, SWEEPING_MOTION_DAMPING_RATIO);
+    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(SWEEPING_MOTION_RESPONSE, SWEEPING_MOTION_DAMPING_RATIO);
     option.SetCurve(motion);
     option.SetIteration(isFormRender ? 1 : -1);
 
-    AnimationUtils::Animate(option,
+    AnimationUtils::Animate(
+        option,
         [&]() { sweepingDate_->Set(date); },
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
@@ -589,9 +589,13 @@ void ProgressModifier::SetValue(float value)
 
     CHECK_NULL_VOID(value_);
     AnimationOption option = AnimationOption();
-    auto motion =
-        AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_MOTION_RESPONSE, SPRING_MOTION_DAMPING_FRACTION);
-    option.SetCurve(motion);
+    if (isVisible_) {
+        auto motion =
+            AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_MOTION_RESPONSE, SPRING_MOTION_DAMPING_FRACTION);
+        option.SetCurve(motion);
+    } else {
+        option.SetDuration(0);
+    }
     AnimationUtils::Animate(option, [&]() { value_->Set(value); });
 
     ProcessSweepingAnimation(ProgressType(progressType_->Get()), value);
@@ -665,10 +669,9 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
         CHECK_NULL_VOID(!NearEqual(barLength, 0.0));
         double dateLength = barLength * value_->Get() / maxValue_->Get();
         canvas.AttachBrush(brush);
-        auto offsetY = offset.GetY() + (contentSize.Height() - strokeWidth_->Get()) / INT32_TWO;
         canvas.DrawRoundRect(
-            { { offset.GetX(), offsetY, contentSize.Width() + offset.GetX(),
-                                   strokeWidth_->Get() + offsetY },
+            { { offset.GetX(), offset.GetY(), contentSize.Width() + offset.GetX(),
+                                   strokeWidth_->Get() + offset.GetY() },
             radius, radius });
         // progress selected part
         CHECK_NULL_VOID(!NearEqual(dateLength, 0.0));
@@ -676,8 +679,8 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
         canvas.AttachBrush(brush);
         RSPath path;
         path.AddRoundRect(
-            { offset.GetX(), offsetY, dateLength + offset.GetX() + strokeWidth_->Get(),
-              strokeWidth_->Get() + offsetY },
+            { offset.GetX(), offset.GetY(), dateLength + offset.GetX() + strokeWidth_->Get(),
+              strokeWidth_->Get() + offset.GetY() },
             radius, radius);
         canvas.DrawPath(path);
         canvas.DetachBrush();
@@ -688,9 +691,8 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
         CHECK_NULL_VOID(!NearEqual(barLength, 0.0));
         double dateLength = barLength * value_->Get() / maxValue_->Get();
         canvas.AttachBrush(brush);
-        auto offsetX = offset.GetX() + (contentSize.Width() - strokeWidth_->Get()) / INT32_TWO;
         canvas.DrawRoundRect(
-            { { offsetX, offset.GetY(), strokeWidth_->Get() + offsetX,
+            { { offset.GetX(), offset.GetY(), strokeWidth_->Get() + offset.GetX(),
                                    contentSize.Height() + offset.GetY() },
             radius, radius });
         // progress selected part
@@ -699,7 +701,7 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
         canvas.AttachBrush(brush);
         RSPath path;
         path.AddRoundRect(
-            { offsetX, offset.GetY(), strokeWidth_->Get() + offsetX,
+            { offset.GetX(), offset.GetY(), strokeWidth_->Get() + offset.GetX(),
               dateLength + offset.GetY() + strokeWidth_->Get() },
             radius, radius);
         canvas.DrawPath(path);
@@ -1096,7 +1098,7 @@ void ProgressModifier::PaintTrailing(RSCanvas& canvas, const RingProgressData& r
     std::vector<RSPoint> points;
     for (uint32_t i = 0; i < point_num; i++) {
         RSPoint point;
-        float trailingAngle = tail + (head - tail) / point_num * i ;
+        float trailingAngle = tail + (head - tail) / point_num * i;
         float trailingRad = trailingAngle * PI_NUM / ANGLE_180;
         point.SetX(std::sin(trailingRad) * radius);
         point.SetY(-std::cos(trailingRad) * radius);
@@ -1204,8 +1206,8 @@ void ProgressModifier::PaintCapsule(RSCanvas& canvas, const OffsetF& offset, con
     }
     static int32_t totalDegree = 1;
     auto capsuleSize = contentSize;
-    double radiusBig = std::min((capsuleSize.Width() - borderWidth) / INT32_TWO,
-        (capsuleSize.Height() - borderWidth) / INT32_TWO);
+    double radiusBig =
+        std::min((capsuleSize.Width() - borderWidth) / INT32_TWO, (capsuleSize.Height() - borderWidth) / INT32_TWO);
     double offsetXBig = offset.GetX() + borderWidth / INT32_TWO;
     double offsetYBig = offset.GetY() + borderWidth / INT32_TWO;
     capsuleSize.SetWidth(contentSize.Width() - borderWidth * INT32_TWO);
@@ -1270,8 +1272,8 @@ void ProgressModifier::PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& off
     }
     static int32_t totalDegree = 1;
     SizeF capsuleSize = contentSize;
-    double radiusBig = std::min((capsuleSize.Width() - borderWidth) / INT32_TWO,
-        (capsuleSize.Height() - borderWidth) / INT32_TWO);
+    double radiusBig =
+        std::min((capsuleSize.Width() - borderWidth) / INT32_TWO, (capsuleSize.Height() - borderWidth) / INT32_TWO);
     double offsetXBig = offset.GetX() + borderWidth / INT32_TWO;
     double offsetYBig = offset.GetY() + borderWidth / INT32_TWO;
     capsuleSize.SetWidth(contentSize.Width() - borderWidth * INT32_TWO);
@@ -1348,19 +1350,19 @@ void ProgressModifier::PaintCapsuleLightSweep(
     if (isVertical) {
         brush.SetShaderEffect(RSShaderEffect::CreateLinearGradient(
             ToRSPoint(PointF(offset.GetX() + contentSize.Width() / 2,
-            offset.GetY() + endPos - SWEEP_WIDTH.ConvertToPx() + capsuleBorderWidth_->Get())),
-            ToRSPoint(PointF(offset.GetX() + contentSize.Width() / 2,
-            offset.GetY() + endPos - capsuleBorderWidth_->Get())),
+                offset.GetY() + endPos - SWEEP_WIDTH.ConvertToPx() + capsuleBorderWidth_->Get())),
+            ToRSPoint(
+                PointF(offset.GetX() + contentSize.Width() / 2, offset.GetY() + endPos - capsuleBorderWidth_->Get())),
             colors, pos, RSTileMode::CLAMP));
     } else {
         brush.SetShaderEffect(RSShaderEffect::CreateLinearGradient(
             ToRSPoint(PointF(offset.GetX() + endPos - SWEEP_WIDTH.ConvertToPx() + capsuleBorderWidth_->Get(),
-            offset.GetY() + contentSize.Height() / 2)),
-            ToRSPoint(PointF(offset.GetX() + endPos - capsuleBorderWidth_->Get(),
-            offset.GetY() + contentSize.Height() / 2)),
+                offset.GetY() + contentSize.Height() / 2)),
+            ToRSPoint(
+                PointF(offset.GetX() + endPos - capsuleBorderWidth_->Get(), offset.GetY() + contentSize.Height() / 2)),
             colors, pos, RSTileMode::CLAMP));
     }
-    
+
     auto offsetX = offset.GetX();
     auto offsetY = offset.GetY();
     canvas.Save();
@@ -1371,12 +1373,12 @@ void ProgressModifier::PaintCapsuleLightSweep(
             { offsetX + capsuleBorderWidth_->Get(),
             offsetY + endPos - SWEEP_WIDTH.ConvertToPx() + capsuleBorderWidth_->Get(),
             offsetX + contentSize.Width() + capsuleBorderWidth_->Get(),
-            offsetY + endPos - capsuleBorderWidth_->Get()});
+            offsetY + endPos - capsuleBorderWidth_->Get() });
     } else {
         canvas.DrawRect(
             { offsetX + endPos - SWEEP_WIDTH.ConvertToPx() + capsuleBorderWidth_->Get(),
             offsetY + capsuleBorderWidth_->Get(), offsetX + endPos + capsuleBorderWidth_->Get(),
-            offsetY + contentSize.Height() + capsuleBorderWidth_->Get()});
+            offsetY + contentSize.Height() + capsuleBorderWidth_->Get() });
     }
     canvas.DetachPen();
     canvas.Restore();

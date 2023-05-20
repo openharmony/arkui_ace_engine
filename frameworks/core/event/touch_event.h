@@ -25,6 +25,8 @@
 
 namespace OHOS::Ace {
 
+static const int32_t TOUCH_TOOL_BASE_ID = 100;
+
 enum class TouchType : size_t {
     DOWN = 0,
     UP,
@@ -80,6 +82,58 @@ struct TouchEvent final {
     // all points on the touch screen.
     std::vector<TouchPoint> pointers;
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("id", id);
+        json->Put("x", x);
+        json->Put("y", y);
+        json->Put("sx", screenX);
+        json->Put("sy", screenY);
+        json->Put("ty", static_cast<int32_t>(type));
+        int64_t timeValue = std::chrono::duration_cast<std::chrono::nanoseconds>(time.time_since_epoch()).count();
+        json->Put("ti", timeValue);
+        json->Put("si", size);
+        json->Put("f", force);
+        int32_t hasTiltX = tiltX.has_value() ? 1 : 0;
+        json->Put("hx", hasTiltX);
+        if (hasTiltX) {
+            json->Put("tx", tiltX.value());
+        }
+        int32_t hasTiltY = tiltY.has_value() ? 1 : 0;
+        json->Put("hy", hasTiltY);
+        if (tiltY.has_value()) {
+            json->Put("ty", tiltY.value());
+        }
+        json->Put("d", deviceId);
+        json->Put("sty", static_cast<int32_t>(sourceType));
+        json->Put("sto", static_cast<int32_t>(sourceTool));
+    }
+
+    void FromJson(const std::unique_ptr<JsonValue>& json)
+    {
+        id = json->GetInt("id");
+        x = json->GetDouble("x");
+        y = json->GetDouble("y");
+        screenX = json->GetDouble("sx");
+        screenY = json->GetDouble("sy");
+        type = static_cast<TouchType>(json->GetInt("ty"));
+        int64_t timeValue = json->GetInt64("ti");
+        time = TimeStamp(std::chrono::nanoseconds(timeValue));
+        size = json->GetDouble("si");
+        force = json->GetDouble("f");
+        int32_t hasTiltX = json->GetInt("hx");
+        int32_t hasTiltY = json->GetInt("hy");
+        if (hasTiltX) {
+            tiltX = json->GetDouble("tx");
+        }
+        if (hasTiltY) {
+            tiltY = json->GetDouble("ty");
+        }
+        deviceId = json->GetInt64("d");
+        sourceType = static_cast<SourceType>(json->GetInt("sty"));
+        sourceTool = static_cast<SourceTool>(json->GetInt("sto"));
+    }
+
     Offset GetOffset() const
     {
         return Offset(x, y);
@@ -88,6 +142,13 @@ struct TouchEvent final {
     Offset GetScreenOffset() const
     {
         return Offset(screenX, screenY);
+    }
+
+    void CovertId()
+    {
+        if ((sourceType == SourceType::TOUCH) && (sourceTool == SourceTool::PEN)) {
+            id = TOUCH_TOOL_BASE_ID + (int32_t)sourceTool;
+        }
     }
 
     TouchEvent CreateScalePoint(float scale) const

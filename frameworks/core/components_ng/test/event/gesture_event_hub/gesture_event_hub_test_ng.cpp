@@ -53,6 +53,8 @@ constexpr int32_t TOUCH_ID = 0;
 const Axis AXIS_VERTICAL = Axis::VERTICAL;
 const PanDirection PAN_DIRECTION_ALL;
 constexpr int32_t FINGERS = 1;
+constexpr int32_t DOUBLE_FINGERS = 2;
+constexpr int32_t CLICK_COUNTS = 2;
 constexpr float DISTANCE = 10.0;
 const std::string CHECK_TAG_1("HELLO");
 const std::string CHECK_TAG_2("WORLD");
@@ -285,6 +287,8 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest004, TestSize.Level1)
      */
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     EXPECT_TRUE(eventHub);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
     auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     EXPECT_TRUE(gestureEventHub);
 
@@ -297,7 +301,28 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest004, TestSize.Level1)
     EXPECT_FALSE(flag);
 
     /**
-     * @tc.steps: step3. construct two clickCallback
+     * @tc.steps: step3. call ActClick
+     *            case: clickEventActuator_ is null, clickRecognizer fingers is 2, count is 1
+     * @tc.expected: flag is false
+     */
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(DOUBLE_FINGERS, 1);
+    gestureEventHub->gestureHierarchy_.emplace_back(clickRecognizer);
+    EXPECT_FALSE(gestureEventHub->ActClick());
+    gestureEventHub->gestureHierarchy_.clear();
+
+    /**
+     * @tc.steps: step4. call ActClick
+     *            case: clickEventActuator_ is null, clickRecognizer fingers is 1, count is 1
+     * @tc.expected: flag is true
+     */
+    clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(1, 1);
+    clickRecognizer->SetOnAction([](GestureEvent& info) {});
+    gestureEventHub->gestureHierarchy_.emplace_back(clickRecognizer);
+    EXPECT_TRUE(gestureEventHub->ActClick());
+    gestureEventHub->gestureHierarchy_.clear();
+
+    /**
+     * @tc.steps: step5. construct two clickCallback
      *            one is for SetUserOnClick, the other is for AddClickEvent
      */
     std::string msg1;
@@ -309,7 +334,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest004, TestSize.Level1)
     gestureEventHub->AddClickEvent(clickEvent);
 
     /**
-     * @tc.steps: step4. call ActClick
+     * @tc.steps: step6. call ActClick
      *                   case: clickEventActuator_ is not null
      * @tc.expected: flag is true & clickCallback & clickCallback2 has be called
      */
@@ -319,14 +344,14 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest004, TestSize.Level1)
     EXPECT_EQ(msg2, CHECK_TAG_2);
 
     /**
-     * @tc.steps: step5. call eventHub's GetOrCreateFocusHub
+     * @tc.steps: step7. call eventHub's GetOrCreateFocusHub
      * @tc.expected: return is not null
      */
     auto focusHub = eventHub->GetOrCreateFocusHub();
     EXPECT_TRUE(focusHub);
 
     /**
-     * @tc.steps: step6. call SetFocusClickEvent
+     * @tc.steps: step8. call SetFocusClickEvent
      * @tc.expected: no fatal error occur
      */
     msg1 = "";
@@ -347,6 +372,8 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest005, TestSize.Level1)
      */
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     EXPECT_TRUE(eventHub);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
     auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     EXPECT_TRUE(gestureEventHub);
 
@@ -359,7 +386,28 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest005, TestSize.Level1)
     EXPECT_FALSE(flag);
 
     /**
-     * @tc.steps: step3. construct a longPressCallback
+     * @tc.steps: step3. call ActLongClick
+     *            case: longPressEventActuator_ is null, longPressRecognizer fingers is 2
+     * @tc.expected: flag is false
+     */
+    auto longPressRecognizer = AceType::MakeRefPtr<LongPressRecognizer>(1, DOUBLE_FINGERS, false);
+    gestureEventHub->gestureHierarchy_.emplace_back(longPressRecognizer);
+    EXPECT_FALSE(gestureEventHub->ActLongClick());
+    gestureEventHub->gestureHierarchy_.clear();
+
+    /**
+     * @tc.steps: step4. call ActLongClick
+     *            case: longPressEventActuator_ is null, longPressRecognizer fingers is 1
+     * @tc.expected: flag is true
+     */
+    longPressRecognizer = AceType::MakeRefPtr<LongPressRecognizer>(1, 1, false);
+    longPressRecognizer->SetOnAction([](GestureEvent& info) {});
+    gestureEventHub->gestureHierarchy_.emplace_back(longPressRecognizer);
+    EXPECT_TRUE(gestureEventHub->ActLongClick());
+    gestureEventHub->gestureHierarchy_.clear();
+
+    /**
+     * @tc.steps: step5. construct a longPressCallback
      */
     std::string msg1;
     auto longPressCallback = [&msg1](GestureEvent& /* info */) { msg1 = CHECK_TAG_1; };
@@ -367,7 +415,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest005, TestSize.Level1)
     gestureEventHub->SetLongPressEvent(longPressEvent);
 
     /**
-     * @tc.steps: step4. call ActLongClick
+     * @tc.steps: step6. call ActLongClick
      *                   case: longPressEventActuator_ is not null
      * @tc.expected: flag is true & longPressCallback will be called
      */
@@ -376,14 +424,14 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest005, TestSize.Level1)
     EXPECT_EQ(msg1, CHECK_TAG_1);
 
     /**
-     * @tc.steps: step5. call eventHub's GetOrCreateFocusHub
+     * @tc.steps: step7. call eventHub's GetOrCreateFocusHub
      * @tc.expected: return is not null
      */
     auto focusHub = eventHub->GetOrCreateFocusHub();
     EXPECT_TRUE(focusHub);
 
     /**
-     * @tc.steps: step6. call SetFocusClickEvent
+     * @tc.steps: step8. call SetFocusClickEvent
      * @tc.expected: no fatal error occur
      */
     msg1 = "";
@@ -769,17 +817,31 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest011, TestSize.Level1)
     ASSERT_NE(gestureEventHub, nullptr);
 
     /**
-     * @tc.steps: step3. gestureHierarchy_ has ClickRecognizer
-     * @tc.expected: IsAccessibilityClickable is true
+     * @tc.steps: step2. gestureHierarchy_ has ClickRecognizer, the number of fingers is two or click count is two
+     * @tc.expected: IsAccessibilityClickable is false
      */
     EXPECT_FALSE(gestureEventHub->IsAccessibilityClickable());
-    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGERS, 1);
+
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(DOUBLE_FINGERS, 1);
+    gestureEventHub->gestureHierarchy_.emplace_back(clickRecognizer);
+    EXPECT_FALSE(gestureEventHub->IsAccessibilityClickable());
+    gestureEventHub->gestureHierarchy_.clear();
+    clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(1, CLICK_COUNTS);
+    gestureEventHub->gestureHierarchy_.emplace_back(clickRecognizer);
+    EXPECT_FALSE(gestureEventHub->IsAccessibilityClickable());
+    gestureEventHub->gestureHierarchy_.clear();
+
+    /**
+     * @tc.steps: step3. gestureHierarchy_ has ClickRecognizer, the number of fingers is one
+     * @tc.expected: IsAccessibilityClickable is true
+     */
+    clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGERS, 1);
     gestureEventHub->gestureHierarchy_.emplace_back(clickRecognizer);
     EXPECT_TRUE(gestureEventHub->IsAccessibilityClickable());
     gestureEventHub->gestureHierarchy_.clear();
 
     /**
-     * @tc.steps: step2. call AddClickEvent
+     * @tc.steps: step4. call AddClickEvent
      * @tc.expected: IsAccessibilityClickable is true
      */
     auto clickCallback = [](GestureEvent& info) {};
@@ -788,17 +850,27 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest011, TestSize.Level1)
     EXPECT_TRUE(gestureEventHub->IsAccessibilityClickable());
 
     /**
-     * @tc.steps: step4. gestureHierarchy_ has LongPressRecognizer
-     * @tc.expected: IsAccessibilityLongClickable is true
+     * @tc.steps: step5. gestureHierarchy_ has LongPressRecognizer, the number of fingers is two
+     * @tc.expected: IsAccessibilityLongClickable is false
      */
     EXPECT_FALSE(gestureEventHub->IsAccessibilityLongClickable());
-    auto longPressRecognizer = AceType::MakeRefPtr<LongPressRecognizer>(false, false);
+
+    auto longPressRecognizer = AceType::MakeRefPtr<LongPressRecognizer>(1, DOUBLE_FINGERS, false);
+    gestureEventHub->gestureHierarchy_.emplace_back(longPressRecognizer);
+    EXPECT_FALSE(gestureEventHub->IsAccessibilityLongClickable());
+    gestureEventHub->gestureHierarchy_.clear();
+
+    /**
+     * @tc.steps: step6. gestureHierarchy_ has LongPressRecognizer, the number of fingers is one
+     * @tc.expected: IsAccessibilityLongClickable is false
+     */
+    longPressRecognizer = AceType::MakeRefPtr<LongPressRecognizer>(1, 1, false);
     gestureEventHub->gestureHierarchy_.emplace_back(longPressRecognizer);
     EXPECT_TRUE(gestureEventHub->IsAccessibilityLongClickable());
     gestureEventHub->gestureHierarchy_.clear();
 
     /**
-     * @tc.steps: step5. call SetLongPressEvent
+     * @tc.steps: step7. call SetLongPressEvent
      * @tc.expected: IsAccessibilityLongClickable is true
      */
     auto longPressCallback = [](GestureEvent& info) {};

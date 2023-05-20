@@ -22,6 +22,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/dimension_size.h"
+#include "base/json/json_util.h"
 
 namespace OHOS::Ace {
 

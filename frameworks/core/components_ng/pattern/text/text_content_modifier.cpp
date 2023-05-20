@@ -141,8 +141,10 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
         paragraph_->Paint(drawingContext.canvas, paintOffset_.GetX(), paintOffset_.GetY());
     } else {
         // Racing
+        auto canvas = drawingContext.canvas;
+        canvas.Save();
         float textRacePercent = GetTextRacePercent();
-        drawingContext.canvas.ClipRect(RSRect(0, 0, drawingContext.width, drawingContext.height), RSClipOp::REPLACE);
+        canvas.ClipRect(RSRect(0, 0, drawingContext.width, drawingContext.height), RSClipOp::INTERSECT);
 
         float paragraph1Offset =
             (paragraph_->GetTextWidth() + textRaceSpaceWidth_) * textRacePercent / RACE_MOVE_PERCENT_MAX * -1;
@@ -153,6 +155,7 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
         if ((paintOffset_.GetX() + paragraph2Offset) < drawingContext.width) {
             paragraph_->Paint(drawingContext.canvas, paintOffset_.GetX() + paragraph2Offset, paintOffset_.GetY());
         }
+        canvas.Restore();
     }
 }
 

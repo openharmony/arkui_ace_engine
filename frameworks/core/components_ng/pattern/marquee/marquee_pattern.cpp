@@ -14,7 +14,9 @@
  */
 
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
+#include <string>
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/offset.h"
 #include "base/utils/utils.h"
@@ -37,6 +39,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double DEFAULT_MARQUEE_SCROLL_DELAY = 85.0; // Delay time between each jump.
+constexpr Dimension DEFAULT_MARQUEE_SCROLL_AMOUNT = 6.0_vp;
+inline constexpr int32_t DEFAULT_MARQUEE_LOOP = -1;
 } // namespace
 
 void MarqueePattern::OnAttachToFrameNode()
@@ -69,7 +73,7 @@ void MarqueePattern::OnModifyDone()
     CHECK_NULL_VOID(textChild);
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    auto src = layoutProperty->GetSrc().value_or("");
+    auto src = layoutProperty->GetSrc().value_or(" ");
     textLayoutProperty->UpdateContent(src);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID_NOLOG(pipelineContext);
@@ -78,9 +82,13 @@ void MarqueePattern::OnModifyDone()
     auto fontSize = layoutProperty->GetFontSize().value_or(theme->GetTextStyle().GetFontSize());
     textLayoutProperty->UpdateFontSize(fontSize);
     textLayoutProperty->UpdateFontWeight(layoutProperty->GetFontWeight().value_or(FontWeight::NORMAL));
-    textLayoutProperty->UpdateFontFamily(
-        layoutProperty->GetFontFamily().value_or(std::vector<std::string>({ "" })));
-    textLayoutProperty->UpdateTextColor(layoutProperty->GetFontColor().value_or(Color()));
+    if (layoutProperty->GetFontFamily().has_value()) {
+        textLayoutProperty->UpdateFontFamily(
+            layoutProperty->GetFontFamily().value());
+    } else {
+        textLayoutProperty->ResetFontFamily();
+    }
+    textLayoutProperty->UpdateTextColor(layoutProperty->GetFontColor().value_or(theme->GetTextStyle().GetTextColor()));
     textChild->MarkModifyDone();
     textChild->MarkDirtyNode();
     if (CheckMeasureFlag(layoutProperty->GetPropertyChangeFlag())) {
@@ -119,7 +127,7 @@ void MarqueePattern::StartMarqueeAnimation()
         return;
     }
     FireStartEvent();
-    auto step = layoutProperty->GetScrollAmount().value_or(DEFAULT_MARQUEE_SCROLL_AMOUNT);
+    auto step = layoutProperty->GetScrollAmount().value_or(DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx());
     auto direction = layoutProperty->GetDirection().value_or(MarqueeDirection::LEFT);
     auto end = -1 * textWidth;
     if (direction == MarqueeDirection::RIGHT) {

@@ -15,10 +15,33 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_remote_window.h"
 
-#include "core/components/remote_window/remote_window_component.h"
-#include "core/components_ng/pattern/remote_window/remote_window_view.h"
+#include "bridge/declarative_frontend/jsview/models/remote_window_model_impl.h"
+#include "core/components_ng/pattern/remote_window/remote_window_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+
+namespace OHOS::Ace {
+std::unique_ptr<RemoteWindowModel> RemoteWindowModel::instance_ = nullptr;
+std::mutex RemoteWindowModel::mutex_;
+
+RemoteWindowModel* RemoteWindowModel::GetInstance()
+{
+    if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
+#ifdef NG_BUILD
+            instance_.reset(new NG::RemoteWindowModelNG());
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::RemoteWindowModelNG());
+            } else {
+                instance_.reset(new Framework::RemoteWindowModelImpl());
+            }
+        }
+#endif
+    }
+    return instance_.get();
+}
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 void JSRemoteWindow::Create(const JSCallbackInfo& info)
@@ -31,16 +54,7 @@ void JSRemoteWindow::Create(const JSCallbackInfo& info)
     }
     rsNode = CreateRSNodeFromNapiValue(info[0]);
 #endif
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::RemoteWindowView::Create(rsNode);
-        return;
-    }
-
-    // specialized component should be firstly pushed.
-    auto specializedComponent = AceType::MakeRefPtr<OHOS::Ace::RemoteWindowComponent>();
-    ViewStackProcessor::GetInstance()->Push(specializedComponent);
-    specializedComponent->SetExternalRSNode(rsNode);
+    RemoteWindowModel::GetInstance()->Create(rsNode);
 }
 
 void JSRemoteWindow::JSBind(BindingTarget globalObj)
@@ -55,7 +69,6 @@ void JSRemoteWindow::JSBind(BindingTarget globalObj)
     JSClass<JSRemoteWindow>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSRemoteWindow>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
 
-    JSClass<JSRemoteWindow>::Inherit<JSViewAbstract>();
-    JSClass<JSRemoteWindow>::Bind<>(globalObj);
+    JSClass<JSRemoteWindow>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

@@ -116,9 +116,7 @@ void JSListItemGroup::JSBind(BindingTarget globalObj)
     JSClass<JSListItemGroup>::StaticMethod("aspectRatio", &JSListItemGroup::SetAspectRatio);
 
     JSClass<JSListItemGroup>::Inherit<JSInteractableView>();
-    JSClass<JSListItemGroup>::Inherit<JSContainerBase>();
-    JSClass<JSListItemGroup>::Inherit<JSViewAbstract>();
-    JSClass<JSListItemGroup>::Bind<>(globalObj);
+    JSClass<JSListItemGroup>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

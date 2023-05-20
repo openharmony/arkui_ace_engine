@@ -91,7 +91,7 @@ void AceDataAbility::OnStart(const OHOS::AAFwk::Want& want, sptr<AAFwk::SessionI
     if (info != nullptr && !info->srcPath.empty()) {
         LOGI("AceDataAbility::OnStart assetBasePathStr: %{public}s, parsedUrl: %{public}s",
             info->srcPath.c_str(), parsedUrl.c_str());
-        auto assetBasePathStr = { "assets/js/" + info->srcPath + "/" };
+        auto assetBasePathStr = { "assets/js/" + info->srcPath + "/", std::string("assets/js/") };
         Platform::PaContainer::AddAssetPath(abilityId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
     } else {
         LOGI("AceDataAbility::OnStart parsedUrl: %{public}s", parsedUrl.c_str());

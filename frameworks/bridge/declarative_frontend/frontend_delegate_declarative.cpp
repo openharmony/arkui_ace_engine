@@ -798,7 +798,7 @@ void FrontendDelegateDeclarative::Push(const std::string& uri, const std::string
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
-        pageRouterManager_->Push({ uri }, params);
+        pageRouterManager_->Push(NG::RouterPageInfo({ uri, params }));
         OnMediaQueryUpdate();
         return;
     }
@@ -810,7 +810,7 @@ void FrontendDelegateDeclarative::PushWithMode(const std::string& uri, const std
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
-        pageRouterManager_->Push({ uri }, params, static_cast<NG::RouterMode>(routerMode));
+        pageRouterManager_->Push(NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode) }));
         OnMediaQueryUpdate();
         return;
     }
@@ -822,7 +822,8 @@ void FrontendDelegateDeclarative::PushWithCallback(const std::string& uri, const
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
-        pageRouterManager_->PushWithCallback({ uri }, params, errorCallback, static_cast<NG::RouterMode>(routerMode));
+        pageRouterManager_->Push(
+            NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
         OnMediaQueryUpdate();
         return;
     }
@@ -833,7 +834,8 @@ void FrontendDelegateDeclarative::Replace(const std::string& uri, const std::str
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
-        pageRouterManager_->Replace({ uri }, params);
+        pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params }));
+        OnMediaQueryUpdate();
         return;
     }
     Replace(PageTarget(uri), params);
@@ -844,7 +846,8 @@ void FrontendDelegateDeclarative::ReplaceWithMode(
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
-        pageRouterManager_->Replace({ uri }, params, static_cast<NG::RouterMode>(routerMode));
+        pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode) }));
+        OnMediaQueryUpdate();
         return;
     }
     Replace(PageTarget(uri, static_cast<RouterMode>(routerMode)), params);
@@ -855,8 +858,9 @@ void FrontendDelegateDeclarative::ReplaceWithCallback(const std::string& uri, co
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
-        pageRouterManager_->ReplaceWithCallback(
-            { uri }, params, errorCallback, static_cast<NG::RouterMode>(routerMode));
+        pageRouterManager_->Replace(
+            NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+        OnMediaQueryUpdate();
         return;
     }
     Replace(PageTarget(uri, static_cast<RouterMode>(routerMode)), params, errorCallback);
@@ -866,7 +870,7 @@ void FrontendDelegateDeclarative::Back(const std::string& uri, const std::string
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
-        pageRouterManager_->BackWithTarget({ uri }, params);
+        pageRouterManager_->BackWithTarget(NG::RouterPageInfo({ uri, params }));
         OnMediaQueryUpdate();
         return;
     }
@@ -2691,29 +2695,31 @@ std::string FrontendDelegateDeclarative::RestoreRouterStack(const std::string& c
     auto pipelineContext = pipelineContextHolder_.Get();
     CHECK_NULL_RETURN(pipelineContext, "");
     pipelineContext->RestoreNodeInfo(std::move(jsonNodeInfo));
-    if (Container::IsCurrentUseNewPipeline()) {
-        return "";
-    }
     // restore stack info
-    std::lock_guard<std::mutex> lock(mutex_);
     auto routerStack = jsonContentInfo->GetValue("stackInfo");
-    if (!routerStack->IsValid() || !routerStack->IsArray()) {
-        LOGW("restore router stack is invalid");
-        return "";
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_RETURN(pageRouterManager_, "");
+        return pageRouterManager_->RestoreRouterStack(std::move(routerStack));
+    } else {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!routerStack->IsValid() || !routerStack->IsArray()) {
+            LOGW("restore router stack is invalid");
+            return "";
+        }
+        int32_t stackSize = routerStack->GetArraySize();
+        if (stackSize < 1) {
+            LOGW("restore stack size is invalid");
+            return "";
+        }
+        for (int32_t index = 0; index < stackSize - 1; ++index) {
+            std::string url = routerStack->GetArrayItem(index)->ToString();
+            // remove 2 useless character, as "XXX" to XXX
+            pageRouteStack_.emplace_back(PageInfo { GenerateNextPageId(), url.substr(1, url.size() - 2), true });
+        }
+        std::string startUrl = routerStack->GetArrayItem(stackSize - 1)->ToString();
+        // remove 5 useless character, as "XXX.js" to XXX
+        return startUrl.substr(1, startUrl.size() - 5);
     }
-    int32_t stackSize = routerStack->GetArraySize();
-    if (stackSize < 1) {
-        LOGW("restore stack size is invalid");
-        return "";
-    }
-    for (int32_t index = 0; index < stackSize - 1; ++index) {
-        std::string url = routerStack->GetArrayItem(index)->ToString();
-        // remove 2 useless character, as "XXX" to XXX
-        pageRouteStack_.emplace_back(PageInfo { GenerateNextPageId(), url.substr(1, url.size() - 2), true });
-    }
-    std::string startUrl = routerStack->GetArrayItem(stackSize - 1)->ToString();
-    // remove 5 useless character, as "XXX.js" to XXX
-    return startUrl.substr(1, startUrl.size() - 5);
 }
 
 std::string FrontendDelegateDeclarative::GetContentInfo()
@@ -2727,6 +2733,9 @@ std::string FrontendDelegateDeclarative::GetContentInfo()
             jsonRouterStack->Put("", pageRouteStack_[index].url.c_str());
         }
         jsonContentInfo->Put("stackInfo", jsonRouterStack);
+    } else {
+        CHECK_NULL_RETURN(pageRouterManager_, "");
+        jsonContentInfo->Put("stackInfo", pageRouterManager_->GetStackInfo());
     }
 
     auto pipelineContext = pipelineContextHolder_.Get();

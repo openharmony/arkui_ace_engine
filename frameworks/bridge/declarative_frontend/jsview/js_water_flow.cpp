@@ -115,9 +115,7 @@ void JSWaterFlow::JSBind(BindingTarget globalObj)
     JSClass<JSWaterFlow>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSWaterFlow>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
-    JSClass<JSWaterFlow>::Inherit<JSContainerBase>();
-    JSClass<JSWaterFlow>::Inherit<JSViewAbstract>();
-    JSClass<JSWaterFlow>::Bind<>(globalObj);
+    JSClass<JSWaterFlow>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSWaterFlow::SetColumnsGap(const JSCallbackInfo& info)

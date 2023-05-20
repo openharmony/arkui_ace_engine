@@ -15,18 +15,12 @@
 
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
 
-#include "base/geometry/axis.h"
 #include "base/memory/ace_type.h"
-#include "base/utils/macros.h"
 #include "base/utils/utils.h"
 #include "core/components/button/button_theme.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/button/toggle_button_paint_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
@@ -39,7 +33,10 @@ void ToggleButtonPattern::OnAttachToFrameNode()
     InitParameters();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToFrame(true);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetClipToFrame(true);
+    renderContext->UpdateClipEdge(true);
 }
 
 void ToggleButtonPattern::InitParameters()
@@ -106,6 +103,7 @@ void ToggleButtonPattern::OnModifyDone()
     InitButtonAndText();
     HandleEnabled();
     InitTouchEvent();
+    InitHoverEvent();
     InitOnKeyEvent();
 }
 

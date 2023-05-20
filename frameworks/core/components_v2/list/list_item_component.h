@@ -44,6 +44,16 @@ public:
     ACE_DEFINE_COMPONENT_PROP(EditMode, uint32_t, EditMode::NONE);
     ACE_DEFINE_COMPONENT_PROP(BorderRadius, Dimension, 0.0_vp);
     ACE_DEFINE_COMPONENT_PROP(EdgeEffect, SwipeEdgeEffect, SwipeEdgeEffect::Spring);
+    ACE_DEFINE_COMPONENT_PROP(StartDeleteAreaDistance, Dimension, 0.0_vp);
+    ACE_DEFINE_COMPONENT_PROP(UseStartDefaultDeleteAnimation, bool, true);
+    ACE_DEFINE_COMPONENT_PROP(UseEndDefaultDeleteAnimation, bool, true);
+    ACE_DEFINE_COMPONENT_EVENT(OnStartDelete, void());
+    ACE_DEFINE_COMPONENT_EVENT(OnEnterStartDeleteArea, void());
+    ACE_DEFINE_COMPONENT_EVENT(OnExitStartDeleteArea, void());
+    ACE_DEFINE_COMPONENT_PROP(EndDeleteAreaDistance, Dimension, 0.0_vp);
+    ACE_DEFINE_COMPONENT_EVENT(OnEndDelete, void());
+    ACE_DEFINE_COMPONENT_EVENT(OnEnterEndDeleteArea, void());
+    ACE_DEFINE_COMPONENT_EVENT(OnExitEndDeleteArea, void());
 
     uint32_t Compare(const RefPtr<Component>& component) const override;
 

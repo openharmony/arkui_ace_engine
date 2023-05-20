@@ -273,9 +273,14 @@ template("declarative_js_engine") {
       "view_stack_processor.cpp",
 
       # Models implemenations for classic fw
+      "jsview/models/action_sheet_model_impl.cpp",
+      "jsview/models/alert_dialog_model_impl.cpp",
       "jsview/models/animator_model_impl.cpp",
       "jsview/models/badge_model_impl.cpp",
       "jsview/models/blank_model_impl.cpp",
+      "jsview/models/button_model_impl.cpp",
+      "jsview/models/calendar_controller_model_impl.cpp",
+      "jsview/models/calendar_model_impl.cpp",
       "jsview/models/checkbox_model_impl.cpp",
       "jsview/models/checkboxgroup_model_impl.cpp",
       "jsview/models/circle_model_impl.cpp",
@@ -288,6 +293,7 @@ template("declarative_js_engine") {
       "jsview/models/flex_model_impl.cpp",
       "jsview/models/for_each_model_impl.cpp",
       "jsview/models/gauge_model_impl.cpp",
+      "jsview/models/gesture_model_impl.cpp",
       "jsview/models/grid_col_model_impl.cpp",
       "jsview/models/grid_container_model_impl.cpp",
       "jsview/models/grid_item_model_impl.cpp",
@@ -295,7 +301,9 @@ template("declarative_js_engine") {
       "jsview/models/grid_row_model_impl.cpp",
       "jsview/models/hyperlink_model_impl.cpp",
       "jsview/models/if_else_model_impl.cpp",
+      "jsview/models/image_animator_model_impl.cpp",
       "jsview/models/image_model_impl.cpp",
+      "jsview/models/indexer_model_impl.cpp",
       "jsview/models/lazy_for_each_model_impl.cpp",
       "jsview/models/line_model_impl.cpp",
       "jsview/models/linear_split_model_impl.cpp",
@@ -304,6 +312,8 @@ template("declarative_js_engine") {
       "jsview/models/list_model_impl.cpp",
       "jsview/models/loading_progress_model_impl.cpp",
       "jsview/models/marquee_model_impl.cpp",
+      "jsview/models/menu_item_model_impl.cpp",
+      "jsview/models/menu_model_impl.cpp",
       "jsview/models/navigator_model_impl.cpp",
       "jsview/models/page_transition_model_impl.cpp",
       "jsview/models/path_model_impl.cpp",
@@ -316,6 +326,7 @@ template("declarative_js_engine") {
       "jsview/models/rect_model_impl.cpp",
       "jsview/models/refresh_model_impl.cpp",
       "jsview/models/row_model_impl.cpp",
+      "jsview/models/scroll_bar_model_impl.cpp",
       "jsview/models/scroll_model_impl.cpp",
       "jsview/models/search_model_impl.cpp",
       "jsview/models/select_model_impl.cpp",
@@ -424,7 +435,10 @@ template("declarative_js_engine") {
     }
 
     if (defined(config.remote_window_support) && config.remote_window_support) {
-      sources += [ "jsview/js_remote_window.cpp" ]
+      sources += [
+        "jsview/js_remote_window.cpp",
+        "jsview/models/remote_window_model_impl.cpp",
+      ]
     }
 
     if (defined(config.plugin_components_support) &&
@@ -586,6 +600,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_rating.cpp",
       "jsview/js_row.cpp",
       "jsview/js_scroll.cpp",
+      "jsview/js_scroller.cpp",
       "jsview/js_span.cpp",
       "jsview/js_stack.cpp",
       "jsview/js_swiper.cpp",
@@ -594,9 +609,11 @@ template("declarative_js_engine_ng") {
       "jsview/js_tabs_controller.cpp",
       "jsview/js_text.cpp",
       "jsview/js_toggle.cpp",
+      "jsview/js_utils.cpp",
       "jsview/js_view.cpp",
       "jsview/js_view_abstract.cpp",
       "jsview/js_view_context.cpp",
+      "jsview/scroll_bar/js_scroll_bar.cpp",
     ]
 
     sources += [

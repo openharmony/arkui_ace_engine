@@ -137,9 +137,7 @@ void JSSideBar::JSBind(BindingTarget globalObj)
     JSClass<JSSideBar>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSideBar>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSSideBar>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSSideBar>::Inherit<JSContainerBase>();
-    JSClass<JSSideBar>::Inherit<JSViewAbstract>();
-    JSClass<JSSideBar>::Bind(globalObj);
+    JSClass<JSSideBar>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSSideBar::OnChange(const JSCallbackInfo& info)

@@ -25,7 +25,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/bubble//bubble_event_hub.h"
-#include "core/components_ng/pattern/bubble/bubble_accessibility_property.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_algorithm.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_paint_method.h"
@@ -88,11 +87,6 @@ public:
         return { FocusType::SCOPE, true };
     }
 
-    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
-    {
-        return MakeRefPtr<BubbleAccessibilityProperty>();
-    }
-
     void StartEnteringAnimation(std::function<void()> finish);
     void StartExitingAnimation(std::function<void()> finish);
     bool IsOnShow();
@@ -106,7 +100,7 @@ private:
     RefPtr<PopupTheme> GetPopupTheme();
     void InitTouchEvent();
     void HandleTouchEvent(const TouchEventInfo& info);
-    void HandleTouchUp(const Offset& clickPosition);
+    void HandleTouchDown(const Offset& clickPosition);
     void RegisterButtonOnHover();
     void RegisterButtonOnTouch();
     void ButtonOnHover(bool isHover, const RefPtr<NG::FrameNode>& buttonNode);

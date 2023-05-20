@@ -15,6 +15,7 @@
 
 #include "gtest/gtest.h"
 
+#include "include/core/SkCanvas.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/ellipse_model_ng.h"
 #include "core/components_ng/pattern/shape/ellipse_pattern.h"
@@ -45,6 +46,8 @@ public:
         LayoutConstraintF layoutConstraint;
         layoutConstraint.percentReference.SetWidth(WIDTH);
         layoutConstraint.percentReference.SetHeight(HEIGHT);
+        layoutConstraint.selfIdealSize.SetWidth(WIDTH);
+        layoutConstraint.selfIdealSize.SetHeight(HEIGHT);
         layoutProperty->UpdateLayoutConstraint(layoutConstraint);
         layoutProperty->UpdateContentConstraint();
         auto size = layoutAlgorithm->MeasureContent(layoutProperty->CreateContentConstraint(), nullptr);

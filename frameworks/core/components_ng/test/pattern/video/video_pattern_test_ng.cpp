@@ -13,9 +13,12 @@
  * limitations under the License.
  */
 
+#include <cmath>
 #include <cstddef>
+#include <memory>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "gtest/gtest.h"
@@ -23,20 +26,26 @@
 #define private public
 #define protected public
 #include "base/geometry/ng/size_t.h"
+#include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/video/video_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/drag_event.h"
+#include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/video/video_layout_algorithm.h"
 #include "core/components_ng/pattern/video/video_layout_property.h"
 #include "core/components_ng/pattern/video/video_model_ng.h"
 #include "core/components_ng/pattern/video/video_pattern.h"
+#include "core/components_ng/pattern/video/video_styles.h"
 #include "core/components_ng/test/mock/render/mock_media_player.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/components_ng/test/mock/render/mock_render_surface.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/gestures/gesture_info.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
@@ -99,6 +108,7 @@ const SizeF LAYOUT_SIZE_RATIO_LESS_THAN_1(VIDEO_WIDTH, MAX_HEIGHT);
 const SizeF INVALID_SIZE(MAX_WIDTH, 0.0f);
 constexpr uint32_t VIDEO_CHILDREN_NUM = 2;
 constexpr uint32_t DURATION = 100;
+const std::string EXTRA_INFO_KEY = "extraInfo";
 TestProperty testProperty;
 } // namespace
 
@@ -638,15 +648,15 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest008, TestSize.Level1)
         .WillOnce(Return(true))
         .WillOnce(Return(true))
         .WillOnce(Return(true))
-        
+
         // 2nd time.
         .WillOnce(Return(true))
         .WillOnce(Return(true))
         .WillOnce(Return(true))
         .WillOnce(Return(true))
         .WillOnce(Return(true))
-         
-         // 3rd time.
+
+        // 3rd time.
         .WillOnce(Return(false))
         .WillOnce(Return(true))
         .WillOnce(Return(true))
@@ -1001,8 +1011,7 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest012, TestSize.Level1)
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Stop())
         .Times(2)
         .WillRepeatedly(Return(0));
-    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), GetDuration(_))
-        .Times(0);
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), GetDuration(_)).Times(0);
     updateCheck.clear();
     pattern->currentPos_ = 1;
     pattern->Stop(); // case3: media player is valid & currentPos != currentPos_ & duration_ = 0 &
@@ -1319,7 +1328,7 @@ HWTEST_F(VideoPropertyTestNg, VideoFullScreenTest015, TestSize.Level1)
 
 /**
  * @tc.name: VideoPropertyTest016
- * @tc.desc: Create Vdeo, and check the pixelmap.
+ * @tc.desc: Create Video, and check the pixelmap.
  * @tc.type: FUNC
  */
 HWTEST_F(VideoPropertyTestNg, VideoPropertyTest016, TestSize.Level1)
@@ -1378,5 +1387,285 @@ HWTEST_F(VideoPropertyTestNg, VideoPropertyTest016, TestSize.Level1)
 
     video.SetPosterSourceByPixelMap(pixelMap);
     EXPECT_EQ(videoLayoutProperty->GetPosterImageInfoValue(defaultImage), pixelMapImage);
+}
+
+/**
+ * @tc.name: VideoPatternTest017
+ * @tc.desc: Test VideoPattern OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoPropertyTestNg, VideoPatternTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a video and get the videoPattern.
+     * @tc.expected: step1. Create and get successfully.
+     */
+    VideoModelNG videoModelNG;
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    videoModelNG.Create(videoController);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    ASSERT_NE(videoPattern, nullptr);
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), IsMediaPlayerValid())
+        .WillRepeatedly(Return(false));
+
+    /**
+     * @tc.steps: step2. Set skipMeasure property of drawSwapConfig.
+     * @tc.expected: step2. LayoutWrapper swap failed.
+     */
+    DirtySwapConfig config;
+    config.skipMeasure = true;
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto videoLayoutProperty = frameNode->GetLayoutProperty<VideoLayoutProperty>();
+    ASSERT_NE(videoLayoutProperty, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, videoLayoutProperty);
+    layoutWrapper->skipMeasureContent_ = true;
+    EXPECT_FALSE(videoPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+    config.skipMeasure = false;
+    EXPECT_FALSE(videoPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+
+    /**
+     * @tc.steps: step3. Set skipMeasure property of layoutAlgorithm.
+     * @tc.expected: step3. LayoutWrapper swap failed.
+     */
+    config.skipMeasure = true;
+    layoutWrapper->skipMeasureContent_ = false;
+    auto layoutAlgorithm = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(AceType::MakeRefPtr<LayoutAlgorithm>());
+    layoutWrapper->layoutAlgorithm_ = layoutAlgorithm;
+    layoutWrapper->layoutAlgorithm_->skipMeasure_ = false;
+    EXPECT_FALSE(videoPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+
+    /**
+     * @tc.steps: step4. Call function while videoSize is null.
+     * @tc.expected: step4. LayoutWrapper swap failed.
+     */
+    config.skipMeasure = false;
+    std::optional<SizeF> videoSize;
+    std::unique_ptr<VideoStyle> tempPtr = std::make_unique<VideoStyle>();
+    videoLayoutProperty->propVideoStyle_ = std::move(tempPtr);
+    videoLayoutProperty->propVideoStyle_->propVideoSize = videoSize;
+    geometryNode->SetContentSize(SizeF(SCREEN_WIDTH_SMALL, 0.0f));
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    videoPattern->renderContextForMediaPlayer_ = mockRenderContext;
+    EXPECT_FALSE(videoPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+}
+
+/**
+ * @tc.name: VideoPatternTest018
+ * @tc.desc: Test VideoPattern OnAreaChangedInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoPropertyTestNg, VideoPatternTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a video and get the videoPattern.
+     * @tc.expected: step1. Create and get successfully.
+     */
+    VideoModelNG videoModelNG;
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    videoModelNG.Create(videoController);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    ASSERT_NE(videoPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set lastBoundsRect property.
+     * @tc.expected: step1. Property set successfully.
+     */
+    SystemProperties::SetExtSurfaceEnabled(false);
+    videoPattern->OnAreaChangedInner();
+    auto videoLayoutProperty = frameNode->GetLayoutProperty<VideoLayoutProperty>();
+    ASSERT_NE(videoLayoutProperty, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    SystemProperties::SetExtSurfaceEnabled(true);
+    videoLayoutProperty->UpdateObjectFit(ImageFit::CONTAIN);
+    geometryNode->SetContentSize(SizeF(SCREEN_WIDTH_SMALL, 0.0f));
+    videoLayoutProperty->propVideoStyle_->propVideoSize = SizeF(VIDEO_WIDTH, 0.0f);
+    videoPattern->OnAreaChangedInner();
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_WIDTH_SMALL);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), 0.0f);
+    videoPattern->OnAreaChangedInner();
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_WIDTH_SMALL);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), 0.0f);
+
+    /**
+     * @tc.steps: step3. Call function with different objectFit status.
+     * @tc.expected: step3. VideoPattern lastBoundsRect_'s width and height set correctly.
+     */
+    videoLayoutProperty->UpdateObjectFit(ImageFit::CONTAIN);
+    videoLayoutProperty->propVideoStyle_->propVideoSize = SizeF(VIDEO_WIDTH, VIDEO_HEIGHT);
+    videoPattern->OnAreaChangedInner();
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_WIDTH_SMALL);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), 0.0f);
+    geometryNode->SetContentSize(SizeF(SCREEN_WIDTH_SMALL, SCREEN_HEIGHT_SMALL));
+    videoLayoutProperty->propVideoStyle_->propVideoSize = SizeF(VIDEO_WIDTH, 0.0f);
+    videoPattern->OnAreaChangedInner();
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_WIDTH_SMALL);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), SCREEN_HEIGHT_SMALL);
+    videoLayoutProperty->propVideoStyle_->propVideoSize = SizeF(VIDEO_WIDTH * 2, VIDEO_HEIGHT);
+    videoPattern->OnAreaChangedInner();
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_WIDTH_SMALL);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), SCREEN_WIDTH_SMALL / 2);
+    geometryNode->SetContentSize(SizeF(SCREEN_WIDTH_SMALL * 6, SCREEN_HEIGHT_SMALL));
+    videoPattern->OnAreaChangedInner();
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_HEIGHT_SMALL * 2);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), SCREEN_HEIGHT_SMALL);
+
+    videoLayoutProperty->UpdateObjectFit(ImageFit::FILL);
+    geometryNode->SetContentSize(SizeF(SCREEN_WIDTH_SMALL, SCREEN_HEIGHT_SMALL));
+    videoPattern->OnAreaChangedInner();
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_WIDTH_SMALL);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), SCREEN_HEIGHT_SMALL);
+
+    videoLayoutProperty->UpdateObjectFit(ImageFit::COVER);
+    geometryNode->SetContentSize(SizeF(SCREEN_WIDTH_SMALL, 0.0f));
+    videoLayoutProperty->propVideoStyle_->propVideoSize = SizeF(VIDEO_WIDTH, VIDEO_HEIGHT);
+    videoPattern->OnAreaChangedInner();
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_WIDTH_SMALL);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), 0.0f);
+    geometryNode->SetContentSize(SizeF(SCREEN_WIDTH_SMALL, SCREEN_HEIGHT_SMALL));
+    videoLayoutProperty->propVideoStyle_->propVideoSize = SizeF(VIDEO_WIDTH, 0.0f);
+    videoPattern->OnAreaChangedInner();
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_WIDTH_SMALL);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), SCREEN_HEIGHT_SMALL);
+    videoLayoutProperty->propVideoStyle_->propVideoSize = SizeF(VIDEO_WIDTH * 2, VIDEO_HEIGHT);
+    videoPattern->OnAreaChangedInner();
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_HEIGHT_SMALL * 2);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), SCREEN_HEIGHT_SMALL);
+    geometryNode->SetContentSize(SizeF(SCREEN_WIDTH_SMALL * 6, SCREEN_HEIGHT_SMALL));
+    videoPattern->OnAreaChangedInner();
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_WIDTH_SMALL * 6);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), SCREEN_WIDTH_SMALL * 3);
+
+    videoLayoutProperty->UpdateObjectFit(ImageFit::NONE);
+    videoLayoutProperty->propVideoStyle_->propVideoSize = SizeF(VIDEO_WIDTH, VIDEO_HEIGHT);
+    videoPattern->OnAreaChangedInner();
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), VIDEO_WIDTH);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), VIDEO_HEIGHT);
+
+    videoLayoutProperty->UpdateObjectFit(ImageFit::SCALE_DOWN);
+    geometryNode->SetContentSize(SizeF(SCREEN_WIDTH_SMALL, SCREEN_HEIGHT_SMALL));
+    videoPattern->OnAreaChangedInner();
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), VIDEO_WIDTH);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), VIDEO_HEIGHT);
+    videoLayoutProperty->propVideoStyle_->propVideoSize = SizeF(VIDEO_WIDTH * 2, VIDEO_HEIGHT);
+    videoPattern->OnAreaChangedInner();
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_WIDTH_SMALL);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), SCREEN_WIDTH_SMALL / 2);
+
+    videoLayoutProperty->UpdateObjectFit(ImageFit::FITHEIGHT);
+    videoPattern->OnAreaChangedInner();
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_WIDTH_SMALL);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), SCREEN_WIDTH_SMALL / 2);
+}
+
+/**
+ * @tc.name: VideoPatternTest019
+ * @tc.desc: Test VideoPattern requestFullscreenImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoPropertyTestNg, VideoPatternTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a video and get the videoPattern.
+     * @tc.expected: step1. Create and get successfully.
+     */
+    VideoModelNG videoModelNG;
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    videoModelNG.Create(videoController);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    ASSERT_NE(videoPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set controlBar Property.
+     * @tc.expected: step2. Property set successfully.
+     */
+    frameNode->children_.clear();
+    videoPattern->isPlaying_ = false;
+    auto controlBar = videoPattern->CreateControlBar();
+    auto playButton = AceType::DynamicCast<FrameNode>(controlBar->GetFirstChild());
+    auto playBtnEvent = playButton->GetOrCreateGestureEventHub();
+    auto playClickCallback = playBtnEvent->clickEventActuator_->userCallback_->callback_;
+    GestureEvent gestureEvent;
+    playClickCallback(gestureEvent);
+
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
+    ASSERT_NE(videoTheme, nullptr);
+    EXPECT_EQ(controlBar->GetRenderContext()->GetBackgroundColorValue(), videoTheme->GetBkgColor());
+    auto controlBarLayoutProperty = controlBar->GetLayoutProperty<LinearLayoutProperty>();
+    EXPECT_EQ(controlBarLayoutProperty->GetMainAxisAlignValue(FlexAlign::AUTO), FlexAlign::SPACE_BETWEEN);
+}
+
+/**
+ * @tc.name: VideoPatternTest020
+ * @tc.desc: Test VideoPattern dragEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoPropertyTestNg, VideoPatternTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a video and get the videoPattern.
+     * @tc.expected: step1. Create and get successfully.
+     */
+    VideoModelNG videoModelNG;
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    videoModelNG.Create(videoController);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    ASSERT_NE(videoPattern, nullptr);
+
+    videoPattern->src_ = "test";
+    videoPattern->OnModifyDone();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto dragEnd = eventHub->onDrop_;
+    std::string extraParams;
+    dragEnd(nullptr, extraParams);
+
+    /**
+     * @tc.steps: step2. Call dragEnd in different wrong situation.
+     * @tc.expected: step2. Log error message.
+     */
+    auto json = JsonUtil::Create(false);
+    json->Put(EXTRA_INFO_KEY.c_str(), "");
+    dragEnd(nullptr, json->ToString());
+    json->Delete(EXTRA_INFO_KEY.c_str());
+    json->Put(EXTRA_INFO_KEY.c_str(), "test");
+    dragEnd(nullptr, json->ToString());
+    json->Delete(EXTRA_INFO_KEY.c_str());
+    json->Put(EXTRA_INFO_KEY.c_str(), "test::");
+    dragEnd(nullptr, json->ToString());
+    json->Delete(EXTRA_INFO_KEY.c_str());
+    json->Put(EXTRA_INFO_KEY.c_str(), "::test");
+    dragEnd(nullptr, json->ToString());
+
+    videoPattern->isInitialState_ = false;
+    json->Delete(EXTRA_INFO_KEY.c_str());
+    json->Put(EXTRA_INFO_KEY.c_str(), "test::test");
+    dragEnd(nullptr, json->ToString());
+    videoPattern->isInitialState_ = true;
+    dragEnd(nullptr, json->ToString());
+
+    /**
+     * @tc.steps: step3. Call dragEnd while use new video src.
+     * @tc.expected: step3. VideoPattern property set correctly.
+     */
+    json->Delete(EXTRA_INFO_KEY.c_str());
+    json->Put(EXTRA_INFO_KEY.c_str(), "test::newTest");
+    videoPattern->SetIsStop(false);
+    videoPattern->isInitialState_ = false;
+    dragEnd(nullptr, json->ToString());
+    EXPECT_TRUE(videoPattern->isStop_);
+    videoPattern->SetIsDrag(true);
+    dragEnd(nullptr, json->ToString());
+    EXPECT_FALSE(videoPattern->isDrag_);
 }
 } // namespace OHOS::Ace::NG

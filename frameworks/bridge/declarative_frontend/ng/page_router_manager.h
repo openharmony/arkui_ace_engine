@@ -40,24 +40,12 @@ enum class RouterMode {
     SINGLE,
 };
 
-enum class RouterAction {
-    DEFAULT = 0,
-    PUSH,
-    REPLACE,
-    BACK,
-    CLEAR,
-};
-
 struct RouterPageInfo {
     std::string url;
-    RouterMode routerMode = RouterMode::STANDARD;
-    std::string path;
-};
-
-struct RouterTask {
-    RouterAction action = RouterAction::PUSH;
-    RouterPageInfo routerPageInfo;
     std::string params;
+    RouterMode routerMode = RouterMode::STANDARD;
+    std::function<void(const std::string&, int32_t)> errorCallback;
+    std::string path;
 };
 
 class PageRouterManager : public AceType {
@@ -67,8 +55,6 @@ public:
     ~PageRouterManager() override = default;
 
     void RunPage(const std::string& url, const std::string& params);
-    void LoadOhmUrl(const RouterPageInfo& target, const std::string& params);
-
     void RunCard(const std::string& url, const std::string& params, int64_t cardId);
 
     void SetManifestParser(const RefPtr<Framework::ManifestParser>& manifestParser)
@@ -93,16 +79,10 @@ public:
     void DisableAlertBeforeBackPage();
 
     // router operation
-    void Push(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD);
-    void PushWithCallback(const RouterPageInfo& target, const std::string& params,
-        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr,
-        RouterMode mode = RouterMode::STANDARD);
+    void Push(const RouterPageInfo& target);
     bool Pop();
-    void Replace(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD);
-    void ReplaceWithCallback(const RouterPageInfo& target, const std::string& params,
-        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr,
-        RouterMode mode = RouterMode::STANDARD);
-    void BackWithTarget(const RouterPageInfo& target, const std::string& params);
+    void Replace(const RouterPageInfo& target);
+    void BackWithTarget(const RouterPageInfo& target);
     void Clear();
     int32_t GetStackSize() const;
 
@@ -131,6 +111,10 @@ public:
 
     void FlushFrontend();
 
+    std::unique_ptr<JsonValue> GetStackInfo();
+
+    std::string RestoreRouterStack(std::unique_ptr<JsonValue> stackInfo);
+
 private:
     class RouterOptScope {
     public:
@@ -152,24 +136,20 @@ private:
 
     std::pair<int32_t, RefPtr<FrameNode>> FindPageInStack(const std::string& url);
 
-    void PushOhmUrl(const RouterPageInfo& target, const std::string& params, RouterMode mode,
-        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
-    void StartPush(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD,
-        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
-    void StartBack(const RouterPageInfo& target, const std::string& params, bool enableAlert = false);
+    void LoadOhmUrl(const RouterPageInfo& target);
+    void PushOhmUrl(const RouterPageInfo& target);
+    void ReplaceOhmUrl(const RouterPageInfo& target);
+    void StartPush(const RouterPageInfo& target);
+    void StartReplace(const RouterPageInfo& target);
+    void StartBack(const RouterPageInfo& target);
     bool StartPop();
-    void StartReplace(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD,
-        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
-    void ReplaceOhmUrl(const RouterPageInfo& target, const std::string& params, RouterMode mode,
-        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
-    void BackCheckAlert(const RouterPageInfo& target, const std::string& params);
+    void StartRestore(const RouterPageInfo& target);
+    void BackCheckAlert(const RouterPageInfo& target);
     void StartClean();
     void CleanPageOverlay();
 
     // page operations
-    void LoadPage(int32_t pageId, const RouterPageInfo& target, const std::string& params, bool isRestore = false,
-        bool needHideLast = true, bool needTransition = true,
-        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
+    void LoadPage(int32_t pageId, const RouterPageInfo& target, bool needHideLast = true, bool needTransition = true);
     void MovePageToFront(int32_t index, const RefPtr<FrameNode>& pageNode, const std::string& params, bool needHideLast,
         bool forceShowCurrent = false, bool needTransition = true);
     void PopPage(const std::string& params, bool needShowNext, bool needTransition);
@@ -192,8 +172,8 @@ private:
     bool isCardRouter_ = false;
     int32_t pageId_ = 0;
     std::list<WeakPtr<FrameNode>> pageRouterStack_;
-    RouterPageInfo ngBackUri_ = { "" };
-    std::string backParam_;
+    std::list<std::string> restorePageStack_;
+    RouterPageInfo ngBackTarget_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PageRouterManager);
 };

@@ -16,6 +16,7 @@
 #include "core/components_ng/render/render_context.h"
 
 #include "core/components_ng/base/frame_node.h"
+
 namespace OHOS::Ace::NG {
 void RenderContext::SetRequestFrame(const std::function<void()>& requestFrame)
 {
@@ -46,6 +47,7 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ACE_PROPERTY_TO_JSON_VALUE(propOverlay_, OverlayProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propPositionProperty_, RenderPositionProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propBackground_, BackgroundProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(propForeground_, ForegroundProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propGraphics_, GraphicsProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propGradient_, GradientProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propTransform_, TransformProperty);
@@ -82,11 +84,23 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     pixelJsonValue->Put("bottom", pixStretchEffectOption.bottom.ToString().c_str());
     json->Put("pixelStretchEffect", pixelJsonValue);
     json->Put("foregroundColor", propForegroundColor_.value_or(Color::FOREGROUND).ColorToString().c_str());
-    auto clickEffectJsonValue = JsonUtil::Create(true);
+}
 
-    clickEffectJsonValue->Put("level", std::to_string((int)propClickEffectLevel_.value().level).c_str());
-    clickEffectJsonValue->Put("scale", std::to_string((float)propClickEffectLevel_.value().scaleNumber).c_str());
-
-    json->Put("clickEffect", clickEffectJsonValue);
+void RenderContext::FromJson(const std::unique_ptr<JsonValue>& json)
+{
+    auto borderRadius = json->GetValue("borderRadius");
+    BorderRadiusProperty brp;
+    brp.radiusTopLeft = Dimension::FromString(borderRadius->GetString("topLeft"));
+    brp.radiusTopRight = Dimension::FromString(borderRadius->GetString("topRight"));
+    brp.radiusBottomLeft = Dimension::FromString(borderRadius->GetString("bottomLeft"));
+    brp.radiusBottomRight = Dimension::FromString(borderRadius->GetString("bottomRight"));
+    UpdateBorderRadius(brp);
+    UpdateBackgroundColor(Color::ColorFromString(json->GetString("backgroundColor")));
+    auto clip = json->GetString("clip");
+    if (clip == "true" || clip == "false") {
+        UpdateClipEdge(clip == "true" ? true : false);
+    } else {
+        LOGE("UITree |ERROR| invalid clip=%{public}s", clip.c_str());
+    }
 }
 } // namespace OHOS::Ace::NG

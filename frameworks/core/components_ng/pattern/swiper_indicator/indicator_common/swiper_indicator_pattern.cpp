@@ -64,6 +64,8 @@ void SwiperIndicatorPattern::OnModifyDone()
         UpdateTextContent(layoutProperty, firstTextNode, lastTextNode);
         host->AddChild(firstTextNode);
         host->AddChild(lastTextNode);
+    } else {
+        host->Clean();
     }
 
     auto swiperEventHub = swiperPattern->GetEventHub<SwiperEventHub>();
@@ -220,6 +222,18 @@ void SwiperIndicatorPattern::HandleHoverEvent(bool isHover)
     isHover_ = isHover;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    if (swiperLayoutProperty->GetHoverShowValue(false)) {
+        swiperPattern->ArrowHover(isHover_);
+    }
+    if (swiperIndicatorType_ == SwiperIndicatorType::DOT) {
+        swiperPattern->IndicatorHover(isHover_);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -448,30 +462,7 @@ void SwiperIndicatorPattern::HandleDragStart(const GestureEvent& info)
 
 void SwiperIndicatorPattern::HandleDragUpdate(const GestureEvent& info)
 {
-    auto swiperNode = GetSwiperNode();
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    auto currentIndex = swiperPattern->GetCurrentIndex();
-    auto childrenSize = swiperPattern->TotalCount();
-
-    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_VOID(swiperLayoutProperty);
-    auto displayCount = swiperLayoutProperty->GetDisplayCount().value_or(1);
-
-    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_VOID(swiperPaintProperty);
-    auto isLoop = swiperPaintProperty->GetLoop().value_or(true);
-    bool isTouchBottom = false;
-    if ((currentIndex >= childrenSize - displayCount) && !isLoop) {
-        isTouchBottom = true;
-    }
-
-    if (isTouchBottom_ != isTouchBottom) {
-        isTouchBottom_ = isTouchBottom;
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (CheckIsTouchBottom(info)) {
         return;
     }
 
@@ -483,6 +474,10 @@ void SwiperIndicatorPattern::HandleDragUpdate(const GestureEvent& info)
         isTouchBottomAnimationPlay_ = false;
     }
 
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
     if (!isTouchBottomAnimationPlay_ && GreatOrEqual(moveDistance, INDICATOR_DRAG_MIN_DISTANCE.ConvertToPx())) {
         if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
             swiperPattern->ShowNext();
@@ -501,7 +496,60 @@ void SwiperIndicatorPattern::HandleDragEnd(double dragVelocity)
     CHECK_NULL_VOID(swiperPattern);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    isTouchBottom_ = false;
+    touchBottomType_ = TouchBottomType::NONE;
+    touchBottomStartPosition_.reset();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+bool SwiperIndicatorPattern::CheckIsTouchBottom(const GestureEvent& info)
+{
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_RETURN(swiperNode, false);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(swiperPattern, false);
+    auto currentIndex = swiperPattern->GetCurrentIndex();
+    auto childrenSize = swiperPattern->TotalCount();
+
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, false);
+    auto displayCount = swiperLayoutProperty->GetDisplayCount().value_or(1);
+
+    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_RETURN(swiperPaintProperty, false);
+    auto isLoop = swiperPaintProperty->GetLoop().value_or(true);
+    auto dragPoint =
+        PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
+    TouchBottomType touchBottomType = TouchBottomType::NONE;
+
+    if ((currentIndex <= 0) && !isLoop) {
+        if (!touchBottomStartPosition_.has_value()) {
+            touchBottomStartPosition_ = dragPoint;
+        }
+
+        auto offset = dragPoint - touchBottomStartPosition_.value();
+        if (Negative(info.GetMainDelta()) || NonPositive(offset.GetX())) {
+            touchBottomType = TouchBottomType::START;
+        }
+    }
+
+    if ((currentIndex >= childrenSize - displayCount) && !isLoop) {
+        if (!touchBottomStartPosition_.has_value()) {
+            touchBottomStartPosition_ = dragPoint;
+        }
+
+        auto offset = dragPoint - touchBottomStartPosition_.value();
+        if (Positive(info.GetMainDelta()) || NonNegative(offset.GetX())) {
+            touchBottomType = TouchBottomType::END;
+        }
+    }
+
+    if (touchBottomType_ != touchBottomType) {
+        touchBottomType_ = touchBottomType;
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+
+    return touchBottomType == TouchBottomType::NONE ? false : true;
 }
 } // namespace OHOS::Ace::NG

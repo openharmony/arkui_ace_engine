@@ -77,13 +77,6 @@ bool ScrollablePattern::OnScrollCallback(float offset, int32_t source)
 
 bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
 {
-    if (coordinationEvent_ && isReactInParentMovement_) {
-        auto onScroll = coordinationEvent_->GetOnScroll();
-        if (onScroll) {
-            onScroll(offset);
-            return false;
-        }
-    }
     auto isAtTop = (IsAtTop() && Positive(offset));
     if (isAtTop && source == SCROLL_FROM_UPDATE && !isReactInParentMovement_ && (axis_ == Axis::VERTICAL)) {
         isReactInParentMovement_ = true;
@@ -92,6 +85,20 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
             if (onScrollStart) {
                 onScrollStart();
             }
+        }
+    }
+    if (coordinationEvent_ && source != SCROLL_FROM_UPDATE && isReactInParentMovement_) {
+        isReactInParentMovement_ = false;
+        auto onScrollEnd = coordinationEvent_->GetOnScrollEndEvent();
+        if (onScrollEnd) {
+            onScrollEnd();
+        }
+    }
+    if (coordinationEvent_ && isReactInParentMovement_) {
+        auto onScroll = coordinationEvent_->GetOnScroll();
+        if (onScroll) {
+            onScroll(offset);
+            return scrollEffect_ && scrollEffect_->IsSpringEffect();
         }
     }
     if (source == SCROLL_FROM_START) {
@@ -195,7 +202,8 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
 bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const SizeF& size)
 {
     // check edgeEffect is not springEffect
-    if (scrollEffect_ && scrollEffect_->IsFadeEffect() && source != SCROLL_FROM_BAR) {    // handle edge effect
+    if (scrollEffect_ && scrollEffect_->IsFadeEffect() && source != SCROLL_FROM_BAR &&
+        source != SCROLL_FROM_AXIS) {    // handle edge effect
         if ((IsAtTop() && Positive(offset)) || (IsAtBottom() && Negative(offset))) {
             scrollEffect_->HandleOverScroll(GetAxis(), -offset, size);
         }

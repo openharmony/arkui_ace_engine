@@ -41,6 +41,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t COUNTER_TEXT_MAXLINE = 1;
+constexpr float ERROR_TEXT_UNDERLINE_MARGIN = 27.0f;
+constexpr float ERROR_TEXT_CAPSULE_MARGIN = 33.0f;
 }
 
 void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -207,11 +209,17 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, std::nullopt);
     if (layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength()) {
-        auto textLength = textContent.length();
+        auto textLength = showPlaceHolder ? 0 : StringUtils::ToWstring(textContent).length();
         auto maxLength = layoutProperty->GetMaxLength().value();
         CreateCounterParagraph(textLength, maxLength, textFieldTheme);
         if (counterParagraph_) {
             counterParagraph_->Layout(idealWidth - pattern->GetScrollBarWidth() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx());
+        }
+    }
+    if (layoutProperty->GetShowErrorTextValue(false)) {
+        CreateErrorParagraph(layoutProperty->GetErrorTextValue(""), textFieldTheme);
+        if (errorParagraph_) {
+            errorParagraph_->Layout(std::numeric_limits<double>::infinity());
         }
     }
     auto paragraphNewWidth = static_cast<float>(paragraph_->GetMaxIntrinsicWidth());
@@ -354,6 +362,33 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto imageOffset = Alignment::GetAlignPosition(size, imageRect_.GetSize(), Alignment::CENTER_RIGHT);
         imageOffset.AddX(-pattern->GetIconRightOffset());
         imageRect_.SetOffset(imageOffset);
+    }
+
+    auto frameBottom = pattern->GetMarginBottom();
+    MarginProperty errorMargin;
+    if (pattern->GetShowUnderLine() && layoutProperty->GetShowErrorTextValue(false) &&
+        (frameBottom < ERROR_TEXT_UNDERLINE_MARGIN)) {
+        errorMargin.bottom = CalcLength(ERROR_TEXT_UNDERLINE_MARGIN);
+        frameNode->GetLayoutProperty()->UpdateMargin(errorMargin);
+    }
+    if (pattern->NeedShowPasswordIcon() && layoutProperty->GetShowErrorTextValue(false) &&
+        (frameBottom < ERROR_TEXT_CAPSULE_MARGIN)) {
+        errorMargin.bottom = CalcLength(ERROR_TEXT_CAPSULE_MARGIN);
+        frameNode->GetLayoutProperty()->UpdateMargin(errorMargin);
+    }
+    if (pattern->GetShowUnderLine()) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(textFieldTheme);
+        if (!layoutProperty->GetShowErrorTextValue(false) && layoutWrapper->IsActive()) {
+            pattern->SetUnderlineWidth(ACTIVED_UNDERLINE_WIDTH);
+            pattern->SetUnderlineColor(textFieldTheme->GetUnderlineActivedColor());
+        }
+        if (!layoutProperty->GetShowErrorTextValue(false) && !layoutWrapper->IsActive()) {
+            pattern->SetUnderlineWidth(UNDERLINE_WIDTH);
+            pattern->SetUnderlineColor(textFieldTheme->GetUnderlineColor());
+        }
     }
     UpdateUnitLayout(layoutWrapper);
 }
@@ -513,7 +548,7 @@ void TextFieldLayoutAlgorithm::CreateCounterParagraph(
     int32_t textLength, int32_t maxLength, const RefPtr<TextFieldTheme>& theme)
 {
     CHECK_NULL_VOID(theme);
-    TextStyle countTextStyle = (textLength != maxLength) ? theme->GetCountTextStyle() : theme->GetOverCountStyle();
+    TextStyle countTextStyle = (textLength != maxLength) ? theme->GetCountTextStyle() : theme->GetOverCountTextStyle();
     std::string counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
     RSParagraphStyle paraStyle;
     paraStyle.fontSize_ = countTextStyle.GetFontSize().ConvertToPx();
@@ -527,6 +562,24 @@ void TextFieldLayoutAlgorithm::CreateCounterParagraph(
 
     auto paragraph = builder->Build();
     counterParagraph_.reset(paragraph.release());
+}
+
+void TextFieldLayoutAlgorithm::CreateErrorParagraph(const std::string& content, const RefPtr<TextFieldTheme>& theme)
+{
+    CHECK_NULL_VOID(theme);
+    TextStyle errorTextStyle = theme->GetErrorTextStyle();
+    std::string counterText = content;
+    RSParagraphStyle paraStyle;
+    paraStyle.fontSize_ = errorTextStyle.GetFontSize().ConvertToPx();
+    paraStyle.textAlign_ = ToRSTextAlign(TextAlign::START);
+    auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance(false));
+    builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), errorTextStyle));
+    StringUtils::TransformStrCase(counterText, static_cast<int32_t>(errorTextStyle.GetTextCase()));
+    builder->AddText(StringUtils::Str8ToStr16(counterText));
+    builder->Pop();
+
+    auto paragraph = builder->Build();
+    errorParagraph_.reset(paragraph.release());
 }
 
 TextDirection TextFieldLayoutAlgorithm::GetTextDirection(const std::string& content)
@@ -553,6 +606,11 @@ const std::shared_ptr<RSParagraph>& TextFieldLayoutAlgorithm::GetParagraph()
 const std::shared_ptr<RSParagraph>& TextFieldLayoutAlgorithm::GetCounterParagraph() const
 {
     return counterParagraph_;
+}
+
+const std::shared_ptr<RSParagraph>& TextFieldLayoutAlgorithm::GetErrorParagraph() const
+{
+    return errorParagraph_;
 }
 
 float TextFieldLayoutAlgorithm::GetTextFieldDefaultHeight()

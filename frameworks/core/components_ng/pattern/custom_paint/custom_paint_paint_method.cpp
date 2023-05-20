@@ -537,10 +537,10 @@ void CustomPaintPaintMethod::FillRect(PaintWrapper* paintWrapper, const Rect& re
         path.addRect(skRect);
         PaintShadow(path, shadow_, skCanvas_.get());
     }
-    if (fillState_.GetGradient().IsValid()) {
+    if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
         UpdatePaintShader(offset, paint, fillState_.GetGradient());
     }
-    if (fillState_.GetPatternValue().IsValid()) {
+    if (fillState_.GetPatternValue().IsValid() && fillState_.GetPaintStyle() == PaintStyle::ImagePattern) {
         UpdatePaintShader(fillState_.GetPatternValue(), paint);
     }
     if (globalState_.HasGlobalAlpha()) {
@@ -578,10 +578,10 @@ void CustomPaintPaintMethod::StrokeRect(PaintWrapper* paintWrapper, const Rect& 
         path.addRect(skRect);
         PaintShadow(path, shadow_, skCanvas_.get());
     }
-    if (strokeState_.GetGradient().IsValid()) {
+    if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
         UpdatePaintShader(offset, paint, strokeState_.GetGradient());
     }
-    if (strokeState_.GetPatternValue().IsValid()) {
+    if (strokeState_.GetPatternValue().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::ImagePattern) {
         UpdatePaintShader(strokeState_.GetPatternValue(), paint);
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
@@ -665,10 +665,10 @@ void CustomPaintPaintMethod::Fill(PaintWrapper* paintWrapper)
     if (HasShadow()) {
         PaintShadow(skPath_, shadow_, skCanvas_.get());
     }
-    if (fillState_.GetGradient().IsValid()) {
+    if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
         UpdatePaintShader(offset, paint, fillState_.GetGradient());
     }
-    if (fillState_.GetPatternValue().IsValid()) {
+    if (fillState_.GetPatternValue().IsValid() && fillState_.GetPaintStyle() == PaintStyle::ImagePattern) {
         UpdatePaintShader(fillState_.GetPatternValue(), paint);
     }
     if (globalState_.HasGlobalAlpha()) {
@@ -712,10 +712,10 @@ void CustomPaintPaintMethod::Path2DFill(const OffsetF& offset)
     if (HasShadow()) {
         PaintShadow(skPath2d_, shadow_, skCanvas_.get());
     }
-    if (fillState_.GetGradient().IsValid()) {
+    if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
         UpdatePaintShader(offset, paint, fillState_.GetGradient());
     }
-    if (fillState_.GetPatternValue().IsValid()) {
+    if (fillState_.GetPatternValue().IsValid() && fillState_.GetPaintStyle() == PaintStyle::ImagePattern) {
         UpdatePaintShader(fillState_.GetPatternValue(), paint);
     }
     if (globalState_.HasGlobalAlpha()) {
@@ -749,10 +749,10 @@ void CustomPaintPaintMethod::Stroke(PaintWrapper* paintWrapper)
     if (HasShadow()) {
         PaintShadow(skPath_, shadow_, skCanvas_.get());
     }
-    if (strokeState_.GetGradient().IsValid()) {
+    if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
         UpdatePaintShader(offset, paint, strokeState_.GetGradient());
     }
-    if (strokeState_.GetPatternValue().IsValid()) {
+    if (strokeState_.GetPatternValue().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::ImagePattern) {
         UpdatePaintShader(strokeState_.GetPatternValue(), paint);
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
@@ -791,10 +791,10 @@ void CustomPaintPaintMethod::Path2DStroke(const OffsetF& offset)
     if (HasShadow()) {
         PaintShadow(skPath2d_, shadow_, skCanvas_.get());
     }
-    if (strokeState_.GetGradient().IsValid()) {
+    if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
         UpdatePaintShader(offset, paint, strokeState_.GetGradient());
     }
-    if (strokeState_.GetPatternValue().IsValid()) {
+    if (strokeState_.GetPatternValue().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::ImagePattern) {
         UpdatePaintShader(strokeState_.GetPatternValue(), paint);
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
@@ -1390,21 +1390,21 @@ void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam, 
     float rad = 0.0f;
     if (percent.find("deg") != std::string::npos) {
         size_t index = percent.find("deg");
-        percent = percent.substr(0, index);
+        percent.resize(index);
         std::istringstream iss(percent);
         iss >> rad;
         rad = rad / HALF_CIRCLE_ANGLE * M_PI;
     }
     if (percent.find("turn") != std::string::npos) {
         size_t index = percent.find("turn");
-        percent = percent.substr(0, index);
+        percent.resize(index);
         std::istringstream iss(percent);
         iss >> rad;
         rad = rad * 2 * M_PI;
     }
     if (percent.find("rad") != std::string::npos) {
         size_t index = percent.find("rad");
-        percent = percent.substr(0, index);
+        percent.resize(index);
         std::istringstream iss(percent);
         iss >> rad;
     }

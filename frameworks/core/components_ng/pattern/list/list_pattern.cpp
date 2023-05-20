@@ -85,6 +85,7 @@ void ListPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID_NOLOG(focusHub);
     InitOnKeyEvent(focusHub);
+    SetAccessibilityAction();
 }
 
 bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -93,30 +94,22 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         return false;
     }
     bool isJump = false;
-    float jumpDistance = 0.0f;
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto listLayoutAlgorithm = DynamicCast<ListLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(listLayoutAlgorithm, false);
     itemPosition_ = listLayoutAlgorithm->GetItemPosition();
     maxListItemIndex_ = listLayoutAlgorithm->GetMaxListItemIndex();
+    spaceWidth_ = listLayoutAlgorithm->GetSpaceWidth();
+    float absoluteOffset = 0.0f;
+    float relativeOffset = listLayoutAlgorithm->GetCurrentOffset();
     if (jumpIndex_) {
-        jumpDistance = listLayoutAlgorithm->GetEstimateOffset() - estimateOffset_;
-        estimateOffset_ = listLayoutAlgorithm->GetEstimateOffset();
-        if (!itemPosition_.empty()) {
-            currentOffset_ = itemPosition_.begin()->second.startPos;
-        }
+        absoluteOffset = listLayoutAlgorithm->GetEstimateOffset();
+        relativeOffset += absoluteOffset - currentOffset_;
         isJump = true;
         jumpIndex_.reset();
     }
-    auto finalOffset = listLayoutAlgorithm->GetCurrentOffset();
-    spaceWidth_ = listLayoutAlgorithm->GetSpaceWidth();
-    if (listLayoutAlgorithm->GetStartIndex() == 0) {
-        estimateOffset_ = 0;
-        currentOffset_ = listLayoutAlgorithm->GetStartPosition();
-    } else {
-        currentOffset_ = currentOffset_ - finalOffset;
-    }
+    currentOffset_ = currentOffset_ + relativeOffset;
     if (isScrollEnd_) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
@@ -142,7 +135,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         (startIndex_ != listLayoutAlgorithm->GetStartIndex()) || (endIndex_ != listLayoutAlgorithm->GetEndIndex());
     startIndex_ = listLayoutAlgorithm->GetStartIndex();
     endIndex_ = listLayoutAlgorithm->GetEndIndex();
-    ProcessEvent(indexChanged, finalOffset + jumpDistance, isJump, prevStartOffset, prevEndOffset);
+    ProcessEvent(indexChanged, relativeOffset, isJump, prevStartOffset, prevEndOffset);
     UpdateScrollBarOffset();
     CheckRestartSpring();
 
@@ -693,7 +686,7 @@ void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
         StopScrollable();
     }
     if (!animator_) {
-        animator_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
+        animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
         animator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
             auto list = weak.Upgrade();
             CHECK_NULL_VOID_NOLOG(list);
@@ -1084,5 +1077,39 @@ int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset)
 void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("multiSelectable", multiSelectable_);
+    json->Put("startIndex", startIndex_);
+    json->Put("startMainPos", startMainPos_);
+}
+
+void ListPattern::FromJson(const std::unique_ptr<JsonValue>& json)
+{
+    ScrollToIndex(json->GetInt("startIndex"));
+    ScrollBy(-json->GetDouble("startMainPos"));
+    ScrollablePattern::FromJson(json);
+}
+
+void ListPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->IsScrollable()) {
+            return;
+        }
+        pattern->ScrollPage(false);
+    });
+
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->IsScrollable()) {
+            return;
+        }
+        pattern->ScrollPage(true);
+    });
 }
 } // namespace OHOS::Ace::NG

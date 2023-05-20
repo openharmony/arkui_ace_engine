@@ -90,7 +90,7 @@ void AceFormAbility::LoadFormEnv(const OHOS::AAFwk::Want& want)
     std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
     if (info != nullptr && !info->srcPath.empty()) {
         LOGI("AceFormAbility srcPath:%{public}s url:%{public}s", info->srcPath.c_str(), parsedUrl.c_str());
-        auto assetBasePathStr = { "assets/js/" + info->srcPath + "/" };
+        auto assetBasePathStr = { "assets/js/" + info->srcPath + "/", std::string("assets/js/") };
         Platform::PaContainer::AddAssetPath(instanceId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
     } else {
         LOGI("AceFormAbility parsedUrl:%{public}s", parsedUrl.c_str());

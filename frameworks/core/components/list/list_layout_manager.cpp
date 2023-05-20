@@ -258,7 +258,7 @@ bool ListLayoutManager::CheckNeedAnimation()
         if (!context) {
             return false;
         }
-        controller_ = AceType::MakeRefPtr<Animator>(context);
+        controller_ = CREATE_ANIMATOR(context);
     }
     return true;
 }

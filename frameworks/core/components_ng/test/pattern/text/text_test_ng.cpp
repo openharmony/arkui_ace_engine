@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -39,6 +40,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/adapter/txt_paragraph.h"
 #include "core/components_ng/render/paragraph.h"
+#include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_ng/test/pattern/text/mock/mock_txt_paragraph.h"
@@ -2393,12 +2395,10 @@ HWTEST_F(TextTestNg, TextAccessibilityPropertyIsSelected001, TestSize.Level1)
     TextModelNG textModel;
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto textPattern = frameNode->GetPattern<TextPattern>();
-    ASSERT_NE(textPattern, nullptr);
     auto textAccessibilityProperty = frameNode->GetAccessibilityProperty<TextAccessibilityProperty>();
     ASSERT_NE(textAccessibilityProperty, nullptr);
     EXPECT_FALSE(textAccessibilityProperty->IsSelected());
-    textPattern->textSelector_.Update(0, TEXT_SIZE_INT);
+    textAccessibilityProperty->SetSelected(true);
     EXPECT_TRUE(textAccessibilityProperty->IsSelected());
 }
 
@@ -2461,11 +2461,8 @@ HWTEST_F(TextTestNg, TextAccessibilityPropertyGetSupportAction001, TestSize.Leve
     std::unordered_set<AceAction> supportAceActions = textAccessibilityProperty->GetSupportAction();
     uint64_t actions = 0, expectActions = 0;
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_COPY);
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SELECT);
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SET_SELECTION);
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_CLEAR_SELECTION);
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
     for (auto action : supportAceActions) {
         actions |= 1UL << static_cast<uint32_t>(action);
     }
@@ -2773,12 +2770,15 @@ HWTEST_F(TextTestNg, DragBase001, TestSize.Level1)
 {
     auto [frameNode, pattern] = Init();
 
-    // test CloseSelectOverlay should reset textSelector
+    // test ResetSelection should reset textSelector
     pattern->CreateHandles();
     pattern->textSelector_.Update(0, 20);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 20);
     pattern->CloseSelectOverlay();
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 20);
+    pattern->ResetSelection();
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
 
@@ -2911,5 +2911,57 @@ HWTEST_F(TextTestNg, UpdateChildProperty002, TestSize.Level1)
      * @tc.expected: Child use owner property
      */
     TestUpdateScenario(pattern);
+}
+
+/**
+ * @tc.name: PerformActionTest001
+ * @tc.desc: Text Accessibility PerformAction test Select ClearSelection and Copy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, PerformActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text, get text frameNode and pattern, set callback function.
+     * @tc.expected: FrameNode and pattern is not null, related function is called.
+     */
+    MockPipelineBase::GetCurrent()->rootNode_ =
+        FrameNode::CreateFrameNodeWithTree(V2::ROOT_ETS_TAG, 0, AceType::MakeRefPtr<RootPattern>());
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateCopyOption(CopyOptions::None);
+    textPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step2. Get text accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto textAccessibilityProperty = frameNode->GetAccessibilityProperty<TextAccessibilityProperty>();
+    ASSERT_NE(textAccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. When text CopyOptions is None, call the callback function in textAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    RectF rect(0.0f, 0.0f, 0.0f, 0.0f);
+    EXPECT_CALL(*(AceType::RawPtr(AceType::DynamicCast<MockRenderContext>(frameNode->renderContext_))),
+        GetPaintRectWithTransform())
+        .WillRepeatedly(Return(rect));
+    EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(1, TEXT_SIZE_INT));
+    EXPECT_TRUE(textAccessibilityProperty->ActActionClearSelection());
+    EXPECT_TRUE(textAccessibilityProperty->ActActionCopy());
+
+    /**
+     * @tc.steps: step4. When text CopyOptions is InApp, call the callback function in textAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    textLayoutProperty->UpdateCopyOption(CopyOptions::InApp);
+    EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(-1, -1));
+    EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(1, TEXT_SIZE_INT));
+    EXPECT_TRUE(textAccessibilityProperty->ActActionClearSelection());
+    EXPECT_TRUE(textAccessibilityProperty->ActActionCopy());
 }
 } // namespace OHOS::Ace::NG

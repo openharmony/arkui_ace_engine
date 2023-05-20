@@ -1231,7 +1231,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest024, TestSize.Level1)
     /**
      * cover AddHotZoneRect
     */
-    radioPattern->AddHotZoneRect();
+    radioPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
     EXPECT_EQ(frameNode->GetOrCreateGestureEventHub()->isResponseRegion_, true);
     /**
      * cover RemoveLastHotZoneRect
@@ -1345,21 +1345,6 @@ HWTEST_F(RadioTestNg, RadioPatternTest027, TestSize.Level1)
     pattern->SetPreGroup(GROUP_NAME);
     paintProperty->UpdateRadioCheck(true);
     frameNode->MarkModifyDone();
-    /**
-     * cover onController_ callback
-    */
-    pattern->onController_->NotifyStopListener();
-    /**
-     * cover offController_ callback
-    */
-    pattern->offController_->NotifyStopListener();
-    /**
-     * cover shrinkEngine selectEngine selectRingEngine callback
-    */
-    auto interpolators = pattern->onController_->interpolators_;
-    for (auto& interpolator : interpolators) {
-        AceType::DynamicCast<OHOS::Ace::KeyframeAnimation<float>>(interpolator)->NotifyListener(100.0f);
-    }
     pattern->SetPreGroup(GROUP_NAME_CHANGE);
     paintProperty->UpdateRadioCheck(false);
     frameNode->MarkModifyDone();

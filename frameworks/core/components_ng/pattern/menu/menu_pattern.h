@@ -185,7 +185,7 @@ private:
     bool HasInnerMenu() const;
     // If CustomBuilder is declared with <Menu> and <MenuItem>,
     // reset outer menu container and only apply theme on the inner <Menu> node.
-    void ResetTheme(const RefPtr<FrameNode>& host);
+    void ResetTheme(const RefPtr<FrameNode>& host, bool resetShadow);
 
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event) const;
@@ -194,6 +194,7 @@ private:
     void DisableTabInMenu();
 
     RefPtr<FrameNode> GetMenuWrapper() const;
+    void SetAccessibilityAction();
 
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;

@@ -26,6 +26,7 @@
 namespace OHOS::Ace {
 namespace {
 constexpr double DEFAULT_OPACITY = 1.0;
+constexpr double STROKE_MITERLIMIT_DEFAULT = 4.0f;
 } // namespace
 std::unique_ptr<ShapeModel> ShapeModel::instance_;
 
@@ -232,13 +233,11 @@ void JSShape::SetStrokeMiterLimit(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    double miterLimit;
+    double miterLimit = STROKE_MITERLIMIT_DEFAULT;
     if (!ParseJsDouble(info[0], miterLimit)) {
-        return;
+        LOGI("strokeMiterLimit error. now use default value");
     }
-    if (GreatOrEqual(miterLimit, 1.0)) {
-        ShapeModel::GetInstance()->SetStrokeMiterLimit(miterLimit);
-    }
+    ShapeModel::GetInstance()->SetStrokeMiterLimit(miterLimit);
 }
 
 void JSShape::SetStrokeOpacity(const JSCallbackInfo& info)
@@ -378,9 +377,7 @@ void JSShape::JSBind(BindingTarget globalObj)
     JSClass<JSShape>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSShape>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSShape>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
-    JSClass<JSShape>::Inherit<JSContainerBase>();
-    JSClass<JSShape>::Inherit<JSViewAbstract>();
-    JSClass<JSShape>::Bind<>(globalObj);
+    JSClass<JSShape>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

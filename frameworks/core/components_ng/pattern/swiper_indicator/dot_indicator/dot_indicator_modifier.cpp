@@ -90,7 +90,7 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, const Conten
         rectHeight = contentProperty.indicatorPadding + selectedItemHeight + contentProperty.indicatorPadding;
     }
 
-    rectWidth = rectWidth * backgroundWidthDilateRatio_->Get();
+    auto widthChangeValue = (backgroundWidthDilateRatio_->Get() - 1.0f) * rectWidth;
     auto heightChangeValue = (1.0f - backgroundHeightDilateRatio_->Get()) * rectHeight;
 
     // Property to get the rectangle offset
@@ -101,7 +101,12 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, const Conten
     // Adapter circle and rect
     float rectRight = rectLeft + (axis_ == Axis::HORIZONTAL ? rectWidth : rectHeight);
     float rectBottom = rectTop + (axis_ == Axis::HORIZONTAL ? rectHeight : rectWidth);
-
+    if (touchBottomType_ == TouchBottomType::START) {
+        rectLeft -= widthChangeValue;
+    }
+    if (touchBottomType_ == TouchBottomType::END) {
+        rectRight += widthChangeValue;
+    }
     rectTop = rectTop + heightChangeValue * 0.5f;
     rectBottom = rectBottom - heightChangeValue * 0.5f;
     rectHeight -= heightChangeValue;
@@ -197,28 +202,24 @@ void DotIndicatorModifier::PaintSelectedIndicator(RSCanvas& canvas, const Offset
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor(selectedColor_->Get()));
     canvas.AttachBrush(brush);
-    if (NearEqual(itemHalfSizes[SELECTED_ITEM_HALF_WIDTH], itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT]) && isCustomSize_) {
-        float customPointX = axis_ == Axis::HORIZONTAL ? center.GetX() : center.GetY();
-        float customPointY = axis_ == Axis::HORIZONTAL ? center.GetY() : center.GetX();
-        canvas.DrawCircle({ customPointX, customPointY }, itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT]);
+
+    float rectLeft = (axis_ == Axis::HORIZONTAL ? leftCenter.GetX() : leftCenter.GetY()) -
+                        itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+    float rectTop = (axis_ == Axis::HORIZONTAL ? leftCenter.GetY() : leftCenter.GetX()) -
+                    itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT];
+    float rectRight = (axis_ == Axis::HORIZONTAL ? rightCenter.GetX() : rightCenter.GetY()) +
+                        itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+    float rectBottom = (axis_ == Axis::HORIZONTAL ? rightCenter.GetY() : rightCenter.GetX()) +
+                        itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT];
+    float rectSelectedItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 2;
+    float rectSelectedItemHeight = itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] * 2;
+
+    if (rectSelectedItemHeight > rectSelectedItemWidth && !isCustomSize_) {
+        canvas.DrawRoundRect(
+            { { rectLeft, rectTop, rectRight, rectBottom }, rectSelectedItemWidth, rectSelectedItemWidth });
     } else {
-        float rectLeft = (axis_ == Axis::HORIZONTAL ? leftCenter.GetX() : leftCenter.GetY()) -
-            itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
-        float rectTop = (axis_ == Axis::HORIZONTAL ? leftCenter.GetY() : leftCenter.GetX()) -
-            itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT];
-        float rectRight = (axis_ == Axis::HORIZONTAL ? rightCenter.GetX() : rightCenter.GetY()) +
-            itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
-        float rectBottom = (axis_ == Axis::HORIZONTAL ? rightCenter.GetY() : rightCenter.GetX()) +
-            itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT];
-        float rectSelectedItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 2;
-        float rectSelectedItemHeight = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 2;
-        if (rectSelectedItemHeight > rectSelectedItemWidth && !isCustomSize_) {
-            canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom },
-                rectSelectedItemWidth, rectSelectedItemWidth });
-        } else {
-            canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom },
-                rectSelectedItemHeight, rectSelectedItemHeight });
-        }
+        canvas.DrawRoundRect(
+            { { rectLeft, rectTop, rectRight, rectBottom }, rectSelectedItemHeight, rectSelectedItemHeight });
     }
 }
 
@@ -260,6 +261,8 @@ void DotIndicatorModifier::UpdateShrinkPaintProperty(
     normalToHoverPointDilateRatio_->Set(1.0f);
     hoverToNormalPointDilateRatio_->Set(1.0f);
     longPointDilateRatio_->Set(1.0f);
+    backgroundWidthDilateRatio_->Set(1.0f);
+    backgroundHeightDilateRatio_->Set(1.0f);
 }
 
 void DotIndicatorModifier::UpdateDilatePaintProperty(
@@ -273,6 +276,8 @@ void DotIndicatorModifier::UpdateDilatePaintProperty(
     longPointLeftCenterX_->Set(longPointCenterX.first);
     longPointRightCenterX_->Set(longPointCenterX.second);
     itemHalfSizes_->Set(hoverItemHalfSizes);
+    backgroundWidthDilateRatio_->Set(1.0f);
+    backgroundHeightDilateRatio_->Set(1.0f);
 }
 
 void DotIndicatorModifier::UpdateBackgroundColor(const Color& backgroundColor)
@@ -442,8 +447,8 @@ void DotIndicatorModifier::UpdateAllPointCenterXAnimation(
     AnimationUtils::Animate(longPointRightOption, [&]() { longPointRightCenterX_->Set(longPointCenterX.second); });
 }
 
-void DotIndicatorModifier::UpdateTouchBottomAnimation(
-    bool isTouchBottom, const LinearVector<float>& vectorBlackPointCenterX)
+void DotIndicatorModifier::UpdateTouchBottomAnimation(TouchBottomType touchBottomType,
+    const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
 {
     AnimationOption option;
     option.SetDuration(POINT_HOVER_ANIMATION_DURATION);
@@ -453,18 +458,20 @@ void DotIndicatorModifier::UpdateTouchBottomAnimation(
     auto backgroundWidthDilateRatio = 1.0f;
     auto backgroundHeightDilateRatio = 1.0f;
 
-    if (isTouchBottom) {
+    if (touchBottomType != TouchBottomType::NONE) {
         backgroundWidthDilateRatio = 1.225f - 0.0125f * vectorBlackPointCenterX_->Get().size();
         backgroundHeightDilateRatio = 0.8f;
     }
-
-    AnimationUtils::Animate(option,
-        [weak = WeakClaim(this), backgroundWidthDilateRatio, backgroundHeightDilateRatio, vectorBlackPointCenterX]() {
-            auto modifier = weak.Upgrade();
-            CHECK_NULL_VOID(modifier);
-            modifier->backgroundWidthDilateRatio_->Set(backgroundWidthDilateRatio);
-            modifier->backgroundHeightDilateRatio_->Set(backgroundHeightDilateRatio);
-            modifier->vectorBlackPointCenterX_->Set(vectorBlackPointCenterX);
-        });
+    touchBottomType_ = touchBottomType;
+    AnimationUtils::Animate(option, [weak = WeakClaim(this), backgroundWidthDilateRatio, backgroundHeightDilateRatio,
+                                        vectorBlackPointCenterX, longPointCenterX]() {
+        auto modifier = weak.Upgrade();
+        CHECK_NULL_VOID(modifier);
+        modifier->backgroundWidthDilateRatio_->Set(backgroundWidthDilateRatio);
+        modifier->backgroundHeightDilateRatio_->Set(backgroundHeightDilateRatio);
+        modifier->vectorBlackPointCenterX_->Set(vectorBlackPointCenterX);
+        modifier->longPointLeftCenterX_->Set(longPointCenterX.first);
+        modifier->longPointRightCenterX_->Set(longPointCenterX.second);
+    });
 }
 } // namespace OHOS::Ace::NG

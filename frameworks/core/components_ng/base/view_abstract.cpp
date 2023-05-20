@@ -38,6 +38,7 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+
 namespace {
 
 // common function to bind menu
@@ -95,18 +96,6 @@ void ViewAbstract::SetHeight(const CalcLength& height)
         width = layoutConstraint->selfIdealSize->Width();
     }
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
-}
-
-void ViewAbstract::SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue)
-{
-    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
-        return;
-    }
-    ClickEffectInfo clickEffectInfo;
-    clickEffectInfo.level = level;
-    clickEffectInfo.scaleNumber = scaleValue;
-    ACE_UPDATE_RENDER_CONTEXT(ClickEffectLevel, clickEffectInfo);
 }
 
 void ViewAbstract::ClearWidthOrHeight(bool isWidth)
@@ -246,6 +235,23 @@ void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
     }
 }
 
+void ViewAbstract::SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateFrontBlurStyle(fgBlurStyle);
+        if (target->GetFrontBlurRadius().has_value()) {
+            target->UpdateFrontBlurRadius(Dimension());
+        }
+    }
+}
+
 void ViewAbstract::SetSphericalEffect(double radio)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -316,6 +322,15 @@ void ViewAbstract::SetFlexShrink(float value)
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexShrink, value);
+}
+
+void ViewAbstract::ResetFlexShrink()
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_RESET_LAYOUT_PROPERTY(LayoutProperty, FlexShrink);
 }
 
 void ViewAbstract::SetFlexGrow(float value)
@@ -753,7 +768,12 @@ void ViewAbstract::SetVisibility(VisibleType visible)
         LOGD("current state is not processed, return");
         return;
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Visibility, visible);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    if (layoutProperty) {
+        layoutProperty->UpdateVisibility(visible, true);
+    }
 }
 
 void ViewAbstract::SetGeometryTransition(const std::string& id)
@@ -953,8 +973,12 @@ void ViewAbstract::BindPopup(
                 popupPattern->StartEnteringAnimation(nullptr);
             }
         } else {
-            LOGI("Popup now hide in subwindow.");
-            SubwindowManager::GetInstance()->HidePopupNG(targetId);
+            if (popupPattern) {
+                popupPattern->StartExitingAnimation([targetId]() {
+                    LOGI("Popup now hide in subwindow.");
+                    SubwindowManager::GetInstance()->HidePopupNG(targetId);
+                });
+            }
         }
         return;
     }
@@ -975,8 +999,15 @@ void ViewAbstract::BindPopup(
             popupPattern->StartEnteringAnimation(nullptr);
         }
     } else {
-        LOGI("begin to update popup node.");
-        overlayManager->UpdatePopupNode(targetId, popupInfo);
+        if (popupPattern) {
+            popupPattern->StartExitingAnimation(
+                [targetId, popupInfo, weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() {
+                    auto overlay = weakOverlayManger.Upgrade();
+                    CHECK_NULL_VOID(overlay);
+                    LOGI("begin to update popup node.");
+                    overlay->UpdatePopupNode(targetId, popupInfo);
+                });
+        }
     }
 }
 
@@ -1044,7 +1075,7 @@ void ViewAbstract::SetBackdropBlur(const Dimension& radius)
     if (target) {
         target->UpdateBackBlurRadius(radius);
         if (target->GetBackBlurStyle().has_value()) {
-            target->UpdateBackBlurStyle(BlurStyleOption());
+            target->UpdateBackBlurStyle(std::nullopt);
         }
     }
 }
@@ -1055,7 +1086,15 @@ void ViewAbstract::SetFrontBlur(const Dimension& radius)
         LOGD("current state is not processed, return");
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(FrontBlurRadius, radius);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateFrontBlurRadius(radius);
+        if (target->GetFrontBlurStyle().has_value()) {
+            target->UpdateFrontBlurStyle(std::nullopt);
+        }
+    }
 }
 
 void ViewAbstract::SetBackShadow(const Shadow& shadow)
@@ -1363,6 +1402,7 @@ void ViewAbstract::SetForegroundColor(const Color& color)
     }
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
 }
 
 void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy& strategy)
@@ -1373,6 +1413,7 @@ void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy& str
     }
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorStrategy, strategy);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
 }
 
 void ViewAbstract::SetKeyboardShortcut(

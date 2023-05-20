@@ -109,7 +109,7 @@ bool ArkJSRuntime::StartDebugger()
 #if !defined(PREVIEW)
     if (!libPath_.empty()) {
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
-        ConnectServerManager::Get().AddInstance(instanceId_);
+        ConnectServerManager::Get().AddInstance(instanceId_, language_);
         ret = JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_, debuggerPostTask_);
 #elif defined(ANDROID_PLATFORM)
         ret = JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_, debuggerPostTask_);

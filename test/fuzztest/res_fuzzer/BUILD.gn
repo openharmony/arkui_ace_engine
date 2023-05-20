@@ -39,6 +39,7 @@ ohos_fuzztest("ResFuzzTest") {
     "$ace_root/frameworks/base/json",
     "$ace_root/frameworks/base/",
     "$ace_root/frameworks",
+    "$ace_root",
     cjson_root,
   ]
 

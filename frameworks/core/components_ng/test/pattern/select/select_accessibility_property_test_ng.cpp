@@ -164,24 +164,4 @@ HWTEST_F(SelectAccessibilityPropertyTestNg, SelectAccessibilityPropertyGetCollec
     }
     EXPECT_EQ(selectAccessibilityProperty_->GetCollectionItemCounts(), CURRENT_INDEX);
 }
-
-/**
- * @tc.name: SelectAccessibilityPropertyGetSupportAction001
- * @tc.desc: Test GetSupportAction of select.
- * @tc.type: FUNC
- */
-HWTEST_F(SelectAccessibilityPropertyTestNg, SelectAccessibilityPropertyGetSupportAction001, TestSize.Level1)
-{
-    InitSelectTestNg();
-
-    selectAccessibilityProperty_->ResetSupportAction();
-    std::unordered_set<AceAction> supportAceActions = selectAccessibilityProperty_->GetSupportAction();
-    uint64_t actions = 0, expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SELECT);
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_CLEAR_SELECTION);
-    for (auto action : supportAceActions) {
-        actions |= 1UL << static_cast<uint32_t>(action);
-    }
-    EXPECT_EQ(actions, expectActions);
-}
 } // namespace OHOS::Ace::NG

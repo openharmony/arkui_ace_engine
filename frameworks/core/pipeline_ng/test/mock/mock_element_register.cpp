@@ -114,4 +114,6 @@ void ElementRegister::AddPendingRemoveNode(const RefPtr<NG::UINode>& node) {}
 
 void ElementRegister::ClearPendingRemoveNodes() {}
 
+void ElementRegister::ReSyncGeometryTransition() {}
+
 } // namespace OHOS::Ace

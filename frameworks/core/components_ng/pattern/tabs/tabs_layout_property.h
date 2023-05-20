@@ -93,6 +93,19 @@ public:
         json->Put("barOverlap", propBarOverlap_.value_or(false) ? "true" : "false");
     }
 
+    void FromJson(const std::unique_ptr<JsonValue>& json) override
+    {
+        static const std::unordered_map<std::string, BarPosition> uMap {
+            { "BarPosition.Start", BarPosition::START },
+            { "BarPosition.End", BarPosition::END },
+        };
+
+        UpdateAxis(json->GetBool("vertical") ? Axis::VERTICAL : Axis::HORIZONTAL);
+        auto barPosition = json->GetString("barPosition");
+        UpdateTabBarPosition(uMap.count(barPosition) ? uMap.at(barPosition) : BarPosition::START);
+        LayoutProperty::FromJson(json);
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TabBarPosition, BarPosition, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Axis, Axis, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TabBarMode, TabBarMode, PROPERTY_UPDATE_MEASURE);

@@ -19,6 +19,7 @@ namespace OHOS::Ace::NG {
 void RenderPositionProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+void ForegroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void GradientProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void TransformProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}

@@ -28,8 +28,6 @@
 #include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
-inline constexpr double DEFAULT_MARQUEE_SCROLL_AMOUNT = 6.0;
-inline constexpr int32_t DEFAULT_MARQUEE_LOOP = -1;
 using TimeCallback = std::function<void()>;
 
 class MarqueePattern : public Pattern {
