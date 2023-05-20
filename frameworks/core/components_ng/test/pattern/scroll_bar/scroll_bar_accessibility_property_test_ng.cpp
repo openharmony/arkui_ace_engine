@@ -21,6 +21,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #undef private
 #undef protected
 
@@ -46,13 +47,17 @@ public:
     RefPtr<ScrollBarAccessibilityProperty> scrollBarAccessibilityProperty_;
 };
 
-void ScrollBarAccessibilityPropertyTestNg::SetUp() {}
+void ScrollBarAccessibilityPropertyTestNg::SetUp()
+{
+    MockPipelineBase::SetUp();
+}
 
 void ScrollBarAccessibilityPropertyTestNg::TearDown()
 {
     frameNode_ = nullptr;
     scrollBarPattern_ = nullptr;
     scrollBarAccessibilityProperty_ = nullptr;
+    MockPipelineBase::TearDown();
 }
 
 void ScrollBarAccessibilityPropertyTestNg::InitScrollBarTestNg()
@@ -80,7 +85,7 @@ HWTEST_F(ScrollBarAccessibilityPropertyTestNg, ScrollBarAccessibilityPropertyIsS
     EXPECT_FALSE(scrollBarAccessibilityProperty_->IsScrollable());
 
     scrollBarPattern_->axis_ = Axis::VERTICAL;
-    scrollBarPattern_->scrollableDistance_ = SCROLLABLE_DISTANCE;
+    scrollBarPattern_->controlDistance_ = SCROLLABLE_DISTANCE;
     EXPECT_TRUE(scrollBarAccessibilityProperty_->IsScrollable());
 }
 
@@ -117,8 +122,9 @@ HWTEST_F(ScrollBarAccessibilityPropertyTestNg, ScrollBarAccessibilityPropertyGet
     InitScrollBarTestNg();
 
     scrollBarPattern_->axis_ = Axis::VERTICAL;
-    scrollBarPattern_->scrollableDistance_ = SCROLLABLE_DISTANCE;
+    scrollBarPattern_->controlDistance_ = SCROLLABLE_DISTANCE;
     scrollBarPattern_->currentOffset_ = CURRENT_DISTANCE;
+    scrollBarPattern_->scrollableDistance_ = SCROLLABLE_DISTANCE;
 
     scrollBarAccessibilityProperty_->ResetSupportAction();
     std::unordered_set<AceAction> supportAceActions = scrollBarAccessibilityProperty_->GetSupportAction();
