@@ -201,6 +201,9 @@ void CalendarElement::BuildCardCalendar(const RefPtr<CalendarComponent>& calenda
                 LOGE("build calendar title callback error");
                 return;
             }
+            if (!date) {
+                return;
+            }
             auto currentDate = controller->GetCurrentMonth();
             auto today = controller->GetToday();
             auto json = JsonUtil::Create(true);
