@@ -15,27 +15,38 @@
 
 #include "interfaces/inner_api/ace/hot_reloader.h"
 
-#include <dlfcn.h>
+#include "utils.h"
 
 namespace OHOS::Ace {
+
+#if defined(WINDOWS_PLATFORM)
+constexpr char ACE_LIB_NAME[] = "libace.dll";
+#elif defined(MAC_PLATFORM)
+constexpr char ACE_LIB_NAME[] = "libace.dylib";
+#elif defined(LINUX_PLATFORM)
+constexpr char ACE_LIB_NAME[] = "libace.so";
+#else
+constexpr char ACE_LIB_NAME[] = "libace.z.so";
+#endif
 
 using ReloadFunc = void (*)();
 constexpr char HOT_RELOAD_FUNC[] = "OHOS_ACE_HotReloadPage";
 
 void InitAceModule()
 {
-    void* handle = dlopen("libace.z.so", RTLD_LAZY);
+    LIBHANDLE handle = LOADLIB(ACE_LIB_NAME);
     if (handle == nullptr) {
         return;
     }
 
-    auto entry = reinterpret_cast<ReloadFunc>(dlsym(handle, HOT_RELOAD_FUNC));
+    auto entry = reinterpret_cast<ReloadFunc>(LOADSYM(handle, HOT_RELOAD_FUNC));
     if (entry == nullptr) {
-        dlclose(handle);
+        FREELIB(handle);
         return;
     }
 
     entry();
+    FREELIB(handle);
 }
 
 void HotReloader::HotReload()

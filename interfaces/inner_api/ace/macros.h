@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_HOT_RELOADER_H
-#define FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_HOT_RELOADER_H
+#ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_MACROS_H
+#define FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_MACROS_H
 
-#include <memory>
-#include <string>
+// The macro "ACE_EXPORT_WITH_PREVIEW" is the extension of the macro "ACE_EXPORT"
+#ifndef ACE_EXPORT_WITH_PREVIEW
+#ifndef WINDOWS_PLATFORM
+#define ACE_EXPORT_WITH_PREVIEW __attribute__((visibility("default")))
+#else
+#define ACE_EXPORT_WITH_PREVIEW __declspec(dllexport)
+#endif
+#endif
 
-#include "macros.h"
-
-namespace OHOS::Ace {
-
-class ACE_EXPORT_WITH_PREVIEW HotReloader {
-public:
-    static void HotReload();
-};
-
-} // namespace OHOS::Ace
-
-#endif // FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_HOT_RELOADER_H
+#endif // FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_MACROS_H
