@@ -25,36 +25,99 @@
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/option/option_accessibility_property.h"
 #include "core/components_ng/pattern/option/option_layout_algorithm.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/geometry_property.h"
 #include "core/components_ng/property/measure_property.h"
 
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
-class PanelOptionTestNg : public testing::Test {
+namespace {
+const std::string EMPTY_TEXT = "";
+const std::string OPTION_TEST_TEXT = "option";
+} // namespace
+
+class OptionTestNg : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp();
-    void TearDown();
+    void SetUp() override;
+    void TearDown() override;
+    bool InitOptionTestNg();
+    RefPtr<FrameNode> frameNode_;
+    RefPtr<OptionPattern> optionPattern_;
+    RefPtr<OptionAccessibilityProperty> optionAccessibilityProperty_;
 };
 
-void PanelOptionTestNg::SetUpTestCase() {}
+void OptionTestNg::SetUp()
+{
+    ASSERT_TRUE(InitOptionTestNg());
+}
 
-void PanelOptionTestNg::TearDownTestCase() {}
+void OptionTestNg::TearDown()
+{
+    frameNode_ = nullptr;
+    optionPattern_ = nullptr;
+    optionAccessibilityProperty_ = nullptr;
+}
 
-void PanelOptionTestNg::SetUp() {}
+bool OptionTestNg::InitOptionTestNg()
+{
+    frameNode_ = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+    CHECK_NULL_RETURN(frameNode_, false);
 
-void PanelOptionTestNg::TearDown() {}
+    optionPattern_ = frameNode_->GetPattern<OptionPattern>();
+    CHECK_NULL_RETURN(optionPattern_, false);
+
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    CHECK_NULL_RETURN(textNode, false);
+
+    optionPattern_->SetTextNode(textNode);
+
+    optionAccessibilityProperty_ = frameNode_->GetAccessibilityProperty<OptionAccessibilityProperty>();
+    CHECK_NULL_RETURN(optionAccessibilityProperty_, false);
+    return true;
+}
 
 /**
- * @tc.name: PanelOptionTestNg001
+ * @tc.name: OptionAccessibilityPropertyGetText001
+ * @tc.desc: Test GetText of option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, OptionAccessibilityPropertyGetText001, TestSize.Level1)
+{
+    auto textLayoutProperty = optionPattern_->text_->GetLayoutProperty<TextLayoutProperty>();
+    textLayoutProperty->UpdateContent(OPTION_TEST_TEXT);
+    EXPECT_EQ(optionAccessibilityProperty_->GetText(), OPTION_TEST_TEXT);
+}
+
+/**
+ * @tc.name: OptionAccessibilityPropertyGetSupportAction001
+ * @tc.desc: Test GetSupportAction of option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, OptionAccessibilityPropertyGetSupportAction001, TestSize.Level1)
+{
+    optionAccessibilityProperty_->ResetSupportAction();
+    std::unordered_set<AceAction> supportAceActions = optionAccessibilityProperty_->GetSupportAction();
+    uint64_t actions = 0, expectActions = 0;
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SELECT);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, expectActions);
+}
+
+/**
+ * @tc.name: OptionTestNg001
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PanelOptionTestNg, PanelOptionTestNg001, TestSize.Level1)
+HWTEST_F(OptionTestNg, OptionTestNg001, TestSize.Level1)
 {
     OHOS::Ace::NG::OptionLayoutAlgorithm rosenOptionLayoutAlgorithm;
     rosenOptionLayoutAlgorithm.horInterval_ = 2.0;
@@ -71,7 +134,7 @@ HWTEST_F(PanelOptionTestNg, PanelOptionTestNg001, TestSize.Level1)
  * @tc.desc: Option Accessibility PerformAction test Select and ClearSelection.
  * @tc.type: FUNC
  */
-HWTEST_F(PanelOptionTestNg, PerformActionTest001, TestSize.Level1)
+HWTEST_F(OptionTestNg, PerformActionTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create option frameNode and pattern, set callback function.

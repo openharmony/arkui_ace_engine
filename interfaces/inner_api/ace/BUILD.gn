@@ -57,8 +57,9 @@ ohos_shared_library("ace_uicontent") {
   public_configs = [ ":uicontent_public_config" ]
 
   configs = [
-    "$ace_root:ace_config",
     ":uicontent_config",
+    "$ace_root:ace_config",
+    "$ace_root/test/unittest:ace_coverage_config",
   ]
 
   sources = [
