@@ -243,6 +243,11 @@ public:
         }
     }
 
+    int32_t GetHalfDisplayCounts() const
+    {
+        return halfDisplayCounts_;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -343,6 +348,8 @@ private:
     bool isJump_ = false;
 
     ColumnChangeCallback changeCallback_;
+
+    int32_t halfDisplayCounts_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerColumnPattern);
 };

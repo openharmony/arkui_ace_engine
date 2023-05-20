@@ -2760,6 +2760,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAccessibilityPropertyGetBeginIndex001, Test
     }
     textPickerColumnPattern_->SetOptions(contents);
     textPickerColumnPattern_->SetCurrentIndex(INDEX_NUM);
+    textPickerColumnPattern_->halfDisplayCounts_ = SECOND;
     EXPECT_EQ(textPickerAccessibilityProperty_->GetBeginIndex(), CURRENT_INDEX);
     DestroyTextPickerTestNgObject();
 }
@@ -2789,6 +2790,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAccessibilityPropertyGetEndIndex001, TestSi
         contents.emplace_back(content);
     }
     textPickerColumnPattern_->SetOptions(contents);
+    textPickerColumnPattern_->halfDisplayCounts_ = SECOND;
     EXPECT_EQ(textPickerAccessibilityProperty_->GetEndIndex(), CURRENT_END_INDEX);
     DestroyTextPickerTestNgObject();
 }

@@ -57,11 +57,17 @@ public:
         defaultPickerItemHeight_ = defaultPickerItemHeight;
     }
 
+    int32_t GetHalfDisplayCounts() const
+    {
+        return halfDisplayCounts_;
+    }
+
 private:
     float pickerItemHeight_ = 0.0f;
     float currentOffset_ = 0.0f;
     double defaultPickerItemHeight_ = 0.0;
     bool isDefaultPickerItemHeight_ = false;
+    int32_t halfDisplayCounts_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerLayoutAlgorithm);
 };
