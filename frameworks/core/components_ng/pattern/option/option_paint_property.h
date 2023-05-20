@@ -36,6 +36,7 @@ public:
         paintProperty->propHover_ = CloneHover();
         paintProperty->propPress_ = ClonePress();
         paintProperty->propNeedDivider_ = CloneNeedDivider();
+        paintProperty->propHasIcon_ = CloneHasIcon();
 
         return paintProperty;
     }
@@ -46,17 +47,20 @@ public:
         ResetHover();
         ResetPress();
         ResetNeedDivider();
+        ResetHasIcon();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Hover, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Press, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NeedDivider, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HasIcon, bool, PROPERTY_UPDATE_RENDER);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         PaintProperty::ToJsonValue(json);
         json->Put("hover", propHover_.value_or(false) ? "true" : "false");
         json->Put("needDivider", propNeedDivider_.value_or(true) ? "true" : "false");
+        json->Put("hasIcon", propHasIcon_.value_or(false) ? "true" : "false");
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(OptionPaintProperty);
