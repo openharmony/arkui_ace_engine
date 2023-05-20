@@ -38,7 +38,10 @@ struct LunarDate : Date {
 
     bool operator==(const LunarDate& lunarDate) const
     {
-        return (isLeapMonth == true);
+        if (lunarDate.isLeapMonth != isLeapMonth) {
+            return false;
+        }
+        return (lunarDate.year == year && lunarDate.month == month && lunarDate.day == day);
     }
 
     bool operator!=(const LunarDate& lunarDate) const
