@@ -88,6 +88,9 @@ std::string Localization::GetLunarDay(uint32_t dayOfMonth)
 LunarDate Localization::GetLunarDate(Date date)
 {
     LunarDate dateRet;
+    dateRet.year = date.year;
+    dateRet.month = date.month;
+    dateRet.day = date.day;
     return dateRet;
 }
 

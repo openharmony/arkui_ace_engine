@@ -27,7 +27,6 @@ namespace {
 std::shared_ptr<UObject> FromJsonObject(const std::unique_ptr<JsonValue>& json)
 {
     if (!json->IsObject()) {
-        LOGE("UITree |ERROR| JsonValue is not object");
         return nullptr;
     }
 

@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
+#endif
 
 #include "core/components/bubble/render_bubble.h"
 #include "core/pipeline/base/rosen_render_context.h"
@@ -34,12 +36,20 @@ public:
 
 private:
     bool hasEventFired_ = false;
+#ifndef USE_ROSEN_DRAWING
     SkPath path_;
     SkRRect rrect_;
 
     SkRRect MakeRRect();
+#else
+    RSRecordingPath path_;
+    RSRoundRect rrect_;
+
+    RSRoundRect MakeRRect();
+#endif
     void PaintMask(RenderContext& context);
     void PaintBubble(RenderContext& context);
+#ifndef USE_ROSEN_DRAWING
     void PaintTopBubble(SkCanvas* skCanvas, const SkPaint& paint);
     void PaintBottomBubble(SkCanvas* skCanvas, const SkPaint& paint);
     void PaintTopBubbleInJs(SkCanvas* skCanvas, const SkPaint& paint);
@@ -49,6 +59,17 @@ private:
     void PaintDefaultBubble(SkCanvas* skCanvas, const SkPaint& paint);
     void PaintBorder(RenderContext& context);
     SkCanvas* GetSkCanvas(RenderContext& context);
+#else
+    void PaintTopBubble(RSCanvas* canvas, const RSPen& pen);
+    void PaintBottomBubble(RSCanvas* canvas, const RSPen& pen);
+    void PaintTopBubbleInJs(RSCanvas* canvas, const RSPen& pen);
+    void PaintBottomBubbleInJs(RSCanvas* canvas, const RSPen& pen);
+    void PaintNonCustomPopup(RSCanvas* canvas, const RSPen& pen);
+    void PaintBubbleWithArrow(RSCanvas* canvas, const RSPen& pen);
+    void PaintDefaultBubble(RSCanvas* canvas, const RSPen& pen);
+    void PaintBorder(RenderContext& context);
+    RSCanvas* GetDrawingCanvas(RenderContext& context);
+#endif
 };
 
 } // namespace OHOS::Ace

@@ -31,13 +31,9 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/text_field_model_impl.h"
-#include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/common/ime/text_input_type.h"
-#include "core/components/text_field/text_field_component.h"
-#include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
@@ -76,69 +72,6 @@ namespace {
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
-constexpr uint32_t TEXTAREA_MAXLENGTH_VALUE_DEFAULT = std::numeric_limits<uint32_t>::max();
-
-void InitTextAreaDefaultStyle()
-{
-    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto textAreaComponent = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-    if (!boxComponent || !textAreaComponent || !theme) {
-        LOGI("boxComponent or textAreaComponent or theme is null");
-        return;
-    }
-
-    textAreaComponent->SetTextMaxLines(TEXTAREA_MAXLENGTH_VALUE_DEFAULT);
-    textAreaComponent->SetCursorColor(theme->GetCursorColor());
-    textAreaComponent->SetPlaceholderColor(theme->GetPlaceholderColor());
-    textAreaComponent->SetFocusBgColor(theme->GetFocusBgColor());
-    textAreaComponent->SetFocusPlaceholderColor(theme->GetFocusPlaceholderColor());
-    textAreaComponent->SetFocusTextColor(theme->GetFocusTextColor());
-    textAreaComponent->SetBgColor(theme->GetBgColor());
-    textAreaComponent->SetTextColor(theme->GetTextColor());
-    textAreaComponent->SetSelectedColor(theme->GetSelectedColor());
-    textAreaComponent->SetHoverColor(theme->GetHoverColor());
-    textAreaComponent->SetPressColor(theme->GetPressColor());
-
-    TextStyle textStyle = textAreaComponent->GetTextStyle();
-    textStyle.SetTextColor(theme->GetTextColor());
-    textStyle.SetFontSize(theme->GetFontSize());
-    textStyle.SetFontWeight(theme->GetFontWeight());
-    textStyle.SetFontFamilies(INPUT_FONT_FAMILY_VALUE);
-    textAreaComponent->SetTextStyle(textStyle);
-    textAreaComponent->SetEditingStyle(textStyle);
-    textAreaComponent->SetPlaceHoldStyle(textStyle);
-
-    textAreaComponent->SetCountTextStyle(theme->GetCountTextStyle());
-    textAreaComponent->SetOverCountStyle(theme->GetOverCountStyle());
-    textAreaComponent->SetCountTextStyleOuter(theme->GetCountTextStyleOuter());
-    textAreaComponent->SetOverCountStyleOuter(theme->GetOverCountStyleOuter());
-    textAreaComponent->SetErrorBorderWidth(theme->GetErrorBorderWidth());
-    textAreaComponent->SetErrorBorderColor(theme->GetErrorBorderColor());
-
-    RefPtr<Decoration> backDecoration = AceType::MakeRefPtr<Decoration>();
-    backDecoration->SetPadding(theme->GetPadding());
-    backDecoration->SetBackgroundColor(theme->GetBgColor());
-    backDecoration->SetBorderRadius(theme->GetBorderRadius());
-    const auto& boxDecoration = boxComponent->GetBackDecoration();
-    if (boxDecoration) {
-        backDecoration->SetImage(boxDecoration->GetImage());
-        backDecoration->SetGradient(boxDecoration->GetGradient());
-    }
-    textAreaComponent->SetOriginBorder(backDecoration->GetBorder());
-    textAreaComponent->SetDecoration(backDecoration);
-    textAreaComponent->SetIconSize(theme->GetIconSize());
-    textAreaComponent->SetIconHotZoneSize(theme->GetIconHotZoneSize());
-    textAreaComponent->SetHeight(theme->GetHeight());
-
-    // text area need to extend height.
-    textAreaComponent->SetExtend(true);
-    boxComponent->SetHeight(-1.0, DimensionUnit::VP);
-}
-
 } // namespace
 
 void ParseTextFieldTextObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -189,10 +122,7 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
         ParseTextFieldTextObject(info, changeEventVal);
     }
 
-    if (!Container::IsCurrentUseNewPipeline()) {
-        JSInteractableView::SetFocusable(true);
-        JSInteractableView::SetFocusNode(true);
-    }
+    TextFieldModel::GetInstance()->SetFocusableAndFocusNode();
 }
 
 void JSTextField::CreateTextArea(const JSCallbackInfo& info)
@@ -225,46 +155,15 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
             jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextAreaController>();
         }
     }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto controller = TextFieldModel::GetInstance()->CreateTextArea(placeholderSrc, value);
-        if (jsController) {
-            jsController->SetController(controller);
-        }
-        if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
-            ParseTextFieldTextObject(info, changeEventVal);
-        }
-        return;
-    }
-
-    RefPtr<TextFieldComponent> textAreaComponent = AceType::MakeRefPtr<TextFieldComponent>();
-    textAreaComponent->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
-    textAreaComponent->SetTextInputType(TextInputType::MULTILINE);
-    textAreaComponent->SetHoverAnimationType(HoverAnimationType::BOARD);
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-
-    ViewStackProcessor::GetInstance()->ClaimElementId(textAreaComponent);
-    ViewStackProcessor::GetInstance()->Push(textAreaComponent);
-    InitTextAreaDefaultStyle();
-    Border boxBorder;
-    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    auto theme = GetTheme<TextFieldTheme>();
-    if (boxComponent->GetBackDecoration()) {
-        boxBorder = boxComponent->GetBackDecoration()->GetBorder();
-    }
-    if (value) {
-        textAreaComponent->SetValue(value.value());
-    }
-    if (placeholderSrc) {
-        textAreaComponent->SetPlaceholder(placeholderSrc.value());
-    }
-    JSTextField::UpdateDecoration(boxComponent, textAreaComponent, boxBorder, theme);
+    auto controller = TextFieldModel::GetInstance()->CreateTextArea(placeholderSrc, value);
     if (jsController) {
-        jsController->SetController(textAreaComponent->GetTextFieldController());
+        jsController->SetController(controller);
+    }
+    if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
+        ParseTextFieldTextObject(info, changeEventVal);
     }
 
-    JSInteractableView::SetFocusable(true);
-    JSInteractableView::SetFocusNode(true);
+    TextFieldModel::GetInstance()->SetFocusableAndFocusNode();
 }
 
 void JSTextField::SetType(const JSCallbackInfo& info)
@@ -424,11 +323,7 @@ void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
         }
         caretStyle.caretWidth = width;
     }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        TextFieldModel::GetInstance()->SetCaretStyle(caretStyle);
-        return;
-    }
+    TextFieldModel::GetInstance()->SetCaretStyle(caretStyle);
 }
 
 void JSTextField::SetCaretPosition(const JSCallbackInfo& info)
@@ -445,10 +340,7 @@ void JSTextField::SetCaretPosition(const JSCallbackInfo& info)
     if (caretPosition < 0) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        TextFieldModel::GetInstance()->SetCaretPosition(caretPosition);
-        return;
-    }
+    TextFieldModel::GetInstance()->SetCaretPosition(caretPosition);
 }
 
 void JSTextField::SetSelectedBackgroundColor(const JSCallbackInfo& info)
@@ -466,10 +358,7 @@ void JSTextField::SetSelectedBackgroundColor(const JSCallbackInfo& info)
         CHECK_NULL_VOID_NOLOG(theme);
         selectedColor = theme->GetSelectedColor();
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        TextFieldModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
-        return;
-    }
+    TextFieldModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
 }
 
 void JSTextField::SetMaxLength(const JSCallbackInfo& info)
@@ -612,50 +501,18 @@ void JSTextField::SetShowPasswordIcon(const JSCallbackInfo& info)
 
 void JSTextField::SetBackgroundColor(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (info.Length() < 1) {
-            LOGI("The argv is wrong, it is supposed to have at least 1 argument");
-            return;
-        }
-        Color backgroundColor;
-        if (!ParseJsColor(info[0], backgroundColor)) {
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID_NOLOG(pipeline);
-            auto themeManager = pipeline->GetThemeManager();
-            CHECK_NULL_VOID_NOLOG(themeManager);
-            auto theme = themeManager->GetTheme<TextFieldTheme>();
-            CHECK_NULL_VOID_NOLOG(theme);
-            backgroundColor = theme->GetBgColor();
-        }
-        ViewAbstractModel::GetInstance()->SetBackgroundColor(backgroundColor);
-        return;
-    }
     if (info.Length() < 1) {
-        LOGI("The arg(SetBackgroundColor) is wrong, it is supposed to have atleast 1 argument");
+        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-
     Color backgroundColor;
-    if (!ParseJsColor(info[0], backgroundColor)) {
-        LOGI("the info[0] is null");
-        return;
-    }
-
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    if (component) {
-        component->SetBgColor(backgroundColor);
-    } else {
-        LOGI("The component(SetPlaceholderColor) is null");
-    }
+    bool tmp = !ParseJsColor(info[0], backgroundColor);
+    TextFieldModel::GetInstance()->SetBackgroundColor(backgroundColor, tmp);
 }
 
 void JSTextField::JsHeight(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsHeight(info);
-    if (Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
     if (info.Length() < 1) {
         LOGI("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
@@ -669,13 +526,7 @@ void JSTextField::JsHeight(const JSCallbackInfo& info)
         LOGI("dimension value: %{public}f is invalid!", value.Value());
         return;
     }
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto textInputComponent = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
-    if (!textInputComponent) {
-        LOGI("JSTextInput set height failed, textInputComponent is null.");
-        return;
-    }
-    textInputComponent->SetHeight(value);
+    TextFieldModel::GetInstance()->SetHeight(value);
 }
 
 void JSTextField::JsWidth(const JSCallbackInfo& info)
@@ -715,22 +566,23 @@ bool CheckIsIllegalString(const std::string& value)
 
 void JSTextField::JsPadding(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (info[0]->IsUndefined() || (info[0]->IsString() && CheckIsIllegalString(info[0]->ToString()))) {
-            return;
-        };
-        CalcDimension length;
-        ParseJsDimensionVp(info[0], length);
-        if (length.IsNegative()) {
-            return;
-        }
-        JSViewAbstract::JsPadding(info);
+    if (info[0]->IsUndefined() || (info[0]->IsString() && CheckIsIllegalString(info[0]->ToString()))) {
+        return;
+    };
+    CalcDimension length;
+    ParseJsDimensionVp(info[0], length);
+    if (length.IsNegative()) {
         return;
     }
-    if (!info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject()) {
-        LOGI("arg is not a string, number or object.");
-        return;
-    }
+    bool tmp = !info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject();
+
+    NG::PaddingProperty newPadding = GetNewPadding(info);
+    Edge oldPadding = Edge(GetOldPadding(info));
+    TextFieldModel::GetInstance()->SetPadding(newPadding, oldPadding, tmp);
+}
+
+Edge JSTextField::GetOldPadding(const JSCallbackInfo& info)
+{
     Edge padding;
     if (info[0]->IsNumber() || info[0]->IsString()) {
         CalcDimension edgeValue;
@@ -750,28 +602,96 @@ void JSTextField::JsPadding(const JSCallbackInfo& info)
         ParseJsDimensionVp(object->GetProperty("bottom"), bottom);
         padding = Edge(left, top, right, bottom);
     }
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
-    if (component) {
-        auto decoration = component->GetDecoration();
-        decoration->SetPadding(padding);
+    return padding;
+}
+
+NG::PaddingProperty JSTextField::GetNewPadding(const JSCallbackInfo& info)
+{
+    NG::PaddingProperty padding;
+    if (info[0]->IsObject()) {
+        std::optional<CalcDimension> left;
+        std::optional<CalcDimension> right;
+        std::optional<CalcDimension> top;
+        std::optional<CalcDimension> bottom;
+        JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
+
+        CalcDimension leftDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("left"), leftDimen)) {
+            left = leftDimen;
+        }
+        CalcDimension rightDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("right"), rightDimen)) {
+            right = rightDimen;
+        }
+        CalcDimension topDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("top"), topDimen)) {
+            top = topDimen;
+        }
+        CalcDimension bottomDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
+            bottom = bottomDimen;
+        }
+        if (left.has_value() || right.has_value() || top.has_value() || bottom.has_value()) {
+            padding = SetPaddings(top, bottom, left, right);
+            return padding;
+        }
     }
+
+    CalcDimension length;
+    if (!ParseJsDimensionVp(info[0], length)) {
+        // use default value.
+        length.Reset();
+    }
+    padding.SetEdges(NG::CalcLength(length.IsNonNegative() ? length : Dimension()));
+    return padding;
+}
+
+NG::PaddingProperty JSTextField::SetPaddings(const std::optional<CalcDimension>& top,
+    const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
+    const std::optional<CalcDimension>& right)
+{
+    NG::PaddingProperty paddings;
+    if (top.has_value()) {
+        if (top.value().Unit() == DimensionUnit::CALC) {
+            paddings.top =
+                NG::CalcLength(top.value().IsNonNegative() ? top.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.top = NG::CalcLength(top.value().IsNonNegative() ? top.value() : CalcDimension());
+        }
+    }
+    if (bottom.has_value()) {
+        if (bottom.value().Unit() == DimensionUnit::CALC) {
+            paddings.bottom = NG::CalcLength(
+                bottom.value().IsNonNegative() ? bottom.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.bottom = NG::CalcLength(bottom.value().IsNonNegative() ? bottom.value() : CalcDimension());
+        }
+    }
+    if (left.has_value()) {
+        if (left.value().Unit() == DimensionUnit::CALC) {
+            paddings.left = NG::CalcLength(
+                left.value().IsNonNegative() ? left.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.left = NG::CalcLength(left.value().IsNonNegative() ? left.value() : CalcDimension());
+        }
+    }
+    if (right.has_value()) {
+        if (right.value().Unit() == DimensionUnit::CALC) {
+            paddings.right = NG::CalcLength(
+                right.value().IsNonNegative() ? right.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.right = NG::CalcLength(right.value().IsNonNegative() ? right.value() : CalcDimension());
+        }
+    }
+
+    return paddings;
 }
 
 void JSTextField::JsBorder(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsBorder(info);
-        return;
-    }
     if (!info[0]->IsObject()) {
         LOGI("args is not a object. %s", info[0]->ToString().c_str());
         return;
-    }
-    RefPtr<Decoration> decoration = nullptr;
-    auto component = AceType::DynamicCast<TextFieldComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (component) {
-        decoration = component->GetDecoration();
     }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
     auto valueWidth = object->GetProperty("width");
@@ -790,99 +710,49 @@ void JSTextField::JsBorder(const JSCallbackInfo& info)
     if (!valueStyle->IsUndefined()) {
         ParseBorderStyle(valueStyle);
     }
-    ViewAbstractModelImpl::SwapBackBorder(decoration);
-    if (component) {
-        component->SetOriginBorder(decoration->GetBorder());
-    }
+    JSViewAbstract::JsBorder(info);
+    TextFieldModel::GetInstance()->SetBackBorder();
     info.ReturnSelf();
 }
 
 void JSTextField::JsBorderWidth(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsBorderWidth(info);
-        return;
-    }
     if (!info[0]->IsObject() && !info[0]->IsString() && !info[0]->IsNumber()) {
         LOGI("args need a string or number or object");
         return;
     }
-    RefPtr<Decoration> decoration = nullptr;
-    auto component = AceType::DynamicCast<TextFieldComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (component) {
-        decoration = component->GetDecoration();
-    }
-    JSViewAbstract::ParseBorderWidth(info[0]);
-    ViewAbstractModelImpl::SwapBackBorder(decoration);
-    if (component) {
-        component->SetOriginBorder(decoration->GetBorder());
-    }
+    JSViewAbstract::JsBorderWidth(info);
+    TextFieldModel::GetInstance()->SetBackBorder();
 }
 
 void JSTextField::JsBorderColor(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsBorderColor(info);
-        return;
-    }
     if (!info[0]->IsObject() && !info[0]->IsString() && !info[0]->IsNumber()) {
         LOGI("args need a string or number or object");
         return;
     }
-    RefPtr<Decoration> decoration = nullptr;
-    auto component = AceType::DynamicCast<TextFieldComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (component) {
-        decoration = component->GetDecoration();
-    }
-    JSViewAbstract::ParseBorderColor(info[0]);
-    ViewAbstractModelImpl::SwapBackBorder(decoration);
-    if (component) {
-        component->SetOriginBorder(decoration->GetBorder());
-    }
+    JSViewAbstract::JsBorderColor(info);
+    TextFieldModel::GetInstance()->SetBackBorder();
 }
 
 void JSTextField::JsBorderStyle(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsBorderStyle(info);
-        return;
-    }
     if (!info[0]->IsObject() && !info[0]->IsNumber()) {
         LOGI("args need a string or number or object");
         return;
     }
-    RefPtr<Decoration> decoration = nullptr;
-    auto component = AceType::DynamicCast<TextFieldComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (component) {
-        decoration = component->GetDecoration();
-    }
-    JSViewAbstract::ParseBorderStyle(info[0]);
-    ViewAbstractModelImpl::SwapBackBorder(decoration);
-    if (component) {
-        component->SetOriginBorder(decoration->GetBorder());
-    }
+    JSViewAbstract::JsBorderStyle(info);
+    TextFieldModel::GetInstance()->SetBackBorder();
 }
 
 void JSTextField::JsBorderRadius(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsBorderRadius(info);
-        return;
-    }
     if (!info[0]->IsObject() && !info[0]->IsString() && !info[0]->IsNumber()) {
         LOGI("args need a string or number or object");
         return;
     }
-    RefPtr<Decoration> decoration = nullptr;
-    auto component = AceType::DynamicCast<TextFieldComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (component) {
-        decoration = component->GetDecoration();
-    }
-    JSViewAbstract::ParseBorderRadius(info[0]);
-    ViewAbstractModelImpl::SwapBackBorder(decoration);
-    if (component) {
-        component->SetOriginBorder(decoration->GetBorder());
-    }
+    JSViewAbstract::JsBorderRadius(info);
+    TextFieldModel::GetInstance()->SetBackBorder();
 }
 
 void JSTextField::JsHoverEffect(const JSCallbackInfo& info)
@@ -891,14 +761,7 @@ void JSTextField::JsHoverEffect(const JSCallbackInfo& info)
         LOGI("info[0] is not a number");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetHoverEffect(static_cast<HoverEffectType>(info[0]->ToNumber<int32_t>()));
-        return;
-    }
-    auto component = AceType::DynamicCast<TextFieldComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (component) {
-        component->SetHoverAnimationType(static_cast<HoverAnimationType>(info[0]->ToNumber<int32_t>()));
-    }
+    TextFieldModel::GetInstance()->SetHoverEffect(static_cast<HoverEffectType>(info[0]->ToNumber<int32_t>()));
 }
 
 void JSTextField::SetOnEditChanged(const JSCallbackInfo& info)
@@ -949,9 +812,8 @@ void JSTextField::SetOnClick(const JSCallbackInfo& info)
         JSInteractableView::JsOnClick(info);
         return;
     }
-    if (!JSViewBindEvent(&TextFieldComponent::SetOnClick, info)) {
-        LOGW("Failed(OnPaste) to bind event");
-    }
+    JsEventCallback<void(const ClickInfo&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    TextFieldModel::GetInstance()->SetOnClick(std::move(callback));
     info.ReturnSelf();
 }
 
@@ -970,14 +832,10 @@ void JSTextField::SetCopyOption(const JSCallbackInfo& info)
 
 void JSTextField::JsMenuOptionsExtension(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (info[0]->IsArray()) {
-            std::vector<NG::MenuOptionsParam> menuOptionsItems;
-            JSViewAbstract::ParseMenuOptions(info, JSRef<JSArray>::Cast(info[0]), menuOptionsItems);
-            TextFieldModel::GetInstance()->SetMenuOptionItems(std::move(menuOptionsItems));
-        }
-    } else {
-        LOGI("only newPipeline supply");
+    if (info[0]->IsArray()) {
+        std::vector<NG::MenuOptionsParam> menuOptionsItems;
+        JSViewAbstract::ParseMenuOptions(info, JSRef<JSArray>::Cast(info[0]), menuOptionsItems);
+        TextFieldModel::GetInstance()->SetMenuOptionItems(std::move(menuOptionsItems));
     }
 }
 
@@ -1079,16 +937,14 @@ void JSTextField::UpdateDecoration(const RefPtr<BoxComponent>& boxComponent,
 
 void JSTextField::SetShowUnit(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (!info[0]->IsFunction()) {
-            LOGI("fail to bind SetShowUnit event due to info is not object");
-            return;
-        }
-
-        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto unitFunc = [builderFunc]() { builderFunc->Execute(); };
-        TextFieldModel::GetInstance()->SetShowUnit(std::move(unitFunc));
+    if (!info[0]->IsFunction()) {
+        LOGI("fail to bind SetShowUnit event due to info is not object");
+        return;
     }
+
+    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto unitFunc = [builderFunc]() { builderFunc->Execute(); };
+    TextFieldModel::GetInstance()->SetShowUnit(std::move(unitFunc));
 }
 
 void JSTextField::SetShowError(const JSCallbackInfo& info)

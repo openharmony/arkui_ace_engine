@@ -55,14 +55,23 @@ void JSImageSpan::Create(const JSCallbackInfo& info)
     ImageModel::GetInstance()->Create(src, noPixmap, pixmap, bundleName, moduleName);
 }
 
-void JSImageSpan::SetObjectFit(int32_t value)
+void JSImageSpan::SetObjectFit(const JSCallbackInfo& info)
 {
-    auto fit = static_cast<ImageFit>(value);
-    if (fit < ImageFit::FILL || fit > ImageFit::SCALE_DOWN) {
-        LOGW("The value of objectFit is out of range %{public}d", value);
-        fit = ImageFit::COVER;
+    if (info.Length() != 1) {
+        LOGE("The arg is wrong, it is supposed to have 1 argument");
+        return;
     }
-    ImageModel::GetInstance()->SetImageFit(fit);
+
+    if (info[0]->IsNumber()) {
+        auto fit = static_cast<ImageFit>(info[0]->ToNumber<int32_t>());
+        if (fit < ImageFit::FILL || fit > ImageFit::SCALE_DOWN) {
+            LOGW("The value of objectFit is out of range %{public}d", fit);
+            fit = ImageFit::COVER;
+        }
+        ImageModel::GetInstance()->SetImageFit(fit);
+    } else {
+        ImageModel::GetInstance()->SetImageFit(ImageFit::COVER);
+    }
 }
 
 void JSImageSpan::SetVerticalAlign(int32_t verticalAlign)
@@ -80,7 +89,7 @@ void JSImageSpan::JSBind(BindingTarget globalObj)
     JSClass<JSImageSpan>::Declare("ImageSpan");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSImageSpan>::StaticMethod("create", &JSImageSpan::Create, opt);
-    JSClass<JSImageSpan>::StaticMethod("objectFit", &JSImageSpan::SetObjectFit, opt);
+    JSClass<JSImageSpan>::StaticMethod("objectFit", &JSImageSpan::SetObjectFit);
     JSClass<JSImageSpan>::StaticMethod("verticalAlign", &JSImageSpan::SetVerticalAlign);
     JSClass<JSImageSpan>::InheritAndBind<JSViewAbstract>(globalObj);
 }

@@ -26,8 +26,8 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/indexer/indexer_layout_property.h"
-#include "core/components_ng/pattern/indexer/indexer_paint_property.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
+#include "core/components_ng/pattern/indexer/indexer_paint_property.h"
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
@@ -43,9 +43,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float DEFAULT_ROOT_WIDTH = 720.f;
 constexpr float DEFAULT_ROOT_HEIGHT = 1136.f;
-std::vector<std::string> CREATE_ARRAY = {
-    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
-    "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
+std::vector<std::string> CREATE_ARRAY = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O",
+    "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
 std::vector<std::string> GetPopupData(int32_t)
 {
     return { "白", "别" };
@@ -520,8 +519,7 @@ HWTEST_F(IndexerTestNg, IndexerPattern001, TestSize.Level1)
     GetInstance();
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
-        frameNode_, geometryNode, layoutProperty_);
+    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode_, geometryNode, layoutProperty_);
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
@@ -829,9 +827,15 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest001, TestSize.Level1)
     IndexerModelNG.SetUsingPopup(true);
     TextStyle textStyle;
     textStyle.SetFontFamilies({ "font1", "font2" });
-    IndexerModelNG.SetSelectedFont(textStyle);
-    IndexerModelNG.SetPopupFont(TextStyle());
-    IndexerModelNG.SetFont(TextStyle());
+
+    std::function<void(TextStyle & textStyle)>&& getSelectedTextStyleFunc = [](TextStyle& textStyle) {
+        textStyle.SetFontFamilies({ "font1", "font2" });
+    };
+    std::function<void(TextStyle & textStyle)>&& getTextStyleFunc = [](TextStyle& textStyle) {};
+
+    IndexerModelNG.SetSelectedFont(std::move(getSelectedTextStyleFunc));
+    IndexerModelNG.SetPopupFont(std::move(getTextStyleFunc));
+    IndexerModelNG.SetFont(std::move(getTextStyleFunc));
     IndexerModelNG.SetItemSize(Dimension(24));
     IndexerModelNG.SetAlignStyle(0);
     IndexerModelNG.SetSelected(0);
@@ -1067,7 +1071,7 @@ HWTEST_F(IndexerTestNg, IndexerPatternCoverage001, TestSize.Level1)
      * @tc.steps: step3. Supplement GetFocusChildIndex branch,
      * has no condition that searchStr is ABC when MoveIndexBySearch.
      */
-    pattern_->selected_  = 5;
+    pattern_->selected_ = 5;
     EXPECT_EQ(pattern_->GetFocusChildIndex("ABC"), -1);
 
     /**
@@ -1147,5 +1151,64 @@ HWTEST_F(IndexerTestNg, IndexerAlgorithmCoverage001, TestSize.Level1)
     EXPECT_EQ(layoutAlgorithm->itemSize_, 0.f);
 
     EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: PerformActionTest001
+ * @tc.desc: Indexer Accessibility PerformAction test Select and ClearSelection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, PerformActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create indexer and initialize related properties.
+     */
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+
+    /**
+     * @tc.steps: step2. Get indexer frameNode and child pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto indexerPattern = frameNode->GetPattern<IndexerPattern>();
+    ASSERT_NE(indexerPattern, nullptr);
+    auto firstTextNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(firstTextNode, nullptr);
+    auto lastTextNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    ASSERT_NE(lastTextNode, nullptr);
+    indexerPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step3. Get text accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto firstTextaccessibilityProperty = firstTextNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(firstTextaccessibilityProperty, nullptr);
+    auto lastTextaccessibilityProperty = lastTextNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(lastTextaccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. The first child call the callback function in textAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(firstTextaccessibilityProperty->ActActionSelect());
+    EXPECT_TRUE(firstTextaccessibilityProperty->ActActionClearSelection());
+
+    /**
+     * @tc.steps: step5. The last child call the callback function in textAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(lastTextaccessibilityProperty->ActActionSelect());
+    EXPECT_TRUE(lastTextaccessibilityProperty->ActActionClearSelection());
+
+    /**
+     * @tc.steps: step6. The last child is not selected, call the ClearSelection callback function in
+     *                   textAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    indexerPattern->selected_ = 0;
+    EXPECT_TRUE(lastTextaccessibilityProperty->ActActionClearSelection());
 }
 } // namespace OHOS::Ace::NG

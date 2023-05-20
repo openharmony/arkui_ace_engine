@@ -87,7 +87,7 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
             }
         }
     }
-    if (source != SCROLL_FROM_UPDATE && isReactInParentMovement_) {
+    if (coordinationEvent_ && source != SCROLL_FROM_UPDATE && isReactInParentMovement_) {
         isReactInParentMovement_ = false;
         auto onScrollEnd = coordinationEvent_->GetOnScrollEndEvent();
         if (onScrollEnd) {

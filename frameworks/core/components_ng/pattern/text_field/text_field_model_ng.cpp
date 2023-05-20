@@ -430,6 +430,62 @@ void TextFieldModelNG::SetShowCounter(bool value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value);
 }
 
+void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
+{
+    Color backgroundColor;
+    if (tmp) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID_NOLOG(pipeline);
+        auto themeManager = pipeline->GetThemeManager();
+        CHECK_NULL_VOID_NOLOG(themeManager);
+        auto theme = themeManager->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID_NOLOG(theme);
+        backgroundColor = theme->GetBgColor();
+        return;
+    }
+    
+    NG::ViewAbstract::SetBackgroundColor(color);
+}
+
+void TextFieldModelNG::SetHeight(const Dimension& value) {}
+
+void TextFieldModelNG::SetPadding(NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp)
+{
+    if (tmp) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID_NOLOG(theme);
+        auto textFieldPadding = theme->GetPadding();
+        auto top = textFieldPadding.Top();
+        auto bottom = textFieldPadding.Bottom();
+        auto left = textFieldPadding.Left();
+        auto right = textFieldPadding.Right();
+
+        NG::PaddingProperty paddings;
+        if (top.Value()) {
+            paddings.top = NG::CalcLength(top.IsNonNegative() ? top : Dimension());
+        }
+        if (bottom.Value()) {
+            paddings.bottom = NG::CalcLength(bottom.IsNonNegative() ? bottom : Dimension());
+        }
+        if (left.Value()) {
+            paddings.left = NG::CalcLength(left.IsNonNegative() ? left : Dimension());
+        }
+        if (right.Value()) {
+            paddings.right = NG::CalcLength(right.IsNonNegative() ? right : Dimension());
+        }
+        ViewAbstract::SetPadding(paddings);
+        return;
+    }
+    NG::ViewAbstract::SetPadding(newPadding);
+}
+
+void TextFieldModelNG::SetHoverEffect(HoverEffectType hoverEffect)
+{
+    NG::ViewAbstract::SetHoverEffect(hoverEffect);
+}
+
 void TextFieldModelNG::SetOnChangeEvent(std::function<void(const std::string&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();

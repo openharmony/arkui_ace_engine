@@ -467,6 +467,10 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
 
             AccessibilityEventType type = AccessibilityEventType::SELECTED;
             host->OnAccessibilityEvent(type);
+            auto textAccessibilityProperty = childNode->GetAccessibilityProperty<TextAccessibilityProperty>();
+            if (textAccessibilityProperty) {
+                textAccessibilityProperty->SetSelected(true);
+            }
             continue;
         } else {
             if (!fromTouchUp || animateSelected_ == lastSelected_ || index != lastSelected_) {
@@ -486,6 +490,10 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
         nodeLayoutProperty->UpdateTextColor(layoutProperty->GetColor().value_or(indexerTheme->GetDefaultTextColor()));
         childNode->MarkModifyDone();
         index++;
+        auto textAccessibilityProperty = childNode->GetAccessibilityProperty<TextAccessibilityProperty>();
+        if (textAccessibilityProperty) {
+            textAccessibilityProperty->SetSelected(false);
+        }
     }
     if (selectChanged || NeedShowPopupView()) {
         ShowBubble();

@@ -585,12 +585,16 @@ bool TextPickerPattern::HandleDirectionKey(KeyCode code)
     if (code == KeyCode::KEY_DPAD_UP) {
         textPickerColumnPattern->SetCurrentIndex((totalOptionCount + currernIndex - 1) % totalOptionCount);
         FlushOptions();
+        textPickerColumnPattern->HandleChangeCallback(false, true);
+        textPickerColumnPattern->HandleEventCallback(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return true;
     }
     if (code == KeyCode::KEY_DPAD_DOWN) {
         textPickerColumnPattern->SetCurrentIndex((totalOptionCount + currernIndex + 1) % totalOptionCount);
         FlushOptions();
+        textPickerColumnPattern->HandleChangeCallback(true, true);
+        textPickerColumnPattern->HandleEventCallback(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return true;
     }

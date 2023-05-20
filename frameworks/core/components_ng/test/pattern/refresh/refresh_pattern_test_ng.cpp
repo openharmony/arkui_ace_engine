@@ -1069,4 +1069,49 @@ HWTEST_F(RefreshPatternTestNg, RefreshAccessibility001, TestSize.Level1)
     pattern_->isRefreshing_ = true;
     EXPECT_FALSE(accessibilityProperty_->IsScrollable());
 }
+
+/**
+ * @tc.name: PerformActionTest001
+ * @tc.desc: Refresh Accessibility PerformAction test ScrollForward and ScrollBackward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshPatternTestNg, PerformActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create refresh and initialize related properties.
+     */
+    RefreshModelNG refreshModelNG;
+    refreshModelNG.Create();
+
+    /**
+     * @tc.steps: step2. Get refresh frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto refreshPattern = frameNode->GetPattern<RefreshPattern>();
+    ASSERT_NE(refreshPattern, nullptr);
+    refreshPattern->isRefreshing_ = false;
+    refreshPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step3. Get refresh accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto refreshAccessibilityProperty = frameNode->GetAccessibilityProperty<RefreshAccessibilityProperty>();
+    ASSERT_NE(refreshAccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. When refresh is not Refreshing, call the callback function in refreshAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(refreshAccessibilityProperty->ActActionScrollForward());
+
+    /**
+     * @tc.steps: step5. When refresh is Refreshing, call the callback function in refreshAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    refreshPattern->isRefreshing_ = true;
+    EXPECT_TRUE(refreshAccessibilityProperty->ActActionScrollForward());
+}
 } // namespace OHOS::Ace::NG

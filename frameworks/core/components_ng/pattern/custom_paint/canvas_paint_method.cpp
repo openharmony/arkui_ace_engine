@@ -522,9 +522,7 @@ bool CanvasPaintMethod::UpdateParagraph(const OffsetF& offset, const std::string
     } else {
         style.text_align = ConvertTxtTextAlign(fillState_.GetTextAlign());
     }
-    if (fillState_.GetOffTextDirection() == TextDirection::RTL) {
-        style.text_direction = txt::TextDirection::rtl;
-    }
+    style.text_direction = ConvertTxtTextDirection(fillState_.GetOffTextDirection());
     style.text_align = GetEffectiveAlign(style.text_align, style.text_direction);
 #ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();

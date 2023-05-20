@@ -69,16 +69,18 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        CalculateCacheRange();
-        auto layoutAlgorithm = MakeRefPtr<SwiperLayoutAlgorithm>(currentIndex_, startIndex_, endIndex_);
-        layoutAlgorithm->SetCurrentOffset(currentOffset_);
-        layoutAlgorithm->SetTargetIndex(targetIndex_);
-        layoutAlgorithm->SetTotalCount(TotalCount());
-        layoutAlgorithm->SetPreItemRange(preItemRange_);
+        auto layoutAlgorithm = MakeRefPtr<SwiperLayoutAlgorithm>();
         layoutAlgorithm->SetIsLoop(IsLoop());
-        layoutAlgorithm->SetMaxChildSize(maxChildSize_);
+        layoutAlgorithm->SetCurrentOffsetTimes(
+            !IsLoop() && GetEdgeEffect() == EdgeEffect::FADE
+                ? std::clamp(currentOffsetTimes_, 0.0f, static_cast<float>(TotalCount() - GetDisplayCount()))
+                : currentOffsetTimes_);
+        layoutAlgorithm->SetTotalCount(TotalCount());
         layoutAlgorithm->SetDisplayCount(GetDisplayCount());
         layoutAlgorithm->SetHoverRatio(hoverRatio_);
+        layoutAlgorithm->SetMaxChildSize(maxChildSize_);
+        layoutAlgorithm->SetItemRange(itemRange_);
+        layoutAlgorithm->SetOnlyNeedMeasurePages(onlyNeedMeasurePages_);
         return layoutAlgorithm;
     }
 
@@ -88,8 +90,9 @@ public:
         CHECK_NULL_RETURN(layoutProperty, nullptr);
         const auto& paddingProperty = layoutProperty->GetPaddingProperty();
         bool needClipPadding = paddingProperty != nullptr;
-        bool needPaintFade = !IsLoop() && GetEdgeEffect() == EdgeEffect::FADE && IsOutOfBoundary(currentOffset_);
-        auto paintMethod = MakeRefPtr<SwiperPaintMethod>(GetDirection(), currentOffset_);
+        bool needPaintFade = !IsLoop() && GetEdgeEffect() == EdgeEffect::FADE && overstepBoundaryOffsetTimes_ != 0.0f;
+        auto paintMethod = MakeRefPtr<SwiperPaintMethod>(
+            GetDirection(), overstepBoundaryOffsetTimes_ * -1.0f * maxChildSize_.MainSize(GetDirection()));
         paintMethod->SetNeedPaintFade(needPaintFade);
         paintMethod->SetNeedClipPadding(needClipPadding);
         return paintMethod;
@@ -103,6 +106,7 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         Pattern::ToJsonValue(json);
+        json->Put("currentOffsetTimes", currentOffsetTimes_);
 
         if (indicatorIsBoolean_) {
             return;
@@ -114,21 +118,9 @@ public:
         } else {
             json->Put("indicator", GetDigitIndicatorStyle().c_str());
         }
-        json->Put("currentIndex", GetCurrentIndex());
-        json->Put("currentOffset", currentOffset_);
     }
 
-    void FromJson(const std::unique_ptr<JsonValue>& json) override
-    {
-        currentIndex_ = json->GetInt("currentIndex");
-        auto currentOffset = json->GetDouble("currentOffset");
-        if (currentOffset != currentOffset_) {
-            auto delta = currentOffset - currentOffset_;
-            LOGD("UITree delta=%{public}f", delta);
-            UpdateCurrentOffset(delta);
-        }
-        Pattern::FromJson(json);
-    }
+    void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
     std::string GetDotIndicatorStyle() const
     {
@@ -201,20 +193,19 @@ public:
 
     float GetTurnPageRate() const
     {
-        return turnPageRate_;
-    }
-
-    RefPtr<Animator> GetController()
-    {
-        return controller_;
+        float turnPageRate = static_cast<float>(currentIndex_);
+        if (moveDirection_ == MoveDirection::ADVANCE) {
+            turnPageRate = std::fmod(currentOffsetTimes_, 1) * -1;
+        } else if (moveDirection_ == MoveDirection::ADVANCE) {
+            turnPageRate = 1.0f - std::fmod(currentOffsetTimes_, 1);
+        }
+        return turnPageRate;
     }
 
     void SetIndicatorDoingAnimation(bool indicatorDoingAnimation)
     {
         indicatorDoingAnimation_ = indicatorDoingAnimation;
     }
-
-    void UpdateCurrentOffset(float offset);
 
     int32_t TotalCount() const;
 
@@ -370,6 +361,11 @@ public:
         indicatorIsBoolean_ = isBoolean;
     }
 
+    const std::shared_ptr<AnimationUtils::Animation>& GetAnimation() const
+    {
+        return animation_;
+    }
+
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
@@ -379,19 +375,30 @@ public:
     bool IsEnabled() const;
     void OnWindowShow() override;
     void OnWindowHide() override;
+
 private:
+    void AttachNodeAnimatableProperty();
+    void UpdateCurrentOffsetTimes(float value);
+    void HandleAnimationEnds();
+    void CalculateItemRange(int32_t index);
+    void PlayTranslateAnimation(int32_t duration);
+    void ForcedStopTranslateAnimation();
+    void GoAutoPlay();
+    void ForcedFinishAutoPlay();
+    void HandleFinishAutoPlayAnimationEnds();
+
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     // Init pan recognizer to move items when drag update, play translate animation when drag end.
-    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitPanEvent();
 
     // Init touch event, stop animation when touch down.
-    void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitTouchEvent();
 
     // Init on key event
-    void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    void InitOnKeyEvent();
     bool OnKeyEvent(const KeyEvent& event);
     void FlushFocus(const RefPtr<FrameNode>& curShowFrame);
     WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
@@ -411,28 +418,21 @@ private:
     void HandleTouchDown();
     void HandleTouchUp();
 
-    void PlayTranslateAnimation(float startPos, float endPos, int32_t nextIndex, bool restartAutoPlay = false);
-    void PlaySpringAnimation(double dragVelocity);
-    void PlayFadeAnimation();
-
     // Implement of swiper controller
     void SwipeToWithoutAnimation(int32_t index);
     void FinishAnimation();
-    void StopTranslateAnimation();
-    void StopSpringAnimation();
 
-    void StopAutoPlay();
     void StartAutoPlay();
-    bool IsOutOfBoundary(float mainOffset) const;
-    float MainSize() const;
     void FireChangeEvent() const;
     void FireAnimationStartEvent() const;
     void FireAnimationEndEvent() const;
-    void CalculateCacheRange();
 
+    const std::optional<LayoutConstraintF>& GetLayoutConstraint() const;
+    RefPtr<GestureEventHub> GetGestureHub() const;
     float GetItemSpace() const;
     int32_t CurrentIndex() const;
     int32_t GetDisplayCount() const;
+    int32_t GetCachedCount() const;
     int32_t GetDuration() const;
     int32_t GetInterval() const;
     RefPtr<Curve> GetCurve() const;
@@ -440,55 +440,32 @@ private:
     bool IsAutoPlay() const;
     bool IsDisableSwipe() const;
     bool IsShowIndicator() const;
-    float GetTranslateLength() const;
     void OnIndexChange() const;
     bool IsOutOfHotRegion(const PointF& dragPoint) const;
     bool IsOutOfIndicatorZone(const PointF& dragPoint);
-    void SaveDotIndicatorProperty(const RefPtr<FrameNode> &indicatorNode);
-    void SaveDigitIndicatorProperty(const RefPtr<FrameNode> &indicatorNode);
-    void PostTranslateTask(uint32_t delayTime);
+    void SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
+    void SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
     void RegisterVisibleAreaChange();
     bool NeedAutoPlay() const;
-    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay);
     bool IsShowArrow() const;
     void SaveArrowProperty(const RefPtr<FrameNode>& arrowNode);
     RefPtr<FocusHub> GetFocusHubChild(std::string childFrameName);
     WeakPtr<FocusHub> PreviousFocus(const RefPtr<FocusHub>& curFocusNode);
     WeakPtr<FocusHub> NextFocus(const RefPtr<FocusHub>& curFocusNode);
-    int32_t ComputeLoadCount(int32_t cacheCount);
     void SetAccessibilityAction();
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
-
-    // Control translate animation when drag end.
-    RefPtr<Animator> controller_;
-
-    // Control spring animation when drag beyond boundary and drag end.
-    RefPtr<Animator> springController_;
-
-    // Control fade animation when drag beyond boundary and drag end.
-    RefPtr<Animator> fadeController_;
-
-    RefPtr<Scheduler> scheduler_;
 
     RefPtr<SwiperController> swiperController_;
 
     bool isLastIndicatorFocused_ = false;
     int32_t startIndex_ = 0;
     int32_t endIndex_ = 0;
-    int32_t currentIndex_ = 0;
-    int32_t oldIndex_ = 0;
-    std::optional<int32_t> targetIndex_;
-    std::set<int32_t> preItemRange_;
 
     PanDirection panDirection_;
     float distance_ = 0.0f;
 
-    float currentOffset_ = 0.0f;
-    float turnPageRate_ = 0.0f;
-
-    bool moveDirection_ = false;
     bool indicatorDoingAnimation_ = false;
     bool isInit_ = true;
     bool hasVisibleChangeRegistered_ = false;
@@ -503,7 +480,6 @@ private:
 
     mutable std::shared_ptr<SwiperParameters> swiperParameters_;
     mutable std::shared_ptr<SwiperDigitalParameters> swiperDigitalParameters_;
-    SizeF maxChildSize_;
 
     WeakPtr<FrameNode> lastWeakShowNode_;
 
@@ -514,6 +490,25 @@ private:
     std::optional<int32_t> leftButtonId_;
     std::optional<int32_t> rightButtonId_;
     std::optional<SwiperIndicatorType> lastSwiperIndicatorType_;
+
+    enum MoveDirection { ADVANCE, STATIC, RETREAT } moveDirection_ = MoveDirection::STATIC;
+
+    std::shared_ptr<AnimationUtils::Animation> animation_;
+
+    int32_t oldIndex_ = 0;
+    int32_t currentIndex_ = 0;
+    int32_t targetIndex_ = 0;
+    std::set<int32_t> itemRange_;
+    SizeF maxChildSize_ = { 0, 0 };
+
+    bool needCalculateItemRange_ = true;
+    float currentOffsetTimes_ = 0;
+    float overstepBoundaryOffsetTimes_ = 0;
+    bool needUpdateCurrentOffsetTimes_ = true;
+    bool translateAnimationIsRunning_ = false;
+    bool returnToOriginalAnimation_ = true;
+    bool playingAutoPlay_ = false;
+    bool onlyNeedMeasurePages_ = false;
 };
 } // namespace OHOS::Ace::NG
 

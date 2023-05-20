@@ -424,7 +424,7 @@ void NavRouterGroupNode::BackToNavBar(const RefPtr<UINode>& parent)
     if (backButtonNode) {
         BackButtonAnimation(backButtonNode, false);
     }
-    NavTransitionOutAnimation(navigationNode, navBarNode, navigationContentNode);
+    NavTransitionOutAnimation(navigationNode, navBarNode, navDestination, navigationContentNode);
     auto navigationPattern = AceType::DynamicCast<NavigationGroupNode>(navigationNode)->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
     navigationPattern->RemoveNavDestination();
@@ -605,6 +605,7 @@ void NavRouterGroupNode::MaskAnimation(const RefPtr<RenderContext>& transitionOu
                 },
                 TaskExecutor::TaskType::UI);
         });
+    transitionOutNodeContext->SetActualForegroundColor(DEFAULT_MASK_COLOR);
     AnimationUtils::Animate(
         maskOption, [transitionOutNodeContext]() { transitionOutNodeContext->SetActualForegroundColor(MASK_COLOR); },
         maskOption.GetOnFinishEvent());
@@ -667,7 +668,8 @@ void NavRouterGroupNode::TitleTransitionInAnimation(const RefPtr<FrameNode>& nav
 }
 
 void NavRouterGroupNode::NavTransitionOutAnimation(const RefPtr<UINode>& navigation,
-    const RefPtr<FrameNode>& navBarNode, const RefPtr<FrameNode>& navigationContentNode)
+    const RefPtr<FrameNode>& navBarNode, const RefPtr<FrameNode>& navDestination,
+    const RefPtr<FrameNode>& navigationContentNode)
 {
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(navigation);
     CHECK_NULL_VOID(navigationNode);
@@ -681,7 +683,7 @@ void NavRouterGroupNode::NavTransitionOutAnimation(const RefPtr<UINode>& navigat
     option.SetDuration(DEFAULT_ANIMATION_DURATION);
     auto navigationContext = navBarNode->GetRenderContext();
     CHECK_NULL_VOID(navigationContext);
-    auto navDestinationContext = navigationContentNode->GetRenderContext();
+    auto navDestinationContext = navDestination->GetRenderContext();
     CHECK_NULL_VOID(navDestinationContext);
 
     auto node = AceType::DynamicCast<FrameNode>(navigationNode);

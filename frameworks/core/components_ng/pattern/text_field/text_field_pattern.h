@@ -784,6 +784,11 @@ public:
         underlineWidth_ = underlineWidth;
     }
 
+    bool IsSelected() const
+    {
+        return HasFocus();
+    }
+
 private:
     bool HasFocus() const;
     void HandleTouchEvent(const TouchEventInfo& info);
