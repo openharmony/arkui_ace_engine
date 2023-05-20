@@ -441,17 +441,9 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(
 
 void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
 {
-    // set min width
     RefPtr<GridColumnInfo> columnInfo;
     columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
     columnInfo->GetParent()->BuildColumnWidth(wrapperSize_.Width());
-    float minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
-    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
-    if (menuPattern->IsSelectOverlayExtensionMenu() && minWidth > constraint.maxSize.Width()) {
-        minWidth = constraint.maxSize.Width();
-    }
-    constraint.minSize.SetWidth(minWidth);
-
     // set max width
     auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(menuLayoutProperty);
@@ -462,6 +454,13 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
     maxWidth = std::min(constraint.maxSize.Width(), maxWidth);
     constraint.maxSize.SetWidth(maxWidth);
     constraint.percentReference.SetWidth(maxWidth);
+    // set min width
+    auto minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
+    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    if (minWidth > constraint.maxSize.Width()) {
+        minWidth = constraint.maxSize.Width();
+    }
+    constraint.minSize.SetWidth(minWidth);
 }
 
 void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
@@ -492,9 +491,10 @@ void MenuLayoutAlgorithm::UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWra
         LOGD("options is empty, no need to update constraint.");
         return;
     }
-    auto maxChildrenWidth = constraint.minSize.Width();
     auto optionConstraint = constraint;
     optionConstraint.maxSize.MinusWidth(optionPadding_ * 2.0f);
+    optionConstraint.minSize.MinusWidth(optionPadding_ * 2.0f);
+    auto maxChildrenWidth = optionConstraint.minSize.Width();
     auto optionsLayoutWrapper = GetOptionsLayoutWrappper(layoutWrapper);
     for (const auto& optionWrapper : optionsLayoutWrapper) {
         optionWrapper->Measure(optionConstraint);
