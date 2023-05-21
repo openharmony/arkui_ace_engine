@@ -12,13 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "core/components_ng/pattern/checkbox/checkbox_paint_method.h"
+
 #include <optional>
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/rect_t.h"
+#include "base/geometry/rect.h"
+#include "base/geometry/rrect.h"
 #include "base/utils/utils.h"
 #include "core/components/checkable/checkable_theme.h"
+#include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/checkbox/checkbox_modifier.h"
+#include "core/components/theme/theme_manager.h"
+#include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
+#include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
@@ -89,7 +97,6 @@ void CheckBoxModifier::InitializeParam()
     hoverRadius_ = checkBoxTheme->GetHoverRadius();
     hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
     hotZoneVerticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding();
-    defaultPadding_ = checkBoxTheme->GetDefaultPadding();
     shadowWidth_ = checkBoxTheme->GetShadowWidth();
     userActiveColor_ = activeColor_;
     hoverDuration_ = checkBoxTheme->GetHoverDuration();
@@ -133,12 +140,10 @@ void CheckBoxModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& siz
     RSBrush brush;
     brush.SetColor(ToRSColor(animateTouchHoverColor_->Get()));
     brush.SetAntiAlias(true);
-    float originX = offset.GetX() - defaultPadding_.ConvertToPx() - hotZoneHorizontalPadding_.ConvertToPx();
-    float originY = offset.GetY() - defaultPadding_.ConvertToPx() - hotZoneVerticalPadding_.ConvertToPx();
-    float endX = size.Width() + originX +
-                 CHECKBOX_DOUBLE_RATIO * (defaultPadding_.ConvertToPx() + hotZoneHorizontalPadding_.ConvertToPx());
-    float endY = size.Height() + originY +
-                 CHECKBOX_DOUBLE_RATIO * (defaultPadding_.ConvertToPx() + hotZoneVerticalPadding_.ConvertToPx());
+    float originX = offset.GetX() - hotZoneHorizontalPadding_.ConvertToPx();
+    float originY = offset.GetY() - hotZoneVerticalPadding_.ConvertToPx();
+    float endX = size.Width() + originX + CHECKBOX_DOUBLE_RATIO * hotZoneHorizontalPadding_.ConvertToPx();
+    float endY = size.Height() + originY + CHECKBOX_DOUBLE_RATIO * hotZoneVerticalPadding_.ConvertToPx();
     auto rrect = RSRoundRect({ originX, originY, endX, endY }, hoverRadius_.ConvertToPx(), hoverRadius_.ConvertToPx());
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(rrect);
