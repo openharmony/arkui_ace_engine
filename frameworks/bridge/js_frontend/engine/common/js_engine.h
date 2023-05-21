@@ -25,6 +25,7 @@
 
 class NativeEngine;
 class NativeReference;
+class NativeValue;
 
 namespace OHOS::Ace::Framework {
 
@@ -302,6 +303,10 @@ public:
 #endif
 
     virtual void FlushReload() {}
+    virtual NativeValue* GetContextValue()
+    {
+        return nullptr;
+    }
 
 protected:
     NativeEngine* nativeEngine_ = nullptr;

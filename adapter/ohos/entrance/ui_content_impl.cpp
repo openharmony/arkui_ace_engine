@@ -353,6 +353,21 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
     Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
 }
 
+NativeValue* UIContentImpl::GetUIContext()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    ContainerScope scope(instanceId_);
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, nullptr);
+    if (frontend->GetType() == FrontendType::DECLARATIVE_JS) {
+        auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend);
+        CHECK_NULL_RETURN(declarativeFrontend, nullptr);
+        return declarativeFrontend->GetContextValue();
+    }
+
+    return nullptr;
+}
+
 void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
 {
     CommonInitialize(window, contentInfo, storage);

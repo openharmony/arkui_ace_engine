@@ -57,6 +57,7 @@ public:
     void DestroyRootViewHandle(int32_t pageId);
     void DestroyAllRootViewHandle();
     void FlushReload();
+    NativeValue* GetContextValue();
 
     static std::unique_ptr<JsonValue> GetI18nStringResource(
         const std::string& targetStringKey, const std::string& targetStringValue);
@@ -143,6 +144,11 @@ public:
 
     void RegisterFaPlugin(); // load ReatureAbility plugin
 
+    void SetContextValue(shared_ptr<JsValue> uiContext)
+    {
+        uiContext_ = uiContext;
+    }
+
 #if defined(PREVIEW)
     bool CallCurlFunction(const OHOS::Ace::RequestData& requestData, int32_t callbackId)
     {
@@ -184,6 +190,8 @@ private:
     void InitJsContextModuleObject();
     void InitGroupJsBridge();
     static shared_ptr<JsRuntime> InnerGetCurrentRuntime();
+    shared_ptr<JsValue> CallGetUIContextFunc(const shared_ptr<JsRuntime>& runtime,
+        const std::vector<shared_ptr<JsValue>>& argv);
 
     std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> rootViewMap_;
     static std::unique_ptr<JsonValue> currentConfigResourceData_;
@@ -212,6 +220,7 @@ private:
     static bool isModulePreloaded_;
     static bool isModuleInitialized_;
     static shared_ptr<JsRuntime> globalRuntime_;
+    shared_ptr<JsValue> uiContext_;
 
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngineInstance);
 };
@@ -360,7 +369,11 @@ public:
     {
         pluginModuleName_ = pluginModuleName;
     }
-    
+
+    NativeValue* GetContextValue() override
+    {
+        return engineInstance_->GetContextValue();
+    }
 #if defined(PREVIEW)
     void ReplaceJSContent(const std::string& url, const std::string componentName) override;
     RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID) override;
