@@ -33,6 +33,7 @@ build_component_ng("web_pattern_ng") {
   sources = [
     "web_accessibility_property.cpp",
     "web_layout_algorithm.cpp",
+    "web_model_ng.cpp",
     "web_pattern.cpp",
     "web_view.cpp",
   ]
