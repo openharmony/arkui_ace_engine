@@ -27,7 +27,7 @@ public:
     void SetOnChange(NG::GroupChangeEvent&& onChange) override;
     void SetWidth(const Dimension& width) override;
     void SetHeight(const Dimension& height) override;
-    void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs, bool flag) override;
+    void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_CHECKBOXGROUP_MODEL_IMPL_H

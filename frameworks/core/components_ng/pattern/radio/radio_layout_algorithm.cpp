@@ -33,7 +33,6 @@ namespace OHOS::Ace::NG {
 std::optional<SizeF> RadioLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    InitializeParam();
     // Case 1: Width and height are set in the front end.
     if (contentConstraint.selfIdealSize.IsValid() && contentConstraint.selfIdealSize.IsNonNegative()) {
         auto height = contentConstraint.selfIdealSize.Height().value();
@@ -54,18 +53,25 @@ std::optional<SizeF> RadioLayoutAlgorithm::MeasureContent(
         auto height = contentConstraint.selfIdealSize.Height().value();
         return SizeF(height, height);
     }
-    return SizeF();
-}
-
-void RadioLayoutAlgorithm::InitializeParam()
-{
+    // Case 3: Width and height are not set in the front end, so return from the theme
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, SizeF());
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_RETURN(pipeline, SizeF());
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
-    CHECK_NULL_VOID(radioTheme);
-    defaultWidth_ = radioTheme->GetWidth().ConvertToPx();
-    defaultHeight_ = radioTheme->GetHeight().ConvertToPx();
-    horizontalPadding_ = radioTheme->GetHotZoneHorizontalPadding().ConvertToPx();
-    verticalPadding_ = radioTheme->GetHotZoneVerticalPadding().ConvertToPx();
+    CHECK_NULL_RETURN(radioTheme, SizeF());
+    const auto& padding = layoutProperty->GetPaddingProperty();
+    auto topPadding = padding->top.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+    auto bottomPadding = padding->bottom.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+    auto leftPadding = padding->left.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+    auto rightPadding = padding->right.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+    auto width = std::max(radioTheme->GetWidth().ConvertToPx() - leftPadding - rightPadding, 0.0);
+    auto height = std::max(radioTheme->GetHeight().ConvertToPx() - topPadding - bottomPadding, 0.0);
+    auto size = SizeF(width, height);
+    size.Constrain(contentConstraint.minSize, contentConstraint.maxSize);
+    auto length = std::min(size.Width(), size.Height());
+    size.SetWidth(length);
+    size.SetHeight(length);
+    return size;
 }
 } // namespace OHOS::Ace::NG

@@ -26,9 +26,8 @@
 namespace OHOS::Ace::NG {
 
 std::optional<SizeF> CheckBoxGroupLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* /*layoutWrapper*/)
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    InitializeParam();
     // Case 1: Width and height are set in the front end.
     if (contentConstraint.selfIdealSize.Width().has_value() && contentConstraint.selfIdealSize.Height().has_value() &&
         contentConstraint.selfIdealSize.IsNonNegative()) {
@@ -50,19 +49,26 @@ std::optional<SizeF> CheckBoxGroupLayoutAlgorithm::MeasureContent(
         auto height = contentConstraint.selfIdealSize.Height().value();
         return SizeF(height, height);
     }
-    return SizeF();
-}
-
-void CheckBoxGroupLayoutAlgorithm::InitializeParam()
-{
+    // Case 3: Width and height are not set in the front end, so return from the theme
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, SizeF());
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_RETURN(pipeline, SizeF());
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
-    CHECK_NULL_VOID(checkBoxTheme);
-    defaultWidth_ = checkBoxTheme->GetDefaultWidth().ConvertToPx();
-    defaultHeight_ = checkBoxTheme->GetDefaultHeight().ConvertToPx();
-    horizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding().ConvertToPx();
-    verticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding().ConvertToPx();
+    CHECK_NULL_RETURN(checkBoxTheme, SizeF());
+    const auto& padding = layoutProperty->GetPaddingProperty();
+    auto topPadding = padding->top.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+    auto bottomPadding = padding->bottom.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+    auto leftPadding = padding->left.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+    auto rightPadding = padding->right.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+    auto width = std::max(checkBoxTheme->GetWidth().ConvertToPx() - leftPadding - rightPadding, 0.0);
+    auto height = std::max(checkBoxTheme->GetHeight().ConvertToPx() - topPadding - bottomPadding, 0.0);
+    auto size = SizeF(width, height);
+    size.Constrain(contentConstraint.minSize, contentConstraint.maxSize);
+    auto length = std::min(size.Width(), size.Height());
+    size.SetWidth(length);
+    size.SetHeight(length);
+    return size;
 }
 
 } // namespace OHOS::Ace::NG

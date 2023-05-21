@@ -28,7 +28,7 @@ public:
     void SetOnChange(NG::ChangeEvent&& onChange) override;
     void SetWidth(const Dimension& width) override;
     void SetHeight(const Dimension& height) override;
-    void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs, bool flag) override;
+    void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs) override;
     void SetChangeEvent(std::function<void(bool)>&& changeEvent) override {};
 };
 } // namespace OHOS::Ace::Framework

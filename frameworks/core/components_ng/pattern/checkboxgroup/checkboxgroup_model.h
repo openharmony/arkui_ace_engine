@@ -36,7 +36,7 @@ public:
     virtual void SetOnChange(NG::GroupChangeEvent&& onChange);
     virtual void SetWidth(const Dimension& width);
     virtual void SetHeight(const Dimension& height);
-    virtual void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs, bool flag);
+    virtual void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs);
     virtual void SetChangeEvent(NG::GroupChangeEvent&& changeEvent) {};
 
 private:
