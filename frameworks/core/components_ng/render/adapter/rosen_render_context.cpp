@@ -717,6 +717,16 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
     return rect;
 }
 
+RectF RosenRenderContext::GetPaintRectWithTranslate()
+{
+    RectF rect;
+    CHECK_NULL_RETURN(rsNode_, rect);
+    rect = GetPaintRectWithoutTransform();
+    auto translate = rsNode_->GetStagingProperties().GetTranslate();
+    rect.SetOffset(rect.GetOffset() + OffsetF(translate[0], translate[1]));
+    return rect;
+}
+
 void RosenRenderContext::GetPointWithTransform(PointF& point)
 {
     // TODO: add rotation and center support
@@ -2486,5 +2496,25 @@ void RosenRenderContext::AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePrope
         rsNode_->AddModifier(nodeModifierImpl);
         nodeModifierImpl->AddProperty(property->GetProperty());
     }
+}
+
+void RosenRenderContext::RegisterSharedTransition(const RefPtr<RenderContext>& other)
+{
+    auto otherContext = AceType::DynamicCast<RosenRenderContext>(other);
+    if (!otherContext) {
+        LOGE("RosenRenderContext::RegisterSharedTransition: other is not RosenRenderContext");
+        return;
+    }
+    RSNode::RegisterTransitionPair(rsNode_->GetId(), otherContext->rsNode_->GetId());
+}
+
+void RosenRenderContext::UnregisterSharedTransition(const RefPtr<RenderContext>& other)
+{
+    auto otherContext = AceType::DynamicCast<RosenRenderContext>(other);
+    if (!otherContext) {
+        // the paired node is already destroyed, we don't need to unregister it, Rosen will handle it.
+        return;
+    }
+    RSNode::UnregisterTransitionPair(rsNode_->GetId(), otherContext->rsNode_->GetId());
 }
 } // namespace OHOS::Ace::NG

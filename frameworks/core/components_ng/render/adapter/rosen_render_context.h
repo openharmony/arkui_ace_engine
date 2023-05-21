@@ -183,6 +183,8 @@ public:
 
     RectF GetPaintRectWithTransform() override;
 
+    RectF GetPaintRectWithTranslate() override;
+
     RectF GetPaintRectWithoutTransform() override;
 
     void GetPointWithTransform(PointF& point) override;
@@ -224,6 +226,9 @@ public:
     RefPtr<PixelMap> GetThumbnailPixelMap() override;
     void SetActualForegroundColor(const Color& value) override;
     void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property) override;
+
+    void RegisterSharedTransition(const RefPtr<RenderContext>& other) override;
+    void UnregisterSharedTransition(const RefPtr<RenderContext>& other) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
