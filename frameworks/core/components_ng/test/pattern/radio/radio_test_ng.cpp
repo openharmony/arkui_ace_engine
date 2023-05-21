@@ -47,7 +47,14 @@ constexpr NG::PaddingPropertyF PADDING = NG::PaddingPropertyF();
 constexpr bool CHECKED = true;
 constexpr Dimension HORIZONTAL_PADDING = Dimension(5.0);
 constexpr Dimension VERTICAL_PADDING = Dimension(4.0);
-constexpr Dimension DEFAULT_PADDING = 2.0_vp;
+constexpr float COMPONENT_WIDTH = 200.0;
+constexpr float COMPONENT_HEIGHT = 210.0;
+constexpr float COMPONENT_WIDTH_INVALID = -1.0;
+constexpr float COMPONENT_HEIGHT_INVALID = -1.0;
+constexpr double DEFAULT_WIDTH = 100.0;
+constexpr double DEFAULT_HEIGHT = 110.0;
+constexpr Dimension DEFAULT_WIDTH_DIMENSION = Dimension(DEFAULT_WIDTH);
+constexpr Dimension DEFAULT_HEIGHT_DIMENSION = Dimension(DEFAULT_HEIGHT);
 const SizeF CONTENT_SIZE = SizeF(400.0, 500.0);
 const OffsetF CONTENT_OFFSET = OffsetF(50.0, 60.0);
 constexpr Color NORMAL_COLOR = Color(0xff0000ff);
@@ -875,80 +882,201 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest007, TestSize.Level1)
 }
 
 /**
- * @tc.name: RadioMeasureTest024
- * @tc.desc: Test Radio MeasureContent.
+ * @tc.name: RadioLayoutAlgorithmTest001
+ * @tc.desc: Verify that RadioLayoutAlgorithm can correctly InitializeParam.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioMeasureTest001, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest001, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. Init Radio node
-     */
-    RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-
-    /**
-     * @tc.steps: step2. Create LayoutWrapper and set radioLayoutAlgorithm.
-     */
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
-    auto radioPattern = frameNode->GetPattern<RadioPattern>();
-    ASSERT_NE(radioPattern, nullptr);
-    auto radioLayoutAlgorithm =
-        AceType::DynamicCast<RadioLayoutAlgorithm>(radioPattern->CreateLayoutAlgorithm());
-    ASSERT_NE(radioLayoutAlgorithm, nullptr);
-    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(radioLayoutAlgorithm));
-
-    /**
-     * @tc.steps: step3. Test Radio Measure method
-     * @tc.expected: step3. Check the Radio frame size and frame offset value
-     */
-    LayoutConstraintF layoutConstraintSize;
-    layoutConstraintSize.selfIdealSize.SetSize(SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
-    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize);
-    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
-    auto size = radioLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
-    // Test the size set by codes.
-    EXPECT_EQ(size, SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
-    /**
-     * Only set width
-     */
-    LayoutConstraintF layoutConstraintSize2;
-    layoutConstraintSize2.selfIdealSize.SetWidth(WIDTH.ConvertToPx());
-    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize2);
-    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
-    auto size2 = radioLayoutAlgorithm->MeasureContent(layoutConstraintSize2, &layoutWrapper);
-    EXPECT_EQ(size2->Width(), WIDTH.ConvertToPx());
-    /**
-     * Only set height
-     */
-    LayoutConstraintF layoutConstraintSize3;
-    layoutConstraintSize3.selfIdealSize.SetHeight(HEIGHT.ConvertToPx());
-    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize3);
-    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
-    auto size3 = radioLayoutAlgorithm->MeasureContent(layoutConstraintSize3, &layoutWrapper);
-    EXPECT_EQ(size3->Height(), HEIGHT.ConvertToPx());
-    /**
-     * Do not set width and height
-     */
+    // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     auto radioTheme = AceType::MakeRefPtr<RadioTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(radioTheme));
-    radioTheme->width_ = WIDTH;
-    radioTheme->height_ = HEIGHT;
-    LayoutConstraintF layoutConstraintSize4;
-    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize4);
-    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
-    PaddingProperty defaultPadding({ CalcLength(DEFAULT_PADDING), CalcLength(DEFAULT_PADDING),
-        CalcLength(DEFAULT_PADDING), CalcLength(DEFAULT_PADDING) });
-    layoutWrapper.GetLayoutProperty()->UpdatePadding(defaultPadding);
-    auto size4 = radioLayoutAlgorithm->MeasureContent(layoutConstraintSize4, &layoutWrapper);
-    EXPECT_EQ(size4->Width(), WIDTH.ConvertToPx() - 2 * DEFAULT_PADDING.ConvertToPx());
-    EXPECT_EQ(size4->Height(), HEIGHT.ConvertToPx() - 2 * DEFAULT_PADDING.ConvertToPx());
+    radioTheme->hotZoneHorizontalPadding_ = HORIZONTAL_PADDING;
+    radioTheme->hotZoneVerticalPadding_ = VERTICAL_PADDING;
+    radioTheme->defaultWidth_ = DEFAULT_WIDTH_DIMENSION;
+    radioTheme->defaultHeight_ = DEFAULT_HEIGHT_DIMENSION;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(radioTheme));
+    RadioLayoutAlgorithm radioLayoutAlgorithm;
+    radioLayoutAlgorithm.InitializeParam();
+    EXPECT_EQ(radioLayoutAlgorithm.horizontalPadding_, HORIZONTAL_PADDING.ConvertToPx());
+    EXPECT_EQ(radioLayoutAlgorithm.verticalPadding_, VERTICAL_PADDING.ConvertToPx());
+}
+
+/**
+ * @tc.name: RadioLayoutAlgorithmTest002
+ * @tc.desc: Verify that RadioLayoutAlgorithm's MeasureContent can get contentSize
+             when Width and height are set in the front end.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest002, TestSize.Level1)
+{
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<RadioTheme>()));
+    /**
+    //     corresponding ets code:
+    //         Radio().width(200).height(210)
+    //     size = (200, 200)
+    */
+    LayoutWrapper layoutWrapper(nullptr, nullptr, nullptr);
+    RadioLayoutAlgorithm radioLayoutAlgorithm;
+    LayoutConstraintF layoutConstraintSize;
+    layoutConstraintSize.selfIdealSize.SetWidth(COMPONENT_WIDTH);
+    layoutConstraintSize.selfIdealSize.SetHeight(COMPONENT_HEIGHT);
+    auto size = radioLayoutAlgorithm.MeasureContent(layoutConstraintSize, &layoutWrapper);
+    ASSERT_NE(size, std::nullopt);
+    EXPECT_EQ(size.value(), SizeF(COMPONENT_WIDTH, COMPONENT_WIDTH));
+}
+
+/**
+ * @tc.name: RadioLayoutAlgorithmTest003
+ * @tc.desc: Verify that RadioLayoutAlgorithm's MeasureContent can get contentSize
+             when The front end only sets width.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest003, TestSize.Level1)
+{
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<RadioTheme>()));
+    /**
+    //     corresponding ets code:
+    //         Radio().width(200)
+    //     size = (200, 200)
+    */
+    LayoutWrapper layoutWrapper(nullptr, nullptr, nullptr);
+    RadioLayoutAlgorithm radioLayoutAlgorithm;
+    LayoutConstraintF layoutConstraintSize;
+    layoutConstraintSize.selfIdealSize.SetWidth(COMPONENT_WIDTH);
+    auto size = radioLayoutAlgorithm.MeasureContent(layoutConstraintSize, &layoutWrapper);
+    ASSERT_NE(size, std::nullopt);
+    EXPECT_EQ(size.value(), SizeF(COMPONENT_WIDTH, COMPONENT_WIDTH));
+}
+
+/**
+ * @tc.name: RadioLayoutAlgorithmTest004
+ * @tc.desc: Verify that RadioLayoutAlgorithm's MeasureContent can get contentSize
+             when The front end only sets height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest004, TestSize.Level1)
+{
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<RadioTheme>()));
+    /**
+    //     corresponding ets code:
+    //         Radio().height(210)
+    //     size = (210, 210)
+    */
+    LayoutWrapper layoutWrapper(nullptr, nullptr, nullptr);
+    RadioLayoutAlgorithm radioLayoutAlgorithm;
+    LayoutConstraintF layoutConstraintSize;
+    layoutConstraintSize.selfIdealSize.SetHeight(COMPONENT_HEIGHT);
+    auto size = radioLayoutAlgorithm.MeasureContent(layoutConstraintSize, &layoutWrapper);
+    ASSERT_NE(size, std::nullopt);
+    EXPECT_EQ(size.value(), SizeF(COMPONENT_HEIGHT, COMPONENT_HEIGHT));
+}
+
+/**
+ * @tc.name: RadioLayoutAlgorithmTest005
+ * @tc.desc: Verify that RadioLayoutAlgorithm's MeasureContent can get contentSize from the theme,
+             when Width and height are not set in the front end.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest005, TestSize.Level1)
+{
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto radioTheme = AceType::MakeRefPtr<RadioTheme>();
+    radioTheme->hotZoneHorizontalPadding_ = HORIZONTAL_PADDING;
+    radioTheme->hotZoneVerticalPadding_ = VERTICAL_PADDING;
+    radioTheme->defaultWidth_ = DEFAULT_WIDTH_DIMENSION;
+    radioTheme->defaultHeight_ = DEFAULT_HEIGHT_DIMENSION;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(radioTheme));
+    /**
+    //     corresponding ets code:
+    //         Radio()
+    //     length = min(theme.Width(), theme.Height()), size = (length, length)
+    */
+    LayoutWrapper layoutWrapper(nullptr, nullptr, nullptr);
+    RadioLayoutAlgorithm radioLayoutAlgorithm;
+    LayoutConstraintF layoutConstraintSize;
+    layoutConstraintSize.maxSize = SizeF(1000.0, 1000.0);
+    layoutConstraintSize.minSize = SizeF(0, 0);
+    auto size = radioLayoutAlgorithm.MeasureContent(layoutConstraintSize, &layoutWrapper);
+    ASSERT_NE(size, std::nullopt);
+    EXPECT_EQ(radioLayoutAlgorithm.horizontalPadding_, HORIZONTAL_PADDING.ConvertToPx());
+    EXPECT_EQ(radioLayoutAlgorithm.verticalPadding_, VERTICAL_PADDING.ConvertToPx());
+}
+
+/**
+ * @tc.name: RadioLayoutAlgorithmTest006
+ * @tc.desc: Verify that RadioLayoutAlgorithm's MeasureContent can get contentSize
+             when Width and height are set in the front end.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest006, TestSize.Level1)
+{
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<RadioTheme>()));
+    LayoutWrapper layoutWrapper(nullptr, nullptr, nullptr);
+    RadioLayoutAlgorithm radioLayoutAlgorithm;
+    LayoutConstraintF layoutConstraintSize;
+    layoutConstraintSize.selfIdealSize.SetWidth(COMPONENT_WIDTH_INVALID);
+    layoutConstraintSize.selfIdealSize.SetHeight(COMPONENT_HEIGHT_INVALID);
+    auto size = radioLayoutAlgorithm.MeasureContent(layoutConstraintSize, &layoutWrapper);
+    ASSERT_NE(size, std::nullopt);
+    EXPECT_EQ(size.value(), SizeF(0, 0));
+}
+
+/**
+ * @tc.name: RadioLayoutAlgorithmTest007
+ * @tc.desc: Verify that RadioLayoutAlgorithm's MeasureContent can get contentSize
+             when The front end only sets width.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest007, TestSize.Level1)
+{
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<RadioTheme>()));
+    LayoutWrapper layoutWrapper(nullptr, nullptr, nullptr);
+    RadioLayoutAlgorithm radioLayoutAlgorithm;
+    LayoutConstraintF layoutConstraintSize;
+    layoutConstraintSize.selfIdealSize.SetWidth(COMPONENT_WIDTH_INVALID);
+    auto size = radioLayoutAlgorithm.MeasureContent(layoutConstraintSize, &layoutWrapper);
+    ASSERT_NE(size, std::nullopt);
+    EXPECT_EQ(size.value(), SizeF(0, 0));
+}
+
+/**
+ * @tc.name: RadioLayoutAlgorithmTest008
+ * @tc.desc: Verify that RadioLayoutAlgorithm's MeasureContent can get contentSize
+             when The front end only sets height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest008, TestSize.Level1)
+{
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RadioTheme>()));
+    LayoutWrapper layoutWrapper(nullptr, nullptr, nullptr);
+    RadioLayoutAlgorithm radioLayoutAlgorithm;
+    LayoutConstraintF layoutConstraintSize;
+    layoutConstraintSize.selfIdealSize.SetHeight(COMPONENT_HEIGHT_INVALID);
+    auto size = radioLayoutAlgorithm.MeasureContent(layoutConstraintSize, &layoutWrapper);
+    ASSERT_NE(size, std::nullopt);
+    EXPECT_EQ(size.value(), SizeF(0, 0));
 }
 
 /**

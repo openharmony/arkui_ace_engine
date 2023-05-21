@@ -125,6 +125,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest001, TestSize.Level1
     CheckBoxGroupModelNG checkBoxGroupModelNG;
     checkBoxGroupModelNG.Create(std::optional<string>());
 
+    bool flag = false;
+
     /**
      * @tc.steps: step2. Set parameters to CheckBoxGroup property
      */
@@ -132,7 +134,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest001, TestSize.Level1
     checkBoxGroupModelNG.SetSelectedColor(SELECTED_COLOR);
     checkBoxGroupModelNG.SetWidth(WIDTH);
     checkBoxGroupModelNG.SetHeight(HEIGHT);
-    checkBoxGroupModelNG.SetPadding(PADDING, newArgs);
+    checkBoxGroupModelNG.SetPadding(PADDING, newArgs, flag);
 
     /**
      * @tc.steps: step3. Get paint property and get CheckBoxGroup property
@@ -168,6 +170,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest002, TestSize.Level1
     CheckBoxGroupModelNG checkBoxGroupModelNG;
     checkBoxGroupModelNG.Create(std::optional<string>());
 
+    bool flag = false;
+
     /**
      * @tc.steps: step2. Set parameters to CheckBoxGroup property
      */
@@ -175,7 +179,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest002, TestSize.Level1
     checkBoxGroupModelNG.SetSelectedColor(SELECTED_COLOR);
     checkBoxGroupModelNG.SetWidth(WIDTH);
     checkBoxGroupModelNG.SetHeight(HEIGHT);
-    checkBoxGroupModelNG.SetPadding(PADDING, newArgs);
+    checkBoxGroupModelNG.SetPadding(PADDING, newArgs, flag);
 
     /**
      * @tc.steps: step3. Get paint property and get CheckBoxGroup property

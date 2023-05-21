@@ -42,9 +42,12 @@ void RadioModelNG::Create(const std::optional<std::string>& value, const std::op
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     CHECK_NULL_VOID(radioTheme);
+    auto width = radioTheme->GetWidth();
+    auto height = radioTheme->GetHeight();
     auto padding = radioTheme->GetDefaultPadding();
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(width), CalcLength(height)));
     PaddingProperty defaultPadding(
         { CalcLength(padding), CalcLength(padding), CalcLength(padding), CalcLength(padding) });
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, defaultPadding);

@@ -45,9 +45,12 @@ void CheckBoxModelNG::Create(
     CHECK_NULL_VOID(pipeline);
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
     CHECK_NULL_VOID(checkBoxTheme);
+    auto width = checkBoxTheme->GetWidth();
+    auto height = checkBoxTheme->GetHeight();
     auto padding = checkBoxTheme->GetDefaultPadding();
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(width), CalcLength(height)));
     PaddingProperty defaultPadding(
         { CalcLength(padding), CalcLength(padding), CalcLength(padding), CalcLength(padding) });
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, defaultPadding);
@@ -102,7 +105,7 @@ void CheckBoxModelNG::SetHeight(const Dimension& height)
     NG::ViewAbstract::SetHeight(NG::CalcLength(height));
 }
 
-void CheckBoxModelNG::SetPadding(const NG::PaddingPropertyF&  /*args*/, const NG::PaddingProperty& newArgs)
+void CheckBoxModelNG::SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs, bool flag)
 {
     NG::ViewAbstract::SetPadding(newArgs);
 }

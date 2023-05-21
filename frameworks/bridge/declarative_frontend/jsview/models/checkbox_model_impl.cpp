@@ -112,8 +112,12 @@ void CheckBoxModelImpl::SetHeight(const Dimension& height)
     }
 }
 
-void CheckBoxModelImpl::SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty&  /*newArgs*/)
+void CheckBoxModelImpl::SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs, bool flag)
 {
+    if (!flag) {
+        return;
+    }
+
     auto* stack = ViewStackProcessor::GetInstance();
     auto box = stack->GetBoxComponent();
     auto checkboxComponent = AceType::DynamicCast<CheckboxComponent>(stack->GetMainComponent());
