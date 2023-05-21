@@ -16,8 +16,10 @@
 #include "core/components_ng/pattern/video/video_model_ng.h"
 
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/video/video_node.h"
 #include "core/components_ng/pattern/video/video_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -27,9 +29,30 @@ void VideoModelNG::Create(const RefPtr<VideoControllerV2>& videoController)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
+    auto videoNode = VideoNode::GetOrCreateVideoNode(
         V2::VIDEO_ETS_TAG, nodeId, [videoController]() { return AceType::MakeRefPtr<VideoPattern>(videoController); });
-    stack->Push(frameNode);
+    CHECK_NULL_VOID(videoNode);
+    stack->Push(videoNode);
+    bool hasPreviewImageNode = videoNode->HasPreviewImageNode();
+    bool hasControllerRowNode = videoNode->HasControllerRowNode();
+    LOGI("Preview image is %{public}d, controller is %{public}d.", hasPreviewImageNode, hasControllerRowNode);
+    if (!hasPreviewImageNode) {
+        auto previewImageId = videoNode->GetPreviewImageId();
+        auto previewImageNode = FrameNode::GetOrCreateFrameNode(
+            V2::IMAGE_ETS_TAG, previewImageId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+        CHECK_NULL_VOID(previewImageNode);
+        videoNode->AddChild(previewImageNode);
+    }
+    if (!hasControllerRowNode) {
+        auto controllerRowId = videoNode->GetControllerRowId();
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+        CHECK_NULL_VOID(videoPattern);
+        auto controllerRowNode = videoPattern->CreateControlBar(controllerRowId);
+        CHECK_NULL_VOID(controllerRowNode);
+        videoNode->AddChild(controllerRowNode);
+    }
     AddDragFrameNodeToManager();
 }
 
