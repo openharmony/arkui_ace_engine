@@ -131,11 +131,10 @@ void JSCheckboxGroup::SetSelectAll(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
         return;
     }
-    auto selectAll = false;
+
     if (info.Length() > 0 && info[0]->IsBoolean()) {
-        selectAll = info[0]->ToBoolean();
+        CheckBoxGroupModel::GetInstance()->SetSelectAll(info[0]->ToBoolean());
     }
-    CheckBoxGroupModel::GetInstance()->SetSelectAll(selectAll);
     if (info.Length() > 1 && info[1]->IsFunction()) {
         ParseSelectAllObject(info, info[1]);
     }
@@ -267,12 +266,13 @@ void JSCheckboxGroup::Mark(const JSCallbackInfo& info)
 
     auto sizeValue = markObj->GetProperty("size");
     CalcDimension size;
-    if ((ParseJsDimensionVp(sizeValue, size)) && (size.Unit() != DimensionUnit::PERCENT) && (size.ConvertToVp() >= 0)) {
+    if ((ParseJsDimensionVp(sizeValue, size)) && (size.Unit() != DimensionUnit::PERCENT) &&
+        (size.ConvertToVp() >= 0)) {
         CheckBoxGroupModel::GetInstance()->SetCheckMarkSize(size);
     } else {
         CheckBoxGroupModel::GetInstance()->SetCheckMarkSize(Dimension(CHECK_BOX_GROUP_MARK_SIZE_INVALID_VALUE));
     }
-
+    
     auto strokeWidthValue = markObj->GetProperty("strokeWidth");
     CalcDimension strokeWidth;
     if ((ParseJsDimensionVp(strokeWidthValue, strokeWidth)) && (strokeWidth.Unit() != DimensionUnit::PERCENT) &&
@@ -289,23 +289,24 @@ void JSCheckboxGroup::JsPadding(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    NG::PaddingPropertyF oldPadding = GetOldPadding(info);
+    if (!info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject()) {
+        LOGE("arg is not a string, number or object.");
+        return;
+    }
+
+    NG::PaddingPropertyF oldPadding;
+    bool flag = GetOldPadding(info, oldPadding);
     NG::PaddingProperty newPadding = GetNewPadding(info);
-    CheckBoxGroupModel::GetInstance()->SetPadding(oldPadding, newPadding);
+    CheckBoxGroupModel::GetInstance()->SetPadding(oldPadding, newPadding, flag);
 }
 
-NG::PaddingPropertyF JSCheckboxGroup::GetOldPadding(const JSCallbackInfo& info)
+bool JSCheckboxGroup::GetOldPadding(const JSCallbackInfo& info, NG::PaddingPropertyF& padding)
 {
-    NG::PaddingPropertyF padding;
-    padding.left = 0.0f;
-    padding.top = 0.0f;
-    padding.right = 0.0f;
-    padding.bottom = 0.0f;
     if (info[0]->IsObject()) {
         auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
         if (!argsPtrItem || argsPtrItem->IsNull()) {
             LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
-            return padding;
+            return false;
         }
         if (argsPtrItem->Contains("top") || argsPtrItem->Contains("bottom") || argsPtrItem->Contains("left") ||
             argsPtrItem->Contains("right")) {
@@ -331,34 +332,25 @@ NG::PaddingPropertyF JSCheckboxGroup::GetOldPadding(const JSCallbackInfo& info)
             padding.right = rightDimen.ConvertToPx();
             padding.top = topDimen.ConvertToPx();
             padding.bottom = bottomDimen.ConvertToPx();
-            return padding;
+            return true;
         }
     }
 
     CalcDimension length;
     if (!ParseJsDimensionVp(info[0], length)) {
-        return padding;
+        return false;
     }
 
     padding.left = length.ConvertToPx();
     padding.right = length.ConvertToPx();
     padding.top = length.ConvertToPx();
     padding.bottom = length.ConvertToPx();
-    return padding;
+    return true;
 }
 
 NG::PaddingProperty JSCheckboxGroup::GetNewPadding(const JSCallbackInfo& info)
 {
     NG::PaddingProperty padding;
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, padding);
-    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
-    CHECK_NULL_RETURN(checkBoxTheme, padding);
-    auto defaultPadding = checkBoxTheme->GetDefaultPadding();
-    padding.left = NG::CalcLength(defaultPadding);
-    padding.top = NG::CalcLength(defaultPadding);
-    padding.right = NG::CalcLength(defaultPadding);
-    padding.bottom = NG::CalcLength(defaultPadding);
     if (info[0]->IsObject()) {
         std::optional<CalcDimension> left;
         std::optional<CalcDimension> right;
@@ -400,7 +392,7 @@ NG::PaddingProperty JSCheckboxGroup::GetNewPadding(const JSCallbackInfo& info)
 
     CalcDimension length;
     if (!ParseJsDimensionVp(info[0], length)) {
-        length = defaultPadding;
+        length.Reset();
     }
 
     padding.SetEdges(NG::CalcLength(length.IsNonNegative() ? length : Dimension()));
