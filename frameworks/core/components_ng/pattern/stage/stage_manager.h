@@ -50,6 +50,11 @@ public:
 
     RefPtr<FrameNode> GetLastPage();
 
+    const RefPtr<FrameNode> GetStageNode() const
+    {
+        return stageNode_;
+    }
+
     void ReloadStage();
 
 private:
