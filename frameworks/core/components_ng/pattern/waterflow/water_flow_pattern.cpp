@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
@@ -37,6 +38,11 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t /* source */)
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 };
+
+bool WaterFlowPattern::IsScrollable() const
+{
+    return !(IsAtTop() && IsAtBottom());
+}
 bool WaterFlowPattern::IsAtTop() const
 {
     return layoutInfo_.itemStart_;
@@ -59,6 +65,7 @@ void WaterFlowPattern::OnModifyDone()
     // SetAxis for scroll event
     SetAxis(layoutProperty->GetAxis());
     AddScrollEvent();
+    SetAccessibilityAction();
 }
 
 bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -90,6 +97,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         }
     }
     layoutInfo_ = std::move(layoutInfo);
+    layoutInfo_.UpdateStartIndex();
     return false;
 }
 
@@ -115,5 +123,61 @@ bool WaterFlowPattern::UpdateStartIndex(int32_t index)
     CHECK_NULL_RETURN(host, false);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
+}
+
+int32_t WaterFlowPattern::GetRows() const
+{
+    auto layoutProperty = GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0);
+
+    return layoutProperty->GetAxis() == Axis::VERTICAL ? layoutInfo_.GetMainCount() : layoutInfo_.GetCrossCount();
+}
+
+int32_t WaterFlowPattern::GetColumns() const
+{
+    auto layoutProperty = GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0);
+
+    return layoutProperty->GetAxis() == Axis::VERTICAL ? layoutInfo_.GetCrossCount() : layoutInfo_.GetMainCount();
+}
+
+void WaterFlowPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern->IsScrollable());
+        pattern->ScrollPage(false);
+    });
+
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern->IsScrollable());
+        pattern->ScrollPage(true);
+    });
+}
+
+void WaterFlowPattern::ScrollPage(bool reverse)
+{
+    CHECK_NULL_VOID_NOLOG(IsScrollable());
+
+    auto layoutProperty = GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto axis = layoutProperty->GetAxis();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto mainContentSize = geometryNode->GetPaddingSize().MainSize(axis);
+
+    UpdateCurrentOffset(reverse ? mainContentSize : -mainContentSize, SCROLL_FROM_JUMP);
+
+    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
 }
 } // namespace OHOS::Ace::NG
