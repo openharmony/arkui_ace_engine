@@ -55,6 +55,7 @@
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/bubble/bubble_pattern.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -1712,5 +1713,248 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg035, TestSize.Level1)
     auto mouseStyle_ = AceType::DynamicCast<MockMouseStyle>(MouseStyle::CreateMouseStyle().rawPtr_);
     EXPECT_CALL(*mouseStyle_, ChangePointerStyle(_, _)).Times(AnyNumber());
     context_->ChangeMouseStyle(0, MouseFormat::DEFAULT);
+}
+
+/**
+ * @tc.name: UITaskSchedulerTestNg001
+ * @tc.desc: Test FlushLayoutTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create taskScheduler.
+     */
+    UITaskScheduler taskScheduler;
+
+    /**
+     * @tc.steps2: Create frameInfo and StartRecordFrameInfo.
+     */
+    FrameInfo frameInfo;
+    taskScheduler.StartRecordFrameInfo(&frameInfo);
+
+    /**
+     * @tc.steps3: Create some frameNode.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, 1, nullptr);
+    frameNode->SetInDestroying();
+    auto frameNode2 = FrameNode::GetOrCreateFrameNode(TEST_TAG, 2, nullptr);
+
+    /**
+     * @tc.steps4: Calling FlushLayoutTask with no layout.
+     * @tc.expected: frame info not record.
+     */
+    taskScheduler.FlushLayoutTask(false);
+    EXPECT_EQ(frameInfo.layoutInfos_.size(), 0);
+
+    /**
+     * @tc.steps5: add some layoutNode and recall FlushLayoutTask with false .
+     * @tc.expected: frame info not record.
+     */
+    taskScheduler.AddDirtyLayoutNode(frameNode);
+    taskScheduler.dirtyLayoutNodes_[1].emplace(nullptr);
+    taskScheduler.AddDirtyLayoutNode(frameNode2);
+    taskScheduler.FlushLayoutTask(false);
+    EXPECT_EQ(frameInfo.layoutInfos_.size(), 0);
+
+    /**
+     * @tc.steps6: add layoutNode again and set isLayoutDirtyMarked_ true  and recall FlushLayoutTask with false .
+     * @tc.expected: frame info record true frameInfo.layoutInfos_.size is 1.
+     */
+    taskScheduler.AddDirtyLayoutNode(frameNode2);
+    frameNode2->isLayoutDirtyMarked_ = true;
+    taskScheduler.FlushLayoutTask(false);
+    EXPECT_EQ(frameInfo.layoutInfos_.size(), 1);
+
+    /**
+     * @tc.steps7: add layoutNode again and call FlushLayoutTask with true .
+     * @tc.expected: frame info record true frameInfo.layoutInfos_.size is 2.
+     */
+    taskScheduler.AddDirtyLayoutNode(frameNode2);
+    frameNode2->isLayoutDirtyMarked_ = true;
+    taskScheduler.FlushLayoutTask(true);
+    EXPECT_EQ(frameInfo.layoutInfos_.size(), 2);
+
+    /**
+     * @tc.steps8: finish FinishRecordFrameInfo and do step7.
+     * @tc.expected: frame info stop record frameInfo.layoutInfos_.size is 2.
+     */
+    taskScheduler.FinishRecordFrameInfo();
+    taskScheduler.AddDirtyLayoutNode(frameNode2);
+    frameNode2->isLayoutDirtyMarked_ = true;
+    taskScheduler.FlushLayoutTask(true);
+    EXPECT_EQ(frameInfo.layoutInfos_.size(), 2);
+}
+
+/**
+ * @tc.name: UITaskSchedulerTestNg002
+ * @tc.desc: Test FlushAfterLayoutTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create taskScheduler.
+     */
+    UITaskScheduler taskScheduler;
+
+    /**
+     * @tc.steps2: Call FlushAfterLayoutTask.
+     */
+    taskScheduler.FlushAfterLayoutTask();
+
+    /**
+     * @tc.steps3: Call AddAfterLayoutTask.
+     * @tc.expected: afterLayoutTasks_ in the taskScheduler size is 2.
+     */
+    taskScheduler.AddAfterLayoutTask([]() {});
+    taskScheduler.AddAfterLayoutTask(nullptr);
+    EXPECT_EQ(taskScheduler.afterLayoutTasks_.size(), 2);
+
+    /**
+     * @tc.steps4: Call FlushTask.
+     * @tc.expected: afterLayoutTasks_ in the taskScheduler size is 0.
+     */
+    taskScheduler.FlushTask();
+    EXPECT_EQ(taskScheduler.afterLayoutTasks_.size(), 0);
+}
+
+/**
+ * @tc.name: UITaskSchedulerTestNg003
+ * @tc.desc: Test FlushAfterLayoutTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg003, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create taskScheduler.
+     */
+    UITaskScheduler taskScheduler;
+
+    /**
+     * @tc.steps2: Call FlushPredictTask.
+     */
+    taskScheduler.FlushPredictTask(0);
+
+    /**
+     * @tc.steps3: Call AddPredictTask.
+     * @tc.expected: predictTask_ in the taskScheduler size is 2.
+     */
+    taskScheduler.AddPredictTask([](int64_t deadline) {});
+    taskScheduler.AddPredictTask(nullptr);
+    EXPECT_EQ(taskScheduler.predictTask_.size(), 2);
+
+    /**
+     * @tc.steps4: Call FlushPredictTask.
+     * @tc.expected: predictTask_ in the taskScheduler size is 0.
+     */
+    taskScheduler.FlushPredictTask(0);
+    EXPECT_EQ(taskScheduler.predictTask_.size(), 0);
+}
+
+/**
+ * @tc.name: UITaskSchedulerTestNg004
+ * @tc.desc: Test NeedAdditionalLayout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg004, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create taskScheduler.
+     */
+    UITaskScheduler taskScheduler;
+
+    /**
+     * @tc.steps2: Create some frameNode and configure the required parameters.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, 1, nullptr);
+    frameNode->layoutProperty_ = nullptr;
+    auto frameNode2 = FrameNode::GetOrCreateFrameNode(TEST_TAG, 2, nullptr);
+
+    /**
+     * @tc.steps3: Call AddDirtyLayoutNode with different parameters.
+     * @tc.expected: NeedAdditionalLayout return false.
+     */
+    taskScheduler.AddDirtyLayoutNode(frameNode);
+    taskScheduler.dirtyLayoutNodes_[1].emplace(nullptr);
+    taskScheduler.AddDirtyLayoutNode(frameNode2);
+    EXPECT_FALSE(taskScheduler.NeedAdditionalLayout());
+
+    /**
+     * @tc.steps4: Create a appropriate node and recall AddDirtyLayoutNode.
+     * @tc.expected: NeedAdditionalLayout return true.
+     */
+    auto frameNode3 = FrameNode::GetOrCreateFrameNode(TEST_TAG, 3, nullptr);
+    auto geometryTransition = AceType::MakeRefPtr<NG::GeometryTransition>(frameNode3);
+    geometryTransition->hasOutAnim_ = true;
+    geometryTransition->inNode_ = frameNode2;
+    geometryTransition->outNode_ = frameNode3;
+    frameNode3->GetLayoutProperty()->geometryTransition_ = geometryTransition;
+    taskScheduler.AddDirtyLayoutNode(frameNode3);
+    EXPECT_TRUE(taskScheduler.NeedAdditionalLayout());
+    taskScheduler.CleanUp();
+}
+
+/**
+ * @tc.name: UITaskSchedulerTestNg005
+ * @tc.desc: Test FlushRenderTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg005, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create taskScheduler.
+     */
+    UITaskScheduler taskScheduler;
+
+    /**
+     * @tc.steps2: Create frameInfo and StartRecordFrameInfo.
+     */
+    FrameInfo frameInfo;
+    taskScheduler.StartRecordFrameInfo(&frameInfo);
+
+    /**
+     * @tc.steps3: Create some frameNode.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, 1, nullptr);
+    frameNode->SetInDestroying();
+    taskScheduler.dirtyRenderNodes_[1].emplace(nullptr);
+    auto pattern = AceType::MakeRefPtr<BubblePattern>();
+    auto frameNode2 = FrameNode::CreateFrameNode(TEST_TAG, 2, pattern);
+
+    /**
+     * @tc.steps4: Calling FlushRenderTask with no layout.
+     * @tc.expected: frame info not record.
+     */
+    taskScheduler.FlushRenderTask(false);
+
+    /**
+     * @tc.steps5: add some layoutNode and recall FlushRenderTask with false .
+     * @tc.expected: frame info not record.
+     */
+    taskScheduler.AddDirtyRenderNode(frameNode);
+    taskScheduler.AddDirtyRenderNode(frameNode2);
+    taskScheduler.FlushRenderTask(false);
+    EXPECT_EQ(frameInfo.renderInfos_.size(), 0);
+
+    /**
+     * @tc.steps6: add renderNode again and set isRenderDirtyMarked_ true  and recall FlushRenderTask with false.
+     * @tc.expected: frame info record true frameInfo.renderInfos_.size is 1.
+     */
+    frameNode2->isRenderDirtyMarked_ = true;
+    pattern->AttachToFrameNode(frameNode2);
+    taskScheduler.AddDirtyRenderNode(frameNode2);
+    taskScheduler.FlushRenderTask(false);
+    EXPECT_EQ(frameInfo.renderInfos_.size(), 1);
+
+    /**
+     * @tc.steps7: add layoutNode again and call FlushRenderTask with true and stop record info .
+     * @tc.expected: frame info record true frameInfo.renderInfos_.size is 1.
+     */
+    frameNode2->isRenderDirtyMarked_ = true;
+    taskScheduler.AddDirtyRenderNode(frameNode2);
+    taskScheduler.FinishRecordFrameInfo();
+    taskScheduler.FlushRenderTask(true);
+    EXPECT_EQ(frameInfo.renderInfos_.size(), 1);
 }
 } // namespace OHOS::Ace::NG
