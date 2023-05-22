@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_PATTERN_H
 
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_ng/pattern/waterflow/water_flow_accessibility_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
@@ -29,7 +28,6 @@ class ACE_EXPORT WaterFlowPattern : public ScrollablePattern {
 
 public:
     bool UpdateCurrentOffset(float delta, int32_t source) override;
-    bool IsScrollable() const override;
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
     void UpdateScrollBarOffset() override;
@@ -45,12 +43,6 @@ public:
     {
         return MakeRefPtr<WaterFlowEventHub>();
     }
-
-    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
-    {
-        return MakeRefPtr<WaterFlowAccessibilityProperty>();
-    }
-
     bool UpdateStartIndex(int32_t index);
 
     void SetPositionController(RefPtr<WaterFlowPositionController> control);
@@ -72,29 +64,6 @@ public:
     {
         layoutInfo_.Reset();
     }
-
-    int32_t GetBeginIndex() const
-    {
-        return layoutInfo_.startIndex_;
-    }
-
-    int32_t GetEndIndex() const
-    {
-        return layoutInfo_.endIndex_;
-    }
-
-    int32_t GetChildrenCount() const
-    {
-        return layoutInfo_.childrenCount_;
-    }
-
-    int32_t GetRows() const;
-
-    int32_t GetColumns() const;
-
-    void SetAccessibilityAction();
-
-    void ScrollPage(bool reverse);
 
 private:
     void OnModifyDone() override;
