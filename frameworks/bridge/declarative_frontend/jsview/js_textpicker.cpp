@@ -544,9 +544,13 @@ bool JSTextPickerParser::ParseInternalArray(const JSRef<JSArray>& jsRangeValue, 
             values.emplace_back("");
         }
     } else {
-        auto valueIterator = std::find(resultStr.begin(), resultStr.end(), values[index]);
-        if (valueIterator == resultStr.end()) {
-            values[index] = resultStr.front();
+        if (resultStr.size() > 0) {
+            auto valueIterator = std::find(resultStr.begin(), resultStr.end(), values[index]);
+            if (valueIterator == resultStr.end()) {
+                values[index] = resultStr.front();
+            }
+        } else {
+            values[index] = "";
         }
     }
 
