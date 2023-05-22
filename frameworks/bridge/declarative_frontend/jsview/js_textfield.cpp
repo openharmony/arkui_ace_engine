@@ -644,7 +644,7 @@ NG::PaddingProperty JSTextField::GetNewPadding(const JSCallbackInfo& info)
         // use default value.
         length.Reset();
     }
-    padding.SetEdges(NG::CalcLength(length.IsNonNegative() ? length : Dimension()));
+    padding.SetEdges(NG::CalcLength(length.IsNonNegative() ? length : CalcDimension()));
     return padding;
 }
 

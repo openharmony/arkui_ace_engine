@@ -463,16 +463,36 @@ void TextFieldModelNG::SetPadding(NG::PaddingProperty& newPadding, Edge oldPaddi
 
         NG::PaddingProperty paddings;
         if (top.Value()) {
-            paddings.top = NG::CalcLength(top.IsNonNegative() ? top : Dimension());
+            if (top.Unit() == DimensionUnit::CALC) {
+                paddings.top = NG::CalcLength(
+                    top.IsNonNegative() ? top.CalcValue() : CalcDimension().CalcValue());
+            } else {
+                paddings.top = NG::CalcLength(top.IsNonNegative() ? top : CalcDimension());
+            }
         }
         if (bottom.Value()) {
-            paddings.bottom = NG::CalcLength(bottom.IsNonNegative() ? bottom : Dimension());
+            if (bottom.Unit() == DimensionUnit::CALC) {
+                paddings.bottom = NG::CalcLength(
+                    bottom.IsNonNegative() ? bottom.CalcValue() : CalcDimension().CalcValue());
+            } else {
+                paddings.bottom = NG::CalcLength(bottom.IsNonNegative() ? bottom : CalcDimension());
+            }
         }
         if (left.Value()) {
-            paddings.left = NG::CalcLength(left.IsNonNegative() ? left : Dimension());
+            if (left.Unit() == DimensionUnit::CALC) {
+                paddings.left = NG::CalcLength(
+                    left.IsNonNegative() ? left.CalcValue() : CalcDimension().CalcValue());
+            } else {
+                paddings.left = NG::CalcLength(left.IsNonNegative() ? left : CalcDimension());
+            }
         }
         if (right.Value()) {
-            paddings.right = NG::CalcLength(right.IsNonNegative() ? right : Dimension());
+            if (right.Unit() == DimensionUnit::CALC) {
+                paddings.right = NG::CalcLength(
+                    right.IsNonNegative() ? right.CalcValue() : CalcDimension().CalcValue());
+            } else {
+                paddings.right = NG::CalcLength(right.IsNonNegative() ? right : CalcDimension());
+            }
         }
         ViewAbstract::SetPadding(paddings);
         return;
