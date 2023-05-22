@@ -83,6 +83,12 @@ public:
         return *this;
     }
 
+    template<typename T>
+    const std::shared_ptr<T> GetImpl() const
+    {
+        return std::shared_ptr<T>();
+    }
+
     virtual void Save() {}
     virtual void Restore() {}
     virtual void DrawCircle(const TestingPoint& center, float radius) {}

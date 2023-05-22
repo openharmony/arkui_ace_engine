@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
 #include "core/components_ng/pattern/stack/stack_layout_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -44,6 +45,17 @@ constexpr float SMALL_ITEM_HEIGHT = 40.0f;
 const SizeF SMALL_ITEM_SIZE(SMALL_ITEM_WIDTH, SMALL_ITEM_HEIGHT);
 } // namespace
 class StackTestNg : public testing::Test {
+public:
+    static void SetUpTestCase()
+    {
+        MockPipelineBase::SetUp();
+    }
+
+    static void TearDownTestCase()
+    {
+        MockPipelineBase::TearDown();
+    }
+
 protected:
     // std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> CreateStack(const Alignment alignment);
     std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> CreateSmallChild(
