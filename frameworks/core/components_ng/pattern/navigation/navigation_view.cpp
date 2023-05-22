@@ -872,6 +872,7 @@ void NavigationView::SetCustomToolBar(const RefPtr<UINode>& customToolBar)
     navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
     auto toolBarNode = navBarNode->GetToolBarNode();
     CHECK_NULL_VOID(toolBarNode);
+    toolBarNode->Clean();
     customToolBar->MountToParent(toolBarNode);
     navBarNode->UpdatePrevToolBarIsCustom(true);
 }
