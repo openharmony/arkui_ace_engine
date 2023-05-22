@@ -40,7 +40,8 @@ public:
 private:
     void FillViewport(float mainSize, LayoutWrapper* layoutWrapper);
     void ModifyCurrentOffsetWhenReachEnd(float mainSize, LayoutWrapper* layoutWrapper);
-    LayoutConstraintF CreateChildConstraint(int32_t crossIndex, const RefPtr<WaterFlowLayoutProperty>& layoutProperty);
+    LayoutConstraintF CreateChildConstraint(int32_t crossIndex, const RefPtr<WaterFlowLayoutProperty>& layoutProperty,
+        const RefPtr<LayoutWrapper>& childLayoutWrapper);
     float ComputeCrossPosition(int32_t crossIndex) const;
     void InitialItemsCrossSize(
         const RefPtr<WaterFlowLayoutProperty>& layoutProperty, const SizeF& frameSize, int32_t childrenCount);
@@ -58,8 +59,6 @@ private:
     float crossGap_ = 0.0f;
     float mainSize_ = 0.0f;
     float footerMainSize_ = 0.0f;
-    OptionalSizeF itemMinSize_;
-    OptionalSizeF itemMaxSize_;
     WaterFlowLayoutInfo layoutInfo_;
 };
 } // namespace OHOS::Ace::NG
