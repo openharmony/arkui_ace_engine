@@ -19,6 +19,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/svg/svg_context.h"
+#include "frameworks/core/components_ng/render/adapter/image_painter_utils.h"
 #include "frameworks/core/components_ng/render/drawing.h"
 #include "frameworks/core/components_ng/svg/parse/svg_animation.h"
 #include "frameworks/core/components_ng/svg/parse/svg_circle.h"
@@ -314,7 +315,11 @@ void SvgDom::FitImage(RSCanvas& canvas, const ImageFit& imageFit, const Size& la
         }
     }
     RSRect clipRect(0.0f, 0.0f, layout_.Width(), layout_.Height());
-    canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
+    if (radius_) {
+        ImagePainterUtils::ClipRRect(canvas, clipRect, *radius_);
+    } else {
+        canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
+    }
 
     canvas.Translate(tx, ty);
 
@@ -399,4 +404,17 @@ SizeF SvgDom::GetContainerSize() const
     return { static_cast<float>(svgSize_.Width()), static_cast<float>(svgSize_.Height()) };
 }
 
+void SvgDom::SetRadius(const BorderRadiusArray& radiusXY)
+{
+    if (!radius_) {
+        radius_ = std::make_unique<BorderRadiusArray>(radiusXY);
+    } else {
+        *radius_ = radiusXY;
+    }
+}
+
+void SvgDom::SetFillColor(const std::optional<Color>& color)
+{
+    fillColor_ = color;
+}
 } // namespace OHOS::Ace::NG
