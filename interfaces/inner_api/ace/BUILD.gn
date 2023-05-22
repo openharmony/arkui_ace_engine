@@ -53,7 +53,6 @@ ohos_shared_library("ace_uicontent") {
     "${ace_root}/interfaces/inner_api/ace/hot_reloader.cpp",
     "${ace_root}/interfaces/inner_api/ace/serializeable_object.cpp",
     "${ace_root}/interfaces/inner_api/ace/ui_content.cpp",
-    "${ace_root}/interfaces/inner_api/ace/ui_window.cpp",
   ]
 
   if (!use_mingw_win && !use_mac && !use_linux &&
