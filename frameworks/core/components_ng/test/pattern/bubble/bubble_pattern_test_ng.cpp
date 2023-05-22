@@ -97,6 +97,8 @@ const std::vector<Placement> BUBBLE_LAYOUT_PROPERTY_PLACEMENTS = {
     Placement::RIGHT_BOTTOM,
     Placement::RIGHT_TOP,
 };
+const Offset POPUP_PARAM_POSITION_OFFSET = Offset(100.0f, 100.0f);
+const OffsetF BUBBLE_POSITION_OFFSET = OffsetF(100.0f, 100.0f);
 } // namespace
 struct TestProperty {
     // layout property
@@ -1141,5 +1143,80 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest014, TestSize.Level1)
             event->GetTouchEventCallback()(touchEventInfo);
         }
     }
+}
+
+/**
+ * @tc.name: BubblePatternTest015
+ * @tc.desc: Test CreateBubbleNode with Offset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubblePatternTestNg, BubblePatternTest015, TestSize.Level1)
+{
+	/**
+     * @tc.steps: step1. set popup value to popupParam.
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    popupParam->SetMessage(BUBBLE_MESSAGE);
+    popupParam->SetTargetOffset(POPUP_PARAM_POSITION_OFFSET);
+
+    /**
+     * @tc.steps: step2. create BubbleNode with position offset
+     */
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(targetNode, nullptr);
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+    auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
+    ASSERT_NE(popupNode, nullptr);
+    auto firstTextNode = BubbleView::CreateMessage(popupParam->GetMessage(), popupParam->IsUseCustom());
+    ASSERT_NE(firstTextNode, nullptr);
+
+    /**
+     * @tc.steps: step3. use BubbleLayoutProperty to check PositionOffset.
+     * @tc.expected: check whether GetPositionOffset value is correct.
+     */
+    auto property = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    EXPECT_EQ(property->GetPositionOffset().value(), BUBBLE_POSITION_OFFSET);
+}
+
+/**
+ * @tc.name: BubblePatternTest016
+ * @tc.desc: Test CreateCustomBubbleNode with with Offset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubblePatternTestNg, BubblePatternTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set popup value to popupParam.
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    popupParam->SetMessage(BUBBLE_MESSAGE);
+    popupParam->SetTargetOffset(POPUP_PARAM_POSITION_OFFSET);
+
+    /**
+     * @tc.steps: step2. create CustomBubbleNode with positon offset
+     */
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(targetNode, nullptr);
+    auto rowFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    ASSERT_NE(rowFrameNode, nullptr);
+    auto blankFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(blankFrameNode, nullptr);
+    rowFrameNode->AddChild(blankFrameNode);
+    auto popupNode =
+        BubbleView::CreateCustomBubbleNode(targetNode->GetTag(), targetNode->GetId(), rowFrameNode, popupParam);
+    ASSERT_NE(popupNode, nullptr);
+
+    /**
+     * @tc.steps: step3. use BubbleLayoutProperty to check PositionOffset.
+     * @tc.expected: check whether GetPositionOffset value is correct.
+     */
+    auto property = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    EXPECT_EQ(property->GetPositionOffset().value(), BUBBLE_POSITION_OFFSET);
 }
 } // namespace OHOS::Ace::NG

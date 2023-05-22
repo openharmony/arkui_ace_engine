@@ -480,4 +480,26 @@ HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest006, TestSize.Level1)
         EXPECT_EQ(bubbleLayoutAlgorithm.arrowPosition_.GetY(), placements[i]);
     }
 }
+
+/**
+ * @tc.name: BubbleLayoutTest007
+ * @tc.desc: Test GetPositionOffset,UpdatePositionOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. use UpdatePositionOffset() to update position offset.
+     */
+    BubbleLayoutProperty property;
+    EXPECT_FALSE(property.GetPositionOffset().has_value());
+    property.UpdatePositionOffset(OffsetF(25.0f, 30.0f));
+    
+    /**
+     * @tc.steps: step2. use GetPositionOffset() get popup position offset .
+     * @tc.expected: check whether popup offset is correct.
+     */
+    ASSERT_TRUE(property.GetPositionOffset().has_value());
+    EXPECT_EQ(property.GetPositionOffset().value(), OffsetF(25.0f, 30.0f));
+}
 } // namespace OHOS::Ace::NG
