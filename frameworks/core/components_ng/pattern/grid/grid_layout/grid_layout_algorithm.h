@@ -43,7 +43,7 @@ private:
     bool CheckGridPlaced(int32_t index, int32_t row, int32_t col, int32_t& rowSpan, int32_t& colSpan);
     void GetNextGrid(int32_t& curRow, int32_t& curCol) const;
     OffsetF ComputeItemPosition(LayoutWrapper* layoutWrapper, int32_t row, int32_t col, int32_t& rowSpan,
-        int32_t& colSpan, const RefPtr<LayoutProperty>& childLayoutProperty) const;
+        int32_t& colSpan, const RefPtr<LayoutWrapper>& childLayoutWrapper) const;
     LayoutConstraintF CreateChildConstraint(const SizeF& idealSize, const RefPtr<GridLayoutProperty>& layoutProperty,
         int32_t row, int32_t col, int32_t& rowSpan, int32_t& colSpan,
         const RefPtr<LayoutProperty>& childLayoutProperty) const;
