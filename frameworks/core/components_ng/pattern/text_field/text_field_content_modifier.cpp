@@ -102,14 +102,8 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     }
     canvas.Restore();
     if (showCounter_->Get() && counterParagraph) {
-        canvas.Save();
-        RSRect clipInnerCounterRect = RSRect(offset.GetX(), textFrameRect.Bottom() - textFrameRect.Top()
-            - COUNTER_TEXT_AREA_MARGIN.ConvertToPx() - textFieldPattern->GetCountHeight(),
-            contentSize.Width() + contentOffset.GetX(), textFrameRect.Bottom() - textFrameRect.Top());
-        canvas.ClipRect(clipInnerCounterRect, RSClipOp::UNION);
         counterParagraph->Paint(&canvas, textRectX_->Get(), textFrameRect.Bottom() - textFrameRect.Top()
             - COUNTER_TEXT_AREA_MARGIN.ConvertToPx() - textFieldPattern->GetCountHeight());
-        canvas.Restore();
     }
     canvas.Save();
     if (showErrorState_->Get() && errorParagraph) {
