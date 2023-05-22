@@ -28,7 +28,7 @@ public:
     ~GridPositionController() override = default;
     Axis GetScrollDirection() const override;
 
-    void JumpTo(int32_t index, int32_t source = 3) override;
+    void JumpTo(int32_t index, bool smooth = false, int32_t source = 3) override;
     bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve) override;
     void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
     void ScrollPage(bool reverse, bool smooth) override;

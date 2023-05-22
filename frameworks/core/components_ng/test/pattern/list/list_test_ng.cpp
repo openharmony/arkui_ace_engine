@@ -2928,7 +2928,7 @@ HWTEST_F(ListTestNg, PositionController001, TestSize.Level1)
     EXPECT_EQ(pattern_->jumpIndex_, 0);
     EXPECT_EQ(pattern_->scrollIndexAlignment_, ScrollIndexAlignment::ALIGN_TOP);
 
-    controller->JumpTo(1, 0);
+    controller->JumpTo(1, false, 0);
     EXPECT_EQ(pattern_->jumpIndex_, 1);
 
     EXPECT_FALSE(controller->AnimateTo(Dimension(1, DimensionUnit::PERCENT), 0, nullptr));
@@ -2981,7 +2981,7 @@ HWTEST_F(ListTestNg, PositionController002, TestSize.Level1)
     EXPECT_EQ(pattern_->jumpIndex_, 0);
     EXPECT_EQ(pattern_->scrollIndexAlignment_, ScrollIndexAlignment::ALIGN_TOP);
 
-    controller->JumpTo(1, 0);
+    controller->JumpTo(1, false, 0);
     EXPECT_EQ(pattern_->jumpIndex_, 1);
 
     EXPECT_FALSE(controller->AnimateTo(Dimension(1, DimensionUnit::PERCENT), 0, nullptr));
@@ -3025,7 +3025,7 @@ HWTEST_F(ListTestNg, PositionController003, TestSize.Level1)
     controller->ScrollPage(false, true);
     EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 50.f)));
 
-    controller->JumpTo(1, 0);
+    controller->JumpTo(1, false, 0);
     EXPECT_EQ(pattern_->jumpIndex_, 1);
 
     EXPECT_FALSE(controller->AnimateTo(Dimension(1, DimensionUnit::PERCENT), 0, nullptr));
@@ -3677,7 +3677,7 @@ HWTEST_F(ListTestNg, Pattern010, TestSize.Level1)
     pattern_->ScrollToIndex(-2, 0, ScrollIndexAlignment::ALIGN_BOTTOM);
     EXPECT_EQ(pattern_->jumpIndex_, -1);
 
-    pattern_->ScrollToIndex(-2, ScrollIndexAlignment::ALIGN_BOTTOM);
+    pattern_->ScrollToIndex(-2, false, ScrollIndexAlignment::ALIGN_BOTTOM);
     EXPECT_EQ(pattern_->jumpIndex_, -1);
 }
 

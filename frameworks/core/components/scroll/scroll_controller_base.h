@@ -57,7 +57,7 @@ public:
     ScrollControllerBase() = default;
     ~ScrollControllerBase() override = default;
 
-    virtual void JumpTo(int32_t index, int32_t source = 3) {}
+    virtual void JumpTo(int32_t index, bool smooth = false, int32_t source = 3) {}
 
     virtual Axis GetScrollDirection() const
     {

@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 
-void GridPositionController::JumpTo(int32_t index, int32_t /* source */)
+void GridPositionController::JumpTo(int32_t index, bool /* smooth */, int32_t /* source */)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
