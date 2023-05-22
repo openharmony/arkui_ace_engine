@@ -131,10 +131,11 @@ void JSCheckboxGroup::SetSelectAll(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
         return;
     }
-
+    bool selectAll = false;
     if (info.Length() > 0 && info[0]->IsBoolean()) {
-        CheckBoxGroupModel::GetInstance()->SetSelectAll(info[0]->ToBoolean());
+        selectAll = info[0]->ToBoolean();
     }
+    CheckBoxGroupModel::GetInstance()->SetSelectAll(selectAll);
     if (info.Length() > 1 && info[1]->IsFunction()) {
         ParseSelectAllObject(info, info[1]);
     }
@@ -289,12 +290,7 @@ void JSCheckboxGroup::JsPadding(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    if (!info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject()) {
-        LOGE("arg is not a string, number or object.");
-        return;
-    }
-
-    NG::PaddingPropertyF oldPadding;
+    NG::PaddingPropertyF oldPadding({ 0.0f, 0.0f, 0.0f, 0.0f });
     bool flag = GetOldPadding(info, oldPadding);
     NG::PaddingProperty newPadding = GetNewPadding(info);
     CheckBoxGroupModel::GetInstance()->SetPadding(oldPadding, newPadding, flag);
@@ -350,6 +346,8 @@ bool JSCheckboxGroup::GetOldPadding(const JSCallbackInfo& info, NG::PaddingPrope
 
 NG::PaddingProperty JSCheckboxGroup::GetNewPadding(const JSCallbackInfo& info)
 {
+    NG::PaddingProperty padding(
+        { NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp) });
     if (info[0]->IsObject()) {
         std::optional<CalcDimension> left;
         std::optional<CalcDimension> right;
@@ -374,11 +372,9 @@ NG::PaddingProperty JSCheckboxGroup::GetNewPadding(const JSCallbackInfo& info)
             bottom = bottomDimen;
         }
 
-        auto padding = GetPadding(top, bottom, left, right);
+        padding = GetPadding(top, bottom, left, right);
         return padding;
     }
-
-    NG::PaddingProperty padding;
     CalcDimension length;
     if (!ParseJsDimensionVp(info[0], length)) {
         length.Reset();
@@ -392,7 +388,8 @@ NG::PaddingProperty JSCheckboxGroup::GetPadding(const std::optional<CalcDimensio
     const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
     const std::optional<CalcDimension>& right)
 {
-    NG::PaddingProperty padding;
+    NG::PaddingProperty padding(
+        { NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp) });
     if (left.has_value()) {
         if (left.value().Unit() == DimensionUnit::CALC) {
             padding.left = NG::CalcLength(
