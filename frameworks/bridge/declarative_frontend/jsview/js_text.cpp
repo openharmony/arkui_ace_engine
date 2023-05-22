@@ -218,6 +218,7 @@ void JSText::SetTextIndent(const JSCallbackInfo& info)
     }
     CalcDimension value;
     if (!ParseJsDimensionFp(info[0], value)) {
+        TextModel::GetInstance()->SetTextIndent(value);
         return;
     }
     TextModel::GetInstance()->SetTextIndent(value);
