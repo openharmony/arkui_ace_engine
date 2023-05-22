@@ -152,7 +152,7 @@ void JSText::SetTextShadow(const JSCallbackInfo& info)
         return;
     }
     double radius = 0.0;
-    ParseJsonDouble(argsPtrItem->GetValue("radius"), radius);
+    ParseJsDouble(JSRef<JSObject>::Cast(info[0])->GetProperty("radius"), radius);
     if (LessNotEqual(radius, 0.0)) {
         radius = 0.0;
     }
