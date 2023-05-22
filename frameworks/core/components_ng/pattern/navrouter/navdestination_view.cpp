@@ -112,6 +112,11 @@ void NavDestinationView::Create(std::function<void()>&& deepRenderFunc)
         [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender))]() {
             return AceType::MakeRefPtr<NavDestinationPattern>(shallowBuilder);
         });
+    auto context = AceType::DynamicCast<FrameNode>(navDestinationNode)->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    if (!(context->GetBackgroundColor().has_value())) {
+        context->UpdateBackgroundColor(Color::WHITE);
+    }
 
     // titleBar node
     if (!navDestinationNode->GetTitleBarNode()) {
