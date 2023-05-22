@@ -100,7 +100,7 @@ private:
     RefPtr<PopupTheme> GetPopupTheme();
     void InitTouchEvent();
     void HandleTouchEvent(const TouchEventInfo& info);
-    void HandleTouchUp(const Offset& clickPosition);
+    void HandleTouchDown(const Offset& clickPosition);
     void RegisterButtonOnHover();
     void RegisterButtonOnTouch();
     void ButtonOnHover(bool isHover, const RefPtr<NG::FrameNode>& buttonNode);

@@ -114,4 +114,17 @@ void AnimationUtils::StopAnimation(const std::shared_ptr<AnimationUtils::Animati
         animation->animations_.clear();
     }
 }
+
+bool AnimationUtils::IsRunning(const std::shared_ptr<AnimationUtils::Animation>& animation)
+{
+    CHECK_NULL_RETURN(animation, false);
+    if (animation->animations_.size()) {
+        for (auto& ani : animation->animations_) {
+            if (ani->IsRunning()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
 } // namespace OHOS::Ace

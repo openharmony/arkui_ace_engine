@@ -55,8 +55,6 @@ void OptionPattern::OnModifyDone()
     CHECK_NULL_VOID(eventHub);
     if (!eventHub->IsEnabled()) {
         CHECK_NULL_VOID(text_);
-        auto textProperty = text_->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(textProperty);
         text_->GetRenderContext()->UpdateForegroundColor(selectTheme_->GetDisabledMenuFontColor());
         text_->MarkModifyDone();
     }

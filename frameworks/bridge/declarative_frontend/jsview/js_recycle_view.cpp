@@ -53,7 +53,6 @@ void JSRecycleView::JSBind(BindingTarget globalObj)
     JSClass<JSRecycleView>::Declare("__Recycle__");
     JSClass<JSRecycleView>::StaticMethod("create", &JSRecycleView::Create, opt);
 
-    JSClass<JSRecycleView>::Inherit<JSViewAbstract>();
-    JSClass<JSRecycleView>::Bind<>(globalObj);
+    JSClass<JSRecycleView>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

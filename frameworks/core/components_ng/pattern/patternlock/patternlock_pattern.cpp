@@ -30,6 +30,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t PATTERN_LOCK_COL_COUNT = 3;
 constexpr int32_t RADIUS_TO_DIAMETER = 2;
+constexpr int32_t RADIUS_COUNT = 6;
 // the scale of selected circle radius and normal circle radius
 constexpr float SCALE_SELECTED_CIRCLE_RADIUS = 26.00 / 14.00;
 } // namespace
@@ -98,6 +99,7 @@ bool PatternLockPattern::AddChoosePoint(const OffsetF& offset, int32_t x, int32_
     if (patternLockPaintProperty->HasCircleRadius()) {
         circleRadius_ = patternLockPaintProperty->GetCircleRadiusValue();
     }
+    auto handleCircleRadius = std::min(circleRadius_ * SCALE_SELECTED_CIRCLE_RADIUS, sideLength_ / RADIUS_COUNT);
 
     const int32_t scale = RADIUS_TO_DIAMETER;
     float offsetX = sideLength_.ConvertToPx() / PATTERN_LOCK_COL_COUNT / scale * (scale * x - 1);
@@ -108,7 +110,7 @@ bool PatternLockPattern::AddChoosePoint(const OffsetF& offset, int32_t x, int32_
     auto X = (offset - centerOffset).GetX();
     auto Y = (offset - centerOffset).GetY();
     float distance = std::sqrt((X * X) + (Y * Y));
-    if (distance <= (circleRadius_.ConvertToPx() * SCALE_SELECTED_CIRCLE_RADIUS)) {
+    if (distance <= (handleCircleRadius.ConvertToPx())) {
         if (!CheckChoosePoint(x, y)) {
             AddPassPoint(x, y);
             choosePoint_.emplace_back(x, y);

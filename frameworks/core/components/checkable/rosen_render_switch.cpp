@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,9 @@
 #include "core/components/checkable/rosen_render_switch.h"
 
 #include "render_service_client/core/ui/rs_node.h"
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkRRect.h"
+#endif
 
 #include "core/components/checkable/checkable_component.h"
 #include "core/components/common/painter/rosen_checkable_painter.h"
@@ -43,6 +45,7 @@ void RosenRenderSwitch::Paint(RenderContext& context, const Offset& offset)
         LOGE("Paint canvas is null");
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     SkAutoCanvasRestore acr(canvas, true);
     canvas->clipRect(SkRect::MakeWH(GetLayoutSize().Width(), GetLayoutSize().Height()));
     Offset paintOffset = offset + paintPosition_;
@@ -50,6 +53,16 @@ void RosenRenderSwitch::Paint(RenderContext& context, const Offset& offset)
     SkPaint paint;
     trackPaint.setAntiAlias(true);
     paint.setAntiAlias(true);
+#else
+    RSAutoCanvasRestore acr(canvas, true);
+    canvas->ClipRect(RSRect(0, 0, GetLayoutSize().Width(), GetLayoutSize().Height()),
+        RSClipOp::INTERSECT);
+    Offset paintOffset = offset + paintPosition_;
+    RSPen trackPen;
+    RSPen pen;
+    trackPen.SetAntiAlias(true);
+    pen.SetAntiAlias(true);
+#endif
 
     double originX = paintOffset.GetX();
     double originY = paintOffset.GetY();
@@ -101,6 +114,7 @@ void RosenRenderSwitch::Paint(RenderContext& context, const Offset& offset)
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderSwitch::PaintTrack(
     SkCanvas* canvas, SkPaint& trackPaint, double originX, double originY, uint32_t trackColor) const
 {
@@ -114,7 +128,24 @@ void RosenRenderSwitch::PaintTrack(
     skPaint.setColor(trackColor);
     canvas->drawRRect(rrect, skPaint);
 }
+#else
+void RosenRenderSwitch::PaintTrack(RSCanvas* canvas, RSPen& trackPaint, double originX,
+    double originY, uint32_t trackColor) const
+{
+    auto& pen = trackPaint;
+    double trackRadius = switchSize_.Height() / 2.0;
+    RSRoundRect rrect(
+        RSRect(originX, originY, paintTrackSize_.Width() + originX, paintTrackSize_.Height() + originY),
+            trackRadius, trackRadius);
+    pen.SetAntiAlias(true);
+    pen.SetColor(trackColor);
+    canvas->AttachPen(pen);
+    canvas->DrawRoundRect(rrect);
+    canvas->DetachPen();
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderSwitch::PaintCenterPoint(
     SkCanvas* canvas, SkPaint& paint, double pointOriginX, double pointOriginY, uint32_t pointColor) const
 {
@@ -135,8 +166,41 @@ void RosenRenderSwitch::PaintCenterPoint(
         pointRadius_ + shadowBorderWidth, pointRadius_ + shadowBorderWidth);
     canvas->drawRRect(rrect, skPaint);
 }
+#else
+void RosenRenderSwitch::PaintCenterPoint(RSCanvas* canvas, RSPen& paint,
+    double pointOriginX, double pointOriginY, uint32_t pointColor) const
+{
+    auto& pen = paint;
+    RSRoundRect rrect;
+    pen.SetAntiAlias(true);
+    pen.SetColor(pointColor);
+    rrect = RSRoundRect(
+        RSRect(
+            pointOriginX, pointOriginY, rawPointSize_.Width() + pointOriginX, rawPointSize_.Height() + pointOriginY),
+        pointRadius_, pointRadius_);
+    canvas->AttachPen(pen);
+    canvas->DrawRoundRect(rrect);
+    canvas->DetachPen();
+    double shadowBorderWidth = NormalizeToPx(shadowWidth_);
+    SetStrokeWidth(shadowBorderWidth, paint);
+    pen.SetColor(shadowColor_);
+    rrect = RSRoundRect(
+        RSRect(pointOriginX - shadowBorderWidth, pointOriginY - shadowBorderWidth,
+            rawPointSize_.Width() + pointOriginX + shadowBorderWidth,
+            rawPointSize_.Height() + pointOriginY + shadowBorderWidth),
+        pointRadius_ + shadowBorderWidth, pointRadius_ + shadowBorderWidth);
+    canvas->AttachPen(pen);
+    canvas->DrawRoundRect(rrect);
+    canvas->DetachPen();
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderSwitch::DrawTrackAnimation(const Offset& paintOffset, SkCanvas* canvas, SkPaint& trackPaint) const
+#else
+void RosenRenderSwitch::DrawTrackAnimation(
+    const Offset& paintOffset, RSCanvas* canvas, RSPen& trackPaint) const
+#endif
 {
     if (!canvas) {
         LOGE("DrawTrackAnimation Paint canvas is null");
@@ -154,16 +218,26 @@ void RosenRenderSwitch::DrawTrackAnimation(const Offset& paintOffset, SkCanvas* 
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderSwitch::DrawTrackOffAndOn(
     const Offset& paintOffset, double trackRadius, SkCanvas* canvas, SkPaint& trackPaint) const
+#else
+void RosenRenderSwitch::DrawTrackOffAndOn(const Offset& paintOffset, double trackRadius,
+    RSCanvas* canvas, RSPen& trackPaint) const
+#endif
 {
+#ifndef USE_ROSEN_DRAWING
     auto& skPaint = trackPaint;
+#else
+    auto& pen = trackPaint;
+#endif
     auto pointPadding = NormalizeToPx(pointPadding_);
     double originX = paintOffset.GetX();
     double originY = paintOffset.GetY();
     double pointOriginX = paintOffset.GetX() + currentPointOriginX_;
     double pointOriginY = paintOffset.GetY() + pointPadding;
     // paint the bottom track rect first
+#ifndef USE_ROSEN_DRAWING
     SkRRect rrectUpper;
     SkRRect rrectBottom;
     skPaint.setAntiAlias(true);
@@ -172,6 +246,18 @@ void RosenRenderSwitch::DrawTrackOffAndOn(
             trackRadius, trackRadius);
     skPaint.setColor(inactiveColor_);
     canvas->drawRRect(rrectBottom, skPaint);
+#else
+    RSRoundRect rrectUpper;
+    RSRoundRect rrectBottom;
+    pen.SetAntiAlias(true);
+    rrectBottom = RSRoundRect(
+        RSRect(originX, originY, paintTrackSize_.Width() + originX, paintTrackSize_.Height() + originY),
+        trackRadius, trackRadius);
+    pen.SetColor(inactiveColor_);
+    canvas->AttachPen(pen);
+    canvas->DrawRoundRect(rrectBottom);
+    canvas->DetachPen();
+#endif
 
     // paint the upper track rect
     auto width = switchSize_.Width() - rawPointSize_.Width() - pointPadding * 3.0;
@@ -186,15 +272,31 @@ void RosenRenderSwitch::DrawTrackOffAndOn(
     double trackHeightDelta = paintTrackSize_.Height() + originY - (rawPointSize_.Height() + pointOriginY);
     double radiusDelta = trackRadius - pointRadius_;
     double trackStartY = pointOriginY - (pointPadding * ratio);
+#ifndef USE_ROSEN_DRAWING
     rrectUpper = SkRRect::MakeRectXY(
         { trackStartX, trackStartY, trackEnd, rawPointSize_.Height() + pointOriginY + trackHeightDelta * ratio },
         pointRadius_ + radiusDelta * ratio, pointRadius_ + radiusDelta * ratio);
     skPaint.setColor(activeColor_);
     canvas->drawRRect(rrectUpper, skPaint);
+#else
+    rrectUpper = RSRoundRect(
+        RSRect(
+            trackStartX, trackStartY, trackEnd, rawPointSize_.Height() + pointOriginY + trackHeightDelta * ratio),
+        pointRadius_ + radiusDelta * ratio, pointRadius_ + radiusDelta * ratio);
+    pen.SetColor(activeColor_);
+    canvas->AttachPen(pen);
+    canvas->DrawRoundRect(rrectUpper);
+    canvas->DetachPen();
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderSwitch::SetPaintStyle(
     double& originX, double& originY, uint32_t& trackColor, uint32_t& pointColor, SkPaint& trackPaint)
+#else
+void RosenRenderSwitch::SetPaintStyle(
+    double& originX, double& originY, uint32_t& trackColor, uint32_t& pointColor, RSPen& trackPaint)
+#endif
 {
     auto borderWidth = NormalizeToPx(borderWidth_);
     switch (uiStatus_) {
@@ -264,6 +366,7 @@ void RosenRenderSwitch::PaintFocusBorder(RenderContext& context, const Offset& o
     double focusBorderHeight = switchSize_.Height() + NormalizeToPx(FOCUS_PADDING * 2 + FOCUS_BORDER_WIDTH);
     double focusBorderWidth = switchSize_.Width() + NormalizeToPx(FOCUS_PADDING * 2 + FOCUS_BORDER_WIDTH);
     double focusRadius = focusBorderHeight * HALF;
+#ifndef USE_ROSEN_DRAWIG
     SkPaint paint;
     paint.setColor(FOCUS_BORDER_COLOR);
     paint.setStrokeWidth(NormalizeToPx(FOCUS_BORDER_WIDTH));
@@ -274,6 +377,19 @@ void RosenRenderSwitch::PaintFocusBorder(RenderContext& context, const Offset& o
     rRect.offset(offset.GetX() - NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF),
         offset.GetY() - NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF));
     canvas->drawRRect(rRect, paint);
+#else
+    RSPen pen;
+    pen.SetColor(FOCUS_BORDER_COLOR);
+    pen.SetWidth(NormalizeToPx(FOCUS_BORDER_WIDTH));
+    pen.SetAntiAlias(true);
+    RSRoundRect rRect(
+        RSRect(0, 0, focusBorderWidth, focusBorderHeight), focusRadius, focusRadius);
+    rRect.Offset(offset.GetX() - NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF),
+        offset.GetY() - NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF));
+    canvas->AttachPen(pen);
+    canvas->DrawRoundRect(rRect);
+    canvas->DetachPen();
+#endif
 }
 
 void RosenRenderSwitch::PaintTouchBoard(const Offset& offset, RenderContext& context)

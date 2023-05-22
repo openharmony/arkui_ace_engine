@@ -379,7 +379,6 @@ void FrameNode::OnAttachToMainTree(bool recursive)
 
 void FrameNode::OnVisibleChange(bool isVisible)
 {
-    // notify transition
     pattern_->OnVisibleChange(isVisible);
     for (const auto& child : GetChildren()) {
         child->OnVisibleChange(isVisible);
@@ -468,8 +467,8 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     // update focus state
     auto focusHub = GetFocusHub();
     if (focusHub && focusHub->IsCurrentFocus()) {
-        focusHub->ClearFocusState();
-        focusHub->PaintFocusState();
+        focusHub->ClearFocusState(false);
+        focusHub->PaintFocusState(false);
     }
 
     // rebuild child render node.
@@ -910,7 +909,10 @@ void FrameNode::MarkModifyDone()
             // store distribute node
             pipeline->StoreNode(restoreId, AceType::WeakClaim(this));
             // restore distribute node info
-            pattern_->OnRestoreInfo(pipeline->GetRestoreInfo(restoreId));
+            std::string restoreInfo;
+            if (pipeline->GetRestoreInfo(restoreId, restoreInfo)) {
+                pattern_->OnRestoreInfo(restoreInfo);
+            }
         }
     }
     eventHub_->MarkModifyDone();
@@ -1490,16 +1492,16 @@ OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf) const
     return offset;
 }
 
-OffsetF FrameNode::GetPaintRectOffsetWithoutTransform(bool excludeSelf) const
+OffsetF FrameNode::GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf) const
 {
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, OffsetF());
-    OffsetF offset = excludeSelf ? OffsetF() : context->GetPaintRectWithoutTransform().GetOffset();
+    OffsetF offset = excludeSelf ? OffsetF() : context->GetPaintRectWithTranslate().GetOffset();
     auto parent = GetAncestorNodeOfFrame();
     while (parent) {
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, OffsetF());
-        offset += renderContext->GetPaintRectWithoutTransform().GetOffset();
+        offset += renderContext->GetPaintRectWithTranslate().GetOffset();
         parent = parent->GetAncestorNodeOfFrame();
     }
     return offset;
@@ -1604,19 +1606,22 @@ void FrameNode::RemoveLastHotZoneRect() const
     gestureHub->RemoveLastResponseRect();
 }
 
-bool FrameNode::OnRemoveFromParent()
+bool FrameNode::OnRemoveFromParent(bool allowTransition)
 {
     // kick out transition animation if needed, wont re-entry if already detached.
-    DetachFromMainTree();
+    DetachFromMainTree(!allowTransition);
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, false);
-    if (context->HasTransitionOutAnimation()) {
-        // pending remove, move self into disappearing children
+    if (!allowTransition || RemoveImmediately()) {
+        // directly remove, reset focusHub, parent and depth
+        if (auto focusHub = GetFocusHub()) {
+            focusHub->RemoveSelf();
+        }
+        ResetParent();
         return true;
-    } else {
-        // directly remove, reset parent and depth
-        return UINode::OnRemoveFromParent();
     }
+    // delayed remove, will move self into disappearing children
+    return false;
 }
 
 RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
@@ -1704,5 +1709,13 @@ void FrameNode::UpdateAnimatableArithmeticProperty(const std::string& propertyNa
 std::string FrameNode::ProvideRestoreInfo()
 {
     return pattern_->ProvideRestoreInfo();
+}
+
+bool FrameNode::RemoveImmediately() const
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, true);
+    // has transition out animation, need to wait for animation end
+    return !context->HasTransitionOutAnimation();
 }
 } // namespace OHOS::Ace::NG

@@ -411,7 +411,9 @@ void ImagePattern::OnWindowShow()
 
 void ImagePattern::OnVisibleChange(bool visible)
 {
-    CloseSelectOverlay();
+    if (!visible) {
+        CloseSelectOverlay();
+    }
     CHECK_NULL_VOID_NOLOG(image_);
     // control svg / gif animation
     image_->ControlAnimation(visible);
@@ -433,6 +435,8 @@ void ImagePattern::OnAttachToFrameNode()
 
 void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    CloseSelectOverlay();
+
     auto id = frameNode->GetId();
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_VOID_NOLOG(pipeline);

@@ -52,6 +52,7 @@ public:
     virtual void SetPathEffect(std::shared_ptr<TestingPathEffect> /* effect */) {}
     virtual void SetJoinStyle(JoinStyle js) {}
     virtual void SetMiterLimit(float limit) {}
+    virtual void SetAlpha(uint32_t alpha) {}
 
     virtual std::shared_ptr<TestingShaderEffect> GetShaderEffect()
     {

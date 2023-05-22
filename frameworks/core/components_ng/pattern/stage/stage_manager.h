@@ -49,6 +49,11 @@ public:
     static void FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE);
 
     RefPtr<FrameNode> GetLastPage();
+    RefPtr<FrameNode> GetPageById(int32_t pageId);
+    const RefPtr<FrameNode> GetStageNode() const
+    {
+        return stageNode_;
+    }
 
     void ReloadStage();
 

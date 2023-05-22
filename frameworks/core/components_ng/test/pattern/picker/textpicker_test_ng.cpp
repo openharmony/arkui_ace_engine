@@ -2760,6 +2760,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAccessibilityPropertyGetBeginIndex001, Test
     }
     textPickerColumnPattern_->SetOptions(contents);
     textPickerColumnPattern_->SetCurrentIndex(INDEX_NUM);
+    textPickerColumnPattern_->halfDisplayCounts_ = SECOND;
     EXPECT_EQ(textPickerAccessibilityProperty_->GetBeginIndex(), CURRENT_INDEX);
     DestroyTextPickerTestNgObject();
 }
@@ -2789,6 +2790,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAccessibilityPropertyGetEndIndex001, TestSi
         contents.emplace_back(content);
     }
     textPickerColumnPattern_->SetOptions(contents);
+    textPickerColumnPattern_->halfDisplayCounts_ = SECOND;
     EXPECT_EQ(textPickerAccessibilityProperty_->GetEndIndex(), CURRENT_END_INDEX);
     DestroyTextPickerTestNgObject();
 }
@@ -4170,5 +4172,79 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest005, TestSize.Level1)
      * test method HandleChangeCallback
     */
     columnPattern->HandleChangeCallback(true, true);
+}
+
+/**
+ * @tc.name: PerformActionTest001
+ * @tc.desc: TextPicker Accessibility PerformAction test ScrollForward and ScrollBackward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, PerformActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create textPicker and initialize related properties.
+     */
+    auto pipeline = MockPipelineBase::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" } };
+    TextPickerModelNG::GetInstance()->SetRange(range);
+    TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
+    auto pickerFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(pickerFrameNode, nullptr);
+    auto pickerNodeLayout = pickerFrameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(false);
+
+    /**
+     * @tc.steps: step2. Get textPickerColumn frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto textPickerPattern = pickerFrameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    textPickerPattern->OnModifyDone();
+    auto columnNode = textPickerPattern->GetColumnNode();
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = columnNode->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    columnPattern->ClearOptions();
+    NG::RangeContent content;
+    content.icon_ = EMPTY_TEXT;
+    content.text_ = TEXT_PICKER_CONTENT;
+    std::vector<NG::RangeContent> contents;
+    contents.emplace_back(content);
+    columnPattern->SetOptions(contents);
+    columnPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step3. Get textPickerColumn accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto accessibilityProperty = columnNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. When textPickerColumn can not move, call the callback function in textPickerColumn
+     *                   accessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    columnPattern->SetCurrentIndex(0);
+    EXPECT_TRUE(accessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(accessibilityProperty->ActActionScrollBackward());
+
+    /**
+     * @tc.steps: step5. When textPickerColumn can move, call the callback function in textPickerColumn
+     *                   accessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    for (int index = 0; index < INDEX_NUM; index++) {
+        contents.emplace_back(content);
+    }
+    columnPattern->SetOptions(contents);
+    columnPattern->SetCurrentIndex(1);
+    EXPECT_TRUE(accessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(accessibilityProperty->ActActionScrollBackward());
 }
 } // namespace OHOS::Ace::NG

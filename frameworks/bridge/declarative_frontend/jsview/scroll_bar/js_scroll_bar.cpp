@@ -60,9 +60,7 @@ void JSScrollBar::JSBind(BindingTarget globalObj)
     JSClass<JSScrollBar>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSScrollBar>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
 
-    JSClass<JSScrollBar>::Inherit<JSContainerBase>();
-    JSClass<JSScrollBar>::Inherit<JSViewAbstract>();
-    JSClass<JSScrollBar>::Bind<>(globalObj);
+    JSClass<JSScrollBar>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSScrollBar::Create(const JSCallbackInfo& info)

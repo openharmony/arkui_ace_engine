@@ -1242,11 +1242,6 @@ bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
         return false;
     }
 
-    if (value.Illegal()) {
-        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
-        return true;
-    }
-
     if (LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
@@ -1274,10 +1269,6 @@ bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
     }
     if (!ParseJsDimensionVp(jsValue, value)) {
         return false;
-    }
-    if (value.Illegal()) {
-        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
-        return true;
     }
 
     if (LessNotEqual(value.Value(), 0.0)) {
@@ -1526,12 +1517,13 @@ void JSViewAbstract::JsEnabled(const JSCallbackInfo& info)
         return;
     }
 
+    bool enabled;
     if (!info[0]->IsBoolean()) {
         LOGE("arg is not bool.");
-        return;
+        enabled = true;
+    } else {
+        enabled = info[0]->ToBoolean();
     }
-
-    bool enabled = info[0]->ToBoolean();
 
     ViewAbstractModel::GetInstance()->SetEnabled(enabled);
 }
@@ -1717,6 +1709,7 @@ void JSViewAbstract::JsFlexShrink(const JSCallbackInfo& info)
     // negative use default value.
     if (value < 0.0) {
         ViewAbstractModel::GetInstance()->ResetFlexShrink();
+        return;
     }
     ViewAbstractModel::GetInstance()->SetFlexShrink(static_cast<float>(value));
 }
@@ -3000,6 +2993,9 @@ bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& 
             return false;
         }
         JSRef<JSVal> args = jsObj->GetProperty("params");
+        if (!args->IsArray()) {
+            return false;
+        }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
         if (resType == static_cast<uint32_t>(ResourceType::STRING)) {
@@ -3077,6 +3073,9 @@ bool JSViewAbstract::ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result)
             return false;
         }
         JSRef<JSVal> args = jsObj->GetProperty("params");
+        if (!args->IsArray()) {
+            return false;
+        }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
         result = themeConstants->GetIntByName(param->ToString());
@@ -3116,6 +3115,9 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
             return false;
         }
         JSRef<JSVal> args = jsObj->GetProperty("params");
+        if (!args->IsArray()) {
+            return false;
+        }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
         result = themeConstants->GetColorByName(param->ToString());
@@ -3172,6 +3174,9 @@ bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vecto
             return false;
         }
         JSRef<JSVal> args = jsObj->GetProperty("params");
+        if (!args->IsArray()) {
+            return false;
+        }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
         result.emplace_back(themeConstants->GetStringByName(param->ToString()));
@@ -3311,6 +3316,9 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
                 return false;
             }
             JSRef<JSVal> args = jsObj->GetProperty("params");
+            if (!args->IsArray()) {
+                return false;
+            }
             JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
             auto param = params->GetValueAt(0);
             if (type->ToNumber<int32_t>() == static_cast<int32_t>(ResourceType::MEDIA)) {
@@ -3451,6 +3459,9 @@ bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vecto
             return false;
         }
         JSRef<JSVal> args = jsObj->GetProperty("params");
+        if (!args->IsArray()) {
+            return false;
+        }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
         if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTARRAY)) {
@@ -3519,6 +3530,9 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
             return false;
         }
         JSRef<JSVal> args = jsObj->GetProperty("params");
+        if (!args->IsArray()) {
+            return false;
+        }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
         if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRARRAY)) {
@@ -4880,7 +4894,7 @@ void JSViewAbstract::JSUpdateAnimatableProperty(const JSCallbackInfo& info)
     }
 }
 
-void JSViewAbstract::JSBind()
+void JSViewAbstract::JSBind(BindingTarget globalObj)
 {
     JSClass<JSViewAbstract>::Declare("JSViewAbstract");
 
@@ -5029,6 +5043,8 @@ void JSViewAbstract::JSBind()
 
     JSClass<JSViewAbstract>::StaticMethod("createAnimatableProperty", &JSViewAbstract::JSCreateAnimatableProperty);
     JSClass<JSViewAbstract>::StaticMethod("updateAnimatableProperty", &JSViewAbstract::JSUpdateAnimatableProperty);
+
+    JSClass<JSViewAbstract>::Bind(globalObj);
 }
 void JSViewAbstract::JsAllowDrop(const JSCallbackInfo& info)
 {

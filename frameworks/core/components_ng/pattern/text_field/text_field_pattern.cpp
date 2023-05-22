@@ -595,6 +595,7 @@ void TextFieldPattern::UpdateCaretPositionByPressOffset()
 {
     if (GetEditingValue().text.empty()) {
         SetCaretOffsetForEmptyTextOrPositionZero();
+        UpdateSelection(textEditingValue_.caretPosition);
         return;
     }
     UpdateCaretOffsetByLastTouchOffset();
@@ -904,6 +905,9 @@ void TextFieldPattern::HandleFocusEvent()
         setSelectAllFlag_ = false;
         HandleOnSelectAll();
     }
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireOnEditChanged(true);
     CloseSelectOverlay();
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -1079,7 +1083,7 @@ void TextFieldPattern::HandleBlurEvent()
     isSelectedAreaRedraw_ = !isSelectedAreaRedraw_;
     UpdateCaretPositionWithClamp(pos);
     textEditingValue_.CursorMoveToPosition(pos);
-    textSelector_.Update(pos);
+    textSelector_.Update(-1);
     selectionMode_ = SelectionMode::NONE;
     caretUpdateType_ = CaretUpdateType::EVENT;
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
@@ -1197,6 +1201,7 @@ void TextFieldPattern::HandleOnCopy()
     }
 
     UpdateCaretPositionWithClamp(textSelector_.GetEnd());
+    UpdateSelection(textEditingValue_.caretPosition);
     selectionMode_ = SelectionMode::NONE;
     StartTwinkling();
     auto host = GetHost();

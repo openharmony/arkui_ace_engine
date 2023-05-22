@@ -274,6 +274,7 @@ template("declarative_js_engine") {
 
       # Models implemenations for classic fw
       "jsview/models/action_sheet_model_impl.cpp",
+      "jsview/models/alert_dialog_model_impl.cpp",
       "jsview/models/animator_model_impl.cpp",
       "jsview/models/badge_model_impl.cpp",
       "jsview/models/blank_model_impl.cpp",
@@ -599,6 +600,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_rating.cpp",
       "jsview/js_row.cpp",
       "jsview/js_scroll.cpp",
+      "jsview/js_scroller.cpp",
       "jsview/js_span.cpp",
       "jsview/js_stack.cpp",
       "jsview/js_swiper.cpp",
@@ -607,9 +609,11 @@ template("declarative_js_engine_ng") {
       "jsview/js_tabs_controller.cpp",
       "jsview/js_text.cpp",
       "jsview/js_toggle.cpp",
+      "jsview/js_utils.cpp",
       "jsview/js_view.cpp",
       "jsview/js_view_abstract.cpp",
       "jsview/js_view_context.cpp",
+      "jsview/scroll_bar/js_scroll_bar.cpp",
     ]
 
     sources += [

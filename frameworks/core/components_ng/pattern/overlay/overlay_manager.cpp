@@ -1075,14 +1075,17 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
         auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetFirstChild());
         CHECK_NULL_VOID(builder);
         if (builder->GetRenderContext()->HasTransition()) {
-            topModalNode->Clean();
+            topModalNode->Clean(false, true);
             topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
+        auto modalPresentationPattern = topModalNode->GetPattern<ModalPresentationPattern>();
+        CHECK_NULL_VOID(modalPresentationPattern);
+        modalTransition = modalPresentationPattern->GetType();
         if (modalTransition == ModalTransition::DEFAULT) {
             PlayDefaultModalTransition(topModalNode, false);
         } else if (modalTransition == ModalTransition::ALPHA) {
             PlayAlphaModalTransition(topModalNode, false);
-        } else {
+        } else if (!builder->GetRenderContext()->HasTransition()) {
             rootNode->RemoveChild(topModalNode);
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
@@ -1112,6 +1115,11 @@ void OverlayManager::PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNo
             }
         });
     } else {
+        auto lastModalNode = lastModalNode_.Upgrade();
+        CHECK_NULL_VOID(lastModalNode);
+        auto lastModalContext = lastModalNode->GetRenderContext();
+        CHECK_NULL_VOID(lastModalContext);
+        lastModalContext->UpdateOpacity(1.0);
         option.SetOnFinishEvent(
             [rootWeak = rootNodeWeak_, modalWK = WeakClaim(RawPtr(modalNode)), id = Container::CurrentId()] {
                 ContainerScope scope(id);
@@ -1129,6 +1137,7 @@ void OverlayManager::PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNo
                     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                     }, TaskExecutor::TaskType::UI);
             });
+        context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
         AnimationUtils::Animate(
             option,
             [context, pageHeight]() {
@@ -1155,6 +1164,7 @@ void OverlayManager::PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode
     if (isTransitionIn) {
         // last page animation
         lastModalContext->OpacityAnimation(option, 1, 0);
+        lastModalContext->UpdateOpacity(0);
 
         // current modal page animation
         context->OpacityAnimation(option, 0, 1);
@@ -1469,13 +1479,7 @@ void OverlayManager::RemoveFilter()
     CHECK_NULL_VOID(rootNode);
     auto children = columnNode->GetChildren();
     rootNode->RemoveChild(columnNode);
-    int32_t slot = 0;
-    for (auto& child : children) {
-        columnNode->RemoveChild(child);
-        child->MountToParent(rootNode, slot);
-        slot++;
-    }
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    rootNode->RebuildRenderContextTree();
     hasFilter_ = false;
 }
 

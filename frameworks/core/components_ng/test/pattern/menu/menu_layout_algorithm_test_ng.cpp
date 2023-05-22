@@ -15,20 +15,22 @@
 
 #include "gtest/gtest.h"
 
+#include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/size_t.h"
+#include "base/memory/ace_type.h"
+
 #define private public
 #define protected public
 
-#include "base/geometry/ng/rect_t.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
-#include "core/components_ng/pattern/menu/menu_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
+#include "core/components_ng/pattern/menu/sub_menu_layout_algorithm.h"
 #include "core/components_ng/syntax/lazy_for_each_model.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
-#include "core/components_ng/test/mock/syntax/mock_lazy_for_each_builder.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
@@ -46,6 +48,8 @@ constexpr float MENU_SIZE_WIDTH = 150.0f;
 constexpr float MENU_SIZE_HEIGHT = 150.0f;
 constexpr double MENU_OFFSET_X = 10.0;
 constexpr double MENU_OFFSET_Y = 10.0;
+constexpr float MENU_ITEM_SIZE_WIDTH = 100.0f;
+constexpr float MENU_ITEM_SIZE_HEIGHT = 50.0f;
 
 constexpr int CHILD_SIZE_X = 1;
 constexpr int CHILD_SIZE_Y = 2;
@@ -972,5 +976,85 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg032, TestSize.Level
     auto result = menuLayoutAlgorithm->GetPositionWithPlacementRightBottom(childSize, topPosition, bottomPosition);
     EXPECT_EQ(result.GetX(), PLACEMENT_RIGHT_BOTTOM_X);
     EXPECT_EQ(result.GetY(), PLACEMENT_RIGHT_BOTTOM_Y);
+}
+
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg033
+ * @tc.desc: Test SubMenu layout algorithm.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg033, TestSize.Level1)
+{
+    // create parent menu item
+    auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+    auto item = AceType::MakeRefPtr<FrameNode>("MenuItem", -1, itemPattern);
+    // set parent item size
+    auto itemGeometryNode = item->GetGeometryNode();
+    ASSERT_TRUE(itemGeometryNode);
+    item->GetGeometryNode()->SetFrameSize(SizeF(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT));
+
+    // create submenu
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::SUB_MENU);
+    auto subMenu = AceType::MakeRefPtr<FrameNode>("", -1, menuPattern);
+    auto algorithm = AceType::DynamicCast<SubMenuLayoutAlgorithm>(menuPattern->CreateLayoutAlgorithm());
+    ASSERT_TRUE(algorithm);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+    auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    auto* wrapper = new LayoutWrapper(subMenu, geometryNode, layoutProp);
+    // link parent menu item and sub menu
+    ASSERT_TRUE(menuPattern);
+    menuPattern->SetParentMenuItem(item);
+    item->GetGeometryNode()->SetFrameOffset(OffsetF(MENU_OFFSET_X, MENU_OFFSET_Y));
+    algorithm->pageOffset_ = OffsetF();
+    algorithm->wrapperSize_ = SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+
+    // @tc.cases: case1. sub menu show on the right side of item
+    algorithm->position_ = OffsetF(MENU_OFFSET_X + MENU_ITEM_SIZE_WIDTH, MENU_OFFSET_Y);
+    algorithm->Layout(wrapper);
+
+    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset(),
+        OffsetF(MENU_OFFSET_X + MENU_ITEM_SIZE_WIDTH, MENU_OFFSET_Y));
+
+    // @tc.cases: case2. sub menu show on the left side of item
+    algorithm->position_ = OffsetF(FULL_SCREEN_WIDTH, MENU_OFFSET_Y);
+    algorithm->Layout(wrapper);
+
+    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(),
+        (FULL_SCREEN_WIDTH - MENU_ITEM_SIZE_WIDTH - MENU_SIZE_WIDTH));
+    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetY(), MENU_OFFSET_Y);
+}
+
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg034
+ * @tc.desc: Test MultiMenu measure algorithm.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg034, TestSize.Level1)
+{
+    // set screen width for grid column
+    ScreenSystemManager::GetInstance().SetWindowInfo(FULL_SCREEN_WIDTH, 1.0, 1.0);
+    // create multi menu
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MULTI_MENU);
+    auto multiMenu = AceType::MakeRefPtr<FrameNode>("", -1, menuPattern);
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    ASSERT_TRUE(algorithm);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    auto* wrapper = new LayoutWrapper(multiMenu, geometryNode, layoutProp);
+    // create menu item
+    for (int32_t i = 0; i < 3; ++i) {
+        auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+        auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, itemPattern);
+        auto itemGeoNode = AceType::MakeRefPtr<GeometryNode>();
+        itemGeoNode->SetFrameSize(SizeF(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT));
+        auto childWrapper = AceType::MakeRefPtr<LayoutWrapper>(menuItem, itemGeoNode, layoutProp);
+        wrapper->AppendChild(childWrapper);
+    }
+
+    algorithm->Measure(wrapper);
+    // @tc.expected: menu content width = item width, height = sum(item height)
+    auto expectedSize = SizeF(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT * 3);
+    EXPECT_EQ(wrapper->GetGeometryNode()->GetContentSize(), expectedSize);
 }
 } // namespace OHOS::Ace::NG

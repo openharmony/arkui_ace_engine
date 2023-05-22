@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #include <optional>
 
 #include "gtest/gtest.h"
+
 #include "core/components_ng/base/geometry_node.h"
 
 #define private public
@@ -31,6 +32,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -39,12 +41,13 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/adapter/txt_paragraph.h"
 #include "core/components_ng/render/paragraph.h"
+#include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_ng/test/pattern/text/mock/mock_txt_paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #include "core/event/mouse_event.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #include "frameworks/base/window/drag_window.h"
 #include "frameworks/core/components_ng/pattern/root/root_pattern.h"
 #undef private
@@ -330,6 +333,13 @@ std::pair<RefPtr<FrameNode>, RefPtr<TextPattern>> Init()
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
     pattern->AttachToFrameNode(frameNode);
+    auto host = pattern->GetHost();
+    auto pipeline = host->GetContext();
+    pipeline->rootNode_ =
+        FrameNode::CreateFrameNodeWithTree(V2::ROOT_ETS_TAG, ROOT_NODE_ID, Referenced::MakeRefPtr<RootPattern>());
+    ;
+    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
+    pattern->clipboard_ = clipboard;
     return { frameNode, pattern };
 }
 
@@ -567,7 +577,7 @@ HWTEST_F(TextTestNg, OnDetachFromFrameNode003, TestSize.Level1)
 
 /**
  * @tc.name: OnHandleMoveDone001
- * @tc.desc: Test TextPattern OnHandleMoveDone when SelectOverlayProxy is not nullptr.
+ * @tc.desc: Test TextPattern OnHandleMoveDone
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestNg, OnHandleMoveDone001, TestSize.Level1)
@@ -579,7 +589,16 @@ HWTEST_F(TextTestNg, OnHandleMoveDone001, TestSize.Level1)
     pattern->textSelector_.Update(0, TEXT_SIZE_INT);
 
     /**
-     * @tc.steps: step2. construct a SelectOverlayManager
+     * @tc.steps: step2. call OnHandleMoveDone when SelectOverlayProxy is nullptr.
+     * @tc.expected: the function exits normally
+     */
+    RectF handleRect = CONTENT_RECT;
+    pattern->OnHandleMoveDone(handleRect, true);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), TEXT_SIZE_INT);
+
+    /**
+     * @tc.steps: step3. construct a SelectOverlayManager
      */
     SelectOverlayInfo selectOverlayInfo;
     selectOverlayInfo.singleLineHeight = NODE_ID;
@@ -587,7 +606,7 @@ HWTEST_F(TextTestNg, OnHandleMoveDone001, TestSize.Level1)
     auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
 
     /**
-     * @tc.steps: step3. call CreateAndShowSelectOverlay
+     * @tc.steps: step4. call CreateAndShowSelectOverlay
      * @tc.expected: return the proxy which has the right SelectOverlayId
      */
     auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo);
@@ -595,60 +614,15 @@ HWTEST_F(TextTestNg, OnHandleMoveDone001, TestSize.Level1)
     EXPECT_NE(pattern->selectOverlayProxy_, nullptr);
 
     /**
-     * @tc.steps: step4. construct rootNode
-     */ 
-    auto host = pattern->GetHost();
-    ASSERT_NE(host, nullptr);
-    auto pipeline = host->GetContext();
-    ASSERT_NE(pipeline, nullptr);
-    pipeline->rootNode_ = FrameNode::CreateFrameNodeWithTree(
-        V2::ROOT_ETS_TAG, ROOT_NODE_ID, Referenced::MakeRefPtr<RootPattern>());;
-    
-    /**
-     * @tc.steps: step5. call OnHandleMoveDone
-     * @tc.expected: return the proxy which has the right SelectOverlayId
+     * @tc.steps: step5. call OnHandleMoveDone when SelectOverlayProxy is not nullptr.
+     * @tc.expected: the OnHandleMoveDone function exits normally
      */
-    RectF handleRect = CONTENT_RECT;
-    pattern->OnHandleMoveDone(handleRect, true);
-    EXPECT_NE(pattern->textSelector_.GetTextStart(), -1);
-    EXPECT_NE(pattern->textSelector_.GetTextEnd(), -1);
-    pattern->OnHandleMoveDone(handleRect, false);
-    EXPECT_NE(pattern->textSelector_.GetTextStart(), -1);
-    EXPECT_NE(pattern->textSelector_.GetTextEnd(), -1);
-}
-
-/**
- * @tc.name: OnHandleMoveDone002
- * @tc.desc: Test TextPattern OnHandleMoveDone when SelectOverlayProxy is nullptr.
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, OnHandleMoveDone002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode and pattern
-     */
-    auto [frameNode, pattern] = Init();
-    pattern->selectOverlayProxy_ = nullptr;
-    pattern->textSelector_.Update(0, TEXT_SIZE_INT);
-
-    /**
-     * @tc.steps: step2. construct rootNode
-     */ 
-    auto host = pattern->GetHost();
-    ASSERT_NE(host, nullptr);
-    auto pipeline = host->GetContext();
-    ASSERT_NE(pipeline, nullptr);
-    pipeline->rootNode_ = FrameNode::CreateFrameNodeWithTree(
-        V2::ROOT_ETS_TAG, ROOT_NODE_ID, Referenced::MakeRefPtr<RootPattern>());;
-    
-    /**
-     * @tc.steps: step3. call OnHandleMoveDone
-     * @tc.expected: the function exits normally
-     */
-    RectF handleRect = CONTENT_RECT;
-    pattern->OnHandleMoveDone(handleRect, true);
-    EXPECT_NE(pattern->textSelector_.GetTextStart(), -1);
-    EXPECT_NE(pattern->textSelector_.GetTextEnd(), -1);
+    bool isFirstHandle[2] = { true, false };
+    for (int i = 0; i < 2; i++) {
+        pattern->OnHandleMoveDone(handleRect, isFirstHandle[i]);
+        EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+        EXPECT_EQ(pattern->textSelector_.GetTextEnd(), TEXT_SIZE_INT);
+    }
 }
 
 /**
@@ -1008,7 +982,7 @@ HWTEST_F(TextTestNg, OnHandleMove001, TestSize.Level1)
     auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo);
     pattern->selectOverlayProxy_ = proxy;
     EXPECT_NE(pattern->selectOverlayProxy_, nullptr);
-    }
+}
 
 /**
  * @tc.name: TextCreatParagraphTest001
@@ -2486,12 +2460,10 @@ HWTEST_F(TextTestNg, TextAccessibilityPropertyIsSelected001, TestSize.Level1)
     TextModelNG textModel;
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto textPattern = frameNode->GetPattern<TextPattern>();
-    ASSERT_NE(textPattern, nullptr);
     auto textAccessibilityProperty = frameNode->GetAccessibilityProperty<TextAccessibilityProperty>();
     ASSERT_NE(textAccessibilityProperty, nullptr);
     EXPECT_FALSE(textAccessibilityProperty->IsSelected());
-    textPattern->textSelector_.Update(0, TEXT_SIZE_INT);
+    textAccessibilityProperty->SetSelected(true);
     EXPECT_TRUE(textAccessibilityProperty->IsSelected());
 }
 
@@ -2836,7 +2808,9 @@ HWTEST_F(TextTestNg, ShowSelectOverlay004, TestSize.Level1)
     info.localLocation_ = Offset(1, 1);
     pattern->HandleLongPress(info);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
-
+    /**
+     * @tc.steps: step2. construct menuOptionItems
+     */
     pattern->copyOption_ = CopyOptions::InApp;
     pattern->paragraph_ = AceType::MakeRefPtr<TxtParagraph>(ParagraphStyle {}, nullptr);
     pattern->textForDisplay_ = "test";
@@ -2850,10 +2824,11 @@ HWTEST_F(TextTestNg, ShowSelectOverlay004, TestSize.Level1)
 
     /**
      * @tc.steps: step2. call ShowSelectOverlay function
+     * @tc.expected: the property of selectInfo is assigned.
      */
     pattern->ShowSelectOverlay(pattern->textSelector_.firstHandle, pattern->textSelector_.secondHandle);
-    EXPECT_NE(pattern->textSelector_.GetTextStart(), -1);
-    EXPECT_NE(pattern->textSelector_.GetTextEnd(), -1);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 20);
 }
 
 /**
@@ -2868,16 +2843,16 @@ HWTEST_F(TextTestNg, IsDraggable001, TestSize.Level1)
     pattern->copyOption_ = CopyOptions::Distributed;
     pattern->paragraph_ = AceType::MakeRefPtr<TxtParagraph>(ParagraphStyle {}, nullptr);
     host->draggable_ = true;
-    
+
     /**
      * @tc.steps: step1. set selected rect to [0, 0] - [20, 20]
-     * @tc.expected: return true if the location is in region 
+     * @tc.expected: return true if the location is in region
      */
     pattern->textSelector_.Update(0, 20);
     EXPECT_TRUE(pattern->IsDraggable(Offset(1, 1)));
 
     /**
-     * @tc.expected: return false if the location is not in region 
+     * @tc.expected: return false if the location is not in region
      */
     EXPECT_FALSE(pattern->IsDraggable(Offset(21, 21)));
 
@@ -2898,12 +2873,15 @@ HWTEST_F(TextTestNg, DragBase001, TestSize.Level1)
 {
     auto [frameNode, pattern] = Init();
 
-    // test CloseSelectOverlay should reset textSelector
+    // test ResetSelection should reset textSelector
     pattern->CreateHandles();
     pattern->textSelector_.Update(0, 20);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 20);
     pattern->CloseSelectOverlay();
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 20);
+    pattern->ResetSelection();
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
 
@@ -3084,7 +3062,7 @@ HWTEST_F(TextTestNg, HandleClickEvent002, TestSize.Level1)
 
     /**
      * @tc.steps: step3. create paragraph
-     */ 
+     */
     ParagraphStyle paragraphStyle;
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
     ASSERT_NE(paragraph, nullptr);
@@ -3098,31 +3076,8 @@ HWTEST_F(TextTestNg, HandleClickEvent002, TestSize.Level1)
     GestureEvent info;
     info.localLocation_ = Offset(0, 0);
     pattern->HandleClickEvent(info);
-    EXPECT_NE(pattern->textSelector_.GetTextStart(), -1);
-    EXPECT_NE(pattern->textSelector_.GetTextEnd(), -1);
-}
-
-/**
- * @tc.name: OnVisibleChange001
- * @tc.desc: test test_pattern.h OnVisibleChange function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, OnVisibleChange001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode and pattern
-     */
-    auto [frameNode, pattern] = Init();
-
-    /**
-     * @tc.steps: step2.call function
-     * @tc.expected: selectOverlay is closed
-     */
-    pattern->CreateHandles();
-    pattern->textSelector_.Update(0, 20);
-    pattern->OnVisibleChange(false);
-    EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
-    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), -2);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -2);
 }
 
 /**
@@ -3138,7 +3093,17 @@ HWTEST_F(TextTestNg, HandleMouseEvent001, TestSize.Level1)
     auto [frameNode, pattern] = Init();
 
     /**
-     * @tc.steps: step2. create MouseEvent and call HandleMouseEvent function when copyOption is none
+     * @tc.steps: step2.call OnVisibleChange function
+     * @tc.expected: selectOverlay is closed
+     */
+    pattern->CreateHandles();
+    pattern->textSelector_.Update(0, 20);
+    pattern->OnVisibleChange(false);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
+
+    /**
+     * @tc.steps: step3. create MouseEvent and call HandleMouseEvent function when copyOption is none
      * @tc.expected: selectOverlay is closed
      */
     MouseInfo info;
@@ -3165,26 +3130,15 @@ HWTEST_F(TextTestNg, HandleMouseEvent002, TestSize.Level1)
     pattern->copyOption_ = CopyOptions::InApp;
 
     /**
-     * @tc.steps: step2. construct rootNode
-     */ 
-    auto host = pattern->GetHost();
-    ASSERT_NE(host, nullptr);
-    auto pipeline = host->GetContext();
-    ASSERT_NE(pipeline, nullptr);
-    pipeline->rootNode_ = FrameNode::CreateFrameNodeWithTree(
-        V2::ROOT_ETS_TAG, ROOT_NODE_ID, Referenced::MakeRefPtr<RootPattern>());;
-    pattern->contentRect_ = CONTENT_RECT;
-
-    /**
-     * @tc.steps: step3. create paragraph
-     */ 
+     * @tc.steps: step2. create paragraph
+     */
     ParagraphStyle paragraphStyle;
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
     ASSERT_NE(paragraph, nullptr);
     pattern->paragraph_ = paragraph;
-   
+
     /**
-     * @tc.steps: step4. create MouseInfo and call HandleMouseEvent function
+     * @tc.steps: step3. create MouseInfo and call HandleMouseEvent function
      * @tc.expected: selectOverlay is not closed
      */
     MouseInfo info;
@@ -3192,8 +3146,8 @@ HWTEST_F(TextTestNg, HandleMouseEvent002, TestSize.Level1)
     info.button_ = MouseButton::RIGHT_BUTTON;
     info.action_ = MouseAction::PRESS;
     pattern->HandleMouseEvent(info);
-    EXPECT_NE(pattern->textSelector_.GetTextStart(), -1);
-    EXPECT_NE(pattern->textSelector_.GetTextEnd(), -1);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 1);
 }
 
 /**
@@ -3209,25 +3163,17 @@ HWTEST_F(TextTestNg, HandleOnCopy001, TestSize.Level1)
     auto [frameNode, pattern] = Init();
 
     /**
-     * @tc.steps: step2. construct clipboard
-     */
-    pattern->BeforeCreateLayoutWrapper();
-    auto host = pattern->GetHost();
-    ASSERT_NE(host, nullptr);
-    auto context = host->GetContext();
-    ASSERT_NE(context, nullptr);
-    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
-    ASSERT_NE(clipboard, nullptr);
-    pattern->clipboard_ = clipboard;
-
-    /**
-     * @tc.steps: step3. call HandleOnCopy function when textSelector is valid and textStart is equal to textEnd
+     * @tc.steps: step2. call HandleOnCopy function when textSelector is valid and textStart is equal to textEnd
+     * @tc.steps: step3. call HandleOnCopy function when textSelector is not valid and textStart < 0
      * @tc.expected: selectOverlay is closed
      */
-    pattern->textSelector_.Update(2, 2);
-    pattern->HandleOnCopy();
-    EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
-    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
+    std::vector<std::vector<int32_t>> params = { { 2, 2 }, { -1, 20 } };
+    for (int turn = 0; turn < params.size(); turn++) {
+        pattern->textSelector_.Update(params[turn][0], params[turn][1]);
+        pattern->HandleOnCopy();
+        EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
+        EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
+    }
 }
 
 /**
@@ -3243,56 +3189,10 @@ HWTEST_F(TextTestNg, HandleOnCopy002, TestSize.Level1)
     auto [frameNode, pattern] = Init();
 
     /**
-     * @tc.steps: step2. construct clipboard
-     */
-    pattern->BeforeCreateLayoutWrapper();
-    auto host = pattern->GetHost();
-    ASSERT_NE(host, nullptr);
-    auto context = host->GetContext();
-    ASSERT_NE(context, nullptr);
-    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
-    ASSERT_NE(clipboard, nullptr);
-    pattern->clipboard_ = clipboard;
-
-    /**
-     * @tc.steps: step3. call HandleOnCopy function when textSelector is not valid and textStart < 0
+     * @tc.steps: step2. call HandleOnCopy function with valid textSelector and copyOption
      * @tc.expected: selectOverlay is closed
      */
-    pattern->textSelector_.Update(-1,20);
-    pattern->HandleOnCopy();
-    EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
-    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
-}
-
-/**
- * @tc.name: HandleOnCopy003
- * @tc.desc: test test_pattern.h HandleOnCopy function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, HandleOnCopy003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode and pattern
-     */
-    auto [frameNode, pattern] = Init();
-
-    /**
-     * @tc.steps: step2. construct clipboard
-     */
-    pattern->BeforeCreateLayoutWrapper();
-    auto host = pattern->GetHost();
-    ASSERT_NE(host, nullptr);
-    auto context = host->GetContext();
-    ASSERT_NE(context, nullptr);
-    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
-    ASSERT_NE(clipboard, nullptr);
-    pattern->clipboard_ = clipboard;
-
-    /**
-     * @tc.steps: step3. call HandleOnCopy function with valid textSelector and copyOption
-     * @tc.expected: selectOverlay is closed
-     */
-    pattern->textSelector_.Update(0,6);
+    pattern->textSelector_.Update(0, 6);
     pattern->textForDisplay_ = "TestHandleOnCopy";
     pattern->copyOption_ = CopyOptions::InApp;
     pattern->HandleOnCopy();
@@ -3320,8 +3220,8 @@ HWTEST_F(TextTestNg, HandlePanStart001, TestSize.Level1)
      * @tc.expected: The function exits normally
      */
     pattern->HandlePanStart(info);
-    EXPECT_NE(pattern->textSelector_.GetTextStart(), -1);
-    EXPECT_NE(pattern->textSelector_.GetTextEnd(), -1);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 20);
 }
 
 /**
@@ -3344,30 +3244,20 @@ HWTEST_F(TextTestNg, HandlePanStart002, TestSize.Level1)
     info.localLocation_ = Offset(1.0, 1.0);
 
     /**
-     * @tc.steps: step2. construct rootNode
-     */ 
-    auto host = pattern->GetHost();
-    ASSERT_NE(host, nullptr);
-    auto pipeline = host->GetContext();
-    ASSERT_NE(pipeline, nullptr);
-    pipeline->rootNode_ = FrameNode::CreateFrameNodeWithTree(
-        V2::ROOT_ETS_TAG, ROOT_NODE_ID, Referenced::MakeRefPtr<RootPattern>());
-    
-    /**
-     * @tc.steps: step3. create paragraph
-     */ 
+     * @tc.steps: step2. create paragraph
+     */
     ParagraphStyle paragraphStyle;
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
     ASSERT_NE(paragraph, nullptr);
     pattern->paragraph_ = paragraph;
 
     /**
-     * @tc.steps: step4. call HandlePanStart function
+     * @tc.steps: step3. call HandlePanStart function
      * @tc.expected: The function exits normally
      */
     pattern->HandlePanStart(info);
-    EXPECT_NE(pattern->textSelector_.GetTextStart(), -1);
-    EXPECT_NE(pattern->textSelector_.GetTextEnd(), -1);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 3);
 }
 
 /**
@@ -3391,22 +3281,12 @@ HWTEST_F(TextTestNg, HandleLongPress001, TestSize.Level1)
     EXPECT_FALSE(pattern->IsDraggable(info.GetLocalLocation()));
 
     /**
-     * @tc.steps: step2. construct rootNode
-     */ 
-    auto host = pattern->GetHost();
-    ASSERT_NE(host, nullptr);
-    auto pipeline = host->GetContext();
-    ASSERT_NE(pipeline, nullptr);
-    pipeline->rootNode_ = FrameNode::CreateFrameNodeWithTree(
-        V2::ROOT_ETS_TAG, ROOT_NODE_ID, Referenced::MakeRefPtr<RootPattern>());
-    
-    /**
      * @tc.steps: step2. call HandleLongPress function
      * @tc.expected: The function exits normally
      */
     pattern->HandleLongPress(info);
-    EXPECT_NE(pattern->textSelector_.GetTextStart(), -1);
-    EXPECT_NE(pattern->textSelector_.GetTextEnd(), -1);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 1);
 }
 
 /**
@@ -3433,58 +3313,16 @@ HWTEST_F(TextTestNg, HandleLongPress002, TestSize.Level1)
      * @tc.expected: The function exits normally
      */
     pattern->HandleLongPress(info);
-    EXPECT_NE(pattern->textSelector_.GetTextStart(), -1);
-    EXPECT_NE(pattern->textSelector_.GetTextEnd(), -1);
-} 
-
-/**
- * @tc.name: HandlePanUpdate001
- * @tc.desc: test text_pattern.h HandlePanUpdate function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, HandlePanUpdate001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode and pattern
-     */
-    auto [frameNode, pattern] = Init();
-    pattern->copyOption_ = CopyOptions::InApp;
-    pattern->textSelector_.Update(0, 20);
-    GestureEvent info;
-    info.localLocation_ = Offset(1, 1);
-
-    /**
-     * @tc.steps: step2. construct dragWindow_
-     */
-    auto host = pattern->GetHost();
-    ASSERT_NE(host, nullptr);
-    auto pipelineContext = host->GetContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto rect = pipelineContext->GetCurrentWindowRect();
-    auto contentRect_ = CONTENT_RECT;
-    // create textdrag window
-    auto dragWindow = DragWindow::CreateTextDragWindow("APP_DRAG_WINDOW",
-        static_cast<int32_t>(host->GetPaintRectOffset().GetX() + rect.Left()),
-        static_cast<int32_t>(host->GetPaintRectOffset().GetY() + rect.Top()),
-        static_cast<int32_t>(contentRect_.Width() + contentRect_.GetX()),
-        contentRect_.Height() + contentRect_.GetY());
-
-    pattern->dragWindow_ = dragWindow;
-    /**
-     * @tc.steps: step3. call HandlePanUpdate function
-     * @tc.expected: The function exits normally
-     */
-    pattern->HandlePanUpdate(info);
-    EXPECT_NE(pattern->textSelector_.GetTextStart(), -1);
-    EXPECT_NE(pattern->textSelector_.GetTextEnd(), -1);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 3);
 }
 
 /**
- * @tc.name: HandlePanEnd001
+ * @tc.name: HandlePanUpdateAndEnd001
  * @tc.desc: test text_pattern.h HandlePanUpdate function
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestNg, HandlePanEnd001, TestSize.Level1)
+HWTEST_F(TextTestNg, HandlePanUpdateAndEnd001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode and pattern
@@ -3509,13 +3347,20 @@ HWTEST_F(TextTestNg, HandlePanEnd001, TestSize.Level1)
     auto dragWindow = DragWindow::CreateTextDragWindow("APP_DRAG_WINDOW",
         static_cast<int32_t>(host->GetPaintRectOffset().GetX() + rect.Left()),
         static_cast<int32_t>(host->GetPaintRectOffset().GetY() + rect.Top()),
-        static_cast<int32_t>(contentRect_.Width() + contentRect_.GetX()),
-        contentRect_.Height() + contentRect_.GetY());
+        static_cast<int32_t>(contentRect_.Width() + contentRect_.GetX()), contentRect_.Height() + contentRect_.GetY());
 
     pattern->dragWindow_ = dragWindow;
 
     /**
-     * @tc.steps: step3. construct dragProxy_
+     * @tc.steps: step3. call HandlePanUpdate function
+     * @tc.expected: The function exits normally
+     */
+    pattern->HandlePanUpdate(info);
+    EXPECT_NE(pattern->textSelector_.GetTextStart(), -1);
+    EXPECT_NE(pattern->textSelector_.GetTextEnd(), -1);
+
+    /**
+     * @tc.steps: step4. construct dragProxy_
      */
     // draw select text on drag window
     pattern->dragWindow_->DrawTextNG(pattern->paragraph_, pattern);
@@ -3527,17 +3372,17 @@ HWTEST_F(TextTestNg, HandlePanEnd001, TestSize.Level1)
     pattern->dragDropProxy_ = dragDropProxy;
 
     /**
-     * @tc.steps: step4. call HandlePanEnd function
+     * @tc.steps: step5. call HandlePanEnd function
      * @tc.expected: The function exits normally
      */
     pattern->HandlePanEnd(info);
-    EXPECT_NE(pattern->textSelector_.GetTextStart(), -1);
-    EXPECT_NE(pattern->textSelector_.GetTextEnd(), -1);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 20);
 }
 
 /**
  * @tc.name: HandleOnSelectAll001
- * @tc.desc: Test TextPattern HandleOnSelectAll when frameNode is not nullptr.
+ * @tc.desc: Test TextPattern HandleOnSelectAll when selectOverlayProxy is nullptr.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestNg, HandleOnSelectAll001, TestSize.Level1)
@@ -3550,25 +3395,15 @@ HWTEST_F(TextTestNg, HandleOnSelectAll001, TestSize.Level1)
     pattern->selectOverlayProxy_ = nullptr;
 
     /**
-     * @tc.steps: step2. construct rootNode
-     */ 
-    auto host = pattern->GetHost();
-    ASSERT_NE(host, nullptr);
-    auto pipeline = host->GetContext();
-    ASSERT_NE(pipeline, nullptr);
-    pipeline->rootNode_ = FrameNode::CreateFrameNodeWithTree(
-        V2::ROOT_ETS_TAG, ROOT_NODE_ID, Referenced::MakeRefPtr<RootPattern>());
-
-    /**
-     * @tc.steps: step3. create paragraph
-     */ 
+     * @tc.steps: step2. create paragraph
+     */
     ParagraphStyle paragraphStyle;
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
     ASSERT_NE(paragraph, nullptr);
     pattern->paragraph_ = paragraph;
-    
+
     /**
-     * @tc.steps: step4. call HandleOnSelectAll
+     * @tc.steps: step3. call HandleOnSelectAll
      * @tc.expected:The function exits normally
      */
     pattern->HandleOnSelectAll();
@@ -3577,7 +3412,7 @@ HWTEST_F(TextTestNg, HandleOnSelectAll001, TestSize.Level1)
 
 /**
  * @tc.name: HandleOnSelectAll002
- * @tc.desc: Test TextPattern HandleOnSelectAll when frameNode is not nullptr.
+ * @tc.desc: Test TextPattern HandleOnSelectAll when selectOverlayProxy is not nullptr.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestNg, HandleOnSelectAll002, TestSize.Level1)
@@ -3601,55 +3436,71 @@ HWTEST_F(TextTestNg, HandleOnSelectAll002, TestSize.Level1)
     auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo);
     pattern->selectOverlayProxy_ = proxy;
     pattern->textForDisplay_ = "TestHandleOnSelectAll";
-    
-    /**
-     * @tc.steps: step4. construct rootNode
-     */ 
-    auto host = pattern->GetHost();
-    ASSERT_NE(host, nullptr);
-    auto pipeline = host->GetContext();
-    ASSERT_NE(pipeline, nullptr);
-    pipeline->rootNode_ = FrameNode::CreateFrameNodeWithTree(
-        V2::ROOT_ETS_TAG, ROOT_NODE_ID, Referenced::MakeRefPtr<RootPattern>());
 
     /**
-     * @tc.steps: step5. call HandleOnSelectAll when selectOverlayProxy is not nullptr.
-     * @tc.expected:The function exits normally
+     * @tc.steps: step4. call HandleOnSelectAll
+     * @tc.expected:textSelector updates successfully
      */
     pattern->HandleOnSelectAll();
-    EXPECT_NE(pattern->selectOverlayProxy_, nullptr);
-}
-
-/**
- * @tc.name: CloseSelectOverlay001
- * @tc.desc: Test TextPattern CloseSelectOverlay when SelectOverlayProxy is not nullptr.
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, CloseSelectOverlay001, TestSize.Level1)
-{
-    auto [frameNode, pattern] = Init();
-    /**
-     * @tc.steps: step1. construct a SelectOverlayManager
-     */
-    SelectOverlayInfo selectOverlayInfo;
-    selectOverlayInfo.singleLineHeight = NODE_ID;
-    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
-    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 21);
 
     /**
-     * @tc.steps: step2. call CreateAndShowSelectOverlay
-     * @tc.expected: return the proxy which has the right SelectOverlayId
-     */
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo);
-    pattern->selectOverlayProxy_ = proxy;
-    ASSERT_NE(pattern->selectOverlayProxy_, nullptr);
-
-    /**
-     * @tc.steps: step3. call CloseSelectOverlay
-     * @tc.expected: textSelector updates successfully
+     * @tc.steps: step5. call CloseSelectOverlay
+     * @tc.expected: Related function is called
      */
     pattern->CloseSelectOverlay();
-    EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
-    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
+    EXPECT_FALSE(pattern->selectOverlayProxy_->IsClosed());
+}
+
+/* @tc.name: PerformActionTest001
+ * @tc.desc: Text Accessibility PerformAction test Select ClearSelection and Copy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, PerformActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text, get text frameNode and pattern, set callback function.
+     * @tc.expected: FrameNode and pattern is not null, related function is called.
+     */
+    MockPipelineBase::GetCurrent()->rootNode_ =
+        FrameNode::CreateFrameNodeWithTree(V2::ROOT_ETS_TAG, 0, AceType::MakeRefPtr<RootPattern>());
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateCopyOption(CopyOptions::None);
+    textPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step2. Get text accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto textAccessibilityProperty = frameNode->GetAccessibilityProperty<TextAccessibilityProperty>();
+    ASSERT_NE(textAccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. When text CopyOptions is None, call the callback function in textAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    RectF rect(0.0f, 0.0f, 0.0f, 0.0f);
+    EXPECT_CALL(*(AceType::RawPtr(AceType::DynamicCast<MockRenderContext>(frameNode->renderContext_))),
+        GetPaintRectWithTransform())
+        .WillRepeatedly(Return(rect));
+    EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(1, TEXT_SIZE_INT));
+    EXPECT_TRUE(textAccessibilityProperty->ActActionClearSelection());
+    EXPECT_TRUE(textAccessibilityProperty->ActActionCopy());
+
+    /**
+     * @tc.steps: step4. When text CopyOptions is InApp, call the callback function in textAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    textLayoutProperty->UpdateCopyOption(CopyOptions::InApp);
+    EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(-1, -1));
+    EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(1, TEXT_SIZE_INT));
+    EXPECT_TRUE(textAccessibilityProperty->ActActionClearSelection());
+    EXPECT_TRUE(textAccessibilityProperty->ActActionCopy());
 }
 } // namespace OHOS::Ace::NG

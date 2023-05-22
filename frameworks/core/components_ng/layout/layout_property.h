@@ -50,7 +50,6 @@ class ACE_EXPORT LayoutProperty : public Property {
     DECLARE_ACE_TYPE(LayoutProperty, Property);
 
 public:
-
     LayoutProperty() = default;
 
     ~LayoutProperty() override = default;
@@ -207,6 +206,14 @@ public:
         if (magicItemProperty_->UpdateAspectRatio(ratio)) {
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         }
+    }
+
+    bool HasAspectRatio()
+    {
+        if (!magicItemProperty_) {
+            return false;
+        }
+        return magicItemProperty_->HasAspectRatio();
     }
 
     void UpdateMeasureType(MeasureType measureType)
@@ -377,7 +384,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(Visibility, VisibleType);
 
 public:
-    void UpdateVisibility(const VisibleType& value)
+    void UpdateVisibility(const VisibleType& value, bool allowTransition = false)
     {
         if (propVisibility_.has_value()) {
             if (NearEqual(propVisibility_.value(), value)) {
@@ -385,9 +392,9 @@ public:
                 return;
             }
         }
-        OnVisibilityUpdate(value);
+        OnVisibilityUpdate(value, allowTransition);
     }
-    void OnVisibilityUpdate(VisibleType visible);
+    void OnVisibilityUpdate(VisibleType visible, bool allowTransition = false);
 
     void UpdateLayoutConstraint(const RefPtr<LayoutProperty>& layoutProperty)
     {

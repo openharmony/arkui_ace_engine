@@ -178,8 +178,7 @@ void JSGridCol::JSBind(BindingTarget globalObj)
     JSClass<JSGridCol>::StaticMethod("offset", &JSGridCol::Offset, MethodOptions::NONE);
     JSClass<JSGridCol>::StaticMethod("gridColOffset", &JSGridCol::Offset, MethodOptions::NONE);
     JSClass<JSGridCol>::StaticMethod("order", &JSGridCol::Order, MethodOptions::NONE);
-    JSClass<JSGridCol>::Inherit<JSContainerBase>();
-    JSClass<JSGridCol>::Bind<>(globalObj);
+    JSClass<JSGridCol>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

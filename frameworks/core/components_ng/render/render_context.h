@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -94,6 +94,9 @@ public:
     // will be unaffected by parent's transition.
     virtual void SetSandBox(const std::optional<OffsetF>& parentPosition) {};
 
+    virtual void RegisterSharedTransition(const RefPtr<RenderContext>& other) {}
+    virtual void UnregisterSharedTransition(const RefPtr<RenderContext>& other) {}
+
     virtual void OnModifyDone() {}
 
     virtual void InitContext(bool isRoot, const std::optional<std::string>& surfaceName, bool useExternalNode = false)
@@ -173,6 +176,7 @@ public:
     virtual void ResetPageTransitionEffect() {}
 
     virtual void AddChild(const RefPtr<RenderContext>& renderContext, int index) {}
+    virtual void RemoveChild(const RefPtr<RenderContext>& renderContext) {}
     virtual void SetBounds(float positionX, float positionY, float width, float height) {}
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
@@ -192,6 +196,11 @@ public:
     virtual void OnOffsetUpdate(const OffsetT<Dimension>& value) {}
 
     virtual RectF GetPaintRectWithTransform()
+    {
+        return {};
+    }
+
+    virtual RectF GetPaintRectWithTranslate()
     {
         return {};
     }

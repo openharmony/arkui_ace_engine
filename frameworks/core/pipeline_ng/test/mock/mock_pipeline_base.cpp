@@ -276,14 +276,14 @@ std::unique_ptr<JsonValue> PipelineContext::GetStoredNodeInfo()
 
 void PipelineContext::StoreNode(int32_t restoreId, const WeakPtr<FrameNode>& node) {}
 
-std::string PipelineContext::GetRestoreInfo(int32_t restoreId)
+bool PipelineContext::GetRestoreInfo(int32_t restoreId, std::string& restoreInfo)
 {
-    return "";
+    return false;
 }
 
 void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode) {}
 
-void PipelineContext::OnAvoidAreaChanged() {}
+void PipelineContext::ResetViewSafeArea() {}
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {

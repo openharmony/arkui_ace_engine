@@ -799,8 +799,7 @@ void FlexLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     mainAxisSize_ = GetMainAxisSizeHelper(contentSize, direction_);
     crossAxisSize_ = GetCrossAxisSizeHelper(contentSize, direction_);
     auto paddingOffset = OffsetF(padding.left.value_or(0.0f), padding.top.value_or(0.0f));
-    float remainSpace = mainAxisAlign_ == FlexAlign::FLEX_END ? mainAxisSize_ - allocatedSize_
-                                                              : std::max(mainAxisSize_ - allocatedSize_, 0.0f);
+    float remainSpace = std::max(mainAxisSize_ - allocatedSize_, 0.0f);
     float frontSpace = 0.0f;
     float betweenSpace = 0.0f;
     CalculateSpace(remainSpace, frontSpace, betweenSpace);

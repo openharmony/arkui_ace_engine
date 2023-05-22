@@ -229,7 +229,7 @@ protected:
 private:
     void MeasureList(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
 
-    void CalculateEstimateOffset();
+    void CalculateEstimateOffset(bool isAlignTop);
 
     std::pair<int32_t, float> LayoutOrRecycleCachedItems(
         LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);

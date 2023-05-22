@@ -18,6 +18,7 @@
 
 #include <refbase.h>
 
+#include "macros.h"
 #include "ui_content.h"
 
 namespace OHOS::Rosen {
@@ -26,10 +27,10 @@ class ISessionStageStateListener;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT UIWindow {
+class ACE_EXPORT_WITH_PREVIEW UIWindow {
 public:
-    static std::shared_ptr<UIWindow> CreateWindowExtension(const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<Rosen::ISession>& iSession);
+    static std::shared_ptr<UIWindow> CreateWindowExtension(
+        const std::shared_ptr<AbilityRuntime::Context>& context, const sptr<Rosen::ISession>& iSession);
 
     virtual ~UIWindow() = default;
 

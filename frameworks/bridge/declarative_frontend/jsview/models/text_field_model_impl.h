@@ -19,6 +19,8 @@
 #include <optional>
 #include <string>
 
+#include "frameworks/core/components/text_field/textfield_theme.h"
+#include "frameworks/core/components/text_field/text_field_component.h"
 #include "frameworks/core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace::Framework {
@@ -29,10 +31,7 @@ public:
         const std::optional<std::string>& placeholder, const std::optional<std::string>& value) override;
 
     RefPtr<TextFieldControllerBase> CreateTextArea(
-        const std::optional<std::string>& placeholder, const std::optional<std::string>& value) override
-    {
-        return nullptr;
-    }
+        const std::optional<std::string>& placeholder, const std::optional<std::string>& value) override;
     void RequestKeyboardOnFocus(bool needToRequest) override {};
     void SetWidthAuto(bool isAuto) override {};
     void SetType(TextInputType value) override;
@@ -67,6 +66,17 @@ public:
     void SetForegroundColor(const Color& value) override {};
     void SetShowUnit(std::function<void()>&& unitAction) override {};
     void SetOnChangeEvent(std::function<void(const std::string&)>&& func) override {};
+    void SetBackgroundColor(const Color& color, bool tmp) override;
+    void SetHeight(const Dimension& value) override;
+    void SetPadding(NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) override;
+    void SetBackBorder() override;
+    void SetHoverEffect(HoverEffectType value) override;
+    void SetOnClick(std::function<void(const ClickInfo&)>&& func) override;
+    void SetFocusableAndFocusNode() override;
+
+private:
+    static void UpdateDecoration(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,
+        const Border& boxBorder, const RefPtr<TextFieldTheme>& textFieldTheme);
 };
 
 } // namespace OHOS::Ace::Framework

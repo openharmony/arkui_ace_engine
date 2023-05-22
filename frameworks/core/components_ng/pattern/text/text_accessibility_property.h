@@ -35,10 +35,16 @@ public:
 
     int32_t GetTextSelectionEnd() const override;
 
+    void SetSelected(bool isSelected)
+    {
+        isSelected_ = isSelected;
+    }
+
 protected:
     void SetSpecificSupportAction() override;
 
 private:
+    bool isSelected_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TextAccessibilityProperty);
 };
 } // namespace OHOS::Ace::NG

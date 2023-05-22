@@ -191,7 +191,7 @@ public:
 
     SafeAreaEdgeInserts GetCurrentViewSafeArea() const override;
 
-    void OnAvoidAreaChanged() override;
+    void ResetViewSafeArea() override;
 
     const RefPtr<FullScreenManager>& GetFullScreenManager();
 
@@ -242,14 +242,25 @@ public:
         isFocusingByTab_ = isFocusingByTab;
     }
 
-    bool GetIsNeedShowFocus() const
+    bool GetIsFocusActive() const
     {
-        return isNeedShowFocus_;
+        return isFocusActive_;
     }
 
-    void SetIsNeedShowFocus(bool isNeedShowFocus)
+    bool SetIsFocusActive(bool isFocusActive)
     {
-        isNeedShowFocus_ = isNeedShowFocus;
+        if (isFocusActive_ == isFocusActive) {
+            return false;
+        }
+        isFocusActive_ = isFocusActive;
+        CHECK_NULL_RETURN_NOLOG(rootNode_, false);
+        auto rootFocusHub = rootNode_->GetFocusHub();
+        CHECK_NULL_RETURN_NOLOG(rootFocusHub, false);
+        if (isFocusActive_) {
+            return rootFocusHub->PaintAllFocusState();
+        }
+        rootFocusHub->ClearAllFocusState();
+        return true;
     }
 
     bool GetOnShow() const
@@ -329,7 +340,7 @@ public:
     void RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo) override;
     std::unique_ptr<JsonValue> GetStoredNodeInfo() override;
     void StoreNode(int32_t restoreId, const WeakPtr<FrameNode>& node);
-    std::string GetRestoreInfo(int32_t restoreId);
+    bool GetRestoreInfo(int32_t restoreId, std::string& restoreInfo);
     void RemoveStoredNode(int32_t restoreId)
     {
         storeNode_.erase(restoreId);
@@ -423,7 +434,7 @@ private:
     int32_t mouseStyleNodeId_ = -1;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
-    bool isNeedShowFocus_ = false;
+    bool isFocusActive_ = false;
     bool onShow_ = false;
     bool onFocus_ = true;
 

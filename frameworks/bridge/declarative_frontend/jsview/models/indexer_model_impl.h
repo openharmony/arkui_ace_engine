@@ -28,13 +28,11 @@ public:
     void SetSelectedBackgroundColor(const Color& color) override;
     void SetPopupBackground(const Color& color) override;
     void SetUsingPopup(bool state) override;
-    void SetSelectedFont(const TextStyle& textStyle) override;
-    void SetPopupFont(const TextStyle& textStyle) override;
-    void SetFont(const TextStyle& textStyle) override;
+    void SetSelectedFont(std::function<void(TextStyle& textStyle)>&& getTextStyleFunc) override;
+    void SetPopupFont(std::function<void(TextStyle& textStyle)>&& getTextStyleFunc) override;
+    void SetFont(std::function<void(TextStyle& textStyle)>&& getTextStyleFunc) override;
     void SetItemSize(const Dimension& value) override;
     void SetAlignStyle(int32_t value) override;
-    void SetFocusable(bool focusable) override;
-    void SetFocusNode(bool isFocusNode) override;
     void SetOnSelected(std::function<void(const int32_t selected)>&& onSelect) override;
     void SetOnRequestPopupData(
         std::function<std::vector<std::string>(const int32_t selected)>&& RequestPopupData) override;

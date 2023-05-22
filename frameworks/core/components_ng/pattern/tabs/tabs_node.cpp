@@ -55,6 +55,7 @@ void TabsNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("barWidth", std::to_string(GetBarWidth().Value()).c_str());
     json->Put("barHeight", std::to_string(GetBarHeight().Value()).c_str());
     json->Put("fadingEdge", GetFadingEdge() ? "true" : "false");
+    json->Put("barBackgroundColor", GetBarBackgroundColor().ColorToString().c_str());
 }
 
 bool TabsNode::Scrollable() const
@@ -137,6 +138,19 @@ Dimension TabsNode::GetBarHeight() const
     auto tabBarProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_RETURN(tabBarProperty, 0.0_vp);
     return tabBarProperty->GetTabBarHeight().value_or(tabTheme->GetTabBarDefaultHeight());
+}
+
+Color TabsNode::GetBarBackgroundColor() const
+{
+    auto backgroundColor = Color::BLACK.BlendOpacity(0.0f);
+    if (!tabBarId_.has_value()) {
+        return backgroundColor;
+    }
+    auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
+    CHECK_NULL_RETURN(tabBarNode, backgroundColor);
+    auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
+    CHECK_NULL_RETURN(tabBarPaintProperty, backgroundColor);
+    return tabBarPaintProperty->GetBarBackgroundColor().value_or(backgroundColor);
 }
 
 bool TabsNode::GetFadingEdge() const

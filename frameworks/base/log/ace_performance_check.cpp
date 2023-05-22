@@ -235,8 +235,6 @@ void AceScopedPerformanceCheck::RecordFunctionTimeout(int64_t time, const std::s
     pageJson->Put("eventTime", eventTime.c_str());
     pageJson->Put("pagePath", codeInfo.sources.c_str());
     pageJson->Put("functionName", functionName.c_str());
-    auto sources = EngineHelper::GetPositionOnJsCode();
-    pageJson->Put("sourceLine", GetCodeInfo(sources.first, sources.second).row);
     pageJson->Put("costTime", time);
     ruleJson->Put(pageJson);
 }

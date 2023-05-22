@@ -111,8 +111,8 @@ void JSCircle::JSBind(BindingTarget globalObj)
     JSClass<JSCircle>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSCircle>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
-    JSClass<JSCircle>::Inherit<JSShapeAbstract>();
-    JSClass<JSCircle>::Bind(globalObj, JSCircle::ConstructorCallback, JSCircle::DestructorCallback);
+    JSClass<JSCircle>::InheritAndBind<JSShapeAbstract>(
+        globalObj, JSCircle::ConstructorCallback, JSCircle::DestructorCallback);
 }
 
 } // namespace OHOS::Ace::Framework

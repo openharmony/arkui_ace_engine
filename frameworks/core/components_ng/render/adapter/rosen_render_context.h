@@ -177,10 +177,13 @@ public:
     void FlushOverlayModifier(const RefPtr<Modifier>& modifier) override;
 
     void AddChild(const RefPtr<RenderContext>& renderContext, int index) override;
+    void RemoveChild(const RefPtr<RenderContext>& renderContext) override;
     void SetBounds(float positionX, float positionY, float width, float height) override;
     void OnTransformTranslateUpdate(const TranslateOptions& value) override;
 
     RectF GetPaintRectWithTransform() override;
+
+    RectF GetPaintRectWithTranslate() override;
 
     RectF GetPaintRectWithoutTransform() override;
 
@@ -223,6 +226,9 @@ public:
     RefPtr<PixelMap> GetThumbnailPixelMap() override;
     void SetActualForegroundColor(const Color& value) override;
     void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property) override;
+
+    void RegisterSharedTransition(const RefPtr<RenderContext>& other) override;
+    void UnregisterSharedTransition(const RefPtr<RenderContext>& other) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -288,7 +294,9 @@ private:
     {
         return transitionEffect_ != nullptr;
     }
+    void OnTransitionInFinish();
     void OnTransitionOutFinish();
+    void RemoveDefaultTransition();
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot);
 
@@ -356,6 +364,8 @@ private:
     bool isBackBlurChanged_ = false;
     bool needDebugBoundary_ = false;
     bool isDisappearing_ = false;
+    bool hasDefaultTransition_ = false;
+    int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
     Color blendColor_ = Color::TRANSPARENT;
     Color hoveredColor_ = Color::TRANSPARENT;

@@ -183,8 +183,6 @@ void NavRouterGroupNode::SetBackButtonEvent(const RefPtr<UINode>& parent)
     CHECK_NULL_VOID(backButtonEventHub);
     auto navRouterPattern = GetPattern<NavRouterPattern>();
     CHECK_NULL_VOID(navRouterPattern);
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    CHECK_NULL_VOID(navigationPattern);
     auto weak = WeakClaim(this);
     auto navRouter = weak.Upgrade();
     CHECK_NULL_VOID(navRouter);
@@ -227,13 +225,11 @@ void NavRouterGroupNode::SetBackButtonEvent(const RefPtr<UINode>& parent)
                 navRouter->BackToPreNavDestination(preNavDestination, navigation, navRouterPattern);
                 navRouter->SetOnStateChangeFalse(navDestination, navDestination, navigation, true);
                 layoutProperty->UpdateDestinationChange(true);
-                navigation->MarkModifyDone();
                 return;
             }
             navRouter->BackToNavBar(navigation);
             navRouter->SetOnStateChangeFalse(navDestination, navDestination, navigation, true);
             layoutProperty->UpdateDestinationChange(false);
-            navigation->MarkModifyDone();
             return;
         }
 
@@ -242,7 +238,6 @@ void NavRouterGroupNode::SetBackButtonEvent(const RefPtr<UINode>& parent)
                 navRouter->BackToPreNavDestination(preNavDestination, navigation, navRouterPattern);
                 navRouter->SetOnStateChangeFalse(navDestination, navDestination, navigation, true);
                 layoutProperty->UpdateDestinationChange(false);
-                navigation->MarkModifyDone();
                 return;
             }
         }
@@ -282,6 +277,7 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
         auto uiNode = navigationStack->CreateNodeByRouteInfo(routeInfo);
         navDestination =
             AceType::DynamicCast<NavDestinationGroupNode>(NavigationGroupNode::GetNavDestinationNode(uiNode));
+        CHECK_NULL_VOID(navDestination);
         auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(navDestinationPattern);
         navDestinationPattern->SetName(name);
@@ -428,7 +424,7 @@ void NavRouterGroupNode::BackToNavBar(const RefPtr<UINode>& parent)
     if (backButtonNode) {
         BackButtonAnimation(backButtonNode, false);
     }
-    NavTransitionOutAnimation(navigationNode, navBarNode, navigationContentNode);
+    NavTransitionOutAnimation(navigationNode, navBarNode, navDestination, navigationContentNode);
     auto navigationPattern = AceType::DynamicCast<NavigationGroupNode>(navigationNode)->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
     navigationPattern->RemoveNavDestination();
@@ -609,6 +605,7 @@ void NavRouterGroupNode::MaskAnimation(const RefPtr<RenderContext>& transitionOu
                 },
                 TaskExecutor::TaskType::UI);
         });
+    transitionOutNodeContext->SetActualForegroundColor(DEFAULT_MASK_COLOR);
     AnimationUtils::Animate(
         maskOption, [transitionOutNodeContext]() { transitionOutNodeContext->SetActualForegroundColor(MASK_COLOR); },
         maskOption.GetOnFinishEvent());
@@ -671,7 +668,8 @@ void NavRouterGroupNode::TitleTransitionInAnimation(const RefPtr<FrameNode>& nav
 }
 
 void NavRouterGroupNode::NavTransitionOutAnimation(const RefPtr<UINode>& navigation,
-    const RefPtr<FrameNode>& navBarNode, const RefPtr<FrameNode>& navigationContentNode)
+    const RefPtr<FrameNode>& navBarNode, const RefPtr<FrameNode>& navDestination,
+    const RefPtr<FrameNode>& navigationContentNode)
 {
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(navigation);
     CHECK_NULL_VOID(navigationNode);
@@ -685,7 +683,7 @@ void NavRouterGroupNode::NavTransitionOutAnimation(const RefPtr<UINode>& navigat
     option.SetDuration(DEFAULT_ANIMATION_DURATION);
     auto navigationContext = navBarNode->GetRenderContext();
     CHECK_NULL_VOID(navigationContext);
-    auto navDestinationContext = navigationContentNode->GetRenderContext();
+    auto navDestinationContext = navDestination->GetRenderContext();
     CHECK_NULL_VOID(navDestinationContext);
 
     auto node = AceType::DynamicCast<FrameNode>(navigationNode);
@@ -712,6 +710,7 @@ void NavRouterGroupNode::NavTransitionOutAnimation(const RefPtr<UINode>& navigat
                         RectF(0.0f, 0.0f, Infinity<float>(), nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
                     ContainerScope scope(id);
                     navigationContentNode->MarkModifyDone();
+                    navigationNode->MarkModifyDone();
                     navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
                     navigationNode->SetIsOnAnimation(false);
                 },
@@ -789,6 +788,7 @@ void NavRouterGroupNode::NavTransitionBackToPreAnimation(const RefPtr<UINode>& n
                     RectF(0.0f, 0.0f, Infinity<float>(), nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
                 ContainerScope scope(id);
                 navigationContentNode->MarkModifyDone();
+                navigationNode->MarkModifyDone();
                 navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
                 navigationNode->SetIsOnAnimation(false);
             },
@@ -817,6 +817,7 @@ void NavRouterGroupNode::NavTransitionBackToPreAnimation(const RefPtr<UINode>& n
     maskOption.SetCurve(Curves::FRICTION);
     maskOption.SetDuration(MASK_DURATION);
     maskOption.SetFillMode(FillMode::FORWARDS);
+    preDestinationContext->SetActualForegroundColor(MASK_COLOR);
     AnimationUtils::Animate(
         maskOption, [preDestinationContext]() { preDestinationContext->SetActualForegroundColor(DEFAULT_MASK_COLOR); });
 }

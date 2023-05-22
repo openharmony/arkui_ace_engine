@@ -49,9 +49,11 @@ public:
     void SetFadingEdge(bool fadingEdge) override;
     void SetBarOverlap(bool barOverlap) override;
     void SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& onChangeEvent) override;
-private:
+    void SetBarBackgroundColor(const Color& backgroundColor) override;
     static RefPtr<TabsNode> GetOrCreateTabsNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
+
+private:
     static RefPtr<TabBarLayoutProperty> GetTabBarLayoutProperty();
     static RefPtr<TabBarPaintProperty> GetTabBarPaintProperty();
     static RefPtr<SwiperLayoutProperty> GetSwiperLayoutProperty();

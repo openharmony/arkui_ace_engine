@@ -35,7 +35,7 @@ constexpr float SWIPE_SPRING_MASS = 1.f;
 constexpr float SWIPE_SPRING_STIFFNESS = 228.f;
 constexpr float SWIPE_SPRING_DAMPING = 30.f;
 constexpr int32_t DELETE_ANIMATION_DURATION = 400;
-constexpr int32_t OPACITY_ANIMATION_DURATION = 100;
+constexpr Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
 } // namespace
 
 RefPtr<LayoutAlgorithm> ListItemPattern::CreateLayoutAlgorithm()
@@ -273,7 +273,7 @@ float ListItemPattern::GetFriction()
         if (hasStartDeleteArea_) {
             if (width + startDeleteAreaDistance_ < curOffset_) {
                 return CalculateFriction(
-                    (curOffset_ - width - startDeleteAreaDistance_) / (itemWidth - width - startDeleteAreaDistance_));
+                    (curOffset_ - width - startDeleteAreaDistance_) / (itemWidth - width));
             }
             return 1.0f;
         }
@@ -286,7 +286,7 @@ float ListItemPattern::GetFriction()
         if (hasEndDeleteArea_) {
             if (width + endDeleteAreaDistance_ < -curOffset_) {
                 return CalculateFriction(
-                    (-curOffset_ - width - endDeleteAreaDistance_) / (itemWidth - width - endDeleteAreaDistance_));
+                    (-curOffset_ - width - endDeleteAreaDistance_) / (itemWidth - width));
             }
             return 1.0f;
         }
@@ -380,20 +380,20 @@ void ListItemPattern::HandleDragUpdate(const GestureEvent& info)
     hasStartDeleteArea_ = false;
     hasEndDeleteArea_ = false;
     float itemWidth = GetContentSize().CrossSize(axis_);
-    float movableDistance = 0.0f;
+    float maxDeleteArea = 0.0f;
 
     if (GreatNotEqual(curOffset_, 0.0) && HasStartNode()) {
-        movableDistance = itemWidth - startNodeSize_;
+        maxDeleteArea = itemWidth - startNodeSize_;
         startDeleteAreaDistance_ = static_cast<float>(
             layoutProperty->GetStartDeleteAreaDistance().value_or(Dimension(0, DimensionUnit::VP)).ConvertToPx());
-        if (GreatNotEqual(startDeleteAreaDistance_, 0.0) && LessNotEqual(startDeleteAreaDistance_, movableDistance)) {
+        if (GreatNotEqual(startDeleteAreaDistance_, 0.0) && LessNotEqual(startDeleteAreaDistance_, maxDeleteArea)) {
             hasStartDeleteArea_ = true;
         }
     } else if (LessNotEqual(curOffset_, 0.0) && HasEndNode()) {
-        movableDistance = itemWidth - endNodeSize_;
+        maxDeleteArea = itemWidth - endNodeSize_;
         endDeleteAreaDistance_ = static_cast<float>(
             layoutProperty->GetEndDeleteAreaDistance().value_or(Dimension(0, DimensionUnit::VP)).ConvertToPx());
-        if (GreatNotEqual(endDeleteAreaDistance_, 0.0) && LessNotEqual(endDeleteAreaDistance_, movableDistance)) {
+        if (GreatNotEqual(endDeleteAreaDistance_, 0.0) && LessNotEqual(endDeleteAreaDistance_, maxDeleteArea)) {
             hasEndDeleteArea_ = true;
         }
     }
@@ -441,7 +441,7 @@ void ListItemPattern::StartSpringMotion(float start, float end, float velocity)
     });
 }
 
-void ListItemPattern::DoDeleteAnimation(const GestureEvent& info, const OnDeleteEvent& onDelete, bool isRightDelete)
+void ListItemPattern::DoDeleteAnimation(const OnDeleteEvent& onDelete, bool isRightDelete)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -450,38 +450,17 @@ void ListItemPattern::DoDeleteAnimation(const GestureEvent& info, const OnDelete
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     float itemWidth = GetContentSize().CrossSize(axis_);
-    float friction = GetFriction();
-
-    AnimationOption optionAlpha = AnimationOption();
-    optionAlpha.SetCurve(Curves::FRICTION);
-    optionAlpha.SetFillMode(FillMode::FORWARDS);
-    optionAlpha.SetDuration(OPACITY_ANIMATION_DURATION);
 
     AnimationOption option = AnimationOption();
     option.SetDuration(DELETE_ANIMATION_DURATION);
     option.SetCurve(Curves::FRICTION);
     option.SetFillMode(FillMode::FORWARDS);
-    context->OpenImplicitAnimation(option, option.GetCurve(),
-        [weak = AceType::WeakClaim(this), onDelete = onDelete, info = info, friction = friction,
-            renderContext = renderContext, optionAlpha = optionAlpha, isRightDelete = isRightDelete]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            onDelete();
-            float end = 0.0f;
-            renderContext->OpacityAnimation(optionAlpha, 0, 1);
-            if (isRightDelete) {
-                pattern->swiperIndex_ = ListItemSwipeIndex::SWIPER_START;
-                end = pattern->startNodeSize_ * static_cast<int32_t>(pattern->swiperIndex_);
-            } else {
-                pattern->swiperIndex_ = ListItemSwipeIndex::SWIPER_END;
-                end = pattern->endNodeSize_ * static_cast<int32_t>(pattern->swiperIndex_);
-            }
-            pattern->StartSpringMotion(pattern->curOffset_, end, info.GetMainVelocity() * friction);
-        });
+    context->OpenImplicitAnimation(option, option.GetCurve(), nullptr);
+    swiperIndex_ = isRightDelete ? ListItemSwipeIndex::SWIPER_START : ListItemSwipeIndex::SWIPER_END;
     curOffset_ = isRightDelete ? itemWidth : -itemWidth;
+    onDelete();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     context->FlushUITasks();
-    renderContext->OpacityAnimation(optionAlpha, 1, 0);
     context->CloseImplicitAnimation();
 }
 
@@ -502,12 +481,11 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
 
     if (GreatNotEqual(curOffset_, 0.0) && HasStartNode()) {
         float width = startNodeSize_;
-        if (hasStartDeleteArea_ && startOnDelete &&
-            (reachRightSpeed || GreatOrEqual(curOffset_, width + startDeleteAreaDistance_))) {
+        if (hasStartDeleteArea_ && startOnDelete && GreatOrEqual(curOffset_, width + startDeleteAreaDistance_)) {
             if (!useStartDefaultDeleteAnimation_) {
                 startOnDelete();
             } else {
-                DoDeleteAnimation(info, startOnDelete, true);
+                DoDeleteAnimation(startOnDelete, true);
                 return;
             }
         }
@@ -522,12 +500,11 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
         end = width * static_cast<int32_t>(swiperIndex_);
     } else if (LessNotEqual(curOffset_, 0.0) && HasEndNode()) {
         float width = endNodeSize_;
-        if (hasEndDeleteArea_ && endOnDelete &&
-            (reachLeftSpeed || GreatOrEqual(-curOffset_, width + endDeleteAreaDistance_))) {
+        if (hasEndDeleteArea_ && endOnDelete && GreatOrEqual(-curOffset_, width + endDeleteAreaDistance_)) {
             if (!useEndDefaultDeleteAnimation_) {
                 endOnDelete();
             } else {
-                DoDeleteAnimation(info, endOnDelete, false);
+                DoDeleteAnimation(endOnDelete, false);
                 return;
             }
         }
@@ -598,7 +575,13 @@ void ListItemPattern::SetAccessibilityAction()
         if (!pattern->Selectable()) {
             return;
         }
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
         pattern->MarkIsSelected(true);
+        context->OnMouseSelectUpdate(true, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
     });
 
     listItemAccessibilityProperty->SetActionClearSelection([weakPtr = WeakClaim(this)]() {
@@ -607,7 +590,12 @@ void ListItemPattern::SetAccessibilityAction()
         if (!pattern->Selectable()) {
             return;
         }
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetRenderContext();
+        CHECK_NULL_VOID(context);
         pattern->MarkIsSelected(false);
+        context->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
     });
 }
 } // namespace OHOS::Ace::NG
