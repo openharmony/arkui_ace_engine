@@ -533,7 +533,7 @@ RefPtr<NG::ChainedTransitionEffect> ParseChainedTransition(
     if (propAnimationOption->IsObject()) {
         auto animationOptionArgs = JsonUtil::ParseJsonString(propAnimationOption->ToString());
         auto animationOptionResult =
-            std::make_shared<AnimationOption>(JSViewContext::CreateAnimation(animationOptionArgs));
+            std::make_shared<AnimationOption>(JSViewContext::CreateAnimation(animationOptionArgs, nullptr));
         auto animationOptionObj = JSRef<JSObject>::Cast(propAnimationOption);
         JSRef<JSVal> onFinish = animationOptionObj->GetProperty("onFinish");
         if (onFinish->IsFunction()) {
