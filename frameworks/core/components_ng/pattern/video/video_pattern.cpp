@@ -192,6 +192,7 @@ void VideoPattern::UpdateMediaPlayer()
 void VideoPattern::PrepareMediaPlayer()
 {
     auto videoLayoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+    CHECK_NULL_VOID(videoLayoutProperty);
     // src has not set/changed
     if (!videoLayoutProperty->HasVideoSource() || videoLayoutProperty->GetVideoSource() == src_) {
         LOGW("Video source is null or the source has not changed.");
@@ -226,6 +227,7 @@ void VideoPattern::PrepareMediaPlayer()
 bool VideoPattern::SetSourceForMediaPlayer()
 {
     auto videoLayoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+    CHECK_NULL_VOID(videoLayoutProperty);
     auto videoSrc = videoLayoutProperty->GetVideoSource().value();
     src_ = videoSrc;
     LOGI("Video Set src for media, it is : %{public}s", videoSrc.c_str());
@@ -295,6 +297,7 @@ void VideoPattern::OnCurrentTimeChange(uint32_t currentPos)
     OnUpdateTime(currentPos, CURRENT_POS);
     currentPos_ = currentPos;
     auto eventHub = GetEventHub<VideoEventHub>();
+    CHECK_NULL_VOID(eventHub);
     auto json = JsonUtil::Create(true);
     json->Put("time", static_cast<double>(currentPos));
     auto param = json->ToString();
@@ -318,12 +321,14 @@ void VideoPattern::OnPlayerStatus(PlaybackStatus status)
         json->Put("start", "");
         auto param = json->ToString();
         auto eventHub = GetEventHub<VideoEventHub>();
+        CHECK_NULL_VOID(eventHub);
         eventHub->FireStartEvent(param);
     } else {
         auto json = JsonUtil::Create(true);
         json->Put("pause", "");
         auto param = json->ToString();
         auto eventHub = GetEventHub<VideoEventHub>();
+        CHECK_NULL_VOID(eventHub);
         eventHub->FirePauseEvent(param);
     }
 
@@ -357,6 +362,7 @@ void VideoPattern::OnError(const std::string& errorId)
     json->Put("error", "");
     auto param = json->ToString();
     auto eventHub = GetEventHub<VideoEventHub>();
+    CHECK_NULL_VOID(eventHub);
     eventHub->FireErrorEvent(param);
 }
 
@@ -370,6 +376,7 @@ void VideoPattern::OnResolutionChange() const
     SizeF videoSize =
         SizeF(static_cast<float>(mediaPlayer_->GetVideoWidth()), static_cast<float>(mediaPlayer_->GetVideoHeight()));
     auto videoLayoutProperty = host->GetLayoutProperty<VideoLayoutProperty>();
+    CHECK_NULL_VOID(videoLayoutProperty);
     videoLayoutProperty->UpdateVideoSize(videoSize);
     LOGI("OnResolutionChange video size: %{public}s", videoSize.ToString().c_str());
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -380,6 +387,7 @@ void VideoPattern::OnPrepared(double width, double height, uint32_t duration, ui
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto videoLayoutProperty = host->GetLayoutProperty<VideoLayoutProperty>();
+    CHECK_NULL_VOID(videoLayoutProperty);
     videoLayoutProperty->UpdateVideoSize(SizeF(static_cast<float>(width), static_cast<float>(height)));
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
@@ -417,6 +425,7 @@ void VideoPattern::OnPrepared(double width, double height, uint32_t duration, ui
         json->Put("duration", static_cast<double>(duration_));
         auto param = json->ToString();
         auto eventHub = GetEventHub<VideoEventHub>();
+        CHECK_NULL_VOID(eventHub);
         eventHub->FirePreparedEvent(param);
     }
     UpdateLooping();
@@ -441,6 +450,7 @@ void VideoPattern::OnCompletion()
     json->Put("finish", "");
     auto param = json->ToString();
     auto eventHub = GetEventHub<VideoEventHub>();
+    CHECK_NULL_VOID(eventHub);
     eventHub->FireFinishEvent(param);
 }
 
@@ -1149,6 +1159,7 @@ void VideoPattern::OnSliderChange(float posTime, int32_t mode)
     LOGD("posTime: %{public}lf, mode: %{public}d", posTime, mode);
     SetCurrentTime(posTime);
     auto eventHub = GetEventHub<VideoEventHub>();
+    CHECK_NULL_VOID(eventHub);
     auto json = JsonUtil::Create(true);
     json->Put("time", static_cast<double>(posTime));
     auto param = json->ToString();
@@ -1166,6 +1177,7 @@ void VideoPattern::OnFullScreenChange(bool isFullScreen)
     json->Put("fullscreen", isFullScreen);
     auto param = json->ToString();
     auto eventHub = GetEventHub<VideoEventHub>();
+    CHECK_NULL_VOID(eventHub);
     eventHub->FireFullScreenChangeEvent(param);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1241,6 +1253,7 @@ void VideoPattern::EnableDrag()
     auto dragEnd = [this, videoSrcBefore](
         const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto videoLayoutProperty = this->GetLayoutProperty<VideoLayoutProperty>();
+        CHECK_NULL_VOID(videoLayoutProperty);
         std::shared_ptr<UDMF::UnifiedData> unifiedData = event->GetData();
         std::string videoSrc = "";
         if (unifiedData != nullptr) {
@@ -1277,6 +1290,7 @@ void VideoPattern::EnableDrag()
             return;
         }
         auto videoLayoutProperty = this->GetLayoutProperty<VideoLayoutProperty>();
+        CHECK_NULL_VOID(videoLayoutProperty);
         auto json = JsonUtil::ParseJsonString(extraParams);
         std::string key = "extraInfo";
         std::string extraInfo = json->GetString(key);
