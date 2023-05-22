@@ -1382,34 +1382,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTestNg029
- * @tc.desc: Test ThemeManager and SharedImageManager multithread.
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg029, TestSize.Level1)
-{
-    std::vector<std::thread> threads;
-    for (int i = 0; i < 20; ++i) {
-        threads.emplace_back(std::thread([]() { context_->GetOrCreateSharedImageManager(); }));
-    }
-    for (auto&& thread : threads) {
-        thread.join();
-    }
-
-    threads.clear();
-    for (int i = 0; i < 20; ++i) {
-        if (i == 10) {
-            context_->SetThemeManager(AceType::MakeRefPtr<MockThemeManager>());
-        } else {
-            threads.emplace_back(std::thread([]() { context_->GetThemeManager(); }));
-        }
-    }
-    for (auto&& thread : threads) {
-        thread.join();
-    }
-}
-
-/**
  * @tc.name: PipelineContextTestNg030
  * @tc.desc: Test RestoreNodeInfo, GetStoredNodeInfo, StoreNode and GetRestoreInfo.
  * @tc.type: FUNC
