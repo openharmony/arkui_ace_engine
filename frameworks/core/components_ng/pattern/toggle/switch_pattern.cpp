@@ -529,4 +529,24 @@ void SwitchPattern::RemoveLastHotZoneRect() const
     CHECK_NULL_VOID(host);
     host->RemoveLastHotZoneRect();
 }
+
+std::string SwitchPattern::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    jsonObj->Put("IsOn", isOn_.value_or(false));
+    return jsonObj->ToString();
+}
+
+void SwitchPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    auto switchPaintProperty = GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_VOID(switchPaintProperty);
+    auto info = JsonUtil::ParseJsonString(restoreInfo);
+    if (!info->IsValid() || !info->IsObject()) {
+        return;
+    }
+    auto jsonIsOn = info->GetValue("IsOn");
+    switchPaintProperty->UpdateIsOn(jsonIsOn->GetBool());
+    OnModifyDone();
+}
 } // namespace OHOS::Ace::NG

@@ -381,6 +381,8 @@ public:
     bool IsEnabled() const;
     void OnWindowShow() override;
     void OnWindowHide() override;
+    std::string ProvideRestoreInfo() override;
+    void OnRestoreInfo(const std::string& restoreInfo) override;
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;

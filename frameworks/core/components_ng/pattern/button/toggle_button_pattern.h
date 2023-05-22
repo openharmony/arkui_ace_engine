@@ -53,7 +53,8 @@ public:
     {
         return MakeRefPtr<ToggleButtonAccessibilityProperty>();
     }
-
+    std::string ProvideRestoreInfo() override;
+    void OnRestoreInfo(const std::string& restoreInfo) override;
     void OnClick();
 
 private:

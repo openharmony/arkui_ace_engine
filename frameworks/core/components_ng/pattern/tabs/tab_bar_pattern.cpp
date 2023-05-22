@@ -1494,4 +1494,39 @@ void TabBarPattern::SetAccessibilityAction()
         }
     });
 }
+
+std::string TabBarPattern::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_RETURN(tabBarLayoutProperty, "");
+    jsonObj->Put("Index", tabBarLayoutProperty->GetIndicator().value_or(0));
+    return jsonObj->ToString();
+}
+
+void TabBarPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    auto info = JsonUtil::ParseJsonString(restoreInfo);
+    if (!info->IsValid() || !info->IsObject()) {
+        return;
+    }
+    auto jsonIsOn = info->GetValue("Index");
+    auto index = jsonIsOn->GetInt();
+    auto totalCount = host->TotalChildCount();
+    if (index < 0 || index >= totalCount || !swiperController_ ||
+        indicator_ >= static_cast<int32_t>(tabBarStyles_.size())) {
+        return;
+    }
+    tabBarLayoutProperty->UpdateIndicator(index);
+    if (animationDuration_.has_value()) {
+        swiperController_->SwipeTo(index);
+    } else {
+        swiperController_->SwipeToWithoutAnimation(index);
+    }
+
+}
 } // namespace OHOS::Ace::NG
