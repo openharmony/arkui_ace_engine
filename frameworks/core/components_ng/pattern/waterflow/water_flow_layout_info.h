@@ -37,9 +37,6 @@ public:
     FlowItemPosition GetCrossIndexForNextItem() const;
     float GetMainHeight(int32_t crossIndex, int32_t itemIndex);
     void Reset();
-    int32_t GetCrossCount() const;
-    int32_t GetMainCount() const;
-
     float currentOffset_ = 0.0f;
     float prevOffset_ = 0.0f;
 
@@ -52,7 +49,6 @@ public:
     int32_t startIndex_ = 0;
     int32_t endIndex_ = 0;
     int32_t footerIndex_ = -1;
-    int32_t childrenCount_ = 0;
     // Map structure: [crossIndex, [index, (mainOffset, itemMainSize)]],
     std::map<int32_t, std::map<int32_t, std::pair<float, float>>> waterFlowItems_;
 };

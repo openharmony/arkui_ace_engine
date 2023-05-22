@@ -221,7 +221,7 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
             CreateMulti(theme, param.values, param.selecteds, optionsAttr, param.options);
         }
         TextPickerModel::GetInstance()->SetDefaultAttributes(theme);
-        JSInteractableView::SetFocusable(false);
+        JSInteractableView::SetFocusable(true);
         JSInteractableView::SetFocusNode(true);
         if (param.valueChangeEventVal->IsFunction()) {
             ParseTextPickerValueObject(info, param.valueChangeEventVal);

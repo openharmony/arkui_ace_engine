@@ -24,7 +24,6 @@ class ACE_EXPORT WaterFlowPositionController : public ScrollController {
 
 public:
     void JumpTo(int32_t index, bool smooth, int32_t source) override;
-    void ScrollPage(bool reverse, bool smooth) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_POSITION_CONTROLLER_H
