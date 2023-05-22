@@ -37,7 +37,7 @@ public:
     static void SetScrollBarWidth(const std::string& scrollWidth);
     static void JsOnScrollIndex(const JSCallbackInfo& info);
     static void SetCachedCount(const JSCallbackInfo& info);
-    static void SetEditMode(bool editMode);
+    static void SetEditMode(const JSCallbackInfo& info);
     static void SetMultiSelectable(bool multiSelectable);
     static void SetMaxCount(double maxCount);
     static void SetMinCount(double minCount);
