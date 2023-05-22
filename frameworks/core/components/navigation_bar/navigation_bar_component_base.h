@@ -29,24 +29,6 @@ class ComposedComponent;
 class NavigationBarTheme;
 class EventMarker;
 
-class ACE_EXPORT NavigationTitleModeChangeEvent : public BaseEventInfo {
-    DECLARE_RELATIONSHIP_OF_CLASSES(NavigationTitleModeChangeEvent, BaseEventInfo);
-
-public:
-    explicit NavigationTitleModeChangeEvent(bool isMiniBar)
-        : BaseEventInfo("NavigationTitleModeChangeEvent"), isMiniBar_(isMiniBar)
-    {}
-    ~NavigationTitleModeChangeEvent() = default;
-
-    bool IsMiniBar() const
-    {
-        return isMiniBar_;
-    }
-
-private:
-    bool isMiniBar_ = 0;
-};
-
 class NavigationBarComponentBase {
 public:
     NavigationBarComponentBase() = default;
