@@ -113,7 +113,7 @@ bool UObject::GetBool(const std::string& key) const
 
 std::shared_ptr<UObject> UObject::GetObject(const std::string& key) const
 {
-    return children_.count(key) ? children_.at(key) : nullptr;
+    return children_.count(key) ? children_.at(key) : std::make_shared<UObject>();
 }
 
 bool UObject::Contains(const std::string& key) const
