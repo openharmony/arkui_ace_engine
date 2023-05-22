@@ -189,6 +189,7 @@ bool RelativeContainerLayoutAlgorithm::PreTopologicalLoopDetection()
         const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
         if (!flexItem) {
             visitedNode.push(node.first);
+            layoutQueue.push(childHostNode->GetInspectorIdValue());
             continue;
         }
         std::set<std::string> anchorSet;
