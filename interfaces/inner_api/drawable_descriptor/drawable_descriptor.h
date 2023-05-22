@@ -31,12 +31,15 @@
 
 #include "foundation/arkui/ace_engine/interfaces/inner_api/form_render/include/form_renderer_hilog.h"
 #include "image_converter.h"
+#include "include/core/SkBlendMode.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPaint.h"
 #include "resource_manager.h"
 
 #include "base/memory/ace_type.h"
 
 namespace OHOS::Ace::Napi {
-
+using OptionalPixelMap = std::optional<std::shared_ptr<Media::PixelMap>>;
 class ACE_EXPORT DrawableDescriptor {
 public:
     enum class DrawableType {
@@ -55,7 +58,7 @@ private:
 
     std::unique_ptr<uint8_t[]> mediaData_;
     size_t len_ = 0;
-    std::optional<std::shared_ptr<Media::PixelMap>> pixelMap_;
+    OptionalPixelMap pixelMap_;
 };
 
 class ACE_EXPORT LayeredDrawableDescriptor : public DrawableDescriptor {
@@ -76,14 +79,16 @@ private:
     bool GetDefaultMask();
     bool GetMaskByName(const std::string& name);
     bool CreatePixelMap();
+    void DrawOntoCanvas(
+        const std::shared_ptr<SkBitmap>& bitMap, float width, float height, SkCanvas& canvas, const SkPaint& paint);
 
     std::unique_ptr<uint8_t[]> jsonBuf_;
     size_t len_ = 0;
     std::shared_ptr<Global::Resource::ResourceManager> resourceMgr_;
-    std::optional<std::shared_ptr<Media::PixelMap>> foreground_;
-    std::optional<std::shared_ptr<Media::PixelMap>> background_;
-    std::optional<std::shared_ptr<Media::PixelMap>> mask_;
-    std::optional<std::shared_ptr<Media::PixelMap>> layeredPixelMap_;
+    OptionalPixelMap foreground_;
+    OptionalPixelMap background_;
+    OptionalPixelMap mask_;
+    OptionalPixelMap layeredPixelMap_;
 };
 
 class DrawableDescriptorFactory {
