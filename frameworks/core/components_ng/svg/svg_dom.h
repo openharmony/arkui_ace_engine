@@ -16,12 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_SVG_DOM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_SVG_DOM_H
 
+#include <memory>
 #include "src/xml/SkDOM.h"
 #include "src/xml/SkXMLParser.h"
 #include "src/xml/SkXMLWriter.h"
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/image_provider/svg_dom_base.h"
+#include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/svg/parse/svg_node.h"
 #include "core/components_ng/svg/parse/svg_style.h"
 #include "core/components_ng/svg/svg_context.h"
@@ -43,12 +45,15 @@ public:
 
     bool ParseSvg(SkStream& svgStream);
 
+    void SetFillColor(const std::optional<Color>& color) override;
+    void SetRadius(const BorderRadiusArray& radiusXY) override;
+
     void DrawImage(
         RSCanvas& canvas, const ImageFit& imageFit, const Size& layout, const std::optional<Color>& color) override;
 
     SizeF GetContainerSize() const override;
     void SetContainerSize(const SizeF& containerSize) override {}
-    const std::optional<Color>& GetSvgFillColor() override
+    const std::optional<Color>& GetFillColor() override
     {
         return fillColor_;
     }
@@ -76,8 +81,9 @@ private:
     Size layout_;  // layout size set by Image Component
     Size svgSize_; // self size specified in SVG file
     Rect viewBox_;
-    std::optional<Color> fillColor_;
     PushAttr attrCallback_;
+    std::optional<Color> fillColor_;
+    std::unique_ptr<BorderRadiusArray> radius_;
 };
 } // namespace OHOS::Ace::NG
 

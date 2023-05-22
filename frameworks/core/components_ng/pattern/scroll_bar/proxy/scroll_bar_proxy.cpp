@@ -121,7 +121,6 @@ void ScrollBarProxy::NotifyScrollBar(const WeakPtr<Pattern>& weakScrollableNode)
     for (const auto& weakScrollBar : scrollBars_) {
         auto scrollBar = weakScrollBar.Upgrade();
         if (!scrollBar) {
-            LOGE("ScrollBar is released.");
             continue;
         }
 
@@ -137,7 +136,6 @@ void ScrollBarProxy::StartScrollBarAnimator() const
     for (const auto& weakScrollBar : scrollBars_) {
         auto scrollBar = weakScrollBar.Upgrade();
         if (!scrollBar) {
-            LOGE("ScrollBar is released.");
             continue;
         }
         if (scrollBar->GetDisplayMode() == DisplayMode::AUTO) {
@@ -152,7 +150,6 @@ void ScrollBarProxy::StopScrollBarAnimator() const
     for (const auto& weakScrollBar : scrollBars_) {
         auto scrollBar = weakScrollBar.Upgrade();
         if (!scrollBar) {
-            LOGE("ScrollBar is released.");
             continue;
         }
         scrollBar->StopAnimator();

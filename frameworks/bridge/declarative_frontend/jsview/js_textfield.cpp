@@ -188,9 +188,11 @@ void JSTextField::SetPlaceholderColor(const JSCallbackInfo& info)
     }
 
     Color color;
-    if (!ParseJsColor(info[0], color)) {
-        LOGI("the info[0] is null");
-        return;
+    if (!CheckColor(info[0], color, V2::TEXTINPUT_ETS_TAG, "PlaceholderColor")) {
+        auto theme = GetTheme<TextFieldTheme>();
+        if (info[0]->IsUndefined() && theme) {
+            color = theme->GetPlaceholderColor();
+        }
     }
     TextFieldModel::GetInstance()->SetPlaceholderColor(color);
 }
@@ -642,7 +644,7 @@ NG::PaddingProperty JSTextField::GetNewPadding(const JSCallbackInfo& info)
         // use default value.
         length.Reset();
     }
-    padding.SetEdges(NG::CalcLength(length.IsNonNegative() ? length : Dimension()));
+    padding.SetEdges(NG::CalcLength(length.IsNonNegative() ? length : CalcDimension()));
     return padding;
 }
 

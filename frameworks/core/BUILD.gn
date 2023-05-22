@@ -20,6 +20,13 @@ template("ace_core_source_set") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    if (current_os == "ohos") {
+      sanitize = {
+        integer_overflow = true
+        boundary_sanitize = true
+        debug = ace_sanitize_debug
+      }
+    }
     subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     defines += invoker.defines
@@ -201,8 +208,11 @@ template("ace_core_source_set") {
       "common/flutter/flutter_asset_manager.cpp",
       "common/flutter/flutter_task_executor.cpp",
       "common/flutter/flutter_thread_model.cpp",
-      "common/flutter/flutter_window.cpp",
     ]
+
+    if (!(defined(config.enable_rosen_backend) && config.enable_rosen_backend)) {
+      sources += [ "common/flutter/flutter_window.cpp" ]
+    }
 
     defines += uicast_configs.uicast_defines
     sources += uicast_configs.uicast_core_sources
@@ -544,10 +554,7 @@ template("ace_core_source_set") {
     if ((current_os == "mingw" || current_os == "mac" ||
          current_os == "linux") && defined(config.enable_rosen_backend) &&
         config.enable_rosen_backend) {
-      sources -= [
-        "common/flutter/flutter_asset_manager.cpp",
-        "common/flutter/flutter_window.cpp",
-      ]
+      sources -= [ "common/flutter/flutter_asset_manager.cpp" ]
       sources += [
         # rs impl
         "common/rosen/rosen_asset_manager.cpp",
@@ -573,6 +580,13 @@ template("ace_core_ng_source_set") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    if (current_os == "ohos") {
+      sanitize = {
+        integer_overflow = true
+        boundary_sanitize = true
+        debug = ace_sanitize_debug
+      }
+    }
     subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     defines += invoker.defines

@@ -37,7 +37,6 @@ const Dimension FONT_SIZE = Dimension(2.0);
 const int32_t ANIMATION_ZERO_TO_OUTER = 200; // 200ms for animation that from zero to outer.
 const int32_t ANIMATION_OUTER_TO_ZERO = 150; // 150ms for animation that from outer to zero.
 const Dimension FOCUS_SIZE = Dimension(1.0);
-const int32_t MIDDLE_CHILD_INDEX = 2;
 const float MOVE_DISTANCE = 5.0f;
 constexpr int32_t HOVER_ANIMATION_DURATION = 40;
 constexpr size_t MIXTURE_CHILD_COUNT = 2;
@@ -92,7 +91,7 @@ void TextPickerColumnPattern::OnModifyDone()
 
 void TextPickerColumnPattern::OnAroundButtonClick(RefPtr<EventParam> param)
 {
-    int32_t step = param->itemIndex - MIDDLE_CHILD_INDEX;
+    int32_t step = param->itemIndex - GetMiddleButtonIndex();
     if (step != 0) {
         InnerHandleScroll(step, false);
     }
@@ -112,6 +111,11 @@ void TextPickerColumnPattern::OnMiddleButtonTouchMove(RefPtr<EventParam> param)
 void TextPickerColumnPattern::OnMiddleButtonTouchUp(RefPtr<EventParam> param)
 {
     PlayPressAnimation(Color::TRANSPARENT);
+}
+
+int32_t TextPickerColumnPattern::GetMiddleButtonIndex()
+{
+    return GetShowOptionCount() / 2;
 }
 
 RefPtr<TouchEventImpl> TextPickerColumnPattern::CreateItemTouchEventListener(RefPtr<EventParam> param)
@@ -163,7 +167,7 @@ RefPtr<InputEvent> TextPickerColumnPattern::CreateMouseHoverEventListener(RefPtr
 
 void TextPickerColumnPattern::InitMouseAndPressEvent()
 {
-    if (touchEventInit) {
+    if (touchEventInit_) {
         return;
     }
     
@@ -182,7 +186,7 @@ void TextPickerColumnPattern::InitMouseAndPressEvent()
         auto eventHub = childNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
 
-        if (i != MIDDLE_CHILD_INDEX) {
+        if (i != GetMiddleButtonIndex()) {
             RefPtr<ClickEvent> clickListener = CreateItemClickEventListener(param);
             CHECK_NULL_VOID(clickListener);
             auto gesture = eventHub->GetOrCreateGestureEventHub();
@@ -203,7 +207,7 @@ void TextPickerColumnPattern::InitMouseAndPressEvent()
         }
     }
 
-    touchEventInit = true;
+    touchEventInit_ = true;
 }
 
 void TextPickerColumnPattern::HandleMouseEvent(bool isHover)
@@ -1015,6 +1019,7 @@ bool TextPickerColumnPattern::InnerHandleScroll(int32_t step, bool isUpateProper
     }
 
     int32_t currentIndex = GetCurrentIndex();
+    int32_t prevIndex = currentIndex;
     RefPtr<TextPickerLayoutProperty> layout = GetParentLayout();
     CHECK_NULL_RETURN(host, false);
 
@@ -1033,11 +1038,13 @@ bool TextPickerColumnPattern::InnerHandleScroll(int32_t step, bool isUpateProper
         currentIndex = (totalOptionCount + currentIndex + step) % totalOptionCount;
     }
 
-    SetCurrentIndex(currentIndex);
-    bool isDown = step > 0 ? true : false;
-    HandleChangeCallback(isDown, true);
-    FlushCurrentOptions(isDown, isUpatePropertiesOnly);
-    
+    if (currentIndex != prevIndex) {
+        SetCurrentIndex(currentIndex);
+        bool isDown = step > 0;
+        HandleChangeCallback(isDown, true);
+        FlushCurrentOptions(isDown, isUpatePropertiesOnly);
+    }
+
     return true;
 }
 

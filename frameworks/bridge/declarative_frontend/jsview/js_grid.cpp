@@ -245,9 +245,23 @@ void JSGrid::SetScrollBarColor(const std::string& color)
     GridModel::GetInstance()->SetScrollBarColor(color);
 }
 
-void JSGrid::SetScrollBarWidth(const std::string& width)
+void JSGrid::SetScrollBarWidth(const JSCallbackInfo& scrollWidth)
 {
-    GridModel::GetInstance()->SetScrollBarWidth(width);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+    CalcDimension scrollBarWidth;
+    if (scrollWidth.Length() < 1) {
+        LOGE("scrollWidth is invalid");
+        return;
+    }
+    if (!ParseJsDimensionVp(scrollWidth[0], scrollBarWidth) || scrollWidth[0]->IsNull() ||
+        scrollWidth[0]->IsUndefined() || (scrollWidth[0]->IsString() && scrollWidth[0]->ToString().empty()) ||
+        LessNotEqual(scrollBarWidth.Value(), 0.0)) {
+        scrollBarWidth = theme->GetNormalWidth();
+    }
+    GridModel::GetInstance()->SetScrollBarWidth(scrollBarWidth.ToString());
 }
 
 void JSGrid::SetCachedCount(const JSCallbackInfo& info)
@@ -265,8 +279,13 @@ void JSGrid::SetCachedCount(const JSCallbackInfo& info)
     GridModel::GetInstance()->SetCachedCount(cachedCount);
 }
 
-void JSGrid::SetEditMode(bool editMode)
+void JSGrid::SetEditMode(const JSCallbackInfo& info)
 {
+    // undefined means false to EditMode
+    bool editMode = false;
+    if (!info[0]->IsUndefined() && info[0]->IsBoolean()) {
+        ParseJsBool(info[0], editMode);
+    }
     GridModel::GetInstance()->SetEditable(editMode);
 }
 

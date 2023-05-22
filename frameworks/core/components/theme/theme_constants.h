@@ -19,6 +19,7 @@
 #include <unordered_map>
 
 #include "base/geometry/dimension.h"
+#include "base/image/pixel_map.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/internal_resource.h"
 #include "base/utils/macros.h"
@@ -30,7 +31,6 @@
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/theme_attributes.h"
 #include "core/components/theme/theme_style.h"
-
 namespace OHOS::Ace {
 
 class ACE_FORCE_EXPORT_WITH_PREVIEW ThemeConstants : public AceType {
@@ -194,6 +194,12 @@ public:
      * NOTE: ResourceId::NO_ID will be returned if not found or value is not ResourceId.
      */
     InternalResource::ResourceId GetResourceId(uint32_t key) const;
+
+    /*
+     * Get PixelMap from platform constants.
+     * NOTE: nullptr will be returned if getPixelMap failed.
+     */
+    std::shared_ptr<Media::PixelMap> GetPixelMap(uint32_t key) const;
 
     /*
      * Get string array value from platform constants.
