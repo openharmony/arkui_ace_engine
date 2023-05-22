@@ -143,7 +143,7 @@ common_bin = [
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },
- {
+  {
     label = "//third_party/skia:new_skia"
     subsystem_name = "thirdparty"
     part_name = "third_party_skia"
