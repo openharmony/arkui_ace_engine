@@ -17,6 +17,7 @@
 #include <optional>
 
 #include "gtest/gtest.h"
+
 #include "core/components_ng/base/geometry_node.h"
 
 #define private public
@@ -2908,5 +2909,28 @@ HWTEST_F(TextTestNg, UpdateChildProperty002, TestSize.Level1)
      * @tc.expected: Child use owner property
      */
     TestUpdateScenario(pattern);
+}
+
+/**
+ * @tc.name: InitSurfaceChangedTest001
+ * @tc.desc: test InitSurfaceChangedCallback function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, InitSurfaceChangedTest001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    /**
+     * @tc.steps: step1. create text FrameNode and SpanNode, Update child FrameNode properties
+     * @tc.expected: Successfully created parent Node and child Node
+     */
+    auto host = CreateTextParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(host, nullptr);
+    /**
+     * @tc.steps: step2. get text pattern called InitSurfaceChangedCallback function.
+     * @tc.expected: HasSurfaceChangedCallback return true.
+     */
+    auto pattern = host->GetPattern<TextPattern>();
+    pattern->InitSurfaceChangedCallback();
+    EXPECT_TRUE(pattern->HasSurfaceChangedCallback());
 }
 } // namespace OHOS::Ace::NG

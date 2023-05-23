@@ -45,6 +45,12 @@ namespace OHOS::Ace::NG {
 void TextPattern::OnDetachFromFrameNode(FrameNode* node)
 {
     CloseSelectOverlay();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (HasSurfaceChangedCallback()) {
+        LOGD("Unregister surface change callback with id %{public}d", surfaceChangedCallbackId_.value_or(-1));
+        pipeline->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
+    }
 }
 
 void TextPattern::CloseSelectOverlay()
@@ -824,6 +830,34 @@ void TextPattern::OnVisibleChange(bool isVisible)
             CloseSelectOverlay();
         }
     }
+}
+
+void TextPattern::InitSurfaceChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (!HasSurfaceChangedCallback()) {
+        auto callbackId = pipeline->RegisterSurfaceChangedCallback(
+            [weak = WeakClaim(this)](int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) {
+                auto pattern = weak.Upgrade();
+                if (pattern) {
+                    pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
+                }
+            });
+        LOGD("Add surface changed callback id %{public}d", callbackId);
+        UpdateSurfaceChangedCallbackId(callbackId);
+    }
+}
+
+void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight)
+{
+    LOGD("TextPattern handle surface change, new width %{public}d, new height %{public}d, prev width %{public}d, prev "
+         "height %{public}d",
+        newWidth, newHeight, prevWidth, prevHeight);
+    CloseSelectOverlay();
+    ResetSelection();
 }
 
 void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)

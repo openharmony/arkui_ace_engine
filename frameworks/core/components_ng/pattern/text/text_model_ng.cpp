@@ -42,6 +42,9 @@ void TextModelNG::Create(const std::string& content)
     auto theme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
     SetDraggable(theme->GetDraggable());
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    textPattern->InitSurfaceChangedCallback();
 }
 
 void TextModelNG::SetFontSize(const Dimension& value)
