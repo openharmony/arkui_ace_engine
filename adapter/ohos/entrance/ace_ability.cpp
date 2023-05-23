@@ -492,6 +492,7 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         KeyboardAnimationConfig config = { rsConfig.curveType_, rsConfig.curveParams_, rsConfig.durationIn_,
             rsConfig.durationOut_ };
         context->SetKeyboardAnimationConfig(config);
+        context->SetMinPlatformVersion(apiCompatibleVersion);
     }
 
     // get url
