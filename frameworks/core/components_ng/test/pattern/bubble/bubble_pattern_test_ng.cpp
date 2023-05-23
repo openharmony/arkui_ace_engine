@@ -526,6 +526,7 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest007, TestSize.Level1)
     popupParam->SetTextColor(BUBBLE_PAINT_PROPERTY_TEXT_COLOR);
     popupParam->SetFontSize(BUBBLE_PAINT_PROPERTY_FONT_SIZE);
     popupParam->SetFontWeight(BUBBLE_PAINT_PROPERTY_FONT_WEIGHT);
+    popupParam->SetFontStyle(Ace::FontStyle::ITALIC);
 
     // create bubbleNode
     auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
