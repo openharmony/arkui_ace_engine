@@ -22,6 +22,11 @@
 #include <vector>
 
 #include "adapter/preview/entrance/ace_run_args.h"
+#include "adapter/preview/entrance/ace_view_preview.h"
+#include "adapter/preview/external/ability/context.h"
+#include "adapter/preview/external/ability/fa/fa_context.h"
+#include "adapter/preview/external/ability/stage/stage_context.h"
+#include "adapter/preview/external/window/window.h"
 #include "adapter/preview/osal/fetch_manager.h"
 #include "base/resource/asset_manager.h"
 #include "base/thread/task_executor.h"
@@ -31,11 +36,6 @@
 #include "core/common/js_message_dispatcher.h"
 #include "core/common/platform_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
-#include "adapter/preview/external/ability/context.h"
-#include "adapter/preview/external/ability/fa/fa_context.h"
-#include "adapter/preview/external/ability/stage/stage_context.h"
-
-#include "adapter/preview/entrance/ace_view_preview.h"
 
 namespace OHOS::Ace::Platform {
 
@@ -45,6 +45,7 @@ namespace {
 constexpr int32_t ACE_INSTANCE_ID = 0;
 } // namespace
 
+using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<PipelineContext>& context)>;
 using OnRouterChangeCallback = bool (*)(const std::string currentRouterPath);
 
 // AceContainer is the instance have its own pipeline and thread models, it can contains multiple pages.
@@ -63,8 +64,8 @@ public:
 #ifndef ENABLE_ROSEN_BACKEND
     static void SetView(AceViewPreview* view, double density, int32_t width, int32_t height);
 #else
-    static void SetView(
-        AceViewPreview* view, double density, int32_t width, int32_t height, SendRenderDataCallback onRender);
+    static void SetView(AceViewPreview* view, sptr<Rosen::Window> rsWindow, double density, int32_t width,
+        int32_t height, UIEnvCallback callback);
 #endif
 
     static void InitDeviceInfo(int32_t instanceId, const AceRunArgs& runArgs);
@@ -259,8 +260,8 @@ private:
     void AttachView(
         std::unique_ptr<Window> window, AceViewPreview* view, double density, int32_t width, int32_t height);
 #else
-    void AttachView(std::unique_ptr<Window> window,
-        AceViewPreview* view, double density, int32_t width, int32_t height, SendRenderDataCallback onRender);
+    void AttachView(std::unique_ptr<Window> window, AceViewPreview* view, double density, int32_t width, int32_t height,
+        UIEnvCallback callback);
 #endif
 
     AceViewPreview* aceView_ = nullptr;
@@ -283,7 +284,7 @@ private:
     mutable std::mutex cardPipelineMutex_;
     RefPtr<Context> context_;
 
-    //app bar to use
+    // app bar to use
     bool installationFree_ = false;
     int32_t labelId_;
 
