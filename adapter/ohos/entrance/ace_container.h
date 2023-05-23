@@ -314,8 +314,6 @@ public:
         sptr<OHOS::Rosen::Window> rsWindow, UIEnvCallback callback = nullptr);
     static void SetViewNew(
         AceView* view, double density, int32_t width, int32_t height, sptr<OHOS::Rosen::Window> rsWindow);
-    static void SetView(AceView* view, double density, int32_t width, int32_t height,
-        const std::shared_ptr<Window>& window);
     static void SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow);
     static sptr<OHOS::Rosen::Window> GetUIWindow(int32_t instanceId);
     static OHOS::AppExecFwk::Ability* GetAbility(int32_t instanceId);
