@@ -663,9 +663,10 @@ void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
         return;
     }
     if (info[0]->IsString()) {
-        std::string colorStr = "";
-        JSViewAbstract::ParseJsString(info[0], colorStr);
-        auto color = Color::FromString(colorStr);
+        Color color;
+        if (!JSViewAbstract::CheckColor(info[0], color, "CanvasRenderer", "fillStyle")) {
+            return;
+        }
 
         if (Container::IsCurrentUseNewPipeline()) {
             if (isOffscreen_ && offscreenCanvasPattern_) {
