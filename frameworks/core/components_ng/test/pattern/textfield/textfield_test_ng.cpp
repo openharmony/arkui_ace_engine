@@ -2840,7 +2840,6 @@ HWTEST_F(TextFieldPatternTestNg, ProcessDefaultPadding, TestSize.Level1)
     EXPECT_EQ(paddings.top, NG::CalcLength(themePadding.Top().ConvertToPx()));
 }
 
-
 /**
  * @tc.name: SetShowCounter
  * @tc.desc: Verify that the SetShowCounter interface calls normally and exits without exception.
@@ -3469,13 +3468,8 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldModel002, TestSize.Level1)
 
     Font font;
     textFieldModelInstance.SetPlaceholderFont(font);
-    std::vector<std::string> fontFamilies {"Georgia", "Serif"};
-    Font otherFont {
-        FontWeight::W200,
-        Dimension(12),
-        OHOS::Ace::FontStyle::ITALIC,
-        fontFamilies
-    };
+    std::vector<std::string> fontFamilies { "Georgia", "Serif" };
+    Font otherFont { FontWeight::W200, Dimension(12), OHOS::Ace::FontStyle::ITALIC, fontFamilies };
     PaddingProperty noPadding = CreatePadding(0.0f, 0.0f, 0.0f, 0.0f);
     PaddingProperty Padding = CreatePadding(10.0f, 10.0f, 10.0f, 10.0f);
     Edge edgePadding = Edge(10.0f, 10.0f, 10.0f, 10.0f);
@@ -3527,5 +3521,36 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldModel003, TestSize.Level1)
     textFieldModelInstance.SetHoverEffect(HoverEffectType::AUTO);
     EXPECT_EQ(layoutProperty->GetTextColor(), Color::BLACK);
     EXPECT_EQ(layoutProperty->GetCopyOptions(), CopyOptions::Local);
+}
+
+/**
+ * @tc.name: ShowOverlay001
+ * @tc.desc: Test CheckHandles function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, ShowOverlay001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->contentRect_ = RectF(10, 10, 30, 30);
+
+    pattern->parentGlobalOffset_ = OffsetF(50, 50);
+    // handles are outside contentRect
+    pattern->textSelector_.firstHandleOffset_ = OffsetF(30, 30);
+    pattern->textSelector_.secondHandleOffset_ = OffsetF(300, 300);
+
+    std::optional<RectF> firstHandle = RectF(0, 0, 0, 0);
+    std::optional<RectF> secondHandle = RectF(0, 0, 0, 0);
+
+    pattern->CheckHandles(firstHandle, secondHandle);
+    // handles should be reset after CheckHandles
+    EXPECT_EQ(firstHandle, std::nullopt);
+    EXPECT_EQ(secondHandle, std::nullopt);
 }
 } // namespace OHOS::Ace::NG

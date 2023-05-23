@@ -535,7 +535,9 @@ void TextFieldPattern::UpdateSelectionOffset()
                 secondHandle.SetSize(handlePaintSize);
                 secondHandleOption = secondHandle;
             }
-            ShowSelectOverlay(firstHandleOption, secondHandleOption);
+            if (firstHandleOption.has_value() || secondHandleOption.has_value()) {
+                ShowSelectOverlay(firstHandleOption, secondHandleOption);
+            }
         }
         return;
     }
@@ -729,21 +731,16 @@ void TextFieldPattern::OnTextAreaScroll(float offset)
     UpdateSelectionOffset();
     if (SelectOverlayIsOn()) {
         SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
-        RectF firstHandle;
         textSelector_.firstHandleOffset_.SetY(textSelector_.firstHandleOffset_.GetY() + offset);
-        firstHandle.SetOffset(textSelector_.firstHandleOffset_);
-        firstHandle.SetSize(handlePaintSize);
-        std::optional<RectF> secondHandleOption;
-        if (isSingleHandle_ == true) {
-            secondHandleOption = std::nullopt;
-        } else {
-            RectF secondHandle;
+        std::optional<RectF> firstHandle = RectF(textSelector_.firstHandleOffset_, handlePaintSize);
+
+        std::optional<RectF> secondHandle;
+        if (!isSingleHandle_) {
             textSelector_.secondHandleOffset_.SetY(textSelector_.secondHandleOffset_.GetY() + offset);
-            secondHandle.SetOffset(textSelector_.secondHandleOffset_);
-            secondHandle.SetSize(handlePaintSize);
-            secondHandleOption = secondHandle;
+            secondHandle = { textSelector_.secondHandleOffset_, handlePaintSize };
         }
-        ShowSelectOverlay(firstHandle, secondHandleOption);
+        CheckHandles(firstHandle, secondHandle);
+        ShowSelectOverlay(firstHandle, secondHandle);
     }
     UpdateScrollBarOffset();
 }
@@ -2053,14 +2050,11 @@ void TextFieldPattern::CreateHandles()
         secondHandlePosition.offset.GetY() + parentGlobalOffset_.GetY());
     textSelector_.secondHandleOffset_ = secondHandleOffset;
     SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
-    RectF firstHandle;
-    firstHandle.SetOffset(firstHandleOffset);
-    firstHandle.SetSize(handlePaintSize);
-    RectF secondHandle;
-    secondHandle.SetOffset(secondHandleOffset);
-    secondHandle.SetSize(handlePaintSize);
-    LOGD("First handle %{public}s, second handle %{public}s", firstHandle.ToString().c_str(),
-        secondHandle.ToString().c_str());
+    std::optional<RectF> firstHandle = RectF(firstHandleOffset, handlePaintSize);
+    std::optional<RectF> secondHandle = RectF(secondHandleOffset, handlePaintSize);
+    LOGD("First handle %{public}s, second handle %{public}s", firstHandle->ToString().c_str(),
+        secondHandle->ToString().c_str());
+    CheckHandles(firstHandle, secondHandle);
     ShowSelectOverlay(firstHandle, secondHandle);
     textBoxes_ = tmp;
 }
@@ -2069,10 +2063,6 @@ void TextFieldPattern::ShowSelectOverlay(
     const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle)
 {
     CloseSelectOverlay();
-    if (!firstHandle.has_value() && !secondHandle.has_value()) {
-        LOGW("No handler available");
-        return;
-    }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto hasDataCallback = [weak = WeakClaim(this), pipeline, firstHandle, secondHandle](bool hasData) {
@@ -4274,5 +4264,19 @@ void TextFieldPattern::SetAccessibilityScrollAction()
             frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         }
     });
+}
+
+void TextFieldPattern::CheckHandles(std::optional<RectF>& firstHandle, std::optional<RectF>& secondHandle)
+{
+    auto firstHandleLocalY = textSelector_.firstHandleOffset_.GetY() - parentGlobalOffset_.GetY();
+    if (firstHandleLocalY + caretRect_.Height() < contentRect_.Top()) {
+        // hide firstHandle when it's out of content region
+        firstHandle = std::nullopt;
+    }
+
+    auto secondHandleLocalY = textSelector_.secondHandleOffset_.GetY() - parentGlobalOffset_.GetY();
+    if (secondHandleLocalY > contentRect_.Bottom()) {
+        secondHandle = std::nullopt;
+    }
 }
 } // namespace OHOS::Ace::NG

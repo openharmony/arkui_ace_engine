@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_PATTERN_H
 
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -218,9 +219,10 @@ public:
     const TextEditingValueNG& GetEditingValue() const;
 
 #if defined(IOS_PLATFORM)
-    const TextEditingValue& GetInputEditingValue() const override {
+    const TextEditingValue& GetInputEditingValue() const override
+    {
         static TextEditingValue value;
-	return value;
+        return value;
     };
 #endif
 
@@ -818,6 +820,8 @@ private:
     void HandleLongPress(GestureEvent& info);
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void UpdateSelectorByPosition(const int32_t& pos);
+    // assert handles are inside the contentRect, reset them if not
+    void CheckHandles(std::optional<RectF>& firstHandle, std::optional<RectF>& secondHandle);
     void ShowSelectOverlay(const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle);
 
     void CursorMoveOnClick(const Offset& offset);
