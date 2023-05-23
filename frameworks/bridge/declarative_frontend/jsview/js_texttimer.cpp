@@ -129,6 +129,13 @@ void JSTextTimer::SetFormat(const JSCallbackInfo& info)
         }
     }
 
+    std::string target = "HmsS:.";
+    for (auto ch : format) {
+        if (target.find(ch) == std::string::npos) {
+            format = DEFAULT_FORMAT;
+        }
+    }
+
     auto pos = format.find("hh");
     if (pos != std::string::npos) {
         format.replace(pos, sizeof("hh") - 1, "HH");

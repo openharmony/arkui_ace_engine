@@ -28,6 +28,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components/progress/progress_theme.h"
+#include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -128,6 +129,7 @@ constexpr Dimension FONT_SIZE = 12.0_vp;
 const std::string FONT_CONTEXT = "start";
 const FontWeight FONT_WEIGHT = FontWeight::BOLDER;
 const std::vector<std::string> FONT_FAMILY = { "serif" };
+constexpr Dimension DEFALUT_SPACE = 4.0_vp;
 
 CreateProperty creatProperty;
 DirtySwapConfig config;
@@ -1439,6 +1441,17 @@ HWTEST_F(ProgressTestNg, ProgressPattern001, TestSize.Level1)
     touchInfo1.SetTouchType(TouchType::DOWN);
     info.AddTouchLocationInfo(std::move(touchInfo1));
     pattern->touchListener_->GetTouchEventCallback()(info);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<AppTheme>()));
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetContentSize(SizeF(PROGRESS_COMPONENT_MAXSIZE_WIDTH, PROGRESS_COMPONENT_MAXSIZE_HEIGHT));
+    geometryNode->SetContentOffset(OffsetF(0, 0));
+    frameNode->SetGeometryNode(geometryNode);
+    RoundRect focusRect;
+    pattern->GetInnerFocusPaintRect(focusRect);
+    EXPECT_EQ(focusRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).x,
+        PROGRESS_COMPONENT_MAXSIZE_WIDTH * 0.5 + DEFALUT_SPACE.ConvertToPx());
+    EXPECT_EQ(focusRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).y,
+        PROGRESS_COMPONENT_MAXSIZE_WIDTH * 0.5 + DEFALUT_SPACE.ConvertToPx());
     EXPECT_FALSE(progressEvent->IsEnabled());
 }
 

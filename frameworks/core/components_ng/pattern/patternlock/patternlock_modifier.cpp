@@ -107,7 +107,7 @@ void PatternLockModifier::PaintLockLine(RSCanvas& canvas, const OffsetF& offset)
     pen.SetAntiAlias(true);
     pen.SetColor(ToRSColor(pathColor));
     pen.SetWidth(pathStrokeWidth);
-    pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+    pen.SetCapStyle(RSPen::CapStyle::FLAT_CAP);
 
     Color pathColorAlpha255 = pathColor.ToColor().ChangeAlpha(MAX_ALPHA);
     pen.SetColor(pathColorAlpha255.GetValue());
@@ -122,8 +122,8 @@ void PatternLockModifier::PaintLockLine(RSCanvas& canvas, const OffsetF& offset)
             GetCircleCenterByXY(offset, choosePoint_[count - 1].GetColumn(), choosePoint_[count - 1].GetRow());
         float x1 = pointBegin.GetX();
         float y1 = pointBegin.GetY();
-        float x2 = offset.GetX() + cellCenter.GetX();
-        float y2 = offset.GetY() + cellCenter.GetY();
+        float x2 = cellCenter.GetX();
+        float y2 = cellCenter.GetY();
         x2 = x2 > offset.GetX() + sideLength ? offset.GetX() + sideLength : x2;
         x2 = x2 < offset.GetX() ? offset.GetX() : x2;
         y2 = y2 > offset.GetY() + sideLength ? offset.GetY() + sideLength : y2;
@@ -165,7 +165,7 @@ void PatternLockModifier::PaintLockCircle(RSCanvas& canvas, const OffsetF& offse
             if (isMoveEventValid_->Get()) {
                 brush.SetColor(ToRSColor(activeColor));
                 canvas.AttachBrush(brush);
-                auto radius = circleRadius * 2 * SCALE_ACTIVE_CIRCLE_RADIUS;
+                auto radius = circleRadius * SCALE_SELECTED_CIRCLE_RADIUS;
                 canvas.DrawCircle(
                     RSPoint(offsetX, offsetY), std::min(static_cast<float>(radius), firstCellcenter.GetX()));
             } else {

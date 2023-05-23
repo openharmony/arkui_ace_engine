@@ -311,7 +311,9 @@ bool JsiPaEngine::InitJsEnv(bool debuggerMode, const std::unordered_map<std::str
 
     // Register pa native functions
     RegisterPaModule();
-    RegisterConsoleModule();
+    if (jsAbilityRuntime_) {
+        jsAbilityRuntime_->InitConsoleModule();
+    }
     // load abc file
     EvaluateJsCode();
 

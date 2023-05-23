@@ -87,7 +87,7 @@ public:
     void SetDefaultPickerItemHeight();
 
     std::map<uint32_t, RefPtr<FrameNode>> GetColumnNodes();
-    
+
     RefPtr<FrameNode> GetColumnNode();
 
     uint32_t GetShowOptionCount() const;
@@ -266,6 +266,7 @@ private:
     void ProcessCascadeOptionsValues(const std::vector<std::string>& rangeResultValue, uint32_t index);
 
     bool enabled_ = true;
+    int32_t focusKeyID_ = 0;
     double defaultPickerItemHeight_;
     uint32_t selectedIndex_ = 0;
     std::vector<NG::RangeContent> range_;
@@ -279,6 +280,9 @@ private:
     std::vector<std::string> values_;
     std::vector<uint32_t> selecteds_;
     Color backgroundColor_ = Color::WHITE;
+
+    // inner focus switch
+    bool operationOn_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerPattern);
 };

@@ -40,12 +40,7 @@ namespace {
 
 constexpr Dimension ARROW_WIDTH = 32.0_vp;
 constexpr Dimension ARROW_HEIGHT = 8.0_vp;
-constexpr Dimension GRID_MARGIN_PORTRAIT = 48.0_vp;
-constexpr Dimension GRID_SPACING = 24.0_vp;
-constexpr Dimension GRID_SPACING_TOTAL = 232.0_vp;
 constexpr Dimension HORIZON_SPACING_WITH_SCREEN = 6.0_vp;
-constexpr int32_t GRID_NUMBER_LANDSCAPE = 8;
-constexpr int32_t BUBBLR_GRID_MAX_LANDSCAPE = 6;
 constexpr Dimension BEZIER_WIDTH_HALF = 16.0_vp;
 
 } // namespace
@@ -71,20 +66,6 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // update child layout constraint
     LayoutConstraintF childLayoutConstraint = bubbleLayoutProperty->CreateChildConstraint();
-    if (!useCustom) {
-        if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
-            childLayoutConstraint.UpdateMaxSizeWithCheck(
-                SizeF(layoutConstraint->maxSize.Width() - GRID_MARGIN_PORTRAIT.ConvertToPx(),
-                    layoutConstraint->maxSize.Height()));
-        } else {
-            static const int32_t gridGaps = 5;
-            float colWidth =
-                (layoutConstraint->maxSize.Width() - GRID_SPACING_TOTAL.ConvertToPx()) / GRID_NUMBER_LANDSCAPE;
-            childLayoutConstraint.UpdateMaxSizeWithCheck(
-                SizeF(colWidth * BUBBLR_GRID_MAX_LANDSCAPE + GRID_SPACING.ConvertToPx() * gridGaps,
-                    layoutConstraint->maxSize.Height()));
-        }
-    }
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
         return;

@@ -2760,6 +2760,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAccessibilityPropertyGetBeginIndex001, Test
     }
     textPickerColumnPattern_->SetOptions(contents);
     textPickerColumnPattern_->SetCurrentIndex(INDEX_NUM);
+    textPickerColumnPattern_->halfDisplayCounts_ = SECOND;
     EXPECT_EQ(textPickerAccessibilityProperty_->GetBeginIndex(), CURRENT_INDEX);
     DestroyTextPickerTestNgObject();
 }
@@ -2789,6 +2790,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAccessibilityPropertyGetEndIndex001, TestSi
         contents.emplace_back(content);
     }
     textPickerColumnPattern_->SetOptions(contents);
+    textPickerColumnPattern_->halfDisplayCounts_ = SECOND;
     EXPECT_EQ(textPickerAccessibilityProperty_->GetEndIndex(), CURRENT_END_INDEX);
     DestroyTextPickerTestNgObject();
 }
@@ -3185,6 +3187,8 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest001, TestSize.Level1)
     textPickerColumnPattern_->InitMouseAndPressEvent();
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    theme->showOptionCount_ = 5;
     
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
     pickerNodeLayout->UpdateCanLoop(true);
@@ -3212,6 +3216,8 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest002, TestSize.Level1)
     textPickerColumnPattern_->InitMouseAndPressEvent();
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    theme->showOptionCount_ = 5;
     
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
     pickerNodeLayout->UpdateCanLoop(true);
@@ -3239,6 +3245,8 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest003, TestSize.Level1)
     textPickerColumnPattern_->InitMouseAndPressEvent();
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    theme->showOptionCount_ = 5;
     
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
     pickerNodeLayout->UpdateCanLoop(true);
@@ -3266,6 +3274,8 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest004, TestSize.Level1)
     textPickerColumnPattern_->InitMouseAndPressEvent();
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    theme->showOptionCount_ = 5;
     
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
     pickerNodeLayout->UpdateCanLoop(true);
@@ -3293,6 +3303,8 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest005, TestSize.Level1)
     textPickerColumnPattern_->InitMouseAndPressEvent();
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    theme->showOptionCount_ = 5;
     
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
     pickerNodeLayout->UpdateCanLoop(true);
@@ -3320,6 +3332,8 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest006, TestSize.Level1)
     textPickerColumnPattern_->InitMouseAndPressEvent();
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    theme->showOptionCount_ = 5;
     
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
     pickerNodeLayout->UpdateCanLoop(true);
@@ -3347,6 +3361,8 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest007, TestSize.Level1)
     textPickerColumnPattern_->InitMouseAndPressEvent();
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    theme->showOptionCount_ = 5;
     
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
     pickerNodeLayout->UpdateCanLoop(true);
@@ -3374,6 +3390,8 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest008, TestSize.Level1)
     textPickerColumnPattern_->InitMouseAndPressEvent();
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    theme->showOptionCount_ = 5;
     
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
     pickerNodeLayout->UpdateCanLoop(true);
@@ -3401,6 +3419,8 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest009, TestSize.Level1)
     textPickerColumnPattern_->InitMouseAndPressEvent();
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    theme->showOptionCount_ = 5;
     
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
     pickerNodeLayout->UpdateCanLoop(true);
@@ -3428,6 +3448,8 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest010, TestSize.Level1)
     textPickerColumnPattern_->InitMouseAndPressEvent();
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    theme->showOptionCount_ = 5;
     
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
     pickerNodeLayout->UpdateCanLoop(true);
@@ -3455,6 +3477,8 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest011, TestSize.Level1)
     textPickerColumnPattern_->InitMouseAndPressEvent();
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    theme->showOptionCount_ = 5;
     
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
     pickerNodeLayout->UpdateCanLoop(true);
@@ -3482,6 +3506,8 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest012, TestSize.Level1)
     textPickerColumnPattern_->InitMouseAndPressEvent();
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    theme->showOptionCount_ = 5;
     
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
     pickerNodeLayout->UpdateCanLoop(true);
@@ -3532,6 +3558,8 @@ HWTEST_F(TextPickerTestNg, CanLoopTest001, TestSize.Level1)
     
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    theme->showOptionCount_ = 5;
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
 
     // canLoop = false,click down, current isn't changed
@@ -3558,6 +3586,8 @@ HWTEST_F(TextPickerTestNg, CanLoopTest002, TestSize.Level1)
     
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    theme->showOptionCount_ = 5;
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
 
     // canLoop = false,click down, current isn't changed
@@ -3584,6 +3614,8 @@ HWTEST_F(TextPickerTestNg, CanLoopTest003, TestSize.Level1)
     
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    theme->showOptionCount_ = 5;
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
 
     // canLoop = false,click up, current isn't changed
@@ -3610,6 +3642,8 @@ HWTEST_F(TextPickerTestNg, CanLoopTest004, TestSize.Level1)
     
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    theme->showOptionCount_ = 5;
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
 
     // canLoop = false,click up, current isn't changed
@@ -3659,6 +3693,50 @@ HWTEST_F(TextPickerTestNg, TextPickerFireChangeEventTest001, TestSize.Level1)
     std::vector<std::string> values {"currentValue"};
     std::vector<double> indexs {1.0};
     textPickerEventHub->FireChangeEvent(values, indexs);
+}
+
+/**
+ * @tc.name: TextPickerKeyEvent001
+ * @tc.desc: test OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerKeyEvent001, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto focusHub = frameNode->GetEventHub<NG::TextPickerEventHub>()->GetOrCreateFocusHub();
+    frameNode->MarkModifyDone();
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+    textPickerPattern->InitOnKeyEvent(focusHub);
+    // before space key down, tab key down
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    event.code = KeyCode::KEY_TAB;
+    bool result = textPickerPattern->OnKeyEvent(event);
+    EXPECT_EQ(result, false);
+    // space key down, operation on
+    event.code = KeyCode::KEY_SPACE;
+    result = textPickerPattern->OnKeyEvent(event);
+    bool operationOn = textPickerPattern->operationOn_;
+    EXPECT_EQ(operationOn, true);
+    EXPECT_EQ(result, true);
+    // tab key down when opeartion is on
+    event.code = KeyCode::KEY_TAB;
+    result = textPickerPattern->OnKeyEvent(event);
+    EXPECT_EQ(result, true);
+    // escape key down, operation off
+    event.code = KeyCode::KEY_ESCAPE;
+    result = textPickerPattern->OnKeyEvent(event);
+    operationOn = textPickerPattern->operationOn_;
+    EXPECT_EQ(operationOn, false);
+    EXPECT_EQ(result, true);
 }
 
 /**

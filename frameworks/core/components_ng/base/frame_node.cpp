@@ -1492,16 +1492,16 @@ OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf) const
     return offset;
 }
 
-OffsetF FrameNode::GetPaintRectOffsetWithoutTransform(bool excludeSelf) const
+OffsetF FrameNode::GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf) const
 {
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, OffsetF());
-    OffsetF offset = excludeSelf ? OffsetF() : context->GetPaintRectWithoutTransform().GetOffset();
+    OffsetF offset = excludeSelf ? OffsetF() : context->GetPaintRectWithTranslate().GetOffset();
     auto parent = GetAncestorNodeOfFrame();
     while (parent) {
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, OffsetF());
-        offset += renderContext->GetPaintRectWithoutTransform().GetOffset();
+        offset += renderContext->GetPaintRectWithTranslate().GetOffset();
         parent = parent->GetAncestorNodeOfFrame();
     }
     return offset;

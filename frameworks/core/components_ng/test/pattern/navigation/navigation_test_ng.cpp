@@ -28,8 +28,10 @@
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
+#include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
-#include "core/components_ng/pattern/navigation/navigation_view.h"
+#include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
+#include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/components_ng/pattern/navigator/navigator_pattern.h"
 #include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
@@ -104,9 +106,9 @@ struct TestProperty {
  */
 HWTEST_F(NavigationTestNg, NavigationPatternTest001, TestSize.Level1)
 {
-    NavigationView navigationView;
-    navigationView.Create();
-    navigationView.SetTitle("navigationView", false);
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
     RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
@@ -121,9 +123,9 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest001, TestSize.Level1)
  */
 HWTEST_F(NavigationTestNg, NavigationPatternTest002, TestSize.Level1)
 {
-    NavigationView navigationView;
-    navigationView.Create();
-    navigationView.SetTitle("navigationView", false);
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
     RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
@@ -144,9 +146,9 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest002, TestSize.Level1)
  */
 HWTEST_F(NavigationTestNg, NavigationPatternTest003, TestSize.Level1)
 {
-    NavigationView navigationView;
-    navigationView.Create();
-    navigationView.SetTitle("navigationView", false);
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
     RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
@@ -187,9 +189,9 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest003, TestSize.Level1)
  */
 HWTEST_F(NavigationTestNg, NavigationPatternTest004, TestSize.Level1)
 {
-    NavigationView navigationView;
-    navigationView.Create();
-    navigationView.SetTitle("navigationView", false);
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
     RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
@@ -226,15 +228,15 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest004, TestSize.Level1)
  */
 HWTEST_F(NavigationTestNg, NavigationPatternTest005, TestSize.Level1)
 {
-    NavigationView navigationView;
-    navigationView.Create();
-    navigationView.SetTitle("navigationView", false);
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
 
     RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    navigationView.SetCustomTitle(frameNode);
+    navigationModel.SetCustomTitle(frameNode);
     RefPtr<UINode> uiNode = nullptr;
-    navigationView.SetCustomTitle(uiNode);
+    navigationModel.SetCustomTitle(uiNode);
 
     RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
         frameNode->GetLayoutProperty<NavigationLayoutProperty>();
@@ -248,9 +250,9 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest005, TestSize.Level1)
  */
 HWTEST_F(NavigationTestNg, NavigationTestNg001, TestSize.Level1)
 {
-    NavigationView navigationView;
-    navigationView.Create();
-    navigationView.SetTitle("NavigationTestNg", false);
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("NavigationTestNg", false);
     int32_t nodeId = TEST_DATA;
     auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>();
     NavigationGroupNode navigationGroupNode(TEST_TAG, nodeId, patternCreator);
@@ -266,9 +268,9 @@ HWTEST_F(NavigationTestNg, NavigationTestNg001, TestSize.Level1)
  */
 HWTEST_F(NavigationTestNg, NavigationTestNg002, TestSize.Level1)
 {
-    NavigationView navigationView;
-    navigationView.Create();
-    navigationView.SetTitle("NavigationTestNg", false);
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("NavigationTestNg", false);
     int32_t nodeId = TEST_DATA;
     auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>();
     NavigationGroupNode navigationGroupNode(TEST_TAG, nodeId, patternCreator);
@@ -288,9 +290,9 @@ HWTEST_F(NavigationTestNg, NavigationTestNg002, TestSize.Level1)
  */
 HWTEST_F(NavigationTestNg, NavigationTestNg003, TestSize.Level1)
 {
-    NavigationView navigationView;
-    navigationView.Create();
-    navigationView.SetTitle("NavigationTestNg", false);
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("NavigationTestNg", false);
     int32_t nodeId = TEST_DATA;
     auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>();
     NavigationGroupNode navigationGroupNode(TEST_TAG, nodeId, patternCreator);
@@ -311,15 +313,15 @@ HWTEST_F(NavigationTestNg, NavigationTestNg003, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavigationViewTest001
- * @tc.desc: Test NavigationView SetTitleMode.
+ * @tc.name: NavigationModelTest001
+ * @tc.desc: Test NavigationModel SetTitleMode.
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationTestNg, NavigationViewTest001, TestSize.Level1)
+HWTEST_F(NavigationTestNg, NavigationModelTest001, TestSize.Level1)
 {
-    NavigationView navigationView;
-    navigationView.Create();
-    navigationView.SetTitle("navigationView", false);
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     EXPECT_NE(frameNode, nullptr);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -328,8 +330,8 @@ HWTEST_F(NavigationTestNg, NavigationViewTest001, TestSize.Level1)
     EXPECT_NE(navBarNode, nullptr);
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     EXPECT_NE(navBarLayoutProperty, nullptr);
-    navigationView.SetTitleMode(NavigationTitleMode::FREE);
-    navigationView.SetTitleMode(NavigationTitleMode::MINI);
+    navigationModel.SetTitleMode(NavigationTitleMode::FREE);
+    navigationModel.SetTitleMode(NavigationTitleMode::MINI);
     bool result = true;
     if (navBarLayoutProperty->GetTitleModeString() != "NavigationTitleMode.Mini") {
         result = false;
@@ -338,15 +340,15 @@ HWTEST_F(NavigationTestNg, NavigationViewTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavigationViewTest002
- * @tc.desc: Test NavigationView SetHideTitleBar false.
+ * @tc.name: NavigationModelTest002
+ * @tc.desc: Test NavigationModel SetHideTitleBar false.
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationTestNg, NavigationViewTest002, TestSize.Level1)
+HWTEST_F(NavigationTestNg, NavigationModelTest002, TestSize.Level1)
 {
-    NavigationView navigationView;
-    navigationView.Create();
-    navigationView.SetTitle("navigationView", false);
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     EXPECT_NE(frameNode, nullptr);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -355,20 +357,20 @@ HWTEST_F(NavigationTestNg, NavigationViewTest002, TestSize.Level1)
     EXPECT_NE(navBarNode, nullptr);
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     EXPECT_NE(navBarLayoutProperty, nullptr);
-    navigationView.SetHideTitleBar(false);
+    navigationModel.SetHideTitleBar(false);
     EXPECT_EQ(navBarLayoutProperty->GetHideTitleBar().value_or(false), false);
 }
 
 /**
- * @tc.name: NavigationViewTest003
- * @tc.desc: Test NavigationView SetHideToolBar false.
+ * @tc.name: NavigationModelTest003
+ * @tc.desc: Test NavigationModel SetHideToolBar false.
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationTestNg, NavigationViewTest003, TestSize.Level1)
+HWTEST_F(NavigationTestNg, NavigationModelTest003, TestSize.Level1)
 {
-    NavigationView navigationView;
-    navigationView.Create();
-    navigationView.SetTitle("navigationView", false);
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     EXPECT_NE(frameNode, nullptr);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -377,22 +379,22 @@ HWTEST_F(NavigationTestNg, NavigationViewTest003, TestSize.Level1)
     EXPECT_NE(navBarNode, nullptr);
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     EXPECT_NE(navBarLayoutProperty, nullptr);
-    navigationView.SetHideToolBar(false);
+    navigationModel.SetHideToolBar(false);
     EXPECT_EQ(navBarLayoutProperty->GetHideToolBar().value_or(false), false);
 }
 
 /**
- * @tc.name: NavigationViewTest004
- * @tc.desc: Test NavigationView SetTitle & SetSubTitle.
+ * @tc.name: NavigationModelTest004
+ * @tc.desc: Test NavigationModel SetTitle & SetSubTitle.
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationTestNg, NavigationViewTest004, TestSize.Level1)
+HWTEST_F(NavigationTestNg, NavigationModelTest004, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
-    NavigationView navigationView;
-    navigationView.Create();
-    navigationView.SetTitle("navigationView", true);
-    navigationView.SetSubtitle("subtitle");
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationView", true);
+    navigationModel.SetSubtitle("subtitle");
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -403,7 +405,7 @@ HWTEST_F(NavigationTestNg, NavigationViewTest004, TestSize.Level1)
     ASSERT_NE(titleNode, nullptr);
     auto subTitleNode = navBarNode->GetSubtitle();
     ASSERT_NE(subTitleNode, nullptr);
-    navigationView.SetTitle("navigationView", false);
+    navigationModel.SetTitle("navigationView", false);
     auto newSubTitleNode = navBarNode->GetSubtitle();
     ASSERT_EQ(newSubTitleNode, nullptr);
 }
@@ -415,8 +417,9 @@ HWTEST_F(NavigationTestNg, NavigationViewTest004, TestSize.Level1)
  */
 HWTEST_F(NavigationTestNg, NavigationPatternTest_006, TestSize.Level1)
 {
-    NavigationView::Create();
-    NavigationView::SetUsrNavigationMode(NavigationMode::SPLIT);
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
     RefPtr<FrameNode> frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
@@ -437,7 +440,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_006, TestSize.Level1)
     EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
 
     // SetUsrNavigationMode:STACK, expect navigationMode_:STACK after OnModifyDone
-    NavigationView::SetUsrNavigationMode(NavigationMode::STACK);
+    navigationModel.SetUsrNavigationMode(NavigationMode::STACK);
     pattern->OnModifyDone();
     auto layoutWrapper1 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper1, nullptr);
@@ -476,8 +479,9 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_006, TestSize.Level1)
  */
 HWTEST_F(NavigationTestNg, NavigationPatternTest_007, TestSize.Level1)
 {
-    NavigationView::Create();
-    NavigationView::SetUsrNavigationMode(NavigationMode::STACK);
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetUsrNavigationMode(NavigationMode::STACK);
     RefPtr<FrameNode> frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
@@ -498,7 +502,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_007, TestSize.Level1)
     EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
 
     // SetUsrNavigationMode:SPLIT, expect navigationMode_:SPLIT after OnModifyDone
-    NavigationView::SetUsrNavigationMode(NavigationMode::SPLIT);
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
     pattern->OnModifyDone();
     auto layoutWrapper1 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper1, nullptr);
@@ -537,8 +541,9 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_007, TestSize.Level1)
  */
 HWTEST_F(NavigationTestNg, NavigationPatternTest_008, TestSize.Level1)
 {
-    NavigationView::Create();
-    NavigationView::SetUsrNavigationMode(NavigationMode::AUTO);
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetUsrNavigationMode(NavigationMode::AUTO);
     RefPtr<FrameNode> frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
@@ -559,7 +564,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_008, TestSize.Level1)
     EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
 
     // SetUsrNavigationMode:SPLIT, expect navigationMode_:SPLIT after OnModifyDone
-    NavigationView::SetUsrNavigationMode(NavigationMode::SPLIT);
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
     pattern->OnModifyDone();
     auto layoutWrapper1 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper1, nullptr);
@@ -598,8 +603,9 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_008, TestSize.Level1)
  */
 HWTEST_F(NavigationTestNg, NavigationPatternTest_009, TestSize.Level1)
 {
-    NavigationView::Create();
-    NavigationView::SetUsrNavigationMode(NavigationMode::AUTO);
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetUsrNavigationMode(NavigationMode::AUTO);
     RefPtr<FrameNode> frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
@@ -620,7 +626,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_009, TestSize.Level1)
     EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
 
     // SetUsrNavigationMode:STACK, expect navigationMode_:STACK after OnModifyDone
-    NavigationView::SetUsrNavigationMode(NavigationMode::STACK);
+    navigationModel.SetUsrNavigationMode(NavigationMode::STACK);
     pattern->OnModifyDone();
     auto layoutWrapper1 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper1, nullptr);
@@ -659,9 +665,10 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_009, TestSize.Level1)
  */
 HWTEST_F(NavigationTestNg, NavigationLayoutTest_001, TestSize.Level1)
 {
-    NavigationView::Create();
-    NavigationView::SetUsrNavigationMode(NavigationMode::SPLIT);
-    NavigationView::SetNavBarPosition(NavBarPosition::START);
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
+    navigationModel.SetNavBarPosition(NavBarPosition::START);
     RefPtr<FrameNode> frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
@@ -681,7 +688,7 @@ HWTEST_F(NavigationTestNg, NavigationLayoutTest_001, TestSize.Level1)
     EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
 
     // SetUsrNavigationMode:STACK, expect navigationMode_:STACK
-    NavigationView::SetUsrNavigationMode(NavigationMode::STACK);
+    navigationModel.SetUsrNavigationMode(NavigationMode::STACK);
     auto layoutWrapper1 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper1, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper1);
@@ -702,9 +709,10 @@ HWTEST_F(NavigationTestNg, NavigationLayoutTest_001, TestSize.Level1)
  */
 HWTEST_F(NavigationTestNg, NavigationLayoutTest_002, TestSize.Level1)
 {
-    NavigationView::Create();
-    NavigationView::SetUsrNavigationMode(NavigationMode::STACK);
-    NavigationView::SetNavBarPosition(NavBarPosition::START);
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetUsrNavigationMode(NavigationMode::STACK);
+    navigationModel.SetNavBarPosition(NavBarPosition::START);
     RefPtr<FrameNode> frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
@@ -724,7 +732,7 @@ HWTEST_F(NavigationTestNg, NavigationLayoutTest_002, TestSize.Level1)
     EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
 
     // SetUsrNavigationMode:SPLIT, expect navigationMode_:SPLIT
-    NavigationView::SetUsrNavigationMode(NavigationMode::SPLIT);
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
     auto layoutWrapper1 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper1, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper1);
@@ -736,5 +744,99 @@ HWTEST_F(NavigationTestNg, NavigationLayoutTest_002, TestSize.Level1)
     ASSERT_NE(layoutWrapper2, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper2);
     EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
+}
+
+/**
+ * @tc.name: NavigationModelNGTest001
+ * @tc.desc: Test Navigation Model
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNGTest001, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+
+    // ParseCommonTitle, Expect has Subtitle and Title or not
+    navigationModel.ParseCommonTitle(true, true, "navigationModel", "navigationModel");
+    navigationModel.ParseCommonTitle(false, false, "navigationModel", "navigationModel");
+    navigationModel.SetTitle("", true);
+
+    // SetTitleHeight:SPLIT_WIDTH
+    navigationModel.SetTitleHeight(SPLIT_WIDTH);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: NavigationModelNGTest002
+ * @tc.desc: Test Navigation Model
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNGTest002, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    RefPtr<PixelMap> pixMap = nullptr;
+    NG::BarItem bar;
+    std::vector<NG::BarItem> toolBarItems;
+    toolBarItems.push_back(bar);
+    navigationModel.Create();
+    navigationModel.SetTitleHeight(SPLIT_WIDTH);
+    navigationModel.SetSubtitle("navigationModel");
+    navigationModel.SetHideNavBar(true);
+    navigationModel.SetBackButtonIcon("navigationModel", true, pixMap);
+    navigationModel.SetHideBackButton(true);
+    navigationModel.NeedSetItems();
+    navigationModel.SetToolBarItems(std::move(toolBarItems));
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    EXPECT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto customNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    customNode->SetDepth(1);
+    EXPECT_NE(navBarNode->GetPreToolBarNode(), nullptr);
+    EXPECT_NE(static_cast<int32_t>(navBarNode->GetPreToolBarNode()->GetChildren().size()), 0);
+    navBarNode->SetPreToolBarNode(customNode);
+    navigationModel.SetToolBarItems(std::move(toolBarItems));
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    EXPECT_EQ(titleBarLayoutProperty->GetTitleHeight(), SPLIT_WIDTH);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    ASSERT_NE(navBarLayoutProperty, nullptr);
+    EXPECT_TRUE(navBarLayoutProperty->GetHideBackButton());
+}
+
+/**
+ * @tc.name: NavigationModelNGTest003
+ * @tc.desc: Test Navigation Model
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNGTest003, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    RefPtr<PixelMap> pixMap = nullptr;
+    bool isSelected = true;
+    auto onChange = [&isSelected](bool select) { isSelected = select; };
+    navigationModel.Create();
+    RefPtr<AceType> customNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(customNode, nullptr);
+    navigationModel.SetCustomMenu(customNode);
+    navigationModel.SetNavBarWidth(SPLIT_WIDTH);
+    navigationModel.SetOnNavBarStateChange(std::move(onChange));
+    navigationModel.SetNavigationMode(NavigationMode::AUTO);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetEventHub<EventHub>());
+    ASSERT_NE(navigationEventHub, nullptr);
+    navigationEventHub->SetOnNavBarStateChange(std::move(onChange));
+    EXPECT_TRUE(isSelected);
 }
 } // namespace OHOS::Ace::NG

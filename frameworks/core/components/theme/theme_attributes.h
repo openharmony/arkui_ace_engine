@@ -76,7 +76,6 @@ extern const char THEME_PATTERN_FORM[];
 // pattern general attributes
 extern const char PATTERN_FG_COLOR[];
 extern const char PATTERN_BG_COLOR[];
-extern const char PATTERN_BRODER_COLOR[];
 extern const char PATTERN_UNDERLINE_ACTIVED_COLOR[];
 extern const char PATTERN_UNDERLINE_TYPING_COLOR[];
 extern const char PATTERN_BG_COLOR_HOVERED[];

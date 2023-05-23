@@ -26,8 +26,8 @@ public:
     explicit SvgCanvasImage(const RefPtr<SvgDomBase>& svgDom) : svgDom_(svgDom) {}
     ~SvgCanvasImage() override = default;
 
-    void SetSvgFillColor(const std::optional<Color>& color) {}
-    std::optional<Color> GetSvgFillColor();
+    void SetFillColor(const std::optional<Color>& color) {}
+    std::optional<Color> GetFillColor();
 
     const RefPtr<SvgDomBase>& GetSVGDom() const;
 

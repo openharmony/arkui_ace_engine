@@ -112,7 +112,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     auto height = static_cast<float>(paragraph_->GetHeight());
     double baselineOffset = 0.0;
     textStyle.GetBaselineOffset().NormalizeToPx(
-        pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(), height, baselineOffset);
+        pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(), 0.0f, baselineOffset);
 
     baselineOffset_ = static_cast<float>(baselineOffset);
 
@@ -650,6 +650,13 @@ void TextLayoutAlgorithm::ApplyIndents(const TextStyle& textStyle, double width)
         indent = width * textStyle.GetTextIndent().Value();
     }
 #ifndef NEW_SKIA
+    std::vector<float> indents;
+    if (indent > 0.0) {
+        indents.emplace_back(static_cast<float>(indent));
+        indents.emplace_back(0.0);
+        paragraph_->SetIndents(indents);
+    }
+#else
     std::vector<float> indents;
     if (indent > 0.0) {
         indents.emplace_back(static_cast<float>(indent));

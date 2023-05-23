@@ -40,6 +40,13 @@ config("uiservice_manager_public_config") {
 }
 
 ohos_shared_library("ui_service_mgr") {
+  if (current_os == "ohos") {
+    sanitize = {
+      integer_overflow = true
+      boundary_sanitize = true
+      debug = ace_sanitize_debug
+    }
+  }
   sources = [
     "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/ui_service_mgr_client.cpp",
     "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/ui_service_mgr_proxy.cpp",
@@ -49,6 +56,7 @@ ohos_shared_library("ui_service_mgr") {
 
   configs = [
     "$ace_root:ace_config",
+    "$ace_root/test/unittest:ace_coverage_config",
     "//commonlibrary/c_utils/base:utils_config",
   ]
 
