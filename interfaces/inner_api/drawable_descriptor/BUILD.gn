@@ -37,7 +37,10 @@ ohos_shared_library("drawable_descriptor") {
   }
   public_configs = [ ":drawable_config" ]
 
-  configs = [ "$ace_root:ace_config" ]
+  configs = [
+    "$ace_root:ace_config",
+    "$ace_root/test/unittest:ace_coverage_config",
+  ]
 
   sources = [
     "drawable_descriptor.cpp",

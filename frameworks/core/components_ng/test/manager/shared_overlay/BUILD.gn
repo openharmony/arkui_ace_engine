@@ -75,8 +75,5 @@ ohos_unittest("shared_overlay_manager_test_ng") {
     "//third_party/googletest:gmock_main",
   ]
 
-  configs = [
-    "$ace_root:ace_test_config",
-    "$ace_root:ace_config",
-  ]
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }

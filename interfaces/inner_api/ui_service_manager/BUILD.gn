@@ -56,6 +56,7 @@ ohos_shared_library("ui_service_mgr") {
 
   configs = [
     "$ace_root:ace_config",
+    "$ace_root/test/unittest:ace_coverage_config",
     "//commonlibrary/c_utils/base:utils_config",
   ]
 
