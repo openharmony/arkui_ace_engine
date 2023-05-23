@@ -88,6 +88,10 @@ void UpdateTextProperties(const RefPtr<PopupParam>& param, const RefPtr<TextLayo
     if (fontWeight.has_value()) {
         textLayoutProps->UpdateFontWeight(fontWeight.value());
     }
+    auto fontStyle = param->GetFontStyle();
+    if (fontStyle.has_value()) {
+        textLayoutProps->UpdateItalicFontStyle(fontStyle.value());
+    }
 }
 } // namespace
 
