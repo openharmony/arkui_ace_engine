@@ -841,14 +841,12 @@ void JSTextField::JsMenuOptionsExtension(const JSCallbackInfo& info)
 
 void JSTextField::SetShowUnderline(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (!info[0]->IsBoolean()) {
-            LOGI("The info is wrong, it is supposed to be an boolean");
-            TextFieldModel::GetInstance()->SetShowUnderline(false);
-            return;
-        }
-        TextFieldModel::GetInstance()->SetShowUnderline(info[0]->ToBoolean());
+    if (!info[0]->IsBoolean()) {
+        LOGI("The info is wrong, it is supposed to be an boolean");
+        TextFieldModel::GetInstance()->SetShowUnderline(false);
+        return;
     }
+    TextFieldModel::GetInstance()->SetShowUnderline(info[0]->ToBoolean());
 }
 
 void JSTextField::SetPasswordIcon(const JSCallbackInfo& info)
