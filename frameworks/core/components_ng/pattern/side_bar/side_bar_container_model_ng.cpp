@@ -284,6 +284,11 @@ void SideBarContainerModelNG::SetDividerEndMargin(const Dimension& endMargin)
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerEndMargin, endMargin);
 }
 
+void SideBarContainerModelNG::SetMinContentWidth(const Dimension& minContentWidth)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinContentWidth, minContentWidth);
+}
+
 void SideBarContainerModelNG::SetOnChange(std::function<void(const bool)>&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

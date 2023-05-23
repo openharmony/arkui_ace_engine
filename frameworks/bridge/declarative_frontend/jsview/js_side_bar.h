@@ -32,6 +32,7 @@ public:
     static void JsShowSideBar(const JSCallbackInfo& info);
     static void JsControlButton(const JSCallbackInfo& info);
     static void JsDivider(const JSCallbackInfo& info);
+    static void JsMinContentWidth(const JSCallbackInfo& info);
     static void JsAutoHide(bool autoHide);
     static void JsSideBarPosition(const JSCallbackInfo& info);
     static void CreateForNG(const JSCallbackInfo& info);
