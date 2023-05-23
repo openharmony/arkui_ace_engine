@@ -532,6 +532,8 @@ public:
         return show_;
     }
 
+    bool IsAccessibilityEnabled() const;
+
     bool IsEnabled() const;
 
     bool IsCurrentFocus() const

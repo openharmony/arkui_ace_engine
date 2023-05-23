@@ -296,6 +296,26 @@ void FocusHub::SetFocusable(bool focusable)
     RefreshFocus();
 }
 
+bool FocusHub::IsAccessibilityEnabled() const
+{
+    if (!IsEnabled()) {
+        return false;
+    }
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, true);
+    auto parentNode = frameNode->GetFocusParent();
+    CHECK_NULL_RETURN(parentNode, true);
+    while (parentNode) {
+        auto eventHubEnable = parentNode->GetFocusHub();
+        CHECK_NULL_RETURN(eventHubEnable, true);
+        if (!eventHubEnable->IsEnabled()) {
+            return false;
+        }
+        parentNode = frameNode->GetFocusParent();
+    }
+    return true;
+}
+
 bool FocusHub::IsEnabled() const
 {
     auto eventHub = eventHub_.Upgrade();
