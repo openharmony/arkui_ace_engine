@@ -25,7 +25,6 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
-#include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -45,12 +44,68 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
-    const auto& constraint = swiperLayoutProperty->GetLayoutConstraint();
+    auto childLayoutConstraint = swiperLayoutProperty->CreateChildConstraint();
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
 
+    MeasureOneself(layoutWrapper, childLayoutConstraint);
+    // Measure child
+    childLayoutConstraint.parentIdealSize = OptionalSizeF(geometryNode->GetFrameSize());
+    MeasurePages(layoutWrapper, childLayoutConstraint);
+    MeasureIndicator(layoutWrapper, childLayoutConstraint);
+    MeasureArrow(layoutWrapper, childLayoutConstraint);
+    layoutWrapper->SetCacheCount(swiperLayoutProperty->GetCachedCount().value_or(1));
+}
+
+float SwiperLayoutAlgorithm::GetPrevAndNextMarginMontage(
+    const RefPtr<SwiperLayoutProperty>& property, float childCalcIdealLength)
+{
+    CHECK_NULL_RETURN(property, 0.0f);
+    auto prevMargin = property->GetPrevMarginValue(0.0_px).ConvertToPx();
+    auto nextMargin = property->GetNextMarginValue(0.0_px).ConvertToPx();
+    if (GreatNotEqual(prevMargin, childCalcIdealLength) ||
+        GreatNotEqual(nextMargin, childCalcIdealLength)) {
+        property->UpdatePrevMargin(0.0_px);
+        property->UpdateNextMargin(0.0_px);
+        return 0.0f;
+    }
+    bool isStretch = property->GetDisplayCount().has_value() ||
+                     property->GetDisplayMode().value_or(SwiperDisplayMode::STRETCH) == SwiperDisplayMode::STRETCH;
+    auto itemSpace = static_cast<float>(property->GetItemSpace().value_or(0.0_px).ConvertToPx());
+    auto prevMarginMontage = Positive(prevMargin) && isStretch ? prevMargin + itemSpace : 0.0f;
+    auto nextMarginMontage = Positive(nextMargin) && isStretch ? nextMargin + itemSpace : 0.0f;
+    return prevMarginMontage + nextMarginMontage;
+}
+
+void SwiperLayoutAlgorithm::MeasureOneself(LayoutWrapper* layoutWrapper, LayoutConstraintF childLayoutConstraint)
+{
+    if (onlyNeedMeasurePages_) {
+        return;
+    }
+    CHECK_NULL_VOID(layoutWrapper);
+    auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    const auto& constraint = swiperLayoutProperty->GetLayoutConstraint();
     auto axis = swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
     auto idealSize = CreateIdealSize(
         constraint.value(), axis, displayCount_ == 1 ? MeasureType::MATCH_PARENT : MeasureType::MATCH_CONTENT, true);
     auto padding = swiperLayoutProperty->CreatePaddingAndBorder();
+
+    if (displayCount_ == 1 && (constraint == std::nullopt || constraint->selfIdealSize.Width() == std::nullopt ||
+        constraint->selfIdealSize.Height() == std::nullopt)) {
+        childLayoutConstraint.parentIdealSize = OptionalSizeF(idealSize);
+        MeasureAllPagesToGetMaxChildSize(layoutWrapper, childLayoutConstraint);
+        idealSize = maxChildSize_;
+        float prevAndNextMarginMontage =
+            GetPrevAndNextMarginMontage(swiperLayoutProperty, maxChildSize_.MainSize(axis));
+        idealSize.SetMainSize(idealSize.MainSize(axis) + prevAndNextMarginMontage, axis);
+        idealSize.AddPadding(padding.left, padding.right, padding.top, padding.bottom);
+    }
+
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->SetFrameSize(idealSize);
+
     auto itemSpace = static_cast<float>(swiperLayoutProperty->GetItemSpace().value_or(0.0_px).ConvertToPx());
     bool isStretch =
         swiperLayoutProperty->GetDisplayCount().has_value() ||
@@ -59,49 +114,32 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto prevMarginMontage = Positive(prevMargin) && isStretch ? prevMargin + itemSpace : 0.0f;
     auto nextMargin = static_cast<float>(swiperLayoutProperty->GetNextMarginValue(0.0_px).ConvertToPx());
     auto nextMarginMontage = Positive(nextMargin) && isStretch ? nextMargin + itemSpace : 0.0f;
-    auto childLayoutConstraint = swiperLayoutProperty->CreateChildConstraint();
-
-    // Measure oneself
-    if (displayCount_ == 1 && (constraint == std::nullopt || constraint->selfIdealSize.Width() == std::nullopt ||
-        constraint->selfIdealSize.Height() == std::nullopt)) {
-        childLayoutConstraint.parentIdealSize = OptionalSizeF(idealSize);
-        MeasureAllPagesToGetMaxChildSize(layoutWrapper, childLayoutConstraint);
-        idealSize = maxChildSize_;
-        idealSize.SetMainSize(idealSize.MainSize(axis) + prevMarginMontage + nextMarginMontage, axis);
-        idealSize.AddPadding(padding.left, padding.right, padding.top, padding.bottom);
-    }
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    geometryNode->SetFrameSize(idealSize);
-
-    // Get maxChildSize_
+    // Calculate maxChildSize_
     maxChildSize_ = idealSize;
     maxChildSize_.MinusPadding(padding.left, padding.right, padding.top, padding.bottom);
     maxChildSize_.SetMainSize(maxChildSize_.MainSize(axis) - itemSpace * (displayCount_ - 1), axis);
-    maxChildSize_.SetMainSize(maxChildSize_.MainSize(axis) - prevMarginMontage - nextMarginMontage, axis);
+    float prevAndNextMarginMontage = GetPrevAndNextMarginMontage(
+        swiperLayoutProperty, (maxChildSize_.MainSize(axis) - prevMarginMontage - nextMarginMontage) / displayCount_);
+    maxChildSize_.SetMainSize(maxChildSize_.MainSize(axis) - prevAndNextMarginMontage, axis);
     maxChildSize_.SetMainSize(maxChildSize_.MainSize(axis) / displayCount_, axis);
-
-    // Measure child
-    childLayoutConstraint.parentIdealSize = OptionalSizeF(idealSize);
-    MeasurePages(layoutWrapper, childLayoutConstraint);
-    MeasureIndicator(layoutWrapper, childLayoutConstraint);
-    MeasureArrow(layoutWrapper, childLayoutConstraint);
-    layoutWrapper->SetCacheCount(swiperLayoutProperty->GetCachedCount().value_or(1));
 }
 
 void SwiperLayoutAlgorithm::MeasureAllPagesToGetMaxChildSize(
     LayoutWrapper* layoutWrapper, LayoutConstraintF childLayoutConstraint)
 {
-    if (onlyNeedMeasurePages_) {
-        return;
-    }
     CHECK_NULL_VOID(layoutWrapper);
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
     int32_t cachedCount = swiperLayoutProperty->GetCachedCount().value_or(1);
     maxChildSize_ = { 0, 0 };
-    for (int32_t index = static_cast<int32_t>(std::floor(currentOffsetTimes_)) - cachedCount;
-         static_cast<float>(index) <= (currentOffsetTimes_ + cachedCount); ++index) {
+
+    int32_t beginIndex = static_cast<int32_t>(std::floor(currentOffsetTimes_)) - cachedCount;
+    int32_t endIndex = static_cast<int32_t>(std::floor(currentOffsetTimes_)) + cachedCount;
+    if (endIndex - beginIndex >= totalCount_) {
+        beginIndex = 0;
+        endIndex = totalCount_ - 1;
+    }
+    for (int32_t index = beginIndex; index <= endIndex; ++index) {
         auto pagesWrapper = layoutWrapper->GetOrCreateChildByIndex((index + totalCount_) % totalCount_);
         if (!pagesWrapper) {
             continue;
@@ -118,6 +156,19 @@ void SwiperLayoutAlgorithm::MeasureAllPagesToGetMaxChildSize(
     }
 }
 
+void SwiperLayoutAlgorithm::CalculatePrevCountAndNextCount(const RefPtr<SwiperLayoutProperty>& property)
+{
+    auto axis = property->GetDirection().value_or(Axis::HORIZONTAL);
+    GetPrevAndNextMarginMontage(property, maxChildSize_.MainSize(axis));
+    bool isStretch =
+        property->GetDisplayCount().has_value() ||
+        property->GetDisplayMode().value_or(SwiperDisplayMode::STRETCH) == SwiperDisplayMode::STRETCH;
+    auto prevMargin = static_cast<float>(property->GetPrevMarginValue(0.0_px).ConvertToPx());
+    auto nextMargin = static_cast<float>(property->GetNextMarginValue(0.0_px).ConvertToPx());
+    prevCount_ = Positive(prevMargin) && isStretch ? 1 : 0;
+    nextCount_ = Positive(nextMargin) && isStretch ? 1 : 0;
+}
+
 void SwiperLayoutAlgorithm::MeasurePages(LayoutWrapper* layoutWrapper, LayoutConstraintF childLayoutConstraint)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -129,10 +180,14 @@ void SwiperLayoutAlgorithm::MeasurePages(LayoutWrapper* layoutWrapper, LayoutCon
         swiperLayoutProperty->GetDisplayMode().value_or(SwiperDisplayMode::STRETCH) == SwiperDisplayMode::STRETCH) {
         childLayoutConstraint.selfIdealSize.SetMainSize(maxChildSize_.MainSize(axis), axis);
     }
-    for (int32_t index = std::floor(currentOffsetTimes_);
-         static_cast<float>(index) < (currentOffsetTimes_ + displayCount_); ++index) {
-        auto pagesWrapper = layoutWrapper->GetOrCreateChildByIndex(index % totalCount_);
+
+    CalculatePrevCountAndNextCount(swiperLayoutProperty);
+
+    for (int32_t index = std::floor(currentOffsetTimes_) - prevCount_;
+         static_cast<float>(index) < (currentOffsetTimes_ + displayCount_ + nextCount_); ++index) {
+        auto pagesWrapper = layoutWrapper->GetOrCreateChildByIndex((index + totalCount_) % totalCount_);
         if (pagesWrapper) {
+            itemRange_.insert((index + totalCount_) % totalCount_);
             pagesWrapper->Measure(childLayoutConstraint);
         }
     }
@@ -222,9 +277,10 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     OffsetF contentOffset = { padding.left.value_or(0.0f), padding.top.value_or(0.0f) };
     contentOffset += axis == Axis::HORIZONTAL ? OffsetF(prevMarginMontage, 0.0f) : OffsetF(0.0f, prevMarginMontage);
 
-    for (int32_t index = std::floor(currentOffsetTimes_);
-         static_cast<float>(index) < (currentOffsetTimes_ + displayCount_); ++index) {
-        layoutWrapper->GetOrCreateChildByIndex(index % totalCount_);
+    CalculatePrevCountAndNextCount(swiperLayoutProperty);
+    for (int32_t index = std::floor(currentOffsetTimes_) - prevCount_;
+         static_cast<float>(index) < (currentOffsetTimes_ + displayCount_ - nextCount_); ++index) {
+        layoutWrapper->GetOrCreateChildByIndex((index + totalCount_) % totalCount_);
     }
     auto iterItemRange = itemRange_.begin();
     while (iterItemRange != itemRange_.end()) {
@@ -306,8 +362,8 @@ float SwiperLayoutAlgorithm::GetPagesOffsetTimes(int32_t index) const
 bool SwiperLayoutAlgorithm::IsVisiblePages(int32_t index) const
 {
     float pagesOffsetTimes = GetPagesOffsetTimes(index);
-    float minPagesOffsetTimes = -1.0f;
-    float maxPagesOffsetTimes = static_cast<float>(displayCount_);
+    float minPagesOffsetTimes = static_cast<float>(-1 - prevCount_);
+    float maxPagesOffsetTimes = static_cast<float>(displayCount_ + nextCount_);
     return minPagesOffsetTimes < pagesOffsetTimes && pagesOffsetTimes < maxPagesOffsetTimes;
 }
 
