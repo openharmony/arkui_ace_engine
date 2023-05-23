@@ -133,6 +133,8 @@ public:
 
     std::string ColorToString() const;
 
+    static Color ColorFromString(const std::string& str);
+
 private:
     constexpr explicit Color(ColorParam colorValue) : colorValue_(colorValue) {}
 

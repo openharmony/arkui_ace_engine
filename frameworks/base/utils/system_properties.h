@@ -19,9 +19,9 @@
 #include <memory>
 #include <string>
 
+#include "base/utils/device_config.h"
 #include "base/utils/device_type.h"
 #include "base/utils/macros.h"
-#include "base/utils/resource_configuration.h"
 
 namespace OHOS::Ace {
 
@@ -373,7 +373,7 @@ public:
     static bool IsPerformanceCheckEnabled();
 
     static int32_t GetPerformanceParameterWithType(PerformanceParameterType type);
-    
+
     static bool IsFormAnimationLimited();
 
 private:

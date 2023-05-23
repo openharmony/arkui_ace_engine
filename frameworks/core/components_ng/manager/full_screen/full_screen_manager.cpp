@@ -21,7 +21,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
-#ifdef WEB_SUPPORTE
+#ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/web_pattern.h"
 #endif
 namespace OHOS::Ace::NG {
@@ -112,7 +112,7 @@ bool FullScreenManager::OnBackPressed()
         CHECK_NULL_RETURN(videoPattern, false);
         return videoPattern->OnBackPressed();
     }
-#ifdef WEB_SUPPORTE
+#ifdef WEB_SUPPORTED
     if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_RETURN(pattern, false);

@@ -15,6 +15,9 @@
 
 #include "gtest/gtest.h"
 
+#include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/geometry_node.h"
+
 #define private public
 #define protected public
 
@@ -27,6 +30,7 @@
 #include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/test/mock/render/mock_canvas_image.h"
+#include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -36,13 +40,14 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr double RADIUS_DEFAULT = 300.0;
+constexpr double RADIUS_DEFAULT = 50.0;
+constexpr double RADIUS_EXTREME = 300.0;
 constexpr double IMAGE_WIDTH_DEFAULT = -1.0;
 constexpr double IMAGE_HEIGHT_DEFAULT = -1.0;
 constexpr double IMAGE_COMPONENTWIDTH_DEFAULT = -1.0;
 constexpr double IMAGE_COMPONENTHEIGHT_DEFAULT = -1.0;
-constexpr double IMAGE_COMPONENTSIZE_WIDTH = 400.0;
-constexpr double IMAGE_COMPONENTSIZE_HEIGHT = 500.0;
+constexpr double WIDTH = 400.0;
+constexpr double HEIGHT = 500.0;
 constexpr double IMAGE_COMPONENT_MAXSIZE_WIDTH = 600.0;
 constexpr double IMAGE_COMPONENT_MAXSIZE_HEIGHT = 700.0;
 constexpr double IMAGE_SOURCESIZE_WIDTH = 300.0;
@@ -60,6 +65,8 @@ constexpr ImageRenderMode IMAGE_RENDERMODE_DEFAULT = ImageRenderMode::ORIGINAL;
 constexpr bool MATCHTEXTDIRECTION_DEFAULT = true;
 const Color SVG_FILL_COLOR_DEFAULT = Color::BLUE;
 const std::vector<float> COLOR_FILTER_DEFAULT = { 1.0, 2.0, 3.0 };
+const SizeF CONTENT_SIZE = SizeF(400.0f, 500.0f);
+const OffsetF CONTENT_OFFSET = OffsetF(50.0f, 60.0f);
 constexpr bool SYNCMODE_DEFAULT = false;
 constexpr CopyOptions COPYOPTIONS_DEFAULT = CopyOptions::None;
 constexpr bool AUTORESIZE_DEFAULT = true;
@@ -269,7 +276,7 @@ HWTEST_F(ImageTestNg, SetImagePaintConfig001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetFrameSize(SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT));
+    geometryNode->SetFrameSize(SizeF(WIDTH, HEIGHT));
     frameNode->SetGeometryNode(geometryNode);
     frameNode->SetActive(true);
     /**
@@ -372,7 +379,7 @@ HWTEST_F(ImageTestNg, ImagePatternCallback001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetFrameSize(SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT));
+    geometryNode->SetFrameSize(SizeF(WIDTH, HEIGHT));
     frameNode->SetGeometryNode(geometryNode);
     /**
      * @tc.steps: step2. get ImagePattern and enter markModifyDone, load ImageLoadingContext.
@@ -408,7 +415,7 @@ HWTEST_F(ImageTestNg, ImagePatternCallback002, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetFrameSize(SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT));
+    geometryNode->SetFrameSize(SizeF(WIDTH, HEIGHT));
     frameNode->SetGeometryNode(geometryNode);
     /**
      * @tc.steps: step2. get ImagePattern and enter markModifyDone, load ImageLoadingContext.
@@ -500,6 +507,7 @@ HWTEST_F(ImageTestNg, ImagePatternCreateNodePaintMethod001, TestSize.Level1)
      */
     imagePattern->image_ = imagePattern->loadingCtx_->MoveCanvasImage();
     EXPECT_TRUE(imagePattern->CreateNodePaintMethod() != nullptr);
+    ASSERT_NE(imagePattern->imageModifier_, nullptr);
     /**
      * @tc.cases: case3. When AltImage load successfully and altImage Rect is valid, it will Create AltImage's
      *                   NodePaintMethod.
@@ -517,8 +525,66 @@ HWTEST_F(ImageTestNg, ImagePatternCreateNodePaintMethod001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ImagePaintMethod002
+ * @tc.desc: ImagePaintMethod can update radius correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImagePaintMethod002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNodeWithDefaultProp(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    // update border radius
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(Dimension(RADIUS_DEFAULT));
+    frameNode->GetRenderContext()->UpdateBorderRadius(borderRadius);
+    /**
+     * @tc.steps: step2. create ImagePaintMethod.
+     */
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    pattern->image_->SetPaintConfig(ImagePaintConfig());
+    pattern->imageModifier_ = AceType::MakeRefPtr<ImageModifier>();
+    ImagePaintMethod imagePaintMethod(pattern->image_, pattern->imageModifier_, true);
+    /**
+     * @tc.steps: step3. ImagePaintMethod UpdateContentModifier.
+     */
+    auto renderProps = pattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(renderProps, nullptr);
+    renderProps->UpdateImageRepeat(ImageRepeat::REPEAT_X);
+    renderProps->UpdateNeedBorderRadius(true);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(WIDTH, HEIGHT));
+    geometryNode->SetFrameOffset(OffsetF(WIDTH, HEIGHT));
+    geometryNode->SetContentSize(SizeF(WIDTH, HEIGHT));
+    PaintWrapper paintWrapper(frameNode->GetRenderContext(), geometryNode, renderProps);
+    imagePaintMethod.UpdateContentModifier(&paintWrapper);
+
+    ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
+    auto config = *imagePaintMethod.canvasImage_->paintConfig_;
+    EXPECT_EQ(config.imageRepeat_, ImageRepeat::REPEAT_X);
+    EXPECT_TRUE(config.borderRadiusXY_ != nullptr);
+    EXPECT_EQ(config.borderRadiusXY_->at(0).GetX(), RADIUS_DEFAULT);
+
+    /**
+     * @tc.steps: step3. Update image radius.
+     * radius should be normalized
+     */
+    borderRadius.SetRadius(Dimension(RADIUS_EXTREME));
+    frameNode->GetRenderContext()->UpdateBorderRadius(borderRadius);
+    imagePaintMethod.UpdateContentModifier(&paintWrapper);
+    config = *imagePaintMethod.canvasImage_->paintConfig_;
+    EXPECT_NE(config.borderRadiusXY_->at(0).GetX(), RADIUS_EXTREME);
+    EXPECT_EQ(config.borderRadiusXY_->at(0).GetX(), WIDTH / 2);
+}
+
+/**
  * @tc.name: ImagePaintMethod001
- * @tc.desc: ImagePaintMethod can get ContentDrawFunction and UpdatePaintConfig correctly.
+ * @tc.desc: ImagePaintMethod can getContentModifier and updateContentModifier..
  * @tc.type: FUNC
  */
 HWTEST_F(ImageTestNg, ImagePaintMethod001, TestSize.Level1)
@@ -536,21 +602,26 @@ HWTEST_F(ImageTestNg, ImagePaintMethod001, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    imagePattern->imageModifier_ = AceType::MakeRefPtr<ImageModifier>();
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, imagePattern->imageModifier_, true);
     /**
-     * @tc.steps: step3. ImagePaintMethod GetContentDrawFunction.
+     * @tc.steps: step3. ImagePaintMethod GetContentModifier.
      */
     auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
     ASSERT_NE(imageRenderProperty, nullptr);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetFrameSize(SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT));
-    geometryNode->SetFrameOffset(OffsetF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT));
+    geometryNode->SetFrameSize(SizeF(WIDTH, HEIGHT));
+    geometryNode->SetFrameOffset(OffsetF(WIDTH, HEIGHT));
     PaintWrapper paintWrapper(nullptr, geometryNode, imageRenderProperty);
     auto pipeLine = PipelineBase::GetCurrentContext();
     pipeLine->SetIsRightToLeft(true);
-    auto paintMethod = imagePaintMethod.GetContentDrawFunction(&paintWrapper);
     ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
-    ASSERT_NE(paintMethod, nullptr);
+    ASSERT_NE(imagePaintMethod.imageModifier_, nullptr);
+    ASSERT_NE(imagePaintMethod.GetContentModifier(&paintWrapper), nullptr);
+    /**
+     * @tc.steps: step4. ImagePaintMethod UpdatePaintConfig
+     */
+    imagePaintMethod.UpdateContentModifier(&paintWrapper);
     auto& config = imagePaintMethod.canvasImage_->paintConfig_;
     EXPECT_EQ(config->imageFit_, IMAGE_FIT_DEFAULT);
     EXPECT_EQ(config->renderMode_, IMAGE_RENDERMODE_DEFAULT);
@@ -639,6 +710,7 @@ HWTEST_F(ImageTestNg, ImageCreator002, TestSize.Level1)
     ASSERT_NE(imageRenderProperty, nullptr);
     EXPECT_EQ(imageRenderProperty->GetImagePaintStyle(), nullptr);
     EXPECT_EQ(imageRenderProperty->GetNeedBorderRadius(), std::nullopt);
+    EXPECT_EQ(imageRenderProperty->GetImageFit(), std::nullopt);
 }
 
 /**
@@ -689,6 +761,7 @@ HWTEST_F(ImageTestNg, ImageCreator003, TestSize.Level1)
     EXPECT_EQ(imageRenderProperty->GetImageRepeat().value(), IMAGE_NO_REPEAT);
     EXPECT_EQ(imageRenderProperty->GetMatchTextDirection().value(), MATCHTEXTDIRECTION_DEFAULT);
     EXPECT_TRUE(imageRenderProperty->GetNeedBorderRadiusValue());
+    EXPECT_EQ(imageRenderProperty->GetImageFitValue(), IMAGE_FIT_DEFAULT);
 }
 
 /**
@@ -710,8 +783,7 @@ HWTEST_F(ImageTestNg, ImageEventTest001, TestSize.Level1)
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
     auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    LoadImageSuccessEvent loadImageSuccessEvent(
-        IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT, IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT, 1);
+    LoadImageSuccessEvent loadImageSuccessEvent(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT, WIDTH, HEIGHT, 1);
     eventHub->FireCompleteEvent(loadImageSuccessEvent);
     EXPECT_EQ(curEvent.GetWidth(), loadImageSuccessEvent.GetWidth());
     EXPECT_EQ(curEvent.GetHeight(), loadImageSuccessEvent.GetHeight());
@@ -738,7 +810,7 @@ HWTEST_F(ImageTestNg, ImageEventTest002, TestSize.Level1)
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
     auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    LoadImageFailEvent loadImageFailEvent(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT, "image load error!");
+    LoadImageFailEvent loadImageFailEvent(WIDTH, HEIGHT, "image load error!");
     eventHub->FireErrorEvent(loadImageFailEvent);
     EXPECT_EQ(curEvent.GetErrorMessage(), loadImageFailEvent.GetErrorMessage());
     EXPECT_EQ(curEvent.GetComponentWidth(), loadImageFailEvent.GetComponentWidth());
@@ -796,7 +868,7 @@ HWTEST_F(ImageTestNg, ImageLayout001, TestSize.Level1)
         LoadNotifier(nullptr, nullptr, nullptr));
     ASSERT_NE(altloadingCtx, nullptr);
     LayoutConstraintF layoutConstraintSize;
-    layoutConstraintSize.selfIdealSize.SetSize(SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT));
+    layoutConstraintSize.selfIdealSize.SetSize(SizeF(WIDTH, HEIGHT));
     /**
     //     corresponding ets code:
     //         Image(IMAGE_SRC_URL).width(400).height(500)
@@ -805,7 +877,7 @@ HWTEST_F(ImageTestNg, ImageLayout001, TestSize.Level1)
     ASSERT_NE(imageLayoutAlgorithm1, nullptr);
     auto size1 = imageLayoutAlgorithm1->MeasureContent(layoutConstraintSize, &layoutWrapper);
     EXPECT_TRUE(size1 != std::nullopt);
-    EXPECT_EQ(size1.value(), SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT));
+    EXPECT_EQ(size1.value(), SizeF(WIDTH, HEIGHT));
     /**
     //     corresponding ets code:
     //         Image().width(400).height(500).Alt(ALT_SRC_URL)
@@ -814,7 +886,7 @@ HWTEST_F(ImageTestNg, ImageLayout001, TestSize.Level1)
     ASSERT_NE(imageLayoutAlgorithm2, nullptr);
     auto size2 = imageLayoutAlgorithm2->MeasureContent(layoutConstraintSize, &layoutWrapper);
     EXPECT_TRUE(size2 != std::nullopt);
-    EXPECT_EQ(size2.value(), SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT));
+    EXPECT_EQ(size2.value(), SizeF(WIDTH, HEIGHT));
     /**
     //     corresponding ets code:
     //         Image().width(400).height(500).Alt(ALT_SRC_URL)
@@ -823,7 +895,7 @@ HWTEST_F(ImageTestNg, ImageLayout001, TestSize.Level1)
     ASSERT_NE(imageLayoutAlgorithm3, nullptr);
     auto size3 = imageLayoutAlgorithm3->MeasureContent(layoutConstraintSize, &layoutWrapper);
     EXPECT_NE(size3, std::nullopt);
-    EXPECT_EQ(size3.value(), SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT));
+    EXPECT_EQ(size3.value(), SizeF(WIDTH, HEIGHT));
 }
 
 /**
@@ -913,7 +985,7 @@ HWTEST_F(ImageTestNg, ImageLayout004, TestSize.Level1)
     double aspectRatio = Size::CalcRatio(SizeF(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
 
     LayoutConstraintF layoutConstraintSize1;
-    layoutConstraintSize1.selfIdealSize.SetWidth(IMAGE_COMPONENTSIZE_WIDTH);
+    layoutConstraintSize1.selfIdealSize.SetWidth(WIDTH);
     /**
     //     corresponding ets code:
     //         Image(IMAGE_SRC_URL).Width(400)
@@ -922,10 +994,10 @@ HWTEST_F(ImageTestNg, ImageLayout004, TestSize.Level1)
     ASSERT_NE(imageLayoutAlgorithm1, nullptr);
     auto size1 = imageLayoutAlgorithm1->MeasureContent(layoutConstraintSize1, &layoutWrapper);
     ASSERT_NE(size1, std::nullopt);
-    EXPECT_EQ(size1.value(), SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_WIDTH / aspectRatio));
+    EXPECT_EQ(size1.value(), SizeF(WIDTH, WIDTH / aspectRatio));
 
     LayoutConstraintF layoutConstraintSize2;
-    layoutConstraintSize2.selfIdealSize.SetHeight(IMAGE_COMPONENTSIZE_HEIGHT);
+    layoutConstraintSize2.selfIdealSize.SetHeight(HEIGHT);
     /**
     //     corresponding ets code:
     //         Image(IMAGE_SRC_URL).Height(500)
@@ -934,13 +1006,13 @@ HWTEST_F(ImageTestNg, ImageLayout004, TestSize.Level1)
     ASSERT_NE(imageLayoutAlgorithm2, nullptr);
     auto size2 = imageLayoutAlgorithm2->MeasureContent(layoutConstraintSize2, &layoutWrapper);
     ASSERT_NE(size2, std::nullopt);
-    EXPECT_EQ(size2.value(), SizeF(IMAGE_COMPONENTSIZE_HEIGHT * aspectRatio, IMAGE_COMPONENTSIZE_HEIGHT));
+    EXPECT_EQ(size2.value(), SizeF(HEIGHT * aspectRatio, HEIGHT));
 
     auto altloadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
         ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT),
         LoadNotifier(nullptr, nullptr, nullptr));
     LayoutConstraintF layoutConstraintSize3;
-    layoutConstraintSize3.selfIdealSize.SetWidth(IMAGE_COMPONENTSIZE_WIDTH);
+    layoutConstraintSize3.selfIdealSize.SetWidth(WIDTH);
     /**
     //     corresponding ets code:
     //         Image(IMAGE_SRC_URL).Width(400).Alt(ALT_SRC_URL)
@@ -949,10 +1021,10 @@ HWTEST_F(ImageTestNg, ImageLayout004, TestSize.Level1)
     ASSERT_NE(imageLayoutAlgorithm3, nullptr);
     auto size3 = imageLayoutAlgorithm3->MeasureContent(layoutConstraintSize1, &layoutWrapper);
     ASSERT_NE(size3, std::nullopt);
-    EXPECT_EQ(size3.value(), SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_WIDTH / aspectRatio));
+    EXPECT_EQ(size3.value(), SizeF(WIDTH, WIDTH / aspectRatio));
 
     LayoutConstraintF layoutConstraintSize4;
-    layoutConstraintSize4.selfIdealSize.SetHeight(IMAGE_COMPONENTSIZE_HEIGHT);
+    layoutConstraintSize4.selfIdealSize.SetHeight(HEIGHT);
     /**
     //     corresponding ets code:
     //         Image(IMAGE_SRC_URL).Height(500).Alt(ALT_SRC_URL)
@@ -961,7 +1033,7 @@ HWTEST_F(ImageTestNg, ImageLayout004, TestSize.Level1)
     ASSERT_NE(imageLayoutAlgorithm4, nullptr);
     auto size4 = imageLayoutAlgorithm4->MeasureContent(layoutConstraintSize2, &layoutWrapper);
     ASSERT_NE(size4, std::nullopt);
-    EXPECT_EQ(size4.value(), SizeF(IMAGE_COMPONENTSIZE_HEIGHT * aspectRatio, IMAGE_COMPONENTSIZE_HEIGHT));
+    EXPECT_EQ(size4.value(), SizeF(HEIGHT * aspectRatio, HEIGHT));
 }
 
 /**
@@ -982,7 +1054,7 @@ HWTEST_F(ImageTestNg, ImageLayout005, TestSize.Level1)
     double aspectRatio = Size::CalcRatio(SizeF(ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
 
     LayoutConstraintF layoutConstraintSize1;
-    layoutConstraintSize1.selfIdealSize.SetWidth(IMAGE_COMPONENTSIZE_WIDTH);
+    layoutConstraintSize1.selfIdealSize.SetWidth(WIDTH);
     /**
     //     corresponding ets code:
     //         Image().Width(400).Alt(ALT_SRC_URL)
@@ -991,10 +1063,10 @@ HWTEST_F(ImageTestNg, ImageLayout005, TestSize.Level1)
     ASSERT_NE(imageLayoutAlgorithm1, nullptr);
     auto size1 = imageLayoutAlgorithm1->MeasureContent(layoutConstraintSize1, &layoutWrapper);
     ASSERT_NE(size1, std::nullopt);
-    EXPECT_EQ(size1.value(), SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_WIDTH / aspectRatio));
+    EXPECT_EQ(size1.value(), SizeF(WIDTH, WIDTH / aspectRatio));
 
     LayoutConstraintF layoutConstraintSize2;
-    layoutConstraintSize2.selfIdealSize.SetHeight(IMAGE_COMPONENTSIZE_HEIGHT);
+    layoutConstraintSize2.selfIdealSize.SetHeight(HEIGHT);
     /**
     //     corresponding ets code:
     //         Image().Height(500).Alt(ALT_SRC_URL)
@@ -1003,7 +1075,7 @@ HWTEST_F(ImageTestNg, ImageLayout005, TestSize.Level1)
     ASSERT_NE(imageLayoutAlgorithm2, nullptr);
     auto size2 = imageLayoutAlgorithm2->MeasureContent(layoutConstraintSize2, &layoutWrapper);
     ASSERT_NE(size2, std::nullopt);
-    EXPECT_EQ(size2.value(), SizeF(IMAGE_COMPONENTSIZE_HEIGHT * aspectRatio, IMAGE_COMPONENTSIZE_HEIGHT));
+    EXPECT_EQ(size2.value(), SizeF(HEIGHT * aspectRatio, HEIGHT));
 }
 
 /**
@@ -1027,7 +1099,7 @@ HWTEST_F(ImageTestNg, ImageLayout006, TestSize.Level1)
         LoadNotifier(nullptr, nullptr, nullptr));
     ASSERT_NE(altloadingCtx, nullptr);
     LayoutConstraintF layoutConstraintSize;
-    layoutConstraintSize.selfIdealSize.SetSize(SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT));
+    layoutConstraintSize.selfIdealSize.SetSize(SizeF(WIDTH, HEIGHT));
     /**
     //     corresponding ets code:
     //         Image(IMAGE_SRC_URL).width(400).height(500).fitOriginalSize(false)
@@ -1036,7 +1108,7 @@ HWTEST_F(ImageTestNg, ImageLayout006, TestSize.Level1)
     ASSERT_NE(imageLayoutAlgorithm1, nullptr);
     auto size1 = imageLayoutAlgorithm1->MeasureContent(layoutConstraintSize, &layoutWrapper);
     ASSERT_NE(size1, std::nullopt);
-    EXPECT_EQ(size1.value(), SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT));
+    EXPECT_EQ(size1.value(), SizeF(WIDTH, HEIGHT));
     /**
     //     corresponding ets code:
     //         Image().width(400).height(500).Alt(ALT_SRC_URL).fitOriginalSize(false)
@@ -1045,7 +1117,7 @@ HWTEST_F(ImageTestNg, ImageLayout006, TestSize.Level1)
     ASSERT_NE(imageLayoutAlgorithm2, nullptr);
     auto size2 = imageLayoutAlgorithm2->MeasureContent(layoutConstraintSize, &layoutWrapper);
     ASSERT_NE(size2, std::nullopt);
-    EXPECT_EQ(size2.value(), SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT));
+    EXPECT_EQ(size2.value(), SizeF(WIDTH, HEIGHT));
     /**
     //     corresponding ets code:
     //         Image().width(400).height(500).Alt(ALT_SRC_URL).fitOriginalSize(false)
@@ -1054,7 +1126,7 @@ HWTEST_F(ImageTestNg, ImageLayout006, TestSize.Level1)
     ASSERT_NE(imageLayoutAlgorithm3, nullptr);
     auto size3 = imageLayoutAlgorithm3->MeasureContent(layoutConstraintSize, &layoutWrapper);
     ASSERT_NE(size3, std::nullopt);
-    EXPECT_EQ(size3.value(), SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT));
+    EXPECT_EQ(size3.value(), SizeF(WIDTH, HEIGHT));
 }
 
 /**
@@ -1135,7 +1207,7 @@ HWTEST_F(ImageTestNg, ImageLayout008, TestSize.Level1)
     double aspectRatio = Size::CalcRatio(SizeF(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
 
     LayoutConstraintF layoutConstraintSize1;
-    layoutConstraintSize1.selfIdealSize.SetWidth(IMAGE_COMPONENTSIZE_WIDTH);
+    layoutConstraintSize1.selfIdealSize.SetWidth(WIDTH);
     /**
     //     corresponding ets code:
     //         Image(IMAGE_SRC_URL).Width(400).fitOriginalSize(false)
@@ -1144,10 +1216,10 @@ HWTEST_F(ImageTestNg, ImageLayout008, TestSize.Level1)
     ASSERT_NE(imageLayoutAlgorithm1, nullptr);
     auto size1 = imageLayoutAlgorithm1->MeasureContent(layoutConstraintSize1, &layoutWrapper);
     ASSERT_NE(size1, std::nullopt);
-    EXPECT_EQ(size1.value(), SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_WIDTH / aspectRatio));
+    EXPECT_EQ(size1.value(), SizeF(WIDTH, WIDTH / aspectRatio));
 
     LayoutConstraintF layoutConstraintSize2;
-    layoutConstraintSize2.selfIdealSize.SetHeight(IMAGE_COMPONENTSIZE_HEIGHT);
+    layoutConstraintSize2.selfIdealSize.SetHeight(HEIGHT);
     /**
     //     corresponding ets code:
     //         Image(IMAGE_SRC_URL).Height(500).fitOriginalSize(false)
@@ -1156,13 +1228,13 @@ HWTEST_F(ImageTestNg, ImageLayout008, TestSize.Level1)
     ASSERT_NE(imageLayoutAlgorithm2, nullptr);
     auto size2 = imageLayoutAlgorithm2->MeasureContent(layoutConstraintSize2, &layoutWrapper);
     ASSERT_NE(size2, std::nullopt);
-    EXPECT_EQ(size2.value(), SizeF(IMAGE_COMPONENTSIZE_HEIGHT * aspectRatio, IMAGE_COMPONENTSIZE_HEIGHT));
+    EXPECT_EQ(size2.value(), SizeF(HEIGHT * aspectRatio, HEIGHT));
 
     auto altloadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
         ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT),
         LoadNotifier(nullptr, nullptr, nullptr));
     LayoutConstraintF layoutConstraintSize3;
-    layoutConstraintSize3.selfIdealSize.SetWidth(IMAGE_COMPONENTSIZE_WIDTH);
+    layoutConstraintSize3.selfIdealSize.SetWidth(WIDTH);
     /**
     //     corresponding ets code:
     //         Image(IMAGE_SRC_URL).Width(400).Alt(ALT_SRC_URL).fitOriginalSize(false)
@@ -1171,10 +1243,10 @@ HWTEST_F(ImageTestNg, ImageLayout008, TestSize.Level1)
     ASSERT_NE(imageLayoutAlgorithm3, nullptr);
     auto size3 = imageLayoutAlgorithm3->MeasureContent(layoutConstraintSize1, &layoutWrapper);
     ASSERT_NE(size3, std::nullopt);
-    EXPECT_EQ(size3.value(), SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_WIDTH / aspectRatio));
+    EXPECT_EQ(size3.value(), SizeF(WIDTH, WIDTH / aspectRatio));
 
     LayoutConstraintF layoutConstraintSize4;
-    layoutConstraintSize4.selfIdealSize.SetHeight(IMAGE_COMPONENTSIZE_HEIGHT);
+    layoutConstraintSize4.selfIdealSize.SetHeight(HEIGHT);
     /**
     //     corresponding ets code:
     //         Image(IMAGE_SRC_URL).Height(500).Alt(ALT_SRC_URL).fitOriginalSize(false)
@@ -1183,7 +1255,7 @@ HWTEST_F(ImageTestNg, ImageLayout008, TestSize.Level1)
     ASSERT_NE(imageLayoutAlgorithm4, nullptr);
     auto size4 = imageLayoutAlgorithm4->MeasureContent(layoutConstraintSize2, &layoutWrapper);
     ASSERT_NE(size4, std::nullopt);
-    EXPECT_EQ(size4.value(), SizeF(IMAGE_COMPONENTSIZE_HEIGHT * aspectRatio, IMAGE_COMPONENTSIZE_HEIGHT));
+    EXPECT_EQ(size4.value(), SizeF(HEIGHT * aspectRatio, HEIGHT));
 }
 
 /**
@@ -1205,7 +1277,7 @@ HWTEST_F(ImageTestNg, ImageLayout009, TestSize.Level1)
     double aspectRatio = Size::CalcRatio(SizeF(ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
 
     LayoutConstraintF layoutConstraintSize1;
-    layoutConstraintSize1.selfIdealSize.SetWidth(IMAGE_COMPONENTSIZE_WIDTH);
+    layoutConstraintSize1.selfIdealSize.SetWidth(WIDTH);
     /**
     //     corresponding ets code:
     //         Image().Widrh(400).Alt(ALT_SRC_URL).fitOriginalSize(false)
@@ -1214,10 +1286,10 @@ HWTEST_F(ImageTestNg, ImageLayout009, TestSize.Level1)
     ASSERT_NE(imageLayoutAlgorithm1, nullptr);
     auto size1 = imageLayoutAlgorithm1->MeasureContent(layoutConstraintSize1, &layoutWrapper);
     ASSERT_NE(size1, std::nullopt);
-    EXPECT_EQ(size1.value(), SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_WIDTH / aspectRatio));
+    EXPECT_EQ(size1.value(), SizeF(WIDTH, WIDTH / aspectRatio));
 
     LayoutConstraintF layoutConstraintSize2;
-    layoutConstraintSize2.selfIdealSize.SetHeight(IMAGE_COMPONENTSIZE_HEIGHT);
+    layoutConstraintSize2.selfIdealSize.SetHeight(HEIGHT);
     /**
     //     corresponding ets code:
     //         Image().Height(500).Alt(ALT_SRC_URL).fitOriginalSize(false)
@@ -1226,7 +1298,7 @@ HWTEST_F(ImageTestNg, ImageLayout009, TestSize.Level1)
     ASSERT_NE(imageLayoutAlgorithm2, nullptr);
     auto size2 = imageLayoutAlgorithm2->MeasureContent(layoutConstraintSize2, &layoutWrapper);
     ASSERT_NE(size2, std::nullopt);
-    EXPECT_EQ(size2.value(), SizeF(IMAGE_COMPONENTSIZE_HEIGHT * aspectRatio, IMAGE_COMPONENTSIZE_HEIGHT));
+    EXPECT_EQ(size2.value(), SizeF(HEIGHT * aspectRatio, HEIGHT));
 }
 
 /**
@@ -1283,7 +1355,7 @@ HWTEST_F(ImageTestNg, ImageLayout011, TestSize.Level1)
     ASSERT_NE(imageLayoutProperty, nullptr);
     LayoutWrapper layoutWrapper(nullptr, nullptr, imageLayoutProperty);
     LayoutConstraintF layoutConstraintSize;
-    layoutConstraintSize.selfIdealSize.SetSize(SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT));
+    layoutConstraintSize.selfIdealSize.SetSize(SizeF(WIDTH, HEIGHT));
     /**
     //     corresponding ets code:
     //         Image()
@@ -1316,11 +1388,11 @@ HWTEST_F(ImageTestNg, ImageLayoutFunction001, TestSize.Level1)
     /**
      * @tc.cases: case2. layoutWrapper->GetGeometryNode()->GetContent() is true, func success.
      */
-    geometryNode->SetContentSize(SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT));
+    geometryNode->SetContentSize(SizeF(WIDTH, HEIGHT));
     imageLayoutAlgorithm->Layout(&layoutWrapper);
     EXPECT_EQ(loadingCtx->imageFit_, ImageFit::COVER);
     EXPECT_EQ(loadingCtx->autoResize_, true);
-    EXPECT_EQ(loadingCtx->dstSize_, SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT));
+    EXPECT_EQ(loadingCtx->dstSize_, SizeF(WIDTH, HEIGHT));
 }
 
 /**
@@ -1376,6 +1448,8 @@ HWTEST_F(ImageTestNg, CopyOption001, TestSize.Level1)
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     gestureHub->ActLongClick();
     EXPECT_TRUE(pattern->selectOverlay_);
+
+    // close selectOverlay
     gestureHub->ActClick();
     EXPECT_FALSE(pattern->selectOverlay_);
 
@@ -1386,5 +1460,180 @@ HWTEST_F(ImageTestNg, CopyOption001, TestSize.Level1)
     pattern->SetCopyOption(CopyOptions::Distributed);
     frameNode->MarkModifyDone();
     EXPECT_TRUE(gestureHub->longPressEventActuator_->longPressEvent_);
+
+    // should close selectOverlay when pattern is deleted
+    gestureHub->ActLongClick();
+    pattern->OnDetachFromFrameNode(AceType::RawPtr(frameNode));
+    EXPECT_FALSE(pattern->selectOverlay_);
+
+    gestureHub->ActLongClick();
+    EXPECT_TRUE(pattern->selectOverlay_);
+
+    // shouldn't close selectOverlay when VisibleChange(true) triggers
+    pattern->OnVisibleChange(true);
+    EXPECT_TRUE(pattern->selectOverlay_);
+
+    pattern->OnVisibleChange(false);
+    EXPECT_FALSE(pattern->selectOverlay_);
+}
+
+/**
+ * @tc.name: ImageModifier001
+ * @tc.desc: Test UpdateContentModifier and Check ImageModifier member variable value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageModifier001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Image frameNode and ImagePaintMethod
+     */
+    auto frameNode = ImageTestNg::CreateImageNodeWithDefaultProp(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->image_->SetPaintConfig(ImagePaintConfig());
+    imagePattern->CreateNodePaintMethod();
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, imagePattern->imageModifier_, true);
+    /**
+     * @tc.steps: step2. UpdateContentModifier
+     */
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    imageRenderProperty->UpdateImageFit(IMAGE_FIT_DEFAULT);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    PaintWrapper paintWrapper(nullptr, geometryNode, imageRenderProperty);
+    imagePaintMethod.UpdateContentModifier(&paintWrapper);
+    /**
+     * @tc.steps: step3. Get imageModifier member variable value
+     * @tc.expected: Check imageModifier member variable value
+     */
+    auto imageModifier = imagePaintMethod.imageModifier_;
+    ASSERT_NE(imageModifier, nullptr);
+    auto canvasImage = imageModifier->canvasImage_.Upgrade();
+    ASSERT_NE(canvasImage, nullptr);
+    EXPECT_EQ(imageModifier->contentSize_, CONTENT_SIZE);
+    EXPECT_EQ(imageModifier->offset_, CONTENT_OFFSET);
+    EXPECT_EQ(imageModifier->imageFit_->Get(), static_cast<float>(IMAGE_FIT_DEFAULT));
+}
+
+/**
+ * @tc.name: ImageModifier002
+ * @tc.desc: Test ImageModifier UpdatePaintConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageModifier002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ImageModifier and CanvasImage;
+     */
+    RefPtr<ImageModifier> imageMoidifier = AceType::MakeRefPtr<ImageModifier>();
+    RefPtr<CanvasImage> canvasImage = AceType::MakeRefPtr<MockCanvasImage>();
+    canvasImage->SetPaintConfig(ImagePaintConfig());
+    auto config = canvasImage->GetPaintConfig();
+    config.dstRect_ = RectF(0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT);
+    config.srcRect_ = RectF(0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT);
+    /**
+     * @tc.steps: step2. UpdateImageData and UpdatePaintConfig
+     * @tc.expected: Check dstRect and srcRect value
+     */
+    SizeF contentSize(WIDTH, HEIGHT);
+    OffsetF offset(WIDTH, HEIGHT);
+    auto canvas = AceType::WeakClaim(AceType::RawPtr(canvasImage));
+    imageMoidifier->UpdateImageData(canvas, offset, contentSize);
+    imageMoidifier->UpdatePaintConfig(1.0f);
+    EXPECT_EQ(config.dstRect_, RectF(0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
+    EXPECT_EQ(config.srcRect_, RectF(0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
+}
+
+/**
+ * @tc.name: ImageModifier003
+ * @tc.desc: Test ImageModifier onDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageModifier003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ImagePaintMethod.
+     */
+    RefPtr<ImageModifier> imageMoidifier = AceType::MakeRefPtr<ImageModifier>();
+    RefPtr<CanvasImage> canvasImage = AceType::MakeRefPtr<MockCanvasImage>();
+    canvasImage->SetPaintConfig(ImagePaintConfig());
+    ImagePaintMethod imagePaintMethod(canvasImage, imageMoidifier, true);
+    /**
+     * @tc.steps: step2. ImagePaintMethod GetContentModifier and UpdateContentModifier
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto imageRenderProperty = AceType::MakeRefPtr<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    PaintWrapper paintWrapper(nullptr, geometryNode, imageRenderProperty);
+    ASSERT_NE(imagePaintMethod.GetContentModifier(&paintWrapper), nullptr);
+    imagePaintMethod.UpdateContentModifier(&paintWrapper);
+    ASSERT_NE(imagePaintMethod.imageModifier_, nullptr);
+    /**
+     * @tc.steps: step3. ImageModifier onDraw
+     * @tc.expected: CanvasImage isDrawAnimate member variable
+     */
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    auto imageCanvas = imagePaintMethod.imageModifier_->canvasImage_.Upgrade();
+    ASSERT_NE(imageCanvas, nullptr);
+    imagePaintMethod.imageModifier_->isFirst_ = true;
+    imagePaintMethod.imageModifier_->onDraw(context);
+    EXPECT_EQ(imageCanvas->isDrawAnimate_, false);
+    imagePaintMethod.imageModifier_->isFirst_ = false;
+    auto paintConfig = imageCanvas->GetPaintConfig();
+    paintConfig.isSvg_ = true;
+    imagePaintMethod.imageModifier_->onDraw(context);
+    EXPECT_EQ(imageCanvas->isDrawAnimate_, false);
+    paintConfig.isSvg_ = false;
+    imagePaintMethod.imageModifier_->onDraw(context);
+    EXPECT_EQ(imageCanvas->isDrawAnimate_, false);
+}
+
+/**
+ * @tc.name: ImageModifier004
+ * @tc.desc: Test ImageModifier SetImageFit and Modify
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageModifier004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ImagePaintMethod.
+     */
+    RefPtr<ImageModifier> imageMoidifier = AceType::MakeRefPtr<ImageModifier>();
+    RefPtr<CanvasImage> canvasImage = AceType::MakeRefPtr<MockCanvasImage>();
+    canvasImage->SetPaintConfig(ImagePaintConfig());
+    ImagePaintMethod imagePaintMethod(canvasImage, imageMoidifier, true);
+    /**
+     * @tc.steps: step2. ImagePaintMethod GetContentModifier and UpdateContentModifier
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto imageRenderProperty = AceType::MakeRefPtr<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    PaintWrapper paintWrapper(nullptr, geometryNode, imageRenderProperty);
+    ASSERT_NE(imagePaintMethod.GetContentModifier(&paintWrapper), nullptr);
+    imagePaintMethod.UpdateContentModifier(&paintWrapper);
+    ASSERT_NE(imagePaintMethod.imageModifier_, nullptr);
+    /**
+     * @tc.steps: step3. ImageModifier Set ImageFit and Modify
+     * @tc.expected: Attach Property value
+     */
+    Testing::MockCanvas canvas;
+    imagePaintMethod.imageModifier_->SetImageFit(ImageFit::FILL);
+    EXPECT_EQ(imagePaintMethod.imageModifier_->imageFit_->Get(), static_cast<float>(ImageFit::FILL));
+    imagePaintMethod.imageModifier_->SetImageFit(ImageFit::SCALE_DOWN);
+    EXPECT_EQ(imagePaintMethod.imageModifier_->imageFit_->Get(), static_cast<float>(ImageFit::SCALE_DOWN));
+    auto flag = imagePaintMethod.imageModifier_->flag_->Get();
+    imagePaintMethod.imageModifier_->Modify();
+    EXPECT_EQ(imagePaintMethod.imageModifier_->flag_->Get(), !flag);
 }
 } // namespace OHOS::Ace::NG

@@ -16,14 +16,17 @@
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 
 #include "core/common/container.h"
+#include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::NG {
-void ViewContextModelNG::closeAnimation(const AnimationOption& option)
+void ViewContextModelNG::closeAnimation(const AnimationOption& option, bool needFlush)
 {
     NG::ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
+    if (needFlush) {
+        NG::ViewStackProcessor::GetInstance()->FlushImplicitAnimation();
+    }
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    NG::ViewStackProcessor::GetInstance()->FlushImplicitAnimation();
     auto pipelineContextBase = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContextBase);
     pipelineContextBase->CloseImplicitAnimation();
@@ -31,9 +34,10 @@ void ViewContextModelNG::closeAnimation(const AnimationOption& option)
 
 void ViewContextModelNG::openAnimation(const AnimationOption& option)
 {
+    NG::ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
+
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    NG::ViewStackProcessor::GetInstance()->FlushImplicitAnimation();
     auto pipelineContextBase = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContextBase);
     pipelineContextBase->OpenImplicitAnimation(option, option.GetCurve(), option.GetOnFinishEvent());

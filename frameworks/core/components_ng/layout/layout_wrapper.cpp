@@ -20,10 +20,12 @@
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper_builder.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -150,7 +152,7 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
     }
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    if (geometryTransition != nullptr) {
+    if (geometryTransition != nullptr && geometryTransition->IsRunning()) {
         geometryTransition->WillLayout(Claim(this));
     }
 
@@ -214,7 +216,8 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
         layoutAlgorithm_->Measure(this);
 
         // check aspect radio.
-        if (hasAspectRatio) {
+        auto pattern = host->GetPattern();
+        if (pattern && pattern->IsNeedAdjustByAspectRatio()) {
             auto aspectRatio = magicItemProperty->GetAspectRatioValue();
             // Adjust by aspect ratio, firstly pick height based on width. It means that when width, height and
             // aspectRatio are all set, the height is not used.
@@ -234,8 +237,7 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
 // Called to perform layout children.
 void LayoutWrapper::Layout()
 {
-    // performace check
-    AddFlexLayouts();
+    int64_t time = GetSysTimestamp();
     auto host = GetHostNode();
     CHECK_NULL_VOID(layoutProperty_);
     CHECK_NULL_VOID(geometryNode_);
@@ -271,29 +273,11 @@ void LayoutWrapper::Layout()
         layoutProperty_->UpdateContentConstraint();
     }
     layoutAlgorithm_->Layout(this);
-    if (SystemProperties::IsPerformanceCheckEnabled() && IsHostFlex()) {
-        PERFORMANCE_CHECK_FLEX_CHILDREN_LAYOUTS(GetChildrenFlexLayouts(childrenMap_));
-    }
+    time = GetSysTimestamp() - time;
+    AddNodeFlexLayouts();
+    AddNodeLayoutTime(time);
     LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", host->GetTag().c_str(),
         host->GetDepth(), geometryNode_->GetFrameOffset().ToString().c_str());
-}
-
-CheckNodeMap LayoutWrapper::GetChildrenFlexLayouts(
-    const std::unordered_map<int32_t, RefPtr<LayoutWrapper>>& childrenMap)
-{
-    CheckNodeMap nodeMap;
-    for (auto&& child : childrenMap) {
-        if (child.second->GetFlexLayouts() >=
-            SystemProperties::GetPerformanceParameterWithType(PerformanceParameterType::FLEX_LAYOUTS)) {
-            auto node = child.second->GetHostNode();
-            CheckNodeInfo checkNode;
-            checkNode.col = node->GetCol();
-            checkNode.row = node->GetRow();
-            checkNode.tag = node->GetTag();
-            nodeMap.insert(std::make_pair(checkNode, child.second->GetFlexLayouts()));
-        }
-    }
-    return nodeMap;
 }
 
 bool LayoutWrapper::SkipMeasureContent() const
@@ -333,7 +317,7 @@ void LayoutWrapper::MountToHostOnMainThread()
 
 void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
 {
-    if (GetHostTag() != V2::TAB_CONTENT_ITEM_ETS_TAG || isActive_) {
+    if (isActive_) {
         for (const auto& child : children_) {
             if (!child) {
                 continue;
@@ -387,7 +371,7 @@ std::pair<int32_t, int32_t> LayoutWrapper::GetLazyBuildRange()
     return { -1, 0 };
 }
 
-void LayoutWrapper::AddFlexLayouts()
+void LayoutWrapper::AddNodeFlexLayouts()
 {
     if (!SystemProperties::IsPerformanceCheckEnabled()) {
         return;
@@ -397,14 +381,17 @@ void LayoutWrapper::AddFlexLayouts()
     auto parent = host->GetParent();
     CHECK_NULL_VOID(parent);
     if (parent->GetTag() == V2::FLEX_ETS_TAG) {
-        flexLayouts_++;
+        host->AddFlexLayouts();
     }
 }
 
-bool LayoutWrapper::IsHostFlex()
+void LayoutWrapper::AddNodeLayoutTime(int64_t time)
 {
+    if (!SystemProperties::IsPerformanceCheckEnabled()) {
+        return;
+    }
     auto host = GetHostNode();
-    CHECK_NULL_RETURN(host, false);
-    return host->GetTag() == V2::FLEX_ETS_TAG;
+    CHECK_NULL_VOID(host);
+    host->SetLayoutTime(time);
 }
 } // namespace OHOS::Ace::NG

@@ -328,6 +328,8 @@ public:
     // get XTS inspector value
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 
+    virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
+
     virtual void OnAreaChangedInner() {}
     virtual void OnVisibleChange(bool isVisible) {}
     virtual std::string ProvideRestoreInfo()
@@ -336,6 +338,15 @@ public:
     }
 
     virtual void OnRestoreInfo(const std::string& restoreInfo) {}
+
+    virtual bool IsNeedAdjustByAspectRatio()
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto layoutProperty = host->GetLayoutProperty();
+        CHECK_NULL_RETURN(host, false);
+        return layoutProperty->HasAspectRatio();
+    }
 
 protected:
     virtual void OnAttachToFrameNode() {}

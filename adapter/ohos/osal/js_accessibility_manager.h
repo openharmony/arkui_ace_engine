@@ -191,7 +191,7 @@ private:
     void FocusMoveSearchNG(int32_t elementId, int32_t direction, Accessibility::AccessibilityElementInfo& info,
         const RefPtr<PipelineBase>& context);
 
-    bool ExecuteActionNG(int32_t elementId, const std::map<std::string, std::string> actionArguments,
+    bool ExecuteActionNG(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         Accessibility::ActionType action, const RefPtr<PipelineBase>& context);
 
     void SetSearchElementInfoByAccessibilityIdResult(Accessibility::AccessibilityElementOperatorCallback& callback,

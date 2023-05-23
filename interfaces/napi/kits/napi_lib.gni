@@ -45,6 +45,13 @@ template("ace_napi_lib") {
   module_name = string_replace(module_path, "_", "")
 
   ohos_shared_library(module_name) {
+    if (current_os == "ohos") {
+      sanitize = {
+        integer_overflow = true
+        boundary_sanitize = true
+        debug = ace_sanitize_debug
+      }
+    }
     deps = [ "$ace_root/interfaces/napi/kits/${module_path}:${module_name}_static_${platform}" ]
 
     relative_install_dir = "module" + install_dir

@@ -144,6 +144,7 @@ public:
     virtual void SetFlexShrink(float value) = 0;
     virtual void SetFlexGrow(float value) = 0;
     virtual void SetDisplayIndex(int32_t value) = 0;
+    virtual void ResetFlexShrink() = 0;
 
     // gradient
     virtual void SetLinearGradient(const NG::Gradient& gradient) = 0;

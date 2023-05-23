@@ -19,11 +19,11 @@
 #include <memory>
 #include <string>
 
-#include "base/utils/macros.h"
+#include "macros.h"
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT HotReloader {
+class ACE_EXPORT_WITH_PREVIEW HotReloader {
 public:
     static void HotReload();
 };

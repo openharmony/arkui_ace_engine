@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@ public:
     void Paint(RenderContext& context, const Offset& offset) override;
 
 private:
+#ifndef USE_ROSEN_DRAWING
     void DrawCheck(SkCanvas* canvas, const Offset& origin, const SkPaint& paint, const SkPaint& shadowPaint) const;
     void DrawActiveBorder(SkCanvas* canvas, const Offset& paintOffset, SkPaint& strokePaint) const;
     void DrawPartSelect(
@@ -42,6 +43,23 @@ private:
         SkCanvas* canvas, const Offset& origin, const SkPaint& paint, const SkPaint& shadowPaint) const;
     void DrawAnimationOnToOff(
         SkCanvas* canvas, const Offset& origin, const SkPaint& paint, const SkPaint& shadowPaint) const;
+#else
+    void DrawCheck(RSCanvas* canvas, const Offset& origin, const RSPen& pen,
+        const RSPen& shadowPen) const;
+    void DrawActiveBorder(
+        RSCanvas* canvas, const Offset& paintOffset, RSPen& strokePen) const;
+    void DrawPartSelect(RSCanvas* canvas, const Offset& paintOffset, RSPen& strokePen,
+        const RSPen& shadowPen) const;
+    void DrawUnselected(
+        RSCanvas* canvas, const Offset& origin, uint32_t paintColor, RSPen& pen) const;
+    void SetUIStatus(RSCanvas* canvas, const Offset& paintOffset, RSPen& strokePaint,
+        RSPen& shadowPaint);
+    void DrawBorder(RSCanvas* canvas, const Offset& origin, const Size& paintSize) const;
+    void DrawAnimationOffToOn(RSCanvas* canvas, const Offset& origin, const RSPen& pen,
+        const RSPen& shadowPen) const;
+    void DrawAnimationOnToOff(RSCanvas* canvas, const Offset& origin, const RSPen& pen,
+        const RSPen& shadowPen) const;
+#endif
     void DrawFocusBorder(RenderContext& context, const Offset& offset);
     void DrawTouchBoard(const Offset& offset, RenderContext& context);
     void DrawHoverBoard(const Offset& offset, RenderContext& context);

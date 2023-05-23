@@ -37,6 +37,9 @@ public:
         V2::SwipeEdgeEffect edgeEffect) override;
     void SetSelectCallback(OnSelectFunc&& selectCallback) override;
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
+    void SetDeleteArea(std::function<void()>&& builderAction, bool useDefaultDeleteAnimation, OnDeleteEvent&& onDelete,
+        OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea, const Dimension& length,
+        bool isStartArea) override;
 
 private:
     static std::unique_ptr<ListItemModel> instance_;

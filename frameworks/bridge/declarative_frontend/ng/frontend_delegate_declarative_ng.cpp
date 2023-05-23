@@ -87,7 +87,7 @@ void FrontendDelegateDeclarativeNG::RunPage(
 void FrontendDelegateDeclarativeNG::Push(const std::string& uri, const std::string& params)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Push({ uri }, params);
+    pageRouterManager_->Push(NG::RouterPageInfo({ uri, params }));
     OnMediaQueryUpdate();
 }
 
@@ -95,21 +95,22 @@ void FrontendDelegateDeclarativeNG::PushWithMode(const std::string& uri, const s
 {
     CHECK_NULL_VOID(pageRouterManager_);
     // TODO: router mode support
-    pageRouterManager_->Push({ uri }, params);
+    pageRouterManager_->Push(NG::RouterPageInfo({ uri, params }));
 }
 
 void FrontendDelegateDeclarativeNG::PushWithCallback(const std::string& uri, const std::string& params,
     const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->PushWithCallback({ uri }, params, errorCallback);
+    // TODO: router mode support
+    pageRouterManager_->Push(NG::RouterPageInfo({ uri, params }));
     OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::Replace(const std::string& uri, const std::string& params)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Replace({ uri }, params);
+    pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params }));
 }
 
 void FrontendDelegateDeclarativeNG::ReplaceWithMode(
@@ -117,21 +118,22 @@ void FrontendDelegateDeclarativeNG::ReplaceWithMode(
 {
     CHECK_NULL_VOID(pageRouterManager_);
     // TODO: router mode support
-    pageRouterManager_->Replace({ uri }, params);
+    pageRouterManager_->Replace({ uri, params });
 }
 
 void FrontendDelegateDeclarativeNG::ReplaceWithCallback(const std::string& uri, const std::string& params,
     const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->ReplaceWithCallback({ uri }, params, errorCallback);
+    // TODO: router mode support
+    pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params }));
     OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::Back(const std::string& uri, const std::string& params)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->BackWithTarget({ uri }, params);
+    pageRouterManager_->BackWithTarget(NG::RouterPageInfo({ uri, params }));
 }
 
 void FrontendDelegateDeclarativeNG::Clear()

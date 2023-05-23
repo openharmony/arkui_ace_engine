@@ -28,10 +28,12 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #define private public
 #define protected public
+#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/button/button_model_ng.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
@@ -46,6 +48,7 @@
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/list/list_properties.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
@@ -66,6 +69,12 @@ constexpr int32_t DEFAULT_LANES = 1;
 constexpr float DEFAULT_INTERVAL = 0;
 constexpr int32_t DEFAULT_STARTINDEX = 0;
 constexpr float LISTITEM_NODE_WIDTH = 80.f;
+constexpr float START_NODE_SIZE = 80.f;
+constexpr float END_NODE_SIZE = 100.f;
+constexpr Dimension DELETE_AREA_DISTANCE = Dimension(50, DimensionUnit::VP);
+constexpr float MOVE_DELTA = 80.f;
+constexpr float MOVE_DELTA2 = 100.f;
+constexpr float MOVE_DELTA3 = 20.f;
 } // namespace
 
 class ListTestNg : public testing::Test {
@@ -83,6 +92,9 @@ protected:
         Axis Direction = Axis::VERTICAL, bool focusable = false);
     void CreateListItemWithSwiper(
         std::function<void()> startAction, std::function<void()> endAction, V2::SwipeEdgeEffect effect);
+    void CreateListItemWithSwipeActionItem(std::function<void()> builderAction, bool useDefaultDeleteAnimation,
+        OnDeleteEvent onDelete, OnEnterDeleteAreaEvent onEnterDeleteArea, OnExitDeleteAreaEvent onExitDeleteArea,
+        const Dimension& length, bool isStartArea, V2::SwipeEdgeEffect effect);
     RefPtr<LayoutWrapper> RunMeasureAndLayout();
     RefPtr<GeometryNode> GetChildGeometryNode(const RefPtr<FrameNode>& frameNode, int32_t index);
     RefPtr<FrameNode> GetChildFrameNode(int32_t index);
@@ -114,6 +126,11 @@ protected:
 void ListTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
+    // set buttonTheme to themeManager before using themeManager to get buttonTheme
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
 }
 
 void ListTestNg::TearDownTestSuite()
@@ -190,6 +207,8 @@ void ListTestNg::CreateListItem(int32_t itemCount, Axis Direction, bool focusabl
             SetHeight(FILL_LENGTH);
         }
         if (focusable) {
+            ButtonModelNG buttonModelNG;
+            buttonModelNG.CreateWithLabel("label");
             ViewStackProcessor::GetInstance()->Pop();
         }
         ViewStackProcessor::GetInstance()->Pop();
@@ -209,6 +228,29 @@ void ListTestNg::CreateListItemWithSwiper(
         rowModel.Create(std::nullopt, nullptr, "");
         SetWidth(FILL_LENGTH);
         SetHeight(Dimension(DEFAULT_LISTITEM_VERTICAL_LENGTH));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+}
+
+void ListTestNg::CreateListItemWithSwipeActionItem(std::function<void()> builderAction, bool useDefaultDeleteAnimation,
+    OnDeleteEvent onDelete, OnEnterDeleteAreaEvent onEnterDeleteArea, OnExitDeleteAreaEvent onExitDeleteArea,
+    const Dimension& length, bool isStartArea, V2::SwipeEdgeEffect effect)
+{
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    ListItemModelNG listItemModel;
+    listItemModel.Create();
+    SetHeight(Dimension(DEFAULT_LISTITEM_VERTICAL_LENGTH));
+    SetWidth(FILL_LENGTH);
+    listItemModel.SetSwiperAction(nullptr, nullptr, effect);
+    listItemModel.SetDeleteArea(std::move(builderAction), useDefaultDeleteAnimation, std::move(onDelete),
+        std::move(onEnterDeleteArea), std::move(onExitDeleteArea), length, isStartArea);
+    {
+        RowModelNG rowModel;
+        rowModel.Create(std::nullopt, nullptr, "");
+        SetHeight(Dimension(DEFAULT_LISTITEM_VERTICAL_LENGTH));
+        SetWidth(FILL_LENGTH);
         ViewStackProcessor::GetInstance()->Pop();
     }
     ViewStackProcessor::GetInstance()->Pop();
@@ -1471,11 +1513,315 @@ HWTEST_F(ListTestNg, ListItemAttrSwiperTest007, TestSize.Level1)
 
 /**
  * @tc.name: ListItemAttrSwiperTest008
+ * @tc.desc: Set the swiperAction Attribute for ListItem, set startNode, startDeleteArea, deleteAreaDistance and
+ * EdgeEffect is none, List can swiper right great than startNode size, if great than startNode size +
+ * deleteAreaDistance, it will adjust to startNode size + deleteAreaDistance
+ *
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListItemAttrSwiperTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get frameNode and set SetSwiperAction for ListItem.
+     */
+    auto startFunc = GetDefaultSwiperBuilder(START_NODE_SIZE, false);
+
+    CreateListItemWithSwipeActionItem(
+        startFunc, true, nullptr, nullptr, nullptr, DELETE_AREA_DISTANCE, true, V2::SwipeEdgeEffect::None);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step2. move right 80px, RunMeasureAndLayout and check result.
+     * @tc.expected: startNode loaded, x position is 80px - startNodeSize
+     */
+    auto itemPattern = GetItemPattern(0);
+    ListItemSwipeMoveAndLayout(itemPattern, MOVE_DELTA);
+    auto childNode = GetChildGeometryNode(itemPattern->GetHost(), 1);
+    auto childRect = childNode->GetFrameRect();
+    EXPECT_FLOAT_EQ(childRect.GetX(), MOVE_DELTA);
+    auto startNode = GetChildGeometryNode(itemPattern->GetHost(), 0);
+    auto startRect = startNode->GetFrameRect();
+    EXPECT_FLOAT_EQ(startRect.Width(), START_NODE_SIZE);
+    EXPECT_FLOAT_EQ(startRect.GetX(), MOVE_DELTA - START_NODE_SIZE);
+
+    /**
+     * @tc.steps: step3. continue move right 80px, RunMeasureAndLayout and check result.
+     * @tc.expected: startNode loaded, x position is deleteAreaDistance, child node position is startNodeSize +
+     * deleteAreaDistance
+     */
+    ListItemSwipeMoveAndLayout(itemPattern, MOVE_DELTA);
+    childNode = GetChildGeometryNode(itemPattern->GetHost(), 1);
+    childRect = childNode->GetFrameRect();
+    EXPECT_FLOAT_EQ(childRect.GetX(), START_NODE_SIZE + static_cast<float>(DELETE_AREA_DISTANCE.ConvertToPx()));
+    startNode = GetChildGeometryNode(itemPattern->GetHost(), 0);
+    startRect = startNode->GetFrameRect();
+    EXPECT_FLOAT_EQ(startRect.Width(), START_NODE_SIZE);
+    EXPECT_FLOAT_EQ(startRect.GetX(), static_cast<float>(DELETE_AREA_DISTANCE.ConvertToPx()));
+}
+
+/**
+ * @tc.name: ListItemAttrSwiperTest009
+ * @tc.desc: Set the swiperAction Attribute for ListItem, set endNode, endDeleteArea, deleteAreaDistance and
+ * EdgeEffect is none, List can swiper left great than endNode size, if great than endNode size +
+ * deleteAreaDistance, it will adjust to endNode size + deleteAreaDistance
+ *
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListItemAttrSwiperTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get frameNode and set SetSwiperAction for ListItem.
+     */
+    auto endFunc = GetDefaultSwiperBuilder(END_NODE_SIZE, false);
+
+    CreateListItemWithSwipeActionItem(
+        endFunc, true, nullptr, nullptr, nullptr, DELETE_AREA_DISTANCE, false, V2::SwipeEdgeEffect::None);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step2. move left 100px, RunMeasureAndLayout and check result.
+     * @tc.expected: endNode loaded, x position is DEFAULT_ROOT_WIDTH - 100px
+     */
+    auto itemPattern = GetItemPattern(0);
+    ListItemSwipeMoveAndLayout(itemPattern, -MOVE_DELTA2);
+    auto childNode = GetChildGeometryNode(itemPattern->GetHost(), 1);
+    auto childRect = childNode->GetFrameRect();
+    EXPECT_FLOAT_EQ(childRect.GetX(), -MOVE_DELTA2);
+    auto endNode = GetChildGeometryNode(itemPattern->GetHost(), 0);
+    auto endRect = endNode->GetFrameRect();
+    EXPECT_FLOAT_EQ(endRect.Width(), END_NODE_SIZE);
+    EXPECT_FLOAT_EQ(endRect.GetX(), DEFAULT_ROOT_WIDTH - MOVE_DELTA2);
+
+    /**
+     * @tc.steps: step3. continue move left 100px, RunMeasureAndLayout and check result.
+     * @tc.expected: endNode loaded, x position is DEFAULT_ROOT_WIDTH - endNodeSize - deleteAreaDistance, child node
+     * position is endNodeSize + deleteAreaDistance
+     */
+    ListItemSwipeMoveAndLayout(itemPattern, -MOVE_DELTA2);
+    childNode = GetChildGeometryNode(itemPattern->GetHost(), 1);
+    childRect = childNode->GetFrameRect();
+    EXPECT_FLOAT_EQ(childRect.GetX(), -END_NODE_SIZE - static_cast<float>(DELETE_AREA_DISTANCE.ConvertToPx()));
+    endNode = GetChildGeometryNode(itemPattern->GetHost(), 0);
+    endRect = endNode->GetFrameRect();
+    EXPECT_FLOAT_EQ(endRect.Width(), END_NODE_SIZE);
+    EXPECT_FLOAT_EQ(
+        endRect.GetX(), DEFAULT_ROOT_WIDTH - END_NODE_SIZE - static_cast<float>(DELETE_AREA_DISTANCE.ConvertToPx()));
+}
+
+/**
+ * @tc.name: ListItemAttrSwiperTest010
+ * @tc.desc: Test swiperAction Attribute for ListItem, set startNode, startDeleteArea, deleteAreaDistance and edge
+ * effect is spring. move friction take effect when moving to the right distance great than startNode size +
+ * deleteAreaDistance
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListItemAttrSwiperTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get frameNode and set SetSwiperAction for ListItem.
+     */
+    auto startFunc = GetDefaultSwiperBuilder(START_NODE_SIZE, true);
+
+    CreateListItemWithSwipeActionItem(
+        startFunc, true, nullptr, nullptr, nullptr, DELETE_AREA_DISTANCE, true, V2::SwipeEdgeEffect::Spring);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step2. moving to the right distance great than startNode size + deleteAreaDistance, check startNode
+     * position.
+     */
+    auto itemPattern = GetItemPattern(0);
+    ListItemSwipeMoveAndLayout(itemPattern, MOVE_DELTA2);
+    ListItemSwipeMoveAndLayout(itemPattern, static_cast<float>(DELETE_AREA_DISTANCE.ConvertToPx()));
+    ListItemSwipeMoveAndLayout(itemPattern, MOVE_DELTA3);
+
+    auto childNode = GetChildGeometryNode(itemPattern->GetHost(), 1);
+    auto childRect = childNode->GetFrameRect();
+    auto factor = ListItemPattern::CalculateFriction(MOVE_DELTA3 / (DEFAULT_ROOT_WIDTH - START_NODE_SIZE));
+    float expOffset = factor * MOVE_DELTA3 + MOVE_DELTA2 + static_cast<float>(DELETE_AREA_DISTANCE.ConvertToPx());
+    EXPECT_FLOAT_EQ(childRect.GetX(), expOffset);
+    auto startNode = GetChildGeometryNode(itemPattern->GetHost(), 0);
+    auto startRect = startNode->GetFrameRect();
+    EXPECT_FLOAT_EQ(startRect.Width(), expOffset);
+    EXPECT_FLOAT_EQ(startRect.GetX(), 0);
+}
+
+/**
+ * @tc.name: ListItemAttrSwiperTest011
+ * @tc.desc: Test swiperAction Attribute for ListItem, set endNode, endDeleteArea, deleteAreaDistance and edge
+ * effect is spring. move friction take effect when moving to the left distance great than endNode size +
+ * deleteAreaDistance
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListItemAttrSwiperTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get frameNode and set SetSwiperAction for ListItem.
+     */
+    auto endFunc = GetDefaultSwiperBuilder(END_NODE_SIZE, true);
+
+    CreateListItemWithSwipeActionItem(
+        endFunc, true, nullptr, nullptr, nullptr, DELETE_AREA_DISTANCE, false, V2::SwipeEdgeEffect::Spring);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step2. moving to the left distance great than endNode size + deleteAreaDistance, check startNode
+     * position.
+     */
+    auto itemPattern = GetItemPattern(0);
+    ListItemSwipeMoveAndLayout(itemPattern, -MOVE_DELTA2 - MOVE_DELTA3);
+    ListItemSwipeMoveAndLayout(itemPattern, -static_cast<float>(DELETE_AREA_DISTANCE.ConvertToPx()));
+    ListItemSwipeMoveAndLayout(itemPattern, -MOVE_DELTA3);
+
+    auto childNode = GetChildGeometryNode(itemPattern->GetHost(), 1);
+    auto childRect = childNode->GetFrameRect();
+    auto factor = ListItemPattern::CalculateFriction(MOVE_DELTA3 / (DEFAULT_ROOT_WIDTH - END_NODE_SIZE));
+    float expOffset =
+        factor * -MOVE_DELTA3 - MOVE_DELTA2 - MOVE_DELTA3 - static_cast<float>(DELETE_AREA_DISTANCE.ConvertToPx());
+    EXPECT_FLOAT_EQ(childRect.GetX(), expOffset);
+    auto endNode = GetChildGeometryNode(itemPattern->GetHost(), 0);
+    auto endRect = endNode->GetFrameRect();
+    EXPECT_FLOAT_EQ(endRect.Width(), -expOffset);
+    EXPECT_FLOAT_EQ(endRect.GetX(), DEFAULT_ROOT_WIDTH + expOffset);
+}
+
+/**
+ * @tc.name: ListItemAttrSwiperTest012
+ * @tc.desc: Test swiperAction Attribute for ListItem, set enterStartDeleteArea callback and exitStartDeleteArea
+ * callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListItemAttrSwiperTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get frameNode and set SetSwiperAction for ListItem.
+     */
+    auto builder = GetDefaultSwiperBuilder(START_NODE_SIZE, false);
+
+    bool isEnterStartDeleteAreaCalled = false;
+    bool isExitStartDeleteAreaCalled = false;
+    auto enterStartDeleteArea = [&isEnterStartDeleteAreaCalled]() { isEnterStartDeleteAreaCalled = true; };
+    auto exitStartDeleteArea = [&isExitStartDeleteAreaCalled]() { isExitStartDeleteAreaCalled = true; };
+    CreateListItemWithSwipeActionItem(builder, true, nullptr, enterStartDeleteArea, exitStartDeleteArea,
+        DELETE_AREA_DISTANCE, true, V2::SwipeEdgeEffect::Spring);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step2. moving to the right distance great than startNode size + deleteAreaDistance, check
+     * enterStartDeleteArea callback.
+     */
+    auto itemPattern = GetItemPattern(0);
+    ListItemSwipeMoveAndLayout(itemPattern, MOVE_DELTA);
+    ListItemSwipeMoveAndLayout(itemPattern, static_cast<float>(DELETE_AREA_DISTANCE.ConvertToPx()));
+    ListItemSwipeMoveAndLayout(itemPattern, MOVE_DELTA3);
+    EXPECT_TRUE(isEnterStartDeleteAreaCalled);
+
+    /**
+     * @tc.steps: step3. moving to the left distance less than startNode size + deleteAreaDistance, check
+     * exitStartDeleteArea callback.
+     */
+    ListItemSwipeMoveAndLayout(itemPattern, -MOVE_DELTA);
+    EXPECT_TRUE(isExitStartDeleteAreaCalled);
+}
+
+/**
+ * @tc.name: ListItemAttrSwiperTest013
+ * @tc.desc: Test swiperAction Attribute for ListItem, set enterEndDeleteArea callback and exitEndDeleteArea
+ * callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListItemAttrSwiperTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get frameNode and set SetSwiperAction for ListItem.
+     */
+    auto builder = GetDefaultSwiperBuilder(END_NODE_SIZE, false);
+
+    bool isEnterEndDeleteAreaCalled = false;
+    bool isExitEndDeleteAreaCalled = false;
+    auto enterEndDeleteArea = [&isEnterEndDeleteAreaCalled]() { isEnterEndDeleteAreaCalled = true; };
+    auto exitEndDeleteArea = [&isExitEndDeleteAreaCalled]() { isExitEndDeleteAreaCalled = true; };
+    CreateListItemWithSwipeActionItem(builder, true, nullptr, enterEndDeleteArea, exitEndDeleteArea,
+        DELETE_AREA_DISTANCE, false, V2::SwipeEdgeEffect::Spring);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step2. moving to the left distance great than endNode size + deleteAreaDistance, check
+     * enterEndDeleteArea callback.
+     */
+    auto itemPattern = GetItemPattern(0);
+    ListItemSwipeMoveAndLayout(itemPattern, -MOVE_DELTA2);
+    ListItemSwipeMoveAndLayout(itemPattern, -static_cast<float>(DELETE_AREA_DISTANCE.ConvertToPx()));
+    ListItemSwipeMoveAndLayout(itemPattern, -MOVE_DELTA3);
+    EXPECT_TRUE(isEnterEndDeleteAreaCalled);
+
+    /**
+     * @tc.steps: step3. moving to the right distance less than endNode size + deleteAreaDistance, check
+     * exitEndDeleteArea callback.
+     */
+    ListItemSwipeMoveAndLayout(itemPattern, MOVE_DELTA2);
+    EXPECT_TRUE(isExitEndDeleteAreaCalled);
+}
+
+/**
+ * @tc.name: ListItemAttrSwiperTest014
+ * @tc.desc: Test swiperAction Attribute for ListItem, set deleteArea, deleteAreaDistance and onDeleteCallBack, Drag the
+ * ListItem left or right to obtain the correct SwipeIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListItemAttrSwiperTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get frameNode and set SetSwiperAction for ListItem.
+     */
+    auto builder = GetDefaultSwiperBuilder(START_NODE_SIZE, false);
+
+    bool isStartOnDeleteCalled = false;
+    auto startOnDelete = [&isStartOnDeleteCalled]() { isStartOnDeleteCalled = true; };
+    CreateListItemWithSwipeActionItem(
+        builder, true, startOnDelete, nullptr, nullptr, DELETE_AREA_DISTANCE, true, V2::SwipeEdgeEffect::Spring);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step2. moving to the right distance great than startNode size + deleteAreaDistance, check
+     * SwipeIndex.
+     */
+    auto itemPattern = GetItemPattern(0);
+    ListItemSwipeMoveAndLayout(itemPattern, MOVE_DELTA);
+    ListItemSwipeMoveAndLayout(itemPattern, static_cast<float>(DELETE_AREA_DISTANCE.ConvertToPx()));
+    ListItemSwipeMoveAndLayout(itemPattern, MOVE_DELTA3);
+    GestureEvent info;
+    itemPattern->HandleDragEnd(info);
+    EXPECT_EQ(itemPattern->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
+
+    /**
+     * @tc.steps: step3. moving to the left distance great than endNode size + deleteAreaDistance, check
+     * SwipeIndex.
+     */
+    ListItemSwipeMoveAndLayout(itemPattern, -MOVE_DELTA);
+    ListItemSwipeMoveAndLayout(itemPattern, -static_cast<float>(DELETE_AREA_DISTANCE.ConvertToPx()));
+    ListItemSwipeMoveAndLayout(itemPattern, -MOVE_DELTA3);
+    ListItemSwipeMoveAndLayout(itemPattern, -MOVE_DELTA);
+    ListItemSwipeMoveAndLayout(itemPattern, -static_cast<float>(DELETE_AREA_DISTANCE.ConvertToPx()));
+    ListItemSwipeMoveAndLayout(itemPattern, -MOVE_DELTA3);
+    itemPattern->HandleDragEnd(info);
+    EXPECT_EQ(itemPattern->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
+}
+
+/**
+ * @tc.name: ListItemAttrSwiperTest015
  * @tc.desc: Test swiperAction Attribute for ListItem, set startNode and endNode.
  * Drag the ListItem left or right with speed.
  * @tc.type: FUNC
  */
-HWTEST_F(ListTestNg, ListItemAttrSwiperTest008, TestSize.Level1)
+HWTEST_F(ListTestNg, ListItemAttrSwiperTest015, TestSize.Level1)
 {
     auto builder = GetDefaultSwiperBuilder(LISTITEM_NODE_WIDTH, false);
 
@@ -1502,12 +1848,12 @@ HWTEST_F(ListTestNg, ListItemAttrSwiperTest008, TestSize.Level1)
     EXPECT_EQ(itemPattern->GetSwiperIndex(), ListItemSwipeIndex::SWIPER_END);
 }
 /**
- * @tc.name: ListItemAttrSwiperTest009
+ * @tc.name: ListItemAttrSwiperTest016
  * @tc.desc: Test swiperAction Attribute for ListItem, set startNode and endNode.
  * When switch ListItem to drag, the previous would be reset.
  * @tc.type: FUNC
  */
-HWTEST_F(ListTestNg, ListItemAttrSwiperTest009, TestSize.Level1)
+HWTEST_F(ListTestNg, ListItemAttrSwiperTest016, TestSize.Level1)
 {
     auto builder = GetDefaultSwiperBuilder(LISTITEM_NODE_WIDTH, false);
 
@@ -1734,7 +2080,8 @@ HWTEST_F(ListTestNg, ListItemGroupHeaderFooterTest003, TestSize.Level1)
      * @tc.steps: step4. Has no head and foot.
      * @tc.expected: Children count is ListItem count.
      */
-    EXPECT_EQ(frameNode_->GetChildren().size(), 1);
+    size_t expectCount = 1;
+    EXPECT_EQ(frameNode_->GetChildren().size(), expectCount);
 }
 
 /**
@@ -2883,6 +3230,7 @@ HWTEST_F(ListTestNg, PaintMethod001, TestSize.Level1)
 {
     ListModelNG listModelNG;
     listModelNG.Create();
+    listModelNG.SetChainAnimation(true);
     RefPtr<ScrollControllerBase> scrollController = listModelNG.CreateScrollController();
     listModelNG.SetScroller(scrollController, nullptr);
     GetInstance();
@@ -3133,6 +3481,15 @@ HWTEST_F(ListTestNg, Pattern005, TestSize.Level1)
     GetInstance();
     RunMeasureAndLayout();
 
+    ChainAnimationOptions options = {
+        .minSpace = Dimension(minSpace),
+        .maxSpace = Dimension(maxSpace),
+        .conductivity = conductivity,
+        .intensity = intensity,
+        .edgeEffect = 0,
+    };
+    pattern_->SetChainAnimationOptions(options);
+
     /**
      * @tc.steps: step1. When minSpace > maxSpace.
      * @tc.expected: minSpace and maxSpace would be space.
@@ -3177,6 +3534,15 @@ HWTEST_F(ListTestNg, Pattern006, TestSize.Level1)
     GetInstance();
     RunMeasureAndLayout();
 
+    ChainAnimationOptions options = {
+        .minSpace = Dimension(minSpace),
+        .maxSpace = Dimension(maxSpace),
+        .conductivity = conductivity,
+        .intensity = intensity,
+        .edgeEffect = 0,
+    };
+    pattern_->SetChainAnimationOptions(options);
+
     /**
      * @tc.steps: step1. When minSpace < maxSpace.
      * @tc.expected: minSpace and maxSpace would be itself.
@@ -3220,6 +3586,15 @@ HWTEST_F(ListTestNg, Pattern007, TestSize.Level1)
     CreateListItem();
     GetInstance();
     RunMeasureAndLayout();
+
+    ChainAnimationOptions options = {
+        .minSpace = Dimension(minSpace),
+        .maxSpace = Dimension(maxSpace),
+        .conductivity = conductivity,
+        .intensity = intensity,
+        .edgeEffect = 0,
+    };
+    pattern_->SetChainAnimationOptions(options);
 
     /**
      * @tc.steps: step1. When conductivity == 0.
@@ -3277,7 +3652,7 @@ HWTEST_F(ListTestNg, Pattern019, TestSize.Level1)
 
 /**
  * @tc.name: Pattern010
- * @tc.desc: Test ScrollToIndex about ScrollIndexAlignment
+ * @tc.desc: Test ScrollToIndex
  * @tc.type: FUNC
  */
 HWTEST_F(ListTestNg, Pattern010, TestSize.Level1)
@@ -3289,11 +3664,21 @@ HWTEST_F(ListTestNg, Pattern010, TestSize.Level1)
     RunMeasureAndLayout();
 
     /**
-     * @tc.steps: step1. Test ScrollToIndex about ScrollIndexAlignment.
-     * @tc.expected: scrollIndexAlignment_ would be set.
+     * @tc.steps: step1. Test ScrollToIndex.
      */
     pattern_->ScrollToIndex(1, 0, ScrollIndexAlignment::ALIGN_BOTTOM);
     EXPECT_EQ(pattern_->scrollIndexAlignment_, ScrollIndexAlignment::ALIGN_BOTTOM);
+    EXPECT_EQ(pattern_->currentDelta_, 0);
+    EXPECT_EQ(pattern_->jumpIndex_, 1);
+
+    pattern_->ScrollToIndex(-1, 0, ScrollIndexAlignment::ALIGN_BOTTOM);
+    EXPECT_EQ(pattern_->jumpIndex_, -1);
+
+    pattern_->ScrollToIndex(-2, 0, ScrollIndexAlignment::ALIGN_BOTTOM);
+    EXPECT_EQ(pattern_->jumpIndex_, -1);
+
+    pattern_->ScrollToIndex(-2, ScrollIndexAlignment::ALIGN_BOTTOM);
+    EXPECT_EQ(pattern_->jumpIndex_, -1);
 }
 
 /**
@@ -3305,6 +3690,7 @@ HWTEST_F(ListTestNg, Pattern011, TestSize.Level1)
 {
     auto startFunc = GetDefaultSwiperBuilder(80.f, false);
     ListModelNG listModelNG;
+    listModelNG.SetChainAnimation(true);
     listModelNG.Create();
     RefPtr<ScrollControllerBase> scrollController = listModelNG.CreateScrollController();
     RefPtr<ScrollProxy> proxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
@@ -3322,24 +3708,36 @@ HWTEST_F(ListTestNg, Pattern011, TestSize.Level1)
      * @tc.steps: step1. When has animator_ and not stop, call OnScrollCallback.
      * @tc.expected: Would stop.
      */
-    pattern_->animator_->Pause();
     pattern_->AnimateTo(0, 0, nullptr);
+    pattern_->animator_->Resume();
+    EXPECT_TRUE(pattern_->animator_->IsRunning());
     pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
     EXPECT_TRUE(pattern_->scrollAbort_);
     const Offset expectOffset1 = Offset(0, 0);
     IsEqualCurrentOffset(expectOffset1);
+    EXPECT_TRUE(pattern_->animator_->IsStopped());
 
     /**
      * @tc.steps: step2. When has animator_ and stop, call OnScrollCallback.
-     * @tc.expected: Would stop.
+     * @tc.expected:
      */
+    ASSERT_NE(pattern_->GetScrollBar(), nullptr);
     pattern_->GetScrollBar()->SetDriving(true);
     pattern_->OnScrollCallback(100.f, SCROLL_FROM_UPDATE);
     const Offset expectOffset2 = Offset(0, 100.f);
     IsEqualCurrentOffset(expectOffset2);
 
     /**
-     * @tc.steps: step3. When has animator_ and stop, call StopAnimate.
+     * @tc.steps: step3. Offset is 0, ProcessDragUpdate do nothing.
+     * @tc.expected: CurrentOffset unchange.
+     */
+    pattern_->GetScrollBar()->SetDriving(false);
+    pattern_->OnScrollCallback(0, SCROLL_FROM_UPDATE);
+    const Offset expectOffset3 = Offset(0, 100.f);
+    IsEqualCurrentOffset(expectOffset3);
+
+    /**
+     * @tc.steps: step4. When has animator_ and stop, call StopAnimate.
      * @tc.expected: Nothing.
      */
     pattern_->StopAnimate();
@@ -3410,5 +3808,146 @@ HWTEST_F(ListTestNg, Pattern014, TestSize.Level1)
     const Point point = Point(0, 1000.f);
     int32_t itemIndex = pattern_->GetItemIndexByPosition(point.GetX(), point.GetY());
     EXPECT_EQ(itemIndex, 0);
+}
+
+/**
+ * @tc.name: Pattern015
+ * @tc.desc: Test UpdateCurrentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, Pattern015, TestSize.Level1)
+{
+    constexpr int32_t itemCount = 5;
+
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    CreateListItem(itemCount);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. UpdateCurrentOffset -100
+     * @tc.expected: The list is unscrollable, offset is 0
+     */
+    constexpr float offset = -100.f;
+    pattern_->UpdateCurrentOffset(offset, SCROLL_FROM_UPDATE);
+    const Offset expectOffset = Offset(0, 0);
+    EXPECT_TRUE(IsEqualCurrentOffset(expectOffset));
+}
+/**
+ * @tc.name: Pattern016
+ * @tc.desc: Test UpdateCurrentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, Pattern016, TestSize.Level1)
+{
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    CreateListItem(DEFAULT_LISTITEM_TOTAL_COUNT);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. UpdateCurrentOffset -100 with SCROLL_FROM_START
+     * @tc.expected: The offset was not effected by friction
+     */
+    constexpr float offset = -100.f;
+    pattern_->UpdateCurrentOffset(offset, SCROLL_FROM_START);
+    constexpr float expectDelta = 100.f;
+    EXPECT_EQ(pattern_->currentDelta_, expectDelta);
+}
+
+/**
+ * @tc.name: PerformActionTest001
+ * @tc.desc: ListItem Accessibility PerformAction test Select and ClearSelection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, PerformActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create listItem and initialize related properties.
+     */
+    ListItemModelNG listItemModel;
+    listItemModel.Create();
+
+    /**
+     * @tc.steps: step2. Get listItem frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto listItemPattern = frameNode->GetPattern<ListItemPattern>();
+    ASSERT_NE(listItemPattern, nullptr);
+    listItemPattern->SetSelectable(false);
+    listItemPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step3. Get listItem accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto listItemAccessibilityProperty = frameNode->GetAccessibilityProperty<ListItemAccessibilityProperty>();
+    ASSERT_NE(listItemAccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. When listItem is not Selectable, call the callback function in listItemAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(listItemAccessibilityProperty->ActActionSelect());
+    EXPECT_TRUE(listItemAccessibilityProperty->ActActionClearSelection());
+
+    /**
+     * @tc.steps: step5. When listItem is Selectable, call the callback function in listItemAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    listItemPattern->SetSelectable(true);
+    EXPECT_TRUE(listItemAccessibilityProperty->ActActionSelect());
+    EXPECT_TRUE(listItemAccessibilityProperty->ActActionClearSelection());
+}
+
+/**
+ * @tc.name: PerformActionTest002
+ * @tc.desc: List Accessibility PerformAction test ScrollForward and ScrollBackward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, PerformActionTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list and initialize related properties.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+
+    /**
+     * @tc.steps: step2. Get list frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto listPattern = frameNode->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    listPattern->scrollable_ = false;
+    listPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step3. Get list accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto listAccessibilityProperty = frameNode->GetAccessibilityProperty<ListAccessibilityProperty>();
+    ASSERT_NE(listAccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. When list is not Scrollable, call the callback function in listAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(listAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(listAccessibilityProperty->ActActionScrollBackward());
+
+    /**
+     * @tc.steps: step5. When list is Scrollable, call the callback function in listAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    listPattern->scrollable_ = true;
+    EXPECT_TRUE(listAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(listAccessibilityProperty->ActActionScrollBackward());
 }
 } // namespace OHOS::Ace::NG

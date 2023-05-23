@@ -59,6 +59,8 @@ public:
 
     void SyncGeometryProperties(const RectF& paintRect) override;
 
+    void SetSandBox(const std::optional<OffsetF>& parentPosition) override;
+
     void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
 
     void AddFrameChildren(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
@@ -176,10 +178,13 @@ public:
     void FlushOverlayModifier(const RefPtr<Modifier>& modifier) override;
 
     void AddChild(const RefPtr<RenderContext>& renderContext, int index) override;
+    void RemoveChild(const RefPtr<RenderContext>& renderContext) override;
     void SetBounds(float positionX, float positionY, float width, float height) override;
     void OnTransformTranslateUpdate(const TranslateOptions& value) override;
 
     RectF GetPaintRectWithTransform() override;
+
+    RectF GetPaintRectWithTranslate() override;
 
     RectF GetPaintRectWithoutTransform() override;
 
@@ -222,6 +227,9 @@ public:
     RefPtr<PixelMap> GetThumbnailPixelMap() override;
     void SetActualForegroundColor(const Color& value) override;
     void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property) override;
+
+    void RegisterSharedTransition(const RefPtr<RenderContext>& other) override;
+    void UnregisterSharedTransition(const RefPtr<RenderContext>& other) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -287,7 +295,9 @@ private:
     {
         return transitionEffect_ != nullptr;
     }
+    void OnTransitionInFinish();
     void OnTransitionOutFinish();
+    void RemoveDefaultTransition();
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot);
 
@@ -306,6 +316,10 @@ private:
     void SetBackBlurFilter();
     void SetFrontBlurFilter();
     void GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddingLeft, Dimension& parentPaddingTop);
+    void CombinePaddingAndOffset(Dimension& resultX, Dimension& resultY, const Dimension& parentPaddingLeft,
+        const Dimension& parentPaddingTop, float widthPercentReference, float heightPercentReference);
+    void CombineMarginAndPosition(Dimension& resultX, Dimension& resultY, const Dimension& parentPaddingLeft,
+        const Dimension& parentPaddingTop, float widthPercentReference, float heightPercentReference);
 
     void InitEventClickEffect();
     RefPtr<Curve> UpdatePlayAnimationValue(const ClickEffectLevel& level, float& scaleValue);
@@ -350,12 +364,13 @@ private:
     bool isHoveredScale_ = false;
     bool isHoveredBoard_ = false;
     bool isPositionChanged_ = false;
-    bool isSynced_ = false;
     bool firstTransitionIn_ = false;
     bool isBreakingPoint_ = false;
     bool isBackBlurChanged_ = false;
     bool needDebugBoundary_ = false;
     bool isDisappearing_ = false;
+    bool hasDefaultTransition_ = false;
+    int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
     Color blendColor_ = Color::TRANSPARENT;
     Color hoveredColor_ = Color::TRANSPARENT;

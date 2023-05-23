@@ -22,7 +22,7 @@ namespace OHOS::Ace::Framework {
 class ViewContextModelImpl : public OHOS::Ace::ViewContextModel {
 public:
     void openAnimation(const AnimationOption& option) override;
-    void closeAnimation(const AnimationOption& option) override;
+    void closeAnimation(const AnimationOption& option, bool needFlush) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_VIEW_CONTEXT_MODEL_IMPL_H

@@ -19,6 +19,7 @@
 #include <map>
 
 #include "base/geometry/dimension.h"
+#include "base/json/json_util.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components_ng/property/property.h"

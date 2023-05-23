@@ -56,11 +56,14 @@ void JSMenuItem::Create(const JSCallbackInfo& info)
     if (info[0]->IsFunction()) {
         auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
         CHECK_NULL_VOID(builderFunc);
-
-        ViewStackModel::GetInstance()->NewScope();
-        builderFunc->Execute();
-        auto customNode = ViewStackModel::GetInstance()->Finish();
+        RefPtr<NG::UINode> customNode;
+        {
+            ViewStackModel::GetInstance()->NewScope();
+            builderFunc->Execute();
+            customNode = AceType::DynamicCast<NG::UINode>(ViewStackModel::GetInstance()->Finish());
+        }
         CHECK_NULL_VOID(customNode);
+        MenuItemModel::GetInstance()->Create(customNode);
     } else {
         auto menuItemObj = JSRef<JSObject>::Cast(info[0]);
 
@@ -126,8 +129,7 @@ void JSMenuItem::JSBind(BindingTarget globalObj)
     JSClass<JSMenuItem>::StaticMethod("contentFontColor", &JSMenuItem::ContentFontColor, opt);
     JSClass<JSMenuItem>::StaticMethod("labelFont", &JSMenuItem::LabelFont, opt);
     JSClass<JSMenuItem>::StaticMethod("labelFontColor", &JSMenuItem::LabelFontColor, opt);
-    JSClass<JSMenuItem>::Inherit<JSViewAbstract>();
-    JSClass<JSMenuItem>::Bind(globalObj);
+    JSClass<JSMenuItem>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void ParseIsSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)

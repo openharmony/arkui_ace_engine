@@ -105,8 +105,7 @@ void JSTextTimer::JSBind(BindingTarget globalObj)
     JSClass<JSTextTimer>::StaticMethod("onTimer", &JSTextTimer::OnTimer);
     JSClass<JSTextTimer>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSTextTimer>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSTextTimer>::Inherit<JSViewAbstract>();
-    JSClass<JSTextTimer>::Bind<>(globalObj);
+    JSClass<JSTextTimer>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSTextTimer::SetFormat(const JSCallbackInfo& info)
@@ -126,6 +125,13 @@ void JSTextTimer::SetFormat(const JSCallbackInfo& info)
     std::regex pattern("(([YyMdD]+))");
     if (std::regex_search(format, result, pattern)) {
         if (!result.empty()) {
+            format = DEFAULT_FORMAT;
+        }
+    }
+
+    std::string target = "HmsS:.";
+    for (auto ch : format) {
+        if (target.find(ch) == std::string::npos) {
             format = DEFAULT_FORMAT;
         }
     }

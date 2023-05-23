@@ -18,7 +18,7 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
-void ViewContextModelImpl::closeAnimation(const AnimationOption& option)
+void ViewContextModelImpl::closeAnimation(const AnimationOption& option, bool needFlush)
 {
     ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
 }

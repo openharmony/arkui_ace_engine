@@ -99,6 +99,7 @@ void DialogPattern::HandleClick(const GestureEvent& info)
     CHECK_NULL_VOID(host);
     auto props = host->GetLayoutProperty<DialogLayoutProperty>();
     CHECK_NULL_VOID(props);
+    auto globalOffset = host->GetPaintRectOffset();
     auto autoCancel = props->GetAutoCancel().value_or(true);
     if (autoCancel) {
         auto content = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
@@ -106,7 +107,8 @@ void DialogPattern::HandleClick(const GestureEvent& info)
         auto contentRect = content->GetGeometryNode()->GetFrameRect();
         // close dialog if clicked outside content rect
         auto&& clickPosition = info.GetGlobalLocation();
-        if (!contentRect.IsInRegion(PointF(clickPosition.GetX(), clickPosition.GetY()))) {
+        if (!contentRect.IsInRegion(
+            PointF(clickPosition.GetX() - globalOffset.GetX(), clickPosition.GetY() - globalOffset.GetY()))) {
             PopDialog(-1);
         }
     }
@@ -121,6 +123,10 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
     CHECK_NULL_VOID(overlayManager);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (host->IsRemoving()) {
+        LOGI("Dialog already in close animation, no need to fire event again.");
+        return;
+    }
 
     auto hub = host->GetEventHub<DialogEventHub>();
     if (buttonIdx != -1) {

@@ -24,20 +24,10 @@ void IndexerModelImpl::Create(std::vector<std::string>& indexerArray, int32_t se
     auto indexerComponent = AceType::MakeRefPtr<V2::IndexerComponent>(indexerArray, selectedVal);
     ViewStackProcessor::GetInstance()->ClaimElementId(indexerComponent);
     ViewStackProcessor::GetInstance()->Push(indexerComponent);
-}
-
-void IndexerModelImpl::SetFocusable(bool focusable)
-{
     auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
     CHECK_NULL_VOID(focusableComponent);
-    focusableComponent->SetFocusable(focusable);
-}
-
-void IndexerModelImpl::SetFocusNode(bool isFocusNode)
-{
-    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
-    CHECK_NULL_VOID(focusableComponent);
-    focusableComponent->SetFocusNode(isFocusNode);
+    focusableComponent->SetFocusable(true);
+    focusableComponent->SetFocusNode(true);
 }
 
 void IndexerModelImpl::SetSelectedColor(const Color& color)
@@ -100,29 +90,35 @@ void IndexerModelImpl::SetUsingPopup(bool state)
     }
 }
 
-void IndexerModelImpl::SetSelectedFont(const TextStyle& textStyle)
+void IndexerModelImpl::SetSelectedFont(std::function<void(TextStyle& textStyle)>&& getTextStyleFunc)
 {
     auto indexerComponent =
         AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (indexerComponent) {
+        auto textStyle = indexerComponent->GetActiveTextStyle();
+        getTextStyleFunc(textStyle);
         indexerComponent->SetActiveTextStyle(std::move(textStyle));
     }
 }
 
-void IndexerModelImpl::SetPopupFont(const TextStyle& textStyle)
+void IndexerModelImpl::SetPopupFont(std::function<void(TextStyle& textStyle)>&& getTextStyleFunc)
 {
     auto indexerComponent =
         AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (indexerComponent) {
+        auto textStyle = indexerComponent->GetBubbleTextStyle();
+        getTextStyleFunc(textStyle);
         indexerComponent->SetBubbleTextStyle(std::move(textStyle));
     }
 }
 
-void IndexerModelImpl::SetFont(const TextStyle& textStyle)
+void IndexerModelImpl::SetFont(std::function<void(TextStyle& textStyle)>&& getTextStyleFunc)
 {
     auto indexerComponent =
         AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (indexerComponent) {
+        auto textStyle = indexerComponent->GetNormalTextStyle();
+        getTextStyleFunc(textStyle);
         indexerComponent->SetNormalTextStyle(std::move(textStyle));
     }
 }

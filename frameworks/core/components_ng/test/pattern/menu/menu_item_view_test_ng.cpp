@@ -606,8 +606,8 @@ HWTEST_F(MenuItemViewTestNg, MenuItemSetSelectedChangeEvent001, TestSize.Level1)
     bool isSelected = false;
     auto changeEvent = [&isSelected](bool select) { isSelected = select; };
     MenuItemProperties itemOption;
-    MneuItemModelInstance.SetSelectedChangeEvent(changeEvent);
     MneuItemModelInstance.Create(itemOption);
+    MneuItemModelInstance.SetSelectedChangeEvent(changeEvent);
     
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);

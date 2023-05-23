@@ -79,6 +79,7 @@ void TimePickerColumnPattern::OnModifyDone()
     hoverColor_ = theme->GetHoverColor();
     InitOnKeyEvent(focusHub);
     InitMouseAndPressEvent();
+    SetAccessibilityAction();
 }
 
 void TimePickerColumnPattern::InitMouseAndPressEvent()
@@ -821,5 +822,46 @@ bool TimePickerColumnPattern::HandleDirectionKey(KeyCode code)
         return true;
     }
     return false;
+}
+
+void TimePickerColumnPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->CanMove(true)) {
+            return;
+        }
+        CHECK_NULL_VOID(pattern->animationCreated_);
+        pattern->InnerHandleScroll(true);
+        CHECK_NULL_VOID(pattern->fromController_);
+        pattern->fromController_->ClearInterpolators();
+        pattern->fromController_->AddInterpolator(pattern->fromTopCurve_);
+        pattern->fromController_->Play();
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    });
+
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->CanMove(false)) {
+            return;
+        }
+        CHECK_NULL_VOID(pattern->animationCreated_);
+        pattern->InnerHandleScroll(false);
+        CHECK_NULL_VOID(pattern->fromController_);
+        pattern->fromController_->ClearInterpolators();
+        pattern->fromController_->AddInterpolator(pattern->fromBottomCurve_);
+        pattern->fromController_->Play();
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    });
 }
 } // namespace OHOS::Ace::NG

@@ -18,14 +18,22 @@
 #include "base/log/log.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_node.h"
 
 namespace OHOS::Ace::NG {
 int32_t TabBarAccessibilityProperty::GetCollectionItemCounts() const
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, 0);
-    return frameNode->TotalChildCount();
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(frameNode->GetParent());
+    CHECK_NULL_RETURN(tabsFrameNode, false);
+    auto swiperFrameNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetTabs());
+    CHECK_NULL_RETURN(swiperFrameNode, false);
+    auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(swiperPattern, false);
+    return swiperPattern->TotalCount();
 }
 
 bool TabBarAccessibilityProperty::IsScrollable() const
@@ -58,7 +66,11 @@ int32_t TabBarAccessibilityProperty::GetCurrentIndex() const
     CHECK_NULL_RETURN(frameNode, -1);
     auto tabBarPattern = frameNode->GetPattern<TabBarPattern>();
     CHECK_NULL_RETURN(tabBarPattern, -1);
-    return tabBarPattern->GetIndicator();
+    if (GetCollectionItemCounts() < 1) {
+        return AccessibilityProperty::GetCurrentIndex();
+    }
+    auto indicator = tabBarPattern->GetIndicator();
+    return indicator;
 }
 
 void TabBarAccessibilityProperty::SetSpecificSupportAction()

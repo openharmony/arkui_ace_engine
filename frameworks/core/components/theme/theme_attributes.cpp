@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,11 +68,14 @@ const char THEME_PATTERN_INDEXER[] = "indexer_pattern";
 const char THEME_PATTERN_APP_BAR[] = "app_bar_pattern";
 const char THEME_PATTERN_ADVANCED_PATTERN[] = "advanced_pattern";
 const char THEME_PATTERN_SECURITY_COMPONENT[] = "security_component_pattern";
+const char THEME_PATTERN_FORM[] = "form_pattern";
 
 // pattern general attributes
 const char PATTERN_FG_COLOR[] = "fg_color";
 const char PATTERN_BG_COLOR[] = "bg_color";
-const char PATTERN_BRODER_COLOR[] = "broder_color";
+const char PATTERN_BRODER_COLOR[] = "focus_broder_color";
+const char PATTERN_UNDERLINE_ACTIVED_COLOR[] = "underline_actived_color";
+const char PATTERN_UNDERLINE_TYPING_COLOR[] = "underline_typing_color";
 const char PATTERN_BG_COLOR_HOVERED[] = "bg_color_hovered";
 const char PATTERN_BG_COLOR_CLICKED[] = "bg_color_clicked";
 const char PATTERN_BG_COLOR_PRESSED[] = "bg_color_pressed";
@@ -173,8 +176,8 @@ const char INDICATOR_TEXT_FONT_COLOR[] = "indicator_text_font_color";
 
 // textinput attributes
 const char ERROR_TEXT_UNDERLINE_COLOR[] = "error_text_underline_color";
-const char OHOS_ID_COLOR_LIST_SEPARATOR[] = "ohos_id_color_list_separator";
-const char OHOS_ID_COLOR_TEXT_HINT[] = "ohos_id_color_text_hint";
+const char UNDERLINE_COLOR[] = "underline_color";
+const char UNDERLINE_TEXT_COLOR[] = "underline_text_color";
 const char BORDER_RADIUS_SIZE[] = "border_radius_size";
 // swiper attributes for arrow
 const char ARROW_COLOR_BOARDCOLOR_HOVER[] = "arrow_color_boardColor_hover";
@@ -185,4 +188,16 @@ const char ARROW_DISABLED_ALPHA[] = "arrow_disabled_alpha";
 const char ARROW_HORIZONTAL_MARGIN[] = "arrow_horizontal_margin";
 const char ARROW_VERTICAL_MARGIN[] = "arrow_vertical_margin";
 const char ARROW_COLOR_COMPONENT_NORMAL[] = "arrow_color_component_normal";
+
+// textfield attributes
+const char ERROR_UNDERLINE_COLOR[] = "error_underline_color";
+const char ERROR_UNDERLINE_TEXT_COLOR[] = "error_underline_text_color";
+const char ERROR_UNDERLINE_TEXT_SIZE[] = "error_underline_text_size";
+const char ERROR_PASSWORD_CONTENT_COLOR[] = "error_password_content_color";
+const char ERROR_PASSWORD_INPUT_COLOR[] = "error_password_input_color";
+const char ERROR_PASSWORD_BORDER_COLOR[] = "error_password_border_color";
+const char ERROR_PASSWORD_TEXT_COLOR[] = "error_password_text_color";
+const char OVER_COUNT_TEXT_COLOR[] = "over_count_text_color";
+const char OVER_COUNT_TEXT_FONT_SIZE[] = "over_count_text_font_size";
+const char OVER_COUNT_BORDER_COLOR[] = "over_count_border_color";
 } // namespace OHOS::Ace

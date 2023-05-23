@@ -139,8 +139,11 @@ void RadioModifier::UpdateIsOnAnimatableProperty(bool isCheck)
     totalScale_->Set(DEFAULT_SHRINK_SCALE);
     AnimationUtils::Animate(
         delayOption, [&]() { totalScale_->Set(1); },
-        [isCheck, this]() {
-            uiStatus_->Set(static_cast<int32_t>(isCheck ? UIStatus::SELECTED : UIStatus::UNSELECTED));
+        [isCheck, weakUiStatus = AceType::WeakClaim(AceType::RawPtr(uiStatus_))]() {
+            auto uiStatus = weakUiStatus.Upgrade();
+            if (uiStatus) {
+                uiStatus->Set(static_cast<int32_t>(isCheck ? UIStatus::SELECTED : UIStatus::UNSELECTED));
+            }
             auto context = PipelineBase::GetCurrentContext();
             if (context) {
                 context->RequestFrame();

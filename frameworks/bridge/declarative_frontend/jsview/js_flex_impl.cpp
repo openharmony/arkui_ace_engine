@@ -202,9 +202,7 @@ void JSFlexImpl::JSBind(BindingTarget globalObj)
     JSClass<JSFlexImpl>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSFlexImpl>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSFlexImpl>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
-    JSClass<JSFlexImpl>::Inherit<JSContainerBase>();
-    JSClass<JSFlexImpl>::Inherit<JSViewAbstract>();
-    JSClass<JSFlexImpl>::Bind<>(globalObj);
+    JSClass<JSFlexImpl>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

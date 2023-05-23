@@ -94,6 +94,11 @@ uint32_t JsonValue::GetUInt() const
     return static_cast<uint32_t>((object_ == nullptr) ? 0 : object_->valuedouble);
 }
 
+int64_t JsonValue::GetInt64() const
+{
+    return static_cast<int64_t>((object_ == nullptr) ? 0 : object_->valuedouble);
+}
+
 double JsonValue::GetDouble() const
 {
     return (object_ == nullptr) ? 0.0 : object_->valuedouble;
@@ -398,6 +403,15 @@ uint32_t JsonValue::GetUInt(const std::string& key, uint32_t defaultVal) const
     auto value = GetValue(key);
     if (value && value->IsNumber()) {
         return value->GetUInt();
+    }
+    return defaultVal;
+}
+
+int64_t JsonValue::GetInt64(const std::string& key, int64_t defaultVal) const
+{
+    auto value = GetValue(key);
+    if (value && value->IsNumber()) {
+        return value->GetInt64();
     }
     return defaultVal;
 }

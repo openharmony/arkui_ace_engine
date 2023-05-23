@@ -336,6 +336,15 @@ void ViewAbstract::SetFlexShrink(float value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexShrink, value);
 }
 
+void ViewAbstract::ResetFlexShrink()
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_RESET_LAYOUT_PROPERTY(LayoutProperty, FlexShrink);
+}
+
 void ViewAbstract::SetFlexGrow(float value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -771,7 +780,12 @@ void ViewAbstract::SetVisibility(VisibleType visible)
         LOGD("current state is not processed, return");
         return;
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Visibility, visible);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    if (layoutProperty) {
+        layoutProperty->UpdateVisibility(visible, true);
+    }
 }
 
 void ViewAbstract::SetGeometryTransition(const std::string& id)

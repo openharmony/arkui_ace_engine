@@ -44,7 +44,7 @@ constexpr int8_t TOP_GRADIENT = 2;
 constexpr int8_t BOTTOM_GRADIENT = 3;
 constexpr float HALF_PROGRESS = 0.5f;
 constexpr float FULL_PROGRESS = 1.0f;
-constexpr float NO_MASK_RADIUS_RATIO = 0.0f;
+constexpr float HALF_MASK_RADIUS_RATIO = 0.717f;
 constexpr float FULL_MASK_RADIUS_RATIO = 1.414f;
 constexpr float INVALID_RATIO = -1.0f;
 constexpr uint16_t MASK_ANIMATION_DURATION = 200;
@@ -407,6 +407,7 @@ void TabBarPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     SetAccessibilityAction();
 
+    CHECK_NULL_VOID(swiperController_);
     auto removeEventCallback = [weak = WeakClaim(this)]() {
         auto tabBarPattern = weak.Upgrade();
         CHECK_NULL_VOID(tabBarPattern);
@@ -562,7 +563,7 @@ void TabBarPattern::HandleBottomTabBarClick(int32_t selectedIndex, int32_t unsel
             originalSelectedMaskOffset, originalUnselectedMaskOffset);
     }
     if (selectedIndex >= 0) {
-        ChangeMask(host, selectedImageSize, originalSelectedMaskOffset, NO_OPACITY, NO_MASK_RADIUS_RATIO, true);
+        ChangeMask(host, selectedImageSize, originalSelectedMaskOffset, NO_OPACITY, HALF_MASK_RADIUS_RATIO, true);
     }
     if (unselectedIndex >= 0) {
         ChangeMask(host, unselectedImageSize, originalUnselectedMaskOffset, FULL_OPACITY, FULL_MASK_RADIUS_RATIO,
@@ -669,7 +670,7 @@ void TabBarPattern::PlayMaskAnimation(float selectedImageSize,
             auto host = tabBar->GetHost();
             CHECK_NULL_VOID(host);
             ChangeMask(host, selectedImageSize, originalSelectedMaskOffset, FULL_OPACITY, FULL_MASK_RADIUS_RATIO, true);
-            ChangeMask(host, unselectedImageSize, originalUnselectedMaskOffset, NO_OPACITY, NO_MASK_RADIUS_RATIO,
+            ChangeMask(host, unselectedImageSize, originalUnselectedMaskOffset, NO_OPACITY, HALF_MASK_RADIUS_RATIO,
                 false);
         }
     });

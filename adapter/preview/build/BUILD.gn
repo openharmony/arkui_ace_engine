@@ -15,24 +15,15 @@ import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/build/ace_lib.gni")
 
 # build for preview shared library
-template("libace_engine") {
-  forward_variables_from(invoker, "*")
-
-  ohos_shared_library(target_name) {
-    deps = [ "$ace_root/build:libace_static_$platform" ]
-    subsystem_name = ace_engine_subsystem
-    part_name = ace_engine_part
+ohos_shared_library("libace") {
+  if (use_mingw_win) {
+    deps = [ "$ace_root/build:libace_static_windows" ]
+  } else if (use_mac) {
+    deps = [ "$ace_root/build:libace_static_mac" ]
+  } else if (use_linux) {
+    deps = [ "$ace_root/build:libace_static_linux" ]
   }
-}
 
-libace_engine("libace_engine_windows") {
-  platform = "windows"
-}
-
-libace_engine("libace_engine_mac") {
-  platform = "mac"
-}
-
-libace_engine("libace_engine_linux") {
-  platform = "linux"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
 }

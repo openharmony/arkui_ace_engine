@@ -149,26 +149,18 @@ RefPtr<PixelMap> SkiaImage::GetPixelMap()
     return PixelMap::ConvertSkImageToPixmap(addr, length, width, height);
 }
 
-void SkiaImage::ClipRRect(RSCanvas& canvas, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
-{
-    std::vector<RSPoint> radius(ImagePainterUtils::RADIUS_POINTS_SIZE);
-    for (size_t i = 0; i < radius.size(); ++i) {
-        radius[i] = RSPoint(radiusXY[i].GetX(), radiusXY[i].GetY());
-    }
-    RSRoundRect rRect(dstRect, radius);
-    canvas.ClipRoundRect(rRect, RSClipOp::INTERSECT);
-}
-
 void SkiaImage::DrawToRSCanvas(
     RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
 {
     auto image = GetImage();
     CHECK_NULL_VOID(image || GetCompressData());
-    if (!DrawWithRecordingCanvas(canvas, srcRect, dstRect, radiusXY)) {
+    if (isDrawAnimate_) {
         RSImage rsImage(&image);
         RSSamplingOptions options;
-        ClipRRect(canvas, dstRect, radiusXY);
+        ImagePainterUtils::ClipRRect(canvas, dstRect, radiusXY);
         canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
+    } else {
+        DrawWithRecordingCanvas(canvas, srcRect, dstRect, radiusXY);
     }
 }
 
@@ -211,7 +203,7 @@ bool SkiaImage::DrawWithRecordingCanvas(
     recordingCanvas->DrawImageWithParm(GetImage(), std::move(data), rsImageInfo, options, paint);
 #endif
     return true;
-#else
+#else // !ENABLE_ROSEN_BACKEND
     return false;
 #endif
 }

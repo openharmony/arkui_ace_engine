@@ -274,10 +274,13 @@ template("declarative_js_engine") {
 
       # Models implemenations for classic fw
       "jsview/models/action_sheet_model_impl.cpp",
+      "jsview/models/alert_dialog_model_impl.cpp",
       "jsview/models/animator_model_impl.cpp",
       "jsview/models/badge_model_impl.cpp",
       "jsview/models/blank_model_impl.cpp",
       "jsview/models/button_model_impl.cpp",
+      "jsview/models/calendar_controller_model_impl.cpp",
+      "jsview/models/calendar_model_impl.cpp",
       "jsview/models/checkbox_model_impl.cpp",
       "jsview/models/checkboxgroup_model_impl.cpp",
       "jsview/models/circle_model_impl.cpp",
@@ -311,6 +314,7 @@ template("declarative_js_engine") {
       "jsview/models/marquee_model_impl.cpp",
       "jsview/models/menu_item_model_impl.cpp",
       "jsview/models/menu_model_impl.cpp",
+      "jsview/models/navigation_model_impl.cpp",
       "jsview/models/navigator_model_impl.cpp",
       "jsview/models/page_transition_model_impl.cpp",
       "jsview/models/path_model_impl.cpp",
@@ -421,6 +425,7 @@ template("declarative_js_engine") {
         "jsview/js_richtext.cpp",
         "jsview/js_web.cpp",
         "jsview/js_web_controller.cpp",
+        "jsview/models/richtext_model_impl.cpp",
       ]
     }
 
@@ -433,7 +438,10 @@ template("declarative_js_engine") {
     }
 
     if (defined(config.remote_window_support) && config.remote_window_support) {
-      sources += [ "jsview/js_remote_window.cpp" ]
+      sources += [
+        "jsview/js_remote_window.cpp",
+        "jsview/models/remote_window_model_impl.cpp",
+      ]
     }
 
     if (defined(config.plugin_components_support) &&
@@ -595,6 +603,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_rating.cpp",
       "jsview/js_row.cpp",
       "jsview/js_scroll.cpp",
+      "jsview/js_scroller.cpp",
       "jsview/js_span.cpp",
       "jsview/js_stack.cpp",
       "jsview/js_swiper.cpp",
@@ -603,9 +612,11 @@ template("declarative_js_engine_ng") {
       "jsview/js_tabs_controller.cpp",
       "jsview/js_text.cpp",
       "jsview/js_toggle.cpp",
+      "jsview/js_utils.cpp",
       "jsview/js_view.cpp",
       "jsview/js_view_abstract.cpp",
       "jsview/js_view_context.cpp",
+      "jsview/scroll_bar/js_scroll_bar.cpp",
     ]
 
     sources += [

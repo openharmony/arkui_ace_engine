@@ -14,6 +14,7 @@
  */
 
 #include "adapter/preview/entrance/ace_ability.h"
+
 #include "base/utils/utils.h"
 
 #ifdef INIT_ICU_DATA_PATH
@@ -25,6 +26,7 @@
 #include "adapter/preview/entrance/ace_application_info.h"
 #include "adapter/preview/entrance/ace_container.h"
 #include "adapter/preview/entrance/event_dispatcher.h"
+#include "adapter/preview/entrance/rs_dir_asset_provider.h"
 #include "adapter/preview/inspector/inspector_client.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/js_frontend.h"
@@ -80,13 +82,14 @@ void AdaptDeviceType(AceRunArgs& runArgs)
 void SetFontMgrConfig(const std::string& containerSdkPath)
 {
     // To check if use ohos or container fonts.
-    std::string runtimeOS;
-    std::string containerFontBasePath;
-    if (containerSdkPath.empty()) {
+    std::string runtimeOS = "OHOS_Container";
+    std::string containerFontBasePath = containerSdkPath + DELIMITER + "resources" + DELIMITER + "fonts" + DELIMITER;
+    RSDirAssetProvider dirAsset(containerFontBasePath);
+    std::vector<std::string> fileList;
+    dirAsset.GetAssetList("", fileList);
+    if (containerSdkPath.empty() || fileList.empty()) {
         runtimeOS = "OHOS";
-    } else {
-        runtimeOS = "OHOS_Container";
-        containerFontBasePath = containerSdkPath + DELIMITER + "resources" + DELIMITER + "fonts" + DELIMITER;
+        containerFontBasePath = "";
     }
     LOGI("Runtime OS is %{public}s, and the container fontBasePath is %{public}s", runtimeOS.c_str(),
         containerFontBasePath.c_str());
@@ -226,9 +229,9 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
         return nullptr;
     }
 #ifdef USE_GLFW_WINDOW
-    ctx->CreateWindow(runArgs.deviceWidth, runArgs.deviceHeight, true);
+    ctx->CreateGlfwWindow(runArgs.deviceWidth, runArgs.deviceHeight, true);
 #else
-    ctx->CreateWindow(runArgs.deviceWidth, runArgs.deviceHeight, false);
+    ctx->CreateGlfwWindow(runArgs.deviceWidth, runArgs.deviceHeight, false);
 #endif
     AceApplicationInfo::GetInstance().SetLocale(runArgs.language, runArgs.region, runArgs.script, "");
     SetFontMgrConfig(runArgs.containerSdkPath);
@@ -314,6 +317,9 @@ void AceAbility::InitEnv()
         paths.push_back(appResourcesPath + ASSET_PATH_SHARE_STAGE);
     } else {
         paths.push_back(GetCustomAssetPath(runArgs_.assetPath) + ASSET_PATH_SHARE);
+    }
+    if (!runArgs_.containerSdkPath.empty()) {
+        paths.push_back(runArgs_.containerSdkPath);
     }
     AceContainer::AddAssetPath(ACE_INSTANCE_ID, "", paths);
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);

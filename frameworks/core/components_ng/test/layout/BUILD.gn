@@ -17,7 +17,5 @@ group("layout_unittest") {
     "box_layout_algorithm:box_layout_algorithm_test_ng",
     "layout_property:layout_property_test_ng",
     "layout_wrapper_builder:layout_wrapper_build_test_ng",
-    "panel:panel_layout_test_ng",
-    "relative_container:relative_container_layout_test_ng",
   ]
 }

@@ -241,11 +241,11 @@ void JSMatrix2d::JsTranslate(const JSCallbackInfo& info)
     }
     double tx = 0;
     double ty = 0;
-    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_1 && info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
+    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_0 && info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
         JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], tx);
         tx = SystemProperties::Vp2Px(tx);
     }
-    if (info.Length() == JS_MATRIX2D_PARAMETER_COUNTS_2 && info[JS_MATRIX2D_PARAMETER_COUNTS_1]->IsNumber()) {
+    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_1 && info[JS_MATRIX2D_PARAMETER_COUNTS_1]->IsNumber()) {
         JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_1], ty);
         ty = SystemProperties::Vp2Px(ty);
     }
@@ -261,10 +261,10 @@ void JSMatrix2d::JsScale(const JSCallbackInfo& info)
     }
     double sx = 1.0f;
     double sy = 1.0f;
-    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_1 && info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
+    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_0 && info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
         JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], sx);
     }
-    if (info.Length() == JS_MATRIX2D_PARAMETER_COUNTS_2 && info[1]->IsNumber()) {
+    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_1 && info[JS_MATRIX2D_PARAMETER_COUNTS_1]->IsNumber()) {
         JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_1], sy);
     }
     NG::Matrix2D::Scale(transform_, sx, sy);

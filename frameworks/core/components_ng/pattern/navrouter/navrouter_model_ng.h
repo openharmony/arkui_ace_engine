@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_NAVROUTER_NAVROUTER_MODEL_NG_H
 
 #include "core/components_ng/pattern/navrouter/navrouter_model.h"
-#include "core/components_ng/pattern/navrouter/navrouter_view.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT NavRouterModelNG : public OHOS::Ace::NavRouterModel {

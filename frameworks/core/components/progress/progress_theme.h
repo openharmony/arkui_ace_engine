@@ -72,7 +72,7 @@ public:
             theme->bubbleRadius_ = themeConstants->GetDimension(THEME_BUBBLE_PROGRESS_RADIUS);
             theme->bubbleDiameter_ = themeConstants->GetDimension(THEME_BUBBLE_PROGRESS_DIAMETER);
             theme->progressHeight_ = themeConstants->GetDimension(THEME_BUTTON_DOWNLOAD_HEIGHT);
-            
+
             // Read style from system.
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;

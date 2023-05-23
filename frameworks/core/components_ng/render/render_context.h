@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
 #include "base/memory/ace_type.h"
@@ -89,6 +90,13 @@ public:
 
     virtual void SyncGeometryProperties(const RectF& rectF) {}
 
+    // draw self and children in sandbox origin at parent's absolute position in root, drawing in sandbox
+    // will be unaffected by parent's transition.
+    virtual void SetSandBox(const std::optional<OffsetF>& parentPosition) {};
+
+    virtual void RegisterSharedTransition(const RefPtr<RenderContext>& other) {}
+    virtual void UnregisterSharedTransition(const RefPtr<RenderContext>& other) {}
+
     virtual void OnModifyDone() {}
 
     virtual void InitContext(bool isRoot, const std::optional<std::string>& surfaceName, bool useExternalNode = false)
@@ -153,6 +161,11 @@ public:
         return false;
     }
 
+    virtual bool IsSynced() const
+    {
+        return isSynced_;
+    }
+
     virtual bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish)
     {
         return false;
@@ -163,6 +176,7 @@ public:
     virtual void ResetPageTransitionEffect() {}
 
     virtual void AddChild(const RefPtr<RenderContext>& renderContext, int index) {}
+    virtual void RemoveChild(const RefPtr<RenderContext>& renderContext) {}
     virtual void SetBounds(float positionX, float positionY, float width, float height) {}
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
@@ -186,6 +200,11 @@ public:
         return {};
     }
 
+    virtual RectF GetPaintRectWithTranslate()
+    {
+        return {};
+    }
+
     virtual void GetPointWithTransform(PointF& point) {}
 
     virtual RectF GetPaintRectWithoutTransform()
@@ -194,6 +213,8 @@ public:
     }
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+
+    virtual void FromJson(const std::unique_ptr<JsonValue>& json);
 
     virtual void ClearDrawCommands() {}
 
@@ -375,6 +396,7 @@ protected:
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
     ShareId shareId_;
     bool isModalRootNode_ = false;
+    bool isSynced_ = false;
 
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}

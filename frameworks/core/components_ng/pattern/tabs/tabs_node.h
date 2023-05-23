@@ -138,6 +138,7 @@ private:
     TabBarMode GetTabBarMode() const;
     Dimension GetBarWidth() const;
     Dimension GetBarHeight() const;
+    Color GetBarBackgroundColor() const;
     int32_t GetIndex() const;
     bool GetFadingEdge() const;
 

@@ -16,11 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_PATTERN_H
 
-#include "include/vsync_station.h"
 #include "session/container/include/session_stage.h"
 #include "ui/rs_surface_node.h"
 #include "ui/rs_ui_director.h"
 #include "ui_window.h"
+#include "vsync_station.h"
 
 #include "core/common/window.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -104,7 +104,6 @@ public:
     void Background() override;
     void Disconnect() override;
     void OnNewWant(const AAFwk::Want& want) override;
-    void SetDisplayDensity(float density);
 
 protected:
     std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode_;
@@ -123,7 +122,9 @@ private:
     int32_t instanceId_ = -1;
     std::shared_ptr<Rosen::RSUIDirector> rsUIDirector_;
     std::shared_ptr<Rosen::VsyncCallback> vsyncCallback_;
+
     float displayDensity_ = 1.5f;
+
     ACE_DISALLOW_COPY_AND_MOVE(WindowPattern);
 };
 } // namespace OHOS::Ace::NG

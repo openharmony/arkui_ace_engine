@@ -16,8 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIEW_VIEW_CONTEXT_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIEW_VIEW_CONTEXT_MODEL_H
 
+#include <mutex>
+
 #include "core/components/common/properties/animation_option.h"
-#include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace {
 class ViewContextModel {
@@ -25,7 +26,7 @@ public:
     static ViewContextModel* GetInstance();
     virtual ~ViewContextModel() = default;
 
-    virtual void closeAnimation(const AnimationOption& option) = 0;
+    virtual void closeAnimation(const AnimationOption& option, bool needFlush) = 0;
     virtual void openAnimation(const AnimationOption& option) = 0;
 
 private:

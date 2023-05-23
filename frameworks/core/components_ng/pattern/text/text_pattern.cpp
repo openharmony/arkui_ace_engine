@@ -45,14 +45,19 @@ namespace OHOS::Ace::NG {
 void TextPattern::OnDetachFromFrameNode(FrameNode* node)
 {
     CloseSelectOverlay();
+    ResetSelection();
 }
 
 void TextPattern::CloseSelectOverlay()
 {
-    textSelector_.Update(-1, -1);
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         selectOverlayProxy_->Close();
     }
+}
+
+void TextPattern::ResetSelection()
+{
+    textSelector_.Update(-1, -1);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -346,12 +351,14 @@ void TextPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
 void TextPattern::OnHandleTouchUp()
 {
     CloseSelectOverlay();
+    ResetSelection();
 }
 
 void TextPattern::HandleClickEvent(GestureEvent& info)
 {
     if (textSelector_.IsValid()) {
         CloseSelectOverlay();
+        ResetSelection();
     }
 
     RectF textContentRect = contentRect_;
@@ -563,6 +570,7 @@ DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, const
 
     AceEngineExt::GetInstance().DragStartExt();
 
+    ResetSelection();
     return itemInfo;
 }
 
@@ -694,7 +702,24 @@ void TextPattern::OnModifyDone()
         }
         InitClickEvent(gestureEventHub);
         InitMouseEvent();
+        SetAccessibilityAction();
     }
+}
+
+void TextPattern::ActSetSelection(int32_t start, int32_t end)
+{
+    if (start < 0) {
+        start = GetWideText().length();
+    }
+    if (end < 0) {
+        end = GetWideText().length();
+    }
+    textSelector_.Update(start, end);
+    CalculateHandleOffsetAndShowOverlay();
+    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -805,6 +830,7 @@ void TextPattern::OnVisibleChange(bool isVisible)
     if (!isVisible) {
         if (textSelector_.IsValid()) {
             CloseSelectOverlay();
+            ResetSelection();
         }
     }
 }
@@ -908,5 +934,45 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
                 break;
         }
     }
+}
+
+void TextPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(textAccessibilityProperty);
+    textAccessibilityProperty->SetActionSetSelection([weakPtr = WeakClaim(this)](int32_t start, int32_t end) {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None) {
+            pattern->ActSetSelection(start, end);
+        }
+    });
+
+    textAccessibilityProperty->SetActionClearSelection([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None) {
+            pattern->CloseSelectOverlay();
+            pattern->ResetSelection();
+        }
+    });
+
+    textAccessibilityProperty->SetActionCopy([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None) {
+            pattern->HandleOnCopy();
+            pattern->CloseSelectOverlay();
+            pattern->ResetSelection();
+        }
+    });
 }
 } // namespace OHOS::Ace::NG

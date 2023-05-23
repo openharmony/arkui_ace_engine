@@ -29,10 +29,16 @@ void ListItemGroupPaintMethod::PaintDivider(PaintWrapper* paintWrapper, RSCanvas
     int32_t lanes = lanes_ > 1 ? lanes_ : 1;
     float crossSize = frameSize.CrossSize(axis);
     float constrainStrokeWidth = divider_.strokeWidth.ConvertToPx();
-    float startMargin = divider_.startMargin.ConvertToPx();
-    float endMargin = divider_.endMargin.ConvertToPx();
     float halfSpaceWidth = (spaceWidth_ + divider_.strokeWidth.ConvertToPx()) / 2.0f; /* 2.0f half */
+    auto startMargin = std::max(0.0, divider_.startMargin.ConvertToPx());
+    auto endMargin = std::max(0.0, divider_.endMargin.ConvertToPx());
     float laneLen = crossSize / lanes - startMargin - endMargin;
+    if (NearZero(laneLen)) return;
+    if (LessNotEqual(laneLen, 0.0f)) {
+        startMargin = 0.0f;
+        endMargin = 0.0f;
+        laneLen = crossSize / lanes - startMargin - endMargin;
+    }
     DividerPainter dividerPainter(constrainStrokeWidth, laneLen, vertical_, divider_.color, LineCap::SQUARE);
     int32_t laneIdx = 0;
     bool isFirstItem = (itemPosition_.begin()->first == 0);

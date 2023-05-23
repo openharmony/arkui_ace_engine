@@ -32,18 +32,17 @@ public:
     ~GeometryTransition() override = default;
 
     bool IsNodeInAndActive(const WeakPtr<FrameNode>& frameNode) const;
+    bool IsNodeOutAndActive(const WeakPtr<FrameNode>& frameNode) const;
     bool IsRunning() const;
     bool IsInAndOutEmpty() const;
+    bool IsInAndOutValid() const;
     std::string ToString() const;
     void Build(const WeakPtr<FrameNode>& frameNode, bool isNodeIn);
     bool Update(const WeakPtr<FrameNode>& which, const WeakPtr<FrameNode>& value);
+    void OnReSync();
+    bool OnAdditionalLayout(const WeakPtr<FrameNode>& frameNode);
     void WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper);
-    void DidLayout(const WeakPtr<FrameNode>& frameNode);
-
-    static void OnLayout(bool layoutStarted)
-    {
-        layoutStarted_ = layoutStarted;
-    }
+    void DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper);
 
 private:
     enum class State {
@@ -52,9 +51,7 @@ private:
         IDENTITY,
     };
 
-    bool IsInAndOutValid() const;
     bool IsNodeInAndIdentity(const WeakPtr<FrameNode>& frameNode) const;
-    bool IsNodeOutAndActive(const WeakPtr<FrameNode>& frameNode) const;
     void SwapInAndOut(bool condition);
     std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> GetMatchedPair(bool isNodeIn) const;
     void ModifyLayoutConstraint(const RefPtr<LayoutWrapper>& layoutWrapper, bool isNodeIn);
@@ -65,12 +62,10 @@ private:
     State state_ = State::IDLE;
     bool hasInAnim_ = false;
     bool hasOutAnim_ = false;
-    bool buildDuringLayout_ = false;
-    bool isInNodeLayoutModified_ = false;
-    SizeF size_;
+    SizeF inNodeActiveFrameSize_;
+    RectF outNodeTargetAbsRect_;
     OffsetF outNodePos_;
     OffsetF outNodeParentPos_;
-    static bool layoutStarted_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GeometryTransition);
 };

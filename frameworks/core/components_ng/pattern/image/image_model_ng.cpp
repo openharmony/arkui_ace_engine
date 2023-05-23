@@ -75,6 +75,7 @@ void ImageModelNG::SetBlur(double blur) {}
 void ImageModelNG::SetImageFit(ImageFit value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageFit, value);
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageFit, value);
 }
 
 void ImageModelNG::SetMatchTextDirection(bool value)
