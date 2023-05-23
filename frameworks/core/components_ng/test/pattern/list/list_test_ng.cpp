@@ -51,6 +51,7 @@
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/list/list_properties.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "frameworks/bridge/common/utils/utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2931,9 +2932,9 @@ HWTEST_F(ListTestNg, PositionController001, TestSize.Level1)
     controller->JumpTo(1, 0);
     EXPECT_EQ(pattern_->jumpIndex_, 1);
 
-    EXPECT_FALSE(controller->AnimateTo(Dimension(1, DimensionUnit::PERCENT), 0, nullptr));
-    EXPECT_TRUE(controller->AnimateTo(Dimension(1), 0, nullptr));
-    EXPECT_TRUE(controller->AnimateTo(Dimension(1), 1, nullptr));
+    EXPECT_FALSE(controller->AnimateTo(Dimension(1, DimensionUnit::PERCENT), 0, nullptr, false));
+    EXPECT_TRUE(controller->AnimateTo(Dimension(1), 0, nullptr, false));
+    EXPECT_TRUE(controller->AnimateTo(Dimension(1), 1, nullptr, false));
 }
 
 /**
@@ -2984,9 +2985,9 @@ HWTEST_F(ListTestNg, PositionController002, TestSize.Level1)
     controller->JumpTo(1, 0);
     EXPECT_EQ(pattern_->jumpIndex_, 1);
 
-    EXPECT_FALSE(controller->AnimateTo(Dimension(1, DimensionUnit::PERCENT), 0, nullptr));
-    EXPECT_TRUE(controller->AnimateTo(Dimension(1), 0, nullptr));
-    EXPECT_TRUE(controller->AnimateTo(Dimension(1), 1, nullptr));
+    EXPECT_FALSE(controller->AnimateTo(Dimension(1, DimensionUnit::PERCENT), 0, nullptr, false));
+    EXPECT_TRUE(controller->AnimateTo(Dimension(1), 0, nullptr, false));
+    EXPECT_TRUE(controller->AnimateTo(Dimension(1), 1, nullptr, false));
 }
 
 /**
@@ -3028,7 +3029,7 @@ HWTEST_F(ListTestNg, PositionController003, TestSize.Level1)
     controller->JumpTo(1, 0);
     EXPECT_EQ(pattern_->jumpIndex_, 1);
 
-    EXPECT_FALSE(controller->AnimateTo(Dimension(1, DimensionUnit::PERCENT), 0, nullptr));
+    EXPECT_FALSE(controller->AnimateTo(Dimension(1, DimensionUnit::PERCENT), 0, nullptr, false));
 }
 
 /**
@@ -3949,5 +3950,112 @@ HWTEST_F(ListTestNg, PerformActionTest002, TestSize.Level1)
     listPattern->scrollable_ = true;
     EXPECT_TRUE(listAccessibilityProperty->ActActionScrollForward());
     EXPECT_TRUE(listAccessibilityProperty->ActActionScrollBackward());
+}
+
+/**
+ * @tc.name: ListPositionControllerTest001
+ * @tc.desc: Test PositionController function with smooth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListPositionControllerTest001, TestSize.Level1)
+{
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    RefPtr<ScrollControllerBase> scroller = listModelNG.CreateScrollController();
+    listModelNG.SetScroller(scroller, nullptr);
+    CreateListItem(10);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. Get positionController and set scroll_.
+     */
+    auto controller = pattern_->positionController_;
+    controller->scroll_ = AceType::WeakClaim(AceType::RawPtr(pattern_));
+
+    /**
+     * @tc.steps: step2. Call func when smooth is false or true.
+     * @tc.expected: Return true.
+     */
+    EXPECT_EQ(controller->GetScrollDirection(), Axis::VERTICAL);
+    EXPECT_TRUE(controller->AnimateTo(Dimension(1), 0, nullptr, false));
+    EXPECT_TRUE(controller->AnimateTo(Dimension(1), 0, nullptr, true));
+
+    /**
+     * @tc.steps: step3. Call func when duration is positive.
+     * @tc.expected: Return true.
+     */
+    EXPECT_TRUE(controller->AnimateTo(Dimension(1), 1.0, nullptr, false));
+    EXPECT_TRUE(controller->AnimateTo(Dimension(1), 1.0, nullptr, true));
+}
+
+/**
+ * @tc.name: ListPositionControllerTest002
+ * @tc.desc: Test PositionController function with ICurve.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListPositionControllerTest002, TestSize.Level1)
+{
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    RefPtr<ScrollControllerBase> scroller = listModelNG.CreateScrollController();
+    listModelNG.SetScroller(scroller, nullptr);
+    CreateListItem(10);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. Get positionController and set scroll_.
+     */
+    auto controller = pattern_->positionController_;
+    controller->scroll_ = AceType::WeakClaim(AceType::RawPtr(pattern_));
+
+    /**
+     * @tc.steps: step2. Create ICurve.
+     */
+    RefPtr<Curve> curve;
+    std::string icurveString = "spring(7.000000,1.000000,227.000000,33.000000)";
+    curve = Framework::CreateCurve(icurveString);
+
+    /**
+     * @tc.steps: step3. Call func when the duration and curve are valid.
+     * @tc.expected: Return true.
+     */
+    EXPECT_TRUE(controller->AnimateTo(Dimension(1), 1.0, curve, false));
+    EXPECT_TRUE(controller->AnimateTo(Dimension(1), 1.0, curve, true));
+}
+
+/**
+ * @tc.name: ListPositionControllerTest003
+ * @tc.desc: Test PositionController function with build-in curve.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListPositionControllerTest003, TestSize.Level1)
+{
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    RefPtr<ScrollControllerBase> scroller = listModelNG.CreateScrollController();
+    listModelNG.SetScroller(scroller, nullptr);
+    CreateListItem(10);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. Get positionController and set scroll_.
+     */
+    auto controller = pattern_->positionController_;
+    controller->scroll_ = AceType::WeakClaim(AceType::RawPtr(pattern_));
+
+    /**
+     * @tc.steps: step2. Create build-in curve.
+     */
+    RefPtr<Curve> curve = Curves::EASE_IN;
+
+    /**
+     * @tc.steps: step3. Call func when the duration and curve are valid.
+     * @tc.expected: Return true.
+     */
+    EXPECT_TRUE(controller->AnimateTo(Dimension(1), 1.0, curve, false));
+    EXPECT_TRUE(controller->AnimateTo(Dimension(1), 1.0, curve, true));
 }
 } // namespace OHOS::Ace::NG
