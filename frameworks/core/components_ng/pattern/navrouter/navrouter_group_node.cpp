@@ -324,6 +324,7 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
     }
     if (navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::STACK) {
         if (navBarNode) {
+            // jump to the first level NavDestination page
             auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
             auto destinationTitleBarNode = AceType::DynamicCast<TitleBarNode>(navDestination->GetTitleBarNode());
             auto backButtonNode = AceType::DynamicCast<FrameNode>(destinationTitleBarNode->GetBackButton());
@@ -351,8 +352,8 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
             NavTransitionInAnimation(navigationNode, currentNavDestination, navDestination);
         }
     }
-    // remove if this navDestinationNode is already in the NavigationStack and not at the top, which will be later
-    // modified by NavRouteMode
+    // remove if this navDestinationNode is already in the NavigationStack and not at the top, as the latter will
+    // later be modified by NavRouteMode
     navigationPattern->RemoveIfNeeded(name, navDestination);
 
     navigationContentNode->AddChild(navDestination);
