@@ -19,6 +19,7 @@
 #include "gtest/gtest.h"
 
 #define private public
+#define protected public
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -31,6 +32,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_events.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "core/components_ng/test/mock/rosen/mock_canvas.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -409,17 +411,29 @@ HWTEST_F(PanelTestNg, PanelTestNg005, TestSize.Level1)
     bool flag = panelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_TRUE(flag == true);
     panelPattern->isShow_ = true;
+    config.skipLayout = true;
+    config.skipMeasure = true;
     flag = panelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_FALSE(flag);
+    flag = true;
     /**
      * @tc.steps: step5. frameNode HeightDynamicUpdate.
      */
     panelPattern->isDrag_ = false;
     panelPattern->isAnimating_ = false;
     panelPattern->previousMode_ = PanelMode::HALF;
+    panelPattern->currentOffset_ = CURRENT_OFFSET;
+    panelPattern->defaultBlankHeights_[PanelMode::HALF] = CURRENT_OFFSET;
     panelPattern->HeightDynamicUpdate();
     panelPattern->previousMode_ = PanelMode::FULL;
+    panelPattern->currentOffset_ = CURRENT_OFFSET;
+    panelPattern->defaultBlankHeights_[PanelMode::FULL] = CURRENT_OFFSET;
     panelPattern->HeightDynamicUpdate();
     panelPattern->previousMode_ = PanelMode::MINI;
+    panelPattern->currentOffset_ = CURRENT_OFFSET;
+    panelPattern->defaultBlankHeights_[PanelMode::MINI] = CURRENT_OFFSET;
+    panelPattern->HeightDynamicUpdate();
+    panelPattern->previousMode_ = PanelMode::AUTO;
     panelPattern->HeightDynamicUpdate();
     EXPECT_TRUE(flag);
 }
@@ -901,14 +915,15 @@ HWTEST_F(PanelTestNg, PanelTestNg0016, TestSize.Level1)
      * @tc.steps: step3. HandleDragEnd.
      * @tc.expected: step3. Check that the branch is covered by the test.
      */
+    auto slidingLayoutProperty = slidingPanelPattern->GetLayoutProperty<SlidingPanelLayoutProperty>();
     GestureEvent endInfo;
     endInfo.SetMainVelocity(MAIN_VELOCITY);
-    slidingPanelPattern->type_ = PanelType::MINI_BAR;
+    slidingLayoutProperty->propPanelType_ = PanelType::MINI_BAR;
     slidingPanelPattern->HandleDragEnd(static_cast<float>(endInfo.GetMainVelocity()));
-    slidingPanelPattern->type_ = PanelType::FOLDABLE_BAR;
+    slidingLayoutProperty->propPanelType_ = PanelType::FOLDABLE_BAR;
     slidingPanelPattern->halfMiniBoundary_ = 100.0f;
     slidingPanelPattern->HandleDragEnd(static_cast<float>(endInfo.GetMainVelocity()));
-    slidingPanelPattern->type_ = PanelType::TEMP_DISPLAY;
+    slidingLayoutProperty->propPanelType_ = PanelType::TEMP_DISPLAY;
     slidingPanelPattern->currentOffset_ = 110.0f;
     slidingPanelPattern->HandleDragEnd(static_cast<float>(endInfo.GetMainVelocity()));
     EXPECT_EQ(endInfo.GetMainVelocity(), MAIN_VELOCITY);
@@ -1385,5 +1400,600 @@ HWTEST_F(PanelTestNg, PanelChangeEventTestNg001, TestSize.Level1)
     slidingPanelModelNG.SetOnSizeChange(sizeChangeEvent);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+}
+
+/**
+ * @tc.name: PanelTestNg0019
+ * @tc.desc: Test DragBarPaintMethod::GetContentDrawFunction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelTestNg, PanelTestNg0019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get renderContext_ and paintWrapper, then call func.
+     * @tc.expected: func function is called.
+     */
+    RenderContext renderContext_;
+    auto renderContext = AceType::WeakClaim<RenderContext>(&renderContext_);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutProperty = AceType::MakeRefPtr<PaintProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    PaintWrapper paintWrapper(renderContext, geometryNode, layoutProperty);
+    DragBarPaintMethod method;
+    Testing::MockCanvas canvas;
+    auto func = method.GetContentDrawFunction(&paintWrapper);
+    ASSERT_NE(func, nullptr);
+    func(canvas);
+    auto weak = AceType::WeakClaim<DragBarPaintMethod>(&method);
+    EXPECT_FALSE(weak.Upgrade());
+}
+
+/**
+ * @tc.name: PanelTestNg0020
+ * @tc.desc: Test SlidingPanelNode::AddChildToGroup.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelTestNg, PanelTestNg0020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get slidingPanelNode, set children_.
+     */
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    SlidingPanelNode slidingPanelNode("SlidingPanelNode", 100, pattern);
+    slidingPanelNode.columnChildren_.insert(1);
+    auto child = AceType::MakeRefPtr<SlidingPanelNode>("child1", 1, pattern);
+    ASSERT_NE(child, nullptr);
+    slidingPanelNode.AddChildToGroup(child, 1);
+    EXPECT_NE(
+        slidingPanelNode.columnChildren_.find(child->GetId()), slidingPanelNode.columnChildren_.end());
+    /**
+     * @tc.steps: step2. construct a UINode of children.
+     * @tc.expected: check whether the value is correct.
+     */
+    std::list<RefPtr<UINode>> list;
+    list.push_back(AceType::MakeRefPtr<SlidingPanelNode>("child3", 3, pattern));
+    auto child4 = AceType::MakeRefPtr<SlidingPanelNode>("child4", 4, pattern);
+    child4->children_ = list;
+    slidingPanelNode.children_.clear();
+    slidingPanelNode.children_.push_back(child4);
+    auto child2 = AceType::MakeRefPtr<SlidingPanelNode>("child2", 2, pattern);
+    slidingPanelNode.AddChildToGroup(child2, 1);
+        EXPECT_NE(
+        slidingPanelNode.columnChildren_.find(child2->GetId()), slidingPanelNode.columnChildren_.end());
+}
+
+/**
+ * @tc.name: PanelTestNg0021
+ * @tc.desc: Test SlidingPanelPattern::CheckPanelModeAndType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelTestNg, PanelTestNg0021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slidingPanel and get frameNode.
+     */
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetPanelMode(PanelMode::FULL);
+    auto panelFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(panelFrameNode, nullptr);
+    /**
+     * @tc.steps: step2. get layoutproperty, geometryNode and create layoutWrapper.
+     * @tc.expected: related function is called.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(panelFrameNode, geometryNode, panelFrameNode->GetLayoutProperty());
+    auto panelPattern = panelFrameNode->GetPattern<SlidingPanelPattern>();
+    ASSERT_NE(panelPattern, nullptr);
+    panelPattern->mode_ = PanelMode::HALF;
+    panelPattern->type_ = PanelType::MINI_BAR;
+    panelPattern->CheckPanelModeAndType();
+    EXPECT_EQ(panelPattern->mode_, PanelMode::MINI);
+    panelPattern->type_ = PanelType::TEMP_DISPLAY;
+    panelPattern->CheckPanelModeAndType();
+    EXPECT_EQ(panelPattern->mode_, PanelMode::HALF);
+}
+
+/**
+ * @tc.name: PanelTestNg0022
+ * @tc.desc: Test SlidingPanelPattern::OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelTestNg, PanelTestNg0022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slidingPanel and get frameNode.
+     */
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetPanelType(PANEL_TYPE_VALUE);
+    slidingPanelModelNG.SetPanelMode(PANEL_MODE_VALUE);
+    slidingPanelModelNG.SetBackgroundColor(BACKGROUND_COLOR_VALUE);
+    slidingPanelModelNG.SetHasDragBar(SLIDING_PANEL_HAS_DRAG_BAR_TRUE);
+    slidingPanelModelNG.SetIsShow(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetBorderColor(BORDER_COLOR);
+    slidingPanelModelNG.SetBorderWidth(BORDER_WIDTH);
+    slidingPanelModelNG.SetBorderStyle(BORDER_STYLE);
+    slidingPanelModelNG.SetBorder(BORDER_STYLE, BORDER_WIDTH);
+    slidingPanelModelNG.SetBackgroundMask(BACKGROUND_COLOR_VALUE);
+    slidingPanelModelNG.Pop();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto slidingPanelPattern = frameNode->GetPattern<SlidingPanelPattern>();
+    ASSERT_NE(slidingPanelPattern, nullptr);
+    /**
+     * @tc.steps: step2. change slidingPanelPattern->isShowQueue_ and slidingPanelPattern->isShow_.
+     * @tc.expected: slidingPanelPattern->isShowQueue_.empty() is correct.
+     */
+    auto host = slidingPanelPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto layoutProperty = host->GetLayoutProperty<SlidingPanelLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto isShow = layoutProperty->GetIsShowValue(false);
+    EXPECT_TRUE(isShow);
+    slidingPanelPattern->isShowQueue_ = std::queue<bool>();
+    EXPECT_TRUE(slidingPanelPattern->isShowQueue_.empty());
+    slidingPanelPattern->isShow_ = false;
+    slidingPanelPattern->OnModifyDone();
+    EXPECT_TRUE(slidingPanelPattern->isShowQueue_.empty());
+}
+
+/**
+ * @tc.name: PanelTestNg0023
+ * @tc.desc: Test SlidingPanelPattern::Update.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelTestNg, PanelTestNg0023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slidingPanel and get frameNode.
+     */
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetPanelType(PANEL_TYPE_VALUE);
+    slidingPanelModelNG.SetPanelMode(PANEL_MODE_VALUE);
+    slidingPanelModelNG.SetBackgroundColor(BACKGROUND_COLOR_VALUE);
+    slidingPanelModelNG.SetHasDragBar(SLIDING_PANEL_HAS_DRAG_BAR_TRUE);
+    slidingPanelModelNG.SetIsShow(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetBorderColor(BORDER_COLOR);
+    slidingPanelModelNG.SetBorderWidth(BORDER_WIDTH);
+    slidingPanelModelNG.SetBorderStyle(BORDER_STYLE);
+    slidingPanelModelNG.SetBorder(BORDER_STYLE, BORDER_WIDTH);
+    slidingPanelModelNG.SetBackgroundMask(BACKGROUND_COLOR_VALUE);
+    slidingPanelModelNG.Pop();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto slidingPanelPattern = frameNode->GetPattern<SlidingPanelPattern>();
+    ASSERT_NE(slidingPanelPattern, nullptr);
+    /**
+     * @tc.steps: step2. change slidingPanelPattern->mode_, layoutProperty->propPanelType_ and so on.
+     * @tc.expected: slidingPanelPattern->mode_.value() is correct.
+     */
+    auto layoutProperty = slidingPanelPattern->GetLayoutProperty<SlidingPanelLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->propPanelMode_ = PanelMode::HALF;
+    slidingPanelPattern->mode_ = PanelMode::HALF;
+    auto mode = layoutProperty->GetPanelMode() == PanelMode::AUTO
+                    ? PanelMode::FULL
+                    : layoutProperty->GetPanelMode().value_or(PanelMode::HALF);
+    slidingPanelPattern->type_ = layoutProperty->GetPanelType().value_or(PanelType::FOLDABLE_BAR);
+    EXPECT_EQ(slidingPanelPattern->type_, PanelType::MINI_BAR);
+    EXPECT_EQ(slidingPanelPattern->mode_.value(), mode);
+    EXPECT_EQ(slidingPanelPattern->mode_.value(), PanelMode::HALF);
+    slidingPanelPattern->isShow_ = true;
+    EXPECT_TRUE(slidingPanelPattern->isShow_);
+    layoutProperty->propIsShow_ = true;
+    slidingPanelPattern->previousMode_ = PanelMode::AUTO;
+    slidingPanelPattern->Update();
+
+    layoutProperty->propPanelType_ = PanelType::TEMP_DISPLAY;
+    layoutProperty->propPanelMode_ = PanelMode::MINI;
+    slidingPanelPattern->mode_ = PanelMode::MINI;
+    slidingPanelPattern->Update();
+    EXPECT_EQ(slidingPanelPattern->mode_.value(), PanelMode::HALF);
+}
+
+/**
+ * @tc.name: PanelTestNg0024
+ * @tc.desc: Test SlidingPanelPattern::InitializeLayoutProps.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelTestNg, PanelTestNg0024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slidingPanel and get frameNode.
+     */
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetPanelType(PANEL_TYPE_VALUE);
+    slidingPanelModelNG.SetPanelMode(PANEL_MODE_VALUE);
+    slidingPanelModelNG.SetBackgroundColor(BACKGROUND_COLOR_VALUE);
+    slidingPanelModelNG.SetHasDragBar(SLIDING_PANEL_HAS_DRAG_BAR_TRUE);
+    slidingPanelModelNG.SetIsShow(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetBorderColor(BORDER_COLOR);
+    slidingPanelModelNG.SetBorderWidth(BORDER_WIDTH);
+    slidingPanelModelNG.SetBorderStyle(BORDER_STYLE);
+    slidingPanelModelNG.SetBorder(BORDER_STYLE, BORDER_WIDTH);
+    slidingPanelModelNG.SetBackgroundMask(BACKGROUND_COLOR_VALUE);
+    slidingPanelModelNG.Pop();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto slidingPanelPattern = frameNode->GetPattern<SlidingPanelPattern>();
+    ASSERT_NE(slidingPanelPattern, nullptr);
+    /**
+     * @tc.steps: step2. change slidingPanelPattern->isShow_, child.
+     * @tc.expected: slidingPanelPattern->isShow_ is correct.
+     */
+    auto layoutProperty = slidingPanelPattern->GetLayoutProperty<SlidingPanelLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto isShow = layoutProperty->GetIsShowValue(false);
+    EXPECT_TRUE(isShow);
+    slidingPanelPattern->isShow_ = false;
+    EXPECT_TRUE(slidingPanelPattern->isShow_.value() != isShow);
+    slidingPanelPattern->InitializeLayoutProps();
+    EXPECT_FALSE(slidingPanelPattern->isShow_.value() != isShow);
+
+    auto host = slidingPanelPattern->GetHost();
+    auto child = host->GetChildren();
+    EXPECT_FALSE(child.empty() || child.size() != 1);
+    child.clear();
+    EXPECT_TRUE(child.empty() || child.size() != 1);
+    slidingPanelPattern->InitializeLayoutProps();
+    EXPECT_TRUE(slidingPanelPattern->isShow_);
+}
+
+/**
+ * @tc.name: PanelTestNg0025
+ * @tc.desc: Test SlidingPanelPattern::FirstLayout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelTestNg, PanelTestNg0025, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slidingPanel and get frameNode.
+     */
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetPanelType(PANEL_TYPE_VALUE);
+    slidingPanelModelNG.SetPanelMode(PANEL_MODE_VALUE);
+    slidingPanelModelNG.SetBackgroundColor(BACKGROUND_COLOR_VALUE);
+    slidingPanelModelNG.SetHasDragBar(SLIDING_PANEL_HAS_DRAG_BAR_TRUE);
+    slidingPanelModelNG.SetIsShow(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetBorderColor(BORDER_COLOR);
+    slidingPanelModelNG.SetBorderWidth(BORDER_WIDTH);
+    slidingPanelModelNG.SetBorderStyle(BORDER_STYLE);
+    slidingPanelModelNG.SetBorder(BORDER_STYLE, BORDER_WIDTH);
+    slidingPanelModelNG.SetBackgroundMask(BACKGROUND_COLOR_VALUE);
+    slidingPanelModelNG.Pop();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto slidingPanelPattern = frameNode->GetPattern<SlidingPanelPattern>();
+    ASSERT_NE(slidingPanelPattern, nullptr);
+    /**
+     * @tc.steps: step2. change layoutProperty->propIsShow_.
+     * @tc.expected: slidingPanelPattern->FirstLayout() is called.
+     */
+    auto layoutProperty = slidingPanelPattern->GetLayoutProperty<SlidingPanelLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_TRUE(layoutProperty->GetIsShowValue(false));
+    EXPECT_TRUE(slidingPanelPattern->previousMode_ != slidingPanelPattern->mode_.value_or(PanelMode::HALF));
+    EXPECT_TRUE(layoutProperty->GetHasDragBarValue(true));
+    auto dragBar = slidingPanelPattern->GetDragBarNode();
+    ASSERT_NE(dragBar, nullptr);
+    auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
+    ASSERT_NE(dragBarPattern, nullptr);
+    slidingPanelPattern->FirstLayout();
+    layoutProperty->propIsShow_ = false;
+    
+    EXPECT_FALSE(layoutProperty->GetIsShowValue(false));
+    slidingPanelPattern->FirstLayout();
+}
+
+/**
+ * @tc.name: PanelTestNg0026
+ * @tc.desc: Test SlidingPanelPattern::FirstLayout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelTestNg, PanelTestNg0026, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slidingPanel and get frameNode.
+     */
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetPanelType(PANEL_TYPE_VALUE);
+    slidingPanelModelNG.SetPanelMode(PANEL_MODE_VALUE);
+    slidingPanelModelNG.SetBackgroundColor(BACKGROUND_COLOR_VALUE);
+    slidingPanelModelNG.SetHasDragBar(SLIDING_PANEL_HAS_DRAG_BAR_TRUE);
+    slidingPanelModelNG.SetIsShow(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetBorderColor(BORDER_COLOR);
+    slidingPanelModelNG.SetBorderWidth(BORDER_WIDTH);
+    slidingPanelModelNG.SetBorderStyle(BORDER_STYLE);
+    slidingPanelModelNG.SetBorder(BORDER_STYLE, BORDER_WIDTH);
+    slidingPanelModelNG.SetBackgroundMask(BACKGROUND_COLOR_VALUE);
+    slidingPanelModelNG.Pop();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto slidingPanelPattern = frameNode->GetPattern<SlidingPanelPattern>();
+    ASSERT_NE(slidingPanelPattern, nullptr);
+    /**
+     * @tc.steps: step2. change slidingPanelPattern->previousMode_, slidingPanelPattern->mode_.
+     * @tc.expected: hasDragBar is correct.
+     */
+    auto layoutProperty = slidingPanelPattern->GetLayoutProperty<SlidingPanelLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto hasDragBar = layoutProperty->GetHasDragBarValue(true);
+    slidingPanelPattern->previousMode_ = PanelMode::HALF;
+    slidingPanelPattern->mode_ = PanelMode::FULL;
+    slidingPanelPattern->IsShowChanged(true);
+    EXPECT_EQ(slidingPanelPattern->previousMode_, slidingPanelPattern->mode_);
+    slidingPanelPattern->IsShowChanged(false);
+    EXPECT_TRUE(hasDragBar);
+}
+
+/**
+ * @tc.name: PanelTestNg0027
+ * @tc.desc: Test SlidingPanelPattern::HeightDynamicUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelTestNg, PanelTestNg0027, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slidingPanel and get frameNode.
+     */
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetPanelType(PANEL_TYPE_VALUE);
+    slidingPanelModelNG.SetPanelMode(PANEL_MODE_VALUE);
+    slidingPanelModelNG.SetBackgroundColor(BACKGROUND_COLOR_VALUE);
+    slidingPanelModelNG.SetHasDragBar(SLIDING_PANEL_HAS_DRAG_BAR_TRUE);
+    slidingPanelModelNG.SetIsShow(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetBorderColor(BORDER_COLOR);
+    slidingPanelModelNG.SetBorderWidth(BORDER_WIDTH);
+    slidingPanelModelNG.SetBorderStyle(BORDER_STYLE);
+    slidingPanelModelNG.SetBorder(BORDER_STYLE, BORDER_WIDTH);
+    slidingPanelModelNG.SetBackgroundMask(BACKGROUND_COLOR_VALUE);
+    slidingPanelModelNG.Pop();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto slidingPanelPattern = frameNode->GetPattern<SlidingPanelPattern>();
+    ASSERT_NE(slidingPanelPattern, nullptr);
+    /**
+     * @tc.steps: step2. change slidingPanelPattern->previousMode_, slidingPanelPattern->isAnimating_ and so on.
+     * @tc.expected: slidingPanelPattern->previousMode_ is correct.
+     */
+    slidingPanelPattern->isShow_ = true;
+    EXPECT_TRUE(slidingPanelPattern->isShow_.value_or(false));
+    EXPECT_FALSE(slidingPanelPattern->isDrag_);
+    EXPECT_FALSE(slidingPanelPattern->isAnimating_);
+
+    slidingPanelPattern->previousMode_ = PanelMode::FULL;
+    slidingPanelPattern->currentOffset_ = 0.3f;
+    slidingPanelPattern->defaultBlankHeights_[PanelMode::FULL] = 0.5f;
+    slidingPanelPattern->HeightDynamicUpdate();
+
+    EXPECT_TRUE(slidingPanelPattern->isShow_.value_or(false));
+    EXPECT_FALSE(slidingPanelPattern->isDrag_);
+    EXPECT_TRUE(slidingPanelPattern->isAnimating_);
+    slidingPanelPattern->isAnimating_ = false;
+    slidingPanelPattern->previousMode_ = PanelMode::HALF;
+    slidingPanelPattern->currentOffset_ = 0.3f;
+    slidingPanelPattern->defaultBlankHeights_[PanelMode::HALF] = 0.5f;
+    slidingPanelPattern->HeightDynamicUpdate();
+    EXPECT_TRUE(slidingPanelPattern->isShow_.value_or(false));
+    EXPECT_FALSE(slidingPanelPattern->isDrag_);
+    EXPECT_TRUE(slidingPanelPattern->isAnimating_);
+    slidingPanelPattern->isAnimating_ = false;
+    slidingPanelPattern->previousMode_ = PanelMode::MINI;
+    slidingPanelPattern->currentOffset_ = 0.3f;
+    slidingPanelPattern->defaultBlankHeights_[PanelMode::MINI] = 0.5f;
+    slidingPanelPattern->HeightDynamicUpdate();
+    EXPECT_EQ(slidingPanelPattern->previousMode_, PanelMode::MINI);
+    slidingPanelPattern->previousMode_ = PanelMode::AUTO;
+    slidingPanelPattern->HeightDynamicUpdate();
+    EXPECT_EQ(slidingPanelPattern->previousMode_, PanelMode::AUTO);
+}
+
+/**
+ * @tc.name: PanelTestNg0028
+ * @tc.desc: Test SlidingPanelPattern::CheckPanelModeAndType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelTestNg, PanelTestNg0028, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slidingPanel and get frameNode.
+     */
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetPanelType(PANEL_TYPE_VALUE);
+    slidingPanelModelNG.SetPanelMode(PANEL_MODE_VALUE);
+    slidingPanelModelNG.SetBackgroundColor(BACKGROUND_COLOR_VALUE);
+    slidingPanelModelNG.SetHasDragBar(SLIDING_PANEL_HAS_DRAG_BAR_TRUE);
+    slidingPanelModelNG.SetIsShow(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetBorderColor(BORDER_COLOR);
+    slidingPanelModelNG.SetBorderWidth(BORDER_WIDTH);
+    slidingPanelModelNG.SetBorderStyle(BORDER_STYLE);
+    slidingPanelModelNG.SetBorder(BORDER_STYLE, BORDER_WIDTH);
+    slidingPanelModelNG.SetBackgroundMask(BACKGROUND_COLOR_VALUE);
+    slidingPanelModelNG.Pop();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto slidingPanelPattern = frameNode->GetPattern<SlidingPanelPattern>();
+    ASSERT_NE(slidingPanelPattern, nullptr);
+    /**
+     * @tc.steps: step2. change slidingPanelPattern->mode_, slidingPanelPattern->type_.
+     * @tc.expected: slidingPanelPattern->mode_ and slidingPanelPattern->type_ are correct.
+     */
+    slidingPanelPattern->mode_ = PanelMode::HALF;
+    slidingPanelPattern->type_ = PanelType::MINI_BAR;
+    slidingPanelPattern->CheckPanelModeAndType();
+    EXPECT_EQ(slidingPanelPattern->mode_, PanelMode::MINI);
+    EXPECT_EQ(slidingPanelPattern->type_, PanelType::MINI_BAR);
+
+    slidingPanelPattern->type_ = PanelType::TEMP_DISPLAY;
+    slidingPanelPattern->CheckPanelModeAndType();
+    EXPECT_EQ(slidingPanelPattern->mode_, PanelMode::HALF);
+    EXPECT_EQ(slidingPanelPattern->type_, PanelType::TEMP_DISPLAY);
+}
+
+/**
+ * @tc.name: PanelTestNg0029
+ * @tc.desc: Test SlidingPanelPattern::CalculateModeTypeFold.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelTestNg, PanelTestNg0029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slidingPanel and get frameNode.
+     */
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetPanelType(PANEL_TYPE_VALUE);
+    slidingPanelModelNG.SetPanelMode(PANEL_MODE_VALUE);
+    slidingPanelModelNG.SetBackgroundColor(BACKGROUND_COLOR_VALUE);
+    slidingPanelModelNG.SetHasDragBar(SLIDING_PANEL_HAS_DRAG_BAR_TRUE);
+    slidingPanelModelNG.SetIsShow(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetBorderColor(BORDER_COLOR);
+    slidingPanelModelNG.SetBorderWidth(BORDER_WIDTH);
+    slidingPanelModelNG.SetBorderStyle(BORDER_STYLE);
+    slidingPanelModelNG.SetBorder(BORDER_STYLE, BORDER_WIDTH);
+    slidingPanelModelNG.SetBackgroundMask(BACKGROUND_COLOR_VALUE);
+    slidingPanelModelNG.Pop();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto slidingPanelPattern = frameNode->GetPattern<SlidingPanelPattern>();
+    ASSERT_NE(slidingPanelPattern, nullptr);
+    /**
+     * @tc.steps: step2. change slidingPanelPattern->currentOffset_.
+     * @tc.expected: slidingPanelPattern->currentOffset_ is correct.
+     */
+    slidingPanelPattern->currentOffset_ = 55.0f;
+    slidingPanelPattern->fullHalfBoundary_ = 50.0f;
+    slidingPanelPattern->halfMiniBoundary_ = 60.0f;
+    slidingPanelPattern->CalculateModeTypeFold(DRAG_LENGTH, DRAG_VELOCITY);
+    EXPECT_GE(slidingPanelPattern->currentOffset_, slidingPanelPattern->fullHalfBoundary_);
+    EXPECT_LT(slidingPanelPattern->currentOffset_, slidingPanelPattern->halfMiniBoundary_);
+    slidingPanelPattern->currentOffset_ = 100.0f;
+    slidingPanelPattern->CalculateModeTypeFold(DRAG_LENGTH, DRAG_VELOCITY);
+    EXPECT_GE(slidingPanelPattern->currentOffset_, slidingPanelPattern->fullHalfBoundary_);
+    EXPECT_GE(slidingPanelPattern->currentOffset_, slidingPanelPattern->halfMiniBoundary_);
+}
+
+/**
+ * @tc.name: PanelTestNg0030
+ * @tc.desc: Test SlidingPanelPattern::CalculateModeTypeFold.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelTestNg, PanelTestNg0030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slidingPanel and get frameNode.
+     */
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetPanelType(PANEL_TYPE_VALUE);
+    slidingPanelModelNG.SetPanelMode(PANEL_MODE_VALUE);
+    slidingPanelModelNG.SetBackgroundColor(BACKGROUND_COLOR_VALUE);
+    slidingPanelModelNG.SetHasDragBar(SLIDING_PANEL_HAS_DRAG_BAR_TRUE);
+    slidingPanelModelNG.SetIsShow(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetBorderColor(BORDER_COLOR);
+    slidingPanelModelNG.SetBorderWidth(BORDER_WIDTH);
+    slidingPanelModelNG.SetBorderStyle(BORDER_STYLE);
+    slidingPanelModelNG.SetBorder(BORDER_STYLE, BORDER_WIDTH);
+    slidingPanelModelNG.SetBackgroundMask(BACKGROUND_COLOR_VALUE);
+    slidingPanelModelNG.Pop();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto slidingPanelPattern = frameNode->GetPattern<SlidingPanelPattern>();
+    ASSERT_NE(slidingPanelPattern, nullptr);
+    /**
+     * @tc.steps: step2. call GetAnimationDuration.
+     * @tc.expected: dragRange is correct.
+     */
+    float delta = 10.0f;
+    float dragRange = 5.0f;
+    slidingPanelPattern->GetAnimationDuration(delta, dragRange);
+    EXPECT_NE(dragRange, 0.0f);
+}
+
+/**
+ * @tc.name: PanelTestNg0031
+ * @tc.desc: Test SlidingPanelPattern::CalculateModeTypeFold.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelTestNg, PanelTestNg0031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slidingPanel and get frameNode.
+     */
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetPanelType(PANEL_TYPE_VALUE);
+    slidingPanelModelNG.SetPanelMode(PANEL_MODE_VALUE);
+    slidingPanelModelNG.SetBackgroundColor(BACKGROUND_COLOR_VALUE);
+    slidingPanelModelNG.SetHasDragBar(SLIDING_PANEL_HAS_DRAG_BAR_TRUE);
+    slidingPanelModelNG.SetIsShow(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetBorderColor(BORDER_COLOR);
+    slidingPanelModelNG.SetBorderWidth(BORDER_WIDTH);
+    slidingPanelModelNG.SetBorderStyle(BORDER_STYLE);
+    slidingPanelModelNG.SetBorder(BORDER_STYLE, BORDER_WIDTH);
+    slidingPanelModelNG.SetBackgroundMask(BACKGROUND_COLOR_VALUE);
+    slidingPanelModelNG.Pop();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto slidingPanelPattern = frameNode->GetPattern<SlidingPanelPattern>();
+    ASSERT_NE(slidingPanelPattern, nullptr);
+    /**
+     * @tc.steps: step2. change slidingPanelPattern->isShowQueue_.
+     * @tc.expected: slidingPanelPattern->invisibleFlag_.value_or(true) is correct.
+     */
+    EXPECT_TRUE(slidingPanelPattern->isShowQueue_.empty());
+    slidingPanelPattern->isShowQueue_.push(true);
+    slidingPanelPattern->isShowQueue_.push(true);
+    slidingPanelPattern->OnAnimationStop();
+    EXPECT_FALSE(slidingPanelPattern->invisibleFlag_.value_or(true));
+}
+
+/**
+ * @tc.name: PanelTestNg0032
+ * @tc.desc: Test DragBarPattern::ShowArrow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelTestNg, PanelTestNg0032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create dragBarPattern, change showMode_.
+     * @tc.expected: dragBarPattern.showMode_ is correct.
+     */
+    DragBarPattern dragBarPattern;
+    dragBarPattern.showMode_ = PanelMode::FULL;
+    dragBarPattern.ShowArrow(true);
+    EXPECT_EQ(dragBarPattern.showMode_, PanelMode::FULL);
+    dragBarPattern.ShowArrow(false);
+    EXPECT_EQ(dragBarPattern.showMode_, PanelMode::HALF);
+}
+
+/**
+ * @tc.name: PanelTestNg0033
+ * @tc.desc: Test DragBarPattern::ShowArrow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelTestNg, PanelTestNg0033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create dragBarPattern, set clickArrowCallback_.
+     * @tc.expected: dragBarPattern.clickArrowCallback_ is correct.
+     */
+    DragBarPattern dragBarPattern;
+    dragBarPattern.OnClick();
+    EXPECT_FALSE(dragBarPattern.clickArrowCallback_);
+    dragBarPattern.clickArrowCallback_ = []() {};
+    dragBarPattern.OnClick();
+    EXPECT_TRUE(dragBarPattern.clickArrowCallback_);
 }
 } // namespace OHOS::Ace::NG

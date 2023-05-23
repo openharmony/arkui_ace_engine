@@ -71,7 +71,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr Dimension BORDER_WIDTH = 2.0_vp;
 constexpr Dimension BORDER_DEFAULT_WIDTH = 0.0_vp;
 constexpr Dimension ERROR_BORDER_WIDTH = 1.0_vp;
 constexpr Dimension OVER_COUNT_BORDER_WIDTH = 1.0_vp;
@@ -911,7 +910,7 @@ void TextFieldPattern::HandleFocusEvent()
     CloseSelectOverlay();
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (GetShowUnderLine()) {
+    if (layoutProperty->GetShowUnderlineValue(false)) {
         auto renderContext = GetHost()->GetRenderContext();
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -919,14 +918,8 @@ void TextFieldPattern::HandleFocusEvent()
         CHECK_NULL_VOID(themeManager);
         auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(textFieldTheme);
-        BorderColorProperty borderColor;
-        borderColor.SetColor(textFieldTheme->GetBorderColor());
-        renderContext->UpdateBorderColor(borderColor);
         auto radius = textFieldTheme->GetBorderRadiusSize();
         renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
-        BorderWidthProperty borderWidth;
-        borderWidth.SetBorderWidth(BORDER_WIDTH);
-        layoutProperty->UpdateBorderWidth(borderWidth);
     }
     GetHost()->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                       : PROPERTY_UPDATE_MEASURE);
@@ -1069,13 +1062,12 @@ void TextFieldPattern::HandleBlurEvent()
     if (textFieldManager) {
         textFieldManager->ClearOnFocusTextField();
     }
-    if (GetShowUnderLine()) {
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetShowUnderlineValue(false)) {
         auto renderContext = GetHost()->GetRenderContext();
-        renderContext->UpdateBorderColor(underLinePattern_.borderColor);
+        renderContext->UpdateBackgroundColor(underLinePattern_.bgColor);
         renderContext->UpdateBorderRadius(underLinePattern_.radius);
-        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->UpdateBorderWidth(underLinePattern_.borderWidth);
     }
     StopTwinkling();
     CloseKeyboard(true);
@@ -1398,6 +1390,16 @@ void TextFieldPattern::FireEventHubOnChange(const std::string& text)
         eventHub->UpdateChangeEvent(text);
         return;
     }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetShowUnderlineValue(false)) {
+        underlineColor_ = textFieldTheme->GetUnderlineTypingColor();
+        underlineWidth_ = TYPING_UNDERLINE_WIDTH;
+    }
 
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1433,7 +1435,10 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
         CHECK_NULL_VOID(themeManager);
         auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(textFieldTheme);
-        if (GetShowUnderLine()) {
+        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        if (layoutProperty->GetShowUnderlineValue(false)) {
+            renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
             auto radius = textFieldTheme->GetBorderRadiusSize();
             renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
         }
@@ -1454,13 +1459,11 @@ void TextFieldPattern::HandleTouchUp()
         if (isOnHover_) {
             AnimatePressAndHover(renderContext, HOVER_ANIMATION_OPACITY);
         } else {
-            if (GetShowUnderLine()) {
+            auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+            CHECK_NULL_VOID(layoutProperty);
+            if (layoutProperty->GetShowUnderlineValue(false)) {
                 renderContext->UpdateBackgroundColor(underLinePattern_.bgColor);
                 renderContext->UpdateBorderRadius(underLinePattern_.radius);
-                renderContext->UpdateBorderColor(underLinePattern_.borderColor);
-                auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-                CHECK_NULL_VOID(layoutProperty);
-                layoutProperty->UpdateBorderWidth(underLinePattern_.borderWidth);
             }
             AnimatePressAndHover(renderContext, 0.0f);
         }
@@ -1800,7 +1803,7 @@ void TextFieldPattern::OnModifyDone()
         CloseKeyboard(true);
         keyboard_ = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
     }
-    if (GetShowUnderLine()) {
+    if (layoutProperty->GetShowUnderlineValue(false)) {
         SaveUnderlineStates();
     }
     SavePasswordModeStates();
@@ -2375,8 +2378,10 @@ void TextFieldPattern::OnHover(bool isHover)
         auto textfieldPaintProperty = GetPaintProperty<TextFieldPaintProperty>();
         CHECK_NULL_VOID(textfieldPaintProperty);
         auto renderContext = GetHost()->GetRenderContext();
+        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
         if (isOnHover_) {
-            if (GetShowUnderLine()) {
+            if (layoutProperty->GetShowUnderlineValue(false)) {
                 renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
                 auto radius = textFieldTheme->GetBorderRadiusSize();
                 renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
@@ -2387,13 +2392,9 @@ void TextFieldPattern::OnHover(bool isHover)
         }
         isOnHover_ = false;
         if (!isMousePressed_) {
-            if (GetShowUnderLine()) {
+            if (layoutProperty->GetShowUnderlineValue(false)) {
                 renderContext->UpdateBackgroundColor(underLinePattern_.bgColor);
                 renderContext->UpdateBorderRadius(underLinePattern_.radius);
-                renderContext->UpdateBorderColor(underLinePattern_.borderColor);
-                auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-                CHECK_NULL_VOID(layoutProperty);
-                layoutProperty->UpdateBorderWidth(underLinePattern_.borderWidth);
             }
             AnimatePressAndHover(renderContext, 0.0f, true);
         }
@@ -3248,21 +3249,7 @@ void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue
                                                                                  : PROPERTY_UPDATE_MEASURE);
 }
 
-void TextFieldPattern::OnValueChanged(bool needFireChangeEvent, bool needFireSelectChangeEvent)
-{
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(textFieldTheme);
-    if (GetShowUnderLine()) {
-        underlineColor_ = textFieldTheme->GetUnderlineTypingColor();
-        underlineWidth_ = TYPING_UNDERLINE_WIDTH;
-    } else {
-        underlineColor_ = textFieldTheme->GetUnderlineColor();
-        underlineWidth_ = UNDERLINE_WIDTH;
-    }
-
-}
+void TextFieldPattern::OnValueChanged(bool needFireChangeEvent, bool needFireSelectChangeEvent) {}
 
 void TextFieldPattern::OnAreaChangedInner()
 {
@@ -4007,11 +3994,11 @@ void TextFieldPattern::SetShowError()
     CHECK_NULL_VOID(renderContext);
     auto visible = layoutProperty->GetShowErrorTextValue(false);
 
-    if (visible && GetShowUnderLine()) {
+    if (visible && layoutProperty->GetShowUnderlineValue(false)) {
         underlineColor_ = textFieldTheme->GetErrorUnderlineColor();
         underlineWidth_ = ERROR_UNDERLINE_WIDTH;
     }
-    if (!visible && GetShowUnderLine()) {
+    if (!visible && layoutProperty->GetShowUnderlineValue(false)) {
         underlineColor_ = textFieldTheme->GetUnderlineColor();
         underlineWidth_ = UNDERLINE_WIDTH;
     }
@@ -4088,22 +4075,10 @@ void TextFieldPattern::SavePasswordModeStates()
 void TextFieldPattern::SaveUnderlineStates()
 {
     auto renderContext = GetHost()->GetRenderContext();
-    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     Radius radius;
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
     underLinePattern_.radius = renderContext->GetBorderRadius().value_or(borderRadius);
     underLinePattern_.bgColor = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
-    BorderColorProperty borderColor;
-    borderColor.SetColor(Color::TRANSPARENT);
-    underLinePattern_.borderColor = renderContext->GetBorderColor().value_or(borderColor);
-    if (layoutProperty->GetBorderWidthProperty()) {
-        underLinePattern_.borderWidth = *(layoutProperty->GetBorderWidthProperty());
-    } else {
-        BorderWidthProperty borderWidth;
-        borderWidth.SetBorderWidth(BORDER_DEFAULT_WIDTH);
-        underLinePattern_.borderWidth = borderWidth;
-    }
 }
 
 float TextFieldPattern::GetMarginBottom() const

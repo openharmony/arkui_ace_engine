@@ -115,8 +115,6 @@ struct CaretMetricsF {
 struct UnderLinePattern {
     BorderRadiusProperty radius;
     Color bgColor;
-    BorderWidthProperty borderWidth;
-    BorderColorProperty borderColor;
 };
 
 struct PasswordModeStyle {
@@ -759,16 +757,6 @@ public:
     void SetUnitNode(const RefPtr<NG::UINode>& unitNode);
     void SetShowError();
 
-    void SetShowUnderLine(bool showUnderLine)
-    {
-        showUnderLine_ = showUnderLine;
-    }
-
-    bool GetShowUnderLine() const
-    {
-        return showUnderLine_;
-    }
-
     float GetUnitWidth() const
     {
         return unitWidth_;
@@ -939,7 +927,6 @@ private:
     PaddingPropertyF utilPadding_;
     OffsetF rightClickOffset_;
 
-    bool showUnderLine_ = false;
     ImageSourceInfo showResultImageInfo_;
     ImageSourceInfo hideResultImageInfo_;
     bool setBorderFlag_ = true;

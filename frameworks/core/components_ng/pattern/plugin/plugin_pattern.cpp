@@ -539,4 +539,13 @@ const RefPtr<PluginSubContainer>& PluginPattern::GetPluginSubContainer() const
 {
     return pluginSubContainer_;
 };
+
+void PluginPattern::FlushReload() const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto customNode = DynamicCast<CustomNodeBase>(host->GetFirstChild());
+    CHECK_NULL_VOID(customNode);
+    customNode->FireReloadFunction(true);
+}
 } // namespace OHOS::Ace::NG

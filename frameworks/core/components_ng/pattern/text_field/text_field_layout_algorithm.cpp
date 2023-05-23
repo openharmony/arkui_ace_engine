@@ -143,7 +143,9 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         RectF(layoutWrapper->GetGeometryNode()->GetFrameOffset(), layoutWrapper->GetGeometryNode()->GetFrameSize());
 
     auto children = frameNode->GetChildren();
-    if (!children.empty() && pattern->GetShowUnderLine()) {
+    auto layoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    if (!children.empty() && layoutProperty->GetShowUnderlineValue(false)) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
         auto childLayoutConstraint = textfieldLayoutProperty->CreateChildConstraint();
         CHECK_NULL_VOID(childWrapper);
@@ -170,14 +172,13 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     bool showPlaceHolder = false;
     auto idealWidth = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
     auto idealHeight = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height());
-
+    auto layoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(textFieldLayoutProperty, std::nullopt);
     if (!textFieldLayoutProperty->GetValueValue("").empty()) {
-        UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled(),
-            pattern->GetShowUnderLine());
+        UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetValueValue("");
     } else {
-        UpdatePlaceholderTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled(),
-            pattern->GetShowUnderLine());
+        UpdatePlaceholderTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetPlaceholderValue("");
         showPlaceHolder = true;
     }
@@ -206,8 +207,6 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         // for text area or placeholder, max width is content width without password icon
         paragraph_->Layout(idealWidth - pattern->GetScrollBarWidth() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx());
     }
-    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, std::nullopt);
     if (layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength()) {
         auto textLength = showPlaceHolder ? 0 : StringUtils::ToWstring(textContent).length();
         auto maxLength = layoutProperty->GetMaxLength().value();
@@ -366,7 +365,7 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     auto frameBottom = pattern->GetMarginBottom();
     MarginProperty errorMargin;
-    if (pattern->GetShowUnderLine() && layoutProperty->GetShowErrorTextValue(false) &&
+    if (layoutProperty->GetShowUnderlineValue(false) && layoutProperty->GetShowErrorTextValue(false) &&
         (frameBottom < ERROR_TEXT_UNDERLINE_MARGIN)) {
         errorMargin.bottom = CalcLength(ERROR_TEXT_UNDERLINE_MARGIN);
         frameNode->GetLayoutProperty()->UpdateMargin(errorMargin);
@@ -376,7 +375,7 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         errorMargin.bottom = CalcLength(ERROR_TEXT_CAPSULE_MARGIN);
         frameNode->GetLayoutProperty()->UpdateMargin(errorMargin);
     }
-    if (pattern->GetShowUnderLine()) {
+    if (layoutProperty->GetShowUnderlineValue(false)) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
@@ -395,7 +394,7 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNode,
     const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle,
-    bool isDisabled, bool isUnderline)
+    bool isDisabled)
 {
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
@@ -412,7 +411,7 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
         layoutProperty->GetFontWeightValue(theme ? theme->GetFontWeight() : textStyle.GetFontWeight()));
     if (isDisabled) {
         textStyle.SetTextColor(theme ? theme->GetDisableTextColor() : textStyle.GetTextColor());
-        if (isUnderline) {
+        if (layoutProperty->GetShowUnderlineValue(false)) {
             textStyle.SetTextColor(theme ? theme->GetTextColorDisable() : textStyle.GetTextColor());
         }
     } else {
@@ -438,7 +437,7 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
 }
 
 void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
-    const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle, bool isDisabled, bool isUnderline)
+    const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle, bool isDisabled)
 {
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
@@ -454,7 +453,7 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<TextField
         layoutProperty->GetPlaceholderFontWeightValue(theme ? theme->GetFontWeight() : textStyle.GetFontWeight()));
     if (isDisabled) {
         textStyle.SetTextColor(theme ? theme->GetDisableTextColor() : textStyle.GetTextColor());
-        if (isUnderline) {
+        if (layoutProperty->GetShowUnderlineValue(false)) {
             textStyle.SetTextColor(theme ? theme->GetTextColorDisable() : textStyle.GetTextColor());
         }
     } else {
@@ -655,7 +654,9 @@ void TextFieldLayoutAlgorithm::UpdateUnitLayout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(content);
     auto contentSize = content->GetRect().GetSize();
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    if (!children.empty() && pattern->GetShowUnderLine()) {
+    auto layoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    if (!children.empty() && layoutProperty->GetShowUnderlineValue(false)) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
         CHECK_NULL_VOID(childWrapper);
         auto textLayoutProperty = DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());

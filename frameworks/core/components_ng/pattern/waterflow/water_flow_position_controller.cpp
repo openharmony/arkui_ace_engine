@@ -25,4 +25,14 @@ void WaterFlowPositionController::JumpTo(int32_t index, bool /* smooth */, int32
     auto waterFlowPattern = AceType::DynamicCast<WaterFlowPattern>(pattern);
     waterFlowPattern->UpdateStartIndex(index);
 }
+
+void WaterFlowPositionController::ScrollPage(bool reverse, bool /* smooth */)
+{
+    auto pattern = scroll_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto waterFlowPattern = AceType::DynamicCast<WaterFlowPattern>(pattern);
+    if (waterFlowPattern && waterFlowPattern->GetAxis() != Axis::NONE) {
+        waterFlowPattern->ScrollPage(reverse);
+    }
+}
 } // namespace OHOS::Ace::NG
