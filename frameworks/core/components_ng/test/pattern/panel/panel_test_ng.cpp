@@ -33,6 +33,7 @@
 #include "core/event/ace_events.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
+#include "core/components_ng/test/mock/render/mock_render_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1413,7 +1414,7 @@ HWTEST_F(PanelTestNg, PanelTestNg0019, TestSize.Level1)
      * @tc.steps: step1. get renderContext_ and paintWrapper, then call func.
      * @tc.expected: func function is called.
      */
-    RenderContext renderContext_;
+    MockRenderContext renderContext_;
     auto renderContext = AceType::WeakClaim<RenderContext>(&renderContext_);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
