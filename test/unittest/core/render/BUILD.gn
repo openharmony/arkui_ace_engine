@@ -14,7 +14,9 @@
 group("render_unittest") {
   testonly = true
   deps = [
+    "line_painter:line_painter_test_ng",
     "polygon_painter:polygon_painter_test_ng",
     "render_context:render_context_test_ng",
+    "render_property:render_property_test_ng",
   ]
 }
