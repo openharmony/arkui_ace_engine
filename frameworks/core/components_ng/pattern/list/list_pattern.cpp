@@ -768,7 +768,8 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollIndexAlignment
             targetIndex_ = index;
             if (index == ListLayoutAlgorithm::LAST_ITEM) {
                 targetIndex_ = totalItemCount - 1;
-            } else if ((targetIndex_.value() < 0) || (targetIndex_.value() >= totalItemCount)) {
+            } else if ((LessNotEqual(targetIndex_.value(), 0)) ||
+                       (GreatOrEqual(targetIndex_.value(), totalItemCount))) {
                 targetIndex_.reset();
             }
         } else {
@@ -1131,7 +1132,10 @@ void ListPattern::StartSpringMotion(float start, float end, float velocity)
     scrollToIndexMotion_->AddListener([weakScroll = AceType::WeakClaim(this), start, end](double position) {
         auto list = weakScroll.Upgrade();
         CHECK_NULL_VOID(list);
-        if (NearEqual(end, start)) {
+        if (NearEqual(end, start) || NearEqual(position, end)) {
+            list->animator_->ClearStopListeners();
+            list->animator_->Stop();
+            position = end;
             return;
         }
         list->UpdateCurrentOffset(list->GetTotalOffset() - position, SCROLL_FROM_JUMP);
