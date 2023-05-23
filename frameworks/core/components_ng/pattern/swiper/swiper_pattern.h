@@ -380,7 +380,7 @@ private:
     void AttachNodeAnimatableProperty();
     void UpdateCurrentOffsetTimes(float value);
     void HandleAnimationEnds();
-    void CalculateItemRange(int32_t index);
+    bool CalculateItemRange();
     void PlayTranslateAnimation(int32_t duration);
     void ForcedStopTranslateAnimation();
     void GoAutoPlay();
@@ -423,7 +423,6 @@ private:
     void FinishAnimation();
 
     void StartAutoPlay();
-    void FireChangeEvent() const;
     void FireAnimationStartEvent() const;
     void FireAnimationEndEvent() const;
 
@@ -501,7 +500,6 @@ private:
     std::set<int32_t> itemRange_;
     SizeF maxChildSize_ = { 0, 0 };
 
-    bool needCalculateItemRange_ = true;
     float currentOffsetTimes_ = 0;
     float overstepBoundaryOffsetTimes_ = 0;
     bool needUpdateCurrentOffsetTimes_ = true;
