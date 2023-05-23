@@ -1469,4 +1469,68 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest037, TestSize.Level1)
     bool result = ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess();
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: ViewAbstractTest038
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTest, ViewAbstractTest038, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object viewAbstract.
+     */
+    ViewStackProcessor viewStackProcessor;
+    ViewAbstract viewAbstract;
+    constexpr char TAG_ROOT[] = "root";
+    constexpr char TAG_CHILD[] = "child";
+    const auto MOCK_PATTERN_ROOT = AceType::MakeRefPtr<Pattern>();
+    const auto FRAME_NODE_ROOT = FrameNode::CreateFrameNode(TAG_ROOT, 1, MOCK_PATTERN_ROOT, true);
+    const auto FRAME_NODE_CHILD = FrameNode::CreateFrameNode(TAG_CHILD, 2, MOCK_PATTERN_ROOT, false);
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
+    /**
+     * @tc.steps: step2. callback SetClickEffectLevel.push FrameNode is not null.
+     */
+    viewAbstract.SetClickEffectLevel(ClickEffectLevel::LIGHT, 1.0f);
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    EXPECT_EQ(strcmp(topFrameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.expected: step3. Return expected results..
+     */
+    auto Node = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    ASSERT_NE(Node, nullptr);
+    auto layoutProperty = Node->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    viewStackProcessor.instance = nullptr;
+}
+
+/**
+ * @tc.name: ViewAbstractTest039
+ * @tc.desc: Test the operation of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTest, ViewAbstractTest039, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object viewAbstract.
+     */
+    ViewStackProcessor viewStackProcessor;
+    ViewAbstract viewAbstract;
+    int32_t index = 1;
+    auto state = static_cast<VisualState>(index);
+    viewStackProcessor.GetInstance()->SetVisualState(state);
+    /**
+     * @tc.steps: step2.ClearStack and callback SetScale.
+     */
+    viewStackProcessor.GetInstance()->ClearStack();
+    /**
+     * @tc.expected: step2. Return expected results..
+     */
+    bool result = ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess();
+    viewAbstract.SetClickEffectLevel(ClickEffectLevel::LIGHT, 1.0f);
+    EXPECT_FALSE(result);
+}
 } // namespace OHOS::Ace::NG

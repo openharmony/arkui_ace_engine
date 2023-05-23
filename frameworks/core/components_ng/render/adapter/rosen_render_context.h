@@ -30,6 +30,7 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
@@ -323,6 +324,10 @@ private:
     void CombineMarginAndPosition(Dimension& resultX, Dimension& resultY, const Dimension& parentPaddingLeft,
         const Dimension& parentPaddingTop, float widthPercentReference, float heightPercentReference);
 
+    void InitEventClickEffect();
+    RefPtr<Curve> UpdatePlayAnimationValue(const ClickEffectLevel& level, float& scaleValue);
+    void ClickEffectPlayAnimation(const TouchType& touchType);
+
     // helper function to check if paint rect is valid
     bool RectIsNull();
 
@@ -397,6 +402,9 @@ private:
         std::shared_ptr<ColorBlendModifier> colorBlend;
     };
     std::unique_ptr<GraphicModifiers> graphics_;
+
+    RefPtr<TouchEventImpl> touchListener_;
+    VectorF currentScale_ = VectorF(1.0f, 1.0f);
 
     template<typename Modifier, typename PropertyType>
     friend class PropertyTransitionEffectTemplate;

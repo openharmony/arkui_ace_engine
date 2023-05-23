@@ -589,6 +589,11 @@ public:
         ViewAbstract::SetHueRotate(value);
     }
 
+    void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override
+    {
+        ViewAbstract::SetClickEffectLevel(level, scaleValue);
+    }
+
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override
     {
         ViewAbstract::SetOnClick(std::move(tapEventFunc));

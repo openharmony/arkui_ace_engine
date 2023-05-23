@@ -33,6 +33,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
+#include "core/animation/spring_curve.h"
 #include "core/common/container.h"
 #include "core/common/rosen/rosen_convert_helper.h"
 #include "core/components/common/properties/decoration.h"
@@ -69,6 +70,17 @@ namespace {
 RefPtr<PixelMap> g_pixelMap {};
 std::mutex g_mutex;
 std::condition_variable thumbnailGet;
+constexpr float ANIMATION_CURVE_VELOCITY_LIGHT_OR_MIDDLE = 10.0f;
+constexpr float ANIMATION_CURVE_VELOCITY_HEAVY = 0.0f;
+constexpr float ANIMATION_CURVE_MASS = 1.0f;
+constexpr float ANIMATION_CURVE_STIFFNESS_LIGHT = 410.0f;
+constexpr float ANIMATION_CURVE_STIFFNESS_MIDDLE = 350.0f;
+constexpr float ANIMATION_CURVE_STIFFNESS_HEAVY = 240.0f;
+constexpr float ANIMATION_CURVE_DAMPING_LIGHT = 38.0f;
+constexpr float ANIMATION_CURVE_DAMPING_MIDDLE = 35.0f;
+constexpr float ANIMATION_CURVE_DAMPING_HEAVY = 28.0f;
+constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
+constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 } // namespace
 
 float RosenRenderContext::ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
@@ -1041,6 +1053,9 @@ void RosenRenderContext::OnModifyDone()
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(rsNode_);
+    if (HasClickEffectLevel()) {
+        InitEventClickEffect();
+    }
     const auto& size = frameNode->GetGeometryNode()->GetFrameSize();
     if (!size.IsPositive()) {
         LOGD("first modify, make change in SyncGeometryProperties");
@@ -2528,6 +2543,97 @@ void RosenRenderContext::AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePrope
         rsNode_->AddModifier(nodeModifierImpl);
         nodeModifierImpl->AddProperty(property->GetProperty());
     }
+}
+
+void RosenRenderContext::InitEventClickEffect()
+{
+    if (touchListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto renderContext = weak.Upgrade();
+        CHECK_NULL_VOID(renderContext);
+        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN ||
+            info.GetTouches().front().GetTouchType() == TouchType::UP) {
+            renderContext->ClickEffectPlayAnimation(info.GetTouches().front().GetTouchType());
+        }
+    };
+    touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    gesture->AddTouchEvent(touchListener_);
+}
+
+void RosenRenderContext::ClickEffectPlayAnimation(const TouchType& touchType)
+{
+    if (touchType != TouchType::DOWN && touchType != TouchType::UP) {
+        return;
+    }
+    auto value = GetClickEffectLevelValue();
+    auto level = value.level;
+    auto scaleValue = value.scaleNumber;
+    auto springCurve = UpdatePlayAnimationValue(level, scaleValue);
+
+    AnimationOption option;
+    option.SetCurve(springCurve);
+
+    if (touchType == TouchType::DOWN) {
+        auto defaultScale = VectorF(1.0f, 1.0f);
+        auto currentScale = GetTransformScaleValue(defaultScale);
+        currentScale_ = currentScale;
+        AnimationUtils::OpenImplicitAnimation(option, springCurve, nullptr);
+        VectorF valueScale(scaleValue, scaleValue);
+        UpdateTransformScale(valueScale);
+        AnimationUtils::CloseImplicitAnimation();
+    }
+
+    if (touchType == TouchType::UP) {
+        AnimationUtils::OpenImplicitAnimation(option, springCurve, nullptr);
+        UpdateTransformScale(currentScale_);
+        AnimationUtils::CloseImplicitAnimation();
+    }
+}
+
+RefPtr<Curve> RosenRenderContext::UpdatePlayAnimationValue(const ClickEffectLevel& level, float& scaleValue)
+{
+    float velocity = 0.0f;
+    float mass = 0.0f;
+    float stiffness = 0.0f;
+    float damping = 0.0f;
+    if (level == ClickEffectLevel::LIGHT) {
+        velocity = ANIMATION_CURVE_VELOCITY_LIGHT_OR_MIDDLE;
+        mass = ANIMATION_CURVE_MASS;
+        stiffness = ANIMATION_CURVE_STIFFNESS_LIGHT;
+        damping = ANIMATION_CURVE_DAMPING_LIGHT;
+        if (GreatOrEqual(scaleValue, 0.0) && LessOrEqual(scaleValue, 1.0)) {
+            scaleValue = sqrt(scaleValue);
+        } else {
+            scaleValue = sqrt(DEFAULT_SCALE_LIGHT);
+        }
+    } else if (level == ClickEffectLevel::MIDDLE) {
+        velocity = ANIMATION_CURVE_VELOCITY_LIGHT_OR_MIDDLE;
+        mass = ANIMATION_CURVE_MASS;
+        stiffness = ANIMATION_CURVE_STIFFNESS_MIDDLE;
+        damping = ANIMATION_CURVE_DAMPING_MIDDLE;
+        if (GreatOrEqual(scaleValue, 0.0) && LessOrEqual(scaleValue, 1.0)) {
+            scaleValue = sqrt(scaleValue);
+        } else {
+            scaleValue = sqrt(DEFAULT_SCALE_MIDDLE_OR_HEAVY);
+        }
+    } else if (level == ClickEffectLevel::HEAVY) {
+        velocity = ANIMATION_CURVE_VELOCITY_HEAVY;
+        mass = ANIMATION_CURVE_MASS;
+        stiffness = ANIMATION_CURVE_STIFFNESS_HEAVY;
+        damping = ANIMATION_CURVE_DAMPING_HEAVY;
+        if (GreatOrEqual(scaleValue, 0.0) && LessOrEqual(scaleValue, 1.0)) {
+            scaleValue = sqrt(scaleValue);
+        } else {
+            scaleValue = sqrt(DEFAULT_SCALE_MIDDLE_OR_HEAVY);
+        }
+    }
+    return AceType::MakeRefPtr<InterpolatingSpring>(velocity, mass, stiffness, damping);
 }
 
 void RosenRenderContext::RegisterSharedTransition(const RefPtr<RenderContext>& other)
