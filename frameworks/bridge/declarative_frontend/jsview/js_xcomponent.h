@@ -135,6 +135,7 @@ public:
     static void JsOnLoad(const JSCallbackInfo& args);
     static void JsOnDestroy(const JSCallbackInfo& args);
     static void OmitEvent(const JSCallbackInfo& args);
+    static void OmitAttribute(const JSCallbackInfo& args);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_XCOMPONENT_H
