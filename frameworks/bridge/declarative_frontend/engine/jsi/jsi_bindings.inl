@@ -622,7 +622,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSConstructorInterceptor(panda::Jsi
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     panda::Local<panda::JSValueRef> newTarget = runtimeCallInfo->GetNewTargetRef();
-    if (newTarget->IsFunction()) {
+    if (newTarget->IsFunction() && jsConstructor_) {
         JsiCallbackInfo info(runtimeCallInfo);
         jsConstructor_(info);
         auto retVal = info.GetReturnValue();
