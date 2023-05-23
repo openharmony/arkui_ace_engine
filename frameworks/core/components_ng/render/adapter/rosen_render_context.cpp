@@ -46,7 +46,7 @@
 #include "core/components_ng/render/adapter/border_image_modifier.h"
 #include "core/components_ng/render/adapter/debug_boundary_modifier.h"
 #include "core/components_ng/render/adapter/focus_state_modifier.h"
-#include "core/components_ng/render/adapter/graphics_modifier.h"
+#include "core/components_ng/render/adapter/graphic_modifier.h"
 #include "core/components_ng/render/adapter/moon_progress_modifier.h"
 #include "core/components_ng/render/adapter/mouse_select_modifier.h"
 #include "core/components_ng/render/adapter/overlay_modifier.h"
@@ -807,10 +807,7 @@ void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
     }
     CHECK_NULL_VOID(rsNode_);
     Rosen::Vector4f cornerRadius;
-    cornerRadius.SetValues(static_cast<float>(value.radiusTopLeft.value_or(Dimension()).ConvertToPx()),
-        static_cast<float>(value.radiusTopRight.value_or(Dimension()).ConvertToPx()),
-        static_cast<float>(value.radiusBottomRight.value_or(Dimension()).ConvertToPx()),
-        static_cast<float>(value.radiusBottomLeft.value_or(Dimension()).ConvertToPx()));
+    ConvertRadius(value, cornerRadius);
     rsNode_->SetCornerRadius(cornerRadius);
     RequestNextFrame();
 }
@@ -1660,44 +1657,48 @@ void RosenRenderContext::PaintGraphics()
 {
     CHECK_NULL_VOID(rsNode_);
     auto&& graphicProps = GetOrCreateGraphics();
+
+    if (!graphics_) {
+        graphics_ = std::make_unique<GraphicModifiers>();
+    }
     if (graphicProps->HasFrontGrayScale()) {
         auto grayScale = graphicProps->GetFrontGrayScaleValue();
-        SetModifier(grayScaleModifier_, grayScale.Value());
+        SetGraphicModifier(graphics_->grayScale, grayScale.Value());
     }
 
     if (graphicProps->HasFrontBrightness()) {
         auto brightness = graphicProps->GetFrontBrightnessValue();
-        SetModifier(brightnessModifier_, brightness.Value());
+        SetGraphicModifier(graphics_->brightness, brightness.Value());
     }
 
     if (graphicProps->HasFrontContrast()) {
         auto contrast = graphicProps->GetFrontContrastValue();
-        SetModifier(contrastModifier_, contrast.Value());
+        SetGraphicModifier(graphics_->contrast, contrast.Value());
     }
 
     if (graphicProps->HasFrontSaturate()) {
         auto saturate = graphicProps->GetFrontSaturateValue();
-        SetModifier(saturateModifier_, saturate.Value());
+        SetGraphicModifier(graphics_->saturate, saturate.Value());
     }
 
     if (graphicProps->HasFrontSepia()) {
         auto sepia = graphicProps->GetFrontSepiaValue();
-        SetModifier(sepiaModifier_, sepia.Value());
+        SetGraphicModifier(graphics_->sepia, sepia.Value());
     }
 
     if (graphicProps->HasFrontInvert()) {
         auto invert = graphicProps->GetFrontInvertValue();
-        SetModifier(invertModifier_, invert.Value());
+        SetGraphicModifier(graphics_->invert, invert.Value());
     }
 
     if (graphicProps->HasFrontHueRotate()) {
         auto hueRotate = graphicProps->GetFrontHueRotateValue();
-        SetModifier(hueRotateModifier_, hueRotate);
+        SetGraphicModifier(graphics_->hueRotate, hueRotate);
     }
 
     if (graphicProps->HasFrontColorBlend()) {
         auto colorBlend = graphicProps->GetFrontColorBlendValue();
-        SetModifier(colorBlendModifier_, ColorBlend(colorBlend));
+        SetGraphicModifier(graphics_->colorBlend, ColorBlend(colorBlend));
     }
 }
 
@@ -1709,7 +1710,7 @@ bool RosenRenderContext::RectIsNull()
 }
 
 template<typename T, typename D>
-void RosenRenderContext::SetModifier(std::shared_ptr<T>& modifier, D data)
+void RosenRenderContext::SetGraphicModifier(std::shared_ptr<T>& modifier, D data)
 {
     if (!modifier) {
         LOGD("create new modifier");
@@ -1717,6 +1718,13 @@ void RosenRenderContext::SetModifier(std::shared_ptr<T>& modifier, D data)
         rsNode_->AddModifier(modifier);
     }
     modifier->SetCustomData(data);
+
+    auto borderRadius = GetBorderRadius();
+    if (borderRadius.has_value()) {
+        Rosen::Vector4f rsRadius;
+        ConvertRadius(*borderRadius, rsRadius);
+        modifier->SetCornerRadius(rsRadius);
+    }
 }
 
 void RosenRenderContext::AddModifier(const std::shared_ptr<Rosen::RSModifier>& modifier)
@@ -1737,48 +1745,72 @@ void RosenRenderContext::UpdateGraphic(std::shared_ptr<T>& modifier, D data)
 {
     CHECK_NULL_VOID_NOLOG(!RectIsNull());
     LOGD("updating graphic effect");
-    SetModifier(modifier, data);
+    SetGraphicModifier(modifier, data);
     RequestNextFrame();
 }
 
 void RosenRenderContext::OnFrontBrightnessUpdate(const Dimension& brightness)
 {
-    UpdateGraphic(brightnessModifier_, brightness.Value());
+    if (!graphics_) {
+        graphics_ = std::make_unique<GraphicModifiers>();
+    }
+    UpdateGraphic(graphics_->brightness, brightness.Value());
 }
 
 void RosenRenderContext::OnFrontGrayScaleUpdate(const Dimension& grayScale)
 {
-    UpdateGraphic(grayScaleModifier_, grayScale.Value());
+    if (!graphics_) {
+        graphics_ = std::make_unique<GraphicModifiers>();
+    }
+    UpdateGraphic(graphics_->grayScale, grayScale.Value());
 }
 
 void RosenRenderContext::OnFrontContrastUpdate(const Dimension& contrast)
 {
-    UpdateGraphic(contrastModifier_, contrast.Value());
+    if (!graphics_) {
+        graphics_ = std::make_unique<GraphicModifiers>();
+    }
+    UpdateGraphic(graphics_->contrast, contrast.Value());
 }
 
 void RosenRenderContext::OnFrontSaturateUpdate(const Dimension& saturate)
 {
-    UpdateGraphic(saturateModifier_, saturate.Value());
+    if (!graphics_) {
+        graphics_ = std::make_unique<GraphicModifiers>();
+    }
+    UpdateGraphic(graphics_->saturate, saturate.Value());
 }
 
 void RosenRenderContext::OnFrontSepiaUpdate(const Dimension& sepia)
 {
-    UpdateGraphic(sepiaModifier_, sepia.Value());
+    if (!graphics_) {
+        graphics_ = std::make_unique<GraphicModifiers>();
+    }
+    UpdateGraphic(graphics_->sepia, sepia.Value());
 }
 
 void RosenRenderContext::OnFrontInvertUpdate(const Dimension& invert)
 {
-    UpdateGraphic(invertModifier_, invert.Value());
+    if (!graphics_) {
+        graphics_ = std::make_unique<GraphicModifiers>();
+    }
+    UpdateGraphic(graphics_->invert, invert.Value());
 }
 
 void RosenRenderContext::OnFrontHueRotateUpdate(float hueRotate)
 {
-    UpdateGraphic(hueRotateModifier_, hueRotate);
+    if (!graphics_) {
+        graphics_ = std::make_unique<GraphicModifiers>();
+    }
+    UpdateGraphic(graphics_->hueRotate, hueRotate);
 }
 
 void RosenRenderContext::OnFrontColorBlendUpdate(const Color& colorBlend)
 {
-    UpdateGraphic(colorBlendModifier_, ColorBlend(colorBlend));
+    if (!graphics_) {
+        graphics_ = std::make_unique<GraphicModifiers>();
+    }
+    UpdateGraphic(graphics_->colorBlend, ColorBlend(colorBlend));
 }
 
 void RosenRenderContext::UpdateTransition(const TransitionOptions& options)
@@ -2516,5 +2548,13 @@ void RosenRenderContext::UnregisterSharedTransition(const RefPtr<RenderContext>&
         return;
     }
     RSNode::UnregisterTransitionPair(rsNode_->GetId(), otherContext->rsNode_->GetId());
+}
+
+inline void RosenRenderContext::ConvertRadius(const BorderRadiusProperty& value, Rosen::Vector4f& cornerRadius)
+{
+    cornerRadius.SetValues(static_cast<float>(value.radiusTopLeft.value_or(Dimension()).ConvertToPx()),
+        static_cast<float>(value.radiusTopRight.value_or(Dimension()).ConvertToPx()),
+        static_cast<float>(value.radiusBottomRight.value_or(Dimension()).ConvertToPx()),
+        static_cast<float>(value.radiusBottomLeft.value_or(Dimension()).ConvertToPx()));
 }
 } // namespace OHOS::Ace::NG

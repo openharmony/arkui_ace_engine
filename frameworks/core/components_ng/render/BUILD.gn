@@ -20,6 +20,7 @@ build_component_ng("render_ng") {
     "adapter/fake_animation_utils.cpp",
     "adapter/fake_modifier_adapter.cpp",
     "adapter/form_render_window.cpp",
+    "adapter/graphic_modifier.cpp",
     "adapter/image_painter_utils.cpp",
     "adapter/matrix2d.cpp",
     "adapter/media_player_impl.cpp",
