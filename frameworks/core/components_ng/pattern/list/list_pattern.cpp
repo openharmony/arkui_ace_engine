@@ -1085,6 +1085,9 @@ void ListPattern::FromJson(const std::unique_ptr<JsonValue>& json)
 {
     ScrollToIndex(json->GetInt("startIndex"));
     ScrollBy(-json->GetDouble("startMainPos"));
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->UpdateClipEdge(true);
     ScrollablePattern::FromJson(json);
 }
 
