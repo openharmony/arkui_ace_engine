@@ -18,6 +18,7 @@
 
 #include "gtest/gtest.h"
 
+#include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
@@ -39,6 +40,7 @@
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -99,6 +101,8 @@ void TabsTestNg::MockPipelineContextGetTheme()
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TabTheme>()));
 }
+
+void funcTEST() {}
 
 /**
  * @tc.name: TabsModelSetDivider001
@@ -364,7 +368,7 @@ HWTEST_F(TabsTestNg, TabsModelMeasure002, TestSize.Level1)
     RefPtr<GeometryNode> swiperGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> swiperLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(swiperNode, swiperGeometryNode, swiperNode->GetLayoutProperty());
-    
+
     auto swipeLayoutAlgorithm = swiperNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
     ASSERT_NE(swipeLayoutAlgorithm, nullptr);
     swiperLayoutWrapper->SetLayoutAlgorithm(
@@ -374,13 +378,13 @@ HWTEST_F(TabsTestNg, TabsModelMeasure002, TestSize.Level1)
     swiperLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(SWIPER_WIDTH)));
     layoutWrapper.AppendChild(swiperLayoutWrapper);
-    
+
     auto dividerNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_DIVIDER_INDEX));
     ASSERT_NE(dividerNode, nullptr);
     RefPtr<GeometryNode> dividerGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> dividerLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(dividerNode, dividerGeometryNode, dividerNode->GetLayoutProperty());
-    
+
     auto dividerLayoutAlgorithm = dividerNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
     ASSERT_NE(dividerLayoutAlgorithm, nullptr);
     dividerLayoutWrapper->SetLayoutAlgorithm(
@@ -390,7 +394,7 @@ HWTEST_F(TabsTestNg, TabsModelMeasure002, TestSize.Level1)
     dividerLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(0.0f)));
     layoutWrapper.AppendChild(dividerLayoutWrapper);
-    
+
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
     ASSERT_NE(tabBarNode, nullptr);
     RefPtr<GeometryNode> tabbarGeometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -482,7 +486,7 @@ HWTEST_F(TabsTestNg, TabsModelMeasure003, TestSize.Level1)
     RefPtr<GeometryNode> swiperGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> swiperLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(swiperNode, swiperGeometryNode, swiperNode->GetLayoutProperty());
-    
+
     auto swipeLayoutAlgorithm = swiperNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
     ASSERT_NE(swipeLayoutAlgorithm, nullptr);
     swiperLayoutWrapper->SetLayoutAlgorithm(
@@ -497,7 +501,7 @@ HWTEST_F(TabsTestNg, TabsModelMeasure003, TestSize.Level1)
     RefPtr<GeometryNode> dividerGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> dividerLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(dividerNode, dividerGeometryNode, dividerNode->GetLayoutProperty());
-    
+
     auto dividerLayoutAlgorithm = dividerNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
     ASSERT_NE(dividerLayoutAlgorithm, nullptr);
     dividerLayoutWrapper->SetLayoutAlgorithm(
@@ -522,7 +526,7 @@ HWTEST_F(TabsTestNg, TabsModelMeasure003, TestSize.Level1)
     tabBarLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(TABBAR_WIDTH), CalcLength(FIRST_ITEM_WIDTH)));
     layoutWrapper.AppendChild(tabBarLayoutWrapper);
-    
+
     tabsLayoutAlgorithm->Measure(&layoutWrapper);
     tabsLayoutAlgorithm->Layout(&layoutWrapper);
 
@@ -656,7 +660,7 @@ HWTEST_F(TabsTestNg, TabsModelMeasure004, TestSize.Level1)
     RefPtr<GeometryNode> dividerGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> dividerLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(dividerNode, dividerGeometryNode, dividerNode->GetLayoutProperty());
-    
+
     auto dividerLayoutAlgorithm = dividerNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
     ASSERT_NE(dividerLayoutAlgorithm, nullptr);
     dividerLayoutWrapper->SetLayoutAlgorithm(
@@ -878,6 +882,21 @@ HWTEST_F(TabsTestNg, TabContentModelSetIndicator002, TestSize.Level1)
 
     EXPECT_EQ(tabContentPattern->GetIndicatorStyle().width.ToString(), width.ToString());
     EXPECT_EQ(tabContentPattern->GetIndicatorStyle().borderRadius.ToString(), borderRadius.ToString());
+}
+
+/**
+ * @tc.name: TabContentModelCreate(std::function<void()>&& deepRenderFunc)
+ * @tc.desc: Test Create(std::function<void()>&& deepRenderFunc)
+ * @tc.type：FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelCreate001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+
+    TabContentModelNG tabContentModel;
+    tabContentModel.Create(funcTEST);
+    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabContentFrameNode, nullptr);
 }
 
 /**
@@ -1116,7 +1135,8 @@ HWTEST_F(TabsTestNg, TabContentModelAddTabBarItem001, TestSize.Level1)
     tabContentModel2.SetSelectedMode(selectedMode);
     auto tabContentFrameNode2 = AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(tabContentFrameNode2, nullptr);
-    EXPECT_EQ(tabContentFrameNode2->GetTag(), V2::TAB_CONTENT_ITEM_ETS_TAG);;
+    EXPECT_EQ(tabContentFrameNode2->GetTag(), V2::TAB_CONTENT_ITEM_ETS_TAG);
+    ;
     auto tabContentPattern2 = tabContentFrameNode2->GetPattern<TabContentPattern>();
     ASSERT_NE(tabContentPattern2, nullptr);
     tabContentFrameNode2->MountToParent(swiperNode);
@@ -1791,7 +1811,6 @@ HWTEST_F(TabsTestNg, TabBarPatternGetSelectedMode001, TestSize.Level1)
     EXPECT_EQ(mode, selectedMode);
 }
 
-
 /**
  * @tc.name: TabBarModifierSetIndicator001
  * @tc.desc: test SetIndicator
@@ -2351,7 +2370,7 @@ HWTEST_F(TabsTestNg, TabsModelSetBarOverlap001, TestSize.Level1)
 
     auto layoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-   
+
     /**
      * @tc.steps: steps2. SetBarOverlap true
      * @tc.expected: steps2. Check the BarOverlap property value
@@ -2912,8 +2931,225 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayoutMask002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TabBarLayoutAlgorithmLayoutMask003
+ * @tc.desc: test LayoutMask
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayoutMask003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build layoutWrapper.
+     */
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    TabsItemDivider divider;
+    tabsModel.SetDivider(divider);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    auto pattern = tabsNode->GetPattern<TabsPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(tabBarLayoutAlgorithm, nullptr);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapper layoutWrapper = LayoutWrapper(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty());
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabBarLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step2. call LayoutMask function.
+     * @tc.expected: step2. expect The function is run ok.
+     */
+    tabBarLayoutAlgorithm->LayoutMask(&layoutWrapper);
+}
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmUpdateChildConstraint001
+ * @tc.desc: test UpdateChildConstraint
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmUpdateChildConstraint001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build tabBarNode and ideaSize.
+     */
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    LayoutConstraintF childConstraint = LayoutConstraintF();
+    std::optional<int32_t> tabBarTestId_(1);
+    auto tabBarNode = GroupNode::GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarTestId_.value());
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(tabBarLayoutAlgorithm, nullptr);
+    auto tabBarProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarProperty, nullptr);
+
+    float width = 1.0;
+    float height = 2.0;
+    auto ideaSize = SizeF(width, height);
+    int32_t childCount = 1;
+    auto axis1 = Axis::HORIZONTAL;
+    auto axis2 = Axis::VERTICAL;
+    tabBarLayoutAlgorithm->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
+
+    /**
+     * @tc.steps: step2. call UpdateChildConstraint function.
+     * @tc.expected: step2. expect The function is run ok when TabBarMode changes.
+     */
+    for (int i = 0; i <= 1; i++) {
+        tabBarLayoutAlgorithm->UpdateChildConstraint(childConstraint, tabBarProperty, ideaSize, childCount, axis1);
+        tabBarLayoutAlgorithm->UpdateChildConstraint(childConstraint, tabBarProperty, ideaSize, childCount, axis2);
+        tabBarProperty->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    }
+}
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmUpdateChildConstraint002
+ * @tc.desc: test UpdateChildConstraint
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmUpdateChildConstraint002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build tabBarNode and ideaSize.
+     */
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    LayoutConstraintF childConstraint = LayoutConstraintF();
+    std::optional<int32_t> tabBarTestId_(1);
+    auto tabBarNode = GroupNode::GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarTestId_.value());
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(tabBarLayoutAlgorithm, nullptr);
+    auto tabBarProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarProperty, nullptr);
+
+    float width = 1.0;
+    float height = 2.0;
+    auto ideaSize = SizeF(width, height);
+    int32_t childCount = 1;
+    auto axis = Axis::HORIZONTAL;
+    tabBarLayoutAlgorithm->tabBarStyle_ = TabBarStyle::BOTTOMTABBATSTYLE;
+
+    /**
+     * @tc.steps: step2. call UpdateChildConstraint function.
+     * @tc.expected: step2. expect The function is run ok when tabBarStyle_ changes.
+     */
+    for (int i = 0; i <= 1; i++) {
+        tabBarLayoutAlgorithm->UpdateChildConstraint(childConstraint, tabBarProperty, ideaSize, childCount, axis);
+        tabBarProperty->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    }
+}
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmUpdateChildConstraint003
+ * @tc.desc: test UpdateChildConstraint
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmUpdateChildConstraint003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build tabBarNode and ideaSize.
+     */
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    LayoutConstraintF childConstraint = LayoutConstraintF();
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(tabBarLayoutAlgorithm, nullptr);
+    auto tabBarProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarProperty, nullptr);
+
+    float width = 1.0;
+    float height = 2.0;
+    auto ideaSize = SizeF(width, height);
+    int32_t childCount = 1;
+    auto axis = Axis::HORIZONTAL;
+    tabBarLayoutAlgorithm->tabBarStyle_ = TabBarStyle::BOTTOMTABBATSTYLE;
+
+    /**
+     * @tc.steps: step2. call UpdateChildConstraint function.
+     * @tc.expected: step2. expect The function is run ok when the fifth parameter changes.
+     */
+    tabBarLayoutAlgorithm->UpdateChildConstraint(childConstraint, tabBarProperty, ideaSize, childCount, axis);
+}
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmCalculateBackChildrenMainSize01
+ * @tc.desc: test CalculateBackChildrenMainSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmCalculateBackChildrenMainSize01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call UpdateSelectedMask and UpdateUnselectedMask.
+     */
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    TabsItemDivider divider;
+    tabsModel.SetDivider(divider);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    auto pattern = tabsNode->GetPattern<TabsPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(tabBarLayoutAlgorithm, nullptr);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+    tabBarLayoutProperty->UpdateSelectedMask(0);
+    tabBarLayoutProperty->UpdateUnselectedMask(1);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = LayoutWrapper(tabBarNode, geometryNode, tabBarLayoutProperty);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabBarLayoutAlgorithm));
+
+    int32_t indicator1 = -2;
+    int32_t indicator2 = -1;
+    auto axis = Axis::HORIZONTAL;
+
+    /**
+     * @tc.steps: step2. call CalculateBackChildrenMainSize function.
+     * @tc.expected: step2. expect The function is run ok.
+     */
+    tabBarLayoutAlgorithm->CalculateBackChildrenMainSize(&layoutWrapper, indicator1, axis);
+    ASSERT_FLOAT_EQ(tabBarLayoutAlgorithm->CalculateBackChildrenMainSize(&layoutWrapper, indicator2, axis), 0.0f);
+}
+
+/**
  * @tc.name: PerformActionTest001
- * @tc.desc: TabBar Accessibility PerformAction test ScrollForward and ScrollBackward.
+ * Action test ScrollForward and ScrollBackward.
  * @tc.type: FUNC
  */
 HWTEST_F(TabsTestNg, PerformActionTest001, TestSize.Level1)
