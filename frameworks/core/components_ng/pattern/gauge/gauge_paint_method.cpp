@@ -74,10 +74,14 @@ void GaugePaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const
     std::vector<float> weights;
     if (paintProperty->GetValues().has_value()) {
         weights = paintProperty->GetValuesValue();
+    } else {
+        weights.push_back(1);
     }
     std::vector<Color> colors;
     if (paintProperty->GetColors().has_value()) {
         colors = paintProperty->GetColorsValue();
+    } else {
+        colors.push_back(Color::BLACK);
     }
     float min = paintProperty->GetMinValue();
     float max = paintProperty->GetMaxValue();
