@@ -45,6 +45,7 @@
 #include "application_env.h"
 #include "nweb_adapter_helper.h"
 #include "nweb_handler.h"
+#include "parameters.h"
 #include "web_configuration_observer.h"
 #include "web_javascript_execute_callback.h"
 #include "web_javascript_result_callback.h"
@@ -84,6 +85,10 @@ const std::string RESOURCE_VIDEO_CAPTURE = "TYPE_VIDEO_CAPTURE";
 const std::string RESOURCE_AUDIO_CAPTURE = "TYPE_AUDIO_CAPTURE";
 const std::string RESOURCE_PROTECTED_MEDIA_ID = "TYPE_PROTECTED_MEDIA_ID";
 const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
+
+// web parameters
+const std::string MULTI_RENDER_PROCESS = "persist.web.multiple_render_processes_enable";
+const std::string BACKGROUMD_MEDIA_SUSPEND = "persist.web.background_media_should_suspend";
 } // namespace
 
 #define EGLCONFIG_VERSION 3
@@ -2390,6 +2395,11 @@ void WebDelegate::InitWebViewWithSurface()
             }
             initArgs.web_engine_args_to_add.push_back(
                 std::string("--init-background-color=").append(std::to_string(delegate->backgroundColor_)));
+            if (!system::GetBoolParameter(BACKGROUMD_MEDIA_SUSPEND, true)) {
+                initArgs.web_engine_args_to_add.emplace_back(
+                    std::move(std::string("--disable-background-media-suspend")));
+            }
+            initArgs.multi_renderer_process = system::GetBoolParameter(MULTI_RENDER_PROCESS, false);
             if (isEnhanceSurface) {
                 LOGI("Create webview with isEnhanceSurface");
                 delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
