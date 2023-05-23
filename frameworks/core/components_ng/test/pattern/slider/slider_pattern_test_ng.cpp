@@ -14,11 +14,17 @@
  */
 
 #include "gtest/gtest.h"
-#include "base/geometry/dimension.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/pattern/slider/slider_model.h"
+
 #define private public
 #define protected public
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/render/mock_paragraph.h"
+
+#include "base/geometry/axis.h"
+#include "base/geometry/dimension.h"
+#include "base/geometry/point.h"
+#include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
@@ -27,11 +33,13 @@
 #include "core/components_ng/pattern/slider/slider_event_hub.h"
 #include "core/components_ng/pattern/slider/slider_layout_algorithm.h"
 #include "core/components_ng/pattern/slider/slider_layout_property.h"
+#include "core/components_ng/pattern/slider/slider_model.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/slider/slider_paint_method.h"
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
 #include "core/components_ng/pattern/slider/slider_pattern.h"
 #include "core/components_ng/pattern/slider/slider_style.h"
+#include "core/components_ng/render/drawing_mock.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -60,7 +68,6 @@ constexpr float MAX_HEIGHT = 500.0f;
 const SizeF MAX_SIZE(MAX_WIDTH, MAX_HEIGHT);
 constexpr float FRAME_WIDTH = 10.0f;
 constexpr float FRAME_HEIGHT = 20.0f;
-const Alignment ALIGNMENT = Alignment::BOTTOM_RIGHT;
 constexpr Dimension SLIDER_OUTSET_TRACK_THICKNRESS = Dimension(10.0);
 constexpr Dimension SLIDER_INSET_TRACK_THICKNRESS = Dimension(20.0);
 constexpr Dimension SLIDER_OUTSET_BLOCK_SIZE = Dimension(30.0);
@@ -82,9 +89,9 @@ constexpr float HALF = 0.5;
 constexpr float CONTAINER_WIDTH = 300.0f;
 constexpr float CONTAINER_HEIGHT = 300.0f;
 const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
-const float BLOCK_SIZE_WIDTH = 300.0f;
-const float BLOCK_SIZE_HEIGHT = 300.0f;
-const SizeF BLOCK_SIZE(BLOCK_SIZE_WIDTH, BLOCK_SIZE_HEIGHT);
+constexpr Dimension BLOCK_SIZE_WIDTH = Dimension(300.0);
+constexpr Dimension BLOCK_SIZE_HEIGHT = Dimension(300.0);
+const SizeT<Dimension> BLOCK_SIZE(BLOCK_SIZE_WIDTH, BLOCK_SIZE_HEIGHT);
 const std::string SLIDER_MODEL_NG_BLOCK_IMAGE = "Default Image";
 const PointF POINTF_START { 10.0f, 10.0f };
 const PointF POINTF_END { 20.0f, 20.0f };
@@ -98,14 +105,19 @@ const Dimension SHAPE_HEIGHT = 20.0_vp;
 constexpr float CONTENT_WIDTH = 100.0f;
 constexpr float CONTENT_HEIGHT = 50.0f;
 constexpr float HOT_BLOCK_SHADOW_WIDTH = 3.0f;
+constexpr Dimension BUBBLE_TO_SLIDER_DISTANCE = 10.0_vp;
+constexpr Dimension TRACK_BORDER_RADIUS = 5.0_px;
 } // namespace
 class SliderPatternTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
+
 private:
     void SetSliderContentModifier(SliderContentModifier& sliderContentModifier);
     void MockCanvasFunction(Testing::MockCanvas& canvas);
+    void MockTipsCanvasFunction(Testing::MockCanvas& canvas);
+    void MockParagraphFunction(RefPtr<MockParagraph>& paragraph, Testing::MockCanvas& canvas);
 };
 
 void SliderPatternTestNg::SetUpTestCase()
@@ -116,6 +128,7 @@ void SliderPatternTestNg::SetUpTestCase()
 void SliderPatternTestNg::TearDownTestCase()
 {
     MockPipelineBase::TearDown();
+    MockParagraph::TearDown();
 }
 
 void SliderPatternTestNg::SetSliderContentModifier(SliderContentModifier& sliderContentModifier)
@@ -143,6 +156,28 @@ void SliderPatternTestNg::MockCanvasFunction(Testing::MockCanvas& canvas)
     EXPECT_CALL(canvas, DrawCircle(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+}
+
+void SliderPatternTestNg::MockTipsCanvasFunction(Testing::MockCanvas& canvas)
+{
+    EXPECT_CALL(canvas, Save()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, Translate(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, ClipPath(_, _, _)).WillRepeatedly(Return());
+}
+
+void SliderPatternTestNg::MockParagraphFunction(RefPtr<MockParagraph>& paragraph, Testing::MockCanvas& canvas)
+{
+    EXPECT_CALL(*paragraph, Paint(An<const RSCanvas&>(), _, _)).WillRepeatedly(Return());
+    EXPECT_CALL(*paragraph, Layout(_)).WillRepeatedly(Return());
+    EXPECT_CALL(*paragraph, PushStyle(_)).WillRepeatedly(Return());
+    EXPECT_CALL(*paragraph, AddText(_)).WillRepeatedly(Return());
+    EXPECT_CALL(*paragraph, Build()).WillRepeatedly(Return());
+    EXPECT_CALL(*paragraph, GetTextWidth()).WillRepeatedly(Return(1.0f));
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(1.0f));
 }
 
 /**
@@ -319,27 +354,49 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg004, TestSize.Level1)
     SliderModelNG sliderModelNG;
     sliderModelNG.Create(VALUE, STEP, MIN, MAX);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. set theme.
      */
     auto pipeline = PipelineBase::GetCurrentContext();
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
     pipeline->SetThemeManager(theme);
-    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    sliderTheme->tipTextPadding_ = Dimension(10.0);
+    sliderTheme->tipColor_ = Color::BLUE;
+    sliderTheme->tipFontSize_ = Dimension(16.0);
+    sliderTheme->tipTextColor_ = Color::BLACK;
+    EXPECT_CALL(*theme, GetTheme(_)).WillOnce(Return(sliderTheme));
     /**
-     * @tc.steps: step3. get sliderPattern.
+     * @tc.steps: step3. get sliderPattern and test init parameter.
      */
     RefPtr<SliderPattern> sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto sliderPaintProperty = sliderPattern->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
     sliderPattern->OnModifyDone();
-    sliderPattern->direction_ = Axis::VERTICAL;
-    sliderPattern->OnModifyDone();
-    sliderPattern->direction_ = Axis::HORIZONTAL;
+    EXPECT_EQ(sliderPattern->value_, VALUE);
+    EXPECT_EQ(sliderPattern->valueRatio_, .5f);
+    EXPECT_EQ(sliderPattern->stepRatio_, .01f);
+    EXPECT_EQ(sliderPattern->showTips_, false);
+    EXPECT_EQ(sliderPaintProperty->GetPadding(), std::nullopt);
+    EXPECT_EQ(sliderPaintProperty->GetTipColor(), std::nullopt);
+    EXPECT_EQ(sliderPaintProperty->GetTextColor(), std::nullopt);
+    EXPECT_EQ(sliderPaintProperty->GetFontSize(), std::nullopt);
+    EXPECT_EQ(sliderPaintProperty->GetContent(), std::nullopt);
     auto layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_EQ(layoutProperty->GetPositionProperty()->GetAlignmentValue(), Alignment::CENTER);
+    /**
+     * @tc.steps: step4. when showTips is true.
+     */
+    sliderPaintProperty->UpdateShowTips(true);
     sliderPattern->OnModifyDone();
-    layoutProperty->UpdateAlignment(ALIGNMENT);
-    sliderPattern->OnModifyDone();
-    EXPECT_NE(ALIGNMENT, layoutProperty->GetPositionProperty()->GetAlignmentValue());
+    EXPECT_EQ(sliderPattern->showTips_, true);
+    EXPECT_EQ(sliderPaintProperty->GetPaddingValue(Dimension()), Dimension(10.0));
+    EXPECT_EQ(sliderPaintProperty->GetTipColorValue(Color::BLACK), Color::BLUE);
+    EXPECT_EQ(sliderPaintProperty->GetTextColorValue(Color::BLUE), Color::BLACK);
+    EXPECT_EQ(sliderPaintProperty->GetFontSizeValue(Dimension()), Dimension(16.0));
+    EXPECT_NE(sliderPaintProperty->GetContent(), std::nullopt);
 }
 
 /**
@@ -349,17 +406,8 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg004, TestSize.Level1)
  */
 HWTEST_F(SliderPatternTestNg, SliderPatternTestNg005, TestSize.Level1)
 {
-    // create mock theme manager
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
-    sliderTheme->tipTextPadding_ = Dimension(10.0);
-    sliderTheme->tipColor_ = Color::BLUE;
-    sliderTheme->tipFontSize_ = Dimension(16.0);
-    sliderTheme->tipTextColor_ = Color::BLACK;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
     /**
-     * @tc.steps: step1. create frameNode.
+     * @tc.steps: step1. create frameNode and set theme.
      */
     RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
     EXPECT_NE(sliderPattern, nullptr);
@@ -368,6 +416,13 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg005, TestSize.Level1)
     frameNode->geometryNode_->SetFrameSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     EXPECT_NE(sliderPaintProperty, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    PipelineBase::GetCurrentContext()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetMaxIntrinsicWidth()).WillRepeatedly(Return(.0f));
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(.0f));
     /**
      * @tc.steps: step2. get sliderPattern and initialize needed layoutProperty.
      * @tc.cases: case1. when TouchType is DOWN and direction is HORIZONTAL.
@@ -387,7 +442,8 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg005, TestSize.Level1)
      */
     sliderPaintProperty->UpdateDirection(Axis::VERTICAL);
     sliderPaintProperty->UpdateReverse(true);
-    sliderPattern->UpdateCircleCenterOffset();
+    sliderPattern->HandleTouchEvent(info);
+    EXPECT_EQ(sliderPattern->valueChangeFlag_, false);
     /**
      * @tc.cases: case3. when TouchType is UP.
      */
@@ -595,6 +651,119 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg009, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SliderPatternTestNg010
+ * @tc.desc: Test Slider HandleTouchEvent with hot area when sourceType is mouse
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTestNg010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and set theme.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(MIN, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->geometryNode_->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    PipelineBase::GetCurrentContext()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    /**
+     * @tc.steps: step2. initialize touch information.
+     * @tc.desc:  when TouchType is DOWN, SourceType is mouse touch.
+     */
+    TouchLocationInfo LInfo(0);
+    LInfo.touchType_ = TouchType::DOWN;
+    LInfo.localLocation_ = Offset(MIN_LABEL, MAX_LABEL);
+    TouchEventInfo info("");
+    info.SetSourceDevice(SourceType::MOUSE);
+    info.changedTouches_.emplace_back(LInfo);
+    sliderPattern->sliderLength_ = MIN_LABEL * MIN_LABEL;
+    /**
+     * @tc.cases: case1. mouse down position is outside the block side, UpdateValueByLocalLocation
+     */
+    sliderPattern->HandleTouchEvent(info);
+    EXPECT_EQ(sliderPattern->hotFlag_, true);
+    EXPECT_NE(sliderPattern->value_, .0f);
+    /**
+     * @tc.cases: case2. mouse down position is inside the block side, not UpdateValueByLocalLocation
+     */
+    sliderPattern->circleCenter_.Reset();
+    sliderPattern->blockSize_ = SizeF(MAX_LABEL, MAX_LABEL);
+    sliderPattern->HandleTouchEvent(info);
+    EXPECT_FALSE(sliderPattern->valueChangeFlag_);
+}
+
+/**
+ * @tc.name: SliderPatternTestNg011
+ * @tc.desc: Test Slider HandleTouchEvent with hot area when sourceType is touch
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTestNg011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and set theme.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(MIN, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->geometryNode_->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    PipelineBase::GetCurrentContext()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    /**
+     * @tc.steps: step2. initialize touch information.
+     * @tc.desc:  when TouchType is DOWN, SourceType is touch.
+     */
+    TouchLocationInfo LInfo(0);
+    LInfo.touchType_ = TouchType::DOWN;
+    LInfo.localLocation_ = Offset(MIN_LABEL, MAX_LABEL);
+    TouchEventInfo info("");
+    info.SetSourceDevice(SourceType::TOUCH);
+    info.changedTouches_.emplace_back(LInfo);
+    sliderPattern->sliderLength_ = MIN_LABEL * MIN_LABEL;
+    sliderPattern->blockHotSize_ = MIN_LABEL;
+    /**
+     * @tc.cases: case1. touch down position is outside the blockHotSize, UpdateValueByLocalLocation
+     */
+    sliderPattern->HandleTouchEvent(info);
+    EXPECT_NE(sliderPattern->value_, .0f);
+    sliderPattern->value_ = .0f;
+    sliderPattern->circleCenter_.Reset();
+    info.changedTouches_.front().localLocation_ = Offset(MIN_LABEL, -MAX_LABEL);
+    sliderPattern->HandleTouchEvent(info);
+    EXPECT_NE(sliderPattern->value_, .0f);
+    sliderPattern->value_ = .0f;
+    sliderPattern->circleCenter_.Reset();
+    info.changedTouches_.front().localLocation_ = Offset(MAX_LABEL, MIN_LABEL);
+    sliderPattern->HandleTouchEvent(info);
+    EXPECT_NE(sliderPattern->value_, .0f);
+    sliderPattern->value_ = VALUE;
+    sliderPattern->circleCenter_.Reset();
+    info.changedTouches_.front().localLocation_ = Offset(-MAX_LABEL, MIN_LABEL);
+    sliderPattern->HandleTouchEvent(info);
+    EXPECT_EQ(sliderPattern->value_, .0f); // Exceeding the leftmost end, take 0
+    /**
+     * @tc.cases: case2. touch down position is inside the blockHotSize, not UpdateValueByLocalLocation
+     */
+    info.changedTouches_.front().localLocation_ = Offset();
+    sliderPattern->HandleTouchEvent(info);
+    EXPECT_EQ(sliderPattern->value_, .0f);
+    EXPECT_FALSE(sliderPattern->valueChangeFlag_);
+}
+
+/**
  * @tc.name: SliderLayoutAlgorithm001
  * @tc.desc: Test SliderLayoutAlgorithm MeasureContent.
  * @tc.type: FUNC
@@ -779,13 +948,14 @@ HWTEST_F(SliderPatternTestNg, SliderModelNgTest001, TestSize.Level1)
     sliderModelNG.SetBlockBorderWidth(SLIDER_MODEL_NG_BLOCK_BORDER_WIDTH);
     sliderModelNG.SetStepColor(TEST_COLOR);
     sliderModelNG.SetTrackBorderRadius(SLIDER_MODEL_NG_TRACK_BORDER_RADIUS);
-    Size silderSize = Size(SLIDER_WIDTH, SLIDER_HEIGHT);
-    sliderModelNG.SetBlockSize(silderSize);
+    sliderModelNG.SetBlockSize(BLOCK_SIZE_WIDTH, BLOCK_SIZE_HEIGHT);
     sliderModelNG.SetBlockType(SliderModel::BlockStyleType::IMAGE);
     sliderModelNG.SetBlockImage(SLIDER_MODEL_NG_BLOCK_IMAGE);
     auto basicShape = AceType::MakeRefPtr<BasicShape>(BasicShapeType::INSET);
     sliderModelNG.SetBlockShape(basicShape);
     sliderModelNG.SetStepSize(SLIDER_MODEL_NG_STEP_SIZE);
+    sliderModelNG.SetShowTips(true, std::nullopt);
+    sliderModelNG.SetShowTips(false, "content");
 
     std::function<void(float, int32_t)> eventOnChange = [](float floatValue, int32_t intValue) {};
     sliderModelNG.SetOnChange(std::move(eventOnChange));
@@ -892,6 +1062,8 @@ HWTEST_F(SliderPatternTestNg, SliderContentModifierTest002, TestSize.Level1)
      */
     SetSliderContentModifier(sliderContentModifier);
     sliderContentModifier.GetBlockCenter();
+    sliderContentModifier.GetTrackThickness();
+    sliderContentModifier.GetBlockSize();
     // set Axis HORIZONTAL
     sliderContentModifier.SetDirection(Axis::HORIZONTAL);
     // set BlockStyleType SHAPE
@@ -1386,8 +1558,6 @@ HWTEST_F(SliderPatternTestNg, SliderPaintPropertyTest001, TestSize.Level1)
      * @tc.steps: step3. call ToJsonValue.
      */
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
-    SizeF defaultBlockSize;
-    sliderPaintProperty->UpdateBlockSize(BLOCK_SIZE);
     sliderPaintProperty->UpdateTrackBorderRadius(SLIDER_MODEL_NG_TRACK_BORDER_RADIUS);
     sliderPaintProperty->ToJsonValue(json);
     ASSERT_NE(json, nullptr);
@@ -1398,7 +1568,6 @@ HWTEST_F(SliderPatternTestNg, SliderPaintPropertyTest001, TestSize.Level1)
     sliderPaintProperty->UpdateStepColor(TEST_COLOR);
     EXPECT_EQ(sliderPaintProperty->GetStepColorValue(Color::TRANSPARENT), TEST_COLOR);
     EXPECT_EQ(sliderPaintProperty->GetTrackBorderRadiusValue(Dimension()), SLIDER_MODEL_NG_TRACK_BORDER_RADIUS);
-    EXPECT_EQ(sliderPaintProperty->GetBlockSizeValue(defaultBlockSize), BLOCK_SIZE);
     sliderPaintProperty->UpdateBlockType(SliderModel::BlockStyleType::IMAGE);
     EXPECT_EQ(sliderPaintProperty->GetBlockTypeValue(SliderModelNG::BlockStyleType::DEFAULT),
         SliderModel::BlockStyleType::IMAGE);
@@ -1432,8 +1601,9 @@ HWTEST_F(SliderPatternTestNg, SliderLayoutPropertyTest001, TestSize.Level1)
      */
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     ASSERT_NE(sliderLayoutProperty, nullptr);
-    SizeF blockSize;
+    SizeT<Dimension> blockSize;
     sliderLayoutProperty->UpdateBlockSize(blockSize);
+    EXPECT_EQ(sliderLayoutProperty->GetBlockSizeValue(SizeF()), SizeF());
 
     /**
      * @tc.steps: step3. call ToJsonValue when SliderMode = OUTSET/INSET
@@ -1442,6 +1612,7 @@ HWTEST_F(SliderPatternTestNg, SliderLayoutPropertyTest001, TestSize.Level1)
     sliderLayoutProperty->ToJsonValue(json);
     ASSERT_NE(json, nullptr);
     sliderLayoutProperty->UpdateSliderMode(SliderModel::SliderMode::INSET);
+    sliderLayoutProperty->ResetBlockSize();
     sliderLayoutProperty->ToJsonValue(json);
     ASSERT_NE(json, nullptr);
 }
@@ -1485,7 +1656,9 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest001, TestSize.Level1)
     EXPECT_EQ(sliderPattern->hotFlag_, false);
     sliderPattern->UpdateBlock();
     sliderPattern->LayoutImageNode();
+    sliderPattern->bubbleFlag_ = true;
     ASSERT_NE(sliderPattern->CreateNodePaintMethod(), nullptr);
+    sliderPattern->sliderTipModifier_->getBubbleVertexFunc_();
     sliderPattern->UpdateCircleCenterOffset();
     auto contentSize = sliderPattern->GetHostContentSize();
     EXPECT_EQ(sliderPattern->GetBlockCenter().GetY(), contentSize->Height() * HALF);
@@ -1721,6 +1894,222 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SliderPatternTest006
+ * @tc.desc: Test slider_pattern CreateNodePaintMethod/HandlingGestureEvent/OnKeyEvent
+ * imageFrameNode_ != nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    sliderPattern->AttachToFrameNode(frameNode);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+    /**
+     * @tc.steps: step2. set attribute and call function.
+     */
+    // mock theme
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    auto appTheme = AceType::MakeRefPtr<AppTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(SliderTheme::TypeId())).WillRepeatedly(Return(sliderTheme));
+    EXPECT_CALL(*themeManager, GetTheme(AppTheme::TypeId())).WillRepeatedly(Return(appTheme));
+
+    // set key event
+    auto func = [&sliderPattern]() {
+        KeyEvent keyEvent;
+        sliderPattern->direction_ = Axis::HORIZONTAL;
+        keyEvent.action = KeyAction::DOWN;
+        keyEvent.code = KeyCode::KEY_DPAD_LEFT;
+        sliderPattern->OnKeyEvent(keyEvent);
+        keyEvent.action = KeyAction::DOWN;
+        keyEvent.code = KeyCode::KEY_DPAD_RIGHT;
+        sliderPattern->OnKeyEvent(keyEvent);
+        keyEvent.action = KeyAction::UP;
+        sliderPattern->OnKeyEvent(keyEvent);
+        sliderPattern->OnKeyEvent(keyEvent);
+
+        sliderPattern->direction_ = Axis::VERTICAL;
+        keyEvent.action = KeyAction::DOWN;
+        keyEvent.code = KeyCode::KEY_DPAD_UP;
+        sliderPattern->OnKeyEvent(keyEvent);
+        keyEvent.action = KeyAction::DOWN;
+        keyEvent.code = KeyCode::KEY_DPAD_DOWN;
+        sliderPattern->OnKeyEvent(keyEvent);
+        keyEvent.action = KeyAction::UNKNOWN;
+        sliderPattern->OnKeyEvent(keyEvent);
+    };
+
+    func();
+    sliderPattern->showTips_ = true;
+    func();
+
+    // set gesture input event
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::AXIS);
+    info.SetOffsetX(-1);
+    sliderPattern->HandlingGestureEvent(info);
+    ASSERT_NE(sliderPattern->CreateNodePaintMethod(), nullptr);
+    sliderPattern->HandledGestureEvent();
+    ASSERT_NE(sliderPattern->CreateNodePaintMethod(), nullptr);
+}
+
+/**
+ * @tc.name: SliderPatternTest007
+ * @tc.desc: Test slider_pattern GetBubbleVertexPosition
+ * imageFrameNode_ != nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    sliderPattern->AttachToFrameNode(frameNode);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+
+    /**
+     * @tc.steps: step2. set attribute and call function.
+     */
+    auto offset = BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx();
+    sliderPattern->direction_ = Axis::HORIZONTAL;
+    ASSERT_EQ(sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()), OffsetF(0, -offset));
+    sliderPattern->direction_ = Axis::VERTICAL;
+    ASSERT_EQ(sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()), OffsetF(-offset, 0));
+
+    sliderPattern->sliderContentModifier_ =
+        AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr);
+    sliderLayoutProperty->UpdateSliderMode(SliderModelNG::SliderMode::INSET);
+    sliderPattern->direction_ = Axis::HORIZONTAL;
+    ASSERT_EQ(sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()), OffsetF(0, -offset));
+    sliderPattern->direction_ = Axis::VERTICAL;
+    ASSERT_EQ(sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()), OffsetF(-offset, 0));
+}
+
+/**
+ * @tc.name: SliderPatternTest008
+ * @tc.desc: Test SliderPattern GetInsetInnerFocusPaintRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slider and prepare environment.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    sliderPattern->AttachToFrameNode(frameNode);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    ASSERT_NE(sliderTheme, nullptr);
+    auto appTheme = AceType::MakeRefPtr<AppTheme>();
+    ASSERT_NE(appTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(SliderTheme::TypeId())).WillRepeatedly(Return(sliderTheme));
+    EXPECT_CALL(*themeManager, GetTheme(AppTheme::TypeId())).WillRepeatedly(Return(appTheme));
+    auto focusDistance =
+        sliderTheme->GetFocusSideDistance().ConvertToPx() + (appTheme->GetFocusWidthVp().ConvertToPx() * HALF);
+    RoundRect roundRect;
+    sliderPattern->trackThickness_ = SLIDER_HEIGHT;
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(CONTENT_WIDTH, CONTENT_HEIGHT));
+
+    /**
+     * @tc.steps: step2. call GetInsetInnerFocusPaintRect without TrackBorderRadius property.
+     * @tc.expected: step2. radius == (TrackThickness / 2 + focusWidth).
+     */
+    sliderPattern->direction_ = Axis::HORIZONTAL;
+    sliderPattern->GetInsetInnerFocusPaintRect(roundRect);
+    auto radius = roundRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS);
+    EXPECT_EQ(radius.x, (SLIDER_HEIGHT * HALF) + focusDistance);
+    EXPECT_EQ(radius.y, (SLIDER_HEIGHT * HALF) + focusDistance);
+
+    /**
+     * @tc.steps: step3. call GetInsetInnerFocusPaintRect with TrackBorderRadius property.
+     * @tc.expected: step3. radius == (TrackBorderRadius + focusWidth).
+     */
+    sliderPattern->direction_ = Axis::VERTICAL;
+    auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateTrackBorderRadius(TRACK_BORDER_RADIUS);
+    sliderPattern->GetInsetInnerFocusPaintRect(roundRect);
+    radius = roundRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS);
+    EXPECT_EQ(radius.x, TRACK_BORDER_RADIUS.ConvertToPx() + focusDistance);
+    EXPECT_EQ(radius.y, TRACK_BORDER_RADIUS.ConvertToPx() + focusDistance);
+}
+
+/**
+ * @tc.name: SliderPatternTest009
+ * @tc.desc: Test slider_pattern onBlurInternal_ HandleMouseEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    sliderPattern->AttachToFrameNode(frameNode);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+
+    /**
+     * @tc.steps: step2. call focusHub onBlurInternal callback.
+     * @tc.expected: step2. sliderPattern->bubbleFlag_ is false.
+     */
+    sliderPattern->bubbleFlag_ = true;
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    sliderPattern->OnModifyDone();
+    focusHub->onBlurInternal_();
+    ASSERT_FALSE(sliderPattern->bubbleFlag_);
+
+    /**
+     * @tc.steps: step3. Mouse on slider block.
+     * @tc.expected: step3. sliderPattern->bubbleFlag_ is true.
+     */
+    MouseInfo mouseInfo;
+    sliderPattern->blockSize_ = SizeF(MAX_WIDTH, MAX_HEIGHT);
+    sliderPattern->showTips_ = true;
+    sliderPattern->HandleMouseEvent(mouseInfo);
+    ASSERT_TRUE(sliderPattern->bubbleFlag_);
+
+    /**
+     * @tc.steps: step4. Mouse not on slider block.
+     * @tc.expected: step4. sliderPattern->bubbleFlag_ is false.
+     */
+    sliderPattern->blockSize_ = SizeF(0, 0);
+    sliderPattern->HandleMouseEvent(mouseInfo);
+    ASSERT_FALSE(sliderPattern->bubbleFlag_);
+}
+
+/**
  * @tc.name: SliderLayoutAlgorithmTest001
  * @tc.desc: Test slider_layout_algorithm Measure and Layout(Reverse=false)
  * @tc.type: FUNC
@@ -1939,12 +2328,10 @@ HWTEST_F(SliderPatternTestNg, SliderPaintMethodTest001, TestSize.Level1)
     SliderContentModifier::Parameters parameters;
     std::function<void()> updateImageFunc;
     auto sliderContentModifier = AceType::MakeRefPtr<SliderContentModifier>(parameters, std::move(updateImageFunc));
-    auto sliderTipModifier = AceType::MakeRefPtr<SliderTipModifier>();
-    ParagraphStyle paraStyle;
-    auto paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
+    auto sliderTipModifier = AceType::MakeRefPtr<SliderTipModifier>(nullptr);
     SliderPaintMethod::TipParameters tipParameters;
     SliderPaintMethod sliderPaintMethod(
-        sliderContentModifier, parameters, 1.0f, 1.0f, sliderTipModifier, paragraph, tipParameters);
+        sliderContentModifier, parameters, 1.0f, 1.0f, sliderTipModifier, tipParameters);
     /**
      * @tc.steps: step2. create paintWrapper.
      */
@@ -1975,6 +2362,52 @@ HWTEST_F(SliderPatternTestNg, SliderPaintMethodTest001, TestSize.Level1)
     EXPECT_EQ(
         sliderPaintMethod.sliderContentModifier_->blockType_, static_cast<int>(SliderModelNG::BlockStyleType::IMAGE));
     EXPECT_EQ(sliderPaintMethod.sliderContentModifier_->directionAxis_, static_cast<int>(Axis::HORIZONTAL));
+}
+
+/**
+ * @tc.name: SliderPaintMethodTest002
+ * @tc.desc: Test slider_paint_method UpdateOverlayModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPaintMethodTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and sliderPaintMethod.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(5.0, 10.0, 10.0, 20.0);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    SliderContentModifier::Parameters parameters;
+    auto sliderContentModifier = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr);
+    auto sliderTipModifier = AceType::MakeRefPtr<SliderTipModifier>(nullptr);
+    SliderPaintMethod::TipParameters tipParameters;
+    SliderPaintMethod sliderPaintMethod(
+        sliderContentModifier, parameters, 1.0f, 1.0f, sliderTipModifier, tipParameters);
+    /**
+     * @tc.steps: step2. create paintWrapper.
+     */
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    sliderPaintProperty->UpdateDirection(Axis::VERTICAL);
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, sliderPaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    /**
+     * @tc.steps: step3. call UpdateOverlayModifier function.
+     */
+    // set theme
+    MockPipelineBase::SetUp();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
+
+    // call UpdateOverlayModifier function
+    sliderPaintMethod.UpdateOverlayModifier(Referenced::RawPtr(paintWrapper));
+    EXPECT_EQ(sliderTipModifier->axis_, Axis::VERTICAL);
 }
 
 /**
@@ -2018,5 +2451,256 @@ HWTEST_F(SliderPatternTestNg, SliderAccessibilityPropertyTest002, TestSize.Level
     auto sliderAccessibilityProperty = frameNode->GetAccessibilityProperty<SliderAccessibilityProperty>();
     ASSERT_NE(sliderAccessibilityProperty, nullptr);
     EXPECT_EQ(sliderAccessibilityProperty->GetText(), std::to_string(VALUE));
+}
+
+/**
+ * @tc.name: SliderAccessibilityPropertyTest003
+ * @tc.desc: Test the IsScrollable and SupportAction properties of Slider
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderAccessibilityPropertyTest003, TestSize.Level1)
+{
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto sliderAccessibilityProperty = frameNode->GetAccessibilityProperty<SliderAccessibilityProperty>();
+    ASSERT_NE(sliderAccessibilityProperty, nullptr);
+    EXPECT_TRUE(sliderAccessibilityProperty->IsScrollable());
+    
+    sliderAccessibilityProperty->ResetSupportAction();
+    std::unordered_set<AceAction> supportAceActions = sliderAccessibilityProperty->GetSupportAction();
+    uint64_t actions = 0, exptectActions = 0;
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, exptectActions);
+}
+
+
+/**
+ * @tc.name: SliderTipModifierTest001
+ * @tc.desc: Test the SliderTipModifier onDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderTipModifierTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SliderTipModifier object.
+     */
+    auto sliderTipModifier = AceType::MakeRefPtr<SliderTipModifier>([]() { return OffsetF(); });
+    ASSERT_NE(sliderTipModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. update SliderTipModifier property.
+     */
+    sliderTipModifier->SetTipFlag(true);
+    sliderTipModifier->SetDirection(TEST_AXIS);
+    sliderTipModifier->SetTextFont(14.0_fp);
+    sliderTipModifier->SetContentSize(MAX_SIZE);
+
+    /**
+     * @tc.steps: step3. call onDraw function.
+     */
+    Testing::MockCanvas canvas;
+    MockTipsCanvasFunction(canvas);
+    DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    MockParagraphFunction(paragraph, canvas);
+
+    sliderTipModifier->SetDirection(Axis::HORIZONTAL);
+    sliderTipModifier->onDraw(context);
+
+    sliderTipModifier->SetDirection(Axis::VERTICAL);
+    sliderTipModifier->onDraw(context);
+
+    sliderTipModifier->SetTipFlag(false);
+    sliderTipModifier->onDraw(context);
+
+    MockParagraph::TearDown();
+    sliderTipModifier->CreateParagraphAndLayout(TextStyle(), "");
+    ASSERT_EQ(sliderTipModifier->paragraph_, nullptr);
+}
+
+/**
+ * @tc.name: SliderContentModifierTest013
+ * @tc.desc: Test DrawStep while not show step
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderContentModifierTest013, TestSize.Level1)
+{
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
+
+    auto isShowStep = AceType::MakeRefPtr<PropertyBool>(false);
+    sliderContentModifier.isShowStep_ = isShowStep;
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
+    sliderContentModifier.DrawStep(context);
+    EXPECT_FALSE(sliderContentModifier.isShowStep_->Get());
+}
+
+/**
+ * @tc.name: SliderContentModifierTest014
+ * @tc.desc: Test JudgeNeedAimate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderContentModifierTest014, TestSize.Level1)
+{
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
+
+    sliderContentModifier.reverse_ = true;
+    sliderContentModifier.JudgeNeedAimate(sliderPaintProperty);
+    EXPECT_FALSE(sliderContentModifier.needAnimate_);
+    EXPECT_FALSE(sliderContentModifier.reverse_);
+}
+
+/**
+ * @tc.name: SliderContentModifierTest015
+ * @tc.desc: Test SetSelectSize while need needAnimate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderContentModifierTest015, TestSize.Level1)
+{
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
+    ASSERT_NE(sliderContentModifier.selectEnd_, nullptr);
+
+    sliderContentModifier.needAnimate_ = true;
+    sliderContentModifier.SetSelectSize(POINTF_START, POINTF_END);
+    EXPECT_EQ(sliderContentModifier.selectEnd_->Get(), POINTF_END - PointF());
+}
+
+/**
+ * @tc.name: SliderContentModifierTest016
+ * @tc.desc: Test SetCircleCenter while needAnimate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderContentModifierTest016, TestSize.Level1)
+{
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
+    ASSERT_NE(sliderContentModifier.blockCenterX_, nullptr);
+    ASSERT_NE(sliderContentModifier.blockCenterY_, nullptr);
+
+    sliderContentModifier.needAnimate_ = true;
+    PointF center(FRAME_WIDTH, FRAME_HEIGHT);
+    sliderContentModifier.directionAxis_->Set(static_cast<int>(Axis::HORIZONTAL));
+    sliderContentModifier.SetCircleCenter(center);
+    EXPECT_EQ(sliderContentModifier.blockCenterX_->Get(), FRAME_WIDTH);
+    EXPECT_EQ(sliderContentModifier.blockCenterY_->Get(), FRAME_HEIGHT);
+
+    sliderContentModifier.directionAxis_->Set(static_cast<int>(Axis::VERTICAL));
+    sliderContentModifier.SetCircleCenter(center);
+    EXPECT_EQ(sliderContentModifier.blockCenterX_->Get(), FRAME_WIDTH);
+    EXPECT_EQ(sliderContentModifier.blockCenterY_->Get(), FRAME_HEIGHT);
+}
+
+/**
+ * @tc.name: SliderContentModifierTest017
+ * @tc.desc: Test DrawBlock while blockType is image
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderContentModifierTest017, TestSize.Level1)
+{
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
+    ASSERT_NE(sliderContentModifier.blockType_, nullptr);
+    auto updateImageFunc = [&]() {
+        sliderContentModifier.blockType_->Set(static_cast<int>(SliderModelNG::BlockStyleType::DEFAULT));
+    };
+    sliderContentModifier.updateImageFunc_ = std::move(updateImageFunc);
+
+    sliderContentModifier.blockType_->Set(static_cast<int>(SliderModelNG::BlockStyleType::IMAGE));
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
+    sliderContentModifier.DrawBlock(context);
+    EXPECT_EQ(sliderContentModifier.blockType_->Get(), static_cast<int>(SliderModelNG::BlockStyleType::DEFAULT));
+}
+
+/**
+ * @tc.name: SliderPatternChangeEventTestNg001
+ * @tc.desc: Test the Text property of Slider
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternChangeEventTestNg001, TestSize.Level1)
+{
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    std::function<void(float)> eventOnChange = [](float floatValue) { EXPECT_EQ(floatValue, 1.0); };
+    sliderModelNG.SetOnChangeEvent(std::move(eventOnChange));
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderEventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    ASSERT_NE(sliderEventHub, nullptr);
+    sliderEventHub->SetOnChangeEvent(std::move(eventOnChange));
+    ASSERT_NE(sliderEventHub->onChangeEvent_, nullptr);
+    sliderEventHub->FireChangeEvent(1.0, 1);
+    sliderEventHub->SetOnChangeEvent(nullptr);
+    ASSERT_EQ(sliderEventHub->onChangeEvent_, nullptr);
+}
+
+/**
+ * @tc.name: PerformActionTest001
+ * @tc.desc: Slider Accessibility PerformAction test ScrollForward and ScrollBackward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, PerformActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create slider and initialize related properties.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+
+    /**
+     * @tc.steps: step2. Get slider frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    sliderPattern->showTips_ = false;
+    sliderPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step3. Get slider accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto sliderAccessibilityProperty = frameNode->GetAccessibilityProperty<SliderAccessibilityProperty>();
+    ASSERT_NE(sliderAccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. When slider is not showTips, call the callback function in sliderAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(sliderAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(sliderAccessibilityProperty->ActActionScrollBackward());
+
+    /**
+     * @tc.steps: step5. When slider is showTips, call the callback function in sliderAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    sliderPattern->showTips_ = true;
+    EXPECT_TRUE(sliderAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(sliderAccessibilityProperty->ActActionScrollBackward());
 }
 } // namespace OHOS::Ace::NG

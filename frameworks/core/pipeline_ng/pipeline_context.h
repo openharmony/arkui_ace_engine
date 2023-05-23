@@ -79,7 +79,7 @@ public:
     uint32_t AddScheduleTask(const RefPtr<ScheduleTask>& task) override;
 
     // remove schedule task by id.
-    void RemoveScheduleTask(uint32_t id) override {}
+    void RemoveScheduleTask(uint32_t id) override;
 
     // Called by view when touch event received.
     void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) override;
@@ -191,6 +191,8 @@ public:
 
     SafeAreaEdgeInserts GetCurrentViewSafeArea() const override;
 
+    void ResetViewSafeArea() override;
+
     const RefPtr<FullScreenManager>& GetFullScreenManager();
 
     const RefPtr<StageManager>& GetStageManager();
@@ -240,14 +242,25 @@ public:
         isFocusingByTab_ = isFocusingByTab;
     }
 
-    bool GetIsNeedShowFocus() const
+    bool GetIsFocusActive() const
     {
-        return isNeedShowFocus_;
+        return isFocusActive_;
     }
 
-    void SetIsNeedShowFocus(bool isNeedShowFocus)
+    bool SetIsFocusActive(bool isFocusActive)
     {
-        isNeedShowFocus_ = isNeedShowFocus;
+        if (isFocusActive_ == isFocusActive) {
+            return false;
+        }
+        isFocusActive_ = isFocusActive;
+        CHECK_NULL_RETURN_NOLOG(rootNode_, false);
+        auto rootFocusHub = rootNode_->GetFocusHub();
+        CHECK_NULL_RETURN_NOLOG(rootFocusHub, false);
+        if (isFocusActive_) {
+            return rootFocusHub->PaintAllFocusState();
+        }
+        rootFocusHub->ClearAllFocusState();
+        return true;
     }
 
     bool GetOnShow() const
@@ -321,6 +334,16 @@ public:
         if (mouseStyleNodeId_ == id) {
             mouseStyleNodeId_ = -1;
         }
+    }
+
+    // restore
+    void RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo) override;
+    std::unique_ptr<JsonValue> GetStoredNodeInfo() override;
+    void StoreNode(int32_t restoreId, const WeakPtr<FrameNode>& node);
+    bool GetRestoreInfo(int32_t restoreId, std::string& restoreInfo);
+    void RemoveStoredNode(int32_t restoreId)
+    {
+        storeNode_.erase(restoreId);
     }
 
 protected:
@@ -411,15 +434,17 @@ private:
     int32_t mouseStyleNodeId_ = -1;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
-    bool isNeedShowFocus_ = false;
+    bool isFocusActive_ = false;
     bool onShow_ = false;
     bool onFocus_ = true;
+
+    std::unordered_map<int32_t, WeakPtr<FrameNode>> storeNode_;
+    std::unordered_map<int32_t, std::string> restoreNodeInfo_;
 
     std::list<FrameInfo> dumpFrameInfos_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PIPELINE_NG_CONTEXT_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,11 @@
 
 #include <cstdint>
 #include <list>
+#include <string>
+#include <unordered_map>
 
 #include "base/geometry/ng/point_t.h"
+#include "base/log/ace_performance_check.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
@@ -38,9 +41,7 @@ class ACE_EXPORT UINode : public virtual AceType {
     DECLARE_ACE_TYPE(UINode, AceType);
 
 public:
-    UINode(const std::string& tag, int32_t nodeId, bool isRoot = false)
-        : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot)
-    {}
+    UINode(const std::string& tag, int32_t nodeId, bool isRoot = false);
     ~UINode() override;
 
     // atomic node is like button, image, custom node and so on.
@@ -53,7 +54,7 @@ public:
 
     // Tree operation start.
     void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false);
-    std::list<RefPtr<UINode>>::iterator RemoveChild(const RefPtr<UINode>& child);
+    std::list<RefPtr<UINode>>::iterator RemoveChild(const RefPtr<UINode>& child, bool allowTransition = false);
     int32_t RemoveChildAndReturnIndex(const RefPtr<UINode>& child);
     void ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode);
     void MovePosition(int32_t slot);
@@ -61,7 +62,7 @@ public:
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
     void GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const;
-    void Clean(bool cleanDirectly = false);
+    void Clean(bool cleanDirectly = false, bool allowTransition = false);
     void RemoveChildAtIndex(int32_t index);
     RefPtr<UINode> GetChildAtIndex(int32_t index) const;
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
@@ -69,6 +70,25 @@ public:
     void DetachFromMainTree(bool recursive = false);
 
     int32_t TotalChildCount() const;
+
+    // performance check get child count, depth, flex layout times and layout time
+    void GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap);
+    void AddFlexLayouts()
+    {
+        flexLayouts_++;
+    }
+    void SetLayoutTime(int64_t time)
+    {
+        layoutTime_ = time;
+    }
+    int64_t GetLayoutTime()
+    {
+        return layoutTime_;
+    }
+    int32_t GetFlexLayouts()
+    {
+        return flexLayouts_;
+    }
 
     // Returns index in the flatten tree structure
     // of the node with given id and type
@@ -217,6 +237,16 @@ public:
         return isInDestroying_;
     }
 
+    int32_t GetRow() const
+    {
+        return row_;
+    }
+
+    int32_t GetCol() const
+    {
+        return col_;
+    }
+
     void SetChildrenInDestroying();
 
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
@@ -278,6 +308,8 @@ public:
     }
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+
+    virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(InspectorId, std::string);
     void OnInspectorIdUpdate(const std::string& /*unused*/) {}
@@ -349,6 +381,21 @@ public:
     }
 #endif
 
+    void SetRestoreId(int32_t restoreId)
+    {
+        restoreId_ = restoreId;
+    }
+
+    int32_t GetRestoreId()
+    {
+        return restoreId_;
+    }
+
+    void UpdateRecycleElmtId(int32_t newElmtId)
+    {
+        nodeId_ = newElmtId;
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -372,9 +419,6 @@ protected:
         }
     }
 
-    virtual void OnAddDisappearingChild() {}
-    virtual void OnRemoveDisappearingChild() {}
-
     virtual void OnContextAttached() {}
     // dump self info.
     virtual void DumpInfo() {}
@@ -384,8 +428,11 @@ protected:
     virtual void OnDetachFromMainTree(bool recursive = false);
 
     bool isRemoving_ = false;
-    // return value: return true if node has disappearing transition
-    virtual bool OnRemoveFromParent();
+
+    // return value: true if the node can be removed immediately.
+    virtual bool OnRemoveFromParent(bool allowTransition);
+    virtual bool RemoveImmediately() const;
+    void ResetParent();
 
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false);
@@ -394,12 +441,16 @@ private:
     std::list<std::pair<RefPtr<UINode>, uint32_t>> disappearingChildren_;
     WeakPtr<UINode> parent_;
     std::string tag_ = "UINode";
+    int32_t row_ = -1;
+    int32_t col_ = -1;
     int32_t depth_ = 0;
     int32_t hostRootId_ = 0;
     int32_t hostPageId_ = 0;
     int32_t nodeId_ = 0;
     int32_t accessibilityId_ = -1;
     int32_t layoutPriority_ = 0;
+    int32_t flexLayouts_ = 0;
+    int64_t layoutTime_ = 0;
     bool isRoot_ = false;
     bool onMainTree_ = false;
     bool removeSilently_ = true;
@@ -408,11 +459,13 @@ private:
 
     int32_t childrenUpdatedFrom_ = -1;
     static thread_local int32_t currentAccessibilityId_;
+    int32_t restoreId_ = -1;
 
 #ifdef PREVIEW
     std::string debugLine_;
     std::string viewId_;
 #endif
+    friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };
 

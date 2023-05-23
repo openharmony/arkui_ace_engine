@@ -45,7 +45,7 @@ public:
         }
         ResetController();
         if (!animationController_) {
-            animationController_ = AceType::MakeRefPtr<Animator>(context_);
+            animationController_ = CREATE_ANIMATOR(context_);
         }
         // create animation
         const auto& animation = CreateAnimation(beginValue, endValue);

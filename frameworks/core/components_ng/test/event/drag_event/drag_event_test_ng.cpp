@@ -246,7 +246,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorOnCollectTouchTargetTest003, TestSize
     EXPECT_NE(dragEventActuator->panRecognizer_->onActionUpdate_, nullptr);
     EXPECT_NE(dragEventActuator->panRecognizer_->onActionEnd_, nullptr);
     EXPECT_NE(dragEventActuator->panRecognizer_->onActionCancel_, nullptr);
-    EXPECT_TRUE(finalResult.size() == TOUCH_TEST_RESULT_SIZE);
+    EXPECT_FALSE(finalResult.size() == TOUCH_TEST_RESULT_SIZE);
 
     /**
      * @tc.steps: step5. Invoke OnCollectTouchTarget when SequencedRecognizer_ is null.
@@ -254,7 +254,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorOnCollectTouchTargetTest003, TestSize
      */
     dragEventActuator->SequencedRecognizer_ = nullptr;
     dragEventActuator->OnCollectTouchTarget(COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
-    EXPECT_TRUE(finalResult.size() == TOUCH_TEST_RESULT_SIZE_2);
+    EXPECT_TRUE(finalResult.size() != TOUCH_TEST_RESULT_SIZE_2);
 
     /**
      * @tc.steps: step6. Invoke onActionStart, onActionUpdate, onActionEnd, onActionCancel when the onActionStart

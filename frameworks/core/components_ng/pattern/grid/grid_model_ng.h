@@ -62,7 +62,6 @@ public:
 
 private:
     void AddDragFrameNodeToManager() const;
-    static bool CheckTemplate(const std::string& value);
 };
 
 } // namespace OHOS::Ace::NG

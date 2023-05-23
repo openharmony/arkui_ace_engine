@@ -226,8 +226,7 @@ void JSDatePicker::JSBind(BindingTarget globalObj)
     JSClass<JSDatePicker>::StaticMethod("disappearTextStyle", &JSDatePicker::SetDisappearTextStyle);
     JSClass<JSDatePicker>::StaticMethod("textStyle", &JSDatePicker::SetTextStyle);
     JSClass<JSDatePicker>::StaticMethod("selectedTextStyle", &JSDatePicker::SetSelectedTextStyle);
-    JSClass<JSDatePicker>::Inherit<JSViewAbstract>();
-    JSClass<JSDatePicker>::Bind(globalObj);
+    JSClass<JSDatePicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSDatePicker::Create(const JSCallbackInfo& info)
@@ -243,11 +242,11 @@ void JSDatePicker::Create(const JSCallbackInfo& info)
     }
     switch (pickerType) {
         case DatePickerType::TIME: {
-            CreateTimePicker(paramObject);
+            CreateTimePicker(info, paramObject);
             break;
         }
         case DatePickerType::DATE: {
-            CreateDatePicker(paramObject);
+            CreateDatePicker(info, paramObject);
             break;
         }
         default: {
@@ -308,7 +307,7 @@ void JSDatePicker::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTex
     if (fontSize->IsNull() || fontSize->IsUndefined()) {
         textStyle.fontSize = Dimension(-1);
     } else {
-        Dimension size;
+        CalcDimension size;
         if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
             textStyle.fontSize = Dimension(-1);
             LOGW("Parse to dimension FP failed.");
@@ -416,6 +415,19 @@ void JSDatePicker::PickerBackgroundColor(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsBackgroundColor(info);
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (info.Length() < 1) {
+            LOGI("The arg(PickerBackgroundColor) is wrong, it is supposed to have at least 1 argument");
+            return;
+        }
+        Color backgroundColor;
+        if (!ParseJsColor(info[0], backgroundColor)) {
+            LOGI("the info[0] is null");
+            return;
+        }
+        DatePickerModel::GetInstance()->SetBackgroundColor(backgroundColor);
+    }
+
     auto pickerBase = AceType::DynamicCast<PickerBaseComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!pickerBase) {
         LOGE("PickerBaseComponent is null");
@@ -469,7 +481,55 @@ PickerTime JSDatePicker::ParseTime(const JSRef<JSVal>& timeVal)
     return pickerTime;
 }
 
-void JSDatePicker::CreateDatePicker(const JSRef<JSObject>& paramObj)
+void ParseSelectedDateTimeObject(const JSCallbackInfo& info, const JSRef<JSObject>& selectedObject, bool isDatePicker)
+{
+    JSRef<JSVal> changeEventVal = selectedObject->GetProperty("changeEvent");
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("DatePicker.SelectedDateTimeChangeEvent");
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(info);
+        CHECK_NULL_VOID(eventInfo);
+        auto selectedStr = eventInfo->GetSelectedStr();
+        auto sourceJson = JsonUtil::ParseJsonString(selectedStr);
+        if (!sourceJson || sourceJson->IsNull()) {
+            LOGE("invalid selected date value.");
+            return;
+        }
+
+        std::tm dateTime = { 0 };
+        auto year = sourceJson->GetValue("year");
+        if (year && year->IsNumber()) {
+            dateTime.tm_year = year->GetInt() - 1900; // local date start from 1900
+        }
+        auto month = sourceJson->GetValue("month");
+        if (month && month->IsNumber()) {
+            dateTime.tm_mon = month->GetInt();
+        }
+        auto day = sourceJson->GetValue("day");
+        if (day && day->IsNumber()) {
+            dateTime.tm_mday = day->GetInt();
+        }
+        auto hour = sourceJson->GetValue("hour");
+        if (hour && hour->IsNumber()) {
+            dateTime.tm_hour = hour->GetInt();
+        }
+        auto minute = sourceJson->GetValue("minute");
+        if (minute && minute->IsNumber()) {
+            dateTime.tm_min = minute->GetInt();
+        }
+        auto milliseconds = Date::GetMilliSecondsByDateTime(dateTime);
+        auto dateObj = JSDate::New(milliseconds);
+        func->ExecuteJS(1, &dateObj);
+    };
+    if (isDatePicker) {
+        DatePickerModel::GetInstance()->SetChangeEvent(std::move(changeEvent));
+    } else {
+        TimePickerModel::GetInstance()->SetChangeEvent(std::move(changeEvent));
+    }
+}
+
+void JSDatePicker::CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj)
 {
     JSRef<JSVal> startDate;
     JSRef<JSVal> endDate;
@@ -481,13 +541,6 @@ void JSDatePicker::CreateDatePicker(const JSRef<JSObject>& paramObj)
     }
     auto parseStartDate = ParseDate(startDate);
     auto parseEndDate = ParseDate(endDate);
-    auto parseSelectedDate = ParseDate(selectedDate);
-    auto startDays = parseStartDate.ToDays();
-    auto endDays = parseEndDate.ToDays();
-    auto selectedDays = parseSelectedDate.ToDays();
-    if (startDays > endDays || selectedDays < startDays || selectedDays > endDays) {
-        LOGE("date error");
-    }
     auto theme = GetTheme<PickerTheme>();
     if (!theme) {
         LOGE("datePicker Theme is null");
@@ -501,6 +554,21 @@ void JSDatePicker::CreateDatePicker(const JSRef<JSObject>& paramObj)
         DatePickerModel::GetInstance()->SetEndDate(parseEndDate);
     }
     if (selectedDate->IsObject()) {
+        JSRef<JSObject> selectedDateObj = JSRef<JSObject>::Cast(selectedDate);
+        JSRef<JSVal> changeEventVal = selectedDateObj->GetProperty("changeEvent");
+        PickerDate parseSelectedDate;
+        if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
+            ParseSelectedDateTimeObject(info, selectedDateObj, true);
+            parseSelectedDate = ParseDate(selectedDateObj->GetProperty("value"));
+        } else {
+            parseSelectedDate = ParseDate(selectedDate);
+        }
+        auto startDays = parseStartDate.ToDays();
+        auto endDays = parseEndDate.ToDays();
+        auto selectedDays = parseSelectedDate.ToDays();
+        if (startDays > endDays || selectedDays < startDays || selectedDays > endDays) {
+            LOGE("date error");
+        }
         DatePickerModel::GetInstance()->SetSelectedDate(parseSelectedDate);
     }
     SetDefaultAttributes();
@@ -533,7 +601,7 @@ void JSDatePicker::SetDefaultAttributes()
     DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
 
-void JSDatePicker::CreateTimePicker(const JSRef<JSObject>& paramObj)
+void JSDatePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj)
 {
     auto theme = GetTheme<PickerTheme>();
     if (!theme) {
@@ -543,7 +611,15 @@ void JSDatePicker::CreateTimePicker(const JSRef<JSObject>& paramObj)
     DatePickerModel::GetInstance()->CreateTimePicker(theme);
     auto selectedTime = paramObj->GetProperty("selected");
     if (selectedTime->IsObject()) {
-        DatePickerModel::GetInstance()->SetSelectedTime(ParseTime(selectedTime));
+        JSRef<JSObject> selectedTimeObj = JSRef<JSObject>::Cast(selectedTime);
+        JSRef<JSVal> changeEventVal = selectedTimeObj->GetProperty("changeEvent");
+        if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
+            ParseSelectedDateTimeObject(info, selectedTimeObj, true);
+            auto parseSelectedTime = ParseTime(selectedTimeObj->GetProperty("value"));
+            DatePickerModel::GetInstance()->SetSelectedTime(parseSelectedTime);
+        } else {
+            DatePickerModel::GetInstance()->SetSelectedTime(ParseTime(selectedTime));
+        }
     }
 }
 
@@ -792,7 +868,7 @@ void JSTimePicker::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSTimePicker>::StaticMethod("create", &JSTimePicker::Create, opt);
     JSClass<JSTimePicker>::StaticMethod("onChange", &JSTimePicker::OnChange);
-    JSClass<JSTimePicker>::StaticMethod("backgroundColor", &JSDatePicker::PickerBackgroundColor);
+    JSClass<JSTimePicker>::StaticMethod("backgroundColor", &JSTimePicker::PickerBackgroundColor);
     JSClass<JSTimePicker>::StaticMethod("useMilitaryTime", &JSTimePicker::UseMilitaryTime);
     JSClass<JSTimePicker>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSTimePicker>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -803,8 +879,7 @@ void JSTimePicker::JSBind(BindingTarget globalObj)
     JSClass<JSTimePicker>::StaticMethod("disappearTextStyle", &JSTimePicker::SetDisappearTextStyle);
     JSClass<JSTimePicker>::StaticMethod("textStyle", &JSTimePicker::SetTextStyle);
     JSClass<JSTimePicker>::StaticMethod("selectedTextStyle", &JSTimePicker::SetSelectedTextStyle);
-    JSClass<JSTimePicker>::Inherit<JSViewAbstract>();
-    JSClass<JSTimePicker>::Bind(globalObj);
+    JSClass<JSTimePicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSTimePicker::Create(const JSCallbackInfo& info)
@@ -813,12 +888,38 @@ void JSTimePicker::Create(const JSCallbackInfo& info)
     if (info.Length() >= 1 && info[0]->IsObject()) {
         paramObject = JSRef<JSObject>::Cast(info[0]);
     }
-    CreateTimePicker(paramObject);
+    CreateTimePicker(info, paramObject);
 }
 
 void JSTimePicker::UseMilitaryTime(bool isUseMilitaryTime)
 {
     TimePickerModel::GetInstance()->SetHour24(isUseMilitaryTime);
+}
+
+void JSTimePicker::PickerBackgroundColor(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsBackgroundColor(info);
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (info.Length() < 1) {
+            LOGI("The arg(PickerBackgroundColor) is wrong, it is supposed to have at least 1 argument");
+            return;
+        }
+        Color backgroundColor;
+        if (!ParseJsColor(info[0], backgroundColor)) {
+            LOGI("the info[0] is null");
+            return;
+        }
+        TimePickerModel::GetInstance()->SetBackgroundColor(backgroundColor);
+    }
+
+    auto pickerBase = AceType::DynamicCast<PickerBaseComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!pickerBase) {
+        LOGE("PickerBaseComponent is null");
+        return;
+    }
+
+    pickerBase->SetHasBackgroundColor(true);
 }
 
 void JSTimePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
@@ -869,7 +970,7 @@ void JSTimePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     TimePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 }
 
-void JSTimePicker::CreateTimePicker(const JSRef<JSObject>& paramObj)
+void JSTimePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj)
 {
     auto selectedTime = paramObj->GetProperty("selected");
     auto theme = GetTheme<PickerTheme>();
@@ -879,7 +980,15 @@ void JSTimePicker::CreateTimePicker(const JSRef<JSObject>& paramObj)
     }
     TimePickerModel::GetInstance()->CreateTimePicker(theme);
     if (selectedTime->IsObject()) {
-        TimePickerModel::GetInstance()->SetSelectedTime(ParseTime(selectedTime));
+        JSRef<JSObject> selectedTimeObj = JSRef<JSObject>::Cast(selectedTime);
+        JSRef<JSVal> changeEventVal = selectedTimeObj->GetProperty("changeEvent");
+        if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
+            ParseSelectedDateTimeObject(info, selectedTimeObj, false);
+            auto parseSelectedTime = ParseTime(selectedTimeObj->GetProperty("value"));
+            TimePickerModel::GetInstance()->SetSelectedTime(parseSelectedTime);
+        } else {
+            TimePickerModel::GetInstance()->SetSelectedTime(ParseTime(selectedTime));
+        }
     }
     SetDefaultAttributes();
 }

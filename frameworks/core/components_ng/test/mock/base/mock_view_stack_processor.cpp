@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/syntax/for_each_node.h"
 
 namespace OHOS::Ace::NG {
 thread_local std::unique_ptr<ViewStackProcessor> ViewStackProcessor::instance = nullptr;
@@ -39,6 +41,46 @@ RefPtr<UINode> ViewStackProcessor::GetMainElementNode() const
         return nullptr;
     }
     return elementsStack_.top();
+}
+
+void ViewStackProcessor::Pop()
+{
+    if (elementsStack_.empty() || elementsStack_.size() == 1) {
+        return;
+    }
+
+    auto currentNode = Finish();
+    auto parent = GetMainElementNode();
+    if (AceType::InstanceOf<GroupNode>(parent)) {
+        auto groupNode = AceType::DynamicCast<GroupNode>(parent);
+        groupNode->AddChildToGroup(currentNode);
+        return;
+    }
+    currentNode->MountToParent(parent, DEFAULT_NODE_SLOT, AceType::InstanceOf<ForEachNode>(parent));
+    auto currentFrameNode = AceType::DynamicCast<FrameNode>(currentNode);
+    if (currentFrameNode) {
+        currentFrameNode->OnMountToParentDone();
+    }
+    LOGD("ViewStackProcessor Pop size %{public}d", static_cast<int32_t>(elementsStack_.size()));
+}
+
+void ViewStackProcessor::PopContainer()
+{
+    auto top = GetMainElementNode();
+    // for container node.
+    if (top && !top->IsAtomicNode()) {
+        Pop();
+        return;
+    }
+
+    while (top && (top->IsAtomicNode())) {
+        if (elementsStack_.size() == 1) {
+            return;
+        }
+        Pop();
+        top = GetMainElementNode();
+    }
+    Pop();
 }
 
 void ViewStackProcessor::Push(const RefPtr<UINode>& element, bool /*isCustomView*/)

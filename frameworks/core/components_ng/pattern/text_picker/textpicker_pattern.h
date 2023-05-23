@@ -21,7 +21,7 @@
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
-#include "core/components_ng/pattern/text_picker/textpicker_accessibility_property.h"
+#include "core/components_ng/pattern/text_picker/textpicker_row_accessibility_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_paint_method.h"
@@ -29,6 +29,7 @@
 
 namespace OHOS::Ace::NG {
 using EventCallback = std::function<void(bool)>;
+using ColumnChangeCallback = std::function<void(const RefPtr<FrameNode>&, bool, uint32_t, bool)>;
 
 namespace {
 const Dimension TEXT_FOCUS_PAINT_WIDTH = 2.0_vp;
@@ -58,7 +59,7 @@ public:
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
-        return MakeRefPtr<TextPickerAccessibilityProperty>();
+        return MakeRefPtr<TextPickerRowAccessibilityProperty>();
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
@@ -66,6 +67,7 @@ public:
         auto textPickerPaintMethod = MakeRefPtr<TextPickerPaintMethod>();
         textPickerPaintMethod->SetDefaultPickerItemHeight(CalculateHeight());
         textPickerPaintMethod->SetEnabled(enabled_);
+        textPickerPaintMethod->SetBackgroundColor(backgroundColor_);
         return textPickerPaintMethod;
     }
 
@@ -83,6 +85,8 @@ public:
     void FlushOptions();
 
     void SetDefaultPickerItemHeight();
+
+    std::map<uint32_t, RefPtr<FrameNode>> GetColumnNodes();
 
     RefPtr<FrameNode> GetColumnNode();
 
@@ -149,6 +153,11 @@ public:
         return options_[index].text_;
     }
 
+    void SetBackgroundColor(const Color& color)
+    {
+        backgroundColor_ = color;
+    }
+
     FocusPattern GetFocusPattern() const override
     {
         auto pipeline = PipelineBase::GetCurrentContext();
@@ -165,6 +174,68 @@ public:
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
+    void SetCascadeOptions(const std::vector<NG::TextCascadePickerOptions>& options,
+        const std::vector<NG::TextCascadePickerOptions>& cascadeOptions)
+    {
+        cascadeOptions_.clear();
+        cascadeOriginptions_.clear();
+        for (auto& option : cascadeOptions) {
+            cascadeOptions_.emplace_back(std::move(option));
+        }
+        for (auto& option : options) {
+            cascadeOriginptions_.emplace_back(std::move(option));
+        }
+    }
+
+    uint32_t GetCascadeOptionCount() const
+    {
+        return cascadeOptions_.size();
+    }
+
+    uint32_t GetOptionCount(const RefPtr<FrameNode>& frmeNode)
+    {
+        uint32_t count = 0;
+        if (optionsWithNode_.find(frmeNode) != optionsWithNode_.end()) {
+            count = optionsWithNode_[frmeNode].size();
+        }
+        return count;
+    }
+
+    void SetIsCascade(bool isCascade)
+    {
+        isCascade_ = isCascade;
+    }
+
+    bool GetIsCascade() const
+    {
+        return isCascade_;
+    }
+
+    void SetValues(const std::vector<std::string>& values)
+    {
+        values_.clear();
+        for (auto& value : values) {
+            values_.emplace_back(value);
+        }
+    }
+
+    void SetHasSelectAttr(bool value)
+    {
+        isHasSelectAttr_ = value;
+    }
+
+    void SetSelecteds(const std::vector<uint32_t>& values);
+
+    void HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify);
+
+    void SetChangeCallback(ColumnChangeCallback&& value);
+
+    void ProcessCascadeOptions(const std::vector<NG::TextCascadePickerOptions>& options,
+        std::vector<NG::TextCascadePickerOptions>& reOptions, uint32_t index);
+
+    size_t ProcessCascadeOptionDepth(const NG::TextCascadePickerOptions& option);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -180,13 +251,38 @@ private:
     void PaintFocusState();
     void SetButtonIdeaSize();
     std::string GetRangeStr() const;
+    std::string GetOptionsMultiStr() const;
+    std::string GetOptionsMultiStrInternal() const;
+    std::string GetOptionsCascadeStr(
+        const std::vector<NG::TextCascadePickerOptions>& options) const;
+    bool ChangeCurrentOptionValue(NG::TextCascadePickerOptions& option,
+        uint32_t value, uint32_t curColumn, uint32_t replaceColumn);
+    void OnColumnsBuildingUnCascade();
+    void OnColumnsBuildingCascade();
+    std::string GetSelectedObjectMulti(const std::vector<std::string>& values,
+        const std::vector<uint32_t>& indexs, int32_t status) const;
+    void SupplementOption(const std::vector<NG::TextCascadePickerOptions>& reOptions,
+        std::vector<NG::RangeContent>& rangeContents, uint32_t patterIndex);
+    void ProcessCascadeOptionsValues(const std::vector<std::string>& rangeResultValue, uint32_t index);
 
     bool enabled_ = true;
+    int32_t focusKeyID_ = 0;
     double defaultPickerItemHeight_;
     uint32_t selectedIndex_ = 0;
     std::vector<NG::RangeContent> range_;
     std::vector<NG::RangeContent> options_;
     uint32_t columnsKind_;
+    std::vector<NG::TextCascadePickerOptions> cascadeOptions_;
+    std::map<RefPtr<FrameNode>, std::vector<NG::RangeContent>> optionsWithNode_;
+    std::vector<NG::TextCascadePickerOptions> cascadeOriginptions_;
+    bool isCascade_ = false;
+    bool isHasSelectAttr_ = false;
+    std::vector<std::string> values_;
+    std::vector<uint32_t> selecteds_;
+    Color backgroundColor_ = Color::WHITE;
+
+    // inner focus switch
+    bool operationOn_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerPattern);
 };

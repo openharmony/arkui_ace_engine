@@ -23,19 +23,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<LineModel> LineModel::instance_ = nullptr;
+std::mutex LineModel::mutex_;
 
 LineModel* LineModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::LineModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::LineModelNG());
-        } else {
-            instance_.reset(new Framework::LineModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::LineModelNG());
+            } else {
+                instance_.reset(new Framework::LineModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -60,8 +64,7 @@ void JSLine::JSBind(BindingTarget globalObj)
     JSClass<JSLine>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSLine>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
 
-    JSClass<JSLine>::Inherit<JSShapeAbstract>();
-    JSClass<JSLine>::Bind<>(globalObj);
+    JSClass<JSLine>::InheritAndBind<JSShapeAbstract>(globalObj);
 }
 
 void JSLine::Create(const JSCallbackInfo& info)

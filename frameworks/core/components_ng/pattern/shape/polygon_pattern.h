@@ -35,7 +35,10 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<PolygonPaintMethod>(GetAncestorPaintProperty(), isPolygon_);
+        if (!shapeOverlayModifier_) {
+            shapeOverlayModifier_ = MakeRefPtr<ShapeOverlayModifier>();
+        }
+        return MakeRefPtr<PolygonPaintMethod>(isPolygon_, GetAncestorPaintProperty(), shapeOverlayModifier_);
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override

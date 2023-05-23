@@ -27,19 +27,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<XComponentModel> XComponentModel::instance_ = nullptr;
+std::mutex XComponentModel::mutex_;
 
 XComponentModel* XComponentModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::XComponentModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::XComponentModelNG());
-        } else {
-            instance_.reset(new Framework::XComponentModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::XComponentModelNG());
+            } else {
+                instance_.reset(new Framework::XComponentModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -53,6 +57,7 @@ void JSXComponent::JSBind(BindingTarget globalObj)
     JSClass<JSXComponent>::StaticMethod("create", &JSXComponent::Create);
     JSClass<JSXComponent>::StaticMethod("onLoad", &JSXComponent::JsOnLoad);
     JSClass<JSXComponent>::StaticMethod("onDestroy", &JSXComponent::JsOnDestroy);
+
     JSClass<JSXComponent>::StaticMethod("onAppear", &JSXComponent::OmitEvent);
     JSClass<JSXComponent>::StaticMethod("onDisAppear", &JSXComponent::OmitEvent);
     JSClass<JSXComponent>::StaticMethod("onTouch", &JSXComponent::OmitEvent);
@@ -60,8 +65,26 @@ void JSXComponent::JSBind(BindingTarget globalObj)
     JSClass<JSXComponent>::StaticMethod("onKeyEvent", &JSXComponent::OmitEvent);
     JSClass<JSXComponent>::StaticMethod("onMouse", &JSXComponent::OmitEvent);
     JSClass<JSXComponent>::StaticMethod("onHover", &JSXComponent::OmitEvent);
-    JSClass<JSXComponent>::Inherit<JSViewAbstract>();
-    JSClass<JSXComponent>::Bind(globalObj);
+    JSClass<JSXComponent>::StaticMethod("onFocus", &JSXComponent::OmitEvent);
+    JSClass<JSXComponent>::StaticMethod("onBlur", &JSXComponent::OmitEvent);
+
+    JSClass<JSXComponent>::StaticMethod("backgroundColor", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("backgroundImage", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("backgroundImageSize", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("backgroundImagePosition", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("opacity", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("blur", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("backdropBlur", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("grayscale", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("brightness", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("saturate", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("contrast", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("invert", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("sepia", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("hueRotate", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("colorBlend", &JSXComponent::OmitAttribute);
+
+    JSClass<JSXComponent>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSXComponent::Create(const JSCallbackInfo& info)
@@ -116,6 +139,10 @@ void JSXComponent::JsOnLoad(const JSCallbackInfo& args)
 
 void JSXComponent::JsOnDestroy(const JSCallbackInfo& args)
 {
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     auto onDestroy = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -129,6 +156,11 @@ void JSXComponent::JsOnDestroy(const JSCallbackInfo& args)
 void JSXComponent::OmitEvent(const JSCallbackInfo& /*args*/)
 {
     LOGW("This event is omitted, please use apis of native_xcomponent instead");
+}
+
+void JSXComponent::OmitAttribute(const JSCallbackInfo& /* args */)
+{
+    LOGW("This attribute is omitted.");
 }
 
 } // namespace OHOS::Ace::Framework

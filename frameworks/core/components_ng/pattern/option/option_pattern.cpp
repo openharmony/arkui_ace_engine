@@ -55,11 +55,10 @@ void OptionPattern::OnModifyDone()
     CHECK_NULL_VOID(eventHub);
     if (!eventHub->IsEnabled()) {
         CHECK_NULL_VOID(text_);
-        auto textProperty = text_->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(textProperty);
-        textProperty->UpdateTextColor(selectTheme_->GetDisabledMenuFontColor());
+        text_->GetRenderContext()->UpdateForegroundColor(selectTheme_->GetDisabledMenuFontColor());
         text_->MarkModifyDone();
     }
+    SetAccessibilityAction();
 }
 
 void OptionPattern::OnSelectProcess()
@@ -78,6 +77,7 @@ void OptionPattern::OnSelectProcess()
         LOGI("selecting option %d", index_);
         onSelect(index_);
     }
+    host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
     // hide menu when option is clicked
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -177,7 +177,7 @@ bool OptionPattern::OnKeyEvent(const KeyEvent& event)
     if (event.action != KeyAction::DOWN) {
         return false;
     }
-    if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_SPACE) {
+    if (event.code == KeyCode::KEY_ENTER) {
         OnSelectProcess();
         return true;
     }
@@ -326,7 +326,11 @@ void OptionPattern::SetFontColor(const Color& color)
     CHECK_NULL_VOID(props);
     text_->MarkModifyDone();
     props->UpdateTextColor(color);
-    text_->GetRenderContext()->UpdateForegroundColor(color);
+    auto context = text_->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->UpdateForegroundColor(color);
+    context->UpdateForegroundColorFlag(false);
+    context->ResetForegroundColorStrategy();
 }
 
 std::string OptionPattern::InspectorGetFont()
@@ -441,5 +445,18 @@ void OptionPattern::UpdateIcon(const std::string& src)
     props->UpdateImageSourceInfo(imageSrcInfo.value());
     icon_->MarkModifyDone();
     icon_->MarkDirtyNode();
+}
+
+void OptionPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionSelect([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnSelectProcess();
+    });
 }
 } // namespace OHOS::Ace::NG

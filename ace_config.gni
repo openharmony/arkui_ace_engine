@@ -46,6 +46,9 @@ declare_args() {
 
   # Disable in OH Core
   ace_engine_standard_fonts_enable = true
+
+  # Sanitize debug
+  ace_sanitize_debug = false
 }
 
 enable_dump_drawcmd = false
@@ -134,13 +137,6 @@ if (is_ohos_standard_system) {
   ark_runtime_path = "//arkcompiler/runtime_core"
 }
 
-# Config test output path
-if (is_ohos_standard_system) {
-  test_output_path = "ace_engine/backenduiFrameNode"
-} else {
-  test_output_path = "ace_engine_full/backenduiFrameNode"
-}
-
 # Config defines
 ace_wearable_defines = [ "WEARABLE_PRODUCT" ]
 ace_ivi_defines = [ "IVI_PRODUCT" ]
@@ -191,6 +187,10 @@ if (!defined(global_parts_info) ||
   os_account_exists = false
 }
 
+if (is_emulator) {
+  ace_common_defines += [ "IS_EMULATOR" ]
+}
+
 if (defined(global_parts_info)) {
   if (defined(global_parts_info.resourceschedule_frame_aware_sched) || defined(
           global_parts_info.hmosresourceschedule_resourceschedule_frame_aware_sched_override)) {
@@ -198,6 +198,14 @@ if (defined(global_parts_info)) {
   } else {
     frame_trace_support = false
   }
+}
+
+if (!defined(global_parts_info) ||
+    defined(global_parts_info.security_security_component)) {
+  security_component_enable = true
+  ace_common_defines += [ "SECURITY_COMPONENT_ENABLE" ]
+} else {
+  security_component_enable = false
 }
 
 ace_platforms = []

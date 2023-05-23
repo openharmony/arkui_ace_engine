@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 
 #include "frameworks/base/geometry/dimension.h"
@@ -41,6 +42,7 @@ public:
 
 private:
     static std::unique_ptr<AbilityComponentModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 

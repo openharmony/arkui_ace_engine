@@ -630,7 +630,7 @@ void RenderRating::RequestFocusAnimationForPhone()
 void RenderRating::PlayEventEffectAnimation(int32_t starIndex, bool isHoverExists)
 {
     if (!eventEffectController_) {
-        eventEffectController_ = AceType::MakeRefPtr<Animator>(context_);
+        eventEffectController_ = CREATE_ANIMATOR(context_);
     }
     if (!eventEffectController_->IsStopped()) {
         eventEffectController_->Stop();

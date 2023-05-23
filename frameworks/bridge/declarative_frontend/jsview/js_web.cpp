@@ -41,6 +41,7 @@
 #include "pixel_map_napi.h"
 
 namespace OHOS::Ace::Framework {
+JSwebEventCallback JSWeb::OnControllerAttachedCallback_ = nullptr;
 bool JSWeb::webDebuggingAccess_ = false;
 class JSWebDialog : public Referenced {
 public:
@@ -860,6 +861,19 @@ public:
             response_->SetData(data);
             return;
         }
+        if (args[0]->IsObject()) {
+            std::string resourceUrl;
+            std::string url;
+            if (!JSViewAbstract::ParseJsMedia(args[0], resourceUrl)) {
+                LOGE("intercept failed to parse url object");
+                return;
+            }
+            auto np = resourceUrl.find_first_of("/");
+            url = (np == std::string::npos) ? resourceUrl : resourceUrl.erase(np, 1);
+            response_->SetResourceUrl(url);
+            LOGI("intercept set data url %{public}s", url.c_str());
+            return;
+        }
     }
 
     void SetResponseEncoding(const JSCallbackInfo& args)
@@ -905,6 +919,10 @@ public:
         }
         JSRef<JSArray> array = JSRef<JSArray>::Cast(args[0]);
         for (size_t i = 0; i < array->Length(); i++) {
+            if (!(array->GetValueAt(i)->IsObject())) {
+                LOGE("Param is invalid");
+                return;
+            }
             auto obj = JSRef<JSObject>::Cast(array->GetValueAt(i));
             auto headerKey = obj->GetProperty("headerKey");
             auto headerValue = obj->GetProperty("headerValue");
@@ -1537,8 +1555,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onAudioStateChanged", &JSWeb::OnAudioStateChanged);
     JSClass<JSWeb>::StaticMethod("mediaOptions", &JSWeb::MediaOptions);
     JSClass<JSWeb>::StaticMethod("onFirstContentfulPaint", &JSWeb::OnFirstContentfulPaint);
-    JSClass<JSWeb>::Inherit<JSViewAbstract>();
-    JSClass<JSWeb>::Bind(globalObj);
+    JSClass<JSWeb>::StaticMethod("onControllerAttached", &JSWeb::OnControllerAttached);
+    JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
     JSWebResourceRequest::JSBind(globalObj);
@@ -1805,6 +1823,9 @@ void JSWeb::CreateInNewPipeline(
                                  int32_t webId) {
             JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(webId)) };
             func->Call(webviewController, 1, argv);
+            if (JSWeb::OnControllerAttachedCallback_) {
+                JSWeb::OnControllerAttachedCallback_();
+            }
         };
         auto setHapPathFunction = controller->GetProperty("innerSetHapPath");
         NG::SetHapPathCallback setHapPathCallback = nullptr;
@@ -2384,11 +2405,8 @@ void JSWeb::OnSslErrorRequest(const JSCallbackInfo& args)
             ContainerScope scope(instanceId);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
             auto* eventInfo = TypeInfoHelper::DynamicCast<WebSslErrorEvent>(info.get());
-            JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
-            if (message->IsBoolean()) {
-                return message->ToBoolean();
-            }
-            return false;
+            func->ExecuteWithValue(*eventInfo);
+            return true;
         };
         NG::WebView::SetOnSslErrorRequestImpl(std::move(uiCallback));
         return;
@@ -2404,11 +2422,8 @@ void JSWeb::OnSslErrorRequest(const JSCallbackInfo& args)
             LOGW("eventInfo is null");
             return false;
         }
-        JSRef<JSVal> result = func->ExecuteWithValue(*eventInfo);
-        if (result->IsBoolean()) {
-            return result->ToBoolean();
-        }
-        return false;
+        func->ExecuteWithValue(*eventInfo);
+        return true;
     };
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     CHECK_NULL_VOID(webComponent);
@@ -3568,6 +3583,11 @@ void JSWeb::JsOnDragStart(const JSCallbackInfo& info)
         return;
     }
 
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) -> DragItemInfo {
@@ -3610,6 +3630,11 @@ void JSWeb::JsOnDragEnter(const JSCallbackInfo& info)
         return;
     }
 
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+
     RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
@@ -3627,6 +3652,11 @@ void JSWeb::JsOnDragMove(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         JSViewAbstract::JsOnDragMove(info);
+        return;
+    }
+
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
         return;
     }
 
@@ -3650,6 +3680,11 @@ void JSWeb::JsOnDragLeave(const JSCallbackInfo& info)
         return;
     }
 
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+
     RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
@@ -3667,6 +3702,11 @@ void JSWeb::JsOnDrop(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         JSViewAbstract::JsOnDrop(info);
+        return;
+    }
+
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
         return;
     }
 
@@ -3790,6 +3830,7 @@ void JSWeb::OnWindowExit(const JSCallbackInfo& args)
             ContainerScope scope(instanceId);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<WebWindowExitEvent>(info.get());
+            CHECK_NULL_VOID(func);
             func->Execute(*eventInfo);
         };
         NG::WebView::SetWindowExitEventId(std::move(uiCallback));
@@ -3799,6 +3840,7 @@ void JSWeb::OnWindowExit(const JSCallbackInfo& args)
         EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto eventInfo = TypeInfoHelper::DynamicCast<WebWindowExitEvent>(info);
+            CHECK_NULL_VOID(func);
             func->Execute(*eventInfo);
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -4304,6 +4346,31 @@ void JSWeb::OnFirstContentfulPaint(const JSCallbackInfo& args)
             });
         };
         NG::WebView::SetFirstContentfulPaintId(std::move(uiCallback));
+        return;
+    }
+}
+
+void JSWeb::OnControllerAttached(const JSCallbackInfo& args)
+{
+    LOGI("JSWeb OnControllerAttached");
+
+    if (!args[0]->IsFunction()) {
+        LOGE("OnControllerAttached Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(args[0]));
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId]() {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostAsyncEvent([execCtx, func = func]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                func->Execute();
+            });
+        };
+        JSWeb::OnControllerAttachedCallback_ = std::move(uiCallback);
         return;
     }
 }

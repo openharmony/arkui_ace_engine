@@ -21,6 +21,9 @@
 namespace OHOS::Ace::NG {
 void SearchEventHub::UpdateChangeEvent(const std::string& value) const
 {
+    if (onValueChangeEvent_) {
+        onValueChangeEvent_(value);
+    }
     if (changeEvent_) {
         changeEvent_(value);
     }

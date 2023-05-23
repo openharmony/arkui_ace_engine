@@ -22,19 +22,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<RatingModel> RatingModel::instance_ = nullptr;
+std::mutex RatingModel::mutex_;
 
 RatingModel* RatingModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::RatingModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::RatingModelNG());
-        } else {
-            instance_.reset(new Framework::RatingModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::RatingModelNG());
+            } else {
+                instance_.reset(new Framework::RatingModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -47,16 +51,39 @@ constexpr double RATING_SCORE_DEFAULT = 0;
 constexpr int32_t STARS_DEFAULT = 5;
 constexpr double STEPS_DEFAULT = 0.5;
 } // namespace
+
+void ParseRatingObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
+{
+    CHECK_NULL_VOID(changeEventVal->IsFunction());
+
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto onChangeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& value) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Rating.onChangeEvent");
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(stod(value)));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    RatingModel::GetInstance()->SetOnChangeEvent(std::move(onChangeEvent));
+}
+
 void JSRating::Create(const JSCallbackInfo& info)
 {
-    double rating = 0;
+    double rating = RATING_SCORE_DEFAULT;
     bool indicator = false;
+    JSRef<JSVal> changeEventVal;
     if (info.Length() >= 1 && info[0]->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
         auto getRating = paramObject->GetProperty("rating");
         auto getIndicator = paramObject->GetProperty("indicator");
         if (getRating->IsNumber()) {
             rating = getRating->ToNumber<double>();
+        } else if (getRating->IsObject()) {
+            JSRef<JSObject> ratingObj = JSRef<JSObject>::Cast(getRating);
+            changeEventVal = ratingObj->GetProperty("changeEvent");
+            auto ratingValue = ratingObj->GetProperty("value");
+            if (ratingValue->IsNumber()) {
+                rating = ratingValue->ToNumber<double>();
+            }
         } else {
             LOGE("create rating fail because the rating is not value");
         }
@@ -71,6 +98,9 @@ void JSRating::Create(const JSCallbackInfo& info)
         }
     }
     RatingModel::GetInstance()->Create(rating, indicator);
+    if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
+        ParseRatingObject(info, changeEventVal);
+    }
 }
 
 void JSRating::SetStars(const JSCallbackInfo& info)
@@ -185,7 +215,6 @@ void JSRating::JSBind(BindingTarget globalObj)
     JSClass<JSRating>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSRating>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSRating>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
-    JSClass<JSRating>::Inherit<JSViewAbstract>();
-    JSClass<JSRating>::Bind<>(globalObj);
+    JSClass<JSRating>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

@@ -42,6 +42,8 @@ public:
     void SetOnSeeked(VideoEventFunc&& onSeeked) override;
     void SetOnUpdate(VideoEventFunc&& onUpdate) override;
     void SetOnFullScreenChange(VideoEventFunc&& onFullScreenChange) override;
+private:
+    void AddDragFrameNodeToManager() const;
 };
 
 } // namespace OHOS::Ace::NG

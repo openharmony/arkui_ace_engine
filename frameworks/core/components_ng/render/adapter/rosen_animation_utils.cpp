@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,11 +45,11 @@ private:
     friend AnimationUtils;
 };
 
-void AnimationUtils::OpenImplicitAnimation(
-    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& wrapFinishCallback)
+void AnimationUtils::OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
+    const std::function<void()>& finishCallback)
 {
     const auto& timingProtocol = OptionToTimingProtocol(option);
-    Rosen::RSNode::OpenImplicitAnimation(timingProtocol, NativeCurveHelper::ToNativeCurve(curve), wrapFinishCallback);
+    Rosen::RSNode::OpenImplicitAnimation(timingProtocol, NativeCurveHelper::ToNativeCurve(curve), finishCallback);
 }
 
 bool AnimationUtils::CloseImplicitAnimation()
@@ -58,12 +58,12 @@ bool AnimationUtils::CloseImplicitAnimation()
     return !animations.empty();
 }
 
-void AnimationUtils::Animate(
-    const AnimationOption& option, const PropertyCallback& callback, const FinishCallback& finishCallback)
+void AnimationUtils::Animate(const AnimationOption& option, const PropertyCallback& callback,
+    const FinishCallback& finishCallback, const RepeatCallback& repeatCallback)
 {
     const auto& timingProtocol = OptionToTimingProtocol(option);
     Rosen::RSNode::Animate(
-        timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()), callback, finishCallback);
+        timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()), callback, finishCallback, repeatCallback);
 }
 
 void AnimationUtils::AnimateWithCurrentOptions(
@@ -75,8 +75,8 @@ void AnimationUtils::AnimateWithCurrentOptions(
 void AnimationUtils::AnimateWithCurrentCallback(const AnimationOption& option, const PropertyCallback& callback)
 {
     const auto& timingProtocol = OptionToTimingProtocol(option);
-    Rosen::RSNode::AnimateWithCurrentCallback(timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()),
-        callback);
+    Rosen::RSNode::AnimateWithCurrentCallback(
+        timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()), callback);
 }
 
 void AnimationUtils::AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback)
@@ -89,14 +89,14 @@ void AnimationUtils::AddKeyFrame(float fraction, const PropertyCallback& callbac
     Rosen::RSNode::AddKeyFrame(fraction, callback);
 }
 
-std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(
-    const AnimationOption& option, const PropertyCallback& callback, const FinishCallback& finishCallback)
+std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(const AnimationOption& option,
+    const PropertyCallback& callback, const FinishCallback& finishCallback, const RepeatCallback& repeatCallback)
 {
     std::shared_ptr<AnimationUtils::Animation> animation = std::make_shared<AnimationUtils::Animation>();
     CHECK_NULL_RETURN(animation, nullptr);
     const auto& timingProtocol = OptionToTimingProtocol(option);
     animation->animations_ = Rosen::RSNode::Animate(
-        timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()), callback, finishCallback);
+        timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()), callback, finishCallback, repeatCallback);
     if (animation->animations_.size()) {
         return animation;
     } else {
@@ -108,10 +108,23 @@ void AnimationUtils::StopAnimation(const std::shared_ptr<AnimationUtils::Animati
 {
     CHECK_NULL_VOID(animation);
     if (animation->animations_.size()) {
-        for (auto& ani: animation->animations_) {
+        for (auto& ani : animation->animations_) {
             ani->Finish();
         }
         animation->animations_.clear();
     }
+}
+
+bool AnimationUtils::IsRunning(const std::shared_ptr<AnimationUtils::Animation>& animation)
+{
+    CHECK_NULL_RETURN(animation, false);
+    if (animation->animations_.size()) {
+        for (auto& ani : animation->animations_) {
+            if (ani->IsRunning()) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 } // namespace OHOS::Ace

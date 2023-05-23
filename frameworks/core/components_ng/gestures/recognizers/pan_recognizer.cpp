@@ -45,6 +45,7 @@ PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) :
     double distance = LessNotEqual(distanceNumber, 0.0) ? DEFAULT_PAN_DISTANCE : distanceNumber;
     distance_ = context->NormalizeToPx(Dimension(distance, DimensionUnit::VP));
     fingers_ = fingersNumber <= DEFAULT_PAN_FINGER ? DEFAULT_PAN_FINGER : fingersNumber;
+    fingers_ = fingers_ > MAX_PAN_FINGERS ? DEFAULT_PAN_FINGER : fingers_;
 
     if (directNum >= PanDirection::NONE && directNum <= PanDirection::ALL) {
         direction_.type = directNum;
@@ -375,6 +376,8 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
     if (callback && *callback) {
         GestureEvent info;
         info.SetTimeStamp(time_);
+        UpdateFingerListInfo(coordinateOffset_);
+        info.SetFingerList(fingerList_);
         info.SetOffsetX(averageDistance_.GetX());
         info.SetOffsetY(averageDistance_.GetY());
         TouchEvent touchPoint = {};

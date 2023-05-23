@@ -22,6 +22,7 @@
 #include "core/components/form/sub_container.h"
 #include "core/components_ng/pattern/form/form_event_hub.h"
 #include "core/components_ng/pattern/form/form_layout_property.h"
+#include "core/components_ng/pattern/form/form_theme.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -53,7 +54,11 @@ void ShowPointEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 30000;
 } // namespace
 
-FormPattern::FormPattern() = default;
+FormPattern::FormPattern()
+{
+    ACE_SCOPED_TRACE("FormCreate");
+}
+
 FormPattern::~FormPattern() = default;
 
 void FormPattern::OnAttachToFrameNode()
@@ -90,6 +95,53 @@ void FormPattern::OnAttachToFrameNode()
     });
 }
 
+void FormPattern::HandleUnTrustForm()
+{
+    LOGI("HandleUnTrustForm start.");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (externalRenderContext_) {
+        auto renderContext = DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
+        CHECK_NULL_VOID(renderContext);
+        LOGI("HandleUnTrustForm removeChild.");
+        renderContext->RemoveChild(externalRenderContext_);
+    }
+
+    isUnTrust_ = true;
+    UpdateBackgroundColorWhenUnTrustForm();
+    auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
+    layoutProperty->UpdateVisibility(visible);
+    isLoaded_ = true;
+
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    auto parent = host->GetParent();
+    CHECK_NULL_VOID(parent);
+    parent->MarkNeedSyncRenderTree();
+    parent->RebuildRenderContextTree();
+    host->GetRenderContext()->RequestNextFrame();
+    LOGI("HandleUnTrustForm end.");
+}
+
+void FormPattern::UpdateBackgroundColorWhenUnTrustForm()
+{
+    if (!isUnTrust_) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto formTheme = pipelineContext->GetTheme<FormTheme>();
+    CHECK_NULL_VOID(formTheme);
+    Color unTrustBackgroundColor = formTheme->GetUnTrustBackgroundColor();
+    LOGI("UpdateBackgroundColor: %{public}s when isUnTrust.",
+        unTrustBackgroundColor.ColorToString().c_str());
+    host->GetRenderContext()->UpdateBackgroundColor(unTrustBackgroundColor);
+}
+
 void FormPattern::OnRebuildFrame()
 {
     auto host = GetHost();
@@ -99,12 +151,18 @@ void FormPattern::OnRebuildFrame()
     renderContext->AddChild(externalRenderContext_, 0);
 }
 
+void FormPattern::OnVisibleChange(bool isVisible)
+{
+    isVisible_ = isVisible;
+}
+
 bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
 
+    UpdateBackgroundColorWhenUnTrustForm();
     auto size = dirty->GetGeometryNode()->GetFrameSize();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -150,6 +208,10 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
                 subContainer_->UpdateRootElementSize();
                 subContainer_->UpdateSurfaceSizeWithAnimathion();
             }
+        }
+        if (isLoaded_) {
+            auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
+            layoutProperty->UpdateVisibility(visible);
         }
         return false;
     }
@@ -289,6 +351,7 @@ void FormPattern::InitFormManagerDelegate()
             layoutProperty->UpdateVisibility(visible);
             formComponent->isLoaded_ = true;
 
+            formComponent->SetIsUnTrust(false);
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
             auto parent = host->GetParent();
             CHECK_NULL_VOID(parent);
@@ -306,6 +369,7 @@ void FormPattern::InitFormManagerDelegate()
         externalRenderContext->SetBounds(0, 0, width, height);
         auto host = formComponent->GetHost();
         CHECK_NULL_VOID(host);
+        formComponent->SetIsUnTrust(false);
         host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         auto parent = host->GetParent();
         CHECK_NULL_VOID(parent);
@@ -321,6 +385,15 @@ void FormPattern::InitFormManagerDelegate()
             auto formPattern = weak.Upgrade();
             CHECK_NULL_VOID(formPattern);
             formPattern->OnActionEvent(action);
+    });
+
+    formManagerBridge_->AddUnTrustFormCallback(
+        [weak = WeakClaim(this), instanceID]() {
+            ContainerScope scope(instanceID);
+            LOGI("HandleUnTrustForm");
+            auto formPattern = weak.Upgrade();
+            CHECK_NULL_VOID(formPattern);
+            formPattern->HandleUnTrustForm();
     });
 }
 
@@ -491,6 +564,7 @@ void FormPattern::FireOnLoadEvent() const
 void FormPattern::OnLoadEvent()
 {
     LOGI("OnLoadEvent");
+    ACE_FUNCTION_TRACE();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto uiTaskExecutor = SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
@@ -549,6 +623,18 @@ void FormPattern::DispatchPointerEvent(
 {
     if (!pointerEvent || !formManagerBridge_) {
         LOGE("Func: %{public}s, pointerEvent or formManagerBridge is null", __func__);
+        return;
+    }
+
+    if (!isVisible_) {
+        LOGW("The form is invisible, stop to dispatch pointEvent");
+        auto pointerAction = pointerEvent->GetPointerAction();
+        if (pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_UP ||
+            pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP ||
+            pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW) {
+            // still dispatch 'up' event to finish this pointer event
+            formManagerBridge_->DispatchPointerEvent(pointerEvent);
+        }
         return;
     }
 

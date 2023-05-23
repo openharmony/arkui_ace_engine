@@ -21,6 +21,9 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+#ifdef WEB_SUPPORTED
+#include "core/components_ng/pattern/web/web_pattern.h"
+#endif
 namespace OHOS::Ace::NG {
 
 void FullScreenManager::RequestFullScreen(const RefPtr<FrameNode>& frameNode)
@@ -34,6 +37,7 @@ void FullScreenManager::RequestFullScreen(const RefPtr<FrameNode>& frameNode)
         return;
     }
     frameNode->MountToParent(rootNode);
+    CHECK_NULL_VOID(parentNode);
     auto slot = parentNode->RemoveChildAndReturnIndex(frameNode);
     auto resultForParent = originalParent_.try_emplace(nodeId, parentNode, slot);
     if (!resultForParent.second) {
@@ -100,15 +104,24 @@ bool FullScreenManager::OnBackPressed()
     auto child = rootNode->GetLastChild();
     auto frameNode = AceType::DynamicCast<FrameNode>(child);
     CHECK_NULL_RETURN(frameNode, false);
-    if (frameNode->GetTag() != V2::VIDEO_ETS_TAG) {
-        return false;
-    }
 
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_RETURN(pattern, false);
-    auto videoPattern = AceType::DynamicCast<VideoPattern>(pattern);
-    CHECK_NULL_RETURN(videoPattern, false);
-    return videoPattern->OnBackPressed();
+    if (frameNode->GetTag() == V2::VIDEO_ETS_TAG) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_RETURN(pattern, false);
+        auto videoPattern = AceType::DynamicCast<VideoPattern>(pattern);
+        CHECK_NULL_RETURN(videoPattern, false);
+        return videoPattern->OnBackPressed();
+    }
+#ifdef WEB_SUPPORTED
+    if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_RETURN(pattern, false);
+        auto webPattern = AceType::DynamicCast<WebPattern>(pattern);
+        CHECK_NULL_RETURN(webPattern, false);
+        return webPattern->OnBackPressed();
+    }
+#endif
+    return false;
 }
 
 } // namespace OHOS::Ace::NG

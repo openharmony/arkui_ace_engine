@@ -31,13 +31,14 @@ constexpr uint8_t DISABLED_ALPHA = 102;
 
 CanvasDrawFunction DatePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
     auto dividerColor = theme->GetDividerColor();
 
     auto dividerSpacing = pipeline->NormalizeToPx(theme->GetDividerSpacing());
-    auto geometryNode = paintWrapper->GetGeometryNode();
+    const auto& geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, nullptr);
     auto frameRect = geometryNode->GetFrameRect();
     return [weak = WeakClaim(this), dividerLineWidth = DIVIDER_LINE_WIDTH, frameRect, dividerSpacing, dividerColor,
@@ -62,10 +63,10 @@ CanvasDrawFunction DatePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
 
 void DatePickerPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& frameRect)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<PickerTheme>();
-    float gradientHeight = static_cast<float>(pipeline->NormalizeToPx(theme->GetGradientHeight()));
+    auto gradientHeight = static_cast<float>(pipeline->NormalizeToPx(theme->GetGradientHeight()));
     if (NearZero(gradientHeight)) {
         return;
     }
@@ -79,8 +80,7 @@ void DatePickerPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& frameRe
     RSPoint topEndPoint;
     topEndPoint.SetX(0.0f);
     topEndPoint.SetY(frameRect.Height());
-    auto backDecoration = theme->GetPopupDecoration(false);
-    Color endColor = backDecoration ? backDecoration->GetBackgroundColor() : Color::WHITE;
+    Color endColor = backgroundColor_;
     Color middleColor = endColor.ChangeAlpha(0);
     std::vector<float> topPos { 0.0f, gradientHeight / frameRect.Bottom(),
         (frameRect.Bottom() - gradientHeight) / frameRect.Bottom(), 1.0f };

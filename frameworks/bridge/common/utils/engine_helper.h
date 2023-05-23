@@ -26,8 +26,8 @@
 #include "bridge/js_frontend/frontend_delegate.h"
 
 namespace OHOS::Ace {
-
 class ContainerScope;
+
 class ACE_FORCE_EXPORT_WITH_PREVIEW ScopedDelegate final {
 public:
     ScopedDelegate(Framework::FrontendDelegate* delegate, int32_t id);
@@ -65,14 +65,15 @@ public:
 
     static ScopedDelegate GetCurrentDelegate();
 
-private:
-    static std::unordered_map<int32_t, WeakPtr<Framework::JsEngine>> engineWeakMap_;
+    static std::pair<int32_t, int32_t> GetPositionOnJsCode();
 
+private:
+    static std::pair<int32_t, int32_t> StringToPair(const std::string& match);
+
+    static std::unordered_map<int32_t, WeakPtr<Framework::JsEngine>> engineWeakMap_;
     static std::shared_mutex mutex_;
 
     ACE_DISALLOW_COPY_AND_MOVE(EngineHelper);
 };
-
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_UTILS_ENGINE_HELPER_H

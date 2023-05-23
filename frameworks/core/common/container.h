@@ -32,6 +32,7 @@
 #include "core/common/platform_res_register.h"
 #include "core/common/settings.h"
 #include "core/common/window.h"
+#include "core/components_ng/base/distributed_ui.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -307,6 +308,26 @@ public:
     virtual void NotifyConfigurationChange(bool) {}
     virtual void HotReload() {}
 
+    void SetIsModule(bool isModule)
+    {
+        isModule_ = isModule;
+    }
+
+    bool IsModule() const
+    {
+        return isModule_;
+    }
+
+    void SetDistributedUI(std::shared_ptr<NG::DistributedUI>& distributedUI)
+    {
+        distributedUI_ = distributedUI;
+    }
+
+    std::shared_ptr<NG::DistributedUI>& GetDistributedUI()
+    {
+        return distributedUI_;
+    }
+
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
     bool firstUpdateData_ = true;
@@ -323,6 +344,8 @@ private:
     bool usePartialUpdate_ = false;
     Settings settings_;
     RefPtr<PageUrlChecker> pageUrlChecker_;
+    bool isModule_ = false;
+    std::shared_ptr<NG::DistributedUI> distributedUI_;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
 

@@ -25,12 +25,9 @@ class ComponentSnapshot {
 public:
     using JsCallback = std::function<void(std::shared_ptr<Media::PixelMap>, int32_t)>;
 
-    explicit ComponentSnapshot(const std::string& componentId);
-    explicit ComponentSnapshot(RefPtr<FrameNode> node) : node_(std::move(node)) {}
+    static void Get(const std::string& componentId, JsCallback&& callback);
+    static void Create(const RefPtr<AceType>& customNode, JsCallback&& callback);
 
-    void Get(JsCallback&& callback);
-
-    static void ProcessOfflineNode(const RefPtr<FrameNode>& node);
 private:
     static std::shared_ptr<Rosen::RSNode> GetRsNode(const RefPtr<FrameNode>& node);
 

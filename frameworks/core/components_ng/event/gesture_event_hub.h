@@ -350,17 +350,17 @@ public:
             dragEventActuator_->SetThumbnailCallback(std::move(callback));
         }
     }
+
+    bool GetTextDraggable() const
+    {
+        return textDraggable_;
+    }
+
+    void SetTextDraggable(bool draggable)
+    {
+        textDraggable_ = draggable;
+    }
 #endif // ENABLE_DRAG_FRAMEWORK
-
-    bool GetTextFieldDraggable() const
-    {
-        return textFieldDraggable_;
-    }
-
-    void SetTextFieldDraggable(bool draggable)
-    {
-        textFieldDraggable_ = draggable;
-    }
 
     void SetPixelMap(RefPtr<PixelMap> pixelMap)
     {
@@ -371,6 +371,7 @@ public:
     {
         return pixelMap_;
     }
+
 #ifdef ENABLE_DRAG_FRAMEWORK
     int32_t SetDragData(std::shared_ptr<UDMF::UnifiedData>& unifiedData, std::string& udKey);
     OnDragCallback GetDragCallback();
@@ -380,6 +381,8 @@ public:
     void HandleOnDragUpdate(const GestureEvent& info);
     void HandleOnDragEnd(const GestureEvent& info);
     void HandleOnDragCancel();
+
+    void StartDragTaskForWeb();
 
     void OnModifyDone();
     bool KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr<NG::FrameNode>& node);
@@ -422,8 +425,12 @@ private:
     bool isResponseRegion_ = false;
     std::vector<DimensionRect> responseRegion_;
     bool touchable_ = true;
-    bool textFieldDraggable_ = false;
     RefPtr<PixelMap> pixelMap_;
+    GestureEvent gestureInfoForWeb_;
+
+#ifdef ENABLE_DRAG_FRAMEWORK
+    bool textDraggable_ = false;
+#endif
 };
 
 } // namespace OHOS::Ace::NG

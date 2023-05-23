@@ -18,7 +18,13 @@
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_style.h"
 #include "include/core/SkMaskFilter.h"
+#include "core/components/common/properties/paint_state.h"
+#ifndef NEW_SKIA
 #include "include/effects/SkBlurImageFilter.h"
+#else
+#include "include/core/SkColorFilter.h"
+#include "include/effects/SkImageFilters.h"
+#endif
 #include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkPngEncoder.h"
 #include "include/encode/SkWebpEncoder.h"
@@ -28,10 +34,14 @@
 #include "base/i18n/localization.h"
 #include "base/image/pixel_map.h"
 #include "base/utils/utils.h"
+#ifndef NEW_SKIA
 #include "core/components/common/painter/flutter_decoration_painter.h"
+#endif
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/font/constants_converter.h"
+#ifndef NEW_SKIA
 #include "core/components/font/flutter_font_collection.h"
+#endif
 #include "core/components/font/rosen_font_collection.h"
 
 namespace OHOS::Ace::NG {
@@ -87,336 +97,8 @@ OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(
     skCanvas_ = std::make_unique<SkCanvas>(canvasCache_);
     cacheCanvas_ = std::make_unique<SkCanvas>(cacheBitmap_);
 
-    InitFilterFunc();
+    imageShadow_ = std::make_unique<Shadow>();
     InitImageCallbacks();
-}
-
-void OffscreenCanvasPaintMethod::InitFilterFunc()
-{
-    filterFunc_["grayscale"] = [&](const std::string& percentage) {
-        SetGrayFilter(percentage);
-    };
-    filterFunc_["sepia"] = [&](const std::string& percentage) {
-        SetSepiaFilter(percentage);
-    };
-    filterFunc_["invert"] = [&](const std::string& percentage) {
-        SetInvertFilter(percentage);
-    };
-    filterFunc_["opacity"] = [&](const std::string& percentage) {
-        SetOpacityFilter(percentage);
-    };
-    filterFunc_["brightness"] = [&](const std::string& percentage) {
-        SetBrightnessFilter(percentage);
-    };
-    filterFunc_["contrast"] = [&](const std::string& percentage) {
-        SetContrastFilter(percentage);
-    };
-    filterFunc_["blur"] = [&](const std::string& percentage) {
-        SetBlurFilter(percentage);
-    };
-    filterFunc_["drop-shadow"] = [&](const std::string& percentage) {
-        SetDropShadowFilter(percentage);
-    };
-    filterFunc_["saturate"] = [&](const std::string& percentage) {
-        SetSaturateFilter(percentage);
-    };
-    filterFunc_["hue-rotate"] = [&](const std::string& percentage) {
-        SetHueRotateFilter(percentage);
-    };
-}
-
-void OffscreenCanvasPaintMethod::SetGrayFilter(const std::string& percent)
-{
-    std::string percentage = percent;
-    bool hasPercent = IsPercentStr(percentage);
-    float percentNum = 0.0f;
-    std::istringstream iss(percentage);
-    iss >> percentNum;
-    if (hasPercent) {
-        percentNum = percentNum / 100;
-    }
-    if (percentNum > 1) {
-        percentNum = 1;
-    }
-    float otherColor = percentNum / 3;
-    float primColor = 1 - 2 * otherColor;
-    float matrix[20] = { 0 };
-    matrix[0] = matrix[6] = matrix[12] = primColor;
-    matrix[1] = matrix[2] = matrix[5] = matrix[7] = matrix[10] = matrix[11] = otherColor;
-    matrix[18] = 1.0f;
-    SetColorFilter(matrix);
-}
-
-void OffscreenCanvasPaintMethod::SetSepiaFilter(const std::string& percent)
-{
-    std::string percentage = percent;
-    bool hasPercent = IsPercentStr(percentage);
-    float percentNum = 0.0f;
-    std::istringstream iss(percentage);
-    iss >> percentNum;
-    if (hasPercent) {
-        percentNum = percentNum / 100;
-    }
-    if (percentNum > 1) {
-        percentNum = 1;
-    }
-    float matrix[20] = { 0 };
-    matrix[0] = 1.0f - percentNum * 0.6412f;
-    matrix[1] = percentNum * 0.7044f;
-    matrix[2] = percentNum * 0.1368f;
-    matrix[5] = percentNum * 0.2990f;
-    matrix[6] = 1.0f - percentNum * 0.4130f;
-    matrix[7] = percentNum * 0.1140f;
-    matrix[10] = percentNum * 0.2392f;
-    matrix[11] = percentNum * 0.4696f;
-    matrix[12] = 1.0f - percentNum * 0.9088f;
-    matrix[18] = 1.0f;
-    SetColorFilter(matrix);
-}
-
-void OffscreenCanvasPaintMethod::SetInvertFilter(const std::string& filterParam)
-{
-    std::string percent = filterParam;
-    bool hasPercent = IsPercentStr(percent);
-    float percentage = 0.0f;
-    std::istringstream iss(percent);
-    iss >> percentage;
-    if (hasPercent) {
-        percentage = percentage / 100;
-    }
-
-    float matrix[20] = { 0 };
-    matrix[0] = matrix[6] = matrix[12] = 1.0 - 2.0 * percentage;
-    matrix[4] = matrix[9] = matrix[14] = percentage;
-    matrix[18] = 1.0f;
-    SetColorFilter(matrix);
-}
-
-void OffscreenCanvasPaintMethod::SetOpacityFilter(const std::string& filterParam)
-{
-    std::string percent = filterParam;
-    bool hasPercent = IsPercentStr(percent);
-    float percentage = 0.0f;
-    std::istringstream iss(percent);
-    iss >> percentage;
-    if (hasPercent) {
-        percentage = percentage / 100;
-    }
-
-    float matrix[20] = { 0 };
-    matrix[0] = matrix[6] = matrix[12] = 1.0f;
-    matrix[18] = percentage;
-    SetColorFilter(matrix);
-}
-
-void OffscreenCanvasPaintMethod::SetBrightnessFilter(const std::string& percent)
-{
-    std::string perStr = percent;
-    bool hasPercent = IsPercentStr(perStr);
-    float percentage = 0.0f;
-    std::istringstream iss(perStr);
-    iss >> percentage;
-    if (hasPercent) {
-        percentage = percentage / 100;
-    }
-
-    if (percentage < 0) {
-        return;
-    }
-    float matrix[20] = { 0 };
-    matrix[0] = matrix[6] = matrix[12] = percentage;
-    matrix[18] = 1.0f;
-    SetColorFilter(matrix);
-}
-
-void OffscreenCanvasPaintMethod::SetContrastFilter(const std::string& percent)
-{
-    std::string perStr = percent;
-    float percentage = 0.0f;
-    bool hasPercent = IsPercentStr(perStr);
-    std::istringstream iss(perStr);
-    iss >> percentage;
-    if (hasPercent) {
-        percentage = percentage / 100;
-    }
-
-    float matrix[20] = { 0 };
-    matrix[0] = matrix[6] = matrix[12] = percentage;
-    matrix[4] = matrix[9] = matrix[14] = 0.5f * (1 - percentage);
-    matrix[18] = 1;
-    SetColorFilter(matrix);
-}
-
-void OffscreenCanvasPaintMethod::SetBlurFilter(const std::string& percent)
-{
-    imagePaint_.setImageFilter(SkBlurImageFilter::Make(BlurStrToDouble(percent), BlurStrToDouble(percent), nullptr));
-}
-
-void OffscreenCanvasPaintMethod::SetDropShadowFilter(const std::string& percent)
-{
-    std::vector<std::string> offsets;
-    StringUtils::StringSplitter(percent, ' ', offsets);
-    if (offsets.empty() || offsets.size() != 4) {
-        return;
-    }
-    imageShadow_.SetOffsetX(PxStrToDouble(offsets[0]));
-    imageShadow_.SetOffsetY(PxStrToDouble(offsets[1]));
-    imageShadow_.SetBlurRadius(PxStrToDouble(offsets[2]));
-    imageShadow_.SetColor(Color::FromString(offsets[3]));
-}
-
-void OffscreenCanvasPaintMethod::SetSaturateFilter(const std::string& filterParam)
-{
-    std::string percent = filterParam;
-    bool hasPercent = IsPercentStr(percent);
-    float percentage = 0.0f;
-    std::istringstream iss(percent);
-    iss >> percentage;
-    if (hasPercent) {
-        percentage = percentage / 100;
-    }
-    double N = percentage;
-    float matrix[20] = { 0 };
-    matrix[0] = 0.3086f * (1 - N) + N;
-    matrix[1] = matrix[11] = 0.6094f * (1 - N);
-    matrix[2] = matrix[7] = 0.0820f * (1 - N);
-    matrix[5] = matrix[10] = 0.3086f * (1 - N);
-    matrix[6] = 0.6094f * (1 - N) + N;
-    matrix[12] = 0.0820f * (1 - N) + N;
-    matrix[18] = 1.0f;
-    SetColorFilter(matrix);
-}
-
-void OffscreenCanvasPaintMethod::SetHueRotateFilter(const std::string& filterParam)
-{
-    std::string percent = filterParam;
-    float degree = 0.0f;
-    if (percent.find("deg") != std::string::npos) {
-        size_t index = percent.find("deg");
-        percent = percent.substr(0, index);
-        std::istringstream iss(percent);
-        iss >> degree;
-    }
-    if (percent.find("turn") != std::string::npos) {
-        size_t index = percent.find("turn");
-        percent = percent.substr(0, index);
-        std::istringstream iss(percent);
-        iss >> degree;
-        degree = degree * 360;
-    }
-    if (percent.find("rad") != std::string::npos) {
-        size_t index = percent.find("rad");
-        percent = percent.substr(0, index);
-        std::istringstream iss(percent);
-        iss >> degree;
-        degree = degree * 180 / 3.142f;
-    }
-
-    while (GreatOrEqual(degree, 360)) {
-        degree -= 360;
-    }
-
-    float matrix[20] = { 0 };
-    int32_t type = degree / 120;
-    float N = (degree - 120 * type) / 120;
-    switch (type) {
-        case 0:
-            // degree is in 0-120
-            matrix[0] = matrix[6] = matrix[12] = 1 - N;
-            matrix[2] = matrix[5] = matrix[11] = N;
-            matrix[18] = 1.0f;
-            break;
-        case 1:
-            // degree is in 120-240
-            matrix[1] = matrix[7] = matrix[10] = N;
-            matrix[2] = matrix[5] = matrix[11] = 1 - N;
-            matrix[18] = 1.0f;
-            break;
-        case 2:
-            // degree is in 240-360
-            matrix[0] = matrix[6] = matrix[11] = N;
-            matrix[1] = matrix[7] = matrix[10] = 1 - N;
-            matrix[18] = 1.0f;
-            break;
-        default:
-            break;
-    }
-    SetColorFilter(matrix);
-}
-
-void OffscreenCanvasPaintMethod::SetColorFilter(float matrix[20])
-{
-#ifdef USE_SYSTEM_SKIA
-    matrix[4] *= 255;
-    matrix[9] *= 255;
-    matrix[14] *= 255;
-    matrix[19] *= 255;
-    imagePaint_.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
-#else
-    imagePaint_.setColorFilter(SkColorFilters::Matrix(matrix));
-#endif
-}
-
-bool OffscreenCanvasPaintMethod::GetFilterType(std::string& filterType, std::string& filterParam)
-{
-    std::string paramData = filterParam_;
-    size_t index = paramData.find("(");
-    if (index == std::string::npos) {
-        return false;
-    }
-    filterType = paramData.substr(0, index);
-    filterParam = paramData.substr(index + 1);
-    size_t endeIndex = filterParam.find(")");
-    if (endeIndex  == std::string::npos) {
-        return false;
-    }
-    filterParam.erase(endeIndex, 1);
-    return true;
-}
-
-bool OffscreenCanvasPaintMethod::IsPercentStr(std::string& percent)
-{
-    if (percent.find("%") != std::string::npos) {
-        size_t index = percent.find("%");
-        percent = percent.substr(0, index);
-        return true;
-    }
-    return false;
-}
-
-double OffscreenCanvasPaintMethod::PxStrToDouble(const std::string& str)
-{
-    double ret = 0;
-    size_t index = str.find("px");
-    if (index != std::string::npos) {
-        std::string result = str.substr(0, index);
-        std::istringstream iss(result);
-        iss >> ret;
-    }
-    return ret;
-}
-
-double OffscreenCanvasPaintMethod::BlurStrToDouble(const std::string& str)
-{
-    double ret = 0;
-    size_t index = str.find("px");
-    size_t index1 = str.find("rem");
-    size_t demIndex = std::string::npos;
-    if (index != std::string::npos) {
-        demIndex = index;
-    }
-    if (index1 != std::string::npos) {
-        demIndex = index1;
-    }
-    if (demIndex != std::string::npos) {
-        std::string result = str.substr(0, demIndex);
-        std::istringstream iss(result);
-        iss >> ret;
-    }
-    if (str.find("rem") != std::string::npos) {
-        return ret * 15;
-    }
-    return ret;
 }
 
 void OffscreenCanvasPaintMethod::ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj)
@@ -452,12 +134,16 @@ void OffscreenCanvasPaintMethod::DrawImage(
     InitPaintBlend(cachePaint_);
     const auto skCanvas =
         globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
-    InitImagePaint();
+#ifndef NEW_SKIA
+    InitImagePaint(imagePaint_);
+#else
+    InitImagePaint(imagePaint_, sampleOptions_);
+#endif
     if (HasImageShadow()) {
         SkRect skRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
         SkPath path;
         path.addRect(skRect);
-        FlutterDecorationPainter::PaintShadow(path, imageShadow_, skCanvas);
+        RosenDecorationPainter::PaintShadow(path, *imageShadow_, skCanvas);
     }
     switch (canvasImage.flag) {
         case 0:
@@ -465,7 +151,11 @@ void OffscreenCanvasPaintMethod::DrawImage(
             break;
         case 1: {
             SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+#ifndef NEW_SKIA
             skCanvas->drawImageRect(image, rect, &imagePaint_);
+#else
+            skCanvas->drawImageRect(image, rect, sampleOptions_, &imagePaint_);
+#endif
             break;
         }
         case 2: {
@@ -473,14 +163,23 @@ void OffscreenCanvasPaintMethod::DrawImage(
                 SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
             SkRect srcRect =
                 SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
+#ifndef NEW_SKIA
             skCanvas->drawImageRect(image, srcRect, dstRect, &imagePaint_);
+#else
+            skCanvas->drawImageRect(
+                image, srcRect, dstRect, sampleOptions_, &imagePaint_, SkCanvas::kFast_SrcRectConstraint);
+#endif
             break;
         }
         default:
             break;
     }
     if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
+#ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+#else
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, sampleOptions_, &cachePaint_);
+#endif
         cacheBitmap_.eraseColor(0);
     }
 }
@@ -500,14 +199,22 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
     InitPaintBlend(cachePaint_);
     const auto skCanvas =
         globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
-    InitImagePaint();
+#ifndef NEW_SKIA
+    InitImagePaint(imagePaint_);
+#else
+    InitImagePaint(imagePaint_, sampleOptions_);
+#endif
     switch (canvasImage.flag) {
         case 0:
             skCanvas->drawImage(image, canvasImage.dx, canvasImage.dy);
             break;
         case 1: {
             SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+#ifndef NEW_SKIA
             skCanvas->drawImageRect(image, rect, &imagePaint_);
+#else
+            skCanvas->drawImageRect(image, rect, sampleOptions_, &imagePaint_);
+#endif
             break;
         }
         case 2: {
@@ -515,44 +222,24 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
                 SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
             SkRect srcRect =
                 SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
+#ifndef NEW_SKIA
             skCanvas->drawImageRect(image, srcRect, dstRect, &imagePaint_);
+#else
+            skCanvas->drawImageRect(
+                image, srcRect, dstRect, sampleOptions_, &imagePaint_, SkCanvas::kFast_SrcRectConstraint);
+#endif
             break;
         }
         default:
             break;
     }
     if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
+#ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
-        cacheBitmap_.eraseColor(0);
-    }
-}
-
-bool OffscreenCanvasPaintMethod::HasImageShadow() const
-{
-    return !(NearZero(imageShadow_.GetOffset().GetX()) && NearZero(imageShadow_.GetOffset().GetY()) &&
-         NearZero(imageShadow_.GetBlurRadius()));
-}
-
-void OffscreenCanvasPaintMethod::SetPaintImage()
-{
-    float matrix[20] = {0};
-    matrix[0] = matrix[6] = matrix[12] = matrix[18] = 1.0f;
-#ifdef USE_SYSTEM_SKIA
-    imagePaint_.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
 #else
-    imagePaint_.setColorFilter(SkColorFilters::Matrix(matrix));
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, sampleOptions_, &cachePaint_);
 #endif
-
-    imagePaint_.setMaskFilter(SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 0));
-    imagePaint_.setImageFilter(SkBlurImageFilter::Make(0, 0, nullptr));
-
-    SetDropShadowFilter("0px 0px 0px black");
-    std::string filterType, filterParam;
-    if (!GetFilterType(filterType, filterParam)) {
-        return;
-    }
-    if (filterFunc_.find(filterType) != filterFunc_.end()) {
-        filterFunc_[filterType](filterParam);
+        cacheBitmap_.eraseColor(0);
     }
 }
 
@@ -577,7 +264,7 @@ std::unique_ptr<Ace::ImageData> OffscreenCanvasPaintMethod::GetImageData(
     SkBitmap tempCache;
     tempCache.allocPixels(imageInfo);
     SkCanvas tempCanvas(tempCache);
-#ifdef USE_SYSTEM_SKIA_S
+#if defined(USE_SYSTEM_SKIA_S) || defined (NEW_SKIA)
     tempCanvas.drawImageRect(
         canvasCache_.asImage(), srcRect, dstRect, SkSamplingOptions(), nullptr, SkCanvas::kFast_SrcRectConstraint);
 #else
@@ -629,7 +316,7 @@ double OffscreenCanvasPaintMethod::MeasureText(const std::string& text, const Pa
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
     style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
-    auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, 0.0);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
@@ -648,7 +335,7 @@ double OffscreenCanvasPaintMethod::MeasureTextHeight(const std::string& text, co
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
     style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
-    auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, 0.0);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
@@ -668,7 +355,7 @@ TextMetrics OffscreenCanvasPaintMethod::MeasureTextMetrics(const std::string& te
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
     style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
-    auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, textMetrics);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
@@ -752,11 +439,9 @@ bool OffscreenCanvasPaintMethod::UpdateOffParagraph(const std::string& text, boo
     } else {
         style.text_align = ConvertTxtTextAlign(fillState_.GetTextAlign());
     }
-    if (fillState_.GetOffTextDirection() == TextDirection::RTL) {
-        style.text_direction = txt::TextDirection::rtl;
-    }
+    style.text_direction = ConvertTxtTextDirection(fillState_.GetOffTextDirection());
     style.text_align = GetEffectiveAlign(style.text_align, style.text_direction);
-    auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, false);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
@@ -765,7 +450,11 @@ bool OffscreenCanvasPaintMethod::UpdateOffParagraph(const std::string& text, boo
         txtShadow.color = shadow_.GetColor().GetValue();
         txtShadow.offset.fX = shadow_.GetOffset().GetX();
         txtShadow.offset.fY = shadow_.GetOffset().GetY();
+#ifndef NEW_SKIA
         txtShadow.blur_radius = shadow_.GetBlurRadius();
+#else
+        txtShadow.blur_sigma = shadow_.GetBlurRadius();
+#endif
         txtStyle.text_shadows.emplace_back(txtShadow);
     }
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
@@ -783,8 +472,14 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::T
         txtStyle.color = ConvertSkColor(fillState_.GetColor());
         txtStyle.font_size = fillState_.GetTextStyle().GetFontSize().Value();
         ConvertTxtStyle(fillState_.GetTextStyle(), context_, txtStyle);
-        if (fillState_.GetGradient().IsValid()) {
+        if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
             SkPaint paint;
+#ifndef NEW_SKIA
+            InitImagePaint(paint);
+#else
+            SkSamplingOptions options;
+            InitImagePaint(paint, options);
+#endif
             paint.setStyle(SkPaint::Style::kFill_Style);
             UpdatePaintShader(OffsetF(0, 0), paint, fillState_.GetGradient());
             txtStyle.foreground = paint;
@@ -796,6 +491,12 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::T
                 txtStyle.foreground.setAlphaf(globalState_.GetAlpha()); // set alpha after color
             } else {
                 SkPaint paint;
+#ifndef NEW_SKIA
+                InitImagePaint(paint);
+#else
+                SkSamplingOptions options;
+                InitImagePaint(paint, options);
+#endif
                 paint.setColor(fillState_.GetColor().GetValue());
                 paint.setAlphaf(globalState_.GetAlpha()); // set alpha after color
                 txtStyle.foreground = paint;
@@ -804,16 +505,22 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::T
         }
     } else {
         // use foreground to draw stroke
-        SkPaint paint = GetStrokePaint();
+        SkPaint paint;
+#ifndef NEW_SKIA
+        GetStrokePaint(paint);
+#else
+        SkSamplingOptions options;
+        GetStrokePaint(paint, options);
+#endif
         ConvertTxtStyle(strokeState_.GetTextStyle(), context_, txtStyle);
         txtStyle.font_size = strokeState_.GetTextStyle().GetFontSize().Value();
-        if (strokeState_.GetGradient().IsValid()) {
+        if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
             UpdatePaintShader(OffsetF(0, 0), paint, strokeState_.GetGradient());
         }
         if (hasShadow) {
             paint.setColor(shadow_.GetColor().GetValue());
             paint.setMaskFilter(SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle,
-                FlutterDecorationPainter::ConvertRadiusToSigma(shadow_.GetBlurRadius())));
+                NG::SkiaDecorationPainter::ConvertRadiusToSigma(shadow_.GetBlurRadius())));
         }
         txtStyle.foreground = paint;
         txtStyle.has_foreground = true;
@@ -822,7 +529,7 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::T
 
 void OffscreenCanvasPaintMethod::PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas)
 {
-    FlutterDecorationPainter::PaintShadow(path, shadow, canvas);
+    RosenDecorationPainter::PaintShadow(path, shadow, canvas);
 }
 
 void OffscreenCanvasPaintMethod::Path2DRect(const OffsetF& offset, const PathArgs& args)
@@ -840,7 +547,7 @@ void OffscreenCanvasPaintMethod::SetTransform(const TransformParam& param)
     CHECK_NULL_VOID(context);
     double viewScale = context->GetViewScale();
     SkMatrix skMatrix;
-    skMatrix.setAll(param.scaleX * viewScale, param.skewY * viewScale, param.translateX, param.skewX * viewScale,
+    skMatrix.setAll(param.scaleX * viewScale, param.skewX * viewScale, param.translateX, param.skewY * viewScale,
         param.scaleY * viewScale, param.translateY, 0, 0, 1);
     skCanvas_->setMatrix(skMatrix);
 }
@@ -858,7 +565,7 @@ std::string OffscreenCanvasPaintMethod::ToDataURL(const std::string& type, const
     double viewScale = context->GetViewScale();
     tempCanvas.clear(SK_ColorTRANSPARENT);
     tempCanvas.scale(1.0 / viewScale, 1.0 / viewScale);
-#ifdef USE_SYSTEM_SKIA_S
+#if defined(USE_SYSTEM_SKIA_S) || defined (NEW_SKIA)
     //The return value of the dual framework interface has no alpha
     tempCanvas.drawImage(canvasCache_.asImage(), 0.0f, 0.0f);
 #else

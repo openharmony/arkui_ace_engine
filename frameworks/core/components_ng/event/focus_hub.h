@@ -66,6 +66,8 @@ enum class FocusStyleType : int32_t {
     OUTER_BORDER = 1,
     CUSTOM_BORDER = 2,
     CUSTOM_REGION = 3,
+    MATCH_ACTIVE = 4,
+    MATCH_ACTIVE_CUSTOM_REGION = 5,
 };
 
 class ACE_EXPORT FocusPaintParam : public virtual AceType {
@@ -307,6 +309,15 @@ public:
         isDefaultGroupFocus_ = isDefaultGroupFocus;
     }
 
+    WeakPtr<FocusHub> GetDefaultFocusNode() const
+    {
+        return defaultFocusNode_;
+    }
+    void SetDefaultFocusNode(const WeakPtr<FocusHub>& node)
+    {
+        defaultFocusNode_ = node;
+    }
+
     std::optional<bool> IsFocusOnTouch() const
     {
         return isFocusOnTouch_;
@@ -339,6 +350,8 @@ private:
     OnBlurFunc onBlurCallback_;
     OnKeyCallbackFunc onKeyEventCallback_;
     GestureEventFunc onClickEventCallback_;
+
+    WeakPtr<FocusHub> defaultFocusNode_;
 
     std::optional<bool> isFocusOnTouch_;
     bool isDefaultFocus_ = { false };
@@ -498,6 +511,8 @@ public:
     }
     void SetParentFocusable(bool parentFocusable)
     {
+        LOGD("Set node: %{public}s/%{public}d parentFocusable from %{public}d to %{public}d", GetFrameName().c_str(),
+            GetFrameId(), parentFocusable_, parentFocusable);
         parentFocusable_ = parentFocusable;
     }
 
@@ -647,24 +662,24 @@ public:
     {
         return focusCallbackEvents_ ? focusCallbackEvents_->IsDefaultFocus() : false;
     }
-    void SetIsDefaultFocus(bool isDefaultFocus)
-    {
-        if (!focusCallbackEvents_) {
-            focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
-        }
-        focusCallbackEvents_->SetIsDefaultFocus(isDefaultFocus);
-    }
+    void SetIsDefaultFocus(bool isDefaultFocus);
 
     bool IsDefaultGroupFocus() const
     {
         return focusCallbackEvents_ ? focusCallbackEvents_->IsDefaultGroupFocus() : false;
     }
-    void SetIsDefaultGroupFocus(bool isDefaultGroupFocus)
+    void SetIsDefaultGroupFocus(bool isDefaultGroupFocus);
+
+    WeakPtr<FocusHub> GetDefaultFocusNode() const
+    {
+        return focusCallbackEvents_ ? focusCallbackEvents_->GetDefaultFocusNode() : nullptr;
+    }
+    void SetDefaultFocusNode(const WeakPtr<FocusHub>& node)
     {
         if (!focusCallbackEvents_) {
             focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
         }
-        focusCallbackEvents_->SetIsDefaultGroupFocus(isDefaultGroupFocus);
+        focusCallbackEvents_->SetDefaultFocusNode(node);
     }
 
     std::optional<bool> IsFocusOnTouch() const
@@ -699,11 +714,11 @@ public:
 
     std::optional<std::string> GetInspectorKey() const;
 
-    void PaintFocusState();
-    void PaintAllFocusState();
-    void ClearFocusState();
+    bool PaintFocusState(bool isNeedStateStyles = true);
+    bool PaintAllFocusState();
+    bool PaintInnerFocusState(const RoundRect& paintRect);
+    void ClearFocusState(bool isNeedStateStyles = true);
     void ClearAllFocusState();
-    void PaintInnerFocusState(const RoundRect& paintRect);
 
     void SetInnerFocusPaintRectCallback(const std::function<void(RoundRect&)>& callback)
     {
@@ -755,6 +770,8 @@ private:
     void SetScopeFocusAlgorithm();
 
     void CheckFocusStateStyle(bool onFocus);
+
+    bool IsNeedPaintFocusState();
 
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;

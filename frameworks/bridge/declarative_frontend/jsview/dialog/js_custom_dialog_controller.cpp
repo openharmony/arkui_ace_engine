@@ -24,7 +24,6 @@
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<CustomDialogControllerModel> CustomDialogControllerModel::instance_ = nullptr;
@@ -51,7 +50,6 @@ CustomDialogControllerModel* CustomDialogControllerModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 namespace {
-constexpr uint32_t DELAY_TIME_FOR_STACK = 100;
 const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, DialogAlignment::CENTER,
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
     DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
@@ -100,8 +98,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
                 ACE_SCORING_EVENT("onCancel");
                 func->Execute();
             };
-            CustomDialogControllerModel::GetInstance()->setOnCancel(
-                std::move(instance->dialogProperties_.onCancel), std::move(onCancel));
+            instance->dialogProperties_.onCancel = onCancel;
         }
 
         // Parses autoCancel.
@@ -192,194 +189,6 @@ void JSCustomDialogController::DestructorCallback(JSCustomDialogController* cont
     }
 }
 
-void JSCustomDialogController::NotifyDialogOperation(DialogOperation operation)
-{
-    LOGI("JSCustomDialogController(NotifyDialogOperation) operation: %{public}d", operation);
-    if (operation == DialogOperation::DIALOG_OPEN) {
-        isShown_ = true;
-        pending_ = false;
-        for (auto iter = dialogOperation_.begin(); iter != dialogOperation_.end();) {
-            if (*iter == DialogOperation::DIALOG_OPEN) {
-                dialogOperation_.erase(iter++);
-                continue;
-            }
-
-            if (*iter == DialogOperation::DIALOG_CLOSE) {
-                dialogOperation_.erase(iter);
-                CloseDialog();
-                break;
-            }
-        }
-    } else if (operation == DialogOperation::DIALOG_CLOSE) {
-        isShown_ = false;
-        pending_ = false;
-        for (auto iter = dialogOperation_.begin(); iter != dialogOperation_.end();) {
-            if (*iter == DialogOperation::DIALOG_CLOSE) {
-                dialogOperation_.erase(iter++);
-                continue;
-            }
-
-            if (*iter == DialogOperation::DIALOG_OPEN) {
-                dialogOperation_.erase(iter);
-                ShowDialog();
-                break;
-            }
-        }
-    }
-}
-
-void JSCustomDialogController::ShowDialog()
-{
-    LOGI("JSCustomDialogController(ShowDialog)");
-    RefPtr<Container> container;
-    auto current = Container::Current();
-    if (!current) {
-        LOGE("Container is null.");
-        return;
-    }
-    if (current->IsSubContainer()) {
-        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
-        container = AceEngine::Get().GetContainer(parentContainerId);
-    } else {
-        container = std::move(current);
-    }
-    if (!container) {
-        LOGE("Container is null.");
-        return;
-    }
-    auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-    if (!context) {
-        LOGE("JSCustomDialogController No Context");
-        return;
-    }
-    dialogProperties_.customComponent = customDialog_;
-    EventMarker cancelMarker([cancelCallback = jsCancelFunction_]() {
-        if (cancelCallback) {
-            ACE_SCORING_EVENT("CustomDialog.cancel");
-            cancelCallback->Execute();
-        }
-    });
-    dialogProperties_.callbacks.try_emplace("cancel", cancelMarker);
-    dialogProperties_.onStatusChanged = [this](bool isShown) {
-        if (!isShown) {
-            this->isShown_ = isShown;
-        }
-    };
-
-    auto executor = context->GetTaskExecutor();
-    if (!executor) {
-        LOGE("JSCustomDialogController(ShowDialog) No Executor. Cannot post task.");
-        return;
-    }
-
-    if (pending_) {
-        LOGI("JSCustomDialogController(ShowDialog) current state is pending.");
-        dialogOperation_.emplace_back(DialogOperation::DIALOG_OPEN);
-        return;
-    }
-
-    if (isShown_) {
-        LOGI("JSCustomDialogController(ShowDialog) CustomDialog has already shown.");
-        return;
-    }
-
-    pending_ = true;
-    auto task = [context, dialogProperties = dialogProperties_, this]() mutable {
-        if (context) {
-            this->dialogComponent_ = AceType::DynamicCast<DialogComponent>(context->ShowDialog(dialogProperties, false, "CustomDialog"));
-        } else {
-            LOGE("JSCustomDialogController(ShowDialog) context is null.");
-        }
-        this->NotifyDialogOperation(DialogOperation::DIALOG_OPEN);
-    };
-    auto stack = context->GetLastStack();
-    auto result = false;
-    if (stack) {
-        result = executor->PostTask(task, TaskExecutor::TaskType::UI);
-    } else {
-        LOGE("JSCustomDialogController(ShowDialog) stack is null, post delay task.");
-        result = executor->PostDelayedTask(task, TaskExecutor::TaskType::UI, DELAY_TIME_FOR_STACK);
-    }
-    if (!result) {
-        LOGW("JSCustomDialogController(ShowDialog) fail to post task, reset pending status");
-        pending_ = false;
-    }
-}
-
-void JSCustomDialogController::CloseDialog()
-{
-    LOGI("JSCustomDialogController(CloseDialog)");
-    RefPtr<Container> container;
-    auto current = Container::Current();
-    if (!current) {
-        LOGE("Container is null.");
-        return;
-    }
-    if (current->IsSubContainer()) {
-        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
-        container = AceEngine::Get().GetContainer(parentContainerId);
-    } else {
-        container = std::move(current);
-    }
-    if (!container) {
-        LOGE("Container is null.");
-        return;
-    }
-    auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-    if (!context) {
-        LOGE("JSCustomDialogController No Context");
-        return;
-    }
-    const auto& lastStack = context->GetLastStack();
-    if (!lastStack) {
-        LOGE("JSCustomDialogController No Stack!");
-        return;
-    }
-    auto executor = context->GetTaskExecutor();
-    if (!executor) {
-        LOGE("JSCustomDialogController(CloseDialog) No Executor. Cannot post task.");
-        return;
-    }
-
-    if (pending_) {
-        LOGI("JSCustomDialogController(CloseDialog) current state is pending.");
-        dialogOperation_.emplace_back(DialogOperation::DIALOG_CLOSE);
-        return;
-    }
-
-    pending_ = true;
-    auto task = [lastStack, dialogComponent = dialogComponent_, this]() {
-        if (!lastStack || !dialogComponent) {
-            LOGI("JSCustomDialogController(CloseDialog) stack or dialog is null.");
-            this->NotifyDialogOperation(DialogOperation::DIALOG_CLOSE);
-            return;
-        }
-        auto animator = AceType::DynamicCast<DialogComponent>(dialogComponent)->GetAnimator();
-        auto dialogId = AceType::DynamicCast<DialogComponent>(dialogComponent)->GetDialogId();
-        if (animator) {
-            if (!AceType::DynamicCast<DialogComponent>(dialogComponent)->HasStopListenerAdded()) {
-                animator->AddStopListener([lastStack, dialogId] {
-                    if (lastStack) {
-                        lastStack->PopDialog(dialogId);
-                    }
-                });
-                AceType::DynamicCast<DialogComponent>(dialogComponent)->SetHasStopListenerAdded(true);
-            }
-            animator->Play();
-        } else {
-            lastStack->PopDialog(dialogId);
-        }
-        this->NotifyDialogOperation(DialogOperation::DIALOG_CLOSE);
-    };
-    auto result = executor->PostTask(task, TaskExecutor::TaskType::UI);
-    if (!result) {
-        LOGW("JSCustomDialogController(CloseDialog) fail to post task, reset pending status");
-        pending_ = false;
-    }
-
-    dialogComponent_ = nullptr;
-}
-
 void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
 {
     LOGI("JSCustomDialogController(JsOpenDialog)");
@@ -394,43 +203,22 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
         return;
     }
 
-    std::function<void(RefPtr<AceType>& dialogComponent)> task;
-    std::function<void()> cancelTask;
-    auto aceType = CustomDialogControllerModel::GetInstance()->SetOpenDialog();
-
-    if (customDialog_) {
-        customDialog_ = nullptr;
-    }
-
-    {
-        ACE_SCORING_EVENT("CustomDialog.builder");
-        jsBuilderFunction_->Execute();
-    }
-    customDialog_ = ViewStackProcessor::GetInstance()->Finish();
-
-    if (customDialog_) {
-        LOGE("Builder does not generate view.");
-        dialogProperties_.customComponent = customDialog_;
-        cancelTask = ([cancelCallback = jsCancelFunction_]() {
-            if (cancelCallback) {
-                ACE_SCORING_EVENT("CustomDialog.cancel");
-                cancelCallback->Execute();
-            }
-        });
-        task = [dialogProperties = dialogProperties_, this](RefPtr<AceType>& dialogComponent) mutable {
-            this->dialogComponent_ = dialogComponent;
-            this->NotifyDialogOperation(DialogOperation::DIALOG_OPEN);
-        };
-    }
-
-    dialogProperties_.onStatusChanged = [this](bool isShown) {
-        if (!isShown) {
-            this->isShown_ = isShown;
+    auto buildFunc = [buildfunc = jsBuilderFunction_]() {
+        {
+            ACE_SCORING_EVENT("CustomDialog.builder");
+            buildfunc->Execute();
         }
     };
 
-    CustomDialogControllerModel::GetInstance()->SetOpenDialog(
-        dialogProperties_, dialogs_, std::move(task), pending_, aceType, std::move(cancelTask));
+    auto cancelTask = ([cancelCallback = jsCancelFunction_]() {
+        if (cancelCallback) {
+            ACE_SCORING_EVENT("CustomDialog.cancel");
+            cancelCallback->Execute();
+        }
+    });
+
+    CustomDialogControllerModel::GetInstance()->SetOpenDialog(dialogProperties_, dialogs_, pending_, isShown_,
+        std::move(cancelTask), buildFunc, dialogComponent_, customDialog_, dialogOperation_);
     return;
 }
 
@@ -444,15 +232,15 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
         return;
     }
 
-    if (pending_) {
-        LOGI("JSCustomDialogController(CloseDialog) current state is pending.");
-        dialogOperation_.emplace_back(DialogOperation::DIALOG_CLOSE);
-        return;
-    }
+    auto cancelTask = ([cancelCallback = jsCancelFunction_]() {
+        if (cancelCallback) {
+            ACE_SCORING_EVENT("CustomDialog.cancel");
+            cancelCallback->Execute();
+        }
+    });
 
-    auto task = [this]() { this->NotifyDialogOperation(DialogOperation::DIALOG_CLOSE); };
-    CustomDialogControllerModel::GetInstance()->SetCloseDialog(
-        dialogProperties_, dialogs_, pending_, task, dialogComponent_);
+    CustomDialogControllerModel::GetInstance()->SetCloseDialog(dialogProperties_, dialogs_, pending_, isShown_,
+        std::move(cancelTask), dialogComponent_, customDialog_, dialogOperation_);
 }
 
 bool JSCustomDialogController::ParseAnimation(

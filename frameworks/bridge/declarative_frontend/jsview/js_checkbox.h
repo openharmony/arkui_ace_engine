@@ -20,7 +20,6 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
-
 class JSCheckbox : public JSViewAbstract {
 public:
     static void JSBind(BindingTarget globalObj);
@@ -36,7 +35,11 @@ public:
     static void SelectedColor(const JSCallbackInfo& info);
     static void UnSelectedColor(const JSCallbackInfo& info);
     static void Mark(const JSCallbackInfo& info);
+    static bool GetOldPadding(const JSCallbackInfo& info, NG::PaddingPropertyF& padding);
+    static NG::PaddingProperty GetNewPadding(const JSCallbackInfo& info);
+    static NG::PaddingProperty GetPadding(const std::optional<CalcDimension>& top,
+        const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
+        const std::optional<CalcDimension>& right);
 };
-
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CHECKBOX_H

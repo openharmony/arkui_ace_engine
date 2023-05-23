@@ -15,6 +15,11 @@
 
 #include "core/components_ng/pattern/image/image_paint_method.h"
 
+#include "core/components/text/text_theme.h"
+#include "core/components_ng/pattern/image/image_modifier.h"
+#include "core/components_ng/render/image_painter.h"
+#include "core/pipeline_ng/pipeline_context.h"
+
 namespace {
 constexpr unsigned int TOP_LEFT = 0;
 constexpr unsigned int TOP_RIGHT = 1;
@@ -23,6 +28,21 @@ constexpr unsigned int BOTTOM_RIGHT = 3;
 } // namespace
 
 namespace OHOS::Ace::NG {
+namespace {
+void NormalizeRadius(BorderRadiusArray& radius, const SizeF& size)
+{
+    // radius shouldn't be larger than half of image size
+    for (auto&& corner : radius) {
+        if (corner.GetX() > size.Width() / 2) {
+            corner.SetX(size.Width() / 2);
+        }
+        if (corner.GetY() > size.Height() / 2) {
+            corner.SetY(size.Height() / 2);
+        }
+    }
+}
+} // namespace
+
 void ImagePaintMethod::UpdateBorderRadius(PaintWrapper* paintWrapper)
 {
     auto renderCtx = paintWrapper->GetRenderContext();
@@ -60,8 +80,28 @@ void ImagePaintMethod::UpdateBorderRadius(PaintWrapper* paintWrapper)
             radiusXY[BOTTOM_RIGHT].SetY(radiusXY[BOTTOM_RIGHT].GetY() - diff);
         }
     }
+
+    NormalizeRadius(radiusXY, paintWrapper->GetContentSize());
     auto&& config = canvasImage_->GetPaintConfig();
-    config.borderRadiusXY_ = std::make_shared<BorderRadiusArray>(std::move(radiusXY));
+    config.borderRadiusXY_ = std::make_shared<BorderRadiusArray>(radiusXY);
+}
+
+RefPtr<Modifier> ImagePaintMethod::GetContentModifier(PaintWrapper* paintWrapper)
+{
+    return imageModifier_;
+}
+
+void ImagePaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
+{
+    auto props = DynamicCast<ImageRenderProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(props);
+    UpdatePaintConfig(props, paintWrapper);
+    auto contentSize = paintWrapper->GetContentSize();
+    auto offset = paintWrapper->GetContentOffset();
+    auto canvasImage = WeakClaim(RawPtr(canvasImage_));
+    imageModifier_->UpdateImageData(canvasImage, offset, contentSize);
+    imageModifier_->SetImageFit(props->GetImageFit().value_or(ImageFit::COVER));
+    imageModifier_->Modify();
 }
 
 void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& renderProps, PaintWrapper* paintWrapper)
@@ -88,18 +128,29 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
     }
 }
 
-CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
+CanvasDrawFunction ImagePaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)
 {
-    CHECK_NULL_RETURN(canvasImage_, nullptr);
-    auto offset = paintWrapper->GetContentOffset();
-    auto contentSize = paintWrapper->GetContentSize();
+    // draw selected mask effect
+    CHECK_NULL_RETURN_NOLOG(selected_, {});
 
-    // update render props to ImagePaintConfig
-    auto props = DynamicCast<ImageRenderProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_RETURN(props, nullptr);
-    UpdatePaintConfig(props, paintWrapper);
-    ImagePainter imagePainter(canvasImage_);
-    return
-        [imagePainter, offset, contentSize](RSCanvas& canvas) { imagePainter.DrawImage(canvas, offset, contentSize); };
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, {});
+    auto theme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, {});
+    auto selectedColor = theme->GetSelectedColor();
+    return [selectedColor, size = paintWrapper->GetContentSize(), offset = paintWrapper->GetContentOffset()](
+               RSCanvas& canvas) {
+        canvas.Save();
+        RSBrush brush;
+        brush.SetAntiAlias(true);
+        brush.SetColor(selectedColor.GetValue());
+        canvas.AttachBrush(brush);
+
+        canvas.DrawRect(
+            RSRect(offset.GetX(), offset.GetY(), offset.GetX() + size.Width(), offset.GetY() + size.Height()));
+
+        canvas.DetachBrush();
+        canvas.Restore();
+    };
 }
 } // namespace OHOS::Ace::NG

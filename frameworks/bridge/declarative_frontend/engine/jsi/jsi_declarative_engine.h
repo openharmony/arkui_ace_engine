@@ -229,9 +229,15 @@ public:
 
     // Load and initialize a JS bundle into the JS Framework
     void LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) override;
-    bool LoadJsWithModule(const std::string& urlName,
+#if !defined(PREVIEW)
+    bool IsModule();
+
+    void LoadJsWithModule(std::string& urlName,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
 
+    void LoadPluginJsWithModule(std::string& urlName);
+
+#endif
     // Load the app.js file of the FA model in NG structure..
     bool LoadFaAppSource() override;
 
@@ -303,6 +309,8 @@ public:
 
     std::string GetStacktraceMessage() override;
 
+    void GetStackTrace(std::string& trace) override;
+
     void SetLocalStorage(int32_t instanceId, NativeReference* storage) override;
 
     void SetContext(int32_t instanceId, NativeReference* context) override;
@@ -343,6 +351,16 @@ public:
         return renderContext_;
     }
 
+    void SetPluginBundleName(const std::string& pluginBundleName) override
+    {
+        pluginBundleName_ = pluginBundleName;
+    }
+
+    void SetPluginModuleName(const std::string& pluginModuleName) override
+    {
+        pluginModuleName_ = pluginModuleName;
+    }
+    
 #if defined(PREVIEW)
     void ReplaceJSContent(const std::string& url, const std::string componentName) override;
     RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID) override;
@@ -391,7 +409,8 @@ private:
     std::string moduleName_;
     bool isBundle_ = true;
 #endif
-
+    std::string pluginBundleName_;
+    std::string pluginModuleName_;
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngine);
 };
 

@@ -25,6 +25,9 @@
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
@@ -67,20 +70,31 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
         if (contentConstraint.selfIdealSize.Height() && !contentConstraint.selfIdealSize.Width()) {
             width_ = height_;
         }
+        if (contentConstraint.selfIdealSize.Height() && contentConstraint.selfIdealSize.Width()) {
+            width_ = std::min(width_, height_);
+            height_ = width_;
+        }
     }
     if (type_ == ProgressType::CAPSULE) {
         if (contentConstraint.selfIdealSize.Width() && !contentConstraint.selfIdealSize.Height()) {
-            height_ = DEFALT_CAPSULE_WIDTH.ConvertToPx();
+            height_ = GetChildHeight(layoutWrapper, width_);
         }
         if (!contentConstraint.selfIdealSize.Width() && contentConstraint.selfIdealSize.Height()) {
             width_ = DEFALT_CAPSULE_WIDTH.ConvertToPx();
         }
         if (!contentConstraint.selfIdealSize.Width() && !contentConstraint.selfIdealSize.Height()) {
-            height_ = DEFALT_CAPSULE_WIDTH.ConvertToPx();
+            height_ = GetChildHeight(layoutWrapper, width_);
         }
     }
     height_ = std::min(height_, static_cast<float>(contentConstraint.maxSize.Height()));
     width_ = std::min(width_, static_cast<float>(contentConstraint.maxSize.Width()));
+    if (type_ == ProgressType::LINEAR) {
+        if (width_ >= height_) {
+            height_ = std::min(height_, strokeWidth_);
+        } else {
+            width_ = std::min(width_, strokeWidth_);
+        }
+    }
     LOGD("ProgressLayoutAlgorithm::Type:%{public}d MeasureContent: width_: %{public}fl ,height_: %{public}fl", type_,
         width_, height_);
     return SizeF(width_, height_);
@@ -96,4 +110,31 @@ float ProgressLayoutAlgorithm::GetStrokeWidth() const
     return strokeWidth_;
 }
 
+float ProgressLayoutAlgorithm::GetChildHeight(LayoutWrapper* layoutWrapper, float width) const
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, DEFALT_CAPSULE_WIDTH.ConvertToPx());
+    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+    Dimension margin = progressTheme->GetTextMargin();
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_RETURN(childWrapper, DEFALT_CAPSULE_WIDTH.ConvertToPx());
+    auto layoutProperty = AceType::DynamicCast<ProgressLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, DEFALT_CAPSULE_WIDTH.ConvertToPx());
+
+    auto childLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(childLayoutProperty, DEFALT_CAPSULE_WIDTH.ConvertToPx());
+    auto childConstraint = layoutProperty->CreateChildConstraint();
+    childConstraint.maxSize.SetWidth(width);
+    childWrapper->Measure(childConstraint);
+    auto childSize = childWrapper->GetGeometryNode()->GetContentSize();
+    if (childSize.Width() > (width - 2 * margin.ConvertToPx())) {
+        CalcSize defaultCalcSize((CalcLength(width - 2 * margin.ConvertToPx())), std::nullopt);
+        childLayoutProperty->UpdateUserDefinedIdealSize(defaultCalcSize);
+    } else {
+        CalcSize defaultCalcSize((CalcLength(childSize.Width())), std::nullopt);
+        childLayoutProperty->UpdateUserDefinedIdealSize(defaultCalcSize);
+    }
+    float childHeight = childSize.Height() + 2 * margin.ConvertToPx();
+    return childHeight;
+}
 } // namespace OHOS::Ace::NG

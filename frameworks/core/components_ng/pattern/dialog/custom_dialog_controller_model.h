@@ -18,8 +18,8 @@
 
 #include <mutex>
 
-#include "core/components/dialog/dialog_component.h"
-
+#include "core/common/ace_engine.h"
+#include "core/common/container.h"
 namespace OHOS::Ace {
 enum class DialogOperation {
     DIALOG_OPEN = 0,
@@ -31,16 +31,14 @@ public:
     static CustomDialogControllerModel* GetInstance();
     virtual ~CustomDialogControllerModel() = default;
 
-    virtual RefPtr<AceType> SetOpenDialog()
-    {
-        return nullptr;
-    };
     virtual void SetOpenDialog(DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs,
-        std::function<void(RefPtr<AceType>&)>&& task, bool& pending, RefPtr<AceType>& overlayManager,
-        std::function<void()>&& cancelTask) = 0;
+        bool& pending, bool& isShown, std::function<void()>&& cancelTask, std::function<void()>&& buildFunc,
+        RefPtr<AceType>& dialogComponent, RefPtr<AceType>& customDialog,
+        std::list<DialogOperation>& dialogOperation) = 0;
     virtual void SetCloseDialog(DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs,
-        bool& pending, std::function<void()>&& task, RefPtr<AceType>& dialogComponent) = 0;
-    virtual void setOnCancel(std::function<void()>&& event, std::function<void()>&& onCancel) {};
+        bool& pending, bool& isShown, std::function<void()>&& cancelTask, RefPtr<AceType>& dialogComponent,
+        RefPtr<AceType>& customDialog, std::list<DialogOperation>& dialogOperation) = 0;
+
 private:
     static std::unique_ptr<CustomDialogControllerModel> instance_;
     static std::mutex mutex_;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,10 +69,15 @@ extern const char THEME_PATTERN_TEXT_OVERLAY[];
 extern const char THEME_PATTERN_VIDEO[];
 extern const char THEME_PATTERN_INDEXER[];
 extern const char THEME_PATTERN_APP_BAR[];
+extern const char THEME_PATTERN_ADVANCED_PATTERN[];
+extern const char THEME_PATTERN_SECURITY_COMPONENT[];
+extern const char THEME_PATTERN_FORM[];
 
 // pattern general attributes
 extern const char PATTERN_FG_COLOR[];
 extern const char PATTERN_BG_COLOR[];
+extern const char PATTERN_UNDERLINE_ACTIVED_COLOR[];
+extern const char PATTERN_UNDERLINE_TYPING_COLOR[];
 extern const char PATTERN_BG_COLOR_HOVERED[];
 extern const char PATTERN_BG_COLOR_CLICKED[];
 extern const char PATTERN_BG_COLOR_PRESSED[];
@@ -85,9 +90,29 @@ extern const char PATTERN_TEXT_COLOR_ALPHA[];
 extern const char PATTERN_TEXT_COLOR_FOCUSED[];
 extern const char PATTERN_TEXT_COLOR_SELECTED[];
 extern const char PATTERN_TEXT_COLOR_DISABLED[];
+extern const char PATTERN_DISABLED_TEXT_COLOR[];
 extern const char PATTERN_TEXT_SIZE[];
 extern const char PATTERN_WIDTH[];
 extern const char PATTERN_HEIGHT[];
+
+// pattern attributes for calendar
+extern const char CALENDAR_WEEK_COLOR[];
+extern const char CALENDAR_DAY_COLOR[];
+extern const char CALENDAR_LUNAR_COLOR[];
+extern const char CALENDAR_WEEKEND_DAY_COLOR[];
+extern const char CALENDAR_WEEKEND_LUNAR_COLOR[];
+extern const char CALENDAR_TODAY_DAY_FOCUS_COLOR[];
+extern const char CALENDAR_TODAY_LUNAR_FOCUS_COLOR[];
+extern const char CALENDAR_TODAY_DAY_UNFOCUS_COLOR[];
+extern const char CALENDAR_TODAY_LUNAR_UNFOCUS_COLOR[];
+extern const char CALENDAR_WORK_MARK_COLOR[];
+extern const char CALENDAR_OFF_MARK_COLOR[];
+extern const char CALENDAR_NONCURRENT_MONTH_WORK_MARK_COLOR[];
+extern const char CALENDAR_NONCURRENT_MONTH_OFF_MARK_COLOR[];
+extern const char CALENDAR_NONCURRENT_MONTH_DAY_COLOR[];
+extern const char CALENDAR_NONCURRENT_MONTH_LUNAR_COLOR[];
+extern const char CALENDAR_FOCUS_AREA_BACKGROUND_COLOR[];
+extern const char CALENDAR_BLUR_AREA_BACKGROUND_COLOR[];
 
 // pattern attributes for checkable
 extern const char RADIO_WIDTH[];
@@ -150,5 +175,33 @@ extern const char BADGE_BORDER_WIDTH[];
 // swiper attributes
 extern const char INDICATOR_TEXT_FONT_SIZE[];
 extern const char INDICATOR_TEXT_FONT_COLOR[];
+
+// textinput attributes
+extern const char ERROR_TEXT_UNDERLINE_COLOR[];
+extern const char UNDERLINE_COLOR[];
+extern const char UNDERLINE_TEXT_COLOR[];
+extern const char BORDER_RADIUS_SIZE[];
+// swiper attributes for arrow
+extern const char ARROW_COLOR_BOARDCOLOR_HOVER[];
+extern const char ARROW_COLOR_BOARDCOLOR_CLICK[];
+extern const char ARROW_COLOR_PRIMARY[];
+extern const char ARROW_COLOR_PRIMARY_CONTRARY[];
+extern const char ARROW_DISABLED_ALPHA[];
+extern const char ARROW_HORIZONTAL_MARGIN[];
+extern const char ARROW_VERTICAL_MARGIN[];
+extern const char ARROW_COLOR_COMPONENT_NORMAL[];
+
+// pattern attributes for textfield
+extern const char PATTERN_FOCUS_BRODER_COLOR[];
+extern const char ERROR_UNDERLINE_COLOR[];
+extern const char ERROR_UNDERLINE_TEXT_COLOR[];
+extern const char ERROR_UNDERLINE_TEXT_SIZE[];
+extern const char ERROR_PASSWORD_CONTENT_COLOR[];
+extern const char ERROR_PASSWORD_INPUT_COLOR[];
+extern const char ERROR_PASSWORD_BORDER_COLOR[];
+extern const char ERROR_PASSWORD_TEXT_COLOR[];
+extern const char OVER_COUNT_TEXT_COLOR[];
+extern const char OVER_COUNT_TEXT_FONT_SIZE[];
+extern const char OVER_COUNT_BORDER_COLOR[];
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_ATTRIBUTES_H

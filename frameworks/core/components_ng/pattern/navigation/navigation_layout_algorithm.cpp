@@ -104,7 +104,7 @@ float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
         navBarWrapper->Layout();
         return geometryNode->GetFrameSize().Width();
     }
-    if ((navigationLayoutProperty->GetDestinationChange().value_or(false) ||
+    if (hostNode->GetIsModeChange() && (navigationLayoutProperty->GetDestinationChange().value_or(false) ||
             contentNode->FindChildNodeOfClass<NavDestinationGroupNode>()) &&
         navigationLayoutProperty->GetNavigationMode() == NavigationMode::STACK) {
         auto contentOffset = OffsetT<float>(-geometryNode->GetFrameSize().Width(), 0.0f);
@@ -223,8 +223,9 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             navigationMode_ = NavigationMode::STACK;
             navigationLayoutProperty->UpdateNavigationMode(navigationMode_);
         }
+    } else {
+        pattern->SetNavigationMode(navigationMode_);
     }
-    pattern->SetNavigationMode(navigationMode_);
 
     auto navBarSize = size;
     auto contentSize = size;
@@ -259,7 +260,7 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         contentSize.SetWidth(contentWidth);
         dividerSize.SetWidth(dividerWidth);
         dividerSize.SetHeight(size.Height());
-    } else {
+    } else if (hostNode->GetIsModeChange()) {
         if (navigationLayoutProperty->GetDestinationChange().value_or(false) ||
             contentNode->FindChildNodeOfClass<NavDestinationGroupNode>()) {
             navigationLayoutProperty->GetNavBarPositionValue(NavBarPosition::START) == NavBarPosition::END

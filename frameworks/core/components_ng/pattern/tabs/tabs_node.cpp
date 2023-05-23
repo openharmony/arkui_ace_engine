@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/tabs/tab_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -38,7 +39,7 @@ void TabsNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
     }
 
     swiperChildren_.emplace(child->GetId());
-    auto swiperNode = GetChildren().back();
+    auto swiperNode = GetTabs();
     if (swiperNode) {
         child->MountToParent(swiperNode);
     }
@@ -54,6 +55,7 @@ void TabsNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("barWidth", std::to_string(GetBarWidth().Value()).c_str());
     json->Put("barHeight", std::to_string(GetBarHeight().Value()).c_str());
     json->Put("fadingEdge", GetFadingEdge() ? "true" : "false");
+    json->Put("barBackgroundColor", GetBarBackgroundColor().ColorToString().c_str());
 }
 
 bool TabsNode::Scrollable() const
@@ -106,6 +108,11 @@ TabBarMode TabsNode::GetTabBarMode() const
 
 Dimension TabsNode::GetBarWidth() const
 {
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, 0.0_vp);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_RETURN(tabTheme, 0.0_vp);
+
     if (!tabBarId_.has_value()) {
         return 0.0_vp;
     }
@@ -113,11 +120,16 @@ Dimension TabsNode::GetBarWidth() const
     CHECK_NULL_RETURN(tabBarNode, 0.0_vp);
     auto tabBarProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_RETURN(tabBarProperty, 0.0_vp);
-    return tabBarProperty->GetTabBarWidth().value_or(0.0_vp);
+    return tabBarProperty->GetTabBarWidth().value_or(tabTheme->GetTabBarDefaultWidth());
 }
 
 Dimension TabsNode::GetBarHeight() const
 {
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, 0.0_vp);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_RETURN(tabTheme, 0.0_vp);
+
     if (!tabBarId_.has_value()) {
         return 0.0_vp;
     }
@@ -125,7 +137,20 @@ Dimension TabsNode::GetBarHeight() const
     CHECK_NULL_RETURN(tabBarNode, 0.0_vp);
     auto tabBarProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_RETURN(tabBarProperty, 0.0_vp);
-    return tabBarProperty->GetTabBarHeight().value_or(0.0_vp);
+    return tabBarProperty->GetTabBarHeight().value_or(tabTheme->GetTabBarDefaultHeight());
+}
+
+Color TabsNode::GetBarBackgroundColor() const
+{
+    auto backgroundColor = Color::BLACK.BlendOpacity(0.0f);
+    if (!tabBarId_.has_value()) {
+        return backgroundColor;
+    }
+    auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
+    CHECK_NULL_RETURN(tabBarNode, backgroundColor);
+    auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
+    CHECK_NULL_RETURN(tabBarPaintProperty, backgroundColor);
+    return tabBarPaintProperty->GetBarBackgroundColor().value_or(backgroundColor);
 }
 
 bool TabsNode::GetFadingEdge() const

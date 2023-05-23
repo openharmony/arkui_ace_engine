@@ -29,19 +29,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<TextClockModel> TextClockModel::instance_ = nullptr;
+std::mutex TextClockModel::mutex_;
 
 TextClockModel* TextClockModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::TextClockModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::TextClockModelNG());
-        } else {
-            instance_.reset(new Framework::TextClockModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::TextClockModelNG());
+            } else {
+                instance_.reset(new Framework::TextClockModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -116,8 +120,7 @@ void JSTextClock::JSBind(BindingTarget globalObj)
     JSClass<JSTextClock>::StaticMethod("fontStyle", &JSText::SetFontStyle, opt);
     JSClass<JSTextClock>::StaticMethod("fontWeight", &JSText::SetFontWeight, opt);
     JSClass<JSTextClock>::StaticMethod("fontFamily", &JSText::SetFontFamily, opt);
-    JSClass<JSTextClock>::Inherit<JSViewAbstract>();
-    JSClass<JSTextClock>::Bind<>(globalObj);
+    JSClass<JSTextClock>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSTextClock::SetFormat(const JSCallbackInfo& info)

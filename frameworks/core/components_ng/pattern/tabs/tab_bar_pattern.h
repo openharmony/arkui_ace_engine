@@ -173,6 +173,8 @@ public:
 
     void UpdateTextColor(int32_t indicator);
 
+    void UpdateImageColor(int32_t indicator);
+
     void UpdateSubTabBoard();
 
     SelectedMode GetSelectedMode() const;
@@ -211,6 +213,7 @@ public:
 
     void PlayTabBarTranslateAnimation(int32_t targetIndex);
     void StopTabBarTranslateAnimation();
+    void HandleBottomTabBarChange(int32_t index);
 
     bool GetChangeByClick() const
     {
@@ -248,6 +251,16 @@ public:
         }
     }
 
+    bool IsMaskAnimationByCreate()
+    {
+        return isMaskAnimationByCreate_;
+    }
+
+    void SetMaskAnimationByCreate(bool isMaskAnimationByCreate)
+    {
+        isMaskAnimationByCreate_ = isMaskAnimationByCreate;
+    }
+
     int32_t GetIndicator()
     {
         return indicator_;
@@ -277,6 +290,15 @@ private:
     void HandleClick(const GestureEvent& info);
     void HandleTouchEvent(const TouchLocationInfo& info);
     void HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& layoutProperty, int32_t index);
+    void HandleBottomTabBarClick(int32_t selectedIndex, int32_t unselectedIndex);
+    static void ChangeMask(const RefPtr<FrameNode>& host, float imageSize,
+        const OffsetF& originalSelectedMaskOffset, float opacity, float radiusRatio, bool isSelected);
+    void PlayMaskAnimation(float selectedImageSize, const OffsetF& originalSelectedMaskOffset, int32_t selectedIndex,
+        float unselectedImageSize, const OffsetF& originalUnselectedMaskOffset, int32_t unselectedIndex);
+    static void MaskAnimationFinish(const RefPtr<FrameNode>& host, int32_t selectedIndex, bool isSelected);
+    void GetBottomTabBarImageSizeAndOffset(const std::vector<int32_t>& selectedIndexes,
+        int32_t maskIndex, float& selectedImageSize, float& unselectedImageSize, OffsetF& originalSelectedMaskOffset,
+        OffsetF& originalUnselectedMaskOffset);
 
     void HandleTouchDown(int32_t index);
     void HandleTouchUp(int32_t index);
@@ -298,6 +320,7 @@ private:
     void SetEdgeEffect(const RefPtr<GestureEventHub>& gestureHub);
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect);
     bool IsOutOfBoundary();
+    void SetAccessibilityAction();
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -319,6 +342,7 @@ private:
 
     bool touching_ = false; // whether the item is in touching
     bool isHover_ = false;
+    bool isMaskAnimationByCreate_ = false;
     std::optional<int32_t> touchingIndex_;
     std::optional<int32_t> hoverIndex_;
     TabBarStyle tabBarStyle_;

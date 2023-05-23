@@ -23,19 +23,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<GridItemModel> GridItemModel::instance_ = nullptr;
+std::mutex GridItemModel::mutex_;
 
 GridItemModel* GridItemModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::GridItemModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::GridItemModelNG());
-        } else {
-            instance_.reset(new Framework::GridItemModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::GridItemModelNG());
+            } else {
+                instance_.reset(new Framework::GridItemModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -148,9 +152,7 @@ void JSGridItem::JSBind(BindingTarget globalObj)
     JSClass<JSGridItem>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSGridItem>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
-    JSClass<JSGridItem>::Inherit<JSContainerBase>();
-    JSClass<JSGridItem>::Inherit<JSViewAbstract>();
-    JSClass<JSGridItem>::Bind<>(globalObj);
+    JSClass<JSGridItem>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

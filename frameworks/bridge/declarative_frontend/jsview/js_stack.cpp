@@ -26,19 +26,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<StackModel> StackModel::instance_ = nullptr;
+std::mutex StackModel::mutex_;
 
 StackModel* StackModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::StackModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::StackModelNG());
-        } else {
-            instance_.reset(new Framework::StackModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::StackModelNG());
+            } else {
+                instance_.reset(new Framework::StackModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -226,9 +230,7 @@ void JSStack::JSBind(BindingTarget globalObj)
     JSClass<JSStack>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSStack>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSStack>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
-    JSClass<JSStack>::Inherit<JSContainerBase>();
-    JSClass<JSStack>::Inherit<JSViewAbstract>();
-    JSClass<JSStack>::Bind<>(globalObj);
+    JSClass<JSStack>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

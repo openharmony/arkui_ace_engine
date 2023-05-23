@@ -41,6 +41,7 @@ public:
 
     ProgressType GetType() const;
     float GetStrokeWidth() const;
+    float GetChildHeight(LayoutWrapper* layoutWrapper, float width) const;
 
 private:
     ProgressType type_ = ProgressType::LINEAR;

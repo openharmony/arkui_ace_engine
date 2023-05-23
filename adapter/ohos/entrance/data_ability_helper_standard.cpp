@@ -26,6 +26,7 @@
 
 namespace OHOS::Ace {
 namespace {
+const std::string MEDIA_SERVER_HEAD = "datashare:///media";
 
 #if !defined(PREVIEW)
 using ThumbnailNapiEntry = void* (*)(const char*, void*);
@@ -88,7 +89,7 @@ int32_t DataAbilityHelperStandard::OpenFile(const std::string& uriStr, const std
     if (!useStageModel_ || StringUtils::StartWith(uriStr, "dataability://")) {
         return OpenFileWithDataAbility(uriStr, mode);
     }
-    if (StringUtils::StartWith(uriStr, "datashare://")) {
+    if (StringUtils::StartWith(uriStr, "datashare://") || StringUtils::StartWith(uriStr, "file://")) {
         return OpenFileWithDataShare(uriStr, mode);
     }
     LOGE("DataAbilityHelperStandard::OpenFile uri is not support.");
@@ -114,7 +115,7 @@ int32_t DataAbilityHelperStandard::OpenFileWithDataShare(const std::string& uriS
 {
     auto context = runtimeContext_.lock();
     if (useStageModel_ && !dataShareHelper_ && context) {
-        dataShareHelper_ = DataShare::DataShareHelper::Creator(context->GetToken(), uriStr);
+        dataShareHelper_ = DataShare::DataShareHelper::Creator(context->GetToken(), MEDIA_SERVER_HEAD);
     }
 
     CHECK_NULL_RETURN(dataShareHelper_, -1);

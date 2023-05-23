@@ -16,15 +16,38 @@
 #include "bridge/declarative_frontend/jsview/js_menu.h"
 
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "core/components_ng/pattern/menu/menu_view.h"
+#include "bridge/declarative_frontend/jsview/models/menu_model_impl.h"
+#include "core/components_ng/pattern/menu/menu_model.h"
+#include "core/components_ng/pattern/menu/menu_model_ng.h"
+
+namespace OHOS::Ace {
+std::unique_ptr<MenuModel> MenuModel::instance_ = nullptr;
+std::mutex MenuModel::mutex_;
+
+MenuModel* MenuModel::GetInstance()
+{
+    if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
+#ifdef NG_BUILD
+            instance_.reset(new NG::MenuModelNG());
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::MenuModelNG());
+            } else {
+                instance_.reset(new Framework::MenuModelImpl());
+            }
+        }
+#endif
+    }
+    return instance_.get();
+}
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 void JSMenu::Create(const JSCallbackInfo& /* info */)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::MenuView::Create();
-        return;
-    }
+    MenuModel::GetInstance()->Create();
 }
 
 void JSMenu::FontSize(const JSCallbackInfo& info)
@@ -33,23 +56,16 @@ void JSMenu::FontSize(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::MenuView::SetFontSize(fontSize);
-        return;
-    }
+    MenuModel::GetInstance()->SetFontSize(fontSize);
 }
 
 void JSMenu::Font(const JSCallbackInfo& info)
 {
-    if (!Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
-
-    Dimension fontSize;
+    CalcDimension fontSize;
     std::string weight;
     if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGW("The argv is wrong, it is supposed to have at least 1 object argument");
@@ -69,15 +85,12 @@ void JSMenu::Font(const JSCallbackInfo& info)
             }
         }
     }
-    NG::MenuView::SetFontSize(fontSize);
-    NG::MenuView::SetFontWeight(ConvertStrToFontWeight(weight));
+    MenuModel::GetInstance()->SetFontSize(fontSize);
+    MenuModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight));
 }
 
 void JSMenu::FontColor(const JSCallbackInfo& info)
 {
-    if (!Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
     std::optional<Color> color = std::nullopt;
     if (info.Length() < 1) {
         LOGW("The argv is wrong, it is supposed to have at least 1 argument");
@@ -87,7 +100,7 @@ void JSMenu::FontColor(const JSCallbackInfo& info)
             color = textColor;
         }
     }
-    NG::MenuView::SetFontColor(color);
+    MenuModel::GetInstance()->SetFontColor(color);
 }
 
 void JSMenu::JSBind(BindingTarget globalObj)
@@ -95,11 +108,11 @@ void JSMenu::JSBind(BindingTarget globalObj)
     JSClass<JSMenu>::Declare("Menu");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSMenu>::StaticMethod("create", &JSMenu::Create, opt);
-
     JSClass<JSMenu>::StaticMethod("fontSize", &JSMenu::FontSize, opt);
     JSClass<JSMenu>::StaticMethod("font", &JSMenu::Font, opt);
     JSClass<JSMenu>::StaticMethod("fontColor", &JSMenu::FontColor, opt);
-    JSClass<JSMenu>::Inherit<JSViewAbstract>();
-    JSClass<JSMenu>::Bind(globalObj);
+    JSClass<JSMenu>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSMenu>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSMenu>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

@@ -114,6 +114,16 @@ SafeAreaEdgeInserts PipelineContext::GetCurrentViewSafeArea() const
 
 void PipelineContext::FlushBuild() {}
 
+void PipelineContext::FlushBuildFinishCallbacks()
+{
+    decltype(buildFinishCallbacks_) buildFinishCallbacks(std::move(buildFinishCallbacks_));
+    for (const auto& func : buildFinishCallbacks) {
+        if (func) {
+            func();
+        }
+    }
+}
+
 void PipelineContext::NotifyMemoryLevel(int32_t level) {}
 
 void PipelineContext::FlushMessages() {}
@@ -171,6 +181,8 @@ uint32_t PipelineContext::AddScheduleTask(const RefPtr<ScheduleTask>& task)
     return 0;
 }
 
+void PipelineContext::RemoveScheduleTask(uint32_t id) {}
+
 void PipelineContext::AddOnAreaChangeNode(int32_t nodeId) {}
 
 bool PipelineContext::OnKeyEvent(const KeyEvent& event)
@@ -209,7 +221,10 @@ const RefPtr<StageManager>& PipelineContext::GetStageManager()
     return stageManager_;
 }
 
-void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback) {}
+void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback)
+{
+    buildFinishCallbacks_.emplace_back(std::move(callback));
+}
 
 const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
 {
@@ -251,6 +266,24 @@ bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
 {
     return true;
 }
+
+void PipelineContext::RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo) {}
+
+std::unique_ptr<JsonValue> PipelineContext::GetStoredNodeInfo()
+{
+    return nullptr;
+}
+
+void PipelineContext::StoreNode(int32_t restoreId, const WeakPtr<FrameNode>& node) {}
+
+bool PipelineContext::GetRestoreInfo(int32_t restoreId, std::string& restoreInfo)
+{
+    return false;
+}
+
+void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode) {}
+
+void PipelineContext::ResetViewSafeArea() {}
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {

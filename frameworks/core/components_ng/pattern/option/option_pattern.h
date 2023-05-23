@@ -173,6 +173,7 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
 
     void OnSelectProcess();
+    void SetAccessibilityAction();
 
     std::optional<Color> bgColor_;
 

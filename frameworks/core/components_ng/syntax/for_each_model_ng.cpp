@@ -68,7 +68,9 @@ void ForEachModelNG::CreateNewChildStart(const std::string& id)
     auto* stack = NG::ViewStackProcessor::GetInstance();
     stack->PushKey(id);
     const auto stacksKey = stack->GetKey();
-    stack->Push(AceType::MakeRefPtr<SyntaxItem>(stacksKey));
+    auto node = AceType::MakeRefPtr<SyntaxItem>(stacksKey);
+    ElementRegister::GetInstance()->AddUINode(node);
+    stack->Push(node);
 }
 
 void ForEachModelNG::CreateNewChildFinish(const std::string& id)

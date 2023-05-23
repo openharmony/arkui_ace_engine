@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GAUGE_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GAUGE_MODEL_H
 
+#include <mutex>
+
 #include "core/components/common/properties/color.h"
 #include "frameworks/base/geometry/dimension.h"
 
@@ -37,6 +39,7 @@ public:
 
 private:
     static std::unique_ptr<GaugeModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 

@@ -119,7 +119,8 @@ void ImagePainter::DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const S
 
     RectF srcRect;
     srcRect.SetSize(svgContainerSize);
-    canvasImage_->DrawToRSCanvas(canvas, ToRSRect(srcRect), ToRSRect(config.dstRect_), BorderRadiusArray());
+    canvasImage_->DrawToRSCanvas(canvas, ToRSRect(srcRect), ToRSRect(config.dstRect_),
+        config.borderRadiusXY_ ? *config.borderRadiusXY_ : BorderRadiusArray());
     canvas.Restore();
 }
 

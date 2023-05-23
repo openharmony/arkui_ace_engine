@@ -617,6 +617,7 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
         }
         if (needSecondaryLayout) {
             childLayoutWrapper->Measure(child.layoutConstraint);
+            crossAxisSize_ = std::max(crossAxisSize_, GetChildCrossAxisSize(childLayoutWrapper));
             CheckBaselineProperties(child.layoutWrapper);
         }
         ++iter;
@@ -839,8 +840,9 @@ void FlexLayoutAlgorithm::CalculateSpace(float remainSpace, float& frontSpace, f
         default:
             break;
     }
-    LOGD("CalculateSpace end front space is %{public}f, between space is %{public}f, remain space is %{public}f",
-        frontSpace, betweenSpace, remainSpace);
+    LOGD("CalculateSpace remainSpace %{public}f, end front space is %{public}f, between space is %{public}f, remain "
+         "space is %{public}f",
+        remainSpace, frontSpace, betweenSpace, remainSpace);
 }
 
 void FlexLayoutAlgorithm::PlaceChildren(

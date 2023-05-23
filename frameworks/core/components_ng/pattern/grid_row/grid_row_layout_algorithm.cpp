@@ -20,7 +20,9 @@
 
 #include "grid_row_event_hub.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/grid_col/grid_col_layout_property.h"
+#include "core/components_ng/pattern/grid_row/grid_row_layout_property.h"
 #include "core/components_v2/grid_layout/grid_container_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -152,7 +154,7 @@ float GridRowLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrapper, doub
             currentRowHeight = child->GetGeometryNode()->GetFrameSize().Height();
         } else {
             newLineOffset.offset += offset;
-            auto childHeight = child->GetGeometryNode()->GetFrameSize().Height();
+            auto childHeight = child->GetGeometryNode()->GetMarginFrameSize().Height();
             currentRowHeight = std::max(currentRowHeight, childHeight);
         }
 
@@ -181,6 +183,7 @@ void GridRowLayoutAlgorithm::CalcCrossAxisAlignment(LayoutWrapper* layoutWrapper
     for (auto& child : row) {
         auto childNode = child.first->GetHostNode();
         auto childSize = child.first->GetGeometryNode()->GetFrameSize();
+        const auto& childMargin = child.first->GetGeometryNode()->GetMargin();
         auto childLayoutProperty = child.first->GetLayoutProperty();
         if (!childLayoutProperty) {
             LOGD("Child %{public}d, tag %{public}s, has no layout property, continue", childNode->GetId(),
@@ -188,11 +191,15 @@ void GridRowLayoutAlgorithm::CalcCrossAxisAlignment(LayoutWrapper* layoutWrapper
             continue;
         }
         auto alignSelf = FlexAlign::FLEX_START;
+        auto gridRowAlignItem = layoutProperty->GetAlignItemsValue(FlexAlign::FLEX_START);
         if (childLayoutProperty->GetFlexItemProperty()) {
-            alignSelf = childLayoutProperty->GetFlexItemProperty()->GetAlignSelf().value_or(
-                layoutProperty->GetAlignItemsValue(FlexAlign::FLEX_START));
+            alignSelf = childLayoutProperty->GetFlexItemProperty()->GetAlignSelf().value_or(gridRowAlignItem);
+            if (alignSelf == FlexAlign::AUTO) {
+                alignSelf = gridRowAlignItem;
+            }
+
         } else {
-            alignSelf = layoutProperty->GetAlignItemsValue(FlexAlign::FLEX_START);
+            alignSelf = gridRowAlignItem;
         }
         if (alignSelf == FlexAlign::STRETCH) {
             // this child has height close to row height, not necessary to stretch
@@ -205,9 +212,12 @@ void GridRowLayoutAlgorithm::CalcCrossAxisAlignment(LayoutWrapper* layoutWrapper
         } else {
             float extraOffset = 0.0f;
             if (alignSelf == FlexAlign::CENTER) {
-                extraOffset = (currentRowHeight - childSize.Height()) * 0.5f;
+                extraOffset = (currentRowHeight - childSize.Height() - childMargin->top.value_or(0) -
+                                  childMargin->bottom.value_or(0.0f)) *
+                              0.5f;
             } else if (alignSelf == FlexAlign::FLEX_END) {
-                extraOffset = currentRowHeight - childSize.Height();
+                extraOffset = currentRowHeight - childSize.Height() - childMargin->bottom.value_or(0.0f) -
+                              childMargin->top.value_or(0.0f);
             }
             if (!NearZero(extraOffset)) {
                 child.second.offsetY += extraOffset;
@@ -221,14 +231,15 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     gridColChildrenRows_.clear();
     gridColChildrenOfOneRow_.clear();
     const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    const auto& hostLayoutProperty = layoutWrapper->GetHostNode()->GetLayoutProperty<GridRowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto maxSize = CreateIdealSize(layoutProperty->GetLayoutConstraint().value_or(LayoutConstraintF()),
         Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
     CreateChildrenConstraint(maxSize, layoutProperty->CreatePaddingAndBorder());
     auto context = NG::PipelineContext::GetCurrentContext();
     auto sizeType = GridContainerUtils::ProcessGridSizeType(
-        layoutProperty->GetBreakPointsValue(), Size(maxSize.Width(), maxSize.Height()));
-    if (layoutProperty->GetSizeTypeValue(V2::GridSizeType::UNDEFINED) != sizeType) {
+        hostLayoutProperty->GetBreakPointsValue(), Size(maxSize.Width(), maxSize.Height()));
+    if (hostLayoutProperty->GetSizeTypeValue(V2::GridSizeType::UNDEFINED) != sizeType) {
         auto sizeTypeString = ConvertSizeTypeToString(sizeType);
         layoutWrapper->GetHostNode()->GetEventHub<GridRowEventHub>()->FireChangeEvent(sizeTypeString);
         layoutProperty->UpdateSizeType(sizeType);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,24 +19,38 @@
 #include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
-#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "core/common/ace_page.h"
-#include "core/components/box/box_component_helper.h"
 #include "core/components/button/button_component.h"
 #include "core/components/button/button_theme.h"
-#include "core/components/padding/padding_component.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_abstract_model.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/bridge/declarative_frontend/engine/bindings.h"
+#include "core/components_ng/pattern/button/button_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
-#include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "frameworks/bridge/declarative_frontend/jsview/models/button_model_impl.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
-namespace OHOS::Ace::Framework {
+namespace OHOS::Ace {
+std::unique_ptr<ButtonModel> ButtonModel::instance_ = nullptr;
+std::mutex ButtonModel::mutex_;
 
+ButtonModel* ButtonModel::GetInstance()
+{
+    if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
+#ifdef NG_BUILD
+            instance_.reset(new NG::ButtonModelNG());
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::ButtonModelNG());
+            } else {
+                instance_.reset(new Framework::ButtonModelImpl());
+            }
+#endif
+        }
+    }
+    return instance_.get();
+}
+} // namespace OHOS::Ace
+
+namespace OHOS::Ace::Framework {
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
@@ -49,44 +63,17 @@ void JSButton::SetFontSize(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ButtonView::SetFontSize(fontSize);
-        return;
-    }
-    auto textComponent = GetTextComponent();
-    if (textComponent) {
-        auto textStyle = textComponent->GetTextStyle();
-        textStyle.SetFontSize(fontSize);
-        textStyle.SetAdaptTextSize(fontSize, fontSize);
-        textComponent->SetTextStyle(textStyle);
-    }
 
-    auto stack = ViewStackProcessor::GetInstance();
-    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
-    if (!buttonComponent) {
-        return;
-    }
-    if (buttonComponent->NeedResetHeight()) {
-        ResetButtonHeight();
-    }
+    ButtonModel::GetInstance()->SetFontSize(fontSize);
 }
 
 void JSButton::SetFontWeight(const std::string& value)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ButtonView::SetFontWeight(ConvertStrToFontWeight(value));
-        return;
-    }
-    auto textComponent = GetTextComponent();
-    if (textComponent) {
-        auto textStyle = textComponent->GetTextStyle();
-        textStyle.SetFontWeight(ConvertStrToFontWeight(value));
-        textComponent->SetTextStyle(textStyle);
-    }
+    ButtonModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
 }
 
 void JSButton::SetFontStyle(int32_t value)
@@ -96,16 +83,8 @@ void JSButton::SetFontStyle(int32_t value)
         LOGE("Text fontStyle(%d) is invalid value", value);
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ButtonView::SetFontStyle(fontStyles[value]);
-        return;
-    }
-    auto textComponent = GetTextComponent();
-    if (textComponent) {
-        auto textStyle = textComponent->GetTextStyle();
-        textStyle.SetFontStyle(fontStyles[value]);
-        textComponent->SetTextStyle(textStyle);
-    }
+
+    ButtonModel::GetInstance()->SetFontStyle(fontStyles[value]);
 }
 
 void JSButton::SetFontFamily(const JSCallbackInfo& info)
@@ -119,16 +98,8 @@ void JSButton::SetFontFamily(const JSCallbackInfo& info)
         LOGE("Parse FontFamilies failed");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ButtonView::SetFontFamily(fontFamilies);
-        return;
-    }
-    auto textComponent = GetTextComponent();
-    if (textComponent) {
-        auto textStyle = textComponent->GetTextStyle();
-        textStyle.SetFontFamilies(fontFamilies);
-        textComponent->SetTextStyle(textStyle);
-    }
+
+    ButtonModel::GetInstance()->SetFontFamily(fontFamilies);
 }
 
 void JSButton::SetTextColor(const JSCallbackInfo& info)
@@ -143,33 +114,8 @@ void JSButton::SetTextColor(const JSCallbackInfo& info)
         auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
         textColor = buttonTheme->GetTextStyle().GetTextColor();
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ButtonView::SetFontColor(textColor);
-        return;
-    }
-    auto textComponent = GetTextComponent();
-    if (textComponent) {
-        auto textStyle = textComponent->GetTextStyle();
-        textStyle.SetTextColor(textColor);
-        textComponent->SetTextStyle(textStyle);
-    }
-}
 
-RefPtr<TextComponent> JSButton::GetTextComponent()
-{
-    auto stack = ViewStackProcessor::GetInstance();
-    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
-    if (buttonComponent == nullptr) {
-        LOGE("Button component create failed");
-        return nullptr;
-    }
-    auto paddingComponent = AceType::DynamicCast<PaddingComponent>(buttonComponent->GetChildren().front());
-    if (!paddingComponent) {
-        LOGE("Padding component create failed");
-        return nullptr;
-    }
-    auto textComponent = AceType::DynamicCast<TextComponent>(paddingComponent->GetChild());
-    return textComponent;
+    ButtonModel::GetInstance()->SetFontColor(textColor);
 }
 
 void JSButton::SetType(const JSCallbackInfo& info)
@@ -183,15 +129,7 @@ void JSButton::SetType(const JSCallbackInfo& info)
     }
     if ((ButtonType)value == ButtonType::CAPSULE || (ButtonType)value == ButtonType::CIRCLE ||
         (ButtonType)value == ButtonType::ARC || (ButtonType)value == ButtonType::NORMAL) {
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::ButtonView::SetType(static_cast<ButtonType>(value));
-            return;
-        }
-        auto stack = ViewStackProcessor::GetInstance();
-        auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
-        if (buttonComponent) {
-            buttonComponent->SetType((ButtonType)value);
-        }
+        ButtonModel::GetInstance()->SetType(value);
     } else {
         LOGE("Setting button to non valid ButtonType %d", value);
     }
@@ -199,22 +137,14 @@ void JSButton::SetType(const JSCallbackInfo& info)
 
 void JSButton::SetStateEffect(bool stateEffect)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ButtonView::SetStateEffect(stateEffect);
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
-    if (buttonComponent) {
-        buttonComponent->SetStateEffect(stateEffect);
-    }
+    ButtonModel::GetInstance()->SetStateEffect(stateEffect);
 }
 
-void JSButton::GetFontContent(const JSRef<JSVal> font, NG::ButtonView::ButtonParameters& buttonParameters)
+void JSButton::GetFontContent(const JSRef<JSVal> font, ButtonParameters& buttonParameters)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(font);
     JSRef<JSVal> size = obj->GetProperty("size");
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (ParseJsDimensionFp(size, fontSize)) {
         buttonParameters.fontSize = fontSize;
     }
@@ -239,7 +169,7 @@ void JSButton::GetFontContent(const JSRef<JSVal> font, NG::ButtonView::ButtonPar
     }
 }
 
-void JSButton::CompleteParameters(NG::ButtonView::ButtonParameters& buttonParameters)
+void JSButton::CompleteParameters(ButtonParameters& buttonParameters)
 {
     auto buttonTheme = GetTheme<ButtonTheme>();
     if (!buttonTheme) {
@@ -274,15 +204,12 @@ void JSButton::CompleteParameters(NG::ButtonView::ButtonParameters& buttonParame
 
 void JSButton::SetLableStyle(const JSCallbackInfo& info)
 {
-    if (!Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
     if (!info[0]->IsObject()) {
         LOGE("info[0] not is Object");
         return;
     }
 
-    NG::ButtonView::ButtonParameters buttonParameters;
+    ButtonParameters buttonParameters;
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> overflowValue = obj->GetProperty("overflow");
     if (!overflowValue->IsNull() && overflowValue->IsNumber()) {
@@ -299,13 +226,13 @@ void JSButton::SetLableStyle(const JSCallbackInfo& info)
     }
 
     JSRef<JSVal> minFontSizeValue = obj->GetProperty("minFontSize");
-    Dimension minFontSize;
+    CalcDimension minFontSize;
     if (ParseJsDimensionFp(minFontSizeValue, minFontSize)) {
         buttonParameters.minFontSize = minFontSize;
     }
 
     JSRef<JSVal> maxFontSizeValue = obj->GetProperty("maxFontSize");
-    Dimension maxFontSize;
+    CalcDimension maxFontSize;
     if (ParseJsDimensionFp(maxFontSizeValue, maxFontSize)) {
         buttonParameters.maxFontSize = maxFontSize;
     }
@@ -324,7 +251,7 @@ void JSButton::SetLableStyle(const JSCallbackInfo& info)
     }
 
     CompleteParameters(buttonParameters);
-    NG::ButtonView::SetLableStyle(buttonParameters);
+    ButtonModel::GetInstance()->SetLableStyle(buttonParameters);
 }
 
 void JSButton::JsRemoteMessage(const JSCallbackInfo& info)
@@ -361,6 +288,7 @@ void JSButton::JSBind(BindingTarget globalObj)
     JSClass<JSButton>::StaticMethod("height", &JSButton::JsHeight);
     JSClass<JSButton>::StaticMethod("aspectRatio", &JSButton::JsAspectRatio);
     JSClass<JSButton>::StaticMethod("borderRadius", &JSButton::JsRadius);
+    JSClass<JSButton>::StaticMethod("border", &JSButton::JsBorder);
     JSClass<JSButton>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSButton>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSButton>::StaticMethod("size", &JSButton::JsSize);
@@ -369,9 +297,7 @@ void JSButton::JSBind(BindingTarget globalObj)
 
     JSClass<JSButton>::StaticMethod("createWithLabel", &JSButton::CreateWithLabel, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("createWithChild", &JSButton::CreateWithChild, MethodOptions::NONE);
-    JSClass<JSButton>::Inherit<JSContainerBase>();
-    JSClass<JSButton>::Inherit<JSViewAbstract>();
-    JSClass<JSButton>::Bind<>(globalObj);
+    JSClass<JSButton>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSButton::CreateWithLabel(const JSCallbackInfo& info)
@@ -379,180 +305,88 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
     std::list<RefPtr<Component>> buttonChildren;
     std::string label;
     bool labelSet = false;
-    if (ParseJsString(info[0], label)) {
+    CreateWithPara para;
+    para.parseSuccess = ParseJsString(info[0], label);
+    para.label = label;
+    if (info[0]->IsObject() && JSRef<JSObject>::Cast(info[0])->GetProperty("type")->IsNumber()) {
+        para.typeFirst =
+            static_cast<ButtonType>(JSRef<JSObject>::Cast(info[0])->GetProperty("type")->ToNumber<int32_t>());
+    }
+    if (info[1]->IsObject() && JSRef<JSObject>::Cast(info[1])->GetProperty("type")->IsNumber()) {
+        para.typeSecond =
+            static_cast<ButtonType>(JSRef<JSObject>::Cast(info[1])->GetProperty("type")->ToNumber<int32_t>());
+    }
+    if (info[0]->IsObject() && JSRef<JSObject>::Cast(info[0])->GetProperty("stateEffect")->IsBoolean()) {
+        para.stateEffectFirst = JSRef<JSObject>::Cast(info[0])->GetProperty("stateEffect")->ToBoolean();
+    }
+    if (info[1]->IsObject() && JSRef<JSObject>::Cast(info[1])->GetProperty("stateEffect")->IsBoolean()) {
+        para.stateEffectSecond = JSRef<JSObject>::Cast(info[1])->GetProperty("stateEffect")->ToBoolean();
+    }
+    if (para.parseSuccess) {
         labelSet = true;
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::ButtonView::CreateWithLabel(label);
-            if (!labelSet && info[0]->IsObject()) {
-                SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[0]));
-            }
-            if ((info.Length() > 1) && info[1]->IsObject()) {
-                SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[1]));
-            }
-            NG::ViewAbstract::SetHoverEffectAuto(HoverEffectType::SCALE);
-            return;
-        }
-        auto textComponent = AceType::MakeRefPtr<TextComponent>(label);
-        auto buttonTheme = GetTheme<ButtonTheme>();
-        auto textStyle = buttonTheme ? buttonTheme->GetTextStyle() : textComponent->GetTextStyle();
-        textStyle.SetMaxLines(buttonTheme ? buttonTheme->GetTextMaxLines() : 1);
-        textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
-        textComponent->SetTextStyle(textStyle);
-        auto padding = AceType::MakeRefPtr<PaddingComponent>();
-        padding->SetPadding(buttonTheme ? buttonTheme->GetPadding() : Edge());
-        padding->SetChild(textComponent);
-        Component::MergeRSNode(padding, textComponent);
-        buttonChildren.emplace_back(padding);
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ButtonView::CreateWithLabel("");
-        if (!labelSet && info[0]->IsObject()) {
-            SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[0]));
-        }
-        if ((info.Length() > 1) && info[1]->IsObject()) {
-            SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[1]));
-        }
-        NG::ViewAbstract::SetHoverEffectAuto(HoverEffectType::SCALE);
-        return;
-    }
-    auto buttonComponent = AceType::MakeRefPtr<ButtonComponent>(buttonChildren);
-    ViewStackProcessor::GetInstance()->ClaimElementId(buttonComponent);
-    buttonComponent->SetHasCustomChild(false);
-    buttonComponent->SetCatchMode(false);
-    SetDefaultAttributes(buttonComponent);
-    if (!labelSet && info[0]->IsObject()) {
-        SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[0]), buttonComponent);
-    }
-    if ((info.Length() > 1) && info[1]->IsObject()) {
-        SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[1]), buttonComponent);
-    }
-    ViewStackProcessor::GetInstance()->Push(buttonComponent);
-    JSInteractableView::SetFocusable(true);
-    JSInteractableView::SetFocusNode(true);
-
-    buttonComponent->SetMouseAnimationType(HoverAnimationType::SCALE);
+    para.labelSetInfoFirst = !labelSet && info[0]->IsObject();
+    para.labelSetInfoSecond = (info.Length() > 1) && info[1]->IsObject();
+    ButtonModel::GetInstance()->CreateWithLabel(para, buttonChildren);
+    ButtonModel::GetInstance()->Create(para, buttonChildren);
 }
 
 void JSButton::CreateWithChild(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ButtonView::Create(V2::BUTTON_ETS_TAG);
-        if (info[0]->IsObject()) {
-            auto obj = JSRef<JSObject>::Cast(info[0]);
-            SetTypeAndStateEffect(obj);
-        }
-        NG::ViewAbstract::SetHoverEffectAuto(HoverEffectType::SCALE);
-        return;
+    CreateWithPara para;
+    para.labelSetInfoFirst = info[0]->IsObject();
+    para.labelSetInfoSecond = (info.Length() > 1) && info[1]->IsObject();
+    if (info[0]->IsObject() && JSRef<JSObject>::Cast(info[0])->GetProperty("type")->IsNumber()) {
+        para.typeFirst =
+            static_cast<ButtonType>(JSRef<JSObject>::Cast(info[0])->GetProperty("type")->ToNumber<int32_t>());
     }
-    std::list<RefPtr<Component>> buttonChildren;
-    auto buttonComponent = AceType::MakeRefPtr<ButtonComponent>(buttonChildren);
-    ViewStackProcessor::GetInstance()->ClaimElementId(buttonComponent);
-    buttonComponent->SetHasCustomChild(true);
-    buttonComponent->SetCatchMode(false);
-    SetDefaultAttributes(buttonComponent);
-    if (info[0]->IsObject()) {
-        auto obj = JSRef<JSObject>::Cast(info[0]);
-        SetTypeAndStateEffect(obj, buttonComponent);
-    }
-    if ((info.Length() > 1) && info[1]->IsObject()) {
-        SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[1]), buttonComponent);
-    }
-    ViewStackProcessor::GetInstance()->Push(buttonComponent);
-    JSInteractableView::SetFocusable(true);
-    JSInteractableView::SetFocusNode(true);
-    buttonComponent->SetMouseAnimationType(HoverAnimationType::SCALE);
-    if (buttonComponent->NeedResetHeight()) {
-        ResetButtonHeight();
-    }
-}
 
-void JSButton::SetDefaultAttributes(const RefPtr<ButtonComponent>& buttonComponent)
-{
-    buttonComponent->SetType(ButtonType::CAPSULE);
-    buttonComponent->SetDeclarativeFlag(true);
-    auto buttonTheme = GetTheme<ButtonTheme>();
-    if (!buttonTheme) {
-        return;
+    if (info[1]->IsObject() && JSRef<JSObject>::Cast(info[1])->GetProperty("type")->IsNumber()) {
+        para.typeSecond =
+            static_cast<ButtonType>(JSRef<JSObject>::Cast(info[1])->GetProperty("type")->ToNumber<int32_t>());
     }
-    buttonComponent->SetHeight(buttonTheme->GetHeight());
-    buttonComponent->SetBackgroundColor(buttonTheme->GetBgColor());
-    buttonComponent->SetClickedColor(buttonComponent->GetBackgroundColor().BlendColor(buttonTheme->GetClickedColor()));
-    buttonComponent->SetHoverColor(buttonTheme->GetHoverColor());
-}
 
-void JSButton::SetTypeAndStateEffect(const JSRef<JSObject>& obj)
-{
-    auto type = obj->GetProperty("type");
-    if (type->IsNumber()) {
-        auto buttonType = static_cast<ButtonType>(type->ToNumber<int32_t>());
-        NG::ButtonView::SetType(buttonType);
-    } else {
-        // undefined use capsule type.
-        NG::ButtonView::SetType(ButtonType::CAPSULE);
+    if (info[0]->IsObject() && JSRef<JSObject>::Cast(info[0])->GetProperty("stateEffect")->IsBoolean()) {
+        para.stateEffectFirst = JSRef<JSObject>::Cast(info[0])->GetProperty("stateEffect")->ToBoolean();
     }
-    auto stateEffect = obj->GetProperty("stateEffect");
-    if (stateEffect->IsBoolean()) {
-        NG::ButtonView::SetStateEffect(stateEffect->ToBoolean());
-    }
-}
 
-void JSButton::SetTypeAndStateEffect(const JSRef<JSObject>& obj, const RefPtr<ButtonComponent>& buttonComponent)
-{
-    auto type = obj->GetProperty("type");
-    if (type->IsNumber()) {
-        auto buttonType = (ButtonType)type->ToNumber<int32_t>();
-        buttonComponent->SetType(buttonType);
-    } else {
-        // undefined use capsule type.
-        buttonComponent->SetType(ButtonType::CAPSULE);
+    if (info[1]->IsObject() && JSRef<JSObject>::Cast(info[1])->GetProperty("stateEffect")->IsBoolean()) {
+        para.stateEffectSecond = JSRef<JSObject>::Cast(info[1])->GetProperty("stateEffect")->ToBoolean();
     }
-    auto stateEffect = obj->GetProperty("stateEffect");
-    if (stateEffect->IsBoolean()) {
-        buttonComponent->SetStateEffect(stateEffect->ToBoolean());
-    }
-}
-
-void JSButton::ResetButtonHeight()
-{
-    auto stack = ViewStackProcessor::GetInstance();
-    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
-    if (buttonComponent) {
-        if (buttonComponent->GetType() == ButtonType::CIRCLE) {
-            return;
-        }
-        const Dimension initialHeight = Dimension(-1.0, DimensionUnit::VP);
-        buttonComponent->SetHeight(initialHeight);
-    }
+    ButtonModel::GetInstance()->CreateWithChild(para);
 }
 
 void JSButton::JsPadding(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsPadding(info);
-        return;
-    }
+    NG::PaddingProperty paddingNew = GetNewPadding(info);
+    Edge paddingOld = Edge(GetOldPadding(info));
+    ButtonModel::GetInstance()->Padding(paddingNew, paddingOld);
+}
+
+Edge JSButton::GetOldPadding(const JSCallbackInfo& info)
+{
+    Edge padding;
     if (!info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject()) {
         LOGE("arg is not a string, number or object.");
-        return;
+        return padding;
     }
-    Edge padding;
+    
     if (info[0]->IsNumber()) {
-        Dimension edgeValue;
+        CalcDimension edgeValue;
         if (ParseJsDimensionVp(info[0], edgeValue)) {
             padding = Edge(edgeValue);
         }
-    }
-    if (info[0]->IsObject()) {
+    } else if (info[0]->IsObject()) {
         auto object = JsonUtil::ParseJsonString(info[0]->ToString());
         if (!object) {
             LOGE("Js Parse object failed. argsPtr is null.");
-            return;
+            return padding;
         }
-        Dimension left = Dimension(0.0, DimensionUnit::VP);
-        Dimension top = Dimension(0.0, DimensionUnit::VP);
-        Dimension right = Dimension(0.0, DimensionUnit::VP);
-        Dimension bottom = Dimension(0.0, DimensionUnit::VP);
+        CalcDimension left = CalcDimension(0.0, DimensionUnit::VP);
+        CalcDimension top = CalcDimension(0.0, DimensionUnit::VP);
+        CalcDimension right = CalcDimension(0.0, DimensionUnit::VP);
+        CalcDimension bottom = CalcDimension(0.0, DimensionUnit::VP);
         if (object->Contains("top") || object->Contains("bottom") || object->Contains("left") ||
             object->Contains("right")) {
             ParseJsonDimensionVp(object->GetValue("left"), left);
@@ -562,17 +396,91 @@ void JSButton::JsPadding(const JSCallbackInfo& info)
         }
         padding = Edge(left, top, right, bottom);
     }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
-    if (component) {
-        auto paddingChild = AceType::DynamicCast<PaddingComponent>(component->GetChildren().front());
-        if (paddingChild) {
-            paddingChild->SetPadding(padding);
+
+    return padding;
+}
+
+NG::PaddingProperty JSButton::GetNewPadding(const JSCallbackInfo& info)
+{
+    NG::PaddingProperty padding;
+    if (info[0]->IsObject()) {
+        std::optional<CalcDimension> left;
+        std::optional<CalcDimension> right;
+        std::optional<CalcDimension> top;
+        std::optional<CalcDimension> bottom;
+        JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
+
+        CalcDimension leftDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("left"), leftDimen)) {
+            left = leftDimen;
         }
-        if (component->NeedResetHeight()) {
-            ResetButtonHeight();
+        CalcDimension rightDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("right"), rightDimen)) {
+            right = rightDimen;
+        }
+        CalcDimension topDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("top"), topDimen)) {
+            top = topDimen;
+        }
+        CalcDimension bottomDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
+            bottom = bottomDimen;
+        }
+        if (left.has_value() || right.has_value() || top.has_value() || bottom.has_value()) {
+            padding = SetPaddings(top, bottom, left, right);
+            return padding;
         }
     }
+
+    CalcDimension length;
+    if (!ParseJsDimensionVp(info[0], length)) {
+        // use default value.
+        length.Reset();
+    }
+
+    padding.SetEdges(NG::CalcLength(length.IsNonNegative() ? length : CalcDimension()));
+    return padding;
+}
+
+NG::PaddingProperty JSButton::SetPaddings(const std::optional<CalcDimension>& top,
+    const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
+    const std::optional<CalcDimension>& right)
+{
+    NG::PaddingProperty paddings;
+    if (top.has_value()) {
+        if (top.value().Unit() == DimensionUnit::CALC) {
+            paddings.top =
+                NG::CalcLength(top.value().IsNonNegative() ? top.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.top = NG::CalcLength(top.value().IsNonNegative() ? top.value() : CalcDimension());
+        }
+    }
+    if (bottom.has_value()) {
+        if (bottom.value().Unit() == DimensionUnit::CALC) {
+            paddings.bottom = NG::CalcLength(
+                bottom.value().IsNonNegative() ? bottom.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.bottom = NG::CalcLength(bottom.value().IsNonNegative() ? bottom.value() : CalcDimension());
+        }
+    }
+    if (left.has_value()) {
+        if (left.value().Unit() == DimensionUnit::CALC) {
+            paddings.left = NG::CalcLength(
+                left.value().IsNonNegative() ? left.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.left = NG::CalcLength(left.value().IsNonNegative() ? left.value() : CalcDimension());
+        }
+    }
+    if (right.has_value()) {
+        if (right.value().Unit() == DimensionUnit::CALC) {
+            paddings.right = NG::CalcLength(
+                right.value().IsNonNegative() ? right.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.right = NG::CalcLength(right.value().IsNonNegative() ? right.value() : CalcDimension());
+        }
+    }
+
+    return paddings;
 }
 
 void JSButton::JsOnClick(const JSCallbackInfo& info)
@@ -582,57 +490,21 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
         LOGE("OnClick parameter need a function.");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSInteractableView::JsOnClick(info);
-        return;
-    }
-    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-    if (!inspector) {
-        LOGE("fail to get inspector for on click event");
-        return;
-    }
-    auto impl = inspector->GetInspectorFunctionImpl();
 
-    RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto clickId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](GestureEvent& info) {
+    auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onTap = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc](GestureEvent& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        if (impl) {
-            impl->UpdateEventInfo(info);
-        }
         ACE_SCORING_EVENT("onClick");
         func->Execute(info);
     };
-    RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>(DEFAULT_TAP_COUNTS, DEFAULT_TAP_FINGERS);
-    if (!tapGesture) {
-        LOGE("tapGesture is null");
-        return;
-    }
-    tapGesture->SetOnActionId(clickId);
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    if (tapGesture) {
-        box->SetOnClick(tapGesture);
-    }
 
-    RefPtr<JsClickFunction> jsClickEventFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-    EventMarker clickEventId(
-        [execCtx = info.GetExecutionContext(), func = std::move(jsClickEventFunc), impl](const BaseEventInfo* info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
-            auto newInfo = *clickInfo;
-            if (impl) {
-                impl->UpdateEventInfo(newInfo);
-            }
-            ACE_SCORING_EVENT("Button.onClick");
-            func->Execute(newInfo);
-        });
-    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (buttonComponent) {
-        buttonComponent->SetKeyEnterEventId(clickEventId);
-    }
-    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
-    if (focusableComponent) {
-        focusableComponent->SetOnClickId(clickEventId);
-    }
+    auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc](const ClickInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onClick");
+        func->Execute(*info);
+    };
+
+    ButtonModel::GetInstance()->OnClick(std::move(onTap), std::move(onClick));
 }
 
 void JSButton::JsBackgroundColor(const JSCallbackInfo& info)
@@ -642,111 +514,42 @@ void JSButton::JsBackgroundColor(const JSCallbackInfo& info)
         return;
     }
     Color backgroundColor;
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (!ParseJsColor(info[0], backgroundColor)) {
-            auto buttonTheme = GetTheme<ButtonTheme>();
-            if (buttonTheme) {
-                backgroundColor = buttonTheme->GetBgColor();
-            }
-        }
-        ViewAbstractModel::GetInstance()->SetBackgroundColor(backgroundColor);
-        return;
-    }
-
-    if (!ParseJsColor(info[0], backgroundColor)) {
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    if (buttonComponent == nullptr) {
-        LOGE("Button component create failed");
-        return;
-    }
-    if (!stack->IsVisualStateSet()) {
-        buttonComponent->SetBackgroundColor(backgroundColor);
+    bool colorFlag = ParseJsColor(info[0], backgroundColor);
+    if (!colorFlag) {
         auto buttonTheme = GetTheme<ButtonTheme>();
         if (buttonTheme) {
-            Color blendColor = buttonTheme->GetClickedColor();
-            buttonComponent->SetClickedColor(buttonComponent->GetBackgroundColor().BlendColor(blendColor));
-        }
-    } else {
-        buttonComponent->GetStateAttributes()->AddAttribute<AnimatableColor>(
-            ButtonStateAttribute::COLOR, AnimatableColor(backgroundColor, option), stack->GetVisualState());
-        if (!buttonComponent->GetStateAttributes()->HasAttribute(ButtonStateAttribute::COLOR, VisualState::NORMAL)) {
-            buttonComponent->GetStateAttributes()->AddAttribute<AnimatableColor>(ButtonStateAttribute::COLOR,
-                AnimatableColor(buttonComponent->GetBackgroundColor(), option), VisualState::NORMAL);
+            backgroundColor = buttonTheme->GetBgColor();
         }
     }
+
+    ButtonModel::GetInstance()->BackgroundColor(backgroundColor, colorFlag);
     info.ReturnSelf();
 }
 
 void JSButton::JsWidth(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsWidth(info);
-        return;
-    }
     JSViewAbstract::JsWidth(info);
-    Dimension value = GetSizeValue(info);
+    CalcDimension value = GetSizeValue(info);
     if (LessNotEqual(value.Value(), 0.0)) {
         return;
     }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
-    AnimationOption option = stack->GetImplicitAnimationOption();
-    if (!buttonComponent) {
-        return;
-    }
-    if (!stack->IsVisualStateSet()) {
-        buttonComponent->SetWidth(value, stack->GetImplicitAnimationOption());
-    } else {
-        buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(
-            ButtonStateAttribute::WIDTH, AnimatableDimension(value, option), stack->GetVisualState());
-        if (!buttonComponent->GetStateAttributes()->HasAttribute(ButtonStateAttribute::WIDTH, VisualState::NORMAL)) {
-            buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(ButtonStateAttribute::WIDTH,
-                AnimatableDimension(buttonComponent->GetWidth(), option), VisualState::NORMAL);
-        }
-    }
+
+    ButtonModel::GetInstance()->SetWidth(value);
 }
 
 void JSButton::JsHeight(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsHeight(info);
-        return;
-    }
     JSViewAbstract::JsHeight(info);
-    Dimension value = GetSizeValue(info);
+    CalcDimension value = GetSizeValue(info);
     if (LessNotEqual(value.Value(), 0.0)) {
         return;
     }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
-    auto option = stack->GetImplicitAnimationOption();
-    if (!buttonComponent) {
-        return;
-    }
-    buttonComponent->IsNeedResetHeight(false);
-    if (!stack->IsVisualStateSet()) {
-        buttonComponent->SetHeight(value, option);
-        buttonComponent->SetDeclareHeight(true);
-    } else {
-        buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(
-            ButtonStateAttribute::HEIGHT, AnimatableDimension(value, option), stack->GetVisualState());
-        if (!buttonComponent->GetStateAttributes()->HasAttribute(ButtonStateAttribute::HEIGHT, VisualState::NORMAL)) {
-            buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(ButtonStateAttribute::HEIGHT,
-                AnimatableDimension(buttonComponent->GetHeight(), option), VisualState::NORMAL);
-        }
-    }
+
+    ButtonModel::GetInstance()->SetHeight(value);
 }
 
 void JSButton::JsAspectRatio(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsAspectRatio(info);
-        return;
-    }
     JSViewAbstract::JsAspectRatio(info);
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
@@ -756,12 +559,8 @@ void JSButton::JsAspectRatio(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], value)) {
         return;
     }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
-    if (!buttonComponent) {
-        return;
-    }
-    buttonComponent->SetAspectRatio(value);
+
+    ButtonModel::GetInstance()->SetAspectRatio(value);
 }
 
 void JSButton::JsSize(const JSCallbackInfo& info)
@@ -776,58 +575,19 @@ void JSButton::JsSize(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
-        Dimension width;
-        if (ParseJsDimensionVp(sizeObj->GetProperty("width"), width)) {
-            NG::ViewAbstract::SetWidth(NG::CalcLength(width));
-        }
-        Dimension height;
-        if (ParseJsDimensionVp(sizeObj->GetProperty("height"), height)) {
-            NG::ViewAbstract::SetHeight(NG::CalcLength(height));
-        }
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
-    auto option = stack->GetImplicitAnimationOption();
-    if (buttonComponent == nullptr) {
-        LOGE("Button component create failed");
-        return;
-    }
+    std::optional<CalcDimension> widthInfo;
+    std::optional<CalcDimension> heightInfo;
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
-    JSRef<JSVal> widthValue = sizeObj->GetProperty("width");
-    Dimension width;
-    if (ParseJsDimensionVp(widthValue, width)) {
-        if (!stack->IsVisualStateSet()) {
-            buttonComponent->SetWidth(width, stack->GetImplicitAnimationOption());
-        } else {
-            buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(
-                ButtonStateAttribute::WIDTH, AnimatableDimension(width, option), stack->GetVisualState());
-            if (!buttonComponent->GetStateAttributes()->HasAttribute(
-                    ButtonStateAttribute::WIDTH, VisualState::NORMAL)) {
-                buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(ButtonStateAttribute::WIDTH,
-                    AnimatableDimension(buttonComponent->GetWidth(), option), VisualState::NORMAL);
-            }
-        }
+    CalcDimension width;
+    if (ParseJsDimensionVp(sizeObj->GetProperty("width"), width)) {
+        widthInfo = width;
     }
-    JSRef<JSVal> heightValue = sizeObj->GetProperty("height");
-    Dimension height;
-    if (ParseJsDimensionVp(heightValue, height)) {
-        buttonComponent->IsNeedResetHeight(false);
-        if (!stack->IsVisualStateSet()) {
-            buttonComponent->SetHeight(height, stack->GetImplicitAnimationOption());
-            buttonComponent->SetDeclareHeight(true);
-        } else {
-            buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(
-                ButtonStateAttribute::HEIGHT, AnimatableDimension(height, option), stack->GetVisualState());
-            if (!buttonComponent->GetStateAttributes()->HasAttribute(
-                    ButtonStateAttribute::HEIGHT, VisualState::NORMAL)) {
-                buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(ButtonStateAttribute::HEIGHT,
-                    AnimatableDimension(buttonComponent->GetHeight(), option), VisualState::NORMAL);
-            }
-        }
+    CalcDimension height;
+    if (ParseJsDimensionVp(sizeObj->GetProperty("height"), height)) {
+        heightInfo = height;
     }
+
+    ButtonModel::GetInstance()->SetSize(widthInfo, heightInfo);
 }
 
 void JSButton::JsRadius(const JSCallbackInfo& info)
@@ -836,51 +596,37 @@ void JSButton::JsRadius(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension radius;
+    CalcDimension radius;
     if (!ParseJsDimensionVp(info[0], radius)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ButtonView::SetBorderRadius(radius);
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
-    auto option = stack->GetImplicitAnimationOption();
-    if (buttonComponent == nullptr) {
-        LOGE("Button component create failed");
-        return;
-    }
-    buttonComponent->SetRadiusState(true);
-    if (!stack->IsVisualStateSet()) {
-        buttonComponent->SetRectRadius(radius);
-        ViewAbstractModel::GetInstance()->SetBorderRadius(radius);
-    } else {
-        buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(
-            ButtonStateAttribute::RADIUS, AnimatableDimension(radius, option), stack->GetVisualState());
-        auto boxComponent = stack->GetBoxComponent();
-        boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(
-            BoxStateAttribute::BORDER_RADIUS, AnimatableDimension(radius, option), stack->GetVisualState());
 
-        if (!buttonComponent->GetStateAttributes()->HasAttribute(ButtonStateAttribute::RADIUS, VisualState::NORMAL)) {
-            buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(ButtonStateAttribute::RADIUS,
-                AnimatableDimension(buttonComponent->GetRectRadius(), option), VisualState::NORMAL);
-            auto defaultRadius = BoxComponentHelper::GetBorderRadius(boxComponent->GetBackDecoration());
-            boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(BoxStateAttribute::BORDER_RADIUS,
-                AnimatableDimension(defaultRadius.GetX(), option), VisualState::NORMAL);
-        }
-    }
+    ButtonModel::GetInstance()->SetBorderRadius(radius);
 }
 
-Dimension JSButton::GetSizeValue(const JSCallbackInfo& info)
+void JSButton::JsBorder(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsBorder(info);
+    if (!info[0]->IsObject()) {
+        LOGE("args is not a object. %s", info[0]->ToString().c_str());
+        return;
+    }
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+    CalcDimension borderRadius;
+    auto valueRadius = object->GetProperty("radius");
+    ParseJsDimensionVp(valueRadius, borderRadius);
+    ButtonModel::GetInstance()->SetBorderRadius(borderRadius);
+}
+
+CalcDimension JSButton::GetSizeValue(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
-        return Dimension(-1.0);
+        return CalcDimension(-1.0);
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
-        return Dimension(-1.0);
+        return CalcDimension(-1.0);
     }
     return value;
 }
@@ -891,14 +637,8 @@ void JSButton::JsHoverEffect(const JSCallbackInfo& info)
         LOGE("The arg is not a number");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetHoverEffect(static_cast<HoverEffectType>(info[0]->ToNumber<int32_t>()));
-        return;
-    }
-    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (buttonComponent) {
-        buttonComponent->SetMouseAnimationType(static_cast<HoverAnimationType>(info[0]->ToNumber<int32_t>()));
-    }
-}
 
+    int32_t hoverEffectNum = info[0]->ToNumber<int32_t>();
+    ButtonModel::GetInstance()->SetHoverEffect(hoverEffectNum);
+}
 } // namespace OHOS::Ace::Framework

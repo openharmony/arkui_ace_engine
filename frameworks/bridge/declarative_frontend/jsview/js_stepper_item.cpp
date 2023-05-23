@@ -23,19 +23,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<StepperItemModel> StepperItemModel::instance_ = nullptr;
+std::mutex StepperItemModel::mutex_;
 
 StepperItemModel* StepperItemModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::ImageModelNG());
+            instance_.reset(new NG::ImageModelNG());
 #else
-        if (Container::IsCurrentUseNewPipeline()) {
-            instance_.reset(new NG::StepperItemModelNG());
-        } else {
-            instance_.reset(new Framework::StepperItemModelImpl());
-        }
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::StepperItemModelNG());
+            } else {
+                instance_.reset(new Framework::StepperItemModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -64,9 +68,7 @@ void JSStepperItem::JSBind(BindingTarget globalObj)
     JSClass<JSStepperItem>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSStepperItem>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSStepperItem>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
-    JSClass<JSStepperItem>::Inherit<JSContainerBase>();
-    JSClass<JSStepperItem>::Inherit<JSViewAbstract>();
-    JSClass<JSStepperItem>::Bind<>(globalObj);
+    JSClass<JSStepperItem>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSStepperItem::SetPrevLabel(const JSCallbackInfo& info)

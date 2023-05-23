@@ -15,6 +15,8 @@
 
 #include "gtest/gtest.h"
 #define private public
+#define protected public
+
 #include "base/geometry/ng/size_t.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -25,6 +27,7 @@
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -204,5 +207,117 @@ HWTEST_F(DividerPatternTestNg, DividerModifierTest001, TestSize.Level1)
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
     DrawingContext context = { rsCanvas, 10.0f, 10.0f };
     dividerModifier.onDraw(context);
+}
+
+/**
+ * @tc.name: DivideAlgorithmTest001
+ * @tc.desc: Test layoutAlgorithm of divider with testProperty.vertical = VERTICAL_TRUE
+ * @tc.type: FUNC
+ */
+HWTEST_F(DividerPatternTestNg, DivideAlgorithmTest001, TestSize.Level1)
+{
+    testProperty.strokeWidth = STROKE_WIDTH;
+    testProperty.vertical = VERTICAL_TRUE;
+    LayoutConstraintF layoutConstraintF;
+    layoutConstraintF.selfIdealSize = SELF_IDEAL_SIZE;
+    layoutConstraintF.maxSize = MAX_SIZE;
+    RefPtr<DividerLayoutAlgorithm> dividerLayoutAlgorithm = AceType::MakeRefPtr<DividerLayoutAlgorithm>();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<DividerTheme>()));
+    
+    RefPtr<FrameNode> frameNode = CreateDividerNode(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<DividerLayoutProperty> layoutProperty = frameNode->GetLayoutProperty<DividerLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, layoutProperty);
+    dividerLayoutAlgorithm->MeasureContent(layoutConstraintF, &layoutWrapper);
+    EXPECT_EQ(dividerLayoutAlgorithm->GetVertical(), testProperty.vertical);
+    EXPECT_EQ(dividerLayoutAlgorithm->GetConstrainStrokeWidth(), 1.0);
+    EXPECT_EQ(dividerLayoutAlgorithm->GetDividerLength(), 100.0f);
+}
+
+/**
+ * @tc.name: DivideAlgorithmTest002
+ * @tc.desc: Test layoutAlgorithm of divider with testProperty.vertical = VERTICAL_FALSE
+ * @tc.type: FUNC
+ */
+HWTEST_F(DividerPatternTestNg, DivideAlgorithmTest002, TestSize.Level1)
+{
+    testProperty.strokeWidth = STROKE_WIDTH;
+    testProperty.vertical = VERTICAL_FALSE;
+    LayoutConstraintF layoutConstraintF;
+    layoutConstraintF.selfIdealSize = SELF_IDEAL_SIZE;
+    layoutConstraintF.maxSize = MAX_SIZE;
+    RefPtr<DividerLayoutAlgorithm> dividerLayoutAlgorithm = AceType::MakeRefPtr<DividerLayoutAlgorithm>();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<DividerTheme>()));
+    
+    RefPtr<FrameNode> frameNode = CreateDividerNode(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<DividerLayoutProperty> layoutProperty = frameNode->GetLayoutProperty<DividerLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, layoutProperty);
+    dividerLayoutAlgorithm->MeasureContent(layoutConstraintF, &layoutWrapper);
+    EXPECT_EQ(dividerLayoutAlgorithm->GetVertical(), testProperty.vertical);
+}
+
+/**
+ * @tc.name: DivideAlgorithmTest003
+ * @tc.desc: Test layoutAlgorithm of divider with testProperty.vertical = VERTICAL_FALSE and no selfIdealSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(DividerPatternTestNg, DivideAlgorithmTest003, TestSize.Level1)
+{
+    testProperty.strokeWidth = STROKE_WIDTH;
+    testProperty.vertical = VERTICAL_FALSE;
+    LayoutConstraintF layoutConstraintF;
+    layoutConstraintF.maxSize = MAX_SIZE;
+    RefPtr<DividerLayoutAlgorithm> dividerLayoutAlgorithm = AceType::MakeRefPtr<DividerLayoutAlgorithm>();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<DividerTheme>()));
+    
+    RefPtr<FrameNode> frameNode = CreateDividerNode(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<DividerLayoutProperty> layoutProperty = frameNode->GetLayoutProperty<DividerLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, layoutProperty);
+    dividerLayoutAlgorithm->MeasureContent(layoutConstraintF, &layoutWrapper);
+    EXPECT_EQ(dividerLayoutAlgorithm->GetVertical(), testProperty.vertical);
+}
+
+/**
+ * @tc.name: DivideAlgorithmTest004
+ * @tc.desc: Test layoutAlgorithm of divider with testProperty.vertical = VERTICAL_TRUE and no selfIdealSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(DividerPatternTestNg, DivideAlgorithmTest004, TestSize.Level1)
+{
+    testProperty.strokeWidth = STROKE_WIDTH;
+    testProperty.vertical = VERTICAL_TRUE;
+    LayoutConstraintF layoutConstraintF;
+    layoutConstraintF.maxSize = MAX_SIZE;
+    RefPtr<DividerLayoutAlgorithm> dividerLayoutAlgorithm = AceType::MakeRefPtr<DividerLayoutAlgorithm>();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<DividerTheme>()));
+    
+    RefPtr<FrameNode> frameNode = CreateDividerNode(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<DividerLayoutProperty> layoutProperty = frameNode->GetLayoutProperty<DividerLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, layoutProperty);
+    dividerLayoutAlgorithm->MeasureContent(layoutConstraintF, &layoutWrapper);
+    EXPECT_EQ(dividerLayoutAlgorithm->GetVertical(), testProperty.vertical);
 }
 } // namespace OHOS::Ace::NG

@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/rosen/testing_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -78,6 +79,8 @@ const Dimension BUBBLE_PAINT_PROPERTY_FONT_SIZE = Dimension(20.1, DimensionUnit:
 const Ace::FontWeight BUBBLE_PAINT_PROPERTY_FONT_WEIGHT = Ace::FontWeight::W100;
 constexpr Dimension BUBBLE_PAINT_PROPERTY_ARROW_OFFSET = 20.0_px;
 constexpr Placement BUBBLE_LAYOUT_PROPERTY_PLACEMENT = Placement::LEFT;
+constexpr Dimension BORDER_EDGE = 1.0_px;
+constexpr Dimension BORDER_EDGE_LARGE = 20.0_px;
 } // namespace
 struct TestProperty {
     // layout property
@@ -450,7 +453,7 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest005, TestSize.Level1)
 
 /**
  * @tc.name: BubblePatternTest006
- * @tc.desc: Test bubble pattern InitTouchEvent HandleTouchEvent HandleTouchUp.
+ * @tc.desc: Test bubble pattern InitTouchEvent HandleTouchEvent HandleTouchDOWN.
  * @tc.type: FUNC
  */
 HWTEST_F(BubblePatternTestNg, BubblePatternTest006, TestSize.Level1)
@@ -498,7 +501,7 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest006, TestSize.Level1)
     bubblePaintProperty->UpdateAutoCancel(BUBBLE_PAINT_PROPERTY_AUTO_CANCEL_TRUE);
     bubblePattern->targetNodeId_ = targetId;
     bubblePattern->touchRegion_ = RectF(OffsetF(50, 50), SizeF(100, 100));
-    bubblePattern->HandleTouchUp(Offset(100.0, 100.0));
+    bubblePattern->HandleTouchDown(Offset(100.0, 100.0));
 }
 
 /**
@@ -591,5 +594,264 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest008, TestSize.Level1)
     popupParam->SetMessage(BUBBLE_NEW_MESSAGE);
     popupParam->SetHasAction(true);
     BubbleView::UpdatePopupParam(popupId, popupParam, targetNode);
+}
+
+/**
+ * @tc.name: BubblePatternTest009
+ * @tc.desc: Test StartEnteringAnimation and StartExitingAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubblePatternTestNg, BubblePatternTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble.
+     */
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto pattern = AceType::MakeRefPtr<BubblePattern>(targetId, targetTag);
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, pattern);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. call StartEnteringAnimation and StartExitingAnimation without finish callback.
+     * @tc.expected: pattern->transitionStatus_ changed.
+     */
+    pattern->arrowPlacement_ = Placement::BOTTOM;
+    pattern->StartEnteringAnimation(nullptr);
+    EXPECT_EQ(pattern->transitionStatus_, BubblePattern::TransitionStatus::NORMAL);
+    pattern->StartExitingAnimation(nullptr);
+    EXPECT_EQ(pattern->transitionStatus_, BubblePattern::TransitionStatus::INVISIABLE);
+
+    /**
+     * @tc.steps: step3. call StartEnteringAnimation and StartExitingAnimation with finish callback.
+     * @tc.expected: pattern->transitionStatus_ changed.
+     */
+    pattern->transitionStatus_ = BubblePattern::TransitionStatus::INVISIABLE;
+    pattern->StartEnteringAnimation([]() {});
+    EXPECT_EQ(pattern->transitionStatus_, BubblePattern::TransitionStatus::NORMAL);
+    pattern->StartExitingAnimation([]() {});
+    EXPECT_EQ(pattern->transitionStatus_, BubblePattern::TransitionStatus::INVISIABLE);
+
+    /**
+     * @tc.steps: step4. call StartEnteringAnimation and StartExitingAnimation while animating.
+     * @tc.expected: pattern->transitionStatus_ has no changed.
+     */
+    pattern->transitionStatus_ = BubblePattern::TransitionStatus::ENTERING;
+    pattern->StartEnteringAnimation(nullptr);
+    EXPECT_EQ(pattern->transitionStatus_, BubblePattern::TransitionStatus::ENTERING);
+    pattern->transitionStatus_ = BubblePattern::TransitionStatus::EXITING;
+    pattern->StartExitingAnimation(nullptr);
+    EXPECT_EQ(pattern->transitionStatus_, BubblePattern::TransitionStatus::EXITING);
+}
+
+/**
+ * @tc.name: BubblePatternTest010
+ * @tc.desc: Test IsOnShow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubblePatternTestNg, BubblePatternTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble.
+     */
+    auto pattern = AceType::MakeRefPtr<BubblePattern>(-1, "target");
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call IsOnShow.
+     */
+    pattern->transitionStatus_ = BubblePattern::TransitionStatus::ENTERING;
+    EXPECT_TRUE(pattern->IsOnShow());
+    pattern->transitionStatus_ = BubblePattern::TransitionStatus::NORMAL;
+    EXPECT_TRUE(pattern->IsOnShow());
+    pattern->transitionStatus_ = BubblePattern::TransitionStatus::EXITING;
+    EXPECT_FALSE(pattern->IsOnShow());
+    pattern->transitionStatus_ = BubblePattern::TransitionStatus::INVISIABLE;
+    EXPECT_FALSE(pattern->IsOnShow());
+}
+
+/**
+ * @tc.name: BubblePatternTest011
+ * @tc.desc: Test GetInvisibleOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubblePatternTestNg, BubblePatternTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble.
+     */
+    auto pattern = AceType::MakeRefPtr<BubblePattern>(-1, "target");
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetInvisibleOffset.
+     */
+    OffsetT<Dimension> offset;
+    pattern->arrowPlacement_.reset();
+    offset = pattern->GetInvisibleOffset();
+    EXPECT_EQ(offset.GetX().Value(), 0);
+    EXPECT_EQ(offset.GetY().Value(), 0);
+    pattern->arrowPlacement_ = Placement::LEFT;
+    offset = pattern->GetInvisibleOffset();
+    EXPECT_GT(offset.GetX().Value(), 0);
+    pattern->arrowPlacement_ = Placement::LEFT_TOP;
+    offset = pattern->GetInvisibleOffset();
+    EXPECT_GT(offset.GetX().Value(), 0);
+    pattern->arrowPlacement_ = Placement::LEFT_BOTTOM;
+    offset = pattern->GetInvisibleOffset();
+    EXPECT_GT(offset.GetX().Value(), 0);
+    pattern->arrowPlacement_ = Placement::RIGHT;
+    offset = pattern->GetInvisibleOffset();
+    EXPECT_LT(offset.GetX().Value(), 0);
+    pattern->arrowPlacement_ = Placement::RIGHT_TOP;
+    offset = pattern->GetInvisibleOffset();
+    EXPECT_LT(offset.GetX().Value(), 0);
+    pattern->arrowPlacement_ = Placement::RIGHT_BOTTOM;
+    offset = pattern->GetInvisibleOffset();
+    EXPECT_LT(offset.GetX().Value(), 0);
+    pattern->arrowPlacement_ = Placement::TOP;
+    offset = pattern->GetInvisibleOffset();
+    EXPECT_GT(offset.GetY().Value(), 0);
+    pattern->arrowPlacement_ = Placement::TOP_LEFT;
+    offset = pattern->GetInvisibleOffset();
+    EXPECT_GT(offset.GetY().Value(), 0);
+    pattern->arrowPlacement_ = Placement::TOP_RIGHT;
+    offset = pattern->GetInvisibleOffset();
+    EXPECT_GT(offset.GetY().Value(), 0);
+    pattern->arrowPlacement_ = Placement::BOTTOM;
+    offset = pattern->GetInvisibleOffset();
+    EXPECT_LT(offset.GetY().Value(), 0);
+    pattern->arrowPlacement_ = Placement::BOTTOM_LEFT;
+    offset = pattern->GetInvisibleOffset();
+    EXPECT_LT(offset.GetY().Value(), 0);
+    pattern->arrowPlacement_ = Placement::BOTTOM_RIGHT;
+    offset = pattern->GetInvisibleOffset();
+    EXPECT_LT(offset.GetY().Value(), 0);
+    pattern->arrowPlacement_ = Placement::NONE;
+    offset = pattern->GetInvisibleOffset();
+    EXPECT_EQ(offset.GetX().Value(), 0);
+    EXPECT_EQ(offset.GetY().Value(), 0);
+}
+
+/**
+ * @tc.name: BubblePatternTest012
+ * @tc.desc: Test start animation in OnDirtyLayoutWrapperSwap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubblePatternTestNg, BubblePatternTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble.
+     */
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto pattern = AceType::MakeRefPtr<BubblePattern>(targetId, targetTag);
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    EXPECT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+
+    /**
+     * @tc.steps: step2. call StartEnteringAnimation.
+     * @tc.expected: pattern->transitionStatus_ has no changed.
+     */
+    pattern->StartEnteringAnimation(nullptr);
+    EXPECT_EQ(pattern->transitionStatus_, BubblePattern::TransitionStatus::INVISIABLE);
+
+    /**
+     * @tc.steps: step3. call OnDirtyLayoutWrapperSwap.
+     * @tc.expected: pattern->transitionStatus_ has changed.
+     */
+    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
+    EXPECT_EQ(pattern->transitionStatus_, BubblePattern::TransitionStatus::NORMAL);
+}
+
+/*
+ * @tc.name: BubblePaintMethod001
+ * @tc.desc: Test BubblePaintMethod PaintBorder PaintBubble.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubblePatternTestNg, BubblePaintMethod001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the BubblePaintMethod.
+     */
+    BubblePaintMethod bubblePaintMethod;
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Translate(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, ClipRoundRect(_, _)).Times(AtLeast(1));
+
+    /**
+     * @tc.steps: step2. Create the GeometryNode and PaintWrapper.Set the progressPaintProperty.
+     * @tc.expected: step2. Check the GeometryNode and PaintWrapper were created successfully.
+     */
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+
+    auto bubblePaintProperty = frameNode->GetPaintProperty<BubbleRenderProperty>();
+    ASSERT_NE(bubblePaintProperty, nullptr);
+
+    WeakPtr<RenderContext> renderContext;
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, bubblePaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+
+    /**
+     * @tc.steps: step3. Set the different properties.Call the function PaintBorder.
+     * @tc.expected: step3. Check the properties.
+     */
+    // PaintBorder border_.IsAllEqual, border_.HasValue.
+    bubblePaintMethod.border_.SetBorderEdge(BorderEdge(Color::BLACK, BORDER_EDGE, BorderStyle::SOLID));
+    bubblePaintMethod.PaintBorder(canvas, paintWrapper);
+    EXPECT_TRUE(bubblePaintMethod.border_.HasValue());
+    EXPECT_TRUE(bubblePaintMethod.border_.IsAllEqual());
+
+    // PaintBorder !border_.IsAllEqual, border_.HasValue.
+    bubblePaintMethod.border_.SetLeftEdge(BorderEdge(Color::BLUE, BORDER_EDGE_LARGE, BorderStyle::DOTTED));
+    ASSERT_FALSE(bubblePaintMethod.border_.IsAllEqual());
+    bubblePaintMethod.PaintBorder(canvas, paintWrapper);
+    bubblePaintMethod.border_.SetLeftEdge(BorderEdge(Color::BLUE, BORDER_EDGE_LARGE, BorderStyle::DASHED));
+    ASSERT_FALSE(bubblePaintMethod.border_.IsAllEqual());
+    bubblePaintMethod.PaintBorder(canvas, paintWrapper);
+    bubblePaintMethod.border_.SetLeftEdge(BorderEdge(Color::BLUE, BORDER_EDGE_LARGE, BorderStyle::NONE));
+    ASSERT_FALSE(bubblePaintMethod.border_.IsAllEqual());
+    bubblePaintMethod.PaintBorder(canvas, paintWrapper);
+    EXPECT_TRUE(bubblePaintMethod.border_.IsAllEqual());
+
+    /**
+     * @tc.steps: step4. Set the different properties.Call the function PaintBubble.
+     * @tc.expected: step4. Check the properties.
+     */
+    bubblePaintMethod.SetShowArrow(true);
+    bubblePaintMethod.enableArrow_ = true;
+    bubblePaintMethod.PaintBubble(canvas, paintWrapper);
+    EXPECT_TRUE(bubblePaintMethod.showArrow_);
+
+    bubblePaintMethod.SetShowArrow(false);
+    bubblePaintMethod.PaintBubble(canvas, paintWrapper);
+    ASSERT_FALSE(bubblePaintMethod.showArrow_);
 }
 } // namespace OHOS::Ace::NG

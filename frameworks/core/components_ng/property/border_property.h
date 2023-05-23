@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "base/geometry/dimension.h"
+#include "base/json/json_util.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"

@@ -31,7 +31,7 @@ constexpr float OPACITY_CHANGE_START = 0.571f;
 
 CardTransitionController::CardTransitionController(const WeakPtr<PipelineContext>& context) : context_(context)
 {
-    controller_ = AceType::MakeRefPtr<Animator>(context);
+    controller_ = CREATE_ANIMATOR(context);
 };
 
 void CardTransitionController::RegisterTransitionListener()

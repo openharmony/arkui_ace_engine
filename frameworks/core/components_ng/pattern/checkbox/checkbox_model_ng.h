@@ -19,7 +19,6 @@
 #include "core/components_ng/pattern/checkbox/checkbox_model.h"
 
 namespace OHOS::Ace::NG {
-
 class ACE_EXPORT CheckBoxModelNG : public OHOS::Ace::CheckBoxModel {
 public:
     void Create(const std::optional<std::string>& name, const std::optional<std::string>& groupName,
@@ -33,9 +32,8 @@ public:
     void SetOnChange(ChangeEvent&& onChange) override;
     void SetWidth(const Dimension& width) override;
     void SetHeight(const Dimension& height) override;
-    void SetPadding(const NG::PaddingPropertyF& args) override;
+    void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs, bool flag) override;
+    void SetChangeEvent(ChangeEvent&& changeEvent) override;
 };
-
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_MODEL_NG_H

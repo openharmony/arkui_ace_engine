@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,7 +59,10 @@
 #include "core/components/tool_bar/tool_bar_theme.h"
 #include "core/components/video/video_theme.h"
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
+#include "core/components_ng/pattern/form/form_theme.h"
+#include "core/components_ng/pattern/security_component/security_component_theme.h"
 #include "core/components_v2/pattern_lock/pattern_lock_theme.h"
+#include "core/components/theme/advanced_pattern_theme.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -116,7 +119,10 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { IconTheme::TypeId(), &ThemeBuildFunc<IconTheme::Builder> },
     { V2::PatternLockTheme::TypeId(), &ThemeBuildFunc<V2::PatternLockTheme::Builder> },
     { IndexerTheme::TypeId(), &ThemeBuildFunc<IndexerTheme::Builder> },
-    { NG::AppBarTheme::TypeId(), &ThemeBuildFunc<NG::AppBarTheme::Builder> }
+    { NG::AppBarTheme::TypeId(), &ThemeBuildFunc<NG::AppBarTheme::Builder> },
+    { AdvancedPatternTheme::TypeId(), &ThemeBuildFunc<AdvancedPatternTheme::Builder> },
+    { NG::SecurityComponentTheme::TypeId(), &ThemeBuildFunc<NG::SecurityComponentTheme::Builder> },
+    { NG::FormTheme::TypeId(), &ThemeBuildFunc<NG::FormTheme::Builder> }
 };
 } // namespace
 

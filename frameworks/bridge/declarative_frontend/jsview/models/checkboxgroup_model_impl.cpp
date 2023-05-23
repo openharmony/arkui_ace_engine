@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,6 @@
 #include "core/components/checkable/checkable_theme.h"
 
 namespace OHOS::Ace::Framework {
-
 void CheckBoxGroupModelImpl::Create(const std::optional<std::string>& groupName)
 {
     RefPtr<CheckboxTheme> checkBoxTheme = JSViewAbstract::GetTheme<CheckboxTheme>();
@@ -112,8 +111,12 @@ void CheckBoxGroupModelImpl::SetHeight(const Dimension& height)
     }
 }
 
-void CheckBoxGroupModelImpl::SetPadding(const NG::PaddingPropertyF& args)
+void CheckBoxGroupModelImpl::SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs, bool flag)
 {
+    if (!flag) {
+        return;
+    }
+
     auto* stack = ViewStackProcessor::GetInstance();
     auto box = stack->GetBoxComponent();
     auto checkboxComponent = AceType::DynamicCast<CheckboxComponent>(stack->GetMainComponent());
@@ -128,5 +131,4 @@ void CheckBoxGroupModelImpl::SetPadding(const NG::PaddingPropertyF& args)
         checkboxComponent->SetHorizontalPadding(Dimension(args.top.value(), DimensionUnit::VP));
     }
 }
-
 } // namespace OHOS::Ace::Framework

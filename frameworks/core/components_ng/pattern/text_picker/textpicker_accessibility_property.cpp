@@ -20,16 +20,11 @@
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 
 namespace OHOS::Ace::NG {
-constexpr int32_t MIDDLE_OF_COUNTS = 2;
 std::string TextPickerAccessibilityProperty::GetText() const
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, "");
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    CHECK_NULL_RETURN(textPickerPattern, "");
-    auto columnNode = textPickerPattern->GetColumnNode();
-    CHECK_NULL_RETURN(columnNode, "");
-    auto textPickerColumnPattern = columnNode->GetPattern<TextPickerColumnPattern>();
+    auto textPickerColumnPattern = frameNode->GetPattern<TextPickerColumnPattern>();
     CHECK_NULL_RETURN(textPickerColumnPattern, "");
     return textPickerColumnPattern->GetOption(textPickerColumnPattern->GetCurrentIndex());
 }
@@ -38,11 +33,7 @@ int32_t TextPickerAccessibilityProperty::GetCurrentIndex() const
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, -1);
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    CHECK_NULL_RETURN(textPickerPattern, -1);
-    auto columnNode = textPickerPattern->GetColumnNode();
-    CHECK_NULL_RETURN(columnNode, -1);
-    auto textPickerColumnPattern = columnNode->GetPattern<TextPickerColumnPattern>();
+    auto textPickerColumnPattern = frameNode->GetPattern<TextPickerColumnPattern>();
     CHECK_NULL_RETURN(textPickerColumnPattern, -1);
     return textPickerColumnPattern->GetCurrentIndex();
 }
@@ -51,13 +42,9 @@ int32_t TextPickerAccessibilityProperty::GetBeginIndex() const
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, -1);
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    CHECK_NULL_RETURN(textPickerPattern, -1);
-    auto columnNode = textPickerPattern->GetColumnNode();
-    CHECK_NULL_RETURN(columnNode, -1);
-    auto textPickerColumnPattern = columnNode->GetPattern<TextPickerColumnPattern>();
+    auto textPickerColumnPattern = frameNode->GetPattern<TextPickerColumnPattern>();
     CHECK_NULL_RETURN(textPickerColumnPattern, -1);
-    auto middleIndex = textPickerColumnPattern->GetShowOptionCount() / MIDDLE_OF_COUNTS;
+    auto middleIndex = textPickerColumnPattern->GetHalfDisplayCounts();
     auto currentIndex = textPickerColumnPattern->GetCurrentIndex();
     auto totalIndex = textPickerColumnPattern->GetOptionCount();
     if (totalIndex == 0) {
@@ -75,13 +62,9 @@ int32_t TextPickerAccessibilityProperty::GetEndIndex() const
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, -1);
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    CHECK_NULL_RETURN(textPickerPattern, -1);
-    auto columnNode = textPickerPattern->GetColumnNode();
-    CHECK_NULL_RETURN(columnNode, -1);
-    auto textPickerColumnPattern = columnNode->GetPattern<TextPickerColumnPattern>();
+    auto textPickerColumnPattern = frameNode->GetPattern<TextPickerColumnPattern>();
     CHECK_NULL_RETURN(textPickerColumnPattern, -1);
-    auto middleIndex = textPickerColumnPattern->GetShowOptionCount() / MIDDLE_OF_COUNTS;
+    auto middleIndex = textPickerColumnPattern->GetHalfDisplayCounts();
     auto currentIndex = textPickerColumnPattern->GetCurrentIndex();
     auto totalIndex = textPickerColumnPattern->GetOptionCount();
     if (totalIndex == 0) {
@@ -99,11 +82,7 @@ AccessibilityValue TextPickerAccessibilityProperty::GetAccessibilityValue() cons
     AccessibilityValue result;
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, result);
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    CHECK_NULL_RETURN(textPickerPattern, result);
-    auto columnNode = textPickerPattern->GetColumnNode();
-    CHECK_NULL_RETURN(columnNode, result);
-    auto textPickerColumnPattern = columnNode->GetPattern<TextPickerColumnPattern>();
+    auto textPickerColumnPattern = frameNode->GetPattern<TextPickerColumnPattern>();
     CHECK_NULL_RETURN(textPickerColumnPattern, result);
 
     auto totalIndex = textPickerColumnPattern->GetOptionCount();
@@ -120,11 +99,7 @@ int32_t TextPickerAccessibilityProperty::GetCollectionItemCounts() const
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, -1);
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    CHECK_NULL_RETURN(textPickerPattern, -1);
-    auto columnNode = textPickerPattern->GetColumnNode();
-    CHECK_NULL_RETURN(columnNode, -1);
-    auto textPickerColumnPattern = columnNode->GetPattern<TextPickerColumnPattern>();
+    auto textPickerColumnPattern = frameNode->GetPattern<TextPickerColumnPattern>();
     CHECK_NULL_RETURN(textPickerColumnPattern, -1);
     return textPickerColumnPattern->GetOptionCount();
 }
@@ -133,11 +108,7 @@ bool TextPickerAccessibilityProperty::IsScrollable() const
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, false);
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    CHECK_NULL_RETURN(textPickerPattern, false);
-    auto columnNode = textPickerPattern->GetColumnNode();
-    CHECK_NULL_RETURN(columnNode, false);
-    auto textPickerColumnPattern = columnNode->GetPattern<TextPickerColumnPattern>();
+    auto textPickerColumnPattern = frameNode->GetPattern<TextPickerColumnPattern>();
     CHECK_NULL_RETURN(textPickerColumnPattern, false);
     return textPickerColumnPattern->GetOptionCount() > 1;
 }
@@ -146,11 +117,7 @@ void TextPickerAccessibilityProperty::SetSpecificSupportAction()
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_VOID(frameNode);
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    CHECK_NULL_VOID(textPickerPattern);
-    auto columnNode = textPickerPattern->GetColumnNode();
-    CHECK_NULL_VOID(columnNode);
-    auto textPickerColumnPattern = columnNode->GetPattern<TextPickerColumnPattern>();
+    auto textPickerColumnPattern = frameNode->GetPattern<TextPickerColumnPattern>();
     CHECK_NULL_VOID(textPickerColumnPattern);
     if (IsScrollable()) {
         if (textPickerColumnPattern->NotLoopOptions()) {

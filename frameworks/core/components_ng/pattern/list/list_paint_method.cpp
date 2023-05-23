@@ -59,7 +59,7 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     listContentModifier_->SetClipOffset(paddingOffset);
     listContentModifier_->SetClipSize(frameSize);
     listContentModifier_->SetClip(clip);
-
+    
     if (!divider_.strokeWidth.IsValid() || totalItemCount_ <= 0) {
         listContentModifier_->ResetDividerInfo();
         return;
@@ -68,8 +68,8 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     DividerInfo dividerInfo = {
         .constrainStrokeWidth = divider_.strokeWidth.ConvertToPx(),
         .crossSize = vertical_ ? frameSize.Height() : frameSize.Width(),
-        .startMargin = divider_.startMargin.ConvertToPx(),
-        .endMargin = divider_.endMargin.ConvertToPx(),
+        .startMargin = std::max(0.0, divider_.startMargin.ConvertToPx()),
+        .endMargin = std::max(0.0, divider_.endMargin.ConvertToPx()),
         .space = space_,
         .mainPadding = paddingOffset.GetMainOffset(axis),
         .crossPadding = paddingOffset.GetCrossOffset(axis),
@@ -78,6 +78,12 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         .totalItemCount = totalItemCount_,
         .color = divider_.color
     };
+    float checkMargin = dividerInfo.crossSize / dividerInfo.lanes - dividerInfo.startMargin - dividerInfo.endMargin;
+    if (NearZero(checkMargin)) return;
+    if (LessNotEqual(checkMargin, 0.0f)) {
+        dividerInfo.startMargin = 0.0f;
+        dividerInfo.endMargin = 0.0f;
+    }
     listContentModifier_->SetDividerInfo(std::move(dividerInfo));
     listContentModifier_->FlushDivider();
 }

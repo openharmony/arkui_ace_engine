@@ -28,19 +28,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<TextTimerModel> TextTimerModel::instance_ = nullptr;
+std::mutex TextTimerModel::mutex_;
 
 TextTimerModel* TextTimerModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::TextTimerModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::TextTimerModelNG());
-        } else {
-            instance_.reset(new Framework::TextTimerModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::TextTimerModelNG());
+            } else {
+                instance_.reset(new Framework::TextTimerModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -101,8 +105,7 @@ void JSTextTimer::JSBind(BindingTarget globalObj)
     JSClass<JSTextTimer>::StaticMethod("onTimer", &JSTextTimer::OnTimer);
     JSClass<JSTextTimer>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSTextTimer>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSTextTimer>::Inherit<JSViewAbstract>();
-    JSClass<JSTextTimer>::Bind<>(globalObj);
+    JSClass<JSTextTimer>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSTextTimer::SetFormat(const JSCallbackInfo& info)
@@ -126,6 +129,13 @@ void JSTextTimer::SetFormat(const JSCallbackInfo& info)
         }
     }
 
+    std::string target = "HmsS:.";
+    for (auto ch : format) {
+        if (target.find(ch) == std::string::npos) {
+            format = DEFAULT_FORMAT;
+        }
+    }
+
     auto pos = format.find("hh");
     if (pos != std::string::npos) {
         format.replace(pos, sizeof("hh") - 1, "HH");
@@ -140,7 +150,7 @@ void JSTextTimer::SetFontSize(const JSCallbackInfo& info)
         LOGE("JSTextInput::SetFontSize The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }

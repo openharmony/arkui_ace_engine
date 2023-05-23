@@ -17,7 +17,10 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 if (!is_cross_platform_build) {
   ohos_ndk_headers("ace_header") {
     dest_dir = "$ndk_headers_out_dir/ace/xcomponent/"
-    sources = [ "native_interface_xcomponent.h" ]
+    sources = [
+      "native_interface_xcomponent.h",
+      "native_xcomponent_key_event.h",
+    ]
   }
 
   ohos_ndk_library("libace_ndk") {
@@ -28,6 +31,13 @@ if (!is_cross_platform_build) {
 }
 
 ohos_shared_library("ace_ndk") {
+  if (current_os == "ohos") {
+    sanitize = {
+      integer_overflow = true
+      boundary_sanitize = true
+      debug = ace_sanitize_debug
+    }
+  }
   include_dirs = [
     "//foundation/arkui/ace_engine",
     "//foundation/arkui/ace_engine/frameworks",

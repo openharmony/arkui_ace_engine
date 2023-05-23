@@ -16,20 +16,19 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIALOG_CUSTOM_DIALOG_CONTROLLER_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIALOG_CUSTOM_DIALOG_CONTROLLER_MODEL_NG_H
 
-#include "core/components/dialog/dialog_component.h"
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT CustomDialogControllerModelNG : public OHOS::Ace::CustomDialogControllerModel {
 public:
-    RefPtr<AceType> SetOpenDialog() override;
-    void SetOpenDialog(DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs,
-        std::function<void(RefPtr<AceType>&)>&& task, bool& pending, RefPtr<AceType>& overlayManager,
-        std::function<void()>&& cancelTask) override;
+    void SetOpenDialog(DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs, bool& pending,
+        bool& isShown, std::function<void()>&& cancelTask, std::function<void()>&& buildFunc,
+        RefPtr<AceType>& dialogComponent, RefPtr<AceType>& customDialog,
+        std::list<DialogOperation>& dialogOperation) override;
     void SetCloseDialog(DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs, bool& pending,
-        std::function<void()>&& task, RefPtr<AceType>& dialogComponent) override;
-    void setOnCancel(std::function<void()>&& event, std::function<void()>&& onCancel) override;
+        bool& isShown, std::function<void()>&& cancelTask, RefPtr<AceType>& dialogComponent,
+        RefPtr<AceType>& customDialog, std::list<DialogOperation>& dialogOperation) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_DIALOG_JS_CUSTOM_DIALOG_CONTROLLER_H

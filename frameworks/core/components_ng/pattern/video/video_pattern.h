@@ -111,7 +111,8 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true };
+        // Video focus type is scope, it is a container, inner focus is on slider now.
+        return { FocusType::SCOPE, true };
     }
 
     void SetHiddenChangeEvent(HiddenChangeEvent&& hiddenChangeEvent)
@@ -135,6 +136,8 @@ public:
 
     void OnAreaChangedInner() override;
 
+    void UpdateMediaPlayer();
+    
     void EnableDrag();
     void SetIsStop(bool isStop)
     {
@@ -152,24 +155,25 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
 
-    void UpdateMediaPlayer();
+    // Set properties for media player.
     void PrepareMediaPlayer();
     void PrepareSurface();
     void RegisterMediaPlayerEvent();
     void SetMethodCall();
     bool SetSourceForMediaPlayer();
+    void UpdateLooping();
+    void UpdateSpeed();
+    void UpdateMuted();
+
     bool HasPlayer() const;
 
+    // Functions for the video controller.
     void Start();
     void Pause();
     void Stop();
-    void SetCurrentTime(float currentPos, SeekMode seekMode = SeekMode::SEEK_PREVIOUS_SYNC);
-    void OnFullScreenChange(bool isFullScreen);
     void FullScreen();
     void ExitFullScreen();
-    void UpdateLooping();
-    void SetSpeed();
-    void UpdateMuted();
+    void SetCurrentTime(float currentPos, SeekMode seekMode = SeekMode::SEEK_PREVIOUS_SYNC);
 
     void OnCurrentTimeChange(uint32_t currentPos);
     void OnPlayerStatus(PlaybackStatus status);
@@ -178,8 +182,8 @@ private:
     void OnPrepared(double width, double height, uint32_t duration, uint32_t currentPos, bool needFireEvent);
     void OnCompletion();
     void OnSliderChange(float posTime, int32_t mode);
-
     void OnUpdateTime(uint32_t time, int pos) const;
+    void OnFullScreenChange(bool isFullScreen);
 
     void AddPreviewNodeIfNeeded();
     void AddControlBarNodeIfNeeded();
@@ -195,6 +199,9 @@ private:
     void ResetStatus();
     void HiddenChange(bool hidden);
 
+    // Fire error manually, eg. src is not existed. It must run on ui.
+    void FireError();
+
     RefPtr<VideoControllerV2> videoControllerV2_;
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
     RefPtr<MediaPlayer> mediaPlayer_ = MediaPlayer::Create();
@@ -205,10 +212,7 @@ private:
     HiddenChangeEvent hiddenChangeEvent_;
 
     bool isStop_ = false;
-    std::string src_;
-
-    uint32_t duration_ = 0;
-    uint32_t currentPos_ = 0;
+    bool isDrag_ = false;
 
     bool muted_ = false;
     bool autoPlay_ = false;
@@ -217,12 +221,18 @@ private:
     bool isInitialState_ = true; // Initial state is true. Play or seek will set it to false.
     bool isPlaying_ = false;
     bool pastPlayingStatus_ = false;
+
+    // Video duration.
+    uint32_t duration_ = 0;
+    uint32_t currentPos_ = 0;
+
+    // Video playback speed.
     double progressRate_ = 1.0;
 
     Rect lastBoundsRect_;
 
-    bool isDrag_ = false;
-
+    // Video src.
+    std::string src_;
     ACE_DISALLOW_COPY_AND_MOVE(VideoPattern);
 };
 } // namespace OHOS::Ace::NG

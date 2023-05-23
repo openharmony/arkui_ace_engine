@@ -45,11 +45,13 @@ public:
     void SetTextAlign(const TextAlign& textAlign) override;
     void SetCopyOption(const CopyOptions& copyOptions) override;
     void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems) override;
+    void SetHeight(const Dimension& height) override;
     void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override;
     void SetOnChange(std::function<void(const std::string&)>&& onChange) override;
     void SetOnCopy(std::function<void(const std::string&)>&& func) override;
     void SetOnCut(std::function<void(const std::string&)>&& func) override;
     void SetOnPaste(std::function<void(const std::string&)>&& func) override;
+    void SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent) override;
 
 private:
     void CreateTextField(const RefPtr<SearchNode>& parentNode,

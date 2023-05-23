@@ -22,19 +22,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<DividerModel> DividerModel::instance_ = nullptr;
+std::mutex DividerModel::mutex_;
 
 DividerModel* DividerModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::DividerModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::DividerModelNG());
-        } else {
-            instance_.reset(new Framework::DividerModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::DividerModelNG());
+            } else {
+                instance_.reset(new Framework::DividerModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -73,15 +77,9 @@ void JSDivider::SetDividerColor(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Color dividerColor;
-    if (!ParseJsColor(info[0], dividerColor)) {
-        auto theme = GetTheme<DividerTheme>();
-        if (theme) {
-            dividerColor = theme->GetColor();
-        }
-        DividerModel::GetInstance()->DividerColor(dividerColor);
-        return;
-    }
+    auto theme = GetTheme<DividerTheme>();
+    Color dividerColor = theme->GetColor();
+    ParseJsColor(info[0], dividerColor);
     DividerModel::GetInstance()->DividerColor(dividerColor);
 }
 
@@ -91,10 +89,9 @@ void JSDivider::SetStrokeWidth(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension strokeWidth;
-    if (!ParseJsDimensionVp(info[0], strokeWidth)) {
-        return;
-    }
+    auto theme = GetTheme<DividerTheme>();
+    CalcDimension strokeWidth = theme->GetStokeWidth();
+    ParseJsDimensionVp(info[0], strokeWidth);
     DividerModel::GetInstance()->StrokeWidth(strokeWidth);
 }
 
@@ -116,7 +113,6 @@ void JSDivider::JSBind(BindingTarget globalObj)
     JSClass<JSDivider>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSDivider>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
-    JSClass<JSDivider>::Inherit<JSViewAbstract>();
-    JSClass<JSDivider>::Bind<>(globalObj);
+    JSClass<JSDivider>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

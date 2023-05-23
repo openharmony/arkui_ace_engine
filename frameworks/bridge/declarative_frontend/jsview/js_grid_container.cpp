@@ -61,7 +61,7 @@ void JSGridContainer::Create(const JSCallbackInfo& info)
             gridContainerInfoBuilder.SetSizeType(static_cast<GridSizeType>(value));
         }
 
-        Dimension dim;
+        CalcDimension dim;
         // gutter?: Length
         if (ParseJsDimensionVp(obj->GetProperty("gutter"), dim)) {
             gridContainerInfoBuilder.SetGutterWidth(dim);
@@ -88,8 +88,7 @@ void JSGridContainer::JSBind(BindingTarget globalObj)
     JSClass<JSGridContainer>::Declare("GridContainer");
     JSClass<JSGridContainer>::StaticMethod("create", &JSGridContainer::Create, MethodOptions::NONE);
     JSClass<JSGridContainer>::StaticMethod("pop", &JSGridContainer::Pop, MethodOptions::NONE);
-    JSClass<JSGridContainer>::Inherit<JSColumn>();
-    JSClass<JSGridContainer>::Bind<>(globalObj);
+    JSClass<JSGridContainer>::InheritAndBind<JSColumn>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

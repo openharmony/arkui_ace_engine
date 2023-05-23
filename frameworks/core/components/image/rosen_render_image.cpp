@@ -421,7 +421,7 @@ void RosenRenderImage::FetchImageObject()
 
 void RosenRenderImage::UpdateSharedMemoryImage(const RefPtr<PipelineContext>& context)
 {
-    auto sharedImageManager = context->GetSharedImageManager();
+    auto sharedImageManager = context->GetOrCreateSharedImageManager();
     if (!sharedImageManager) {
         LOGE("sharedImageManager is null when image try loading memory image, sourceInfo_: %{private}s",
             sourceInfo_.ToString().c_str());
@@ -796,7 +796,12 @@ void RosenRenderImage::CanvasDrawImageRect(
         recordingCanvas->translate(imageRenderPosition_.GetX() * -1, imageRenderPosition_.GetY() * -1);
         Rosen::RsImageInfo rsImageInfo(
             fitNum, repeatNum, radii_, scale_, 0, skImage->GetCompressWidth(), skImage->GetCompressHeight());
+#ifndef NEW_SKIA
         recordingCanvas->DrawImageWithParm(skImage->GetImage(), skImage->GetCompressData(), rsImageInfo, paint);
+#else
+        recordingCanvas->DrawImageWithParm(
+            skImage->GetImage(), skImage->GetCompressData(), rsImageInfo, options_, paint);
+#endif
         skImage->SetCompressData(nullptr, 0, 0);
         return;
     }

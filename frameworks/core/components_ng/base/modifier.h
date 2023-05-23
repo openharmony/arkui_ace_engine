@@ -19,6 +19,7 @@
 #include <atomic>
 #include <cstdint>
 #include <functional>
+#include <optional>
 #include <vector>
 
 #include "base/memory/ace_type.h"
@@ -150,8 +151,19 @@ public:
         return attachedProperties_;
     }
 
+    const std::optional<RectF>& GetBoundsRect()
+    {
+        return rect_;
+    }
+
+    void SetBoundsRect(const std::optional<RectF>& rect)
+    {
+        rect_ = rect;
+    }
+
 private:
     std::vector<RefPtr<PropertyBase>> attachedProperties_;
+    std::optional<RectF> rect_;
     ACE_DISALLOW_COPY_AND_MOVE(ContentModifier);
 };
 
@@ -212,6 +224,7 @@ DECLARE_PROP_TYPED_CLASS(AnimatablePropertyVectorFloat, AnimatableProperty, Line
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyVectorColor, AnimatableProperty, GradientArithmetic);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyOffsetF, AnimatableProperty, OffsetF);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertySizeF, AnimatableProperty, SizeF);
+DECLARE_PROP_TYPED_CLASS(AnimatableArithmeticProperty, AnimatableProperty, RefPtr<CustomAnimatableArithmetic>);
 
 class ModifierImpl {
 };
@@ -284,6 +297,8 @@ private:
 };
 
 using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;
+using NodeAnimatableArithmeticProperty =
+    NodeAnimatableProperty<RefPtr<CustomAnimatableArithmetic>, AnimatableArithmeticProperty>;
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MODIFIER_H

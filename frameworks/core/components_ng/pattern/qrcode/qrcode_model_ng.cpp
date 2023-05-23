@@ -38,6 +38,8 @@ void QRCodeModelNG::SetQRCodeColor(Color color)
 {
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Color, color);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
 }
 
 void QRCodeModelNG::SetQRBackgroundColor(Color color)

@@ -30,19 +30,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<ToggleModel> ToggleModel::instance_ = nullptr;
+std::mutex ToggleModel::mutex_;
 
 ToggleModel* ToggleModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::ToggleModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::ToggleModelNG());
-        } else {
-            instance_.reset(new Framework::ToggleModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::ToggleModelNG());
+            } else {
+                instance_.reset(new Framework::ToggleModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -71,8 +75,21 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSToggle>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSToggle>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSToggle>::Inherit<JSViewAbstract>();
-    JSClass<JSToggle>::Bind(globalObj);
+    JSClass<JSToggle>::InheritAndBind<JSViewAbstract>(globalObj);
+}
+
+void ParseToggleIsOnObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
+{
+    CHECK_NULL_VOID(changeEventVal->IsFunction());
+
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto onChangeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](bool isOn) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Toggle.onChangeEvent");
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(isOn));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    ToggleModel::GetInstance()->OnChangeEvent(std::move(onChangeEvent));
 }
 
 void JSToggle::Create(const JSCallbackInfo& info)
@@ -84,18 +101,29 @@ void JSToggle::Create(const JSCallbackInfo& info)
 
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto type = paramObject->GetProperty("type");
-    if (!type->IsNumber()) {
-        LOGE("toggle create error, type is non-valid");
-        return;
+    int32_t toggleTypeInt = 1;
+    if (type->IsNumber()) {
+        toggleTypeInt = type->ToNumber<int32_t>();
     }
-
+    if (toggleTypeInt < 0 || toggleTypeInt > 2) {
+        toggleTypeInt = 1;
+    }
     auto tempIsOn = paramObject->GetProperty("isOn");
-    bool isOn = tempIsOn->IsBoolean() ? tempIsOn->ToBoolean() : false;
-    auto toggleType = static_cast<ToggleType>(type->ToNumber<int32_t>());
-
-    auto toggleTypeInt = static_cast<int32_t>(toggleType);
+    bool isOn = false;
+    JSRef<JSVal> changeEventVal;
+    if (tempIsOn->IsObject()) {
+        JSRef<JSObject> isOnObj = JSRef<JSObject>::Cast(tempIsOn);
+        changeEventVal = isOnObj->GetProperty("changeEvent");
+        auto isOnProperty = isOnObj->GetProperty("value");
+        isOn = isOnProperty->IsBoolean() ? isOnProperty->ToBoolean() : false;
+    } else {
+        isOn = tempIsOn->IsBoolean() ? tempIsOn->ToBoolean() : false;
+    }
     
     ToggleModel::GetInstance()->Create(NG::ToggleType(toggleTypeInt), isOn);
+    if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
+        ParseToggleIsOnObject(info, changeEventVal);
+    }
 }
 
 void JSToggle::JsWidth(const JSCallbackInfo& info)
@@ -110,7 +138,7 @@ void JSToggle::JsWidth(const JSCallbackInfo& info)
 
 void JSToggle::JsWidth(const JSRef<JSVal>& jsValue)
 {
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(jsValue, value)) {
         return;
     }
@@ -135,7 +163,7 @@ void JSToggle::JsHeight(const JSCallbackInfo& info)
 
 void JSToggle::JsHeight(const JSRef<JSVal>& jsValue)
 {
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(jsValue, value)) {
         return;
     }
@@ -236,10 +264,10 @@ void JSToggle::JsPadding(const JSCallbackInfo& info)
         }
         if (argsPtrItem->Contains("top") || argsPtrItem->Contains("bottom") || argsPtrItem->Contains("left") ||
             argsPtrItem->Contains("right")) {
-            Dimension topDimen = Dimension(0.0, DimensionUnit::VP);
-            Dimension leftDimen = Dimension(0.0, DimensionUnit::VP);
-            Dimension rightDimen = Dimension(0.0, DimensionUnit::VP);
-            Dimension bottomDimen = Dimension(0.0, DimensionUnit::VP);
+            CalcDimension topDimen = CalcDimension(0.0, DimensionUnit::VP);
+            CalcDimension leftDimen = CalcDimension(0.0, DimensionUnit::VP);
+            CalcDimension rightDimen = CalcDimension(0.0, DimensionUnit::VP);
+            CalcDimension bottomDimen = CalcDimension(0.0, DimensionUnit::VP);
             ParseJsonDimensionVp(argsPtrItem->GetValue("top"), topDimen);
             ParseJsonDimensionVp(argsPtrItem->GetValue("left"), leftDimen);
             ParseJsonDimensionVp(argsPtrItem->GetValue("right"), rightDimen);
@@ -262,7 +290,7 @@ void JSToggle::JsPadding(const JSCallbackInfo& info)
             return;
         }
     }
-    Dimension length;
+    CalcDimension length;
     if (!JSViewAbstract::ParseJsDimensionVp(info[0], length)) {
         return;
     }

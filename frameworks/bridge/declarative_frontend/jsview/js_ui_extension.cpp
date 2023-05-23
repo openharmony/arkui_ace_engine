@@ -26,52 +26,40 @@
 
 namespace OHOS::Ace {
 std::unique_ptr<UIExtensionModel> UIExtensionModel::instance_ = nullptr;
+std::mutex UIExtensionModel::mutex_;
 
 UIExtensionModel* UIExtensionModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::UIExtensionModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::UIExtensionModelNG());
-        } else {
-            LOGE("The old frameworks does not support UIExtensionComponent");
-            return nullptr;
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::UIExtensionModelNG());
+            } else {
+                LOGE("The old frameworks does not support UIExtensionComponent");
+                return nullptr;
+            }
 #endif
+        }
     }
     return instance_.get();
 }
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-namespace {
-std::function<void()> CreateCallback(const std::string& callbackName, const JSCallbackInfo& info)
-{
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onConnect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), callbackName]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT(callbackName);
-        auto newJSVal = JSRef<JSVal>::Make();
-        func->ExecuteJS(1, &newJSVal);
-    };
-    return onConnect;
-}
-} // namespace
-
 void JSUIExtension::JSBind(BindingTarget globalObj)
 {
     JSClass<JSUIExtension>::Declare("UIExtensionComponent");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSUIExtension>::StaticMethod("create", &JSUIExtension::Create, opt);
-    JSClass<JSUIExtension>::StaticMethod("onConnect", &JSUIExtension::SetOnConnect, opt);
-    JSClass<JSUIExtension>::StaticMethod("onDisconnect", &JSUIExtension::SetOnDisconnect, opt);
+    JSClass<JSUIExtension>::StaticMethod("onConnected", &JSUIExtension::SetOnConnect, opt);
+    JSClass<JSUIExtension>::StaticMethod("onDisconnected", &JSUIExtension::SetOnDisconnect, opt);
     JSClass<JSUIExtension>::StaticMethod("onError", &JSUIExtension::SetOnError, opt);
-    JSClass<JSUIExtension>::StaticMethod("onCall", &JSUIExtension::SetOnCall, opt);
     JSClass<JSUIExtension>::StaticMethod("onResult", &JSUIExtension::SetOnResult, opt);
-    JSClass<JSUIExtension>::Inherit<JSViewAbstract>();
-    JSClass<JSUIExtension>::Bind<>(globalObj);
+    JSClass<JSUIExtension>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSUIExtension::Create(const JSCallbackInfo& info)
@@ -91,7 +79,7 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
     }
     std::string bundleName = want->GetProperty("bundleName")->ToString();
     std::string abilityName = want->GetProperty("abilityName")->ToString();
-    LOGI("JSUIExtension Create, bundleName=%{public}s, abilityName=%{public}s", bundleName.c_str(),
+    LOGI("JSUIExtension::Create, bundleName=%{public}s, abilityName=%{public}s", bundleName.c_str(),
         abilityName.c_str());
 
     UIExtensionModel::GetInstance()->Create(bundleName, abilityName);
@@ -100,26 +88,49 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
 
 void JSUIExtension::SetOnConnect(const JSCallbackInfo& info)
 {
-    auto connect = CreateCallback("UIExtension.onConnect", info);
+    if (info.Length() != 1 || !info[0]->IsFunction()) {
+        LOGE("Incorrect definition of callback onConnected method");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onConnect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("UIExtension.onConnected");
+        auto newJSVal = JSRef<JSVal>::Make();
+        func->ExecuteJS(1, &newJSVal);
+    };
 }
 
 void JSUIExtension::SetOnDisconnect(const JSCallbackInfo& info)
 {
-    auto disconnect = CreateCallback("UIExtension.onConnect", info);
+    if (info.Length() != 1 || !info[0]->IsFunction()) {
+        LOGE("Incorrect definition of callback onDisconnected method");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onConnect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("UIExtension.Disconnected");
+        auto newJSVal = JSRef<JSVal>::Make();
+        func->ExecuteJS(1, &newJSVal);
+    };
 }
 
 void JSUIExtension::SetOnError(const JSCallbackInfo& info)
 {
-    auto error = CreateCallback("UIExtension.onConnect", info);
-}
-
-void JSUIExtension::SetOnCall(const JSCallbackInfo& info)
-{
-    auto call = CreateCallback("UIExtension.onConnect", info);
+    if (info.Length() != 1 || !info[0]->IsFunction()) {
+        LOGE("Incorrect definition of callback onError method");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
 }
 
 void JSUIExtension::SetOnResult(const JSCallbackInfo& info)
 {
-    auto result = CreateCallback("UIExtension.onConnect", info);
+    if (info.Length() != 1 || !info[0]->IsFunction()) {
+        LOGE("Incorrect definition of callback onResult method");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
 }
 } // namespace OHOS::Ace::Framework

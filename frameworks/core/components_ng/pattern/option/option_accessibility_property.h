@@ -32,6 +32,12 @@ public:
 
     std::string GetText() const override;
 
+protected:
+    void SetSpecificSupportAction() override
+    {
+        AddSupportAction(AceAction::ACTION_SELECT);
+    }
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(OptionAccessibilityProperty);
 };

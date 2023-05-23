@@ -22,6 +22,7 @@
 #include <unordered_map>
 
 #include "base/geometry/offset.h"
+#include "base/log/ace_performance_check.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
@@ -38,6 +39,7 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/position_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 class FrameNode;
@@ -212,6 +214,10 @@ public:
     {
         outOfLayout_ = outOfLayout;
     }
+
+    // performance check
+    void AddNodeFlexLayouts();
+    void AddNodeLayoutTime(int64_t time);
 
     // Check the flag attribute with descendant node
     bool CheckNeedForceMeasureAndLayout();

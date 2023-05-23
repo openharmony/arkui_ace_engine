@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +15,9 @@
 
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
+#include "base/log/ace_performance_check.h"
 #include "base/log/frame_report.h"
 #include "base/memory/referenced.h"
-#include "base/thread/background_task_executor.h"
-#include "base/thread/cancelable_callback.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/thread_checker.h"
@@ -59,30 +58,18 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     ACE_FUNCTION_TRACE();
     auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
     std::vector<RefPtr<FrameNode>> orderedNodes;
-    bool hasNormalNode = false;
-    bool hasPriorityNode = false;
     for (auto&& pageNodes : dirtyLayoutNodes) {
         for (auto&& node : pageNodes.second) {
             if (!node || node->IsInDestroying()) {
                 continue;
             }
             orderedNodes.emplace_back(node);
-            if (node->GetLayoutPriority() == 0) {
-                hasNormalNode = true;
-            } else {
-                hasPriorityNode = true;
-            }
         }
     }
-    if (!hasNormalNode) {
-        dirtyLayoutNodes_ = std::move(dirtyLayoutNodes);
-        return;
-    } else if (hasPriorityNode) {
-        std::sort(orderedNodes.begin(), orderedNodes.end(), Cmp);
-    }
+    std::sort(orderedNodes.begin(), orderedNodes.end(), Cmp);
 
     // Priority task creation
-    uint64_t time = 0;
+    int64_t time = 0;
     for (auto& node : orderedNodes) {
         // need to check the node is destroying or not before CreateLayoutTask
         if (!node || node->IsInDestroying()) {
@@ -113,7 +100,7 @@ void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
     }
     auto dirtyRenderNodes = std::move(dirtyRenderNodes_);
     // Priority task creation
-    uint64_t time = 0;
+    int64_t time = 0;
     for (auto&& pageNodes : dirtyRenderNodes) {
         for (auto&& node : pageNodes.second) {
             if (!node) {
@@ -142,31 +129,15 @@ void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
 bool UITaskScheduler::NeedAdditionalLayout()
 {
     bool ret = false;
+    ElementRegister::GetInstance()->ReSyncGeometryTransition();
     for (auto&& pageNodes : dirtyLayoutNodes_) {
         for (auto&& node : pageNodes.second) {
             if (!node || !node->GetLayoutProperty()) {
                 continue;
             }
             const auto& geometryTransition = node->GetLayoutProperty()->GetGeometryTransition();
-            if (!geometryTransition || !geometryTransition->IsNodeInAndActive(node)) {
-                continue;
-            }
-            // if nodes with geometry transitions are added during layout, we need to initiate the additional layout
-            // in current frame, while under normal build layout workflow the additional layout is unnecessary.
-            auto parent = node->GetParent();
-            while (parent) {
-                auto parentNode = AceType::DynamicCast<FrameNode>(parent);
-                if (parentNode) {
-                    node->GetLayoutProperty()->CleanDirty();
-                    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-                    parentNode->GetLayoutProperty()->CleanDirty();
-                    parentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-                    ret = true;
-                    LOGD("GeometryTransition needs additional layout, node%{public}d, parent node%{public}d is"
-                        "marked dirty", node->GetId(), parentNode->GetId());
-                    break;
-                }
-                parent = parent->GetParent();
+            if (geometryTransition != nullptr) {
+                ret |= geometryTransition->OnAdditionalLayout(node);
             }
         }
     }
@@ -177,9 +148,7 @@ void UITaskScheduler::FlushTask()
 {
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("UITaskScheduler::FlushTask");
-    GeometryTransition::OnLayout(true);
     FlushLayoutTask();
-    GeometryTransition::OnLayout(false);
     if (NeedAdditionalLayout()) {
         FlushLayoutTask();
     }
@@ -213,10 +182,7 @@ void UITaskScheduler::CleanUp()
 
 bool UITaskScheduler::isEmpty()
 {
-    if (dirtyLayoutNodes_.empty() && dirtyRenderNodes_.empty()) {
-        return true;
-    }
-    return false;
+    return dirtyLayoutNodes_.empty() && dirtyRenderNodes_.empty();
 }
 
 void UITaskScheduler::AddAfterLayoutTask(std::function<void()>&& task)

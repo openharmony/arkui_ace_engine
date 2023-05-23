@@ -41,19 +41,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<SpanModel> SpanModel::instance_ = nullptr;
+std::mutex SpanModel::mutex_;
 
 SpanModel* SpanModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::SpanModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::SpanModelNG());
-        } else {
-            instance_.reset(new Framework::SpanModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::SpanModelNG());
+            } else {
+                instance_.reset(new Framework::SpanModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -74,7 +78,7 @@ void JSSpan::SetFontSize(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }
@@ -130,7 +134,7 @@ void JSSpan::SetLetterSpacing(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionFp(info[0], value)) {
         return;
     }
@@ -229,6 +233,19 @@ void JSSpan::JsRemoteMessage(const JSCallbackInfo& info)
 #endif
 }
 
+void JSSpan::SetLineHeight(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    CalcDimension value;
+    if (!ParseJsDimensionFp(info[0], value)) {
+        return;
+    }
+    SpanModel::GetInstance()->SetLineHeight(value);
+}
+
 void JSSpan::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSpan>::Declare("Span");
@@ -248,9 +265,8 @@ void JSSpan::JSBind(BindingTarget globalObj)
     JSClass<JSSpan>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSSpan>::StaticMethod("remoteMessage", &JSSpan::JsRemoteMessage);
     JSClass<JSSpan>::StaticMethod("onClick", &JSSpan::JsOnClick);
-    JSClass<JSSpan>::Inherit<JSContainerBase>();
-    JSClass<JSSpan>::Inherit<JSViewAbstract>();
-    JSClass<JSSpan>::Bind<>(globalObj);
+    JSClass<JSSpan>::StaticMethod("lineHeight", &JSSpan::SetLineHeight, opt);
+    JSClass<JSSpan>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSSpan::Create(const JSCallbackInfo& info)

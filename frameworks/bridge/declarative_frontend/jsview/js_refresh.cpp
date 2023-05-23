@@ -30,19 +30,23 @@ constexpr int32_t DEFAULT_FRICTION = 62;
 constexpr int32_t MAX_FRICTION = 100;
 } // namespace
 std::unique_ptr<RefreshModel> RefreshModel::instance_ = nullptr;
+std::mutex RefreshModel::mutex_;
 
 RefreshModel* RefreshModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::RefreshModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::RefreshModelNG());
-        } else {
-            instance_.reset(new Framework::RefreshModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::RefreshModelNG());
+            } else {
+                instance_.reset(new Framework::RefreshModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -81,8 +85,7 @@ void JSRefresh::JSBind(BindingTarget globalObj)
     JSClass<JSRefresh>::StaticMethod("onRefreshing", &JSRefresh::OnRefreshing);
     JSClass<JSRefresh>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSRefresh>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSRefresh>::Inherit<JSViewAbstract>();
-    JSClass<JSRefresh>::Bind(globalObj);
+    JSClass<JSRefresh>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSRefresh::Create(const JSCallbackInfo& info)
@@ -118,7 +121,7 @@ void JSRefresh::Create(const JSCallbackInfo& info)
         ParseRefreshingObject(info, refreshingObj);
         RefreshModel::GetInstance()->SetRefreshing(refreshingObj->GetProperty("value")->ToBoolean());
     }
-    Dimension offset;
+    CalcDimension offset;
     if (ParseJsDimensionVp(jsOffset, offset)) {
         if (LessNotEqual(offset.Value(), 0.0) || offset.Unit() == DimensionUnit::PERCENT) {
             RefreshModel::GetInstance()->SetRefreshDistance(theme->GetRefreshDistance());
@@ -142,6 +145,10 @@ void JSRefresh::Create(const JSCallbackInfo& info)
 
 void JSRefresh::ParseCustomBuilder(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("Invalid params");
+        return;
+    }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto builder = paramObject->GetProperty("builder");
     if (builder->IsFunction()) {
@@ -163,6 +170,10 @@ void JSRefresh::Pop()
 
 void JSRefresh::OnStateChange(const JSCallbackInfo& args)
 {
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGI("refresh onStateChange error, param is non-valid");
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     auto onStateChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const int32_t& value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -175,6 +186,10 @@ void JSRefresh::OnStateChange(const JSCallbackInfo& args)
 
 void JSRefresh::OnRefreshing(const JSCallbackInfo& args)
 {
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGI("refresh onRefreshing error, param is non-valid");
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     auto onRefreshing = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

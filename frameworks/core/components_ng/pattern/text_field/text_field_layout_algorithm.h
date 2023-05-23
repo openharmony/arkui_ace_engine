@@ -55,6 +55,9 @@ public:
 
     const std::shared_ptr<RSParagraph>& GetParagraph();
 
+    const std::shared_ptr<RSParagraph>& GetCounterParagraph() const;
+    const std::shared_ptr<RSParagraph>& GetErrorParagraph() const;
+
     const RectF& GetTextRect() const
     {
         return textRect_;
@@ -85,6 +88,11 @@ public:
         return parentGlobalOffset_;
     }
 
+    float GetUnitWidth() const
+    {
+        return unitWidth_;
+    }
+
     static TextDirection GetTextDirection(const std::string& content);
 
     static void UpdateTextStyle(const RefPtr<FrameNode>& frameNode,
@@ -97,6 +105,8 @@ private:
     void CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText, bool disableTextAlign);
     void CreateParagraph(const std::vector<TextStyle>& textStyles, const std::vector<std::string>& contents,
         const std::string& content, bool needObscureText, bool disableTextAlign);
+    void CreateCounterParagraph(int32_t textLength, int32_t maxLength, const RefPtr<TextFieldTheme>& theme);
+    void CreateErrorParagraph(const std::string& content, const RefPtr<TextFieldTheme>& theme);
     bool CreateParagraphAndLayout(
         const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint);
     bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
@@ -108,14 +118,18 @@ private:
     float GetTextFieldDefaultImageHeight();
 
     int32_t ConvertTouchOffsetToCaretPosition(const Offset& localOffset);
+    void UpdateUnitLayout(LayoutWrapper* layoutWrapper);
 
     std::shared_ptr<RSParagraph> paragraph_;
+    std::shared_ptr<RSParagraph> counterParagraph_;
+    std::shared_ptr<RSParagraph> errorParagraph_;
     RectF frameRect_;
     RectF textRect_;
     RectF imageRect_;
     OffsetF parentGlobalOffset_;
 
     float caretOffsetX_ = 0.0f;
+    float unitWidth_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutAlgorithm);
 };

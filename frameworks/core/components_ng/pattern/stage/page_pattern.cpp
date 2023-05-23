@@ -85,7 +85,7 @@ bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::func
     };
     if (effect && effect->GetUserCallback()) {
         if (!controller_) {
-            controller_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
+            controller_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
         }
         if (!controller_->IsStopped()) {
             controller_->Finish();

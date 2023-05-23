@@ -35,6 +35,8 @@ void LoadingProgressModelNG::SetColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(LoadingProgressPaintProperty, Color, value);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, value);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
 }
 
 } // namespace OHOS::Ace::NG

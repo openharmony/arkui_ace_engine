@@ -102,6 +102,7 @@ class Environment {
     prop = AppStorage.SetAndProp(key, tmp);
     this.props_.set(key, prop);
     stateMgmtConsole.debug(`Environment: envProp for '${key}' done.`);
+    return true;
   }
 
   private envProps(properties: {

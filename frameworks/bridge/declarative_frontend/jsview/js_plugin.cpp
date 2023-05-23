@@ -101,13 +101,13 @@ void JSPlugin::JsSize(const JSCallbackInfo& info)
 
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> widthValue = sizeObj->GetProperty("width");
-    Dimension width = 0.0_vp;
+    CalcDimension width = 0.0_vp;
     if (!ParseJsDimensionVp(widthValue, width)) {
         LOGE("ParseJsDimensionVp width is error.");
         return;
     }
     JSRef<JSVal> heightValue = sizeObj->GetProperty("height");
-    Dimension height = 0.0_vp;
+    CalcDimension height = 0.0_vp;
     if (!ParseJsDimensionVp(heightValue, height)) {
         LOGE("ParseJsDimensionVp height is error.");
         return;
@@ -122,7 +122,7 @@ void JSPlugin::JsWidth(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
@@ -141,7 +141,7 @@ void JSPlugin::JsHeight(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
@@ -203,7 +203,6 @@ void JSPlugin::JSBind(BindingTarget globalObj)
     JSClass<JSPlugin>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSPlugin>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
 
-    JSClass<JSPlugin>::Inherit<JSViewAbstract>();
-    JSClass<JSPlugin>::Bind<>(globalObj);
+    JSClass<JSPlugin>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

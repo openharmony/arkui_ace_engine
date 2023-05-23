@@ -24,19 +24,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<CircleModel> CircleModel::instance_ = nullptr;
+std::mutex CircleModel::mutex_;
 
 CircleModel* CircleModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::CircleModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::CircleModelNG());
-        } else {
-            instance_.reset(new Framework::CircleModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::CircleModelNG());
+            } else {
+                instance_.reset(new Framework::CircleModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -64,12 +68,12 @@ void JSCircle::ConstructorCallback(const JSCallbackInfo& info)
     auto circle = AceType::MakeRefPtr<Circle>();
     JSRef<JSObject> params = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> width = params->GetProperty("width");
-    Dimension dimWidth;
+    CalcDimension dimWidth;
     if (ParseJsDimensionVp(width, dimWidth)) {
         circle->SetWidth(dimWidth);
     }
     JSRef<JSVal> height = params->GetProperty("height");
-    Dimension dimHeight;
+    CalcDimension dimHeight;
     if (ParseJsDimensionVp(height, dimHeight)) {
         circle->SetHeight(dimHeight);
     }
@@ -107,8 +111,8 @@ void JSCircle::JSBind(BindingTarget globalObj)
     JSClass<JSCircle>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSCircle>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
-    JSClass<JSCircle>::Inherit<JSShapeAbstract>();
-    JSClass<JSCircle>::Bind(globalObj, JSCircle::ConstructorCallback, JSCircle::DestructorCallback);
+    JSClass<JSCircle>::InheritAndBind<JSShapeAbstract>(
+        globalObj, JSCircle::ConstructorCallback, JSCircle::DestructorCallback);
 }
 
 } // namespace OHOS::Ace::Framework

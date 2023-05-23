@@ -77,13 +77,6 @@ bool ScrollablePattern::OnScrollCallback(float offset, int32_t source)
 
 bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
 {
-    if (coordinationEvent_ && isReactInParentMovement_) {
-        auto onScroll = coordinationEvent_->GetOnScroll();
-        if (onScroll) {
-            onScroll(offset);
-            return false;
-        }
-    }
     auto isAtTop = (IsAtTop() && Positive(offset));
     if (isAtTop && source == SCROLL_FROM_UPDATE && !isReactInParentMovement_ && (axis_ == Axis::VERTICAL)) {
         isReactInParentMovement_ = true;
@@ -92,6 +85,20 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
             if (onScrollStart) {
                 onScrollStart();
             }
+        }
+    }
+    if (coordinationEvent_ && source != SCROLL_FROM_UPDATE && isReactInParentMovement_) {
+        isReactInParentMovement_ = false;
+        auto onScrollEnd = coordinationEvent_->GetOnScrollEndEvent();
+        if (onScrollEnd) {
+            onScrollEnd();
+        }
+    }
+    if (coordinationEvent_ && isReactInParentMovement_) {
+        auto onScroll = coordinationEvent_->GetOnScroll();
+        if (onScroll) {
+            onScroll(offset);
+            return scrollEffect_ && scrollEffect_->IsSpringEffect();
         }
     }
     if (source == SCROLL_FROM_START) {
@@ -195,7 +202,8 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
 bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const SizeF& size)
 {
     // check edgeEffect is not springEffect
-    if (scrollEffect_ && scrollEffect_->IsFadeEffect() && source != SCROLL_FROM_BAR) {    // handle edge effect
+    if (scrollEffect_ && scrollEffect_->IsFadeEffect() && source != SCROLL_FROM_BAR &&
+        source != SCROLL_FROM_AXIS) {    // handle edge effect
         if ((IsAtTop() && Positive(offset)) || (IsAtBottom() && Negative(offset))) {
             scrollEffect_->HandleOverScroll(GetAxis(), -offset, size);
         }
@@ -282,24 +290,21 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
             scrollBar_->SetNormalWidth(barWidth.value());
             scrollBar_->SetActiveWidth(barWidth.value());
             scrollBar_->SetTouchWidth(barWidth.value());
+            scrollBar_->SetIsUserNormalWidth(true);
+        } else {
+            scrollBar_->SetIsUserNormalWidth(false);
         }
     }
 }
 
-void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort)
+void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset)
 {
-    // inner scrollbar
+    // inner scrollbar, viewOffset is padding offset
     if (scrollBar_) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto layoutPriority = host->GetLayoutProperty();
-        CHECK_NULL_VOID(layoutPriority);
-        auto paddingOffset = layoutPriority->CreatePaddingAndBorder().Offset();
         auto mainSize = axis_ == Axis::VERTICAL ? viewPort.Height() : viewPort.Width();
         bool scrollable = GreatNotEqual(estimatedHeight, mainSize);
         scrollBar_->SetScrollable(IsScrollable() && scrollable);
         Offset scrollOffset = { offset, offset }; // fit for w/h switched.
-        Offset viewOffset = { paddingOffset.GetX(), paddingOffset.GetY() };
         scrollBar_->UpdateScrollBarRegion(viewOffset, viewPort, scrollOffset, estimatedHeight);
         scrollBar_->MarkNeedRender();
     }

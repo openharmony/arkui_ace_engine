@@ -36,7 +36,7 @@ public:
 
     void InitController(const WeakPtr<PipelineContext>& context)
     {
-        animator_ = AceType::MakeRefPtr<Animator>(context);
+        animator_ = CREATE_ANIMATOR(context);
     }
 
     double GetPositionResult() const;

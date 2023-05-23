@@ -21,10 +21,33 @@
 #include "base/log/ace_scoring_log.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "bridge/declarative_frontend/jsview/models/action_sheet_model_impl.h"
 #include "core/common/container.h"
-#include "core/components/dialog/dialog_component.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/action_sheet/action_sheet_model_ng.h"
+
+namespace OHOS::Ace {
+std::unique_ptr<ActionSheetModel> ActionSheetModel::instance_ = nullptr;
+std::mutex ActionSheetModel::mutex_;
+
+ActionSheetModel* ActionSheetModel::GetInstance()
+{
+    if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
+#ifdef NG_BUILD
+            instance_.reset(new NG::ActionSheetModelNG());
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::ActionSheetModelNG());
+            } else {
+                instance_.reset(new Framework::ActionSheetModelImpl());
+            }
+#endif
+        }
+    }
+    return instance_.get();
+}
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -60,41 +83,12 @@ ActionSheetInfo ParseSheetInfo(const JSCallbackInfo& args, JSRef<JSVal> val)
     auto actionValue = obj->GetProperty("action");
     if (actionValue->IsFunction()) {
         auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
-        // NG
-        if (Container::IsCurrentUseNewPipeline()) {
-            auto callback = [execCtx = args.GetExecutionContext(), func = std::move(actionFunc)](
-                                const GestureEvent& /*info*/) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                ACE_SCORING_EVENT("SheetInfo.action");
-                func->ExecuteJS();
-                LOGD("action triggered");
-            };
-            sheetInfo.action = AceType::MakeRefPtr<NG::ClickEvent>(callback);
-            return sheetInfo;
-        }
-
-        RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>();
-        tapGesture->SetOnActionId(
-            [execCtx = args.GetExecutionContext(), func = std::move(actionFunc)](const GestureEvent& info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                ACE_SCORING_EVENT("SheetInfo.action");
-                func->Execute();
-                // Close dialog when click sheet.
-                auto container = Container::Current();
-                if (!container) {
-                    return;
-                }
-                auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-                if (!context) {
-                    return;
-                }
-                auto stack = context->GetLastStack();
-                if (!stack) {
-                    return;
-                }
-                stack->PopDialog();
-            });
-        sheetInfo.gesture = tapGesture;
+        auto eventFunc = [execCtx = args.GetExecutionContext(), func = std::move(actionFunc)](const GestureEvent&) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("SheetInfo.action");
+            func->ExecuteJS();
+        };
+        ActionSheetModel::GetInstance()->SetAction(eventFunc, sheetInfo);
     }
     return sheetInfo;
 }
@@ -141,22 +135,12 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
     auto cancelValue = obj->GetProperty("cancel");
     if (cancelValue->IsFunction()) {
         auto cancelFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(cancelValue));
-        // NG
-        if (Container::IsCurrentUseNewPipeline()) {
-            properties.onCancel = [execCtx = args.GetExecutionContext(), func = std::move(cancelFunc)]() {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                ACE_SCORING_EVENT("ActionSheet.cancel");
-                func->ExecuteJS();
-                LOGD("actionSheet cancel triggered");
-            };
-        } else {
-            EventMarker cancelId([execCtx = args.GetExecutionContext(), func = std::move(cancelFunc)]() {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                ACE_SCORING_EVENT("ActionSheet.cancel");
-                func->Execute();
-            });
-            properties.callbacks.try_emplace("cancel", cancelId);
-        }
+        auto eventFunc = [execCtx = args.GetExecutionContext(), func = std::move(cancelFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("ActionSheet.cancel");
+            func->Execute();
+        };
+        ActionSheetModel::GetInstance()->SetCancel(eventFunc, properties);
     }
 
     // Parse confirm.
@@ -171,24 +155,20 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
             // parse confirm action
             if (actionValue->IsFunction()) {
                 auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
-                // NG
-                if (Container::IsCurrentUseNewPipeline()) {
-                    auto callback = [execCtx = args.GetExecutionContext(), func = std::move(actionFunc)](
-                                        GestureEvent& /*info*/) {
-                        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                        ACE_SCORING_EVENT("ActionSheet.confirm.action");
-                        LOGD("actionSheet confirm triggered");
-                        func->ExecuteJS();
-                    };
-                    buttonInfo.action = AceType::MakeRefPtr<NG::ClickEvent>(std::move(callback));
-                } else {
-                    EventMarker actionId([execCtx = args.GetExecutionContext(), func = std::move(actionFunc)]() {
-                        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                        ACE_SCORING_EVENT("ActionSheet.confirm.action");
-                        func->Execute();
-                    });
-                    properties.primaryId = actionId;
-                }
+                auto gestureEvent = [execCtx = args.GetExecutionContext(),
+                    func = std::move(actionFunc)](GestureEvent&) {
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                    ACE_SCORING_EVENT("ActionSheet.confirm.action");
+                    LOGD("actionSheet confirm triggered");
+                    func->ExecuteJS();
+                };
+                actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
+                auto eventFunc = [execCtx = args.GetExecutionContext(), func = std::move(actionFunc)]() {
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                    ACE_SCORING_EVENT("ActionSheet.confirm.action");
+                    func->Execute();
+                };
+                ActionSheetModel::GetInstance()->SetConfirm(gestureEvent, eventFunc, buttonInfo, properties);
             }
             properties.buttons.emplace_back(buttonInfo);
         }
@@ -223,10 +203,10 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
     auto offsetValue = obj->GetProperty("offset");
     if (offsetValue->IsObject()) {
         auto offsetObj = JSRef<JSObject>::Cast(offsetValue);
-        Dimension dx;
+        CalcDimension dx;
         auto dxValue = offsetObj->GetProperty("dx");
         ParseJsDimensionVp(dxValue, dx);
-        Dimension dy;
+        CalcDimension dy;
         auto dyValue = offsetObj->GetProperty("dy");
         ParseJsDimensionVp(dyValue, dy);
         properties.offset = DimensionOffset(dx, dy);
@@ -238,36 +218,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
         properties.gridCount = gridCountValue->ToNumber<int32_t>();
     }
 
-    // NG
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
-        auto pipelineContext = container->GetPipelineContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-        CHECK_NULL_VOID(context);
-        auto overlayManager = context->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->ShowDialog(properties, nullptr, false);
-        args.SetReturnValue(args.This());
-        return;
-    }
-
-    // Show ActionSheet.
-    auto container = Container::Current();
-    if (container) {
-        auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-        auto executor = container->GetTaskExecutor();
-        if (executor) {
-            executor->PostTask(
-                [context, properties]() {
-                    if (context) {
-                        context->ShowDialog(properties, false, "ActionSheet");
-                    }
-                },
-                TaskExecutor::TaskType::UI);
-        }
-    }
+    ActionSheetModel::GetInstance()->ShowActionSheet(properties);
     args.SetReturnValue(args.This());
 }
 
@@ -275,8 +226,6 @@ void JSActionSheet::JSBind(BindingTarget globalObj)
 {
     JSClass<JSActionSheet>::Declare("ActionSheet");
     JSClass<JSActionSheet>::StaticMethod("show", &JSActionSheet::Show);
-    JSClass<JSActionSheet>::Inherit<JSViewAbstract>();
-    JSClass<JSActionSheet>::Bind<>(globalObj);
+    JSClass<JSActionSheet>::InheritAndBind<JSViewAbstract>(globalObj);
 }
-
 } // namespace OHOS::Ace::Framework

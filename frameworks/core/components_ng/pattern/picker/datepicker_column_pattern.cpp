@@ -75,12 +75,14 @@ void DatePickerColumnPattern::OnAttachToFrameNode()
 
 void DatePickerColumnPattern::OnModifyDone()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
     pressColor_ = theme->GetPressColor();
     hoverColor_ = theme->GetHoverColor();
     InitMouseAndPressEvent();
+    SetAccessibilityAction();
 }
 
 void DatePickerColumnPattern::InitMouseAndPressEvent()
@@ -102,9 +104,8 @@ void DatePickerColumnPattern::InitMouseAndPressEvent()
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleMouseEvent(isHover);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleMouseEvent(isHover);
     };
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnHoverEvent(mouseEvent_);
@@ -178,9 +179,8 @@ void DatePickerColumnPattern::PlayPressAnimation(const Color& pressColor)
     option.SetFillMode(FillMode::FORWARDS);
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), pressColor]() {
         auto picker = weak.Upgrade();
-        if (picker) {
-            picker->SetButtonBackgroundColor(pressColor);
-        }
+        CHECK_NULL_VOID(picker);
+        picker->SetButtonBackgroundColor(pressColor);
     });
 }
 
@@ -192,9 +192,8 @@ void DatePickerColumnPattern::PlayHoverAnimation(const Color& color)
     option.SetFillMode(FillMode::FORWARDS);
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), color]() {
         auto picker = weak.Upgrade();
-        if (picker) {
-            picker->SetButtonBackgroundColor(color);
-        }
+        CHECK_NULL_VOID(picker);
+        picker->SetButtonBackgroundColor(color);
     });
 }
 
@@ -278,7 +277,7 @@ void DatePickerColumnPattern::UpdatePickerTextProperties(
     uint32_t index, uint32_t showOptionCount, const RefPtr<TextLayoutProperty>& textLayoutProperty,
     const RefPtr<DataPickerRowLayoutProperty>& dataPickerRowLayoutProperty)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
@@ -361,8 +360,10 @@ void DatePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
 
 void DatePickerColumnPattern::SetDividerHeight(uint32_t showOptionCount)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
     if (showOptionCount != OPTION_COUNT_PHONE_LANDSCAPE) {
         gradientHeight_ = static_cast<float>(pickerTheme->GetGradientHeight().Value() * TEXT_HEIGHT_NUMBER);
     } else {
@@ -584,6 +585,9 @@ void DatePickerColumnPattern::HandleDragStart(const GestureEvent& event)
     toss->SetStart(yOffset_);
     yLast_ = yOffset_;
     pressed_ = true;
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
 }
 
 void DatePickerColumnPattern::HandleDragMove(const GestureEvent& event)
@@ -610,7 +614,10 @@ void DatePickerColumnPattern::HandleDragEnd()
     CHECK_NULL_VOID_NOLOG(GetHost());
     CHECK_NULL_VOID_NOLOG(GetToss());
     auto toss = GetToss();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
     if (!NotLoopOptions() && toss->Play()) {
+        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         return;
     }
     yOffset_ = 0.0;
@@ -623,11 +630,12 @@ void DatePickerColumnPattern::HandleDragEnd()
     fromController_->ClearInterpolators();
     fromController_->AddInterpolator(curve);
     fromController_->Play();
+    frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
 }
 void DatePickerColumnPattern::CreateAnimation()
 {
     CHECK_NULL_VOID_NOLOG(!animationCreated_);
-    toController_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
+    toController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
     toController_->SetDuration(ANIMATION_ZERO_TO_OUTER); // 200ms for animation that from zero to outer.
     auto weak = AceType::WeakClaim(this);
     toController_->AddStopListener([weak]() {
@@ -637,7 +645,7 @@ void DatePickerColumnPattern::CreateAnimation()
     });
     fromBottomCurve_ = CreateAnimation(jumpInterval_, 0.0);
     fromTopCurve_ = CreateAnimation(0.0 - jumpInterval_, 0.0);
-    fromController_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
+    fromController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
     fromController_->SetDuration(ANIMATION_OUTER_TO_ZERO); // 150ms for animation that from outer to zero.
     animationCreated_ = true;
 }
@@ -730,6 +738,7 @@ void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
         ScrollOption(dragDelta);
         return;
     }
+    // update selected option
     InnerHandleScroll(LessNotEqual(dragDelta, 0.0), true, true);
     double jumpDelta = (LessNotEqual(dragDelta, 0.0) ? jumpInterval_ : 0.0 - jumpInterval_);
     ScrollOption(jumpDelta, true);
@@ -749,5 +758,44 @@ bool DatePickerColumnPattern::CanMove(bool isDown) const
     int currentIndex = static_cast<int>(datePickerColumnPattern->GetCurrentIndex());
     int nextVirtualIndex = isDown ? currentIndex + 1 : currentIndex - 1;
     return nextVirtualIndex >= 0 && nextVirtualIndex < totalOptionCount;
+}
+
+void DatePickerColumnPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->CanMove(true)) {
+            return;
+        }
+        CHECK_NULL_VOID(pattern->animationCreated_);
+        pattern->InnerHandleScroll(true);
+        pattern->fromController_->ClearInterpolators();
+        pattern->fromController_->AddInterpolator(pattern->fromTopCurve_);
+        pattern->fromController_->Play();
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    });
+
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->CanMove(false)) {
+            return;
+        }
+        CHECK_NULL_VOID(pattern->animationCreated_);
+        pattern->InnerHandleScroll(false);
+        pattern->fromController_->ClearInterpolators();
+        pattern->fromController_->AddInterpolator(pattern->fromBottomCurve_);
+        pattern->fromController_->Play();
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    });
 }
 } // namespace OHOS::Ace::NG

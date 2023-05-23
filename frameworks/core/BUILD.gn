@@ -20,10 +20,18 @@ template("ace_core_source_set") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    if (current_os == "ohos") {
+      sanitize = {
+        integer_overflow = true
+        boundary_sanitize = true
+        debug = ace_sanitize_debug
+      }
+    }
     subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     defines += invoker.defines
     platform = invoker.platform
+    include_dirs = []
 
     # add common source file needed by all product platform here
     sources = [
@@ -200,8 +208,11 @@ template("ace_core_source_set") {
       "common/flutter/flutter_asset_manager.cpp",
       "common/flutter/flutter_task_executor.cpp",
       "common/flutter/flutter_thread_model.cpp",
-      "common/flutter/flutter_window.cpp",
     ]
+
+    if (!(defined(config.enable_rosen_backend) && config.enable_rosen_backend)) {
+      sources += [ "common/flutter/flutter_window.cpp" ]
+    }
 
     defines += uicast_configs.uicast_defines
     sources += uicast_configs.uicast_core_sources
@@ -221,6 +232,9 @@ template("ace_core_source_set") {
     # add sources needed by phone, tv and wearable. previews do not need them
     if (defined(config.connect_server_support) &&
         config.connect_server_support) {
+      if (use_ios) {
+        include_dirs += [ "$ark_toolchain_path" ]
+      }
       sources += [ "common/connect_server_manager.cpp" ]
     }
 
@@ -236,12 +250,19 @@ template("ace_core_source_set") {
     ]
 
     if (ace_use_new_skia) {
-      sources += [
-        "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
-        "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
-      ]
+      if (is_ohos) {
+        sources += [
+          "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
+          "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
+        ]
+      } else {
+        sources += [
+          "$flutter_root/engine/flutter/common/task_runners.cc",
+          "$flutter_root/engine/flutter/shell/common/thread_host.cc",
+        ]
+      }
       configs += [ "$ace_flutter_engine_root:flutter_config" ]
-      deps += [ "$skia_root_new:skia" ]
+      deps += [ "$skia_root_new:skia_$platform" ]
     } else {
       deps += [
         "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
@@ -435,6 +456,8 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_ng/pattern/text_field:ace_core_components_text_field_pattern_ng_$platform",
     ]
 
+    deps += [ "$ace_root/frameworks/core/components_ng/pattern/security_component:ace_core_components_security_component_pattern_ng_$platform" ]
+
     # xcomponent components supports phone, TV and wearable except PC Preview
     if (defined(config.xcomponent_components_support) &&
         config.xcomponent_components_support) {
@@ -502,7 +525,8 @@ template("ace_core_source_set") {
       deps += [ "$ace_root/frameworks/core/components_ng/pattern/preview_mock:ace_core_components_preview_mock_pattern_ng_$platform" ]
     }
 
-    include_dirs = [ "//foundation/window/window_manager/interfaces/innerkits" ]
+    include_dirs +=
+        [ "//foundation/window/window_manager/interfaces/innerkits" ]
     if (is_cross_platform_build) {
       include_dirs += [
         "//foundation/appframework/ability/ability_runtime/cross_platform/frameworks/native/base/event_handler/include",
@@ -530,10 +554,7 @@ template("ace_core_source_set") {
     if ((current_os == "mingw" || current_os == "mac" ||
          current_os == "linux") && defined(config.enable_rosen_backend) &&
         config.enable_rosen_backend) {
-      sources -= [
-        "common/flutter/flutter_asset_manager.cpp",
-        "common/flutter/flutter_window.cpp",
-      ]
+      sources -= [ "common/flutter/flutter_asset_manager.cpp" ]
       sources += [
         # rs impl
         "common/rosen/rosen_asset_manager.cpp",
@@ -559,6 +580,13 @@ template("ace_core_ng_source_set") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    if (current_os == "ohos") {
+      sanitize = {
+        integer_overflow = true
+        boundary_sanitize = true
+        debug = ace_sanitize_debug
+      }
+    }
     subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     defines += invoker.defines
@@ -738,6 +766,9 @@ template("ace_core_ng_source_set") {
       "components/theme/theme_constants.cpp",
       "components/theme/theme_manager_impl.cpp",
       "components/theme/theme_utils.cpp",
+      "components/video/resource/ext_surface.cpp",
+      "components/video/resource/player.cpp",
+      "components/video/resource/resource.cpp",
 
       # v2 inspector
       "components_v2/grid/grid_event.cpp",

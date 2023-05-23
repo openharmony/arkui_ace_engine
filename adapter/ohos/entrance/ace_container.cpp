@@ -49,6 +49,7 @@
 #include "core/common/flutter/flutter_task_executor.h"
 #include "core/common/hdc_register.h"
 #include "core/common/platform_window.h"
+#include "core/common/plugin_manager.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/window.h"
 #include "core/components/theme/theme_constants.h"
@@ -1466,6 +1467,7 @@ void AceContainer::UpdateConfiguration(
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);
     themeManager->LoadResourceThemes();
+    OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
     NotifyConfigurationChange(!deviceAccess.empty());
 }
 
@@ -1591,11 +1593,7 @@ void AceContainer::GetNamesOfSharedImage(std::vector<std::string>& picNameArray)
     }
     auto context = AceType::DynamicCast<NG::PipelineContext>(GetPipelineContext());
     CHECK_NULL_VOID(context);
-    RefPtr<SharedImageManager> sharedImageManager = context->GetSharedImageManager();
-    if (!sharedImageManager) {
-        sharedImageManager = AceType::MakeRefPtr<SharedImageManager>(context->GetTaskExecutor());
-        context->SetSharedImageManager(sharedImageManager);
-    }
+    auto sharedImageManager = context->GetOrCreateSharedImageManager();
     auto nameSize = picNameArray.size();
     for (uint32_t i = 0; i < nameSize; i++) {
         // get name of picture
@@ -1668,7 +1666,7 @@ void AceContainer::GetImageDataFromAshmem(
     }
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_VOID(context);
-    RefPtr<SharedImageManager> sharedImageManager = context->GetSharedImageManager();
+    RefPtr<SharedImageManager> sharedImageManager = context->GetOrCreateSharedImageManager();
     if (sharedImageManager) {
         // read image data from shared memory and save a copy to sharedImageManager
         sharedImageManager->AddSharedImage(picName, std::vector<uint8_t>(imageData, imageData + len));

@@ -108,6 +108,8 @@ void TextFieldPattern::SetSelectionFlag(int32_t selectionStart, int32_t selectio
 
 void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 
+void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json) {}
+
 bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
 {
     return true;
@@ -124,5 +126,19 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info) {}
 
 void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyboard) {}
 void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent) {}
+int32_t TextFieldPattern::ConvertTouchOffsetToCaretPosition(const Offset& localOffset)
+{
+    return {};
+}
+bool TextFieldPattern::CloseKeyboard(bool forceClose)
+{
+    return {};
+}
+void TextFieldPattern::CloseSelectOverlay() {}
+bool TextFieldPattern::IsTextArea() const
+{
+    return {};
+}
+void TextFieldPattern::CreateHandles() {}
 
 } // namespace OHOS::Ace::NG

@@ -23,19 +23,19 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t MIDDLE_OF_COUNTS = 2;
-}
+} // namespace
 
 int32_t DatePickerColumnAccessibilityProperty::GetCollectionItemCounts() const
 {
     auto frameNode = host_.Upgrade();
-    CHECK_NULL_RETURN(frameNode, -1);
+    CHECK_NULL_RETURN(frameNode, 0);
     auto pattern = frameNode->GetPattern<DatePickerColumnPattern>();
-    CHECK_NULL_RETURN(pattern, -1);
+    CHECK_NULL_RETURN(pattern, 0);
     auto options = pattern->GetOptions();
     if (options.find(frameNode) != options.end()) {
         return options[frameNode].size();
     }
-    return -1;
+    return 0;
 }
 
 int32_t DatePickerColumnAccessibilityProperty::GetCurrentIndex() const
@@ -53,9 +53,15 @@ int32_t DatePickerColumnAccessibilityProperty::GetEndIndex() const
     CHECK_NULL_RETURN(frameNode, -1);
     auto pattern = frameNode->GetPattern<DatePickerColumnPattern>();
     CHECK_NULL_RETURN(pattern, -1);
-
+    auto itemCounts = GetCollectionItemCounts();
+    if (itemCounts == 0) {
+        return -1;
+    }
+    if (pattern->NotLoopOptions()) {
+        return itemCounts - 1;
+    }
     auto currentIndex = pattern->GetCurrentIndex();
-    return currentIndex + pattern->GetShowCount() / MIDDLE_OF_COUNTS;
+    return (itemCounts + currentIndex + pattern->GetShowCount() / MIDDLE_OF_COUNTS) % itemCounts;
 }
 
 int32_t DatePickerColumnAccessibilityProperty::GetBeginIndex() const
@@ -64,9 +70,15 @@ int32_t DatePickerColumnAccessibilityProperty::GetBeginIndex() const
     CHECK_NULL_RETURN(frameNode, -1);
     auto pattern = frameNode->GetPattern<DatePickerColumnPattern>();
     CHECK_NULL_RETURN(pattern, -1);
-
+    auto itemCounts = GetCollectionItemCounts();
+    if (itemCounts == 0) {
+        return -1;
+    }
+    if (pattern->NotLoopOptions()) {
+        return 0;
+    }
     auto currentIndex = pattern->GetCurrentIndex();
-    return currentIndex - pattern->GetShowCount() / MIDDLE_OF_COUNTS;
+    return (itemCounts + currentIndex - pattern->GetShowCount() / MIDDLE_OF_COUNTS) % itemCounts;
 }
 
 std::string DatePickerColumnAccessibilityProperty::GetText() const

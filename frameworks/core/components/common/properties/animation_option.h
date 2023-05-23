@@ -28,6 +28,7 @@ namespace OHOS::Ace {
 class AnimationOption final {
 public:
     AnimationOption() = default;
+    AnimationOption(const RefPtr<Curve>& curve, int32_t duration) : duration_(duration), curve_(curve) {}
     ~AnimationOption() = default;
 
     void SetDuration(int32_t duration)
@@ -142,7 +143,6 @@ private:
     float tempo_ = 1.0f;
     FillMode fillMode_ = FillMode::FORWARDS;
     bool allowRunningAsynchronously_ = false;
-
     RefPtr<Curve> curve_;
     std::function<void()> onFinishEvent_;
     AnimationDirection direction_ = AnimationDirection::NORMAL;

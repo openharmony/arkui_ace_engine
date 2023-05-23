@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,11 @@
 
 #include "core/components/button/rosen_render_button.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkMaskFilter.h"
 #include "include/core/SkPath.h"
 #include "include/core/SkRRect.h"
+#endif
 
 #include "core/components/box/render_box.h"
 #include "core/pipeline/base/rosen_render_context.h"
@@ -81,12 +83,20 @@ void RosenRenderButton::UpdateLayer()
     opacityLayer_ = DEFAULT_OPACITY * opacity_;
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderButton::PaintLayer(SkCanvas* canvas)
+#else
+void RosenRenderButton::PaintLayer(RSCanvas* canvas)
+#endif
 {
 #ifdef OHOS_PLATFORM
     auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
     recordingCanvas->MultiplyAlpha(opacityLayer_ / 255.0f);
+#ifndef USE_ROSEN_DRAWING
     recordingCanvas->concat(RosenSvgPainter::ToSkMatrix(transformLayer_));
+#else
+    recordingCanvas->ConcatMatrix(RosenSvgPainter::ToDrawingMatrix(transformLayer_));
+#endif
 #endif
 }
 
@@ -242,6 +252,7 @@ void RosenRenderButton::ResetBoxRadius()
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderButton::DrawShape(SkCanvas* canvas, const Offset& offset, bool isStroke)
 {
     SkPaint paint;
@@ -277,7 +288,71 @@ void RosenRenderButton::DrawShape(SkCanvas* canvas, const Offset& offset, bool i
     canvas->drawRRect(rRect, paint);
 #endif
 }
+#else
+void RosenRenderButton::DrawShape(RSCanvas* canvas, const Offset& offset, bool isStroke)
+{
+    RSRoundRect rRect;
 
+    if (isStroke) {
+        RSPen pen;
+        uint32_t focusColorValue = buttonComponent_->GetFocusColor().GetValue();
+        uint32_t borderColorValue = buttonComponent_->GetBorderEdge().GetColor().GetValue();
+        pen.SetColor(needFocusColor_ ? focusColorValue : borderColorValue);
+        pen.SetWidth(NormalizeToPx(borderEdge_.GetWidth()));
+        pen.SetAntiAlias(true);
+
+        if (buttonComponent_->GetType() == ButtonType::CUSTOM) {
+            ConvertToVector(buttonComponent_->GetRectRadii(), radii_);
+            rRect = RSRoundRect(RSRect(0, 0, static_cast<RSscalar>(buttonSize_.Width()),
+                static_cast<RSscalar>(buttonSize_.Height())), radii_);
+        } else {
+            rRect = RSRoundRect(RSRect(0, 0, static_cast<RSscalar>(buttonSize_.Width()),
+                static_cast<RSscalar>(buttonSize_.Height())),
+                rrectRadius_, rrectRadius_);
+        }
+        rRect.Offset(offset.GetX(), offset.GetY());
+
+#ifdef OHOS_PLATFORM
+        auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
+        recordingCanvas->AttachPen(pen);
+        recordingCanvas->DrawAdaptiveRRect(rRect.GetCornerRadius(RSRoundRect::CornerPos::TOP_LEFT_POS).GetX());
+        recordingCanvas->DetachPen();
+#else
+        canvas->AttachPen(pen);
+        canvas->DrawRoundRect(rRect);
+        canvas->DetachPen();
+#endif
+    } else {
+        RSBrush brush;
+        brush.SetColor(GetStateColor());
+        brush.SetAntiAlias(true);
+
+        if (buttonComponent_->GetType() == ButtonType::CUSTOM) {
+            ConvertToVector(buttonComponent_->GetRectRadii(), radii_);
+            rRect = RSRoundRect(RSRect(0, 0, static_cast<RSscalar>(buttonSize_.Width()),
+                static_cast<RSscalar>(buttonSize_.Height())), radii_);
+        } else {
+            rRect = RSRoundRect(RSRect(0, 0, static_cast<RSscalar>(buttonSize_.Width()),
+                static_cast<RSscalar>(buttonSize_.Height())),
+                rrectRadius_, rrectRadius_);
+        }
+        rRect.Offset(offset.GetX(), offset.GetY());
+
+#ifdef OHOS_PLATFORM
+        auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
+        recordingCanvas->AttachBrush(brush);
+        recordingCanvas->DrawAdaptiveRRect(rRect.GetCornerRadius(RSRoundRect::CornerPos::TOP_LEFT_POS).GetX());
+        recordingCanvas->DetachBrush();
+#else
+        canvas->AttachBrush(brush);
+        canvas->DrawRoundRect(rRect);
+        canvas->DetachBrush();
+#endif
+    }
+}
+#endif
+
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderButton::DrawArc(SkCanvas* canvas, const Offset& offset)
 {
     double offsetDelta = NormalizeToPx((OVAL_WIDTH - CIRCLE_DIAMETER)) / 2;
@@ -294,7 +369,29 @@ void RosenRenderButton::DrawArc(SkCanvas* canvas, const Offset& offset)
     paint.setAntiAlias(true);
     canvas->drawPath(arcPath, paint);
 }
+#else
+void RosenRenderButton::DrawArc(RSCanvas* canvas, const Offset& offset)
+{
+    double offsetDelta = NormalizeToPx((OVAL_WIDTH - CIRCLE_DIAMETER)) / 2;
+    RSRecordingPath arcPath;
+    arcPath.AddArc(
+        RSRect(0, NormalizeToPx(OFFSET_Y), NormalizeToPx(OVAL_WIDTH), NormalizeToPx(OVAL_HEIGHT + OFFSET_Y)),
+        OVAL_START_ANGLE * RADIAN_TO_DEGREE, OVAL_SWEEP_ANGLE * RADIAN_TO_DEGREE);
+    arcPath.AddArc(
+        RSRect(offsetDelta, 0, NormalizeToPx(CIRCLE_DIAMETER) + offsetDelta, NormalizeToPx(CIRCLE_DIAMETER)),
+        CIRCLE_START_ANGLE * RADIAN_TO_DEGREE, CIRCLE_SWEEP_ANGLE * RADIAN_TO_DEGREE);
+    arcPath.Offset(offset.GetX() - NormalizeToPx(OFFSET_X), offset.GetY() - NormalizeToPx(OFFSET_Y));
 
+    RSBrush brush;
+    brush.SetColor(GetStateColor());
+    brush.SetAntiAlias(true);
+    canvas->AttachBrush(brush);
+    canvas->DrawPath(arcPath);
+    canvas->DetachBrush();
+}
+#endif
+
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderButton::DrawLineProgress(SkCanvas* canvas, const Offset& offset)
 {
     SkPaint paint;
@@ -309,7 +406,25 @@ void RosenRenderButton::DrawLineProgress(SkCanvas* canvas, const Offset& offset)
     canvas->drawRect({ offset.GetX(), offset.GetY(), progressWidth_, buttonSize_.Height() }, paint);
     canvas->restore();
 }
+#else
+void RosenRenderButton::DrawLineProgress(RSCanvas* canvas, const Offset& offset)
+{
+    RSBrush brush;
+    brush.SetColor(needFocusColor_ ? progressFocusColor_.GetValue() : progressColor_.GetValue());
+    brush.SetAntiAlias(true);
+    RSRoundRect rRect(
+        RSRect(0, 0, buttonSize_.Width(), buttonSize_.Height()), rrectRadius_, rrectRadius_);
+    rRect.Offset(offset.GetX(), offset.GetY());
+    canvas->Save();
+    canvas->ClipRoundRect(rRect, RSClipOp::INTERSECT, true);
+    canvas->AttachBrush(brush);
+    canvas->DrawRect({ offset.GetX(), offset.GetY(), progressWidth_, buttonSize_.Height() });
+    canvas->DetachBrush();
+    canvas->Restore();
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderButton::DrawLineProgressAnimation(SkCanvas* canvas, const Offset& offset)
 {
     double offsetX = offset.GetX();
@@ -336,7 +451,41 @@ void RosenRenderButton::DrawLineProgressAnimation(SkCanvas* canvas, const Offset
     paint.setAntiAlias(true);
     canvas->drawPath(path, paint);
 }
+#else
+void RosenRenderButton::DrawLineProgressAnimation(RSCanvas* canvas, const Offset& offset)
+{
+    double offsetX = offset.GetX();
+    double offsetY = offset.GetY();
+    double radius = buttonSize_.Height() / 2.0;
+    RSRecordingPath path;
+    path.AddArc(RSRect(offsetX, offsetY, buttonSize_.Height() + offsetX, buttonSize_.Height() + offsetY),
+        90, 180);
+    if (LessNotEqual(progressWidth_, radius)) {
+        path.AddArc(RSRect(progressWidth_ + offsetX, offsetY,
+            buttonSize_.Height() - progressWidth_ + offsetX, buttonSize_.Height() + offsetY),
+            270, -180);
+    } else if (GreatNotEqual(progressWidth_, buttonSize_.Width() - radius)) {
+        path.AddRect(RSRect(radius + offsetX, offsetY, buttonSize_.Width() - radius + offsetX,
+            buttonSize_.Height() + offsetY),
+            RSPathDirection::CW_DIRECTION);
+        path.AddArc(RSRect((buttonSize_.Width() - radius) * 2.0 - progressWidth_ + offsetX, offsetY,
+            progressWidth_ + offsetX, buttonSize_.Height() + offsetY),
+            270, 180);
+    } else {
+        path.AddRect(
+            RSRect(radius + offsetX, offsetY, progressWidth_ + offsetX, buttonSize_.Height() + offsetY),
+            RSPathDirection::CW_DIRECTION);
+    }
+    RSBrush brush;
+    brush.SetColor(progressColor_.GetValue());
+    brush.SetAntiAlias(true);
+    canvas->AttachBrush(brush);
+    canvas->DrawPath(path);
+    canvas->DetachBrush();
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderButton::DrawCircleProgress(SkCanvas* canvas, const Offset& offset)
 {
     SkPaint paint;
@@ -349,10 +498,30 @@ void RosenRenderButton::DrawCircleProgress(SkCanvas* canvas, const Offset& offse
         { offset.GetX(), offset.GetY(), progressDiameter_ + offset.GetX(), progressDiameter_ + offset.GetY() },
         PROGRESS_START_ANGLE * RADIAN_TO_DEGREE, 360 * progressPercent_, false, paint);
 }
+#else
+void RosenRenderButton::DrawCircleProgress(RSCanvas* canvas, const Offset& offset)
+{
+    RSPen pen;
+    pen.SetAntiAlias(true);
+    pen.SetColor(progressColor_.GetValue());
+    pen.SetWidth(NormalizeToPx(CIRCLE_PROGRESS_THICKNESS));
+    pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+    canvas->AttachPen(pen);
+    canvas->DrawArc(RSRect(offset.GetX(), offset.GetY(),
+        progressDiameter_ + offset.GetX(), progressDiameter_ + offset.GetY()),
+        PROGRESS_START_ANGLE * RADIAN_TO_DEGREE, 360 * progressPercent_);
+    canvas->DetachPen();
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderButton::DrawDownloadButton(SkCanvas* canvas, const Offset& offset)
+#else
+void RosenRenderButton::DrawDownloadButton(RSCanvas* canvas, const Offset& offset)
+#endif
 {
     if (isWatch_) {
+#ifndef USE_ROSEN_DRAWING
         SkPaint paint;
         paint.setAntiAlias(true);
         paint.setStyle(SkPaint::Style::kFill_Style);
@@ -361,6 +530,18 @@ void RosenRenderButton::DrawDownloadButton(SkCanvas* canvas, const Offset& offse
         canvas->drawCircle(offset.GetX() + buttonSize_.Width() / 2, offset.GetY() + buttonSize_.Height() / 2,
             (progressDiameter_ + NormalizeToPx(WATCH_DOWNLOAD_SIZE_DELTA)) / 2, paint);
         canvas->restore();
+#else
+        RSBrush brush;
+        brush.SetAntiAlias(true);
+        canvas->Save();
+        brush.SetColor(GetStateColor());
+        canvas->AttachBrush(brush);
+        canvas->DrawCircle(
+            RSPoint(offset.GetX() + buttonSize_.Width() / 2, offset.GetY() + buttonSize_.Height() / 2),
+            (progressDiameter_ + NormalizeToPx(WATCH_DOWNLOAD_SIZE_DELTA)) / 2);
+        canvas->DetachBrush();
+        canvas->Restore();
+#endif
         if (progressDisplay_) {
             DrawCircleProgress(canvas, offset + Offset((buttonSize_.Width() - progressDiameter_) / 2,
                 (buttonSize_.Height() - progressDiameter_) / 2));
@@ -386,7 +567,11 @@ void RosenRenderButton::DrawDownloadButton(SkCanvas* canvas, const Offset& offse
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderButton::DrawButton(SkCanvas* canvas, const Offset& inOffset)
+#else
+void RosenRenderButton::DrawButton(RSCanvas* canvas, const Offset& inOffset)
+#endif
 {
     Offset offset = inOffset + offsetDelta_;
     if (buttonComponent_->GetType() == ButtonType::ARC) {
@@ -460,7 +645,11 @@ bool RosenRenderButton::HasEffectiveTransform() const
     return scale_ != INIT_SCALE;
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderButton::ConvertToSkVector(const std::array<Radius, 4>& radii, SkVector* skRadii)
+#else
+void RosenRenderButton::ConvertToVector(const std::array<Radius, 4>& radii, RSPoint* pRadii)
+#endif
 {
     auto context = context_.Upgrade();
     if (!context) {
@@ -468,8 +657,13 @@ void RosenRenderButton::ConvertToSkVector(const std::array<Radius, 4>& radii, Sk
     }
     double dipScale = context->GetDipScale();
     for (int32_t i = 0; i < 4; ++i) {
+#ifndef USE_ROSEN_DRAWING
         skRadii[i].set(SkDoubleToScalar(std::max(radii[i].GetX().ConvertToPx(dipScale), 0.0)),
             SkDoubleToScalar(std::max(radii[i].GetY().ConvertToPx(dipScale), 0.0)));
+#else
+        pRadii[i].SetX(static_cast<float>(std::max(radii[i].GetX().ConvertToPx(dipScale), 0.0)));
+        pRadii[i].SetY(static_cast<float>(std::max(radii[i].GetY().ConvertToPx(dipScale), 0.0)));
+#endif
     }
 }
 
@@ -491,6 +685,7 @@ void RosenRenderButton::PaintFocus(RenderContext& context, const Offset& offset)
         focusRadius = rrectRadius_ + NormalizeToPx(FOCUS_PADDING);
     }
 
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setColor(FOCUS_BORDER_COLOR);
     paint.setStyle(SkPaint::Style::kStroke_Style);
@@ -501,8 +696,21 @@ void RosenRenderButton::PaintFocus(RenderContext& context, const Offset& offset)
     rRect.offset(-NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF),
         -NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF));
     canvas->drawRRect(rRect, paint);
+#else
+    RSPen pen;
+    pen.SetColor(FOCUS_BORDER_COLOR);
+    pen.SetWidth(NormalizeToPx(FOCUS_BORDER_WIDTH));
+    pen.SetAntiAlias(true);
+    RSRoundRect rRect(RSRect(0, 0, focusBorderWidth, focusBorderHeight), focusRadius, focusRadius);
+    rRect.Offset(-NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF),
+        -NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF));
+    canvas->AttachPen(pen);
+    canvas->DrawRoundRect(rRect);
+    canvas->DetachPen();
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderButton::PaintPopupFocus(RenderContext& context)
 {
     auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
@@ -528,6 +736,35 @@ void RosenRenderButton::PaintPopupFocus(RenderContext& context)
     rRect.offset(NormalizeToPx(FOCUS_BORDER_WIDTH), NormalizeToPx(FOCUS_BORDER_WIDTH));
     canvas->drawRRect(rRect, paint);
 }
+#else
+void RosenRenderButton::PaintPopupFocus(RenderContext& context)
+{
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (!canvas) {
+        LOGE("paint canvas is null");
+        return;
+    }
+    Size canvasSize = GetLayoutSize();
+    double focusBorderHeight = canvasSize.Height() - NormalizeToPx(FOCUS_BORDER_WIDTH) / HALF;
+    double focusBorderWidth = canvasSize.Width() - NormalizeToPx(FOCUS_BORDER_WIDTH) / HALF;
+    double focusRadius = focusBorderHeight * HALF;
+    if (!buttonComponent_) {
+        return;
+    }
+
+    RSPen pen;
+    pen.SetColor(FOCUS_POPUP_BORDER_COLOR);
+    pen.SetWidth(NormalizeToPx(FOCUS_BORDER_WIDTH));
+    pen.SetAntiAlias(true);
+
+    RSRoundRect rRect(RSRect(0, 0, focusBorderWidth, focusBorderHeight), focusRadius, focusRadius);
+    rRect.Offset(NormalizeToPx(FOCUS_BORDER_WIDTH), NormalizeToPx(FOCUS_BORDER_WIDTH));
+
+    canvas->AttachPen(pen);
+    canvas->DrawRoundRect(rRect);
+    canvas->DetachPen();
+}
+#endif
 
 void RosenRenderButton::SyncFocusGeometryProperties()
 {

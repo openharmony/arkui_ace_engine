@@ -17,6 +17,7 @@
 
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
 
+#include "core/common/ace_application_info.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_paint_method.h"
 
 namespace OHOS::Ace::NG {
@@ -24,6 +25,12 @@ OffscreenCanvasPattern::OffscreenCanvasPattern(int32_t width, int32_t height)
 {
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
+    if (Negative(width)) {
+        width = 0;
+    }
+    if (Negative(height)) {
+        height = 0;
+    }
     offscreenPaintMethod_ = MakeRefPtr<OffscreenCanvasPaintMethod>(context, width, height);
 }
 
@@ -210,7 +217,15 @@ void OffscreenCanvasPattern::SetLineDash(const std::vector<double>& segments)
 
 void OffscreenCanvasPattern::SetTextDirection(TextDirection direction)
 {
+    if (direction == TextDirection::INHERIT) {
+        direction = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
+    }
     offscreenPaintMethod_->SetTextDirection(direction);
+}
+
+void OffscreenCanvasPattern::SetFilterParam(const std::string& filterStr)
+{
+    offscreenPaintMethod_->SetFilterParam(filterStr);
 }
 
 void OffscreenCanvasPattern::Save()
@@ -253,9 +268,9 @@ void OffscreenCanvasPattern::Translate(double x, double y)
     offscreenPaintMethod_->Translate(x, y);
 }
 
-void OffscreenCanvasPattern::SetFillPattern(const Ace::Pattern& pattern)
+void OffscreenCanvasPattern::SetFillPattern(const std::weak_ptr<Ace::Pattern>& pattern)
 {
-    offscreenPaintMethod_->SetFillPattern(pattern);
+    offscreenPaintMethod_->SetFillPatternNG(pattern);
 }
 
 void OffscreenCanvasPattern::SetFillGradient(const Ace::Gradient& gradient)
@@ -338,9 +353,9 @@ void OffscreenCanvasPattern::SetShadowColor(const Color& color)
     offscreenPaintMethod_->SetShadowColor(color);
 }
 
-void OffscreenCanvasPattern::SetStrokePattern(const Ace::Pattern& pattern)
+void OffscreenCanvasPattern::SetStrokePattern(const std::weak_ptr<Ace::Pattern>& pattern)
 {
-    offscreenPaintMethod_->SetStrokePattern(pattern);
+    offscreenPaintMethod_->SetStrokePatternNG(pattern);
 }
 
 void OffscreenCanvasPattern::SetStrokeGradient(const Ace::Gradient& gradient)

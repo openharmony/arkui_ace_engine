@@ -22,6 +22,8 @@
 namespace OHOS::Ace::Framework {
 class JSIndexer : public JSContainerBase {
 public:
+    static void ParseIndexerSelectedObject(
+        const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal, bool isMethodProp);
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& args);
     static void JsOnSelected(const JSCallbackInfo& args);

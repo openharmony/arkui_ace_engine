@@ -80,6 +80,9 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     // collect
     TouchTestResult hitTestResult;
     const NG::PointF point { touchPoint.x, touchPoint.y };
+    if (refereeNG_->CheckSourceTypeChange(touchPoint.sourceType)) {
+        refereeNG_->CleanAll();
+    }
     if (refereeNG_->QueryAllDone(touchPoint.id)) {
         refereeNG_->CleanGestureScope(touchPoint.id);
     }
@@ -103,7 +106,10 @@ void EventManager::TouchTest(
     const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode, const TouchRestrict& touchRestrict)
 {
     ContainerScope scope(instanceId_);
-
+    
+    if (refereeNG_->CheckSourceTypeChange(event.sourceType, true)) {
+        refereeNG_->CleanAll();
+    }
     ACE_FUNCTION_TRACE();
     CHECK_NULL_VOID(frameNode);
     // collect
@@ -701,7 +707,7 @@ void EventManager::AddKeyboardShortcutNode(const WeakPtr<NG::FrameNode>& node)
     keyboardShortcutNode_.emplace_back(node);
 }
 
-uint8_t EventManager::GetKeyboardShortcutKeys(const std::vector<CtrlKey>& keys)
+uint8_t EventManager::GetKeyboardShortcutKeys(const std::vector<ModifierKey>& keys)
 {
     uint8_t keyValue = 0;
     uint8_t ctrlTimes = 0;
@@ -712,17 +718,17 @@ uint8_t EventManager::GetKeyboardShortcutKeys(const std::vector<CtrlKey>& keys)
     }
     for (const auto& key : keys) {
         switch (static_cast<uint8_t>(key)) {
-            case static_cast<uint8_t>(CtrlKey::CTRL): {
+            case static_cast<uint8_t>(ModifierKey::CTRL): {
                 keyValue |= static_cast<uint8_t>(CtrlKeysBit::CTRL);
                 ++ctrlTimes;
                 break;
             }
-            case static_cast<uint8_t>(CtrlKey::SHIFT): {
+            case static_cast<uint8_t>(ModifierKey::SHIFT): {
                 keyValue |= static_cast<uint8_t>(CtrlKeysBit::SHIFT);
                 ++shiftTimes;
                 break;
             }
-            case static_cast<uint8_t>(CtrlKey::ALT): {
+            case static_cast<uint8_t>(ModifierKey::ALT): {
                 keyValue |= static_cast<uint8_t>(CtrlKeysBit::ALT);
                 ++altTimes;
                 break;

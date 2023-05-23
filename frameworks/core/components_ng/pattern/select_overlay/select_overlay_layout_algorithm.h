@@ -43,12 +43,26 @@ public:
         return defaultMenuEndOffset_;
     }
 
+    const std::optional<float>& GetMenuWidth() const
+    {
+        return menuWidth_;
+    }
+
+    bool GetHasExtensitonMenu() const
+    {
+        return hasExtensitonMenu_;
+    }
+
 private:
     OffsetF ComputeSelectMenuPosition(LayoutWrapper* layoutWrapper);
+    OffsetF ComputeExtensionMenuPosition(LayoutWrapper* layoutWrapper, const OffsetF& offset);
+    void RemeasureExtensionMenu(LayoutWrapper* layoutWrapper, const OffsetF& offset);
 
     std::shared_ptr<SelectOverlayInfo> info_;
 
     OffsetF defaultMenuEndOffset_;
+    std::optional<float> menuWidth_;
+    bool hasExtensitonMenu_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayLayoutAlgorithm);
 };

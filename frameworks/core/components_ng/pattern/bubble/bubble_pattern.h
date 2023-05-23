@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUBBLE_BUBBLE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUBBLE_BUBBLE_PATTERN_H
 
+#include <optional>
+
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
@@ -23,7 +25,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/bubble//bubble_event_hub.h"
-#include "core/components_ng/pattern/bubble/bubble_accessibility_property.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_algorithm.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_paint_method.h"
@@ -50,9 +51,7 @@ public:
         bubbleMethod->SetArrowPosition(arrowPosition_);
         bubbleMethod->SetChildOffset(childOffset_);
         bubbleMethod->SetChildSize(childSize_);
-        bubbleMethod->SetShowTopArrow(showTopArrow_);
-        bubbleMethod->SetShowBottomArrow(showBottomArrow_);
-        bubbleMethod->SetShowCustomArrow(showCustomArrow_);
+        bubbleMethod->SetShowArrow(showArrow_);
         return bubbleMethod;
     }
 
@@ -88,10 +87,9 @@ public:
         return { FocusType::SCOPE, true };
     }
 
-    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
-    {
-        return MakeRefPtr<BubbleAccessibilityProperty>();
-    }
+    void StartEnteringAnimation(std::function<void()> finish);
+    void StartExitingAnimation(std::function<void()> finish);
+    bool IsOnShow();
 
 private:
     void OnModifyDone() override;
@@ -102,7 +100,7 @@ private:
     RefPtr<PopupTheme> GetPopupTheme();
     void InitTouchEvent();
     void HandleTouchEvent(const TouchEventInfo& info);
-    void HandleTouchUp(const Offset& clickPosition);
+    void HandleTouchDown(const Offset& clickPosition);
     void RegisterButtonOnHover();
     void RegisterButtonOnTouch();
     void ButtonOnHover(bool isHover, const RefPtr<NG::FrameNode>& buttonNode);
@@ -110,6 +108,15 @@ private:
     void PopBubble();
     void Animation(RefPtr<RenderContext>& renderContext, const Color& endColor,
         int32_t duration, const RefPtr<Curve>& curve);
+
+    OffsetT<Dimension> GetInvisibleOffset();
+    RefPtr<RenderContext> GetRenderContext();
+    void ResetToInvisible();
+    bool PostTask(const TaskExecutor::Task& task);
+    void StartOffsetEnteringAnimation();
+    void StartAlphaEnteringAnimation(std::function<void()> finish);
+    void StartOffsetExitingAnimation();
+    void StartAlphaExitingAnimation(std::function<void()> finish);
 
     int32_t targetNodeId_ = -1;
     std::string targetTag_;
@@ -123,10 +130,20 @@ private:
     OffsetF arrowPosition_;
     SizeF childSize_;
     RectF touchRegion_;
+    std::optional<Placement> arrowPlacement_;
 
-    bool showTopArrow_ = true;
-    bool showBottomArrow_ = true;
-    bool showCustomArrow_ = false;
+    bool showArrow_ = false;
+
+    enum class TransitionStatus {
+        INVISIABLE,
+        ENTERING,
+        NORMAL,
+        EXITING,
+    };
+
+    TransitionStatus transitionStatus_ = TransitionStatus::INVISIABLE;
+
+    bool delayShow_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(BubblePattern);
 };

@@ -164,7 +164,7 @@ void DragDropManager::UpdatePixelMapPosition(int32_t globalX, int32_t globalY)
         CHECK_NULL_VOID(draggedFrameNode_);
         auto hub = draggedFrameNode_->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(hub);
-        if (!hub->GetTextFieldDraggable()) {
+        if (!hub->GetTextDraggable()) {
             hub = columnNode->GetOrCreateGestureEventHub();
             CHECK_NULL_VOID(hub);
         }
@@ -284,7 +284,7 @@ bool DragDropManager::CheckDragDropProxy(int64_t id) const
 void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode)
 {
     const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
-    if (dragFrameNodeAllowDrop.empty()) {
+    if (dragFrameNodeAllowDrop.empty() || summaryMap_.empty()) {
         InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::DEFAULT);
         return;
     }
@@ -357,6 +357,9 @@ void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string&
 {
     preTargetFrameNode_ = nullptr;
     auto frameNodes = FindDragFrameNodeMapByPosition(globalX, globalY, DragType::COMMON);
+#ifdef ENABLE_DRAG_FRAMEWORK
+    bool isUseDefaultDrop = false;
+#endif // ENABLE_DRAG_FRAMEWORK
     for (auto iter = frameNodes.rbegin(); iter != frameNodes.rend(); ++iter) {
         auto dragFrameNode = iter->second;
         CHECK_NULL_VOID_NOLOG(dragFrameNode);
@@ -371,8 +374,9 @@ void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string&
             continue;
         }
         RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-        auto extraParams = eventHub->GetDragExtraParams(extraInfo, Point(globalX, globalY), DragEventType::DROP);
+        auto extraParams = eventHub->GetDragExtraParams(extraInfo_, Point(globalX, globalY), DragEventType::DROP);
 #ifdef ENABLE_DRAG_FRAMEWORK
+        isUseDefaultDrop = true;
         InteractionManager::GetInstance()->SetDragWindowVisible(false);
 #endif // ENABLE_DRAG_FRAMEWORK
         UpdateDragEvent(event, globalX, globalY);
@@ -384,6 +388,10 @@ void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string&
         break;
     }
 #ifdef ENABLE_DRAG_FRAMEWORK
+    if (!isUseDefaultDrop) {
+        LOGD("DragDropManager Not Use DefaultDrop");
+        InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_FAIL, false);
+    }
     summaryMap_.clear();
 #endif // ENABLE_DRAG_FRAMEWORK
 }
@@ -466,7 +474,11 @@ void DragDropManager::FireOnDragEvent(
 
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (event->GetResult() == DragRet::ENABLE_DROP) {
-        InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::COPY);
+        if (event->IsCopy()) {
+            InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::COPY);
+        } else {
+            InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
+        }
     } else if (event->GetResult() == DragRet::DISABLE_DROP) {
         InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::FORBIDDEN);
     } else {
@@ -737,7 +749,12 @@ void DragDropManager::DestroyDragWindow()
     CHECK_NULL_VOID(dragWindow_);
     dragWindow_->Destroy();
     dragWindow_ = nullptr;
-#endif
+#elif defined(ENABLE_DRAG_FRAMEWORK)
+    if (dragWindow_ != nullptr) {
+        dragWindow_->Destroy();
+        dragWindow_ = nullptr;
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
     if (dragWindowRootNode_) {
         dragWindowRootNode_ = nullptr;
     }

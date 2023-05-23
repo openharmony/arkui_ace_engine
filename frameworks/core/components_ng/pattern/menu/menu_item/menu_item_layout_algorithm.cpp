@@ -29,49 +29,45 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    verInterval_ = static_cast<float>(VERTICAL_INTERVAL.ConvertToPx());
-    horInterval_ = static_cast<float>(theme->GetMenuIconPadding().ConvertToPx());
+    horInterval_ = static_cast<float>(theme->GetMenuIconPadding().ConvertToPx()) -
+        static_cast<float>(theme->GetOutPadding().ConvertToPx());
     auto props = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(props);
     auto layoutConstraint = props->GetLayoutConstraint();
     CHECK_NULL_VOID(layoutConstraint);
-
     float maxRowWidth = layoutConstraint->maxSize.Width() - horInterval_ * 2.0;
     float minRowWidth = layoutConstraint->minSize.Width();
 
     auto childConstraint = props->CreateChildConstraint();
+    // set item min height
+    auto minItemHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
+    childConstraint.minSize.SetHeight(minItemHeight);
+    // measure right row
     childConstraint.maxSize.SetWidth(maxRowWidth);
     childConstraint.percentReference.SetWidth(maxRowWidth);
-
+    float rightRowWidth = 0.0f;
+    auto rightRow = layoutWrapper->GetOrCreateChildByIndex(1);
+    if (rightRow) {
+        rightRow->Measure(childConstraint);
+        rightRowWidth = rightRow->GetGeometryNode()->GetMarginFrameSize().Width();
+    }
+    // measure left row
+    // left row constraint width = total constraint width - right row width - space
+    auto middleSpace = static_cast<float>(theme->GetIconContentPadding().ConvertToPx());
+    maxRowWidth -= rightRowWidth + middleSpace;
+    childConstraint.maxSize.SetWidth(maxRowWidth);
+    childConstraint.percentReference.SetWidth(maxRowWidth);
     auto leftRow = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(leftRow);
-    auto rightRow = layoutWrapper->GetOrCreateChildByIndex(1);
-    CHECK_NULL_VOID(rightRow);
+    leftRow->Measure(childConstraint);
+    float leftRowWidth = leftRow->GetGeometryNode()->GetMarginFrameSize().Width();
 
-    auto minItemHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
-
-    SizeF size;
     if (!layoutConstraint->selfIdealSize.Width().has_value()) {
-        // measure left row
-        leftRow->Measure(childConstraint);
-        // measure right row
-        rightRow->Measure(childConstraint);
-
-        auto leftRowSize = leftRow->GetGeometryNode()->GetFrameSize();
-        auto rightRowSize = rightRow->GetGeometryNode()->GetFrameSize();
-        auto childHeight = std::max(leftRowSize.Height(), rightRowSize.Height());
-        auto contentWidth = leftRowSize.Width() + rightRowSize.Width() + horInterval_ * 2 +
-                            static_cast<float>(theme->GetIconContentPadding().ConvertToPx());
-        size = SizeF(std::max(contentWidth, minRowWidth), std::max(childHeight, minItemHeight));
-    } else {
-        auto leftRowSize = leftRow->GetGeometryNode()->GetFrameSize();
-        auto rightRowSize = rightRow->GetGeometryNode()->GetFrameSize();
-        auto childHeight = std::max(leftRowSize.Height(), rightRowSize.Height());
-        size = SizeF(layoutConstraint->selfIdealSize.Width().value(), std::max(childHeight, minItemHeight));
+        float contentWidth = leftRowWidth + rightRowWidth + horInterval_ * 2.0 + middleSpace;
+        layoutConstraint->selfIdealSize.SetWidth(std::max(minRowWidth, contentWidth));
+        props->UpdateLayoutConstraint(layoutConstraint.value());
     }
-
-    LOGD("menuItem frame size set to %{public}f x %{public}f", size.Width(), size.Height());
-    layoutWrapper->GetGeometryNode()->SetFrameSize(size);
+    BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
 }
 
 void MenuItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

@@ -28,6 +28,13 @@ config("drawable_config") {
 }
 
 ohos_shared_library("drawable_descriptor") {
+  if (current_os == "ohos") {
+    sanitize = {
+      integer_overflow = true
+      boundary_sanitize = true
+      debug = ace_sanitize_debug
+    }
+  }
   public_configs = [ ":drawable_config" ]
 
   configs = [ "$ace_root:ace_config" ]
@@ -38,10 +45,14 @@ ohos_shared_library("drawable_descriptor") {
     "js_drawable_descriptor.cpp",
   ]
 
-  deps = [
-    "$ace_flutter_engine_root/skia:ace_skia_ohos",
-    "$cjson_root:cjson",
-  ]
+  deps = [ "$cjson_root:cjson" ]
+
+  if (ace_use_new_skia) {
+    deps += [ "$skia_root_new:skia_ohos" ]
+    defines = [ "NEW_SKIA" ]
+  } else {
+    deps += [ "$ace_flutter_engine_root/skia:ace_skia_ohos" ]
+  }
 
   public_deps = [
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",

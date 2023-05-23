@@ -27,19 +27,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<CounterModel> CounterModel::instance_ = nullptr;
+std::mutex CounterModel::mutex_;
 
 CounterModel* CounterModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::CounterModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::CounterModelNG());
-        } else {
-            instance_.reset(new Framework::CounterModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::CounterModelNG());
+            } else {
+                instance_.reset(new Framework::CounterModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -62,8 +66,7 @@ void JSCounter::JSBind(BindingTarget globalObj)
     JSClass<JSCounter>::StaticMethod("controlWidth", &JSCounter::JSControlWidth);
     JSClass<JSCounter>::StaticMethod("state", &JSCounter::JSStateChange);
     JSClass<JSCounter>::StaticMethod("backgroundColor", &JSCounter::JsBackgroundColor);
-    JSClass<JSCounter>::Inherit<JSContainerBase>();
-    JSClass<JSCounter>::Bind(globalObj);
+    JSClass<JSCounter>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSCounter::JsEnableDec(const JSCallbackInfo& args)

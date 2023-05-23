@@ -41,19 +41,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<TextModel> TextModel::instance_ = nullptr;
+std::mutex TextModel::mutex_;
 
 TextModel* TextModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::TextModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::TextModelNG());
-        } else {
-            instance_.reset(new Framework::TextModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::TextModelNG());
+            } else {
+                instance_.reset(new Framework::TextModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -91,7 +95,7 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
         LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }
@@ -148,17 +152,17 @@ void JSText::SetTextShadow(const JSCallbackInfo& info)
         return;
     }
     double radius = 0.0;
-    ParseJsonDouble(argsPtrItem->GetValue("radius"), radius);
+    ParseJsDouble(JSRef<JSObject>::Cast(info[0])->GetProperty("radius"), radius);
     if (LessNotEqual(radius, 0.0)) {
         radius = 0.0;
     }
     Shadow shadow;
     shadow.SetBlurRadius(radius);
-    Dimension offsetX;
+    CalcDimension offsetX;
     if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetX"), offsetX)) {
         shadow.SetOffsetX(offsetX.Value());
     }
-    Dimension offsetY;
+    CalcDimension offsetY;
     if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetY"), offsetY)) {
         shadow.SetOffsetY(offsetY.Value());
     }
@@ -212,8 +216,9 @@ void JSText::SetTextIndent(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionFp(info[0], value)) {
+        TextModel::GetInstance()->SetTextIndent(value);
         return;
     }
     TextModel::GetInstance()->SetTextIndent(value);
@@ -252,7 +257,7 @@ void JSText::SetLineHeight(const JSCallbackInfo& info)
         LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionFp(info[0], value)) {
         return;
     }
@@ -279,7 +284,7 @@ void JSText::SetMinFontSize(const JSCallbackInfo& info)
         LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }
@@ -292,7 +297,7 @@ void JSText::SetMaxFontSize(const JSCallbackInfo& info)
         LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }
@@ -305,7 +310,7 @@ void JSText::SetLetterSpacing(const JSCallbackInfo& info)
         LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionFp(info[0], value)) {
         return;
     }
@@ -327,7 +332,7 @@ void JSText::SetBaselineOffset(const JSCallbackInfo& info)
         LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionFp(info[0], value)) {
         return;
     }
@@ -536,7 +541,7 @@ void JSText::JsDraggable(const JSCallbackInfo& info)
         LOGI("The info is wrong, it is supposed to be an boolean");
         return;
     }
-    TextModel::GetInstance()->SetDraggable(info[0]->IsBoolean());
+    TextModel::GetInstance()->SetDraggable(info[0]->ToBoolean());
 }
 
 void JSText::JsMenuOptionsExtension(const JSCallbackInfo& info)
@@ -595,9 +600,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("focusable", &JSText::JsFocusable);
     JSClass<JSText>::StaticMethod("draggable", &JSText::JsDraggable);
     JSClass<JSText>::StaticMethod("textMenuOptions", &JSText::JsMenuOptionsExtension);
-    JSClass<JSText>::Inherit<JSContainerBase>();
-    JSClass<JSText>::Inherit<JSViewAbstract>();
-    JSClass<JSText>::Bind<>(globalObj);
+    JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

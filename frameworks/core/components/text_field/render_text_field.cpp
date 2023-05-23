@@ -67,7 +67,7 @@ constexpr double FIFTY_PERCENT = 0.5;
 constexpr Dimension OFFSET_FOCUS = 4.0_vp;
 constexpr Dimension DEFLATE_RADIUS_FOCUS = 3.0_vp;
 
-const std::string DIGIT_BLACK_LIST = "[^\\d.\\-e]+";
+const std::string DIGIT_BLACK_LIST = "[^\\d]+";
 const std::string PHONE_BLACK_LIST = "[^\\d\\-\\+\\*\\#]+";
 const std::string DIGIT_WHITE_LIST = "^[0-9]*$";
 const std::string PHONE_WHITE_LIST = "[\\d\\-\\+\\*\\#]+";
@@ -678,7 +678,7 @@ void RenderTextField::OnTouchTestHit(
 void RenderTextField::StartPressAnimation(bool pressDown)
 {
     if (!pressController_) {
-        pressController_ = AceType::MakeRefPtr<Animator>(context_);
+        pressController_ = CREATE_ANIMATOR(context_);
     }
     if (pressController_->IsRunning()) {
         pressController_->Stop();
@@ -705,7 +705,7 @@ void RenderTextField::StartHoverAnimation(bool isHovered)
         return;
     }
     if (!hoverController_) {
-        hoverController_ = AceType::MakeRefPtr<Animator>(context_);
+        hoverController_ = CREATE_ANIMATOR(context_);
     }
     if (hoverController_->IsRunning()) {
         hoverController_->Stop();
@@ -1021,7 +1021,7 @@ void RenderTextField::InitAnimation()
 
     // Add the animation
     LOGD("Add animation to animator");
-    animator_ = AceType::MakeRefPtr<Animator>(context_);
+    animator_ = CREATE_ANIMATOR(context_);
     animator_->AddInterpolator(diameterAnimation);
     animator_->AddInterpolator(diameterInnerAnimation);
     animator_->SetDuration(SHOW_HANDLE_DURATION);

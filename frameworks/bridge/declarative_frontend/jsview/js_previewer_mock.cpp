@@ -24,14 +24,18 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<PreviewMockModel> PreviewMockModel::instance_ = nullptr;
+std::mutex PreviewMockModel::mutex_;
 
 PreviewMockModel* PreviewMockModel::GetInstance()
 {
     if (!instance_) {
-        if (Container::IsCurrentUseNewPipeline()) {
-            instance_.reset(new NG::PreviewMockModelNG());
-        } else {
-            instance_.reset(new Framework::PreviewMockModelImpl());
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::PreviewMockModelNG());
+            } else {
+                instance_.reset(new Framework::PreviewMockModelImpl());
+            }
         }
     }
     return instance_.get();
@@ -80,8 +84,7 @@ void JSForm::JSBind(BindingTarget globalObj)
     JSClass<JSForm>::StaticMethod("onDeleteEvent", &JSForm::Mock);
     JSClass<JSForm>::StaticMethod("onClick", &JSForm::Mock);
 
-    JSClass<JSForm>::Inherit<JSViewAbstract>();
-    JSClass<JSForm>::Bind<>(globalObj);
+    JSClass<JSForm>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSRichText::Create(const JSCallbackInfo& info)
@@ -101,8 +104,7 @@ void JSRichText::JSBind(BindingTarget globalObj)
     JSClass<JSRichText>::StaticMethod("create", &JSRichText::Create);
     JSClass<JSRichText>::StaticMethod("onStart", &JSRichText::Mock);
     JSClass<JSRichText>::StaticMethod("onComplete", &JSRichText::Mock);
-    JSClass<JSRichText>::Inherit<JSViewAbstract>();
-    JSClass<JSRichText>::Bind<>(globalObj);
+    JSClass<JSRichText>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 class JSWebDialog : public Referenced {
@@ -304,8 +306,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onHttpAuthRequest", &JSWeb::Mock);
     JSClass<JSWeb>::StaticMethod("onSslErrorEventReceive", &JSWeb::Mock);
     JSClass<JSWeb>::StaticMethod("onClientAuthenticationRequest", &JSWeb::Mock);
-    JSClass<JSWeb>::Inherit<JSViewAbstract>();
-    JSClass<JSWeb>::Bind(globalObj);
+    JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
 
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -398,8 +399,7 @@ void JSXComponent::JSBind(BindingTarget globalObj)
     JSClass<JSXComponent>::StaticMethod("create", &JSXComponent::Create);
     JSClass<JSXComponent>::StaticMethod("onLoad", &JSXComponent::Mock);
     JSClass<JSXComponent>::StaticMethod("onDestroy", &JSXComponent::Mock);
-    JSClass<JSXComponent>::Inherit<JSViewAbstract>();
-    JSClass<JSXComponent>::Bind(globalObj);
+    JSClass<JSXComponent>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSXComponentController::JSBind(BindingTarget globalObj)
@@ -454,11 +454,10 @@ void JSVideo::JSBind(BindingTarget globalObj)
     JSClass<JSVideo>::StaticMethod("onDisAppear", &JSVideo::Mock);
     JSClass<JSVideo>::StaticMethod("remoteMessage", &JSVideo::Mock);
 
-    JSClass<JSVideo>::Inherit<JSViewAbstract>();
     // override method
     JSClass<JSVideo>::StaticMethod("opacity", &JSVideo::Mock);
     JSClass<JSVideo>::StaticMethod("transition", &JSVideo::Mock);
-    JSClass<JSVideo>::Bind<>(globalObj);
+    JSClass<JSVideo>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSVideoController::JSBind(BindingTarget globalObj)
@@ -503,8 +502,7 @@ void JSPlugin::JSBind(BindingTarget globalObj)
     JSClass<JSPlugin>::StaticMethod("onDeleteEvent", &JSPlugin::Mock);
     JSClass<JSPlugin>::StaticMethod("onClick", &JSPlugin::Mock);
 
-    JSClass<JSPlugin>::Inherit<JSViewAbstract>();
-    JSClass<JSPlugin>::Bind<>(globalObj);
+    JSClass<JSPlugin>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

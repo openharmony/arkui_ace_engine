@@ -32,15 +32,15 @@ void ListItemLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     }
     auto editMode = propEditMode_.value_or(V2::EditMode::SHAM);
     if (editMode == V2::EditMode::NONE) {
-        json->Put("editMode", "EditMode.None");
+        json->Put("editable", "EditMode.None");
     } else if (editMode == V2::EditMode::MOVABLE) {
-        json->Put("editMode", "EditMode.Movable");
+        json->Put("editable", "EditMode.Movable");
     } else if (editMode == V2::EditMode::DELETABLE) {
-        json->Put("editMode", "EditMode.Deletable");
+        json->Put("editable", "EditMode.Deletable");
     } else if (editMode == (V2::EditMode::DELETABLE | V2::EditMode::MOVABLE)) {
-        json->Put("editMode", true);
+        json->Put("editable", true);
     } else {
-        json->Put("editMode", false);
+        json->Put("editable", false);
     }
     if (propEdgeEffect_.has_value()) {
         auto swipeAction = JsonUtil::Create(true);
@@ -51,5 +51,9 @@ void ListItemLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         auto swipeAction = JsonUtil::Create(true);
         json->Put("swipeAction", swipeAction);
     }
+    json->Put("startDeleteAreaDistance",
+        propStartDeleteAreaDistance_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+    json->Put("endDeleteAreaDistance",
+        propEndDeleteAreaDistance_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
 }
 }

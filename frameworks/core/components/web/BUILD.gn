@@ -30,7 +30,6 @@ if (is_ohos_standard_system) {
 
 build_component("web") {
   sources = [
-    "flutter_render_web.cpp",
     "render_web.cpp",
     "render_web_creator.cpp",
     "resource/web_client_impl.cpp",
@@ -40,6 +39,9 @@ build_component("web") {
     "web_component.cpp",
     "web_element.cpp",
   ]
+  if (!ace_use_new_skia) {
+    sources += [ "flutter_render_web.cpp" ]
+  }
 
   if (is_ohos_standard_system) {
     sources += [ "resource/web_javascript_result_callback.cpp" ]

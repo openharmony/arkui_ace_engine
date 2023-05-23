@@ -23,19 +23,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<RowModel> RowModel::instance_ = nullptr;
+std::mutex RowModel::mutex_;
 
 RowModel* RowModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::RowModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::RowModelNG());
-        } else {
-            instance_.reset(new Framework::RowModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::RowModelNG());
+            } else {
+                instance_.reset(new Framework::RowModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -45,11 +49,11 @@ namespace OHOS::Ace::Framework {
 
 void JSRow::Create(const JSCallbackInfo& info)
 {
-    std::optional<Dimension> space;
+    std::optional<CalcDimension> space;
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> spaceVal = obj->GetProperty("space");
-        Dimension value;
+        CalcDimension value;
         if (ParseJsDimensionVp(spaceVal, value)) {
             space = value;
         }
@@ -118,9 +122,7 @@ void JSRow::JSBind(BindingTarget globalObj)
     JSClass<JSRow>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSRow>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRow>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
-    JSClass<JSRow>::Inherit<JSContainerBase>();
-    JSClass<JSRow>::Inherit<JSViewAbstract>();
-    JSClass<JSRow>::Bind<>(globalObj);
+    JSClass<JSRow>::InheritAndBind<JSContainerBase>(globalObj);
 
     JSClass<VerticalAlignDeclaration>::Declare("VerticalAlignDeclaration");
     JSClass<VerticalAlignDeclaration>::Bind(

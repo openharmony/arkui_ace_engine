@@ -32,7 +32,7 @@ class ACE_EXPORT RotationGesture : public Gesture {
 
 public:
     RotationGesture() = default;
-    RotationGesture(int32_t fingers, double angle) : Gesture(fingers), angle_(angle) {}
+    RotationGesture(int32_t fingers, double angle);
     ~RotationGesture() override = default;
 
 protected:

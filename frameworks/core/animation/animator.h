@@ -16,10 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_ANIMATOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_ANIMATOR_H
 
+#include <fstream>
 #include <list>
 
 #include "base/log/ace_trace.h"
+#include "base/memory/referenced.h"
 #include "base/utils/macros.h"
+#include "base/utils/system_properties.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/interpolator.h"
 #include "core/animation/motion.h"
@@ -27,18 +30,24 @@
 #include "core/animation/status_listener.h"
 #include "core/animation/time_event.h"
 #include "core/components/common/properties/animation_option.h"
+#include "core/components_ng/syntax/if_else_model.h"
+
+#ifdef PREVIEW
+#define CREATE_ANIMATOR(...) AceType::MakeRefPtr<Animator>(__VA_ARGS__)
+#else
+#define CREATE_ANIMATOR(...) Animator::CreateAnimator(__FILE__, __LINE__, ##__VA_ARGS__)
+#endif
 
 namespace OHOS::Ace {
-
 class ACE_FORCE_EXPORT_WITH_PREVIEW Animator : public AceType, public StatusListenable {
     DECLARE_ACE_TYPE(Animator, AceType);
 
 public:
     enum class Status {
-        IDLE,     // when animation not start or been cancel.
-        RUNNING,  // play in reverse / forward direction.
-        PAUSED,   // paused by call Pause API.
-        STOPPED,  // stopped by call Finish/Stop API or has played to the end.
+        IDLE,    // when animation not start or been cancel.
+        RUNNING, // play in reverse / forward direction.
+        PAUSED,  // paused by call Pause API.
+        STOPPED, // stopped by call Finish/Stop API or has played to the end.
     };
 
     // Adjust global animation duration, default scale is 1.0f.
@@ -54,6 +63,43 @@ public:
     Animator(const char* name = nullptr);
 
     ~Animator() override;
+
+private:
+    static std::string CombineStrUint(const char* fileName, int line)
+    {
+        std::string output = fileName;
+        output += " Line : ";
+        output += std::to_string(line);
+        return output;
+    }
+
+public:
+    static RefPtr<Animator> CreateAnimator(
+        const char* fileName, int line, const WeakPtr<PipelineBase>& context, const char* name = nullptr)
+    {
+        if (SystemProperties::GetDebugEnabled()) {
+            if (name == nullptr) {
+                return AceType::MakeRefPtr<Animator>(context, CombineStrUint(fileName, line).c_str());
+            } else {
+                return AceType::MakeRefPtr<Animator>(context, (CombineStrUint(fileName, line) + name).c_str());
+            }
+        } else {
+            return AceType::MakeRefPtr<Animator>(context, name);
+        }
+    }
+
+    static RefPtr<Animator> CreateAnimator(const char* fileName, int line, const char* name = nullptr)
+    {
+        if (SystemProperties::GetDebugEnabled()) {
+            if (name == nullptr) {
+                return AceType::MakeRefPtr<Animator>(CombineStrUint(fileName, line).c_str());
+            } else {
+                return AceType::MakeRefPtr<Animator>((CombineStrUint(fileName, line) + name).c_str());
+            }
+        } else {
+            return AceType::MakeRefPtr<Animator>(name);
+        }
+    }
 
     void AttachScheduler(const WeakPtr<PipelineBase>& context);
     void AttachSchedulerOnContainer();

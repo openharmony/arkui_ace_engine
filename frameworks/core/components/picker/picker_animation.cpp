@@ -21,7 +21,7 @@ void PickerAnimation::Init()
 {
     animation_ = AceType::MakeRefPtr<CurveAnimation<double>>(start_, end_, curve_);
     animation_->AddListener(Animation<double>::ValueCallback(callback_));
-    controller_ = AceType::MakeRefPtr<Animator>(pipe_);
+    controller_ = CREATE_ANIMATOR(pipe_);
     controller_->SetDuration(duration_);
     controller_->SetStartDelay(delay_);
 }

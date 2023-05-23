@@ -28,19 +28,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<ScrollModel> ScrollModel::instance_ = nullptr;
+std::mutex ScrollModel::mutex_;
 
 ScrollModel* ScrollModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::ScrollModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::ScrollModelNG());
-        } else {
-            instance_.reset(new Framework::ScrollModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::ScrollModelNG());
+            } else {
+                instance_.reset(new Framework::ScrollModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -243,9 +247,7 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSScroll>::StaticMethod("width", &JSScroll::JsWidth);
     JSClass<JSScroll>::StaticMethod("height", &JSScroll::JsHeight);
-    JSClass<JSScroll>::Inherit<JSContainerBase>();
-    JSClass<JSScroll>::Inherit<JSViewAbstract>();
-    JSClass<JSScroll>::Bind<>(globalObj);
+    JSClass<JSScroll>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSScroll::SetScrollBar(const JSCallbackInfo& args)
@@ -267,13 +269,14 @@ void JSScroll::SetScrollBarWidth(const JSCallbackInfo& args)
     CHECK_NULL_VOID_NOLOG(pipelineContext);
     auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID_NOLOG(theme);
-    Dimension scrollBarWidth;
+    CalcDimension scrollBarWidth;
     if (args.Length() < 1) {
         LOGE("args is invalid");
         return;
     }
     if (!ParseJsDimensionVp(args[0], scrollBarWidth) || args[0]->IsNull() || args[0]->IsUndefined() ||
-        (args[0]->IsString() && args[0]->ToString().empty()) || LessNotEqual(scrollBarWidth.Value(), 0.0)) {
+        (args[0]->IsString() && args[0]->ToString().empty()) || LessNotEqual(scrollBarWidth.Value(), 0.0) ||
+        scrollBarWidth.Unit() == DimensionUnit::PERCENT) {
         scrollBarWidth = theme->GetNormalWidth();
     }
     ScrollModel::GetInstance()->SetScrollBarWidth(scrollBarWidth);
@@ -293,8 +296,17 @@ void JSScroll::SetScrollBarColor(const std::string& scrollBarColor)
     ScrollModel::GetInstance()->SetScrollBarColor(color);
 }
 
-void JSScroll::SetEdgeEffect(int edgeEffect)
+void JSScroll::SetEdgeEffect(const JSCallbackInfo& args)
 {
+    if (args.Length() < 1) {
+        LOGE("args is invalid");
+        return;
+    }
+    int32_t edgeEffect;
+    if (args[0]->IsNull() || args[0]->IsUndefined() || !ParseJsInt32(args[0], edgeEffect) ||
+        edgeEffect < static_cast<int32_t>(EdgeEffect::SPRING) || edgeEffect > static_cast<int32_t>(EdgeEffect::NONE)) {
+        edgeEffect = static_cast<int32_t>(EdgeEffect::NONE);
+    }
     ScrollModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect));
 }
 

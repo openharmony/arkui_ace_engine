@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,10 @@
 
 #include "adapter/ohos/entrance/ace_form_ability.h"
 
+#include "form_provider_client.h"
 #include "res_config.h"
 #include "resource_manager.h"
+#include "session_info.h"
 
 #include "adapter/ohos/entrance/pa_container.h"
 #include "adapter/ohos/entrance/pa_engine/pa_backend.h"
@@ -82,13 +84,13 @@ void AceFormAbility::LoadFormEnv(const OHOS::AAFwk::Want& want)
     // init form ability
     BackendType backendType = BackendType::FORM;
 
-    Platform::PaContainer::CreateContainer(instanceId_, backendType, this,
+    Platform::PaContainer::CreateContainer(instanceId_, backendType, this, moduleInfo->hapPath,
         std::make_unique<FormPlatformEventCallback>([this]() { TerminateAbility(); }));
 
     std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
     if (info != nullptr && !info->srcPath.empty()) {
         LOGI("AceFormAbility srcPath:%{public}s url:%{public}s", info->srcPath.c_str(), parsedUrl.c_str());
-        auto assetBasePathStr = { "assets/js/" + info->srcPath + "/" };
+        auto assetBasePathStr = { "assets/js/" + info->srcPath + "/", std::string("assets/js/") };
         Platform::PaContainer::AddAssetPath(instanceId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
     } else {
         LOGI("AceFormAbility parsedUrl:%{public}s", parsedUrl.c_str());
@@ -159,10 +161,10 @@ bool AceFormAbility::OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams
     return Platform::PaContainer::OnShare(instanceId_, formId, wantParams);
 }
 
-void AceFormAbility::OnStart(const OHOS::AAFwk::Want& want)
+void AceFormAbility::OnStart(const OHOS::AAFwk::Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     LOGI("AceFormAbility::OnStart start");
-    Ability::OnStart(want);
+    Ability::OnStart(want, sessionInfo);
     LoadFormEnv(want);
 }
 
@@ -183,5 +185,22 @@ void AceFormAbility::OnDisconnect(const Want& want)
 {
     LOGI("AceFormAbility::OnDisconnect start");
     Ability::OnDisconnect(want);
+}
+
+sptr<IRemoteObject> AceFormAbility::GetFormRemoteObject()
+{
+    LOGD("Get form remote object start");
+    if (formProviderRemoteObject_ == nullptr) {
+        sptr<FormProviderClient> providerClient = new (std::nothrow) FormProviderClient();
+        std::shared_ptr<Ability> thisAbility = this->shared_from_this();
+        if (thisAbility == nullptr) {
+            LOGE("Get form remote object failed, ability is nullptr");
+            return nullptr;
+        }
+        providerClient->SetOwner(thisAbility);
+        formProviderRemoteObject_ = providerClient->AsObject();
+    }
+    LOGD("Get form remote object end");
+    return formProviderRemoteObject_;
 }
 } // namespace OHOS::Ace

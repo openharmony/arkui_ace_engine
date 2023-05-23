@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_ADAPTER_SKIA_SVG_DOM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_ADAPTER_SKIA_SVG_DOM_H
 
-#ifdef FLUTTER_2_5
+#if defined(FLUTTER_2_5) || defined(NEW_SKIA)
 #include "include/core/SkColor.h"
 #include "modules/svg/include/SkSVGDOM.h"
 #else
@@ -49,7 +49,7 @@ public:
 
     // skia SVG doesn't support <animate> element
 
-    const std::optional<Color>& GetSvgFillColor() override
+    const std::optional<Color>& GetFillColor() override
     {
         return svgColor_;
     }

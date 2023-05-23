@@ -23,4 +23,6 @@ std::string TextLayoutProperty::GetCopyOptionString() const
 
 void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {}
+
+void TextLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json) {}
 } // namespace OHOS::Ace::NG

@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "frameworks/bridge/declarative_frontend/jsview/dialog/js_alert_dialog.h"
 
 #include <sstream>
@@ -20,15 +19,35 @@
 #include <vector>
 
 #include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/jsview/models/alert_dialog_model_impl.h"
 #include "core/common/container.h"
-#include "core/components/dialog/dialog_component.h"
-#include "core/components_ng/event/click_event.h"
-#include "core/components_ng/pattern/dialog/dialog_event_hub.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/dialog/alert_dialog_model_ng.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
+namespace OHOS::Ace {
+std::unique_ptr<AlertDialogModel> AlertDialogModel::instance_ = nullptr;
+std::mutex AlertDialogModel::mutex_;
+AlertDialogModel* AlertDialogModel::GetInstance()
+{
+    if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
+#ifdef NG_BUILD
+            instance_.reset(new NG::AlertDialogModelNG());
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::AlertDialogModelNG());
+            } else {
+                instance_.reset(new Framework::AlertDialogModelImpl());
+            }
+#endif
+        }
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 namespace {
 const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, DialogAlignment::CENTER,
@@ -68,28 +87,12 @@ void ParseButtonObj(
     auto actionValue = objInner->GetProperty("action");
     if (actionValue->IsFunction()) {
         auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
-        // NG
-        if (Container::IsCurrentUseNewPipeline()) {
-            auto callback = [execCtx = args.GetExecutionContext(), func = std::move(actionFunc), property](
-                                GestureEvent& /*info*/) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                ACE_SCORING_EVENT("AlertDialog.[" + property + "].onAction");
-                func->ExecuteJS();
-            };
-            buttonInfo.action = AceType::MakeRefPtr<NG::ClickEvent>(std::move(callback));
-        } else {
-            EventMarker actionId([execCtx = args.GetExecutionContext(), func = std::move(actionFunc), property]() {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                ACE_SCORING_EVENT("AlertDialog.[" + property + "].onAction");
-                func->Execute();
-            });
-
-            if (property == "confirm" || property == "primaryButton") {
-                properties.primaryId = actionId;
-            } else if (property == "secondaryButton") {
-                properties.secondaryId = actionId;
-            }
-        }
+        auto eventFunc = [execCtx = args.GetExecutionContext(), func = std::move(actionFunc), property]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("AlertDialog.[" + property + "].onAction");
+            func->Execute();
+        };
+        AlertDialogModel::GetInstance()->SetParseButtonObj(eventFunc, buttonInfo, properties, property);
     }
 
     if (buttonInfo.IsValid()) {
@@ -140,22 +143,12 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         auto cancelValue = obj->GetProperty("cancel");
         if (cancelValue->IsFunction()) {
             auto cancelFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(cancelValue));
-            // NG set onCancel
-            if (Container::IsCurrentUseNewPipeline()) {
-                properties.onCancel = [execCtx = args.GetExecutionContext(), func = std::move(cancelFunc)] {
-                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                    ACE_SCORING_EVENT("AlertDialog.property.cancel");
-                    LOGD("dialog onCancel triggered");
-                    func->ExecuteJS();
-                };
-            } else {
-                EventMarker cancelId([execCtx = args.GetExecutionContext(), func = std::move(cancelFunc)]() {
-                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                    ACE_SCORING_EVENT("AlertDialog.property.cancel");
-                    func->Execute();
-                });
-                properties.callbacks.try_emplace("cancel", cancelId);
-            }
+            auto eventFunc = [execCtx = args.GetExecutionContext(), func = std::move(cancelFunc)]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("AlertDialog.property.cancel");
+                func->Execute();
+            };
+            AlertDialogModel::GetInstance()->SetOnCancel(eventFunc, properties);
         }
 
         if (obj->GetProperty("confirm")->IsObject()) {
@@ -180,48 +173,15 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         auto offsetValue = obj->GetProperty("offset");
         if (offsetValue->IsObject()) {
             auto offsetObj = JSRef<JSObject>::Cast(offsetValue);
-            Dimension dx;
+            CalcDimension dx;
             auto dxValue = offsetObj->GetProperty("dx");
             ParseJsDimensionVp(dxValue, dx);
-            Dimension dy;
+            CalcDimension dy;
             auto dyValue = offsetObj->GetProperty("dy");
             ParseJsDimensionVp(dyValue, dy);
             properties.offset = DimensionOffset(dx, dy);
         }
-
-        if (Container::IsCurrentUseNewPipeline()) {
-            auto container = Container::Current();
-            CHECK_NULL_VOID(container);
-            auto pipelineContext = container->GetPipelineContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-            CHECK_NULL_VOID(context);
-            auto overlayManager = context->GetOverlayManager();
-            CHECK_NULL_VOID(overlayManager);
-
-            auto dialog = overlayManager->ShowDialog(properties, nullptr, false);
-            CHECK_NULL_VOID(dialog);
-            auto hub = dialog->GetEventHub<NG::DialogEventHub>();
-            hub->SetOnCancel(std::move(properties.onCancel));
-            return;
-        }
-
-        // Show dialog.
-        auto container = Container::Current();
-        if (container) {
-            auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-            auto executor = container->GetTaskExecutor();
-            if (executor) {
-                executor->PostTask(
-                    [context, properties]() {
-                        if (context) {
-                            context->ShowDialog(properties, false, "AlertDialog");
-                        }
-                    },
-                    TaskExecutor::TaskType::UI);
-            }
-        }
-        args.SetReturnValue(args.This());
+        AlertDialogModel::GetInstance()->SetShowDialog(properties);
     }
 }
 
@@ -230,8 +190,7 @@ void JSAlertDialog::JSBind(BindingTarget globalObj)
     JSClass<JSAlertDialog>::Declare("AlertDialog");
     JSClass<JSAlertDialog>::StaticMethod("show", &JSAlertDialog::Show);
 
-    JSClass<JSAlertDialog>::Inherit<JSViewAbstract>();
-    JSClass<JSAlertDialog>::Bind<>(globalObj);
+    JSClass<JSAlertDialog>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

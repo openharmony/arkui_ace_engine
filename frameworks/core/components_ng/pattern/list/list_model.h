@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_MODEL_H
 
 #include <memory>
+#include <mutex>
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -72,6 +73,7 @@ public:
 
 private:
     static std::unique_ptr<ListModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

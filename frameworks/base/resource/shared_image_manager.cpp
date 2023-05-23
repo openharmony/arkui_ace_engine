@@ -21,6 +21,7 @@
 
 #include "base/log/log.h"
 #include "base/thread/cancelable_callback.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -52,14 +53,12 @@ std::function<void()> SharedImageManager::GenerateClearImageDataCallback(const s
 
 void SharedImageManager::PostDelayedTaskToClearImageData(const std::string& name, size_t dataSize)
 {
-    if (!taskExecutor_) {
-        LOGE("taskExecutor is null!");
-        return;
-    }
+    auto taskExecutor = taskExecutor_.Upgrade();
+    CHECK_NULL_VOID(taskExecutor);
     std::lock_guard<std::mutex> lockCancelableCallbackMap_(cancelableCallbackMapMutex_);
     auto& cancelableCallback = cancelableCallbackMap_[name];
     cancelableCallback.Reset(GenerateClearImageDataCallback(name, dataSize));
-    taskExecutor_->PostDelayedTask(cancelableCallback, TaskExecutor::TaskType::BACKGROUND,
+    taskExecutor->PostDelayedTask(cancelableCallback, TaskExecutor::TaskType::BACKGROUND,
         DELAY_TIME_FOR_IMAGE_DATA_CLEAN);
 }
 
@@ -88,39 +87,39 @@ void SharedImageManager::AddSharedImage(const std::string& name, SharedImage&& s
         } else {
             sharedImageMap_.emplace(name, std::move(sharedImage));
         }
-        if (!taskExecutor_) {
-            LOGE("taskExecutor is null when try UpdateData");
-            return;
-        }
-        taskExecutor_->PostTask([providerWpSet, name, wp = AceType::WeakClaim(this)] () {
-            auto sharedImageManager = wp.Upgrade();
-            if (!sharedImageManager) {
-                LOGE("sharedImageManager is null when try UpdateData");
-                return;
-            }
-            size_t dataSize = 0;
-            auto sharedImageMap = sharedImageManager->GetSharedImageMap();
-            {
-                std::lock_guard<std::mutex> lockImageMap(sharedImageManager->sharedImageMapMutex_);
-                auto imageDataIter = sharedImageMap.find(name);
-                if (imageDataIter == sharedImageMap.end()) {
-                    LOGE("fail to find data of %{public}s in sharedImageMap, stop UpdateData", name.c_str());
+        auto taskExecutor = taskExecutor_.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [providerWpSet, name, wp = AceType::WeakClaim(this)]() {
+                auto sharedImageManager = wp.Upgrade();
+                if (!sharedImageManager) {
+                    LOGE("sharedImageManager is null when try UpdateData");
                     return;
                 }
-                dataSize = imageDataIter->second.size();
-                for (const auto& providerWp : providerWpSet) {
-                    auto provider = providerWp.Upgrade();
-                    if (!provider) {
-                        LOGE("provider of %{public}s is null when UpdateData, dataSize is %{public}zu",
-                            name.c_str(), dataSize);
-                        continue;
+                size_t dataSize = 0;
+                auto sharedImageMap = sharedImageManager->GetSharedImageMap();
+                {
+                    std::lock_guard<std::mutex> lockImageMap(sharedImageManager->sharedImageMapMutex_);
+                    auto imageDataIter = sharedImageMap.find(name);
+                    if (imageDataIter == sharedImageMap.end()) {
+                        LOGE("fail to find data of %{public}s in sharedImageMap, stop UpdateData", name.c_str());
+                        return;
                     }
-                    provider->UpdateData(std::string(MEMORY_IMAGE_HEAD).append(name), imageDataIter->second);
+                    dataSize = imageDataIter->second.size();
+                    for (const auto& providerWp : providerWpSet) {
+                        auto provider = providerWp.Upgrade();
+                        if (!provider) {
+                            LOGE("provider of %{public}s is null when UpdateData, dataSize is %{public}zu",
+                                name.c_str(), dataSize);
+                            continue;
+                        }
+                        provider->UpdateData(std::string(MEMORY_IMAGE_HEAD).append(name), imageDataIter->second);
+                    }
+                    LOGI("done add image data for %{private}s, length of data is %{public}zu", name.c_str(), dataSize);
                 }
-                LOGI("done add image data for %{private}s, length of data is %{public}zu", name.c_str(), dataSize);
-            }
-            sharedImageManager->PostDelayedTaskToClearImageData(name, dataSize);
-        }, TaskExecutor::TaskType::UI);
+                sharedImageManager->PostDelayedTaskToClearImageData(name, dataSize);
+            },
+            TaskExecutor::TaskType::UI);
 }
 
 void SharedImageManager::AddPictureNamesToReloadMap(std::string&& name)

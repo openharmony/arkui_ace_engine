@@ -18,12 +18,14 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "frameworks/core/components_ng/pattern/custom/custom_node_base.h"
 
 namespace OHOS::Ace {
 
@@ -40,6 +42,7 @@ struct NodeInfoPU {
     std::function<void(bool)> reloadFunc;
     std::function<RefPtr<AceType>()> completeReloadFunc;
     std::function<void(int32_t)> nodeUpdateFunc;
+    std::function<void(RefPtr<NG::CustomNodeBase>)> recycleCustomNodeFunc;
 
     bool hasMeasureOrLayout = false;
     bool isStatic = false;
@@ -62,6 +65,7 @@ public:
 
 private:
     static std::unique_ptr<ViewPartialUpdateModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

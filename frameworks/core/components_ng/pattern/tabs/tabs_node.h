@@ -23,6 +23,11 @@
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t SWIPER_INDEX = 0;
+constexpr int32_t DIVIDER_INDEX = 1;
+constexpr int32_t TAB_BAR_INDEX = 2;
+} // namespace
 
 class ACE_EXPORT TabsNode : public GroupNode {
     DECLARE_ACE_TYPE(TabsNode, GroupNode);
@@ -50,6 +55,16 @@ public:
         return dividerId_.has_value();
     }
 
+    bool HasSelectedMaskNode() const
+    {
+        return selectedMaskId_.has_value();
+    }
+
+    bool HasUnselectedMaskNode() const
+    {
+        return unselectedMaskId_.has_value();
+    }
+
     int32_t GetSwiperId()
     {
         if (!swiperId_.has_value()) {
@@ -73,6 +88,22 @@ public:
         }
         return tabBarId_.value();
     }
+	
+    int32_t GetSelectedMaskId()
+    {
+        if (!selectedMaskId_.has_value()) {
+            selectedMaskId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return selectedMaskId_.value();
+    }
+
+    int32_t GetUnselectedMaskId()
+    {
+        if (!unselectedMaskId_.has_value()) {
+            unselectedMaskId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return unselectedMaskId_.value();
+    }
 
     RefPtr<UINode> GetBuilderByContentId(int32_t tabContentId, const RefPtr<UINode>& builderNode)
     {
@@ -88,12 +119,17 @@ public:
 
     RefPtr<UINode> GetTabBar()
     {
-        return GetChildren().front();
+        return GetChildAtIndex(TAB_BAR_INDEX);
     }
 
     RefPtr<UINode> GetTabs()
     {
-        return GetChildren().back();
+        return GetChildAtIndex(SWIPER_INDEX);
+    }
+
+    RefPtr<UINode> GetDivider()
+    {
+        return GetChildAtIndex(DIVIDER_INDEX);
     }
 
 private:
@@ -102,12 +138,15 @@ private:
     TabBarMode GetTabBarMode() const;
     Dimension GetBarWidth() const;
     Dimension GetBarHeight() const;
+    Color GetBarBackgroundColor() const;
     int32_t GetIndex() const;
     bool GetFadingEdge() const;
 
     std::optional<int32_t> swiperId_;
     std::optional<int32_t> tabBarId_;
     std::optional<int32_t> dividerId_;
+    std::optional<int32_t> selectedMaskId_;
+    std::optional<int32_t> unselectedMaskId_;
     std::set<int32_t> swiperChildren_;
     std::map<int32_t, RefPtr<UINode>> builderNode_; // Key is id of TabContent, value is id of builder of TabBar.
 };

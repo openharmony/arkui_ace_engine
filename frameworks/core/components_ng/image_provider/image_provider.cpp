@@ -63,8 +63,9 @@ bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
     // if image object has no skData, reload data.
     auto imageLoader = ImageLoader::CreateImageLoader(imageObj->GetSourceInfo());
     CHECK_NULL_RETURN(imageLoader, false);
-    auto newLoadedData = imageLoader->GetImageData(
-        imageObj->GetSourceInfo(), WeakClaim(RawPtr(NG::PipelineContext::GetCurrentContext())));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto newLoadedData = imageLoader->GetImageData(imageObj->GetSourceInfo(), WeakClaim(RawPtr(pipeline)));
     CHECK_NULL_RETURN(newLoadedData, false);
     // load data success
     imageObj->SetData(newLoadedData);
@@ -126,6 +127,7 @@ void ImageProvider::FailCallback(const std::string& key, const std::string& erro
 
 void ImageProvider::SuccessCallback(const RefPtr<CanvasImage>& canvasImage, const std::string& key, bool sync)
 {
+    CacheCanvasImage(canvasImage, key);
     auto ctxs = EndTask(key);
     // when upload success, pass back canvasImage to LoadingContext
     auto notifyLoadSuccess = [ctxs, canvasImage] {
@@ -154,8 +156,8 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
         FailCallback(src.GetKey(), errorMessage, sync);
         return;
     }
-    RefPtr<ImageData> data =
-        imageLoader->GetImageData(src, WeakClaim(RawPtr(NG::PipelineContext::GetCurrentContext())));
+    auto pipeline = PipelineContext::GetCurrentContext();
+    RefPtr<ImageData> data = imageLoader->GetImageData(src, WeakClaim(RawPtr(pipeline)));
 
     // build ImageObject
     RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(src, data);
@@ -207,7 +209,7 @@ std::set<WeakPtr<ImageLoadingContext>> ImageProvider::EndTask(const std::string&
     auto it = tasks_.find(key);
     if (it == tasks_.end()) {
         LOGW("task not found in map %{private}s", key.c_str());
-        return std::set<WeakPtr<ImageLoadingContext>>();
+        return {};
     }
     auto ctxs = it->second.ctxs_;
     if (ctxs.empty()) {

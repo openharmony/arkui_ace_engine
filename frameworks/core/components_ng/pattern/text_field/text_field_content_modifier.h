@@ -43,19 +43,24 @@ public:
     void SetContentOffset(OffsetF& value);
     void SetContentSize(SizeF& value);
     void SetTextValue(std::string& value);
+    void SetErrorTextValue(const std::string& value);
     void SetPlaceholderValue(std::string&& value);
     void SetTextRectY(const float value);
     void SetTextObscured(bool value);
     void ChangeDragStatus();
     void SetTextRectX(const float value);
     void SetTextAlign(const TextAlign value);
+    void SetShowCounter(bool value);
     bool NeedMeasureUpdate(PropertyChangeFlag& flag);
+    void SetShowErrorState(bool value);
+    void SetShowUnderlineState(bool value);
 
 private:
     void SetDefaultFontSize(const TextStyle& textStyle);
     void SetDefaultFontWeight(const TextStyle& textStyle);
     void SetDefaultTextColor(const TextStyle& textStyle);
     void SetDefaultPropertyValue();
+    void UpdatePaintConfig(RefPtr<CanvasImage>& passwordIconCanvasImage, DrawingContext context, RectF iconRect) const;
 
     WeakPtr<Pattern> pattern_;
     std::optional<Dimension> fontSize_;
@@ -72,10 +77,14 @@ private:
     RefPtr<PropertyOffsetF> contentOffset_;
     RefPtr<PropertySizeF> contentSize_;
     RefPtr<PropertyString> textValue_;
+    RefPtr<PropertyString> errorTextValue_;
     RefPtr<PropertyString> placeholderValue_;
     RefPtr<PropertyBool> textObscured_;
     RefPtr<PropertyBool> dragStatus_;
     RefPtr<PropertyInt> textAlign_;
+    RefPtr<PropertyBool> showCounter_;
+    RefPtr<PropertyBool> showErrorState_;
+    RefPtr<PropertyBool> showUnderline_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldContentModifier);
 };

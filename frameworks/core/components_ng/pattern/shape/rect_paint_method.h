@@ -17,25 +17,29 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SHAPE_RECT_PAINT_METHOD_H
 
 #include "base/geometry/ng/radius.h"
+#include "core/components_ng/pattern/shape/shape_paint_method.h"
+#include "core/components_ng/pattern/shape/shape_overlay_modifier.h"
 #include "core/components_ng/pattern/shape/rect_paint_property.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/rect_painter.h"
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT RectPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(RectPaintMethod, NodePaintMethod)
+class ACE_EXPORT RectPaintMethod : public ShapePaintMethod {
+    DECLARE_ACE_TYPE(RectPaintMethod, ShapePaintMethod)
 public:
     RectPaintMethod() = default;
-    RectPaintMethod(const RefPtr<ShapePaintProperty>& shape_paint_property)
-        : propertiesFromAncestor_(shape_paint_property)
+    RectPaintMethod(
+        const RefPtr<ShapePaintProperty>& shapePaintProperty,
+        const RefPtr<ShapeOverlayModifier>& shapeOverlayModifier)
+        : ShapePaintMethod(shapePaintProperty, shapeOverlayModifier)
     {}
     ~RectPaintMethod() override = default;
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
+        CHECK_NULL_RETURN_NOLOG(paintWrapper, nullptr);
         auto rectPaintProperty = DynamicCast<RectPaintProperty>(paintWrapper->GetPaintProperty()->Clone());
-        if (!rectPaintProperty) {
-            return nullptr;
-        }
+        CHECK_NULL_RETURN_NOLOG(rectPaintProperty, nullptr);
+
         if (propertiesFromAncestor_) {
             if (!rectPaintProperty->HasFill() && propertiesFromAncestor_->HasFill()) {
                 auto renderContext = paintWrapper->GetRenderContext();
@@ -53,8 +57,12 @@ public:
         rect_.SetSize(paintWrapper->GetContentSize());
         rect_.SetOffset(paintWrapper->GetContentOffset());
 
-        return [rect = rect_, rectPaintProperty](
-                   RSCanvas& canvas) { RectPainter::DrawRect(canvas, rect, *rectPaintProperty); };
+        return [rect = rect_, rectPaintProperty, paintWrapper](RSCanvas& canvas) {
+                    RectPainter::DrawRect(canvas, rect, *rectPaintProperty);
+                    if (paintWrapper) {
+                        paintWrapper->FlushOverlayModifier();
+                    }
+                };
     }
 
 private:
@@ -63,7 +71,6 @@ private:
     Radius topRightRadius_;
     Radius bottomLeftRadius_;
     Radius bottomRightRadius_;
-    RefPtr<ShapePaintProperty> propertiesFromAncestor_;
     ACE_DISALLOW_COPY_AND_MOVE(RectPaintMethod);
 };
 

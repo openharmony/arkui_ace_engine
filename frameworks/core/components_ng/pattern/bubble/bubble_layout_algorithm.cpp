@@ -40,12 +40,7 @@ namespace {
 
 constexpr Dimension ARROW_WIDTH = 32.0_vp;
 constexpr Dimension ARROW_HEIGHT = 8.0_vp;
-constexpr Dimension GRID_MARGIN_PORTRAIT = 48.0_vp;
-constexpr Dimension GRID_SPACING = 24.0_vp;
-constexpr Dimension GRID_SPACING_TOTAL = 232.0_vp;
 constexpr Dimension HORIZON_SPACING_WITH_SCREEN = 6.0_vp;
-constexpr int32_t GRID_NUMBER_LANDSCAPE = 8;
-constexpr int32_t BUBBLR_GRID_MAX_LANDSCAPE = 6;
 constexpr Dimension BEZIER_WIDTH_HALF = 16.0_vp;
 
 } // namespace
@@ -71,20 +66,6 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // update child layout constraint
     LayoutConstraintF childLayoutConstraint = bubbleLayoutProperty->CreateChildConstraint();
-    if (!useCustom) {
-        if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
-            childLayoutConstraint.UpdateMaxSizeWithCheck(
-                SizeF(layoutConstraint->maxSize.Width() - GRID_MARGIN_PORTRAIT.ConvertToPx(),
-                    layoutConstraint->maxSize.Height()));
-        } else {
-            static const int32_t gridGaps = 5;
-            float colWidth =
-                (layoutConstraint->maxSize.Width() - GRID_SPACING_TOTAL.ConvertToPx()) / GRID_NUMBER_LANDSCAPE;
-            childLayoutConstraint.UpdateMaxSizeWithCheck(
-                SizeF(colWidth * BUBBLR_GRID_MAX_LANDSCAPE + GRID_SPACING.ConvertToPx() * gridGaps,
-                    layoutConstraint->maxSize.Height()));
-        }
-    }
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
         return;
@@ -149,10 +130,8 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     childSize_ = child->GetGeometryNode()->GetMarginFrameSize(); // bubble's child's size
     childOffset_ = GetChildPosition(childSize_, bubbleProp);     // bubble's child's offset
     bool useCustom = bubbleProp->GetUseCustom().value_or(false);
-    if (useCustom) { // use custom popupOption
-        UpdateCustomChildPosition(bubbleProp);
-        UpdateTouchRegion();
-    }
+    UpdateChildPosition(bubbleProp);
+    UpdateTouchRegion();
     child->GetGeometryNode()->SetMarginFrameOffset(childOffset_);
     child->Layout();
     auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
@@ -193,18 +172,11 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
 
 OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp)
 {
-    InitArrowState(layoutProp);
     float targetSpace = targetSpace_.ConvertToPx();
     OffsetF bottomPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / 2.0,
-        targetOffset_.GetY() + targetSize_.Height() + targetSpace);
-    if (showBottomArrow_) {
-        bottomPosition += OffsetF(0.0, arrowHeight_);
-    }
+        targetOffset_.GetY() + targetSize_.Height() + targetSpace + arrowHeight_);
     OffsetF topPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / 2.0,
-        targetOffset_.GetY() - childSize.Height() - targetSpace);
-    if (showTopArrow_) {
-        topPosition += OffsetF(0.0, -arrowHeight_);
-    }
+        targetOffset_.GetY() - childSize.Height() - targetSpace - arrowHeight_);
     OffsetF topArrowPosition;
     OffsetF bottomArrowPosition;
     InitArrowTopAndBottomPosition(topArrowPosition, bottomArrowPosition, topPosition, bottomPosition, childSize);
@@ -238,27 +210,7 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const Re
     // If childPosition is error, adjust bubble to origin position.
     arrowPlacement_ = placement_;
     arrowPosition_ = arrowPlacement_ == Placement::TOP ? topArrowPosition : bottomArrowPosition;
-
     return originOffset;
-}
-
-void BubbleLayoutAlgorithm::InitArrowState(const RefPtr<BubbleLayoutProperty>& layoutProp)
-{
-    auto enableArrow = layoutProp->GetEnableArrow().value_or(true);
-    if (!enableArrow) {
-        showTopArrow_ = false;
-        showBottomArrow_ = false;
-        return;
-    }
-    float arrowWidth = static_cast<float>(ARROW_WIDTH.ConvertToPx());
-    showTopArrow_ = GreatOrEqual(
-        childSize_.Width() - std::max(padding_.Left().ConvertToPx(), border_.TopLeftRadius().GetX().ConvertToPx()) -
-            std::max(padding_.Right().ConvertToPx(), border_.TopRightRadius().GetX().ConvertToPx()),
-        arrowWidth);
-    showBottomArrow_ = GreatOrEqual(
-        childSize_.Width() - std::max(padding_.Left().ConvertToPx(), border_.BottomLeftRadius().GetX().ConvertToPx()) -
-            std::max(padding_.Right().ConvertToPx(), border_.BottomRightRadius().GetX().ConvertToPx()),
-        arrowWidth);
 }
 
 void BubbleLayoutAlgorithm::InitArrowTopAndBottomPosition(OffsetF& topArrowPosition, OffsetF& bottomArrowPosition,
@@ -389,45 +341,41 @@ OffsetF BubbleLayoutAlgorithm::FitToScreen(const OffsetF& fitPosition, const Siz
     return childPosition;
 }
 
-void BubbleLayoutAlgorithm::UpdateCustomChildPosition(const RefPtr<BubbleLayoutProperty>& layoutProp)
+void BubbleLayoutAlgorithm::UpdateChildPosition(const RefPtr<BubbleLayoutProperty>& layoutProp)
 {
     auto enableArrow = layoutProp->GetEnableArrow().value_or(true);
     double arrowWidth = ARROW_WIDTH.ConvertToPx();
     double twoRadiusPx = borderRadius_.ConvertToPx() * 2.0;
     switch (arrowPlacement_) {
         case Placement::TOP:
-            showCustomArrow_ = GreatOrEqual(childSize_.Width() - twoRadiusPx, arrowWidth);
-            break;
         case Placement::TOP_LEFT:
         case Placement::TOP_RIGHT:
-            showCustomArrow_ = GreatOrEqual(childSize_.Width() - twoRadiusPx, arrowWidth);
-            if (!showCustomArrow_ || !enableArrow) {
+            showArrow_ = GreatOrEqual(childSize_.Width() - twoRadiusPx, arrowWidth);
+            if (!showArrow_ || !enableArrow) {
                 childOffset_ += OffsetF(0.0, ARROW_HEIGHT.ConvertToPx());
             }
             break;
         case Placement::BOTTOM:
-            showCustomArrow_ = GreatOrEqual(childSize_.Width() - twoRadiusPx, arrowWidth);
-            break;
         case Placement::BOTTOM_LEFT:
         case Placement::BOTTOM_RIGHT:
-            showCustomArrow_ = GreatOrEqual(childSize_.Width() - twoRadiusPx, arrowWidth);
-            if (!showCustomArrow_ || !enableArrow) {
+            showArrow_ = GreatOrEqual(childSize_.Width() - twoRadiusPx, arrowWidth);
+            if (!showArrow_ || !enableArrow) {
                 childOffset_ += OffsetF(0.0, -ARROW_HEIGHT.ConvertToPx());
             }
             break;
         case Placement::LEFT:
         case Placement::LEFT_TOP:
         case Placement::LEFT_BOTTOM:
-            showCustomArrow_ = GreatOrEqual(childSize_.Height() - twoRadiusPx, arrowWidth);
-            if (!showCustomArrow_ || !enableArrow) {
+            showArrow_ = GreatOrEqual(childSize_.Height() - twoRadiusPx, arrowWidth);
+            if (!showArrow_ || !enableArrow) {
                 childOffset_ += OffsetF(ARROW_HEIGHT.ConvertToPx(), 0.0);
             }
             break;
         case Placement::RIGHT:
         case Placement::RIGHT_TOP:
         case Placement::RIGHT_BOTTOM:
-            showCustomArrow_ = GreatOrEqual(childSize_.Height() - twoRadiusPx, arrowWidth);
-            if (!showCustomArrow_ || !enableArrow) {
+            showArrow_ = GreatOrEqual(childSize_.Height() - twoRadiusPx, arrowWidth);
+            if (!showArrow_ || !enableArrow) {
                 childOffset_ += OffsetF(-ARROW_HEIGHT.ConvertToPx(), 0.0);
             }
             break;
@@ -446,7 +394,7 @@ void BubbleLayoutAlgorithm::UpdateTouchRegion()
         case Placement::TOP_RIGHT:
             topLeft = childOffset_;
             bottomRight = OffsetF(childSize_.Width(), targetSpace_.ConvertToPx() + childSize_.Height());
-            if (showCustomArrow_) {
+            if (showArrow_) {
                 bottomRight += OffsetF(0.0, ARROW_HEIGHT.ConvertToPx());
             }
             break;
@@ -455,7 +403,7 @@ void BubbleLayoutAlgorithm::UpdateTouchRegion()
         case Placement::BOTTOM_RIGHT:
             topLeft = childOffset_ + OffsetF(0.0, -targetSpace_.ConvertToPx());
             bottomRight = OffsetF(childSize_.Width(), targetSpace_.ConvertToPx() + childSize_.Height());
-            if (showCustomArrow_) {
+            if (showArrow_) {
                 topLeft += OffsetF(0.0, -ARROW_HEIGHT.ConvertToPx());
                 bottomRight += OffsetF(0.0, ARROW_HEIGHT.ConvertToPx());
             }
@@ -465,7 +413,7 @@ void BubbleLayoutAlgorithm::UpdateTouchRegion()
         case Placement::LEFT_BOTTOM:
             topLeft = childOffset_;
             bottomRight = OffsetF(targetSpace_.ConvertToPx() + childSize_.Width(), childSize_.Height());
-            if (showCustomArrow_) {
+            if (showArrow_) {
                 bottomRight += OffsetF(ARROW_HEIGHT.ConvertToPx(), 0.0);
             }
             break;
@@ -474,7 +422,7 @@ void BubbleLayoutAlgorithm::UpdateTouchRegion()
         case Placement::RIGHT_BOTTOM:
             topLeft = childOffset_ + OffsetF(-targetSpace_.ConvertToPx(), 0.0);
             bottomRight = OffsetF(targetSpace_.ConvertToPx() + childSize_.Width(), childSize_.Height());
-            if (showCustomArrow_) {
+            if (showArrow_) {
                 topLeft += OffsetF(-ARROW_HEIGHT.ConvertToPx(), 0.0);
                 bottomRight += OffsetF(ARROW_HEIGHT.ConvertToPx(), 0.0);
             }

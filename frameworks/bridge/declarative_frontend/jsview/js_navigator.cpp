@@ -25,19 +25,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<NavigatorModel> NavigatorModel::instance_ = nullptr;
+std::mutex NavigatorModel::mutex_;
 
 NavigatorModel* NavigatorModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::NavigatorModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::NavigatorModelNG());
-        } else {
-            instance_.reset(new Framework::NavigatorModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::NavigatorModelNG());
+            } else {
+                instance_.reset(new Framework::NavigatorModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -108,9 +112,7 @@ void JSNavigator::JSBind(BindingTarget globalObj)
     JSClass<JSNavigator>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSNavigator>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSNavigator>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
-    JSClass<JSNavigator>::Inherit<JSContainerBase>();
-    JSClass<JSNavigator>::Inherit<JSViewAbstract>();
-    JSClass<JSNavigator>::Bind<>(globalObj);
+    JSClass<JSNavigator>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSNavigator::SetActive(bool active)

@@ -23,19 +23,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<PolygonModel> PolygonModel::instance_ = nullptr;
+std::mutex PolygonModel::mutex_;
 
 PolygonModel* PolygonModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::PolygonModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::PolygonModelNG());
-        } else {
-            instance_.reset(new Framework::PolygonModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::PolygonModelNG());
+            } else {
+                instance_.reset(new Framework::PolygonModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -65,8 +69,7 @@ void JSPolygon::JSBind(BindingTarget globalObj)
     JSClass<JSPolygon>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSPolygon>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
 
-    JSClass<JSPolygon>::Inherit<JSShapeAbstract>();
-    JSClass<JSPolygon>::Bind(globalObj);
+    JSClass<JSPolygon>::InheritAndBind<JSShapeAbstract>(globalObj);
 }
 
 void JSPolygon::JsPoints(const JSCallbackInfo& info)
@@ -83,7 +86,12 @@ void JSPolygon::JsPoints(const JSCallbackInfo& info)
         return;
     } else {
         for (size_t i = 0; i < pointsArray->Length(); i++) {
-            JSRef<JSArray> pointArray = pointsArray->GetValueAt(i);
+            JSRef<JSVal> val = pointsArray->GetValueAt(i);
+            if (!val->IsArray()) {
+                LOGE("point is not array.");
+                continue;
+            }
+            JSRef<JSArray> pointArray = JSRef<JSArray>::Cast(val);
             if (pointArray->GetValueAt(0)->IsNumber()) {
                 shapePoint.first = Dimension(pointArray->GetValueAt(0)->ToNumber<double>(), DimensionUnit::VP);
             } else if (pointArray->GetValueAt(0)->IsString()) {

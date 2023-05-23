@@ -26,6 +26,8 @@
 #include "flutter/fml/message_loop.h"
 #if defined(OHOS_PLATFORM) || defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
 #include "flutter/shell/platform/ohos/platform_task_runner_adapter.h"
+#elif defined(PREVIEW)
+#include "adapter/preview/external/flutter/platform_task_runner_adapter.h"
 #endif
 #include "shell/common/thread_host.h"
 
@@ -53,7 +55,7 @@ std::unique_ptr<FlutterThreadModel> FlutterThreadModel::CreateThreadModel(
     fml::RefPtr<fml::TaskRunner> gpuRunner;
     fml::RefPtr<fml::TaskRunner> uiRunner;
     
-#ifdef OHOS_PLATFORM
+#if defined(OHOS_PLATFORM) || defined(PREVIEW)
     fml::RefPtr<fml::TaskRunner> platformRunner =
         flutter::PlatformTaskRunnerAdapter::CurrentTaskRunner(useCurrentEventRunner);
 #else

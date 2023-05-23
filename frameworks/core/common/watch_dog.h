@@ -21,7 +21,6 @@
 #include "base/thread/task_executor.h"
 
 namespace OHOS::Ace {
-
 class ThreadWatcher;
 
 struct Watchers {

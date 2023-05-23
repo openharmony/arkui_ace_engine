@@ -25,19 +25,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<AbilityComponentModel> AbilityComponentModel::instance_ = nullptr;
+std::mutex AbilityComponentModel::mutex_;
 
 AbilityComponentModel* AbilityComponentModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::AbilityComponentModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::AbilityComponentModelNG());
-        } else {
-            instance_.reset(new Framework::AbilityComponentModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::AbilityComponentModelNG());
+            } else {
+                instance_.reset(new Framework::AbilityComponentModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -60,8 +64,7 @@ void JSAbilityComponent::JSBind(BindingTarget globalObj)
     JSClass<JSAbilityComponent>::StaticMethod("onDisconnect", &JSAbilityComponent::JsOnDisconnect, opt);
     JSClass<JSAbilityComponent>::StaticMethod("width", &JSAbilityComponent::Width, opt);
     JSClass<JSAbilityComponent>::StaticMethod("height", &JSAbilityComponent::Height, opt);
-    JSClass<JSAbilityComponent>::Inherit<JSViewAbstract>();
-    JSClass<JSAbilityComponent>::Bind<>(globalObj);
+    JSClass<JSAbilityComponent>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSAbilityComponent::Create(const JSCallbackInfo& info)
@@ -141,7 +144,7 @@ void JSAbilityComponent::JsOnAbilityWillRemove(const JSCallbackInfo& info)
 void JSAbilityComponent::Width(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsWidth(info);
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
@@ -151,7 +154,7 @@ void JSAbilityComponent::Width(const JSCallbackInfo& info)
 void JSAbilityComponent::Height(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsHeight(info);
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }

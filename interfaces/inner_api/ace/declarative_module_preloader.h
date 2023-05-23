@@ -19,13 +19,13 @@
 #include <memory>
 #include <string>
 
-#include "base/utils/macros.h"
+#include "macros.h"
 
 class NativeEngine;
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT DeclarativeModulePreloader {
+class ACE_EXPORT_WITH_PREVIEW DeclarativeModulePreloader {
 public:
     static void Preload(NativeEngine& runtime);
 

@@ -15,19 +15,44 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigation.h"
 
+#include <vector>
+
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/navigation_bar/navigation_bar_component_v2.h"
-#include "core/components/navigation_bar/navigation_container_component.h"
-#include "core/components/option/option_component.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/navigation/navigation_declaration.h"
-#include "core/components_ng/pattern/navigation/navigation_view.h"
+#include "bridge/declarative_frontend/jsview/models/navigation_model_impl.h"
+#include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/pattern/navigation/navigation_model_data.h"
+#include "core/components_ng/pattern/navigation/navigation_model_ng.h"
+
+namespace OHOS::Ace {
+std::unique_ptr<NavigationModel> NavigationModel::instance_ = nullptr;
+std::mutex NavigationModel::mutex_;
+
+NavigationModel* NavigationModel::GetInstance()
+{
+    if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
+#ifdef NG_BUILD
+            instance_.reset(new NG::NavigationModelNG());
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::NavigationModelNG());
+            } else {
+                instance_.reset(new Framework::NavigationModelImpl());
+            }
+        }
+#endif
+        }
+        return instance_.get();
+    }
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -35,6 +60,7 @@ constexpr int32_t TITLE_MODE_RANGE = 2;
 constexpr int32_t NAVIGATION_MODE_RANGE = 2;
 constexpr int32_t NAV_BAR_POSITION_RANGE = 1;
 constexpr int32_t DEFAULT_NAV_BAR_WIDTH = 200;
+
 JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent& eventInfo)
 {
     return JSRef<JSVal>::Make(ToJSValue(eventInfo.IsMiniBar() ? static_cast<int32_t>(NavigationTitleMode::MINI)
@@ -124,41 +150,46 @@ void JSNavigation::ParseBarItems(
 
 bool JSNavigation::ParseCommonTitle(const JSRef<JSVal>& jsValue)
 {
-    if (!Container::IsCurrentUseNewPipeline()) {
-        return false;
-    }
-
     bool isCommonTitle = false;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> subtitle = jsObj->GetProperty("sub");
-    if (subtitle->IsString()) {
-        NG::NavigationView::SetSubtitle(subtitle->ToString());
-        isCommonTitle = true;
-    }
     JSRef<JSVal> title = jsObj->GetProperty("main");
-    if (title->IsString()) {
-        // if no subtitle, title's maxLine = 2
-        NG::NavigationView::SetTitle(title->ToString(), (subtitle->IsString()));
-        isCommonTitle = true;
+    bool sub = subtitle->IsString();
+    bool main = title->IsString();
+    if (subtitle->IsString() || title->IsString()) {
+        NavigationModel::GetInstance()->ParseCommonTitle(
+            sub, main, subtitle->ToString(), title->ToString());
     }
     return isCommonTitle;
 }
 
-void JSNavigation::Create()
+void JSNavigation::Create(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::NavigationView::Create();
+    if (info.Length() <= 0) {
+        NavigationModel::GetInstance()->Create();
+        NavigationModel::GetInstance()->SetNavigationStack();
         return;
     }
-    auto navigationContainer = AceType::MakeRefPtr<NavigationContainerComponent>();
-    ViewStackProcessor::GetInstance()->Push(navigationContainer);
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto obj = JSRef<JSObject>::Cast(info[0]);
+    auto value = obj->GetProperty("type");
+    if (value->ToString() != "NavPathStack") {
+        return;
+    }
+
+    NavigationModel::GetInstance()->Create();
+    auto navigationStack = AceType::MakeRefPtr<JSNavigationStack>();
+    navigationStack->SetDataSourceObj(obj);
+    NavigationModel::GetInstance()->SetNavigationStack(std::move(navigationStack));
 }
 
 void JSNavigation::JSBind(BindingTarget globalObj)
 {
     JSClass<JSNavigation>::Declare("Navigation");
     MethodOptions opt = MethodOptions::NONE;
-    JSClass<JSNavigation>::StaticMethod("create", &JSNavigation::Create, opt);
+    JSClass<JSNavigation>::StaticMethod("create", &JSNavigation::Create);
     JSClass<JSNavigation>::StaticMethod("title", &JSNavigation::SetTitle, opt);
     JSClass<JSNavigation>::StaticMethod("subTitle", &JSNavigation::SetSubTitle, opt);
     JSClass<JSNavigation>::StaticMethod("titleMode", &JSNavigation::SetTitleMode, opt);
@@ -175,9 +206,8 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("hideNavBar", &JSNavigation::SetHideNavBar);
     JSClass<JSNavigation>::StaticMethod("backButtonIcon", &JSNavigation::SetBackButtonIcon);
     JSClass<JSNavigation>::StaticMethod("onNavBarStateChange", &JSNavigation::SetOnNavBarStateChange);
-    JSClass<JSNavigation>::Inherit<JSContainerBase>();
-    JSClass<JSNavigation>::Inherit<JSViewAbstract>();
-    JSClass<JSNavigation>::Bind(globalObj);
+    JSClass<JSNavigation>::StaticMethod("navDestination", &JSNavigation::SetNavDestination);
+    JSClass<JSNavigation>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSNavigation::SetTitle(const JSCallbackInfo& info)
@@ -187,85 +217,42 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
         return;
     }
     if (info[0]->IsString()) {
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::NavigationView::SetTitle(info[0]->ToString());
-            return;
-        }
-        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-        auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
-        if (!navigationContainer) {
-            LOGI("component is not navigationContainer.");
-            return;
-        }
-        navigationContainer->GetDeclaration()->title = info[0]->ToString();
+        NavigationModel::GetInstance()->SetTitle(info[0]->ToString());
     } else if (info[0]->IsObject()) {
         if (ParseCommonTitle(info[0])) {
             return;
         }
-        if (Container::IsCurrentUseNewPipeline()) {
-            std::string title;
-            if (ParseJsString(info[0], title)) {
-                NG::NavigationView::SetTitle(title);
-                return;
-            }
+        std::string title;
+        if (ParseJsString(info[0], title)) {
+            NavigationModel::GetInstance()->SetTitle(title);
         }
         // CustomBuilder | NavigationCustomTitle
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> builderObject = jsObj->GetProperty("builder");
         if (builderObject->IsFunction()) {
-            if (Container::IsCurrentUseNewPipeline()) {
-                RefPtr<NG::UINode> customNode;
-                {
-                    NG::ScopedViewStackProcessor builderViewStackProcessor;
-                    JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
-                    ACE_SCORING_EVENT("Navigation.title.builder");
-                    jsBuilderFunc.Execute();
-                    customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-                }
-                NG::NavigationView::SetCustomTitle(customNode);
-            } else {
-                auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-                auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
-                if (!navigationContainer) {
-                    LOGI("component is not navigationContainer.");
-                    return;
-                }
-                {
-                    ScopedViewStackProcessor builderViewStackProcessor;
-                    JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
-                    ACE_SCORING_EVENT("Navigation.title.builder");
-                    jsBuilderFunc.Execute();
-                    auto customTile = ViewStackProcessor::GetInstance()->Finish();
-#if defined(PREVIEW)
-                    auto composedComponent =
-                        ViewStackProcessor::GetInstance()->CreateInspectorWrapper("NavigationTitle");
-                    composedComponent->SetChild(customTile);
-                    navigationContainer->GetDeclaration()->customTitle = composedComponent;
-#else
-                    navigationContainer->GetDeclaration()->customTitle = customTile;
-#endif
-                }
-            }
+            ViewStackModel::GetInstance()->NewScope();
+            JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
+            ACE_SCORING_EVENT("Navigation.title.builder");
+            jsBuilderFunc.Execute();
+            auto customNode = ViewStackModel::GetInstance()->Finish();
+            NavigationModel::GetInstance()->SetCustomTitle(customNode);
         }
 
-        if (!Container::IsCurrentUseNewPipeline()) {
-            return;
-        }
         JSRef<JSVal> height = jsObj->GetProperty("height");
         if (height->IsNumber()) {
             if (height->ToNumber<int32_t>() == 0) {
-                NG::NavigationView::SetTitleHeight(NG::FULL_SINGLE_LINE_TITLEBAR_HEIGHT);
+                NavigationModel::GetInstance()->SetTitleHeight(NG::FULL_SINGLE_LINE_TITLEBAR_HEIGHT);
                 return;
             }
             if (height->ToNumber<int32_t>() == 1) {
-                NG::NavigationView::SetTitleHeight(NG::FULL_DOUBLE_LINE_TITLEBAR_HEIGHT);
+                NavigationModel::GetInstance()->SetTitleHeight(NG::FULL_DOUBLE_LINE_TITLEBAR_HEIGHT);
                 return;
             }
-            Dimension titleHeight;
+            CalcDimension titleHeight;
             if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight)) {
                 return;
             }
-            NG::NavigationView::SetTitleHeight(titleHeight);
+            NavigationModel::GetInstance()->SetTitleHeight(titleHeight);
         }
     } else {
         LOGE("arg is not [String|Function].");
@@ -275,15 +262,7 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
 void JSNavigation::SetTitleMode(int32_t value)
 {
     if (value >= 0 && value <= TITLE_MODE_RANGE) {
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::NavigationView::SetTitleMode(static_cast<NG::NavigationTitleMode>(value));
-            return;
-        }
-        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-        auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
-        if (navigationContainer) {
-            navigationContainer->GetDeclaration()->titleMode = static_cast<NavigationTitleMode>(value);
-        }
+        NavigationModel::GetInstance()->SetTitleMode(static_cast<NG::NavigationTitleMode>(value));
     } else {
         LOGE("invalid value for titleMode");
     }
@@ -291,45 +270,21 @@ void JSNavigation::SetTitleMode(int32_t value)
 
 void JSNavigation::SetSubTitle(const std::string& subTitle)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::NavigationView::SetSubtitle(subTitle);
-        return;
-    }
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
-    if (navigationContainer) {
-        navigationContainer->GetDeclaration()->subTitle = subTitle;
-    }
+    NavigationModel::GetInstance()->SetSubtitle(subTitle);
 }
 
 void JSNavigation::SetHideTitleBar(bool hide)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::NavigationView::SetHideTitleBar(hide);
-        return;
-    }
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
-    if (navigationContainer) {
-        auto declaration = navigationContainer->GetDeclaration();
-        declaration->hideBar = hide;
-        declaration->animationOption = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    }
+    NavigationModel::GetInstance()->SetHideTitleBar(hide);
 }
 
 void JSNavigation::SetHideNavBar(bool hide)
 {
-    if (!Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
-    NG::NavigationView::SetHideNavBar(hide);
+    NavigationModel::GetInstance()->SetHideNavBar(hide);
 }
 
 void JSNavigation::SetBackButtonIcon(const JSCallbackInfo& info)
 {
-    if (!Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
@@ -343,35 +298,17 @@ void JSNavigation::SetBackButtonIcon(const JSCallbackInfo& info)
         pixMap = CreatePixelMapFromNapiValue(info[0]);
     }
 #endif
-    NG::NavigationView::SetBackButtonIcon(src, noPixMap, pixMap);
+    NavigationModel::GetInstance()->SetBackButtonIcon(src, noPixMap, pixMap);
 }
 
 void JSNavigation::SetHideBackButton(bool hide)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::NavigationView::SetHideBackButton(hide);
-        return;
-    }
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
-    if (navigationContainer) {
-        navigationContainer->GetDeclaration()->hideBarBackButton = hide;
-    }
+    NavigationModel::GetInstance()->SetHideBackButton(hide);
 }
 
 void JSNavigation::SetHideToolBar(bool hide)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::NavigationView::SetHideToolBar(hide);
-        return;
-    }
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
-    if (navigationContainer) {
-        auto declaration = navigationContainer->GetDeclaration();
-        declaration->hideToolbar = hide;
-        declaration->animationOption = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    }
+    NavigationModel::GetInstance()->SetHideToolBar(hide);
 }
 
 void JSNavigation::SetToolBar(const JSCallbackInfo& info)
@@ -386,31 +323,11 @@ void JSNavigation::SetToolBar(const JSCallbackInfo& info)
     }
     auto builderFuncParam = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
     if (builderFuncParam->IsFunction()) {
-        if (Container::IsCurrentUseNewPipeline()) {
-            RefPtr<NG::UINode> customNode;
-            {
-                NG::ScopedViewStackProcessor builderViewStackProcessor;
-                JsFunction jsBuilderFunc(builderFuncParam);
-                jsBuilderFunc.Execute();
-                customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-            }
-            NG::NavigationView::SetCustomToolBar(customNode);
-            return;
-        }
-        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-        auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
-        if (!navigationContainer) {
-            LOGI("component is not navigationContainer.");
-            return;
-        }
-        {
-            ScopedViewStackProcessor builderViewStackProcessor;
-            JsFunction jsBuilderFunc(builderFuncParam);
-            jsBuilderFunc.Execute();
-            RefPtr<Component> builderGeneratedRootComponent = ViewStackProcessor::GetInstance()->Finish();
-            navigationContainer->GetDeclaration()->toolBarBuilder = builderGeneratedRootComponent;
-        }
-        return;
+        ViewStackModel::GetInstance()->NewScope();
+        JsFunction jsBuilderFunc(builderFuncParam);
+        jsBuilderFunc.Execute();
+        auto customNode = ViewStackModel::GetInstance()->Finish();
+        NavigationModel::GetInstance()->SetCustomToolBar(customNode);
     }
 
     auto itemsValue = JSRef<JSObject>::Cast(info[0])->GetProperty("items");
@@ -418,19 +335,15 @@ void JSNavigation::SetToolBar(const JSCallbackInfo& info)
         LOGE("arg format error: not find items");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
+    if (NavigationModel::GetInstance()->NeedSetItems()) {
         std::vector<NG::BarItem> toolBarItems;
         ParseBarItems(info, JSRef<JSArray>::Cast(itemsValue), toolBarItems);
-        NG::NavigationView::SetToolBarItems(std::move(toolBarItems));
+        NavigationModel::GetInstance()->SetToolBarItems(std::move(toolBarItems));
         return;
     }
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
-    if (!navigationContainer) {
-        LOGI("component is not navigationContainer.");
-        return;
-    }
-    ParseToolBarItems(JSRef<JSArray>::Cast(itemsValue), navigationContainer->GetDeclaration()->toolbarItems);
+    std::list<RefPtr<ToolBarItem>> items;
+    NavigationModel::GetInstance()->GetToolBarItems(items);
+    ParseToolBarItems(JSRef<JSArray>::Cast(itemsValue), items);
 }
 
 void JSNavigation::SetMenus(const JSCallbackInfo& info)
@@ -441,54 +354,24 @@ void JSNavigation::SetMenus(const JSCallbackInfo& info)
     }
 
     if (info[0]->IsArray()) {
-        if (Container::IsCurrentUseNewPipeline()) {
+        if (NavigationModel::GetInstance()->NeedSetItems()) {
             std::vector<NG::BarItem> menuItems;
             ParseBarItems(info, JSRef<JSArray>::Cast(info[0]), menuItems);
-            NG::NavigationView::SetMenuItems(std::move(menuItems));
+            NavigationModel::GetInstance()->SetMenuItems(std::move(menuItems));
             return;
         }
-        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-        auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
-        if (!navigationContainer) {
-            LOGI("component is not navigationContainer.");
-            return;
-        }
-        ParseToolBarItems(JSRef<JSArray>::Cast(info[0]), navigationContainer->GetDeclaration()->menuItems);
+        std::list<RefPtr<ToolBarItem>> items;
+        NavigationModel::GetInstance()->GetMenuItems(items);
+        ParseToolBarItems(JSRef<JSArray>::Cast(info[0]), items);
     } else if (info[0]->IsObject()) {
         auto builderObject = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
         if (builderObject->IsFunction()) {
-            if (Container::IsCurrentUseNewPipeline()) {
-                RefPtr<NG::UINode> customNode;
-                {
-                    NG::ScopedViewStackProcessor builderViewStackProcessor;
-                    JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
-                    ACE_SCORING_EVENT("Navigation.menu.builder");
-                    jsBuilderFunc.Execute();
-                    customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-                }
-                NG::NavigationView::SetCustomMenu(customNode);
-                return;
-            }
-            auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-            auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
-            if (!navigationContainer) {
-                LOGI("component is not navigationContainer.");
-                return;
-            }
-            {
-                ScopedViewStackProcessor builderViewStackProcessor;
-                JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
-                ACE_SCORING_EVENT("Navigation.menu.builder");
-                jsBuilderFunc.Execute();
-                auto customMenus = ViewStackProcessor::GetInstance()->Finish();
-#if defined(PREVIEW)
-                auto composedComponent = ViewStackProcessor::GetInstance()->CreateInspectorWrapper("NavigationMenus");
-                composedComponent->SetChild(customMenus);
-                navigationContainer->GetDeclaration()->customMenus = composedComponent;
-#else
-                navigationContainer->GetDeclaration()->customMenus = customMenus;
-#endif
-            }
+            ViewStackModel::GetInstance()->NewScope();
+            JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
+            ACE_SCORING_EVENT("Navigation.menu.builder");
+            jsBuilderFunc.Execute();
+            auto customNode = ViewStackModel::GetInstance()->Finish();
+            NavigationModel::GetInstance()->SetCustomMenu(customNode);
         }
     } else {
         LOGE("arg is not [String|Function].");
@@ -497,11 +380,7 @@ void JSNavigation::SetMenus(const JSCallbackInfo& info)
 
 void JSNavigation::SetMenuCount(int32_t menuCount)
 {
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
-    if (navigationContainer) {
-        navigationContainer->SetMenuCount(menuCount);
-    }
+    NavigationModel::GetInstance()->SetMenuCount(menuCount);
 }
 
 void JSNavigation::SetOnTitleModeChanged(const JSCallbackInfo& info)
@@ -511,23 +390,19 @@ void JSNavigation::SetOnTitleModeChanged(const JSCallbackInfo& info)
         return;
     }
     if (info[0]->IsFunction()) {
-        if (Container::IsCurrentUseNewPipeline()) {
-            auto onTitleModeChangeCallback =
-                AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-            auto onTitleModeChange = [execCtx = info.GetExecutionContext(),
-                                         func = std::move(onTitleModeChangeCallback)](NG::NavigationTitleMode mode) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                ACE_SCORING_EVENT("OnTitleModeChange");
-                JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(mode));
-                func->ExecuteJS(1, &param);
-            };
-            NG::NavigationView::SetOnTitleModeChange(std::move(onTitleModeChange));
-            return;
-        }
+        auto onTitleModeChangeCallback =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto onTitleModeChange = [execCtx = info.GetExecutionContext(), func = std::move(onTitleModeChangeCallback)](
+            NG::NavigationTitleMode mode) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("OnTitleModeChange");
+            JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(mode));
+            func->ExecuteJS(1, &param);
+        };
         auto changeHandler = AceType::MakeRefPtr<JsEventFunction<NavigationTitleModeChangeEvent, 1>>(
             JSRef<JSFunc>::Cast(info[0]), TitleModeChangeEventToJSValue);
-        auto eventMarker = EventMarker([executionContext = info.GetExecutionContext(), func = std::move(changeHandler)](
-                                           const BaseEventInfo* baseInfo) {
+        auto eventInfo = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler)](
+            const BaseEventInfo* baseInfo) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
             auto eventInfo = TypeInfoHelper::DynamicCast<NavigationTitleModeChangeEvent>(baseInfo);
             if (!eventInfo) {
@@ -536,24 +411,16 @@ void JSNavigation::SetOnTitleModeChanged(const JSCallbackInfo& info)
             }
             ACE_SCORING_EVENT("Navigation.onTitleModeChanged");
             func->Execute(*eventInfo);
-        });
-        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-        auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
-        if (navigationContainer) {
-            navigationContainer->GetDeclaration()->titleModeChangedEvent = eventMarker;
-        }
+        };
+        NavigationModel::GetInstance()->SetOnTitleModeChange(std::move(onTitleModeChange), std::move(eventInfo));
     }
     info.ReturnSelf();
 }
 
 void JSNavigation::SetUsrNavigationMode(int32_t value)
 {
-    if (!Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
-
     if (value >= 0 && value <= NAVIGATION_MODE_RANGE) {
-        NG::NavigationView::SetUsrNavigationMode(static_cast<NG::NavigationMode>(value));
+        NavigationModel::GetInstance()->SetUsrNavigationMode(static_cast<NG::NavigationMode>(value));
     } else {
         LOGE("invalid value for navigationMode");
     }
@@ -561,12 +428,8 @@ void JSNavigation::SetUsrNavigationMode(int32_t value)
 
 void JSNavigation::SetNavBarPosition(int32_t value)
 {
-    if (!Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
-
     if (value >= 0 && value <= NAV_BAR_POSITION_RANGE) {
-        NG::NavigationView::SetNavBarPosition(static_cast<NG::NavBarPosition>(value));
+        NavigationModel::GetInstance()->SetNavBarPosition(static_cast<NG::NavBarPosition>(value));
     } else {
         LOGE("invalid value for navBarPosition");
     }
@@ -574,15 +437,12 @@ void JSNavigation::SetNavBarPosition(int32_t value)
 
 void JSNavigation::SetNavBarWidth(const JSCallbackInfo& info)
 {
-    if (!Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
-    Dimension navBarWidth;
+    CalcDimension navBarWidth;
     if (!ParseJsDimensionVp(info[0], navBarWidth)) {
         return;
     }
@@ -591,14 +451,11 @@ void JSNavigation::SetNavBarWidth(const JSCallbackInfo& info)
         navBarWidth.SetValue(DEFAULT_NAV_BAR_WIDTH);
     }
 
-    NG::NavigationView::SetNavBarWidth(navBarWidth);
+    NavigationModel::GetInstance()->SetNavBarWidth(navBarWidth);
 }
 
 void JSNavigation::SetOnNavBarStateChange(const JSCallbackInfo& info)
 {
-    if (!Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least one argument");
         return;
@@ -608,15 +465,36 @@ void JSNavigation::SetOnNavBarStateChange(const JSCallbackInfo& info)
         auto onNavBarStateChangeCallback =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto onNavBarStateChange = [execCtx = info.GetExecutionContext(),
-                                       func = std::move(onNavBarStateChangeCallback)](bool isVisible) {
+            func = std::move(onNavBarStateChangeCallback)](bool isVisible) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("OnNavBarStateChange");
             JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(isVisible));
             func->ExecuteJS(1, &param);
         };
-        NG::NavigationView::SetOnNavBarStateChange(std::move(onNavBarStateChange));
+        NavigationModel::GetInstance()->SetOnNavBarStateChange(std::move(onNavBarStateChange));
     }
     info.ReturnSelf();
 }
 
+void JSNavigation::SetNavDestination(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    auto builder = obj->GetProperty("builder");
+    if (!builder->IsFunction()) {
+        LOGE("JSNavigation::SetNavDestination builder param is not a function.");
+        return;
+    }
+
+    auto navigationStack = NavigationModel::GetInstance()->GetNavigationStack();
+    auto jsNavigationStack = AceType::DynamicCast<JSNavigationStack>(navigationStack);
+    if (jsNavigationStack) {
+        jsNavigationStack->SetJSExecutionContext(info.GetExecutionContext());
+        jsNavigationStack->SetNavDestBuilderFunc(JSRef<JSFunc>::Cast(builder));
+    }
+}
 } // namespace OHOS::Ace::Framework

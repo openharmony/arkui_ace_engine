@@ -26,6 +26,7 @@
 namespace OHOS::Ace {
 namespace {
 constexpr double DEFAULT_OPACITY = 1.0;
+constexpr double STROKE_MITERLIMIT_DEFAULT = 4.0f;
 } // namespace
 std::unique_ptr<ShapeModel> ShapeModel::instance_;
 
@@ -80,13 +81,13 @@ void JSShape::SetViewPort(const JSCallbackInfo& info)
         JSRef<JSVal> widthValue = obj->GetProperty("width");
         JSRef<JSVal> heightValue = obj->GetProperty("height");
         ShapeViewBox viewBox;
-        Dimension dimLeft;
+        CalcDimension dimLeft;
         ParseJsDimensionVp(leftValue, dimLeft);
-        Dimension dimTop;
+        CalcDimension dimTop;
         ParseJsDimensionVp(topValue, dimTop);
-        Dimension dimWidth;
+        CalcDimension dimWidth;
         ParseJsDimensionVp(widthValue, dimWidth);
-        Dimension dimHeight;
+        CalcDimension dimHeight;
         ParseJsDimensionVp(heightValue, dimHeight);
         ShapeModel::GetInstance()->SetViewPort(dimLeft, dimTop, dimWidth, dimHeight);
     }
@@ -157,7 +158,7 @@ void JSShape::SetStrokeDashArray(const JSCallbackInfo& info)
     std::vector<Dimension> dashArray;
     for (int32_t i = 0; i < length; i++) {
         JSRef<JSVal> value = array->GetValueAt(i);
-        Dimension dim;
+        CalcDimension dim;
         if (ParseJsDimensionVp(value, dim)) {
             dashArray.emplace_back(dim);
         }
@@ -209,7 +210,7 @@ void JSShape::SetStrokeDashOffset(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension offset;
+    CalcDimension offset;
     if (!ParseJsDimensionVp(info[0], offset)) {
         return;
     }
@@ -232,13 +233,11 @@ void JSShape::SetStrokeMiterLimit(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    double miterLimit;
+    double miterLimit = STROKE_MITERLIMIT_DEFAULT;
     if (!ParseJsDouble(info[0], miterLimit)) {
-        return;
+        LOGI("strokeMiterLimit error. now use default value");
     }
-    if (GreatOrEqual(miterLimit, 1.0)) {
-        ShapeModel::GetInstance()->SetStrokeMiterLimit(miterLimit);
-    }
+    ShapeModel::GetInstance()->SetStrokeMiterLimit(miterLimit);
 }
 
 void JSShape::SetStrokeOpacity(const JSCallbackInfo& info)
@@ -270,7 +269,7 @@ void JSShape::SetStrokeWidth(const JSCallbackInfo& info)
         return;
     }
     // the default value is 1.0_vp
-    Dimension lineWidth = 1.0_vp;
+    CalcDimension lineWidth = 1.0_vp;
     if (info[0]->IsString()) {
         const std::string& value = info[0]->ToString();
         lineWidth = StringUtils::StringToDimensionWithUnit(value, DimensionUnit::VP, 1.0);
@@ -378,9 +377,7 @@ void JSShape::JSBind(BindingTarget globalObj)
     JSClass<JSShape>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSShape>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSShape>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
-    JSClass<JSShape>::Inherit<JSContainerBase>();
-    JSClass<JSShape>::Inherit<JSViewAbstract>();
-    JSClass<JSShape>::Bind<>(globalObj);
+    JSClass<JSShape>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

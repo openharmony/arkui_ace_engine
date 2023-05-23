@@ -33,4 +33,9 @@ bool LongPressRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& /* re
     return true;
 }
 void LongPressRecognizer::OnResetStatus() {}
+
+GestureEventFunc LongPressRecognizer::GetLongPressActionFunc()
+{
+    return [](GestureEvent& info) {};
+}
 } // namespace OHOS::Ace::NG

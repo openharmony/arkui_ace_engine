@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STEPPER_STEPPER_ITEM_MODEL_H
 
 #include <memory>
+#include <mutex>
 #include <string>
 
 #include "base/utils/macros.h"
@@ -35,6 +36,7 @@ public:
 
 private:
     static std::unique_ptr<StepperItemModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

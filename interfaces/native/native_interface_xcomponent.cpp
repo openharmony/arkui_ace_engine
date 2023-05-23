@@ -60,8 +60,8 @@ int32_t OH_NativeXComponent_GetTouchEvent(
     return component->GetTouchEvent(window, touchEvent);
 }
 
-int32_t OH_NativeXComponent_GetTouchPointToolType(OH_NativeXComponent* component, uint32_t pointIndex,
-    OH_NativeXComponent_TouchPointToolType* toolType)
+int32_t OH_NativeXComponent_GetTouchPointToolType(
+    OH_NativeXComponent* component, uint32_t pointIndex, OH_NativeXComponent_TouchPointToolType* toolType)
 {
     if ((component == nullptr) || (toolType == nullptr)) {
         return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
@@ -111,6 +111,87 @@ int32_t OH_NativeXComponent_RegisterMouseEventCallback(
     return component->RegisterMouseEventCallback(callback);
 }
 
+int32_t OH_NativeXComponent_RegisterFocusEventCallback(
+    OH_NativeXComponent* component, void (*callback)(OH_NativeXComponent* component, void* window))
+{
+    if ((component == nullptr) || (callback == nullptr)) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    return component->RegisterFocusEventCallback(callback);
+}
+
+int32_t OH_NativeXComponent_RegisterKeyEventCallback(
+    OH_NativeXComponent* component, void (*callback)(OH_NativeXComponent* component, void* window))
+{
+    if ((component == nullptr) || (callback == nullptr)) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    return component->RegisterKeyEventCallback(callback);
+}
+
+int32_t OH_NativeXComponent_RegisterBlurEventCallback(
+    OH_NativeXComponent* component, void (*callback)(OH_NativeXComponent* component, void* window))
+{
+    if ((component == nullptr) || (callback == nullptr)) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    return component->RegisterBlurEventCallback(callback);
+}
+
+int32_t OH_NativeXComponent_GetKeyEvent(OH_NativeXComponent* component, OH_NativeXComponent_KeyEvent** keyEvent)
+{
+    if ((component == nullptr) || (keyEvent == nullptr)) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    return component->GetKeyEvent(keyEvent);
+}
+
+int32_t OH_NativeXComponent_GetKeyEventAction(
+    OH_NativeXComponent_KeyEvent* keyEvent, OH_NativeXComponent_KeyAction* action)
+{
+    if ((keyEvent == nullptr) || (action == nullptr)) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    (*action) = keyEvent->action;
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent_GetKeyEventCode(OH_NativeXComponent_KeyEvent* keyEvent, OH_NativeXComponent_KeyCode* code)
+{
+    if ((keyEvent == nullptr) || (code == nullptr)) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    (*code) = keyEvent->code;
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent_GetKeyEventSourceType(
+    OH_NativeXComponent_KeyEvent* keyEvent, OH_NativeXComponent_EventSourceType* sourceType)
+{
+    if ((keyEvent == nullptr) || (sourceType == nullptr)) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    (*sourceType) = keyEvent->sourceType;
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent_GetKeyEventDeviceId(OH_NativeXComponent_KeyEvent* keyEvent, int64_t* deviceId)
+{
+    if ((keyEvent == nullptr) || (deviceId == nullptr)) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    (*deviceId) = keyEvent->deviceId;
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent_GetKeyEventTimestamp(OH_NativeXComponent_KeyEvent* keyEvent, int64_t* timestamp)
+{
+    if ((keyEvent == nullptr) || (timestamp == nullptr)) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    (*timestamp) = keyEvent->timestamp;
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
 #ifdef __cplusplus
 };
 #endif

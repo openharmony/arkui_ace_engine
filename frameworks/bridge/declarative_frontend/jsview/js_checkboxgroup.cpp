@@ -30,27 +30,29 @@ namespace {
 constexpr float CHECK_BOX_GROUP_MARK_SIZE_INVALID_VALUE = -1.0f;
 }
 std::unique_ptr<CheckBoxGroupModel> CheckBoxGroupModel::instance_ = nullptr;
+std::mutex CheckBoxGroupModel::mutex_;
 
 CheckBoxGroupModel* CheckBoxGroupModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::CheckBoxGroupModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::CheckBoxGroupModelNG());
-        } else {
-            instance_.reset(new Framework::CheckBoxGroupModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::CheckBoxGroupModelNG());
+            } else {
+                instance_.reset(new Framework::CheckBoxGroupModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
-
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-
 JSRef<JSVal> CheckboxGroupResultEventToJSValue(const CheckboxGroupResult& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -85,8 +87,7 @@ void JSCheckboxGroup::JSBind(BindingTarget globalObj)
     JSClass<JSCheckboxGroup>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSCheckboxGroup>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSCheckboxGroup>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSCheckboxGroup>::Inherit<JSViewAbstract>();
-    JSClass<JSCheckboxGroup>::Bind<>(globalObj);
+    JSClass<JSCheckboxGroup>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSCheckboxGroup::Create(const JSCallbackInfo& info)
@@ -103,14 +104,41 @@ void JSCheckboxGroup::Create(const JSCallbackInfo& info)
     CheckBoxGroupModel::GetInstance()->Create(checkboxGroupName);
 }
 
+void ParseSelectAllObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
+{
+    CHECK_NULL_VOID(changeEventVal->IsFunction());
+
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<CheckboxGroupResult>(info);
+        if (eventInfo) {
+            if (eventInfo->GetStatus() == 0) {
+                auto newJSVal = JSRef<JSVal>::Make(ToJSValue(true));
+                func->ExecuteJS(1, &newJSVal);
+            } else {
+                auto newJSVal = JSRef<JSVal>::Make(ToJSValue(false));
+                func->ExecuteJS(1, &newJSVal);
+            }
+        }
+    };
+    CheckBoxGroupModel::GetInstance()->SetChangeEvent(std::move(changeEvent));
+}
+
 void JSCheckboxGroup::SetSelectAll(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsBoolean()) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments, arg is not a bool");
+    if (info.Length() < 1 || info.Length() > 2) {
+        LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
         return;
     }
-
-    CheckBoxGroupModel::GetInstance()->SetSelectAll(info[0]->ToBoolean());
+    bool selectAll = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        selectAll = info[0]->ToBoolean();
+    }
+    CheckBoxGroupModel::GetInstance()->SetSelectAll(selectAll);
+    if (info.Length() > 1 && info[1]->IsFunction()) {
+        ParseSelectAllObject(info, info[1]);
+    }
 }
 
 void JSCheckboxGroup::SetOnChange(const JSCallbackInfo& args)
@@ -141,12 +169,8 @@ void JSCheckboxGroup::JsWidth(const JSCallbackInfo& info)
 
 void JSCheckboxGroup::JsWidth(const JSRef<JSVal>& jsValue)
 {
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(jsValue, value)) {
-        return;
-    }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetWidth(NG::CalcLength(value));
         return;
     }
 
@@ -165,13 +189,8 @@ void JSCheckboxGroup::JsHeight(const JSCallbackInfo& info)
 
 void JSCheckboxGroup::JsHeight(const JSRef<JSVal>& jsValue)
 {
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(jsValue, value)) {
-        return;
-    }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetHeight(NG::CalcLength(value));
         return;
     }
 
@@ -247,7 +266,7 @@ void JSCheckboxGroup::Mark(const JSCallbackInfo& info)
     CheckBoxGroupModel::GetInstance()->SetCheckMarkColor(strokeColor);
 
     auto sizeValue = markObj->GetProperty("size");
-    Dimension size;
+    CalcDimension size;
     if ((ParseJsDimensionVp(sizeValue, size)) && (size.Unit() != DimensionUnit::PERCENT) &&
         (size.ConvertToVp() >= 0)) {
         CheckBoxGroupModel::GetInstance()->SetCheckMarkSize(size);
@@ -256,7 +275,7 @@ void JSCheckboxGroup::Mark(const JSCallbackInfo& info)
     }
     
     auto strokeWidthValue = markObj->GetProperty("strokeWidth");
-    Dimension strokeWidth;
+    CalcDimension strokeWidth;
     if ((ParseJsDimensionVp(strokeWidthValue, strokeWidth)) && (strokeWidth.Unit() != DimensionUnit::PERCENT) &&
         (strokeWidth.ConvertToVp() >= 0)) {
         CheckBoxGroupModel::GetInstance()->SetCheckMarkWidth(strokeWidth);
@@ -271,28 +290,26 @@ void JSCheckboxGroup::JsPadding(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    if (!info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject()) {
-        LOGE("arg is not a string, number or object.");
-        return;
-    }
+    NG::PaddingPropertyF oldPadding({ 0.0f, 0.0f, 0.0f, 0.0f });
+    bool flag = GetOldPadding(info, oldPadding);
+    NG::PaddingProperty newPadding = GetNewPadding(info);
+    CheckBoxGroupModel::GetInstance()->SetPadding(oldPadding, newPadding, flag);
+}
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsPadding(info);
-        return;
-    }
-
+bool JSCheckboxGroup::GetOldPadding(const JSCallbackInfo& info, NG::PaddingPropertyF& padding)
+{
     if (info[0]->IsObject()) {
         auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
         if (!argsPtrItem || argsPtrItem->IsNull()) {
             LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
-            return;
+            return false;
         }
         if (argsPtrItem->Contains("top") || argsPtrItem->Contains("bottom") || argsPtrItem->Contains("left") ||
             argsPtrItem->Contains("right")) {
-            Dimension topDimen = Dimension(0.0, DimensionUnit::VP);
-            Dimension leftDimen = Dimension(0.0, DimensionUnit::VP);
-            Dimension rightDimen = Dimension(0.0, DimensionUnit::VP);
-            Dimension bottomDimen = Dimension(0.0, DimensionUnit::VP);
+            CalcDimension topDimen = CalcDimension(0.0, DimensionUnit::VP);
+            CalcDimension leftDimen = CalcDimension(0.0, DimensionUnit::VP);
+            CalcDimension rightDimen = CalcDimension(0.0, DimensionUnit::VP);
+            CalcDimension bottomDimen = CalcDimension(0.0, DimensionUnit::VP);
             ParseJsonDimensionVp(argsPtrItem->GetValue("top"), topDimen);
             ParseJsonDimensionVp(argsPtrItem->GetValue("left"), leftDimen);
             ParseJsonDimensionVp(argsPtrItem->GetValue("right"), rightDimen);
@@ -306,25 +323,106 @@ void JSCheckboxGroup::JsPadding(const JSCallbackInfo& info)
             if (leftDimen == 0.0_vp) {
                 leftDimen = topDimen;
             }
-            NG::PaddingPropertyF padding;
+
             padding.left = leftDimen.ConvertToPx();
             padding.right = rightDimen.ConvertToPx();
             padding.top = topDimen.ConvertToPx();
             padding.bottom = bottomDimen.ConvertToPx();
-            CheckBoxGroupModel::GetInstance()->SetPadding(padding);
-            return;
+            return true;
         }
     }
-    Dimension length;
+
+    CalcDimension length;
     if (!ParseJsDimensionVp(info[0], length)) {
-        return;
+        return false;
     }
-    NG::PaddingPropertyF padding;
+
     padding.left = length.ConvertToPx();
     padding.right = length.ConvertToPx();
     padding.top = length.ConvertToPx();
     padding.bottom = length.ConvertToPx();
-    CheckBoxGroupModel::GetInstance()->SetPadding(padding);
+    return true;
 }
 
+NG::PaddingProperty JSCheckboxGroup::GetNewPadding(const JSCallbackInfo& info)
+{
+    NG::PaddingProperty padding(
+        { NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp) });
+    if (info[0]->IsObject()) {
+        std::optional<CalcDimension> left;
+        std::optional<CalcDimension> right;
+        std::optional<CalcDimension> top;
+        std::optional<CalcDimension> bottom;
+        JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
+
+        CalcDimension leftDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("left"), leftDimen)) {
+            left = leftDimen;
+        }
+        CalcDimension rightDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("right"), rightDimen)) {
+            right = rightDimen;
+        }
+        CalcDimension topDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("top"), topDimen)) {
+            top = topDimen;
+        }
+        CalcDimension bottomDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
+            bottom = bottomDimen;
+        }
+
+        padding = GetPadding(top, bottom, left, right);
+        return padding;
+    }
+    CalcDimension length;
+    if (!ParseJsDimensionVp(info[0], length)) {
+        length.Reset();
+    }
+
+    padding.SetEdges(NG::CalcLength(length.IsNonNegative() ? length : CalcDimension()));
+    return padding;
+}
+
+NG::PaddingProperty JSCheckboxGroup::GetPadding(const std::optional<CalcDimension>& top,
+    const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
+    const std::optional<CalcDimension>& right)
+{
+    NG::PaddingProperty padding(
+        { NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp) });
+    if (left.has_value()) {
+        if (left.value().Unit() == DimensionUnit::CALC) {
+            padding.left = NG::CalcLength(
+                left.value().IsNonNegative() ? left.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            padding.left = NG::CalcLength(left.value().IsNonNegative() ? left.value() : CalcDimension());
+        }
+    }
+    if (right.has_value()) {
+        if (right.value().Unit() == DimensionUnit::CALC) {
+            padding.right = NG::CalcLength(
+                right.value().IsNonNegative() ? right.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            padding.right = NG::CalcLength(right.value().IsNonNegative() ? right.value() : CalcDimension());
+        }
+    }
+    if (top.has_value()) {
+        if (top.value().Unit() == DimensionUnit::CALC) {
+            padding.top = NG::CalcLength(
+                top.value().IsNonNegative() ? top.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            padding.top = NG::CalcLength(top.value().IsNonNegative() ? top.value() : CalcDimension());
+        }
+    }
+    if (bottom.has_value()) {
+        if (bottom.value().Unit() == DimensionUnit::CALC) {
+            padding.bottom = NG::CalcLength(
+                bottom.value().IsNonNegative() ? bottom.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            padding.bottom = NG::CalcLength(
+                bottom.value().IsNonNegative() ? bottom.value() : CalcDimension());
+        }
+    }
+    return padding;
+}
 } // namespace OHOS::Ace::Framework

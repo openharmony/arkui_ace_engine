@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 
 #include "base/utils/macros.h"
@@ -38,9 +39,11 @@ public:
     virtual void SetSecondarySrc(const std::string& value, bool flag) = 0;
     virtual void SetBackgroundSrc(const std::string& value, bool flag) = 0;
     virtual void SetOnChange(ChangeEvent&& onChange) = 0;
+    virtual void SetOnChangeEvent(ChangeEvent&& onChangeEvent) = 0;
 
 private:
     static std::unique_ptr<RatingModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RATING_RATING_MODEL_H

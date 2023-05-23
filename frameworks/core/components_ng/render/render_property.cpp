@@ -104,6 +104,7 @@ void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         jsonShadow->Put("color", shadow.GetColor().ColorToString().c_str());
         jsonShadow->Put("offsetX", std::to_string(shadow.GetOffset().GetX()).c_str());
         jsonShadow->Put("offsetY", std::to_string(shadow.GetOffset().GetY()).c_str());
+        jsonShadow->Put("type", std::to_string(static_cast<int32_t>(shadow.GetShadowType())).c_str());
         json->Put("shadow", jsonShadow);
     }
 }
@@ -131,6 +132,11 @@ void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("backdropBlur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx());
 }
 
+void ForegroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("frontBlur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx());
+}
+
 void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     if (propClipShape.has_value()) {
@@ -142,7 +148,11 @@ void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         }
         json->Put("clip", jsonClip->ToString().c_str());
     } else {
-        json->Put("clip", propClipEdge.value_or(false) ? "true" : "false");
+        if (json->Contains("startIndex")) {
+            json->Put("clip", propClipEdge.value_or(true) ? "true" : "false");
+        } else {
+            json->Put("clip", propClipEdge.value_or(false) ? "true" : "false");
+        }
     }
 
     auto jsonMask = JsonUtil::Create(true);

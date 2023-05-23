@@ -20,19 +20,23 @@
 
 namespace OHOS::Ace {
 std::unique_ptr<WaterFlowItemModel> WaterFlowItemModel::instance_ = nullptr;
+std::mutex WaterFlowItemModel::mutex_;
 
 WaterFlowItemModel* WaterFlowItemModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::WaterFlowItemModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::WaterFlowItemModelNG());
-        } else {
-            instance_.reset(new Framework::WaterFlowItemModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::WaterFlowItemModelNG());
+            } else {
+                instance_.reset(new Framework::WaterFlowItemModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -60,8 +64,6 @@ void JSWaterFlowItem::JSBind(BindingTarget globalObj)
     JSClass<JSWaterFlowItem>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSWaterFlowItem>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
-    JSClass<JSWaterFlowItem>::Inherit<JSContainerBase>();
-    JSClass<JSWaterFlowItem>::Inherit<JSViewAbstract>();
-    JSClass<JSWaterFlowItem>::Bind<>(globalObj);
+    JSClass<JSWaterFlowItem>::InheritAndBind<JSContainerBase>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

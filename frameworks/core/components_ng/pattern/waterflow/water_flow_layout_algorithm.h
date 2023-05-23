@@ -28,36 +28,6 @@ public:
     explicit WaterFlowLayoutAlgorithm(WaterFlowLayoutInfo layoutInfo) : layoutInfo_(std::move(layoutInfo)) {}
     ~WaterFlowLayoutAlgorithm() override = default;
 
-    void SetCurrentOffset(float offset)
-    {
-        currentOffset_ = offset;
-    }
-
-    float GetCurrentOffset() const
-    {
-        return currentOffset_;
-    }
-
-    float GetScrollableDistance() const
-    {
-        return scrollableDistance_;
-    }
-
-    float GetViewPort() const
-    {
-        return viewPortLength_;
-    }
-
-    const SizeF& GetViewPortSize() const
-    {
-        return viewPort_;
-    }
-
-    const SizeF& GetViewPortExtent() const
-    {
-        return viewPortExtent_;
-    }
-
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
@@ -68,22 +38,19 @@ public:
     }
 
 private:
+    FlowItemPosition GetItemPosition(int32_t index);
     void FillViewport(float mainSize, LayoutWrapper* layoutWrapper);
     void ModifyCurrentOffsetWhenReachEnd(float mainSize, LayoutWrapper* layoutWrapper);
-    LayoutConstraintF CreateChildConstraint(int32_t crossIndex, const RefPtr<WaterFlowLayoutProperty>& layoutProperty);
+    LayoutConstraintF CreateChildConstraint(int32_t crossIndex, const RefPtr<WaterFlowLayoutProperty>& layoutProperty,
+        const RefPtr<LayoutWrapper>& childLayoutWrapper);
     float ComputeCrossPosition(int32_t crossIndex) const;
-    void InitialItemsCrossSize(const RefPtr<WaterFlowLayoutProperty>& layoutProperty, const SizeF& frameSize);
+    void InitialItemsCrossSize(
+        const RefPtr<WaterFlowLayoutProperty>& layoutProperty, const SizeF& frameSize, int32_t childrenCount);
     int32_t GetChildIndexWithFooter(int32_t index) const
     {
         return index + layoutInfo_.footerIndex_ + 1;
     }
     float MeasuerFooter(LayoutWrapper* layoutWrapper);
-
-    float currentOffset_ = 0.0f;
-    float scrollableDistance_ = 0.0f;
-    float viewPortLength_ = 0.0f;
-    SizeF viewPort_;
-    SizeF viewPortExtent_;
 
     std::map<int32_t, float> itemsCrossSize_;
     std::map<int32_t, float> itemsCrossPosition_;
@@ -91,11 +58,8 @@ private:
 
     float mainGap_ = 0.0f;
     float crossGap_ = 0.0f;
-    float crossPaddingOffset_ = 0.0f;
     float mainSize_ = 0.0f;
     float footerMainSize_ = 0.0f;
-    OptionalSizeF itemMinSize_;
-    OptionalSizeF itemMaxSize_;
     WaterFlowLayoutInfo layoutInfo_;
 };
 } // namespace OHOS::Ace::NG

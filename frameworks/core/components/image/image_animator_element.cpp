@@ -38,7 +38,7 @@ void Ace::ImageAnimatorElement::Update()
     SetElementId(imageAnimatorComponent->GetElementId());
 
     if (!animator_) {
-        animator_ = AceType::MakeRefPtr<Animator>();
+        animator_ = CREATE_ANIMATOR();
     }
     UpdateCallbackAndFunc(imageAnimatorComponent);
     if (!animator_->HasScheduler()) {

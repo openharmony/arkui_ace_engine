@@ -24,19 +24,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<GaugeModel> GaugeModel::instance_ = nullptr;
+std::mutex GaugeModel::mutex_;
 
 GaugeModel* GaugeModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::GaugeModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::GaugeModelNG());
-        } else {
-            instance_.reset(new Framework::GaugeModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::GaugeModelNG());
+            } else {
+                instance_.reset(new Framework::GaugeModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -62,8 +66,7 @@ void JSGauge::JSBind(BindingTarget globalObj)
     JSClass<JSGauge>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSGauge>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
 
-    JSClass<JSGauge>::Inherit<JSViewAbstract>();
-    JSClass<JSGauge>::Bind(globalObj);
+    JSClass<JSGauge>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSGauge::Create(const JSCallbackInfo& info)
@@ -151,9 +154,9 @@ void JSGauge::SetStrokeWidth(const JSCallbackInfo& info)
         LOGE(" JSGauge::SetStrokeWidth::The info is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    Dimension strokeWidth;
+    CalcDimension strokeWidth;
     if (!ParseJsDimensionVp(info[0], strokeWidth)) {
-        strokeWidth = Dimension(0);
+        strokeWidth = CalcDimension(0);
     }
     GaugeModel::GetInstance()->SetStrokeWidth(strokeWidth);
 }

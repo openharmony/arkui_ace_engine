@@ -377,6 +377,10 @@ void SubContainer::ProcessSharedImage(const std::map<std::string, sptr<AppExecFw
     std::vector<int> byteLenArray;
     if (!imageDataMap.empty()) {
         for (auto& imageData : imageDataMap) {
+            if (!imageData.second) {
+                LOGE("the point of FormAshmem about %{private}s is null, continue", imageData.first.c_str());
+                continue;
+            }
             picNameArray.push_back(imageData.first);
             fileDescriptorArray.push_back(imageData.second->GetAshmemFd());
             byteLenArray.push_back(imageData.second->GetAshmemSize());
@@ -397,13 +401,7 @@ void SubContainer::GetNamesOfSharedImage(std::vector<std::string>& picNameArray)
         LOGE("pipeline context is null!");
         return;
     }
-    RefPtr<SharedImageManager> sharedImageManager;
-    if (!pipelineCtx->GetSharedImageManager()) {
-        sharedImageManager = AceType::MakeRefPtr<SharedImageManager>(pipelineCtx->GetTaskExecutor());
-        pipelineCtx->SetSharedImageManager(sharedImageManager);
-    } else {
-        sharedImageManager = pipelineCtx->GetSharedImageManager();
-    }
+    auto sharedImageManager = pipelineCtx->GetOrCreateSharedImageManager();
     auto nameSize = picNameArray.size();
     for (uint32_t i = 0; i < nameSize; i++) {
         // get name of picture
@@ -479,7 +477,7 @@ void SubContainer::GetImageDataFromAshmem(
     }
     auto context = DynamicCast<PipelineContext>(pipelineContext);
     CHECK_NULL_VOID(context);
-    RefPtr<SharedImageManager> sharedImageManager = context->GetSharedImageManager();
+    RefPtr<SharedImageManager> sharedImageManager = context->GetOrCreateSharedImageManager();
     if (sharedImageManager) {
         // read image data from shared memory and save a copy to sharedImageManager
         sharedImageManager->AddSharedImage(picName, std::vector<uint8_t>(imageData, imageData + len));

@@ -27,9 +27,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float START_OPACITY = 0.0f;
-constexpr float END_OPACITY = 0.1f;
-constexpr int32_t DURATION = 100;
+constexpr float HOVER_OPACITY = 0.05f;
+constexpr float TOUCH_OPACITY = 0.1f;
+constexpr int32_t HOVER_TO_TOUCH_DURATION = 100;
+constexpr int32_t TOUCH_DURATION = 250;
 } // namespace
 
 void ButtonPattern::OnAttachToFrameNode()
@@ -39,7 +40,10 @@ void ButtonPattern::OnAttachToFrameNode()
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     SetDefaultAttributes(host, pipeline);
-    host->GetRenderContext()->SetClipToFrame(true);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetClipToFrame(true);
+    renderContext->UpdateClipEdge(true);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     clickedColor_ = buttonTheme->GetClickedColor();
@@ -59,8 +63,8 @@ void ButtonPattern::SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode, co
     renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor());
 }
 
-void ButtonPattern::UpdateTextLayoutProperty(RefPtr<ButtonLayoutProperty> layoutProperty,
-    RefPtr<TextLayoutProperty> textLayoutProperty)
+void ButtonPattern::UpdateTextLayoutProperty(
+    RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
     CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(textLayoutProperty);
@@ -125,6 +129,7 @@ void ButtonPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     InitButtonLabel();
     HandleEnabled();
+    InitHoverEvent();
     InitTouchEvent();
 }
 
@@ -152,6 +157,26 @@ void ButtonPattern::InitTouchEvent()
     gesture->AddTouchEvent(touchListener_);
 }
 
+void ButtonPattern::InitHoverEvent()
+{
+    if (hoverListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<ButtonEventHub>();
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleHoverEvent(isHover);
+        }
+    };
+
+    hoverListener_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
+    inputHub->AddOnHoverEvent(hoverListener_);
+}
+
 void ButtonPattern::OnTouchDown()
 {
     auto host = GetHost();
@@ -159,7 +184,7 @@ void ButtonPattern::OnTouchDown()
     auto buttonEventHub = GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     if (buttonEventHub->GetStateEffect()) {
-        const auto& renderContext = host->GetRenderContext();
+        auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         backgroundColor_ = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
         if (isSetClickedColor_) {
@@ -168,7 +193,8 @@ void ButtonPattern::OnTouchDown()
             return;
         }
         // for system default
-        AnimateTouchEffectBoard(START_OPACITY, END_OPACITY, DURATION, Curves::SHARP);
+        AnimateTouchAndHover(renderContext, isHover_ ? HOVER_OPACITY : 0.0f, TOUCH_OPACITY,
+            isHover_ ? HOVER_TO_TOUCH_DURATION : TOUCH_DURATION, isHover_ ? Curves::SHARP : Curves::FRICTION);
     }
 }
 
@@ -179,13 +205,24 @@ void ButtonPattern::OnTouchUp()
     auto buttonEventHub = GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     if (buttonEventHub->GetStateEffect()) {
-        const auto& renderContext = host->GetRenderContext();
+        auto renderContext = host->GetRenderContext();
         if (isSetClickedColor_) {
             renderContext->UpdateBackgroundColor(backgroundColor_);
             return;
         }
-        AnimateTouchEffectBoard(END_OPACITY, START_OPACITY, DURATION, Curves::SHARP);
+        AnimateTouchAndHover(renderContext, TOUCH_OPACITY, isHover_ ? HOVER_OPACITY : 0.0,
+            isHover_ ? HOVER_TO_TOUCH_DURATION : TOUCH_DURATION, isHover_ ? Curves::SHARP : Curves::FRICTION);
     }
+}
+
+void ButtonPattern::HandleHoverEvent(bool isHover)
+{
+    isHover_ = isHover;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->AnimateHoverEffectBoard(isHover);
 }
 
 void ButtonPattern::HandleEnabled()
@@ -210,21 +247,19 @@ void ButtonPattern::HandleEnabled()
     }
 }
 
-void ButtonPattern::AnimateTouchEffectBoard(
-    float startOpacity, float endOpacity, int32_t duration, const RefPtr<Curve>& curve)
+void ButtonPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
+    int32_t duration, const RefPtr<Curve>& curve)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    Color touchColorFrom = Color::FromRGBO(0, 0, 0, startOpacity);
-    Color touchColorTo = Color::FromRGBO(0, 0, 0, endOpacity);
     if (startOpacity > endOpacity) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
         auto toggleButtonPattern = host->GetPattern<ToggleButtonPattern>();
         if (toggleButtonPattern) {
             toggleButtonPattern->OnClick();
         }
     }
+    Color touchColorFrom = Color::FromRGBO(0, 0, 0, startOpacity);
+    Color touchColorTo = Color::FromRGBO(0, 0, 0, endOpacity);
     Color highlightStart = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(touchColorFrom);
     Color highlightEnd = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(touchColorTo);
     renderContext->OnBackgroundColorUpdate(highlightStart);

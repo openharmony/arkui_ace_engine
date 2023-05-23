@@ -13,23 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PATTERNLOCK_PATTERNLOCK_PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PATTERNLOCK_PATTERNLOCK_PATTERN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PATTERNLOCK_PATTERNLOCK_PATTERN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PATTERNLOCK_PATTERNLOCK_PATTERN_H
 
 #include "base/geometry/axis.h"
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/patternlock/patternlock_event_hub.h"
 #include "core/components_ng/pattern/patternlock/patternlock_layout_algorithm.h"
+#include "core/components_ng/pattern/patternlock/patternlock_layout_property.h"
+#include "core/components_ng/pattern/patternlock/patternlock_modifier.h"
 #include "core/components_ng/pattern/patternlock/patternlock_paint_method.h"
 #include "core/components_ng/pattern/patternlock/patternlock_paint_property.h"
 #include "core/components_v2/pattern_lock/pattern_lock_controller.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
 class PatternLockPattern : public Pattern {
     DECLARE_ACE_TYPE(PatternLockPattern, Pattern);
 
@@ -40,6 +42,11 @@ public:
     bool IsAtomicNode() const override
     {
         return true;
+    }
+
+    RefPtr<LayoutProperty> CreateLayoutProperty() override
+    {
+        return MakeRefPtr<PatternLockLayoutProperty>();
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
@@ -55,11 +62,15 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto paintMethod = MakeRefPtr<PatternLockPaintMethod>(choosePoint_, cellCenter_, isMoveEventValid_);
+        if (!patternLockModifier_) {
+            patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
+        }
+        auto paintMethod =
+            MakeRefPtr<PatternLockPaintMethod>(cellCenter_, isMoveEventValid_, choosePoint_, patternLockModifier_);
         return paintMethod;
     }
 
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*dirty*/, const DirtySwapConfig& /*config*/) override
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
     {
         return true;
     }
@@ -90,9 +101,9 @@ private:
     void OnTouchMove(const TouchEventInfo& info);
     void OnTouchUp();
 
-    bool CheckChoosePoint(int16_t x, int16_t y) const;
-    bool AddChoosePoint(const OffsetF& offset, int16_t x, int16_t y);
-    void AddPassPoint(int16_t x, int16_t y);
+    bool CheckChoosePoint(int32_t x, int32_t y) const;
+    bool AddChoosePoint(const OffsetF& offset, int32_t x, int32_t y);
+    void AddPassPoint(int32_t x, int32_t y);
     void HandleReset();
     bool CheckAutoReset() const;
 
@@ -103,15 +114,17 @@ private:
 
     bool isMoveEventValid_ = false;
     std::vector<PatternLockCell> choosePoint_;
-    int16_t passPointCount_ = 0;
+    int32_t passPointCount_ = 0;
     OffsetF cellCenter_;
 
     mutable bool autoReset_ = true;
     Dimension sideLength_ = 300.0_vp;
     Dimension circleRadius_ = 14.0_vp;
 
+    RefPtr<PatternLockModifier> patternLockModifier_;
+
     ACE_DISALLOW_COPY_AND_MOVE(PatternLockPattern);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PATTERNLOCK_PATTERNLOCK_PATTERN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PATTERNLOCK_PATTERNLOCK_PATTERN_H

@@ -29,14 +29,14 @@ constexpr int32_t STANDARD_FRAME_DURATION = 100;
 constexpr int32_t FORM_REPEAT_COUNT = 1;
 } // namespace
 
-AnimatedImage::AnimatedImage(std::unique_ptr<SkCodec> codec, const SizeF& size, const std::string& url)
-    : codec_(std::move(codec)), cacheKey_(url + size.ToString()), size_(size)
+AnimatedImage::AnimatedImage(std::unique_ptr<SkCodec> codec, std::string url)
+    : codec_(std::move(codec)), cacheKey_(std::move(url))
 {
     // set up animator
     int32_t totalDuration = 0;
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    animator_ = MakeRefPtr<Animator>(pipelineContext);
+    animator_ = CREATE_ANIMATOR(pipelineContext);
     CHECK_NULL_VOID(animator_);
 
     auto info = codec_->getFrameInfo();
@@ -71,31 +71,29 @@ AnimatedImage::AnimatedImage(std::unique_ptr<SkCodec> codec, const SizeF& size, 
 
 sk_sp<SkImage> AnimatedImage::GetImage() const
 {
+    std::scoped_lock<std::mutex> lock(frameMtx_);
     return currentFrame_;
 }
 
-RefPtr<CanvasImage> AnimatedImage::Create(const RefPtr<ImageData>& data, const SizeF& size, const std::string& url)
+RefPtr<CanvasImage> AnimatedImage::Create(const RefPtr<ImageData>& data, const std::string& url)
 {
     auto skData = DynamicCast<SkiaImageData>(data);
     CHECK_NULL_RETURN(skData, nullptr);
     auto codec = SkCodec::MakeFromData(skData->GetSkData());
     CHECK_NULL_RETURN(codec, nullptr);
-    return MakeRefPtr<AnimatedImage>(std::move(codec), size, url);
+    return MakeRefPtr<AnimatedImage>(std::move(codec), url);
 }
 
 void AnimatedImage::RenderFrame(uint32_t idx)
 {
-    if (!GetCachedFrame(idx)) {
-        auto task = [weak = WeakClaim(this), idx] {
-            auto self = weak.Upgrade();
-            CHECK_NULL_VOID(self);
-            self->DecodeFrame(idx);
-        };
-        ImageUtils::PostToBg(std::move(task));
+    if (GetCachedFrame(idx)) {
         return;
     }
-    CHECK_NULL_VOID(redraw_);
-    redraw_();
+    ImageUtils::PostToBg([weak = WeakClaim(this), idx] {
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self);
+        self->DecodeFrame(idx);
+    });
 }
 
 // Background thread
@@ -105,7 +103,6 @@ void AnimatedImage::DecodeFrame(uint32_t idx)
     std::scoped_lock<std::mutex> lock(decodeMtx_);
 
     SkImageInfo imageInfo = codec_->getInfo();
-    imageInfo.makeWH(size_.Width(), size_.Height());
 
     SkBitmap bitmap;
 
@@ -133,7 +130,10 @@ void AnimatedImage::DecodeFrame(uint32_t idx)
     }
 
     // save current frame, notify redraw
-    currentFrame_ = SkImage::MakeFromBitmap(bitmap);
+    {
+        std::scoped_lock<std::mutex> lock(frameMtx_);
+        currentFrame_ = SkImage::MakeFromBitmap(bitmap);
+    }
     ImageUtils::PostToUI([weak = WeakClaim(this)] {
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self && self->redraw_);
@@ -154,7 +154,12 @@ void AnimatedImage::CacheFrame(uint32_t idx)
     CHECK_NULL_VOID(ctx);
     auto cache = ctx->GetImageCache();
     CHECK_NULL_VOID(cache);
-    cache->CacheImageNG(cacheKey_ + std::to_string(idx), std::make_shared<CachedImage>(currentFrame_));
+    std::shared_ptr<CachedImage> cacheNode;
+    {
+        std::scoped_lock<std::mutex> lock(frameMtx_);
+        cacheNode = std::make_shared<CachedImage>(currentFrame_);
+    }
+    cache->CacheImageNG(cacheKey_ + std::to_string(idx), cacheNode);
 }
 
 bool AnimatedImage::GetCachedFrame(uint32_t idx)
@@ -165,8 +170,23 @@ bool AnimatedImage::GetCachedFrame(uint32_t idx)
     CHECK_NULL_RETURN(cache, false);
     auto image = cache->GetCacheImageNG(cacheKey_ + std::to_string(idx));
     CHECK_NULL_RETURN_NOLOG(image && image->imagePtr, false);
-    currentFrame_ = image->imagePtr;
+
+    if (!decodeMtx_.try_lock()) {
+        // last frame still decoding, skip this frame to avoid blocking UI thread
+        return true;
+    }
+
+    {
+        std::scoped_lock<std::mutex> lock(frameMtx_);
+        currentFrame_ = image->imagePtr;
+    }
+
+    decodeMtx_.unlock();
     LOGD("frame cache found src = %{public}s, frame = %{public}d", cacheKey_.c_str(), idx);
+
+    if (redraw_) {
+        redraw_();
+    }
     return true;
 }
 } // namespace OHOS::Ace::NG

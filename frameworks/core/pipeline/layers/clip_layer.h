@@ -20,7 +20,11 @@
 #include "core/pipeline/layers/layer.h"
 #include "core/pipeline/layers/offset_layer.h"
 #include "core/pipeline/layers/scene_builder.h"
+#ifdef NEW_SKIA
+#include "modules/svg/include/SkSVGDOM.h"
+#else
 #include "experimental/svg/model/SkSVGDOM.h"
+#endif
 #include "include/core/SkPaint.h"
 #include "include/core/SkData.h"
 
