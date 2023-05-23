@@ -436,7 +436,7 @@ bool TextFieldPattern::IsTextArea() const
 void TextFieldPattern::UpdateDestinationToCaretByEvent()
 {
     CHECK_NULL_VOID_NOLOG(isMousePressed_);
-    textSelector_.destinationOffset = textEditingValue_.caretPosition;
+    UpdateSelection(textSelector_.GetStart(), textEditingValue_.caretPosition);
     if (textSelector_.destinationOffset != textSelector_.baseOffset) {
         selectionMode_ = SelectionMode::SELECT;
     }
@@ -467,7 +467,7 @@ bool TextFieldPattern::UpdateCaretPositionByMouseMovement()
         needToShiftCaretAndTextRect = true;
     }
     UpdateCaretOffsetByLastTouchOffset();
-    textSelector_.destinationOffset = textEditingValue_.caretPosition;
+    UpdateSelection(textSelector_.GetStart(), textEditingValue_.caretPosition);
     GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
     selectionMode_ =
         textSelector_.destinationOffset == textSelector_.baseOffset ? SelectionMode::NONE : SelectionMode::SELECT;
@@ -2269,11 +2269,11 @@ void TextFieldPattern::UpdateTextSelectorByHandleMove(
         return;
     }
     if (isMovingBase) {
-        textSelector_.baseOffset = position;
+        UpdateSelection(position, textSelector_.GetEnd());
         textSelector_.selectionBaseOffset = offsetToParagraphBeginning;
         return;
     }
-    textSelector_.destinationOffset = position;
+    UpdateSelection(textSelector_.GetStart(), position);
     textSelector_.selectionDestinationOffset = offsetToParagraphBeginning;
 }
 
@@ -3459,7 +3459,7 @@ void TextFieldPattern::HandleSelectionUp()
 #else
         static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(caretRect_.GetX(), newOffsetY).pos_);
 #endif
-    textSelector_.destinationOffset = textEditingValue_.caretPosition;
+    UpdateSelection(textSelector_.GetStart(), textEditingValue_.caretPosition);
     selectionMode_ = SelectionMode::SELECT;
     if (textSelector_.baseOffset == textSelector_.destinationOffset) {
         selectionMode_ = SelectionMode::NONE;
@@ -3484,7 +3484,7 @@ void TextFieldPattern::HandleSelectionDown()
 #else
         static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(caretRect_.GetX(), newOffsetY).pos_);
 #endif
-    textSelector_.destinationOffset = textEditingValue_.caretPosition;
+    UpdateSelection(textSelector_.GetStart(), textEditingValue_.caretPosition);
     selectionMode_ = SelectionMode::SELECT;
     if (textSelector_.baseOffset == textSelector_.destinationOffset) {
         selectionMode_ = SelectionMode::NONE;
@@ -3500,11 +3500,10 @@ void TextFieldPattern::HandleSelectionLeft()
             LOGW("Caret position at beginning, cannot update selection to left");
             return;
         }
-        textSelector_.baseOffset = textEditingValue_.caretPosition;
-        textSelector_.destinationOffset =
+        UpdateSelection(textEditingValue_.caretPosition,
             std::max(textSelector_.baseOffset -
                          GetGraphemeClusterLength(GetEditingValue().GetWideText(), textSelector_.baseOffset, true),
-                0);
+                0));
         UpdateCaretPositionWithClamp(textSelector_.destinationOffset);
         selectionMode_ = SelectionMode::SELECT;
     } else {
@@ -3529,11 +3528,10 @@ void TextFieldPattern::HandleSelectionRight()
             LOGW("Caret position at the end, cannot update selection to right");
             return;
         }
-        textSelector_.baseOffset = textEditingValue_.caretPosition;
-        textSelector_.destinationOffset =
+        UpdateSelection(textEditingValue_.caretPosition,
             std::min(textSelector_.baseOffset +
                          GetGraphemeClusterLength(GetEditingValue().GetWideText(), textSelector_.baseOffset),
-                static_cast<int32_t>(textEditingValue_.GetWideText().length()));
+                static_cast<int32_t>(textEditingValue_.GetWideText().length())));
         UpdateCaretPositionWithClamp(textSelector_.destinationOffset);
         selectionMode_ = SelectionMode::SELECT;
     } else {
