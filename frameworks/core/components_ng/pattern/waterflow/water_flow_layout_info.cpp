@@ -98,6 +98,21 @@ float WaterFlowLayoutInfo::GetMainHeight(int32_t crossIndex, int32_t itemIndex)
     return result;
 }
 
+float WaterFlowLayoutInfo::GetStartMainPos(int32_t crossIndex, int32_t itemIndex)
+{
+    float result = 0.0f;
+    auto cross = waterFlowItems_.find(crossIndex);
+    if (cross == waterFlowItems_.end()) {
+        return result;
+    }
+    auto item = cross->second.find(itemIndex);
+    if (item == cross->second.end()) {
+        return result;
+    }
+    result = item->second.first;
+    return result;
+}
+
 bool WaterFlowLayoutInfo::IsAllCrossReachend(float mainSize) const
 {
     bool result = true;
@@ -116,15 +131,16 @@ bool WaterFlowLayoutInfo::IsAllCrossReachend(float mainSize) const
     return result;
 }
 
-FlowItemPosition WaterFlowLayoutInfo::GetCrossIndexForNextItem() const
+FlowItemIndex WaterFlowLayoutInfo::GetCrossIndexForNextItem() const
 {
-    FlowItemPosition position;
+    FlowItemIndex position = { 0, -1 };
     auto minHeight = 0.0f;
     auto crossSize = static_cast<int32_t>(waterFlowItems_.size());
     for (int32_t i = 0; i < crossSize; ++i) {
         const auto& crossItems = waterFlowItems_.at(i);
         if (crossItems.empty()) {
             position.crossIndex = i;
+            position.lastItemIndex = -1;
             break;
         }
         auto lastItem = crossItems.rbegin();
