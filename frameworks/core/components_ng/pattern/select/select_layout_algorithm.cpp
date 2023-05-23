@@ -27,7 +27,6 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto layoutProps = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProps);
-    layoutProps->UpdateAlignment(Alignment::CENTER);
     auto layoutConstraint = layoutProps->GetLayoutConstraint();
     if (layoutConstraint.has_value()) {
         auto pipeline = PipelineBase::GetCurrentContext();
