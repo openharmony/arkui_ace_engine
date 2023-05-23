@@ -19,6 +19,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -36,6 +37,7 @@ constexpr float SWIPE_SPRING_STIFFNESS = 228.f;
 constexpr float SWIPE_SPRING_DAMPING = 30.f;
 constexpr int32_t DELETE_ANIMATION_DURATION = 400;
 constexpr int32_t OPACITY_ANIMATION_DURATION = 100;
+constexpr Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
 } // namespace
 
 RefPtr<LayoutAlgorithm> ListItemPattern::CreateLayoutAlgorithm()
@@ -578,6 +580,11 @@ void ListItemPattern::MarkIsSelected(bool isSelected)
         } else {
             host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
         }
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto context = host->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnMouseSelectUpdate(isSelected, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
     }
 }
 
