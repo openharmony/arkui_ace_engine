@@ -25,6 +25,7 @@
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
+#include "core/components_ng/pattern/progress/progress_paint_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_property.h"
@@ -113,6 +114,10 @@ float ProgressLayoutAlgorithm::GetStrokeWidth() const
 
 float ProgressLayoutAlgorithm::GetChildHeight(LayoutWrapper* layoutWrapper, float width) const
 {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, DEFALT_CAPSULE_WIDTH.ConvertToPx());
+    auto paintProperty = host->GetPaintProperty<ProgressPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, DEFALT_CAPSULE_WIDTH.ConvertToPx());
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, DEFALT_CAPSULE_WIDTH.ConvertToPx());
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();
@@ -135,7 +140,8 @@ float ProgressLayoutAlgorithm::GetChildHeight(LayoutWrapper* layoutWrapper, floa
         CalcSize defaultCalcSize((CalcLength(childSize.Width())), std::nullopt);
         childLayoutProperty->UpdateUserDefinedIdealSize(defaultCalcSize);
     }
-    float childHeight = childSize.Height() + 2 * margin.ConvertToPx();
+    float childHeight =
+        paintProperty->GetTextSize().value_or(progressTheme->GetTextSize()).ConvertToPx() + 2 * margin.ConvertToPx();
     return childHeight;
 }
 
