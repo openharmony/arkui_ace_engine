@@ -85,10 +85,19 @@ foreach(item, ace_platforms) {
   if (platform == "ohos") {
     # libace target
     ohos_shared_library("libace") {
+      if (current_os == "ohos") {
+        sanitize = {
+          integer_overflow = true
+          boundary_sanitize = true
+          debug = ace_sanitize_debug
+        }
+      }
+
       deps = [ "$ace_root/build:libace_static_ohos" ]
       version_script = "libace.map"
       part_name = ace_engine_part
       subsystem_name = ace_engine_subsystem
+      configs = [ "$ace_root/test/unittest:ace_coverage_config" ]
     }
 
     ohos_source_set("ace_ohos_unittest_base") {

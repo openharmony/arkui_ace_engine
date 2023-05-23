@@ -109,6 +109,8 @@ constexpr int32_t MIN_ROTATE_VECTOR_Z = 9;
 constexpr int32_t PARAMETER_LENGTH_FIRST = 1;
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
+constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
+constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 
 bool CheckJSCallbackInfo(
     const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
@@ -1517,12 +1519,13 @@ void JSViewAbstract::JsEnabled(const JSCallbackInfo& info)
         return;
     }
 
+    bool enabled;
     if (!info[0]->IsBoolean()) {
         LOGE("arg is not bool.");
-        return;
+        enabled = true;
+    } else {
+        enabled = info[0]->ToBoolean();
     }
-
-    bool enabled = info[0]->ToBoolean();
 
     ViewAbstractModel::GetInstance()->SetEnabled(enabled);
 }
@@ -1708,6 +1711,7 @@ void JSViewAbstract::JsFlexShrink(const JSCallbackInfo& info)
     // negative use default value.
     if (value < 0.0) {
         ViewAbstractModel::GetInstance()->ResetFlexShrink();
+        return;
     }
     ViewAbstractModel::GetInstance()->SetFlexShrink(static_cast<float>(value));
 }
@@ -2991,6 +2995,9 @@ bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& 
             return false;
         }
         JSRef<JSVal> args = jsObj->GetProperty("params");
+        if (!args->IsArray()) {
+            return false;
+        }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
         if (resType == static_cast<uint32_t>(ResourceType::STRING)) {
@@ -3068,6 +3075,9 @@ bool JSViewAbstract::ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result)
             return false;
         }
         JSRef<JSVal> args = jsObj->GetProperty("params");
+        if (!args->IsArray()) {
+            return false;
+        }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
         result = themeConstants->GetIntByName(param->ToString());
@@ -3107,6 +3117,9 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
             return false;
         }
         JSRef<JSVal> args = jsObj->GetProperty("params");
+        if (!args->IsArray()) {
+            return false;
+        }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
         result = themeConstants->GetColorByName(param->ToString());
@@ -3163,6 +3176,9 @@ bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vecto
             return false;
         }
         JSRef<JSVal> args = jsObj->GetProperty("params");
+        if (!args->IsArray()) {
+            return false;
+        }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
         result.emplace_back(themeConstants->GetStringByName(param->ToString()));
@@ -3302,6 +3318,9 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
                 return false;
             }
             JSRef<JSVal> args = jsObj->GetProperty("params");
+            if (!args->IsArray()) {
+                return false;
+            }
             JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
             auto param = params->GetValueAt(0);
             if (type->ToNumber<int32_t>() == static_cast<int32_t>(ResourceType::MEDIA)) {
@@ -3442,6 +3461,9 @@ bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vecto
             return false;
         }
         JSRef<JSVal> args = jsObj->GetProperty("params");
+        if (!args->IsArray()) {
+            return false;
+        }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
         if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTARRAY)) {
@@ -3510,6 +3532,9 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
             return false;
         }
         JSRef<JSVal> args = jsObj->GetProperty("params");
+        if (!args->IsArray()) {
+            return false;
+        }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
         if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRARRAY)) {
@@ -5000,6 +5025,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onMouse", &JSViewAbstract::JsOnMouse);
     JSClass<JSViewAbstract>::StaticMethod("onHover", &JSViewAbstract::JsOnHover);
     JSClass<JSViewAbstract>::StaticMethod("onClick", &JSViewAbstract::JsOnClick);
+    JSClass<JSViewAbstract>::StaticMethod("clickEffect", &JSViewAbstract::JsClickEffect);
 #if defined(PREVIEW)
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
 #endif
@@ -5530,6 +5556,53 @@ void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
         func->Execute(*info);
     };
     ViewAbstractModel::GetInstance()->SetOnClick(std::move(onTap), std::move(onClick));
+}
+
+void JSViewAbstract::JsClickEffect(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("clickEffect needs at least 1 parameter.");
+        return;
+    }
+    if (info[0]->IsUndefined() || info[0]->IsNull()) {
+        LOGD("Parameter value error, not set effect.");
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> clickEffectLevel = obj->GetProperty("level");
+    int32_t clickEffectLevelValue = 0;
+    if (clickEffectLevel->IsNumber()) {
+        clickEffectLevelValue = clickEffectLevel->ToNumber<int32_t>();
+        if (clickEffectLevelValue < static_cast<int32_t>(ClickEffectLevel::LIGHT) ||
+            clickEffectLevelValue > static_cast<int32_t>(ClickEffectLevel::HEAVY)) {
+            LOGW("clickEffectLevel over range, use default value.");
+            clickEffectLevelValue = 0;
+        }
+    }
+
+    JSRef<JSVal> scaleNumber = obj->GetProperty("scale");
+    float scaleNumberValue = DEFAULT_SCALE_LIGHT;
+    if (!scaleNumber->IsNumber()) {
+        if ((ClickEffectLevel)clickEffectLevelValue == ClickEffectLevel::MIDDLE ||
+            (ClickEffectLevel)clickEffectLevelValue == ClickEffectLevel::HEAVY) {
+            scaleNumberValue = DEFAULT_SCALE_MIDDLE_OR_HEAVY;
+        }
+        ViewAbstractModel::GetInstance()->SetClickEffectLevel(
+            (ClickEffectLevel)clickEffectLevelValue, scaleNumberValue);
+        return;
+    }
+
+    scaleNumberValue = scaleNumber->ToNumber<float>();
+    if (LessNotEqual(scaleNumberValue, 0.0) || GreatNotEqual(scaleNumberValue, 1.0)) {
+        if ((ClickEffectLevel)clickEffectLevelValue == ClickEffectLevel::MIDDLE ||
+            (ClickEffectLevel)clickEffectLevelValue == ClickEffectLevel::HEAVY) {
+            scaleNumberValue = DEFAULT_SCALE_MIDDLE_OR_HEAVY;
+        } else {
+            scaleNumberValue = DEFAULT_SCALE_LIGHT;
+        }
+    }
+
+    ViewAbstractModel::GetInstance()->SetClickEffectLevel((ClickEffectLevel)clickEffectLevelValue, scaleNumberValue);
 }
 
 void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)

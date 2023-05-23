@@ -919,6 +919,10 @@ public:
         }
         JSRef<JSArray> array = JSRef<JSArray>::Cast(args[0]);
         for (size_t i = 0; i < array->Length(); i++) {
+            if (!(array->GetValueAt(i)->IsObject())) {
+                LOGE("Param is invalid");
+                return;
+            }
             auto obj = JSRef<JSObject>::Cast(array->GetValueAt(i));
             auto headerKey = obj->GetProperty("headerKey");
             auto headerValue = obj->GetProperty("headerValue");
@@ -2401,11 +2405,8 @@ void JSWeb::OnSslErrorRequest(const JSCallbackInfo& args)
             ContainerScope scope(instanceId);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
             auto* eventInfo = TypeInfoHelper::DynamicCast<WebSslErrorEvent>(info.get());
-            JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
-            if (message->IsBoolean()) {
-                return message->ToBoolean();
-            }
-            return false;
+            func->ExecuteWithValue(*eventInfo);
+            return true;
         };
         NG::WebView::SetOnSslErrorRequestImpl(std::move(uiCallback));
         return;
@@ -2421,11 +2422,8 @@ void JSWeb::OnSslErrorRequest(const JSCallbackInfo& args)
             LOGW("eventInfo is null");
             return false;
         }
-        JSRef<JSVal> result = func->ExecuteWithValue(*eventInfo);
-        if (result->IsBoolean()) {
-            return result->ToBoolean();
-        }
-        return false;
+        func->ExecuteWithValue(*eventInfo);
+        return true;
     };
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     CHECK_NULL_VOID(webComponent);

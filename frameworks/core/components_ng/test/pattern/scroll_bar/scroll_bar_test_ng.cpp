@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -598,5 +598,75 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest005, TestSize.Level1)
     EXPECT_EQ(scrollBarProxy->scrollBars_.size(), 2);
     scrollBarProxy->UnRegisterScrollBar(AceType::WeakClaim(scrollBarPatternRaw2));
     EXPECT_EQ(scrollBarProxy->scrollBars_.size(), 2);
+}
+
+/**
+ * @tc.name: PerformActionTest001
+ * @tc.desc: ScrollBar Accessibility PerformAction test ScrollForward and ScrollBackward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, PerformActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBar and initialize related properties.
+     */
+    RefPtr<ScrollProxy> scrollProxy;
+    ScrollBarModelNG scrollBarModelNG;
+    auto proxy = scrollBarModelNG.GetScrollBarProxy(scrollProxy);
+    scrollBarModelNG.Create(proxy, true, false, 3, 3);
+
+    /**
+     * @tc.steps: step2. Get scrollBar frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto scrollBarPattern = frameNode->GetPattern<ScrollBarPattern>();
+    ASSERT_NE(scrollBarPattern, nullptr);
+    scrollBarPattern->axis_ = Axis::NONE;
+    scrollBarPattern->scrollableDistance_ = 0.0;
+    scrollBarPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step3. Get scrollBar accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto scrollBarAccessibilityProperty = frameNode->GetAccessibilityProperty<ScrollBarAccessibilityProperty>();
+    ASSERT_NE(scrollBarAccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. When scrollBar Axis is NONE and scrollable distance is 0, call the callback function in
+     *                   scrollBarAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(scrollBarAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(scrollBarAccessibilityProperty->ActActionScrollBackward());
+
+    /**
+     * @tc.steps: step5. When scrollBar Axis is NONE and scrollable distance is not 0, call the callback function in
+     *                   scrollBarAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    scrollBarPattern->scrollableDistance_ = SCROLL_BAR_FLOAT_100;
+    EXPECT_TRUE(scrollBarAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(scrollBarAccessibilityProperty->ActActionScrollBackward());
+
+    /**
+     * @tc.steps: step6. When scrollBar Axis is VERTICAL and scrollable distance is not 0, call the callback function in
+     *                   scrollBarAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    scrollBarPattern->axis_ = Axis::VERTICAL;
+    EXPECT_TRUE(scrollBarAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(scrollBarAccessibilityProperty->ActActionScrollBackward());
+
+    /**
+     * @tc.steps: step7. When scrollBar Axis is VERTICAL and scrollable distance is 0, call the callback function in
+     *                   scrollBarAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    scrollBarPattern->scrollableDistance_ = 0.0;
+    EXPECT_TRUE(scrollBarAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(scrollBarAccessibilityProperty->ActActionScrollBackward());
 }
 } // namespace OHOS::Ace::NG

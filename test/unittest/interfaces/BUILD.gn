@@ -40,6 +40,8 @@ ohos_unittest("form_render_test") {
   include_dirs = [ "$ace_root/interfaces/inner_api/form_render/include" ]
   sources = [
     # mock
+    "$ace_root/frameworks/core/components/common/properties/color.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
     "$ace_root/test/mock/interfaces/mock_uicontent_creator.cpp",
 
     # self
@@ -57,6 +59,7 @@ ohos_unittest("form_render_test") {
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 
   deps = [
+    "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",

@@ -18,6 +18,3 @@ defines += [
   "MAC_PLATFORM",
   "SK_BUILD_FONT_MGR_FOR_PREVIEW_MAC",
 ]
-
-libace_target =
-    "//foundation/arkui/ace_engine/adapter/preview/build:libace_engine_mac"

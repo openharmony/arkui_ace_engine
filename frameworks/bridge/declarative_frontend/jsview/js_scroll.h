@@ -38,7 +38,7 @@ public:
     static void SetScrollBarColor(const std::string& color);
     static void SetScrollBarWidth(const JSCallbackInfo& args);
     static void SetScrollBar(const JSCallbackInfo& args);
-    static void SetEdgeEffect(int edgeEffect);
+    static void SetEdgeEffect(const JSCallbackInfo& args);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
 };

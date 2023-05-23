@@ -49,7 +49,7 @@ public:
 
     // skia SVG doesn't support <animate> element
 
-    const std::optional<Color>& GetSvgFillColor() override
+    const std::optional<Color>& GetFillColor() override
     {
         return svgColor_;
     }

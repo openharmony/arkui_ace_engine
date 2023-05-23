@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,11 +71,11 @@ extern const char THEME_PATTERN_INDEXER[];
 extern const char THEME_PATTERN_APP_BAR[];
 extern const char THEME_PATTERN_ADVANCED_PATTERN[];
 extern const char THEME_PATTERN_SECURITY_COMPONENT[];
+extern const char THEME_PATTERN_FORM[];
 
 // pattern general attributes
 extern const char PATTERN_FG_COLOR[];
 extern const char PATTERN_BG_COLOR[];
-extern const char PATTERN_BRODER_COLOR[];
 extern const char PATTERN_UNDERLINE_ACTIVED_COLOR[];
 extern const char PATTERN_UNDERLINE_TYPING_COLOR[];
 extern const char PATTERN_BG_COLOR_HOVERED[];

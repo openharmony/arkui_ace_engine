@@ -416,7 +416,11 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
     CHECK_NULL_VOID_NOLOG(context);
     context->SetIsFocusActive(false);
 #ifdef UICAST_COMPONENT_SUPPORTED
-    Container::Current()->GetDistributedUI()->OnPageChanged(node->GetPageId());
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto distributedUI = container->GetDistributedUI();
+    CHECK_NULL_VOID(distributedUI);
+    distributedUI->OnPageChanged(node->GetPageId());
 #endif
 }
 

@@ -100,7 +100,7 @@ private:
     RefPtr<PopupTheme> GetPopupTheme();
     void InitTouchEvent();
     void HandleTouchEvent(const TouchEventInfo& info);
-    void HandleTouchUp(const Offset& clickPosition);
+    void HandleTouchDown(const Offset& clickPosition);
     void RegisterButtonOnHover();
     void RegisterButtonOnTouch();
     void ButtonOnHover(bool isHover, const RefPtr<NG::FrameNode>& buttonNode);
@@ -112,6 +112,11 @@ private:
     OffsetT<Dimension> GetInvisibleOffset();
     RefPtr<RenderContext> GetRenderContext();
     void ResetToInvisible();
+    bool PostTask(const TaskExecutor::Task& task);
+    void StartOffsetEnteringAnimation();
+    void StartAlphaEnteringAnimation(std::function<void()> finish);
+    void StartOffsetExitingAnimation();
+    void StartAlphaExitingAnimation(std::function<void()> finish);
 
     int32_t targetNodeId_ = -1;
     std::string targetTag_;

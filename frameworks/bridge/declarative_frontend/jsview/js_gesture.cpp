@@ -221,6 +221,7 @@ constexpr int32_t DEFAULT_LONG_PRESS_DURATION = 500;
 constexpr int32_t DEFAULT_PINCH_FINGER = 2;
 constexpr double DEFAULT_PINCH_DISTANCE = 3.0;
 constexpr int32_t DEFAULT_PAN_FINGER = 1;
+constexpr int32_t DEFAULT_MAX_PAN_FINGERS = 10;
 constexpr double DEFAULT_PAN_DISTANCE = 5.0;
 constexpr int32_t DEFAULT_SLIDE_FINGER = DEFAULT_PAN_FINGER;
 constexpr double DEFAULT_SLIDE_SPEED = 100.0;
@@ -525,6 +526,9 @@ void JSPanGestureOption::SetDirection(const JSCallbackInfo& args)
     if (args.Length() > 0 && args[0]->IsNumber()) {
         PanDirection direction = { args[0]->ToNumber<int32_t>() };
         panGestureOption_->SetDirection(direction);
+    } else {
+        PanDirection directionAll = { PanDirection::ALL };
+        panGestureOption_->SetDirection(directionAll);
     }
 }
 
@@ -533,6 +537,8 @@ void JSPanGestureOption::SetDistance(const JSCallbackInfo& args)
     if (args.Length() > 0 && args[0]->IsNumber()) {
         auto distance = args[0]->ToNumber<double>();
         panGestureOption_->SetDistance(distance);
+    } else {
+        panGestureOption_->SetDistance(DEFAULT_PAN_DISTANCE);
     }
 }
 
@@ -540,7 +546,11 @@ void JSPanGestureOption::SetFingers(const JSCallbackInfo& args)
 {
     if (args.Length() > 0 && args[0]->IsNumber()) {
         auto fingers = args[0]->ToNumber<int32_t>();
+        fingers = fingers <= DEFAULT_PAN_FINGER ? DEFAULT_PAN_FINGER : fingers;
+        fingers = fingers > DEFAULT_MAX_PAN_FINGERS ? DEFAULT_PAN_FINGER : fingers;
         panGestureOption_->SetFingers(fingers);
+    } else {
+        panGestureOption_->SetFingers(DEFAULT_PAN_FINGER);
     }
 }
 

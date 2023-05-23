@@ -382,6 +382,8 @@ public:
     void HandleOnDragEnd(const GestureEvent& info);
     void HandleOnDragCancel();
 
+    void StartDragTaskForWeb();
+
     void OnModifyDone();
     bool KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr<NG::FrameNode>& node);
     bool IsAllowedDrag(RefPtr<EventHub> eventHub);
@@ -424,6 +426,7 @@ private:
     std::vector<DimensionRect> responseRegion_;
     bool touchable_ = true;
     RefPtr<PixelMap> pixelMap_;
+    GestureEvent gestureInfoForWeb_;
 
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool textDraggable_ = false;

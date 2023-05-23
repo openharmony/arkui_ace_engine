@@ -33,6 +33,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
+#include "core/animation/spring_curve.h"
 #include "core/common/container.h"
 #include "core/common/rosen/rosen_convert_helper.h"
 #include "core/components/common/properties/decoration.h"
@@ -46,7 +47,7 @@
 #include "core/components_ng/render/adapter/border_image_modifier.h"
 #include "core/components_ng/render/adapter/debug_boundary_modifier.h"
 #include "core/components_ng/render/adapter/focus_state_modifier.h"
-#include "core/components_ng/render/adapter/graphics_modifier.h"
+#include "core/components_ng/render/adapter/graphic_modifier.h"
 #include "core/components_ng/render/adapter/moon_progress_modifier.h"
 #include "core/components_ng/render/adapter/mouse_select_modifier.h"
 #include "core/components_ng/render/adapter/overlay_modifier.h"
@@ -69,6 +70,17 @@ namespace {
 RefPtr<PixelMap> g_pixelMap {};
 std::mutex g_mutex;
 std::condition_variable thumbnailGet;
+constexpr float ANIMATION_CURVE_VELOCITY_LIGHT_OR_MIDDLE = 10.0f;
+constexpr float ANIMATION_CURVE_VELOCITY_HEAVY = 0.0f;
+constexpr float ANIMATION_CURVE_MASS = 1.0f;
+constexpr float ANIMATION_CURVE_STIFFNESS_LIGHT = 410.0f;
+constexpr float ANIMATION_CURVE_STIFFNESS_MIDDLE = 350.0f;
+constexpr float ANIMATION_CURVE_STIFFNESS_HEAVY = 240.0f;
+constexpr float ANIMATION_CURVE_DAMPING_LIGHT = 38.0f;
+constexpr float ANIMATION_CURVE_DAMPING_MIDDLE = 35.0f;
+constexpr float ANIMATION_CURVE_DAMPING_HEAVY = 28.0f;
+constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
+constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 } // namespace
 
 float RosenRenderContext::ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
@@ -717,6 +729,16 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
     return rect;
 }
 
+RectF RosenRenderContext::GetPaintRectWithTranslate()
+{
+    RectF rect;
+    CHECK_NULL_RETURN(rsNode_, rect);
+    rect = GetPaintRectWithoutTransform();
+    auto translate = rsNode_->GetStagingProperties().GetTranslate();
+    rect.SetOffset(rect.GetOffset() + OffsetF(translate[0], translate[1]));
+    return rect;
+}
+
 void RosenRenderContext::GetPointWithTransform(PointF& point)
 {
     // TODO: add rotation and center support
@@ -797,10 +819,7 @@ void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
     }
     CHECK_NULL_VOID(rsNode_);
     Rosen::Vector4f cornerRadius;
-    cornerRadius.SetValues(static_cast<float>(value.radiusTopLeft.value_or(Dimension()).ConvertToPx()),
-        static_cast<float>(value.radiusTopRight.value_or(Dimension()).ConvertToPx()),
-        static_cast<float>(value.radiusBottomRight.value_or(Dimension()).ConvertToPx()),
-        static_cast<float>(value.radiusBottomLeft.value_or(Dimension()).ConvertToPx()));
+    ConvertRadius(value, cornerRadius);
     rsNode_->SetCornerRadius(cornerRadius);
     RequestNextFrame();
 }
@@ -838,6 +857,7 @@ void RosenRenderContext::OnAccessibilityFocusUpdate(bool isAccessibilityFocus)
 {
     auto uiNode = GetHost();
     CHECK_NULL_VOID(uiNode);
+    UpdateAccessibilityFocus(isAccessibilityFocus);
     if (isAccessibilityFocus) {
         PaintAccessibilityFocus();
     } else {
@@ -1033,6 +1053,9 @@ void RosenRenderContext::OnModifyDone()
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(rsNode_);
+    if (HasClickEffectLevel()) {
+        InitEventClickEffect();
+    }
     const auto& size = frameNode->GetGeometryNode()->GetFrameSize();
     if (!size.IsPositive()) {
         LOGD("first modify, make change in SyncGeometryProperties");
@@ -1649,44 +1672,48 @@ void RosenRenderContext::PaintGraphics()
 {
     CHECK_NULL_VOID(rsNode_);
     auto&& graphicProps = GetOrCreateGraphics();
+
+    if (!graphics_) {
+        graphics_ = std::make_unique<GraphicModifiers>();
+    }
     if (graphicProps->HasFrontGrayScale()) {
         auto grayScale = graphicProps->GetFrontGrayScaleValue();
-        SetModifier(grayScaleModifier_, grayScale.Value());
+        SetGraphicModifier(graphics_->grayScale, grayScale.Value());
     }
 
     if (graphicProps->HasFrontBrightness()) {
         auto brightness = graphicProps->GetFrontBrightnessValue();
-        SetModifier(brightnessModifier_, brightness.Value());
+        SetGraphicModifier(graphics_->brightness, brightness.Value());
     }
 
     if (graphicProps->HasFrontContrast()) {
         auto contrast = graphicProps->GetFrontContrastValue();
-        SetModifier(contrastModifier_, contrast.Value());
+        SetGraphicModifier(graphics_->contrast, contrast.Value());
     }
 
     if (graphicProps->HasFrontSaturate()) {
         auto saturate = graphicProps->GetFrontSaturateValue();
-        SetModifier(saturateModifier_, saturate.Value());
+        SetGraphicModifier(graphics_->saturate, saturate.Value());
     }
 
     if (graphicProps->HasFrontSepia()) {
         auto sepia = graphicProps->GetFrontSepiaValue();
-        SetModifier(sepiaModifier_, sepia.Value());
+        SetGraphicModifier(graphics_->sepia, sepia.Value());
     }
 
     if (graphicProps->HasFrontInvert()) {
         auto invert = graphicProps->GetFrontInvertValue();
-        SetModifier(invertModifier_, invert.Value());
+        SetGraphicModifier(graphics_->invert, invert.Value());
     }
 
     if (graphicProps->HasFrontHueRotate()) {
         auto hueRotate = graphicProps->GetFrontHueRotateValue();
-        SetModifier(hueRotateModifier_, hueRotate);
+        SetGraphicModifier(graphics_->hueRotate, hueRotate);
     }
 
     if (graphicProps->HasFrontColorBlend()) {
         auto colorBlend = graphicProps->GetFrontColorBlendValue();
-        SetModifier(colorBlendModifier_, ColorBlend(colorBlend));
+        SetGraphicModifier(graphics_->colorBlend, ColorBlend(colorBlend));
     }
 }
 
@@ -1698,7 +1725,7 @@ bool RosenRenderContext::RectIsNull()
 }
 
 template<typename T, typename D>
-void RosenRenderContext::SetModifier(std::shared_ptr<T>& modifier, D data)
+void RosenRenderContext::SetGraphicModifier(std::shared_ptr<T>& modifier, D data)
 {
     if (!modifier) {
         LOGD("create new modifier");
@@ -1706,6 +1733,13 @@ void RosenRenderContext::SetModifier(std::shared_ptr<T>& modifier, D data)
         rsNode_->AddModifier(modifier);
     }
     modifier->SetCustomData(data);
+
+    auto borderRadius = GetBorderRadius();
+    if (borderRadius.has_value()) {
+        Rosen::Vector4f rsRadius;
+        ConvertRadius(*borderRadius, rsRadius);
+        modifier->SetCornerRadius(rsRadius);
+    }
 }
 
 void RosenRenderContext::AddModifier(const std::shared_ptr<Rosen::RSModifier>& modifier)
@@ -1726,48 +1760,72 @@ void RosenRenderContext::UpdateGraphic(std::shared_ptr<T>& modifier, D data)
 {
     CHECK_NULL_VOID_NOLOG(!RectIsNull());
     LOGD("updating graphic effect");
-    SetModifier(modifier, data);
+    SetGraphicModifier(modifier, data);
     RequestNextFrame();
 }
 
 void RosenRenderContext::OnFrontBrightnessUpdate(const Dimension& brightness)
 {
-    UpdateGraphic(brightnessModifier_, brightness.Value());
+    if (!graphics_) {
+        graphics_ = std::make_unique<GraphicModifiers>();
+    }
+    UpdateGraphic(graphics_->brightness, brightness.Value());
 }
 
 void RosenRenderContext::OnFrontGrayScaleUpdate(const Dimension& grayScale)
 {
-    UpdateGraphic(grayScaleModifier_, grayScale.Value());
+    if (!graphics_) {
+        graphics_ = std::make_unique<GraphicModifiers>();
+    }
+    UpdateGraphic(graphics_->grayScale, grayScale.Value());
 }
 
 void RosenRenderContext::OnFrontContrastUpdate(const Dimension& contrast)
 {
-    UpdateGraphic(contrastModifier_, contrast.Value());
+    if (!graphics_) {
+        graphics_ = std::make_unique<GraphicModifiers>();
+    }
+    UpdateGraphic(graphics_->contrast, contrast.Value());
 }
 
 void RosenRenderContext::OnFrontSaturateUpdate(const Dimension& saturate)
 {
-    UpdateGraphic(saturateModifier_, saturate.Value());
+    if (!graphics_) {
+        graphics_ = std::make_unique<GraphicModifiers>();
+    }
+    UpdateGraphic(graphics_->saturate, saturate.Value());
 }
 
 void RosenRenderContext::OnFrontSepiaUpdate(const Dimension& sepia)
 {
-    UpdateGraphic(sepiaModifier_, sepia.Value());
+    if (!graphics_) {
+        graphics_ = std::make_unique<GraphicModifiers>();
+    }
+    UpdateGraphic(graphics_->sepia, sepia.Value());
 }
 
 void RosenRenderContext::OnFrontInvertUpdate(const Dimension& invert)
 {
-    UpdateGraphic(invertModifier_, invert.Value());
+    if (!graphics_) {
+        graphics_ = std::make_unique<GraphicModifiers>();
+    }
+    UpdateGraphic(graphics_->invert, invert.Value());
 }
 
 void RosenRenderContext::OnFrontHueRotateUpdate(float hueRotate)
 {
-    UpdateGraphic(hueRotateModifier_, hueRotate);
+    if (!graphics_) {
+        graphics_ = std::make_unique<GraphicModifiers>();
+    }
+    UpdateGraphic(graphics_->hueRotate, hueRotate);
 }
 
 void RosenRenderContext::OnFrontColorBlendUpdate(const Color& colorBlend)
 {
-    UpdateGraphic(colorBlendModifier_, ColorBlend(colorBlend));
+    if (!graphics_) {
+        graphics_ = std::make_unique<GraphicModifiers>();
+    }
+    UpdateGraphic(graphics_->colorBlend, ColorBlend(colorBlend));
 }
 
 void RosenRenderContext::UpdateTransition(const TransitionOptions& options)
@@ -1873,9 +1931,6 @@ void RosenRenderContext::PaintClip(const SizeF& frameSize)
     if (clip->HasClipShape()) {
         auto basicShape = clip->GetClipShapeValue();
         auto skPath = SkiaDecorationPainter::SkiaCreateSkPath(basicShape, frameSize);
-        if (skPath.isEmpty()) {
-            return;
-        }
         rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
     }
 
@@ -2162,6 +2217,15 @@ void RosenRenderContext::AddChild(const RefPtr<RenderContext>& renderContext, in
     CHECK_NULL_VOID(rosenRenderContext);
     auto child = rosenRenderContext->GetRSNode();
     rsNode_->AddChild(child, index);
+}
+
+void RosenRenderContext::RemoveChild(const RefPtr<RenderContext>& renderContext)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(renderContext);
+    CHECK_NULL_VOID(rosenRenderContext);
+    auto child = rosenRenderContext->GetRSNode();
+    rsNode_->RemoveChild(child);
 }
 
 void RosenRenderContext::SetBounds(float positionX, float positionY, float width, float height)
@@ -2479,5 +2543,124 @@ void RosenRenderContext::AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePrope
         rsNode_->AddModifier(nodeModifierImpl);
         nodeModifierImpl->AddProperty(property->GetProperty());
     }
+}
+
+void RosenRenderContext::InitEventClickEffect()
+{
+    if (touchListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto renderContext = weak.Upgrade();
+        CHECK_NULL_VOID(renderContext);
+        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN ||
+            info.GetTouches().front().GetTouchType() == TouchType::UP) {
+            renderContext->ClickEffectPlayAnimation(info.GetTouches().front().GetTouchType());
+        }
+    };
+    touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    gesture->AddTouchEvent(touchListener_);
+}
+
+void RosenRenderContext::ClickEffectPlayAnimation(const TouchType& touchType)
+{
+    if (touchType != TouchType::DOWN && touchType != TouchType::UP) {
+        return;
+    }
+    auto value = GetClickEffectLevelValue();
+    auto level = value.level;
+    auto scaleValue = value.scaleNumber;
+    auto springCurve = UpdatePlayAnimationValue(level, scaleValue);
+
+    AnimationOption option;
+    option.SetCurve(springCurve);
+
+    if (touchType == TouchType::DOWN) {
+        auto defaultScale = VectorF(1.0f, 1.0f);
+        auto currentScale = GetTransformScaleValue(defaultScale);
+        currentScale_ = currentScale;
+        AnimationUtils::OpenImplicitAnimation(option, springCurve, nullptr);
+        VectorF valueScale(scaleValue, scaleValue);
+        UpdateTransformScale(valueScale);
+        AnimationUtils::CloseImplicitAnimation();
+    }
+
+    if (touchType == TouchType::UP) {
+        AnimationUtils::OpenImplicitAnimation(option, springCurve, nullptr);
+        UpdateTransformScale(currentScale_);
+        AnimationUtils::CloseImplicitAnimation();
+    }
+}
+
+RefPtr<Curve> RosenRenderContext::UpdatePlayAnimationValue(const ClickEffectLevel& level, float& scaleValue)
+{
+    float velocity = 0.0f;
+    float mass = 0.0f;
+    float stiffness = 0.0f;
+    float damping = 0.0f;
+    if (level == ClickEffectLevel::LIGHT) {
+        velocity = ANIMATION_CURVE_VELOCITY_LIGHT_OR_MIDDLE;
+        mass = ANIMATION_CURVE_MASS;
+        stiffness = ANIMATION_CURVE_STIFFNESS_LIGHT;
+        damping = ANIMATION_CURVE_DAMPING_LIGHT;
+        if (GreatOrEqual(scaleValue, 0.0) && LessOrEqual(scaleValue, 1.0)) {
+            scaleValue = sqrt(scaleValue);
+        } else {
+            scaleValue = sqrt(DEFAULT_SCALE_LIGHT);
+        }
+    } else if (level == ClickEffectLevel::MIDDLE) {
+        velocity = ANIMATION_CURVE_VELOCITY_LIGHT_OR_MIDDLE;
+        mass = ANIMATION_CURVE_MASS;
+        stiffness = ANIMATION_CURVE_STIFFNESS_MIDDLE;
+        damping = ANIMATION_CURVE_DAMPING_MIDDLE;
+        if (GreatOrEqual(scaleValue, 0.0) && LessOrEqual(scaleValue, 1.0)) {
+            scaleValue = sqrt(scaleValue);
+        } else {
+            scaleValue = sqrt(DEFAULT_SCALE_MIDDLE_OR_HEAVY);
+        }
+    } else if (level == ClickEffectLevel::HEAVY) {
+        velocity = ANIMATION_CURVE_VELOCITY_HEAVY;
+        mass = ANIMATION_CURVE_MASS;
+        stiffness = ANIMATION_CURVE_STIFFNESS_HEAVY;
+        damping = ANIMATION_CURVE_DAMPING_HEAVY;
+        if (GreatOrEqual(scaleValue, 0.0) && LessOrEqual(scaleValue, 1.0)) {
+            scaleValue = sqrt(scaleValue);
+        } else {
+            scaleValue = sqrt(DEFAULT_SCALE_MIDDLE_OR_HEAVY);
+        }
+    }
+    return AceType::MakeRefPtr<InterpolatingSpring>(velocity, mass, stiffness, damping);
+}
+
+void RosenRenderContext::RegisterSharedTransition(const RefPtr<RenderContext>& other)
+{
+    auto otherContext = AceType::DynamicCast<RosenRenderContext>(other);
+    if (!otherContext) {
+        LOGE("RosenRenderContext::RegisterSharedTransition: other is not RosenRenderContext");
+        return;
+    }
+    RSNode::RegisterTransitionPair(rsNode_->GetId(), otherContext->rsNode_->GetId());
+}
+
+void RosenRenderContext::UnregisterSharedTransition(const RefPtr<RenderContext>& other)
+{
+    auto otherContext = AceType::DynamicCast<RosenRenderContext>(other);
+    if (!otherContext) {
+        // the paired node is already destroyed, we don't need to unregister it, Rosen will handle it.
+        return;
+    }
+    RSNode::UnregisterTransitionPair(rsNode_->GetId(), otherContext->rsNode_->GetId());
+}
+
+inline void RosenRenderContext::ConvertRadius(const BorderRadiusProperty& value, Rosen::Vector4f& cornerRadius)
+{
+    cornerRadius.SetValues(static_cast<float>(value.radiusTopLeft.value_or(Dimension()).ConvertToPx()),
+        static_cast<float>(value.radiusTopRight.value_or(Dimension()).ConvertToPx()),
+        static_cast<float>(value.radiusBottomRight.value_or(Dimension()).ConvertToPx()),
+        static_cast<float>(value.radiusBottomLeft.value_or(Dimension()).ConvertToPx()));
 }
 } // namespace OHOS::Ace::NG

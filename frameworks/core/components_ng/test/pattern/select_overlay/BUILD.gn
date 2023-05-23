@@ -11,12 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("select_overlay_test_ng") {
-  module_out_path = "$test_output_path/select_overlay"
+  module_out_path = pattern_test_output_path
 
   sources = [
     "$ace_root/frameworks/base/test/mock/mock_subwindow_manager.cpp",
@@ -24,6 +22,7 @@ ohos_unittest("select_overlay_test_ng") {
     "$ace_root/frameworks/core/animation/test/mock/mock_scheduler.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/image/image_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll/inner/scroll_bar.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.cpp",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -718,7 +718,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg004, Test
 
 /**
  * @tc.name: TimePickerAccessibilityPropertyTestNg005
- * @tc.desc: Test the SupportAction property of DatePickerPattern
+ * @tc.desc: Test the SupportAction property of TimePickerPattern
  * @tc.type: FUNC
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg005, TestSize.Level1)
@@ -1742,5 +1742,68 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerFireChangeEventTest001, TestSize.Lev
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
     timePickerRowPattern->FireChangeEvent(true);
+}
+
+/**
+ * @tc.name: PerformActionTest001
+ * @tc.desc: TimePicker Accessibility PerformAction test ScrollForward and ScrollBackward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, PerformActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create timePicker and initialize related properties.
+     */
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto pickerFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(pickerFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Get timePickerColumn frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto timePickerRowPattern = pickerFrameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto minuteColumn = allChildNode["minute"];
+    ASSERT_NE(minuteColumn, nullptr);
+    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(minuteColumnPattern, nullptr);
+    auto options = minuteColumnPattern->GetOptions();
+    options[minuteColumn].clear();
+    minuteColumnPattern->SetOptions(options);
+    minuteColumnPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step3. Get timePickerColumn accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto accessibilityProperty = minuteColumn->GetAccessibilityProperty<TimePickerColumnAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. When timePickerColumn can move, call the callback function in timePickerColumn
+     *                   accessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(accessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(accessibilityProperty->ActActionScrollBackward());
+
+    /**
+     * @tc.steps: step5. When timePickerColumn can not move, call the callback function in timePickerColumn
+     *                   accessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    options = minuteColumnPattern->GetOptions();
+    options[minuteColumn].clear();
+    for (int i = 0; i < INDEX; i++) {
+        options[minuteColumn].emplace_back(std::to_string(i));
+    }
+    minuteColumnPattern->SetOptions(options);
+    minuteColumnPattern->SetCurrentIndex(1);
+    EXPECT_TRUE(accessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(accessibilityProperty->ActActionScrollBackward());
 }
 } // namespace OHOS::Ace::NG

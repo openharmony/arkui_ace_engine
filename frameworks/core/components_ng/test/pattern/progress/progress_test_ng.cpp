@@ -28,6 +28,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components/progress/progress_theme.h"
+#include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -128,6 +129,7 @@ constexpr Dimension FONT_SIZE = 12.0_vp;
 const std::string FONT_CONTEXT = "start";
 const FontWeight FONT_WEIGHT = FontWeight::BOLDER;
 const std::vector<std::string> FONT_FAMILY = { "serif" };
+constexpr Dimension DEFALUT_SPACE = 4.0_vp;
 
 CreateProperty creatProperty;
 DirtySwapConfig config;
@@ -445,7 +447,7 @@ HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm001, TestSize.Level1)
     ASSERT_NE(size, std::nullopt);
     EXPECT_EQ(progressLayoutAlgorithm->GetType(), PROGRESS_TYPE_LINEAR);
     EXPECT_EQ(progressLayoutAlgorithm->GetStrokeWidth(), DEFALUT_STROKE_WIDTH.ConvertToPx());
-    EXPECT_EQ(size->Height(), PROGRESS_COMPONENT_WIDTH);
+    EXPECT_EQ(size->Height(), DEFALUT_STROKE_WIDTH.ConvertToPx());
     EXPECT_EQ(size->Width(), PROGRESS_COMPONENT_HEIGHT);
 }
 
@@ -547,7 +549,7 @@ HWTEST_F(ProgressTestNg, LinearProgressCreator001, TestSize.Level1)
     size = progressLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     ASSERT_NE(size, std::nullopt);
     EXPECT_EQ(progressLayoutAlgorithm->GetStrokeWidth(), STORKE_WIDTH.ConvertToPx());
-    EXPECT_EQ(size->Height(), PROGRESS_COMPONENT_HEIGHT);
+    EXPECT_EQ(size->Height(), STORKE_WIDTH.ConvertToPx());
     EXPECT_EQ(size->Width(), PROGRESS_COMPONENT_WIDTH);
 
     contentConstraint.selfIdealSize.SetWidth(LARG_PROGRESS_COMPONENT_WIDTH);
@@ -556,7 +558,7 @@ HWTEST_F(ProgressTestNg, LinearProgressCreator001, TestSize.Level1)
     ASSERT_NE(size, std::nullopt);
     EXPECT_EQ(progressLayoutAlgorithm->GetStrokeWidth(), STORKE_WIDTH.ConvertToPx());
     EXPECT_EQ(size->Height(), PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
-    EXPECT_EQ(size->Width(), PROGRESS_COMPONENT_MAXSIZE_WIDTH);
+    EXPECT_EQ(size->Width(), STORKE_WIDTH.ConvertToPx());
 }
 
 /**
@@ -1439,6 +1441,17 @@ HWTEST_F(ProgressTestNg, ProgressPattern001, TestSize.Level1)
     touchInfo1.SetTouchType(TouchType::DOWN);
     info.AddTouchLocationInfo(std::move(touchInfo1));
     pattern->touchListener_->GetTouchEventCallback()(info);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<AppTheme>()));
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetContentSize(SizeF(PROGRESS_COMPONENT_MAXSIZE_WIDTH, PROGRESS_COMPONENT_MAXSIZE_HEIGHT));
+    geometryNode->SetContentOffset(OffsetF(0, 0));
+    frameNode->SetGeometryNode(geometryNode);
+    RoundRect focusRect;
+    pattern->GetInnerFocusPaintRect(focusRect);
+    EXPECT_EQ(focusRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).x,
+        PROGRESS_COMPONENT_MAXSIZE_WIDTH * 0.5 + DEFALUT_SPACE.ConvertToPx());
+    EXPECT_EQ(focusRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).y,
+        PROGRESS_COMPONENT_MAXSIZE_WIDTH * 0.5 + DEFALUT_SPACE.ConvertToPx());
     EXPECT_FALSE(progressEvent->IsEnabled());
 }
 

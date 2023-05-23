@@ -719,19 +719,24 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
 #endif
 }
 
-void PipelineContext::OnAvoidAreaChanged()
+void PipelineContext::ResetViewSafeArea()
 {
     auto stageManager = GetStageManager();
     CHECK_NULL_VOID_NOLOG(stageManager);
+    auto stageNode = stageManager->GetStageNode();
+    CHECK_NULL_VOID_NOLOG(stageNode);
     auto pageNode = stageManager->GetLastPage();
     CHECK_NULL_VOID_NOLOG(pageNode);
     auto layoutProperty = pageNode->GetLayoutProperty();
     const static int32_t PLATFORM_VERSION_TEN = 10;
-    if (GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && !GetIgnoreViewSafeArea() && layoutProperty) {
-        layoutProperty->SetSafeArea(GetCurrentViewSafeArea());
-        LOGI("OnAvoidAreaChanged viewSafeArea:%{public}s",
-            layoutProperty->GetSafeArea().ToString().c_str());
-        pageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && layoutProperty) {
+        if (!GetIgnoreViewSafeArea()) {
+            layoutProperty->SetSafeArea(GetCurrentViewSafeArea());
+            LOGI("OnAvoidAreaChanged viewSafeArea:%{public}s", layoutProperty->GetSafeArea().ToString().c_str());
+        } else {
+            layoutProperty->SetSafeArea({});
+        }
+        stageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -1576,6 +1581,12 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
     manager->GetExtraInfoFromClipboard(extraInfo);
 #endif // ENABLE_DRAG_FRAMEWORK
     if (action == DragEventAction::DRAG_EVENT_END) {
+#ifdef ENABLE_DRAG_FRAMEWORK
+    if (manager->GetExtraInfo().empty()) {
+        manager->GetExtraInfoFromClipboard(extraInfo);
+        manager->SetExtraInfo(extraInfo);
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
         manager->OnDragEnd(static_cast<float>(x), static_cast<float>(y), extraInfo);
         manager->RestoreClipboardData();
         return;

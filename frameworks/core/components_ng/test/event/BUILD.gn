@@ -19,8 +19,7 @@ group("event_unittest") {
     "event_hub:event_hub_test_ng",
     "event_manager:event_manager_test_ng",
     "focus_hub:focus_hub_test_ng",
-
-    #"gesture_event_hub:gesture_event_hub_test_ng",
+    "gesture_event_hub:gesture_event_hub_test_ng",
     "input_event_hub:input_event_hub_test_ng",
     "long_press_event:long_press_event_test_ng",
     "pan_event:pan_event_test_ng",

@@ -40,4 +40,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
     result.emplace_back(touchEventActuator);
 }
+
+void DragEventActuator::StartDragTaskForWeb(const GestureEvent& info) {}
 } // namespace OHOS::Ace::NG

@@ -26,9 +26,13 @@ public:
     MultiMenuLayoutAlgorithm() = default;
     ~MultiMenuLayoutAlgorithm() override = default;
 
+    void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
+    void UpdateConstraintBaseOnMenuItems(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
+    float GetChildrenMaxWidth(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
+
     ACE_DISALLOW_COPY_AND_MOVE(MultiMenuLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

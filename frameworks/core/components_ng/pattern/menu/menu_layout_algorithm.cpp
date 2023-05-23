@@ -416,12 +416,19 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(
             auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
             float windowsOffsetX = windowGlobalRect.GetOffset().GetX();
             float windowsOffsetY = windowGlobalRect.GetOffset().GetY();
-            x += windowsOffsetX + pageOffset_.GetX();
-            y += windowsOffsetY + pageOffset_.GetY();
-            x = std::clamp(x, windowsOffsetX + pageOffset_.GetX(),
-                wrapperSize_.Width() - size.Width() - margin_ * 2.0f + windowsOffsetX + pageOffset_.GetX());
-            y = std::clamp(y, windowsOffsetY + pageOffset_.GetY(),
-                wrapperSize_.Height() - size.Height() - margin_ * 2.0f + windowsOffsetY + pageOffset_.GetY());
+            auto isContainerModal =
+                pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
+                pipelineContext->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+            OffsetF pageOffset;
+            if (isContainerModal) {
+                pageOffset = pageOffset_;
+            }
+            x += windowsOffsetX + pageOffset.GetX();
+            y += windowsOffsetY + pageOffset.GetY();
+            x = std::clamp(x, windowsOffsetX + pageOffset.GetX(),
+                wrapperSize_.Width() - size.Width() - margin_ * 2.0f + windowsOffsetX + pageOffset.GetX());
+            y = std::clamp(y, windowsOffsetY + pageOffset.GetY(),
+                wrapperSize_.Height() - size.Height() - margin_ * 2.0f + windowsOffsetY + pageOffset.GetY());
 
             return OffsetF(x, y);
         }
@@ -441,17 +448,9 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(
 
 void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
 {
-    // set min width
     RefPtr<GridColumnInfo> columnInfo;
     columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
     columnInfo->GetParent()->BuildColumnWidth(wrapperSize_.Width());
-    float minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
-    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
-    if (menuPattern->IsSelectOverlayExtensionMenu() && minWidth > constraint.maxSize.Width()) {
-        minWidth = constraint.maxSize.Width();
-    }
-    constraint.minSize.SetWidth(minWidth);
-
     // set max width
     auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(menuLayoutProperty);
@@ -462,6 +461,13 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
     maxWidth = std::min(constraint.maxSize.Width(), maxWidth);
     constraint.maxSize.SetWidth(maxWidth);
     constraint.percentReference.SetWidth(maxWidth);
+    // set min width
+    auto minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
+    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    if (minWidth > constraint.maxSize.Width()) {
+        minWidth = constraint.maxSize.Width();
+    }
+    constraint.minSize.SetWidth(minWidth);
 }
 
 void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
@@ -479,13 +485,7 @@ LayoutConstraintF MenuLayoutAlgorithm::CreateChildConstraint(LayoutWrapper* layo
     auto childConstraint = menuLayoutProperty->CreateChildConstraint();
     UpdateConstraintWidth(layoutWrapper, childConstraint);
     UpdateConstraintHeight(layoutWrapper, childConstraint);
-    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
-    CHECK_NULL_RETURN(menuLayoutProperty, childConstraint);
-    if (!menuPattern->IsMultiMenu()) {
-        UpdateConstraintBaseOnOptions(layoutWrapper, childConstraint);
-    } else {
-        UpdateConstraintBaseOnMenuItems(layoutWrapper, childConstraint);
-    }
+    UpdateConstraintBaseOnOptions(layoutWrapper, childConstraint);
     return childConstraint;
 }
 
@@ -498,9 +498,10 @@ void MenuLayoutAlgorithm::UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWra
         LOGD("options is empty, no need to update constraint.");
         return;
     }
-    auto maxChildrenWidth = constraint.minSize.Width();
     auto optionConstraint = constraint;
     optionConstraint.maxSize.MinusWidth(optionPadding_ * 2.0f);
+    optionConstraint.minSize.MinusWidth(optionPadding_ * 2.0f);
+    auto maxChildrenWidth = optionConstraint.minSize.Width();
     auto optionsLayoutWrapper = GetOptionsLayoutWrappper(layoutWrapper);
     for (const auto& optionWrapper : optionsLayoutWrapper) {
         optionWrapper->Measure(optionConstraint);
@@ -535,13 +536,6 @@ void MenuLayoutAlgorithm::UpdateOptionConstraint(std::list<RefPtr<LayoutWrapper>
         CHECK_NULL_VOID(optionLayoutProps);
         optionLayoutProps->UpdateCalcMinSize(CalcSize(CalcLength(width), std::nullopt));
     }
-}
-
-void MenuLayoutAlgorithm::UpdateConstraintBaseOnMenuItems(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
-{
-    // multiMenu children are menuItem or menuItemGroup, constrain width is same as the menu
-    auto maxChildrenWidth = GetChildrenMaxWidth(layoutWrapper, constraint);
-    constraint.minSize.SetWidth(maxChildrenWidth);
 }
 
 // return vertical offset
@@ -587,17 +581,6 @@ float MenuLayoutAlgorithm::HorizontalLayout(const SizeF& size, float position, b
 
     // can't fit in screen, line up with left side of the screen
     return 0.0f;
-}
-
-float MenuLayoutAlgorithm::GetChildrenMaxWidth(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint)
-{
-    float maxWidth = layoutConstraint.minSize.Width();
-    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->Measure(layoutConstraint);
-        auto childSize = child->GetGeometryNode()->GetFrameSize();
-        maxWidth = std::max(maxWidth, childSize.Width());
-    }
-    return maxWidth;
 }
 
 OffsetF MenuLayoutAlgorithm::GetPositionWithPlacement(
@@ -694,12 +677,19 @@ OffsetF MenuLayoutAlgorithm::FitToScreen(const OffsetF& fitPosition, const SizeF
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
         float windowsOffsetX = windowGlobalRect.GetOffset().GetX();
         float windowsOffsetY = windowGlobalRect.GetOffset().GetY();
-        x += windowsOffsetX + pageOffset_.GetX();
-        y += windowsOffsetY + pageOffset_.GetY();
-        x = std::clamp(x, windowsOffsetX + pageOffset_.GetX(),
-            wrapperSize_.Width() - childSize.Width() - margin_ * 2.0f + windowsOffsetX + pageOffset_.GetX());
-        y = std::clamp(y, windowsOffsetY + pageOffset_.GetY(),
-            wrapperSize_.Height() - childSize.Height() - margin_ * 2.0f + windowsOffsetY + pageOffset_.GetY());
+        auto isContainerModal =
+            pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
+            pipelineContext->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+        OffsetF pageOffset;
+        if (isContainerModal) {
+            pageOffset = pageOffset_;
+        }
+        x += windowsOffsetX + pageOffset.GetX();
+        y += windowsOffsetY + pageOffset.GetY();
+        x = std::clamp(x, windowsOffsetX + pageOffset.GetX(),
+            wrapperSize_.Width() - childSize.Width() - margin_ * 2.0f + windowsOffsetX + pageOffset.GetX());
+        y = std::clamp(y, windowsOffsetY + pageOffset.GetY(),
+            wrapperSize_.Height() - childSize.Height() - margin_ * 2.0f + windowsOffsetY + pageOffset.GetY());
 
         return OffsetF(x, y);
     }

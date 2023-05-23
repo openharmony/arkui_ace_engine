@@ -114,7 +114,7 @@ void MenuPattern::OnModifyDone()
     auto theme = pipeline->GetTheme<SelectTheme>();
 
     if (HasInnerMenu()) {
-        ResetTheme(host);
+        ResetTheme(host, false);
     }
 
     if (type_ == MenuType::MULTI_MENU) {
@@ -423,17 +423,17 @@ RefPtr<LayoutAlgorithm> MenuPattern::CreateLayoutAlgorithm()
     }
 }
 
-void MenuPattern::ResetTheme(const RefPtr<FrameNode>& host)
+void MenuPattern::ResetTheme(const RefPtr<FrameNode>& host, bool resetShadow)
 {
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    renderContext->UpdateBackShadow(ShadowConfig::NoneShadow);
-    renderContext->SetClipToBounds(false);
+    if (resetShadow) {
+        renderContext->UpdateBackShadow(ShadowConfig::NoneShadow);
+    }
 
     auto scroll = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(scroll);
-    scroll->GetRenderContext()->SetClipToBounds(false);
     // move padding from scroll to inner menu
     auto scrollProp = scroll->GetLayoutProperty();
     scrollProp->UpdatePadding(PaddingProperty());
@@ -450,7 +450,10 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
 
     auto bgColor = theme->GetBackgroundColor();
     renderContext->UpdateBackgroundColor(bgColor);
-    renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
+    // interior menu nodes don't need shadow effect
+    if (type_ != MenuType::MULTI_MENU) {
+        renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
+    }
     renderContext->SetClipToBounds(true);
     // make menu round rect
     BorderRadiusProperty borderRadius;

@@ -1024,4 +1024,37 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg033, TestSize.Level
         (FULL_SCREEN_WIDTH - MENU_ITEM_SIZE_WIDTH - MENU_SIZE_WIDTH));
     EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetY(), MENU_OFFSET_Y);
 }
+
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg034
+ * @tc.desc: Test MultiMenu measure algorithm.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg034, TestSize.Level1)
+{
+    // set screen width for grid column
+    ScreenSystemManager::GetInstance().SetWindowInfo(FULL_SCREEN_WIDTH, 1.0, 1.0);
+    // create multi menu
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MULTI_MENU);
+    auto multiMenu = AceType::MakeRefPtr<FrameNode>("", -1, menuPattern);
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    ASSERT_TRUE(algorithm);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    auto* wrapper = new LayoutWrapper(multiMenu, geometryNode, layoutProp);
+    // create menu item
+    for (int32_t i = 0; i < 3; ++i) {
+        auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+        auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, itemPattern);
+        auto itemGeoNode = AceType::MakeRefPtr<GeometryNode>();
+        itemGeoNode->SetFrameSize(SizeF(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT));
+        auto childWrapper = AceType::MakeRefPtr<LayoutWrapper>(menuItem, itemGeoNode, layoutProp);
+        wrapper->AppendChild(childWrapper);
+    }
+
+    algorithm->Measure(wrapper);
+    // @tc.expected: menu content width = item width, height = sum(item height)
+    auto expectedSize = SizeF(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT * 3);
+    EXPECT_EQ(wrapper->GetGeometryNode()->GetContentSize(), expectedSize);
+}
 } // namespace OHOS::Ace::NG

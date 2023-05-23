@@ -27,6 +27,15 @@ group("unittest") {
   }
 }
 
+config("ace_coverage_config") {
+  cflags = []
+  ldflags = []
+  if (ace_engine_feature_enable_coverage) {
+    cflags += [ "--coverage" ]
+    ldflags += [ "--coverage" ]
+  }
+}
+
 # ace unittest config
 config("ace_unittest_config") {
   visibility = [ "./../../*" ]

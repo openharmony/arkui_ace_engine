@@ -1281,4 +1281,160 @@ HWTEST_F(SearchTestNg, SearchChangeEventHub001, TestSize.Level1)
     eventHub->UpdateChangeEvent("");
     EXPECT_EQ(eventHub->onValueChangeEvent_, nullptr);
 }
+
+/**
+ * @tc.name: Pattern009
+ * @tc.desc: test InitButtonAndImageClickEvent, buttonClickListener_ already exist
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, Pattern009, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create frameNode and pattern.
+     */
+    SearchModelNG searchModelInstance;
+    SetThemeInCreate();
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.step: step2. Reset pattern->imageClickListener_.
+     * @tc.expected: pattern->imageClickListener_ is nullptr.
+     */
+    pattern->imageClickListener_.Reset();
+    EXPECT_EQ(pattern->imageClickListener_, nullptr);
+    pattern->InitButtonAndImageClickEvent();
+}
+
+/**
+ * @tc.name: Pattern010
+ * @tc.desc: test OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, Pattern010, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. get frameNode and pattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_ENTER, keyEvent.action = KeyAction::UP;
+    pattern->OnKeyEvent(keyEvent);
+    /**
+     * @tc.step: step2. call OnKeyEvent().
+     * @tc.expected: focusChoice_ = FocusChoice::CANCEL_BUTTON.
+     */
+    keyEvent.code = KeyCode::KEY_DPAD_LEFT, keyEvent.action = KeyAction::DOWN;
+    pattern->focusChoice_ = SearchPattern::FocusChoice::SEARCH_BUTTON;
+    pattern->cancelButtonSize_ = SizeF(100.0, 50.0);
+    pattern->OnKeyEvent(keyEvent);
+    EXPECT_EQ(pattern->focusChoice_, SearchPattern::FocusChoice::CANCEL_BUTTON);
+
+    keyEvent.code = KeyCode::KEY_DPAD_RIGHT;
+    pattern->focusChoice_ = SearchPattern::FocusChoice::SEARCH;
+    pattern->OnKeyEvent(keyEvent);
+    EXPECT_EQ(pattern->focusChoice_, SearchPattern::FocusChoice::CANCEL_BUTTON);
+
+    keyEvent.code = KeyCode::KEY_1;
+    pattern->OnKeyEvent(keyEvent);
+}
+
+/**
+ * @tc.name: Pattern011
+ * @tc.desc: test InitMouseEvent, InitTextFieldMouseEvent, InitButtonMouseEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, Pattern011, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. get frameNode and pattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.step: step2. call GetOnHoverEventFunc()(false).
+     * @tc.expected: isHover_ is false.
+     */
+    pattern->hoverEvent_->GetOnHoverEventFunc()(false);
+    EXPECT_FALSE(pattern->isHover_);
+    MouseInfo mouseInfo;
+    pattern->mouseEvent_->GetOnMouseEventFunc()(mouseInfo);
+    pattern->textFieldHoverEvent_->GetOnHoverEventFunc()(false);
+    pattern->searchButtonMouseEvent_->GetOnHoverEventFunc()(false);
+}
+
+/**
+ * @tc.name: Pattern012
+ * @tc.desc: test OnTouchDown, OnTouchUp when isHover_ = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, Pattern012, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. get frameNode and pattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.step: step2. set isHover_ = false and call OnTouchDown, OnTouchUp.
+     */
+    pattern->isHover_ = false;
+    pattern->OnTouchDown();
+    pattern->OnTouchUp();
+}
+
+/**
+ * @tc.name: Pattern013
+ * @tc.desc: test HandleTextFieldHoverEvent, InitFocusEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, Pattern013, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. get frameNode and pattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    /**
+     * @tc.step: step2. call HandleTextFieldHoverEvent().
+     */
+    pattern->isHover_ = false;
+    pattern->HandleTextFieldHoverEvent(false);
+    pattern->isHover_ = true;
+    pattern->HandleTextFieldHoverEvent(false);
+    /**
+     * @tc.step: step3. call onFocusInternal_().
+     */
+    focusHub->onFocusInternal_();
+    /**
+     * @tc.step: step4. call onBlurInternal_().
+     * @tc.expected: selectionMode_ = SelectionMode::NONE.
+     */
+    focusHub->onBlurInternal_();
+    EXPECT_EQ(textFieldPattern->selectionMode_, SelectionMode::NONE);
+    GestureEvent gestureEvent;
+    pattern->clickListener_->GetGestureEventFunc()(gestureEvent);
+}
 } // namespace OHOS::Ace::NG

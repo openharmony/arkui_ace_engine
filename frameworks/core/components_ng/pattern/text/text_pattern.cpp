@@ -45,20 +45,26 @@ namespace OHOS::Ace::NG {
 void TextPattern::OnDetachFromFrameNode(FrameNode* node)
 {
     CloseSelectOverlay();
+    ResetSelection();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     if (HasSurfaceChangedCallback()) {
         LOGD("Unregister surface change callback with id %{public}d", surfaceChangedCallbackId_.value_or(-1));
         pipeline->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
     }
+    ResetSelection();
 }
 
 void TextPattern::CloseSelectOverlay()
 {
-    textSelector_.Update(-1, -1);
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         selectOverlayProxy_->Close();
     }
+}
+
+void TextPattern::ResetSelection()
+{
+    textSelector_.Update(-1, -1);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -352,12 +358,14 @@ void TextPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
 void TextPattern::OnHandleTouchUp()
 {
     CloseSelectOverlay();
+    ResetSelection();
 }
 
 void TextPattern::HandleClickEvent(GestureEvent& info)
 {
     if (textSelector_.IsValid()) {
         CloseSelectOverlay();
+        ResetSelection();
     }
 
     RectF textContentRect = contentRect_;
@@ -569,6 +577,7 @@ DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, const
 
     AceEngineExt::GetInstance().DragStartExt();
 
+    ResetSelection();
     return itemInfo;
 }
 
@@ -828,6 +837,7 @@ void TextPattern::OnVisibleChange(bool isVisible)
     if (!isVisible) {
         if (textSelector_.IsValid()) {
             CloseSelectOverlay();
+            ResetSelection();
         }
     }
 }
@@ -984,6 +994,7 @@ void TextPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(textLayoutProperty);
         if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None) {
             pattern->CloseSelectOverlay();
+            pattern->ResetSelection();
         }
     });
 
@@ -995,6 +1006,7 @@ void TextPattern::SetAccessibilityAction()
         if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None) {
             pattern->HandleOnCopy();
             pattern->CloseSelectOverlay();
+            pattern->ResetSelection();
         }
     });
 }

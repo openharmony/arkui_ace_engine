@@ -20,12 +20,10 @@
 #include <memory>
 #include <string>
 
-#ifndef ACE_EXPORT
-#define ACE_EXPORT __attribute__((visibility("default")))
-#endif
+#include "macros.h"
 
 namespace OHOS::Ace {
-class ACE_EXPORT SerializeableObject {
+class ACE_EXPORT_WITH_PREVIEW SerializeableObject {
 public:
     SerializeableObject() = default;
     virtual ~SerializeableObject() = default;

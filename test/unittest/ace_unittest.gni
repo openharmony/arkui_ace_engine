@@ -29,6 +29,7 @@ accessibility_test_output_path = "ace_engine/accessibility"
 property_test_output_path = "ace_engine/property"
 layout_test_output_path = "ace_engine/layout"
 svg_test_output_path = "ace_engine/svg"
+render_test_output_path = "ace_engine/render"
 
 template("ace_unittest") {
   forward_variables_from(invoker, "*")
