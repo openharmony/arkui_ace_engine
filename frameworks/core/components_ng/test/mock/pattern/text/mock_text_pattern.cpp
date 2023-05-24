@@ -67,5 +67,6 @@ bool TextPattern::BetweenSelectedPosition(const Offset& globalOffset)
     return {};
 }
 
+void TextPattern::InitSurfaceChangedCallback() {}
 void TextPattern::OnAttachToFrameNode() {}
 } // namespace OHOS::Ace::NG
