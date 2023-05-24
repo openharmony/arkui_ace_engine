@@ -257,8 +257,13 @@ void JSGrid::SetCachedCount(int32_t cachedCount)
     GridModel::GetInstance()->SetCachedCount(cachedCount);
 }
 
-void JSGrid::SetEditMode(bool editMode)
+void JSGrid::SetEditMode(const JSCallbackInfo& info)
 {
+    // undefined means false to EditMode
+    bool editMode = false;
+    if (!info[0]->IsUndefined() && info[0]->IsBoolean()) {
+        ParseJsBool(info[0], editMode);
+    }
     GridModel::GetInstance()->SetEditable(editMode);
 }
 
