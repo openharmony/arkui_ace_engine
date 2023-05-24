@@ -26,9 +26,6 @@
 using namespace testing;
 using namespace testing::ext;
 
-
-
-
 namespace OHOS::Ace::NG {
 
 namespace {
