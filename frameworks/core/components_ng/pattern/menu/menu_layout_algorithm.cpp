@@ -18,6 +18,7 @@
 #include <optional>
 #include <vector>
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -35,11 +36,11 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-constexpr uint32_t MIN_GRID_COUNTS = 2;
 constexpr uint32_t GRID_COUNTS_4 = 4;
 constexpr uint32_t GRID_COUNTS_6 = 6;
 constexpr uint32_t GRID_COUNTS_8 = 8;
 constexpr uint32_t GRID_COUNTS_12 = 12;
+constexpr Dimension MIN_MENU_WIDTH = Dimension(64.0, DimensionUnit::VP);
 
 uint32_t GetMaxGridCounts(const RefPtr<GridColumnInfo>& columnInfo)
 {
@@ -462,7 +463,7 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
     constraint.maxSize.SetWidth(maxWidth);
     constraint.percentReference.SetWidth(maxWidth);
     // set min width
-    auto minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
+    auto minWidth = static_cast<float>(MIN_MENU_WIDTH.ConvertToPx());
     auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
     if (minWidth > constraint.maxSize.Width()) {
         minWidth = constraint.maxSize.Width();
