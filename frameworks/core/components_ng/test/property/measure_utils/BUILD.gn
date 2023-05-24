@@ -22,7 +22,6 @@ ohos_unittest("measure_utils_test_ng") {
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
 
     # components_ng
-    "$ace_root/frameworks/core/components_ng/property/border_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",
     "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",
 

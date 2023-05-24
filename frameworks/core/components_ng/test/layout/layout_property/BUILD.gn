@@ -56,7 +56,6 @@ ohos_unittest("layout_property_test_ng") {
     "$ace_root/frameworks/core/components_ng/gestures/recognizers/recognizer_group.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_builder.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
-    "$ace_root/frameworks/core/components_ng/property/border_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/property.cpp",
     "$ace_root/frameworks/core/components_ng/syntax/for_each_node.cpp",
 

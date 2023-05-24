@@ -57,7 +57,6 @@ common_sources = [
 
   # components_ng_property
   "$ace_root/frameworks/core/components_ng/property/accessibility_property.cpp",
-  "$ace_root/frameworks/core/components_ng/property/border_property.cpp",
   "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",
   "$ace_root/frameworks/core/components_ng/property/grid_property.cpp",
   "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",
