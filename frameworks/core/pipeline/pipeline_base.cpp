@@ -502,10 +502,18 @@ void PipelineBase::OpenImplicitAnimation(
             return;
         }
         context->GetTaskExecutor()->PostTask(
-            [finishCallback]() {
-                if (finishCallback) {
+            [finishCallback, weak]() {
+                auto context = weak.Upgrade();
+                CHECK_NULL_VOID(context);
+                CHECK_NULL_VOID(finishCallback);
+                if (context->IsFormRender()) {
+                    context->SetEnableImplicitAnimation(true);
                     finishCallback();
+                    context->FlushBuild();
+                    context->SetEnableImplicitAnimation(false);
+                    return;
                 }
+                finishCallback();
             },
             TaskExecutor::TaskType::UI);
     };
