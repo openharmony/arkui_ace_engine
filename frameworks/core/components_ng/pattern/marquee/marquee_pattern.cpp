@@ -28,6 +28,7 @@
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_property.h"
+#include "core/components_ng/pattern/marquee/marquee_paint_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/calc_length.h"
@@ -39,7 +40,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double DEFAULT_MARQUEE_SCROLL_DELAY = 85.0; // Delay time between each jump.
-constexpr Dimension DEFAULT_MARQUEE_SCROLL_AMOUNT = 6.0_vp;
 inline constexpr int32_t DEFAULT_MARQUEE_LOOP = -1;
 } // namespace
 
@@ -53,11 +53,14 @@ void MarqueePattern::OnAttachToFrameNode()
 bool MarqueePattern::OnDirtyLayoutWrapperSwap(
     const RefPtr<LayoutWrapper>& /* dirty */, const DirtySwapConfig& /* config */)
 {
-    if (forceStropAnimation_) {
-        forceStropAnimation_ = false;
-        auto statusChanged = statusChanged_;
-        statusChanged_ = false;
-        StopMarqueeAnimation(lastStartStatus_, statusChanged);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (measureChanged_) {
+        measureChanged_ = false;
+        auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
+        CHECK_NULL_RETURN(paintProperty, false);
+        auto playStatus = paintProperty->GetPlayerStatus().value_or(false);
+        StopMarqueeAnimation(playStatus);
     }
     return false;
 }
@@ -91,15 +94,19 @@ void MarqueePattern::OnModifyDone()
     textLayoutProperty->UpdateTextColor(layoutProperty->GetFontColor().value_or(theme->GetTextStyle().GetTextColor()));
     textChild->MarkModifyDone();
     textChild->MarkDirtyNode();
-    if (CheckMeasureFlag(layoutProperty->GetPropertyChangeFlag())) {
-        forceStropAnimation_ = true;
-        host->MarkDirtyNode();
+    if (CheckMeasureFlag(layoutProperty->GetPropertyChangeFlag()) ||
+        CheckLayoutFlag(layoutProperty->GetPropertyChangeFlag())) {
+        measureChanged_ = true;
+    } else if (OnlyPlayStatusChange()) {
+        ChangeAnimationPlayStatus();
+    } else {
+        auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        auto playStatus = paintProperty->GetPlayerStatus().value_or(false);
+        StopMarqueeAnimation(playStatus);
     }
-    auto startPlay = layoutProperty->GetPlayerStatus().value_or(false);
-    if (startPlay != lastStartStatus_) {
-        lastStartStatus_ = startPlay;
-        statusChanged_ = true;
-    }
+    StoreProperties();
+    host->MarkDirtyNode();
     RegistVisibleAreaChangeCallback();
 }
 
@@ -107,13 +114,6 @@ void MarqueePattern::StartMarqueeAnimation()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto layoutProperty = host->GetLayoutProperty<MarqueeLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    repeatCount_ = layoutProperty->GetLoop().value_or(DEFAULT_MARQUEE_LOOP);
-    if (repeatCount_ == 0) {
-        lastStartStatus_ = false;
-        return;
-    }
     auto geoNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geoNode);
     auto marqueeSize = geoNode->GetFrameSize();
@@ -123,14 +123,17 @@ void MarqueePattern::StartMarqueeAnimation()
     CHECK_NULL_VOID(textGeoNode);
     auto textWidth = textGeoNode->GetFrameSize().Width();
     if (GreatOrEqual(marqueeSize.Width(), textWidth)) {
-        lastStartStatus_ = false;
         return;
     }
     FireStartEvent();
-    auto step = layoutProperty->GetScrollAmount().value_or(DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx());
-    auto direction = layoutProperty->GetDirection().value_or(MarqueeDirection::LEFT);
+    auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto step = paintProperty->GetScrollAmount().value_or(DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx());
+    auto direction = paintProperty->GetDirection().value_or(MarqueeDirection::LEFT);
     auto end = -1 * textWidth;
     if (direction == MarqueeDirection::RIGHT) {
+        auto layoutProperty = host->GetLayoutProperty<MarqueeLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
         const auto& padding = layoutProperty->CreatePaddingAndBorder();
         MinusPaddingToSize(padding, marqueeSize);
         end = marqueeSize.Width() >= textWidth ? marqueeSize.Width() : textWidth;
@@ -139,13 +142,14 @@ void MarqueePattern::StartMarqueeAnimation()
     if (GreatNotEqual(step, 0.0)) {
         duration = static_cast<int32_t>(duration / step);
     }
+    auto repeatCount = paintProperty->GetLoop().value_or(DEFAULT_MARQUEE_LOOP);
     AnimationOption option;
     option.SetCurve(Curves::LINEAR);
     option.SetDuration(duration);
-    option.SetIteration(repeatCount_);
+    option.SetIteration(repeatCount);
     SetTextOffset(0.0f);
     animationId_++;
-    AnimationUtils::Animate(
+    animation_ = AnimationUtils::StartAnimation(
         option,
         [weak = AceType::WeakClaim(this), end]() {
             auto pattern = weak.Upgrade();
@@ -158,7 +162,6 @@ void MarqueePattern::StartMarqueeAnimation()
             if (animationId == pattern->animationId_) {
                 pattern->FireFinishEvent();
                 pattern->SetTextOffset(0.0f);
-                pattern->lastStartStatus_ = false;
             }
         },
         [weak = AceType::WeakClaim(this)]() {
@@ -168,11 +171,9 @@ void MarqueePattern::StartMarqueeAnimation()
         });
 }
 
-void MarqueePattern::StopMarqueeAnimation(bool stopAndStart, bool statusChanged)
+void MarqueePattern::StopMarqueeAnimation(bool stopAndStart)
 {
-    if (!statusChanged & !lastStartStatus_) {
-        return;
-    }
+    animation_ = nullptr;
     AnimationOption option;
     option.SetCurve(Curves::LINEAR);
     option.SetDuration(0);
@@ -186,11 +187,8 @@ void MarqueePattern::StopMarqueeAnimation(bool stopAndStart, bool statusChanged)
         [weak = AceType::WeakClaim(this), restart = stopAndStart]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->FireFinishEvent();
             if (restart) {
                 pattern->StartMarqueeAnimation();
-            } else {
-                pattern->lastStartStatus_ = false;
             }
         });
 }
@@ -249,29 +247,61 @@ void MarqueePattern::OnVisibleAreaChange(bool visible)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(animation_);
     if (visible) {
-        CHECK_NULL_VOID(textNode_);
-        auto childNode = DynamicCast<FrameNode>(host->GetFirstChild());
-        if (!childNode) {
-            host->AddChild(textNode_);
-            host->RebuildRenderContextTree();
-        }
+        AnimationUtils::ResumeAnimation(animation_);
     } else {
-        auto layoutProperty = host->GetLayoutProperty<MarqueeLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        auto repeatCount = layoutProperty->GetLoop().value_or(DEFAULT_MARQUEE_LOOP);
-        if (repeatCount >= 0) {
-            return;
-        }
-        auto childNode = DynamicCast<FrameNode>(host->GetFirstChild());
-        CHECK_NULL_VOID(childNode);
-        bool isTextNode = AceType::InstanceOf<TextPattern>(childNode->GetPattern());
-        if (!isTextNode) {
-            return;
-        }
-        textNode_ = childNode;
-        host->RemoveChild(childNode);
-        host->RebuildRenderContextTree();
+        AnimationUtils::PauseAnimation(animation_);
     }
+}
+
+bool MarqueePattern::OnlyPlayStatusChange()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto playStatus = paintProperty->GetPlayerStatus().value_or(false);
+    auto scrollAmount = paintProperty->GetScrollAmount().value_or(DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx());
+    auto loop = paintProperty->GetLoop().value_or(DEFAULT_MARQUEE_LOOP);
+    auto direction = paintProperty->GetDirection().value_or(MarqueeDirection::LEFT);
+    if (!NearEqual(scrollAmount_, scrollAmount) || loop_ != loop || direction_ != direction) {
+        return false;
+    }
+    if (playStatus_ != playStatus) {
+        return true;
+    }
+    return false;
+}
+
+void MarqueePattern::ChangeAnimationPlayStatus()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto playStatus = paintProperty->GetPlayerStatus().value_or(false);
+    if (playStatus) {
+        if (!animation_) {
+            StartMarqueeAnimation();
+            return;
+        }
+        AnimationUtils::ResumeAnimation(animation_);
+    } else {
+        CHECK_NULL_VOID(animation_);
+        AnimationUtils::PauseAnimation(animation_);
+    }
+}
+
+void MarqueePattern::StoreProperties()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    playStatus_ = paintProperty->GetPlayerStatus().value_or(false);
+    scrollAmount_ = paintProperty->GetScrollAmount().value_or(DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx());
+    loop_ = paintProperty->GetLoop().value_or(DEFAULT_MARQUEE_LOOP);
+    direction_ = paintProperty->GetDirection().value_or(MarqueeDirection::LEFT);
 }
 } // namespace OHOS::Ace::NG
