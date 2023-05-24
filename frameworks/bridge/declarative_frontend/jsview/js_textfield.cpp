@@ -96,15 +96,18 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
             placeholderSrc = placeholder;
         }
         std::string text;
-        if (paramObject->GetProperty("text")->IsObject()) {
-            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(paramObject->GetProperty("text"));
+        JSRef<JSVal> textValue = paramObject->GetProperty("text");
+        if (textValue->IsObject()) {
+            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(textValue);
             changeEventVal = valueObj->GetProperty("changeEvent");
-            auto valueProperty = valueObj->GetProperty("value");
-            if (ParseJsString(valueProperty, text)) {
+            if (changeEventVal->IsFunction()) {
+                textValue = valueObj->GetProperty("value");
+            }
+            if (ParseJsString(textValue, text)) {
                 value = text;
             }
         } else {
-            if (ParseJsString(paramObject->GetProperty("text"), text)) {
+            if (ParseJsString(textValue, text)) {
                 value = text;
             }
         }
@@ -130,7 +133,7 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
     std::optional<std::string> placeholderSrc;
     std::optional<std::string> value;
     JSTextAreaController* jsController = nullptr;
-    JSRef<JSVal> changeEventVal;
+    JSRef<JSVal> changeEventVal = JSRef<JSVal>::Make();
     if (info[0]->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
         std::string placeholder;
@@ -138,15 +141,18 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
             placeholderSrc = placeholder;
         }
         std::string text;
-        if (paramObject->GetProperty("text")->IsObject()) {
-            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(paramObject->GetProperty("text"));
+        JSRef<JSVal> textValue = paramObject->GetProperty("text");
+        if (textValue->IsObject()) {
+            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(textValue);
             changeEventVal = valueObj->GetProperty("changeEvent");
-            auto valueProperty = valueObj->GetProperty("value");
-            if (ParseJsString(valueProperty, text)) {
+            if (changeEventVal->IsFunction()) {
+                textValue = valueObj->GetProperty("value");
+            }
+            if (ParseJsString(textValue, text)) {
                 value = text;
             }
         } else {
-            if (ParseJsString(paramObject->GetProperty("text"), text)) {
+            if (ParseJsString(textValue, text)) {
                 value = text;
             }
         }
