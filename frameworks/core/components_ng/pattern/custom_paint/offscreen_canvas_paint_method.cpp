@@ -145,6 +145,10 @@ void OffscreenCanvasPaintMethod::DrawImage(
         path.addRect(skRect);
         RosenDecorationPainter::PaintShadow(path, *imageShadow_, skCanvas);
     }
+
+    if (globalState_.HasGlobalAlpha()) {
+        imagePaint_.setAlphaf(globalState_.GetAlpha());
+    }
     switch (canvasImage.flag) {
         case 0:
             skCanvas->drawImage(image, canvasImage.dx, canvasImage.dy);
