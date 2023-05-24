@@ -78,7 +78,8 @@ private:
     LayoutConstraintF CreateChildConstraint(float mainSize, float crossSize,
         const RefPtr<GridLayoutProperty>& gridLayoutProperty, int32_t crossStart, int32_t crossSpan) const;
     void ModifyCurrentOffsetWhenReachEnd(float mainSize);
-    void InitialItemsCrossSize(const RefPtr<GridLayoutProperty>& layoutProperty, const SizeF& frameSize);
+    void InitialItemsCrossSize(
+        const RefPtr<GridLayoutProperty>& layoutProperty, const SizeF& frameSize, int32_t childrenCount);
     bool IsIndexInMatrix(int32_t index, int32_t& startLine);
     void UpdateGridLayoutInfo(LayoutWrapper* layoutWrapper, float mainSize);
     void GetTargetIndexInfoWithBenchMark(LayoutWrapper* layoutWrapper, bool isTargetBackward, int32_t targetIndex);
