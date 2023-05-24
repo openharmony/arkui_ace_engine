@@ -5207,7 +5207,7 @@ void JSViewAbstract::SetPaddingRight(const JSCallbackInfo& info)
 
 void JSViewAbstract::SetBlur(float radius)
 {
-    CalcDimension dimensionRadius(radius, DimensionUnit::PX);
+    CalcDimension dimensionRadius(radius, DimensionUnit::VP);
     ViewAbstractModel::GetInstance()->SetFrontBlur(dimensionRadius);
 }
 
@@ -5218,7 +5218,7 @@ void JSViewAbstract::SetColorBlend(Color color)
 
 void JSViewAbstract::SetBackdropBlur(float radius)
 {
-    CalcDimension dimensionRadius(radius, DimensionUnit::PX);
+    CalcDimension dimensionRadius(radius, DimensionUnit::VP);
     ViewAbstractModel::GetInstance()->SetBackdropBlur(dimensionRadius);
 }
 
