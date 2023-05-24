@@ -33,9 +33,6 @@
 #include "core/components_ng/base/view_abstract_model.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
-} // namespace
 
 RefPtr<FrameNode> TextPickerDialogView::Show(const DialogProperties& dialogProperties,
     const TextPickerSettingData& settingData,
@@ -74,10 +71,6 @@ RefPtr<FrameNode> TextPickerDialogView::RangeShow(const DialogProperties& dialog
         CalcSize(NG::CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), std::nullopt));
     pickerNodeLayout->UpdateCanLoop(settingData.canLoop);
     uint32_t showCount = pickerTheme->GetShowOptionCount();
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
-        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-        showCount = OPTION_COUNT_PHONE_LANDSCAPE;
-    }
     OptionsCreateNode(textPickerPattern, settingData, textPickerNode, showCount, 1, pickerTheme);
     SetDefaultPickerItemHeight(settingData.height);
     SetTextProperties(pickerTheme, settingData.properties);
