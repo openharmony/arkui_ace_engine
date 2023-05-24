@@ -465,6 +465,7 @@ std::shared_ptr<Media::PixelMap> ResourceAdapterImpl::GetPixelMap(uint32_t resId
         LOGE("Failed to Create drawableDescriptor by %{public}d", resId);
         return nullptr;
     }
+    CHECK_NULL_RETURN(drawableDescriptor, nullptr);
     return drawableDescriptor->GetPixelMap();
 }
 
