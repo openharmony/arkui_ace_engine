@@ -944,6 +944,9 @@ void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end)
 
 void TextFieldPattern::AdjustTextSelectionRectOffsetX()
 {
+    if (textBoxes_.empty()) {
+        return;
+    }
     auto contentLeftBoundary = contentRect_.GetX();
     auto contentRightBoundary = contentRect_.GetX() + contentRect_.GetSize().Width() - unitWidth_;
     auto selectionStart = textBoxes_.begin()->rect_.GetLeft() + textRect_.GetX();
@@ -3545,9 +3548,8 @@ void TextFieldPattern::SetTextSelection(int32_t selectionStart, int32_t selectio
 {
     selectionStart = selectionStart < 0 ? 0 : selectionStart;
     selectionEnd = std::clamp(selectionEnd, 0, static_cast<int32_t>(textEditingValue_.GetWideText().length()));
-    if (selectionStart >= selectionEnd) {
-        LOGE("The start position is greater than or equal to the end position");
-        return;
+    if (selectionStart > selectionEnd) {
+        selectionStart = selectionEnd;
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -3565,7 +3567,14 @@ void TextFieldPattern::SetTextSelection(int32_t selectionStart, int32_t selectio
         }
         ContainerScope scope(client->GetInstanceId());
         client->HandleSetSelection(selectionStart, selectionEnd);
-        client->SetInSelectMode(SelectionMode::SELECT);
+        if (selectionStart == selectionEnd) {
+            client->SetInSelectMode(SelectionMode::NONE);
+            client->StartTwinkling();
+        } else {
+            client->SetInSelectMode(SelectionMode::SELECT);
+            client->StopTwinkling();
+        }
+        client->isUsingMouse_ = false;
         client->SetCaretUpdateType(CaretUpdateType::EVENT);
         client->CloseSelectOverlay();
         client->isSelectedAreaRedraw_ = !client->isSelectedAreaRedraw_;
@@ -3576,7 +3585,6 @@ void TextFieldPattern::SetTextSelection(int32_t selectionStart, int32_t selectio
             CHECK_NULL_VOID(eventHub);
             eventHub->FireOnEditChanged(true);
         }
-        client->StopTwinkling();
     };
     taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
 }
