@@ -550,8 +550,6 @@ void CustomPaintPattern::UpdateStrokePattern(const std::weak_ptr<Ace::Pattern>& 
 {
     auto task = [pattern](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.SetStrokePatternNG(pattern);
-        paintMethod.SetStrokeGradient(Ace::Gradient());
-        paintMethod.SetStrokeColor(Color());
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
@@ -563,8 +561,6 @@ void CustomPaintPattern::UpdateStrokeColor(const Color& color)
 {
     auto task = [color](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.SetStrokeColor(color);
-        paintMethod.SetStrokePattern(Ace::Pattern());
-        paintMethod.SetStrokeGradient(Ace::Gradient());
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
@@ -576,8 +572,6 @@ void CustomPaintPattern::UpdateStrokeGradient(const Ace::Gradient& grad)
 {
     auto task = [grad](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.SetStrokeGradient(grad);
-        paintMethod.SetStrokeColor(Color());
-        paintMethod.SetStrokePattern(Ace::Pattern());
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
