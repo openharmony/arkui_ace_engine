@@ -197,6 +197,10 @@ void CanvasPaintMethod::DrawImage(
         PaintShadow(path, *imageShadow_, skCanvas);
     }
 
+    if (globalState_.HasGlobalAlpha()) {
+        imagePaint_.setAlphaf(globalState_.GetAlpha());
+    }
+
     switch (canvasImage.flag) {
         case 0:
             skCanvas_->drawImage(image, canvasImage.dx, canvasImage.dy);
