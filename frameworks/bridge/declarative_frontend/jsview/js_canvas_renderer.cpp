@@ -769,9 +769,12 @@ void JSCanvasRenderer::JsSetStrokeStyle(const JSCallbackInfo& info)
         return;
     }
     if (info[0]->IsString()) {
-        std::string colorStr;
-        JSViewAbstract::ParseJsString(info[0], colorStr);
-        auto color = Color::FromString(colorStr);
+        static const char componentCanvasRenderer[] = "CanvasRenderer";
+        static const char propCanvasRendererStrokeStyle[] = "strokeStyle";
+        Color color;
+        if (!JSViewAbstract::CheckColor(info[0], color, componentCanvasRenderer, propCanvasRendererStrokeStyle)) {
+            return;
+        }
         if (Container::IsCurrentUseNewPipeline()) {
             if (isOffscreen_ && offscreenCanvasPattern_) {
                 offscreenCanvasPattern_->SetStrokeColor(color);

@@ -379,7 +379,9 @@ void CustomPaintPaintMethod::GetStrokePaint(SkPaint& paint, SkSamplingOptions& o
         { LineCapStyle::SQUARE, SkPaint::Cap::kSquare_Cap },
     };
     InitImagePaint(paint, options);
-    paint.setColor(strokeState_.GetColor().GetValue());
+    if (strokeState_.GetPaintStyle() == PaintStyle::Color) {
+        paint.setColor(strokeState_.GetColor().GetValue());
+    }
     paint.setStyle(SkPaint::Style::kStroke_Style);
     paint.setStrokeJoin(ConvertEnumToSkEnum(
         strokeState_.GetLineJoin(), skLineJoinTable, ArraySize(skLineJoinTable), SkPaint::Join::kMiter_Join));
@@ -571,6 +573,10 @@ void CustomPaintPaintMethod::StrokeRect(PaintWrapper* paintWrapper, const Rect& 
     GetStrokePaint(paint, options);
 #endif
     paint.setAntiAlias(antiAlias_);
+    if (strokeState_.GetPaintStyle() == PaintStyle::Color) {
+        paint.setColor(strokeState_.GetColor().GetValue());
+    }
+    paint.setStyle(SkPaint::Style::kStroke_Style);
     SkRect skRect = SkRect::MakeLTRB(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
         rect.Right() + offset.GetX(), offset.GetY() + rect.Bottom());
     if (HasShadow()) {
