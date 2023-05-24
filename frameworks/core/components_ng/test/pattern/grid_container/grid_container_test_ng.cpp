@@ -32,9 +32,7 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-
 namespace {
-
 constexpr float DEFAULT_WIDTH = 800.0f;
 constexpr int32_t DEFAULT_COLUMN_NUM = 8;
 constexpr float DEFAULT_COLUMN_WIDTH = 100.0f;
@@ -54,10 +52,9 @@ void MeasureLayout(RefPtr<LayoutWrapper>& container, RefPtr<LayoutWrapper>& text
 
     container->SwapDirtyLayoutWrapperOnMainThread();
 }
-
 } // namespace
 
-class GridContainerPatternTestNg : public testing::Test {
+class GridContainerTestNg : public testing::Test {
 public:
     RefPtr<LayoutWrapper> CreateGridContainerWithChild()
     {
@@ -98,7 +95,7 @@ private:
  * @tc.desc: Test default properties of grid-container.
  * @tc.type: FUNC
  */
-HWTEST_F(GridContainerPatternTestNg, DefaultProperty001, TestSize.Level1)
+HWTEST_F(GridContainerTestNg, DefaultProperty001, TestSize.Level1)
 {
     GridContainerInfo::Builder builder;
     GridContainerModelNG modelNG;
@@ -122,7 +119,7 @@ HWTEST_F(GridContainerPatternTestNg, DefaultProperty001, TestSize.Level1)
  * @tc.desc: Test GridContainer build width.
  * @tc.type: FUNC
  */
-HWTEST_F(GridContainerPatternTestNg, BuildContainer001, TestSize.Level1)
+HWTEST_F(GridContainerTestNg, BuildContainer001, TestSize.Level1)
 {
     auto layoutWrapper = CreateGridContainerWithChild();
     auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
@@ -144,5 +141,4 @@ HWTEST_F(GridContainerPatternTestNg, BuildContainer001, TestSize.Level1)
     EXPECT_EQ(rect.Width(), DEFAULT_COLUMN_WIDTH);
     EXPECT_EQ(rect.GetX(), DEFAULT_COLUMN_WIDTH);
 }
-
 } // namespace OHOS::Ace::NG
