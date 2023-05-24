@@ -800,7 +800,7 @@ HWTEST_F(BubblePatternTestNg, BubblePaintMethod001, TestSize.Level1)
     EXPECT_CALL(canvas, Translate(_, _)).Times(AtLeast(1));
     EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
     EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(AtLeast(1));
-    EXPECT_CALL(canvas, ClipRoundRect(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, ClipRoundRectImpl(_, _, _)).Times(AtLeast(1));
 
     /**
      * @tc.steps: step2. Create the GeometryNode and PaintWrapper.Set the progressPaintProperty.
