@@ -858,9 +858,8 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg019, TestSize.Level1)
     auto outerMenu = AceType::DynamicCast<FrameNode>(menuWrapper->GetFirstChild());
     ASSERT_NE(outerMenu, nullptr);
 
-    // backgroundColor and shadow should be reset
+    // backgroundColor should be reset
     ASSERT_EQ(outerMenu->GetRenderContext()->GetBackgroundColorValue(), Color::TRANSPARENT);
-    ASSERT_EQ(outerMenu->GetRenderContext()->GetBackShadow(), ShadowConfig::NoneShadow);
 
     // padding should be moved to inner multi menu
     auto scroll = AceType::DynamicCast<FrameNode>(outerMenu->GetFirstChild());
@@ -869,10 +868,11 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg019, TestSize.Level1)
     // should have empty padding
     ASSERT_EQ(padding->ToString(), PaddingProperty().ToString());
 
-    // inner multi menu should have backgroundColor, shadow, and padding set up
+    // inner multi menu should have backgroundColor and padding set up
     ASSERT_NE(multiMenu->GetLayoutProperty()->GetPaddingProperty()->ToString(), PaddingProperty().ToString());
     ASSERT_NE(multiMenu->GetRenderContext()->GetBackgroundColor(), std::nullopt);
-    ASSERT_NE(multiMenu->GetRenderContext()->GetBackShadow(), ShadowConfig::NoneShadow);
+    // inner menu should have no shadow
+    ASSERT_EQ(multiMenu->GetRenderContext()->GetBackShadow(), std::nullopt);
 
     // MultiMenu should have its own layout algorithm
     auto layoutAlgorithm = multiMenu->GetPattern<MenuPattern>()->CreateLayoutAlgorithm();

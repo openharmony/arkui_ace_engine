@@ -411,7 +411,12 @@ void RatingPattern::HandleTouchDown(const Offset& localPosition)
 void RatingPattern::HandleClick(const GestureEvent& info)
 {
     CHECK_NULL_VOID_NOLOG(!IsIndicator());
-    RecalculatedRatingScoreBasedOnEventPoint(info.GetLocalLocation().GetX(), false);
+    auto eventPointX = info.GetLocalLocation().GetX();
+    if (Negative(eventPointX)) {
+        LOGW("eventPointX cannot be less than zero when handling click event");
+        return;
+    }
+    RecalculatedRatingScoreBasedOnEventPoint(eventPointX, false);
     FireChangeEvent();
 }
 

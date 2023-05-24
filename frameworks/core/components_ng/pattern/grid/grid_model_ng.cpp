@@ -57,9 +57,9 @@ void GridModelNG::Pop()
 
 void GridModelNG::SetColumnsTemplate(const std::string& value)
 {
-    if (!CheckTemplate(value)) {
+    if (value.empty()) {
         LOGE("Columns Template [%{public}s] is not valid.", value.c_str());
-        ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsTemplate, "");
+        ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsTemplate, "1fr");
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsTemplate, value);
@@ -67,9 +67,9 @@ void GridModelNG::SetColumnsTemplate(const std::string& value)
 
 void GridModelNG::SetRowsTemplate(const std::string& value)
 {
-    if (!CheckTemplate(value)) {
+    if (value.empty()) {
         LOGE("Rows Template [%{public}s] is not valid.", value.c_str());
-        ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, RowsTemplate, "");
+        ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, RowsTemplate, "1fr");
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, RowsTemplate, value);
@@ -252,14 +252,6 @@ void GridModelNG::AddDragFrameNodeToManager() const
     CHECK_NULL_VOID(frameNode);
 
     dragDropManager->AddGridDragFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
-}
-
-bool GridModelNG::CheckTemplate(const std::string& value)
-{
-    std::vector<std::string> strs;
-    StringUtils::StringSplitter(value, ' ', strs);
-    std::regex reg("\\d+fr");
-    return std::all_of(strs.begin(), strs.end(), [reg](const std::string& str) { return std::regex_match(str, reg); });
 }
 
 RefPtr<ScrollControllerBase> GridModelNG::CreatePositionController()
