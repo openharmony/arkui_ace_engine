@@ -2362,7 +2362,7 @@ void WebDelegate::InitWebViewWithSurface()
     rosenWindowId_ = window->GetWindowId();
     LOGI("Init WebView With Surface");
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this)]() {
+        [weak = WeakClaim(this), context = context_]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             OHOS::NWeb::NWebInitArgs initArgs;
@@ -2418,10 +2418,13 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->nweb_->SetNWebHandler(nweb_handler);
             delegate->nweb_->PutDownloadCallback(downloadListenerImpl);
 #ifdef OHOS_STANDARD_SYSTEM
-            delegate->nweb_->RegisterScreenLockFunction(delegate->GetRosenWindowId(), [weak](bool key) {
-                auto delegate = weak.Upgrade();
-                CHECK_NULL_VOID(delegate);
-                delegate->SetKeepScreenOn(key);
+            delegate->nweb_->RegisterScreenLockFunction(delegate->GetRosenWindowId(), [context](bool key) {
+                LOGD("SetKeepScreenOn %{public}d", key);
+                auto weakContext = context.Upgrade();
+                CHECK_NULL_VOID(weakContext);
+                auto window = weakContext->GetWindow();
+                CHECK_NULL_VOID(window);
+                window->SetKeepScreenOn(key);
             });
 #endif
             auto findListenerImpl = std::make_shared<FindListenerImpl>(Container::CurrentId());

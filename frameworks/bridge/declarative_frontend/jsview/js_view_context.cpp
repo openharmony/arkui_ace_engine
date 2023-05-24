@@ -216,6 +216,10 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     CHECK_NULL_VOID(container);
     auto pipelineContextBase = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContextBase);
+    if (!pipelineContextBase->GetEnableImplicitAnimation() && pipelineContextBase->IsFormRender()) {
+        LOGW("Form need enable implicit animation in finish callback.");
+        return;
+    }
     if (info[0]->IsNull() || !info[0]->IsObject()) {
         ViewContextModel::GetInstance()->closeAnimation(option, true);
         return;
@@ -269,6 +273,15 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
         return;
     }
 
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (!pipelineContext->GetEnableImplicitAnimation() && pipelineContext->IsFormRender()) {
+        LOGW("Form need enable implicit animation in finish callback.");
+        return;
+    }
+
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
     std::function<void()> onFinishEvent;
@@ -287,11 +300,6 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
         LOGE("Js Parse failed. animationArgs is null.");
         return;
     }
-
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
 
     AnimationOption option = CreateAnimation(animationArgs, pipelineContext->IsFormRender());
     if (SystemProperties::GetRosenBackendEnabled()) {
