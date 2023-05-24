@@ -334,7 +334,7 @@ void JSCanvasRenderer::JsStrokeText(const JSCallbackInfo& info)
         x = SystemProperties::Vp2Px(x);
         y = SystemProperties::Vp2Px(y);
         std::optional<double> maxWidth;
-        if (info.Length() >= 4 && info[3]->IsNumber()) {
+        if (info.Length() >= 4) {
             double width = 0.0;
             if (info[3]->IsUndefined()) {
                 width = FLT_MAX;
