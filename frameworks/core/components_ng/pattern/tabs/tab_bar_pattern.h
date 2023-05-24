@@ -299,6 +299,7 @@ private:
     void GetBottomTabBarImageSizeAndOffset(const std::vector<int32_t>& selectedIndexes,
         int32_t maskIndex, float& selectedImageSize, float& unselectedImageSize, OffsetF& originalSelectedMaskOffset,
         OffsetF& originalUnselectedMaskOffset);
+    bool CheckSvg(int32_t index);
 
     void HandleTouchDown(int32_t index);
     void HandleTouchUp(int32_t index);
