@@ -29,8 +29,6 @@ if (is_ohos_standard_system) {
 build_component_ng("window_scene") {
   sources = [
     "root/root_scene_model.cpp",
-    "scene/container/window_extension.cpp",
-    "scene/container/window_pattern.cpp",
     "scene/host/host_window_extension.cpp",
     "scene/host/host_window_node.cpp",
     "scene/host/host_window_pattern.cpp",
@@ -47,7 +45,6 @@ build_component_ng("window_scene") {
 
     external_deps = [
       "ability_runtime:abilitykit_native",
-      "ace_engine:ace_uicontent",
       "input:libmmi-client",
       "ipc:ipc_single",
       "window_manager:libdm",
