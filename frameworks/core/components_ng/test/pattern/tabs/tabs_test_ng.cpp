@@ -1136,7 +1136,6 @@ HWTEST_F(TabsTestNg, TabContentModelAddTabBarItem001, TestSize.Level1)
     auto tabContentFrameNode2 = AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(tabContentFrameNode2, nullptr);
     EXPECT_EQ(tabContentFrameNode2->GetTag(), V2::TAB_CONTENT_ITEM_ETS_TAG);
-    ;
     auto tabContentPattern2 = tabContentFrameNode2->GetPattern<TabContentPattern>();
     ASSERT_NE(tabContentPattern2, nullptr);
     tabContentFrameNode2->MountToParent(swiperNode);
@@ -2367,9 +2366,13 @@ HWTEST_F(TabsTestNg, TabsModelSetBarOverlap001, TestSize.Level1)
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
     auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
 
     auto layoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
+    auto barPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
+    ASSERT_NE(barPaintProperty, nullptr);
 
     /**
      * @tc.steps: steps2. SetBarOverlap true
@@ -2381,9 +2384,7 @@ HWTEST_F(TabsTestNg, TabsModelSetBarOverlap001, TestSize.Level1)
     tabsModel.SetBarOverlap(false);
     EXPECT_FALSE(layoutProperty->GetBarOverlap().value());
 
-    auto tabsRenderContext = tabsNode->GetRenderContext();
-    ASSERT_NE(tabsRenderContext, nullptr);
-    tabsRenderContext->UpdateBackgroundColor(Color::RED);
+    barPaintProperty->UpdateBarBackgroundColor(Color::RED);
 
     tabsModel.SetBarOverlap(true);
     EXPECT_TRUE(layoutProperty->GetBarOverlap().value());
@@ -3001,24 +3002,11 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmUpdateChildConstraint001, TestSize.Lev
     float height = 2.0;
     auto ideaSize = SizeF(width, height);
     int32_t childCount = 1;
-<<<<<<< Updated upstream
-    auto axis1 = Axis::HORIZONTAL;
-    auto axis2 = Axis::VERTICAL;
-=======
     auto axis = Axis::HORIZONTAL;
->>>>>>> Stashed changes
     tabBarLayoutAlgorithm->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
 
     /**
      * @tc.steps: step2. call UpdateChildConstraint function.
-<<<<<<< Updated upstream
-     * @tc.expected: step2. expect The function is run ok when TabBarMode changes.
-     */
-    for (int i = 0; i <= 1; i++) {
-        tabBarLayoutAlgorithm->UpdateChildConstraint(childConstraint, tabBarProperty, ideaSize, childCount, axis1);
-        tabBarLayoutAlgorithm->UpdateChildConstraint(childConstraint, tabBarProperty, ideaSize, childCount, axis2);
-        tabBarProperty->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-=======
      * @tc.expected: The function is run ok.
      */
     for (int i = 0; i <= 1; i++) {
@@ -3029,25 +3017,14 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmUpdateChildConstraint001, TestSize.Lev
                 axis = Axis::VERTICAL;
             }
             tabBarLayoutAlgorithm->tabBarStyle_ = TabBarStyle::BOTTOMTABBATSTYLE;
-            auto axis = Axis::HORIZONTAL;
+            axis = Axis::HORIZONTAL;
         }
         tabBarProperty->UpdateTabBarMode(TabBarMode::SCROLLABLE);
         tabBarLayoutAlgorithm->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
->>>>>>> Stashed changes
     }
 }
 
 /**
-<<<<<<< Updated upstream
- * @tc.name: TabBarLayoutAlgorithmUpdateChildConstraint002
- * @tc.desc: test UpdateChildConstraint
- * @tc.type: FUNC
- */
-HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmUpdateChildConstraint002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. build tabBarNode and ideaSize.
-=======
  * @tc.name: TabBarLayoutAlgorithmCalculateBackChildrenMainSize001
  * @tc.desc: test CalculateBackChildrenMainSize
  * @tc.type: FUNC
@@ -3056,97 +3033,11 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmCalculateBackChildrenMainSize001, Test
 {
     /**
      * @tc.steps: step1. call UpdateSelectedMask and UpdateUnselectedMask.
->>>>>>> Stashed changes
      */
     MockPipelineContextGetTheme();
     EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
     EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
-<<<<<<< Updated upstream
-    LayoutConstraintF childConstraint = LayoutConstraintF();
-    std::optional<int32_t> tabBarTestId_(1);
-    auto tabBarNode = GroupNode::GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarTestId_.value());
-    ASSERT_NE(tabBarNode, nullptr);
-    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-    ASSERT_NE(tabBarPattern, nullptr);
-    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern->CreateLayoutAlgorithm());
-    ASSERT_NE(tabBarLayoutAlgorithm, nullptr);
-    auto tabBarProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
-    ASSERT_NE(tabBarProperty, nullptr);
-
-    float width = 1.0;
-    float height = 2.0;
-    auto ideaSize = SizeF(width, height);
-    int32_t childCount = 1;
-    auto axis = Axis::HORIZONTAL;
-    tabBarLayoutAlgorithm->tabBarStyle_ = TabBarStyle::BOTTOMTABBATSTYLE;
-
-    /**
-     * @tc.steps: step2. call UpdateChildConstraint function.
-     * @tc.expected: step2. expect The function is run ok when tabBarStyle_ changes.
-     */
-    for (int i = 0; i <= 1; i++) {
-        tabBarLayoutAlgorithm->UpdateChildConstraint(childConstraint, tabBarProperty, ideaSize, childCount, axis);
-        tabBarProperty->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    }
-}
-
-/**
- * @tc.name: TabBarLayoutAlgorithmUpdateChildConstraint003
- * @tc.desc: test UpdateChildConstraint
- * @tc.type: FUNC
- */
-HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmUpdateChildConstraint003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. build tabBarNode and ideaSize.
-     */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
-    LayoutConstraintF childConstraint = LayoutConstraintF();
-    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    ASSERT_NE(tabsNode, nullptr);
-    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
-    ASSERT_NE(tabBarNode, nullptr);
-    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-    ASSERT_NE(tabBarPattern, nullptr);
-    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern->CreateLayoutAlgorithm());
-    ASSERT_NE(tabBarLayoutAlgorithm, nullptr);
-    auto tabBarProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
-    ASSERT_NE(tabBarProperty, nullptr);
-
-    float width = 1.0;
-    float height = 2.0;
-    auto ideaSize = SizeF(width, height);
-    int32_t childCount = 1;
-    auto axis = Axis::HORIZONTAL;
-    tabBarLayoutAlgorithm->tabBarStyle_ = TabBarStyle::BOTTOMTABBATSTYLE;
-
-    /**
-     * @tc.steps: step2. call UpdateChildConstraint function.
-     * @tc.expected: step2. expect The function is run ok when the fifth parameter changes.
-     */
-    tabBarLayoutAlgorithm->UpdateChildConstraint(childConstraint, tabBarProperty, ideaSize, childCount, axis);
-}
-
-/**
- * @tc.name: TabBarLayoutAlgorithmCalculateBackChildrenMainSize01
- * @tc.desc: test CalculateBackChildrenMainSize
- * @tc.type: FUNC
- */
-HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmCalculateBackChildrenMainSize01, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. call UpdateSelectedMask and UpdateUnselectedMask.
-     */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
-=======
->>>>>>> Stashed changes
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
     TabsItemDivider divider;
@@ -3157,24 +3048,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmCalculateBackChildrenMainSize01, TestS
     ASSERT_NE(tabBarNode, nullptr);
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     ASSERT_NE(tabBarPattern, nullptr);
-<<<<<<< Updated upstream
-
-    auto pattern = tabsNode->GetPattern<TabsPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern->CreateLayoutAlgorithm());
-    ASSERT_NE(tabBarLayoutAlgorithm, nullptr);
-    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
-    ASSERT_NE(tabBarLayoutProperty, nullptr);
-    tabBarLayoutProperty->UpdateSelectedMask(0);
-    tabBarLayoutProperty->UpdateUnselectedMask(1);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto layoutWrapper = LayoutWrapper(tabBarNode, geometryNode, tabBarLayoutProperty);
-    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabBarLayoutAlgorithm));
-
-    int32_t indicator1 = -2;
-    int32_t indicator2 = -1;
-    auto axis = Axis::HORIZONTAL;
-=======
     auto pattern = tabsNode->GetPattern<TabsPattern>();
     ASSERT_NE(pattern, nullptr);
     auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern->CreateLayoutAlgorithm());
@@ -3191,7 +3064,7 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmCalculateBackChildrenMainSize01, TestS
     auto axis = Axis::HORIZONTAL;
 
     /**
-     * @tc.steps: step2. build selectedMaskNode and unselectedMaskNode.
+     * @tc.steps: step2. build selectedMaskNode.
      */
     for (int i = 0; i <= 2; i++) {
         auto selectedmaskPosition = tabBarNode->GetChildren().size() - TEST_SELECTED_MASK_COUNT;
@@ -3231,21 +3104,22 @@ HWTEST_F(TabsTestNg, TabsModelSetBarBackgroundColor001, TestSize.Level1)
     ASSERT_NE(tabsNode, nullptr);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
     ASSERT_NE(tabBarNode, nullptr);
+
     auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
     ASSERT_NE(tabBarPaintProperty, nullptr);
->>>>>>> Stashed changes
 
     /**
-     * @tc.steps: step2. call CalculateBackChildrenMainSize function.
-     * @tc.expected: step2. expect The function is run ok.
+     * @tc.steps: steps2. SetBarBackgroundColor true
+     * @tc.expected: steps2. Check the BarBarBackgroundColor property value
      */
-    tabBarLayoutAlgorithm->CalculateBackChildrenMainSize(&layoutWrapper, indicator1, axis);
-    ASSERT_FLOAT_EQ(tabBarLayoutAlgorithm->CalculateBackChildrenMainSize(&layoutWrapper, indicator2, axis), 0.0f);
+    Color color = Color::RED;
+    tabsModel.SetBarBackgroundColor(color);
+    EXPECT_EQ(tabBarPaintProperty->GetBarBackgroundColor().value_or(Color::BLACK), color);
 }
 
 /**
  * @tc.name: PerformActionTest001
- * Action test ScrollForward and ScrollBackward.
+ * @tc.desc: TabBar Accessibility PerformAction test ScrollForward and ScrollBackward.
  * @tc.type: FUNC
  */
 HWTEST_F(TabsTestNg, PerformActionTest001, TestSize.Level1)
