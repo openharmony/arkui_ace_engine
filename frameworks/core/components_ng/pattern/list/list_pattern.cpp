@@ -40,7 +40,6 @@ constexpr double CHAIN_SPRING_DAMPING = 30.0;
 constexpr double CHAIN_SPRING_STIFFNESS = 228;
 constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
 constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
-constexpr Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
 constexpr float DEFAULT_MIN_SPACE_SCALE = 0.75f;
 constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
 } // namespace
@@ -82,6 +81,9 @@ void ListPattern::OnModifyDone()
     if (multiSelectable_ && !isMouseEventInit_) {
         InitMouseEvent();
     }
+    if (!multiSelectable_ && isMouseEventInit_) {
+        UninitMouseEvent();
+    }
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID_NOLOG(focusHub);
     InitOnKeyEvent(focusHub);
@@ -101,15 +103,18 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     itemPosition_ = listLayoutAlgorithm->GetItemPosition();
     maxListItemIndex_ = listLayoutAlgorithm->GetMaxListItemIndex();
     spaceWidth_ = listLayoutAlgorithm->GetSpaceWidth();
-    float absoluteOffset = 0.0f;
     float relativeOffset = listLayoutAlgorithm->GetCurrentOffset();
     if (jumpIndex_) {
-        absoluteOffset = listLayoutAlgorithm->GetEstimateOffset();
+        float absoluteOffset = listLayoutAlgorithm->GetEstimateOffset();
         relativeOffset += absoluteOffset - currentOffset_;
         isJump = true;
         jumpIndex_.reset();
     }
-    currentOffset_ = currentOffset_ + relativeOffset;
+    if (listLayoutAlgorithm->GetStartIndex() == 0) {
+        currentOffset_ = -listLayoutAlgorithm->GetStartPosition();
+    } else {
+        currentOffset_ = currentOffset_ + relativeOffset;
+    }
     if (isScrollEnd_) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
@@ -933,6 +938,17 @@ float ListPattern::GetChainDelta(int32_t index) const
     return chainAnimation_->GetValue(index);
 }
 
+void ListPattern::UninitMouseEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto mouseEventHub = host->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(mouseEventHub);
+    mouseEventHub->SetMouseEvent(nullptr);
+    ClearMultiSelect();
+    isMouseEventInit_ = false;
+}
+
 void ListPattern::InitMouseEvent()
 {
     auto host = GetHost();
@@ -950,22 +966,44 @@ void ListPattern::InitMouseEvent()
 
 void ListPattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
 {
+    if (info.GetButton() != MouseButton::LEFT_BUTTON) {
+        return;
+    }
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(manager);
+    if (manager->IsDragged()) {
+        return;
+    }
+
     auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
     auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
-    if (info.GetButton() == MouseButton::LEFT_BUTTON) {
-        if (info.GetAction() == MouseAction::PRESS) {
-            mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-            mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-            // do not select when click
-        } else if (info.GetAction() == MouseAction::MOVE) {
+    if (info.GetAction() == MouseAction::PRESS) {
+        ClearMultiSelect();
+        mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+        mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+        mousePressOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+        mousePressed_ = true;
+        // do not select when click
+    } else if (info.GetAction() == MouseAction::MOVE) {
+        if (!mousePressed_) {
+            return;
+        }
+        const static double FRAME_SELECTION_DISTANCE =
+            pipeline->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP));
+        auto delta = OffsetF(mouseOffsetX, mouseOffsetY) - mousePressOffset_;
+        if (Offset(delta.GetX(), delta.GetY()).GetDistance() > FRAME_SELECTION_DISTANCE) {
             mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
             auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
             MultiSelectWithoutKeyboard(selectedZone);
-        } else if (info.GetAction() == MouseAction::RELEASE) {
-            mouseStartOffset_.Reset();
-            mouseEndOffset_.Reset();
-            ClearSelectedZone();
         }
+    } else if (info.GetAction() == MouseAction::RELEASE) {
+        mouseStartOffset_.Reset();
+        mouseEndOffset_.Reset();
+        mousePressed_ = false;
+        ClearSelectedZone();
     }
 }
 
@@ -984,22 +1022,38 @@ void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
 
         auto itemGeometry = item->GetGeometryNode();
         CHECK_NULL_VOID(itemGeometry);
-        auto context = item->GetRenderContext();
-        CHECK_NULL_VOID(context);
 
         auto itemRect = itemGeometry->GetFrameRect();
         if (!selectedZone.IsIntersectWith(itemRect)) {
             itemPattern->MarkIsSelected(false);
-            context->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
         } else {
             itemPattern->MarkIsSelected(true);
-            context->OnMouseSelectUpdate(true, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
         }
     }
 
     auto hostContext = host->GetRenderContext();
     CHECK_NULL_VOID(hostContext);
     hostContext->UpdateMouseSelectWithRect(selectedZone, SELECT_FILL_COLOR, SELECT_STROKE_COLOR);
+}
+
+void ListPattern::ClearMultiSelect()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::list<RefPtr<FrameNode>> children;
+    host->GenerateOneDepthAllFrame(children);
+    for (const auto& item : children) {
+        if (!AceType::InstanceOf<FrameNode>(item)) {
+            continue;
+        }
+
+        auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
+        auto itemPattern = itemFrameNode->GetPattern<ListItemPattern>();
+        CHECK_NULL_VOID(itemPattern);
+        itemPattern->MarkIsSelected(false);
+    }
+
+    ClearSelectedZone();
 }
 
 void ListPattern::ClearSelectedZone()
