@@ -530,7 +530,9 @@ void CustomPaintPaintMethod::FillRect(PaintWrapper* paintWrapper, const Rect& re
     InitImagePaint(paint, options);
 #endif
     paint.setAntiAlias(antiAlias_);
-    paint.setColor(fillState_.GetColor().GetValue());
+    if (fillState_.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
+        paint.setColor(fillState_.GetColor().GetValue());
+    }
     paint.setStyle(SkPaint::Style::kFill_Style);
     SkRect skRect = SkRect::MakeLTRB(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
         rect.Right() + offset.GetX(), offset.GetY() + rect.Bottom());
@@ -662,7 +664,9 @@ void CustomPaintPaintMethod::Fill(PaintWrapper* paintWrapper)
     InitImagePaint(paint, options);
 #endif
     paint.setAntiAlias(antiAlias_);
-    paint.setColor(fillState_.GetColor().GetValue());
+    if (fillState_.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
+        paint.setColor(fillState_.GetColor().GetValue());
+    }
     paint.setStyle(SkPaint::Style::kFill_Style);
     if (HasShadow()) {
         PaintShadow(skPath_, shadow_, skCanvas_.get());
@@ -709,7 +713,9 @@ void CustomPaintPaintMethod::Path2DFill(const OffsetF& offset)
     InitImagePaint(paint, options);
 #endif
     paint.setAntiAlias(antiAlias_);
-    paint.setColor(fillState_.GetColor().GetValue());
+    if (fillState_.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
+        paint.setColor(fillState_.GetColor().GetValue());
+    }
     paint.setStyle(SkPaint::Style::kFill_Style);
     if (HasShadow()) {
         PaintShadow(skPath2d_, shadow_, skCanvas_.get());
