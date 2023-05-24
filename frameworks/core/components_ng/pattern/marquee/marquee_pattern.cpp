@@ -258,9 +258,9 @@ void MarqueePattern::OnVisibleAreaChange(bool visible)
 bool MarqueePattern::OnlyPlayStatusChange()
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_RETURN(host, false);
     auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
+    CHECK_NULL_RETURN(paintProperty, false);
     auto playStatus = paintProperty->GetPlayerStatus().value_or(false);
     auto scrollAmount = paintProperty->GetScrollAmount().value_or(DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx());
     auto loop = paintProperty->GetLoop().value_or(DEFAULT_MARQUEE_LOOP);
