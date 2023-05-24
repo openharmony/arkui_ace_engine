@@ -111,6 +111,7 @@ ohos_unittest("form_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_surface_creator.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/syntax/mock_for_each_node.cpp",
+    "$ace_root/frameworks/core/components_ng/test/pattern/form/mock/mock_rs_surface_mode.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
   ]
@@ -140,7 +141,6 @@ ohos_unittest("form_pattern_test_ng") {
       "form_fwk:fmskit_native",
       "form_fwk:form_manager",
       "input:libmmi-client",
-      "ipc:ipc_core",
     ]
   }
   configs = [
