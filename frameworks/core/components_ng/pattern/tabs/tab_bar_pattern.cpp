@@ -540,7 +540,7 @@ void TabBarPattern::HandleBottomTabBarChange(int32_t index)
     }
 }
 
-bool TabBarPattern::CheckSvg(int32_t index)
+bool TabBarPattern::CheckSvg(int32_t index) const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
