@@ -978,7 +978,7 @@ private:
     OnRouterChangeCallback onRouterChangeCallback_ = nullptr;
     PostRTTaskCallback postRTTaskCallback_;
     std::function<void(void)> gsVsyncCallback_;
-    bool enableImplicitAnimation_ = false;
+    bool enableImplicitAnimation_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

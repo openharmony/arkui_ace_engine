@@ -507,10 +507,10 @@ void PipelineBase::OpenImplicitAnimation(
                 CHECK_NULL_VOID(context);
                 CHECK_NULL_VOID(finishCallback);
                 if (context->IsFormRender()) {
-                    context->SetEnableImplicitAnimation(true);
+                    context->SetEnableImplicitAnimation(false);
                     finishCallback();
                     context->FlushBuild();
-                    context->SetEnableImplicitAnimation(false);
+                    context->SetEnableImplicitAnimation(true);
                     return;
                 }
                 finishCallback();

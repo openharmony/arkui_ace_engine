@@ -216,7 +216,7 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     CHECK_NULL_VOID(container);
     auto pipelineContextBase = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContextBase);
-    if (pipelineContextBase->GetEnableImplicitAnimation() && pipelineContextBase->IsFormRender()) {
+    if (!pipelineContextBase->GetEnableImplicitAnimation() && pipelineContextBase->IsFormRender()) {
         LOGW("Form need enable implicit animation in finish callback.");
         return;
     }
@@ -277,7 +277,7 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (pipelineContext->GetEnableImplicitAnimation() && pipelineContext->IsFormRender()) {
+    if (!pipelineContext->GetEnableImplicitAnimation() && pipelineContext->IsFormRender()) {
         LOGW("Form need enable implicit animation in finish callback.");
         return;
     }
