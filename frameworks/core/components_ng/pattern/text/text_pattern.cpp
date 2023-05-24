@@ -59,7 +59,6 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
         LOGD("Unregister surface change callback with id %{public}d", surfaceChangedCallbackId_.value_or(-1));
         pipeline->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
     }
-    ResetSelection();
 }
 
 void TextPattern::CloseSelectOverlay()
