@@ -36,12 +36,6 @@ void TextModelNG::Create(const std::string& content)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, content);
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, TextAlign::START);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::CENTER_LEFT);
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    SetDraggable(theme->GetDraggable());
 }
 
 void TextModelNG::SetFontSize(const Dimension& value)

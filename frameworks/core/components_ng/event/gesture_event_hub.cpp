@@ -354,8 +354,11 @@ bool GestureEventHub::IsAllowedDrag(RefPtr<EventHub> eventHub)
 {
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_RETURN(pattern, false);
+
     if (frameNode->IsDraggable()) {
-        if (!eventHub->HasOnDragStart()) {
+        if (!eventHub->HasOnDragStart() && !pattern->DefaultSupportDrag()) {
             LOGE("Default support for drag and drop, but there is no onDragStart function.");
             return false;
         }
@@ -364,7 +367,7 @@ bool GestureEventHub::IsAllowedDrag(RefPtr<EventHub> eventHub)
             LOGE("User settings cannot be dragged");
             return false;
         }
-        if (!eventHub->HasOnDragStart()) {
+        if (!eventHub->HasOnDragStart() && !pattern->DefaultSupportDrag()) {
             LOGE("The default does not support drag and drop, and there is no onDragStart function.");
             return false;
         }

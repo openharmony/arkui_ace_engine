@@ -64,6 +64,11 @@ public:
         return MakeRefPtr<VideoAccessibilityProperty>();
     }
 
+    bool DefaultSupportDrag() override
+    {
+        return true;
+    }
+    
     void UpdateMuted(bool muted)
     {
         muted_ = muted;
