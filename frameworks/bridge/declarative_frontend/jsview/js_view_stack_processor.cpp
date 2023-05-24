@@ -24,6 +24,7 @@
 #include "core/components_ng/base/view_stack_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "frameworks/core/pipeline/base/element_register.h"
+#include "foundation/arkui/ace_engine/frameworks/core/common/ace_application_info.h"
 
 namespace OHOS::Ace {
 
@@ -88,6 +89,7 @@ void JSViewStackProcessor::JSBind(BindingTarget globalObj)
     JSClass<JSViewStackProcessor>::StaticMethod("visualState", JSVisualState, opt);
     JSClass<JSViewStackProcessor>::StaticMethod("MakeUniqueId", &JSViewStackProcessor::JSMakeUniqueId, opt);
     JSClass<JSViewStackProcessor>::StaticMethod("UsesNewPipeline", &JSViewStackProcessor::JsUsesNewPipeline, opt);
+    JSClass<JSViewStackProcessor>::StaticMethod("getApiVersion", &JSViewStackProcessor::JsGetApiVersion, opt);
     JSClass<JSViewStackProcessor>::Bind<>(globalObj);
 }
 
@@ -142,12 +144,21 @@ void JSViewStackProcessor::JSMakeUniqueId(const JSCallbackInfo& info)
     const auto result = ElementRegister::GetInstance()->MakeUniqueId();
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
 }
+
 /**
  * return true of current Container uses new Pipeline
  */
 bool JSViewStackProcessor::JsUsesNewPipeline()
 {
     return Container::IsCurrentUseNewPipeline();
+}
+
+/**
+ * return the API version specified in the manifest.json
+ */
+int32_t JSViewStackProcessor::JsGetApiVersion()
+{
+    return AceApplicationInfo::GetInstance().GetApiTargetVersion();
 }
 
 } // namespace OHOS::Ace::Framework
