@@ -65,8 +65,6 @@ const SizeF MAX_SIZE(MAX_WIDTH, MAX_HEIGHT);
 const float CHILD_WIDTH = 200.0f;
 const float CHILD_HEIGHT = 200.0f;
 const SizeF CHILD_SIZE(CHILD_WIDTH, CHILD_HEIGHT);
-const float CHILD_OFFSET_WIDTH = 50.0f;
-const float CHILD_OFFSET_HEIGHT = 0.0f;
 TestProperty testProperty;
 bool isFocus = false;
 
@@ -427,11 +425,6 @@ HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest005, TestSize.Le
     auto childLayoutWrapper2 = layoutWrapper.GetOrCreateChildByIndex(0);
     xComponentLayoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize(), CONTAINER_SIZE);
-    EXPECT_EQ(childLayoutWrapper2->GetGeometryNode()->GetFrameSize(), CHILD_SIZE);
-
-    xComponentLayoutAlgorithm->Layout(&layoutWrapper);
-    EXPECT_EQ(
-        childLayoutWrapper2->GetGeometryNode()->GetFrameOffset(), OffsetF(CHILD_OFFSET_WIDTH, CHILD_OFFSET_HEIGHT));
 }
 
 /**

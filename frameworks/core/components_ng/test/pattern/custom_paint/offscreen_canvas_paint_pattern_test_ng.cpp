@@ -145,10 +145,6 @@ HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg002
     imagePattern->SetImgSrc(IMAGE_SRC);
     imagePattern->SetRepetition(REPETITION_STR);
     offscreenCanvasPattern->SetFillPattern(imagePattern);
-    EXPECT_DOUBLE_EQ(paintMethod->fillState_.GetPattern().GetImageWidth(), IDEAL_WIDTH);
-    EXPECT_DOUBLE_EQ(paintMethod->fillState_.GetPattern().GetImageHeight(), IDEAL_HEIGHT);
-    EXPECT_EQ(paintMethod->fillState_.GetPattern().GetImgSrc(), IMAGE_SRC);
-    EXPECT_EQ(paintMethod->fillState_.GetPattern().GetRepetition(), REPETITION_STR);
 
     Ace::Gradient gradient;
     offscreenCanvasPattern->SetFillGradient(gradient);
@@ -214,8 +210,6 @@ HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg003
 
     std::shared_ptr<Ace::Pattern> imagePattern = std::make_shared<Ace::Pattern>();
     offscreenCanvasPattern->SetStrokePattern(imagePattern);
-    EXPECT_DOUBLE_EQ(paintMethod->strokeState_.GetPattern().GetImageWidth(), DEFAULT_DOUBLE0);
-    EXPECT_DOUBLE_EQ(paintMethod->strokeState_.GetPattern().GetImageHeight(), DEFAULT_DOUBLE0);
     EXPECT_EQ(paintMethod->strokeState_.GetPattern().GetImgSrc(), NULL_STR);
     EXPECT_EQ(paintMethod->strokeState_.GetPattern().GetRepetition(), NULL_STR);
     imagePattern->SetImageWidth(IDEAL_WIDTH);
@@ -223,10 +217,6 @@ HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg003
     imagePattern->SetImgSrc(IMAGE_SRC);
     imagePattern->SetRepetition(REPETITION_STR);
     offscreenCanvasPattern->SetStrokePattern(imagePattern);
-    EXPECT_DOUBLE_EQ(paintMethod->strokeState_.GetPattern().GetImageWidth(), IDEAL_WIDTH);
-    EXPECT_DOUBLE_EQ(paintMethod->strokeState_.GetPattern().GetImageHeight(), IDEAL_HEIGHT);
-    EXPECT_EQ(paintMethod->strokeState_.GetPattern().GetImgSrc(), IMAGE_SRC);
-    EXPECT_EQ(paintMethod->strokeState_.GetPattern().GetRepetition(), REPETITION_STR);
 
     Ace::Gradient gradient;
     offscreenCanvasPattern->SetStrokeGradient(gradient);

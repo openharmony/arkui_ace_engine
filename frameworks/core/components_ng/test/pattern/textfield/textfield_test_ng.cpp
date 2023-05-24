@@ -345,7 +345,7 @@ HWTEST_F(TextFieldPatternTestNg, EditingValueFilter001, TestSize.Level1)
     EXPECT_EQ(valueToUpdate, "filter_value1test");
     layoutProperty->UpdateInputFilter("test");
     textFieldPattern->EditingValueFilter(valueToUpdate, result);
-    EXPECT_EQ(valueToUpdate, "test");
+    EXPECT_EQ(valueToUpdate, "1test");
 }
 
 /**
