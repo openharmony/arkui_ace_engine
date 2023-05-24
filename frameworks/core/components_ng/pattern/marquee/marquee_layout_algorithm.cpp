@@ -39,7 +39,6 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // measure child.
     LayoutConstraintF textLayoutConstraint;
     textLayoutConstraint.UpdateMaxSizeWithCheck(SizeF(Infinity<float>(), maxSize.Height()));
-    textLayoutConstraint.UpdateMinSizeWithCheck(minSize);
     child->Measure(textLayoutConstraint);
     // measure self.
     OptionalSizeF frameSize;
@@ -49,8 +48,9 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (frameSize.IsValid()) {
             break;
         }
+        frameSize.UpdateIllegalSizeWithCheck(layoutConstraint->parentIdealSize);
+        frameSize.UpdateIllegalSizeWithCheck(layoutConstraint->percentReference);
         if (measureType == MeasureType::MATCH_PARENT) {
-            frameSize.UpdateIllegalSizeWithCheck(layoutConstraint->parentIdealSize);
             if (frameSize.IsValid()) {
                 frameSize.Constrain(minSize, maxSize);
                 break;
@@ -60,7 +60,7 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             auto childFrame = child->GetGeometryNode()->GetMarginFrameSize();
             childFrame.Constrain(SizeF(Infinity<float>(), minSize.Height()), maxSize);
             AddPaddingToSize(padding, childFrame);
-            frameSize.UpdateIllegalSizeWithCheck(childFrame);
+            frameSize.Constrain(SizeF { 0.0f, 0.0f }, SizeF { Infinity<float>(), childFrame.Height() });
             break;
         }
         frameSize.UpdateIllegalSizeWithCheck(SizeF { 0.0f, 0.0f });
