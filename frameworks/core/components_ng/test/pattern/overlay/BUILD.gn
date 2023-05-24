@@ -48,6 +48,7 @@ ohos_unittest("overlay_manager_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/picker/datepicker_dialog_view.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/stage/stage_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_picker/textpicker_dialog_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_dialog_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/toast/toast_view.cpp",
@@ -68,13 +69,23 @@ ohos_unittest("overlay_manager_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/text/mock_text_pattern.cpp",
 
     # self
+    "$ace_root/frameworks/core/components_ng/pattern/overlay/modal_presentation_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/overlay_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/overlay/sheet_drag_bar_paint_method.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/overlay/sheet_drag_bar_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/overlay/sheet_presentation_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/overlay/sheet_view.cpp",
     "overlay_manager_test_ng.cpp",
   ]
 
   sources += [
     # base
     "$ace_root/frameworks/base/geometry/dimension.cpp",
+    "$ace_root/frameworks/base/geometry/least_square_impl.cpp",
+    "$ace_root/frameworks/base/geometry/matrix3.cpp",
+    "$ace_root/frameworks/base/geometry/matrix4.cpp",
+    "$ace_root/frameworks/base/geometry/quaternion.cpp",
+    "$ace_root/frameworks/base/geometry/transform_util.cpp",
     "$ace_root/frameworks/base/json/json_util.cpp",
     "$ace_root/frameworks/base/utils/base_id.cpp",
     "$ace_root/frameworks/base/utils/string_expression.cpp",
@@ -124,6 +135,7 @@ ohos_unittest("overlay_manager_test_ng") {
     "$ace_root/frameworks/core/components_ng/property/property.cpp",
     "$ace_root/frameworks/core/components_ng/render/drawing_prop_convertor.cpp",
     "$ace_root/frameworks/core/components_ng/render/paint_wrapper.cpp",
+    "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
 
     # components_v2
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",

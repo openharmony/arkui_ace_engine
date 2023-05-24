@@ -107,7 +107,6 @@ HWTEST_F(SwiperPatternTestNg, SwiperEvent001, TestSize.Level1)
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
     pattern->HandleTouchEvent(touchEventInfo);
     EXPECT_FALSE(pattern->indicatorDoingAnimation_);
-    const char* name = "HandleTouchDown";
     pattern->HandleTouchEvent(touchEventInfo);
     EXPECT_FALSE(pattern->indicatorDoingAnimation_);
 

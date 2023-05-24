@@ -42,6 +42,13 @@
 
 namespace OHOS::Ace::NG {
 
+void TextPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->SetClipToFrame(true);
+}
+
 void TextPattern::OnDetachFromFrameNode(FrameNode* node)
 {
     CloseSelectOverlay();
@@ -683,8 +690,6 @@ void TextPattern::OnModifyDone()
         paragraph_.Reset();
     }
 
-    bool shouldClipToContent = textLayoutProperty->GetTextOverflow().value_or(TextOverflow::CLIP) == TextOverflow::CLIP;
-    host->GetRenderContext()->SetClipToFrame(shouldClipToContent);
 
     std::string textCache = textForDisplay_;
     textForDisplay_ = textLayoutProperty->GetContent().value_or("");

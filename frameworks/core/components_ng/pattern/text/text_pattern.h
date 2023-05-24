@@ -79,6 +79,11 @@ public:
         return false;
     }
 
+    bool DefaultSupportDrag() override
+    {
+        return true;
+    }
+    
     void OnModifyDone() override;
 
     void BeforeCreateLayoutWrapper() override;
@@ -202,6 +207,7 @@ public:
 
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
+    void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void HandleLongPress(GestureEvent& info);
