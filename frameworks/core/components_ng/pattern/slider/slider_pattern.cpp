@@ -56,9 +56,9 @@ void SliderPattern::OnModifyDone()
     auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(sliderPaintProperty);
     showTips_ = sliderPaintProperty->GetShowTips().value_or(false);
-    value_ = sliderPaintProperty->GetValue().value_or(0.0f);
     float min = sliderPaintProperty->GetMin().value_or(0.0f);
     float max = sliderPaintProperty->GetMax().value_or(100.0f);
+    value_ = sliderPaintProperty->GetValue().value_or(min);
     float step = sliderPaintProperty->GetStep().value_or(1.0f);
     CancelExceptionValue(min, max, step);
     valueRatio_ = (value_ - min) / (max - min);
@@ -275,6 +275,7 @@ void SliderPattern::HandlingGestureEvent(const GestureEvent& info)
         UpdateValueByLocalLocation(info.GetLocalLocation());
         UpdateBubble();
     }
+    panMoveFlag_ = true;
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -284,6 +285,7 @@ void SliderPattern::HandledGestureEvent()
     if (bubbleFlag_) {
         bubbleFlag_ = false;
     }
+    panMoveFlag_ = false;
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -691,7 +693,10 @@ SliderContentModifier::Parameters SliderPattern::UpdateContentParameters()
     SliderContentModifier::Parameters parameters { trackThickness_, blockSize_, stepRatio_, hotBlockShadowWidth_,
         mouseHoverFlag_, mousePressedFlag_ };
     auto contentSize = GetHostContentSize();
-    auto contentOffset = GetHost()->GetGeometryNode()->GetContent()->GetRect().GetOffset();
+    CHECK_NULL_RETURN(contentSize, SliderContentModifier::Parameters());
+    const auto& content = GetHost()->GetGeometryNode()->GetContent();
+    CHECK_NULL_RETURN(content, SliderContentModifier::Parameters());
+    auto contentOffset = content->GetRect().GetOffset();
     // Distance between slide track and Content boundary
     auto centerWidth = direction_ == Axis::HORIZONTAL ? contentSize->Height() : contentSize->Width();
     centerWidth *= HALF;
@@ -866,5 +871,15 @@ void SliderPattern::SetAccessibilityAction()
         }
         pattern->PaintFocusState();
     });
+}
+
+void SliderPattern::UpdateValue(float value)
+{
+    if (panMoveFlag_) {
+        return;
+    }
+    auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(sliderPaintProperty);
+    sliderPaintProperty->UpdateValue(value);
 }
 } // namespace OHOS::Ace::NG

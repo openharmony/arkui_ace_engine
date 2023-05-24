@@ -552,9 +552,10 @@ void VideoPattern::OnUpdateTime(uint32_t time, int pos) const
     durationNode->MarkModifyDone();
     if (pos == CURRENT_POS) {
         auto sliderNode = DynamicCast<FrameNode>(controlBar->GetChildAtIndex(SLIDER_POS));
-        auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
-        CHECK_NULL_VOID(sliderPaintProperty);
-        sliderPaintProperty->UpdateValue(static_cast<float>(time));
+        CHECK_NULL_VOID(sliderNode);
+        auto sliderPattern = sliderNode->GetPattern<SliderPattern>();
+        CHECK_NULL_VOID(sliderPattern);
+        sliderPattern->UpdateValue(static_cast<float>(time));
         sliderNode->MarkModifyDone();
     }
 }
