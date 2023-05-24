@@ -1632,7 +1632,7 @@ bool CustomPaintPaintMethod::HasImageShadow() const
 std::optional<double> CustomPaintPaintMethod::CalcTextScale(double maxIntrinsicWidth, std::optional<double> maxWidth)
 {
     std::optional<double> scale;
-    if (NearEqual(maxIntrinsicWidth, 0) || !maxWidth.has_value()) {
+    if (NearZero(maxIntrinsicWidth) || !maxWidth.has_value()) {
         return scale;
     }
     if (Negative(maxWidth.value())) {
@@ -1648,7 +1648,7 @@ std::optional<double> CustomPaintPaintMethod::CalcTextScale(double maxIntrinsicW
 TransformParam CustomPaintPaintMethod::GetTransform() const
 {
     TransformParam param;
-    if (skCanvas_.get() != nullptr) {
+    if (skCanvas_ != nullptr) {
         SkMatrix matrix = skCanvas_->getTotalMatrix();
         param.scaleX = matrix.getScaleX();
         param.scaleY = matrix.getScaleY();

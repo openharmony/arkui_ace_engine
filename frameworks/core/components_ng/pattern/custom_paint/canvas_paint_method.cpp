@@ -484,7 +484,7 @@ void CanvasPaintMethod::PaintText(const OffsetF& offset, const SizeF& frameSize,
                 dx /= scale.value();
                 shadowOffsetX /= scale.value();
             }
-            skCanvas_->scale(scale.value(), 1);
+            skCanvas_->scale(scale.value(), 1.0);
         }
         paragraph_->Paint(skCanvas_.get(), dx + shadowOffsetX, dy + shadowOffsetY);
         skCanvas_->restore();
@@ -495,7 +495,7 @@ void CanvasPaintMethod::PaintText(const OffsetF& offset, const SizeF& frameSize,
             dx /= scale.value();
         }
         skCanvas_->save();
-        skCanvas_->scale(scale.value(), 1);
+        skCanvas_->scale(scale.value(), 1.0);
         paragraph_->Paint(skCanvas_.get(), dx, dy);
         skCanvas_->restore();
     } else {

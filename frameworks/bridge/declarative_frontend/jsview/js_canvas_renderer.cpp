@@ -288,7 +288,7 @@ void JSCanvasRenderer::JsFillText(const JSCallbackInfo& info)
         y = SystemProperties::Vp2Px(y);
         std::optional<double> maxWidth;
         if (info.Length() >= 4) {
-            double width = 0;
+            double width = 0.0;
             if (info[3]->IsUndefined()) {
                 width = FLT_MAX;
             } else if (info[3]->IsNumber()) {
@@ -335,7 +335,7 @@ void JSCanvasRenderer::JsStrokeText(const JSCallbackInfo& info)
         y = SystemProperties::Vp2Px(y);
         std::optional<double> maxWidth;
         if (info.Length() >= 4 && info[3]->IsNumber()) {
-            double width = 0;
+            double width = 0.0;
             if (info[3]->IsUndefined()) {
                 width = FLT_MAX;
             } else if (info[3]->IsNumber()) {
