@@ -63,7 +63,8 @@ void SwiperPattern::FromJson(const std::unique_ptr<JsonValue>& json)
     auto currentOffsetTimes = static_cast<float>(json->GetDouble("currentOffsetTimes"));
     if (currentOffsetTimes != currentOffsetTimes_) {
         LOGD("UITree currentOffsetTimes=%{public}f", currentOffsetTimes);
-        host->UpdateAnimatablePropertyFloat(PROPERTY_NAME, currentOffsetTimes);
+        currentOffsetTimes_ = currentOffsetTimes;
+        OnlyUpdateAnimatableProperty();
     }
     Pattern::FromJson(json);
 }
@@ -200,6 +201,7 @@ void SwiperPattern::OnModifyDone()
 
     targetIndex_ = currentIndex_;
     currentOffsetTimes_ = currentIndex_;
+    OnlyUpdateAnimatableProperty();
     CalculateItemRange();
     RegisterVisibleAreaChange();
     InitSwiperController();
@@ -1005,8 +1007,14 @@ void SwiperPattern::PlayTranslateAnimation(int32_t duration)
 void SwiperPattern::ForcedStopTranslateAnimation()
 {
     if (!AnimationUtils::IsRunning(animation_)) {
+        animation_ = nullptr;
         return;
     }
+    OnlyUpdateAnimatableProperty();
+}
+
+void SwiperPattern::OnlyUpdateAnimatableProperty()
+{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     std::string propertyName = PROPERTY_NAME;

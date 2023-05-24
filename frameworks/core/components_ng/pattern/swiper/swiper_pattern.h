@@ -383,6 +383,7 @@ private:
     bool CalculateItemRange();
     void PlayTranslateAnimation(int32_t duration);
     void ForcedStopTranslateAnimation();
+    void OnlyUpdateAnimatableProperty();
     void GoAutoPlay();
     void ForcedFinishAutoPlay();
     void HandleFinishAutoPlayAnimationEnds();
