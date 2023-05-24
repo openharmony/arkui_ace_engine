@@ -24,11 +24,11 @@
 #include "ui/rs_surface_node.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/window_scene/scene/host/host_window_extension.h"
-#include "core/components_ng/pattern/window_scene/scene/host/host_window_node.h"
-#include "core/components_ng/pattern/window_scene/scene/host/host_window_pattern.h"
-#include "core/components_ng/pattern/window_scene/scene/host/host_window_scene.h"
-#include "core/components_ng/pattern/window_scene/scene/host/host_window_scene_model.h"
+#include "core/components_ng/pattern/window_scene/scene/window_extension.h"
+#include "core/components_ng/pattern/window_scene/scene/window_node.h"
+#include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
+#include "core/components_ng/pattern/window_scene/scene/window_scene.h"
+#include "core/components_ng/pattern/window_scene/scene/window_scene_model.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #include "test/mock/core/common/mock_container.h"
@@ -62,12 +62,12 @@ HWTEST_F(WindowPatternTest, WindowPatternTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. Create WindowPatternModel.
      */
-    auto model = HostWindowSceneModel();
+    auto model = WindowSceneModel();
     uint64_t persistentId = 0;
     model.Create(persistentId);
 
     auto windowSceneNode =
-        AceType::DynamicCast<HostWindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+        AceType::DynamicCast<WindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     EXPECT_EQ(windowSceneNode, nullptr);
 }
 
@@ -81,7 +81,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. Create WindowPatternModel.
      */
-    auto model = HostWindowSceneModel();
+    auto model = WindowSceneModel();
 
     Rosen::SessionInfo sessionInfo = {
         .bundleName_ = BUNDLE_NAME,
@@ -92,7 +92,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest002, TestSize.Level1)
     model.Create(persistentId);
 
     auto frameNode =
-        AceType::DynamicCast<HostWindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+        AceType::DynamicCast<WindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     EXPECT_NE(frameNode, nullptr);
 }
 
@@ -113,7 +113,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest003, TestSize.Level1)
     EXPECT_NE(container, nullptr);
     auto context = container->GetPipelineContext();
     EXPECT_NE(context, nullptr);
-    auto model = HostWindowSceneModel();
+    auto model = WindowSceneModel();
 
     Rosen::SessionInfo sessionInfo = {
         .bundleName_ = BUNDLE_NAME,
@@ -124,7 +124,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest003, TestSize.Level1)
     model.Create(persistentId);
 
     auto frameNode =
-        AceType::DynamicCast<HostWindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+        AceType::DynamicCast<WindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     ASSERT_NE(frameNode, nullptr);
 
     Rosen::RSSurfaceNodeConfig config = {
@@ -133,7 +133,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest003, TestSize.Level1)
     session->surfaceNode_ = Rosen::RSSurfaceNode::Create(config);
     EXPECT_NE(session->surfaceNode_, nullptr);
 
-    auto pattern = frameNode->GetPattern<HostWindowScene>();
+    auto pattern = frameNode->GetPattern<WindowScene>();
     pattern->OnConnect();
     pattern->BufferAvailableCallback();
     pattern->OnForeground();
@@ -157,7 +157,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest004, TestSize.Level1)
     EXPECT_NE(container, nullptr);
     auto context = container->GetPipelineContext();
     EXPECT_NE(context, nullptr);
-    auto model = HostWindowSceneModel();
+    auto model = WindowSceneModel();
 
     Rosen::SessionInfo sessionInfo = {
         .bundleName_ = BUNDLE_NAME,
@@ -172,7 +172,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest004, TestSize.Level1)
     session->state_ = Rosen::SessionState::STATE_DISCONNECT;
     model.Create(persistentId);
     auto frameNode =
-        AceType::DynamicCast<HostWindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+        AceType::DynamicCast<WindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     ASSERT_NE(frameNode, nullptr);
 
     /**
@@ -181,7 +181,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest004, TestSize.Level1)
     session->state_ = Rosen::SessionState::STATE_ACTIVE;
     model.Create(persistentId);
     frameNode =
-        AceType::DynamicCast<HostWindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+        AceType::DynamicCast<WindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     ASSERT_NE(frameNode, nullptr);
 
     /**
@@ -195,7 +195,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest004, TestSize.Level1)
     session->state_ = Rosen::SessionState::STATE_BACKGROUND;
     model.Create(persistentId);
     frameNode =
-        AceType::DynamicCast<HostWindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+        AceType::DynamicCast<WindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     ASSERT_NE(frameNode, nullptr);
 }
 
@@ -216,7 +216,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest005, TestSize.Level1)
     EXPECT_NE(container, nullptr);
     auto context = container->GetPipelineContext();
     EXPECT_NE(context, nullptr);
-    auto model = HostWindowSceneModel();
+    auto model = WindowSceneModel();
 
     Rosen::SessionInfo sessionInfo = {
         .bundleName_ = BUNDLE_NAME,
@@ -227,7 +227,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest005, TestSize.Level1)
     model.Create(persistentId);
 
     auto frameNode =
-        AceType::DynamicCast<HostWindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+        AceType::DynamicCast<WindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     ASSERT_NE(frameNode, nullptr);
 
     Rosen::RSSurfaceNodeConfig config = {
@@ -259,7 +259,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest006, TestSize.Level1)
     EXPECT_NE(container, nullptr);
     auto context = container->GetPipelineContext();
     EXPECT_NE(context, nullptr);
-    auto model = HostWindowSceneModel();
+    auto model = WindowSceneModel();
 
     Rosen::SessionInfo sessionInfo = {
         .bundleName_ = BUNDLE_NAME,
@@ -270,9 +270,9 @@ HWTEST_F(WindowPatternTest, WindowPatternTest006, TestSize.Level1)
     model.Create(persistentId);
 
     auto frameNode =
-        AceType::DynamicCast<HostWindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+        AceType::DynamicCast<WindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<HostWindowScene>();
+    auto pattern = frameNode->GetPattern<WindowScene>();
     ASSERT_NE(pattern, nullptr);
 
     auto dirty = AceType::MakeRefPtr<LayoutWrapper>(nullptr, AceType::MakeRefPtr<GeometryNode>(), nullptr);
@@ -298,7 +298,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest006, TestSize.Level1)
 HWTEST_F(WindowPatternTest, WindowPatternTest007, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create HostWindowExtension.
+     * @tc.steps: step1. Create WindowExtension.
      */
     MockPipelineBase::SetUp();
     MockContainer::SetUp();
@@ -308,7 +308,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest007, TestSize.Level1)
     auto context = container->GetPipelineContext();
     EXPECT_NE(context, nullptr);
 
-    auto pattern = AceType::MakeRefPtr<HostWindowExtension>(BUNDLE_NAME, ABILITY_NAME);
+    auto pattern = AceType::MakeRefPtr<WindowExtension>(BUNDLE_NAME, ABILITY_NAME);
     ASSERT_NE(pattern, nullptr);
 
     pattern->OnConnect();
@@ -324,7 +324,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest007, TestSize.Level1)
 HWTEST_F(WindowPatternTest, WindowPatternTest008, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create HostWindowExtension.
+     * @tc.steps: step1. Create WindowExtension.
      */
     MockPipelineBase::SetUp();
     MockContainer::SetUp();
@@ -334,7 +334,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest008, TestSize.Level1)
     auto context = container->GetPipelineContext();
     EXPECT_NE(context, nullptr);
 
-    auto pattern = AceType::MakeRefPtr<HostWindowExtension>(BUNDLE_NAME, ABILITY_NAME);
+    auto pattern = AceType::MakeRefPtr<WindowExtension>(BUNDLE_NAME, ABILITY_NAME);
     ASSERT_NE(pattern, nullptr);
 
     pattern->OnAttachToFrameNode();
@@ -351,30 +351,27 @@ HWTEST_F(WindowPatternTest, WindowPatternTest008, TestSize.Level1)
 HWTEST_F(WindowPatternTest, WindowPatternTest009, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Get or create HostWindowExtension.
-     * @tc.expect: Get or create HostWindowExtension success.
+     * @tc.steps: step1. Get or create WindowExtension.
+     * @tc.expect: Get or create WindowExtension success.
      */
-    auto frameNode1 = HostWindowNode::GetOrCreateHostWindowNode(
-        "HostWindowNode", NODE_ID,
-        []() { return AceType::MakeRefPtr<HostWindowExtension>(BUNDLE_NAME, ABILITY_NAME); });
+    auto frameNode1 = WindowNode::GetOrCreateWindowNode("WindowNode", NODE_ID,
+        []() { return AceType::MakeRefPtr<WindowExtension>(BUNDLE_NAME, ABILITY_NAME); });
     EXPECT_NE(frameNode1, nullptr);
 
     /**
-     * @tc.steps: step2. Get or create HostWindowExtension.
+     * @tc.steps: step2. Get or create WindowExtension.
      * @tc.expect: frameNode1 equal frameNode2.
      */
-    auto frameNode2 = HostWindowNode::GetOrCreateHostWindowNode(
-        "HostWindowNode", NODE_ID,
-        []() { return AceType::MakeRefPtr<HostWindowExtension>(BUNDLE_NAME, ABILITY_NAME); });
+    auto frameNode2 = WindowNode::GetOrCreateWindowNode("WindowNode", NODE_ID,
+        []() { return AceType::MakeRefPtr<WindowExtension>(BUNDLE_NAME, ABILITY_NAME); });
     EXPECT_EQ(frameNode1, frameNode2);
 
     /**
-     * @tc.steps: step3. Get or create HostWindowExtension.
+     * @tc.steps: step3. Get or create WindowExtension.
      * @tc.expect: frameNode2 does not equal frameNode3.
      */
-    auto frameNode3 = HostWindowNode::GetOrCreateHostWindowNode(
-        "HostWindowNode2", NODE_ID,
-        []() { return AceType::MakeRefPtr<HostWindowExtension>(BUNDLE_NAME, ABILITY_NAME); });
+    auto frameNode3 = WindowNode::GetOrCreateWindowNode("WindowNode2", NODE_ID,
+        []() { return AceType::MakeRefPtr<WindowExtension>(BUNDLE_NAME, ABILITY_NAME); });
     EXPECT_NE(frameNode2, frameNode3);
 }
 } // namespace OHOS::Ace::NG
