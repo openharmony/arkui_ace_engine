@@ -1628,4 +1628,35 @@ bool CustomPaintPaintMethod::HasImageShadow() const
     return !(NearZero(imageShadow_->GetOffset().GetX()) && NearZero(imageShadow_->GetOffset().GetY()) &&
          NearZero(imageShadow_->GetBlurRadius()));
 }
+
+std::optional<double> CustomPaintPaintMethod::CalcTextScale(double maxIntrinsicWidth, std::optional<double> maxWidth)
+{
+    std::optional<double> scale;
+    if (NearEqual(maxIntrinsicWidth, 0) || !maxWidth.has_value()) {
+        return scale;
+    }
+    if (Negative(maxWidth.value())) {
+        maxWidth = 0.0f;
+    }
+    double maxWidthValue = maxWidth.value();
+    if (GreatNotEqual(maxIntrinsicWidth, maxWidthValue)) {
+        scale = maxWidthValue / maxIntrinsicWidth;
+    }
+    return scale;
+}
+
+TransformParam CustomPaintPaintMethod::GetTransform() const
+{
+    TransformParam param;
+    if (skCanvas_.get() != nullptr) {
+        SkMatrix matrix = skCanvas_->getTotalMatrix();
+        param.scaleX = matrix.getScaleX();
+        param.scaleY = matrix.getScaleY();
+        param.skewX = matrix.getSkewX();
+        param.skewY = matrix.getSkewY();
+        param.translateX = matrix.getTranslateX();
+        param.translateY = matrix.getTranslateY();
+    }
+    return param;
+}
 } // namespace OHOS::Ace::NG
