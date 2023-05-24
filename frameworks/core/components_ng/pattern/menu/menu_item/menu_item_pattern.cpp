@@ -123,7 +123,7 @@ void MenuItemPattern::ShowSubMenu()
         auto menuProps = subMenu->GetLayoutProperty<MenuLayoutProperty>();
         CHECK_NULL_VOID(menuProps);
         menuProps->UpdateMenuOffset(offset);
-        menuWrapper->MarkDirtyNode();
+        menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         RegisterWrapperMouseEvent();
 
         auto focusHub = subMenu->GetOrCreateFocusHub();

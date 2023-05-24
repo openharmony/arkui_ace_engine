@@ -116,7 +116,6 @@ RefPtr<FrameNode> OptionView::CreateSelectOption(const std::string& value, const
         CHECK_NULL_RETURN(iconNode, nullptr);
         auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
         props->UpdateImageSourceInfo(ImageSourceInfo(icon));
-        props->UpdateImageFit(ImageFit::SCALE_DOWN);
 
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, nullptr);

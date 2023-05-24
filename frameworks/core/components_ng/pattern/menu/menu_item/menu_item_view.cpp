@@ -39,12 +39,11 @@ void MenuItemView::AddIcon(const std::optional<std::string>& icon, const RefPtr<
             V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
         auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
         props->UpdateImageSourceInfo(ImageSourceInfo(iconPath));
-        props->UpdateImageFit(ImageFit::SCALE_DOWN);
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
-        props->UpdateCalcMaxSize(
+        props->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(theme->GetIconSideLength()), CalcLength(theme->GetIconSideLength())));
         props->UpdateAlignment(Alignment::CENTER);
 
