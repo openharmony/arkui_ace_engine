@@ -79,6 +79,11 @@ public:
 
     void EnableDrag();
 
+    bool DefaultSupportDrag() override
+    {
+        return true;
+    }
+    
     void SetCopyOption(CopyOptions value)
     {
         copyOption_ = value;

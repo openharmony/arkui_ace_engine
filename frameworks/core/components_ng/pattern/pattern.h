@@ -54,6 +54,11 @@ public:
         return true;
     }
 
+    virtual bool DefaultSupportDrag()
+    {
+        return false;
+    }
+
     virtual std::optional<std::string> GetSurfaceNodeName() const
     {
         return std::nullopt;
