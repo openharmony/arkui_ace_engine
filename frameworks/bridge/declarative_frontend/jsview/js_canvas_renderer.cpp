@@ -769,10 +769,8 @@ void JSCanvasRenderer::JsSetStrokeStyle(const JSCallbackInfo& info)
         return;
     }
     if (info[0]->IsString()) {
-        static const char componentCanvasRenderer[] = "CanvasRenderer";
-        static const char propCanvasRendererStrokeStyle[] = "strokeStyle";
         Color color;
-        if (!JSViewAbstract::CheckColor(info[0], color, componentCanvasRenderer, propCanvasRendererStrokeStyle)) {
+        if (!JSViewAbstract::CheckColor(info[0], color, "CanvasRenderer", "strokeStyle")) {
             return;
         }
         if (Container::IsCurrentUseNewPipeline()) {
