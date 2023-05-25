@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
@@ -79,6 +80,7 @@ protected:
     void CreateGridItem(int32_t count = 10, Axis direction = Axis::VERTICAL, bool focusable = false);
     RefPtr<LayoutWrapper> RunMeasureAndLayout(
         float width = DEVICE_WIDTH, float height = GRID_HEIGHT);
+    void UpdateLayoutWrapper(RefPtr<LayoutWrapper> layoutWrapper, float width, float height);
     RefPtr<FrameNode> GetItemFrameNode(int32_t index);
     RefPtr<GridItemPattern> GetItemPattern(int32_t index);
     RefPtr<FocusHub> GetItemFocusHub(int32_t index);
@@ -178,6 +180,16 @@ RefPtr<LayoutWrapper> GridTestNg::RunMeasureAndLayout(float width, float height)
     layoutWrapper->Layout();
     layoutWrapper->MountToHostOnMainThread();
     return layoutWrapper;
+}
+
+void GridTestNg::UpdateLayoutWrapper(RefPtr<LayoutWrapper> layoutWrapper, float width, float height)
+{
+    LayoutConstraintF LayoutConstraint;
+    LayoutConstraint.selfIdealSize = { width, height };
+    LayoutConstraint.maxSize = { width, height };
+    layoutWrapper->Measure(LayoutConstraint);
+    layoutWrapper->Layout();
+    layoutWrapper->MountToHostOnMainThread();
 }
 
 RefPtr<FrameNode> GridTestNg::GetItemFrameNode(int32_t index)
@@ -794,7 +806,7 @@ HWTEST_F(GridTestNg, EventHub001, TestSize.Level1)
     /**
      * @tc.steps: step1. Mock GetPaintRectWithTransform.
      */
-    RectF gridRect(0.f, 0.f, DEVICE_WIDTH, DEVICE_HEIGHT);
+    RectF gridRect(0.f, 0.f, DEVICE_WIDTH, GRID_HEIGHT);
     EXPECT_CALL(
         *(AceType::RawPtr(AceType::DynamicCast<MockRenderContext>(frameNode_->renderContext_))),
         GetPaintRectWithTransform())
@@ -1546,7 +1558,8 @@ HWTEST_F(GridTestNg, Drag002, TestSize.Level1)
     gridModelNG.SetColumnsTemplate(TEMPLATE_4);
     gridModelNG.SetEditable(true);
     gridModelNG.SetSupportAnimation(true);
-    CreateGridItem(8);
+    const int32_t itemCount = 8;
+    CreateGridItem(itemCount);
     GetInstance();
     RunMeasureAndLayout();
     auto onItemDragStart = [](const ItemDragInfo&, int32_t) {
@@ -1569,7 +1582,7 @@ HWTEST_F(GridTestNg, Drag002, TestSize.Level1)
     dragInfo.SetY(0.f);
     eventHub_->FireOnItemDragEnter(dragInfo);
     eventHub_->FireOnItemDragLeave(dragInfo, -1);
-    EXPECT_EQ(pattern_->GetOriginalIndex(), 8);
+    EXPECT_EQ(pattern_->GetOriginalIndex(), itemCount);
 
     /**
      * @tc.steps: step2. Drag 2nd item to 3rd item, Drag 3 item to 2 item.
@@ -1597,6 +1610,18 @@ HWTEST_F(GridTestNg, Drag002, TestSize.Level1)
     EXPECT_EQ(pattern_->GetOriginalIndex(), 2);
     // SupportAnimation, ClearDragState
     eventHub_->FireOnItemDrop(dragInfo, -1, 1, true);
+    EXPECT_EQ(pattern_->GetOriginalIndex(), -1);
+
+    /**
+     * @tc.steps: step4. Move one item to wrong insertIndex.
+     * @tc.expected: GetOriginalIndex unchanged.
+     */
+    // insertIndex < 0
+    eventHub_->FireOnItemDragEnter(dragInfo);
+    eventHub_->FireOnItemDragMove(dragInfo, 1, -1);
+    EXPECT_EQ(pattern_->GetOriginalIndex(), -1);
+    // insertIndex >= itemCount
+    eventHub_->FireOnItemDragMove(dragInfo, 1, itemCount);
     EXPECT_EQ(pattern_->GetOriginalIndex(), -1);
 }
 
@@ -1910,6 +1935,48 @@ HWTEST_F(GridTestNg, FocusStep005, TestSize.Level1)
     EXPECT_TRUE(IsEqualNextFocusNode(currentIndex, next));
     EXPECT_EQ(pattern_->gridLayoutInfo_.jumpIndex_, 16);
 }
+
+/**
+ * @tc.name: Focus001
+ * @tc.desc: Test Foucus
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, Focus001, TestSize.Level1)
+{
+    GridModelNG gridModelNG;
+    gridModelNG.Create(nullptr, nullptr);
+    gridModelNG.SetColumnsTemplate(TEMPLATE_4);
+    CreateGridItem(18, Axis::VERTICAL, true);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. When focus grid from the outside
+     * @tc.expected: Will focus first child
+     */
+    auto gridFocus = frameNode_->GetOrCreateFocusHub();
+    gridFocus->RequestFocusImmediately();
+    RunMeasureAndLayout();
+    EXPECT_TRUE(GetItemFocusHub(0)->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step2. When grid IsCurrentFocus and has lastFocus child
+     * @tc.expected: Will focus last child
+     */
+    GetItemFocusHub(1)->RequestFocusImmediately();
+    gridFocus->RequestFocusImmediately();
+    RunMeasureAndLayout();
+    EXPECT_TRUE(GetItemFocusHub(1)->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step3. Scroll to second row
+     * @tc.expected: Would change startMainLineIndex_, focus last child.
+     */
+    gridFocus->RequestFocusImmediately();
+    UpdateCurrentOffset(-ITEM_HEIGHT - 1.f);
+    EXPECT_TRUE(GetItemFocusHub(1)->IsCurrentFocus());
+}
+
 
 /**
  * @tc.name: GridPatternTest001
@@ -2531,6 +2598,104 @@ HWTEST_F(GridTestNg, GridPatternTest022, TestSize.Level1)
     auto layoutProperty = frameNode->GetLayoutProperty<GridLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     EXPECT_EQ(layoutProperty->GetEdgeEffectValue(), EdgeEffect::SPRING);
+}
+
+/**
+ * @tc.name: ScrollLayout001
+ * @tc.desc: Test UpdateOffsetOnVirtualKeyboardHeightChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, ScrollLayout001, TestSize.Level1)
+{
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    MockPipelineBase::GetCurrent()->SetTextFieldManager(textFieldManager);
+    auto textFieldPattern = AceType::MakeRefPtr<Pattern>();
+    textFieldManager->SetOnFocusTextField(textFieldPattern);
+    const Offset clickPosition = Offset(100.f, GRID_HEIGHT + ITEM_HEIGHT);
+    textFieldManager->SetClickPosition(clickPosition);
+
+    GridModelNG gridModelNG;
+    gridModelNG.Create(nullptr, nullptr);
+    gridModelNG.SetColumnsTemplate(TEMPLATE_4);
+    CreateGridItem(18, Axis::VERTICAL, true);
+    GetInstance();
+    auto layoutWrapper = RunMeasureAndLayout();
+
+    // MOCK GetPaintRectWithTransform()
+    const float smallerHeight = GRID_HEIGHT - ITEM_HEIGHT;
+    RectF gridRect(0.f, 0.f, DEVICE_WIDTH, smallerHeight);
+    EXPECT_CALL(
+        *(AceType::RawPtr(AceType::DynamicCast<MockRenderContext>(frameNode_->renderContext_))),
+        GetPaintRectWithTransform())
+        .WillRepeatedly(Return(gridRect));
+
+    /**
+     * @tc.steps: step1. Change to smaller mainSize
+     * @tc.expected: The mainSize is correct
+     */
+    auto gridFocus = frameNode_->GetOrCreateFocusHub();
+    gridFocus->RequestFocusImmediately();
+    // change grid height and trigger Measure
+    UpdateLayoutWrapper(layoutWrapper, DEVICE_WIDTH, smallerHeight);
+    float gridHeight = frameNode_->GetGeometryNode()->GetFrameSize().Height();
+    EXPECT_FLOAT_EQ(gridHeight, smallerHeight);
+    float currentOffset = pattern_->gridLayoutInfo_.currentOffset_;
+    EXPECT_FLOAT_EQ(currentOffset, 0.f);
+}
+
+/**
+ * @tc.name: ScrollLayout002
+ * @tc.desc: Test UpdateOffsetOnVirtualKeyboardHeightChange that currentOffset wuold not change
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, ScrollLayout002, TestSize.Level1)
+{
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    MockPipelineBase::GetCurrent()->SetTextFieldManager(textFieldManager);
+    auto textFieldPattern = AceType::MakeRefPtr<Pattern>();
+    textFieldManager->SetOnFocusTextField(textFieldPattern);
+    const Offset clickPosition = Offset(100.f, 100.f);
+    textFieldManager->SetClickPosition(clickPosition);
+
+    GridModelNG gridModelNG;
+    gridModelNG.Create(nullptr, nullptr);
+    gridModelNG.SetColumnsTemplate(TEMPLATE_4);
+    CreateGridItem(18, Axis::VERTICAL, true);
+    GetInstance();
+    auto layoutWrapper = RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. While axis_ == Axis::HORIZONTAL
+     * @tc.expected: currentOffset_ would not change
+     */
+    pattern_->gridLayoutInfo_.axis_ = Axis::HORIZONTAL;
+    const float smallerHeight = GRID_HEIGHT - ITEM_HEIGHT;
+    // change grid height and trigger Measure
+    UpdateLayoutWrapper(layoutWrapper, DEVICE_WIDTH, smallerHeight);
+    float currentOffset = pattern_->gridLayoutInfo_.currentOffset_;
+    EXPECT_FLOAT_EQ(currentOffset, 0.f);
+
+    /**
+     * @tc.steps: step2. While Grid !IsCurrentFocus()
+     * @tc.expected: currentOffset_ would not change
+     */
+    UpdateLayoutWrapper(layoutWrapper, DEVICE_WIDTH, GRID_HEIGHT); // reset Grid height
+    pattern_->gridLayoutInfo_.axis_ = Axis::VERTICAL;
+    // change grid height and trigger Measure
+    UpdateLayoutWrapper(layoutWrapper, DEVICE_WIDTH, smallerHeight);
+    currentOffset = pattern_->gridLayoutInfo_.currentOffset_;
+    EXPECT_FLOAT_EQ(currentOffset, 0.f);
+
+    /**
+     * @tc.steps: step3. While clickPosition is in Grid
+     * @tc.expected: currentOffset_ would not change
+     */
+    UpdateLayoutWrapper(layoutWrapper, DEVICE_WIDTH, GRID_HEIGHT); // reset Grid height
+    pattern_->gridLayoutInfo_.axis_ = Axis::VERTICAL;
+    // change grid height and trigger Measure
+    UpdateLayoutWrapper(layoutWrapper, DEVICE_WIDTH, smallerHeight);
+    currentOffset = pattern_->gridLayoutInfo_.currentOffset_;
+    EXPECT_FLOAT_EQ(currentOffset, 0.f);
 }
 
 /**
