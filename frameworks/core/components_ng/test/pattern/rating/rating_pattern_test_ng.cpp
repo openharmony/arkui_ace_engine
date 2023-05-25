@@ -17,14 +17,9 @@
 
 #include "gtest/gtest.h"
 #include "third_party/libpng/png.h"
-
-#include "base/memory/ace_type.h"
-#include "core/components_ng/test/mock/render/mock_canvas_image.h"
-#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
-#include "core/image/image_source_info.h"
-
 #define private public
 #define protected public
+#include "base/memory/ace_type.h"
 #include "core/components/rating/rating_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -32,7 +27,10 @@
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/components_ng/pattern/rating/rating_pattern.h"
 #include "core/components_ng/pattern/rating/rating_render_property.h"
+#include "core/components_ng/test/mock/render/mock_canvas_image.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/image/image_source_info.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -59,6 +57,8 @@ constexpr double DEFAULT_RATING_SCORE = 0.0;
 constexpr double DEFAULT_STEP_SIZE = 0.5;
 constexpr double RATING_STEP_SIZE = 0.7;
 constexpr double RATING_STEP_SIZE_2 = DEFAULT_STAR_NUM + DEFAULT_STAR_NUM;
+const float FRAME_WIDTH = 400.0f;
+const float FRAME_HEIGHT = 400.0f;
 const float CONTAINER_WIDTH = 300.0f;
 const float CONTAINER_HEIGHT = 300.0f;
 const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
@@ -658,6 +658,62 @@ HWTEST_F(RatingPatternTestNg, RatingPatternTest011, TestSize.Level1)
     EXPECT_EQ(ratingPattern->ratingModifier_->foregroundUri_, RATING_SVG_URL);
     EXPECT_EQ(ratingPattern->ratingModifier_->secondaryUri_, RATING_SECONDARY_URL);
     EXPECT_EQ(ratingPattern->ratingModifier_->backgroundUri_, RESOURCE_URL);
+}
+
+/**
+ * @tc.name: RatingPatternTest012
+ * @tc.desc: Test rating three images render scale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingPatternTestNg, RatingPatternTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create rating FrameNode and Pattern, and initialize rating modifier.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    ratingPattern->foregroundImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
+    ratingPattern->secondaryImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
+    ratingPattern->backgroundImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
+    auto paintMethod1 = ratingPattern->CreateNodePaintMethod();
+    ASSERT_NE(paintMethod1, nullptr);
+    ASSERT_NE(ratingPattern->ratingModifier_, nullptr);
+    /**
+     * @tc.steps: step2. update PaintConfig.
+     */
+    frameNode->geometryNode_->SetFrameSize(SizeF(FRAME_WIDTH, FRAME_HEIGHT));
+    frameNode->geometryNode_->SetContentSize(CONTAINER_SIZE);
+    ratingPattern->imageSuccessStateCode_ = RATING_IMAGE_SUCCESS_CODE;
+    auto paintMethod2 = ratingPattern->CreateNodePaintMethod();
+    ASSERT_NE(paintMethod2, nullptr);
+    ASSERT_NE(ratingPattern->ratingModifier_, nullptr);
+    auto scaleX = CONTAINER_SIZE.Height() / FRAME_WIDTH;
+    auto scaleY = CONTAINER_SIZE.Height() / FRAME_HEIGHT;
+    EXPECT_EQ(ratingPattern->foregroundConfig_.scaleX_, scaleX);
+    EXPECT_EQ(ratingPattern->foregroundConfig_.scaleY_, scaleY);
+    EXPECT_EQ(ratingPattern->secondaryConfig_.scaleX_, scaleX);
+    EXPECT_EQ(ratingPattern->secondaryConfig_.scaleY_, scaleY);
+    EXPECT_EQ(ratingPattern->backgroundConfig_.scaleX_, scaleX);
+    EXPECT_EQ(ratingPattern->backgroundConfig_.scaleY_, scaleY);
+    ASSERT_NE(ratingPattern->ratingModifier_->foregroundImageCanvas_->paintConfig_, nullptr);
+    ASSERT_NE(ratingPattern->ratingModifier_->secondaryImageCanvas_->paintConfig_, nullptr);
+    ASSERT_NE(ratingPattern->ratingModifier_->backgroundImageCanvas_->paintConfig_, nullptr);
+    EXPECT_EQ(ratingPattern->foregroundConfig_.scaleX_,
+        ratingPattern->ratingModifier_->foregroundImageCanvas_->GetPaintConfig().scaleX_);
+    EXPECT_EQ(ratingPattern->foregroundConfig_.scaleY_,
+        ratingPattern->ratingModifier_->foregroundImageCanvas_->GetPaintConfig().scaleY_);
+    EXPECT_EQ(ratingPattern->secondaryConfig_.scaleX_,
+        ratingPattern->ratingModifier_->secondaryImageCanvas_->GetPaintConfig().scaleX_);
+    EXPECT_EQ(ratingPattern->secondaryConfig_.scaleY_,
+        ratingPattern->ratingModifier_->secondaryImageCanvas_->GetPaintConfig().scaleY_);
+    EXPECT_EQ(ratingPattern->backgroundConfig_.scaleX_,
+        ratingPattern->ratingModifier_->backgroundImageCanvas_->GetPaintConfig().scaleX_);
+    EXPECT_EQ(ratingPattern->backgroundConfig_.scaleY_,
+        ratingPattern->ratingModifier_->backgroundImageCanvas_->GetPaintConfig().scaleY_);
 }
 
 /**
