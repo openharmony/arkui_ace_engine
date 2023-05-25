@@ -51,6 +51,7 @@
 #include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -339,8 +340,8 @@ void NavigationModelNG::Create()
     // content node
     if (!navigationGroupNode->GetContentNode()) {
         int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG, contentNodeId,
-            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto contentNode = FrameNode::GetOrCreateFrameNode(
+            V2::NAVIGATION_CONTENT_ETS_TAG, contentNodeId, []() { return AceType::MakeRefPtr<StackPattern>(); });
         navigationGroupNode->AddChild(contentNode);
         navigationGroupNode->SetContentNode(contentNode);
     }
@@ -663,6 +664,7 @@ void NavigationModelNG::SetBackButtonIcon(const std::string& src, bool noPixMap,
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
+
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
     auto navBarContentNode = navBarNode->GetNavBarContentNode();
@@ -676,9 +678,11 @@ void NavigationModelNG::SetBackButtonIcon(const std::string& src, bool noPixMap,
         if (navBarContentChildFrameNode->GetTag() != V2::NAVROUTER_VIEW_ETS_TAG) {
             return;
         }
-        auto navRouterNode = AceType::DynamicCast<NavRouterGroupNode>(navBarContentChildFrameNode);
-        CHECK_NULL_VOID(navRouterNode);
-        auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(navRouterNode->GetNavDestinationNode());
+
+        auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+        CHECK_NULL_VOID(navigationPattern);
+        auto navDestinationNode =
+            AceType::DynamicCast<NavDestinationGroupNode>(navigationPattern->GetNavDestinationNode());
         CHECK_NULL_VOID(navDestinationNode);
         auto navDestinationLayoutProperty = navDestinationNode->GetLayoutProperty<NavDestinationLayoutProperty>();
         navDestinationLayoutProperty->UpdateImageSource(imageSourceInfo);
@@ -731,7 +735,6 @@ void NavigationModelNG::SetCustomToolBar(const RefPtr<AceType>& customNode)
     navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
     auto toolBarNode = navBarNode->GetToolBarNode();
     CHECK_NULL_VOID(toolBarNode);
-    toolBarNode->Clean();
     customToolBar->MountToParent(toolBarNode);
     navBarNode->UpdatePrevToolBarIsCustom(true);
 }
@@ -801,7 +804,7 @@ void NavigationModelNG::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
     CHECK_NULL_VOID(rowProperty);
     rowProperty->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
     auto theme = NavigationGetTheme();
-    auto mostMenuItemCount = theme ? theme->GetMostMenuItemCountInBar() : 0;
+    auto mostMenuItemCount = theme->GetMostMenuItemCountInBar();
     bool needMoreButton = menuItems.size() > mostMenuItemCount ? true : false;
     int32_t count = 0;
     std::vector<OptionParam> params;
