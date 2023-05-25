@@ -3898,4 +3898,23 @@ HWTEST_F(TextFieldPatternTestNg, GetCopyOptionString, TestSize.Level2)
         EXPECT_STREQ(pattern->GetCopyOptionString().c_str(), optionData.expectOptionString.c_str());
     }
 }
+
+/**
+ * @tc.name: UpdateOtherHandleOnMove001
+ * @tc.desc: test function UpdateOtherHandleOnMove.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, UpdateOtherHandleOnMove001, TestSize.Level1)
+{
+    auto pattern = GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(-1);
+    pattern->isFirstHandle_ = true;
+    pattern->UpdateOtherHandleOnMove(1.0f);
+    ASSERT_EQ(pattern->textSelector_.secondHandleOffset_.GetX(), 1.0f);
+
+    pattern->isFirstHandle_ = false;
+    pattern->UpdateOtherHandleOnMove(-1.0f);
+    ASSERT_EQ(pattern->textSelector_.firstHandleOffset_.GetX(), -1.0f);
+}
 } // namespace OHOS::Ace::NG
