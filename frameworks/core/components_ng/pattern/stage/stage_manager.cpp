@@ -56,7 +56,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
                 CHECK_NULL_VOID(page);
                 auto context = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(context);
-                context->SetIsNeedShowFocus(false);
+                context->SetIsFocusActive(false);
                 auto pageFocusHub = page->GetFocusHub();
                 CHECK_NULL_VOID(pageFocusHub);
                 pageFocusHub->SetParentFocusable(false);
@@ -93,7 +93,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             pageFocusHub->RequestFocus();
             auto context = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(context);
-            context->SetIsNeedShowFocus(false);
+            context->SetIsFocusActive(false);
         });
 }
 } // namespace
@@ -386,7 +386,7 @@ void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType t
 
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID_NOLOG(context);
-    context->SetIsNeedShowFocus(false);
+    context->SetIsFocusActive(false);
 }
 
 void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType)
@@ -417,7 +417,7 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
 
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID_NOLOG(context);
-    context->SetIsNeedShowFocus(false);
+    context->SetIsFocusActive(false);
 }
 
 RefPtr<FrameNode> StageManager::GetLastPage()
