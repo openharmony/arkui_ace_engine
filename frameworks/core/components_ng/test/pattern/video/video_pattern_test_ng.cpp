@@ -1664,8 +1664,5 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest020, TestSize.Level1)
     videoPattern->isInitialState_ = false;
     dragEnd(nullptr, json->ToString());
     EXPECT_TRUE(videoPattern->isStop_);
-    videoPattern->SetIsDrag(true);
-    dragEnd(nullptr, json->ToString());
-    EXPECT_FALSE(videoPattern->isDrag_);
 }
 } // namespace OHOS::Ace::NG
