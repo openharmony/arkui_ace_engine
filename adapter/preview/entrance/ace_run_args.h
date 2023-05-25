@@ -92,6 +92,7 @@ struct ACE_FORCE_EXPORT_WITH_PREVIEW AceRunArgs {
 
     // Container sdk path.
     std::string containerSdkPath = "";
+    bool isComponentMode = false;
 };
 
 } // namespace OHOS::Ace::Platform

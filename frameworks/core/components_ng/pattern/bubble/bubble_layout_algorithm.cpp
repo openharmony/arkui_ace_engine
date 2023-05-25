@@ -229,6 +229,11 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const Re
 void BubbleLayoutAlgorithm::InitArrowTopAndBottomPosition(OffsetF& topArrowPosition, OffsetF& bottomArrowPosition,
     OffsetF& topPosition, OffsetF& bottomPosition, const SizeF& childSize)
 {
+    auto arrowCenter = targetOffset_.GetX() + targetSize_.Width() / 2.0;
+    auto horizonSpacing = static_cast<float>(HORIZON_SPACING_WITH_SCREEN.ConvertToPx());
+    double arrowWidth = ARROW_WIDTH.ConvertToPx();
+    float radius = borderRadius_.ConvertToPx();
+    auto safePosition = horizonSpacing + radius + arrowWidth / 2.0;
     topArrowPosition =
         topPosition + OffsetF(std::max(padding_.Left().ConvertToPx(), border_.TopLeftRadius().GetX().ConvertToPx()) +
                                   BEZIER_WIDTH_HALF.ConvertToPx(),
@@ -237,6 +242,16 @@ void BubbleLayoutAlgorithm::InitArrowTopAndBottomPosition(OffsetF& topArrowPosit
                                                        border_.BottomLeftRadius().GetX().ConvertToPx()) +
                                                        BEZIER_WIDTH_HALF.ConvertToPx(),
                                                -arrowHeight_);
+    // move the arrow to safe position while arrow too close to window
+    // In order not to separate the bubble from the arrow
+    if (arrowCenter < safePosition) {
+        topArrowPosition = topArrowPosition + OffsetF(safePosition - arrowCenter, 0);
+        bottomArrowPosition = bottomArrowPosition + OffsetF(safePosition - arrowCenter, 0);
+    }
+    if (arrowCenter > selfSize_.Width() - safePosition) {
+        topArrowPosition = topArrowPosition - OffsetF(arrowCenter + safePosition - selfSize_.Width(), 0);
+        bottomArrowPosition = bottomArrowPosition - OffsetF(arrowCenter + safePosition - selfSize_.Width(), 0);
+    }
 }
 
 OffsetF BubbleLayoutAlgorithm::GetPositionWithPlacement(const SizeF& childSize, const OffsetF& topPosition,

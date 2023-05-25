@@ -268,6 +268,7 @@ private:
     bool clickEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
     bool panEventInitialized_ = false;
+    bool showSelectOverlay_ = false;
     std::optional<TextStyle> textStyle_;
     std::optional<int32_t> surfaceChangedCallbackId_;
 

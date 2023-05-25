@@ -72,7 +72,7 @@ const char LOCALE_KEY[] = "locale";
 } // namespace
 
 std::once_flag AceContainer::onceFlag_;
-
+bool AceContainer::isComponentMode_ = false;
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, RefPtr<Context> context, bool useCurrentEventRunner)
     : instanceId_(instanceId), messageBridge_(AceType::MakeRefPtr<PlatformBridge>()), type_(type), context_(context)
 {
@@ -939,7 +939,7 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceViewPreview* vi
     pipelineContext_->SetWindowModal(windowModal_);
     pipelineContext_->SetDrawDelegate(aceView_->GetDrawDelegate());
     pipelineContext_->SetIsJsCard(type_ == FrontendType::JS_CARD);
-    if (installationFree_) {
+    if (installationFree_ && !isComponentMode_) {
         LOGD("installationFree:%{public}d, labelId:%{public}d", installationFree_, labelId_);
         pipelineContext_->SetInstallationFree(installationFree_);
         pipelineContext_->SetAppLabelId(labelId_);
@@ -1033,6 +1033,7 @@ void AceContainer::InitDeviceInfo(int32_t instanceId, const AceRunArgs& runArgs)
     config.SetColorMode(runArgs.deviceConfig.colorMode);
     config.SetFontRatio(runArgs.deviceConfig.fontRatio);
     container->SetResourceConfiguration(config);
+    isComponentMode_ = runArgs.isComponentMode;
 }
 
 RefPtr<AceContainer> AceContainer::GetContainerInstance(int32_t instanceId)

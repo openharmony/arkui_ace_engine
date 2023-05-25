@@ -422,7 +422,7 @@ HWTEST_F(GridTestNg, KeyEvent001, TestSize.Level1)
     KeyEvent event;
     pattern_->OnKeyEvent(event);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
-    
+
     /**
      * @tc.steps: step1. KeyCode::KEY_PAGE_DOWN.
      * @tc.expected: Page jump down width Grid height.
@@ -431,7 +431,7 @@ HWTEST_F(GridTestNg, KeyEvent001, TestSize.Level1)
     event.code = KeyCode::KEY_PAGE_DOWN;
     pattern_->OnKeyEvent(event);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -300.f);
-    
+
     /**
      * @tc.steps: step1. KeyCode::KEY_PAGE_UP.
      * @tc.expected: Page jump up width Grid height.
@@ -859,7 +859,7 @@ HWTEST_F(GridTestNg, PositionController001, TestSize.Level1)
      * @tc.steps: step2. Test AnimateTo func.
      * @tc.expected: Verify return value.
      */
-    controller->AnimateTo(Dimension(100.f, DimensionUnit::PX), 200.f, Curves::LINEAR);
+    controller->AnimateTo(Dimension(100.f, DimensionUnit::PX), 200.f, Curves::LINEAR, false);
     ASSERT_NE(pattern_->animator_, nullptr);
 
     /**

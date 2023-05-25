@@ -42,6 +42,10 @@ constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
 constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
 constexpr float DEFAULT_MIN_SPACE_SCALE = 0.75f;
 constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
+constexpr float LIST_SCROLL_TO_MASS = 1.0f;
+constexpr float LIST_SCROLL_TO_STIFFNESS = 227.0f;
+constexpr float LIST_SCROLL_TO_DAMPING = 33.0f;
+constexpr float LIST_SCROLL_TO_VELOCITY = 7.0f;
 } // namespace
 
 void ListPattern::OnAttachToFrameNode()
@@ -726,12 +730,53 @@ void ListPattern::StopAnimate()
     }
 }
 
-void ListPattern::ScrollTo(float position)
+void ListPattern::ScrollTo(float position, bool smooth)
 {
     LOGI("ScrollTo:%{public}f", position);
     StopAnimate();
-    UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
+    if (smooth) {
+        StartDefaultSpringMotion(currentOffset_, position, LIST_SCROLL_TO_VELOCITY);
+    } else {
+        UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
+    }
     isScrollEnd_ = true;
+}
+
+void ListPattern::StartDefaultSpringMotion(float start, float end, float velocity)
+{
+    if (!animator_) {
+        animator_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
+    }
+
+    float mass = LIST_SCROLL_TO_MASS;
+    float stiffness = LIST_SCROLL_TO_STIFFNESS;
+    float damping = LIST_SCROLL_TO_DAMPING;
+    const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
+        AceType::MakeRefPtr<SpringProperty>(mass, stiffness, damping);
+    if (!springMotion_) {
+        springMotion_ = AceType::MakeRefPtr<SpringMotion>(start, end, velocity, DEFAULT_OVER_SPRING_PROPERTY);
+    } else {
+        springMotion_->Reset(start, end, velocity, DEFAULT_OVER_SPRING_PROPERTY);
+        springMotion_->ClearListeners();
+    }
+    springMotion_->AddListener([weakScroll = AceType::WeakClaim(this), start, end](double position) {
+        auto list = weakScroll.Upgrade();
+        CHECK_NULL_VOID(list);
+        if (NearEqual(end, start) || NearEqual(position, end)) {
+            list->animator_->ClearStopListeners();
+            list->animator_->Stop();
+            position = end;
+            return;
+        }
+        list->UpdateCurrentOffset(list->GetTotalOffset() - position, SCROLL_FROM_JUMP);
+    });
+    animator_->ClearStopListeners();
+    animator_->PlayMotion(springMotion_);
+    animator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
+        auto list = weak.Upgrade();
+        CHECK_NULL_VOID(list);
+        list->MarkDirtyNodeSelf();
+    });
 }
 
 void ListPattern::ScrollToIndex(int32_t index, ScrollIndexAlignment align)
