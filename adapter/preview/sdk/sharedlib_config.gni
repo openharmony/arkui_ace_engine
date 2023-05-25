@@ -144,7 +144,7 @@ common_bin = [
     part_name = "ace_engine"
   },
   {
-    label = "//third_party/skia:new_skia"
+    label = "//third_party/skia:skia_canvaskit_0310"
     subsystem_name = "thirdparty"
     part_name = "third_party_skia"
   },
