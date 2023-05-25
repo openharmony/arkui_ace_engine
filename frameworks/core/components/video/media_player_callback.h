@@ -92,37 +92,38 @@ public:
         ContainerScope scope(instanceId_);
         switch (type) {
             case OHOS::Media::INFO_TYPE_SEEKDONE:
-                LOGI("video OnSeekDone callback");
+                LOGD("video OnSeekDone callback");
                 if (positionUpdatedEvent_) {
                     positionUpdatedEvent_(extra / MILLISECONDS_TO_SECONDS);
                 }
                 break;
             case OHOS::Media::INFO_TYPE_EOS:
-                LOGI("video OnEndOfStream callback");
+                LOGD("video OnEndOfStream callback");
                 if (endOfStreamEvent_) {
                     endOfStreamEvent_();
                 }
                 break;
             case OHOS::Media::INFO_TYPE_STATE_CHANGE:
-                LOGI("video OnStateChanged callback");
+                LOGD("video OnStateChanged callback");
                 PrintState(static_cast<OHOS::Media::PlayerStates>(extra));
                 if (stateChangedEvent_) {
                     stateChangedEvent_(ConvertToPlaybackStatus(extra));
                 }
                 break;
             case OHOS::Media::INFO_TYPE_POSITION_UPDATE:
-                LOGI("video INFO_TYPE_POSITION_UPDATE callback");
+                LOGD("video INFO_TYPE_POSITION_UPDATE callback");
                 if (positionUpdatedEvent_) {
                     positionUpdatedEvent_(extra / MILLISECONDS_TO_SECONDS);
                 }
                 break;
             case OHOS::Media::INFO_TYPE_RESOLUTION_CHANGE:
+                LOGD("video INFO_TYPE_RESOLUTION_CHANGE callback");
                 if (resolutionChangeEvent_) {
                     resolutionChangeEvent_();
                 }
                 break;
             case OHOS::Media::INFO_TYPE_MESSAGE:
-                LOGI("OnMessage callback type: %{public}d", extra);
+                LOGD("OnMessage callback type: %{public}d", extra);
                 break;
             default:
                 break;
