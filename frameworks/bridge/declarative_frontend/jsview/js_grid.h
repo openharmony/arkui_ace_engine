@@ -34,7 +34,7 @@ public:
     static void SetRowsGap(const JSCallbackInfo& info);
     static void SetScrollBar(int32_t displayMode);
     static void SetScrollBarColor(const std::string& color);
-    static void SetScrollBarWidth(const std::string& scrollWidth);
+    static void SetScrollBarWidth(const JSCallbackInfo& scrollWidth);
     static void JsOnScrollIndex(const JSCallbackInfo& info);
     static void SetCachedCount(int32_t cachedCount);
     static void SetEditMode(const JSCallbackInfo& info);
