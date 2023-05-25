@@ -475,8 +475,8 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
 {
     // ListItem -> Row -> title + icon
     auto Id = ElementRegister::GetInstance()->MakeUniqueId();
-    RefPtr<FrameNode> itemNode =
-        FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, Id, AceType::MakeRefPtr<ListItemPattern>(nullptr));
+    RefPtr<FrameNode> itemNode = FrameNode::CreateFrameNode(
+        V2::LIST_ITEM_ETS_TAG, Id, AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE));
     CHECK_NULL_RETURN(itemNode, nullptr);
 
     // update sheet row flex align

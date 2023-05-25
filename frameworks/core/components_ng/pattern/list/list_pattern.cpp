@@ -31,6 +31,8 @@
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/list/list_item_group_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -42,6 +44,7 @@ constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
 constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
 constexpr float DEFAULT_MIN_SPACE_SCALE = 0.75f;
 constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
+constexpr Color CARD_ITEM_FILL_COLOR = Color(0x1A007DFF);
 constexpr float LIST_SCROLL_TO_MASS = 1.0f;
 constexpr float LIST_SCROLL_TO_STIFFNESS = 227.0f;
 constexpr float LIST_SCROLL_TO_DAMPING = 33.0f;
@@ -1059,6 +1062,15 @@ void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
     std::list<RefPtr<FrameNode>> childrens;
     host->GenerateOneDepthVisibleFrame(childrens);
     for (const auto& item : childrens) {
+        if (item->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
+            auto itemGroupPattern = item->GetPattern<ListItemGroupPattern>();
+            CHECK_NULL_VOID(itemGroupPattern);
+            auto itemGroupStyle = itemGroupPattern->GetListItemGroupStyle();
+            if (itemGroupStyle == V2::ListItemGroupStyle::CARD) {
+                HandleCardModeSelectedEvent(selectedZone, item);
+            }
+            continue;
+        }
         auto itemPattern = item->GetPattern<ListItemPattern>();
         CHECK_NULL_VOID(itemPattern);
         if (!itemPattern->Selectable()) {
@@ -1079,6 +1091,32 @@ void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
     auto hostContext = host->GetRenderContext();
     CHECK_NULL_VOID(hostContext);
     hostContext->UpdateMouseSelectWithRect(selectedZone, SELECT_FILL_COLOR, SELECT_STROKE_COLOR);
+}
+
+void ListPattern::HandleCardModeSelectedEvent(const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode)
+{
+    CHECK_NULL_VOID(itemGroupNode);
+    std::list<RefPtr<FrameNode>> childrens;
+    itemGroupNode->GenerateOneDepthVisibleFrame(childrens);
+    for (const auto& item : childrens) {
+        auto itemPattern = item->GetPattern<ListItemPattern>();
+        CHECK_NULL_VOID(itemPattern);
+        if (!itemPattern->Selectable()) {
+            continue;
+        }
+        auto itemGeometry = item->GetGeometryNode();
+        CHECK_NULL_VOID(itemGeometry);
+        auto context = item->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        auto itemRect = itemGeometry->GetFrameRect();
+        if (!selectedZone.IsIntersectWith(itemRect)) {
+            itemPattern->MarkIsSelected(false);
+            context->OnMouseSelectUpdate(false, CARD_ITEM_FILL_COLOR, CARD_ITEM_FILL_COLOR);
+        } else {
+            itemPattern->MarkIsSelected(true);
+            context->OnMouseSelectUpdate(true, CARD_ITEM_FILL_COLOR, CARD_ITEM_FILL_COLOR);
+        }
+    }
 }
 
 void ListPattern::ClearMultiSelect()
