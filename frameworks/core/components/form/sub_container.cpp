@@ -377,6 +377,10 @@ void SubContainer::ProcessSharedImage(const std::map<std::string, sptr<AppExecFw
     std::vector<int> byteLenArray;
     if (!imageDataMap.empty()) {
         for (auto& imageData : imageDataMap) {
+            if (!imageData.second) {
+                LOGI("the point of FormAshmem about %{private}s is null, continue", imageData.first.c_str());
+                continue;
+            }
             picNameArray.push_back(imageData.first);
             fileDescriptorArray.push_back(imageData.second->GetAshmemFd());
             byteLenArray.push_back(imageData.second->GetAshmemSize());
