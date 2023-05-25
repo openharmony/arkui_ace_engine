@@ -60,6 +60,8 @@ public:
     }
 
 private:
+    void ParseCustomCurveParams(RefPtr<Curve>& curve, const JSRef<JSVal>& jsValue);
+
     WeakPtr<ScrollControllerBase> controllerWeak_;
     WeakPtr<ScrollProxy> scrollBarProxyWeak_;
 
