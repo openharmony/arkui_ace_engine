@@ -287,6 +287,7 @@ private:
     // app bar to use
     bool installationFree_ = false;
     int32_t labelId_;
+    static bool isComponentMode_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };
