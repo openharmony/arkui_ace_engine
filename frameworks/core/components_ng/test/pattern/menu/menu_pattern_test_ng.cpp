@@ -176,6 +176,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg006, TestSize.Level1)
     MneuModelInstance.SetFontSize(Dimension(25.0));
     MneuModelInstance.SetFontColor(Color::RED);
     MneuModelInstance.SetFontWeight(FontWeight::BOLD);
+    MneuModelInstance.SetFontStyle(Ace::FontStyle::ITALIC);
 
     auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(menuNode, nullptr);
@@ -193,6 +194,8 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg006, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetFontWeight().value(), FontWeight::BOLD);
     ASSERT_TRUE(layoutProperty->GetFontColor().has_value());
     EXPECT_EQ(layoutProperty->GetFontColor().value(), Color::RED);
+    ASSERT_TRUE(layoutProperty->GetItalicFontStyle().has_value());
+    EXPECT_EQ(layoutProperty->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
 }
 
 /**
@@ -505,6 +508,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg011, TestSize.Level1)
     MenuItemProperties itemOption;
     itemOption.content = "content";
     MneuItemModelInstance.Create(itemOption);
+    MneuItemModelInstance.SetFontStyle(Ace::FontStyle::ITALIC);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
     auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
@@ -878,6 +882,68 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg019, TestSize.Level1)
     // MultiMenu should have its own layout algorithm
     auto layoutAlgorithm = multiMenu->GetPattern<MenuPattern>()->CreateLayoutAlgorithm();
     ASSERT_NE(AceType::DynamicCast<MultiMenuLayoutAlgorithm>(layoutAlgorithm), nullptr);
+}
+
+/**
+ * @tc.name: MenuPatternTestNg020
+ * @tc.desc: Verify UpdateMenuItemChildren.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTestNg020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create MenuModelNG and MenuItemModelNG object and set FontStyle properties of MenuModelNG.
+     */
+    MenuModelNG MneuModelInstance;
+    MenuItemModelNG MneuItemModelInstance;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+
+    MneuModelInstance.Create();
+    MneuModelInstance.SetFontStyle(Ace::FontStyle::ITALIC);
+
+    /**
+     * @tc.steps: step2. get the frameNode, MenuPattern and MenuLayoutProperty.
+     * @tc.expected: step2. check whether the objects is available.
+     */
+    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. not set FontStyle properties of MenuModelNG.
+     */
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    MneuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    itemPattern->OnModifyDone();
+    itemNode->MountToParent(menuNode);
+    itemNode->OnMountToParentDone();
+
+    /**
+     * @tc.steps: step4. call OnModifyDone of MenuPattern to call UpdateMenuItemChildren
+     */
+    menuPattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step5. get the FontStyle properties of menuItemLayoutProperty.
+     * @tc.expected: step5. check whether the FontStyle properties is is correct.
+     */
+    auto contentNode = itemPattern->GetContentNode();
+    ASSERT_NE(contentNode, nullptr);
+    auto textProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProperty, nullptr);
+    ASSERT_TRUE(textProperty->GetItalicFontStyle().has_value());
+    EXPECT_EQ(textProperty->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
 }
 
 /**
