@@ -36,6 +36,8 @@ const std::string TEST_TAG = "Test";
 constexpr int32_t NODE_ID = 143;
 constexpr int32_t NODE_ID2 = 153;
 constexpr int32_t NODE_ID3 = 157;
+constexpr float DEFAULT_ROOT_WIDTH = 480.f;
+constexpr float DEFAULT_ROOT_HEIGHT = 800.f;
 } // namespace
 
 class SelectOverlayTestNg : public testing::Test {
@@ -278,5 +280,116 @@ HWTEST_F(SelectOverlayTestNg, UpdateSelectHandleInfo002, TestSize.Level1)
         pattern->UpdateSecondSelectHandleInfo(selectInfo2.secondHandle);
         pattern->UpdateFirstAndSecondHandleInfo(selectInfo3.firstHandle, selectInfo3.secondHandle);
     }
+}
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap001
+ * @tc.desc: Test SelectOverlayPattern OnDirtyLayoutWrapperSwap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize selectOverlayInfo properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuOptionItems = GetMenuOptionItems();
+    selectInfo.singleLineHeight = NODE_ID;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    /**
+     * @tc.steps: step2. Create pattern and geometryNode.
+     */
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    /**
+     * @tc.steps: step2. Call OnDirtyLayoutWrapperSwap function.
+     * @tc.expected: return false
+     */
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    DirtySwapConfig config;
+    config.skipMeasure = true;
+    EXPECT_FALSE(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+}
+/**
+ * @tc.name: UpdateShowArea001
+ * @tc.desc: Test SelectOverlayPattern UpdateShowArea.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, UpdateShowArea001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize selectOverlayInfo properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuOptionItems = GetMenuOptionItems();
+    selectInfo.singleLineHeight = NODE_ID;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    /**
+     * @tc.steps: step2. Create pattern
+     */
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step3. Call UpdateShowArea
+     * @tc.expected: the function exits normally
+     */
+    RectF area;
+    pattern->UpdateShowArea(area);
+    EXPECT_NE(pattern->GetSelectOverlayInfo(), nullptr);
+    /**
+     * @tc.steps: step4. Call UpdateShowArea
+     * @tc.expected: the function exits normally
+     */
+    pattern->UpdateShowArea(selectInfo.showArea);
+    EXPECT_NE(pattern->GetSelectOverlayInfo(), nullptr);
+}
+/**
+ * @tc.name: HandleOperator001
+ * @tc.desc: Test SelectOverlayPattern HandleOperator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, HandleOperator001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize selectOverlayInfo properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.singleLineHeight = NODE_ID;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    /**
+     * @tc.steps: step2. Create pattern
+     */
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step4. Construct GestureEvent and Call UpdateShowArea
+     * @tc.expected: the function exits normally
+     */
+    GestureEvent info;
+    info.localLocation_ = Offset(1, 1);
+    pattern->HandleOnClick(info);
+    EXPECT_FALSE(pattern->GetSelectOverlayInfo()->isSingleHandle);
+    GestureEvent info2;
+    info2.localLocation_ = Offset(1, 1);
+    pattern->HandlePanEnd(info2);
+    EXPECT_FALSE(pattern->GetSelectOverlayInfo()->isSingleHandle);
 }
 } // namespace OHOS::Ace::NG
