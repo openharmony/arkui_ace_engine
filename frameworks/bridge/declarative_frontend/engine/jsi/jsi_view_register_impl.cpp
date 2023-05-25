@@ -432,6 +432,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "CanvasGradient", JSCanvasGradient::JSBind },
     { "ImageBitmap", JSRenderImage::JSBind },
     { "ImageData", JSCanvasImageData::JSBind },
+    { "ImageAnimator", JSImageAnimator::JSBind },
     { "Path2D", JSPath2D::JSBind },
     { "RenderingContextSettings", JSRenderingContextSettings::JSBind },
     { "Sheet", JSSheet::JSBind },
