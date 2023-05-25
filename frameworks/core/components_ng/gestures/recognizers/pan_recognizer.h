@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_PAN_RECOGNIZER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_PAN_RECOGNIZER_H
 
+#include <map>
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 
 namespace OHOS::Ace::NG {
@@ -72,6 +73,7 @@ private:
 
     bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer) override;
     GestureAcceptResult IsPanGestureAccept() const;
+    bool CalculateTruthFingers() const;
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
     void ChangeFingers(int32_t fingers);
@@ -90,6 +92,7 @@ private:
     double distance_ = 0.0;
     AxisEvent lastAxisEvent_;
     Offset averageDistance_;
+    std::map<int32_t, Offset> touchPointsDistance_;
     Offset delta_;
     double mainDelta_ = 0.0;
     VelocityTracker velocityTracker_;
