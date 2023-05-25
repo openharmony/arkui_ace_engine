@@ -151,6 +151,10 @@ void SwiperPattern::HandleAnimationEnds()
     if (NeedAutoPlay()) {
         GoAutoPlay();
     }
+
+#ifdef OHOS_PLATFORM
+    ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+#endif
 }
 
 void SwiperPattern::OnAttachToFrameNode()
@@ -1000,6 +1004,10 @@ void SwiperPattern::PlayTranslateAnimation(int32_t duration)
             CHECK_NULL_VOID(swiperPattern);
             swiperPattern->HandleAnimationEnds();
         });
+
+#ifdef OHOS_PLATFORM
+    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+#endif
 }
 
 void SwiperPattern::ForcedStopTranslateAnimation()
