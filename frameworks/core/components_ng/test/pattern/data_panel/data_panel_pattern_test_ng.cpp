@@ -582,7 +582,8 @@ HWTEST_F(DataPanelPropertyTestNg, DataPanelPaintPropertyTest010, TestSize.Level1
     int length = 3;
     std::vector<Gradient> valueColors;
     GradientColorSet(valueColors, length);
-    DataPanelShadow shadowOption { DEFAULT_SHADOW_VALUE, DEFAULT_SHADOW_VALUE, DEFAULT_SHADOW_VALUE, valueColors };
+    DataPanelShadow shadowOption { true, DEFAULT_SHADOW_VALUE, DEFAULT_SHADOW_VALUE, DEFAULT_SHADOW_VALUE,
+        valueColors };
     dataPanelModelNG.SetShadowOption(shadowOption);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -594,7 +595,8 @@ HWTEST_F(DataPanelPropertyTestNg, DataPanelPaintPropertyTest010, TestSize.Level1
     dataPanelModelNG2.Create(VALUES, MAX, TYPE_CYCLE);
     std::vector<Gradient> valueColors2;
     GradientColorSet(valueColors2, length);
-    DataPanelShadow shadowOption2 { -DEFAULT_SHADOW_VALUE, -DEFAULT_SHADOW_VALUE, -DEFAULT_SHADOW_VALUE, valueColors2 };
+    DataPanelShadow shadowOption2 { true, -DEFAULT_SHADOW_VALUE, -DEFAULT_SHADOW_VALUE, -DEFAULT_SHADOW_VALUE,
+        valueColors2 };
     dataPanelModelNG2.SetShadowOption(shadowOption2);
     auto frameNode2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode2, nullptr);
@@ -607,7 +609,8 @@ HWTEST_F(DataPanelPropertyTestNg, DataPanelPaintPropertyTest010, TestSize.Level1
     int length2 = 12;
     std::vector<Gradient> valueColors3;
     GradientColorSet(valueColors3, length2);
-    DataPanelShadow shadowOption3 { -DEFAULT_SHADOW_VALUE, -DEFAULT_SHADOW_VALUE, -DEFAULT_SHADOW_VALUE, valueColors3 };
+    DataPanelShadow shadowOption3 { true, -DEFAULT_SHADOW_VALUE, -DEFAULT_SHADOW_VALUE, -DEFAULT_SHADOW_VALUE,
+        valueColors3 };
     dataPanelModelNG3.SetShadowOption(shadowOption3);
     auto frameNode3 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode3, nullptr);
@@ -620,7 +623,7 @@ HWTEST_F(DataPanelPropertyTestNg, DataPanelPaintPropertyTest010, TestSize.Level1
     int length3 = 8;
     std::vector<Gradient> valueColors4;
     GradientColorSet(valueColors4, length3);
-    DataPanelShadow shadowOption4 { 0.0, 0.0, 0.0, valueColors4 };
+    DataPanelShadow shadowOption4 { true, 0.0, 0.0, 0.0, valueColors4 };
     dataPanelModelNG4.SetShadowOption(shadowOption4);
     auto frameNode4 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode4, nullptr);

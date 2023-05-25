@@ -212,6 +212,13 @@ void JSDataPanel::ShadowOption(const JSCallbackInfo& info)
         return;
     }
 
+    OHOS::Ace::NG::DataPanelShadow shadow;
+    if (info[0]->IsNull()) {
+        shadow.isShadowVisible = false;
+        DataPanelModel::GetInstance()->SetShadowOption(shadow);
+        return;
+    }
+
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> jsRadius = paramObject->GetProperty("radius");
     JSRef<JSVal> jsOffsetX = paramObject->GetProperty("offsetX");
@@ -249,7 +256,6 @@ void JSDataPanel::ShadowOption(const JSCallbackInfo& info)
         }
     }
 
-    OHOS::Ace::NG::DataPanelShadow shadow;
     shadow.radius = radius;
     shadow.offsetX = offsetX;
     shadow.offsetY = offsetY;
