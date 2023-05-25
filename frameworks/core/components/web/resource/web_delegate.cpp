@@ -2396,8 +2396,7 @@ void WebDelegate::InitWebViewWithSurface()
             initArgs.web_engine_args_to_add.push_back(
                 std::string("--init-background-color=").append(std::to_string(delegate->backgroundColor_)));
             if (!system::GetBoolParameter(BACKGROUMD_MEDIA_SUSPEND, true)) {
-                initArgs.web_engine_args_to_add.emplace_back(
-                    std::move(std::string("--disable-background-media-suspend")));
+                initArgs.web_engine_args_to_add.emplace_back(std::string("--disable-background-media-suspend"));
             }
             initArgs.multi_renderer_process = system::GetBoolParameter(MULTI_RENDER_PROCESS, false);
             if (isEnhanceSurface) {
