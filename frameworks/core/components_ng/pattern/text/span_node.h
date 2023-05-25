@@ -180,7 +180,6 @@ enum class PropertyInfo {
     FONTWEIGHT,
     FONTFAMILY,
     TEXTDECORATION,
-    TEXTDECORATIONCOLOR,
     TEXTCASE,
     LETTERSPACE,
     LINEHEIGHT,
@@ -277,7 +276,6 @@ public:
                                                                PropertyInfo::FONTWEIGHT,
                                                                PropertyInfo::FONTFAMILY,
                                                                PropertyInfo::TEXTDECORATION,
-                                                               PropertyInfo::TEXTDECORATIONCOLOR,
                                                                PropertyInfo::TEXTCASE,
                                                                PropertyInfo::LETTERSPACE,
                                                                PropertyInfo::LINEHEIGHT };
