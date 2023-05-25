@@ -70,6 +70,7 @@ void TextPattern::CloseSelectOverlay()
 
 void TextPattern::ResetSelection()
 {
+    showSelectOverlay_ = false;
     textSelector_.Update(-1, -1);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -158,7 +159,7 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
-
+    showSelectOverlay_ = true;
     InitSelection(textOffset);
     CalculateHandleOffsetAndShowOverlay();
     ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
@@ -267,10 +268,7 @@ void TextPattern::HandleOnCopy()
     if (copyOption_ != CopyOptions::None) {
         clipboard_->SetData(value, copyOption_);
     }
-    textSelector_.Update(-1, -1);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    ResetSelection();
 }
 
 void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle)
@@ -333,10 +331,7 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
 
 void TextPattern::HandleOnOverlayClose()
 {
-    textSelector_.Update(-1, -1);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    ResetSelection();
 }
 
 void TextPattern::HandleOnSelectAll()
@@ -773,6 +768,11 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     contentRect_ = dirty->GetGeometryNode()->GetContentRect();
     contentOffset_ = dirty->GetGeometryNode()->GetContentOffset();
     textStyle_ = textLayoutAlgorithm->GetTextStyle();
+
+    if (showSelectOverlay_) {
+        CalculateHandleOffsetAndShowOverlay();
+        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+    }
     return true;
 }
 
