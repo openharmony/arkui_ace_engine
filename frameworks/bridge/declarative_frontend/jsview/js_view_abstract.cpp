@@ -111,6 +111,7 @@ constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
+const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 
 bool CheckJSCallbackInfo(
     const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
@@ -607,6 +608,19 @@ void SetPopupMessageOptions(const JSRef<JSObject> messageOptionsObj, const RefPt
         if (fontWeightValue->IsString()) {
             if (popupParam) {
                 popupParam->SetFontWeight(ConvertStrToFontWeight(fontWeightValue->ToString()));
+            } else {
+                LOGI("Empty popup.");
+            }
+        }
+        auto fontStyleValue = fontObj->GetProperty("style");
+        if (fontStyleValue->IsNumber()) {
+            int32_t value = fontStyleValue->ToNumber<int32_t>();
+            if (value < 0 || value >= static_cast<int32_t>(FONT_STYLES.size())) {
+                LOGI("Text fontStyle(%d) is invalid value", value);
+                return;
+            }
+            if (popupParam) {
+                popupParam->SetFontStyle(FONT_STYLES[value]);
             } else {
                 LOGI("Empty popup.");
             }
@@ -5210,7 +5224,7 @@ void JSViewAbstract::SetPaddingRight(const JSCallbackInfo& info)
 
 void JSViewAbstract::SetBlur(float radius)
 {
-    CalcDimension dimensionRadius(radius, DimensionUnit::PX);
+    CalcDimension dimensionRadius(radius, DimensionUnit::VP);
     ViewAbstractModel::GetInstance()->SetFrontBlur(dimensionRadius);
 }
 
@@ -5221,7 +5235,7 @@ void JSViewAbstract::SetColorBlend(Color color)
 
 void JSViewAbstract::SetBackdropBlur(float radius)
 {
-    CalcDimension dimensionRadius(radius, DimensionUnit::PX);
+    CalcDimension dimensionRadius(radius, DimensionUnit::VP);
     ViewAbstractModel::GetInstance()->SetBackdropBlur(dimensionRadius);
 }
 

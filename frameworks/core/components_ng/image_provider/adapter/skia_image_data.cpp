@@ -63,15 +63,15 @@ sk_sp<SkData> SkiaImageData::GetSkData() const
 
 RefPtr<SvgDomBase> SkiaImageData::MakeSvgDom(const std::optional<Color>& svgFillColor)
 {
-    // TODO: svg support in ng build
-#ifdef NG_BUILD
-    return nullptr;
-#else
     const auto svgStream = std::make_unique<SkMemoryStream>(skData_);
     CHECK_NULL_RETURN(svgStream, nullptr);
     if (SystemProperties::GetSvgMode() <= 0) {
         return SkiaSvgDom::CreateSkiaSvgDom(*svgStream, svgFillColor);
     }
+#ifdef NG_BUILD
+    LOGE("NG SvgDom not support!");
+    return nullptr;
+#else
     auto svgDom_ = SvgDom::CreateSvgDom(*svgStream, svgFillColor);
     if (!svgDom_) {
         return nullptr;

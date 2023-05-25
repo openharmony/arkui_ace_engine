@@ -111,7 +111,7 @@ public:
 
     void JumpTo(int32_t index, int32_t source) override;
     void JumpTo(double position);
-    bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve) override;
+    bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth) override;
     bool AnimateTo(double position, float duration, const RefPtr<Curve>& curve, bool limitDuration = true,
         const std::function<void()>& onFinish = nullptr);
     bool AnimateToTarget(const ComposeId& targetId, float duration, const RefPtr<Curve>& curve,

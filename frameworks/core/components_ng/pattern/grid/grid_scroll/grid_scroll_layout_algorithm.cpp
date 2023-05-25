@@ -227,6 +227,8 @@ void GridScrollLayoutAlgorithm::InitialItemsCrossSize(
         ConvertToPx(layoutProperty->GetColumnsGap().value_or(0.0_vp), scale, frameSize.Width()).value_or(0);
     mainGap_ = axis_ == Axis::HORIZONTAL ? columnsGap : rowsGap;
     crossGap_ = axis_ == Axis::VERTICAL ? columnsGap : rowsGap;
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    crossPaddingOffset_ = axis_ == Axis::HORIZONTAL ? padding.top.value_or(0) : padding.left.value_or(0);
     
     auto crossSize = frameSize.CrossSize(axis_);
     std::vector<double> crossLens;

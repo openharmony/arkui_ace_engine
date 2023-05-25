@@ -67,7 +67,6 @@ ohos_shared_library("ace_uicontent") {
     "${ace_root}/interfaces/inner_api/ace/hot_reloader.cpp",
     "${ace_root}/interfaces/inner_api/ace/serializeable_object.cpp",
     "${ace_root}/interfaces/inner_api/ace/ui_content.cpp",
-    "${ace_root}/interfaces/inner_api/ace/ui_window.cpp",
   ]
 
   if (!use_mingw_win && !use_mac && !use_linux &&
@@ -82,5 +81,6 @@ ohos_shared_library("ace_uicontent") {
   }
 
   subsystem_name = ace_engine_subsystem
+  innerapi_tags = [ "platformsdk_indirect" ]
   part_name = ace_engine_part
 }

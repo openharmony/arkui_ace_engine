@@ -960,7 +960,8 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
         auto workerPostTask = [nativeEngine](std::function<void()>&& callback) {
             nativeEngine->CallDebuggerPostTaskFunc(std::move(callback));
         };
-        panda::JSNApi::StartDebugger(libraryPath.c_str(), vm, debugMode, gettid(), workerPostTask);
+        panda::JSNApi::DebugOption debugOption = {libraryPath.c_str(), debugMode};
+        panda::JSNApi::StartDebugger(vm, debugOption, gettid(), workerPostTask);
 #endif
         instance->InitConsoleModule(arkNativeEngine);
 

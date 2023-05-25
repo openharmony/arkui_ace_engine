@@ -95,6 +95,7 @@ foreach(item, ace_platforms) {
 
       deps = [ "$ace_root/build:libace_static_ohos" ]
       version_script = "libace.map"
+      innerapi_tags = [ "platformsdk" ]
       part_name = ace_engine_part
       subsystem_name = ace_engine_subsystem
       configs = [ "$ace_root/test/unittest:ace_coverage_config" ]
@@ -120,7 +121,10 @@ foreach(item, ace_platforms) {
         ]
       }
 
-      configs = [ "$ace_root:ace_test_config" ]
+      configs = [
+        "$ace_root:ace_test_config",
+        "$ace_root/test/unittest:ace_coverage_config",
+      ]
 
       deps = [
         "$ace_root/adapter/ohos/osal:ace_osal_ohos",

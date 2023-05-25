@@ -51,6 +51,8 @@ public:
 
     void MoreOrBackAnimation(bool isMore);
 
+    bool IsInSelectedOrSelectOverlayArea(const PointF& point);
+
 private:
     void CreateToolBar();
     void CreateExtensionToolBar();

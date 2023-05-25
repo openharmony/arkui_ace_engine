@@ -47,6 +47,11 @@ public:
         return draggable_;
     }
 
+    bool DefaultSupportDrag() override
+    {
+        return true;
+    }
+
 private:
     void LinkToAddress();
     void OnAttachToFrameNode() override;
