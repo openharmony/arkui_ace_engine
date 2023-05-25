@@ -74,7 +74,7 @@ private:
     void NavTransitionInAnimation(const RefPtr<FrameNode>& navigationNode,
         const RefPtr<FrameNode>& transitionOutNode, const RefPtr<FrameNode>& navDestination);
     void NavTransitionOutAnimation(const RefPtr<UINode>& navigationNode, const RefPtr<FrameNode>& navBarNode,
-        const RefPtr<FrameNode>& navigationContentNode);
+        const RefPtr<FrameNode>& navDestination, const RefPtr<FrameNode>& navigationContentNode);
     void NavTransitionBackToPreAnimation(const RefPtr<UINode>& navigationNode, const RefPtr<FrameNode>& preDestination,
         const RefPtr<FrameNode>& curNavDestination, const RefPtr<FrameNode>& navigationContentNode);
     void TitleTransitionInAnimation(const RefPtr<FrameNode>& navigationNode,
