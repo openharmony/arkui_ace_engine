@@ -145,6 +145,10 @@ void OffscreenCanvasPaintMethod::DrawImage(
         path.addRect(skRect);
         RosenDecorationPainter::PaintShadow(path, *imageShadow_, skCanvas);
     }
+
+    if (globalState_.HasGlobalAlpha()) {
+        imagePaint_.setAlphaf(globalState_.GetAlpha());
+    }
     switch (canvasImage.flag) {
         case 0:
             skCanvas->drawImage(image, canvasImage.dx, canvasImage.dy);
@@ -439,9 +443,7 @@ bool OffscreenCanvasPaintMethod::UpdateOffParagraph(const std::string& text, boo
     } else {
         style.text_align = ConvertTxtTextAlign(fillState_.GetTextAlign());
     }
-    if (fillState_.GetOffTextDirection() == TextDirection::RTL) {
-        style.text_direction = txt::TextDirection::rtl;
-    }
+    style.text_direction = ConvertTxtTextDirection(fillState_.GetOffTextDirection());
     style.text_align = GetEffectiveAlign(style.text_align, style.text_direction);
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, false);

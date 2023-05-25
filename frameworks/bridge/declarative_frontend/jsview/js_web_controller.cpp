@@ -223,6 +223,13 @@ std::shared_ptr<WebJSValue> JSWebController::GetJavaScriptResult(const std::stri
     for (std::shared_ptr<WebJSValue> input : args) {
         ParseWebViewValueToJsValue(input, argv);
     }
+
+    if (jsObject->GetProperty(objectMethod.c_str())->IsEmpty() ||
+        !(jsObject->GetProperty(objectMethod.c_str())->IsFunction())) {
+        LOGE("Param is invalid");
+        return jsResult;
+    }
+
     JSRef<JSFunc> func = JSRef<JSFunc>::Cast(jsObject->GetProperty(objectMethod.c_str()));
     if (func->IsEmpty()) {
         LOGE("%{public}s not found or is not a function!", objectMethod.c_str());

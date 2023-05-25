@@ -85,6 +85,7 @@ public:
 
     uint32_t GetCurrentIndex() const
     {
+        // currentIndex_ is year/month/day information, for example month [0, 11] is Equivalent to [1, 12]
         return currentIndex_;
     }
 

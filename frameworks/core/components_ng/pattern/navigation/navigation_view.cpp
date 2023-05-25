@@ -385,6 +385,10 @@ void NavigationView::SetTitle(const std::string& title, bool hasSubTitle)
         // if no subtitle, title's maxLine = 2. if has subtitle, title's maxLine = 1.
         if (!hasSubTitle) {
             if (navBarNode->GetSubtitle()) {
+                auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+                CHECK_NULL_VOID(titleBarNode);
+                titleBarNode->RemoveChild(navBarNode->GetSubtitle());
+                titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
                 navBarNode->SetSubtitle(nullptr);
             }
             titleProperty->UpdateMaxLines(2);
@@ -874,6 +878,7 @@ void NavigationView::SetCustomToolBar(const RefPtr<UINode>& customToolBar)
     navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
     auto toolBarNode = navBarNode->GetToolBarNode();
     CHECK_NULL_VOID(toolBarNode);
+    toolBarNode->Clean();
     customToolBar->MountToParent(toolBarNode);
     navBarNode->UpdatePrevToolBarIsCustom(true);
 }

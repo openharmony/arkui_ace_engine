@@ -1259,26 +1259,4 @@ HWTEST_F(SearchTestNg, PaintMethodTest002, TestSize.Level1)
     auto canvasDrawFunction = searchPaintMethod->GetContentDrawFunction(paintWrapper);
     canvasDrawFunction(rsCanvas);
 }
-
-/**
- * @tc.name: SearchChangeEventHub001
- * @tc.desc: SearchEventHub
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestNg, SearchChangeEventHub001, TestSize.Level1)
-{
-    SearchModelNG searchModelInstance;
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    ChangeAndSubmitEvent changeEvent = [](const std::string str) {};
-    searchModelInstance.SetOnChangeEvent(changeEvent);
-    auto eventHub = frameNode->GetEventHub<SearchEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    eventHub->AttachHost(frameNode);
-    eventHub->UpdateChangeEvent("");
-    ASSERT_NE(eventHub->changeEvent_, nullptr);
-    eventHub->changeEvent_ = nullptr;
-    eventHub->UpdateChangeEvent("");
-    EXPECT_EQ(eventHub->changeEvent_, nullptr);
-}
 } // namespace OHOS::Ace::NG

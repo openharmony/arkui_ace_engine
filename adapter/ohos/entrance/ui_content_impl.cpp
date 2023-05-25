@@ -172,17 +172,19 @@ public:
 
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
     {
-        if (type == Rosen::AvoidAreaType::TYPE_SYSTEM || type == Rosen::AvoidAreaType::TYPE_CUTOUT) {
+        if (type == OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM || type == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) {
+            LOGI("UIContent::OnAvoidAreaChanged type:%{public}d", type);
             auto container = Platform::AceContainer::GetContainer(instanceId_);
             CHECK_NULL_VOID(container);
             auto taskExecutor = container->GetTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);
             taskExecutor->PostTask(
                 [container, instanceId = instanceId_] {
+                    CHECK_NULL_VOID(container);
                     ContainerScope scope(instanceId);
                     auto context = container->GetPipelineContext();
                     CHECK_NULL_VOID_NOLOG(context);
-                    context->OnAvoidAreaChanged();
+                    context->ResetViewSafeArea();
                 },
                 TaskExecutor::TaskType::UI);
         }
@@ -1550,6 +1552,7 @@ void UIContentImpl::SetIgnoreViewSafeArea(bool ignoreViewSafeArea)
             auto pipelineContext = container->GetPipelineContext();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->SetIgnoreViewSafeArea(ignoreSafeArea);
+            pipelineContext->ResetViewSafeArea();
         },
         TaskExecutor::TaskType::UI);
 }

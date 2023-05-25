@@ -27,6 +27,7 @@
 #include "base/log/log.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 #undef protected
 #undef private
@@ -37,8 +38,15 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 class MeasureUtilsTestNg : public testing::Test {
 public:
-    static void SetUpTestCase() {};
-    static void TearDownTestCase() {};
+    static void SetUpTestCase()
+    {
+        MockPipelineBase::SetUp();
+    }
+
+    static void TearDownTestCase()
+    {
+        MockPipelineBase::TearDown();
+    }
 };
 
 /**

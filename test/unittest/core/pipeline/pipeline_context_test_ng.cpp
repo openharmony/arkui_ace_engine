@@ -912,22 +912,22 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
      #             pressedCodes = { KeyCode::KEY_TAB }.
      * @tc.expected: The return value of OnKeyEvent is true.
      */
-    context_->SetIsNeedShowFocus(false);
+    context_->SetIsFocusActive(false);
     event.action = KeyAction::DOWN;
     event.pressedCodes = { KeyCode::KEY_TAB };
     EXPECT_TRUE(context_->OnKeyEvent(event));
-    EXPECT_TRUE(context_->GetIsNeedShowFocus());
+    EXPECT_TRUE(context_->GetIsFocusActive());
 
     /**
      * @tc.steps3: Call the function OnKeyEvent with isNeedShowFocus_ = false, action = KeyAction::DOWN and
      #             pressedCodes = { KeyCode::KEY_DPAD_UP }.
      * @tc.expected: The return value of OnKeyEvent is true.
      */
-    context_->SetIsNeedShowFocus(false);
+    context_->SetIsFocusActive(false);
     event.pressedCodes = { KeyCode::KEY_DPAD_UP };
     eventManager->SetInstanceId(DEFAULT_INT0);
     EXPECT_TRUE(context_->OnKeyEvent(event));
-    EXPECT_FALSE(context_->GetIsNeedShowFocus());
+    EXPECT_FALSE(context_->GetIsFocusActive());
 
     /**
      * @tc.steps4: Call the function OnKeyEvent with isNeedShowFocus_ = false, action = KeyAction::UP and
@@ -935,11 +935,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
      * @tc.expected: The return value of OnKeyEvent is true.
      */
     eventManager->SetInstanceId(DEFAULT_INT0);
-    context_->SetIsNeedShowFocus(false);
+    context_->SetIsFocusActive(false);
     event.action = KeyAction::UP;
     event.pressedCodes = { KeyCode::KEY_CLEAR };
     EXPECT_TRUE(context_->OnKeyEvent(event));
-    EXPECT_FALSE(context_->GetIsNeedShowFocus());
+    EXPECT_FALSE(context_->GetIsFocusActive());
 
     /**
      * @tc.steps4: Call the function OnKeyEvent with isNeedShowFocus_ = true, action = KeyAction::UP and
@@ -947,11 +947,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
      * @tc.expected: The return value of OnKeyEvent is false.
      */
     eventManager->SetInstanceId(DEFAULT_INT1);
-    context_->SetIsNeedShowFocus(true);
+    context_->SetIsFocusActive(true);
     event.action = KeyAction::UP;
     event.pressedCodes = { KeyCode::KEY_CLEAR };
     EXPECT_FALSE(context_->OnKeyEvent(event));
-    EXPECT_TRUE(context_->GetIsNeedShowFocus());
+    EXPECT_TRUE(context_->GetIsFocusActive());
 }
 
 /**
