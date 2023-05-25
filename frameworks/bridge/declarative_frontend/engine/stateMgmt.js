@@ -4592,7 +4592,6 @@ class ViewPU extends NativeViewPartialUpdate {
         const newElmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
         const oldElmtId = node.id__();
         // store the current id and origin id, used for dirty element sort in {compareNumber}
-        // this.getRecycleManager().setRecycleNodeCurrentElmtId(elmtId, currentElmtId);
         recycleUpdateFunc(newElmtId, /* is first render */ true, node);
         this.updateFuncByElmtId.delete(oldElmtId);
         this.updateFuncByElmtId.set(newElmtId, compilerAssignedUpdateFunc);
