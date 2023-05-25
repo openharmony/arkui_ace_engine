@@ -213,7 +213,8 @@ void ListLayoutAlgorithm::MeasureList(
             jumpIndex_.value(), currentOffset_, startMainPos_, endMainPos_);
         if (scrollIndexAlignment_ == ScrollIndexAlignment::ALIGN_TOP) {
             jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value());
-            LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), 0);
+            startPos = (jumpIndex_.value() == 0) && Negative(startMainPos_) ? startMainPos_ : 0;
+            LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), startPos);
             if (jumpIndex_.value() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
                 LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() - 1, GetStartPosition());
             }
