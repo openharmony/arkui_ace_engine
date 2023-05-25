@@ -3310,6 +3310,7 @@ void TextFieldPattern::RequestKeyboardOnFocus()
     if (!RequestKeyboard(false, true, true)) {
         return;
     }
+    StartTwinkling();
     LOGI("RequestKeyboardOnFocus ok, reset flag");
     auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
