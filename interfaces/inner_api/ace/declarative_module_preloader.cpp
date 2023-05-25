@@ -46,7 +46,6 @@ void InitAceModule(void* runtime)
     }
 
     entry(runtime);
-    FREELIB(handle);
 }
 
 void DeclarativeModulePreloader::Preload(NativeEngine& runtime)
@@ -72,7 +71,6 @@ void InitAceModuleCard(void* runtime)
     }
 
     entry(runtime);
-    FREELIB(handle);
 }
 
 void DeclarativeModulePreloader::PreloadCard(NativeEngine& runtime)
