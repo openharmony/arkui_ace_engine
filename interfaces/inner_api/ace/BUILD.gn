@@ -57,8 +57,9 @@ ohos_shared_library("ace_uicontent") {
   public_configs = [ ":uicontent_public_config" ]
 
   configs = [
-    "$ace_root:ace_config",
     ":uicontent_config",
+    "$ace_root:ace_config",
+    "$ace_root/test/unittest:ace_coverage_config",
   ]
 
   sources = [
@@ -66,7 +67,6 @@ ohos_shared_library("ace_uicontent") {
     "${ace_root}/interfaces/inner_api/ace/hot_reloader.cpp",
     "${ace_root}/interfaces/inner_api/ace/serializeable_object.cpp",
     "${ace_root}/interfaces/inner_api/ace/ui_content.cpp",
-    "${ace_root}/interfaces/inner_api/ace/ui_window.cpp",
   ]
 
   if (!use_mingw_win && !use_mac && !use_linux &&

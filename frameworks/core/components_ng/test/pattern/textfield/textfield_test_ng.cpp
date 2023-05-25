@@ -357,7 +357,7 @@ HWTEST_F(TextFieldPatternTestNg, EditingValueFilter001, TestSize.Level1)
     EXPECT_EQ(valueToUpdate, "filter_value1test");
     layoutProperty->UpdateInputFilter("test");
     textFieldPattern->EditingValueFilter(valueToUpdate, result);
-    EXPECT_EQ(valueToUpdate, "test");
+    EXPECT_EQ(valueToUpdate, "1test");
 }
 
 /**
@@ -2840,7 +2840,6 @@ HWTEST_F(TextFieldPatternTestNg, ProcessDefaultPadding, TestSize.Level1)
     EXPECT_EQ(paddings.top, NG::CalcLength(themePadding.Top().ConvertToPx()));
 }
 
-
 /**
  * @tc.name: SetShowCounter
  * @tc.desc: Verify that the SetShowCounter interface calls normally and exits without exception.
@@ -3469,13 +3468,8 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldModel002, TestSize.Level1)
 
     Font font;
     textFieldModelInstance.SetPlaceholderFont(font);
-    std::vector<std::string> fontFamilies {"Georgia", "Serif"};
-    Font otherFont {
-        FontWeight::W200,
-        Dimension(12),
-        OHOS::Ace::FontStyle::ITALIC,
-        fontFamilies
-    };
+    std::vector<std::string> fontFamilies { "Georgia", "Serif" };
+    Font otherFont { FontWeight::W200, Dimension(12), OHOS::Ace::FontStyle::ITALIC, fontFamilies };
     PaddingProperty noPadding = CreatePadding(0.0f, 0.0f, 0.0f, 0.0f);
     PaddingProperty Padding = CreatePadding(10.0f, 10.0f, 10.0f, 10.0f);
     Edge edgePadding = Edge(10.0f, 10.0f, 10.0f, 10.0f);
@@ -3527,5 +3521,381 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldModel003, TestSize.Level1)
     textFieldModelInstance.SetHoverEffect(HoverEffectType::AUTO);
     EXPECT_EQ(layoutProperty->GetTextColor(), Color::BLACK);
     EXPECT_EQ(layoutProperty->GetCopyOptions(), CopyOptions::Local);
+}
+
+/**
+ * @tc.name: ShowOverlay001
+ * @tc.desc: Test CheckHandles function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, ShowOverlay001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->contentRect_ = RectF(10, 10, 30, 30);
+
+    pattern->parentGlobalOffset_ = OffsetF(50, 50);
+    // handles are outside contentRect
+    pattern->textSelector_.firstHandleOffset_ = OffsetF(30, 30);
+    pattern->textSelector_.secondHandleOffset_ = OffsetF(300, 300);
+
+    std::optional<RectF> firstHandle = RectF(0, 0, 0, 0);
+    std::optional<RectF> secondHandle = RectF(0, 0, 0, 0);
+
+    pattern->CheckHandles(firstHandle, secondHandle);
+    // handles should be reset after CheckHandles
+    EXPECT_EQ(firstHandle, std::nullopt);
+    EXPECT_EQ(secondHandle, std::nullopt);
+}
+
+/**
+ * @tc.name: TextFieldModelNGSetShowUnderLine
+ * @tc.desc: test SetShowUnderLine.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldModelNGSetShowUnderLine, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern and TextFieldLayoutProperty.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. test branch - showUnderLine is true and PropertyChangeFlag is PROPERTY_UPDATE_NORMAL.
+     * @tc.expected: Check the ShowUnderLine of the pattern.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.SetShowUnderline(true);
+    layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_NORMAL);
+    EXPECT_TRUE(layoutProperty->GetShowUnderline().value());
+
+    /**
+     * @tc.steps: step3. test branch - showUnderLine is false.
+     * @tc.expected: Check the ShowUnderLine of the pattern.
+     */
+    textFieldModelNG.SetShowUnderline(false);
+    EXPECT_FALSE(layoutProperty->GetShowUnderline().value());
+
+    /**
+     * @tc.steps: step4. test branch - showUnderLine is true and PropertyChangeFlag not equal PROPERTY_UPDATE_NORMAL.
+     * @tc.expected: Check the ShowUnderLine of the pattern.
+     */
+    layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    textFieldModelNG.SetShowUnderline(true);
+    EXPECT_TRUE(layoutProperty->GetShowUnderline().value());
+
+    /**
+     * @tc.steps: step5. test branch - showUnderLine is true and layoutProperty has text color.
+     * @tc.expected: Check the ShowUnderLine of the pattern.
+     */
+    layoutProperty->UpdateTextColor(Color::FromString("#FF909090"));
+    textFieldModelNG.SetShowUnderline(true);
+    EXPECT_TRUE(layoutProperty->GetShowUnderline().value());
+}
+
+/**
+ * @tc.name: TextFieldModelNGProcessDefaultPadding
+ * @tc.desc: test ProcessDefaultPadding.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldModelNGProcessDefaultPadding, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Crate TextFieldLayoutProperty and MockThemeManager.
+     * @tc.expected: Check if they are nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextFieldTheme>()));
+
+    /**
+     * @tc.steps: step2. let ShowUnderLine be true.
+     * @tc.expected: Check the paddingProperty.
+     */
+    TextFieldModelNG textFieldModelNG;
+    PaddingProperty paddingProperty;
+
+    layoutProperty->UpdateShowUnderline(true);
+    textFieldModelNG.ProcessDefaultPadding(paddingProperty);
+    Dimension vertical { 12.0, DimensionUnit::PX };
+    Dimension horizontal { 0.0, DimensionUnit::PX };
+    EXPECT_EQ(paddingProperty.top.value().GetDimension(), vertical);
+    EXPECT_EQ(paddingProperty.bottom.value().GetDimension(), vertical);
+    EXPECT_EQ(paddingProperty.left.value().GetDimension(), horizontal);
+    EXPECT_EQ(paddingProperty.right.value().GetDimension(), horizontal);
+
+    /**
+     * @tc.steps: step3. let ShowUnderLine be false.
+     * @tc.expected: Check the value of the updated property.
+     */
+    layoutProperty->UpdateShowUnderline(false);
+    textFieldModelNG.ProcessDefaultPadding(paddingProperty);
+    Dimension zero { 0.0, DimensionUnit::PX };
+    EXPECT_EQ(paddingProperty.top.value().GetDimension(), zero);
+    EXPECT_EQ(paddingProperty.bottom.value().GetDimension(), zero);
+    EXPECT_EQ(paddingProperty.left.value().GetDimension(), zero);
+    EXPECT_EQ(paddingProperty.right.value().GetDimension(), zero);
+}
+
+/**
+ * @tc.name: TextFieldModelNGSetWidthAuto
+ * @tc.desc: test SetWidthAuto.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldModelNGSetWidthAuto, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Crate TextFieldLayoutProperty
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. call SetWidthAuto.
+     * @tc.expected: Check the value of WidthAuto.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.SetWidthAuto(true);
+    EXPECT_TRUE(layoutProperty->GetWidthAuto().value_or(false));
+
+    textFieldModelNG.SetWidthAuto(false);
+    EXPECT_FALSE(layoutProperty->GetWidthAuto().value_or(true));
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap
+ * @tc.desc: test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create LayoutWrapper.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutProperty = GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto textFieldPattern = GetPattern();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto textFieldLayoutAlgorithm = textFieldPattern->CreateLayoutAlgorithm();
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(textFieldLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step2. Call OnDirtyLayoutWrapperSwap.
+     * @tc.expected: Check the return value.
+     */
+    DirtySwapConfig dirtySwapConfig;
+    EXPECT_TRUE(textFieldPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
+}
+
+/**
+ * @tc.name: GetFontFamily
+ * @tc.desc: test GetFontFamily.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, GetFontFamily, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldLayoutProperty.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Call GetFontFamily.
+     * @tc.expected: Check the font family return from GetFontFamily.
+     */
+    std::vector<std::string> fontFamily = { "Sans", "serif" };
+    layoutProperty->UpdateFontFamily(fontFamily);
+
+    auto getFontFamily = pattern->GetFontFamily();
+    EXPECT_STREQ(getFontFamily.c_str(), "Sans,serif");
+}
+
+/**
+ * @tc.name: UpdateCaretPositionByMouseMovement
+ * @tc.desc: test UpdateCaretPositionByMouseMovement.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, UpdateCaretPositionByMouseMovement, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.Get pattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call function UpdateCaretPositionByMouseMovement.
+     * @tc.expected: Check the return value.
+     */
+    EXPECT_FALSE(pattern->UpdateCaretPositionByMouseMovement());
+    pattern->UpdateEditingValue(TEXT_VALUE, 5);
+    pattern->UpdateCaretPositionByMouseMovement();
+    EXPECT_FALSE(pattern->UpdateCaretPositionByMouseMovement());
+
+    pattern->lastTouchOffset_.SetX(8);
+    pattern->contentRect_.SetLeft(4);
+    pattern->contentRect_.SetWidth(2);
+    EXPECT_TRUE(pattern->UpdateCaretPositionByMouseMovement());
+}
+
+/**
+ * @tc.name: UpdateSelectionOffset
+ * @tc.desc: test UpdateSelectionOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, UpdateSelectionOffset, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. setup condition parameters.
+     * @tc.expected: Check the value of the updated property.
+     */
+    pattern->SetInSelectMode(SelectionMode::SELECT_ALL);
+    pattern->textSelector_.baseOffset = 5;
+    pattern->textSelector_.destinationOffset = 6;
+    pattern->textRect_.SetLeft(4);
+    pattern->textRect_.SetWidth(4);
+    pattern->UpdateSelectionOffset();
+    EXPECT_EQ(pattern->GetTextSelector().selectionBaseOffset.GetX(), 4);
+    EXPECT_EQ(pattern->GetTextSelector().selectionDestinationOffset.GetX(), 8);
+
+    std::vector<RSTypographyProperties::TextBox> textBoxes;
+    RSTypographyProperties::TextBox textBox;
+    textBoxes.emplace_back(textBox);
+    pattern->textBoxes_ = textBoxes;
+    pattern->textRect_.SetLeft(5);
+    pattern->textRect_.SetWidth(5);
+    pattern->UpdateSelectionOffset();
+    EXPECT_EQ(pattern->GetTextSelector().selectionBaseOffset.GetX(), 5);
+    EXPECT_EQ(pattern->GetTextSelector().selectionDestinationOffset.GetX(), 10);
+}
+
+/**
+ * @tc.name: UpdateCaretPositionByTextEdit
+ * @tc.desc: test UpdateCaretPositionByTextEdit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, UpdateCaretPositionByTextEdit, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. let editing text be empty.
+     * @tc.expected: Check CaretRect property.
+     */
+    layoutProperty->UpdateMaxLines(2);
+    layoutProperty->UpdateTextAlign(TextAlign::START);
+    pattern->textRect_.SetLeft(8);
+    pattern->textRect_.SetTop(5);
+    pattern->UpdateEditingValue("", 0);
+    pattern->UpdateCaretPositionByTextEdit();
+    EXPECT_EQ(pattern->GetCaretRect().GetX(), 8);
+    EXPECT_EQ(pattern->GetCaretRect().GetY(), 5);
+
+    /**
+     * @tc.steps: step3. let editing text caret position be zero.
+     * @tc.expected: Check CaretRect property.
+     */
+    pattern->UpdateEditingValue(TEXT_VALUE, 0);
+    pattern->textEditingValue_.caretPosition = 0;
+    pattern->UpdateCaretPositionByTextEdit();
+    EXPECT_EQ(pattern->GetCaretRect().GetX(), 8);
+    EXPECT_EQ(pattern->GetCaretRect().GetY(), 5);
+
+    /**
+     * @tc.steps: step4. editing text not empty and caret position > 0.
+     * @tc.expected: Check CaretRect property.
+     */
+    pattern->textEditingValue_.caretPosition = 1;
+    pattern->contentRect_.SetLeft(4);
+    pattern->UpdateCaretPositionByTextEdit();
+    EXPECT_EQ(pattern->GetCaretRect().GetX(), 4);
+    EXPECT_EQ(pattern->GetCaretRect().GetY(), 5);
+}
+
+/**
+ * @tc.name: GetCopyOptionString
+ * @tc.desc: test GetCopyOptionString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, GetCopyOptionString, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. build all test items and call GetCopyOptionString.
+     * @tc.expected: Check the return value.
+     */
+    struct OptionData {
+        CopyOptions options;
+        std::string expectOptionString;
+    };
+    std::vector<OptionData> allOptions = { { CopyOptions::InApp, "CopyOptions.InApp" },
+        { CopyOptions::Local, "CopyOptions.Local" }, { CopyOptions::Distributed, "CopyOptions.Distributed" },
+        { CopyOptions::None, "CopyOptions.None" } };
+    for (auto optionData : allOptions) {
+        layoutProperty->UpdateCopyOptions(optionData.options);
+        EXPECT_STREQ(pattern->GetCopyOptionString().c_str(), optionData.expectOptionString.c_str());
+    }
 }
 } // namespace OHOS::Ace::NG

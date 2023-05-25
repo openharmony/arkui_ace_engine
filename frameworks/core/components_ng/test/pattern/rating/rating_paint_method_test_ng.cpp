@@ -126,7 +126,7 @@ HWTEST_F(RatingPaintMethodTestNg, RatingPaintPropertyTest001, TestSize.Level1)
     DrawingContext context = { mockCanvas, 10.0f, 10.0f };
     EXPECT_CALL(mockCanvas, DrawBackground(_)).Times(RATING_DRAW_BACKGROUND_TIMES);
     EXPECT_CALL(mockCanvas, Save()).Times(RATING_SAVE_TIMES);
-    EXPECT_CALL(mockCanvas, ClipRoundRect(_, _)).Times(RATING_CLIP_ROUND_RECT_TIMES);
+    EXPECT_CALL(mockCanvas, ClipRoundRectImpl(_, _, _)).Times(RATING_CLIP_ROUND_RECT_TIMES);
     EXPECT_CALL(mockCanvas, Restore()).Times(RATING_RESTORE_TIMES);
     EXPECT_CALL(mockCanvas, ClipRect(_, _)).Times(RATING_CLIP_CLIP_RECT_TIMES);
     ratingPaintMethod->ratingModifier_->onDraw(context);

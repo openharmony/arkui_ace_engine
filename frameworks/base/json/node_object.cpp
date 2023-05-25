@@ -116,13 +116,13 @@ std::string NodeObject::GetString(const std::string& key, const std::string& def
 
 std::unique_ptr<JsonValue> NodeObject::GetValue(const std::string& key) const
 {
-    CHECK_NULL_RETURN_NOLOG(uobject_, nullptr);
+    CHECK_NULL_RETURN_NOLOG(uobject_, std::make_unique<NodeObject>());
     if (Contains(key)) {
         auto object = std::make_unique<NodeObject>();
         object->uobject_ = uobject_->GetObject(key);
         return object;
     }
-    return nullptr;
+    return std::make_unique<NodeObject>();
 }
 
 std::unique_ptr<JsonValue> NodeObject::GetObject(const std::string& key) const

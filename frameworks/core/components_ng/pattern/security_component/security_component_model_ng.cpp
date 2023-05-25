@@ -80,14 +80,18 @@ void SecurityComponentModelNG::CreateCommon(const std::string& tag, int32_t text
     CHECK_NULL_VOID(frameNode);
 
     if (frameNode->GetChildren().empty()) {
-        if (backgroundType != SecurityComponentBackgroundType::BACKGROUND_NULL) {
-            auto buttonNode = FrameNode::CreateFrameNode(
-                V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-                AceType::MakeRefPtr<ButtonPattern>());
-            buttonNode->SetInternal();
+        bool isButtonVisible = (backgroundType != SecurityComponentBackgroundType::BACKGROUND_NULL);
+        auto buttonNode = FrameNode::CreateFrameNode(
+            V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<ButtonPattern>());
+        buttonNode->SetInternal();
+
+        if (isButtonVisible) {
             SetDefaultBackgroundButton(buttonNode, backgroundType);
-            frameNode->AddChild(buttonNode);
+        } else {
+            SetInvisibleBackgroundButton(buttonNode);
         }
+        frameNode->AddChild(buttonNode);
 
         if (icon != static_cast<int32_t>(SecurityComponentIconStyle::ICON_NULL)) {
             auto imageIcon = FrameNode::CreateFrameNode(
@@ -95,7 +99,7 @@ void SecurityComponentModelNG::CreateCommon(const std::string& tag, int32_t text
             imageIcon->SetInternal();
             InternalResource::ResourceId iconId;
             if (GetIconResource(icon, iconId)) {
-                SetDefaultIconStyle(imageIcon, iconId);
+                SetDefaultIconStyle(imageIcon, iconId, isButtonVisible);
             }
             frameNode->AddChild(imageIcon);
         }
@@ -106,7 +110,7 @@ void SecurityComponentModelNG::CreateCommon(const std::string& tag, int32_t text
             textNode->SetInternal();
             std::string textStr = "";
             GetTextResource(text, textStr);
-            SetDefaultTextStyle(textNode, textStr);
+            SetDefaultTextStyle(textNode, textStr, isButtonVisible);
             frameNode->AddChild(textNode);
         }
     }
@@ -115,7 +119,8 @@ void SecurityComponentModelNG::CreateCommon(const std::string& tag, int32_t text
     stack->Push(frameNode);
 }
 
-void SecurityComponentModelNG::SetDefaultTextStyle(const RefPtr<FrameNode>& textNode, const std::string& text)
+void SecurityComponentModelNG::SetDefaultTextStyle(const RefPtr<FrameNode>& textNode, const std::string& text,
+    bool isButtonVisible)
 {
     auto secCompTheme = GetTheme();
     CHECK_NULL_VOID(secCompTheme);
@@ -124,20 +129,31 @@ void SecurityComponentModelNG::SetDefaultTextStyle(const RefPtr<FrameNode>& text
     textLayoutProperty->UpdateContent(text);
     textLayoutProperty->UpdateMaxLines(1);
     textLayoutProperty->UpdateFontSize(secCompTheme->GetFontSize());
-    textLayoutProperty->UpdateTextColor(secCompTheme->GetFontColor());
     textLayoutProperty->UpdateItalicFontStyle(Ace::FontStyle::NORMAL);
     textLayoutProperty->UpdateFontWeight(FontWeight::NORMAL);
     std::vector<std::string> defaultFontFamily = { "HarmonyOS Sans" };
     textLayoutProperty->UpdateFontFamily(defaultFontFamily);
+
+    if (isButtonVisible) {
+        textLayoutProperty->UpdateTextColor(secCompTheme->GetFontColor());
+    } else {
+        textLayoutProperty->UpdateTextColor(secCompTheme->GetFontColorNoBg());
+    }
 }
 
-void SecurityComponentModelNG::SetDefaultIconStyle(const RefPtr<FrameNode>& imageNode, InternalResource::ResourceId id)
+void SecurityComponentModelNG::SetDefaultIconStyle(const RefPtr<FrameNode>& imageNode, InternalResource::ResourceId id,
+    bool isButtonVisible)
 {
     auto secCompTheme = GetTheme();
     CHECK_NULL_VOID(secCompTheme);
     ImageSourceInfo imageSourceInfo;
     imageSourceInfo.SetResourceId(id);
-    imageSourceInfo.SetFillColor(secCompTheme->GetIconColor());
+    if (isButtonVisible) {
+        imageSourceInfo.SetFillColor(secCompTheme->GetIconColor());
+    } else {
+        imageSourceInfo.SetFillColor(secCompTheme->GetIconColorNoBg());
+    }
+
     auto iconProp = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(iconProp);
     iconProp->UpdateImageSourceInfo(imageSourceInfo);
@@ -189,12 +205,33 @@ void SecurityComponentModelNG::SetDefaultBackgroundButton(const RefPtr<FrameNode
     buttonLayoutProperty->UpdateType(TransformSecCompBgType(type));
 }
 
+void SecurityComponentModelNG::SetInvisibleBackgroundButton(const RefPtr<FrameNode>& buttonNode)
+{
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    const auto& renderContext = buttonNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
+}
+
 template<typename T>
 RefPtr<T> GetChildLayoutProprty(const std::string& tag)
 {
     auto node = GetCurSecCompChildNode(tag);
     CHECK_NULL_RETURN(node, nullptr);
     return node->GetLayoutProperty<T>();
+}
+
+bool SecurityComponentModelNG::IsBackgroundVisible()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    if (prop) {
+        return (prop->GetBackgroundType() != SecurityComponentBackgroundType::BACKGROUND_NULL);
+    }
+    return false;
 }
 
 void SecurityComponentModelNG::SetIconSize(const Dimension& value)
@@ -250,6 +287,10 @@ void SecurityComponentModelNG::SetFontColor(const Color& value)
 
 void SecurityComponentModelNG::SetBackgroundColor(const Color& value)
 {
+    if (!IsBackgroundVisible()) {
+        LOGW("background is not exist");
+        return;
+    }
     auto bgNode = GetCurSecCompChildNode(V2::BUTTON_ETS_TAG);
     CHECK_NULL_VOID(bgNode);
     const auto& renderContext = bgNode->GetRenderContext();
@@ -259,6 +300,11 @@ void SecurityComponentModelNG::SetBackgroundColor(const Color& value)
 
 void SecurityComponentModelNG::SetBackgroundBorderWidth(const Dimension& value)
 {
+    if (!IsBackgroundVisible()) {
+        LOGW("background is not exist");
+        return;
+    }
+
     auto bgProp = GetChildLayoutProprty<ButtonLayoutProperty>(V2::BUTTON_ETS_TAG);
     CHECK_NULL_VOID(bgProp);
     BorderWidthProperty widthProp;
@@ -268,6 +314,11 @@ void SecurityComponentModelNG::SetBackgroundBorderWidth(const Dimension& value)
 
 void SecurityComponentModelNG::SetBackgroundBorderColor(const Color& value)
 {
+    if (!IsBackgroundVisible()) {
+        LOGW("background is not exist");
+        return;
+    }
+
     auto bgNode = GetCurSecCompChildNode(V2::BUTTON_ETS_TAG);
     CHECK_NULL_VOID(bgNode);
     const auto& renderContext = bgNode->GetRenderContext();
@@ -279,6 +330,11 @@ void SecurityComponentModelNG::SetBackgroundBorderColor(const Color& value)
 
 void SecurityComponentModelNG::SetBackgroundBorderStyle(const BorderStyle& value)
 {
+    if (!IsBackgroundVisible()) {
+        LOGW("background is not exist");
+        return;
+    }
+
     auto bgNode = GetCurSecCompChildNode(V2::BUTTON_ETS_TAG);
     CHECK_NULL_VOID(bgNode);
     const auto& renderContext = bgNode->GetRenderContext();
@@ -290,6 +346,11 @@ void SecurityComponentModelNG::SetBackgroundBorderStyle(const BorderStyle& value
 
 void SecurityComponentModelNG::SetBackgroundBorderRadius(const Dimension& value)
 {
+    if (!IsBackgroundVisible()) {
+        LOGW("background is not exist");
+        return;
+    }
+
     auto bgProp = GetChildLayoutProprty<ButtonLayoutProperty>(V2::BUTTON_ETS_TAG);
     CHECK_NULL_VOID(bgProp);
     bgProp->UpdateBorderRadius(value);
@@ -299,7 +360,7 @@ void SecurityComponentModelNG::SetBackgroundPadding(const std::optional<Dimensio
     const std::optional<Dimension>& right, const std::optional<Dimension>& top,
     const std::optional<Dimension>& bottom)
 {
-    if (GetCurSecCompChildNode(V2::BUTTON_ETS_TAG) == nullptr) {
+    if (!IsBackgroundVisible()) {
         LOGW("Can not set background padding without background");
         return;
     }

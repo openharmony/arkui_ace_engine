@@ -79,6 +79,11 @@ public:
         return false;
     }
 
+    bool DefaultSupportDrag() override
+    {
+        return true;
+    }
+    
     void OnModifyDone() override;
 
     void BeforeCreateLayoutWrapper() override;
@@ -189,8 +194,20 @@ public:
     // end of TextDragBase implementations
     // ===========================================================
 
+    void InitSurfaceChangedCallback();
+    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
+    bool HasSurfaceChangedCallback()
+    {
+        return surfaceChangedCallbackId_.has_value();
+    }
+    void UpdateSurfaceChangedCallbackId(int32_t id)
+    {
+        surfaceChangedCallbackId_ = id;
+    }
+
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
+    void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void HandleLongPress(GestureEvent& info);
@@ -251,6 +268,7 @@ private:
     bool mouseEventInitialized_ = false;
     bool panEventInitialized_ = false;
     std::optional<TextStyle> textStyle_;
+    std::optional<int32_t> surfaceChangedCallbackId_;
 
     RefPtr<TextContentModifier> textContentModifier_;
     RefPtr<TextOverlayModifier> textOverlayModifier_;

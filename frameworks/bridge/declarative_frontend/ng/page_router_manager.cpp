@@ -456,23 +456,21 @@ RefPtr<Framework::RevSourceMap> PageRouterManager::GetCurrentPageSourceMap(const
         if (Framework::GetAssetContentImpl(assetManager, "sourceMaps.map", jsSourceMap)) {
             auto jsonPages = JsonUtil::ParseJsonString(jsSourceMap);
             auto jsonPage = jsonPages->GetValue(judgePath)->ToString();
-            auto pageMap = MakeRefPtr<Framework::RevSourceMap>();
-            pageMap->Init(jsonPage);
-            entryPageInfo->SetPageMap(pageMap);
-            return pageMap;
+            auto stagePageMap = MakeRefPtr<Framework::RevSourceMap>();
+            stagePageMap->Init(jsonPage);
+            entryPageInfo->SetPageMap(stagePageMap);
+            return stagePageMap;
         }
-        LOGW("js source map load failed!");
-        return nullptr;
     } else {
         if (Framework::GetAssetContentImpl(assetManager, entryPageInfo->GetPagePath() + ".map", jsSourceMap)) {
-            auto pageMap = MakeRefPtr<Framework::RevSourceMap>();
-            pageMap->Init(jsSourceMap);
-            entryPageInfo->SetPageMap(pageMap);
-            return pageMap;
+            auto faPageMap = MakeRefPtr<Framework::RevSourceMap>();
+            faPageMap->Init(jsSourceMap);
+            entryPageInfo->SetPageMap(faPageMap);
+            return faPageMap;
         }
-        LOGW("js source map load failed!");
-        return nullptr;
     }
+    LOGW("js source map load failed!");
+    return nullptr;
 }
 
 std::unique_ptr<JsonValue> PageRouterManager::GetStackInfo()

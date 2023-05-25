@@ -287,27 +287,29 @@ std::unique_ptr<Ace::ImageData> OffscreenCanvasPaintMethod::GetImageData(
     return imageData;
 }
 
-void OffscreenCanvasPaintMethod::FillText(const std::string& text, double x, double y, const PaintState& state)
+void OffscreenCanvasPaintMethod::FillText(
+    const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state)
 {
     if (!UpdateOffParagraph(text, false, state, HasShadow())) {
         return;
     }
-    PaintText(text, x, y, false, HasShadow());
+    PaintText(text, x, y, maxWidth, false, HasShadow());
 }
 
-void OffscreenCanvasPaintMethod::StrokeText(const std::string& text, double x, double y, const PaintState& state)
+void OffscreenCanvasPaintMethod::StrokeText(
+    const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state)
 {
     if (HasShadow()) {
         if (!UpdateOffParagraph(text, true, state, true)) {
             return;
         }
-        PaintText(text, x, y, true, true);
+        PaintText(text, x, y, maxWidth, true, true);
     }
 
     if (!UpdateOffParagraph(text, true, state)) {
         return;
     }
-    PaintText(text, x, y, true);
+    PaintText(text, x, y, maxWidth, true);
 }
 
 double OffscreenCanvasPaintMethod::MeasureText(const std::string& text, const PaintState& state)
@@ -378,9 +380,9 @@ TextMetrics OffscreenCanvasPaintMethod::MeasureTextMetrics(const std::string& te
 }
 
 void OffscreenCanvasPaintMethod::PaintText(
-    const std::string& text, double x, double y, bool isStroke, bool hasShadow)
+    const std::string& text, double x, double y, std::optional<double> maxWidth, bool isStroke, bool hasShadow)
 {
-    paragraph_->Layout(width_);
+    paragraph_->Layout(FLT_MAX);
     if (width_ > paragraph_->GetMaxIntrinsicWidth()) {
         paragraph_->Layout(std::ceil(paragraph_->GetMaxIntrinsicWidth()));
     }
@@ -390,15 +392,33 @@ void OffscreenCanvasPaintMethod::PaintText(
         isStroke ? strokeState_.GetTextStyle().GetTextBaseline() : fillState_.GetTextStyle().GetTextBaseline();
     double dy = y + GetBaselineOffset(baseline, paragraph_);
 
+    std::optional<double> scale = CalcTextScale(paragraph_->GetMaxIntrinsicWidth(), maxWidth);
     if (hasShadow) {
         skCanvas_->save();
         auto shadowOffsetX = shadow_.GetOffset().GetX();
         auto shadowOffsetY = shadow_.GetOffset().GetY();
+        if (scale.has_value()) {
+            if (!NearZero(scale.value())) {
+                dx /= scale.value();
+                shadowOffsetX /= scale.value();
+            }
+            skCanvas_->scale(scale.value(), 1.0);
+        }
         paragraph_->Paint(skCanvas_.get(), dx + shadowOffsetX, dy + shadowOffsetY);
         skCanvas_->restore();
         return;
     }
-    paragraph_->Paint(skCanvas_.get(), dx, dy);
+    if (scale.has_value()) {
+        if (!NearZero(scale.value())) {
+            dx /= scale.value();
+        }
+        skCanvas_->save();
+        skCanvas_->scale(scale.value(), 1.0);
+        paragraph_->Paint(skCanvas_.get(), dx, dy);
+        skCanvas_->restore();
+    } else {
+        paragraph_->Paint(skCanvas_.get(), dx, dy);
+    }
 }
 
 double OffscreenCanvasPaintMethod::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph)

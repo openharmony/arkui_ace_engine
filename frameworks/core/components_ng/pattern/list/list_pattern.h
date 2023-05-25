@@ -221,8 +221,10 @@ private:
     void StopAnimate();
 
     // multiSelectable
+    void UninitMouseEvent();
     void InitMouseEvent();
     void HandleMouseEventWithoutKeyboard(const MouseInfo& info);
+    void ClearMultiSelect();
     void ClearSelectedZone();
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     void MultiSelectWithoutKeyboard(const RectF& selectedZone);
@@ -274,8 +276,10 @@ private:
     // multiSelectable
     bool multiSelectable_ = false;
     bool isMouseEventInit_ = false;
+    bool mousePressed_ = false;
     OffsetF mouseStartOffset_;
     OffsetF mouseEndOffset_;
+    OffsetF mousePressOffset_;
 
     // ListItem swiperAction
     WeakPtr<ListItemPattern> swiperItem_;

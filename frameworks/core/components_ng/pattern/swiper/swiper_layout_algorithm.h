@@ -23,6 +23,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -92,6 +93,10 @@ public:
         hoverRatio_ = hoverRatio;
     }
 private:
+    float GetPrevAndNextMarginMontage(
+        const RefPtr<SwiperLayoutProperty>& property, float childCalcIdealLength);
+    void CalculatePrevCountAndNextCount(const RefPtr<SwiperLayoutProperty>& property);
+    void MeasureOneself(LayoutWrapper* layoutWrapper, LayoutConstraintF childLayoutConstraint);
     void MeasureAllPagesToGetMaxChildSize(LayoutWrapper* layoutWrapper, LayoutConstraintF childLayoutConstraint);
     void MeasurePages(LayoutWrapper* layoutWrapper, LayoutConstraintF childLayoutConstraint);
     void MeasureIndicator(LayoutWrapper* layoutWrapper, LayoutConstraintF childLayoutConstraint);
@@ -115,6 +120,8 @@ private:
 
     SizeF maxChildSize_ { 0, 0 };
     bool onlyNeedMeasurePages_ = false;
+    int32_t prevCount_ = 0;
+    int32_t nextCount_ = 0;
 };
 
 } // namespace OHOS::Ace::NG

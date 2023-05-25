@@ -108,14 +108,17 @@ public:
         if (type == "json") {
             HILOG_DEBUG("Create LayeredDrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::LAYERED;
+            state = Global::Resource::SUCCESS;
             return std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), len, resourceMgr);
         }
-        if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif") {
+        if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp") {
             HILOG_DEBUG("Create DrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::BASE;
+            state = Global::Resource::SUCCESS;
             return std::make_unique<DrawableDescriptor>(std::move(jsonBuf), len);
         }
         HILOG_ERROR("unknow resource type: %{public}s", type.c_str());
+        state = Global::Resource::INVALID_FORMAT;
         return nullptr;
     }
 
@@ -134,14 +137,17 @@ public:
         if (type == "json") {
             HILOG_DEBUG("Create LayeredDrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::LAYERED;
+            state = Global::Resource::SUCCESS;
             return std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), len, resourceMgr);
         }
-        if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif") {
+        if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp") {
             HILOG_DEBUG("Create DrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::BASE;
+            state = Global::Resource::SUCCESS;
             return std::make_unique<DrawableDescriptor>(std::move(jsonBuf), len);
         }
         HILOG_ERROR("unknow resource type: %{public}s", type.c_str());
+        state = Global::Resource::INVALID_FORMAT;
         return nullptr;
     }
 };
