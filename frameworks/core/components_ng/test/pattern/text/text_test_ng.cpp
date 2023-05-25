@@ -2964,4 +2964,40 @@ HWTEST_F(TextTestNg, PerformActionTest001, TestSize.Level1)
     EXPECT_TRUE(textAccessibilityProperty->ActActionClearSelection());
     EXPECT_TRUE(textAccessibilityProperty->ActActionCopy());
 }
+
+/**
+ * @tc.name: TextSelectorTest001
+ * @tc.desc: test Update function in TextSelector
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextSelectorTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Text.
+     */
+    TextModelNG textModel;
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set callback function.
+     */
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateCopyOption(CopyOptions::InApp);
+    textPattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step3. call callback function.
+     * @tc.expected: textSelector_ update successfully.
+     */
+    textPattern->textSelector_.Update(0);
+    EXPECT_EQ(textPattern->textSelector_.baseOffset, 0);
+
+    textPattern->textSelector_.Update(0, TEXT_SIZE_INT);
+    EXPECT_EQ(textPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(textPattern->textSelector_.destinationOffset, TEXT_SIZE_INT);
+}
 } // namespace OHOS::Ace::NG

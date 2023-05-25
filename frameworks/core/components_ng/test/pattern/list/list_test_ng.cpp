@@ -3455,6 +3455,7 @@ HWTEST_F(ListTestNg, Pattern004, TestSize.Level1)
     DirtySwapConfig config;
     config.skipMeasure = true;
     config.skipLayout = false;
+    pattern_->isScrollEnd_ = true;
     EXPECT_TRUE(pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
 }
 
@@ -3949,5 +3950,28 @@ HWTEST_F(ListTestNg, PerformActionTest002, TestSize.Level1)
     listPattern->scrollable_ = true;
     EXPECT_TRUE(listAccessibilityProperty->ActActionScrollForward());
     EXPECT_TRUE(listAccessibilityProperty->ActActionScrollBackward());
+}
+
+/**
+ * @tc.name: AccessibilityEvent001
+ * @tc.desc: Test AddStopListener callBack in animator
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, AccessibilityEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list and initialize related properties.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    GetInstance();
+
+    /**
+     * @tc.steps: step2. Call NotifyStopListener func.
+     * @tc.expected isScrollEnd_ is true
+     */
+    pattern_->AnimateTo(0, 0, nullptr);
+    pattern_->animator_->NotifyStopListener();
+    EXPECT_TRUE(pattern_->isScrollEnd_);
 }
 } // namespace OHOS::Ace::NG

@@ -94,6 +94,9 @@ const uint32_t DEFAULT_DAY = 5;
 constexpr uint32_t AM_PM_HOUR_12 = 12;
 constexpr int32_t CHILD_WITH_AMPM_SIZE = 3;
 constexpr int32_t CHILD_WITHOUT_AMPM_SIZE = 2;
+const double YOFFSET_START1 = 0.0;
+const double YOFFSET_END1 = 1000.0;
+const double TIME_PLUS = 1 * 100.0;
 } // namespace
 class TimePickerPatternTestNg : public testing::Test {
 public:
@@ -1104,6 +1107,18 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern010, TestSize.Level1)
     EXPECT_EQ(minuteColumnPattern->yOffset_, 0.0);
     EXPECT_EQ(minuteColumnPattern->yLast_, 0.0);
     EXPECT_EQ(minuteColumnPattern->scrollDelta_, 0.0);
+
+    // action end for OnAccessibilityEvent
+    minuteColumnPattern->SetShowCount(0);
+    EXPECT_FALSE(minuteColumnPattern->NotLoopOptions());
+    auto toss = minuteColumnPattern->GetToss();
+    toss->SetStart(YOFFSET_START1);
+    toss->SetEnd(YOFFSET_END1);
+    toss->timeEnd_ = toss->GetCurrentTime() + TIME_PLUS;
+    EXPECT_TRUE(toss->Play());
+    gestureEvent.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    panEvent->actionEnd_(gestureEvent);
+    EXPECT_FALSE(minuteColumnPattern->pressed_);
 }
 
 /**

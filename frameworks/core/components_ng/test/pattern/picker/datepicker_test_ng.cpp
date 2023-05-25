@@ -61,6 +61,9 @@ const std::vector<int> DEFAULT_VALUE = { 1970, 1971, 1972 };
 const double OFFSET_X = 6.0;
 const double OFFSET_Y = 8.0;
 constexpr double TOSS_DELTA = 20.0;
+const double YOFFSET_START1 = 0.0;
+const double YOFFSET_END1 = 1000.0;
+const double TIME_PLUS = 1 * 100.0;
 } // namespace
 
 class DatePickerTestNg : public testing::Test {
@@ -2309,5 +2312,66 @@ HWTEST_F(DatePickerTestNg, PerformActionTest001, TestSize.Level1)
     columnPattern->SetOptions(options);
     columnPattern->SetCurrentIndex(1);
     EXPECT_TRUE(accessibilityProperty->ActActionScrollBackward());
+}
+
+/**
+ * @tc.name: DatePickerEventActionsTest001
+ * @tc.desc: Test pan event actions
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerEventActionsTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create datePickerColumn.
+     */
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild()->GetChildAtIndex(1));
+    columnNode->MarkModifyDone();
+    auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+    auto panEvent = columnPattern->panEvent_;
+
+    /**
+     * @tc.steps: step2. call actionStart_ func.
+     * @tc.expected: pressed_ is true.
+     */
+    GestureEvent gestureEvent;
+    ASSERT_NE(panEvent->actionStart_, nullptr);
+    panEvent->actionStart_(gestureEvent);
+    EXPECT_TRUE(columnPattern->pressed_);
+
+    /**
+     * @tc.steps: step3. call actionEnd_ func.
+     * @tc.expected: pressed_ is false.
+     */
+    ASSERT_NE(panEvent->actionEnd_, nullptr);
+    panEvent->actionEnd_(gestureEvent);
+    EXPECT_FALSE(columnPattern->pressed_);
+
+    /**
+     * @tc.steps: step4. call actionEnd_ func in another condition.
+     * @tc.expected: pressed_ is false.
+     */
+    auto toss = columnPattern->GetToss();
+    toss->SetStart(YOFFSET_START1);
+    toss->SetEnd(YOFFSET_END1);
+    toss->timeEnd_ = toss->GetCurrentTime() + TIME_PLUS;
+    EXPECT_TRUE(toss->Play());
+
+    columnPattern->SetShowCount(0);
+    auto options = columnPattern->GetOptions();
+    for (auto& Value : DEFAULT_VALUE) {
+        options[columnNode].emplace_back(std::to_string(Value));
+    }
+    columnPattern->SetOptions(options);
+    EXPECT_FALSE(columnPattern->NotLoopOptions());
+
+    columnPattern->pressed_ = true;
+    panEvent->actionEnd_(gestureEvent);
+    EXPECT_FALSE(columnPattern->pressed_);
 }
 } // namespace OHOS::Ace::NG
