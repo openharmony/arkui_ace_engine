@@ -84,6 +84,17 @@ void JSMenu::Font(const JSCallbackInfo& info)
                 ParseJsString(jsWeight, weight);
             }
         }
+
+        auto jsStyle = obj->GetProperty("style");
+        if (!jsStyle->IsNull()) {
+            if (jsStyle->IsNumber()) {
+                MenuModel::GetInstance()->SetFontStyle(static_cast<FontStyle>(jsStyle->ToNumber<int32_t>()));
+            } else {
+                std::string style;
+                ParseJsString(jsStyle, style);
+                MenuModel::GetInstance()->SetFontStyle(ConvertStrToFontStyle(style));
+            }
+        }
     }
     MenuModel::GetInstance()->SetFontSize(fontSize);
     MenuModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight));

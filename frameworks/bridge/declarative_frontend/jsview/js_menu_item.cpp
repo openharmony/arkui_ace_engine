@@ -224,6 +224,17 @@ void JSMenuItem::ContentFont(const JSCallbackInfo& info)
                 ParseJsString(jsWeight, weight);
             }
         }
+
+        auto jsStyle = obj->GetProperty("style");
+        if (!jsStyle->IsNull()) {
+            if (jsStyle->IsNumber()) {
+                MenuItemModel::GetInstance()->SetFontStyle(static_cast<FontStyle>(jsStyle->ToNumber<int32_t>()));
+            } else {
+                std::string style;
+                ParseJsString(jsStyle, style);
+                MenuItemModel::GetInstance()->SetFontStyle(ConvertStrToFontStyle(style));
+            }
+        }
     }
     MenuItemModel::GetInstance()->SetFontSize(fontSize);
     MenuItemModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight));
@@ -262,6 +273,17 @@ void JSMenuItem::LabelFont(const JSCallbackInfo& info)
                 weight = std::to_string(jsWeight->ToNumber<int32_t>());
             } else {
                 ParseJsString(jsWeight, weight);
+            }
+        }
+
+        auto jsStyle = obj->GetProperty("style");
+        if (!jsStyle->IsNull()) {
+            if (jsStyle->IsNumber()) {
+                MenuItemModel::GetInstance()->SetLabelFontStyle(static_cast<FontStyle>(jsStyle->ToNumber<int32_t>()));
+            } else {
+                std::string style;
+                ParseJsString(jsStyle, style);
+                MenuItemModel::GetInstance()->SetLabelFontStyle(ConvertStrToFontStyle(style));
             }
         }
     }
