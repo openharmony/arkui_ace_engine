@@ -466,7 +466,7 @@ void SubwindowOhos::HideMenuNG(int32_t targetId)
 {
     if (!isShowed_) {
         return;
-    } 
+    }
     isShowed_ = false;
     LOGI("SubwindowOhos::HideMenuNG for target id %{public}d", targetId);
     targetId_ = targetId;
@@ -941,7 +941,7 @@ void SubwindowOhos::HideFilter()
     manager->RemoveFilter();
 }
 
-void SubwindowOhos::HidePixelMap(bool startDrag, double x, double y, bool showAnimiation)
+void SubwindowOhos::HidePixelMap(bool startDrag, double x, double y, bool showAnimation)
 {
     auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
     CHECK_NULL_VOID(parentAceContainer);
@@ -950,7 +950,7 @@ void SubwindowOhos::HidePixelMap(bool startDrag, double x, double y, bool showAn
     auto manager = parentPipeline->GetOverlayManager();
     CHECK_NULL_VOID(manager);
     ContainerScope scope(parentContainerId_);
-    if (showAnimiation) {
+    if (showAnimation) {
         manager->RemovePixelMapAnimation(startDrag, x, y);
     } else {
         manager->RemovePixelMap();
