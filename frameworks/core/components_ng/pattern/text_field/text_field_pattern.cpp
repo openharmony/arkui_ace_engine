@@ -377,9 +377,9 @@ void TextFieldPattern::CreateSingleHandle()
     RectF secondHandle;
     auto secondHandleMetrics = CalcCursorOffsetByPosition(textEditingValue_.caretPosition);
     OffsetF emptyOffset;
-#if defined(PREVIEW)
-    emptyOffset = MakeEmptyOffset();
-#endif
+    if (textEditingValue_.Empty()) {
+        emptyOffset = MakeEmptyOffset();
+    }
     OffsetF secondHandleOffset(secondHandleMetrics.offset.GetX() + parentGlobalOffset_.GetX() + emptyOffset.GetX(),
         secondHandleMetrics.offset.GetY() + parentGlobalOffset_.GetY() + emptyOffset.GetY());
     textSelector_.secondHandleOffset_ = secondHandleOffset;
