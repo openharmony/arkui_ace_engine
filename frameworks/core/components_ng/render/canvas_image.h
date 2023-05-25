@@ -38,7 +38,7 @@ struct ImagePaintConfig {
     ImageInterpolation imageInterpolation_ = ImageInterpolation::NONE;
     ImageRepeat imageRepeat_ = ImageRepeat::NO_REPEAT;
     ImageFit imageFit_ = ImageFit::COVER;
-    bool needFlipCanvasHorizontally_ = false;
+    bool flipHorizontally_ = false;
     bool isSvg_ = false;
 };
 
