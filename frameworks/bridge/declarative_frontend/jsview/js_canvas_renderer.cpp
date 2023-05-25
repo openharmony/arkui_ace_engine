@@ -992,11 +992,13 @@ void JSCanvasRenderer::JsCreateImageData(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[1], height);
         width = SystemProperties::Vp2Px(width);
         height = SystemProperties::Vp2Px(height);
-
     }
     if (info.Length() == 1 && info[0]->IsObject()) {
-        width = imageData_.dirtyWidth;
-        height = imageData_.dirtyHeight;
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> widthValue = obj->GetProperty("width");
+        JSRef<JSVal> heightValue = obj->GetProperty("height");
+        JSViewAbstract::ParseJsDouble(widthValue, width);
+        JSViewAbstract::ParseJsDouble(heightValue, height);
     }
 
     auto container = Container::Current();
@@ -1004,9 +1006,6 @@ void JSCanvasRenderer::JsCreateImageData(const JSCallbackInfo& info)
         LOGW("container is null");
         return;
     }
-
-    imageData_.dirtyWidth = width;
-    imageData_.dirtyHeight = height;
 
     JSRef<JSArray> colorArray = JSRef<JSArray>::New();
     uint32_t count = 0;
