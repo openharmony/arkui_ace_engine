@@ -3004,6 +3004,9 @@ float TextFieldPattern::PreferredTextHeight(bool isPlaceholder)
     paraStyle.locale_ = Localization::GetInstance()->GetFontLocale();
     paraStyle.wordBreakType_ = ToRSWordBreakType(textStyle.GetWordBreak());
     paraStyle.fontSize_ = textStyle.GetFontSize().ConvertToPx();
+    if (LessOrEqual(paraStyle.fontSize_, 0.0f)) {
+        paraStyle.fontSize_ = DEFAULT_FONT.ConvertToPx();
+    }
     if (textStyle.GetTextOverflow() == TextOverflow::ELLIPSIS) {
         paraStyle.ellipsis_ = RSParagraphStyle::ELLIPSIS;
     }
