@@ -166,6 +166,7 @@ void AceContainer::Destroy()
 
         // 2. Destroy Frontend on JS thread.
         RefPtr<Frontend> frontend;
+        LOGI("Frontend Swap");
         frontend_.Swap(frontend);
         if (GetSettings().usePlatformAsUIThread && GetSettings().useUIAsJSThread) {
             frontend->UpdateState(Frontend::State::ON_DESTROY);
