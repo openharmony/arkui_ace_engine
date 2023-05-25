@@ -809,12 +809,28 @@ HWTEST_F(TextFieldPatternTestNg, CheckScrollable003, TestSize.Level1)
  */
 HWTEST_F(TextFieldPatternTestNg, CheckScrollable004, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create TextFieldPattern and TextFieldLayoutProperty.
+     * @tc.expected: Check it is not nullptr.
+     */
     auto textFieldPattern = GetPattern();
     ASSERT_NE(textFieldPattern, nullptr);
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. setup prerequisite property and call CheckScrollable.
+     * @tc.expected: Check scrollable_ value.
+     */
     textFieldPattern->textEditingValue_.text = "checkScrollable";
     textFieldPattern->textRect_.SetHeight(0.0);
     textFieldPattern->contentRect_.SetHeight(1.0);
     EXPECT_FALSE(textFieldPattern->scrollable_);
+    textFieldPattern->CheckScrollable();
+    EXPECT_FALSE(textFieldPattern->scrollable_);
+
+    layoutProperty->UpdateShowCounter(true);
+    textFieldPattern->counterParagraph_ = std::make_shared<RSParagraph>();
     textFieldPattern->CheckScrollable();
     EXPECT_FALSE(textFieldPattern->scrollable_);
 }
@@ -2801,6 +2817,9 @@ HWTEST_F(TextFieldPatternTestNg, SetShowUnit, TestSize.Level1)
      */
     textFieldModelInstance.SetShowUnit(std::move(unitAction));
     EXPECT_EQ(static_cast<int32_t>(host->GetChildren().size()), 0);
+
+    textFieldModelInstance.SetShowUnit([]() {});
+    EXPECT_EQ(static_cast<int32_t>(host->GetChildren().size()), 0);
 }
 
 /**
@@ -3908,13 +3927,238 @@ HWTEST_F(TextFieldPatternTestNg, UpdateOtherHandleOnMove001, TestSize.Level1)
 {
     auto pattern = GetPattern();
     ASSERT_NE(pattern, nullptr);
+    pattern->textSelector_.secondHandleOffset_.SetX(0);
     pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(-1);
     pattern->isFirstHandle_ = true;
     pattern->UpdateOtherHandleOnMove(1.0f);
     ASSERT_EQ(pattern->textSelector_.secondHandleOffset_.GetX(), 1.0f);
 
+    pattern->textSelector_.firstHandleOffset_.SetX(0);
     pattern->isFirstHandle_ = false;
     pattern->UpdateOtherHandleOnMove(-1.0f);
     ASSERT_EQ(pattern->textSelector_.firstHandleOffset_.GetX(), -1.0f);
+}
+
+/**
+ * @tc.name: GetMarginBottom
+ * @tc.desc: test GetMarginBottom.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, GetMarginBottom, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. update margin property and call GetMarginBottom.
+     * @tc.expected: Check the return value.
+     */
+    EXPECT_EQ(pattern->GetMarginBottom(), 0.0f);
+
+    MarginProperty margin;
+    layoutProperty->UpdateMargin(margin);
+    EXPECT_EQ(pattern->GetMarginBottom(), 0.0f);
+
+    margin.bottom = CalcLength(8);
+    layoutProperty->UpdateMargin(margin);
+    EXPECT_EQ(pattern->GetMarginBottom(), 8.0f);
+}
+
+/**
+ * @tc.name: SavePasswordModeStates
+ * @tc.desc: test SavePasswordModeStates.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SavePasswordModeStates, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextFieldTheme>()));
+
+    /**
+     * @tc.steps: step2. setup layoutProperty and call SavePasswordModeStates.
+     * @tc.expected: Check the passwordModeStyle_ padding and borderwidth.
+     */
+    layoutProperty->borderWidth_ = nullptr;
+    layoutProperty->padding_ = nullptr;
+    layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    pattern->SavePasswordModeStates();
+    auto passwordPadding = &pattern->passwordModeStyle_.padding;
+    ASSERT_TRUE(passwordPadding->right.has_value());
+    EXPECT_EQ(passwordPadding->right.value().GetDimension().Value(), 0.0);
+    auto defaultBorder = &pattern->passwordModeStyle_.borderwidth;
+    ASSERT_TRUE(defaultBorder->bottomDimen.has_value());
+    EXPECT_EQ(defaultBorder->bottomDimen.value().Value(), 0.0);
+
+    /**
+     * @tc.steps: step3. set PaddingProperty, BorderWithProperty and call SavePasswordModeStates.
+     * @tc.expected: Check the passwordModeStyle_ padding and borderwidth.
+     */
+    const double padingLen = 4.0;
+    PaddingProperty paddingProperty;
+    paddingProperty.right = CalcLength(padingLen);
+    layoutProperty->UpdatePadding(paddingProperty);
+
+    const float borderWidth = 3.0;
+    BorderWidthProperty borderWidthProperty;
+    borderWidthProperty.SetBorderWidth(Dimension(borderWidth));
+    layoutProperty->UpdateBorderWidth(borderWidthProperty);
+
+    pattern->SavePasswordModeStates();
+    ASSERT_TRUE(passwordPadding->right.has_value());
+    EXPECT_EQ(passwordPadding->right.value().GetDimension().Value(), padingLen);
+    auto border = &pattern->passwordModeStyle_.borderwidth;
+    ASSERT_TRUE(border->bottomDimen.has_value());
+    EXPECT_EQ(border->bottomDimen.value().Value(), borderWidth);
+}
+
+/**
+ * @tc.name: SetShowError
+ * @tc.desc: test SetShowError.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetShowError, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextFieldTheme>()));
+
+    /**
+     * @tc.steps: step2. test scense - error text is visible and in password mode and show underline.
+     * @tc.expected: Check several properties that have been changed.
+     */
+    layoutProperty->UpdateShowErrorText(true);
+    layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    layoutProperty->UpdateShowUnderline(true);
+    pattern->SetShowError();
+    EXPECT_EQ(pattern->GetUnderlineWidth(), 2.0);
+    auto borderWithProperty = *(layoutProperty->GetBorderWidthProperty());
+    ASSERT_TRUE(borderWithProperty.bottomDimen.has_value());
+    EXPECT_EQ(borderWithProperty.bottomDimen.value().Value(), 1.0);
+
+    /**
+     * @tc.steps: step3. test scense - error text is visible and not in password mode and hide underline.
+     * @tc.expected: no properties that have been changed.
+     */
+    layoutProperty->UpdateShowUnderline(false);
+    layoutProperty->UpdateTextInputType(TextInputType::TEXT);
+    pattern->SetShowError();
+    EXPECT_EQ(pattern->GetUnderlineWidth(), 2.0);
+    borderWithProperty = *(layoutProperty->GetBorderWidthProperty());
+    ASSERT_TRUE(borderWithProperty.bottomDimen.has_value());
+    EXPECT_EQ(borderWithProperty.bottomDimen.value().Value(), 1.0);
+
+    /**
+     * @tc.steps: step4. test scense - error text is invisible and in password mode and show underline.
+     * @tc.expected: Check several properties that have been changed..
+     */
+    layoutProperty->UpdateShowErrorText(false);
+    layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    layoutProperty->UpdateShowUnderline(true);
+    BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(Dimension(5.0));
+    pattern->passwordModeStyle_.borderwidth = borderWidth;
+    pattern->SetShowError();
+    EXPECT_EQ(pattern->GetUnderlineWidth(), 1.0);
+    borderWithProperty = *(layoutProperty->GetBorderWidthProperty());
+    ASSERT_TRUE(borderWithProperty.bottomDimen.has_value());
+    EXPECT_EQ(borderWithProperty.bottomDimen.value().Value(), 5.0);
+
+    /**
+     * @tc.steps: step5. test scense - error text is invisible and not in password mode and hide underline.
+     * @tc.expected: no properties that have been changed.
+     */
+    layoutProperty->UpdateShowErrorText(false);
+    layoutProperty->UpdateTextInputType(TextInputType::TEXT);
+    layoutProperty->UpdateShowUnderline(false);
+    pattern->SetShowError();
+    EXPECT_EQ(pattern->GetUnderlineWidth(), 1.0);
+    borderWithProperty = *(layoutProperty->GetBorderWidthProperty());
+    ASSERT_TRUE(borderWithProperty.bottomDimen.has_value());
+    EXPECT_EQ(borderWithProperty.bottomDimen.value().Value(), 5.0);
+}
+
+/**
+ * @tc.name: GetScrollBarWidth
+ * @tc.desc: test GetScrollBarWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, GetScrollBarWidth, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. show scrollbar and call GetScrollBarWidth.
+     * @tc.expected: Check the return value.
+     */
+    pattern->scrollBar_ = nullptr;
+    EXPECT_EQ(pattern->GetScrollBarWidth(), 0.0);
+    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
+    Offset offset;
+    pattern->scrollBar_ = scrollBar;
+    EXPECT_EQ(pattern->GetScrollBarWidth(), 0.0);
+}
+
+/**
+ * @tc.name: GetMaxLines
+ * @tc.desc: test GetMaxLines.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, GetMaxLines, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetMaxLines.
+     * @tc.expected: Check the return value.
+     */
+    layoutProperty->ResetMaxLines();
+    EXPECT_EQ(pattern->GetMaxLines(), Infinity<uint32_t>());
+    layoutProperty->UpdateMaxLines(20);
+    EXPECT_EQ(pattern->GetMaxLines(), 20);
 }
 } // namespace OHOS::Ace::NG
