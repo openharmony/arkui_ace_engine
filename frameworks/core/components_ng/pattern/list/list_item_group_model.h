@@ -32,7 +32,7 @@ public:
     static ListItemGroupModel* GetInstance();
     virtual ~ListItemGroupModel() = default;
 
-    virtual void Create() = 0;
+    virtual void Create(V2::ListItemGroupStyle listItemGroupStyle) = 0;
     virtual void SetSpace(const Dimension& space) = 0;
     virtual void SetDivider(const V2::ItemDivider& divider) = 0;
     virtual void SetHeader(std::function<void()>&& header) = 0;

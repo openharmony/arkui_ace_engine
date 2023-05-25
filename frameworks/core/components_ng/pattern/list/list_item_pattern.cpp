@@ -19,6 +19,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_layout_property.h"
@@ -38,6 +39,39 @@ constexpr float SWIPE_SPRING_DAMPING = 30.f;
 constexpr int32_t DELETE_ANIMATION_DURATION = 400;
 constexpr Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
 } // namespace
+
+void ListItemPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (listItemStyle_ == V2::ListItemStyle::CARD) {
+        SetListItemDefaultAttributes(host);
+    }
+    host->GetRenderContext()->SetClipToBounds(true);
+}
+
+void ListItemPattern::SetListItemDefaultAttributes(const RefPtr<FrameNode>& listItemNode)
+{
+    auto renderContext = listItemNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto layoutProperty = listItemNode->GetLayoutProperty<ListItemLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto listItemTheme = pipeline->GetTheme<ListItemTheme>();
+    CHECK_NULL_VOID(listItemTheme);
+
+    renderContext->UpdateBackgroundColor(listItemTheme->GetItemDefaultColor());
+
+    PaddingProperty itemPadding;
+    itemPadding.left = CalcLength(listItemTheme->GetItemDefaultLeftPadding());
+    itemPadding.right = CalcLength(listItemTheme->GetItemDefaultRightPadding());
+    layoutProperty->UpdatePadding(itemPadding);
+
+    layoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(listItemTheme->GetItemDefaultHeight())));
+    renderContext->UpdateBorderRadius(listItemTheme->GetItemDefaultBorderRadius());
+}
 
 RefPtr<LayoutAlgorithm> ListItemPattern::CreateLayoutAlgorithm()
 {
@@ -168,6 +202,7 @@ void ListItemPattern::SetSwiperItemForList()
 void ListItemPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    InitListItemCardStyleForList();
     if (HasStartNode() || HasEndNode()) {
         auto axis = GetAxis();
         bool axisChanged = axis_ != axis;
@@ -604,4 +639,150 @@ void ListItemPattern::SetAccessibilityAction()
         context->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
     });
 }
+
+void ListItemPattern::InitListItemCardStyleForList()
+{
+    if (listItemStyle_ == V2::ListItemStyle::CARD) {
+        UpdateListItemAlignToCenter();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        currentBackgroundColor_ = renderContext->GetBackgroundColorValue();
+        InitHoverEvent();
+        InitPressEvent();
+        InitDisableEvent();
+    }
+}
+
+void ListItemPattern::UpdateListItemAlignToCenter()
+{
+    auto frameNode = GetListFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto itemAlign = layoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
+    if (itemAlign != V2::ListItemAlign::CENTER) {
+        layoutProperty->UpdateListItemAlign(V2::ListItemAlign::CENTER);
+    }
+}
+
+void ListItemPattern::InitHoverEvent()
+{
+    if (hoverEvent_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    auto hoverTask = [weak = WeakClaim(this), host](bool isHover) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleHoverEvent(isHover, host);
+        }
+    };
+    hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
+    inputHub->AddOnHoverEvent(hoverEvent_);
+}
+
+void ListItemPattern::HandleHoverEvent(bool isHover, const RefPtr<NG::FrameNode>& itemNode)
+{
+    auto renderContext = itemNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ListItemTheme>();
+    CHECK_NULL_VOID(theme);
+
+    isHover_ = isHover;
+    auto hoverColor = theme->GetItemHoverColor();
+
+    if (isHover) {
+        AnimationUtils::BlendBgColorAnimation(
+            renderContext, hoverColor, theme->GetHoverAnimationDuration(), Curves::FRICTION);
+    } else {
+        AnimationUtils::BlendBgColorAnimation(
+            renderContext, currentBackgroundColor_, theme->GetHoverAnimationDuration(), Curves::FRICTION);
+    }
+}
+
+void ListItemPattern::InitPressEvent()
+{
+    if (touchListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto touchCallback = [weak = WeakClaim(this), host](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandlePressEvent(info, host);
+    };
+    auto touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    gesture->AddTouchEvent(touchListener_);
+}
+
+void ListItemPattern::HandlePressEvent(const TouchEventInfo& info, const RefPtr<NG::FrameNode>& itemNode)
+{
+    auto touchType = info.GetTouches().front().GetTouchType();
+    auto renderContext = itemNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ListItemTheme>();
+    CHECK_NULL_VOID(theme);
+
+    auto pressColor = theme->GetItemPressColor();
+    auto hoverColor = theme->GetItemHoverColor();
+
+    if (touchType == TouchType::DOWN) {
+        if (isHover_) {
+            // hover to press
+            AnimationUtils::BlendBgColorAnimation(
+                renderContext, pressColor, theme->GetHoverToPressAnimationDuration(), Curves::SHARP);
+        } else {
+            // normal to press
+            AnimationUtils::BlendBgColorAnimation(
+                renderContext, pressColor, theme->GetHoverAnimationDuration(), Curves::SHARP);
+        }
+    } else if (touchType == TouchType::UP) {
+        if (isHover_) {
+            // press to hover
+            AnimationUtils::BlendBgColorAnimation(
+                renderContext, hoverColor, theme->GetHoverToPressAnimationDuration(), Curves::SHARP);
+        } else {
+            // press to normal
+            AnimationUtils::BlendBgColorAnimation(
+                renderContext, currentBackgroundColor_, theme->GetHoverAnimationDuration(), Curves::SHARP);
+        }
+    }
+}
+
+void ListItemPattern::InitDisableEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ListItemTheme>();
+    CHECK_NULL_VOID(theme);
+
+    if (!eventHub->IsEnabled()) {
+        if (selectable_) {
+            selectable_ = false;
+        }
+        auto blendOpacityColor = currentBackgroundColor_.BlendOpacity(theme->GetItemDisabledAlpha());
+        renderContext->UpdateBackgroundColor(blendOpacityColor);
+    }
+}
 } // namespace OHOS::Ace::NG
+

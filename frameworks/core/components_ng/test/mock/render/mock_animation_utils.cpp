@@ -64,6 +64,10 @@ std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(const 
 
 void AnimationUtils::StopAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation) {}
 
+void AnimationUtils::BlendBgColorAnimation(
+    RefPtr<NG::RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve)
+{}
+
 bool AnimationUtils::IsRunning(const std::shared_ptr<AnimationUtils::Animation>& animation)
 {
     return false;

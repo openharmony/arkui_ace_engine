@@ -227,6 +227,7 @@ private:
     void ClearSelectedZone();
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     void MultiSelectWithoutKeyboard(const RectF& selectedZone);
+    void HandleCardModeSelectedEvent(const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode);
 
     void DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper);
     void SetAccessibilityAction();

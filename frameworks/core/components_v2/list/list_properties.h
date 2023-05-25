@@ -62,6 +62,16 @@ enum class SwipeEdgeEffect {
     None,
 };
 
+enum class ListItemStyle {
+    NONE = 0,
+    CARD,
+};
+
+enum class ListItemGroupStyle {
+    NONE = 0,
+    CARD,
+};
+
 struct EditMode {
     enum : uint32_t {
         NONE = 0,

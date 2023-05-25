@@ -51,6 +51,7 @@
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/list/list_properties.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 using namespace testing;
@@ -76,6 +77,7 @@ constexpr Dimension DELETE_AREA_DISTANCE = Dimension(50, DimensionUnit::VP);
 constexpr float MOVE_DELTA = 80.f;
 constexpr float MOVE_DELTA2 = 100.f;
 constexpr float MOVE_DELTA3 = 20.f;
+constexpr Dimension LIST_ITEM_GROUP_MARGIN = 12.0_vp;
 } // namespace
 
 class ListTestNg : public testing::Test {
@@ -189,7 +191,7 @@ void ListTestNg::CreateListItemGroup(int32_t GroupCount)
 {
     for (int32_t index = 0; index < GroupCount; index++) {
         ListItemGroupModelNG listItemGroupModel;
-        listItemGroupModel.Create();
+        listItemGroupModel.Create(V2::ListItemGroupStyle::NONE);
         CreateListItem(DEFAULT_LISTITEM_VIEWPORT_COUNT);
         ViewStackProcessor::GetInstance()->Pop();
     }
@@ -1009,7 +1011,7 @@ HWTEST_F(ListTestNg, AttrLanes005, TestSize.Level1)
     listModelNG.SetLaneMaxLength(Dimension(maxLaneLength));
 
     ListItemGroupModelNG listItemGroupModel;
-    listItemGroupModel.Create();
+    listItemGroupModel.Create(V2::ListItemGroupStyle::NONE);
     SetWidth(Dimension(groupWidth));
     CreateListItem(DEFAULT_LISTITEM_VIEWPORT_COUNT);
     ViewStackProcessor::GetInstance()->Pop();
@@ -1902,7 +1904,7 @@ HWTEST_F(ListTestNg, ListItemGroupSpaceTest001, TestSize.Level1)
     ListModelNG listModelNG;
     listModelNG.Create();
     ListItemGroupModelNG listItemGroupModel;
-    listItemGroupModel.Create();
+    listItemGroupModel.Create(V2::ListItemGroupStyle::NONE);
     listItemGroupModel.SetSpace(Dimension(space));
     CreateListItem(itemCount);
     ViewStackProcessor::GetInstance()->Pop();
@@ -1930,7 +1932,7 @@ HWTEST_F(ListTestNg, ListItemGroupHeaderFooterTest001, TestSize.Level1)
     ListModelNG listModelNG;
     listModelNG.Create();
     ListItemGroupModelNG listItemGroupModel;
-    listItemGroupModel.Create();
+    listItemGroupModel.Create(V2::ListItemGroupStyle::NONE);
     listItemGroupModel.SetHeader(std::move(header));
     listItemGroupModel.SetFooter(std::move(footer));
     CreateListItem(itemCount);
@@ -1987,7 +1989,7 @@ HWTEST_F(ListTestNg, ListItemGroupHeaderFooterTest002, TestSize.Level1)
     ViewStackProcessor::GetInstance()->Pop();
     // Create ListItemGroup
     ListItemGroupModelNG listItemGroupModel;
-    listItemGroupModel.Create();
+    listItemGroupModel.Create(V2::ListItemGroupStyle::NONE);
     listItemGroupModel.SetHeader(std::move(header));
     listItemGroupModel.SetFooter(std::move(footer));
     CreateListItem(4);
@@ -2069,7 +2071,7 @@ HWTEST_F(ListTestNg, ListItemGroupHeaderFooterTest003, TestSize.Level1)
     ListModelNG listModelNG;
     listModelNG.Create();
     ListItemGroupModelNG listItemGroupModel;
-    listItemGroupModel.Create();
+    listItemGroupModel.Create(V2::ListItemGroupStyle::NONE);
     listItemGroupModel.SetHeader(nullptr);
     listItemGroupModel.SetFooter(nullptr);
     CreateListItem(itemCount);
@@ -2107,7 +2109,7 @@ HWTEST_F(ListTestNg, ListItemGroupHeaderFooterTest004, TestSize.Level1)
     listModelNG.Create();
 
     ListItemGroupModelNG listItemGroupModel1;
-    listItemGroupModel1.Create();
+    listItemGroupModel1.Create(V2::ListItemGroupStyle::NONE);
     listItemGroupModel1.SetDivider(itemDivider);
     listItemGroupModel1.SetSpace(Dimension(space));
     CreateListItem(DEFAULT_LISTITEM_VIEWPORT_COUNT);
@@ -2115,7 +2117,7 @@ HWTEST_F(ListTestNg, ListItemGroupHeaderFooterTest004, TestSize.Level1)
 
     // empty listItem
     ListItemGroupModelNG listItemGroupModel2;
-    listItemGroupModel2.Create();
+    listItemGroupModel2.Create(V2::ListItemGroupStyle::NONE);
     listItemGroupModel2.SetDivider(itemDivider);
     ViewStackProcessor::GetInstance()->Pop();
 
@@ -2147,7 +2149,7 @@ HWTEST_F(ListTestNg, ListItemGroupHeaderFooterTest005, TestSize.Level1)
     ListModelNG listModelNG;
     listModelNG.Create();
     ListItemGroupModelNG listItemGroupModel;
-    listItemGroupModel.Create();
+    listItemGroupModel.Create(V2::ListItemGroupStyle::NONE);
     listItemGroupModel.SetDivider(itemDivider);
     listItemGroupModel.SetSpace(Dimension(space));
     CreateListItem(DEFAULT_LISTITEM_VIEWPORT_COUNT);
@@ -2193,7 +2195,7 @@ HWTEST_F(ListTestNg, ListItemGroupLayoutTest001, TestSize.Level1)
     ListModelNG listModelNG;
     listModelNG.Create();
     ListItemGroupModelNG listItemGroupModel;
-    listItemGroupModel.Create();
+    listItemGroupModel.Create(V2::ListItemGroupStyle::NONE);
     CreateListItem(itemCount);
     ViewStackProcessor::GetInstance()->Pop();
     GetInstance();
@@ -2225,7 +2227,7 @@ HWTEST_F(ListTestNg, ListItemGroupLayoutTest002, TestSize.Level1)
     listModelNG.Create();
     listModelNG.SetInitialIndex(1);
     ListItemGroupModelNG listItemGroupModel;
-    listItemGroupModel.Create();
+    listItemGroupModel.Create(V2::ListItemGroupStyle::NONE);
     CreateListItem(itemCount);
     ViewStackProcessor::GetInstance()->Pop();
     CreateListItem(1);
@@ -2844,7 +2846,7 @@ HWTEST_F(ListTestNg, AccessibilityProperty007, TestSize.Level1)
     ListModelNG listModelNG;
     listModelNG.Create();
     ListItemGroupModelNG listItemGroupModel;
-    listItemGroupModel.Create();
+    listItemGroupModel.Create(V2::ListItemGroupStyle::NONE);
     CreateListItem(4);
     ViewStackProcessor::GetInstance()->Pop();
     GetInstance();
@@ -2872,7 +2874,7 @@ HWTEST_F(ListTestNg, AccessibilityProperty007, TestSize.Level1)
 HWTEST_F(ListTestNg, AccessibilityProperty008, TestSize.Level1)
 {
     ListItemGroupModelNG listItemGroupModelNG;
-    listItemGroupModelNG.Create();
+    listItemGroupModelNG.Create(V2::ListItemGroupStyle::NONE);
     RefPtr<UINode> groupElement = ViewStackProcessor::GetInstance()->Finish();
     auto groupFrameNode = AceType::DynamicCast<FrameNode>(groupElement);
     auto groupAccessibilityProperty = groupFrameNode->GetAccessibilityProperty<ListItemGroupAccessibilityProperty>();
@@ -3348,7 +3350,7 @@ HWTEST_F(ListTestNg, PaintMethod004, TestSize.Level1)
     ListModelNG listModelNG;
     listModelNG.Create();
     ListItemGroupModelNG listItemGroupModelNG;
-    listItemGroupModelNG.Create();
+    listItemGroupModelNG.Create(V2::ListItemGroupStyle::NONE);
     CreateListItem();
     ViewStackProcessor::GetInstance()->Pop();
     GetInstance();
@@ -3857,6 +3859,510 @@ HWTEST_F(ListTestNg, Pattern016, TestSize.Level1)
     pattern_->UpdateCurrentOffset(offset, SCROLL_FROM_START);
     constexpr float expectDelta = 100.f;
     EXPECT_EQ(pattern_->currentDelta_, expectDelta);
+}
+
+/**
+ * @tc.name: ListSelectForCardModeTest001
+ * @tc.desc: Test the card mode for select.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListSelectForCardModeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List/ListItemGroup/ListItem.
+     * @tc.expected: step1. create a card style ListItemGroup success.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    listModelNG.SetMultiSelectable(true);
+    ListItemGroupModelNG listItemGroupModel;
+    listItemGroupModel.Create(V2::ListItemGroupStyle::CARD);
+    CreateListItem(9);
+    ViewStackProcessor::GetInstance()->Pop();
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step2. Click the (0, 0) point of firstItem.
+     * @tc.expected: Can not select by click, the item is not selected.
+     */
+    MouseInfo info;
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(Offset(0.f, 0.f));
+    pattern_->HandleMouseEventWithoutKeyboard(info);
+
+    /**
+     * @tc.steps: step3. Get ListItemGroup frameNode and ListItemPattern.
+     * @tc.expected: Get ListItemGroup frameNode/ListItemPattern success, and judge the step2.
+     */
+    ASSERT_NE(frameNode_, nullptr);
+    auto itemGroup = frameNode_->GetChildAtIndex(0);
+    ASSERT_NE(itemGroup, nullptr);
+    auto itemGroupFrameNode = AceType::DynamicCast<FrameNode>(itemGroup);
+    ASSERT_NE(itemGroupFrameNode, nullptr);
+    auto item = itemGroupFrameNode->GetChildAtIndex(0);
+    ASSERT_NE(item, nullptr);
+    auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
+    ASSERT_NE(itemFrameNode, nullptr);
+    RefPtr<ListItemPattern> firstItemPattern = itemFrameNode->GetPattern<ListItemPattern>();
+    ASSERT_NE(firstItemPattern, nullptr);
+    EXPECT_FALSE(firstItemPattern->IsSelected());
+
+    /**
+     * @tc.steps: step4. Release the mouse to deselect.
+     * @tc.expected: Release the mouse to deselect.
+     */
+    info.SetAction(MouseAction::RELEASE);
+    pattern_->HandleMouseEventWithoutKeyboard(info);
+    firstItemPattern->MarkIsSelected(false);
+    EXPECT_FALSE(firstItemPattern->IsSelected());
+}
+
+/**
+ * @tc.name: ListSelectForCardModeTest002
+ * @tc.desc: Test the card mode for select.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListSelectForCardModeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List/ListItemGroup/ListItem.
+     * @tc.expected: step1. create a card style ListItemGroup success.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    listModelNG.SetMultiSelectable(true);
+    ListItemGroupModelNG listItemGroupModel;
+    listItemGroupModel.Create(V2::ListItemGroupStyle::CARD);
+    CreateListItem(9);
+    ViewStackProcessor::GetInstance()->Pop();
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step2. Select (0, 0) - (200, 100) zone.
+     * @tc.expected: The 1st item is selected.
+     */
+    MouseInfo info;
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(Offset(0.f, 0.f));
+    pattern_->HandleMouseEventWithoutKeyboard(info);
+    info.SetAction(MouseAction::MOVE);
+    info.SetLocalLocation(Offset(200.f, 100.f));
+    pattern_->HandleMouseEventWithoutKeyboard(info);
+
+    /**
+     * @tc.steps: step3. Get ListItemGroup frameNode and ListItemPattern.
+     * @tc.expected: Get ListItemGroup frameNode/ListItemPattern success, and judge the step2.
+     */
+    ASSERT_NE(frameNode_, nullptr);
+    auto itemGroup = frameNode_->GetChildAtIndex(0);
+    ASSERT_NE(itemGroup, nullptr);
+    auto itemGroupFrameNode = AceType::DynamicCast<FrameNode>(itemGroup);
+    ASSERT_NE(itemGroupFrameNode, nullptr);
+    auto item = itemGroupFrameNode->GetChildAtIndex(0);
+    ASSERT_NE(item, nullptr);
+    auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
+    ASSERT_NE(itemFrameNode, nullptr);
+    RefPtr<ListItemPattern> firstItemPattern = itemFrameNode->GetPattern<ListItemPattern>();
+    ASSERT_NE(firstItemPattern, nullptr);
+    EXPECT_TRUE(firstItemPattern->IsSelected());
+
+    /**
+     * @tc.steps: step4. Release the mouse to deselect.
+     * @tc.expected: Release the mouse to deselect.
+     */
+    info.SetAction(MouseAction::RELEASE);
+    pattern_->HandleMouseEventWithoutKeyboard(info);
+    firstItemPattern->MarkIsSelected(false);
+    EXPECT_FALSE(firstItemPattern->IsSelected());
+}
+
+/**
+ * @tc.name: ListSelectForCardModeTest003
+ * @tc.desc: Test the card mode for select when the 'selectable' of listItem  is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListSelectForCardModeTest003, TestSize.Level1)
+{
+    constexpr int32_t itemCount = 9;
+
+    /**
+     * @tc.steps: step1. create List/ListItemGroup/ListItem and ListItem set to unselectable.
+     * @tc.expected: step1. create a card style ListItemGroup success.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    listModelNG.SetMultiSelectable(true);
+    ListItemGroupModelNG listItemGroupModel;
+    listItemGroupModel.Create(V2::ListItemGroupStyle::CARD);
+
+    for (int32_t i = 0; i < itemCount; i++) {
+        ListItemModelNG listItemModel;
+        listItemModel.Create();
+        SetHeight(Dimension(DEFAULT_LISTITEM_VERTICAL_LENGTH));
+        SetWidth(FILL_LENGTH);
+        if (i == 3) {
+            listItemModel.SetSelectable(false);
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+
+    ViewStackProcessor::GetInstance()->Pop();
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step2. Select (120, 250) - (360, 350) zone.
+     * @tc.expected: The third and fourth listItems cannot be selected.
+     */
+    MouseInfo info;
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(Offset(120.f, 350.f));
+    pattern_->HandleMouseEventWithoutKeyboard(info);
+    info.SetAction(MouseAction::MOVE);
+    info.SetLocalLocation(Offset(360.f, 450.f));
+    pattern_->HandleMouseEventWithoutKeyboard(info);
+
+    /**
+     * @tc.steps: step3. Get ListItemGroup frameNode and ListItemPattern.
+     * @tc.expected: Get ListItemGroup frameNode/ListItemPattern success, and judge the step2.
+     */
+    auto itemGroupFrameNode = GetChildFrameNode(0);
+    ASSERT_NE(itemGroupFrameNode, nullptr);
+    auto itemFourth = itemGroupFrameNode->GetChildAtIndex(3);
+    ASSERT_NE(itemFourth, nullptr);
+    auto itemFourthFrameNode = AceType::DynamicCast<FrameNode>(itemFourth);
+    ASSERT_NE(itemFourthFrameNode, nullptr);
+    RefPtr<ListItemPattern> fourthItemPattern = itemFourthFrameNode->GetPattern<ListItemPattern>();
+    ASSERT_NE(fourthItemPattern, nullptr);
+    EXPECT_FALSE(fourthItemPattern->IsSelected());
+
+    /**
+     * @tc.steps: step4. Release the mouse to deselect.
+     * @tc.expected: Release the mouse to deselect.
+     */
+    info.SetAction(MouseAction::RELEASE);
+    pattern_->HandleMouseEventWithoutKeyboard(info);
+    fourthItemPattern->MarkIsSelected(false);
+}
+
+/**
+ * @tc.name: ListItemGroupCreateForCardModeTest001
+ * @tc.desc: Test the initialization of listItem in card mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListItemGroupCreateForCardModeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ListItem theme and set default attributes.
+     * @tc.expected: step1. create ListItem theme success.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto listTheme = AceType::MakeRefPtr<ListItemTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(listTheme));
+
+    listTheme->defaultColor_ = Color::WHITE;
+    listTheme->defaultLeftMargin_ = LIST_ITEM_GROUP_MARGIN;
+    listTheme->defaultRightMargin_ = LIST_ITEM_GROUP_MARGIN;
+
+    /**
+     * @tc.steps: step2. create ListItemGroup.
+     * @tc.expected: step2. create a card style ListItemGroup success.
+     */
+    ListItemGroupModelNG listItemGroupModelNG;
+    listItemGroupModelNG.Create(V2::ListItemGroupStyle::CARD);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(pattern->GetListItemGroupStyle(), V2::ListItemGroupStyle::CARD);
+
+    /**
+     * @tc.steps: step3. compare the obtained value with the set value.
+     * @tc.expected: step3. the obtained value is equal to the set value.
+     */
+    auto renderContext = frameNode->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::WHITE);
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(), CalcLength(LIST_ITEM_GROUP_MARGIN));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(), CalcLength(LIST_ITEM_GROUP_MARGIN));
+}
+
+/**
+ * @tc.name: ListItemCreateForCardModeTest001
+ * @tc.desc: Test the initialization of listItem in card mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListItemCreateForCardModeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ListItem theme and set default attributes.
+     * @tc.expected: step1. create ListItem theme success.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto listTheme = AceType::MakeRefPtr<ListItemTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(listTheme));
+    listTheme->itemDefaultColor_ = Color::WHITE;
+
+    /**
+     * @tc.steps: step2. create ListItem in card mode.
+     * @tc.expected: step2. create a card style ListItem success.
+     */
+    ListItemModelNG listItemModel;
+    listItemModel.Create([](int32_t) {}, V2::ListItemStyle::CARD);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(pattern->GetListItemStyle(), V2::ListItemStyle::CARD);
+
+    /**
+     * @tc.steps: step3. compare the obtained value with the set value.
+     * @tc.expected: step3. the obtained value is equal to the set value.
+     */
+    auto renderContext = frameNode->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::WHITE);
+}
+
+/**
+ * @tc.name: ListItemCallEventsForCardModeTest001
+ * @tc.desc: Test whether the event has been called when listItem is in card mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListItemCallEventsForCardModeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ListItem theme and set default attributes.
+     * @tc.expected: step1. create ListItem theme success.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto listTheme = AceType::MakeRefPtr<ListItemTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(listTheme));
+
+    /**
+     * @tc.steps: step2. create ListItem in card mode.
+     * @tc.expected: step2. create a card style ListItem success.
+     */
+    ListItemModelNG listItemModel;
+    listItemModel.Create([](int32_t) {}, V2::ListItemStyle::CARD);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(pattern->GetListItemStyle(), V2::ListItemStyle::CARD);
+    auto renderContext = frameNode->GetRenderContext();
+    renderContext->UpdateBackgroundColor(Color::WHITE);
+
+    /**
+     * @tc.steps: step3. call function - InitListItemCardStyleForList.
+     * @tc.expected: step3. the function can be called.
+     */
+    pattern->InitListItemCardStyleForList();
+    EXPECT_EQ(pattern->currentBackgroundColor_, Color::WHITE);
+}
+
+/**
+ * @tc.name: ListItemHoverEventForCardModeTest001
+ * @tc.desc: Test the hover event when the hover status of card mode listItem is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListItemHoverEventForCardModeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ListItem theme and set default attributes.
+     * @tc.expected: step1. create ListItem theme success.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto listTheme = AceType::MakeRefPtr<ListItemTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(listTheme));
+    listTheme->hoverColor_ = Color::RED;
+    listTheme->hoverAnimationDuration_ = 250;
+
+    /**
+     * @tc.steps: step2. create ListItem in card mode.
+     * @tc.expected: step2. create a card style ListItem success.
+     */
+    ListItemModelNG listItemModel;
+    listItemModel.Create([](int32_t) {}, V2::ListItemStyle::CARD);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. call function HandleHoverEvent and Set hover status to true.
+     * @tc.expected: step3. the hover status is true.
+     */
+    pattern->HandleHoverEvent(true, frameNode);
+    EXPECT_TRUE(pattern->isHover_);
+}
+
+/**
+ * @tc.name: ListItemHoverEventForCardModeTest002
+ * @tc.desc: Test the hover event when the hover status of card mode listItem is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListItemHoverEventForCardModeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ListItem theme and set default attributes.
+     * @tc.expected: step1. create ListItem theme success.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto listTheme = AceType::MakeRefPtr<ListItemTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(listTheme));
+    listTheme->hoverColor_ = Color::RED;
+    listTheme->hoverAnimationDuration_ = 250;
+
+    /**
+     * @tc.steps: step2. create ListItem in card mode.
+     * @tc.expected: step2. create a card style ListItem success.
+     */
+    ListItemModelNG listItemModel;
+    listItemModel.Create([](int32_t) {}, V2::ListItemStyle::CARD);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->currentBackgroundColor_ = Color::WHITE;
+
+    /**
+     * @tc.steps: step3. call function HandleHoverEvent and Set hover status to false.
+     * @tc.expected: step3. the hover status is false.
+     */
+    pattern->HandleHoverEvent(false, frameNode);
+    EXPECT_FALSE(pattern->isHover_);
+}
+
+/**
+ * @tc.name: ListItemPressEventForCardModeTest001
+ * @tc.desc: Test the press event when the TouchType is DOWN.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListItemPressEventForCardModeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ListItem theme and set default attributes.
+     * @tc.expected: step1. create ListItem theme success.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto listTheme = AceType::MakeRefPtr<ListItemTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(listTheme));
+    listTheme->hoverColor_ = Color::RED;
+    listTheme->pressColor_ = Color::BLACK;
+    listTheme->hoverToPressAnimationDuration_ = 100;
+
+    /**
+     * @tc.steps: step2. create ListItem in card mode.
+     * @tc.expected: step2. create a card style ListItem success.
+     */
+    ListItemModelNG listItemModel;
+    listItemModel.Create([](int32_t) {}, V2::ListItemStyle::CARD);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    pattern->currentBackgroundColor_ = Color::WHITE;
+
+    /**
+     * @tc.steps: step3. call function HandlePressEvent, set TouchType to DOWN and set hover status is true.
+     * @tc.expected: step3. the color is different from the initial color when the listItem is pressed with the mouse.
+     */
+    TouchLocationInfo touchLocationInfo1(1);
+    touchLocationInfo1.SetTouchType(TouchType::DOWN);
+    TouchEventInfo touchEventInfo1("onTouchDown");
+    touchEventInfo1.AddTouchLocationInfo(std::move(touchLocationInfo1));
+    pattern->isHover_ = true;
+    pattern->HandlePressEvent(touchEventInfo1, frameNode);
+    EXPECT_NE(renderContext->GetBackgroundColorValue(), pattern->currentBackgroundColor_);
+
+    /**
+     * @tc.steps: step4. call function HandlePressEvent, set TouchType to DOWN and set hover status is false.
+     * @tc.expected: step4. the color is different from the initial color when the listItem is pressed with gesture.
+     */
+    pattern->isHover_ = false;
+    pattern->HandlePressEvent(touchEventInfo1, frameNode);
+    EXPECT_NE(renderContext->GetBackgroundColorValue(), pattern->currentBackgroundColor_);
+
+    /**
+     * @tc.steps: step5. call function HandlePressEvent, set TouchType to UP and set hover status is true.
+     * @tc.expected: step5. the color differs from the initial color when mouse hovers over listItem after pressing.
+     */
+    TouchLocationInfo touchLocationInfo2(1);
+    touchLocationInfo2.SetTouchType(TouchType::UP);
+    TouchEventInfo touchEventInfo2("onTouchUp");
+    touchEventInfo2.AddTouchLocationInfo(std::move(touchLocationInfo2));
+    pattern->isHover_ = true;
+    pattern->HandlePressEvent(touchEventInfo2, frameNode);
+    EXPECT_NE(renderContext->GetBackgroundColorValue(), pattern->currentBackgroundColor_);
+
+    /**
+     * @tc.steps: step6. call function HandlePressEvent, set TouchType to UP and set hover status is false.
+     * @tc.expected: step6. the color returns to its original color after pressing on listItem through gestures.
+     */
+    pattern->isHover_ = false;
+    renderContext->UpdateBackgroundColor(pattern->currentBackgroundColor_);
+    pattern->HandlePressEvent(touchEventInfo2, frameNode);
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), pattern->currentBackgroundColor_);
+}
+
+/**
+ * @tc.name: ListItemDisableEventForCardModeTest001
+ * @tc.desc: Test disable event when the enable status of the listItem is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListItemDisableEventForCardModeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ListItem theme and set default attributes.
+     * @tc.expected: step1. create ListItem theme success.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto listTheme = AceType::MakeRefPtr<ListItemTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(listTheme));
+    listTheme->disabledAlpha_ = 0.4;
+
+    /**
+     * @tc.steps: step2. create ListItem in card mode.
+     * @tc.expected: step2. create a card style ListItem success and set enable status to false.
+     */
+    ListItemModelNG listItemModel;
+    listItemModel.Create([](int32_t) {}, V2::ListItemStyle::CARD);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    eventHub->SetEnabled(false);
+    pattern->selectable_ = true;
+    pattern->currentBackgroundColor_ = Color::WHITE;
+
+    /**
+     * @tc.steps: step3. call function InitDisableEvent.
+     * @tc.expected: step3. the background color has been updated and selectable has been set to false.
+     */
+    pattern->InitDisableEvent();
+    EXPECT_FALSE(pattern->selectable_);
+    EXPECT_NE(renderContext->GetBackgroundColorValue(), pattern->currentBackgroundColor_);
 }
 
 /**
