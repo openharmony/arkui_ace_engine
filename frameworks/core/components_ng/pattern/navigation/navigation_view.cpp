@@ -295,6 +295,9 @@ void NavigationView::Create()
         int32_t navBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
         auto navBarNode = NavBarNode::GetOrCreateNavBarNode(
             V2::NAVBAR_ETS_TAG, navBarNodeId, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+        auto navBarRenderContext = navBarNode->GetRenderContext();
+        CHECK_NULL_VOID(navBarRenderContext);
+        navBarRenderContext->UpdateClipEdge(true);
         navigationGroupNode->AddChild(navBarNode);
         navigationGroupNode->SetNavBarNode(navBarNode);
 
