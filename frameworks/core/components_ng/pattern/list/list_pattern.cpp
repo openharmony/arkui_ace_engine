@@ -130,7 +130,6 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         }
         targetIndex_.reset();
     }
-    currentOffset_ = currentOffset_ + relativeOffset;
     if (listLayoutAlgorithm->GetStartIndex() == 0) {
         currentOffset_ = -listLayoutAlgorithm->GetStartPosition();
     } else {
