@@ -1920,11 +1920,6 @@ void JsiDeclarativeEngine::OnCompleteContinuation(int32_t code)
     CallAppFunc("onCompleteContinuation", argv);
 }
 
-void JsiDeclarativeEngine::ClearCache()
-{
-    JSNApi::CleanJSVMCache();
-}
-
 void JsiDeclarativeEngine::OnRemoteTerminated()
 {
     LOGI("JsiDeclarativeEngine OnRemoteTerminated");
