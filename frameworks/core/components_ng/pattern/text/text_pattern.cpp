@@ -711,6 +711,10 @@ void TextPattern::OnModifyDone()
     if (textCache != textForDisplay_) {
         host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
     }
+    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
+        copyOption_ = CopyOptions::None;
+        return;
+    }
     copyOption_ = textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
     if (copyOption_ != CopyOptions::None) {
         auto context = host->GetContext();
