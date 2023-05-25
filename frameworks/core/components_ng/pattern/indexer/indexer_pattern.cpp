@@ -783,8 +783,6 @@ void IndexerPattern::ChangeListItemsSelectedStyle(int32_t clickIndex)
     popupClickedIndex_ = clickIndex;
     auto host = GetHost();
     CHECK_NULL_VOID(popupNode_);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
@@ -796,7 +794,7 @@ void IndexerPattern::ChangeListItemsSelectedStyle(int32_t clickIndex)
     auto popupSelectedTextColor =
         paintProperty->GetPopupSelectedColor().value_or(indexerTheme->GetPopupDefaultColor());
     auto popupUnselectedTextColor =
-        paintProperty->GetPopupUnselectedColor().value_or(indexerTheme->GetPopupDefaultColor());
+        paintProperty->GetPopupUnselectedColor().value_or(indexerTheme->GetDefaultTextColor());
     auto popupItemBackground =
         paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupBackgroundColor());
     auto listNode = popupNode_->GetLastChild();

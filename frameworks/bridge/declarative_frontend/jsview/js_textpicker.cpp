@@ -544,9 +544,13 @@ bool JSTextPickerParser::ParseInternalArray(const JSRef<JSArray>& jsRangeValue, 
             values.emplace_back("");
         }
     } else {
-        auto valueIterator = std::find(resultStr.begin(), resultStr.end(), values[index]);
-        if (valueIterator == resultStr.end()) {
-            values[index] = resultStr.front();
+        if (resultStr.size() > 0) {
+            auto valueIterator = std::find(resultStr.begin(), resultStr.end(), values[index]);
+            if (valueIterator == resultStr.end()) {
+                values[index] = resultStr.front();
+            }
+        } else {
+            values[index] = "";
         }
     }
 
@@ -638,7 +642,9 @@ bool JSTextPickerParser::ParseTextArray(const JSRef<JSObject>& paramObject, Pars
         if (getValue->IsObject()) {
             JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(getValue);
             param.valueChangeEventVal = valueObj->GetProperty("changeEvent");
-            getValue = valueObj->GetProperty("value");
+            if (param.valueChangeEventVal->IsFunction()) {
+                getValue = valueObj->GetProperty("value");
+            }
         }
         if (!ParseJsString(getValue, param.value)) {
             param.value = getRangeVector.front();
@@ -646,7 +652,9 @@ bool JSTextPickerParser::ParseTextArray(const JSRef<JSObject>& paramObject, Pars
         if (getSelected->IsObject()) {
             JSRef<JSObject> selectedObj = JSRef<JSObject>::Cast(getSelected);
             param.selectedChangeEventVal = selectedObj->GetProperty("changeEvent");
-            getSelected = selectedObj->GetProperty("value");
+            if (param.selectedChangeEventVal->IsFunction()) {
+                getSelected = selectedObj->GetProperty("value");
+            }
         }
         if (!ParseJsInteger(getSelected, param.selected) && !param.value.empty()) {
             auto valueIterator = std::find(getRangeVector.begin(), getRangeVector.end(), param.value);

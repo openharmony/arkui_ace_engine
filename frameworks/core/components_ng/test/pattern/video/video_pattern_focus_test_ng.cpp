@@ -92,18 +92,15 @@ void VideoPatternFocusTestNg::TearDownTestSuite()
 
 RefPtr<FrameNode> VideoPatternFocusTestNg::CreateVideoNode(TestProperty& testProperty)
 {
-    if (testProperty.videoController.has_value()) {
-        VideoModelNG().Create(testProperty.videoController.value());
-    } else {
-        auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
-        VideoModelNG().Create(videoController);
-    }
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    VideoModelNG().Create(videoController);
+
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
     CHECK_NULL_RETURN(videoPattern, nullptr);
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), IsMediaPlayerValid())
-        .WillRepeatedly(Return(false));
+        .WillRepeatedly(Return(true));
 
     if (testProperty.src.has_value()) {
         VideoModelNG().SetSrc(testProperty.src.value());
@@ -126,8 +123,7 @@ RefPtr<FrameNode> VideoPatternFocusTestNg::CreateVideoNode(TestProperty& testPro
     if (testProperty.loop.has_value()) {
         VideoModelNG().SetLoop(testProperty.loop.value());
     }
-
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); // pop
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     return AceType::DynamicCast<FrameNode>(element);
 }
 
@@ -158,39 +154,29 @@ HWTEST_F(VideoPatternFocusTestNg, VideoFocusTest001, TestSize.Level1)
  */
 HWTEST_F(VideoPatternFocusTestNg, VideoFocusTest002, TestSize.Level1)
 {
-    VideoModelNG video;
-    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
-    video.Create(videoController);
-
     /**
      * @tc.steps: step1. Create Video
      * @tc.expected: step1. Create Video successfully
      */
-    auto frameNodeTemp = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNodeTemp);
-    auto videoPatternTemp = AceType::DynamicCast<VideoPattern>(frameNodeTemp->GetPattern());
-    CHECK_NULL_VOID(videoPatternTemp);
-    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPatternTemp->mediaPlayer_)), IsMediaPlayerValid())
-        .WillRepeatedly(Return(false));
+    auto frameNode = CreateVideoNode(testProperty);
+    EXPECT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+    frameNode->GetOrCreateFocusHub()->currentFocus_ = true;
+    auto videoPattern = frameNode->GetPattern<VideoPattern>();
+    CHECK_NULL_VOID(videoPattern);
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), IsMediaPlayerValid())
+        .WillRepeatedly(Return(true));
 
-    // when video set preview image and control, it will contains two children which are image and row respectively.
-    video.SetPosterSourceInfo(VIDEO_POSTER_URL);
-    video.SetControls(true);
-
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::VIDEO_ETS_TAG);
     auto videoLayoutProperty = frameNode->GetLayoutProperty<VideoLayoutProperty>();
     ASSERT_NE(videoLayoutProperty, nullptr);
 
     /**
      * @tc.steps: step2. Create LayoutWrapper and set videoLayoutAlgorithm.
-     * @tc.expected: step2. Create video pattern nad node successfully.
+     * @tc.expected: step2. Create video pattern and node successfully.
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
-    auto videoPattern = frameNode->GetPattern<VideoPattern>();
-    ASSERT_NE(videoPattern, nullptr);
     auto videoLayoutAlgorithm = videoPattern->CreateLayoutAlgorithm();
     ASSERT_NE(videoLayoutAlgorithm, nullptr);
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(videoLayoutAlgorithm));
@@ -211,7 +197,6 @@ HWTEST_F(VideoPatternFocusTestNg, VideoFocusTest002, TestSize.Level1)
      * @tc.steps: step4. Set the framenode tree, and test the focus.
      * @tc.expected: step4. Test focus on child successfully.
      */
-    videoPattern->OnModifyDone();
     frameNode->GetOrCreateFocusHub()->RequestFocusImmediately();
 
     for (const auto& child : frameNode->GetChildren()) {

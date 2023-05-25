@@ -32,7 +32,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 const Dimension FONT_SIZE = Dimension(2.0);
 const int32_t ANIMATION_ZERO_TO_OUTER = 200; // 200ms for animation that from zero to outer.
 const int32_t ANIMATION_OUTER_TO_ZERO = 150; // 150ms for animation that from outer to zero.
@@ -252,10 +251,6 @@ uint32_t TextPickerColumnPattern::GetShowOptionCount() const
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, 0);
     auto showCount = pickerTheme->GetShowOptionCount();
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
-        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-        showCount = OPTION_COUNT_PHONE_LANDSCAPE;
-    }
     return showCount;
 }
 

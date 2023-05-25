@@ -18,7 +18,10 @@ import(
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 config("config_svg_parse_test") {
-  visibility = [ ":*" ]
+  visibility = [
+    ":*",
+    "../dom:*",
+  ]
   include_dirs = [
     "//commonlibrary/c_utils/base/include",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
@@ -26,7 +29,7 @@ config("config_svg_parse_test") {
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
-    "//third_party/flutter/skia",
+    "//third_party/skia",
     "$ace_root",
     "$ace_root/frameworks",
   ]

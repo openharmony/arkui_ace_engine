@@ -413,7 +413,7 @@ RefPtr<LayoutAlgorithm> MenuPattern::CreateLayoutAlgorithm()
 {
     switch (type_) {
         case MenuType::NAVIGATION_MENU:
-            return MakeRefPtr<NavigationMenuLayoutAlgorithm>();
+            return MakeRefPtr<MenuLayoutAlgorithm>();
         case MenuType::MULTI_MENU:
             return MakeRefPtr<MultiMenuLayoutAlgorithm>();
         case MenuType::SUB_MENU:

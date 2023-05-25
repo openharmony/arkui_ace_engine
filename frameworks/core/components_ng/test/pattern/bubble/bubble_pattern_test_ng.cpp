@@ -526,6 +526,7 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest007, TestSize.Level1)
     popupParam->SetTextColor(BUBBLE_PAINT_PROPERTY_TEXT_COLOR);
     popupParam->SetFontSize(BUBBLE_PAINT_PROPERTY_FONT_SIZE);
     popupParam->SetFontWeight(BUBBLE_PAINT_PROPERTY_FONT_WEIGHT);
+    popupParam->SetFontStyle(Ace::FontStyle::ITALIC);
 
     // create bubbleNode
     auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
@@ -799,7 +800,7 @@ HWTEST_F(BubblePatternTestNg, BubblePaintMethod001, TestSize.Level1)
     EXPECT_CALL(canvas, Translate(_, _)).Times(AtLeast(1));
     EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
     EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(AtLeast(1));
-    EXPECT_CALL(canvas, ClipRoundRect(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, ClipRoundRectImpl(_, _, _)).Times(AtLeast(1));
 
     /**
      * @tc.steps: step2. Create the GeometryNode and PaintWrapper.Set the progressPaintProperty.

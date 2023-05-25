@@ -16,25 +16,26 @@
 #include <functional>
 #include <memory>
 #include <optional>
-#include <vector>
 #include <utility>
+#include <vector>
+
 #include "gtest/gtest.h"
 
 #define protected public
 #define private public
+#include "cJSON.h"
+#include "interfaces/inner_api/ace/ui_content.h"
+#include "test/mock/base/mock_task_executor.h"
+
 #include "base/utils/utils.h"
-#include "core/components_ng/base/inspector.h"
 #include "core/common/ace_application_info.h"
+#include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-#include "core/components_ng/pattern/stage/stage_manager.h"
-#include "interfaces/inner_api/ace/ui_content.h"
-#include "cJSON.h"
-#undef private
-#undef protected
 
 using namespace testing;
 using namespace testing::ext;
@@ -129,7 +130,7 @@ HWTEST_F(InspectorTestNg, InspectorTestNg002, TestSize.Level1)
      */
     context1->rootNode_ = ONE;
     ASSERT_NE(context1, nullptr);
-    auto test2 =Inspector::GetInspectorNodeByKey(key);
+    auto test2 = Inspector::GetInspectorNodeByKey(key);
     EXPECT_EQ(test2, "");
     /**
      * @tc.steps: step3. callback GetInspectorNodeByKey
@@ -156,8 +157,14 @@ HWTEST_F(InspectorTestNg, InspectorTestNg003, TestSize.Level1)
 
     context1->GetStageManager()->GetLastPage()->GetParent()->SetParent(ONE);
 
+    /**
+     * @tc.steps: step2. call GetInspector
+     * @tc.expected: the return value is empty string
+     */
     auto test1 = Inspector::GetInspector(false);
+    EXPECT_NE(test1, "");
     auto test3 = Inspector::GetInspector(true);
+    EXPECT_NE(test3, "");
     context1->stageManager_ = nullptr;
 }
 
@@ -240,7 +247,32 @@ HWTEST_F(InspectorTestNg, InspectorTestNg006, TestSize.Level1)
     children.push_back(TWO);
 
     auto test = Inspector::GetInspector(false);
+
+    /**
+     * @tc.steps: step2 add child to two and create a temp node with tag "temp"
+                call GetInspector
+     * @tc.expected: the return value is empty string
+     */
+    THREE->isInternal_ = true;
+    TWO->AddChild(PAGE);
+    TWO->AddChild(THREE);
+    TWO->AddChild(STAGE);
+    auto temp = FrameNode::CreateFrameNode("temp", 5, AceType::MakeRefPtr<Pattern>(), true);
+    STAGE->AddChild(temp);
+    ONE->tag_ = "stage";
+    auto test1 = Inspector::GetInspector(false);
+    EXPECT_NE(test1, "");
+
+    PAGE->hostPageId_ = TWO->GetPageId();
+    auto test2 = Inspector::GetInspector(false);
+    EXPECT_NE(test2, "");
+
+    TWO->children_.clear();
+    auto test3 = Inspector::GetInspector(false);
+    EXPECT_NE(test3, "");
+
     context1->stageManager_ = nullptr;
+    ONE->tag_ = "one";
 }
 
 /**
@@ -265,8 +297,7 @@ HWTEST_F(InspectorTestNg, InspectorTestNg007, TestSize.Level1)
     ONE->children_.pop_back();
     auto pageRootNode = context1->GetStageManager()->GetLastPage();
     auto test = Inspector::GetInspector(false);
-    EXPECT_EQ(test,
-        "{\"$type\":\"root\",\"width\":\"0.000000\",\"height\":\"0.000000\",\"$resolution\":\"0.000000\"}");
+    EXPECT_EQ(test, "{\"$type\":\"root\",\"width\":\"0.000000\",\"height\":\"0.000000\",\"$resolution\":\"0.000000\"}");
     context1->stageManager_ = nullptr;
 }
 } // namespace OHOS::Ace::NG

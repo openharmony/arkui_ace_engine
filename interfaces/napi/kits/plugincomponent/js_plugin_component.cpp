@@ -22,6 +22,7 @@
 #include "js_plugin_want.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
+#include "tokenid_kit.h"
 
 #include "core/components/plugin/plugin_component_manager.h"
 
@@ -253,6 +254,12 @@ napi_value NAPI_JSPushWrap(napi_env env, napi_callback_info info, ACEAsyncJSCall
 static napi_value JSPush(napi_env env, napi_callback_info info)
 {
     HILOG_INFO("%{public}s called.", __func__);
+
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        HILOG_INFO("This application is not system-app, can not use system-api");
+        return nullptr;
+    }
 
     ACEAsyncJSCallbackInfo* asyncCallbackInfo = AceCreateAsyncJSCallbackInfo(env);
     if (asyncCallbackInfo == nullptr) {
@@ -519,6 +526,12 @@ napi_value NAPI_JSRequestWrap(napi_env env, napi_callback_info info, ACEAsyncJSC
 static napi_value JSRequest(napi_env env, napi_callback_info info)
 {
     HILOG_INFO("%{public}s called.", __func__);
+
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        HILOG_INFO("This application is not system-app, can not use system-api");
+        return nullptr;
+    }
 
     ACEAsyncJSCallbackInfo* asyncCallbackInfo = AceCreateAsyncJSCallbackInfo(env);
     if (asyncCallbackInfo == nullptr) {
