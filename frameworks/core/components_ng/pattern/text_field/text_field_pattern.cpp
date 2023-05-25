@@ -1154,6 +1154,7 @@ void TextFieldPattern::HandleOnSelectAll()
     textEditingValue_.caretPosition = textSize;
     selectionMode_ = SelectionMode::SELECT_ALL;
     caretUpdateType_ = CaretUpdateType::EVENT;
+    ChangeIsSelectedAreaRedraw();
     GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -2050,6 +2051,7 @@ void TextFieldPattern::ProcessOverlay()
 void TextFieldPattern::CreateHandles()
 {
     std::vector<RSTypographyProperties::TextBox> tmp;
+    ChangeIsSelectedAreaRedraw();
     GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), tmp);
     auto firstHandlePosition = CalcCursorOffsetByPosition(textSelector_.GetStart());
     OffsetF firstHandleOffset(firstHandlePosition.offset.GetX() + parentGlobalOffset_.GetX(),

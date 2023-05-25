@@ -791,6 +791,11 @@ public:
         return HasFocus();
     }
 
+    void ChangeIsSelectedAreaRedraw()
+    {
+        isSelectedAreaRedraw_ = !isSelectedAreaRedraw_;
+    }
+
 private:
     bool HasFocus() const;
     void HandleTouchEvent(const TouchEventInfo& info);
