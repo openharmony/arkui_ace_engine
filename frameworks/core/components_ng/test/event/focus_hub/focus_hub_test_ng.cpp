@@ -323,7 +323,6 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg007, TestSize.Level1)
      */
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
-    focusHub->show_ = true;
     focusHub->focusable_ = true;
     focusHub->parentFocusable_ = true;
 
@@ -523,7 +522,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0013, TestSize.Level1)
     focusHub->SetFocusType(FocusType::NODE);
     focusHub->SetShow(true);
     focusHub->SetEnabled(true);
-    EXPECT_TRUE(focusHub->show_);
+    EXPECT_TRUE(focusHub->IsShow());
 
     /**
      * @tc.steps3: call the function SetShow with FocusType::SCOPE.
@@ -532,7 +531,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0013, TestSize.Level1)
     focusHub->SetFocusType(FocusType::SCOPE);
     focusHub->SetShow(false);
     focusHub->SetEnabled(false);
-    EXPECT_FALSE(focusHub->show_);
+    EXPECT_FALSE(focusHub->IsShow());
 
     /**
      * @tc.steps4: call the function SetShow with FocusType::DISABLE.
@@ -541,7 +540,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0013, TestSize.Level1)
     focusHub->SetFocusType(FocusType::DISABLE);
     focusHub->SetShow(true);
     focusHub->SetEnabled(true);
-    EXPECT_FALSE(focusHub->show_);
+    EXPECT_FALSE(focusHub->IsShow());
 }
 
 /**
@@ -838,7 +837,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0020, TestSize.Level1)
      * @tc.expected: The return value of the function is focusHub.
      */
     focusHub->SetFocusType(FocusType::NODE);
-    focusHub->show_ = true;
+    focusHub->SetShow(true);
     focusHub->focusable_ = true;
     focusHub->parentFocusable_ = true;
     focusHub->SetIsDefaultFocus(true);
@@ -848,7 +847,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0020, TestSize.Level1)
      * @tc.steps3: call the function GetChildFocusNodeByType with FocusNodeType::DEFAULT and show_ = false.
      * @tc.expected: The return value of the function is nullptr.
      */
-    focusHub->show_ = false;
+    focusHub->SetShow(false);
     EXPECT_EQ(focusHub->GetChildFocusNodeByType(FocusNodeType::DEFAULT), nullptr);
 
     /**
@@ -862,7 +861,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0020, TestSize.Level1)
      * @tc.steps5: call the function GetChildFocusNodeByType with FocusNodeType::DEFAULT and show_ = true.
      * @tc.expected: The return value of the function is focusHub.
      */
-    focusHub->show_ = true;
+    focusHub->SetShow(true);
     focusHub->SetIsDefaultGroupFocus(true);
     EXPECT_EQ(focusHub->GetChildFocusNodeByType(FocusNodeType::GROUP_DEFAULT), focusHub);
 
@@ -870,7 +869,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0020, TestSize.Level1)
      * @tc.steps6: call the function GetChildFocusNodeByType with FocusNodeType::DEFAULT and show_ = false.
      * @tc.expected: The return value of the function is nullptr.
      */
-    focusHub->show_ = false;
+    focusHub->SetShow(false);
     EXPECT_EQ(focusHub->GetChildFocusNodeByType(FocusNodeType::GROUP_DEFAULT), nullptr);
 
     /**
@@ -878,7 +877,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0020, TestSize.Level1)
      *             IsDefaultGroupFocus = false.
      * @tc.expected: The return value of the function is nullptr.
      */
-    focusHub->show_ = true;
+    focusHub->SetShow(true);
     focusHub->SetIsDefaultGroupFocus(false);
     EXPECT_EQ(focusHub->GetChildFocusNodeByType(FocusNodeType::GROUP_DEFAULT), nullptr);
 
@@ -945,7 +944,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0021, TestSize.Level1)
      * @tc.steps7: call the function GoToFocusByTabNodeIdx with the unempty TabIndexNodeList.
      * @tc.expected: The return value of the function is true.
      */
-    focusHub->show_ = true;
+    focusHub->SetShow(true);
     focusHub->focusable_ = true;
     focusHub->parentFocusable_ = true;
     EXPECT_TRUE(focusHub->GoToFocusByTabNodeIdx(tabIndexNodes, 1));

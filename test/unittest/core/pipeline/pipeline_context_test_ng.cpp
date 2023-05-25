@@ -442,7 +442,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
     focusHub->focusCallbackEvents_->SetDefaultFocusNode(newFocusHub);
     newFocusHub->SetFocusType(FocusType::NODE);
     frameNode_2->eventHub_->enabled_ = true;
-    newFocusHub->show_ = true;
     newFocusHub->focusable_ = true;
     newFocusHub->parentFocusable_ = true;
     EXPECT_TRUE(context_->RequestDefaultFocus());
@@ -1071,47 +1070,51 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     KeyEvent event;
 
     /**
-     * @tc.steps2: Call the function OnKeyEvent with isNeedShowFocus_ = false, action = KeyAction::DOWN and
+     * @tc.steps2: Call the function OnKeyEvent with isFocusActive_ = false, action = KeyAction::DOWN and
      #             pressedCodes = { KeyCode::KEY_TAB }.
      * @tc.expected: The return value of OnKeyEvent is true.
      */
     context_->SetIsFocusActive(false);
     event.action = KeyAction::DOWN;
+    event.code = KeyCode::KEY_TAB;
     event.pressedCodes = { KeyCode::KEY_TAB };
     EXPECT_TRUE(context_->OnKeyEvent(event));
     EXPECT_TRUE(context_->GetIsFocusActive());
 
     /**
-     * @tc.steps3: Call the function OnKeyEvent with isNeedShowFocus_ = false, action = KeyAction::DOWN and
+     * @tc.steps3: Call the function OnKeyEvent with isFocusActive_ = false, action = KeyAction::DOWN and
      #             pressedCodes = { KeyCode::KEY_DPAD_UP }.
-     * @tc.expected: The return value of OnKeyEvent is true.
+     * @tc.expected: The return value of OnKeyEvent is false.
      */
     context_->SetIsFocusActive(false);
     event.pressedCodes = { KeyCode::KEY_DPAD_UP };
+    event.code = KeyCode::KEY_DPAD_UP;
     eventManager->SetInstanceId(DEFAULT_INT0);
     EXPECT_FALSE(context_->OnKeyEvent(event));
     EXPECT_FALSE(context_->GetIsFocusActive());
 
     /**
-     * @tc.steps4: Call the function OnKeyEvent with isNeedShowFocus_ = false, action = KeyAction::UP and
+     * @tc.steps4: Call the function OnKeyEvent with isFocusActive_ = false, action = KeyAction::UP and
      #             pressedCodes = { KeyCode::KEY_CLEAR }.
      * @tc.expected: The return value of OnKeyEvent is true.
      */
     eventManager->SetInstanceId(DEFAULT_INT0);
     context_->SetIsFocusActive(false);
     event.action = KeyAction::UP;
+    event.code = KeyCode::KEY_CLEAR;
     event.pressedCodes = { KeyCode::KEY_CLEAR };
     EXPECT_FALSE(context_->OnKeyEvent(event));
     EXPECT_FALSE(context_->GetIsFocusActive());
 
     /**
-     * @tc.steps4: Call the function OnKeyEvent with isNeedShowFocus_ = true, action = KeyAction::UP and
+     * @tc.steps4: Call the function OnKeyEvent with isFocusActive_ = true, action = KeyAction::UP and
      #             pressedCodes = { KeyCode::KEY_CLEAR }.
      * @tc.expected: The return value of OnKeyEvent is false.
      */
     eventManager->SetInstanceId(DEFAULT_INT1);
     context_->SetIsFocusActive(true);
     event.action = KeyAction::UP;
+    event.code = KeyCode::KEY_CLEAR;
     event.pressedCodes = { KeyCode::KEY_CLEAR };
     EXPECT_FALSE(context_->OnKeyEvent(event));
     EXPECT_TRUE(context_->GetIsFocusActive());
@@ -1888,13 +1891,12 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg036, TestSize.Level1)
 
     /**
      * @tc.steps3: change host_,focusType_,enabled_,
-                    show_,focusable_,parentFocusable_,currentFocus_
+                    focusable_,parentFocusable_,currentFocus_
      */
     auto eventHub1 = frameNode_1->GetEventHub<EventHub>();
     eventHub1->host_ = nullptr;
     focusHub->focusType_ = FocusType::NODE;
     eventHub->enabled_ = true;
-    focusHub->show_ = true;
     focusHub->focusable_ = true;
     focusHub->parentFocusable_ = true;
     focusHub->currentFocus_ = true;
