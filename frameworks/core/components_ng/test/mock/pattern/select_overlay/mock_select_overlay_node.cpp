@@ -35,4 +35,9 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
 }
 
 void SelectOverlayNode::UpdateToolBar(bool menuItemChanged) {}
+
+bool SelectOverlayNode::IsInSelectedOrSelectOverlayArea(const PointF& point)
+{
+    return true;
+}
 } // namespace OHOS::Ace::NG
