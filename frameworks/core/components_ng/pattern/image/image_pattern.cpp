@@ -218,13 +218,15 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
         if (!imageModifier_) {
             imageModifier_ = AceType::MakeRefPtr<ImageModifier>();
         }
+        imageModifier_->SetIsAltImage(false);
         return MakeRefPtr<ImagePaintMethod>(image_, imageModifier_, selectOverlay_);
     }
     if (altImage_ && altDstRect_ && altSrcRect_) {
-        if (!altImageModifier_) {
-            altImageModifier_ = AceType::MakeRefPtr<ImageModifier>();
+        if (!imageModifier_) {
+            imageModifier_ = AceType::MakeRefPtr<ImageModifier>();
         }
-        return MakeRefPtr<ImagePaintMethod>(altImage_, altImageModifier_, selectOverlay_);
+        imageModifier_->SetIsAltImage(true);
+        return MakeRefPtr<ImagePaintMethod>(altImage_, imageModifier_, selectOverlay_);
     }
     return nullptr;
 }

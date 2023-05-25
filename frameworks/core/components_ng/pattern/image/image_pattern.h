@@ -151,7 +151,6 @@ private:
     RefPtr<CanvasImage> altImage_;
     std::unique_ptr<RectF> altDstRect_;
     std::unique_ptr<RectF> altSrcRect_;
-    RefPtr<ImageModifier> altImageModifier_;
 
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<ClickEvent> clickEvent_;
