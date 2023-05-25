@@ -45,6 +45,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t TARGET_ID = 3;
 constexpr MenuType TYPE = MenuType::MENU;
+constexpr int32_t SELECTED_INDEX = 10;
 class MenuPatternTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -982,6 +983,44 @@ HWTEST_F(MenuPatternTestNg, PerformActionTest002, TestSize.Level1)
     textNode->MarkModifyDone();
     EXPECT_TRUE(menuAccessibilityProperty->ActActionScrollForward());
     EXPECT_TRUE(menuAccessibilityProperty->ActActionScrollBackward());
+}
+
+/**
+ * @tc.name: MenuAccessibilityEventTestNg001
+ * @tc.desc: Test Click Event for Option of Menu.
+ */
+HWTEST_F(MenuPatternTestNg, MenuAccessibilityEventTestNg001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Option for Menu.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+    ASSERT_NE(frameNode, nullptr);
+    auto optionPattern = frameNode->GetPattern<OptionPattern>();
+    ASSERT_NE(optionPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set callback function.
+     */
+    int testIndex = SELECTED_INDEX;
+    auto selectFunc = [optionPattern, testIndex](int index) { optionPattern->index_ = testIndex; };
+    auto optionEventHub = frameNode->GetEventHub<OptionEventHub>();
+    optionEventHub->SetOnSelect(selectFunc);
+    optionPattern->RegisterOnClick();
+
+    /**
+     * @tc.steps: step3. call callback function.
+     * @tc.expected: index_ is SELECTED_INDEX.
+     */
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    auto clickEventActuator = gestureHub->clickEventActuator_;
+    ASSERT_NE(clickEventActuator, nullptr);
+    auto event = clickEventActuator->GetClickEvent();
+    ASSERT_NE(event, nullptr);
+    GestureEvent gestureEvent;
+    event(gestureEvent);
+    EXPECT_EQ(optionPattern->index_, SELECTED_INDEX);
 }
 } // namespace
 } // namespace OHOS::Ace::NG

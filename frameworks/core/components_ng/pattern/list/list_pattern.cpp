@@ -237,10 +237,6 @@ void ListPattern::ProcessEvent(
         scrollStop_ = false;
         scrollAbort_ = false;
     }
-
-    if (isScrollEnd_) {
-        isScrollEnd_ = false;
-    }
 }
 
 void ListPattern::DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper)

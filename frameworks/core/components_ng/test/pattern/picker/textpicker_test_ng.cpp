@@ -69,6 +69,9 @@ const std::string TEXT_PICKER_CONTENT = "text";
 const double OFFSET_X = 6.0;
 const double OFFSET_Y = 8.0;
 constexpr double TOSS_DELTA = 20.0;
+const double YOFFSET_START1 = 0.0;
+const double YOFFSET_END1 = 1000.0;
+const double TIME_PLUS = 1 * 100.0;
 } // namespace
 
 class TextPickerTestNg : public testing::Test {
@@ -4322,5 +4325,61 @@ HWTEST_F(TextPickerTestNg, PerformActionTest001, TestSize.Level1)
     columnPattern->SetCurrentIndex(1);
     EXPECT_TRUE(accessibilityProperty->ActActionScrollForward());
     EXPECT_TRUE(accessibilityProperty->ActActionScrollBackward());
+}
+
+/**
+ * @tc.name: TextPickerEventActionsTest001
+ * @tc.desc: Test pan event actions
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextEventActionsTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create textPickerColumn.
+     */
+    InitTextPickerTestNg();
+    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureHub = eventHub->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    textPickerColumnPattern_->InitPanEvent(gestureHub);
+
+    /**
+     * @tc.steps: step2. call actionStart_ func.
+     * @tc.expected: pressed_ is true.
+     */
+    GestureEvent gestureEvent;
+    auto panEvent = textPickerColumnPattern_->panEvent_;
+    ASSERT_NE(panEvent->actionStart_, nullptr);
+    panEvent->actionStart_(gestureEvent);
+    EXPECT_TRUE(textPickerColumnPattern_->pressed_);
+
+    /**
+     * @tc.steps: step3. call actionEnd_ func.
+     * @tc.expected: pressed_ is false.
+     */
+    auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerNodeLayout, nullptr);
+    pickerNodeLayout->UpdateCanLoop(false);
+
+    ASSERT_NE(panEvent->actionEnd_, nullptr);
+    panEvent->actionEnd_(gestureEvent);
+    EXPECT_FALSE(textPickerColumnPattern_->pressed_);
+
+    /**
+     * @tc.steps: step4. call actionEnd_ func in another condition.
+     * @tc.expected: pressed_ is false.
+     */
+    pickerNodeLayout->UpdateCanLoop(true);
+    EXPECT_FALSE(textPickerColumnPattern_->NotLoopOptions());
+    auto toss = textPickerColumnPattern_->GetToss();
+    toss->SetStart(YOFFSET_START1);
+    toss->SetEnd(YOFFSET_END1);
+    toss->timeEnd_ = toss->GetCurrentTime() + TIME_PLUS;
+    EXPECT_TRUE(toss->Play());
+
+    textPickerColumnPattern_->pressed_ = true;
+    panEvent->actionEnd_(gestureEvent);
+    EXPECT_FALSE(textPickerColumnPattern_->pressed_);
 }
 } // namespace OHOS::Ace::NG

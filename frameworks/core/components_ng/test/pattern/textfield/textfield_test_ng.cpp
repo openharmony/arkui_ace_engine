@@ -3524,6 +3524,38 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldModel003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SelectorTest001
+ * @tc.desc: test Update function in TextSelector
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SelectorTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextField.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set callback function.
+     */
+    pattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step3. call callback function.
+     * @tc.expected: textSelector_ update successfully.
+     */
+    pattern->textSelector_.Update(0);
+    EXPECT_EQ(pattern->textSelector_.baseOffset, 0);
+    
+    pattern->textSelector_.Update(0, 0);
+    EXPECT_EQ(pattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(pattern->textSelector_.destinationOffset, 0);
+}
+
+/**
  * @tc.name: ShowOverlay001
  * @tc.desc: Test CheckHandles function
  * @tc.type: FUNC
