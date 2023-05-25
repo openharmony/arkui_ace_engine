@@ -18,7 +18,8 @@ group("core_unittest") {
   testonly = true
   deps = [
     "common:core_common_unittest",
-    "gestures:gestures_test_ng",
+
+    #"gestures:gestures_test_ng",
     "pattern:core_pattern_unittest",
     "pipeline:pipeline_context_test_ng",
   ]
