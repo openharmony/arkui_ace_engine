@@ -13,21 +13,14 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/remote_window/remote_window_pattern.h"
+#include "bridge/declarative_frontend/jsview/models/effect_view_model_impl.h"
 
-#include "base/geometry/rect.h"
-#include "base/utils/utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components/effect_view/effect_view_component.h"
 
-namespace OHOS::Ace::NG {
-
-void RemoteWindowPattern::OnAttachToFrameNode()
+namespace OHOS::Ace::Framework {
+void EffectViewModelImpl::Create()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+    // empty implementation
 }
-
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::Framework

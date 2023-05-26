@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/remote_window/remote_window_model_ng.h"
+#include "core/components_ng/pattern/effect_view/effect_view_model_ng.h"
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/remote_window/remote_window_pattern.h"
+#include "core/components_ng/pattern/effect_view/effect_view_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-void RemoteWindowModelNG::Create(const std::shared_ptr<OHOS::Rosen::RSNode>& rsNode)
+void EffectViewModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::REMOTE_WINDOW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RemoteWindowPattern>(); });
+        V2::EFFECT_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<EffectViewPattern>(); });
     stack->Push(frameNode);
 #ifdef ENABLE_ROSEN_BACKEND
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());

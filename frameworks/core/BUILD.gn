@@ -501,6 +501,15 @@ template("ace_core_source_set") {
       }
     }
 
+    if (defined(config.effect_view_support) && config.effect_view_support) {
+      if (!use_mingw_win && !use_mac && !use_linux) {
+        deps += [
+          "$ace_root/frameworks/core/components/effect_view:ace_core_components_effect_view$platform",
+          "$ace_root/frameworks/core/components_ng/pattern/effect_view:ace_core_components_effect_view_pattern_ng_$platform",
+        ]
+      }
+    }
+
     if (defined(config.build_container_scope_lib) &&
         config.build_container_scope_lib) {
       sources -= [ "common/container_scope.cpp" ]

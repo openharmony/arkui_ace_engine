@@ -13,21 +13,16 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/remote_window/remote_window_pattern.h"
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_EFFECT_VIEW_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_EFFECT_VIEW_H
 
-#include "base/geometry/rect.h"
-#include "base/utils/utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
-namespace OHOS::Ace::NG {
-
-void RemoteWindowPattern::OnAttachToFrameNode()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
-}
-
-} // namespace OHOS::Ace::NG
+namespace OHOS::Ace::Framework {
+class JSEffectView : public JSViewAbstract {
+public:
+    static void JSBind(BindingTarget globalObj);
+    static void Create();
+};
+} // namespace OHOS::Ace::Framework
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_EFFECT_VIEW_H

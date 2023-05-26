@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/remote_window/remote_window_pattern.h"
+#include "core/components_ng/pattern/effect_view/effect_view_pattern.h"
 
 #include "base/geometry/rect.h"
 #include "base/utils/utils.h"
@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 
-void RemoteWindowPattern::OnAttachToFrameNode()
+void EffectViewPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);

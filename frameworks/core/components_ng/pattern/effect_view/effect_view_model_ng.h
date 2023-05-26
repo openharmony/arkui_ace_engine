@@ -13,21 +13,15 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/remote_window/remote_window_pattern.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_VIEW_MODEL_NG_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_VIEW_MODEL_NG_H
 
-#include "base/geometry/rect.h"
-#include "base/utils/utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
+#include "core/components_ng/pattern/effect_view/effect_view_model.h"
 
 namespace OHOS::Ace::NG {
-
-void RemoteWindowPattern::OnAttachToFrameNode()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
-}
-
+class ACE_EXPORT EffectViewModelNG : public OHOS::Ace::EffectViewModel {
+public:
+    void Create() override;
+};
 } // namespace OHOS::Ace::NG
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_VIEW_MODEL_NG_H

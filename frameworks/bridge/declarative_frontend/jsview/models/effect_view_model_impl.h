@@ -13,21 +13,17 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/remote_window/remote_window_pattern.h"
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_EFFECT_VIEW_MODEL_IMPL_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_EFFECT_VIEW_MODEL_IMPL_H
 
-#include "base/geometry/rect.h"
-#include "base/utils/utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
+#include <string>
 
-namespace OHOS::Ace::NG {
+#include "core/components_ng/pattern/effect_view/effect_view_model.h"
 
-void RemoteWindowPattern::OnAttachToFrameNode()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
-}
-
-} // namespace OHOS::Ace::NG
+namespace OHOS::Ace::Framework {
+class EffectViewModelImpl : public EffectViewModel {
+public:
+    void Create() override;
+};
+} // namespace OHOS::Ace::Framework
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_EFFECT_VIEW_MODEL_IMPL_H
