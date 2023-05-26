@@ -33,11 +33,11 @@ public:
     virtual ~IndexerModel() = default;
 
     virtual void Create(std::vector<std::string>& indexerArray, int32_t selectedVal) = 0;
-    virtual void SetSelectedColor(const Color& color) = 0;
-    virtual void SetColor(const Color& color) = 0;
-    virtual void SetPopupColor(const Color& color) = 0;
-    virtual void SetSelectedBackgroundColor(const Color& color) = 0;
-    virtual void SetPopupBackground(const Color& color) = 0;
+    virtual void SetSelectedColor(const std::optional<Color>& color) = 0;
+    virtual void SetColor(const std::optional<Color>& color) = 0;
+    virtual void SetPopupColor(const std::optional<Color>& color) = 0;
+    virtual void SetSelectedBackgroundColor(const std::optional<Color>& color) = 0;
+    virtual void SetPopupBackground(const std::optional<Color>& color) = 0;
     virtual void SetUsingPopup(bool state) = 0;
     virtual void SetSelectedFont(std::function<void(TextStyle& textStyle)>&& getTextStyleFunc) = 0;
     virtual void SetPopupFont(std::function<void(TextStyle& textStyle)>&& getTextStyleFunc) = 0;
