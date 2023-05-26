@@ -42,7 +42,6 @@ public:
     ProgressType GetType() const;
     float GetStrokeWidth() const;
     float GetChildHeight(LayoutWrapper* layoutWrapper, float width) const;
-    void SetRadius(LayoutWrapper* layoutWrapper, float width, float height) const;
 
 private:
     ProgressType type_ = ProgressType::LINEAR;
