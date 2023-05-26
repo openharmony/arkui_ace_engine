@@ -1594,6 +1594,7 @@ void TextFieldPattern::InitDragDropEvent()
         }
         focusHub->RequestFocusImmediately();
         pattern->SetCaretPosition(position);
+        pattern->StartTwinkling();
     };
     eventHub->SetOnDragMove(std::move(onDragMove));
 
