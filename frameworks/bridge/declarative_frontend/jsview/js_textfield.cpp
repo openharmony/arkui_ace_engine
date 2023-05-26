@@ -406,11 +406,6 @@ void JSTextField::SetFontSize(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetFontSize(fontSize);
 }
 
-void JSTextField::RequestKeyboardOnFocus(bool needToRequest)
-{
-    TextFieldModel::GetInstance()->RequestKeyboardOnFocus(needToRequest);
-}
-
 void JSTextField::SetFontWeight(const std::string& value)
 {
     TextFieldModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
@@ -975,6 +970,20 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
     }
 
     TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
+}
+
+void JSTextField::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("EnableKeyboardOnFocus should have at least 1 param");
+        return;
+    }
+    if (info[0]->IsUndefined() || !info[0]->IsBoolean()) {
+        LOGI("The info of SetEnableKeyboardOnFocus is not correct, using default");
+        TextFieldModel::GetInstance()->RequestKeyboardOnFocus(true);
+        return;
+    }
+    TextFieldModel::GetInstance()->RequestKeyboardOnFocus(info[0]->ToBoolean());
 }
 
 } // namespace OHOS::Ace::Framework

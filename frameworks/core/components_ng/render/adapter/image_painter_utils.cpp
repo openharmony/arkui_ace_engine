@@ -71,9 +71,11 @@ void ImagePainterUtils::AddFilter(SkPaint& paint, SkSamplingOptions& options, co
         }
         case ImageInterpolation::HIGH: {
             options = SkSamplingOptions(SkCubicResampler::Mitchell());
+            break;
         }
         default:
             options = SkSamplingOptions();
+            break;
     }
 
     if (config.colorFilter_) {

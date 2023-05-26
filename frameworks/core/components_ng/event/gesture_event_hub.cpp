@@ -452,13 +452,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     if (pixelMap == nullptr) {
         pixelMap = pixelMap_->GetPixelMapSharedPtr();
     }
-    if (pixelMap->GetWidth() > Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH ||
-        pixelMap->GetHeight() > Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) {
-            float scaleWidth = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH) / pixelMap->GetWidth();
-            float scaleHeight = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) / pixelMap->GetHeight();
-            float scale = std::min(scaleWidth, scaleHeight);
-            pixelMap->scale(scale, scale);
-    } else if (!GetTextDraggable()) {
+    if (!GetTextDraggable()) {
         pixelMap->scale(PIXELMAP_DRAG_SCALE, PIXELMAP_DRAG_SCALE);
     }
     uint32_t width = pixelMap->GetWidth();

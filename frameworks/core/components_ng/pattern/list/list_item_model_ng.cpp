@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace::NG {
 
-void ListItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc)
+void ListItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc, V2::ListItemStyle listItemStyle)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -38,8 +38,9 @@ void ListItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc)
         return ViewStackProcessor::GetInstance()->Finish();
     };
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::LIST_ITEM_ETS_TAG, nodeId, [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender))]() {
-            return AceType::MakeRefPtr<ListItemPattern>(shallowBuilder);
+        V2::LIST_ITEM_ETS_TAG, nodeId,
+        [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender)), itemStyle = listItemStyle]() {
+            return AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, itemStyle);
         });
     stack->Push(frameNode);
 }
@@ -48,8 +49,8 @@ void ListItemModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::LIST_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr); });
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
     stack->Push(frameNode);
 }
 

@@ -146,6 +146,11 @@ void MenuItemModelNG::SetFontWeight(FontWeight weight)
     ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontWeight, weight);
 }
 
+void MenuItemModelNG::SetFontStyle(Ace::FontStyle style)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, ItalicFontStyle, style);
+}
+
 void MenuItemModelNG::SetFontColor(const std::optional<Color>& color)
 {
     if (color.has_value()) {
@@ -168,6 +173,11 @@ void MenuItemModelNG::SetLabelFontSize(const Dimension& fontSize)
 void MenuItemModelNG::SetLabelFontWeight(FontWeight weight)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontWeight, weight);
+}
+
+void MenuItemModelNG::SetLabelFontStyle(Ace::FontStyle style)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelItalicFontStyle, style);
 }
 
 void MenuItemModelNG::SetLabelFontColor(const std::optional<Color>& color)

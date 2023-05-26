@@ -1583,3 +1583,15 @@ var SecLocationButtonOnClickResult;
   SecLocationButtonOnClickResult[SecLocationButtonOnClickResult["LOCATION_BUTTON_CLICK_GRANT_FAILED"] = 1] =
     "LOCATION_BUTTON_CLICK_GRANT_FAILED ";
 })(SecLocationButtonOnClickResult || (SecLocationButtonOnClickResult = {}));
+
+var ListItemStyle;
+(function (ListItemStyle) {
+  ListItemStyle[ListItemStyle["NONE"] = 0] = "NONE";
+  ListItemStyle[ListItemStyle["CARD"] = 1] = "CARD";
+})(ListItemStyle || (ListItemStyle = {}));
+
+var ListItemGroupStyle;
+(function (ListItemGroupStyle) {
+  ListItemGroupStyle[ListItemGroupStyle["NONE"] = 0] = "NONE";
+  ListItemGroupStyle[ListItemGroupStyle["CARD"] = 1] = "CARD";
+})(ListItemGroupStyle || (ListItemGroupStyle = {}));
