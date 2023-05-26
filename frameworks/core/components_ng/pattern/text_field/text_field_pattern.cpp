@@ -591,7 +591,8 @@ void TextFieldPattern::SetCaretOffsetForEmptyTextOrPositionZero()
             caretRect_.SetLeft(static_cast<float>(contentRect_.GetX()) + contentRect_.Width() / 2.0f);
             return;
         case TextAlign::END:
-            caretRect_.SetLeft(static_cast<float>(contentRect_.GetX()) + contentRect_.Width());
+            caretRect_.SetLeft(static_cast<float>(contentRect_.GetX()) + contentRect_.Width() -
+                               static_cast<float>(CURSOR_WIDTH.ConvertToPx()));
             return;
         default:
             caretRect_.SetLeft(textRect_.GetX());
