@@ -268,10 +268,11 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
     if (needTransition) {
         // from the penultimate node, (popSize - 1) nodes are deleted.
         // the last node will be deleted after pageTransition
-        iter = children.rbegin();
-        ++iter;
+        LOGI("PopPageToIndex, before pageTransition, to index:%{public}d, children size:%{public}zu, "
+             "stage children size:%{public}zu",
+            index, children.size(), stageNode_->GetChildren().size());
         for (int32_t current = 1; current < popSize; ++current) {
-            auto pageNode = *(iter++);
+            auto pageNode = *(++children.rbegin());
             stageNode_->RemoveChild(pageNode);
         }
         stageNode_->RebuildRenderContextTree();
