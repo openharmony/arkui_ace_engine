@@ -56,27 +56,20 @@ void JSEllipse::Create(const JSCallbackInfo& info)
 
 void JSEllipse::ConstructorCallback(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    if (!info[0]->IsObject()) {
-        LOGE("The arg is not Object");
-        return;
-    }
     auto ellipse = AceType::MakeRefPtr<Ellipse>();
-    JSRef<JSObject> params = JSRef<JSObject>::Cast(info[0]);
-    JSRef<JSVal> width = params->GetProperty("width");
-    CalcDimension dimWidth;
-    if (ParseJsDimensionVp(width, dimWidth)) {
-        ellipse->SetWidth(dimWidth);
+    if (info.Length() == 1 && info[0]->IsObject()) {
+        JSRef<JSObject> params = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> width = params->GetProperty("width");
+        CalcDimension dimWidth;
+        if (ParseJsDimensionVp(width, dimWidth)) {
+            ellipse->SetWidth(dimWidth);
+        }
+        JSRef<JSVal> height = params->GetProperty("height");
+        CalcDimension dimHeight;
+        if (ParseJsDimensionVp(height, dimHeight)) {
+            ellipse->SetHeight(dimHeight);
+        }
     }
-    JSRef<JSVal> height = params->GetProperty("height");
-    CalcDimension dimHeight;
-    if (ParseJsDimensionVp(height, dimHeight)) {
-        ellipse->SetHeight(dimHeight);
-    }
-
     auto jsEllipse = AceType::MakeRefPtr<JSEllipse>();
     jsEllipse->SetBasicShape(ellipse);
     jsEllipse->IncRefCount();
