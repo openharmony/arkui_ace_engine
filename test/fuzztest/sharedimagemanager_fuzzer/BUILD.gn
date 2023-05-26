@@ -99,10 +99,13 @@ ohos_fuzztest("SharedImageManagerFuzzTest") {
     ]
   }
 
-  configs = [
-    ":config_theme_manager_test",
-    "$ace_root:ace_test_config",
-  ]
+  configs = [ ":config_theme_manager_test" ]
+  ldflags = []
+  cflags = []
+  if (ace_engine_feature_enable_coverage) {
+    cflags += [ "--coverage" ]
+    ldflags += [ "--coverage" ]
+  }
 
   if (is_ohos_standard_system) {
     external_deps = [
@@ -138,6 +141,7 @@ ohos_fuzztest("SharedImageManagerFuzzTest") {
     "//third_party/flutter/engine",
     "//third_party",
     "//commonlibrary/c_utils/base/include",
+    "$root_out_dir/arkui/framework",
   ]
 }
 

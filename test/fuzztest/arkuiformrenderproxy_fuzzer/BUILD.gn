@@ -27,6 +27,7 @@ ohos_fuzztest("ArkuiFormRenderProxyFuzzTest") {
   include_dirs = [
     "$ace_root",
     "$ace_root/interfaces/inner_api",
+    "$root_out_dir/arkui/framework",
   ]
   cflags = [
     "-g",
@@ -50,6 +51,12 @@ ohos_fuzztest("ArkuiFormRenderProxyFuzzTest") {
     "input:libmmi-client",
     "ipc:ipc_core",
   ]
+
+  ldflags = []
+  if (ace_engine_feature_enable_coverage) {
+    cflags += [ "--coverage" ]
+    ldflags += [ "--coverage" ]
+  }
 }
 
 ###############################################################################
