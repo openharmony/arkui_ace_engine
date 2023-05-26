@@ -409,8 +409,6 @@ public:
     void GetImageDataFromAshmem(
         const std::string& picName, Ashmem& ashmem, const RefPtr<PipelineBase>& pipelineContext, int len);
 
-    std::shared_ptr<AbilityRuntime::Context> GetAbilityRuntimeContext();
-
 private:
     void InitializeFrontend();
     void InitializeCallback();

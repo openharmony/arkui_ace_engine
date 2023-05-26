@@ -30,8 +30,8 @@ public:
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
-    void DispatchPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent);
-    void DispatchKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent);
+    void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
 
 protected:
     void OnAttachToFrameNode() override;

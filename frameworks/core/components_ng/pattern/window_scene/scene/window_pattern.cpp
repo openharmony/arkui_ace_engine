@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 
-#include "interfaces/include/ws_common.h"
 #include "ui/rs_surface_node.h"
 
 #include "core/common/container.h"
@@ -216,21 +215,15 @@ bool WindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     return false;
 }
 
-void WindowPattern::DispatchPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
+void WindowPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     CHECK_NULL_VOID(session_);
-    auto errCode = session_->TransferPointerEvent(pointerEvent);
-    if (errCode != Rosen::WSError::WS_OK) {
-        LOGE("DispatchPointerEvent failed, errCode=%{public}d", static_cast<int>(errCode));
-    }
+    session_->TransferPointerEvent(pointerEvent);
 }
 
-void WindowPattern::DispatchKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent)
+void WindowPattern::DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     CHECK_NULL_VOID(session_);
-    auto errCode = session_->TransferKeyEvent(keyEvent);
-    if (errCode != Rosen::WSError::WS_OK) {
-        LOGE("DispatchPointerEvent failed, errCode=%{public}d", static_cast<int>(errCode));
-    }
+    session_->TransferKeyEvent(keyEvent);
 }
 } // namespace OHOS::Ace::NG

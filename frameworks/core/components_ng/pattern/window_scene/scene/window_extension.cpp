@@ -25,13 +25,9 @@
 namespace OHOS::Ace::NG {
 WindowExtension::WindowExtension(const std::string& bundleName, const std::string& abilityName)
 {
-    sptr<OHOS::IRemoteObject> callerToken = nullptr;
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
     CHECK_NULL_VOID(container);
-    auto context = container->GetAbilityRuntimeContext();
-    if (context != nullptr) {
-        callerToken = context->GetToken();
-    }
+    auto callerToken = container->GetToken();
 
     Rosen::ExtensionSessionManager::GetInstance().Init();
     Rosen::SessionInfo extensionSessionInfo = {
