@@ -396,6 +396,42 @@ void AceAbility::Stop()
     container->GetTaskExecutor()->PostTask([]() { loopRunning_ = false; }, TaskExecutor::TaskType::PLATFORM);
 }
 
+void AceAbility::InitializeClipboard(CallbackSetClipboardData cbkSetData, CallbackGetClipboardData cbkGetData) const
+{
+    ClipboardProxy::GetInstance()->SetDelegate(
+        std::make_unique<Platform::ClipboardProxyImpl>(cbkSetData, cbkGetData));
+}
+
+void AceAbility::OnBackPressed() const
+{
+    LOGI("Process Back Pressed Event");
+    EventDispatcher::GetInstance().DispatchBackPressedEvent();
+}
+
+bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const
+{
+    LOGI("Process MMI::PointerEvent");
+    return EventDispatcher::GetInstance().DispatchTouchEvent(pointerEvent);
+}
+
+bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const
+{
+    LOGI("Process MMI::KeyEvent");
+    return EventDispatcher::GetInstance().DispatchKeyEvent(keyEvent);
+}
+
+bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axisEvent) const
+{
+    LOGI("Process MMI::AxisEvent");
+    return false;
+}
+
+bool AceAbility::OnInputMethodEvent(const unsigned int codePoint) const
+{
+    LOGI("Process Input Method Event");
+    return EventDispatcher::GetInstance().DispatchInputMethodEvent(codePoint);
+}
+
 #ifndef ENABLE_ROSEN_BACKEND
 void AceAbility::RunEventLoop()
 {
