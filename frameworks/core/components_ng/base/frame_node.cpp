@@ -1374,9 +1374,9 @@ RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub() const
     if (!pattern_) {
         return eventHub_->GetOrCreateFocusHub();
     }
-    return eventHub_->GetOrCreateFocusHub(pattern_->GetFocusPattern().GetFocusType(),
-        pattern_->GetFocusPattern().GetFocusable(), pattern_->GetFocusPattern().GetStyleType(),
-        pattern_->GetFocusPattern().GetFocusPaintParams());
+    auto focusPattern = pattern_->GetFocusPattern();
+    return eventHub_->GetOrCreateFocusHub(focusPattern.GetFocusType(), focusPattern.GetFocusable(),
+        focusPattern.GetStyleType(), focusPattern.GetFocusPaintParams());
 }
 
 void FrameNode::OnWindowShow()
