@@ -22,6 +22,7 @@
 #include "base/utils/utils.h"
 #include "core/components/custom_paint/rosen_render_custom_paint.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
@@ -154,6 +155,20 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
     }
 
     // navBar title bar
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(titleBarNode->GetParent());
+    CHECK_NULL_VOID(navBarNode);
+    if (navBarNode->GetPrevTitleIsCustomValue(false)) {
+        auto occupiedWidth = Dimension(0.0, DimensionUnit::VP);
+        if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::MINI ||
+            titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
+            occupiedWidth = maxPaddingStart_ + defaultPaddingStart_ + HORIZONTAL_MARGIN;
+        } else {
+            occupiedWidth = defaultPaddingStart_ + BACK_BUTTON_ICON_SIZE + HORIZONTAL_MARGIN * 2 + defaultPaddingStart_;
+        }
+        constraint.parentIdealSize.SetWidth(titleBarSize.Width() - static_cast<float>(occupiedWidth.ConvertToPx()));
+        titleWrapper->Measure(constraint);
+        return;
+    }
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::MINI) {
         auto occupiedWidth = maxPaddingStart_ + defaultPaddingStart_ + HORIZONTAL_MARGIN;
         constraint.maxSize.SetWidth(titleBarSize.Width() -
@@ -185,6 +200,13 @@ float TitleBarLayoutAlgorithm::MeasureMenu(LayoutWrapper* layoutWrapper, const R
     auto menuWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_RETURN(menuWrapper, 0.0f);
     auto constraint = titleBarLayoutProperty->CreateChildConstraint();
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(titleBarNode->GetParent());
+    CHECK_NULL_RETURN(navBarNode, 0.0f);
+    auto isCustomMenu = navBarNode->GetPrevMenuIsCustomValue(false);
+    if (isCustomMenu) {
+        menuWrapper->Measure(constraint);
+        return menuWrapper->GetGeometryNode()->GetFrameSize().Width();
+    }
     auto menuItemNum = static_cast<int32_t>(menuNode->GetChildren().size());
     float menuWidth = 0.0f;
     if (menuItemNum >= MAX_MENU_ITEMS_NUM) {
