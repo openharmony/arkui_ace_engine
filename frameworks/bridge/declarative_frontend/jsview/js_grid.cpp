@@ -266,9 +266,17 @@ void JSGrid::SetScrollBarWidth(const JSCallbackInfo& scrollWidth)
     GridModel::GetInstance()->SetScrollBarWidth(scrollBarWidth.ToString());
 }
 
-void JSGrid::SetCachedCount(int32_t cachedCount)
+void JSGrid::SetCachedCount(const JSCallbackInfo& info)
 {
-    GridModel::GetInstance()->SetCachedCount(cachedCount);
+    int32_t cachedCount = 1;
+    auto jsValue = info[0];
+
+    if (!jsValue->IsUndefined() && jsValue->IsNumber()) {
+        ParseJsInt32(jsValue, cachedCount);
+        if (cachedCount < 0) {
+            cachedCount = 1;
+        }
+    }
 }
 
 void JSGrid::SetEditMode(const JSCallbackInfo& info)
