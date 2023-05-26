@@ -156,7 +156,7 @@ int32_t SpanItem::UpdateParagraph(
 int32_t ImageSpanItem::UpdateParagraph(
     const RefPtr<Paragraph>& builder, double width, double height, VerticalAlign verticalAlign)
 {
-    LOGI("ImageSpanItem::UpdateParagraph imageWidth = %{public}f, imageHeight = %{public}f verticalAlign = "
+    LOGD("ImageSpanItem::UpdateParagraph imageWidth = %{public}f, imageHeight = %{public}f verticalAlign = "
          "%{public}d",
         width, height, verticalAlign);
     CHECK_NULL_RETURN(builder, -1);
@@ -181,7 +181,7 @@ int32_t ImageSpanItem::UpdateParagraph(
             run.alignment = PlaceholderAlignment::BOTTOM;
     }
     builder->PushStyle(textStyle);
-    LOGI("ImageSpan fontsize = %{public}f", textStyle.GetFontSize().Value());
+    LOGD("ImageSpan fontsize = %{public}f", textStyle.GetFontSize().Value());
     int32_t index = builder->AddPlaceholder(run);
     builder->PopStyle();
     return index;
