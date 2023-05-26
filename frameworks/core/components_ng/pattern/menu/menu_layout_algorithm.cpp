@@ -461,7 +461,6 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
     auto maxWidth = std::min(maxHorizontalSpace, maxGridWidth);
     maxWidth = std::min(constraint.maxSize.Width(), maxWidth);
     constraint.maxSize.SetWidth(maxWidth);
-    constraint.percentReference.SetWidth(maxWidth);
     // set min width
     auto minWidth = static_cast<float>(MIN_MENU_WIDTH.ConvertToPx());
     auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
@@ -475,7 +474,6 @@ void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, L
 {
     auto maxSpaceHeight = std::max(topSpace_, bottomSpace_);
     constraint.maxSize.SetHeight(maxSpaceHeight);
-    constraint.percentReference.SetHeight(maxSpaceHeight);
 }
 
 LayoutConstraintF MenuLayoutAlgorithm::CreateChildConstraint(LayoutWrapper* layoutWrapper)
