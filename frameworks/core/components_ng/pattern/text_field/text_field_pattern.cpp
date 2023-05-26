@@ -250,10 +250,17 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     // caret position change (such as move left)
     // caret get offset from typographic algorithm
     // if caret position exceeds constrained content region, adjust both caret position and text rect offset
-    AdjustTextRectOffsetX();
+    float dx = AdjustTextRectOffsetX();
     AdjustTextAreaOffsetY();
     UpdateSelectionOffset();
-    SetHandlerOnMoveDone();
+    if (caretUpdateType_ == CaretUpdateType::HANDLE_MOVE && !NearZero(dx)) {
+        UpdateOtherHandleOnMove(dx);
+        // trigger selection box repaint
+        isSelectedAreaRedraw_ = !isSelectedAreaRedraw_;
+    } else if (caretUpdateType_ == CaretUpdateType::HANDLE_MOVE_DONE) {
+        SetHandlerOnMoveDone();
+    }
+
     CheckScrollable();
     UpdateScrollBarOffset();
     caretUpdateType_ = CaretUpdateType::NONE;
@@ -1147,6 +1154,7 @@ void TextFieldPattern::HandleOnSelectAll()
     textEditingValue_.caretPosition = textSize;
     selectionMode_ = SelectionMode::SELECT_ALL;
     caretUpdateType_ = CaretUpdateType::EVENT;
+    ChangeIsSelectedAreaRedraw();
     GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -2043,6 +2051,7 @@ void TextFieldPattern::ProcessOverlay()
 void TextFieldPattern::CreateHandles()
 {
     std::vector<RSTypographyProperties::TextBox> tmp;
+    ChangeIsSelectedAreaRedraw();
     GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), tmp);
     auto firstHandlePosition = CalcCursorOffsetByPosition(textSelector_.GetStart());
     OffsetF firstHandleOffset(firstHandlePosition.offset.GetX() + parentGlobalOffset_.GetX(),
@@ -2203,11 +2212,12 @@ bool TextFieldPattern::SelectOverlayIsOn()
 void TextFieldPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
 {
     CHECK_NULL_VOID_NOLOG(SelectOverlayIsOn());
+    isFirstHandle_ = isFirstHandle;
     auto localOffset = handleRect.GetOffset() - parentGlobalOffset_;
     auto position = UpdateCaretPositionOnHandleMove(localOffset);
     textEditingValue_.CursorMoveToPosition(position);
     auto caretMetrics = CalcCursorOffsetByPosition(position);
-    caretRect_.SetOffset(OffsetF(caretMetrics.offset.GetX(), caretMetrics.offset.GetY()));
+    caretRect_.SetOffset(caretMetrics.offset);
     selectionMode_ = isSingleHandle_ ? SelectionMode::NONE : SelectionMode::SELECT;
     caretUpdateType_ = CaretUpdateType::HANDLE_MOVE;
     UpdateTextSelectorByHandleMove(isFirstHandle, position, caretMetrics.offset);
@@ -2218,7 +2228,7 @@ void TextFieldPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
     auto end = GetTextSelector().GetEnd();
     selectOverlay->SetSelectInfo(GetTextEditingValue().GetSelectedText(start, end));
 
-    GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
+    GetTextRectsInRange(start, end, textBoxes_);
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -2282,11 +2292,32 @@ void TextFieldPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHan
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
+void TextFieldPattern::UpdateOtherHandleOnMove(float dx)
+{
+    SelectHandleInfo firstInfo, secondInfo;
+    SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
+    if (isFirstHandle_) {
+        // update position of the other handle
+        textSelector_.secondHandleOffset_.AddX(dx);
+        secondInfo.paintRect = { textSelector_.secondHandleOffset_, handlePaintSize };
+        // hide the other handle if it's outside content rect
+        auto handleOffset = textSelector_.secondHandleOffset_ - parentGlobalOffset_;
+        secondInfo.isShow =
+            contentRect_.IsInRegion({ handleOffset.GetX(), handleOffset.GetY() + caretRect_.Height() / 2 });
+        selectOverlayProxy_->UpdateSecondSelectHandleInfo(secondInfo);
+    } else {
+        textSelector_.firstHandleOffset_.AddX(dx);
+        firstInfo.paintRect = { textSelector_.firstHandleOffset_, handlePaintSize };
+
+        auto handleOffset = textSelector_.firstHandleOffset_ - parentGlobalOffset_;
+        firstInfo.isShow =
+            contentRect_.IsInRegion({ handleOffset.GetX(), handleOffset.GetY() + caretRect_.Height() / 2 });
+        selectOverlayProxy_->UpdateFirstSelectHandleInfo(firstInfo);
+    }
+}
+
 void TextFieldPattern::SetHandlerOnMoveDone()
 {
-    if (caretUpdateType_ != CaretUpdateType::HANDLE_MOVE_DONE) {
-        return;
-    }
     SelectHandleInfo info;
     auto newHandleOffset = parentGlobalOffset_;
     auto handleOffset =
@@ -2975,6 +3006,9 @@ float TextFieldPattern::PreferredTextHeight(bool isPlaceholder)
     paraStyle.locale_ = Localization::GetInstance()->GetFontLocale();
     paraStyle.wordBreakType_ = ToRSWordBreakType(textStyle.GetWordBreak());
     paraStyle.fontSize_ = textStyle.GetFontSize().ConvertToPx();
+    if (LessOrEqual(paraStyle.fontSize_, 0.0f)) {
+        paraStyle.fontSize_ = DEFAULT_FONT.ConvertToPx();
+    }
     if (textStyle.GetTextOverflow() == TextOverflow::ELLIPSIS) {
         paraStyle.ellipsis_ = RSParagraphStyle::ELLIPSIS;
     }
@@ -3278,6 +3312,7 @@ void TextFieldPattern::RequestKeyboardOnFocus()
     if (!RequestKeyboard(false, true, true)) {
         return;
     }
+    StartTwinkling();
     LOGI("RequestKeyboardOnFocus ok, reset flag");
     auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -3917,6 +3952,9 @@ void TextFieldPattern::UpdateScrollBarOffset()
 
 bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
 {
+    if (source == SCROLL_FROM_START) {
+        return true;
+    }
     auto scrollBar = GetScrollBar();
     if (scrollBar && scrollBar->IsDriving()) {
         offset = scrollBar->CalcPatternOffset(offset);

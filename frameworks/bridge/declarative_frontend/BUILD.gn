@@ -524,9 +524,9 @@ template("declarative_js_engine") {
       if (defined(config.window_scene_support) && config.window_scene_support) {
         sources += [
           "jsview/js_ui_extension.cpp",
-          "jsview/window_scene/js_host_window_scene.cpp",
           "jsview/window_scene/js_root_scene.cpp",
           "jsview/window_scene/js_screen.cpp",
+          "jsview/window_scene/js_window_scene.cpp",
         ]
       }
     }
@@ -582,6 +582,7 @@ template("declarative_js_engine_ng") {
       "sharedata/js_share_data.cpp",
 
       # jsviews
+      "jsview/js_button.cpp",
       "jsview/js_column.cpp",
       "jsview/js_container_base.cpp",
       "jsview/js_counter.cpp",

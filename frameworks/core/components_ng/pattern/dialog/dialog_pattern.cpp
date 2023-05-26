@@ -57,6 +57,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 
+constexpr int32_t SHEET_INFO_IDX = -2;
 constexpr Dimension SHEET_IMAGE_MARGIN = 16.0_vp;
 constexpr Dimension SHEET_DIVIDER_WIDTH = 1.0_px;
 constexpr Dimension SHEET_LIST_PADDING = 24.0_vp;
@@ -474,8 +475,8 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
 {
     // ListItem -> Row -> title + icon
     auto Id = ElementRegister::GetInstance()->MakeUniqueId();
-    RefPtr<FrameNode> itemNode =
-        FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, Id, AceType::MakeRefPtr<ListItemPattern>(nullptr));
+    RefPtr<FrameNode> itemNode = FrameNode::CreateFrameNode(
+        V2::LIST_ITEM_ETS_TAG, Id, AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE));
     CHECK_NULL_RETURN(itemNode, nullptr);
 
     // update sheet row flex align
@@ -531,7 +532,7 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
         hub->AddClickEvent(item.action);
     }
     // close dialog when clicked
-    BindCloseCallBack(hub, -1);
+    BindCloseCallBack(hub, SHEET_INFO_IDX);
 
     itemRow->MountToParent(itemNode);
     return itemNode;

@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/window_scene/scene/host/host_window_extension.h"
+#include "core/components_ng/pattern/window_scene/scene/window_extension.h"
 
 namespace OHOS::Ace::NG {
-HostWindowExtension::HostWindowExtension(const std::string& /* bundleName */, const std::string& /* abilityName */) {}
+WindowExtension::WindowExtension(const std::string& /* bundleName */, const std::string& /* abilityName */) {}
 
-HostWindowExtension::~HostWindowExtension() = default;
+WindowExtension::~WindowExtension() = default;
 
-void HostWindowExtension::OnWindowShow() {}
+void WindowExtension::OnWindowShow() {}
 
-void HostWindowExtension::OnWindowHide() {}
+void WindowExtension::OnWindowHide() {}
 
-void HostWindowExtension::OnConnect() {}
+void WindowExtension::OnConnect() {}
 
-void HostWindowExtension::RequestExtensionSessionActivation() {}
+void WindowExtension::RequestExtensionSessionActivation() {}
 
-void HostWindowExtension::RequestExtensionSessionBackground() {}
+void WindowExtension::RequestExtensionSessionBackground() {}
 
-void HostWindowExtension::RequestExtensionSessionDestruction() {}
+void WindowExtension::RequestExtensionSessionDestruction() {}
 } // namespace OHOS::Ace::NG

@@ -13,27 +13,27 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/window_scene/scene/host/host_window_scene.h"
+#include "core/components_ng/pattern/window_scene/scene/window_scene.h"
 
-#include "render_service_client/core/ui/rs_surface_node.h"
+#include "ui/rs_surface_node.h"
 
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-HostWindowScene::HostWindowScene(const sptr<Rosen::Session>& session)
+WindowScene::WindowScene(const sptr<Rosen::Session>& session)
 {
     session_ = session;
     RegisterLifecycleListener();
 }
 
-HostWindowScene::~HostWindowScene()
+WindowScene::~WindowScene()
 {
     UnregisterLifecycleListener();
 }
 
-void HostWindowScene::UpdateSession(const sptr<Rosen::Session>& session)
+void WindowScene::UpdateSession(const sptr<Rosen::Session>& session)
 {
     CHECK_NULL_VOID(session_);
     CHECK_NULL_VOID(session);
@@ -53,21 +53,21 @@ void HostWindowScene::UpdateSession(const sptr<Rosen::Session>& session)
     context->SetRSNode(surfaceNode);
 }
 
-void HostWindowScene::OnForeground()
+void WindowScene::OnForeground()
 {
     CHECK_NULL_VOID(snapshotNode_);
 
     auto uiTask = [weakThis = WeakClaim(this)]() {
-        auto hostWindowScene = weakThis.Upgrade();
-        CHECK_NULL_VOID(hostWindowScene);
+        auto windowScene = weakThis.Upgrade();
+        CHECK_NULL_VOID(windowScene);
 
-        auto host = hostWindowScene->GetHost();
+        auto host = windowScene->GetHost();
         CHECK_NULL_VOID(host);
 
-        host->RemoveChild(hostWindowScene->snapshotNode_);
-        hostWindowScene->snapshotNode_.Reset();
+        host->RemoveChild(windowScene->snapshotNode_);
+        windowScene->snapshotNode_.Reset();
 
-        host->AddChild(hostWindowScene->contentNode_);
+        host->AddChild(windowScene->contentNode_);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
 
@@ -77,32 +77,32 @@ void HostWindowScene::OnForeground()
     pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
 }
 
-void HostWindowScene::OnBackground()
+void WindowScene::OnBackground()
 {
     auto uiTask = [weakThis = WeakClaim(this)]() {
-        auto hostWindowScene = weakThis.Upgrade();
-        CHECK_NULL_VOID(hostWindowScene);
+        auto windowScene = weakThis.Upgrade();
+        CHECK_NULL_VOID(windowScene);
 
-        hostWindowScene->snapshotNode_ = FrameNode::CreateFrameNode(
+        windowScene->snapshotNode_ = FrameNode::CreateFrameNode(
             V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-        auto imageLayoutProperty = hostWindowScene->snapshotNode_->GetLayoutProperty<ImageLayoutProperty>();
+        auto imageLayoutProperty = windowScene->snapshotNode_->GetLayoutProperty<ImageLayoutProperty>();
         imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        hostWindowScene->snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
+        windowScene->snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
 
-        auto host = hostWindowScene->GetHost();
+        auto host = windowScene->GetHost();
         CHECK_NULL_VOID(host);
-        host->RemoveChild(hostWindowScene->contentNode_);
-        host->AddChild(hostWindowScene->snapshotNode_);
+        host->RemoveChild(windowScene->contentNode_);
+        host->AddChild(windowScene->snapshotNode_);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
-        CHECK_NULL_VOID(hostWindowScene->session_);
-        auto snapshot = hostWindowScene->session_->GetSnapshot();
+        CHECK_NULL_VOID(windowScene->session_);
+        auto snapshot = windowScene->session_->GetSnapshot();
         auto pixelMap = PixelMap::CreatePixelMap(&snapshot);
 
         CHECK_NULL_VOID(pixelMap);
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
         imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
-        hostWindowScene->snapshotNode_->MarkModifyDone();
+        windowScene->snapshotNode_->MarkModifyDone();
     };
 
     ContainerScope scope(instanceId_);

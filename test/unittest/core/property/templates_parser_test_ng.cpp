@@ -44,8 +44,8 @@ public:
 HWTEST_F(TemplatesParserTestNg, TemplatesParserTestNg001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1 init args of ParseTemplateArgs.
-     * @tc.steps: step1 call ParseTemplateArgs.
+     * @tc.steps: step1 init args of ParseTemplateArgs and
+                call ParseTemplateArgs.
      * @tc.expected: the return value is same as the forth val of tuple.
      */
     double size = 0;
@@ -143,14 +143,31 @@ HWTEST_F(TemplatesParserTestNg, TemplatesParserTestNg001, TestSize.Level1)
             return "auto-fill arepeatpx10vp10 10)2";
         },
             size, gap, childrenCount, { 0 } },
+        { [&]() {
+            size = 200;
+            gap = 10;
+            childrenCount = 5;
+            return "repeat(auto-fill, 2px )repeat(auto-fill, 2px )repeat(auto-fill, 2vp)";
+        },
+            size, gap, childrenCount, { 0 } },
+        { [&]() {
+            size = 200;
+            gap = 10;
+            childrenCount = 5;
+            return "repeat(auto-fill, 2px 2% 2vp 2 )";
+        },
+            size, gap, childrenCount, { 2, 0, 2, 2 } },
+        { [&]() {
+            size = 200;
+            gap = 10;
+            childrenCount = 5;
+            return "2px 2px repeat(auto-fill, 2px 2% 2 ) 2px";
+        },
+            size, gap, childrenCount, { 2, 2, 2, 0, 2, 2 } }
     };
     for (auto [args, size, gap, childrenCount, rt] : parms) {
         auto result = ParseTemplateArgs(args(), size, gap, childrenCount);
-        if (rt.size() == 0) {
-            EXPECT_EQ(result.size(), 0);
-            continue;
-        }
-        EXPECT_NE(result.size(), 0);
+        EXPECT_EQ(result.size(), rt.size());
         for (int i = 0; i < rt.size() && i < result.size(); i++) {
             EXPECT_EQ(rt[i], result[i]);
         }

@@ -669,4 +669,41 @@ HWTEST_F(ScrollBarTestNg, PerformActionTest001, TestSize.Level1)
     EXPECT_TRUE(scrollBarAccessibilityProperty->ActActionScrollForward());
     EXPECT_TRUE(scrollBarAccessibilityProperty->ActActionScrollBackward());
 }
+
+/**
+ * @tc.name: AccessibilityEventTest001
+ * @tc.desc: Test the ScrollEndCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, AccessibilityEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBar and initialize related properties.
+     */
+    RefPtr<ScrollProxy> scrollProxy;
+    ScrollBarModelNG scrollBarModelNG;
+    auto proxy = scrollBarModelNG.GetScrollBarProxy(scrollProxy);
+    scrollBarModelNG.Create(proxy, true, false, 0, 0);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ScrollBarPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set callback function.
+     */
+    pattern->OnModifyDone();
+    ASSERT_NE(pattern->scrollableEvent_, nullptr);
+    auto callback = pattern->scrollableEvent_->GetScrollEndCallback();
+    ASSERT_NE(callback, nullptr);
+    EXPECT_EQ(pattern->scrollEndAnimator_, nullptr);
+
+    /**
+     * @tc.steps: step3. call callback function.
+     * @tc.expected: scrollEndAnimator_ is not nullptr.
+     */
+    pattern->displayMode_ = DisplayMode::AUTO;
+    callback();
+    EXPECT_NE(pattern->scrollEndAnimator_, nullptr);
+}
 } // namespace OHOS::Ace::NG

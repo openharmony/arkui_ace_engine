@@ -75,6 +75,9 @@ const std::map<GridColumnType, std::vector<SystemGridInfo>> SYSTEM_GRID_TYPES = 
     { GridColumnType::CAR_DIALOG, { SystemGridInfo(GridSizeType::SM, CAR_SMALL_GUTTER, CAR_SMALL_MARGIN, 4),
                                       SystemGridInfo(GridSizeType::MD, CAR_SMALL_GUTTER, CAR_SMALL_MARGIN, 8),
                                       SystemGridInfo(GridSizeType::LG, CAR_SMALL_GUTTER, CAR_SMALL_MARGIN, 12) } },
+    { GridColumnType::LIST_CARD, { SystemGridInfo(GridSizeType::SM, SMALL_GUTTER, SMALL_MARGIN, 4),
+                                   SystemGridInfo(GridSizeType::MD, SMALL_GUTTER, SMALL_MARGIN, 8),
+                                   SystemGridInfo(GridSizeType::LG, SMALL_GUTTER, SMALL_MARGIN, 12) } },
 };
 
 } // namespace

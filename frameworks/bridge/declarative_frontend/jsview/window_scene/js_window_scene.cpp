@@ -13,21 +13,21 @@
  * limitations under the License.
  */
 
-#include "bridge/declarative_frontend/jsview/window_scene/js_host_window_scene.h"
+#include "bridge/declarative_frontend/jsview/window_scene/js_window_scene.h"
 
-#include "core/components_ng/pattern/window_scene/scene/host/host_window_scene_model.h"
+#include "core/components_ng/pattern/window_scene/scene/window_scene_model.h"
 
 namespace OHOS::Ace::Framework {
-void JSHostWindowScene::JSBind(BindingTarget globalObj)
+void JSWindowScene::JSBind(BindingTarget globalObj)
 {
-    JSClass<JSHostWindowScene>::Declare("HostWindowScene");
-    JSClass<JSHostWindowScene>::StaticMethod("create", &JSHostWindowScene::Create, MethodOptions::NONE);
+    JSClass<JSWindowScene>::Declare("WindowScene");
+    JSClass<JSWindowScene>::StaticMethod("create", &JSWindowScene::Create, MethodOptions::NONE);
 
-    JSClass<JSHostWindowScene>::Inherit<JSInteractableView>();
-    JSClass<JSHostWindowScene>::InheritAndBind<JSViewAbstract>(globalObj);
+    JSClass<JSWindowScene>::Inherit<JSInteractableView>();
+    JSClass<JSWindowScene>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
-void JSHostWindowScene::Create(const JSCallbackInfo& info)
+void JSWindowScene::Create(const JSCallbackInfo& info)
 {
     if (!Container::IsCurrentUseNewPipeline()) {
         LOGE("Window scene is only supported on new pipeline!");
@@ -45,6 +45,6 @@ void JSHostWindowScene::Create(const JSCallbackInfo& info)
     }
 
     auto persistentId = static_cast<uint64_t>(info[0]->ToNumber<double>());
-    NG::HostWindowSceneModel::Create(persistentId);
+    NG::WindowSceneModel::Create(persistentId);
 }
 } // namespace OHOS::Ace::Framework

@@ -213,6 +213,7 @@ private:
     void HandleLongPress(GestureEvent& info);
     void HandleOnSelectAll();
     void HandleOnCopy();
+    void HandleOnOverlayClose();
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -267,6 +268,7 @@ private:
     bool clickEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
     bool panEventInitialized_ = false;
+    bool showSelectOverlay_ = false;
     std::optional<TextStyle> textStyle_;
     std::optional<int32_t> surfaceChangedCallbackId_;
 

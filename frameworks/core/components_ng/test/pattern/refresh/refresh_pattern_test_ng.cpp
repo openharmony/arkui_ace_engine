@@ -736,6 +736,14 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest016, TestSize.Level1)
 
     pattern_->HandleDragStart();
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
+
+    auto loadingProgressChild =
+        FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG, -1, AceType::MakeRefPtr<LoadingProgressPattern>());
+    ASSERT_NE(loadingProgressChild, nullptr);
+    pattern_->progressChild_ = loadingProgressChild;
+    pattern_->customBuilder_ = nullptr;
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
 }
 
 /**

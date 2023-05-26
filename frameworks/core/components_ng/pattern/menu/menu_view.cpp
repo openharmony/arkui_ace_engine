@@ -84,6 +84,7 @@ void CreateTitleNode(const std::string& title, RefPtr<FrameNode>& column)
     textProperty->UpdatePadding(textPadding);
     textProperty->UpdateFontSize(theme->GetMenuTitleFontSize());
     textProperty->UpdateFontWeight(FontWeight::MEDIUM);
+    textProperty->UpdateItalicFontStyle(Ace::FontStyle::NORMAL);
     textProperty->UpdateTextColor(theme->GetMenuFontColor());
     textProperty->UpdateContent(title);
 

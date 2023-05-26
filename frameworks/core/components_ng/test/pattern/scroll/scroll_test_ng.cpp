@@ -765,7 +765,7 @@ HWTEST_F(ScrollTestNg, ScrollTest007, TestSize.Level1)
     auto offset = positionController->GetCurrentOffset();
     EXPECT_EQ(offset, Offset::Zero());
     Dimension dimension(0, DimensionUnit::VP);
-    auto animate = positionController->AnimateTo(dimension, 0.0f, Curves::LINEAR);
+    auto animate = positionController->AnimateTo(dimension, 0.0f, Curves::LINEAR, false);
     EXPECT_EQ(animate, false);
 }
 
@@ -1042,7 +1042,7 @@ HWTEST_F(ScrollTestNg, ScrollTest0010, TestSize.Level1)
     auto offset = positionController->GetCurrentOffset();
     EXPECT_EQ(offset, Offset(0, -SCROLL_FLOAT_98));
     Dimension dimension(0, DimensionUnit::VP);
-    auto animate = positionController->AnimateTo(dimension, 0.0f, Curves::LINEAR);
+    auto animate = positionController->AnimateTo(dimension, 0.0f, Curves::LINEAR, false);
     EXPECT_EQ(animate, true);
 }
 

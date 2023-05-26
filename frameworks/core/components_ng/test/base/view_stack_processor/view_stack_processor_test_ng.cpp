@@ -47,7 +47,7 @@ HWTEST_F(ViewStackProcessorTestNg, ViewStackProcessorTestNg001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. push isCustomView = false
-     * @tc.expected: step1. removeSilently_ is false
+     * @tc.expected: removeSilently_ is false
      */
     bool customViews[2] = { true, false };
     for (int i = 0; i < 2; ++i) {
@@ -66,7 +66,7 @@ HWTEST_F(ViewStackProcessorTestNg, ViewStackProcessorTestNg002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. push childFrameNode
-     * @tc.expected: step1. mainFrameNode's tag is child
+     * @tc.expected: mainFrameNode's tag is child
      */
     ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
     ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
@@ -75,7 +75,7 @@ HWTEST_F(ViewStackProcessorTestNg, ViewStackProcessorTestNg002, TestSize.Level1)
     EXPECT_EQ(strcmp(topFrameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
     /**
      * @tc.steps: step2. ImplicitPopBeforeContinue
-     * @tc.expected: step2. mainFrameNode's tag is child
+     * @tc.expected: mainFrameNode's tag is child
      */
     ViewStackProcessor::GetInstance()->ImplicitPopBeforeContinue();
     auto topFrameNodeTwo = ViewStackProcessor::GetInstance()->Finish();
@@ -91,16 +91,19 @@ HWTEST_F(ViewStackProcessorTestNg, ViewStackProcessorTestNg003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. ImplicitPopBeforeContinue
-     * @tc.expected: step1. frameNode's isMeasureBoundary_ is false
+     * @tc.expected: frameNode's isMeasureBoundary_ is false
      */
     ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
     ViewStackProcessor::GetInstance()->FlushImplicitAnimation();
     FRAME_NODE_ROOT->onMainTree_ = true;
     ViewStackProcessor::GetInstance()->FlushImplicitAnimation();
     ViewStackProcessor::GetInstance()->FlushRerenderTask();
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+    ViewStackProcessor::GetInstance()->SetPredict(true);
+    ViewStackProcessor::GetInstance()->FlushRerenderTask();
+    ViewStackProcessor::GetInstance()->FlushRerenderTask();
     EXPECT_FALSE(FRAME_NODE_ROOT->isMeasureBoundary_);
 }
-
 
 /**
  * @tc.name: ViewStackProcessorTestNg004
@@ -111,7 +114,7 @@ HWTEST_F(ViewStackProcessorTestNg, ViewStackProcessorTestNg004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. push key one and two
-     * @tc.expected: step1. GetKey is "one_two"
+     * @tc.expected: GetKey is "one_two"
      */
     const std::string keyOne("one");
     const std::string keyTwo("two");
@@ -120,7 +123,7 @@ HWTEST_F(ViewStackProcessorTestNg, ViewStackProcessorTestNg004, TestSize.Level1)
     EXPECT_EQ(strcmp(ViewStackProcessor::GetInstance()->GetKey().c_str(), "one_two"), 0);
     /**
      * @tc.steps: step2. pop key one and two
-     * @tc.expected: step2. GetKey is ""
+     * @tc.expected: GetKey is ""
      */
     ViewStackProcessor::GetInstance()->PopKey();
     ViewStackProcessor::GetInstance()->PopKey();
@@ -128,11 +131,103 @@ HWTEST_F(ViewStackProcessorTestNg, ViewStackProcessorTestNg004, TestSize.Level1)
     ViewStackProcessor::GetInstance()->ProcessViewId("three");
     EXPECT_EQ(strcmp(ViewStackProcessor::GetInstance()->GetKey().c_str(), ""), 0);
     /**
-     * @tc.steps: step3. create ScopedViewStackProcessor
-     * @tc.expected: step3. not nullptr
+     * @tc.steps: step3. push a empty key and do pop key
+     * @tc.expected: GetKey is ""
+     */
+    ViewStackProcessor::GetInstance()->PushKey("");
+    ViewStackProcessor::GetInstance()->PopKey();
+    EXPECT_EQ(strcmp(ViewStackProcessor::GetInstance()->GetKey().c_str(), ""), 0);
+    /**
+     * @tc.steps: step4. create ScopedViewStackProcessor
+     * @tc.expected: not nullptr
      */
     auto scoped = std::make_shared<ScopedViewStackProcessor>();
     EXPECT_NE(scoped->instance_, nullptr);
     scoped = nullptr;
+}
+
+/**
+ * @tc.name: ViewStackProcessorTestNg005
+ * @tc.desc: Test the SetVisualState and GetVisualState in view stack processor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewStackProcessorTestNg, ViewStackProcessorTestNg005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get instance and set different states and show result
+     * @tc.expected: GetVisualState value meeting expectations.
+     */
+    auto instance = ViewStackProcessor::GetInstance();
+    instance->SetVisualState(VisualState::DISABLED);
+    EXPECT_EQ(instance->GetVisualState(), 4);
+    instance->SetVisualState(VisualState::FOCUSED);
+    EXPECT_EQ(instance->GetVisualState(), 2);
+    instance->SetVisualState(VisualState::PRESSED);
+    EXPECT_EQ(instance->GetVisualState(), 1);
+    instance->SetVisualState(VisualState::NORMAL);
+    EXPECT_EQ(instance->GetVisualState(), 0);
+    instance->SetVisualState(VisualState::HOVER);
+    EXPECT_EQ(instance->GetVisualState(), 0);
+    /**
+     * @tc.steps: step2. clear visual state
+     * @tc.expected: IsCurrentVisualStateProcess meeting expectations.
+     */
+    EXPECT_FALSE(instance->IsCurrentVisualStateProcess());
+    instance->ClearVisualState();
+    EXPECT_TRUE(instance->IsCurrentVisualStateProcess());
+}
+
+/**
+ * @tc.name: ViewStackProcessorTestNg006
+ * @tc.desc: Test the Push and PopContainer in view stack processor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewStackProcessorTestNg, ViewStackProcessorTestNg006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get instance and try PopContainer
+     * @tc.expected: actually nothing happened because elementsStack no value.
+     */
+    auto instance = ViewStackProcessor::GetInstance();
+    instance->PopContainer();
+    EXPECT_EQ(instance->elementsStack_.size(), 0);
+    /**
+     * @tc.steps: step2. Create some node
+     */
+    const auto root = FrameNode::CreateFrameNode(TAG_CHILD, 0, AceType::MakeRefPtr<RootPattern>(), true);
+    const auto child = FrameNode::CreateFrameNode(TAG_CHILD, 1, AceType::MakeRefPtr<RootPattern>(), true);
+    const auto child2 = FrameNode::CreateFrameNode(TAG_CHILD, 2, AceType::MakeRefPtr<Pattern>(), true);
+    /**
+     * @tc.steps: step3. Push root into container
+     * @tc.expected: Pop failed elementsStack_ size still 1.
+     */
+    instance->Push(root);
+    instance->PopContainer();
+    EXPECT_EQ(instance->elementsStack_.size(), 1);
+    /**
+     * @tc.steps: step4. pop root and put FRAME_NODE_ROOT into container
+     * @tc.expected: Pop failed elementsStack_ size still 1.
+     */
+    instance->elementsStack_.pop();
+    instance->Push(FRAME_NODE_ROOT);
+    instance->PopContainer();
+    EXPECT_EQ(instance->elementsStack_.size(), 1);
+    /**
+     * @tc.steps: step5. push child2 and child into instance
+     * @tc.expected: Pop success elementsStack_ size residue 1.
+     */
+    instance->Push(child2);
+    instance->Push(child);
+    instance->ImplicitPopBeforeContinue();
+    EXPECT_EQ(instance->elementsStack_.size(), 2);
+    instance->PopContainer();
+    EXPECT_EQ(instance->elementsStack_.size(), 1);
+    /**
+     * @tc.steps: step6. push child2 again
+     * @tc.expected: Pop success elementsStack_ size residue 1.
+     */
+    instance->Push(child2);
+    instance->PopContainer();
+    EXPECT_EQ(instance->elementsStack_.size(), 1);
 }
 } // namespace OHOS::Ace::NG

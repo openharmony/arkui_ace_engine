@@ -166,8 +166,6 @@ ohos_unittest("picker_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/dialog/mock_dialog_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/dialog/mock_dialog_view.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/picker/mock_datepicker_model.cpp",
-    "$ace_root/frameworks/core/components_ng/test/mock/pattern/picker/mock_textpicker_model.cpp",
-    "$ace_root/frameworks/core/components_ng/test/mock/pattern/picker/mock_timepicker_model.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/select_overlay/mock_select_overlay_node.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_animation_utils.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_drawing_convertor.cpp",
@@ -187,10 +185,6 @@ ohos_unittest("picker_test_ng") {
 
     # self
     "datepicker_test_ng.cpp",
-    "textpicker_test_ng.cpp",
-    "textpicker_toss_animation_controller_test_ng.cpp",
-    "timepicker_test_ng.cpp",
-    "toss_animation_controller_test_ng.cpp",
   ]
 
   deps = [

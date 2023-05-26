@@ -386,4 +386,9 @@ Rect PipelineBase::GetCurrentWindowRect() const
 {
     return { 0., 0., DISPLAY_WIDTH, DISPLAY_HEIGHT };
 }
+
+void PipelineBase::SetTextFieldManager(const RefPtr<ManagerInterface>& manager)
+{
+    textFieldManager_ = manager;
+}
 } // namespace OHOS::Ace

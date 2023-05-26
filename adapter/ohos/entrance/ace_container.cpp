@@ -166,6 +166,7 @@ void AceContainer::Destroy()
 
         // 2. Destroy Frontend on JS thread.
         RefPtr<Frontend> frontend;
+        LOGI("Frontend Swap");
         frontend_.Swap(frontend);
         if (GetSettings().usePlatformAsUIThread && GetSettings().useUIAsJSThread) {
             frontend->UpdateState(Frontend::State::ON_DESTROY);
@@ -727,7 +728,6 @@ void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t
 #ifdef ENABLE_ROSEN_BACKEND
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-
     auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
 #else
     auto platformWindow = PlatformWindow::Create(view);
@@ -756,24 +756,6 @@ void AceContainer::SetViewNew(
         auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
         container->AttachView(window, view, density, width, height, rsWindow->GetWindowId(), nullptr);
     }
-#endif
-}
-
-void AceContainer::SetView(
-    AceView* view, double density, int32_t width, int32_t height, const std::shared_ptr<Window>& window)
-{
-#ifdef ENABLE_ROSEN_BACKEND
-    CHECK_NULL_VOID(view);
-    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(view->GetInstanceId()));
-    CHECK_NULL_VOID(container);
-    auto taskExecutor = container->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    CHECK_NULL_VOID(window);
-    window->SetTaskExecutor(taskExecutor);
-    window->SetInstanceId(view->GetInstanceId());
-    window->Init();
-
-    container->AttachView(window, view, density, width, height, window->GetWindowId(), nullptr);
 #endif
 }
 

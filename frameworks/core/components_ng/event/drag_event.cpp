@@ -47,6 +47,8 @@ constexpr int32_t LONG_PRESS_DURATION = 500;
 constexpr Dimension FILTER_RADIUS(100.0f);
 constexpr float PIXELMAP_ANIMATION_SCALE = 1.1f;
 constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
+constexpr int32_t MAX_PIXEL_MAP_WIDTH = 600;
+constexpr int32_t MAX_PIXEL_MAP_HEIGHT = 600;
 #endif // ENABLE_DRAG_FRAMEWORK
 } // namespace
 
@@ -479,8 +481,8 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
     auto dragFrame = dragNode->GetGeometryNode()->GetFrameRect();
     auto frameWidth = dragFrame.Width();
     auto frameheight = dragFrame.Height();
-    float scaleWidth = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH) / pixelMap->GetWidth();
-    float scaleHeight = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) / pixelMap->GetHeight();
+    float scaleWidth = static_cast<float>(MAX_PIXEL_MAP_WIDTH) / pixelMap->GetWidth();
+    float scaleHeight = static_cast<float>(MAX_PIXEL_MAP_HEIGHT) / pixelMap->GetHeight();
     float scale = std::min(std::min(scaleWidth, scaleHeight), 1.0f);
     auto context = dragNode->GetRenderContext();
     CHECK_NULL_VOID(context);

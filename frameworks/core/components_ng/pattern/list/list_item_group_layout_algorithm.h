@@ -162,7 +162,10 @@ private:
     bool NeedMeasureItem() const;
     static void SetListItemIndex(const LayoutWrapper* groupLayoutWrapper,
         const RefPtr<LayoutWrapper>& itemLayoutWrapper, int32_t indexInGroup);
+    bool IsCardStyleForListItemGroup(const LayoutWrapper* groupLayoutWrapper);
+    float GetMaxGridWidth();
 
+    bool isCardStyle_ = false;
     int32_t headerIndex_;
     int32_t footerIndex_;
     int32_t itemStartIndex_;

@@ -64,9 +64,12 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
             CHECK_NULL_VOID(textNode);
             textNode->SetInternal();
-            SetTextDefaultStyle(textNode, value, max);
             textNode->MountToParent(frameNode);
         }
+        auto textHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
+        CHECK_NULL_VOID(textHost);
+        SetTextDefaultStyle(textHost, value, max);
+        textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         eventHub->SetHoverEffect(HoverEffectType::SCALE);
     } else {
         if (!frameNode->GetChildren().empty()) {

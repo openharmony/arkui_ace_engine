@@ -44,6 +44,11 @@ void MenuModelNG::SetFontWeight(FontWeight weight)
     ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontWeight, weight);
 }
 
+void MenuModelNG::SetFontStyle(Ace::FontStyle style)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ItalicFontStyle, style);
+}
+
 void MenuModelNG::SetFontColor(const std::optional<Color>& color)
 {
     if (color.has_value()) {

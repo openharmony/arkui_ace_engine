@@ -28,7 +28,8 @@ void ListPositionController::JumpTo(int32_t index, bool /* smooth */, int32_t so
     list->JumpToIndex(index, source);
 }
 
-bool ListPositionController::AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve)
+bool ListPositionController::AnimateTo(
+    const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth)
 {
     auto list = AceType::DynamicCast<V2::RenderList>(scroll_.Upgrade());
     if (!list) {

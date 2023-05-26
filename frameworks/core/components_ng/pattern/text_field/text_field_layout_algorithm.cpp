@@ -403,7 +403,7 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
 
     Dimension fontSize;
-    if (layoutProperty->HasFontSize() && layoutProperty->GetFontSizeValue(Dimension()).IsNonNegative()) {
+    if (layoutProperty->HasFontSize() && layoutProperty->GetFontSizeValue(Dimension()).IsValid()) {
         fontSize = layoutProperty->GetFontSizeValue(Dimension());
     } else {
         fontSize = theme ? theme->GetFontSize() : textStyle.GetFontSize();
@@ -446,7 +446,7 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<TextField
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
     Dimension fontSize;
     if (layoutProperty->HasPlaceholderFontSize() &&
-        layoutProperty->GetPlaceholderFontSizeValue(Dimension()).IsNonNegative()) {
+        layoutProperty->GetPlaceholderFontSizeValue(Dimension()).IsValid()) {
         fontSize = layoutProperty->GetPlaceholderFontSizeValue(Dimension());
     } else {
         fontSize = theme ? theme->GetFontSize() : textStyle.GetFontSize();

@@ -13,31 +13,31 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_SCENE_HOST_WINDOW_NODE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_SCENE_HOST_WINDOW_NODE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_NODE_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_NODE_H
 
 #include <optional>
 
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT HostWindowNode : public FrameNode {
-    DECLARE_ACE_TYPE(HostWindowNode, FrameNode);
+class ACE_EXPORT WindowNode : public FrameNode {
+    DECLARE_ACE_TYPE(WindowNode, FrameNode);
 
 public:
-    HostWindowNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false)
+    WindowNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false)
         : FrameNode(tag, nodeId, pattern, isRoot)
     {}
-    ~HostWindowNode() override = default;
+    ~WindowNode() override = default;
 
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
         const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId) override;
 
-    static RefPtr<HostWindowNode> GetOrCreateHostWindowNode(
+    static RefPtr<WindowNode> GetOrCreateWindowNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
     void DispatchPointerEvent(const TouchEvent& point) const;
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_SCENE_HOST_WINDOW_NODE_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_NODE_H
