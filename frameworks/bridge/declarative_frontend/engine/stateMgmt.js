@@ -3674,7 +3674,7 @@ class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
                 this.source_.aboutToBeDeleted();
             }
             this.source_ = undefined;
-            this.sourceIsOwnObject == false;
+            this.sourceIsOwnObject = false;
         }
         super.aboutToBeDeleted();
     }
