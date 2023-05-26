@@ -32,7 +32,6 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr const double UNDERLINE_NORMAL_HEIGHT = 48.0;
 constexpr const double UNDERLINE_NORMAL_PADDING = 12.0;
-constexpr const double UNDERLINE_NORMAL_FONTSIZE = 16.0;
 } // namespace
 void TextFieldModelNG::CreateNode(
     const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool isTextArea)
@@ -106,7 +105,7 @@ void TextFieldModelNG::SetShowUnderline(bool showUnderLine)
             idealSize.SetHeight(height);
             textFieldLayoutProperty->UpdateUserDefinedIdealSize(idealSize);
         }
-        textFieldLayoutProperty->UpdateFontSize(Dimension(UNDERLINE_NORMAL_FONTSIZE));
+        textFieldLayoutProperty->UpdateFontSize(textFieldTheme->GetUnderlineFontSize());
         if (!textFieldLayoutProperty->HasTextColor()) {
             textFieldLayoutProperty->UpdateTextColor(textFieldTheme->GetUnderlineTextColor());
         }

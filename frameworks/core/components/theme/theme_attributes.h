@@ -180,6 +180,7 @@ extern const char INDICATOR_TEXT_FONT_COLOR[];
 extern const char ERROR_TEXT_UNDERLINE_COLOR[];
 extern const char UNDERLINE_COLOR[];
 extern const char UNDERLINE_TEXT_COLOR[];
+extern const char UNDERLINE_FONT_SIZE[];
 extern const char BORDER_RADIUS_SIZE[];
 // swiper attributes for arrow
 extern const char ARROW_COLOR_BOARDCOLOR_HOVER[];

@@ -177,6 +177,7 @@ const char INDICATOR_TEXT_FONT_COLOR[] = "indicator_text_font_color";
 const char ERROR_TEXT_UNDERLINE_COLOR[] = "error_text_underline_color";
 const char UNDERLINE_COLOR[] = "underline_color";
 const char UNDERLINE_TEXT_COLOR[] = "underline_text_color";
+const char UNDERLINE_FONT_SIZE[] = "text_font_size";
 const char BORDER_RADIUS_SIZE[] = "border_radius_size";
 // swiper attributes for arrow
 const char ARROW_COLOR_BOARDCOLOR_HOVER[] = "arrow_color_boardColor_hover";
