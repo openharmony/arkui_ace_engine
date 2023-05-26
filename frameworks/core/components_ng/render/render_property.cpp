@@ -147,11 +147,7 @@ void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         }
         json->Put("clip", jsonClip->ToString().c_str());
     } else {
-        if (json->Contains("startIndex")) {
-            json->Put("clip", propClipEdge.value_or(true) ? "true" : "false");
-        } else {
-            json->Put("clip", propClipEdge.value_or(false) ? "true" : "false");
-        }
+        json->Put("clip", propClipEdge.value_or(false) ? "true" : "false");
     }
 
     auto jsonMask = JsonUtil::Create(true);
