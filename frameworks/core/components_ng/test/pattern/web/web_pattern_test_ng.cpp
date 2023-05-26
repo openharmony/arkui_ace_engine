@@ -18,7 +18,6 @@
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
-#include "core/components_ng/pattern/web/web_view.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/utils/system_properties.h"
@@ -39,7 +38,6 @@ void WebPatternTestNg::SetUpTestCase() {}
 void WebPatternTestNg::TearDownTestCase() {}
 void WebPatternTestNg::SetUp() {}
 void WebPatternTestNg::TearDown() {}
-
 
 /**
  * @tc.name: WebPatternTestNg_001

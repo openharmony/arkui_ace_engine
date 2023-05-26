@@ -40,7 +40,6 @@
 #include "core/common/container_scope.h"
 #include "core/components/web/web_event.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
-#include "core/components_ng/pattern/web/web_view.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
@@ -640,19 +639,19 @@ public:
             }
             if (args.Length() < 1 || !args[0]->IsObject()) {
                 LOGE("SetWebController param err");
-                NG::WebView::NotifyPopupWindowResult(parentNWebId, false);
+                WebModel::GetInstance()->NotifyPopupWindowResult(parentNWebId, false);
                 return;
             }
             auto controller = JSRef<JSObject>::Cast(args[0]);
             if (controller.IsEmpty()) {
                 LOGI("SetWebController controller is empty");
-                NG::WebView::NotifyPopupWindowResult(parentNWebId, false);
+                WebModel::GetInstance()->NotifyPopupWindowResult(parentNWebId, false);
                 return;
             }
             auto getWebIdFunction = controller->GetProperty("innerGetWebId");
             if (!getWebIdFunction->IsFunction()) {
                 LOGI("SetWebController get innerGetWebId failed");
-                NG::WebView::NotifyPopupWindowResult(parentNWebId, false);
+                WebModel::GetInstance()->NotifyPopupWindowResult(parentNWebId, false);
                 return;
             }
             auto func = JSRef<JSFunc>::Cast(getWebIdFunction);
@@ -660,7 +659,7 @@ public:
             int32_t childWebId = webId->ToNumber<int32_t>();
             if (childWebId == parentNWebId || childWebId != -1) {
                 LOGE("The child window is initialized or the parent window is the same as the child window");
-                NG::WebView::NotifyPopupWindowResult(parentNWebId, false);
+                WebModel::GetInstance()->NotifyPopupWindowResult(parentNWebId, false);
                 return;
             }
             controller_map_.insert(
@@ -947,6 +946,10 @@ public:
         }
         JSRef<JSArray> array = JSRef<JSArray>::Cast(args[0]);
         for (size_t i = 0; i < array->Length(); i++) {
+            if (!(array->GetValueAt(i)->IsObject())) {
+                LOGE("Param is invalid");
+                return;
+            }
             auto obj = JSRef<JSObject>::Cast(array->GetValueAt(i));
             auto headerKey = obj->GetProperty("headerKey");
             auto headerValue = obj->GetProperty("headerValue");
@@ -1936,14 +1939,14 @@ void JSWeb::OnConsoleLog(const JSCallbackInfo& args)
 
     auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](
                           const BaseEventInfo* info) -> bool {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        bool result = false;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, result);
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebConsoleLogEvent>(info);
         JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
         if (message->IsBoolean()) {
-            return message->ToBoolean();
-        } else {
-            return false;
+            result = message->ToBoolean();
         }
+        return result;
     };
 
     WebModel::GetInstance()->SetOnConsoleLog(jsCallback);
@@ -2107,10 +2110,7 @@ void JSWeb::OnRequestFocus(const JSCallbackInfo& args)
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebRequestFocusEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), LoadWebRequestFocusEventToJSValue);
-    auto instanceId = Container::CurrentId();
-    auto jsCallback = [instanceId, execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](
-                          const BaseEventInfo* info) {
-        ContainerScope scope(instanceId);
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebRequestFocusEvent>(info);
         func->Execute(*eventInfo);
@@ -2221,10 +2221,8 @@ void JSWeb::OnKeyEvent(const JSCallbackInfo& args)
     }
 
     RefPtr<JsKeyFunction> jsOnKeyEventFunc = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
-    auto instanceId = Container::CurrentId();
-    auto jsCallback = [instanceId, execCtx = args.GetExecutionContext(), func = std::move(jsOnKeyEventFunc)](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsOnKeyEventFunc)](
                           KeyEventInfo& keyEventInfo) {
-        ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         func->Execute(keyEventInfo);
     };
@@ -2690,10 +2688,7 @@ void JSWeb::OnMouse(const JSCallbackInfo& args)
     }
 
     RefPtr<JsClickFunction> jsOnMouseFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(args[0]));
-    auto instanceId = Container::CurrentId();
-    auto jsCallback = [instanceId, execCtx = args.GetExecutionContext(), func = std::move(jsOnMouseFunc)](
-                          MouseInfo& info) {
-        ContainerScope scope(instanceId);
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsOnMouseFunc)](MouseInfo& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         func->Execute(info);
     };
@@ -3181,18 +3176,16 @@ void JSWeb::OnInterceptKeyEvent(const JSCallbackInfo& args)
     }
 
     RefPtr<JsKeyFunction> jsOnPreKeyEventFunc = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
-    auto instanceId = Container::CurrentId();
-    auto uiCallback = [instanceId, execCtx = args.GetExecutionContext(), func = std::move(jsOnPreKeyEventFunc)](
+    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsOnPreKeyEventFunc)](
                           KeyEventInfo& keyEventInfo) -> bool {
-        ContainerScope scope(instanceId);
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        bool result = false;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, result);
         ACE_SCORING_EVENT("onPreKeyEvent");
         JSRef<JSVal> obj = func->ExecuteWithValue(keyEventInfo);
         if (obj->IsBoolean()) {
-            return obj->ToBoolean();
-        } else {
-            return false;
+            result = obj->ToBoolean();
         }
+        return result;
     };
     WebModel::GetInstance()->SetOnInterceptKeyEventCallback(uiCallback);
 }
@@ -3447,13 +3440,13 @@ void JSWeb::MediaOptions(const JSCallbackInfo& args)
     auto resumeIntervalObj = paramObject->GetProperty("resumeInterval");
     if (resumeIntervalObj->IsNumber()) {
         int32_t resumeInterval = resumeIntervalObj->ToNumber<int32_t>();
-        NG::WebView::SetAudioResumeInterval(resumeInterval);
+        WebModel::GetInstance()->SetAudioResumeInterval(resumeInterval);
     }
 
     auto audioExclusiveObj = paramObject->GetProperty("audioExclusive");
     if (audioExclusiveObj->IsBoolean()) {
         bool audioExclusive = audioExclusiveObj->ToBoolean();
-        NG::WebView::SetAudioExclusive(audioExclusive);
+        WebModel::GetInstance()->SetAudioExclusive(audioExclusive);
     }
 }
 

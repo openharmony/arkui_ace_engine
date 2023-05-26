@@ -315,14 +315,14 @@ void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const
 
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
+    if (renderContext_) {
+        renderContext_->ToJsonValue(json);
+    }
     // scrollable in AccessibilityProperty
     ACE_PROPERTY_TO_JSON_VALUE(accessibilityProperty_, AccessibilityProperty);
     ACE_PROPERTY_TO_JSON_VALUE(layoutProperty_, LayoutProperty);
     ACE_PROPERTY_TO_JSON_VALUE(paintProperty_, PaintProperty);
     ACE_PROPERTY_TO_JSON_VALUE(pattern_, Pattern);
-    if (renderContext_) {
-        renderContext_->ToJsonValue(json);
-    }
     if (eventHub_) {
         eventHub_->ToJsonValue(json);
     }
@@ -1492,16 +1492,16 @@ OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf) const
     return offset;
 }
 
-OffsetF FrameNode::GetPaintRectOffsetWithoutTransform(bool excludeSelf) const
+OffsetF FrameNode::GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf) const
 {
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, OffsetF());
-    OffsetF offset = excludeSelf ? OffsetF() : context->GetPaintRectWithoutTransform().GetOffset();
+    OffsetF offset = excludeSelf ? OffsetF() : context->GetPaintRectWithTranslate().GetOffset();
     auto parent = GetAncestorNodeOfFrame();
     while (parent) {
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, OffsetF());
-        offset += renderContext->GetPaintRectWithoutTransform().GetOffset();
+        offset += renderContext->GetPaintRectWithTranslate().GetOffset();
         parent = parent->GetAncestorNodeOfFrame();
     }
     return offset;

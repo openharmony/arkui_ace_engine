@@ -1143,7 +1143,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0053, TestSize.Level1)
      * @tc.expected: step1. expect The function is run ok.
      */
     auto test = AceApplicationInfo::GetInstance().isAccessibilityEnabled_ = true;
-    FRAME_NODE2->OnAccessibilityEvent(AccessibilityEventType::ACCESSIBILITY_FOCUSED);
+    FRAME_NODE2->OnAccessibilityEvent(
+        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+    FRAME_NODE2->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, "", "");
     EXPECT_TRUE(test);
 
     auto test1 = AceApplicationInfo::GetInstance().isAccessibilityEnabled_ = false;

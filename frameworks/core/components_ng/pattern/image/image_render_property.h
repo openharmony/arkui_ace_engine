@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,6 +66,7 @@ public:
         renderProperty->UpdatePaintProperty(this);
         renderProperty->propImagePaintStyle_ = CloneImagePaintStyle();
         renderProperty->propNeedBorderRadius_ = CloneNeedBorderRadius();
+        renderProperty->propImageFit_ = CloneImageFit();
         return renderProperty;
     }
 
@@ -90,6 +91,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImagePaintStyle, MatchTextDirection, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImagePaintStyle, SvgFillColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NeedBorderRadius, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageFit, ImageFit, PROPERTY_UPDATE_RENDER);
 };
 
 } // namespace OHOS::Ace::NG

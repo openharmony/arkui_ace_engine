@@ -23,10 +23,14 @@ common_sources = [
   "$ace_root/frameworks/base/utils/string_expression.cpp",
   "$ace_root/frameworks/base/utils/string_utils.cpp",
   "$ace_root/frameworks/base/utils/time_util.cpp",
+  "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
+  "$ace_root/frameworks/bridge/common/utils/utils.cpp",
+  "$ace_root/frameworks/bridge/js_frontend/engine/common/js_constants.cpp",
   "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
   "$ace_root/frameworks/core/animation/chain_animation.cpp",
   "$ace_root/frameworks/core/animation/cubic_curve.cpp",
   "$ace_root/frameworks/core/animation/curves.cpp",
+  "$ace_root/frameworks/core/animation/spring_curve.cpp",
   "$ace_root/frameworks/core/animation/spring_model.cpp",
   "$ace_root/frameworks/core/animation/spring_motion.cpp",
   "$ace_root/frameworks/core/components/common/layout/grid_column_info.cpp",
@@ -57,6 +61,7 @@ common_sources = [
 
   # components_ng_property
   "$ace_root/frameworks/core/components_ng/property/accessibility_property.cpp",
+  "$ace_root/frameworks/core/components_ng/property/border_property.cpp",
   "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",
   "$ace_root/frameworks/core/components_ng/property/grid_property.cpp",
   "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",

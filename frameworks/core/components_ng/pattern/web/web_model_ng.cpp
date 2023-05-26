@@ -173,8 +173,10 @@ void WebModelNG::SetOnGeolocationShow(std::function<void(const BaseEventInfo* in
 void WebModelNG::SetOnRequestFocus(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto func = jsCallback;
+    auto instanceId = Container::CurrentId();
 
-    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) {
+    auto uiCallback = [func, instanceId](const std::shared_ptr<BaseEventInfo>& info) {
+        ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->PostAsyncEvent([info, func]() { func(info.get()); });
@@ -230,8 +232,9 @@ void WebModelNG::SetMediaPlayGestureAccess(bool isNeedGestureAccess)
 void WebModelNG::SetOnKeyEvent(std::function<void(KeyEventInfo& keyEventInfo)>&& jsCallback)
 {
     auto func = jsCallback;
-
-    auto uiCallback = [func](KeyEventInfo& keyEventInfo) {
+    auto instanceId = Container::CurrentId();
+    auto uiCallback = [func, instanceId](KeyEventInfo& keyEventInfo) {
+        ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->PostSyncEvent([&keyEventInfo, func]() { func(keyEventInfo); });
@@ -439,7 +442,9 @@ void WebModelNG::SetWebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled)
 void WebModelNG::SetOnMouseEvent(std::function<void(MouseInfo& info)>&& jsCallback)
 {
     auto func = jsCallback;
-    auto uiCallback = [func](MouseInfo& info) {
+    auto instanceId = Container::CurrentId();
+    auto uiCallback = [func, instanceId](MouseInfo& info) {
+        ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->PostSyncEvent([&info, func]() { func(info); });
@@ -671,11 +676,12 @@ void WebModelNG::SetPageVisibleId(OnWebAsyncFunc&& pageVisibleId)
 void WebModelNG::SetOnInterceptKeyEventCallback(std::function<bool(KeyEventInfo& keyEventInfo)>&& keyEventInfo)
 {
     auto func = keyEventInfo;
-
-    auto onConsole = [func](KeyEventInfo& keyEventInfo) -> bool {
+    auto instanceId = Container::CurrentId();
+    auto onConsole = [func, instanceId](KeyEventInfo& keyEventInfo) -> bool {
+        ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(context, false);
         bool result = false;
+        CHECK_NULL_RETURN(context, result);
         context->PostSyncEvent([func, &keyEventInfo, &result]() { result = func(keyEventInfo); });
         return result;
     };
@@ -760,5 +766,29 @@ void WebModelNG::SetVerticalScrollBarAccessEnabled(bool isVerticalScrollBarAcces
 void WebModelNG::SetOnControllerAttached(std::function<void()>&& callback_, std::function<void()>&& callback)
 {
     callback_ = callback;
+}
+
+void WebModelNG::NotifyPopupWindowResult(int32_t webId, bool result)
+{
+    if (webId != -1) {
+        std::weak_ptr<OHOS::NWeb::NWeb> nwebWeak = OHOS::NWeb::NWebHelper::Instance().GetNWeb(webId);
+        auto nwebSptr = nwebWeak.lock();
+        if (nwebSptr) {
+            nwebSptr->NotifyPopupWindowResult(result);
+        }
+    }
+}
+
+void WebModelNG::SetAudioResumeInterval(int32_t resumeInterval)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateAudioResumeInterval(resumeInterval);
+}
+void WebModelNG::SetAudioExclusive(bool audioExclusive)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateAudioExclusive(audioExclusive);
 }
 } // namespace OHOS::Ace::NG

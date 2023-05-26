@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@ const testAppStorageArray = tsuite("AppStorage Array", () => {
     private id_: number = SubscriberManager. MakeId();
 
     constructor() {
-      AppStorage.SubscribeToChangesOf("arr", this);
+      AppStorage.subscribeToChangesOf("arr", this);
       SubscriberManager.Add(this);
     }
 
@@ -33,7 +33,7 @@ const testAppStorageArray = tsuite("AppStorage Array", () => {
     // that the subscriber is about to be deleted
     // hence , unsubscribe
     aboutToBeDeleted(owningView?: IPropertySubscriber): void {
-      AppStorage.UnsubscribeFromChangesOf("arr", this.id__());
+      AppStorage.unsubscribeFromChangesOf("arr", this.id__());
       SubscriberManager.Delete(this.id__());
     }
 
@@ -105,22 +105,22 @@ const testAppStorageArray = tsuite("AppStorage Array", () => {
 
   tcase("create and read back", () => {
     let arr: number[] = [1, 2, 3, 4];
-    AppStorage.SetOrCreate<number[]>("arr", arr);
+    AppStorage.setOrCreate<number[]>("arr", arr);
 
-    test("AppStrorage has initial one ObservedProperties", AppStorage.Size() == 1);
-    test("Initial array value readback.", AppStorage.Get<number[]>("arr").toString() == arr.toString());
-    test(`Initial array value readback, check Array.isArray`, Array.isArray(AppStorage.Get<number[]>("arr")));
-    test(`Initial array value readback, check instance of ObservedObject`, ObservedObject.IsObservedObject(AppStorage.Get<number[]>("arr")));
+    test("AppStrorage has initial one ObservedProperties", AppStorage.size() == 1);
+    test("Initial array value readback.", AppStorage.get<number[]>("arr").toString() == arr.toString());
+    test(`Initial array value readback, check Array.isArray`, Array.isArray(AppStorage.get<number[]>("arr")));
+    test(`Initial array value readback, check instance of ObservedObject`, ObservedObject.IsObservedObject(AppStorage.get<number[]>("arr")));
   });
 
   tcase("push to array", () => {
     let arrSub = new ArrayChangeSubscriber();
     let spyArrayChange = spyOn(arrSub, "hasChanged");
-    AppStorage.Get<number[]>("arr").push(5);
-    test("Changed array value readback", AppStorage.Get<number[]>("arr").toString() == [1, 2, 3, 4, 5].toString());
+    AppStorage.get<number[]>("arr").push(5);
+    test("Changed array value readback", AppStorage.get<number[]>("arr").toString() == [1, 2, 3, 4, 5].toString());
     test(`hasChanged was called`, spyArrayChange.called);
     test(`hasChanged param is the correct changed array.`, spyArrayChange.args[0].toString() == [1, 2, 3, 4, 5].toString());
-    test(`Initial array value readback, check instance of ObservedObject`, ObservedObject.IsObservedObject(AppStorage.Get<number[]>("arr")));
+    test(`Initial array value readback, check instance of ObservedObject`, ObservedObject.IsObservedObject(AppStorage.get<number[]>("arr")));
     arrSub.aboutToBeDeleted();
   });
 
@@ -128,12 +128,12 @@ const testAppStorageArray = tsuite("AppStorage Array", () => {
     let arrSub = new ArrayChangeSubscriber();
     let spyArrayChange = spyOn(arrSub, "hasChanged");
 
-    AppStorage.Set<number[]>("arr", [2, 3, 4]);
+    AppStorage.set<number[]>("arr", [2, 3, 4]);
 
-    test("Changed array value readback", AppStorage.Get<number[]>("arr").toString() == [2, 3, 4].toString());
+    test("Changed array value readback", AppStorage.get<number[]>("arr").toString() == [2, 3, 4].toString());
     test(`hasChanged was called`, spyArrayChange.called);
     test(`hasChanged param is the correct changed array.`, spyArrayChange.args[0].toString() == [2, 3, 4].toString());
-    test(`Initial array value readback, check instance of ObservedObject`, ObservedObject.IsObservedObject(AppStorage.Get<number[]>("arr")));
+    test(`Initial array value readback, check instance of ObservedObject`, ObservedObject.IsObservedObject(AppStorage.get<number[]>("arr")));
 
     arrSub.aboutToBeDeleted();
   });
@@ -141,19 +141,19 @@ const testAppStorageArray = tsuite("AppStorage Array", () => {
 
   tcase("change property value gets observed #2", () => {
     let arrSub = new ArrayChangeSubscriber();
-    AppStorage.Set<number[]>("arr", [2, 3, 4]);
+    AppStorage.set<number[]>("arr", [2, 3, 4]);
     let spyArrayChange = spyOn(arrSub, "hasChanged");
-    AppStorage.Get<number[]>("arr")[1] = 7;
+    AppStorage.get<number[]>("arr")[1] = 7;
 
-    test("Changed array value readback", AppStorage.Get<number[]>("arr").toString() == [2, 7, 4].toString());
+    test("Changed array value readback", AppStorage.get<number[]>("arr").toString() == [2, 7, 4].toString());
     test(`hasChanged was called`, spyArrayChange.called);
     test(`hasChanged param is the correct changed array.`, spyArrayChange.args[0].toString() == [2, 7, 4].toString());
     arrSub.aboutToBeDeleted();
   });
 
   tcase("ObservedObject Array proxying is transparent", () => {
-    AppStorage.Set<number[]>("arr", [2, 3, 4]);
-    let link = AppStorage.Link<number[]>("arr");
+    AppStorage.set<number[]>("arr", [2, 3, 4]);
+    let link = AppStorage.link<number[]>("arr");
     test("link readback value OK", link.get().toString() == [2, 3, 4].toString());
     test("link readback value OK", link.get().length == 3);
     test("Array.isArray(link) OK", Array.isArray(link.get()));
@@ -170,14 +170,14 @@ const testAppStorageArray = tsuite("AppStorage Array", () => {
   tcase("cleanup ok", () => {
 
     // manual cleanup to see everything works as expected
-    const deleteOk = AppStorage.Delete("arr");
+    const deleteOk = AppStorage.delete("arr");
     test(`Deletion of props form AppStrorage without isuses`, deleteOk);
-    test(`AppStrorage has ${AppStorage.Size()} ObservedProperties: >${Array.from(AppStorage.Keys())}<, should be none.`, AppStorage.Size() == 0);
+    test(`AppStrorage has ${AppStorage.size()} ObservedProperties: >${Array.from(AppStorage.keys())}<, should be none.`, AppStorage.size() == 0);
 
     test(`SubscriberManager num of subscribers us ${SubscriberManager.NumberOfSubscribers()} should be 0 .`, 
        SubscriberManager.NumberOfSubscribers() == 0);
 
     // this will do nothing because manual cleanup was done already
-    AppStorage.AboutToBeDeleted();
+    AppStorage.aboutToBeDeleted();
   });
 });

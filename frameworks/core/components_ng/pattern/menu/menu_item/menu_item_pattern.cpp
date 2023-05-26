@@ -58,6 +58,18 @@ void UpdateFontWeight(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayou
     }
 }
 
+void UpdateFontStyle(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayoutProperty>& menuProperty,
+    const std::optional<Ace::FontStyle>& fontStyle)
+{
+    if (fontStyle.has_value()) {
+        textProperty->UpdateItalicFontStyle(fontStyle.value());
+    } else if (menuProperty && menuProperty->GetItalicFontStyle().has_value()) {
+        textProperty->UpdateItalicFontStyle(menuProperty->GetItalicFontStyle().value());
+    } else {
+        textProperty->UpdateItalicFontStyle(Ace::FontStyle::NORMAL);
+    }
+}
+
 void UpdateFontColor(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayoutProperty>& menuProperty,
     const std::optional<Color>& fontColor, const Color& defaultFontColor)
 {
@@ -102,25 +114,7 @@ void MenuItemPattern::OnModifyDone()
     RegisterOnClick();
     RegisterOnTouch();
     RegisterOnHover();
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto focusHub = host->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    RegisterOnKeyEvent(focusHub);
-
-    auto eventHub = host->GetEventHub<MenuItemEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    if (!eventHub->IsEnabled()) {
-        CHECK_NULL_VOID(content_);
-        auto context = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        auto theme = context->GetTheme<SelectTheme>();
-        CHECK_NULL_VOID(theme);
-        auto contentProperty = content_->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(contentProperty);
-        contentProperty->UpdateTextColor(theme->GetDisabledMenuFontColor());
-    }
+    RegisterOnKeyEvent();
     /*
      * The structure of menu item is designed as follows :
      * |--menu_item
@@ -131,6 +125,8 @@ void MenuItemPattern::OnModifyDone()
      *     |--label
      *     |--end_icon
      */
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     RefPtr<FrameNode> leftRow =
         host->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
     CHECK_NULL_VOID(leftRow);
@@ -145,6 +141,9 @@ void MenuItemPattern::OnModifyDone()
     CHECK_NULL_VOID(rightRow);
     UpdateText(rightRow, menuProperty, true);
     UpdateIcon(rightRow, false);
+    if (IsDisabled()) {
+        UpdateDisabledStyle();
+    }
     SetAccessibilityAction();
 }
 
@@ -315,8 +314,12 @@ void MenuItemPattern::RegisterOnHover()
     inputHub->SetHoverEffect(HoverEffectType::BOARD);
 }
 
-void MenuItemPattern::RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+void MenuItemPattern::RegisterOnKeyEvent()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
         CHECK_NULL_RETURN_NOLOG(pattern, false);
@@ -567,6 +570,8 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     UpdateFontSize(textProperty, menuProperty, fontSize, theme->GetMenuFontSize());
     auto fontWeight = isLabel ? itemProperty->GetLabelFontWeight() : itemProperty->GetFontWeight();
     UpdateFontWeight(textProperty, menuProperty, fontWeight);
+    auto fontStyle = isLabel ? itemProperty->GetLabelItalicFontStyle() : itemProperty->GetItalicFontStyle();
+    UpdateFontStyle(textProperty, menuProperty, fontStyle);
     auto fontColor = isLabel ? itemProperty->GetLabelFontColor() : itemProperty->GetFontColor();
     UpdateFontColor(
         textProperty, menuProperty, fontColor, isLabel ? theme->GetSecondaryFontColor() : theme->GetMenuFontColor());
@@ -593,6 +598,24 @@ void MenuItemPattern::UpdateTextNodes()
         host->GetChildAtIndex(1) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1)) : nullptr;
     CHECK_NULL_VOID(rightRow);
     UpdateText(rightRow, menuProperty, true);
+}
+
+bool MenuItemPattern::IsDisabled()
+{
+    auto eventHub = GetHost()->GetEventHub<MenuItemEventHub>();
+    CHECK_NULL_RETURN(eventHub, true);
+    return !eventHub->IsEnabled();
+}
+
+void MenuItemPattern::UpdateDisabledStyle()
+{
+    CHECK_NULL_VOID(content_);
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    content_->GetRenderContext()->UpdateForegroundColor(theme->GetDisabledMenuFontColor());
+    content_->MarkModifyDone();
 }
 
 void MenuItemPattern::SetAccessibilityAction()

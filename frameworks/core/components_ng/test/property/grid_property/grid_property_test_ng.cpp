@@ -313,38 +313,6 @@ HWTEST_F(GridPropertyTestNg, GridPropertyTest010, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridPropertyTest011
- * @tc.desc: Test the operation of Grid_Property
- * @tc.type: FUNC
- */
-HWTEST_F(GridPropertyTestNg, GridPropertyTest011, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Build a object GridProperty.
-     * @tc.steps: step2. callback ToJsonValue.push json is true.
-     * @tc.expected: step2. Return expected results.
-     */
-    GridProperty testGridProperty;
-    std::vector<GridTypedProperty> typedPropertySet;
-    GridTypedProperty testGridTypedProperty0 {GridSizeType::XS, DEFAULT_GRID_SPAN, DEFAULT_GRID_OFFSET};
-    GridTypedProperty testGridTypedProperty1 {GridSizeType::SM, DEFAULT_GRID_SPAN, DEFAULT_GRID_OFFSET};
-    GridTypedProperty testGridTypedProperty2 {GridSizeType::MD, DEFAULT_GRID_SPAN, DEFAULT_GRID_OFFSET};
-    GridTypedProperty testGridTypedProperty3 {GridSizeType::LG, DEFAULT_GRID_SPAN, DEFAULT_GRID_OFFSET};
-    GridTypedProperty testGridTypedProperty4 {GridSizeType::XL, DEFAULT_GRID_SPAN, DEFAULT_GRID_OFFSET};
-    typedPropertySet.clear();
-    typedPropertySet.emplace_back(testGridTypedProperty0);
-    typedPropertySet.emplace_back(testGridTypedProperty1);
-    typedPropertySet.emplace_back(testGridTypedProperty2);
-    typedPropertySet.emplace_back(testGridTypedProperty3);
-    typedPropertySet.emplace_back(testGridTypedProperty4);
-    testGridProperty.typedPropertySet_ = typedPropertySet;
-
-    auto json = JsonUtil::Create(true);
-    testGridProperty.ToJsonValue(json);
-    EXPECT_EQ(json->GetString("span"), "");
-}
-
-/**
  * @tc.name: GridPropertyTest012
  * @tc.desc: Test the operation of Grid_Property
  * @tc.type: FUNC

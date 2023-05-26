@@ -314,6 +314,7 @@ template("declarative_js_engine") {
       "jsview/models/marquee_model_impl.cpp",
       "jsview/models/menu_item_model_impl.cpp",
       "jsview/models/menu_model_impl.cpp",
+      "jsview/models/navigation_model_impl.cpp",
       "jsview/models/navigator_model_impl.cpp",
       "jsview/models/page_transition_model_impl.cpp",
       "jsview/models/path_model_impl.cpp",
@@ -350,6 +351,7 @@ template("declarative_js_engine") {
       "jsview/models/timepicker_model_impl.cpp",
       "jsview/models/toggle_model_impl.cpp",
       "jsview/models/view_abstract_model_impl.cpp",
+      "jsview/models/view_context_model_impl.cpp",
       "jsview/models/view_full_update_model_impl.cpp",
       "jsview/models/view_partial_update_model_impl.cpp",
       "jsview/models/water_flow_item_model_impl.cpp",
@@ -523,9 +525,9 @@ template("declarative_js_engine") {
       if (defined(config.window_scene_support) && config.window_scene_support) {
         sources += [
           "jsview/js_ui_extension.cpp",
-          "jsview/window_scene/js_host_window_scene.cpp",
           "jsview/window_scene/js_root_scene.cpp",
           "jsview/window_scene/js_screen.cpp",
+          "jsview/window_scene/js_window_scene.cpp",
         ]
       }
     }
@@ -581,6 +583,7 @@ template("declarative_js_engine_ng") {
       "sharedata/js_share_data.cpp",
 
       # jsviews
+      "jsview/js_button.cpp",
       "jsview/js_column.cpp",
       "jsview/js_container_base.cpp",
       "jsview/js_counter.cpp",

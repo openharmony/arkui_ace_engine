@@ -15,11 +15,18 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H
 
+#include "base/web/webview/ohos_nweb/include/nweb_helper.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/web/web_model.h"
 
 namespace OHOS::Ace::NG {
+using OnWebSyncFunc = std::function<bool(const std::shared_ptr<BaseEventInfo>& info)>;
+using OnWebAsyncFunc = std::function<void(const std::shared_ptr<BaseEventInfo>& info)>;
+using SetWebIdCallback = std::function<void(int32_t)>;
+using SetHapPathCallback = std::function<void(const std::string&)>;
+using JsProxyCallback = std::function<void()>;
+
 class ACE_EXPORT WebModelNG : public OHOS::Ace::WebModel {
 public:
     void Create(const std::string& src, const RefPtr<WebController>& webController) override;
@@ -126,6 +133,9 @@ public:
     void SetVerticalScrollBarAccessEnabled(bool isVerticalScrollBarAccessEnabled) override;
 
     void SetOnControllerAttached(std::function<void()>&& callback_, std::function<void()>&& callback) override;
+    void NotifyPopupWindowResult(int32_t webId, bool result) override;
+    void SetAudioResumeInterval(int32_t resumeInterval) override;
+    void SetAudioExclusive(bool audioExclusive) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

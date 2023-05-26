@@ -20,7 +20,6 @@
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 
 namespace OHOS::Ace::NG {
-constexpr int32_t MIDDLE_OF_COUNTS = 2;
 std::string TextPickerAccessibilityProperty::GetText() const
 {
     auto frameNode = host_.Upgrade();
@@ -45,7 +44,7 @@ int32_t TextPickerAccessibilityProperty::GetBeginIndex() const
     CHECK_NULL_RETURN(frameNode, -1);
     auto textPickerColumnPattern = frameNode->GetPattern<TextPickerColumnPattern>();
     CHECK_NULL_RETURN(textPickerColumnPattern, -1);
-    auto middleIndex = textPickerColumnPattern->GetShowOptionCount() / MIDDLE_OF_COUNTS;
+    auto middleIndex = textPickerColumnPattern->GetHalfDisplayCounts();
     auto currentIndex = textPickerColumnPattern->GetCurrentIndex();
     auto totalIndex = textPickerColumnPattern->GetOptionCount();
     if (totalIndex == 0) {
@@ -65,7 +64,7 @@ int32_t TextPickerAccessibilityProperty::GetEndIndex() const
     CHECK_NULL_RETURN(frameNode, -1);
     auto textPickerColumnPattern = frameNode->GetPattern<TextPickerColumnPattern>();
     CHECK_NULL_RETURN(textPickerColumnPattern, -1);
-    auto middleIndex = textPickerColumnPattern->GetShowOptionCount() / MIDDLE_OF_COUNTS;
+    auto middleIndex = textPickerColumnPattern->GetHalfDisplayCounts();
     auto currentIndex = textPickerColumnPattern->GetCurrentIndex();
     auto totalIndex = textPickerColumnPattern->GetOptionCount();
     if (totalIndex == 0) {

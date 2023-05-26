@@ -135,7 +135,7 @@ public:
     {
         ViewAbstract::SetForegroundBlurStyle(fgBlurStyle);
     }
-    
+
     void SetSphericalEffect(double radio) override
     {
         ViewAbstract::SetSphericalEffect(radio);
@@ -257,6 +257,7 @@ public:
         borderRadius.radiusTopRight = radiusTopRight;
         borderRadius.radiusBottomLeft = radiusBottomLeft;
         borderRadius.radiusBottomRight = radiusBottomRight;
+        borderRadius.multiValued = true;
         ViewAbstract::SetBorderRadius(borderRadius);
     }
 
@@ -272,6 +273,7 @@ public:
         borderColors.rightColor = colorRight;
         borderColors.topColor = colorTop;
         borderColors.bottomColor = colorBottom;
+        borderColors.multiValued = true;
         ViewAbstract::SetBorderColor(borderColors);
     }
 
@@ -288,6 +290,7 @@ public:
         borderWidth.rightDimen = right;
         borderWidth.topDimen = top;
         borderWidth.bottomDimen = bottom;
+        borderWidth.multiValued = true;
         ViewAbstract::SetBorderWidth(borderWidth);
     }
 
@@ -304,6 +307,7 @@ public:
         borderStyles.styleRight = styleRight.value_or(BorderStyle::SOLID);
         borderStyles.styleTop = styleTop.value_or(BorderStyle::SOLID);
         borderStyles.styleBottom = styleBottom.value_or(BorderStyle::SOLID);
+        borderStyles.multiValued = true;
         ViewAbstract::SetBorderStyle(borderStyles);
     }
 
@@ -589,6 +593,11 @@ public:
         ViewAbstract::SetHueRotate(value);
     }
 
+    void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override
+    {
+        ViewAbstract::SetClickEffectLevel(level, scaleValue);
+    }
+
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override
     {
         ViewAbstract::SetOnClick(std::move(tapEventFunc));
@@ -816,6 +825,7 @@ public:
     {
         ViewAbstract::SetForegroundColorStrategy(strategy);
     }
+
 private:
     void RegisterMenuAppearCallback(
         std::vector<NG::OptionParam>& params, std::function<void()>&& buildFunc, const MenuParam& menuParam);

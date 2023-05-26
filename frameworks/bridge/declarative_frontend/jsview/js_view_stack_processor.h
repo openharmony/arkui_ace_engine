@@ -76,7 +76,15 @@ public:
         return it->second;
     }
 
+    /**
+     * return true of current Container uses new Pipeline
+     */
     static bool JsUsesNewPipeline();
+
+    /**
+     * return the API version specified in the manifest.json
+    */
+    static int32_t JsGetApiVersion();
 
 private:
     static void JSVisualState(const JSCallbackInfo& info);

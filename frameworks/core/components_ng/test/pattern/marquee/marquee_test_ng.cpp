@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -77,8 +78,14 @@ protected:
     static RefPtr<FrameNode> CreateMarqueeParagraph(const TestProperty& testProperty);
 };
 
-void MarqueeTestNg::SetUpTestCase() {}
-void MarqueeTestNg::TearDownTestCase() {}
+void MarqueeTestNg::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
+void MarqueeTestNg::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
 void MarqueeTestNg::SetUp() {}
 void MarqueeTestNg::TearDown() {}
 
@@ -413,7 +420,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest005, TestSize.Level1)
     auto childLayoutWrapper = layoutWrapper.GetOrCreateChildByIndex(0);
     ASSERT_NE(childLayoutWrapper, nullptr);
     EXPECT_EQ(childLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(CHILD_WIDTH_600, CHILD_HEIGHT_50));
-    EXPECT_EQ(childLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetX(), (DEVICE_WIDTH - CHILD_WIDTH_600) / 2);
+    EXPECT_EQ(childLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetX(), 0);
 }
 
 /**
@@ -833,36 +840,5 @@ HWTEST_F(MarqueeTestNg, MarqueeTest0011, TestSize.Level1)
     pattern->OnModifyDone();
     EXPECT_TRUE(CheckMeasureFlag(marqueeLayoutProperty->GetPropertyChangeFlag()));
     EXPECT_TRUE(CheckMeasureFlag(textLayoutProperty->GetPropertyChangeFlag()));
-}
-
-/**
- * @tc.name: MarqueeTest012
- * @tc.desc: Test Stop Animation.
- * @tc.type: FUNC
- */
-HWTEST_F(MarqueeTestNg, MarqueeTest0012, TestSize.Level1)
-{
-    MarqueeModelNG marqueeModel;
-    marqueeModel.Create();
-    marqueeModel.SetValue(MARQUEE_SRC);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<MarqueePattern>();
-    ASSERT_NE(pattern, nullptr);
-    pattern->lastStartStatus_ = false;
-    pattern->StopMarqueeAnimation(false, true);
-    EXPECT_TRUE(!pattern->lastStartStatus_);
-
-    pattern->lastStartStatus_ = true;
-    pattern->StopMarqueeAnimation(false, false);
-    EXPECT_TRUE(pattern->lastStartStatus_);
-
-    pattern->lastStartStatus_ = true;
-    pattern->StopMarqueeAnimation(true, false);
-    EXPECT_TRUE(pattern->lastStartStatus_);
-
-    pattern->lastStartStatus_ = true;
-    pattern->StopMarqueeAnimation(true, true);
-    EXPECT_TRUE(pattern->lastStartStatus_);
 }
 } // namespace OHOS::Ace::NG

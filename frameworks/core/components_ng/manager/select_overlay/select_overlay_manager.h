@@ -44,8 +44,11 @@ public:
     // Destroy the pop-up interface and delete the pop-up information.
     void DestroySelectOverlay(const RefPtr<SelectOverlayProxy>& proxy);
     void DestroySelectOverlay(int32_t overlayId);
+    void DestroySelectOverlay();
 
     bool HasSelectOverlay(int32_t overlayId);
+
+    bool IsInSelectedOrSelectOverlayArea(const PointF& point);
 
     RefPtr<SelectOverlayNode> GetSelectOverlayNode(int32_t overlayId);
 

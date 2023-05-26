@@ -63,38 +63,32 @@ void SwiperPattern::FromJson(const std::unique_ptr<JsonValue>& json)
     auto currentOffsetTimes = static_cast<float>(json->GetDouble("currentOffsetTimes"));
     if (currentOffsetTimes != currentOffsetTimes_) {
         LOGD("UITree currentOffsetTimes=%{public}f", currentOffsetTimes);
-        host->UpdateAnimatablePropertyFloat(PROPERTY_NAME, currentOffsetTimes);
+        currentOffsetTimes_ = currentOffsetTimes;
+        OnlyUpdateAnimatableProperty();
     }
     Pattern::FromJson(json);
 }
 
-void SwiperPattern::CalculateItemRange(int32_t index)
+bool SwiperPattern::CalculateItemRange()
 {
-    if (!needCalculateItemRange_) {
-        return;
-    }
+    bool needMeasure = false;
+    auto property = GetLayoutProperty<SwiperLayoutProperty>();
+    bool isStretch =
+        property->GetDisplayCount().has_value() ||
+        property->GetDisplayMode().value_or(SwiperDisplayMode::STRETCH) == SwiperDisplayMode::STRETCH;
+    auto prevMargin = static_cast<float>(property->GetPrevMarginValue(0.0_px).ConvertToPx());
+    auto nextMargin = static_cast<float>(property->GetNextMarginValue(0.0_px).ConvertToPx());
+    int32_t prevCount = Positive(prevMargin) && isStretch ? 1 : 0;
+    int32_t nextCount = Positive(nextMargin) && isStretch ? 1 : 0;
 
-    auto childrenSize = TotalCount();
-    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_VOID(swiperLayoutProperty);
-    const auto& constraint = swiperLayoutProperty->GetLayoutConstraint();
-    if (constraint == std::nullopt || constraint->selfIdealSize.Width() == std::nullopt ||
-        constraint->selfIdealSize.Height() == std::nullopt) {
-        for (int32_t i = 0; i < childrenSize; ++i) {
-            itemRange_.insert(i);
+    for (int32_t index = std::floor(currentOffsetTimes_) - prevCount;
+         static_cast<float>(index) < (currentOffsetTimes_ + GetDisplayCount() + nextCount); ++index) {
+        if (itemRange_.find((index + TotalCount()) % TotalCount()) == itemRange_.end()) {
+            itemRange_.insert((index + TotalCount()) % TotalCount());
+            needMeasure = true;
         }
-        needCalculateItemRange_ = false;
-        return;
     }
-
-    int32_t displayCount = GetDisplayCount();
-    int32_t cachedCount = GetCachedCount();
-    int32_t cachedItemIndexStart = IsLoop() ? index - cachedCount : std::max(index - cachedCount, 0);
-    int32_t cachedItemIndexEnd =
-        IsLoop() ? index + displayCount + cachedCount : std::min(index + displayCount + cachedCount, childrenSize);
-    for (int32_t i = cachedItemIndexStart; i < cachedItemIndexEnd; ++i) {
-        itemRange_.insert((i + childrenSize) % childrenSize);
-    }
+    return needMeasure;
 }
 
 void SwiperPattern::AttachNodeAnimatableProperty()
@@ -115,15 +109,8 @@ void SwiperPattern::UpdateCurrentOffsetTimes(float value)
     if (!needUpdateCurrentOffsetTimes_) {
         return;
     }
-    bool needMeasure = false;
     currentOffsetTimes_ = IsLoop() ? std::fmod(value + TotalCount(), TotalCount()) : value;
-    for (int32_t index = std::floor(currentOffsetTimes_);
-         static_cast<float>(index) < (currentOffsetTimes_ + GetDisplayCount()); ++index) {
-        if (itemRange_.find(index % TotalCount()) == itemRange_.end()) {
-            itemRange_.insert(index % TotalCount());
-            needMeasure = true;
-        }
-    }
+    bool needMeasure = CalculateItemRange();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(needMeasure ? PROPERTY_UPDATE_MEASURE_SELF : PROPERTY_UPDATE_LAYOUT);
@@ -158,7 +145,8 @@ void SwiperPattern::HandleAnimationEnds()
     layoutProperty->UpdateIndexWithoutMeasure(currentIndex_);
     moveDirection_ = MoveDirection::STATIC;
     animation_ = nullptr;
-    FireChangeEvent();
+    OnIndexChange();
+    oldIndex_ = currentIndex_;
     FireAnimationEndEvent();
 
     if (NeedAutoPlay()) {
@@ -188,6 +176,8 @@ void SwiperPattern::OnIndexChange() const
         auto swiperEventHub = GetEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(swiperEventHub);
         swiperEventHub->FireChangeEvent(targetIndex);
+        swiperEventHub->FireIndicatorChangeEvent(targetIndex);
+        swiperEventHub->FireChangeDoneEvent(moveDirection_);
     }
 }
 
@@ -211,10 +201,8 @@ void SwiperPattern::OnModifyDone()
 
     targetIndex_ = currentIndex_;
     currentOffsetTimes_ = currentIndex_;
-    for (int32_t index = std::floor(currentOffsetTimes_);
-         static_cast<float>(index) < (currentOffsetTimes_ + GetDisplayCount()); ++index) {
-        itemRange_.insert(index % TotalCount());
-    }
+    OnlyUpdateAnimatableProperty();
+    CalculateItemRange();
     RegisterVisibleAreaChange();
     InitSwiperController();
     InitTouchEvent();
@@ -455,6 +443,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         OnIndexChange();
     }
 
+    oldIndex_ = currentIndex_;
     auto curChild = dirty->GetOrCreateChildByIndex(currentIndex_);
     CHECK_NULL_RETURN(curChild, false);
     auto curChildFrame = curChild->GetHostNode();
@@ -475,18 +464,8 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     layoutProperty->UpdateIndexWithoutMeasure(currentIndex_);
     maxChildSize_ = swiperLayoutAlgorithm->GetMaxChildSize();
     itemRange_ = swiperLayoutAlgorithm->GetItemRange();
-    oldIndex_ = currentIndex_;
     onlyNeedMeasurePages_ = false;
     return GetEdgeEffect() == EdgeEffect::FADE || paddingProperty != nullptr;
-}
-
-void SwiperPattern::FireChangeEvent() const
-{
-    auto swiperEventHub = GetEventHub<SwiperEventHub>();
-    CHECK_NULL_VOID(swiperEventHub);
-    swiperEventHub->FireChangeEvent(currentIndex_);
-    swiperEventHub->FireIndicatorChangeEvent(currentIndex_);
-    swiperEventHub->FireChangeDoneEvent(moveDirection_);
 }
 
 void SwiperPattern::FireAnimationStartEvent() const
@@ -1028,8 +1007,14 @@ void SwiperPattern::PlayTranslateAnimation(int32_t duration)
 void SwiperPattern::ForcedStopTranslateAnimation()
 {
     if (!AnimationUtils::IsRunning(animation_)) {
+        animation_ = nullptr;
         return;
     }
+    OnlyUpdateAnimatableProperty();
+}
+
+void SwiperPattern::OnlyUpdateAnimatableProperty()
+{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     std::string propertyName = PROPERTY_NAME;

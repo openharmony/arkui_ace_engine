@@ -142,12 +142,17 @@ void ParseTextPickerValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& 
                              const std::vector<std::string>& value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("TextPicker.onValueChange");
-        JSRef<JSArray> valueArray = JSRef<JSArray>::New();
-        for (uint32_t i = 0; i < value.size(); i++) {
-            valueArray->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(value[i])));
+        if (value.size() == 1) {
+            JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(value[0]));
+            func->ExecuteJS(1, &newJSVal);
+        } else {
+            JSRef<JSArray> valueArray = JSRef<JSArray>::New();
+            for (uint32_t i = 0; i < value.size(); i++) {
+                valueArray->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(value[i])));
+            }
+            JSRef<JSVal> newJSVal = JSRef<JSVal>::Cast(valueArray);
+            func->ExecuteJS(1, &newJSVal);
         }
-        JSRef<JSVal> newJSVal = JSRef<JSVal>::Cast(valueArray);
-        func->ExecuteJS(1, &newJSVal);
     };
     TextPickerModel::GetInstance()->SetOnValueChangeEvent(std::move(onValueChange));
 }
@@ -161,12 +166,17 @@ void ParseTextPickerSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal
                                 const std::vector<double>& index) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("TextPicker.onSelectedChange");
-        JSRef<JSArray> indexArray = JSRef<JSArray>::New();
-        for (uint32_t i = 0; i < index.size(); i++) {
-            indexArray->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(index[i])));
+        if (index.size() == 1) {
+            JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(index[0]));
+            func->ExecuteJS(1, &newJSVal);
+        } else {
+            JSRef<JSArray> indexArray = JSRef<JSArray>::New();
+            for (uint32_t i = 0; i < index.size(); i++) {
+                indexArray->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(index[i])));
+            }
+            JSRef<JSVal> newJSVal = JSRef<JSVal>::Cast(indexArray);
+            func->ExecuteJS(1, &newJSVal);
         }
-        JSRef<JSVal> newJSVal = JSRef<JSVal>::Cast(indexArray);
-        func->ExecuteJS(1, &newJSVal);
     };
     TextPickerModel::GetInstance()->SetOnSelectedChangeEvent(std::move(onSelectedChange));
 }
@@ -211,7 +221,7 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
             CreateMulti(theme, param.values, param.selecteds, optionsAttr, param.options);
         }
         TextPickerModel::GetInstance()->SetDefaultAttributes(theme);
-        JSInteractableView::SetFocusable(false);
+        JSInteractableView::SetFocusable(true);
         JSInteractableView::SetFocusNode(true);
         if (param.valueChangeEventVal->IsFunction()) {
             ParseTextPickerValueObject(info, param.valueChangeEventVal);
@@ -534,9 +544,13 @@ bool JSTextPickerParser::ParseInternalArray(const JSRef<JSArray>& jsRangeValue, 
             values.emplace_back("");
         }
     } else {
-        auto valueIterator = std::find(resultStr.begin(), resultStr.end(), values[index]);
-        if (valueIterator == resultStr.end()) {
-            values[index] = resultStr.front();
+        if (resultStr.size() > 0) {
+            auto valueIterator = std::find(resultStr.begin(), resultStr.end(), values[index]);
+            if (valueIterator == resultStr.end()) {
+                values[index] = resultStr.front();
+            }
+        } else {
+            values[index] = "";
         }
     }
 
@@ -628,7 +642,9 @@ bool JSTextPickerParser::ParseTextArray(const JSRef<JSObject>& paramObject, Pars
         if (getValue->IsObject()) {
             JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(getValue);
             param.valueChangeEventVal = valueObj->GetProperty("changeEvent");
-            getValue = valueObj->GetProperty("value");
+            if (param.valueChangeEventVal->IsFunction()) {
+                getValue = valueObj->GetProperty("value");
+            }
         }
         if (!ParseJsString(getValue, param.value)) {
             param.value = getRangeVector.front();
@@ -636,7 +652,9 @@ bool JSTextPickerParser::ParseTextArray(const JSRef<JSObject>& paramObject, Pars
         if (getSelected->IsObject()) {
             JSRef<JSObject> selectedObj = JSRef<JSObject>::Cast(getSelected);
             param.selectedChangeEventVal = selectedObj->GetProperty("changeEvent");
-            getSelected = selectedObj->GetProperty("value");
+            if (param.selectedChangeEventVal->IsFunction()) {
+                getSelected = selectedObj->GetProperty("value");
+            }
         }
         if (!ParseJsInteger(getSelected, param.selected) && !param.value.empty()) {
             auto valueIterator = std::find(getRangeVector.begin(), getRangeVector.end(), param.value);

@@ -96,15 +96,18 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
             placeholderSrc = placeholder;
         }
         std::string text;
-        if (paramObject->GetProperty("text")->IsObject()) {
-            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(paramObject->GetProperty("text"));
+        JSRef<JSVal> textValue = paramObject->GetProperty("text");
+        if (textValue->IsObject()) {
+            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(textValue);
             changeEventVal = valueObj->GetProperty("changeEvent");
-            auto valueProperty = valueObj->GetProperty("value");
-            if (ParseJsString(valueProperty, text)) {
+            if (changeEventVal->IsFunction()) {
+                textValue = valueObj->GetProperty("value");
+            }
+            if (ParseJsString(textValue, text)) {
                 value = text;
             }
         } else {
-            if (ParseJsString(paramObject->GetProperty("text"), text)) {
+            if (ParseJsString(textValue, text)) {
                 value = text;
             }
         }
@@ -130,7 +133,7 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
     std::optional<std::string> placeholderSrc;
     std::optional<std::string> value;
     JSTextAreaController* jsController = nullptr;
-    JSRef<JSVal> changeEventVal;
+    JSRef<JSVal> changeEventVal = JSRef<JSVal>::Make();
     if (info[0]->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
         std::string placeholder;
@@ -138,15 +141,18 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
             placeholderSrc = placeholder;
         }
         std::string text;
-        if (paramObject->GetProperty("text")->IsObject()) {
-            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(paramObject->GetProperty("text"));
+        JSRef<JSVal> textValue = paramObject->GetProperty("text");
+        if (textValue->IsObject()) {
+            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(textValue);
             changeEventVal = valueObj->GetProperty("changeEvent");
-            auto valueProperty = valueObj->GetProperty("value");
-            if (ParseJsString(valueProperty, text)) {
+            if (changeEventVal->IsFunction()) {
+                textValue = valueObj->GetProperty("value");
+            }
+            if (ParseJsString(textValue, text)) {
                 value = text;
             }
         } else {
-            if (ParseJsString(paramObject->GetProperty("text"), text)) {
+            if (ParseJsString(textValue, text)) {
                 value = text;
             }
         }
@@ -188,9 +194,11 @@ void JSTextField::SetPlaceholderColor(const JSCallbackInfo& info)
     }
 
     Color color;
-    if (!ParseJsColor(info[0], color)) {
-        LOGI("the info[0] is null");
-        return;
+    if (!CheckColor(info[0], color, V2::TEXTINPUT_ETS_TAG, "PlaceholderColor")) {
+        auto theme = GetTheme<TextFieldTheme>();
+        if (info[0]->IsUndefined() && theme) {
+            color = theme->GetPlaceholderColor();
+        }
     }
     TextFieldModel::GetInstance()->SetPlaceholderColor(color);
 }
@@ -396,11 +404,6 @@ void JSTextField::SetFontSize(const JSCallbackInfo& info)
         return;
     }
     TextFieldModel::GetInstance()->SetFontSize(fontSize);
-}
-
-void JSTextField::RequestKeyboardOnFocus(bool needToRequest)
-{
-    TextFieldModel::GetInstance()->RequestKeyboardOnFocus(needToRequest);
 }
 
 void JSTextField::SetFontWeight(const std::string& value)
@@ -642,7 +645,7 @@ NG::PaddingProperty JSTextField::GetNewPadding(const JSCallbackInfo& info)
         // use default value.
         length.Reset();
     }
-    padding.SetEdges(NG::CalcLength(length.IsNonNegative() ? length : Dimension()));
+    padding.SetEdges(NG::CalcLength(length.IsNonNegative() ? length : CalcDimension()));
     return padding;
 }
 
@@ -843,6 +846,7 @@ void JSTextField::SetShowUnderline(const JSCallbackInfo& info)
 {
     if (!info[0]->IsBoolean()) {
         LOGI("The info is wrong, it is supposed to be an boolean");
+        TextFieldModel::GetInstance()->SetShowUnderline(false);
         return;
     }
     TextFieldModel::GetInstance()->SetShowUnderline(info[0]->ToBoolean());
@@ -949,6 +953,7 @@ void JSTextField::SetShowError(const JSCallbackInfo& info)
     if (Container::IsCurrentUseNewPipeline()) {
         if (!info[0]->IsUndefined() && !info[0]->IsString()) {
             LOGI("args need a string or undefined");
+            TextFieldModel::GetInstance()->SetShowError("", false);
             return;
         }
         TextFieldModel::GetInstance()->SetShowError(
@@ -965,6 +970,20 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
     }
 
     TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
+}
+
+void JSTextField::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("EnableKeyboardOnFocus should have at least 1 param");
+        return;
+    }
+    if (info[0]->IsUndefined() || !info[0]->IsBoolean()) {
+        LOGI("The info of SetEnableKeyboardOnFocus is not correct, using default");
+        TextFieldModel::GetInstance()->RequestKeyboardOnFocus(true);
+        return;
+    }
+    TextFieldModel::GetInstance()->RequestKeyboardOnFocus(info[0]->ToBoolean());
 }
 
 } // namespace OHOS::Ace::Framework

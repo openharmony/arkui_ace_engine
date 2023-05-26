@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.* Licensed under the Apache License, Version 2.0 (the "License");
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -19,7 +20,6 @@
 
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/web/web_property.h"
-#include "core/components_ng/pattern/web/web_view.h"
 
 namespace OHOS::Ace {
 class WebModel {
@@ -133,6 +133,9 @@ public:
     virtual void SetVerticalScrollBarAccessEnabled(bool isVerticalScrollBarAccessEnabled) {};
 
     virtual void SetOnControllerAttached(std::function<void()>&& callback_, std::function<void()>&& callback) {};
+    virtual void NotifyPopupWindowResult(int32_t webId, bool result) {};
+    virtual void SetAudioResumeInterval(int32_t resumeInterval) {};
+    virtual void SetAudioExclusive(bool audioExclusive) {};
 
 private:
     static std::unique_ptr<WebModel> instance_;

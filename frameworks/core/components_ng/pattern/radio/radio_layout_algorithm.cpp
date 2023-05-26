@@ -54,7 +54,17 @@ std::optional<SizeF> RadioLayoutAlgorithm::MeasureContent(
         auto height = contentConstraint.selfIdealSize.Height().value();
         return SizeF(height, height);
     }
-    return SizeF();
+    // Case 3: Width and height are not set in the front end, so return from the theme
+    auto width = defaultWidth_ - 2 * horizontalPadding_;
+    auto height = defaultHeight_ - 2 * verticalPadding_;
+    auto size = SizeF(width, height);
+    size.Constrain(contentConstraint.minSize, contentConstraint.maxSize);
+    if (!NearEqual(size.Width(), size.Height())) {
+        auto length = std::min(size.Width(), size.Height());
+        size.SetWidth(length);
+        size.SetHeight(length);
+    }
+    return size;
 }
 
 void RadioLayoutAlgorithm::InitializeParam()

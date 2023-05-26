@@ -27,6 +27,15 @@ group("unittest") {
   }
 }
 
+config("ace_coverage_config") {
+  cflags = []
+  ldflags = []
+  if (ace_engine_feature_enable_coverage) {
+    cflags += [ "--coverage" ]
+    ldflags += [ "--coverage" ]
+  }
+}
+
 # ace unittest config
 config("ace_unittest_config") {
   visibility = [ "./../../*" ]
@@ -180,6 +189,7 @@ ohos_source_set("ace_components_property") {
   part_name = ace_engine_part
   sources = [
     "$ace_root/frameworks/core/components_ng/property/accessibility_property.cpp",
+    "$ace_root/frameworks/core/components_ng/property/border_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",
     "$ace_root/frameworks/core/components_ng/property/gradient_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/grid_property.cpp",

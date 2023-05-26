@@ -162,11 +162,14 @@ RefPtr<FrameNode> TextPickerPattern::GetColumnNode()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto stackNode = host->GetFirstChild();
+
+    auto stackNode = host->GetChildAtIndex(focusKeyID_);
     CHECK_NULL_RETURN(stackNode, nullptr);
-    auto column = stackNode->GetLastChild();
-    CHECK_NULL_RETURN(column, nullptr);
-    return DynamicCast<FrameNode>(column);
+
+    auto columnNode = stackNode->GetLastChild();
+    CHECK_NULL_RETURN(columnNode, nullptr);
+
+    return DynamicCast<FrameNode>(columnNode);
 }
 
 std::map<uint32_t, RefPtr<FrameNode>> TextPickerPattern::GetColumnNodes()
@@ -367,24 +370,28 @@ void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
+    auto childSize = host->GetChildren().size();
+    if (childSize == 0) {
+        return;
+    }
+    auto columnNode = GetColumnNode();
+    CHECK_NULL_VOID(columnNode);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     auto frameWidth = host->GetGeometryNode()->GetFrameSize().Width();
-    auto pickerThemeWidth = pipeline->NormalizeToPx(pickerTheme->GetDividerSpacing()) * 2;
-    auto centerX = (frameWidth - pickerThemeWidth) / 2 + PRESS_INTERVAL.ConvertToPx();
+    auto dividerSpacing = pipeline->NormalizeToPx(pickerTheme->GetDividerSpacing());
+    auto pickerThemeWidth = dividerSpacing * 2;
+
+    auto centerX = (frameWidth / childSize - pickerThemeWidth) / 2 +
+                   columnNode->GetGeometryNode()->GetFrameRect().Width() * focusKeyID_ +
+                   PRESS_INTERVAL.ConvertToPx() * 2;
     auto centerY =
-        (host->GetGeometryNode()->GetFrameRect().Height() - CalculateHeight()) / 2 + PRESS_INTERVAL.ConvertToPx();
+        (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / 2 + PRESS_INTERVAL.ConvertToPx();
 
-    if (frameWidth > pickerThemeWidth) {
-        frameWidth = static_cast<float>(pickerThemeWidth);
-    }
-    paintRect.SetRect(RectF(static_cast<float>(centerX), static_cast<float>(centerY),
-        frameWidth - static_cast<float>(PRESS_INTERVAL.ConvertToPx() * 2),
-        static_cast<float>(CalculateHeight() - PRESS_INTERVAL.ConvertToPx() * 2)));
-
+    paintRect.SetRect(RectF(centerX, centerY, (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * 2,
+        dividerSpacing - PRESS_INTERVAL.ConvertToPx() * 2));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
@@ -400,9 +407,21 @@ bool TextPickerPattern::OnKeyEvent(const KeyEvent& event)
     if (event.action != KeyAction::DOWN) {
         return false;
     }
+
+    if (event.code == KeyCode::KEY_SPACE || event.code == KeyCode::KEY_ESCAPE) {
+        operationOn_ = event.code == KeyCode::KEY_SPACE;
+        return true;
+    }
+
+    if (event.code == KeyCode::KEY_TAB) {
+        return operationOn_;
+    }
+
     if (event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_DOWN ||
         event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_DPAD_RIGHT) {
-        HandleDirectionKey(event.code);
+        if (operationOn_) {
+            HandleDirectionKey(event.code);
+        }
         return true;
     }
     return false;
@@ -573,32 +592,47 @@ bool TextPickerPattern::HandleDirectionKey(KeyCode code)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    auto childSize = host->GetChildren().size();
     auto frameNode = GetColumnNode();
     CHECK_NULL_RETURN(frameNode, false);
     auto textPickerColumnPattern = frameNode->GetPattern<TextPickerColumnPattern>();
     CHECK_NULL_RETURN(textPickerColumnPattern, false);
-    auto currernIndex = textPickerColumnPattern->GetCurrentIndex();
-    auto totalOptionCount = GetOptionCount();
+    auto totalOptionCount = textPickerColumnPattern->GetOptionCount();
     if (totalOptionCount == 0) {
         return false;
     }
-    if (code == KeyCode::KEY_DPAD_UP) {
-        textPickerColumnPattern->SetCurrentIndex((totalOptionCount + currernIndex - 1) % totalOptionCount);
-        FlushOptions();
-        textPickerColumnPattern->HandleChangeCallback(false, true);
-        textPickerColumnPattern->HandleEventCallback(true);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        return true;
+    bool result = true;
+    switch (code) {
+        case KeyCode::KEY_DPAD_UP:
+            textPickerColumnPattern->InnerHandleScroll(-1, false);
+            break;
+
+        case KeyCode::KEY_DPAD_DOWN:
+            textPickerColumnPattern->InnerHandleScroll(1, false);
+            break;
+
+        case KeyCode::KEY_DPAD_LEFT:
+            focusKeyID_ -= 1;
+            if (focusKeyID_ < 0) {
+                focusKeyID_ = 0;
+            }
+            PaintFocusState();
+            break;
+
+        case KeyCode::KEY_DPAD_RIGHT:
+            focusKeyID_ += 1;
+            if (focusKeyID_ > static_cast<int32_t>(childSize) - 1) {
+                focusKeyID_ = static_cast<int32_t>(childSize) - 1;
+            }
+            PaintFocusState();
+            break;
+
+        default:
+            result = false;
+            break;
     }
-    if (code == KeyCode::KEY_DPAD_DOWN) {
-        textPickerColumnPattern->SetCurrentIndex((totalOptionCount + currernIndex + 1) % totalOptionCount);
-        FlushOptions();
-        textPickerColumnPattern->HandleChangeCallback(true, true);
-        textPickerColumnPattern->HandleEventCallback(true);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        return true;
-    }
-    return false;
+
+    return result;
 }
 
 std::string TextPickerPattern::GetSelectedObjectMulti(const std::vector<std::string>& values,

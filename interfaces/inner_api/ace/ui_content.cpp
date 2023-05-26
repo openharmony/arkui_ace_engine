@@ -15,14 +15,24 @@
 
 #include "interfaces/inner_api/ace/ui_content.h"
 
-#include <dlfcn.h>
 #include <vector>
 
+#include "utils.h"
 #ifdef UICAST_COMPONENT_SUPPORTED
 #include "interfaces/inner_api/ace/uicast/uicast_subscriber.h"
 #endif
 
 namespace OHOS::Ace {
+
+#if defined(WINDOWS_PLATFORM)
+constexpr char ACE_LIB_NAME[] = "libace.dll";
+#elif defined(MAC_PLATFORM)
+constexpr char ACE_LIB_NAME[] = "libace.dylib";
+#elif defined(LINUX_PLATFORM)
+constexpr char ACE_LIB_NAME[] = "libace.so";
+#else
+constexpr char ACE_LIB_NAME[] = "libace.z.so";
+#endif
 
 using CreateCardFunc = UIContent* (*)(void*, void*, bool);
 using CreateFunc = UIContent* (*)(void*, void*);
@@ -35,42 +45,35 @@ OHOS::AbilityRuntime::Context* context_ = nullptr;
 
 UIContent* CreateUIContent(void* context, void* runtime, bool isFormRender)
 {
-    void* handle = dlopen("libace.z.so", RTLD_LAZY);
+    LIBHANDLE handle = LOADLIB(ACE_LIB_NAME);
     if (handle == nullptr) {
         return nullptr;
     }
 
-    auto entry = reinterpret_cast<CreateCardFunc>(dlsym(handle, Card_CREATE_FUNC));
+    auto entry = reinterpret_cast<CreateCardFunc>(LOADSYM(handle, Card_CREATE_FUNC));
     if (entry == nullptr) {
-        dlclose(handle);
+        FREELIB(handle);
         return nullptr;
     }
 
     auto content = entry(context, runtime, isFormRender);
-    if (content == nullptr) {
-        dlclose(handle);
-    }
-
     return content;
 }
 
 UIContent* CreateUIContent(void* context, void* runtime)
 {
-    void* handle = dlopen("libace.z.so", RTLD_LAZY);
+    LIBHANDLE handle = LOADLIB(ACE_LIB_NAME);
     if (handle == nullptr) {
         return nullptr;
     }
 
-    auto entry = reinterpret_cast<CreateFunc>(dlsym(handle, UI_CONTENT_CREATE_FUNC));
+    auto entry = reinterpret_cast<CreateFunc>(LOADSYM(handle, UI_CONTENT_CREATE_FUNC));
     if (entry == nullptr) {
-        dlclose(handle);
+        FREELIB(handle);
         return nullptr;
     }
 
     auto content = entry(context, runtime);
-    if (content == nullptr) {
-        dlclose(handle);
-    }
 #ifdef UICAST_COMPONENT_SUPPORTED
     UICastEventSubscribeProxy::GetInstance()->SubscribeStartEvent(content);
 #endif
@@ -80,21 +83,18 @@ UIContent* CreateUIContent(void* context, void* runtime)
 
 UIContent* CreateUIContent(void* ability)
 {
-    void* handle = dlopen("libace.z.so", RTLD_LAZY);
+    LIBHANDLE handle = LOADLIB(ACE_LIB_NAME);
     if (handle == nullptr) {
         return nullptr;
     }
 
-    auto entry = reinterpret_cast<CreateFunction>(dlsym(handle, SUB_WINDOW_UI_CONTENT_CREATE_FUNC));
+    auto entry = reinterpret_cast<CreateFunction>(LOADSYM(handle, SUB_WINDOW_UI_CONTENT_CREATE_FUNC));
     if (entry == nullptr) {
-        dlclose(handle);
+        FREELIB(handle);
         return nullptr;
     }
 
     auto content = entry(ability);
-    if (content == nullptr) {
-        dlclose(handle);
-    }
 #ifdef UICAST_COMPONENT_SUPPORTED
     UICastEventSubscribeProxy::GetInstance()->SubscribeStartEvent(content);
 #endif
@@ -109,9 +109,8 @@ std::unique_ptr<UIContent> UIContent::Create(OHOS::AbilityRuntime::Context* cont
     return content;
 }
 
-std::unique_ptr<UIContent> UIContent::Create(OHOS::AbilityRuntime::Context* context,
-                                             NativeEngine* runtime,
-                                             bool isFormRender)
+std::unique_ptr<UIContent> UIContent::Create(
+    OHOS::AbilityRuntime::Context* context, NativeEngine* runtime, bool isFormRender)
 {
     std::unique_ptr<UIContent> content;
     content.reset(CreateUIContent(reinterpret_cast<void*>(context), reinterpret_cast<void*>(runtime), isFormRender));

@@ -40,7 +40,7 @@ void JSSecLocationButton::SetIconSize(const JSCallbackInfo& info)
     CHECK_NULL_VOID_NOLOG(theme);
 
     CalcDimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
+    if (!ParseJsDimensionVp(info[0], value) || (value.ConvertToVp() < theme->GetMinIconSize().ConvertToVp())) {
         LocationButtonModelNG::GetInstance()->SetIconSize(theme->GetIconSize());
     } else {
         LocationButtonModelNG::GetInstance()->SetIconSize(value);
@@ -73,7 +73,7 @@ void JSSecLocationButton::SetFontSize(const JSCallbackInfo& info)
     CHECK_NULL_VOID_NOLOG(theme);
 
     CalcDimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
+    if (!ParseJsDimensionVp(info[0], value) || (value.ConvertToVp() < theme->GetMinFontSize().ConvertToVp())) {
         LocationButtonModelNG::GetInstance()->SetFontSize(theme->GetFontSize());
     } else {
         LocationButtonModelNG::GetInstance()->SetFontSize(value);

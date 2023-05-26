@@ -97,9 +97,9 @@ public:
 
     static void UpdateTextStyle(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
-        TextStyle& textStyle, bool isDisabled, bool isUnderline = false);
+        TextStyle& textStyle, bool isDisabled);
     static void UpdatePlaceholderTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
-        const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle, bool isDisabled, bool isUnderline = false);
+        const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle, bool isDisabled);
 
 private:
     void CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText, bool disableTextAlign);

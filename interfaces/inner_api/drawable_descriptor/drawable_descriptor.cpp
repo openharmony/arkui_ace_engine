@@ -18,21 +18,21 @@
 #include <cstddef>
 #include <memory>
 
-#include "include/core/SkBlendMode.h"
-#include "include/core/SkCanvas.h"
+#include "base/utils/string_utils.h"
+
 #ifdef NEW_SKIA
 #include "include/core/SkSamplingOptions.h"
 #endif
 #include "cJSON.h"
 #include "image_source.h"
 #include "include/core/SkImage.h"
-#include "include/core/SkPaint.h"
 #include "include/core/SkRect.h"
 
 namespace OHOS::Ace::Napi {
 namespace {
 const char DRAWABLEDESCRIPTOR_JSON_KEY_BACKGROUND[] = "background";
 const char DRAWABLEDESCRIPTOR_JSON_KEY_FOREGROUND[] = "foreground";
+constexpr float SIDE = 192.0;
 } // namespace
 
 bool DrawableDescriptor::GetPixelMapFromBuffer()
@@ -73,9 +73,12 @@ std::unique_ptr<Media::ImageSource> LayeredDrawableDescriptor::CreateImageSource
 {
     std::string itemStr = item;
     std::string idStr = itemStr.substr(itemStr.find(':') + 1);
+    if (!StringUtils::IsNumber(idStr)) {
+        return nullptr;
+    }
+
     size_t len = 0;
     std::unique_ptr<uint8_t[]> data;
-
     auto state = resourceMgr_->GetMediaDataById(static_cast<uint32_t>(std::stoul(idStr)), len, data);
     if (state != Global::Resource::SUCCESS) {
         HILOG_ERROR("GetMediaDataById failed");
@@ -215,6 +218,21 @@ std::unique_ptr<DrawableDescriptor> LayeredDrawableDescriptor::GetMask()
     return nullptr;
 }
 
+void LayeredDrawableDescriptor::DrawOntoCanvas(
+    const std::shared_ptr<SkBitmap>& bitMap, float width, float height, SkCanvas& canvas, const SkPaint& paint)
+{
+    auto x = static_cast<float>((bitMap->width() - static_cast<float>(width)) / 2);
+    auto y = static_cast<float>((bitMap->height() - static_cast<float>(height)) / 2);
+    auto rect1 = SkRect::MakeXYWH(x, y, static_cast<float>(width), static_cast<float>(width));
+    auto rect2 = SkRect::MakeWH(static_cast<float>(width), static_cast<float>(width));
+#ifndef NEW_SKIA
+    canvas.drawImageRect(SkImage::MakeFromBitmap(*bitMap), rect1, rect2, &paint);
+#else
+    canvas.drawImageRect(
+        SkImage::MakeFromBitmap(*bitMap), rect1, rect2, SkSamplingOptions(), &paint, SkCanvas::kFast_SrcRectConstraint);
+#endif
+}
+
 bool LayeredDrawableDescriptor::CreatePixelMap()
 {
     std::shared_ptr<SkBitmap> foreground;
@@ -249,37 +267,26 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
 
     SkPaint paint;
     paint.setAntiAlias(true);
-    SkCanvas bitmapCanvas(*background);
-    auto rect1 = SkRect::MakeWH(static_cast<float>(mask->width()), static_cast<float>(mask->height()));
-    auto rect2 =
-        SkRect::MakeXYWH(0, 0, static_cast<float>(background->width()), static_cast<float>(background->height()));
+    auto colorType = ImageConverter::PixelFormatToSkColorType(background_.value()->GetPixelFormat());
+    auto alphaType = ImageConverter::AlphaTypeToSkAlphaType(background_.value()->GetAlphaType());
+    auto imageInfo = SkImageInfo::Make(SIDE, SIDE, colorType, alphaType);
+    SkBitmap tempCache;
+    tempCache.allocPixels(imageInfo);
+    SkCanvas bitmapCanvas(tempCache);
+
+    paint.setBlendMode(SkBlendMode::kSrc);
+    DrawOntoCanvas(background, SIDE, SIDE, bitmapCanvas, paint);
     paint.setBlendMode(SkBlendMode::kDstATop);
-#ifndef NEW_SKIA
-    bitmapCanvas.drawImageRect(SkImage::MakeFromBitmap(*mask), rect1, rect2, &paint);
-#else
-    bitmapCanvas.drawImageRect(
-        SkImage::MakeFromBitmap(*mask), rect1, rect2, SkSamplingOptions(), &paint, SkCanvas::kFast_SrcRectConstraint);
-#endif
-    rect1 = SkRect::MakeWH(static_cast<float>(foreground->width()), static_cast<float>(foreground->height()));
-    auto x = static_cast<float>((background->width() - foreground->width()) / 2);
-    auto y = static_cast<float>((background->height() - foreground->height()) / 2);
-    rect2 = SkRect::MakeXYWH(x, y, static_cast<float>(foreground->width()), static_cast<float>(foreground->height()));
+    DrawOntoCanvas(mask, SIDE, SIDE, bitmapCanvas, paint);
     paint.setBlendMode(SkBlendMode::kSrcATop);
-#ifndef NEW_SKIA
-    bitmapCanvas.drawImageRect(SkImage::MakeFromBitmap(*foreground), rect1, rect2, &paint);
-#else
-    bitmapCanvas.drawImageRect(SkImage::MakeFromBitmap(*foreground), rect1, rect2, SkSamplingOptions(), &paint,
-        SkCanvas::kFast_SrcRectConstraint);
-#endif
-    SkBitmap result;
-    result.allocPixels(background->info());
-    bitmapCanvas.readPixels(result, 0, 0);
+    DrawOntoCanvas(foreground, SIDE, SIDE, bitmapCanvas, paint);
+    bitmapCanvas.readPixels(tempCache, 0, 0);
 
     // convert bitmap back to pixelMap
     Media::InitializationOptions opts;
     opts.alphaType = background_.value()->GetAlphaType();
     opts.pixelFormat = Media::PixelFormat::BGRA_8888;
-    layeredPixelMap_ = ImageConverter::BitmapToPixelMap(std::make_shared<SkBitmap>(result), opts);
+    layeredPixelMap_ = ImageConverter::BitmapToPixelMap(std::make_shared<SkBitmap>(tempCache), opts);
     return true;
 }
 

@@ -29,6 +29,7 @@ class ImagePainterUtils {
 public:
     static constexpr uint8_t RADIUS_POINTS_SIZE = 4;
     static std::unique_ptr<SkVector[]> ToSkRadius(const BorderRadiusArray& radiusXY);
+    static void ClipRRect(RSCanvas& canvas, const RSRect& dstRect, const BorderRadiusArray& radiusXY);
 #ifndef NEW_SKIA
     static void AddFilter(SkPaint& paint, const ImagePaintConfig& config);
 #else

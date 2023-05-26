@@ -256,6 +256,7 @@ void JSButton::SetLableStyle(const JSCallbackInfo& info)
 
 void JSButton::JsRemoteMessage(const JSCallbackInfo& info)
 {
+#ifndef NG_BUILD
     RemoteCallback remoteCallback;
     JSInteractableView::JsRemoteMessage(info, remoteCallback);
     EventMarker remoteMessageEventId(std::move(remoteCallback));
@@ -264,6 +265,7 @@ void JSButton::JsRemoteMessage(const JSCallbackInfo& info)
     if (buttonComponent) {
         buttonComponent->SetRemoteMessageEventId(remoteMessageEventId);
     }
+#endif
 }
 
 void JSButton::JSBind(BindingTarget globalObj)
