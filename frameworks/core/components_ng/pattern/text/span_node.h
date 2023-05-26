@@ -170,6 +170,8 @@ public:
         const RefPtr<Paragraph>& builder, double width, double height, VerticalAlign verticalAlign) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override {};
 
+    TextStyle textStyle;
+
     ACE_DISALLOW_COPY_AND_MOVE(ImageSpanItem);
 };
 
