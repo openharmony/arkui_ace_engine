@@ -336,4 +336,16 @@ bool SharedOverlayManager::OnBackPressed()
     return inSharedTransition;
 }
 
+void SharedOverlayManager::StopSharedTransition()
+{
+    for (const auto& effect : effects_) {
+        auto controller = effect->GetController();
+        if (controller->IsRunning()) {
+            // When two new pages switch, let controller finishes, so passenger can go back to the original page.
+            controller->Finish();
+        }
+    }
+    effects_.clear();
+}
+
 } // namespace OHOS::Ace::NG
