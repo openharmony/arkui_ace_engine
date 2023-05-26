@@ -198,7 +198,6 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const Re
         targetOffset_.GetY() - childSize.Height() - targetSpace - arrowHeight_);
     OffsetF topArrowPosition;
     OffsetF bottomArrowPosition;
-    OffsetF oppositePosition;
     OffsetF fitPosition;
     InitArrowTopAndBottomPosition(topArrowPosition, bottomArrowPosition, topPosition, bottomPosition, childSize);
 
@@ -229,7 +228,8 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const Re
         return childPosition;
     }
 
-    oppositePosition = fitPosition == topPosition ? bottomPosition : topPosition;
+    // Fit popup to opposite position
+    fitPosition = fitPosition == topPosition ? bottomPosition : topPosition;
     arrowPosition_ = arrowPosition_ == topArrowPosition ? bottomArrowPosition : topArrowPosition;
     arrowPlacement_ = arrowPlacement_ == Placement::TOP ? Placement::BOTTOM : Placement::TOP;
 
