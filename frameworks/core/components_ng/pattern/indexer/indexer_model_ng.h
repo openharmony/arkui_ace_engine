@@ -22,11 +22,11 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT IndexerModelNG : public OHOS::Ace::IndexerModel {
 public:
     void Create(std::vector<std::string>& indexerArray, int32_t selectedVal) override;
-    void SetSelectedColor(const Color& color) override;
-    void SetColor(const Color& color) override;
-    void SetPopupColor(const Color& color) override;
-    void SetSelectedBackgroundColor(const Color& color) override;
-    void SetPopupBackground(const Color& color) override;
+    void SetSelectedColor(const std::optional<Color>& color) override;
+    void SetColor(const std::optional<Color>& color) override;
+    void SetPopupColor(const std::optional<Color>& color) override;
+    void SetSelectedBackgroundColor(const std::optional<Color>& color) override;
+    void SetPopupBackground(const std::optional<Color>& color) override;
     void SetUsingPopup(bool state) override;
     void SetSelectedFont(const TextStyle& textStyle) override;
     void SetPopupFont(const TextStyle& textStyle) override;
