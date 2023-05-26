@@ -129,6 +129,9 @@ public:
     void SetSelectable(bool selectable)
     {
         selectable_ = selectable;
+        if (!selectable) {
+            MarkIsSelected(false);
+        }
     }
 
     void SetUseStartDefaultDeleteAnimation(bool useStartDefaultDeleteAnimation)
