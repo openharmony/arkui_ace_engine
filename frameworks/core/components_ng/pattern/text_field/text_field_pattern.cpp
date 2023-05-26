@@ -3780,7 +3780,7 @@ std::string TextFieldPattern::GetShowPasswordIconString() const
 
 std::string TextFieldPattern::GetInputStyleString() const
 {
-    auto paintProperty = GetLayoutProperty<TextFieldPaintProperty>();
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, "TextInputStyle.Default");
     std::string result = "TextInputStyle.Default";
     switch (paintProperty->GetInputStyleValue(InputStyle::DEFAULT)) {
