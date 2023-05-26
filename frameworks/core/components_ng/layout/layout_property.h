@@ -377,7 +377,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(Visibility, VisibleType);
 
 public:
-    void UpdateVisibility(const VisibleType& value)
+    void UpdateVisibility(const VisibleType& value, bool allowTransition = false)
     {
         if (propVisibility_.has_value()) {
             if (NearEqual(propVisibility_.value(), value)) {
@@ -385,9 +385,9 @@ public:
                 return;
             }
         }
-        OnVisibilityUpdate(value);
+        OnVisibilityUpdate(value, allowTransition);
     }
-    void OnVisibilityUpdate(VisibleType visible);
+    void OnVisibilityUpdate(VisibleType visible, bool allowTransition = false);
 
     void UpdateLayoutConstraint(const RefPtr<LayoutProperty>& layoutProperty)
     {

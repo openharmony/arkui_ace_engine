@@ -55,7 +55,7 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
     layoutConstraint_ = parentConstraint;
 }
 
-void LayoutProperty::OnVisibilityUpdate(VisibleType visible) {}
+void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransition) {}
 
 RefPtr<FrameNode> LayoutProperty::GetHost() const
 {

@@ -39,9 +39,13 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void FrameNode::FromJson(const std::unique_ptr<JsonValue>& json) {}
 void FrameNode::OnAttachToMainTree(bool) {}
 void FrameNode::OnDetachFromMainTree(bool) {}
-bool FrameNode::OnRemoveFromParent()
+bool FrameNode::OnRemoveFromParent(bool)
 {
-    return false;
+    return true;
+}
+bool FrameNode::RemoveImmediately() const
+{
+    return true;
 }
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty) {}
 void FrameNode::SetActive(bool active)
