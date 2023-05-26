@@ -376,7 +376,6 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
         return;
     }
 
-#ifdef OHOS_PLATFORM
     RefPtr<RosenMaskPainter> mask = AceType::DynamicCast<RosenMaskPainter>(mask_);
     if (mask && mask->HasReady()) {
         SkPath skPath;
@@ -389,7 +388,7 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
         }
         rsNode->SetMask(mask->GetRSMask(GetPaintRect(), skPath));
     }
-#endif
+
     if ((!backDecoration_) || backDecoration_->GetImage() ||
         (backDecoration_->GetBackgroundColor() != Color::TRANSPARENT) || !(backDecoration_->GetGradient().IsValid())) {
         // no need to paint gradient
@@ -401,9 +400,7 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
 
     auto size = SkSize::Make(GetLayoutSize().Width(), GetLayoutSize().Height());
     auto shader = RosenDecorationPainter::CreateGradientShader(backDecoration_->GetGradient(), size, dipScale_);
-#ifdef OHOS_PLATFORM
     rsNode->SetBackgroundShader(Rosen::RSShader::CreateRSShader(shader));
-#endif
 }
 
 /* TODO.lx flutter对应实现中定义了该函数，去除flutter后，找不到对应实现，先这么改，后面实现在rosen中 */
