@@ -87,7 +87,7 @@ public:
     }
 
     // Set by user define, which will replace old one.
-    void SetHoverEvent(OnHoverEventFunc&& onHoverEventFunc)
+    void SetHoverEvent(OnHoverFunc&& onHoverEventFunc)
     {
         if (!hoverEventActuator_) {
             hoverEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));

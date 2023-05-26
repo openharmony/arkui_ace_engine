@@ -130,7 +130,7 @@ public:
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;
     void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) override;
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override;
-    void SetOnHover(OnHoverEventFunc&& onHoverEventFunc) override;
+    void SetOnHover(OnHoverFunc&& onHoverEventFunc) override;
     void SetOnDelete(std::function<void()>&& onDeleteCallback) override;
     void SetOnAppear(std::function<void()>&& onAppearCallback) override;
     void SetOnDisAppear(std::function<void()>&& onDisAppearCallback) override;

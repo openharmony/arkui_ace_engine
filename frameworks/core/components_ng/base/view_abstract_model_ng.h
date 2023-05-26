@@ -614,7 +614,7 @@ public:
         ViewAbstract::SetOnMouse(std::move(onMouseEventFunc));
     }
 
-    void SetOnHover(OnHoverEventFunc&& onHoverEventFunc) override
+    void SetOnHover(OnHoverFunc&& onHoverEventFunc) override
     {
         ViewAbstract::SetOnHover(std::move(onHoverEventFunc));
     }
