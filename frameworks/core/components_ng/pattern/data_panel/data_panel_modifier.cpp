@@ -176,7 +176,7 @@ void DataPanelModifier::PaintRainbowFilterMask(RSCanvas& canvas, double factor, 
     endCirclePaint.SetFilter(filter);
 
     gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
+        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::DECAL, 0, drawAngle));
 
     canvas.Save();
     canvas.AttachBrush(startCirclePaint);
@@ -189,7 +189,7 @@ void DataPanelModifier::PaintRainbowFilterMask(RSCanvas& canvas, double factor, 
     canvas.Save();
     canvas.Rotate(-QUARTER_CIRCLE, center.GetX(), center.GetY());
     gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
+        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::DECAL, 0, drawAngle));
     canvas.AttachPen(gradientPaint);
     canvas.DrawPath(path);
     canvas.DetachPen();
