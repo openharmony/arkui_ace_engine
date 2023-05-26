@@ -13,35 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LOCATION_BUTTON_LOCATION_COMMON_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LOCATION_BUTTON_LOCATION_COMMON_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PASTE_BUTTON_PASTE_COMMON_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PASTE_BUTTON_PASTE_COMMON_H
 
 #include <cstdint>
 #include "base/geometry/dimension.h"
 #include "core/components_ng/pattern/security_component/security_component_common.h"
 
 namespace OHOS::Ace {
-enum class LocationButtonIconStyle : int32_t {
+enum class PasteButtonIconStyle : int32_t {
     ICON_NULL = -1,
-    ICON_FULL_FILLED = 0,
-    ICON_LINE = 1
+    ICON_LINE = 0
 };
 
-enum class LocationButtonLocationDescription : int32_t {
+enum class PasteButtonPasteDescription : int32_t {
     TEXT_NULL = -1,
-    CURRENT_LOCATION = 0,
-    ADD_LOCATION,
-    SELECT_LOCATION,
-    SHARE_LOCATION,
-    SEND_LOCATION,
-    LOCATING,
-    LOCATION,
-    SEND_CURRENT_LOCATION,
-    RELOCATION,
-    PUNCHIN,
-    CURRENT_POSITION,
+    PASTE = 0,
     MAX_LABEL_TYPE
 };
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LOCATION_BUTTON_LOCATION_COMMON_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PASTE_BUTTON_PASTE_COMMON_H
