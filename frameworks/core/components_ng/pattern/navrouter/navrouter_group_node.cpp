@@ -248,7 +248,7 @@ void NavRouterGroupNode::SetBackButtonEvent(const RefPtr<UINode>& parent)
 
     navDestination->SetNavDestinationBackButtonEvent(onBackButtonEvent);
     auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(onBackButtonEvent));
-    if (backButtonEventHub->GetGestureEventHub()) {
+    if (!backButtonEventHub->GetGestureEventHub()) {
         return;
     }
     backButtonEventHub->GetOrCreateGestureEventHub()->AddClickEvent(clickEvent);
@@ -320,7 +320,9 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
     auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(navigationLayoutProperty);
     auto navRouteMode = navRouterPattern->GetNavRouteMode();
-    if (navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) != NavigationMode::SPLIT) {
+    if (!(navigationStack->Empty() &&
+            navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::SPLIT)) {
+        // add backButton except for the first level page in SPLIT mode
         SetBackButtonVisible(navDestination);
     }
     if (navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::STACK) {
