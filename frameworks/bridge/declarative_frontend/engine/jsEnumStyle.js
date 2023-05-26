@@ -1590,6 +1590,11 @@ var SecLocationButtonOnClickResult;
     "LOCATION_BUTTON_CLICK_GRANT_FAILED ";
 })(SecLocationButtonOnClickResult || (SecLocationButtonOnClickResult = {}));
 
+var ObscuredReasons;
+(function (ObscuredReasons) {
+  ObscuredReasons[ObscuredReasons["PLACEHOLDER"] = 0] = "PLACEHOLDER";
+})(ObscuredReasons || (ObscuredReasons = {}));
+
 var ListItemStyle;
 (function (ListItemStyle) {
   ListItemStyle[ListItemStyle["NONE"] = 0] = "NONE";

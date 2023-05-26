@@ -787,6 +787,11 @@ public:
         ViewAbstract::SetKeyboardShortcut(value, keys, std::move(onKeyboardShortcutAction));
     }
 
+    void SetObscured(const std::vector<ObscuredReasons>& reasons) override
+    {
+        ViewAbstract::SetObscured(reasons);
+    }
+
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override
     {
         auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

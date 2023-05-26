@@ -1492,4 +1492,16 @@ void ViewAbstract::UpdateAnimatableArithmeticProperty(const std::string& propert
     CHECK_NULL_VOID(frameNode);
     frameNode->UpdateAnimatableArithmeticProperty(propertyName, value);
 }
+
+void ViewAbstract::SetObscured(const std::vector<ObscuredReasons>& reasons)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(Obscured, reasons);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
 } // namespace OHOS::Ace::NG
