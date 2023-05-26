@@ -20,46 +20,61 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "core/common/container_scope.h"
+#include "core/components_ng/base/distributed_ui.h"
 
 namespace OHOS::Ace {
-class DistributeUIManager {
+class DistributedUIManager {
 public:
-    explicit DistributeUIManager(int32_t instanceid) : instanceId_(instanceid) {}
-    ~DistributeUIManager() = default;
+    DistributedUIManager(int32_t instanceid, const std::shared_ptr<NG::DistributedUI>& distributedUI)
+        : instanceId_(instanceid), distributedUI_(distributedUI)
+    {}
+    ~DistributedUIManager() = default;
 
     SerializeableObjectArray DumpUITree()
     {
         SerializeableObjectArray ret;
-        auto task = [&ret]() {};
+        auto task = [this, &ret]() { ret = distributedUI_->DumpUITree(); };
         PostSyncTaskToUI(task);
         return ret;
     }
 
-    void SubscribeUpdate(const std::function<void(int32_t, SerializeableObjectArray&)>& onUpdate) {}
+    void SubscribeUpdate(const std::function<void(int32_t, SerializeableObjectArray&)>& onUpdate)
+    {
+        distributedUI_->SubscribeUpdate(onUpdate);
+    }
 
-    void UnSubscribeUpdate() {}
+    void UnSubscribeUpdate()
+    {
+        distributedUI_->UnSubscribeUpdate();
+    }
 
     void ProcessSerializeableInputEvent(const SerializeableObjectArray& event)
     {
-        auto task = [&event]() {};
+        auto task = [this, &event]() { distributedUI_->ProcessSerializeableInputEvent(event); };
         PostSyncTaskToUI(task);
     }
 
     void RestoreUITree(const SerializeableObjectArray& uiTree)
     {
-        auto task = [&uiTree]() {};
+        auto task = [this, &uiTree]() { distributedUI_->RestoreUITree(uiTree); };
         PostSyncTaskToUI(task);
     }
 
     void UpdateUITree(const SerializeableObjectArray& update)
     {
-        auto task = [&update]() {};
+        auto task = [this, &update]() { distributedUI_->UpdateUITree(update); };
         PostSyncTaskToUI(task);
     }
 
-    void SubscribeInputEventProcess(const std::function<void(SerializeableObjectArray&)>& onEvent) {}
+    void SubscribeInputEventProcess(const std::function<void(SerializeableObjectArray&)>& onEvent)
+    {
+        distributedUI_->SubscribeInputEventProcess(onEvent);
+    }
 
-    void UnSubscribeInputEventProcess() {}
+    void UnSubscribeInputEventProcess()
+    {
+        distributedUI_->UnSubscribeInputEventProcess();
+    }
 
 private:
     void PostSyncTaskToUI(const std::function<void()>& task)
@@ -69,11 +84,11 @@ private:
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         ContainerScope scope(instanceId_);
-
         taskExecutor->PostSyncTask(task, TaskExecutor::TaskType::UI);
     }
 
     int32_t instanceId_ = -1;
+    std::shared_ptr<NG::DistributedUI> distributedUI_;
 };
 } // namespace OHOS::Ace
 

@@ -23,6 +23,7 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "core/common/container.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -39,10 +40,27 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
         row_ = pos.first;
         col_ = pos.second;
     }
+#ifdef UICAST_COMPONENT_SUPPORTED
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto distributedUI = container->GetDistributedUI();
+    CHECK_NULL_VOID(distributedUI);
+    distributedUI->AddNewNode(nodeId_);
+#endif
 }
 
 UINode::~UINode()
 {
+#ifdef UICAST_COMPONENT_SUPPORTED
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto distributedUI = container->GetDistributedUI();
+    CHECK_NULL_VOID(distributedUI);
+    if (hostPageId_ == distributedUI->GetCurrentPageId()) {
+        distributedUI->AddDeletedNode(nodeId_);
+    }
+#endif
+
     if (!removeSilently_) {
         ElementRegister::GetInstance()->RemoveItem(nodeId_);
     } else {
