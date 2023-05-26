@@ -216,8 +216,14 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    if (info[0]->IsString()) {
-        NavigationModel::GetInstance()->SetTitle(info[0]->ToString());
+    if (info[0]->IsString() || info[0]->IsUndefined()) {
+        std::string title;
+        if (info[0]->IsUndefined()) {
+            title = "";
+        } else {
+            title = info[0]->ToString();
+        }
+        NavigationModel::GetInstance()->SetTitle(title);
     } else if (info[0]->IsObject()) {
         if (ParseCommonTitle(info[0])) {
             return;
@@ -317,8 +323,12 @@ void JSNavigation::SetToolBar(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least one argument");
         return;
     }
-    if (!info[0]->IsObject()) {
-        LOGE("arg is not a object.");
+    if (!info[0]->IsObject() && !info[0]->IsUndefined()) {
+        LOGE("arg is not a object or is not undefined.");
+        return;
+    }
+    if (info[0]->IsUndefined()) {
+        NavigationModel::GetInstance()->SetToolBarItems({});
         return;
     }
     auto builderFuncParam = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
@@ -353,10 +363,14 @@ void JSNavigation::SetMenus(const JSCallbackInfo& info)
         return;
     }
 
-    if (info[0]->IsArray()) {
+    if (info[0]->IsUndefined() || info[0]->IsArray()) {
         if (NavigationModel::GetInstance()->NeedSetItems()) {
             std::vector<NG::BarItem> menuItems;
-            ParseBarItems(info, JSRef<JSArray>::Cast(info[0]), menuItems);
+            if (info[0]->IsUndefined()) {
+                menuItems = {};
+            } else {
+                ParseBarItems(info, JSRef<JSArray>::Cast(info[0]), menuItems);
+            }
             NavigationModel::GetInstance()->SetMenuItems(std::move(menuItems));
             return;
         }
