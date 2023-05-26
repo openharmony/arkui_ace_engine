@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_PATTERN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_PATTERN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_PATTERN_H
 
 #include "session/host/include/session.h"
 
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
-class HostWindowPattern : public Pattern {
-    DECLARE_ACE_TYPE(HostWindowPattern, Pattern);
+class WindowPattern : public Pattern {
+    DECLARE_ACE_TYPE(WindowPattern, Pattern);
 
 public:
-    HostWindowPattern();
-    ~HostWindowPattern() override = default;
+    WindowPattern();
+    ~WindowPattern() override = default;
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -65,8 +65,8 @@ private:
 
     friend class LifecycleListener;
 
-    ACE_DISALLOW_COPY_AND_MOVE(HostWindowPattern);
+    ACE_DISALLOW_COPY_AND_MOVE(WindowPattern);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_PATTERN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_PATTERN_H

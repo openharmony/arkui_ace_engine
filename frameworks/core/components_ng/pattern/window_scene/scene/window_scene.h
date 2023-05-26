@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_SCENE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_SCENE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_SCENE_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_SCENE_H
 
-#include "core/components_ng/pattern/window_scene/scene/host/host_window_pattern.h"
+#include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 
 namespace OHOS::Ace::NG {
-class HostWindowScene : public HostWindowPattern {
-    DECLARE_ACE_TYPE(HostWindowScene, HostWindowPattern);
+class WindowScene : public WindowPattern {
+    DECLARE_ACE_TYPE(WindowScene, WindowPattern);
 
 public:
-    HostWindowScene(const sptr<Rosen::Session>& session);
-    ~HostWindowScene() override;
+    WindowScene(const sptr<Rosen::Session>& session);
+    ~WindowScene() override;
 
 private:
     bool HasStartingPage() override
@@ -37,10 +37,10 @@ private:
     void OnForeground() override;
     void OnBackground() override;
 
-    friend class HostWindowSceneModel;
+    friend class WindowSceneModel;
 
-    ACE_DISALLOW_COPY_AND_MOVE(HostWindowScene);
+    ACE_DISALLOW_COPY_AND_MOVE(WindowScene);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_SCENE_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_SCENE_H
