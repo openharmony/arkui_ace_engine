@@ -50,6 +50,21 @@ public:
         return MakeRefPtr<LinePaintProperty>();
     }
 
+    void OnModifyDone() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto paintProperty = host->GetPaintProperty<LinePaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        if (!paintProperty->HasStartPoint()) {
+            paintProperty->UpdateStartPoint(ShapePoint(0.0, 0.0));
+        }
+        if (!paintProperty->HasEndPoint()) {
+            paintProperty->UpdateEndPoint(ShapePoint(0.0, 0.0));
+        }
+        ShapePattern::OnModifyDone();
+    }
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(LinePattern);
 };
