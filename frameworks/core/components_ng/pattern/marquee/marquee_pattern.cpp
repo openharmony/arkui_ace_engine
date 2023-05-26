@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
 
-#include <math.h>
 #include <string>
 
 #include "base/geometry/dimension.h"
@@ -110,6 +109,7 @@ void MarqueePattern::OnModifyDone()
     StoreProperties();
     host->MarkDirtyNode();
     RegistVisibleAreaChangeCallback();
+    RegistOritationListener();
 }
 
 void MarqueePattern::StartMarqueeAnimation()
@@ -124,9 +124,6 @@ void MarqueePattern::StartMarqueeAnimation()
     auto textGeoNode = textNode->GetGeometryNode();
     CHECK_NULL_VOID(textGeoNode);
     auto textWidth = textGeoNode->GetFrameSize().Width();
-    auto layoutProperty = host->GetLayoutProperty<MarqueeLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    const auto& padding = layoutProperty->CreatePaddingAndBorder();
     if (GreatOrEqual(marqueeSize.Width(), textWidth)) {
         return;
     }
@@ -134,15 +131,7 @@ void MarqueePattern::StartMarqueeAnimation()
     CHECK_NULL_VOID(paintProperty);
     auto repeatCount = paintProperty->GetLoop().value_or(DEFAULT_MARQUEE_LOOP);
     FireStartEvent();
-    auto direction = paintProperty->GetDirection().value_or(MarqueeDirection::LEFT);
-    bool needSecondPlay = false;
-    if (repeatCount != 1) {
-        needSecondPlay = LessNotEqual(textGeoNode->GetMarginFrameOffset().GetX(), 0.0f);
-        if (direction == MarqueeDirection::RIGHT) {
-            needSecondPlay = GreatNotEqual(
-                textGeoNode->GetMarginFrameOffset().GetX(), marqueeSize.Width() - textGeoNode->GetFrameSize().Width());
-        }
-    }
+    bool needSecondPlay = repeatCount != 1 ? true : false;
     PlayMarqueeAnimation(0.0f, repeatCount, needSecondPlay);
 }
 
@@ -152,16 +141,13 @@ void MarqueePattern::PlayMarqueeAnimation(float start, int32_t playCount, bool n
     CHECK_NULL_VOID(host);
     auto geoNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geoNode);
-    auto marqueeSize = geoNode->GetFrameSize();
     auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(textNode);
     auto textGeoNode = textNode->GetGeometryNode();
     CHECK_NULL_VOID(textGeoNode);
-    auto textWidth = textGeoNode->GetFrameSize().Width();
     auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto step = paintProperty->GetScrollAmount().value_or(DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx());
-    auto direction = paintProperty->GetDirection().value_or(MarqueeDirection::LEFT);
     auto end = CalculateEnd();
     auto duration = static_cast<int32_t>(std::abs(end - start) * DEFAULT_MARQUEE_SCROLL_DELAY);
     if (GreatNotEqual(step, 0.0)) {
@@ -350,27 +336,27 @@ void MarqueePattern::StoreProperties()
 
 float MarqueePattern::CalculateStart()
 {
+    float start = 0.0f;
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_RETURN(host, start);
     auto geoNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geoNode);
+    CHECK_NULL_RETURN(geoNode, start);
     auto marqueeSize = geoNode->GetFrameSize();
     auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
-    CHECK_NULL_VOID(textNode);
+    CHECK_NULL_RETURN(textNode, start);
     auto textGeoNode = textNode->GetGeometryNode();
-    CHECK_NULL_VOID(textGeoNode);
+    CHECK_NULL_RETURN(textGeoNode, start);
     auto textWidth = textGeoNode->GetFrameSize().Width();
     auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
+    CHECK_NULL_RETURN(paintProperty, start);
     auto direction = paintProperty->GetDirection().value_or(MarqueeDirection::LEFT);
     auto layoutProperty = host->GetLayoutProperty<MarqueeLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_RETURN(layoutProperty, start);
     Alignment align = Alignment::CENTER_LEFT;
     if (layoutProperty->GetPositionProperty()) {
         align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
     }
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
-    auto start = marqueeSize.Width();
     if (direction == MarqueeDirection::LEFT) {
         if (NearEqual(align.GetHorizontal(), -1.0)) {
             start = marqueeSize.Width() - padding.left.value_or(0);
@@ -393,28 +379,27 @@ float MarqueePattern::CalculateStart()
 
 float MarqueePattern::CalculateEnd()
 {
+    float end = 0.0f;
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_RETURN(host, end);
     auto geoNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geoNode);
+    CHECK_NULL_RETURN(geoNode, end);
     auto marqueeSize = geoNode->GetFrameSize();
     auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
-    CHECK_NULL_VOID(textNode);
+    CHECK_NULL_RETURN(textNode, end);
     auto textGeoNode = textNode->GetGeometryNode();
-    CHECK_NULL_VOID(textGeoNode);
+    CHECK_NULL_RETURN(textGeoNode, end);
     auto textWidth = textGeoNode->GetFrameSize().Width();
     auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
+    CHECK_NULL_RETURN(paintProperty, end);
     auto layoutProperty = host->GetLayoutProperty<MarqueeLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_RETURN(layoutProperty, end);
     auto direction = paintProperty->GetDirection().value_or(MarqueeDirection::LEFT);
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
-
     Alignment align = Alignment::CENTER_LEFT;
     if (layoutProperty->GetPositionProperty()) {
         align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
     }
-    float end = 0.0f;
     if (direction == MarqueeDirection::LEFT) {
         if (NearEqual(align.GetHorizontal(), -1.0)) {
             end = -1 * textWidth - padding.left.value_or(0);
@@ -433,5 +418,39 @@ float MarqueePattern::CalculateEnd()
         }
     }
     return end;
+}
+
+void MarqueePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    measureChanged_ = false;
+    auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto playStatus = paintProperty->GetPlayerStatus().value_or(false);
+    StopMarqueeAnimation(playStatus);
+}
+
+void MarqueePattern::RegistOritationListener()
+{
+    if (isOritationListenerRegisted_) {
+        return;
+    }
+    isOritationListenerRegisted_ = true;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowSizeChangeCallback(host->GetId());
+}
+
+void MarqueePattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowSizeChangeCallback(host->GetId());
+    pipeline->RemoveVisibleAreaChangeNode(host->GetId());
 }
 } // namespace OHOS::Ace::NG

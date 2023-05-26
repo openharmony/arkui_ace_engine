@@ -65,6 +65,10 @@ public:
     }
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+
+protected:
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
 private:
     void OnModifyDone() override;
@@ -86,6 +90,7 @@ private:
     void OnAnimationFinish();
     float CalculateStart();
     float CalculateEnd();
+    void RegistOritationListener();
     bool measureChanged_ = false;
     int32_t animationId_ = 0;
     bool isRegistedAreaCallback_ = false;
@@ -94,6 +99,7 @@ private:
     double scrollAmount_ = DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx();
     int32_t loop_ = -1;
     MarqueeDirection direction_ = MarqueeDirection::LEFT;
+    bool isOritationListenerRegisted_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(MarqueePattern);
 };
 } // namespace OHOS::Ace::NG
