@@ -99,7 +99,12 @@ public:
 
     virtual void OnModifyDone() {}
 
-    virtual void InitContext(bool isRoot, const std::optional<std::string>& surfaceName, bool useExternalNode = false)
+    enum class ContextType : int8_t { CANVAS, ROOT, SURFACE, EFFECT, EXTERNAL };
+    struct ContextParam {
+        ContextType type;
+        std::optional<std::string> surfaceName;
+    };
+    virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param)
     {}
 
     virtual void StartRecording() {}

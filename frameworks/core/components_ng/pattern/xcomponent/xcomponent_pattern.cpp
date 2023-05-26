@@ -128,7 +128,8 @@ void XComponentPattern::OnAttachToFrameNode()
         renderContext->SetClipToBounds(true);
         renderSurface_ = RenderSurface::Create();
         renderContextForSurface_ = RenderContext::Create();
-        renderContextForSurface_->InitContext(false, id_ + "Surface");
+        static RenderContext::ContextParam param = { RenderContext::ContextType::SURFACE, id_ + "Surface" };
+        renderContextForSurface_->InitContext(false, param);
         renderContextForSurface_->UpdateBackgroundColor(Color::BLACK);
         scopeId_ = Container::CurrentId();
         if (!SystemProperties::GetExtSurfaceEnabled()) {

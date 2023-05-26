@@ -83,9 +83,9 @@ public:
         VK_HIDE
     };
 
-    std::optional<std::string> GetSurfaceNodeName() const override
+    std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
-        return "RosenWeb";
+        return RenderContext::ContextParam { RenderContext::ContextType::SURFACE, "RosenWeb" };
     }
 
     bool IsAtomicNode() const override

@@ -59,14 +59,9 @@ public:
         return false;
     }
 
-    virtual std::optional<std::string> GetSurfaceNodeName() const
+    virtual std::optional<RenderContext::ContextParam> GetContextParam() const
     {
         return std::nullopt;
-    }
-
-    virtual bool UseExternalRSNode() const
-    {
-        return false;
     }
 
     void DetachFromFrameNode(FrameNode* frameNode)

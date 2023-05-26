@@ -69,7 +69,9 @@ void FormPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToBounds(true);
     // Init the render context for RSSurfaceNode from FRS.
     externalRenderContext_ = RenderContext::Create();
-    externalRenderContext_->InitContext(false, "Form_" + std::to_string(host->GetId()) + "_Remote_Surface", true);
+    // for external RSNode, name is meaningless.
+    static RenderContext::ContextParam param = { RenderContext::ContextType::EXTERNAL, std::nullopt };
+    externalRenderContext_->InitContext(false, param);
     InitFormManagerDelegate();
     auto eventHub = host->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);

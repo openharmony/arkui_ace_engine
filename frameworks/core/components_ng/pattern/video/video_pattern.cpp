@@ -643,7 +643,8 @@ void VideoPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContextForMediaPlayer_->InitContext(false, "MediaPlayerSurface");
+    static RenderContext::ContextParam param = { RenderContext::ContextType::SURFACE, "MediaPlayerSurface" };
+    renderContextForMediaPlayer_->InitContext(false, param);
     renderContext->UpdateBackgroundColor(Color::BLACK);
     renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
     renderContext->SetClipToBounds(true);
