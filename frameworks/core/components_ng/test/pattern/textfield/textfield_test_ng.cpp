@@ -4193,4 +4193,431 @@ HWTEST_F(TextFieldPatternTestNg, GetMaxLines, TestSize.Level2)
     layoutProperty->UpdateMaxLines(20);
     EXPECT_EQ(pattern->GetMaxLines(), 20);
 }
+
+/**
+ * @tc.name: GetPlaceholderFont
+ * @tc.desc: test GetPlaceholderFont.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, GetPlaceholderFont, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextFieldTheme>()));
+
+    /**
+     * @tc.steps: step2. set the required parameters and call GetPlaceholderFont.
+     * @tc.expected: Check the return value.
+     */
+    layoutProperty->ResetPlaceholderFontStyle();
+    layoutProperty->UpdateFontSize(Dimension(5.0));
+    layoutProperty->UpdatePlaceholderItalicFontStyle(Ace::FontStyle::NORMAL);
+    layoutProperty->UpdatePlaceholderFontWeight(FontWeight::BOLD);
+    std::vector<std::string> fontFamilies { "Georgia", "Serif" };
+    layoutProperty->UpdatePlaceholderFontFamily(fontFamilies);
+    auto placeholderFont = pattern->GetPlaceholderFont();
+    auto parsedValue = JsonUtil::ParseJsonString(placeholderFont);
+    EXPECT_STREQ(parsedValue->GetString("style").c_str(), "FontStyle.Normal");
+    EXPECT_STREQ(parsedValue->GetString("size").c_str(), "5.00px");
+    EXPECT_STREQ(parsedValue->GetString("fontWeight").c_str(), "FontWeight.Bold");
+    EXPECT_STREQ(parsedValue->GetString("fontFamily").c_str(), "Georgia,Serif");
+    layoutProperty->UpdatePlaceholderItalicFontStyle(Ace::FontStyle::ITALIC);
+    layoutProperty->UpdatePlaceholderFontSize(Dimension(8.0));
+    placeholderFont = pattern->GetPlaceholderFont();
+    parsedValue = JsonUtil::ParseJsonString(placeholderFont);
+    EXPECT_STREQ(parsedValue->GetString("style").c_str(), "FontStyle.Italic");
+    EXPECT_STREQ(parsedValue->GetString("size").c_str(), "8.00px");
+
+    /**
+     * @tc.steps: step2. test all number font weight.
+     * @tc.expected: Check the return value.
+     */
+    std::pair<FontWeight, std::string> numberFontWeights[] = { std::make_pair(FontWeight::W100, "100"),
+        std::make_pair(FontWeight::W200, "200"), std::make_pair(FontWeight::W300, "300"),
+        std::make_pair(FontWeight::W400, "400"), std::make_pair(FontWeight::W500, "500"),
+        std::make_pair(FontWeight::W600, "600"), std::make_pair(FontWeight::W700, "700"),
+        std::make_pair(FontWeight::W800, "800"), std::make_pair(FontWeight::W900, "900") };
+    for (auto weight : numberFontWeights) {
+        layoutProperty->UpdatePlaceholderFontWeight(weight.first);
+        placeholderFont = pattern->GetPlaceholderFont();
+        parsedValue = JsonUtil::ParseJsonString(placeholderFont);
+        EXPECT_STREQ(parsedValue->GetString("weight").c_str(), weight.second.c_str());
+    }
+}
+
+/**
+ * @tc.name: ToJsonValue and FromJson
+ * @tc.desc: test ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, ToJsonValue, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = CreatTextFieldNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. updates the properties to be checked and call ToJsonValue.
+     * @tc.expected: Check the properties.
+     */
+    layoutProperty->UpdateItalicFontStyle(Ace::FontStyle::NORMAL);
+    layoutProperty->ResetMaxLength();
+    layoutProperty->UpdateShowErrorText(true);
+    layoutProperty->UpdateErrorText("Error Text");
+    layoutProperty->ResetMaxLines();
+    auto json = JsonUtil::Create(true);
+    pattern->ToJsonValue(json);
+    EXPECT_STREQ(json->GetString("fontStyle").c_str(), "FontStyle.Normal");
+    EXPECT_STREQ(json->GetString("maxLength").c_str(), "INF");
+    EXPECT_STREQ(json->GetString("showError").c_str(), "Error Text");
+    EXPECT_STREQ(json->GetString("maxLines").c_str(), "INF");
+
+    layoutProperty->UpdateItalicFontStyle(Ace::FontStyle::ITALIC);
+    layoutProperty->UpdateMaxLength(18);
+    layoutProperty->UpdateShowErrorText(false);
+    layoutProperty->UpdateMaxLines(5);
+    json = JsonUtil::Create(true);
+    pattern->ToJsonValue(json);
+    EXPECT_STREQ(json->GetString("fontStyle").c_str(), "FontStyle.Italic");
+    EXPECT_STREQ(json->GetString("maxLength").c_str(), "18");
+    EXPECT_STREQ(json->GetString("showError").c_str(), "undefined");
+    EXPECT_STREQ(json->GetString("maxLines").c_str(), "5");
+}
+
+/**
+ * @tc.name: TextInputActionToString.
+ * @tc.desc: test TextInputActionToString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextInputActionToString, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = CreatTextFieldNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. update TextInputAction and call TextInputActionToString.
+     * @tc.expected: Check the return string.
+     */
+    std::pair<TextInputAction, std::string> inputTextInputActions[] = {
+        std::make_pair(TextInputAction::GO, "EnterKeyType.Go"),
+        std::make_pair(TextInputAction::SEARCH, "EnterKeyType.Search"),
+        std::make_pair(TextInputAction::SEND, "EnterKeyType.Send"),
+        std::make_pair(TextInputAction::DONE, "EnterKeyType.Done"),
+        std::make_pair(TextInputAction::NEXT, "EnterKeyType.Next") };
+    for (auto action : inputTextInputActions) {
+        pattern->UpdateTextInputAction(action.first);
+        EXPECT_STREQ(pattern->TextInputActionToString().c_str(), action.second.c_str());
+    }
+}
+
+/**
+ * @tc.name: CaretMoveToLastNewLineChar.
+ * @tc.desc: test CaretMoveToLastNewLineChar.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, CaretMoveToLastNewLineChar, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = CreatTextFieldNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. update editing value and  call CaretMoveToLastNewLineChar.
+     * @tc.expected: Check the editing value's crePosition.
+     */
+    pattern->UpdateEditingValue("New\nLine\nChar", 0);
+    pattern->CaretMoveToLastNewLineChar();
+    EXPECT_EQ(pattern->textEditingValue_.caretPosition, 0);
+    pattern->UpdateEditingValue("New\nLine\nChar", 10);
+    pattern->CaretMoveToLastNewLineChar();
+    EXPECT_EQ(pattern->textEditingValue_.caretPosition, 8);
+}
+
+/**
+ * @tc.name: SetSelectionFlag.
+ * @tc.desc: test SetSelectionFlag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetSelectionFlag, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = CreatTextFieldNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call SetSelectionFlag with expectd parameters.
+     * @tc.expected: Check the value of the updated property.
+     */
+    pattern->selectionStart_ = 0;
+    pattern->selectionEnd_ = 0;
+    pattern->SetSelectionFlag(5, 8);
+    EXPECT_EQ(pattern->selectionStart_, 0);
+    EXPECT_EQ(pattern->selectionEnd_, 0);
+
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    focusHub->RequestFocusImmediately();
+    pattern->SetSelectionFlag(5, 8);
+    EXPECT_EQ(pattern->selectionStart_, 5);
+    EXPECT_EQ(pattern->selectionEnd_, 8);
+}
+
+/**
+ * @tc.name: HandleSelect.
+ * @tc.desc: test HandleSelect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, HandleSelect, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = CreatTextFieldNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call HandleSelect with expectd parameters.
+     * @tc.expected: Check the value of the updated property.
+     */
+    int32_t keyCodes[] = {
+        2014, // KeyCode::KEY_DPAD_LEFT,
+        2015, // KeyCode::KEY_DPAD_RIGHT,
+        2012, // KeyCode::KEY_DPAD_UP,
+        2013, // KeyCode::KEY_DPAD_DOWN
+        2016, // KeyCode::KEY_DPAD_CENTER
+    };
+    for (auto kCode : keyCodes) {
+        pattern->caretUpdateType_ = CaretUpdateType::NONE;
+        pattern->HandleSelect(kCode, 0);
+        EXPECT_EQ(pattern->caretUpdateType_, CaretUpdateType::EVENT);
+    }
+}
+
+/**
+ * @tc.name: HandleSelectionRight.
+ * @tc.desc: test HandleSelectionRight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, HandleSelectionRight, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = CreatTextFieldNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. not in select mode and call HandleSelectionRight.
+     * @tc.expected: Check the value of the updated property.
+     */
+    pattern->selectionMode_ = SelectionMode::NONE;
+    pattern->textSelector_.baseOffset = 0;
+    pattern->UpdateEditingValue("HandleSelectionRight", 20);
+    pattern->HandleSelectionRight();
+    pattern->UpdateEditingValue("HandleSelectionRight", 10);
+    pattern->HandleSelectionRight();
+    EXPECT_EQ(pattern->GetSelectMode(), SelectionMode::SELECT);
+    EXPECT_EQ(pattern->GetTextSelector().GetStart(), 10);
+    EXPECT_EQ(pattern->GetTextSelector().GetEnd(), 1);
+
+    /**
+     * @tc.steps: step2. in select mode and call HandleSelectionRight.
+     * @tc.expected: Check the value of the updated property.
+     */
+    pattern->selectionMode_ = SelectionMode::SELECT;
+    pattern->textSelector_.baseOffset = 12;
+    pattern->textSelector_.destinationOffset = 10;
+    pattern->UpdateEditingValue("HandleSelectionRight", 20);
+    pattern->HandleSelectionRight();
+    EXPECT_EQ(pattern->GetSelectMode(), SelectionMode::SELECT);
+    EXPECT_EQ(pattern->GetTextSelector().GetEnd(), 11);
+
+    pattern->selectionMode_ = SelectionMode::SELECT;
+    pattern->textSelector_.baseOffset = 11;
+    pattern->textSelector_.destinationOffset = 10;
+    pattern->UpdateEditingValue("HandleSelectionRight", 20);
+    pattern->HandleSelectionRight();
+    EXPECT_EQ(pattern->GetSelectMode(), SelectionMode::NONE);
+    EXPECT_EQ(pattern->GetTextSelector().GetEnd(), 11);
+}
+
+/**
+ * @tc.name: HandleSelectionLeft.
+ * @tc.desc: test HandleSelectionLeft.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, HandleSelectionLeft, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = CreatTextFieldNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. not in select mode and call HandleSelectionLeft.
+     * @tc.expected: Check the value of the updated property.
+     */
+    pattern->UpdateEditingValue("HandleSelectionLeft", 0);
+    pattern->selectionMode_ = SelectionMode::NONE;
+    pattern->HandleSelectionLeft();
+    EXPECT_EQ(pattern->GetSelectMode(), SelectionMode::NONE);
+
+    pattern->textEditingValue_.caretPosition = 10;
+    pattern->textSelector_.baseOffset = 5;
+    pattern->HandleSelectionLeft();
+    EXPECT_EQ(pattern->GetSelectMode(), SelectionMode::SELECT);
+
+    /**
+     * @tc.steps: step3. in select mode and call HandleSelectionLeft.
+     * @tc.expected: Check the value of the updated property.
+     */
+    pattern->selectionMode_ = SelectionMode::SELECT;
+    pattern->textSelector_.baseOffset = 5;
+    pattern->HandleSelectionLeft();
+    EXPECT_EQ(pattern->GetSelectMode(), SelectionMode::SELECT);
+
+    pattern->textSelector_.baseOffset = 4;
+    pattern->textSelector_.destinationOffset = 5;
+    pattern->HandleSelectionLeft();
+    EXPECT_EQ(pattern->GetSelectMode(), SelectionMode::NONE);
+}
+
+/**
+ * @tc.name: HandleSelectionDown.
+ * @tc.desc: test HandleSelectionDown.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, HandleSelectionDown, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = CreatTextFieldNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. not in text area and call HandleSelectionDown.
+     * @tc.expected: Check the value of the updated property.
+     */
+    layoutProperty->UpdateMaxLines(1);
+    pattern->selectionMode_ = SelectionMode::NONE;
+    pattern->HandleSelectionDown();
+    EXPECT_EQ(pattern->GetSelectMode(), SelectionMode::NONE);
+
+    /**
+     * @tc.steps: step3. in text area and call HandleSelectionDown.
+     * @tc.expected: Check the value of the updated property.
+     */
+    pattern->paragraph_ = std::make_shared<RSParagraph>();
+    layoutProperty->UpdateMaxLines(2);
+    pattern->selectionMode_ = SelectionMode::SELECT;
+    pattern->HandleSelectionDown();
+    pattern->selectionMode_ = SelectionMode::NONE;
+    pattern->caretRect_.SetTop(0);
+    pattern->caretRect_.SetLeft(0);
+    pattern->textRect_.SetTop(0);
+    pattern->HandleSelectionDown();
+    EXPECT_EQ(pattern->GetSelectMode(), SelectionMode::NONE);
+
+    pattern->textSelector_.baseOffset = 1;
+    pattern->HandleSelectionDown();
+    EXPECT_EQ(pattern->GetSelectMode(), SelectionMode::NONE);
+}
+
+/**
+ * @tc.name: HandleSelectionUp.
+ * @tc.desc: test HandleSelectionUp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, HandleSelectionUp, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = CreatTextFieldNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. not in text area and call HandleSelectionUp.
+     * @tc.expected: Check the value of the updated property.
+     */
+    layoutProperty->UpdateMaxLines(1);
+    pattern->selectionMode_ = SelectionMode::NONE;
+    pattern->HandleSelectionUp();
+    EXPECT_EQ(pattern->GetSelectMode(), SelectionMode::NONE);
+
+    /**
+     * @tc.steps: step3. in text area and call HandleSelectionUp.
+     * @tc.expected: Check the value of the updated property.
+     */
+    pattern->paragraph_ = std::make_shared<RSParagraph>();
+    layoutProperty->UpdateMaxLines(2);
+    pattern->selectionMode_ = SelectionMode::SELECT;
+    pattern->HandleSelectionUp();
+    pattern->selectionMode_ = SelectionMode::NONE;
+    pattern->caretRect_.SetTop(0);
+    pattern->caretRect_.SetLeft(0);
+    pattern->textRect_.SetTop(0);
+    pattern->HandleSelectionUp();
+    EXPECT_EQ(pattern->GetSelectMode(), SelectionMode::NONE);
+    pattern->textSelector_.baseOffset = 1;
+    pattern->HandleSelectionUp();
+    EXPECT_EQ(pattern->GetSelectMode(), SelectionMode::NONE);
+}
 } // namespace OHOS::Ace::NG
