@@ -240,7 +240,7 @@ void VideoPattern::PrepareMediaPlayer()
 bool VideoPattern::SetSourceForMediaPlayer()
 {
     auto videoLayoutProperty = GetLayoutProperty<VideoLayoutProperty>();
-    CHECK_NULL_VOID(videoLayoutProperty);
+    CHECK_NULL_RETURN(videoLayoutProperty, false);
     auto videoSrc = videoLayoutProperty->GetVideoSource().value();
     src_ = videoSrc;
     LOGI("Video Set src for media, it is : %{public}s", videoSrc.c_str());

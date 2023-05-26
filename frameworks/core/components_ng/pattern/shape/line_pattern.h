@@ -55,9 +55,9 @@ public:
     void OnModifyDone() override
     {
         auto host = GetHost();
-        CHECK_NULL_RETURN(host, std::nullopt);
+        CHECK_NULL_VOID(host);
         auto paintProperty = host->GetPaintProperty<LinePaintProperty>();
-        CHECK_NULL_RETURN(paintProperty, std::nullopt);
+        CHECK_NULL_VOID(paintProperty);
         if (!paintProperty->HasStartPoint()) {
             paintProperty->UpdateStartPoint(DEFAULT_POINT);
         }

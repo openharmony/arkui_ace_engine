@@ -1746,9 +1746,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerFireChangeEventTest001, TestSize.Lev
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
 
-    auto changeEvent = [](const BaseEventInfo* info) {
-        EXPECT_EQ(info->GetType(), "DatePickerChangeEvent");
-    };
+    auto changeEvent = [](const BaseEventInfo* info) { EXPECT_EQ(info->GetType(), "DatePickerChangeEvent"); };
     TimePickerModelNG::GetInstance()->SetChangeEvent(std::move(changeEvent));
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -1761,7 +1759,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerFireChangeEventTest001, TestSize.Lev
 
 /**
  * @tc.name: PerformActionTest001
- * @tc.desc: TimePicker Accessibility PerformAction test ScrollForward and ScrollBackward.
+ * @tc.desc: TimePicker accessibilityProperty PerformAction test ScrollForward and ScrollBackward.
  * @tc.type: FUNC
  */
 HWTEST_F(TimePickerPatternTestNg, PerformActionTest001, TestSize.Level1)

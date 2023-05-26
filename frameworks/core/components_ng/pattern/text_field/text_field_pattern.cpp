@@ -384,9 +384,9 @@ void TextFieldPattern::CreateSingleHandle()
     RectF secondHandle;
     auto secondHandleMetrics = CalcCursorOffsetByPosition(textEditingValue_.caretPosition);
     OffsetF emptyOffset;
-#if defined(PREVIEW)
-    emptyOffset = MakeEmptyOffset();
-#endif
+    if (textEditingValue_.Empty()) {
+        emptyOffset = MakeEmptyOffset();
+    }
     OffsetF secondHandleOffset(secondHandleMetrics.offset.GetX() + parentGlobalOffset_.GetX() + emptyOffset.GetX(),
         secondHandleMetrics.offset.GetY() + parentGlobalOffset_.GetY() + emptyOffset.GetY());
     textSelector_.secondHandleOffset_ = secondHandleOffset;
@@ -591,7 +591,8 @@ void TextFieldPattern::SetCaretOffsetForEmptyTextOrPositionZero()
             caretRect_.SetLeft(static_cast<float>(contentRect_.GetX()) + contentRect_.Width() / 2.0f);
             return;
         case TextAlign::END:
-            caretRect_.SetLeft(static_cast<float>(contentRect_.GetX()) + contentRect_.Width());
+            caretRect_.SetLeft(static_cast<float>(contentRect_.GetX()) + contentRect_.Width() -
+                               static_cast<float>(CURSOR_WIDTH.ConvertToPx()));
             return;
         default:
             caretRect_.SetLeft(textRect_.GetX());
@@ -1594,6 +1595,7 @@ void TextFieldPattern::InitDragDropEvent()
         }
         focusHub->RequestFocusImmediately();
         pattern->SetCaretPosition(position);
+        pattern->StartTwinkling();
     };
     eventHub->SetOnDragMove(std::move(onDragMove));
 
@@ -3815,7 +3817,7 @@ std::string TextFieldPattern::GetShowPasswordIconString() const
 
 std::string TextFieldPattern::GetInputStyleString() const
 {
-    auto paintProperty = GetLayoutProperty<TextFieldPaintProperty>();
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, "TextInputStyle.Default");
     std::string result = "TextInputStyle.Default";
     switch (paintProperty->GetInputStyleValue(InputStyle::DEFAULT)) {

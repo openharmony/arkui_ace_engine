@@ -188,55 +188,58 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
 double DialogLayoutAlgorithm::GetMaxWidthBasedOnGridType(
     const RefPtr<GridColumnInfo>& info, GridSizeType type, DeviceType deviceType)
 {
+    auto parentColumns = info->GetParent()->GetColumns();
     if (gridCount_ >= 0) {
-        return info->GetWidth(std::min(gridCount_, info->GetParent()->GetColumns()));
+        return info->GetWidth(std::min(gridCount_, parentColumns));
     }
 
+    int32_t deviceColumns;
     if (deviceType == DeviceType::WATCH) {
         if (type == GridSizeType::SM) {
-            return info->GetWidth(3);
+            deviceColumns = 3;
         } else if (type == GridSizeType::MD) {
-            return info->GetWidth(4);
+            deviceColumns = 4;
         } else if (type == GridSizeType::LG) {
-            return info->GetWidth(5);
+            deviceColumns = 5;
         } else {
             LOGD("GetMaxWidthBasedOnGridType is undefined");
-            return info->GetWidth(5);
+            deviceColumns = 5;
         }
     } else if (deviceType == DeviceType::PHONE) {
         if (type == GridSizeType::SM) {
-            return info->GetWidth(4);
+            deviceColumns = 4;
         } else if (type == GridSizeType::MD) {
-            return info->GetWidth(5);
+            deviceColumns = 5;
         } else if (type == GridSizeType::LG) {
-            return info->GetWidth(6);
+            deviceColumns = 6;
         } else {
             LOGD("GetMaxWidthBasedOnGridType is undefined");
-            return info->GetWidth(6);
+            deviceColumns = 6;
         }
     } else if (deviceType == DeviceType::CAR) {
         if (type == GridSizeType::SM) {
-            return info->GetWidth(4);
+            deviceColumns = 4;
         } else if (type == GridSizeType::MD) {
-            return info->GetWidth(6);
+            deviceColumns = 6;
         } else if (type == GridSizeType::LG) {
-            return info->GetWidth(8);
+            deviceColumns = 8;
         } else {
             LOGD("GetMaxWidthBasedOnGridType is undefined");
-            return info->GetWidth(8);
+            deviceColumns = 8;
         }
     } else {
         if (type == GridSizeType::SM) {
-            return info->GetWidth(2);
+            deviceColumns = 2;
         } else if (type == GridSizeType::MD) {
-            return info->GetWidth(3);
+            deviceColumns = 3;
         } else if (type == GridSizeType::LG) {
-            return info->GetWidth(4);
+            deviceColumns = 4;
         } else {
             LOGD("GetMaxWidthBasedOnGridType is undefined");
-            return info->GetWidth(4);
+            deviceColumns = 4;
         }
     }
+    return info->GetWidth(std::min(deviceColumns, parentColumns));
 }
 
 void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

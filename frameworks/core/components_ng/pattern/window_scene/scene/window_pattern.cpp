@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/window_scene/scene/host/host_window_pattern.h"
+#include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 
-#include "render_service_client/core/ui/rs_surface_node.h"
-#include "interfaces/include/ws_common.h"
+#include "ui/rs_surface_node.h"
 
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
@@ -27,57 +26,57 @@
 namespace OHOS::Ace::NG {
 class LifecycleListener : public Rosen::ILifecycleListener {
 public:
-    explicit LifecycleListener(const WeakPtr<HostWindowPattern>& hostWindowPattern)
-        : hostWindowPattern_(hostWindowPattern) {}
+    explicit LifecycleListener(const WeakPtr<WindowPattern>& windowPattern)
+        : windowPattern_(windowPattern) {}
     virtual ~LifecycleListener() = default;
 
     void OnConnect() override
     {
-        auto hostWindowPattern = hostWindowPattern_.Upgrade();
-        CHECK_NULL_VOID(hostWindowPattern);
-        hostWindowPattern->OnConnect();
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnConnect();
     }
 
     void OnForeground() override
     {
-        auto hostWindowPattern = hostWindowPattern_.Upgrade();
-        CHECK_NULL_VOID(hostWindowPattern);
-        hostWindowPattern->OnForeground();
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnForeground();
     }
 
     void OnBackground() override
     {
-        auto hostWindowPattern = hostWindowPattern_.Upgrade();
-        CHECK_NULL_VOID(hostWindowPattern);
-        hostWindowPattern->OnBackground();
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnBackground();
     }
 
 private:
-    WeakPtr<HostWindowPattern> hostWindowPattern_;
+    WeakPtr<WindowPattern> windowPattern_;
 };
 
-HostWindowPattern::HostWindowPattern()
+WindowPattern::WindowPattern()
 {
     instanceId_ = Container::CurrentId();
 }
 
-void HostWindowPattern::RegisterLifecycleListener()
+void WindowPattern::RegisterLifecycleListener()
 {
     CHECK_NULL_VOID(session_);
     lifecycleListener_ = std::make_shared<LifecycleListener>(WeakClaim(this));
     session_->RegisterLifecycleListener(lifecycleListener_);
 }
 
-void HostWindowPattern::UnregisterLifecycleListener()
+void WindowPattern::UnregisterLifecycleListener()
 {
     CHECK_NULL_VOID(session_);
     session_->UnregisterLifecycleListener(lifecycleListener_);
 }
 
-void HostWindowPattern::InitContent()
+void WindowPattern::InitContent()
 {
     contentNode_ = FrameNode::CreateFrameNode(
-        V2::HOST_WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+        V2::WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     contentNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
 
     CHECK_NULL_VOID(session_);
@@ -108,7 +107,7 @@ void HostWindowPattern::InitContent()
     }
 }
 
-void HostWindowPattern::CreateStartingNode()
+void WindowPattern::CreateStartingNode()
 {
     if (!HasStartingPage()) {
         return;
@@ -124,7 +123,7 @@ void HostWindowPattern::CreateStartingNode()
     host->AddChild(startingNode_);
 }
 
-void HostWindowPattern::CreateSnapshotNode()
+void WindowPattern::CreateSnapshotNode()
 {
     snapshotNode_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
@@ -146,7 +145,7 @@ void HostWindowPattern::CreateSnapshotNode()
     snapshotNode_->MarkModifyDone();
 }
 
-void HostWindowPattern::OnConnect()
+void WindowPattern::OnConnect()
 {
     ContainerScope scope(instanceId_);
     CHECK_NULL_VOID(session_);
@@ -168,13 +167,13 @@ void HostWindowPattern::OnConnect()
     }
     surfaceNode->SetBufferAvailableCallback([weak = WeakClaim(this)]() {
         LOGI("RSSurfaceNode buffer available callback");
-        auto hostWindowPattern = weak.Upgrade();
-        CHECK_NULL_VOID(hostWindowPattern);
-        hostWindowPattern->BufferAvailableCallback();
+        auto windowPattern = weak.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->BufferAvailableCallback();
     });
 }
 
-void HostWindowPattern::BufferAvailableCallback()
+void WindowPattern::BufferAvailableCallback()
 {
     ContainerScope scope(instanceId_);
 
@@ -186,7 +185,7 @@ void HostWindowPattern::BufferAvailableCallback()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void HostWindowPattern::OnAttachToFrameNode()
+void WindowPattern::OnAttachToFrameNode()
 {
     InitContent();
 
@@ -195,7 +194,7 @@ void HostWindowPattern::OnAttachToFrameNode()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-bool HostWindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool WindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (!config.frameSizeChange) {
         LOGI("frame size not changed, just return");
@@ -216,21 +215,15 @@ bool HostWindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     return false;
 }
 
-void HostWindowPattern::DispatchPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
+void WindowPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     CHECK_NULL_VOID(session_);
-    auto errCode = session_->TransferPointerEvent(pointerEvent);
-    if (errCode != Rosen::WSError::WS_OK) {
-        LOGE("DispatchPointerEvent failed, errCode=%{public}d", static_cast<int>(errCode));
-    }
+    session_->TransferPointerEvent(pointerEvent);
 }
 
-void HostWindowPattern::DispatchKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent)
+void WindowPattern::DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     CHECK_NULL_VOID(session_);
-    auto errCode = session_->TransferKeyEvent(keyEvent);
-    if (errCode != Rosen::WSError::WS_OK) {
-        LOGE("DispatchPointerEvent failed, errCode=%{public}d", static_cast<int>(errCode));
-    }
+    session_->TransferKeyEvent(keyEvent);
 }
 } // namespace OHOS::Ace::NG

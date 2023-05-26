@@ -44,13 +44,11 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr double PATTERN_OFFSET = 1000;
 constexpr double TEST_FONT_SIZE = 10;
-
 constexpr int32_t START_YEAR_BEFORE = 1990;
 constexpr int32_t START_YEAR = 1980;
 constexpr int32_t SELECTED_YEAR = 2000;
 constexpr int32_t END_YEAR = 2090;
 constexpr int32_t CURRENT_DAY = 5;
-
 const int YEARINDEX = 1;
 const int BIG_SHOWCOUNT = 5;
 const int SMALL_SHOWCOUNT = 3;
@@ -63,7 +61,10 @@ const double OFFSET_Y = 8.0;
 constexpr double TOSS_DELTA = 20.0;
 const double YOFFSET_START1 = 0.0;
 const double YOFFSET_END1 = 1000.0;
+const double YOFFSET_START2 = 2000.0;
+const double YOFFSET_END2 = 3000.0;
 const double TIME_PLUS = 1 * 100.0;
+const double TIME_PLUS_LARGE = 10 * 1000.0;
 } // namespace
 
 class DatePickerTestNg : public testing::Test {
@@ -1293,13 +1294,10 @@ HWTEST_F(DatePickerTestNg, DatePickerAlgorithmTest001, TestSize.Level1)
     ASSERT_NE(datePickerPattern, nullptr);
     auto yearId = datePickerPattern->GetYearId();
     auto yearColumnNode = FrameNode::GetFrameNode(V2::COLUMN_ETS_TAG, yearId);
-    LayoutWrapper layoutWrapper =
-        LayoutWrapper(yearColumnNode, yearColumnNode->GetGeometryNode(), pickerProperty);
-    RefPtr<LayoutWrapper> subLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(nullptr, nullptr, nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(yearColumnNode, yearColumnNode->GetGeometryNode(), pickerProperty);
+    RefPtr<LayoutWrapper> subLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(nullptr, nullptr, nullptr);
     EXPECT_NE(subLayoutWrapper, nullptr);
-    RefPtr<LayoutWrapper> subTwoLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(nullptr, nullptr, nullptr);
+    RefPtr<LayoutWrapper> subTwoLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(nullptr, nullptr, nullptr);
     EXPECT_NE(subTwoLayoutWrapper, nullptr);
     layoutWrapper.AppendChild(std::move(subLayoutWrapper));
     layoutWrapper.AppendChild(std::move(subTwoLayoutWrapper));
@@ -1315,7 +1313,7 @@ HWTEST_F(DatePickerTestNg, DatePickerAlgorithmTest001, TestSize.Level1)
     datePickerColumnLayoutAlgorithm.Measure(&layoutWrapper);
     /**
      * test branch width.has_value()
-    */
+     */
     layoutConstraint.parentIdealSize = OptionalSize<float>(300.0f, 200.0f);
     datePickerColumnLayoutAlgorithm.Measure(&layoutWrapper);
 }
@@ -1536,9 +1534,7 @@ HWTEST_F(DatePickerTestNg, DatePickerFireChangeEventTest001, TestSize.Level1)
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
 
-    auto changeEvent = [](const BaseEventInfo* info) {
-        EXPECT_EQ(info->GetType(), "DatePickerChangeEvent");
-    };
+    auto changeEvent = [](const BaseEventInfo* info) { EXPECT_EQ(info->GetType(), "DatePickerChangeEvent"); };
     DatePickerModelNG::GetInstance()->SetChangeEvent(std::move(changeEvent));
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -1567,8 +1563,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest001, TestSize.Level1)
     auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
     auto pickerProperty = columnNode->GetLayoutProperty<DataPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
-        columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(columnNode, columnNode->GetGeometryNode(), pickerProperty);
     DirtySwapConfig dirtySwapConfig;
     dirtySwapConfig.frameSizeChange = true;
     auto pickerColumnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
@@ -1605,7 +1600,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest002, TestSize.Level1)
     pickerColumnPattern->FlushAnimationTextProperties(true);
     /**
      * test !animationProperties_.size() branch
-    */
+     */
     pickerColumnPattern->animationProperties_.clear();
     pickerColumnPattern->FlushAnimationTextProperties(true);
 }
@@ -1684,7 +1679,6 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest003, TestSize.Level1)
     EXPECT_FALSE(columnPattern->pressed_);
     EXPECT_EQ(columnPattern->scrollDelta_, 0.0);
 }
-
 
 /**
  * @tc.name: DatePickerColumnPatternTest004
@@ -1780,12 +1774,12 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest005, TestSize.Level1)
     columnPattern->toController_->NotifyStopListener();
     /**
      * test fromBottomCurve_ callback
-    */
+     */
     ASSERT_NE(columnPattern->fromBottomCurve_, nullptr);
     columnPattern->fromBottomCurve_->NotifyListener(0.1);
     /**
      * test fromTopCurve_ callback
-    */
+     */
     ASSERT_NE(columnPattern->fromTopCurve_, nullptr);
     columnPattern->fromTopCurve_->NotifyListener(0.0);
 }
@@ -1826,7 +1820,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest006, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     /**
      * test actionScrollForwardImpl_ callback
-    */
+     */
     ASSERT_NE(accessibilityProperty->actionScrollForwardImpl_, nullptr);
     accessibilityProperty->ActActionScrollForward();
 }
@@ -1867,7 +1861,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest007, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     /**
      * test actionScrollBackwardImpl_ callback
-    */
+     */
     ASSERT_NE(accessibilityProperty->actionScrollBackwardImpl_, nullptr);
     accessibilityProperty->ActActionScrollBackward();
 }
@@ -1915,8 +1909,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest009, TestSize.Level1)
     auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
     auto pickerProperty = columnNode->GetLayoutProperty<DataPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
-        columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(columnNode, columnNode->GetGeometryNode(), pickerProperty);
     DirtySwapConfig dirtySwapConfig;
     dirtySwapConfig.frameSizeChange = true;
     auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
@@ -1956,7 +1949,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest010, TestSize.Level1)
     pickerPattern->ToJsonValue(jsonValue);
     /**
      * cover branch LunarValue == true
-    */
+     */
     rowLayoutProperty->UpdateLunar(true);
     pickerPattern->ToJsonValue(jsonValue2);
     ASSERT_NE(jsonValue2->GetValue("constructor"), nullptr);
@@ -1985,7 +1978,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest011, TestSize.Level1)
     focusHub->onKeyEventInternal_(keyEvent);
     /**
      * test callback getInnerFocusRectFunc_
-    */
+     */
     RoundRect paintRect;
     focusHub->getInnerFocusRectFunc_(paintRect);
 }
@@ -2017,7 +2010,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest012, TestSize.Level1)
     pickerPattern->OnDataLinking(frameNode, false, 0, tags);
     /**
      * test HandleSolarDayChange
-    */
+     */
     auto yearColumnNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild()->GetChildAtIndex(1));
     ASSERT_NE(yearColumnNode, nullptr);
     auto monthColumnNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(1)->GetChildAtIndex(1));
@@ -2040,7 +2033,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest012, TestSize.Level1)
     pickerPattern->HandleSolarDayChange(true, 0);
     /**
      * test branch !yearDatePickerColumnPattern
-    */
+     */
     auto allChildNode = pickerPattern->GetAllChildNode();
     auto yearNode = allChildNode["year"];
     yearNode->pattern_.Reset();
@@ -2114,7 +2107,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest014, TestSize.Level1)
     lunarDateLeft.year = 2013, lunarDateRight.year = 2000;
     lunarDateLeft.month = 5, lunarDateRight.month = 7;
     lunarDateLeft.day = 3, lunarDateRight.day = 2;
-    lunarDateLeft.isLeapMonth  = lunarDateRight.isLeapMonth  = false;
+    lunarDateLeft.isLeapMonth = lunarDateRight.isLeapMonth = false;
     /**
      * @tc.step: step2. call LunarDateCompare(lunarDateLeft, lunarDateRight).
      * @tc.expected: the result of LunarDateCompare is 1.
@@ -2143,7 +2136,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest014, TestSize.Level1)
     EXPECT_EQ(ret, 1);
     /**
      * test branch left.day > right.day
-    */
+     */
     lunarDateLeft.month = lunarDateRight.month = 7;
     ret = pickerPattern->LunarDateCompare(lunarDateRight, lunarDateLeft);
     EXPECT_EQ(ret, -1);
@@ -2171,7 +2164,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest015, TestSize.Level1)
     startDate.year = 2013, endDate.year = 2000;
     startDate.month = 8, endDate.month = 3;
     startDate.day = 3, endDate.day = 2;
-    startDate.isLeapMonth  = endDate.isLeapMonth  = false;
+    startDate.isLeapMonth = endDate.isLeapMonth = false;
 
     auto dataPickerRowLayoutProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
     ASSERT_NE(dataPickerRowLayoutProperty, nullptr);
@@ -2179,18 +2172,18 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest015, TestSize.Level1)
     dataPickerRowLayoutProperty->UpdateEndDate(endDate);
     /**
      * test branch startDateSolar_.GetYear() > endDateSolar_.GetYear()
-    */
+     */
     pickerPattern->AdjustSolarStartEndDate();
     /**
      * test branch startDateSolar_.GetMonth()>endDateSolar_.GetMonth()
-    */
+     */
     startDate.year = endDate.year = 2000;
     dataPickerRowLayoutProperty->UpdateStartDate(startDate);
     dataPickerRowLayoutProperty->UpdateEndDate(endDate);
     pickerPattern->AdjustSolarStartEndDate();
     /**
      * test branch startDateSolar_.GetDay() > endDateSolar_.GetDay()
-    */
+     */
     startDate.month = endDate.month = 7;
     dataPickerRowLayoutProperty->UpdateStartDate(startDate);
     dataPickerRowLayoutProperty->UpdateEndDate(endDate);
@@ -2219,25 +2212,25 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest016, TestSize.Level1)
     startDate.year = 2013, endDate.year = 2000;
     startDate.month = 8, endDate.month = 3;
     startDate.day = 3, endDate.day = 2;
-    startDate.isLeapMonth  = endDate.isLeapMonth  = false;
+    startDate.isLeapMonth = endDate.isLeapMonth = false;
     auto dataPickerRowLayoutProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
     ASSERT_NE(dataPickerRowLayoutProperty, nullptr);
     dataPickerRowLayoutProperty->UpdateStartDate(startDate);
     dataPickerRowLayoutProperty->UpdateEndDate(endDate);
     /**
      * test branch GetStartDateLunar().year > GetEndDateLunar().year
-    */
+     */
     pickerPattern->AdjustLunarStartEndDate();
     /**
      * test branch GetStartDateLunar().month > GetEndDateLunar().month
-    */
+     */
     startDate.year = endDate.year = 2000;
     dataPickerRowLayoutProperty->UpdateStartDate(startDate);
     dataPickerRowLayoutProperty->UpdateEndDate(endDate);
     pickerPattern->AdjustLunarStartEndDate();
     /**
      * test branch GetStartDateLunar().day > GetEndDateLunar().day
-    */
+     */
     startDate.month = endDate.month = 7;
     dataPickerRowLayoutProperty->UpdateStartDate(startDate);
     dataPickerRowLayoutProperty->UpdateEndDate(endDate);
@@ -2373,5 +2366,123 @@ HWTEST_F(DatePickerTestNg, DatePickerEventActionsTest001, TestSize.Level1)
     columnPattern->pressed_ = true;
     panEvent->actionEnd_(gestureEvent);
     EXPECT_FALSE(columnPattern->pressed_);
+}
+
+/**
+ * @tc.name: TossAnimationControllerTest001
+ * @tc.desc: Test TossAnimationController.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, TossAnimationControllerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TossAnimationController instance.
+     */
+    RefPtr<TossAnimationController> toss = AceType::MakeRefPtr<TossAnimationController>();
+    toss->SetStart(YOFFSET_START1);
+    toss->SetEnd(YOFFSET_END1);
+    toss->timeEnd_ = toss->GetCurrentTime() + TIME_PLUS;
+    /**
+     * @tc.steps: step2. call Play function.
+     * @tc.expected: The return value is true.
+     */
+    auto ret = toss->Play();
+    EXPECT_EQ(toss->yStart_, YOFFSET_START1);
+    EXPECT_EQ(toss->yEnd_, YOFFSET_END1);
+    EXPECT_TRUE(ret);
+    auto column = AceType::MakeRefPtr<DatePickerColumnPattern>();
+    toss->SetColumn(column);
+    /**
+     * cover StopCallback callback
+     */
+    toss->toss_->controller_->NotifyStopListener();
+}
+
+/**
+ * @tc.name: TossAnimationControllerTest002
+ * @tc.desc: Test TossAnimationController.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, TossAnimationControllerTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TossAnimationController instance.
+     */
+    RefPtr<TossAnimationController> toss = AceType::MakeRefPtr<TossAnimationController>();
+    toss->SetStart(YOFFSET_START1);
+    toss->SetEnd(YOFFSET_END1);
+    toss->timeEnd_ = toss->GetCurrentTime() + TIME_PLUS;
+    /**
+     * @tc.steps: step2. call Play function.
+     * @tc.expected: The return value is true.
+     */
+    auto ret = toss->Play();
+    EXPECT_EQ(toss->yStart_, YOFFSET_START1);
+    EXPECT_EQ(toss->yEnd_, YOFFSET_END1);
+    EXPECT_TRUE(ret);
+    toss->SetStart(YOFFSET_START2);
+    toss->SetEnd(YOFFSET_END2);
+    toss->timeEnd_ = toss->GetCurrentTime() + TIME_PLUS;
+    ret = toss->Play();
+    EXPECT_EQ(toss->yStart_, YOFFSET_START2);
+    EXPECT_EQ(toss->yEnd_, YOFFSET_END2);
+    EXPECT_TRUE(ret);
+    auto column = AceType::MakeRefPtr<DatePickerColumnPattern>();
+    toss->SetColumn(column);
+    /**
+     * cover PickerAnimation callback
+     */
+    toss->toss_->callback_(0.5);
+}
+
+/**
+ * @tc.name: TossAnimationControllerTest003
+ * @tc.desc: Test TossAnimationController.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, TossAnimationControllerTest003, TestSize.Level1)
+{
+    RefPtr<TossAnimationController> toss = AceType::MakeRefPtr<TossAnimationController>();
+    toss->SetStart(YOFFSET_START1);
+    toss->SetEnd(YOFFSET_END1);
+    toss->timeEnd_ = toss->GetCurrentTime() - TIME_PLUS;
+    auto ret = toss->Play();
+    EXPECT_EQ(toss->yStart_, YOFFSET_START1);
+    EXPECT_EQ(toss->yEnd_, YOFFSET_END1);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: TossAnimationControllerTest004
+ * @tc.desc: Test TossAnimationController.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, TossAnimationControllerTest004, TestSize.Level1)
+{
+    RefPtr<TossAnimationController> toss = AceType::MakeRefPtr<TossAnimationController>();
+    toss->SetStart(YOFFSET_START1);
+    toss->SetEnd(YOFFSET_START1);
+    toss->timeEnd_ = toss->GetCurrentTime() + TIME_PLUS;
+    auto ret = toss->Play();
+    EXPECT_EQ(toss->yStart_, YOFFSET_START1);
+    EXPECT_EQ(toss->yEnd_, YOFFSET_START1);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: TossAnimationControllerTest005
+ * @tc.desc: Test TossAnimationController.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, TossAnimationControllerTest005, TestSize.Level1)
+{
+    RefPtr<TossAnimationController> toss = AceType::MakeRefPtr<TossAnimationController>();
+    toss->SetStart(YOFFSET_START1);
+    toss->SetEnd(YOFFSET_END1);
+    toss->timeEnd_ = toss->GetCurrentTime() + TIME_PLUS_LARGE;
+    auto ret = toss->Play();
+    EXPECT_EQ(toss->yStart_, YOFFSET_START1);
+    EXPECT_EQ(toss->yEnd_, YOFFSET_END1);
+    EXPECT_FALSE(ret);
 }
 } // namespace OHOS::Ace::NG
