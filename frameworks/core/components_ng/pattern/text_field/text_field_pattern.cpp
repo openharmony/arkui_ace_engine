@@ -1788,6 +1788,31 @@ void TextFieldPattern::StopTwinkling()
     }
 }
 
+void TextFieldPattern::CheckIfNeedToResetKeyboard()
+{
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    bool needToResetKeyboard = false;
+    // check unspecified  for first time entrance
+    if (keyboard_ != layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED)) {
+        LOGI("Keyboard type changed to %{public}d", layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED));
+        keyboard_ = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
+        needToResetKeyboard = true;
+    }
+    if (action_ != TextInputAction::UNSPECIFIED) {
+        needToResetKeyboard = action_ != GetTextInputActionValue(TextInputAction::DONE);
+    }
+    action_ = GetTextInputActionValue(TextInputAction::DONE);
+    LOGI("Keyboard action is %{public}d", action_);
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    // if keyboard attached and keyboard is shown, pull up keyboard again
+    if (needToResetKeyboard && imeAttached_ && imeShown_) {
+        CloseKeyboard(true);
+        RequestKeyboard(false, true, true);
+    }
+#endif
+}
+
 void TextFieldPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -1798,11 +1823,7 @@ void TextFieldPattern::OnModifyDone()
     instanceId_ = context->GetInstanceId();
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (keyboard_ != layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED)) {
-        LOGI("Keyboard type changed to %{public}d", layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED));
-        CloseKeyboard(true);
-        keyboard_ = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
-    }
+    CheckIfNeedToResetKeyboard();
     if (layoutProperty->GetShowUnderlineValue(false)) {
         SaveUnderlineStates();
     }
