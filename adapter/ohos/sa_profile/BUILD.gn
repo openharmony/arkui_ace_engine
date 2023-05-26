@@ -15,7 +15,7 @@ import("//build/ohos/sa_profile/sa_profile.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 ohos_sa_profile("ace_sa_profile") {
-  sources = [ "7001.xml" ]
+  sources = [ "7001.json" ]
 
   part_name = ace_engine_part
 }
