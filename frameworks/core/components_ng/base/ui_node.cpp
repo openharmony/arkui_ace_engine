@@ -89,7 +89,7 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently)
     DoAddChild(it, child, silently);
 }
 
-std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child)
+std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child, bool allowTransition)
 {
     CHECK_NULL_RETURN(child, children_.end());
 
@@ -101,13 +101,13 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
     // If the child is undergoing a disappearing transition, rather than simply removing it, we should move it to the
     // disappearing children. This ensures that the child remains alive and the tree hierarchy is preserved until the
     // transition has finished. We can then perform the necessary cleanup after the transition is complete.
-    if ((*iter)->OnRemoveFromParent()) {
-        // move child into disappearing children, skip syncing render tree
-        AddDisappearingChild(child, std::distance(children_.begin(), iter));
-    } else {
-        // remove the child and sync render tree
+    if ((*iter)->OnRemoveFromParent(allowTransition)) {
+        // OnRemoveFromParent returns true means the child can be removed from tree immediately.
         RemoveDisappearingChild(child);
         MarkNeedSyncRenderTree();
+    } else {
+        // else move child into disappearing children, skip syncing render tree
+        AddDisappearingChild(child, std::distance(children_.begin(), iter));
     }
     auto result = children_.erase(iter);
     return result;
@@ -167,7 +167,7 @@ void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& n
     DoAddChild(iter, newNode);
 }
 
-void UINode::Clean(bool cleanDirectly)
+void UINode::Clean(bool cleanDirectly, bool allowTransition)
 {
     bool needSyncRenderTree = false;
     int32_t index = 0;
@@ -180,11 +180,13 @@ void UINode::Clean(bool cleanDirectly)
         // the disappearing children. This ensures that the child remains alive and the tree hierarchy is preserved
         // until the transition has finished. We can then perform the necessary cleanup after the transition is
         // complete.
-        if (child->OnRemoveFromParent()) {
-            AddDisappearingChild(child, index);
-        } else {
+        if (child->OnRemoveFromParent(allowTransition)) {
+            // OnRemoveFromParent returns true means the child can be removed from tree immediately.
             RemoveDisappearingChild(child);
             needSyncRenderTree = true;
+        } else {
+            // else move child into disappearing children, skip syncing render tree
+            AddDisappearingChild(child, index);
         }
         ++index;
     }
@@ -206,19 +208,22 @@ void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot, bool sile
     }
 }
 
-bool UINode::OnRemoveFromParent()
+bool UINode::OnRemoveFromParent(bool allowTransition)
 {
-    DetachFromMainTree();
-    auto* frame = AceType::DynamicCast<FrameNode>(this);
-    if (frame) {
-        auto focusHub = frame->GetFocusHub();
-        if (focusHub) {
-            focusHub->RemoveSelf();
-        }
+    // The recursive flag will used by RenderContext, if recursive flag is false,
+    // it may trigger transition
+    DetachFromMainTree(!allowTransition);
+    if (allowTransition && !RemoveImmediately()) {
+        return false;
     }
+    ResetParent();
+    return true;
+}
+
+void UINode::ResetParent()
+{
     parent_.Reset();
     depth_ = -1;
-    return false;
 }
 
 void UINode::DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently)
@@ -698,5 +703,11 @@ void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<Frame
     for (const auto& [child, index] : disappearingChildren_) {
         child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList, index);
     }
+}
+
+bool UINode::RemoveImmediately() const
+{
+    return std::all_of(
+        children_.begin(), children_.end(), [](const auto& child) { return child->RemoveImmediately(); });
 }
 } // namespace OHOS::Ace::NG
