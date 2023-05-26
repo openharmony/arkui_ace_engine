@@ -280,6 +280,7 @@ sk_sp<SkData> DataProviderImageLoader::LoadImageData(
     CHECK_NULL_RETURN(fd >= 0, nullptr);
     auto data = SkData::MakeFromFD(fd);
     close(fd);
+    CHECK_NULL_RETURN(data, nullptr);
     BackgroundTaskExecutor::GetInstance().PostTask(
         [src, data]() {
             // cache file content
