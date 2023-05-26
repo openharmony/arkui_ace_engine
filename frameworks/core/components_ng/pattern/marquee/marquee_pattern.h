@@ -82,6 +82,10 @@ private:
     bool OnlyPlayStatusChange();
     void ChangeAnimationPlayStatus();
     void StoreProperties();
+    void PlayMarqueeAnimation(float start, int32_t playCount, bool needSecondPlay);
+    void OnAnimationFinish();
+    float CalculateStart();
+    float CalculateEnd();
     bool measureChanged_ = false;
     int32_t animationId_ = 0;
     bool isRegistedAreaCallback_ = false;
