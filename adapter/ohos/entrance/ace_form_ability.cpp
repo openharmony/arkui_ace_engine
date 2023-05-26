@@ -80,18 +80,24 @@ void AceFormAbility::LoadFormEnv(const OHOS::AAFwk::Want& want)
     auto moduleInfo = GetHapModuleInfo();
     CHECK_NULL_VOID_NOLOG(moduleInfo);
     packagePathStr += "/" + moduleInfo->package + "/";
+    std::shared_ptr<AbilityInfo> abilityInfo = GetAbilityInfo();
 
     // init form ability
     BackendType backendType = BackendType::FORM;
+    SrcLanguage srcLanguage = SrcLanguage::ETS;
+    if (abilityInfo != nullptr && !abilityInfo->srcLanguage.empty()) {
+        if (abilityInfo->srcLanguage == "js") {
+            srcLanguage = SrcLanguage::JS;
+        }
+    }
 
     std::shared_ptr<Platform::WorkerPath> workerPath = std::make_shared<Platform::WorkerPath>();
     workerPath->packagePathStr = packagePathStr;
     std::vector<std::string> assetBasePathStr;
 
-    std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
-    if (info != nullptr && !info->srcPath.empty()) {
-        LOGI("AceFormAbility srcPath:%{public}s url:%{public}s", info->srcPath.c_str(), parsedUrl.c_str());
-        assetBasePathStr = { "assets/js/" + info->srcPath + "/", std::string("assets/js/") };
+    if (abilityInfo != nullptr && !abilityInfo->srcPath.empty()) {
+        LOGI("AceFormAbility srcPath:%{public}s url:%{public}s", abilityInfo->srcPath.c_str(), parsedUrl.c_str());
+        assetBasePathStr = { "assets/js/" + abilityInfo->srcPath + "/", std::string("assets/js/") };
     } else {
         LOGI("AceFormAbility parsedUrl:%{public}s", parsedUrl.c_str());
         assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
@@ -99,9 +105,14 @@ void AceFormAbility::LoadFormEnv(const OHOS::AAFwk::Want& want)
 
     workerPath->assetBasePathStr = assetBasePathStr;
 
-    Platform::PaContainer::CreateContainer(instanceId_, backendType, this, moduleInfo->hapPath,
-        std::make_unique<FormPlatformEventCallback>([this]() { TerminateAbility(); }), workerPath);
+    Platform::PaContainerOptions options;
+    options.type = backendType;
+    options.language = srcLanguage;
+    options.hapPath = moduleInfo->hapPath;
+    options.workerPath = workerPath;
 
+    Platform::PaContainer::CreateContainer(instanceId_, this, options,
+        std::make_unique<FormPlatformEventCallback>([this]() { TerminateAbility(); }));
     Platform::PaContainer::AddAssetPath(instanceId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
 
     // run form ability

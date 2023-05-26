@@ -39,7 +39,7 @@ public:
     JsBackendEngine() = default;
     virtual ~JsBackendEngine() = default;
 
-    virtual bool Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendType type) = 0;
+    virtual bool Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendType type, SrcLanguage language) = 0;
 
     virtual void SetAssetManager(const RefPtr<AssetManager>& assetManager) = 0;
 

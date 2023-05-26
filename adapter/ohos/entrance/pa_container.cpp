@@ -45,24 +45,23 @@ const char* GetPaEngineSharedLibrary()
 
 } // namespace
 
-PaContainer::PaContainer(int32_t instanceId, BackendType type, void* paAbility, const std::string& hapPath,
-    std::unique_ptr<PlatformEventCallback> callback, std::shared_ptr<WorkerPath> workerPath)
-    : instanceId_(instanceId), type_(type), paAbility_(paAbility)
+PaContainer::PaContainer(int32_t instanceId, void* paAbility, const PaContainerOptions& options,
+    std::unique_ptr<PlatformEventCallback> callback)
+    : instanceId_(instanceId), paAbility_(paAbility)
 {
     ACE_DCHECK(callback);
     auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     flutterTaskExecutor->InitPlatformThread();
     flutterTaskExecutor->InitJsThread();
     taskExecutor_ = flutterTaskExecutor;
-    hapPath_ = hapPath;
-    workerPath_ =  workerPath;
-
-    InitializeBackend();
-
+    type_ = options.type;
+    hapPath_ = options.hapPath;
+    workerPath_ =  options.workerPath;
+    InitializeBackend(options.language);
     platformEventCallback_ = std::move(callback);
 }
 
-void PaContainer::InitializeBackend()
+void PaContainer::InitializeBackend(SrcLanguage language)
 {
     // create backend
     backend_ = Backend::Create();
@@ -80,7 +79,7 @@ void PaContainer::InitializeBackend()
     paBackend->SetJsEngine(jsEngine);
 
     ACE_DCHECK(backend_);
-    backend_->Initialize(type_, taskExecutor_);
+    backend_->Initialize(type_, language, taskExecutor_);
 }
 
 RefPtr<PaContainer> PaContainer::GetContainer(int32_t instanceId)
@@ -89,11 +88,10 @@ RefPtr<PaContainer> PaContainer::GetContainer(int32_t instanceId)
     return AceType::DynamicCast<PaContainer>(container);
 }
 
-void PaContainer::CreateContainer(int32_t instanceId, BackendType type, void* paAbility, const std::string& hapPath,
-    std::unique_ptr<PlatformEventCallback> callback, std::shared_ptr<WorkerPath> workerPath)
+void PaContainer::CreateContainer(int32_t instanceId, void* paAbility, const PaContainerOptions& options,
+    std::unique_ptr<PlatformEventCallback> callback)
 {
-    auto aceContainer = AceType::MakeRefPtr<PaContainer>(instanceId, type, paAbility, hapPath,
-        std::move(callback), workerPath);
+    auto aceContainer = AceType::MakeRefPtr<PaContainer>(instanceId, paAbility, options, std::move(callback));
     AceEngine::Get().AddContainer(instanceId, aceContainer);
 
     auto back = aceContainer->GetBackend();

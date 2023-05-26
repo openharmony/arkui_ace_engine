@@ -179,21 +179,6 @@ void JsiPaEngine::RegisterUncaughtExceptionHandler()
     jsAbilityRuntime_->RegisterUncaughtExceptionHandler(uncaughtExceptionInfo);
 }
 
-void JsiPaEngine::RegisterConsoleModule()
-{
-    ACE_SCOPED_TRACE("JsiPaEngine::RegisterConsoleModule");
-    shared_ptr<JsValue> global = runtime_->GetGlobal();
-
-    // app log method
-    shared_ptr<JsValue> consoleObj = runtime_->NewObject();
-    consoleObj->SetProperty(runtime_, "log", runtime_->NewFunction(JsiBaseUtils::AppInfoLogPrint));
-    consoleObj->SetProperty(runtime_, "debug", runtime_->NewFunction(JsiBaseUtils::AppDebugLogPrint));
-    consoleObj->SetProperty(runtime_, "info", runtime_->NewFunction(JsiBaseUtils::AppInfoLogPrint));
-    consoleObj->SetProperty(runtime_, "warn", runtime_->NewFunction(JsiBaseUtils::AppWarnLogPrint));
-    consoleObj->SetProperty(runtime_, "error", runtime_->NewFunction(JsiBaseUtils::AppErrorLogPrint));
-    global->SetProperty(runtime_, "console", consoleObj);
-}
-
 void JsiPaEngine::RegisterConsoleModule(ArkNativeEngine* engine)
 {
     ACE_SCOPED_TRACE("JsiPaEngine::RegisterConsoleModule");
@@ -249,7 +234,7 @@ void JsiPaEngine::EvaluateJsCode()
     ACE_SCOPED_TRACE("JsiPaEngine::EvaluateJsCode");
     CHECK_NULL_VOID(jsAbilityRuntime_);
     // load jsfwk
-    if (!jsAbilityRuntime_->LoadScript("/system/etc/strip.native.min.abc")) {
+    if (language_ == SrcLanguage::JS && !jsAbilityRuntime_->LoadScript("/system/etc/strip.native.min.abc")) {
         LOGE("Failed to load js framework!");
     }
     // load paMgmt.js
@@ -307,6 +292,7 @@ bool JsiPaEngine::InitJsEnv(bool debuggerMode, const std::unordered_map<std::str
 
 #if !defined(PREVIEW)
     for (const auto& [key, value] : extraNativeObject) {
+        LOGD("Set property, key: %{public}s.", key.c_str());
         shared_ptr<JsValue> nativeValue = runtime_->NewNativePointer(value);
         runtime_->GetGlobal()->SetProperty(runtime_, key, nativeValue);
     }
@@ -314,9 +300,7 @@ bool JsiPaEngine::InitJsEnv(bool debuggerMode, const std::unordered_map<std::str
 
     // Register pa native functions
     RegisterPaModule();
-    if (jsAbilityRuntime_) {
-        jsAbilityRuntime_->InitConsoleModule();
-    }
+
     // load abc file
     EvaluateJsCode();
 
@@ -393,7 +377,7 @@ JsiPaEngine::~JsiPaEngine()
     runtime_ = nullptr;
 }
 
-bool JsiPaEngine::Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendType type)
+bool JsiPaEngine::Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendType type, SrcLanguage language)
 {
     ACE_SCOPED_TRACE("JsiPaEngine::Initialize");
     LOGD("JsiPaEngine initialize");
@@ -401,6 +385,7 @@ bool JsiPaEngine::Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendTy
     ACE_DCHECK(taskExecutor);
     taskExecutor_ = taskExecutor;
     type_ = type;
+    language_ = language;
 
     AbilityRuntime::Runtime::Options options;
     InitJsRuntimeOptions(options);
@@ -424,7 +409,11 @@ bool JsiPaEngine::Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendTy
         CHECK_NULL_VOID(nativeEngine);
         nativeEngine->Loop(LOOP_NOWAIT);
     });
-    JsBackendTimerModule::GetInstance()->InitTimerModule(nativeEngine, taskExecutor);
+
+    if (language_ == SrcLanguage::JS) {
+        JsBackendTimerModule::GetInstance()->InitTimerModule(nativeEngine, taskExecutor);
+    }
+
     SetPostTask(nativeEngine);
 #if !defined(PREVIEW)
     nativeEngine->CheckUVLoop();
