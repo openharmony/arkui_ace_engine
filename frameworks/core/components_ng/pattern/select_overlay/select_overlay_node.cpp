@@ -812,7 +812,7 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
 bool SelectOverlayNode::IsInSelectedOrSelectOverlayArea(const PointF& point)
 {
     auto pattern = GetPattern<SelectOverlayPattern>();
-    CHECK_NULL_VOID(pattern);
+    CHECK_NULL_RETURN(pattern, false);
 
     std::vector<RectF> rects;
     rects.emplace_back(pattern->GetHandleRegion(true));

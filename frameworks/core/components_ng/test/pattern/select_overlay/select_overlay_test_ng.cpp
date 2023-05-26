@@ -36,8 +36,6 @@ const std::string TEST_TAG = "Test";
 constexpr int32_t NODE_ID = 143;
 constexpr int32_t NODE_ID2 = 153;
 constexpr int32_t NODE_ID3 = 157;
-constexpr float DEFAULT_ROOT_WIDTH = 480.f;
-constexpr float DEFAULT_ROOT_HEIGHT = 800.f;
 } // namespace
 
 class SelectOverlayTestNg : public testing::Test {
