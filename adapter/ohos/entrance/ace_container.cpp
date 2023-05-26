@@ -1527,11 +1527,6 @@ sptr<IRemoteObject> AceContainer::GetToken()
     return nullptr;
 }
 
-std::shared_ptr<AbilityRuntime::Context> AceContainer::GetAbilityRuntimeContext()
-{
-    return runtimeContext_.lock();
-}
-
 // ArkTsCard start
 std::shared_ptr<Rosen::RSSurfaceNode> AceContainer::GetFormSurfaceNode(int32_t instanceId)
 {
