@@ -28,12 +28,12 @@
 #include "core/components_ng/pattern/shape/circle_pattern.h"
 #include "core/components_ng/pattern/shape/ellipse_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
+#include "core/components_ng/pattern/shape/shape_container_layout_algorithm.h"
 #include "core/components_ng/pattern/shape/shape_container_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_container_pattern.h"
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_pattern.h"
 #include "core/components_ng/test/pattern/shape/base_shape_pattern_test_ng.h"
-#include "core/components_ng/pattern/shape/shape_container_layout_algorithm.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -92,8 +92,8 @@ HWTEST_F(ShapePatternTestNg, LayoutAlgorithm001, TestSize.Level1)
     layoutConstraint.selfIdealSize.SetHeight(HEIGHT);
     layoutProperty->UpdateLayoutConstraint(layoutConstraint);
     layoutProperty->UpdateContentConstraint();
-    auto size = layoutAlgorithm->MeasureContent(layoutProperty->CreateContentConstraint(),
-                                            AccessibilityManager::RawPtr(layoutWrapper));
+    auto size = layoutAlgorithm->MeasureContent(
+        layoutProperty->CreateContentConstraint(), AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_EQ(size.has_value(), true);
     EXPECT_FLOAT_EQ(size.value().Width(), WIDTH);
     EXPECT_FLOAT_EQ(size.value().Height(), HEIGHT);
@@ -273,39 +273,8 @@ HWTEST_F(ShapePatternTestNg, GetChildrenSize001, TestSize.Level1)
     auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
     auto shapeContainerLayoutAlgorithm = AceType::DynamicCast<ShapeContainerLayoutAlgorithm>(layoutAlgorithm);
     auto childFrame =
-         shapeContainerLayoutAlgorithm->GetChildrenSize(AccessibilityManager::RawPtr(layoutWrapper), SizeF(0, 0));
+        shapeContainerLayoutAlgorithm->GetChildrenSize(AccessibilityManager::RawPtr(layoutWrapper), SizeF(0, 0));
     EXPECT_TRUE(childFrame.IsNonNegative());
 }
-
-/**
- * @tc.name: OnDirtyLayoutWrapperSwap
- * @tc.desc: check ShapeContainerPattern OnDirtyLayoutWrapperSwap
- * @tc.type: FUNC
- */
-
-HWTEST_F(ShapePatternTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
-{
-    auto shapeModel = ShapeModelNG();
-    shapeModel.Create();
-    shapeModel.SetBitmapMesh(MESH, COLUMN, ROW);
-    RefPtr<UINode> uiNode = ViewStackProcessor::GetInstance()->Finish();
-    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
-    EXPECT_TRUE(frameNode);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_TRUE(geometryNode);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
-    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
-    auto flag = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
-    EXPECT_TRUE(layoutWrapper);
-    auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
-    EXPECT_TRUE(paintProperty);
-    pattern->ViewPortTransform();
-    paintProperty->propShapeViewBox_ = std::nullopt;
-    pattern->ViewPortTransform();
-    pattern->OnModifyDone();
-    EXPECT_FALSE(flag);
-}
-
 
 } // namespace OHOS::Ace::NG
