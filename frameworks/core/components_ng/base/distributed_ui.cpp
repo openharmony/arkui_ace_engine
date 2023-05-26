@@ -487,8 +487,8 @@ RefPtr<UINode> DistributedUI::RestoreNode(const std::unique_ptr<NodeObject>& nod
                 } },
             { V2::LIST_ITEM_ETS_TAG,
                 [](const std::string& type, int32_t nodeId) {
-                    return FrameNode::GetOrCreateFrameNode(
-                        type, nodeId, []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr); });
+                    return FrameNode::GetOrCreateFrameNode(type, nodeId,
+                        []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
                 } },
             { V2::LIST_ETS_TAG,
                 [](const std::string& type, int32_t nodeId) {

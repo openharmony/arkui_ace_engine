@@ -212,7 +212,6 @@ private:
     std::weak_ptr<Ace::Pattern> GetPatternNG(int32_t id);
     Pattern GetPattern(unsigned int id);
     std::vector<uint32_t> lineDash_;
-    ImageData imageData_;
     bool isOffscreen_ = false;
 };
 

@@ -809,4 +809,28 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
     return menu;
 }
 
+bool SelectOverlayNode::IsInSelectedOrSelectOverlayArea(const PointF& point)
+{
+    auto pattern = GetPattern<SelectOverlayPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    std::vector<RectF> rects;
+    rects.emplace_back(pattern->GetHandleRegion(true));
+    rects.emplace_back(pattern->GetHandleRegion(false));
+    if (selectMenu_ && selectMenu_->GetGeometryNode()) {
+        rects.emplace_back(selectMenu_->GetGeometryNode()->GetFrameRect());
+    }
+    if (extensionMenu_ && extensionMenu_->GetGeometryNode()) {
+        rects.emplace_back(extensionMenu_->GetGeometryNode()->GetFrameRect());
+    }
+
+    for (const auto& rect : rects) {
+        if (rect.IsInRegion(point)) {
+            LOGD("point is in select overlay rects");
+            return true;
+        }
+    }
+    return false;
+}
+
 } // namespace OHOS::Ace::NG

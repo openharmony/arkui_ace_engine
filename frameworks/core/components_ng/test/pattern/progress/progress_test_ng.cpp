@@ -2103,6 +2103,116 @@ HWTEST_F(ProgressTestNg, RingProgressModifier004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RingProgressModifier005
+ * @tc.desc: Test the modifier while drawing ring progress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, RingProgressModifier005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
+     * @tc.expected: step1. Check the ProgressModifier property value.
+     */
+    Gradient gradient;
+    GradientColor gradientColorEnd;
+    GradientColor gradientColorStart;
+    gradientColorEnd.SetLinearColor(LinearColor(Color::WHITE));
+    gradientColorStart.SetLinearColor(LinearColor(Color::WHITE));
+    gradientColorEnd.SetDimension(Dimension(0.0));
+    gradient.AddColor(gradientColorEnd);
+    gradientColorStart.SetDimension(Dimension(1.0));
+    gradient.AddColor(gradientColorStart);
+
+    ProgressModifier progressModifier;
+    SizeF contentSize(CONTEXT_WIDTH, CONTEXT_HEIGHT);
+    progressModifier.SetContentSize(contentSize);
+    progressModifier.SetVisible(true);
+    progressModifier.SetProgressType(PROGRESS_TYPE_RING);
+    progressModifier.SetProgressStatus(ProgressStatus::PROGRESSING);
+    EXPECT_EQ(progressModifier.progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_RING));
+    LinearColor linearColor;
+    progressModifier.SetColor(linearColor);
+    EXPECT_EQ(progressModifier.color_->Get(), linearColor);
+    progressModifier.SetBackgroundColor(linearColor);
+    EXPECT_EQ(progressModifier.bgColor_->Get(), linearColor);
+    progressModifier.SetRingProgressColor(gradient);
+    progressModifier.SetMaxValue(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(progressModifier.maxValue_->Get(), PROGRESS_MODIFIER_VALUE);
+    progressModifier.SetValue(50.0f);
+    EXPECT_EQ(progressModifier.value_->Get(), 50.0f);
+    OffsetF offset(0, 0);
+    progressModifier.SetContentOffset(offset);
+    EXPECT_EQ(progressModifier.offset_->Get(), offset);
+
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+
+    /**
+     * @tc.steps: step2. Disable shadow and make stroke width smaller than the radius, then call function onDraw.
+     * @tc.expected: step2. Draw ring progress without shadow.
+     */
+    progressModifier.SetPaintShadow(false);
+    contentSize.SetWidth(CONTEXT_WIDTH);
+    contentSize.SetHeight(CONTEXT_WIDTH);
+    progressModifier.SetContentSize(contentSize);
+    progressModifier.SetStrokeWidth(50.0f);
+    progressModifier.onDraw(context);
+    EXPECT_EQ(progressModifier.contentSize_->Get(), contentSize);
+
+    /**
+     * @tc.steps: step3. Disable shadow and make stroke width equal to the radius, then call function onDraw.
+     * @tc.expected: step3. Draw ring progress without shadow.
+     */
+    progressModifier.SetPaintShadow(false);
+    contentSize.SetWidth(CONTEXT_WIDTH);
+    contentSize.SetHeight(CONTEXT_WIDTH);
+    progressModifier.SetContentSize(contentSize);
+    progressModifier.SetStrokeWidth(CONTEXT_WIDTH);
+    progressModifier.onDraw(context);
+    EXPECT_EQ(progressModifier.contentSize_->Get(), contentSize);
+
+    /**
+     * @tc.steps: step4. Enable shadow and make stroke width smaller than the radius, then call function onDraw.
+     * @tc.expected: step4. Draw ring progress with shadow.
+     */
+    progressModifier.SetPaintShadow(true);
+    contentSize.SetWidth(CONTEXT_WIDTH);
+    contentSize.SetHeight(CONTEXT_WIDTH);
+    progressModifier.SetContentSize(contentSize);
+    progressModifier.SetStrokeWidth(50.0f);
+    progressModifier.onDraw(context);
+    EXPECT_EQ(progressModifier.contentSize_->Get(), contentSize);
+
+    /**
+     * @tc.steps: step5. Enable shadow and make stroke width close to the radius, then call function onDraw.
+     * @tc.expected: step5. Draw ring progress with shadow.
+     */
+    progressModifier.SetPaintShadow(true);
+    contentSize.SetWidth(CONTEXT_WIDTH);
+    contentSize.SetHeight(CONTEXT_WIDTH);
+    progressModifier.SetContentSize(contentSize);
+    progressModifier.SetStrokeWidth(CONTEXT_WIDTH - 5.0f);
+    progressModifier.onDraw(context);
+    EXPECT_EQ(progressModifier.contentSize_->Get(), contentSize);
+
+    /**
+     * @tc.steps: step6. Enable shadow and make radius equal to 10.0, then call function onDraw.
+     * @tc.expected: step6. Draw ring progress without shadow.
+     */
+    progressModifier.SetPaintShadow(true);
+    contentSize.SetWidth(20.0f);
+    contentSize.SetHeight(20.0f);
+    progressModifier.SetContentSize(contentSize);
+    progressModifier.SetStrokeWidth(1.0f);
+    progressModifier.onDraw(context);
+    EXPECT_EQ(progressModifier.contentSize_->Get(), contentSize);
+}
+
+/**
  * @tc.name: LinearProgressModifier001
  * @tc.desc: Test ProgressModifier.
  * @tc.type: FUNC

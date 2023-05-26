@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_PATTERN_H
 
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -213,9 +214,10 @@ public:
     const TextEditingValueNG& GetEditingValue() const;
 
 #if defined(IOS_PLATFORM)
-    const TextEditingValue& GetInputEditingValue() const override {
+    const TextEditingValue& GetInputEditingValue() const override
+    {
         static TextEditingValue value;
-	return value;
+        return value;
     };
 #endif
 
@@ -541,7 +543,7 @@ public:
     float GetIconHotZoneSize();
     float GetIconSize();
 
-    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) const;
+    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) const;
 
     void InitSurfaceChangedCallback();
@@ -784,6 +786,11 @@ public:
         return HasFocus();
     }
 
+    void ChangeIsSelectedAreaRedraw()
+    {
+        isSelectedAreaRedraw_ = !isSelectedAreaRedraw_;
+    }
+
 private:
     bool HasFocus() const;
     void HandleTouchEvent(const TouchEventInfo& info);
@@ -813,6 +820,8 @@ private:
     void HandleLongPress(GestureEvent& info);
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void UpdateSelectorByPosition(const int32_t& pos);
+    // assert handles are inside the contentRect, reset them if not
+    void CheckHandles(std::optional<RectF>& firstHandle, std::optional<RectF>& secondHandle);
     void ShowSelectOverlay(const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle);
 
     void CursorMoveOnClick(const Offset& offset);
@@ -821,6 +830,8 @@ private:
     void ProcessOverlay();
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
+    // when moving one handle causes shift of textRect, update x position of the other handle
+    void UpdateOtherHandleOnMove(float dx);
     void SetHandlerOnMoveDone();
     void OnDetachFromFrameNode(FrameNode* node) override;
     bool UpdateCaretByPressOrLongPress();
@@ -948,7 +959,7 @@ private:
     bool isOnHover_ = false;
     bool needToRefreshSelectOverlay_ = false;
     bool needToRequestKeyboardInner_ = false;
-    bool needToRequestKeyboardOnFocus_ = false;
+    bool needToRequestKeyboardOnFocus_ = true;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 

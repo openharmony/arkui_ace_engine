@@ -66,10 +66,13 @@ protected:
     RefPtr<SecurityComponentTheme> GetTheme();
 
 private:
-    void SetDefaultIconStyle(const RefPtr<FrameNode>& imageNode, InternalResource::ResourceId id);
+    void SetDefaultIconStyle(const RefPtr<FrameNode>& imageNode, InternalResource::ResourceId id,
+        bool isButtonVisible);
+    void SetInvisibleBackgroundButton(const RefPtr<FrameNode>& buttonNode);
+    bool IsBackgroundVisible();
     void SetDefaultBackgroundButton(const RefPtr<FrameNode>& buttonNode,
         SecurityComponentBackgroundType type);
-    void SetDefaultTextStyle(const RefPtr<FrameNode>& textNode, const std::string& text);
+    void SetDefaultTextStyle(const RefPtr<FrameNode>& textNode, const std::string& text, bool isButtonVisible);
     void InitLayoutProperty(RefPtr<FrameNode>& node, int32_t text, int32_t icon,
         SecurityComponentBackgroundType backgroundType);
 };

@@ -131,7 +131,10 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             frameSize.SetWidth(layoutConstraint->minSize.Width());
         }
     }
-    frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
+    if (calcLayoutConstraint &&
+        (calcLayoutConstraint->minSize.has_value() || calcLayoutConstraint->maxSize.has_value())) {
+        frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
+    }
     if (layoutConstraint->maxSize.Height() < layoutConstraint->minSize.Height()) {
         frameSize.SetHeight(layoutConstraint->minSize.Height());
     }
@@ -400,7 +403,7 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
 
     Dimension fontSize;
-    if (layoutProperty->HasFontSize() && layoutProperty->GetFontSizeValue(Dimension()).IsNonNegative()) {
+    if (layoutProperty->HasFontSize() && layoutProperty->GetFontSizeValue(Dimension()).IsValid()) {
         fontSize = layoutProperty->GetFontSizeValue(Dimension());
     } else {
         fontSize = theme ? theme->GetFontSize() : textStyle.GetFontSize();
@@ -443,7 +446,7 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<TextField
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
     Dimension fontSize;
     if (layoutProperty->HasPlaceholderFontSize() &&
-        layoutProperty->GetPlaceholderFontSizeValue(Dimension()).IsNonNegative()) {
+        layoutProperty->GetPlaceholderFontSizeValue(Dimension()).IsValid()) {
         fontSize = layoutProperty->GetPlaceholderFontSizeValue(Dimension());
     } else {
         fontSize = theme ? theme->GetFontSize() : textStyle.GetFontSize();

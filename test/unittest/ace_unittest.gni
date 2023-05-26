@@ -161,6 +161,7 @@ template("ace_unittest") {
       sources += invoker.sources
       sources += flutter_sources
       deps = ace_unittest_deps
+      deps += [ "$ace_root/test/unittest:ace_base" ]
 
       configs = ace_unittest_config
 

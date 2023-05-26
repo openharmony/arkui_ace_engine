@@ -1003,7 +1003,7 @@ void GridPattern::UpdateScrollBarOffset()
             continue;
         }
         auto lineStart = line->second.begin()->second;
-        auto lineEnd = line->second.end()->second;
+        auto lineEnd = line->second.rbegin()->second;
         itemCount += (lineEnd - lineStart + 1);
         heightSum += item.second + mainGap;
     }

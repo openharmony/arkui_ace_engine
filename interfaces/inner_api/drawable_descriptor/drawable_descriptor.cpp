@@ -17,6 +17,7 @@
 
 #include <cstddef>
 #include <memory>
+
 #include "base/utils/string_utils.h"
 
 #ifdef NEW_SKIA
@@ -72,6 +73,10 @@ std::unique_ptr<Media::ImageSource> LayeredDrawableDescriptor::CreateImageSource
 {
     std::string itemStr = item;
     std::string idStr = itemStr.substr(itemStr.find(':') + 1);
+    if (!StringUtils::IsNumber(idStr)) {
+        return nullptr;
+    }
+
     size_t len = 0;
     std::unique_ptr<uint8_t[]> data;
     auto state = resourceMgr_->GetMediaDataById(static_cast<uint32_t>(std::stoul(idStr)), len, data);

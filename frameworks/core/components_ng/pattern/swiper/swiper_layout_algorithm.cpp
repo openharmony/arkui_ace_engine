@@ -135,6 +135,8 @@ void SwiperLayoutAlgorithm::MeasureAllPagesToGetMaxChildSize(
 
     int32_t beginIndex = static_cast<int32_t>(std::floor(currentOffsetTimes_)) - cachedCount;
     int32_t endIndex = static_cast<int32_t>(std::floor(currentOffsetTimes_)) + cachedCount;
+    beginIndex = isLoop_ ? beginIndex : std::clamp(beginIndex, 0, totalCount_ - 1);
+    endIndex = isLoop_ ? endIndex : std::clamp(endIndex, 0, totalCount_ - 1);
     if (endIndex - beginIndex >= totalCount_) {
         beginIndex = 0;
         endIndex = totalCount_ - 1;

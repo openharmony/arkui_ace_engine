@@ -35,6 +35,26 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t DEFAULT_CLICK_DISTANCE = 15;
+void UpdateFontStyle(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
+    RefPtr<MenuItemPattern>& itemPattern, bool& contentChanged, bool& labelChanged)
+{
+    auto contentNode = itemPattern->GetContentNode();
+    CHECK_NULL_VOID(contentNode);
+    auto textLayoutProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto label = itemPattern->GetLabelNode();
+    RefPtr<TextLayoutProperty> labelProperty = label ? label->GetLayoutProperty<TextLayoutProperty>() : nullptr;
+    if (menuProperty->GetItalicFontStyle().has_value()) {
+        if (!itemProperty->GetItalicFontStyle().has_value()) {
+            textLayoutProperty->UpdateItalicFontStyle(menuProperty->GetItalicFontStyle().value());
+            contentChanged = true;
+        }
+        if (labelProperty && !itemProperty->GetLabelItalicFontStyle().has_value()) {
+            labelProperty->UpdateItalicFontStyle(menuProperty->GetItalicFontStyle().value());
+            labelChanged = true;
+        }
+    }
+}
 
 void UpdateMenuItemTextNode(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
     RefPtr<MenuItemPattern>& itemPattern)
@@ -77,6 +97,7 @@ void UpdateMenuItemTextNode(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<Men
             labelChanged = true;
         }
     }
+    UpdateFontStyle(menuProperty, itemProperty, itemPattern, contentChanged, labelChanged);
     if (contentChanged) {
         contentNode->MarkModifyDone();
         contentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -413,7 +434,7 @@ RefPtr<LayoutAlgorithm> MenuPattern::CreateLayoutAlgorithm()
 {
     switch (type_) {
         case MenuType::NAVIGATION_MENU:
-            return MakeRefPtr<NavigationMenuLayoutAlgorithm>();
+            return MakeRefPtr<MenuLayoutAlgorithm>();
         case MenuType::MULTI_MENU:
             return MakeRefPtr<MultiMenuLayoutAlgorithm>();
         case MenuType::SUB_MENU:

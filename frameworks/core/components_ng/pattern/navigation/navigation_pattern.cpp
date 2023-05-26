@@ -216,40 +216,6 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
             }
         }
     }
-
-    auto navigationMode = navigationLayoutAlgorithm->GetNavigationMode();
-    auto navigationChildrenSize = hostNode->GetChildren().size();
-    if (navigationMode == NavigationMode::STACK) {
-        auto contentNode = hostNode->GetContentNode();
-        CHECK_NULL_RETURN(contentNode, false);
-        auto contentChildSize = contentNode->GetChildren().size();
-        if (contentChildSize != 0) {
-            auto contentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
-            CHECK_NULL_RETURN(contentNode, false);
-            hostNode->AddChild(contentNode);
-            auto dividerNode = AceType::DynamicCast<FrameNode>(hostNode->GetDividerNode());
-            CHECK_NULL_RETURN(dividerNode, false);
-            hostNode->AddChild(dividerNode);
-            hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        } else {
-            auto contentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
-            CHECK_NULL_RETURN(contentNode, false);
-            hostNode->RemoveChild(contentNode);
-            auto dividerNode = AceType::DynamicCast<FrameNode>(hostNode->GetDividerNode());
-            CHECK_NULL_RETURN(dividerNode, false);
-            hostNode->RemoveChild(dividerNode);
-        }
-    } else {
-        if (navigationChildrenSize != MAX_NAVIGATION_CHILDREN_SIZE) {
-            auto contentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
-            CHECK_NULL_RETURN(contentNode, false);
-            hostNode->AddChild(contentNode);
-            auto dividerNode = AceType::DynamicCast<FrameNode>(hostNode->GetDividerNode());
-            CHECK_NULL_RETURN(dividerNode, false);
-            hostNode->AddChild(dividerNode);
-            hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        }
-    }
     return false;
 }
 

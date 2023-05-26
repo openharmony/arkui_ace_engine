@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -220,16 +220,24 @@ static napi_value JSReset(napi_env env, napi_callback_info info)
         auto curve = Framework::CreateCurve(option->easing);
         auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(option->begin, option->end, curve);
         animation->AddListener([env, onframeRef](double value) {
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(env, &scope);
+            if (scope == nullptr) {
+                LOGW("JsAnimator: open handle scope failed");
+                return;
+            }
             napi_value ret = nullptr;
             napi_value valueNapi = nullptr;
             napi_value onframe = nullptr;
             auto result = napi_get_reference_value(env, onframeRef, &onframe);
             if (result != napi_ok || onframe == nullptr) {
-                LOGW("get onframe in callback failed");
+                LOGW("JsAnimator: get onframe in callback failed");
+                napi_close_handle_scope(env, scope);
                 return;
             }
             napi_create_double(env, value, &valueNapi);
             napi_call_function(env, nullptr, onframe, 1, &valueNapi, &ret);
+            napi_close_handle_scope(env, scope);
         });
         animator->AddInterpolator(animation);
     }
@@ -356,16 +364,24 @@ static napi_value SetOnframe(napi_env env, napi_callback_info info)
     napi_create_reference(env, onframe, 1, &onframeRef);
     animatorResult->SetOnframeRef(onframeRef);
     animation->AddListener([env, onframeRef](double value) {
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(env, &scope);
+        if (scope == nullptr) {
+            LOGW("JsAnimator: open handle scope failed");
+            return;
+        }
         napi_value ret = nullptr;
         napi_value valueNapi = nullptr;
         napi_value onframe = nullptr;
         auto result = napi_get_reference_value(env, onframeRef, &onframe);
         if (result != napi_ok || onframe == nullptr) {
-            LOGW("get onframe in callback failed");
+            LOGW("JsAnimator: get onframe in callback failed");
+            napi_close_handle_scope(env, scope);
             return;
         }
         napi_create_double(env, value, &valueNapi);
         napi_call_function(env, nullptr, onframe, 1, &valueNapi, &ret);
+        napi_close_handle_scope(env, scope);
     });
     animator->AddInterpolator(animation);
     if (!animator->HasScheduler()) {
@@ -409,15 +425,23 @@ static napi_value SetOnfinish(napi_env env, napi_callback_info info)
     animatorResult->SetOnfinishRef(onfinishRef);
     animator->ClearStopListeners();
     animator->AddStopListener([env, onfinishRef] {
-        LOGI("JsAnimator: onfinish->AddIdleListener");
+        LOGI("JsAnimator: onfinish");
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(env, &scope);
+        if (scope == nullptr) {
+            LOGW("JsAnimator: open handle scope failed");
+            return;
+        }
         napi_value ret = nullptr;
         napi_value onfinish = nullptr;
         auto result = napi_get_reference_value(env, onfinishRef, &onfinish);
         if (result != napi_ok || onfinish == nullptr) {
-            LOGW("get onfinish in callback failed");
+            LOGW("JsAnimator: get onfinish in callback failed");
+            napi_close_handle_scope(env, scope);
             return;
         }
         napi_call_function(env, NULL, onfinish, 0, NULL, &ret);
+        napi_close_handle_scope(env, scope);
     });
     napi_value undefined;
     napi_get_undefined(env, &undefined);
@@ -457,15 +481,23 @@ static napi_value SetOncancel(napi_env env, napi_callback_info info)
     animatorResult->SetOncancelRef(oncancelRef);
     animator->ClearIdleListeners();
     animator->AddIdleListener([env, oncancelRef] {
-        LOGI("JsAnimator: oncancel->AddIdleListener");
+        LOGI("JsAnimator: oncancel");
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(env, &scope);
+        if (scope == nullptr) {
+            LOGW("JsAnimator: open handle scope failed");
+            return;
+        }
         napi_value ret = nullptr;
         napi_value oncancel = nullptr;
         auto result = napi_get_reference_value(env, oncancelRef, &oncancel);
         if (result != napi_ok || oncancel == nullptr) {
-            LOGW("get oncancel in callback failed");
+            LOGW("JsAnimator: get oncancel in callback failed");
+            napi_close_handle_scope(env, scope);
             return;
         }
         napi_call_function(env, NULL, oncancel, 0, NULL, &ret);
+        napi_close_handle_scope(env, scope);
     });
     napi_value undefined;
     napi_get_undefined(env, &undefined);
@@ -505,15 +537,23 @@ static napi_value SetOnrepeat(napi_env env, napi_callback_info info)
     animatorResult->SetOnrepeatRef(onrepeatRef);
     animator->ClearRepeatListeners();
     animator->AddRepeatListener([env, onrepeatRef] {
-        LOGI("JsAnimator: onrepeat->AddIdleListener");
+        LOGI("JsAnimator: onrepeat");
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(env, &scope);
+        if (scope == nullptr) {
+            LOGW("JsAnimator: open handle scope failed");
+            return;
+        }
         napi_value ret = nullptr;
         napi_value onrepeat = nullptr;
         auto result = napi_get_reference_value(env, onrepeatRef, &onrepeat);
         if (result != napi_ok || onrepeat == nullptr) {
-            LOGW("get onrepeat in callback failed");
+            LOGW("JsAnimator: get onrepeat in callback failed");
+            napi_close_handle_scope(env, scope);
             return;
         }
         napi_call_function(env, NULL, onrepeat, 0, NULL, &ret);
+        napi_close_handle_scope(env, scope);
     });
     napi_value undefined;
     napi_get_undefined(env, &undefined);

@@ -476,5 +476,47 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText003, TestSize.Lev
     auto textRenderContext = contentNode->GetRenderContext();
     EXPECT_EQ(textRenderContext->GetForegroundColor(), ITEM_DISABLED_COLOR);
 }
+
+/**
+ * @tc.name: MenuItemPatternTestEvent001
+ * @tc.desc: Test Click Event
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menuItem.
+     */
+    MenuItemModelNG MenuItemModelInstance;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    MenuItemProperties itemOption;
+    MenuItemModelInstance.Create(itemOption);
+    MenuItemModelInstance.SetSelected(true);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set callback function.
+     */
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    itemPattern->RegisterOnClick();
+    auto gestureHub = itemNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    auto clickEventActuator = gestureHub->clickEventActuator_;
+    ASSERT_NE(clickEventActuator, nullptr);
+    auto event = clickEventActuator->GetClickEvent();
+    ASSERT_NE(event, nullptr);
+
+    /**
+     * @tc.steps: step3. call callback function.
+     * @tc.expected: isSelected_ is false.
+     */
+    GestureEvent gestureEvent;
+    event(gestureEvent);
+    EXPECT_FALSE(itemPattern->isSelected_);
+}
 } // namespace
 } // namespace OHOS::Ace::NG
