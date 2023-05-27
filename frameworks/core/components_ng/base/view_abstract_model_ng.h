@@ -593,6 +593,11 @@ public:
         ViewAbstract::SetHueRotate(value);
     }
 
+    void SetUseEffect(bool useEffect) override
+    {
+        ViewAbstract::SetUseEffect(useEffect);
+    }
+
     void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override
     {
         ViewAbstract::SetClickEffectLevel(level, scaleValue);

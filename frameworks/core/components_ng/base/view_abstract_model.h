@@ -170,6 +170,7 @@ public:
     virtual void SetInvert(const Dimension& value) = 0;
     virtual void SetHueRotate(float value) = 0;
     virtual void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) = 0;
+    virtual void SetUseEffect(bool useEffect) = 0;
 
     // event
     virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) = 0;

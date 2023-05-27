@@ -888,6 +888,12 @@ void RosenRenderContext::OnAccessibilityFocusUpdate(bool isAccessibilityFocus)
                                                       : AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED);
 }
 
+void RosenRenderContext::OnUseEffectUpdate(bool useEffect)
+{
+    CHECK_NULL_VOID(rsNode_);
+    // rsNode_->SetUseEffect(useEffect);
+}
+
 void RosenRenderContext::OnFreezeUpdate(bool isFreezed)
 {
     CHECK_NULL_VOID(rsNode_);

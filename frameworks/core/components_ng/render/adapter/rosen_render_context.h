@@ -282,6 +282,7 @@ private:
     void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
     void OnMotionPathUpdate(const MotionPathOption& motionPath) override;
 
+    void OnUseEffectUpdate(bool useEffect) override;
     void OnFreezeUpdate(bool isFreezed) override;
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 

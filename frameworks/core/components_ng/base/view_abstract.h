@@ -251,6 +251,9 @@ public:
 
     static void Pop();
 
+    // useEffect
+    static void SetUseEffect(bool useEffect);
+
     // foregroundColor
     static void SetForegroundColor(const Color& color);
     static void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy);

@@ -1411,6 +1411,15 @@ void ViewAbstract::SetSharedTransition(
     }
 }
 
+void ViewAbstract::SetUseEffect(bool useEffect)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(UseEffect, useEffect);
+}
+
 void ViewAbstract::SetForegroundColor(const Color& color)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
