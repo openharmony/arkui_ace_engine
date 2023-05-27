@@ -55,6 +55,10 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle> textStyl
 {
     contentChange_ = AceType::MakeRefPtr<PropertyBool>(false);
     AttachProperty(contentChange_);
+    contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
+    contentSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
+    AttachProperty(contentOffset_);
+    AttachProperty(contentSize_);
 
     if (textStyle.has_value()) {
         SetDefaultAnimatablePropertyValue(textStyle.value());
@@ -137,12 +141,17 @@ void TextContentModifier::SetDefaultBaselineOffset(const TextStyle& textStyle)
 void TextContentModifier::onDraw(DrawingContext& drawingContext)
 {
     CHECK_NULL_VOID_NOLOG(paragraph_);
+    auto canvas = drawingContext.canvas;
+    canvas.Save();
     if (!textRacing_) {
-        paragraph_->Paint(drawingContext.canvas, paintOffset_.GetX(), paintOffset_.GetY());
+        auto contentSize = contentSize_->Get();
+        auto contentOffset = contentOffset_->Get();
+        RSRect clipInnerRect = RSRect(contentOffset.GetX(), contentOffset.GetY(),
+            contentSize.Width() + contentOffset.GetX(), contentSize.Height() + contentOffset.GetY());
+        canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
+        paragraph_->Paint(canvas, paintOffset_.GetX(), paintOffset_.GetY());
     } else {
         // Racing
-        auto canvas = drawingContext.canvas;
-        canvas.Save();
         float textRacePercent = GetTextRacePercent();
         canvas.ClipRect(RSRect(0, 0, drawingContext.width, drawingContext.height), RSClipOp::INTERSECT);
 
@@ -155,8 +164,8 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
         if ((paintOffset_.GetX() + paragraph2Offset) < drawingContext.width) {
             paragraph_->Paint(drawingContext.canvas, paintOffset_.GetX() + paragraph2Offset, paintOffset_.GetY());
         }
-        canvas.Restore();
     }
+    canvas.Restore();
 }
 
 void TextContentModifier::ModifyFontSizeInTextStyle(TextStyle& textStyle)
@@ -382,6 +391,18 @@ void TextContentModifier::SetBaselineOffset(const Dimension& value)
     baselineOffset_ = Dimension(baselineOffsetValue);
     CHECK_NULL_VOID(baselineOffsetFloat_);
     baselineOffsetFloat_->Set(baselineOffsetValue);
+}
+
+void TextContentModifier::SetContentOffset(OffsetF& value)
+{
+    CHECK_NULL_VOID(contentOffset_);
+    contentOffset_->Set(value);
+}
+
+void TextContentModifier::SetContentSize(SizeF& value)
+{
+    CHECK_NULL_VOID(contentSize_);
+    contentSize_->Set(value);
 }
 
 void TextContentModifier::StartTextRace()
