@@ -67,6 +67,8 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe) {}
 
 void PipelineContext::OnMouseEvent(const MouseEvent& event) {}
 
+void PipelineContext::FlushTouchEvents() {}
+
 void PipelineContext::OnAxisEvent(const AxisEvent& event) {}
 
 void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action) {}
@@ -371,8 +373,7 @@ bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& c
 
 void PipelineBase::Destroy() {}
 
-void PipelineBase::AddEtsCardTouchEventCallback(
-    int32_t ponitId, EtsCardTouchEventCallback&& callback) {}
+void PipelineBase::AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback) {}
 
 double PipelineBase::ConvertPxToVp(const Dimension& dimension) const
 {
