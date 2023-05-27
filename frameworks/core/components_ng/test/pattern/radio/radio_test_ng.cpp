@@ -1218,6 +1218,8 @@ HWTEST_F(RadioTestNg, RadioPatternTest024, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     auto geometryNode = frameNode->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
 
     RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
         frameNode, geometryNode, layoutProperty);
