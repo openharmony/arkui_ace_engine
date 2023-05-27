@@ -188,7 +188,6 @@ build_component_ng("pattern_ng") {
     "menu/menu_pattern.cpp",
     "menu/menu_view.cpp",
     "menu/multi_menu_layout_algorithm.cpp",
-    "menu/navigation_menu_layout_algorithm.cpp",
     "menu/wrapper/menu_wrapper_layout_algorithm.cpp",
     "menu/wrapper/menu_wrapper_paint_method.cpp",
     "menu/wrapper/menu_wrapper_pattern.cpp",
