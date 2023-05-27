@@ -1305,7 +1305,6 @@ void UIContentImpl::ReloadForm()
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     auto flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->GetAssetManager());
     flutterAssetManager->ReloadProvider();
-    Platform::AceContainer::ClearEngineCache(instanceId_);
     Platform::AceContainer::RunPage(instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(),
         startUrl_, "");
 }
