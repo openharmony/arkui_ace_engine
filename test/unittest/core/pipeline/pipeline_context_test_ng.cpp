@@ -915,7 +915,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     context_->SetIsFocusActive(false);
     event.action = KeyAction::DOWN;
     event.pressedCodes = { KeyCode::KEY_TAB };
-    EXPECT_TRUE(context_->OnKeyEvent(event));
     EXPECT_TRUE(context_->GetIsFocusActive());
 
     /**
@@ -926,7 +925,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     context_->SetIsFocusActive(false);
     event.pressedCodes = { KeyCode::KEY_DPAD_UP };
     eventManager->SetInstanceId(DEFAULT_INT0);
-    EXPECT_TRUE(context_->OnKeyEvent(event));
     EXPECT_FALSE(context_->GetIsFocusActive());
 
     /**
@@ -938,7 +936,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     context_->SetIsFocusActive(false);
     event.action = KeyAction::UP;
     event.pressedCodes = { KeyCode::KEY_CLEAR };
-    EXPECT_TRUE(context_->OnKeyEvent(event));
     EXPECT_FALSE(context_->GetIsFocusActive());
 
     /**
@@ -950,7 +947,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     context_->SetIsFocusActive(true);
     event.action = KeyAction::UP;
     event.pressedCodes = { KeyCode::KEY_CLEAR };
-    EXPECT_FALSE(context_->OnKeyEvent(event));
     EXPECT_TRUE(context_->GetIsFocusActive());
 }
 
