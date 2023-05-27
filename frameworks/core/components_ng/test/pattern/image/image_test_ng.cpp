@@ -1583,6 +1583,9 @@ HWTEST_F(ImageTestNg, ImageModifier003, TestSize.Level1)
     DrawingContext context { canvas, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
     auto imageCanvas = imagePaintMethod.imageModifier_->canvasImage_.Upgrade();
     ASSERT_NE(imageCanvas, nullptr);
+    imagePaintMethod.imageModifier_->SetIsAltImage(true);
+    EXPECT_EQ(imageCanvas->isDrawAnimate_, false);
+    imagePaintMethod.imageModifier_->SetIsAltImage(false);
     imagePaintMethod.imageModifier_->isFirst_ = true;
     imagePaintMethod.imageModifier_->onDraw(context);
     EXPECT_EQ(imageCanvas->isDrawAnimate_, false);
