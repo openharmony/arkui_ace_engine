@@ -265,7 +265,6 @@ bool JSTextPicker::ProcessCascadeOptions(const JSRef<JSObject>& paramObject,
         options.clear();
         return false;
     } else {
-        JSRef<JSArray> getRange = paramObject->GetProperty("range");
         JSTextPickerParser::GenerateCascadeOptions(getRange, options);
         uint32_t maxCount = options.empty()? 0 : 1;
         for (size_t i = 0; i < options.size(); i++) {
@@ -332,7 +331,6 @@ bool JSTextPickerParser::ParseMultiTextArrayRangeInternal(const JSRef<JSVal>& va
     std::vector<NG::TextCascadePickerOptions>& options)
 {
     if (value->IsArray()) {
-        std::vector<std::string> rangeResult;
         NG::TextCascadePickerOptions option;
         if (!ParseJsStrArray(value, option.rangeResult)) {
             LOGI("parse str array error.");
@@ -392,7 +390,7 @@ void JSTextPickerParser::ParseMultiTextArraySelectArrayInternal(
         if (i > selectedValues.size() - 1) {
             selectedValues.emplace_back(0);
         } else {
-            if (selectedValues[i] < 0 || selectedValues[i] >= options[i].rangeResult.size()) {
+            if (selectedValues[i] >= options[i].rangeResult.size()) {
                 LOGW("selectedValue is out of range");
                 selectedValues[i] = 0;
             }
@@ -411,8 +409,7 @@ bool JSTextPickerParser::ParseMultiTextArraySelect(const JsiRef<JsiValue>& jsSel
     } else {
         uint32_t selectedValue = 0;
         if (ParseJsInteger(jsSelectedValue, selectedValue)) {
-            if (param.options.size() < 1 ||
-                selectedValue < 0 || selectedValue >= param.options[0].rangeResult.size()) {
+            if (param.options.size() < 1 || selectedValue >= param.options[0].rangeResult.size()) {
                 LOGW("selectedValue is out of range");
                 selectedValue = 0;
             }
@@ -498,7 +495,6 @@ bool JSTextPickerParser::ParseMultiTextArray(const JSRef<JSObject>& paramObject,
         return false;
     }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(getRange);
-    std::vector<NG::TextCascadePickerOptions> getOptionsVector;
     if (!ParseMultiTextArrayRange(array, param.options)) {
         return false;
     }
@@ -557,7 +553,7 @@ bool JSTextPickerParser::ParseInternalArray(const JSRef<JSArray>& jsRangeValue, 
     if (index > selectedValues.size() - 1) {
         selectedValues.emplace_back(0);
     } else {
-        if (selectedValues[index] < 0 || selectedValues[index] >= resultStr.size()) {
+        if (selectedValues[index] >= resultStr.size()) {
             LOGW("selectedValue is out of range");
             selectedValues[index] = 0;
         }
@@ -583,22 +579,18 @@ bool JSTextPickerParser::ParseCascadeTextArray(const JSRef<JSObject>& paramObjec
     JSRef<JSArray> getRange = paramObject->GetProperty("range");
     auto getSelected = paramObject->GetProperty("selected");
     auto getValue = paramObject->GetProperty("value");
-    std::vector<NG::TextCascadePickerOptions> getOptionsVector;
-    std::vector<std::string> resultStr;
-
-    std::string value = "";
     if (getValue->IsArray()) {
         if (!ParseJsStrArray(getValue, values)) {
             LOGE("parse value array error.");
             return false;
         }
     } else {
+        std::string value = "";
         if (!ParseJsString(getValue, value)) {
             value = "";
         }
         values.emplace_back(value);
     }
-    uint32_t selectValue = 0;
     if (getSelected->IsArray()) {
         if (!ParseJsIntegerArray(getSelected, selectedValues)) {
             LOGE("parse selectedValues array error.");
@@ -608,6 +600,7 @@ bool JSTextPickerParser::ParseCascadeTextArray(const JSRef<JSObject>& paramObjec
             attr.isHasSelectAttr = true;
         }
     } else {
+        uint32_t selectValue = 0;
         if (!ParseJsInteger(getSelected, selectValue)) {
             selectValue = 0;
             attr.isHasSelectAttr = false;
@@ -662,7 +655,7 @@ bool JSTextPickerParser::ParseTextArray(const JSRef<JSObject>& paramObject, Pars
                 param.selected = std::distance(getRangeVector.begin(), valueIterator);
             }
         }
-        if (param.selected < 0 || param.selected >= getRangeVector.size()) {
+        if (param.selected >= getRangeVector.size()) {
             LOGW("selectedValue is out of range");
             param.selected = 0;
         }
@@ -838,7 +831,7 @@ void JSTextPicker::ProcessCascadeSelected(const std::vector<NG::TextCascadePicke
     if (index > selectedValues.size() - 1) {
         selectedValues.emplace_back(0);
     }
-    if (selectedValues[index] < 0 || selectedValues[index] >= rangeResultValue.size()) {
+    if (selectedValues[index] >= rangeResultValue.size()) {
         LOGW("selectedValue is out of range");
         selectedValues[index] = 0;
     }
@@ -854,7 +847,7 @@ void JSTextPicker::SetSelectedInternal(uint32_t count,
         if (i > selectedValues.size() - 1) {
             selectedValues.emplace_back(0);
         } else {
-            if (selectedValues[i] < 0 || selectedValues[i] >= options[i].rangeResult.size()) {
+            if (selectedValues[i] >= options[i].rangeResult.size()) {
                 LOGW("selectedValue is out of range");
                 selectedValues[i] = 0;
             }
@@ -884,7 +877,7 @@ void JSTextPicker::SetSelectedIndexSingleInternal(const std::vector<NG::TextCasc
     uint32_t count, uint32_t& selectedValue, std::vector<uint32_t>& selectedValues)
 {
     if (options.size() > 0) {
-        if (selectedValue < 0 || selectedValue >= options[0].rangeResult.size()) {
+        if (selectedValue >= options[0].rangeResult.size()) {
             LOGW("selectedValue is out of range");
             selectedValue = 0;
         }
@@ -937,10 +930,10 @@ void JSTextPicker::SetSelectedIndexMulti(const JsiRef<JsiValue>& jsSelectedValue
 void JSTextPicker::SetSelectedIndexSingle(const JsiRef<JsiValue>& jsSelectedValue)
 {
     // Single
-    std::vector<uint32_t> selectedValues;
     std::vector<NG::RangeContent> rangeResult;
     TextPickerModel::GetInstance()->GetSingleRange(rangeResult);
     if (jsSelectedValue->IsArray()) {
+        std::vector<uint32_t> selectedValues;
         if (!ParseJsIntegerArray(jsSelectedValue, selectedValues)) {
             LOGE("SetselectedIndex parse selectedValues array error.");
             uint32_t selectedValue = 0;
@@ -948,7 +941,7 @@ void JSTextPicker::SetSelectedIndexSingle(const JsiRef<JsiValue>& jsSelectedValu
             return;
         }
         if (selectedValues.size() > 0) {
-            if (selectedValues[0] < 0 || selectedValues[0] >= rangeResult.size()) {
+            if (selectedValues[0] >= rangeResult.size()) {
                 LOGW("selectedValue is out of range");
                 selectedValues[0] = 0;
             }
@@ -960,7 +953,7 @@ void JSTextPicker::SetSelectedIndexSingle(const JsiRef<JsiValue>& jsSelectedValu
     } else {
         uint32_t selectedValue = 0;
         if (ParseJsInteger(jsSelectedValue, selectedValue)) {
-            if (selectedValue < 0 || selectedValue >= rangeResult.size()) {
+            if (selectedValue >= rangeResult.size()) {
                 LOGW("selectedValue is out of range");
                 selectedValue = 0;
             }
@@ -1406,7 +1399,7 @@ void JSTextPickerDialog::ParseText(RefPtr<PickerTextComponent>& component, const
         }
     }
 
-    if (selectedValue < 0 || selectedValue >= getRangeVector.size()) {
+    if (selectedValue >= getRangeVector.size()) {
         LOGW("selectedValue is out of range");
         selectedValue = 0;
     }
