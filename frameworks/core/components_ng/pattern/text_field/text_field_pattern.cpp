@@ -2924,9 +2924,10 @@ void TextFieldPattern::EditingValueFilter(std::string& valueToUpdate, std::strin
         }
         case TextInputType::EMAIL_ADDRESS: {
             if (valueToUpdate == "@") {
-                auto charExists = valueToUpdate.find('@') != std::string::npos;
+                auto charExists = textEditingValue_.text.find('@') != std::string::npos;
                 textChanged = !charExists;
                 result = charExists ? "" : valueToUpdate;
+                return;
             } else {
                 textChanged |= FilterWithRegex(EMAIL_WHITE_LIST, valueToUpdate, result);
             }
