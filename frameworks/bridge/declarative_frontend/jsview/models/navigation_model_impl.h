@@ -39,9 +39,9 @@ public:
     void SetCustomToolBar(const RefPtr<AceType>& customToolBar) override;
     bool NeedSetItems() override;
     void SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems) override;
-    void GetToolBarItems(std::list<RefPtr<ToolBarItem>>& items) override;
+    void GetToolBarItems(std::list<RefPtr<AceType>>& items) override;
     void SetMenuItems(std::vector<NG::BarItem>&& menuItems) override;
-    void GetMenuItems(std::list<RefPtr<ToolBarItem>>& items) override;
+    void GetMenuItems(std::list<RefPtr<AceType>>& items) override;
     void SetCustomMenu(const RefPtr<AceType>& customMenu) override;
     void SetOnTitleModeChange(std::function<void(NG::NavigationTitleMode)>&& onTitleModeChange,
         std::function<void(const BaseEventInfo* baseInfo)>&& eventInfo) override;

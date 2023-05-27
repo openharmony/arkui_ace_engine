@@ -40,8 +40,8 @@ SideBarContainerModel* SideBarContainerModel::GetInstance()
             } else {
                 instance_.reset(new Framework::SideBarContainerModelImpl());
             }
-        }
 #endif
+        }
     }
     return instance_.get();
 }
