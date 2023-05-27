@@ -37,7 +37,10 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     textContentModifier_->SetParagraph(paragraph_);
 
+    SizeF contentSize = paintWrapper->GetContentSize();
+    textContentModifier_->SetContentSize(contentSize);
     auto offset = paintWrapper->GetContentOffset();
+    textContentModifier_->SetContentOffset(offset);
     auto paintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     textContentModifier_->SetPrintOffset(paintOffset);
 
