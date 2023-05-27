@@ -130,8 +130,8 @@ common_bin = [
   },
   {
     label = "//third_party/openssl:libcrypto_shared"
-    subsystem_name = "security"
-    part_name = "huks"
+    subsystem_name = "thirdparty"
+    part_name = "openssl"
     lib_names = [ "crypto_openssl" ]
   },
   {
@@ -249,8 +249,8 @@ if (use_mac || use_mingw_win) {
     },
     {
       label = "//third_party/openssl:libcrypto_restool"
-      subsystem_name = "security"
-      part_name = "huks"
+      subsystem_name = "thirdparty"
+      part_name = "openssl"
     },
     {
       label = "//foundation/distributeddatamgr/kv_store/kvstoremock/interfaces/innerkits/distributeddata:distributeddata_inner_mock"
