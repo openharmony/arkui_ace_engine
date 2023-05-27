@@ -815,9 +815,9 @@ private:
     int32_t UpdateCaretPositionOnHandleMove(const OffsetF& localOffset);
     bool HasStateStyle(UIState state) const;
 
-    void AddScrollEvent();
     void OnTextAreaScroll(float offset);
     bool OnScrollCallback(float offset, int32_t source) override;
+    void OnScrollEndCallback() override;
     void InitMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
     void OnHover(bool isHover);
@@ -836,7 +836,7 @@ private:
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
     // when moving one handle causes shift of textRect, update x position of the other handle
-    void UpdateOtherHandleOnMove(float dx);
+    void UpdateOtherHandleOnMove(float dx, float dy);
     void SetHandlerOnMoveDone();
     void OnDetachFromFrameNode(FrameNode* node) override;
     bool UpdateCaretByPressOrLongPress();
