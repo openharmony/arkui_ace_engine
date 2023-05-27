@@ -183,7 +183,6 @@ void JSForEach::SetIdArray(const JSCallbackInfo& info)
 // parentView : JSView
 void JSForEach::CreateNewChildStart(const JSCallbackInfo& info)
 {
-    ACE_SCOPED_TRACE("JSForEach::CreateNewChildStart");
     if ((info.Length() != 2) || !info[1]->IsObject() || (!info[0]->IsNumber() && !info[0]->IsString())) {
         LOGE("Invalid arguments for ForEach.CreateNewChildStart");
         return;
@@ -198,7 +197,6 @@ void JSForEach::CreateNewChildStart(const JSCallbackInfo& info)
 // parentView : JSView
 void JSForEach::CreateNewChildFinish(const JSCallbackInfo& info)
 {
-    ACE_SCOPED_TRACE("JSForEach::CreateNewChildFinish");
     if ((info.Length() != 2) || !info[1]->IsObject() || (!info[0]->IsNumber() && !info[0]->IsString())) {
         LOGE("Invalid arguments for ForEach.CreateNewChildFinish");
         return;
