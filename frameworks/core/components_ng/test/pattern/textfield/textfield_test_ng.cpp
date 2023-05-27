@@ -3959,16 +3959,18 @@ HWTEST_F(TextFieldPatternTestNg, UpdateOtherHandleOnMove001, TestSize.Level1)
 {
     auto pattern = GetPattern();
     ASSERT_NE(pattern, nullptr);
-    pattern->textSelector_.secondHandleOffset_.SetX(0);
     pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(-1);
     pattern->isFirstHandle_ = true;
-    pattern->UpdateOtherHandleOnMove(1.0f);
-    ASSERT_EQ(pattern->textSelector_.secondHandleOffset_.GetX(), 1.0f);
+    auto oldSecondHandleOffset = pattern->textSelector_.secondHandleOffset_;
+    pattern->UpdateOtherHandleOnMove(1.0f, 1.0f);
+    ASSERT_EQ(pattern->textSelector_.secondHandleOffset_.GetX(), oldSecondHandleOffset.GetX() + 1.0f);
+    ASSERT_EQ(pattern->textSelector_.secondHandleOffset_.GetY(), oldSecondHandleOffset.GetY() + 1.0f);
 
-    pattern->textSelector_.firstHandleOffset_.SetX(0);
     pattern->isFirstHandle_ = false;
-    pattern->UpdateOtherHandleOnMove(-1.0f);
-    ASSERT_EQ(pattern->textSelector_.firstHandleOffset_.GetX(), -1.0f);
+    auto oldFirstHandleOffset = pattern->textSelector_.firstHandleOffset_;
+    pattern->UpdateOtherHandleOnMove(-1.0f, -1.0f);
+    ASSERT_EQ(pattern->textSelector_.firstHandleOffset_.GetX(), oldFirstHandleOffset.GetX() - 1.0f);
+    ASSERT_EQ(pattern->textSelector_.firstHandleOffset_.GetY(), oldFirstHandleOffset.GetY() - 1.0f);
 }
 
 /**

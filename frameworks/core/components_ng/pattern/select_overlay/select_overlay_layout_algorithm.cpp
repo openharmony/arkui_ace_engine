@@ -118,6 +118,11 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     if (!info_->firstHandle.isShow) {
         singleHandle = secondHandleRect;
     }
+    if (IsTextAreaSelectAll()) {
+        singleHandle = RectF(info_->menuInfo.menuOffset.value().GetX(), info_->menuInfo.menuOffset.value().GetY(),
+            singleHandle.Width(), singleHandle.Height());
+    }
+
     if (info_->isSingleHandle) {
         auto menuSpacing = static_cast<float>(menuSpacingBetweenText);
         menuPosition = OffsetF((singleHandle.Left() + singleHandle.Right() - menuWidth) / 2.0f,
@@ -137,8 +142,12 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
         menuPosition.SetX(overlayWidth - menuWidth - theme->GetDefaultMenuPositionX());
     }
     if (LessNotEqual(menuPosition.GetY(), menuHeight)) {
-        menuPosition.SetY(
-            static_cast<float>(singleHandle.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle));
+        if (IsTextAreaSelectAll()) {
+            menuPosition.SetY(singleHandle.Top());
+        } else {
+            menuPosition.SetY(
+                static_cast<float>(singleHandle.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle));
+        }
     }
     defaultMenuEndOffset_ = menuPosition + OffsetF(menuWidth, 0.0f);
     return menuPosition;
@@ -159,6 +168,11 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeExtensionMenuPosition(LayoutWrapper
     }
     auto extensionWidth = extensionItem->GetGeometryNode()->GetMarginFrameSize().Width();
     return (defaultMenuEndOffset_ - OffsetF(extensionWidth, 0.0f));
+}
+
+bool SelectOverlayLayoutAlgorithm::IsTextAreaSelectAll()
+{
+    return info_->menuInfo.menuOffset.has_value() && (!info_->firstHandle.isShow || !info_->secondHandle.isShow);
 }
 
 } // namespace OHOS::Ace::NG
