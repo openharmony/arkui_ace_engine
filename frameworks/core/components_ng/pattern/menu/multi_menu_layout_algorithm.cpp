@@ -67,9 +67,12 @@ void MultiMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    auto outPadding = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     // translate each option by the height of previous options
-    OffsetF translate(outPadding, outPadding);
+    auto outPadding = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    const auto& padding = layoutProperty->CreatePaddingAndBorder();
+    OffsetF translate(padding.left.value_or(outPadding), padding.top.value_or(outPadding));
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
         child->Layout();
