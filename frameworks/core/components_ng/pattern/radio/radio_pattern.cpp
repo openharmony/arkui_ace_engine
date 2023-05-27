@@ -406,11 +406,12 @@ FocusPattern RadioPattern::GetFocusPattern() const
 bool RadioPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& /*config*/)
 {
     auto geometryNode = dirty->GetGeometryNode();
-    offset_ = geometryNode->GetContentOffset();
-    size_ = geometryNode->GetContentSize();
-    if (isFirstAddhotZoneRect_) {
+    auto offset = geometryNode->GetContentOffset();
+    auto size = geometryNode->GetContentSize();
+    if (!NearEqual(offset, offset_) || !NearEqual(size, size_)) {
+        offset_ = offset;
+        size_ = size;
         AddHotZoneRect();
-        isFirstAddhotZoneRect_ = false;
     }
     return true;
 }
