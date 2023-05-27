@@ -721,7 +721,7 @@ void TextFieldPattern::OnTextAreaScroll(float offset)
     LOGI("OnTextAreaScroll with offset %{public}f", offset);
     if (!IsTextArea() || textRect_.Height() < contentRect_.Height() ||
         (textRect_.GetY() + offset) > contentRect_.GetY() ||
-        std::abs(((textRect_.GetY() + offset) - contentRect_.Height())) > textRect_.Height()) {
+        std::abs(((textRect_.GetY() + offset) - contentRect_.Height() - GetPaddingBottom())) > textRect_.Height()) {
         return;
     }
     caretRect_.SetTop(caretRect_.GetY() + offset);
