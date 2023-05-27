@@ -230,6 +230,10 @@ void JSDataPanel::ShadowOption(const JSCallbackInfo& info)
         radius = theme->GetTrackShadowRadius().ConvertToVp();
     }
 
+    if (NonPositive(radius)) {
+        radius = theme->GetTrackShadowRadius().ConvertToVp();
+    }
+
     double offsetX = 0.0;
     if (!ParseJsDouble(jsOffsetX, offsetX)) {
         offsetX = theme->GetTrackShadowOffsetX().ConvertToVp();
