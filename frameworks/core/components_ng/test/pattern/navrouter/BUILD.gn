@@ -17,6 +17,13 @@ ace_unittest("navrouter_test_ng") {
   ace_animation = true
   flutter_skia = true
   sources = [
+    # custom
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_measure_layout_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node_base.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node_pattern.cpp",
+
     # stack
     "$ace_root/frameworks/core/components_ng/pattern/stack/stack_layout_algorithm.cpp",
 
