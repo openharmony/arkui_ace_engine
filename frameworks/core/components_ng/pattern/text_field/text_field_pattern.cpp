@@ -1874,6 +1874,7 @@ void TextFieldPattern::OnModifyDone()
         auto scrollBar = GetScrollBar();
         if (scrollBar) {
             scrollBar->SetMinHeight(SCROLL_BAR_MIN_HEIGHT);
+            scrollBar->SetReservedHeight(0.0_vp);
         }
     }
     SetShowError();
