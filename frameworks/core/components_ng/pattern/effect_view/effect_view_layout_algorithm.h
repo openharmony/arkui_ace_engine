@@ -20,7 +20,6 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 
 namespace OHOS::Ace::NG {
-
 class ACE_EXPORT EffectViewLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(EffectViewLayoutAlgorithm, BoxLayoutAlgorithm);
 
@@ -36,5 +35,4 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(EffectViewLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_EFFECT_VIEW_LAYOUT_ALGORITHM_H

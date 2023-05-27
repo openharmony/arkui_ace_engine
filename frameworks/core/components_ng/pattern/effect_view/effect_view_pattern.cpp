@@ -21,7 +21,6 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
-
 void EffectViewPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -29,5 +28,4 @@ void EffectViewPattern::OnAttachToFrameNode()
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
 }
-
 } // namespace OHOS::Ace::NG

@@ -23,7 +23,6 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
-
 class ACE_EXPORT EffectViewPattern : public Pattern {
     DECLARE_ACE_TYPE(EffectViewPattern, Pattern);
 
@@ -31,14 +30,9 @@ public:
     EffectViewPattern() = default;
     ~EffectViewPattern() override = default;
 
-    bool IsMeasureBoundary() const override
-    {
-        return true;
-    }
-
     bool IsAtomicNode() const override
     {
-        return true;
+        return false;
     }
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
@@ -51,7 +45,5 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(EffectViewPattern);
 };
-
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_VIEW_PATTERN_H

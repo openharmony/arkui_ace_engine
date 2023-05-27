@@ -14,7 +14,7 @@
 xcomponent_components_support = false
 form_components_support = false
 remote_window_support = false
-effect_view_support = true
+effect_view_support = false
 use_curl_download = true
 accessibility_support = true
 rich_components_support = true

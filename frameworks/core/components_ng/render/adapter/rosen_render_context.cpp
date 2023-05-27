@@ -205,7 +205,7 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
             Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or("") };
             rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
             break;
-        } 
+        }
         case ContextType::EFFECT:
             // create effect view
             break;

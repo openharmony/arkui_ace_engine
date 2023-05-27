@@ -16,9 +16,8 @@
 #include "core/components_ng/pattern/effect_view/effect_view_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
-
 std::optional<SizeF> EffectViewLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* /*layoutWrapper*/)
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* /* layoutWrapper */)
 {
     OptionalSizeF contentSize;
     do {
@@ -34,5 +33,4 @@ std::optional<SizeF> EffectViewLayoutAlgorithm::MeasureContent(
 
     return contentSize.ConvertToSizeT();
 }
-
 } // namespace OHOS::Ace::NG

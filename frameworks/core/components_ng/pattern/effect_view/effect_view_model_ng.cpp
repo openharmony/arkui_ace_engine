@@ -19,7 +19,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/effect_view/effect_view_pattern.h"
-// #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -30,10 +29,5 @@ void EffectViewModelNG::Create()
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::EFFECT_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<EffectViewPattern>(); });
     stack->Push(frameNode);
-#ifdef ENABLE_ROSEN_BACKEND
-    // auto context = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
-    // CHECK_NULL_VOID(context);
-    // context->SetRSNode(rsNode);
-#endif
 }
 } // namespace OHOS::Ace::NG
