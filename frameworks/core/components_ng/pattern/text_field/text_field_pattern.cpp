@@ -1156,6 +1156,7 @@ void TextFieldPattern::HandleOnSelectAll()
     selectionMode_ = SelectionMode::SELECT_ALL;
     caretUpdateType_ = CaretUpdateType::EVENT;
     GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
+    isSingleHandle_ = textEditingValue_.text.empty();
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -2101,11 +2102,8 @@ void TextFieldPattern::ShowSelectOverlay(
         selectInfo.isUsingMouse = pattern->IsUsingMouse();
         selectInfo.rightClickOffset = pattern->GetRightClickOffset();
         selectInfo.singleLineHeight = pattern->PreferredLineHeight();
-        selectInfo.menuInfo.showCopy = !pattern->GetEditingValue().text.empty() && pattern->AllowCopy();
-        selectInfo.menuInfo.showCut = selectInfo.menuInfo.showCopy && !pattern->GetEditingValue().text.empty();
-        selectInfo.menuInfo.showCopyAll = !pattern->GetEditingValue().text.empty();
-        selectInfo.menuInfo.showPaste = hasData;
-        selectInfo.menuInfo.menuIsShow = !pattern->GetEditingValue().text.empty() || hasData;
+        pattern->UpdateSelectMenuInfo(hasData);
+        selectInfo.menuInfo = pattern->GetSelectMenuInfo();
         selectInfo.menuCallback.onCopy = [weak]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -2130,6 +2128,7 @@ void TextFieldPattern::ShowSelectOverlay(
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->HandleOnSelectAll();
+            pattern->UpdateCopyAllStatus();
             pattern->SetNeedCloseOverlay(false);
         };
         if (!pattern->GetMenuOptionItems().empty()) {
@@ -2259,6 +2258,14 @@ int32_t TextFieldPattern::UpdateCaretPositionOnHandleMove(const OffsetF& localOf
     return position;
 }
 
+void TextFieldPattern::UpdateCopyAllStatus()
+{
+    selectMenuInfo_.showCopyAll = !IsSelectAll();
+    if (selectOverlayProxy_) {
+        selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
+    }
+}
+
 void TextFieldPattern::UpdateTextSelectorByHandleMove(
     bool isMovingBase, int32_t position, OffsetF& offsetToParagraphBeginning)
 {
@@ -2277,12 +2284,13 @@ void TextFieldPattern::UpdateTextSelectorByHandleMove(
     textSelector_.selectionDestinationOffset = offsetToParagraphBeginning;
 }
 
-void TextFieldPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
+void TextFieldPattern::OnHandleMoveDone(const RectF& /* handleRect */, bool isFirstHandle)
 {
     CHECK_NULL_VOID_NOLOG(SelectOverlayIsOn());
     caretUpdateType_ = CaretUpdateType::HANDLE_MOVE_DONE;
     isFirstHandle_ = isFirstHandle;
     StopTwinkling();
+    UpdateCopyAllStatus();
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
