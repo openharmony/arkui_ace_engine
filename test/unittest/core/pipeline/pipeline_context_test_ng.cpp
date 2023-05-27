@@ -1959,6 +1959,57 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg040, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PipelineContextTestNg041
+ * @tc.desc: Test the function OnLayoutCompleted.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg041, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: frontend-ptr is non-null.
+     */
+    ContainerScope scope(DEFAULT_INSTANCE_ID);
+    ASSERT_NE(context_, nullptr);
+    auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    context_->weakFrontend_ = frontend;
+
+    /**
+     * @tc.steps2: test the function OnLayoutCompleted by TEST_TAG.
+     * @tc.expected: frontend componentId_ is TEST_TAG
+     */
+    context_->OnLayoutCompleted(TEST_TAG);
+    EXPECT_EQ(frontend->GetComponentId(), TEST_TAG);
+    context_->weakFrontend_.Reset();
+}
+
+/**
+ * @tc.name: PipelineContextTestNg042
+ * @tc.desc: Test the function OnDrawCompleted.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg042, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: frontend-ptr is non-null.
+     */
+
+    ContainerScope scope(DEFAULT_INSTANCE_ID);
+    ASSERT_NE(context_, nullptr);
+    auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    context_->weakFrontend_ = frontend;
+
+    /**
+     * @tc.steps4: test the function OnDrawCompleted by TEST_TAG.
+     * @tc.expected: frontend componentId_ is TEST_TAG
+     */
+    context_->OnDrawCompleted(TEST_TAG);
+    EXPECT_EQ(frontend->GetComponentId(), TEST_TAG);
+    context_->weakFrontend_.Reset();
+}
+
+/**
  * @tc.name: UITaskSchedulerTestNg001
  * @tc.desc: Test FlushLayoutTask.
  * @tc.type: FUNC

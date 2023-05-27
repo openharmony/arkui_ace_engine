@@ -261,6 +261,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         FrameReport::GetInstance().FlushEnd();
     }
     FlushMessages();
+    InspectDrew();
     if (!isFormRender_ && onShow_ && onFocus_) {
         FlushFocus();
     }
@@ -270,8 +271,17 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         FlushMouseEvent();
         isNeedFlushMouseEvent_ = false;
     }
+    needRenderNode_.clear();
     // Keep the call sent at the end of the function
     ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_COMPLETE_EVENT);
+}
+
+void PipelineContext::InspectDrew()
+{
+    auto needRenderNode = std::move(needRenderNode_);
+    for (auto&& node : needRenderNode) {
+        OnDrawCompleted(node->GetInspectorId()->c_str());
+    }
 }
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
@@ -307,6 +317,12 @@ void PipelineContext::FlushMessages()
 {
     ACE_FUNCTION_TRACE();
     window_->FlushTasks();
+}
+
+void PipelineContext::SetNeedRenderNode(const RefPtr<FrameNode>& node)
+{
+    CHECK_RUN_ON(UI);
+    needRenderNode_.insert(node);
 }
 
 void PipelineContext::FlushFocus()
@@ -554,6 +570,24 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
 #else
     SetRootRect(width, height, 0.0);
 #endif
+}
+
+void PipelineContext::OnLayoutCompleted(const std::string& componentId)
+{
+    CHECK_RUN_ON(UI);
+    auto frontend = weakFrontend_.Upgrade();
+    if (frontend) {
+        frontend->OnLayoutCompleted(componentId);
+    }
+}
+
+void PipelineContext::OnDrawCompleted(const std::string& componentId)
+{
+    CHECK_RUN_ON(UI);
+    auto frontend = weakFrontend_.Upgrade();
+    if (frontend) {
+        frontend->OnDrawCompleted(componentId);
+    }
 }
 
 void PipelineContext::ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight)

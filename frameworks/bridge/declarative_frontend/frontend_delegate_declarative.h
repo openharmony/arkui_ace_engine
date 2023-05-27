@@ -63,7 +63,8 @@ public:
         const ResetStagingPageCallback& resetLoadingPageCallback, const DestroyPageCallback& destroyPageCallback,
         const DestroyApplicationCallback& destroyApplicationCallback,
         const UpdateApplicationStateCallback& updateApplicationStateCallback, const TimerCallback& timerCallback,
-        const MediaQueryCallback& mediaQueryCallback, const RequestAnimationCallback& requestAnimationCallback,
+        const MediaQueryCallback& mediaQueryCallback, const LayoutInspectorCallback& layoutInpsectorCallback,
+        const DrawInspectorCallback& drawInpsectorCallback, const RequestAnimationCallback& requestAnimationCallback,
         const JsCallback& jsCallback, const OnWindowDisplayModeChangedCallBack& onWindowDisplayModeChangedCallBack,
         const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack,
         const OnSaveAbilityStateCallBack& onSaveAbilityStateCallBack,
@@ -128,6 +129,8 @@ public:
 
     void OnMediaQueryUpdate() override;
     void OnSurfaceChanged();
+    void OnLayoutCompleted(const std::string& componentId);
+    void OnDrawCompleted(const std::string& componentId);
     // JSEventHandler delegate functions.
     void FireAsyncEvent(const std::string& eventId, const std::string& param, const std::string& jsonArgs);
     bool FireSyncEvent(const std::string& eventId, const std::string& param, const std::string& jsonArgs);
@@ -414,6 +417,8 @@ private:
     TimerCallback timer_;
     std::unordered_map<std::string, CancelableCallback<void()>> timeoutTaskMap_;
     MediaQueryCallback mediaQueryCallback_;
+    LayoutInspectorCallback layoutInspectorCallback_;
+    DrawInspectorCallback drawInspectorCallback_;
     RequestAnimationCallback requestAnimationCallback_;
     JsCallback jsCallback_;
     OnWindowDisplayModeChangedCallBack onWindowDisplayModeChanged_;

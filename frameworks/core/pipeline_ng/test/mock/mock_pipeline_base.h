@@ -59,6 +59,9 @@ public:
     MOCK_METHOD2(ShowContainerTitle, void(bool isShow, bool hasDeco));
     MOCK_METHOD4(OnSurfaceChanged, void(int32_t width, int32_t height, WindowSizeChangeReason type,
                                        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction));
+    MOCK_METHOD1(OnLayoutCompleted, void(const std::string& componentId));
+    MOCK_METHOD1(OnDrawCompleted, void(const std::string& componentId));
+    MOCK_METHOD1(SetNeedRenderNode, void(const RefPtr<FrameNode>& node));
     MOCK_METHOD2(OnSurfacePositionChanged, void(int32_t posX, int32_t posY));
     MOCK_METHOD1(OnSurfaceDensityChanged, void(double density));
     MOCK_METHOD2(OnSystemBarHeightChanged, void(double statusBar, double navigationBar));

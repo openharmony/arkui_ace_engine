@@ -149,6 +149,12 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {}
 
+void PipelineContext::OnLayoutCompleted(const std::string& componentId) {}
+
+void PipelineContext::OnDrawCompleted(const std::string& componentId) {}
+
+void PipelineContext::SetNeedRenderNode(const RefPtr<FrameNode>& node) {}
+
 void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
 
 void PipelineContext::FlushReload() {}
