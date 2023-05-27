@@ -128,11 +128,13 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     taskScheduler_.AddDirtyLayoutNode(dirty);
     ForceLayoutForImplicitAnimation();
 #ifdef UICAST_COMPONENT_SUPPORTED
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto distributedUI = container->GetDistributedUI();
-    CHECK_NULL_VOID(distributedUI);
-    distributedUI->AddDirtyLayoutNode(dirty->GetId());
+    do {
+        auto container = Container::Current();
+        CHECK_NULL_BREAK(container);
+        auto distributedUI = container->GetDistributedUI();
+        CHECK_NULL_BREAK(distributedUI);
+        distributedUI->AddDirtyLayoutNode(dirty->GetId());
+    } while (false);
 #endif
     hasIdleTasks_ = true;
     RequestFrame();
@@ -145,11 +147,13 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     taskScheduler_.AddDirtyRenderNode(dirty);
     ForceRenderForImplicitAnimation();
 #ifdef UICAST_COMPONENT_SUPPORTED
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto distributedUI = container->GetDistributedUI();
-    CHECK_NULL_VOID(distributedUI);
-    distributedUI->AddDirtyRenderNode(dirty->GetId());
+    do {
+        auto container = Container::Current();
+        CHECK_NULL_BREAK(container);
+        auto distributedUI = container->GetDistributedUI();
+        CHECK_NULL_BREAK(distributedUI);
+        distributedUI->AddDirtyRenderNode(dirty->GetId());
+    } while (false);
 #endif
     hasIdleTasks_ = true;
     RequestFrame();
@@ -211,12 +215,14 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     window_->RecordFrameTime(nanoTimestamp, abilityName);
 
 #ifdef UICAST_COMPONENT_SUPPORTED
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto distributedUI = container->GetDistributedUI();
-    CHECK_NULL_VOID(distributedUI);
-    distributedUI->ApplyOneUpdate();
-    distributedUI->OnTreeUpdate();
+    do {
+        auto container = Container::Current();
+        CHECK_NULL_BREAK(container);
+        auto distributedUI = container->GetDistributedUI();
+        CHECK_NULL_BREAK(distributedUI);
+        distributedUI->ApplyOneUpdate();
+        distributedUI->OnTreeUpdate();
+    } while (false);
 #endif
 
     FlushAnimation(GetTimeFromExternalTimer());
@@ -865,14 +871,16 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     CHECK_RUN_ON(UI);
 
 #ifdef UICAST_COMPONENT_SUPPORTED
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto distributedUI = container->GetDistributedUI();
-    CHECK_NULL_VOID(distributedUI);
-    if (distributedUI->IsSinkMode()) {
-        distributedUI->BypassEvent(point, isSubPipe);
-        return;
-    }
+    do {
+        auto container = Container::Current();
+        CHECK_NULL_BREAK(container);
+        auto distributedUI = container->GetDistributedUI();
+        CHECK_NULL_BREAK(distributedUI);
+        if (distributedUI->IsSinkMode()) {
+            distributedUI->BypassEvent(point, isSubPipe);
+            return;
+        }
+    } while (false);
 #endif
 
     HandleEtsCardTouchEvent(point);

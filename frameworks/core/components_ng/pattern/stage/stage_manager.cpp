@@ -416,11 +416,13 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID_NOLOG(context);
 #ifdef UICAST_COMPONENT_SUPPORTED
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto distributedUI = container->GetDistributedUI();
-    CHECK_NULL_VOID(distributedUI);
-    distributedUI->OnPageChanged(node->GetPageId());
+    do {
+        auto container = Container::Current();
+        CHECK_NULL_BREAK(container);
+        auto distributedUI = container->GetDistributedUI();
+        CHECK_NULL_BREAK(distributedUI);
+        distributedUI->OnPageChanged(node->GetPageId());
+    } while (false);
 #endif
 }
 
