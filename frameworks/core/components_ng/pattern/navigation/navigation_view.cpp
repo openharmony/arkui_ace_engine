@@ -185,8 +185,14 @@ void BuildMoreItemNodeAction(const RefPtr<BarItemNode>& barItemNode, const RefPt
         auto imgOffset = imageFrameNode->GetOffsetRelativeToWindow();
         auto imageSize = imageFrameNode->GetGeometryNode()->GetFrameSize();
 
-        imgOffset.SetX(imgOffset.GetX() + imageSize.Width());
-        imgOffset.SetY(imgOffset.GetY() + imageSize.Height() + static_cast<float>(MENU_AND_BUTTON_SPACE.ConvertToPx()));
+        auto menuNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
+        CHECK_NULL_VOID(menuNode);
+        auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+        CHECK_NULL_VOID(menuLayoutProperty);
+        menuLayoutProperty->UpdateTargetSize(imageSize);
+
+        imgOffset.SetX(imgOffset.GetX());
+        imgOffset.SetY(imgOffset.GetY() + imageSize.Height());
         overlayManager->ShowMenu(id, imgOffset, menu);
     };
     eventHub->SetItemAction(clickCallback);
