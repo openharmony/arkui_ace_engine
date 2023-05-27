@@ -180,7 +180,6 @@ private:
     float endPos_ = 0.0f;
     float referencePos_ = 0.0f;
     bool forwardLayout_ = true;
-    bool lanesChanged_ = false;
 };
 } // namespace OHOS::Ace::NG
 

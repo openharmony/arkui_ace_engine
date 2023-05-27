@@ -227,6 +227,7 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
     LOGD("referencePos_ is %{public}f, startPos_: %{public}f, endPos_: %{public}f, forward:%{public}d",
         referencePos_, startPos_, endPos_, forwardLayout_);
     if (forwardLayout_) {
+        startIndex = GetLanesFloor(startIndex);
         LOGD("startIndex:%{public}d, startPos:%{public}f", startIndex, startPos);
         MeasureForward(layoutWrapper, layoutConstraint, startIndex, startPos);
     } else {
@@ -241,10 +242,6 @@ int32_t ListItemGroupLayoutAlgorithm::MeasureALineForward(LayoutWrapper* layoutW
     float mainLen = 0.0f;
     int32_t cnt = 0;
     int32_t lanes = lanes_ > 1 ? lanes_ : 1;
-    if (lanesChanged_) {
-        lanesChanged_ = false;
-        currentIndex = GetLanesFloor(currentIndex + 1) - 1;
-    }
     for (int32_t i = 0; i < lanes && currentIndex + 1 <= totalItemCount_; i++) {
         auto wrapper = GetListItem(layoutWrapper, currentIndex + 1);
         if (!wrapper) {
@@ -525,11 +522,7 @@ void ListItemGroupLayoutAlgorithm::CalculateLanes(const RefPtr<ListLayoutPropert
                 layoutConstraint.scaleProperty, crossSizeOptional.value());
         }
     }
-    lanes = ListLanesLayoutAlgorithm::CalculateLanesParam(minLaneLength_, maxLaneLength_, lanes, crossSizeOptional);
-    if (lanes_ != lanes) {
-        lanes_ = lanes;
-        lanesChanged_ = true;
-    }
+    lanes_ = ListLanesLayoutAlgorithm::CalculateLanesParam(minLaneLength_, maxLaneLength_, lanes, crossSizeOptional);
 }
 
 void ListItemGroupLayoutAlgorithm::SetListItemIndex(const LayoutWrapper* groupLayoutWrapper,
