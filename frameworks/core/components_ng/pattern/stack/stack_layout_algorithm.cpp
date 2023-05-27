@@ -48,12 +48,10 @@ void StackLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     auto align = Alignment::CENTER;
     auto layoutProperty = DynamicCast<StackLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->HasAlignmentContent()) {
-        align = layoutProperty->GetAlignmentContent().value_or(Alignment::CENTER);
+    if (layoutProperty->GetPositionProperty()) {
+        align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER);
     }
-    if (layoutProperty->HasAlignment()) {
-        align = layoutProperty->GetAlignment().value_or(Alignment::CENTER);
-    }
+    LOGI("cfw:----44----- align = %{public}s", align.ToString().c_str());
     // Update child position.
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         auto translate =
