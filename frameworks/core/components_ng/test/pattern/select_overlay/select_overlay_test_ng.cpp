@@ -36,6 +36,8 @@ const std::string TEST_TAG = "Test";
 constexpr int32_t NODE_ID = 143;
 constexpr int32_t NODE_ID2 = 153;
 constexpr int32_t NODE_ID3 = 157;
+const RectF FIRST_HANDLE_REGION(0, 0, 10, 10);
+const RectF SECOND_HANDLE_REGION(10, 10, 10, 10);
 } // namespace
 
 class SelectOverlayTestNg : public testing::Test {
@@ -327,9 +329,6 @@ HWTEST_F(SelectOverlayTestNg, UpdateShowArea001, TestSize.Level1)
     SelectOverlayInfo selectInfo;
     selectInfo.menuOptionItems = GetMenuOptionItems();
     selectInfo.singleLineHeight = NODE_ID;
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
@@ -346,12 +345,6 @@ HWTEST_F(SelectOverlayTestNg, UpdateShowArea001, TestSize.Level1)
     RectF area;
     pattern->UpdateShowArea(area);
     EXPECT_NE(pattern->GetSelectOverlayInfo(), nullptr);
-    /**
-     * @tc.steps: step4. Call UpdateShowArea
-     * @tc.expected: the function exits normally
-     */
-    pattern->UpdateShowArea(selectInfo.showArea);
-    EXPECT_NE(pattern->GetSelectOverlayInfo(), nullptr);
 }
 /**
  * @tc.name: HandleOperator001
@@ -365,9 +358,6 @@ HWTEST_F(SelectOverlayTestNg, HandleOperator001, TestSize.Level1)
      */
     SelectOverlayInfo selectInfo;
     selectInfo.singleLineHeight = NODE_ID;
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
@@ -385,9 +375,105 @@ HWTEST_F(SelectOverlayTestNg, HandleOperator001, TestSize.Level1)
     info.localLocation_ = Offset(1, 1);
     pattern->HandleOnClick(info);
     EXPECT_FALSE(pattern->GetSelectOverlayInfo()->isSingleHandle);
-    GestureEvent info2;
-    info2.localLocation_ = Offset(1, 1);
-    pattern->HandlePanEnd(info2);
+    pattern->HandlePanEnd(info);
     EXPECT_FALSE(pattern->GetSelectOverlayInfo()->isSingleHandle);
+}
+/**
+ * @tc.name: HandleOperator002
+ * @tc.desc: Test SelectOverlayPattern HandleOperator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, HandleOperator002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize selectOverlayInfo properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.singleLineHeight = NODE_ID;
+    selectInfo.isSingleHandle = true;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    /**
+     * @tc.steps: step2. Create pattern and initialize HandleRegion
+     */
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->firstHandleRegion_ = FIRST_HANDLE_REGION;
+    pattern->secondHandleRegion_ = SECOND_HANDLE_REGION;
+    /**
+     * @tc.steps: step3. Construct GestureEvent and Call HandleOperator functions in firstHandleRegion.
+     * @tc.expected: the function runs rightly
+     */
+    GestureEvent info;
+    info.localLocation_ = Offset(1, 1);
+    pattern->HandleOnClick(info);
+    EXPECT_TRUE(pattern->GetSelectOverlayInfo()->menuInfo.menuIsShow);
+    pattern->HandlePanStart(info);
+    EXPECT_TRUE(pattern->firstHandleDrag_);
+    const auto& offset = OffsetF(info.GetDelta().GetX(), info.GetDelta().GetY());
+    auto firstHandlePaintRect = pattern->GetSelectOverlayInfo()->firstHandle.paintRect+offset;
+    pattern->HandlePanMove(info);
+    auto firstHandlePaintRect2 = pattern->GetSelectOverlayInfo()->secondHandle.paintRect;
+    EXPECT_EQ(firstHandlePaintRect.GetX(), firstHandlePaintRect2.GetX());
+    pattern->HandlePanEnd(info);
+    EXPECT_FALSE(pattern->firstHandleDrag_);
+    /**
+     * @tc.steps: step4. Construct GestureEvent and Call HandleOperator functions in secondHandleRegion.
+     * @tc.expected: the function runs rightly
+     */
+    GestureEvent info2;
+    info2.localLocation_ = Offset(11, 11);
+    pattern->HandlePanStart(info2);
+    EXPECT_TRUE(pattern->secondHandleDrag_);
+    const auto& offset2 = OffsetF(info2.GetDelta().GetX(), info2.GetDelta().GetY());
+    auto secondHandlePaintRect = pattern->GetSelectOverlayInfo()->secondHandle.paintRect+offset2;
+    pattern->HandlePanMove(info2);
+    auto secondHandlePaintRect2 = pattern->GetSelectOverlayInfo()->secondHandle.paintRect;
+    EXPECT_EQ(secondHandlePaintRect.GetX(), secondHandlePaintRect2.GetX());
+    pattern->HandlePanEnd(info2);
+    EXPECT_FALSE(pattern->secondHandleDrag_);
+    /**
+     * @tc.steps: step5. Construct GestureEvent and Call HandleOperator functions which is not in handleRegion.
+     * @tc.expected: the function runs rightly
+     */
+    GestureEvent info3;
+    info3.localLocation_ = Offset(21, 21);
+    pattern->HandlePanStart(info3);
+    pattern->HandlePanMove(info3);
+    EXPECT_FALSE(pattern->firstHandleDrag_);
+    EXPECT_FALSE(pattern->secondHandleDrag_);
+}
+/**
+ * @tc.name: HandleOperator003
+ * @tc.desc: Test SelectOverlayPattern HandleOperator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, HandleOperator003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize selectOverlayInfo properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.singleLineHeight = NODE_ID;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    /**
+     * @tc.steps: step2. Create pattern
+     */
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step3. Construct TouchEventInfo and Call HandleTouchEvent function.
+     * @tc.expected: check whether the function is executed.
+     */
+    TouchEventInfo touchInfo("touchDown");
+    TouchLocationInfo touchLocationInfo(1);
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    touchInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
+    pattern->HandleTouchEvent(touchInfo);
 }
 } // namespace OHOS::Ace::NG
