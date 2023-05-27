@@ -37,8 +37,8 @@ MenuModel* MenuModel::GetInstance()
             } else {
                 instance_.reset(new Framework::MenuModelImpl());
             }
-        }
 #endif
+        }
     }
     return instance_.get();
 }

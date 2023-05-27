@@ -38,8 +38,8 @@ MenuItemModel* MenuItemModel::GetInstance()
             } else {
                 instance_.reset(new Framework::MenuItemModelImpl());
             }
-        }
 #endif
+        }
     }
     return instance_.get();
 }

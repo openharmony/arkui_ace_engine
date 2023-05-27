@@ -47,11 +47,11 @@ NavigationModel* NavigationModel::GetInstance()
             } else {
                 instance_.reset(new Framework::NavigationModelImpl());
             }
-        }
 #endif
         }
-        return instance_.get();
     }
+    return instance_.get();
+}
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
@@ -69,7 +69,7 @@ JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent&
 
 } // namespace
 
-void JSNavigation::ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<RefPtr<ToolBarItem>>& items)
+void JSNavigation::ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<RefPtr<AceType>>& items)
 {
     auto length = jsArray->Length();
     for (size_t i = 0; i < length; i++) {
@@ -341,7 +341,7 @@ void JSNavigation::SetToolBar(const JSCallbackInfo& info)
         NavigationModel::GetInstance()->SetToolBarItems(std::move(toolBarItems));
         return;
     }
-    std::list<RefPtr<ToolBarItem>> items;
+    std::list<RefPtr<AceType>> items;
     NavigationModel::GetInstance()->GetToolBarItems(items);
     ParseToolBarItems(JSRef<JSArray>::Cast(itemsValue), items);
 }
@@ -360,7 +360,7 @@ void JSNavigation::SetMenus(const JSCallbackInfo& info)
             NavigationModel::GetInstance()->SetMenuItems(std::move(menuItems));
             return;
         }
-        std::list<RefPtr<ToolBarItem>> items;
+        std::list<RefPtr<AceType>> items;
         NavigationModel::GetInstance()->GetMenuItems(items);
         ParseToolBarItems(JSRef<JSArray>::Cast(info[0]), items);
     } else if (info[0]->IsObject()) {
