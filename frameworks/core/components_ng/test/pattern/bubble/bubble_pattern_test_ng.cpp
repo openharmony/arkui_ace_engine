@@ -81,6 +81,22 @@ constexpr Dimension BUBBLE_PAINT_PROPERTY_ARROW_OFFSET = 20.0_px;
 constexpr Placement BUBBLE_LAYOUT_PROPERTY_PLACEMENT = Placement::LEFT;
 constexpr Dimension BORDER_EDGE = 1.0_px;
 constexpr Dimension BORDER_EDGE_LARGE = 20.0_px;
+constexpr Dimension ARROW_ZERO_PERCENT_VALUE = Dimension(0.0, DimensionUnit::PERCENT);
+constexpr Dimension ARROW_ONE_HUNDRED_PERCENT_VALUE = Dimension(1.0, DimensionUnit::PERCENT);
+const std::vector<Placement> BUBBLE_LAYOUT_PROPERTY_PLACEMENTS = {
+    Placement::LEFT,
+    Placement::RIGHT,
+    Placement::TOP,
+    Placement::BOTTOM,
+    Placement::TOP_LEFT,
+    Placement::TOP_RIGHT,
+    Placement::BOTTOM_LEFT,
+    Placement::BOTTOM_RIGHT,
+    Placement::LEFT_BOTTOM,
+    Placement::LEFT_TOP,
+    Placement::RIGHT_BOTTOM,
+    Placement::RIGHT_TOP,
+};
 } // namespace
 struct TestProperty {
     // layout property
@@ -854,5 +870,101 @@ HWTEST_F(BubblePatternTestNg, BubblePaintMethod001, TestSize.Level1)
     bubblePaintMethod.SetShowArrow(false);
     bubblePaintMethod.PaintBubble(canvas, paintWrapper);
     ASSERT_FALSE(bubblePaintMethod.showArrow_);
+
+    bubblePaintMethod.SetShowArrow(true);
+    for (size_t i = 0; i < BUBBLE_LAYOUT_PROPERTY_PLACEMENTS.size(); i++)
+    {
+        bubblePaintProperty->UpdatePlacement(BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i]);
+        bubblePaintMethod.PaintBubble(canvas, paintWrapper);
+    }
+}
+
+/*
+ * @tc.name: BubblePaintMethod002
+ * @tc.desc: Test BubblePaintMethod UpdateArrowOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubblePatternTestNg, BubblePaintMethod002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the BubblePaintMethod.
+     */
+    BubblePaintMethod bubblePaintMethod;
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    /**
+     * @tc.steps: step2. Create the GeometryNode and PaintWrapper.Set the progressPaintProperty.
+     * @tc.expected: Check the GeometryNode and PaintWrapper were created successfully.
+     */
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+
+    auto bubblePaintProperty = frameNode->GetPaintProperty<BubbleRenderProperty>();
+    ASSERT_NE(bubblePaintProperty, nullptr);
+
+    WeakPtr<RenderContext> renderContext;
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, bubblePaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    /**
+     * @tc.steps: step4. Set the different properties.Call the function UpdateArrowOffset.
+     * @tc.expected: Check the properties.
+     */
+    auto paintProperty = AceType::DynamicCast<BubbleRenderProperty>(paintWrapper->GetPaintProperty());
+    ASSERT_NE(paintProperty, nullptr);
+    bubblePaintMethod.UpdateArrowOffset(Dimension(10.0), paintProperty->GetPlacement().value_or(Placement::BOTTOM));
+    EXPECT_EQ(bubblePaintMethod.arrowOffset_.Value(), 10.0);
+    bubblePaintMethod.UpdateArrowOffset(
+        Dimension(10.0, DimensionUnit::PERCENT), paintProperty->GetPlacement().value_or(Placement::BOTTOM));
+    EXPECT_EQ(bubblePaintMethod.arrowOffset_.Value(), 1.0);
+    bubblePaintMethod.UpdateArrowOffset(std::nullopt, paintProperty->GetPlacement().value_or(Placement::TOP_LEFT));
+    EXPECT_EQ(bubblePaintMethod.arrowOffset_.Value(), ARROW_ZERO_PERCENT_VALUE.Value());
+    bubblePaintMethod.UpdateArrowOffset(std::nullopt, paintProperty->GetPlacement().value_or(Placement::TOP_RIGHT));
+    EXPECT_EQ(bubblePaintMethod.arrowOffset_.Value(), ARROW_ONE_HUNDRED_PERCENT_VALUE.Value());
+    bubblePaintMethod.UpdateArrowOffset(std::nullopt, paintProperty->GetPlacement().value_or(Placement::NONE));
+}
+
+/*
+ * @tc.name: BubblePaintMethod003
+ * @tc.desc: Test BubblePaintMethod PaintMask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubblePatternTestNg, BubblePaintMethod003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the BubblePaintMethod.
+     */
+    BubblePaintMethod bubblePaintMethod;
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawRect(_)).Times(1);
+    EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
+    /**
+     * @tc.steps: step2. Create the GeometryNode and PaintWrapper.Set the progressPaintProperty.
+     * @tc.expected: Check the GeometryNode and PaintWrapper were created successfully.
+     */
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+
+    auto bubblePaintProperty = frameNode->GetPaintProperty<BubbleRenderProperty>();
+    ASSERT_NE(bubblePaintProperty, nullptr);
+
+    WeakPtr<RenderContext> renderContext;
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, bubblePaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    /**
+     * @tc.steps: step4. Call the function PaintMask.
+     */
+    bubblePaintMethod.PaintMask(canvas, paintWrapper);
 }
 } // namespace OHOS::Ace::NG
