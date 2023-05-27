@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_PATTERN_H
 
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -115,8 +116,6 @@ struct CaretMetricsF {
 struct UnderLinePattern {
     BorderRadiusProperty radius;
     Color bgColor;
-    BorderWidthProperty borderWidth;
-    BorderColorProperty borderColor;
 };
 
 struct PasswordModeStyle {
@@ -220,9 +219,10 @@ public:
     const TextEditingValueNG& GetEditingValue() const;
 
 #if defined(IOS_PLATFORM)
-    const TextEditingValue& GetInputEditingValue() const override {
+    const TextEditingValue& GetInputEditingValue() const override
+    {
         static TextEditingValue value;
-	return value;
+        return value;
     };
 #endif
 
@@ -242,7 +242,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyleType::MATCH_ACTIVE };
+        return { FocusType::NODE, true };
     }
 
     void UpdateConfiguration();
@@ -548,7 +548,7 @@ public:
     float GetIconHotZoneSize();
     float GetIconSize();
 
-    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) const;
+    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) const;
 
     void InitSurfaceChangedCallback();
@@ -759,16 +759,6 @@ public:
     void SetUnitNode(const RefPtr<NG::UINode>& unitNode);
     void SetShowError();
 
-    void SetShowUnderLine(bool showUnderLine)
-    {
-        showUnderLine_ = showUnderLine;
-    }
-
-    bool GetShowUnderLine() const
-    {
-        return showUnderLine_;
-    }
-
     float GetUnitWidth() const
     {
         return unitWidth_;
@@ -796,6 +786,16 @@ public:
         underlineWidth_ = underlineWidth;
     }
 
+    bool IsSelected() const
+    {
+        return HasFocus();
+    }
+
+    void ChangeIsSelectedAreaRedraw()
+    {
+        isSelectedAreaRedraw_ = !isSelectedAreaRedraw_;
+    }
+
 private:
     bool HasFocus() const;
     void HandleTouchEvent(const TouchEventInfo& info);
@@ -815,9 +815,9 @@ private:
     int32_t UpdateCaretPositionOnHandleMove(const OffsetF& localOffset);
     bool HasStateStyle(UIState state) const;
 
-    void AddScrollEvent();
     void OnTextAreaScroll(float offset);
     bool OnScrollCallback(float offset, int32_t source) override;
+    void OnScrollEndCallback() override;
     void InitMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
     void OnHover(bool isHover);
@@ -825,6 +825,8 @@ private:
     void HandleLongPress(GestureEvent& info);
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void UpdateSelectorByPosition(const int32_t& pos);
+    // assert handles are inside the contentRect, reset them if not
+    void CheckHandles(std::optional<RectF>& firstHandle, std::optional<RectF>& secondHandle);
     void ShowSelectOverlay(const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle);
 
     void CursorMoveOnClick(const Offset& offset);
@@ -833,6 +835,8 @@ private:
     void ProcessOverlay();
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
+    // when moving one handle causes shift of textRect, update x position of the other handle
+    void UpdateOtherHandleOnMove(float dx, float dy);
     void SetHandlerOnMoveDone();
     void OnDetachFromFrameNode(FrameNode* node) override;
     bool UpdateCaretByPressOrLongPress();
@@ -934,7 +938,6 @@ private:
     PaddingPropertyF utilPadding_;
     OffsetF rightClickOffset_;
 
-    bool showUnderLine_ = false;
     ImageSourceInfo showResultImageInfo_;
     ImageSourceInfo hideResultImageInfo_;
     bool setBorderFlag_ = true;
@@ -961,7 +964,7 @@ private:
     bool isOnHover_ = false;
     bool needToRefreshSelectOverlay_ = false;
     bool needToRequestKeyboardInner_ = false;
-    bool needToRequestKeyboardOnFocus_ = false;
+    bool needToRequestKeyboardOnFocus_ = true;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 

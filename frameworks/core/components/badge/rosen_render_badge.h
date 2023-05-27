@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BADGE_ROSEN_RENDER_BADGE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BADGE_ROSEN_RENDER_BADGE_H
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
+#endif
 
 #include "core/components/badge/render_badge.h"
 #include "core/components/common/painter/debug_boundary_painter.h"
@@ -37,9 +39,15 @@ private:
     Size CalculateTextSize(
         const std::string& text, const TextStyle& textStyle, RefPtr<RenderText>& renderText) override;
     void PaintText(const Offset& textOffset, RenderContext& context) const;
+#ifndef USE_ROSEN_DRAWING
     void DrawCircleBadge(SkCanvas* canvas, const Offset& offset);
     void DrawNumericalBadge(SkCanvas* canvas, const Offset& offset);
     void RenderBadgeBoundary(SkCanvas* canvas, double startX, double startY, double width, double height);
+#else
+    void DrawCircleBadge(RSCanvas* canvas, const Offset& offset);
+    void DrawNumericalBadge(RSCanvas* canvas, const Offset& offset);
+    void RenderBadgeBoundary(RSCanvas* canvas, double startX, double startY, double width, double height);
+#endif
 
     double badgeCircleDiameter_ = 0.0;
     double badgeCircleRadius_ = 0.0;

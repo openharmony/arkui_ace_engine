@@ -133,6 +133,9 @@ int32_t SpanItem::UpdateParagraph(
         CHECK_NULL_RETURN(pipelineContext, -1);
         TextStyle textStyle =
             CreateTextStyleUsingTheme(fontStyle, textLineStyle, pipelineContext->GetTheme<TextTheme>());
+        if (NearZero(textStyle.GetFontSize().Value())) {
+            return -1;
+        }
         builder->PushStyle(textStyle);
     }
     auto displayText = content;
@@ -177,6 +180,10 @@ int32_t ImageSpanItem::UpdateParagraph(
         default:
             run.alignment = PlaceholderAlignment::BOTTOM;
     }
-    return builder->AddPlaceholder(run);
+    builder->PushStyle(textStyle);
+    LOGI("ImageSpan fontsize = %{public}f", textStyle.GetFontSize().Value());
+    int32_t index = builder->AddPlaceholder(run);
+    builder->PopStyle();
+    return index;
 }
 } // namespace OHOS::Ace::NG

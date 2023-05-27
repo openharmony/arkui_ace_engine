@@ -59,7 +59,6 @@ void TextClockPattern::OnModifyDone()
 {
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
     hourWest_ = GetHoursWest();
     UpdateTimeText();
 }

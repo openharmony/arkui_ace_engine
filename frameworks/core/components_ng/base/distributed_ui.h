@@ -26,6 +26,12 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/event/touch_event.h"
 
+#define CHECK_NULL_BREAK(ptr)                                       \
+    if (!(ptr)) {                                                   \
+        LOGW(#ptr " is null, break on line %{public}d", __LINE__); \
+        break;                                                      \
+    }
+
 namespace OHOS::Ace::NG {
 class DistributedUI {
 public:

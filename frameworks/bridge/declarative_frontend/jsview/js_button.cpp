@@ -258,12 +258,7 @@ void JSButton::JsRemoteMessage(const JSCallbackInfo& info)
 {
     RemoteCallback remoteCallback;
     JSInteractableView::JsRemoteMessage(info, remoteCallback);
-    EventMarker remoteMessageEventId(std::move(remoteCallback));
-    auto stack = ViewStackProcessor::GetInstance();
-    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
-    if (buttonComponent) {
-        buttonComponent->SetRemoteMessageEventId(remoteMessageEventId);
-    }
+    ButtonModel::GetInstance()->SetRemoteMessage(remoteCallback);
 }
 
 void JSButton::JSBind(BindingTarget globalObj)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SWIPER_ROSEN_RENDER_SWIPER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SWIPER_ROSEN_RENDER_SWIPER_H
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkRRect.h"
+#endif
 
 #include "core/components/swiper/render_swiper.h"
 
@@ -36,7 +38,11 @@ private:
     void LayoutDigitalIndicator();
     void CanvasDrawIndicator(RenderContext& context, const Offset& offset);
     void PaintFade(RenderContext& context, const Offset& offset);
+#ifndef USE_ROSEN_DRAWING
     void PaintShadow(SkCanvas* canvas, const Offset& offset);
+#else
+    void PaintShadow(RSCanvas* canvas, const Offset& offset);
+#endif
     IndicatorProperties PrepareIndicatorProperties() const;
 
     void DrawIndicator(RenderContext& context, const Offset& offset);
@@ -45,7 +51,11 @@ private:
     void DrawIndicatorItems(RenderContext& context, const Offset& offset);
     void DrawIndicatorFocus(RenderContext& context, const Offset& offset);
 
+#ifndef USE_ROSEN_DRAWING
     void GetRRect(SkRRect& rRect, double& startOffset, double& endOffset, const Offset& offset);
+#else
+    void GetRRect(RSRoundRect& rRect, double& startOffset, double& endOffset, const Offset& offset);
+#endif
     bool HideIndicatorPoint(int32_t index, const IndicatorOffsetInfo& pointInfo, const Offset& offset);
     void GetIndicatorPointMoveOffset(int32_t index, Offset& animationMove);
     void InitMoveRange();

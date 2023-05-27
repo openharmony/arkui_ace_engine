@@ -24,6 +24,11 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+namespace {
+constexpr int FOR_HOTZONESIZE_CALCULATE_MULTIPLY_TWO = 2;
+} // namespace
+
 void RadioPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -82,7 +87,6 @@ void RadioPattern::OnModifyDone()
     layoutProperty->UpdateMargin(margin);
     hotZoneHorizontalPadding_ = radioTheme->GetHotZoneHorizontalPadding();
     hotZoneVerticalPadding_ = radioTheme->GetHotZoneVerticalPadding();
-    defaultPadding_ = radioTheme->GetDefaultPadding();
     InitClickEvent();
     InitTouchEvent();
     InitMouseEvent();
@@ -414,12 +418,12 @@ bool RadioPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
 // Set the default hot zone for the component.
 void RadioPattern::AddHotZoneRect()
 {
-    hotZoneOffset_.SetX(offset_.GetX() - defaultPadding_.ConvertToPx() - hotZoneHorizontalPadding_.ConvertToPx());
-    hotZoneOffset_.SetY(offset_.GetY() - defaultPadding_.ConvertToPx() - hotZoneVerticalPadding_.ConvertToPx());
+    hotZoneOffset_.SetX(offset_.GetX() - hotZoneHorizontalPadding_.ConvertToPx());
+    hotZoneOffset_.SetY(offset_.GetY() - hotZoneVerticalPadding_.ConvertToPx());
     hotZoneSize_.SetWidth(
-        size_.Width() + 2 * (defaultPadding_.ConvertToPx() + hotZoneHorizontalPadding_.ConvertToPx()));
+        size_.Width() + FOR_HOTZONESIZE_CALCULATE_MULTIPLY_TWO * hotZoneHorizontalPadding_.ConvertToPx());
     hotZoneSize_.SetHeight(
-        size_.Height() + 2 * (defaultPadding_.ConvertToPx() + hotZoneVerticalPadding_.ConvertToPx()));
+        size_.Height() + FOR_HOTZONESIZE_CALCULATE_MULTIPLY_TWO * hotZoneVerticalPadding_.ConvertToPx());
     DimensionRect hotZoneRegion;
     hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize_.Width()), Dimension(hotZoneSize_.Height())));
     hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset_.GetX()), Dimension(hotZoneOffset_.GetY())));

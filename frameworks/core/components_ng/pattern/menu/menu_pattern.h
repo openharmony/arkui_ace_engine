@@ -24,7 +24,6 @@
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_paint_method.h"
-#include "core/components_ng/pattern/menu/navigation_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select/select_model.h"
 
@@ -185,7 +184,7 @@ private:
     bool HasInnerMenu() const;
     // If CustomBuilder is declared with <Menu> and <MenuItem>,
     // reset outer menu container and only apply theme on the inner <Menu> node.
-    void ResetTheme(const RefPtr<FrameNode>& host);
+    void ResetTheme(const RefPtr<FrameNode>& host, bool resetShadow);
 
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event) const;

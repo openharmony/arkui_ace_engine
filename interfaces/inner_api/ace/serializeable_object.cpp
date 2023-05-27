@@ -15,31 +15,38 @@
 
 #include "interfaces/inner_api/ace/serializeable_object.h"
 
-#include <dlfcn.h>
+#include "utils.h"
 
 namespace OHOS::Ace {
 namespace {
+
+#if defined(WINDOWS_PLATFORM)
+constexpr char ACE_LIB_NAME[] = "libace.dll";
+#elif defined(MAC_PLATFORM)
+constexpr char ACE_LIB_NAME[] = "libace.dylib";
+#elif defined(LINUX_PLATFORM)
+constexpr char ACE_LIB_NAME[] = "libace.so";
+#else
+constexpr char ACE_LIB_NAME[] = "libace.z.so";
+#endif
+
 using CreateFunction = SerializeableObject* (*)();
 constexpr char NODE_OBJECT_CREATE_FUNC[] = "OHOS_ACE_CreateNodeObject";
 
 SerializeableObject* CreateNodeObjectInner()
 {
-    void* handle = dlopen("libace.z.so", RTLD_LAZY);
+    LIBHANDLE handle = LOADLIB(ACE_LIB_NAME);
     if (handle == nullptr) {
         return nullptr;
     }
 
-    auto entry = reinterpret_cast<CreateFunction>(dlsym(handle, NODE_OBJECT_CREATE_FUNC));
+    auto entry = reinterpret_cast<CreateFunction>(LOADSYM(handle, NODE_OBJECT_CREATE_FUNC));
     if (entry == nullptr) {
-        dlclose(handle);
+        FREELIB(handle);
         return nullptr;
     }
 
     auto nodeObject = entry();
-    if (nodeObject == nullptr) {
-        dlclose(handle);
-    }
-
     return nodeObject;
 }
 } // namespace

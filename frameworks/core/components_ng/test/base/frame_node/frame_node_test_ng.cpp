@@ -14,12 +14,17 @@
  */
 
 #include <list>
+#include <unordered_map>
+#include <vector>
 
 #include "gtest/gtest.h"
 
 #define protected public
 #define private public
 
+#include "base/geometry/dimension.h"
+#include "base/geometry/dimension_rect.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/json/json_util.h"
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
@@ -27,16 +32,16 @@
 #include "core/common/ace_application_info.h"
 #include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/syntax/if_else_model_ng.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/event/mouse_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-#undef private
-#undef protected
 
 using namespace testing;
 using namespace testing::ext;
@@ -66,6 +71,25 @@ void FrameNodeTestNg::TearDownTestSuite()
     MockPipelineBase::TearDown();
 }
 
+class TestNode : public UINode {
+    DECLARE_ACE_TYPE(TestNode, UINode);
+
+public:
+    static RefPtr<TestNode> CreateTestNode(int32_t nodeId)
+    {
+        auto node = MakeRefPtr<TestNode>(nodeId);
+        return node;
+    }
+
+    bool IsAtomicNode() const override
+    {
+        return true;
+    }
+
+    explicit TestNode(int32_t nodeId) : UINode("TestNode", nodeId) {}
+    ~TestNode() override = default;
+};
+
 /**
  * @tc.name: FrameNodeTestNg001
  * @tc.desc: Test frame node method
@@ -77,6 +101,17 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg001, TestSize.Level1)
     auto two = FrameNode::GetFrameNode("two", 1);
     EXPECT_NE(one, nullptr);
     EXPECT_EQ(two, nullptr);
+
+    /**
+     * @tc.steps: step2. create FrameNode and set a callback
+     * @tc.expect: call DestroyCallback while object is destroyed
+     */
+    bool flag = false;
+    auto three = FrameNode::GetOrCreateFrameNode("one", 1, nullptr);
+    ASSERT_NE(three, nullptr);
+    three->PushDestroyCallback([&flag]() { flag = !flag; });
+    three = nullptr;
+    EXPECT_TRUE(flag);
 }
 
 /**
@@ -261,6 +296,17 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg006, TestSize.Level1)
     frameNode.layoutProperty_->GetBorderWidthProperty();
     frameNode.DumpInfo();
     EXPECT_EQ(layoutProperty.borderWidth_, nullptr);
+
+    /**
+     * @tc.steps: step2. set layoutConstraintF_ an geometryNode_'sParentLayoutConstraint
+                and call DumpInfo
+     * @tc.expected: expect The function is run ok.
+     */
+    frameNode.layoutProperty_->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    auto layoutConstraintF_ = LayoutConstraintF();
+    frameNode.geometryNode_->SetParentLayoutConstraint(layoutConstraintF_);
+    frameNode.DumpInfo();
+    EXPECT_EQ(layoutProperty.calcLayoutConstraint_, nullptr);
 }
 
 /**
@@ -275,9 +321,27 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg007, TestSize.Level1)
      * @tc.expected: step1. expect The function is run ok.
      */
     FrameNode frameNode("main", 10, AceType::MakeRefPtr<Pattern>(), true);
+    auto gestureEventHub = frameNode.GetOrCreateGestureEventHub();
+
+    std::vector<DimensionRect> responseRegion;
+    responseRegion.push_back(DimensionRect());
+    gestureEventHub->SetResponseRegion(responseRegion);
+
     auto jsonValue = JsonUtil::Create(true);
     frameNode.ToJsonValue(jsonValue);
     EXPECT_TRUE(jsonValue);
+
+    /**
+     * @tc.steps: step2. build a object to jsonValue and call FromJson
+     * @tc.expected: expect The function is run ok.
+     */
+    frameNode.FromJson(jsonValue);
+    frameNode.renderContext_ = nullptr;
+    auto jsonValue2 = JsonUtil::Create(true);
+    frameNode.ToJsonValue(jsonValue2);
+    frameNode.eventHub_ = nullptr;
+    frameNode.FromJson(jsonValue2);
+    EXPECT_TRUE(jsonValue2);
 }
 
 /**
@@ -295,6 +359,18 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg008, TestSize.Level1)
     FRAME_NODE2->OnAttachToMainTree(true);
 
     auto request = FRAME_NODE2->hasPendingRequest_ = true;
+    FRAME_NODE2->OnAttachToMainTree(true);
+    EXPECT_TRUE(request);
+
+    /**
+     * @tc.steps: step2 set PositionProperty of FRAME_NODE2 and call OnAttachToMainTree
+     * @tc.expected: expect The function is run ok.
+     */
+    auto& posProperty = FRAME_NODE2->renderContext_->GetOrCreatePositionProperty();
+    posProperty->UpdateOffset(OffsetT<Dimension>()); // OffsetT<Dimension>
+    FRAME_NODE2->SetParent(FRAME_NODE_PARENT);
+    auto testNode_ = TestNode::CreateTestNode(100);
+    FRAME_NODE_PARENT->SetParent(testNode_);
     FRAME_NODE2->OnAttachToMainTree(true);
     EXPECT_TRUE(request);
 }
@@ -380,8 +456,19 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0012, TestSize.Level1)
      * @tc.steps: step1. build a object to SetOnAreaChangeCallback
      * @tc.expected: step1. expect The function is run ok.
      */
-    OnAreaChangedFunc callback;
+    OnAreaChangedFunc callback = [](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect,
+                                     const OffsetF& origin) {};
     FRAME_NODE2->SetOnAreaChangeCallback(std::move(callback));
+    EXPECT_NE(FRAME_NODE2->lastFrameRect_, nullptr);
+    EXPECT_NE(FRAME_NODE2->lastParentOffsetToWindow_, nullptr);
+
+    /**
+     * @tc.steps: step2.test while callback is nullptr
+     * @tc.expected:expect The function is run ok.
+     */
+    FRAME_NODE2->lastFrameRect_ = nullptr;
+    FRAME_NODE2->lastParentOffsetToWindow_ = nullptr;
+    FRAME_NODE2->SetOnAreaChangeCallback(nullptr);
     EXPECT_NE(FRAME_NODE2->lastFrameRect_, nullptr);
     EXPECT_NE(FRAME_NODE2->lastParentOffsetToWindow_, nullptr);
 }
@@ -394,14 +481,60 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0012, TestSize.Level1)
 HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0013, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. build a object to TriggerOnAreaChangeCallback
-     * @tc.expected: step1. expect The function is run ok.
+     * @tc.steps: step1. set a flag and init a callback(onAreaChanged)
      */
-    OnAreaChangedFunc onAreaChanged;
-    FRAME_NODE2->eventHub_->SetOnAreaChanged(std::move(onAreaChanged));
-    auto test = FRAME_NODE2->eventHub_->HasOnAreaChanged();
+    bool flag = false;
+    OnAreaChangedFunc onAreaChanged = [&flag](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect,
+        const OffsetF& origin) { flag = !flag; };
+
+    /**
+     * @tc.steps: step2. call TriggerOnAreaChangeCallback before set callback
+     * @tc.expected: expect flag is still false
+     */
     FRAME_NODE2->TriggerOnAreaChangeCallback();
-    EXPECT_FALSE(test);
+    EXPECT_FALSE(flag);
+
+    /**
+     * @tc.steps: step3.set callback and release lastParentOffsetToWindow_
+     * @tc.expected: expect flag is still false
+     */
+    FRAME_NODE2->eventHub_->SetOnAreaChanged(std::move(onAreaChanged));
+    FRAME_NODE2->lastParentOffsetToWindow_ = nullptr;
+    FRAME_NODE2->TriggerOnAreaChangeCallback();
+    EXPECT_FALSE(flag);
+
+    /**
+     * @tc.steps: step4. release lastFrameRect_
+     * @tc.expected: expect flag is still false
+     */
+    FRAME_NODE2->lastFrameRect_ = nullptr;
+    FRAME_NODE2->TriggerOnAreaChangeCallback();
+    EXPECT_FALSE(flag);
+
+    /**
+     * @tc.steps: step5.set lastParentOffsetToWindow_ and lastFrameRect_
+     * @tc.expected: expect flag is still false
+     */
+    FRAME_NODE2->lastParentOffsetToWindow_ = std::make_unique<OffsetF>();
+    FRAME_NODE2->lastFrameRect_ = std::make_unique<RectF>();
+    FRAME_NODE2->TriggerOnAreaChangeCallback();
+    EXPECT_FALSE(flag);
+
+    /**
+     * @tc.steps: step6.set FrameSize
+     * @tc.expected: expect flag is turns true
+     */
+    FRAME_NODE2->geometryNode_->SetFrameSize(SizeF(10, 10));
+    FRAME_NODE2->TriggerOnAreaChangeCallback();
+    EXPECT_TRUE(flag);
+
+    /**
+     * @tc.steps: step7.set lastParentOffsetToWindow_
+     * @tc.expected: expect flag is turns false
+     */
+    FRAME_NODE2->lastParentOffsetToWindow_->SetX(7);
+    FRAME_NODE2->TriggerOnAreaChangeCallback();
+    EXPECT_FALSE(flag);
 }
 
 /**
@@ -437,6 +570,26 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0014, TestSize.Level1)
 
     FRAME_NODE2->lastVisibleRatio_ = 1.0;
     FRAME_NODE2->TriggerVisibleAreaChangeCallback();
+
+    /**
+     * @tc.steps: step2. set onShow_ and call TriggerVisibleAreaChangeCallback
+     * @tc.expected: expect GetOnShow is true and lastVisibleRatio_ is zero.
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    context->onShow_ = true;
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback();
+    auto testNode_ = TestNode::CreateTestNode(101);
+    FRAME_NODE3->SetParent(testNode_);
+    FRAME_NODE3->isActive_ = true;
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback();
+    FRAME_NODE3->layoutProperty_->UpdateVisibility(VisibleType::INVISIBLE);
+    FRAME_NODE2->layoutProperty_->UpdateVisibility(VisibleType::VISIBLE);
+    FRAME_NODE2->isActive_ = true;
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback();
+    FRAME_NODE3->layoutProperty_->UpdateVisibility(VisibleType::VISIBLE);
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback();
+    EXPECT_TRUE(context->GetOnShow());
+    EXPECT_NE(FRAME_NODE2->lastVisibleRatio_, 0);
 }
 
 /**
@@ -1143,7 +1296,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0053, TestSize.Level1)
      * @tc.expected: step1. expect The function is run ok.
      */
     auto test = AceApplicationInfo::GetInstance().isAccessibilityEnabled_ = true;
-    FRAME_NODE2->OnAccessibilityEvent(AccessibilityEventType::ACCESSIBILITY_FOCUSED);
+    FRAME_NODE2->OnAccessibilityEvent(
+        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+    FRAME_NODE2->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, "", "");
     EXPECT_TRUE(test);
 
     auto test1 = AceApplicationInfo::GetInstance().isAccessibilityEnabled_ = false;
@@ -1211,11 +1366,20 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0057, TestSize.Level1)
      * @tc.steps: step1. callback RemoveLastHotZoneRect.
      * @tc.expected: step1. expect The function is run ok.
      */
-    const RectF visibleRect;
-    const RectF renderRect;
+    RectF visibleRect;
+    RectF renderRect;
     FRAME_NODE2->CalculateCurrentVisibleRatio(visibleRect, renderRect);
     EXPECT_EQ(visibleRect.Width(), 0);
     EXPECT_EQ(renderRect.Width(), 0);
+
+    /**
+     * @tc.steps: step2. set wrong value and call CalculateCurrentVisibleRatio
+     * @tc.expected: expect The function returns 0.
+     */
+    renderRect.SetWidth(-1);
+    EXPECT_EQ(FRAME_NODE2->CalculateCurrentVisibleRatio(visibleRect, renderRect), 0);
+    visibleRect.SetWidth(-1);
+    EXPECT_EQ(FRAME_NODE2->CalculateCurrentVisibleRatio(visibleRect, renderRect), 0);
 }
 
 /**
@@ -1233,5 +1397,126 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0058, TestSize.Level1)
     bool isHandled = false;
     FRAME_NODE2->OnVisibleAreaChangeCallback(callbackInfo, true, 1.0, isHandled);
     EXPECT_TRUE(callbackInfo.isCurrentVisible);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg0059
+ * @tc.desc: Test InitializePatternAndContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0059, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a node and set onMainTree_=false, then call InitializePatternAndContext
+            and trigger the callback
+     * @tc.expected: hasPendingRequest_ is true
+     */
+    auto one = FrameNode::GetOrCreateFrameNode("one", 11, []() { return AceType::MakeRefPtr<Pattern>(); });
+    one->onMainTree_ = false;
+    one->InitializePatternAndContext();
+    auto renderContext_ = one->renderContext_;
+    renderContext_->RequestNextFrame();
+    EXPECT_TRUE(one->hasPendingRequest_);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg0060
+ * @tc.desc: Test ProcessAllVisibleCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0060, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a node and init a map for preparing for args, then set a flag
+     */
+    auto one = FrameNode::GetOrCreateFrameNode("one", 11, []() { return AceType::MakeRefPtr<Pattern>(); });
+    std::unordered_map<double, VisibleCallbackInfo> visibleAreaCallbacks;
+    auto insert = [&visibleAreaCallbacks](double callbackRatio, std::function<void(bool, double)> callback,
+                      bool isCurrentVisible = false, double visibleRatio = 1.0) {
+        VisibleCallbackInfo callbackInfo { callback, visibleRatio, isCurrentVisible };
+        visibleAreaCallbacks.emplace(callbackRatio, callbackInfo);
+    };
+    bool flag = false;
+    auto defaultCallback = [&flag](bool input1, double input2) { flag = !flag; };
+    insert(0.2, std::function<void(bool, double)>(defaultCallback), false);
+    insert(0.8, std::function<void(bool, double)>(defaultCallback), true);
+    insert(0.21, std::function<void(bool, double)>(defaultCallback), true);
+    insert(0.79, std::function<void(bool, double)>(defaultCallback), false);
+    insert(0.5, std::function<void(bool, double)>(defaultCallback), false);
+
+    /**
+     * @tc.steps: step2. call ProcessAllVisibleCallback with .5
+     * @tc.expected: flag is true
+     */
+    one->ProcessAllVisibleCallback(visibleAreaCallbacks, 0.5);
+    EXPECT_TRUE(flag);
+
+    /**
+     * @tc.steps: step3. call ProcessAllVisibleCallback with 0
+     * @tc.expected: flag turns false
+     */
+    visibleAreaCallbacks.clear();
+    insert(0, std::function<void(bool, double)>(defaultCallback), false);
+    one->ProcessAllVisibleCallback(visibleAreaCallbacks, 0);
+    EXPECT_FALSE(flag);
+
+    /**
+     * @tc.steps: step4. call ProcessAllVisibleCallback with 0
+     * @tc.expected: flag turns true
+     */
+    visibleAreaCallbacks.clear();
+    insert(0, std::function<void(bool, double)>(defaultCallback), true);
+    one->ProcessAllVisibleCallback(visibleAreaCallbacks, 0);
+    EXPECT_TRUE(flag);
+
+    /**
+     * @tc.steps: step5. call ProcessAllVisibleCallback with 0
+     * @tc.expected: flag turns false
+     */
+    visibleAreaCallbacks.clear();
+    insert(1, std::function<void(bool, double)>(defaultCallback), false);
+    one->ProcessAllVisibleCallback(visibleAreaCallbacks, 1);
+    EXPECT_FALSE(flag);
+
+    /**
+     * @tc.steps: step6. call ProcessAllVisibleCallback with 1
+     * @tc.expected: flag turns true
+     */
+    visibleAreaCallbacks.clear();
+    insert(1, std::function<void(bool, double)>(defaultCallback), true);
+    one->ProcessAllVisibleCallback(visibleAreaCallbacks, 1);
+    EXPECT_TRUE(flag);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg0061
+ * @tc.desc: Test AnimateHoverEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0061, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a frame node and release inputEventHub_, then
+            change hoverEffectType_ and call AnimateHoverEffect
+     * @tc.expected: AnimateHoverEffectScale has been called 
+     */
+    auto one = FrameNode::GetOrCreateFrameNode("one", 12, []() { return AceType::MakeRefPtr<Pattern>(); });
+    one->eventHub_->inputEventHub_ = nullptr;
+    auto renderContext = AceType::DynamicCast<MockRenderContext>(one->renderContext_);
+    EXPECT_CALL(*renderContext, AnimateHoverEffectScale(_));
+    one->AnimateHoverEffect(false);
+    auto inputEventHub = one->eventHub_->GetOrCreateInputEventHub();
+    inputEventHub->hoverEffectType_ = HoverEffectType::UNKNOWN;
+    one->AnimateHoverEffect(false);
+    inputEventHub->hoverEffectType_ = HoverEffectType::AUTO;
+    one->AnimateHoverEffect(false);
+    inputEventHub->hoverEffectType_ = HoverEffectType::SCALE;
+    one->AnimateHoverEffect(false);
+    inputEventHub->hoverEffectType_ = HoverEffectType::BOARD;
+    one->AnimateHoverEffect(false);
+    inputEventHub->hoverEffectType_ = HoverEffectType::OPACITY;
+    one->AnimateHoverEffect(false);
+    inputEventHub->hoverEffectType_ = HoverEffectType::NONE;
+    one->AnimateHoverEffect(false);
 }
 } // namespace OHOS::Ace::NG

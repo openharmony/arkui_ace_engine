@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_modifier.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/property.h"
@@ -79,6 +80,11 @@ public:
 
     void EnableDrag();
 
+    bool DefaultSupportDrag() override
+    {
+        return true;
+    }
+    
     void SetCopyOption(CopyOptions value)
     {
         copyOption_ = value;
@@ -138,6 +144,7 @@ private:
     RefPtr<CanvasImage> image_;
     RectF dstRect_;
     RectF srcRect_;
+    RefPtr<ImageModifier> imageModifier_;
 
     // clear alt data after [OnImageLoadSuccess] being called
     RefPtr<ImageLoadingContext> altLoadingCtx_;

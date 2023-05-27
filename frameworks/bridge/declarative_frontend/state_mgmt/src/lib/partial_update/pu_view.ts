@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -545,7 +545,6 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const newElmtId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
     const oldElmtId: number = node.id__();
     // store the current id and origin id, used for dirty element sort in {compareNumber}
-    // this.getRecycleManager().setRecycleNodeCurrentElmtId(elmtId, currentElmtId);
     recycleUpdateFunc(newElmtId, /* is first render */ true, node);
     this.updateFuncByElmtId.delete(oldElmtId);
     this.updateFuncByElmtId.set(newElmtId, compilerAssignedUpdateFunc);
@@ -683,7 +682,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
      * @returns SynchedPropertySimple/ObjectTwoWay/PU
      */
   public createStorageLink<T>(storagePropName: string, defaultValue: T, viewVariableName: string): ObservedPropertyAbstractPU<T> {
-    return AppStorage.__CreateSync<T>(storagePropName, defaultValue,
+    return AppStorage.__createSync<T>(storagePropName, defaultValue,
       <T>(source: ObservedPropertyAbstract<T>) => (source === undefined)
         ? undefined
         : (source instanceof ObservedPropertySimple)
@@ -693,7 +692,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   }
 
   public createStorageProp<T>(storagePropName: string, defaultValue: T, viewVariableName: string): ObservedPropertyAbstractPU<T> {
-    return AppStorage.__CreateSync<T>(storagePropName, defaultValue,
+    return AppStorage.__createSync<T>(storagePropName, defaultValue,
       <T>(source: ObservedPropertyAbstract<T>) => (source === undefined)
         ? undefined
         : (source instanceof ObservedPropertySimple)

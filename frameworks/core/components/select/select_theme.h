@@ -679,6 +679,11 @@ public:
     {
         return disabledMenuFontColor_;
     }
+    void SetDisabledMenuFontColor(const Color& value)
+    {
+        disabledMenuFontColor_ = value;
+    }
+
 
     const Dimension& GetMenuIconPadding() const
     {

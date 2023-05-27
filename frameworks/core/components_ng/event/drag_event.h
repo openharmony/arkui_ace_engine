@@ -113,6 +113,7 @@ public:
         return direction_;
     }
 
+    void StartDragTaskForWeb(const GestureEvent& info);
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     RefPtr<DragEvent> userCallback_;
@@ -121,6 +122,7 @@ private:
     RefPtr<LongPressRecognizer> longPressRecognizer_;
     RefPtr<SequencedRecognizer> SequencedRecognizer_;
     WeakPtr<FrameNode> columnNodeWeak_;
+    std::function<void(GestureEvent&)> actionStart_;
 
     PanDirection direction_;
     int32_t fingers_ = 1;

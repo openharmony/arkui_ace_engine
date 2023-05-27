@@ -18,6 +18,7 @@
 #include <optional>
 #include <vector>
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -35,11 +36,11 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-constexpr uint32_t MIN_GRID_COUNTS = 2;
 constexpr uint32_t GRID_COUNTS_4 = 4;
 constexpr uint32_t GRID_COUNTS_6 = 6;
 constexpr uint32_t GRID_COUNTS_8 = 8;
 constexpr uint32_t GRID_COUNTS_12 = 12;
+constexpr Dimension MIN_MENU_WIDTH = Dimension(64.0, DimensionUnit::VP);
 
 uint32_t GetMaxGridCounts(const RefPtr<GridColumnInfo>& columnInfo)
 {
@@ -416,12 +417,19 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(
             auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
             float windowsOffsetX = windowGlobalRect.GetOffset().GetX();
             float windowsOffsetY = windowGlobalRect.GetOffset().GetY();
-            x += windowsOffsetX + pageOffset_.GetX();
-            y += windowsOffsetY + pageOffset_.GetY();
-            x = std::clamp(x, windowsOffsetX + pageOffset_.GetX(),
-                wrapperSize_.Width() - size.Width() - margin_ * 2.0f + windowsOffsetX + pageOffset_.GetX());
-            y = std::clamp(y, windowsOffsetY + pageOffset_.GetY(),
-                wrapperSize_.Height() - size.Height() - margin_ * 2.0f + windowsOffsetY + pageOffset_.GetY());
+            auto isContainerModal =
+                pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
+                pipelineContext->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+            OffsetF pageOffset;
+            if (isContainerModal) {
+                pageOffset = pageOffset_;
+            }
+            x += windowsOffsetX + pageOffset.GetX();
+            y += windowsOffsetY + pageOffset.GetY();
+            x = std::clamp(x, windowsOffsetX + pageOffset.GetX() + margin_,
+                wrapperSize_.Width() - size.Width() - margin_ + windowsOffsetX + pageOffset.GetX());
+            y = std::clamp(y, windowsOffsetY + pageOffset.GetY() + margin_,
+                wrapperSize_.Height() - size.Height() - margin_ + windowsOffsetY + pageOffset.GetY());
 
             return OffsetF(x, y);
         }
@@ -433,25 +441,17 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(
             y -= pageOffset_.GetY();
         }
     }
-    x = std::clamp(x, 0.0f, wrapperSize_.Width() - size.Width() - margin_ * 2.0f);
-    y = std::clamp(y, 0.0f, wrapperSize_.Height() - size.Height() - margin_ * 2.0f);
+    x = std::clamp(x, margin_, wrapperSize_.Width() - size.Width() - margin_);
+    y = std::clamp(y, margin_, wrapperSize_.Height() - size.Height() - margin_);
 
     return OffsetF(x, y);
 }
 
 void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
 {
-    // set min width
     RefPtr<GridColumnInfo> columnInfo;
     columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
     columnInfo->GetParent()->BuildColumnWidth(wrapperSize_.Width());
-    float minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
-    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
-    if (menuPattern->IsSelectOverlayExtensionMenu() && minWidth > constraint.maxSize.Width()) {
-        minWidth = constraint.maxSize.Width();
-    }
-    constraint.minSize.SetWidth(minWidth);
-
     // set max width
     auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(menuLayoutProperty);
@@ -461,14 +461,19 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
     auto maxWidth = std::min(maxHorizontalSpace, maxGridWidth);
     maxWidth = std::min(constraint.maxSize.Width(), maxWidth);
     constraint.maxSize.SetWidth(maxWidth);
-    constraint.percentReference.SetWidth(maxWidth);
+    // set min width
+    auto minWidth = static_cast<float>(MIN_MENU_WIDTH.ConvertToPx());
+    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    if (minWidth > constraint.maxSize.Width()) {
+        minWidth = constraint.maxSize.Width();
+    }
+    constraint.minSize.SetWidth(minWidth);
 }
 
 void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
 {
     auto maxSpaceHeight = std::max(topSpace_, bottomSpace_);
     constraint.maxSize.SetHeight(maxSpaceHeight);
-    constraint.percentReference.SetHeight(maxSpaceHeight);
 }
 
 LayoutConstraintF MenuLayoutAlgorithm::CreateChildConstraint(LayoutWrapper* layoutWrapper)
@@ -492,9 +497,10 @@ void MenuLayoutAlgorithm::UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWra
         LOGD("options is empty, no need to update constraint.");
         return;
     }
-    auto maxChildrenWidth = constraint.minSize.Width();
     auto optionConstraint = constraint;
     optionConstraint.maxSize.MinusWidth(optionPadding_ * 2.0f);
+    optionConstraint.minSize.MinusWidth(optionPadding_ * 2.0f);
+    auto maxChildrenWidth = optionConstraint.minSize.Width();
     auto optionsLayoutWrapper = GetOptionsLayoutWrappper(layoutWrapper);
     for (const auto& optionWrapper : optionsLayoutWrapper) {
         optionWrapper->Measure(optionConstraint);
@@ -670,17 +676,24 @@ OffsetF MenuLayoutAlgorithm::FitToScreen(const OffsetF& fitPosition, const SizeF
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
         float windowsOffsetX = windowGlobalRect.GetOffset().GetX();
         float windowsOffsetY = windowGlobalRect.GetOffset().GetY();
-        x += windowsOffsetX + pageOffset_.GetX();
-        y += windowsOffsetY + pageOffset_.GetY();
-        x = std::clamp(x, windowsOffsetX + pageOffset_.GetX(),
-            wrapperSize_.Width() - childSize.Width() - margin_ * 2.0f + windowsOffsetX + pageOffset_.GetX());
-        y = std::clamp(y, windowsOffsetY + pageOffset_.GetY(),
-            wrapperSize_.Height() - childSize.Height() - margin_ * 2.0f + windowsOffsetY + pageOffset_.GetY());
+        auto isContainerModal =
+            pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
+            pipelineContext->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+        OffsetF pageOffset;
+        if (isContainerModal) {
+            pageOffset = pageOffset_;
+        }
+        x += windowsOffsetX + pageOffset.GetX();
+        y += windowsOffsetY + pageOffset.GetY();
+        x = std::clamp(x, windowsOffsetX + pageOffset.GetX() + margin_,
+            wrapperSize_.Width() - childSize.Width() - margin_ + windowsOffsetX + pageOffset.GetX());
+        y = std::clamp(y, windowsOffsetY + pageOffset.GetY() + margin_,
+            wrapperSize_.Height() - childSize.Height() - margin_ + windowsOffsetY + pageOffset.GetY());
 
         return OffsetF(x, y);
     }
-    x = std::clamp(x, 0.0f, wrapperSize_.Width() - childSize.Width() - margin_ * 2.0f);
-    y = std::clamp(y, 0.0f, wrapperSize_.Height() - childSize.Height() - margin_ * 2.0f);
+    x = std::clamp(x, margin_, wrapperSize_.Width() - childSize.Width() - margin_);
+    y = std::clamp(y, margin_, wrapperSize_.Height() - childSize.Height() - margin_);
 
     return OffsetF(x, y);
 }

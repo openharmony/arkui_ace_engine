@@ -40,6 +40,7 @@ public:
     void SetFadingEdge(bool fadingEdge) override {};
     void SetBarOverlap(bool barOverlap) override {};
     void SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& onChangeEvent) override {};
+    void SetBarBackgroundColor(const Color& backgroundColor) override {};
 
 private:
     RefPtr<TabTheme> GetTheme() const;

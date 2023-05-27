@@ -47,7 +47,6 @@ public:
         Dimension hoverRadius;
         Dimension hotZoneHorizontalPadding;
         Dimension hotZoneVerticalPadding;
-        Dimension defaultPadding;
         Dimension shadowWidth;
         UIStatus uiStatus;
         CheckBoxGroupPaintProperty::SelectStatus status;
@@ -244,7 +243,6 @@ private:
     Dimension hoverRadius_;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;
-    Dimension defaultPadding_;
     Dimension shadowWidth_;
     float hoverDuration_ = 0.0f;
     float hoverToTouchDuration_ = 0.0f;

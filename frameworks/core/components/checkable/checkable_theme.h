@@ -140,11 +140,6 @@ public:
         return focusPaintPadding_;
     }
 
-    const Dimension& GetDefaultPadding() const
-    {
-        return defaultPadding_;
-    }
-
     double GetHoverDuration() const
     {
         return hoverDuration_;
@@ -182,7 +177,6 @@ protected:
     Dimension hoverRadius_;
     Dimension focusRadius_;
     Dimension focusPaintPadding_;
-    Dimension defaultPadding_;
     double hoverDuration_ = 0.0f;
     double hoverToTouchDuration_ = 0.0f;
     double touchDuration_ = 0.0f;
@@ -244,11 +238,6 @@ public:
                 LOGE("Pattern of checkbox is null, please check!");
                 return;
             }
-            theme->width_ = checkboxPattern->GetAttr<Dimension>("default_width", 0.0_vp);
-            theme->height_ = checkboxPattern->GetAttr<Dimension>("default_height", 0.0_vp);
-            theme->hotZoneHorizontalPadding_ =
-                checkboxPattern->GetAttr<Dimension>("hotzone_padding_horizontal", 0.0_vp);
-            theme->hotZoneVerticalPadding_ = checkboxPattern->GetAttr<Dimension>("hotzone_padding_verical", 0.0_vp);
             theme->pointColor_ = checkboxPattern->GetAttr<Color>("fg_color_checked", Color::RED);
             theme->activeColor_ = checkboxPattern->GetAttr<Color>("bg_color_checked", Color::RED);
             theme->inactiveColor_ = checkboxPattern->GetAttr<Color>("bg_border_color_unchecked", Color::RED);
@@ -260,7 +249,6 @@ public:
             theme->hoverRadius_ = checkboxPattern->GetAttr<Dimension>("hover_border_radius", 0.0_vp);
             theme->focusRadius_ = checkboxPattern->GetAttr<Dimension>("focus_border_radius", 0.0_vp);
             theme->focusPaintPadding_ = checkboxPattern->GetAttr<Dimension>("focus_paint_padding", 0.0_vp);
-            theme->defaultPadding_ = checkboxPattern->GetAttr<Dimension>("default_padding", 0.0_vp);
             theme->hoverDuration_ = checkboxPattern->GetAttr<double>("hover_animation_duration", 0.0);
             theme->hoverToTouchDuration_ = checkboxPattern->GetAttr<double>("hover_to_press_animation_duration", 0.0);
             theme->touchDuration_ = checkboxPattern->GetAttr<double>("touch_animation_duration", 0.0);
@@ -437,10 +425,6 @@ public:
                 LOGW("find pattern of radio fail");
                 return;
             }
-            theme->width_ = radioPattern->GetAttr<Dimension>("default_width", 0.0_vp);
-            theme->height_ = radioPattern->GetAttr<Dimension>("default_height", 0.0_vp);
-            theme->hotZoneHorizontalPadding_ = radioPattern->GetAttr<Dimension>("hotzone_padding_horizontal", 0.0_vp);
-            theme->hotZoneVerticalPadding_ = radioPattern->GetAttr<Dimension>("hotzone_padding_verical", 0.0_vp);
             theme->pointColor_ = radioPattern->GetAttr<Color>("fg_color_checked", Color::RED);
             theme->activeColor_ = radioPattern->GetAttr<Color>("bg_color_checked", Color::RED);
             theme->inactiveColor_ = radioPattern->GetAttr<Color>("bg_color_unchecked", Color::RED);
@@ -449,7 +433,6 @@ public:
             theme->hoverColor_ = radioPattern->GetAttr<Color>("hover_border_color", Color::RED);
             theme->clickEffectColor_ = radioPattern->GetAttr<Color>("click_effect_color", Color::RED);
             theme->focusPaintPadding_ = radioPattern->GetAttr<Dimension>("focus_paint_padding", 0.0_vp);
-            theme->defaultPadding_ = radioPattern->GetAttr<Dimension>("default_padding", 0.0_vp);
             theme->hoverDuration_ = radioPattern->GetAttr<double>("hover_animation_duration", 0.0);
             theme->hoverToTouchDuration_ = radioPattern->GetAttr<double>("hover_to_press_animation_duration", 0.0);
             theme->touchDuration_ = radioPattern->GetAttr<double>("touch_animation_duration", 0.0);

@@ -19,6 +19,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/svg/svg_context.h"
+#include "frameworks/core/components_ng/render/adapter/image_painter_utils.h"
 #include "frameworks/core/components_ng/render/drawing.h"
 #include "frameworks/core/components_ng/svg/parse/svg_animation.h"
 #include "frameworks/core/components_ng/svg/parse/svg_circle.h"
@@ -281,13 +282,14 @@ void SvgDom::DrawImage(
 
 void SvgDom::FitImage(RSCanvas& canvas, const ImageFit& imageFit, const Size& layout)
 {
-    // abandon this function, if image component support function fitImage
+    // scale svg to layout_ with ImageFit applied
     double scaleX = 1.0;
     double scaleY = 1.0;
-    double scaleViewBox = 1.0;
-    double tx = 0.0;
-    double ty = 0.0;
-    double half = 0.5;
+
+    float scaleViewBox = 1.0;
+    float tx = 0.0;
+    float ty = 0.0;
+    constexpr float half = 0.5f;
 
     if (!layout.IsEmpty()) {
         layout_ = layout;
@@ -295,17 +297,27 @@ void SvgDom::FitImage(RSCanvas& canvas, const ImageFit& imageFit, const Size& la
     if (!layout_.IsEmpty() && (svgSize_.IsValid() && !svgSize_.IsInfinite())) {
         ApplyImageFit(imageFit, scaleX, scaleY);
     }
+    /*
+     * 1. viewBox_, svgSize_, and layout_ are on 3 different scales.
+     * 2. Elements are painted in viewBox_ scale but displayed in layout_ scale.
+     * 3. To center align svg content, we first align viewBox_ to svgSize_, then we align svgSize_ to layout_.
+     * 4. Canvas is initially in layout_ scale, so transformation (tx, ty) needs to be in that scale, too.
+     */
     if (viewBox_.IsValid()) {
         if (svgSize_.IsValid() && !svgSize_.IsInfinite()) {
-            // center align viewBox to svg
+            // center align viewBox_ to svg, need to map viewBox_ to the scale of svgSize_
             scaleViewBox = std::min(svgSize_.Width() / viewBox_.Width(), svgSize_.Height() / viewBox_.Height());
             tx = svgSize_.Width() * half - (viewBox_.Width() * half + viewBox_.Left()) * scaleViewBox;
             ty = svgSize_.Height() * half - (viewBox_.Height() * half + viewBox_.Top()) * scaleViewBox;
+            // map transformation to layout_ scale
+            tx *= scaleX;
+            ty *= scaleY;
+
             // center align svg to layout container
-            tx += layout_.Width() * half - svgSize_.Width() * half * scaleX;
-            ty += layout_.Height() * half - svgSize_.Height() * half * scaleY;
+            tx += (layout_.Width() - svgSize_.Width() * scaleX) * half;
+            ty += (layout_.Height() - svgSize_.Height() * scaleY) * half;
         } else if (!layout_.IsEmpty()) {
-            // no svg size, center align viewBox to layout container
+            // no svgSize_, center align viewBox to layout container
             scaleViewBox = std::min(layout_.Width() / viewBox_.Width(), layout_.Height() / viewBox_.Height());
             tx = layout_.Width() * half - (viewBox_.Width() * half + viewBox_.Left()) * scaleViewBox;
             ty = layout_.Height() * half - (viewBox_.Height() * half + viewBox_.Top()) * scaleViewBox;
@@ -314,7 +326,11 @@ void SvgDom::FitImage(RSCanvas& canvas, const ImageFit& imageFit, const Size& la
         }
     }
     RSRect clipRect(0.0f, 0.0f, layout_.Width(), layout_.Height());
-    canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
+    if (radius_) {
+        ImagePainterUtils::ClipRRect(canvas, clipRect, *radius_);
+    } else {
+        canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
+    }
 
     canvas.Translate(tx, ty);
 
@@ -399,4 +415,17 @@ SizeF SvgDom::GetContainerSize() const
     return { static_cast<float>(svgSize_.Width()), static_cast<float>(svgSize_.Height()) };
 }
 
+void SvgDom::SetRadius(const BorderRadiusArray& radiusXY)
+{
+    if (!radius_) {
+        radius_ = std::make_unique<BorderRadiusArray>(radiusXY);
+    } else {
+        *radius_ = radiusXY;
+    }
+}
+
+void SvgDom::SetFillColor(const std::optional<Color>& color)
+{
+    fillColor_ = color;
+}
 } // namespace OHOS::Ace::NG

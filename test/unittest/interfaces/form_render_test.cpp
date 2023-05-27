@@ -21,6 +21,7 @@
 #include "interfaces/inner_api/form_render/include/form_renderer.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_delegate_impl.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_group.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -41,7 +42,18 @@ constexpr double FORM_HEIGHT = 100.0f;
 constexpr double FORM_WIDTH_2 = 200.0f;
 constexpr double FORM_HEIGHT_2 = 200.0f;
 } // namespace
-class FormRenderTest : public testing::Test {};
+class FormRenderTest : public testing::Test {
+public:
+    static void SetUpTestCase()
+    {
+        NG::MockPipelineBase::SetUp();
+    }
+
+    static void TearDownTestCase()
+    {
+        NG::MockPipelineBase::TearDown();
+    }
+};
 
 /**
  * @tc.name: FormRenderTest001
@@ -210,6 +222,7 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level1)
     struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceNodeName };
     std::shared_ptr<Rosen::RSSurfaceNode> rsNode = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), GetFormRootNode())
+        .WillOnce(Return(rsNode))
         .WillOnce(Return(rsNode))
         .WillOnce(Return(rsNode));
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), Foreground()).WillOnce(Return());

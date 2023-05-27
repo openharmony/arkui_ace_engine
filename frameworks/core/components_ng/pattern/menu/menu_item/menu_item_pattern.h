@@ -164,7 +164,7 @@ private:
     void RegisterOnClick();
     void RegisterOnTouch();
     void RegisterOnHover();
-    void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    void RegisterOnKeyEvent();
     // change menu item paint props on press
     void OnPress(const TouchEventInfo& info);
     void OnHover(bool isHover);
@@ -175,6 +175,9 @@ private:
     void AddSelectIcon(RefPtr<FrameNode>& row);
     void UpdateIcon(RefPtr<FrameNode>& row, bool isStart);
     void UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel);
+
+    bool IsDisabled();
+    void UpdateDisabledStyle();
 
     RefPtr<FrameNode> GetMenuWrapper();
 

@@ -453,7 +453,7 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest005, TestSize.Level1)
 
 /**
  * @tc.name: BubblePatternTest006
- * @tc.desc: Test bubble pattern InitTouchEvent HandleTouchEvent HandleTouchUp.
+ * @tc.desc: Test bubble pattern InitTouchEvent HandleTouchEvent HandleTouchDOWN.
  * @tc.type: FUNC
  */
 HWTEST_F(BubblePatternTestNg, BubblePatternTest006, TestSize.Level1)
@@ -501,7 +501,7 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest006, TestSize.Level1)
     bubblePaintProperty->UpdateAutoCancel(BUBBLE_PAINT_PROPERTY_AUTO_CANCEL_TRUE);
     bubblePattern->targetNodeId_ = targetId;
     bubblePattern->touchRegion_ = RectF(OffsetF(50, 50), SizeF(100, 100));
-    bubblePattern->HandleTouchUp(Offset(100.0, 100.0));
+    bubblePattern->HandleTouchDown(Offset(100.0, 100.0));
 }
 
 /**
@@ -526,6 +526,7 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest007, TestSize.Level1)
     popupParam->SetTextColor(BUBBLE_PAINT_PROPERTY_TEXT_COLOR);
     popupParam->SetFontSize(BUBBLE_PAINT_PROPERTY_FONT_SIZE);
     popupParam->SetFontWeight(BUBBLE_PAINT_PROPERTY_FONT_WEIGHT);
+    popupParam->SetFontStyle(Ace::FontStyle::ITALIC);
 
     // create bubbleNode
     auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
@@ -799,7 +800,7 @@ HWTEST_F(BubblePatternTestNg, BubblePaintMethod001, TestSize.Level1)
     EXPECT_CALL(canvas, Translate(_, _)).Times(AtLeast(1));
     EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
     EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(AtLeast(1));
-    EXPECT_CALL(canvas, ClipRoundRect(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, ClipRoundRectImpl(_, _, _)).Times(AtLeast(1));
 
     /**
      * @tc.steps: step2. Create the GeometryNode and PaintWrapper.Set the progressPaintProperty.

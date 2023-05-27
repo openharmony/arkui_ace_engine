@@ -45,7 +45,7 @@ public:
  * @tc.desc: Verify the AddSubContainer Interface of FormManager work correctly.
  * @tc.type: FUNC
  */
-HWTEST_F(FormManagerTest, AddPluginSubContainer001, TestSize.Level1)
+HWTEST_F(FormManagerTest, AddSubContainer001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Build a FormManager.

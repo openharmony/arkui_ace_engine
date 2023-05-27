@@ -25,13 +25,15 @@
 
 namespace OHOS::Ace::NG {
 struct DataPanelShadow {
+    bool isShadowVisible = true;
     double radius = 5.0;
     double offsetX = 5.0;
     double offsetY = 5.0;
     std::vector<Gradient> colors;
     bool operator==(const DataPanelShadow& rhs) const
     {
-        return radius == rhs.radius && offsetX == rhs.offsetX && offsetY == rhs.offsetY && colors == rhs.colors;
+        return radius == rhs.radius && offsetX == rhs.offsetX && offsetY == rhs.offsetY && colors == rhs.colors &&
+               isShadowVisible == rhs.isShadowVisible;
     }
 };
 class DataPanelPaintProperty : public PaintProperty {
@@ -142,10 +144,16 @@ public:
             trackShadow.offsetX = propShadowOption_.value().offsetX;
             trackShadow.offsetY = propShadowOption_.value().offsetY;
             trackShadow.colors = propShadowOption_.value().colors;
+            trackShadow.isShadowVisible = propShadowOption_.value().isShadowVisible;
         } else {
             trackShadow.radius = theme->GetTrackShadowRadius().ConvertToVp();
             trackShadow.offsetX = theme->GetTrackShadowOffsetX().ConvertToVp();
             trackShadow.offsetY = theme->GetTrackShadowOffsetY().ConvertToVp();
+        }
+
+        if (!trackShadow.isShadowVisible) {
+            json->Put("trackShadow", "null");
+            return;
         }
 
         if (trackShadow.colors.size() == 0) {

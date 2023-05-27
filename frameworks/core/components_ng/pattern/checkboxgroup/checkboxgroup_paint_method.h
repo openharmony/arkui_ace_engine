@@ -87,11 +87,10 @@ public:
         auto checkboxTheme = pipeline->GetTheme<CheckboxTheme>();
         auto horizontalPadding = checkboxTheme->GetHotZoneHorizontalPadding().ConvertToPx();
         auto verticalPadding = checkboxTheme->GetHotZoneVerticalPadding().ConvertToPx();
-        auto defaultPadding = checkboxTheme->GetDefaultPadding().ConvertToPx();
-        float boundsRectOriginX = offset.GetX() - defaultPadding - horizontalPadding;
-        float boundsRectOriginY = offset.GetY() - defaultPadding - verticalPadding;
-        float boundsRectWidth = size.Width() + 2 * (defaultPadding + horizontalPadding);
-        float boundsRectHeight = size.Height() + 2 * (defaultPadding + verticalPadding);
+        float boundsRectOriginX = offset.GetX() - horizontalPadding;
+        float boundsRectOriginY = offset.GetY() - verticalPadding;
+        float boundsRectWidth = size.Width() + 2 * horizontalPadding;
+        float boundsRectHeight = size.Height() + 2 * verticalPadding;
         RectF boundsRect(boundsRectOriginX, boundsRectOriginY, boundsRectWidth, boundsRectHeight);
         checkboxGroupModifier_->SetBoundsRect(boundsRect);
     }

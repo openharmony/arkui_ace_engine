@@ -30,10 +30,11 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
-#include "core/components_ng/render/adapter/graphics_modifier.h"
+#include "core/components_ng/render/adapter/graphic_modifier.h"
 #include "core/components_ng/render/adapter/rosen_modifier_property.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
 #include "core/components_ng/render/render_context.h"
@@ -177,10 +178,13 @@ public:
     void FlushOverlayModifier(const RefPtr<Modifier>& modifier) override;
 
     void AddChild(const RefPtr<RenderContext>& renderContext, int index) override;
+    void RemoveChild(const RefPtr<RenderContext>& renderContext) override;
     void SetBounds(float positionX, float positionY, float width, float height) override;
     void OnTransformTranslateUpdate(const TranslateOptions& value) override;
 
     RectF GetPaintRectWithTransform() override;
+
+    RectF GetPaintRectWithTranslate() override;
 
     RectF GetPaintRectWithoutTransform() override;
 
@@ -223,6 +227,9 @@ public:
     RefPtr<PixelMap> GetThumbnailPixelMap() override;
     void SetActualForegroundColor(const Color& value) override;
     void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property) override;
+
+    void RegisterSharedTransition(const RefPtr<RenderContext>& other) override;
+    void UnregisterSharedTransition(const RefPtr<RenderContext>& other) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -297,6 +304,9 @@ private:
     RefPtr<PageTransitionEffect> GetDefaultPageTransition(PageTransitionType type);
     RefPtr<PageTransitionEffect> GetPageTransitionEffect(const RefPtr<PageTransitionEffect>& transition);
 
+    // Convert BorderRadiusProperty to Rosen::Vector4f
+    static inline void ConvertRadius(const BorderRadiusProperty& value, Rosen::Vector4f& cornerRadius);
+
     void PaintBackground();
     void PaintClip(const SizeF& frameSize);
     void PaintProgressMask();
@@ -314,6 +324,10 @@ private:
     void CombineMarginAndPosition(Dimension& resultX, Dimension& resultY, const Dimension& parentPaddingLeft,
         const Dimension& parentPaddingTop, float widthPercentReference, float heightPercentReference);
 
+    void InitEventClickEffect();
+    RefPtr<Curve> UpdatePlayAnimationValue(const ClickEffectLevel& level, float& scaleValue);
+    void ClickEffectPlayAnimation(const TouchType& touchType);
+
     // helper function to check if paint rect is valid
     bool RectIsNull();
 
@@ -324,7 +338,7 @@ private:
      *   @param data         passed to SetCustomData, set to the modifier
      */
     template<typename T, typename D>
-    void SetModifier(std::shared_ptr<T>& modifier, D data);
+    void SetGraphicModifier(std::shared_ptr<T>& modifier, D data);
 
     void AddModifier(const std::shared_ptr<Rosen::RSModifier>& modifier);
     void RemoveModifier(const std::shared_ptr<Rosen::RSModifier>& modifier);
@@ -377,14 +391,20 @@ private:
     std::shared_ptr<OverlayTextModifier> modifier_ = nullptr;
 
     // graphics modifiers
-    std::shared_ptr<GrayScaleModifier> grayScaleModifier_;
-    std::shared_ptr<BrightnessModifier> brightnessModifier_;
-    std::shared_ptr<ContrastModifier> contrastModifier_;
-    std::shared_ptr<SaturateModifier> saturateModifier_;
-    std::shared_ptr<SepiaModifier> sepiaModifier_;
-    std::shared_ptr<InvertModifier> invertModifier_;
-    std::shared_ptr<HueRotateModifier> hueRotateModifier_;
-    std::shared_ptr<ColorBlendModifier> colorBlendModifier_;
+    struct GraphicModifiers {
+        std::shared_ptr<GrayScaleModifier> grayScale;
+        std::shared_ptr<BrightnessModifier> brightness;
+        std::shared_ptr<ContrastModifier> contrast;
+        std::shared_ptr<SaturateModifier> saturate;
+        std::shared_ptr<SepiaModifier> sepia;
+        std::shared_ptr<InvertModifier> invert;
+        std::shared_ptr<HueRotateModifier> hueRotate;
+        std::shared_ptr<ColorBlendModifier> colorBlend;
+    };
+    std::unique_ptr<GraphicModifiers> graphics_;
+
+    RefPtr<TouchEventImpl> touchListener_;
+    VectorF currentScale_ = VectorF(1.0f, 1.0f);
 
     template<typename Modifier, typename PropertyType>
     friend class PropertyTransitionEffectTemplate;

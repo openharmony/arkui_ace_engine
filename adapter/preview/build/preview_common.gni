@@ -104,3 +104,5 @@ if (defined(model_component_support) && model_component_support) {
 if (defined(enable_rosen_backend) && enable_rosen_backend) {
   defines += [ "ENABLE_ROSEN_BACKEND" ]
 }
+
+libace_target = "//foundation/arkui/ace_engine/adapter/preview/build:libace"

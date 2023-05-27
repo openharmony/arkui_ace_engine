@@ -29,6 +29,8 @@ class LinePattern : public ShapePattern {
     DECLARE_ACE_TYPE(LinePattern, ShapePattern);
 
 public:
+    static constexpr ShapePoint DEFAULT_POINT = ShapePoint(0.0, 0.0);
+
     LinePattern() = default;
     ~LinePattern() override = default;
 
@@ -48,6 +50,21 @@ public:
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
         return MakeRefPtr<LinePaintProperty>();
+    }
+
+    void OnModifyDone() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto paintProperty = host->GetPaintProperty<LinePaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        if (!paintProperty->HasStartPoint()) {
+            paintProperty->UpdateStartPoint(DEFAULT_POINT);
+        }
+        if (!paintProperty->HasEndPoint()) {
+            paintProperty->UpdateEndPoint(DEFAULT_POINT);
+        }
+        ShapePattern::OnModifyDone();
     }
 
 private:

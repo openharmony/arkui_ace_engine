@@ -89,7 +89,7 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
     if (!isNodeIn && (frameNode == inNode_ || frameNode == outNode_)) {
         SwapInAndOut(frameNode == inNode_);
         hasOutAnim_ = true;
-        outNodeParentPos_ = node->GetPaintRectOffsetWithoutTransform(true);
+        outNodeParentPos_ = node->GetPaintRectGlobalOffsetWithTranslate(true);
         outNodePos_ = outNodeParentPos_ + renderContext->GetPaintRectWithTransform().GetOffset();
     }
     if (isNodeIn && (frameNode != inNode_)) {
@@ -244,19 +244,24 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
     CHECK_NULL_VOID(targetRenderContext);
     auto geometryNode = self->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    // get own parent's global position, parent's transform is not taken into account
-    auto parentPos = self->IsRemoving() ? outNodeParentPos_ : self->GetPaintRectOffsetWithoutTransform(true);
+    // get own parent's global position, parent's transform is not taken into account other than translate
+    auto parentPos = self->IsRemoving() ? outNodeParentPos_ : self->GetPaintRectGlobalOffsetWithTranslate(true);
     // get target's global position, target own transform is taken into account
-    auto targetPos = target->IsRemoving() ? outNodePos_ : target->GetPaintRectOffsetWithoutTransform(true) +
+    auto targetPos = target->IsRemoving() ? outNodePos_ : target->GetPaintRectGlobalOffsetWithTranslate(true) +
         targetRenderContext->GetPaintRectWithTransform().GetOffset();
     // adjust self's position to match with target's position, here we only need to adjust node self,
     // its children's positions are still determined by layout process.
     auto activeFrameRect = isNodeIn ? RectF(targetPos - parentPos, inNodeActiveFrameSize_) :
                                       RectF(targetPos - parentPos, geometryNode->GetFrameSize());
     auto activeCornerRadius = targetRenderContext->GetBorderRadius().value_or(BorderRadiusProperty());
-    // save outNode's target global frame rect for future compare to sync outNode with inNode's frame change
+    auto cornerRadius = renderContext->GetBorderRadius().value_or(BorderRadiusProperty());
+
     if (!isNodeIn) {
+        // save outNode's target global frame rect for future compare to sync outNode with inNode's frame change
         outNodeTargetAbsRect_ = RectF(targetPos, activeFrameRect.GetSize());
+    } else if (target->IsRemoving()) {
+        // notify backend for hierarchy processing to avoid outNode being shaded
+        renderContext->RegisterSharedTransition(targetRenderContext);
     }
 
     // draw self and children in sandbox which will not be affected by parent's transition
@@ -269,7 +274,6 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
             renderContext->SyncGeometryProperties(activeFrameRect);
             // sync geometry in identity state for inNode
             if (isNodeIn) {
-                auto cornerRadius = renderContext->GetBorderRadius().value_or(BorderRadiusProperty());
                 renderContext->UpdateBorderRadius(cornerRadius);
                 renderContext->SyncGeometryProperties(RawPtr(geometryNode));
             }

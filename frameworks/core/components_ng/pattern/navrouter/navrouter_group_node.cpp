@@ -246,7 +246,7 @@ void NavRouterGroupNode::SetBackButtonEvent(const RefPtr<UINode>& parent)
 
     navDestination->SetNavDestinationBackButtonEvent(onBackButtonEvent);
     auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(onBackButtonEvent));
-    if (backButtonEventHub->GetGestureEventHub()) {
+    if (!backButtonEventHub->GetGestureEventHub()) {
         return;
     }
     backButtonEventHub->GetOrCreateGestureEventHub()->AddClickEvent(clickEvent);
@@ -319,11 +319,14 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
     auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(navigationLayoutProperty);
     auto navRouteMode = navRouterPattern->GetNavRouteMode();
-    if (navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) != NavigationMode::SPLIT) {
+    if (!(navigationStack->Empty() &&
+            navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::SPLIT)) {
+        // add backButton except for the first level page in SPLIT mode
         SetBackButtonVisible(navDestination);
     }
     if (navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::STACK) {
         if (navBarNode) {
+            // jump to the first level NavDestination page
             auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
             auto destinationTitleBarNode = AceType::DynamicCast<TitleBarNode>(navDestination->GetTitleBarNode());
             auto backButtonNode = AceType::DynamicCast<FrameNode>(destinationTitleBarNode->GetBackButton());
@@ -351,8 +354,8 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
             NavTransitionInAnimation(navigationNode, currentNavDestination, navDestination);
         }
     }
-    // remove if this navDestinationNode is already in the NavigationStack and not at the top, which will be later
-    // modified by NavRouteMode
+    // remove if this navDestinationNode is already in the NavigationStack and not at the top, as the latter will
+    // later be modified by NavRouteMode
     navigationPattern->RemoveIfNeeded(name, navDestination);
 
     navigationContentNode->AddChild(navDestination);
@@ -424,7 +427,7 @@ void NavRouterGroupNode::BackToNavBar(const RefPtr<UINode>& parent)
     if (backButtonNode) {
         BackButtonAnimation(backButtonNode, false);
     }
-    NavTransitionOutAnimation(navigationNode, navBarNode, navigationContentNode);
+    NavTransitionOutAnimation(navigationNode, navBarNode, navDestination, navigationContentNode);
     auto navigationPattern = AceType::DynamicCast<NavigationGroupNode>(navigationNode)->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
     navigationPattern->RemoveNavDestination();
@@ -605,6 +608,7 @@ void NavRouterGroupNode::MaskAnimation(const RefPtr<RenderContext>& transitionOu
                 },
                 TaskExecutor::TaskType::UI);
         });
+    transitionOutNodeContext->SetActualForegroundColor(DEFAULT_MASK_COLOR);
     AnimationUtils::Animate(
         maskOption, [transitionOutNodeContext]() { transitionOutNodeContext->SetActualForegroundColor(MASK_COLOR); },
         maskOption.GetOnFinishEvent());
@@ -667,7 +671,8 @@ void NavRouterGroupNode::TitleTransitionInAnimation(const RefPtr<FrameNode>& nav
 }
 
 void NavRouterGroupNode::NavTransitionOutAnimation(const RefPtr<UINode>& navigation,
-    const RefPtr<FrameNode>& navBarNode, const RefPtr<FrameNode>& navigationContentNode)
+    const RefPtr<FrameNode>& navBarNode, const RefPtr<FrameNode>& navDestination,
+    const RefPtr<FrameNode>& navigationContentNode)
 {
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(navigation);
     CHECK_NULL_VOID(navigationNode);
@@ -681,7 +686,7 @@ void NavRouterGroupNode::NavTransitionOutAnimation(const RefPtr<UINode>& navigat
     option.SetDuration(DEFAULT_ANIMATION_DURATION);
     auto navigationContext = navBarNode->GetRenderContext();
     CHECK_NULL_VOID(navigationContext);
-    auto navDestinationContext = navigationContentNode->GetRenderContext();
+    auto navDestinationContext = navDestination->GetRenderContext();
     CHECK_NULL_VOID(navDestinationContext);
 
     auto node = AceType::DynamicCast<FrameNode>(navigationNode);
