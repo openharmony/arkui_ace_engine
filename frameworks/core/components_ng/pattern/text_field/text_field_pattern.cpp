@@ -899,8 +899,18 @@ void TextFieldPattern::HandleFocusEvent()
     auto globalOffset = GetHost()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
     if (caretUpdateType_ != CaretUpdateType::PRESSED) {
-        needToRequestKeyboardInner_ = true;
-        caretUpdateType_ = CaretUpdateType::EVENT;
+        if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
+            // Long press after out of focus, flash the cursor and request keyboard.
+            caretUpdateType_ = CaretUpdateType::PRESSED;
+            if (RequestKeyboard(false, true, true)) {
+                auto eventHub = host->GetEventHub<TextFieldEventHub>();
+                CHECK_NULL_VOID(eventHub);
+                eventHub->FireOnEditChanged(true);
+            }
+        } else {
+            caretUpdateType_ = CaretUpdateType::EVENT;
+            needToRequestKeyboardInner_ = true;
+        }
     }
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
