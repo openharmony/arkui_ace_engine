@@ -3138,6 +3138,8 @@ void TextFieldPattern::Delete(int32_t start, int32_t end)
     if (IsTextArea() && layoutProperty->HasMaxLength()) {
         HandleCounterBorder();
     }
+    // trigger repaint of select mask
+    isSelectedAreaRedraw_ = !isSelectedAreaRedraw_;
     GetHost()->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                       : PROPERTY_UPDATE_MEASURE);
 }
