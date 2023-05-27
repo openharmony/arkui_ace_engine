@@ -115,7 +115,7 @@ struct LableStyleProperty {
     std::optional<Ace::TextHeightAdaptivePolicy> adaptHeight;
 };
 
-class ButtonPatternTestNg : public testing::Test {
+class ButtonTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -129,7 +129,7 @@ protected:
         const std::string& createValue, const LableStyleProperty& lableStyleProperty);
 };
 
-void ButtonPatternTestNg::SetUpTestCase()
+void ButtonTestNg::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
     // set buttonTheme to themeManager before using themeManager to get buttonTheme
@@ -140,12 +140,12 @@ void ButtonPatternTestNg::SetUpTestCase()
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
 }
 
-void ButtonPatternTestNg::TearDownTestCase()
+void ButtonTestNg::TearDownTestCase()
 {
     MockPipelineBase::TearDown();
 }
 
-void ButtonPatternTestNg::FontWeightTest(RefPtr<ButtonLayoutProperty> buttonLayoutProperty,
+void ButtonTestNg::FontWeightTest(RefPtr<ButtonLayoutProperty> buttonLayoutProperty,
     RefPtr<ButtonPattern> buttonPattern, RefPtr<TextLayoutProperty> textLayoutProp)
 {
     buttonLayoutProperty->UpdateFontWeight(Ace::FontWeight::BOLD);
@@ -219,7 +219,7 @@ PaddingProperty CreatePadding(float left, float top, float right, float bottom)
     return padding;
 }
 
-RefPtr<FrameNode> ButtonPatternTestNg::CreateLabelButtonParagraph(
+RefPtr<FrameNode> ButtonTestNg::CreateLabelButtonParagraph(
     const std::string& createValue, const TestProperty& testProperty)
 {
     ButtonModelNG buttonModelNG;
@@ -256,7 +256,7 @@ RefPtr<FrameNode> ButtonPatternTestNg::CreateLabelButtonParagraph(
     return AceType::DynamicCast<FrameNode>(element);
 }
 
-RefPtr<FrameNode> ButtonPatternTestNg::CreateChildButtonParagraph(
+RefPtr<FrameNode> ButtonTestNg::CreateChildButtonParagraph(
     const std::string& createValue, const TestProperty& testProperty)
 {
     ButtonModelNG buttonModelNG;
@@ -290,7 +290,7 @@ RefPtr<FrameNode> ButtonPatternTestNg::CreateChildButtonParagraph(
     return AceType::DynamicCast<FrameNode>(element);
 }
 
-RefPtr<FrameNode> ButtonPatternTestNg::CreateLabelButtonParagraphForLableStyle(
+RefPtr<FrameNode> ButtonTestNg::CreateLabelButtonParagraphForLableStyle(
     const std::string& createValue, const LableStyleProperty& lableStyleProperty)
 {
     ButtonParameters buttonParameters;
@@ -332,7 +332,7 @@ RefPtr<FrameNode> ButtonPatternTestNg::CreateLabelButtonParagraphForLableStyle(
  * @tc.desc: Test all the properties of button.
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonPatternTestNg, ButtonPatternTest001, TestSize.Level1)
+HWTEST_F(ButtonTestNg, ButtonPatternTest001, TestSize.Level1)
 {
     TestProperty testProperty;
     testProperty.typeValue = std::make_optional(BUTTON_TYPE_CAPSULE_VALUE);
@@ -348,7 +348,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest001, TestSize.Level1)
  * @tc.desc: Test all the properties of button.
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonPatternTestNg, ButtonModelTest001, TestSize.Level1)
+HWTEST_F(ButtonTestNg, ButtonModelTest001, TestSize.Level1)
 {
     TestProperty testProperty;
     testProperty.typeValue = std::make_optional(BUTTON_TYPE_CAPSULE_VALUE);
@@ -364,7 +364,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonModelTest001, TestSize.Level1)
  * @tc.desc: Test all the properties of button.
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonPatternTestNg, ButtonPatternTest002, TestSize.Level1)
+HWTEST_F(ButtonTestNg, ButtonPatternTest002, TestSize.Level1)
 {
     TestProperty testProperty;
     testProperty.typeValue = std::make_optional(BUTTON_TYPE_CUSTOM_VALUE);
@@ -391,7 +391,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest002, TestSize.Level1)
  * @tc.desc: Test all the properties of button.
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonPatternTestNg, ButtonPatternTest003, TestSize.Level1)
+HWTEST_F(ButtonTestNg, ButtonPatternTest003, TestSize.Level1)
 {
     TestProperty testProperty;
     testProperty.typeValue = std::make_optional(BUTTON_TYPE_DOWNLOAD_VALUE);
@@ -414,7 +414,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest003, TestSize.Level1)
  * @tc.desc: Test all the properties of button.
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonPatternTestNg, ButtonPatternTest004, TestSize.Level1)
+HWTEST_F(ButtonTestNg, ButtonPatternTest004, TestSize.Level1)
 {
     TestProperty testProperty;
     testProperty.typeValue = std::make_optional(BUTTON_TYPE_CIRCLE_VALUE);
@@ -440,7 +440,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest004, TestSize.Level1)
  * @tc.desc: test button created.
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonPatternTestNg, ButtonPatternTest005, TestSize.Level1)
+HWTEST_F(ButtonTestNg, ButtonPatternTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create button and get frameNode.
@@ -471,7 +471,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest005, TestSize.Level1)
  * @tc.desc: test button pattern OnModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonPatternTestNg, ButtonPatternTest006, TestSize.Level1)
+HWTEST_F(ButtonTestNg, ButtonPatternTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -526,7 +526,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest006, TestSize.Level1)
  * @tc.desc: test button pattern OnModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonPatternTestNg, ButtonPatternTest007, TestSize.Level1)
+HWTEST_F(ButtonTestNg, ButtonPatternTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -559,7 +559,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest007, TestSize.Level1)
  * @tc.desc: test button layout using buttonType CIRCLE.
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonPatternTestNg, ButtonPatternTest008, TestSize.Level1)
+HWTEST_F(ButtonTestNg, ButtonPatternTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -625,7 +625,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest008, TestSize.Level1)
  * @tc.desc: test button layout using buttonType CAPSULE.
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonPatternTestNg, ButtonPatternTest009, TestSize.Level1)
+HWTEST_F(ButtonTestNg, ButtonPatternTest009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -681,7 +681,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest009, TestSize.Level1)
  * @tc.desc: test button layout using buttonType others and set border by user.
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonPatternTestNg, ButtonPatternTest0010, TestSize.Level1)
+HWTEST_F(ButtonTestNg, ButtonPatternTest0010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -722,12 +722,39 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest0010, TestSize.Level1)
 
     /**
      * @tc.steps: step3. use layoutAlgorithm to measure and layout.
-     * @tc.expected: step3. check whether the value of geometry's frameSize and frameOffset is correct.
+     * @tc.expected: check whether the value of geometry's frameSize and frameOffset is correct.
      */
     buttonLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     buttonLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().Width(), BUTTON_WIDTH);
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF());
+
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    ASSERT_NE(childWrapper, nullptr);
+    auto iter = layoutWrapper->childrenMap_.find(0);
+    if (iter == layoutWrapper->childrenMap_.end()) {
+        layoutWrapper->AppendChild(childWrapper);
+    }
+    auto childButtonLayoutProperty = AccessibilityManager::DynamicCast<LayoutProperty>(
+        childWrapper->GetLayoutProperty());
+    ASSERT_NE(childButtonLayoutProperty, nullptr);
+    CalcSize calcSize {CalcLength(Dimension(300.0)), CalcLength(Dimension(300.0))};
+    childButtonLayoutProperty->UpdateUserDefinedIdealSize(calcSize);
+    
+    buttonLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    buttonLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(childWrapper->GetGeometryNode()->GetContentSize().Width(), 1.0);
+    /**
+     * @tc.steps: step4. use layoutAlgorithm to measure and layout.
+     * @tc.expected: check whether the value of geometry's contentSize's height is 1.
+     */
+    auto buttonLayoutProperty = AccessibilityManager::DynamicCast<ButtonLayoutProperty>(
+        layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    buttonLayoutProperty->UpdateFontSize(Dimension(24.0));
+    buttonLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    buttonLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(childWrapper->GetGeometryNode()->GetContentSize().Height(), 1.0);
 }
 
 /**
@@ -735,7 +762,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest0010, TestSize.Level1)
  * @tc.desc: test button pattern OnModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonPatternTestNg, ButtonPatternTest011, TestSize.Level1)
+HWTEST_F(ButtonTestNg, ButtonPatternTest011, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create button and get frameNode.
@@ -797,7 +824,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest011, TestSize.Level1)
  * @tc.desc: test textOverflow enum value.
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonPatternTestNg, ButtonPatternTest012, TestSize.Level1)
+HWTEST_F(ButtonTestNg, ButtonPatternTest012, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create button and get frameNode.
@@ -853,7 +880,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest012, TestSize.Level1)
  * @tc.desc: test fontStyle enum value.
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonPatternTestNg, ButtonPatternTest013, TestSize.Level1)
+HWTEST_F(ButtonTestNg, ButtonPatternTest013, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create button and get frameNode.
@@ -901,7 +928,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest013, TestSize.Level1)
  * @tc.desc: test TextHeightAdaptivePolicy and fontWeight enum value.
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonPatternTestNg, ButtonPatternTest014, TestSize.Level1)
+HWTEST_F(ButtonTestNg, ButtonPatternTest014, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create button and get frameNode.
@@ -955,7 +982,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest014, TestSize.Level1)
  * @tc.desc: Test HandleLabelCircleButtonConstraint and HandleLabelCircleButtonFrameSize.
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonPatternTestNg, ButtonPatternTest015, TestSize.Level1)
+HWTEST_F(ButtonTestNg, ButtonPatternTest015, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create button and get frameNode.
@@ -1036,7 +1063,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest015, TestSize.Level1)
  * @tc.desc: Test button view branch
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonPatternTestNg, ButtonPatternTest016, TestSize.Level1)
+HWTEST_F(ButtonTestNg, ButtonPatternTest016, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create button and set button view's value.
@@ -1080,7 +1107,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest016, TestSize.Level1)
  * @tc.desc: Test touch event callback
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonPatternTestNg, ButtonPatternTest017, TestSize.Level1)
+HWTEST_F(ButtonTestNg, ButtonPatternTest017, TestSize.Level1)
 {
     TestProperty testProperty;
     testProperty.typeValue = std::make_optional(ButtonType::CIRCLE);
@@ -1122,7 +1149,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest017, TestSize.Level1)
  * @tc.desc: Test HandleEnable disable
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonPatternTestNg, ButtonPatternTest018, TestSize.Level1)
+HWTEST_F(ButtonTestNg, ButtonPatternTest018, TestSize.Level1)
 {
     TestProperty testProperty;
     testProperty.typeValue = std::make_optional(ButtonType::CIRCLE);
@@ -1153,7 +1180,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest018, TestSize.Level1)
  * @tc.desc: Test AnimateTouchAndHover
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonPatternTestNg, ButtonPatternTest019, TestSize.Level1)
+HWTEST_F(ButtonTestNg, ButtonPatternTest019, TestSize.Level1)
 {
     TestProperty testProperty;
     auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
@@ -1169,10 +1196,10 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest019, TestSize.Level1)
 
 /**
  * @tc.name: ButtonAccessibilityPropertyTest001
- * @tc.desc: Test button accessibility property
+ * @tc.desc: Test button property
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonPatternTestNg, ButtonAccessibilityPropertyTest001, TestSize.Level1)
+HWTEST_F(ButtonTestNg, ButtonAccessibilityPropertyTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create button and get frameNode.
@@ -1184,7 +1211,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonAccessibilityPropertyTest001, TestSize.Level
     ASSERT_NE(frameNode, nullptr);
 
     /**
-     * @tc.steps: step2. get button accessibility property.
+     * @tc.steps: step2. get button property.
      * @tc.expected: step2. check whether the properties is correct.
      */
     auto buttonAccessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
