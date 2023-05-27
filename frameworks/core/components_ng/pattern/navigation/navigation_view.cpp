@@ -312,6 +312,9 @@ void NavigationView::Create()
             int32_t navBarContentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
             auto navBarContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVBAR_CONTENT_ETS_TAG, navBarContentNodeId,
                 []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+            auto navBarContentRenderContext = navBarContentNode->GetRenderContext();
+            CHECK_NULL_VOID(navBarContentRenderContext);
+            navBarContentRenderContext->UpdateClipEdge(true);
             navBarNode->AddChild(navBarContentNode);
             navBarNode->SetNavBarContentNode(navBarContentNode);
         }
