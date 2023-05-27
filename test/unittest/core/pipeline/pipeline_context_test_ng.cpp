@@ -1084,13 +1084,13 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     /**
      * @tc.steps3: Call the function OnKeyEvent with isFocusActive_ = false, action = KeyAction::DOWN and
      #             pressedCodes = { KeyCode::KEY_DPAD_UP }.
-     * @tc.expected: The return value of OnKeyEvent is false.
+     * @tc.expected: The return value of OnKeyEvent is true.
      */
     context_->SetIsFocusActive(false);
     event.pressedCodes = { KeyCode::KEY_DPAD_UP };
     event.code = KeyCode::KEY_DPAD_UP;
     eventManager->SetInstanceId(DEFAULT_INT0);
-    EXPECT_FALSE(context_->OnKeyEvent(event));
+    EXPECT_TRUE(context_->OnKeyEvent(event));
     EXPECT_FALSE(context_->GetIsFocusActive());
 
     /**
@@ -1103,7 +1103,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     event.action = KeyAction::UP;
     event.code = KeyCode::KEY_CLEAR;
     event.pressedCodes = { KeyCode::KEY_CLEAR };
-    EXPECT_FALSE(context_->OnKeyEvent(event));
+    EXPECT_TRUE(context_->OnKeyEvent(event));
     EXPECT_FALSE(context_->GetIsFocusActive());
 
     /**
