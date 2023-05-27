@@ -211,14 +211,14 @@ void DistributedUI::OnTreeUpdate()
         }
         updateType = UpdateType::PAGE_UPDATE;
     }
-    LOGD("UITree process use %{public}lld ms",
-        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - tp).count());
+    auto duration =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - tp);
+    LOGD("UITree process use %{public}lld ms", static_cast<long long>(duration.count()));
 
     if (onUpdateCb_) {
         onUpdateCb_(updateType, update);
     }
-    LOGD("UITree process OnTreeUpdate use %{public}lld ms",
-        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - tp).count());
+    LOGD("UITree process OnTreeUpdate use %{public}lld ms", static_cast<long long>(duration.count()));
 }
 
 void DistributedUI::OnPageChanged(int32_t pageId)
@@ -269,9 +269,9 @@ void DistributedUI::ApplyOneUpdate()
         pendingUpdates_.pop_front();
         UpdateUITreeInner(update);
     }
-    LOGD("UITree process use %{public}lld ms",
-        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - timeStart)
-            .count());
+    auto duration =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - timeStart);
+    LOGD("UITree process use %{public}lld ms", static_cast<long long>(duration.count()));
 }
 
 void DistributedUI::DumpDirtyRenderNodes(SerializeableObjectArray& objectArray)
@@ -359,8 +359,9 @@ SerializeableObjectArray DistributedUI::DumpUpdate()
     DumpDelNodes(objectArray);
     ResetDirtyNodes();
 
-    LOGD("UITree process use %{public}lld ms",
-        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - tp).count());
+    auto duration =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - tp);
+    LOGD("UITree process use %{public}lld ms", static_cast<long long>(duration.count()));
     return objectArray;
 }
 
@@ -691,9 +692,9 @@ void DistributedUI::UpdateUITreeInner(SerializeableObjectArray& nodeArray)
     }
 
     context->RequestFrame();
-    LOGD("UITree process use %{public}lld ms",
-        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - timeStart)
-            .count());
+    auto duration =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - timeStart);
+    LOGD("UITree process use %{public}lld ms", static_cast<long long>(duration.count()));
 }
 
 void DistributedUI::RestoreUITreeInner(const SerializeableObjectArray& nodeArray)
