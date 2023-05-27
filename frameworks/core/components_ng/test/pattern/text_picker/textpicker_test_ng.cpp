@@ -53,7 +53,6 @@ constexpr int32_t HALF_INDEX_NUM = 5;
 constexpr int32_t INDEX_NUM = 10;
 constexpr int32_t CURRENT_INDEX = 8;
 constexpr int32_t CURRENT_END_INDEX = 3;
-constexpr size_t THREE_CHILDREN = 3;
 constexpr size_t FIVE_CHILDREN = 5;
 constexpr size_t THREE = 3;
 constexpr size_t SECOND = 2;
@@ -216,7 +215,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions001, TestSi
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
     std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("1", content);
+    EXPECT_EQ("3", content);
 }
 
 /**
@@ -509,7 +508,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions003, TestSi
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
     std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("test1", content);
+    EXPECT_EQ("test3", content);
 }
 
 /**
@@ -776,6 +775,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions011, TestSi
 {
     auto pipeline = MockPipelineBase::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
+    theme->showOptionCount_ = 4;
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
@@ -815,6 +815,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions012, TestSi
 {
     auto pipeline = MockPipelineBase::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
+    theme->showOptionCount_ = 4;
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
@@ -835,7 +836,6 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions012, TestSi
     ASSERT_NE(columnPattern, nullptr);
     columnPattern->SetColumnKind(ICON);
     columnPattern->SetOptions(range);
-    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
     columnPattern->FlushCurrentOptions(false, false);
     auto linearLayoutNode = AceType::DynamicCast<FrameNode>(child->GetFirstChild());
     ASSERT_NE(linearLayoutNode, nullptr);
@@ -857,6 +857,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions013, TestSi
 {
     auto pipeline = MockPipelineBase::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
+    theme->showOptionCount_ = 4;
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
@@ -1043,7 +1044,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp003, TestSi
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
     std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("test1", content);
+    EXPECT_EQ("test2", content);
     ASSERT_TRUE(textLayoutProperty->HasFontSize());
     double fontSize = textLayoutProperty->GetFontSize().value().Value();
     double expectFontSize = FONT_SIZE_5 * HALF + FONT_SIZE_5 * HALF * HALF;
@@ -1162,7 +1163,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollDown003, Test
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     std::string content = textLayoutProperty->GetContent().value_or("");
-    EXPECT_EQ("test3", content);
+    EXPECT_EQ("test2", content);
     ASSERT_TRUE(textLayoutProperty->HasFontSize());
     double fontSize = textLayoutProperty->GetFontSize().value().Value();
     double expectFontSize = FONT_SIZE_5 * HALF + FONT_SIZE_5 * HALF * HALF;
@@ -1215,6 +1216,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScroll001, TestSize
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScroll002, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    theme->showOptionCount_ = 4;
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -2254,7 +2256,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGCreate001, TestSize.Level1)
     auto columnNode = AceType::DynamicCast<FrameNode>(stackNode->GetLastChild());
     ASSERT_NE(columnNode, nullptr);
     auto columnChildren = columnNode->GetChildren();
-    EXPECT_EQ(THREE_CHILDREN, columnChildren.size());
+    EXPECT_EQ(FIVE_CHILDREN, columnChildren.size());
 }
 
 /**
