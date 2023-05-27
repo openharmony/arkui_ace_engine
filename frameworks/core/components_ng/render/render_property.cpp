@@ -57,8 +57,8 @@ std::string BasicShapeTypeToString(BasicShapeType type)
         json##name->Put("x", prop##name->GetX().ToString().c_str()); \
         json##name->Put("y", prop##name->GetY().ToString().c_str()); \
     } else {                                                         \
-        json##name->Put("x", "0.0px");                               \
-        json##name->Put("y", "0.0px");                               \
+        json##name->Put("x", "");                                    \
+        json##name->Put("y", "");                                    \
     }
 
 void RenderPositionProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
