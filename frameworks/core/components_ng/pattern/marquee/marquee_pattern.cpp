@@ -42,6 +42,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr double DEFAULT_MARQUEE_SCROLL_DELAY = 85.0; // Delay time between each jump.
 constexpr float HALF = 0.5f;
+constexpr float FAKE_VALUE = 0.1f;
 inline constexpr int32_t DEFAULT_MARQUEE_LOOP = -1;
 } // namespace
 
@@ -203,6 +204,8 @@ void MarqueePattern::OnAnimationFinish()
 void MarqueePattern::StopMarqueeAnimation(bool stopAndStart)
 {
     animation_ = nullptr;
+    animationId_++;
+    SetTextOffset(FAKE_VALUE);
     AnimationOption option;
     option.SetCurve(Curves::LINEAR);
     option.SetDuration(0);
@@ -213,10 +216,10 @@ void MarqueePattern::StopMarqueeAnimation(bool stopAndStart)
             CHECK_NULL_VOID(pattern);
             pattern->SetTextOffset(0.0f);
         },
-        [weak = AceType::WeakClaim(this), restart = stopAndStart]() {
+        [weak = AceType::WeakClaim(this), restart = stopAndStart, animationId = animationId_]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            if (restart) {
+            if (restart && animationId == pattern->animationId_) {
                 pattern->StartMarqueeAnimation();
             }
         });
@@ -424,11 +427,8 @@ void MarqueePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSi
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    measureChanged_ = false;
-    auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    auto playStatus = paintProperty->GetPlayerStatus().value_or(false);
-    StopMarqueeAnimation(playStatus);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    measureChanged_ = true;
 }
 
 void MarqueePattern::RegistOritationListener()
@@ -452,5 +452,7 @@ void MarqueePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(host->GetId());
     pipeline->RemoveVisibleAreaChangeNode(host->GetId());
+    isOritationListenerRegisted_ = false;
+    isRegistedAreaCallback_ = false;
 }
 } // namespace OHOS::Ace::NG
