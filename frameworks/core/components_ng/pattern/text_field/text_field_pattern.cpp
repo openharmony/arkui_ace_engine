@@ -1285,6 +1285,7 @@ void TextFieldPattern::HandleOnPaste()
         textfield->FireEventHubOnChange(value.text);
         host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                      : PROPERTY_UPDATE_MEASURE);
+        textfield->StartTwinkling();
     };
 #if defined(PREVIEW)
     pasteCallback(clipRecords_.empty() ? "" : StringUtils::ToString((*clipRecords_.rbegin())));
