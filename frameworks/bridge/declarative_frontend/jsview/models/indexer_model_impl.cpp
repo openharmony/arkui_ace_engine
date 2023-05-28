@@ -40,54 +40,54 @@ void IndexerModelImpl::SetFocusNode(bool isFocusNode)
     focusableComponent->SetFocusNode(isFocusNode);
 }
 
-void IndexerModelImpl::SetSelectedColor(const Color& color)
+void IndexerModelImpl::SetSelectedColor(const std::optional<Color>& color)
 {
     auto indexerComponent =
         AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (indexerComponent) {
+    if (indexerComponent && color.has_value()) {
         auto textStyle = indexerComponent->GetActiveTextStyle();
-        textStyle.SetTextColor(color);
+        textStyle.SetTextColor(color.value());
         indexerComponent->SetActiveTextStyle(std::move(textStyle));
     }
 }
 
-void IndexerModelImpl::SetColor(const Color& color)
+void IndexerModelImpl::SetColor(const std::optional<Color>& color)
 {
     auto indexerComponent =
         AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (indexerComponent) {
+    if (indexerComponent && color.has_value()) {
         auto textStyle = indexerComponent->GetNormalTextStyle();
-        textStyle.SetTextColor(color);
+        textStyle.SetTextColor(color.value());
         indexerComponent->SetNormalTextStyle(std::move(textStyle));
     }
 }
 
-void IndexerModelImpl::SetPopupColor(const Color& color)
+void IndexerModelImpl::SetPopupColor(const std::optional<Color>& color)
 {
     auto indexerComponent =
         AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (indexerComponent) {
+    if (indexerComponent && color.has_value()) {
         auto textStyle = indexerComponent->GetBubbleTextStyle();
-        textStyle.SetTextColor(color);
+        textStyle.SetTextColor(color.value());
         indexerComponent->SetBubbleTextStyle(std::move(textStyle));
     }
 }
 
-void IndexerModelImpl::SetSelectedBackgroundColor(const Color& color)
+void IndexerModelImpl::SetSelectedBackgroundColor(const std::optional<Color>& color)
 {
     auto indexerComponent =
         AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (indexerComponent) {
-        indexerComponent->SetSelectedBackgroundColor(color);
+    if (indexerComponent && color.has_value()) {
+        indexerComponent->SetSelectedBackgroundColor(color.value());
     }
 }
 
-void IndexerModelImpl::SetPopupBackground(const Color& color)
+void IndexerModelImpl::SetPopupBackground(const std::optional<Color>& color)
 {
     auto indexerComponent =
         AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (indexerComponent) {
-        indexerComponent->SetBubbleBackgroundColor(color);
+    if (indexerComponent && color.has_value()) {
+        indexerComponent->SetBubbleBackgroundColor(color.value());
     }
 }
 
