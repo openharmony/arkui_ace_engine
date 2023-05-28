@@ -30,13 +30,6 @@ ohos_unittest("video_pattern_test_ng") {
     "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",
     "//foundation/arkui/ace_engine/frameworks/base/memory",
     "//third_party/bounds_checking_function/include",
-    "//third_party/flutter/engine",
-    "//third_party/flutter/engine/flutter/third_party/txt/src/txt",
-    "//third_party/flutter/engine/flutter/third_party/txt/src",
-    "//third_party/flutter/engine/flutter/third_party/txt/src/minikin",
-    "//third_party/flutter/skia/third_party",
-    "//third_party/flutter/skia/third_party/externals/harfbuzz/src",
-    "//third_party/flutter/skia/third_party/externals/icu/source/common",
     "//foundation/arkui/ace_engine/frameworks",
     "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter",
     "//foundation/arkui/ace_engine/frameworks/base/window",
@@ -54,6 +47,7 @@ ohos_unittest("video_pattern_test_ng") {
     "$ace_root/frameworks/base/utils/base_id.cpp",
     "$ace_root/frameworks/base/utils/string_expression.cpp",
     "$ace_root/frameworks/base/utils/string_utils.cpp",
+    "$ace_root/frameworks/base/utils/time_util.cpp",
     "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",
     "$ace_root/frameworks/core/animation/curves.cpp",
@@ -76,7 +70,6 @@ ohos_unittest("video_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/base/geometry_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/ui_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/view_abstract.cpp",
-    "$ace_root/frameworks/core/components_ng/base/view_stack_processor.cpp",
 
     # components_ng_event
     "$ace_root/frameworks/core/components_ng/event/click_event.cpp",
@@ -122,6 +115,7 @@ ohos_unittest("video_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/image/image_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/linear_layout/linear_layout_utils.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.cpp",
@@ -150,6 +144,7 @@ ohos_unittest("video_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/pattern/image/mock_icon_theme.cpp",
 
     # components_ng_property
+    "$ace_root/frameworks/core/components_ng/property/border_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",
     "$ace_root/frameworks/core/components_ng/property/grid_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",
@@ -170,6 +165,7 @@ ohos_unittest("video_pattern_test_ng") {
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_localization.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/base/mock_view_stack_processor.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loading_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_painter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_source_info.cpp",
@@ -195,13 +191,16 @@ ohos_unittest("video_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/video/video_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/video/video_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/video/video_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/video/video_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/video/video_pattern.cpp",
     "video_accessibility_property_test_ng.cpp",
+    "video_pattern_focus_test_ng.cpp",
     "video_pattern_test_ng.cpp",
   ]
 
   deps = [
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
+    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",

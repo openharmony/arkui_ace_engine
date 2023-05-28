@@ -105,9 +105,7 @@ void JSSlidingPanel::JSBind(BindingTarget globalObj)
     JSClass<JSSlidingPanel>::StaticMethod("onChange", &JSSlidingPanel::SetOnSizeChange);
     JSClass<JSSlidingPanel>::StaticMethod("onHeightChange", &JSSlidingPanel::SetOnHeightChange);
 
-    JSClass<JSSlidingPanel>::Inherit<JSContainerBase>();
-    JSClass<JSSlidingPanel>::Inherit<JSViewAbstract>();
-    JSClass<JSSlidingPanel>::Bind<>(globalObj);
+    JSClass<JSSlidingPanel>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSSlidingPanel::SetBackgroundMask(const JSCallbackInfo& info)
@@ -354,9 +352,8 @@ void JSSlidingPanel::SetPanelMode(const JSCallbackInfo& info)
         }
     }
 
-    if (info.Length() > 1 && info[1]->IsObject()) {
-        JSRef<JSVal> modeObj = JSRef<JSObject>::Cast(info[1]);
-        ParseModeObject(info, modeObj);
+    if (info.Length() > 1 && info[1]->IsFunction()) {
+        ParseModeObject(info, info[1]);
     }
 
     SlidingPanelModel::GetInstance()->SetPanelMode(PANEL_MODES[mode]);

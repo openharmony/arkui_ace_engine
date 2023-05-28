@@ -112,14 +112,23 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
         return defaultMenuEndOffset_ - OffsetF(menuWidth, 0.0f);
     }
 
+    const auto& firstHandleRect = info_->firstHandle.paintRect;
     const auto& secondHandleRect = info_->secondHandle.paintRect;
+    auto singleHandle = firstHandleRect;
+    if (!info_->firstHandle.isShow) {
+        singleHandle = secondHandleRect;
+    }
+    if (IsTextAreaSelectAll()) {
+        singleHandle = RectF(info_->menuInfo.menuOffset.value().GetX(), info_->menuInfo.menuOffset.value().GetY(),
+            singleHandle.Width(), singleHandle.Height());
+    }
+
     if (info_->isSingleHandle) {
         auto menuSpacing = static_cast<float>(menuSpacingBetweenText);
-        menuPosition = OffsetF((secondHandleRect.Left() + secondHandleRect.Right() - menuWidth) / 2.0f,
-            static_cast<float>(secondHandleRect.Top() - menuSpacing - menuHeight));
+        menuPosition = OffsetF((singleHandle.Left() + singleHandle.Right() - menuWidth) / 2.0f,
+            static_cast<float>(singleHandle.Top() - menuSpacing - menuHeight));
     } else {
         auto menuSpacing = static_cast<float>(menuSpacingBetweenText + menuSpacingBetweenHandle);
-        const auto& firstHandleRect = info_->firstHandle.paintRect;
         menuPosition = OffsetF((firstHandleRect.Left() + secondHandleRect.Left() - menuWidth) / 2.0f,
             static_cast<float>(firstHandleRect.Top() - menuSpacing - menuHeight));
     }
@@ -133,8 +142,12 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
         menuPosition.SetX(overlayWidth - menuWidth - theme->GetDefaultMenuPositionX());
     }
     if (LessNotEqual(menuPosition.GetY(), menuHeight)) {
-        menuPosition.SetY(
-            static_cast<float>(secondHandleRect.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle));
+        if (IsTextAreaSelectAll()) {
+            menuPosition.SetY(singleHandle.Top());
+        } else {
+            menuPosition.SetY(
+                static_cast<float>(singleHandle.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle));
+        }
     }
     defaultMenuEndOffset_ = menuPosition + OffsetF(menuWidth, 0.0f);
     return menuPosition;
@@ -155,6 +168,11 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeExtensionMenuPosition(LayoutWrapper
     }
     auto extensionWidth = extensionItem->GetGeometryNode()->GetMarginFrameSize().Width();
     return (defaultMenuEndOffset_ - OffsetF(extensionWidth, 0.0f));
+}
+
+bool SelectOverlayLayoutAlgorithm::IsTextAreaSelectAll()
+{
+    return info_->menuInfo.menuOffset.has_value() && (!info_->firstHandle.isShow || !info_->secondHandle.isShow);
 }
 
 } // namespace OHOS::Ace::NG

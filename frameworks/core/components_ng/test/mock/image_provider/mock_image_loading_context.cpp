@@ -50,18 +50,18 @@ void ImageLoadingContext::SuccessCallback(const RefPtr<CanvasImage>& image)
     canvasImage_ = image;
     OnLoadSuccess();
 
-    if (notifiers_.dataReadyNotifyTask_) {
-        notifiers_.dataReadyNotifyTask_(src_);
+    if (notifiers_.onDataReady_) {
+        notifiers_.onDataReady_(src_);
     }
-    if (notifiers_.loadSuccessNotifyTask_) {
-        notifiers_.loadSuccessNotifyTask_(src_);
+    if (notifiers_.onLoadSuccess_) {
+        notifiers_.onLoadSuccess_(src_);
     }
 }
 
 void ImageLoadingContext::FailCallback(const std::string& /* errorMsg */)
 {
-    if (notifiers_.loadFailNotifyTask_) {
-        notifiers_.loadFailNotifyTask_(src_);
+    if (notifiers_.onLoadFail_) {
+        notifiers_.onLoadFail_(src_);
     }
 }
 

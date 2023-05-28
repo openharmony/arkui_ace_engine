@@ -34,7 +34,8 @@ void ListPositionController::JumpTo(int32_t index, int32_t source)
     listPattern->ScrollToIndex(index);
 }
 
-bool ListPositionController::AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve)
+bool ListPositionController::AnimateTo(
+    const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_RETURN(pattern, false);
@@ -47,7 +48,7 @@ bool ListPositionController::AnimateTo(const Dimension& position, float duration
         if (Positive(duration)) {
             listPattern->AnimateTo(position.ConvertToPx(), duration, curve);
         } else {
-            listPattern->ScrollTo(position.ConvertToPx());
+            listPattern->ScrollTo(position.ConvertToPx(), smooth);
         }
         return true;
     }

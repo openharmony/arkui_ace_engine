@@ -259,7 +259,7 @@ void ViewFunctions::InitViewFunctions(
         }
 
         JSRef<JSVal> jsForceRerenderNodeFunc = jsObject->GetProperty("forceRerenderNode");
-        if (jsReloadFunc->IsFunction()) {
+        if (jsForceRerenderNodeFunc->IsFunction()) {
             jsForceRerenderNodeFunc_ = JSRef<JSFunc>::Cast(jsForceRerenderNodeFunc);
         } else {
             LOGE("View lacks mandatory 'forceRerenderNode()' function, fatal internal error.");
@@ -418,7 +418,11 @@ void ViewFunctions::ExecuteRender()
 
     auto func = jsRenderFunc_.Lock();
     JSRef<JSVal> jsThis = jsObject_.Lock();
-    jsRenderResult_ = func->Call(jsThis);
+    if (!jsThis->IsUndefined()) {
+        jsRenderResult_ = func->Call(jsThis);
+    } else {
+        LOGE("jsView Object is undefined and will not execute render function");
+    }
 }
 
 void ViewFunctions::ExecuteAppear()
@@ -428,7 +432,20 @@ void ViewFunctions::ExecuteAppear()
 
 void ViewFunctions::ExecuteDisappear()
 {
-    ExecuteFunction(jsDisappearFunc_, "aboutToDisappear");
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    if (jsDisappearFunc_.IsEmpty()) {
+        LOGD("View doesn't have %{public}s() method!", "aboutToDisappear");
+        return;
+    }
+    ACE_SCOPED_TRACE("%s", "aboutToDisappear");
+    JSRef<JSVal> jsObject = jsObject_.Lock();
+    std::string functionName("aboutToDisappear");
+    AceScopedPerformanceCheck scoped(functionName);
+    if (!jsObject->IsUndefined()) {
+        jsDisappearFunc_.Lock()->Call(jsObject);
+    } else {
+        LOGE("jsView Object is undefined and will not execute aboutToDisappear function");
+    }
 }
 
 bool ViewFunctions::HasLayout() const
@@ -443,7 +460,20 @@ bool ViewFunctions::HasMeasure() const
 
 void ViewFunctions::ExecuteAboutToBeDeleted()
 {
-    ExecuteFunction(jsAboutToBeDeletedFunc_, "aboutToBeDeleted");
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    if (jsAboutToBeDeletedFunc_.IsEmpty()) {
+        LOGD("View doesn't have %{public}s() method!", "aboutToBeDeleted");
+        return;
+    }
+    ACE_SCOPED_TRACE("%s", "aboutToBeDeleted");
+    JSRef<JSVal> jsObject = jsObject_.Lock();
+    std::string functionName("aboutToBeDeleted");
+    AceScopedPerformanceCheck scoped(functionName);
+    if (!jsObject->IsUndefined()) {
+        jsAboutToBeDeletedFunc_.Lock()->Call(jsObject);
+    } else {
+        LOGE("jsView Object is undefined and will not execute aboutToBeDeleted function");
+    }
 }
 
 void ViewFunctions::ExecuteAboutToRender()
@@ -640,7 +670,11 @@ void ViewFunctions::ExecuteRerender()
 
     auto func = jsRerenderFunc_.Lock();
     JSRef<JSVal> jsThis = jsObject_.Lock();
-    jsRenderResult_ = func->Call(jsThis);
+    if (!jsThis->IsUndefined()) {
+        jsRenderResult_ = func->Call(jsThis);
+    } else {
+        LOGE("jsView Object is undefined and will not execute rerender function");
+    }
 }
 
 // Partial update method

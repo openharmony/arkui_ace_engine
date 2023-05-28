@@ -35,7 +35,7 @@ public:
     void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
     void ScrollPage(bool reverse, bool smooth) override;
     void JumpTo(int32_t index, int32_t source) override;
-    bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve) override;
+    bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth) override;
 };
 
 } // namespace OHOS::Ace::NG

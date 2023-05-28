@@ -28,6 +28,7 @@ namespace OHOS::Ace {
 class AnimationOption final {
 public:
     AnimationOption() = default;
+    AnimationOption(const RefPtr<Curve>& curve, int32_t duration) : duration_(duration), curve_(curve) {}
     ~AnimationOption() = default;
 
     void SetDuration(int32_t duration)

@@ -273,19 +273,28 @@ template("declarative_js_engine") {
       "view_stack_processor.cpp",
 
       # Models implemenations for classic fw
+      "jsview/models/action_sheet_model_impl.cpp",
+      "jsview/models/alert_dialog_model_impl.cpp",
       "jsview/models/animator_model_impl.cpp",
+      "jsview/models/badge_model_impl.cpp",
       "jsview/models/blank_model_impl.cpp",
+      "jsview/models/button_model_impl.cpp",
+      "jsview/models/calendar_controller_model_impl.cpp",
+      "jsview/models/calendar_model_impl.cpp",
       "jsview/models/checkbox_model_impl.cpp",
       "jsview/models/checkboxgroup_model_impl.cpp",
       "jsview/models/circle_model_impl.cpp",
       "jsview/models/column_model_impl.cpp",
+      "jsview/models/common_view_model_impl.cpp",
       "jsview/models/counter_model_impl.cpp",
+      "jsview/models/custom_dialog_controller_model_impl.cpp",
       "jsview/models/data_panel_model_impl.cpp",
       "jsview/models/divider_model_impl.cpp",
       "jsview/models/ellipse_model_impl.cpp",
       "jsview/models/flex_model_impl.cpp",
       "jsview/models/for_each_model_impl.cpp",
       "jsview/models/gauge_model_impl.cpp",
+      "jsview/models/gesture_model_impl.cpp",
       "jsview/models/grid_col_model_impl.cpp",
       "jsview/models/grid_container_model_impl.cpp",
       "jsview/models/grid_item_model_impl.cpp",
@@ -293,7 +302,9 @@ template("declarative_js_engine") {
       "jsview/models/grid_row_model_impl.cpp",
       "jsview/models/hyperlink_model_impl.cpp",
       "jsview/models/if_else_model_impl.cpp",
+      "jsview/models/image_animator_model_impl.cpp",
       "jsview/models/image_model_impl.cpp",
+      "jsview/models/indexer_model_impl.cpp",
       "jsview/models/lazy_for_each_model_impl.cpp",
       "jsview/models/line_model_impl.cpp",
       "jsview/models/linear_split_model_impl.cpp",
@@ -302,6 +313,9 @@ template("declarative_js_engine") {
       "jsview/models/list_model_impl.cpp",
       "jsview/models/loading_progress_model_impl.cpp",
       "jsview/models/marquee_model_impl.cpp",
+      "jsview/models/menu_item_model_impl.cpp",
+      "jsview/models/menu_model_impl.cpp",
+      "jsview/models/navigation_model_impl.cpp",
       "jsview/models/navigator_model_impl.cpp",
       "jsview/models/page_transition_model_impl.cpp",
       "jsview/models/path_model_impl.cpp",
@@ -314,6 +328,7 @@ template("declarative_js_engine") {
       "jsview/models/rect_model_impl.cpp",
       "jsview/models/refresh_model_impl.cpp",
       "jsview/models/row_model_impl.cpp",
+      "jsview/models/scroll_bar_model_impl.cpp",
       "jsview/models/scroll_model_impl.cpp",
       "jsview/models/search_model_impl.cpp",
       "jsview/models/select_model_impl.cpp",
@@ -337,6 +352,7 @@ template("declarative_js_engine") {
       "jsview/models/timepicker_model_impl.cpp",
       "jsview/models/toggle_model_impl.cpp",
       "jsview/models/view_abstract_model_impl.cpp",
+      "jsview/models/view_context_model_impl.cpp",
       "jsview/models/view_full_update_model_impl.cpp",
       "jsview/models/view_partial_update_model_impl.cpp",
       "jsview/models/water_flow_item_model_impl.cpp",
@@ -410,6 +426,7 @@ template("declarative_js_engine") {
         "jsview/js_richtext.cpp",
         "jsview/js_web.cpp",
         "jsview/js_web_controller.cpp",
+        "jsview/models/richtext_model_impl.cpp",
       ]
     }
 
@@ -422,7 +439,10 @@ template("declarative_js_engine") {
     }
 
     if (defined(config.remote_window_support) && config.remote_window_support) {
-      sources += [ "jsview/js_remote_window.cpp" ]
+      sources += [
+        "jsview/js_remote_window.cpp",
+        "jsview/models/remote_window_model_impl.cpp",
+      ]
     }
 
     if (defined(config.plugin_components_support) &&
@@ -477,6 +497,9 @@ template("declarative_js_engine") {
     if (is_cross_platform_build) {
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
       deps += [ "$ark_ets_path:libark_jsruntime_static" ]
+      if (defined(config.pixel_map_support) && config.pixel_map_support) {
+        configs += [ "//foundation/multimedia/image_framework/interfaces/innerkits:image_external_config" ]
+      }
     } else {
       external_deps += [ "ets_runtime:libark_jsruntime" ]
     }
@@ -502,15 +525,9 @@ template("declarative_js_engine") {
       if (defined(config.window_scene_support) && config.window_scene_support) {
         sources += [
           "jsview/js_ui_extension.cpp",
-          "jsview/window_scene/js_host_window_scene.cpp",
           "jsview/window_scene/js_root_scene.cpp",
           "jsview/window_scene/js_screen.cpp",
-        ]
-        external_deps += [
-          "window_manager:scene_session",
-          "window_manager:scene_session_manager",
-          "window_manager:screen_session",
-          "window_manager:screen_session_manager",
+          "jsview/window_scene/js_window_scene.cpp",
         ]
       }
     }
@@ -566,6 +583,7 @@ template("declarative_js_engine_ng") {
       "sharedata/js_share_data.cpp",
 
       # jsviews
+      "jsview/js_button.cpp",
       "jsview/js_column.cpp",
       "jsview/js_container_base.cpp",
       "jsview/js_counter.cpp",
@@ -587,6 +605,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_rating.cpp",
       "jsview/js_row.cpp",
       "jsview/js_scroll.cpp",
+      "jsview/js_scroller.cpp",
       "jsview/js_span.cpp",
       "jsview/js_stack.cpp",
       "jsview/js_swiper.cpp",
@@ -595,9 +614,11 @@ template("declarative_js_engine_ng") {
       "jsview/js_tabs_controller.cpp",
       "jsview/js_text.cpp",
       "jsview/js_toggle.cpp",
+      "jsview/js_utils.cpp",
       "jsview/js_view.cpp",
       "jsview/js_view_abstract.cpp",
       "jsview/js_view_context.cpp",
+      "jsview/scroll_bar/js_scroll_bar.cpp",
     ]
 
     sources += [

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 
 #include "base/utils/utils.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
@@ -23,6 +24,34 @@
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
+
+namespace {
+constexpr uint32_t GRID_COUNTS_4 = 4;
+constexpr uint32_t GRID_COUNTS_6 = 6;
+constexpr uint32_t GRID_COUNTS_8 = 8;
+constexpr uint32_t GRID_COUNTS_12 = 12;
+
+uint32_t GetMaxGridCounts(const RefPtr<GridColumnInfo>& columnInfo)
+{
+    CHECK_NULL_RETURN(columnInfo, GRID_COUNTS_8);
+    auto currentColumns = columnInfo->GetParent()->GetColumns();
+    auto maxGridCounts = GRID_COUNTS_8;
+    switch (currentColumns) {
+        case GRID_COUNTS_4:
+            maxGridCounts = GRID_COUNTS_4;
+            break;
+        case GRID_COUNTS_8:
+            maxGridCounts = GRID_COUNTS_6;
+            break;
+        case GRID_COUNTS_12:
+            maxGridCounts = GRID_COUNTS_8;
+            break;
+        default:
+            break;
+    }
+    return maxGridCounts;
+}
+} // namespace
 
 void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -40,6 +69,10 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutConstraint = layoutProperty->GetLayoutConstraint().value();
     CalculateLanes(listLayoutProperty_, layoutConstraint, contentIdealSize.CrossSize(axis_), axis_);
     auto itemLayoutConstraint = layoutProperty->CreateChildConstraint();
+    isCardStyle_ = IsCardStyleForListItemGroup(layoutWrapper);
+    if (isCardStyle_) {
+        contentIdealSize.SetCrossSize(GetMaxGridWidth() - layoutProperty->CreatePaddingAndBorder().Width(), axis_);
+    }
     UpdateListItemConstraint(contentIdealSize, itemLayoutConstraint);
     auto headerFooterLayoutConstraint = layoutProperty->CreateChildConstraint();
     headerFooterLayoutConstraint.maxSize.SetMainSize(Infinity<float>(), axis_);
@@ -85,6 +118,14 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     AddPaddingToSize(padding, contentIdealSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(contentIdealSize.ConvertToSizeT());
     layoutWrapper->SetCacheCount(listLayoutProperty_->GetCachedCountValue(1) * lanes_);
+}
+
+float ListItemGroupLayoutAlgorithm::GetMaxGridWidth()
+{
+    RefPtr<GridColumnInfo> columnInfo;
+    columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::LIST_CARD);
+    columnInfo->GetParent()->BuildColumnWidth();
+    return static_cast<float>(columnInfo->GetWidth(GetMaxGridCounts(columnInfo)));
 }
 
 void ListItemGroupLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -227,6 +268,7 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
     LOGD("referencePos_ is %{public}f, startPos_: %{public}f, endPos_: %{public}f, forward:%{public}d",
         referencePos_, startPos_, endPos_, forwardLayout_);
     if (forwardLayout_) {
+        startIndex = GetLanesFloor(startIndex);
         LOGD("startIndex:%{public}d, startPos:%{public}f", startIndex, startPos);
         MeasureForward(layoutWrapper, layoutConstraint, startIndex, startPos);
     } else {
@@ -241,10 +283,6 @@ int32_t ListItemGroupLayoutAlgorithm::MeasureALineForward(LayoutWrapper* layoutW
     float mainLen = 0.0f;
     int32_t cnt = 0;
     int32_t lanes = lanes_ > 1 ? lanes_ : 1;
-    if (lanesChanged_) {
-        lanesChanged_ = false;
-        currentIndex = GetLanesFloor(currentIndex + 1) - 1;
-    }
     for (int32_t i = 0; i < lanes && currentIndex + 1 <= totalItemCount_; i++) {
         auto wrapper = GetListItem(layoutWrapper, currentIndex + 1);
         if (!wrapper) {
@@ -421,7 +459,7 @@ void ListItemGroupLayoutAlgorithm::LayoutListItem(LayoutWrapper* layoutWrapper,
             offset = offset + OffsetF(0, pos.second.first) + OffsetF(laneCrossOffset, 0) +
                 OffsetF(crossSize / lanes_ * laneIndex, 0);
         } else {
-            offset = offset + OffsetF(pos.second.first, 0) + OffsetF(laneCrossOffset, 0) +
+            offset = offset + OffsetF(pos.second.first, 0) + OffsetF(0, laneCrossOffset) +
                 OffsetF(0, crossSize / lanes_ * laneIndex);
         }
         SetListItemIndex(layoutWrapper, wrapper, pos.first);
@@ -525,11 +563,7 @@ void ListItemGroupLayoutAlgorithm::CalculateLanes(const RefPtr<ListLayoutPropert
                 layoutConstraint.scaleProperty, crossSizeOptional.value());
         }
     }
-    lanes = ListLanesLayoutAlgorithm::CalculateLanesParam(minLaneLength_, maxLaneLength_, lanes, crossSizeOptional);
-    if (lanes_ != lanes) {
-        lanes_ = lanes;
-        lanesChanged_ = true;
-    }
+    lanes_ = ListLanesLayoutAlgorithm::CalculateLanesParam(minLaneLength_, maxLaneLength_, lanes, crossSizeOptional);
 }
 
 void ListItemGroupLayoutAlgorithm::SetListItemIndex(const LayoutWrapper* groupLayoutWrapper,
@@ -546,5 +580,14 @@ void ListItemGroupLayoutAlgorithm::SetListItemIndex(const LayoutWrapper* groupLa
     auto listItemGroup = host->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_VOID_NOLOG(listItemGroup);
     listItem->SetIndexInList(listItemGroup->GetIndexInList());
+}
+
+bool ListItemGroupLayoutAlgorithm::IsCardStyleForListItemGroup(const LayoutWrapper* groupLayoutWrapper)
+{
+    auto host = groupLayoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto listItemGroup = host->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_RETURN(listItemGroup, false);
+    return listItemGroup->GetListItemGroupStyle() == V2::ListItemGroupStyle::CARD;
 }
 } // namespace OHOS::Ace::NG

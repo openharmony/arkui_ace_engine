@@ -40,4 +40,5 @@ RefPtr<FrameNode> RenderContext::GetHost() const
 }
 
 void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+void RenderContext::FromJson(const std::unique_ptr<JsonValue>& json) {}
 } // namespace OHOS::Ace::NG

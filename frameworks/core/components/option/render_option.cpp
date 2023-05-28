@@ -629,7 +629,7 @@ void RenderOption::Update(const RefPtr<Component>& component)
         return;
     }
     if (!eventEffectController_) {
-        eventEffectController_ = AceType::MakeRefPtr<Animator>(context_);
+        eventEffectController_ = CREATE_ANIMATOR(context_);
     }
     auto theme = data_->GetTheme();
     lineColor_ = theme->GetLineColor();

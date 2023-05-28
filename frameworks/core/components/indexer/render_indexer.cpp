@@ -374,7 +374,7 @@ void RenderIndexer::BuildBubbleAnimation()
         return;
     }
     if (!bubbleController_) {
-        bubbleController_ = AceType::MakeRefPtr<Animator>(GetContext());
+        bubbleController_ = CREATE_ANIMATOR(GetContext());
     }
     bubbleController_->ClearInterpolators();
     bubbleController_->ClearAllListeners();

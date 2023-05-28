@@ -127,6 +127,7 @@ void ImageProvider::FailCallback(const std::string& key, const std::string& erro
 
 void ImageProvider::SuccessCallback(const RefPtr<CanvasImage>& canvasImage, const std::string& key, bool sync)
 {
+    CacheCanvasImage(canvasImage, key);
     auto ctxs = EndTask(key);
     // when upload success, pass back canvasImage to LoadingContext
     auto notifyLoadSuccess = [ctxs, canvasImage] {

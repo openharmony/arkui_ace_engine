@@ -48,13 +48,13 @@ public:
     void SetWidth(Dimension& value) override;
     void SetHeight(Dimension& value) override;
     void SetSize(Dimension& width, Dimension& height) override;
-    void SetPaddings(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
-        const std::optional<Dimension>& left, const std::optional<Dimension>& right) override;
-    void SetPadding(const Dimension& value) override;
-    void SetPaddingLeft(const Dimension& value) override;
-    void SetPaddingTop(const Dimension& value) override;
-    void SetPaddingRight(const Dimension& value) override;
-    void SetPaddingBottom(const Dimension& value) override;
+    void SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
+        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override;
+    void SetPadding(const CalcDimension& value) override;
+    void SetPaddingLeft(const CalcDimension& value) override;
+    void SetPaddingTop(const CalcDimension& value) override;
+    void SetPaddingRight(const CalcDimension& value) override;
+    void SetPaddingBottom(const CalcDimension& value) override;
     void SetSpace(const Dimension& value) override;
     void SetArrowPosition(const ArrowPosition value) override;
     void SetMenuAlign(const MenuAlign& menuAlign) override;

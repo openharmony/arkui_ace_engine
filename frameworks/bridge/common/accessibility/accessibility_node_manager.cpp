@@ -680,7 +680,7 @@ void AccessibilityNodeManager::OnDumpInfo(const std::vector<std::string>& params
         DumpTree(0, 0);
     } else if (params.size() == PROPERTY_DUMP_PARAM_LENGTH) {
         DumpProperty(params);
-    } else if (params.size() == EVENT_DUMP_PARAM_LENGTH_LOWER || params.size() == EVENT_DUMP_PARAM_LENGTH_UPPER) {
+    } else if (params.size() >= EVENT_DUMP_PARAM_LENGTH_LOWER) {
         DumpHandleEvent(params);
     }
 }

@@ -28,7 +28,7 @@ class MultiFingersRecognizer : public NGGestureRecognizer {
 
 public:
     MultiFingersRecognizer() = default;
-    explicit MultiFingersRecognizer(int32_t fingers) : fingers_(fingers) {}
+    explicit MultiFingersRecognizer(int32_t fingers);
 
     ~MultiFingersRecognizer() override = default;
 
@@ -37,6 +37,11 @@ public:
     bool CheckTouchId(int32_t touchId) override
     {
         return touchPoints_.find(touchId) != touchPoints_.end();
+    }
+
+    int GetFingers()
+    {
+        return fingers_;
     }
 
 protected:

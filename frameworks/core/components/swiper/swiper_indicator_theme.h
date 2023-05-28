@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace {
 namespace {
-constexpr float SWIPER_ARROW_ALPHA_DISABLED = 0.4f;
+constexpr double SWIPER_ARROW_ALPHA_DISABLED = 0.4;
 constexpr Dimension SWIPER_ARROW_SCALE = 24.0_vp;
 constexpr Dimension SWIPER_ARROW_SMALL_ARROW_BOARD_SIZE = 24.0_vp;
 constexpr Dimension SWIPER_ARROW_SMALL_ARROW_SIZE = 18.0_vp;
@@ -30,6 +30,7 @@ constexpr Dimension SWIPER_ARROW_BIG_ARROW_BOARD_SIZE = 32.0_vp;
 constexpr Dimension SWIPER_ARROW_BIG_ARROW_SIZE = 24.0_vp;
 constexpr Dimension SWIPER_ARROW_HORIZONTAL_MARGIN_DEFAULT = 8.0_vp;
 constexpr Dimension SWIPER_ARROW_VERTICAL_MARGIN_DEFAULT = 8.0_vp;
+constexpr float SWIPER_ARROW_ZOOM_OUT_SCALE = 1.33f;
 } // namespace
 class SwiperIndicatorTheme : public virtual Theme {
     DECLARE_ACE_TYPE(SwiperIndicatorTheme, Theme);
@@ -117,6 +118,7 @@ public:
             theme->bigArrowBoardColor_ =
                 swiperPattern->GetAttr<Color>(ARROW_COLOR_COMPONENT_NORMAL, Color::TRANSPARENT);
             theme->bigArrowColor_ = swiperPattern->GetAttr<Color>(ARROW_COLOR_PRIMARY, Color::TRANSPARENT);
+            theme->arrowZoomOutScale_ = SWIPER_ARROW_ZOOM_OUT_SCALE;
         }
     };
 
@@ -314,6 +316,11 @@ public:
         return arrowVerticalMargin_;
     }
 
+    float GetArrowZoomOutScale() const
+    {
+        return arrowZoomOutScale_;
+    }
+
 protected:
     SwiperIndicatorTheme() = default;
 
@@ -353,10 +360,11 @@ private:
     Dimension bigArrowSize_;
     Color bigArrowBoardColor_;
     Color bigArrowColor_;
-    float arrowDisabledAlpha_ = 0.4f;
+    double arrowDisabledAlpha_ = 0.4;
     Dimension arrowScale_;
     Dimension arrowHorizontalMargin_;
     Dimension arrowVerticalMargin_;
+    float arrowZoomOutScale_ = 1.33f;
 };
 
 } // namespace OHOS::Ace

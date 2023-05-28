@@ -496,4 +496,9 @@ Color SvgBaseDeclaration::GetColor(const std::string& value) const
     return Color::FromString(value);
 }
 
+void SvgBaseDeclaration::ReplaceAttributes(const SvgBaseAttribute& attr)
+{
+    auto& attribute = MaybeResetAttribute<SvgBaseAttribute>(AttributeTag::SPECIALIZED_ATTR);
+    attribute = attr;
+}
 } // namespace OHOS::Ace

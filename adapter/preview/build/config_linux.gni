@@ -19,6 +19,3 @@ defines += [
   "GPU_DISABLED",
   "SK_BUILD_FONT_MGR_FOR_PREVIEW_LINUX",
 ]
-
-libace_target =
-    "//foundation/arkui/ace_engine/adapter/preview/build:libace_engine_linux"

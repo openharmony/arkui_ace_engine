@@ -50,9 +50,9 @@ HWTEST_F(CalcLengthTestNg, calcLengthTest001, TestSize.Level1)
     double result = 0.0;
     calc.dimension_ = Dimension(100.0, DimensionUnit::PX);
     auto calcBool = calc.NormalizeToPx(VP_SCALE, FP_SCALE, LPX_SCALE, PARENT_LENGTH, result);
-    EXPECT_TRUE(calcBool);
+    EXPECT_FALSE(calcBool);
     calc.SetCalcValue("calcLengthTest");
     calcBool = calc.NormalizeToPx(VP_SCALE, FP_SCALE, LPX_SCALE, PARENT_LENGTH, result);
-    EXPECT_TRUE(calcBool);
+    EXPECT_FALSE(calcBool);
 }
 } // namespace OHOS::Ace::NG

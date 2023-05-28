@@ -243,6 +243,11 @@ public:
         }
     }
 
+    int32_t GetHalfDisplayCounts() const
+    {
+        return halfDisplayCounts_;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -297,9 +302,12 @@ private:
     void OnMiddleButtonTouchDown(RefPtr<EventParam> param);
     void OnMiddleButtonTouchMove(RefPtr<EventParam> param);
     void OnMiddleButtonTouchUp(RefPtr<EventParam> param);
-    bool touchEventInit = false;
+    int32_t GetMiddleButtonIndex();
+
+    bool touchEventInit_ = false;
     RefPtr<InputEvent> CreateMouseHoverEventListener(RefPtr<EventParam> param);
     RefPtr<ClickEvent> CreateItemClickEventListener(RefPtr<EventParam> param);
+    void SetAccessibilityAction();
 
     float localDownDistance_ = 0.0f;
     Color pressColor_;
@@ -342,6 +350,8 @@ private:
     bool isJump_ = false;
 
     ColumnChangeCallback changeCallback_;
+
+    int32_t halfDisplayCounts_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerColumnPattern);
 };

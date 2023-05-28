@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/progress/progress_pattern.h"
 
 #include "core/components/progress/progress_theme.h"
+#include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/progress/progress_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -126,7 +127,7 @@ void ProgressPattern::OnPress(const TouchEventInfo& info)
     CHECK_NULL_VOID(textHost);
     auto textLayoutProperty = textHost->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    
+
     if (touchType == TouchType::DOWN) {
         backgroundColor_ = paintProperty->GetBackgroundColor().value_or(theme->GetCapsuleBgColor());
         selectColor_ = paintProperty->GetColor().value_or(theme->GetCapsuleSelectColor());
@@ -151,17 +152,62 @@ void ProgressPattern::OnPress(const TouchEventInfo& info)
     host->MarkDirtyNode();
 }
 
+void ProgressPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->GetInnerFocusPaintRect(paintRect);
+    };
+    focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
+}
+
+void ProgressPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& content = host->GetGeometryNode()->GetContent();
+    CHECK_NULL_VOID(content);
+    auto contentOffset = content->GetRect().GetOffset();
+    auto contentSize = content->GetRect().GetSize();
+    auto currentContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(currentContext);
+    auto appTheme = currentContext->GetTheme<AppTheme>();
+    CHECK_NULL_VOID(appTheme);
+    auto paintWidth = appTheme->GetFocusWidthVp();
+    auto focusPadding = appTheme->GetFocusOutPaddingVp();
+    auto focusDistance = paintWidth + focusPadding;
+    auto focusRadius =
+        std::min(contentSize.Width(), contentSize.Height()) * 0.5 + static_cast<float>(focusDistance.ConvertToPx());
+    paintRect.SetRect(RectF(contentOffset.GetX() - focusDistance.ConvertToPx(),
+        contentOffset.GetY() - focusDistance.ConvertToPx(), contentSize.Width() + 2 * focusDistance.ConvertToPx(),
+        contentSize.Height() + 2 * focusDistance.ConvertToPx()));
+    paintRect.SetCornerRadius(focusRadius);
+}
+
 void ProgressPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto progressLayoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
+    CHECK_NULL_VOID(progressLayoutProperty);
     if (progressLayoutProperty->GetType() == ProgressType::CAPSULE) {
+        auto hub = host->GetEventHub<EventHub>();
         HandleEnabled();
         InitTouchEvent();
+        auto focusHub = hub->GetFocusHub();
+        CHECK_NULL_VOID_NOLOG(focusHub);
+        InitOnKeyEvent(focusHub);
     }
-    visibilityType_ = progressLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE);
+}
+
+void ProgressPattern::OnVisibleChange(bool isVisible)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    visibilityProp_ = isVisible;
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void ProgressPattern::ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>& json) const

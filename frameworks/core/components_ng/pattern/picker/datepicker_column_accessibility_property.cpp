@@ -23,7 +23,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t MIDDLE_OF_COUNTS = 2;
-}
+} // namespace
 
 int32_t DatePickerColumnAccessibilityProperty::GetCollectionItemCounts() const
 {

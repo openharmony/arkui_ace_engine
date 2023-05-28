@@ -231,6 +231,8 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
+    void FromJson(const std::unique_ptr<JsonValue>& json) override;
+
     RefPtr<FrameNode> GetAncestorNodeOfFrame() const;
 
     std::string& GetNodeName()
@@ -264,6 +266,8 @@ public:
     RectF GetTransformRectRelativeToWindow() const;
 
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
+
+    OffsetF GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
 
     OffsetF GetPaintRectOffsetToPage() const;
 
@@ -325,8 +329,6 @@ public:
         return renderContext_->HasPosition() || renderContext_->HasOffset() || renderContext_->HasAnchor();
     }
 
-    bool OnRemoveFromParent() override;
-
     // The function is only used for fast preview.
     void FastPreviewUpdateChildDone() override
     {
@@ -371,9 +373,12 @@ public:
 
     RefPtr<FrameNode> FindChildByPosition(float x, float y);
 
-    void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
-        const std::function<void(float)>& onCallbackEvent);
+    void CreateAnimatablePropertyFloat(
+        const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent);
     void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value);
+    void CreateAnimatableArithmeticProperty(const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value,
+        std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent);
+    void UpdateAnimatableArithmeticProperty(const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value);
 
     std::string ProvideRestoreInfo();
 
@@ -399,6 +404,9 @@ private:
     bool IsMeasureBoundary();
     bool IsRenderBoundary();
 
+    bool OnRemoveFromParent(bool allowTransition) override;
+    bool RemoveImmediately() const override;
+
     // dump self info.
     void DumpInfo() override;
 
@@ -414,7 +422,8 @@ private:
 
     void ProcessAllVisibleCallback(
         std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks, double currentVisibleRatio);
-    void OnVisibleAreaChangeCallback(VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio);
+    void OnVisibleAreaChangeCallback(
+        VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio, bool isHandled);
     double CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect);
 
     struct ZIndexComparator {

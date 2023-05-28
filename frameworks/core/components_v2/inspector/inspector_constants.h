@@ -96,6 +96,8 @@ ACE_EXPORT extern const char STACK_ETS_TAG[];
 ACE_EXPORT extern const char SWIPER_COMPONENT_TAG[];
 ACE_EXPORT extern const char SWIPER_ETS_TAG[];
 ACE_EXPORT extern const char SWIPER_INDICATOR_ETS_TAG[];
+ACE_EXPORT extern const char SWIPER_LEFT_ARROW_ETS_TAG[];
+ACE_EXPORT extern const char SWIPER_RIGHT_ARROW_ETS_TAG[];
 
 // tabs
 ACE_EXPORT extern const char TABS_COMPONENT_TAG[];
@@ -499,7 +501,7 @@ ACE_EXPORT extern const char MODEL_ETS_TAG[];
 // window scene
 ACE_EXPORT extern const char ROOT_SCENE_ETS_TAG[];
 ACE_EXPORT extern const char SCREEN_ETS_TAG[];
-ACE_EXPORT extern const char HOST_WINDOW_SCENE_ETS_TAG[];
+ACE_EXPORT extern const char WINDOW_SCENE_ETS_TAG[];
 
 // ui_extension_component
 ACE_EXPORT extern const char UI_EXTENSION_COMPONENT_TAG[];

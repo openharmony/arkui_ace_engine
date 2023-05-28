@@ -36,12 +36,9 @@ void TextModelNG::Create(const std::string& content)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, content);
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, TextAlign::START);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::CENTER_LEFT);
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    SetDraggable(theme->GetDraggable());
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    textPattern->InitSurfaceChangedCallback();
 }
 
 void TextModelNG::SetFontSize(const Dimension& value)
@@ -59,6 +56,8 @@ void TextModelNG::SetTextColor(const Color& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColor, value);
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, ForegroundColor, value);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, value);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
 }
 
 void TextModelNG::SetTextShadow(const Shadow& value)

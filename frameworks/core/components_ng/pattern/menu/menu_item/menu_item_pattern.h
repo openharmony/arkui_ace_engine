@@ -164,7 +164,7 @@ private:
     void RegisterOnClick();
     void RegisterOnTouch();
     void RegisterOnHover();
-    void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    void RegisterOnKeyEvent();
     // change menu item paint props on press
     void OnPress(const TouchEventInfo& info);
     void OnHover(bool isHover);
@@ -176,6 +176,9 @@ private:
     void UpdateIcon(RefPtr<FrameNode>& row, bool isStart);
     void UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel);
 
+    bool IsDisabled();
+    void UpdateDisabledStyle();
+
     RefPtr<FrameNode> GetMenuWrapper();
 
     void ShowSubMenu();
@@ -183,6 +186,7 @@ private:
     OffsetF GetSubMenuPostion(const RefPtr<FrameNode>& targetNode);
 
     void AddSelfHoverRegion(const RefPtr<FrameNode>& targetNode);
+    void SetAccessibilityAction();
 
     std::list<TouchRegion> hoverRegions_;
 

@@ -72,7 +72,9 @@ void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
 {
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
-    if (!textFieldPattern->GetShowUnderLine()) {
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->GetShowUnderlineValue(false)) {
         return;
     }
     auto textRect = textFieldPattern->GetContentRect();
@@ -95,6 +97,7 @@ void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
 void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
 {
     auto canvas = context.canvas;
+    canvas.Save();
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
     if (!textFieldPattern->InSelectMode()) {
@@ -159,7 +162,7 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
     brush.SetColor(ToRSColor(cursorColor_->Get()));
     canvas.AttachBrush(brush);
     auto paintOffset = contentOffset_->Get() - OffsetF(0.0f, textFieldPattern->GetBaseLineOffset());
-    float clipRectHeight = 0.0;
+    float clipRectHeight = 0.0f;
     if (showCounter_->Get() && textFieldPattern->GetCounterParagraph()) {
         clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height() - textFieldPattern->GetCountHeight();
     } else {
@@ -168,13 +171,16 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
     RSRect clipInnerRect(paintOffset.GetX(), paintOffset.GetY(),
         // add extra clip space for cases such as auto width
         paintOffset.GetX() + contentSize_->Get().Width() + cursorWidth_->Get() * 2.0f, clipRectHeight);
-    if (!textFieldPattern->GetShowUnderLine()) {
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->GetShowUnderlineValue(false)) {
         canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     }
     auto caretRect = textFieldPattern->GetCaretRect();
     canvas.DrawRect(RSRect(cursorOffsetX_->Get(), caretRect.GetY(),
         cursorOffsetX_->Get() + static_cast<float>(cursorWidth_->Get()), caretRect.GetY() + caretRect.Height()));
-        canvas.DetachBrush();
+    canvas.DetachBrush();
+    canvas.Restore();
 }
 
 void TextFieldOverlayModifier::PaintScrollBar(RSCanvas& canvas)

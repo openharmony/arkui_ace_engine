@@ -42,7 +42,7 @@ RenderRoot::RenderRoot() : RenderNode(true) {}
 void RenderRoot::Update(const RefPtr<Component>& component)
 {
     if (!controller_ && IsShadowModal(context_)) {
-        controller_ = AceType::MakeRefPtr<Animator>(GetContext());
+        controller_ = CREATE_ANIMATOR(GetContext());
         controller_->SetFillMode(FillMode::FORWARDS);
     }
     auto root = AceType::DynamicCast<RootComponent>(component);

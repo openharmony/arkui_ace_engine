@@ -98,6 +98,18 @@ void ViewAbstract::SetHeight(const CalcLength& height)
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
 }
 
+void ViewAbstract::SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ClickEffectInfo clickEffectInfo;
+    clickEffectInfo.level = level;
+    clickEffectInfo.scaleNumber = scaleValue;
+    ACE_UPDATE_RENDER_CONTEXT(ClickEffectLevel, clickEffectInfo);
+}
+
 void ViewAbstract::ClearWidthOrHeight(bool isWidth)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -235,6 +247,23 @@ void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
     }
 }
 
+void ViewAbstract::SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateFrontBlurStyle(fgBlurStyle);
+        if (target->GetFrontBlurRadius().has_value()) {
+            target->UpdateFrontBlurRadius(Dimension());
+        }
+    }
+}
+
 void ViewAbstract::SetSphericalEffect(double radio)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -305,6 +334,15 @@ void ViewAbstract::SetFlexShrink(float value)
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexShrink, value);
+}
+
+void ViewAbstract::ResetFlexShrink()
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_RESET_LAYOUT_PROPERTY(LayoutProperty, FlexShrink);
 }
 
 void ViewAbstract::SetFlexGrow(float value)
@@ -386,7 +424,6 @@ void ViewAbstract::SetBorderRadius(const Dimension& value)
     }
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(value);
-    borderRadius.SetRadiusFlag(true);
     ACE_UPDATE_RENDER_CONTEXT(BorderRadius, borderRadius);
 }
 
@@ -742,7 +779,17 @@ void ViewAbstract::SetVisibility(VisibleType visible)
         LOGD("current state is not processed, return");
         return;
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Visibility, visible);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    if (layoutProperty) {
+        layoutProperty->UpdateVisibility(visible, true);
+    }
+
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    if (focusHub) {
+        focusHub->SetShow(visible == VisibleType::VISIBLE);
+    }
 }
 
 void ViewAbstract::SetGeometryTransition(const std::string& id)
@@ -1044,7 +1091,7 @@ void ViewAbstract::SetBackdropBlur(const Dimension& radius)
     if (target) {
         target->UpdateBackBlurRadius(radius);
         if (target->GetBackBlurStyle().has_value()) {
-            target->UpdateBackBlurStyle(BlurStyleOption());
+            target->UpdateBackBlurStyle(std::nullopt);
         }
     }
 }
@@ -1055,7 +1102,15 @@ void ViewAbstract::SetFrontBlur(const Dimension& radius)
         LOGD("current state is not processed, return");
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(FrontBlurRadius, radius);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateFrontBlurRadius(radius);
+        if (target->GetFrontBlurStyle().has_value()) {
+            target->UpdateFrontBlurStyle(std::nullopt);
+        }
+    }
 }
 
 void ViewAbstract::SetBackShadow(const Shadow& shadow)
@@ -1363,6 +1418,7 @@ void ViewAbstract::SetForegroundColor(const Color& color)
     }
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
 }
 
 void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy& strategy)
@@ -1373,6 +1429,7 @@ void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy& str
     }
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorStrategy, strategy);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
 }
 
 void ViewAbstract::SetKeyboardShortcut(
@@ -1417,5 +1474,22 @@ void ViewAbstract::UpdateAnimatablePropertyFloat(const std::string& propertyName
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     frameNode->UpdateAnimatablePropertyFloat(propertyName, value);
+}
+
+void ViewAbstract::CreateAnimatableArithmeticProperty(const std::string& propertyName,
+    RefPtr<CustomAnimatableArithmetic>& value,
+    std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->CreateAnimatableArithmeticProperty(propertyName, value, onCallbackEvent);
+}
+
+void ViewAbstract::UpdateAnimatableArithmeticProperty(const std::string& propertyName,
+    RefPtr<CustomAnimatableArithmetic>& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->UpdateAnimatableArithmeticProperty(propertyName, value);
 }
 } // namespace OHOS::Ace::NG

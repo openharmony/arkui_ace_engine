@@ -232,6 +232,10 @@ void PluginPattern::CreatePluginSubContainer()
             pluginPattern->FireOnErrorEvent("1", "package path is empty.");
             return;
         }
+        if (!info.bundleName.empty() && !info.moduleName.empty()) {
+            pluginSubContainer_->SetPluginBundleName(info.bundleName);
+            pluginSubContainer_->SetPluginModuleName(info.moduleName);
+        }
         if (packagePathStr.rfind(".hap") != std::string::npos) {
             std::string sub = packagePathStr.substr(1, packagePathStr.size() - 5) + "/";
             ReplaceAll(info.source, sub, "");
@@ -513,6 +517,7 @@ std::string PluginPattern::GerPackagePathByBms(const WeakPtr<PluginPattern>& wea
     }
     if (info.moduleName.empty() || info.moduleName == "default") {
         info.moduleResPath = bundleInfo.hapModuleInfos[0].resourcePath;
+        info.moduleName = bundleInfo.hapModuleInfos[0].name;
         packagePathStr = bundleInfo.hapModuleInfos[0].hapPath;
         return packagePathStr;
     }
@@ -534,4 +539,13 @@ const RefPtr<PluginSubContainer>& PluginPattern::GetPluginSubContainer() const
 {
     return pluginSubContainer_;
 };
+
+void PluginPattern::FlushReload() const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto customNode = DynamicCast<CustomNodeBase>(host->GetFirstChild());
+    CHECK_NULL_VOID(customNode);
+    customNode->FireReloadFunction(true);
+}
 } // namespace OHOS::Ace::NG

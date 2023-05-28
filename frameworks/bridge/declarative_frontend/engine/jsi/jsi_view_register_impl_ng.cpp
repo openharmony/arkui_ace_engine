@@ -17,18 +17,15 @@
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
-#ifdef VIDEO_SUPPORTED
-#include "bridge/declarative_frontend/jsview/js_video.h"
-#endif
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
-#include "frameworks/bridge/card_frontend/card_frontend_declarative.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_column.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_counter.h"
@@ -50,6 +47,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_rating.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroll.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_scroller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_stack.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_swiper.h"
@@ -59,12 +57,15 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_toggle.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
+#include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
+#include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
+#include "frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.h"
+
 #ifdef VIDEO_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_video.h"
 #endif
-#include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
-#include "frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -149,9 +150,9 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 
 void JsBindViews(BindingTarget globalObj)
 {
-    JSViewAbstract::JSBind();
+    JSViewAbstract::JSBind(globalObj);
     JSViewStackProcessor::JSBind(globalObj);
-    JSContainerBase::JSBind();
+    JSContainerBase::JSBind(globalObj);
     JSView::JSBind(globalObj);
     JSText::JSBind(globalObj);
     JSColumn::JSBind(globalObj);
@@ -184,6 +185,9 @@ void JsBindViews(BindingTarget globalObj)
     JSGridItem::JSBind(globalObj);
     JSSwiper::JSBind(globalObj);
     JSImageSpan::JSBind(globalObj);
+    JSScroller::JSBind(globalObj);
+    JSScrollBar::JSBind(globalObj);
+    JSButton::JSBind(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

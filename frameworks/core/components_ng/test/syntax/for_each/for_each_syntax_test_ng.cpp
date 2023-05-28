@@ -36,6 +36,7 @@ constexpr bool IS_ATOMIC_NODE = false;
 const std::list<std::string> ID_ARRAY = { "0" };
 const std::list<std::string> FOR_EACH_ARRAY = { "0", "1", "2", "3" };
 const std::list<std::string> FOR_EACH_IDS = { "0", "1", "2", "3", "4", "5" };
+constexpr int32_t FOR_EACH_NODE_ID = 1;
 } // namespace
 
 class ForEachSyntaxTestNg : public testing::Test {
@@ -164,6 +165,50 @@ HWTEST_F(ForEachSyntaxTestNg, ForEachSyntaxUpdateTest005, TestSize.Level1)
      */
     forEachNode->CreateTempItems();
     std::list<std::string> ids2 = ID_ARRAY;
+    forEachNode->SetIds(std::move(ids2));
+    forEachNode->onMainTree_ = true;
+    auto node = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    forEachNode->SetParent(node);
+    forEachNode->children_ = { node };
+    forEachNode->CompareAndUpdateChildren();
+    auto tempIds = forEachNode->GetTempIds();
+    EXPECT_TRUE(tempIds.empty());
+}
+
+/**
+ * @tc.name: ForEachSyntaxCreateTest006
+ * @tc.desc: Create ForEach with same node id.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForEachSyntaxTestNg, ForEachSyntaxTest006, TestSize.Level1)
+{
+    auto forEachNode = ForEachNode::GetOrCreateForEachNode(FOR_EACH_NODE_ID);
+    auto anotherForEachNode = ForEachNode::GetOrCreateForEachNode(FOR_EACH_NODE_ID);
+    EXPECT_EQ(forEachNode, anotherForEachNode);
+}
+
+/**
+ * @tc.name: ForEachSyntaxUpdateTest007
+ * @tc.desc: Create ForEach and update children.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForEachSyntaxTestNg, ForEachSyntaxUpdateTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set branch id which is same as before.
+     */
+    ForEachModelNG forEach;
+    forEach.Create();
+    std::list<std::string> ids = FOR_EACH_ARRAY;
+    forEach.SetNewIds(std::move(ids));
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(forEachNode != nullptr && forEachNode->GetTag() == V2::JS_FOR_EACH_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. CompareAndUpdateChildren when newIds and oldIds are same.
+     */
+    forEachNode->CreateTempItems();
+    std::list<std::string> ids2 = FOR_EACH_IDS;
     forEachNode->SetIds(std::move(ids2));
     forEachNode->onMainTree_ = true;
     auto node = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());

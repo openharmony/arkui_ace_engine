@@ -47,7 +47,7 @@ void LocationButtonModelNG::Create(int32_t text, int32_t icon,
 bool LocationButtonModelNG::GetIconResource(int32_t iconStyle, InternalResource::ResourceId& id)
 {
     if ((iconStyle < 0) || (static_cast<uint32_t>(iconStyle) >= ICON_RESOURCE_TABLE.size())) {
-        LOGE("Icon type is invalid, can not get resource id");
+        LOGW("Icon type is invalid, can not get resource id");
         return false;
     }
     id = static_cast<InternalResource::ResourceId>(ICON_RESOURCE_TABLE[iconStyle]);

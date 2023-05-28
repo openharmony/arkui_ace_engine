@@ -26,6 +26,7 @@
 #include "ipc_skeleton.h"
 #include "res_config.h"
 #include "resource_manager.h"
+#include "session_info.h"
 #include "string_wrapper.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -199,11 +200,17 @@ bool AceWindowListener::OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axis
     return callbackOwner_->OnInputEvent(axisEvent);
 }
 
+void AceWindowListener::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
+{
+    CHECK_NULL_VOID(callbackOwner_);
+    return callbackOwner_->OnAvoidAreaChanged(avoidArea, type);
+}
+
 AceAbility::AceAbility() = default;
 
-void AceAbility::OnStart(const Want& want)
+void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
-    Ability::OnStart(want);
+    Ability::OnStart(want, sessionInfo);
     LOGI("AceAbility::OnStart called");
     abilityId_ = g_instanceId++;
     static std::once_flag onceFlag;
@@ -485,6 +492,7 @@ void AceAbility::OnStart(const Want& want)
         KeyboardAnimationConfig config = { rsConfig.curveType_, rsConfig.curveParams_, rsConfig.durationIn_,
             rsConfig.durationOut_ };
         context->SetKeyboardAnimationConfig(config);
+        context->SetMinPlatformVersion(apiCompatibleVersion);
     }
 
     // get url
@@ -879,6 +887,26 @@ uint32_t AceAbility::GetBackgroundColor()
 
     LOGI("AceAbilityHandler::GetBackgroundColor, value is %{public}u", bgColor);
     return bgColor;
+}
+
+void AceAbility::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
+{
+    if (type == OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM || type == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) {
+        LOGI("AceAbility::OnAvoidAreaChanged type:%{public}d", type);
+        auto container = Platform::AceContainer::GetContainer(abilityId_);
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [container, abilityId = abilityId_] {
+                CHECK_NULL_VOID(container);
+                ContainerScope scope(abilityId);
+                auto context = container->GetPipelineContext();
+                CHECK_NULL_VOID_NOLOG(context);
+                context->ResetViewSafeArea();
+            },
+            TaskExecutor::TaskType::UI);
+    }
 }
 } // namespace Ace
 } // namespace OHOS

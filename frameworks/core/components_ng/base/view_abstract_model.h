@@ -73,6 +73,7 @@ public:
     virtual void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) = 0;
     virtual void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) = 0;
     virtual void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) = 0;
+    virtual void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) {}
     virtual void SetSphericalEffect(double radio) {}
     virtual void SetPixelStretchEffect(PixStretchEffectOption& option) {}
     virtual void SetLightUpEffect(double radio) {}
@@ -143,6 +144,7 @@ public:
     virtual void SetFlexShrink(float value) = 0;
     virtual void SetFlexGrow(float value) = 0;
     virtual void SetDisplayIndex(int32_t value) = 0;
+    virtual void ResetFlexShrink() = 0;
 
     // gradient
     virtual void SetLinearGradient(const NG::Gradient& gradient) = 0;
@@ -167,6 +169,7 @@ public:
     virtual void SetSepia(const Dimension& value) = 0;
     virtual void SetInvert(const Dimension& value) = 0;
     virtual void SetHueRotate(float value) = 0;
+    virtual void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) = 0;
 
     // event
     virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) = 0;
@@ -241,6 +244,12 @@ public:
     virtual void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
         const std::function<void(float)>& onCallbackEvent) = 0;
     virtual void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value) = 0;
+
+    virtual void CreateAnimatableArithmeticProperty(const std::string& propertyName,
+        RefPtr<NG::CustomAnimatableArithmetic>& value,
+        std::function<void(const RefPtr<NG::CustomAnimatableArithmetic>&)>& onCallbackEvent) = 0;
+    virtual void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
+        RefPtr<NG::CustomAnimatableArithmetic>& value) = 0;
 private:
     static std::unique_ptr<ViewAbstractModel> instance_;
     static std::mutex mutex_;

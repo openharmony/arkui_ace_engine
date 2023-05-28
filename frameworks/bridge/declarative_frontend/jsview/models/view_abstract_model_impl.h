@@ -103,6 +103,7 @@ public:
     void SetFlexShrink(float value) override;
     void SetFlexGrow(float value) override;
     void SetDisplayIndex(int32_t value) override;
+    void ResetFlexShrink() override {};
 
     void SetLinearGradient(const NG::Gradient& gradient) override;
     void SetSweepGradient(const NG::Gradient& gradient) override;
@@ -124,7 +125,7 @@ public:
     void SetSepia(const Dimension& value) override;
     void SetInvert(const Dimension& value) override;
     void SetHueRotate(float value) override;
-
+    void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override {}
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override;
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;
     void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) override;
@@ -191,6 +192,12 @@ public:
     void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
         const std::function<void(float)>& onCallbackEvent) override {};
     void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value) override {};
+
+    void CreateAnimatableArithmeticProperty(const std::string& propertyName,
+        RefPtr<NG::CustomAnimatableArithmetic>& value,
+        std::function<void(const RefPtr<NG::CustomAnimatableArithmetic>&)>& onCallbackEvent) override {};
+    void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
+        RefPtr<NG::CustomAnimatableArithmetic>& value) override {};
 };
 
 } // namespace OHOS::Ace::Framework

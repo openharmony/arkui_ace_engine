@@ -15,6 +15,8 @@
 
 #include "gtest/gtest.h"
 
+#include "core/components/common/properties/color.h"
+
 #define private public
 #define protected public
 
@@ -22,15 +24,17 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
-#include "core/components_ng/pattern/menu/menu_item/menu_item_view.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
+#include "core/components_ng/pattern/menu/menu_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
@@ -39,6 +43,8 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr Color ITEM_DISABLED_COLOR = Color(0x0c182431);
+
 class MenuItemPatternTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -67,14 +73,15 @@ void MenuItemPatternTestNg::TearDown() {}
  */
 HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon001, TestSize.Level1)
 {
+    MenuItemModelNG MenuItemModelInstance;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     MenuItemProperties itemOption;
-    MenuItemView::Create(itemOption);
-    MenuItemView::SetSelectIcon(false);
-    MenuItemView::SetSelectIconSrc("selectIcon.png");
-    MenuItemView::SetSelected(true);
+    MenuItemModelInstance.Create(itemOption);
+    MenuItemModelInstance.SetSelectIcon(false);
+    MenuItemModelInstance.SetSelectIconSrc("selectIcon.png");
+    MenuItemModelInstance.SetSelected(true);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
     auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
@@ -102,14 +109,15 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon001, TestSize.
  */
 HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon002, TestSize.Level1)
 {
+    MenuItemModelNG MenuItemModelInstance;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     MenuItemProperties itemOption;
-    MenuItemView::Create(itemOption);
-    MenuItemView::SetSelectIcon(true);
-    MenuItemView::SetSelectIconSrc("");
-    MenuItemView::SetSelected(true);
+    MenuItemModelInstance.Create(itemOption);
+    MenuItemModelInstance.SetSelectIcon(true);
+    MenuItemModelInstance.SetSelectIconSrc("");
+    MenuItemModelInstance.SetSelected(true);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
     auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
@@ -149,14 +157,15 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon002, TestSize.
  */
 HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon003, TestSize.Level1)
 {
+    MenuItemModelNG MenuItemModelInstance;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     MenuItemProperties itemOption;
-    MenuItemView::Create(itemOption);
-    MenuItemView::SetSelectIcon(true);
-    MenuItemView::SetSelectIconSrc("selectIcon.png");
-    MenuItemView::SetSelected(false);
+    MenuItemModelInstance.Create(itemOption);
+    MenuItemModelInstance.SetSelectIcon(true);
+    MenuItemModelInstance.SetSelectIconSrc("selectIcon.png");
+    MenuItemModelInstance.SetSelected(false);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
     auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
@@ -197,14 +206,15 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon003, TestSize.
  */
 HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon004, TestSize.Level1)
 {
+    MenuItemModelNG MenuItemModelInstance;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     MenuItemProperties itemOption;
-    MenuItemView::Create(itemOption);
-    MenuItemView::SetSelectIcon(true);
-    MenuItemView::SetSelectIconSrc("selectIcon.png");
-    MenuItemView::SetSelected(false);
+    MenuItemModelInstance.Create(itemOption);
+    MenuItemModelInstance.SetSelectIcon(true);
+    MenuItemModelInstance.SetSelectIconSrc("selectIcon.png");
+    MenuItemModelInstance.SetSelected(false);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
     auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
@@ -244,12 +254,13 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon004, TestSize.
  */
 HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateIcon001, TestSize.Level1)
 {
+    MenuItemModelNG MenuItemModelInstance;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     MenuItemProperties itemOption;
     itemOption.startIcon = "startIcon.png";
-    MenuItemView::Create(itemOption);
+    MenuItemModelInstance.Create(itemOption);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
     auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
@@ -285,12 +296,13 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateIcon001, TestSize.Lev
  */
 HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateIcon002, TestSize.Level1)
 {
+    MenuItemModelNG MenuItemModelInstance;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     MenuItemProperties itemOption;
     itemOption.endIcon = "endIcon.png";
-    MenuItemView::Create(itemOption);
+    MenuItemModelInstance.Create(itemOption);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
     auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
@@ -337,12 +349,13 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateIcon002, TestSize.Lev
  */
 HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText001, TestSize.Level1)
 {
+    MenuItemModelNG MenuItemModelInstance;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     MenuItemProperties itemOption;
     itemOption.content = "content";
-    MenuItemView::Create(itemOption);
+    MenuItemModelInstance.Create(itemOption);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
     auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
@@ -376,12 +389,13 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText001, TestSize.Lev
  */
 HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText002, TestSize.Level1)
 {
+    MenuItemModelNG MenuItemModelInstance;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     MenuItemProperties itemOption;
     itemOption.labelInfo = "label";
-    MenuItemView::Create(itemOption);
+    MenuItemModelInstance.Create(itemOption);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
     auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
@@ -406,6 +420,103 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText002, TestSize.Lev
     auto content = textLayoutProperty->GetContent();
     ASSERT_TRUE(content.has_value());
     EXPECT_EQ(content.value(), "label");
+}
+
+/**
+ * @tc.name: MenuItemPatternTestNgUpdateText003
+ * @tc.desc: Verify update text when item is disabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText003, TestSize.Level1)
+{
+    // mock theme
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto selectTheme = MockPipelineBase::GetCurrent()->GetTheme<SelectTheme>();
+    selectTheme->SetDisabledMenuFontColor(ITEM_DISABLED_COLOR);
+
+    // create menu item
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.startIcon = "startIcon.png";
+    itemOption.content = "item content";
+    MenuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto itemEventHub = itemNode->GetEventHub<MenuItemEventHub>();
+    ASSERT_NE(itemEventHub, nullptr);
+    itemEventHub->SetEnabled(false);
+    // update item
+    itemPattern->OnModifyDone();
+
+    EXPECT_FALSE(itemEventHub->IsEnabled());
+    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
+    EXPECT_EQ(leftRow->GetChildren().size(), 2u);
+    auto startIconNode = AceType::DynamicCast<FrameNode>(leftRow->GetChildAtIndex(0));
+    ASSERT_NE(startIconNode, nullptr);
+    EXPECT_EQ(startIconNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imageLayoutProperty = startIconNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    auto sourceInfo = imageLayoutProperty->GetImageSourceInfo();
+    ASSERT_TRUE(sourceInfo.has_value());
+    EXPECT_EQ(sourceInfo.value().GetSrc(), "startIcon.png");
+
+    auto contentNode = AceType::DynamicCast<FrameNode>(leftRow->GetChildAtIndex(1));
+    ASSERT_NE(contentNode, nullptr);
+    EXPECT_EQ(contentNode->GetTag(), V2::TEXT_ETS_TAG);
+    auto textLayoutProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto content = textLayoutProperty->GetContent();
+    ASSERT_TRUE(content.has_value());
+    EXPECT_EQ(content.value(), "item content");
+    auto textRenderContext = contentNode->GetRenderContext();
+    EXPECT_EQ(textRenderContext->GetForegroundColor(), ITEM_DISABLED_COLOR);
+}
+
+/**
+ * @tc.name: MenuItemPatternTestEvent001
+ * @tc.desc: Test Click Event
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menuItem.
+     */
+    MenuItemModelNG MenuItemModelInstance;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    MenuItemProperties itemOption;
+    MenuItemModelInstance.Create(itemOption);
+    MenuItemModelInstance.SetSelected(true);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set callback function.
+     */
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    itemPattern->RegisterOnClick();
+    auto gestureHub = itemNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    auto clickEventActuator = gestureHub->clickEventActuator_;
+    ASSERT_NE(clickEventActuator, nullptr);
+    auto event = clickEventActuator->GetClickEvent();
+    ASSERT_NE(event, nullptr);
+
+    /**
+     * @tc.steps: step3. call callback function.
+     * @tc.expected: isSelected_ is false.
+     */
+    GestureEvent gestureEvent;
+    event(gestureEvent);
+    EXPECT_FALSE(itemPattern->isSelected_);
 }
 } // namespace
 } // namespace OHOS::Ace::NG

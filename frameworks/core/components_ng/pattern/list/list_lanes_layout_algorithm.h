@@ -60,7 +60,6 @@ private:
     static int32_t FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t index);
 
     int32_t lanes_ = 1;
-    bool lanesChanged_ = false;
     std::optional<float> minLaneLength_;
     std::optional<float> maxLaneLength_;
     std::map<int32_t, int32_t> lanesItemRange_;

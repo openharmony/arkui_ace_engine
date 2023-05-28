@@ -124,6 +124,24 @@ public:
         json->Put("space", SpaceToString().c_str());
     }
 
+    void FromJson(const std::unique_ptr<JsonValue>& json) override
+    {
+        auto property = GetLayoutProperty<FlexLayoutProperty>();
+        CHECK_NULL_VOID(property);
+        if (json->Contains("constructor")) {
+            auto constructor = json->GetValue("constructor");
+            property->UpdateFlexDirection(V2::ConvertStringToFlexDirection(constructor->GetString("direction")));
+            property->UpdateMainAxisAlign(V2::ConvertStringToFlexAlign(constructor->GetString("justifyContent")));
+            property->UpdateCrossAxisAlign(V2::ConvertStringToFlexAlign(constructor->GetString("alignItems")));
+            if (constructor->GetString("wrap") == "FlexWrap.NoWrap") {
+                SetIsWrap(false);
+                property->UpdateMainAxisAlign(V2::ConvertStringToFlexAlign(constructor->GetString("justifyContent")));
+                property->UpdateCrossAxisAlign(V2::ConvertStringToItemAlign(constructor->GetString("alignItems")));
+            }
+        }
+        Pattern::FromJson(json);
+    }
+
     std::string SpaceToString() const
     {
         auto host = GetHost();

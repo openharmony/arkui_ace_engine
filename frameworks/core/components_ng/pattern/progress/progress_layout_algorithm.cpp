@@ -70,6 +70,10 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
         if (contentConstraint.selfIdealSize.Height() && !contentConstraint.selfIdealSize.Width()) {
             width_ = height_;
         }
+        if (contentConstraint.selfIdealSize.Height() && contentConstraint.selfIdealSize.Width()) {
+            width_ = std::min(width_, height_);
+            height_ = width_;
+        }
     }
     if (type_ == ProgressType::CAPSULE) {
         if (contentConstraint.selfIdealSize.Width() && !contentConstraint.selfIdealSize.Height()) {
@@ -81,10 +85,16 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
         if (!contentConstraint.selfIdealSize.Width() && !contentConstraint.selfIdealSize.Height()) {
             height_ = GetChildHeight(layoutWrapper, width_);
         }
-        SetRadius(layoutWrapper, width_, height_);
     }
     height_ = std::min(height_, static_cast<float>(contentConstraint.maxSize.Height()));
     width_ = std::min(width_, static_cast<float>(contentConstraint.maxSize.Width()));
+    if (type_ == ProgressType::LINEAR) {
+        if (width_ >= height_) {
+            height_ = std::min(height_, strokeWidth_);
+        } else {
+            width_ = std::min(width_, strokeWidth_);
+        }
+    }
     LOGD("ProgressLayoutAlgorithm::Type:%{public}d MeasureContent: width_: %{public}fl ,height_: %{public}fl", type_,
         width_, height_);
     return SizeF(width_, height_);
@@ -126,23 +136,5 @@ float ProgressLayoutAlgorithm::GetChildHeight(LayoutWrapper* layoutWrapper, floa
     }
     float childHeight = childSize.Height() + 2 * margin.ConvertToPx();
     return childHeight;
-}
-
-void ProgressLayoutAlgorithm::SetRadius(LayoutWrapper* layoutWrapper, float width, float height) const
-{
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    Dimension radius;
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    auto& borderWidthProperty = layoutProperty->GetBorderWidthProperty();
-    float borderWidth = 0;
-    if (borderWidthProperty) {
-        borderWidth = borderWidthProperty->leftDimen->ConvertToPx();
-    }
-    auto minSize = std::min(height, width);
-    radius.SetValue((minSize + 2 * borderWidth) / 2);
-    BorderRadiusProperty borderRadius { radius, radius, radius, radius };
-    host->GetRenderContext()->UpdateBorderRadius(borderRadius);
 }
 } // namespace OHOS::Ace::NG

@@ -130,6 +130,18 @@ inline std::string ConvertFlexDirectionToStirng(FlexDirection direction)
         }
     }
 
+inline FlexDirection ConvertStringToFlexDirection(const std::string& str)
+{
+    static const std::unordered_map<std::string, FlexDirection> uMap {
+        { "FlexDirection.Row", FlexDirection::ROW },
+        { "FlexDirection.RowReverse", FlexDirection::ROW_REVERSE },
+        { "FlexDirection.Column", FlexDirection::COLUMN },
+        { "FlexDirection.ColumnReverse", FlexDirection::COLUMN_REVERSE },
+    };
+
+    return uMap.count(str) ? uMap.at(str) : FlexDirection::ROW;
+}
+
     inline std::string ConvertWrapDirectionToStirng(WrapDirection direction)
     {
         if (direction == WrapDirection::HORIZONTAL) {
@@ -164,6 +176,22 @@ inline std::string ConvertFlexDirectionToStirng(FlexDirection direction)
         }
     }
 
+inline FlexAlign ConvertStringToFlexAlign(const std::string& str)
+{
+    static const std::unordered_map<std::string, FlexAlign> uMap {
+        { "FlexAlign.Start", FlexAlign::FLEX_START },
+        { "FlexAlign.Center", FlexAlign::CENTER },
+        { "FlexAlign.End", FlexAlign::FLEX_END },
+        { "FlexAlign.SpaceBetween", FlexAlign::SPACE_BETWEEN },
+        { "FlexAlign.SpaceAround", FlexAlign::SPACE_AROUND },
+        { "FlexAlign.Baseline", FlexAlign::BASELINE },
+        { "FlexAlign.Stretch", FlexAlign::STRETCH },
+        { "FlexAlign.SpaceEvenly", FlexAlign::SPACE_EVENLY },
+    };
+
+    return uMap.count(str) ? uMap.at(str) : FlexAlign::FLEX_START;
+}
+
     inline std::string ConvertItemAlignToStirng(FlexAlign align)
     {
         if (align == FlexAlign::FLEX_START) {
@@ -183,6 +211,19 @@ inline std::string ConvertFlexDirectionToStirng(FlexDirection direction)
         }
         return "ItemAlign.Auto";
     }
+
+inline FlexAlign ConvertStringToItemAlign(const std::string& str)
+{
+    static const std::unordered_map<std::string, FlexAlign> uMap {
+        { "ItemAlign.Start", FlexAlign::FLEX_START },
+        { "ItemAlign.Center", FlexAlign::CENTER },
+        { "ItemAlign.End", FlexAlign::FLEX_END },
+        { "ItemAlign.Baseline", FlexAlign::BASELINE },
+        { "ItemAlign.Stretch", FlexAlign::STRETCH },
+    };
+
+    return uMap.count(str) ? uMap.at(str) : FlexAlign::AUTO;
+}
 
     inline std::string ConvertWrapAlignmentToStirng(WrapAlignment align)
     {
@@ -300,6 +341,20 @@ inline std::string ConvertFlexDirectionToStirng(FlexDirection direction)
         return index < 0 ? "TextAlign.Start" : textAlignTable[index].value;
     }
 
+inline TextAlign ConvertWrapStringToTextAlign(const std::string& str)
+{
+    static const std::unordered_map<std::string, TextAlign> uMap {
+        { "TextAlign.Left", TextAlign::LEFT },
+        { "TextAlign.Right", TextAlign::RIGHT },
+        { "TextAlign.Center", TextAlign::CENTER },
+        { "TextAlign.Justify", TextAlign::JUSTIFY },
+        { "TextAlign.Start", TextAlign::START },
+        { "TextAlign.End", TextAlign::END },
+    };
+
+    return uMap.count(str) ? uMap.at(str) : TextAlign::START;
+}
+
     inline std::string ConvertWrapTextOverflowToString(TextOverflow textOverflow)
     {
         static const LinearEnumMapNode<TextOverflow, std::string> textOverflowTable[] = {
@@ -312,6 +367,17 @@ inline std::string ConvertFlexDirectionToStirng(FlexDirection direction)
         auto index = BinarySearchFindIndex(textOverflowTable, ArraySize(textOverflowTable), textOverflow);
         return index < 0 ? "TextAlign.Start" : textOverflowTable[index].value;
     }
+
+inline TextOverflow ConvertWrapStringToTextOverflow(const std::string& str)
+{
+    static const std::unordered_map<std::string, TextOverflow> uMap {
+        { "TextOverflow.Clip", TextOverflow::CLIP },
+        { "TextOverflow.Ellipsis", TextOverflow::ELLIPSIS },
+        { "TextOverflow.None", TextOverflow::NONE },
+    };
+
+    return uMap.count(str) ? uMap.at(str) : TextOverflow::CLIP;
+}
 
     inline std::string ConvertWrapFontStyleToStirng(FontStyle fontStyle)
     {
@@ -347,6 +413,29 @@ inline std::string ConvertFlexDirectionToStirng(FlexDirection direction)
         auto index = BinarySearchFindIndex(fontWeightTable, ArraySize(fontWeightTable), fontWeight);
         return index < 0 ? "FontWeight.Normal" : fontWeightTable[index].value;
     }
+
+inline FontWeight ConvertWrapStringToFontWeight(const std::string& str)
+{
+    static const std::unordered_map<std::string, FontWeight> uMap {
+        { "FontWeight.100", FontWeight::W100 },
+        { "FontWeight.200", FontWeight::W200 },
+        { "FontWeight.300", FontWeight::W300 },
+        { "FontWeight.400", FontWeight::W400 },
+        { "FontWeight.500", FontWeight::W500 },
+        { "FontWeight.600", FontWeight::W600 },
+        { "FontWeight.700", FontWeight::W700 },
+        { "FontWeight.800", FontWeight::W800 },
+        { "FontWeight.900", FontWeight::W900 },
+        { "FontWeight.Bold", FontWeight::BOLD },
+        { "FontWeight.Normal", FontWeight::NORMAL },
+        { "FontWeight.Bolder", FontWeight::BOLDER },
+        { "FontWeight.Lighter", FontWeight::LIGHTER },
+        { "FontWeight.Medium", FontWeight::MEDIUM },
+        { "FontWeight.Regular", FontWeight::REGULAR },
+    };
+
+    return uMap.count(str) ? uMap.at(str) : FontWeight::NORMAL;
+}
 
     inline std::string ConvertWrapCopyOptionToString(CopyOptions copyOptions)
     {

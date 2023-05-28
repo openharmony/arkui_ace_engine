@@ -19,6 +19,8 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/list/list_item_group_layout_property.h"
+#include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -34,7 +36,42 @@ constexpr float SWIPE_RATIO = 0.6f;
 constexpr float SWIPE_SPRING_MASS = 1.f;
 constexpr float SWIPE_SPRING_STIFFNESS = 228.f;
 constexpr float SWIPE_SPRING_DAMPING = 30.f;
+constexpr int32_t DELETE_ANIMATION_DURATION = 400;
+constexpr Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
 } // namespace
+
+void ListItemPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (listItemStyle_ == V2::ListItemStyle::CARD) {
+        SetListItemDefaultAttributes(host);
+    }
+    host->GetRenderContext()->SetClipToBounds(true);
+}
+
+void ListItemPattern::SetListItemDefaultAttributes(const RefPtr<FrameNode>& listItemNode)
+{
+    auto renderContext = listItemNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto layoutProperty = listItemNode->GetLayoutProperty<ListItemLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto listItemTheme = pipeline->GetTheme<ListItemTheme>();
+    CHECK_NULL_VOID(listItemTheme);
+
+    renderContext->UpdateBackgroundColor(listItemTheme->GetItemDefaultColor());
+
+    PaddingProperty itemPadding;
+    itemPadding.left = CalcLength(listItemTheme->GetItemDefaultLeftPadding());
+    itemPadding.right = CalcLength(listItemTheme->GetItemDefaultRightPadding());
+    layoutProperty->UpdatePadding(itemPadding);
+
+    layoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(listItemTheme->GetItemDefaultHeight())));
+    renderContext->UpdateBorderRadius(listItemTheme->GetItemDefaultBorderRadius());
+}
 
 RefPtr<LayoutAlgorithm> ListItemPattern::CreateLayoutAlgorithm()
 {
@@ -165,6 +202,7 @@ void ListItemPattern::SetSwiperItemForList()
 void ListItemPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    InitListItemCardStyleForList();
     if (HasStartNode() || HasEndNode()) {
         auto axis = GetAxis();
         bool axisChanged = axis_ != axis;
@@ -174,6 +212,7 @@ void ListItemPattern::OnModifyDone()
     }
     panEvent_.Reset();
     springController_.Reset();
+    SetAccessibilityAction();
 }
 
 V2::SwipeEdgeEffect ListItemPattern::GetEdgeEffect()
@@ -239,7 +278,7 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
         curOffset_ = 0.0f;
     }
     if (!springController_) {
-        springController_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
+        springController_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
     }
 }
 
@@ -267,12 +306,26 @@ float ListItemPattern::GetFriction()
     if (GreatNotEqual(curOffset_, 0.0f)) {
         float width = startNodeSize_;
         float itemWidth = GetContentSize().CrossSize(axis_);
+        if (hasStartDeleteArea_) {
+            if (width + startDeleteAreaDistance_ < curOffset_) {
+                return CalculateFriction(
+                    (curOffset_ - width - startDeleteAreaDistance_) / (itemWidth - width));
+            }
+            return 1.0f;
+        }
         if (width < curOffset_) {
             return CalculateFriction((curOffset_ - width) / (itemWidth - width));
         }
     } else if (LessNotEqual(curOffset_, 0.0f)) {
         float width = endNodeSize_;
         float itemWidth = GetContentSize().CrossSize(axis_);
+        if (hasEndDeleteArea_) {
+            if (width + endDeleteAreaDistance_ < -curOffset_) {
+                return CalculateFriction(
+                    (-curOffset_ - width - endDeleteAreaDistance_) / (itemWidth - width));
+            }
+            return 1.0f;
+        }
         if (width < -curOffset_) {
             return CalculateFriction((-curOffset_ - width) / (itemWidth - width));
         }
@@ -280,16 +333,72 @@ float ListItemPattern::GetFriction()
     return 1.0f;
 }
 
+void ListItemPattern::ChangeDeleteAreaStage()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_VOID(listItemEventHub);
+    auto enterStartDeleteArea = listItemEventHub->GetOnEnterStartDeleteArea();
+    auto enterEndDeleteArea = listItemEventHub->GetOnEnterEndDeleteArea();
+    auto exitStartDeleteArea = listItemEventHub->GetOnExitStartDeleteArea();
+    auto exitEndDeleteArea = listItemEventHub->GetOnExitEndDeleteArea();
+    if (Positive(startNodeSize_) && hasStartDeleteArea_) {
+        if (GreatOrEqual(curOffset_, startNodeSize_ + startDeleteAreaDistance_)) {
+            if (!inStartDeleteArea_) {
+                inStartDeleteArea_ = true;
+                if (enterStartDeleteArea) {
+                    enterStartDeleteArea();
+                }
+            }
+        } else {
+            if (inStartDeleteArea_) {
+                inStartDeleteArea_ = false;
+                if (exitStartDeleteArea) {
+                    exitStartDeleteArea();
+                }
+            }
+        }
+    }
+    if (Positive(endNodeSize_) && hasEndDeleteArea_) {
+        if (GreatNotEqual(-curOffset_, endNodeSize_ + endDeleteAreaDistance_)) {
+            if (!inEndDeleteArea_) {
+                inEndDeleteArea_ = true;
+                if (enterEndDeleteArea) {
+                    enterEndDeleteArea();
+                }
+            }
+        } else {
+            if (inEndDeleteArea_) {
+                inEndDeleteArea_ = false;
+                if (exitEndDeleteArea) {
+                    exitEndDeleteArea();
+                }
+            }
+        }
+    }
+}
+
 void ListItemPattern::UpdatePostion(float delta)
 {
     float offset = curOffset_;
     curOffset_ += delta;
+    ChangeDeleteAreaStage();
     auto edgeEffect = GetEdgeEffect();
     if (edgeEffect == V2::SwipeEdgeEffect::None) {
-        if (Positive(startNodeSize_) && GreatNotEqual(curOffset_, startNodeSize_)) {
-            curOffset_ = startNodeSize_;
-        } else if (Positive(endNodeSize_) && GreatNotEqual(-curOffset_, endNodeSize_)) {
-            curOffset_ = -endNodeSize_;
+        if (Positive(startNodeSize_)) {
+            if (hasStartDeleteArea_ && GreatNotEqual(curOffset_, startNodeSize_ + startDeleteAreaDistance_)) {
+                curOffset_ = startNodeSize_ + startDeleteAreaDistance_;
+            } else if (!hasStartDeleteArea_ && GreatNotEqual(curOffset_, startNodeSize_)) {
+                curOffset_ = startNodeSize_;
+            }
+        }
+        if (Positive(endNodeSize_)) {
+            if (hasEndDeleteArea_ && GreatNotEqual(-curOffset_, endNodeSize_ + endDeleteAreaDistance_)) {
+                curOffset_ = -endNodeSize_ - endDeleteAreaDistance_;
+            } else if (!hasEndDeleteArea_ && GreatNotEqual(-curOffset_, endNodeSize_)) {
+                curOffset_ = -endNodeSize_;
+            }
         }
         if ((Negative(curOffset_) && !HasEndNode()) || (Positive(curOffset_) && !HasStartNode())) {
             curOffset_ = 0.0f;
@@ -302,6 +411,28 @@ void ListItemPattern::UpdatePostion(float delta)
 
 void ListItemPattern::HandleDragUpdate(const GestureEvent& info)
 {
+    auto layoutProperty = GetLayoutProperty<ListItemLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    hasStartDeleteArea_ = false;
+    hasEndDeleteArea_ = false;
+    float itemWidth = GetContentSize().CrossSize(axis_);
+    float maxDeleteArea = 0.0f;
+
+    if (GreatNotEqual(curOffset_, 0.0) && HasStartNode()) {
+        maxDeleteArea = itemWidth - startNodeSize_;
+        startDeleteAreaDistance_ = static_cast<float>(
+            layoutProperty->GetStartDeleteAreaDistance().value_or(Dimension(0, DimensionUnit::VP)).ConvertToPx());
+        if (GreatNotEqual(startDeleteAreaDistance_, 0.0) && LessNotEqual(startDeleteAreaDistance_, maxDeleteArea)) {
+            hasStartDeleteArea_ = true;
+        }
+    } else if (LessNotEqual(curOffset_, 0.0) && HasEndNode()) {
+        maxDeleteArea = itemWidth - endNodeSize_;
+        endDeleteAreaDistance_ = static_cast<float>(
+            layoutProperty->GetEndDeleteAreaDistance().value_or(Dimension(0, DimensionUnit::VP)).ConvertToPx());
+        if (GreatNotEqual(endDeleteAreaDistance_, 0.0) && LessNotEqual(endDeleteAreaDistance_, maxDeleteArea)) {
+            hasEndDeleteArea_ = true;
+        }
+    }
     float delta = info.GetMainDelta();
     delta *= GetFriction();
     UpdatePostion(delta);
@@ -346,16 +477,54 @@ void ListItemPattern::StartSpringMotion(float start, float end, float velocity)
     });
 }
 
+void ListItemPattern::DoDeleteAnimation(const OnDeleteEvent& onDelete, bool isRightDelete)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    float itemWidth = GetContentSize().CrossSize(axis_);
+
+    AnimationOption option = AnimationOption();
+    option.SetDuration(DELETE_ANIMATION_DURATION);
+    option.SetCurve(Curves::FRICTION);
+    option.SetFillMode(FillMode::FORWARDS);
+    context->OpenImplicitAnimation(option, option.GetCurve(), nullptr);
+    swiperIndex_ = isRightDelete ? ListItemSwipeIndex::SWIPER_START : ListItemSwipeIndex::SWIPER_END;
+    curOffset_ = isRightDelete ? itemWidth : -itemWidth;
+    onDelete();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    context->FlushUITasks();
+    context->CloseImplicitAnimation();
+}
+
 void ListItemPattern::HandleDragEnd(const GestureEvent& info)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_VOID(listItemEventHub);
     float end = 0.0f;
     float friction = GetFriction();
     float threshold = SWIPER_TH;
     float speedThreshold = SWIPER_SPEED_TH;
     bool reachRightSpeed = info.GetMainVelocity() > speedThreshold;
     bool reachLeftSpeed = -info.GetMainVelocity() > speedThreshold;
+    auto startOnDelete = listItemEventHub->GetStartOnDelete();
+    auto endOnDelete = listItemEventHub->GetEndOnDelete();
+
     if (GreatNotEqual(curOffset_, 0.0) && HasStartNode()) {
         float width = startNodeSize_;
+        if (hasStartDeleteArea_ && startOnDelete && GreatOrEqual(curOffset_, width + startDeleteAreaDistance_)) {
+            if (!useStartDefaultDeleteAnimation_) {
+                startOnDelete();
+            } else {
+                DoDeleteAnimation(startOnDelete, true);
+                return;
+            }
+        }
         if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD && (curOffset_ > width * threshold || reachRightSpeed)) {
             swiperIndex_ = ListItemSwipeIndex::SWIPER_START;
         } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_START &&
@@ -367,6 +536,14 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
         end = width * static_cast<int32_t>(swiperIndex_);
     } else if (LessNotEqual(curOffset_, 0.0) && HasEndNode()) {
         float width = endNodeSize_;
+        if (hasEndDeleteArea_ && endOnDelete && GreatOrEqual(-curOffset_, width + endDeleteAreaDistance_)) {
+            if (!useEndDefaultDeleteAnimation_) {
+                endOnDelete();
+            } else {
+                DoDeleteAnimation(endOnDelete, false);
+                return;
+            }
+        }
         if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD && (width * threshold < -curOffset_ || reachLeftSpeed)) {
             swiperIndex_ = ListItemSwipeIndex::SWIPER_END;
         } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_END &&
@@ -414,6 +591,11 @@ void ListItemPattern::MarkIsSelected(bool isSelected)
         } else {
             host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
         }
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto context = host->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnMouseSelectUpdate(isSelected, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
     }
 }
 
@@ -421,4 +603,186 @@ void ListItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("selectable", selectable_);
 }
+
+void ListItemPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto listItemAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(listItemAccessibilityProperty);
+    listItemAccessibilityProperty->SetActionSelect([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->Selectable()) {
+            return;
+        }
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+        pattern->MarkIsSelected(true);
+        context->OnMouseSelectUpdate(true, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+    });
+
+    listItemAccessibilityProperty->SetActionClearSelection([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->Selectable()) {
+            return;
+        }
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        pattern->MarkIsSelected(false);
+        context->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+    });
+}
+
+void ListItemPattern::InitListItemCardStyleForList()
+{
+    if (listItemStyle_ == V2::ListItemStyle::CARD) {
+        UpdateListItemAlignToCenter();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        currentBackgroundColor_ = renderContext->GetBackgroundColorValue();
+        InitHoverEvent();
+        InitPressEvent();
+        InitDisableEvent();
+    }
+}
+
+void ListItemPattern::UpdateListItemAlignToCenter()
+{
+    auto frameNode = GetListFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto itemAlign = layoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
+    if (itemAlign != V2::ListItemAlign::CENTER) {
+        layoutProperty->UpdateListItemAlign(V2::ListItemAlign::CENTER);
+    }
+}
+
+void ListItemPattern::InitHoverEvent()
+{
+    if (hoverEvent_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    auto hoverTask = [weak = WeakClaim(this), host](bool isHover) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleHoverEvent(isHover, host);
+        }
+    };
+    hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
+    inputHub->AddOnHoverEvent(hoverEvent_);
+}
+
+void ListItemPattern::HandleHoverEvent(bool isHover, const RefPtr<NG::FrameNode>& itemNode)
+{
+    auto renderContext = itemNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ListItemTheme>();
+    CHECK_NULL_VOID(theme);
+
+    isHover_ = isHover;
+    auto hoverColor = theme->GetItemHoverColor();
+
+    if (isHover) {
+        AnimationUtils::BlendBgColorAnimation(
+            renderContext, hoverColor, theme->GetHoverAnimationDuration(), Curves::FRICTION);
+    } else {
+        AnimationUtils::BlendBgColorAnimation(
+            renderContext, currentBackgroundColor_, theme->GetHoverAnimationDuration(), Curves::FRICTION);
+    }
+}
+
+void ListItemPattern::InitPressEvent()
+{
+    if (touchListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto touchCallback = [weak = WeakClaim(this), host](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandlePressEvent(info, host);
+    };
+    auto touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    gesture->AddTouchEvent(touchListener_);
+}
+
+void ListItemPattern::HandlePressEvent(const TouchEventInfo& info, const RefPtr<NG::FrameNode>& itemNode)
+{
+    auto touchType = info.GetTouches().front().GetTouchType();
+    auto renderContext = itemNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ListItemTheme>();
+    CHECK_NULL_VOID(theme);
+
+    auto pressColor = theme->GetItemPressColor();
+    auto hoverColor = theme->GetItemHoverColor();
+
+    if (touchType == TouchType::DOWN) {
+        if (isHover_) {
+            // hover to press
+            AnimationUtils::BlendBgColorAnimation(
+                renderContext, pressColor, theme->GetHoverToPressAnimationDuration(), Curves::SHARP);
+        } else {
+            // normal to press
+            AnimationUtils::BlendBgColorAnimation(
+                renderContext, pressColor, theme->GetHoverAnimationDuration(), Curves::SHARP);
+        }
+    } else if (touchType == TouchType::UP) {
+        if (isHover_) {
+            // press to hover
+            AnimationUtils::BlendBgColorAnimation(
+                renderContext, hoverColor, theme->GetHoverToPressAnimationDuration(), Curves::SHARP);
+        } else {
+            // press to normal
+            AnimationUtils::BlendBgColorAnimation(
+                renderContext, currentBackgroundColor_, theme->GetHoverAnimationDuration(), Curves::SHARP);
+        }
+    }
+}
+
+void ListItemPattern::InitDisableEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ListItemTheme>();
+    CHECK_NULL_VOID(theme);
+
+    if (!eventHub->IsEnabled()) {
+        if (selectable_) {
+            selectable_ = false;
+        }
+        auto blendOpacityColor = currentBackgroundColor_.BlendOpacity(theme->GetItemDisabledAlpha());
+        renderContext->UpdateBackgroundColor(blendOpacityColor);
+    }
+}
 } // namespace OHOS::Ace::NG
+

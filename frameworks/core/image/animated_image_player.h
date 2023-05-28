@@ -44,7 +44,7 @@ public:
         LOGD("animated image frameCount_ : %{public}d, repetitionCount_ : %{public}d", frameCount_, repetitionCount_);
         auto context = context_.Upgrade();
         if (context) {
-            animator_ = AceType::MakeRefPtr<Animator>(context);
+            animator_ = CREATE_ANIMATOR(context);
             auto pictureAnimation = AceType::MakeRefPtr<PictureAnimation<int32_t>>();
             float totalFrameDuration = 0.0f;
             int32_t lastRequiredIndex = -1;

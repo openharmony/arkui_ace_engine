@@ -357,12 +357,10 @@ void JSVideo::JSBind(BindingTarget globalObj)
     JSClass<JSVideo>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSVideo>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSVideo>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
-
-    JSClass<JSVideo>::Inherit<JSViewAbstract>();
     // override method
     JSClass<JSVideo>::StaticMethod("opacity", &JSViewAbstract::JsOpacityPassThrough);
     JSClass<JSVideo>::StaticMethod("transition", &JSViewAbstract::JsTransitionPassThrough);
-    JSClass<JSVideo>::Bind<>(globalObj);
+    JSClass<JSVideo>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

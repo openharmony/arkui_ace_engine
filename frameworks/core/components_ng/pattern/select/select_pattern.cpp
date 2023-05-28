@@ -25,10 +25,10 @@
 #include "core/animation/curves.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/button/button_view.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
@@ -92,6 +92,15 @@ void SelectPattern::ShowSelectMenu()
     CHECK_NULL_VOID(menuLayoutProps);
     menuLayoutProps->UpdateTargetSize(selectSize_);
     auto offset = GetHost()->GetPaintRectOffset();
+    auto isContainerModal = context->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
+                            context->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+    if (isContainerModal) {
+        auto newOffsetX = offset.GetX() + static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx() * 2) +
+                          static_cast<float>(CONTENT_PADDING.ConvertToPx() * 2);
+        auto newOffsetY = offset.GetY() + static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx());
+        offset.SetX(newOffsetX);
+        offset.SetY(newOffsetY);
+    }
     offset.AddY(selectSize_.Height());
     LOGD("select offset %{public}s size %{public}s", offset.ToString().c_str(), selectSize_.ToString().c_str());
     overlayManager->ShowMenu(GetHost()->GetId(), offset, menuWrapper_);
@@ -262,8 +271,12 @@ bool SelectPattern::OnKeyEvent(const KeyEvent& event)
     if (event.action != KeyAction::DOWN) {
         return false;
     }
-    if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_SPACE) {
-        ShowSelectMenu();
+    if (event.code == KeyCode::KEY_ENTER) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto focusHub = host->GetOrCreateFocusHub();
+        CHECK_NULL_RETURN(focusHub, false);
+        focusHub->OnClick(event);
         return true;
     }
     return false;
@@ -380,7 +393,7 @@ void SelectPattern::BuildChild()
     auto renderContext = select->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
-
+    renderContext->SetClipToFrame(true);
     BorderRadiusProperty border;
     border.SetRadius(theme->GetSelectBorderRadius());
     renderContext->UpdateBorderRadius(border);
@@ -429,7 +442,10 @@ void SelectPattern::SetFontColor(const Color& color)
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateTextColor(color);
-    text_->GetRenderContext()->UpdateForegroundColor(color);
+    auto context = text_->GetRenderContext();
+    context->UpdateForegroundColor(color);
+    context->UpdateForegroundColorFlag(false);
+    context->ResetForegroundColorStrategy();
 }
 
 void SelectPattern::SetOptionBgColor(const Color& color)

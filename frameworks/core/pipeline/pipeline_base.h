@@ -756,7 +756,7 @@ public:
 
     virtual void FlushPipelineImmediately() = 0;
 
-    // for sync animation only
+    // get animateTo closure option
     AnimationOption GetSyncAnimationOption()
     {
         return animationOption_;
@@ -842,12 +842,24 @@ public:
         return ignoreViewSafeArea_;
     }
 
+    void SetEnableImplicitAnimation(bool enableImplicitAnimation)
+    {
+        enableImplicitAnimation_ = enableImplicitAnimation;
+    }
+
+    bool GetEnableImplicitAnimation() const
+    {
+        return enableImplicitAnimation_;
+    }
+
     // restore
     virtual void RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo) {}
     virtual std::unique_ptr<JsonValue> GetStoredNodeInfo()
     {
         return nullptr;
     }
+
+    virtual void ResetViewSafeArea() {}
 
 protected:
     void TryCallNextFrameLayoutCallback()
@@ -966,6 +978,7 @@ private:
     OnRouterChangeCallback onRouterChangeCallback_ = nullptr;
     PostRTTaskCallback postRTTaskCallback_;
     std::function<void(void)> gsVsyncCallback_;
+    bool enableImplicitAnimation_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

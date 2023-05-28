@@ -52,8 +52,8 @@ ohos_unittest("badge_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/badge/badge_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/badge/badge_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/badge/badge_layout_property.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/badge/badge_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/badge/badge_pattern.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/badge/badge_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_pattern.cpp",
     "badge_accessibility_property_test_ng.cpp",
     "badge_pattern_test_ng.cpp",
@@ -66,6 +66,7 @@ ohos_unittest("badge_pattern_test_ng") {
     "$ace_root/frameworks/base/utils/base_id.cpp",
     "$ace_root/frameworks/base/utils/string_expression.cpp",
     "$ace_root/frameworks/base/utils/string_utils.cpp",
+    "$ace_root/frameworks/base/utils/time_util.cpp",
 
     # components
     "$ace_root/frameworks/core/components/common/layout/grid_column_info.cpp",
@@ -104,6 +105,7 @@ ohos_unittest("badge_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/layout/layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_builder.cpp",
+    "$ace_root/frameworks/core/components_ng/property/border_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",
     "$ace_root/frameworks/core/components_ng/property/grid_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",
@@ -138,15 +140,11 @@ ohos_unittest("badge_pattern_test_ng") {
   deps = [
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
+    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
     "$cjson_root:cjson_static",
     "//third_party/googletest:gmock_main",
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
-
-  deps += [
-    "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
-    "$ace_flutter_engine_root/skia:ace_skia_ohos",
-  ]
 }

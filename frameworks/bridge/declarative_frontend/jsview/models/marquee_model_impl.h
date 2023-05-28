@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_MARQUEE_MODEL_IMPL_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_MARQUEE_MODEL_IMPL_H
 
+#include <optional>
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "core/components/marquee/marquee_component.h"
 #include "core/components_ng/pattern/marquee/marquee_model.h"
@@ -24,16 +25,16 @@ namespace OHOS::Ace::Framework {
 class ACE_EXPORT MarqueeModelImpl : public MarqueeModel {
 public:
     void Create() override;
-    void SetValue(const std::string& value) override;
-    void SetPlayerStatus(bool playerStatus) override;
-    void SetScrollAmount(double scrollAmount) override;
-    void SetLoop(int32_t loop) override;
-    void SetDirection(MarqueeDirection direction) override;
-    void SetTextColor(const Color& textColor) override;
-    void SetFontSize(const Dimension& fontSize) override;
-    void SetFontWeight(const FontWeight& fontWeight) override;
-    void SetFontFamily(const std::vector<std::string>& fontFamilies) override;
-    void SetAllowScale(bool allowScale) override;
+    void SetValue(const std::optional<std::string>& value) override;
+    void SetPlayerStatus(const std::optional<bool>& playerStatus) override;
+    void SetScrollAmount(const std::optional<double>& scrollAmount) override;
+    void SetLoop(const std::optional<int32_t>& loop) override;
+    void SetDirection(const std::optional<MarqueeDirection>& direction) override;
+    void SetTextColor(const std::optional<Color>& textColor) override;
+    void SetFontSize(const std::optional<Dimension>& fontSize) override;
+    void SetFontWeight(const std::optional<FontWeight>& fontWeight) override;
+    void SetFontFamily(const std::optional<std::vector<std::string>>& fontFamilies) override;
+    void SetAllowScale(const std::optional<bool>& allowScale) override;
     void SetOnStart(std::function<void()>&& onChange) override;
     void SetOnBounce(std::function<void()>&& onChange) override;
     void SetOnFinish(std::function<void()>&& onChange) override;

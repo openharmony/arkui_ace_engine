@@ -95,8 +95,7 @@ void JSRadio::JSBind(BindingTarget globalObj)
     JSClass<JSRadio>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSRadio>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSRadio>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSRadio>::Inherit<JSViewAbstract>();
-    JSClass<JSRadio>::Bind<>(globalObj);
+    JSClass<JSRadio>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSRadio::Checked(bool checked)
@@ -138,9 +137,8 @@ void JSRadio::Checked(const JSCallbackInfo& info)
         RadioModel::GetInstance()->SetChecked(false);
     }
 
-    if (info.Length() > 1 && info[1]->IsObject()) {
-        JSRef<JSVal> checkedObj = JSRef<JSObject>::Cast(info[1]);
-        ParseCheckedObject(info, checkedObj);
+    if (info.Length() > 1 && info[1]->IsFunction()) {
+        ParseCheckedObject(info, info[1]);
     }
 }
 

@@ -18,6 +18,13 @@ template("ace_base_source_set") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    if (current_os == "ohos") {
+      sanitize = {
+        integer_overflow = true
+        boundary_sanitize = true
+        debug = ace_sanitize_debug
+      }
+    }
     subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     defines += invoker.defines
@@ -41,6 +48,8 @@ template("ace_base_source_set") {
       "geometry/transform_util.cpp",
       "image/pixel_map.cpp",
       "json/json_util.cpp",
+      "json/node_object.cpp",
+      "json/uobject.cpp",
       "log/ace_performance_check.cpp",
       "log/ace_scoring_log.cpp",
       "log/ace_trace.cpp",
@@ -57,6 +66,7 @@ template("ace_base_source_set") {
       "utils/string_expression.cpp",
       "utils/string_utils.cpp",
       "utils/time_util.cpp",
+      "utils/utils.cpp",
     ]
 
     if (platform != "windows") {
@@ -67,6 +77,9 @@ template("ace_base_source_set") {
       } else {
         deps += [ "//third_party/bounds_checking_function:libsec_shared" ]
       }
+    } else {
+      defines -= [ "UNICODE" ]
+      libs = [ "//prebuilts/mingw-w64/ohos/linux-x86_64/clang-mingw/x86_64-w64-mingw32/lib/libshlwapi.a" ]
     }
 
     # curl download manager

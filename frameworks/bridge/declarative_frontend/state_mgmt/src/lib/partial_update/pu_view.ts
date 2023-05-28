@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,6 +54,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   private parent_: ViewPU = undefined;
   private childrenWeakrefMap_ = new Map<number, WeakRef<ViewPU>>();
+
+  // flag for initgial rendering or re-render on-going.
+  private isRenderInProgress: boolean = false;
 
   private watchedProps: Map<string, (propName: string) => void>
     = new Map<string, (propName: string) => void>();
@@ -231,21 +234,30 @@ abstract class ViewPU extends NativeViewPartialUpdate
   }
 
   protected initialRenderView(): void {
+    this.isRenderInProgress = true;
     this.initialRender();
+    this.isRenderInProgress = false;
   }
 
   private UpdateElement(elmtId: number): void {
+    if (elmtId == this.id__()) {
+      // do not attempt to update itself.
+      // a @Prop can add a dependency of the ViewPU onto itself. Ignore it.
+      return;
+    }
     // do not process an Element that has been marked to be deleted
     const updateFunc: UpdateFunc = this.updateFuncByElmtId.get(elmtId);
     if ((updateFunc == undefined) || (typeof updateFunc !== "function")) {
       stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
     } else {
       stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: updateDirtyElements: update function on elmtId ${elmtId} start ...`);
+      this.isRenderInProgress = true;
       updateFunc(elmtId, /* isFirstRender */ false);
       // continue in native JSView
       // Finish the Update in JSView::JsFinishUpdateFunc
       // this function appends no longer used elmtIds (as recrded by VSP) to the given allRmElmtIds array
       this.finishUpdateFunc(elmtId);
+      this.isRenderInProgress = false;
       stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}: ViewPU.updateDirtyElements: update function on ElementId ${elmtId} done`);
     }
   }
@@ -322,6 +334,10 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // implements IMultiPropertiesChangeSubscriber
   viewPropertyHasChanged(varName: PropertyInfo, dependentElmtIds: Set<number>): void {
     stateMgmtTrace.scopedTrace(() => {
+      if (this.isRenderInProgress) {
+        stateMgmtConsole.error(`@Component '${this.constructor.name}' (id: ${this.id__()}) State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
+      }
+      
       stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}'. View needs ${dependentElmtIds.size ? 'update' : 'no update'}.`);
       this.syncInstanceId();
 
@@ -332,8 +348,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
           this.markNeedUpdate();
         }
         stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}': elmtIds affected by value change [${Array.from(dependentElmtIds).toString()}].`)
-        const union: Set<number> = new Set<number>([...this.dirtDescendantElementIds_, ...dependentElmtIds]);
-        this.dirtDescendantElementIds_ = union;
+        for (const elmtId of dependentElmtIds) {
+          this.dirtDescendantElementIds_.add(elmtId);
+        }
         stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}': all elmtIds need update [${Array.from(this.dirtDescendantElementIds_).toString()}].`)
       }
 
@@ -435,6 +452,11 @@ abstract class ViewPU extends NativeViewPartialUpdate
             this.UpdateElement(elmtId);
             this.dirtDescendantElementIds_.delete(elmtId);
         });
+
+        if (this.dirtDescendantElementIds_.size) {
+          stateMgmtConsole.error(`@Component '${this.constructor.name}' (id: ${this.id__()}): New UINode objects added to update queue while re-render! \
+            Likely caused by @Component state change during build phase, not allowed. Application error!`);
+        }
     } while(this.dirtDescendantElementIds_.size);
   }
 
@@ -523,7 +545,6 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const newElmtId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
     const oldElmtId: number = node.id__();
     // store the current id and origin id, used for dirty element sort in {compareNumber}
-    // this.getRecycleManager().setRecycleNodeCurrentElmtId(elmtId, currentElmtId);
     recycleUpdateFunc(newElmtId, /* is first render */ true, node);
     this.updateFuncByElmtId.delete(oldElmtId);
     this.updateFuncByElmtId.set(newElmtId, compilerAssignedUpdateFunc);
@@ -661,7 +682,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
      * @returns SynchedPropertySimple/ObjectTwoWay/PU
      */
   public createStorageLink<T>(storagePropName: string, defaultValue: T, viewVariableName: string): ObservedPropertyAbstractPU<T> {
-    return AppStorage.__CreateSync<T>(storagePropName, defaultValue,
+    return AppStorage.__createSync<T>(storagePropName, defaultValue,
       <T>(source: ObservedPropertyAbstract<T>) => (source === undefined)
         ? undefined
         : (source instanceof ObservedPropertySimple)
@@ -671,7 +692,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   }
 
   public createStorageProp<T>(storagePropName: string, defaultValue: T, viewVariableName: string): ObservedPropertyAbstractPU<T> {
-    return AppStorage.__CreateSync<T>(storagePropName, defaultValue,
+    return AppStorage.__createSync<T>(storagePropName, defaultValue,
       <T>(source: ObservedPropertyAbstract<T>) => (source === undefined)
         ? undefined
         : (source instanceof ObservedPropertySimple)

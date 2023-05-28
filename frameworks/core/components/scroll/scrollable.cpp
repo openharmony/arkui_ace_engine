@@ -203,8 +203,8 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
         }
     });
 
-    controller_ = AceType::MakeRefPtr<Animator>(context);
-    springController_ = AceType::MakeRefPtr<Animator>(context);
+    controller_ = CREATE_ANIMATOR(context);
+    springController_ = CREATE_ANIMATOR(context);
 
     spring_ = GetDefaultOverSpringProperty();
     available_ = true;

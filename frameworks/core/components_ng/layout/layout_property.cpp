@@ -44,6 +44,17 @@ std::string VisibleTypeToString(VisibleType type)
     return "Visibility.Visible";
 }
 
+VisibleType StringToVisibleType(const std::string& str)
+{
+    static const std::unordered_map<std::string, VisibleType> uMap {
+        { "Visibility.Visible", VisibleType::VISIBLE },
+        { "Visibility.Hidden", VisibleType::INVISIBLE },
+        { "Visibility.None", VisibleType::GONE },
+    };
+
+    return uMap.count(str) ? uMap.at(str) : VisibleType::VISIBLE;
+}
+
 std::string TextDirectionToString(TextDirection type)
 {
     static const LinearEnumMapNode<TextDirection, std::string> toStringMap[] = {
@@ -57,6 +68,18 @@ std::string TextDirectionToString(TextDirection type)
         return toStringMap[idx].value;
     }
     return "Direction.Ltr";
+}
+
+TextDirection StringToTextDirection(const std::string& str)
+{
+    static const std::unordered_map<std::string, TextDirection> uMap {
+        { "Direction.Ltr", TextDirection::LTR },
+        { "Direction.Rtl", TextDirection::RTL },
+        { "Direction.Inherit", TextDirection::INHERIT },
+        { "Direction.Auto", TextDirection::AUTO },
+    };
+
+    return uMap.count(str) ? uMap.at(str) : TextDirection::LTR;
 }
 } // namespace
 
@@ -101,6 +124,23 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 
     json->Put("visibility", VisibleTypeToString(propVisibility_.value_or(VisibleType::VISIBLE)).c_str());
     json->Put("direction", TextDirectionToString(GetLayoutDirection()).c_str());
+}
+
+void LayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
+{
+    UpdateCalcLayoutProperty(MeasureProperty::FromJson(json));
+    UpdateLayoutWeight(json->GetDouble("layoutWeight"));
+    UpdateAlignment(Alignment::GetAlignment(TextDirection::LTR, json->GetString("align")));
+    auto padding = json->GetString("padding");
+    if (padding != "0.0") {
+        UpdatePadding(PaddingProperty::FromJsonString(padding));
+    }
+    auto margin = json->GetString("margin");
+    if (margin != "0.0") {
+        UpdateMargin(MarginProperty::FromJsonString(margin));
+    }
+    UpdateVisibility(StringToVisibleType(json->GetString("visibility")));
+    UpdateLayoutDirection(StringToTextDirection(json->GetString("direction")));
 }
 
 RefPtr<LayoutProperty> LayoutProperty::Clone() const
@@ -184,18 +224,18 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
     if (calcLayoutConstraint_) {
         if (calcLayoutConstraint_->maxSize.has_value()) {
             layoutConstraint_->UpdateMaxSizeWithCheck(ConvertToSize(calcLayoutConstraint_->maxSize.value(),
-                layoutConstraint_->scaleProperty, layoutConstraint_->percentReference));
+                parentConstraint.scaleProperty, parentConstraint.percentReference));
         }
         if (calcLayoutConstraint_->minSize.has_value()) {
             layoutConstraint_->UpdateMinSizeWithCheck(ConvertToSize(calcLayoutConstraint_->minSize.value(),
-                layoutConstraint_->scaleProperty, layoutConstraint_->percentReference));
+                parentConstraint.scaleProperty, parentConstraint.percentReference));
         }
         if (calcLayoutConstraint_->selfIdealSize.has_value()) {
             LOGD("CalcLayoutConstraint->selfIdealSize = %{public}s",
                 calcLayoutConstraint_->selfIdealSize.value().ToString().c_str());
             layoutConstraint_->UpdateIllegalSelfIdealSizeWithCheck(
-                ConvertToOptionalSize(calcLayoutConstraint_->selfIdealSize.value(), layoutConstraint_->scaleProperty,
-                    layoutConstraint_->percentReference));
+                ConvertToOptionalSize(calcLayoutConstraint_->selfIdealSize.value(), parentConstraint.scaleProperty,
+                    parentConstraint.percentReference));
         }
     }
 
@@ -465,7 +505,7 @@ RefPtr<FrameNode> LayoutProperty::GetHost() const
     return host_.Upgrade();
 }
 
-void LayoutProperty::OnVisibilityUpdate(VisibleType visible)
+void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransition)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -475,6 +515,14 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible)
     // update visibility value.
     propVisibility_ = visible;
     host->OnVisibleChange(visible == VisibleType::VISIBLE);
+    if (allowTransition) {
+        if (preVisible == VisibleType::VISIBLE && visible == VisibleType::INVISIBLE) {
+            // only trigger transition when visibility changes between visible and invisible.
+            host->GetRenderContext()->OnNodeDisappear(false);
+        } else if (preVisible == VisibleType::INVISIBLE && visible == VisibleType::VISIBLE) {
+            host->GetRenderContext()->OnNodeAppear(false);
+        }
+    }
 
     auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);

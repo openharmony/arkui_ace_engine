@@ -299,6 +299,7 @@ private:
     void GetBottomTabBarImageSizeAndOffset(const std::vector<int32_t>& selectedIndexes,
         int32_t maskIndex, float& selectedImageSize, float& unselectedImageSize, OffsetF& originalSelectedMaskOffset,
         OffsetF& originalUnselectedMaskOffset);
+    bool CheckSvg(int32_t index) const;
 
     void HandleTouchDown(int32_t index);
     void HandleTouchUp(int32_t index);
@@ -320,6 +321,7 @@ private:
     void SetEdgeEffect(const RefPtr<GestureEventHub>& gestureHub);
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect);
     bool IsOutOfBoundary();
+    void SetAccessibilityAction();
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<TouchEventImpl> touchEvent_;

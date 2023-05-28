@@ -126,6 +126,7 @@ void GridPattern::OnModifyDone()
     if (focusHub) {
         InitOnKeyEvent(focusHub);
     }
+    SetAccessibilityAction();
 }
 
 void GridPattern::UninitMouseEvent()
@@ -952,7 +953,7 @@ bool GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
         return false;
     }
     if (!animator_) {
-        animator_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
+        animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
     }
     if (!animator_->IsStopped()) {
         animator_->Stop();
@@ -995,23 +996,28 @@ void GridPattern::UpdateScrollBarOffset()
     auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
     for (const auto& item : info.lineHeightMap_) {
         auto line = info.gridMatrix_.find(item.first);
-        if (line != info.gridMatrix_.end()) {
-            itemCount += static_cast<int32_t>(line->second.size());
-        } else {
-            itemCount += info.crossCount_;
+        if (line == info.gridMatrix_.end()) {
+            continue;
         }
+        if (line->second.empty()) {
+            continue;
+        }
+        auto lineStart = line->second.begin()->second;
+        auto lineEnd = line->second.rbegin()->second;
+        itemCount += (lineEnd - lineStart + 1);
         heightSum += item.second + mainGap;
     }
 
+    auto averageHeight = heightSum / itemCount;
+    float offset = info.startIndex_ * averageHeight - info.currentOffset_;
     float estimatedHeight = 0.f;
-    auto averageHeight_ = heightSum / itemCount;
     if (itemCount >= (info.childrenCount_ - 1)) {
         estimatedHeight = heightSum - mainGap;
+        offset = info.GetStartLineOffset(mainGap);
     } else {
-        estimatedHeight = heightSum + (info.childrenCount_ - itemCount) * averageHeight_;
+        estimatedHeight = heightSum + (info.childrenCount_ - itemCount) * averageHeight;
     }
 
-    float offset = info.startIndex_ * averageHeight_ - info.currentOffset_;
     auto viewSize = geometryNode->GetFrameSize();
     Size mainSize = { viewSize.Width(), viewSize.Height() };
     UpdateScrollBarRegion(offset, estimatedHeight, mainSize, Offset(0.0, 0.0));
@@ -1125,4 +1131,28 @@ bool GridPattern::OutBoundaryCallback()
     return IsOutOfBoundary();
 }
 
+void GridPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->IsScrollable()) {
+            return;
+        }
+        pattern->ScrollPage(false);
+    });
+
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->IsScrollable()) {
+            return;
+        }
+        pattern->ScrollPage(true);
+    });
+}
 } // namespace OHOS::Ace::NG

@@ -45,31 +45,6 @@ public:
         return windowId_;
     }
 
-    const std::string& GetWindowName() const
-    {
-        return windowName_;
-    }
-
-    void SetWindowRect(Rect rect)
-    {
-        windowRect_ = rect;
-    }
-
-    Rect GetWindowRect() const
-    {
-        return windowRect_;
-    }
-
-    bool IsDecorEnable() const
-    {
-        return false;
-    }
-
-    bool IsFocused() const
-    {
-        return true;
-    }
-
     virtual void RequestFrame();
 
     virtual void SetTaskExecutor(const RefPtr<TaskExecutor>& taskExecutor) {}
@@ -192,11 +167,7 @@ protected:
     std::list<struct VsyncCallback> callbacks_;
 
     uint64_t lastRequestVsyncTime_ = 0;
-
-    // window properties
-    std::string windowName_;
     uint32_t windowId_ = 0;
-    Rect windowRect_;
 
 private:
     std::function<Rect()> windowRectImpl_;

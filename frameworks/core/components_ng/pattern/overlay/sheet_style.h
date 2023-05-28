@@ -33,12 +33,12 @@ enum SheetMode {
 struct SheetStyle {
     std::optional<Dimension> height;
     std::optional<SheetMode> sheetMode;
-    std::optional<bool> showDragIndicator;
+    std::optional<bool> showDragBar;
 
     bool operator==(const SheetStyle& sheetStyle) const
     {
         if (height != sheetStyle.height || sheetMode != sheetStyle.sheetMode 
-            || showDragIndicator != sheetStyle.showDragIndicator) {
+            || showDragBar != sheetStyle.showDragBar) {
             return false;
         }
         return true;

@@ -46,6 +46,9 @@ declare_args() {
 
   # Disable in OH Core
   ace_engine_standard_fonts_enable = true
+
+  # Sanitize debug
+  ace_sanitize_debug = false
 }
 
 enable_dump_drawcmd = false
@@ -132,13 +135,6 @@ if (is_ohos_standard_system) {
   }
   hilog_deps = [ "hilog:libhilog" ]
   ark_runtime_path = "//arkcompiler/runtime_core"
-}
-
-# Config test output path
-if (is_ohos_standard_system) {
-  test_output_path = "ace_engine/backenduiFrameNode"
-} else {
-  test_output_path = "ace_engine_full/backenduiFrameNode"
 }
 
 # Config defines

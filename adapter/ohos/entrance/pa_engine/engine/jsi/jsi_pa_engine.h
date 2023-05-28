@@ -127,6 +127,10 @@ public:
         isDebugMode_ = isDebugMode;
     }
 
+    bool GetDebugMode()
+    {
+        return isDebugMode_;
+    }
 private:
     void SetPostTask(NativeEngine* nativeEngine);
     void LoadLibrary();

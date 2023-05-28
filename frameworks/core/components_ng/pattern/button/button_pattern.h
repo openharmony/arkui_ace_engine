@@ -18,10 +18,11 @@
 
 #include <optional>
 
+#include "base/utils/utils.h"
+#include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
-#include "core/components_ng/pattern/button/button_accessibility_property.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_algorithm.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -57,11 +58,6 @@ public:
         return MakeRefPtr<ButtonLayoutProperty>();
     }
 
-    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
-    {
-        return MakeRefPtr<ButtonAccessibilityProperty>();
-    }
-
     FocusPattern GetFocusPattern() const override
     {
         if (buttonType_ == ComponentButtonType::POPUP) {
@@ -70,6 +66,16 @@ public:
             return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, focusPaintParam };
         }
         return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
+    }
+
+    bool IsNeedAdjustByAspectRatio() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
+        CHECK_NULL_RETURN(host, false);
+        return layoutProperty->HasAspectRatio() &&
+               layoutProperty->GetType().value_or(ButtonType::CAPSULE) != ButtonType::CIRCLE;
     }
 
     void SetClickedColor(const Color& color)
@@ -95,14 +101,25 @@ public:
         CHECK_NULL_VOID(host);
         auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
+        auto context = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto buttonTheme = context->GetTheme<ButtonTheme>();
+        CHECK_NULL_VOID(buttonTheme);
+        auto textStyle = buttonTheme->GetTextStyle();
         json->Put(
             "type", host->GetTag() == "Toggle"
                         ? "ToggleType.Button"
                         : ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::CAPSULE)).c_str());
-        json->Put("fontSize", layoutProperty->GetFontSizeValue(Dimension(0)).ToString().c_str());
+        json->Put("fontSize",
+            layoutProperty->GetFontSizeValue(layoutProperty->HasLabel() ? textStyle.GetFontSize() : Dimension(0))
+                .ToString()
+                .c_str());
         json->Put("fontWeight",
             V2::ConvertWrapFontWeightToStirng(layoutProperty->GetFontWeight().value_or(FontWeight::NORMAL)).c_str());
-        json->Put("fontColor", layoutProperty->GetFontColor().value_or(Color::BLACK).ColorToString().c_str());
+        json->Put("fontColor", layoutProperty->GetFontColor()
+                                   .value_or(layoutProperty->HasLabel() ? textStyle.GetTextColor() : Color::BLACK)
+                                   .ColorToString()
+                                   .c_str());
         auto fontFamilyVector =
             layoutProperty->GetFontFamily().value_or<std::vector<std::string>>({ "HarmonyOS Sans" });
         std::string fontFamily = fontFamilyVector.at(0);
@@ -169,11 +186,14 @@ protected:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     void InitTouchEvent();
+    void InitHoverEvent();
     void OnTouchDown();
     void OnTouchUp();
+    void HandleHoverEvent(bool isHover);
     void HandleEnabled();
     void InitButtonLabel();
-    void AnimateTouchEffectBoard(float startOpacity, float endOpacity, int32_t duration, const RefPtr<Curve>& curve);
+    void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
+        int32_t duration, const RefPtr<Curve>& curve);
     Color clickedColor_;
 
 private:
@@ -186,7 +206,8 @@ private:
     ComponentButtonType buttonType_ = ComponentButtonType::BUTTON;
 
     RefPtr<TouchEventImpl> touchListener_;
-    RefPtr<InputEvent> mouseEvent_;
+    RefPtr<InputEvent> hoverListener_;
+    bool isHover_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ButtonPattern);
 };

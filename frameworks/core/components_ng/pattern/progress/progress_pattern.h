@@ -24,15 +24,15 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/progress/progress_accessibility_property.h"
 #include "core/components_ng/pattern/progress/progress_layout_algorithm.h"
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
+#include "core/components_ng/pattern/progress/progress_modifier.h"
 #include "core/components_ng/pattern/progress/progress_paint_method.h"
 #include "core/components_ng/pattern/progress/progress_paint_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/pattern/progress/progress_modifier.h"
-#include "core/components_ng/base/geometry_node.h"
 
 namespace OHOS::Ace::NG {
 // ProgressPattern is the base class for progress render node to perform paint progress.
@@ -51,7 +51,7 @@ public:
         if (!progressModifier_) {
             progressModifier_ = AceType::MakeRefPtr<ProgressModifier>();
         }
-        progressModifier_->SetVisible(visibilityType_ == VisibleType::VISIBLE);
+        progressModifier_->SetVisible(visibilityProp_);
         return MakeRefPtr<ProgressPaintMethod>(progressType_, strokeWidth_, progressModifier_);
     }
 
@@ -79,7 +79,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
+        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
     }
 
     void SetTextFromUser(bool value)
@@ -92,6 +92,8 @@ public:
         return isTextFromUser_;
     }
 
+    void OnVisibleChange(bool isVisible) override;
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
@@ -99,6 +101,8 @@ private:
     void InitTouchEvent();
     void OnPress(const TouchEventInfo& info);
     void HandleEnabled();
+    void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
     void ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>& json) const;
     static std::string ConvertProgressStatusToString(const ProgressStatus status);
 
@@ -110,7 +114,7 @@ private:
     Color borderColor_;
     Color fontColor_;
     bool isTextFromUser_ = false;
-    VisibleType visibilityType_ = VisibleType::VISIBLE;
+    bool visibilityProp_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPattern);
 };

@@ -22,7 +22,6 @@
 #include "core/components_ng/pattern/calendar/calendar_controller_ng.h"
 
 namespace OHOS::Ace::Framework {
-
 class JSCalendarController : public Referenced {
 public:
     JSCalendarController() = default;
@@ -35,33 +34,21 @@ public:
     void BackToToday(const JSCallbackInfo& args);
     void GoTo(const JSCallbackInfo& args);
 
-    const RefPtr<CalendarControllerV2>& GetController() const
+    const RefPtr<AceType>& GetController() const
     {
         return controller_;
     }
 
-    void SetController(const RefPtr<CalendarControllerV2>& controllerV2)
+    void SetController(const RefPtr<AceType>& controller)
     {
-        controller_ = controllerV2;
-    }
-
-    const RefPtr<NG::CalendarControllerNg>& GetControllerNg() const
-    {
-        return controllerNg_;
-    }
-
-    void SetControllerNg(const RefPtr<NG::CalendarControllerNg>& controllerNg)
-    {
-        controllerNg_ = controllerNg;
+        controller_ = controller;
     }
 
 private:
-    RefPtr<CalendarControllerV2> controller_;
-    RefPtr<NG::CalendarControllerNg> controllerNg_;
+    RefPtr<AceType> controller_;
 
     ACE_DISALLOW_COPY_AND_MOVE(JSCalendarController);
 };
-
 } // namespace OHOS::Ace::Framework
 
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CALENDAR_CONTROLLER_H

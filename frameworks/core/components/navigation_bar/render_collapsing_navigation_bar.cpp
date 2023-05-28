@@ -20,6 +20,7 @@
 #include "core/components/navigation_bar/navigation_bar_component.h"
 #include "core/components/navigation_bar/render_navigation_container.h"
 #include "core/components/transform/transform_component.h"
+#include "core/components_ng/pattern/navigation/navigation_model_data.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -224,7 +225,7 @@ void RenderCollapsingNavigationBar::Initialize(const WeakPtr<PipelineContext>& c
             scroll->HandleDragEnd();
         }
     });
-    controller_ = AceType::MakeRefPtr<Animator>(context);
+    controller_ = CREATE_ANIMATOR(context);
     controller_->SetDuration(COLLAPSING_ANIMATION_DURATION);
 
     InitRelatedParent(GetParent());

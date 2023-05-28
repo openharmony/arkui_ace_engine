@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
 #include "base/memory/ace_type.h"
@@ -89,6 +90,13 @@ public:
 
     virtual void SyncGeometryProperties(const RectF& rectF) {}
 
+    // draw self and children in sandbox origin at parent's absolute position in root, drawing in sandbox
+    // will be unaffected by parent's transition.
+    virtual void SetSandBox(const std::optional<OffsetF>& parentPosition) {};
+
+    virtual void RegisterSharedTransition(const RefPtr<RenderContext>& other) {}
+    virtual void UnregisterSharedTransition(const RefPtr<RenderContext>& other) {}
+
     virtual void OnModifyDone() {}
 
     virtual void InitContext(bool isRoot, const std::optional<std::string>& surfaceName, bool useExternalNode = false)
@@ -153,6 +161,11 @@ public:
         return false;
     }
 
+    virtual bool IsSynced() const
+    {
+        return isSynced_;
+    }
+
     virtual bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish)
     {
         return false;
@@ -163,10 +176,13 @@ public:
     virtual void ResetPageTransitionEffect() {}
 
     virtual void AddChild(const RefPtr<RenderContext>& renderContext, int index) {}
+    virtual void RemoveChild(const RefPtr<RenderContext>& renderContext) {}
     virtual void SetBounds(float positionX, float positionY, float width, float height) {}
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
-    virtual void UpdateBackBlurStyle(const BlurStyleOption& blurStyle) {}
+    virtual void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) {}
+    virtual void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) {}
+    virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
     virtual void ResetBackBlurStyle() {}
     virtual void ClipWithRect(const RectF& rectF) {}
     virtual void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) {}
@@ -184,6 +200,11 @@ public:
         return {};
     }
 
+    virtual RectF GetPaintRectWithTranslate()
+    {
+        return {};
+    }
+
     virtual void GetPointWithTransform(PointF& point) {}
 
     virtual RectF GetPaintRectWithoutTransform()
@@ -192,6 +213,8 @@ public:
     }
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+
+    virtual void FromJson(const std::unique_ptr<JsonValue>& json);
 
     virtual void ClearDrawCommands() {}
 
@@ -234,6 +257,14 @@ public:
     {
         return GetBackground() ? GetBackground()->propBlurRadius : std::nullopt;
     }
+    std::optional<BlurStyleOption> GetFrontBlurStyle() const
+    {
+        return GetForeground() ? GetForeground()->propBlurStyleOption : std::nullopt;
+    }
+    std::optional<Dimension> GetFrontBlurRadius() const
+    {
+        return GetForeground() ? GetForeground()->propBlurRadius : std::nullopt;
+    }
 
     virtual void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> modifier) {};
 
@@ -253,9 +284,11 @@ public:
     virtual void OnSphericalEffectUpdate(double radio) {}
     virtual void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) {}
     virtual void OnLightUpEffectUpdate(double radio) {}
+    virtual void OnClickEffectLevelUpdate(const ClickEffectInfo& info) {}
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SphericalEffect, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PixelStretchEffect, PixStretchEffectOption);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LightUpEffect, double);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ClickEffectLevel, ClickEffectInfo);
     virtual RefPtr<PixelMap> GetThumbnailPixelMap()
     {
         return nullptr;
@@ -270,6 +303,9 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformCenter, DimensionOffset);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformTranslate, TranslateOptions);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformRotate, Vector4F);
+
+    // Foreground
+    ACE_DEFINE_PROPERTY_GROUP(Foreground, ForegroundProperty);
 
     // Background
     ACE_DEFINE_PROPERTY_GROUP(Background, BackgroundProperty);
@@ -292,6 +328,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColorStrategy, ForegroundColorStrategy);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundColorFlag, bool);
 
     // Graphics
     ACE_DEFINE_PROPERTY_GROUP(Graphics, GraphicsProperty);
@@ -303,7 +340,6 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontInvert, Dimension);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontHueRotate, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontColorBlend, Color);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontBlurRadius, Dimension);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackShadow, Shadow);
 
     // BorderRadius.
@@ -360,6 +396,7 @@ protected:
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
     ShareId shareId_;
     bool isModalRootNode_ = false;
+    bool isSynced_ = false;
 
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
@@ -406,7 +443,6 @@ protected:
     virtual void OnFrontInvertUpdate(const Dimension& value) {}
     virtual void OnFrontHueRotateUpdate(float value) {}
     virtual void OnFrontColorBlendUpdate(const Color& value) {}
-    virtual void OnFrontBlurRadiusUpdate(const Dimension& value) {}
     virtual void OnBackShadowUpdate(const Shadow& shadow) {}
 
     virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}
@@ -416,7 +452,6 @@ protected:
 private:
     std::function<void()> requestFrame_;
     WeakPtr<FrameNode> host_;
-    bool needDebugBoundary_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderContext);
 };

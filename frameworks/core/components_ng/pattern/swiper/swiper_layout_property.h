@@ -19,6 +19,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
+#include "base/utils/string_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components/declaration/swiper/swiper_declaration.h"
@@ -52,6 +53,14 @@ public:
         value->propBottom_ = CloneBottom();
         value->propPrevMargin_ = ClonePrevMargin();
         value->propNextMargin_ = CloneNextMargin();
+        value->propDisplayArrow_ = CloneDisplayArrow();
+        value->propHoverShow_ = CloneHoverShow();
+        value->propIsShowBoard_ = CloneIsShowBoard();
+        value->propIsSiderMiddle_ = CloneIsSiderMiddle();
+        value->propBoardSize_ = CloneBoardSize();
+        value->propBoardColor_ = CloneBoardColor();
+        value->propArrowSize_ = CloneArrowSize();
+        value->propArrowColor_ = CloneArrowColor();
         return value;
     }
 
@@ -72,6 +81,14 @@ public:
         ResetBottom();
         ResetPrevMargin();
         ResetNextMargin();
+        ResetDisplayArrow();
+        ResetHoverShow();
+        ResetIsShowBoard();
+        ResetIsSiderMiddle();
+        ResetBoardSize();
+        ResetBoardColor();
+        ResetArrowSize();
+        ResetArrowColor();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -88,6 +105,32 @@ public:
         json->Put("displayCount", propDisplayCount_.value_or(1));
         json->Put("prevMargin", propPrevMargin_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
         json->Put("nextMargin", propNextMargin_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+        json->Put("displayArrow", propDisplayArrow_.value_or(false) ? "true" : "false");
+        json->Put("hoverShow", propHoverShow_.value_or(false) ? "true" : "false");
+        json->Put("isShowBoard", propIsShowBoard_.value_or(false) ? "true" : "false");
+        json->Put("isSiderMiddle", propIsSiderMiddle_.value_or(false) ? "true" : "false");
+        json->Put("boardSize", propBoardSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+        json->Put("arrowSize", propArrowSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+        json->Put("boardColor", propBoardColor_.value_or(Color::TRANSPARENT).ColorToString().c_str());
+        json->Put("arrowColor", propArrowColor_.value_or(Color::TRANSPARENT).ColorToString().c_str());
+    }
+
+    void FromJson(const std::unique_ptr<JsonValue>& json) override
+    {
+        static const std::unordered_map<std::string, SwiperDisplayMode> uMap {
+            { "SwiperDisplayMode.AutoLinear", SwiperDisplayMode::AUTO_LINEAR },
+            { "SwiperDisplayMode.Stretch", SwiperDisplayMode::STRETCH },
+        };
+
+        UpdateIndex(StringUtils::StringToInt(json->GetString("index")));
+        UpdateDirection(json->GetString("vertical") == "true" ? Axis::VERTICAL : Axis::HORIZONTAL);
+        UpdateShowIndicator(json->GetString("indicator") == "true" ? true : false);
+        UpdateItemSpace(Dimension::FromString(json->GetString("itemSpace")));
+        UpdateCachedCount(json->GetInt("cachedCount"));
+        auto displayMode = json->GetString("displayMode");
+        UpdateDisplayMode(uMap.count(displayMode) ? uMap.at(displayMode) : SwiperDisplayMode::STRETCH);
+        UpdateDisplayCount(json->GetInt("displayCount"));
+        LayoutProperty::FromJson(json);
     }
 
     void UpdateIndexWithoutMeasure(int32_t index)
@@ -111,6 +154,14 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Bottom, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PrevMargin, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NextMargin, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayArrow, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HoverShow, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsShowBoard, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsSiderMiddle, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BoardSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BoardColor, Color, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowColor, Color, PROPERTY_UPDATE_NORMAL);
 };
 } // namespace OHOS::Ace::NG
 

@@ -311,7 +311,9 @@ bool JsiPaEngine::InitJsEnv(bool debuggerMode, const std::unordered_map<std::str
 
     // Register pa native functions
     RegisterPaModule();
-    RegisterConsoleModule();
+    if (jsAbilityRuntime_) {
+        jsAbilityRuntime_->InitConsoleModule();
+    }
     // load abc file
     EvaluateJsCode();
 
@@ -464,7 +466,7 @@ bool JsiPaEngine::Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendTy
         return false;
     }
 
-    bool result = InitJsEnv(IsDebugVersion(), GetExtraNativeObject());
+    bool result = InitJsEnv(GetDebugMode(), GetExtraNativeObject());
     if (!result) {
         LOGE("Init js env failed");
         return false;

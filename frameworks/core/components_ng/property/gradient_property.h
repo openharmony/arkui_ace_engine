@@ -23,6 +23,8 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/json/json_util.h"
+#include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/components/common/properties/color.h"

@@ -90,6 +90,8 @@ const char STACK_ETS_TAG[] = "Stack";
 const char SWIPER_COMPONENT_TAG[] = "SwiperComponent";
 const char SWIPER_ETS_TAG[] = "Swiper";
 const char SWIPER_INDICATOR_ETS_TAG[] = "SwiperIndicator";
+const char SWIPER_LEFT_ARROW_ETS_TAG[] = "LeftArrow";
+const char SWIPER_RIGHT_ARROW_ETS_TAG[] = "RightArrow";
 
 // tabs
 const char TABS_COMPONENT_TAG[] = "TabsComponent";
@@ -488,7 +490,7 @@ const char MODEL_ETS_TAG[] = "Model";
 // window scene
 ACE_EXPORT extern const char ROOT_SCENE_ETS_TAG[] = "RootScene";
 ACE_EXPORT extern const char SCREEN_ETS_TAG[] = "Screen";
-ACE_EXPORT extern const char HOST_WINDOW_SCENE_ETS_TAG[] = "HostWindowScene";
+ACE_EXPORT extern const char WINDOW_SCENE_ETS_TAG[] = "WindowScene";
 
 // ui_extension_component
 const char UI_EXTENSION_COMPONENT_TAG[] = "UIExtensionComponent";

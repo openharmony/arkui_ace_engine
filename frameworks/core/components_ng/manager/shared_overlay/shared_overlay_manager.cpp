@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -115,6 +115,7 @@ void SharedOverlayManager::PrepareSharedTransition(const RefPtr<FrameNode>& page
     CHECK_NULL_VOID(patternDest);
     auto patternSrc = pageSrc->GetPattern<PagePattern>();
     CHECK_NULL_VOID(patternSrc);
+    pageOffset_ = pageDest->GetRenderContext()->GetPaintRectWithoutTransform().GetOffset();
     const auto& srcMap = patternSrc->GetSharedTransitionMap();
     const auto& destMap = patternDest->GetSharedTransitionMap();
     std::list<RefPtr<SharedTransitionEffect>> effects;
@@ -235,6 +236,9 @@ void SharedOverlayManager::PassengerAboard(
     const RefPtr<SharedTransitionEffect>& effect, const RefPtr<FrameNode>& passenger)
 {
     auto ticket = passenger->GetPaintRectOffsetToPage();
+    // Get offset relative to stage(or overlay), for safeArea
+    ticket += pageOffset_;
+    LOGI("passenger offset is %{public}s, id = %{public}s", ticket.ToString().c_str(), effect->GetShareId().c_str());
     auto initialPosition = passenger->GetRenderContext()->GetPosition();
     // save initialFrameOffset for static type sharedTransition
     auto initialFrameOffset = passenger->GetGeometryNode()->GetFrameOffset();
@@ -256,8 +260,6 @@ void SharedOverlayManager::PassengerAboard(
     effect->SetPassengerHolder(passengerHolder);
     sharedManager_->AddChild(passenger);
     auto offset = OffsetT<Dimension>(Dimension(ticket.GetX()), Dimension(ticket.GetY()));
-    LOGD("offset is (%{public}s, %{public}s), id = %{public}s", offset.GetX().ToString().c_str(),
-        offset.GetY().ToString().c_str(), effect->GetShareId().c_str());
     passenger->GetRenderContext()->UpdateZIndex(effect->GetZIndex());
     passenger->GetRenderContext()->UpdatePosition(offset);
     passenger->GetRenderContext()->OnModifyDone();

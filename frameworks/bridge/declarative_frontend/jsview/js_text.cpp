@@ -152,7 +152,7 @@ void JSText::SetTextShadow(const JSCallbackInfo& info)
         return;
     }
     double radius = 0.0;
-    ParseJsonDouble(argsPtrItem->GetValue("radius"), radius);
+    ParseJsDouble(JSRef<JSObject>::Cast(info[0])->GetProperty("radius"), radius);
     if (LessNotEqual(radius, 0.0)) {
         radius = 0.0;
     }
@@ -218,6 +218,7 @@ void JSText::SetTextIndent(const JSCallbackInfo& info)
     }
     CalcDimension value;
     if (!ParseJsDimensionFp(info[0], value)) {
+        TextModel::GetInstance()->SetTextIndent(value);
         return;
     }
     TextModel::GetInstance()->SetTextIndent(value);
@@ -257,8 +258,9 @@ void JSText::SetLineHeight(const JSCallbackInfo& info)
         return;
     }
     CalcDimension value;
-    if (!ParseJsDimensionFp(info[0], value)) {
-        return;
+    ParseJsDimensionFp(info[0], value);
+    if (value.IsNegative()) {
+        value.Reset();
     }
     TextModel::GetInstance()->SetLineHeight(value);
 }
@@ -599,9 +601,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("focusable", &JSText::JsFocusable);
     JSClass<JSText>::StaticMethod("draggable", &JSText::JsDraggable);
     JSClass<JSText>::StaticMethod("textMenuOptions", &JSText::JsMenuOptionsExtension);
-    JSClass<JSText>::Inherit<JSContainerBase>();
-    JSClass<JSText>::Inherit<JSViewAbstract>();
-    JSClass<JSText>::Bind<>(globalObj);
+    JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

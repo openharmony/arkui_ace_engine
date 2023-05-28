@@ -18,7 +18,6 @@
 
 #include <optional>
 
-#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/button/button_pattern.h"

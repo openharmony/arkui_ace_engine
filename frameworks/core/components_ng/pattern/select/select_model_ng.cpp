@@ -240,57 +240,123 @@ void SelectModelNG::SetSize(Dimension& width, Dimension& height)
     ViewAbstract::SetHeight(NG::CalcLength(height));
 }
 
-void SelectModelNG::SetPaddings(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
-    const std::optional<Dimension>& left, const std::optional<Dimension>& right)
+void SelectModelNG::SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
+    const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right)
 {
     NG::PaddingProperty paddings;
-    paddings.top = NG::CalcLength(top.value().IsNonNegative() ? top.value() : Dimension());
-    paddings.bottom = NG::CalcLength(bottom.value().IsNonNegative() ? bottom.value() : Dimension());
-    paddings.left = NG::CalcLength(left.value().IsNonNegative() ? left.value() : Dimension());
-    paddings.right = NG::CalcLength(right.value().IsNonNegative() ? right.value() : Dimension());
+    if (top.has_value()) {
+        if (top.value().Unit() == DimensionUnit::CALC) {
+            paddings.top =
+                NG::CalcLength(top.value().IsNonNegative() ? top.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.top = NG::CalcLength(top.value().IsNonNegative() ? top.value() : CalcDimension());
+        }
+    }
+    if (bottom.has_value()) {
+        if (bottom.value().Unit() == DimensionUnit::CALC) {
+            paddings.bottom = NG::CalcLength(
+                bottom.value().IsNonNegative() ? bottom.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.bottom = NG::CalcLength(bottom.value().IsNonNegative() ? bottom.value() : CalcDimension());
+        }
+    }
+    if (left.has_value()) {
+        if (left.value().Unit() == DimensionUnit::CALC) {
+            paddings.left = NG::CalcLength(
+                left.value().IsNonNegative() ? left.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.left = NG::CalcLength(left.value().IsNonNegative() ? left.value() : CalcDimension());
+        }
+    }
+    if (right.has_value()) {
+        if (right.value().Unit() == DimensionUnit::CALC) {
+            paddings.right = NG::CalcLength(
+                right.value().IsNonNegative() ? right.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.right = NG::CalcLength(right.value().IsNonNegative() ? right.value() : CalcDimension());
+        }
+    }
     ViewAbstract::SetPadding(paddings);
 }
 
-void SelectModelNG::SetPadding(const Dimension& value)
+void SelectModelNG::SetPadding(const CalcDimension& value)
 {
-    ViewAbstract::SetPadding(NG::CalcLength(value.IsNonNegative() ? value : Dimension()));
+    if (value.Unit() == DimensionUnit::CALC) {
+        // padding must great or equal zero.
+        ViewAbstract::SetPadding(
+            NG::CalcLength(value.IsNonNegative() ? value.CalcValue() : CalcDimension().CalcValue()));
+    } else {
+        // padding must great or equal zero.
+        ViewAbstract::SetPadding(NG::CalcLength(value.IsNonNegative() ? value : CalcDimension()));
+    }
 }
 
-void SelectModelNG::SetPaddingLeft(const Dimension& leftValue)
+void SelectModelNG::SetPaddingLeft(const CalcDimension& leftValue)
 {
     NG::PaddingProperty paddings;
     paddings.top = std::nullopt;
     paddings.bottom = std::nullopt;
-    paddings.left = NG::CalcLength(leftValue.IsNonNegative() ? leftValue : Dimension());
+
+    if (!NearEqual(leftValue.Value(), 0.0)) {
+        if (leftValue.Unit() == DimensionUnit::CALC) {
+            paddings.left = NG::CalcLength(
+                leftValue.IsNonNegative() ? leftValue.CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.left = NG::CalcLength(leftValue.IsNonNegative() ? leftValue : CalcDimension());
+        }
+    }
     paddings.right = std::nullopt;
     ViewAbstract::SetPadding(paddings);
 }
 
-void SelectModelNG::SetPaddingTop(const Dimension& topValue)
+void SelectModelNG::SetPaddingTop(const CalcDimension& topValue)
 {
     NG::PaddingProperty paddings;
-    paddings.top = NG::CalcLength(topValue.IsNonNegative() ? topValue : Dimension());
+    if (!NearEqual(topValue.Value(), 0.0)) {
+        if (topValue.Unit() == DimensionUnit::CALC) {
+            paddings.top = NG::CalcLength(
+                topValue.IsNonNegative() ? topValue.CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.top = NG::CalcLength(topValue.IsNonNegative() ? topValue : CalcDimension());
+        }
+    }
     paddings.bottom = std::nullopt;
     paddings.left = std::nullopt;
     paddings.right = std::nullopt;
     ViewAbstract::SetPadding(paddings);
 }
 
-void SelectModelNG::SetPaddingRight(const Dimension& rightValue)
+void SelectModelNG::SetPaddingRight(const CalcDimension& rightValue)
 {
     NG::PaddingProperty paddings;
     paddings.top = std::nullopt;
     paddings.bottom = std::nullopt;
     paddings.left = std::nullopt;
-    paddings.right = NG::CalcLength(rightValue.IsNonNegative() ? rightValue : Dimension());
+    if (!NearEqual(rightValue.Value(), 0.0)) {
+        if (rightValue.Unit() == DimensionUnit::CALC) {
+            paddings.right = NG::CalcLength(
+                rightValue.IsNonNegative() ? rightValue.CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.right = NG::CalcLength(
+                rightValue.IsNonNegative() ? rightValue : CalcDimension());
+        }
+    }
     ViewAbstract::SetPadding(paddings);
 }
 
-void SelectModelNG::SetPaddingBottom(const Dimension& buttomValue)
+void SelectModelNG::SetPaddingBottom(const CalcDimension& buttomValue)
 {
     NG::PaddingProperty paddings;
     paddings.top = std::nullopt;
-    paddings.bottom = NG::CalcLength(buttomValue.IsNonNegative() ? buttomValue : Dimension());
+    if (!NearEqual(buttomValue.Value(), 0.0)) {
+        if (buttomValue.Unit() == DimensionUnit::CALC) {
+            paddings.bottom = NG::CalcLength(
+                buttomValue.IsNonNegative() ? buttomValue.CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.bottom = NG::CalcLength(
+                buttomValue.IsNonNegative() ? buttomValue : CalcDimension());
+        }
+    }
     paddings.left = std::nullopt;
     paddings.right = std::nullopt;
     ViewAbstract::SetPadding(paddings);

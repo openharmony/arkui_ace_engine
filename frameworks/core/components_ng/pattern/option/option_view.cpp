@@ -94,8 +94,9 @@ RefPtr<FrameNode> OptionView::CreateIcon(const std::string& icon, const RefPtr<F
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(iconNode, nullptr);
     auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
-    props->UpdateImageSourceInfo(ImageSourceInfo(icon));
-    props->UpdateImageFit(ImageFit::SCALE_DOWN);
+    if (!icon.empty()) {
+        props->UpdateImageSourceInfo(ImageSourceInfo(icon));
+    }
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
@@ -118,8 +119,8 @@ RefPtr<FrameNode> OptionView::CreateIcon(const std::string& icon, const RefPtr<F
     return iconNode;
 }
 
-RefPtr<FrameNode> OptionView::CreateMenuOption(
-    const std::string& value, std::function<void()>&& onClickFunc, int32_t index, const std::string& icon)
+RefPtr<FrameNode> OptionView::CreateMenuOption(bool optionsHasIcon, const std::string& value,
+    std::function<void()>&& onClickFunc, int32_t index, const std::string& icon)
 {
     auto option = Create(index);
     auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -127,7 +128,7 @@ RefPtr<FrameNode> OptionView::CreateMenuOption(
     auto pattern = option->GetPattern<OptionPattern>();
     CHECK_NULL_RETURN(pattern, option);
 
-    if (!icon.empty()) {
+    if (optionsHasIcon) {
         auto iconNode = CreateIcon(icon, row);
         pattern->SetIconNode(iconNode);
         pattern->SetIcon(icon);

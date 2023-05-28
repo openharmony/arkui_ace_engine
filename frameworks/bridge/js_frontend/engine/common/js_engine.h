@@ -94,7 +94,7 @@ public:
         return false;
     }
 
-    // Load the je file of the page in NG structure..
+    // Load the js file of the page in NG structure..
     virtual bool LoadPageSource(const std::string& /*url*/,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr)
     {
@@ -185,8 +185,6 @@ public:
 
     virtual void DumpHeapSnapshot(bool isPrivate) {}
 
-    virtual void ClearCache() {}
-
     virtual std::string GetStacktraceMessage()
     {
         return "";
@@ -268,6 +266,11 @@ public:
     }
 
     virtual void RunNativeEngineLoop();
+
+    virtual void SetPluginBundleName(const std::string& pluginBundleName) {}
+
+    virtual void SetPluginModuleName(const std::string& pluginModuleName) {}
+
 #if !defined(PREVIEW)
     static PixelMapNapiEntry GetPixelMapNapiEntry();
 #endif

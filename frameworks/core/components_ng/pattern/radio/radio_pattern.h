@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_PATTERN_H
 
 #include "base/memory/referenced.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/radio/radio_accessibility_property.h"
@@ -25,7 +24,6 @@
 #include "core/components_ng/pattern/radio/radio_layout_algorithm.h"
 #include "core/components_ng/pattern/radio/radio_paint_method.h"
 #include "core/components_ng/pattern/radio/radio_paint_property.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -67,7 +65,10 @@ public:
         CHECK_NULL_RETURN(eventHub, nullptr);
         auto enabled = eventHub->IsEnabled();
         paintMethod->SetEnabled(enabled);
+        paintMethod->SetIsOnAnimationFlag(isOnAnimationFlag_);
         paintMethod->SetTouchHoverAnimationType(touchHoverType_);
+        paintMethod->SetIsFirstCreated(isFirstCreated_);
+        isFirstCreated_ = false;
         return paintMethod;
     }
 
@@ -132,12 +133,6 @@ private:
     void OnTouchDown();
     void OnTouchUp();
     void HandleMouseEvent(bool isHover);
-    void PlayAnimation(bool isOn);
-    void StopTranslateAnimation();
-    void StopAnimation();
-    void UpdateTotalScale(float scale);
-    void UpdatePointScale(float scale);
-    void UpdateRingPointScale(float scale);
     void UpdateUIStatus(bool check);
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -169,8 +164,8 @@ private:
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     bool isGroupChanged_ = false;
-    bool isFirstAddhotZoneRect_ = true;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
+    bool isOnAnimationFlag_ = false;
 
     RefPtr<RadioModifier> radioModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);

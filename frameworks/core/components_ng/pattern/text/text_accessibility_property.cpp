@@ -40,12 +40,7 @@ std::string TextAccessibilityProperty::GetText() const
 
 bool TextAccessibilityProperty::IsSelected() const
 {
-    auto frameNode = host_.Upgrade();
-    CHECK_NULL_RETURN(frameNode, false);
-    auto textPattern = frameNode->GetPattern<TextPattern>();
-    CHECK_NULL_RETURN(textPattern, false);
-    const auto& textSelector = textPattern->GetTextSelector();
-    return textSelector.IsValid();
+    return isSelected_;
 }
 
 int32_t TextAccessibilityProperty::GetTextSelectionStart() const
@@ -76,12 +71,12 @@ void TextAccessibilityProperty::SetSpecificSupportAction()
     CHECK_NULL_VOID(textLayoutProperty);
     if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None) {
         AddSupportAction(AceAction::ACTION_COPY);
-        AddSupportAction(AceAction::ACTION_SELECT);
         AddSupportAction(AceAction::ACTION_SET_SELECTION);
         AddSupportAction(AceAction::ACTION_CLEAR_SELECTION);
     }
-
-    AddSupportAction(AceAction::ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
-    AddSupportAction(AceAction::ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
+    if (actionSelectImpl_) {
+        AddSupportAction(AceAction::ACTION_SELECT);
+        AddSupportAction(AceAction::ACTION_CLEAR_SELECTION);
+    }
 }
 } // namespace OHOS::Ace::NG

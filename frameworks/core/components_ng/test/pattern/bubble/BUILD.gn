@@ -20,6 +20,7 @@ ohos_unittest("bubble_pattern_test_ng") {
   sources = [
     # inner
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
+    "$ace_root/frameworks/base/utils/time_util.cpp",
     "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",
     "$ace_root/frameworks/core/animation/curves.cpp",
@@ -105,6 +106,7 @@ ohos_unittest("bubble_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/layout/layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_builder.cpp",
+    "$ace_root/frameworks/core/components_ng/property/border_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",
     "$ace_root/frameworks/core/components_ng/property/grid_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",

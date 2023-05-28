@@ -617,6 +617,7 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
         }
         if (needSecondaryLayout) {
             childLayoutWrapper->Measure(child.layoutConstraint);
+            crossAxisSize_ = std::max(crossAxisSize_, GetChildCrossAxisSize(childLayoutWrapper));
             CheckBaselineProperties(child.layoutWrapper);
         }
         ++iter;
@@ -798,8 +799,7 @@ void FlexLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     mainAxisSize_ = GetMainAxisSizeHelper(contentSize, direction_);
     crossAxisSize_ = GetCrossAxisSizeHelper(contentSize, direction_);
     auto paddingOffset = OffsetF(padding.left.value_or(0.0f), padding.top.value_or(0.0f));
-    float remainSpace = mainAxisAlign_ == FlexAlign::FLEX_END ? mainAxisSize_ - allocatedSize_
-                                                              : std::max(mainAxisSize_ - allocatedSize_, 0.0f);
+    float remainSpace = std::max(mainAxisSize_ - allocatedSize_, 0.0f);
     float frontSpace = 0.0f;
     float betweenSpace = 0.0f;
     CalculateSpace(remainSpace, frontSpace, betweenSpace);
@@ -896,6 +896,14 @@ void FlexLayoutAlgorithm::PlaceChildren(
             offset = OffsetF(childMainPos, childCrossPos);
         } else {
             offset = OffsetF(childCrossPos, childMainPos);
+        }
+        // no need to constraint X offset when padding left is zero
+        if (!NearZero(paddingOffset.GetX())) {
+            offset.SetX(std::max(offset.GetX(), 0.0f));
+        }
+        // no need to constraint Y offset when padding top is zero
+        if (!NearZero(paddingOffset.GetY())) {
+            offset.SetY(std::max(offset.GetY(), 0.0f));
         }
 
         if (!IsStartTopLeft(direction_, textDir_)) {

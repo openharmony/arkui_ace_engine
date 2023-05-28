@@ -131,6 +131,11 @@ public:
         ViewAbstract::SetBackgroundBlurStyle(bgBlurStyle);
     }
 
+    void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) override
+    {
+        ViewAbstract::SetForegroundBlurStyle(fgBlurStyle);
+    }
+
     void SetSphericalEffect(double radio) override
     {
         ViewAbstract::SetSphericalEffect(radio);
@@ -252,6 +257,7 @@ public:
         borderRadius.radiusTopRight = radiusTopRight;
         borderRadius.radiusBottomLeft = radiusBottomLeft;
         borderRadius.radiusBottomRight = radiusBottomRight;
+        borderRadius.multiValued = true;
         ViewAbstract::SetBorderRadius(borderRadius);
     }
 
@@ -267,6 +273,7 @@ public:
         borderColors.rightColor = colorRight;
         borderColors.topColor = colorTop;
         borderColors.bottomColor = colorBottom;
+        borderColors.multiValued = true;
         ViewAbstract::SetBorderColor(borderColors);
     }
 
@@ -283,6 +290,7 @@ public:
         borderWidth.rightDimen = right;
         borderWidth.topDimen = top;
         borderWidth.bottomDimen = bottom;
+        borderWidth.multiValued = true;
         ViewAbstract::SetBorderWidth(borderWidth);
     }
 
@@ -299,6 +307,7 @@ public:
         borderStyles.styleRight = styleRight.value_or(BorderStyle::SOLID);
         borderStyles.styleTop = styleTop.value_or(BorderStyle::SOLID);
         borderStyles.styleBottom = styleBottom.value_or(BorderStyle::SOLID);
+        borderStyles.multiValued = true;
         ViewAbstract::SetBorderStyle(borderStyles);
     }
 
@@ -475,6 +484,11 @@ public:
         ViewAbstract::SetFlexShrink(value);
     }
 
+    void ResetFlexShrink() override
+    {
+        ViewAbstract::ResetFlexShrink();
+    }
+
     void SetFlexGrow(float value) override
     {
         ViewAbstract::SetFlexGrow(value);
@@ -577,6 +591,11 @@ public:
     void SetHueRotate(float value) override
     {
         ViewAbstract::SetHueRotate(value);
+    }
+
+    void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override
+    {
+        ViewAbstract::SetClickEffectLevel(level, scaleValue);
     }
 
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override
@@ -806,6 +825,7 @@ public:
     {
         ViewAbstract::SetForegroundColorStrategy(strategy);
     }
+
 private:
     void RegisterMenuAppearCallback(
         std::vector<NG::OptionParam>& params, std::function<void()>&& buildFunc, const MenuParam& menuParam);
@@ -814,12 +834,26 @@ private:
     void RegisterContextMenuDisappearCallback(const MenuParam& menuParam);
 
     void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
-        const std::function<void(float)>& onCallbackEvent) override {
+        const std::function<void(float)>& onCallbackEvent) override
+    {
         ViewAbstract::CreateAnimatablePropertyFloat(propertyName, value, onCallbackEvent);
     }
 
-    void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value) override {
+    void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value) override
+    {
         ViewAbstract::UpdateAnimatablePropertyFloat(propertyName, value);
+    }
+
+    void CreateAnimatableArithmeticProperty(const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value,
+        std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent) override
+    {
+        ViewAbstract::CreateAnimatableArithmeticProperty(propertyName, value, onCallbackEvent);
+    }
+
+    void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
+        RefPtr<CustomAnimatableArithmetic>& value) override
+    {
+        ViewAbstract::UpdateAnimatableArithmeticProperty(propertyName, value);
     }
 };
 } // namespace OHOS::Ace::NG

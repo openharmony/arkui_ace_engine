@@ -1206,6 +1206,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetShadow() const
     jsonValue->Put("color", ConvertColorToString(shadow.GetColor()).c_str());
     jsonValue->Put("offsetX", std::to_string(shadow.GetOffset().GetX()).c_str());
     jsonValue->Put("offsetY", std::to_string(shadow.GetOffset().GetY()).c_str());
+    jsonValue->Put("type", std::to_string(static_cast<int32_t>(shadow.GetShadowType())).c_str());
     return jsonValue;
 }
 

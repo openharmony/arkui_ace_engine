@@ -128,7 +128,7 @@ void RenderToolBarItem::Update(const RefPtr<Component>& component)
         onClick_ = AceAsyncEvent<void()>::Create(toolBarItemComponent->GetClickedEventId(), context_);
     }
     if (!eventEffectController_) {
-        eventEffectController_ = AceType::MakeRefPtr<Animator>(context_);
+        eventEffectController_ = CREATE_ANIMATOR(context_);
     }
     isEndItem_ = toolBarItemComponent->GetIsEndItem();
     rrectRadius_ = toolBarItemComponent->GetRadius();
@@ -187,7 +187,7 @@ void RenderToolBarItem::OnMouseHoverEnterTest()
 {
     ResetController(controllerExit_);
     if (!controllerEnter_) {
-        controllerEnter_ = AceType::MakeRefPtr<Animator>(context_);
+        controllerEnter_ = CREATE_ANIMATOR(context_);
     }
     colorAnimationEnter_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
     CreateColorAnimation(colorAnimationEnter_, Color::TRANSPARENT, mouseHoverColor_, true);
@@ -199,7 +199,7 @@ void RenderToolBarItem::OnMouseHoverExitTest()
 {
     ResetController(controllerEnter_);
     if (!controllerExit_) {
-        controllerExit_ = AceType::MakeRefPtr<Animator>(context_);
+        controllerExit_ = CREATE_ANIMATOR(context_);
     }
     colorAnimationExit_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
     CreateColorAnimation(colorAnimationExit_, hoverColor_, Color::TRANSPARENT, false);

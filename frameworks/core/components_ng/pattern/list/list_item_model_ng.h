@@ -24,7 +24,7 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ListItemModelNG : public ListItemModel {
 public:
-    void Create(std::function<void(int32_t)>&& deepRenderFunc) override;
+    void Create(std::function<void(int32_t)>&& deepRenderFunc, V2::ListItemStyle listItemStyle) override;
     void Create() override;
     void SetBorderRadius(const Dimension& borderRadius) override {}
     void SetType(const std::string& type) override {}
@@ -36,6 +36,9 @@ public:
         V2::SwipeEdgeEffect edgeEffect) override;
     void SetSelectCallback(OnSelectFunc&& selectCallback) override;
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override {}
+    void SetDeleteArea(std::function<void()>&& builderAction, bool useDefaultDeleteAnimation, OnDeleteEvent&& onDelete,
+        OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea, const Dimension& length,
+        bool isStartArea) override;
 };
 } // namespace OHOS::Ace::NG
 

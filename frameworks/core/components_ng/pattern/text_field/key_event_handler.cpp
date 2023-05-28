@@ -27,14 +27,14 @@ bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
         if (keyEvent.code == KeyCode::KEY_ENTER || keyEvent.code == KeyCode::KEY_NUMPAD_ENTER ||
             keyEvent.code == KeyCode::KEY_DPAD_CENTER) {
             if (pattern->GetKeyboard() != TextInputType::MULTILINE) {
-                pattern->PerformAction(pattern->GetAction(), false);
+                pattern->PerformAction(pattern->GetTextInputActionValue(TextInputAction::DONE), false);
                 return true;
             }
         } else if (HandleShiftPressedEvent(keyEvent)) {
             return true;
         } else if (keyEvent.IsDirectionalKey()) {
-            auto handleDirectionalKey = HandleDirectionalKey(keyEvent);
-            return handleDirectionalKey;
+            HandleDirectionalKey(keyEvent);
+            return true;
         } else if (keyEvent.IsNumberKey()) {
             appendElement = keyEvent.ConvertCodeToString();
         } else if (keyEvent.IsLetterKey()) {

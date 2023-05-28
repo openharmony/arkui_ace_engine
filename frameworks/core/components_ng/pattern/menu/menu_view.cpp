@@ -84,6 +84,7 @@ void CreateTitleNode(const std::string& title, RefPtr<FrameNode>& column)
     textProperty->UpdatePadding(textPadding);
     textProperty->UpdateFontSize(theme->GetMenuTitleFontSize());
     textProperty->UpdateFontWeight(FontWeight::MEDIUM);
+    textProperty->UpdateItalicFontStyle(Ace::FontStyle::NORMAL);
     textProperty->UpdateTextColor(theme->GetMenuFontColor());
     textProperty->UpdateContent(title);
 
@@ -129,6 +130,16 @@ void OptionKeepMenu(RefPtr<FrameNode>& option, WeakPtr<FrameNode>& menuWeak)
     CHECK_NULL_VOID(pattern);
     pattern->SetMenu(menuWeak);
 }
+
+bool GetHasIcon(const std::vector<OptionParam>& params)
+{
+    for (size_t i = 0; i < params.size(); ++i) {
+        if (!params[i].icon.empty()) {
+            return true;
+        }
+    }
+    return false;
+}
 } // namespace
 
 // create menu with menuItems
@@ -143,16 +154,21 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     }
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_RETURN(menuPattern, nullptr);
+    bool optionsHasIcon = GetHasIcon(params);
     // append options to menu
     for (size_t i = 0; i < params.size(); ++i) {
-        auto optionNode = OptionView::CreateMenuOption(params[i].value, std::move(params[i].action), i, params[i].icon);
+        auto optionNode = OptionView::CreateMenuOption(
+            optionsHasIcon, params[i].value, std::move(params[i].action), i, params[i].icon);
         menuPattern->AddOptionNode(optionNode);
         auto menuWeak = AceType::WeakClaim(AceType::RawPtr(menuNode));
         OptionKeepMenu(optionNode, menuWeak);
         // first node never paints divider
+        auto props = optionNode->GetPaintProperty<OptionPaintProperty>();
         if (i == 0 && menuParam.title.empty()) {
-            auto props = optionNode->GetPaintProperty<OptionPaintProperty>();
             props->UpdateNeedDivider(false);
+        }
+        if (optionsHasIcon) {
+            props->UpdateHasIcon(true);
         }
         optionNode->MountToParent(column);
         optionNode->MarkModifyDone();
@@ -204,8 +220,8 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     return wrapperNode;
 }
 
-void MenuView::UpdateWrapperPaintProperty(const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam,
-    const MenuType& type)
+void MenuView::UpdateWrapperPaintProperty(
+    const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam, const MenuType& type)
 {
     if (!(type == MenuType::CONTEXT_MENU)) {
         return;
@@ -256,29 +272,5 @@ void MenuView::Create()
         []() { return AceType::MakeRefPtr<MenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MULTI_MENU); });
     CHECK_NULL_VOID(menuNode);
     ViewStackProcessor::GetInstance()->Push(menuNode);
-}
-
-void MenuView::SetFontSize(const Dimension& fontSize)
-{
-    if (fontSize.IsValid()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontSize, fontSize);
-    } else {
-        LOGW("FontSize value is not valid");
-        ACE_RESET_LAYOUT_PROPERTY(MenuLayoutProperty, FontSize);
-    }
-}
-
-void MenuView::SetFontColor(const std::optional<Color>& color)
-{
-    if (color.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor, color.value());
-    } else {
-        ACE_RESET_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor);
-    }
-}
-
-void MenuView::SetFontWeight(Ace::FontWeight weight)
-{
-    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontWeight, weight);
 }
 } // namespace OHOS::Ace::NG

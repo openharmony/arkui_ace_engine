@@ -18,13 +18,14 @@
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
+#include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
 
 namespace OHOS::Ace::NG {
 
-constexpr int32_t MAX_NAVIGATION_CHILDREN_SIZE = 3;
 constexpr int32_t NAVIMODE_CHANGE_ANIMATION_DURATION = 250;
 constexpr int32_t OPACITY_ANIMATION_DURATION_APPEAR = 150;
 constexpr int32_t OPACITY_ANIMATION_DURATION_DISAPPEAR = 250;
@@ -107,6 +108,7 @@ void NavigationPattern::OnModifyDone()
     auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
     navBarNode->MarkModifyDone();
+    auto preTopNavPath = GetTopNavPath();
     if (!navPathList_.empty()) {
         navPathList_.clear();
     }
@@ -130,16 +132,39 @@ void NavigationPattern::OnModifyDone()
     }
 
     navigationStack_->SetNavPathList(navPathList_);
-
     auto contentNode = hostNode->GetContentNode();
     contentNode->Clean();
     hostNode->AddNavDestinationToNavigation(hostNode);
+
+    auto newTopNavPath = GetTopNavPath();
+    if (preTopNavPath != newTopNavPath) {
+        // fire onHidden event
+        if (preTopNavPath.second != nullptr) {
+            auto preTop = preTopNavPath.second;
+            auto preTopNavDestination =
+                AceType::DynamicCast<NavDestinationGroupNode>(NavigationGroupNode::GetNavDestinationNode(preTop));
+            auto eventHub = preTopNavDestination->GetEventHub<NavDestinationEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->FireOnHiddenEvent();
+        }
+
+        // fire onShown event
+        if (newTopNavPath.second != nullptr) {
+            auto newTop = newTopNavPath.second;
+            auto newTopNavDestination =
+                AceType::DynamicCast<NavDestinationGroupNode>(NavigationGroupNode::GetNavDestinationNode(newTop));
+            auto eventHub = newTopNavDestination->GetEventHub<NavDestinationEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->FireOnShownEvent();
+        }
+    }
 
     auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto currentMode = layoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO);
     if (currentMode != NavigationMode::AUTO && navigationMode_ != currentMode &&
         navigationMode_ != NavigationMode::AUTO) {
+        hostNode->SetIsModeChange(true);
         DoAnimation(currentMode);
     }
     preNavPathList_ = navPathList_;
@@ -163,6 +188,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         if (navigationLayoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO) == NavigationMode::AUTO) {
             auto currentMode = navigationLayoutAlgorithm->GetNavigationMode();
             if (navigationMode_ != NavigationMode::AUTO && navigationMode_ != currentMode) {
+                hostNode->SetIsModeChange(true);
                 DoAnimation(currentMode);
             }
             navigationMode_ = currentMode;
@@ -187,40 +213,6 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                 navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
                 eventHub->FireNavBarStateChangeEvent(true);
             }
-        }
-    }
-
-    auto navigationMode = navigationLayoutAlgorithm->GetNavigationMode();
-    auto navigationChildrenSize = hostNode->GetChildren().size();
-    if (navigationMode == NavigationMode::STACK) {
-        auto contentNode = hostNode->GetContentNode();
-        CHECK_NULL_RETURN(contentNode, false);
-        auto contentChildSize = contentNode->GetChildren().size();
-        if (contentChildSize != 0) {
-            auto contentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
-            CHECK_NULL_RETURN(contentNode, false);
-            hostNode->AddChild(contentNode);
-            auto dividerNode = AceType::DynamicCast<FrameNode>(hostNode->GetDividerNode());
-            CHECK_NULL_RETURN(dividerNode, false);
-            hostNode->AddChild(dividerNode);
-            hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        } else {
-            auto contentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
-            CHECK_NULL_RETURN(contentNode, false);
-            hostNode->RemoveChild(contentNode);
-            auto dividerNode = AceType::DynamicCast<FrameNode>(hostNode->GetDividerNode());
-            CHECK_NULL_RETURN(dividerNode, false);
-            hostNode->RemoveChild(dividerNode);
-        }
-    } else {
-        if (navigationChildrenSize != MAX_NAVIGATION_CHILDREN_SIZE) {
-            auto contentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
-            CHECK_NULL_RETURN(contentNode, false);
-            hostNode->AddChild(contentNode);
-            auto dividerNode = AceType::DynamicCast<FrameNode>(hostNode->GetDividerNode());
-            CHECK_NULL_RETURN(dividerNode, false);
-            hostNode->AddChild(dividerNode);
-            hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     }
     return false;

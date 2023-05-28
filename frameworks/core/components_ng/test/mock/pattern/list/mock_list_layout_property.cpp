@@ -17,4 +17,5 @@
 
 namespace OHOS::Ace::NG {
 void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+void ListLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json) {}
 } // namespace OHOS::Ace::NG

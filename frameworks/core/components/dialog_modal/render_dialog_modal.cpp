@@ -42,7 +42,7 @@ RefPtr<RenderNode> RenderDialogModal::Create()
 void RenderDialogModal::Update(const RefPtr<Component>& component)
 {
     if (!controller_) {
-        controller_ = AceType::MakeRefPtr<Animator>(GetContext());
+        controller_ = CREATE_ANIMATOR(GetContext());
     }
     MarkNeedLayout();
 }

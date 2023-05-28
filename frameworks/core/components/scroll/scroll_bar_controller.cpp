@@ -79,8 +79,8 @@ void ScrollBarController::Initialize(const WeakPtr<PipelineContext>& context, bo
         }
     });
 
-    touchAnimator_ = AceType::MakeRefPtr<Animator>(context);
-    dragEndAnimator_ = AceType::MakeRefPtr<Animator>(context);
+    touchAnimator_ = CREATE_ANIMATOR(context);
+    dragEndAnimator_ = CREATE_ANIMATOR(context);
     InitBarEndAnimation(context);
 
     // when touching down, it need vibrate, last 100ms
@@ -292,7 +292,7 @@ void ScrollBarController::InitBarEndAnimation(const WeakPtr<PipelineContext>& co
         return;
     }
 
-    scrollEndAnimator_ = AceType::MakeRefPtr<Animator>(context);
+    scrollEndAnimator_ = CREATE_ANIMATOR(context);
     auto hiddenStartKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEYTIME_START, UINT8_MAX);
     auto hiddenMiddleKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEYTIME_MIDDLE, UINT8_MAX);
     auto hiddenEndKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEYTIME_END, 0);

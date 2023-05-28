@@ -351,7 +351,7 @@ void TextOverlayBase::InitAnimation(const WeakPtr<PipelineContext>& pipelineCont
 
     // Add the animation
     LOGD("Add animation to animator");
-    animator_ = AceType::MakeRefPtr<Animator>(context);
+    animator_ = CREATE_ANIMATOR(context);
     animator_->AddInterpolator(diameterAnimation);
     animator_->AddInterpolator(diameterInnerAnimation);
     animator_->SetDuration(SHOW_HANDLE_DURATION);

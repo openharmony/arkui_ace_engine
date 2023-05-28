@@ -23,6 +23,8 @@ build_component_ng("security_component_pattern_ng") {
   sources = [
     "location_button/location_button_model_ng.cpp",
     "security_component_accessibility_property.cpp",
+    "security_component_handler.cpp",
+    "security_component_layout_algorithm.cpp",
     "security_component_model_ng.cpp",
     "security_component_pattern.cpp",
   ]

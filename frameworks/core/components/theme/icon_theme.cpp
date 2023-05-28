@@ -77,7 +77,18 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::APP_BAR_FA_SVG, "app_bar_fa" },
     { InternalResource::ResourceId::MENU_OK_SVG, "ic_public_ok" },
     { InternalResource::ResourceId::LOCATION_BUTTON_FILLED_SVG, "location_button_filled"},
-    { InternalResource::ResourceId::LOCATION_BUTTON_LINE_SVG, "location_button_line"}
+    { InternalResource::ResourceId::LOCATION_BUTTON_LINE_SVG, "location_button_line"},
+    { InternalResource::ResourceId::IC_PUBLIC_ARROW_LEFT_SVG, "ic_public_arrow_left" },
+    { InternalResource::ResourceId::IC_PUBLIC_ARROW_RIGHT_SVG, "ic_public_arrow_right" },
+    { InternalResource::ResourceId::IC_PUBLIC_ARROW_UP_SVG, "ic_public_arrow_up" },
+    { InternalResource::ResourceId::IC_PUBLIC_ARROW_DOWN_SVG, "ic_public_arrow_down" },
+    { InternalResource::ResourceId::IC_CUT_SVG, "ic_public_cut" },
+    { InternalResource::ResourceId::IC_COPY_SVG, "ic_public_copy" },
+    { InternalResource::ResourceId::IC_PASTE_SVG, "ic_public_paste" },
+    { InternalResource::ResourceId::IC_SELECT_ALL_SVG, "ic_public_select_all" },
+    { InternalResource::ResourceId::IC_SHARE_SVG, "ic_public_share" },
+    { InternalResource::ResourceId::IC_TRANSLATE_SVG, "ic_public_translate_c2e" },
+    { InternalResource::ResourceId::IC_SEARCH_SVG, "ic_public_search_filled" }
 };
 }
 

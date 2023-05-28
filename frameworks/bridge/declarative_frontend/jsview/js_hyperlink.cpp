@@ -61,10 +61,9 @@ void JSHyperlink::JSBind(BindingTarget globalObj)
     JSClass<JSHyperlink>::StaticMethod("pop", &JSHyperlink::Pop);
 
     JSClass<JSHyperlink>::StaticMethod("draggable", &JSHyperlink::JsSetDraggable);
-
-    JSClass<JSHyperlink>::Inherit<JSViewAbstract>();
     JSClass<JSHyperlink>::Inherit<JSInteractableView>();
-    JSClass<JSHyperlink>::Bind(globalObj);
+
+    JSClass<JSHyperlink>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSHyperlink::Create(const JSCallbackInfo& args)

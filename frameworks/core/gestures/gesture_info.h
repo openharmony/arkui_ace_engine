@@ -615,7 +615,7 @@ public:
         displayX_ = displayX;
     }
 
-    double GetDisplayX()
+    double GetDisplayX() const
     {
         return displayX_;
     }
@@ -624,12 +624,18 @@ public:
     {
         displayY_ = displayY;
     }
-    double GetDisplayY()
+
+    double GetDisplayY() const
     {
         return displayY_;
     }
 
-    JsonValue& GetSecCompHandleEvent()
+    void SetSecCompHandleEvent(const std::shared_ptr<JsonValue>& event)
+    {
+        secCompHandleEvent_ = event;
+    }
+
+    std::shared_ptr<JsonValue> GetSecCompHandleEvent() const
     {
         return secCompHandleEvent_;
     }
@@ -650,9 +656,9 @@ private:
     int32_t pointerId_ = 0;
 #endif // ENABLE_DRAG_FRAMEWORK
 #ifdef SECURITY_COMPONENT_ENABLE
-    float displayX_ = 0.0;
-    float displayY_ = 0.0;
-    JsonValue secCompHandleEvent_;
+    double displayX_ = 0.0;
+    double displayY_ = 0.0;
+    std::shared_ptr<JsonValue> secCompHandleEvent_;
 #endif
     Point globalPoint_;
     // global position at which the touch point contacts the screen.

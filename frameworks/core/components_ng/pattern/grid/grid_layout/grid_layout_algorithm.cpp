@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 
-#include <vector>
-
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
@@ -25,22 +23,17 @@
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-void OffsetByAlign(
-    const LayoutConstraintF& layoutConstraint, float rowLen, float colLen, float& positionX, float& positionY)
+void OffsetByAlign(const SizeF& size, float rowLen, float colLen, float& positionX, float& positionY)
 {
     // only support Alignment.Center now
-    auto size = layoutConstraint.selfIdealSize;
-    if (size.Width().has_value()) {
-        auto width = size.Width().value();
-        positionX += (colLen - width) / 2;
-    }
-    if (size.Height().has_value()) {
-        auto height = size.Height().value();
-        positionY += (rowLen - height) / 2;
-    }
+    auto width = size.Width();
+    positionX += (colLen - width) / 2;
+    auto height = size.Height();
+    positionY += (rowLen - height) / 2;
 }
 } // namespace
 
@@ -77,9 +70,11 @@ void GridLayoutAlgorithm::InitGridCeils(LayoutWrapper* layoutWrapper, const Size
     auto scale = layoutProperty->GetLayoutConstraint()->scaleProperty;
     rowsGap_ = ConvertToPx(layoutProperty->GetRowsGap().value_or(0.0_vp), scale, idealSize.Height()).value_or(0);
     columnsGap_ = ConvertToPx(layoutProperty->GetColumnsGap().value_or(0.0_vp), scale, idealSize.Width()).value_or(0);
-    auto rowsLen = GridUtils::ParseArgs(layoutProperty->GetRowsTemplate().value_or(""), idealSize.Height(), rowsGap_);
-    auto colsLen =
-        GridUtils::ParseArgs(layoutProperty->GetColumnsTemplate().value_or(""), idealSize.Width(), columnsGap_);
+    auto rowsLen = ParseTemplateArgs(GridUtils::ParseArgs(layoutProperty->GetRowsTemplate().value_or("")),
+        idealSize.Height(), rowsGap_, layoutWrapper->GetTotalChildCount());
+    auto colsLen = ParseTemplateArgs(GridUtils::ParseArgs(layoutProperty->GetColumnsTemplate().value_or("")),
+        idealSize.Width(), columnsGap_, layoutWrapper->GetTotalChildCount());
+
     if (rowsLen.empty()) {
         rowsLen.push_back(idealSize.Height());
     }
@@ -167,7 +162,7 @@ void GridLayoutAlgorithm::GetNextGrid(int32_t& curRow, int32_t& curCol) const
 }
 
 OffsetF GridLayoutAlgorithm::ComputeItemPosition(LayoutWrapper* layoutWrapper, int32_t row, int32_t col,
-    int32_t& rowSpan, int32_t& colSpan, const RefPtr<OHOS::Ace::NG::LayoutProperty>& childLayoutProperty) const
+    int32_t& rowSpan, int32_t& colSpan, const RefPtr<LayoutWrapper>& childLayoutWrapper) const
 {
     auto layoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, OffsetF());
@@ -197,11 +192,9 @@ OffsetF GridLayoutAlgorithm::ComputeItemPosition(LayoutWrapper* layoutWrapper, i
     }
     colLen += (colSpan - 1) * columnsGap_;
 
-    if (childLayoutProperty) {
-        auto layoutConstraint = childLayoutProperty->GetLayoutConstraint();
-        if (layoutConstraint.has_value()) {
-            OffsetByAlign(layoutConstraint.value(), rowLen, colLen, positionX, positionY);
-        }
+    if (childLayoutWrapper) {
+        auto childSize = childLayoutWrapper->GetGeometryNode()->GetMarginFrameSize();
+        OffsetByAlign(childSize, rowLen, colLen, positionX, positionY);
     }
 
     // If RTL, place the item from right.
@@ -259,7 +252,7 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             childLayoutWrapper->Measure(CreateChildConstraint(idealSize, gridLayoutProperty, itemRowStart, itemColStart,
                 itemRowSpan, itemColSpan, childLayoutProperty));
             itemsPosition_.try_emplace(index, ComputeItemPosition(layoutWrapper, itemRowStart, itemColStart,
-                itemRowSpan, itemColSpan, childLayoutProperty));
+                itemRowSpan, itemColSpan, childLayoutWrapper));
         } else {
             while (!CheckGridPlaced(itemIndex, rowIndex, colIndex, itemRowSpan, itemColSpan)) {
                 GetNextGrid(rowIndex, colIndex);
@@ -273,7 +266,7 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             childLayoutWrapper->Measure(CreateChildConstraint(
                 idealSize, gridLayoutProperty, rowIndex, colIndex, itemRowSpan, itemColSpan, childLayoutProperty));
             itemsPosition_.try_emplace(index,
-                ComputeItemPosition(layoutWrapper, rowIndex, colIndex, itemRowSpan, itemColSpan, childLayoutProperty));
+                ComputeItemPosition(layoutWrapper, rowIndex, colIndex, itemRowSpan, itemColSpan, childLayoutWrapper));
         }
         ++itemIndex;
     }
@@ -287,7 +280,7 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, frameSize);
-
+    layoutWrapper->RemoveAllChildInRenderTree();
     for (int32_t index = 0; index < mainCount_ * crossCount_; ++index) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!childWrapper) {
@@ -297,11 +290,8 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto childPosition = itemsPosition_.find(index);
         if (childPosition != itemsPosition_.end()) {
             childOffset = itemsPosition_.at(index);
-            // TODO: add center position when grid item is less than ceil.
             childWrapper->GetGeometryNode()->SetMarginFrameOffset(padding.Offset() + childOffset);
             childWrapper->Layout();
-        } else {
-            LayoutWrapper::RemoveChildInRenderTree(childWrapper);
         }
     }
 

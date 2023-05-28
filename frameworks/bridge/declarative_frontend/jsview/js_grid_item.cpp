@@ -152,9 +152,7 @@ void JSGridItem::JSBind(BindingTarget globalObj)
     JSClass<JSGridItem>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSGridItem>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
-    JSClass<JSGridItem>::Inherit<JSContainerBase>();
-    JSClass<JSGridItem>::Inherit<JSViewAbstract>();
-    JSClass<JSGridItem>::Bind<>(globalObj);
+    JSClass<JSGridItem>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

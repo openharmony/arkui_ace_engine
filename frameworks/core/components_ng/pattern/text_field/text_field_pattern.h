@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_PATTERN_H
 
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -68,6 +69,9 @@ namespace OHOS::Ace::NG {
 constexpr Dimension CURSOR_WIDTH = 1.5_vp;
 constexpr Dimension SCROLL_BAR_MIN_HEIGHT = 4.0_vp;
 constexpr Dimension UNDERLINE_WIDTH = 1.0_px;
+constexpr Dimension ERROR_UNDERLINE_WIDTH = 2.0_px;
+constexpr Dimension ACTIVED_UNDERLINE_WIDTH = 2.0_px;
+constexpr Dimension TYPING_UNDERLINE_WIDTH = 2.0_px;
 
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
 
@@ -112,8 +116,15 @@ struct CaretMetricsF {
 struct UnderLinePattern {
     BorderRadiusProperty radius;
     Color bgColor;
-    BorderWidthProperty borderWidth;
+};
+
+struct PasswordModeStyle {
+    Color bgColor;
+    Color textColor;
+    BorderWidthProperty borderwidth;
     BorderColorProperty borderColor;
+    BorderRadiusProperty radius;
+    PaddingProperty padding;
 };
 
 class TextFieldPattern : public ScrollablePattern,
@@ -208,9 +219,10 @@ public:
     const TextEditingValueNG& GetEditingValue() const;
 
 #if defined(IOS_PLATFORM)
-    const TextEditingValue& GetInputEditingValue() const override {
+    const TextEditingValue& GetInputEditingValue() const override
+    {
         static TextEditingValue value;
-	return value;
+        return value;
     };
 #endif
 
@@ -230,7 +242,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        return { FocusType::NODE, true };
     }
 
     void UpdateConfiguration();
@@ -243,6 +255,7 @@ public:
     void OnAreaChangedInner() override;
     void OnVisibleChange(bool isVisible) override;
     void ClearEditingValue();
+    void HandleCounterBorder();
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TextInputAction, TextInputAction)
 
@@ -259,6 +272,11 @@ public:
     const std::shared_ptr<RSParagraph>& GetCounterParagraph() const
     {
         return counterParagraph_;
+    }
+
+    const std::shared_ptr<RSParagraph>& GetErrorParagraph() const
+    {
+        return errorParagraph_;
     }
 
     bool GetCursorVisible() const
@@ -418,6 +436,7 @@ public:
     }
     void CaretMoveToLastNewLineChar();
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void FromJson(const std::unique_ptr<JsonValue>& json) override;
     void InitEditingValueText(std::string content);
     void InitCaretPosition(std::string content);
     const TextEditingValueNG& GetTextEditingValue()
@@ -447,6 +466,10 @@ public:
     {
         needCloseOverlay_ = needClose;
     }
+    const RefPtr<ImageLoadingContext>& GetShowPasswordIconCtx() const
+    {
+        return showPasswordImageLoadingCtx_;
+    }
 
     void SearchRequestKeyboard();
 
@@ -455,9 +478,24 @@ public:
         return showPasswordCanvasImage_;
     }
 
+    const RefPtr<ImageLoadingContext>& GetHidePasswordIconCtx() const
+    {
+        return hidePasswordImageLoadingCtx_;
+    }
+
     const RefPtr<CanvasImage>& GetHidePasswordIconCanvasImage() const
     {
         return hidePasswordCanvasImage_;
+    }
+
+    void SetShowResultImageInfo(ImageSourceInfo showResultImageInfo)
+    {
+        showResultImageInfo_ = showResultImageInfo;
+    }
+
+    void SetHideResultImageInfo(ImageSourceInfo hideResultImageInfo)
+    {
+        hideResultImageInfo_ = hideResultImageInfo;
     }
 
     bool GetTextObscured() const
@@ -490,6 +528,11 @@ public:
                layoutProperty->GetShowPasswordIconValue(true);
     }
 
+    void SetShowUserDefinedIcon()
+    {
+        showUserDefinedIcon_ = true;
+    }
+
     void SetEnableTouchAndHoverEffect(bool enable)
     {
         enableTouchAndHoverEffect_ = enable;
@@ -505,7 +548,7 @@ public:
     float GetIconHotZoneSize();
     float GetIconSize();
 
-    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) const;
+    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) const;
 
     void InitSurfaceChangedCallback();
@@ -672,9 +715,12 @@ public:
     TextAlign GetTextAlign() const;
     std::string GetPlaceHolder() const;
     uint32_t GetMaxLength() const;
+    uint32_t GetMaxLines() const;
     std::string GetInputFilter() const;
     std::string GetCopyOptionString() const;
     std::string GetInputStyleString() const;
+    std::string GetErrorTextString() const;
+    bool GetErrorTextState() const;
     std::string GetShowPasswordIconString() const;
     void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd);
     void HandleBlurEvent();
@@ -711,26 +757,7 @@ public:
     }
     static int32_t GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev = false);
     void SetUnitNode(const RefPtr<NG::UINode>& unitNode);
-
-    const RefPtr<ImageLoadingContext>& GetShowPasswordIconCtx() const
-    {
-        return showPasswordImageLoadingCtx_;
-    }
-
-    const RefPtr<ImageLoadingContext>& GetHidePasswordIconCtx() const
-    {
-        return hidePasswordImageLoadingCtx_;
-    }
-
-    void SetShowUnderLine(bool showUnderLine)
-    {
-        showUnderLine_ = showUnderLine;
-    }
-
-    bool GetShowUnderLine() const
-    {
-        return showUnderLine_;
-    }
+    void SetShowError();
 
     float GetUnitWidth() const
     {
@@ -745,6 +772,28 @@ public:
     const Color& GetUnderlineColor() const
     {
         return underlineColor_;
+    }
+
+    float GetMarginBottom() const;
+
+    void SetUnderlineColor(Color underlineColor)
+    {
+        underlineColor_ = underlineColor;
+    }
+
+    void SetUnderlineWidth(Dimension underlineWidth)
+    {
+        underlineWidth_ = underlineWidth;
+    }
+
+    bool IsSelected() const
+    {
+        return HasFocus();
+    }
+
+    void ChangeIsSelectedAreaRedraw()
+    {
+        isSelectedAreaRedraw_ = !isSelectedAreaRedraw_;
     }
 
 private:
@@ -766,9 +815,9 @@ private:
     int32_t UpdateCaretPositionOnHandleMove(const OffsetF& localOffset);
     bool HasStateStyle(UIState state) const;
 
-    void AddScrollEvent();
     void OnTextAreaScroll(float offset);
     bool OnScrollCallback(float offset, int32_t source) override;
+    void OnScrollEndCallback() override;
     void InitMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
     void OnHover(bool isHover);
@@ -776,6 +825,8 @@ private:
     void HandleLongPress(GestureEvent& info);
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void UpdateSelectorByPosition(const int32_t& pos);
+    // assert handles are inside the contentRect, reset them if not
+    void CheckHandles(std::optional<RectF>& firstHandle, std::optional<RectF>& secondHandle);
     void ShowSelectOverlay(const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle);
 
     void CursorMoveOnClick(const Offset& offset);
@@ -784,6 +835,8 @@ private:
     void ProcessOverlay();
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
+    // when moving one handle causes shift of textRect, update x position of the other handle
+    void UpdateOtherHandleOnMove(float dx, float dy);
     void SetHandlerOnMoveDone();
     void OnDetachFromFrameNode(FrameNode* node) override;
     bool UpdateCaretByPressOrLongPress();
@@ -827,6 +880,7 @@ private:
     void AnimatePressAndHover(RefPtr<RenderContext>& renderContext, float endOpacity, bool isHoverChange = false);
 
     void ProcessPasswordIcon();
+    void UpdateUserDefineResource(ImageSourceInfo& sourceInfo);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
     ImageSourceInfo GetImageSourceInfoFromTheme(bool checkHidePasswordIcon);
     LoadSuccessNotifyTask CreateLoadSuccessCallback(bool checkHidePasswordIcon);
@@ -840,6 +894,10 @@ private:
     void RequestKeyboardOnFocus();
     void SetNeedToRequestKeyboardOnFocus();
     void SaveUnderlineStates();
+    void SavePasswordModeStates();
+    void SetAccessibilityAction();
+    void SetAccessibilityMoveTextAction();
+    void SetAccessibilityScrollAction();
 
     RectF frameRect_;
     RectF contentRect_;
@@ -847,6 +905,7 @@ private:
     RectF imageRect_;
     std::shared_ptr<RSParagraph> paragraph_;
     std::shared_ptr<RSParagraph> counterParagraph_;
+    std::shared_ptr<RSParagraph> errorParagraph_;
     std::shared_ptr<RSParagraph> dragParagraph_;
     std::shared_ptr<RSParagraph> textLineHeightUtilParagraph_;
     std::shared_ptr<RSParagraph> placeholderLineHeightUtilParagraph_;
@@ -879,8 +938,13 @@ private:
     PaddingPropertyF utilPadding_;
     OffsetF rightClickOffset_;
 
-    bool showUnderLine_ = false;
+    ImageSourceInfo showResultImageInfo_;
+    ImageSourceInfo hideResultImageInfo_;
+    bool setBorderFlag_ = true;
+    BorderWidthProperty lastDiffBorderWidth_;
+    BorderColorProperty lastDiffBorderColor_;
 
+    bool showUserDefinedIcon_ = false;
     bool isSingleHandle_ = false;
     bool isFirstHandle_ = false;
     float baselineOffset_ = 0.0f;
@@ -900,7 +964,7 @@ private:
     bool isOnHover_ = false;
     bool needToRefreshSelectOverlay_ = false;
     bool needToRequestKeyboardInner_ = false;
-    bool needToRequestKeyboardOnFocus_ = false;
+    bool needToRequestKeyboardOnFocus_ = true;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 
@@ -946,6 +1010,7 @@ private:
     std::vector<TextSelector> redoTextSelectorRecords_;
     std::vector<MenuOptionsParam> menuOptionItems_;
     UnderLinePattern underLinePattern_;
+    PasswordModeStyle passwordModeStyle_;
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> textChangeListener_;

@@ -197,7 +197,7 @@ void RenderDisplay::ResetAppearingAnimation()
 void RenderDisplay::CreateAppearingAnimation(uint8_t opacity, int32_t limit)
 {
     if (!animator_) {
-        animator_ = AceType::MakeRefPtr<Animator>(context_);
+        animator_ = CREATE_ANIMATOR(context_);
     }
     ResetAppearingAnimation();
     if (!appearingAnimation_) {

@@ -92,8 +92,16 @@ HWTEST_F(ParseUseTestNg, ParseTest001, TestSize.Level1)
     EXPECT_STREQ(stroke.GetColor().ColorToString().c_str(), Color(STROKE).ColorToString().c_str());
     EXPECT_STREQ(svgUseDeclaration->GetHref().c_str(), HREF.c_str());
     RSCanvas rSCanvas;
-    svgDom->DrawImage(rSCanvas, ImageFit::FILL, Size(IMAGE_COPONENT_WIDTH, IMAGE_COPONENT_HEIGHT), Color::BLACK);
+    svgDom->DrawImage(rSCanvas, ImageFit::FILL, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), true);
+
+    // <Use> shouldn't overwrite attributes of the referenced <Path>
+    auto svgPath = svgDom->svgContext_->GetSvgNodeById(HREF);
+    auto pathDeclaration = svgPath->declaration_;
+    EXPECT_NE(pathDeclaration->GetFillState().GetFillRule().c_str(), FILL_RULE.c_str());
+    EXPECT_NE(pathDeclaration->GetFillState().GetColor(), Color::RED);
+    EXPECT_NE(pathDeclaration->GetTransform().c_str(), TRANSFORM.c_str());
+    EXPECT_NE(pathDeclaration->GetStrokeState().GetColor(), Color(STROKE));
 }
 } // namespace OHOS::Ace::NG

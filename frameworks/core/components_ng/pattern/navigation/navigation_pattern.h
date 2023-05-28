@@ -70,7 +70,7 @@ public:
     {
         return { FocusType::SCOPE, true };
     }
-    
+
     void SetNavDestination(std::function<void(std::string)>&& builder)
     {
         builder_ = std::move(builder);
@@ -109,6 +109,7 @@ public:
 
     RefPtr<UINode> GetNavDestinationNode()
     {
+        // get NavDestinationNode from the stack top
         return navigationStack_->Get();
     }
 
@@ -120,6 +121,29 @@ public:
     const std::vector<std::pair<std::string, RefPtr<UINode>>>& GetAllNavDestinationNodes()
     {
         return navigationStack_->GetAllNavDestinationNodes();
+    }
+
+    std::pair<std::string, RefPtr<UINode>> GetTopNavPath()
+    {
+        if (navPathList_.empty()) {
+            return std::make_pair("", nullptr);
+        }
+        int32_t top = navPathList_.size() - 1;
+        return std::make_pair(navPathList_[top].first, navPathList_[top].second);
+    }
+
+    void RemoveIfNeeded(const std::string& name, const RefPtr<UINode>& navDestinationNode)
+    {
+        auto index = navigationStack_->FindIndex(name, navDestinationNode);
+        // exit and not the top, need to be removed
+        if (index != -1 && index != static_cast<int32_t>(navPathList_.size()) - 1) {
+            navigationStack_->Remove(name, navDestinationNode);
+        }
+    }
+
+    void RemoveNavDestination()
+    {
+        navigationStack_->Remove();
     }
 
 private:

@@ -15,6 +15,8 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_marquee.h"
 #include <limits>
+#include <optional>
+#include <string>
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
@@ -30,9 +32,6 @@ namespace OHOS::Ace {
 
 std::unique_ptr<MarqueeModel> MarqueeModel::instance_ = nullptr;
 std::mutex MarqueeModel::mutex_;
-namespace {
-constexpr Dimension DEFAULT_STEP = 6.0_vp;
-}
 MarqueeModel* MarqueeModel::GetInstance()
 {
     if (!instance_) {
@@ -65,44 +64,50 @@ void JSMarquee::Create(const JSCallbackInfo& info)
     MarqueeModel::GetInstance()->Create();
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto src = paramObject->GetProperty("src");
-    if (!src->IsString()) {
-        LOGE("marquee create error, src is non-valid");
-        return;
+    std::optional<std::string> srcOpt;
+    if (src->IsString()) {
+        srcOpt = src->ToString();
     }
-    MarqueeModel::GetInstance()->SetValue(src->ToString());
+    MarqueeModel::GetInstance()->SetValue(srcOpt);
 
     auto getStart = paramObject->GetProperty("start");
-    bool start = getStart->IsBoolean() ? getStart->ToBoolean() : false;
-    MarqueeModel::GetInstance()->SetPlayerStatus(start);
+    std::optional<bool> startOpt = getStart->IsBoolean() ? getStart->ToBoolean() : false;
+    MarqueeModel::GetInstance()->SetPlayerStatus(startOpt);
 
     auto getStep = paramObject->GetProperty("step");
+    std::optional<double> stepOpt;
     if (getStep->IsNumber()) {
         auto step = getStep->ToNumber<double>();
-        MarqueeModel::GetInstance()->SetScrollAmount(
-            LessOrEqual(step, 0.0) ? DEFAULT_STEP.ConvertToPx() : Dimension(step, DimensionUnit::VP).ConvertToPx());
+        if (GreatNotEqual(step, 0.0)) {
+            stepOpt = Dimension(step, DimensionUnit::VP).ConvertToPx();
+        }
     }
+    MarqueeModel::GetInstance()->SetScrollAmount(stepOpt);
 
     auto getLoop = paramObject->GetProperty("loop");
+    std::optional<int32_t> loopOpt;
     if (getLoop->IsNumber()) {
         auto loopDouble = getLoop->ToNumber<double>();
         int32_t loop = -1;
-
-        if (GreatOrEqual(loopDouble, 0.0)) {
+        if (GreatNotEqual(loopDouble, 0.0)) {
             loop = static_cast<int32_t>(loopDouble);
             if (loop == std::numeric_limits<int32_t>::max()) {
                 loop = -1;
             }
         }
-        MarqueeModel::GetInstance()->SetLoop(loop < 0 ? -1 : loop);
+        loopOpt = loop;
     }
+    MarqueeModel::GetInstance()->SetLoop(loopOpt);
 
     auto getFromStart = paramObject->GetProperty("fromStart");
     bool fromStart = getFromStart->IsBoolean() ? getFromStart->ToBoolean() : true;
+    std::optional<MarqueeDirection> directionOpt;
     if (fromStart) {
-        MarqueeModel::GetInstance()->SetDirection(MarqueeDirection::LEFT);
+        directionOpt = MarqueeDirection::LEFT;
     } else {
-        MarqueeModel::GetInstance()->SetDirection(MarqueeDirection::RIGHT);
+        directionOpt = MarqueeDirection::RIGHT;
     }
+    MarqueeModel::GetInstance()->SetDirection(directionOpt);
 }
 
 void JSMarquee::JSBind(BindingTarget globalObj)
@@ -124,8 +129,7 @@ void JSMarquee::JSBind(BindingTarget globalObj)
     JSClass<JSMarquee>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSMarquee>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSMarquee>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSMarquee>::Inherit<JSViewAbstract>();
-    JSClass<JSMarquee>::Bind(globalObj);
+    JSClass<JSMarquee>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSMarquee::SetTextColor(const JSCallbackInfo& info)
@@ -134,13 +138,12 @@ void JSMarquee::SetTextColor(const JSCallbackInfo& info)
         LOGE("SetFontColor create error, info is non-valid");
         return;
     }
-
+    std::optional<Color> colorOpt;
     Color color;
-    if (!ParseJsColor(info[0], color)) {
-        LOGE("the info[0] is null");
-        return;
+    if (ParseJsColor(info[0], color)) {
+        colorOpt = color;
     }
-    MarqueeModel::GetInstance()->SetTextColor(color);
+    MarqueeModel::GetInstance()->SetTextColor(colorOpt);
 }
 
 void JSMarquee::SetFontSize(const JSCallbackInfo& info)
@@ -149,34 +152,33 @@ void JSMarquee::SetFontSize(const JSCallbackInfo& info)
         LOGE("SetFrontSize create error, info is non-valid");
         return;
     }
-
+    std::optional<Dimension> fontSizeOpt;
     CalcDimension fontSize;
-    if (!ParseJsDimensionFp(info[0], fontSize)) {
-        return;
+    if (ParseJsDimensionFp(info[0], fontSize)) {
+        if (!fontSize.IsNegative() && fontSize.Unit() != DimensionUnit::PERCENT) {
+            fontSizeOpt = fontSize;
+        }
     }
-    if (fontSize.IsNegative() || fontSize.Unit() == DimensionUnit::PERCENT) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(pipelineContext);
-        auto theme = pipelineContext->GetTheme<TextTheme>();
-        CHECK_NULL_VOID_NOLOG(theme);
-        MarqueeModel::GetInstance()->SetFontSize(theme->GetTextStyle().GetFontSize());
-        return;
-    }
-    MarqueeModel::GetInstance()->SetFontSize(fontSize);
+    MarqueeModel::GetInstance()->SetFontSize(fontSizeOpt);
 }
 
 void JSMarquee::SetAllowScale(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsBoolean()) {
+    if (info.Length() < 1) {
         LOGE("SetAllowScale create error, info is non-valid");
         return;
     }
-    MarqueeModel::GetInstance()->SetAllowScale(info[0]->ToBoolean());
+    std::optional<bool> allowScaleOpt;
+    if (info[0]->IsBoolean()) {
+        allowScaleOpt = info[0]->ToBoolean();
+    }
+    MarqueeModel::GetInstance()->SetAllowScale(allowScaleOpt);
 }
 
 void JSMarquee::SetFontWeight(const std::string& value)
 {
-    MarqueeModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
+    std::optional<FontWeight> fontWeightOpt = ConvertStrToFontWeight(value);
+    MarqueeModel::GetInstance()->SetFontWeight(fontWeightOpt);
 }
 
 void JSMarquee::SetFontFamily(const JSCallbackInfo& info)
@@ -185,13 +187,12 @@ void JSMarquee::SetFontFamily(const JSCallbackInfo& info)
         LOGE("SetFrontFamily create error, info is non-valid");
         return;
     }
-
+    std::optional<std::vector<std::string>> fontFamiliesOpt;
     std::vector<std::string> fontFamilies;
-    if (!ParseJsFontFamilies(info[0], fontFamilies)) {
-        LOGE("Parse FontFamilies failed");
-        return;
+    if (ParseJsFontFamilies(info[0], fontFamilies)) {
+        fontFamiliesOpt = fontFamilies;
     }
-    MarqueeModel::GetInstance()->SetFontFamily(fontFamilies);
+    MarqueeModel::GetInstance()->SetFontFamily(fontFamiliesOpt);
 }
 
 void JSMarquee::OnStart(const JSCallbackInfo& info)

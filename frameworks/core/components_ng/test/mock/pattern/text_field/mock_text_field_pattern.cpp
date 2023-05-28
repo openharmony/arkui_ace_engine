@@ -108,10 +108,14 @@ void TextFieldPattern::SetSelectionFlag(int32_t selectionStart, int32_t selectio
 
 void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 
+void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json) {}
+
 bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
 {
     return true;
 }
+void TextFieldPattern::OnScrollEndCallback() {}
+
 void TextFieldPattern::UpdateScrollBarOffset() {}
 
 void TextFieldPattern::HandleBlurEvent() {}

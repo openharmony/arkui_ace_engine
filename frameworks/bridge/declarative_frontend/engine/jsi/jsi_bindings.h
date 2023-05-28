@@ -84,6 +84,11 @@ public:
     static void Bind(BindingTarget t, JSDestructorCallback<C> dtor = nullptr, JSGCMarkCallback<C> gcMark = nullptr);
 
     template<typename Base>
+    static void InheritAndBind(
+        BindingTarget t, JSFunctionCallback ctor = nullptr,
+        JSDestructorCallback<C> dtor = nullptr, JSGCMarkCallback<C> gcMark = nullptr);
+
+    template<typename Base>
     static void Inherit();
 
     static std::unordered_map<std::string, panda::Global<panda::FunctionRef>>& GetCustomFunctions();

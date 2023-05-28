@@ -53,6 +53,8 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("fontFamily", &JSTextField::SetFontFamily);
     JSClass<JSTextArea>::StaticMethod("inputFilter", &JSTextField::SetInputFilter);
     JSClass<JSTextArea>::StaticMethod("hoverEffect", &JSTextField::JsHoverEffect);
+    JSClass<JSTextArea>::StaticMethod("maxLength", &JSTextField::SetMaxLength);
+    JSClass<JSTextArea>::StaticMethod("showCounter", &JSTextField::SetShowCounter);
     JSClass<JSTextArea>::StaticMethod("onChange", &JSTextField::SetOnChange);
     JSClass<JSTextArea>::StaticMethod("onCopy", &JSTextField::SetOnCopy);
     JSClass<JSTextArea>::StaticMethod("onCut", &JSTextField::SetOnCut);
@@ -68,8 +70,8 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("copyOption", &JSTextField::SetCopyOption);
     JSClass<JSTextArea>::StaticMethod("textMenuOptions", &JSTextField::JsMenuOptionsExtension);
     JSClass<JSTextArea>::StaticMethod("foregroundColor", &JSTextField::SetForegroundColor);
-    JSClass<JSTextArea>::Inherit<JSViewAbstract>();
-    JSClass<JSTextArea>::Bind(globalObj);
+    JSClass<JSTextArea>::StaticMethod("enableKeyboardOnFocus", &JSTextField::SetEnableKeyboardOnFocus);
+    JSClass<JSTextArea>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSTextArea::Create(const JSCallbackInfo& info)

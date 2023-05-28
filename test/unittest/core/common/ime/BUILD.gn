@@ -11,27 +11,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
-
-ohos_unittest("ime_test") {
-  module_out_path = "$basic_test_output_path/common"
-
-  include_dirs = [
-    "//foundation/window/window_manager/interfaces/innerkits",
-    "//third_party/flutter/engine/",
-  ]
-
-  sources = [ "ime_test.cpp" ]
-
-  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
-
-  deps = [
-    "$ace_flutter_engine_root/skia:ace_skia_ohos",
-    "$ace_root/build:ace_ohos_unittest_base",
-    "//third_party/googletest:gmock_main",
+ace_unittest("ime_test") {
+  type = "basic/common"
+  sources = [
+    "$ace_root/frameworks/core/common/ime/text_editing_value.cpp",
+    "$ace_root/frameworks/core/common/ime/text_input_action.cpp",
+    "$ace_root/frameworks/core/common/ime/text_input_configuration.cpp",
+    "$ace_root/frameworks/core/common/ime/text_input_connection.cpp",
+    "$ace_root/frameworks/core/common/ime/text_input_formatter.cpp",
+    "$ace_root/frameworks/core/common/ime/text_input_proxy.cpp",
+    "$ace_root/frameworks/core/common/ime/text_input_type.cpp",
+    "ime_test.cpp",
   ]
 
   external_deps = [ "ability_base:base" ]
-  part_name = ace_engine_part
 }

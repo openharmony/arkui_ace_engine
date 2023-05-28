@@ -59,11 +59,12 @@ bool SwitchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     width_ = width;
     height_ = height;
     auto geometryNode = dirty->GetGeometryNode();
-    offset_ = geometryNode->GetContentOffset();
-    size_ = geometryNode->GetContentSize();
-    if (isFirstAddhotZoneRect_) {
+    auto offset = geometryNode->GetContentOffset();
+    auto size = geometryNode->GetContentSize();
+    if (!NearEqual(offset, offset_) || !NearEqual(size, size_)) {
+        offset_ = offset;
+        size_ = size;
         AddHotZoneRect();
-        isFirstAddhotZoneRect_ = false;
     }
     return true;
 }
@@ -171,7 +172,7 @@ void SwitchPattern::PlayTranslateAnimation(float startPos, float endPos)
     if (!controller_) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        controller_ = AceType::MakeRefPtr<Animator>(pipeline);
+        controller_ = CREATE_ANIMATOR(pipeline);
     }
     controller_->ClearStopListeners();
     controller_->ClearInterpolators();

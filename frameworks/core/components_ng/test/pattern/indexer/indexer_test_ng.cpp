@@ -26,10 +26,10 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/indexer/indexer_layout_property.h"
+#include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/components_ng/pattern/indexer/indexer_paint_property.h"
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
-#include "core/components_ng/pattern/indexer/indexer_view.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
@@ -43,9 +43,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float DEFAULT_ROOT_WIDTH = 720.f;
 constexpr float DEFAULT_ROOT_HEIGHT = 1136.f;
-const std::vector<std::string> CREATE_ARRAY = {
-    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
-    "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
+std::vector<std::string> CREATE_ARRAY = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O",
+    "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
 std::vector<std::string> GetPopupData(int32_t)
 {
     return { "白", "别" };
@@ -129,8 +128,8 @@ void IndexerTestNg::RunMeasureAndLayout()
  */
 HWTEST_F(IndexerTestNg, IndexerMoveIndex001, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY, 0);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
     GetInstance();
     RunMeasureAndLayout();
     ASSERT_NE(pattern_->panEvent_, nullptr);
@@ -185,8 +184,8 @@ HWTEST_F(IndexerTestNg, IndexerMoveIndex001, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerMoveIndex002, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY, 0);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
     GetInstance();
     RunMeasureAndLayout();
     ASSERT_NE(pattern_->panEvent_, nullptr);
@@ -223,8 +222,8 @@ HWTEST_F(IndexerTestNg, IndexerMoveIndex002, TestSize.Level1)
 HWTEST_F(IndexerTestNg, IndexerMoveIndex003, TestSize.Level1)
 {
     std::vector<std::string> arrayValue;
-    IndexerView indexerView;
-    indexerView.Create(arrayValue, 0); // empty array
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(arrayValue, 0); // empty array
     GetInstance();
     RunMeasureAndLayout();
     ASSERT_NE(pattern_->panEvent_, nullptr);
@@ -251,8 +250,8 @@ HWTEST_F(IndexerTestNg, IndexerMoveIndex003, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerTouch001, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY, 0);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
     GetInstance();
     RunMeasureAndLayout();
     ASSERT_NE(pattern_->touchListener_, nullptr);
@@ -292,8 +291,8 @@ HWTEST_F(IndexerTestNg, IndexerTouch001, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerTouch002, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY, 0);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
     GetInstance();
     RunMeasureAndLayout();
     ASSERT_NE(pattern_->touchListener_, nullptr);
@@ -332,8 +331,8 @@ HWTEST_F(IndexerTestNg, IndexerTouch002, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerTouch003, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY, 0);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
     GetInstance();
     RunMeasureAndLayout();
     ASSERT_NE(pattern_->touchListener_, nullptr);
@@ -359,8 +358,8 @@ HWTEST_F(IndexerTestNg, IndexerTouch003, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerKeyEvent001, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY, 0);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
     GetInstance();
     RunMeasureAndLayout();
 
@@ -414,8 +413,8 @@ HWTEST_F(IndexerTestNg, IndexerKeyEvent001, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerKeyEvent002, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY, 0);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
     GetInstance();
     RunMeasureAndLayout();
 
@@ -487,9 +486,9 @@ HWTEST_F(IndexerTestNg, IndexerKeyEvent002, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerHover001, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY, 0);
-    indexerView.SetUsingPopup(true);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    IndexerModelNG.SetUsingPopup(true);
     GetInstance();
     RunMeasureAndLayout();
 
@@ -515,13 +514,12 @@ HWTEST_F(IndexerTestNg, IndexerHover001, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerPattern001, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY, 0);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
     GetInstance();
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
-        frameNode_, geometryNode, layoutProperty_);
+    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode_, geometryNode, layoutProperty_);
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
@@ -555,12 +553,12 @@ HWTEST_F(IndexerTestNg, IndexerPattern001, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerPattern002, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY, 2);
-    indexerView.SetUsingPopup(true);
-    indexerView.SetAlignStyle(AlignStyle::LEFT);
-    indexerView.SetPopupUnselectedColor(Color(0x00000000));
-    indexerView.SetOnRequestPopupData(GetPopupData);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 2);
+    IndexerModelNG.SetUsingPopup(true);
+    IndexerModelNG.SetAlignStyle(0);
+    IndexerModelNG.SetPopupUnselectedColor(Color(0x00000000));
+    IndexerModelNG.SetOnRequestPopupData(GetPopupData);
     GetInstance();
     RunMeasureAndLayout();
 
@@ -582,11 +580,11 @@ HWTEST_F(IndexerTestNg, IndexerPattern002, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerPattern003, TestSize.Level1)
 {
-    IndexerView indexerView1;
-    indexerView1.Create(CREATE_ARRAY, 2);
-    indexerView1.SetUsingPopup(true);
-    indexerView1.SetPopupHorizontalSpace(Dimension(50));
-    indexerView1.SetOnRequestPopupData(GetPopupData);
+    IndexerModelNG IndexerModelNG1;
+    IndexerModelNG1.Create(CREATE_ARRAY, 2);
+    IndexerModelNG1.SetUsingPopup(true);
+    IndexerModelNG1.SetPopupHorizontalSpace(Dimension(50));
+    IndexerModelNG1.SetOnRequestPopupData(GetPopupData);
     GetInstance();
     RunMeasureAndLayout();
 
@@ -597,12 +595,12 @@ HWTEST_F(IndexerTestNg, IndexerPattern003, TestSize.Level1)
     ASSERT_NE(renderContext, nullptr);
     auto rightValue = renderContext->GetPosition().value();
 
-    IndexerView indexerView2;
-    indexerView2.Create(CREATE_ARRAY, 2);
-    indexerView2.SetUsingPopup(true);
-    indexerView2.SetAlignStyle(AlignStyle::LEFT);
-    indexerView2.SetPopupHorizontalSpace(Dimension(50));
-    indexerView2.SetOnRequestPopupData(GetPopupData);
+    IndexerModelNG IndexerModelNG2;
+    IndexerModelNG2.Create(CREATE_ARRAY, 2);
+    IndexerModelNG2.SetUsingPopup(true);
+    IndexerModelNG2.SetAlignStyle(0);
+    IndexerModelNG2.SetPopupHorizontalSpace(Dimension(50));
+    IndexerModelNG2.SetOnRequestPopupData(GetPopupData);
     GetInstance();
     RunMeasureAndLayout();
 
@@ -622,13 +620,13 @@ HWTEST_F(IndexerTestNg, IndexerPattern003, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerPattern004, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY, 2);
-    indexerView.SetUsingPopup(true);
-    indexerView.SetPopupSelectedColor(Color(0x00000000));
-    indexerView.SetPopupUnselectedColor(Color(0x00000000));
-    indexerView.SetPopupItemBackground(Color(0x00000000));
-    indexerView.SetOnRequestPopupData(GetPopupData);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 2);
+    IndexerModelNG.SetUsingPopup(true);
+    IndexerModelNG.SetPopupSelectedColor(Color(0x00000000));
+    IndexerModelNG.SetPopupUnselectedColor(Color(0x00000000));
+    IndexerModelNG.SetPopupItemBackground(Color(0x00000000));
+    IndexerModelNG.SetOnRequestPopupData(GetPopupData);
     GetInstance();
     RunMeasureAndLayout();
 
@@ -652,10 +650,10 @@ HWTEST_F(IndexerTestNg, IndexerPattern004, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerUpdateBubble001, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY, 0);
-    indexerView.SetUsingPopup(true);
-    indexerView.SetOnRequestPopupData(GetPopupData);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    IndexerModelNG.SetUsingPopup(true);
+    IndexerModelNG.SetOnRequestPopupData(GetPopupData);
     GetInstance();
     RunMeasureAndLayout();
 
@@ -681,10 +679,10 @@ HWTEST_F(IndexerTestNg, IndexerUpdateBubble001, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerUpdateBubble002, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY, 0);
-    indexerView.SetUsingPopup(true);
-    indexerView.SetOnRequestPopupData(GetPopupData);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    IndexerModelNG.SetUsingPopup(true);
+    IndexerModelNG.SetOnRequestPopupData(GetPopupData);
     GetInstance();
     RunMeasureAndLayout();
 
@@ -710,10 +708,10 @@ HWTEST_F(IndexerTestNg, IndexerUpdateBubble002, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerUpdateBubble003, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY, 0);
-    indexerView.SetUsingPopup(true);
-    indexerView.SetOnRequestPopupData(GetMorePopupData); // GetMorePopupData.
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    IndexerModelNG.SetUsingPopup(true);
+    IndexerModelNG.SetOnRequestPopupData(GetMorePopupData); // GetMorePopupData.
     GetInstance();
     RunMeasureAndLayout();
 
@@ -739,9 +737,9 @@ HWTEST_F(IndexerTestNg, IndexerUpdateBubble003, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerPopupTouchDown001, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY, 0);
-    indexerView.SetUsingPopup(true); // NeedShowPopupView is true.
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    IndexerModelNG.SetUsingPopup(true); // NeedShowPopupView is true.
     GetInstance();
     RunMeasureAndLayout();
 
@@ -765,13 +763,13 @@ HWTEST_F(IndexerTestNg, IndexerPopupTouchDown001, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerCallback001, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY, 2);
-    indexerView.SetUsingPopup(true);
-    indexerView.SetOnRequestPopupData(GetPopupData);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 2);
+    IndexerModelNG.SetUsingPopup(true);
+    IndexerModelNG.SetOnRequestPopupData(GetPopupData);
     bool isOnPopupSelectedCalled = false;
     OnPopupSelectedEvent event = [&isOnPopupSelectedCalled](int32_t) { isOnPopupSelectedCalled = true; };
-    indexerView.SetOnPopupSelected(std::move(event));
+    IndexerModelNG.SetOnPopupSelected(std::move(event));
     GetInstance();
     RunMeasureAndLayout();
 
@@ -791,11 +789,11 @@ HWTEST_F(IndexerTestNg, IndexerCallback001, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerCallback002, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY, 0);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
     bool isOnSelectedCalled = false;
     OnSelectedEvent event = [&isOnSelectedCalled](int32_t) { isOnSelectedCalled = true; };
-    indexerView.SetOnSelected(std::move(event));
+    IndexerModelNG.SetOnSelected(std::move(event));
     GetInstance();
     RunMeasureAndLayout();
 
@@ -813,30 +811,36 @@ HWTEST_F(IndexerTestNg, IndexerCallback002, TestSize.Level1)
 }
 
 /**
- * @tc.name: IndexerViewTest001
+ * @tc.name: IndexerModelNGTest001
  * @tc.desc: Test all the properties of indexer.
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerTestNg, IndexerViewTest001, TestSize.Level1)
+HWTEST_F(IndexerTestNg, IndexerModelNGTest001, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY, 0);
-    indexerView.SetColor(Color(0x00000000));
-    indexerView.SetSelectedColor(Color(0x00000000));
-    indexerView.SetPopupColor(Color(0x00000000));
-    indexerView.SetSelectedBackgroundColor(Color(0x00000000));
-    indexerView.SetPopupBackground(Color(0x00000000));
-    indexerView.SetUsingPopup(true);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    IndexerModelNG.SetColor(Color(0x00000000));
+    IndexerModelNG.SetSelectedColor(Color(0x00000000));
+    IndexerModelNG.SetPopupColor(Color(0x00000000));
+    IndexerModelNG.SetSelectedBackgroundColor(Color(0x00000000));
+    IndexerModelNG.SetPopupBackground(Color(0x00000000));
+    IndexerModelNG.SetUsingPopup(true);
     TextStyle textStyle;
     textStyle.SetFontFamilies({ "font1", "font2" });
-    indexerView.SetSelectedFont(textStyle);
-    indexerView.SetPopupFont(TextStyle());
-    indexerView.SetFont(TextStyle());
-    indexerView.SetItemSize(Dimension(24));
-    indexerView.SetAlignStyle(AlignStyle::LEFT);
-    indexerView.SetSelected(0);
-    indexerView.SetPopupPositionX(Dimension(-96.f, DimensionUnit::VP));
-    indexerView.SetPopupPositionY(Dimension(48.f, DimensionUnit::VP));
+
+    std::function<void(TextStyle & textStyle)>&& getSelectedTextStyleFunc = [](TextStyle& textStyle) {
+        textStyle.SetFontFamilies({ "font1", "font2" });
+    };
+    std::function<void(TextStyle & textStyle)>&& getTextStyleFunc = [](TextStyle& textStyle) {};
+
+    IndexerModelNG.SetSelectedFont(std::move(getSelectedTextStyleFunc));
+    IndexerModelNG.SetPopupFont(std::move(getTextStyleFunc));
+    IndexerModelNG.SetFont(std::move(getTextStyleFunc));
+    IndexerModelNG.SetItemSize(Dimension(24));
+    IndexerModelNG.SetAlignStyle(0);
+    IndexerModelNG.SetSelected(0);
+    IndexerModelNG.SetPopupPositionX(Dimension(-96.f, DimensionUnit::VP));
+    IndexerModelNG.SetPopupPositionY(Dimension(48.f, DimensionUnit::VP));
     GetInstance();
     RunMeasureAndLayout();
 
@@ -866,16 +870,16 @@ HWTEST_F(IndexerTestNg, IndexerViewTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: IndexerViewTest002
+ * @tc.name: IndexerModelNGTest002
  * @tc.desc: Test special value properties of indexer.
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerTestNg, IndexerViewTest002, TestSize.Level1)
+HWTEST_F(IndexerTestNg, IndexerModelNGTest002, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY, 0);
-    indexerView.SetSelected(-1);
-    indexerView.SetItemSize(Dimension(-1));
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    IndexerModelNG.SetSelected(-1);
+    IndexerModelNG.SetItemSize(Dimension(-1));
     GetInstance();
     RunMeasureAndLayout();
 
@@ -888,20 +892,20 @@ HWTEST_F(IndexerTestNg, IndexerViewTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: IndexerViewTest003
+ * @tc.name: IndexerModelNGTest003
  * @tc.desc: Test newly added properties of indexer.
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerTestNg, IndexerViewTest003, TestSize.Level1)
+HWTEST_F(IndexerTestNg, IndexerModelNGTest003, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY, 0);
-    indexerView.SetPopupSelectedColor(Color(0x00000000));
-    indexerView.SetPopupUnselectedColor(Color(0x00000000));
-    indexerView.SetPopupItemBackground(Color(0x00000000));
-    indexerView.SetPopupHorizontalSpace(Dimension(50));
-    indexerView.SetFontSize(Dimension(24));
-    indexerView.SetFontWeight(FontWeight::MEDIUM);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    IndexerModelNG.SetPopupSelectedColor(Color(0x00000000));
+    IndexerModelNG.SetPopupUnselectedColor(Color(0x00000000));
+    IndexerModelNG.SetPopupItemBackground(Color(0x00000000));
+    IndexerModelNG.SetPopupHorizontalSpace(Dimension(50));
+    IndexerModelNG.SetFontSize(Dimension(24));
+    IndexerModelNG.SetFontWeight(FontWeight::MEDIUM);
     GetInstance();
     RunMeasureAndLayout();
 
@@ -918,19 +922,19 @@ HWTEST_F(IndexerTestNg, IndexerViewTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: IndexerViewTest004
+ * @tc.name: IndexerModelNGTest004
  * @tc.desc: Test newly added properties of indexer.
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerTestNg, IndexerViewTest004, TestSize.Level1)
+HWTEST_F(IndexerTestNg, IndexerModelNGTest004, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY, 0);
-    indexerView.SetPopupSelectedColor(std::nullopt);
-    indexerView.SetPopupUnselectedColor(std::nullopt);
-    indexerView.SetPopupItemBackground(std::nullopt);
-    indexerView.SetPopupHorizontalSpace(Dimension(-1));
-    indexerView.SetFontSize(Dimension());
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    IndexerModelNG.SetPopupSelectedColor(std::nullopt);
+    IndexerModelNG.SetPopupUnselectedColor(std::nullopt);
+    IndexerModelNG.SetPopupItemBackground(std::nullopt);
+    IndexerModelNG.SetPopupHorizontalSpace(Dimension(-1));
+    IndexerModelNG.SetFontSize(Dimension());
     GetInstance();
     RunMeasureAndLayout();
 
@@ -946,18 +950,18 @@ HWTEST_F(IndexerTestNg, IndexerViewTest004, TestSize.Level1)
 }
 
 /**
- * @tc.name: IndexerViewTest005
+ * @tc.name: IndexerModelNGTest005
  * @tc.desc: Test Create func with special arg
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerTestNg, IndexerViewTest005, TestSize.Level1)
+HWTEST_F(IndexerTestNg, IndexerModelNGTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create with normal arg.
      * @tc.expected: LayoutProperty is correct.
      */
-    IndexerView indexerView1;
-    indexerView1.Create(CREATE_ARRAY, 5);
+    IndexerModelNG IndexerModelNG1;
+    IndexerModelNG1.Create(CREATE_ARRAY, 5);
     GetInstance();
     EXPECT_EQ(layoutProperty_->GetArrayValueValue(), CREATE_ARRAY);
     EXPECT_EQ(layoutProperty_->GetSelectedValue(), 5);
@@ -967,8 +971,8 @@ HWTEST_F(IndexerTestNg, IndexerViewTest005, TestSize.Level1)
      * @tc.expected: LayoutProperty is correct.
      */
     std::vector<std::string> arrayValue;
-    IndexerView indexerView2;
-    indexerView2.Create(arrayValue, -1);
+    IndexerModelNG IndexerModelNG2;
+    IndexerModelNG2.Create(arrayValue, -1);
     GetInstance();
     EXPECT_TRUE(layoutProperty_->GetArrayValueValue().empty());
     EXPECT_EQ(layoutProperty_->GetSelectedValue(), 0);
@@ -977,8 +981,8 @@ HWTEST_F(IndexerTestNg, IndexerViewTest005, TestSize.Level1)
      * @tc.steps: step3. Create with special arg.
      * @tc.expected: LayoutProperty is correct.
      */
-    IndexerView indexerView3;
-    indexerView3.Create(arrayValue, CREATE_ARRAY.size() + 1);
+    IndexerModelNG IndexerModelNG3;
+    IndexerModelNG3.Create(arrayValue, CREATE_ARRAY.size() + 1);
     GetInstance();
     EXPECT_TRUE(layoutProperty_->GetArrayValueValue().empty());
     EXPECT_EQ(layoutProperty_->GetSelectedValue(), 0);
@@ -991,8 +995,8 @@ HWTEST_F(IndexerTestNg, IndexerViewTest005, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerAccessibilityTest001, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY, 0);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
     GetInstance();
     RunMeasureAndLayout();
 
@@ -1011,8 +1015,8 @@ HWTEST_F(IndexerTestNg, IndexerAccessibilityTest001, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerAlgorithmTest001, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY, 0);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
     GetInstance();
 
     /**
@@ -1042,9 +1046,9 @@ HWTEST_F(IndexerTestNg, IndexerAlgorithmTest001, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerPatternCoverage001, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY, 0);
-    indexerView.SetUsingPopup(true);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    IndexerModelNG.SetUsingPopup(true);
     GetInstance();
     RunMeasureAndLayout();
     pattern_->OnModifyDone();
@@ -1067,7 +1071,7 @@ HWTEST_F(IndexerTestNg, IndexerPatternCoverage001, TestSize.Level1)
      * @tc.steps: step3. Supplement GetFocusChildIndex branch,
      * has no condition that searchStr is ABC when MoveIndexBySearch.
      */
-    pattern_->selected_  = 5;
+    pattern_->selected_ = 5;
     EXPECT_EQ(pattern_->GetFocusChildIndex("ABC"), -1);
 
     /**
@@ -1101,8 +1105,8 @@ HWTEST_F(IndexerTestNg, IndexerPatternCoverage001, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerPatternCoverage002, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY, 0);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
     GetInstance();
     RunMeasureAndLayout();
 
@@ -1123,8 +1127,8 @@ HWTEST_F(IndexerTestNg, IndexerPatternCoverage002, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerAlgorithmCoverage001, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY, 0);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
     GetInstance();
     RunMeasureAndLayout();
 
@@ -1147,5 +1151,64 @@ HWTEST_F(IndexerTestNg, IndexerAlgorithmCoverage001, TestSize.Level1)
     EXPECT_EQ(layoutAlgorithm->itemSize_, 0.f);
 
     EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: PerformActionTest001
+ * @tc.desc: Indexer Accessibility PerformAction test Select and ClearSelection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, PerformActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create indexer and initialize related properties.
+     */
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+
+    /**
+     * @tc.steps: step2. Get indexer frameNode and child pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto indexerPattern = frameNode->GetPattern<IndexerPattern>();
+    ASSERT_NE(indexerPattern, nullptr);
+    auto firstTextNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(firstTextNode, nullptr);
+    auto lastTextNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    ASSERT_NE(lastTextNode, nullptr);
+    indexerPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step3. Get text accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto firstTextaccessibilityProperty = firstTextNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(firstTextaccessibilityProperty, nullptr);
+    auto lastTextaccessibilityProperty = lastTextNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(lastTextaccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. The first child call the callback function in textAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(firstTextaccessibilityProperty->ActActionSelect());
+    EXPECT_TRUE(firstTextaccessibilityProperty->ActActionClearSelection());
+
+    /**
+     * @tc.steps: step5. The last child call the callback function in textAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(lastTextaccessibilityProperty->ActActionSelect());
+    EXPECT_TRUE(lastTextaccessibilityProperty->ActActionClearSelection());
+
+    /**
+     * @tc.steps: step6. The last child is not selected, call the ClearSelection callback function in
+     *                   textAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    indexerPattern->selected_ = 0;
+    EXPECT_TRUE(lastTextaccessibilityProperty->ActActionClearSelection());
 }
 } // namespace OHOS::Ace::NG

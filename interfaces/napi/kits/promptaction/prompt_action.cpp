@@ -30,8 +30,8 @@
 
 namespace OHOS::Ace::Napi {
 namespace {
-const int32_t SHOW_DIALOG_BUTTON_NUM_MAX = 3;
-const int32_t SHOW_ACTION_MENU_BUTTON_NUM_MAX = 6;
+const uint32_t SHOW_DIALOG_BUTTON_NUM_MAX = 3;
+const uint32_t SHOW_ACTION_MENU_BUTTON_NUM_MAX = 6;
 constexpr char DEFAULT_FONT_COLOR_STRING_VALUE[] = "#ff007dff";
 
 #ifdef OHOS_STANDARD_SYSTEM
@@ -50,6 +50,13 @@ bool ContainerIsService()
 }
 #endif
 } // namespace
+
+bool HasProperty(napi_env env, napi_value value, const std::string& targetStr)
+{
+    bool hasProperty = false;
+    napi_has_named_property(env, value, targetStr.c_str(), &hasProperty);
+    return hasProperty;
+}
 
 napi_value GetReturnObject(napi_env env, std::string callbackString)
 {
@@ -73,16 +80,19 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         NapiThrow(env, "The number of parameters must be equal to 1.", Framework::ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
-
     napi_value messageNApi = nullptr;
     napi_value durationNApi = nullptr;
     napi_value bottomNApi = nullptr;
     std::string messageString;
     std::string bottomString;
-
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, argv, &valueType);
     if (valueType == napi_object) {
+        // message can not be null
+        if (!HasProperty(env, argv, "message")) {
+            NapiThrow(env, "Required input parameters are missing.", Framework::ERROR_CODE_PARAM_INVALID);
+            return nullptr;
+        }
         napi_get_named_property(env, argv, "message", &messageNApi);
         napi_get_named_property(env, argv, "duration", &durationNApi);
         napi_get_named_property(env, argv, "bottom", &bottomNApi);
@@ -111,9 +121,6 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
             NapiThrow(env, "Can not get message from resource manager.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
-    } else if (valueType == napi_undefined) {
-        NapiThrow(env, "Required input parameters are missing.", Framework::ERROR_CODE_PARAM_INVALID);
-        return nullptr;
     } else {
         LOGE("The parameter type is incorrect.");
         NapiThrow(env, "The type of message is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
@@ -217,6 +224,67 @@ struct PromptAsyncContext {
     bool valid = true;
 };
 
+void DeleteContextAndThrowError(napi_env env, PromptAsyncContext* context, const std::string& errorMessage)
+{
+    if (!context) {
+        // context is null, no need to delete
+        return;
+    }
+    delete context;
+    context = nullptr;
+    NapiThrow(env, errorMessage, Framework::ERROR_CODE_PARAM_INVALID);
+}
+
+bool ParseButtons(napi_env env, PromptAsyncContext* context, uint32_t maxButtonNum)
+{
+    uint32_t buttonsLen = 0;
+    napi_value buttonArray = nullptr;
+    napi_value textNApi = nullptr;
+    napi_value colorNApi = nullptr;
+    napi_valuetype valueType = napi_undefined;
+    uint32_t index = 0;
+    napi_get_array_length(env, context->buttonsNApi, &buttonsLen);
+    uint32_t buttonsLenInt = buttonsLen;
+    if (buttonsLenInt <= 0) {
+        DeleteContextAndThrowError(env, context, "Required input parameters are missing.");
+        return false;
+    }
+    if (buttonsLenInt > maxButtonNum) {
+        buttonsLenInt = maxButtonNum;
+        LOGW("Supports 1 - %{public}u buttons", maxButtonNum);
+    }
+    for (index = 0; index < buttonsLenInt; index++) {
+        napi_get_element(env, context->buttonsNApi, index, &buttonArray);
+        if (!HasProperty(env, buttonArray, "text")) {
+            DeleteContextAndThrowError(env, context, "Required input parameters are missing.");
+            return false;
+        }
+        std::string textString;
+        napi_get_named_property(env, buttonArray, "text", &textNApi);
+        if (!GetNapiString(env, textNApi, textString, valueType)) {
+            DeleteContextAndThrowError(env, context, "The type of parameters is incorrect.");
+            return false;
+        }
+        if (!HasProperty(env, buttonArray, "color")) {
+            DeleteContextAndThrowError(env, context, "Required input parameters are missing.");
+            return false;
+        }
+        std::string colorString;
+        napi_get_named_property(env, buttonArray, "color", &colorNApi);
+        if (!GetNapiString(env, colorNApi, colorString, valueType)) {
+            if (valueType == napi_undefined) {
+                colorString = DEFAULT_FONT_COLOR_STRING_VALUE;
+            } else {
+                DeleteContextAndThrowError(env, context, "The type of parameters is incorrect.");
+                return false;
+            }
+        }
+        ButtonInfo buttonInfo = { .text = textString, .textColor = colorString };
+        context->buttons.emplace_back(buttonInfo);
+    }
+    return true;
+}
+
 napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
 {
     size_t requireArgc = 1;
@@ -248,44 +316,21 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         napi_typeof(env, argv[i], &valueType);
         if (i == 0) {
             if (valueType != napi_object) {
-                delete asyncContext;
-                asyncContext = nullptr;
-                NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+                DeleteContextAndThrowError(env, asyncContext, "The type of parameters is incorrect.");
                 return nullptr;
             }
             napi_get_named_property(env, argv[0], "title", &asyncContext->titleNApi);
             napi_get_named_property(env, argv[0], "message", &asyncContext->messageNApi);
             napi_get_named_property(env, argv[0], "buttons", &asyncContext->buttonsNApi);
             napi_get_named_property(env, argv[0], "autoCancel", &asyncContext->autoCancel);
-            GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString);
-            GetNapiString(env, asyncContext->messageNApi, asyncContext->messageString);
+            GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString, valueType);
+            GetNapiString(env, asyncContext->messageNApi, asyncContext->messageString, valueType);
             bool isBool = false;
             napi_is_array(env, asyncContext->buttonsNApi, &isBool);
             napi_typeof(env, asyncContext->buttonsNApi, &valueType);
             if (valueType == napi_object && isBool) {
-                uint32_t buttonsLen = 0;
-                napi_value buttonArray = nullptr;
-                napi_value textNApi = nullptr;
-                napi_value colorNApi = nullptr;
-
-                uint32_t index = 0;
-                napi_get_array_length(env, asyncContext->buttonsNApi, &buttonsLen);
-                uint32_t buttonsLenInt = buttonsLen;
-                if (buttonsLenInt > SHOW_DIALOG_BUTTON_NUM_MAX) {
-                    buttonsLenInt = SHOW_DIALOG_BUTTON_NUM_MAX;
-                    LOGE("Supports 1 - 3 buttons");
-                }
-                for (uint32_t j = 0; j < buttonsLenInt; j++) {
-                    napi_get_element(env, asyncContext->buttonsNApi, index, &buttonArray);
-                    index++;
-                    napi_get_named_property(env, buttonArray, "text", &textNApi);
-                    napi_get_named_property(env, buttonArray, "color", &colorNApi);
-                    std::string textString;
-                    std::string colorString;
-                    GetNapiString(env, textNApi, textString);
-                    GetNapiString(env, colorNApi, colorString);
-                    ButtonInfo buttonInfo = { .text = textString, .textColor = colorString };
-                    asyncContext->buttons.emplace_back(buttonInfo);
+                if (!ParseButtons(env, asyncContext, SHOW_DIALOG_BUTTON_NUM_MAX)) {
+                    return nullptr;
                 }
             }
             napi_typeof(env, asyncContext->autoCancel, &valueType);
@@ -295,9 +340,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         } else if (valueType == napi_function) {
             napi_create_reference(env, argv[i], 1, &asyncContext->callbackRef);
         } else {
-            delete asyncContext;
-            asyncContext = nullptr;
-            NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+            DeleteContextAndThrowError(env, asyncContext, "The type of parameters is incorrect.");
             return nullptr;
         }
     }
@@ -339,6 +382,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 if (!asyncContext->valid) {
                     LOGE("%{public}s, module exported object is invalid.", __func__);
                     delete asyncContext;
+                    asyncContext = nullptr;
                     delete work;
                     work = nullptr;
                     return;
@@ -349,6 +393,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 if (scope == nullptr) {
                     LOGE("%{public}s, open handle scope failed.", __func__);
                     delete asyncContext;
+                    asyncContext = nullptr;
                     delete work;
                     work = nullptr;
                     return;
@@ -392,6 +437,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 napi_delete_async_work(asyncContext->env, asyncContext->work);
                 napi_close_handle_scope(asyncContext->env, scope);
                 delete asyncContext;
+                asyncContext = nullptr;
                 delete work;
                 work = nullptr;
             });
@@ -477,26 +523,6 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     return result;
 }
 
-struct ShowActionMenuAsyncContext {
-    napi_env env = nullptr;
-    napi_async_work work = nullptr;
-    napi_value titleNApi = nullptr;
-    napi_value buttonsNApi = nullptr;
-    napi_ref callbackSuccess = nullptr;
-    napi_ref callbackFail = nullptr;
-    napi_ref callbackComplete = nullptr;
-    std::string titleString;
-    std::vector<ButtonInfo> buttons;
-    std::string callbackSuccessString;
-    std::string callbackFailString;
-    std::string callbackCompleteString;
-    napi_deferred deferred = nullptr;
-    napi_ref callbackRef = nullptr;
-    int32_t callbackType = -1;
-    int32_t successType = -1;
-    bool valid = true;
-};
-
 napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
 {
     size_t requireArgc = 1;
@@ -521,111 +547,38 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto asyncContext = new ShowActionMenuAsyncContext();
+    auto* asyncContext = new PromptAsyncContext();
     asyncContext->env = env;
     for (size_t i = 0; i < argc; i++) {
-        size_t ret = 0;
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, argv[i], &valueType);
         if (i == 0) {
             if (valueType != napi_object) {
-                delete asyncContext;
-                asyncContext = nullptr;
-                NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+                DeleteContextAndThrowError(env, asyncContext, "The type of parameters is incorrect.");
                 return nullptr;
             }
             napi_get_named_property(env, argv[0], "title", &asyncContext->titleNApi);
+            GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString, valueType);
+            if (!HasProperty(env, argv[0], "buttons")) {
+                DeleteContextAndThrowError(env, asyncContext, "Required input parameters are missing.");
+                return nullptr;
+            }
             napi_get_named_property(env, argv[0], "buttons", &asyncContext->buttonsNApi);
-            GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString);
             bool isBool = false;
             napi_is_array(env, asyncContext->buttonsNApi, &isBool);
             napi_typeof(env, asyncContext->buttonsNApi, &valueType);
             if (valueType == napi_object && isBool) {
-                uint32_t buttonsLen = 0;
-                napi_value buttonArray = nullptr;
-                napi_value textNApi = nullptr;
-                napi_value colorNApi = nullptr;
-                uint32_t index = 0;
-                napi_get_array_length(env, asyncContext->buttonsNApi, &buttonsLen);
-                uint32_t buttonsLenInt = buttonsLen;
-                if (buttonsLenInt > SHOW_ACTION_MENU_BUTTON_NUM_MAX) {
-                    buttonsLenInt = SHOW_ACTION_MENU_BUTTON_NUM_MAX;
-                    LOGE("Supports 1 - 6 buttons");
-                }
-                for (uint32_t j = 0; j < buttonsLenInt; j++) {
-                    napi_get_element(env, asyncContext->buttonsNApi, index, &buttonArray);
-                    index++;
-                    napi_get_named_property(env, buttonArray, "text", &textNApi);
-                    napi_get_named_property(env, buttonArray, "color", &colorNApi);
-                    std::string textString;
-                    std::string colorString;
-                    napi_typeof(env, textNApi, &valueType);
-                    if (valueType == napi_string) {
-                        size_t textLen = GetParamLen(textNApi) + 1;
-                        std::unique_ptr<char[]> text = std::make_unique<char[]>(textLen + 1);
-                        napi_get_value_string_utf8(env, textNApi, text.get(), textLen, &ret);
-                        textString = text.get();
-                    } else if (valueType == napi_object) {
-                        int32_t id = 0;
-                        int32_t type = 0;
-                        std::vector<std::string> params;
-                        if (ParseResourceParam(env, textNApi, id, type, params)) {
-                            ParseString(id, type, params, textString);
-                        }
-                    } else {
-                        delete asyncContext;
-                        asyncContext = nullptr;
-                        if (valueType == napi_undefined) {
-                            NapiThrow(
-                                env, "Required input parameters are missing.", Framework::ERROR_CODE_PARAM_INVALID);
-                        } else {
-                            NapiThrow(env, "The type of the button text parameter is incorrect.",
-                                Framework::ERROR_CODE_PARAM_INVALID);
-                        }
-                        return nullptr;
-                    }
-                    napi_typeof(env, colorNApi, &valueType);
-                    if (valueType == napi_string) {
-                        size_t colorLen = GetParamLen(colorNApi) + 1;
-                        char color[colorLen + 1];
-                        napi_get_value_string_utf8(env, colorNApi, color, colorLen, &ret);
-                        colorString = color;
-                    } else if (valueType == napi_object) {
-                        int32_t id = 0;
-                        int32_t type = 0;
-                        std::vector<std::string> params;
-                        if (ParseResourceParam(env, colorNApi, id, type, params)) {
-                            ParseString(id, type, params, colorString);
-                        }
-                    } else if (valueType == napi_undefined) {
-                        colorString = DEFAULT_FONT_COLOR_STRING_VALUE;
-                    } else {
-                        delete asyncContext;
-                        asyncContext = nullptr;
-                        NapiThrow(env, "The type of the button color parameter is incorrect.",
-                            Framework::ERROR_CODE_PARAM_INVALID);
-                        return nullptr;
-                    }
-                    ButtonInfo buttonInfo = { .text = textString, .textColor = colorString };
-                    asyncContext->buttons.emplace_back(buttonInfo);
+                if (!ParseButtons(env, asyncContext, SHOW_ACTION_MENU_BUTTON_NUM_MAX)) {
+                    return nullptr;
                 }
             } else {
-                delete asyncContext;
-                asyncContext = nullptr;
-                if (valueType == napi_undefined) {
-                    NapiThrow(env, "Required input parameters are missing.", Framework::ERROR_CODE_PARAM_INVALID);
-                } else {
-                    NapiThrow(
-                        env, "The type of the button parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
-                }
+                DeleteContextAndThrowError(env, asyncContext, "The type of the button parameters is incorrect.");
                 return nullptr;
             }
         } else if (valueType == napi_function) {
             napi_create_reference(env, argv[i], 1, &asyncContext->callbackRef);
         } else {
-            delete asyncContext;
-            asyncContext = nullptr;
-            NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+            DeleteContextAndThrowError(env, asyncContext, "The type of parameters is incorrect.");
             return nullptr;
         }
     }
@@ -654,7 +607,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                     return;
                 }
 
-                ShowActionMenuAsyncContext* asyncContext = (ShowActionMenuAsyncContext*)work->data;
+                auto* asyncContext = static_cast<PromptAsyncContext*>(work->data);
                 if (asyncContext == nullptr) {
                     LOGE("%{public}s, asyncContext is nullptr.", __func__);
                     delete work;
@@ -665,6 +618,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 if (!asyncContext->valid) {
                     LOGE("%{public}s, module exported object is invalid.", __func__);
                     delete asyncContext;
+                    asyncContext = nullptr;
                     delete work;
                     work = nullptr;
                     return;
@@ -675,6 +629,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 if (scope == nullptr) {
                     LOGE("%{public}s, open handle scope failed.", __func__);
                     delete asyncContext;
+                    asyncContext = nullptr;
                     delete work;
                     work = nullptr;
                     return;
@@ -718,6 +673,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 napi_delete_async_work(asyncContext->env, asyncContext->work);
                 napi_close_handle_scope(asyncContext->env, scope);
                 delete asyncContext;
+                asyncContext = nullptr;
                 delete work;
                 work = nullptr;
             });
@@ -732,7 +688,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
     napi_wrap(
         env, thisVar, (void*)asyncContext,
         [](napi_env env, void* data, void* hint) {
-            ShowActionMenuAsyncContext* cbInfo = (ShowActionMenuAsyncContext*)data;
+            auto* cbInfo = static_cast<PromptAsyncContext*>(data);
             if (cbInfo != nullptr) {
                 LOGE("%{public}s, thisVar JavaScript object is ready for garbage-collection.", __func__);
                 cbInfo->valid = false;

@@ -75,7 +75,6 @@ void RenderPositionProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 
 void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-    json->Put("blur", round(propFrontBlurRadius.value_or(0.0_vp).Value() * 100) / 100);
     json->Put("grayscale", propFrontGrayScale.has_value() ? propFrontGrayScale->Value() : 0.0);
     json->Put("brightness", propFrontBrightness.has_value() ? propFrontBrightness->Value() : 1.0);
     json->Put("saturate", propFrontSaturate.has_value() ? propFrontSaturate->Value() : 1.0);
@@ -104,6 +103,7 @@ void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         jsonShadow->Put("color", shadow.GetColor().ColorToString().c_str());
         jsonShadow->Put("offsetX", std::to_string(shadow.GetOffset().GetX()).c_str());
         jsonShadow->Put("offsetY", std::to_string(shadow.GetOffset().GetY()).c_str());
+        jsonShadow->Put("type", std::to_string(static_cast<int32_t>(shadow.GetShadowType())).c_str());
         json->Put("shadow", jsonShadow);
     }
 }
@@ -129,6 +129,11 @@ void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         json->Put("backgroundImagePosition", jsonValue);
     }
     json->Put("backdropBlur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx());
+}
+
+void ForegroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("blur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx());
 }
 
 void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const

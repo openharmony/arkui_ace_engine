@@ -243,10 +243,9 @@ void JSTabs::SetFadingEdge(const JSCallbackInfo& info)
 {
     bool fadingEdge = true;
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
-    }
-    if (!ParseJsBool(info[0], fadingEdge)) {
-        LOGE("The arg is wrong, fail to parse bool");
+        LOGW("The arg is wrong, it is supposed to have at least 1 arguments");
+    } else if (!ParseJsBool(info[0], fadingEdge)) {
+        LOGW("The arg is wrong, fail to parse bool");
     }
     TabsModel::GetInstance()->SetFadingEdge(fadingEdge);
 }
@@ -256,19 +255,29 @@ void JSTabs::SetBarOverlap(const JSCallbackInfo& info)
     bool barOverlap = false;
     if (info.Length() < 1) {
         LOGW("The arg is wrong, it is supposed to have at least 1 arguments");
-    }
-    if (!ParseJsBool(info[0], barOverlap)) {
+    } else if (!ParseJsBool(info[0], barOverlap)) {
         LOGW("The arg is wrong, fail to parse bool");
     }
     TabsModel::GetInstance()->SetBarOverlap(barOverlap);
+}
+
+void JSTabs::SetBarBackgroundColor(const JSCallbackInfo& info)
+{
+    Color backgroundColor = Color::BLACK.BlendOpacity(0.0f);
+    if (info.Length() < 1) {
+        LOGD("Invalid parameters. Use default parameters instead.");
+    } else if (!ConvertFromJSValue(info[0], backgroundColor)) {
+        LOGD("Invalid parameters. Use default parameters instead.");
+    }
+    TabsModel::GetInstance()->SetBarBackgroundColor(backgroundColor);
 }
 
 void JSTabs::SetDivider(const JSCallbackInfo& info)
 {
     TabsItemDivider divider;
     RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
-    CHECK_NULL_VOID (tabTheme);
-    
+    CHECK_NULL_VOID(tabTheme);
+
     if (info.Length() < 1) {
         LOGW("Invalid params");
     } else {
@@ -287,7 +296,7 @@ void JSTabs::SetDivider(const JSCallbackInfo& info)
                 divider.startMargin.Value() < 0.0f) {
                 divider.startMargin.Reset();
             }
-            
+
             if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin) ||
                 divider.endMargin.Value() < 0.0f) {
                 divider.endMargin.Reset();
@@ -322,9 +331,9 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSTabs>::StaticMethod("fadingEdge", &JSTabs::SetFadingEdge);
     JSClass<JSTabs>::StaticMethod("barOverlap", &JSTabs::SetBarOverlap);
+    JSClass<JSTabs>::StaticMethod("barBackgroundColor", &JSTabs::SetBarBackgroundColor);
 
-    JSClass<JSTabs>::Inherit<JSContainerBase>();
-    JSClass<JSTabs>::Bind<>(globalObj);
+    JSClass<JSTabs>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

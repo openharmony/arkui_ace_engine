@@ -599,50 +599,8 @@ HWTEST_F(RadioTestNg, RadioPatternTest016, TestSize.Level1)
 }
 
 /**
- * @tc.name: RadioPatternTest017
- * @tc.desc: Test PlayAnimation.
- * @tc.type: FUNC
- */
-HWTEST_F(RadioTestNg, RadioPatternTest017, TestSize.Level1)
-{
-    RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
-    radioModelNG.SetChecked(false);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    frameNode->MarkModifyDone();
-    auto pattern = frameNode->GetPattern<RadioPattern>();
-    ASSERT_NE(pattern, nullptr);
-    radioModelNG.SetChecked(true);
-    pattern->PlayAnimation(true);
-    ASSERT_NE(pattern->onController_, nullptr);
-    pattern->PlayAnimation(true);
-}
-
-/**
- * @tc.name: RadioPatternTest018
- * @tc.desc: Test PlayAnimation.
- * @tc.type: FUNC
- */
-HWTEST_F(RadioTestNg, RadioPatternTest018, TestSize.Level1)
-{
-    RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
-    radioModelNG.SetChecked(true);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    frameNode->MarkModifyDone();
-    auto pattern = frameNode->GetPattern<RadioPattern>();
-    ASSERT_NE(pattern, nullptr);
-    radioModelNG.SetChecked(false);
-    pattern->PlayAnimation(false);
-    ASSERT_NE(pattern->onController_, nullptr);
-    pattern->PlayAnimation(false);
-}
-
-/**
  * @tc.name: RadioPatternTest019
- * @tc.desc: Test OnTouchDown   OnTouchUp.
+ * @tc.desc: Test OnTouchDown and OnTouchUp.
  * @tc.type: FUNC
  */
 HWTEST_F(RadioTestNg, RadioPatternTest019, TestSize.Level1)
@@ -870,6 +828,57 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest005, TestSize.Level1)
     radioModifier->touchHoverType_ = TouchHoverAnimationType::PRESS;
     radioModifier->UpdateAnimatableProperty();
     EXPECT_EQ(radioModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
+}
+
+/**
+ * @tc.name: RadioPaintMethodTest006
+ * @tc.desc: Test Radio UpdateIsOnAnimatableProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioPaintMethodTest006, TestSize.Level1)
+{
+    auto radioModifier = AceType::MakeRefPtr<RadioModifier>();
+    radioModifier->isOnAnimationFlag_->Set(true);
+    radioModifier->UpdateIsOnAnimatableProperty(true);
+    EXPECT_EQ(radioModifier->pointScale_->Get(), 0.5);
+    EXPECT_EQ(radioModifier->ringPointScale_->Get(), 0);
+    radioModifier->isOnAnimationFlag_->Set(false);
+    radioModifier->UpdateIsOnAnimatableProperty(true);
+    EXPECT_EQ(radioModifier->pointScale_->Get(), 0);
+    EXPECT_EQ(radioModifier->ringPointScale_->Get(), 1);
+}
+
+/**
+ * @tc.name: RadioPaintMethodTest007
+ * @tc.desc: Test Radio PaintMethod UpdateContentModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioPaintMethodTest007, TestSize.Level1)
+{
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto radioPaintProperty = AceType::MakeRefPtr<RadioPaintProperty>();
+    ASSERT_NE(radioPaintProperty, nullptr);
+    PaintWrapper paintWrapper(nullptr, geometryNode, radioPaintProperty);
+    auto radioModifier = AceType::MakeRefPtr<RadioModifier>();
+    RadioPaintMethod radioPaintMethod(radioModifier);
+
+    radioPaintMethod.radioModifier_->SetIsCheck(true);
+    radioPaintMethod.isFirstCreated_ = true;
+    radioPaintMethod.UpdateContentModifier(&paintWrapper);
+    EXPECT_EQ(radioPaintMethod.radioModifier_->uiStatus_->Get(), static_cast<int32_t>(UIStatus::SELECTED));
+    radioPaintMethod.radioModifier_->SetIsCheck(true);
+    radioPaintMethod.isFirstCreated_ = false;
+    radioPaintMethod.UpdateContentModifier(&paintWrapper);
+    EXPECT_EQ(radioPaintMethod.radioModifier_->uiStatus_->Get(), static_cast<int32_t>(UIStatus::UNSELECTED));
+
+    auto paintProperty = AccessibilityManager::DynamicCast<RadioPaintProperty>(paintWrapper.GetPaintProperty());
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateRadioCheck(true);
+    radioPaintMethod.UpdateContentModifier(&paintWrapper);
+    EXPECT_EQ(radioPaintMethod.radioModifier_->uiStatus_->Get(), static_cast<int32_t>(UIStatus::SELECTED));
 }
 
 /**
@@ -1209,6 +1218,8 @@ HWTEST_F(RadioTestNg, RadioPatternTest024, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     auto geometryNode = frameNode->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
 
     RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
         frameNode, geometryNode, layoutProperty);
@@ -1222,7 +1233,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest024, TestSize.Level1)
     /**
      * cover AddHotZoneRect
     */
-    radioPattern->AddHotZoneRect();
+    radioPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
     EXPECT_EQ(frameNode->GetOrCreateGestureEventHub()->isResponseRegion_, true);
     /**
      * cover RemoveLastHotZoneRect
@@ -1336,21 +1347,6 @@ HWTEST_F(RadioTestNg, RadioPatternTest027, TestSize.Level1)
     pattern->SetPreGroup(GROUP_NAME);
     paintProperty->UpdateRadioCheck(true);
     frameNode->MarkModifyDone();
-    /**
-     * cover onController_ callback
-    */
-    pattern->onController_->NotifyStopListener();
-    /**
-     * cover offController_ callback
-    */
-    pattern->offController_->NotifyStopListener();
-    /**
-     * cover shrinkEngine selectEngine selectRingEngine callback
-    */
-    auto interpolators = pattern->onController_->interpolators_;
-    for (auto& interpolator : interpolators) {
-        AceType::DynamicCast<OHOS::Ace::KeyframeAnimation<float>>(interpolator)->NotifyListener(100.0f);
-    }
     pattern->SetPreGroup(GROUP_NAME_CHANGE);
     paintProperty->UpdateRadioCheck(false);
     frameNode->MarkModifyDone();

@@ -24,6 +24,7 @@
 #include "native_engine/native_value.h"
 #include "wm/window.h"
 
+#include "adapter/ohos/entrance/distributed_ui_manager.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 
 namespace OHOS::Ace {
@@ -41,7 +42,6 @@ public:
 
     // UI content lifeCycles
     void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) override;
-    void Initialize(const std::shared_ptr<Window>& aceWindow, const std::string& url, NativeValue* storage) override;
     void Foreground() override;
     void Background() override;
     void Focus() override;
@@ -110,9 +110,45 @@ public:
 
     void OnFormSurfaceChange(float width, float height) override;
 
+    SerializeableObjectArray DumpUITree() override
+    {
+        return uiManager_->DumpUITree();
+    }
+    void SubscribeUpdate(const std::function<void(int32_t, SerializeableObjectArray&)>& onUpdate) override
+    {
+        return uiManager_->SubscribeUpdate(onUpdate);
+    }
+    void UnSubscribeUpdate() override
+    {
+        uiManager_->UnSubscribeUpdate();
+    }
+    void ProcessSerializeableInputEvent(const SerializeableObjectArray& array) override
+    {
+        uiManager_->ProcessSerializeableInputEvent(array);
+    }
+    void RestoreUITree(const SerializeableObjectArray& array) override
+    {
+        uiManager_->RestoreUITree(array);
+    }
+    void UpdateUITree(const SerializeableObjectArray& array) override
+    {
+        uiManager_->UpdateUITree(array);
+    }
+    void SubscribeInputEventProcess(const std::function<void(SerializeableObjectArray&)>& onEvent) override
+    {
+        uiManager_->SubscribeInputEventProcess(onEvent);
+    }
+    void UnSubscribeInputEventProcess() override
+    {
+        uiManager_->UnSubscribeInputEventProcess();
+    }
+    void GetResourcePaths(std::vector<std::string>& resourcesPaths, std::string& assetRootPath,
+        std::vector<std::string>& assetBasePaths, std::string& resFolderName) override;
+    void SetResourcePaths(const std::vector<std::string>& resourcesPaths, const std::string& assetRootPath,
+        const std::vector<std::string>& assetBasePaths) override;
+
 private:
-    void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage,
-        const std::shared_ptr<Window>& aceWindow = nullptr);
+    void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void CommonInitializeForm(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
     void DestroyCallback() const;
@@ -125,7 +161,8 @@ private:
     int32_t instanceId_ = -1;
     OHOS::sptr<OHOS::Rosen::IWindowDragListener> dragWindowListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IOccupiedAreaChangeListener> occupiedAreaChangeListener_ = nullptr;
-
+    OHOS::sptr<OHOS::Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
+    
     // ITouchOutsideListener is used for touching out of hot areas of window.
     OHOS::sptr<OHOS::Rosen::ITouchOutsideListener> touchOutsideListener_ = nullptr;
 
@@ -140,6 +177,7 @@ private:
     float formHeight_ = 0.0;
     std::string formData_;
     std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>> formImageDataMap_;
+    std::unique_ptr<DistributedUIManager> uiManager_;
 };
 
 } // namespace OHOS::Ace

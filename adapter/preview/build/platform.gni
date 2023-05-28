@@ -16,7 +16,7 @@ import("config.gni")
 
 platforms = []
 
-if (use_mingw_win || true) {
+if (use_mingw_win) {
   windows_platform = {
     name = "windows"
     config = {
@@ -27,7 +27,7 @@ if (use_mingw_win || true) {
   platforms += [ windows_platform ]
 }
 
-if (use_mac || true) {
+if (use_mac) {
   mac_platform = {
     name = "mac"
     config = {
@@ -38,7 +38,7 @@ if (use_mac || true) {
   platforms += [ mac_platform ]
 }
 
-if (use_linux || true) {
+if (use_linux) {
   linux_platform = {
     name = "linux"
     config = {

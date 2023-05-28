@@ -19,11 +19,11 @@
 #include "base/log/log_wrapper.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/progress/progress_date.h"
 #include "core/components_ng/pattern/progress/progress_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_ng/pattern/progress/progress_date.h"
 
 namespace OHOS::Ace::NG {
 void ProgressModelNG::Create(double min, double value, double cachedValue, double max, NG::ProgressType type)
@@ -47,6 +47,8 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
         ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Color, theme->GetCapsuleSelectColor());
         ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BorderColor, theme->GetBorderColor());
         ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, theme->GetCapsuleBgColor());
+    } else if (type == ProgressType::RING) {
+        ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, theme->GetRingProgressBgColor());
     } else {
         ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, theme->GetTrackBgColor());
         ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Color, theme->GetTrackSelectedColor());
@@ -62,9 +64,12 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
             CHECK_NULL_VOID(textNode);
             textNode->SetInternal();
-            SetTextDefaultStyle(textNode, value, max);
             textNode->MountToParent(frameNode);
         }
+        auto textHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
+        CHECK_NULL_VOID(textHost);
+        SetTextDefaultStyle(textHost, value, max);
+        textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         eventHub->SetHoverEffect(HoverEffectType::SCALE);
     } else {
         if (!frameNode->GetChildren().empty()) {

@@ -18,9 +18,20 @@
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect_impl.h"
-#include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float SLIDE_SWITCH_FRAME_PERCENT = 0.333f;
+constexpr float SLIDE_SWITCH_SCALE = 0.85f;
+const auto SLIDE_SWITCH_DEFAULT_CURVE = AceType::MakeRefPtr<CubicCurve>(0.24f, 0.0f, 0.50f, 1.0f);
+constexpr int32_t SLIDE_SWITCH_DEFAULT_DURATION = 600;
+const auto SLIDE_SWITCH_DEFAULT_OPTION =
+    std::make_shared<AnimationOption>(SLIDE_SWITCH_DEFAULT_CURVE, SLIDE_SWITCH_DEFAULT_DURATION);
+const std::vector<std::pair<float, Rosen::Vector2f>> SLIDE_SWITCH_KEYFRAMES = {
+    { SLIDE_SWITCH_FRAME_PERCENT, Rosen::Vector2f { SLIDE_SWITCH_SCALE, SLIDE_SWITCH_SCALE } },
+};
+} // namespace
+
 void RosenTransitionEffect::Attach(const RefPtr<RosenRenderContext>& context, bool activeTransition)
 {
     OnAttach(context, activeTransition);
@@ -99,67 +110,71 @@ RefPtr<RosenTransitionEffect> RosenTransitionEffect::ConvertToRosenTransitionEff
     const RefPtr<NG::ChainedTransitionEffect>& effect)
 {
     RefPtr<RosenTransitionEffect> res;
-    RefPtr<RosenTransitionEffect> tailEffect;
-    RefPtr<ChainedTransitionEffect> nowEffect = effect;
-    while (nowEffect) {
-        RefPtr<RosenTransitionEffect> nowRSEffect;
-        switch (nowEffect->GetType()) {
+    RefPtr<RosenTransitionEffect> tailRSEffect;
+    RefPtr<ChainedTransitionEffect> currentEffect = effect;
+    while (currentEffect) {
+        RefPtr<RosenTransitionEffect> currentRSEffect;
+        switch (currentEffect->GetType()) {
             case ChainedTransitionEffectType::IDENTITY: {
-                nowRSEffect = AceType::MakeRefPtr<RosenIdentityTransitionEffect>();
+                currentRSEffect = AceType::MakeRefPtr<RosenIdentityTransitionEffect>();
                 break;
             }
             case ChainedTransitionEffectType::OPACITY: {
-                auto opacityEffect = AceType::DynamicCast<ChainedOpacityEffect>(nowEffect);
+                auto opacityEffect = AceType::DynamicCast<ChainedOpacityEffect>(currentEffect);
                 auto opacity = opacityEffect->GetEffect();
-                nowRSEffect = AceType::MakeRefPtr<RosenOpacityTransitionEffect>(1.0f, opacity);
+                currentRSEffect = AceType::MakeRefPtr<RosenOpacityTransitionEffect>(1.0f, opacity);
                 break;
             }
             case ChainedTransitionEffectType::MOVE: {
-                auto moveEffect = AceType::DynamicCast<ChainedMoveEffect>(nowEffect);
+                auto moveEffect = AceType::DynamicCast<ChainedMoveEffect>(currentEffect);
                 const auto& edge = moveEffect->GetEffect();
-                nowRSEffect = AceType::MakeRefPtr<RosenMoveTransitionEffect>(edge);
+                currentRSEffect = AceType::MakeRefPtr<RosenMoveTransitionEffect>(edge);
                 break;
             }
             case ChainedTransitionEffectType::ROTATE: {
-                auto rotateEffect = AceType::DynamicCast<ChainedRotateEffect>(nowEffect);
+                auto rotateEffect = AceType::DynamicCast<ChainedRotateEffect>(currentEffect);
                 const auto& rotateOption = rotateEffect->GetEffect();
-                nowRSEffect = AceType::MakeRefPtr<RosenRotation3DTransitionEffect>(rotateOption);
+                currentRSEffect = AceType::MakeRefPtr<RosenRotation3DTransitionEffect>(rotateOption);
                 break;
             }
             case ChainedTransitionEffectType::SCALE: {
-                auto scaleEffect = AceType::DynamicCast<ChainedScaleEffect>(nowEffect);
+                auto scaleEffect = AceType::DynamicCast<ChainedScaleEffect>(currentEffect);
                 const auto& scaleOption = scaleEffect->GetEffect();
                 // Scale z is not considered
-                nowRSEffect = AceType::MakeRefPtr<RosenScaleTransitionEffect>(scaleOption);
+                currentRSEffect = AceType::MakeRefPtr<RosenScaleTransitionEffect>(scaleOption);
                 break;
             }
             case ChainedTransitionEffectType::TRANSLATE: {
-                auto translateEffect = AceType::DynamicCast<ChainedTranslateEffect>(nowEffect);
+                auto translateEffect = AceType::DynamicCast<ChainedTranslateEffect>(currentEffect);
                 const auto& translateOption = translateEffect->GetEffect();
-                nowRSEffect = AceType::MakeRefPtr<RosenTranslateTransitionEffect>(translateOption);
+                currentRSEffect = AceType::MakeRefPtr<RosenTranslateTransitionEffect>(translateOption);
                 break;
             }
             case ChainedTransitionEffectType::ASYMMETRIC: {
-                auto asymmetricEffect = AceType::DynamicCast<ChainedAsymmetricEffect>(nowEffect);
+                auto asymmetricEffect = AceType::DynamicCast<ChainedAsymmetricEffect>(currentEffect);
                 auto rsAppearTransition = ConvertToRosenTransitionEffect(asymmetricEffect->GetAppearEffect());
                 auto rsDisappearTransition = ConvertToRosenTransitionEffect(asymmetricEffect->GetDisappearEffect());
-                nowRSEffect =
+                currentRSEffect =
                     AceType::MakeRefPtr<RosenAsymmetricTransitionEffect>(rsAppearTransition, rsDisappearTransition);
                 break;
             }
+            case ChainedTransitionEffectType::SLIDE_SWITCH: {
+                currentRSEffect = AceType::MakeRefPtr<RosenSlideSwitchTransitionEffect>();
+                break;
+            }
             default: {
-                LOGW("not support effect type: %{public}d", static_cast<int>(nowEffect->GetType()));
+                LOGW("not support effect type: %{public}d", static_cast<int>(currentEffect->GetType()));
                 return res;
             }
         }
-        nowRSEffect->SetAnimationOption(nowEffect->GetAnimationOption());
-        if (tailEffect) {
-            tailEffect->CombineWith(nowRSEffect);
+        currentRSEffect->SetAnimationOption(currentEffect->GetAnimationOption());
+        if (tailRSEffect) {
+            tailRSEffect->CombineWith(currentRSEffect);
         } else {
-            res = nowRSEffect;
+            res = currentRSEffect;
         }
-        tailEffect = nowRSEffect;
-        nowEffect = nowEffect->GetNext();
+        tailRSEffect = currentRSEffect;
+        currentEffect = currentEffect->GetNext();
     }
     return res;
 }
@@ -256,6 +271,9 @@ bool RosenTransitionEffect::UpdateRosenTransitionEffect(
                     LOGW("asymmetricEffect update transitionOut failed");
                     return false;
                 }
+                break;
+            }
+            case ChainedTransitionEffectType::SLIDE_SWITCH: {
                 break;
             }
             default: {
@@ -466,6 +484,10 @@ RosenAsyncMoveTransitionEffect ::RosenAsyncMoveTransitionEffect(TransitionEdge i
           MakeRefPtr<RosenMoveTransitionEffect>(inEdge), MakeRefPtr<RosenMoveTransitionEffect>(outEdge))
 {}
 
+RosenSlideTransitionEffect::RosenSlideTransitionEffect()
+    : RosenSlideTransitionEffect(TransitionEdge::END, TransitionEdge::START)
+{}
+
 RosenSlideTransitionEffect::RosenSlideTransitionEffect(TransitionEdge inEdge, TransitionEdge outEdge)
     : RosenAsymmetricTransitionEffect(MakeRefPtr<InternalTranslateEffect>(), MakeRefPtr<InternalTranslateEffect>()),
       inEdge_(inEdge), outEdge_(outEdge)
@@ -553,5 +575,16 @@ InternalScaleEffect::PropertyTransitionEffectTemplate() : identityValue_(1.0f, 1
 RefPtr<RosenTransitionEffect> RosenTransitionEffect::CreateDefaultRosenTransitionEffect()
 {
     return AceType::MakeRefPtr<RosenOpacityTransitionEffect>();
+}
+
+RosenSlideSwitchTransitionEffect::RosenSlideSwitchTransitionEffect()
+{
+    std::get<InternalScaleEffect>(effects_).SetKeyframes(SLIDE_SWITCH_KEYFRAMES);
+    SetAnimationOption(SLIDE_SWITCH_DEFAULT_OPTION);
+}
+
+void RosenSlideSwitchTransitionEffect::SetAnimationOption(const std::shared_ptr<AnimationOption>& option)
+{
+    RosenTransitionEffect::SetAnimationOption(option ? option : SLIDE_SWITCH_DEFAULT_OPTION);
 }
 } // namespace OHOS::Ace::NG

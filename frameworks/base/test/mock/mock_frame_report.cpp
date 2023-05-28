@@ -48,7 +48,7 @@ void FrameReport::Init()
 int FrameReport::GetEnable()
 {
     frameGetEnableFunc_ = nullptr;
-    return false;
+    return true;
 }
 
 int FrameReport::GetFrameReportEnable()
