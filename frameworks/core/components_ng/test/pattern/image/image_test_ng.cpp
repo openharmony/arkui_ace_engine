@@ -627,7 +627,7 @@ HWTEST_F(ImageTestNg, ImagePaintMethod001, TestSize.Level1)
     EXPECT_EQ(config->renderMode_, IMAGE_RENDERMODE_DEFAULT);
     EXPECT_EQ(config->imageInterpolation_, IMAGE_INTERPOLATION_DEFAULT);
     EXPECT_EQ(config->imageRepeat_, IMAGE_REPEAT_DEFAULT);
-    EXPECT_EQ(config->needFlipCanvasHorizontally_, MATCHTEXTDIRECTION_DEFAULT);
+    EXPECT_EQ(config->flipHorizontally_, MATCHTEXTDIRECTION_DEFAULT);
     EXPECT_EQ(*config->colorFilter_, COLOR_FILTER_DEFAULT);
 
     /**
@@ -1583,6 +1583,9 @@ HWTEST_F(ImageTestNg, ImageModifier003, TestSize.Level1)
     DrawingContext context { canvas, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
     auto imageCanvas = imagePaintMethod.imageModifier_->canvasImage_.Upgrade();
     ASSERT_NE(imageCanvas, nullptr);
+    imagePaintMethod.imageModifier_->SetIsAltImage(true);
+    EXPECT_EQ(imageCanvas->isDrawAnimate_, false);
+    imagePaintMethod.imageModifier_->SetIsAltImage(false);
     imagePaintMethod.imageModifier_->isFirst_ = true;
     imagePaintMethod.imageModifier_->onDraw(context);
     EXPECT_EQ(imageCanvas->isDrawAnimate_, false);

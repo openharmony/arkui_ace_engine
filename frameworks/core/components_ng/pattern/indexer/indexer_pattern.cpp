@@ -717,8 +717,9 @@ void IndexerPattern::CreateBubbleListView(std::vector<std::string>& currentListD
     CHECK_NULL_VOID(listNode);
     listNode->Clean();
     for (uint32_t i = 0; i < currentListData.size(); i++) {
-        auto listItemNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ListItemPattern>(nullptr));
+        auto listItemNode =
+            FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE));
         auto textNode = FrameNode::CreateFrameNode(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         listItemNode->AddChild(textNode);

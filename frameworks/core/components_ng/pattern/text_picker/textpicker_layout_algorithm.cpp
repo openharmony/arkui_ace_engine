@@ -24,10 +24,9 @@ namespace OHOS::Ace::NG {
 
 namespace {
 const int32_t DIVIDER_SIZE = 2;
-const int32_t TEXT_PICKER_CHILD_SIZE = 5;
+const int32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 const float PICKER_HEIGHT_HALF = 2.5f;
 const float ITEM_HEIGHT_HALF = 2.0f;
-const int32_t TEXT_PICKER_GRADIENT_CHILD_SIZE = 4;
 const int32_t MAX_HALF_DISPLAY_COUNT = 2;
 } // namespace
 void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -55,11 +54,17 @@ void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     }
 
+    uint32_t showCount_ = pickerTheme->GetShowOptionCount();
+    if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
+        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+        showCount_ = OPTION_COUNT_PHONE_LANDSCAPE;
+    }
+
     if (isDefaultPickerItemHeight_) {
-        pickerHeight = static_cast<float>(defaultPickerItemHeight_ * TEXT_PICKER_CHILD_SIZE);
+        pickerHeight = static_cast<float>(defaultPickerItemHeight_ * showCount_);
     } else {
         pickerHeight =
-            static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() * TEXT_PICKER_GRADIENT_CHILD_SIZE +
+            static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() * (showCount_ - 1) +
                                pickerTheme->GetDividerSpacing().ConvertToPx());
     }
 

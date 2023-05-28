@@ -70,6 +70,7 @@ void TextPattern::CloseSelectOverlay()
 
 void TextPattern::ResetSelection()
 {
+    showSelectOverlay_ = false;
     textSelector_.Update(-1, -1);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -158,7 +159,7 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
-
+    showSelectOverlay_ = true;
     InitSelection(textOffset);
     CalculateHandleOffsetAndShowOverlay();
     ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
@@ -267,10 +268,7 @@ void TextPattern::HandleOnCopy()
     if (copyOption_ != CopyOptions::None) {
         clipboard_->SetData(value, copyOption_);
     }
-    textSelector_.Update(-1, -1);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    ResetSelection();
 }
 
 void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle)
@@ -333,10 +331,7 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
 
 void TextPattern::HandleOnOverlayClose()
 {
-    textSelector_.Update(-1, -1);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    ResetSelection();
 }
 
 void TextPattern::HandleOnSelectAll()
@@ -716,6 +711,10 @@ void TextPattern::OnModifyDone()
     if (textCache != textForDisplay_) {
         host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
     }
+    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
+        copyOption_ = CopyOptions::None;
+        return;
+    }
     copyOption_ = textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
     if (copyOption_ != CopyOptions::None) {
         auto context = host->GetContext();
@@ -773,6 +772,11 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     contentRect_ = dirty->GetGeometryNode()->GetContentRect();
     contentOffset_ = dirty->GetGeometryNode()->GetContentOffset();
     textStyle_ = textLayoutAlgorithm->GetTextStyle();
+
+    if (showSelectOverlay_) {
+        CalculateHandleOffsetAndShowOverlay();
+        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+    }
     return true;
 }
 
@@ -933,7 +937,6 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
     CHECK_NULL_VOID(textLayoutProp);
 
     auto inheritPropertyInfo = child->CaculateInheritPropertyInfo();
-    auto iter = inheritPropertyInfo.find(PropertyInfo::TEXTDECORATION);
     for (const PropertyInfo& info : inheritPropertyInfo) {
         switch (info) {
             case PropertyInfo::FONTSIZE:
@@ -964,10 +967,6 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
             case PropertyInfo::TEXTDECORATION:
                 if (textLayoutProp->HasTextDecoration()) {
                     child->UpdateTextDecorationWithoutFlushDirty(textLayoutProp->GetTextDecoration().value());
-                }
-                break;
-            case PropertyInfo::TEXTDECORATIONCOLOR:
-                if (iter != inheritPropertyInfo.end()) {
                     if (textLayoutProp->HasTextDecorationColor()) {
                         child->UpdateTextDecorationColorWithoutFlushDirty(
                             textLayoutProp->GetTextDecorationColor().value());

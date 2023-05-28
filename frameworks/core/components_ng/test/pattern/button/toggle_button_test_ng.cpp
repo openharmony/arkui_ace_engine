@@ -60,7 +60,7 @@ struct TestProperty {
     std::optional<Color> backgroundColor = std::nullopt;
 };
 
-class ToggleButtonPatternTestNg : public testing::Test {
+class ToggleButtonTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -69,7 +69,7 @@ protected:
     RefPtr<FrameNode> CreateToggleButtonFrameNode(const TestProperty& testProperty);
 };
 
-void ToggleButtonPatternTestNg::SetUpTestCase()
+void ToggleButtonTestNg::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
     // set buttonTheme to themeManager before using themeManager to get buttonTheme
@@ -78,12 +78,12 @@ void ToggleButtonPatternTestNg::SetUpTestCase()
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ButtonTheme>()));
 }
 
-void ToggleButtonPatternTestNg::TearDownTestCase()
+void ToggleButtonTestNg::TearDownTestCase()
 {
     MockPipelineBase::TearDown();
 }
 
-RefPtr<FrameNode> ToggleButtonPatternTestNg::CreateToggleButtonFrameNode(const TestProperty& testProperty)
+RefPtr<FrameNode> ToggleButtonTestNg::CreateToggleButtonFrameNode(const TestProperty& testProperty)
 {
     ToggleButtonModelNG toggleButtonModelNG;
     toggleButtonModelNG.Create(TOGGLE_ETS_TAG);
@@ -106,7 +106,7 @@ RefPtr<FrameNode> ToggleButtonPatternTestNg::CreateToggleButtonFrameNode(const T
  * @tc.desc: Test all the properties of bubble.
  * @tc.type: FUNC
  */
-HWTEST_F(ToggleButtonPatternTestNg, ToggleButtonPatternTest001, TestSize.Level1)
+HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Initialize all properties of bubble.
@@ -144,7 +144,7 @@ HWTEST_F(ToggleButtonPatternTestNg, ToggleButtonPatternTest001, TestSize.Level1)
  * @tc.desc: test toggleButton pattern OnModifyDone .
  * @tc.type: FUNC
  */
-HWTEST_F(ToggleButtonPatternTestNg, ToggleButtonPatternTest002, TestSize.Level1)
+HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -181,7 +181,7 @@ HWTEST_F(ToggleButtonPatternTestNg, ToggleButtonPatternTest002, TestSize.Level1)
  * @tc.desc: test toggleButton pattern OnModifyDone and onClick.
  * @tc.type: FUNC
  */
-HWTEST_F(ToggleButtonPatternTestNg, ToggleButtonPatternTest003, TestSize.Level1)
+HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -229,7 +229,7 @@ HWTEST_F(ToggleButtonPatternTestNg, ToggleButtonPatternTest003, TestSize.Level1)
  * @tc.desc: test toggleButton pattern OnKeyEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(ToggleButtonPatternTestNg, ToggleButtonPatternTest004, TestSize.Level1)
+HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create and get frameNode.
@@ -255,7 +255,7 @@ HWTEST_F(ToggleButtonPatternTestNg, ToggleButtonPatternTest004, TestSize.Level1)
     EXPECT_TRUE(togglePattern->OnKeyEvent(event));
 }
 
-HWTEST_F(ToggleButtonPatternTestNg, ToggleButtonPatternTest005, TestSize.Level1)
+HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -287,7 +287,7 @@ HWTEST_F(ToggleButtonPatternTestNg, ToggleButtonPatternTest005, TestSize.Level1)
     togglePattern->OnModifyDone();
 }
 
-HWTEST_F(ToggleButtonPatternTestNg, ToggleButtonPatternTest006, TestSize.Level1)
+HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -318,7 +318,7 @@ HWTEST_F(ToggleButtonPatternTestNg, ToggleButtonPatternTest006, TestSize.Level1)
     EXPECT_TRUE(togglePattern->clickListener_);
 }
 
-HWTEST_F(ToggleButtonPatternTestNg, ToggleButtonPatternTest007, TestSize.Level1)
+HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -374,7 +374,7 @@ HWTEST_F(ToggleButtonPatternTestNg, ToggleButtonPatternTest007, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetFontSizeValue(buttonFontSize).Value(), childDimensionValue);
 }
 
-HWTEST_F(ToggleButtonPatternTestNg, ToggleButtonPatternTest008, TestSize.Level1)
+HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest008, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -391,7 +391,7 @@ HWTEST_F(ToggleButtonPatternTestNg, ToggleButtonPatternTest008, TestSize.Level1)
  * @tc.desc: test button pattern AnimateTouchAndHover.
  * @tc.type: FUNC
  */
-HWTEST_F(ToggleButtonPatternTestNg, ToggleButtonPatternTest009, TestSize.Level1)
+HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest009, TestSize.Level1)
 {
     TestProperty testProperty;
     testProperty.isOn = std::make_optional(IS_ON);

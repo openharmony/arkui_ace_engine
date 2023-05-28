@@ -2640,6 +2640,37 @@ HWTEST_F(TextTestNg, TextPatternTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextPatternTest004
+ * @tc.desc: Test the CopyOption value while in Marquee state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPatternTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode("", 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set the TextOverflow value to Marquee.
+     */
+    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateCopyOption(CopyOptions::InApp);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+
+    /**
+     * @tc.steps: step3. call OnModifyDone function.
+     * @tc.expected: The copyOption_ value is equal to CopyOptions::None.
+     */
+    textPattern->OnModifyDone();
+    EXPECT_EQ(textPattern->copyOption_, CopyOptions::None);
+}
+
+/**
  * @tc.name: CreateParagraph001
  * @tc.desc: test text_pattern.h CreateNodePaintMethod function
  * @tc.type: FUNC
@@ -3526,5 +3557,41 @@ HWTEST_F(TextTestNg, PerformActionTest001, TestSize.Level1)
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(1, TEXT_SIZE_INT));
     EXPECT_TRUE(textAccessibilityProperty->ActActionClearSelection());
     EXPECT_TRUE(textAccessibilityProperty->ActActionCopy());
+}
+
+/**
+ * @tc.name: TextSelectorTest001
+ * @tc.desc: test Update function in TextSelector
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextSelectorTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Text.
+     */
+    TextModelNG textModel;
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set callback function.
+     */
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateCopyOption(CopyOptions::InApp);
+    textPattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step3. call callback function.
+     * @tc.expected: textSelector_ update successfully.
+     */
+    textPattern->textSelector_.Update(0);
+    EXPECT_EQ(textPattern->textSelector_.baseOffset, 0);
+
+    textPattern->textSelector_.Update(0, TEXT_SIZE_INT);
+    EXPECT_EQ(textPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(textPattern->textSelector_.destinationOffset, TEXT_SIZE_INT);
 }
 } // namespace OHOS::Ace::NG

@@ -58,6 +58,18 @@ void UpdateFontWeight(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayou
     }
 }
 
+void UpdateFontStyle(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayoutProperty>& menuProperty,
+    const std::optional<Ace::FontStyle>& fontStyle)
+{
+    if (fontStyle.has_value()) {
+        textProperty->UpdateItalicFontStyle(fontStyle.value());
+    } else if (menuProperty && menuProperty->GetItalicFontStyle().has_value()) {
+        textProperty->UpdateItalicFontStyle(menuProperty->GetItalicFontStyle().value());
+    } else {
+        textProperty->UpdateItalicFontStyle(Ace::FontStyle::NORMAL);
+    }
+}
+
 void UpdateFontColor(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayoutProperty>& menuProperty,
     const std::optional<Color>& fontColor, const Color& defaultFontColor)
 {
@@ -558,6 +570,8 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     UpdateFontSize(textProperty, menuProperty, fontSize, theme->GetMenuFontSize());
     auto fontWeight = isLabel ? itemProperty->GetLabelFontWeight() : itemProperty->GetFontWeight();
     UpdateFontWeight(textProperty, menuProperty, fontWeight);
+    auto fontStyle = isLabel ? itemProperty->GetLabelItalicFontStyle() : itemProperty->GetItalicFontStyle();
+    UpdateFontStyle(textProperty, menuProperty, fontStyle);
     auto fontColor = isLabel ? itemProperty->GetLabelFontColor() : itemProperty->GetFontColor();
     UpdateFontColor(
         textProperty, menuProperty, fontColor, isLabel ? theme->GetSecondaryFontColor() : theme->GetMenuFontColor());

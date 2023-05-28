@@ -57,7 +57,6 @@ UIContent* CreateUIContent(void* context, void* runtime, bool isFormRender)
     }
 
     auto content = entry(context, runtime, isFormRender);
-    FREELIB(handle);
     return content;
 }
 
@@ -75,7 +74,6 @@ UIContent* CreateUIContent(void* context, void* runtime)
     }
 
     auto content = entry(context, runtime);
-    FREELIB(handle);
 #ifdef UICAST_COMPONENT_SUPPORTED
     UICastEventSubscribeProxy::GetInstance()->SubscribeStartEvent(content);
 #endif
@@ -97,7 +95,6 @@ UIContent* CreateUIContent(void* ability)
     }
 
     auto content = entry(ability);
-    FREELIB(handle);
 #ifdef UICAST_COMPONENT_SUPPORTED
     UICastEventSubscribeProxy::GetInstance()->SubscribeStartEvent(content);
 #endif

@@ -287,6 +287,7 @@ template("declarative_js_engine") {
       "jsview/models/column_model_impl.cpp",
       "jsview/models/common_view_model_impl.cpp",
       "jsview/models/counter_model_impl.cpp",
+      "jsview/models/custom_dialog_controller_model_impl.cpp",
       "jsview/models/data_panel_model_impl.cpp",
       "jsview/models/divider_model_impl.cpp",
       "jsview/models/ellipse_model_impl.cpp",
@@ -524,9 +525,9 @@ template("declarative_js_engine") {
       if (defined(config.window_scene_support) && config.window_scene_support) {
         sources += [
           "jsview/js_ui_extension.cpp",
-          "jsview/window_scene/js_host_window_scene.cpp",
           "jsview/window_scene/js_root_scene.cpp",
           "jsview/window_scene/js_screen.cpp",
+          "jsview/window_scene/js_window_scene.cpp",
         ]
       }
     }
@@ -582,6 +583,7 @@ template("declarative_js_engine_ng") {
       "sharedata/js_share_data.cpp",
 
       # jsviews
+      "jsview/js_button.cpp",
       "jsview/js_column.cpp",
       "jsview/js_container_base.cpp",
       "jsview/js_counter.cpp",

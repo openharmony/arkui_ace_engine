@@ -166,7 +166,7 @@ public:
 
     // scroller
     void AnimateTo(float position, float duration, const RefPtr<Curve>& curve);
-    void ScrollTo(float position);
+    void ScrollTo(float position, bool smooth);
     void ScrollToIndex(int32_t index, ScrollIndexAlignment align = ScrollIndexAlignment::ALIGN_TOP);
     void ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollIndexAlignment align);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
@@ -217,6 +217,7 @@ private:
     void FireOnScrollStart();
     void CheckRestartSpring();
     void StopAnimate();
+    void StartDefaultSpringMotion(float start, float end, float velocity);
 
     // multiSelectable
     void UninitMouseEvent();
@@ -226,6 +227,7 @@ private:
     void ClearSelectedZone();
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     void MultiSelectWithoutKeyboard(const RectF& selectedZone);
+    void HandleCardModeSelectedEvent(const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode);
 
     void DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper);
     void SetAccessibilityAction();
@@ -281,6 +283,8 @@ private:
     WeakPtr<ListItemPattern> swiperItem_;
 
     bool isScrollEnd_ = false;
+
+    RefPtr<SpringMotion> springMotion_;
 };
 } // namespace OHOS::Ace::NG
 

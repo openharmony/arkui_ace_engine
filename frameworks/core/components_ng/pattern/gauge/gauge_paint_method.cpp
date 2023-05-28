@@ -103,6 +103,13 @@ void GaugePaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const
     float highLightStart = 0.0f;
     size_t highLightIndex = 0;
     float ratio = 0.0f;
+    if (max < min) {
+        min = 0.0f;
+        max = 100.0f;
+    }
+    if (value < min || value > max) {
+        value = min;
+    }
     if (min < max && value >= min && value <= max) {
         ratio = (value - min) / (max - min);
     }

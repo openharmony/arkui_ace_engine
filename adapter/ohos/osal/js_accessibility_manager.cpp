@@ -775,7 +775,7 @@ void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, const Com
     nodeInfo.SetAccessibilityId(node->GetAccessibilityId());
     nodeInfo.SetComponentType(node->GetTag());
 
-    nodeInfo.SetEnabled(node->GetFocusHub() ? node->GetFocusHub()->IsAccessibilityEnabled() : true);
+    nodeInfo.SetEnabled(node->GetFocusHub() ? node->GetFocusHub()->IsEnabled() : true);
     nodeInfo.SetFocused(node->GetFocusHub() ? node->GetFocusHub()->IsCurrentFocus() : false);
     nodeInfo.SetAccessibilityFocus(node->GetRenderContext()->GetAccessibilityFocus().value_or(false));
     nodeInfo.SetInspectorKey(node->GetInspectorId().value_or(""));
@@ -787,6 +787,9 @@ void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, const Com
         auto bottom = rect.Bottom() + commonProperty.windowTop;
         Accessibility::Rect bounds { left, top, right, bottom };
         nodeInfo.SetRectInScreen(bounds);
+        LOGD("UpdateAccessibilityElementInfo nodeId:%{public}d, tag:%{public}s rect:left:%{public}f, top:%{public}f, "
+             "right:%{public}f, bottom:%{public}f",
+            node->GetAccessibilityId(), node->GetTag().c_str(), left, top, right, bottom);
     }
 
     nodeInfo.SetWindowId(commonProperty.windowId);

@@ -4780,6 +4780,9 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
     NG::SheetStyle sheetStyle;
     if (info.Length() == 3) { // 3 : parameter total
         ParseSheetStyle(info[2], sheetStyle); // 2 : The last parameter
+    } else {
+        sheetStyle.sheetMode = NG::SheetMode::LARGE;
+        sheetStyle.showDragBar = true;
     }
     ViewAbstractModel::GetInstance()->BindSheet(isShow, std::move(callback), std::move(buildFunc), sheetStyle);
 }
@@ -4797,7 +4800,7 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
             LOGW("show drag indicator failed.");
         }
     }
-
+    CalcDimension sheetHeight;
     if (height->IsNull() || height->IsUndefined()) {
         sheetStyle.sheetMode = NG::SheetMode::LARGE;
         sheetStyle.height.reset();
@@ -4816,10 +4819,19 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
                 sheetStyle.height.reset();
                 return;
             } else {
-                LOGI("sheet height is not default mode.");
+                if (heightStr.find("calc") != std::string::npos) {
+                    LOGI("calc value = %{public}s", heightStr.c_str());
+                    sheetHeight = CalcDimension(heightStr, DimensionUnit::CALC);
+                } else {
+                    sheetHeight = StringUtils::StringToDimensionWithUnit(heightStr, DimensionUnit::VP, -1.0);
+                }
+                if (sheetHeight.Value() < 0) {
+                    sheetStyle.sheetMode = NG::SheetMode::LARGE;
+                    sheetStyle.height.reset();
+                    return;
+                }
             }
         }
-        CalcDimension sheetHeight;
         if (!ParseJsDimensionVp(height, sheetHeight)) {
             sheetStyle.sheetMode = NG::SheetMode::LARGE;
             sheetStyle.height.reset();
@@ -5224,7 +5236,7 @@ void JSViewAbstract::SetPaddingRight(const JSCallbackInfo& info)
 
 void JSViewAbstract::SetBlur(float radius)
 {
-    CalcDimension dimensionRadius(radius, DimensionUnit::VP);
+    CalcDimension dimensionRadius(radius, DimensionUnit::PX);
     ViewAbstractModel::GetInstance()->SetFrontBlur(dimensionRadius);
 }
 
@@ -5235,7 +5247,7 @@ void JSViewAbstract::SetColorBlend(Color color)
 
 void JSViewAbstract::SetBackdropBlur(float radius)
 {
-    CalcDimension dimensionRadius(radius, DimensionUnit::VP);
+    CalcDimension dimensionRadius(radius, DimensionUnit::PX);
     ViewAbstractModel::GetInstance()->SetBackdropBlur(dimensionRadius);
 }
 

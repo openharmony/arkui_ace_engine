@@ -36,7 +36,6 @@ void ToggleButtonPattern::OnAttachToFrameNode()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->SetClipToFrame(true);
-    renderContext->UpdateClipEdge(true);
 }
 
 void ToggleButtonPattern::InitParameters()

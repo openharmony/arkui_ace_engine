@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,9 @@
 
 #include "core/components/side_bar/rosen_render_side_bar_container.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkPath.h"
+#endif
 #include "render_service_client/core/ui/rs_node.h"
 
 #include "core/pipeline/base/rosen_render_context.h"
@@ -31,9 +33,16 @@ void RosenRenderSideBarContainer::Paint(RenderContext& context, const Offset& of
 
     rsNode->SetClipToBounds(true);
     auto paintRect = GetPaintRect();
+#ifndef USE_ROSEN_DRAWING
     SkPath skPath;
     skPath.addRect(SkRect::MakeXYWH(paintRect.Left(), paintRect.Top(), paintRect.Width(), paintRect.Height()));
     rsNode->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
+#else
+    RSRecordingPath dPath;
+    dPath.AddRect(RSRect(paintRect.GetLeft(), paintRect.GetTop(),
+        paintRect.GetWidth() + paintRect.GetLeft(), paintRect.GetHeight()));
+    rsNode->SetClipBounds(Rosen::RSPath::CreateRSPath(dPath));
+#endif
 
     RenderNode::Paint(context, offset);
 }

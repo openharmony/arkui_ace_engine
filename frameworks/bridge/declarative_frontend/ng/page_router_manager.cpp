@@ -223,9 +223,8 @@ void PageRouterManager::EnableAlertBeforeBackPage(const std::string& message, st
     CHECK_NULL_VOID(currentPage);
     auto pagePattern = currentPage->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
-    auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
+    auto pageInfo = pagePattern->GetPageInfo();
     CHECK_NULL_VOID(pageInfo);
-    ClearAlertCallback(pageInfo);
 
     DialogProperties dialogProperties = {
         .content = message,
@@ -233,10 +232,12 @@ void PageRouterManager::EnableAlertBeforeBackPage(const std::string& message, st
         .buttons = { { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" },
             { .text = Localization::GetInstance()->GetEntryLetters("common.ok"), .textColor = "" } },
         .onSuccess =
-            [weak = AceType::WeakClaim(this), callback](int32_t successType, int32_t successIndex) {
+            [weak = AceType::WeakClaim(this), weakPageInfo = AceType::WeakClaim(AceType::RawPtr(pageInfo))](
+                int32_t successType, int32_t successIndex) {
                 LOGI("showDialog successType: %{public}d, successIndex: %{public}d", successType, successIndex);
-                if (!successType) {
-                    callback(successIndex);
+                auto pageInfo = weakPageInfo.Upgrade();
+                if (pageInfo && pageInfo->GetAlertCallback() && !successType) {
+                    pageInfo->GetAlertCallback()(successIndex);
                     if (successIndex) {
                         auto router = weak.Upgrade();
                         CHECK_NULL_VOID(router);
@@ -258,18 +259,7 @@ void PageRouterManager::DisableAlertBeforeBackPage()
     CHECK_NULL_VOID(pagePattern);
     auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
     CHECK_NULL_VOID(pageInfo);
-    ClearAlertCallback(pageInfo);
     pageInfo->SetAlertCallback(nullptr);
-}
-
-void PageRouterManager::ClearAlertCallback(const RefPtr<PageInfo>& pageInfo)
-{
-    if (pageInfo->GetAlertCallback()) {
-        // notify to clear js reference
-        auto alertCallback = pageInfo->GetAlertCallback();
-        alertCallback(static_cast<int32_t>(Framework::AlertState::RECOVERY));
-        pageInfo->SetAlertCallback(nullptr);
-    }
 }
 
 void PageRouterManager::StartClean()
@@ -630,9 +620,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
         }
         return;
     }
-    if (info.errorCallback != nullptr) {
-        info.errorCallback("", Framework::ERROR_CODE_NO_ERROR);
-    }
+
     CleanPageOverlay();
 
     if (info.routerMode == RouterMode::SINGLE) {
@@ -718,9 +706,6 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target)
             info.errorCallback("The uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR_LITE);
         }
         return;
-    }
-    if (info.errorCallback != nullptr) {
-        info.errorCallback("", Framework::ERROR_CODE_NO_ERROR);
     }
 
     PopPage("", false, false);
@@ -814,7 +799,6 @@ void PageRouterManager::BackCheckAlert(const RouterPageInfo& target)
 
 void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, bool needHideLast, bool needTransition)
 {
-    // TODO: isRestore function.
     CHECK_RUN_ON(JS);
     LOGI("PageRouterManager LoadPage[%{public}d]: %{public}s.", pageId, target.url.c_str());
     auto entryPageInfo = AceType::MakeRefPtr<EntryPageInfo>(pageId, target.url, target.path, target.params);
@@ -826,6 +810,9 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     pageNode->SetHostPageId(pageId);
     pageRouterStack_.emplace_back(pageNode);
     auto result = loadJs_(target.path, target.errorCallback);
+    if (target.errorCallback != nullptr) {
+        target.errorCallback("", Framework::ERROR_CODE_NO_ERROR);
+    }
     if (!result) {
         LOGE("fail to load page file");
         pageRouterStack_.pop_back();

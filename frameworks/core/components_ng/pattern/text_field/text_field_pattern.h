@@ -189,7 +189,11 @@ public:
     bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result);
 
     bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result) const;
-    bool IsSelectedAreaRedraw() const;
+
+    uint32_t GetDrawOverlayFlag() const
+    {
+        return drawOverlayFlag_;
+    }
 
     OffsetF MakeEmptyOffset() const;
 
@@ -242,7 +246,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyleType::MATCH_ACTIVE };
+        return { FocusType::NODE, true };
     }
 
     void UpdateConfiguration();
@@ -791,6 +795,11 @@ public:
         return HasFocus();
     }
 
+    void MarkRedrawOverlay()
+    {
+        ++drawOverlayFlag_;
+    }
+
 private:
     bool HasFocus() const;
     void HandleTouchEvent(const TouchEventInfo& info);
@@ -810,9 +819,9 @@ private:
     int32_t UpdateCaretPositionOnHandleMove(const OffsetF& localOffset);
     bool HasStateStyle(UIState state) const;
 
-    void AddScrollEvent();
     void OnTextAreaScroll(float offset);
     bool OnScrollCallback(float offset, int32_t source) override;
+    void OnScrollEndCallback() override;
     void InitMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
     void OnHover(bool isHover);
@@ -830,6 +839,8 @@ private:
     void ProcessOverlay();
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
+    // when moving one handle causes shift of textRect, update x position of the other handle
+    void UpdateOtherHandleOnMove(float dx, float dy);
     void SetHandlerOnMoveDone();
     void OnDetachFromFrameNode(FrameNode* node) override;
     bool UpdateCaretByPressOrLongPress();
@@ -957,20 +968,22 @@ private:
     bool isOnHover_ = false;
     bool needToRefreshSelectOverlay_ = false;
     bool needToRequestKeyboardInner_ = false;
-    bool needToRequestKeyboardOnFocus_ = false;
+    bool needToRequestKeyboardOnFocus_ = true;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 
     SelectionMode selectionMode_ = SelectionMode::NONE;
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
-    uint32_t twinklingInterval_ = 0;
-    int32_t obscureTickCountDown_ = 0;
     bool setSelectionFlag_ = false;
-    bool isSelectedAreaRedraw_ = false;
     bool setSelectAllFlag_ = true;
+    bool scrollable_ = true;
     int32_t selectionStart_ = 0;
     int32_t selectionEnd_ = 0;
-    bool scrollable_ = true;
+    // controls redraw of overlay modifier, update when need to redraw
+    int32_t drawOverlayFlag_ = 0;
+
+    uint32_t twinklingInterval_ = 0;
+    int32_t obscureTickCountDown_ = 0;
     float currentOffset_ = 0.0f;
     float unitWidth_ = 0.0f;
     float countHeight_ = 0.0f;

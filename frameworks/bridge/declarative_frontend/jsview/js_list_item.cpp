@@ -89,6 +89,15 @@ void JSListItem::CreateForPartialUpdate(const JSCallbackInfo& args)
         return;
     }
     const bool isLazy = args[1]->ToBoolean();
+
+    V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE;
+    if (args[2]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[2]);
+        JSRef<JSVal> styleObj = obj->GetProperty("style");
+        listItemStyle = styleObj->IsNumber() ? static_cast<V2::ListItemStyle>(styleObj->ToNumber<int32_t>())
+                                             : V2::ListItemStyle::NONE;
+    }
+
     if (!isLazy) {
         ListItemModel::GetInstance()->Create();
     } else {
@@ -103,7 +112,7 @@ void JSListItem::CreateForPartialUpdate(const JSCallbackInfo& args)
             jsParams[1] = JSRef<JSVal>::Make(ToJSValue(true));
             jsDeepRenderFunc->ExecuteJS(2, jsParams);
         }; // listItemDeepRenderFunc lambda
-        ListItemModel::GetInstance()->Create(std::move(listItemDeepRenderFunc));
+        ListItemModel::GetInstance()->Create(std::move(listItemDeepRenderFunc), listItemStyle);
         ListItemModel::GetInstance()->SetIsLazyCreating(isLazy);
     }
     args.ReturnSelf();

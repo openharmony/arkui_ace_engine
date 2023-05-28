@@ -785,6 +785,11 @@ void ViewAbstract::SetVisibility(VisibleType visible)
     if (layoutProperty) {
         layoutProperty->UpdateVisibility(visible, true);
     }
+
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    if (focusHub) {
+        focusHub->SetShow(visible == VisibleType::VISIBLE);
+    }
 }
 
 void ViewAbstract::SetGeometryTransition(const std::string& id)

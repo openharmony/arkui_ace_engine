@@ -75,7 +75,7 @@ void SpanModelNG::SetTextDecoration(Ace::TextDecoration value)
 
 void SpanModelNG::SetTextDecorationColor(const Color& value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(TextDecorationColor, value, PropertyInfo::TEXTDECORATIONCOLOR);
+    ACE_UPDATE_SPAN_PROPERTY(TextDecorationColor, value, PropertyInfo::NONE);
 }
 
 void SpanModelNG::SetTextCase(Ace::TextCase value)

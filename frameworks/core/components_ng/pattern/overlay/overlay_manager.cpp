@@ -231,16 +231,20 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInS
             ContainerScope scope(id);
             auto pipeline = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID_NOLOG(pipeline);
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(pipelineContext);
             auto taskExecutor = pipeline->GetTaskExecutor();
             CHECK_NULL_VOID_NOLOG(taskExecutor);
             taskExecutor->PostTask(
-                [weak, menuWK, id, isInSubWindow]() {
+                [weak, menuWK, id, isInSubWindow, pipelineContext]() {
                     auto menu = menuWK.Upgrade();
                     auto overlayManager = weak.Upgrade();
                     CHECK_NULL_VOID_NOLOG(menu && overlayManager);
                     ContainerScope scope(id);
                     overlayManager->FocusOverlayNode(menu, isInSubWindow);
                     overlayManager->CallOnShowMenuCallback();
+                    // Trigger mouse move action
+                    pipelineContext->FlushMouseEvent();
                 },
                 TaskExecutor::TaskType::UI);
         });
@@ -1470,12 +1474,6 @@ void OverlayManager::UpdatePixelMapScale(float& scale)
     CHECK_NULL_VOID(hub);
     RefPtr<PixelMap> pixelMap = hub->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
-    if (pixelMap->GetWidth() > Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH ||
-        pixelMap->GetHeight() > Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) {
-        float scaleWidth = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH) / pixelMap->GetWidth();
-        float scaleHeight = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) / pixelMap->GetHeight();
-        scale = std::min(scaleWidth, scaleHeight);
-    }
 }
 
 void OverlayManager::RemoveFilter()
