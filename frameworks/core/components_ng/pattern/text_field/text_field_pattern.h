@@ -189,7 +189,11 @@ public:
     bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result);
 
     bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result) const;
-    bool IsSelectedAreaRedraw() const;
+
+    uint32_t GetDrawOverlayFlag() const
+    {
+        return drawOverlayFlag_;
+    }
 
     OffsetF MakeEmptyOffset() const;
 
@@ -791,9 +795,9 @@ public:
         return HasFocus();
     }
 
-    void ChangeIsSelectedAreaRedraw()
+    void MarkRedrawOverlay()
     {
-        isSelectedAreaRedraw_ = !isSelectedAreaRedraw_;
+        ++drawOverlayFlag_;
     }
 
 private:
@@ -970,14 +974,16 @@ private:
 
     SelectionMode selectionMode_ = SelectionMode::NONE;
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
-    uint32_t twinklingInterval_ = 0;
-    int32_t obscureTickCountDown_ = 0;
     bool setSelectionFlag_ = false;
-    bool isSelectedAreaRedraw_ = false;
     bool setSelectAllFlag_ = true;
+    bool scrollable_ = true;
     int32_t selectionStart_ = 0;
     int32_t selectionEnd_ = 0;
-    bool scrollable_ = true;
+    // controls redraw of overlay modifier, update when need to redraw
+    int32_t drawOverlayFlag_ = 0;
+
+    uint32_t twinklingInterval_ = 0;
+    int32_t obscureTickCountDown_ = 0;
     float currentOffset_ = 0.0f;
     float unitWidth_ = 0.0f;
     float countHeight_ = 0.0f;

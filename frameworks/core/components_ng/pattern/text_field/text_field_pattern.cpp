@@ -258,7 +258,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (caretUpdateType_ == CaretUpdateType::HANDLE_MOVE && (!NearZero(dx) || !NearZero(dy))) {
         UpdateOtherHandleOnMove(dx, dy);
         // trigger selection box repaint
-        ChangeIsSelectedAreaRedraw();
+        MarkRedrawOverlay();
     } else if (caretUpdateType_ == CaretUpdateType::HANDLE_MOVE_DONE) {
         SetHandlerOnMoveDone();
     }
@@ -1078,7 +1078,7 @@ void TextFieldPattern::HandleBlurEvent()
     StopTwinkling();
     CloseKeyboard(true);
     auto pos = static_cast<int32_t>(textEditingValue_.GetWideText().length());
-    isSelectedAreaRedraw_ = !isSelectedAreaRedraw_;
+    MarkRedrawOverlay();
     UpdateCaretPositionWithClamp(pos);
     textEditingValue_.CursorMoveToPosition(pos);
     textSelector_.Update(-1);
@@ -1153,7 +1153,7 @@ void TextFieldPattern::HandleOnSelectAll()
     textEditingValue_.caretPosition = textSize;
     selectionMode_ = SelectionMode::SELECT_ALL;
     caretUpdateType_ = CaretUpdateType::EVENT;
-    ChangeIsSelectedAreaRedraw();
+    MarkRedrawOverlay();
     GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -2051,7 +2051,7 @@ void TextFieldPattern::ProcessOverlay()
 void TextFieldPattern::CreateHandles()
 {
     std::vector<RSTypographyProperties::TextBox> tmp;
-    ChangeIsSelectedAreaRedraw();
+    MarkRedrawOverlay();
     GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), tmp);
     auto firstHandlePosition = CalcCursorOffsetByPosition(textSelector_.GetStart());
     OffsetF firstHandleOffset(firstHandlePosition.offset.GetX() + parentGlobalOffset_.GetX(),
@@ -3150,7 +3150,7 @@ void TextFieldPattern::Delete(int32_t start, int32_t end)
         HandleCounterBorder();
     }
     // trigger repaint of select mask
-    isSelectedAreaRedraw_ = !isSelectedAreaRedraw_;
+    ++drawOverlayFlag_;
     GetHost()->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                       : PROPERTY_UPDATE_MEASURE);
 }
@@ -3624,7 +3624,7 @@ void TextFieldPattern::SetTextSelection(int32_t selectionStart, int32_t selectio
         client->isUsingMouse_ = false;
         client->SetCaretUpdateType(CaretUpdateType::EVENT);
         client->CloseSelectOverlay();
-        client->isSelectedAreaRedraw_ = !client->isSelectedAreaRedraw_;
+        client->MarkRedrawOverlay();
         if (client->RequestKeyboard(false, true, true)) {
             auto textFieldFrameNode = client->GetHost();
             CHECK_NULL_VOID(textFieldFrameNode);
@@ -3643,7 +3643,7 @@ void TextFieldPattern::SetSelectionFlag(int32_t selectionStart, int32_t selectio
     }
     setSelectionFlag_ = true;
     cursorVisible_ = false;
-    isSelectedAreaRedraw_ = false;
+    MarkRedrawOverlay();
     selectionStart_ = selectionStart;
     selectionEnd_ = selectionEnd;
     auto host = GetHost();
@@ -4195,11 +4195,6 @@ void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json)
     auto copyOption = json->GetString("copyOption");
     layoutProperty->UpdateCopyOptions(uMap.count(copyOption) ? uMap.at(copyOption) : CopyOptions::None);
     Pattern::FromJson(json);
-}
-
-bool TextFieldPattern::IsSelectedAreaRedraw() const
-{
-    return isSelectedAreaRedraw_;
 }
 
 void TextFieldPattern::SetAccessibilityAction()
