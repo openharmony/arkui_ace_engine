@@ -124,19 +124,6 @@ void AnimationUtils::BlendBgColorAnimation(
     AnimationUtils::Animate(option, [context = renderContext, color = endColor]() { context->BlendBgColor(color); });
 }
 
-bool AnimationUtils::IsRunning(const std::shared_ptr<AnimationUtils::Animation>& animation)
-{
-    CHECK_NULL_RETURN(animation, false);
-    if (animation->animations_.size()) {
-        for (auto& ani : animation->animations_) {
-            if (ani->IsRunning()) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
 void AnimationUtils::PauseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation)
 {
     CHECK_NULL_VOID(animation);
