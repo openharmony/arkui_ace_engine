@@ -790,6 +790,26 @@ public:
         underlineWidth_ = underlineWidth;
     }
 
+    bool IsSelectAll()
+    {
+        return abs(textSelector_.GetStart() - textSelector_.GetEnd()) >=
+               static_cast<int32_t>(StringUtils::ToWstring(textEditingValue_.text).length());
+    }
+
+    SelectMenuInfo GetSelectMenuInfo() const
+    {
+        return selectMenuInfo_;
+    }
+
+    void UpdateSelectMenuInfo(bool hasData)
+    {
+        selectMenuInfo_.showCopy = !GetEditingValue().text.empty() && AllowCopy();
+        selectMenuInfo_.showCut = selectMenuInfo_.showCopy && !GetEditingValue().text.empty();
+        selectMenuInfo_.showCopyAll = !GetEditingValue().text.empty() && !IsSelectAll();
+        selectMenuInfo_.showPaste = hasData;
+        selectMenuInfo_.menuIsShow = !GetEditingValue().text.empty() || hasData;
+    }
+
     bool IsSelected() const
     {
         return HasFocus();
@@ -902,6 +922,8 @@ private:
     void SetAccessibilityAction();
     void SetAccessibilityMoveTextAction();
     void SetAccessibilityScrollAction();
+
+    void UpdateCopyAllStatus();
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1017,6 +1039,8 @@ private:
     std::vector<MenuOptionsParam> menuOptionItems_;
     UnderLinePattern underLinePattern_;
     PasswordModeStyle passwordModeStyle_;
+
+    SelectMenuInfo selectMenuInfo_;
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> textChangeListener_;
