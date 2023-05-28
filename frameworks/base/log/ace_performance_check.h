@@ -68,18 +68,19 @@ public:
     explicit AceScopedPerformanceCheck(const std::string& name);
     ~AceScopedPerformanceCheck();
 
+    static CodeInfo GetCodeInfo(int32_t row, int32_t col);
     static void RecordPerformanceCheckData(const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout);
 
 private:
     static std::string GetCurrentTime();
-    static CodeInfo GetCodeInfo(int32_t row, int32_t col);
     static bool CheckIsRuleContainsPage(const std::string& ruleType, const std::string& pagePath);
-    static void RecordPageNodeCountAndDepth(
-        int32_t pageNodeCount, int32_t pageDepth, std::vector<PerformanceCheckNode>& pageNodeList);
+    static void RecordPageNodeCountAndDepth(int32_t pageNodeCount, int32_t pageDepth,
+        std::vector<PerformanceCheckNode>& pageNodeList, const CodeInfo& info);
     static void RecordForEachItemsCount(
-        int32_t count, std::unordered_map<int32_t, PerformanceCheckNode>& foreachNodeMap);
-    static void RecordFlexLayoutsCount(const std::vector<PerformanceCheckNode>& nodeList);
-    static void RecordVsyncTimeout(const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout);
+        int32_t count, std::unordered_map<int32_t, PerformanceCheckNode>& foreachNodeMap, const CodeInfo& info);
+    static void RecordFlexLayoutsCount(const std::vector<PerformanceCheckNode>& nodeList, const CodeInfo& info);
+    static void RecordVsyncTimeout(const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout, const CodeInfo& info);
+    static bool CheckPage(const CodeInfo& codeInfo, const std::string& rule);
     void RecordFunctionTimeout(int64_t sec, const std::string& functionName);
 
     int64_t markTime_ = 0;

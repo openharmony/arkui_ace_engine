@@ -1691,8 +1691,8 @@ void FrameNode::CreateAnimatableArithmeticProperty(const std::string& propertyNa
     nodeAnimatablePropertyMap_.emplace(propertyName, property);
 }
 
-void FrameNode::UpdateAnimatableArithmeticProperty(const std::string& propertyName,
-    RefPtr<CustomAnimatableArithmetic>& value)
+void FrameNode::UpdateAnimatableArithmeticProperty(
+    const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value)
 {
     auto iter = nodeAnimatablePropertyMap_.find(propertyName);
     if (iter == nodeAnimatablePropertyMap_.end()) {

@@ -103,6 +103,7 @@ void ViewStackProcessor::Pop()
     }
 
     auto currentNode = Finish();
+    currentNode->SetBuildByJs(true);
     auto parent = GetMainElementNode();
     if (AceType::InstanceOf<GroupNode>(parent)) {
         auto groupNode = AceType::DynamicCast<GroupNode>(parent);
