@@ -1316,9 +1316,6 @@ void VideoPattern::EnableDrag()
 
         videoLayoutProperty->UpdateVideoSource(videoSrc);
 
-        if (!isInitialState) {
-            this->SetIsStop(true);
-        }
         auto frameNode = this->GetHost();
         frameNode->MarkModifyDone();
     };
