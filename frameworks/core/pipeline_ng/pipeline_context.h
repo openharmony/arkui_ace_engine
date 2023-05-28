@@ -90,6 +90,8 @@ public:
 
     // Called by view when mouse event received.
     void OnMouseEvent(const MouseEvent& event) override;
+    // A temporary solution: triggers once mouse move action
+    void FlushMouseEvent();
 
     // Called by view when axis event received.
     void OnAxisEvent(const AxisEvent& event) override;
@@ -443,6 +445,7 @@ private:
     bool isTabJustTriggerOnKeyEvent_ = false;
     bool onShow_ = false;
     bool onFocus_ = true;
+    MouseEvent lastMouseEvent_;
 
     std::unordered_map<int32_t, WeakPtr<FrameNode>> storeNode_;
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;

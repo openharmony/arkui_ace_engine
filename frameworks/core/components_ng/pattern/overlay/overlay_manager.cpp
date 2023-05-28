@@ -231,16 +231,20 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInS
             ContainerScope scope(id);
             auto pipeline = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID_NOLOG(pipeline);
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(pipelineContext);
             auto taskExecutor = pipeline->GetTaskExecutor();
             CHECK_NULL_VOID_NOLOG(taskExecutor);
             taskExecutor->PostTask(
-                [weak, menuWK, id, isInSubWindow]() {
+                [weak, menuWK, id, isInSubWindow, pipelineContext]() {
                     auto menu = menuWK.Upgrade();
                     auto overlayManager = weak.Upgrade();
                     CHECK_NULL_VOID_NOLOG(menu && overlayManager);
                     ContainerScope scope(id);
                     overlayManager->FocusOverlayNode(menu, isInSubWindow);
                     overlayManager->CallOnShowMenuCallback();
+                    // Trigger mouse move action
+                    pipelineContext->FlushMouseEvent();
                 },
                 TaskExecutor::TaskType::UI);
         });
