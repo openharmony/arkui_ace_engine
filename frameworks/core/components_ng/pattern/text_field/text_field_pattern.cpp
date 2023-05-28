@@ -3019,6 +3019,9 @@ float TextFieldPattern::PreferredTextHeight(bool isPlaceholder)
         TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(layoutProperty, textFieldTheme, textStyle, false);
         textContent = "b";
     }
+    if (textStyle.GetFontSize().IsNonPositive()) {
+        textStyle.SetFontSize(DEFAULT_FONT);
+    }
     RSParagraphStyle paraStyle;
     paraStyle.textDirection_ = ToRSTextDirection(TextFieldLayoutAlgorithm::GetTextDirection(textEditingValue_.text));
     paraStyle.textAlign_ = ToRSTextAlign(textStyle.GetTextAlign());
