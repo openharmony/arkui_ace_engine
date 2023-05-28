@@ -54,7 +54,6 @@ public:
     static void StopAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
     static void BlendBgColorAnimation(
         RefPtr<NG::RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve);
-    static bool IsRunning(const std::shared_ptr<AnimationUtils::Animation>& animation);
     static void PauseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
     static void ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
 };

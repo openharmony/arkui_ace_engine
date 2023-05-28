@@ -547,8 +547,8 @@ void StepperPattern::HandlingLeftButtonClickEvent()
     CHECK_NULL_VOID(stepperHub);
     auto swiperNode =
         DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId())));
-    const auto& swiperAnimation = swiperNode->GetPattern<SwiperPattern>()->GetAnimation();
-    if (AnimationUtils::IsRunning(swiperAnimation)) {
+    auto swiperAnimationController = swiperNode->GetPattern<SwiperPattern>()->GetController();
+    if (swiperAnimationController && !swiperAnimationController->IsStopped()) {
         return;
     }
     auto swiperController = swiperNode->GetPattern<SwiperPattern>()->GetSwiperController();
@@ -565,8 +565,8 @@ void StepperPattern::HandlingRightButtonClickEvent()
     CHECK_NULL_VOID(stepperHub);
     auto swiperNode =
         DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId())));
-    const auto& swiperAnimation = swiperNode->GetPattern<SwiperPattern>()->GetAnimation();
-    if (AnimationUtils::IsRunning(swiperAnimation)) {
+    auto swiperAnimationController = swiperNode->GetPattern<SwiperPattern>()->GetController();
+    if (swiperAnimationController && !swiperAnimationController->IsStopped()) {
         return;
     }
     auto stepperItemNode = DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(static_cast<int32_t>(index_)));

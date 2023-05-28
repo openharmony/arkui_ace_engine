@@ -1728,7 +1728,7 @@ HWTEST_F(SwiperIndicatorPatternTestNg, SwiperLayoutAlgorithmLayout001, TestSize.
     InitLayoutWrapper(frameNode, algorithm, indicatorNode, layoutWrapper);
     algorithm->Measure(AceType::RawPtr(layoutWrapper));
 
-    auto swiperPatternAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(swiperPattern->CreateLayoutAlgorithm());
+    auto swiperPatternAlgorithm = swiperPattern->CreateLayoutAlgorithm();
     ASSERT_NE(swiperPatternAlgorithm, nullptr);
     auto swiperNode = swiperPattern->GetHost();
     ASSERT_NE(swiperNode, nullptr);
@@ -1747,7 +1747,7 @@ HWTEST_F(SwiperIndicatorPatternTestNg, SwiperLayoutAlgorithmLayout001, TestSize.
      * @tc.expected: indicatorNodeWrapper MarginFrameOffset is 327.0, 1106.0 .
      */
     swiperPatternAlgorithm->Layout(&swiperLayoutWrapper);
-    EXPECT_EQ(indicatorNodeWrapper->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(0.0, 0.0));
+    EXPECT_EQ(indicatorNodeWrapper->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(327.0, 1106.0));
 }
 
 /**
@@ -1793,7 +1793,7 @@ HWTEST_F(SwiperIndicatorPatternTestNg, SwiperLayoutAlgorithmLayout002, TestSize.
      * @tc.expected: indicatorNodeWrapper MarginFrameOffset is 654.0, 553.0 .
      */
     swiperPatternAlgorithm->Layout(&swiperLayoutWrapper);
-    EXPECT_EQ(indicatorNodeWrapper->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(0.0, 0.0));
+    EXPECT_EQ(indicatorNodeWrapper->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(654.0, 553.0));
 }
 
 /**
@@ -1842,7 +1842,7 @@ HWTEST_F(SwiperIndicatorPatternTestNg, SwiperLayoutAlgorithmLayout003, TestSize.
      * @tc.expected: indicatorNodeWrapper MarginFrameOffset is 20.0, 20.0 .
      */
     swiperPatternAlgorithm->Layout(&swiperLayoutWrapper);
-    EXPECT_EQ(indicatorNodeWrapper->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(0.0, 0.0));
+    EXPECT_EQ(indicatorNodeWrapper->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(20.0, 20.0));
 }
 
 /**
@@ -1889,7 +1889,7 @@ HWTEST_F(SwiperIndicatorPatternTestNg, SwiperLayoutAlgorithmLayout004, TestSize.
      * @tc.expected: indicatorNodeWrapper MarginFrameOffset is 634.0, 1086.0 .
      */
     swiperPatternAlgorithm->Layout(&swiperLayoutWrapper);
-    EXPECT_EQ(indicatorNodeWrapper->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(0.0, 0.0));
+    EXPECT_EQ(indicatorNodeWrapper->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(634.0, 1086.0));
 }
 
 /**

@@ -108,11 +108,18 @@ HWTEST_F(SwiperPatternTestNg, SwiperEvent001, TestSize.Level1)
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
     pattern->HandleTouchEvent(touchEventInfo);
     EXPECT_FALSE(pattern->indicatorDoingAnimation_);
+    const char* name = "HandleTouchDown";
+    pattern->controller_ = CREATE_ANIMATOR(name);
+    pattern->controller_->status_ = Animator::Status::RUNNING;
+    pattern->springController_ = CREATE_ANIMATOR(name);
+    pattern->springController_->status_ = Animator::Status::RUNNING;
     pattern->HandleTouchEvent(touchEventInfo);
     EXPECT_FALSE(pattern->indicatorDoingAnimation_);
 
     touchEventInfo.touches_.begin()->SetTouchType(TouchType::UP);
     pattern->HandleTouchEvent(touchEventInfo);
+    pattern->controller_ = nullptr;
+    pattern->springController_ = nullptr;
     touchEventInfo.touches_.begin()->SetTouchType(TouchType::CANCEL);
     pattern->HandleTouchEvent(touchEventInfo);
     touchEventInfo.touches_.begin()->SetTouchType(TouchType::MOVE);
@@ -134,13 +141,14 @@ HWTEST_F(SwiperPatternTestNg, SwiperEvent002, TestSize.Level1)
     stack->Push(swiperNode);
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
     auto eventHub = AceType::MakeRefPtr<EventHub>();
-    pattern->InitPanEvent();
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    pattern->InitPanEvent(gestureEventHub);
     EXPECT_EQ(pattern->direction_, Axis::HORIZONTAL);
     pattern->touchEvent_ = nullptr;
-    pattern->InitTouchEvent();
+    pattern->InitTouchEvent(gestureEventHub);
     TouchEventFunc callback = [](TouchEventInfo& info) {};
     pattern->touchEvent_ = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback));
-    pattern->InitTouchEvent();
+    pattern->InitTouchEvent(gestureEventHub);
     EXPECT_TRUE(pattern->touchEvent_);
 
     EXPECT_TRUE(pattern->panEvent_);
@@ -200,21 +208,22 @@ HWTEST_F(SwiperPatternTestNg, SwiperUtilsTest001, TestSize.Level1)
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(swiperLayoutAlgorithm));
     int32_t startIndex = 0;
     int32_t endIndex = 4;
+    swiperLayoutAlgorithm->startIndex_ = startIndex;
+    swiperLayoutAlgorithm->endIndex_ = endIndex;
+    swiperLayoutAlgorithm->currentIndex_ = 1;
     swiperLayoutAlgorithm->SetTotalCount(endIndex - startIndex);
     CreateChildWrapperAppendToHostWrapper(startIndex, endIndex, layoutWrapper);
     swiperLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     swiperLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
-    auto calcIdealLength =
-        (SWIPER_IDEAL_WIDTH - PREVIOUS_MARGIN.Value() - NEXT_MARGIN.Value() - ITEM_SPACE.Value() * (displaycount + 1)) /
-        displaycount;
-
-    for (int32_t index = startIndex; index < endIndex; index++) {
+    auto calcIdealLength = (SWIPER_IDEAL_WIDTH - PREVIOUS_MARGIN.Value() - NEXT_MARGIN.Value() -
+                            ITEM_SPACE.Value() * (displaycount + 1)) / displaycount;
+    for (int32_t index = startIndex; index <= endIndex; index++) {
         auto childLayout = layoutWrapper->GetOrCreateChildByIndex(index);
         ASSERT_NE(childLayout, nullptr);
-        auto mainDirectionOffset = OffsetF(50.0f + 20.0f, 0.0f) +
-                                   OffsetF(swiperLayoutAlgorithm->GetPagesOffsetTimes(index) * 200, 0);
+        auto mainDirectionOffset = (PREVIOUS_MARGIN.Value() - calcIdealLength) +
+            index * (calcIdealLength + ITEM_SPACE.Value());
         EXPECT_EQ(childLayout->GetGeometryNode()->GetFrameSize(), SizeF(calcIdealLength, calcIdealLength));
-        EXPECT_EQ(childLayout->GetGeometryNode()->GetMarginFrameOffset(), mainDirectionOffset);
+        EXPECT_EQ(childLayout->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(mainDirectionOffset, 0.0f));
     }
 }
 
@@ -423,6 +432,26 @@ HWTEST_F(SwiperPatternTestNg, SwiperInit001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SwiperInit002
+ * @tc.desc: InitOnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperInit002, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    RefPtr<FocusHub> focusHub = AceType::MakeRefPtr<FocusHub>(eventHub, FocusType::DISABLE, false);
+    pattern->InitOnKeyEvent(focusHub);
+    KeyEvent event = KeyEvent();
+    event.action = KeyAction::DOWN;
+    EXPECT_FALSE(focusHub->onKeyEventInternal_(event));
+}
+
+/**
  * @tc.name: SwiperFunc001
  * @tc.desc: OnKeyEvent
  * @tc.type: FUNC
@@ -506,7 +535,8 @@ HWTEST_F(SwiperPatternTestNg, SwiperFunc004, TestSize.Level1)
     stack->Push(swiperNode);
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
     auto eventHub = AceType::MakeRefPtr<EventHub>();
-    pattern->InitPanEvent();
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    pattern->InitPanEvent(gestureEventHub);
     EXPECT_EQ(pattern->direction_, Axis::HORIZONTAL);
 
     auto indicatorNode = FrameNode::GetOrCreateFrameNode(
@@ -520,15 +550,20 @@ HWTEST_F(SwiperPatternTestNg, SwiperFunc004, TestSize.Level1)
     gestureEvent.SetLocalLocation(Offset(0, 0));
     gestureEvent.inputEventType_ = InputEventType::TOUCH_SCREEN;
     pattern->panEvent_->actionUpdate_(gestureEvent);
+    EXPECT_EQ(pattern->currentOffset_, MAIN_DELTA);
 
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     swiperPaintProperty->propLoop_ = false;
+    EXPECT_TRUE(pattern->IsOutOfBoundary(MAIN_DELTA));
     swiperNode->geometryNode_->frame_.SetSize(SizeF(GEOMETRY_WIDTH, GEOMETRY_HEIGHT));
+    EXPECT_FALSE(pattern->IsOutOfBoundary(MAIN_DELTA));
     // Swiper has reached boundary.
     swiperNode->geometryNode_->frame_.SetSize(SizeF(0, 0));
     pattern->panEvent_->actionUpdate_(gestureEvent);
+    pattern->currentOffset_ = MAIN_DELTA;
     swiperPaintProperty->propEdgeEffect_ = EdgeEffect::FADE;
     pattern->panEvent_->actionUpdate_(gestureEvent);
+    pattern->currentOffset_ = MAIN_DELTA;
     swiperPaintProperty->propEdgeEffect_ = EdgeEffect::NONE;
     pattern->panEvent_->actionUpdate_(gestureEvent);
 }
