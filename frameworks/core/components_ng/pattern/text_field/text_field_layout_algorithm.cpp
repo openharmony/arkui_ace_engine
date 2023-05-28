@@ -131,10 +131,7 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             frameSize.SetWidth(layoutConstraint->minSize.Width());
         }
     }
-    if (calcLayoutConstraint &&
-        (calcLayoutConstraint->minSize.has_value() || calcLayoutConstraint->maxSize.has_value())) {
-        frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
-    }
+    frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
     if (layoutConstraint->maxSize.Height() < layoutConstraint->minSize.Height()) {
         frameSize.SetHeight(layoutConstraint->minSize.Height());
     }
