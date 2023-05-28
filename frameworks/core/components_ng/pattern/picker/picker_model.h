@@ -22,6 +22,18 @@
 
 namespace OHOS::Ace {
 using DateChangeEvent = std::function<void(const BaseEventInfo* info)>;
+struct PickerDialogInfo {
+    bool isLunar;
+    PickerDate parseStartDate;
+    PickerDate parseEndDate;
+    PickerDate parseSelectedDate;
+    PickerTime pickerTime;
+    bool isUseMilitaryTime;
+    bool isSelectedTime;
+    bool isStartDate;
+    bool isEndDate;
+    bool isSelectedDate;
+};
 class DatePickerModel {
 public:
     static DatePickerModel* GetInstance();
@@ -44,6 +56,19 @@ public:
 
 private:
     static std::unique_ptr<DatePickerModel> datePickerInstance_;
+};
+
+class DatePickerDialogModel {
+public:
+    static DatePickerDialogModel* GetInstance();
+    virtual ~DatePickerDialogModel() = default;
+
+    virtual void SetDatePickerDialogShow(PickerDialogInfo& pickerDialog, NG::DatePickerSettingData& settingData,
+        std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
+        std::function<void(const std::string&)>&& onChange, DatePickerType pickerType) = 0;
+
+private:
+    static std::unique_ptr<DatePickerDialogModel> datePickerDialogInstance_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PICKER_PICKER_MODEL_H

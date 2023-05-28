@@ -18,6 +18,7 @@
 
 #include "core/components/picker/picker_data.h"
 #include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_model.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 
 namespace OHOS::Ace {
@@ -39,6 +40,19 @@ public:
 
 private:
     static std::unique_ptr<TimePickerModel> timePickerInstance_;
+};
+
+class TimePickerDialogModel {
+public:
+    static TimePickerDialogModel* GetInstance();
+    virtual ~TimePickerDialogModel() = default;
+
+    virtual void SetTimePickerDialogShow(PickerDialogInfo& pickerDialog, NG::TimePickerSettingData& settingData,
+        std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
+        std::function<void(const std::string&)>&& onChange) = 0;
+
+private:
+    static std::unique_ptr<TimePickerDialogModel> timePickerDialogInstance_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TIME_PICKER_TIME_PICKER_MODEL_H

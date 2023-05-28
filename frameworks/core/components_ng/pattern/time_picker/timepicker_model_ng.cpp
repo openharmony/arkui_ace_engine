@@ -51,7 +51,7 @@ void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme)
     auto timePickerRowPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_VOID(timePickerRowPattern);
     timePickerRowPattern->SetShowCount(showCount);
-    
+
     auto hasHourNode = timePickerRowPattern->HasHourNode();
     auto hasMinuteNode = timePickerRowPattern->HasMinuteNode();
     auto hourId = timePickerRowPattern->GetHourId();
@@ -170,8 +170,7 @@ void TimePickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& theme, con
     } else {
         ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontSize, normalStyle.GetFontSize());
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(
-        TimePickerLayoutProperty, Color, value.textColor.value_or(normalStyle.GetTextColor()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Color, value.textColor.value_or(normalStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, Weight, value.fontWeight.value_or(normalStyle.GetFontWeight()));
 }
@@ -207,5 +206,59 @@ void TimePickerModelNG::SetChangeEvent(TimeChangeEvent&& onChange)
     auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(onChange));
+}
+
+void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDialog,
+    NG::TimePickerSettingData& settingData, std::function<void()>&& onCancel,
+    std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange)
+{
+    auto container = Container::Current();
+    if (!container) {
+        return;
+    }
+    auto pipelineContext = AccessibilityManager::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    if (!pipelineContext) {
+        return;
+    }
+    auto executor = pipelineContext->GetTaskExecutor();
+    if (!executor) {
+        return;
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<DialogTheme>();
+    if (!theme) {
+        LOGE("DialogTheme is null");
+        return;
+    }
+    ButtonInfo buttonInfo;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    dialogEvent["changeId"] = onChange;
+    dialogEvent["acceptId"] = onAccept;
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    auto func = [onCancel](const GestureEvent& /* info */) { onCancel(); };
+    dialogCancelEvent["cancelId"] = func;
+    DialogProperties properties;
+    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+        properties.alignment = DialogAlignment::BOTTOM;
+    } else {
+        properties.alignment = DialogAlignment::CENTER;
+    }
+    properties.customStyle = false;
+    properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+    std::map<std::string, PickerTime> timePickerProperty;
+    if (pickerDialog.isSelectedTime == true) {
+        timePickerProperty["selected"] = pickerDialog.pickerTime;
+    }
+    auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
+    auto overlayManager = context ? context->GetOverlayManager() : nullptr;
+    executor->PostTask(
+        [properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent,
+            weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->ShowTimeDialog(properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent);
+        },
+        TaskExecutor::TaskType::UI);
 }
 } // namespace OHOS::Ace::NG
