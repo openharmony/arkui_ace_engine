@@ -30,7 +30,11 @@ struct MagicItemProperty {
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const
     {
         json->Put("layoutWeight", propLayoutWeight.value_or(0));
-        json->Put("aspectRatio", round(static_cast<double>(propAspectRatio.value_or(0.0)) * 100) / 100);
+        if (propAspectRatio.has_value()) {
+            json->Put("aspectRatio", round(static_cast<double>(propAspectRatio.value()) * 100) / 100);
+        } else {
+            json->Put("aspectRatio", "");
+        }
     }
 };
 } // namespace OHOS::Ace::NG
