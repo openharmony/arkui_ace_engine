@@ -55,6 +55,11 @@ public:
 
     void SetDirection(const PanDirection& direction);
 
+    void SetIsForDrag(bool isForDrag)
+    {
+        isForDrag_ = isForDrag;
+    }
+
 private:
     enum class GestureAcceptResult {
         ACCEPT,
@@ -107,6 +112,7 @@ private:
     PanDirection newDirection_;
     bool isFlushTouchEventsEnd_ = false;
     InputEventType inputEventType_ = InputEventType::TOUCH_SCREEN;
+    bool isForDrag_ = false;
 };
 
 } // namespace OHOS::Ace::NG

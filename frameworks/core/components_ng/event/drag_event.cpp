@@ -162,6 +162,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             customActionCancel();
         }
     };
+    panRecognizer_->SetIsForDrag(true);
     panRecognizer_->SetOnActionCancel(actionCancel);
 
 #ifdef ENABLE_DRAG_FRAMEWORK
