@@ -47,6 +47,7 @@ public:
     virtual void SetSize(const std::optional<Dimension>& width, const std::optional<Dimension>& height) = 0;
     virtual void SetBorderRadius(const Dimension& radius) = 0;
     virtual void SetHoverEffect(const int32_t& hoverEffectNum) = 0;
+    virtual void SetRemoteMessage(RemoteCallback remoteCallback) {}
 
 private:
     static std::unique_ptr<ButtonModel> instance_;

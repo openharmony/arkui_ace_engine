@@ -125,7 +125,7 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     textFieldOverlayModifier_->SetCursorColor(cursorColor);
     auto selectedColor = paintProperty->GetSelectedBackgroundColorValue(theme->GetSelectedColor());
     textFieldOverlayModifier_->SetSelectedBackGroundColor(selectedColor);
-    textFieldOverlayModifier_->SetSelectedAreaRedraw(textFieldPattern->IsSelectedAreaRedraw());
+    textFieldOverlayModifier_->SetRedrawFlag(textFieldPattern->GetDrawOverlayFlag());
     if (paintProperty->GetCursorWidth().has_value()) {
         float cursorWidth = static_cast<float>(paintProperty->GetCursorWidthValue().ConvertToPx());
         textFieldOverlayModifier_->SetCursorWidth(cursorWidth);

@@ -74,8 +74,6 @@ public:
 
     void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback);
 
-    void ClearAlertCallback(const RefPtr<PageInfo>& pageInfo);
-
     void DisableAlertBeforeBackPage();
 
     // router operation

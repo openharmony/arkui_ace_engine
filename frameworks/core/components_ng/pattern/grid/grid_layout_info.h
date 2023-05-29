@@ -66,6 +66,17 @@ struct GridLayoutInfo {
         return totalRow > 0 ? totalHeight / totalRow : 0;
     }
 
+    // should only be used when all children of Grid are in gridMatrix_
+    float GetStartLineOffset(float mainGap) const
+    {
+        float totalHeight = 0;
+        for (auto iter = lineHeightMap_.begin(); iter != lineHeightMap_.end() && iter->first < startMainLineIndex_;
+             ++iter) {
+            totalHeight += (iter->second + mainGap);
+        }
+        return totalHeight - currentOffset_;
+    }
+
     void ResetPositionFlags()
     {
         reachEnd_ = false;

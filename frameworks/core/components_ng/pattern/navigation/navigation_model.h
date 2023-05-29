@@ -20,7 +20,6 @@
 
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
-#include "core/components/navigation_bar/navigation_container_component.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 
@@ -48,9 +47,9 @@ public:
     virtual void SetCustomToolBar(const RefPtr<AceType>& customNode) = 0;
     virtual bool NeedSetItems() = 0;
     virtual void SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems) = 0;
-    virtual void GetToolBarItems(std::list<RefPtr<ToolBarItem>>& items) {};
+    virtual void GetToolBarItems(std::list<RefPtr<AceType>>& items) {};
     virtual void SetMenuItems(std::vector<NG::BarItem>&& menuItems) = 0;
-    virtual void GetMenuItems(std::list<RefPtr<ToolBarItem>>& items) {};
+    virtual void GetMenuItems(std::list<RefPtr<AceType>>& items) {};
     virtual void SetCustomMenu(const RefPtr<AceType>& customNode) = 0;
     virtual void SetOnTitleModeChange(std::function<void(NG::NavigationTitleMode)>&& onTitleModeChange,
         std::function<void(const BaseEventInfo* baseInfo)>&& eventInfo) = 0;

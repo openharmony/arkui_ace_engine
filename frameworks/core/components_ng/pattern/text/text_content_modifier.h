@@ -41,6 +41,8 @@ public:
     void SetTextDecoration(const TextDecoration& value);
     void SetTextDecorationColor(const Color& value);
     void SetBaselineOffset(const Dimension& value);
+    void SetContentOffset(OffsetF& value);
+    void SetContentSize(SizeF& value);
 
     void ContentChange();
 
@@ -117,6 +119,8 @@ private:
     RefPtr<AnimatablePropertyFloat> racePercentFloat_;
     std::shared_ptr<AnimationUtils::Animation> raceAnimation_;
 
+    RefPtr<PropertyOffsetF> contentOffset_;
+    RefPtr<PropertySizeF> contentSize_;
     RefPtr<PropertyBool> contentChange_;
 
     RefPtr<Paragraph> paragraph_;

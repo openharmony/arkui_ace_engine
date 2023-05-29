@@ -293,11 +293,9 @@ void TxtParagraph::GetRectsForPlaceholders(std::vector<Rect>& selectedRects)
 
 void TxtParagraph::SetIndents(const std::vector<float>& indents)
 {
-#ifndef NEW_SKIA
     auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
     CHECK_NULL_VOID(paragraphTxt);
     paragraphTxt->SetIndents(indents);
-#endif
 }
 
 } // namespace OHOS::Ace::NG

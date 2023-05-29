@@ -27,9 +27,8 @@ ohos_fuzztest("Res2FuzzTest") {
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$cjson_root:cjson",
-
-    #    "//third_party/googletest:gtest_main",
   ]
+
   sources = [
     # base
     "$ace_root/frameworks/base/json/json_util.cpp",
@@ -102,10 +101,14 @@ ohos_fuzztest("Res2FuzzTest") {
     ]
   }
 
-  configs = [
-    ":config_theme_manager_test",
-    "$ace_root:ace_test_config",
-  ]
+  configs = [ ":config_theme_manager_test" ]
+
+  ldflags = []
+  cflags = []
+  if (ace_engine_feature_enable_coverage) {
+    cflags += [ "--coverage" ]
+    ldflags += [ "--coverage" ]
+  }
 
   if (is_ohos_standard_system) {
     external_deps = [
@@ -141,6 +144,7 @@ ohos_fuzztest("Res2FuzzTest") {
     "//third_party/flutter/engine",
     "//third_party",
     "//commonlibrary/c_utils/base/include",
+    "$root_out_dir/arkui/framework",
   ]
 }
 

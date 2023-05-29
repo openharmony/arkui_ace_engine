@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
+#include <map>
 
 #include "base/geometry/offset.h"
 #include "base/log/log.h"
@@ -121,6 +122,7 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     deviceType_ = event.sourceType;
     lastTouchEvent_ = event;
     touchPoints_[event.id] = event;
+    touchPointsDistance_[event.id] = Offset(0.0, 0.0);
     if (event.sourceType == SourceType::MOUSE) {
         inputEventType_ = InputEventType::MOUSE_BUTTON;
     } else {
@@ -176,7 +178,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
 #ifdef ENABLE_DRAG_FRAMEWORK
-        if (onActionCancel_ && *onActionCancel_) {
+        if (isForDrag_ && onActionCancel_ && *onActionCancel_) {
             (*onActionCancel_)();
         }
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -216,6 +218,7 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     velocityTracker_.UpdateTouchPoint(event);
     averageDistance_ += delta_;
     touchPoints_[event.id] = event;
+    touchPointsDistance_[event.id] += delta_;
     time_ = event.time;
 
     if (refereeState_ == RefereeState::DETECTING) {
@@ -229,8 +232,14 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     } else if (refereeState_ == RefereeState::SUCCEED) {
         if ((direction_.type & PanDirection::VERTICAL) == 0) {
             averageDistance_.SetY(0.0);
+            for (auto& element : touchPointsDistance_) {
+                element.second.SetY(0.0);
+            }
         } else if ((direction_.type & PanDirection::HORIZONTAL) == 0) {
             averageDistance_.SetX(0.0);
+            for (auto& element : touchPointsDistance_) {
+                element.second.SetX(0.0);
+            }
         }
         LOGD("pan recognizer detected successful");
         if (isFlushTouchEventsEnd_) {
@@ -322,6 +331,28 @@ void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& /*event*/)
     }
 }
 
+bool PanRecognizer::CalculateTruthFingers() const
+{
+    std::map<int32_t, int32_t> totalFingers{{0, 0}, {1, 0}};
+    std::map<int32_t, double> totalDistance{{0, 0.0}, {1, 0.0}};
+    for (auto& element : touchPointsDistance_) {
+        auto each_point_move = element.second.GetY();
+        if (each_point_move > 0) {
+            totalFingers[1]++;
+            totalDistance[1] += each_point_move;
+        } else {
+            totalFingers[0]++;
+            totalDistance[0] -= each_point_move;
+        }
+    }
+    if ((totalDistance[1] > distance_ && totalFingers[1] >= fingers_) ||
+        (totalDistance[0] > distance_ && totalFingers[0] >= fingers_)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
 {
     if ((direction_.type & PanDirection::ALL) == PanDirection::ALL) {
@@ -353,11 +384,12 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
         if (fabs(offset) < distance_) {
             return GestureAcceptResult::DETECTING;
         }
-        if ((direction_.type & PanDirection::UP) == 0 && offset < 0) {
-            return GestureAcceptResult::REJECT;
-        }
-        if ((direction_.type & PanDirection::DOWN) == 0 && offset > 0) {
-            return GestureAcceptResult::REJECT;
+        if ((direction_.type & PanDirection::DOWN) == 0) {
+            if (CalculateTruthFingers()) {
+                return GestureAcceptResult::ACCEPT;
+            } else {
+                return GestureAcceptResult::REJECT;
+            }
         }
         return GestureAcceptResult::ACCEPT;
     }
@@ -369,6 +401,9 @@ void PanRecognizer::OnResetStatus()
     MultiFingersRecognizer::OnResetStatus();
     touchPoints_.clear();
     averageDistance_.Reset();
+    for (auto& element : touchPointsDistance_) {
+        element.second.Reset();
+    }
 }
 
 void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)

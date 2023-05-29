@@ -94,7 +94,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
 {
     CHECK_RUN_ON(UI);
-    ACE_FUNCTION_TRACE();
+    ACE_SCOPED_TRACE("FlushRenderTask %d", dirtyRenderNodes_.size());
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushRender();
     }

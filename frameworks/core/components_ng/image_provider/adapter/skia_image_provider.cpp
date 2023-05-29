@@ -150,20 +150,20 @@ void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& objWp, const Wea
 namespace {
 RefPtr<CanvasImage> QueryCompressedCache(const sk_sp<SkData>& skData, const std::string& key, const SizeF& imageSize)
 {
+    auto cachedData = ImageLoader::LoadImageDataFromFileCache(key, ".astc");
+    CHECK_NULL_RETURN_NOLOG(cachedData, {});
+    auto skiaImageData = AceType::DynamicCast<SkiaImageData>(cachedData);
+    CHECK_NULL_RETURN(skiaImageData, {});
+    auto stripped = ImageCompressor::StripFileHeader(skiaImageData->GetSkData());
+
+    // round width and height to nearest int
+    int32_t dstWidth = std::lround(imageSize.Width());
+    int32_t dstHeight = std::lround(imageSize.Height());
+    LOGI("use astc cache %{public}s %{public}d×%{public}d", key.c_str(), dstWidth, dstHeight);
     // create encoded SkImage to use its uniqueId
     auto image = SkImage::MakeFromEncoded(skData);
     auto canvasImage = AceType::DynamicCast<SkiaImage>(CanvasImage::Create(&image));
 
-    auto cachedData = ImageLoader::LoadImageDataFromFileCache(key, ".astc");
-    CHECK_NULL_RETURN_NOLOG(cachedData, {});
-    // round width and height to nearest int
-    int32_t dstWidth = std::lround(imageSize.Width());
-    int32_t dstHeight = std::lround(imageSize.Height());
-
-    auto skiaImageData = AceType::DynamicCast<SkiaImageData>(cachedData);
-    CHECK_NULL_RETURN(skiaImageData, {});
-    auto stripped = ImageCompressor::StripFileHeader(skiaImageData->GetSkData());
-    LOGI("use astc cache %{public}s %{public}d×%{public}d", key.c_str(), dstWidth, dstHeight);
     canvasImage->SetCompressData(stripped, dstWidth, dstHeight);
     canvasImage->ReplaceSkImage(nullptr);
     return canvasImage;

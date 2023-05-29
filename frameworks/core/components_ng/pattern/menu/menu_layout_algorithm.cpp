@@ -18,6 +18,7 @@
 #include <optional>
 #include <vector>
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -35,11 +36,11 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-constexpr uint32_t MIN_GRID_COUNTS = 2;
 constexpr uint32_t GRID_COUNTS_4 = 4;
 constexpr uint32_t GRID_COUNTS_6 = 6;
 constexpr uint32_t GRID_COUNTS_8 = 8;
 constexpr uint32_t GRID_COUNTS_12 = 12;
+constexpr Dimension MIN_MENU_WIDTH = Dimension(64.0, DimensionUnit::VP);
 
 uint32_t GetMaxGridCounts(const RefPtr<GridColumnInfo>& columnInfo)
 {
@@ -425,10 +426,10 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(
             }
             x += windowsOffsetX + pageOffset.GetX();
             y += windowsOffsetY + pageOffset.GetY();
-            x = std::clamp(x, windowsOffsetX + pageOffset.GetX(),
-                wrapperSize_.Width() - size.Width() - margin_ * 2.0f + windowsOffsetX + pageOffset.GetX());
-            y = std::clamp(y, windowsOffsetY + pageOffset.GetY(),
-                wrapperSize_.Height() - size.Height() - margin_ * 2.0f + windowsOffsetY + pageOffset.GetY());
+            x = std::clamp(x, windowsOffsetX + pageOffset.GetX() + margin_,
+                wrapperSize_.Width() - size.Width() - margin_ + windowsOffsetX + pageOffset.GetX());
+            y = std::clamp(y, windowsOffsetY + pageOffset.GetY() + margin_,
+                wrapperSize_.Height() - size.Height() - margin_ + windowsOffsetY + pageOffset.GetY());
 
             return OffsetF(x, y);
         }
@@ -440,8 +441,8 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(
             y -= pageOffset_.GetY();
         }
     }
-    x = std::clamp(x, 0.0f, wrapperSize_.Width() - size.Width() - margin_ * 2.0f);
-    y = std::clamp(y, 0.0f, wrapperSize_.Height() - size.Height() - margin_ * 2.0f);
+    x = std::clamp(x, margin_, wrapperSize_.Width() - size.Width() - margin_);
+    y = std::clamp(y, margin_, wrapperSize_.Height() - size.Height() - margin_);
 
     return OffsetF(x, y);
 }
@@ -460,9 +461,8 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
     auto maxWidth = std::min(maxHorizontalSpace, maxGridWidth);
     maxWidth = std::min(constraint.maxSize.Width(), maxWidth);
     constraint.maxSize.SetWidth(maxWidth);
-    constraint.percentReference.SetWidth(maxWidth);
     // set min width
-    auto minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
+    auto minWidth = static_cast<float>(MIN_MENU_WIDTH.ConvertToPx());
     auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
     if (minWidth > constraint.maxSize.Width()) {
         minWidth = constraint.maxSize.Width();
@@ -474,7 +474,6 @@ void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, L
 {
     auto maxSpaceHeight = std::max(topSpace_, bottomSpace_);
     constraint.maxSize.SetHeight(maxSpaceHeight);
-    constraint.percentReference.SetHeight(maxSpaceHeight);
 }
 
 LayoutConstraintF MenuLayoutAlgorithm::CreateChildConstraint(LayoutWrapper* layoutWrapper)
@@ -686,15 +685,15 @@ OffsetF MenuLayoutAlgorithm::FitToScreen(const OffsetF& fitPosition, const SizeF
         }
         x += windowsOffsetX + pageOffset.GetX();
         y += windowsOffsetY + pageOffset.GetY();
-        x = std::clamp(x, windowsOffsetX + pageOffset.GetX(),
-            wrapperSize_.Width() - childSize.Width() - margin_ * 2.0f + windowsOffsetX + pageOffset.GetX());
-        y = std::clamp(y, windowsOffsetY + pageOffset.GetY(),
-            wrapperSize_.Height() - childSize.Height() - margin_ * 2.0f + windowsOffsetY + pageOffset.GetY());
+        x = std::clamp(x, windowsOffsetX + pageOffset.GetX() + margin_,
+            wrapperSize_.Width() - childSize.Width() - margin_ + windowsOffsetX + pageOffset.GetX());
+        y = std::clamp(y, windowsOffsetY + pageOffset.GetY() + margin_,
+            wrapperSize_.Height() - childSize.Height() - margin_ + windowsOffsetY + pageOffset.GetY());
 
         return OffsetF(x, y);
     }
-    x = std::clamp(x, 0.0f, wrapperSize_.Width() - childSize.Width() - margin_ * 2.0f);
-    y = std::clamp(y, 0.0f, wrapperSize_.Height() - childSize.Height() - margin_ * 2.0f);
+    x = std::clamp(x, margin_, wrapperSize_.Width() - childSize.Width() - margin_);
+    y = std::clamp(y, margin_, wrapperSize_.Height() - childSize.Height() - margin_);
 
     return OffsetF(x, y);
 }

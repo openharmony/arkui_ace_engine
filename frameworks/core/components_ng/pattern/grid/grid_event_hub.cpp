@@ -270,8 +270,10 @@ bool GridEventHub::FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemInde
     }
     if (onItemDrop_) {
         onItemDrop_(dragInfo, itemIndex, insertIndex, isSuccess);
+        host->ChildrenUpdatedFrom(0);
         return true;
     }
+    host->ChildrenUpdatedFrom(0);
     return false;
 }
 

@@ -132,6 +132,7 @@ void JSIndexer::SetSelectedColor(const JSCallbackInfo& args)
     }
     Color color;
     if (!ParseJsColor(args[0], color)) {
+        IndexerModel::GetInstance()->SetSelectedColor(std::nullopt);
         return;
     }
 
@@ -146,6 +147,7 @@ void JSIndexer::SetColor(const JSCallbackInfo& args)
     }
     Color color;
     if (!ParseJsColor(args[0], color)) {
+        IndexerModel::GetInstance()->SetColor(std::nullopt);
         return;
     }
 
@@ -160,6 +162,7 @@ void JSIndexer::SetPopupColor(const JSCallbackInfo& args)
     }
     Color color;
     if (!ParseJsColor(args[0], color)) {
+        IndexerModel::GetInstance()->SetPopupColor(std::nullopt);
         return;
     }
 
@@ -174,6 +177,7 @@ void JSIndexer::SetSelectedBackgroundColor(const JSCallbackInfo& args)
     }
     Color color;
     if (!ParseJsColor(args[0], color)) {
+        IndexerModel::GetInstance()->SetSelectedBackgroundColor(std::nullopt);
         return;
     }
 
@@ -188,6 +192,7 @@ void JSIndexer::SetPopupBackground(const JSCallbackInfo& args)
     }
     Color color;
     if (!ParseJsColor(args[0], color)) {
+        IndexerModel::GetInstance()->SetPopupBackground(std::nullopt);
         return;
     }
 
@@ -292,7 +297,7 @@ void JSIndexer::GetFontContent(const JSCallbackInfo& args, TextStyle& textStyle)
     }
 
     JSRef<JSVal> weight = obj->GetProperty("weight");
-    if (weight->IsString()) {
+    if (weight->IsString() || weight->IsNumber()) {
         textStyle.SetFontWeight(ConvertStrToFontWeight(weight->ToString()));
     }
 
