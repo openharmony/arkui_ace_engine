@@ -71,6 +71,11 @@ public:
         stage->GetRenderContext()->UpdateBackgroundColor(color);
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(RootPattern);
 };

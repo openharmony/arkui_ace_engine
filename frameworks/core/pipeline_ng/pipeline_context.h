@@ -263,6 +263,11 @@ public:
         return true;
     }
 
+    bool IsTabJustTriggerOnKeyEvent() const
+    {
+        return isTabJustTriggerOnKeyEvent_;
+    }
+
     bool GetOnShow() const
     {
         return onShow_;
@@ -435,6 +440,7 @@ private:
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isFocusActive_ = false;
+    bool isTabJustTriggerOnKeyEvent_ = false;
     bool onShow_ = false;
     bool onFocus_ = true;
 

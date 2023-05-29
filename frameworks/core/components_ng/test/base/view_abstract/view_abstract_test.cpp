@@ -430,9 +430,9 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest010, TestSize.Level1)
 
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
-    focusHub->show_ = true;
     focusHub->focusable_ = true;
     focusHub->parentFocusable_ = true;
+    ViewAbstract::SetVisibility(VisibleType::VISIBLE);
     ViewAbstract::SetEnabled(true);
 
     /**
