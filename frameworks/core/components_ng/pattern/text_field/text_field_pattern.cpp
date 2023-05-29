@@ -3632,7 +3632,11 @@ bool TextFieldPattern::OnBackPressed()
 #endif
     LOGI("Closing keyboard on back press");
     CloseKeyboard(true);
+#if defined(ANDROID_PLATFORM)
+    return false;
+#else
     return true;
+#endif
 }
 
 std::string TextFieldPattern::TextInputTypeToString() const
