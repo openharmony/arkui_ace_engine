@@ -129,8 +129,7 @@ void JSMarquee::JSBind(BindingTarget globalObj)
     JSClass<JSMarquee>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSMarquee>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSMarquee>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSMarquee>::Inherit<JSViewAbstract>();
-    JSClass<JSMarquee>::Bind(globalObj);
+    JSClass<JSMarquee>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSMarquee::SetTextColor(const JSCallbackInfo& info)

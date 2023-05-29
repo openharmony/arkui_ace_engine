@@ -67,14 +67,6 @@ enum class DimensionUnit {
      * The value is expression.
      */
     CALC,
-    /*
-     * The value is viewport width.
-     */
-    VW,
-    /*
-     * The value is viewport height.
-     */
-    VH,
 };
 
 /*
@@ -249,6 +241,8 @@ public:
     }
 
     std::string ToString() const;
+
+    static Dimension FromString(const std::string& str);
 
 private:
     double value_ = 0.0;

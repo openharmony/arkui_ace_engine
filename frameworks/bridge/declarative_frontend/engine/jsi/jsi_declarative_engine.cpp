@@ -232,6 +232,8 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
         runtime_->GetGlobal()->SetProperty(runtime_, key, nativeValue);
     }
 
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
+    arkRuntime->SetLanguage("ets");
     runtime_->StartDebugger();
 #endif
 
@@ -296,7 +298,7 @@ void JsiDeclarativeEngineInstance::InitAceModule()
     if (!jsMockSystemPlugin) {
         LOGE("EvaluateJsCode jsMockSystemPlugin failed");
     }
-    const std::string filename = "js-mock/jsMockHmos.abc";
+    const std::string filename = "apiMock/jsMockHmos.abc";
     std::string content;
     if (!frontendDelegate_->GetAssetContent(filename, content)) {
         LOGW("Failed to get the content from the file %{public}s", filename.c_str());
@@ -953,12 +955,13 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
             return;
         }
 #ifdef OHOS_PLATFORM
-        ConnectServerManager::Get().AddInstance(gettid());
+        ConnectServerManager::Get().AddInstance(gettid(), "ets");
         auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
         auto workerPostTask = [nativeEngine](std::function<void()>&& callback) {
             nativeEngine->CallDebuggerPostTaskFunc(std::move(callback));
         };
-        panda::JSNApi::StartDebugger(libraryPath.c_str(), vm, debugMode, gettid(), workerPostTask);
+        panda::JSNApi::DebugOption debugOption = {libraryPath.c_str(), debugMode};
+        panda::JSNApi::StartDebugger(vm, debugOption, gettid(), workerPostTask);
 #endif
         instance->InitConsoleModule(arkNativeEngine);
 
@@ -1163,12 +1166,17 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     auto pos = url.rfind(js_ext);
     if (pos != std::string::npos && pos == url.length() - (sizeof(js_ext) - 1)) {
         std::string urlName = url.substr(0, pos) + bin_ext;
-        if (isMainPage) {
 #if !defined(PREVIEW)
-            if (LoadJsWithModule(urlName)) {
+        if (IsModule()) {
+            if (engineInstance_->IsPlugin()) {
+                LoadPluginJsWithModule(urlName);
                 return;
             }
+            LoadJsWithModule(urlName);
+            return;
+        }
 #endif
+        if (isMainPage) {
             if (!ExecuteAbc("commons.abc")) {
                 return;
             }
@@ -1188,9 +1196,6 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
             }
         }
 #if !defined(PREVIEW)
-        if (LoadJsWithModule(urlName)) {
-            return;
-        }
         if (!ExecuteAbc(urlName)) {
             return;
         }
@@ -1217,25 +1222,45 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     }
 }
 #if !defined(PREVIEW)
-bool JsiDeclarativeEngine::LoadJsWithModule(std::string& urlName,
-    const std::function<void(const std::string&, int32_t)>& errorCallback)
+bool JsiDeclarativeEngine::IsModule()
 {
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
-    if (container->IsModule()) {
-        const std::string assetPath = ASSET_PATH_PREFIX +
-            container->GetModuleName() + "/" + FORM_ES_MODULE_PATH;
-        auto runtime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
-        runtime->SetAssetPath(assetPath);
-        if (urlName.substr(0, strlen(BUNDLE_TAG)) != BUNDLE_TAG) {
-            urlName = container->GetModuleName() + "/ets/" + urlName;
-        }
-        if (!runtime->ExecuteJsBin(urlName, errorCallback)) {
-            LOGE("ExecuteJsBin %{private}s failed.", urlName.c_str());
-        }
-        return true;
+    return container->IsModule();
+}
+
+void JsiDeclarativeEngine::LoadPluginJsWithModule(std::string& urlName)
+{
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
+    auto delegate = engineInstance_->GetDelegate();
+    auto pluginUrlName = "@bundle:" + pluginBundleName_ + "/" + pluginModuleName_ + "/ets/" + urlName;
+    LOGD("the url of plugin is %{private}s", pluginUrlName.c_str());
+    std::vector<uint8_t> content;
+    if (!delegate->GetAssetContent("ets/modules.abc", content)) {
+        LOGE("GetAssetContent \"%{public}s\" failed.", pluginUrlName.c_str());
+        return;
     }
-    return false;
+    if (!runtime->ExecuteModuleBuffer(content.data(), content.size(), pluginUrlName, true)) {
+        LOGE("EvaluateJsCode \"%{public}s\" failed.", pluginUrlName.c_str());
+        return;
+    }
+}
+
+void JsiDeclarativeEngine::LoadJsWithModule(
+    std::string& urlName, const std::function<void(const std::string&, int32_t)>& errorCallback)
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
+    const std::string assetPath = ASSET_PATH_PREFIX + container->GetModuleName() + "/" + FORM_ES_MODULE_PATH;
+    runtime->SetAssetPath(assetPath);
+    if (urlName.substr(0, strlen(BUNDLE_TAG)) != BUNDLE_TAG) {
+        urlName = container->GetModuleName() + "/ets/" + urlName;
+    }
+    if (!runtime->ExecuteJsBin(urlName, errorCallback)) {
+        LOGE("ExecuteJsBin %{private}s failed.", urlName.c_str());
+        return;
+    }
 }
 #endif
 // Load the app.js file of the FA model in NG structure.
@@ -1257,8 +1282,8 @@ bool JsiDeclarativeEngine::LoadFaAppSource()
 }
 
 // Load the js file of the page in NG structure..
-bool JsiDeclarativeEngine::LoadPageSource(const std::string& url,
-    const std::function<void(const std::string&, int32_t)>& errorCallback)
+bool JsiDeclarativeEngine::LoadPageSource(
+    const std::string& url, const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadPageSource");
     LOGI("JsiDeclarativeEngine LoadJs %{private}s page", url.c_str());
@@ -1277,7 +1302,8 @@ bool JsiDeclarativeEngine::LoadPageSource(const std::string& url,
     }
 
 #if !defined(PREVIEW)
-    if (LoadJsWithModule(urlName.value(), errorCallback)) {
+    if (IsModule()) {
+        LoadJsWithModule(urlName.value(), errorCallback);
         return true;
     }
 #else
@@ -1893,11 +1919,6 @@ void JsiDeclarativeEngine::OnCompleteContinuation(int32_t code)
 
     std::vector<shared_ptr<JsValue>> argv = { runtime->NewNumber(code) };
     CallAppFunc("onCompleteContinuation", argv);
-}
-
-void JsiDeclarativeEngine::ClearCache()
-{
-    JSNApi::CleanJSVMCache();
 }
 
 void JsiDeclarativeEngine::OnRemoteTerminated()

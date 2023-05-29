@@ -115,7 +115,7 @@ private:
     void SortItems(std::list<int32_t>& preItems, std::list<int32_t>& nextItems, int32_t displayCount);
     void LayoutItems(
         LayoutWrapper* layoutWrapper, const std::list<int32_t>& preItems, const std::list<int32_t>& nextItems);
-    RefPtr<LayoutWrapper> GetNodeLayoutWrapperByIndex(LayoutWrapper* layoutWrapper, int32_t index) const;
+    RefPtr<LayoutWrapper> GetNodeLayoutWrapperByTag(LayoutWrapper* layoutWrapper, const std::string& tagName) const;
     void MeasureArrow(const RefPtr<LayoutWrapper>& arrowWrapper, const RefPtr<LayoutProperty>& layoutProperty) const;
     void ArrowLayout(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& arrowWrapper,
         const RefPtr<LayoutProperty>& layoutProperty, Axis axis) const;

@@ -28,9 +28,19 @@ config("drawable_config") {
 }
 
 ohos_shared_library("drawable_descriptor") {
+  if (current_os == "ohos") {
+    sanitize = {
+      integer_overflow = true
+      boundary_sanitize = true
+      debug = ace_sanitize_debug
+    }
+  }
   public_configs = [ ":drawable_config" ]
 
-  configs = [ "$ace_root:ace_config" ]
+  configs = [
+    "$ace_root:ace_config",
+    "$ace_root/test/unittest:ace_coverage_config",
+  ]
 
   sources = [
     "drawable_descriptor.cpp",
@@ -60,5 +70,6 @@ ohos_shared_library("drawable_descriptor") {
   ]
 
   subsystem_name = ace_engine_subsystem
+  innerapi_tags = [ "platformsdk" ]
   part_name = ace_engine_part
 }

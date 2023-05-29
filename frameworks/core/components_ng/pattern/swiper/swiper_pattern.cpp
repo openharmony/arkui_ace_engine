@@ -558,6 +558,13 @@ void SwiperPattern::StopSpringAnimation()
     }
 }
 
+void SwiperPattern::StopFadeAnimation()
+{
+    if (fadeController_ && !fadeController_->IsStopped()) {
+        fadeController_->Stop();
+    }
+}
+
 void SwiperPattern::InitSwiperController()
 {
     if (swiperController_->HasInitialized()) {
@@ -1041,6 +1048,8 @@ void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t
     }
 
     // If animation is still running, stop it before play new animation.
+    StopSpringAnimation();
+    StopFadeAnimation();
     StopTranslateAnimation();
     StopAutoPlay();
 
@@ -1394,15 +1403,19 @@ bool SwiperPattern::IsOutOfHotRegion(const PointF& dragPoint) const
     return !hotRegion.IsInRegion(dragPoint + OffsetF(hotRegion.GetX(), hotRegion.GetY()));
 }
 
-bool SwiperPattern::IsOutOfIndicatorZone(const PointF& dragPoint) const
+bool SwiperPattern::IsOutOfIndicatorZone(const PointF& dragPoint)
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, true);
-    auto lastChild = host->GetLastChild();
-    CHECK_NULL_RETURN(lastChild, true);
-    auto indicatorNode = AceType::DynamicCast<FrameNode>(lastChild);
+    if (!HasIndicatorNode() || !IsShowIndicator() || (GetIndicatorType() != SwiperIndicatorType::DOT)) {
+        return true;
+    }
+
+    auto swiperNode = GetHost();
+    CHECK_NULL_RETURN(swiperNode, true);
+    auto indicatorNode = swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(GetIndicatorId()));
     CHECK_NULL_RETURN(indicatorNode, true);
-    auto geometryNode = indicatorNode->GetGeometryNode();
+    auto indicatorFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode);
+    CHECK_NULL_RETURN(indicatorFrameNode, true);
+    auto geometryNode = indicatorFrameNode->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, true);
 
     auto hotRegion = geometryNode->GetFrameRect();
@@ -1430,14 +1443,14 @@ void SwiperPattern::SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorN
     layoutProperty->UpdateBottom(swiperParameters->dimBottom.value_or(0.0_vp));
     paintProperty->UpdateItemWidth(swiperParameters->itemWidth.value_or(swiperIndicatorTheme->GetSize()));
     paintProperty->UpdateItemHeight(swiperParameters->itemHeight.value_or(swiperIndicatorTheme->GetSize()));
-    paintProperty->UpdateSelectedItemWidth(swiperParameters->selectedItemWidth.value_or(
-        swiperIndicatorTheme->GetSize()));
-    paintProperty->UpdateSelectedItemHeight(swiperParameters->selectedItemHeight.value_or(
-        swiperIndicatorTheme->GetSize()));
+    paintProperty->UpdateSelectedItemWidth(
+        swiperParameters->selectedItemWidth.value_or(swiperIndicatorTheme->GetSize()));
+    paintProperty->UpdateSelectedItemHeight(
+        swiperParameters->selectedItemHeight.value_or(swiperIndicatorTheme->GetSize()));
     paintProperty->UpdateIndicatorMask(swiperParameters->maskValue.value_or(false));
     paintProperty->UpdateColor(swiperParameters->colorVal.value_or(swiperIndicatorTheme->GetColor()));
-    paintProperty->UpdateSelectedColor(swiperParameters->selectedColorVal.value_or(
-        swiperIndicatorTheme->GetSelectedColor()));
+    paintProperty->UpdateSelectedColor(
+        swiperParameters->selectedColorVal.value_or(swiperIndicatorTheme->GetSelectedColor()));
     paintProperty->UpdateIsCustomSize(IsCustomSize_);
 }
 
@@ -1461,8 +1474,8 @@ void SwiperPattern::SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicato
         swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor()));
     layoutProperty->UpdateSelectedFontColor(swiperDigitalParameters->selectedFontColor.value_or(
         swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor()));
-    layoutProperty->UpdateFontSize(swiperDigitalParameters->fontSize.value_or(
-        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize()));
+    layoutProperty->UpdateFontSize(
+        swiperDigitalParameters->fontSize.value_or(swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize()));
     layoutProperty->UpdateSelectedFontSize(swiperDigitalParameters->selectedFontSize.value_or(
         swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize()));
     layoutProperty->UpdateFontWeight(swiperDigitalParameters->fontWeight.value_or(
@@ -1681,7 +1694,7 @@ void SwiperPattern::SetAccessibilityAction()
             if (!accessibilityProperty->IsScrollable()) {
                 return;
             }
-        pattern->ShowPrevious();
-    });
+            pattern->ShowPrevious();
+        });
 }
 } // namespace OHOS::Ace::NG

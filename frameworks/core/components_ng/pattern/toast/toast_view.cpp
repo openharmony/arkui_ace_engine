@@ -28,7 +28,6 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -55,7 +54,6 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     auto textId = ElementRegister::GetInstance()->MakeUniqueId();
     auto toastId = ElementRegister::GetInstance()->MakeUniqueId();
     LOGI("begin to show toast, toast id is %{public}d, message is %{public}s", toastId, message.c_str());
-
     // make toast node
     auto toastNode =
         FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, toastId, AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -67,14 +65,13 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     auto toastAccessibilityProperty = toastNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_RETURN(toastAccessibilityProperty, nullptr);
     toastAccessibilityProperty->SetText(message);
-
+    // create text in toast
     auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, textId, AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textNode, nullptr);
     auto textlayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textlayoutProperty, nullptr);
     auto textContext = textNode->GetRenderContext();
     CHECK_NULL_RETURN(textContext, nullptr);
-
     auto toastTheme = context->GetTheme<ToastTheme>();
     CHECK_NULL_RETURN(toastTheme, nullptr);
 
@@ -83,8 +80,10 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     auto rootWidth = Dimension(context->GetRootWidth());
     toastProperty->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(rootWidth), std::nullopt));
 
-    auto bottomPosition =
-        Dimension(StringUtils::StringToDimensionWithThemeValue(bottom, true, toastTheme->GetBottom()).ConvertToPx());
+    auto bottomPosition = StringUtils::StringToDimensionWithThemeValue(bottom, true, toastTheme->GetBottom());
+    if ((bottomPosition.Unit() == DimensionUnit::PERCENT)) {
+        bottomPosition = rootHeight * bottomPosition.Value();
+    }
     Color textColor;
     Color toastBackgroundColor;
     Dimension fontSize;

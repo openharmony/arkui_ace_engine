@@ -428,4 +428,126 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest005, TestSize.Level1)
     EXPECT_EQ(loadingProgressModifier.cometSizeScale_->Get(), 0.825f);
     EXPECT_EQ(loadingProgressModifier.cometOpacity_->Get(), 0.7f);
 }
+
+/**
+ * @tc.name: LoadingProgressModifierTest006
+ * @tc.desc: Test LoadingProgressModifier DrawOrbit function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest006, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create LoadingProgressModifier instance.
+     */
+    LoadingProgressModifier loadingProgressModifier;
+    Testing::MockCanvas rsCanvas;
+    DrawingContext context { rsCanvas, 100.0f, 100.0f };
+
+    EXPECT_CALL(rsCanvas, Save()).Times(2);
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(1);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(2);
+    /**
+     * @tc.step: step2. call SetColor method.
+     * @tc.expected: loadingProgressModifier.color_ equal to Color::FOREGROUND.
+     */
+    LinearColor linearColor(0x00000001);
+    loadingProgressModifier.SetColor(linearColor);
+    EXPECT_EQ(loadingProgressModifier.color_->Get().GetValue(), Color::FOREGROUND.GetValue());
+    loadingProgressModifier.onDraw(context);
+}
+
+/**
+ * @tc.name: LoadingProgressModifierTest007
+ * @tc.desc: Test LoadingProgressModifier DrawOrbit function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest007, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create LoadingProgressModifier instance.
+     */
+    LoadingProgressModifier loadingProgressModifier;
+    Testing::MockCanvas rsCanvas;
+    DrawingContext context { rsCanvas, 100.0f, 100.0f };
+
+    EXPECT_CALL(rsCanvas, Save()).Times(2);
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(1);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(2);
+    /**
+     * @tc.step: step2. call SetColor method.
+     * @tc.expected: loadingProgressModifier.color_ equal to LinearColor::WHITE.
+     */
+    loadingProgressModifier.SetColor(LinearColor::WHITE);
+    EXPECT_EQ(loadingProgressModifier.color_->Get().GetValue(), LinearColor::WHITE.GetValue());
+    loadingProgressModifier.onDraw(context);
+}
+
+/**
+ * @tc.name: LoadingProgressModifierTest008
+ * @tc.desc: Test LoadingProgressModifier StartTransToRecycleAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest008, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. set isFormRender_ is true.
+     */
+    MockPipelineBase::GetCurrent()->SetIsFormRender(true);
+    /**
+     * @tc.step: step2. create LoadingProgressModifier pointer.
+     */
+    auto loadingProgressModifier = AceType::MakeRefPtr<LoadingProgressModifier>();
+    
+    LinearColor color;
+    loadingProgressModifier->SetColor(color);
+    EXPECT_EQ(loadingProgressModifier->color_->Get(), color);
+    Testing::MockCanvas rsCanvas;
+    loadingProgressModifier->date_->Set(20.0f);
+    loadingProgressModifier->cometTailLen_->Set(60.0f);
+    /**
+     * test context->IsFormRender() branch
+    */
+    loadingProgressModifier->StartTransToRecycleAnimation();
+    /**
+     * @tc.step: step2. reset date_, cometOpacity_, cometSizeScale_.
+     * @tc.expected: date_, cometOpacity_, cometSizeScale_ all are nullptr.
+     */
+    loadingProgressModifier->date_.Reset();
+    loadingProgressModifier->cometOpacity_.Reset();
+    loadingProgressModifier->cometSizeScale_.Reset();
+    EXPECT_EQ(loadingProgressModifier->date_, nullptr);
+    EXPECT_EQ(loadingProgressModifier->cometOpacity_, nullptr);
+    EXPECT_EQ(loadingProgressModifier->cometSizeScale_, nullptr);
+    loadingProgressModifier->StartTransToRecycleAnimation();
+}
+
+/**
+ * @tc.name: LoadingProgressModifierTest009
+ * @tc.desc: Test LoadingProgressModifier StartRecycleCometAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest009, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create LoadingProgressModifier pointer.
+     */
+    auto loadingProgressModifier = AceType::MakeRefPtr<LoadingProgressModifier>();
+    /**
+     * @tc.step: step2. reset cometSizeScale_.
+     * @tc.expected: cometSizeScale_ is nullptr.
+     */
+    loadingProgressModifier->cometSizeScale_.Reset();
+    EXPECT_EQ(loadingProgressModifier->cometSizeScale_, nullptr);
+    loadingProgressModifier->StartRecycleCometAnimation();
+}
 } // namespace OHOS::Ace::NG

@@ -33,10 +33,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
-} // namespace
-
 void TextPickerModelNG::Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnKind)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -49,10 +45,6 @@ void TextPickerModelNG::Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnK
 
     CHECK_NULL_VOID(pickerTheme);
     uint32_t showCount = pickerTheme->GetShowOptionCount();
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
-        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-        showCount = OPTION_COUNT_PHONE_LANDSCAPE;
-    }
 
     if (textPickerNode->GetChildren().empty()) {
         auto columnNode = CreateColumnNode(columnKind, showCount);
@@ -324,8 +316,6 @@ void TextPickerModelNG::SetCascadeColumns(const std::vector<NG::TextCascadePicke
     CHECK_NULL_VOID(frameNode);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
-    std::vector<std::string> values;
-    std::vector<uint32_t> selectedValues;
     std::vector<NG::TextCascadePickerOptions> reOptions;
     // Caculate max depth
     size_t columnCount = options.empty()? 0 : 1;

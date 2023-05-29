@@ -20,6 +20,7 @@
 #include <functional>
 #include <list>
 
+#include "base/log/log.h"
 #include "core/components/video/video_utils.h"
 #include "frameworks/base/memory/ace_type.h"
 

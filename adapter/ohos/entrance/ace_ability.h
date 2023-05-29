@@ -32,7 +32,8 @@ class AceWindowListener : public OHOS::Rosen::IWindowDragListener,
                           public OHOS::Rosen::IWindowChangeListener,
                           public OHOS::Rosen::IOccupiedAreaChangeListener,
                           public OHOS::Rosen::IAceAbilityHandler,
-                          public OHOS::Rosen::IInputEventConsumer {
+                          public OHOS::Rosen::IInputEventConsumer,
+                          public OHOS::Rosen::IAvoidAreaChangedListener {
 public:
     explicit AceWindowListener(std::shared_ptr<AceAbility> owner) : callbackOwner_(owner) {}
     ~AceWindowListener() = default;
@@ -56,6 +57,9 @@ public:
     bool OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const override;
     bool OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
     bool OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axisEvent) const override;
+
+    // override Rosen::IAvoidAreaChangedListener virtual callback function
+    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override;
 private:
     std::shared_ptr<AceAbility> callbackOwner_;
 };
@@ -104,6 +108,9 @@ public:
     // handle window Rosen::IAceAbilityHandler
     void SetBackgroundColor(uint32_t color);
     uint32_t GetBackgroundColor();
+
+    // handle window Rosen::IAvoidAreaChangedListener
+    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type);
 
     void Dump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 

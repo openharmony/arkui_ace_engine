@@ -25,6 +25,7 @@
 #include "bridge/common/media_query/media_queryer.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/js_frontend/engine/common/js_engine.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::Napi {
 namespace {
@@ -64,16 +65,15 @@ public:
     MediaQueryListener(bool match, const std::string& media) : MediaQueryResult(match, media) {}
     ~MediaQueryListener() override
     {
-        const std::lock_guard<std::mutex> lock(mutex_);
-        auto iter = listenerSets_.begin();
-        while (iter != listenerSets_.end()) {
-            iter->second.erase(this);
-            if (iter->second.empty()) {
-                iter->first->UnregisterMediaUpdateCallback();
-                iter = listenerSets_.erase(iter);
-            } else {
-                iter++;
-            }
+        auto container = Container::Current();
+        if (!container) {
+            return;
+        }
+        if (container->IsUseStageModel()) {
+            CleanListenerSet();
+        } else {
+            std::lock_guard<std::mutex> lock(mutex_);
+            CleanListenerSet();
         }
 
         if (env_ == nullptr) {
@@ -89,7 +89,20 @@ public:
 
     static void NapiCallback(JsEngine* jsEngine)
     {
-        const std::lock_guard<std::mutex> lock(mutex_);
+        auto container = Container::Current();
+        if (!container) {
+            return;
+        }
+        if (container->IsUseStageModel()) {
+            OnNapiCallback(jsEngine);
+        } else {
+            std::lock_guard<std::mutex> lock(mutex_);
+            OnNapiCallback(jsEngine);
+        }
+    }
+
+    static void OnNapiCallback(JsEngine* jsEngine)
+    {
         MediaQueryer queryer;
         for (auto listener : listenerSets_[jsEngine]) {
             auto json = MediaQueryInfo::GetMediaQueryJsonInfo();
@@ -182,16 +195,6 @@ public:
                 listener->cbList_.erase(iter);
             }
         }
-        auto jsEngine = EngineHelper::GetCurrentEngine();
-        if (!jsEngine) {
-            LOGE("get jsEngine failed");
-            return nullptr;
-        }
-        const std::lock_guard<std::mutex> lock(mutex_);
-        if (listenerSets_[AceType::RawPtr(jsEngine)].empty()) {
-            jsEngine->UnregisterMediaUpdateCallback();
-            listenerSets_.erase(AceType::RawPtr(jsEngine));
-        }
         return nullptr;
     }
 
@@ -232,6 +235,20 @@ public:
     }
 
 private:
+    void CleanListenerSet()
+    {
+        auto iter = listenerSets_.begin();
+        while (iter != listenerSets_.end()) {
+            iter->second.erase(this);
+            if (iter->second.empty()) {
+                iter->first->UnregisterMediaUpdateCallback();
+                iter = listenerSets_.erase(iter);
+            } else {
+                iter++;
+            }
+        }
+    }
+
     void Initialize(napi_env env, napi_value thisVar)
     {
         napi_handle_scope scope = nullptr;
@@ -251,8 +268,16 @@ private:
             LOGE("get jsEngine failed");
             return;
         }
-        const std::lock_guard<std::mutex> lock(mutex_);
-        listenerSets_[AceType::RawPtr(jsEngine)].emplace(this);
+        auto container = Container::Current();
+        if (!container) {
+            return;
+        }
+        if (container->IsUseStageModel()) {
+            listenerSets_[AceType::RawPtr(jsEngine)].emplace(this);
+        } else {
+            std::lock_guard<std::mutex> lock(mutex_);
+            listenerSets_[AceType::RawPtr(jsEngine)].emplace(this);
+        }
     }
 
     static MediaQueryListener* GetListener(napi_env env, napi_value thisVar)

@@ -103,10 +103,6 @@ void ButtonModelNG::SetLableStyle(ButtonParameters& buttonParameters)
 
 void ButtonModelNG::CreateWithLabel(const CreateWithPara& para, std::list<RefPtr<Component>>& buttonChildren)
 {
-    if (!para.parseSuccess.value()) {
-        return;
-    }
-
     CreateWithLabel(para.label.value());
     if (para.labelSetInfoFirst.value()) {
         SetTypeAndStateEffect(para.typeFirst, para.stateEffectFirst);
@@ -114,7 +110,6 @@ void ButtonModelNG::CreateWithLabel(const CreateWithPara& para, std::list<RefPtr
     if (para.labelSetInfoSecond.value()) {
         SetTypeAndStateEffect(para.typeSecond, para.stateEffectSecond);
     }
-    NG::ViewAbstract::SetHoverEffectAuto(HoverEffectType::SCALE);
 }
 
 void ButtonModelNG::CreateWithLabel(const std::string& label)
@@ -163,7 +158,6 @@ void ButtonModelNG::Create(const CreateWithPara& para, std::list<RefPtr<Componen
     if (para.labelSetInfoSecond.value()) {
         SetTypeAndStateEffect(para.typeSecond, para.stateEffectSecond);
     }
-    NG::ViewAbstract::SetHoverEffectAuto(HoverEffectType::SCALE);
 }
 
 void ButtonModelNG::CreateWithChild(const CreateWithPara& para)
@@ -173,7 +167,6 @@ void ButtonModelNG::CreateWithChild(const CreateWithPara& para)
     if (para.labelSetInfoFirst.value()) {
         SetTypeAndStateEffect(para.typeFirst, para.stateEffectFirst);
     }
-    NG::ViewAbstract::SetHoverEffectAuto(HoverEffectType::SCALE);
 }
 
 void ButtonModelNG::Create(const std::string& tagName)

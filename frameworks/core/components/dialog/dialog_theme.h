@@ -138,6 +138,9 @@ public:
             theme->contentTextStyle_.SetFontSize(dialogPattern->GetAttr<Dimension>("content_text_font_size", 16.0_fp));
             theme->buttonBackgroundColor_ = dialogPattern->GetAttr<Color>("button_bg_color", Color::BLACK);
             theme->radius_ = Radius(dialogPattern->GetAttr<Dimension>("radius", 24.0_vp));
+            theme->dividerLength_ = dialogPattern->GetAttr<Dimension>(DIALOG_DIVIDER_LENGTH, 24.0_vp);
+            theme->dividerBetweenButtonWidth_ =
+                dialogPattern->GetAttr<Dimension>(DIALOG_DIVIDER_BETWEEN_BUTTON_WIDTH, 2.0_px);
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
             }
@@ -161,13 +164,11 @@ public:
             theme->maxButtonWidth_ = dialogPattern->GetAttr<Dimension>(DIALOG_MAX_BUTTON_WIDTH, 260.0_vp);
             theme->maskColorEnd_ = dialogPattern->GetAttr<Color>(DIALOG_MASK_COLOR_END, Color::WHITE);
             // pattern config
-            theme->titleTextStyle_.SetFontSize(
-                dialogPattern->GetAttr<Dimension>("title_text_font_size", 20.0_vp));
+            theme->titleTextStyle_.SetFontSize(dialogPattern->GetAttr<Dimension>("title_text_font_size", 20.0_vp));
             theme->titleMinFontSize_ = dialogPattern->GetAttr<Dimension>("title_text_font_size_min", 20.0_vp);
             theme->commonButtonBgColor_ = dialogPattern->GetAttr<Color>("common_button_bg_color", Color::GRAY);
             theme->emphasizeButtonBgColor_ = dialogPattern->GetAttr<Color>("first_button_bg_color", Color::BLACK);
-            theme->emphasizeButtonTextColor_ =
-                dialogPattern->GetAttr<Color>("first_button_text_color", Color::WHITE);
+            theme->emphasizeButtonTextColor_ = dialogPattern->GetAttr<Color>("first_button_text_color", Color::WHITE);
             theme->buttonTextSize_ = dialogPattern->GetAttr<Dimension>("button_text_font_size", 16.0_vp);
             theme->buttonClickedColor_ = dialogPattern->GetAttr<Color>("button_bg_color_clicked", Color::BLACK);
             theme->contentTextStyle_.SetFontSize(themeStyle->GetAttr<Dimension>("content_text_font_size", 16.0_vp));
@@ -280,6 +281,16 @@ public:
     const Dimension& GetButtonSpacingVertical() const
     {
         return buttonSpacingVertical_;
+    }
+
+    const Dimension& GetDividerLength() const
+    {
+        return dividerLength_;
+    }
+
+    const Dimension& GetDividerBetweenButtonWidth_() const
+    {
+        return dividerBetweenButtonWidth_;
     }
 
     const Color& GetButtonBackgroundColor() const
@@ -435,6 +446,8 @@ private:
     Edge buttonPaddingCenter_;
     Dimension buttonSpacingHorizontal_;
     Dimension buttonSpacingVertical_;
+    Dimension dividerLength_;
+    Dimension dividerBetweenButtonWidth_;
     Color buttonBackgroundColor_;
     Color buttonClickedColor_;
     Color emphasizeButtonTextColor_;

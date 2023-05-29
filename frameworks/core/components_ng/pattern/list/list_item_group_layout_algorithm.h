@@ -157,7 +157,10 @@ private:
     bool NeedMeasureItem() const;
     static void SetListItemIndex(const LayoutWrapper* groupLayoutWrapper,
         const RefPtr<LayoutWrapper>& itemLayoutWrapper, int32_t indexInGroup);
+    bool IsCardStyleForListItemGroup(const LayoutWrapper* groupLayoutWrapper);
+    float GetMaxGridWidth();
 
+    bool isCardStyle_ = false;
     int32_t headerIndex_;
     int32_t footerIndex_;
     int32_t itemStartIndex_;
@@ -180,7 +183,6 @@ private:
     float endPos_ = 0.0f;
     float referencePos_ = 0.0f;
     bool forwardLayout_ = true;
-    bool lanesChanged_ = false;
 };
 } // namespace OHOS::Ace::NG
 

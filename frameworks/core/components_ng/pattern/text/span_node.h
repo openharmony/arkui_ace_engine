@@ -170,6 +170,8 @@ public:
         const RefPtr<Paragraph>& builder, double width, double height, VerticalAlign verticalAlign) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override {};
 
+    TextStyle textStyle;
+
     ACE_DISALLOW_COPY_AND_MOVE(ImageSpanItem);
 };
 
@@ -180,7 +182,6 @@ enum class PropertyInfo {
     FONTWEIGHT,
     FONTFAMILY,
     TEXTDECORATION,
-    TEXTDECORATIONCOLOR,
     TEXTCASE,
     LETTERSPACE,
     LINEHEIGHT,
@@ -277,7 +278,6 @@ public:
                                                                PropertyInfo::FONTWEIGHT,
                                                                PropertyInfo::FONTFAMILY,
                                                                PropertyInfo::TEXTDECORATION,
-                                                               PropertyInfo::TEXTDECORATIONCOLOR,
                                                                PropertyInfo::TEXTCASE,
                                                                PropertyInfo::LETTERSPACE,
                                                                PropertyInfo::LINEHEIGHT };

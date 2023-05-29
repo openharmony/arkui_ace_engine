@@ -73,8 +73,11 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     textFieldContentModifier_->SetTextObscured(textFieldPattern->GetTextObscured());
-    textFieldContentModifier_->SetShowCounter(layoutProperty->GetShowCounterValue(false));
+    textFieldContentModifier_->SetShowCounter(
+        layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength());
     textFieldContentModifier_->SetShowErrorState(layoutProperty->GetShowErrorTextValue(false));
+    textFieldContentModifier_->SetErrorTextValue(layoutProperty->GetErrorTextValue(""));
+    textFieldContentModifier_->SetShowUnderlineState(layoutProperty->GetShowUnderlineValue(false));
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextFieldTheme>();
@@ -122,7 +125,7 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     textFieldOverlayModifier_->SetCursorColor(cursorColor);
     auto selectedColor = paintProperty->GetSelectedBackgroundColorValue(theme->GetSelectedColor());
     textFieldOverlayModifier_->SetSelectedBackGroundColor(selectedColor);
-    textFieldOverlayModifier_->SetSelectedAreaRedraw(textFieldPattern->IsSelectedAreaRedraw());
+    textFieldOverlayModifier_->SetRedrawFlag(textFieldPattern->GetDrawOverlayFlag());
     if (paintProperty->GetCursorWidth().has_value()) {
         float cursorWidth = static_cast<float>(paintProperty->GetCursorWidthValue().ConvertToPx());
         textFieldOverlayModifier_->SetCursorWidth(cursorWidth);
@@ -133,6 +136,7 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    textFieldOverlayModifier_->SetShowCounter(layoutProperty->GetShowCounterValue(false));
+    textFieldOverlayModifier_->SetShowCounter(
+        layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength());
 }
 } // namespace OHOS::Ace::NG

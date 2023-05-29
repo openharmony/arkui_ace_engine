@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,7 +65,7 @@ class DistributedStorage implements IMultiPropertiesChangeSubscriber {
       stateMgmtConsole.warn(`DistributedStorage: linkProp: ${propName} is already exist`);
         return false;
     }
-    let link = AppStorage.Link(propName, this);
+    let link = AppStorage.link(propName, this);
     if (link) {
       stateMgmtConsole.debug(`DistributedStorage: linkProp ${propName} in AppStorage, using that`);
         this.links_.set(propName, link);
@@ -83,7 +83,7 @@ class DistributedStorage implements IMultiPropertiesChangeSubscriber {
                 returnValue = newValue;
             }
         }
-        link = AppStorage.SetAndLink(propName, returnValue, this);
+        link = AppStorage.setAndLink(propName, returnValue, this);
         this.links_.set(propName, link);
         stateMgmtConsole.debug(`DistributedStorage: created new linkProp prop for ${propName}`);
     }

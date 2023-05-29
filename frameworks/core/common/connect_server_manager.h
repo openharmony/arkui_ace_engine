@@ -30,7 +30,8 @@ public:
     ~ConnectServerManager();
     static ConnectServerManager& Get();
     void SetDebugMode();
-    void AddInstance(int32_t instanceId, const std::string& instanceName = "PandaDebugger");
+    void AddInstance(
+        int32_t instanceId, const std::string& language = "", const std::string& instanceName = "PandaDebugger");
     void SendInspector(const std::string& jsonTreeStr, const std::string& jsonSnapshotStr);
     void RemoveInstance(int32_t instanceId);
     void SetLayoutInspectorCallback(
@@ -44,7 +45,7 @@ private:
     void CloseConnectServerSo();
     void StopConnectServer();
     bool CheckDebugVersion();
-    std::string GetInstanceMapMessage(const char* messageType, int32_t instanceId);
+    std::string GetInstanceMapMessage(const char* messageType, int32_t instanceId, const std::string& language = "");
 
     mutable std::mutex mutex_;
     bool isDebugVersion_;

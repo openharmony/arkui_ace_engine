@@ -81,8 +81,7 @@ void JSPatternLock::JSBind(BindingTarget globalObj)
     JSClass<JSPatternLock>::StaticMethod("circleRadius", &JSPatternLock::SetCircleRadius, MethodOptions::NONE);
     JSClass<JSPatternLock>::StaticMethod("sideLength", &JSPatternLock::SetSideLength, MethodOptions::NONE);
     JSClass<JSPatternLock>::StaticMethod("autoReset", &JSPatternLock::SetAutoReset, MethodOptions::NONE);
-    JSClass<JSPatternLock>::Inherit<JSViewAbstract>();
-    JSClass<JSPatternLock>::Bind(globalObj);
+    JSClass<JSPatternLock>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 void JSPatternLock::SetDefaultTheme(OHOS::Ace::RefPtr<OHOS::Ace::V2::PatternLockComponent>& patternLock)
 {
@@ -204,8 +203,6 @@ void JSPatternLock::SetSideLength(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], sideLength)) {
         return;
     }
-    JSViewAbstract::JsWidth(info);
-    JSViewAbstract::JsHeight(info);
 
     PatternLockModel::GetInstance()->SetSideLength(sideLength);
 }

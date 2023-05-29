@@ -16,9 +16,48 @@
 #include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
 
 #include "base/geometry/ng/offset_t.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr uint32_t MIN_GRID_COUNTS = 2;
+} // namespace
+
+void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto childConstraint = layoutProperty->CreateChildConstraint();
+    // constraint max size minus padding
+    const auto& padding = layoutProperty->CreatePaddingAndBorder();
+    MinusPaddingToSize(padding, childConstraint.maxSize);
+    // constraint min width base on grid column
+    auto columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
+    CHECK_NULL_VOID(columnInfo);
+    CHECK_NULL_VOID(columnInfo->GetParent());
+    columnInfo->GetParent()->BuildColumnWidth();
+    auto minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
+    childConstraint.minSize.SetWidth(minWidth);
+    // Calculate max width of menu items
+    UpdateConstraintBaseOnMenuItems(layoutWrapper, childConstraint);
+
+    float contentHeight = 0.0f;
+    float contentWidth = childConstraint.minSize.Width();
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        child->Measure(childConstraint);
+        auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
+        LOGD("child finish measure, child %{public}s size = %{public}s", child->GetHostTag().c_str(),
+            child->GetGeometryNode()->GetMarginFrameSize().ToString().c_str());
+        contentHeight += childSize.Height();
+    }
+    layoutWrapper->GetGeometryNode()->SetContentSize(SizeF(contentWidth, contentHeight));
+
+    BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
+}
+
 void MultiMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -28,13 +67,36 @@ void MultiMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    auto outPadding = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     // translate each option by the height of previous options
-    OffsetF translate(outPadding, outPadding);
+    auto outPadding = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    const auto& padding = layoutProperty->CreatePaddingAndBorder();
+    OffsetF translate(padding.left.value_or(outPadding), padding.top.value_or(outPadding));
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
         child->Layout();
         translate.AddY(child->GetGeometryNode()->GetFrameSize().Height());
     }
+}
+
+void MultiMenuLayoutAlgorithm::UpdateConstraintBaseOnMenuItems(
+    LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
+{
+    // multiMenu children are menuItem or menuItemGroup, constrain width is same as the menu
+    auto maxChildrenWidth = GetChildrenMaxWidth(layoutWrapper, constraint);
+    constraint.minSize.SetWidth(maxChildrenWidth);
+}
+
+float MultiMenuLayoutAlgorithm::GetChildrenMaxWidth(
+    LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint)
+{
+    float maxWidth = 0.0f;
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        child->Measure(layoutConstraint);
+        auto childSize = child->GetGeometryNode()->GetFrameSize();
+        maxWidth = std::max(maxWidth, childSize.Width());
+    }
+    return maxWidth;
 }
 } // namespace OHOS::Ace::NG

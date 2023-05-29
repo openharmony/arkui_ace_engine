@@ -75,6 +75,8 @@ public:
 
     std::string GetAlignmentStr(TextDirection direction) const;
 
+    static Alignment GetAlignment(TextDirection direction, const std::string& str);
+
 private:
     friend class AlignCreator;
     Alignment(double horizontal, double vertical) : horizontal_(horizontal), vertical_(vertical) {}

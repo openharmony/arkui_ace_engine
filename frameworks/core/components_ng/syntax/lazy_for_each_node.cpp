@@ -67,7 +67,7 @@ void LazyForEachNode::UpdateLazyForEachItems(int32_t newStartIndex, int32_t newE
     // delete all.
     if (newIds.empty()) {
         // clean current children.
-        Clean(true);
+        Clean(true, true);
         builder_->Clean();
         startIndex_ = -1;
         endIndex_ = -1;
@@ -96,7 +96,7 @@ void LazyForEachNode::UpdateLazyForEachItems(int32_t newStartIndex, int32_t newE
         slot++;
     }
     while (static_cast<size_t>(slot) < GetChildren().size()) {
-        RemoveChild(GetLastChild());
+        RemoveChild(GetLastChild(), true);
     }
 
     // delete useless items.

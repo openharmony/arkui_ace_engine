@@ -31,6 +31,8 @@
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/list/list_item_group_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -40,9 +42,13 @@ constexpr double CHAIN_SPRING_DAMPING = 30.0;
 constexpr double CHAIN_SPRING_STIFFNESS = 228;
 constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
 constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
-constexpr Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
 constexpr float DEFAULT_MIN_SPACE_SCALE = 0.75f;
 constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
+constexpr Color CARD_ITEM_FILL_COLOR = Color(0x1A007DFF);
+constexpr float LIST_SCROLL_TO_MASS = 1.0f;
+constexpr float LIST_SCROLL_TO_STIFFNESS = 227.0f;
+constexpr float LIST_SCROLL_TO_DAMPING = 33.0f;
+constexpr float LIST_SCROLL_TO_VELOCITY = 7.0f;
 } // namespace
 
 void ListPattern::OnAttachToFrameNode()
@@ -82,6 +88,9 @@ void ListPattern::OnModifyDone()
     if (multiSelectable_ && !isMouseEventInit_) {
         InitMouseEvent();
     }
+    if (!multiSelectable_ && isMouseEventInit_) {
+        UninitMouseEvent();
+    }
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID_NOLOG(focusHub);
     InitOnKeyEvent(focusHub);
@@ -94,29 +103,24 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         return false;
     }
     bool isJump = false;
-    float jumpDistance = 0.0f;
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto listLayoutAlgorithm = DynamicCast<ListLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(listLayoutAlgorithm, false);
     itemPosition_ = listLayoutAlgorithm->GetItemPosition();
     maxListItemIndex_ = listLayoutAlgorithm->GetMaxListItemIndex();
+    spaceWidth_ = listLayoutAlgorithm->GetSpaceWidth();
+    float relativeOffset = listLayoutAlgorithm->GetCurrentOffset();
     if (jumpIndex_) {
-        jumpDistance = listLayoutAlgorithm->GetEstimateOffset() - estimateOffset_;
-        estimateOffset_ = listLayoutAlgorithm->GetEstimateOffset();
-        if (!itemPosition_.empty()) {
-            currentOffset_ = itemPosition_.begin()->second.startPos;
-        }
+        float absoluteOffset = listLayoutAlgorithm->GetEstimateOffset();
+        relativeOffset += absoluteOffset - currentOffset_;
         isJump = true;
         jumpIndex_.reset();
     }
-    auto finalOffset = listLayoutAlgorithm->GetCurrentOffset();
-    spaceWidth_ = listLayoutAlgorithm->GetSpaceWidth();
     if (listLayoutAlgorithm->GetStartIndex() == 0) {
-        estimateOffset_ = 0;
-        currentOffset_ = listLayoutAlgorithm->GetStartPosition();
+        currentOffset_ = -listLayoutAlgorithm->GetStartPosition();
     } else {
-        currentOffset_ = currentOffset_ - finalOffset;
+        currentOffset_ = currentOffset_ + relativeOffset;
     }
     if (isScrollEnd_) {
         auto host = GetHost();
@@ -143,7 +147,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         (startIndex_ != listLayoutAlgorithm->GetStartIndex()) || (endIndex_ != listLayoutAlgorithm->GetEndIndex());
     startIndex_ = listLayoutAlgorithm->GetStartIndex();
     endIndex_ = listLayoutAlgorithm->GetEndIndex();
-    ProcessEvent(indexChanged, finalOffset + jumpDistance, isJump, prevStartOffset, prevEndOffset);
+    ProcessEvent(indexChanged, relativeOffset, isJump, prevStartOffset, prevEndOffset);
     UpdateScrollBarOffset();
     CheckRestartSpring();
 
@@ -235,10 +239,6 @@ void ListPattern::ProcessEvent(
         }
         scrollStop_ = false;
         scrollAbort_ = false;
-    }
-
-    if (isScrollEnd_) {
-        isScrollEnd_ = false;
     }
 }
 
@@ -729,12 +729,53 @@ void ListPattern::StopAnimate()
     }
 }
 
-void ListPattern::ScrollTo(float position)
+void ListPattern::ScrollTo(float position, bool smooth)
 {
     LOGI("ScrollTo:%{public}f", position);
     StopAnimate();
-    UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
+    if (smooth) {
+        StartDefaultSpringMotion(currentOffset_, position, LIST_SCROLL_TO_VELOCITY);
+    } else {
+        UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
+    }
     isScrollEnd_ = true;
+}
+
+void ListPattern::StartDefaultSpringMotion(float start, float end, float velocity)
+{
+    if (!animator_) {
+        animator_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
+    }
+
+    float mass = LIST_SCROLL_TO_MASS;
+    float stiffness = LIST_SCROLL_TO_STIFFNESS;
+    float damping = LIST_SCROLL_TO_DAMPING;
+    const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
+        AceType::MakeRefPtr<SpringProperty>(mass, stiffness, damping);
+    if (!springMotion_) {
+        springMotion_ = AceType::MakeRefPtr<SpringMotion>(start, end, velocity, DEFAULT_OVER_SPRING_PROPERTY);
+    } else {
+        springMotion_->Reset(start, end, velocity, DEFAULT_OVER_SPRING_PROPERTY);
+        springMotion_->ClearListeners();
+    }
+    springMotion_->AddListener([weakScroll = AceType::WeakClaim(this), start, end](double position) {
+        auto list = weakScroll.Upgrade();
+        CHECK_NULL_VOID(list);
+        if (NearEqual(end, start) || NearEqual(position, end)) {
+            list->animator_->ClearStopListeners();
+            list->animator_->Stop();
+            position = end;
+            return;
+        }
+        list->UpdateCurrentOffset(list->GetTotalOffset() - position, SCROLL_FROM_JUMP);
+    });
+    animator_->ClearStopListeners();
+    animator_->PlayMotion(springMotion_);
+    animator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
+        auto list = weak.Upgrade();
+        CHECK_NULL_VOID(list);
+        list->MarkDirtyNodeSelf();
+    });
 }
 
 void ListPattern::ScrollToIndex(int32_t index, ScrollIndexAlignment align)
@@ -941,6 +982,17 @@ float ListPattern::GetChainDelta(int32_t index) const
     return chainAnimation_->GetValue(index);
 }
 
+void ListPattern::UninitMouseEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto mouseEventHub = host->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(mouseEventHub);
+    mouseEventHub->SetMouseEvent(nullptr);
+    ClearMultiSelect();
+    isMouseEventInit_ = false;
+}
+
 void ListPattern::InitMouseEvent()
 {
     auto host = GetHost();
@@ -958,22 +1010,44 @@ void ListPattern::InitMouseEvent()
 
 void ListPattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
 {
+    if (info.GetButton() != MouseButton::LEFT_BUTTON) {
+        return;
+    }
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(manager);
+    if (manager->IsDragged()) {
+        return;
+    }
+
     auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
     auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
-    if (info.GetButton() == MouseButton::LEFT_BUTTON) {
-        if (info.GetAction() == MouseAction::PRESS) {
-            mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-            mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-            // do not select when click
-        } else if (info.GetAction() == MouseAction::MOVE) {
+    if (info.GetAction() == MouseAction::PRESS) {
+        ClearMultiSelect();
+        mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+        mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+        mousePressOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+        mousePressed_ = true;
+        // do not select when click
+    } else if (info.GetAction() == MouseAction::MOVE) {
+        if (!mousePressed_) {
+            return;
+        }
+        const static double FRAME_SELECTION_DISTANCE =
+            pipeline->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP));
+        auto delta = OffsetF(mouseOffsetX, mouseOffsetY) - mousePressOffset_;
+        if (Offset(delta.GetX(), delta.GetY()).GetDistance() > FRAME_SELECTION_DISTANCE) {
             mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
             auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
             MultiSelectWithoutKeyboard(selectedZone);
-        } else if (info.GetAction() == MouseAction::RELEASE) {
-            mouseStartOffset_.Reset();
-            mouseEndOffset_.Reset();
-            ClearSelectedZone();
         }
+    } else if (info.GetAction() == MouseAction::RELEASE) {
+        mouseStartOffset_.Reset();
+        mouseEndOffset_.Reset();
+        mousePressed_ = false;
+        ClearSelectedZone();
     }
 }
 
@@ -984,6 +1058,15 @@ void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
     std::list<RefPtr<FrameNode>> childrens;
     host->GenerateOneDepthVisibleFrame(childrens);
     for (const auto& item : childrens) {
+        if (item->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
+            auto itemGroupPattern = item->GetPattern<ListItemGroupPattern>();
+            CHECK_NULL_VOID(itemGroupPattern);
+            auto itemGroupStyle = itemGroupPattern->GetListItemGroupStyle();
+            if (itemGroupStyle == V2::ListItemGroupStyle::CARD) {
+                HandleCardModeSelectedEvent(selectedZone, item);
+            }
+            continue;
+        }
         auto itemPattern = item->GetPattern<ListItemPattern>();
         CHECK_NULL_VOID(itemPattern);
         if (!itemPattern->Selectable()) {
@@ -992,22 +1075,64 @@ void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
 
         auto itemGeometry = item->GetGeometryNode();
         CHECK_NULL_VOID(itemGeometry);
-        auto context = item->GetRenderContext();
-        CHECK_NULL_VOID(context);
 
         auto itemRect = itemGeometry->GetFrameRect();
         if (!selectedZone.IsIntersectWith(itemRect)) {
             itemPattern->MarkIsSelected(false);
-            context->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
         } else {
             itemPattern->MarkIsSelected(true);
-            context->OnMouseSelectUpdate(true, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
         }
     }
 
     auto hostContext = host->GetRenderContext();
     CHECK_NULL_VOID(hostContext);
     hostContext->UpdateMouseSelectWithRect(selectedZone, SELECT_FILL_COLOR, SELECT_STROKE_COLOR);
+}
+
+void ListPattern::HandleCardModeSelectedEvent(const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode)
+{
+    CHECK_NULL_VOID(itemGroupNode);
+    std::list<RefPtr<FrameNode>> childrens;
+    itemGroupNode->GenerateOneDepthVisibleFrame(childrens);
+    for (const auto& item : childrens) {
+        auto itemPattern = item->GetPattern<ListItemPattern>();
+        CHECK_NULL_VOID(itemPattern);
+        if (!itemPattern->Selectable()) {
+            continue;
+        }
+        auto itemGeometry = item->GetGeometryNode();
+        CHECK_NULL_VOID(itemGeometry);
+        auto context = item->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        auto itemRect = itemGeometry->GetFrameRect();
+        if (!selectedZone.IsIntersectWith(itemRect)) {
+            itemPattern->MarkIsSelected(false);
+            context->OnMouseSelectUpdate(false, CARD_ITEM_FILL_COLOR, CARD_ITEM_FILL_COLOR);
+        } else {
+            itemPattern->MarkIsSelected(true);
+            context->OnMouseSelectUpdate(true, CARD_ITEM_FILL_COLOR, CARD_ITEM_FILL_COLOR);
+        }
+    }
+}
+
+void ListPattern::ClearMultiSelect()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::list<RefPtr<FrameNode>> children;
+    host->GenerateOneDepthAllFrame(children);
+    for (const auto& item : children) {
+        if (!AceType::InstanceOf<FrameNode>(item)) {
+            continue;
+        }
+
+        auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
+        auto itemPattern = itemFrameNode->GetPattern<ListItemPattern>();
+        CHECK_NULL_VOID(itemPattern);
+        itemPattern->MarkIsSelected(false);
+    }
+
+    ClearSelectedZone();
 }
 
 void ListPattern::ClearSelectedZone()
@@ -1085,6 +1210,18 @@ int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset)
 void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("multiSelectable", multiSelectable_);
+    json->Put("startIndex", startIndex_);
+    json->Put("startMainPos", startMainPos_);
+}
+
+void ListPattern::FromJson(const std::unique_ptr<JsonValue>& json)
+{
+    ScrollToIndex(json->GetInt("startIndex"));
+    ScrollBy(-json->GetDouble("startMainPos"));
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->UpdateClipEdge(true);
+    ScrollablePattern::FromJson(json);
 }
 
 void ListPattern::SetAccessibilityAction()

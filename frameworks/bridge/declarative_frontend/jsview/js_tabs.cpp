@@ -261,12 +261,23 @@ void JSTabs::SetBarOverlap(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetBarOverlap(barOverlap);
 }
 
+void JSTabs::SetBarBackgroundColor(const JSCallbackInfo& info)
+{
+    Color backgroundColor = Color::BLACK.BlendOpacity(0.0f);
+    if (info.Length() < 1) {
+        LOGD("Invalid parameters. Use default parameters instead.");
+    } else if (!ConvertFromJSValue(info[0], backgroundColor)) {
+        LOGD("Invalid parameters. Use default parameters instead.");
+    }
+    TabsModel::GetInstance()->SetBarBackgroundColor(backgroundColor);
+}
+
 void JSTabs::SetDivider(const JSCallbackInfo& info)
 {
     TabsItemDivider divider;
     RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
-    CHECK_NULL_VOID (tabTheme);
-    
+    CHECK_NULL_VOID(tabTheme);
+
     if (info.Length() < 1) {
         LOGW("Invalid params");
     } else {
@@ -285,7 +296,7 @@ void JSTabs::SetDivider(const JSCallbackInfo& info)
                 divider.startMargin.Value() < 0.0f) {
                 divider.startMargin.Reset();
             }
-            
+
             if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin) ||
                 divider.endMargin.Value() < 0.0f) {
                 divider.endMargin.Reset();
@@ -293,6 +304,17 @@ void JSTabs::SetDivider(const JSCallbackInfo& info)
         }
     }
     TabsModel::GetInstance()->SetDivider(divider);
+}
+
+void JSTabs::SetClip(const JSCallbackInfo& info)
+{
+    if (info[0]->IsObject() || !Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsClip(info);
+        return;
+    }
+    if (info[0]->IsBoolean()) {
+        TabsModel::GetInstance()->SetClipEdge(info[0]->ToBoolean());
+    }
 }
 
 void JSTabs::JSBind(BindingTarget globalObj)
@@ -320,9 +342,10 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSTabs>::StaticMethod("fadingEdge", &JSTabs::SetFadingEdge);
     JSClass<JSTabs>::StaticMethod("barOverlap", &JSTabs::SetBarOverlap);
+    JSClass<JSTabs>::StaticMethod("barBackgroundColor", &JSTabs::SetBarBackgroundColor);
+    JSClass<JSTabs>::StaticMethod("clip", &JSTabs::SetClip);
 
-    JSClass<JSTabs>::Inherit<JSContainerBase>();
-    JSClass<JSTabs>::Bind<>(globalObj);
+    JSClass<JSTabs>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

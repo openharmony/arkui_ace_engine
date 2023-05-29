@@ -215,10 +215,18 @@ void ImagePattern::SetImagePaintConfig(
 RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
 {
     if (image_) {
-        return MakeRefPtr<ImagePaintMethod>(image_, selectOverlay_);
+        if (!imageModifier_) {
+            imageModifier_ = AceType::MakeRefPtr<ImageModifier>();
+        }
+        imageModifier_->SetIsAltImage(false);
+        return MakeRefPtr<ImagePaintMethod>(image_, imageModifier_, selectOverlay_);
     }
     if (altImage_ && altDstRect_ && altSrcRect_) {
-        return MakeRefPtr<ImagePaintMethod>(altImage_, selectOverlay_);
+        if (!imageModifier_) {
+            imageModifier_ = AceType::MakeRefPtr<ImageModifier>();
+        }
+        imageModifier_->SetIsAltImage(true);
+        return MakeRefPtr<ImagePaintMethod>(altImage_, imageModifier_, selectOverlay_);
     }
     return nullptr;
 }
@@ -411,7 +419,9 @@ void ImagePattern::OnWindowShow()
 
 void ImagePattern::OnVisibleChange(bool visible)
 {
-    CloseSelectOverlay();
+    if (!visible) {
+        CloseSelectOverlay();
+    }
     CHECK_NULL_VOID_NOLOG(image_);
     // control svg / gif animation
     image_->ControlAnimation(visible);
@@ -433,6 +443,8 @@ void ImagePattern::OnAttachToFrameNode()
 
 void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    CloseSelectOverlay();
+
     auto id = frameNode->GetId();
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_VOID_NOLOG(pipeline);

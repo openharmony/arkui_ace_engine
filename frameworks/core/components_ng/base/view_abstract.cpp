@@ -98,6 +98,18 @@ void ViewAbstract::SetHeight(const CalcLength& height)
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
 }
 
+void ViewAbstract::SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ClickEffectInfo clickEffectInfo;
+    clickEffectInfo.level = level;
+    clickEffectInfo.scaleNumber = scaleValue;
+    ACE_UPDATE_RENDER_CONTEXT(ClickEffectLevel, clickEffectInfo);
+}
+
 void ViewAbstract::ClearWidthOrHeight(bool isWidth)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -324,6 +336,15 @@ void ViewAbstract::SetFlexShrink(float value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexShrink, value);
 }
 
+void ViewAbstract::ResetFlexShrink()
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_RESET_LAYOUT_PROPERTY(LayoutProperty, FlexShrink);
+}
+
 void ViewAbstract::SetFlexGrow(float value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -403,7 +424,6 @@ void ViewAbstract::SetBorderRadius(const Dimension& value)
     }
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(value);
-    borderRadius.SetRadiusFlag(true);
     ACE_UPDATE_RENDER_CONTEXT(BorderRadius, borderRadius);
 }
 
@@ -759,7 +779,17 @@ void ViewAbstract::SetVisibility(VisibleType visible)
         LOGD("current state is not processed, return");
         return;
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Visibility, visible);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    if (layoutProperty) {
+        layoutProperty->UpdateVisibility(visible, true);
+    }
+
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    if (focusHub) {
+        focusHub->SetShow(visible == VisibleType::VISIBLE);
+    }
 }
 
 void ViewAbstract::SetGeometryTransition(const std::string& id)

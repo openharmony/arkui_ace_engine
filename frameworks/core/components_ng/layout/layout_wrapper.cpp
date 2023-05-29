@@ -25,6 +25,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper_builder.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -151,7 +152,7 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
     }
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    if (geometryTransition != nullptr) {
+    if (geometryTransition != nullptr && geometryTransition->IsRunning()) {
         geometryTransition->WillLayout(Claim(this));
     }
 
@@ -215,7 +216,8 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
         layoutAlgorithm_->Measure(this);
 
         // check aspect radio.
-        if (hasAspectRatio) {
+        auto pattern = host->GetPattern();
+        if (pattern && pattern->IsNeedAdjustByAspectRatio()) {
             auto aspectRatio = magicItemProperty->GetAspectRatioValue();
             // Adjust by aspect ratio, firstly pick height based on width. It means that when width, height and
             // aspectRatio are all set, the height is not used.
@@ -315,7 +317,7 @@ void LayoutWrapper::MountToHostOnMainThread()
 
 void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
 {
-    if (GetHostTag() != V2::TAB_CONTENT_ITEM_ETS_TAG || isActive_) {
+    if (isActive_) {
         for (const auto& child : children_) {
             if (!child) {
                 continue;

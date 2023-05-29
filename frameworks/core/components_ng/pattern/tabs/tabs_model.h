@@ -25,8 +25,8 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components/tab_bar/tab_controller.h"
-#include "core/components/tab_bar/tabs_event.h"
 #include "core/components/tab_bar/tab_theme.h"
+#include "core/components/tab_bar/tabs_event.h"
 #include "core/event/ace_events.h"
 #include "core/pipeline/pipeline_context.h"
 
@@ -78,6 +78,8 @@ public:
     virtual void SetFadingEdge(bool fadingEdge) = 0;
     virtual void SetBarOverlap(bool barOverlap) = 0;
     virtual void SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& onChangeEvent) = 0;
+    virtual void SetBarBackgroundColor(const Color& backgroundColor) = 0;
+    virtual void SetClipEdge(bool clipEdge) = 0;
 
 private:
     static std::unique_ptr<TabsModel> instance_;

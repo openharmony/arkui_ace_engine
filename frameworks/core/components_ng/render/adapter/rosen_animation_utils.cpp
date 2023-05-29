@@ -114,4 +114,29 @@ void AnimationUtils::StopAnimation(const std::shared_ptr<AnimationUtils::Animati
         animation->animations_.clear();
     }
 }
+
+void AnimationUtils::BlendBgColorAnimation(
+    RefPtr<NG::RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve)
+{
+    AnimationOption option = AnimationOption();
+    option.SetCurve(curve);
+    option.SetDuration(duration);
+    AnimationUtils::Animate(option, [context = renderContext, color = endColor]() { context->BlendBgColor(color); });
+}
+
+void AnimationUtils::PauseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation)
+{
+    CHECK_NULL_VOID(animation);
+    for (auto& ani : animation->animations_) {
+        ani->Pause();
+    }
+}
+
+void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation)
+{
+    CHECK_NULL_VOID(animation);
+    for (auto& ani : animation->animations_) {
+        ani->Resume();
+    }
+}
 } // namespace OHOS::Ace

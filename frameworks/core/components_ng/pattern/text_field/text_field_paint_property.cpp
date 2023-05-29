@@ -33,4 +33,10 @@ void TextFieldPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("selectedBackgroundColor",
         propSelectedBackgroundColor_.value_or(textFieldTheme->GetSelectedColor()).ColorToString().c_str());
 }
+
+void TextFieldPaintProperty::FromJson(const std::unique_ptr<JsonValue>& json)
+{
+    UpdateCursorColor(Color::ColorFromString(json->GetString("placeholderColor")));
+    PaintProperty::FromJson(json);
+}
 } // namespace OHOS::Ace::NG

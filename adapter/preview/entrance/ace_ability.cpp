@@ -14,7 +14,6 @@
  */
 
 #include "adapter/preview/entrance/ace_ability.h"
-#include "base/utils/utils.h"
 
 #ifdef INIT_ICU_DATA_PATH
 #include "unicode/putil.h"
@@ -25,13 +24,18 @@
 #include "adapter/preview/entrance/ace_application_info.h"
 #include "adapter/preview/entrance/ace_container.h"
 #include "adapter/preview/entrance/event_dispatcher.h"
+#include "adapter/preview/entrance/rs_dir_asset_provider.h"
 #include "adapter/preview/inspector/inspector_client.h"
+#include "frameworks/base/utils/utils.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/js_frontend.h"
 
 #ifndef ENABLE_ROSEN_BACKEND
 #include "frameworks/core/components/common/painter/flutter_svg_painter.h"
 #else
+#include <ui/rs_surface_node.h>
+#include <ui/rs_ui_director.h>
+
 #include "adapter/preview/external/flutter/main_event_loop.h"
 #endif
 
@@ -80,13 +84,14 @@ void AdaptDeviceType(AceRunArgs& runArgs)
 void SetFontMgrConfig(const std::string& containerSdkPath)
 {
     // To check if use ohos or container fonts.
-    std::string runtimeOS;
-    std::string containerFontBasePath;
-    if (containerSdkPath.empty()) {
+    std::string runtimeOS = "OHOS_Container";
+    std::string containerFontBasePath = containerSdkPath + DELIMITER + "resources" + DELIMITER + "fonts" + DELIMITER;
+    RSDirAssetProvider dirAsset(containerFontBasePath);
+    std::vector<std::string> fileList;
+    dirAsset.GetAssetList("", fileList);
+    if (containerSdkPath.empty() || fileList.empty()) {
         runtimeOS = "OHOS";
-    } else {
-        runtimeOS = "OHOS_Container";
-        containerFontBasePath = containerSdkPath + DELIMITER + "resources" + DELIMITER + "fonts" + DELIMITER;
+        containerFontBasePath = "";
     }
     LOGI("Runtime OS is %{public}s, and the container fontBasePath is %{public}s", runtimeOS.c_str(),
         containerFontBasePath.c_str());
@@ -226,14 +231,15 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
         return nullptr;
     }
 #ifdef USE_GLFW_WINDOW
-    ctx->CreateWindow(runArgs.deviceWidth, runArgs.deviceHeight, true);
+    ctx->CreateGlfwWindow(runArgs.deviceWidth, runArgs.deviceHeight, true);
 #else
-    ctx->CreateWindow(runArgs.deviceWidth, runArgs.deviceHeight, false);
+    ctx->CreateGlfwWindow(runArgs.deviceWidth, runArgs.deviceHeight, false);
 #endif
     AceApplicationInfo::GetInstance().SetLocale(runArgs.language, runArgs.region, runArgs.script, "");
     SetFontMgrConfig(runArgs.containerSdkPath);
     EventDispatcher::GetInstance().Initialize();
     auto aceAbility = std::make_unique<AceAbility>(runArgs);
+    aceAbility->SetWindow(Rosen::Window::Create(runArgs.onRender));
     aceAbility->SetGlfwWindowController(ctx);
     return aceAbility;
 }
@@ -279,6 +285,8 @@ void AceAbility::InitEnv()
         AceContainer::RunPage(ACE_INSTANCE_ID, UNUSED_PAGE_ID, runArgs_.url, "");
         AceContainer::SetView(view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight);
     }
+    // Drive the native engine with the platform thread.
+    container->RunNativeEngineLoop();
     if (runArgs_.projectModel == ProjectModel::STAGE) {
         container->InitializeStageAppConfig(runArgs_.assetPath, runArgs_.formsEnabled);
     }
@@ -332,15 +340,36 @@ void AceAbility::InitEnv()
         runArgs_.appResourcesPath, runArgs_.themeId, runArgs_.deviceConfig.colorMode);
 
     auto view = AceViewPreview::CreateView(ACE_INSTANCE_ID);
+    auto window = GetWindow();
+    UIEnvCallback callback = [window, id = ACE_INSTANCE_ID](const OHOS::Ace::RefPtr<PipelineContext>& context) mutable {
+        CHECK_NULL_VOID(context);
+        CHECK_NULL_VOID(window);
+        auto director = OHOS::Rosen::RSUIDirector::Create();
+        CHECK_NULL_VOID(director);
+        director->SetRSSurfaceNode(window->GetSurfaceNode());
+        auto container = AceContainer::GetContainerInstance(id);
+        CHECK_NULL_VOID(container);
+        auto func = [taskExecutor = container->GetTaskExecutor(), id](const std::function<void()>& task) {
+            CHECK_NULL_VOID(taskExecutor);
+            ContainerScope scope(id);
+            taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+        };
+        director->SetUITaskRunner(func);
+        director->Init();
+        context->SetRSUIDirector(director);
+    };
+
     if (runArgs_.aceVersion == AceVersion::ACE_2_0) {
         AceContainer::SetView(
-            view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight, runArgs_.onRender);
+            view, window, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight, callback);
         AceContainer::RunPage(ACE_INSTANCE_ID, UNUSED_PAGE_ID, runArgs_.url, "");
     } else {
         AceContainer::RunPage(ACE_INSTANCE_ID, UNUSED_PAGE_ID, runArgs_.url, "");
         AceContainer::SetView(
-            view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight, runArgs_.onRender);
+            view, window, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight, callback);
     }
+    // Drive the native engine with the platform thread.
+    container->RunNativeEngineLoop();
     if (runArgs_.projectModel == ProjectModel::STAGE) {
         container->InitializeStageAppConfig(runArgs_.assetPath, runArgs_.formsEnabled);
     }
@@ -382,11 +411,6 @@ void AceAbility::RunEventLoop()
             SurfaceChanged(runArgs_.deviceConfig.orientation, runArgs_.deviceConfig.density, width, height);
         }
 #endif
-        auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
-        if (container) {
-            container->RunNativeEngineLoop();
-        }
-
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
     loopRunning_ = true;
@@ -427,13 +451,6 @@ void AceAbility::RunEventLoop()
             SurfaceChanged(runArgs_.deviceConfig.orientation, runArgs_.deviceConfig.density, width, height);
         }
 #endif
-
-        // Drive the native engine.
-        auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
-        if (container) {
-            container->RunNativeEngineLoop();
-        }
-
         // Process the event of glfw
         controller_->PollEvents();
         std::this_thread::sleep_for(std::chrono::milliseconds(1));

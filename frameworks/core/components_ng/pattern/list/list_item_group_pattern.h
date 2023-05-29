@@ -32,7 +32,10 @@ class ACE_EXPORT ListItemGroupPattern : public Pattern {
     DECLARE_ACE_TYPE(ListItemGroupPattern, Pattern);
 
 public:
-    explicit ListItemGroupPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder) {}
+    explicit ListItemGroupPattern(
+        const RefPtr<ShallowBuilder>& shallowBuilder, V2::ListItemGroupStyle listItemGroupStyle)
+        : shallowBuilder_(shallowBuilder), listItemGroupStyle_(listItemGroupStyle)
+    {}
     ~ListItemGroupPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -105,9 +108,17 @@ public:
         return indexInList_;
     }
 
+    V2::ListItemGroupStyle GetListItemGroupStyle()
+    {
+        return listItemGroupStyle_;
+    }
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void OnAttachToFrameNode() override;
+    void SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode);
     RefPtr<ShallowBuilder> shallowBuilder_;
+    V2::ListItemGroupStyle listItemGroupStyle_ = V2::ListItemGroupStyle::NONE;
 
     int32_t indexInList_ = 0;
 

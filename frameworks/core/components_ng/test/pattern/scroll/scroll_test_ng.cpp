@@ -765,7 +765,7 @@ HWTEST_F(ScrollTestNg, ScrollTest007, TestSize.Level1)
     auto offset = positionController->GetCurrentOffset();
     EXPECT_EQ(offset, Offset::Zero());
     Dimension dimension(0, DimensionUnit::VP);
-    auto animate = positionController->AnimateTo(dimension, 0.0f, Curves::LINEAR);
+    auto animate = positionController->AnimateTo(dimension, 0.0f, Curves::LINEAR, false);
     EXPECT_EQ(animate, false);
 }
 
@@ -1042,7 +1042,7 @@ HWTEST_F(ScrollTestNg, ScrollTest0010, TestSize.Level1)
     auto offset = positionController->GetCurrentOffset();
     EXPECT_EQ(offset, Offset(0, -SCROLL_FLOAT_98));
     Dimension dimension(0, DimensionUnit::VP);
-    auto animate = positionController->AnimateTo(dimension, 0.0f, Curves::LINEAR);
+    auto animate = positionController->AnimateTo(dimension, 0.0f, Curves::LINEAR, false);
     EXPECT_EQ(animate, true);
 }
 
@@ -1658,5 +1658,73 @@ HWTEST_F(ScrollTestNg, ScrollTest0016, TestSize.Level1)
     fadeController->decele_->NotifyListener(SCROLL_DOUBLE_100);
     EXPECT_EQ(param1, 20.3);
     EXPECT_EQ(param2, 3.25);
+}
+
+/**
+ * @tc.name: ScrollTest0017
+ * @tc.desc: Scroll Accessibility PerformAction test ScrollForward and ScrollBackward..
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollTest0017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scroll and initialize related properties.
+     */
+    ScrollModelNG scrollModel;
+    scrollModel.Create();
+    scrollModel.SetAxis(Axis::NONE);
+
+    /**
+     * @tc.steps: step2. Get scroll frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto scrollPattern = frameNode->GetPattern<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    scrollPattern->scrollableDistance_ = 0.0;
+    scrollPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step3. Get scroll accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto scrollAccessibilityProperty = frameNode->GetAccessibilityProperty<ScrollAccessibilityProperty>();
+    ASSERT_NE(scrollAccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. When scroll is not scrollable and scrollable distance is 0, call the callback function in
+     *                   scrollAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(scrollAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(scrollAccessibilityProperty->ActActionScrollBackward());
+
+    /**
+     * @tc.steps: step5. When scroll is not scrollable and scrollable distance is not 0, call the callback function in
+     *                   scrollAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    scrollPattern->scrollableDistance_ = SCROLL_FLOAT_100;
+    EXPECT_TRUE(scrollAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(scrollAccessibilityProperty->ActActionScrollBackward());
+
+    /**
+     * @tc.steps: step6. When scroll is scrollable and scrollable distance is not 0, call the callback function in
+     *                   scrollAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    scrollPattern->SetAxis(Axis::VERTICAL);
+    EXPECT_TRUE(scrollAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(scrollAccessibilityProperty->ActActionScrollBackward());
+
+    /**
+     * @tc.steps: step7. When scroll is scrollable and scrollable distance is 0, call the callback function in
+     *                   scrollAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    scrollPattern->scrollableDistance_ = 0.0;
+    EXPECT_TRUE(scrollAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(scrollAccessibilityProperty->ActActionScrollBackward());
 }
 } // namespace OHOS::Ace::NG

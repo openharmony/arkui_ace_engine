@@ -76,8 +76,7 @@ void JSCalendar::JSBind(BindingTarget globalObj)
     JSClass<JSCalendar>::StaticMethod("todayStyle", &JSCalendar::SetTodayStyle, opt);
     JSClass<JSCalendar>::StaticMethod("weekStyle", &JSCalendar::SetWeekStyle, opt);
     JSClass<JSCalendar>::StaticMethod("workStateStyle", &JSCalendar::SetWorkStateStyle, opt);
-    JSClass<JSCalendar>::Inherit<JSViewAbstract>();
-    JSClass<JSCalendar>::Bind<>(globalObj);
+    JSClass<JSCalendar>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSCalendar::Create(const JSCallbackInfo& info)

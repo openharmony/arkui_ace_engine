@@ -30,6 +30,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t PATTERN_LOCK_COL_COUNT = 3;
 constexpr int32_t RADIUS_TO_DIAMETER = 2;
+constexpr int32_t RADIUS_COUNT = 6;
 // the scale of selected circle radius and normal circle radius
 constexpr float SCALE_SELECTED_CIRCLE_RADIUS = 26.00 / 14.00;
 } // namespace
@@ -92,23 +93,25 @@ bool PatternLockPattern::AddChoosePoint(const OffsetF& offset, int32_t x, int32_
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto patternLockPaintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
-    if (patternLockPaintProperty->HasSideLength()) {
-        sideLength_ = patternLockPaintProperty->GetSideLengthValue();
-    }
+    float sideLength = host->GetGeometryNode()->GetContentSize().Width();
+    OffsetF contentOffset = host->GetGeometryNode()->GetContentOffset();
     if (patternLockPaintProperty->HasCircleRadius()) {
         circleRadius_ = patternLockPaintProperty->GetCircleRadiusValue();
     }
-
+    auto handleCircleRadius = static_cast<float>(circleRadius_.ConvertToPx());
+    handleCircleRadius =  std::min(handleCircleRadius * SCALE_SELECTED_CIRCLE_RADIUS, sideLength / RADIUS_COUNT);
     const int32_t scale = RADIUS_TO_DIAMETER;
-    float offsetX = sideLength_.ConvertToPx() / PATTERN_LOCK_COL_COUNT / scale * (scale * x - 1);
-    float offsetY = sideLength_.ConvertToPx() / PATTERN_LOCK_COL_COUNT / scale * (scale * y - 1);
+    float offsetX = sideLength / PATTERN_LOCK_COL_COUNT / scale * (scale * x - 1);
+    float offsetY = sideLength / PATTERN_LOCK_COL_COUNT / scale * (scale * y - 1);
+    offsetX += contentOffset.GetX();
+    offsetY += contentOffset.GetY();
     OffsetF centerOffset;
     centerOffset.SetX(offsetX);
     centerOffset.SetY(offsetY);
     auto X = (offset - centerOffset).GetX();
     auto Y = (offset - centerOffset).GetY();
     float distance = std::sqrt((X * X) + (Y * Y));
-    if (distance <= (circleRadius_.ConvertToPx() * SCALE_SELECTED_CIRCLE_RADIUS)) {
+    if (LessOrEqual(distance, handleCircleRadius)) {
         if (!CheckChoosePoint(x, y)) {
             AddPassPoint(x, y);
             choosePoint_.emplace_back(x, y);

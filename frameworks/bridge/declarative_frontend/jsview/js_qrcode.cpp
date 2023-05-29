@@ -97,8 +97,7 @@ void JSQRCode::JSBind(BindingTarget globalObj)
     JSClass<JSQRCode>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSQRCode>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSQRCode>::Inherit<JSInteractableView>();
-    JSClass<JSQRCode>::Inherit<JSViewAbstract>();
-    JSClass<JSQRCode>::Bind<>(globalObj);
+    JSClass<JSQRCode>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

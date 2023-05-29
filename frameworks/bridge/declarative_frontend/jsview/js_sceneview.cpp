@@ -550,8 +550,7 @@ void JSSceneView::JSBind(BindingTarget globalObj)
     JSClass<JSSceneView>::StaticMethod("addCustomRender", &JSSceneView::JSAddCustomRender);
     JSClass<JSSceneView>::StaticMethod("width", &JSSceneView::JsWidth);
     JSClass<JSSceneView>::StaticMethod("height", &JSSceneView::JsHeight);
-    JSClass<JSSceneView>::Inherit<JSViewAbstract>();
-    JSClass<JSSceneView>::Bind<>(globalObj);
+    JSClass<JSSceneView>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

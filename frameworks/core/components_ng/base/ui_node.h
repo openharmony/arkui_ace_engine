@@ -54,7 +54,7 @@ public:
 
     // Tree operation start.
     void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false);
-    std::list<RefPtr<UINode>>::iterator RemoveChild(const RefPtr<UINode>& child);
+    std::list<RefPtr<UINode>>::iterator RemoveChild(const RefPtr<UINode>& child, bool allowTransition = false);
     int32_t RemoveChildAndReturnIndex(const RefPtr<UINode>& child);
     void ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode);
     void MovePosition(int32_t slot);
@@ -62,7 +62,7 @@ public:
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
     void GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const;
-    void Clean(bool cleanDirectly = false);
+    void Clean(bool cleanDirectly = false, bool allowTransition = false);
     void RemoveChildAtIndex(int32_t index);
     RefPtr<UINode> GetChildAtIndex(int32_t index) const;
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
@@ -309,6 +309,8 @@ public:
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 
+    virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
+
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(InspectorId, std::string);
     void OnInspectorIdUpdate(const std::string& /*unused*/) {}
 
@@ -426,8 +428,11 @@ protected:
     virtual void OnDetachFromMainTree(bool recursive = false);
 
     bool isRemoving_ = false;
-    // return value: return true if node has disappearing transition
-    virtual bool OnRemoveFromParent();
+
+    // return value: true if the node can be removed immediately.
+    virtual bool OnRemoveFromParent(bool allowTransition);
+    virtual bool RemoveImmediately() const;
+    void ResetParent();
 
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false);
@@ -460,6 +465,7 @@ private:
     std::string debugLine_;
     std::string viewId_;
 #endif
+    friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };
 

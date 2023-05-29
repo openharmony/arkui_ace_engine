@@ -29,8 +29,8 @@ constexpr int32_t STANDARD_FRAME_DURATION = 100;
 constexpr int32_t FORM_REPEAT_COUNT = 1;
 } // namespace
 
-AnimatedImage::AnimatedImage(std::unique_ptr<SkCodec> codec, const SizeF& size, const std::string& url)
-    : codec_(std::move(codec)), cacheKey_(url + size.ToString()), size_(size)
+AnimatedImage::AnimatedImage(std::unique_ptr<SkCodec> codec, std::string url)
+    : codec_(std::move(codec)), cacheKey_(std::move(url))
 {
     // set up animator
     int32_t totalDuration = 0;
@@ -75,13 +75,13 @@ sk_sp<SkImage> AnimatedImage::GetImage() const
     return currentFrame_;
 }
 
-RefPtr<CanvasImage> AnimatedImage::Create(const RefPtr<ImageData>& data, const SizeF& size, const std::string& url)
+RefPtr<CanvasImage> AnimatedImage::Create(const RefPtr<ImageData>& data, const std::string& url)
 {
     auto skData = DynamicCast<SkiaImageData>(data);
     CHECK_NULL_RETURN(skData, nullptr);
     auto codec = SkCodec::MakeFromData(skData->GetSkData());
     CHECK_NULL_RETURN(codec, nullptr);
-    return MakeRefPtr<AnimatedImage>(std::move(codec), size, url);
+    return MakeRefPtr<AnimatedImage>(std::move(codec), url);
 }
 
 void AnimatedImage::RenderFrame(uint32_t idx)
@@ -103,7 +103,6 @@ void AnimatedImage::DecodeFrame(uint32_t idx)
     std::scoped_lock<std::mutex> lock(decodeMtx_);
 
     SkImageInfo imageInfo = codec_->getInfo();
-    imageInfo.makeWH(size_.Width(), size_.Height());
 
     SkBitmap bitmap;
 

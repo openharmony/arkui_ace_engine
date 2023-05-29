@@ -18,7 +18,7 @@
 
 #include <mutex>
 
-#include "core/components_ng/pattern/navrouter/navrouter_view.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 
 namespace OHOS::Ace {
 class NavRouterModel {

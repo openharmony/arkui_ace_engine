@@ -18,6 +18,13 @@ template("ace_base_source_set") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    if (current_os == "ohos") {
+      sanitize = {
+        integer_overflow = true
+        boundary_sanitize = true
+        debug = ace_sanitize_debug
+      }
+    }
     subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     defines += invoker.defines
@@ -41,6 +48,8 @@ template("ace_base_source_set") {
       "geometry/transform_util.cpp",
       "image/pixel_map.cpp",
       "json/json_util.cpp",
+      "json/node_object.cpp",
+      "json/uobject.cpp",
       "log/ace_performance_check.cpp",
       "log/ace_scoring_log.cpp",
       "log/ace_trace.cpp",

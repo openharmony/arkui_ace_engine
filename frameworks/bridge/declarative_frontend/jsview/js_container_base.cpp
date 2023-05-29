@@ -24,12 +24,12 @@ void JSContainerBase::Pop()
     ViewStackModel::GetInstance()->PopContainer();
 }
 
-void JSContainerBase::JSBind()
+void JSContainerBase::JSBind(BindingTarget globalObj)
 {
     JSClass<JSContainerBase>::Declare("JSContainerBase");
     // staticmethods
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSContainerBase>::StaticMethod("pop", &JSContainerBase::Pop, opt);
-    JSClass<JSContainerBase>::Inherit<JSViewAbstract>();
+    JSClass<JSContainerBase>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

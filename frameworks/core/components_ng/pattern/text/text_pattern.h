@@ -79,6 +79,11 @@ public:
         return false;
     }
 
+    bool DefaultSupportDrag() override
+    {
+        return true;
+    }
+    
     void OnModifyDone() override;
 
     void BeforeCreateLayoutWrapper() override;
@@ -189,13 +194,26 @@ public:
     // end of TextDragBase implementations
     // ===========================================================
 
+    void InitSurfaceChangedCallback();
+    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
+    bool HasSurfaceChangedCallback()
+    {
+        return surfaceChangedCallbackId_.has_value();
+    }
+    void UpdateSurfaceChangedCallbackId(int32_t id)
+    {
+        surfaceChangedCallbackId_ = id;
+    }
+
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
+    void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void HandleLongPress(GestureEvent& info);
     void HandleOnSelectAll();
     void HandleOnCopy();
+    void HandleOnOverlayClose();
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -217,6 +235,7 @@ private:
 
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
     void InitSelection(const Offset& pos);
+    void ResetSelection();
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
 
     inline RSTypographyProperties::TextBox ConvertRect(const Rect& rect);
@@ -249,7 +268,9 @@ private:
     bool clickEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
     bool panEventInitialized_ = false;
+    bool showSelectOverlay_ = false;
     std::optional<TextStyle> textStyle_;
+    std::optional<int32_t> surfaceChangedCallbackId_;
 
     RefPtr<TextContentModifier> textContentModifier_;
     RefPtr<TextOverlayModifier> textOverlayModifier_;

@@ -17,12 +17,16 @@
 
 #include <type_traits>
 
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/divider/divider_layout_property.h"
+#include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
@@ -33,9 +37,6 @@
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/divider/divider_layout_property.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
-#include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -87,11 +88,11 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     auto tabBarNode = FrameNode::GetOrCreateFrameNode(
         V2::TAB_BAR_ETS_TAG, tabBarId, [controller]() { return AceType::MakeRefPtr<TabBarPattern>(controller); });
 
-    auto selectedMaskNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, selectedMaskId,
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto selectedMaskNode = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, selectedMaskId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
 
-    auto unselectedMaskNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, unselectedMaskId,
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto unselectedMaskNode = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, unselectedMaskId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
 
     if (!hasSwiperNode) {
         swiperNode->MountToParent(tabsNode);
@@ -270,7 +271,7 @@ void TabsModelNG::SetFadingEdge(bool fadingEdge)
 void TabsModelNG::SetBarOverlap(bool barOverlap)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, BarOverlap, barOverlap);
-    
+
     auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(tabsNode);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
@@ -289,11 +290,13 @@ void TabsModelNG::SetBarOverlap(bool barOverlap)
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
     auto defaultBgColorBlur = tabTheme->GetColorBottomTabSubBgBlur();
-
-    if (barOverlap) {
+    auto tabBarPaintProperty = GetTabBarPaintProperty();
+    CHECK_NULL_VOID(tabBarPaintProperty);
+    if (barOverlap && !tabBarPaintProperty->GetBarBackgroundColor().has_value()) {
         tabBarRenderContext->UpdateBackgroundColor(defaultBgColorBlur);
     } else {
-        tabBarRenderContext->UpdateBackgroundColor(Color::BLACK.BlendOpacity(0.0f));
+        tabBarRenderContext->UpdateBackgroundColor(
+            tabBarPaintProperty->GetBarBackgroundColor().value_or(Color::BLACK.BlendOpacity(0.0f)));
     }
 }
 
@@ -326,6 +329,20 @@ void TabsModelNG::SetDivider(const TabsItemDivider& divider)
         dividerRenderContext->UpdateOpacity(1.0f);
         ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, Divider, divider);
     }
+}
+
+void TabsModelNG::SetBarBackgroundColor(const Color& backgroundColor)
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
+    CHECK_NULL_VOID(tabBarPaintProperty);
+    tabBarPaintProperty->UpdateBarBackgroundColor(backgroundColor);
+    auto tabBarRenderContext = tabBarNode->GetRenderContext();
+    CHECK_NULL_VOID(tabBarRenderContext);
+    tabBarRenderContext->UpdateBackgroundColor(backgroundColor);
 }
 
 RefPtr<TabBarLayoutProperty> TabsModelNG::GetTabBarLayoutProperty()
@@ -458,5 +475,22 @@ void TabsModelNG::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& o
     auto tabPattern = tabsNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabPattern);
     tabPattern->SetOnIndexChangeEvent(std::move(onChangeEvent));
+}
+
+void TabsModelNG::SetClipEdge(bool clipEdge)
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsRenderContext = tabsNode->GetRenderContext();
+    CHECK_NULL_VOID(tabsRenderContext);
+    tabsRenderContext->UpdateClipEdge(clipEdge);
+    auto tabsChildren = tabsNode->GetChildren();
+    for (const auto& child : tabsChildren) {
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(childFrameNode);
+        auto renderContext = childFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateClipEdge(clipEdge);
+    }
 }
 } // namespace OHOS::Ace::NG

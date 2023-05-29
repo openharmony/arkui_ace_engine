@@ -44,19 +44,20 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParseColorPattern(themeConstants->GetThemeStyle(), theme);
+            ParseDimensionPattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
 
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<AdvancedPatternTheme>& theme) const
+        void ParseColorPattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<AdvancedPatternTheme>& theme) const
         {
             if (!themeStyle) {
                 return;
             }
             auto advancedPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_ADVANCED_PATTERN, nullptr);
             if (!advancedPattern) {
-                LOGW("find pattern of advance theme fail");
+                LOGE("find pattern of advance theme fail");
                 return;
             }
 
@@ -80,6 +81,24 @@ public:
             theme->textActivedColor_ = advancedPattern->GetAttr<Color>("color_toolbar_text_actived", Color());
             theme->toolBarSubBgColor_ = advancedPattern->GetAttr<Color>("color_toolbar_sub_bg", Color());
             theme->toolBarBgColor_ = advancedPattern->GetAttr<Color>("color_toolbar_bg", Color());
+            theme->buttonNormalColor_ = advancedPattern->GetAttr<Color>("color_button_normal", Color());
+            theme->progressColor_ = advancedPattern->GetAttr<Color>("color_progress", Color());
+            theme->emphasizeColor_ = advancedPattern->GetAttr<Color>("color_emphasize", Color());
+            theme->primaryContrary_ = advancedPattern->GetAttr<Color>("color_text_primary_contrary", Color());
+        }
+
+        void ParseDimensionPattern(const RefPtr<ThemeStyle>& themeStyle,
+            const RefPtr<AdvancedPatternTheme>& theme) const
+        {
+            if (!themeStyle) {
+                return;
+            }
+            auto advancedPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_ADVANCED_PATTERN, nullptr);
+            if (!advancedPattern) {
+                LOGE("find pattern of advance theme fail");
+                return;
+            }
+
             theme->dialogTitleSize_ = advancedPattern->GetAttr<Dimension>("text_size_dialog_tittle", DEFAULT_DIMENSION);
             theme->subTitleSize_ = advancedPattern->GetAttr<Dimension>("text_size_sub_title3", DEFAULT_DIMENSION);
             theme->subTitleTextSize_ = advancedPattern->GetAttr<Dimension>("text_size_sub_title2", DEFAULT_DIMENSION);
@@ -203,6 +222,26 @@ public:
     const Color& GetToolBarBgColor() const
     {
         return toolBarBgColor_;
+    }
+
+    const Color& GetButtonNormal() const
+    {
+        return buttonNormalColor_;
+    }
+
+    const Color& GetProgress() const
+    {
+        return progressColor_;
+    }
+
+    const Color& GetEmphasizeColor() const
+    {
+        return emphasizeColor_;
+    }
+
+    const Color& GetPrimaryContrary() const
+    {
+        return primaryContrary_;
     }
 
     const Dimension& GetDialogTitleSize() const
@@ -330,6 +369,10 @@ private:
     Color textActivedColor_;
     Color toolBarSubBgColor_;
     Color toolBarBgColor_;
+    Color buttonNormalColor_;
+    Color progressColor_;
+    Color emphasizeColor_;
+    Color primaryContrary_;
     Dimension dialogTitleSize_;
     Dimension maxPaddingStart_;
     Dimension maxPaddingEnd_;

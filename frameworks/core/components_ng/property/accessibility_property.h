@@ -120,6 +120,8 @@ public:
         json->Put("scrollable", IsScrollable());
     }
 
+    virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
+
     virtual bool HasRange() const
     {
         return false;

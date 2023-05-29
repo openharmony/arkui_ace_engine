@@ -103,6 +103,8 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         Pattern::ToJsonValue(json);
+        json->Put("currentIndex", GetCurrentIndex());
+        json->Put("currentOffset", currentOffset_);
 
         if (indicatorIsBoolean_) {
             return;
@@ -114,6 +116,18 @@ public:
         } else {
             json->Put("indicator", GetDigitIndicatorStyle().c_str());
         }
+    }
+
+    void FromJson(const std::unique_ptr<JsonValue>& json) override
+    {
+        currentIndex_ = json->GetInt("currentIndex");
+        auto currentOffset = json->GetDouble("currentOffset");
+        if (currentOffset != currentOffset_) {
+            auto delta = currentOffset - currentOffset_;
+            LOGD("UITree delta=%{public}f", delta);
+            UpdateCurrentOffset(delta);
+        }
+        Pattern::FromJson(json);
     }
 
     std::string GetDotIndicatorStyle() const
@@ -406,6 +420,7 @@ private:
     void FinishAnimation();
     void StopTranslateAnimation();
     void StopSpringAnimation();
+    void StopFadeAnimation();
 
     void StopAutoPlay();
     void StartAutoPlay();
@@ -429,7 +444,7 @@ private:
     float GetTranslateLength() const;
     void OnIndexChange() const;
     bool IsOutOfHotRegion(const PointF& dragPoint) const;
-    bool IsOutOfIndicatorZone(const PointF& dragPoint) const;
+    bool IsOutOfIndicatorZone(const PointF& dragPoint);
     void SaveDotIndicatorProperty(const RefPtr<FrameNode> &indicatorNode);
     void SaveDigitIndicatorProperty(const RefPtr<FrameNode> &indicatorNode);
     void PostTranslateTask(uint32_t delayTime);

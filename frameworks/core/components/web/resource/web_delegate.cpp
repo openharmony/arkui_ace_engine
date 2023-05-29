@@ -45,6 +45,7 @@
 #include "application_env.h"
 #include "nweb_adapter_helper.h"
 #include "nweb_handler.h"
+#include "parameters.h"
 #include "web_configuration_observer.h"
 #include "web_javascript_execute_callback.h"
 #include "web_javascript_result_callback.h"
@@ -84,6 +85,10 @@ const std::string RESOURCE_VIDEO_CAPTURE = "TYPE_VIDEO_CAPTURE";
 const std::string RESOURCE_AUDIO_CAPTURE = "TYPE_AUDIO_CAPTURE";
 const std::string RESOURCE_PROTECTED_MEDIA_ID = "TYPE_PROTECTED_MEDIA_ID";
 const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
+
+// web parameters
+const std::string MULTI_RENDER_PROCESS = "persist.web.multiple_render_processes_enable";
+const std::string BACKGROUMD_MEDIA_SUSPEND = "persist.web.background_media_should_suspend";
 } // namespace
 
 #define EGLCONFIG_VERSION 3
@@ -1470,8 +1475,10 @@ void WebDelegate::InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<
         LOGI("source is nullptr, initialize with window");
         if (PrepareInitOHOSWeb(context)) {
             if (!isCreateWebView_) {
+#ifndef ENABLE_ROSEN_BACKEND
                 InitWebViewWithWindow();
                 isCreateWebView_ = true;
+#endif
             }
         } else {
             LOGE("prepare init web failed");
@@ -2362,7 +2369,7 @@ void WebDelegate::InitWebViewWithSurface()
     rosenWindowId_ = window->GetWindowId();
     LOGI("Init WebView With Surface");
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this)]() {
+        [weak = WeakClaim(this), context = context_]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             OHOS::NWeb::NWebInitArgs initArgs;
@@ -2390,6 +2397,10 @@ void WebDelegate::InitWebViewWithSurface()
             }
             initArgs.web_engine_args_to_add.push_back(
                 std::string("--init-background-color=").append(std::to_string(delegate->backgroundColor_)));
+            if (!system::GetBoolParameter(BACKGROUMD_MEDIA_SUSPEND, true)) {
+                initArgs.web_engine_args_to_add.emplace_back(std::string("--disable-background-media-suspend"));
+            }
+            initArgs.multi_renderer_process = system::GetBoolParameter(MULTI_RENDER_PROCESS, false);
             if (isEnhanceSurface) {
                 LOGI("Create webview with isEnhanceSurface");
                 delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
@@ -2418,10 +2429,13 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->nweb_->SetNWebHandler(nweb_handler);
             delegate->nweb_->PutDownloadCallback(downloadListenerImpl);
 #ifdef OHOS_STANDARD_SYSTEM
-            delegate->nweb_->RegisterScreenLockFunction(delegate->GetRosenWindowId(), [weak](bool key) {
-                auto delegate = weak.Upgrade();
-                CHECK_NULL_VOID(delegate);
-                delegate->SetKeepScreenOn(key);
+            delegate->nweb_->RegisterScreenLockFunction(delegate->GetRosenWindowId(), [context](bool key) {
+                LOGD("SetKeepScreenOn %{public}d", key);
+                auto weakContext = context.Upgrade();
+                CHECK_NULL_VOID(weakContext);
+                auto window = weakContext->GetWindow();
+                CHECK_NULL_VOID(window);
+                window->SetKeepScreenOn(key);
             });
 #endif
             auto findListenerImpl = std::make_shared<FindListenerImpl>(Container::CurrentId());
@@ -4263,7 +4277,13 @@ bool WebDelegate::OnDragAndDropData(const void* data, size_t len, int width, int
         return false;
     }
     isRefreshPixelMap_ = true;
-    return true;
+
+    auto webPattern = webPattern_.Upgrade();
+    if (!webPattern) {
+        LOGE("web pattern is nullptr");
+        return false;
+    }
+    return webPattern->NotifyStartDragTask();
 }
 
 void WebDelegate::OnWindowNew(const std::string& targetUrl, bool isAlert, bool isUserTrigger,

@@ -30,6 +30,7 @@
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/property/measure_property.h"
 
@@ -151,6 +152,12 @@ public:
     virtual void SetCopyOption(CopyOptions copyOption) = 0;
     virtual void ResetMaxLength() = 0;
     virtual void SetForegroundColor(const Color& value) = 0;
+    virtual void SetBackgroundColor(const Color& color, bool tmp) = 0;
+    virtual void SetHeight(const Dimension& value) = 0;
+    virtual void SetPadding(NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) = 0;
+    virtual void SetBackBorder() {};
+    virtual void SetHoverEffect(HoverEffectType hoverEffect) = 0;
+    virtual void SetOnClick(std::function<void(const ClickInfo&)>&& func) {};
 
     virtual void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) = 0;
     virtual void SetPasswordIcon(const PasswordIcon& passwordIcon) {};
@@ -160,6 +167,7 @@ public:
     virtual void SetShowUnderline(bool showUnderLine) {};
     virtual void SetShowCounter(bool value) {};
     virtual void SetOnChangeEvent(std::function<void(const std::string&)>&& func) = 0;
+    virtual void SetFocusableAndFocusNode() {}
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;

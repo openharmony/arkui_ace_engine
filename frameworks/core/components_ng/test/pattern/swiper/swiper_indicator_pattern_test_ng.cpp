@@ -2591,10 +2591,10 @@ HWTEST_F(SwiperIndicatorPatternTestNg, SwiperInitIndicator002, TestSize.Level1)
 
     /**
      * @tc.steps: step3. call InitIndicator.
-     * @tc.expected: swiperNode->GetLastChild is nullptr.
+     * @tc.expected: swiperNode->GetLastChild is 1.
      */
     swiperPattern->InitIndicator();
-    ASSERT_EQ(swiperNode->GetLastChild(), nullptr);
+    ASSERT_EQ(swiperNode->GetLastChild(), 1);
 }
 
 /**

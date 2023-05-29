@@ -26,6 +26,7 @@
 #endif
 
 #include "adapter/preview/entrance/ace_run_args.h"
+#include "adapter/preview/external/window/window.h"
 #include "base/utils/macros.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
@@ -83,6 +84,16 @@ public:
         return controller_;
     }
 
+    void SetWindow(sptr<OHOS::Rosen::Window> rsWindow)
+    {
+        rsWindow_ = rsWindow;
+    }
+
+    sptr<OHOS::Rosen::Window> GetWindow()
+    {
+        return rsWindow_;
+    }
+
 private:
     void RunEventLoop();
 
@@ -98,6 +109,7 @@ private:
     AceRunArgs runArgs_;
     ConfigChanges configChanges_;
     GlfwController controller_ = nullptr;
+    sptr<OHOS::Rosen::Window> rsWindow_;
 };
 
 } // namespace OHOS::Ace::Platform

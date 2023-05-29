@@ -51,6 +51,7 @@ struct SelectMenuInfo {
     bool showPaste = true;
     bool showCopyAll = true;
     bool showCut = true;
+    std::optional<OffsetF> menuOffset;
 
     bool IsIconChanged(const SelectMenuInfo& info) const
     {

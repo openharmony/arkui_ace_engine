@@ -226,8 +226,7 @@ void JSDatePicker::JSBind(BindingTarget globalObj)
     JSClass<JSDatePicker>::StaticMethod("disappearTextStyle", &JSDatePicker::SetDisappearTextStyle);
     JSClass<JSDatePicker>::StaticMethod("textStyle", &JSDatePicker::SetTextStyle);
     JSClass<JSDatePicker>::StaticMethod("selectedTextStyle", &JSDatePicker::SetSelectedTextStyle);
-    JSClass<JSDatePicker>::Inherit<JSViewAbstract>();
-    JSClass<JSDatePicker>::Bind(globalObj);
+    JSClass<JSDatePicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSDatePicker::Create(const JSCallbackInfo& info)
@@ -880,8 +879,7 @@ void JSTimePicker::JSBind(BindingTarget globalObj)
     JSClass<JSTimePicker>::StaticMethod("disappearTextStyle", &JSTimePicker::SetDisappearTextStyle);
     JSClass<JSTimePicker>::StaticMethod("textStyle", &JSTimePicker::SetTextStyle);
     JSClass<JSTimePicker>::StaticMethod("selectedTextStyle", &JSTimePicker::SetSelectedTextStyle);
-    JSClass<JSTimePicker>::Inherit<JSViewAbstract>();
-    JSClass<JSTimePicker>::Bind(globalObj);
+    JSClass<JSTimePicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSTimePicker::Create(const JSCallbackInfo& info)

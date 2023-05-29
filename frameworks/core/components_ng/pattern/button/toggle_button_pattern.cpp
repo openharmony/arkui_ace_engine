@@ -33,7 +33,9 @@ void ToggleButtonPattern::OnAttachToFrameNode()
     InitParameters();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToFrame(true);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetClipToFrame(true);
 }
 
 void ToggleButtonPattern::InitParameters()

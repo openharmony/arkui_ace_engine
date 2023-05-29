@@ -17,9 +17,11 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/marquee/marquee_paint_property.h"
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 void MarqueeModelNG::Create()
@@ -56,36 +58,36 @@ void MarqueeModelNG::SetValue(const std::optional<std::string>& srcValue)
 void MarqueeModelNG::SetPlayerStatus(const std::optional<bool>& playerStatus)
 {
     if (playerStatus.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, PlayerStatus, playerStatus.value());
+        ACE_UPDATE_PAINT_PROPERTY(MarqueePaintProperty, PlayerStatus, playerStatus.value());
     } else {
-        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(MarqueeLayoutProperty, PlayerStatus, PROPERTY_UPDATE_MEASURE);
+        ACE_RESET_PAINT_PROPERTY_WITH_FLAG(MarqueePaintProperty, PlayerStatus, PROPERTY_UPDATE_RENDER);
     }
 }
 
 void MarqueeModelNG::SetScrollAmount(const std::optional<double>& scrollAmount)
 {
     if (scrollAmount.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, ScrollAmount, scrollAmount.value());
+        ACE_UPDATE_PAINT_PROPERTY(MarqueePaintProperty, ScrollAmount, scrollAmount.value());
     } else {
-        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(MarqueeLayoutProperty, ScrollAmount, PROPERTY_UPDATE_MEASURE);
+        ACE_RESET_PAINT_PROPERTY_WITH_FLAG(MarqueePaintProperty, ScrollAmount, PROPERTY_UPDATE_RENDER);
     }
 }
 
 void MarqueeModelNG::SetLoop(const std::optional<int32_t>& loop)
 {
     if (loop.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, Loop, loop.value());
+        ACE_UPDATE_PAINT_PROPERTY(MarqueePaintProperty, Loop, loop.value());
     } else {
-        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(MarqueeLayoutProperty, Loop, PROPERTY_UPDATE_MEASURE);
+        ACE_RESET_PAINT_PROPERTY_WITH_FLAG(MarqueePaintProperty, Loop, PROPERTY_UPDATE_RENDER);
     }
 }
 
 void MarqueeModelNG::SetDirection(const std::optional<MarqueeDirection>& direction)
 {
     if (direction.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, Direction, direction.value());
+        ACE_UPDATE_PAINT_PROPERTY(MarqueePaintProperty, Direction, direction.value());
     } else {
-        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(MarqueeLayoutProperty, Direction, PROPERTY_UPDATE_MEASURE);
+        ACE_RESET_PAINT_PROPERTY_WITH_FLAG(MarqueePaintProperty, Direction, PROPERTY_UPDATE_RENDER);
     }
 }
 

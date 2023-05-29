@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 
+#include "base/image/pixel_map.h"
 #include "core/components_ng/gestures/pan_gesture.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -125,7 +126,13 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
     if (titleFocus) {
         titleFocus->SetFocusable(false);
     }
-    imageSourceInfo.SetSrc(themeConstants->GetMediaPath(pipeline->GetWindowManager()->GetAppIconId()));
+    auto id = pipeline->GetWindowManager()->GetAppIconId();
+    auto pixelMap = themeConstants->GetPixelMap(id);
+    if (pixelMap) {
+        imageSourceInfo = ImageSourceInfo(PixelMap::CreatePixelMap(&pixelMap));
+    } else {
+        imageSourceInfo.SetSrc(themeConstants->GetMediaPath(id));
+    }
     auto imageLayoutProperty = titleIcon->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);

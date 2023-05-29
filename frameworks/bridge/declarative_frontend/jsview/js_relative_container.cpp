@@ -37,9 +37,7 @@ void JSRelativeContainer::JSBind(BindingTarget globalObj)
     JSClass<JSRelativeContainer>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSRelativeContainer>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRelativeContainer>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
-    JSClass<JSRelativeContainer>::Inherit<JSContainerBase>();
-    JSClass<JSRelativeContainer>::Inherit<JSViewAbstract>();
-    JSClass<JSRelativeContainer>::Bind<>(globalObj);
+    JSClass<JSRelativeContainer>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSRelativeContainer::Create(const JSCallbackInfo& info)

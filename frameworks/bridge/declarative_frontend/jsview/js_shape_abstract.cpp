@@ -364,7 +364,7 @@ void JSShapeAbstract::ObjectFill(const JSCallbackInfo& info)
     }
 }
 
-void JSShapeAbstract::JSBind()
+void JSShapeAbstract::JSBind(BindingTarget globalObj)
 {
     JSClass<JSShapeAbstract>::Declare("JSShapeAbstract");
     MethodOptions opt = MethodOptions::NONE;
@@ -384,7 +384,7 @@ void JSShapeAbstract::JSBind()
     JSClass<JSShapeAbstract>::StaticMethod("size", &JSShapeAbstract::JsSize, opt);
     JSClass<JSShapeAbstract>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSShapeAbstract>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSShapeAbstract>::Inherit<JSViewAbstract>();
+    JSClass<JSShapeAbstract>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSShapeAbstract::SetSize(const JSCallbackInfo& info)

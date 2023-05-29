@@ -58,6 +58,13 @@ public:
         json->Put("tabBar", jsonValue->ToString().c_str());
     }
 
+    void FromJson(const std::unique_ptr<JsonValue>& json) override
+    {
+        UpdateIcon(json->GetString("icon"));
+        UpdateText(json->GetString("text"));
+        LayoutProperty::FromJson(json);
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Icon, std::string, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Text, std::string, PROPERTY_UPDATE_LAYOUT);
 };

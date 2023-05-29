@@ -14,6 +14,7 @@
  */
 
 #include "page_url_checker_ohos.h"
+
 #include <string>
 
 #include "ability_runtime/context/context.h"
@@ -219,7 +220,7 @@ void PageUrlCheckerOhos::LoadPageUrl(const std::string& url, const std::function
             sptr<AtomicServiceStatusCallback> routerCallback = new AtomicServiceStatusCallback();
             routerCallback->SetActionEventHandler(callback);
             routerCallback->SetErrorEventHandler(silentInstallErrorCallBack);
-            if (bms->SilentInstall(want, appInfo->uid, routerCallback)) {
+            if (bms->SilentInstall(want, appInfo->uid / AppExecFwk::Constants::BASE_USER_RANGE, routerCallback)) {
                 LOGI("Begin to silent install");
             }
         } else {
