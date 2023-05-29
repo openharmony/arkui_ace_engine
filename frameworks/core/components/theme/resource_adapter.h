@@ -16,9 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_RESOURCE_ADAPTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_RESOURCE_ADAPTER_H
 
+#include "base/image/pixel_map.h"
 #include "base/utils/resource_configuration.h"
 #include "core/components/theme/theme_style.h"
-
 namespace OHOS::Ace {
 
 struct RawfileDescription {
@@ -100,6 +100,11 @@ public:
     virtual std::string GetPluralStringByName(const std::string& resName, int quantity)
     {
         return {};
+    }
+
+    virtual std::shared_ptr<Media::PixelMap> GetPixelMap(uint32_t resId)
+    {
+        return nullptr;
     }
 
     virtual std::string GetMediaPath(uint32_t resId)

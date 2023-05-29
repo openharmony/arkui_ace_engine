@@ -384,6 +384,17 @@ InternalResource::ResourceId ThemeConstants::GetResourceId(uint32_t key) const
     return resPair.second;
 }
 
+std::shared_ptr<Media::PixelMap> ThemeConstants::GetPixelMap(uint32_t key) const
+{
+    if (IsGlobalResource(key)) {
+        if (!resAdapter_) {
+            return nullptr;
+        }
+        return resAdapter_->GetPixelMap(key);
+    }
+    return nullptr;
+}
+
 ResValueWrapper ThemeConstants::GetValue(uint32_t key) const
 {
     // Find resource at custom styles.
