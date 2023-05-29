@@ -126,15 +126,18 @@ void JSSearch::Create(const JSCallbackInfo& info)
         }
         std::string text;
         key = "";
-        if (param->GetProperty("value")->IsObject()) {
-            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(param->GetProperty("value"));
+        JSRef<JSVal> textValue = param->GetProperty("value");
+        if (textValue->IsObject()) {
+            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(textValue);
             changeEventVal = valueObj->GetProperty("changeEvent");
-            auto valueProperty = valueObj->GetProperty("value");
-            if (ParseJsString(valueProperty, text)) {
+            if (changeEventVal->IsFunction()) {
+                textValue = valueObj->GetProperty("value");
+            }
+            if (ParseJsString(textValue, text)) {
                 key = text;
             }
         } else {
-            if (ParseJsString(param->GetProperty("value"), text)) {
+            if (ParseJsString(textValue, text)) {
                 key = text;
             }
         }
