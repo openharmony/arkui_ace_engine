@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_PATTERN_H
 
-#include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -160,13 +159,11 @@ private:
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;
-    Dimension defaultPadding_;
     OffsetF offset_;
     SizeF size_;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     bool isGroupChanged_ = false;
-    bool isFirstAddhotZoneRect_ = true;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
     bool isOnAnimationFlag_ = false;
 

@@ -36,6 +36,7 @@ public:
         paintProperty->PaintProperty::UpdatePaintProperty(DynamicCast<PaintProperty>(this));
         paintProperty->propIndicator_ = CloneIndicator();
         paintProperty->propFadingEdge_ = CloneFadingEdge();
+        paintProperty->propBarBackgroundColor_ = CloneBarBackgroundColor();
 
         return paintProperty;
     }
@@ -45,6 +46,7 @@ public:
         PaintProperty::Reset();
         ResetIndicator();
         ResetFadingEdge();
+        ResetBarBackgroundColor();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -69,6 +71,7 @@ public:
     /* Need to render when indicator has animation */
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Indicator, RectF, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FadingEdge, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarBackgroundColor, Color, PROPERTY_UPDATE_RENDER);
 };
 
 } // namespace OHOS::Ace::NG

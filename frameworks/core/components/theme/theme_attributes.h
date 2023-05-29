@@ -76,7 +76,6 @@ extern const char THEME_PATTERN_FORM[];
 // pattern general attributes
 extern const char PATTERN_FG_COLOR[];
 extern const char PATTERN_BG_COLOR[];
-extern const char PATTERN_BRODER_COLOR[];
 extern const char PATTERN_UNDERLINE_ACTIVED_COLOR[];
 extern const char PATTERN_UNDERLINE_TYPING_COLOR[];
 extern const char PATTERN_BG_COLOR_HOVERED[];
@@ -160,6 +159,8 @@ extern const char DIALOG_MAX_BUTTON_WIDTH[];
 extern const char DIALOG_MIN_BUTTON_WIDTH[];
 extern const char DIALOG_ACTIONS_TOP_PADDING[];
 extern const char DIALOG_MASK_COLOR_END[];
+extern const char DIALOG_DIVIDER_LENGTH[];
+extern const char DIALOG_DIVIDER_BETWEEN_BUTTON_WIDTH[];
 
 // pattern attributes for drag bar
 extern const char DRAG_BAR_COLOR[];

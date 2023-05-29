@@ -242,6 +242,10 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
     // ViewStackProcessor.getApiVersion function is not present in API9 
     // therefore shallowCopyObject will always be used in API version 9 and before
     // but the code in this file is the same regardless of API version
+    stateMgmtConsole.debug(`targetApiVersion: \
+    ${(typeof ViewStackProcessor["getApiVersion"] == "function") ? ViewStackProcessor["getApiVersion"]() : 'unknown'}, \
+    will use ${((typeof ViewStackProcessor["getApiVersion"] == "function") && (ViewStackProcessor["getApiVersion"]() >= 10)) ? 'deep copy' : 'shallow copy'} .`);
+
     return ((typeof ViewStackProcessor["getApiVersion"] == "function") &&
       (ViewStackProcessor["getApiVersion"]() >= 10))
       ? this.deepCopyObject(value, propName)

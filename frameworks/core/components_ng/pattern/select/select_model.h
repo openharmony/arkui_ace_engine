@@ -72,13 +72,13 @@ public:
     virtual void SetWidth(Dimension& value);
     virtual void SetHeight(Dimension& value);
     virtual void SetSize(Dimension& width, Dimension& height);
-    virtual void SetPaddings(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
-        const std::optional<Dimension>& left, const std::optional<Dimension>& right);
-    virtual void SetPadding(const Dimension& value);
-    virtual void SetPaddingLeft(const Dimension& value);
-    virtual void SetPaddingTop(const Dimension& value);
-    virtual void SetPaddingRight(const Dimension& value);
-    virtual void SetPaddingBottom(const Dimension& value);
+    virtual void SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
+        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right);
+    virtual void SetPadding(const CalcDimension& value);
+    virtual void SetPaddingLeft(const CalcDimension& value);
+    virtual void SetPaddingTop(const CalcDimension& value);
+    virtual void SetPaddingRight(const CalcDimension& value);
+    virtual void SetPaddingBottom(const CalcDimension& value);
     virtual void SetSpace(const Dimension& value);
     virtual void SetArrowPosition(const ArrowPosition value);
     virtual void SetMenuAlign(const MenuAlign& menuAlign);

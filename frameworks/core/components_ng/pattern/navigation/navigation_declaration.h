@@ -89,7 +89,6 @@ constexpr Dimension BUTTON_RADIUS = 5.0_vp;
 
 // more button
 constexpr Dimension MORE_BUTTON_CORNER_RADIUS = 8.0_vp;
-constexpr Dimension MENU_AND_BUTTON_SPACE = 8.0_vp;
 
 struct BarItem {
     std::optional<std::string> text;

@@ -142,12 +142,17 @@ void ParseTextPickerValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& 
                              const std::vector<std::string>& value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("TextPicker.onValueChange");
-        JSRef<JSArray> valueArray = JSRef<JSArray>::New();
-        for (uint32_t i = 0; i < value.size(); i++) {
-            valueArray->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(value[i])));
+        if (value.size() == 1) {
+            JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(value[0]));
+            func->ExecuteJS(1, &newJSVal);
+        } else {
+            JSRef<JSArray> valueArray = JSRef<JSArray>::New();
+            for (uint32_t i = 0; i < value.size(); i++) {
+                valueArray->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(value[i])));
+            }
+            JSRef<JSVal> newJSVal = JSRef<JSVal>::Cast(valueArray);
+            func->ExecuteJS(1, &newJSVal);
         }
-        JSRef<JSVal> newJSVal = JSRef<JSVal>::Cast(valueArray);
-        func->ExecuteJS(1, &newJSVal);
     };
     TextPickerModel::GetInstance()->SetOnValueChangeEvent(std::move(onValueChange));
 }
@@ -161,12 +166,17 @@ void ParseTextPickerSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal
                                 const std::vector<double>& index) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("TextPicker.onSelectedChange");
-        JSRef<JSArray> indexArray = JSRef<JSArray>::New();
-        for (uint32_t i = 0; i < index.size(); i++) {
-            indexArray->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(index[i])));
+        if (index.size() == 1) {
+            JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(index[0]));
+            func->ExecuteJS(1, &newJSVal);
+        } else {
+            JSRef<JSArray> indexArray = JSRef<JSArray>::New();
+            for (uint32_t i = 0; i < index.size(); i++) {
+                indexArray->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(index[i])));
+            }
+            JSRef<JSVal> newJSVal = JSRef<JSVal>::Cast(indexArray);
+            func->ExecuteJS(1, &newJSVal);
         }
-        JSRef<JSVal> newJSVal = JSRef<JSVal>::Cast(indexArray);
-        func->ExecuteJS(1, &newJSVal);
     };
     TextPickerModel::GetInstance()->SetOnSelectedChangeEvent(std::move(onSelectedChange));
 }
@@ -211,7 +221,7 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
             CreateMulti(theme, param.values, param.selecteds, optionsAttr, param.options);
         }
         TextPickerModel::GetInstance()->SetDefaultAttributes(theme);
-        JSInteractableView::SetFocusable(false);
+        JSInteractableView::SetFocusable(true);
         JSInteractableView::SetFocusNode(true);
         if (param.valueChangeEventVal->IsFunction()) {
             ParseTextPickerValueObject(info, param.valueChangeEventVal);
@@ -255,7 +265,6 @@ bool JSTextPicker::ProcessCascadeOptions(const JSRef<JSObject>& paramObject,
         options.clear();
         return false;
     } else {
-        JSRef<JSArray> getRange = paramObject->GetProperty("range");
         JSTextPickerParser::GenerateCascadeOptions(getRange, options);
         uint32_t maxCount = options.empty()? 0 : 1;
         for (size_t i = 0; i < options.size(); i++) {
@@ -322,7 +331,6 @@ bool JSTextPickerParser::ParseMultiTextArrayRangeInternal(const JSRef<JSVal>& va
     std::vector<NG::TextCascadePickerOptions>& options)
 {
     if (value->IsArray()) {
-        std::vector<std::string> rangeResult;
         NG::TextCascadePickerOptions option;
         if (!ParseJsStrArray(value, option.rangeResult)) {
             LOGI("parse str array error.");
@@ -382,7 +390,7 @@ void JSTextPickerParser::ParseMultiTextArraySelectArrayInternal(
         if (i > selectedValues.size() - 1) {
             selectedValues.emplace_back(0);
         } else {
-            if (selectedValues[i] < 0 || selectedValues[i] >= options[i].rangeResult.size()) {
+            if (selectedValues[i] >= options[i].rangeResult.size()) {
                 LOGW("selectedValue is out of range");
                 selectedValues[i] = 0;
             }
@@ -401,8 +409,7 @@ bool JSTextPickerParser::ParseMultiTextArraySelect(const JsiRef<JsiValue>& jsSel
     } else {
         uint32_t selectedValue = 0;
         if (ParseJsInteger(jsSelectedValue, selectedValue)) {
-            if (param.options.size() < 1 ||
-                selectedValue < 0 || selectedValue >= param.options[0].rangeResult.size()) {
+            if (param.options.size() < 1 || selectedValue >= param.options[0].rangeResult.size()) {
                 LOGW("selectedValue is out of range");
                 selectedValue = 0;
             }
@@ -488,7 +495,6 @@ bool JSTextPickerParser::ParseMultiTextArray(const JSRef<JSObject>& paramObject,
         return false;
     }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(getRange);
-    std::vector<NG::TextCascadePickerOptions> getOptionsVector;
     if (!ParseMultiTextArrayRange(array, param.options)) {
         return false;
     }
@@ -534,16 +540,20 @@ bool JSTextPickerParser::ParseInternalArray(const JSRef<JSArray>& jsRangeValue, 
             values.emplace_back("");
         }
     } else {
-        auto valueIterator = std::find(resultStr.begin(), resultStr.end(), values[index]);
-        if (valueIterator == resultStr.end()) {
-            values[index] = resultStr.front();
+        if (resultStr.size() > 0) {
+            auto valueIterator = std::find(resultStr.begin(), resultStr.end(), values[index]);
+            if (valueIterator == resultStr.end()) {
+                values[index] = resultStr.front();
+            }
+        } else {
+            values[index] = "";
         }
     }
 
     if (index > selectedValues.size() - 1) {
         selectedValues.emplace_back(0);
     } else {
-        if (selectedValues[index] < 0 || selectedValues[index] >= resultStr.size()) {
+        if (selectedValues[index] >= resultStr.size()) {
             LOGW("selectedValue is out of range");
             selectedValues[index] = 0;
         }
@@ -569,22 +579,18 @@ bool JSTextPickerParser::ParseCascadeTextArray(const JSRef<JSObject>& paramObjec
     JSRef<JSArray> getRange = paramObject->GetProperty("range");
     auto getSelected = paramObject->GetProperty("selected");
     auto getValue = paramObject->GetProperty("value");
-    std::vector<NG::TextCascadePickerOptions> getOptionsVector;
-    std::vector<std::string> resultStr;
-
-    std::string value = "";
     if (getValue->IsArray()) {
         if (!ParseJsStrArray(getValue, values)) {
             LOGE("parse value array error.");
             return false;
         }
     } else {
+        std::string value = "";
         if (!ParseJsString(getValue, value)) {
             value = "";
         }
         values.emplace_back(value);
     }
-    uint32_t selectValue = 0;
     if (getSelected->IsArray()) {
         if (!ParseJsIntegerArray(getSelected, selectedValues)) {
             LOGE("parse selectedValues array error.");
@@ -594,6 +600,7 @@ bool JSTextPickerParser::ParseCascadeTextArray(const JSRef<JSObject>& paramObjec
             attr.isHasSelectAttr = true;
         }
     } else {
+        uint32_t selectValue = 0;
         if (!ParseJsInteger(getSelected, selectValue)) {
             selectValue = 0;
             attr.isHasSelectAttr = false;
@@ -628,7 +635,9 @@ bool JSTextPickerParser::ParseTextArray(const JSRef<JSObject>& paramObject, Pars
         if (getValue->IsObject()) {
             JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(getValue);
             param.valueChangeEventVal = valueObj->GetProperty("changeEvent");
-            getValue = valueObj->GetProperty("value");
+            if (param.valueChangeEventVal->IsFunction()) {
+                getValue = valueObj->GetProperty("value");
+            }
         }
         if (!ParseJsString(getValue, param.value)) {
             param.value = getRangeVector.front();
@@ -636,7 +645,9 @@ bool JSTextPickerParser::ParseTextArray(const JSRef<JSObject>& paramObject, Pars
         if (getSelected->IsObject()) {
             JSRef<JSObject> selectedObj = JSRef<JSObject>::Cast(getSelected);
             param.selectedChangeEventVal = selectedObj->GetProperty("changeEvent");
-            getSelected = selectedObj->GetProperty("value");
+            if (param.selectedChangeEventVal->IsFunction()) {
+                getSelected = selectedObj->GetProperty("value");
+            }
         }
         if (!ParseJsInteger(getSelected, param.selected) && !param.value.empty()) {
             auto valueIterator = std::find(getRangeVector.begin(), getRangeVector.end(), param.value);
@@ -644,7 +655,7 @@ bool JSTextPickerParser::ParseTextArray(const JSRef<JSObject>& paramObject, Pars
                 param.selected = std::distance(getRangeVector.begin(), valueIterator);
             }
         }
-        if (param.selected < 0 || param.selected >= getRangeVector.size()) {
+        if (param.selected >= getRangeVector.size()) {
             LOGW("selectedValue is out of range");
             param.selected = 0;
         }
@@ -820,7 +831,7 @@ void JSTextPicker::ProcessCascadeSelected(const std::vector<NG::TextCascadePicke
     if (index > selectedValues.size() - 1) {
         selectedValues.emplace_back(0);
     }
-    if (selectedValues[index] < 0 || selectedValues[index] >= rangeResultValue.size()) {
+    if (selectedValues[index] >= rangeResultValue.size()) {
         LOGW("selectedValue is out of range");
         selectedValues[index] = 0;
     }
@@ -836,7 +847,7 @@ void JSTextPicker::SetSelectedInternal(uint32_t count,
         if (i > selectedValues.size() - 1) {
             selectedValues.emplace_back(0);
         } else {
-            if (selectedValues[i] < 0 || selectedValues[i] >= options[i].rangeResult.size()) {
+            if (selectedValues[i] >= options[i].rangeResult.size()) {
                 LOGW("selectedValue is out of range");
                 selectedValues[i] = 0;
             }
@@ -866,7 +877,7 @@ void JSTextPicker::SetSelectedIndexSingleInternal(const std::vector<NG::TextCasc
     uint32_t count, uint32_t& selectedValue, std::vector<uint32_t>& selectedValues)
 {
     if (options.size() > 0) {
-        if (selectedValue < 0 || selectedValue >= options[0].rangeResult.size()) {
+        if (selectedValue >= options[0].rangeResult.size()) {
             LOGW("selectedValue is out of range");
             selectedValue = 0;
         }
@@ -919,10 +930,10 @@ void JSTextPicker::SetSelectedIndexMulti(const JsiRef<JsiValue>& jsSelectedValue
 void JSTextPicker::SetSelectedIndexSingle(const JsiRef<JsiValue>& jsSelectedValue)
 {
     // Single
-    std::vector<uint32_t> selectedValues;
     std::vector<NG::RangeContent> rangeResult;
     TextPickerModel::GetInstance()->GetSingleRange(rangeResult);
     if (jsSelectedValue->IsArray()) {
+        std::vector<uint32_t> selectedValues;
         if (!ParseJsIntegerArray(jsSelectedValue, selectedValues)) {
             LOGE("SetselectedIndex parse selectedValues array error.");
             uint32_t selectedValue = 0;
@@ -930,7 +941,7 @@ void JSTextPicker::SetSelectedIndexSingle(const JsiRef<JsiValue>& jsSelectedValu
             return;
         }
         if (selectedValues.size() > 0) {
-            if (selectedValues[0] < 0 || selectedValues[0] >= rangeResult.size()) {
+            if (selectedValues[0] >= rangeResult.size()) {
                 LOGW("selectedValue is out of range");
                 selectedValues[0] = 0;
             }
@@ -942,7 +953,7 @@ void JSTextPicker::SetSelectedIndexSingle(const JsiRef<JsiValue>& jsSelectedValu
     } else {
         uint32_t selectedValue = 0;
         if (ParseJsInteger(jsSelectedValue, selectedValue)) {
-            if (selectedValue < 0 || selectedValue >= rangeResult.size()) {
+            if (selectedValue >= rangeResult.size()) {
                 LOGW("selectedValue is out of range");
                 selectedValue = 0;
             }
@@ -1388,7 +1399,7 @@ void JSTextPickerDialog::ParseText(RefPtr<PickerTextComponent>& component, const
         }
     }
 
-    if (selectedValue < 0 || selectedValue >= getRangeVector.size()) {
+    if (selectedValue >= getRangeVector.size()) {
         LOGW("selectedValue is out of range");
         selectedValue = 0;
     }

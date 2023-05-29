@@ -87,7 +87,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSSearch>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSSearch>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
-    JSClass<JSSearch>::StaticMethod("requestKeyboardOnFocus", &JSSearch::RequestKeyboardOnFocus);
+    JSClass<JSSearch>::StaticMethod("requestKeyboardOnFocus", &JSSearch::SetEnableKeyboardOnFocus);
     JSClass<JSSearch>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSSearch>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSearch>::StaticMethod("onCopy", &JSSearch::SetOnCopy);
@@ -125,15 +125,18 @@ void JSSearch::Create(const JSCallbackInfo& info)
         }
         std::string text;
         key = "";
-        if (param->GetProperty("value")->IsObject()) {
-            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(param->GetProperty("value"));
+        JSRef<JSVal> textValue = param->GetProperty("value");
+        if (textValue->IsObject()) {
+            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(textValue);
             changeEventVal = valueObj->GetProperty("changeEvent");
-            auto valueProperty = valueObj->GetProperty("value");
-            if (ParseJsString(valueProperty, text)) {
+            if (changeEventVal->IsFunction()) {
+                textValue = valueObj->GetProperty("value");
+            }
+            if (ParseJsString(textValue, text)) {
                 key = text;
             }
         } else {
-            if (ParseJsString(param->GetProperty("value"), text)) {
+            if (ParseJsString(textValue, text)) {
                 key = text;
             }
         }
@@ -157,9 +160,18 @@ void JSSearch::Create(const JSCallbackInfo& info)
     }
 }
 
-void JSSearch::RequestKeyboardOnFocus(bool needToRequest)
+void JSSearch::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
 {
-    SearchModel::GetInstance()->RequestKeyboardOnFocus(needToRequest);
+    if (info.Length() < 1) {
+        LOGW("EnableKeyboardOnFocus should have at least 1 param");
+        return;
+    }
+    if (info[0]->IsUndefined() || !info[0]->IsBoolean()) {
+        LOGI("The info of SetEnableKeyboardOnFocus is not correct, using default");
+        SearchModel::GetInstance()->RequestKeyboardOnFocus(true);
+        return;
+    }
+    SearchModel::GetInstance()->RequestKeyboardOnFocus(info[0]->ToBoolean());
 }
 
 void JSSearch::SetSearchButton(const JSCallbackInfo& info)

@@ -136,7 +136,7 @@ public:
     {
         auto index = navigationStack_->FindIndex(name, navDestinationNode);
         // exit and not the top, need to be removed
-        if (index != -1 && index != navPathList_.size() - 1) {
+        if (index != -1 && index != static_cast<int32_t>(navPathList_.size()) - 1) {
             navigationStack_->Remove(name, navDestinationNode);
         }
     }

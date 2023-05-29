@@ -34,13 +34,15 @@ void TabContentNode::OnAttachToMainTree(bool recursive)
     auto myIndex = swiper->GetChildFlatIndex(GetId()).second;
     bool update = false;
 #ifdef UICAST_COMPONENT_SUPPORTED
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto distributedUI = container->GetDistributedUI();
-    CHECK_NULL_VOID(distributedUI);
-    if (distributedUI->IsSinkMode()) {
-        update = true;
-    }
+    do {
+        auto container = Container::Current();
+        CHECK_NULL_BREAK(container);
+        auto distributedUI = container->GetDistributedUI();
+        CHECK_NULL_BREAK(distributedUI);
+        if (distributedUI->IsSinkMode()) {
+            update = true;
+        }
+    } while (false);
 #endif
     TabContentModelNG::AddTabBarItem(Referenced::Claim(this), myIndex, update);
 }

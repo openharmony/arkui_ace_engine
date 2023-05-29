@@ -49,6 +49,8 @@ public:
     void SetFadingEdge(bool fadingEdge) override;
     void SetBarOverlap(bool barOverlap) override;
     void SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& onChangeEvent) override;
+    void SetBarBackgroundColor(const Color& backgroundColor) override;
+    void SetClipEdge(bool clipEdge) override;
     static RefPtr<TabsNode> GetOrCreateTabsNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 

@@ -59,6 +59,16 @@ public:
         return fontSize_;
     }
 
+    const Dimension& GetMinIconSize() const
+    {
+        return minIconSize_;
+    }
+
+    const Dimension& GetMinFontSize() const
+    {
+        return minFontSize_;
+    }
+
     const Dimension& GetBackgroundTopPadding() const
     {
         return backgroundTopPadding_;
@@ -107,6 +117,16 @@ public:
     const Color& GetFontColor() const
     {
         return fontColor_;
+    }
+
+    const Color& GetIconColorNoBg() const
+    {
+        return iconColorNoBg_;
+    }
+
+    const Color& GetFontColorNoBg() const
+    {
+        return fontColorNoBg_;
     }
 
     const Color& GetBackgroundColor() const
@@ -170,6 +190,8 @@ private:
         }
         theme->iconSize_ = securityComponentPattern->GetAttr<Dimension>("icon_size", 0.0_vp);
         theme->fontSize_ = securityComponentPattern->GetAttr<Dimension>("font_size", 0.0_vp);
+        theme->minIconSize_ = securityComponentPattern->GetAttr<Dimension>("min_icon_size", 0.0_vp);
+        theme->minFontSize_ = securityComponentPattern->GetAttr<Dimension>("min_font_size", 0.0_vp);
         theme->backgroundTopPadding_ =
             securityComponentPattern->GetAttr<Dimension>("background_top_padding", 0.0_vp);
         theme->backgroundRightPadding_ =
@@ -184,6 +206,8 @@ private:
         theme->borderWidth_ = securityComponentPattern->GetAttr<Dimension>("border_width", 0.0_vp);
         theme->iconColor_ = securityComponentPattern->GetAttr<Color>("icon_color", Color());
         theme->fontColor_ = securityComponentPattern->GetAttr<Color>("font_color", Color());
+        theme->iconColorNoBg_ = securityComponentPattern->GetAttr<Color>("icon_color_no_bg", Color());
+        theme->fontColorNoBg_ = securityComponentPattern->GetAttr<Color>("font_color_no_bg", Color());
         theme->backgroundColor_ = securityComponentPattern->GetAttr<Color>("background_color", Color());
         theme->borderColor_ = securityComponentPattern->GetAttr<Color>("border_color", Color());
         ParseLocationDescriptions(securityComponentPattern, theme);
@@ -191,6 +215,8 @@ private:
 
     Dimension iconSize_;
     Dimension fontSize_;
+    Dimension minIconSize_;
+    Dimension minFontSize_;
     Dimension backgroundTopPadding_;
     Dimension backgroundRightPadding_;
     Dimension backgroundBottomPadding_;
@@ -202,6 +228,8 @@ private:
 
     Color iconColor_;
     Color fontColor_;
+    Color iconColorNoBg_;
+    Color fontColorNoBg_;
     Color backgroundColor_;
     Color borderColor_;
 

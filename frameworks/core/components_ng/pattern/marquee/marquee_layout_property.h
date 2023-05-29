@@ -75,12 +75,6 @@ public:
         auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         json->Put("src", textLayoutProperty->GetContent().value_or("").c_str());
-        constexpr double DEFAULT_MARQUEE_SCROLL_AMOUNT = 6.0;
-        json->Put("step", std::to_string(propScrollAmount_.value_or(DEFAULT_MARQUEE_SCROLL_AMOUNT)).c_str());
-        json->Put("loop", std::to_string(propLoop_.value_or(-1)).c_str());
-        json->Put("start", propPlayerStatus_.value_or(true) ? "true" : "false");
-        json->Put(
-            "fromStart", propDirection_.value_or(MarqueeDirection::RIGHT) == MarqueeDirection::LEFT ? "true" : "false");
         json->Put("allowScale", propAllowScale_.value_or(false) ? "true" : "false");
         json->Put("fontSize", propFontSize_.value_or(10.0_vp).ToString().c_str());
         json->Put("fontColor",

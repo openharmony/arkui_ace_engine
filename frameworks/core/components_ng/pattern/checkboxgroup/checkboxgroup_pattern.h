@@ -81,11 +81,12 @@ public:
         const RefPtr<LayoutWrapper>& dirty, bool /*skipMeasure*/, bool /*skipLayout*/) override
     {
         auto geometryNode = dirty->GetGeometryNode();
-        offset_ = geometryNode->GetContentOffset();
-        size_ = geometryNode->GetContentSize();
-        if (isFirstAddhotZoneRect_) {
+        auto offset = geometryNode->GetContentOffset();
+        auto size = geometryNode->GetContentSize();
+        if (!NearEqual(offset, offset_) || !NearEqual(size, size_)) {
+            offset_ = offset;
+            size_ = size;
             AddHotZoneRect();
-            isFirstAddhotZoneRect_ = false;
         }
         return true;
     }
@@ -173,12 +174,10 @@ private:
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;
-    Dimension defaultPadding_;
     OffsetF offset_;
     SizeF size_;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
-    bool isFirstAddhotZoneRect_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxGroupPattern);
 };

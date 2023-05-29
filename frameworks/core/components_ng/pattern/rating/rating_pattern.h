@@ -104,6 +104,7 @@ private:
     void LoadForeground();
     void LoadSecondary();
     void LoadBackground();
+    void UpdatePaintConfig();
     void OnImageDataReady(int32_t imageFlag);
     void OnImageLoadSuccess(int32_t imageFlag);
     void CheckImageInfoHasChangedOrNot(

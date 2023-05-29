@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -85,6 +85,7 @@ ohos_unittest("picker_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/image/image_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/picker/date_time_animation_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/picker/datepicker_accessibility_property.cpp",
@@ -132,6 +133,7 @@ ohos_unittest("picker_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_row_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/toss_animation_controller.cpp",
     "$ace_root/frameworks/core/components_ng/property/accessibility_property.cpp",
+    "$ace_root/frameworks/core/components_ng/property/border_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",
     "$ace_root/frameworks/core/components_ng/property/grid_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",
@@ -164,8 +166,6 @@ ohos_unittest("picker_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/dialog/mock_dialog_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/dialog/mock_dialog_view.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/picker/mock_datepicker_model.cpp",
-    "$ace_root/frameworks/core/components_ng/test/mock/pattern/picker/mock_textpicker_model.cpp",
-    "$ace_root/frameworks/core/components_ng/test/mock/pattern/picker/mock_timepicker_model.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/select_overlay/mock_select_overlay_node.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_animation_utils.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_drawing_convertor.cpp",
@@ -185,10 +185,6 @@ ohos_unittest("picker_test_ng") {
 
     # self
     "datepicker_test_ng.cpp",
-    "textpicker_test_ng.cpp",
-    "textpicker_toss_animation_controller_test_ng.cpp",
-    "timepicker_test_ng.cpp",
-    "toss_animation_controller_test_ng.cpp",
   ]
 
   deps = [

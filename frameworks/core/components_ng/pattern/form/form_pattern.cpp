@@ -151,6 +151,11 @@ void FormPattern::OnRebuildFrame()
     renderContext->AddChild(externalRenderContext_, 0);
 }
 
+void FormPattern::OnVisibleChange(bool isVisible)
+{
+    isVisible_ = isVisible;
+}
+
 bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {
@@ -618,6 +623,18 @@ void FormPattern::DispatchPointerEvent(
 {
     if (!pointerEvent || !formManagerBridge_) {
         LOGE("Func: %{public}s, pointerEvent or formManagerBridge is null", __func__);
+        return;
+    }
+
+    if (!isVisible_) {
+        LOGW("The form is invisible, stop to dispatch pointEvent");
+        auto pointerAction = pointerEvent->GetPointerAction();
+        if (pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_UP ||
+            pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP ||
+            pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW) {
+            // still dispatch 'up' event to finish this pointer event
+            formManagerBridge_->DispatchPointerEvent(pointerEvent);
+        }
         return;
     }
 

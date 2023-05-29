@@ -73,7 +73,6 @@ const char THEME_PATTERN_FORM[] = "form_pattern";
 // pattern general attributes
 const char PATTERN_FG_COLOR[] = "fg_color";
 const char PATTERN_BG_COLOR[] = "bg_color";
-const char PATTERN_BRODER_COLOR[] = "focus_broder_color";
 const char PATTERN_UNDERLINE_ACTIVED_COLOR[] = "underline_actived_color";
 const char PATTERN_UNDERLINE_TYPING_COLOR[] = "underline_typing_color";
 const char PATTERN_BG_COLOR_HOVERED[] = "bg_color_hovered";
@@ -157,6 +156,8 @@ const char DIALOG_MAX_BUTTON_WIDTH[] = "dialog_max_button_width";
 const char DIALOG_MIN_BUTTON_WIDTH[] = "dialog_min_button_width";
 const char DIALOG_ACTIONS_TOP_PADDING[] = "dialog_actions_top_padding";
 const char DIALOG_MASK_COLOR_END[] = "dialog_mask_color_end";
+const char DIALOG_DIVIDER_LENGTH[] = "dialog_divider_length";
+const char DIALOG_DIVIDER_BETWEEN_BUTTON_WIDTH[] = "dialog_divider_between_button_width";
 
 // pattern attributes for drag bar
 const char DRAG_BAR_COLOR[] = "drag_bar_color";

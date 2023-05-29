@@ -139,6 +139,7 @@ ohos_fuzztest("AceResKeyParserFuzzTest") {
     "//third_party/flutter/engine",
     "//third_party",
     "//commonlibrary/c_utils/base/include",
+    "$root_out_dir/arkui/framework",
   ]
 }
 

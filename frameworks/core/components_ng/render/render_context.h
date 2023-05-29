@@ -94,6 +94,9 @@ public:
     // will be unaffected by parent's transition.
     virtual void SetSandBox(const std::optional<OffsetF>& parentPosition) {};
 
+    virtual void RegisterSharedTransition(const RefPtr<RenderContext>& other) {}
+    virtual void UnregisterSharedTransition(const RefPtr<RenderContext>& other) {}
+
     virtual void OnModifyDone() {}
 
     virtual void InitContext(bool isRoot, const std::optional<std::string>& surfaceName, bool useExternalNode = false)
@@ -197,6 +200,11 @@ public:
         return {};
     }
 
+    virtual RectF GetPaintRectWithTranslate()
+    {
+        return {};
+    }
+
     virtual void GetPointWithTransform(PointF& point) {}
 
     virtual RectF GetPaintRectWithoutTransform()
@@ -276,9 +284,11 @@ public:
     virtual void OnSphericalEffectUpdate(double radio) {}
     virtual void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) {}
     virtual void OnLightUpEffectUpdate(double radio) {}
+    virtual void OnClickEffectLevelUpdate(const ClickEffectInfo& info) {}
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SphericalEffect, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PixelStretchEffect, PixStretchEffectOption);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LightUpEffect, double);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ClickEffectLevel, ClickEffectInfo);
     virtual RefPtr<PixelMap> GetThumbnailPixelMap()
     {
         return nullptr;
@@ -442,7 +452,6 @@ protected:
 private:
     std::function<void()> requestFrame_;
     WeakPtr<FrameNode> host_;
-    bool needDebugBoundary_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderContext);
 };

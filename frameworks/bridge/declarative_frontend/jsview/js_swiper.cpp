@@ -463,7 +463,7 @@ bool JSSwiper::GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& s
     CalcDimension dimension;
     Color color;
     if (swiperArrowParameters.isSidebarMiddle.value()) {
-        parseOk = ParseJsDimensionPx(backgroundSizeValue, dimension);
+        parseOk = ParseJsDimensionVp(backgroundSizeValue, dimension);
         swiperArrowParameters.backgroundSize = parseOk && GreatOrEqual(dimension.ConvertToVp(), 0.0)
                                                    ? dimension
                                                    : swiperIndicatorTheme->GetBigArrowBackgroundSize();
@@ -472,7 +472,7 @@ bool JSSwiper::GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& s
         if (swiperArrowParameters.isShowBackground.value()) {
             swiperArrowParameters.arrowSize = swiperArrowParameters.backgroundSize.value() * ARROW_SIZE_COEFFICIENT;
         } else {
-            parseOk = ParseJsDimensionPx(arrowSizeValue, dimension);
+            parseOk = ParseJsDimensionVp(arrowSizeValue, dimension);
             swiperArrowParameters.arrowSize = parseOk && GreatOrEqual(dimension.ConvertToVp(), 0.0)
                                                   ? dimension
                                                   : swiperIndicatorTheme->GetBigArrowSize();
@@ -480,7 +480,7 @@ bool JSSwiper::GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& s
         parseOk = ParseJsColor(arrowColorValue, color);
         swiperArrowParameters.arrowColor = parseOk ? color : swiperIndicatorTheme->GetBigArrowColor();
     } else {
-        parseOk = ParseJsDimensionPx(backgroundSizeValue, dimension);
+        parseOk = ParseJsDimensionVp(backgroundSizeValue, dimension);
         swiperArrowParameters.backgroundSize = parseOk && GreatOrEqual(dimension.ConvertToVp(), 0.0)
                                                    ? dimension
                                                    : swiperIndicatorTheme->GetSmallArrowBackgroundSize();
@@ -489,7 +489,7 @@ bool JSSwiper::GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& s
         if (swiperArrowParameters.isShowBackground.value()) {
             swiperArrowParameters.arrowSize = swiperArrowParameters.backgroundSize.value() * ARROW_SIZE_COEFFICIENT;
         } else {
-            parseOk = ParseJsDimensionPx(arrowSizeValue, dimension);
+            parseOk = ParseJsDimensionVp(arrowSizeValue, dimension);
             swiperArrowParameters.arrowSize = parseOk && GreatOrEqual(dimension.ConvertToVp(), 0.0)
                                                   ? dimension
                                                   : swiperIndicatorTheme->GetSmallArrowSize();

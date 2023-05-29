@@ -17,13 +17,14 @@
 
 #include <dirent.h>
 
+#include "drawable_descriptor.h"
+
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/resource_convertor.h"
 #include "adapter/ohos/osal/resource_theme_style.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components/theme/theme_attributes.h"
-
 namespace OHOS::Ace {
 namespace {
 
@@ -452,6 +453,20 @@ bool ResourceAdapterImpl::GetBooleanByName(const std::string& resName) const
         LOGE("GetBoolean error, resName=%{public}s", resName.c_str());
     }
     return result;
+}
+
+std::shared_ptr<Media::PixelMap> ResourceAdapterImpl::GetPixelMap(uint32_t resId)
+{
+    CHECK_NULL_RETURN_NOLOG(resourceManager_, nullptr);
+    Napi::DrawableDescriptor::DrawableType drawableType;
+    Global::Resource::RState state;
+    auto drawableDescriptor = Napi::DrawableDescriptorFactory::Create(resId, resourceManager_, state, drawableType, 0);
+    if (state != Global::Resource::SUCCESS) {
+        LOGE("Failed to Create drawableDescriptor by %{public}d", resId);
+        return nullptr;
+    }
+    CHECK_NULL_RETURN(drawableDescriptor, nullptr);
+    return drawableDescriptor->GetPixelMap();
 }
 
 std::string ResourceAdapterImpl::GetMediaPath(uint32_t resId)

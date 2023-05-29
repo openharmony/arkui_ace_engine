@@ -112,6 +112,11 @@ private:
     OffsetT<Dimension> GetInvisibleOffset();
     RefPtr<RenderContext> GetRenderContext();
     void ResetToInvisible();
+    bool PostTask(const TaskExecutor::Task& task);
+    void StartOffsetEnteringAnimation();
+    void StartAlphaEnteringAnimation(std::function<void()> finish);
+    void StartOffsetExitingAnimation();
+    void StartAlphaExitingAnimation(std::function<void()> finish);
 
     int32_t targetNodeId_ = -1;
     std::string targetTag_;

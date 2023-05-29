@@ -109,6 +109,9 @@ constexpr int32_t MIN_ROTATE_VECTOR_Z = 9;
 constexpr int32_t PARAMETER_LENGTH_FIRST = 1;
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
+constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
+constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
+const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 
 bool CheckJSCallbackInfo(
     const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
@@ -605,6 +608,19 @@ void SetPopupMessageOptions(const JSRef<JSObject> messageOptionsObj, const RefPt
         if (fontWeightValue->IsString()) {
             if (popupParam) {
                 popupParam->SetFontWeight(ConvertStrToFontWeight(fontWeightValue->ToString()));
+            } else {
+                LOGI("Empty popup.");
+            }
+        }
+        auto fontStyleValue = fontObj->GetProperty("style");
+        if (fontStyleValue->IsNumber()) {
+            int32_t value = fontStyleValue->ToNumber<int32_t>();
+            if (value < 0 || value >= static_cast<int32_t>(FONT_STYLES.size())) {
+                LOGI("Text fontStyle(%d) is invalid value", value);
+                return;
+            }
+            if (popupParam) {
+                popupParam->SetFontStyle(FONT_STYLES[value]);
             } else {
                 LOGI("Empty popup.");
             }
@@ -4764,6 +4780,9 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
     NG::SheetStyle sheetStyle;
     if (info.Length() == 3) { // 3 : parameter total
         ParseSheetStyle(info[2], sheetStyle); // 2 : The last parameter
+    } else {
+        sheetStyle.sheetMode = NG::SheetMode::LARGE;
+        sheetStyle.showDragBar = true;
     }
     ViewAbstractModel::GetInstance()->BindSheet(isShow, std::move(callback), std::move(buildFunc), sheetStyle);
 }
@@ -4781,7 +4800,7 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
             LOGW("show drag indicator failed.");
         }
     }
-
+    CalcDimension sheetHeight;
     if (height->IsNull() || height->IsUndefined()) {
         sheetStyle.sheetMode = NG::SheetMode::LARGE;
         sheetStyle.height.reset();
@@ -4800,10 +4819,19 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
                 sheetStyle.height.reset();
                 return;
             } else {
-                LOGI("sheet height is not default mode.");
+                if (heightStr.find("calc") != std::string::npos) {
+                    LOGI("calc value = %{public}s", heightStr.c_str());
+                    sheetHeight = CalcDimension(heightStr, DimensionUnit::CALC);
+                } else {
+                    sheetHeight = StringUtils::StringToDimensionWithUnit(heightStr, DimensionUnit::VP, -1.0);
+                }
+                if (sheetHeight.Value() < 0) {
+                    sheetStyle.sheetMode = NG::SheetMode::LARGE;
+                    sheetStyle.height.reset();
+                    return;
+                }
             }
         }
-        CalcDimension sheetHeight;
         if (!ParseJsDimensionVp(height, sheetHeight)) {
             sheetStyle.sheetMode = NG::SheetMode::LARGE;
             sheetStyle.height.reset();
@@ -5023,6 +5051,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onMouse", &JSViewAbstract::JsOnMouse);
     JSClass<JSViewAbstract>::StaticMethod("onHover", &JSViewAbstract::JsOnHover);
     JSClass<JSViewAbstract>::StaticMethod("onClick", &JSViewAbstract::JsOnClick);
+    JSClass<JSViewAbstract>::StaticMethod("clickEffect", &JSViewAbstract::JsClickEffect);
 #if defined(PREVIEW)
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
 #endif
@@ -5553,6 +5582,53 @@ void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
         func->Execute(*info);
     };
     ViewAbstractModel::GetInstance()->SetOnClick(std::move(onTap), std::move(onClick));
+}
+
+void JSViewAbstract::JsClickEffect(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("clickEffect needs at least 1 parameter.");
+        return;
+    }
+    if (info[0]->IsUndefined() || info[0]->IsNull()) {
+        LOGD("Parameter value error, not set effect.");
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> clickEffectLevel = obj->GetProperty("level");
+    int32_t clickEffectLevelValue = 0;
+    if (clickEffectLevel->IsNumber()) {
+        clickEffectLevelValue = clickEffectLevel->ToNumber<int32_t>();
+        if (clickEffectLevelValue < static_cast<int32_t>(ClickEffectLevel::LIGHT) ||
+            clickEffectLevelValue > static_cast<int32_t>(ClickEffectLevel::HEAVY)) {
+            LOGW("clickEffectLevel over range, use default value.");
+            clickEffectLevelValue = 0;
+        }
+    }
+
+    JSRef<JSVal> scaleNumber = obj->GetProperty("scale");
+    float scaleNumberValue = DEFAULT_SCALE_LIGHT;
+    if (!scaleNumber->IsNumber()) {
+        if ((ClickEffectLevel)clickEffectLevelValue == ClickEffectLevel::MIDDLE ||
+            (ClickEffectLevel)clickEffectLevelValue == ClickEffectLevel::HEAVY) {
+            scaleNumberValue = DEFAULT_SCALE_MIDDLE_OR_HEAVY;
+        }
+        ViewAbstractModel::GetInstance()->SetClickEffectLevel(
+            (ClickEffectLevel)clickEffectLevelValue, scaleNumberValue);
+        return;
+    }
+
+    scaleNumberValue = scaleNumber->ToNumber<float>();
+    if (LessNotEqual(scaleNumberValue, 0.0) || GreatNotEqual(scaleNumberValue, 1.0)) {
+        if ((ClickEffectLevel)clickEffectLevelValue == ClickEffectLevel::MIDDLE ||
+            (ClickEffectLevel)clickEffectLevelValue == ClickEffectLevel::HEAVY) {
+            scaleNumberValue = DEFAULT_SCALE_MIDDLE_OR_HEAVY;
+        } else {
+            scaleNumberValue = DEFAULT_SCALE_LIGHT;
+        }
+    }
+
+    ViewAbstractModel::GetInstance()->SetClickEffectLevel((ClickEffectLevel)clickEffectLevelValue, scaleNumberValue);
 }
 
 void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)

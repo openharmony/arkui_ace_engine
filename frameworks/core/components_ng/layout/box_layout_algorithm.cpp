@@ -47,6 +47,14 @@ void BoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             };
             layoutConstraint.UpdateMaxSizeWithCheck(maxSize);
             layoutConstraint.UpdatePercentReference(percentReference);
+            if (layoutConstraint.parentIdealSize.Width()) {
+                layoutConstraint.parentIdealSize.MinusWidth(
+                    safeArea.leftRect_.Width() + safeArea.rightRect_.Width());
+            }
+            if (layoutConstraint.parentIdealSize.Height()) {
+                layoutConstraint.parentIdealSize.MinusHeight(
+                    safeArea.topRect_.Height() + safeArea.bottomRect_.Height());
+            }
         }
     }
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {

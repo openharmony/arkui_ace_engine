@@ -15,23 +15,33 @@
 
 #include "interfaces/inner_api/ace/declarative_module_preloader.h"
 
-#include <dlfcn.h>
+#include "utils.h"
 
 namespace OHOS::Ace {
+
+#if defined(WINDOWS_PLATFORM)
+constexpr char ACE_LIB_NAME[] = "libace.dll";
+#elif defined(MAC_PLATFORM)
+constexpr char ACE_LIB_NAME[] = "libace.dylib";
+#elif defined(LINUX_PLATFORM)
+constexpr char ACE_LIB_NAME[] = "libace.so";
+#else
+constexpr char ACE_LIB_NAME[] = "libace.z.so";
+#endif
 
 using CreateFunc = void (*)(void*);
 constexpr char PRE_INIT_ACE_MODULE_FUNC[] = "OHOS_ACE_PreloadAceModule";
 
 void InitAceModule(void* runtime)
 {
-    void* handle = dlopen("libace.z.so", RTLD_LAZY);
+    LIBHANDLE handle = LOADLIB(ACE_LIB_NAME);
     if (handle == nullptr) {
         return;
     }
 
-    auto entry = reinterpret_cast<CreateFunc>(dlsym(handle, PRE_INIT_ACE_MODULE_FUNC));
+    auto entry = reinterpret_cast<CreateFunc>(LOADSYM(handle, PRE_INIT_ACE_MODULE_FUNC));
     if (entry == nullptr) {
-        dlclose(handle);
+        FREELIB(handle);
         return;
     }
 
@@ -49,14 +59,14 @@ constexpr char PRE_INIT_ACE_MODULE_FUNC_CARD[] = "OHOS_ACE_PreloadAceModuleCard"
 
 void InitAceModuleCard(void* runtime)
 {
-    void* handle = dlopen("libace.z.so", RTLD_LAZY);
+    LIBHANDLE handle = LOADLIB(ACE_LIB_NAME);
     if (handle == nullptr) {
         return;
     }
 
-    auto entry = reinterpret_cast<CreateFuncCard>(dlsym(handle, PRE_INIT_ACE_MODULE_FUNC_CARD));
+    auto entry = reinterpret_cast<CreateFuncCard>(LOADSYM(handle, PRE_INIT_ACE_MODULE_FUNC_CARD));
     if (entry == nullptr) {
-        dlclose(handle);
+        FREELIB(handle);
         return;
     }
 

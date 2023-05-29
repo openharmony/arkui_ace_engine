@@ -63,6 +63,12 @@ config("ace_config") {
     cflags_cc += [ "-std=c++17" ]
     defines += [ "_USE_MATH_DEFINES" ]
   }
+
+  ldflags = []
+  if (ace_engine_feature_enable_coverage) {
+    cflags += [ "--coverage" ]
+    ldflags += [ "--coverage" ]
+  }
 }
 
 config("ace_test_config") {
@@ -114,4 +120,9 @@ config("ace_test_config") {
 
   cflags_cc += [ "-fvisibility-inlines-hidden" ]
   ldflags = [ "-Wl,-gc-sections" ]
+
+  if (ace_engine_feature_enable_coverage) {
+    cflags += [ "--coverage" ]
+    ldflags += [ "--coverage" ]
+  }
 }

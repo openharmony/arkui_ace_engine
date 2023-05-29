@@ -71,9 +71,11 @@ void ImagePainterUtils::AddFilter(SkPaint& paint, SkSamplingOptions& options, co
         }
         case ImageInterpolation::HIGH: {
             options = SkSamplingOptions(SkCubicResampler::Mitchell());
+            break;
         }
         default:
             options = SkSamplingOptions();
+            break;
     }
 
     if (config.colorFilter_) {
@@ -83,4 +85,14 @@ void ImagePainterUtils::AddFilter(SkPaint& paint, SkSamplingOptions& options, co
     }
 }
 #endif
+
+void ImagePainterUtils::ClipRRect(RSCanvas& canvas, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
+{
+    std::vector<RSPoint> radius(ImagePainterUtils::RADIUS_POINTS_SIZE);
+    for (size_t i = 0; i < radius.size(); ++i) {
+        radius[i] = RSPoint(radiusXY[i].GetX(), radiusXY[i].GetY());
+    }
+    RSRoundRect rRect(dstRect, radius);
+    canvas.ClipRoundRect(rRect, RSClipOp::INTERSECT, true);
+}
 } // namespace OHOS::Ace::NG

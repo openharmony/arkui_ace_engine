@@ -16,15 +16,14 @@
 #include "gtest/gtest.h"
 
 #define private public
+#include "core/common/frontend.h"
+#include "core/common/window.h"
+#include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
-#include "core/components_ng/pattern/web/web_view.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/common/frontend.h"
-#include "core/components/web/resource/web_delegate.h"
-#include "core/common/window.h"
 #include "core/event/touch_event.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -71,8 +70,8 @@ void WebPatternTest::SetUpTestCase()
     RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId,
-        [src, controller]() { return AceType::MakeRefPtr<WebPattern>(src, controller); });
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::WEB_ETS_TAG, nodeId, [src, controller]() { return AceType::MakeRefPtr<WebPattern>(src, controller); });
     stack->Push(frameNode);
 
     g_webPattern = frameNode->GetPattern<WebPattern>();
@@ -151,8 +150,7 @@ public:
         return g_editStateFlags;
     }
 
-    std::shared_ptr<NWebTouchHandleState> GetTouchHandleState(
-        NWebTouchHandleState::TouchHandleType type) override
+    std::shared_ptr<NWebTouchHandleState> GetTouchHandleState(NWebTouchHandleState::TouchHandleType type) override
     {
         if (type == NWebTouchHandleState::TouchHandleType::INSERT_HANDLE) {
             return g_insertHandle;
@@ -165,11 +163,9 @@ public:
 
 class NWebQuickMenuCallbackMock : public NWebQuickMenuCallback {
 public:
-    void Continue(int32_t commandId, MenuEventFlags flag)
-    {}
+    void Continue(int32_t commandId, MenuEventFlags flag) {}
 
-    void Cancel()
-    {}
+    void Cancel() {}
 };
 #endif
 
@@ -359,7 +355,7 @@ HWTEST_F(WebPatternTest, RegisterSelectOverlayCallbackTest005, TestSize.Level1)
     g_webPattern->ComputeTouchHandleRect(touchHandle);
     g_Y = -1;
     g_webPattern->ComputeTouchHandleRect(touchHandle);
-    
+
     std::shared_ptr<NWebQuickMenuParams> params = std::make_shared<NWebQuickMenuParamsMock>();
     std::shared_ptr<NWebQuickMenuCallback> callback = std::make_shared<NWebQuickMenuCallbackMock>();
     SelectOverlayInfo selectInfo;
@@ -525,7 +521,7 @@ HWTEST_F(WebPatternTest, HandleDragUpdateTest010, TestSize.Level1)
     g_webPattern->HandleDragEnd(info);
     g_webPattern->needUpdateWeb_ = false;
     g_webPattern->RegistVirtualKeyBoardListener();
-   
+
     RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
     RefPtr<WebPattern> webPattern = AceType::MakeRefPtr<WebPattern>("test", controller);
     EXPECT_NE(webPattern, nullptr);
@@ -567,4 +563,4 @@ HWTEST_F(WebPatternTest, OnWindowShowTest011, TestSize.Level1)
     g_webPattern->OnVisibleChange(true);
 #endif
 }
-}
+} // namespace OHOS::Ace::NG

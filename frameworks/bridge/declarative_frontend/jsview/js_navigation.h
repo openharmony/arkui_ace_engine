@@ -45,7 +45,7 @@ public:
     static void SetOnNavBarStateChange(const JSCallbackInfo& info);
     static void SetNavDestination(const JSCallbackInfo& info);
 
-    static void ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<RefPtr<ToolBarItem>>& items);
+    static void ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<RefPtr<AceType>>& items);
     static void ParseBarItems(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::BarItem>& items);
     static bool ParseCommonTitle(const JSRef<JSVal>& jsValue);

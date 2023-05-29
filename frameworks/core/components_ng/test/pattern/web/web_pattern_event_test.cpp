@@ -18,7 +18,6 @@
 #define private public
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
-#include "core/components_ng/pattern/web/web_view.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
@@ -27,8 +26,8 @@ using namespace OHOS::Ace;
 
 namespace OHOS::Ace::NG {
 namespace {
-    RefPtr<FrameNode> g_frameNode = nullptr;
-    RefPtr<WebPattern> g_webPattern = nullptr;
+RefPtr<FrameNode> g_frameNode = nullptr;
+RefPtr<WebPattern> g_webPattern = nullptr;
 } // namespace
 
 class WebPatternEventTest : public testing::Test {

@@ -112,7 +112,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     auto height = static_cast<float>(paragraph_->GetHeight());
     double baselineOffset = 0.0;
     textStyle.GetBaselineOffset().NormalizeToPx(
-        pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(), height, baselineOffset);
+        pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(), 0.0f, baselineOffset);
 
     baselineOffset_ = static_cast<float>(baselineOffset);
 
@@ -211,7 +211,9 @@ bool TextLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, c
         ApplyIndents(textStyle, maxSize.Width());
     }
     paragraph_->Layout(maxSize.Width());
-    return true;
+
+    bool ret = CreateImageSpanAndLayout(textStyle, content, contentConstraint, layoutWrapper);
+    return ret;
 }
 
 OffsetF TextLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper) const
@@ -649,13 +651,168 @@ void TextLayoutAlgorithm::ApplyIndents(const TextStyle& textStyle, double width)
     } else {
         indent = width * textStyle.GetTextIndent().Value();
     }
-#ifndef NEW_SKIA
     std::vector<float> indents;
-    if (indent > 0.0) {
-        indents.emplace_back(static_cast<float>(indent));
-        indents.emplace_back(0.0);
-        paragraph_->SetIndents(indents);
+    indents.emplace_back(static_cast<float>(indent));
+    indents.emplace_back(0.0);
+    paragraph_->SetIndents(indents);
+}
+
+bool TextLayoutAlgorithm::IncludeImageSpan(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    return (layoutWrapper->GetAllChildrenWithBuild().size() > 0);
+}
+
+void TextLayoutAlgorithm::GetSpanAndImageSpanList(
+    std::list<RefPtr<SpanItem>>& spanList, std::map<int32_t, std::pair<Rect, RefPtr<ImageSpanItem>>>& imageSpanList)
+{
+    std::vector<Rect> rectsForPlaceholders;
+    paragraph_->GetRectsForPlaceholders(rectsForPlaceholders);
+
+    for (const auto& child : spanItemChildren_) {
+        if (!child) {
+            continue;
+        }
+        auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(child);
+        if (imageSpanItem) {
+            int32_t index = child->placeHolderIndex;
+            if (index > static_cast<int32_t>(rectsForPlaceholders.size())) {
+                continue;
+            }
+            imageSpanList.emplace(index, std::make_pair(rectsForPlaceholders.at(index), imageSpanItem));
+        } else {
+            spanList.emplace_back(child);
+        }
     }
-#endif
+}
+
+void TextLayoutAlgorithm::SplitSpanContentByLines(const TextStyle& textStyle,
+    const std::list<RefPtr<SpanItem>>& spanList,
+    std::map<int32_t, std::pair<Rect, std::list<RefPtr<SpanItem>>>>& spanContentLines)
+{
+    int32_t currentLine = 0;
+    size_t currentLength = 0;
+    for (const auto& child : spanList) {
+        if (!child) {
+            continue;
+        }
+        std::string textValue = child->content;
+        std::vector<Rect> selectedRects;
+        if (!textValue.empty()) {
+            paragraph_->GetRectsForRange(currentLength, currentLength + textValue.size(), selectedRects);
+        }
+        currentLength += textValue.size();
+        Rect currentRect;
+        auto preLinetLastSpan = spanContentLines.rbegin();
+        double preLineFontSize = textStyle.GetFontSize().Value();
+        if (preLinetLastSpan != spanContentLines.rend()) {
+            currentRect = preLinetLastSpan->second.first;
+            if (preLinetLastSpan->second.second.back() && preLinetLastSpan->second.second.back()->fontStyle) {
+                preLineFontSize = preLinetLastSpan->second.second.back()->fontStyle->GetFontSize().value().Value();
+            }
+        }
+        for (const auto& rect : selectedRects) {
+            if (!NearEqual(currentRect.GetOffset().GetY(), rect.GetOffset().GetY())) {
+                currentRect = rect;
+                ++currentLine;
+            }
+
+            auto iter = spanContentLines.find(currentLine);
+            if (iter != spanContentLines.end()) {
+                auto iterSecond = std::find(iter->second.second.begin(), iter->second.second.end(), child);
+                if (iterSecond != iter->second.second.end()) {
+                    continue;
+                }
+                if (NearEqual(rect.GetOffset().GetY(), currentRect.GetOffset().GetY()) && child->fontStyle &&
+                    NearEqual(preLineFontSize, child->fontStyle->GetFontSize().value().Value())) {
+                    continue;
+                }
+                iter->second.second.emplace_back(child);
+            } else {
+                std::list<RefPtr<SpanItem>> spanLineList;
+                spanLineList.emplace_back(child);
+                spanContentLines.emplace(currentLine, std::make_pair(currentRect, spanLineList));
+            }
+        }
+    }
+}
+
+void TextLayoutAlgorithm::SetImageSpanTextStyleByLines(const TextStyle& textStyle,
+    std::map<int32_t, std::pair<Rect, RefPtr<ImageSpanItem>>>& imageSpanList,
+    std::map<int32_t, std::pair<Rect, std::list<RefPtr<SpanItem>>>>& spanContentLines)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    auto imageSpanItem = imageSpanList.begin();
+    for (auto spanItem = spanContentLines.begin(); spanItem != spanContentLines.end(); spanItem++) {
+        for (; imageSpanItem != imageSpanList.end();) {
+            auto imageSpan = imageSpanItem->second.second;
+            if (!imageSpan) {
+                continue;
+            }
+            imageSpan->textStyle = textStyle;
+
+            auto offset = imageSpanItem->second.first.GetOffset();
+            auto imageSpanItemRect = imageSpanItem->second.first;
+            imageSpanItemRect.SetOffset(Offset(spanItem->second.first.GetOffset().GetX(), offset.GetY()));
+            bool isIntersectWith = spanItem->second.first.IsIntersectWith(imageSpanItemRect);
+            if (!isIntersectWith) {
+                break;
+            }
+            Dimension maxFontSize;
+            TextStyle spanTextStyle = textStyle;
+            for (const auto& child : spanItem->second.second) {
+                if (!child || !child->fontStyle) {
+                    continue;
+                }
+                if (!child->fontStyle->GetFontSize().has_value()) {
+                    continue;
+                }
+                if (LessNotEqual(maxFontSize.Value(), child->fontStyle->GetFontSize().value().Value())) {
+                    maxFontSize = child->fontStyle->GetFontSize().value();
+                    spanTextStyle = CreateTextStyleUsingTheme(
+                        child->fontStyle, child->textLineStyle, pipelineContext->GetTheme<TextTheme>());
+                }
+            }
+            imageSpan->textStyle = spanTextStyle;
+            imageSpanItem++;
+        }
+    }
+}
+
+void TextLayoutAlgorithm::SetImageSpanTextStyle(const TextStyle& textStyle)
+{
+    CHECK_NULL_VOID(paragraph_);
+
+    std::list<RefPtr<SpanItem>> spanList;
+    std::map<int32_t, std::pair<Rect, RefPtr<ImageSpanItem>>> imageSpanList;
+    GetSpanAndImageSpanList(spanList, imageSpanList);
+
+    // split text content by lines
+    std::map<int32_t, std::pair<Rect, std::list<RefPtr<SpanItem>>>> spanContentLines;
+    SplitSpanContentByLines(textStyle, spanList, spanContentLines);
+
+    // set imagespan textstyle
+    SetImageSpanTextStyleByLines(textStyle, imageSpanList, spanContentLines);
+}
+
+bool TextLayoutAlgorithm::CreateImageSpanAndLayout(const TextStyle& textStyle, const std::string& content,
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    bool includeImageSpan = IncludeImageSpan(layoutWrapper);
+    if (includeImageSpan) {
+        SetImageSpanTextStyle(textStyle);
+        if (!CreateParagraph(textStyle, content, layoutWrapper)) {
+            return false;
+        }
+        CHECK_NULL_RETURN(paragraph_, false);
+        auto maxSize = GetMaxMeasureSize(contentConstraint);
+        if (GreatNotEqual(textStyle.GetTextIndent().Value(), 0.0)) {
+            ApplyIndents(textStyle, maxSize.Width());
+        }
+        paragraph_->Layout(maxSize.Width());
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

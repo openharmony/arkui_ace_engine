@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include <algorithm>
-
 #include "core/components_ng/pattern/search/search_layout_algorithm.h"
+
+#include <algorithm>
 
 #include "core/components/search/search_theme.h"
 #include "core/components_ng/layout/layout_algorithm.h"
@@ -82,7 +82,7 @@ void SearchLayoutAlgorithm::CancelButtonMeasure(LayoutWrapper* layoutWrapper)
 
     // calculate theme space from cancel button to cancel image
     auto spaceHeight = searchTheme->GetHeight().ConvertToPx() - 2 * searchTheme->GetSearchButtonSpace().ConvertToPx() -
-        searchTheme->GetIconHeight().ConvertToPx();
+                       searchTheme->GetIconHeight().ConvertToPx();
 
     // calculate cancel button height
     auto cancelButtonHeight =
@@ -116,9 +116,9 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
     auto iconRenderWidth =
         layoutProperty->GetSearchIconUDSizeValue(Dimension(searchIconSizeMeasure_.Width())).ConvertToPx();
     auto constraint = layoutProperty->GetLayoutConstraint();
-    auto searchWidthMax = (constraint->selfIdealSize.Width().has_value()) ?
-        constraint->selfIdealSize.Width().value() : constraint->maxSize.Width();
-
+    auto searchWidthMax = (constraint->selfIdealSize.Width().has_value())
+                              ? std::min(constraint->selfIdealSize.Width().value(), constraint->maxSize.Width())
+                              : constraint->maxSize.Width();
     auto searchWrapper = layoutWrapper->GetOrCreateChildByIndex(BUTTON_INDEX);
     auto searchButtonNode = searchWrapper->GetHostNode();
     auto searchButtonEvent = searchButtonNode->GetEventHub<ButtonEventHub>();
@@ -126,7 +126,7 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
     auto cancelButtonEvent = cancelButtonNode->GetEventHub<ButtonEventHub>();
 
     auto textFieldWidth = searchWidthMax - searchTheme->GetSearchIconLeftSpace().ConvertToPx() - iconRenderWidth -
-                           searchTheme->GetSearchIconRightSpace().ConvertToPx();
+                          searchTheme->GetSearchIconRightSpace().ConvertToPx();
     if (searchButtonEvent->IsEnabled()) {
         textFieldWidth = textFieldWidth - buttonWidth - searchTheme->GetSearchDividerWidth().ConvertToPx() -
                          MULTIPLE_2 * searchTheme->GetDividerSideSpace().ConvertToPx();
@@ -173,7 +173,7 @@ void SearchLayoutAlgorithm::SearchButtonMeasure(LayoutWrapper* layoutWrapper)
 
     // calculate theme space from search button to font
     auto spaceHeight = searchTheme->GetHeight().ConvertToPx() - 2 * searchTheme->GetSearchButtonSpace().ConvertToPx() -
-        searchTheme->GetFontSize().ConvertToPx();
+                       searchTheme->GetFontSize().ConvertToPx();
 
     // calculate search button height
     auto searchButtonHeight =
@@ -267,8 +267,10 @@ void SearchLayoutAlgorithm::SelfMeasure(LayoutWrapper* layoutWrapper)
 
     // update search height
     constraint->selfIdealSize.SetHeight(searchHeightAdapt);
-
-    auto idealSize = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(), true);
+    auto searchWidth = (constraint->selfIdealSize.Width().has_value())
+                           ? std::min(constraint->selfIdealSize.Width().value(), constraint->maxSize.Width())
+                           : constraint->maxSize.Width();
+    SizeF idealSize(searchWidth, searchHeightAdapt);
     if (GreaterOrEqualToInfinity(idealSize.Width()) || GreaterOrEqualToInfinity(idealSize.Height())) {
         LOGW("Size is infinity.");
         geometryNode->SetFrameSize(SizeF());
