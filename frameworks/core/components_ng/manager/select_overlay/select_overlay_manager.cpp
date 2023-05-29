@@ -66,11 +66,41 @@ void SelectOverlayManager::DestroySelectOverlay(int32_t overlayId)
     }
 }
 
+void SelectOverlayManager::DestroySelectOverlay()
+{
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto current = selectOverlayItem_.Upgrade();
+    if (current) {
+        LOGD("destroy overlay, id is %{public}d.", current->GetId());
+        rootNode->RemoveChild(current);
+        rootNode->MarkNeedSyncRenderTree();
+        rootNode->RebuildRenderContextTree();
+        selectOverlayItem_.Reset();
+    }
+}
+
 bool SelectOverlayManager::HasSelectOverlay(int32_t overlayId)
 {
     auto current = selectOverlayItem_.Upgrade();
     CHECK_NULL_RETURN_NOLOG(current, false);
     return current->GetId() == overlayId;
+}
+
+bool SelectOverlayManager::IsInSelectedOrSelectOverlayArea(const PointF& point)
+{
+    auto current = selectOverlayItem_.Upgrade();
+    CHECK_NULL_RETURN_NOLOG(current, false);
+    auto selectOverlayNode = DynamicCast<SelectOverlayNode>(current);
+    if (selectOverlayNode) {
+        return selectOverlayNode->IsInSelectedOrSelectOverlayArea(point);
+    } else {
+        auto menuRect = current->GetGeometryNode()->GetFrameRect();
+        if (menuRect.IsInRegion(point)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 RefPtr<SelectOverlayNode> SelectOverlayManager::GetSelectOverlayNode(int32_t overlayId)

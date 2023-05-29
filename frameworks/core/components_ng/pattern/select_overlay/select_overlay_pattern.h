@@ -101,6 +101,15 @@ public:
         return meanuWidth_;
     }
 
+    const RectF& GetHandleRegion(bool isFirst) const
+    {
+        if (isFirst) {
+            return firstHandleRegion_;
+        } else {
+            return secondHandleRegion_;
+        }
+    }
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void UpdateHandleHotZone();
