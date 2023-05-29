@@ -326,9 +326,10 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
         labelSet = true;
     }
 
-    para.labelSetInfoFirst = info[0]->IsObject();
+    para.labelSetInfoFirst = !labelSet && info[0]->IsObject();
     para.labelSetInfoSecond = (info.Length() > 1) && info[1]->IsObject();
     ButtonModel::GetInstance()->CreateWithLabel(para, buttonChildren);
+    ButtonModel::GetInstance()->Create(para, buttonChildren);
 }
 
 void JSButton::CreateWithChild(const JSCallbackInfo& info)
