@@ -120,6 +120,7 @@ private:
 
     void UpdateDialogButtonProperty(RefPtr<FrameNode>& buttonNode);
     RefPtr<FrameNode> BuildButtons(const std::vector<ButtonInfo>& buttons);
+    RefPtr<FrameNode> CreateDivider(const Dimension dividerLength, const Dimension dividerWidth);
     RefPtr<FrameNode> CreateButton(const ButtonInfo& params, int32_t index, bool isCancel = false);
     RefPtr<FrameNode> CreateButtonText(const std::string& text, const std::string& colorStr);
     // to close dialog when button is clicked

@@ -23,6 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "bridge/common/dom/dom_type.h"
 #include "core/common/container.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/properties/alignment.h"
@@ -31,8 +32,10 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
@@ -64,6 +67,7 @@ constexpr Dimension SHEET_LIST_PADDING = 24.0_vp;
 constexpr Dimension DIALOG_BUTTON_TEXT_SIZE = 16.0_fp;
 constexpr Color DEFAULT_BUTTON_COLOR = Color(0xff007dff);
 const CalcLength SHEET_IMAGE_SIZE(40.0_vp);
+constexpr int32_t TWO_BUTTON_MODE = 2;
 
 } // namespace
 
@@ -417,6 +421,19 @@ void DialogPattern::UpdateDialogButtonProperty(RefPtr<FrameNode>& buttonNode)
     buttonProp->UpdatePadding(buttonPadding);
 }
 
+RefPtr<FrameNode> DialogPattern::CreateDivider(const Dimension dividerLength, const Dimension dividerWidth)
+{
+    auto dividerNode = FrameNode::CreateFrameNode(
+        V2::DIVIDER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DividerPattern>());
+    CHECK_NULL_RETURN(dividerNode, nullptr);
+    auto dividerProps = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
+    CHECK_NULL_RETURN(dividerProps, nullptr);
+    dividerProps->UpdateVertical(true);
+    dividerProps->UpdateStrokeWidth(dividerWidth);
+    dividerProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(dividerLength)));
+    return dividerNode;
+}
+
 // alert dialog buttons
 RefPtr<FrameNode> DialogPattern::BuildButtons(const std::vector<ButtonInfo>& buttons)
 {
@@ -443,6 +460,8 @@ RefPtr<FrameNode> DialogPattern::BuildButtons(const std::vector<ButtonInfo>& but
     // set action's padding
     PaddingProperty actionPadding;
     auto padding = dialogTheme_->GetActionsPadding();
+    auto dividerLength = dialogTheme_->GetDividerLength();
+    auto dividerWidth = dialogTheme_->GetDividerBetweenButtonWidth_();
     actionPadding.left = CalcLength(padding.Left());
     actionPadding.right = CalcLength(padding.Right());
     actionPadding.top = CalcLength(padding.Top());
@@ -454,6 +473,10 @@ RefPtr<FrameNode> DialogPattern::BuildButtons(const std::vector<ButtonInfo>& but
         CHECK_NULL_RETURN(buttonNode, nullptr);
         buttonNode->MountToParent(container);
         buttonNode->MarkModifyDone();
+        if (buttons.size() == TWO_BUTTON_MODE && i == 0) {
+            auto dividerNode = CreateDivider(dividerLength, dividerWidth);
+            dividerNode->MountToParent(container);
+        }
     }
     return container;
 }
