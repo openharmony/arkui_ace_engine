@@ -30,6 +30,13 @@ void SelectOverlayManager::DestroySelectOverlay(const RefPtr<SelectOverlayProxy>
 
 void SelectOverlayManager::DestroySelectOverlay(int32_t overlayId) {}
 
+void SelectOverlayManager::DestroySelectOverlay() {}
+
+bool SelectOverlayManager::IsInSelectedOrSelectOverlayArea(const PointF& point)
+{
+    return true;
+}
+
 bool SelectOverlayManager::HasSelectOverlay(int32_t overlayId)
 {
     return SELECT_OVERLAY_ID == overlayId;

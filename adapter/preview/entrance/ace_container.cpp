@@ -24,9 +24,6 @@
 #include "core/common/flutter/flutter_asset_manager.h"
 #include "core/common/flutter/flutter_task_executor.h"
 #else // ENABLE_ROSEN_BACKEND == true
-#include <ui/rs_surface_node.h>
-#include <ui/rs_ui_director.h>
-
 #include "adapter/preview/entrance/rs_dir_asset_provider.h"
 #include "core/common/flutter/flutter_task_executor.h"
 #include "core/common/rosen/rosen_asset_manager.h"
@@ -34,7 +31,6 @@
 
 #include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
 #include "adapter/preview/entrance/ace_application_info.h"
-#include "adapter/preview/external/window/window_preview.h"
 #include "adapter/preview/osal/stage_card_parser.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
@@ -76,7 +72,7 @@ const char LOCALE_KEY[] = "locale";
 } // namespace
 
 std::once_flag AceContainer::onceFlag_;
-
+bool AceContainer::isComponentMode_ = false;
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, RefPtr<Context> context, bool useCurrentEventRunner)
     : instanceId_(instanceId), messageBridge_(AceType::MakeRefPtr<PlatformBridge>()), type_(type), context_(context)
 {
@@ -238,6 +234,9 @@ void AceContainer::InitializeFrontend()
 void AceContainer::RunNativeEngineLoop()
 {
     taskExecutor_->PostTask([frontend = frontend_]() { frontend->RunNativeEngineLoop(); }, TaskExecutor::TaskType::JS);
+    // After the JS thread executes frontend ->RunNativeEngineLoop(),
+    // it is thrown back into the Platform thread queue to form a loop.
+    taskExecutor_->PostTask([this]() { RunNativeEngineLoop(); }, TaskExecutor::TaskType::PLATFORM);
 }
 
 void AceContainer::InitializeStageAppConfig(const std::string& assetPath, bool formsEnabled)
@@ -804,17 +803,16 @@ void AceContainer::SetView(AceViewPreview* view, double density, int32_t width, 
     container->AttachView(std::move(window), view, density, width, height);
 }
 #else
-void AceContainer::SetView(
-    AceViewPreview* view, double density, int32_t width, int32_t height, SendRenderDataCallback onRender)
+void AceContainer::SetView(AceViewPreview* view, sptr<Rosen::Window> rsWindow, double density, int32_t width,
+    int32_t height, UIEnvCallback callback)
 {
     CHECK_NULL_VOID(view);
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(view->GetInstanceId()));
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    auto rsWindow = new Rosen::Window(onRender);
     auto window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
-    container->AttachView(std::move(window), view, density, width, height, onRender);
+    container->AttachView(std::move(window), view, density, width, height, callback);
 }
 #endif
 
@@ -905,7 +903,7 @@ void AceContainer::AttachView(
 }
 #else
 void AceContainer::AttachView(std::unique_ptr<Window> window, AceViewPreview* view, double density, int32_t width,
-    int32_t height, SendRenderDataCallback onRender)
+    int32_t height, UIEnvCallback callback)
 {
     ContainerScope scope(instanceId_);
     aceView_ = view;
@@ -941,7 +939,7 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceViewPreview* vi
     pipelineContext_->SetWindowModal(windowModal_);
     pipelineContext_->SetDrawDelegate(aceView_->GetDrawDelegate());
     pipelineContext_->SetIsJsCard(type_ == FrontendType::JS_CARD);
-    if (installationFree_) {
+    if (installationFree_ && !isComponentMode_) {
         LOGD("installationFree:%{public}d, labelId:%{public}d", installationFree_, labelId_);
         pipelineContext_->SetInstallationFree(installationFree_);
         pipelineContext_->SetAppLabelId(labelId_);
@@ -973,33 +971,14 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceViewPreview* vi
             },
             TaskExecutor::TaskType::UI);
     }
-
-    taskExecutor_->PostTask(
-        [pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContext_), onRender, this]() {
-            CHECK_NULL_VOID(pipelineContext);
-            auto director = Rosen::RSUIDirector::Create();
-            if (director == nullptr) {
-                return;
-            }
-
-            struct Rosen::RSSurfaceNodeConfig rsSurfaceNodeConfig = {
-                .SurfaceNodeName = "preview_surface",
-                .additionalData = reinterpret_cast<void*>(onRender),
-            };
-            static auto snode = Rosen::RSSurfaceNode::Create(rsSurfaceNodeConfig);
-            director->SetRSSurfaceNode(snode);
-
-            auto func = [taskExecutor = taskExecutor_, id = instanceId_](const std::function<void()>& task) {
-                ContainerScope scope(id);
-                taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-            };
-            director->SetUITaskRunner(func);
-
-            director->Init();
-            pipelineContext->SetRSUIDirector(director);
-            LOGI("Init Rosen Backend");
-        },
-        TaskExecutor::TaskType::UI);
+    if (!useNewPipeline_) {
+        taskExecutor_->PostTask(
+            [context = pipelineContext_, callback]() {
+                CHECK_NULL_VOID(callback);
+                callback(AceType::DynamicCast<PipelineContext>(context));
+            },
+            TaskExecutor::TaskType::UI);
+    }
 
     auto weak = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
     taskExecutor_->PostTask(
@@ -1054,6 +1033,7 @@ void AceContainer::InitDeviceInfo(int32_t instanceId, const AceRunArgs& runArgs)
     config.SetColorMode(runArgs.deviceConfig.colorMode);
     config.SetFontRatio(runArgs.deviceConfig.fontRatio);
     container->SetResourceConfiguration(config);
+    isComponentMode_ = runArgs.isComponentMode;
 }
 
 RefPtr<AceContainer> AceContainer::GetContainerInstance(int32_t instanceId)

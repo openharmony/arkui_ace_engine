@@ -302,7 +302,9 @@ private:
     void OnMiddleButtonTouchDown(RefPtr<EventParam> param);
     void OnMiddleButtonTouchMove(RefPtr<EventParam> param);
     void OnMiddleButtonTouchUp(RefPtr<EventParam> param);
-    bool touchEventInit = false;
+    int32_t GetMiddleButtonIndex();
+
+    bool touchEventInit_ = false;
     RefPtr<InputEvent> CreateMouseHoverEventListener(RefPtr<EventParam> param);
     RefPtr<ClickEvent> CreateItemClickEventListener(RefPtr<EventParam> param);
     void SetAccessibilityAction();

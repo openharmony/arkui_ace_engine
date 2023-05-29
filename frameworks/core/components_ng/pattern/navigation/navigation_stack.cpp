@@ -162,12 +162,9 @@ bool NavigationStack::HasNode(const std::string& name, const RefPtr<UINode>& nav
     if (navPathList_.empty()) {
         return false;
     }
-    for (const auto& item : navPathList_) {
-        if (item.first == name && item.second == navDestinationNode) {
-            return true;
-        }
-    }
-    return false;
+    return std::any_of(navPathList_.begin(), navPathList_.end(), [name, navDestinationNode](const auto& item) {
+        return item.first == name && item.second == navDestinationNode;
+    });
 }
 
 int32_t NavigationStack::FindIndex(const std::string& name, const RefPtr<UINode>& navDestinationNode)
@@ -254,7 +251,7 @@ void NavigationStack::RemoveName(const std::string& name)
     if (navPathList_.empty()) {
         return;
     }
-    for (auto it = navPathList_.begin(); it != navPathList_.end(); ++it) {
+    for (auto it = navPathList_.begin(); it != navPathList_.end();) {
         if ((*it).first == name) {
             it = navPathList_.erase(it);
         } else {

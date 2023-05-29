@@ -66,8 +66,6 @@ enum class FocusStyleType : int32_t {
     OUTER_BORDER = 1,
     CUSTOM_BORDER = 2,
     CUSTOM_REGION = 3,
-    MATCH_ACTIVE = 4,
-    MATCH_ACTIVE_CUSTOM_REGION = 5,
 };
 
 class ACE_EXPORT FocusPaintParam : public virtual AceType {
@@ -170,7 +168,7 @@ public:
     {
         return focusType_;
     }
-    void SetSetFocusType(FocusType type)
+    void SetFocusType(FocusType type)
     {
         focusType_ = type;
     }
@@ -179,7 +177,7 @@ public:
     {
         return focusable_;
     }
-    void SetSetFocusable(bool focusable)
+    void SetFocusable(bool focusable)
     {
         focusable_ = focusable;
     }
@@ -527,10 +525,8 @@ public:
     void SetEnabled(bool enabled);
     void SetEnabledNode(bool enabled);
     void SetEnabledScope(bool enabled);
-    bool CanShow() const
-    {
-        return show_;
-    }
+
+    bool IsShow() const;
 
     bool IsEnabled() const;
 
@@ -791,7 +787,6 @@ private:
     bool parentFocusable_ { true };
     bool currentFocus_ { false };
     bool isFirstFocusInPage_ { true };
-    bool show_ { true };
 
     FocusType focusType_ = FocusType::DISABLE;
     FocusStyleType focusStyleType_ = FocusStyleType::NONE;

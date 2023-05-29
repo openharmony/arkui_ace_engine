@@ -960,7 +960,8 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
         auto workerPostTask = [nativeEngine](std::function<void()>&& callback) {
             nativeEngine->CallDebuggerPostTaskFunc(std::move(callback));
         };
-        panda::JSNApi::StartDebugger(libraryPath.c_str(), vm, debugMode, gettid(), workerPostTask);
+        panda::JSNApi::DebugOption debugOption = {libraryPath.c_str(), debugMode};
+        panda::JSNApi::StartDebugger(vm, debugOption, gettid(), workerPostTask);
 #endif
         instance->InitConsoleModule(arkNativeEngine);
 
@@ -1918,11 +1919,6 @@ void JsiDeclarativeEngine::OnCompleteContinuation(int32_t code)
 
     std::vector<shared_ptr<JsValue>> argv = { runtime->NewNumber(code) };
     CallAppFunc("onCompleteContinuation", argv);
-}
-
-void JsiDeclarativeEngine::ClearCache()
-{
-    JSNApi::CleanJSVMCache();
 }
 
 void JsiDeclarativeEngine::OnRemoteTerminated()

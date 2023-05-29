@@ -315,14 +315,14 @@ void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const
 
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
+    if (renderContext_) {
+        renderContext_->ToJsonValue(json);
+    }
     // scrollable in AccessibilityProperty
     ACE_PROPERTY_TO_JSON_VALUE(accessibilityProperty_, AccessibilityProperty);
     ACE_PROPERTY_TO_JSON_VALUE(layoutProperty_, LayoutProperty);
     ACE_PROPERTY_TO_JSON_VALUE(paintProperty_, PaintProperty);
     ACE_PROPERTY_TO_JSON_VALUE(pattern_, Pattern);
-    if (renderContext_) {
-        renderContext_->ToJsonValue(json);
-    }
     if (eventHub_) {
         eventHub_->ToJsonValue(json);
     }
@@ -700,11 +700,9 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     if (!isRenderDirtyMarked_) {
         return std::nullopt;
     }
-    ACE_SCOPED_TRACE("CreateRenderTask:PrepareTask");
     auto wrapper = CreatePaintWrapper();
     CHECK_NULL_RETURN_NOLOG(wrapper, std::nullopt);
     auto task = [wrapper, paintProperty = paintProperty_]() {
-        ACE_SCOPED_TRACE("FrameNode::RenderTask");
         wrapper->FlushRender();
         paintProperty->CleanDirty();
     };
@@ -1374,9 +1372,9 @@ RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub() const
     if (!pattern_) {
         return eventHub_->GetOrCreateFocusHub();
     }
-    return eventHub_->GetOrCreateFocusHub(pattern_->GetFocusPattern().GetFocusType(),
-        pattern_->GetFocusPattern().GetFocusable(), pattern_->GetFocusPattern().GetStyleType(),
-        pattern_->GetFocusPattern().GetFocusPaintParams());
+    auto focusPattern = pattern_->GetFocusPattern();
+    return eventHub_->GetOrCreateFocusHub(focusPattern.GetFocusType(), focusPattern.GetFocusable(),
+        focusPattern.GetStyleType(), focusPattern.GetFocusPaintParams());
 }
 
 void FrameNode::OnWindowShow()

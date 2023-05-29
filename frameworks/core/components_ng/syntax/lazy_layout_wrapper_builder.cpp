@@ -125,7 +125,9 @@ void LazyLayoutWrapperBuilder::SwapDirtyAndUpdateBuildCache()
 void LazyLayoutWrapperBuilder::AdjustGridOffset()
 {
     for (const auto& wrapper : childWrappers_) {
-        wrapper->GetHostNode()->AdjustGridOffset();
+        auto frameNode = wrapper->GetHostNode();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->AdjustGridOffset();
     }
 }
 

@@ -30,36 +30,28 @@ class ACE_EXPORT SwiperLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(SwiperLayoutAlgorithm, LayoutAlgorithm);
 
 public:
-    SwiperLayoutAlgorithm() = default;
+    SwiperLayoutAlgorithm(int32_t currentIndex, int32_t startIndex, int32_t endIndex)
+        : currentIndex_(currentIndex), startIndex_(startIndex), endIndex_(endIndex)
+    {}
     ~SwiperLayoutAlgorithm() override = default;
 
     void OnReset() override {}
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    const std::set<int32_t>& GetItemRange()
+    void SetCurrentOffset(float offset)
     {
-        return itemRange_;
+        currentOffset_ = offset;
     }
 
-    void SetMaxChildSize(const SizeF& maxChildSize)
+    float GetCurrentOffset() const
     {
-        maxChildSize_ = maxChildSize;
+        return currentOffset_;
     }
 
-    void SetItemRange(const std::set<int32_t>& itemRange)
+    void SetTargetIndex(std::optional<int32_t> targetIndex)
     {
-        itemRange_ = itemRange;
-    }
-
-    void SetIsLoop(bool isLoop)
-    {
-        isLoop_ = isLoop;
-    }
-
-    void SetCurrentOffsetTimes(float currentOffsetTimes)
-    {
-        currentOffsetTimes_ = currentOffsetTimes;
+        targetIndex_ = targetIndex;
     }
 
     void SetTotalCount(int32_t totalCount)
@@ -67,24 +59,39 @@ public:
         totalCount_ = totalCount;
     }
 
-    void SetDisplayCount(int32_t displayCount)
+    const std::set<int32_t>& GetItemRange()
     {
-        displayCount_ = displayCount;
+        return itemRange_;
     }
 
-    SizeF GetMaxChildSize() const
+    void SetPreItemRange(const std::set<int32_t>& preItemRange)
+    {
+        preItemRange_ = preItemRange;
+    }
+
+    void SetIsLoop(bool isLoop)
+    {
+        isLoop_ = isLoop;
+    }
+
+    int32_t GetCurrentIndex() const
+    {
+        return currentIndex_;
+    }
+
+    const SizeF& GetMaxChildSize() const
     {
         return maxChildSize_;
     }
 
-    void SetOnlyNeedMeasurePages(bool onlyNeedMeasurePages)
+    void SetMaxChildSize(const SizeF& maxChildSize)
     {
-        onlyNeedMeasurePages_ = onlyNeedMeasurePages;
+        maxChildSize_ = maxChildSize;
     }
 
-    bool GetOnlyNeedMeasurePages() const
+    void SetDisplayCount(int32_t displayCount)
     {
-        return onlyNeedMeasurePages_;
+        displayCount_ = displayCount;
     }
 
     void SetHoverRatio(float hoverRatio)
@@ -92,29 +99,42 @@ public:
         hoverRatio_ = hoverRatio;
     }
 private:
-    void MeasureAllPagesToGetMaxChildSize(LayoutWrapper* layoutWrapper, LayoutConstraintF childLayoutConstraint);
-    void MeasurePages(LayoutWrapper* layoutWrapper, LayoutConstraintF childLayoutConstraint);
-    void MeasureIndicator(LayoutWrapper* layoutWrapper, LayoutConstraintF childLayoutConstraint);
-
-    float GetPagesOffsetTimes(int32_t index) const;
-    bool IsVisiblePages(int32_t index) const;
+    void InitItemRange(LayoutWrapper* layoutWrapper);
+    void AddToItemRange(int32_t index);
+    void LoadItemWithDrag(float translateLength);
+    void InitInActiveItems(float translateLength);
+    int32_t ClampIndex(int32_t index);
 
     void PlaceDigitChild(const RefPtr<LayoutWrapper>& indicatorWrapper, const RefPtr<LayoutProperty>& layoutProperty);
     double GetValidEdgeLength(float swiperLength, float indicatorLength, const Dimension& edge);
+    void LayoutOffScreen(LayoutWrapper* layoutWrapper, Axis axis) const;
+    void LoopMeasure(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
+        float& crossSize, float& mainSize);
+    void LoopLayout(LayoutWrapper* layoutWrapper);
+    void NonLoopLayout(LayoutWrapper* layoutWrapper);
+    void SortItems(std::list<int32_t>& preItems, std::list<int32_t>& nextItems, int32_t displayCount);
+    void LayoutItems(
+        LayoutWrapper* layoutWrapper, const std::list<int32_t>& preItems, const std::list<int32_t>& nextItems);
     RefPtr<LayoutWrapper> GetNodeLayoutWrapperByTag(LayoutWrapper* layoutWrapper, const std::string& tagName) const;
-    void MeasureArrow(LayoutWrapper* layoutWrapper, LayoutConstraintF childLayoutConstraint) const;
-    void ArrowLayout(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& arrowWrapper) const;
-
-    std::set<int32_t> itemRange_;
+    void MeasureArrow(const RefPtr<LayoutWrapper>& arrowWrapper, const RefPtr<LayoutProperty>& layoutProperty) const;
+    void ArrowLayout(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& arrowWrapper,
+        const RefPtr<LayoutProperty>& layoutProperty, Axis axis) const;
     bool isLoop_ = true;
-    float currentOffsetTimes_ = 0;
+    int32_t currentIndex_ = 0;
+    int32_t startIndex_;
+    int32_t endIndex_;
+    std::optional<int32_t> targetIndex_;
+    float currentOffset_ = 0.0f;
     int32_t totalCount_ = 0;
     int32_t displayCount_ = 0;
+    float prevMargin_ = 0.0f;
+    float nextMargin_ = 0.0f;
+    std::set<int32_t> itemRange_;
+    std::set<int32_t> preItemRange_;
+    std::vector<int32_t> inActiveItems_;
+    SizeF maxChildSize_;
     // Arrow default hover ratio
     float hoverRatio_ = 1.0f;
-
-    SizeF maxChildSize_ { 0, 0 };
-    bool onlyNeedMeasurePages_ = false;
 };
 
 } // namespace OHOS::Ace::NG

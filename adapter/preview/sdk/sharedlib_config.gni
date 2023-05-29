@@ -10,6 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import("//build/ohos_var.gni")
 import("//foundation/arkui/ace_engine/adapter/preview/build/config.gni")
 
 # Avoid conditional judgment branches caused by dynamic library suffixes.
@@ -102,11 +103,6 @@ common_bin = [
     part_name = "flutter"
   },
   {
-    label = "//third_party/skia:new_skia"
-    subsystem_name = "thirdparty"
-    part_name = "third_party_skia"
-  },
-  {
     label = "//foundation/arkui/napi:ace_napi_ark"
     subsystem_name = "arkui"
     part_name = "napi"
@@ -128,14 +124,14 @@ common_bin = [
   },
   {
     label = "//third_party/openssl:libssl_shared"
-    subsystem_name = "developtools"
-    part_name = "profiler"
+    subsystem_name = "thirdparty"
+    part_name = "openssl"
     lib_names = [ "ssl_openssl" ]
   },
   {
     label = "//third_party/openssl:libcrypto_shared"
-    subsystem_name = "security"
-    part_name = "huks"
+    subsystem_name = "thirdparty"
+    part_name = "openssl"
     lib_names = [ "crypto_openssl" ]
   },
   {
@@ -160,6 +156,16 @@ common_bin = [
     part_name = "ace_engine"
   },
 ]
+
+if (defined(use_new_skia) && use_new_skia) {
+  common_bin += [
+    {
+      label = "//third_party/skia:skia_canvaskit_0310"
+      subsystem_name = "thirdparty"
+      part_name = "third_party_skia"
+    },
+  ]
+}
 
 napi_modules = [
   {
@@ -243,8 +249,8 @@ if (use_mac || use_mingw_win) {
     },
     {
       label = "//third_party/openssl:libcrypto_restool"
-      subsystem_name = "security"
-      part_name = "huks"
+      subsystem_name = "thirdparty"
+      part_name = "openssl"
     },
     {
       label = "//foundation/distributeddatamgr/kv_store/kvstoremock/interfaces/innerkits/distributeddata:distributeddata_inner_mock"

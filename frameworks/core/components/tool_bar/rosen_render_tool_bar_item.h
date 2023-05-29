@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOOL_BAR_ROSEN_RENDER_TOOL_BAR_ITEM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOOL_BAR_ROSEN_RENDER_TOOL_BAR_ITEM_H
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
+#endif
 
 #include "core/components/tool_bar/render_tool_bar_item.h"
 
@@ -30,7 +32,11 @@ public:
 
 private:
     void DrawFocus();
+#ifndef USE_ROSEN_DRAWING
     void DrawShape(SkCanvas& canvas, const Rect& paintRect, const Color& color, double radius);
+#else
+    void DrawShape(RSCanvas& canvas, const Rect& paintRect, const Color& color, double radius);
+#endif
 };
 } // namespace OHOS::Ace
 

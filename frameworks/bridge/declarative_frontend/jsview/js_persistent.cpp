@@ -60,7 +60,7 @@ void JSPersistent::Set(const JSCallbackInfo& args)
         "emulator or a real device instead.");
     return;
 #endif
-    if (args.Length() < 2 || !args[0]->IsString() || !args[1]->IsString()) {
+    if (args.Length() < 2 || !args[0]->IsString() || args[1]->IsUndefined() || args[1]->IsNull()) {
         LOGW("JSPersistent: Fail to set persistent data, args too few");
         return;
     }
@@ -73,6 +73,7 @@ void JSPersistent::Set(const JSCallbackInfo& args)
     }
     auto executor = container->GetTaskExecutor();
     if(!StorageProxy::GetInstance()->GetStorage(executor)) {
+        LOGW("no storage available");
         return;
     }
     StorageProxy::GetInstance()->GetStorage(executor)->SetString(key, value);

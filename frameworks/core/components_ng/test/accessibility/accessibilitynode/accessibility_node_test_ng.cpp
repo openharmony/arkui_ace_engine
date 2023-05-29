@@ -20,7 +20,9 @@
 #include "frameworks/core/accessibility/accessibility_manager.h"
 #include "frameworks/core/accessibility/accessibility_node.h"
 #include "frameworks/core/accessibility/accessibility_utils.h"
-
+#include "core/common/container.h"
+#include "test/mock/core/common/mock_container.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -31,7 +33,7 @@ const char VALUE[] = "value";
 const char TYPE[] = "type";
 const char DISABLED[] = "disabled";
 const char GROUP[] = "accessibilitygroup";
-const char TEXT[] = "accessibilitytext";
+const char ACCESS_TEXT[] = "accessibilitytext";
 const char DESCRIPTION[] = "accessibilitydescription";
 const char IMPORTANCE[] = "accessibilityimportance";
 const char SHOW[] = "show";
@@ -41,11 +43,19 @@ const char CLICK[] = "click";
 const char LONG_PRESS[] = "longpress";
 const char FOCUS[] = "focus";
 const char BLUR[] = "blur";
+const char FAKE[] = "fake";
+const char INPUT_TYPE_CHECKBOX[] = "checkbox";
+const char INPUT_TYPE_RADIO[] = "radio";
+const char INPUT_TYPE_PASSWORD[] = "password";
 } // namespace
 
 class AccessibilityNodeTestNg : public testing::Test {
 public:
-    static void SetUpTestCase() {};
+    static void SetUpTestCase()
+    {
+        MockPipelineBase::SetUp();
+        MockContainer::SetUp();
+    };
     static void TearDownTestCase() {};
 };
 
@@ -59,44 +69,36 @@ HWTEST_F(AccessibilityNodeTestNg, accessibilityNodeTest001, TestSize.Level1)
     std::string nodeName = "accessibilityNodeTest";
     AccessibilityNode accessibilityNode(id, nodeName);
     EXPECT_FALSE(accessibilityNode.ActionClick());
-    ActionClickImpl actionClickImpl = []() {};
-    accessibilityNode.SetActionClickImpl(actionClickImpl);
+    accessibilityNode.SetActionClickImpl([]() {});
     EXPECT_TRUE(accessibilityNode.ActionClick());
 
     EXPECT_FALSE(accessibilityNode.ActionLongClick());
-    ActionLongClickImpl actionLongClickImpl = []() {};
-    accessibilityNode.SetActionLongClickImpl(actionLongClickImpl);
+    accessibilityNode.SetActionLongClickImpl([]() {});
     EXPECT_TRUE(accessibilityNode.ActionLongClick());
 
     EXPECT_FALSE(accessibilityNode.ActionSetText(nodeName));
-    ActionSetTextImpl actionSetTextImpl = [](const std::string& text) {};
-    accessibilityNode.SetActionSetTextImpl(actionSetTextImpl);
+    accessibilityNode.SetActionSetTextImpl([](const std::string& text) {});
     EXPECT_TRUE(accessibilityNode.ActionSetText(nodeName));
 
     EXPECT_FALSE(accessibilityNode.ActionScrollForward());
-    ActionScrollForwardImpl actionScrollForwardImpl = []() { return true; };
-    accessibilityNode.SetActionScrollForward(actionScrollForwardImpl);
+    accessibilityNode.SetActionScrollForward([]() { return true; });
     EXPECT_TRUE(accessibilityNode.ActionScrollForward());
 
     EXPECT_FALSE(accessibilityNode.ActionScrollBackward());
-    ActionScrollBackwardImpl actionScrollBackwardImpl = []() { return true; };
-    accessibilityNode.SetActionScrollBackward(actionScrollBackwardImpl);
+    accessibilityNode.SetActionScrollBackward([]() { return true; });
     EXPECT_TRUE(accessibilityNode.ActionScrollBackward());
 
     bool result = true;
     EXPECT_FALSE(accessibilityNode.ActionAccessibilityFocus(result));
-    ActionAccessibilityFocusImpl actionAccessibilityFocusImpl = [](bool result) {};
-    accessibilityNode.SetActionAccessibilityFocusImpl(actionAccessibilityFocusImpl);
+    accessibilityNode.SetActionAccessibilityFocusImpl([](bool result) {});
     EXPECT_TRUE(accessibilityNode.ActionAccessibilityFocus(result));
 
     EXPECT_FALSE(accessibilityNode.ActionFocus());
-    ActionFocusImpl actionFocusImpl = []() {};
-    accessibilityNode.SetActionFocusImpl(actionFocusImpl);
+    accessibilityNode.SetActionFocusImpl([]() {});
     EXPECT_TRUE(accessibilityNode.ActionFocus());
 
     accessibilityNode.ActionUpdateIds();
-    ActionUpdateIdsImpl actionUpdateIdsImpl = []() {};
-    accessibilityNode.SetActionUpdateIdsImpl(actionUpdateIdsImpl);
+    accessibilityNode.SetActionUpdateIdsImpl([]() {});
     accessibilityNode.ActionUpdateIds();
 }
 
@@ -115,9 +117,9 @@ HWTEST_F(AccessibilityNodeTestNg, accessibilityNodeTest002, TestSize.Level1)
     accessibilityNode.SetPositionInfo(positionInfo);
     EXPECT_EQ(accessibilityNode.rect_.Height(), TEST_NUMBER);
 
-    accessibilityNode.OnFocusChange(false);
     accessibilityNode.focusChangeEventId_ = [](const std::string& str) {};
-    accessibilityNode.OnFocusChange(true);
+    accessibilityNode.SetFocusedState(false);
+    accessibilityNode.SetFocusedState(true);
 
     EXPECT_EQ(accessibilityNode.GetSupportAction().size(), 0);
     accessibilityNode.supportActions_ = static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
@@ -139,7 +141,7 @@ HWTEST_F(AccessibilityNodeTestNg, accessibilityNodeTest003, TestSize.Level1)
     vec.emplace_back(std::make_pair(DISABLED, "ACCESSIBILITY_DISABLED"));
     vec.emplace_back(std::make_pair(TYPE, "ACCESSIBILITY_TYPE"));
     vec.emplace_back(std::make_pair(GROUP, "ACCESSIBILITY_GROUP"));
-    vec.emplace_back(std::make_pair(TEXT, "ACCESSIBILITY_TEXT"));
+    vec.emplace_back(std::make_pair(ACCESS_TEXT, "ACCESSIBILITY_TEXT"));
     vec.emplace_back(std::make_pair(DESCRIPTION, "ACCESSIBILITY_DESCRIPTION"));
     vec.emplace_back(std::make_pair(IMPORTANCE, "ACCESSIBILITY_IMPORTANCE"));
     vec.emplace_back(std::make_pair(ID, "ID"));
@@ -155,6 +157,9 @@ HWTEST_F(AccessibilityNodeTestNg, accessibilityNodeTest003, TestSize.Level1)
     accessibilityNode.attrs_.emplace_back(std::make_pair(IMPORTANCE, "ACCESSIBILITY_IMPORTANCE"));
     accessibilityNode.SetAttr(vec);
     EXPECT_EQ(accessibilityNode.importantForAccessibility_, "ACCESSIBILITY_IMPORTANCE");
+
+    accessibilityNode.SetTag("text");
+    accessibilityNode.SetAttr(vec);
 }
 
 /**
@@ -173,6 +178,7 @@ HWTEST_F(AccessibilityNodeTestNg, accessibilityNodeTest004, TestSize.Level1)
     vec.emplace_back(LONG_PRESS);
     vec.emplace_back(FOCUS);
     vec.emplace_back(BLUR);
+    vec.emplace_back(FAKE);
 
     accessibilityNode.AddEvent(0, vec);
     EXPECT_TRUE(accessibilityNode.isClickable_);
@@ -185,13 +191,152 @@ HWTEST_F(AccessibilityNodeTestNg, accessibilityNodeTest004, TestSize.Level1)
  */
 HWTEST_F(AccessibilityNodeTestNg, accessibilityNodeTest005, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create AccessibilityNode and vector.
+     */
     NodeId id = 0;
     std::string nodeName = "text";
     AccessibilityNode accessibilityNode(id, nodeName);
+
+    /**
+     * @tc.steps: step2. create offset.
+     */
+    Offset offset(1.0, 1.0);
+
+    /**
+     * @tc.steps: step3. create child and add node twice.
+     * @tc.expected: only one can add success.
+     */
     auto child = AceType::MakeRefPtr<AccessibilityNode>(1, "child");
     accessibilityNode.AddNode(child, 0);
+    accessibilityNode.AddNode(child, 0);
     EXPECT_EQ(accessibilityNode.children_.size(), 1);
+
+    /**
+     * @tc.steps: step4. call AddOffsetForChildren.
+     * @tc.expected: accessibilityNode offset is meet expectations.
+     */
+    accessibilityNode.AddOffsetForChildren(offset);
+    EXPECT_EQ(accessibilityNode.GetLeft(), 1);
+
+    /**
+     * @tc.steps: step5. call remove node.
+     * @tc.expected: child remove success.
+     */
     accessibilityNode.RemoveNode(child);
     EXPECT_EQ(accessibilityNode.children_.size(), 0);
+}
+
+/**
+ * @tc.name: accessibilityNodeTest006
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityNodeTestNg, accessibilityNodeTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create AccessibilityNode and vector.
+     */
+    NodeId id = 0;
+    AccessibilityNode currentNode(id, "test");
+    std::vector<std::pair<std::string, std::string>> vec;
+
+    /**
+     * @tc.steps: step2. config pare and call SetAttr.
+     * @tc.expected: currentNode params text_ is meet expectations.
+     */
+    vec.emplace_back(std::make_pair(VALUE, "value"));
+    currentNode.SetAttr(vec);
+    EXPECT_EQ(currentNode.text_, "value");
+
+    /**
+     * @tc.steps: step3. create a parent node and setTag recall SetAttr.
+     * @tc.expected: currentNode params text_ is meet expectations.
+     */
+    auto parentNode = AceType::MakeRefPtr<AccessibilityNode>(1, "parent");
+    currentNode.SetParentNode(parentNode);
+    currentNode.SetTag("text");
+    currentNode.SetAttr(vec);
+    EXPECT_NE(parentNode->text_, "value");
+
+    /**
+     * @tc.steps: step4. put a fake value in pair and set tag popup.
+     * @tc.expected: currentNode params text_ is meet expectations.
+     */
+    vec.emplace_back(std::make_pair(FAKE, "FAKE_VALUE"));
+    parentNode->SetTag("popup");
+    currentNode.SetAttr(vec);
+    EXPECT_EQ(parentNode->text_, "value");
+
+    /**
+     * @tc.steps: step5. set tag input, put a wrong type in pair, initialization parameters.
+     * @tc.expected: currentNode params isCheckable_ is false.
+     */
+    currentNode.SetTag("input");
+    currentNode.isFocusable_ = false;
+    currentNode.isCheckable_ = false;
+    currentNode.isCheckable_ = false;
+    vec.emplace_back(std::make_pair(TYPE, FAKE));
+    currentNode.SetAttr(vec);
+    EXPECT_FALSE(currentNode.isCheckable_);
+
+    /**
+     * @tc.steps: step6. remove fake pair and put type with INPUT_TYPE_CHECKBOX.
+     * @tc.expected: currentNode params isCheckable_ is true.
+     */
+    vec.pop_back();
+    vec.emplace_back(std::make_pair(TYPE, INPUT_TYPE_CHECKBOX));
+    currentNode.SetAttr(vec);
+    EXPECT_TRUE(currentNode.isCheckable_);
+
+    /**
+     * @tc.steps: step7. remove fake pair and put type with INPUT_TYPE_RADIO.
+     * @tc.expected: currentNode params isCheckable_ is true.
+     */
+    currentNode.isCheckable_ = false;
+    vec.pop_back();
+    vec.emplace_back(std::make_pair(TYPE, INPUT_TYPE_RADIO));
+    currentNode.SetAttr(vec);
+    EXPECT_TRUE(currentNode.isCheckable_);
+
+    /**
+     * @tc.steps: step8. remove fake pair and put type with INPUT_TYPE_PASSWORD.
+     * @tc.expected: currentNode params isPassword_ is true.
+     */
+    vec.pop_back();
+    vec.emplace_back(std::make_pair(TYPE, INPUT_TYPE_PASSWORD));
+    currentNode.SetAttr(vec);
+    EXPECT_TRUE(currentNode.isPassword_);
+}
+
+/**
+ * @tc.name: accessibilityNodeTest007
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityNodeTestNg, accessibilityNodeTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create EventMarker with empty eventId and AccessibilityNode.
+     */
+    NodeId id = 0;
+    int32_t pageId = 1;
+    auto marker = EventMarker("", "event", pageId);
+    std::string nodeName = "text";
+    AccessibilityNode accessibilityNode(id, nodeName);
+
+    /**
+     * @tc.steps: step2. call SetFocusChangeEventMarker function.
+     * @tc.expected: the param focusChangeEventId_ in accessibilityNode is null.
+     */
+    accessibilityNode.SetFocusChangeEventMarker(marker);
+    EXPECT_FALSE(accessibilityNode.focusChangeEventId_);
+
+    /**
+     * @tc.steps: step3. set eventId not empty and config Container, then recall SetFocusChangeEventMarker.
+     * @tc.expected: the param focusChangeEventId_ in accessibilityNode is null.
+     */
+    marker.data_->eventId = std::to_string(id);
+    MockContainer::Current()->pipelineContext_ = MockPipelineBase::GetCurrent();
+    accessibilityNode.SetFocusChangeEventMarker(marker);
+    EXPECT_FALSE(accessibilityNode.focusChangeEventId_);
 }
 } // namespace OHOS::Ace::NG

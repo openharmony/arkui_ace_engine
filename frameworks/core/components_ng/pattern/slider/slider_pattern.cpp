@@ -535,22 +535,27 @@ void SliderPattern::PaintFocusState()
 
 bool SliderPattern::OnKeyEvent(const KeyEvent& event)
 {
+    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    auto reverse = paintProperty->GetReverseValue(false);
     if (event.action == KeyAction::DOWN) {
         if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_LEFT) ||
             (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP)) {
-            MoveStep(-1);
+            reverse ? MoveStep(1) : MoveStep(-1);
             if (showTips_) {
                 InitializeBubble();
             }
             PaintFocusState();
+            return true;
         }
         if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT) ||
             (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
-            MoveStep(1);
+            reverse ? MoveStep(-1) : MoveStep(1);
             if (showTips_) {
                 InitializeBubble();
             }
             PaintFocusState();
+            return true;
         }
     } else if (event.action == KeyAction::UP) {
         if (showTips_) {

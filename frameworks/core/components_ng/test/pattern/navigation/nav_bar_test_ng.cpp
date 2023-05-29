@@ -23,7 +23,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
-#include "core/components_ng/pattern/navigation/navigation_view.h"
+#include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 
 using namespace testing;
 using namespace testing::ext;

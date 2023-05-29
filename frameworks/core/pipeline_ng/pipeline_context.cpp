@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <memory>
 
+
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -128,11 +129,13 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     taskScheduler_.AddDirtyLayoutNode(dirty);
     ForceLayoutForImplicitAnimation();
 #ifdef UICAST_COMPONENT_SUPPORTED
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto distributedUI = container->GetDistributedUI();
-    CHECK_NULL_VOID(distributedUI);
-    distributedUI->AddDirtyLayoutNode(dirty->GetId());
+    do {
+        auto container = Container::Current();
+        CHECK_NULL_BREAK(container);
+        auto distributedUI = container->GetDistributedUI();
+        CHECK_NULL_BREAK(distributedUI);
+        distributedUI->AddDirtyLayoutNode(dirty->GetId());
+    } while (false);
 #endif
     hasIdleTasks_ = true;
     RequestFrame();
@@ -145,11 +148,13 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     taskScheduler_.AddDirtyRenderNode(dirty);
     ForceRenderForImplicitAnimation();
 #ifdef UICAST_COMPONENT_SUPPORTED
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto distributedUI = container->GetDistributedUI();
-    CHECK_NULL_VOID(distributedUI);
-    distributedUI->AddDirtyRenderNode(dirty->GetId());
+    do {
+        auto container = Container::Current();
+        CHECK_NULL_BREAK(container);
+        auto distributedUI = container->GetDistributedUI();
+        CHECK_NULL_BREAK(distributedUI);
+        distributedUI->AddDirtyRenderNode(dirty->GetId());
+    } while (false);
 #endif
     hasIdleTasks_ = true;
     RequestFrame();
@@ -211,12 +216,14 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     window_->RecordFrameTime(nanoTimestamp, abilityName);
 
 #ifdef UICAST_COMPONENT_SUPPORTED
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto distributedUI = container->GetDistributedUI();
-    CHECK_NULL_VOID(distributedUI);
-    distributedUI->ApplyOneUpdate();
-    distributedUI->OnTreeUpdate();
+    do {
+        auto container = Container::Current();
+        CHECK_NULL_BREAK(container);
+        auto distributedUI = container->GetDistributedUI();
+        CHECK_NULL_BREAK(distributedUI);
+        distributedUI->ApplyOneUpdate();
+        distributedUI->OnTreeUpdate();
+    } while (false);
 #endif
 
     FlushAnimation(GetTimeFromExternalTimer());
@@ -865,14 +872,16 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     CHECK_RUN_ON(UI);
 
 #ifdef UICAST_COMPONENT_SUPPORTED
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto distributedUI = container->GetDistributedUI();
-    CHECK_NULL_VOID(distributedUI);
-    if (distributedUI->IsSinkMode()) {
-        distributedUI->BypassEvent(point, isSubPipe);
-        return;
-    }
+    do {
+        auto container = Container::Current();
+        CHECK_NULL_BREAK(container);
+        auto distributedUI = container->GetDistributedUI();
+        CHECK_NULL_BREAK(distributedUI);
+        if (distributedUI->IsSinkMode()) {
+            distributedUI->BypassEvent(point, isSubPipe);
+            return;
+        }
+    } while (false);
 #endif
 
     HandleEtsCardTouchEvent(point);
@@ -888,6 +897,8 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         // Set focus state inactive while touch down event received。
         SetIsFocusActive(false);
         LOGD("receive touch down event, first use touch test to collect touch event target");
+        // Remove the select overlay node when touched down.
+        eventManager_->HandleGlobalEventNG(scalePoint, selectOverlayManager_);
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
@@ -1071,6 +1082,8 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
 {
     CHECK_RUN_ON(UI);
 
+    lastMouseEvent_ = event;
+
     if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
         // Mouse right button press event set focus inactive here.
         // Mouse left button press event will set focus inactive in touch process.
@@ -1098,6 +1111,25 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     RequestFrame();
 }
 
+void PipelineContext::FlushMouseEvent()
+{
+    MouseEvent event;
+    event.x = lastMouseEvent_.x;
+    event.y = lastMouseEvent_.y;
+    event.action = MouseAction::MOVE;
+    event.button = MouseButton::NONE_BUTTON;
+    event.sourceType = SourceType::MOUSE;
+
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(rootNode_);
+    auto scaleEvent = event.CreateScaleEvent(viewScale_);
+    TouchRestrict touchRestrict { TouchRestrict::NONE };
+    touchRestrict.sourceType = event.sourceType;
+    touchRestrict.hitTestType = SourceType::MOUSE;
+    eventManager_->MouseTest(scaleEvent, rootNode_, touchRestrict);
+    eventManager_->DispatchMouseHoverEventNG(scaleEvent);
+}
+
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
 {
     if (!onFocus_) {
@@ -1121,15 +1153,9 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         eventManager_->DispatchKeyboardShortcut(event);
     }
     // TAB key set focus state from inactive to active.
-    if (event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB }) && SetIsFocusActive(true)) {
-        // if current focus node show focus state. The key event won't trigger onKeyEvent.
-        return true;
-    }
-    if (!isFocusActive_) {
-        LOGD("KeyEvent: {%{public}d, %{public}d} won't be dispatched because current focus state is inactive.",
-            event.code, event.action);
-        return false;
-    }
+    // If return success. This tab key will just trigger onKeyEvent process.
+    isTabJustTriggerOnKeyEvent_ =
+        (event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB }) && SetIsFocusActive(true));
     auto lastPage = stageManager_->GetLastPage();
     auto mainNode = lastPage ? lastPage : rootNode_;
     CHECK_NULL_RETURN(mainNode, false);

@@ -36,6 +36,11 @@ void SelectOverlayPattern::UpdateShowArea(const RectF& area)
     GTEST_LOG_(INFO) << "UpdateShowArea has called";
 }
 
+void SelectOverlayPattern::ShowOrHiddenMenu(bool isHidden)
+{
+    GTEST_LOG_(INFO) << "ShowOrHiddenMenu has called";
+}
+
 void SelectOverlayPattern::OnAttachToFrameNode() {}
 
 void SelectOverlayPattern::OnDetachFromFrameNode(FrameNode* frameNode) {}

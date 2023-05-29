@@ -73,8 +73,8 @@ public:
     void BezierCurveTo(const BezierCurveParam& param);
     void QuadraticCurveTo(const QuadraticCurveParam& param);
 
-    void FillText(const std::string& text, double x, double y);
-    void StrokeText(const std::string& text, double x, double y);
+    void FillText(const std::string& text, double x, double y, std::optional<double> maxWidth);
+    void StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth);
     double MeasureText(const std::string& text, const PaintState& state);
     double MeasureTextHeight(const std::string& text, const PaintState& state);
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
@@ -133,6 +133,7 @@ public:
 
     void SetTextDirection(TextDirection direction);
     void SetFilterParam(const std::string& filterStr);
+    TransformParam GetTransform() const;
     
 private:
     void OnAttachToFrameNode() override;

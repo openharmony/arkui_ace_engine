@@ -165,7 +165,6 @@ public:
             theme->cursorWidth_ = pattern->GetAttr<Dimension>("cursor_width", 1.5_vp);
             theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, Color());
             theme->pressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, Color());
-            theme->borderColor_ = pattern->GetAttr<Color>(PATTERN_BRODER_COLOR, Color());
             theme->borderRadiusSize_ = Radius(pattern->GetAttr<Dimension>(BORDER_RADIUS_SIZE, 20.0_vp));
             theme->disabledIconFillColor_ = theme->bgColor_.BlendOpacity(theme->disableOpacityRatio_);
             theme->passwordErrorTextColor_ = pattern->GetAttr<Color>(ERROR_PASSWORD_CONTENT_COLOR, Color());
@@ -266,11 +265,6 @@ public:
     const Color& GetPressColor() const
     {
         return pressColor_;
-    }
-
-    const Color& GetBorderColor() const
-    {
-        return borderColor_;
     }
 
     const Radius& GetBorderRadiusSize() const
@@ -429,7 +423,6 @@ private:
     Radius borderRadius_;
 
     Color bgColor_;
-    Color borderColor_;
     Radius borderRadiusSize_;
     Color placeholderColor_;
     Color focusBgColor_;

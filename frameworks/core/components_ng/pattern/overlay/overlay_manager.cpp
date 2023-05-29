@@ -231,16 +231,20 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInS
             ContainerScope scope(id);
             auto pipeline = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID_NOLOG(pipeline);
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(pipelineContext);
             auto taskExecutor = pipeline->GetTaskExecutor();
             CHECK_NULL_VOID_NOLOG(taskExecutor);
             taskExecutor->PostTask(
-                [weak, menuWK, id, isInSubWindow]() {
+                [weak, menuWK, id, isInSubWindow, pipelineContext]() {
                     auto menu = menuWK.Upgrade();
                     auto overlayManager = weak.Upgrade();
                     CHECK_NULL_VOID_NOLOG(menu && overlayManager);
                     ContainerScope scope(id);
                     overlayManager->FocusOverlayNode(menu, isInSubWindow);
                     overlayManager->CallOnShowMenuCallback();
+                    // Trigger mouse move action
+                    pipelineContext->FlushMouseEvent();
                 },
                 TaskExecutor::TaskType::UI);
         });
@@ -1264,8 +1268,13 @@ void OverlayManager::PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTra
     CHECK_NULL_VOID(context);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto pageNode = pipeline->GetStageManager()->GetLastPage();
-    auto pageHeight = pageNode->GetGeometryNode()->GetFrameSize().Height();
+    auto stageManager = pipeline->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto pageNode = stageManager->GetLastPage();
+    CHECK_NULL_VOID(pageNode);
+    auto geometryNode = pageNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto pageHeight = geometryNode->GetFrameSize().Height();
     if (isTransitionIn) {
         auto offset = pageHeight - sheetHeight_;
         if (isFirstTransition) {
@@ -1310,8 +1319,13 @@ void OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto pageNode = pipeline->GetStageManager()->GetLastPage();
-    auto pageHeight = pageNode->GetGeometryNode()->GetFrameSize().Height();
+    auto stageManager = pipeline->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto pageNode = stageManager->GetLastPage();
+    CHECK_NULL_VOID(pageNode);
+    auto geometryNode = pageNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto pageHeight = geometryNode->GetFrameSize().Height();
     auto largeHeight = pageHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
     if (sheetStyle.sheetMode.has_value()) {
         if (sheetStyle.sheetMode == SheetMode::MEDIUM) {
@@ -1460,12 +1474,6 @@ void OverlayManager::UpdatePixelMapScale(float& scale)
     CHECK_NULL_VOID(hub);
     RefPtr<PixelMap> pixelMap = hub->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
-    if (pixelMap->GetWidth() > Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH ||
-        pixelMap->GetHeight() > Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) {
-        float scaleWidth = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH) / pixelMap->GetWidth();
-        float scaleHeight = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) / pixelMap->GetHeight();
-        scale = std::min(scaleWidth, scaleHeight);
-    }
 }
 
 void OverlayManager::RemoveFilter()

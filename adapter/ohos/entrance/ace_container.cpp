@@ -49,6 +49,7 @@
 #include "core/common/flutter/flutter_task_executor.h"
 #include "core/common/hdc_register.h"
 #include "core/common/platform_window.h"
+#include "core/common/plugin_manager.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/window.h"
 #include "core/components/theme/theme_constants.h"
@@ -165,6 +166,7 @@ void AceContainer::Destroy()
 
         // 2. Destroy Frontend on JS thread.
         RefPtr<Frontend> frontend;
+        LOGI("Frontend Swap");
         frontend_.Swap(frontend);
         if (GetSettings().usePlatformAsUIThread && GetSettings().useUIAsJSThread) {
             frontend->UpdateState(Frontend::State::ON_DESTROY);
@@ -726,7 +728,6 @@ void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t
 #ifdef ENABLE_ROSEN_BACKEND
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-
     auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
 #else
     auto platformWindow = PlatformWindow::Create(view);
@@ -755,24 +756,6 @@ void AceContainer::SetViewNew(
         auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
         container->AttachView(window, view, density, width, height, rsWindow->GetWindowId(), nullptr);
     }
-#endif
-}
-
-void AceContainer::SetView(
-    AceView* view, double density, int32_t width, int32_t height, const std::shared_ptr<Window>& window)
-{
-#ifdef ENABLE_ROSEN_BACKEND
-    CHECK_NULL_VOID(view);
-    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(view->GetInstanceId()));
-    CHECK_NULL_VOID(container);
-    auto taskExecutor = container->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    CHECK_NULL_VOID(window);
-    window->SetTaskExecutor(taskExecutor);
-    window->SetInstanceId(view->GetInstanceId());
-    window->Init();
-
-    container->AttachView(window, view, density, width, height, window->GetWindowId(), nullptr);
 #endif
 }
 
@@ -808,19 +791,6 @@ bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string
     LOGD("RunPage content=[%{private}s]", content.c_str());
     front->RunPage(pageId, content, params);
     return true;
-}
-
-void AceContainer::ClearEngineCache(int32_t instanceId)
-{
-    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
-    CHECK_NULL_VOID(container);
-    ContainerScope scope(instanceId);
-    if (!container->IsFormRender()) {
-        return;
-    }
-    auto formFrontend = AceType::DynamicCast<FormFrontendDeclarative>(container->GetFrontend());
-    CHECK_NULL_VOID(formFrontend);
-    formFrontend->ClearEngineCache();
 }
 
 bool AceContainer::PushPage(int32_t instanceId, const std::string& content, const std::string& params)
@@ -1466,6 +1436,7 @@ void AceContainer::UpdateConfiguration(
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);
     themeManager->LoadResourceThemes();
+    OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
     NotifyConfigurationChange(!deviceAccess.empty());
 }
 
@@ -1541,11 +1512,6 @@ sptr<IRemoteObject> AceContainer::GetToken()
     }
     LOGE("fail to get Token");
     return nullptr;
-}
-
-std::shared_ptr<AbilityRuntime::Context> AceContainer::GetAbilityRuntimeContext()
-{
-    return runtimeContext_.lock();
 }
 
 // ArkTsCard start

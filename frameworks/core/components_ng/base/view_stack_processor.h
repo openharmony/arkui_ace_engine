@@ -90,6 +90,16 @@
         cast##target->Reset##name();                                            \
     } while (false)
 
+#define ACE_RESET_PAINT_PROPERTY_WITH_FLAG(target, name, changeFlag)            \
+    do {                                                                        \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        CHECK_NULL_VOID(frameNode);                                             \
+        auto cast##target = frameNode->GetPaintProperty<target>();              \
+        CHECK_NULL_VOID(cast##target);                                          \
+        cast##target->Reset##name();                                            \
+        cast##target->UpdatePropertyChangeFlag(changeFlag);                     \
+    } while (false)
+
 #define ACE_RESET_RENDER_CONTEXT(target, name)                                  \
     do {                                                                        \
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \

@@ -419,7 +419,6 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
         return;
     }
 
-#ifdef OHOS_PLATFORM
     RefPtr<RosenMaskPainter> mask = AceType::DynamicCast<RosenMaskPainter>(mask_);
     if (mask && mask->HasReady()) {
 #ifndef USE_ROSEN_DRAWING
@@ -444,7 +443,7 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
         rsNode->SetMask(mask->GetRSMask(GetPaintRect(), drawingPath));
 #endif
     }
-#endif
+
     if ((!backDecoration_) || backDecoration_->GetImage() ||
         (backDecoration_->GetBackgroundColor() != Color::TRANSPARENT) || !(backDecoration_->GetGradient().IsValid())) {
         // no need to paint gradient
@@ -460,9 +459,7 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
     auto size = RSSize(GetLayoutSize().Width(), GetLayoutSize().Height());
 #endif
     auto shader = RosenDecorationPainter::CreateGradientShader(backDecoration_->GetGradient(), size, dipScale_);
-#ifdef OHOS_PLATFORM
     rsNode->SetBackgroundShader(Rosen::RSShader::CreateRSShader(shader));
-#endif
 }
 
 #ifndef USE_ROSEN_DRAWING

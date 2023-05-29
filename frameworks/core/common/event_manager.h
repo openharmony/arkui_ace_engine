@@ -34,7 +34,8 @@ namespace OHOS::Ace {
 
 namespace NG {
 class FrameNode;
-}
+class SelectOverlayManager;
+} // namespace NG
 class RenderNode;
 class Element;
 class TextOverlayManager;
@@ -125,6 +126,7 @@ public:
         return instanceId_;
     }
     void HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<TextOverlayManager>& textOverlayManager);
+    void HandleGlobalEventNG(const TouchEvent& touchPoint, const RefPtr<NG::SelectOverlayManager>& selectOverlayManager);
 
     void CollectTabIndexNodes(const RefPtr<FocusNode>& rootNode);
 

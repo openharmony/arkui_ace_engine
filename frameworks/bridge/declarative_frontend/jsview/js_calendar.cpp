@@ -81,14 +81,22 @@ void JSCalendar::JSBind(BindingTarget globalObj)
 
 void JSCalendar::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1 || !info[0]->IsObject()) {
+    if (!info[0]->IsObject()) {
         return;
     }
     auto obj = JSRef<JSObject>::Cast(info[0]);
-    auto date = JSRef<JSObject>::Cast(obj->GetProperty("date"));
-    auto currentData = JSRef<JSObject>::Cast(obj->GetProperty("currentData"));
-    auto preData = JSRef<JSObject>::Cast(obj->GetProperty("preData"));
-    auto nextData = JSRef<JSObject>::Cast(obj->GetProperty("nextData"));
+    auto dataJsVal = obj->GetProperty("date");
+    auto currentDataJsVal = obj->GetProperty("currentData");
+    auto preDataJsVal = obj->GetProperty("preData");
+    auto nextDataJsVal = obj->GetProperty("nextData");
+    if (!(dataJsVal->IsObject() && currentDataJsVal->IsObject() && preDataJsVal->IsObject() &&
+        nextDataJsVal->IsObject())) {
+        return;
+    }
+    auto date = JSRef<JSObject>::Cast(dataJsVal);
+    auto currentData = JSRef<JSObject>::Cast(currentDataJsVal);
+    auto preData = JSRef<JSObject>::Cast(preDataJsVal);
+    auto nextData = JSRef<JSObject>::Cast(nextDataJsVal);
     auto controllerObj = obj->GetProperty("controller");
     auto yearValue = date->GetProperty("year");
     auto monthValue = date->GetProperty("month");
