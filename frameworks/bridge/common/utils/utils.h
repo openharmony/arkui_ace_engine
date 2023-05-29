@@ -324,6 +324,21 @@ inline TextDirection ConvertStrToTextDirection(const std::string& val)
     auto index = BinarySearchFindIndex(textDirectionTable, ArraySize(textDirectionTable), val.c_str());
     return index < 0 ? TextDirection::LTR : textDirectionTable[index].value;
 }
+
+TextFieldOverflowX ConvertStrToTextFieldOverflowX(const std::string& val)
+{
+    const LinearMapNode<TextFieldOverflowX> textFieldOverflowXTable[] = {
+        { "auto", TextFieldOverflowX::AUTO },
+        { "hidden", TextFieldOverflowX::HIDDEN },
+        { "no-content", TextFieldOverflowX::NO_CONTENT },
+        { "no-display", TextFieldOverflowX::NO_DISPLAY },
+        { "scroll", TextFieldOverflowX::SCROLL },
+        { "visible", TextFieldOverflowX::VISIBLE },
+    };
+    auto index = BinarySearchFindIndex(textFieldOverflowXTable, ArraySize(textFieldOverflowXTable), val.c_str());
+    return index < 0 ? TextFieldOverflowX::HIDDEN : textFieldOverflowXTable[index].value;
+}
+
 inline std::vector<std::string> ConvertStrToFontFamilies(const std::string& family)
 {
     std::vector<std::string> fontFamilies;

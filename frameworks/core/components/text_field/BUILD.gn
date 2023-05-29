@@ -21,6 +21,7 @@ build_component("text_field") {
     "text_field_component.cpp",
     "text_field_controller.cpp",
     "text_field_element.cpp",
+    "text_field_scroll_bar_controller.cpp",
   ]
 
   if (!ace_use_new_skia) {
