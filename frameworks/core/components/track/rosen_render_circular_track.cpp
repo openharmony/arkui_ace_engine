@@ -81,10 +81,10 @@ void DrawArc(RenderContext& context, const RenderRingInfo& trackInfo)
             colors[index] = trackInfo.gradient.GetColors()[index].GetColor().GetValue();
         }
         colors[trackInfo.gradient.GetColors().size()] = trackInfo.gradient.GetColors()[0].GetColor().GetValue();
-        float position[] = { COLOR_STOP, 2.0 * COLOR_STOP, 1.0 };
+        RSScalar position[] = { COLOR_STOP, 2.0 * COLOR_STOP, 1.0 };
 
-        std::vector<RSColorQuad> vecColor(colors, colors + sizeof(colors));
-        std::vector<RSScalar> vecPos(position, position + sizeof(position));
+        std::vector<RSColorQuad> vecColor(colors, colors + sizeof(colors) / sizeof(RSColorQuad));
+        std::vector<RSScalar> vecPos(position, position + sizeof(position) / sizeof(RSScalar));
 
         pen.SetShaderEffect(RSShaderEffect::CreateSweepGradientByMatrix(
             RSPoint(trackInfo.center.GetX(), trackInfo.center.GetY()), vecColor, vecPos,
