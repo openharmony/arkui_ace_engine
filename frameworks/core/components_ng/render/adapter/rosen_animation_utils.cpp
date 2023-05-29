@@ -114,4 +114,20 @@ void AnimationUtils::StopAnimation(const std::shared_ptr<AnimationUtils::Animati
         animation->animations_.clear();
     }
 }
+
+void AnimationUtils::PauseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation)
+{
+    CHECK_NULL_VOID(animation);
+    for (auto& ani : animation->animations_) {
+        ani->Pause();
+    }
+}
+
+void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation)
+{
+    CHECK_NULL_VOID(animation);
+    for (auto& ani : animation->animations_) {
+        ani->Resume();
+    }
+}
 } // namespace OHOS::Ace

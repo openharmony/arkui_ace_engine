@@ -50,6 +50,8 @@ public:
         const PropertyCallback& callback, const FinishCallback& finishCallback = nullptr,
         const RepeatCallback& repeatCallback = nullptr);
     static void StopAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
+    static void PauseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
+    static void ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
 };
 } // namespace OHOS::Ace
 
