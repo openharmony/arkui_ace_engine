@@ -213,6 +213,7 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
             layoutProperty->UpdateVisibility(visible);
         }
+        UpdateConfiguration();
         return false;
     }
     CreateCardContainer();
@@ -686,5 +687,14 @@ void FormPattern::EnableDrag()
     auto eventHub = GetHost()->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDragStart(std::move(dragStart));
+}
+
+void FormPattern::UpdateConfiguration()
+{
+    auto localeTag = AceApplicationInfo::GetInstance().GetLocaleTag();
+    if (localeTag != localeTag_ && subContainer_) {
+        localeTag_ = localeTag;
+        subContainer_->UpdateConfiguration();
+    }
 }
 } // namespace OHOS::Ace::NG
