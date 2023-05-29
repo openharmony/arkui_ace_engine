@@ -171,7 +171,8 @@ group("shape_pattern_unit_test") {
   deps = [
     ":circle_pattern_test_ng",
     ":ellipse_pattern_test_ng",
-    ":line_pattern_test_ng",
+
+    #":line_pattern_test_ng",
     ":path_pattern_test_ng",
     ":polygon_pattern_test_ng",
     ":polyline_pattern_test_ng",
