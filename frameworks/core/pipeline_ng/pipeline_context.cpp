@@ -1082,8 +1082,6 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
 {
     CHECK_RUN_ON(UI);
 
-    lastMouseEvent_ = event;
-
     if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
         // Mouse right button press event set focus inactive here.
         // Mouse left button press event will set focus inactive in touch process.
@@ -1109,25 +1107,6 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     eventManager_->DispatchMouseHoverEventNG(scaleEvent);
     eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
     RequestFrame();
-}
-
-void PipelineContext::FlushMouseEvent()
-{
-    MouseEvent event;
-    event.x = lastMouseEvent_.x;
-    event.y = lastMouseEvent_.y;
-    event.action = MouseAction::MOVE;
-    event.button = MouseButton::NONE_BUTTON;
-    event.sourceType = SourceType::MOUSE;
-
-    CHECK_RUN_ON(UI);
-    CHECK_NULL_VOID(rootNode_);
-    auto scaleEvent = event.CreateScaleEvent(viewScale_);
-    TouchRestrict touchRestrict { TouchRestrict::NONE };
-    touchRestrict.sourceType = event.sourceType;
-    touchRestrict.hitTestType = SourceType::MOUSE;
-    eventManager_->MouseTest(scaleEvent, rootNode_, touchRestrict);
-    eventManager_->DispatchMouseHoverEventNG(scaleEvent);
 }
 
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
