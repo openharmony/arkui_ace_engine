@@ -29,7 +29,7 @@ public:
     GridUtils() = delete;
     ~GridUtils() = delete;
 
-    static std::vector<float> ParseArgs(const std::string& args, float size, float gap);
+    static std::string ParseArgs(const std::string& args);
     static float GetMainGap(const RefPtr<GridLayoutProperty>& gridLayoutProperty, const SizeF& frameSize, Axis axis);
     static float GetCrossGap(const RefPtr<GridLayoutProperty>& gridLayoutProperty, const SizeF& frameSize, Axis axis);
 };

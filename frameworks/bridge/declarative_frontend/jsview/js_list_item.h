@@ -34,6 +34,7 @@ public:
     static void SelectCallback(const JSCallbackInfo& args);
     static void JsBorderRadius(const JSCallbackInfo& info);
     static void JsOnDragStart(const JSCallbackInfo& info);
+    static void JsParseDeleteArea(const JSCallbackInfo& args, const JSRef<JSVal>& jsValue, bool isStartArea);
 };
 
 } // namespace OHOS::Ace::Framework

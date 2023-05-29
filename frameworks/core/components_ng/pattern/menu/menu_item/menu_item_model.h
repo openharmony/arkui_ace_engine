@@ -35,8 +35,7 @@ public:
     virtual ~MenuItemModel() = default;
 
     // createMenuItem with custom
-    virtual void Create(const RefPtr<NG::UINode>& customNode) {};
-
+    virtual void Create(const RefPtr<NG::UINode>& customNode);
     virtual void Create(const MenuItemProperties& props);
     virtual void SetSelected(bool isSelected = false);
     virtual void SetSelectIcon(bool isShow = false);
@@ -44,9 +43,11 @@ public:
     virtual void SetOnChange(std::function<void(bool)>&& onChange);
     virtual void SetFontSize(const Dimension& fontSize);
     virtual void SetFontWeight(FontWeight weight);
+    virtual void SetFontStyle(Ace::FontStyle style);
     virtual void SetFontColor(const std::optional<Color>& color);
     virtual void SetLabelFontSize(const Dimension& fontSize);
     virtual void SetLabelFontWeight(FontWeight weight);
+    virtual void SetLabelFontStyle(Ace::FontStyle style);
     virtual void SetLabelFontColor(const std::optional<Color>& color);
     virtual void SetSelectedChangeEvent(std::function<void(bool)>&& selectedChangeEvent);
 

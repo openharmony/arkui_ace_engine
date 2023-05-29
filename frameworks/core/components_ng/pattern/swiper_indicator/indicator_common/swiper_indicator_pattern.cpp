@@ -64,6 +64,8 @@ void SwiperIndicatorPattern::OnModifyDone()
         UpdateTextContent(layoutProperty, firstTextNode, lastTextNode);
         host->AddChild(firstTextNode);
         host->AddChild(lastTextNode);
+    } else {
+        host->Clean();
     }
 
     auto swiperEventHub = swiperPattern->GetEventHub<SwiperEventHub>();
@@ -220,6 +222,18 @@ void SwiperIndicatorPattern::HandleHoverEvent(bool isHover)
     isHover_ = isHover;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    if (swiperLayoutProperty->GetHoverShowValue(false)) {
+        swiperPattern->ArrowHover(isHover_);
+    }
+    if (swiperIndicatorType_ == SwiperIndicatorType::DOT) {
+        swiperPattern->IndicatorHover(isHover_);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

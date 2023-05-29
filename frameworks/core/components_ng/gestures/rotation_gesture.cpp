@@ -18,7 +18,18 @@
 #include "core/components_ng/gestures/recognizers/rotation_recognizer.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr double MAX_ANGLE = 360.0;
+} // namespace
 
+RotationGesture::RotationGesture(int32_t fingers, double angle): Gesture(fingers)
+{
+    if (angle > MAX_ANGLE || angle <= 0) {
+        angle_ = 1.0;
+    } else {
+        angle_ = angle;
+    }
+}
 RefPtr<NGGestureRecognizer> RotationGesture::CreateRecognizer()
 {
     auto rotationRecognizer = AceType::MakeRefPtr<RotationRecognizer>(fingers_, angle_);

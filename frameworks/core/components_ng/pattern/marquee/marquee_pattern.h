@@ -23,13 +23,13 @@
 #include "core/components_ng/pattern/marquee/marquee_event_hub.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_algorithm.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_property.h"
+#include "core/components_ng/pattern/marquee/marquee_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/render/paint_property.h"
 #include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
-inline constexpr double DEFAULT_MARQUEE_SCROLL_AMOUNT = 6.0;
-inline constexpr int32_t DEFAULT_MARQUEE_LOOP = -1;
 using TimeCallback = std::function<void()>;
 
 class MarqueePattern : public Pattern {
@@ -42,6 +42,11 @@ public:
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<MarqueeLayoutProperty>();
+    }
+
+    RefPtr<PaintProperty> CreatePaintProperty() override
+    {
+        return MakeRefPtr<MarqueePaintProperty>();
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -60,6 +65,10 @@ public:
     }
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+
+protected:
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
 private:
     void OnModifyDone() override;
@@ -70,17 +79,27 @@ private:
     void FireFinishEvent() const;
 
     void StartMarqueeAnimation();
-    void StopMarqueeAnimation(bool stopAndStart, bool statusChanged);
+    void StopMarqueeAnimation(bool stopAndStart);
     void SetTextOffset(float offsetX);
     void RegistVisibleAreaChangeCallback();
     void OnVisibleAreaChange(bool visible);
-    bool lastStartStatus_ = false;
-    bool statusChanged_ = false;
-    bool forceStropAnimation_ = false;
-    int32_t repeatCount_ = 0;
+    bool OnlyPlayStatusChange();
+    void ChangeAnimationPlayStatus();
+    void StoreProperties();
+    void PlayMarqueeAnimation(float start, int32_t playCount, bool needSecondPlay);
+    void OnAnimationFinish();
+    float CalculateStart();
+    float CalculateEnd();
+    void RegistOritationListener();
+    bool measureChanged_ = false;
     int32_t animationId_ = 0;
-    RefPtr<FrameNode> textNode_;
     bool isRegistedAreaCallback_ = false;
+    std::shared_ptr<AnimationUtils::Animation> animation_;
+    bool playStatus_ = false;
+    double scrollAmount_ = DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx();
+    int32_t loop_ = -1;
+    MarqueeDirection direction_ = MarqueeDirection::LEFT;
+    bool isOritationListenerRegisted_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(MarqueePattern);
 };
 } // namespace OHOS::Ace::NG

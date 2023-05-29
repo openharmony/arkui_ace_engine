@@ -185,6 +185,7 @@ void JSList::SetLanes(const JSCallbackInfo& info)
     if (ParseJsInteger<int32_t>(info[0], laneNum)) {
         // when [lanes] is set, [laneConstrain_] of list component will be reset to std::nullopt
         ListModel::GetInstance()->SetLanes(laneNum);
+        ListModel::GetInstance()->SetLaneConstrain(-1.0_vp, -1.0_vp);
         return;
     }
     if (info[0]->IsObject()) {
@@ -200,9 +201,12 @@ void JSList::SetLanes(const JSCallbackInfo& info)
         if (!ParseJsDimensionVp(minLengthParam, minLengthValue)
             || !ParseJsDimensionVp(maxLengthParam, maxLengthValue)) {
             LOGW("minLength param or maxLength param is invalid");
+            ListModel::GetInstance()->SetLanes(1);
+            ListModel::GetInstance()->SetLaneConstrain(-1.0_vp, -1.0_vp);
             return;
         }
         ListModel::GetInstance()->SetLaneConstrain(minLengthValue, maxLengthValue);
+        ListModel::GetInstance()->SetLanes(1);
     }
 }
 
@@ -581,9 +585,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("onItemDrop", &JSList::ItemDropCallback);
     JSClass<JSList>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
-    JSClass<JSList>::Inherit<JSContainerBase>();
-    JSClass<JSList>::Inherit<JSViewAbstract>();
-    JSClass<JSList>::Bind(globalObj);
+    JSClass<JSList>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

@@ -27,7 +27,7 @@ const int32_t DIVIDER_SIZE = 2;
 } // namespace
 void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
@@ -69,7 +69,7 @@ void DatePickerColumnLayoutAlgorithm::ChangeTextStyle(uint32_t index, uint32_t s
     const RefPtr<LayoutWrapper>& childLayoutWrapper, LayoutWrapper* layoutWrapper)
 {
     SizeF frameSize = { -1.0f, -1.0f };
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);

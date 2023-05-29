@@ -18,6 +18,7 @@
 
 #include <memory>
 
+#include "base/json/json_util.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/property/property.h"
 
@@ -40,6 +41,8 @@ public:
     virtual void Reset() {}
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+
+    virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 
 protected:
     void UpdatePaintProperty(const PaintProperty* renderProperty) {}

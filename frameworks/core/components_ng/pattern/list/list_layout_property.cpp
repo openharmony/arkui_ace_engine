@@ -14,9 +14,23 @@
  */
 
 #include "core/components_ng/pattern/list/list_layout_property.h"
+
+#include "base/utils/string_utils.h"
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+V2::ItemDivider ItemDividerFromJson(const std::unique_ptr<JsonValue>& json)
+{
+    LOGD("UITree json=%{public}s", json->ToString().c_str());
+    V2::ItemDivider divider;
+    divider.strokeWidth = Dimension::FromString(json->GetString("strokeWidth"));
+    divider.startMargin = Dimension::FromString(json->GetString("startMargin"));
+    divider.endMargin = Dimension::FromString(json->GetString("endMargin"));
+    divider.color = Color::ColorFromString(json->GetString("color"));
+    return divider;
+}
+} // namespace
 
 void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
@@ -70,5 +84,16 @@ void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     } else {
         json->Put("sticky", "StickyStyle.None");
     }
+}
+
+void ListLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
+{
+    UpdateSpace(Dimension::FromString(json->GetString("space")));
+    UpdateInitialIndex(StringUtils::StringToInt(json->GetString("initialIndex")));
+    auto dividerJson = json->GetObject("divider");
+    if (dividerJson->Contains("strokeWidth")) {
+        UpdateDivider(ItemDividerFromJson(dividerJson));
+    }
+    LayoutProperty::FromJson(json);
 }
 }

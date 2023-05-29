@@ -39,6 +39,8 @@ ohos_fuzztest("ResFuzzTest") {
     "$ace_root/frameworks/base/json",
     "$ace_root/frameworks/base/",
     "$ace_root/frameworks",
+    "$ace_root",
+    "$root_out_dir/arkui/framework",
     cjson_root,
   ]
 
@@ -61,6 +63,12 @@ ohos_fuzztest("ResFuzzTest") {
     "ipc:ipc_core",
     "window_manager:libdm",
   ]
+
+  ldflags = []
+  if (ace_engine_feature_enable_coverage) {
+    cflags += [ "--coverage" ]
+    ldflags += [ "--coverage" ]
+  }
 }
 
 ###############################################################################

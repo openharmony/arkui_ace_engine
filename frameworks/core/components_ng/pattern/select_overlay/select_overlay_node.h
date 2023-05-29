@@ -51,9 +51,13 @@ public:
 
     void MoreOrBackAnimation(bool isMore);
 
+    bool IsInSelectedOrSelectOverlayArea(const PointF& point);
+
 private:
     void CreateToolBar();
-    void CreateExtensionToolBar(const std::vector<MenuOptionsParam>& menuOptionItems, int32_t index);
+    void CreateExtensionToolBar();
+    bool AddSystemDefaultOptions(float defaultOptionWidth, float fontWidth, float maxWidth, float& allocatedSize);
+    void AddExtensionMenuOptions(const std::vector<MenuOptionsParam>& menuOptionItems, int32_t index);
     void GetDefaultButtonAndMenuWidth(float& defaultOptionWidth, float& fontWidth, float& maxWidth);
 
     void MoreAnimation();
@@ -78,6 +82,9 @@ private:
     // Controls that only default menus can be converted to extended menus, and extended menus can be converted to
     // default menus.
     bool isExtensionMenu_ = false;
+
+    // Label whether the menu default button needs to appear within the extended menu.
+    bool isShowInExtension_[3] = { false };
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayNode);
 };

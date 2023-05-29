@@ -47,10 +47,13 @@ public:
 
     virtual std::string GetText() const
     {
-        return "";
+        return propText_.value_or("");
     }
 
-    virtual void SetText(const std::string& text) {}
+    virtual void SetText(const std::string& text)
+    {
+        propText_ = text;
+    }
 
     virtual bool IsCheckable() const
     {
@@ -116,6 +119,8 @@ public:
     {
         json->Put("scrollable", IsScrollable());
     }
+
+    virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 
     virtual bool HasRange() const
     {
@@ -337,6 +342,7 @@ public:
 
 protected:
     virtual void SetSpecificSupportAction() {}
+    std::optional<std::string> propText_;
     WeakPtr<FrameNode> host_;
     uint64_t supportActions_ = 0;
     ActionSetTextImpl actionSetTextImpl_;

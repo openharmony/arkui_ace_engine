@@ -28,7 +28,7 @@ class MultiFingersRecognizer : public NGGestureRecognizer {
 
 public:
     MultiFingersRecognizer() = default;
-    explicit MultiFingersRecognizer(int32_t fingers) : fingers_(fingers) {}
+    explicit MultiFingersRecognizer(int32_t fingers);
 
     ~MultiFingersRecognizer() override = default;
 

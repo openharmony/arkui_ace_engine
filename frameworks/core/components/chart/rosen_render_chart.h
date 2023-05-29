@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CHART_ROSEN_RENDER_CHART_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CHART_ROSEN_RENDER_CHART_H
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkPaint.h"
 #include "include/core/SkPath.h"
+#endif
 
 #include "base/geometry/offset.h"
 #include "base/geometry/rect.h"
@@ -45,7 +47,7 @@ private:
     void PaintVerticalAxis(RenderContext& context, const Offset& offset, const Rect& paintRect);
 
     Offset ConvertDataToPosition(const Rect& paintRegion, const PointInfo& point);
-
+#ifndef USE_ROSEN_DRAWING
     void SetEdgeStyle(const PointInfo& point, SkPaint& paint) const;
 
     void PaintStylePoints(SkCanvas* canvas, const Rect& paintRegion, const MainChart& chartData);
@@ -74,6 +76,40 @@ private:
 
     void PaintBar(SkCanvas* canvas, SkPaint& paint, const std::vector<LineInfo>& barGroupData, const Rect& paintRect,
         int32_t barGroupNum, int32_t barsAreaNum, int32_t barGroupIndex);
+#else
+    void SetEdgeStyle(const PointInfo& point, RSPen& pen) const;
+
+    void PaintStylePoints(
+        RSCanvas* canvas, const Rect& paintRegion, const MainChart& chartData);
+
+    void PaintPoint(RSCanvas* canvas, const Offset& offset, RSPen pen,
+        RSBrush brush, const PointInfo& point);
+
+    void PaintText(RSCanvas* canvas, const Rect& paintRegion, const MainChart& chartData);
+
+    void PaintLinearGraph(RSCanvas* canvas, const Rect& paintRect);
+
+    void PaintLineEdge(RSCanvas* canvas, RSPath& path, const SegmentInfo segmentInfo,
+        double thickness, bool drawGradient = false);
+
+    void UpdateLineGradientPoint(const std::vector<LineInfo>& pointInfo, const MainChart& line, const Rect& paintRect);
+
+    void PaintLineGradient(RSCanvas* canvas, RSPath& path, const Rect& paintRect,
+        Color fillColor, const PointInfo& peekPoint);
+
+    int32_t PaintLine(uint32_t index, const std::vector<LineInfo>& line, RSPath& path,
+        const MainChart& data, const Rect& paintRect);
+
+    void AddCubicPath(RSPath& path, const Rect& paintRect, const std::vector<LineInfo>& line,
+        uint32_t index, bool isEnd);
+
+    std::shared_ptr<RSShaderEffect> CreateFillGradientShader(
+        const Rect& paintRect, const Color& fillColor, double top);
+
+    void PaintBar(RSCanvas* canvas, RSPen& pen, RSBrush brush,
+        const std::vector<LineInfo>& barGroupData, const Rect& paintRect, int32_t barGroupNum, int32_t barsAreaNum,
+        int32_t barGroupIndex);
+#endif
 
     Rect GetBarsAreaPaintRect(const Rect& paintRect, int32_t barsAreaIndex);
 

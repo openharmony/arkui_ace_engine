@@ -62,6 +62,7 @@ ohos_unittest("stepper_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_method.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/swiper_indicator/mock_swiper_arrow_pattern.cpp",
 
@@ -76,6 +77,7 @@ ohos_unittest("stepper_pattern_test_ng") {
     "$ace_root/frameworks/core/components/theme/theme_constants.cpp",
     "$ace_root/frameworks/core/components/theme/theme_utils.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/image/image_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loading_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_painter.cpp",
@@ -125,6 +127,7 @@ ohos_unittest("stepper_pattern_test_ng") {
     "$ace_root/frameworks/base/utils/base_id.cpp",
     "$ace_root/frameworks/base/utils/string_expression.cpp",
     "$ace_root/frameworks/base/utils/string_utils.cpp",
+    "$ace_root/frameworks/base/utils/time_util.cpp",
 
     # components
     "$ace_root/frameworks/core/components/common/layout/grid_column_info.cpp",
@@ -163,6 +166,7 @@ ohos_unittest("stepper_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/layout/layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_builder.cpp",
+    "$ace_root/frameworks/core/components_ng/property/border_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",
     "$ace_root/frameworks/core/components_ng/property/grid_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",

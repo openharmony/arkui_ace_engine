@@ -83,6 +83,15 @@ class LocalStorage extends NativeLocalStorage {
             this.initializeProps(initializingProperties);
         }
     }
+    /*
+      get access to provded LocalStorage instance thru Stake model
+      @StageModelOnly
+      @form
+      @since 10
+    */
+    static getShared() {
+        return LocalStorage.GetShared();
+    }
     /**
      * clear storage and init with given properties
      * @param initializingProperties
@@ -447,7 +456,7 @@ class LocalStorage extends NativeLocalStorage {
     }
 }
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -472,26 +481,26 @@ class LocalStorage extends NativeLocalStorage {
  */
 class AppStorage extends LocalStorage {
     /** singleton class, app can not create instances
-     *
-     * not a public / sdk function
+    *
+    * not a public / sdk function
     */
     constructor(initializingProperties) {
         super(initializingProperties);
     }
     /**
-     * create and initialize singleton
-     * initialzie with all properties and their values that Object.keys(params) returns
-     * Property values must not be undefined.
-     *
-     * not a public / sdk function
-     */
-    static CreateSingleton(initializingPropersties) {
-        if (!AppStorage.Instance_) {
+    * create and initialize singleton
+    * initialzie with all properties and their values that Object.keys(params) returns
+    * Property values must not be undefined.
+    *
+    * not a public / sdk function
+    */
+    static createSingleton(initializingPropersties) {
+        if (!AppStorage.instance_) {
             
-            AppStorage.Instance_ = new AppStorage(initializingPropersties);
+            AppStorage.instance_ = new AppStorage(initializingPropersties);
         }
         else {
-            stateMgmtConsole.error("AppStorage.CreateNewInstance(..): instance exists already, internal error!");
+            stateMgmtConsole.error("AppStorage.createNewInstance(..): instance exists already, internal error!");
         }
     }
     /**
@@ -500,20 +509,28 @@ class AppStorage extends LocalStorage {
     * Same as @see LocalStorage.link()
     *
     * @param propName name of source property in AppStorage
-     * @param linkUser IPropertySubscriber to be notified when source changes,
-     * @param subscribersName the linkUser (subscriber) uses this name for the property
-     *      this name will be used in propertyChange(propName) callback of IMultiPropertiesChangeSubscriber
-     * @returns  SynchedPropertyTwoWay{Simple|Object| object with given LocalStoage prop as its source.
-     *           Apps can use SDK functions of base class SubscribedAbstractProperty<S>
-     *           return undefiend if named property does not already exist in AppStorage
-     *
-     * @since 7
-     */
-    static Link(key, linkUser, subscribersName) {
-        return AppStorage.GetOrCreate().link(key, linkUser, subscribersName);
+    * @param linkUser IPropertySubscriber to be notified when source changes,
+    * @param subscribersName the linkUser (subscriber) uses this name for the property
+    *      this name will be used in propertyChange(propName) callback of IMultiPropertiesChangeSubscriber
+    * @returns  SynchedPropertyTwoWay{Simple|Object| object with given LocalStoage prop as its source.
+    *           Apps can use SDK functions of base class SubscribedAbstractProperty<S>
+    *           return undefiend if named property does not already exist in AppStorage
+    *
+    * @since 10
+    */
+    static link(key, linkUser, subscribersName) {
+        return AppStorage.getOrCreate().link(key, linkUser, subscribersName);
     }
     /**
-    * Like @see link(), but will create and initialize a new source property in LocalStorge if missing
+    * @see link
+    * @since 7
+    * @deprecated
+    */
+    static Link(key, linkUser, subscribersName) {
+        return AppStorage.getOrCreate().link(key, linkUser, subscribersName);
+    }
+    /**
+    * Like @see link(), but will create and initialize a new source property in LocalStorage if missing
     *
     * Same as @see LocalStorage.setAndLink()
     *
@@ -526,79 +543,121 @@ class AppStorage extends LocalStorage {
     * @returns SynchedPropertyTwoWay{Simple|Object| object with given LocalStoage prop as  its source.
     *          Apps can use SDK functions of base class SubscribedAbstractProperty<S>
     *
+    * @since 10
+    */
+    static setAndLink(key, defaultValue, linkUser, subscribersName) {
+        return AppStorage.getOrCreate().setAndLink(key, defaultValue, linkUser, subscribersName);
+    }
+    /**
+    * @see setAndLink
     * @since 7
+    * @deprecated
     */
     static SetAndLink(key, defaultValue, linkUser, subscribersName) {
-        return AppStorage.GetOrCreate().setAndLink(key, defaultValue, linkUser, subscribersName);
+        return AppStorage.getOrCreate().setAndLink(key, defaultValue, linkUser, subscribersName);
     }
     /**
-   * create and return a one-way sync ('prop') to named property
-   *
-   * Same as @see LocalStorage.prop()
-   *
-   * @param propName name of source property in AppStorage
-   * @param propUser IPropertySubscriber to be notified when source changes,
-   * @param subscribersName the linkUser (subscriber) uses this name for the property
-   *      this name will be used in propertyChange(propName) callback of IMultiPropertiesChangeSubscriber
-   * @returns  SynchedPropertyOneWay{Simple|Object| object with given LocalStoage prop as  its source.
-   *           Apps can use SDK functions of base class SubscribedAbstractProperty<S>
-   *           return undefiend if named property does not already exist in AppStorage.
-   * @since 7
-   */
+    * create and return a one-way sync ('prop') to named property
+    *
+    * Same as @see LocalStorage.prop()
+    *
+    * @param propName name of source property in AppStorage
+    * @param propUser IPropertySubscriber to be notified when source changes,
+    * @param subscribersName the linkUser (subscriber) uses this name for the property
+    *      this name will be used in propertyChange(propName) callback of IMultiPropertiesChangeSubscriber
+    * @returns  SynchedPropertyOneWay{Simple|Object| object with given LocalStoage prop as  its source.
+    *           Apps can use SDK functions of base class SubscribedAbstractProperty<S>
+    *           return undefiend if named property does not already exist in AppStorage.
+    * @since 10
+    */
+    static prop(propName, propUser, subscribersName) {
+        return AppStorage.getOrCreate().prop(propName, propUser, subscribersName);
+    }
+    /**
+    * @see prop
+    * @since 7
+    * @deprecated
+    */
     static Prop(propName, propUser, subscribersName) {
-        return AppStorage.GetOrCreate().prop(propName, propUser, subscribersName);
+        return AppStorage.getOrCreate().prop(propName, propUser, subscribersName);
     }
     /**
-   * Like @see prop(), will create and initialize a new source property in AppStorage if missing
-   *
-   * Same as @see LocalStorage.setAndProp()
-   *
-   * @param propName name of source property in AppStorage
-   * @param defaultValue value to be used for initializing if new creating new property in AppStorage.
-   *        default value must be of type S, must not be undefined or null.
-   * @param propUser IPropertySubscriber to be notified when returned 'prop' changes,
-   * @param subscribersName the propUser (subscriber) uses this name for the property
-   *      this name will be used in propertyChange(propName) callback of IMultiPropertiesChangeSubscriber
-   * @returns  SynchedPropertyOneWay{Simple|Object| object with given LocalStoage prop as its source.
-   *           Apps can use SDK functions of base class SubscribedAbstractProperty<S>
-   *
-   * @since 7
-   */
+    * Like @see prop(), will create and initialize a new source property in AppStorage if missing
+    *
+    * Same as @see LocalStorage.setAndProp()
+    *
+    * @param propName name of source property in AppStorage
+    * @param defaultValue value to be used for initializing if new creating new property in AppStorage.
+    *        default value must be of type S, must not be undefined or null.
+    * @param propUser IPropertySubscriber to be notified when returned 'prop' changes,
+    * @param subscribersName the propUser (subscriber) uses this name for the property
+    *      this name will be used in propertyChange(propName) callback of IMultiPropertiesChangeSubscriber
+    * @returns  SynchedPropertyOneWay{Simple|Object| object with given LocalStoage prop as its source.
+    *           Apps can use SDK functions of base class SubscribedAbstractProperty<S>
+    *
+    * @since 10
+    */
+    static setAndProp(key, defaultValue, propUser, subscribersName) {
+        return AppStorage.getOrCreate().setAndProp(key, defaultValue, propUser, subscribersName);
+    }
+    /**
+    * @see setAndProp
+    * @since 7
+    * @deprecated
+    */
     static SetAndProp(key, defaultValue, propUser, subscribersName) {
-        return AppStorage.GetOrCreate().setAndProp(key, defaultValue, propUser, subscribersName);
+        return AppStorage.getOrCreate().setAndProp(key, defaultValue, propUser, subscribersName);
     }
     /**
-     * Check if AppStorge has a property with given name
-     * return true if prooperty with given name exists
-     * same as ES6 Map.prototype.has()
-     *
-     * Same as @see LocalStorage.has()
-     *
-     * @param propName searched property
-     * @returns true if property with such name exists in AppStorage
-     *
-     * @since 7
-     */
+    * Check if AppStorage has a property with given name
+    * return true if property with given name exists
+    * same as ES6 Map.prototype.has()
+    *
+    * Same as @see LocalStorage.has()
+    *
+    * @param propName searched property
+    * @returns true if property with such name exists in AppStorage
+    *
+    * @since 10
+    */
+    static has(key) {
+        return AppStorage.getOrCreate().has(key);
+    }
+    /**
+   * @see has()
+   * @since 7
+   * @deprecated
+   */
     static Has(key) {
-        return AppStorage.GetOrCreate().has(key);
+        return AppStorage.getOrCreate().has(key);
     }
     /**
     * Returns value of given property
     * return undefined if no property with this name
-    *
     *
     * @Same as see LocalStorage.get()
     *
     * @param propName
     * @returns property value if found or undefined
     *
+    * @since 10
+    *
+    */
+    static get(key) {
+        return AppStorage.getOrCreate().get(key);
+    }
+    /**
+    * @see get
+    * @since 7
+    * @deprecated
+    *
     */
     static Get(key) {
-        return AppStorage.GetOrCreate().get(key);
+        return AppStorage.getOrCreate().get(key);
     }
     /**
     * Set value of given property in AppStorage
-    * Methosd sets nothing and returns false if property with this name does not exist
+    * Method sets nothing and returns false if property with this name does not exist
     * or if newValue is `undefined` or `null` (`undefined`, `null` value are not allowed for state variables).
     *
     * Same as @see LocalStorage.set
@@ -607,10 +666,18 @@ class AppStorage extends LocalStorage {
     * @param newValue must be of type T and must not be undefined or null
     * @returns true on success, i.e. when above conditions are satisfied, otherwise false
     *
+    * @since 10
+    */
+    static set(key, newValue) {
+        return AppStorage.getOrCreate().set(key, newValue);
+    }
+    /**
+    * @see set
     * @since 7
+    * @deprecated
     */
     static Set(key, newValue) {
-        return AppStorage.GetOrCreate().set(key, newValue);
+        return AppStorage.getOrCreate().set(key, newValue);
     }
     /**
    * Set value of given property, if it exists, @see set() .
@@ -624,35 +691,51 @@ class AppStorage extends LocalStorage {
    * @param newValue must be of type T and must not be undefined or null
    * @returns true on success, i.e. when above conditions are satisfied, otherwise false
    *
-   * @since 7
+   * @since 10
    */
-    static SetOrCreate(key, newValue) {
-        AppStorage.GetOrCreate().setOrCreate(key, newValue);
+    static setOrCreate(key, newValue) {
+        AppStorage.getOrCreate().setOrCreate(key, newValue);
     }
     /**
-     * Delete property from StorageBase
-     * Use with caution:
-     * Before deleting a prop from AppStorage all its subscribers need to
-     * unsubscribe from the property.
-     * This method fails and returns false if given property still has subscribers
-     * Another reason for failing is unkmown property.
-     *
-     * Developer advise:
-     * Subscribers are created with @see link(), @see prop()
-     * and also via @LocalStorageLink and @LocalStorageProp state variable decorators.
-     * That means as long as their is a @Component instance that uses such decorated variable
-     * or a sync relationship with a SubscribedAbstractProperty variable the property can nit
-     * (and also should not!) be deleted from AppStorage.
-     *
-     * Same as @see LocalStorage.delete()
-     *
-     * @param propName
-     * @returns false if method failed
-     *
-     * @since 7
+    * @see setOrCreate
+    * @since 7
+    * @deprecated
+    */
+    static SetOrCreate(key, newValue) {
+        AppStorage.getOrCreate().setOrCreate(key, newValue);
+    }
+    /**
+    * Delete property from StorageBase
+    * Use with caution:
+    * Before deleting a prop from AppStorage all its subscribers need to
+    * unsubscribe from the property.
+    * This method fails and returns false if given property still has subscribers
+    * Another reason for failing is unkmown property.
+    *
+    * Developer advise:
+    * Subscribers are created with @see link(), @see prop()
+    * and also via @LocalStorageLink and @LocalStorageProp state variable decorators.
+    * That means as long as their is a @Component instance that uses such decorated variable
+    * or a sync relationship with a SubscribedAbstractProperty variable the property can nit
+    * (and also should not!) be deleted from AppStorage.
+    *
+    * Same as @see LocalStorage.delete()
+    *
+    * @param propName
+    * @returns false if method failed
+    *
+    * @since 10
+    */
+    static delete(key) {
+        return AppStorage.getOrCreate().delete(key);
+    }
+    /**
+    * @see delete
+    * @since 7
+    * @deprecated
     */
     static Delete(key) {
-        return AppStorage.GetOrCreate().delete(key);
+        return AppStorage.getOrCreate().delete(key);
     }
     /**
     * Provide names of all properties in AppStorage
@@ -662,53 +745,77 @@ class AppStorage extends LocalStorage {
     *
     * @returns return a Map Iterator
     *
-    * @since 7
+    * @since 10
    */
+    static keys() {
+        return AppStorage.getOrCreate().keys();
+    }
+    /**
+    * @see keys
+    * @since 7
+    * @deprecated
+    */
     static Keys() {
-        return AppStorage.GetOrCreate().keys();
+        return AppStorage.getOrCreate().keys();
     }
     /**
-     * Returns number of properties in AppStorage
-     * same as Map.prototype.size()
-     *
-     * Same as @see LocalStorage.size()
-     *
-     * @param propName
-     * @returns return number of properties
-     *
-     * @since 7
-     */
+    * Returns number of properties in AppStorage
+    * same as Map.prototype.size()
+    *
+    * Same as @see LocalStorage.size()
+    *
+    * @param propName
+    * @returns return number of properties
+    *
+    * @since 10
+    */
+    static size() {
+        return AppStorage.getOrCreate().size();
+    }
+    /**
+    * @see size
+    * @since 7
+    * @deprecated
+    */
     static Size() {
-        return AppStorage.GetOrCreate().size();
+        return AppStorage.getOrCreate().size();
     }
     /**
-     * delete all properties from the AppStorage
-     *
-     * @see delete(), same as @see LocalStorage.clear()
-     *
-     * precondition is that there are no subscribers.
-     * method returns false and deletes no poperties if there is any property
-     * that still has subscribers
-     *
-     * @since 7
-     */
+    * delete all properties from the AppStorage
+    *
+    * @see delete(), same as @see LocalStorage.clear()
+    *
+    * precondition is that there are no subscribers.
+    * method returns false and deletes no poperties if there is any property
+    * that still has subscribers
+    *
+    * @since 10
+    */
+    static clear() {
+        return AppStorage.getOrCreate().clear();
+    }
+    /**
+    * @see clear
+    * @since 7
+    * @deprecated
+    */
     static Clear() {
-        return AppStorage.GetOrCreate().clear();
+        return AppStorage.getOrCreate().clear();
     }
     /**
-     * Same as @see Clear().
-     *
-     * @since 7, depreciated, used Clear() instead!
-     *
-     */
+    * Same as @see clear().
+    *
+    * @since 7, deprecated, used clear() instead!
+    *
+    */
     static StaticClear() {
-        return AppStorage.Clear();
+        return AppStorage.clear();
     }
     /**
     * not a public / sdk function
     */
-    static AboutToBeDeleted() {
-        AppStorage.GetOrCreate().aboutToBeDeleted();
+    static aboutToBeDeleted() {
+        AppStorage.getOrCreate().aboutToBeDeleted();
     }
     /**
      * return number of subscribers to named property
@@ -716,8 +823,8 @@ class AppStorage extends LocalStorage {
      *
      * not a public / sdk function
     */
-    static NumberOfSubscribersTo(propName) {
-        return AppStorage.GetOrCreate().numberOfSubscrbersTo(propName);
+    static numberOfSubscribersTo(propName) {
+        return AppStorage.getOrCreate().numberOfSubscrbersTo(propName);
     }
     /**
     * Subscribe to value change notifications of named property
@@ -732,52 +839,68 @@ class AppStorage extends LocalStorage {
     * @param subscriber object that implements ISinglePropertyChangeSubscriber interface
     * @returns false if named property does not exist
     *
+    * @since 10
+    */
+    static subscribeToChangesOf(propName, subscriber) {
+        return AppStorage.getOrCreate().subscribeToChangesOf(propName, subscriber);
+    }
+    /**
+    * @see subscribeToChangesOf
     * @since 7
+    * @deprecated
     */
     static SubscribeToChangesOf(propName, subscriber) {
-        return AppStorage.GetOrCreate().subscribeToChangesOf(propName, subscriber);
+        return AppStorage.getOrCreate().subscribeToChangesOf(propName, subscriber);
     }
     /**
-     * inverse of @see SubscribeToChangesOf,
-     * same as @see LocalStorage.subscribeToChangesOf()
-     *
-     * @param propName property in AppStorage to subscribe to
-     * @param subscriberId id of the subscrber passed to @see subscribeToChangesOf
-     * @returns false if named property does not exist
-     *
-     * @since 7
-     */
+    * inverse of @see SubscribeToChangesOf,
+    * same as @see LocalStorage.subscribeToChangesOf()
+    *
+    * @param propName property in AppStorage to subscribe to
+    * @param subscriberId id of the subscrber passed to @see subscribeToChangesOf
+    * @returns false if named property does not exist
+    *
+    * @since 10
+    */
+    static unsubscribeFromChangesOf(propName, subscriberId) {
+        return AppStorage.getOrCreate().unsubscribeFromChangesOf(propName, subscriberId);
+    }
+    /**
+    * @see unsubscribeFromChangesOf
+    * @since 7
+    * @deprecated
+    */
     static UnsubscribeFromChangesOf(propName, subscriberId) {
-        return AppStorage.GetOrCreate().unsubscribeFromChangesOf(propName, subscriberId);
+        return AppStorage.getOrCreate().unsubscribeFromChangesOf(propName, subscriberId);
     }
     /**
-     * Unimplemenrted, currently all properties of AppStorage are mutable.
+     * Unimplemented, currently all properties of AppStorage are mutable.
      *
-     * @since 7, depreciated
+     * @since 7, deprecated
      */
     static IsMutable(key) {
         return true;
     }
     /**
-     * not a public / sdk function
-     */
-    static __CreateSync(storagePropName, defaultValue, factoryFunc) {
-        return AppStorage.GetOrCreate().__createSync(storagePropName, defaultValue, factoryFunc);
+    * not a public / sdk function
+    */
+    static __createSync(storagePropName, defaultValue, factoryFunc) {
+        return AppStorage.getOrCreate().__createSync(storagePropName, defaultValue, factoryFunc);
     }
     /**
-     * not a public / sdk function
-     */
-    static GetOrCreate() {
-        if (!AppStorage.Instance_) {
-            stateMgmtConsole.warn("AppStorage instance missing. Use AppStorage.CreateInstance(initObj). Creating instance without any initialization.");
-            AppStorage.Instance_ = new AppStorage({});
+    * not a public / sdk function
+    */
+    static getOrCreate() {
+        if (!AppStorage.instance_) {
+            stateMgmtConsole.warn("AppStorage instance missing. Use AppStorage.createInstance(initObj). Creating instance without any initialization.");
+            AppStorage.instance_ = new AppStorage({});
         }
-        return AppStorage.Instance_;
+        return AppStorage.instance_;
     }
 }
 // instance functions below:
 // Should all be protected, but TS lang does not allow access from static member to protected member
-AppStorage.Instance_ = undefined;
+AppStorage.instance_ = undefined;
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -1162,7 +1285,7 @@ class SubscribaleAbstract {
     }
 }
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1199,83 +1322,111 @@ class PersistentStorage {
      * internal function, not part of the SDK
      *
      */
-    static ConfigureBackend(storage) {
-        PersistentStorage.Storage_ = storage;
+    static configureBackend(storage) {
+        PersistentStorage.storage_ = storage;
     }
     /**
      * private, use static functions!
      */
-    static GetOrCreate() {
-        if (PersistentStorage.Instance_) {
+    static getOrCreate() {
+        if (PersistentStorage.instance_) {
             // already initialized
-            return PersistentStorage.Instance_;
+            return PersistentStorage.instance_;
         }
-        PersistentStorage.Instance_ = new PersistentStorage();
-        return PersistentStorage.Instance_;
+        PersistentStorage.instance_ = new PersistentStorage();
+        return PersistentStorage.instance_;
     }
     /**
      *
      * internal function, not part of the SDK
      */
-    static AboutToBeDeleted() {
-        if (!PersistentStorage.Instance_) {
+    static aboutToBeDeleted() {
+        if (!PersistentStorage.instance_) {
             return;
         }
-        PersistentStorage.GetOrCreate().aboutToBeDeleted();
-        PersistentStorage.Instance_ = undefined;
+        PersistentStorage.getOrCreate().aboutToBeDeleted();
+        PersistentStorage.instance_ = undefined;
     }
     /**
      * Add property 'key' to AppStorage properties whose current value will be
-     * persistemt.
+     * persistent.
      * If AppStorage does not include this property it will be added and initializes
      * with given value
      *
-     * @since 9
+     * @since 10
      *
      * @param key property name
      * @param defaultValue If AppStorage does not include this property it will be initialized with this value
      *
      */
-    static PersistProp(key, defaultValue) {
-        PersistentStorage.GetOrCreate().persistProp(key, defaultValue);
+    static persistProp(key, defaultValue) {
+        PersistentStorage.getOrCreate().persistProp(key, defaultValue);
     }
     /**
-     * Reverse of @see PersistProp
+     * @see persistProp
+     * @deprecated
+     */
+    static PersistProp(key, defaultValue) {
+        PersistentStorage.getOrCreate().persistProp(key, defaultValue);
+    }
+    /**
+     * Reverse of @see persistProp
      * @param key no longer persist the property named key
      *
-     * @since 9
+     * @since 10
+     */
+    static deleteProp(key) {
+        PersistentStorage.getOrCreate().deleteProp(key);
+    }
+    /**
+     * @see deleteProp
+     * @deprecated
      */
     static DeleteProp(key) {
-        PersistentStorage.GetOrCreate().deleteProp(key);
+        PersistentStorage.getOrCreate().deleteProp(key);
     }
     /**
      * Persist given AppStorage properties with given names.
      * If a property does not exist in AppStorage, add it and initialize it with given value
-     * works as @see PersistProp for multiple properties.
+     * works as @see persistProp for multiple properties.
      *
      * @param properties
      *
-     * @since 9
+     * @since 10
      *
      */
+    static persistProps(properties) {
+        PersistentStorage.getOrCreate().persistProps(properties);
+    }
+    /**
+     * @see persistProps
+     * @deprecated
+     */
     static PersistProps(properties) {
-        PersistentStorage.GetOrCreate().persistProps(properties);
+        PersistentStorage.getOrCreate().persistProps(properties);
     }
     /**
      * Inform persisted AppStorage property names
      * @returns array of AppStorage keys
      *
-     * @since 9
+     * @since 10
      */
-    static Keys() {
+    static keys() {
         let result = [];
-        const it = PersistentStorage.GetOrCreate().keys();
+        const it = PersistentStorage.getOrCreate().keys();
         let val = it.next();
         while (!val.done) {
             result.push(val.value);
             val = it.next();
         }
         return result;
+    }
+    /**
+     * @see keys
+     * @deprecated
+     */
+    static Keys() {
+        return PersistentStorage.keys();
     }
     /**
       * This methid offers a way to force writing the property value with given
@@ -1287,12 +1438,20 @@ class PersistentStorage {
       *
       * @param key property that has changed
       *
-      * @since 9
+      * @since 10
       *
       */
+    static notifyHasChanged(propName) {
+        
+        PersistentStorage.storage_.set(propName, PersistentStorage.getOrCreate().links_.get(propName).get());
+    }
+    /**
+     * @see notifyHasChanged
+     * @deprecated
+     */
     static NotifyHasChanged(propName) {
         
-        PersistentStorage.Storage_.set(propName, PersistentStorage.GetOrCreate().links_.get(propName).get());
+        PersistentStorage.storage_.set(propName, PersistentStorage.getOrCreate().links_.get(propName).get());
     }
     keys() {
         return this.links_.keys();
@@ -1301,7 +1460,7 @@ class PersistentStorage {
         if (this.persistProp1(propName, defaultValue)) {
             // persist new prop
             
-            PersistentStorage.Storage_.set(propName, this.links_.get(propName).get());
+            PersistentStorage.storage_.set(propName, this.links_.get(propName).get());
         }
     }
     // helper function to persist a property
@@ -1315,13 +1474,13 @@ class PersistentStorage {
             stateMgmtConsole.warn(`PersistentStorage: persistProp: ${propName} is already persisted`);
             return false;
         }
-        let link = AppStorage.Link(propName, this);
+        let link = AppStorage.link(propName, this);
         if (link) {
             
             this.links_.set(propName, link);
         }
         else {
-            let newValue = PersistentStorage.Storage_.get(propName);
+            let newValue = PersistentStorage.storage_.get(propName);
             let returnValue;
             if (!newValue) {
                 
@@ -1330,7 +1489,7 @@ class PersistentStorage {
             else {
                 returnValue = newValue;
             }
-            link = AppStorage.SetAndLink(propName, returnValue, this);
+            link = AppStorage.setAndLink(propName, returnValue, this);
             this.links_.set(propName, link);
             
         }
@@ -1345,7 +1504,7 @@ class PersistentStorage {
         if (link) {
             link.aboutToBeDeleted();
             this.links_.delete(propName);
-            PersistentStorage.Storage_.delete(propName);
+            PersistentStorage.storage_.delete(propName);
             
         }
         else {
@@ -1355,7 +1514,7 @@ class PersistentStorage {
     write() {
         this.links_.forEach((link, propName, map) => {
             
-            PersistentStorage.Storage_.set(propName, link.get());
+            PersistentStorage.storage_.set(propName, link.get());
         });
     }
     propertyHasChanged(info) {
@@ -1375,16 +1534,16 @@ class PersistentStorage {
         });
         this.links_.clear();
         SubscriberManager.Delete(this.id__());
-        PersistentStorage.Storage_.clear();
+        PersistentStorage.storage_.clear();
     }
     id__() {
         return this.id_;
     }
 }
-PersistentStorage.Instance_ = undefined;
+PersistentStorage.instance_ = undefined;
 ;
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1406,37 +1565,72 @@ PersistentStorage.Instance_ = undefined;
 class Environment {
     constructor() {
         this.props_ = new Map();
-        Environment.EnvBackend_.onValueChanged(this.onValueChanged.bind(this));
+        Environment.envBackend_.onValueChanged(this.onValueChanged.bind(this));
     }
-    static GetOrCreate() {
-        if (Environment.Instance_) {
+    static getOrCreate() {
+        if (Environment.instance_) {
             // already initialized
-            return Environment.Instance_;
+            return Environment.instance_;
         }
-        Environment.Instance_ = new Environment();
-        return Environment.Instance_;
+        Environment.instance_ = new Environment();
+        return Environment.instance_;
     }
+    static configureBackend(envBackend) {
+        Environment.envBackend_ = envBackend;
+    }
+    /**
+     * @see configureBackend
+     * @deprecated
+     */
     static ConfigureBackend(envBackend) {
-        Environment.EnvBackend_ = envBackend;
+        Environment.envBackend_ = envBackend;
     }
-    static AboutToBeDeleted() {
-        if (!Environment.Instance_) {
+    static aboutToBeDeleted() {
+        if (!Environment.instance_) {
             return;
         }
-        Environment.GetOrCreate().aboutToBeDeleted();
-        Environment.Instance_ = undefined;
+        Environment.getOrCreate().aboutToBeDeleted();
+        Environment.instance_ = undefined;
     }
+    /**
+     * @see aboutToBeDeleted
+     * @deprecated
+     */
+    static AboutToBeDeleted() {
+        Environment.aboutToBeDeleted();
+    }
+    static envProp(key, value) {
+        return Environment.getOrCreate().envProp(key, value);
+    }
+    /**
+     * @see envProp
+     * @deprecated
+     */
     static EnvProp(key, value) {
-        return Environment.GetOrCreate().envProp(key, value);
+        return Environment.getOrCreate().envProp(key, value);
     }
+    static envProps(props) {
+        Environment.getOrCreate().envProps(props);
+    }
+    /**
+     * @see envProps
+     * @deprecated
+     */
     static EnvProps(props) {
-        Environment.GetOrCreate().envProps(props);
+        Environment.getOrCreate().envProps(props);
     }
+    static keys() {
+        return Environment.getOrCreate().keys();
+    }
+    /**
+     * @see keys
+     * @deprecated
+     */
     static Keys() {
-        return Environment.GetOrCreate().keys();
+        return Environment.getOrCreate().keys();
     }
     envProp(key, value) {
-        let prop = AppStorage.Prop(key);
+        let prop = AppStorage.prop(key);
         if (prop) {
             stateMgmtConsole.warn(`Environment: envProp '${key}': Property already exists in AppStorage. Not using environment property.`);
             return false;
@@ -1444,29 +1638,30 @@ class Environment {
         let tmp;
         switch (key) {
             case "accessibilityEnabled":
-                tmp = Environment.EnvBackend_.getAccessibilityEnabled();
+                tmp = Environment.envBackend_.getAccessibilityEnabled();
                 break;
             case "colorMode":
-                tmp = Environment.EnvBackend_.getColorMode();
+                tmp = Environment.envBackend_.getColorMode();
                 break;
             case "fontScale":
-                tmp = Environment.EnvBackend_.getFontScale();
+                tmp = Environment.envBackend_.getFontScale();
                 break;
             case "fontWeightScale":
-                tmp = Environment.EnvBackend_.getFontWeightScale().toFixed(2);
+                tmp = Environment.envBackend_.getFontWeightScale().toFixed(2);
                 break;
             case "layoutDirection":
-                tmp = Environment.EnvBackend_.getLayoutDirection();
+                tmp = Environment.envBackend_.getLayoutDirection();
                 break;
             case "languageCode":
-                tmp = Environment.EnvBackend_.getLanguageCode();
+                tmp = Environment.envBackend_.getLanguageCode();
                 break;
             default:
                 tmp = value;
         }
-        prop = AppStorage.SetAndProp(key, tmp);
+        prop = AppStorage.setAndProp(key, tmp);
         this.props_.set(key, prop);
         
+        return true;
     }
     envProps(properties) {
         properties.forEach(property => {
@@ -1485,7 +1680,7 @@ class Environment {
         return result;
     }
     onValueChanged(key, value) {
-        let ok = AppStorage.Set(key, value);
+        let ok = AppStorage.set(key, value);
         if (ok) {
             
         }
@@ -1496,11 +1691,11 @@ class Environment {
     aboutToBeDeleted() {
         this.props_.forEach((val, key, map) => {
             val.aboutToBeDeleted();
-            AppStorage.Delete(key);
+            AppStorage.delete(key);
         });
     }
 }
-Environment.Instance_ = undefined;
+Environment.instance_ = undefined;
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -1547,7 +1742,7 @@ class stateMgmtTrace {
     }
 }
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1595,7 +1790,7 @@ class DistributedStorage {
             stateMgmtConsole.warn(`DistributedStorage: linkProp: ${propName} is already exist`);
             return false;
         }
-        let link = AppStorage.Link(propName, this);
+        let link = AppStorage.link(propName, this);
         if (link) {
             
             this.links_.set(propName, link);
@@ -1613,7 +1808,7 @@ class DistributedStorage {
                     returnValue = newValue;
                 }
             }
-            link = AppStorage.SetAndLink(propName, returnValue, this);
+            link = AppStorage.setAndLink(propName, returnValue, this);
             this.links_.set(propName, link);
             
         }
@@ -1859,6 +2054,10 @@ class SubscribableHandler {
             }
         });
     }
+    // notify a property has been 'read'
+    // this functionality is in preparation for observed computed variables
+    // enable calling from 'get' trap handler functions to this function once
+    // adding support for observed computed variables
     notifyObjectPropertyHasBeenRead(propName) {
         
         this.owningProperties_.forEach((subscribedId) => {
@@ -3088,7 +3287,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         this.dependentElementIds_ = new Set();
     }
     notifyPropertyRead() {
-        stateMgmtConsole.error(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: \
+        stateMgmtConsole.error(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: \
         notifyPropertyRead, DO NOT USE with PU. Use notifyPropertyHasBeenReadPU`);
     }
     notifyPropertyHasBeenReadPU() {
@@ -3115,7 +3314,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
                     subscriber.syncPeerHasChanged(this);
                 }
                 else {
-                    stateMgmtConsole.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyPropertryHasChangedPU: unknown subscriber ID '${subscribedId}' error!`);
+                    stateMgmtConsole.warn(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: notifyPropertryHasChangedPU: unknown subscriber ID '${subscribedId}' error!`);
                 }
             }
         });
@@ -3123,7 +3322,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     markDependentElementsDirty(view) {
         // TODO ace-ets2bundle, framework, compilated apps need to update together
         // this function will be removed after a short transiition periode
-        stateMgmtConsole.warn(`markDependentElementsDirty no longer supported. App will work ok, but
+        stateMgmtConsole.warn(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: markDependentElementsDirty no longer supported. App will work ok, but
         please update your ace-ets2bundle and recompile your application!`);
     }
     /**
@@ -3174,7 +3373,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
       ObservedPropertyAbstract. Need to overwrite these functions to do nothing for PU
       */
     notifyHasChanged(_) {
-        stateMgmtConsole.error(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: \
+        stateMgmtConsole.error(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: \
           notifyHasChanged, DO NOT USE with PU. Use syncPeerHasChanged() or objectPropertyHasChangedPU()`);
     }
     hasChanged(_) {
@@ -3267,12 +3466,12 @@ class ObservedPropertySimpleAbstractPU extends ObservedPropertyAbstractPU {
  * property.
 */
 class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
-    constructor(value, owningView, propertyName) {
+    constructor(localInitValue, owningView, propertyName) {
         super(owningView, propertyName);
-        this.setValueInternal(value);
+        this.setValueInternal(localInitValue);
     }
     aboutToBeDeleted(unsubscribeMe) {
-        this.unsubscribeFromOwningProperty();
+        this.unsubscribeWrappedObject();
         if (unsubscribeMe) {
             this.unlinkSuscriber(unsubscribeMe.id__());
         }
@@ -3299,7 +3498,7 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
         
         this.notifyPropertyHasBeenReadPU();
     }
-    unsubscribeFromOwningProperty() {
+    unsubscribeWrappedObject() {
         if (this.wrappedValue_) {
             if (this.wrappedValue_ instanceof SubscribaleAbstract) {
                 this.wrappedValue_.removeOwningProperty(this);
@@ -3315,11 +3514,20 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
       and also notify with this.aboutToChange();
     */
     setValueInternal(newValue) {
+        if (newValue == undefined || newValue == null) {
+            stateMgmtConsole.error(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @State/@Provide value must not be undefined or null. Application error!`);
+            // TODO enable support for undefined and null
+            // unsubscribe old value, set wrappedValue_ to null/undefined
+        }
         if (typeof newValue !== 'object') {
             
             return false;
         }
-        this.unsubscribeFromOwningProperty();
+        if (newValue == this.wrappedValue_) {
+            
+            return false;
+        }
+        this.unsubscribeWrappedObject();
         if (ObservedObject.IsObservedObject(newValue)) {
             
             ObservedObject.addOwningProperty(newValue, this);
@@ -3343,7 +3551,7 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
     }
     getUnmonitored() {
         
-        // unmonitored get access , no call to otifyPropertyRead !
+        // unmonitored get access , no call to notifyPropertyRead !
         return this.wrappedValue_;
     }
     set(newValue) {
@@ -3352,8 +3560,9 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
             return;
         }
         
-        this.setValueInternal(newValue);
-        this.notifyPropertyHasChangedPU();
+        if (this.setValueInternal(newValue)) {
+            this.notifyPropertyHasChangedPU();
+        }
     }
 }
 /*
@@ -3381,12 +3590,13 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
  * all definitions in this file are framework internal
 */
 class ObservedPropertySimplePU extends ObservedPropertySimpleAbstractPU {
-    constructor(value, owningView, propertyName) {
+    constructor(localInitValue, owningView, propertyName) {
         super(owningView, propertyName);
-        if (typeof value === "object") {
-            throw new SyntaxError("ObservedPropertySimple value must not be an object");
+        // TODO undefined and null support remove this if statement
+        if (typeof localInitValue === "object") {
+            throw new SyntaxError("ObservedPropertySimple constructor: @State/@Provide value must not be an object");
         }
-        this.setValueInternal(value);
+        this.setValueInternal(localInitValue);
     }
     aboutToBeDeleted(unsubscribeMe) {
         if (unsubscribeMe) {
@@ -3409,11 +3619,15 @@ class ObservedPropertySimplePU extends ObservedPropertySimpleAbstractPU {
     */
     setValueInternal(newValue) {
         
-        this.wrappedValue_ = newValue;
+        if (this.wrappedValue_ != newValue) {
+            this.wrappedValue_ = newValue;
+            return true;
+        }
+        return false;
     }
     getUnmonitored() {
         
-        // unmonitored get access , no call to otifyPropertyRead !
+        // unmonitored get access , no call to notifyPropertyRead !
         return this.wrappedValue_;
     }
     get() {
@@ -3427,8 +3641,9 @@ class ObservedPropertySimplePU extends ObservedPropertySimpleAbstractPU {
             return;
         }
         
-        this.setValueInternal(newValue);
-        this.notifyPropertyHasChangedPU();
+        if (this.setValueInternal(newValue)) {
+            this.notifyPropertyHasChangedPU();
+        }
     }
 }
 /*
@@ -3445,28 +3660,77 @@ class ObservedPropertySimplePU extends ObservedPropertySimpleAbstractPU {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * SynchedPropertyObjectOneWayPU
+ * implementation  of @Prop decorated variables of type class object
+ *
+ * all definitions in this file are framework internal
+ *
+ */
+/**
+ * Initialisation scenarios:
+ * -------------------------
+ *
+ * 1 - no local initialization, source provided (its ObservedObject value)
+ *     wrap the ObservedObject into an ObservedPropertyObjectPU
+ *     deep copy the ObservedObject into localCopyObservedObject_
+ *
+ * 2 - local initialization, no source provided
+ *     app transpiled code calls set
+ *     leave source_ undefined
+ *     no deep copy needed, but provided local init might need wrapping inside an ObservedObject to set to
+ *     localCopyObservedObject_
+ *
+ * 3  local initialization,  source provided (its ObservedObject value)
+ *    current app transpiled code is not optional
+ *    sets source in constructor, as in case 1
+ *    calls set() to set the source value, but this will not deepcopy
+ *
+ * Update scenarios:
+ * -----------------
+ *
+ * 1- assignment of a new Object value: this.aProp = new ClassA()
+ *    rhs can be ObservedObject because of @Observed decoration or now
+ *    notifyPropertryHasChangedPU
+ *
+ * 2- local ObservedObject member property change
+ *    objectPropertyHasChangedPU called, eventSource is the ObservedObject stored in localCopyObservedObject_
+ *    no need to copy, notifyPropertryHasChangedPU
+ *
+ * 3- Rerender of the custom component triggered from the parent
+ *    reset() is called (code generated by the transpiler), set the value of source_ ,  if that causes a change will call syncPeerHasChanged
+ *    syncPeerHasChanged need to deep copy the ObservedObject from source to localCopyObservedObject_
+ *    notifyPropertryHasChangedPU
+ *
+ * 4- source_ ObservedObject member property change
+ *     objectPropertyHasChangedPU called, eventSource is the ObservedObject stored source_.getUnmonitored
+ *     notifyPropertryHasChangedPU
+ */
 class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
     constructor(source, owningChildView, thisPropertyName) {
         super(owningChildView, thisPropertyName);
         if (source && (typeof (source) === "object") && ("subscribeMe" in source)) {
-            // code path for @(Local)StorageProp, the souce is a ObservedPropertyObject in aLocalStorage)
+            // code path for @(Local)StorageProp, the source is a ObservedPropertyObject<C> in a LocalStorage)
             this.source_ = source;
             this.sourceIsOwnObject = false;
             // subscribe to receive value change updates from LocalStorage source property
             this.source_.subscribeMe(this);
         }
         else {
-            // code path for @Prop
+            // code path for 
+            // 1- source is of same type C in parent, not that the value(!) is provided, not the ObservedPropertyAbstract<C>
+            // 2- nested Object/Array inside observed another object/array in parent
             if (!ObservedObject.IsObservedObject(source)) {
                 stateMgmtConsole.warn(`@Prop ${this.info()}  Provided source object's class 
            lacks @Observed class decorator. Object property changes will not be observed.`);
             }
             
-            this.source_ = new ObservedPropertyObjectPU(source, this, thisPropertyName);
+            this.source_ = new ObservedPropertyObjectPU(source, this, this.getSourceObservedPropertyFakeName());
             this.sourceIsOwnObject = true;
         }
-        // deep copy source Object and wrap it
-        this.setWrappedValue(this.source_.get());
+        if (this.source_ != undefined) {
+            this.resetLocalValue(this.source_.get(), /* needCopyObject */ true);
+        }
         
     }
     /*
@@ -3484,6 +3748,9 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
         }
         super.aboutToBeDeleted();
     }
+    getSourceObservedPropertyFakeName() {
+        return `${this.info()}_source`;
+    }
     syncPeerHasChanged(eventSource) {
         if (eventSource && this.source_ == eventSource) {
             // defensive programming: should always be the case!
@@ -3491,12 +3758,13 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
             const newValue = this.source_.getUnmonitored();
             if (typeof newValue == "object") {
                 
-                this.setWrappedValue(newValue);
-                this.notifyPropertyHasChangedPU();
+                if (this.resetLocalValue(newValue, /* needCopyObject */ true)) {
+                    this.notifyPropertyHasChangedPU();
+                }
             }
         }
         else {
-            stateMgmtConsole.warn(`SynchedPropertyNesedObjectPU[${this.id__()}]: syncPeerHasChanged Unexpected situation. Ignorning event.`);
+            stateMgmtConsole.warn(`SynchedPropertyObjectOneWayPU[${this.id__()}]: syncPeerHasChanged Unexpected situation. Ignoring event.`);
         }
     }
     /**
@@ -3504,58 +3772,208 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
      * @param souceObject
      * @param changedPropertyName
      */
-    objectPropertyHasChangedPU(souceObject, changedPropertyName) {
+    objectPropertyHasChangedPU(sourceObject, changedPropertyName) {
         
         this.notifyPropertyHasChangedPU();
     }
-    objectPropertyHasBeenReadPU(souceObject, changedPropertyName) {
+    objectPropertyHasBeenReadPU(sourceObject, changedPropertyName) {
         
         this.notifyPropertyHasBeenReadPU();
     }
     getUnmonitored() {
         
         // unmonitored get access , no call to notifyPropertyRead !
-        return this.wrappedValue_;
+        return this.localCopyObservedObject_;
     }
-    // get 'read through` from the ObservedObject
     get() {
         
         this.notifyPropertyHasBeenReadPU();
-        return this.wrappedValue_;
+        return this.localCopyObservedObject_;
     }
     // assignment to local variable in the form of this.aProp = <object value>
     // set 'writes through` to the ObservedObject
     set(newValue) {
-        if (this.wrappedValue_ == newValue) {
+        if (this.localCopyObservedObject_ == newValue) {
             
             return;
         }
         
         if (!ObservedObject.IsObservedObject(newValue)) {
             stateMgmtConsole.warn(`@Prop ${this.info()} Set: Provided new object's class 
-         lacks @Observed class decorator. Object property changes will not be observed.`);
+         lacks '@Observed' class decorator. Object property changes will not be observed.`);
         }
-        this.setWrappedValue(newValue);
-        this.notifyPropertyHasChangedPU();
+        if (this.resetLocalValue(newValue, /* needCopyObject */ false)) {
+            this.notifyPropertyHasChangedPU();
+        }
     }
+    // called when updated from parent
     reset(sourceChangedValue) {
         
-        // if set causes an actual change, then, ObservedPropertyObject source_ will call syncPeerHasChanged
-        this.source_.set(sourceChangedValue);
-    }
-    setWrappedValue(value) {
-        let rawValue = ObservedObject.GetRawObject(value);
-        let copy;
-        // FIXME: Proper object deep copy missing here!
-        if (rawValue instanceof Array) {
-            copy = ObservedObject.createNew([...rawValue], this);
+        if (this.source_ !== undefined) {
+            // if this.source_.set causes an actual change, then, ObservedPropertyObject source_ will call syncPeerHasChanged method
+            this.source_.set(sourceChangedValue);
         }
         else {
-            copy = ObservedObject.createNew(Object.assign({}, rawValue), this);
+            stateMgmtConsole.error(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: reset @Prop --- No source_. Internal error!`);
         }
-        Object.setPrototypeOf(copy, Object.getPrototypeOf(rawValue));
-        ObservedObject.addOwningProperty(this.wrappedValue_, this);
-        this.wrappedValue_ = copy;
+    }
+    /*
+      unsubscribe from previous wrappped ObjectObject
+      take a shallow or (TODO) deep copy
+      copied Object might already be an ObservedObject (e.g. becuse of @Observed decroator) or might be raw
+      Therefore, conditionally wrap the object, then subscribe
+      return value true only if localCopyObservedObject_ has been changed
+    */
+    resetLocalValue(newObservedObjectValue, needCopyObject) {
+        // note: We can not test for newObservedObjectValue == this.localCopyObservedObject_
+        // here because the object might still be the same, but some property of it has changed
+        if (typeof newObservedObjectValue !== "object") {
+            // if not undefined or null, then the provided newObservedObjectValue must be an Object 
+            stateMgmtConsole.error(`SynchedPropertyOneWayObjectPU[${this.id__()}]: setLocalValue new value must be an Object.`);
+        }
+        // unsubscribe from old wrappedValue ObservedOject  
+        ObservedObject.removeOwningProperty(this.localCopyObservedObject_, this);
+        // shallow/deep copy value 
+        // needed whenever newObservedObjectValue comes from source
+        // not needed on a local set (aka when called from set() method)
+        let copy = needCopyObject ? this.copyObject(newObservedObjectValue, this.info_) : newObservedObjectValue;
+        if (ObservedObject.IsObservedObject(copy)) {
+            // case: new ObservedObject
+            this.localCopyObservedObject_ = copy;
+            ObservedObject.addOwningProperty(this.localCopyObservedObject_, this);
+        }
+        else {
+            // wrap newObservedObjectValue raw object as ObservedObject and subscribe to it
+            stateMgmtConsole.warn(`@Prop ${this.info()}  Provided source object's class \
+            lacks @Observed class decorator. Object property changes will not be observed.`);
+            this.localCopyObservedObject_ = ObservedObject.createNew(copy, this);
+        }
+        return true;
+    }
+    copyObject(value, propName) {
+        // ViewStackProcessor.getApiVersion function is not present in API9 
+        // therefore shallowCopyObject will always be used in API version 9 and before
+        // but the code in this file is the same regardless of API version
+        
+        return ((typeof ViewStackProcessor["getApiVersion"] == "function") &&
+            (ViewStackProcessor["getApiVersion"]() >= 10))
+            ? this.deepCopyObject(value, propName)
+            : this.shallowCopyObject(value, propName);
+    }
+    // API 9 code path
+    shallowCopyObject(value, propName) {
+        let rawValue = ObservedObject.GetRawObject(value);
+        let copy;
+        if (rawValue == undefined || rawValue == null) {
+            copy = rawValue;
+        }
+        else if (typeof rawValue != "object") {
+            // TODO would it be better to crash the app here?
+            stateMgmtConsole.error(`@Prop ${this.info()} shallowCopyObject: request to copy non-object but defined value of type '${typeof rawValue}'. Internal error! Setting copy=original value.`);
+            copy = rawValue;
+        }
+        else if (rawValue instanceof Array) {
+            // case Array inside ObservedObject
+            copy = ObservedObject.createNew([...rawValue], this);
+            Object.setPrototypeOf(copy, Object.getPrototypeOf(rawValue));
+        }
+        else if (rawValue instanceof Date) {
+            // case Date inside ObservedObject
+            let d = new Date();
+            d.setTime(rawValue.getTime());
+            // subscribe, also Date gets wrapped / proxied by ObservedObject
+            copy = ObservedObject.createNew(d, this);
+        }
+        else if (rawValue instanceof SubscribaleAbstract) {
+            // case SubscriabableAbstract, no wrapping inside ObservedObject
+            copy = Object.assign({}, rawValue);
+            Object.setPrototypeOf(copy, Object.getPrototypeOf(rawValue));
+            if (copy instanceof SubscribaleAbstract) {
+                // subscribe
+                copy.addOwningProperty(this);
+            }
+        }
+        else if (typeof rawValue == "object") {
+            // case Object that is not Array, not Date, not SubscribaleAbstract
+            copy = ObservedObject.createNew(Object.assign({}, rawValue), this);
+            Object.setPrototypeOf(copy, Object.getPrototypeOf(rawValue));
+        }
+        else {
+            // TODO in PR "F": change to exception throwing:
+            stateMgmtConsole.error(`@Prop ${this.info()} shallow failed. Attempt to copy unsupported value type '${typeof rawValue}' .`);
+            copy = rawValue;
+        }
+        return copy;
+    }
+    // API 10 code path
+    deepCopyObject(obj, variable) {
+        let copy = SynchedPropertyObjectOneWayPU.deepCopyObjectInternal(obj, variable);
+        // this subscribe to the top level object/array of the copy
+        // same as shallowCopy does
+        if ((obj instanceof SubscribaleAbstract) &&
+            (copy instanceof SubscribaleAbstract)) {
+            copy.addOwningProperty(this);
+        }
+        else if (ObservedObject.IsObservedObject(obj) && ObservedObject.IsObservedObject(copy)) {
+            ObservedObject.addOwningProperty(copy, this);
+        }
+        return copy;
+        ;
+    }
+    // do not use this function from outside unless it is for testing purposes.
+    static deepCopyObjectInternal(obj, variable) {
+        if (!obj || typeof obj !== 'object') {
+            return obj;
+        }
+        let stack = new Array();
+        let copiedObjects = new Map();
+        return getDeepCopyOfObjectRecursive(obj);
+        function getDeepCopyOfObjectRecursive(obj) {
+            if (!obj || typeof obj !== 'object') {
+                return obj;
+            }
+            const alreadyCopiedObject = copiedObjects.get(obj);
+            if (alreadyCopiedObject) {
+                let msg = `@Prop deepCopyObject: Found reference to already copied object: Path ${variable ? variable : 'unknown variable'}`;
+                stack.forEach(stackItem => msg += ` - ${stackItem.name}`);
+                
+                return alreadyCopiedObject;
+            }
+            let copy;
+            if (obj instanceof Set) {
+                copy = new Set();
+                for (const setKey of obj.keys()) {
+                    stack.push({ name: setKey });
+                    copiedObjects.set(obj, copy);
+                    copy.add(getDeepCopyOfObjectRecursive(setKey));
+                    stack.pop();
+                }
+            }
+            else if (obj instanceof Map) {
+                copy = new Map();
+                for (const mapKey of obj.keys()) {
+                    stack.push({ name: mapKey });
+                    copiedObjects.set(obj, copy);
+                    copy.set(mapKey, getDeepCopyOfObjectRecursive(obj.get(mapKey)));
+                    stack.pop();
+                }
+            }
+            else if (obj instanceof Date) {
+                copy = new Date();
+                copy.setTime(obj.getTime());
+            }
+            else if (obj instanceof Object) {
+                copy = Array.isArray(obj) ? [] : {};
+                Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
+                for (const objKey of Object.keys(obj)) {
+                    stack.push({ name: objKey });
+                    copiedObjects.set(obj, copy);
+                    Reflect.set(copy, objKey, getDeepCopyOfObjectRecursive(obj[objKey]));
+                    stack.pop();
+                }
+            }
+            return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
+        }
     }
 }
 /*
@@ -3579,16 +3997,19 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
  * all definitions in this file are framework internal
  */
 class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
-    constructor(linkSource, owningChildView, thisPropertyName) {
+    constructor(source, owningChildView, thisPropertyName) {
         super(owningChildView, thisPropertyName);
         this.changeNotificationIsOngoing_ = false;
-        this.linkedParentProperty_ = linkSource;
-        if (this.linkedParentProperty_) {
+        this.source_ = source;
+        if (this.source_) {
             // register to the parent property
-            this.linkedParentProperty_.subscribeMe(this);
+            this.source_.subscribeMe(this);
+            // register to the ObservedObject
+            ObservedObject.addOwningProperty(this.source_.get(), this);
         }
-        // register to the ObservedObject
-        ObservedObject.addOwningProperty(this.linkedParentProperty_.get(), this);
+        else {
+            stateMgmtConsole.error(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Link/@Consume source must not be undefined. Application error!`);
+        }
     }
     /*
     like a destructor, need to call this before deleting
@@ -3596,19 +4017,24 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
     */
     aboutToBeDeleted() {
         // unregister from parent of this link
-        if (this.linkedParentProperty_) {
-            this.linkedParentProperty_.unlinkSuscriber(this.id__());
+        if (this.source_) {
+            this.source_.unlinkSuscriber(this.id__());
             // unregister from the ObservedObject
-            ObservedObject.removeOwningProperty(this.linkedParentProperty_.getUnmonitored(), this);
+            ObservedObject.removeOwningProperty(this.source_.getUnmonitored(), this);
         }
         super.aboutToBeDeleted();
     }
     setObject(newValue) {
-        if (!this.linkedParentProperty_) {
-            stateMgmtConsole.warn(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: setObject, no linked parent property.`);
+        if (!this.source_) {
+            stateMgmtConsole.warn(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: setObject (assign a new value), @Link/@Consume: no linked parent property. Likely a consequence of earlier application error.`);
             return;
         }
-        this.linkedParentProperty_.set(newValue);
+        let oldValueObject = this.getUnmonitored();
+        if (oldValueObject != undefined && oldValueObject != null) {
+            ObservedObject.removeOwningProperty(oldValueObject, this);
+        }
+        this.source_.set(newValue);
+        ObservedObject.addOwningProperty(this.getUnmonitored(), this);
     }
     /**
      * Called when sync peer ObservedPropertyObject or SynchedPropertyObjectTwoWay has chnaged value
@@ -3638,7 +4064,7 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
     getUnmonitored() {
         
         // unmonitored get access , no call to otifyPropertyRead !
-        return (this.linkedParentProperty_ ? this.linkedParentProperty_.getUnmonitored() : undefined);
+        return (this.source_ ? this.source_.getUnmonitored() : undefined);
     }
     // get 'read through` from the ObservedProperty
     get() {
@@ -3653,11 +4079,9 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
             return;
         }
         
-        ObservedObject.removeOwningProperty(this.getUnmonitored(), this);
         // avoid circular notifications @Link -> source @State -> other but also back to same @Link
         this.changeNotificationIsOngoing_ = true;
         this.setObject(newValue);
-        ObservedObject.addOwningProperty(this.getUnmonitored(), this);
         this.notifyPropertyHasChangedPU();
         this.changeNotificationIsOngoing_ = false;
     }
@@ -3689,7 +4113,7 @@ class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
             // code path for @(Local)StorageProp
             this.source_ = source;
             this.sourceIsOwnObject = false;
-            // subscribe to receive value chnage updates from LocalStorge source property
+            // subscribe to receive value change updates from LocalStorage source property
             this.source_.subscribeMe(this);
         }
         else {
@@ -3713,7 +4137,7 @@ class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
                 this.source_.aboutToBeDeleted();
             }
             this.source_ = undefined;
-            this.sourceIsOwnObject == false;
+            this.sourceIsOwnObject = false;
         }
         super.aboutToBeDeleted();
     }
@@ -3721,17 +4145,13 @@ class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
         if (eventSource && (eventSource == this.source_)) {
             // defensive, should always be the case
             
-            this.sourceHasChanged(eventSource);
+            this.setWrappedValue(eventSource.getUnmonitored());
+            this.notifyPropertyHasChangedPU();
         }
-    }
-    sourceHasChanged(eventSource) {
-        
-        this.wrappedValue_ = eventSource.getUnmonitored();
-        this.notifyPropertyHasChangedPU();
     }
     getUnmonitored() {
         
-        // unmonitored get access , no call to otifyPropertyRead !
+        // unmonitored get access, no call to notifyPropertyRead !
         return this.wrappedValue_;
     }
     // get 'read through` from the ObservedProperty
@@ -3746,13 +4166,19 @@ class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
             return;
         }
         
-        this.wrappedValue_ = newValue;
+        this.setWrappedValue(newValue);
         this.notifyPropertyHasChangedPU();
     }
     reset(sourceChangedValue) {
         
         // if set causes an actual change, then, ObservedPropertySimple source_ will call hasChanged
-        this.source_.set(sourceChangedValue);
+        if (this.source_ !== undefined) {
+            // if set causes an actual change, then, ObservedPropertySimple source_ will call hasChanged
+            this.source_.set(sourceChangedValue);
+        }
+    }
+    setWrappedValue(newValue) {
+        this.wrappedValue_ = newValue;
     }
 }
 /*
@@ -3780,7 +4206,12 @@ class SynchedPropertySimpleTwoWayPU extends ObservedPropertySimpleAbstractPU {
         super(owningView, owningViewPropNme);
         this.changeNotificationIsOngoing_ = false;
         this.source_ = source;
-        this.source_.subscribeMe(this);
+        if (this.source_) {
+            this.source_.subscribeMe(this);
+        }
+        else {
+            stateMgmtConsole.error(`SynchedPropertySimpleTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Link/@Consume source must not be undefined. Application error!`);
+        }
     }
     /*
     like a destructor, need to call this before deleting
@@ -3889,14 +4320,13 @@ class SynchedPropertyNesedObjectPU extends ObservedPropertyObjectAbstractPU {
         this.notifyPropertyHasBeenReadPU();
     }
     getUnmonitored() {
-        // 
+        
         // unmonitored get access , no call to otifyPropertyRead !
         return this.obsObject_;
     }
     // get 'read through` from the ObservedProperty
     get() {
         
-        // this.notifyPropertyRead();
         this.notifyPropertyHasBeenReadPU();
         return this.obsObject_;
     }
@@ -3917,7 +4347,7 @@ class SynchedPropertyNesedObjectPU extends ObservedPropertyObjectAbstractPU {
     }
 }
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -3959,6 +4389,8 @@ class ViewPU extends NativeViewPartialUpdate {
         super();
         this.parent_ = undefined;
         this.childrenWeakrefMap_ = new Map();
+        // flag for initgial rendering or re-render on-going.
+        this.isRenderInProgress = false;
         this.watchedProps = new Map();
         this.recycleManager = undefined;
         // Set of dependent elmtIds that need partial update
@@ -4086,9 +4518,16 @@ class ViewPU extends NativeViewPartialUpdate {
         stateMgmtConsole.warn("ViewPU.updateStateVars unimplemented. Pls upgrade to latest eDSL transpiler version.");
     }
     initialRenderView() {
+        this.isRenderInProgress = true;
         this.initialRender();
+        this.isRenderInProgress = false;
     }
     UpdateElement(elmtId) {
+        if (elmtId == this.id__()) {
+            // do not attempt to update itself.
+            // a @Prop can add a dependency of the ViewPU onto itself. Ignore it.
+            return;
+        }
         // do not process an Element that has been marked to be deleted
         const updateFunc = this.updateFuncByElmtId.get(elmtId);
         if ((updateFunc == undefined) || (typeof updateFunc !== "function")) {
@@ -4096,11 +4535,13 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         else {
             
+            this.isRenderInProgress = true;
             updateFunc(elmtId, /* isFirstRender */ false);
             // continue in native JSView
             // Finish the Update in JSView::JsFinishUpdateFunc
             // this function appends no longer used elmtIds (as recrded by VSP) to the given allRmElmtIds array
             this.finishUpdateFunc(elmtId);
+            this.isRenderInProgress = false;
             
         }
     }
@@ -4166,6 +4607,9 @@ class ViewPU extends NativeViewPartialUpdate {
     // implements IMultiPropertiesChangeSubscriber
     viewPropertyHasChanged(varName, dependentElmtIds) {
         stateMgmtTrace.scopedTrace(() => {
+            if (this.isRenderInProgress) {
+                stateMgmtConsole.error(`@Component '${this.constructor.name}' (id: ${this.id__()}) State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
+            }
             
             this.syncInstanceId();
             if (dependentElmtIds.size && !this.isFirstRender()) {
@@ -4175,8 +4619,9 @@ class ViewPU extends NativeViewPartialUpdate {
                     this.markNeedUpdate();
                 }
                 
-                const union = new Set([...this.dirtDescendantElementIds_, ...dependentElmtIds]);
-                this.dirtDescendantElementIds_ = union;
+                for (const elmtId of dependentElmtIds) {
+                    this.dirtDescendantElementIds_.add(elmtId);
+                }
                 
             }
             let cb = this.watchedProps.get(varName);
@@ -4264,6 +4709,10 @@ class ViewPU extends NativeViewPartialUpdate {
                 this.UpdateElement(elmtId);
                 this.dirtDescendantElementIds_.delete(elmtId);
             });
+            if (this.dirtDescendantElementIds_.size) {
+                stateMgmtConsole.error(`@Component '${this.constructor.name}' (id: ${this.id__()}): New UINode objects added to update queue while re-render! \
+            Likely caused by @Component state change during build phase, not allowed. Application error!`);
+            }
         } while (this.dirtDescendantElementIds_.size);
     }
     //  given a list elementIds removes these from state variables dependency list and from elmtId -> updateFunc map
@@ -4338,7 +4787,6 @@ class ViewPU extends NativeViewPartialUpdate {
         const newElmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
         const oldElmtId = node.id__();
         // store the current id and origin id, used for dirty element sort in {compareNumber}
-        // this.getRecycleManager().setRecycleNodeCurrentElmtId(elmtId, currentElmtId);
         recycleUpdateFunc(newElmtId, /* is first render */ true, node);
         this.updateFuncByElmtId.delete(oldElmtId);
         this.updateFuncByElmtId.set(newElmtId, compilerAssignedUpdateFunc);
@@ -4456,14 +4904,14 @@ class ViewPU extends NativeViewPartialUpdate {
        * @returns SynchedPropertySimple/ObjectTwoWay/PU
        */
     createStorageLink(storagePropName, defaultValue, viewVariableName) {
-        return AppStorage.__CreateSync(storagePropName, defaultValue, (source) => (source === undefined)
+        return AppStorage.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
             : (source instanceof ObservedPropertySimple)
                 ? new SynchedPropertySimpleTwoWayPU(source, this, viewVariableName)
                 : new SynchedPropertyObjectTwoWayPU(source, this, viewVariableName));
     }
     createStorageProp(storagePropName, defaultValue, viewVariableName) {
-        return AppStorage.__CreateSync(storagePropName, defaultValue, (source) => (source === undefined)
+        return AppStorage.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
             : (source instanceof ObservedPropertySimple)
                 ? new SynchedPropertySimpleOneWayPU(source, this, viewVariableName)
@@ -4616,7 +5064,7 @@ function makeBuilderParameterProxy(builderName, source) {
     }); // new Proxy
 }
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -4630,6 +5078,6 @@ function makeBuilderParameterProxy(builderName, source) {
  * limitations under the License.
  */
 
-PersistentStorage.ConfigureBackend(new Storage());
-Environment.ConfigureBackend(new EnvironmentSetting());
+PersistentStorage.configureBackend(new Storage());
+Environment.configureBackend(new EnvironmentSetting());
 

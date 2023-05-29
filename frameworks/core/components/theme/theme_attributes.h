@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,11 +71,13 @@ extern const char THEME_PATTERN_INDEXER[];
 extern const char THEME_PATTERN_APP_BAR[];
 extern const char THEME_PATTERN_ADVANCED_PATTERN[];
 extern const char THEME_PATTERN_SECURITY_COMPONENT[];
+extern const char THEME_PATTERN_FORM[];
 
 // pattern general attributes
 extern const char PATTERN_FG_COLOR[];
 extern const char PATTERN_BG_COLOR[];
-extern const char PATTERN_BRODER_COLOR[];
+extern const char PATTERN_UNDERLINE_ACTIVED_COLOR[];
+extern const char PATTERN_UNDERLINE_TYPING_COLOR[];
 extern const char PATTERN_BG_COLOR_HOVERED[];
 extern const char PATTERN_BG_COLOR_CLICKED[];
 extern const char PATTERN_BG_COLOR_PRESSED[];
@@ -157,6 +159,8 @@ extern const char DIALOG_MAX_BUTTON_WIDTH[];
 extern const char DIALOG_MIN_BUTTON_WIDTH[];
 extern const char DIALOG_ACTIONS_TOP_PADDING[];
 extern const char DIALOG_MASK_COLOR_END[];
+extern const char DIALOG_DIVIDER_LENGTH[];
+extern const char DIALOG_DIVIDER_BETWEEN_BUTTON_WIDTH[];
 
 // pattern attributes for drag bar
 extern const char DRAG_BAR_COLOR[];
@@ -176,8 +180,8 @@ extern const char INDICATOR_TEXT_FONT_COLOR[];
 
 // textinput attributes
 extern const char ERROR_TEXT_UNDERLINE_COLOR[];
-extern const char OHOS_ID_COLOR_LIST_SEPARATOR[];
-extern const char OHOS_ID_COLOR_TEXT_HINT[];
+extern const char UNDERLINE_COLOR[];
+extern const char UNDERLINE_TEXT_COLOR[];
 extern const char BORDER_RADIUS_SIZE[];
 // swiper attributes for arrow
 extern const char ARROW_COLOR_BOARDCOLOR_HOVER[];
@@ -188,5 +192,18 @@ extern const char ARROW_DISABLED_ALPHA[];
 extern const char ARROW_HORIZONTAL_MARGIN[];
 extern const char ARROW_VERTICAL_MARGIN[];
 extern const char ARROW_COLOR_COMPONENT_NORMAL[];
+
+// pattern attributes for textfield
+extern const char PATTERN_FOCUS_BRODER_COLOR[];
+extern const char ERROR_UNDERLINE_COLOR[];
+extern const char ERROR_UNDERLINE_TEXT_COLOR[];
+extern const char ERROR_UNDERLINE_TEXT_SIZE[];
+extern const char ERROR_PASSWORD_CONTENT_COLOR[];
+extern const char ERROR_PASSWORD_INPUT_COLOR[];
+extern const char ERROR_PASSWORD_BORDER_COLOR[];
+extern const char ERROR_PASSWORD_TEXT_COLOR[];
+extern const char OVER_COUNT_TEXT_COLOR[];
+extern const char OVER_COUNT_TEXT_FONT_SIZE[];
+extern const char OVER_COUNT_BORDER_COLOR[];
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_ATTRIBUTES_H

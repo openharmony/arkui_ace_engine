@@ -50,7 +50,6 @@ class ACE_EXPORT LayoutProperty : public Property {
     DECLARE_ACE_TYPE(LayoutProperty, Property);
 
 public:
-
     LayoutProperty() = default;
 
     ~LayoutProperty() override = default;
@@ -60,6 +59,8 @@ public:
     virtual void Reset();
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+
+    virtual void FromJson(const std::unique_ptr<JsonValue>& json);
 
     const std::optional<LayoutConstraintF>& GetLayoutConstraint() const
     {
@@ -207,6 +208,14 @@ public:
         }
     }
 
+    bool HasAspectRatio()
+    {
+        if (!magicItemProperty_) {
+            return false;
+        }
+        return magicItemProperty_->HasAspectRatio();
+    }
+
     void UpdateMeasureType(MeasureType measureType)
     {
         if (measureType_ == measureType) {
@@ -291,6 +300,17 @@ public:
         }
     }
 
+    void ResetFlexShrink()
+    {
+        if (!flexItemProperty_) {
+            return;
+        }
+        if (flexItemProperty_->HasFlexShrink()) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+        flexItemProperty_->ResetFlexShrink();
+    }
+
     void UpdateFlexBasis(const Dimension& flexBasis)
     {
         if (!flexItemProperty_) {
@@ -364,7 +384,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(Visibility, VisibleType);
 
 public:
-    void UpdateVisibility(const VisibleType& value)
+    void UpdateVisibility(const VisibleType& value, bool allowTransition = false)
     {
         if (propVisibility_.has_value()) {
             if (NearEqual(propVisibility_.value(), value)) {
@@ -372,9 +392,9 @@ public:
                 return;
             }
         }
-        OnVisibilityUpdate(value);
+        OnVisibilityUpdate(value, allowTransition);
     }
-    void OnVisibilityUpdate(VisibleType visible);
+    void OnVisibilityUpdate(VisibleType visible, bool allowTransition = false);
 
     void UpdateLayoutConstraint(const RefPtr<LayoutProperty>& layoutProperty)
     {

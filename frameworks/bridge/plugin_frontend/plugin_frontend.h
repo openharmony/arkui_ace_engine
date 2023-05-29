@@ -163,6 +163,20 @@ public:
         }
     }
 
+    void SetPluginBundleName(const std::string& pluginBundleName)
+    {
+        if (jsEngine_) {
+            jsEngine_->SetPluginBundleName(pluginBundleName);
+        }
+    }
+
+    void SetPluginModuleName(const std::string& pluginModuleName)
+    {
+        if (jsEngine_) {
+            jsEngine_->SetPluginModuleName(pluginModuleName);
+        }
+    }
+
     void MarkIsSubWindow(bool isSubWindow)
     {
         isSubWindow_ = isSubWindow;

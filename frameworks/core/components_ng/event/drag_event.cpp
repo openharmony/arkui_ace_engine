@@ -44,9 +44,11 @@ constexpr int32_t PAN_FINGER = 1;
 constexpr double PAN_DISTANCE = 5.0;
 constexpr int32_t LONG_PRESS_DURATION = 500;
 #ifdef ENABLE_DRAG_FRAMEWORK
-constexpr float FILTER_RADIUS = 100.0f;
+constexpr Dimension FILTER_RADIUS(100.0f);
 constexpr float PIXELMAP_ANIMATION_SCALE = 1.1f;
 constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
+constexpr int32_t MAX_PIXEL_MAP_WIDTH = 600;
+constexpr int32_t MAX_PIXEL_MAP_HEIGHT = 600;
 #endif // ENABLE_DRAG_FRAMEWORK
 } // namespace
 
@@ -64,6 +66,14 @@ DragEventActuator::DragEventActuator(
 
     panRecognizer_ = MakeRefPtr<PanRecognizer>(fingers_, direction_, distance_);
     longPressRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, fingers_, false, false);
+}
+
+void DragEventActuator::StartDragTaskForWeb(const GestureEvent& info)
+{
+    auto gestureInfo = const_cast<GestureEvent&>(info);
+    if (actionStart_) {
+        actionStart_(gestureInfo);
+    }
 }
 
 void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -98,6 +108,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             customActionStart(info);
         }
     };
+    actionStart_ = actionStart;
     panRecognizer_->SetOnActionStart(actionStart);
 
     auto actionUpdate = [weak = WeakClaim(this)](GestureEvent& info) {
@@ -162,6 +173,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             customActionCancel();
         }
     };
+    panRecognizer_->SetIsForDrag(true);
     panRecognizer_->SetOnActionCancel(actionCancel);
 
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -189,7 +201,10 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     CHECK_NULL_VOID(gestureHub);
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    if (!longPressRecognizer_->HasThumbnailCallback()) {
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    bool isAllowedDrag = gestureHub->IsAllowedDrag(eventHub);
+    if (!longPressRecognizer_->HasThumbnailCallback() && isAllowedDrag) {
         auto callback = [weakPtr = gestureEventHub_](Offset point) {
             auto gestureHub = weakPtr.Upgrade();
             CHECK_NULL_VOID(gestureHub);
@@ -229,36 +244,20 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
     if (!manager->GetHasFilter() && !manager->GetIsOnAnimation()) {
+        bool isBindOverlayValue = frameNode->GetLayoutProperty()->GetIsBindOverlayValue(false);
+        CHECK_NULL_VOID_NOLOG(isBindOverlayValue && SystemProperties::GetDeviceType() == DeviceType::PHONE);
         // insert columnNode to rootNode
         auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(true));
-        auto children = parent->GetChildren();
-        int32_t slot = 0;
-        for (auto& child : children) {
-            if (child->GetTag() == "Popup") {
-                continue;
-            }
-            parent->RemoveChild(child);
-            child->MountToParent(columnNode, slot);
-            slot++;
-        }
-        columnNode->MountToParent(parent, 0);
+        columnNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        // set filter
+        LOGI("User Device use default Filter");
+        columnNode->GetRenderContext()->UpdateBackBlurRadius(FILTER_RADIUS);
+        columnNode->MountToParent(parent);
         columnNode->OnMountToParentDone();
         manager->SetHasFilter(true);
         manager->SetFilterColumnNode(columnNode);
         parent->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
-        // set filter
-        bool isBindOverlayValue = frameNode->GetLayoutProperty()->GetIsBindOverlayValue(false);
-        auto context = DynamicCast<NG::RosenRenderContext>(columnNode->GetRenderContext());
-        CHECK_NULL_VOID(context);
-        auto rsNode = context->GetRSNode();
-        CHECK_NULL_VOID(rsNode);
-        std::shared_ptr<Rosen::RSFilter> backFilter = Rosen::RSFilter::CreateBlurFilter(FILTER_RADIUS, FILTER_RADIUS);
-        std::shared_ptr<Rosen::RSFilter> filter = Rosen::RSFilter::CreateBlurFilter(FILTER_RADIUS, FILTER_RADIUS);
-        if (isBindOverlayValue) {
-            rsNode->SetBackgroundFilter(backFilter);
-            rsNode->SetFilter(filter);
-        }
     }
 }
 
@@ -483,8 +482,8 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
     auto dragFrame = dragNode->GetGeometryNode()->GetFrameRect();
     auto frameWidth = dragFrame.Width();
     auto frameheight = dragFrame.Height();
-    float scaleWidth = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH) / pixelMap->GetWidth();
-    float scaleHeight = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) / pixelMap->GetHeight();
+    float scaleWidth = static_cast<float>(MAX_PIXEL_MAP_WIDTH) / pixelMap->GetWidth();
+    float scaleHeight = static_cast<float>(MAX_PIXEL_MAP_HEIGHT) / pixelMap->GetHeight();
     float scale = std::min(std::min(scaleWidth, scaleHeight), 1.0f);
     auto context = dragNode->GetRenderContext();
     CHECK_NULL_VOID(context);

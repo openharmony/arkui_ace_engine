@@ -221,7 +221,10 @@ const RefPtr<StageManager>& PipelineContext::GetStageManager()
     return stageManager_;
 }
 
-void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback) {}
+void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback)
+{
+    buildFinishCallbacks_.emplace_back(std::move(callback));
+}
 
 const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
 {
@@ -273,12 +276,18 @@ std::unique_ptr<JsonValue> PipelineContext::GetStoredNodeInfo()
 
 void PipelineContext::StoreNode(int32_t restoreId, const WeakPtr<FrameNode>& node) {}
 
-std::string PipelineContext::GetRestoreInfo(int32_t restoreId)
+bool PipelineContext::GetRestoreInfo(int32_t restoreId, std::string& restoreInfo)
 {
-    return "";
+    return false;
 }
 
 void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode) {}
+
+void PipelineContext::ResetViewSafeArea() {}
+
+void PipelineContext::AddWindowSizeChangeCallback(int32_t nodeId) {}
+
+void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId) {}
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
@@ -380,5 +389,10 @@ void PipelineBase::RequestFrame() {}
 Rect PipelineBase::GetCurrentWindowRect() const
 {
     return { 0., 0., DISPLAY_WIDTH, DISPLAY_HEIGHT };
+}
+
+void PipelineBase::SetTextFieldManager(const RefPtr<ManagerInterface>& manager)
+{
+    textFieldManager_ = manager;
 }
 } // namespace OHOS::Ace

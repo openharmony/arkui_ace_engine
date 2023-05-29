@@ -41,7 +41,6 @@ public:
     static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
     static void SetMaxLength(const JSCallbackInfo& info);
     static void SetFontSize(const JSCallbackInfo& info);
-    static void RequestKeyboardOnFocus(bool needToRequest);
     static void SetFontWeight(const std::string& value);
     static void SetTextColor(const JSCallbackInfo& info);
     static void SetFontStyle(int32_t value);
@@ -53,6 +52,11 @@ public:
     static void JsHeight(const JSCallbackInfo& info);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsPadding(const JSCallbackInfo& info);
+    static Edge GetOldPadding(const JSCallbackInfo& info);
+    static NG::PaddingProperty GetNewPadding(const JSCallbackInfo& info);
+    static NG::PaddingProperty SetPaddings(const std::optional<CalcDimension>& top,
+        const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
+        const std::optional<CalcDimension>& right);
     static void JsBorder(const JSCallbackInfo& info);
     static void JsBorderWidth(const JSCallbackInfo& info);
     static void JsBorderColor(const JSCallbackInfo& info);
@@ -71,10 +75,13 @@ public:
         const Border& boxBorder, const RefPtr<TextFieldTheme>& textFieldTheme);
     static void JsMenuOptionsExtension(const JSCallbackInfo& info);
     static void SetForegroundColor(const JSCallbackInfo& info);
+    static void SetPasswordIcon(const JSCallbackInfo& info);
     static void SetShowUnit(const JSCallbackInfo& info);
     static void SetShowCounter(const JSCallbackInfo& info);
+    static void SetShowError(const JSCallbackInfo& info);
 
     static void SetShowUnderline(const JSCallbackInfo& info);
+    static void SetEnableKeyboardOnFocus(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

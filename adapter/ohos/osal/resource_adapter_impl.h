@@ -16,17 +16,19 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_OSAL_RESOURCE_ADAPTER_IMPL_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_RESOURCE_ADAPTER_IMPL_H
 
-#include "resource_manager.h"
-
 #include <mutex>
 #include <shared_mutex>
 
+#include "resource_manager.h"
+
+#include "base/image/pixel_map.h"
 #include "core/components/theme/resource_adapter.h"
 
 namespace OHOS::Ace {
 
 class ResourceAdapterImpl : public ResourceAdapter {
     DECLARE_ACE_TYPE(ResourceAdapterImpl, ResourceAdapter);
+
 public:
     ResourceAdapterImpl() = default;
     ~ResourceAdapterImpl() override = default;
@@ -55,6 +57,7 @@ public:
     std::vector<uint32_t> GetIntArrayByName(const std::string& resName) const override;
     bool GetBoolean(uint32_t resId) const override;
     bool GetBooleanByName(const std::string& resName) const override;
+    std::shared_ptr<Media::PixelMap> GetPixelMap(uint32_t resId) override;
     std::string GetMediaPath(uint32_t resId) override;
     std::string GetMediaPathByName(const std::string& resName) override;
     std::string GetRawfile(const std::string& fileName) override;

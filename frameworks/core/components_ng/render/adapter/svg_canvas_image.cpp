@@ -23,17 +23,18 @@ const RefPtr<SvgDomBase>& SvgCanvasImage::GetSVGDom() const
     return svgDom_;
 }
 
-std::optional<Color> SvgCanvasImage::GetSvgFillColor()
+std::optional<Color> SvgCanvasImage::GetFillColor()
 {
-    return svgDom_ ? std::nullopt : svgDom_->GetSvgFillColor();
+    return svgDom_ ? svgDom_->GetFillColor() : std::nullopt;
 }
 
 void SvgCanvasImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect& /* dstRect */,
-    const BorderRadiusArray& /* radiusXY */)
+    const BorderRadiusArray& radiusXY)
 {
     CHECK_NULL_VOID(svgDom_);
+    svgDom_->SetRadius(radiusXY);
     svgDom_->DrawImage(
-        canvas, GetPaintConfig().imageFit_, Size(srcRect.GetWidth(), srcRect.GetHeight()), GetSvgFillColor());
+        canvas, GetPaintConfig().imageFit_, Size(srcRect.GetWidth(), srcRect.GetHeight()), GetFillColor());
 }
 
 bool SvgCanvasImage::IsStatic()

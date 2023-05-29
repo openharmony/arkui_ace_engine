@@ -99,6 +99,7 @@ void IndexerPattern::OnModifyDone()
         gesture->AddTouchEvent(touchListener_);
     }
     InitOnKeyEvent();
+    SetAccessibilityAction();
 }
 
 bool IndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -466,6 +467,10 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
 
             AccessibilityEventType type = AccessibilityEventType::SELECTED;
             host->OnAccessibilityEvent(type);
+            auto textAccessibilityProperty = childNode->GetAccessibilityProperty<TextAccessibilityProperty>();
+            if (textAccessibilityProperty) {
+                textAccessibilityProperty->SetSelected(true);
+            }
             continue;
         } else {
             if (!fromTouchUp || animateSelected_ == lastSelected_ || index != lastSelected_) {
@@ -485,6 +490,10 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
         nodeLayoutProperty->UpdateTextColor(layoutProperty->GetColor().value_or(indexerTheme->GetDefaultTextColor()));
         childNode->MarkModifyDone();
         index++;
+        auto textAccessibilityProperty = childNode->GetAccessibilityProperty<TextAccessibilityProperty>();
+        if (textAccessibilityProperty) {
+            textAccessibilityProperty->SetSelected(false);
+        }
     }
     if (selectChanged || NeedShowPopupView()) {
         ShowBubble();
@@ -708,8 +717,9 @@ void IndexerPattern::CreateBubbleListView(std::vector<std::string>& currentListD
     CHECK_NULL_VOID(listNode);
     listNode->Clean();
     for (uint32_t i = 0; i < currentListData.size(); i++) {
-        auto listItemNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ListItemPattern>(nullptr));
+        auto listItemNode =
+            FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE));
         auto textNode = FrameNode::CreateFrameNode(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         listItemNode->AddChild(textNode);
@@ -774,8 +784,6 @@ void IndexerPattern::ChangeListItemsSelectedStyle(int32_t clickIndex)
     popupClickedIndex_ = clickIndex;
     auto host = GetHost();
     CHECK_NULL_VOID(popupNode_);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
@@ -787,7 +795,7 @@ void IndexerPattern::ChangeListItemsSelectedStyle(int32_t clickIndex)
     auto popupSelectedTextColor =
         paintProperty->GetPopupSelectedColor().value_or(indexerTheme->GetPopupDefaultColor());
     auto popupUnselectedTextColor =
-        paintProperty->GetPopupUnselectedColor().value_or(indexerTheme->GetPopupDefaultColor());
+        paintProperty->GetPopupUnselectedColor().value_or(indexerTheme->GetDefaultTextColor());
     auto popupItemBackground =
         paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupBackgroundColor());
     auto listNode = popupNode_->GetLastChild();
@@ -1144,5 +1152,60 @@ void IndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
     }
     lastFireSelectIndex_ = selectIndex;
     lastIndexFromPress_ = fromPress;
+}
+
+void IndexerPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto childrenNode = host->GetChildren();
+    for (auto& iter : childrenNode) {
+        auto textNode = DynamicCast<NG::FrameNode>(iter);
+        CHECK_NULL_VOID(textNode);
+        auto accessibilityProperty = textNode->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(accessibilityProperty);
+        accessibilityProperty->SetActionSelect(
+            [weakPtr = WeakClaim(this), node = WeakClaim(RawPtr(textNode)), childrenNode]() {
+                const auto& indexerPattern = weakPtr.Upgrade();
+                CHECK_NULL_VOID(indexerPattern);
+                const auto& frameNode = node.Upgrade();
+                CHECK_NULL_VOID(frameNode);
+                auto index = 0;
+                auto nodeId = frameNode->GetAccessibilityId();
+                for (auto& child : childrenNode) {
+                    if (child->GetAccessibilityId() == nodeId) {
+                        break;
+                    }
+                    index++;
+                }
+                indexerPattern->selected_ = index;
+                indexerPattern->ResetStatus();
+                indexerPattern->ApplyIndexChanged(true, true);
+                indexerPattern->OnSelect(true);
+            });
+
+        accessibilityProperty->SetActionClearSelection(
+            [weakPtr = WeakClaim(this), node = WeakClaim(RawPtr(textNode)), childrenNode] {
+                const auto& indexerPattern = weakPtr.Upgrade();
+                CHECK_NULL_VOID(indexerPattern);
+                const auto& frameNode = node.Upgrade();
+                CHECK_NULL_VOID(frameNode);
+                auto index = 0;
+                auto nodeId = frameNode->GetAccessibilityId();
+                for (auto& child : childrenNode) {
+                    if (child->GetAccessibilityId() == nodeId) {
+                        break;
+                    }
+                    index++;
+                }
+                if (indexerPattern->selected_ != index) {
+                    return;
+                }
+                indexerPattern->selected_ = 0;
+                indexerPattern->ResetStatus();
+                indexerPattern->ApplyIndexChanged(false);
+                indexerPattern->OnSelect(false);
+            });
+    }
 }
 } // namespace OHOS::Ace::NG

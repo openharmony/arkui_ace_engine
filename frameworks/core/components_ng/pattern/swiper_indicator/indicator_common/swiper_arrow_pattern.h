@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -38,7 +39,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<BoxLayoutAlgorithm>();
+        return MakeRefPtr<SwiperArrowLayoutAlgorithm>();
     }
 
     RefPtr<FrameNode> GetSwiperNode() const

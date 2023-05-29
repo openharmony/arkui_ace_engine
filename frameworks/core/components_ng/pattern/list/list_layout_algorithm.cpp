@@ -163,7 +163,7 @@ float ListLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Ax
     return maxCrossSize;
 }
 
-void ListLayoutAlgorithm::CalculateEstimateOffset()
+void ListLayoutAlgorithm::CalculateEstimateOffset(bool isAlignTop)
 {
     if (itemPosition_.empty()) {
         estimateOffset_ = 0;
@@ -176,7 +176,12 @@ void ListLayoutAlgorithm::CalculateEstimateOffset()
     }
     if (lines > 0) {
         float averageHeight = itemsHeight / static_cast<float>(lines);
-        estimateOffset_ = averageHeight * static_cast<float>(itemPosition_.begin()->first);
+        if (isAlignTop) {
+            estimateOffset_ = averageHeight * static_cast<float>(jumpIndex_.value());
+        } else {
+            estimateOffset_ = averageHeight * static_cast<float>(jumpIndex_.value() + 1) -
+                spaceWidth_ - contentMainSize_;
+        }
     } else {
         estimateOffset_ = 0;
     }
@@ -210,27 +215,30 @@ void ListLayoutAlgorithm::MeasureList(
             jumpIndex_.value(), currentOffset_, startMainPos_, endMainPos_);
         if (scrollIndexAlignment_ == ScrollIndexAlignment::ALIGN_TOP) {
             jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value());
-            if (jumpIndex_ == 0) {
+            if (jumpIndex_.value() == 0) {
                 startMainPos_ = contentStartOffset_;
             }
-            LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), startMainPos_);
+            startPos = (jumpIndex_.value() == 0) && Negative(startMainPos_) ? startMainPos_ : 0;
+            LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), startPos);
             if (jumpIndex_.value() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
                 LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() - 1, GetStartPosition());
             }
+            CalculateEstimateOffset(true);
         } else if (scrollIndexAlignment_ == ScrollIndexAlignment::ALIGN_BOTTOM) {
             jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value()) + GetLanes() - 1;
             LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), contentMainSize_);
             if (jumpIndex_.value() < totalItemCount_ - 1 && LessNotEqual(GetEndPosition(), endMainPos_)) {
                 LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() + 1, GetEndPosition());
             }
+            CalculateEstimateOffset(false);
         }
-        CalculateEstimateOffset();
     } else {
         jumpIndexInGroup_.reset();
         LOGD("StartIndex index: %{public}d, offset is %{public}f, startMainPos: %{public}f, endMainPos: %{public}f",
             startIndex, currentOffset_, startMainPos_, endMainPos_);
         bool overScrollTop = startIndex == 0 && GreatNotEqual(startPos, startMainPos_);
         if ((!overScrollFeature_ && NonNegative(currentOffset_)) || (overScrollFeature_ && overScrollTop)) {
+            startIndex = GetLanesFloor(layoutWrapper, startIndex);
             LayoutForward(layoutWrapper, layoutConstraint, axis, startIndex, startPos);
             if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
                 LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());

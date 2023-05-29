@@ -31,8 +31,6 @@ struct CalcDimensionParam {
     float fpScale = 0.0f;
     float lpxScale = 0.0f;
     float parentLength = 0.0f;
-    float rootWidth = 0.0f;
-    float rootHeight = 0.0f;
 };
 
 using CalcDimensionFunc = std::function<bool(const CalcDimensionParam& param, double& result)>;
@@ -84,31 +82,10 @@ bool CalcDimensionLpx(const CalcDimensionParam& param, double& result)
     return false;
 }
 
-bool CalcDimensionVw(const CalcDimensionParam& param, double& result)
-{
-    if (NearZero(param.rootWidth)) {
-        LOGE("PipelineContext's RootWidth is 0");
-        return false;
-    }
-    result = param.value * param.rootWidth;
-    return true;
-}
-
-bool CalcDimensionVh(const CalcDimensionParam& param, double& result)
-{
-    if (NearZero(param.rootHeight)) {
-        LOGE("PipelineContext's RootHeight is 0");
-        return false;
-    }
-    result = param.value * param.rootHeight;
-    return true;
-}
-
 std::unordered_map<DimensionUnit, CalcDimensionFunc> calcDimensionFuncMap_ = {
     { DimensionUnit::NONE, &CalcDimensionNone }, { DimensionUnit::PX, &CalcDimensionPx },
     { DimensionUnit::PERCENT, &CalcDimensionPercent }, { DimensionUnit::VP, &CalcDimensionVp },
-    { DimensionUnit::FP, &CalcDimensionFp }, { DimensionUnit::LPX, &CalcDimensionLpx },
-    { DimensionUnit::VW, &CalcDimensionVw }, { DimensionUnit::VH, &CalcDimensionVh }
+    { DimensionUnit::FP, &CalcDimensionFp }, { DimensionUnit::LPX, &CalcDimensionLpx }
 };
 } // namespace
 
@@ -170,14 +147,48 @@ double Dimension::ConvertToPxWithSize(double size) const
 
 std::string Dimension::ToString() const
 {
-    static const int32_t unitsNum = 8;
+    static const int32_t unitsNum = 6;
     static const int32_t percentIndex = 3;
     static const int32_t percentUnit = 100;
-    static std::array<std::string, unitsNum> units = { "px", "vp", "fp", "%", "lpx", "auto", "vw", "vh" };
+    static std::array<std::string, unitsNum> units = { "px", "vp", "fp", "%", "lpx", "auto" };
     if (units[static_cast<int>(unit_)] == units[percentIndex]) {
         return StringUtils::DoubleToString(value_ * percentUnit).append(units[static_cast<int>(unit_)]);
     }
     return StringUtils::DoubleToString(value_).append(units[static_cast<int>(unit_)]);
+}
+
+// for example str = 0.00px
+Dimension Dimension::FromString(const std::string& str)
+{
+    static const int32_t percentUnit = 100;
+    static const std::unordered_map<std::string, DimensionUnit> uMap {
+        { "px", DimensionUnit::PX },
+        { "vp", DimensionUnit::VP },
+        { "fp", DimensionUnit::FP },
+        { "%", DimensionUnit::PERCENT },
+        { "lpx", DimensionUnit::LPX },
+        { "auto", DimensionUnit::AUTO },
+    };
+
+    LOGD("UITree str=%{public}s", str.c_str());
+    double value = 0.0;
+    DimensionUnit unit = DimensionUnit::FP;
+
+    if (str.empty()) {
+        LOGE("UITree |ERROR| empty string");
+        return Dimension(value, unit);
+    }
+
+    for (int32_t i = str.length() - 1; i >= 0; --i) {
+        if (str[i] >= '0' && str[i] <= '9') {
+            value = StringUtils::StringToDouble(str.substr(0, i + 1));
+            auto subStr = str.substr(i + 1);
+            unit = uMap.count(subStr) ? uMap.at(subStr) : unit;
+            value = unit == DimensionUnit::PERCENT ? value / percentUnit : value;
+            break;
+        }
+    }
+    return Dimension(value, unit);
 }
 
 bool Dimension::NormalizeToPx(
@@ -185,11 +196,7 @@ bool Dimension::NormalizeToPx(
 {
     auto func = calcDimensionFuncMap_.find(unit_);
     if (func != calcDimensionFuncMap_.end()) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, false);
-        auto rootWidth = pipeline->GetRootWidth();
-        auto rootHeight = pipeline->GetRootHeight();
-        CalcDimensionParam param = { value_, vpScale, fpScale, lpxScale, parentLength, rootWidth, rootHeight };
+        CalcDimensionParam param = { value_, vpScale, fpScale, lpxScale, parentLength };
         return func->second(param, result);
     }
     return false;

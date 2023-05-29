@@ -208,6 +208,7 @@ public:
     // flex properties
     static void SetAlignSelf(FlexAlign value);
     static void SetFlexShrink(float value);
+    static void ResetFlexShrink();
     static void SetFlexGrow(float value);
     static void SetFlexBasis(const Dimension& value);
     static void SetDisplayIndex(int32_t value);
@@ -251,6 +252,9 @@ public:
     // foregroundColor
     static void SetForegroundColor(const Color& color);
     static void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy);
+
+    // clickEffect
+    static void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue);
 
     // custom animatable property
     static void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,

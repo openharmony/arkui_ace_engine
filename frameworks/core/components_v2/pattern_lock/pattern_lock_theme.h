@@ -29,6 +29,11 @@ public:
     public:
         Builder() = default;
         ~Builder() = default;
+
+        static constexpr Dimension DEFAULT_SIDE_LENGTH = 300.0_vp;
+        static constexpr Dimension DEFAULT_CIRCLE_RADIUS = 14.0_vp;
+        static constexpr Dimension DEFAULT_PATH_STROKE_WIDTH = 34.0_vp;
+        
         RefPtr<PatternLockTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
             RefPtr<PatternLockTheme> theme = AceType::Claim(new PatternLockTheme());
@@ -38,10 +43,10 @@ public:
             theme->regularColor_ = Color::BLACK;
             theme->activeColor_ = Color::BLACK;
             theme->selectedColor_ = Color::BLACK;
-            const int16_t redColor = 77;
-            const int16_t greenColor = 164;
-            const int16_t blueColor = 255;
-            theme->pathColor_ = Color::FromRGB(redColor, greenColor, blueColor);
+            theme->pathColor_ = Color::BLUE;
+            theme->sideLength_ = DEFAULT_SIDE_LENGTH;
+            theme->circleRadius_ = DEFAULT_CIRCLE_RADIUS;
+            theme->pathStrokeWidth_ = DEFAULT_PATH_STROKE_WIDTH;
             return theme;
         }
     };
@@ -63,6 +68,21 @@ public:
         return pathColor_;
     }
 
+    Dimension GetSideLength() const
+    {
+        return sideLength_;
+    }
+
+    Dimension GetCircleRadius() const
+    {
+        return circleRadius_;
+    }
+
+    Dimension GetPathStrokeWidth() const
+    {
+        return pathStrokeWidth_;
+    }
+
 protected:
     PatternLockTheme() = default;
 
@@ -71,6 +91,9 @@ private:
     Color selectedColor_;
     Color activeColor_;
     Color pathColor_;
+    Dimension sideLength_;
+    Dimension circleRadius_;
+    Dimension pathStrokeWidth_;
 };
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_PATTERN_LOCK_PATTERN_LOCK_THEME_H

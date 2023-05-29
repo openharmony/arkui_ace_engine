@@ -28,9 +28,32 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
+{
+    CHECK_NULL_VOID(customNode);
+    auto* stack = ViewStackProcessor::GetInstance();
+    int32_t nodeId = stack->ClaimNodeId();
+    auto menuItem = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MenuItemPattern>(); });
+    CHECK_NULL_VOID(menuItem);
+    stack->Push(menuItem);
+
+    // set border radius
+    auto renderContext = menuItem->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    BorderRadiusProperty border;
+    border.SetRadius(theme->GetInnerBorderRadius());
+    renderContext->UpdateBorderRadius(border);
+
+    menuItem->AddChild(customNode);
+}
+
 void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
 {
-    LOGI("MenuItemView::Create");
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
     auto menuItem = FrameNode::GetOrCreateFrameNode(
@@ -123,6 +146,11 @@ void MenuItemModelNG::SetFontWeight(FontWeight weight)
     ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontWeight, weight);
 }
 
+void MenuItemModelNG::SetFontStyle(Ace::FontStyle style)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, ItalicFontStyle, style);
+}
+
 void MenuItemModelNG::SetFontColor(const std::optional<Color>& color)
 {
     if (color.has_value()) {
@@ -145,6 +173,11 @@ void MenuItemModelNG::SetLabelFontSize(const Dimension& fontSize)
 void MenuItemModelNG::SetLabelFontWeight(FontWeight weight)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontWeight, weight);
+}
+
+void MenuItemModelNG::SetLabelFontStyle(Ace::FontStyle style)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelItalicFontStyle, style);
 }
 
 void MenuItemModelNG::SetLabelFontColor(const std::optional<Color>& color)

@@ -29,7 +29,7 @@
 #include "adapter/android/entrance/java/jni/virtual_rs_window.h"
 #endif
 #else
-#include "adapter/preview/external/window/window_preview.h"
+#include "adapter/preview/external/window/window.h"
 #endif
 
 #include "base/thread/task_executor.h"
@@ -56,6 +56,11 @@ public:
     std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector() const override
     {
         return rsUIDirector_;
+    }
+
+    sptr<Rosen::Window> GetRSWindow() const
+    {
+        return rsWindow_;
     }
 
     void RecordFrameTime(uint64_t timeStamp, const std::string& name) override;

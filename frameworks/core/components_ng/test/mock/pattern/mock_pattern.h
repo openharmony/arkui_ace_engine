@@ -63,6 +63,9 @@ public:
     MOCK_METHOD0(OnAttachToFrameNode, void());
     MOCK_METHOD1(OnDetachFromFrameNode, void(FrameNode* frameNode));
     MOCK_CONST_METHOD1(ToJsonValue, void(std::unique_ptr<JsonValue>& json));
+    MOCK_METHOD0(ProvideRestoreInfo, std::string());
+    MOCK_METHOD0(OnAreaChangedInner, void());
+    MOCK_METHOD3(OnWindowSizeChanged, void(int32_t width, int32_t height, WindowSizeChangeReason type));
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_PATTERN_H

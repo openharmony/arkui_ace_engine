@@ -40,7 +40,9 @@ void ButtonPattern::OnAttachToFrameNode()
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     SetDefaultAttributes(host, pipeline);
-    host->GetRenderContext()->SetClipToFrame(true);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetClipToFrame(true);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     clickedColor_ = buttonTheme->GetClickedColor();
@@ -104,12 +106,16 @@ void ButtonPattern::InitButtonLabel()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
     auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (!layoutProperty->GetLabel().has_value()) {
         LOGI("No label, no need to initialize label.");
+        focusHub->SetFocusType(FocusType::SCOPE);
         return;
     }
+    focusHub->SetFocusType(FocusType::NODE);
     auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();

@@ -25,7 +25,6 @@
 
 namespace OHOS::Ace::NG {
 
-using ChangeEvent = std::function<void(const std::string, const std::string)>;
 using OnScrollEvent = std::function<void(Dimension, ScrollState)>;
 using OnScrollBeginEvent = std::function<ScrollInfo(Dimension, Dimension)>;
 using OnScrollFrameBeginEvent = std::function<ScrollFrameResult(Dimension, ScrollState)>;

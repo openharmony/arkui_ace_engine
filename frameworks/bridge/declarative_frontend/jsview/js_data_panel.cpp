@@ -72,8 +72,7 @@ void JSDataPanel::JSBind(BindingTarget globalObj)
     JSClass<JSDataPanel>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSDataPanel>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
-    JSClass<JSDataPanel>::Inherit<JSViewAbstract>();
-    JSClass<JSDataPanel>::Bind(globalObj);
+    JSClass<JSDataPanel>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSDataPanel::Create(const JSCallbackInfo& info)
@@ -213,6 +212,13 @@ void JSDataPanel::ShadowOption(const JSCallbackInfo& info)
         return;
     }
 
+    OHOS::Ace::NG::DataPanelShadow shadow;
+    if (info[0]->IsNull()) {
+        shadow.isShadowVisible = false;
+        DataPanelModel::GetInstance()->SetShadowOption(shadow);
+        return;
+    }
+
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> jsRadius = paramObject->GetProperty("radius");
     JSRef<JSVal> jsOffsetX = paramObject->GetProperty("offsetX");
@@ -221,6 +227,10 @@ void JSDataPanel::ShadowOption(const JSCallbackInfo& info)
     RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
     double radius = 0.0;
     if (!ParseJsDouble(jsRadius, radius)) {
+        radius = theme->GetTrackShadowRadius().ConvertToVp();
+    }
+
+    if (NonPositive(radius)) {
         radius = theme->GetTrackShadowRadius().ConvertToVp();
     }
 
@@ -250,7 +260,6 @@ void JSDataPanel::ShadowOption(const JSCallbackInfo& info)
         }
     }
 
-    OHOS::Ace::NG::DataPanelShadow shadow;
     shadow.radius = radius;
     shadow.offsetX = offsetX;
     shadow.offsetY = offsetY;

@@ -90,6 +90,8 @@ public:
 
     // Called by view when mouse event received.
     void OnMouseEvent(const MouseEvent& event) override;
+    // A temporary solution: triggers once mouse move action
+    void FlushMouseEvent();
 
     // Called by view when axis event received.
     void OnAxisEvent(const AxisEvent& event) override;
@@ -191,6 +193,8 @@ public:
 
     SafeAreaEdgeInserts GetCurrentViewSafeArea() const override;
 
+    void ResetViewSafeArea() override;
+
     const RefPtr<FullScreenManager>& GetFullScreenManager();
 
     const RefPtr<StageManager>& GetStageManager();
@@ -240,14 +244,30 @@ public:
         isFocusingByTab_ = isFocusingByTab;
     }
 
-    bool GetIsNeedShowFocus() const
+    bool GetIsFocusActive() const
     {
-        return isNeedShowFocus_;
+        return isFocusActive_;
     }
 
-    void SetIsNeedShowFocus(bool isNeedShowFocus)
+    bool SetIsFocusActive(bool isFocusActive)
     {
-        isNeedShowFocus_ = isNeedShowFocus;
+        if (isFocusActive_ == isFocusActive) {
+            return false;
+        }
+        isFocusActive_ = isFocusActive;
+        CHECK_NULL_RETURN_NOLOG(rootNode_, false);
+        auto rootFocusHub = rootNode_->GetFocusHub();
+        CHECK_NULL_RETURN_NOLOG(rootFocusHub, false);
+        if (isFocusActive_) {
+            return rootFocusHub->PaintAllFocusState();
+        }
+        rootFocusHub->ClearAllFocusState();
+        return true;
+    }
+
+    bool IsTabJustTriggerOnKeyEvent() const
+    {
+        return isTabJustTriggerOnKeyEvent_;
     }
 
     bool GetOnShow() const
@@ -327,7 +347,7 @@ public:
     void RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo) override;
     std::unique_ptr<JsonValue> GetStoredNodeInfo() override;
     void StoreNode(int32_t restoreId, const WeakPtr<FrameNode>& node);
-    std::string GetRestoreInfo(int32_t restoreId);
+    bool GetRestoreInfo(int32_t restoreId, std::string& restoreInfo);
     void RemoveStoredNode(int32_t restoreId)
     {
         storeNode_.erase(restoreId);
@@ -421,9 +441,11 @@ private:
     int32_t mouseStyleNodeId_ = -1;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
-    bool isNeedShowFocus_ = false;
+    bool isFocusActive_ = false;
+    bool isTabJustTriggerOnKeyEvent_ = false;
     bool onShow_ = false;
     bool onFocus_ = true;
+    MouseEvent lastMouseEvent_;
 
     std::unordered_map<int32_t, WeakPtr<FrameNode>> storeNode_;
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;

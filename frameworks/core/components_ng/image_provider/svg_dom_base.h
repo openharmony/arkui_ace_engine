@@ -33,8 +33,9 @@ class SvgDomBase : public AceType {
 public:
     virtual SizeF GetContainerSize() const = 0;
     virtual void SetContainerSize(const SizeF& containerSize) = 0;
-    virtual const std::optional<Color>& GetSvgFillColor() = 0;
-    virtual void SetSvgFillColor(const std::optional<Color>& color) {}
+    virtual const std::optional<Color>& GetFillColor() = 0;
+    virtual void SetFillColor(const std::optional<Color>& color) {}
+    virtual void SetRadius(const BorderRadiusArray& radiusXY) {}
 
     virtual bool IsStatic()
     {

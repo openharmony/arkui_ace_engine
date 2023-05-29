@@ -111,12 +111,12 @@ void BubblePattern::HandleTouchEvent(const TouchEventInfo& info)
     }
     auto touchType = info.GetTouches().front().GetTouchType();
     auto clickPos = info.GetTouches().front().GetLocalLocation();
-    if (touchType == TouchType::UP) {
-        HandleTouchUp(clickPos);
+    if (touchType == TouchType::DOWN) {
+        HandleTouchDown(clickPos);
     }
 }
 
-void BubblePattern::HandleTouchUp(const Offset& clickPosition)
+void BubblePattern::HandleTouchDown(const Offset& clickPosition)
 {
     // TODO: need to check click position
     auto host = GetHost();
@@ -261,9 +261,9 @@ RefPtr<FrameNode> BubblePattern::GetButtonRowNode()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto columnNode = AceType::DynamicCast<FrameNode>(host->GetLastChild());
-    CHECK_NULL_RETURN(host, nullptr);
+    CHECK_NULL_RETURN(columnNode, nullptr);
     auto buttonRowNode = AceType::DynamicCast<FrameNode>(columnNode->GetLastChild());
-    CHECK_NULL_RETURN(host, nullptr);
+    CHECK_NULL_RETURN(buttonRowNode, nullptr);
     if (buttonRowNode->GetTag() != V2::ROW_ETS_TAG) {
         return nullptr;
     }
@@ -323,6 +323,15 @@ void BubblePattern::Animation(
         option, [buttonContext = renderContext, color = endColor]() { buttonContext->UpdateBackgroundColor(color); });
 }
 
+bool BubblePattern::PostTask(const TaskExecutor::Task& task)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, false);
+    return taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+}
+
 void BubblePattern::StartEnteringAnimation(std::function<void()> finish)
 {
     if (!arrowPlacement_.has_value()) {
@@ -337,6 +346,12 @@ void BubblePattern::StartEnteringAnimation(std::function<void()> finish)
         ResetToInvisible();
     }
 
+    StartOffsetEnteringAnimation();
+    StartAlphaEnteringAnimation(finish);
+}
+
+void BubblePattern::StartOffsetEnteringAnimation()
+{
     AnimationOption optionPosition;
     optionPosition.SetDuration(ENTRY_ANIMATION_DURATION);
     optionPosition.SetCurve(Curves::FRICTION);
@@ -351,7 +366,10 @@ void BubblePattern::StartEnteringAnimation(std::function<void()> finish)
             renderContext->SyncGeometryProperties(nullptr);
         },
         nullptr);
+}
 
+void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
+{
     AnimationOption optionAlpha;
     optionAlpha.SetDuration(ENTRY_ANIMATION_DURATION);
     optionAlpha.SetCurve(Curves::SHARP);
@@ -374,7 +392,10 @@ void BubblePattern::StartEnteringAnimation(std::function<void()> finish)
             }
             pattern->transitionStatus_ = TransitionStatus::NORMAL;
             if (finish) {
-                finish();
+                pattern->PostTask([finish, id = Container::CurrentId()]() {
+                    ContainerScope scope(id);
+                    finish();
+                });
             }
         });
 }
@@ -385,6 +406,12 @@ void BubblePattern::StartExitingAnimation(std::function<void()> finish)
         return;
     }
 
+    StartOffsetExitingAnimation();
+    StartAlphaExitingAnimation(finish);
+}
+
+void BubblePattern::StartOffsetExitingAnimation()
+{
     AnimationOption optionPosition;
     optionPosition.SetDuration(EXIT_ANIMATION_DURATION);
     optionPosition.SetCurve(Curves::FRICTION);
@@ -399,7 +426,10 @@ void BubblePattern::StartExitingAnimation(std::function<void()> finish)
             renderContext->SyncGeometryProperties(nullptr);
         },
         nullptr);
+}
 
+void BubblePattern::StartAlphaExitingAnimation(std::function<void()> finish)
+{
     AnimationOption optionAlpha;
     optionAlpha.SetDuration(EXIT_ANIMATION_DURATION);
     optionAlpha.SetCurve(Curves::SHARP);
@@ -422,7 +452,10 @@ void BubblePattern::StartExitingAnimation(std::function<void()> finish)
             }
             pattern->transitionStatus_ = TransitionStatus::INVISIABLE;
             if (finish) {
-                finish();
+                pattern->PostTask([finish, id = Container::CurrentId()]() {
+                    ContainerScope scope(id);
+                    finish();
+                });
             }
         });
 }

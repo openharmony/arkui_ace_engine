@@ -73,7 +73,7 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         if (!container->GetSettings().usingSharedRuntime) {
             return;
         }
-        if (!container->WindowIsShow()) {
+        if (!container->IsFRSCardContainer() && !container->WindowIsShow()) {
             return;
         }
         auto frontendType = context->GetFrontendType();
@@ -88,7 +88,8 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         }
         context->PrepareOpenImplicitAnimation();
     });
-    ViewContextModel::GetInstance()->openAnimation(option);
+    pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
+    pipelineContext->SetSyncAnimationOption(option);
     // Execute the function.
     JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
     jsAnimateToFunc->Call(info[1]);
@@ -101,7 +102,7 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         if (!container->GetSettings().usingSharedRuntime) {
             return;
         }
-        if (!container->WindowIsShow()) {
+        if (!container->IsFRSCardContainer() && !container->WindowIsShow()) {
             return;
         }
         auto frontendType = context->GetFrontendType();
@@ -116,18 +117,21 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         }
         context->PrepareCloseImplicitAnimation();
     });
-    ViewContextModel::GetInstance()->closeAnimation(AnimationOption());
+    pipelineContext->SetSyncAnimationOption(AnimationOption());
+    pipelineContext->CloseImplicitAnimation();
 }
 
 void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOption& option,
     const JSCallbackInfo& info, std::function<void()>& onFinishEvent)
 {
     pipelineContext->FlushBuild();
-    ViewContextModel::GetInstance()->openAnimation(option);
-
+    pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
+    pipelineContext->SetSyncAnimationOption(option);
     JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
     jsAnimateToFunc->Call(info[1]);
-    ViewContextModel::GetInstance()->closeAnimation(AnimationOption());
+    pipelineContext->FlushBuild();
+    pipelineContext->SetSyncAnimationOption(AnimationOption());
+    pipelineContext->CloseImplicitAnimation();
 }
 
 } // namespace
@@ -144,6 +148,11 @@ const AnimationOption JSViewContext::CreateAnimation(const std::unique_ptr<JsonV
     auto delay = animationArgs->GetInt("delay", 0);
     auto iterations = animationArgs->GetInt("iterations", 1);
     auto tempo = animationArgs->GetDouble("tempo", 1.0);
+    if (SystemProperties::GetRosenBackendEnabled() && NearZero(tempo)) {
+        // set duration to 0 to disable animation.
+        LOGI("tempo near 0, set duration to 0.");
+        duration = 0;
+    }
     auto direction = StringToAnimationDirection(animationArgs->GetString("playMode", "normal"));
     RefPtr<Curve> curve;
     auto curveArgs = animationArgs->GetValue("curve");
@@ -203,8 +212,16 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
         return;
     }
     AnimationOption option = AnimationOption();
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContextBase = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContextBase);
+    if (!pipelineContextBase->GetEnableImplicitAnimation() && pipelineContextBase->IsFormRender()) {
+        LOGW("Form need enable implicit animation in finish callback.");
+        return;
+    }
     if (info[0]->IsNull() || !info[0]->IsObject()) {
-        ViewContextModel::GetInstance()->closeAnimation(option);
+        ViewContextModel::GetInstance()->closeAnimation(option, true);
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -222,15 +239,9 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     auto animationArgs = JsonUtil::ParseJsonString(info[0]->ToString());
     if (animationArgs->IsNull()) {
         LOGE("Js Parse failed. animationArgs is null.");
-        ViewContextModel::GetInstance()->closeAnimation(option);
+        ViewContextModel::GetInstance()->closeAnimation(option, false);
         return;
     }
-
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto pipelineContextBase = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContextBase);
-
     option = CreateAnimation(animationArgs, pipelineContextBase->IsFormRender());
     option.SetOnFinishEvent(onFinishEvent);
     if (SystemProperties::GetRosenBackendEnabled()) {
@@ -262,6 +273,15 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
         return;
     }
 
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (!pipelineContext->GetEnableImplicitAnimation() && pipelineContext->IsFormRender()) {
+        LOGW("Form need enable implicit animation in finish callback.");
+        return;
+    }
+
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
     std::function<void()> onFinishEvent;
@@ -280,11 +300,6 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
         LOGE("Js Parse failed. animationArgs is null.");
         return;
     }
-
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
 
     AnimationOption option = CreateAnimation(animationArgs, pipelineContext->IsFormRender());
     if (SystemProperties::GetRosenBackendEnabled()) {

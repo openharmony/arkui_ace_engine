@@ -76,7 +76,7 @@ protected:
     void UnregisterSecurityComponent();
     void InitSecurityComponentAppearCallback(RefPtr<FrameNode>& frameNode);
 private:
-    RefPtr<ClickEvent> clickListener_ = nullptr;
+    RefPtr<ClickEvent> clickListener_;
     bool isAppearCallback_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(SecurityComponentPattern);
 };

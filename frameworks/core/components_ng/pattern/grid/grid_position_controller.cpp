@@ -30,7 +30,8 @@ void GridPositionController::JumpTo(int32_t index, int32_t /* source */)
     gridPattern->UpdateStartIndex(index);
 }
 
-bool GridPositionController::AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve)
+bool GridPositionController::AnimateTo(
+    const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_RETURN(pattern, false);

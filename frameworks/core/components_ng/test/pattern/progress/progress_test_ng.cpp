@@ -24,8 +24,11 @@
 #define private public
 #define protected public
 
+#include "test/mock/base/mock_task_executor.h"
+
 #include "base/memory/ace_type.h"
 #include "core/components/progress/progress_theme.h"
+#include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -35,11 +38,10 @@
 #include "core/components_ng/pattern/progress/progress_paint_property.h"
 #include "core/components_ng/pattern/progress/progress_pattern.h"
 #include "core/components_ng/property/progress_mask_property.h"
+#include "core/components_ng/render/render_context.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-#include "core/components_ng/render/render_context.h"
-#include "test/mock/base/mock_task_executor.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -126,7 +128,8 @@ constexpr Dimension BORDER_WIDTH = 2.0_vp;
 constexpr Dimension FONT_SIZE = 12.0_vp;
 const std::string FONT_CONTEXT = "start";
 const FontWeight FONT_WEIGHT = FontWeight::BOLDER;
-const std::vector<std::string> FONT_FAMILY = {"serif"};
+const std::vector<std::string> FONT_FAMILY = { "serif" };
+constexpr Dimension DEFALUT_SPACE = 4.0_vp;
 
 CreateProperty creatProperty;
 DirtySwapConfig config;
@@ -444,7 +447,7 @@ HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm001, TestSize.Level1)
     ASSERT_NE(size, std::nullopt);
     EXPECT_EQ(progressLayoutAlgorithm->GetType(), PROGRESS_TYPE_LINEAR);
     EXPECT_EQ(progressLayoutAlgorithm->GetStrokeWidth(), DEFALUT_STROKE_WIDTH.ConvertToPx());
-    EXPECT_EQ(size->Height(), PROGRESS_COMPONENT_WIDTH);
+    EXPECT_EQ(size->Height(), DEFALUT_STROKE_WIDTH.ConvertToPx());
     EXPECT_EQ(size->Width(), PROGRESS_COMPONENT_HEIGHT);
 }
 
@@ -546,7 +549,7 @@ HWTEST_F(ProgressTestNg, LinearProgressCreator001, TestSize.Level1)
     size = progressLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     ASSERT_NE(size, std::nullopt);
     EXPECT_EQ(progressLayoutAlgorithm->GetStrokeWidth(), STORKE_WIDTH.ConvertToPx());
-    EXPECT_EQ(size->Height(), PROGRESS_COMPONENT_HEIGHT);
+    EXPECT_EQ(size->Height(), STORKE_WIDTH.ConvertToPx());
     EXPECT_EQ(size->Width(), PROGRESS_COMPONENT_WIDTH);
 
     contentConstraint.selfIdealSize.SetWidth(LARG_PROGRESS_COMPONENT_WIDTH);
@@ -555,7 +558,7 @@ HWTEST_F(ProgressTestNg, LinearProgressCreator001, TestSize.Level1)
     ASSERT_NE(size, std::nullopt);
     EXPECT_EQ(progressLayoutAlgorithm->GetStrokeWidth(), STORKE_WIDTH.ConvertToPx());
     EXPECT_EQ(size->Height(), PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
-    EXPECT_EQ(size->Width(), PROGRESS_COMPONENT_MAXSIZE_WIDTH);
+    EXPECT_EQ(size->Width(), STORKE_WIDTH.ConvertToPx());
 }
 
 /**
@@ -900,9 +903,8 @@ HWTEST_F(ProgressTestNg, GetContentDrawFunction, TestSize.Level1)
         RefPtr<PaintWrapper> paintWrapper =
             AceType::MakeRefPtr<PaintWrapper>(RenderContext::Create(), geometryNode, progressPaintProperty);
         auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
-        auto progressPaintMethod =
-            AceType::MakeRefPtr<ProgressPaintMethod>(progressType[i], LARG_STORKE_WIDTH.ConvertToPx(),
-            progressModifier);
+        auto progressPaintMethod = AceType::MakeRefPtr<ProgressPaintMethod>(
+            progressType[i], LARG_STORKE_WIDTH.ConvertToPx(), progressModifier);
         EXPECT_NE(progressPaintMethod, nullptr);
         EXPECT_NE(progressPaintMethod->progressModifier_, nullptr);
     }
@@ -1439,6 +1441,17 @@ HWTEST_F(ProgressTestNg, ProgressPattern001, TestSize.Level1)
     touchInfo1.SetTouchType(TouchType::DOWN);
     info.AddTouchLocationInfo(std::move(touchInfo1));
     pattern->touchListener_->GetTouchEventCallback()(info);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<AppTheme>()));
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetContentSize(SizeF(PROGRESS_COMPONENT_MAXSIZE_WIDTH, PROGRESS_COMPONENT_MAXSIZE_HEIGHT));
+    geometryNode->SetContentOffset(OffsetF(0, 0));
+    frameNode->SetGeometryNode(geometryNode);
+    RoundRect focusRect;
+    pattern->GetInnerFocusPaintRect(focusRect);
+    EXPECT_EQ(focusRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).x,
+        PROGRESS_COMPONENT_MAXSIZE_WIDTH * 0.5 + DEFALUT_SPACE.ConvertToPx());
+    EXPECT_EQ(focusRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).y,
+        PROGRESS_COMPONENT_MAXSIZE_WIDTH * 0.5 + DEFALUT_SPACE.ConvertToPx());
     EXPECT_FALSE(progressEvent->IsEnabled());
 }
 
@@ -1578,8 +1591,8 @@ HWTEST_F(ProgressTestNg, CapulseProgressMeasure001, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetContentSize(SizeF(100, 50));
-    RefPtr<LayoutWrapper> textWrapper = AceType::MakeRefPtr<LayoutWrapper>(textNode,
-        geometryNode, textNode->GetLayoutProperty());
+    RefPtr<LayoutWrapper> textWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(textNode, geometryNode, textNode->GetLayoutProperty());
     ASSERT_NE(textWrapper, nullptr);
     layoutWrapper.AppendChild(textWrapper);
     contentConstraint.selfIdealSize.SetWidth(PROGRESS_COMPONENT_WIDTH);
@@ -1628,8 +1641,8 @@ HWTEST_F(ProgressTestNg, CapulseProgressMeasure002, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetContentSize(SizeF(500, 100));
-    RefPtr<LayoutWrapper> textWrapper = AceType::MakeRefPtr<LayoutWrapper>(textNode,
-        geometryNode, textNode->GetLayoutProperty());
+    RefPtr<LayoutWrapper> textWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(textNode, geometryNode, textNode->GetLayoutProperty());
     ASSERT_NE(textWrapper, nullptr);
     layoutWrapper.AppendChild(textWrapper);
     contentConstraint.selfIdealSize.SetWidth(PROGRESS_COMPONENT_WIDTH);
@@ -2090,6 +2103,116 @@ HWTEST_F(ProgressTestNg, RingProgressModifier004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RingProgressModifier005
+ * @tc.desc: Test the modifier while drawing ring progress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, RingProgressModifier005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
+     * @tc.expected: step1. Check the ProgressModifier property value.
+     */
+    Gradient gradient;
+    GradientColor gradientColorEnd;
+    GradientColor gradientColorStart;
+    gradientColorEnd.SetLinearColor(LinearColor(Color::WHITE));
+    gradientColorStart.SetLinearColor(LinearColor(Color::WHITE));
+    gradientColorEnd.SetDimension(Dimension(0.0));
+    gradient.AddColor(gradientColorEnd);
+    gradientColorStart.SetDimension(Dimension(1.0));
+    gradient.AddColor(gradientColorStart);
+
+    ProgressModifier progressModifier;
+    SizeF contentSize(CONTEXT_WIDTH, CONTEXT_HEIGHT);
+    progressModifier.SetContentSize(contentSize);
+    progressModifier.SetVisible(true);
+    progressModifier.SetProgressType(PROGRESS_TYPE_RING);
+    progressModifier.SetProgressStatus(ProgressStatus::PROGRESSING);
+    EXPECT_EQ(progressModifier.progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_RING));
+    LinearColor linearColor;
+    progressModifier.SetColor(linearColor);
+    EXPECT_EQ(progressModifier.color_->Get(), linearColor);
+    progressModifier.SetBackgroundColor(linearColor);
+    EXPECT_EQ(progressModifier.bgColor_->Get(), linearColor);
+    progressModifier.SetRingProgressColor(gradient);
+    progressModifier.SetMaxValue(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(progressModifier.maxValue_->Get(), PROGRESS_MODIFIER_VALUE);
+    progressModifier.SetValue(50.0f);
+    EXPECT_EQ(progressModifier.value_->Get(), 50.0f);
+    OffsetF offset(0, 0);
+    progressModifier.SetContentOffset(offset);
+    EXPECT_EQ(progressModifier.offset_->Get(), offset);
+
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+
+    /**
+     * @tc.steps: step2. Disable shadow and make stroke width smaller than the radius, then call function onDraw.
+     * @tc.expected: step2. Draw ring progress without shadow.
+     */
+    progressModifier.SetPaintShadow(false);
+    contentSize.SetWidth(CONTEXT_WIDTH);
+    contentSize.SetHeight(CONTEXT_WIDTH);
+    progressModifier.SetContentSize(contentSize);
+    progressModifier.SetStrokeWidth(50.0f);
+    progressModifier.onDraw(context);
+    EXPECT_EQ(progressModifier.contentSize_->Get(), contentSize);
+
+    /**
+     * @tc.steps: step3. Disable shadow and make stroke width equal to the radius, then call function onDraw.
+     * @tc.expected: step3. Draw ring progress without shadow.
+     */
+    progressModifier.SetPaintShadow(false);
+    contentSize.SetWidth(CONTEXT_WIDTH);
+    contentSize.SetHeight(CONTEXT_WIDTH);
+    progressModifier.SetContentSize(contentSize);
+    progressModifier.SetStrokeWidth(CONTEXT_WIDTH);
+    progressModifier.onDraw(context);
+    EXPECT_EQ(progressModifier.contentSize_->Get(), contentSize);
+
+    /**
+     * @tc.steps: step4. Enable shadow and make stroke width smaller than the radius, then call function onDraw.
+     * @tc.expected: step4. Draw ring progress with shadow.
+     */
+    progressModifier.SetPaintShadow(true);
+    contentSize.SetWidth(CONTEXT_WIDTH);
+    contentSize.SetHeight(CONTEXT_WIDTH);
+    progressModifier.SetContentSize(contentSize);
+    progressModifier.SetStrokeWidth(50.0f);
+    progressModifier.onDraw(context);
+    EXPECT_EQ(progressModifier.contentSize_->Get(), contentSize);
+
+    /**
+     * @tc.steps: step5. Enable shadow and make stroke width close to the radius, then call function onDraw.
+     * @tc.expected: step5. Draw ring progress with shadow.
+     */
+    progressModifier.SetPaintShadow(true);
+    contentSize.SetWidth(CONTEXT_WIDTH);
+    contentSize.SetHeight(CONTEXT_WIDTH);
+    progressModifier.SetContentSize(contentSize);
+    progressModifier.SetStrokeWidth(CONTEXT_WIDTH - 5.0f);
+    progressModifier.onDraw(context);
+    EXPECT_EQ(progressModifier.contentSize_->Get(), contentSize);
+
+    /**
+     * @tc.steps: step6. Enable shadow and make radius equal to 10.0, then call function onDraw.
+     * @tc.expected: step6. Draw ring progress without shadow.
+     */
+    progressModifier.SetPaintShadow(true);
+    contentSize.SetWidth(20.0f);
+    contentSize.SetHeight(20.0f);
+    progressModifier.SetContentSize(contentSize);
+    progressModifier.SetStrokeWidth(1.0f);
+    progressModifier.onDraw(context);
+    EXPECT_EQ(progressModifier.contentSize_->Get(), contentSize);
+}
+
+/**
  * @tc.name: LinearProgressModifier001
  * @tc.desc: Test ProgressModifier.
  * @tc.type: FUNC
@@ -2159,7 +2282,6 @@ HWTEST_F(ProgressTestNg, LinearProgressModifier001, TestSize.Level1)
     progressModifier.onDraw(context);
     EXPECT_EQ(progressModifier.progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_LINEAR));
     EXPECT_EQ(progressModifier.sweepingDateUpdated_, true);
-
 
     /**
      * @tc.steps: step4. Set invisible.

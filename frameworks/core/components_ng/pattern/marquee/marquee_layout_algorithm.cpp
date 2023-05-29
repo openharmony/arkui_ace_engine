@@ -39,9 +39,7 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // measure child.
     LayoutConstraintF textLayoutConstraint;
     textLayoutConstraint.UpdateMaxSizeWithCheck(SizeF(Infinity<float>(), maxSize.Height()));
-    textLayoutConstraint.UpdateMinSizeWithCheck(minSize);
     child->Measure(textLayoutConstraint);
-
     // measure self.
     OptionalSizeF frameSize;
     do {
@@ -50,9 +48,9 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (frameSize.IsValid()) {
             break;
         }
-
+        frameSize.UpdateIllegalSizeWithCheck(layoutConstraint->parentIdealSize);
+        frameSize.UpdateIllegalSizeWithCheck(layoutConstraint->percentReference);
         if (measureType == MeasureType::MATCH_PARENT) {
-            frameSize.UpdateIllegalSizeWithCheck(layoutConstraint->parentIdealSize);
             if (frameSize.IsValid()) {
                 frameSize.Constrain(minSize, maxSize);
                 break;
@@ -62,7 +60,7 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             auto childFrame = child->GetGeometryNode()->GetMarginFrameSize();
             childFrame.Constrain(SizeF(Infinity<float>(), minSize.Height()), maxSize);
             AddPaddingToSize(padding, childFrame);
-            frameSize.UpdateIllegalSizeWithCheck(childFrame);
+            frameSize.Constrain(SizeF { 0.0f, 0.0f }, SizeF { Infinity<float>(), childFrame.Height() });
             break;
         }
         frameSize.UpdateIllegalSizeWithCheck(SizeF { 0.0f, 0.0f });
@@ -78,7 +76,7 @@ void MarqueeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto left = padding.left.value_or(0);
     auto top = padding.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);
-    auto align = Alignment::CENTER;
+    auto align = Alignment::CENTER_LEFT;
     if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }

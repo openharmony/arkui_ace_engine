@@ -25,7 +25,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace {
-static constexpr int32_t HALF = 2;
+constexpr float HALF = 2.0f;
 }
 
 namespace OHOS::Ace::NG {
@@ -225,11 +225,9 @@ void SecurityComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     UpdateFrameMeasure(layoutWrapper, securityComponentLayoutProperty);
-    if (buttonType_ != SecurityComponentBackgroundType::BACKGROUND_NULL) {
-        MeasureButton(layoutWrapper, securityComponentLayoutProperty);
-        componentWidth_ = buttonSizeF_.Width();
-        componentHeight_ = buttonSizeF_.Height();
-    }
+    MeasureButton(layoutWrapper, securityComponentLayoutProperty);
+    componentWidth_ = buttonSizeF_.Width();
+    componentHeight_ = buttonSizeF_.Height();
 
     LOGD("security components size %{public}f %{public}f icon %{public}f %{public}f text %{public}f %{public}f",
         componentWidth_, componentHeight_, iconSizeF_.Width(),

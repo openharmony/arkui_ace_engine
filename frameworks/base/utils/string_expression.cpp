@@ -98,7 +98,7 @@ void ReplaceSignNumber(std::string& formula)
 
 void ReplaceSignNumberWithUnit(std::string& formula)
 {
-    std::regex pattern("(\\-|\\+)\\d+(\\.\\d+)?(px|vp|%|vw|vh|fp|lpx)");
+    std::regex pattern("(\\-|\\+)\\d+(\\.\\d+)?(px|vp|%|fp|lpx)");
     std::smatch result;
     std::string matchStr;
     std::string catStr;
@@ -173,6 +173,22 @@ bool PushOpStack(const std::string& formula, std::string& curNum, std::vector<st
     return true;
 }
 
+bool FilterCalcSpecialString(const std::string& formula)
+{
+    if (formula.empty()) {
+        return false;
+    }
+    // check calc(100%)/2
+    size_t startPos = formula.find("calc");
+    size_t endPos = formula.rfind(")");
+    bool isSingleCalc = (startPos == 0) && (endPos == formula.size() - 1);
+    // check calc(100%())
+    size_t emptyBracketPos = formula.find("()");
+    bool isNotIncludeEmptyBracket = (emptyBracketPos == std::string::npos);
+
+    return (isSingleCalc && isNotIncludeEmptyBracket);
+}
+
 std::vector<std::string> ConvertDal2Rpn(std::string formula)
 {
     std::vector<std::string> result;
@@ -186,8 +202,12 @@ std::vector<std::string> ConvertDal2Rpn(std::string formula)
     }
     ReplaceSignNumberWithUnit(formula);
     ReplaceSignNumber(formula);
-    formula = regex_replace(formula, calc, "");
     formula = regex_replace(formula, space, "");
+    isValid = FilterCalcSpecialString(formula);
+    if (!isValid) {
+        return result;
+    }
+    formula = regex_replace(formula, calc, "");
     bool ret = PushOpStack(formula, curNum, result, opStack);
     if (!ret) {
         return result;
@@ -227,8 +247,7 @@ bool CalculateFourOperationsExp(const std::string& exp, const Dimension& num1, c
         if (NearZero(calcFunc(num1))) {
             return false;
         }
-        if ((num1.Unit() != DimensionUnit::NONE) ||
-            (num1.Unit() != DimensionUnit::NONE && num2.Unit() != DimensionUnit::NONE)) {
+        if ((num1.Unit() != DimensionUnit::NONE)) {
             return false;
         }
         opRes = calcFunc(num2) / calcFunc(num1);
@@ -277,11 +296,11 @@ double CalculateExp(const std::string& expression, const std::function<double(co
     double opRes = 0.0;
     auto ret = CalculateExpImpl(rpnexp, calcFunc, result, opRes);
     if (!ret) {
-        return -1.0;
+        return 0.0;
     }
     if (result.size() == 1 && result.back().Unit() != DimensionUnit::NONE) {
         return calcFunc(result.back());
     }
-    return -1.0;
+    return 0.0;
 }
 } // namespace OHOS::Ace::StringExpression

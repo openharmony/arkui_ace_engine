@@ -62,6 +62,16 @@ enum class SwipeEdgeEffect {
     None,
 };
 
+enum class ListItemStyle {
+    NONE = 0,
+    CARD,
+};
+
+enum class ListItemGroupStyle {
+    NONE = 0,
+    CARD,
+};
+
 struct EditMode {
     enum : uint32_t {
         NONE = 0,
@@ -99,6 +109,9 @@ using OnItemDragMoveFunc = std::function<void(const ItemDragInfo&, int32_t, int3
 using OnItemDragLeaveFunc = std::function<void(const ItemDragInfo&, int32_t)>;
 using OnItemDropFunc = std::function<void(const ItemDragInfo&, int32_t, int32_t, bool)>;
 using OnSelectFunc = std::function<void(bool)>;
+using OnDeleteEvent = std::function<void()>;
+using OnEnterDeleteAreaEvent = std::function<void()>;
+using OnExitDeleteAreaEvent = std::function<void()>;
 
 } // namespace OHOS::Ace
 

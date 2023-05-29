@@ -185,6 +185,7 @@ RefPtr<AceType> JSViewFullUpdate::CreateViewNode()
     auto appearFunc = [weak = AceType::WeakClaim(this)] {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
+        ContainerScope scope(jsView->GetInstanceId());
         ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Appear");
         if (jsView->viewNode_.Invalid() && jsView->jsViewFunction_) {
             jsView->jsViewFunction_->ExecuteAppear();
@@ -193,7 +194,9 @@ RefPtr<AceType> JSViewFullUpdate::CreateViewNode()
 
     auto renderFunction = [weak = AceType::WeakClaim(this)]() -> RefPtr<AceType> {
         auto jsView = weak.Upgrade();
-        return jsView ? jsView->InternalRender() : nullptr;
+        CHECK_NULL_RETURN(jsView, nullptr);
+        ContainerScope scope(jsView->GetInstanceId());
+        return jsView->InternalRender();
     };
 
     auto pageTransitionFunction = [weak = AceType::WeakClaim(this)]() {
@@ -202,6 +205,7 @@ RefPtr<AceType> JSViewFullUpdate::CreateViewNode()
             return;
         }
         {
+            ContainerScope scope(jsView->GetInstanceId());
             ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Transition");
             jsView->jsViewFunction_->ExecuteTransition();
         }
@@ -217,6 +221,7 @@ RefPtr<AceType> JSViewFullUpdate::CreateViewNode()
     auto removeFunction = [weak = AceType::WeakClaim(this)]() -> void {
         auto jsView = weak.Upgrade();
         if (jsView && jsView->jsViewFunction_) {
+            ContainerScope scope(jsView->GetInstanceId());
             jsView->jsViewFunction_->ExecuteDisappear();
         }
     };
@@ -305,8 +310,7 @@ void JSViewFullUpdate::JSBind(BindingTarget object)
     JSClass<JSViewFullUpdate>::CustomMethod("getCardId", &JSViewFullUpdate::JsGetCardId);
     JSClass<JSViewFullUpdate>::CustomMethod("findChildById", &JSViewFullUpdate::FindChildById);
     JSClass<JSViewFullUpdate>::CustomMethod("findChildByIdForPreview", &JSViewFullUpdate::FindChildByIdForPreview);
-    JSClass<JSViewFullUpdate>::Inherit<JSViewAbstract>();
-    JSClass<JSViewFullUpdate>::Bind(object, ConstructorCallback, DestructorCallback);
+    JSClass<JSViewFullUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);
 }
 
 void JSViewFullUpdate::FindChildById(const JSCallbackInfo& info)
@@ -323,11 +327,11 @@ void JSViewFullUpdate::FindChildById(const JSCallbackInfo& info)
 
 void JSViewFullUpdate::FindChildByIdForPreview(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsString()) {
-        LOGE("info[0] is not a string.");
+    if (!info[0]->IsNumber()) {
+        LOGE("info[0] is not a number");
         return;
     }
-    std::string viewId = info[0]->ToString();
+    std::string viewId = std::to_string(info[0]->ToNumber<int32_t>());
     if (viewId_ == viewId) {
         info.SetReturnValue(jsViewObject_);
         return;
@@ -882,8 +886,7 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
         "findChildByIdForPreview", &JSViewPartialUpdate::FindChildByIdForPreview);
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "resetRecycleCustomNode", &JSViewPartialUpdate::JSResetRecycleCustomNode);
-    JSClass<JSViewPartialUpdate>::Inherit<JSViewAbstract>();
-    JSClass<JSViewPartialUpdate>::Bind(object, ConstructorCallback, DestructorCallback);
+    JSClass<JSViewPartialUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);
 }
 
 void JSViewPartialUpdate::ConstructorCallback(const JSCallbackInfo& info)
@@ -1003,11 +1006,11 @@ void JSViewPartialUpdate::IsFirstRender(const JSCallbackInfo& info)
 void JSViewPartialUpdate::FindChildByIdForPreview(const JSCallbackInfo& info)
 {
     LOGD("JSViewPartialUpdate::FindChildByIdForPreview");
-    if (!info[0]->IsString()) {
-        LOGE("info[0] is not a string.");
+    if (!info[0]->IsNumber()) {
+        LOGE("info[0] is not a number");
         return;
     }
-    std::string viewId = info[0]->ToString();
+    std::string viewId = std::to_string(info[0]->ToNumber<int32_t>());
     JSRef<JSObject> targetView = Framework::JSViewStackProcessor::GetViewById(viewId);
     info.SetReturnValue(targetView);
     return;

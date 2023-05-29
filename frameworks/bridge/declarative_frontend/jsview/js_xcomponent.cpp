@@ -57,6 +57,7 @@ void JSXComponent::JSBind(BindingTarget globalObj)
     JSClass<JSXComponent>::StaticMethod("create", &JSXComponent::Create);
     JSClass<JSXComponent>::StaticMethod("onLoad", &JSXComponent::JsOnLoad);
     JSClass<JSXComponent>::StaticMethod("onDestroy", &JSXComponent::JsOnDestroy);
+
     JSClass<JSXComponent>::StaticMethod("onAppear", &JSXComponent::OmitEvent);
     JSClass<JSXComponent>::StaticMethod("onDisAppear", &JSXComponent::OmitEvent);
     JSClass<JSXComponent>::StaticMethod("onTouch", &JSXComponent::OmitEvent);
@@ -66,8 +67,24 @@ void JSXComponent::JSBind(BindingTarget globalObj)
     JSClass<JSXComponent>::StaticMethod("onHover", &JSXComponent::OmitEvent);
     JSClass<JSXComponent>::StaticMethod("onFocus", &JSXComponent::OmitEvent);
     JSClass<JSXComponent>::StaticMethod("onBlur", &JSXComponent::OmitEvent);
-    JSClass<JSXComponent>::Inherit<JSViewAbstract>();
-    JSClass<JSXComponent>::Bind(globalObj);
+
+    JSClass<JSXComponent>::StaticMethod("backgroundColor", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("backgroundImage", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("backgroundImageSize", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("backgroundImagePosition", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("opacity", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("blur", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("backdropBlur", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("grayscale", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("brightness", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("saturate", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("contrast", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("invert", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("sepia", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("hueRotate", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("colorBlend", &JSXComponent::OmitAttribute);
+
+    JSClass<JSXComponent>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSXComponent::Create(const JSCallbackInfo& info)
@@ -139,6 +156,11 @@ void JSXComponent::JsOnDestroy(const JSCallbackInfo& args)
 void JSXComponent::OmitEvent(const JSCallbackInfo& /*args*/)
 {
     LOGW("This event is omitted, please use apis of native_xcomponent instead");
+}
+
+void JSXComponent::OmitAttribute(const JSCallbackInfo& /* args */)
+{
+    LOGW("This attribute is omitted.");
 }
 
 } // namespace OHOS::Ace::Framework

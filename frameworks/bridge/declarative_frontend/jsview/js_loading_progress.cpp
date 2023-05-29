@@ -55,8 +55,7 @@ void JSLoadingProgress::JSBind(BindingTarget globalObj)
     JSClass<JSLoadingProgress>::StaticMethod("create", &JSLoadingProgress::Create, opt);
     JSClass<JSLoadingProgress>::StaticMethod("color", &JSLoadingProgress::SetColor, opt);
     JSClass<JSLoadingProgress>::StaticMethod("foregroundColor", &JSLoadingProgress::SetForegroundColor, opt);
-    JSClass<JSLoadingProgress>::Inherit<JSViewAbstract>();
-    JSClass<JSLoadingProgress>::Bind(globalObj);
+    JSClass<JSLoadingProgress>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSLoadingProgress::Create()

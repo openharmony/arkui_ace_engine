@@ -10,6 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import("//build/ohos_var.gni")
 import("//foundation/arkui/ace_engine/adapter/preview/build/config.gni")
 
 # Avoid conditional judgment branches caused by dynamic library suffixes.
@@ -19,23 +20,18 @@ if (use_mac) {
       "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac"
   label_hilog =
       "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_mac"
-  label_ace =
-      "//foundation/arkui/ace_engine/adapter/preview/build:libace_engine_mac"
 } else if (use_mingw_win) {
   dylib_suffix = ".dll"
   label_res =
       "//base/global/resource_management/frameworks/resmgr:global_resmgr_win"
   label_hilog =
       "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_windows"
-  label_ace = "//foundation/arkui/ace_engine/adapter/preview/build:libace_engine_windows"
 } else if (use_linux) {
   dylib_suffix = ".so"
   label_res =
       "//base/global/resource_management/frameworks/resmgr:global_resmgr_linux"
   label_hilog =
       "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_linux"
-  label_ace =
-      "//foundation/arkui/ace_engine/adapter/preview/build:libace_engine_linux"
 }
 
 common_bin = [
@@ -117,15 +113,25 @@ common_bin = [
     part_name = "ets_runtime"
   },
   {
+    label = "//arkcompiler/toolchain/tooling:libark_ecma_debugger"
+    subsystem_name = "arkcompiler"
+    part_name = "toolchain"
+  },
+  {
+    label = "//arkcompiler/toolchain/inspector:ark_debugger"
+    subsystem_name = "arkcompiler"
+    part_name = "toolchain"
+  },
+  {
     label = "//third_party/openssl:libssl_shared"
-    subsystem_name = "developtools"
-    part_name = "profiler"
+    subsystem_name = "thirdparty"
+    part_name = "openssl"
     lib_names = [ "ssl_openssl" ]
   },
   {
     label = "//third_party/openssl:libcrypto_shared"
-    subsystem_name = "security"
-    part_name = "huks"
+    subsystem_name = "thirdparty"
+    part_name = "openssl"
     lib_names = [ "crypto_openssl" ]
   },
   {
@@ -139,11 +145,27 @@ common_bin = [
     part_name = "hilog_native"
   },
   {
-    label = label_ace
+    label = "//foundation/arkui/ace_engine/adapter/preview/build:libace"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
+    label =
+        "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent"
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },
 ]
+
+if (defined(use_new_skia) && use_new_skia) {
+  common_bin += [
+    {
+      label = "//third_party/skia:skia_canvaskit_0310"
+      subsystem_name = "thirdparty"
+      part_name = "third_party_skia"
+    },
+  ]
+}
 
 napi_modules = [
   {
@@ -227,8 +249,8 @@ if (use_mac || use_mingw_win) {
     },
     {
       label = "//third_party/openssl:libcrypto_restool"
-      subsystem_name = "security"
-      part_name = "huks"
+      subsystem_name = "thirdparty"
+      part_name = "openssl"
     },
     {
       label = "//foundation/distributeddatamgr/kv_store/kvstoremock/interfaces/innerkits/distributeddata:distributeddata_inner_mock"

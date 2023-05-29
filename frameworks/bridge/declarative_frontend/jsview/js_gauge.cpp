@@ -66,8 +66,7 @@ void JSGauge::JSBind(BindingTarget globalObj)
     JSClass<JSGauge>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSGauge>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
 
-    JSClass<JSGauge>::Inherit<JSViewAbstract>();
-    JSClass<JSGauge>::Bind(globalObj);
+    JSClass<JSGauge>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSGauge::Create(const JSCallbackInfo& info)
@@ -158,6 +157,11 @@ void JSGauge::SetStrokeWidth(const JSCallbackInfo& info)
     CalcDimension strokeWidth;
     if (!ParseJsDimensionVp(info[0], strokeWidth)) {
         strokeWidth = CalcDimension(0);
+    }
+    if (strokeWidth.Value() <= 0.0 || strokeWidth.Unit() == DimensionUnit::PERCENT) {
+        RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+        CHECK_NULL_VOID(theme);
+        strokeWidth = theme->GetTrackThickness();
     }
     GaugeModel::GetInstance()->SetStrokeWidth(strokeWidth);
 }

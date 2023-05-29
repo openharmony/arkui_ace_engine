@@ -21,7 +21,7 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ViewContextModelNG : public OHOS::Ace::ViewContextModel {
 public:
-    void closeAnimation(const AnimationOption& option) override;
+    void closeAnimation(const AnimationOption& option, bool needFlush) override;
     void openAnimation(const AnimationOption& option) override;
 };
 } // namespace OHOS::Ace::NG

@@ -197,6 +197,10 @@ void CanvasPaintMethod::DrawImage(
         PaintShadow(path, *imageShadow_, skCanvas);
     }
 
+    if (globalState_.HasGlobalAlpha()) {
+        imagePaint_.setAlphaf(globalState_.GetAlpha());
+    }
+
     switch (canvasImage.flag) {
         case 0:
             skCanvas_->drawImage(image, canvasImage.dx, canvasImage.dy);
@@ -353,7 +357,8 @@ void CanvasPaintMethod::TransferFromImageBitmap(PaintWrapper* paintWrapper,
     PutImageData(paintWrapper, *imageData);
 }
 
-void CanvasPaintMethod::FillText(PaintWrapper* paintWrapper, const std::string& text, double x, double y)
+void CanvasPaintMethod::FillText(
+    PaintWrapper* paintWrapper, const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
     CHECK_NULL_VOID(paintWrapper);
     auto offset = paintWrapper->GetContentOffset();
@@ -361,10 +366,11 @@ void CanvasPaintMethod::FillText(PaintWrapper* paintWrapper, const std::string& 
 
     auto success = UpdateParagraph(offset, text, false, HasShadow());
     CHECK_NULL_VOID(success);
-    PaintText(offset, frameSize, x, y, false, HasShadow());
+    PaintText(offset, frameSize, x, y, maxWidth, false, HasShadow());
 }
 
-void CanvasPaintMethod::StrokeText(PaintWrapper* paintWrapper, const std::string& text, double x, double y)
+void CanvasPaintMethod::StrokeText(
+    PaintWrapper* paintWrapper, const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
     CHECK_NULL_VOID(paintWrapper);
     auto offset = paintWrapper->GetContentOffset();
@@ -373,12 +379,12 @@ void CanvasPaintMethod::StrokeText(PaintWrapper* paintWrapper, const std::string
     if (HasShadow()) {
         auto success = UpdateParagraph(offset, text, true, true);
         CHECK_NULL_VOID(success);
-        PaintText(offset, frameSize, x, y, true, true);
+        PaintText(offset, frameSize, x, y, maxWidth, true, true);
     }
 
     auto success = UpdateParagraph(offset, text, true);
     CHECK_NULL_VOID(success);
-    PaintText(offset, frameSize, x, y, true);
+    PaintText(offset, frameSize, x, y, maxWidth, true);
 }
 
 double CanvasPaintMethod::MeasureText(const std::string& text, const PaintState& state)
@@ -458,10 +464,10 @@ TextMetrics CanvasPaintMethod::MeasureTextMetrics(const std::string& text, const
     return textMetrics;
 }
 
-void CanvasPaintMethod::PaintText(
-    const OffsetF& offset, const SizeF& frameSize, double x, double y, bool isStroke, bool hasShadow)
+void CanvasPaintMethod::PaintText(const OffsetF& offset, const SizeF& frameSize, double x, double y,
+    std::optional<double> maxWidth, bool isStroke, bool hasShadow)
 {
-    paragraph_->Layout(frameSize.Width());
+    paragraph_->Layout(FLT_MAX);
     auto width = paragraph_->GetMaxIntrinsicWidth();
     if (frameSize.Width() > width) {
         paragraph_->Layout(std::ceil(width));
@@ -472,16 +478,33 @@ void CanvasPaintMethod::PaintText(
         isStroke ? strokeState_.GetTextStyle().GetTextBaseline() : fillState_.GetTextStyle().GetTextBaseline();
     double dy = offset.GetY() + y + GetBaselineOffset(baseline, paragraph_);
 
+    std::optional<double> scale = CalcTextScale(paragraph_->GetMaxIntrinsicWidth(), maxWidth);
     if (hasShadow) {
         skCanvas_->save();
         auto shadowOffsetX = shadow_.GetOffset().GetX();
         auto shadowOffsetY = shadow_.GetOffset().GetY();
+        if (scale.has_value()) {
+            if (!NearZero(scale.value())) {
+                dx /= scale.value();
+                shadowOffsetX /= scale.value();
+            }
+            skCanvas_->scale(scale.value(), 1.0);
+        }
         paragraph_->Paint(skCanvas_.get(), dx + shadowOffsetX, dy + shadowOffsetY);
         skCanvas_->restore();
         return;
     }
-
-    paragraph_->Paint(skCanvas_.get(), dx, dy);
+    if (scale.has_value()) {
+        if (!NearZero(scale.value())) {
+            dx /= scale.value();
+        }
+        skCanvas_->save();
+        skCanvas_->scale(scale.value(), 1.0);
+        paragraph_->Paint(skCanvas_.get(), dx, dy);
+        skCanvas_->restore();
+    } else {
+        paragraph_->Paint(skCanvas_.get(), dx, dy);
+    }
 }
 
 double CanvasPaintMethod::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph)
@@ -522,9 +545,7 @@ bool CanvasPaintMethod::UpdateParagraph(const OffsetF& offset, const std::string
     } else {
         style.text_align = ConvertTxtTextAlign(fillState_.GetTextAlign());
     }
-    if (fillState_.GetOffTextDirection() == TextDirection::RTL) {
-        style.text_direction = txt::TextDirection::rtl;
-    }
+    style.text_direction = ConvertTxtTextDirection(fillState_.GetOffTextDirection());
     style.text_align = GetEffectiveAlign(style.text_align, style.text_direction);
 #ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
@@ -562,7 +583,7 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
         txtStyle.color = ConvertSkColor(fillState_.GetColor());
         txtStyle.font_size = fillState_.GetTextStyle().GetFontSize().Value();
         ConvertTxtStyle(fillState_.GetTextStyle(), context_, txtStyle);
-        if (fillState_.GetGradient().IsValid()) {
+        if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
             SkPaint paint;
 #ifndef NEW_SKIA
             InitImagePaint(paint);
@@ -606,7 +627,7 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
         InitPaintBlend(paint);
         ConvertTxtStyle(strokeState_.GetTextStyle(), context_, txtStyle);
         txtStyle.font_size = strokeState_.GetTextStyle().GetFontSize().Value();
-        if (strokeState_.GetGradient().IsValid()) {
+        if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
             UpdatePaintShader(offset, paint, strokeState_.GetGradient());
         }
         if (hasShadow) {

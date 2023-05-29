@@ -85,6 +85,11 @@ void JSIndexer::Create(const JSCallbackInfo& args)
                 length = static_cast<uint32_t>(arrayVal->GetArraySize());
             }
         }
+        if (length <= 0) {
+            LOGE("info is invalid");
+            return;
+        }
+
         std::vector<std::string> indexerArray;
         for (size_t i = 0; i < length; i++) {
             auto value = arrayVal->GetArrayItem(i);
@@ -114,12 +119,7 @@ void JSIndexer::Create(const JSCallbackInfo& args)
             }
             return;
         }
-        if (length <= 0) {
-            LOGE("info is invalid");
-            return;
-        }
-        IndexerModel::GetInstance()->SetFocusable(true);
-        IndexerModel::GetInstance()->SetFocusNode(true);
+
         args.ReturnSelf();
     }
 }
@@ -132,6 +132,7 @@ void JSIndexer::SetSelectedColor(const JSCallbackInfo& args)
     }
     Color color;
     if (!ParseJsColor(args[0], color)) {
+        IndexerModel::GetInstance()->SetSelectedColor(std::nullopt);
         return;
     }
 
@@ -146,6 +147,7 @@ void JSIndexer::SetColor(const JSCallbackInfo& args)
     }
     Color color;
     if (!ParseJsColor(args[0], color)) {
+        IndexerModel::GetInstance()->SetColor(std::nullopt);
         return;
     }
 
@@ -160,6 +162,7 @@ void JSIndexer::SetPopupColor(const JSCallbackInfo& args)
     }
     Color color;
     if (!ParseJsColor(args[0], color)) {
+        IndexerModel::GetInstance()->SetPopupColor(std::nullopt);
         return;
     }
 
@@ -174,6 +177,7 @@ void JSIndexer::SetSelectedBackgroundColor(const JSCallbackInfo& args)
     }
     Color color;
     if (!ParseJsColor(args[0], color)) {
+        IndexerModel::GetInstance()->SetSelectedBackgroundColor(std::nullopt);
         return;
     }
 
@@ -188,6 +192,7 @@ void JSIndexer::SetPopupBackground(const JSCallbackInfo& args)
     }
     Color color;
     if (!ParseJsColor(args[0], color)) {
+        IndexerModel::GetInstance()->SetPopupBackground(std::nullopt);
         return;
     }
 
@@ -202,27 +207,24 @@ void JSIndexer::SetUsingPopup(bool state)
 void JSIndexer::SetSelectedFont(const JSCallbackInfo& args)
 {
     if (args.Length() >= 1 && args[0]->IsObject()) {
-        TextStyle textStyle;
-        GetFontContent(args, textStyle);
-        IndexerModel::GetInstance()->SetSelectedFont(textStyle);
+        auto getTextStyleFunc = [&args](TextStyle& textStyle) { GetFontContent(args, textStyle); };
+        IndexerModel::GetInstance()->SetSelectedFont(getTextStyleFunc);
     }
 }
 
 void JSIndexer::SetPopupFont(const JSCallbackInfo& args)
 {
     if (args.Length() >= 1 && args[0]->IsObject()) {
-        TextStyle textStyle;
-        GetFontContent(args, textStyle);
-        IndexerModel::GetInstance()->SetPopupFont(textStyle);
+        auto getTextStyleFunc = [&args](TextStyle& textStyle) { GetFontContent(args, textStyle); };
+        IndexerModel::GetInstance()->SetPopupFont(getTextStyleFunc);
     }
 }
 
 void JSIndexer::SetFont(const JSCallbackInfo& args)
 {
     if (args.Length() >= 1 && args[0]->IsObject()) {
-        TextStyle textStyle;
-        GetFontContent(args, textStyle);
-        IndexerModel::GetInstance()->SetFont(textStyle);
+        auto getTextStyleFunc = [&args](TextStyle& textStyle) { GetFontContent(args, textStyle); };
+        IndexerModel::GetInstance()->SetFont(getTextStyleFunc);
     }
 }
 
@@ -295,7 +297,7 @@ void JSIndexer::GetFontContent(const JSCallbackInfo& args, TextStyle& textStyle)
     }
 
     JSRef<JSVal> weight = obj->GetProperty("weight");
-    if (weight->IsString()) {
+    if (weight->IsString() || weight->IsNumber()) {
         textStyle.SetFontWeight(ConvertStrToFontWeight(weight->ToString()));
     }
 
@@ -473,7 +475,6 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     JSClass<JSIndexer>::StaticMethod("onPopupSelect", &JSIndexer::JsOnPopupSelected, opt);
     JSClass<JSIndexer>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSIndexer>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSIndexer>::Inherit<JSViewAbstract>();
-    JSClass<JSIndexer>::Bind(globalObj);
+    JSClass<JSIndexer>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

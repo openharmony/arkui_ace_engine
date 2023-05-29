@@ -17,12 +17,13 @@
 
 #include "input_manager.h"
 #include "ipc_skeleton.h"
+#include "root_scene.h"
 #include "ui/rs_display_node.h"
 
 #include "base/utils/utils.h"
 #include "core/common/container.h"
-#include "core/components_ng/pattern/window_scene/scene/container/window_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/components_ng/render/adapter/rosen_window.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -66,14 +67,16 @@ void ScreenPattern::OnAttachToFrameNode()
 
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    auto window = static_cast<WindowPattern*>(container->GetWindow());
+    auto window = static_cast<RosenWindow*>(container->GetWindow());
     CHECK_NULL_VOID(window);
+    auto rootScene = static_cast<Rosen::RootScene*>(window->GetRSWindow().GetRefPtr());
+    CHECK_NULL_VOID(rootScene);
     auto screenBounds = screenSession_->GetScreenProperty().GetBounds();
-    auto rect = Rect(screenBounds.rect_.left_, screenBounds.rect_.top_,
-        screenBounds.rect_.width_, screenBounds.rect_.height_);
+    Rosen::Rect rect = { screenBounds.rect_.left_, screenBounds.rect_.top_,
+        screenBounds.rect_.width_, screenBounds.rect_.height_ };
     float density = screenSession_->GetScreenProperty().GetDensity();
-    window->SetDisplayDensity(density);
-    window->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
+    rootScene->SetDisplayDensity(density);
+    rootScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
 }
 
 void ScreenPattern::UpdateDisplayInfo()

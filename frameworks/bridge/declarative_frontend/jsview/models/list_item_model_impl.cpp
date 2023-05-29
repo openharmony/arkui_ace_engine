@@ -32,7 +32,7 @@ void ListItemModelImpl::Create()
     JSInteractableView::SetFocusNode(true);
 }
 
-void ListItemModelImpl::Create(std::function<void(int32_t)>&& deepRenderFunc)
+void ListItemModelImpl::Create(std::function<void(int32_t)>&& deepRenderFunc, V2::ListItemStyle listItemStyle)
 {
     auto listItemComponent = AceType::MakeRefPtr<V2::ListItemComponent>();
     ViewStackProcessor::GetInstance()->ClaimElementId(listItemComponent);
@@ -116,6 +116,10 @@ void ListItemModelImpl::SetSelectCallback(OnSelectFunc&& selectCallback)
 {
     JSViewSetProperty(&V2::ListItemComponent::SetOnSelectId, std::move(selectCallback));
 }
+
+void ListItemModelImpl::SetDeleteArea(std::function<void()>&& builderAction, bool useDefaultDeleteAnimation,
+    OnDeleteEvent&& onDelete, OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
+    const Dimension& length, bool isStartArea) {};
 
 void ListItemModelImpl::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
 {

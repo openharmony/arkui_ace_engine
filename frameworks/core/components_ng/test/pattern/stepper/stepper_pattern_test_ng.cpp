@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -702,5 +702,42 @@ HWTEST_F(StepperPatternTestNg, StepperEventHubChangeEvent001, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<StepperEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->FireChangeEvent(1, 1);
+}
+
+/**
+ * @tc.name: PerformActionTest001
+ * @tc.desc: Stepper Accessibility PerformAction test ScrollForward and ScrollBackward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StepperPatternTestNg, PerformActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create stepper and initialize related properties.
+     */
+    StepperModelNG().Create(INDEX);
+
+    /**
+     * @tc.steps: step2. Get stepper frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto stepperPattern = frameNode->GetPattern<StepperPattern>();
+    ASSERT_NE(stepperPattern, nullptr);
+    stepperPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step3. Get stepper accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto stepperAccessibilityProperty = frameNode->GetAccessibilityProperty<StepperAccessibilityProperty>();
+    ASSERT_NE(stepperAccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. Call the callback function in stepperAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(stepperAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(stepperAccessibilityProperty->ActActionScrollBackward());
 }
 } // namespace OHOS::Ace::NG

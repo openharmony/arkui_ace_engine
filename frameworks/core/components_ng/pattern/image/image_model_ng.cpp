@@ -50,12 +50,6 @@ void ImageModelNG::Create(const std::string& src, bool noPixMap, RefPtr<PixelMap
         V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, createSourceInfoFunc());
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<ImageTheme>();
-    CHECK_NULL_VOID(theme);
-    SetDraggable(theme->GetDraggable());
 }
 
 void ImageModelNG::SetAlt(const std::string& src)
@@ -75,6 +69,7 @@ void ImageModelNG::SetBlur(double blur) {}
 void ImageModelNG::SetImageFit(ImageFit value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageFit, value);
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageFit, value);
 }
 
 void ImageModelNG::SetMatchTextDirection(bool value)

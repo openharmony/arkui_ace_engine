@@ -319,6 +319,16 @@ public:
         return fontWeight_;
     }
 
+    void SetFontStyle(const FontStyle& fontStyle)
+    {
+        fontStyle_ = fontStyle;
+    }
+
+    const std::optional<FontStyle>& GetFontStyle() const
+    {
+        return fontStyle_;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -345,6 +355,7 @@ private:
     std::optional<FontWeight> fontWeight_;
     std::optional<Color> textColor_;
     std::optional<Dimension> fontSize_;
+    std::optional<FontStyle> fontStyle_;
 
     // Used in NG mode
     StateChangeFunc onStateChange_;

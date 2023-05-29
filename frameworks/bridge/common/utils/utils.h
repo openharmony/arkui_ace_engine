@@ -317,9 +317,9 @@ inline Overflow ConvertStrToOverflow(const std::string& val)
 inline TextDirection ConvertStrToTextDirection(const std::string& val)
 {
     const LinearMapNode<TextDirection> textDirectionTable[] = {
+        { "inherit", TextDirection::INHERIT },
         { "ltr", TextDirection::LTR },
         { "rtl", TextDirection::RTL },
-        { "inherit", TextDirection::INHERIT },
     };
     auto index = BinarySearchFindIndex(textDirectionTable, ArraySize(textDirectionTable), val.c_str());
     return index < 0 ? TextDirection::LTR : textDirectionTable[index].value;

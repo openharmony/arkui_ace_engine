@@ -56,9 +56,9 @@ void SliderPattern::OnModifyDone()
     auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(sliderPaintProperty);
     showTips_ = sliderPaintProperty->GetShowTips().value_or(false);
-    value_ = sliderPaintProperty->GetValue().value_or(0.0f);
     float min = sliderPaintProperty->GetMin().value_or(0.0f);
     float max = sliderPaintProperty->GetMax().value_or(100.0f);
+    value_ = sliderPaintProperty->GetValue().value_or(min);
     float step = sliderPaintProperty->GetStep().value_or(1.0f);
     CancelExceptionValue(min, max, step);
     valueRatio_ = (value_ - min) / (max - min);
@@ -71,6 +71,7 @@ void SliderPattern::OnModifyDone()
     CHECK_NULL_VOID_NOLOG(focusHub);
     InitOnKeyEvent(focusHub);
     InitializeBubble();
+    SetAccessibilityAction();
 }
 
 void SliderPattern::CancelExceptionValue(float& min, float& max, float& step)
@@ -274,6 +275,7 @@ void SliderPattern::HandlingGestureEvent(const GestureEvent& info)
         UpdateValueByLocalLocation(info.GetLocalLocation());
         UpdateBubble();
     }
+    panMoveFlag_ = true;
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -283,6 +285,7 @@ void SliderPattern::HandledGestureEvent()
     if (bubbleFlag_) {
         bubbleFlag_ = false;
     }
+    panMoveFlag_ = false;
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -532,22 +535,27 @@ void SliderPattern::PaintFocusState()
 
 bool SliderPattern::OnKeyEvent(const KeyEvent& event)
 {
+    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    auto reverse = paintProperty->GetReverseValue(false);
     if (event.action == KeyAction::DOWN) {
         if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_LEFT) ||
             (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP)) {
-            MoveStep(-1);
+            reverse ? MoveStep(1) : MoveStep(-1);
             if (showTips_) {
                 InitializeBubble();
             }
             PaintFocusState();
+            return true;
         }
         if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT) ||
             (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
-            MoveStep(1);
+            reverse ? MoveStep(-1) : MoveStep(1);
             if (showTips_) {
                 InitializeBubble();
             }
             PaintFocusState();
+            return true;
         }
     } else if (event.action == KeyAction::UP) {
         if (showTips_) {
@@ -690,7 +698,10 @@ SliderContentModifier::Parameters SliderPattern::UpdateContentParameters()
     SliderContentModifier::Parameters parameters { trackThickness_, blockSize_, stepRatio_, hotBlockShadowWidth_,
         mouseHoverFlag_, mousePressedFlag_ };
     auto contentSize = GetHostContentSize();
-    auto contentOffset = GetHost()->GetGeometryNode()->GetContent()->GetRect().GetOffset();
+    CHECK_NULL_RETURN(contentSize, SliderContentModifier::Parameters());
+    const auto& content = GetHost()->GetGeometryNode()->GetContent();
+    CHECK_NULL_RETURN(content, SliderContentModifier::Parameters());
+    auto contentOffset = content->GetRect().GetOffset();
     // Distance between slide track and Content boundary
     auto centerWidth = direction_ == Axis::HORIZONTAL ? contentSize->Height() : contentSize->Width();
     centerWidth *= HALF;
@@ -834,5 +845,46 @@ OffsetF SliderPattern::GetBubbleVertexPosition(const OffsetF& blockCenter, float
         }
     }
     return bubbleVertex;
+}
+
+void SliderPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->MoveStep(1);
+
+        if (pattern->showTips_) {
+            pattern->bubbleFlag_ = true;
+            pattern->InitializeBubble();
+        }
+        pattern->PaintFocusState();
+    });
+
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->MoveStep(-1);
+
+        if (pattern->showTips_) {
+            pattern->bubbleFlag_ = true;
+            pattern->InitializeBubble();
+        }
+        pattern->PaintFocusState();
+    });
+}
+
+void SliderPattern::UpdateValue(float value)
+{
+    if (panMoveFlag_) {
+        return;
+    }
+    auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(sliderPaintProperty);
+    sliderPaintProperty->UpdateValue(value);
 }
 } // namespace OHOS::Ace::NG

@@ -38,8 +38,8 @@ MenuItemModel* MenuItemModel::GetInstance()
             } else {
                 instance_.reset(new Framework::MenuItemModelImpl());
             }
-        }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -56,11 +56,14 @@ void JSMenuItem::Create(const JSCallbackInfo& info)
     if (info[0]->IsFunction()) {
         auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
         CHECK_NULL_VOID(builderFunc);
-
-        ViewStackModel::GetInstance()->NewScope();
-        builderFunc->Execute();
-        auto customNode = ViewStackModel::GetInstance()->Finish();
+        RefPtr<NG::UINode> customNode;
+        {
+            ViewStackModel::GetInstance()->NewScope();
+            builderFunc->Execute();
+            customNode = AceType::DynamicCast<NG::UINode>(ViewStackModel::GetInstance()->Finish());
+        }
         CHECK_NULL_VOID(customNode);
+        MenuItemModel::GetInstance()->Create(customNode);
     } else {
         auto menuItemObj = JSRef<JSObject>::Cast(info[0]);
 
@@ -126,8 +129,9 @@ void JSMenuItem::JSBind(BindingTarget globalObj)
     JSClass<JSMenuItem>::StaticMethod("contentFontColor", &JSMenuItem::ContentFontColor, opt);
     JSClass<JSMenuItem>::StaticMethod("labelFont", &JSMenuItem::LabelFont, opt);
     JSClass<JSMenuItem>::StaticMethod("labelFontColor", &JSMenuItem::LabelFontColor, opt);
-    JSClass<JSMenuItem>::Inherit<JSViewAbstract>();
-    JSClass<JSMenuItem>::Bind(globalObj);
+    JSClass<JSMenuItem>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSMenuItem>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSMenuItem>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void ParseIsSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -222,6 +226,17 @@ void JSMenuItem::ContentFont(const JSCallbackInfo& info)
                 ParseJsString(jsWeight, weight);
             }
         }
+
+        auto jsStyle = obj->GetProperty("style");
+        if (!jsStyle->IsNull()) {
+            if (jsStyle->IsNumber()) {
+                MenuItemModel::GetInstance()->SetFontStyle(static_cast<FontStyle>(jsStyle->ToNumber<int32_t>()));
+            } else {
+                std::string style;
+                ParseJsString(jsStyle, style);
+                MenuItemModel::GetInstance()->SetFontStyle(ConvertStrToFontStyle(style));
+            }
+        }
     }
     MenuItemModel::GetInstance()->SetFontSize(fontSize);
     MenuItemModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight));
@@ -260,6 +275,17 @@ void JSMenuItem::LabelFont(const JSCallbackInfo& info)
                 weight = std::to_string(jsWeight->ToNumber<int32_t>());
             } else {
                 ParseJsString(jsWeight, weight);
+            }
+        }
+
+        auto jsStyle = obj->GetProperty("style");
+        if (!jsStyle->IsNull()) {
+            if (jsStyle->IsNumber()) {
+                MenuItemModel::GetInstance()->SetLabelFontStyle(static_cast<FontStyle>(jsStyle->ToNumber<int32_t>()));
+            } else {
+                std::string style;
+                ParseJsString(jsStyle, style);
+                MenuItemModel::GetInstance()->SetLabelFontStyle(ConvertStrToFontStyle(style));
             }
         }
     }

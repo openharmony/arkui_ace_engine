@@ -88,8 +88,7 @@ void JSPiece::JSBind(BindingTarget globalObj)
     JSClass<JSPiece>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSPiece>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSPiece>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSPiece>::Inherit<JSViewAbstract>();
-    JSClass<JSPiece>::Bind<>(globalObj);
+    JSClass<JSPiece>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 // showDelete Parameters should be bool type,but after click event triggering,

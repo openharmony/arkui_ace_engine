@@ -103,6 +103,11 @@ public:
         return calcValue_;
     }
 
+    static CalcLength FromString(const std::string& str)
+    {
+        return CalcLength(Dimension::FromString(str));
+    }
+
     Dimension GetDimension() const
     {
         if (!IsValid()) {

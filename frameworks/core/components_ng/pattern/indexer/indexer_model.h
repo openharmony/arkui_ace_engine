@@ -33,15 +33,15 @@ public:
     virtual ~IndexerModel() = default;
 
     virtual void Create(std::vector<std::string>& indexerArray, int32_t selectedVal) = 0;
-    virtual void SetSelectedColor(const Color& color) = 0;
-    virtual void SetColor(const Color& color) = 0;
-    virtual void SetPopupColor(const Color& color) = 0;
-    virtual void SetSelectedBackgroundColor(const Color& color) = 0;
-    virtual void SetPopupBackground(const Color& color) = 0;
+    virtual void SetSelectedColor(const std::optional<Color>& color) = 0;
+    virtual void SetColor(const std::optional<Color>& color) = 0;
+    virtual void SetPopupColor(const std::optional<Color>& color) = 0;
+    virtual void SetSelectedBackgroundColor(const std::optional<Color>& color) = 0;
+    virtual void SetPopupBackground(const std::optional<Color>& color) = 0;
     virtual void SetUsingPopup(bool state) = 0;
-    virtual void SetSelectedFont(const TextStyle& textStyle) = 0;
-    virtual void SetPopupFont(const TextStyle& textStyle) = 0;
-    virtual void SetFont(const TextStyle& textStyle) = 0;
+    virtual void SetSelectedFont(std::function<void(TextStyle& textStyle)>&& getTextStyleFunc) = 0;
+    virtual void SetPopupFont(std::function<void(TextStyle& textStyle)>&& getTextStyleFunc) = 0;
+    virtual void SetFont(std::function<void(TextStyle& textStyle)>&& getTextStyleFunc) = 0;
     virtual void SetItemSize(const Dimension& value) = 0;
     virtual void SetPopupHorizontalSpace(const Dimension& value) {};
     virtual void SetAlignStyle(int32_t value) = 0;
@@ -53,10 +53,6 @@ public:
     virtual void SetFontWeight(const FontWeight weight) {};
     virtual void SetPopupPositionX(const Dimension& positionX) {};
     virtual void SetPopupPositionY(const Dimension& positionY) {};
-
-    virtual void SetFocusable(bool focusable) {};
-    virtual void SetFocusNode(bool isFocusNode) {};
-
     virtual void SetOnSelected(std::function<void(const int32_t selected)>&& onSelect) = 0;
     virtual void SetOnRequestPopupData(
         std::function<std::vector<std::string>(const int32_t selected)>&& RequestPopupData) = 0;

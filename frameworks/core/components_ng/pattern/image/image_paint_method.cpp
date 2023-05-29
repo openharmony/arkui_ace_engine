@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/image/image_paint_method.h"
 
 #include "core/components/text/text_theme.h"
+#include "core/components_ng/pattern/image/image_modifier.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -27,6 +28,21 @@ constexpr unsigned int BOTTOM_RIGHT = 3;
 } // namespace
 
 namespace OHOS::Ace::NG {
+namespace {
+void NormalizeRadius(BorderRadiusArray& radius, const SizeF& size)
+{
+    // radius shouldn't be larger than half of image size
+    for (auto&& corner : radius) {
+        if (corner.GetX() > size.Width() / 2) {
+            corner.SetX(size.Width() / 2);
+        }
+        if (corner.GetY() > size.Height() / 2) {
+            corner.SetY(size.Height() / 2);
+        }
+    }
+}
+} // namespace
+
 void ImagePaintMethod::UpdateBorderRadius(PaintWrapper* paintWrapper)
 {
     auto renderCtx = paintWrapper->GetRenderContext();
@@ -64,8 +80,28 @@ void ImagePaintMethod::UpdateBorderRadius(PaintWrapper* paintWrapper)
             radiusXY[BOTTOM_RIGHT].SetY(radiusXY[BOTTOM_RIGHT].GetY() - diff);
         }
     }
+
+    NormalizeRadius(radiusXY, paintWrapper->GetContentSize());
     auto&& config = canvasImage_->GetPaintConfig();
-    config.borderRadiusXY_ = std::make_shared<BorderRadiusArray>(std::move(radiusXY));
+    config.borderRadiusXY_ = std::make_shared<BorderRadiusArray>(radiusXY);
+}
+
+RefPtr<Modifier> ImagePaintMethod::GetContentModifier(PaintWrapper* paintWrapper)
+{
+    return imageModifier_;
+}
+
+void ImagePaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
+{
+    auto props = DynamicCast<ImageRenderProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(props);
+    UpdatePaintConfig(props, paintWrapper);
+    auto contentSize = paintWrapper->GetContentSize();
+    auto offset = paintWrapper->GetContentOffset();
+    auto canvasImage = WeakClaim(RawPtr(canvasImage_));
+    imageModifier_->UpdateImageData(canvasImage, offset, contentSize);
+    imageModifier_->SetImageFit(props->GetImageFit().value_or(ImageFit::COVER));
+    imageModifier_->Modify();
 }
 
 void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& renderProps, PaintWrapper* paintWrapper)
@@ -76,7 +112,7 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
     config.imageRepeat_ = renderProps->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
     auto pipelineCtx = PipelineBase::GetCurrentContext();
     bool isRightToLeft = pipelineCtx && pipelineCtx->IsRightToLeft();
-    config.needFlipCanvasHorizontally_ = isRightToLeft && renderProps->GetMatchTextDirection().value_or(false);
+    config.flipHorizontally_ = isRightToLeft && renderProps->GetMatchTextDirection().value_or(false);
     auto colorFilterMatrix = renderProps->GetColorFilter();
     if (colorFilterMatrix.has_value()) {
         config.colorFilter_ = std::make_shared<std::vector<float>>(colorFilterMatrix.value());
@@ -90,21 +126,6 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
     if (renderProps->GetNeedBorderRadiusValue(false)) {
         UpdateBorderRadius(paintWrapper);
     }
-}
-
-CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
-{
-    CHECK_NULL_RETURN(canvasImage_, nullptr);
-    auto offset = paintWrapper->GetContentOffset();
-    auto contentSize = paintWrapper->GetContentSize();
-
-    // update render props to ImagePaintConfig
-    auto props = DynamicCast<ImageRenderProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_RETURN(props, nullptr);
-    UpdatePaintConfig(props, paintWrapper);
-    ImagePainter imagePainter(canvasImage_);
-    return
-        [imagePainter, offset, contentSize](RSCanvas& canvas) { imagePainter.DrawImage(canvas, offset, contentSize); };
 }
 
 CanvasDrawFunction ImagePaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)

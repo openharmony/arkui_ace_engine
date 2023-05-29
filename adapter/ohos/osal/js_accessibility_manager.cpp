@@ -787,6 +787,9 @@ void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, const Com
         auto bottom = rect.Bottom() + commonProperty.windowTop;
         Accessibility::Rect bounds { left, top, right, bottom };
         nodeInfo.SetRectInScreen(bounds);
+        LOGD("UpdateAccessibilityElementInfo nodeId:%{public}d, tag:%{public}s rect:left:%{public}f, top:%{public}f, "
+             "right:%{public}f, bottom:%{public}f",
+            node->GetAccessibilityId(), node->GetTag().c_str(), left, top, right, bottom);
     }
 
     nodeInfo.SetWindowId(commonProperty.windowId);
@@ -2256,7 +2259,7 @@ bool ActAccessibilityAction(Accessibility::ActionType action, const std::map<std
 }
 
 bool JsAccessibilityManager::ExecuteActionNG(int32_t elementId,
-    const std::map<std::string, std::string> actionArguments, ActionType action, const RefPtr<PipelineBase>& context)
+    const std::map<std::string, std::string>& actionArguments, ActionType action, const RefPtr<PipelineBase>& context)
 {
     bool result = false;
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);

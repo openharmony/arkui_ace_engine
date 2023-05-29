@@ -36,7 +36,6 @@ void DataPanelPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto dataPanelType_ = paintProperty->GetDataPanelType().value_or(0);
     auto effect_ = paintProperty->GetEffect().value_or(true);
     auto offset_ = paintWrapper->GetContentOffset();
-
     auto trackBackgroundColor = paintProperty->GetTrackBackground().value_or(theme->GetBackgroundColor());
     auto strokeWidth = paintProperty->GetStrokeWidth().value_or(theme->GetThickness()).ConvertToPx();
 
@@ -52,9 +51,9 @@ void DataPanelPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         }
     }
 
-    auto isShadowVisible = false;
+    bool isHasShadowValue = false;
     if (paintProperty->HasShadowOption()) {
-        isShadowVisible = true;
+        isHasShadowValue = true;
     }
 
     DataPanelShadow shadowDefault;
@@ -73,7 +72,8 @@ void DataPanelPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     dataPanelModifier_->SetValueColors(valuesColor);
     dataPanelModifier_->SetTrackBackground(trackBackgroundColor);
     dataPanelModifier_->SetStrokeWidth(strokeWidth);
-    dataPanelModifier_->SetShadowVisible(isShadowVisible);
+    dataPanelModifier_->SetIsHasShadowValue(isHasShadowValue);
+    dataPanelModifier_->SetShadowVisible(shadowOption.isShadowVisible);
     dataPanelModifier_->SetShadowRadius(shadowOption.radius);
     dataPanelModifier_->SetShadowOffsetX(shadowOption.offsetX);
     dataPanelModifier_->SetShadowOffsetY(shadowOption.offsetY);

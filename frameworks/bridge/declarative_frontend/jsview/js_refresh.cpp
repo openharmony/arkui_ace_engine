@@ -85,8 +85,7 @@ void JSRefresh::JSBind(BindingTarget globalObj)
     JSClass<JSRefresh>::StaticMethod("onRefreshing", &JSRefresh::OnRefreshing);
     JSClass<JSRefresh>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSRefresh>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSRefresh>::Inherit<JSViewAbstract>();
-    JSClass<JSRefresh>::Bind(globalObj);
+    JSClass<JSRefresh>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSRefresh::Create(const JSCallbackInfo& info)
@@ -146,6 +145,10 @@ void JSRefresh::Create(const JSCallbackInfo& info)
 
 void JSRefresh::ParseCustomBuilder(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("Invalid params");
+        return;
+    }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto builder = paramObject->GetProperty("builder");
     if (builder->IsFunction()) {
@@ -167,7 +170,8 @@ void JSRefresh::Pop()
 
 void JSRefresh::OnStateChange(const JSCallbackInfo& args)
 {
-    if (!args[0]->IsFunction()) {
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGI("refresh onStateChange error, param is non-valid");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
@@ -182,7 +186,8 @@ void JSRefresh::OnStateChange(const JSCallbackInfo& args)
 
 void JSRefresh::OnRefreshing(const JSCallbackInfo& args)
 {
-    if (!args[0]->IsFunction()) {
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGI("refresh onRefreshing error, param is non-valid");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));

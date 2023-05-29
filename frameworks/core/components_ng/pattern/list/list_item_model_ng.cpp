@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace::NG {
 
-void ListItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc)
+void ListItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc, V2::ListItemStyle listItemStyle)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -38,8 +38,9 @@ void ListItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc)
         return ViewStackProcessor::GetInstance()->Finish();
     };
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::LIST_ITEM_ETS_TAG, nodeId, [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender))]() {
-            return AceType::MakeRefPtr<ListItemPattern>(shallowBuilder);
+        V2::LIST_ITEM_ETS_TAG, nodeId,
+        [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender)), itemStyle = listItemStyle]() {
+            return AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, itemStyle);
         });
     stack->Push(frameNode);
 }
@@ -48,8 +49,8 @@ void ListItemModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::LIST_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr); });
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
     stack->Push(frameNode);
 }
 
@@ -108,5 +109,60 @@ void ListItemModelNG::SetSelectCallback(OnSelectFunc&& selectCallback)
     auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelect(std::move(selectCallback));
+}
+
+void ListItemModelNG::SetDeleteArea(std::function<void()>&& builderAction, bool useDefaultDeleteAnimation,
+    OnDeleteEvent&& onDelete, OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
+    const Dimension& length, bool isStartArea)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (isStartArea) {
+        RefPtr<NG::UINode> startNode;
+        if (builderAction) {
+            NG::ScopedViewStackProcessor builderViewStackProcessor;
+            builderAction();
+            startNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        }
+        if (startNode) {
+            pattern->SetStartNode(startNode);
+        }
+        if (onDelete) {
+            eventHub->SetStartOnDelete(std::move(onDelete));
+        }
+        if (onEnterDeleteArea) {
+            eventHub->SetOnEnterStartDeleteArea(std::move(onEnterDeleteArea));
+        }
+        if (onExitDeleteArea) {
+            eventHub->SetOnExitStartDeleteArea(std::move(onExitDeleteArea));
+        }
+        pattern->SetUseStartDefaultDeleteAnimation(useDefaultDeleteAnimation);
+        ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, length);
+    } else {
+        RefPtr<NG::UINode> endNode;
+        if (builderAction) {
+            NG::ScopedViewStackProcessor builderViewStackProcessor;
+            builderAction();
+            endNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        }
+        if (endNode) {
+            pattern->SetEndNode(endNode);
+        }
+        if (onDelete) {
+            eventHub->SetEndOnDelete(std::move(onDelete));
+        }
+        if (onEnterDeleteArea) {
+            eventHub->SetOnEnterEndDeleteArea(std::move(onEnterDeleteArea));
+        }
+        if (onExitDeleteArea) {
+            eventHub->SetOnExitEndDeleteArea(std::move(onExitDeleteArea));
+        }
+        pattern->SetUseEndDefaultDeleteAnimation(useDefaultDeleteAnimation);
+        ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length);
+    }
 }
 } // namespace OHOS::Ace::NG
