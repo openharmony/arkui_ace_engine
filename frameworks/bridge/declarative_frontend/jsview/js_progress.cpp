@@ -55,8 +55,7 @@ namespace OHOS::Ace::Framework {
 
 void JSProgress::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1 || !info[0]->IsObject()) {
-        LOGE("create progress fail beacase the param is invalid");
+    if (!info[0]->IsObject()) {
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -65,23 +64,17 @@ void JSProgress::Create(const JSCallbackInfo& info)
     auto jsValue = paramObject->GetProperty("value");
     if (jsValue->IsNumber()) {
         value = jsValue->ToNumber<double>();
-    } else {
-        LOGE("create progress fail because the value is not number");
     }
 
     auto total = 100;
     auto jsTotal = paramObject->GetProperty("total");
     if (jsTotal->IsNumber() && jsTotal->ToNumber<int>() > 0) {
         total = jsTotal->ToNumber<int>();
-    } else {
-        LOGE("create progress fail because the total is not value or total is less than zero");
     }
 
     if (value > total) {
-        LOGE("value is lager than total , set value euqals total");
         value = total;
     } else if (value < 0) {
-        LOGE("value is s less than zero, set value euqals zero");
         value = 0;
     }
 
@@ -133,21 +126,14 @@ void JSProgress::SetValue(double value)
     if (std::isnan(value)) {
         return;
     }
-
     if (value < 0) {
-        LOGE("value is less than zero , set value equals zero");
         value = 0;
     }
-
     ProgressModel::GetInstance()->SetValue(value);
 }
 
 void JSProgress::SetColor(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
     Color colorVal;
     OHOS::Ace::NG::Gradient gradient;
     RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
@@ -178,8 +164,7 @@ void JSProgress::SetColor(const JSCallbackInfo& info)
 
 void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+    if (!info[0]->IsObject()) {
         return;
     }
 
@@ -290,11 +275,6 @@ void JSProgress::JsSetRingStyleOptions(const JSCallbackInfo& info)
 
 void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
-
     Color colorVal;
     if (!CheckColor(info[0], colorVal, V2::PROGRESS_ETS_TAG, V2::ATTRS_COMMON_BACKGROUND_COLOR)) {
         RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
@@ -313,32 +293,23 @@ void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
 
 void JSProgress::JsBorderColor(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
-
     JSViewAbstract::JsBorderColor(info);
 }
 
 void JSProgress::JsSetCapsuleStyle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+    if (!info[0]->IsObject()) {
         return;
     }
-
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
 
     auto jsBorderWidth = paramObject->GetProperty("borderWidth");
     CalcDimension borderWidth;
     if (!ParseJsDimensionVp(jsBorderWidth, borderWidth)) {
-        LOGI("JsProgress set Inner BorderWidth is mull");
         borderWidth = theme->GetBorderWidth();
     }
     if (LessNotEqual(borderWidth.Value(), 0.0)) {
-        LOGI("JsProgress set Inner BorderWidth is to small");
         borderWidth = theme->GetBorderWidth();
     }
     ProgressModel::GetInstance()->SetBorderWidth(borderWidth);
@@ -383,7 +354,6 @@ void JSProgress::JsSetFontStyle(const JSCallbackInfo& info)
 
     auto textStyle = paramObject->GetProperty("font");
     if (!textStyle->IsObject()) {
-        LOGI("JsProgress textStyle is not object");
         JsSetFontDefault();
     } else {
         auto textObject = JSRef<JSObject>::Cast(textStyle);
@@ -410,11 +380,9 @@ void JSProgress::JsSetFont(const JSRef<JSObject>& textObject)
     auto size = textObject->GetProperty("size");
     CalcDimension fontSize;
     if (!ParseJsDimensionFp(size, fontSize)) {
-        LOGI("JsProgress set fontSize is mull");
         fontSize = theme->GetTextSize();
     }
     if (LessNotEqual(fontSize.Value(), 0.0)) {
-        LOGI("JsProgress set fontSize is to small");
         fontSize = theme->GetTextSize();
     }
     ProgressModel::GetInstance()->SetFontSize(fontSize);

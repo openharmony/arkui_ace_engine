@@ -551,8 +551,7 @@ void JSImage::JsOnDragMove(const JSCallbackInfo& info)
 
 void JSImage::JsOnDragLeave(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1 || !info[0]->IsFunction()) {
-        LOGW("argument is invalid");
+    if (!info[0]->IsFunction()) {
         return;
     }
     auto jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
@@ -567,8 +566,7 @@ void JSImage::JsOnDragLeave(const JSCallbackInfo& info)
 
 void JSImage::JsOnDrop(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1 || !info[0]->IsFunction()) {
-        LOGW("argument is invalid");
+    if (!info[0]->IsFunction()) {
         return;
     }
     auto jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
@@ -583,19 +581,14 @@ void JSImage::JsOnDrop(const JSCallbackInfo& info)
 
 void JSImage::SetCopyOption(const JSCallbackInfo& info)
 {
-    if (info.Length() == 0) {
-        return;
-    }
     auto copyOptions = CopyOptions::None;
     if (info[0]->IsNumber()) {
         auto enumNumber = info[0]->ToNumber<int>();
         copyOptions = static_cast<CopyOptions>(enumNumber);
         if (copyOptions < CopyOptions::None || copyOptions > CopyOptions::Distributed) {
-            LOGW("copy option is invalid %{public}d", copyOptions);
             copyOptions = CopyOptions::None;
         }
     }
-    LOGI("copy option: %{public}d", copyOptions);
     ImageModel::GetInstance()->SetCopyOption(copyOptions);
 }
 

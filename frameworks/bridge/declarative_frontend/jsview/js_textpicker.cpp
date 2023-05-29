@@ -660,7 +660,7 @@ bool JSTextPickerParser::ParseTextArray(const JSRef<JSObject>& paramObject, Pars
             param.selected = 0;
         }
     }
-    
+
     return true;
 }
 
@@ -677,6 +677,9 @@ bool JSTextPickerParser::ParseIconTextArray(const JSRef<JSObject>& paramObject,
     result.clear();
     kind = 0;
     for (size_t i = 0; i < array->Length(); i++) {
+        if (!array->GetValueAt(i)->IsObject()) {
+            continue;
+        }
         auto jsObj = JSRef<JSObject>::Cast(array->GetValueAt(i));
         auto rangeIcon = jsObj->GetProperty("icon");
         auto rangeText = jsObj->GetProperty("text");
@@ -768,7 +771,7 @@ void JSTextPicker::SetCanLoop(const JSCallbackInfo& info)
     } else {
         value = info[0]->ToBoolean();
     }
-    
+
     TextPickerModel::GetInstance()->SetCanLoop(value);
 }
 
