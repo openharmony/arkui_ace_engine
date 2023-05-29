@@ -1123,15 +1123,9 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         eventManager_->DispatchKeyboardShortcut(event);
     }
     // TAB key set focus state from inactive to active.
-    if (event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB }) && SetIsFocusActive(true)) {
-        // if current focus node show focus state. The key event won't trigger onKeyEvent.
-        return true;
-    }
-    if (!isFocusActive_) {
-        LOGD("KeyEvent: {%{public}d, %{public}d} won't be dispatched because current focus state is inactive.",
-            event.code, event.action);
-        return false;
-    }
+    // If return success. This tab key will just trigger onKeyEvent process.
+    isTabJustTriggerOnKeyEvent_ =
+        (event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB }) && SetIsFocusActive(true));
     auto lastPage = stageManager_->GetLastPage();
     auto mainNode = lastPage ? lastPage : rootNode_;
     CHECK_NULL_RETURN(mainNode, false);

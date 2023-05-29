@@ -810,6 +810,12 @@ var SourceTool;
   SourceTool[SourceTool["PEN"] = 2] = "PEN";
 })(SourceTool || (SourceTool = {}));
 
+var KeySource;
+(function (KeySource) {
+  KeySource[KeySource["Unknown"] = 0] = "Unknown";
+  KeySource[KeySource["Keyboard"] = 4] = "Keyboard";
+})(KeySource || (KeySource = {}));
+
 var SeekMode;
 (function (SeekMode) {
   SeekMode[SeekMode["PreviousKeyframe"] = 0] = "PreviousKeyframe";
