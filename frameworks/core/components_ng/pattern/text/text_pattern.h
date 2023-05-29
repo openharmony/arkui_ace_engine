@@ -79,6 +79,11 @@ public:
         return false;
     }
 
+    bool DefaultSupportDrag() override
+    {
+        return true;
+    }
+    
     void OnModifyDone() override;
 
     void BeforeCreateLayoutWrapper() override;
