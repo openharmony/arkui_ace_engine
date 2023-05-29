@@ -43,10 +43,7 @@ public:
             theme->regularColor_ = Color::BLACK;
             theme->activeColor_ = Color::BLACK;
             theme->selectedColor_ = Color::BLACK;
-            const int16_t redColor = 77;
-            const int16_t greenColor = 164;
-            const int16_t blueColor = 255;
-            theme->pathColor_ = Color::FromRGB(redColor, greenColor, blueColor);
+            theme->pathColor_ = Color::BLUE;
             theme->sideLength_ = DEFAULT_SIDE_LENGTH;
             theme->circleRadius_ = DEFAULT_CIRCLE_RADIUS;
             theme->pathStrokeWidth_ = DEFAULT_PATH_STROKE_WIDTH;
