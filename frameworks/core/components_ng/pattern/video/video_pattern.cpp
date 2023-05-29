@@ -733,16 +733,6 @@ void VideoPattern::UpdateControllerBar()
             controllerLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
             controller->MarkModifyDone();
         }
-        for (const auto& child : children) {
-            if (child->GetTag() == V2::ROW_ETS_TAG) {
-                if (isDrag_) {
-                    host->RemoveChild(child);
-                    auto controlBar = CreateControlBar();
-                    host->AddChild(controlBar);
-                }
-                break;
-            }
-        }
     } else {
         auto video = AceType::DynamicCast<VideoNode>(host);
         CHECK_NULL_VOID(video);
@@ -1300,6 +1290,7 @@ void VideoPattern::EnableDrag()
             auto records = unifiedData->GetRecords();
             if (records.size() == 0) {
                 LOGE("unifiedRecords is empty");
+                return;
             }
             auto video = reinterpret_cast<UDMF::Video*>(records[0].get());
             videoSrc = video->GetUri();
@@ -1361,10 +1352,8 @@ void VideoPattern::EnableDrag()
         if (!isInitialState) {
             this->SetIsStop(true);
         }
-        this->SetIsDrag(true);
         auto frameNode = this->GetHost();
         frameNode->MarkModifyDone();
-        this->SetIsDrag(false);
     };
 #endif
     auto eventHub = host->GetEventHub<EventHub>();
