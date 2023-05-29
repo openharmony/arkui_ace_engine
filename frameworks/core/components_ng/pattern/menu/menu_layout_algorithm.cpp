@@ -423,12 +423,19 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(
             auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
             float windowsOffsetX = windowGlobalRect.GetOffset().GetX();
             float windowsOffsetY = windowGlobalRect.GetOffset().GetY();
-            x += windowsOffsetX + pageOffset_.GetX();
-            y += windowsOffsetY + pageOffset_.GetY();
-            x = std::clamp(x, windowsOffsetX + pageOffset_.GetX(),
-                wrapperSize_.Width() - size.Width() - margin_ * 2.0f + windowsOffsetX + pageOffset_.GetX());
-            y = std::clamp(y, windowsOffsetY + pageOffset_.GetY(),
-                wrapperSize_.Height() - size.Height() - margin_ * 2.0f + windowsOffsetY + pageOffset_.GetY());
+            auto isContainerModal =
+                pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
+                pipelineContext->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+            OffsetF pageOffset;
+            if (isContainerModal) {
+                pageOffset = pageOffset_;
+            }
+            x += windowsOffsetX + pageOffset.GetX();
+            y += windowsOffsetY + pageOffset.GetY();
+            x = std::clamp(x, windowsOffsetX + pageOffset.GetX(),
+                wrapperSize_.Width() - size.Width() - margin_ * 2.0f + windowsOffsetX + pageOffset.GetX());
+            y = std::clamp(y, windowsOffsetY + pageOffset.GetY(),
+                wrapperSize_.Height() - size.Height() - margin_ * 2.0f + windowsOffsetY + pageOffset.GetY());
 
             return OffsetF(x, y);
         }
@@ -771,12 +778,19 @@ OffsetF MenuLayoutAlgorithm::FitToScreen(const OffsetF& fitPosition, const SizeF
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
         float windowsOffsetX = windowGlobalRect.GetOffset().GetX();
         float windowsOffsetY = windowGlobalRect.GetOffset().GetY();
-        x += windowsOffsetX + pageOffset_.GetX();
-        y += windowsOffsetY + pageOffset_.GetY();
-        x = std::clamp(x, windowsOffsetX + pageOffset_.GetX(),
-            wrapperSize_.Width() - childSize.Width() - margin_ * 2.0f + windowsOffsetX + pageOffset_.GetX());
-        y = std::clamp(y, windowsOffsetY + pageOffset_.GetY(),
-            wrapperSize_.Height() - childSize.Height() - margin_ * 2.0f + windowsOffsetY + pageOffset_.GetY());
+        auto isContainerModal =
+            pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
+            pipelineContext->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+        OffsetF pageOffset;
+        if (isContainerModal) {
+            pageOffset = pageOffset_;
+        }
+        x += windowsOffsetX + pageOffset.GetX();
+        y += windowsOffsetY + pageOffset.GetY();
+        x = std::clamp(x, windowsOffsetX + pageOffset.GetX(),
+            wrapperSize_.Width() - childSize.Width() - margin_ * 2.0f + windowsOffsetX + pageOffset.GetX());
+        y = std::clamp(y, windowsOffsetY + pageOffset.GetY(),
+            wrapperSize_.Height() - childSize.Height() - margin_ * 2.0f + windowsOffsetY + pageOffset.GetY());
 
         return OffsetF(x, y);
     }
