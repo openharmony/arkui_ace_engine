@@ -24,6 +24,16 @@
 
 namespace OHOS::Ace {
 
+const std::string TEXT_VALUE = "value";
+const std::map<std::string, TextFieldOverflowX> textFieldOverflowXTable {
+    {"auto", TextFieldOverflowX::AUTO},
+    {"hidden", TextFieldOverflowX::HIDDEN},
+    {"no-content", TextFieldOverflowX::NO_CONTENT},
+    {"no-display", TextFieldOverflowX::NO_DISPLAY},
+    {"scroll", TextFieldOverflowX::SCROLL},
+    {"visible", TextFieldOverflowX::VISIBLE},
+};
+
 RefPtr<Component> TextFieldCreator::CreateFromJson(const JsonValue& json, const JsonComponentFactory&)
 {
     LOGD("CreateFromJson TextField");
@@ -34,13 +44,11 @@ RefPtr<Component> TextFieldCreator::CreateFromJson(const JsonValue& json, const 
     }
 
     auto textField = AceType::MakeRefPtr<TextFieldComponent>();
-
     int32_t align = json.GetInt(TEXT_ALIGN, static_cast<int32_t>(TextAlign::START));
     textField->SetTextAlign(static_cast<TextAlign>(align));
 
     int32_t direction = json.GetInt(TEXT_OVERFLOW, static_cast<int32_t>(TextDirection::INHERIT));
     textField->SetTextDirection(static_cast<TextDirection>(direction));
-
     textField->SetObscure(json.GetBool(OBSCURE_TEXT, false));
     textField->SetEnabled(json.GetBool(TEXT_FIELD_ENABLED, true));
     textField->SetAutoFocus(json.GetBool(TEXT_FIELD_AUTO_FOCUS, false));
@@ -72,17 +80,21 @@ RefPtr<Component> TextFieldCreator::CreateFromJson(const JsonValue& json, const 
     }
 
     textField->SetPlaceholder(json.GetString(TEXT_FIELD_PLACEHOLDER));
+    auto iter = textFieldOverflowXTable.find(json.GetString(DOM_TEXTAREA_OVERFLOWX));
+    if (iter != textFieldOverflowXTable.end()) {
+        textField->SetOverflowX(iter->second);
+    }
+
     temp = json.GetValue(TEXT_FIELD_PLACEHOLDER_COLOR);
     if (temp && temp->IsObject()) {
         textField->SetPlaceholderColor(ColorCreator::CreateFromJson(*temp));
     }
-
     textField->SetExtend(json.GetBool(TEXT_FIELD_EXTEND, false));
     textField->SetIconImage(json.GetString(TEXT_FIELD_ICON_IMAGE));
-
     textField->SetOnTextChange(EventMarker { json.GetString(TEXT_FIELD_ON_TEXT_CHANGE) });
     textField->SetOnFinishInput(EventMarker { json.GetString(TEXT_FIELD_ON_FINISH_INPUT) });
     textField->SetOnTap(EventMarker { json.GetString(TEXT_FIELD_ON_TAP) });
+    textField->SetValue(json.GetString(TEXT_VALUE));
     return textField;
 }
 

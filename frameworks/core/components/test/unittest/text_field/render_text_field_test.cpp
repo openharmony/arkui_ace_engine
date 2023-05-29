@@ -145,6 +145,10 @@ public:
     {
         return copyOption_;
     }
+    RefPtr<ScrollBar> GetScrollBar()
+    {
+        return scrollBar_;
+    }
 };
 
 class RenderTextFieldTest : public testing::Test {
@@ -469,5 +473,4 @@ HWTEST_F(RenderTextFieldTest, RenderTextFieldUpdate013, TestSize.Level1)
     EXPECT_EQ(renderTextField->GetCopyOption(), CopyOptions::InApp);
     GTEST_LOG_(INFO) << "RenderTextFieldTest RenderTextFieldUpdate013 start";
 }
-
 } // namespace OHOS::Ace

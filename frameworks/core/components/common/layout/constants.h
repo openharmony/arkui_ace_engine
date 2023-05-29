@@ -204,6 +204,16 @@ enum class TextOverflow {
     MARQUEE,
 };
 
+// overflow-x: visible|hidden|scroll|auto|no-display|no-content;
+enum class TextFieldOverflowX {
+    VISIBLE,
+    HIDDEN,
+    SCROLL,
+    AUTO,
+    NO_DISPLAY,
+    NO_CONTENT,
+};
+
 enum class TextDirection {
     LTR,
     RTL,

@@ -68,6 +68,7 @@ protected:
     Offset GetHandleOffset(int32_t extend) override;
     Size ComputeDeflateSizeOfErrorAndCountText() const override;
     void ResetStatus() override;
+    double GetLongestLine() override;
 
 private:
     std::unique_ptr<txt::ParagraphStyle> CreateParagraphStyle(bool isErrorText = false);
@@ -82,6 +83,7 @@ private:
     // Make an offset when no text exists. The position of caret depends on the [textAlign_] && [textDirection_].
     Offset MakeEmptyOffset() const;
     Size Measure() override;
+    double GetRealTextWidth() override;
     double MeasureParagraph(
         const std::unique_ptr<txt::ParagraphStyle>& paragraphStyle, std::unique_ptr<txt::TextStyle>& txtStyle);
     Size ComputeLayoutSize(const Size& size, double decorationHeight);
@@ -118,6 +120,7 @@ private:
     void PaintTextField(const Offset& offset, RenderContext& context, SkCanvas* canvas, bool isMagnifier = false);
     SkVector GetSkRadii(const Radius& radius) const;
     void PaintFocus(const Offset& offset, const Size& widthHeight, RenderContext& context);
+    void PaintScrollBar(const Offset& offset, RenderContext& context, SkCanvas* canvas);
 
     std::unique_ptr<txt::Paragraph> paragraph_;
     std::unique_ptr<txt::Paragraph> errorParagraph_;
@@ -129,7 +132,7 @@ private:
     Rect startCaretRect_;
     Size lastLayoutSize_;
     double originInnerWidth_ = 0.0;
-
+    double realTextWidth_ = 0.0;
     SkBitmap canvasCache_ {};
     std::unique_ptr<SkCanvas> magnifierCanvas_;
 };

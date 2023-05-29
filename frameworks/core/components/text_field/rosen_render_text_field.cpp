@@ -33,6 +33,7 @@
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/rosen_font_collection.h"
 #include "core/pipeline/base/rosen_render_context.h"
+#include "core/components/common/painter/rosen_scroll_bar_painter.h"
 
 #if defined(ENABLE_STANDARD_INPUT)
 #include "core/components/text_field/on_text_changed_listener_impl.h"
@@ -52,6 +53,7 @@ const char ELLIPSIS[] = "...";
 constexpr Dimension DEFAULT_FOCUS_BORDER_WIDTH = 2.0_vp;
 constexpr uint32_t DEFAULT_FOCUS_BORDER_COLOR = 0xFF254FF7;
 constexpr double HALF = 0.5;
+constexpr char16_t OPTICITY = 255;
 
 } // namespace
 
@@ -426,6 +428,19 @@ void RosenRenderTextField::PaintFocus(const Offset& offset, const Size& widthHei
     canvas->drawRRect(rrect, paint);
 }
 
+void RosenRenderTextField::PaintScrollBar(const Offset& offset, RenderContext& context, SkCanvas* canvas)
+{
+    LOGI("Enter function RosenRenderTextField::PaintScrollBar:");
+    if (scrollBar_ && scrollBar_->NeedPaint()) {
+        LOGI("need paint scroll bar");
+        scrollBar_->UpdateScrollBarRegion(offset, GetLayoutSize(), GetLastOffset(), GetLongestLine());
+        RefPtr<RosenScrollBarPainter> scrollBarPainter = AceType::MakeRefPtr<RosenScrollBarPainter>();
+        scrollBarPainter->PaintBar(canvas, offset, GetPaintRect(), scrollBar_, GetGlobalOffset(), OPTICITY);
+    } else {
+        LOGI("no need paint scroll bar");
+    }
+}
+
 void RosenRenderTextField::Paint(RenderContext& context, const Offset& offset)
 {
     const auto renderContext = static_cast<RosenRenderContext*>(&context);
@@ -464,6 +479,7 @@ void RosenRenderTextField::Paint(RenderContext& context, const Offset& offset)
 
     PaintTextField(offset, context, canvas);
     PaintTextField(offset, context, magnifierCanvas_.get(), true);
+    PaintScrollBar(offset, context, canvas);
 
     magnifierCanvas_->scale(1.0 / (viewScale * MAGNIFIER_GAIN), 1.0 / (viewScale * MAGNIFIER_GAIN));
 
@@ -502,6 +518,7 @@ Size RosenRenderTextField::Measure()
     auto paragraphStyle = CreateParagraphStyle();
     std::unique_ptr<txt::TextStyle> txtStyle;
     double textAreaWidth = MeasureParagraph(paragraphStyle, txtStyle);
+    realTextWidth_ = textAreaWidth;
     ComputeExtendHeight(decorationHeight);
 
     double height = NearZero(extendHeight_) ? GetLayoutParam().GetMaxSize().Height() : extendHeight_;
@@ -607,6 +624,10 @@ double RosenRenderTextField::MeasureParagraph(
             LessOrEqual(paragraph_->GetLongestLine(), innerRect_.Width())) {
             paragraph_->Layout(limitWidth);
         }
+        if (IsOverflowX()) {
+            (*paragraphStyle).max_lines = 1;
+            paragraph_->Layout(std::numeric_limits<double>::infinity());
+        }
     } else {
         std::unique_ptr<txt::ParagraphBuilder> placeholderBuilder =
             txt::ParagraphBuilder::CreateTxtBuilder(*paragraphStyle, GetFontCollection());
@@ -659,6 +680,11 @@ void RosenRenderTextField::ComputeExtendHeight(double decorationHeight)
         extendHeight_ = std::max(heightInPx, decorationHeight);
     }
     extendHeight_ = std::min(extendHeight_, GetLayoutParam().GetMaxSize().Height());
+}
+
+double RosenRenderTextField::GetRealTextWidth()
+{
+    return realTextWidth_;
 }
 
 void RosenRenderTextField::ComputeOffsetAfterLayout()
@@ -1410,6 +1436,14 @@ void RosenRenderTextField::PaintTextField(
 void RosenRenderTextField::ResetStatus()
 {
     template_.reset();
+}
+
+double RosenRenderTextField::GetLongestLine()
+{
+    if (paragraph_) {
+        return paragraph_->GetLongestLine();
+    }
+    return RenderTextField::GetLongestLine();
 }
 
 } // namespace OHOS::Ace
