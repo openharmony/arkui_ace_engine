@@ -317,7 +317,12 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (pattern->IsTextArea()) {
         if (hasAlign) {
             content->SetOffset(OffsetF(pattern->GetUtilPadding().Offset().GetX(), contentOffset.GetY()));
-            textRect_.SetOffset(OffsetF(pattern->GetTextRect().GetOffset().GetX(), contentOffset.GetY()));
+            OffsetF textRectOffSet = Alignment::GetAlignPosition(size, textRect_.GetSize(), align);
+            if (LessOrEqual(textRect_.Height(), content->GetRect().Height())) {
+                textRect_.SetOffset(OffsetF(pattern->GetTextRect().GetOffset().GetX(), textRectOffSet.GetY()));
+            } else {
+                textRect_.SetOffset(pattern->GetTextRect().GetOffset());
+            }
         } else {
             content->SetOffset(pattern->GetUtilPadding().Offset());
             textRect_.SetOffset(pattern->GetTextRect().GetOffset());
