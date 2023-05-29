@@ -233,18 +233,13 @@ struct BorderWidthPropertyT<Dimension> {
     std::optional<Dimension> topDimen;
     std::optional<Dimension> rightDimen;
     std::optional<Dimension> bottomDimen;
-    bool multiValued = true;
+    bool multiValued = false;
 
     void SetBorderWidth(const Dimension& borderWidth);
 
     bool operator==(const BorderWidthPropertyT& value) const;
 
     bool UpdateWithCheck(const BorderWidthPropertyT& value);
-
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
-    {
-        json->Put("borderWidth", leftDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
-    }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson) const;
 

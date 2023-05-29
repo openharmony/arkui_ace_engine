@@ -124,17 +124,7 @@ struct BorderProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderStyle, BorderStyleProperty);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderWidth, BorderWidthProperty);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
-    {
-        auto jsonBorder = JsonUtil::Create(true);
-
-        propBorderStyle.value_or(BorderStyleProperty()).ToJsonValue(json, jsonBorder);
-        propBorderColor.value_or(BorderColorProperty()).ToJsonValue(json, jsonBorder);
-        propBorderWidth.value_or(BorderWidthProperty()).ToJsonValue(json, jsonBorder);
-        propBorderRadius.value_or(BorderRadiusProperty()).ToJsonValue(json, jsonBorder);
-
-        json->Put("border", jsonBorder->ToString().c_str());
-    }
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 };
 
 struct TransformProperty {
