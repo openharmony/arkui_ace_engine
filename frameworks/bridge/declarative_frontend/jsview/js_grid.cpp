@@ -277,6 +277,7 @@ void JSGrid::SetCachedCount(const JSCallbackInfo& info)
             cachedCount = 1;
         }
     }
+    GridModel::GetInstance()->SetCachedCount(cachedCount);
 }
 
 void JSGrid::SetEditMode(const JSCallbackInfo& info)
