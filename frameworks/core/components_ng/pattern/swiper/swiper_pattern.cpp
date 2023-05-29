@@ -558,6 +558,13 @@ void SwiperPattern::StopSpringAnimation()
     }
 }
 
+void SwiperPattern::StopFadeAnimation()
+{
+    if (fadeController_ && !fadeController_->IsStopped()) {
+        fadeController_->Stop();
+    }
+}
+
 void SwiperPattern::InitSwiperController()
 {
     if (swiperController_->HasInitialized()) {
@@ -1041,6 +1048,8 @@ void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t
     }
 
     // If animation is still running, stop it before play new animation.
+    StopSpringAnimation();
+    StopFadeAnimation();
     StopTranslateAnimation();
     StopAutoPlay();
 
