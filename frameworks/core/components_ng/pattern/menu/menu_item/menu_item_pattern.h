@@ -18,21 +18,19 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
-#include "base/utils/utils.h"
 #include "core/components/slider/render_slider.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_accessibility_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT MenuItemPattern : public Pattern {
     DECLARE_ACE_TYPE(MenuItemPattern, Pattern);
 
 public:
-    explicit MenuItemPattern() = default;
+    MenuItemPattern() = default;
     ~MenuItemPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -155,18 +153,19 @@ public:
     RefPtr<FrameNode> GetMenu();
     void UpdateTextNodes();
 
-protected:
+    void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     void OnMountToParentDone() override;
+
+protected:
+    void RegisterOnTouch();
 
 private:
     // register menu item's callback
     void RegisterOnClick();
-    void RegisterOnTouch();
     void RegisterOnHover();
     void RegisterOnKeyEvent();
-    // change menu item paint props on press
-    void OnPress(const TouchEventInfo& info);
+    virtual void OnTouch(const TouchEventInfo& info);
     void OnHover(bool isHover);
     bool OnKeyEvent(const KeyEvent& event);
 
@@ -212,6 +211,17 @@ private:
     Color bgBlendColor_ = Color::TRANSPARENT;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemPattern);
+};
+
+class CustomMenuItemPattern : public MenuItemPattern {
+    DECLARE_ACE_TYPE(CustomMenuItemPattern, MenuItemPattern);
+
+public:
+    void OnAttachToFrameNode() override;
+
+private:
+    void OnTouch(const TouchEventInfo& info) override;
+    std::unique_ptr<Offset> lastTouchOffset_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_PATTERN_H
