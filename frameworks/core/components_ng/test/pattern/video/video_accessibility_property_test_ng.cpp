@@ -70,8 +70,7 @@ RefPtr<FrameNode> VideoAccessibilityPropertyTestNg::CreateVideoNode()
     CHECK_NULL_RETURN(pattern, nullptr);
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
         .WillRepeatedly(Return(false));
-
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_RETURN(element, nullptr);
     return AceType::DynamicCast<FrameNode>(element);
 }
@@ -119,7 +118,6 @@ HWTEST_F(VideoAccessibilityPropertyTestNg, VideoAccessibilityPropertyTest002, Te
     EXPECT_EQ(accessibilityValue.min, 0);
     EXPECT_EQ(accessibilityValue.max, 0);
     EXPECT_EQ(accessibilityValue.current, 0);
-
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_NE(pattern, nullptr);
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
