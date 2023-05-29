@@ -427,6 +427,7 @@ template("declarative_js_engine") {
         "jsview/js_web.cpp",
         "jsview/js_web_controller.cpp",
         "jsview/models/richtext_model_impl.cpp",
+        "jsview/models/web_model_impl.cpp",
       ]
     }
 

@@ -421,13 +421,13 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
     bool parseOk = false;
     SwiperDigitalParameters digitalParameters;
     CalcDimension dimPosition;
-    parseOk = ParseJsDimensionPx(dotLeftValue, dimPosition);
+    parseOk = ParseJsDimensionVp(dotLeftValue, dimPosition);
     digitalParameters.dimLeft = parseOk ? dimPosition : 0.0_vp;
-    parseOk = ParseJsDimensionPx(dotTopValue, dimPosition);
+    parseOk = ParseJsDimensionVp(dotTopValue, dimPosition);
     digitalParameters.dimTop = parseOk ? dimPosition : 0.0_vp;
-    parseOk = ParseJsDimensionPx(dotRightValue, dimPosition);
+    parseOk = ParseJsDimensionVp(dotRightValue, dimPosition);
     digitalParameters.dimRight = parseOk ? dimPosition : 0.0_vp;
-    parseOk = ParseJsDimensionPx(dotBottomValue, dimPosition);
+    parseOk = ParseJsDimensionVp(dotBottomValue, dimPosition);
     digitalParameters.dimBottom = parseOk ? dimPosition : 0.0_vp;
     Color fontColor;
     parseOk = JSViewAbstract::ParseJsColor(fontColorValue, fontColor);

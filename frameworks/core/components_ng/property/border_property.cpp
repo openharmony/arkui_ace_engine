@@ -60,7 +60,7 @@ void BorderWidthPropertyT<Dimension>::ToJsonValue(
         res->Put("bottom", bottomDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
 
         borderJson->Put("width", res);
-        json->Put("borderWidth", borderJson);
+        json->Put("borderWidth", res);
     } else {
         auto left = leftDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString();
         borderJson->Put("width", left.c_str());

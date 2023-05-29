@@ -4678,4 +4678,178 @@ HWTEST_F(TextFieldPatternTestNg, HandleSelectionUp, TestSize.Level2)
     pattern->HandleSelectionUp();
     EXPECT_EQ(pattern->GetSelectMode(), SelectionMode::NONE);
 }
+
+/**
+ * @tc.name: TextFieldModelSetPadding
+ * @tc.desc: Test textfield model SetPadding
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldModelSetPadding, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldModelNG and TextFieldLayoutProperty.
+     * @tc.expected: Check it is not nullptr.
+     */
+    TextFieldModelNG textFieldModelInstance;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set padding use new padding.
+     * @tc.expected: Check paddingProperty value.
+     */
+    PaddingProperty noPadding = CreatePadding(0.0f, 0.0f, 0.0f, 0.0f);
+    PaddingProperty padding = CreatePadding(10.0f, 10.0f, 10.0f, 10.0f);
+    Edge edgePadding = Edge(10.0f, 10.0f, 10.0f, 10.0f);
+    const std::unique_ptr<PaddingProperty>& paddingProperty = layoutProperty->GetPaddingProperty();
+    textFieldModelInstance.SetPadding(padding, edgePadding, false);
+    ASSERT_TRUE(paddingProperty->left.has_value());
+    EXPECT_EQ(paddingProperty->left.value().GetDimension().Value(), 10.0f);
+
+    /**
+     * @tc.steps: step3. update theme padding and call SetPadding.
+     * @tc.expected: Check paddingProperty value.
+     */
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+    ASSERT_NE(theme, nullptr);
+    std::vector<AnimatableDimension*> paddings = {
+        &theme->padding_.top_, &theme->padding_.bottom_,
+        &theme->padding_.left_, &theme->padding_.right_ };
+    for (auto pd : paddings) {
+        pd->SetValue(5);
+        pd->SetCalcValue("10");
+        pd->SetUnit(DimensionUnit::CALC);
+    }
+    textFieldModelInstance.SetPadding(padding, edgePadding, true);
+    std::vector<std::optional<CalcLength>*> checkPaddings = {
+        &paddingProperty->top, &paddingProperty->bottom,
+        &paddingProperty->left, &paddingProperty->right };
+    for (auto pd : checkPaddings) {
+        ASSERT_TRUE(pd->has_value());
+        EXPECT_STREQ(pd->value().CalcValue().c_str(), "10");
+    }
+
+    /**
+     * @tc.steps: step4. set padding unit to PX and call SetPadding.
+     * @tc.expected: Check paddingProperty value.
+     */
+    for (auto pd : paddings) {
+        pd->SetValue(5);
+        pd->SetUnit(DimensionUnit::PX);
+    }
+    textFieldModelInstance.SetPadding(padding, edgePadding, true);
+    for (auto pd : checkPaddings) {
+        ASSERT_TRUE(pd->has_value());
+        EXPECT_EQ(pd->value().GetDimension().Value(), 5);
+    }
+}
+
+/**
+ * @tc.name: OnKeyEvent
+ * @tc.desc: Test TextFiledPattern.OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, OnKeyEvent, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldModelNG and TextFieldLayoutProperty.
+     * @tc.expected: Check it is not nullptr.
+     */
+    TextFieldModelNG textFieldModelInstance;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    context->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManagerNG>());
+    pattern->paragraph_ = std::make_shared<RSParagraph>();
+
+    KeyEvent event;
+    EXPECT_FALSE(pattern->OnKeyEvent(event));
+    event.action = KeyAction::DOWN;
+
+    /**
+     * @tc.steps: step2. test center keys.
+     * @tc.expected: Check the return value.
+     */
+    KeyCode centerCodes[] = { KeyCode::KEY_ENTER, KeyCode::KEY_NUMPAD_ENTER,
+        KeyCode::KEY_DPAD_CENTER };
+    for (auto centerCode : centerCodes) {
+        event.code = centerCode;
+        EXPECT_TRUE(pattern->OnKeyEvent(event));
+    }
+
+    /**
+     * @tc.steps: step3. test symbol keys.
+     * @tc.expected: Check the return value.
+     */
+    std::chrono::milliseconds milliseconds(0);
+    TimeStamp time(milliseconds);
+    KeyEvent symbolKeyWithOnePressedCode(
+        KeyCode::KEY_EQUALS, KeyAction::DOWN, { KeyCode::KEY_EQUALS },
+        1, time, 0, 0, SourceType::KEYBOARD);
+    EXPECT_TRUE(pattern->OnKeyEvent(symbolKeyWithOnePressedCode));
+
+    KeyEvent symbolKeyWithMaxKeySize(KeyCode::KEY_EQUALS, KeyAction::DOWN,
+        { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_EQUALS }, 1, time, 0, 0, SourceType::KEYBOARD);
+    EXPECT_TRUE(pattern->OnKeyEvent(symbolKeyWithMaxKeySize));
+
+    /**
+     * @tc.steps: step4. test direction keys.
+     * @tc.expected: Check the return value.
+     */
+    KeyCode directionCodes[] = { KeyCode::KEY_DPAD_UP, KeyCode::KEY_DPAD_DOWN,
+        KeyCode::KEY_DPAD_LEFT, KeyCode::KEY_DPAD_RIGHT };
+    KeyCode shiftKeyCodes[] = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_SHIFT_RIGHT };
+    for (auto directionKeyCode : directionCodes) {
+        for (auto shiftCode : shiftKeyCodes) {
+            KeyEvent directionKey(directionKeyCode, KeyAction::DOWN,
+                { shiftCode, directionKeyCode }, 1, time, 0, 0,
+                SourceType::KEYBOARD);
+            EXPECT_TRUE(pattern->OnKeyEvent(directionKey));
+        }
+        KeyEvent directionKey(directionKeyCode, KeyAction::DOWN);
+        EXPECT_TRUE(pattern->OnKeyEvent(directionKey));
+    }
+    event.code = KeyCode::KEY_9;
+    EXPECT_TRUE(pattern->OnKeyEvent(event));
+
+    /**
+     * @tc.steps: step5. test letter keys.
+     * @tc.expected: Check the return value.
+     */
+    KeyCode ctrlCodes[] = { KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_CTRL_RIGHT };
+    KeyCode letterCodes[] = { KeyCode::KEY_Z, KeyCode::KEY_A,
+        KeyCode::KEY_C, KeyCode::KEY_V, KeyCode::KEY_X };
+    // redo action
+    for (auto ctrl : ctrlCodes) {
+        for (auto shift : shiftKeyCodes) {
+            KeyEvent letterKey(
+                KeyCode::KEY_Z, KeyAction::DOWN, { ctrl, shift, KeyCode::KEY_Z },
+                1, time, 0, 0, SourceType::KEYBOARD);
+            EXPECT_FALSE(pattern->OnKeyEvent(letterKey));
+        }
+        KeyEvent letterKey(
+            KeyCode::KEY_Y, KeyAction::DOWN, { ctrl, KeyCode::KEY_Y },
+            1, time, 0, 0, SourceType::KEYBOARD);
+        EXPECT_FALSE(pattern->OnKeyEvent(letterKey));
+    }
+
+    for (auto ctrl : ctrlCodes) {
+        for (auto letter : letterCodes) {
+            KeyEvent letterKey(letter, KeyAction::DOWN, { ctrl, letter },
+            1, time, 0, 0, SourceType::KEYBOARD);
+            EXPECT_FALSE(pattern->OnKeyEvent(letterKey));
+        }
+    }
+
+    event.code = KeyCode::KEY_DEL;
+    EXPECT_TRUE(pattern->OnKeyEvent(event));
+    event.code = KeyCode::KEY_FORWARD_DEL;
+    EXPECT_TRUE(pattern->OnKeyEvent(event));
+}
 } // namespace OHOS::Ace::NG

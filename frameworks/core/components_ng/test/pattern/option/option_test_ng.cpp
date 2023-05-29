@@ -126,6 +126,8 @@ HWTEST_F(OptionTestNg, OptionTestNg001, TestSize.Level1)
     auto rosenRefPtr = AceType::MakeRefPtr<OHOS::Ace::NG::GeometryNode>();
     rosenRefPtr->margin_ = nullptr;
     OHOS::Ace::NG::LayoutWrapper* rosenLayoutWrapper = new LayoutWrapper(nullptr, rosenRefPtr, rosenMakeRefPtr);
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapper>(nullptr, rosenRefPtr, rosenMakeRefPtr);
+    rosenLayoutWrapper->AppendChild(childWrapper);
     rosenOptionLayoutAlgorithm.Layout(rosenLayoutWrapper);
 }
 

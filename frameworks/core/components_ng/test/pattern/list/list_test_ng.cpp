@@ -1802,7 +1802,7 @@ HWTEST_F(ListTestNg, ListItemAttrSwiperTest014, TestSize.Level1)
     ListItemSwipeMoveAndLayout(itemPattern, MOVE_DELTA3);
     GestureEvent info;
     itemPattern->HandleDragEnd(info);
-    EXPECT_EQ(itemPattern->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
+    EXPECT_EQ(itemPattern->GetSwiperIndex(), ListItemSwipeIndex::SWIPER_START);
 
     /**
      * @tc.steps: step3. moving to the left distance great than endNode size + deleteAreaDistance, check
@@ -1815,7 +1815,7 @@ HWTEST_F(ListTestNg, ListItemAttrSwiperTest014, TestSize.Level1)
     ListItemSwipeMoveAndLayout(itemPattern, -static_cast<float>(DELETE_AREA_DISTANCE.ConvertToPx()));
     ListItemSwipeMoveAndLayout(itemPattern, -MOVE_DELTA3);
     itemPattern->HandleDragEnd(info);
-    EXPECT_EQ(itemPattern->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
+    EXPECT_EQ(itemPattern->GetSwiperIndex(), ListItemSwipeIndex::SWIPER_START);
 }
 
 /**

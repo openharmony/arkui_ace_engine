@@ -1838,17 +1838,8 @@ void TextFieldPattern::OnModifyDone()
     obscureTickCountDown_ = OBSCURE_SHOW_TICKS;
     ProcessInnerPadding();
     textRect_.SetOffset(OffsetF(GetPaddingLeft(), GetPaddingTop()));
+    CalculateDefaultCursor();
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
-    float caretWidth = paintProperty->GetCursorWidth().has_value()
-                           ? static_cast<float>(paintProperty->GetCursorWidthValue().ConvertToPx())
-                           : static_cast<float>(CURSOR_WIDTH.ConvertToPx());
-    caretRect_.SetWidth(caretWidth);
-    caretRect_.SetHeight(GetTextOrPlaceHolderFontSize());
-    if (textEditingValue_.caretPosition == 0) {
-        caretRect_.SetLeft(GetPaddingLeft());
-        caretRect_.SetTop(GetPaddingTop());
-        caretRect_.SetHeight(PreferredLineHeight());
-    }
     auto renderContext = GetHost()->GetRenderContext();
     if (renderContext->HasBackgroundColor()) {
         paintProperty->UpdateBackgroundColor(renderContext->GetBackgroundColorValue());
@@ -1908,6 +1899,33 @@ void TextFieldPattern::OnModifyDone()
                                                                                  : PROPERTY_UPDATE_MEASURE);
 }
 
+void TextFieldPattern::CalculateDefaultCursor()
+{
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    float caretWidth = paintProperty->GetCursorWidth().has_value()
+                           ? static_cast<float>(paintProperty->GetCursorWidthValue().ConvertToPx())
+                           : static_cast<float>(CURSOR_WIDTH.ConvertToPx());
+    caretRect_.SetWidth(caretWidth);
+    if (textEditingValue_.caretPosition != 0) {
+        return;
+    }
+    caretRect_.SetLeft(GetPaddingLeft());
+    caretRect_.SetTop(GetPaddingTop());
+    caretRect_.SetHeight(PreferredLineHeight());
+    CHECK_NULL_VOID(layoutProperty->GetCalcLayoutConstraint());
+    CHECK_NULL_VOID(layoutProperty->GetCalcLayoutConstraint()->selfIdealSize.has_value());
+    CHECK_NULL_VOID(layoutProperty->GetCalcLayoutConstraint()->selfIdealSize.value().Height().has_value());
+    auto alignment = layoutProperty->GetPositionProperty()
+                         ? layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER)
+                         : Alignment::CENTER;
+    auto idealHeight = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize.value().Height().value();
+    caretRect_.SetTop(
+        (1.0 + alignment.GetVertical()) * (idealHeight.GetDimension().ConvertToPx() - PreferredLineHeight()) / 2.0);
+}
+
 void TextFieldPattern::FireOnChangeIfNeeded()
 {
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -1939,12 +1957,20 @@ void TextFieldPattern::ProcessInnerPadding()
     auto themePadding = textFieldTheme->GetPadding();
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    utilPadding_.left = layoutProperty->GetPaddingProperty()->left.value_or(CalcLength()).GetDimension().ConvertToPx();
-    utilPadding_.top = layoutProperty->GetPaddingProperty()->top.value_or(CalcLength()).GetDimension().ConvertToPx();
-    utilPadding_.bottom =
-        layoutProperty->GetPaddingProperty()->bottom.value_or(CalcLength()).GetDimension().ConvertToPx();
-    utilPadding_.right =
-        layoutProperty->GetPaddingProperty()->right.value_or(CalcLength()).GetDimension().ConvertToPx();
+    utilPadding_.left = layoutProperty->GetPaddingProperty()
+                            ->left.value_or(CalcLength(themePadding.Left()))
+                            .GetDimension()
+                            .ConvertToPx();
+    utilPadding_.top =
+        layoutProperty->GetPaddingProperty()->top.value_or(CalcLength(themePadding.Top())).GetDimension().ConvertToPx();
+    utilPadding_.bottom = layoutProperty->GetPaddingProperty()
+                              ->bottom.value_or(CalcLength(themePadding.Bottom()))
+                              .GetDimension()
+                              .ConvertToPx();
+    utilPadding_.right = layoutProperty->GetPaddingProperty()
+                             ->right.value_or(CalcLength(themePadding.Right()))
+                             .GetDimension()
+                             .ConvertToPx();
 }
 
 void TextFieldPattern::InitLongPressEvent()

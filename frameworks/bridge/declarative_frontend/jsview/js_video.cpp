@@ -54,8 +54,7 @@ namespace OHOS::Ace::Framework {
 
 void JSVideo::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() <= 0 || !info[0]->IsObject()) {
-        LOGE("JSVideo: info is invalid.");
+    if (!info[0]->IsObject()) {
         return;
     }
     JSRef<JSObject> videoObj = JSRef<JSObject>::Cast(info[0]);
@@ -103,8 +102,6 @@ void JSVideo::Create(const JSCallbackInfo& info)
 #if defined(PIXEL_MAP_SUPPORTED)
         RefPtr<PixelMap> pixMap = CreatePixelMapFromNapiValue(previewUriValue);
         VideoModel::GetInstance()->SetPosterSourceByPixelMap(pixMap);
-#else
-        LOGE("can not support pixel map");
 #endif
     }
 }
@@ -157,7 +154,6 @@ void JSVideo::JsObjectFit(const JSCallbackInfo& info)
     // The default value of Imagefit is FILL, but in the video the default value is COVER.
     // So the default value need to be converted.
     if (info[0]->IsUndefined()) {
-        LOGW("JSVideo: objectfit is undefined.");
         VideoModel::GetInstance()->SetObjectFit(imageFit);
         return;
     }
@@ -167,14 +163,13 @@ void JSVideo::JsObjectFit(const JSCallbackInfo& info)
     VideoModel::GetInstance()->SetObjectFit(imageFit);
 }
 
-void JSVideo::JsOnStart(const JSCallbackInfo& args)
+void JSVideo::JsOnStart(const JSCallbackInfo& info)
 {
-    if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
+    if (!info[0]->IsFunction()) {
         return;
     }
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    auto onStart = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onStart = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Video.onStart");
         std::vector<std::string> keys = { "start" };
@@ -183,14 +178,13 @@ void JSVideo::JsOnStart(const JSCallbackInfo& args)
     VideoModel::GetInstance()->SetOnStart(std::move(onStart));
 }
 
-void JSVideo::JsOnPause(const JSCallbackInfo& args)
+void JSVideo::JsOnPause(const JSCallbackInfo& info)
 {
-    if (!args[0]->IsFunction()) {
-        LOGE("OnPause args need a function.");
+    if (!info[0]->IsFunction()) {
         return;
     }
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    auto onPause = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onPause = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Video.onPause");
         std::vector<std::string> keys = { "pause" };
@@ -199,14 +193,13 @@ void JSVideo::JsOnPause(const JSCallbackInfo& args)
     VideoModel::GetInstance()->SetOnPause(std::move(onPause));
 }
 
-void JSVideo::JsOnFinish(const JSCallbackInfo& args)
+void JSVideo::JsOnFinish(const JSCallbackInfo& info)
 {
-    if (!args[0]->IsFunction()) {
-        LOGE("OnFinish args need a function.");
+    if (!info[0]->IsFunction()) {
         return;
     }
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    auto onFinish = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onFinish = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Video.onFinish");
         std::vector<std::string> keys = { "finish" };
@@ -215,14 +208,13 @@ void JSVideo::JsOnFinish(const JSCallbackInfo& args)
     VideoModel::GetInstance()->SetOnFinish(std::move(onFinish));
 }
 
-void JSVideo::JsOnFullscreenChange(const JSCallbackInfo& args)
+void JSVideo::JsOnFullscreenChange(const JSCallbackInfo& info)
 {
-    if (!args[0]->IsFunction()) {
-        LOGE("OnFullscreenChange args need a function.");
+    if (!info[0]->IsFunction()) {
         return;
     }
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    auto OnFullScreenChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto OnFullScreenChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
                                   const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Video.OnFullScreenChange");
@@ -232,14 +224,13 @@ void JSVideo::JsOnFullscreenChange(const JSCallbackInfo& args)
     VideoModel::GetInstance()->SetOnFullScreenChange(std::move(OnFullScreenChange));
 }
 
-void JSVideo::JsOnPrepared(const JSCallbackInfo& args)
+void JSVideo::JsOnPrepared(const JSCallbackInfo& info)
 {
-    if (!args[0]->IsFunction()) {
-        LOGE("OnPrepared args need a function.");
+    if (!info[0]->IsFunction()) {
         return;
     }
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    auto onPrepared = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onPrepared = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Video.onPrepared");
         std::vector<std::string> keys = { "duration" };
@@ -248,14 +239,13 @@ void JSVideo::JsOnPrepared(const JSCallbackInfo& args)
     VideoModel::GetInstance()->SetOnPrepared(std::move(onPrepared));
 }
 
-void JSVideo::JsOnSeeking(const JSCallbackInfo& args)
+void JSVideo::JsOnSeeking(const JSCallbackInfo& info)
 {
-    if (!args[0]->IsFunction()) {
-        LOGE("OnSeeking args need a function.");
+    if (!info[0]->IsFunction()) {
         return;
     }
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    auto onSeeking = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onSeeking = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Video.onSeeking");
         std::vector<std::string> keys = { "time" };
@@ -264,14 +254,13 @@ void JSVideo::JsOnSeeking(const JSCallbackInfo& args)
     VideoModel::GetInstance()->SetOnSeeking(std::move(onSeeking));
 }
 
-void JSVideo::JsOnSeeked(const JSCallbackInfo& args)
+void JSVideo::JsOnSeeked(const JSCallbackInfo& info)
 {
-    if (!args[0]->IsFunction()) {
-        LOGE("OnSeeked args need a function.");
+    if (!info[0]->IsFunction()) {
         return;
     }
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    auto onSeeked = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onSeeked = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Video.onSeeked");
         std::vector<std::string> keys = { "time" };
@@ -280,14 +269,13 @@ void JSVideo::JsOnSeeked(const JSCallbackInfo& args)
     VideoModel::GetInstance()->SetOnSeeked(std::move(onSeeked));
 }
 
-void JSVideo::JsOnUpdate(const JSCallbackInfo& args)
+void JSVideo::JsOnUpdate(const JSCallbackInfo& info)
 {
-    if (!args[0]->IsFunction()) {
-        LOGE("OnUpdate args need a function.");
+    if (!info[0]->IsFunction()) {
         return;
     }
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    auto onUpdate = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onUpdate = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Video.onUpdate");
         std::vector<std::string> keys = { "time" };
@@ -296,14 +284,13 @@ void JSVideo::JsOnUpdate(const JSCallbackInfo& args)
     VideoModel::GetInstance()->SetOnUpdate(std::move(onUpdate));
 }
 
-void JSVideo::JsOnError(const JSCallbackInfo& args)
+void JSVideo::JsOnError(const JSCallbackInfo& info)
 {
-    if (!args[0]->IsFunction()) {
-        LOGE("OnError args need a function.");
+    if (!info[0]->IsFunction()) {
         return;
     }
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    auto onError = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Video.onError");
         std::vector<std::string> keys = { "error" };
@@ -315,7 +302,6 @@ void JSVideo::JsOnError(const JSCallbackInfo& args)
 EventMarker JSVideo::GetEventMarker(const JSCallbackInfo& info, const std::vector<std::string>& keys)
 {
     if (!info[0]->IsFunction()) {
-        LOGE("info[0] is not a function.");
         return EventMarker();
     }
 

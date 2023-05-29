@@ -909,6 +909,8 @@ private:
     void OnImageLoadSuccess(bool checkHidePasswordIcon);
     void OnImageLoadFail(bool checkHidePasswordIcon);
 
+    void CalculateDefaultCursor();
+
     bool IsSearchParentNode() const;
     void RequestKeyboardOnFocus();
     void SetNeedToRequestKeyboardOnFocus();
