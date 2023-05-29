@@ -18,8 +18,6 @@ group("fuzztest") {
   deps = [
     "acereskeyparser_fuzzer:AceResKeyParserFuzzTest",
     "arkressched_fuzzer:ArkResschedFuzzTest",
-
-    #"imageApi_fuzzer:ImageApiFuzzTest",
     "arkuiformrendergroup_fuzzer:ArkuiFormRenderGroupFuzzTest",
     "arkuiformrenderimpl_fuzzer:ArkuiFormRenderImplFuzzTest",
     "arkuiformrenderproxy_fuzzer:ArkuiFormRenderProxyFuzzTest",

@@ -477,6 +477,11 @@ void SubwindowOhos::HideMenuNG(int32_t targetId)
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     overlay->HideMenuInSubWindow(targetId_);
+#ifdef ENABLE_DRAG_FRAMEWORK
+    HideEventColumn();
+    HidePixelMap(false, 0, 0, false);
+    HideFilter();
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void SubwindowOhos::ClearMenuNG()
@@ -936,7 +941,7 @@ void SubwindowOhos::HideFilter()
     manager->RemoveFilter();
 }
 
-void SubwindowOhos::HidePixelMap(bool startDrag, double x, double y)
+void SubwindowOhos::HidePixelMap(bool startDrag, double x, double y, bool showAnimation)
 {
     auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
     CHECK_NULL_VOID(parentAceContainer);
@@ -945,7 +950,11 @@ void SubwindowOhos::HidePixelMap(bool startDrag, double x, double y)
     auto manager = parentPipeline->GetOverlayManager();
     CHECK_NULL_VOID(manager);
     ContainerScope scope(parentContainerId_);
-    manager->RemovePixelMapAnimation(startDrag, x, y);
+    if (showAnimation) {
+        manager->RemovePixelMapAnimation(startDrag, x, y);
+    } else {
+        manager->RemovePixelMap();
+    }
 }
 
 void SubwindowOhos::HideEventColumn()

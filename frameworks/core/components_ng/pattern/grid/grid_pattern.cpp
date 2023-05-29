@@ -1008,15 +1008,16 @@ void GridPattern::UpdateScrollBarOffset()
         heightSum += item.second + mainGap;
     }
 
-    float estimatedHeight = 0.f;
     auto averageHeight = heightSum / itemCount;
+    float offset = info.startIndex_ * averageHeight - info.currentOffset_;
+    float estimatedHeight = 0.f;
     if (itemCount >= (info.childrenCount_ - 1)) {
         estimatedHeight = heightSum - mainGap;
+        offset = info.GetStartLineOffset(mainGap);
     } else {
         estimatedHeight = heightSum + (info.childrenCount_ - itemCount) * averageHeight;
     }
 
-    float offset = info.startIndex_ * averageHeight - info.currentOffset_;
     auto viewSize = geometryNode->GetFrameSize();
     Size mainSize = { viewSize.Width(), viewSize.Height() };
     UpdateScrollBarRegion(offset, estimatedHeight, mainSize, Offset(0.0, 0.0));

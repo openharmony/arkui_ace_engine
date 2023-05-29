@@ -92,7 +92,6 @@ void PixelMapImage::DrawToRSCanvas(
 #ifndef NEW_SKIA
     recordingCanvas->DrawPixelMapWithParm(pixelMap_->GetPixelMapSharedPtr(), rsImageInfo, paint);
 #else
-    // TODO:Haw to set SamplingOptions?
     recordingCanvas->DrawPixelMapWithParm(pixelMap_->GetPixelMapSharedPtr(), rsImageInfo, options, paint);
 #endif
 #endif

@@ -103,10 +103,6 @@ void ButtonModelNG::SetLableStyle(ButtonParameters& buttonParameters)
 
 void ButtonModelNG::CreateWithLabel(const CreateWithPara& para, std::list<RefPtr<Component>>& buttonChildren)
 {
-    if (!para.parseSuccess.value()) {
-        return;
-    }
-
     CreateWithLabel(para.label.value());
     if (para.labelSetInfoFirst.value()) {
         SetTypeAndStateEffect(para.typeFirst, para.stateEffectFirst);

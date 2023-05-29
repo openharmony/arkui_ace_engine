@@ -44,6 +44,7 @@ constexpr int32_t MAX_NODE_NUMBER = 3;
 constexpr double MAIN_DELTA = 20.0;
 constexpr float GEOMETRY_WIDTH = 10.0f;
 constexpr float GEOMETRY_HEIGHT = 10.0f;
+constexpr int32_t SWIPER_DEFAULT_INDEX = 1;
 } // namespace
 
 class SwiperPatternTestNg : public testing::Test {
@@ -95,8 +96,8 @@ void SwiperPatternTestNg::CreateChildWrapperAppendToHostWrapper(
 HWTEST_F(SwiperPatternTestNg, SwiperEvent001, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto swiperNode = FrameNode::GetOrCreateFrameNode(
-        "Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     stack->Push(swiperNode);
     TouchLocationInfo touchLocationInfo("down", 0);
     touchLocationInfo.SetTouchType(TouchType::DOWN);
@@ -107,11 +108,18 @@ HWTEST_F(SwiperPatternTestNg, SwiperEvent001, TestSize.Level1)
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
     pattern->HandleTouchEvent(touchEventInfo);
     EXPECT_FALSE(pattern->indicatorDoingAnimation_);
+    const char* name = "HandleTouchDown";
+    pattern->controller_ = CREATE_ANIMATOR(name);
+    pattern->controller_->status_ = Animator::Status::RUNNING;
+    pattern->springController_ = CREATE_ANIMATOR(name);
+    pattern->springController_->status_ = Animator::Status::RUNNING;
     pattern->HandleTouchEvent(touchEventInfo);
     EXPECT_FALSE(pattern->indicatorDoingAnimation_);
 
     touchEventInfo.touches_.begin()->SetTouchType(TouchType::UP);
     pattern->HandleTouchEvent(touchEventInfo);
+    pattern->controller_ = nullptr;
+    pattern->springController_ = nullptr;
     touchEventInfo.touches_.begin()->SetTouchType(TouchType::CANCEL);
     pattern->HandleTouchEvent(touchEventInfo);
     touchEventInfo.touches_.begin()->SetTouchType(TouchType::MOVE);
@@ -128,18 +136,19 @@ HWTEST_F(SwiperPatternTestNg, SwiperEvent001, TestSize.Level1)
 HWTEST_F(SwiperPatternTestNg, SwiperEvent002, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto swiperNode = FrameNode::GetOrCreateFrameNode(
-        "Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     stack->Push(swiperNode);
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
     auto eventHub = AceType::MakeRefPtr<EventHub>();
-    pattern->InitPanEvent();
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    pattern->InitPanEvent(gestureEventHub);
     EXPECT_EQ(pattern->direction_, Axis::HORIZONTAL);
     pattern->touchEvent_ = nullptr;
-    pattern->InitTouchEvent();
+    pattern->InitTouchEvent(gestureEventHub);
     TouchEventFunc callback = [](TouchEventInfo& info) {};
     pattern->touchEvent_ = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback));
-    pattern->InitTouchEvent();
+    pattern->InitTouchEvent(gestureEventHub);
     EXPECT_TRUE(pattern->touchEvent_);
 
     EXPECT_TRUE(pattern->panEvent_);
@@ -199,6 +208,9 @@ HWTEST_F(SwiperPatternTestNg, SwiperUtilsTest001, TestSize.Level1)
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(swiperLayoutAlgorithm));
     int32_t startIndex = 0;
     int32_t endIndex = 4;
+    swiperLayoutAlgorithm->startIndex_ = startIndex;
+    swiperLayoutAlgorithm->endIndex_ = endIndex;
+    swiperLayoutAlgorithm->currentIndex_ = 1;
     swiperLayoutAlgorithm->SetTotalCount(endIndex - startIndex);
     CreateChildWrapperAppendToHostWrapper(startIndex, endIndex, layoutWrapper);
     swiperLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
@@ -420,6 +432,26 @@ HWTEST_F(SwiperPatternTestNg, SwiperInit001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SwiperInit002
+ * @tc.desc: InitOnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperInit002, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    RefPtr<FocusHub> focusHub = AceType::MakeRefPtr<FocusHub>(eventHub, FocusType::DISABLE, false);
+    pattern->InitOnKeyEvent(focusHub);
+    KeyEvent event = KeyEvent();
+    event.action = KeyAction::DOWN;
+    EXPECT_FALSE(focusHub->onKeyEventInternal_(event));
+}
+
+/**
  * @tc.name: SwiperFunc001
  * @tc.desc: OnKeyEvent
  * @tc.type: FUNC
@@ -480,8 +512,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperFunc003, TestSize.Level1)
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
     pattern->OnIndexChange();
     int32_t nodeId = 0;
-    while (nodeId < MAX_NODE_NUMBER)
-    {
+    while (nodeId < MAX_NODE_NUMBER) {
         auto indicatorNode = FrameNode::GetOrCreateFrameNode(
             "SwiperIndicator", nodeId, []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
         swiperNode->AddChild(indicatorNode);
@@ -499,12 +530,13 @@ HWTEST_F(SwiperPatternTestNg, SwiperFunc003, TestSize.Level1)
 HWTEST_F(SwiperPatternTestNg, SwiperFunc004, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto swiperNode = FrameNode::GetOrCreateFrameNode(
-        "Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     stack->Push(swiperNode);
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
     auto eventHub = AceType::MakeRefPtr<EventHub>();
-    pattern->InitPanEvent();
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    pattern->InitPanEvent(gestureEventHub);
     EXPECT_EQ(pattern->direction_, Axis::HORIZONTAL);
 
     auto indicatorNode = FrameNode::GetOrCreateFrameNode(
@@ -518,15 +550,20 @@ HWTEST_F(SwiperPatternTestNg, SwiperFunc004, TestSize.Level1)
     gestureEvent.SetLocalLocation(Offset(0, 0));
     gestureEvent.inputEventType_ = InputEventType::TOUCH_SCREEN;
     pattern->panEvent_->actionUpdate_(gestureEvent);
+    EXPECT_EQ(pattern->currentOffset_, MAIN_DELTA);
 
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     swiperPaintProperty->propLoop_ = false;
+    EXPECT_TRUE(pattern->IsOutOfBoundary(MAIN_DELTA));
     swiperNode->geometryNode_->frame_.SetSize(SizeF(GEOMETRY_WIDTH, GEOMETRY_HEIGHT));
+    EXPECT_FALSE(pattern->IsOutOfBoundary(MAIN_DELTA));
     // Swiper has reached boundary.
     swiperNode->geometryNode_->frame_.SetSize(SizeF(0, 0));
     pattern->panEvent_->actionUpdate_(gestureEvent);
+    pattern->currentOffset_ = MAIN_DELTA;
     swiperPaintProperty->propEdgeEffect_ = EdgeEffect::FADE;
     pattern->panEvent_->actionUpdate_(gestureEvent);
+    pattern->currentOffset_ = MAIN_DELTA;
     swiperPaintProperty->propEdgeEffect_ = EdgeEffect::NONE;
     pattern->panEvent_->actionUpdate_(gestureEvent);
 }
@@ -578,5 +615,293 @@ HWTEST_F(SwiperPatternTestNg, PerformActionTest001, TestSize.Level1)
     swiperPaintProperty->UpdateLoop(true);
     EXPECT_TRUE(swiperAccessibilityProperty->ActActionScrollForward());
     EXPECT_TRUE(swiperAccessibilityProperty->ActActionScrollBackward());
+}
+
+/**
+ * @tc.name: SwiperModelNg001
+ * @tc.desc: Swiper Model NG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperModelNg001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create SwiperModelNG.
+     */
+    SwiperModelNG swiperModelNG;
+    swiperModelNG.Create();
+
+    /**
+     * @tc.steps: step2. Create frameNode, pattern.
+     */
+    auto swiperFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(swiperFrameNode, nullptr);
+    auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto swiperLayoutProperty = swiperFrameNode->GetLayoutProperty<SwiperLayoutProperty>();
+    ASSERT_NE(swiperLayoutProperty, nullptr);
+    auto swiperPaintProperty = swiperFrameNode->GetPaintProperty<SwiperPaintProperty>();
+    ASSERT_NE(swiperPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3.1. Test SetIndex function.
+     * @tc.expected: swiperLayoutProperty->GetIndex() is equal to SWIPER_DEFAULT_INDEX.
+     */
+    swiperModelNG.SetIndex(SWIPER_DEFAULT_INDEX);
+    EXPECT_EQ(swiperLayoutProperty->GetIndex(), SWIPER_DEFAULT_INDEX);
+
+    /**
+     * @tc.steps: step3.2. Test SetDisplayMode function.
+     * @tc.expected: swiperLayoutProperty->GetDisplayMode() is equal to swiperDisplayMode.
+     */
+    swiperModelNG.SetDisplayMode(SwiperDisplayMode::STRETCH);
+    EXPECT_EQ(swiperLayoutProperty->GetDisplayMode(), SwiperDisplayMode::STRETCH);
+
+    /**
+     * @tc.steps: step3.3. Test SetDisplayCount function.
+     * @tc.expected:DisplayCount = -1 swiperLayoutProperty->GetDisplayCount() is equal to SWIPER_DEFAULT_INDEX.
+     * @tc.expected:DisplayCount = 1 swiperLayoutProperty->GetDisplayCount() is equal to SWIPER_DEFAULT_INDEX.
+     */
+    swiperModelNG.SetDisplayCount(-SWIPER_DEFAULT_INDEX);
+    EXPECT_EQ(swiperLayoutProperty->GetDisplayCount(), SWIPER_DEFAULT_INDEX);
+    swiperModelNG.SetDisplayCount(SWIPER_DEFAULT_INDEX);
+    EXPECT_EQ(swiperLayoutProperty->GetDisplayCount(), SWIPER_DEFAULT_INDEX);
+
+    /**
+     * @tc.steps: step3.4. Test SetShowIndicator function.
+     * @tc.expected: swiperLayoutProperty->GetIndex() is equal to SWIPER_DEFAULT_INDEX.
+     */
+    swiperModelNG.SetShowIndicator(true);
+    EXPECT_TRUE(swiperLayoutProperty->GetShowIndicator());
+
+    /**
+     * @tc.steps: step3.5. Test SetItemSpace function.
+     * @tc.expected: swiperLayoutProperty->GetItemSpace() is equal to dimension.
+     */
+    auto dimension = Dimension(-1.0);
+    swiperModelNG.SetItemSpace(dimension);
+    EXPECT_EQ(swiperLayoutProperty->GetItemSpace(), dimension);
+
+    /**
+     * @tc.steps: step3.6. Test SetCachedCount function.
+     * @tc.expected:DisplayCount = -1 swiperLayoutProperty->SetCachedCount() is equal to SWIPER_DEFAULT_INDEX.
+     * @tc.expected:DisplayCount = 1 swiperLayoutProperty->SetCachedCount() is equal to SWIPER_DEFAULT_INDEX.
+     */
+    swiperModelNG.SetCachedCount(-SWIPER_DEFAULT_INDEX);
+    swiperModelNG.SetCachedCount(SWIPER_DEFAULT_INDEX);
+    EXPECT_EQ(swiperLayoutProperty->GetCachedCount(), SWIPER_DEFAULT_INDEX);
+
+    /**
+     * @tc.steps: step3.7. Test SetIsIndicatorCustomSize function.
+     * @tc.expected: swiperPattern->IsIndicatorCustomSize() is equal to true.
+     */
+    swiperModelNG.SetIsIndicatorCustomSize(true);
+    EXPECT_TRUE(swiperPattern->IsIndicatorCustomSize());
+
+    /**
+     * @tc.steps: step3.8. Test SetAutoPlay function.
+     * @tc.expected: SwiperPaintProperty->GetAutoPlay() is equal to true.
+     */
+    swiperModelNG.SetAutoPlay(true);
+    EXPECT_TRUE(swiperPaintProperty->GetAutoPlay());
+
+    /**
+     * @tc.steps: step3.9. Test SetAutoPlayInterval function.
+     * @tc.expected: SwiperPaintProperty->GetAutoPlayInterval() is equal to SWIPER_DEFAULT_INDEX.
+     */
+    swiperModelNG.SetAutoPlayInterval(SWIPER_DEFAULT_INDEX);
+    EXPECT_EQ(swiperPaintProperty->GetAutoPlayInterval(), SWIPER_DEFAULT_INDEX);
+
+    /**
+     * @tc.steps: step3.10. Test SetDuration function.
+     * @tc.expected: SwiperPaintProperty->GetDuration() is equal to SWIPER_DEFAULT_INDEX.
+     */
+    swiperModelNG.SetDuration(SWIPER_DEFAULT_INDEX);
+    EXPECT_EQ(swiperPaintProperty->GetDuration(), SWIPER_DEFAULT_INDEX);
+}
+
+/**
+ * @tc.name: SwiperModelNg002
+ * @tc.desc: Swiper Model NG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperModelNg002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create SwiperModelNG.
+     */
+    SwiperModelNG swiperModelNG;
+    swiperModelNG.Create();
+
+    /**
+     * @tc.steps: step2. Create frameNode, pattern.
+     */
+    auto swiperFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(swiperFrameNode, nullptr);
+    auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto swiperLayoutProperty = swiperFrameNode->GetLayoutProperty<SwiperLayoutProperty>();
+    ASSERT_NE(swiperLayoutProperty, nullptr);
+    auto swiperPaintProperty = swiperFrameNode->GetPaintProperty<SwiperPaintProperty>();
+    ASSERT_NE(swiperPaintProperty, nullptr);
+    auto eventHub = swiperFrameNode->GetEventHub<SwiperEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step3.1. Test SetLoop function.
+     * @tc.expected: SwiperPaintProperty->GetLoop() is true.
+     */
+    swiperModelNG.SetLoop(true);
+    EXPECT_TRUE(swiperPaintProperty->GetLoop());
+
+    /**
+     * @tc.steps: step3.2. Test SetEnabled function.
+     * @tc.expected: SwiperPaintProperty->GetEnabled() is true.
+     */
+    swiperModelNG.SetEnabled(true);
+    EXPECT_TRUE(swiperPaintProperty->GetEnabled());
+
+    /**
+     * @tc.steps: step3.3. Test SetDisableSwipe function.
+     * @tc.expected: SwiperPaintProperty->GetDisableSwipe() is true.
+     */
+    swiperModelNG.SetDisableSwipe(true);
+    EXPECT_TRUE(swiperPaintProperty->GetDisableSwipe());
+
+    /**
+     * @tc.steps: step3.4. Test SetEdgeEffect function.
+     * @tc.expected: SwiperPaintProperty->GetEdgeEffect() is true.
+     */
+    swiperModelNG.SetEdgeEffect(EdgeEffect::FADE);
+    EXPECT_EQ(swiperPaintProperty->GetEdgeEffect(), EdgeEffect::FADE);
+
+    /**
+     * @tc.steps: step3.5. Test SetOnChange function.
+     * @tc.expected:swiperPattern->changeEvent_ not null.
+     */
+    auto onChange = [](const BaseEventInfo* info) {};
+    swiperModelNG.SetOnChange(std::move(onChange));
+    EXPECT_NE(swiperPattern->changeEvent_, nullptr);
+
+    /**
+     * @tc.steps: step3.6. Test SetOnAnimationStart function.
+     * @tc.expected:swiperPattern->animationStartEvent_ not null.
+     */
+    auto onAnimationStart = [](const BaseEventInfo* info) {};
+    swiperModelNG.SetOnAnimationStart(std::move(onAnimationStart));
+    EXPECT_NE(eventHub->animationStartEvent_, nullptr);
+
+    /**
+     * @tc.steps: step3.7. Test SetOnAnimationEnd function.
+     * @tc.expected:swiperPattern->animationEndEvent_ not null.
+     */
+    auto onAnimationEnd = [](const BaseEventInfo* info) {};
+    swiperModelNG.SetOnAnimationEnd(std::move(onAnimationEnd));
+    EXPECT_NE(eventHub->animationEndEvent_, nullptr);
+}
+
+/**
+ * @tc.name: SwiperModelNg003
+ * @tc.desc: Swiper Model NG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperModelNg003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create SwiperModelNG.
+     */
+    SwiperModelNG swiperModelNG;
+    swiperModelNG.Create();
+
+    /**
+     * @tc.steps: step2. Create frameNode, pattern.
+     */
+    auto swiperFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(swiperFrameNode, nullptr);
+    auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto swiperLayoutProperty = swiperFrameNode->GetLayoutProperty<SwiperLayoutProperty>();
+    ASSERT_NE(swiperLayoutProperty, nullptr);
+    auto swiperPaintProperty = swiperFrameNode->GetPaintProperty<SwiperPaintProperty>();
+    ASSERT_NE(swiperPaintProperty, nullptr);
+    auto eventHub = swiperFrameNode->GetEventHub<SwiperEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step3.1. Test SetIndicatorStyle function.
+     * @tc.expected: SwiperPaintProperty->swiperParameters_->colorVal is swiperParameters.colorVal.
+     */
+    SwiperParameters swiperParameters;
+    swiperParameters.colorVal = Color(Color::BLUE);
+    swiperModelNG.SetIndicatorStyle(swiperParameters);
+    EXPECT_EQ(swiperPattern->swiperParameters_->colorVal, swiperParameters.colorVal);
+
+    /**
+     * @tc.steps: step3.2. Test SetPreviousMargin function.
+     * @tc.expected: swiperPaintProperty->GetPrevMargin() is equal to dimension.
+     */
+    auto dimension = Dimension(-1.0);
+    swiperModelNG.SetPreviousMargin(dimension);
+    EXPECT_EQ(swiperLayoutProperty->GetPrevMargin(), dimension);
+
+    /**
+     * @tc.steps: step3.3. Test SetNextMargin function.
+     * @tc.expected: swiperPaintProperty->GetNextMargin() is equal to dimension.
+     */
+    swiperModelNG.SetNextMargin(dimension);
+    EXPECT_EQ(swiperLayoutProperty->GetNextMargin(), dimension);
+
+    /**
+     * @tc.steps: step3.4. Test SetOnChangeEvent function.
+     * @tc.expected: swiperPaintProperty->GetLoop() is not null.
+     */
+    auto onAnimationEnd = [](const BaseEventInfo* info) {};
+    swiperModelNG.SetOnChangeEvent(std::move(onAnimationEnd));
+    EXPECT_NE(swiperPattern->onIndexChangeEvent_, nullptr);
+
+    /**
+     * @tc.steps: step3.5. Test SetIndicatorIsBoolean function.
+     * @tc.expected: swiperPattern->indicatorIsBoolean_ is true.
+     */
+    swiperModelNG.SetIndicatorIsBoolean(true);
+    EXPECT_TRUE(swiperPattern->indicatorIsBoolean_);
+
+    /**
+     * @tc.steps: step3.6. Test SetArrowStyle function.
+     * @tc.expected: before set swiperArrowParameters, all result is null.
+     */
+    SwiperArrowParameters swiperArrowParameters;
+    swiperModelNG.SetArrowStyle(swiperArrowParameters);
+
+    /**
+     * @tc.steps: step3.7. Test SetArrowStyle function.
+     * @tc.expected: after set swiperArrowParameters, swiperLayoutProperty->IsShowBoard is true.
+     */
+    swiperArrowParameters.isShowBoard = true;
+    swiperArrowParameters.boardSize = dimension;
+    swiperArrowParameters.boardColor = Color(Color::BLUE);
+    swiperArrowParameters.arrowSize = dimension;
+    swiperArrowParameters.arrowColor = Color(Color::RED);
+    swiperArrowParameters.isSiderMiddle = true;
+    swiperModelNG.SetArrowStyle(swiperArrowParameters);
+    EXPECT_TRUE(swiperLayoutProperty->GetIsShowBoard());
+    EXPECT_EQ(swiperLayoutProperty->GetBoardSize(), dimension);
+    EXPECT_EQ(swiperLayoutProperty->GetBoardColor(), Color(Color::BLUE));
+    EXPECT_EQ(swiperLayoutProperty->GetArrowSize(), dimension);
+    EXPECT_EQ(swiperLayoutProperty->GetArrowColor(), Color(Color::RED));
+    EXPECT_TRUE(swiperLayoutProperty->GetIsSiderMiddle());
+
+    /**
+     * @tc.steps: step3.8. Test SetDisplayArrow function.
+     * @tc.expected: swiperLayoutProperty->GetDisplayArrow() is true.
+     */
+    swiperModelNG.SetDisplayArrow(true);
+    EXPECT_TRUE(swiperLayoutProperty->GetDisplayArrow());
+
+    /**
+     * @tc.steps: step3.9. Test SetHoverShow function.
+     * @tc.expected: swiperLayoutProperty->GetHoverShow() is true.
+     */
+    swiperModelNG.SetHoverShow(true);
+    EXPECT_TRUE(swiperLayoutProperty->GetHoverShow());
 }
 } // namespace OHOS::Ace::NG

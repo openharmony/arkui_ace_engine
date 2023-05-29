@@ -817,6 +817,12 @@ var SourceTool;
   SourceTool[SourceTool["PEN"] = 2] = "PEN";
 })(SourceTool || (SourceTool = {}));
 
+var KeySource;
+(function (KeySource) {
+  KeySource[KeySource["Unknown"] = 0] = "Unknown";
+  KeySource[KeySource["Keyboard"] = 4] = "Keyboard";
+})(KeySource || (KeySource = {}));
+
 var SeekMode;
 (function (SeekMode) {
   SeekMode[SeekMode["PreviousKeyframe"] = 0] = "PreviousKeyframe";
@@ -1595,3 +1601,12 @@ var ListItemGroupStyle;
   ListItemGroupStyle[ListItemGroupStyle["NONE"] = 0] = "NONE";
   ListItemGroupStyle[ListItemGroupStyle["CARD"] = 1] = "CARD";
 })(ListItemGroupStyle || (ListItemGroupStyle = {}));
+
+var DragRet;
+(function (DragRet) {
+  DragRet[DragRet["DRAG_SUCCESS"] = 0] = "DRAG_SUCCESS";
+  DragRet[DragRet["DRAG_FAILED"] = 1] = "DRAG_FAILED";
+  DragRet[DragRet["DRAG_CANCELED"] = 2] = "DRAG_CANCELED";
+  DragRet[DragRet["DROP_ENABLED"] = 3] = "DROP_ENABLED";
+  DragRet[DragRet["DROP_DISABLED"] = 4] = "DROP_DISABLED";
+})

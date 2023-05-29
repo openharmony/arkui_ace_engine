@@ -507,7 +507,7 @@ void ProgressModifier::StartLinearSweepingAnimation(float value)
         return;
     }
 
-    date = dateLength + LINEAR_SWEEPING_LEN.ConvertToPx();
+    date = dateLength + strokeWidth_->Get() + LINEAR_SWEEPING_LEN.ConvertToPx();
 
     if (!isSweeping_) {
         StartLinearSweepingAnimationImpl(date);

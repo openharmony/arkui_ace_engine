@@ -344,6 +344,7 @@ RefPtr<FrameNode> DialogPattern::CreateButton(const ButtonInfo& params, int32_t 
     auto buttonNode = FrameNode::CreateFrameNode(
         V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<ButtonPattern>());
     CHECK_NULL_RETURN(buttonNode, nullptr);
+    UpdateDialogButtonProperty(buttonNode);
     // append text inside button
     auto textNode = CreateButtonText(params.text, params.textColor);
     CHECK_NULL_RETURN(textNode, nullptr);
@@ -405,6 +406,15 @@ RefPtr<FrameNode> DialogPattern::CreateButton(const ButtonInfo& params, int32_t 
     layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(theme->GetHeight())));
 
     return buttonNode;
+}
+
+void DialogPattern::UpdateDialogButtonProperty(RefPtr<FrameNode>& buttonNode)
+{
+    auto buttonProp = AceType::DynamicCast<ButtonLayoutProperty>(buttonNode->GetLayoutProperty());
+    PaddingProperty buttonPadding;
+    buttonPadding.left = CalcLength(SHEET_LIST_PADDING);
+    buttonPadding.right = CalcLength(SHEET_LIST_PADDING);
+    buttonProp->UpdatePadding(buttonPadding);
 }
 
 // alert dialog buttons

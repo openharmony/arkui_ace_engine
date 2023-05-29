@@ -34,13 +34,6 @@ constexpr std::size_t DEFAULT_DRAG_INDEX = -1;
 
 } // namespace
 
-void LinearSplitPattern::OnAttachToFrameNode()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToFrame(true);
-}
-
 void LinearSplitPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     if (panEvent_) {

@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_EXTENSION_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_EXTENSION_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_EXTENSION_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_EXTENSION_H
 
-#include "core/components_ng/pattern/window_scene/scene/host/host_window_pattern.h"
+#include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 
 namespace OHOS::Ace::NG {
-class HostWindowExtension : public HostWindowPattern {
-    DECLARE_ACE_TYPE(HostWindowExtension, HostWindowPattern);
+class WindowExtension : public WindowPattern {
+    DECLARE_ACE_TYPE(WindowExtension, WindowPattern);
 
 public:
-    HostWindowExtension(const std::string& bundleName, const std::string& abilityName);
-    ~HostWindowExtension() override;
+    WindowExtension(const std::string& bundleName, const std::string& abilityName);
+    ~WindowExtension() override;
 
     void OnWindowShow() override;
     void OnWindowHide() override;
@@ -47,8 +47,8 @@ protected:
     void RequestExtensionSessionDestruction();
 
 private:
-    ACE_DISALLOW_COPY_AND_MOVE(HostWindowExtension);
+    ACE_DISALLOW_COPY_AND_MOVE(WindowExtension);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_EXTENSION_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_EXTENSION_H

@@ -38,8 +38,8 @@ MenuItemModel* MenuItemModel::GetInstance()
             } else {
                 instance_.reset(new Framework::MenuItemModelImpl());
             }
-        }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -129,6 +129,8 @@ void JSMenuItem::JSBind(BindingTarget globalObj)
     JSClass<JSMenuItem>::StaticMethod("contentFontColor", &JSMenuItem::ContentFontColor, opt);
     JSClass<JSMenuItem>::StaticMethod("labelFont", &JSMenuItem::LabelFont, opt);
     JSClass<JSMenuItem>::StaticMethod("labelFontColor", &JSMenuItem::LabelFontColor, opt);
+    JSClass<JSMenuItem>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSMenuItem>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSMenuItem>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

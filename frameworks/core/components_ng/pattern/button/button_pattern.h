@@ -18,6 +18,8 @@
 
 #include <optional>
 
+#include "base/utils/utils.h"
+#include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
@@ -99,14 +101,25 @@ public:
         CHECK_NULL_VOID(host);
         auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
+        auto context = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto buttonTheme = context->GetTheme<ButtonTheme>();
+        CHECK_NULL_VOID(buttonTheme);
+        auto textStyle = buttonTheme->GetTextStyle();
         json->Put(
             "type", host->GetTag() == "Toggle"
                         ? "ToggleType.Button"
                         : ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::CAPSULE)).c_str());
-        json->Put("fontSize", layoutProperty->GetFontSizeValue(Dimension(0)).ToString().c_str());
+        json->Put("fontSize",
+            layoutProperty->GetFontSizeValue(layoutProperty->HasLabel() ? textStyle.GetFontSize() : Dimension(0))
+                .ToString()
+                .c_str());
         json->Put("fontWeight",
             V2::ConvertWrapFontWeightToStirng(layoutProperty->GetFontWeight().value_or(FontWeight::NORMAL)).c_str());
-        json->Put("fontColor", layoutProperty->GetFontColor().value_or(Color::BLACK).ColorToString().c_str());
+        json->Put("fontColor", layoutProperty->GetFontColor()
+                                   .value_or(layoutProperty->HasLabel() ? textStyle.GetTextColor() : Color::BLACK)
+                                   .ColorToString()
+                                   .c_str());
         auto fontFamilyVector =
             layoutProperty->GetFontFamily().value_or<std::vector<std::string>>({ "HarmonyOS Sans" });
         std::string fontFamily = fontFamilyVector.at(0);

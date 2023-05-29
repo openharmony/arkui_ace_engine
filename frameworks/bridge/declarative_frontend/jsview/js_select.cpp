@@ -49,8 +49,8 @@ SelectModel* SelectModel::GetInstance()
             } else {
                 instance_.reset(new Framework::SelectModelImpl());
             }
-        }
 #endif
+        }
     }
     return instance_.get();
 }

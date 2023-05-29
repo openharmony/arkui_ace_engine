@@ -57,8 +57,8 @@ std::string BasicShapeTypeToString(BasicShapeType type)
         json##name->Put("x", prop##name->GetX().ToString().c_str()); \
         json##name->Put("y", prop##name->GetY().ToString().c_str()); \
     } else {                                                         \
-        json##name->Put("x", "0.0px");                               \
-        json##name->Put("y", "0.0px");                               \
+        json##name->Put("x", "");                                    \
+        json##name->Put("y", "");                                    \
     }
 
 void RenderPositionProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
@@ -128,12 +128,12 @@ void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         jsonValue->Put("y", 0.0);
         json->Put("backgroundImagePosition", jsonValue);
     }
-    json->Put("backdropBlur", (propBlurRadius.value_or(Dimension(0))).ConvertToVp());
+    json->Put("backdropBlur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx());
 }
 
 void ForegroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-    json->Put("blur", (propBlurRadius.value_or(Dimension(0))).ConvertToVp());
+    json->Put("blur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx());
 }
 
 void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const

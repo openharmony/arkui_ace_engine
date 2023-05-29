@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/window_scene/scene/host/host_window_node.h"
+#include "core/components_ng/pattern/window_scene/scene/window_node.h"
 
 #include "base/utils/utils.h"
-#include "core/components_ng/pattern/window_scene/scene/host/host_window_pattern.h"
+#include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "pointer_event.h"
 
@@ -65,7 +65,7 @@ std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, co
 }
 }
 
-HitTestResult HostWindowNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+HitTestResult WindowNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
     const auto& rect = GetGeometryNode()->GetFrameRect();
@@ -78,42 +78,42 @@ HitTestResult HostWindowNode::TouchTest(const PointF& globalPoint, const PointF&
 
     DispatchPointerEvent(touchRestrict.touchEvent);
     auto callback = [weak = WeakClaim(this)] (const TouchEvent& point) {
-        auto hostWindowNode = weak.Upgrade();
-        CHECK_NULL_VOID(hostWindowNode);
-        hostWindowNode->DispatchPointerEvent(point);
+        auto windowNode = weak.Upgrade();
+        CHECK_NULL_VOID(windowNode);
+        windowNode->DispatchPointerEvent(point);
     };
     context->AddUIExtensionCallback(callback);
     return HitTestResult::BUBBLING;
 }
 
-void HostWindowNode::DispatchPointerEvent(const TouchEvent& point) const
+void WindowNode::DispatchPointerEvent(const TouchEvent& point) const
 {
-    auto pattern = GetPattern<HostWindowPattern>();
+    auto pattern = GetPattern<WindowPattern>();
     CHECK_NULL_VOID(pattern);
     auto selfGlobalOffset = GetTransformRelativeOffset();
     auto pointerEvent = ConvertPointerEvent(selfGlobalOffset, point);
     pattern->DispatchPointerEvent(pointerEvent);
 }
 
-RefPtr<HostWindowNode> HostWindowNode::GetOrCreateHostWindowNode(
+RefPtr<WindowNode> WindowNode::GetOrCreateWindowNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
-    auto hostWindowNode = ElementRegister::GetInstance()->GetSpecificItemById<HostWindowNode>(nodeId);
-    if (hostWindowNode) {
-        if (hostWindowNode->GetTag() == tag) {
-            return hostWindowNode;
+    auto windowNode = ElementRegister::GetInstance()->GetSpecificItemById<WindowNode>(nodeId);
+    if (windowNode) {
+        if (windowNode->GetTag() == tag) {
+            return windowNode;
         }
         ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
-        auto parent = hostWindowNode->GetParent();
+        auto parent = windowNode->GetParent();
         if (parent) {
-            parent->RemoveChild(hostWindowNode);
+            parent->RemoveChild(windowNode);
         }
     }
 
     auto pattern = patternCreator ? patternCreator() : AceType::MakeRefPtr<Pattern>();
-    hostWindowNode = AceType::MakeRefPtr<HostWindowNode>(tag, nodeId, pattern, false);
-    hostWindowNode->InitializePatternAndContext();
-    ElementRegister::GetInstance()->AddUINode(hostWindowNode);
-    return hostWindowNode;
+    windowNode = AceType::MakeRefPtr<WindowNode>(tag, nodeId, pattern, false);
+    windowNode->InitializePatternAndContext();
+    ElementRegister::GetInstance()->AddUINode(windowNode);
+    return windowNode;
 }
 } // namespace OHOS::Ace::NG

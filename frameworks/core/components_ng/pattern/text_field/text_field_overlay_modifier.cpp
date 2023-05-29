@@ -39,7 +39,7 @@ TextFieldOverlayModifier::TextFieldOverlayModifier(const WeakPtr<OHOS::Ace::NG::
     cursorOffsetX_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(textFieldPattern->GetCaretOffsetX());
     frameSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
     currentOffset_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
-    isSelectedAreaRedraw_ = AceType::MakeRefPtr<PropertyBool>(false);
+    flag_ = AceType::MakeRefPtr<PropertyInt>(0);
     underlineWidth_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
     underlineColor_ = AceType::MakeRefPtr<PropertyColor>(Color());
     showCounter_ = AceType::MakeRefPtr<PropertyBool>(false);
@@ -53,7 +53,7 @@ TextFieldOverlayModifier::TextFieldOverlayModifier(const WeakPtr<OHOS::Ace::NG::
     AttachProperty(cursorOffsetX_);
     AttachProperty(frameSize_);
     AttachProperty(currentOffset_);
-    AttachProperty(isSelectedAreaRedraw_);
+    AttachProperty(flag_);
     AttachProperty(underlineWidth_);
     AttachProperty(underlineColor_);
     AttachProperty(showCounter_);
@@ -123,8 +123,8 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
         } else {
             clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height();
         }
-        RSRect clipInnerRect(paintOffset.GetX(), paintOffset.GetY(), paintOffset.GetX() + contentSize_->Get().Width(),
-            clipRectHeight);
+        RSRect clipInnerRect(
+            paintOffset.GetX(), paintOffset.GetY(), paintOffset.GetX() + contentSize_->Get().Width(), clipRectHeight);
         canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
         // for default style, selection height is equal to the content height
         for (const auto& textBox : textBoxes) {
@@ -252,9 +252,9 @@ void TextFieldOverlayModifier::SetCurrentOffset(float value)
     currentOffset_->Set(value);
 }
 
-void TextFieldOverlayModifier::SetSelectedAreaRedraw(bool value)
+void TextFieldOverlayModifier::SetRedrawFlag(int32_t value)
 {
-    isSelectedAreaRedraw_->Set(value);
+    flag_->Set(value);
 }
 
 void TextFieldOverlayModifier::SetUnderlineWidth(float value)

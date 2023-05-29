@@ -452,7 +452,6 @@ protected:
 private:
     std::function<void()> requestFrame_;
     WeakPtr<FrameNode> host_;
-    bool needDebugBoundary_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderContext);
 };

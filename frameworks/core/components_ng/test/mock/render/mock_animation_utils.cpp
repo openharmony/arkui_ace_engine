@@ -68,11 +68,6 @@ void AnimationUtils::BlendBgColorAnimation(
     RefPtr<NG::RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve)
 {}
 
-bool AnimationUtils::IsRunning(const std::shared_ptr<AnimationUtils::Animation>& animation)
-{
-    return false;
-}
-
 void AnimationUtils::PauseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation) {}
 
 void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation) {}

@@ -138,7 +138,9 @@ void MenuPattern::OnModifyDone()
         ResetTheme(host, false);
     }
 
-    if (type_ == MenuType::MULTI_MENU) {
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    if (type_ == MenuType::MULTI_MENU && !layoutProperty->GetPaddingProperty()) {
         // move padding from scroll to inner menu
         PaddingProperty padding;
         padding.SetEdges(CalcLength(theme->GetOutPadding()));
