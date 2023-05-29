@@ -61,6 +61,9 @@ public:
 void SelectPropertyTestNg::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 }
 
 void SelectPropertyTestNg::TearDownTestCase()
@@ -76,11 +79,7 @@ void SelectPropertyTestNg::TearDownTestCase()
 HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest001, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
-    // set buttonTheme to themeManager before using themeManager to get buttonTheme
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-
+    
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
     selectModelInstance.Create(params);
@@ -105,10 +104,6 @@ HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest001, TestSize.Level1)
 HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest002, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
-    // set buttonTheme to themeManager before using themeManager to get buttonTheme
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
@@ -162,11 +157,7 @@ HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest003, TestSize.Level1)
  */
 HWTEST_F(SelectPropertyTestNg, SelectSetMenuAlign001, TestSize.Level1)
 {
-    // create mock themeManager
     SelectModelNG selectModelInstance;
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     // create select
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
@@ -186,5 +177,46 @@ HWTEST_F(SelectPropertyTestNg, SelectSetMenuAlign001, TestSize.Level1)
     auto menuAlign3 = selectPattern->menuAlign_.offset;
     ASSERT_EQ(menuAlign.alignType, menuAlign2);
     ASSERT_EQ(menuAlign.offset, menuAlign3);
+}
+/**
+ * @tc.name: SelectEvent001
+ * @tc.desc: Test SelectPattern PlayBgColorAnimation and OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, SelectEvent001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call PlayBgColorAnimation.
+     * @tc.expected: the function runs normally
+     */
+    bool isHoverChange[2] = { false, true };
+    for (int turn = 0; turn < 2; turn++) {
+        selectPattern->PlayBgColorAnimation(isHoverChange[turn]);
+        EXPECT_EQ(selectPattern->options_.size(), params.size());
+    }
+    /**
+     * @tc.steps: step4. construct keyEvent.
+     * @tc.expected: the function runs normally
+     */
+    KeyEvent event;
+    EXPECT_FALSE(selectPattern->OnKeyEvent(event));
+    event.action = KeyAction::DOWN;
+    EXPECT_FALSE(selectPattern->OnKeyEvent(event));
+    event.code = KeyCode::KEY_ENTER;
+    EXPECT_TRUE(selectPattern->OnKeyEvent(event));
 }
 } // namespace OHOS::Ace::NG
