@@ -420,6 +420,7 @@ private:
     void FinishAnimation();
     void StopTranslateAnimation();
     void StopSpringAnimation();
+    void StopFadeAnimation();
 
     void StopAutoPlay();
     void StartAutoPlay();
