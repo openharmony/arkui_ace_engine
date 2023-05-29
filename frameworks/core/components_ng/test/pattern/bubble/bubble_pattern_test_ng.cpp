@@ -113,6 +113,29 @@ struct TestProperty {
     std::optional<Dimension> arrowOffset = std::nullopt;
 };
 
+class MockBubbleTheme : public PopupTheme, public ButtonTheme {
+    DECLARE_ACE_TYPE(MockBubbleTheme, PopupTheme, ButtonTheme);
+
+public:
+    class Builder {
+    public:
+        Builder() = default;
+        ~Builder() = default;
+
+        RefPtr<MockBubbleTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
+        {
+            RefPtr<MockBubbleTheme> theme = AceType::Claim(new MockBubbleTheme());
+            return theme;
+        }
+    };
+
+    ~MockBubbleTheme() override = default;
+
+protected:
+    MockBubbleTheme() = default;
+};
+
+
 class BubblePatternTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -966,5 +989,64 @@ HWTEST_F(BubblePatternTestNg, BubblePaintMethod003, TestSize.Level1)
      * @tc.steps: step4. Call the function PaintMask.
      */
     bubblePaintMethod.PaintMask(canvas, paintWrapper);
+}
+
+/**
+ * @tc.name: BubblePatternTest013
+ * @tc.desc: Test bubble onModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubblePatternTestNg, BubblePatternTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set value to popupParam.
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    ButtonProperties buttonProperties {true, "Button"};
+    buttonProperties.action = AceType::MakeRefPtr<ClickEvent>(nullptr);
+    popupParam->SetPrimaryButtonProperties(buttonProperties);
+    popupParam->SetSecondaryButtonProperties(buttonProperties);
+    popupParam->SetMessage(BUBBLE_MESSAGE);
+    popupParam->SetArrowOffset(BUBBLE_PAINT_PROPERTY_ARROW_OFFSET);
+    popupParam->SetEnableArrow(BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW_FALSE);
+    popupParam->SetPlacement(Placement::BOTTOM_RIGHT);
+    popupParam->SetUseCustomComponent(BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM_FALSE);
+    popupParam->SetMaskColor(BUBBLE_PAINT_PROPERTY_MASK_COLOR);
+    popupParam->SetHasAction(false);
+    popupParam->SetBackgroundColor(BUBBLE_PAINT_PROPERTY_BACK_GROUND_COLOR);
+    popupParam->SetTargetSpace(BUBBLE_PAINT_PROPERTY_TARGET_SPACE);
+    popupParam->SetTextColor(BUBBLE_PAINT_PROPERTY_TEXT_COLOR);
+    popupParam->SetFontSize(BUBBLE_PAINT_PROPERTY_FONT_SIZE);
+    popupParam->SetFontWeight(BUBBLE_PAINT_PROPERTY_FONT_WEIGHT);
+    popupParam->SetFontStyle(Ace::FontStyle::ITALIC);
+    /**
+     * @tc.steps: step2. create bubble and get popupNode.
+     * @tc.expected: Check the popupNode were created successfully.
+     */
+    auto targetNode = CreateTargetNode();
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MockBubbleTheme>()));
+    auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
+    EXPECT_NE(popupNode, nullptr);
+    auto pattern = popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto paintProps = pattern->GetPaintProperty<BubbleRenderProperty>();
+    ASSERT_NE(paintProps, nullptr);
+    /**
+     * @tc.steps: step3. set properties and call MarkModifyDone function.
+     */
+    pattern->mouseEventInitFlag_ = true;
+    pattern->touchEventInitFlag_ = true;
+    popupNode->MarkModifyDone();
+    pattern->mouseEventInitFlag_ = false;
+    pattern->touchEventInitFlag_ = false;
+    paintProps->UpdateUseCustom(true);
+    popupNode->MarkModifyDone();
+    paintProps->UpdateUseCustom(false);
+    paintProps->UpdatePrimaryButtonShow(true);
+    paintProps->UpdateSecondaryButtonShow(true);
+    popupNode->MarkModifyDone();
 }
 } // namespace OHOS::Ace::NG
