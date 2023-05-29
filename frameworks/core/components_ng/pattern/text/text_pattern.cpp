@@ -729,6 +729,12 @@ void TextPattern::OnModifyDone()
 
 void TextPattern::ActSetSelection(int32_t start, int32_t end)
 {
+    if (start < 0) {
+        start = GetWideText().length();
+    }
+    if (end < 0) {
+        end = GetWideText().length();
+    }
     textSelector_.Update(start, end);
     CalculateHandleOffsetAndShowOverlay();
     ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);

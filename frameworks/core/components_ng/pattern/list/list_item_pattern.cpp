@@ -605,7 +605,13 @@ void ListItemPattern::SetAccessibilityAction()
         if (!pattern->Selectable()) {
             return;
         }
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
         pattern->MarkIsSelected(true);
+        context->OnMouseSelectUpdate(true, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
     });
 
     listItemAccessibilityProperty->SetActionClearSelection([weakPtr = WeakClaim(this)]() {
@@ -614,7 +620,12 @@ void ListItemPattern::SetAccessibilityAction()
         if (!pattern->Selectable()) {
             return;
         }
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetRenderContext();
+        CHECK_NULL_VOID(context);
         pattern->MarkIsSelected(false);
+        context->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
     });
 }
 } // namespace OHOS::Ace::NG
