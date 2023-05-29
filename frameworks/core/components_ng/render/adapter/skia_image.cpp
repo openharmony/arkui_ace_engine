@@ -129,6 +129,9 @@ RefPtr<CanvasImage> SkiaImage::Clone()
 {
     auto clone = MakeRefPtr<SkiaImage>(image_);
     clone->uniqueId_ = uniqueId_;
+    clone->compressData_ = std::move(compressData_);
+    clone->compressWidth_ = compressWidth_;
+    clone->compressHeight_ = compressHeight_;
     return clone;
 }
 
