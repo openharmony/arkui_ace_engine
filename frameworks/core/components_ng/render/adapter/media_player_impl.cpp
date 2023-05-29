@@ -236,7 +236,7 @@ int32_t MediaPlayerImpl::Seek(int32_t mSeconds, OHOS::Ace::SeekMode mode)
 {
     CHECK_NULL_RETURN(player_, -1);
     LOGI("Media player start to seek.");
-    player_->SeekTo(mSeconds);
+    player_->SeekTo(mSeconds, static_cast<uint32_t>(mode));
     return 0;
 }
 
