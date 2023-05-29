@@ -1888,8 +1888,9 @@ HWTEST_F(ProgressTestNg, RingProgressModifier001, TestSize.Level1)
     progressModifier.SetPaintShadow(true);
     progressModifier.SetMaxValue(PROGRESS_MODIFIER_VALUE);
     EXPECT_EQ(progressModifier.maxValue_->Get(), PROGRESS_MODIFIER_VALUE);
-    progressModifier.SetValue(50.0f);
-    EXPECT_EQ(progressModifier.value_->Get(), 50.0f);
+    float value = 50.0f;
+    progressModifier.SetValue(value);
+    EXPECT_EQ(progressModifier.value_->Get(), value);
     OffsetF offset(0, 0);
     progressModifier.SetContentOffset(offset);
     EXPECT_EQ(progressModifier.offset_->Get(), offset);
@@ -1911,11 +1912,13 @@ HWTEST_F(ProgressTestNg, RingProgressModifier001, TestSize.Level1)
      * @tc.steps: step2. Set different properties, call function onDraw.
      * @tc.expected: step2. Set the properties success.
      */
+    value = 60.0f;
     SizeF ContentSize(CONTEXT_WIDTH, CONTEXT_HEIGHT);
     progressModifier.SetContentSize(ContentSize);
     progressModifier.isSweeping_ = false;
     progressModifier.sweepingDateUpdated_ = true;
-    progressModifier.SetValue(60.0f);
+    progressModifier.SetValue(value);
+    progressModifier.ProcessRingSweepingAnimation(value);
     progressModifier.onDraw(context);
     EXPECT_EQ(progressModifier.isSweeping_, true);
 
@@ -1923,9 +1926,11 @@ HWTEST_F(ProgressTestNg, RingProgressModifier001, TestSize.Level1)
      * @tc.steps: step3. In sweeping, set value.
      * @tc.expected: step3. The sweepingDateUpdated_ flag to be true.
      */
+    value = 70.0f;
     progressModifier.isSweeping_ = true;
     progressModifier.sweepingDateBackup_ = 10000.0f;
-    progressModifier.SetValue(70.0f);
+    progressModifier.SetValue(value);
+    progressModifier.ProcessRingSweepingAnimation(value);
     progressModifier.onDraw(context);
     EXPECT_EQ(progressModifier.progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_RING));
     EXPECT_EQ(progressModifier.sweepingDateUpdated_, true);
@@ -1934,7 +1939,9 @@ HWTEST_F(ProgressTestNg, RingProgressModifier001, TestSize.Level1)
      * @tc.steps: step4. In sweeping, set value to 0.
      * @tc.expected: step4. The sweeping animation is stopped.
      */
-    progressModifier.SetValue(0.0f);
+    value = 0.0f;
+    progressModifier.SetValue(value);
+    progressModifier.ProcessRingSweepingAnimation(value);
     progressModifier.onDraw(context);
     EXPECT_EQ(progressModifier.progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_RING));
     EXPECT_EQ(progressModifier.isSweeping_, false);
@@ -2223,6 +2230,7 @@ HWTEST_F(ProgressTestNg, LinearProgressModifier001, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
+    float value = 50.0f;
     ProgressModifier progressModifier;
     progressModifier.SetStrokeWidth(PROGRESS_STROKE_WIDTH);
     LinearColor linearColor;
@@ -2232,8 +2240,8 @@ HWTEST_F(ProgressTestNg, LinearProgressModifier001, TestSize.Level1)
     EXPECT_EQ(progressModifier.borderColor_->Get(), linearColor);
     progressModifier.SetMaxValue(PROGRESS_MODIFIER_VALUE);
     EXPECT_EQ(progressModifier.maxValue_->Get(), PROGRESS_MODIFIER_VALUE);
-    progressModifier.SetValue(50.0f);
-    EXPECT_EQ(progressModifier.value_->Get(), 50.0f);
+    progressModifier.SetValue(value);
+    EXPECT_EQ(progressModifier.value_->Get(), value);
     progressModifier.SetScaleWidth(PROGRESS_MODIFIER_VALUE);
     EXPECT_EQ(progressModifier.scaleWidth_->Get(), PROGRESS_MODIFIER_VALUE);
 
@@ -2264,7 +2272,8 @@ HWTEST_F(ProgressTestNg, LinearProgressModifier001, TestSize.Level1)
     progressModifier.isSweeping_ = false;
     progressModifier.sweepingDateUpdated_ = true;
     progressModifier.SetProgressType(PROGRESS_TYPE_LINEAR);
-    progressModifier.SetValue(50.0f);
+    progressModifier.SetValue(value);
+    progressModifier.ProcessLinearSweepingAnimation(value);
     progressModifier.onDraw(context);
     EXPECT_EQ(progressModifier.progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_LINEAR));
     EXPECT_EQ(progressModifier.isSweeping_, true);
@@ -2278,7 +2287,8 @@ HWTEST_F(ProgressTestNg, LinearProgressModifier001, TestSize.Level1)
     progressModifier.isSweeping_ = true;
     progressModifier.sweepingDateBackup_ = 10000.0f;
     progressModifier.SetProgressType(PROGRESS_TYPE_LINEAR);
-    progressModifier.SetValue(50.0f);
+    progressModifier.SetValue(value);
+    progressModifier.ProcessLinearSweepingAnimation(value);
     progressModifier.onDraw(context);
     EXPECT_EQ(progressModifier.progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_LINEAR));
     EXPECT_EQ(progressModifier.sweepingDateUpdated_, true);
@@ -2287,9 +2297,11 @@ HWTEST_F(ProgressTestNg, LinearProgressModifier001, TestSize.Level1)
      * @tc.steps: step4. Set invisible.
      * @tc.expected: step4. The sweeping animation is stopped.
      */
+    value = 0.0f;
     progressModifier.SetContentSize(ContentSize3);
     progressModifier.SetProgressType(PROGRESS_TYPE_LINEAR);
-    progressModifier.SetValue(0.0f);
+    progressModifier.SetValue(value);
+    progressModifier.ProcessLinearSweepingAnimation(value);
     progressModifier.onDraw(context);
     progressModifier.SetVisible(false);
     EXPECT_EQ(progressModifier.progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_LINEAR));
