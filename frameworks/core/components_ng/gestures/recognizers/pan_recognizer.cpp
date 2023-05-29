@@ -331,22 +331,21 @@ void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& /*event*/)
     }
 }
 
-bool PanRecognizer::CalculateTruthFingers() const
+bool PanRecognizer::CalculateTruthFingers(bool isDirectionUp) const
 {
-    std::map<int32_t, int32_t> totalFingers{{0, 0}, {1, 0}};
-    std::map<int32_t, double> totalDistance{{0, 0.0}, {1, 0.0}};
+    int32_t totalFingers = 0;
+    float totalDistance = 0.0f;
     for (auto& element : touchPointsDistance_) {
         auto each_point_move = element.second.GetY();
-        if (each_point_move > 0) {
-            totalFingers[1]++;
-            totalDistance[1] += each_point_move;
-        } else {
-            totalFingers[0]++;
-            totalDistance[0] -= each_point_move;
+        if (GreatNotEqual(each_point_move, 0.0) && isDirectionUp) {
+            totalFingers++;
+            totalDistance += each_point_move;
+        } else if (LessNotEqual(each_point_move, 0.0) && !isDirectionUp) {
+            totalFingers++;
+            totalDistance -= each_point_move;
         }
     }
-    if ((totalDistance[1] > distance_ && totalFingers[1] >= fingers_) ||
-        (totalDistance[0] > distance_ && totalFingers[0] >= fingers_)) {
+    if (GreatNotEqual(totalDistance, distance_) && totalFingers >= fingers_) {
         return true;
     } else {
         return false;
@@ -384,12 +383,11 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
         if (fabs(offset) < distance_) {
             return GestureAcceptResult::DETECTING;
         }
+        if ((direction_.type & PanDirection::UP) == 0) {
+            return CalculateTruthFingers(true) ? GestureAcceptResult::ACCEPT : GestureAcceptResult::REJECT;
+        }
         if ((direction_.type & PanDirection::DOWN) == 0) {
-            if (CalculateTruthFingers()) {
-                return GestureAcceptResult::ACCEPT;
-            } else {
-                return GestureAcceptResult::REJECT;
-            }
+            return CalculateTruthFingers(false) ? GestureAcceptResult::ACCEPT : GestureAcceptResult::REJECT;
         }
         return GestureAcceptResult::ACCEPT;
     }
