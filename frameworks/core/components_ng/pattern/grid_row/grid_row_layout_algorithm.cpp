@@ -238,11 +238,11 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CreateChildrenConstraint(maxSize, layoutProperty->CreatePaddingAndBorder());
     auto context = NG::PipelineContext::GetCurrentContext();
     auto sizeType = GridContainerUtils::ProcessGridSizeType(
-        hostLayoutProperty->GetBreakPointsValue(), Size(maxSize.Width(), maxSize.Height()));
+        layoutProperty->GetBreakPointsValue(), Size(maxSize.Width(), maxSize.Height()));
     if (hostLayoutProperty->GetSizeTypeValue(V2::GridSizeType::UNDEFINED) != sizeType) {
         auto sizeTypeString = ConvertSizeTypeToString(sizeType);
         layoutWrapper->GetHostNode()->GetEventHub<GridRowEventHub>()->FireChangeEvent(sizeTypeString);
-        layoutProperty->UpdateSizeType(sizeType);
+        hostLayoutProperty->UpdateSizeType(sizeType);
     }
     auto gutter = GridContainerUtils::ProcessGutter(sizeType, layoutProperty->GetGutterValue());
     gutterInDouble_ =
