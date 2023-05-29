@@ -21,6 +21,7 @@
 #include "render_service_client/core/pipeline/rs_node_map.h"
 #include "render_service_client/core/transaction/rs_interfaces.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
+#include "render_service_client/core/ui/rs_effect_node.h"
 #include "render_service_client/core/ui/rs_root_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 
@@ -207,7 +208,7 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
             break;
         }
         case ContextType::EFFECT:
-            // create effect view
+            rsNode_ = Rosen::RSEffectNode::Create();
             break;
         case ContextType::EXTERNAL:
             break;
@@ -891,7 +892,7 @@ void RosenRenderContext::OnAccessibilityFocusUpdate(bool isAccessibilityFocus)
 void RosenRenderContext::OnUseEffectUpdate(bool useEffect)
 {
     CHECK_NULL_VOID(rsNode_);
-    // rsNode_->SetUseEffect(useEffect);
+    rsNode_->SetUseEffect(useEffect);
 }
 
 void RosenRenderContext::OnFreezeUpdate(bool isFreezed)
