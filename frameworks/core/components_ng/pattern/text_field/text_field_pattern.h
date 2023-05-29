@@ -803,8 +803,8 @@ public:
 
     void UpdateSelectMenuInfo(bool hasData)
     {
-        selectMenuInfo_.showCopy = !GetEditingValue().text.empty() && AllowCopy();
-        selectMenuInfo_.showCut = selectMenuInfo_.showCopy && !GetEditingValue().text.empty();
+        selectMenuInfo_.showCopy = !GetEditingValue().text.empty() && AllowCopy() && InSelectMode();
+        selectMenuInfo_.showCut = selectMenuInfo_.showCopy && !GetEditingValue().text.empty() && InSelectMode();
         selectMenuInfo_.showCopyAll = !GetEditingValue().text.empty() && !IsSelectAll();
         selectMenuInfo_.showPaste = hasData;
         selectMenuInfo_.menuIsShow = !GetEditingValue().text.empty() || hasData;
