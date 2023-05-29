@@ -137,18 +137,8 @@ void ProgressModifier::ProcessSweepingAnimation(ProgressType type, float value)
         return;
     }
 
-    switch (type) {
-        case ProgressType::RING:
-            ProcessRingSweepingAnimation(value);
-            break;
-        case ProgressType::LINEAR:
-            ProcessLinearSweepingAnimation(value);
-            break;
-        case ProgressType::CAPSULE:
-            StartCapsuleSweepingAnimation(value);
-            break;
-        default:
-            break;
+    if (type == ProgressType::CAPSULE) {
+        StartCapsuleSweepingAnimation(value);
     }
 }
 
