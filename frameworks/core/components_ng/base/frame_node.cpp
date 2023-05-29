@@ -700,11 +700,9 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     if (!isRenderDirtyMarked_) {
         return std::nullopt;
     }
-    ACE_SCOPED_TRACE("CreateRenderTask:PrepareTask");
     auto wrapper = CreatePaintWrapper();
     CHECK_NULL_RETURN_NOLOG(wrapper, std::nullopt);
     auto task = [wrapper, paintProperty = paintProperty_]() {
-        ACE_SCOPED_TRACE("FrameNode::RenderTask");
         wrapper->FlushRender();
         paintProperty->CleanDirty();
     };
