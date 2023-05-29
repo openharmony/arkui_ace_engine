@@ -53,7 +53,7 @@ constexpr float RING_SHADOW_BLUR_RADIUS_MIN = 5.0f;
 constexpr float RING_SHADOW_VALID_RADIUS_MIN = 10.0f;
 constexpr Dimension LINEAR_SWEEPING_LEN = 80.0_vp;
 constexpr float OPACITY_MAX = 1.0f;
-constexpr float OPACITY_MIN = 0.001f;
+constexpr float OPACITY_MIN = 0.005f;
 constexpr float POINT_INTERVAL = 2.0f;
 } // namespace
 ProgressModifier::ProgressModifier()
@@ -332,7 +332,7 @@ void ProgressModifier::StartRingLoadingTailAnimation()
     CHECK_NULL_VOID(context);
     bool isFormRender = context->IsFormRender();
     AnimationOption optionTail = AnimationOption();
-    auto curveTail = AceType::MakeRefPtr<CubicCurve>(0.5f, 0.15f, 0.75f, 0.45f);
+    auto curveTail = AceType::MakeRefPtr<CubicCurve>(0.33f, 0.00f, 0.66f, 0.30f);
     optionTail.SetDuration(LOADING_ANIMATION_DURATION);
     optionTail.SetCurve(curveTail);
     optionTail.SetIteration(isFormRender ? 1 : -1);
@@ -1043,11 +1043,11 @@ void ProgressModifier::GenerateRingSweepingGradientInfo(
     gradientColorEnd.SetDimension(Dimension(0.0, DimensionUnit::PERCENT));
     gradient.AddColor(gradientColorEnd);
 
-    // The sweep layer is a 45-degree white gradient with an opacity of 0.7 at 40 degrees and 0 at both ends.
-    Color sweepingColorMiddle = sweepingColorBase.ChangeOpacity(0.7f);
+    // The sweep layer is a 45-degree white gradient with an opacity of 0.6 at 35 degrees and 0 at both ends.
+    Color sweepingColorMiddle = sweepingColorBase.ChangeOpacity(0.6f);
     GradientColor gradientColorMiddle;
     gradientColorMiddle.SetColor(sweepingColorMiddle);
-    gradientColorMiddle.SetDimension(Dimension(40.0f / ANGLE_45, DimensionUnit::PERCENT));
+    gradientColorMiddle.SetDimension(Dimension(35.0f / ANGLE_45, DimensionUnit::PERCENT));
     gradient.AddColor(gradientColorMiddle);
 
     Color sweepingColorStart = sweepingColorBase.ChangeOpacity(0.0f);
@@ -1063,20 +1063,10 @@ void ProgressModifier::GenerateRingSweepingGradientInfo(
     }
 }
 
-Color ProgressModifier::GenerateTrailingPointColor(
-    const Color& headColor, const Color& tailColor, uint32_t index, uint32_t totalPoints) const
+Color ProgressModifier::GenerateTrailingPointColor(const Color& headColor, uint32_t index, uint32_t totalPoints) const
 {
-    float headRed = headColor.GetRed();
-    float headGreen = headColor.GetGreen();
-    float headBlue = headColor.GetBlue();
-    float tailRed = tailColor.GetRed();
-    float tailGreen = tailColor.GetGreen();
-    float tailBlue = tailColor.GetBlue();
     float opacity = TrailingCoefficient(OPACITY_MAX, index, totalPoints);
-    uint32_t red = tailRed - TrailingCoefficient(tailRed - headRed, index, totalPoints);
-    uint32_t green = tailGreen - TrailingCoefficient(tailGreen - headGreen, index, totalPoints);
-    uint32_t blue = tailBlue - TrailingCoefficient(tailBlue - headBlue, index, totalPoints);
-    return Color::FromRGBO(red, green, blue, opacity);
+    return Color::FromRGBO(headColor.GetRed(), headColor.GetGreen(), headColor.GetBlue(), opacity);
 }
 
 float ProgressModifier::TrailingCoefficient(float base, uint32_t index, uint32_t totalPoints) const
@@ -1115,11 +1105,10 @@ void ProgressModifier::PaintTrailing(RSCanvas& canvas, const RingProgressData& r
     CHECK_NULL_VOID(theme);
 
     Color headColor = theme->GetRingProgressBeginSideColor();
-    Color tailColor = theme->GetRingProgressEndSideColor();
     auto pointSize = points.size();
     for (uint32_t i = 0; i < pointSize; i++) {
         RSPoint pointCenter = points[i];
-        Color color = GenerateTrailingPointColor(headColor, tailColor, pointSize - i, pointSize);
+        Color color = GenerateTrailingPointColor(headColor, pointSize - i, pointSize);
         brush.SetColor(ToRSColor(color));
         canvas.AttachBrush(brush);
         canvas.DrawCircle(pointCenter, thickness / 2);
