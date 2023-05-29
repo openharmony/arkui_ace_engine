@@ -64,7 +64,7 @@ public:
         auto prevMargin = property->GetPrevMarginValue(0.0_px).ConvertToPx();
         auto nextMargin = property->GetNextMarginValue(0.0_px).ConvertToPx();
         auto itemSpaceCount = CaculateDisplayItemSpaceCount(property, prevMargin, nextMargin);
-        auto childSelfIdealSize = idealSize;
+        auto childSelfIdealSize = OptionalSizeF();
         float childCalcIdealLength = 0.0f;
 
         if (axis == Axis::HORIZONTAL) {

@@ -222,6 +222,8 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
+    auto cacheCount = swiperLayoutProperty->GetCachedCount().value_or(1);
+    layoutWrapper->SetCacheCount(cacheCount);
 
     auto axis = swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
     const auto& constraint = swiperLayoutProperty->GetLayoutConstraint();
