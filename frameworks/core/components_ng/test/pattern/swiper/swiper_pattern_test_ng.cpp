@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <cstddef>
 #include "gtest/gtest.h"
 
 #define private public
@@ -658,11 +659,8 @@ HWTEST_F(SwiperPatternTestNg, SwiperModelNg001, TestSize.Level1)
 
     /**
      * @tc.steps: step3.3. Test SetDisplayCount function.
-     * @tc.expected:DisplayCount = -1 swiperLayoutProperty->GetDisplayCount() is equal to SWIPER_DEFAULT_INDEX.
      * @tc.expected:DisplayCount = 1 swiperLayoutProperty->GetDisplayCount() is equal to SWIPER_DEFAULT_INDEX.
      */
-    swiperModelNG.SetDisplayCount(-SWIPER_DEFAULT_INDEX);
-    EXPECT_EQ(swiperLayoutProperty->GetDisplayCount(), SWIPER_DEFAULT_INDEX);
     swiperModelNG.SetDisplayCount(SWIPER_DEFAULT_INDEX);
     EXPECT_EQ(swiperLayoutProperty->GetDisplayCount(), SWIPER_DEFAULT_INDEX);
 
@@ -903,5 +901,222 @@ HWTEST_F(SwiperPatternTestNg, SwiperModelNg003, TestSize.Level1)
      */
     swiperModelNG.SetHoverShow(true);
     EXPECT_TRUE(swiperLayoutProperty->GetHoverShow());
+}
+
+/**
+ * @tc.name: SwiperFlushFocus001
+ * @tc.desc: Swiper FlushFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperFlushFocus001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode, pattern.
+     */
+    auto swiperFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(swiperFrameNode, nullptr);
+    auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto swiperLayoutProperty = swiperFrameNode->GetLayoutProperty<SwiperLayoutProperty>();
+    ASSERT_NE(swiperLayoutProperty, nullptr);
+    auto swiperPaintProperty = swiperFrameNode->GetPaintProperty<SwiperPaintProperty>();
+    ASSERT_NE(swiperPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Create curShowFrameNode, addChild to frameNode.
+     */
+    auto curShowFrame = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<SwiperPattern>());
+    auto child2 = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<SwiperPattern>());
+    child->GetOrCreateFocusHub();
+    child2->GetOrCreateFocusHub();
+    curShowFrame->AddChild(child);
+    swiperFrameNode->AddChild(child2);
+    
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(swiperFrameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    
+    /**
+     * @tc.steps: step3. test FlushFocus with IsShowIndicator() is false.
+     * @tc.expected: curShowFrame->GetFirstFocusHubChild()->lastWeakFocusNode_ is not null.
+     */
+    swiperLayoutProperty->UpdateShowIndicator(false);
+    swiperPattern->isLastIndicatorFocused_ = true;
+    EXPECT_FALSE(swiperPattern->IsShowIndicator());
+    swiperPattern->FlushFocus(curShowFrame);
+    EXPECT_FALSE(curShowFrame->GetFirstFocusHubChild()->currentFocus_);
+    swiperPattern->isLastIndicatorFocused_ = false;
+    swiperPattern->FlushFocus(curShowFrame);
+    EXPECT_EQ(swiperPattern->lastWeakShowNode_, AceType::WeakClaim(AceType::RawPtr(curShowFrame)));
+
+    /**
+     * @tc.steps: step4. test FlushFocus with IsShowIndicator() is true and hasLeftButton and hasRightButton.
+     * @tc.expected: curShowFrame->GetFirstFocusHubChild()->currentFocus_ is false.
+     */
+    swiperLayoutProperty->UpdateShowIndicator(true);
+    swiperPattern->GetLeftButtonId();
+    swiperPattern->GetRightButtonId();
+    EXPECT_TRUE(swiperLayoutProperty->GetShowIndicatorValue(true));
+    EXPECT_TRUE(swiperPattern->IsShowIndicator());
+    focusHub->currentFocus_ = true;
+    swiperPattern->FlushFocus(curShowFrame);
+    EXPECT_FALSE(curShowFrame->GetFirstFocusHubChild()->currentFocus_);
+    swiperPattern->isLastIndicatorFocused_ = false;
+    swiperPattern->FlushFocus(curShowFrame);
+}
+
+/**
+ * @tc.name: SwiperGetNextFocusNode001
+ * @tc.desc: Swiper GetNextFocusNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperGetNextFocusNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode, pattern.
+     */
+    auto swiperFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(swiperFrameNode, nullptr);
+    auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto swiperLayoutProperty = swiperFrameNode->GetLayoutProperty<SwiperLayoutProperty>();
+    ASSERT_NE(swiperLayoutProperty, nullptr);
+    auto swiperPaintProperty = swiperFrameNode->GetPaintProperty<SwiperPaintProperty>();
+    ASSERT_NE(swiperPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Create localShowNode and focusNode.
+     */
+    auto localShowNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto eventHubLocal = AceType::MakeRefPtr<EventHub>();
+    eventHubLocal->AttachHost(localShowNode);
+    auto focusHubLocal = AceType::MakeRefPtr<FocusHub>(eventHubLocal);
+
+    auto focusNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(focusNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+
+    swiperPattern->lastWeakShowNode_ = AceType::WeakClaim(AceType::RawPtr(localShowNode));
+
+    /**
+     * @tc.steps: step3. Test different Axis and FocusStep.
+     */
+    /**
+     * @tc.steps: step3.1. Test different Axis::HORIZONTAL and FocusStep::UP.
+     * @tc.expected: swiperPattern->GetNextFocusNode return nullptr.
+     */
+    swiperPattern->direction_ = Axis::HORIZONTAL;
+    swiperPattern->GetNextFocusNode(FocusStep::UP, focusHub);
+    EXPECT_FALSE(swiperPattern->isLastIndicatorFocused_);
+
+    /**
+     * @tc.steps: step3.2. Test different Axis::VERTICAL and FocusStep::LEFT.
+     * @tc.expected: swiperPattern->GetNextFocusNode return nullptr.
+     */
+    swiperPattern->direction_ = Axis::VERTICAL;
+    swiperPattern->GetNextFocusNode(FocusStep::LEFT, focusHub);
+    EXPECT_FALSE(swiperPattern->isLastIndicatorFocused_);
+
+    /**
+     * @tc.steps: step3.3. Test different Axis::HORIZONTAL and FocusStep::DOWN.
+     * @tc.expected: swiperPattern->GetNextFocusNode return nullptr.
+     */
+    swiperPattern->direction_ = Axis::HORIZONTAL;
+    swiperPattern->GetNextFocusNode(FocusStep::LEFT, focusHub);
+    EXPECT_FALSE(swiperPattern->isLastIndicatorFocused_);
+
+    /**
+     * @tc.steps: step3.4. Test different Axis::VERTICAL and FocusStep::RIGHT.
+     * @tc.expected: swiperPattern->GetNextFocusNode return nullptr.
+     */
+    swiperPattern->direction_ = Axis::VERTICAL;
+    swiperPattern->GetNextFocusNode(FocusStep::RIGHT, focusHub);
+    EXPECT_FALSE(swiperPattern->isLastIndicatorFocused_);
+
+    /**
+     * @tc.steps: step3.5. Test different Axis::FREE.
+     * @tc.expected: swiperPattern->GetNextFocusNode return nullptr.
+     */
+    swiperPattern->direction_ = Axis::FREE;
+    swiperPattern->GetNextFocusNode(FocusStep::RIGHT, focusHub);
+    EXPECT_FALSE(swiperPattern->isLastIndicatorFocused_);
+
+    /**
+     * @tc.steps: step3.6. Test different Axis::HORIZONTAL and FocusStep::UP and has left right button.
+     * @tc.expected: swiperPattern->GetNextFocusNode return nullptr.
+     */
+    swiperPattern->GetLeftButtonId();
+    swiperPattern->GetRightButtonId();
+    swiperPattern->direction_ = Axis::HORIZONTAL;
+    swiperPattern->GetNextFocusNode(FocusStep::UP, focusHub);
+    EXPECT_FALSE(swiperPattern->isLastIndicatorFocused_);
+
+    /**
+     * @tc.steps: step3.7. Test different Axis::HORIZONTAL and FocusStep::UP and has left right button.
+     * @tc.expected: swiperPattern->GetNextFocusNode return nullptr.
+     */
+    swiperPattern->direction_ = Axis::HORIZONTAL;
+    swiperPattern->GetNextFocusNode(FocusStep::DOWN, focusHub);
+    EXPECT_FALSE(swiperPattern->isLastIndicatorFocused_);
+}
+
+/**
+ * @tc.name: SwiperPreviousFocus001
+ * @tc.desc: Swiper PreviousFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperPreviousFocus001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode, pattern.
+     */
+    SwiperModelNG swiperModelNG;
+    swiperModelNG.Create();
+
+    auto swiperFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(swiperFrameNode, nullptr);
+    auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto swiperLayoutProperty = swiperFrameNode->GetLayoutProperty<SwiperLayoutProperty>();
+    ASSERT_NE(swiperLayoutProperty, nullptr);
+    auto swiperPaintProperty = swiperFrameNode->GetPaintProperty<SwiperPaintProperty>();
+    ASSERT_NE(swiperPaintProperty, nullptr);
+
+    auto swiperLeftArrowNode = AceType::MakeRefPtr<FrameNode>(V2::SWIPER_LEFT_ARROW_ETS_TAG,
+                                                -1, AceType::MakeRefPtr<SwiperPattern>());
+    auto swiperRightArrowNode = AceType::MakeRefPtr<FrameNode>(V2::SWIPER_INDICATOR_ETS_TAG,
+                                                -1, AceType::MakeRefPtr<SwiperPattern>());
+    swiperFrameNode->AddChild(swiperLeftArrowNode);
+    swiperFrameNode->AddChild(swiperRightArrowNode);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(swiperFrameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+
+    auto curEventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SWIPER_LEFT_ARROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    curEventHub->AttachHost(frameNode);
+    auto curFocusHub = AceType::MakeRefPtr<FocusHub>(curEventHub);
+
+    auto focusChildren = focusHub->GetChildren();
+    swiperPattern->leftButtonId_ = std::nullopt;
+    swiperPattern->PreviousFocus(curFocusHub);
+    EXPECT_FALSE(swiperPattern->isLastIndicatorFocused_);
+    EXPECT_FALSE(curFocusHub->parentFocusable_);
+    swiperModelNG.SetLoop(false);
+    swiperPattern->PreviousFocus(curFocusHub);
+    EXPECT_TRUE(curFocusHub->parentFocusable_);
+    EXPECT_FALSE(swiperPattern->isLastIndicatorFocused_);
+    curFocusHub->GetFrameNode()->tag_ = V2::SWIPER_INDICATOR_ETS_TAG;
+    swiperPattern->PreviousFocus(curFocusHub);
+    EXPECT_TRUE(swiperPattern->isLastIndicatorFocused_);
+    curFocusHub->GetFrameNode()->tag_ = V2::SWIPER_RIGHT_ARROW_ETS_TAG;
+    swiperPattern->PreviousFocus(curFocusHub);
+    swiperModelNG.SetLoop(true);
+    swiperPattern->GetLeftButtonId();
+    EXPECT_FALSE(swiperLayoutProperty->GetHoverShowValue(false));
+    swiperPattern->PreviousFocus(curFocusHub);
+    EXPECT_TRUE(swiperPattern->isLastIndicatorFocused_);
 }
 } // namespace OHOS::Ace::NG

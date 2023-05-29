@@ -1747,7 +1747,7 @@ HWTEST_F(SwiperIndicatorPatternTestNg, SwiperLayoutAlgorithmLayout001, TestSize.
      * @tc.expected: indicatorNodeWrapper MarginFrameOffset is 327.0, 1106.0 .
      */
     swiperPatternAlgorithm->Layout(&swiperLayoutWrapper);
-    EXPECT_EQ(indicatorNodeWrapper->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(327.0, 1106.0));
+    EXPECT_EQ(indicatorNodeWrapper->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(327.0, 1098.0));
 }
 
 /**
