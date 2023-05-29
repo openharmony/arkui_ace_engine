@@ -2641,6 +2641,8 @@ HWTEST_F(TabsTestNg, TabsModelSetBarOverlap001, TestSize.Level1)
     tabsModel.SetBarOverlap(false);
     EXPECT_FALSE(layoutProperty->GetBarOverlap().value());
 
+    barPaintProperty->UpdateBarBackgroundColor(Color::RED);
+
     tabsModel.SetBarOverlap(true);
     EXPECT_TRUE(layoutProperty->GetBarOverlap().value());
 
