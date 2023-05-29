@@ -43,7 +43,7 @@ namespace {
 constexpr double DIALOG_HEIGHT_RATIO = 0.8;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_LANDSCAPE = 0.9;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_CAR = 0.95;
-constexpr int listPaddingHeight = 72;
+constexpr Dimension listPaddingHeight = 48.0_vp;
 
 } // namespace
 
@@ -107,7 +107,8 @@ void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper)
         Distribute(scrollHeight, listHeight, restHeight);
         auto childConstraint = CreateDialogChildConstraint(layoutWrapper, scrollHeight, restWidth);
         scroll->Measure(childConstraint);
-        childConstraint = CreateDialogChildConstraint(layoutWrapper, listHeight + listPaddingHeight, restWidth);
+        childConstraint =
+            CreateDialogChildConstraint(layoutWrapper, listHeight + listPaddingHeight.ConvertToPx(), restWidth);
         list->Measure(childConstraint);
     } else {
         if (scroll != nullptr) {
@@ -117,7 +118,7 @@ void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper)
         }
         if (list != nullptr) {
             auto childConstraint = CreateDialogChildConstraint(
-                layoutWrapper, std::min(restHeight, listHeight + listPaddingHeight), restWidth);
+                layoutWrapper, std::min(restHeight, listHeight + (float)listPaddingHeight.ConvertToPx()), restWidth);
             list->Measure(childConstraint);
         }
     }
