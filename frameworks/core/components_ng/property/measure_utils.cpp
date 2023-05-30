@@ -186,9 +186,9 @@ void AddPaddingToSize(const PaddingPropertyF& padding, SizeF& size)
     size.AddPadding(padding.left, padding.right, padding.top, padding.bottom);
 }
 
-void MinusPaddingToSize(const PaddingPropertyF& padding, SizeF& size, Axis reserveAxis)
+void MinusPaddingToSize(const PaddingPropertyF& padding, SizeF& size)
 {
-    size.MinusPadding(padding.left, padding.right, padding.top, padding.bottom, reserveAxis);
+    size.MinusPadding(padding.left, padding.right, padding.top, padding.bottom);
 }
 
 void AddPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size)
@@ -196,9 +196,9 @@ void AddPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size)
     size.AddPadding(padding.left, padding.right, padding.top, padding.bottom);
 }
 
-void MinusPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size, Axis reserveAxis)
+void MinusPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size)
 {
-    size.MinusPadding(padding.left, padding.right, padding.top, padding.bottom, reserveAxis);
+    size.MinusPadding(padding.left, padding.right, padding.top, padding.bottom);
 }
 
 float GetMainAxisOffset(const OffsetF& offset, Axis axis)
