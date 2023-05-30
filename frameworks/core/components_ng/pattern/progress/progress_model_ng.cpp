@@ -268,8 +268,8 @@ void ProgressModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, dou
     MarginProperty margin;
     margin.left = CalcLength(progressTheme->GetTextMargin());
     margin.right = CalcLength(progressTheme->GetTextMargin());
-    margin.top = CalcLength(progressTheme->GetTextMargin());
-    margin.bottom = CalcLength(progressTheme->GetTextMargin());
+    margin.top = CalcLength(0.0_vp);
+    margin.bottom = CalcLength(0.0_vp);
     textProps->UpdateMargin(margin);
     textNode->MarkModifyDone();
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Text, number);
