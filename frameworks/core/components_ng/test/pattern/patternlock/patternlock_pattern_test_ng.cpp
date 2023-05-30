@@ -386,41 +386,43 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest007, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
 
     /**
-     * @tc.steps: step3. Set PatternLock pattern variable and call AddChoosePoint
-     * @tc.expected: step3. Check the return value of PatternLock pattern method AddChoosePoint
+     * @tc.cases: when distance is unvalid, Point(x, y) will not AddChoosePoint.
      */
     float offsetX = 75.0f;
     float offsetY = 75.0f;
     OffsetF offset(offsetX, offsetY);
     bool result1 = pattern->AddChoosePoint(offset, 1, 1);
-    EXPECT_EQ(result1, false);
-    bool result2 = pattern->AddChoosePoint(offset, 1, 1);
-    EXPECT_EQ(result2, false);
+    EXPECT_FALSE(result1);
     auto patternLockPaintProperty = frameNode->GetPaintProperty<PatternLockPaintProperty>();
     ASSERT_NE(patternLockPaintProperty, nullptr);
     patternLockPaintProperty->UpdateSideLength(SIDE_LENGTH);
     patternLockPaintProperty->UpdateCircleRadius(CIRCLE_RADIUS);
-    offsetX = 150.0f;
-    offsetY = 150.0f;
-    offset.SetX(offsetX);
-    offset.SetY(offsetY);
-    bool result3 = pattern->AddChoosePoint(offset, 1, 1);
-    EXPECT_EQ(result3, false);
+    bool result2 = pattern->AddChoosePoint(offset, 1, 1);
+    EXPECT_FALSE(result2);
 
     /**
      * @tc.cases: when distance is valid, Point(x, y) will AddChoosePoint.
      */
-    patternLockPaintProperty->UpdateSideLength(SIDE_LENGTH);
-    patternLockPaintProperty->UpdateCircleRadius(Dimension(200.0));
+    patternLockPaintProperty->UpdateCircleRadius(Dimension(20.0));
+    EXPECT_EQ(pattern->choosePoint_.size(), 0);
+    EXPECT_FALSE(pattern->CheckChoosePoint(1, 1));
+    bool result3 = pattern->AddChoosePoint(offset, 1, 1);
+    EXPECT_EQ(pattern->choosePoint_.size(), 1);
+    EXPECT_TRUE(result3);
+
+    EXPECT_TRUE(pattern->CheckChoosePoint(1, 1));
     bool result4 = pattern->AddChoosePoint(offset, 1, 1);
-    EXPECT_EQ(result4, true);
     EXPECT_EQ(pattern->choosePoint_.size(), 1);
-    bool result5 = pattern->AddChoosePoint(offset, 1, 1);
-    EXPECT_EQ(pattern->choosePoint_.size(), 1);
-    EXPECT_EQ(result5, true);
-    bool result6 = pattern->AddChoosePoint(offset, 1, 2);
+    EXPECT_TRUE(result4);
+
+    offsetX = 150.0f;
+    offsetY = 150.0f;
+    offset.SetX(offsetX);
+    offset.SetY(offsetY);
+    EXPECT_FALSE(pattern->CheckChoosePoint(2, 2));
+    bool result5 = pattern->AddChoosePoint(offset, 2, 2);
     EXPECT_EQ(pattern->choosePoint_.size(), 2);
-    EXPECT_EQ(result6, true);
+    EXPECT_TRUE(result5);
 }
 
 /**
