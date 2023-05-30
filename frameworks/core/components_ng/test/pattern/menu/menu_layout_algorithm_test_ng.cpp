@@ -25,6 +25,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
@@ -247,7 +248,7 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg008, TestSize.Level
  */
 HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg009, TestSize.Level1)
 {
-    // set buttonTheme to themeManager before using themeManager to get buttonTheme
+    // set selectTheme to themeManager before using themeManager to get selectTheme
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
@@ -255,11 +256,10 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg009, TestSize.Level
     RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
     const std::string tag = "tag";
     RefPtr<Pattern> pattern = AceType::MakeRefPtr<Pattern>();
-    MenuView menuView;
     std::vector<SelectParam> params;
     params.emplace_back("A", "B");
     int32_t targetId = 1;
-    auto frameNode = menuView.Create(params, targetId);
+    auto frameNode = MenuView::Create(params, targetId);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapper* layoutWrapper = new LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
     menuLayoutAlgorithm->Initialize(layoutWrapper);
@@ -1056,5 +1056,57 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg034, TestSize.Level
     // @tc.expected: menu content width = item width, height = sum(item height)
     auto expectedSize = SizeF(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT * 3);
     EXPECT_EQ(wrapper->GetGeometryNode()->GetContentSize(), expectedSize);
+}
+
+/**
+ * @tc.name: MenuItemGroupLayoutAlgorithmTestNg001
+ * @tc.desc: Test MenuItemGroup measure algorithm.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayoutAlgorithmTestNg, MenuItemGroupLayoutAlgorithmTestNg001, TestSize.Level1)
+{
+    // create menu item group
+    auto menuItemGroupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    auto menuItemGroup = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, -1, menuItemGroupPattern);
+    auto algorithm = AceType::MakeRefPtr<MenuItemGroupLayoutAlgorithm>(-1, -1, 0);
+    ASSERT_TRUE(algorithm);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProp = AceType::MakeRefPtr<LayoutProperty>();
+    auto* layoutWrapper = new LayoutWrapper(menuItemGroup, geometryNode, layoutProp);
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    auto props = layoutWrapper->GetLayoutProperty();
+    props->UpdateLayoutConstraint(parentLayoutConstraint);
+    props->UpdateContentConstraint();
+    // create menu item
+    for (int32_t i = 0; i < 3; ++i) {
+        auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+        auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, itemPattern);
+        auto itemGeoNode = AceType::MakeRefPtr<GeometryNode>();
+        itemGeoNode->SetFrameSize(SizeF(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT));
+        auto childWrapper = AceType::MakeRefPtr<LayoutWrapper>(menuItem, itemGeoNode, layoutProp);
+        layoutWrapper->AppendChild(childWrapper);
+    }
+    // set selectTheme to themeManager before using themeManager to get selectTheme
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+
+    // test measure
+    algorithm->Measure(layoutWrapper);
+    // @tc.expected: menu content width = item width, height = sum(item height)
+    auto expectedSize = SizeF(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT * 3);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), expectedSize);
+
+    // test layout
+    algorithm->Layout(layoutWrapper);
+    // @tc.expected: menu item offset y = item height * (index - 1)
+    OffsetF offset;
+    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        EXPECT_EQ(child->GetGeometryNode()->GetMarginFrameOffset(), offset);
+        offset.AddY(MENU_SIZE_HEIGHT / 3);
+    }
 }
 } // namespace OHOS::Ace::NG
