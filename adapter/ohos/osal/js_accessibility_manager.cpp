@@ -2199,8 +2199,13 @@ bool JsAccessibilityManager::AccessibilityActionEvent(const ActionType& action,
 void JsAccessibilityManager::SendActionEvent(const Accessibility::ActionType& action, NodeId nodeId)
 {
     static std::unordered_map<Accessibility::ActionType, std::string> actionToStr {
+        { Accessibility::ActionType::ACCESSIBILITY_ACTION_CLICK, DOM_CLICK },
+        { Accessibility::ActionType::ACCESSIBILITY_ACTION_LONG_CLICK, DOM_LONG_PRESS },
+        { Accessibility::ActionType::ACCESSIBILITY_ACTION_FOCUS, DOM_FOCUS },
         { Accessibility::ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS, ACCESSIBILITY_FOCUSED_EVENT },
         { Accessibility::ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS, ACCESSIBILITY_CLEAR_FOCUS_EVENT },
+        { Accessibility::ActionType::ACCESSIBILITY_ACTION_SCROLL_FORWARD, SCROLL_END_EVENT },
+        { Accessibility::ActionType::ACCESSIBILITY_ACTION_SCROLL_BACKWARD, SCROLL_END_EVENT },
     };
     if (actionToStr.find(action) == actionToStr.end()) {
         return;
