@@ -725,8 +725,6 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
             auto codeInfo = EngineHelper::GetPositionOnJsCode();
             uiNode->SetRow(codeInfo.first);
             uiNode->SetCol(codeInfo.second);
-            auto code = AceScopedPerformanceCheck::GetCodeInfo(codeInfo.first, codeInfo.second);
-            LOGE("Lee, row=%{public}d, col=%{public}d", code.row, code.col);
         }
     }
     return node;

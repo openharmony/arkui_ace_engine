@@ -371,7 +371,6 @@ public:
     // --------------------------------------------------------------------------------
     // performance check get child count, depth, flex layout times and layout time
     void GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap);
-    void AddFlexLayouts();
     void SetLayoutTime(int64_t time)
     {
         nodeInfo_->layoutTime = time;
@@ -411,6 +410,10 @@ public:
     void SetForeachItem()
     {
         nodeInfo_->isForEachItem = true;
+    }
+    void AddFlexLayouts()
+    {
+        nodeInfo_->flexLayouts++;
     }
     // --------------------------------------------------------------------------------
 
