@@ -40,6 +40,10 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr Dimension BAR_BLUR_RADIUS = 200.0_vp;
+constexpr Dimension BAR_SATURATE = 1.3_vp;
+} // namespace
 
 void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<TabController>& /*tabController*/,
     const RefPtr<SwiperController>& swiperController)
@@ -279,11 +283,11 @@ void TabsModelNG::SetBarOverlap(bool barOverlap)
     auto tabBarRenderContext = tabBarNode->GetRenderContext();
     CHECK_NULL_VOID(tabBarRenderContext);
     if (barOverlap) {
-        BlurStyleOption option;
-        option.blurStyle = BlurStyle::REGULAR;
-        tabBarRenderContext->UpdateBackBlurStyle(option);
+        tabBarRenderContext->UpdateBackBlurRadius(BAR_BLUR_RADIUS);
+        tabBarRenderContext->UpdateFrontSaturate(BAR_SATURATE);
     } else {
-        tabBarRenderContext->ResetBackBlurStyle();
+        tabBarRenderContext->UpdateBackBlurRadius(0.0_vp);
+        tabBarRenderContext->ResetFrontSaturate();
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
