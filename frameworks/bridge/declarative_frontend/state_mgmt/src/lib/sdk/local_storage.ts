@@ -395,7 +395,7 @@ class LocalStorage extends NativeLocalStorage {
   public subscribeToChangesOf<T>(propName: string, subscriber: ISinglePropertyChangeSubscriber<T>): boolean {
     var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
     if (p) {
-      p.subscribeMe(subscriber);
+      p.addSubscriber(subscriber);
       return true;
     }
     return false;
@@ -412,7 +412,7 @@ class LocalStorage extends NativeLocalStorage {
   public unsubscribeFromChangesOf(propName: string, subscriberId: number): boolean {
     var p: ObservedPropertyAbstract<any> | undefined = this.storage_.get(propName);
     if (p) {
-      p.unlinkSuscriber(subscriberId);
+      p.removeSubscriber(null, subscriberId);
       return true;
     }
     return false;

@@ -82,11 +82,11 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
 
     if (source && (typeof (source) === "object") && ("subscribeMe" in source)) {
       // code path for @(Local)StorageProp, the source is a ObservedPropertyObject<C> in a LocalStorage)
-      this.source_ = source as ObservedPropertyAbstractPU<C>;
+      this.source_ = source;
       this.sourceIsOwnObject = false;
-      
+
       // subscribe to receive value change updates from LocalStorage source property
-      this.source_.subscribeMe(this);
+      this.source_.addSubscriber(this);
     } else {
       // code path for 
       // 1- source is of same type C in parent, source is its value, not the backing store ObservedPropertyObject
@@ -112,7 +112,7 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
   */
   aboutToBeDeleted() {
     if (this.source_) {
-      this.source_.unlinkSuscriber(this.id__());
+      this.source_.removeSubscriber(this);
       if (this.sourceIsOwnObject == true && this.source_.numberOfSubscrbers()==0){
         stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: aboutToBeDeleted. owning source_ ObservedPropertySimplePU, calling its aboutToBeDeleted`);
         this.source_.aboutToBeDeleted();
