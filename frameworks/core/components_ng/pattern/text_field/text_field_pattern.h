@@ -113,11 +113,6 @@ struct CaretMetricsF {
     }
 };
 
-struct UnderLinePattern {
-    BorderRadiusProperty radius;
-    Color bgColor;
-};
-
 struct PasswordModeStyle {
     Color bgColor;
     Color textColor;
@@ -1039,7 +1034,7 @@ private:
     std::vector<TextSelector> textSelectorRecords_;
     std::vector<TextSelector> redoTextSelectorRecords_;
     std::vector<MenuOptionsParam> menuOptionItems_;
-    UnderLinePattern underLinePattern_;
+    BorderRadiusProperty borderRadius_;
     PasswordModeStyle passwordModeStyle_;
 
     SelectMenuInfo selectMenuInfo_;

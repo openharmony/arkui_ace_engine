@@ -3543,6 +3543,62 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldModel003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetShowUnderlineState
+ * @tc.desc: Verify that the SetShowUnderlineState interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetShowUnderlineState, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    bool value = true;
+
+    /**
+     * @tc.steps: step2. call SetShowUnderlineState function.
+     * @tc.expected: The member variable value of textFieldContentModifier is the value set above.
+     */
+    textFieldContentModifier.showUnderline_ = nullptr;
+    textFieldContentModifier.SetShowUnderlineState(value);
+    textFieldContentModifier.showUnderline_ = AceType::MakeRefPtr<PropertyBool>(value);
+    textFieldContentModifier.SetShowUnderlineState(value);
+    EXPECT_EQ(textFieldContentModifier.showUnderline_->Get(), value);
+}
+
+/**
+ * @tc.name: SetErrorTextValue
+ * @tc.desc: Verify that the SetErrorTextValue interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetErrorTextValue, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    TextFieldContentModifier textFieldContentModifier(pattern);
+
+    /**
+     * @tc.steps: step2. call SetErrorTextValue function.
+     * @tc.expected: The member variable value of textFieldContentModifier is the value set above.
+     */
+    textFieldContentModifier.errorTextValue_ = AceType::MakeRefPtr<PropertyString>("");
+    const std::string value1 = "";
+    textFieldContentModifier.SetErrorTextValue(value1);
+    const std::string value2 = "ErrorText";
+    textFieldContentModifier.SetErrorTextValue(value2);
+    EXPECT_EQ(textFieldContentModifier.errorTextValue_->Get(), value2);
+}
+
+/**
  * @tc.name: SelectorTest001
  * @tc.desc: test Update function in TextSelector
  * @tc.type: FUNC

@@ -917,9 +917,7 @@ void TextFieldPattern::HandleFocusEvent()
         auto renderContext = GetHost()->GetRenderContext();
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto themeManager = pipeline->GetThemeManager();
-        CHECK_NULL_VOID(themeManager);
-        auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+        auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(textFieldTheme);
         auto radius = textFieldTheme->GetBorderRadiusSize();
         renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
@@ -1072,8 +1070,7 @@ void TextFieldPattern::HandleBlurEvent()
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetShowUnderlineValue(false)) {
         auto renderContext = GetHost()->GetRenderContext();
-        renderContext->UpdateBackgroundColor(underLinePattern_.bgColor);
-        renderContext->UpdateBorderRadius(underLinePattern_.radius);
+        renderContext->UpdateBorderRadius(borderRadius_);
     }
     StopTwinkling();
     CloseKeyboard(true);
@@ -1440,14 +1437,11 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
         auto renderContext = GetHost()->GetRenderContext();
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto themeManager = pipeline->GetThemeManager();
-        CHECK_NULL_VOID(themeManager);
-        auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+        auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(textFieldTheme);
         auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         if (layoutProperty->GetShowUnderlineValue(false)) {
-            renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
             auto radius = textFieldTheme->GetBorderRadiusSize();
             renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
         }
@@ -1471,8 +1465,15 @@ void TextFieldPattern::HandleTouchUp()
             auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
             if (layoutProperty->GetShowUnderlineValue(false)) {
-                renderContext->UpdateBackgroundColor(underLinePattern_.bgColor);
-                renderContext->UpdateBorderRadius(underLinePattern_.radius);
+                renderContext->UpdateBorderRadius(borderRadius_);
+            }
+            if (layoutProperty->GetShowUnderlineValue(false) && HasFocus()) {
+                auto pipeline = PipelineBase::GetCurrentContext();
+                CHECK_NULL_VOID(pipeline);
+                auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+                CHECK_NULL_VOID(textFieldTheme);
+                auto radius = textFieldTheme->GetBorderRadiusSize();
+                renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
             }
             AnimatePressAndHover(renderContext, 0.0f);
         }
@@ -2451,7 +2452,6 @@ void TextFieldPattern::OnHover(bool isHover)
         CHECK_NULL_VOID(layoutProperty);
         if (isOnHover_) {
             if (layoutProperty->GetShowUnderlineValue(false)) {
-                renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
                 auto radius = textFieldTheme->GetBorderRadiusSize();
                 renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
             }
@@ -2462,8 +2462,11 @@ void TextFieldPattern::OnHover(bool isHover)
         isOnHover_ = false;
         if (!isMousePressed_) {
             if (layoutProperty->GetShowUnderlineValue(false)) {
-                renderContext->UpdateBackgroundColor(underLinePattern_.bgColor);
-                renderContext->UpdateBorderRadius(underLinePattern_.radius);
+                renderContext->UpdateBorderRadius(borderRadius_);
+            }
+            if (layoutProperty->GetShowUnderlineValue(false) && HasFocus()) {
+                auto radius = textFieldTheme->GetBorderRadiusSize();
+                renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
             }
             AnimatePressAndHover(renderContext, 0.0f, true);
         }
@@ -4173,8 +4176,7 @@ void TextFieldPattern::SaveUnderlineStates()
     auto renderContext = GetHost()->GetRenderContext();
     Radius radius;
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
-    underLinePattern_.radius = renderContext->GetBorderRadius().value_or(borderRadius);
-    underLinePattern_.bgColor = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
+    borderRadius_ = renderContext->GetBorderRadius().value_or(borderRadius);
 }
 
 float TextFieldPattern::GetMarginBottom() const
