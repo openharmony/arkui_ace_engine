@@ -222,7 +222,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         auto distributedUI = container->GetDistributedUI();
         CHECK_NULL_BREAK(distributedUI);
         distributedUI->ApplyOneUpdate();
-        distributedUI->OnTreeUpdate();
     } while (false);
 #endif
 
@@ -244,6 +243,17 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     taskScheduler_.FlushTask();
     taskScheduler_.FinishRecordFrameInfo();
     TryCallNextFrameLayoutCallback();
+
+#ifdef UICAST_COMPONENT_SUPPORTED
+    do {
+        auto container = Container::Current();
+        CHECK_NULL_BREAK(container);
+        auto distributedUI = container->GetDistributedUI();
+        CHECK_NULL_BREAK(distributedUI);
+        distributedUI->OnTreeUpdate();
+    } while (false);
+#endif
+
     bool hasAnimation = window_->FlushCustomAnimation(nanoTimestamp);
     if (hasAnimation) {
         RequestFrame();
