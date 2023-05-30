@@ -269,11 +269,9 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
     auto navigationStack = navigationPattern->GetNavigationStack();
     auto routeInfo = navRouterPattern->GetRouteInfo();
     std::string name;
-    bool withRouteInfo = false;
     if (!navDestination && routeInfo) {
         // create navDestination with routerInfo
         name = routeInfo->GetName();
-        withRouteInfo = true;
         auto uiNode = navigationStack->CreateNodeByRouteInfo(routeInfo);
         navDestination =
             AceType::DynamicCast<NavDestinationGroupNode>(NavigationGroupNode::GetNavDestinationNode(uiNode));
@@ -359,7 +357,7 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
     navigationPattern->RemoveIfNeeded(name, navDestination);
 
     navigationContentNode->AddChild(navDestination);
-    if (withRouteInfo) {
+    if (routeInfo) {
         navigationPattern->AddNavDestinationNode(name, navDestination, navRouteMode, routeInfo);
     } else {
         navigationPattern->AddNavDestinationNode(navRouterPattern->GetNavDestination(), navDestination, navRouteMode);
