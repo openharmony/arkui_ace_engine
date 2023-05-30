@@ -150,15 +150,23 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
 #ifdef ENABLE_DRAG_FRAMEWORK
+        auto gestureHub = actuator->gestureEventHub_.Upgrade();
+        CHECK_NULL_VOID(gestureHub);
         if (!GetIsBindOverlayValue(actuator)) {
-            auto gestureHub = actuator->gestureEventHub_.Upgrade();
-            CHECK_NULL_VOID(gestureHub);
             if (gestureHub->GetTextDraggable()) {
                 HideTextAnimation();
             } else {
                 HideEventColumn();
                 HidePixelMap();
                 HideFilter();
+            }
+        } else {
+            if (actuator->panRecognizer_->getDeviceType() == SourceType::MOUSE) {
+                if (!gestureHub->GetTextDraggable()) {
+                    HideEventColumn();
+                    HidePixelMap();
+                    HideFilter();
+                }
             }
         }
 #endif // ENABLE_DRAG_FRAMEWORK
