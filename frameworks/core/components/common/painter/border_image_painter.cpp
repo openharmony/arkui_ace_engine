@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,9 @@
 
 #include "core/components/common/painter/border_image_painter.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkImage.h"
+#endif
 
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/border_edge.h"
@@ -23,10 +25,17 @@
 
 namespace OHOS::Ace {
 
+#ifndef USE_ROSEN_DRAWING
 BorderImagePainter::BorderImagePainter(const Size& paintSize, const RefPtr<Decoration>& decoration,
     const sk_sp<SkImage>& image, double dipscale)
     : paintSize_(paintSize), decoration_(decoration), image_(image), dipscale_(dipscale)
 {}
+#else
+BorderImagePainter::BorderImagePainter(const Size& paintSize, const RefPtr<Decoration>& decoration,
+    const std::shared_ptr<RSImage>& image, double dipscale)
+    : paintSize_(paintSize), decoration_(decoration), image_(image), dipscale_(dipscale)
+{}
+#endif
 
 namespace {
     constexpr double EXTRA_OFFSET = 1.0;
@@ -34,8 +43,13 @@ namespace {
 
 void BorderImagePainter::InitPainter()
 {
+#ifndef USE_ROSEN_DRAWING
     imageWidth_ = std::ceil(image_->width());
     imageHeight_ = std::ceil(image_->height());
+#else
+    imageWidth_ = std::ceil(image_->GetWidth());
+    imageHeight_ = std::ceil(image_->GetHeight());
+#endif
     auto border = decoration_->GetBorder();
     auto borderImage = decoration_->GetBorderImage();
     InitBorderImageSlice(borderImage);
@@ -45,10 +59,19 @@ void BorderImagePainter::InitPainter()
     imageCenterHeight_ = std::ceil(imageHeight_ - topSlice_ - bottomSlice_);
     borderCenterWidth_ = std::ceil(paintSize_.Width() - leftWidth_ - rightWidth_ + leftOutset_ + rightOutset_);
     borderCenterHeight_ = std::ceil(paintSize_.Height() - topWidth_ - bottomWidth_ + topOutset_ + bottomOutset_);
+#ifndef USE_ROSEN_DRAWING
     srcRectLeft_ = SkRect::MakeXYWH(0, topSlice_, leftSlice_, imageCenterHeight_);
     srcRectTop_ = SkRect::MakeXYWH(leftSlice_, 0, imageCenterWidth_, topSlice_);
     srcRectRight_ = SkRect::MakeXYWH(imageWidth_ - rightSlice_, topSlice_, rightSlice_, imageCenterHeight_);
     srcRectBottom_ = SkRect::MakeXYWH(leftSlice_, imageHeight_ - bottomSlice_, imageCenterWidth_, bottomSlice_);
+#else
+    srcRectLeft_ = RSRect(0, topSlice_, leftSlice_, imageCenterHeight_ + topSlice_);
+    srcRectTop_ = RSRect(leftSlice_, 0, imageCenterWidth_ + leftSlice_, topSlice_);
+    srcRectRight_ = RSRect(imageWidth_ - rightSlice_, topSlice_,
+        imageWidth_, imageCenterHeight_ + topSlice_);
+    srcRectBottom_ = RSRect(leftSlice_, imageHeight_ - bottomSlice_,
+        imageCenterWidth_ + leftSlice_, imageHeight_);
+#endif
 }
 
 void BorderImagePainter::UpdateExtraOffsetToPaintSize(const Offset& extraOffset)
@@ -195,6 +218,7 @@ void BorderImagePainter::InitBorderImageOutset(Border& border, RefPtr<BorderImag
     ParseNegativeNumberToZeroOrCeil(bottomOutset_);
 }
 
+#ifndef USE_ROSEN_DRAWING
 void BorderImagePainter::PaintBorderImage(const Offset& offset, SkCanvas* canvas, SkPaint& paint)
 {
     Offset ceiledOffset(std::ceil(offset.GetX()), std::ceil(offset.GetY()));
@@ -223,7 +247,39 @@ void BorderImagePainter::PaintBorderImage(const Offset& offset, SkCanvas* canvas
     }
     paint.reset();
 }
+#else
+void BorderImagePainter::PaintBorderImage(const Offset& offset, RSCanvas* canvas,
+    RSBrush& brush)
+{
+    Offset ceiledOffset(std::ceil(offset.GetX()), std::ceil(offset.GetY()));
+    PaintBorderImageCorners(ceiledOffset, canvas, brush);
+    if (paintCornersOnly_) {
+        return;
+    }
+    switch (decoration_->GetBorderImage()->GetRepeatMode()) {
+        case BorderImageRepeat::STRETCH:
+            PaintBorderImageStretch(ceiledOffset, canvas, brush);
+            break;
+        case BorderImageRepeat::SPACE:
+            PaintBorderImageSpace(ceiledOffset, canvas, brush);
+            break;
+        case BorderImageRepeat::ROUND:
+            PaintBorderImageRound(ceiledOffset, canvas, brush);
+            break;
+        case BorderImageRepeat::REPEAT:
+            PaintBorderImageRepeat(ceiledOffset, canvas, brush);
+            break;
+        default:
+            LOGE("Unsupported Border Image repeat mode");
+    }
+    if (decoration_->GetBorderImage()->GetNeedFillCenter()) {
+        FillBorderImageCenter(ceiledOffset, canvas, brush);
+    }
+    brush.Reset();
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 void BorderImagePainter::FillBorderImageCenter(const Offset& offset, SkCanvas* canvas, SkPaint& paint)
 {
     double destLeftOffset = offset.GetX() - leftOutset_ + leftWidth_ - EXTRA_OFFSET;
@@ -237,7 +293,26 @@ void BorderImagePainter::FillBorderImageCenter(const Offset& offset, SkCanvas* c
     canvas->drawImageRect(image_, srcRectCenter, desRectCenter, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
 #endif
 }
+#else
+void BorderImagePainter::FillBorderImageCenter(const Offset& offset, RSCanvas* canvas,
+    RSBrush& brush)
+{
+    double destLeftOffset = offset.GetX() - leftOutset_ + leftWidth_ - EXTRA_OFFSET;
+    double destTopOffset = offset.GetY() - topOutset_ + topWidth_ - EXTRA_OFFSET;
+    RSRect srcRectCenter = RSRect(leftSlice_, topSlice_,
+        imageCenterWidth_ + leftSlice_, imageCenterHeight_ + topSlice_);
+    RSRect desRectCenter = RSRect(destLeftOffset, destTopOffset,
+        borderCenterWidth_ + EXTRA_OFFSET * 2 + destLeftOffset,
+        borderCenterHeight_ + EXTRA_OFFSET * 2 + destTopOffset);
 
+    canvas->AttachBrush(brush);
+    RSSamplingOptions samplingOpetions;
+    canvas->DrawImageRect(*image_, srcRectCenter, desRectCenter, samplingOpetions);
+    canvas->DetachBrush();
+}
+#endif
+
+#ifndef USE_ROSEN_DRAWING
 void BorderImagePainter::PaintBorderImageCorners(const Offset& offset, SkCanvas* canvas, SkPaint& paint)
 {
     double offsetLeftX = std::ceil(offset.GetX() - leftOutset_);
@@ -292,7 +367,56 @@ void BorderImagePainter::PaintBorderImageCorners(const Offset& offset, SkCanvas*
     canvas->drawImageRect(image_, srcRectRightBottom, desRectRightBottom, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
 #endif
 }
+#else
+void BorderImagePainter::PaintBorderImageCorners(const Offset& offset, RSCanvas* canvas,
+    RSBrush& brush)
+{
+    double offsetLeftX = std::ceil(offset.GetX() - leftOutset_);
+    double offsetRightX = std::ceil(offset.GetX() + paintSize_.Width() + rightOutset_);
+    double offsetTopY = std::ceil(offset.GetY() - topOutset_);
+    double offsetBottomY = std::ceil(offset.GetY() + paintSize_.Height() + bottomOutset_);
 
+    // top left corner
+    RSRect srcRectLeftTop = RSRect(0, 0, leftSlice_, topSlice_);
+    // top right corner
+    RSRect srcRectRightTop = RSRect(imageWidth_ - rightSlice_, 0, imageWidth_, topSlice_);
+    // left bottom corner
+    RSRect srcRectLeftBottom =
+        RSRect(0, imageHeight_ - bottomSlice_, leftSlice_, imageHeight_);
+    // right bottom corner
+    RSRect srcRectRightBottom =
+        RSRect(imageWidth_ - rightSlice_, imageHeight_ - bottomSlice_, imageWidth_, imageHeight_);
+
+    canvas->AttachBrush(brush);
+    RSSamplingOptions samplingOpetions;
+
+    // Draw the four corners of the picture to the four corners of the border
+    // left top
+    RSRect desRectLeftTop = RSRect(offsetLeftX, offsetTopY,
+        leftWidth_ + EXTRA_OFFSET + offsetLeftX, topWidth_ + EXTRA_OFFSET + offsetTopY);
+    canvas->DrawImageRect(*image_, srcRectLeftTop, desRectLeftTop, samplingOpetions);
+
+    // right top
+    RSRect desRectRightTop = RSRect(offsetRightX - rightWidth_ - EXTRA_OFFSET, offsetTopY,
+        offsetRightX, topWidth_ + EXTRA_OFFSET + offsetTopY);
+    canvas->DrawImageRect(*image_, srcRectRightTop, desRectRightTop, samplingOpetions);
+
+    // left bottom
+    RSRect desRectLeftBottom =
+        RSRect(offsetLeftX, offsetBottomY - bottomWidth_ - EXTRA_OFFSET,
+            leftWidth_ + EXTRA_OFFSET + offsetLeftX, offsetBottomY);
+    canvas->DrawImageRect(*image_, srcRectLeftBottom, desRectLeftBottom, samplingOpetions);
+
+    // right bottom
+    RSRect desRectRightBottom =
+        RSRect(offsetRightX - rightWidth_ - EXTRA_OFFSET, offsetBottomY - bottomWidth_ - EXTRA_OFFSET,
+            offsetRightX, offsetBottomY);
+    canvas->DrawImageRect(*image_, srcRectRightBottom, desRectRightBottom, samplingOpetions);
+    canvas->DetachBrush();
+}
+#endif
+
+#ifndef USE_ROSEN_DRAWING
 void BorderImagePainter::PaintBorderImageStretch(const Offset& offset, SkCanvas* canvas, SkPaint& paint)
 {
     double offsetLeftX = std::ceil(offset.GetX() - leftOutset_);
@@ -332,6 +456,41 @@ void BorderImagePainter::PaintBorderImageStretch(const Offset& offset, SkCanvas*
     canvas->drawImageRect(image_, srcRectBottom_, desRectBottom, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
 #endif
 }
+#else
+void BorderImagePainter::PaintBorderImageStretch(const Offset& offset, RSCanvas* canvas,
+    RSBrush& brush)
+{
+    double offsetLeftX = std::ceil(offset.GetX() - leftOutset_);
+    double offsetRightX = std::ceil(offset.GetX() + paintSize_.Width() + rightOutset_);
+    double offsetTopY = std::ceil(offset.GetY() - topOutset_);
+    double offsetBottomY = std::ceil(offset.GetY() + paintSize_.Height() + bottomOutset_);
+
+    canvas->AttachBrush(brush);
+    RSSamplingOptions samplingOpetions;
+
+    RSRect desRectLeft =
+        RSRect(offsetLeftX, offsetTopY + topWidth_,
+            leftWidth_ + offsetLeftX, borderCenterHeight_ + offsetTopY + topWidth_);
+    canvas->DrawImageRect(*image_, srcRectLeft_, desRectLeft, samplingOpetions);
+
+    RSRect desRectRight =
+        RSRect(offsetRightX - rightWidth_, offsetTopY + topWidth_,
+            offsetRightX, borderCenterHeight_ + offsetTopY + topWidth_);
+    canvas->DrawImageRect(*image_, srcRectRight_, desRectRight, samplingOpetions);
+
+    RSRect desRectTop =
+        RSRect(offsetLeftX + leftWidth_, offsetTopY,
+            paintSize_.Width() - rightWidth_ + leftOutset_ + rightOutset_ + offsetLeftX,
+            topWidth_ + offsetTopY);
+    canvas->DrawImageRect(*image_, srcRectTop_, desRectTop, samplingOpetions);
+
+    RSRect desRectBottom =
+        RSRect(offsetLeftX + leftWidth_, offsetBottomY - bottomWidth_,
+            paintSize_.Width() - rightWidth_ + leftOutset_ + rightOutset_ + offsetLeftX, offsetBottomY);
+    canvas->DrawImageRect(*image_, srcRectBottom_, desRectBottom, samplingOpetions);
+    canvas->DetachBrush();
+}
+#endif
 
 void BorderImagePainter::PaintBorderImageRound(const Offset& offset, SkCanvas* canvas, SkPaint& paint)
 {
