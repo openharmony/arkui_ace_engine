@@ -404,9 +404,13 @@ void TextFieldPattern::CreateSingleHandle()
 bool TextFieldPattern::UpdateCaretByPressOrLongPress()
 {
     UpdateCaretPositionByPressOffset();
-    if (caretUpdateType_ != CaretUpdateType::LONG_PRESSED) {
+    if (caretUpdateType_ != CaretUpdateType::LONG_PRESSED && !isMousePressed_) {
         isSingleHandle_ = true;
         CreateSingleHandle();
+        return true;
+    }
+    if (isMousePressed_) {
+        StartTwinkling();
         return true;
     }
     // in long press case, we have caret and one handle at pressed location and another handle at -1 or +1 position
