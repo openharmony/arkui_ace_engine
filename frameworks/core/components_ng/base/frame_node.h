@@ -481,6 +481,8 @@ private:
 
     bool isRestoreInfoUsed_ = false;
 
+    bool isWaitingAttach_ = false;
+
     friend class RosenRenderContext;
     friend class RenderContext;
     friend class Pattern;
