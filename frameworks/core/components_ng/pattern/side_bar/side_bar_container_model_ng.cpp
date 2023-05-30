@@ -33,6 +33,7 @@ constexpr Color DEFAULT_DIVIDER_COLOR = Color(0x08000000);
 constexpr Dimension DEFAULT_SIDE_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
+constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
 } // namespace
 
 void SideBarContainerModelNG::Create()
@@ -286,7 +287,11 @@ void SideBarContainerModelNG::SetDividerEndMargin(const Dimension& endMargin)
 
 void SideBarContainerModelNG::SetMinContentWidth(const Dimension& minContentWidth)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinContentWidth, minContentWidth);
+    if (minContentWidth.IsNonNegative()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinContentWidth, minContentWidth);
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinContentWidth, DEFAULT_MIN_CONTENT_WIDTH);
+    }
 }
 
 void SideBarContainerModelNG::SetOnChange(std::function<void(const bool)>&& onChange)

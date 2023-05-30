@@ -49,10 +49,8 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         LOGE("SideBarContainerLayoutAlgorithm::Measure, children is less than 3.");
         return;
     }
-
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-
     const auto& constraint = layoutProperty->GetLayoutConstraint();
     const auto& scaleProperty = constraint->scaleProperty;
     auto idealSize = CreateIdealSize(
@@ -69,11 +67,9 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto minSideBarWidthPx = ConvertToPx(minSideBarWidth, scaleProperty, parentWidth).value_or(0);
     auto dividerStrokeWidthPx = ConvertToPx(dividerStrokeWidth, scaleProperty, parentWidth).value_or(1);
     AutoChangeSideBarWidth(layoutWrapper, parentWidth, minSideBarWidthPx, dividerStrokeWidthPx);
+
     auto type = layoutProperty->GetSideBarContainerType().value_or(SideBarContainerType::EMBED);
     if (type == SideBarContainerType::AUTO) {
-        AutoMode_ = true;
-    }
-    if (AutoMode_) {
         AutoMode(layoutWrapper, parentWidth, minSideBarWidthPx, dividerStrokeWidthPx);
     }
 
@@ -133,21 +129,17 @@ void SideBarContainerLayoutAlgorithm::InitRealSideBarWidth(LayoutWrapper* layout
 void SideBarContainerLayoutAlgorithm::AutoChangeSideBarWidth(
     LayoutWrapper* layoutWrapper, float parentWidth, float minSideBarWidthPx, float dividerStrokeWidthPx)
 {
-    // When reducing component width, first reduce the width of the content to minContentWidth,
-    // and then reduce the width of the sidebar
+    /*
+     * When reducing component width, first reduce the width of the content to minContentWidth,
+     * and then reduce the width of the sidebar
+     */
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     const auto& constraint = layoutProperty->GetLayoutConstraint();
     const auto& scaleProperty = constraint->scaleProperty;
     auto minContentWidth = layoutProperty->GetMinContentWidth().value_or(DEFAULT_MIN_CONTENT_WIDTH);
     auto minContentWidthPx = ConvertToPx(minContentWidth, scaleProperty, parentWidth).value_or(0);
-    auto defaultMinContentWidth = ConvertToPx(DEFAULT_MIN_CONTENT_WIDTH, scaleProperty, parentWidth).value_or(0);
-
-    if (minContentWidthPx <= 0) {
-        minContentWidth_ = defaultMinContentWidth;
-    } else {
-        minContentWidth_ = minContentWidthPx;
-    }
+    minContentWidth_ = minContentWidthPx;
 
     if ((realSideBarWidth_ + minContentWidth_ + dividerStrokeWidthPx) >= parentWidth) {
         realSideBarWidth_ = parentWidth - minContentWidth_- dividerStrokeWidthPx;

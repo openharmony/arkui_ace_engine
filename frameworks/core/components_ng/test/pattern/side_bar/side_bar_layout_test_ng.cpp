@@ -297,28 +297,22 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg008, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
 
     /**
-     * @tc.steps: step2. set parentWidth > (minSidebarWidth + minContentWidth) && AutoMode_ = false
+     * @tc.steps: step2. set parentWidth > (minSidebarWidth + minContentWidth)
      * @tc.expected: SideBarContainerType == EMBED
      */
     float parentWidth = PARENT_WIDTH;
-    layoutAlgorithm->AutoMode(AccessibilityManager::RawPtr(layoutWrapper), parentWidth);
+    layoutAlgorithm->AutoMode(
+        AccessibilityManager::RawPtr(layoutWrapper), parentWidth, layoutAlgorithm->minContentWidth_, 0.0);
     EXPECT_EQ(layoutProperty->GetSideBarContainerType(), SideBarContainerType::EMBED);
 
     /**
-     * @tc.steps: step3. set parentWidth > (minSidebarWidth + minContentWidth) && AutoMode_ = true
-     * @tc.expected: SideBarContainerType == EMBED
-     */
-    layoutAlgorithm->AutoMode_ = true;
-    layoutAlgorithm->AutoMode(AccessibilityManager::RawPtr(layoutWrapper), parentWidth);
-    EXPECT_EQ(layoutProperty->GetSideBarContainerType(), SideBarContainerType::EMBED);
-
-    /**
-     * @tc.steps: step4. set parentWidth < (minSidebarWidth + minContentWidth) && AutoMode_ = true
+     * @tc.steps: step3. set parentWidth < (minSidebarWidth + minContentWidth)
      * @tc.expected: SideBarContainerType == OVERLAY
      */
     parentWidth = MIN_PARENT_WIDTH;
     layoutAlgorithm->minContentWidth_ = 1.0f;
-    layoutAlgorithm->AutoMode(AccessibilityManager::RawPtr(layoutWrapper), parentWidth);
+    layoutAlgorithm->AutoMode(
+        AccessibilityManager::RawPtr(layoutWrapper), parentWidth, layoutAlgorithm->minContentWidth_, 0.0);
     EXPECT_EQ(layoutProperty->GetSideBarContainerType(), SideBarContainerType::OVERLAY);
 }
 
@@ -350,7 +344,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg009, TestSize.Level1)
     auto parentWidth = MIN_PARENT_WIDTH;
     layoutAlgorithm->minContentWidth_ = 2.0f;
     layoutAlgorithm->realSideBarWidth_ = 2.0f;
-    layoutAlgorithm->AutoChangeSideBarWidth(AccessibilityManager::RawPtr(layoutWrapper), parentWidth);
+    layoutAlgorithm->AutoChangeSideBarWidth(AccessibilityManager::RawPtr(layoutWrapper), parentWidth, 1.0, 1.0);
     EXPECT_NE(layoutAlgorithm->realSideBarWidth_, 2.0f);
 }
 } // namespace OHOS::Ace::NG

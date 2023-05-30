@@ -317,18 +317,15 @@ void JSSideBar::JsMinContentWidth(const JSCallbackInfo& info)
         return;
     }
     if (info[0]->IsNull()) {
-        SideBarContainerModel::GetInstance()->SetMinContentWidth(0.0_vp);
+        SideBarContainerModel::GetInstance()->SetMinContentWidth(-1.0_vp);
         LOGW("JsMinContentWidth::info[0]->IsNull()");
         return;
     }
     CalcDimension minContentWidth;
     if (!JSViewAbstract::ParseJsDimensionVp(info[0], minContentWidth)) {
+        SideBarContainerModel::GetInstance()->SetMinContentWidth(-1.0_vp);
         LOGW("JsMinContentWidth::ParseJsDimensionVp Fail!!!");
         return;
-    }
-    if (LessNotEqual(minContentWidth.Value(), 0.0)) {
-        LOGW("minContentWidth.Value() < 0");
-        minContentWidth = 0.0_vp;
     }
     SideBarContainerModel::GetInstance()->SetMinContentWidth(minContentWidth);
 }

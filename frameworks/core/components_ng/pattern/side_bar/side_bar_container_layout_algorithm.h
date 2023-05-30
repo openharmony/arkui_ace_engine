@@ -105,7 +105,6 @@ private:
     SideBarStatus sideBarStatus_ = SideBarStatus::SHOW;
     bool needInitRealSideBarWidth_ = true;
     OffsetF sideBarOffset_;
-    bool AutoMode_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SideBarContainerLayoutAlgorithm);
 };
