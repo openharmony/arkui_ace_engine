@@ -889,7 +889,8 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         SetIsFocusActive(false);
         LOGD("receive touch down event, first use touch test to collect touch event target");
         // Remove the select overlay node when touched down.
-        eventManager_->HandleGlobalEventNG(scalePoint, selectOverlayManager_);
+        auto rootOffset = GetRootRect().GetOffset();
+        eventManager_->HandleGlobalEventNG(scalePoint, selectOverlayManager_, rootOffset);
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
