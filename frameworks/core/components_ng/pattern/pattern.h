@@ -305,6 +305,7 @@ public:
     virtual void OnRebuildFrame() {}
     // Called before frameNode CreateLayoutWrapper.
     virtual void BeforeCreateLayoutWrapper() {}
+    virtual void LazyBuild() {}
     // Called before frameNode CreatePaintWrapper.
     virtual void BeforeCreatePaintWrapper() {}
 

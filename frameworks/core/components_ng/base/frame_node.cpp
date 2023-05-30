@@ -772,6 +772,12 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool for
     return UpdateLayoutWrapper(nullptr, forceMeasure, forceLayout);
 }
 
+void FrameNode::Build()
+{
+    pattern_->LazyBuild();
+    UINode::Build();
+}
+
 RefPtr<LayoutWrapper> FrameNode::UpdateLayoutWrapper(
     RefPtr<LayoutWrapper> layoutWrapper, bool forceMeasure, bool forceLayout)
 {
