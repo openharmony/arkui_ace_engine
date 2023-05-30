@@ -82,6 +82,7 @@ protected:
         float width = DEVICE_WIDTH, float height = GRID_HEIGHT);
     void UpdateLayoutWrapper(RefPtr<LayoutWrapper> layoutWrapper, float width, float height);
     RefPtr<FrameNode> GetItemFrameNode(int32_t index);
+    RectF GetItemRect(int32_t index);
     RefPtr<GridItemPattern> GetItemPattern(int32_t index);
     RefPtr<FocusHub> GetItemFocusHub(int32_t index);
     void UpdateCurrentOffset(float offset);
@@ -90,6 +91,7 @@ protected:
 
     testing::AssertionResult IsEqualNextFocusNode(
         int32_t currentIndex, std::map<FocusStep, int32_t> next);
+    testing::AssertionResult IsEqualRect(RectF rect, RectF expectRect);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<GridPattern> pattern_;
@@ -197,6 +199,11 @@ RefPtr<FrameNode> GridTestNg::GetItemFrameNode(int32_t index)
     return AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(index));
 }
 
+RectF GridTestNg::GetItemRect(int32_t index)
+{
+    return GetItemFrameNode(index)->GetGeometryNode()->GetFrameRect();
+}
+
 RefPtr<GridItemPattern> GridTestNg::GetItemPattern(int32_t index)
 {
     return GetItemFrameNode(index)->GetPattern<GridItemPattern>();
@@ -260,6 +267,17 @@ testing::AssertionResult GridTestNg::IsEqualNextFocusNode(
     return testing::AssertionSuccess();
 }
 
+testing::AssertionResult GridTestNg::IsEqualRect(RectF rect, RectF expectRect)
+{
+    if (rect == expectRect) {
+        return testing::AssertionSuccess();
+    }
+    return testing::AssertionFailure() <<
+        "rect: " << rect.ToString() <<
+        " expectRect: " << expectRect.ToString();
+}
+
+
 /**
  * @tc.name: Property001
  * @tc.desc: Test all the properties of Grid.
@@ -294,29 +312,6 @@ HWTEST_F(GridTestNg, Property001, TestSize.Level1)
     auto json2 = JsonUtil::Create(true);
     layoutProperty_->ToJsonValue(json2);
     EXPECT_EQ(json2->GetString("edgeEffect"), "EdgeEffect.Fade");
-}
-
-/**
- * @tc.name: Property002
- * @tc.desc: Test empty row/col template.
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, Property002, TestSize.Level1)
-{
-    GridModelNG gridModelNG;
-    gridModelNG.Create(nullptr, nullptr);
-    gridModelNG.SetRowsTemplate("");
-    gridModelNG.SetColumnsTemplate("");
-    CreateGridItem(10);
-    GetInstance();
-    RunMeasureAndLayout();
-
-    /**
-     * @tc.steps: step1. compare grid properties and expected value after change.
-     * @tc.expected: grid properties equals expected value after change.
-     */
-    EXPECT_EQ(layoutProperty_->GetRowsTemplateValue(), "1fr");
-    EXPECT_EQ(layoutProperty_->GetColumnsTemplateValue(), "1fr");
 }
 
 /**
@@ -411,6 +406,264 @@ HWTEST_F(GridTestNg, Property005, TestSize.Level1)
     auto json = JsonUtil::Create(true);
     layoutProperty->ToJsonValue(json);
     EXPECT_NE(json, nullptr);
+}
+
+/**
+ * @tc.name: AttrColumnsTemplate001
+ * @tc.desc: Test property about columnsTemplate and Gap,
+ * test normal condition that template is "1fr 1fr 1fr 1fr"
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, AttrColumnsTemplate001, TestSize.Level1)
+{
+    GridModelNG gridModelNG;
+    gridModelNG.Create(nullptr, nullptr);
+    const std::string columnsTemplate = "1fr 1fr 1fr 1fr";
+    gridModelNG.SetColumnsTemplate(columnsTemplate);
+    const Dimension columnsGap = Dimension(10);
+    gridModelNG.SetColumnsGap(columnsGap);
+    const Dimension rowsGap = Dimension(5);
+    gridModelNG.SetRowsGap(rowsGap);
+    constexpr int32_t gridItemNumber = 10;
+    CreateGridItem(gridItemNumber);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. While only set ColumnsTemplate
+     * @tc.expected: The axis is VERTICAL
+     */
+    EXPECT_EQ(pattern_->GetAxis(), Axis::VERTICAL);
+
+    /**
+     * @tc.steps: step2. Verify all of gridItems rect
+     * @tc.expected: The rect is equal to expectRect
+     */
+    constexpr int32_t colsNumber = 4;
+    const float colsGapTotal = columnsGap.ConvertToPx() * (colsNumber - 1);
+    const float averageWidth = (DEVICE_WIDTH - colsGapTotal) / colsNumber;
+    for (int32_t index = 0; index < gridItemNumber; index++) {
+        RectF childRect = GetItemRect(index);
+        float offsetX = index % colsNumber * (averageWidth + columnsGap.ConvertToPx());
+        float offsetY = floor(index / colsNumber) * (ITEM_HEIGHT + rowsGap.ConvertToPx());
+        RectF expectRect = RectF(offsetX, offsetY, averageWidth, ITEM_HEIGHT);
+        EXPECT_TRUE(IsEqualRect(childRect, expectRect));
+    }
+}
+
+/**
+ * @tc.name: AttrColumnsTemplate002
+ * @tc.desc: Test property about columnsTemplate,
+ * test condition that template is "1fr 2fr 3fr 1fr"
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, AttrColumnsTemplate002, TestSize.Level1)
+{
+    GridModelNG gridModelNG;
+    gridModelNG.Create(nullptr, nullptr);
+    const std::string columnsTemplate = "1fr 2fr 3fr 1fr";
+    gridModelNG.SetColumnsTemplate(columnsTemplate);
+    constexpr int32_t gridItemNumber = 10;
+    CreateGridItem(gridItemNumber);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. Verify index 1 gridItem rect
+     * @tc.expected: The rect is equal to expectRect
+     */
+    const float averageWidth = DEVICE_WIDTH / 7;
+    RectF rect_1 = GetItemRect(1);
+    const float offsetX_1 = averageWidth;
+    const float offsetY_1 = 0.f;
+    const float width_1 = averageWidth * 2;
+    const float height_1 = ITEM_HEIGHT;
+    const RectF expectRect_1 = RectF(offsetX_1, offsetY_1, width_1, height_1);
+    EXPECT_TRUE(IsEqualRect(rect_1, expectRect_1));
+
+    /**
+     * @tc.steps: step2. Verify index 6 gridItem rect
+     * @tc.expected: The rect is equal to expectRect
+     */
+    RectF rect_6 = GetItemRect(6);
+    const float offsetX_6 = averageWidth * 3;
+    const float offsetY_6 = ITEM_HEIGHT;
+    const float width_6 = averageWidth * 3;
+    const float height_6 = ITEM_HEIGHT;
+    const RectF expectRect_6 = RectF(offsetX_6, offsetY_6, width_6, height_6);
+    EXPECT_TRUE(IsEqualRect(rect_6, expectRect_6));
+}
+
+/**
+ * @tc.name: AttrColumnsTemplate003
+ * @tc.desc: Test property about columnsTemplate,
+ * test condition that template is "1fr 0fr 0fr 1fr"
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, AttrColumnsTemplate003, TestSize.Level1)
+{
+    GridModelNG gridModelNG;
+    gridModelNG.Create(nullptr, nullptr);
+    const std::string columnsTemplate = "1fr 0fr 0fr 1fr";
+    gridModelNG.SetColumnsTemplate(columnsTemplate);
+    constexpr int32_t gridItemNumber = 10;
+    CreateGridItem(gridItemNumber);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. Verify index 1 gridItem rect
+     * @tc.expected: The item width is zero
+     */
+    const float averageWidth = DEVICE_WIDTH / 2;
+    RectF rect_1 = GetItemRect(1);
+    const float offsetX_1 = averageWidth;
+    const float offsetY_1 = 0.f;
+    const float width_1 = 0.f;
+    const float height_1 = ITEM_HEIGHT;
+    const RectF expectRect_1 = RectF(offsetX_1, offsetY_1, width_1, height_1);
+    EXPECT_TRUE(IsEqualRect(rect_1, expectRect_1));
+}
+
+/**
+ * @tc.name: AttrRowsTemplate001
+ * @tc.desc: Test property about rowsTemplate and Gap,
+ * test normal condition that template is "1fr 1fr 1fr 1fr"
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, AttrRowsTemplate001, TestSize.Level1)
+{
+    GridModelNG gridModelNG;
+    gridModelNG.Create(nullptr, nullptr);
+    const std::string rowsTemplate = "1fr 1fr 1fr 1fr";
+    gridModelNG.SetRowsTemplate(rowsTemplate);
+    const Dimension columnsGap = Dimension(10);
+    gridModelNG.SetColumnsGap(columnsGap);
+    const Dimension rowsGap = Dimension(5);
+    gridModelNG.SetRowsGap(rowsGap);
+    constexpr int32_t gridItemNumber = 10;
+    CreateGridItem(gridItemNumber, Axis::HORIZONTAL);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. While only set rowsTemplate
+     * @tc.expected: The axis is HORIZONTAL
+     */
+    EXPECT_EQ(pattern_->GetAxis(), Axis::HORIZONTAL);
+
+    /**
+     * @tc.steps: step2. Verify all of gridItems rect
+     * @tc.expected: The rect is equal to expectRect
+     */
+    constexpr int32_t rowsNumber = 4;
+    const float rowsGapTotal = rowsGap.ConvertToPx() * (rowsNumber - 1);
+    const float averageHeight = (GRID_HEIGHT - rowsGapTotal) / rowsNumber;
+    for (int32_t index = 0; index < gridItemNumber; index++) {
+        RectF childRect = GetItemRect(index);
+        float offsetX = floor(index / rowsNumber) * (ITEM_WIDTH + columnsGap.ConvertToPx());
+        float offsetY = index % rowsNumber * (averageHeight + rowsGap.ConvertToPx());
+        RectF expectRect = RectF(offsetX, offsetY, ITEM_WIDTH, averageHeight);
+        EXPECT_TRUE(IsEqualRect(childRect, expectRect));
+    }
+}
+
+/**
+ * @tc.name: AttrRowsTemplate002
+ * @tc.desc: Test property about rowsTemplate,
+ * test condition that template is "1fr 2fr 3fr 1fr"
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, AttrRowsTemplate002, TestSize.Level1)
+{
+    GridModelNG gridModelNG;
+    gridModelNG.Create(nullptr, nullptr);
+    const std::string rowsTemplate = "1fr 2fr 3fr 1fr";
+    gridModelNG.SetRowsTemplate(rowsTemplate);
+    constexpr int32_t gridItemNumber = 10;
+    CreateGridItem(gridItemNumber, Axis::HORIZONTAL);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. Verify index 1 gridItem rect
+     * @tc.expected: The rect is equal to expectRect
+     */
+    const float averageHeight = GRID_HEIGHT / 7;
+    RectF rect_1 = GetItemRect(1);
+    const float offsetX_1 = 0.f;
+    const float offsetY_1 = averageHeight;
+    const float width_1 = ITEM_WIDTH;
+    const float height_1 = averageHeight * 2;
+    const RectF expectRect_1 = RectF(offsetX_1, offsetY_1, width_1, height_1);
+    EXPECT_TRUE(IsEqualRect(rect_1, expectRect_1));
+
+    /**
+     * @tc.steps: step2. Verify index 6 gridItem rect
+     * @tc.expected: The rect is equal to expectRect
+     */
+    RectF rect_6 = GetItemRect(6);
+    const float offsetX_6 = ITEM_WIDTH;
+    const float offsetY_6 = averageHeight * 3;
+    const float width_6 = ITEM_WIDTH;
+    const float height_6 = averageHeight * 3;
+    const RectF expectRect_6 = RectF(offsetX_6, offsetY_6, width_6, height_6);
+    EXPECT_TRUE(IsEqualRect(rect_6, expectRect_6));
+}
+
+/**
+ * @tc.name: AttrRowsTemplate003
+ * @tc.desc: Test property about rowsTemplate,
+ * test condition that template is "1fr 0fr 0fr 1fr"
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, AttrRowsTemplate003, TestSize.Level1)
+{
+    GridModelNG gridModelNG;
+    gridModelNG.Create(nullptr, nullptr);
+    const std::string rowsTemplate = "1fr 0fr 0fr 1fr";
+    gridModelNG.SetRowsTemplate(rowsTemplate);
+    constexpr int32_t gridItemNumber = 10;
+    CreateGridItem(gridItemNumber, Axis::HORIZONTAL);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. Verify index 1 gridItem rect
+     * @tc.expected: The item height is zero
+     */
+    const float averageHeight = GRID_HEIGHT / 2;
+    RectF rect_1 = GetItemRect(1);
+    const float offsetX_1 = 0.f;
+    const float offsetY_1 = averageHeight;
+    const float width_1 = ITEM_WIDTH;
+    const float height_1 = 0.f;
+    const RectF expectRect_1 = RectF(offsetX_1, offsetY_1, width_1, height_1);
+    EXPECT_TRUE(IsEqualRect(rect_1, expectRect_1));
+}
+
+/**
+ * @tc.name: AttrColumnsRows001
+ * @tc.desc: Test property about columns/rows Template,
+ * test condition that template is empty: ""
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, AttrColumnsRows001, TestSize.Level1)
+{
+    GridModelNG gridModelNG;
+    gridModelNG.Create(nullptr, nullptr);
+    gridModelNG.SetRowsTemplate("");
+    gridModelNG.SetColumnsTemplate("");
+    CreateGridItem(10);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. compare grid properties and expected value after change.
+     * @tc.expected: grid properties equals expected value after change.
+     */
+    EXPECT_EQ(layoutProperty_->GetRowsTemplateValue(), "1fr");
+    EXPECT_EQ(layoutProperty_->GetColumnsTemplateValue(), "1fr");
 }
 
 /**
