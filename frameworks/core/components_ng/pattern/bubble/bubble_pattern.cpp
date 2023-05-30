@@ -261,9 +261,9 @@ RefPtr<FrameNode> BubblePattern::GetButtonRowNode()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto columnNode = AceType::DynamicCast<FrameNode>(host->GetLastChild());
-    CHECK_NULL_RETURN(host, nullptr);
+    CHECK_NULL_RETURN(columnNode, nullptr);
     auto buttonRowNode = AceType::DynamicCast<FrameNode>(columnNode->GetLastChild());
-    CHECK_NULL_RETURN(host, nullptr);
+    CHECK_NULL_RETURN(buttonRowNode, nullptr);
     if (buttonRowNode->GetTag() != V2::ROW_ETS_TAG) {
         return nullptr;
     }
