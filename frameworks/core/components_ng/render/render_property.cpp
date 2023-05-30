@@ -57,8 +57,8 @@ std::string BasicShapeTypeToString(BasicShapeType type)
         json##name->Put("x", prop##name->GetX().ToString().c_str()); \
         json##name->Put("y", prop##name->GetY().ToString().c_str()); \
     } else {                                                         \
-        json##name->Put("x", "0.0px");                               \
-        json##name->Put("y", "0.0px");                               \
+        json##name->Put("x", "");                                    \
+        json##name->Put("y", "");                                    \
     }
 
 void RenderPositionProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
@@ -75,7 +75,6 @@ void RenderPositionProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 
 void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-    json->Put("blur", round(propFrontBlurRadius.value_or(0.0_vp).Value() * 100) / 100);
     json->Put("grayscale", propFrontGrayScale.has_value() ? propFrontGrayScale->Value() : 0.0);
     json->Put("brightness", propFrontBrightness.has_value() ? propFrontBrightness->Value() : 1.0);
     json->Put("saturate", propFrontSaturate.has_value() ? propFrontSaturate->Value() : 1.0);
@@ -134,7 +133,7 @@ void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 
 void ForegroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-    json->Put("frontBlur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx());
+    json->Put("blur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx());
 }
 
 void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
@@ -148,11 +147,7 @@ void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         }
         json->Put("clip", jsonClip->ToString().c_str());
     } else {
-        if (json->Contains("startIndex")) {
-            json->Put("clip", propClipEdge.value_or(true) ? "true" : "false");
-        } else {
-            json->Put("clip", propClipEdge.value_or(false) ? "true" : "false");
-        }
+        json->Put("clip", propClipEdge.value_or(false) ? "true" : "false");
     }
 
     auto jsonMask = JsonUtil::Create(true);
@@ -225,5 +220,17 @@ void TransformProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     } else {
         json->Put("translate", JsonUtil::Create(true));
     }
+}
+
+void BorderProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    auto jsonBorder = JsonUtil::Create(true);
+
+    propBorderStyle.value_or(BorderStyleProperty()).ToJsonValue(json, jsonBorder);
+    propBorderColor.value_or(BorderColorProperty()).ToJsonValue(json, jsonBorder);
+    propBorderWidth.value_or(BorderWidthProperty()).ToJsonValue(json, jsonBorder);
+    propBorderRadius.value_or(BorderRadiusProperty()).ToJsonValue(json, jsonBorder);
+
+    json->Put("border", jsonBorder->ToString().c_str());
 }
 } // namespace OHOS::Ace::NG

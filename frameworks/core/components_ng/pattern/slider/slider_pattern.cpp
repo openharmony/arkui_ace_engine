@@ -536,7 +536,7 @@ void SliderPattern::PaintFocusState()
 bool SliderPattern::OnKeyEvent(const KeyEvent& event)
 {
     auto paintProperty = GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_RETURN(paintProperty, true);
+    CHECK_NULL_RETURN(paintProperty, false);
     auto reverse = paintProperty->GetReverseValue(false);
     if (event.action == KeyAction::DOWN) {
         if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_LEFT) ||
@@ -546,6 +546,7 @@ bool SliderPattern::OnKeyEvent(const KeyEvent& event)
                 InitializeBubble();
             }
             PaintFocusState();
+            return true;
         }
         if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT) ||
             (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
@@ -554,6 +555,7 @@ bool SliderPattern::OnKeyEvent(const KeyEvent& event)
                 InitializeBubble();
             }
             PaintFocusState();
+            return true;
         }
     } else if (event.action == KeyAction::UP) {
         if (showTips_) {

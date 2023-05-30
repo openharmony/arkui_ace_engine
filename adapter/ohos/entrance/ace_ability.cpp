@@ -202,7 +202,7 @@ bool AceWindowListener::OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axis
 
 void AceWindowListener::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
 {
-    CHECK_NULL_RETURN(callbackOwner_, false);
+    CHECK_NULL_VOID(callbackOwner_);
     return callbackOwner_->OnAvoidAreaChanged(avoidArea, type);
 }
 
@@ -492,6 +492,7 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         KeyboardAnimationConfig config = { rsConfig.curveType_, rsConfig.curveParams_, rsConfig.durationIn_,
             rsConfig.durationOut_ };
         context->SetKeyboardAnimationConfig(config);
+        context->SetMinPlatformVersion(apiCompatibleVersion);
     }
 
     // get url

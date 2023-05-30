@@ -38,10 +38,10 @@ template("web_pattern_unit_source_set") {
       ]
       sources = [
         "web_accessibility_property_test_ng.cpp",
+        "web_model_test_ng.cpp",
         "web_pattern_event_test.cpp",
         "web_pattern_test.cpp",
         "web_pattern_test_ng.cpp",
-        "web_view_test_ng.cpp",
       ]
       deps = [
         "$ace_root/build:ace_ohos_unittest_base",

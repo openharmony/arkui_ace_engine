@@ -378,10 +378,16 @@ void LayoutWrapper::AddNodeFlexLayouts()
     }
     auto host = GetHostNode();
     CHECK_NULL_VOID(host);
-    auto parent = host->GetParent();
-    CHECK_NULL_VOID(parent);
-    if (parent->GetTag() == V2::FLEX_ETS_TAG) {
-        host->AddFlexLayouts();
+    auto frameNodeParent = host->GetAncestorNodeOfFrame();
+    CHECK_NULL_VOID(frameNodeParent);
+    if (frameNodeParent->GetTag() == V2::FLEX_ETS_TAG) {
+        auto parent = host->GetParent();
+        CHECK_NULL_VOID(parent);
+        if (parent->GetTag() == V2::JS_VIEW_ETS_TAG) {
+            parent->AddFlexLayouts();
+        } else {
+            host->AddFlexLayouts();
+        }
     }
 }
 

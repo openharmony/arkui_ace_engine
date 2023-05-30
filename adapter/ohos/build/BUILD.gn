@@ -16,20 +16,14 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 
 # Install packages
 group("ace_packages") {
-  deps = []
-
   # core library for Ability Cross-platform Environment(ACE) JS
-  deps += [
+  deps = [
     "$ace_root/build:libace",
+    "$ace_root/build:libace_engine_pa_ark",
+    "$ace_root/frameworks/core/common/register:hdc_register",
     "$ace_root/interfaces/inner_api:innerkits_target",
     "$ace_root/interfaces/inner_api/ace:ace_uicontent",
     "$ace_root/interfaces/napi/kits:napi_group",
     "$ace_root/interfaces/native:ace_packages_ndk",
   ]
-
-  # Pa engine
-  deps += [ "$ace_root/build:libace_engine_pa_ark" ]
-
-  # pid register
-  deps += [ "$ace_root/frameworks/core/common/register:hdc_register" ]
 }

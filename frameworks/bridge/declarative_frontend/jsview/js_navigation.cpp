@@ -47,11 +47,11 @@ NavigationModel* NavigationModel::GetInstance()
             } else {
                 instance_.reset(new Framework::NavigationModelImpl());
             }
-        }
 #endif
         }
-        return instance_.get();
     }
+    return instance_.get();
+}
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
@@ -69,7 +69,7 @@ JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent&
 
 } // namespace
 
-void JSNavigation::ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<RefPtr<ToolBarItem>>& items)
+void JSNavigation::ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<RefPtr<AceType>>& items)
 {
     auto length = jsArray->Length();
     for (size_t i = 0; i < length; i++) {
@@ -216,8 +216,14 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    if (info[0]->IsString()) {
-        NavigationModel::GetInstance()->SetTitle(info[0]->ToString());
+    if (info[0]->IsString() || info[0]->IsUndefined()) {
+        std::string title;
+        if (info[0]->IsUndefined()) {
+            title = "";
+        } else {
+            title = info[0]->ToString();
+        }
+        NavigationModel::GetInstance()->SetTitle(title);
     } else if (info[0]->IsObject()) {
         if (ParseCommonTitle(info[0])) {
             return;
@@ -317,8 +323,12 @@ void JSNavigation::SetToolBar(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least one argument");
         return;
     }
-    if (!info[0]->IsObject()) {
-        LOGE("arg is not a object.");
+    if (!info[0]->IsObject() && !info[0]->IsUndefined()) {
+        LOGE("arg is not a object or is not undefined.");
+        return;
+    }
+    if (info[0]->IsUndefined()) {
+        NavigationModel::GetInstance()->SetToolBarItems({});
         return;
     }
     auto builderFuncParam = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
@@ -341,7 +351,7 @@ void JSNavigation::SetToolBar(const JSCallbackInfo& info)
         NavigationModel::GetInstance()->SetToolBarItems(std::move(toolBarItems));
         return;
     }
-    std::list<RefPtr<ToolBarItem>> items;
+    std::list<RefPtr<AceType>> items;
     NavigationModel::GetInstance()->GetToolBarItems(items);
     ParseToolBarItems(JSRef<JSArray>::Cast(itemsValue), items);
 }
@@ -353,14 +363,18 @@ void JSNavigation::SetMenus(const JSCallbackInfo& info)
         return;
     }
 
-    if (info[0]->IsArray()) {
+    if (info[0]->IsUndefined() || info[0]->IsArray()) {
         if (NavigationModel::GetInstance()->NeedSetItems()) {
             std::vector<NG::BarItem> menuItems;
-            ParseBarItems(info, JSRef<JSArray>::Cast(info[0]), menuItems);
+            if (info[0]->IsUndefined()) {
+                menuItems = {};
+            } else {
+                ParseBarItems(info, JSRef<JSArray>::Cast(info[0]), menuItems);
+            }
             NavigationModel::GetInstance()->SetMenuItems(std::move(menuItems));
             return;
         }
-        std::list<RefPtr<ToolBarItem>> items;
+        std::list<RefPtr<AceType>> items;
         NavigationModel::GetInstance()->GetMenuItems(items);
         ParseToolBarItems(JSRef<JSArray>::Cast(info[0]), items);
     } else if (info[0]->IsObject()) {

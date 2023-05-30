@@ -43,7 +43,7 @@ namespace {
 constexpr uint32_t COUNTER_TEXT_MAXLINE = 1;
 constexpr float ERROR_TEXT_UNDERLINE_MARGIN = 27.0f;
 constexpr float ERROR_TEXT_CAPSULE_MARGIN = 33.0f;
-}
+} // namespace
 
 void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -229,13 +229,14 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         }
     }
     auto preferredHeight = static_cast<float>(paragraph_->GetHeight());
-    if (textContent.empty()) {
+    if (textContent.empty() || showPlaceHolder) {
         preferredHeight = pattern->PreferredLineHeight();
     }
     if (pattern->IsTextArea()) {
-        auto useHeight = counterParagraph_ ?
-            static_cast<float>(paragraph_->GetHeight() + counterParagraph_->GetHeight()) :
-            static_cast<float>(paragraph_->GetHeight());
+        auto paragraphHeight =
+            (textContent.empty() || showPlaceHolder) ? preferredHeight : static_cast<float>(paragraph_->GetHeight());
+        auto useHeight =
+            static_cast<float>(paragraphHeight + (counterParagraph_ ? counterParagraph_->GetHeight() : 0.0f));
         const auto& calcLayoutConstraint = textFieldLayoutProperty->GetCalcLayoutConstraint();
         if (calcLayoutConstraint && calcLayoutConstraint->maxSize.has_value() &&
             calcLayoutConstraint->maxSize.value().Height().has_value()) {
@@ -316,7 +317,12 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (pattern->IsTextArea()) {
         if (hasAlign) {
             content->SetOffset(OffsetF(pattern->GetUtilPadding().Offset().GetX(), contentOffset.GetY()));
-            textRect_.SetOffset(OffsetF(pattern->GetTextRect().GetOffset().GetX(), contentOffset.GetY()));
+            OffsetF textRectOffSet = Alignment::GetAlignPosition(size, textRect_.GetSize(), align);
+            if (LessOrEqual(textRect_.Height(), content->GetRect().Height())) {
+                textRect_.SetOffset(OffsetF(pattern->GetTextRect().GetOffset().GetX(), textRectOffSet.GetY()));
+            } else {
+                textRect_.SetOffset(pattern->GetTextRect().GetOffset());
+            }
         } else {
             content->SetOffset(pattern->GetUtilPadding().Offset());
             textRect_.SetOffset(pattern->GetTextRect().GetOffset());
@@ -400,7 +406,7 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
 
     Dimension fontSize;
-    if (layoutProperty->HasFontSize() && layoutProperty->GetFontSizeValue(Dimension()).IsNonNegative()) {
+    if (layoutProperty->HasFontSize() && layoutProperty->GetFontSize().value_or(Dimension()).IsNonNegative()) {
         fontSize = layoutProperty->GetFontSizeValue(Dimension());
     } else {
         fontSize = theme ? theme->GetFontSize() : textStyle.GetFontSize();
@@ -443,7 +449,7 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<TextField
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
     Dimension fontSize;
     if (layoutProperty->HasPlaceholderFontSize() &&
-        layoutProperty->GetPlaceholderFontSizeValue(Dimension()).IsNonNegative()) {
+        layoutProperty->GetPlaceholderFontSize().value_or(Dimension()).IsNonNegative()) {
         fontSize = layoutProperty->GetPlaceholderFontSizeValue(Dimension());
     } else {
         fontSize = theme ? theme->GetFontSize() : textStyle.GetFontSize();

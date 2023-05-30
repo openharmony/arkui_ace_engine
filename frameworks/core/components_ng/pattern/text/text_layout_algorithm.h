@@ -89,6 +89,17 @@ private:
     void UpdateTextColorIfForeground(const RefPtr<FrameNode>& frameNode, TextStyle& textStyle);
     void UpdateParagraph(LayoutWrapper* layoutWrapper);
     OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) const;
+    bool CreateImageSpanAndLayout(const TextStyle& textStyle, const std::string& content,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    bool IncludeImageSpan(LayoutWrapper* layoutWrapper);
+    void SetImageSpanTextStyle(const TextStyle& textStyle);
+    void GetSpanAndImageSpanList(std::list<RefPtr<SpanItem>>& spanList,
+        std::map<int32_t, std::pair<Rect, RefPtr<ImageSpanItem>>>& imageSpanList);
+    void SplitSpanContentByLines(const TextStyle& textStyle, const std::list<RefPtr<SpanItem>>& spanList,
+        std::map<int32_t, std::pair<Rect, std::list<RefPtr<SpanItem>>>>& spanContentLines);
+    void SetImageSpanTextStyleByLines(const TextStyle& textStyle,
+        std::map<int32_t, std::pair<Rect, RefPtr<ImageSpanItem>>>& imageSpanList,
+        std::map<int32_t, std::pair<Rect, std::list<RefPtr<SpanItem>>>>& spanContentLines);
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;
     RefPtr<Paragraph> paragraph_;

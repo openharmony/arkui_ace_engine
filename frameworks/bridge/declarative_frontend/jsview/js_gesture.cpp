@@ -219,6 +219,7 @@ constexpr int32_t DEFAULT_TAP_COUNT = 1;
 constexpr int32_t DEFAULT_LONG_PRESS_FINGER = 1;
 constexpr int32_t DEFAULT_LONG_PRESS_DURATION = 500;
 constexpr int32_t DEFAULT_PINCH_FINGER = 2;
+constexpr int32_t DEFAULT_MAX_PINCH_FINGER = 5;
 constexpr double DEFAULT_PINCH_DISTANCE = 3.0;
 constexpr int32_t DEFAULT_PAN_FINGER = 1;
 constexpr int32_t DEFAULT_MAX_PAN_FINGERS = 10;
@@ -411,6 +412,7 @@ void JSPinchGesture::Create(const JSCallbackInfo& args)
         if (fingers->IsNumber()) {
             int32_t fingersNumber = fingers->ToNumber<int32_t>();
             fingersNum = fingersNumber <= DEFAULT_PINCH_FINGER ? DEFAULT_PINCH_FINGER : fingersNumber;
+            fingersNum = fingersNum > DEFAULT_MAX_PINCH_FINGER ? DEFAULT_PINCH_FINGER : fingersNum;
         }
         if (distance->IsNumber()) {
             double distanceNumber = distance->ToNumber<double>();

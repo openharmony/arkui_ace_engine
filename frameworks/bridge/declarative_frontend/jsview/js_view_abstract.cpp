@@ -111,6 +111,7 @@ constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
+const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 
 bool CheckJSCallbackInfo(
     const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
@@ -607,6 +608,19 @@ void SetPopupMessageOptions(const JSRef<JSObject> messageOptionsObj, const RefPt
         if (fontWeightValue->IsString()) {
             if (popupParam) {
                 popupParam->SetFontWeight(ConvertStrToFontWeight(fontWeightValue->ToString()));
+            } else {
+                LOGI("Empty popup.");
+            }
+        }
+        auto fontStyleValue = fontObj->GetProperty("style");
+        if (fontStyleValue->IsNumber()) {
+            int32_t value = fontStyleValue->ToNumber<int32_t>();
+            if (value < 0 || value >= static_cast<int32_t>(FONT_STYLES.size())) {
+                LOGI("Text fontStyle(%d) is invalid value", value);
+                return;
+            }
+            if (popupParam) {
+                popupParam->SetFontStyle(FONT_STYLES[value]);
             } else {
                 LOGI("Empty popup.");
             }
@@ -1198,9 +1212,7 @@ NG::TransitionOptions JSViewAbstract::ParseTransition(std::unique_ptr<JsonValue>
 
 void JSViewAbstract::JsTransition(const JSCallbackInfo& info)
 {
-    LOGD("JsTransition");
     if (info.Length() > 1) {
-        LOGE("Too many arguments");
         return;
     }
     if (info.Length() == 0) {
@@ -1254,11 +1266,6 @@ bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
 
 void JSViewAbstract::JsHeight(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
-
     JsHeight(info[0]);
 }
 
@@ -4766,6 +4773,9 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
     NG::SheetStyle sheetStyle;
     if (info.Length() == 3) { // 3 : parameter total
         ParseSheetStyle(info[2], sheetStyle); // 2 : The last parameter
+    } else {
+        sheetStyle.sheetMode = NG::SheetMode::LARGE;
+        sheetStyle.showDragBar = true;
     }
     ViewAbstractModel::GetInstance()->BindSheet(isShow, std::move(callback), std::move(buildFunc), sheetStyle);
 }
@@ -4783,7 +4793,7 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
             LOGW("show drag indicator failed.");
         }
     }
-
+    CalcDimension sheetHeight;
     if (height->IsNull() || height->IsUndefined()) {
         sheetStyle.sheetMode = NG::SheetMode::LARGE;
         sheetStyle.height.reset();
@@ -4802,10 +4812,19 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
                 sheetStyle.height.reset();
                 return;
             } else {
-                LOGI("sheet height is not default mode.");
+                if (heightStr.find("calc") != std::string::npos) {
+                    LOGI("calc value = %{public}s", heightStr.c_str());
+                    sheetHeight = CalcDimension(heightStr, DimensionUnit::CALC);
+                } else {
+                    sheetHeight = StringUtils::StringToDimensionWithUnit(heightStr, DimensionUnit::VP, -1.0);
+                }
+                if (sheetHeight.Value() < 0) {
+                    sheetStyle.sheetMode = NG::SheetMode::LARGE;
+                    sheetStyle.height.reset();
+                    return;
+                }
             }
         }
-        CalcDimension sheetHeight;
         if (!ParseJsDimensionVp(height, sheetHeight)) {
             sheetStyle.sheetMode = NG::SheetMode::LARGE;
             sheetStyle.height.reset();
@@ -5734,17 +5753,14 @@ bool JSViewAbstract::CheckColor(
 {
     // Color is undefined or null
     if (jsValue->IsUndefined() || jsValue->IsNull()) {
-        LOGW("%{public}s-%{public}s is undefined or null, using default color", componentName, propName);
         return false;
     }
     // input type is not in [number, string, Resource]
     if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
-        LOGW("%{public}s-%{public}s Color property input type is error, using default color", componentName, propName);
         return false;
     }
     // Correct type, incorrect value parsing
     if (!ParseJsColor(jsValue, result)) {
-        LOGW("%{public}s-%{public}s Color parses error, using default color", componentName, propName);
         return false;
     }
     return true;
@@ -5755,18 +5771,14 @@ bool JSViewAbstract::CheckLength(
 {
     // Length is undefined or null
     if (jsValue->IsUndefined() || jsValue->IsNull()) {
-        LOGW("%{public}s-%{public}s is undefined or null, using default length", componentName, propName);
         return false;
     }
     // input type is not in [number, string, Resource]
     if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
-        LOGW(
-            "%{public}s-%{public}s Length property input type is error, using default length", componentName, propName);
         return false;
     }
     // Correct type, incorrect value parsing
     if (!ParseJsDimensionVp(jsValue, result)) {
-        LOGW("%{public}s-%{public}s Length parses error, using default length", componentName, propName);
         return false;
     }
     return true;

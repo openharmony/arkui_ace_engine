@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr uint32_t MIN_GRID_COUNTS = 2;
+constexpr Dimension MIN_MENU_WIDTH = Dimension(64.0, DimensionUnit::VP);
 } // namespace
 
 void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -34,12 +34,8 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // constraint max size minus padding
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, childConstraint.maxSize);
-    // constraint min width base on grid column
-    auto columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
-    CHECK_NULL_VOID(columnInfo);
-    CHECK_NULL_VOID(columnInfo->GetParent());
-    columnInfo->GetParent()->BuildColumnWidth();
-    auto minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
+    // constraint min width 64.0_vp
+    auto minWidth = static_cast<float>(MIN_MENU_WIDTH.ConvertToPx());
     childConstraint.minSize.SetWidth(minWidth);
     // Calculate max width of menu items
     UpdateConstraintBaseOnMenuItems(layoutWrapper, childConstraint);
@@ -67,9 +63,12 @@ void MultiMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    auto outPadding = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     // translate each option by the height of previous options
-    OffsetF translate(outPadding, outPadding);
+    auto outPadding = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    const auto& padding = layoutProperty->CreatePaddingAndBorder();
+    OffsetF translate(padding.left.value_or(outPadding), padding.top.value_or(outPadding));
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
         child->Layout();

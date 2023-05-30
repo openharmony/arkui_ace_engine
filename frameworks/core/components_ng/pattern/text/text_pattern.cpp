@@ -42,10 +42,23 @@
 
 namespace OHOS::Ace::NG {
 
+void TextPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->SetClipToFrame(true);
+}
+
 void TextPattern::OnDetachFromFrameNode(FrameNode* node)
 {
     CloseSelectOverlay();
     ResetSelection();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (HasSurfaceChangedCallback()) {
+        LOGD("Unregister surface change callback with id %{public}d", surfaceChangedCallbackId_.value_or(-1));
+        pipeline->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
+    }
 }
 
 void TextPattern::CloseSelectOverlay()
@@ -57,6 +70,7 @@ void TextPattern::CloseSelectOverlay()
 
 void TextPattern::ResetSelection()
 {
+    showSelectOverlay_ = false;
     textSelector_.Update(-1, -1);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -145,7 +159,7 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
-
+    showSelectOverlay_ = true;
     InitSelection(textOffset);
     CalculateHandleOffsetAndShowOverlay();
     ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
@@ -254,10 +268,7 @@ void TextPattern::HandleOnCopy()
     if (copyOption_ != CopyOptions::None) {
         clipboard_->SetData(value, copyOption_);
     }
-    textSelector_.Update(-1, -1);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    ResetSelection();
 }
 
 void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle)
@@ -288,21 +299,39 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
         CHECK_NULL_VOID(pattern);
         pattern->HandleOnSelectAll();
     };
+    selectInfo.onClose = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleOnOverlayClose();
+    };
 
     if (!menuOptionItems_.empty()) {
         selectInfo.menuOptionItems = GetMenuOptionItems();
     }
 
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
-        selectOverlayProxy_->Close();
+        SelectHandleInfo firstHandleInfo;
+        SelectHandleInfo secondHandleInfo;
+        firstHandleInfo.paintRect = textSelector_.firstHandle;
+        secondHandleInfo.paintRect = textSelector_.secondHandle;
+        auto start = textSelector_.GetTextStart();
+        auto end = textSelector_.GetTextEnd();
+        selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
+        selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstHandleInfo, secondHandleInfo);
+    } else {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo);
+        CHECK_NULL_VOID_NOLOG(selectOverlayProxy_);
+        auto start = textSelector_.GetTextStart();
+        auto end = textSelector_.GetTextEnd();
+        selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo);
-    CHECK_NULL_VOID_NOLOG(selectOverlayProxy_);
-    auto start = textSelector_.GetTextStart();
-    auto end = textSelector_.GetTextEnd();
-    selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
+}
+
+void TextPattern::HandleOnOverlayClose()
+{
+    ResetSelection();
 }
 
 void TextPattern::HandleOnSelectAll()
@@ -310,7 +339,7 @@ void TextPattern::HandleOnSelectAll()
     auto textSize = GetWideText().length();
     textSelector_.Update(0, textSize);
     CalculateHandleOffsetAndShowOverlay();
-    if (selectOverlayProxy_) {
+    if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         SelectHandleInfo firstHandleInfo;
         SelectHandleInfo secondHandleInfo;
         firstHandleInfo.paintRect = textSelector_.firstHandle;
@@ -676,13 +705,15 @@ void TextPattern::OnModifyDone()
         paragraph_.Reset();
     }
 
-    bool shouldClipToContent = textLayoutProperty->GetTextOverflow().value_or(TextOverflow::CLIP) == TextOverflow::CLIP;
-    host->GetRenderContext()->SetClipToFrame(shouldClipToContent);
 
     std::string textCache = textForDisplay_;
     textForDisplay_ = textLayoutProperty->GetContent().value_or("");
     if (textCache != textForDisplay_) {
         host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
+    }
+    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
+        copyOption_ = CopyOptions::None;
+        return;
     }
     copyOption_ = textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
     if (copyOption_ != CopyOptions::None) {
@@ -741,6 +772,11 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     contentRect_ = dirty->GetGeometryNode()->GetContentRect();
     contentOffset_ = dirty->GetGeometryNode()->GetContentOffset();
     textStyle_ = textLayoutAlgorithm->GetTextStyle();
+
+    if (showSelectOverlay_) {
+        CalculateHandleOffsetAndShowOverlay();
+        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+    }
     return true;
 }
 
@@ -835,6 +871,34 @@ void TextPattern::OnVisibleChange(bool isVisible)
     }
 }
 
+void TextPattern::InitSurfaceChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (!HasSurfaceChangedCallback()) {
+        auto callbackId = pipeline->RegisterSurfaceChangedCallback(
+            [weak = WeakClaim(this)](int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) {
+                auto pattern = weak.Upgrade();
+                if (pattern) {
+                    pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
+                }
+            });
+        LOGD("Add surface changed callback id %{public}d", callbackId);
+        UpdateSurfaceChangedCallbackId(callbackId);
+    }
+}
+
+void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight)
+{
+    LOGD("TextPattern handle surface change, new width %{public}d, new height %{public}d, prev width %{public}d, prev "
+         "height %{public}d",
+        newWidth, newHeight, prevWidth, prevHeight);
+    CloseSelectOverlay();
+    ResetSelection();
+}
+
 void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
 {
     CHECK_NULL_VOID(child);
@@ -873,7 +937,6 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
     CHECK_NULL_VOID(textLayoutProp);
 
     auto inheritPropertyInfo = child->CaculateInheritPropertyInfo();
-    auto iter = inheritPropertyInfo.find(PropertyInfo::TEXTDECORATION);
     for (const PropertyInfo& info : inheritPropertyInfo) {
         switch (info) {
             case PropertyInfo::FONTSIZE:
@@ -904,10 +967,6 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
             case PropertyInfo::TEXTDECORATION:
                 if (textLayoutProp->HasTextDecoration()) {
                     child->UpdateTextDecorationWithoutFlushDirty(textLayoutProp->GetTextDecoration().value());
-                }
-                break;
-            case PropertyInfo::TEXTDECORATIONCOLOR:
-                if (iter != inheritPropertyInfo.end()) {
                     if (textLayoutProp->HasTextDecorationColor()) {
                         child->UpdateTextDecorationColorWithoutFlushDirty(
                             textLayoutProp->GetTextDecorationColor().value());

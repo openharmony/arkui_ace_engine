@@ -50,6 +50,7 @@ constexpr Dimension SWEEP_WIDTH = 80.0_vp;
 constexpr float RING_SHADOW_OFFSET_X = 5.0f;
 constexpr float RING_SHADOW_OFFSET_Y = 5.0f;
 constexpr float RING_SHADOW_BLUR_RADIUS_MIN = 5.0f;
+constexpr float RING_SHADOW_VALID_RADIUS_MIN = 10.0f;
 constexpr Dimension LINEAR_SWEEPING_LEN = 80.0_vp;
 constexpr float OPACITY_MAX = 1.0f;
 constexpr float OPACITY_MIN = 0.001f;
@@ -137,18 +138,8 @@ void ProgressModifier::ProcessSweepingAnimation(ProgressType type, float value)
         return;
     }
 
-    switch (type) {
-        case ProgressType::RING:
-            ProcessRingSweepingAnimation(value);
-            break;
-        case ProgressType::LINEAR:
-            ProcessLinearSweepingAnimation(value);
-            break;
-        case ProgressType::CAPSULE:
-            StartCapsuleSweepingAnimation(value);
-            break;
-        default:
-            break;
+    if (type == ProgressType::CAPSULE) {
+        StartCapsuleSweepingAnimation(value);
     }
 }
 
@@ -506,7 +497,7 @@ void ProgressModifier::StartLinearSweepingAnimation(float value)
         return;
     }
 
-    date = dateLength + LINEAR_SWEEPING_LEN.ConvertToPx();
+    date = dateLength + strokeWidth_->Get() + LINEAR_SWEEPING_LEN.ConvertToPx();
 
     if (!isSweeping_) {
         StartLinearSweepingAnimationImpl(date);
@@ -798,14 +789,17 @@ void ProgressModifier::PaintRing(RSCanvas& canvas, const OffsetF& offset, const 
     auto radius = std::min(contentSize.Width() / 2, contentSize.Height() / 2);
     auto angle = (value_->Get() / maxValue_->Get()) * ANGLE_360;
     auto thickness = strokeWidth_->Get();
-    if (thickness >= radius) {
+    // No shadow is drawn if radius is less or equal to 10, because it is no enough space to draw both ring and shadow.
+    auto paintShadow = paintShadow_->Get() && GreatNotEqual(radius, RING_SHADOW_VALID_RADIUS_MIN);
+    auto shadowBlurOffset = paintShadow ? thickness / 2 + std::max(RING_SHADOW_OFFSET_X, RING_SHADOW_OFFSET_Y) : 0.0f;
+    if (GreatOrEqual(thickness + shadowBlurOffset, radius)) {
         LOGI("strokeWidth is lager than radius,  auto set strokeWidth as half of radius");
         thickness = radius / 2;
+        shadowBlurOffset = paintShadow ? thickness / 2 + std::max(RING_SHADOW_OFFSET_X, RING_SHADOW_OFFSET_Y) : 0.0f;
     }
     // The shadowBlurSigma is an empirical value. If it is greater than thickness / 5, the shadow will be cut by
     // the canvas boundary.
     auto shadowBlurSigma = std::max(thickness / 5, RING_SHADOW_BLUR_RADIUS_MIN);
-    auto shadowBlurOffset = thickness / 2 + std::max(RING_SHADOW_OFFSET_X, RING_SHADOW_OFFSET_Y);
     radius = radius - thickness / 2 - shadowBlurOffset;
 
     RingProgressData ringData;
@@ -826,7 +820,7 @@ void ProgressModifier::PaintRing(RSCanvas& canvas, const OffsetF& offset, const 
         return;
     }
 
-    if (paintShadow_->Get()) {
+    if (paintShadow) {
         PaintRingProgressOrShadow(canvas, ringData, true);
     }
 

@@ -89,6 +89,15 @@ void JSListItem::CreateForPartialUpdate(const JSCallbackInfo& args)
         return;
     }
     const bool isLazy = args[1]->ToBoolean();
+
+    V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE;
+    if (args[2]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[2]);
+        JSRef<JSVal> styleObj = obj->GetProperty("style");
+        listItemStyle = styleObj->IsNumber() ? static_cast<V2::ListItemStyle>(styleObj->ToNumber<int32_t>())
+                                             : V2::ListItemStyle::NONE;
+    }
+
     if (!isLazy) {
         ListItemModel::GetInstance()->Create();
     } else {
@@ -103,7 +112,7 @@ void JSListItem::CreateForPartialUpdate(const JSCallbackInfo& args)
             jsParams[1] = JSRef<JSVal>::Make(ToJSValue(true));
             jsDeepRenderFunc->ExecuteJS(2, jsParams);
         }; // listItemDeepRenderFunc lambda
-        ListItemModel::GetInstance()->Create(std::move(listItemDeepRenderFunc));
+        ListItemModel::GetInstance()->Create(std::move(listItemDeepRenderFunc), listItemStyle);
         ListItemModel::GetInstance()->SetIsLazyCreating(isLazy);
     }
     args.ReturnSelf();
@@ -116,11 +125,6 @@ void JSListItem::SetSticky(int32_t sticky)
 
 void JSListItem::SetEditable(const JSCallbackInfo& args)
 {
-    if (args.Length() < 1) {
-        LOGW("Not enough params");
-        return;
-    }
-
     if (args[0]->IsBoolean()) {
         uint32_t value = args[0]->ToBoolean() ? V2::EditMode::DELETABLE | V2::EditMode::MOVABLE : V2::EditMode::SHAM;
         ListItemModel::GetInstance()->SetEditMode(value);
@@ -132,7 +136,6 @@ void JSListItem::SetEditable(const JSCallbackInfo& args)
         ListItemModel::GetInstance()->SetEditMode(value);
         return;
     }
-    LOGW("Invalid params, unknown type");
 }
 
 void JSListItem::SetSelectable(bool selectable)
@@ -193,7 +196,6 @@ void JSListItem::JsParseDeleteArea(const JSCallbackInfo& args, const JSRef<JSVal
 void JSListItem::SetSwiperAction(const JSCallbackInfo& args)
 {
     if (!args[0]->IsObject()) {
-        LOGE("fail to bind SwiperAction event due to info is not object");
         return;
     }
 
@@ -227,7 +229,6 @@ void JSListItem::SetSwiperAction(const JSCallbackInfo& args)
 void JSListItem::SelectCallback(const JSCallbackInfo& args)
 {
     if (!args[0]->IsFunction()) {
-        LOGE("fail to bind onSelect event due to info is not function");
         return;
     }
 
@@ -251,6 +252,9 @@ void JSListItem::JsBorderRadius(const JSCallbackInfo& info)
 
 void JSListItem::JsOnDragStart(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsFunction()) {
+        return;
+    }
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
                            const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
@@ -259,12 +263,10 @@ void JSListItem::JsOnDragStart(const JSCallbackInfo& info)
 
         auto ret = func->Execute(info, extraParams);
         if (!ret->IsObject()) {
-            LOGE("builder param is not an object.");
             return itemInfo;
         }
         auto node = ParseDragNode(ret);
         if (node) {
-            LOGI("use custom builder param.");
             itemInfo.node = node;
             return itemInfo;
         }

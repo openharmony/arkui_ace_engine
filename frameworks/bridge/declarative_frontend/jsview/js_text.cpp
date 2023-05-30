@@ -258,8 +258,9 @@ void JSText::SetLineHeight(const JSCallbackInfo& info)
         return;
     }
     CalcDimension value;
-    if (!ParseJsDimensionFp(info[0], value)) {
-        return;
+    ParseJsDimensionFp(info[0], value);
+    if (value.IsNegative()) {
+        value.Reset();
     }
     TextModel::GetInstance()->SetLineHeight(value);
 }

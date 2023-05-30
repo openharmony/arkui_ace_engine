@@ -281,10 +281,10 @@ void CustomPaintPattern::QuadraticCurveTo(const QuadraticCurveParam& param)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void CustomPaintPattern::FillText(const std::string& text, double x, double y)
+void CustomPaintPattern::FillText(const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
-    auto task = [text, x, y](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
-        paintMethod.FillText(paintWrapper, text, x, y);
+    auto task = [text, x, y, maxWidth](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.FillText(paintWrapper, text, x, y, maxWidth);
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
@@ -292,10 +292,10 @@ void CustomPaintPattern::FillText(const std::string& text, double x, double y)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void CustomPaintPattern::StrokeText(const std::string& text, double x, double y)
+void CustomPaintPattern::StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
-    auto task = [text, x, y](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
-        paintMethod.StrokeText(paintWrapper, text, x, y);
+    auto task = [text, x, y, maxWidth](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.StrokeText(paintWrapper, text, x, y, maxWidth);
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
@@ -550,8 +550,6 @@ void CustomPaintPattern::UpdateStrokePattern(const std::weak_ptr<Ace::Pattern>& 
 {
     auto task = [pattern](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.SetStrokePatternNG(pattern);
-        paintMethod.SetStrokeGradient(Ace::Gradient());
-        paintMethod.SetStrokeColor(Color());
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
@@ -563,8 +561,6 @@ void CustomPaintPattern::UpdateStrokeColor(const Color& color)
 {
     auto task = [color](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.SetStrokeColor(color);
-        paintMethod.SetStrokePattern(Ace::Pattern());
-        paintMethod.SetStrokeGradient(Ace::Gradient());
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
@@ -576,8 +572,6 @@ void CustomPaintPattern::UpdateStrokeGradient(const Ace::Gradient& grad)
 {
     auto task = [grad](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.SetStrokeGradient(grad);
-        paintMethod.SetStrokeColor(Color());
-        paintMethod.SetStrokePattern(Ace::Pattern());
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
@@ -841,5 +835,10 @@ void CustomPaintPattern::SetFilterParam(const std::string& filterStr)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+TransformParam CustomPaintPattern::GetTransform() const
+{
+    return paintMethod_->GetTransform();
 }
 } // namespace OHOS::Ace::NG

@@ -17,6 +17,7 @@
 
 #include <type_traits>
 
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
@@ -474,5 +475,22 @@ void TabsModelNG::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& o
     auto tabPattern = tabsNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabPattern);
     tabPattern->SetOnIndexChangeEvent(std::move(onChangeEvent));
+}
+
+void TabsModelNG::SetClipEdge(bool clipEdge)
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsRenderContext = tabsNode->GetRenderContext();
+    CHECK_NULL_VOID(tabsRenderContext);
+    tabsRenderContext->UpdateClipEdge(clipEdge);
+    auto tabsChildren = tabsNode->GetChildren();
+    for (const auto& child : tabsChildren) {
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(childFrameNode);
+        auto renderContext = childFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateClipEdge(clipEdge);
+    }
 }
 } // namespace OHOS::Ace::NG
