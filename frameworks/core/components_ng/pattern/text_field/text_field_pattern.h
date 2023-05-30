@@ -418,9 +418,26 @@ public:
     {
         return isUsingMouse_;
     }
-
+    int32_t GetWordLength(int32_t originCaretPosition, int32_t directionalMove);
+    int32_t GetLineBeginPosision(int32_t originCaretPosition, bool needToCheckLineChanged = true);
+    int32_t GetLineEndPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);
+    bool IsOperation() const
+    {
+        if (textEditingValue_.ToString().length() > 1) {
+            return true;
+        }
+        return false;
+    }
     bool CursorMoveLeft();
+    bool CursorMoveLeftWord();
+    bool CursorMoveLineBegin();
+    bool CursorMoveToParagraphBegin();
+    bool CursorMoveHome();
     bool CursorMoveRight();
+    bool CursorMoveRightWord();
+    bool CursorMoveLineEnd();
+    bool CursorMoveToParagraphEnd();
+    bool CursorMoveEnd();
     bool CursorMoveUp();
     bool CursorMoveDown();
     void SetCaretPosition(int32_t position);
@@ -731,8 +748,13 @@ public:
     void HandleSelectionUp();
     void HandleSelectionDown();
     void HandleSelectionLeft();
+    void HandleSelectionLeftWord();
+    void HandleSelectionLineBegin();
+    void HandleSelectionHome();
     void HandleSelectionRight();
-
+    void HandleSelectionRightWord();
+    void HandleSelectionLineEnd();
+    void HandleSelectionEnd();
     void HandleOnUndoAction();
     void HandleOnRedoAction();
     void HandleOnSelectAll();
@@ -873,11 +895,13 @@ private:
     void UpdateCaretOffsetByLastTouchOffset();
     bool UpdateCaretPositionByMouseMovement();
     bool UpdateCaretPosition();
+    bool CharLineChanged(int32_t caretPosition);
 
     void ScheduleCursorTwinkling();
     void OnCursorTwinkling();
     void StartTwinkling();
     void StopTwinkling();
+    void CheckIfNeedToResetKeyboard();
 
     float PreferredTextHeight(bool isPlaceholder);
 
