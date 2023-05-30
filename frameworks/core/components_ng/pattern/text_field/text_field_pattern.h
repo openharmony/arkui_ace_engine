@@ -878,6 +878,7 @@ private:
     void OnCursorTwinkling();
     void StartTwinkling();
     void StopTwinkling();
+    void CheckIfNeedToResetKeyboard();
 
     float PreferredTextHeight(bool isPlaceholder);
 
