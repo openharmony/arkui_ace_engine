@@ -528,6 +528,44 @@ void MenuPattern::SetAccessibilityAction()
     });
 }
 
+bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    UpdateMenuHotArea();
+    return false;
+}
+
+void MenuPattern::UpdateMenuHotArea()
+{
+    auto rootNode = GetMenuWrapper();
+    CHECK_NULL_VOID(rootNode);
+    if (rootNode->GetChildren().empty()) {
+        return;
+    }
+    auto children = rootNode->GetChildren();
+    auto mainMenuNode = DynamicCast<FrameNode>(children.front());
+    CHECK_NULL_VOID(mainMenuNode);
+    auto mainMenuPattern = mainMenuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(mainMenuPattern);
+    if (!mainMenuPattern->IsContextMenu()) {
+        return;
+    }
+    std::vector<Rect> rects;
+    for (auto child = children.begin(); child != children.end(); ++child) {
+        auto menuNode = DynamicCast<FrameNode>(*child);
+        CHECK_NULL_VOID(menuNode);
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        if (!menuPattern->IsContextMenu() && !menuPattern->IsSubMenu()) {
+            continue;
+        }
+        auto menuContext = menuNode->GetRenderContext();
+        CHECK_NULL_VOID(menuContext);
+        auto menuHotArea = menuContext->GetPaintRectWithTransform();
+        rects.emplace_back(Rect(menuHotArea.GetX(), menuHotArea.GetY(), menuHotArea.Width(), menuHotArea.Height()));
+    }
+    SubwindowManager::GetInstance()->SetHotAreas(rects);
+}
+
 void MenuPattern::RecordItemsAndGroups()
 {
     itemsAndGroups_.clear();
