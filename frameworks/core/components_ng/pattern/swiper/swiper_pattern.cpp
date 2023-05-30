@@ -857,10 +857,24 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    if (host->GetLastChild()->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG && !indicatorDoingAnimation_) {
+    if (NeedMarkDirtyNodeRenderIndicator()) {
         auto indicatorNode = DynamicCast<FrameNode>(host->GetLastChild());
         indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+}
+
+bool SwiperPattern::NeedMarkDirtyNodeRenderIndicator()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (host->GetLastChild()->GetTag() != V2::SWIPER_INDICATOR_ETS_TAG || indicatorDoingAnimation_) {
+        return false;
+    }
+    if (!IsLoop() &&
+        ((currentIndex_ == 0 && turnPageRate_ > 0.0f) || (currentIndex_ == TotalCount() - 1 && turnPageRate_ < 0.0f))) {
+        return false;
+    }
+    return true;
 }
 
 void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
