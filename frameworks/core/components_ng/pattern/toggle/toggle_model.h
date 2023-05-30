@@ -49,7 +49,7 @@ public:
     virtual void SetHeight(const Dimension& height) = 0;
     virtual void SetBackgroundColor(const Color& color) = 0;
     virtual bool IsToggle() = 0;
-    virtual void SetPadding(const NG::PaddingPropertyF& args) = 0;
+    virtual void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs) = 0;
     virtual void OnChangeEvent(NG::ChangeEvent&& onChangeEvent) = 0;
 
 private:
