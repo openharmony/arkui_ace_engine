@@ -91,7 +91,7 @@ struct BorderRadiusPropertyT<Dimension> {
     std::optional<Dimension> radiusTopRight;
     std::optional<Dimension> radiusBottomRight;
     std::optional<Dimension> radiusBottomLeft;
-    bool multiValued = false;
+    bool multiValued = true;
 
     bool operator==(const BorderRadiusPropertyT<Dimension>& value) const;
 
