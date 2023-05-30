@@ -1779,6 +1779,7 @@ bool RosenDecorationPainter::CanUseInnerRRect(const Border& border)
     return true;
 }
 
+#ifndef USE_ROSEN_DRAWING
 SkRRect RosenDecorationPainter::GetBoxRRect(
     const Offset& offset, const Border& border, double shrinkFactor, bool isRound)
 {
@@ -1825,7 +1826,61 @@ SkRRect RosenDecorationPainter::GetBoxRRect(
     rrect.setRectRadii(skRect, fRadii);
     return rrect;
 }
+#else
+RSRoundRect RosenDecorationPainter::GetBoxRRect(
+    const Offset& offset, const Border& border, double shrinkFactor, bool isRound)
+{
+    RSRoundRect rrect;
+    RSRect rect;
+    if (CheckBorderEdgeForRRect(border)) {
+        std::vector<RSPoint> fRadii;
+        BorderEdge borderEdge = border.Left();
+        double borderWidth = NormalizeToPx(borderEdge.GetWidth());
+        rect = RSRect(static_cast<RSScalar>(offset.GetX() + shrinkFactor * borderWidth),
+            static_cast<RSScalar>(offset.GetY() + shrinkFactor * borderWidth),
+            static_cast<RSScalar>(paintSize_.Width() - shrinkFactor * borderWidth + offset.GetX()),
+            static_cast<RSScalar>(paintSize_.Height() - shrinkFactor * borderWidth + offset.GetY()));
+        if (isRound) {
+            fRadii.push_back(RSPoint(
+                static_cast<RSScalar>(
+                    std::max(NormalizeToPx(border.TopLeftRadius().GetX()) - shrinkFactor * borderWidth, 0.0)),
+                static_cast<RSScalar>(
+                    std::max(NormalizeToPx(border.TopLeftRadius().GetY()) - shrinkFactor * borderWidth, 0.0))));
+            fRadii.push_back(RSPoint(
+                static_cast<RSScalar>(
+                    std::max(NormalizeToPx(border.TopRightRadius().GetX()) - shrinkFactor * borderWidth, 0.0)),
+                static_cast<RSScalar>(
+                    std::max(NormalizeToPx(border.TopRightRadius().GetY()) - shrinkFactor * borderWidth, 0.0))));
+            fRadii.push_back(RSPoint(
+                static_cast<RSScalar>(
+                    std::max(NormalizeToPx(border.BottomRightRadius().GetX()) - shrinkFactor * borderWidth, 0.0)),
+                static_cast<RSScalar>(
+                    std::max(NormalizeToPx(border.BottomRightRadius().GetY()) - shrinkFactor * borderWidth, 0.0))));
+            fRadii.push_back(RSPoint(
+                static_cast<RSScalar>(
+                    std::max(NormalizeToPx(border.BottomLeftRadius().GetX()) - shrinkFactor * borderWidth, 0.0)),
+                static_cast<RSScalar>(
+                    std::max(NormalizeToPx(border.BottomLeftRadius().GetY()) - shrinkFactor * borderWidth, 0.0))));
+        }
+        rrect = RSRoundRect(rect, fRadii);
+    } else {
+        rect = RSRect(
+            static_cast<RSScalar>(offset.GetX() + shrinkFactor * NormalizeToPx(border.Left().GetWidth())),
+            static_cast<RSScalar>(offset.GetY() + shrinkFactor * NormalizeToPx(border.Top().GetWidth())),
+            static_cast<RSScalar>(
+                paintSize_.Width() - shrinkFactor * DOUBLE_WIDTH * NormalizeToPx(border.Right().GetWidth())
+                + offset.GetX() + shrinkFactor * NormalizeToPx(border.Left().GetWidth())),
+            static_cast<RSScalar>(
+                paintSize_.Height()
+                - shrinkFactor * (NormalizeToPx(border.Bottom().GetWidth()) + NormalizeToPx(border.Top().GetWidth()))
+                + offset.GetY() + shrinkFactor * NormalizeToPx(border.Top().GetWidth())));
+        rrect.SetRect(rect);
+    }
+    return rrect;
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 void RosenDecorationPainter::SetBorderStyle(
     const BorderEdge& borderEdge, SkPaint& paint, bool useDefaultColor, double spaceBetweenDot, double borderLength)
 {
@@ -1867,8 +1922,57 @@ void RosenDecorationPainter::SetBorderStyle(
         }
     }
 }
+#else
+void RosenDecorationPainter::SetBorderStyle(const BorderEdge& borderEdge,
+    RSPen& pen, bool useDefaultColor, double spaceBetweenDot, double borderLength)
+{
+    if (borderEdge.HasValue()) {
+        double width = NormalizeToPx(borderEdge.GetWidth());
+        uint32_t color = useDefaultColor ? Color::BLACK.GetValue() : borderEdge.GetColor().GetValue();
+        pen.SetWidth(width);
+        pen.SetColor(color);
+        if (borderEdge.GetBorderStyle() == BorderStyle::DOTTED) {
+            RSPath dotPath;
+            if (NearZero(spaceBetweenDot)) {
+                spaceBetweenDot = width * 2.0;
+            }
+            dotPath.AddCircle(0.0f, 0.0f, static_cast<RSScalar>(width / 2.0));
+            pen.SetPathEffect(RSPathEffect::CreatePathDashEffect(
+                dotPath, spaceBetweenDot, 0.0, RSPathDashStyle::ROTATE));
+        } else if (borderEdge.GetBorderStyle() == BorderStyle::DASHED) {
+            double addLen = 0.0; // When left < 2 * gap, splits left to gaps.
+            double delLen = 0.0; // When left > 2 * gap, add one dash and shortening them.
+            if (!NearZero(borderLength)) {
+                double count = borderLength / width;
+                double leftLen = fmod((count - DASHED_LINE_LENGTH), (DASHED_LINE_LENGTH + 1));
+                if (NearZero(count - DASHED_LINE_LENGTH)) {
+                    return;
+                }
+                if (leftLen > DASHED_LINE_LENGTH - 1) {
+                    delLen = (DASHED_LINE_LENGTH + 1 - leftLen) * width /
+                             static_cast<int32_t>((count - DASHED_LINE_LENGTH) / (DASHED_LINE_LENGTH + 1) + DEL_NUM);
+                } else {
+                    addLen = leftLen * width /
+                             static_cast<int32_t>((count - DASHED_LINE_LENGTH) / (DASHED_LINE_LENGTH + 1));
+                }
+            }
+            const RSScalar intervals[] = { width * DASHED_LINE_LENGTH - delLen, width + addLen };
+            pen.SetPathEffect(
+                RSPathEffect::CreateDashPathEffect(
+                    intervals, sizeof(intervals)/sizeof(RSScalar), 0.0));
+        } else {
+            pen.SetPathEffect(nullptr);
+        }
+    }
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 void RosenDecorationPainter::PaintBorder(const Offset& offset, const Border& border, SkCanvas* canvas, SkPaint& paint)
+#else
+void RosenDecorationPainter::PaintBorder(const Offset& offset, const Border& border,
+    RSCanvas* canvas, RSPen& pen)
+#endif
 {
     float offsetX = offset.GetX();
     float offsetY = offset.GetY();
@@ -1891,6 +1995,7 @@ void RosenDecorationPainter::PaintBorder(const Offset& offset, const Border& bor
     float brY = std::max(0.0, NormalizeToPx(border.BottomRightRadius().GetY()) - (bottomW + rightW) / 4.0f);
     float blX = std::max(0.0, NormalizeToPx(border.BottomLeftRadius().GetX()) - (bottomW + leftW) / 4.0f);
     float blY = std::max(0.0, NormalizeToPx(border.BottomLeftRadius().GetY()) - (bottomW + leftW) / 4.0f);
+#ifndef USE_ROSEN_DRAWING
     if (border.Top().HasValue() && !NearZero(topW)) {
         // Draw Top Border
         SetBorderStyle(border.Top(), paint, false);
@@ -2047,6 +2152,172 @@ void RosenDecorationPainter::PaintBorder(const Offset& offset, const Border& bor
             canvas->restore();
         }
     }
+#else
+    if (border.Top().HasValue() && !NearZero(topW)) {
+        // Draw Top Border
+        SetBorderStyle(border.Top(), pen, false);
+        auto rectStart = RSRect(x, y, tlX * 2.0f + x, tlY * 2.0f + y);
+        auto rectEnd = RSRect(x + w - trX * 2.0f, y, x + w, trY * 2.0f + y);
+        RSRecordingPath topBorder;
+        pen.SetWidth(maxW);
+        if (border.Top().GetBorderStyle() != BorderStyle::DOTTED) {
+            pen.SetWidth(maxW);
+        }
+        if (NearZero(tlX) || NearZero(tlY) || NearZero(trX) || NearZero(trY)) {
+            canvas->Save();
+        }
+        if (NearZero(tlX) && !NearZero(leftW)) {
+            topBorder.MoveTo(offsetX, y);
+            topBorder.LineTo(x, y);
+            RSRecordingPath topClipPath;
+            topClipPath.MoveTo(offsetX - leftW, offsetY - topW);
+            topClipPath.LineTo(offsetX + leftW * EXTEND, offsetY + topW * EXTEND);
+            topClipPath.LineTo(offsetX, offsetY + topW * EXTEND);
+            topClipPath.Close();
+            canvas->ClipPath(topClipPath, RSClipOp::DIFFERENCE, true);
+        }
+        topBorder.ArcTo(rectStart, TOP_START, SWEEP_ANGLE, false);
+        topBorder.ArcTo(rectEnd, TOP_END, SWEEP_ANGLE + 0.5f, false);
+        if (NearZero(trX) && !NearZero(rightW)) {
+            topBorder.LineTo(offsetX + width, y);
+            RSRecordingPath topClipPath;
+            topClipPath.MoveTo(offsetX + width + rightW, offsetY - topW);
+            topClipPath.LineTo(offsetX + width - rightW * EXTEND, offsetY + topW * EXTEND);
+            topClipPath.LineTo(offsetX + width, offsetY + topW * EXTEND);
+            topClipPath.Close();
+            canvas->ClipPath(topClipPath, RSClipOp::DIFFERENCE, true);
+        }
+        canvas->AttachPen(pen);
+        canvas->DrawPath(topBorder);
+        if (NearZero(tlX) || NearZero(tlY) || NearZero(trX) || NearZero(trY)) {
+            canvas->Restore();
+        }
+        canvas->DetachPen();
+    }
+    if (border.Right().HasValue() && !NearZero(rightW)) {
+        // Draw Right Border
+        SetBorderStyle(border.Right(), pen, false);
+        auto rectStart = RSRect(x + w - trX * 2.0f, y, x + w, trY * 2.0f + y);
+        auto rectEnd = RSRect(x + w - brX * 2.0f, y + h - brY * 2.0f, x + w, y + h);
+        RSRecordingPath rightBorder;
+        pen.SetWidth(maxW);
+        if (border.Right().GetBorderStyle() != BorderStyle::DOTTED) {
+            pen.SetWidth(maxW);
+        }
+        if (NearZero(trX) || NearZero(trY) || NearZero(brX) || NearZero(brY)) {
+            canvas->Save();
+        }
+        if (NearZero(trX) && !NearZero(topW)) {
+            rightBorder.MoveTo(offsetX + width - rightW / 2.0f, offsetY);
+            rightBorder.LineTo(x + w - trX * 2.0f, y);
+            RSRecordingPath rightClipPath;
+            rightClipPath.MoveTo(offsetX + width + rightW, offsetY - topW);
+            rightClipPath.LineTo(offsetX + width - rightW * EXTEND, offsetY + topW * EXTEND);
+            rightClipPath.LineTo(offsetX + width - rightW * EXTEND, offsetY);
+            rightClipPath.Close();
+            canvas->ClipPath(rightClipPath, RSClipOp::DIFFERENCE, true);
+        }
+        rightBorder.ArcTo(rectStart, RIGHT_START, SWEEP_ANGLE, false);
+        rightBorder.ArcTo(rectEnd, RIGHT_END, SWEEP_ANGLE + 0.5f, false);
+        if (NearZero(brX) && !NearZero(bottomW)) {
+            rightBorder.LineTo(offsetX + width - rightW / 2.0f,
+                               offsetY + height);
+            RSRecordingPath rightClipPath;
+            rightClipPath.MoveTo(offsetX + width + rightW, offsetY + height + bottomW);
+            rightClipPath.LineTo(offsetX + width - rightW * EXTEND, offsetY + height - bottomW * EXTEND);
+            rightClipPath.LineTo(offsetX + width - rightW * EXTEND, offsetY + height);
+            rightClipPath.Close();
+            canvas->ClipPath(rightClipPath, RSClipOp::DIFFERENCE, true);
+        }
+        canvas->AttachPen(pen);
+        canvas->DrawPath(rightBorder);
+        if (NearZero(trX) || NearZero(trY) || NearZero(brX) || NearZero(brY)) {
+            canvas->Restore();
+        }
+        canvas->DetachPen();
+    }
+    if (border.Bottom().HasValue() && !NearZero(bottomW)) {
+        // Draw Bottom Border
+        SetBorderStyle(border.Bottom(), pen, false);
+        auto rectStart = RSRect(x + w - brX * 2.0f, y + h - brY * 2.0f, x + w, y + h);
+        auto rectEnd = RSRect(x, y + h - blY * 2.0f, blX * 2.0f + x, y + h);
+        RSRecordingPath bottomBorder;
+        if (border.Bottom().GetBorderStyle() != BorderStyle::DOTTED) {
+            pen.SetWidth(maxW);
+        }
+        if (NearZero(brX) || NearZero(brY) || NearZero(blX) || NearZero(blY)) {
+            canvas->Save();
+        }
+        if (NearZero(brX) && !NearZero(rightW)) {
+            bottomBorder.MoveTo(offsetX + width,
+                                offsetY + height - bottomW / 2.0f);
+            bottomBorder.LineTo(x + w - brX * 2.0f, y + h - brY * 2.0f);
+            RSRecordingPath bottomClipPath;
+            bottomClipPath.MoveTo(offsetX + width + rightW, offsetY + height + bottomW);
+            bottomClipPath.LineTo(offsetX + width - rightW * EXTEND, offsetY + height - bottomW * EXTEND);
+            bottomClipPath.LineTo(offsetX + width, offsetY + height - bottomW * EXTEND);
+            bottomClipPath.Close();
+            canvas->ClipPath(bottomClipPath, RSClipOp::DIFFERENCE, true);
+        }
+        bottomBorder.ArcTo(rectStart, BOTTOM_START, SWEEP_ANGLE, false);
+        bottomBorder.ArcTo(rectEnd, BOTTOM_END, SWEEP_ANGLE + 0.5f, false);
+        if (NearZero(blX) && !NearZero(leftW)) {
+            bottomBorder.LineTo(offsetX, offsetY + height - bottomW / 2.0f);
+            RSRecordingPath bottomClipPath;
+            bottomClipPath.MoveTo(offsetX - leftW, offsetY + height + bottomW);
+            bottomClipPath.LineTo(offsetX + leftW * EXTEND, offsetY + height - bottomW * EXTEND);
+            bottomClipPath.LineTo(offsetX, offsetY + height - bottomW * EXTEND);
+            bottomClipPath.Close();
+            canvas->ClipPath(bottomClipPath, RSClipOp::DIFFERENCE, true);
+        }
+        canvas->AttachPen(pen);
+        canvas->DrawPath(bottomBorder);
+        if (NearZero(brX) || NearZero(brY) || NearZero(blX) || NearZero(blY)) {
+            canvas->Restore();
+        }
+        canvas->DetachPen();
+    }
+    if (border.Left().HasValue() && !NearZero(leftW)) {
+        // Draw Left Border
+        SetBorderStyle(border.Left(), pen, false);
+        auto rectStart = RSRect::MakeXYWH(x, y + h - blY * 2.0f, blX * 2.0f, blY * 2.0f);
+        auto rectEnd = RSRect::MakeXYWH(x, y, tlX * 2.0f, tlY * 2.0f);
+        RSRecordingPath leftBorder;
+        if (border.Left().GetBorderStyle() != BorderStyle::DOTTED) {
+            pen.SetWidth(maxW);
+        }
+        if (NearZero(blX) || NearZero(blY) || NearZero(tlX) || NearZero(tlY)) {
+            canvas->Save();
+        }
+        if (NearZero(blX) && !NearZero(bottomW)) {
+            leftBorder.MoveTo(offsetX + leftW / 2.0f, offsetY + height);
+            leftBorder.LineTo(x, y + h - blY * 2.0f);
+            RSRecordingPath leftClipPath;
+            leftClipPath.MoveTo(offsetX - leftW, offsetY + height + bottomW);
+            leftClipPath.LineTo(offsetX + leftW * EXTEND, offsetY + height - bottomW * EXTEND);
+            leftClipPath.LineTo(offsetX + leftW * EXTEND, offsetY + height);
+            leftClipPath.Close();
+            canvas->ClipPath(leftClipPath, RSClipOp::DIFFERENCE, true);
+        }
+        leftBorder.ArcTo(rectStart, LEFT_START, SWEEP_ANGLE, false);
+        leftBorder.ArcTo(rectEnd, LEFT_END, SWEEP_ANGLE + 0.5f, false);
+        if (NearZero(tlX) && !NearZero(topW)) {
+            leftBorder.LineTo(offsetX + leftW / 2.0f, offsetY);
+            RSRecordingPath topClipPath;
+            topClipPath.MoveTo(offsetX - leftW, offsetY - topW);
+            topClipPath.LineTo(offsetX + leftW * EXTEND, offsetY + topW * EXTEND);
+            topClipPath.LineTo(offsetX + leftW * EXTEND, offsetY);
+            topClipPath.Close();
+            canvas->ClipPath(topClipPath, RSClipOp::DIFFERENCE, true);
+        }
+        canvas->AttachPen(pen);
+        canvas->DrawPath(leftBorder);
+        if (NearZero(blX) || NearZero(blY) || NearZero(tlX) || NearZero(tlY)) {
+            canvas->Restore();
+        }
+        canvas->DetachPen();
+    }
+#endif
 }
 
 #ifndef USE_ROSEN_DRAWING
