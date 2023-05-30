@@ -193,7 +193,8 @@ void ConnectServerManager::StopConnectServer()
     stopServer(packageName_);
 }
 
-void ConnectServerManager::AddInstance(int32_t instanceId, const std::string& instanceName)
+void ConnectServerManager::AddInstance(
+    int32_t instanceId, const std::string& language, const std::string& instanceName)
 {
     if (!CheckDebugVersion()) {
         return;
@@ -208,7 +209,7 @@ void ConnectServerManager::AddInstance(int32_t instanceId, const std::string& in
         }
     }
     // Get the message including information of new instance, which will be send to IDE.
-    std::string message = GetInstanceMapMessage("addInstance", instanceId);
+    std::string message = GetInstanceMapMessage("addInstance", instanceId, language);
 
     if (!g_waitForConnection()) { // g_waitForConnection : the res means the connection state of the connect server
         g_sendMessage(message); // if connected, message will be sent immediately.
@@ -253,7 +254,8 @@ void ConnectServerManager::RemoveInstance(int32_t instanceId)
     }
 }
 
-std::string ConnectServerManager::GetInstanceMapMessage(const char* messageType, int32_t instanceId)
+std::string ConnectServerManager::GetInstanceMapMessage(
+    const char* messageType, int32_t instanceId, const std::string& language)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     auto message = JsonUtil::Create(true);
@@ -267,6 +269,8 @@ std::string ConnectServerManager::GetInstanceMapMessage(const char* messageType,
     pthread_threadid_np(0, &tid);
     message->Put("tid", static_cast<int64_t>(tid));
 #endif
+    message->Put("apiType", "faMode");
+    message->Put("language", language.c_str());
     return message->ToString();
 }
 
