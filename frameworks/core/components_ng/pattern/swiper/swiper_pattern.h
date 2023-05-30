@@ -216,6 +216,8 @@ public:
 
     void UpdateCurrentOffset(float offset);
 
+    bool NeedMarkDirtyNodeRenderIndicator();
+
     int32_t TotalCount() const;
 
     Axis GetDirection() const;
