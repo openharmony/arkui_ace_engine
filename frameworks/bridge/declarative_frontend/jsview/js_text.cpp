@@ -145,30 +145,27 @@ void JSText::SetTextShadow(const JSCallbackInfo& info)
         TextModel::GetInstance()->SetTextShadow(shadow);
         return;
     }
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (!argsPtrItem || argsPtrItem->IsNull()) {
-        LOGW("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
-        info.ReturnSelf();
-        return;
-    }
-    double radius = 0.0;
-    ParseJsDouble(JSRef<JSObject>::Cast(info[0])->GetProperty("radius"), radius);
-    if (LessNotEqual(radius, 0.0)) {
-        radius = 0.0;
-    }
+
+    auto jsObject = JSRef<JSObject>::Cast(info[0]);
     Shadow shadow;
-    shadow.SetBlurRadius(radius);
-    CalcDimension offsetX;
-    if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetX"), offsetX)) {
-        shadow.SetOffsetX(offsetX.Value());
-    }
-    CalcDimension offsetY;
-    if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetY"), offsetY)) {
-        shadow.SetOffsetY(offsetY.Value());
-    }
-    Color color;
-    if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
-        shadow.SetColor(color);
+    double radius = 0.0;
+    if (ParseJsDouble(jsObject->GetProperty("radius"), radius)) {
+        if (LessNotEqual(radius, 0.0)) {
+            radius = 0.0;
+        }
+        shadow.SetBlurRadius(radius);
+        CalcDimension offsetX;
+        if (ParseJsDimensionVp(jsObject->GetProperty("offsetX"), offsetX)) {
+            shadow.SetOffsetX(offsetX.Value());
+        }
+        CalcDimension offsetY;
+        if (ParseJsDimensionVp(jsObject->GetProperty("offsetY"), offsetY)) {
+            shadow.SetOffsetY(offsetY.Value());
+        }
+        Color color;
+        if (ParseJsColor(jsObject->GetProperty("color"), color)) {
+            shadow.SetColor(color);
+        }
     }
     TextModel::GetInstance()->SetTextShadow(shadow);
 }
