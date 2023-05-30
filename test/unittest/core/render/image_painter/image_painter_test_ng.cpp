@@ -633,7 +633,7 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_ApplyImageFit11, TestSize.Level1
     imagePainter.ApplyImageFit(ImageFit::CONTAIN, rawpicsize, dstsize, srcRect_, dstRect_);
     auto testSize4 = Alignment::GetAlignPosition(dstsize, dstRect_.GetSize(), Alignment::CENTER);
     EXPECT_EQ(testSize4.GetX(), 0);
-    EXPECT_EQ(testSize4.GetY(), 0.45);
+    EXPECT_FLOAT_EQ(testSize4.GetY(), 0.45);
 
     /**
      * @tc.steps6: callback ApplyImageFit when ImageFit::CONTAIN.

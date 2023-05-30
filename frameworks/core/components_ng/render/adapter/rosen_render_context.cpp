@@ -51,6 +51,7 @@
 #include "core/components_ng/render/adapter/moon_progress_modifier.h"
 #include "core/components_ng/render/adapter/mouse_select_modifier.h"
 #include "core/components_ng/render/adapter/overlay_modifier.h"
+#include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
@@ -378,19 +379,13 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBgImageLoadSuccessCallback()
 
 void RosenRenderContext::PaintBackground()
 {
-    auto image = DynamicCast<NG::SkiaImage>(bgImage_);
-    CHECK_NULL_VOID(bgLoadingCtx_ && image);
-
-    auto rosenImage = std::make_shared<Rosen::RSImage>();
-    auto compressData = image->GetCompressData();
-    if (compressData) {
-        rosenImage->SetCompressData(
-            compressData, image->GetUniqueID(), image->GetCompressWidth(), image->GetCompressHeight());
+    if (InstanceOf<PixelMapImage>(bgImage_)) {
+        PaintPixmapBgImage();
+    } else if (InstanceOf<SkiaImage>(bgImage_)) {
+        PaintSkBgImage();
     } else {
-        rosenImage->SetImage(image->GetImage());
+        return;
     }
-    rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
-    rsNode_->SetBgImage(rosenImage);
 
     SizeF renderSize = ImagePainter::CalculateBgImageSize(
         GetHost()->GetGeometryNode()->GetFrameSize(), bgLoadingCtx_->GetImageSize(), GetBackgroundImageSize());
@@ -916,10 +911,18 @@ void RosenRenderContext::BdImagePaintTask(RSCanvas& canvas)
     auto dipScale = pipeline->GetDipScale();
 
     CHECK_NULL_VOID(bdImage_);
-    auto image = DynamicCast<SkiaImage>(bdImage_)->GetImage();
+    sk_sp<SkImage> image;
+    if (InstanceOf<SkiaImage>(bdImage_)) {
+        image = DynamicCast<SkiaImage>(bdImage_)->GetImage();
+    } else if (InstanceOf<PixelMapImage>(bdImage_)) {
+        auto pixmap = DynamicCast<PixelMapImage>(bdImage_)->GetPixelMap();
+        CHECK_NULL_VOID(pixmap);
+        image = SkiaImage::MakeSkImageFromPixmap(pixmap);
+    } else {
+        return;
+    }
     CHECK_NULL_VOID(image);
     RSImage rsImage(&image);
-
     BorderImagePainter borderImagePainter(*GetBdImage(), widthProp, paintRect.GetSize(), rsImage, dipScale);
     borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), canvas);
 }
@@ -2664,4 +2667,33 @@ inline void RosenRenderContext::ConvertRadius(const BorderRadiusProperty& value,
         static_cast<float>(value.radiusBottomRight.value_or(Dimension()).ConvertToPx()),
         static_cast<float>(value.radiusBottomLeft.value_or(Dimension()).ConvertToPx()));
 }
+
+void RosenRenderContext::PaintSkBgImage()
+{
+    auto image = DynamicCast<NG::SkiaImage>(bgImage_);
+    CHECK_NULL_VOID(bgLoadingCtx_ && image);
+
+    auto rosenImage = std::make_shared<Rosen::RSImage>();
+    auto compressData = image->GetCompressData();
+    if (compressData) {
+        rosenImage->SetCompressData(
+            compressData, image->GetUniqueID(), image->GetCompressWidth(), image->GetCompressHeight());
+    } else {
+        rosenImage->SetImage(image->GetImage());
+    }
+    rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
+    rsNode_->SetBgImage(rosenImage);
+}
+
+void RosenRenderContext::PaintPixmapBgImage()
+{
+    auto image = DynamicCast<NG::PixelMapImage>(bgImage_);
+    CHECK_NULL_VOID(bgLoadingCtx_ && image);
+
+    auto rosenImage = std::make_shared<Rosen::RSImage>();
+    rosenImage->SetPixelMap(image->GetPixelMap()->GetPixelMapSharedPtr());
+    rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
+    rsNode_->SetBgImage(rosenImage);
+}
+
 } // namespace OHOS::Ace::NG

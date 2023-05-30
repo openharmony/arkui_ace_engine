@@ -23,6 +23,7 @@ class PixelMapPreview : public PixelMap {
     DECLARE_ACE_TYPE(PixelMapPreview, PixelMap)
 
 public:
+    explicit PixelMapPreview(std::shared_ptr<Media::PixelMap> pixmap) : pixmap_(std::move(pixmap)) {}
     static RefPtr<PixelMap> CreatePixelMap(void* sptrAddr);
     static RefPtr<PixelMap> CreatePixelMapFromDataAbility(void* uniquePtr);
     static RefPtr<PixelMap> ConvertSkImageToPixmap(
@@ -38,6 +39,13 @@ public:
     void* GetRawPixelMapPtr() const override;
     std::string GetId() override;
     std::string GetModifyId() override;
+    std::shared_ptr<Media::PixelMap> GetPixelMapSharedPtr() override
+    {
+        return pixmap_;
+    }
+
+private:
+    std::shared_ptr<Media::PixelMap> pixmap_;
 };
 } // namespace OHOS::Ace
 

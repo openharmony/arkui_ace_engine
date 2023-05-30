@@ -18,8 +18,6 @@
 
 #include <utility>
 
-#include "include/core/SkImage.h"
-
 #include "core/components_ng/render/canvas_image.h"
 
 namespace OHOS::Ace::NG {
@@ -39,8 +37,12 @@ public:
         return pixelMap_;
     }
 
+    void Cache(const std::string& key) override;
+
     void DrawToRSCanvas(
         RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) override;
+
+    static RefPtr<CanvasImage> QueryFromCache(const std::string& key);
 
 private:
     const RefPtr<PixelMap> pixelMap_;

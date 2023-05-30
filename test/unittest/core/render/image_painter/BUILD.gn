@@ -32,6 +32,7 @@ ohos_unittest("image_painter_test_ng") {
 
     #mock
     "$ace_root/frameworks/base/test/mock/mock_pixel_map.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_cache.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_drawing_convertor.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
   ]

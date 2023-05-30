@@ -32,6 +32,12 @@ RefPtr<PixelMap> SkiaImage::GetPixelMap()
     return nullptr;
 }
 
+void SkiaImage::Cache(const std::string& key) {}
+RefPtr<CanvasImage> SkiaImage::QueryFromCache(const std::string& key)
+{
+    return nullptr;
+}
+
 void SkiaImage::DrawToRSCanvas(
     RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
 {}
