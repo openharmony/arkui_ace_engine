@@ -85,6 +85,7 @@ public:
     void UpdateRootElementSize();
     void UpdateSurfaceSize();
     void UpdateSurfaceSizeWithAnimathion();
+    void UpdateConfiguration();
     void AddFormAcquireCallback(const OnFormAcquiredCallback& callback)
     {
         if (callback) {

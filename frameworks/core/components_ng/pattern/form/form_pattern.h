@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_PATTERN_H
 
+#include "core/common/ace_application_info.h"
 #include "core/components/form/resource/form_request_data.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/form/form_event_hub.h"
@@ -96,6 +97,7 @@ private:
 
     bool ISAllowUpdate() const;
     void EnableDrag();
+    void UpdateConfiguration();
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     RefPtr<RenderContext> externalRenderContext_;
 
@@ -106,6 +108,7 @@ private:
     bool isLoaded_ = false;
     bool isVisible_ = true;
     bool isUnTrust_ = false;
+    std::string localeTag_ = AceApplicationInfo::GetInstance().GetLocaleTag();
 };
 
 } // namespace NG
