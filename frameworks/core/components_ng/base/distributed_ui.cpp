@@ -63,8 +63,6 @@ void RestorePageNode(const RefPtr<NG::FrameNode>& pageNode)
     auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
     CHECK_NULL_VOID(pagePattern);
     pagePattern->SetOnBackPressed([]() { return true; });
-    std::function<void()> emptyFunc;
-    pagePattern->SetPageTransitionFunc(std::move(emptyFunc));
 }
 } // namespace
 
@@ -708,8 +706,8 @@ void DistributedUI::RestoreUITreeInner(const SerializeableObjectArray& nodeArray
     auto pageRootNode = context->GetStageManager()->GetLastPage();
     CHECK_NULL_VOID_NOLOG(pageRootNode);
     RestorePageNode(pageRootNode);
-    auto children = pageRootNode->GetChildren();
-    for (const auto& child : children) {
+    sinkPageChildren_ = pageRootNode->GetChildren();
+    for (const auto& child : sinkPageChildren_) {
         pageRootNode->RemoveChild(child);
     }
 

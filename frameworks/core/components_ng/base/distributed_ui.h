@@ -123,6 +123,7 @@ private:
 
     std::unordered_map<int32_t, int32_t> nodeIdMapping_;
     std::unordered_map<int32_t, std::size_t> nodeHashs_;
+    std::list<RefPtr<NG::UINode>> sinkPageChildren_;
 };
 } // namespace OHOS::Ace::NG
 
