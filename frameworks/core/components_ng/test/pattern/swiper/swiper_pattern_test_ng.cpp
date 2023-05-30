@@ -876,19 +876,19 @@ HWTEST_F(SwiperPatternTestNg, SwiperModelNg003, TestSize.Level1)
      * @tc.steps: step3.7. Test SetArrowStyle function.
      * @tc.expected: after set swiperArrowParameters, swiperLayoutProperty->IsShowBoard is true.
      */
-    swiperArrowParameters.isShowBoard = true;
-    swiperArrowParameters.boardSize = dimension;
-    swiperArrowParameters.boardColor = Color(Color::BLUE);
+    swiperArrowParameters.isShowBackground = true;
+    swiperArrowParameters.backgroundSize = dimension;
+    swiperArrowParameters.backgroundColor = Color(Color::BLUE);
     swiperArrowParameters.arrowSize = dimension;
     swiperArrowParameters.arrowColor = Color(Color::RED);
-    swiperArrowParameters.isSiderMiddle = true;
+    swiperArrowParameters.isSidebarMiddle = true;
     swiperModelNG.SetArrowStyle(swiperArrowParameters);
-    EXPECT_TRUE(swiperLayoutProperty->GetIsShowBoard());
-    EXPECT_EQ(swiperLayoutProperty->GetBoardSize(), dimension);
-    EXPECT_EQ(swiperLayoutProperty->GetBoardColor(), Color(Color::BLUE));
+    EXPECT_TRUE(swiperLayoutProperty->GetIsShowBackground());
+    EXPECT_EQ(swiperLayoutProperty->GetBackgroundSize(), dimension);
+    EXPECT_EQ(swiperLayoutProperty->GetBackgroundColor(), Color(Color::BLUE));
     EXPECT_EQ(swiperLayoutProperty->GetArrowSize(), dimension);
     EXPECT_EQ(swiperLayoutProperty->GetArrowColor(), Color(Color::RED));
-    EXPECT_TRUE(swiperLayoutProperty->GetIsSiderMiddle());
+    EXPECT_TRUE(swiperLayoutProperty->GetIsSidebarMiddle());
 
     /**
      * @tc.steps: step3.8. Test SetDisplayArrow function.

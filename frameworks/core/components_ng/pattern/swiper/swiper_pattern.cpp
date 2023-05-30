@@ -235,22 +235,13 @@ RefPtr<FocusHub> SwiperPattern::GetFocusHubChild(std::string childFrameName)
 
 WeakPtr<FocusHub> SwiperPattern::GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode)
 {
-    auto swiperHost = GetHost();
-    CHECK_NULL_RETURN(swiperHost, nullptr);
-    auto swiperFocusHub = swiperHost->GetFocusHub();
-    CHECK_NULL_RETURN(swiperFocusHub, nullptr);
-    auto focusChildren = swiperFocusHub->GetChildren();
-    CHECK_NULL_RETURN_NOLOG(!focusChildren.empty(), nullptr);
-    auto lastShowNode = lastWeakShowNode_.Upgrade();
-    CHECK_NULL_RETURN(lastShowNode, nullptr);
-    auto lastShowFocusHub = lastShowNode->GetFocusHub();
-    CHECK_NULL_RETURN(lastShowFocusHub, nullptr);
     auto curFocusNode = currentFocusNode.Upgrade();
     CHECK_NULL_RETURN(curFocusNode, nullptr);
     if ((direction_ == Axis::HORIZONTAL && step == FocusStep::UP) ||
         (direction_ == Axis::VERTICAL && step == FocusStep::LEFT)) {
         return PreviousFocus(curFocusNode);
-    } else if ((direction_ == Axis::HORIZONTAL && step == FocusStep::DOWN) ||
+    }
+    if ((direction_ == Axis::HORIZONTAL && step == FocusStep::DOWN) ||
                (direction_ == Axis::VERTICAL && step == FocusStep::RIGHT)) {
         return NextFocus(curFocusNode);
     }
@@ -274,7 +265,8 @@ WeakPtr<FocusHub> SwiperPattern::PreviousFocus(const RefPtr<FocusHub>& curFocusN
     }
     if (curFocusNode->GetFrameName() == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
         isLastIndicatorFocused_ = false;
-        curFocusNode->SetParentFocusable(true);
+        (!IsLoop() && currentIndex_ == 0) ? curFocusNode->SetParentFocusable(true)
+                                          : curFocusNode->SetParentFocusable(false);
         return nullptr;
     }
     if (curFocusNode->GetFrameName() == V2::SWIPER_INDICATOR_ETS_TAG) {
@@ -347,7 +339,8 @@ WeakPtr<FocusHub> SwiperPattern::NextFocus(const RefPtr<FocusHub>& curFocusNode)
     }
     if (curFocusNode->GetFrameName() == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
         isLastIndicatorFocused_ = false;
-        curFocusNode->SetParentFocusable(true);
+        (!IsLoop() && currentIndex_ == TotalCount() - 1) ? curFocusNode->SetParentFocusable(true)
+                                                         : curFocusNode->SetParentFocusable(false);
         return nullptr;
     }
     curFocusNode->SetParentFocusable(true);
@@ -1659,12 +1652,12 @@ void SwiperPattern::SaveArrowProperty(const RefPtr<FrameNode>& arrowNode)
     arrowLayoutProperty->UpdateEnabled(swiperPaintProperty->GetEnabled().value_or(true));
     arrowLayoutProperty->UpdateDisplayArrow(layoutProperty->GetDisplayArrowValue());
     arrowLayoutProperty->UpdateHoverShow(layoutProperty->GetHoverShowValue());
-    arrowLayoutProperty->UpdateIsShowBoard(layoutProperty->GetIsShowBoardValue());
-    arrowLayoutProperty->UpdateBoardSize(layoutProperty->GetBoardSizeValue());
-    arrowLayoutProperty->UpdateBoardColor(layoutProperty->GetBoardColorValue());
+    arrowLayoutProperty->UpdateIsShowBackground(layoutProperty->GetIsShowBackgroundValue());
+    arrowLayoutProperty->UpdateBackgroundSize(layoutProperty->GetBackgroundSizeValue());
+    arrowLayoutProperty->UpdateBackgroundColor(layoutProperty->GetBackgroundColorValue());
     arrowLayoutProperty->UpdateArrowSize(layoutProperty->GetArrowSizeValue());
     arrowLayoutProperty->UpdateArrowColor(layoutProperty->GetArrowColorValue());
-    arrowLayoutProperty->UpdateIsSiderMiddle(layoutProperty->GetIsSiderMiddleValue());
+    arrowLayoutProperty->UpdateIsSidebarMiddle(layoutProperty->GetIsSidebarMiddleValue());
 }
 
 void SwiperPattern::SetAccessibilityAction()
