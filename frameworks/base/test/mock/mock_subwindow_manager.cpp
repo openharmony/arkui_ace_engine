@@ -15,6 +15,7 @@
 
 #include "base/geometry/rect.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "core/common/container.h"
 namespace OHOS::Ace {
 namespace {
 static RefPtr<Subwindow> g_currentWindow;
@@ -52,4 +53,26 @@ Rect SubwindowManager::GetParentWindowRect()
 {
     return Rect();
 }
+
+const RefPtr<Subwindow>& SubwindowManager::GetCurrentDialogWindow()
+{
+    std::lock_guard<std::mutex> lock(currentDialogSubwindowMutex_);
+    return currentDialogSubwindow_;
+}
+
+void SubwindowManager::HideSubWindowNG()
+{
+    RefPtr<Subwindow> subwindow;
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (container->IsDialogContainer()) {
+        subwindow = GetCurrentDialogWindow();
+    } else {
+        subwindow = GetCurrentWindow();
+    }
+    if (subwindow) {
+        subwindow->HideSubWindowNG();
+    }
+}
+
 } // namespace OHOS::Ace
