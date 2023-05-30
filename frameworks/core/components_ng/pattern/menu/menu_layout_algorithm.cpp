@@ -432,10 +432,10 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(
             }
             x += windowsOffsetX + pageOffset.GetX();
             y += windowsOffsetY + pageOffset.GetY();
-            x = std::clamp(x, windowsOffsetX + pageOffset.GetX(),
-                wrapperSize_.Width() - size.Width() - margin_ * 2.0f + windowsOffsetX + pageOffset.GetX());
-            y = std::clamp(y, windowsOffsetY + pageOffset.GetY(),
-                wrapperSize_.Height() - size.Height() - margin_ * 2.0f + windowsOffsetY + pageOffset.GetY());
+            x = std::clamp(x, windowsOffsetX + pageOffset.GetX() + margin_,
+                wrapperSize_.Width() - size.Width() - margin_ + windowsOffsetX + pageOffset.GetX());
+            y = std::clamp(y, windowsOffsetY + pageOffset.GetY() + margin_,
+                wrapperSize_.Height() - size.Height() - margin_ + windowsOffsetY + pageOffset.GetY());
 
             return OffsetF(x, y);
         }
@@ -447,8 +447,8 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(
             y -= pageOffset_.GetY();
         }
     }
-    x = std::clamp(x, 0.0f, wrapperSize_.Width() - size.Width() - margin_ * 2.0f);
-    y = std::clamp(y, 0.0f, wrapperSize_.Height() - size.Height() - margin_ * 2.0f);
+    x = std::clamp(x, margin_, wrapperSize_.Width() - size.Width() - margin_);
+    y = std::clamp(y, margin_, wrapperSize_.Height() - size.Height() - margin_);
 
     return OffsetF(x, y);
 }
@@ -787,15 +787,15 @@ OffsetF MenuLayoutAlgorithm::FitToScreen(const OffsetF& fitPosition, const SizeF
         }
         x += windowsOffsetX + pageOffset.GetX();
         y += windowsOffsetY + pageOffset.GetY();
-        x = std::clamp(x, windowsOffsetX + pageOffset.GetX(),
-            wrapperSize_.Width() - childSize.Width() - margin_ * 2.0f + windowsOffsetX + pageOffset.GetX());
-        y = std::clamp(y, windowsOffsetY + pageOffset.GetY(),
-            wrapperSize_.Height() - childSize.Height() - margin_ * 2.0f + windowsOffsetY + pageOffset.GetY());
+        x = std::clamp(x, windowsOffsetX + pageOffset.GetX() + margin_,
+            wrapperSize_.Width() - childSize.Width() - margin_ + windowsOffsetX + pageOffset.GetX());
+        y = std::clamp(y, windowsOffsetY + pageOffset.GetY() + margin_,
+            wrapperSize_.Height() - childSize.Height() - margin_ + windowsOffsetY + pageOffset.GetY());
 
         return OffsetF(x, y);
     }
-    x = std::clamp(x, 0.0f, wrapperSize_.Width() - childSize.Width() - margin_ * 2.0f);
-    y = std::clamp(y, 0.0f, wrapperSize_.Height() - childSize.Height() - margin_ * 2.0f);
+    x = std::clamp(x, margin_, wrapperSize_.Width() - childSize.Width() - margin_);
+    y = std::clamp(y, margin_, wrapperSize_.Height() - childSize.Height() - margin_);
 
     return OffsetF(x, y);
 }
