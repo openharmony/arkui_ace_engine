@@ -322,7 +322,7 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
     if (info[1]->IsObject() && JSRef<JSObject>::Cast(info[1])->GetProperty("stateEffect")->IsBoolean()) {
         para.stateEffectSecond = JSRef<JSObject>::Cast(info[1])->GetProperty("stateEffect")->ToBoolean();
     }
-    if (para.parseSuccess) {
+    if (para.parseSuccess.value()) {
         labelSet = true;
     }
 
