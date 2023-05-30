@@ -211,19 +211,14 @@ void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
 void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint)
 {
     layoutConstraint_ = parentConstraint;
-    bool hasWidth = calcLayoutConstraint_ && calcLayoutConstraint_->selfIdealSize.has_value() &&
-                    calcLayoutConstraint_->selfIdealSize.value().Width().has_value();
-    bool hasHeight = calcLayoutConstraint_ && calcLayoutConstraint_->selfIdealSize.has_value() &&
-                     calcLayoutConstraint_->selfIdealSize.value().Height().has_value();
-    if (margin_ && (!hasWidth || !hasHeight)) {
+    if (margin_) {
         // TODO: add margin is negative case.
         auto margin = CreateMargin();
-        Axis reserveAxis = !hasWidth && !hasHeight ? Axis::NONE : !hasWidth ? Axis::VERTICAL : Axis::HORIZONTAL;
-        MinusPaddingToSize(margin, layoutConstraint_->maxSize, reserveAxis);
-        MinusPaddingToSize(margin, layoutConstraint_->minSize, reserveAxis);
-        MinusPaddingToSize(margin, layoutConstraint_->percentReference, reserveAxis);
-        MinusPaddingToSize(margin, layoutConstraint_->selfIdealSize, reserveAxis);
-        MinusPaddingToSize(margin, layoutConstraint_->parentIdealSize, reserveAxis);
+        MinusPaddingToSize(margin, layoutConstraint_->maxSize);
+        MinusPaddingToSize(margin, layoutConstraint_->minSize);
+        MinusPaddingToSize(margin, layoutConstraint_->percentReference);
+        MinusPaddingToSize(margin, layoutConstraint_->selfIdealSize);
+        MinusPaddingToSize(margin, layoutConstraint_->parentIdealSize);
     }
     if (calcLayoutConstraint_) {
         if (calcLayoutConstraint_->maxSize.has_value()) {
