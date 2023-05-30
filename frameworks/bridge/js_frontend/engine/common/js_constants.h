@@ -130,6 +130,7 @@ ACE_EXPORT extern const char SPRING_CURVE[];
 ACE_EXPORT extern const char INTERPOLATING_SPRING[];
 ACE_EXPORT extern const char CURVES_STEPS[];
 ACE_EXPORT extern const char STEPS_CURVE[];
+ACE_EXPORT extern const char CURVES_CUSTOM[];
 ACE_EXPORT extern const char CURVE_INTERPOLATE[];
 ACE_EXPORT extern const char SPRING_MOTION[];
 ACE_EXPORT extern const char RESPONSIVE_SPRING_MOTION[];
