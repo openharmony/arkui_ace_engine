@@ -45,7 +45,6 @@
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/key_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
@@ -3564,5 +3563,132 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleTouchEvent001, TestSize.Level1)
     tabBarPattern->tabItemOffsets_ = { { -1.0f, -1.0f }, { 1.0f, 1.0f }, { 2.0f, 2.0f } };
     tabBarPattern->HandleTouchEvent(touchLocationInfo);
     EXPECT_EQ(tabBarNode->TotalChildCount(), 2);
+}
+
+/**
+ * @tc.name: TabsModelSetTabBarWidth001
+ * @tc.desc: test SetTabBarWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsModelSetTabBarWidth001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    MockPipelineContextGetTheme();
+    TabsModelNG tabsModel;
+    Dimension tabBarWidth = 10.0_vp;
+    Dimension tabBarHeight = 3.0_vp;
+
+    /**
+     * @tc.steps: step2. Test function SetTabBarWidth and SetTabBarHeight When tabBarWidth and tabBarHeight change.
+     * @tc.expected: Related functions run ok.
+     */
+    for (int i = 0; i <= 1; i++) {
+        tabsModel.SetTabBarWidth(tabBarWidth);
+        tabsModel.SetTabBarHeight(tabBarHeight);
+        tabBarWidth = -1.0_vp;
+        tabBarHeight = -1.0_vp;
+    }
+}
+
+/**
+ * @tc.name: TabsModelSetAnimationDuration001
+ * @tc.desc: test SetAnimationDuration
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsModelSetAnimationDuration001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    MockPipelineContextGetTheme();
+    TabsModelNG tabsModel;
+    bool duration = true;
+
+    /**
+     * @tc.steps: step2. Test function SetAnimationDuration.
+     * @tc.expected: Related function runs ok.
+     */
+    for (int i = 0; i <= 1; i++) {
+        tabsModel.SetAnimationDuration(duration);
+        duration = false;
+    }
+}
+
+/**
+ * @tc.name: TabBarmodifieronDraw001
+ * @tc.desc: test onDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarmodifieronDraw001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create tabBarmodifier
+     */
+    MockPipelineContextGetTheme();
+
+    auto tabBarModifier = AceType::MakeRefPtr<TabBarModifier>();
+
+    /**
+     * @tc.steps: step2. Test function onDraw.
+     * @tc.expected: Related function runs ok.
+     */
+    float height = 1.0f;
+    tabBarModifier->hasIndicator_ = nullptr;
+    tabBarModifier->indicator_.SetHeight(height);
+}
+
+float fun_test01()
+{
+    return 1.0f;
+}
+float fun_test02()
+{
+    return 0.0f;
+}
+void fun_test03(const float& v1)
+{
+    return;
+}
+
+/**
+ * @tc.name: TabBarmodifierPaintIndicator001
+ * @tc.desc: test PaintIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarmodifierPaintIndicator001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create tabBarmodifier
+     */
+    MockPipelineContextGetTheme();
+
+    auto tabBarModifier = AceType::MakeRefPtr<TabBarModifier>();
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(AnyNumber());
+    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(AnyNumber());
+    EXPECT_CALL(rsCanvas, Restore()).Times(AnyNumber());
+
+    DrawingContext context { rsCanvas, 10.0f, 10.0f };
+    RectF indicator(0.0f, 0.0f, 1.0f, 1.0f);
+    tabBarModifier->indicatorHeight_->SetUpCallbacks(fun_test01, fun_test03);
+    tabBarModifier->indicatorWidth_->SetUpCallbacks(fun_test01, fun_test03);
+    tabBarModifier->indicatorMarginTop_->SetUpCallbacks(fun_test01, fun_test03);
+    tabBarModifier->indicatorBorderRadius_->SetUpCallbacks(fun_test01, fun_test03);
+
+    /**
+     * @tc.steps: step2. Test function PaintIndicator.
+     * @tc.expected: Related function runs ok.
+     */
+    for (int i = 0; i <= 1; i++) {
+        tabBarModifier->PaintIndicator(context, indicator);
+        tabBarModifier->indicatorHeight_->SetUpCallbacks(fun_test02, fun_test03);
+        tabBarModifier->indicatorWidth_->SetUpCallbacks(fun_test02, fun_test03);
+        tabBarModifier->indicatorMarginTop_->SetUpCallbacks(fun_test02, fun_test03);
+        tabBarModifier->indicatorBorderRadius_->SetUpCallbacks(fun_test02, fun_test03);
+    }
 }
 } // namespace OHOS::Ace::NG
