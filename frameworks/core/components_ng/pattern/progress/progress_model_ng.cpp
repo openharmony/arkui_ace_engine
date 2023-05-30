@@ -195,7 +195,7 @@ void ProgressModelNG::SetText(const std::optional<std::string>& value)
         auto curValue = progressPaintProperty->GetValue();
         int32_t curPercent = curValue.value() * 100 / maxValue.value();
         std::string number = std::to_string(curPercent) + "%";
-        textLayoutProperty->UpdateContent(number);
+        textLayoutProperty->UpdateContent("");
         context = number;
         pattern->SetTextFromUser(false);
     } else {
@@ -259,7 +259,7 @@ void ProgressModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, dou
         curPercent = value * 100 / maxValue;
     }
     std::string number = std::to_string(curPercent) + "%";
-    textProps->UpdateContent(number);
+    textProps->UpdateContent("");
     textProps->UpdateFontSize(progressTheme->GetTextSize());
     textProps->UpdateTextColor(progressTheme->GetTextColor());
     textProps->UpdateFontWeight(FontWeight::MEDIUM);
