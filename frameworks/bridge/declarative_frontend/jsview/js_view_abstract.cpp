@@ -533,7 +533,7 @@ RefPtr<NG::ChainedTransitionEffect> ParseChainedTransition(
     if (propAnimationOption->IsObject()) {
         auto animationOptionArgs = JsonUtil::ParseJsonString(propAnimationOption->ToString());
         auto animationOptionResult =
-            std::make_shared<AnimationOption>(JSViewContext::CreateAnimation(animationOptionArgs));
+            std::make_shared<AnimationOption>(JSViewContext::CreateAnimation(animationOptionArgs, nullptr));
         auto animationOptionObj = JSRef<JSObject>::Cast(propAnimationOption);
         JSRef<JSVal> onFinish = animationOptionObj->GetProperty("onFinish");
         if (onFinish->IsFunction()) {
@@ -4387,7 +4387,7 @@ void JSViewAbstract::JsClip(const JSCallbackInfo& info)
             return;
         }
         ViewAbstractModel::GetInstance()->SetClipShape(clipShape->GetBasicShape());
-    } else if (info[0]->IsBoolean()) {
+    } else if (info[0]->IsBoolean() || info[0]->IsUndefined()) {
         ViewAbstractModel::GetInstance()->SetClipEdge(info[0]->ToBoolean());
     }
 }

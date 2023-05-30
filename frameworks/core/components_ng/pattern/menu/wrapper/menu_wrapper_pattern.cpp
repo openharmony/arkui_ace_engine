@@ -115,6 +115,24 @@ void MenuWrapperPattern::OnModifyDone()
 // close subMenu when mouse move outside
 void MenuWrapperPattern::HandleMouseEvent(const MouseInfo& info, RefPtr<MenuItemPattern>& menuItemPattern)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto subMenu = host->GetChildren().back();
+    if (host->GetChildren().size() <= 1) {
+        return;
+    }
+    auto subMenuNode = DynamicCast<FrameNode>(subMenu);
+    CHECK_NULL_VOID(subMenuNode);
+    auto subMenuPattern = subMenuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(subMenuPattern);
+    auto currentHoverMenuItem = subMenuPattern->GetParentMenuItem();
+    CHECK_NULL_VOID(currentHoverMenuItem);
+
+    auto menuItemNode = menuItemPattern->GetHost();
+    CHECK_NULL_VOID(menuItemNode);
+    if (currentHoverMenuItem->GetId() != menuItemNode->GetId()) {
+        return;
+    }
     const auto& mousePosition = info.GetGlobalLocation();
     if (!menuItemPattern->IsInHoverRegions(mousePosition.GetX(), mousePosition.GetY()) &&
         menuItemPattern->IsSubMenuShowed()) {

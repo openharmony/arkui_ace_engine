@@ -382,8 +382,6 @@ public:
 
     std::string ProvideRestoreInfo();
 
-    void Build() override;
-
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;
@@ -482,6 +480,8 @@ private:
     std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
 
     bool isRestoreInfoUsed_ = false;
+
+    bool isWaitingAttach_ = false;
 
     friend class RosenRenderContext;
     friend class RenderContext;

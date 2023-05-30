@@ -40,6 +40,7 @@ class ACE_EXPORT ListItemPattern : public Pattern {
     DECLARE_ACE_TYPE(ListItemPattern, Pattern);
 
 public:
+    explicit ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder) {}
     explicit ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder, V2::ListItemStyle listItemStyle)
         : shallowBuilder_(shallowBuilder), listItemStyle_(listItemStyle)
     {}
@@ -56,11 +57,6 @@ public:
             shallowBuilder_->ExecuteDeepRender();
             shallowBuilder_.Reset();
         }
-    }
-
-    void LazyBuild() override
-    {
-        BeforeCreateLayoutWrapper();
     }
 
     FocusPattern GetFocusPattern() const override

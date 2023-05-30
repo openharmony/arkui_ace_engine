@@ -56,9 +56,9 @@ const Ace::FontStyle ITALIC_FONT_STYLE_VALUE = Ace::FontStyle::ITALIC;
 const Ace::FontWeight FONT_WEIGHT_VALUE = Ace::FontWeight::W100;
 const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
 const std::vector<SelectParam> CREATE_VALUE = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
-        { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    { OPTION_TEXT_3, INTERNAL_SOURCE } };
 } // namespace
-struct TestSelectedFont {
+struct TestProperty {
     std::optional<Dimension> FontSize = std::nullopt;
     std::optional<Ace::FontStyle> FontStyle = std::nullopt;
     std::optional<FontWeight> FontWeight = std::nullopt;
@@ -70,7 +70,7 @@ public:
     static void SetUpTestCase();
     static void TearDownTestCase();
 protected:
-    static RefPtr<FrameNode> CreateSelectParagraph(const std::vector<SelectParam>& createValue, const TestSelectedFont& testSelectedFont);
+    static RefPtr<FrameNode> CreateSelect(const std::vector<SelectParam>& value, const TestProperty& test);
 };
 
 void SelectPropertyTestNg::SetUpTestCase()
@@ -85,24 +85,24 @@ void SelectPropertyTestNg::TearDownTestCase()
 {
     MockPipelineBase::TearDown();
 }
-RefPtr<FrameNode> SelectPropertyTestNg::CreateSelectParagraph(const std::vector<SelectParam>& createValue, const TestSelectedFont& testSelectedFont)
+RefPtr<FrameNode> SelectPropertyTestNg::CreateSelect(const std::vector<SelectParam>& value, const TestProperty& test)
 {
     SelectModelNG selectModelInstance;
-    selectModelInstance.Create(createValue);
-    if (testSelectedFont.FontSize.has_value()) {
-        selectModelInstance.SetFontSize(testSelectedFont.FontSize.value());
+    selectModelInstance.Create(value);
+    if (test.FontSize.has_value()) {
+        selectModelInstance.SetFontSize(test.FontSize.value());
     }
-    if (testSelectedFont.FontColor.has_value()) {
-        selectModelInstance.SetFontColor(testSelectedFont.FontColor.value());
+    if (test.FontColor.has_value()) {
+        selectModelInstance.SetFontColor(test.FontColor.value());
     }
-    if (testSelectedFont.FontStyle.has_value()) {
-        selectModelInstance.SetItalicFontStyle(testSelectedFont.FontStyle.value());
+    if (test.FontStyle.has_value()) {
+        selectModelInstance.SetItalicFontStyle(test.FontStyle.value());
     }
-    if (testSelectedFont.FontWeight.has_value()) {
-        selectModelInstance.SetFontWeight(testSelectedFont.FontWeight.value());
+    if (test.FontWeight.has_value()) {
+        selectModelInstance.SetFontWeight(test.FontWeight.value());
     }
-    if (testSelectedFont.FontFamily.has_value()) {
-        selectModelInstance.SetFontFamily(testSelectedFont.FontFamily.value());
+    if (test.FontFamily.has_value()) {
+        selectModelInstance.SetFontFamily(test.FontFamily.value());
     }
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
@@ -293,7 +293,6 @@ HWTEST_F(SelectPropertyTestNg, OnModifyDone001, TestSize.Level1)
  */
 HWTEST_F(SelectPropertyTestNg, UpdateSelectedProps001, TestSize.Level1)
 {
-    
     SelectModelNG selectModelInstance;
     /**
      * @tc.steps: step1. Create select.
@@ -340,14 +339,14 @@ HWTEST_F(SelectPropertyTestNg, UpdateSelectedProps001, TestSize.Level1)
 HWTEST_F(SelectPropertyTestNg, UpdateSelectedProps002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Initialize testSelectedFont and Create select frameNode.
+     * @tc.steps: step1. Initialize testProperty and Create select frameNode.
      */
-    TestSelectedFont testSelectedFont;
-    testSelectedFont.FontSize = std::make_optional(FONT_SIZE_VALUE);
-    testSelectedFont.FontStyle = std::make_optional(ITALIC_FONT_STYLE_VALUE);
-    testSelectedFont.FontWeight = std::make_optional(FONT_WEIGHT_VALUE);
-    testSelectedFont.FontColor = std::make_optional(TEXT_COLOR_VALUE);
-    auto frameNode = CreateSelectParagraph(CREATE_VALUE, testSelectedFont);
+    TestProperty testProperty;
+    testProperty.FontSize = std::make_optional(FONT_SIZE_VALUE);
+    testProperty.FontStyle = std::make_optional(ITALIC_FONT_STYLE_VALUE);
+    testProperty.FontWeight = std::make_optional(FONT_WEIGHT_VALUE);
+    testProperty.FontColor = std::make_optional(TEXT_COLOR_VALUE);
+    auto frameNode = CreateSelect(CREATE_VALUE, testProperty);
     ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. Get pattern.

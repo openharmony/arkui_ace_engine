@@ -1313,7 +1313,6 @@ void VideoPattern::EnableDrag()
             videoSrc = json->GetString(key);
         }
 
-        bool isInitialState = this->isInitialState_;
         if (videoSrc == videoSrcBefore) {
             return;
         }

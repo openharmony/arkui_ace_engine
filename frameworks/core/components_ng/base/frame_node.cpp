@@ -368,6 +368,10 @@ void FrameNode::OnAttachToMainTree(bool recursive)
             parent = parent->GetParent();
         }
     }
+    if (isWaitingAttach_) {
+        MarkDirtyNode();
+        isWaitingAttach_ = false;
+    }
     if (!hasPendingRequest_) {
         return;
     }
@@ -770,12 +774,6 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool for
     return UpdateLayoutWrapper(nullptr, forceMeasure, forceLayout);
 }
 
-void FrameNode::Build()
-{
-    pattern_->LazyBuild();
-    UINode::Build();
-}
-
 RefPtr<LayoutWrapper> FrameNode::UpdateLayoutWrapper(
     RefPtr<LayoutWrapper> layoutWrapper, bool forceMeasure, bool forceLayout)
 {
@@ -998,6 +996,12 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
     auto paintFlag = paintProperty_->GetPropertyChangeFlag();
     if (CheckNoChanged(layoutFlag | paintFlag)) {
         LOGD("MarkDirtyNode: flag not changed, node tag: %{public}s", GetTag().c_str());
+        return;
+    }
+
+    if (!IsOnMainTree()) {
+        LOGD("MarkDirtyNode: IsNotOnMainTree, node tag: %{public}s", GetTag().c_str());
+        isWaitingAttach_ = true;
         return;
     }
     auto context = GetContext();
