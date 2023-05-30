@@ -976,6 +976,35 @@ HWTEST_F(SliderPatternTestNg, SliderModelNgTest001, TestSize.Level1)
     EXPECT_EQ(sliderPaintProperty->GetBlockType(), SliderModel::BlockStyleType::IMAGE);
     EXPECT_EQ(sliderPaintProperty->GetBlockImage(), SLIDER_MODEL_NG_BLOCK_IMAGE);
     EXPECT_EQ(sliderPaintProperty->GetBlockShape(), basicShape);
+
+    /**
+     * @tc.steps: step3. reset the properties.
+     */
+    sliderModelNG.ResetBlockBorderColor();
+    sliderModelNG.ResetBlockBorderWidth();
+    sliderModelNG.ResetTrackBorderRadius();
+    sliderModelNG.ResetStepColor();
+    sliderModelNG.ResetStepSize();
+    sliderModelNG.ResetBlockType();
+    sliderModelNG.ResetBlockImage();
+    sliderModelNG.ResetBlockShape();
+    frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. check whether the properties is correct.
+     * @tc.expected: step4. check whether the properties is correct.
+     */
+    EXPECT_FALSE(sliderPaintProperty->GetBlockBorderColor().has_value());
+    EXPECT_FALSE(sliderPaintProperty->GetBlockBorderWidth().has_value());
+    EXPECT_FALSE(sliderPaintProperty->GetTrackBorderRadius().has_value());
+    EXPECT_FALSE(sliderPaintProperty->GetStepColor().has_value());
+    EXPECT_FALSE(sliderPaintProperty->GetStepSize().has_value());
+    EXPECT_FALSE(sliderPaintProperty->GetBlockType().has_value());
+    EXPECT_FALSE(sliderPaintProperty->GetBlockImage().has_value());
+    EXPECT_FALSE(sliderPaintProperty->GetBlockShape().has_value());
 }
 
 /**
