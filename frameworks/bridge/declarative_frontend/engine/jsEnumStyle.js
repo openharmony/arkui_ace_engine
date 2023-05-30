@@ -1609,4 +1609,4 @@ var DragRet;
   DragRet[DragRet["DRAG_CANCELED"] = 2] = "DRAG_CANCELED";
   DragRet[DragRet["DROP_ENABLED"] = 3] = "DROP_ENABLED";
   DragRet[DragRet["DROP_DISABLED"] = 4] = "DROP_DISABLED";
-})
+})(DragRet || (DragRet = {}));
