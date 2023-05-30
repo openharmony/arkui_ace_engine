@@ -50,12 +50,27 @@ const CalcSize TEXT_IDEAL_SIZE = CalcSize(CalcLength("50vp"), std::nullopt);
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
+const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
+const Ace::FontStyle ITALIC_FONT_STYLE_VALUE = Ace::FontStyle::ITALIC;
+const Ace::FontWeight FONT_WEIGHT_VALUE = Ace::FontWeight::W100;
+const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
+const std::vector<SelectParam> CREATE_VALUE = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE } };
 } // namespace
-
+struct TestSelectedFont {
+    std::optional<Dimension> FontSize = std::nullopt;
+    std::optional<Ace::FontStyle> FontStyle = std::nullopt;
+    std::optional<FontWeight> FontWeight = std::nullopt;
+    std::optional<std::vector<std::string>> FontFamily = std::nullopt;
+    std::optional<Color> FontColor = std::nullopt;
+};
 class SelectPropertyTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
+protected:
+    static RefPtr<FrameNode> CreateSelectParagraph(const std::vector<SelectParam>& createValue, const TestSelectedFont& testSelectedFont);
 };
 
 void SelectPropertyTestNg::SetUpTestCase()
@@ -69,6 +84,29 @@ void SelectPropertyTestNg::SetUpTestCase()
 void SelectPropertyTestNg::TearDownTestCase()
 {
     MockPipelineBase::TearDown();
+}
+RefPtr<FrameNode> SelectPropertyTestNg::CreateSelectParagraph(const std::vector<SelectParam>& createValue, const TestSelectedFont& testSelectedFont)
+{
+    SelectModelNG selectModelInstance;
+    selectModelInstance.Create(createValue);
+    if (testSelectedFont.FontSize.has_value()) {
+        selectModelInstance.SetFontSize(testSelectedFont.FontSize.value());
+    }
+    if (testSelectedFont.FontColor.has_value()) {
+        selectModelInstance.SetFontColor(testSelectedFont.FontColor.value());
+    }
+    if (testSelectedFont.FontStyle.has_value()) {
+        selectModelInstance.SetItalicFontStyle(testSelectedFont.FontStyle.value());
+    }
+    if (testSelectedFont.FontWeight.has_value()) {
+        selectModelInstance.SetFontWeight(testSelectedFont.FontWeight.value());
+    }
+    if (testSelectedFont.FontFamily.has_value()) {
+        selectModelInstance.SetFontFamily(testSelectedFont.FontFamily.value());
+    }
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    return AceType::DynamicCast<FrameNode>(element);
 }
 
 /**
@@ -218,5 +256,119 @@ HWTEST_F(SelectPropertyTestNg, SelectEvent001, TestSize.Level1)
     EXPECT_FALSE(selectPattern->OnKeyEvent(event));
     event.code = KeyCode::KEY_ENTER;
     EXPECT_TRUE(selectPattern->OnKeyEvent(event));
+}
+/**
+ * @tc.name: OnModifyDone001
+ * @tc.desc: Test SelectPattern OnModifyDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, OnModifyDone001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call OnModifyDone.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->OnModifyDone();
+    auto host = selectPattern->GetHost();
+    EXPECT_NE(host->GetEventHub<SelectEventHub>(), nullptr);
+}
+/**
+ * @tc.name: UpdateSelectedProps001
+ * @tc.desc: Test SelectPattern UpdateSelectedProps
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, UpdateSelectedProps001, TestSize.Level1)
+{
+    
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    /**
+     * @tc.steps: step3. not selected.
+     * @tc.expected: the function of SetSelectedOptionFontFamily exits normally
+     */
+    selectPattern->SetSelectedOptionFontFamily(FONT_FAMILY_VALUE);
+    EXPECT_EQ(selectPattern->GetSelected(), -1);
+    /**
+     * @tc.steps: step4. select first option.
+     * @tc.expected: the font family of first option is setted successfully
+     */
+    selectPattern->SetSelected(0);
+    EXPECT_EQ(selectPattern->GetSelected(), 0);
+    selectPattern->SetSelectedOptionFontFamily(FONT_FAMILY_VALUE);
+    selectPattern->UpdateSelectedProps(0);
+    EXPECT_EQ(selectPattern->selectedFont_.FontFamily, FONT_FAMILY_VALUE);
+    /**
+     * @tc.steps: step5. Invalid selection or repeated selection.
+     * @tc.expected: the function of SetSelected exits normally
+     */
+    selectPattern->SetSelected(0);
+    EXPECT_EQ(selectPattern->GetSelected(), 0);
+    selectPattern->SetSelected(4);
+    EXPECT_EQ(selectPattern->GetSelected(), 0);
+}
+/**
+ * @tc.name: UpdateSelectedProps002
+ * @tc.desc: Test SelectPattern UpdateSelectedProps
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, UpdateSelectedProps002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize testSelectedFont and Create select frameNode.
+     */
+    TestSelectedFont testSelectedFont;
+    testSelectedFont.FontSize = std::make_optional(FONT_SIZE_VALUE);
+    testSelectedFont.FontStyle = std::make_optional(ITALIC_FONT_STYLE_VALUE);
+    testSelectedFont.FontWeight = std::make_optional(FONT_WEIGHT_VALUE);
+    testSelectedFont.FontColor = std::make_optional(TEXT_COLOR_VALUE);
+    auto frameNode = CreateSelectParagraph(CREATE_VALUE, testSelectedFont);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. Get pattern.
+     */
+    auto selectPattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    /**
+     * @tc.steps: step3. select option.
+     * @tc.expected: text style is updated when selected
+     */
+    selectPattern->SetSelected(1);
+    selectPattern->SetSelectedOptionFontColor(TEXT_COLOR_VALUE);
+    selectPattern->SetSelectedOptionFontWeight(FONT_WEIGHT_VALUE);
+    selectPattern->SetSelectedOptionItalicFontStyle(ITALIC_FONT_STYLE_VALUE);
+    selectPattern->SetSelectedOptionFontSize(FONT_SIZE_VALUE);
+    selectPattern->selectedBgColor_ = TEXT_COLOR_VALUE;
+    selectPattern->UpdateSelectedProps(1);
+    EXPECT_NE(selectPattern->selectedFont_.FontFamily, FONT_FAMILY_VALUE);
+    EXPECT_EQ(selectPattern->selectedFont_.FontSize, FONT_SIZE_VALUE);
+    EXPECT_EQ(selectPattern->selectedFont_.FontStyle, ITALIC_FONT_STYLE_VALUE);
+    EXPECT_EQ(selectPattern->selectedFont_.FontWeight, FONT_WEIGHT_VALUE);
+    EXPECT_EQ(selectPattern->selectedFont_.FontColor, TEXT_COLOR_VALUE);
 }
 } // namespace OHOS::Ace::NG
