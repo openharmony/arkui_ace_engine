@@ -58,11 +58,6 @@ public:
         }
     }
 
-    void LazyBuild() override
-    {
-        BeforeCreateLayoutWrapper();
-    }
-
     FocusPattern GetFocusPattern() const override
     {
         if (listItemStyle_ == V2::ListItemStyle::CARD) {
