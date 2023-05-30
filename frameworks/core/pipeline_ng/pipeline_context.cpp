@@ -658,6 +658,14 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         rootContext->SyncGeometryProperties(RawPtr(rootNode_->GetGeometryNode()));
         RequestFrame();
     }
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+    // For cross-platform build, flush tasks when first resize, speed up for fisrt frame.
+    if (window_ && rootNode_->GetRenderContext() && !NearZero(width) && !NearZero(height)) {
+        rootNode_->GetRenderContext()->SetBounds(0.0, 0.0, width, height);
+        window_->FlushTasks();
+        FlushVsync(GetTimeFromExternalTimer(), 0);
+    }
+#endif
 }
 
 void PipelineContext::SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback)
