@@ -748,7 +748,7 @@ HWTEST_F(ScrollTestNg, ScrollTest007, TestSize.Level1)
      */
     auto positionController = AceType::DynamicCast<ScrollPositionController>(controller);
     EXPECT_NE(positionController, nullptr);
-    positionController->JumpTo(0, SCROLL_FROM_START);
+    positionController->JumpTo(0, false, SCROLL_FROM_START);
     positionController->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
     EXPECT_EQ(pattern->animator_, nullptr);
     int32_t temp = 0;
@@ -1020,7 +1020,7 @@ HWTEST_F(ScrollTestNg, ScrollTest0010, TestSize.Level1)
      */
     auto positionController = AceType::DynamicCast<ScrollPositionController>(controller);
     EXPECT_NE(positionController, nullptr);
-    positionController->JumpTo(0, SCROLL_FROM_START);
+    positionController->JumpTo(0, false, SCROLL_FROM_START);
     positionController->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
     positionController->ScrollToEdge(ScrollEdgeType::SCROLL_NONE, true);
     pattern->currentOffset_ = SCROLL_FLOAT_100;

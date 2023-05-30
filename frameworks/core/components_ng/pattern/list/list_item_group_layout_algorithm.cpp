@@ -238,6 +238,12 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
     int32_t endIndex = totalItemCount_ - 1;
     float startPos = headerMainSize_;
     float endPos = totalMainSize_ - footerMainSize_;
+    prevStartPos_ = startPos_;
+    prevEndPos_ = endPos_;
+    if (targetIndex_) {
+        startPos_ = -Infinity<float>();
+        endPos_ = Infinity<float>();
+    }
     if (jumpIndex_.has_value()) {
         auto jumpIndex = jumpIndex_.value();
         if (jumpIndex < 0 || jumpIndex >= totalItemCount_) {
@@ -354,6 +360,11 @@ void ListItemGroupLayoutAlgorithm::MeasureForward(LayoutWrapper* layoutWrapper,
         }
         LOGD("LayoutForward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);
+        if (targetIndex_ && GreatOrEqual(startIndex, targetIndex_.value())) {
+            startPos_ = prevStartPos_;
+            endPos_ = prevEndPos_;
+            targetIndex_.reset();
+        }
     }
 
     currentStartPos = startPos - spaceWidth_;
@@ -389,6 +400,11 @@ void ListItemGroupLayoutAlgorithm::MeasureBackward(LayoutWrapper* layoutWrapper,
         }
         LOGD("LayoutBackward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);
+        if (targetIndex_ && LessOrEqual(endIndex, targetIndex_.value())) {
+            startPos_ = prevStartPos_;
+            endPos_ = prevEndPos_;
+            targetIndex_.reset();
+        }
     }
 
     if (itemPosition_.empty()) {

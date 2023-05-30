@@ -162,6 +162,7 @@ void JSScroller::ScrollEdge(const JSCallbackInfo& args)
 void JSScroller::ScrollToIndex(const JSCallbackInfo& args)
 {
     int32_t index = 0;
+    bool smooth = false;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], index) || index < 0) {
         LOGW("Invalid params");
         return;
@@ -171,7 +172,10 @@ void JSScroller::ScrollToIndex(const JSCallbackInfo& args)
         LOGE("controller_ is nullptr");
         return;
     }
-    scrollController->JumpTo(index, SCROLL_FROM_JUMP);
+    if (args.Length() == 2 && args[1]->IsBoolean()) {
+        smooth = args[1]->ToBoolean();
+    }
+    scrollController->JumpTo(index, smooth, SCROLL_FROM_JUMP);
 }
 
 void JSScroller::ScrollPage(const JSCallbackInfo& args)
