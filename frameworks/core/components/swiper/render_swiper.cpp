@@ -2096,7 +2096,10 @@ void RenderSwiper::UpdateIndicatorPosition(SwiperIndicatorData& indicatorData)
     // update position on stretch or retract indicator zone
     UpdatePositionOnStretch(position, indicatorData);
 
-    // update  position
+    // update position
+    if (digitalIndicator_ && indicatorData.flexRender) {
+        indicatorData.flexRender->SetPaintRect(indicatorData.flexRender->GetPaintRect() + position);
+    }
     indicatorPosition_ = position;
     indicatorData.indicatorPaintData.position = position;
     indicatorData.indicatorPaintData.center = position + Offset(indicatorData.indicatorPaintData.width / 2,
