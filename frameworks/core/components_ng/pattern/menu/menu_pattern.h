@@ -187,6 +187,8 @@ private:
     void OnModifyDone() override;
     void RegisterOnTouch();
     void OnTouchEvent(const TouchEventInfo& info);
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void UpdateMenuHotArea();
 
     void InitTheme(const RefPtr<FrameNode>& host);
     bool HasInnerMenu() const;
