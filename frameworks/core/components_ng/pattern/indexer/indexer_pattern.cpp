@@ -699,10 +699,13 @@ void IndexerPattern::UpdateBubbleListView(std::vector<std::string>& currentListD
         listNode->Clean();
     }
     auto divider = V2::ItemDivider();
-    divider.strokeWidth = Dimension(INDEXER_LIST_DIVIDER, DimensionUnit::VP);
+    divider.strokeWidth = Dimension(INDEXER_LIST_DIVIDER, DimensionUnit::PX);
     divider.color = indexerTheme->GetPopupSeparateColor();
     listLayoutProperty->UpdateDivider(divider);
     listLayoutProperty->UpdateListDirection(Axis::VERTICAL);
+    auto listPaintProperty = listNode->GetPaintProperty<ListPaintProperty>();
+    CHECK_NULL_VOID(listPaintProperty);
+    listPaintProperty->UpdateBarDisplayMode(DisplayMode::OFF);
     auto listRenderContext = listNode->GetRenderContext();
     CHECK_NULL_VOID(listRenderContext);
     listRenderContext->SetClipToBounds(true);
