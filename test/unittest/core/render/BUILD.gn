@@ -16,7 +16,9 @@ group("render_unittest") {
   deps = [
     "circle_painter:circle_painter_test_ng",
     "image_painter:image_painter_test_ng",
+    "line_painter:line_painter_test_ng",
     "polygon_painter:polygon_painter_test_ng",
     "render_context:render_context_test_ng",
+    "render_property:render_property_test_ng",
   ]
 }
