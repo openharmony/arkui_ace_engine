@@ -215,16 +215,16 @@ bool MenuPattern::OnKeyEvent(const KeyEvent& event) const
     if (event.action != KeyAction::DOWN || IsMultiMenu()) {
         return false;
     }
-    if (event.code == KeyCode::KEY_ESCAPE) {
-        HideMenu();
-        return true;
-    }
-    if (event.code == KeyCode::KEY_DPAD_LEFT && IsSubMenu()) {
+    if ((event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_ESCAPE) && IsSubMenu()) {
         auto menuWrapper = GetMenuWrapper();
         CHECK_NULL_RETURN(menuWrapper, true);
         auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_RETURN(wrapperPattern, true);
         wrapperPattern->HideSubMenu();
+        return true;
+    }
+    if (event.code == KeyCode::KEY_ESCAPE) {
+        HideMenu();
         return true;
     }
     return false;
