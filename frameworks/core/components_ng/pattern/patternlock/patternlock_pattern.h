@@ -24,7 +24,6 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/patternlock/patternlock_event_hub.h"
 #include "core/components_ng/pattern/patternlock/patternlock_layout_algorithm.h"
-#include "core/components_ng/pattern/patternlock/patternlock_layout_property.h"
 #include "core/components_ng/pattern/patternlock/patternlock_modifier.h"
 #include "core/components_ng/pattern/patternlock/patternlock_paint_method.h"
 #include "core/components_ng/pattern/patternlock/patternlock_paint_property.h"
@@ -42,11 +41,6 @@ public:
     bool IsAtomicNode() const override
     {
         return true;
-    }
-
-    RefPtr<LayoutProperty> CreateLayoutProperty() override
-    {
-        return MakeRefPtr<PatternLockLayoutProperty>();
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override

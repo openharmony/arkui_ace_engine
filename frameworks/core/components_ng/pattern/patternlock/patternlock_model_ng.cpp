@@ -77,7 +77,7 @@ void PatternLockModelNG::SetCircleRadius(const Dimension& radius)
 
 void PatternLockModelNG::SetSideLength(const Dimension& sideLength)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(PatternLockLayoutProperty, SideLength, sideLength);
+    ACE_UPDATE_PAINT_PROPERTY(PatternLockPaintProperty, SideLength, sideLength);
 }
 
 void PatternLockModelNG::SetStrokeWidth(const Dimension& lineWidth)

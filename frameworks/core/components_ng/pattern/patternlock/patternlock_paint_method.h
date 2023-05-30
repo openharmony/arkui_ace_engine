@@ -54,7 +54,7 @@ public:
 private:
     void GetThemeProp();
 
-    float sideLength_ = 0.0f;
+    Dimension sideLength_ = 300.0_vp;
     Dimension circleRadius_ = 14.0_vp;
     Color regularColor_;
     Color selectedColor_;
