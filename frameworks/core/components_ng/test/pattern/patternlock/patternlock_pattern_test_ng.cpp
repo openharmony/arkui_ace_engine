@@ -37,13 +37,13 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
-constexpr Dimension SIDE_LENGTH = 300.0_vp;
-constexpr Dimension CIRCLE_RADIUS = 14.0_vp;
+const Dimension SIDE_LENGTH = 300.0_vp;
+const Dimension CIRCLE_RADIUS = 14.0_vp;
 const Color REGULAR_COLOR = Color::BLACK;
 const Color SELECTED_COLOR = Color::BLUE;
 const Color ACTIVE_COLOR = Color::RED;
 const Color PATH_COLOR = Color::GRAY;
-constexpr Dimension PATH_STROKE_WIDTH = 34.0_vp;
+const Dimension PATH_STROKE_WIDTH = 34.0_vp;
 } // namespace
 
 struct TestProperty {
@@ -95,6 +95,7 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPaintPropertyTest001, TestSize.Lev
      * @tc.steps: step2. Init PatternLock parameters and set them to PatternLock property
      */
     TestProperty testProperty;
+    testProperty.sideLength = std::make_optional(SIDE_LENGTH);
     testProperty.circleRadius = std::make_optional(CIRCLE_RADIUS);
     testProperty.regularColor = std::make_optional(REGULAR_COLOR);
     testProperty.selectedColor = std::make_optional(SELECTED_COLOR);
@@ -102,6 +103,8 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPaintPropertyTest001, TestSize.Lev
     testProperty.pathColor = std::make_optional(PATH_COLOR);
     testProperty.strokeWidth = std::make_optional(PATH_STROKE_WIDTH);
     testProperty.autoReset = std::make_optional(true);
+    EXPECT_TRUE(testProperty.sideLength.has_value());
+    patternLockModelNG.SetSideLength(testProperty.sideLength.value());
     patternLockModelNG.SetCircleRadius(testProperty.circleRadius.value());
     patternLockModelNG.SetRegularColor(testProperty.regularColor.value());
     patternLockModelNG.SetSelectedColor(testProperty.selectedColor.value());
@@ -111,58 +114,27 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPaintPropertyTest001, TestSize.Lev
     patternLockModelNG.SetAutoReset(testProperty.autoReset.value());
 
     /**
-     * @tc.steps: step3. Get paint property and get PatternLock property
+     * @tc.steps: step3. Get layout property and get PatternLock property
      * @tc.expected: step3. Check the PatternLock property value
      */
     auto patternLockPaintProperty = frameNode->GetPaintProperty<PatternLockPaintProperty>();
     ASSERT_NE(patternLockPaintProperty, nullptr);
+    EXPECT_EQ(patternLockPaintProperty->GetSideLengthValue(), SIDE_LENGTH);
     EXPECT_EQ(patternLockPaintProperty->GetCircleRadiusValue(), CIRCLE_RADIUS);
     EXPECT_EQ(patternLockPaintProperty->GetRegularColorValue(), REGULAR_COLOR);
     EXPECT_EQ(patternLockPaintProperty->GetSelectedColorValue(), SELECTED_COLOR);
     EXPECT_EQ(patternLockPaintProperty->GetActiveColorValue(), ACTIVE_COLOR);
     EXPECT_EQ(patternLockPaintProperty->GetPathColorValue(), PATH_COLOR);
     EXPECT_EQ(patternLockPaintProperty->GetPathStrokeWidthValue(), PATH_STROKE_WIDTH);
-    EXPECT_TRUE(patternLockPaintProperty->GetAutoResetValue());
+    EXPECT_EQ(patternLockPaintProperty->GetAutoResetValue(), true);
 }
 
 /**
- * @tc.name: PatternLockLayoutPropertyTest001
- * @tc.desc: Set PatternLock value into PatternLockLayoutProperty and get it.
- * @tc.type: FUNC
- */
-HWTEST_F(PatternLockPatternTestNg, PatternLockLayoutPropertyTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init PatternLock node
-     */
-    PatternLockModelNG patternLockModelNG;
-    auto controller = patternLockModelNG.Create();
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    ViewStackProcessor::GetInstance()->Push(frameNode);
-
-    /**
-     * @tc.steps: step2. Init PatternLock parameters and set them to PatternLock property
-     */
-    TestProperty testProperty;
-    testProperty.sideLength = std::make_optional(SIDE_LENGTH);
-    patternLockModelNG.SetSideLength(testProperty.sideLength.value());
-
-    /**
-     * @tc.steps: step3. Get layout property and get PatternLock property
-     * @tc.expected: step3. Check the PatternLock property value
-     */
-    auto patternLockLayoutProperty = frameNode->GetLayoutProperty<PatternLockLayoutProperty>();
-    ASSERT_NE(patternLockLayoutProperty, nullptr);
-    EXPECT_EQ(patternLockLayoutProperty->GetSideLength(), SIDE_LENGTH);
-}
-
-/**
- * @tc.name: PatternLockEventTest001
+ * @tc.name: PatternLockEventTest002
  * @tc.desc: Test PatternLock onComplete event.
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockPatternTestNg, PatternLockEventTest001, TestSize.Level1)
+HWTEST_F(PatternLockPatternTestNg, PatternLockEventTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init PatternLock node
@@ -212,11 +184,11 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockEventTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: PatternLockPatternTest001
+ * @tc.name: PatternLockPatternTest003
  * @tc.desc: Test PatternLock pattern method HandleReset.
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest001, TestSize.Level1)
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init PatternLock node
@@ -256,11 +228,11 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: PatternLockPatternTest002
+ * @tc.name: PatternLockPatternTest004
  * @tc.desc: Test PatternLock pattern method CheckAutoReset.
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest002, TestSize.Level1)
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init PatternLock node
@@ -297,11 +269,11 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: PatternLockPatternTest003
+ * @tc.name: PatternLockPatternTest005
  * @tc.desc: Test PatternLock pattern method AddPassPoint.
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest003, TestSize.Level1)
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init PatternLock node
@@ -360,11 +332,11 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: PatternLockPatternTest004
+ * @tc.name: PatternLockPatternTest006
  * @tc.desc: Test PatternLock pattern method CheckChoosePoint.
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest004, TestSize.Level1)
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init PatternLock node
@@ -393,11 +365,11 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest004, TestSize.Level1)
 }
 
 /**
- * @tc.name: PatternLockPatternTest005
+ * @tc.name: PatternLockPatternTest007
  * @tc.desc: Test PatternLock pattern method AddChoosePoint.
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest005, TestSize.Level1)
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init PatternLock node
@@ -412,7 +384,6 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest005, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<PatternLockPattern>();
     ASSERT_NE(pattern, nullptr);
-    frameNode->GetGeometryNode()->SetContentSize(SizeF(300.0f, 300.0f));
 
     /**
      * @tc.steps: step3. Set PatternLock pattern variable and call AddChoosePoint
@@ -427,6 +398,7 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest005, TestSize.Level1)
     EXPECT_EQ(result2, false);
     auto patternLockPaintProperty = frameNode->GetPaintProperty<PatternLockPaintProperty>();
     ASSERT_NE(patternLockPaintProperty, nullptr);
+    patternLockPaintProperty->UpdateSideLength(SIDE_LENGTH);
     patternLockPaintProperty->UpdateCircleRadius(CIRCLE_RADIUS);
     offsetX = 150.0f;
     offsetY = 150.0f;
@@ -452,11 +424,11 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest005, TestSize.Level1)
 }
 
 /**
- * @tc.name: PatternLockPatternTest006
+ * @tc.name: PatternLockPatternTest008
  * @tc.desc: Test PatternLock pattern method OnTouchUp.
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest006, TestSize.Level1)
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init PatternLock node
@@ -486,11 +458,11 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest006, TestSize.Level1)
 }
 
 /**
- * @tc.name: PatternLockPatternTest007
+ * @tc.name: PatternLockPatternTest009
  * @tc.desc: Test PatternLock pattern method OnTouchMove.
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest007, TestSize.Level1)
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init PatternLock node
@@ -527,11 +499,11 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest007, TestSize.Level1)
 }
 
 /**
- * @tc.name: PatternLockPatternTest008
+ * @tc.name: PatternLockPatternTest010
  * @tc.desc: Test PatternLock pattern method OnTouchDown.
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest008, TestSize.Level1)
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init PatternLock node
@@ -569,11 +541,11 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest008, TestSize.Level1)
 }
 
 /**
- * @tc.name: PatternLockPatternTest009
+ * @tc.name: PatternLockPatternTest011
  * @tc.desc: Test PatternLock pattern method HandleTouchEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest009, TestSize.Level1)
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest011, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init PatternLock node
@@ -635,11 +607,11 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest009, TestSize.Level1)
 }
 
 /**
- * @tc.name: PatternLockPatternTest010
+ * @tc.name: PatternLockPatternTest012
  * @tc.desc: Test PatternLock pattern method InitTouchEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest010, TestSize.Level1)
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest012, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init PatternLock node
@@ -695,14 +667,12 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPaintMethodTest001, TestSize.Level
     patternlockTheme->selectedColor_ = SELECTED_COLOR;
     patternlockTheme->activeColor_ = ACTIVE_COLOR;
     patternlockTheme->pathColor_ = PATH_COLOR;
-    patternlockTheme->circleRadius_ = CIRCLE_RADIUS;
-    patternlockTheme->pathStrokeWidth_ = PATH_STROKE_WIDTH;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(patternlockTheme));
     /**
      * @tc.case: case1. call GetThemeProp with PatternLockTheme.
      */
     paintMethod.GetThemeProp();
-    EXPECT_EQ(paintMethod.sideLength_, .0f);
+    EXPECT_EQ(paintMethod.sideLength_, SIDE_LENGTH);
     EXPECT_EQ(paintMethod.circleRadius_, CIRCLE_RADIUS);
     EXPECT_EQ(paintMethod.pathStrokeWidth_, PATH_STROKE_WIDTH);
     EXPECT_EQ(paintMethod.regularColor_, REGULAR_COLOR);
@@ -714,7 +684,7 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPaintMethodTest001, TestSize.Level
      */
     PaintWrapper paintWrapper(nullptr, geometryNode, patternLockPaintProperty);
     paintMethod.UpdateContentModifier(&paintWrapper);
-    EXPECT_EQ(paintMethod.sideLength_, paintWrapper.GetContentSize().Width());
+    EXPECT_EQ(paintMethod.sideLength_, SIDE_LENGTH);
     EXPECT_EQ(paintMethod.circleRadius_, CIRCLE_RADIUS);
     EXPECT_EQ(paintMethod.pathStrokeWidth_, PATH_STROKE_WIDTH);
     EXPECT_EQ(paintMethod.regularColor_, REGULAR_COLOR);
@@ -724,6 +694,7 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPaintMethodTest001, TestSize.Level
     /**
      * @tc.case: case3. call UpdateContentModifier with valid PatternLockPaintProperty.
      */
+    patternLockPaintProperty->UpdateSideLength(Dimension(30.0));
     patternLockPaintProperty->UpdateCircleRadius(Dimension(20.0));
     patternLockPaintProperty->UpdatePathStrokeWidth(Dimension(10.0));
     patternLockPaintProperty->UpdateAutoReset(false);
@@ -732,6 +703,7 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPaintMethodTest001, TestSize.Level
     patternLockPaintProperty->UpdateActiveColor(Color::BLACK);
     patternLockPaintProperty->UpdatePathColor(Color::WHITE);
     paintMethod.UpdateContentModifier(&paintWrapper);
+    EXPECT_EQ(paintMethod.sideLength_, patternLockPaintProperty->GetSideLengthValue());
     EXPECT_EQ(paintMethod.circleRadius_, patternLockPaintProperty->GetCircleRadiusValue());
     EXPECT_EQ(paintMethod.pathStrokeWidth_, patternLockPaintProperty->GetPathStrokeWidthValue());
     EXPECT_EQ(paintMethod.regularColor_, patternLockPaintProperty->GetRegularColorValue());
@@ -880,37 +852,33 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockModifierTest004, TestSize.Level1)
 
 /**
  * @tc.name: PatternLockLayoutAlgorithmTest001
- * @tc.desc: Test MeasureContent function .
+ * @tc.desc: Test GetCircleCenterByXY function can get correct offset.
  * @tc.type: FUNC
  */
 HWTEST_F(PatternLockPatternTestNg, PatternLockLayoutAlgorithmTest001, TestSize.Level1)
 {
     constexpr Dimension sideLength = Dimension(20.0);
     PatternLockLayoutAlgorithm layoutAlgorithm(sideLength);
-    auto layoutProperty = AceType::MakeRefPtr<PatternLockLayoutProperty>();
-    LayoutWrapper layoutWrapper(nullptr, nullptr, layoutProperty);
     /**
-     * @tc.case: case1.
+     * @tc.case: case1. selfIdealSize's width is null.
      */
     LayoutConstraintF constraint1;
-    auto size1 = layoutAlgorithm.MeasureContent(constraint1, &layoutWrapper);
-    EXPECT_EQ(size1.value(), SizeF(20.0f, 20.0f));
+    auto size1 = layoutAlgorithm.MeasureContent(constraint1, nullptr);
+    EXPECT_EQ(size1.value(), SizeF(20.0, 20.0));
     /**
-     * @tc.case: case2.
+     * @tc.case: case2. selfIdealSize's width is not null but selfIdealSize is invalid.
      */
     LayoutConstraintF constraint2;
-    constraint2.maxSize = SizeF(10.0f, 25.0f);
-    constraint2.minSize = SizeF(15.0f, 20.0f);
-    auto size2 = layoutAlgorithm.MeasureContent(constraint2, &layoutWrapper);
-    EXPECT_EQ(size2.value(), SizeF(15.0f, 15.0f));
+    constraint2.selfIdealSize.width_ = 10.0;
+    auto size2 = layoutAlgorithm.MeasureContent(constraint2, nullptr);
+    EXPECT_EQ(size2.value(), SizeF(20.0, 20.0));
     /**
-     * @tc.case: case3.
+     * @tc.case: case3. selfIdealSize's width is valid.
      */
     LayoutConstraintF constraint3;
-    constraint3.maxSize = SizeF(40.0f, 30.0f);
-    constraint3.minSize = SizeF(15.0f, 20.0f);
-    layoutProperty->UpdateSideLength(Dimension(30.0));
-    auto size3 = layoutAlgorithm.MeasureContent(constraint3, &layoutWrapper);
-    EXPECT_EQ(size3.value(), SizeF(30.0f, 30.0f));
+    constraint3.selfIdealSize.width_ = 10.0;
+    constraint3.selfIdealSize.height_ = .0;
+    auto size3 = layoutAlgorithm.MeasureContent(constraint3, nullptr);
+    EXPECT_EQ(size3.value(), SizeF(10.0, 10.0));
 }
 } // namespace OHOS::Ace::NG

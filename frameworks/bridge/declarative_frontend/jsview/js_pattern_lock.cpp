@@ -204,6 +204,8 @@ void JSPatternLock::SetSideLength(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], sideLength)) {
         return;
     }
+    JSViewAbstract::JsWidth(info);
+    JSViewAbstract::JsHeight(info);
 
     PatternLockModel::GetInstance()->SetSideLength(sideLength);
 }
