@@ -382,6 +382,8 @@ public:
 
     std::string ProvideRestoreInfo();
 
+    void Build() override;
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;

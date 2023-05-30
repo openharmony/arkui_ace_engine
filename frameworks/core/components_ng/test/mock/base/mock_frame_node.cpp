@@ -74,6 +74,7 @@ void FrameNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, boo
 void FrameNode::UpdateLayoutPropertyFlag() {}
 void FrameNode::AdjustParentLayoutFlag(PropertyChangeFlag& flag) {}
 void FrameNode::MarkResponseRegion(bool isResponseRegion) {}
+void FrameNode::Build() {}
 
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
     : UINode(tag, nodeId, isRoot), pattern_(pattern)
