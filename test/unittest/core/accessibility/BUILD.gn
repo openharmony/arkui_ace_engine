@@ -16,5 +16,6 @@ group("accessibility_unittest") {
   deps = [
     "accessibilitynode:accessibility_node_test_ng",
     "accessibilityutils:accessibility_utils_test_ng",
+    "js_inspector:js_inspector_test",
   ]
 }
