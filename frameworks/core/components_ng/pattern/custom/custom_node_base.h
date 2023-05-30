@@ -124,7 +124,8 @@ public:
         }
     }
 
-    bool HasRecycleRenderFunc() {
+    bool HasRecycleRenderFunc()
+    {
         return recycleRenderFunc_ != nullptr;
     }
 
@@ -151,10 +152,13 @@ public:
         jsViewName_ = name;
     }
 
-    const std::string& GetJSViewName() const
+    std::string& GetJSViewName()
     {
         return jsViewName_;
     }
+
+protected:
+    std::string jsViewName_;
 
 private:
     std::function<void()> updateFunc_;
@@ -167,8 +171,6 @@ private:
     std::function<void(RefPtr<CustomNodeBase>)> recycleCustomNodeFunc_;
     std::function<void()> recycleRenderFunc_;
     bool needRebuild_ = false;
-
-    std::string jsViewName_;
 };
 } // namespace OHOS::Ace::NG
 

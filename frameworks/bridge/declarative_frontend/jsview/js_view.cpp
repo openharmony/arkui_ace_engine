@@ -18,10 +18,13 @@
 #include "uicast_interface/uicast_context_impl.h"
 #include "uicast_interface/uicast_impl.h"
 
+#include "base/log/ace_performance_check.h"
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
@@ -715,6 +718,17 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         Framework::JSViewStackProcessor::SetViewMap(std::to_string(uiNode->GetId()), jsViewObject_);
     }
 #endif
+
+    if (SystemProperties::IsPerformanceCheckEnabled()) {
+        auto uiNode = AceType::DynamicCast<NG::UINode>(node);
+        if (uiNode) {
+            auto codeInfo = EngineHelper::GetPositionOnJsCode();
+            uiNode->SetRow(codeInfo.first);
+            uiNode->SetCol(codeInfo.second);
+            auto code = AceScopedPerformanceCheck::GetCodeInfo(codeInfo.first, codeInfo.second);
+            LOGE("Lee, row=%{public}d, col=%{public}d", code.row, code.col);
+        }
+    }
     return node;
 }
 

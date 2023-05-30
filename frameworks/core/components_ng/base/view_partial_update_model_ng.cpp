@@ -16,6 +16,9 @@
 #include "core/components_ng/base/view_partial_update_model_ng.h"
 
 #include "base/log/ace_trace.h"
+#include "base/memory/ace_type.h"
+#include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
