@@ -21,6 +21,7 @@
 #define protected public
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/size_t.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -41,6 +42,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 
 namespace {
+const float ZERO = 0.0;
 const float LEFT = -20.0f;
 const float TOP = -30.0f;
 const int32_t COLUMN = 2;
@@ -222,7 +224,7 @@ HWTEST_F(ShapePatternTestNg, InheritedProperty001, TestSize.Level1)
 
 /**
  * @tc.name: MeasureContent001
- * @tc.desc: check ShapeContainerLayoutAlgorithm MeasureContent
+ * @tc.desc: check ShapeContainerLayoutAlgorithm MeasureContent when ShapeViewBox is invaild
  * @tc.type: FUNC
  */
 
@@ -244,9 +246,102 @@ HWTEST_F(ShapePatternTestNg, MeasureContent001, TestSize.Level1)
     LayoutConstraintF constrain;
     auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
     auto newSize = layoutAlgorithm->MeasureContent(constrain, AccessibilityManager::RawPtr(layoutWrapper));
-    paintProperty->propShapeViewBox_ = std::nullopt;
-    layoutAlgorithm->MeasureContent(constrain, AccessibilityManager::RawPtr(layoutWrapper));
+    LayoutConstraintF constrain2;
+    constrain2.selfIdealSize = OptionalSize<float>(std::nullopt, std::nullopt);
+    newSize = layoutAlgorithm->MeasureContent(constrain2, AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_TRUE(newSize);
+}
+
+/**
+ * @tc.name: MeasureContent002
+ * @tc.desc: check ShapeContainerLayoutAlgorithm MeasureContent when ShapeViewBox is vaild
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ShapePatternTestNg, MeasureContent002, TestSize.Level1)
+{
+    auto shapeModel = ShapeModelNG();
+    shapeModel.Create();
+    shapeModel.SetBitmapMesh(MESH, COLUMN, ROW);
+    /**
+     * @tc.desc: set HasShapeViewBox() == TRUE && GetShapeViewBoxValue().IsValid() == FALSE;
+     */
+    shapeModel.SetViewPort(Dimension(ZERO), Dimension(ZERO), Dimension(ZERO), Dimension(ZERO));
+    RefPtr<UINode> uiNode = ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    EXPECT_TRUE(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
+    EXPECT_TRUE(paintProperty);
+    EXPECT_TRUE(paintProperty->HasShapeViewBox());
+    EXPECT_EQ(paintProperty->GetShapeViewBoxValue().IsValid(), false);
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_TRUE(geometryNode);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutConstraintF constrain;
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    /**
+     * @tc.desc: Call MeasureContent(selfIdealSize != Null && selfIdealSize.IsValid == TRUE)
+     */
+    auto newSize = layoutAlgorithm->MeasureContent(constrain, AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_TRUE(newSize);
+}
+
+/**
+ * @tc.name: MeasureContent003
+ * @tc.desc: check ShapeContainerLayoutAlgorithm MeasureContent when selfIdealSize is vaild/invaild
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ShapePatternTestNg, MeasureContent003, TestSize.Level1)
+{
+    auto shapeModel = ShapeModelNG();
+    shapeModel.Create();
+    shapeModel.SetBitmapMesh(MESH, COLUMN, ROW);
+    /**
+     * @tc.desc: set HasShapeViewBox() == TRUE && GetShapeViewBoxValue().IsValid() == TRUE;
+     */
+    shapeModel.SetViewPort(Dimension(LEFT), Dimension(TOP), Dimension(WIDTH), Dimension(HEIGHT));
+    RefPtr<UINode> uiNode = ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    EXPECT_TRUE(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
+    EXPECT_TRUE(paintProperty);
+    EXPECT_TRUE(paintProperty->HasShapeViewBox());
+    EXPECT_TRUE(paintProperty->GetShapeViewBoxValue().IsValid());
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_TRUE(geometryNode);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    /**
+     * @tc.desc: Call MeasureContent(selfIdealSize == Null && GreatNotEqual == TRUE)
+     */
+    LayoutConstraintF constrain;
+    constrain.selfIdealSize = OptionalSize<float>(std::nullopt, std::nullopt);
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    auto newSize = layoutAlgorithm->MeasureContent(constrain, AccessibilityManager::RawPtr(layoutWrapper));
+    /**
+     * @tc.desc: Call MeasureContent(selfIdealSize != Null && selfIdealSize.IsValid != TRUE)
+     */
+    LayoutConstraintF constrain2;
+    constrain2.selfIdealSize = OptionalSize<float>(0, 0);
+    newSize = layoutAlgorithm->MeasureContent(constrain2, AccessibilityManager::RawPtr(layoutWrapper));
+    /**
+     * @tc.desc: Call MeasureContent(selfIdealSize != Null && selfIdealSize.IsValid == TRUE &&
+     * (hasDefineWidth && !hasDefineHeight && GreatNotEqual(portWidth, 0.0)))
+     */
+    LayoutConstraintF constrain3;
+    constrain3.selfIdealSize = OptionalSize<float>(-1, std::nullopt);
+    newSize = layoutAlgorithm->MeasureContent(constrain3, AccessibilityManager::RawPtr(layoutWrapper));
+    /**
+     * @tc.desc: Call MeasureContent(selfIdealSize != Null && selfIdealSize.IsValid != TRUE &&
+     * (!hasDefineWidth && hasDefineHeight && GreatNotEqual(portHeight, 0.0)))
+     */
+    LayoutConstraintF constrain4;
+    constrain4.selfIdealSize = OptionalSize<float>(std::nullopt, -1);
+    newSize = layoutAlgorithm->MeasureContent(constrain4, AccessibilityManager::RawPtr(layoutWrapper));
 }
 
 /**
