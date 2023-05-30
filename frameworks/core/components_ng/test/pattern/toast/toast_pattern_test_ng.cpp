@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
- #include "gtest/gtest.h"
+#include "gtest/gtest.h"
 
- #include "core/components_ng/pattern/toast/toast_view.h"
+#include "core/components_ng/pattern/toast/toast_view.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -24,6 +24,8 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::string BOTTOM_HEIGHT = "200";
 const std::string MESSAGE_INFO = "Message_Info";
+const std::string LANG_MESSAGE_INFO =
+    "Message_Info: Hello World,Hello World,Hello World,Hello World,Hello World,Hello World";
 
 } // namespace
 
@@ -42,11 +44,11 @@ void ToastPatternTestNg::TearDown() {}
 
 /**
  * @tc.name: ToastFrameNodeCreator001
- * @tc.desc: Test ActionSheet toast with image icon (internal source)
+ * @tc.desc: Test toastNode with single line text
  * @tc.type: FUNC
  * @tc.author: lijuan
  */
- HWTEST_F(ToastPatternTestNg, ToastFrameNodeCreator001, TestSize.Level1)
+HWTEST_F(ToastPatternTestNg, ToastFrameNodeCreator001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ToastNode
@@ -59,4 +61,23 @@ void ToastPatternTestNg::TearDown() {}
     EXPECT_EQ(toastNode == nullptr, false);
 }
 
-}// namespace OHOS::Ace::NG
+/**
+ * @tc.name: ToastFrameNodeCreator002
+ * @tc.desc: Test toastNode with multiline text
+ * @tc.type: FUNC
+ * @tc.author: Yujiadong
+ */
+HWTEST_F(ToastPatternTestNg, ToastFrameNodeCreator002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ToastNode
+     */
+    auto toastNode = ToastView::CreateToastNode(LANG_MESSAGE_INFO, BOTTOM_HEIGHT, true);
+
+    /**
+     * @tc.steps: step2. check if position are initiated correctly
+     */
+    EXPECT_EQ(toastNode == nullptr, false);
+}
+
+} // namespace OHOS::Ace::NG
