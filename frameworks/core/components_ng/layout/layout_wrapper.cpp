@@ -385,6 +385,12 @@ void LayoutWrapper::AddNodeFlexLayouts()
         CHECK_NULL_VOID(parent);
         if (parent->GetTag() == V2::JS_VIEW_ETS_TAG) {
             parent->AddFlexLayouts();
+        } else if (host->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
+            auto children = host->GetChildren();
+            if (!children.empty()) {
+                auto begin = children.begin();
+                (*begin)->AddFlexLayouts();
+            }
         } else {
             host->AddFlexLayouts();
         }

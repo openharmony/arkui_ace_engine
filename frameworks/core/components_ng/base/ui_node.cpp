@@ -690,7 +690,15 @@ void UINode::GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap)
         // At this point, all of the children_
         // belong to the child nodes of syntaxItem
         for (const auto& child : GetChildren()) {
-            child->SetForeachItem();
+            if (child->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
+                auto children = child->GetChildren();
+                if (!children.empty()) {
+                    auto begin = children.begin();
+                    (*begin)->SetForeachItem();
+                }
+            } else {
+                child->SetForeachItem();
+            }
         }
     }
 
@@ -712,10 +720,5 @@ void UINode::GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap)
         // Recursively traverse the child nodes of each node
         child->GetPerformanceCheckData(nodeMap);
     }
-}
-
-void UINode::AddFlexLayouts()
-{
-    nodeInfo_->flexLayouts++;
 }
 } // namespace OHOS::Ace::NG
