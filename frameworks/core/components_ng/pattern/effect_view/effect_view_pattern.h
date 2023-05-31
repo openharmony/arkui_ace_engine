@@ -41,8 +41,6 @@ public:
     }
 
 private:
-    void OnAttachToFrameNode() override;
-
     ACE_DISALLOW_COPY_AND_MOVE(EffectViewPattern);
 };
 } // namespace OHOS::Ace::NG

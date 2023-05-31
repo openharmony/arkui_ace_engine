@@ -34,7 +34,7 @@ EffectViewModel* EffectViewModel::GetInstance()
             if (Container::IsCurrentUseNewPipeline()) {
                 instance_.reset(new NG::EffectViewModelNG());
             } else {
-                // empty implentation
+                // empty implementation
                 instance_.reset(new Framework::EffectViewModelImpl());
             }
         }

@@ -28,9 +28,9 @@ public:
     explicit SystemWindowScene(const sptr<Rosen::SceneSession>& session) : session_(session) {}
     ~SystemWindowScene() override = default;
 
-    bool UseExternalRSNode() const override
+    std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
-        return true;
+        return RenderContext::ContextParam { RenderContext::ContextType::EXTERNAL };
     }
 
 protected:
