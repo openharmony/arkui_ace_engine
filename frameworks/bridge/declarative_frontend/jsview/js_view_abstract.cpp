@@ -4387,7 +4387,7 @@ void JSViewAbstract::JsClip(const JSCallbackInfo& info)
             return;
         }
         ViewAbstractModel::GetInstance()->SetClipShape(clipShape->GetBasicShape());
-    } else if (info[0]->IsBoolean() || info[0]->IsUndefined()) {
+    } else if (info[0]->IsBoolean()) {
         ViewAbstractModel::GetInstance()->SetClipEdge(info[0]->ToBoolean());
     }
 }
