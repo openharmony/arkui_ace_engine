@@ -788,7 +788,7 @@ RefPtr<LayoutWrapper> FrameNode::UpdateLayoutWrapper(
     }
 
     pattern_->BeforeCreateLayoutWrapper();
-    if (!isActive_ || forceMeasure) {
+    if (forceMeasure) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
     if (forceLayout) {
