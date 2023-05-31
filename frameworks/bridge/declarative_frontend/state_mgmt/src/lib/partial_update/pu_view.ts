@@ -174,6 +174,15 @@ abstract class ViewPU extends NativeViewPartialUpdate
     }
   }
 
+
+  /**
+ * ArkUI engine will call this function when the corresponding CustomNode's active status change.
+ * @param active true for active, false for inactive
+ */
+  public setActive(active: boolean) {
+    stateMgmtConsole.debug(`ViewPU('${this.constructor.name}', ${this.id__()}): setActive(${active})`);
+  }
+
   private setParent(parent: ViewPU) {
     if (this.parent_ && parent) {
       stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).setChild: changing parent to '${parent.constructor.name}', id ${parent.id__()} (unsafe operation)`);
