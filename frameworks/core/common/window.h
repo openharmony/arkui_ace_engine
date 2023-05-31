@@ -146,12 +146,38 @@ public:
         return viewSafeArea_;
     }
 
-    void SetSafeArea(SafeAreaEdgeInserts viewSafeArea)
+    void SetSafeArea(const SafeAreaEdgeInserts& viewSafeArea)
     {
         viewSafeArea_ = viewSafeArea;
     }
 
     SafeAreaEdgeInserts viewSafeArea_;
+
+    void SetSystemSafeArea(const SafeAreaEdgeInserts& safeArea)
+    {
+        if (systemSafeArea_ == safeArea) {
+            return;
+        }
+        systemSafeArea_ = safeArea;
+    }
+
+    SafeAreaEdgeInserts GetSystemSafeArea() const
+    {
+        return systemSafeArea_;
+    }
+
+    void SetCutoutSafeArea(const SafeAreaEdgeInserts& safeArea)
+    {
+        if (cutoutSafeArea_ == safeArea) {
+            return;
+        }
+        cutoutSafeArea_ = safeArea;
+    }
+
+    SafeAreaEdgeInserts GetCutoutSafeArea() const
+    {
+        return cutoutSafeArea_;
+    }
 
     virtual void SetKeepScreenOn(bool keepScreenOn) {};
 
@@ -168,6 +194,9 @@ protected:
 
     uint64_t lastRequestVsyncTime_ = 0;
     uint32_t windowId_ = 0;
+
+    SafeAreaEdgeInserts systemSafeArea_;
+    SafeAreaEdgeInserts cutoutSafeArea_;
 
 private:
     std::function<Rect()> windowRectImpl_;

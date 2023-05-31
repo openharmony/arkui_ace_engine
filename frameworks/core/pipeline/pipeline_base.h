@@ -708,9 +708,33 @@ public:
 
     Rect GetCurrentWindowRect() const;
 
-    virtual void SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback) = 0;
+    virtual void SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback) {}
 
-    virtual SafeAreaEdgeInserts GetCurrentViewSafeArea() const = 0;
+    virtual SafeAreaEdgeInserts GetCurrentViewSafeArea() const
+    {
+        return SafeAreaEdgeInserts();
+    }
+
+    virtual void SetSystemSafeArea(const SafeAreaEdgeInserts& systemSafeArea) {}
+
+    virtual SafeAreaEdgeInserts GetSystemSafeArea() const
+    {
+        return SafeAreaEdgeInserts();
+    }
+
+    virtual void SetCutoutSafeArea(const SafeAreaEdgeInserts& cutoutSafeArea) {}
+
+    virtual SafeAreaEdgeInserts GetCutoutSafeArea() const
+    {
+        return SafeAreaEdgeInserts();
+    }
+
+    virtual SafeAreaEdgeInserts GetViewSafeArea() const
+    {
+        return SafeAreaEdgeInserts();
+    }
+
+    virtual void ResetViewSafeArea() {}
 
     void SetPluginOffset(const Offset& offset)
     {
@@ -858,8 +882,6 @@ public:
     {
         return nullptr;
     }
-
-    virtual void ResetViewSafeArea() {}
 
 protected:
     void TryCallNextFrameLayoutCallback()

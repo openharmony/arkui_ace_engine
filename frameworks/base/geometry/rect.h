@@ -415,7 +415,14 @@ private:
 
 struct SafeAreaEdgeInserts {
     SafeAreaEdgeInserts() = default;
-    void SetRect(Rect leftRect, Rect topRect, Rect rightRect, Rect bottomRect)
+    ~SafeAreaEdgeInserts() = default;
+
+    SafeAreaEdgeInserts(const Rect& leftRect, const Rect& topRect, const Rect& rightRect, const Rect& bottomRect)
+    {
+        SetRect(leftRect, topRect, rightRect, bottomRect);
+    }
+
+    void SetRect(const Rect& leftRect, const Rect& topRect, const Rect& rightRect, const Rect& bottomRect)
     {
         leftRect_ = leftRect;
         topRect_ = topRect;
@@ -432,6 +439,23 @@ struct SafeAreaEdgeInserts {
     {
         return "SafeAreaEdgeInserts leftRect_: " + leftRect_.ToString() + ", topRect_: " + topRect_.ToString() +
                ", rightRect_: " + rightRect_.ToString() + ", bottomRect_: " + bottomRect_.ToString();
+    }
+
+    bool operator==(const SafeAreaEdgeInserts& safeArea) const
+    {
+        return (leftRect_ == safeArea.leftRect_) && ((topRect_ == safeArea.topRect_)) &&
+               ((rightRect_ == safeArea.rightRect_)) && ((bottomRect_ == safeArea.bottomRect_));
+    }
+
+    bool operator!=(const SafeAreaEdgeInserts& safeArea) const
+    {
+        return !operator==(safeArea);
+    }
+
+    SafeAreaEdgeInserts CombineSafeArea(const SafeAreaEdgeInserts& other) const
+    {
+        return SafeAreaEdgeInserts(leftRect_.CombineRect(other.leftRect_), topRect_.CombineRect(other.topRect_),
+            rightRect_.CombineRect(other.rightRect_), bottomRect_.CombineRect(other.bottomRect_));
     }
 };
 

@@ -191,6 +191,16 @@ public:
 
     SafeAreaEdgeInserts GetCurrentViewSafeArea() const override;
 
+    void SetSystemSafeArea(const SafeAreaEdgeInserts& systemSafeArea) override;
+
+    SafeAreaEdgeInserts GetSystemSafeArea() const override;
+
+    void SetCutoutSafeArea(const SafeAreaEdgeInserts& cutoutSafeArea) override;
+
+    SafeAreaEdgeInserts GetCutoutSafeArea() const override;
+
+    SafeAreaEdgeInserts GetViewSafeArea() const override;
+
     void ResetViewSafeArea() override;
 
     const RefPtr<FullScreenManager>& GetFullScreenManager();
