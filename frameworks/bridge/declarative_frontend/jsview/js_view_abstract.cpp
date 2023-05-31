@@ -917,13 +917,19 @@ void ParseCustomPopupParam(
 
 } // namespace
 
-uint32_t ColorAlphaAdapt(uint32_t origin)
+bool ColorAlphaAdapt(int64_t colorValue, Color& colorResult)
 {
-    uint32_t result = origin;
-    if (origin >> COLOR_ALPHA_OFFSET == 0) {
-        result = origin | COLOR_ALPHA_VALUE;
+    static const int64_t colorMaxValue = 0xFFFFFFFF;
+    if (colorValue < 0 || colorValue > colorMaxValue) {
+        LOGE("color Number is within an invalid range");
+        return false;
     }
-    return result;
+    auto origin = static_cast<uint32_t>(colorValue);
+    if (origin >> COLOR_ALPHA_OFFSET == 0) {
+        origin |= COLOR_ALPHA_VALUE;
+    }
+    colorResult = Color(origin);
+    return true;
 }
 
 void JSViewAbstract::JsScale(const JSCallbackInfo& info)
@@ -3094,18 +3100,8 @@ bool JSViewAbstract::ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result)
     return true;
 }
 
-bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
+bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color& result)
 {
-    if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
-        return false;
-    }
-    if (jsValue->IsNumber()) {
-        result = Color(ColorAlphaAdapt(jsValue->ToNumber<uint32_t>()));
-        return true;
-    }
-    if (jsValue->IsString()) {
-        return Color::ParseColorString(jsValue->ToString(), result);
-    }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (!resId->IsNumber()) {
@@ -3132,8 +3128,33 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
         result = themeConstants->GetColorByName(param->ToString());
         return true;
     }
+    JSRef<JSVal> type = jsObj->GetProperty("type");
+    if (!type->IsNull() && type->IsNumber() &&
+        type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRING)) {
+        auto value = themeConstants->GetString(resId->ToNumber<uint32_t>());
+        return Color::ParseColorString(value, result);
+    }
+    if (!type->IsNull() && type->IsNumber() &&
+        type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        auto value = themeConstants->GetInt(resId->ToNumber<int64_t>());
+        return ColorAlphaAdapt(value, result);
+    }
     result = themeConstants->GetColor(resId->ToNumber<uint32_t>());
     return true;
+}
+
+bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
+{
+    if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
+        return false;
+    }
+    if (jsValue->IsNumber()) {
+        return ColorAlphaAdapt(jsValue->ToNumber<int64_t>(), result);
+    }
+    if (jsValue->IsString()) {
+        return Color::ParseColorString(jsValue->ToString(), result);
+    }
+    return ParseJsColorFromResource(jsValue, result);
 }
 
 bool JSViewAbstract::ParseJsColorStrategy(const JSRef<JSVal>& jsValue, ForegroundColorStrategy& strategy)
@@ -5344,8 +5365,7 @@ bool JSViewAbstract::ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue,
         return false;
     }
     if (jsonValue->IsNumber()) {
-        result = Color(ColorAlphaAdapt(jsonValue->GetUInt()));
-        return true;
+        return ColorAlphaAdapt(jsonValue->GetInt64(), result);
     }
     if (jsonValue->IsString()) {
         result = Color::FromString(jsonValue->GetString());
