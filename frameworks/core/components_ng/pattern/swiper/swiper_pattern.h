@@ -464,7 +464,6 @@ private:
     int32_t endIndex_ = 0;
 
     PanDirection panDirection_;
-    float distance_ = 0.0f;
 
     bool indicatorDoingAnimation_ = false;
     bool isInit_ = true;
