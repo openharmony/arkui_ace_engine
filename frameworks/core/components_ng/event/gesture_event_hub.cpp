@@ -433,7 +433,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     std::string udKey;
     auto unifiedData = event->GetData();
     auto records = unifiedData->GetRecords();
-    int32_t recordsSize = std:min(records.size(), 1);
+    int32_t recordsSize = records.size() > 1 ? records.size() : 1;
     SetDragData(unifiedData, udKey);
     auto udmfClient = UDMF::UdmfClient::GetInstance();
     UDMF::Summary summary;
