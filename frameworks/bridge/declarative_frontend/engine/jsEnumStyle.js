@@ -833,6 +833,7 @@ var SeekMode;
 
 var SideBarContainerType;
 (function (SideBarContainerType) {
+  SideBarContainerType[SideBarContainerType["AUTO"] = 2] = "AUTO";
   SideBarContainerType[SideBarContainerType["Overlay"] = 1] = "Overlay";
   SideBarContainerType[SideBarContainerType["Embed"] = 0] = "Embed";
 })(SideBarContainerType || (SideBarContainerType = {}));

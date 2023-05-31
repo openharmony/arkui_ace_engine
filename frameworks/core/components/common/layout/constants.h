@@ -465,7 +465,7 @@ enum class CalendarType {
     SIMPLE,
 };
 
-enum class SideBarContainerType { EMBED, OVERLAY };
+enum class SideBarContainerType { EMBED, OVERLAY, AUTO };
 
 enum class SideBarPosition { START, END };
 

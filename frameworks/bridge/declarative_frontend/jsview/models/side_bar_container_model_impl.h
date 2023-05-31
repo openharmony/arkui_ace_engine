@@ -47,6 +47,7 @@ public:
     void SetDividerStartMargin(const Dimension& startMargin) override;
     void SetDividerEndMargin(const Dimension& endMargin) override;
     void SetOnChangeEvent(std::function<void(const bool)>&& onChange) override {};
+    void SetMinContentWidth(const Dimension& minContentWidth) override;
 
 private:
     void CreateAndMountControlButton(const RefPtr<NG::FrameNode>& parentNode) override;
