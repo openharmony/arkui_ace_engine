@@ -277,8 +277,6 @@ public:
     void ShowPrevious();
     void SwipeTo(int32_t index);
 
-    void OnVisibleChange(bool isVisible) override;
-
     int32_t GetStartIndex() const
     {
         return startIndex_;
