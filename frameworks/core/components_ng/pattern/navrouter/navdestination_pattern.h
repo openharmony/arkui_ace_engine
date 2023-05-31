@@ -84,6 +84,11 @@ public:
         return routeInfo_;
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
