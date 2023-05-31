@@ -39,7 +39,7 @@ ohos_shared_library("drawable_descriptor") {
 
   configs = [
     "$ace_root:ace_config",
-    "$ace_root/test/unittest:ace_coverage_config",
+    "$ace_root:ace_coverage_config",
   ]
 
   sources = [

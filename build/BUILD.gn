@@ -98,7 +98,7 @@ foreach(item, ace_platforms) {
       innerapi_tags = [ "platformsdk" ]
       part_name = ace_engine_part
       subsystem_name = ace_engine_subsystem
-      configs = [ "$ace_root/test/unittest:ace_coverage_config" ]
+      configs = [ "$ace_root:ace_coverage_config" ]
     }
 
     ohos_source_set("ace_ohos_unittest_base") {
@@ -123,7 +123,7 @@ foreach(item, ace_platforms) {
 
       configs = [
         "$ace_root:ace_test_config",
-        "$ace_root/test/unittest:ace_coverage_config",
+        "$ace_root:ace_coverage_config",
       ]
 
       deps = [
