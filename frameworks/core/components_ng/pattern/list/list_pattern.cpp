@@ -826,7 +826,7 @@ void ListPattern::SetChainAnimation()
     auto listLayoutProperty = GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(listLayoutProperty);
     auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
-    int32_t lanes = listLayoutProperty->GetLanes().value_or(1);
+    int32_t lanes = std::max(listLayoutProperty->GetLanes().value_or(1), 1);
     bool autoLanes = listLayoutProperty->HasLaneMinLength() || listLayoutProperty->HasLaneMaxLength();
     bool animation = listLayoutProperty->GetChainAnimation().value_or(false);
     bool enable = edgeEffect == EdgeEffect::SPRING && lanes == 1 && !autoLanes && animation;
