@@ -897,14 +897,6 @@ void FlexLayoutAlgorithm::PlaceChildren(
         } else {
             offset = OffsetF(childCrossPos, childMainPos);
         }
-        // no need to constraint X offset when padding left is zero
-        if (!NearZero(paddingOffset.GetX())) {
-            offset.SetX(std::max(offset.GetX(), 0.0f));
-        }
-        // no need to constraint Y offset when padding top is zero
-        if (!NearZero(paddingOffset.GetY())) {
-            offset.SetY(std::max(offset.GetY(), 0.0f));
-        }
 
         if (!IsStartTopLeft(direction_, textDir_)) {
             if (direction_ != FlexDirection::COLUMN_REVERSE) {
