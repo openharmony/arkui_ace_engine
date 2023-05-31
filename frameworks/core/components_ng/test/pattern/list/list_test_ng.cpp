@@ -4460,6 +4460,195 @@ HWTEST_F(ListTestNg, PerformActionTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListPattern_ScrollToIndex001
+ * @tc.desc: Test ScrollToIndex when smooth is true and index is different value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListPattern_ScrollToIndex001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list item.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    GetInstance();
+    
+    /**
+     * @tc.steps: step2. Test ScrollToIndex when index is -2.
+     * @tc.expected: Related function is called.
+     */
+    pattern_->ScrollToIndex(-2, true);
+    EXPECT_EQ(pattern_->scrollIndexAlignment_, ScrollIndexAlignment::ALIGN_TOP);
+    EXPECT_EQ(pattern_->currentDelta_, 0.0);
+    EXPECT_FALSE(pattern_->targetIndex_.has_value());
+
+    /**
+     * @tc.steps: step3. Test ScrollToIndex when index is 11.
+     * @tc.expected: Related function is called.
+     */
+    pattern_->ScrollToIndex(11, true);
+    EXPECT_FALSE(pattern_->targetIndex_.has_value());
+
+    /**
+     * @tc.steps: step4. Test ScrollToIndex when index is -1.
+     * @tc.expected: Related function is called.
+     */
+    pattern_->ScrollToIndex(-1, true);
+    EXPECT_EQ(pattern_->targetIndex_, -1);
+}
+
+/**
+ * @tc.name: ListPattern_OnDirtyLayoutWrapperSwap001
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap when targetIndex_ have value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListPattern_OnDirtyLayoutWrapperSwap001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialization and create list item.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    GetInstance();
+    auto layoutWrapper = RunMeasureAndLayout();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(layoutWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithmWrapper, nullptr);
+    auto listLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+    float startPos = 0.0f;
+    float endPos = 0.0f;
+    float mainLen = 20.0f;
+    bool isGroup = false;
+    for (int i = 0; i < 10; i++) {
+        startPos = endPos;
+        listLayoutAlgorithm->itemPosition_[i] = { startPos, endPos, isGroup };
+        endPos = startPos + mainLen;
+    }
+
+    /**
+     * @tc.steps: step2. Assign a value to targetIndex_ and test OnDirtyLayoutWrapperSwap.
+     * @tc.expected: Related function is called.
+     */
+    DirtySwapConfig config;
+    config.skipMeasure = true;
+    config.skipLayout = false;
+    pattern_->targetIndex_ = DEFAULT_LISTITEM_VIEWPORT_COUNT;
+    EXPECT_TRUE(pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+
+    pattern_->targetIndex_ = DEFAULT_LISTITEM_TOTAL_COUNT + 1;
+    EXPECT_TRUE(pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+    EXPECT_FALSE(pattern_->targetIndex_.has_value());
+
+    /**
+     * @tc.steps: step3. Take different values for scrollIndexAlignment_ and test OnDirtyLayoutWrapperSwap.
+     * @tc.expected: Related function is called.
+     */
+    pattern_->targetIndex_ = DEFAULT_LISTITEM_VIEWPORT_COUNT -1;
+    pattern_->scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_BOTTOM;
+    EXPECT_TRUE(pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+}
+
+/**
+ * @tc.name: ListLayoutAlgorithm_OffScreenLayoutDirection001
+ * @tc.desc: Test OffScreenLayoutDirection when targetIndex_ is in a different state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListLayoutAlgorithm_OffScreenLayoutDirection001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialization.
+     */
+    constexpr float space = 5.0f;
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    listModelNG.SetSpace(Dimension(space));
+    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>();
+
+    /**
+     * @tc.steps: step2. When targetIndex_ is nullptr and test OffScreenLayoutDirection.
+     * @tc.expected: Related function is called.
+     */
+    listLayoutAlgorithm->OffScreenLayoutDirection();
+    EXPECT_FALSE(listLayoutAlgorithm->forwardFeature_);
+    EXPECT_FALSE(listLayoutAlgorithm->backwardFeature_);
+
+    /**
+     * @tc.steps: step3. When targetIndex_ is nullptr and test OffScreenLayoutDirection.
+     * @tc.expected: Related function is called.
+     */
+    listLayoutAlgorithm->SetTargetIndex(DEFAULT_LISTITEM_TOTAL_COUNT - 2);
+    listLayoutAlgorithm->OffScreenLayoutDirection();
+    EXPECT_FALSE(listLayoutAlgorithm->forwardFeature_);
+    EXPECT_FALSE(listLayoutAlgorithm->backwardFeature_);
+
+    /**
+     * @tc.steps: step4. Creat itemPosition_.
+     */
+    float startPos = 0.0f;
+    float endPos = 0.0f;
+    float mainLen = 20.0f;
+    bool isGroup = false;
+    for (int i = 0; i < 10; i++) {
+        startPos = endPos;
+        listLayoutAlgorithm->itemPosition_[i] = { startPos, endPos, isGroup };
+        endPos = startPos + mainLen;
+    }
+
+    /**
+     * @tc.steps: step5. Assign a value to targetIndex_ and test OffScreenLayoutDirection.
+     * @tc.expected: Related function is called.
+     */
+    listLayoutAlgorithm->SetTargetIndex(DEFAULT_LISTITEM_TOTAL_COUNT - 2);
+    listLayoutAlgorithm->OffScreenLayoutDirection();
+    EXPECT_FALSE(listLayoutAlgorithm->forwardFeature_);
+    EXPECT_FALSE(listLayoutAlgorithm->backwardFeature_);
+
+    listLayoutAlgorithm->SetTargetIndex(DEFAULT_LISTITEM_TOTAL_COUNT + 1);
+    listLayoutAlgorithm->OffScreenLayoutDirection();
+    EXPECT_TRUE(listLayoutAlgorithm->forwardFeature_);
+    EXPECT_FALSE(listLayoutAlgorithm->backwardFeature_);
+}
+
+/**
+ * @tc.name: ListLayoutAlgorithm_OffScreenLayoutDirection002
+ * @tc.desc: Test OffScreenLayoutDirection When the value of targetIndex_ is greater than endIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListLayoutAlgorithm_OffScreenLayoutDirection002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialization.
+     */
+    constexpr float space = 5.0f;
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    listModelNG.SetSpace(Dimension(space));
+    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>();
+
+    /**
+     * @tc.steps: step2. Creat itemPosition_.
+     */
+    float startPos = 0.0f;
+    float endPos = 0.0f;
+    float mainLen = 20.0f;
+    bool isGroup = false;
+    for (int i = 10; i < 20; i++) {
+        startPos = endPos;
+        listLayoutAlgorithm->itemPosition_[i] = { startPos, endPos, isGroup };
+        endPos = startPos + mainLen;
+    }
+
+    /**
+     * @tc.steps: step3. Assign a value to targetIndex_ and test OffScreenLayoutDirection.
+     * @tc.expected: Related function is called.
+     */
+    listLayoutAlgorithm->SetTargetIndex(DEFAULT_LISTITEM_TOTAL_COUNT - 2);
+    listLayoutAlgorithm->OffScreenLayoutDirection();
+    EXPECT_FALSE(listLayoutAlgorithm->forwardFeature_);
+    EXPECT_TRUE(listLayoutAlgorithm->backwardFeature_);
+}
+ /**
  * @tc.name: ListPositionControllerTest001
  * @tc.desc: Test PositionController function with smooth.
  * @tc.type: FUNC
