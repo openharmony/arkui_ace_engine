@@ -486,7 +486,6 @@ private:
     std::set<int32_t> preItemRange_;
 
     PanDirection panDirection_;
-    float distance_ = 0.0f;
 
     float currentOffset_ = 0.0f;
     float turnPageRate_ = 0.0f;
