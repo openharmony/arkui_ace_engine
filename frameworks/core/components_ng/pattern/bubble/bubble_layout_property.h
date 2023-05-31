@@ -39,6 +39,7 @@ public:
         value->propDisplayWindowOffset_ = CloneDisplayWindowOffset();
         value->propTargetSpace_ = CloneTargetSpace();
         value->propBlockEvent_ = CloneBlockEvent();
+        value->propPositionOffset_ = ClonePositionOffset();
         return value;
     }
 
@@ -52,6 +53,7 @@ public:
         ResetDisplayWindowOffset();
         ResetTargetSpace();
         ResetBlockEvent();
+        ResetPositionOffset();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableArrow, bool, PROPERTY_UPDATE_MEASURE);
@@ -61,6 +63,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayWindowOffset, OffsetF, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TargetSpace, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BlockEvent, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PositionOffset, OffsetF, PROPERTY_UPDATE_LAYOUT);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(BubbleLayoutProperty);

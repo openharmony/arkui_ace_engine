@@ -800,6 +800,23 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
             LOGI("Empty.");
         }
     }
+
+    auto offsetVal = popupObj->GetProperty("offset");
+    if (offsetVal->IsObject()) {
+        auto offsetObj = JSRef<JSObject>::Cast(offsetVal);
+        auto xVal = offsetObj->GetProperty("x");
+        auto yVal = offsetObj->GetProperty("y");
+        Offset popupOffset;
+        if (xVal->IsNumber()) {
+            popupOffset.SetX(xVal->ToNumber<double>());
+        }
+        if (yVal->IsNumber()) {
+            popupOffset.SetY(yVal->ToNumber<double>());
+        }
+        if (popupParam) {
+            popupParam->SetTargetOffset(popupOffset);
+        }
+    }
 }
 
 void ParseCustomPopupParam(
@@ -910,6 +927,23 @@ void ParseCustomPopupParam(
                 func->Execute(keys, param);
             };
             popupParam->SetOnStateChange(onStateChangeCallback);
+        }
+    }
+
+    auto offsetVal = popupObj->GetProperty("offset");
+    if (offsetVal->IsObject()) {
+        auto offsetObj = JSRef<JSObject>::Cast(offsetVal);
+        auto xVal = offsetObj->GetProperty("x");
+        auto yVal = offsetObj->GetProperty("y");
+        Offset popupOffset;
+        if (xVal->IsNumber()) {
+            popupOffset.SetX(xVal->ToNumber<double>());
+        }
+        if (yVal->IsNumber()) {
+            popupOffset.SetY(yVal->ToNumber<double>());
+        }
+        if (popupParam) {
+            popupParam->SetTargetOffset(popupOffset);
         }
     }
 }

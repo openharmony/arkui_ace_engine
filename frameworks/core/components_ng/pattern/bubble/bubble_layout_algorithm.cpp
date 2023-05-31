@@ -168,6 +168,7 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     placement_ = layoutProp->GetPlacement().value_or(Placement::BOTTOM);
     scaledBubbleSpacing_ = static_cast<float>(popupTheme->GetBubbleSpacing().ConvertToPx());
     arrowHeight_ = static_cast<float>(popupTheme->GetArrowHeight().ConvertToPx());
+    positionOffset_ = layoutProp->GetPositionOffset().value_or(OffsetF());
 }
 
 OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp)
@@ -184,7 +185,8 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const Re
 
     OffsetF originOffset =
         GetPositionWithPlacement(childSize, topPosition, bottomPosition, topArrowPosition, bottomArrowPosition);
-    OffsetF childPosition = originOffset;
+    OffsetF childPosition = originOffset + positionOffset_;
+    arrowPosition_ += positionOffset_;
     arrowPlacement_ = placement_;
 
     // Fit popup to screen range.
