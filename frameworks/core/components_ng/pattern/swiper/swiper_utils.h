@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -64,7 +65,13 @@ public:
         auto prevMargin = property->GetPrevMarginValue(0.0_px).ConvertToPx();
         auto nextMargin = property->GetNextMarginValue(0.0_px).ConvertToPx();
         auto itemSpaceCount = CaculateDisplayItemSpaceCount(property, prevMargin, nextMargin);
-        auto childSelfIdealSize = OptionalSizeF();
+        auto childSelfIdealSize = idealSize;
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, LayoutConstraintF());
+        const static int32_t PLATFORM_VERSION_TEN = 10;
+        if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+            childSelfIdealSize = OptionalSizeF();
+        }
         float childCalcIdealLength = 0.0f;
 
         if (axis == Axis::HORIZONTAL) {
