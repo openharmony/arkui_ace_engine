@@ -168,6 +168,9 @@ void VideoPattern::ResetStatus()
 {
     isInitialState_ = true;
     isPlaying_ = false;
+#ifndef OHOS_PLATFORM
+    isStop_ = false;
+#endif
 }
 
 void VideoPattern::UpdateMediaPlayer()
