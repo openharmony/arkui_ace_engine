@@ -335,6 +335,10 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 
 void FrameNode::FromJson(const std::unique_ptr<JsonValue>& json)
 {
+    if (renderContext_) {
+        LOGD("UITree start decode renderContext");
+        renderContext_->FromJson(json);
+    }
     LOGD("UITree start decode accessibilityProperty");
     accessibilityProperty_->FromJson(json);
     LOGD("UITree start decode layoutProperty");
@@ -343,10 +347,6 @@ void FrameNode::FromJson(const std::unique_ptr<JsonValue>& json)
     paintProperty_->FromJson(json);
     LOGD("UITree start decode pattern");
     pattern_->FromJson(json);
-    if (renderContext_) {
-        LOGD("UITree start decode renderContext");
-        renderContext_->FromJson(json);
-    }
     if (eventHub_) {
         LOGD("UITree start decode eventHub");
         eventHub_->FromJson(json);
