@@ -617,7 +617,9 @@ void RosenRenderContext::OnTransformTranslateUpdate(const TranslateOptions& tran
         xValue = translate.x.ConvertToPx();
         yValue = translate.y.ConvertToPx();
     }
-    rsNode_->SetTranslate(xValue, yValue, 0.0f);
+    // translateZ doesn't support percentage
+    float zValue = translate.z.ConvertToPx();
+    rsNode_->SetTranslate(xValue, yValue, zValue);
     RequestNextFrame();
 }
 
