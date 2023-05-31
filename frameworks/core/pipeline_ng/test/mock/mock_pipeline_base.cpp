@@ -290,6 +290,25 @@ void PipelineContext::ResetViewSafeArea() {}
 void PipelineContext::AddWindowSizeChangeCallback(int32_t nodeId) {}
 
 void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId) {}
+
+void PipelineContext::SetSystemSafeArea(const SafeAreaEdgeInserts& systemSafeArea) {};
+
+SafeAreaEdgeInserts PipelineContext::GetSystemSafeArea() const
+{
+    return {};
+}
+
+void PipelineContext::SetCutoutSafeArea(const SafeAreaEdgeInserts& cutoutSafeArea) {};
+
+SafeAreaEdgeInserts PipelineContext::GetCutoutSafeArea() const
+{
+    return {};
+}
+
+SafeAreaEdgeInserts PipelineContext::GetViewSafeArea() const
+{
+    return {};
+}
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {

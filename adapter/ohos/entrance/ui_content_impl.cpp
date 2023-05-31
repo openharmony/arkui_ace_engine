@@ -172,22 +172,45 @@ public:
 
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
     {
-        if (type == OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM || type == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) {
-            LOGI("UIContent::OnAvoidAreaChanged type:%{public}d", type);
-            auto container = Platform::AceContainer::GetContainer(instanceId_);
-            CHECK_NULL_VOID(container);
-            auto taskExecutor = container->GetTaskExecutor();
-            CHECK_NULL_VOID(taskExecutor);
-            taskExecutor->PostTask(
-                [container, instanceId = instanceId_] {
-                    CHECK_NULL_VOID(container);
-                    ContainerScope scope(instanceId);
-                    auto context = container->GetPipelineContext();
-                    CHECK_NULL_VOID_NOLOG(context);
-                    context->ResetViewSafeArea();
-                },
-                TaskExecutor::TaskType::UI);
+        LOGI("UIContent::OnAvoidAreaChanged type:%{public}d, avoidArea:topRect:x:%{public}d, y:%{public}d, "
+             "width:%{public}d, height%{public}d",
+            type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
+            (int32_t)avoidArea.topRect_.height_);
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID_NOLOG(container);
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID_NOLOG(pipelineContext);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID_NOLOG(taskExecutor);
+        Rect leftRect(static_cast<double>(avoidArea.leftRect_.posX_), static_cast<double>(avoidArea.leftRect_.posY_),
+            static_cast<double>(avoidArea.leftRect_.width_), static_cast<double>(avoidArea.leftRect_.height_));
+        Rect topRect(static_cast<double>(avoidArea.topRect_.posX_), static_cast<double>(avoidArea.topRect_.posY_),
+            static_cast<double>(avoidArea.topRect_.width_), static_cast<double>(avoidArea.topRect_.height_));
+        Rect rightRect(static_cast<double>(avoidArea.rightRect_.posX_), static_cast<double>(avoidArea.rightRect_.posY_),
+            static_cast<double>(avoidArea.rightRect_.width_), static_cast<double>(avoidArea.rightRect_.height_));
+        Rect bottomRect(static_cast<double>(avoidArea.bottomRect_.posX_),
+            static_cast<double>(avoidArea.bottomRect_.posY_), static_cast<double>(avoidArea.bottomRect_.width_),
+            static_cast<double>(avoidArea.bottomRect_.height_));
+        SafeAreaEdgeInserts safeArea(leftRect, topRect, rightRect, bottomRect);
+        if (type == OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM) {
+            CHECK_NULL_VOID_NOLOG(safeArea != pipelineContext->GetSystemSafeArea());
+            pipelineContext->SetSystemSafeArea(safeArea);
+        } else if (type == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) {
+            CHECK_NULL_VOID_NOLOG(safeArea != pipelineContext->GetCutoutSafeArea());
+            pipelineContext->SetCutoutSafeArea(safeArea);
+        } else {
+            return;
         }
+
+        taskExecutor->PostTask(
+            [container, instanceId = instanceId_] {
+                CHECK_NULL_VOID(container);
+                ContainerScope scope(instanceId);
+                auto context = container->GetPipelineContext();
+                CHECK_NULL_VOID_NOLOG(context);
+                context->ResetViewSafeArea();
+            },
+            TaskExecutor::TaskType::UI);
     }
 
 private:
@@ -1228,8 +1251,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     window_->RegisterDragListener(dragWindowListener_);
     occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
     window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
-    avoidAreaChangedListener_ = new AvoidAreaChangedListener(instanceId_);
-    window_->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
 
     // create ace_view
     auto aceView =
@@ -1292,6 +1313,14 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                 nativeEngine->CreateReference(storage, 1), context->GetBindingObject()->Get<NativeReference>());
         }
     }
+    const static int32_t PLATFORM_VERSION_TEN = 10;
+    if (pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        avoidAreaChangedListener_ = new AvoidAreaChangedListener(instanceId_);
+        window_->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
+        pipeline->SetSystemSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM));
+        pipeline->SetCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
+    }
+
     LayoutInspector::SetCallback(instanceId_);
 
     LOGI("Initialize UIContentImpl end.");
