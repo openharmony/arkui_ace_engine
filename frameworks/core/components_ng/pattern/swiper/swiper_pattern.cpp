@@ -817,20 +817,6 @@ void SwiperPattern::StartAutoPlay()
     }
 }
 
-void SwiperPattern::OnVisibleChange(bool isVisible)
-{
-    if (isInit_) {
-        return;
-    }
-
-    if (isVisible) {
-        isVisible_ = true;
-        StartAutoPlay();
-    } else {
-        StopAutoPlay();
-    }
-}
-
 void SwiperPattern::UpdateCurrentOffset(float offset)
 {
     currentOffset_ = currentOffset_ + offset;
@@ -1587,8 +1573,9 @@ void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay)
 
 void SwiperPattern::OnWindowShow()
 {
-    isVisible_ = true;
-    StartAutoPlay();
+    if (isVisible_) {
+        StartAutoPlay();
+    }
 }
 
 void SwiperPattern::OnWindowHide()
