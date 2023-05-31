@@ -592,6 +592,7 @@ bool SliderPattern::MoveStep(int32_t stepCount)
     value_ = nextValue;
     sliderPaintProperty->UpdateValue(value_);
     valueRatio_ = (value_ - min) / (max - min);
+    FireChangeEvent(SliderChangeMode::Begin);
     FireChangeEvent(SliderChangeMode::End);
     LOGD("Move %{public}d steps, Value change to %{public}f", stepCount, value_);
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
