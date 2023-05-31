@@ -21,12 +21,13 @@
 #define protected public
 #define private public
 #include "core/components/select/select_theme.h"
+#include "core/components/text/text_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
-#include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
+#include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -55,6 +56,7 @@ const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
 const Ace::FontStyle ITALIC_FONT_STYLE_VALUE = Ace::FontStyle::ITALIC;
 const Ace::FontWeight FONT_WEIGHT_VALUE = Ace::FontWeight::W100;
 const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
+const Color BG_COLOR_VALUE = Color::FromRGB(100, 255, 100);
 const std::vector<SelectParam> CREATE_VALUE = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
     { OPTION_TEXT_3, INTERNAL_SOURCE } };
 } // namespace
@@ -69,6 +71,7 @@ class SelectPropertyTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
+
 protected:
     static RefPtr<FrameNode> CreateSelect(const std::vector<SelectParam>& value, const TestProperty& test);
 };
@@ -117,7 +120,7 @@ RefPtr<FrameNode> SelectPropertyTestNg::CreateSelect(const std::vector<SelectPar
 HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest001, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
-    
+
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
     selectModelInstance.Create(params);
@@ -362,12 +365,109 @@ HWTEST_F(SelectPropertyTestNg, UpdateSelectedProps002, TestSize.Level1)
     selectPattern->SetSelectedOptionFontWeight(FONT_WEIGHT_VALUE);
     selectPattern->SetSelectedOptionItalicFontStyle(ITALIC_FONT_STYLE_VALUE);
     selectPattern->SetSelectedOptionFontSize(FONT_SIZE_VALUE);
-    selectPattern->selectedBgColor_ = TEXT_COLOR_VALUE;
+    selectPattern->selectedBgColor_ = BG_COLOR_VALUE;
     selectPattern->UpdateSelectedProps(1);
     EXPECT_NE(selectPattern->selectedFont_.FontFamily, FONT_FAMILY_VALUE);
     EXPECT_EQ(selectPattern->selectedFont_.FontSize, FONT_SIZE_VALUE);
     EXPECT_EQ(selectPattern->selectedFont_.FontStyle, ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(selectPattern->selectedFont_.FontWeight, FONT_WEIGHT_VALUE);
     EXPECT_EQ(selectPattern->selectedFont_.FontColor, TEXT_COLOR_VALUE);
+}
+/**
+ * @tc.name: SelectLayoutPropertyTest004
+ * @tc.desc: Test SetSelectOptionFont.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get frameNode and pattern.
+     */
+    TestProperty testProperty;
+    testProperty.FontSize = std::make_optional(FONT_SIZE_VALUE);
+    testProperty.FontStyle = std::make_optional(ITALIC_FONT_STYLE_VALUE);
+    testProperty.FontWeight = std::make_optional(FONT_WEIGHT_VALUE);
+    testProperty.FontColor = std::make_optional(TEXT_COLOR_VALUE);
+    testProperty.FontFamily = std::make_optional(FONT_FAMILY_VALUE);
+    auto frameNode = CreateSelect(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    EXPECT_TRUE(pattern);
+    /**
+     * @tc.steps: step2. Get options and Set optionFont.
+     * @tc.expected: option style is updated successfully
+     */
+    auto options = pattern->GetOptions();
+    EXPECT_EQ(options.size(), CREATE_VALUE.size());
+    for (size_t i = 0; i < options.size(); ++i) {
+        pattern->SetSelected(i);
+        auto optionPattern = options[i]->GetPattern<OptionPattern>();
+        optionPattern->selectTheme_ = AceType::MakeRefPtr<SelectTheme>();
+        optionPattern->textTheme_ = AceType::MakeRefPtr<TextTheme>();
+        EXPECT_EQ(optionPattern->GetText(), CREATE_VALUE[i].first);
+        pattern->SetOptionBgColor(BG_COLOR_VALUE);
+        EXPECT_EQ(optionPattern->bgColor_, BG_COLOR_VALUE);
+        pattern->SetOptionFontFamily(FONT_FAMILY_VALUE);
+        pattern->SetOptionFontSize(FONT_SIZE_VALUE);
+        pattern->SetOptionItalicFontStyle(ITALIC_FONT_STYLE_VALUE);
+        pattern->SetOptionFontColor(TEXT_COLOR_VALUE);
+        pattern->SetOptionFontWeight(FONT_WEIGHT_VALUE);
+        EXPECT_EQ(optionPattern->GetFontColor(), TEXT_COLOR_VALUE);
+        EXPECT_EQ(optionPattern->GetFontSize(), FONT_SIZE_VALUE);
+        EXPECT_EQ(optionPattern->GetFontFamily(), FONT_FAMILY_VALUE);
+        EXPECT_EQ(optionPattern->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
+        EXPECT_EQ(optionPattern->GetFontWeight(), FONT_WEIGHT_VALUE);
+        pattern->InitSelected();
+    }
+}
+/**
+ * @tc.name: ShowSelectMenuTest001
+ * @tc.desc: Test SelectPattern ShowSelectMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, ShowSelectMenuTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get frameNode and pattern.
+     */
+    TestProperty testProperty;
+    testProperty.FontSize = std::make_optional(FONT_SIZE_VALUE);
+    auto frameNode = CreateSelect(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    EXPECT_TRUE(pattern);
+    /**
+     * @tc.steps: step2. call ShowSelectMenu function.
+     * @tc.expected: the function exits normally
+     */
+    pattern->ShowSelectMenu();
+    auto offset = pattern->GetHost()->GetPaintRectOffset();
+    EXPECT_EQ(offset.GetY(), pattern->selectSize_.Height());
+}
+/**
+ * @tc.name: SelectLayoutPropertyTest005
+ * @tc.desc: Test Select Layout Algorithm Measure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get frameNode and geometryNode.
+     */
+    TestProperty testProperty;
+    testProperty.FontSize = std::make_optional(FONT_SIZE_VALUE);
+    auto frameNode = CreateSelect(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    /**
+     * @tc.steps: step2. Get layoutWrapper and Call Measure when has no layoutConstraint.
+     * @tc.expected: the function exits normally
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    LayoutWrapper* layoutWrapper = new LayoutWrapper(frameNode, geometryNode, layoutProperty);
+    auto layoutAlgorithm = AceType::MakeRefPtr<SelectLayoutAlgorithm>();
+    layoutAlgorithm->Measure(layoutWrapper);
+    auto rowWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    EXPECT_EQ(rowWrapper, nullptr);
 }
 } // namespace OHOS::Ace::NG
