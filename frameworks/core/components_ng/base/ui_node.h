@@ -270,6 +270,8 @@ public:
 
     virtual void SetActive(bool active);
 
+    virtual void SetJSViewActive(bool active);
+
     virtual void OnVisibleChange(bool isVisible);
 
     virtual bool MarkRemoving();
