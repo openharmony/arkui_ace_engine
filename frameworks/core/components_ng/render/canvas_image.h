@@ -40,6 +40,7 @@ struct ImagePaintConfig {
     ImageFit imageFit_ = ImageFit::COVER;
     bool flipHorizontally_ = false;
     bool isSvg_ = false;
+    std::vector<ObscuredReasons> obscuredReasons_;
 };
 
 struct RenderTaskHolder;

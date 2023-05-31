@@ -5061,6 +5061,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
     JSClass<JSViewAbstract>::StaticMethod("hitTestBehavior", &JSViewAbstract::JsHitTestBehavior);
     JSClass<JSViewAbstract>::StaticMethod("keyboardShortcut", &JSViewAbstract::JsKeyboardShortcut);
+    JSClass<JSViewAbstract>::StaticMethod("obscured", &JSViewAbstract::JsObscured);
     JSClass<JSViewAbstract>::StaticMethod("allowDrop", &JSViewAbstract::JsAllowDrop);
 
     JSClass<JSViewAbstract>::StaticMethod("createAnimatableProperty", &JSViewAbstract::JSCreateAnimatableProperty);
@@ -5782,5 +5783,25 @@ bool JSViewAbstract::CheckLength(
         return false;
     }
     return true;
+}
+
+void JSViewAbstract::JsObscured(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsArray()) {
+        return;
+    }
+
+    auto obscuredArray = JSRef<JSArray>::Cast(info[0]);
+    size_t size = obscuredArray->Length();
+    std::vector<ObscuredReasons> reasons(size);
+    reasons.clear();
+    for (size_t i = 0; i < size; i++) {
+        JSRef<JSVal> reason = obscuredArray->GetValueAt(i);
+        if (reason->IsNumber()) {
+            reasons.emplace_back(static_cast<ObscuredReasons>(reason->ToNumber<int32_t>()));
+        }
+    }
+
+    ViewAbstractModel::GetInstance()->SetObscured(reasons);
 }
 } // namespace OHOS::Ace::Framework

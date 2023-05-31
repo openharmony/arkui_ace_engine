@@ -98,6 +98,9 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
     if (colorFilterMatrix.has_value()) {
         config.colorFilter_ = std::make_shared<std::vector<float>>(colorFilterMatrix.value());
     }
+    auto renderCtx = paintWrapper->GetRenderContext();
+    CHECK_NULL_VOID(renderCtx);
+    config.obscuredReasons_ = renderCtx->GetObscured().value_or(std::vector<ObscuredReasons>());
     // scale for recordingCanvas: take padding into account
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
     auto contentSize = paintWrapper->GetContentSize();

@@ -28,6 +28,7 @@ public:
     explicit ImagePainter(const RefPtr<CanvasImage>& canvasImage) : canvasImage_(canvasImage) {}
     ~ImagePainter() = default;
 
+    void DrawObscuration(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void DrawImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void DrawStaticImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& svgContainerSize) const;
