@@ -121,6 +121,11 @@ constexpr int32_t NODE_ID = 143;
 const Color FOREGROUND_COLOR_VALUE = Color::FOREGROUND;
 const RectF CONTENT_RECT(3.0, 3.0, TEXT_WIDTH, TEXT_HEIGHT);
 constexpr int32_t ROOT_NODE_ID = 113;
+const std::string EMPTY_TEXT = "";
+constexpr int32_t UNKNOWN_REASON = 1;
+constexpr float TEXT_RECT_WIDTH = 10.0f;
+constexpr float TEXT_RECT_TOP_ONE = 10.0f;
+constexpr float TEXT_RECT_TOP_TWO = 20.0f;
 
 using OnClickCallback = std::function<void(const BaseEventInfo* info)>;
 using DragDropBaseCallback = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
@@ -3593,5 +3598,208 @@ HWTEST_F(TextTestNg, TextSelectorTest001, TestSize.Level1)
     textPattern->textSelector_.Update(0, TEXT_SIZE_INT);
     EXPECT_EQ(textPattern->textSelector_.baseOffset, 0);
     EXPECT_EQ(textPattern->textSelector_.destinationOffset, TEXT_SIZE_INT);
+}
+
+/**
+ * @tc.name: TextPaintMethodTest003
+ * @tc.desc: test text_paint_method.cpp UpdateContentModifier function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPaintMethodTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and geometryNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto renderContext = textFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProperty = textPattern->CreatePaintProperty();
+    ASSERT_NE(paintProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set textForDisplay_ to EMPTY_TEXT.
+     */
+    textPattern->textForDisplay_ = EMPTY_TEXT;
+
+    /**
+     * @tc.steps: step3. create textPaintMethod and call UpdateContentModifier function.
+     * @tc.expected: The drawObscuredRects_ of textContentModifier is empty.
+     */
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    RefPtr<TextContentModifier> textContentModifier =
+        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
+    TextPaintMethod textPaintMethod(
+        textPattern, paragraph, BASE_LINE_OFFSET_VALUE, textContentModifier, textOverlayModifier);
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty);
+    textPaintMethod.UpdateContentModifier(AceType::RawPtr(paintWrapper));
+    EXPECT_EQ(textContentModifier->drawObscuredRects_, std::vector<Rect>());
+
+    /**
+     * @tc.steps: step4. set textForDisplay_ to CREATE_VALUE.
+     */
+    textPattern->textForDisplay_ = CREATE_VALUE;
+
+    /**
+     * @tc.steps: step5. call UpdateContentModifier function.
+     * @tc.expected: The drawObscuredRects_ of textContentModifier is not empty.
+     */
+    textPaintMethod.UpdateContentModifier(AceType::RawPtr(paintWrapper));
+    EXPECT_NE(textContentModifier->drawObscuredRects_, std::vector<Rect>());
+}
+
+/**
+ * @tc.name: TextContentModifier003
+ * @tc.desc: test text_content_modifier.cpp onDraw function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextContentModifier003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and geometryNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textPaintMethod = textPattern->CreateNodePaintMethod();
+    ASSERT_NE(textPaintMethod, nullptr);
+    auto textContentModifier = textPattern->GetContentModifier();
+    ASSERT_NE(textContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. set context.
+     */
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, ClipRect(_, _)).WillRepeatedly(Return());
+    DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+
+    /**
+     * @tc.steps: step3. call onDraw function of textContentModifier.
+     * @tc.expected: The obscuredReasons_ of textContentModifier is empty.
+     *               The ifHaveSpanItemChildren_ of textContentModifier is false.
+     */
+    textContentModifier->onDraw(context);
+    EXPECT_EQ(textContentModifier->obscuredReasons_, std::vector<ObscuredReasons>());
+    EXPECT_EQ(textContentModifier->ifHaveSpanItemChildren_, false);
+
+    /**
+     * @tc.steps: step4. set ifHaveSpanItemChildren_ to true.
+     */
+    textContentModifier->SetIfHaveSpanItemChildren(true);
+
+    /**
+     * @tc.steps: step5. call onDraw function of textContentModifier.
+     * @tc.expected: The obscuredReasons_ of textContentModifier is empty.
+     *               The ifHaveSpanItemChildren_ of textContentModifier is true.
+     */
+    textContentModifier->onDraw(context);
+    EXPECT_EQ(textContentModifier->obscuredReasons_, std::vector<ObscuredReasons>());
+    EXPECT_EQ(textContentModifier->ifHaveSpanItemChildren_, true);
+
+    /**
+     * @tc.steps: step6. push UNKNOWN_REASON and PLACEHOLDER to reasons.
+     *                   set obscuredReasons_ to reasons.
+     */
+    std::vector<ObscuredReasons> reasons;
+    reasons.push_back((ObscuredReasons)UNKNOWN_REASON);
+    reasons.push_back(ObscuredReasons::PLACEHOLDER);
+    textContentModifier->SetObscured(reasons);
+
+    /**
+     * @tc.steps: step7. call onDraw function of textContentModifier.
+     * @tc.expected: The obscuredReasons_ of textContentModifier is reasons.
+     *               The ifHaveSpanItemChildren_ of textContentModifier is true.
+     */
+    textContentModifier->onDraw(context);
+    EXPECT_EQ(textContentModifier->obscuredReasons_, reasons);
+    EXPECT_EQ(textContentModifier->ifHaveSpanItemChildren_, true);
+
+    /**
+     * @tc.steps: step8. set ifHaveSpanItemChildren_ to false.
+     */
+    textContentModifier->SetIfHaveSpanItemChildren(false);
+
+    /**
+     * @tc.steps: step9. call onDraw function of textContentModifier.
+     * @tc.expected: The obscuredReasons_ of textContentModifier is reasons.
+     *               The ifHaveSpanItemChildren_ of textContentModifier is false.
+     */
+    textContentModifier->onDraw(context);
+    EXPECT_EQ(textContentModifier->obscuredReasons_, reasons);
+    EXPECT_EQ(textContentModifier->ifHaveSpanItemChildren_, false);
+}
+
+/**
+ * @tc.name: TextContentModifier004
+ * @tc.desc: test text_content_modifier.cpp DrawObscuration function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextContentModifier004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textPaintMethod = textPattern->CreateNodePaintMethod();
+    ASSERT_NE(textPaintMethod, nullptr);
+    auto textContentModifier = textPattern->GetContentModifier();
+    ASSERT_NE(textContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. set context and paragraph.
+     *                   set defaultFontSize and defaultTextColor of textContentModifier.
+     *                   push one rect to drawObscuredRects and set drawObscuredRects_ to drawObscuredRects.
+     */
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, ClipRect(_, _)).WillRepeatedly(Return());
+    DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    textContentModifier->SetParagraph(paragraph);
+    TextStyle textStyle;
+    textStyle.SetFontSize(ADAPT_FONT_SIZE_VALUE);
+    textStyle.SetTextColor(TEXT_COLOR_VALUE);
+    textContentModifier->SetDefaultFontSize(textStyle);
+    textContentModifier->SetDefaultTextColor(textStyle);
+    std::vector<Rect> drawObscuredRects;
+    Rect textRect;
+    textRect.SetWidth(TEXT_RECT_WIDTH);
+    textRect.SetTop(TEXT_RECT_TOP_ONE);
+    drawObscuredRects.push_back(textRect);
+    textContentModifier->SetDrawObscuredRects(drawObscuredRects);
+
+    /**
+     * @tc.steps: step3. call DrawObscuration function of textContentModifier.
+     * @tc.expected: The drawObscuredRects_ of textContentModifier is drawObscuredRects.
+     */
+    textContentModifier->DrawObscuration(context);
+    EXPECT_EQ(textContentModifier->drawObscuredRects_, drawObscuredRects);
+
+    /**
+     * @tc.steps: step4. push two rect to drawObscuredRects and set drawObscuredRects_ to drawObscuredRects.
+     */
+    drawObscuredRects.push_back(textRect);
+    textRect.SetTop(TEXT_RECT_TOP_TWO);
+    drawObscuredRects.push_back(textRect);
+    textContentModifier->SetDrawObscuredRects(drawObscuredRects);
+
+    /**
+     * @tc.steps: step5. call DrawObscuration function of textContentModifier.
+     * @tc.expected: The drawObscuredRects_ of textContentModifier is drawObscuredRects.
+     */
+    textContentModifier->DrawObscuration(context);
+    EXPECT_EQ(textContentModifier->drawObscuredRects_, drawObscuredRects);
 }
 } // namespace OHOS::Ace::NG
