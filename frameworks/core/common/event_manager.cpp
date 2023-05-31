@@ -151,13 +151,13 @@ void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<
     inSelectedRect_ = false;
 }
 
-void EventManager::HandleGlobalEventNG(
-    const TouchEvent& touchPoint, const RefPtr<NG::SelectOverlayManager>& selectOverlayManager)
+void EventManager::HandleGlobalEventNG(const TouchEvent& touchPoint,
+    const RefPtr<NG::SelectOverlayManager>& selectOverlayManager, const NG::OffsetF& rootOffset)
 {
     if (touchPoint.type != TouchType::DOWN || touchPoint.sourceType != SourceType::MOUSE) {
         return;
     }
-    const NG::PointF point { touchPoint.x, touchPoint.y };
+    const NG::PointF point { touchPoint.x - rootOffset.GetX(), touchPoint.y - rootOffset.GetY() };
     CHECK_NULL_VOID_NOLOG(selectOverlayManager);
     if (!selectOverlayManager->IsInSelectedOrSelectOverlayArea(point)) {
         selectOverlayManager->DestroySelectOverlay();
