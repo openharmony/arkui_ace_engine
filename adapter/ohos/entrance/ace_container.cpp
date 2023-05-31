@@ -658,13 +658,15 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterSurfaceDestroyCallback(surfaceDestroyCallback);
 
-    auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](
-                                   int32_t x, int32_t y, const DragEventAction& action) {
-        ContainerScope scope(id);
-        context->GetTaskExecutor()->PostTask(
-            [context, x, y, action]() { context->OnDragEvent(x, y, action); }, TaskExecutor::TaskType::UI);
-    };
-    aceView_->RegisterDragEventCallback(dragEventCallback);
+    if (!isFormRender_) {
+        auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](
+                                       int32_t x, int32_t y, const DragEventAction& action) {
+            ContainerScope scope(id);
+            context->GetTaskExecutor()->PostTask(
+                [context, x, y, action]() { context->OnDragEvent(x, y, action); }, TaskExecutor::TaskType::UI);
+        };
+        aceView_->RegisterDragEventCallback(dragEventCallback);
+    }
 }
 
 void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, const std::string& instanceName,
