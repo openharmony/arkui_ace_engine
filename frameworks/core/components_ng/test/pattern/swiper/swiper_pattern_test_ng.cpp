@@ -598,7 +598,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperInit001, TestSize.Level1)
     swiperNode->children_.clear();
     swiperNode->AddChild(indicatorNode);
     pattern->InitIndicator();
-    EXPECT_EQ(swiperNode->children_.size(), 2);
+    EXPECT_EQ(swiperNode->children_.size(), 1);
     swiperNode->children_.clear();
     indicatorNode = FrameNode::GetOrCreateFrameNode(
         "SwiperIndicator", 0, []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });

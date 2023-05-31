@@ -146,12 +146,12 @@ ohos_unittest("swiper_indicator_pattern_test_ng") {
 
   deps = [
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
+    "$ace_root/frameworks/core/components/theme:build_theme_code",
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",
     "//third_party/googletest:gmock_main",
-    "$ace_root/frameworks/core/components/theme:build_theme_code",
   ]
 
   if (platform == "ohos") {
