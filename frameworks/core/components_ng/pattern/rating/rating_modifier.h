@@ -68,7 +68,7 @@ public:
     }
 
     bool JudgeImageUri(const std::string& foregroundUri, const std::string& secondaryUri,
-        const std::string& backgroundUri, const RectF& dstRect)
+        const std::string& backgroundUri, const ImagePaintConfig& foregroundConfig)
     {
         if (foregroundUri_ != foregroundUri) {
             return true;
@@ -80,7 +80,11 @@ public:
             return true;
         }
         CHECK_NULL_RETURN(foregroundImageCanvas_, true);
-        if (foregroundImageCanvas_->GetPaintConfig().dstRect_ != dstRect) {
+        if (foregroundImageCanvas_->GetPaintConfig().dstRect_ != foregroundConfig.dstRect_) {
+            return true;
+        }
+        if (foregroundImageCanvas_->GetPaintConfig().scaleX_ != foregroundConfig.scaleX_ ||
+            foregroundImageCanvas_->GetPaintConfig().scaleY_ != foregroundConfig.scaleY_) {
             return true;
         }
         // No need to update three CanvasImages
