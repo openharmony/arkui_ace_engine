@@ -145,6 +145,7 @@
 #include "bridge/declarative_frontend/jsview/js_water_flow_item.h"
 #include "bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
+#include "bridge/declarative_frontend/jsview/js_scope_util.h"
 #include "bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -809,6 +810,7 @@ void JsBindViews(BindingTarget globalObj)
     JSScroller::JSBind(globalObj);
 
     JSProfiler::JSBind(globalObj);
+    JSScopeUtil::JSBind(globalObj);
 
     auto delegate = JsGetFrontendDelegate();
     std::string jsModules;

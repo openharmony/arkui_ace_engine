@@ -46,6 +46,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_persistent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rating.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_scope_util.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroll.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
@@ -177,6 +178,7 @@ void JsBindViews(BindingTarget globalObj)
     JSNavigator::JSBind(globalObj);
     JSToggle::JSBind(globalObj);
     JSCounter::JSBind(globalObj);
+    JSScopeUtil::JSBind(globalObj);
 #ifdef VIDEO_SUPPORTED
     JSVideo::JSBind(globalObj);
 #endif

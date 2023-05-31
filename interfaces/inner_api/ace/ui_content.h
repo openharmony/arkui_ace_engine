@@ -154,6 +154,11 @@ public:
         std::vector<std::string>& assetBasePaths, std::string& resFolderName) {};
     virtual void SetResourcePaths(const std::vector<std::string>& resourcesPaths, const std::string& assetRootPath,
         const std::vector<std::string>& assetBasePaths) {};
+		
+    virtual NativeValue* GetUIContext()
+    {
+        return nullptr;
+    };
 };
 
 } // namespace OHOS::Ace

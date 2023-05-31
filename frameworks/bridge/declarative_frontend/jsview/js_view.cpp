@@ -159,6 +159,11 @@ void JSView::RestoreInstanceId()
     ContainerScope::UpdateCurrent(restoreInstanceId_);
 }
 
+void JSView::GetInstanceId(const JSCallbackInfo& info)
+{
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(instanceId_)));
+}
+
 void JSView::JsSetCardId(int64_t cardId)
 {
     cardId_ = cardId;
@@ -307,6 +312,7 @@ void JSViewFullUpdate::JSBind(BindingTarget object)
     JSClass<JSViewFullUpdate>::Method("markNeedUpdate", &JSViewFullUpdate::MarkNeedUpdate);
     JSClass<JSViewFullUpdate>::Method("syncInstanceId", &JSViewFullUpdate::SyncInstanceId);
     JSClass<JSViewFullUpdate>::Method("restoreInstanceId", &JSViewFullUpdate::RestoreInstanceId);
+    JSClass<JSViewFullUpdate>::CustomMethod("getInstanceId", &JSViewFullUpdate::GetInstanceId);
     JSClass<JSViewFullUpdate>::Method("needsUpdate", &JSViewFullUpdate::NeedsUpdate);
     JSClass<JSViewFullUpdate>::Method("markStatic", &JSViewFullUpdate::MarkStatic);
     JSClass<JSViewFullUpdate>::Method("setCardId", &JSViewFullUpdate::JsSetCardId);
@@ -884,6 +890,7 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::Method("markNeedUpdate", &JSViewPartialUpdate::MarkNeedUpdate);
     JSClass<JSViewPartialUpdate>::Method("syncInstanceId", &JSViewPartialUpdate::SyncInstanceId);
     JSClass<JSViewPartialUpdate>::Method("restoreInstanceId", &JSViewPartialUpdate::RestoreInstanceId);
+    JSClass<JSViewPartialUpdate>::CustomMethod("getInstanceId", &JSViewPartialUpdate::GetInstanceId);
     JSClass<JSViewPartialUpdate>::Method("markStatic", &JSViewPartialUpdate::MarkStatic);
     JSClass<JSViewPartialUpdate>::Method("finishUpdateFunc", &JSViewPartialUpdate::JsFinishUpdateFunc);
     JSClass<JSViewPartialUpdate>::Method("setCardId", &JSViewPartialUpdate::JsSetCardId);

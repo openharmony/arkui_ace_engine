@@ -146,6 +146,7 @@ public:
         std::vector<std::string>& assetBasePaths, std::string& resFolderName) override;
     void SetResourcePaths(const std::vector<std::string>& resourcesPaths, const std::string& assetRootPath,
         const std::vector<std::string>& assetBasePaths) override;
+    NativeValue* GetUIContext() override;
 
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);

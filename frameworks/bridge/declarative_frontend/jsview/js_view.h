@@ -46,6 +46,7 @@ public:
 
     void SyncInstanceId();
     void RestoreInstanceId();
+    void GetInstanceId(const JSCallbackInfo& info);
 
     void FireOnShow()
     {
