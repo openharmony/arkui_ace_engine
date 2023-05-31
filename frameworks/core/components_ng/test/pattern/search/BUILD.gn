@@ -26,6 +26,7 @@ ohos_unittest("search_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/text/text_content_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_overlay_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text/text_styles.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_paint_property.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loading_context.cpp",
