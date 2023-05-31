@@ -2014,6 +2014,7 @@ HWTEST_F(GesturesTestNg, PanRecognizerTest007, TestSize.Level1)
      */
     panRecognizer.direction_.type = PanDirection::DOWN;
     panRecognizer.averageDistance_ = Offset(-1, 1);
+    panRecognizer.touchPointsDistance_[0] = Offset(-1, 1);
     panRecognizer.distance_ = 0;
     result = panRecognizer.IsPanGestureAccept();
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
