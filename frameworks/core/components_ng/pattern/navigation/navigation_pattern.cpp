@@ -134,7 +134,7 @@ void NavigationPattern::OnModifyDone()
     navigationStack_->SetNavPathList(navPathList_);
     auto contentNode = hostNode->GetContentNode();
     contentNode->Clean();
-    hostNode->AddNavDestinationToNavigation(hostNode);
+    hostNode->AddNavDestinationToNavigation();
 
     auto newTopNavPath = GetTopNavPath();
     if (preTopNavPath != newTopNavPath) {
