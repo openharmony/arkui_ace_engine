@@ -13,17 +13,16 @@
  * limitations under the License.
  */
 
-// ArkTsCard start
-#ifdef FORM_SUPPORTED
 #include "form_module_preloader.h"
 
 #include <mutex>
 #include <unordered_map>
 
+#include "adapter/ohos/entrance/utils.h"
 #include "base/log/log.h"
 #include "base/json/json_util.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
-#include "utils.h"
+
 
 namespace OHOS::Ace {
 namespace {
@@ -276,5 +275,3 @@ RefPtr<AssetManager> FormModulePreloader::CreateAssetManager(const std::string& 
     return flutterAssetManager;
 }
 } // namespace OHOS::Ace
-#endif
-// ArkTsCard end

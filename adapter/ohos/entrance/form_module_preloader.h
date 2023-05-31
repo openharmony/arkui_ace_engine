@@ -13,10 +13,8 @@
  * limitations under the License.
  */
 
-// ArkTsCard start
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_FORM_MODULE_PRELOADER_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_FORM_MODULE_PRELOADER_H
-#ifdef FORM_SUPPORTED
 
 #include <unordered_set>
 #include <vector>
@@ -65,6 +63,4 @@ private:
     static RefPtr<AssetManager> CreateAssetManager(const std::string& hapPath);
 };
 } // namespace OHOS::Ace
-#endif
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_FORM_MODULE_PRELOADER_H
-// ArkTsCard end
