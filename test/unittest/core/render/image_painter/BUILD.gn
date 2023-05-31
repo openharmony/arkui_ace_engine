@@ -31,6 +31,9 @@ ohos_unittest("image_painter_test_ng") {
     "$ace_root/frameworks/core/components_ng/render/adapter/pixelmap_image.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/svg_canvas_image.cpp",
 
+    #pipeline
+    "$ace_root/frameworks/core/pipeline/base/constants.cpp",
+
     #mock
     "$ace_root/frameworks/base/test/mock/mock_pixel_map.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_drawing_convertor.cpp",

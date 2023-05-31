@@ -16,7 +16,6 @@
 #include "gtest/gtest.h"
 
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/geometry_node.h"
 
 #define private public
 #define protected public
@@ -24,6 +23,7 @@
 #include "core/components/text/text_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
@@ -524,6 +524,115 @@ HWTEST_F(ImageTestNg, ImagePatternCreateNodePaintMethod001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ImagePatternCreateNodePaintMethod002
+ * @tc.desc: When SrcImage and AltImage are not loaded, check return of CreateNodePaintMethod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImagePatternCreateNodePaintMethod002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create ImagePattern and ImageLayoutProperty.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    /**
+     * @tc.steps: step3. set image_ = nullptr, altImage_ = nullptr
+     */
+    imagePattern->image_ = nullptr;
+    imagePattern->altImage_ = nullptr;
+    /**
+     * @tc.steps: step4. call CreateNodePaintMethod.
+     * @tc.expected: step4. return nullptr
+     */
+    EXPECT_EQ(imagePattern->CreateNodePaintMethod(), nullptr);
+    /**
+     * @tc.steps: step5. set obscuredImage_ is not nullptr;
+     */
+    imagePattern->obscuredImage_ = AceType::MakeRefPtr<MockCanvasImage>();
+    /**
+     * @tc.steps: step6. call CreateNodePaintMethod.
+     * @tc.expected: step6. return is not nullptr
+     */
+    EXPECT_NE(imagePattern->CreateNodePaintMethod(), nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternCreateObscuredImageIfNeed001
+ * @tc.desc: Check CreateObscuredImageIfNeed method if will create ObscuredImage
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImagePatternCreateObscuredImageIfNeed001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create ImagePattern and ImageLayoutProperty.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    /**
+     * @tc.steps: step3. set invalid selfIdealSize.
+     */
+    LayoutConstraintF layoutConstraint;
+    imageLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    EXPECT_FALSE(layoutConstraint.selfIdealSize.IsValid());
+    /**
+     * @tc.steps: step4. check obscuredImage_.
+     * @tc.expected: step4. obscuredImage is nullptr
+     */
+    imagePattern->CreateObscuredImageIfNeed();
+    EXPECT_EQ(imagePattern->obscuredImage_, nullptr);
+    /**
+     * @tc.steps: step5. set valid obscured.
+     */
+    std::vector<ObscuredReasons> reasons;
+    reasons.emplace_back(static_cast<ObscuredReasons>(0));
+    frameNode->GetRenderContext()->UpdateObscured(reasons);
+    /**
+     * @tc.steps: step6. check obscuredImage_.
+     * @tc.expected: step6. obscuredImage_ is nullptr
+     */
+    imagePattern->CreateObscuredImageIfNeed();
+    EXPECT_EQ(imagePattern->obscuredImage_, nullptr);
+    /**
+     * @tc.steps: step7. set valid selfIdealSize.
+     */
+    layoutConstraint.selfIdealSize.width_ = 10.0;
+    layoutConstraint.selfIdealSize.height_ = 10.0;
+    imageLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    /**
+     * @tc.steps: step8. check obscuredImage_.
+     * @tc.expected: step8. obscuredImage_ is not nullptr
+     */
+    imagePattern->CreateObscuredImageIfNeed();
+    EXPECT_NE(imagePattern->obscuredImage_, nullptr);
+    /**
+     * @tc.steps: step9. set empty obscured.
+     */
+    imagePattern->CreateObscuredImageIfNeed();
+    reasons.clear();
+    frameNode->GetRenderContext()->UpdateObscured(reasons);
+    /**
+     * @tc.steps: step10. check obscuredImage_.
+     * @tc.expected: step10. obscuredImage_ is not nullptr
+     */
+    imagePattern->CreateObscuredImageIfNeed();
+    EXPECT_NE(imagePattern->obscuredImage_, nullptr);
+}
+
+/**
  * @tc.name: ImagePaintMethod002
  * @tc.desc: ImagePaintMethod can update radius correctly.
  * @tc.type: FUNC
@@ -623,6 +732,7 @@ HWTEST_F(ImageTestNg, ImagePaintMethod001, TestSize.Level1)
     EXPECT_EQ(config->imageRepeat_, IMAGE_REPEAT_DEFAULT);
     EXPECT_EQ(config->flipHorizontally_, MATCHTEXTDIRECTION_DEFAULT);
     EXPECT_EQ(*config->colorFilter_, COLOR_FILTER_DEFAULT);
+    EXPECT_EQ(config->obscuredReasons_, std::vector<ObscuredReasons>());
 
     /**
      * @tc.steps: step4. ImagePaintMethod GetOverlayDrawFunction
