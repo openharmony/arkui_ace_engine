@@ -25,53 +25,12 @@
 namespace OHOS::Ace::NG {
 struct MagicItemProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LayoutWeight, float);
-    std::optional<float> propAspectRatio;
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AspectRatio, float);
 
-    const std::optional<float>& GetAspectRatio() const
-    {
-        return propAspectRatio;
-    }
-    bool HasAspectRatio() const
-    {
-        return propAspectRatio.has_value();
-    }
-    float GetAspectRatioValue() const
-    {
-        return propAspectRatio.value();
-    }
-    bool UpdateAspectRatio(const float& value)
-    {
-        if (value <= 0) {
-            ResetAspectRatio();
-            return true;
-        }
-        if (propAspectRatio.has_value()) {
-            if (NearEqual(propAspectRatio.value(), value)) {
-                return false;
-            }
-        }
-        propAspectRatio = value;
-        return true;
-    }
-    bool CheckAspectRatio(const float& value) const
-    {
-        if (!propAspectRatio.has_value()) {
-            return false;
-        }
-        return NearEqual(propAspectRatio.value(), value);
-    }
-    void ResetAspectRatio()
-    {
-        propAspectRatio.reset();
-    }
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const
     {
         json->Put("layoutWeight", propLayoutWeight.value_or(0));
-        if (propAspectRatio.has_value()) {
-            json->Put("aspectRatio", round(static_cast<double>(propAspectRatio.value()) * 100) / 100);
-        } else {
-            json->Put("aspectRatio", "");
-        }
+        json->Put("aspectRatio", round(static_cast<double>(propAspectRatio.value_or(0.0)) * 100) / 100);
     }
 };
 } // namespace OHOS::Ace::NG
