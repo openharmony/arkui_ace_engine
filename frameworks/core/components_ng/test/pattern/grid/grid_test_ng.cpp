@@ -79,16 +79,15 @@ protected:
     void CreateGridItem(int32_t count = 10, float width = -1, float height = -1, bool focusable = false);
     void CreateSingleGridItem(int32_t rowStart = -1, int32_t rowEnd = -1, int32_t colStart = -1,
         int32_t colEnd = -1, float width = -1, float height = -1);
-    void CreateFixedGridItem(int32_t count = 10);
     RefPtr<LayoutWrapper> RunMeasureAndLayout(
         float width = DEVICE_WIDTH, float height = GRID_HEIGHT);
-    void UpdateLayoutWrapper(RefPtr<LayoutWrapper> layoutWrapper,
-        float width = DEVICE_WIDTH, float height = GRID_HEIGHT);
+    void UpdateLayoutWrapper(
+        RefPtr<LayoutWrapper>& layoutWrapper, float width = DEVICE_WIDTH, float height = GRID_HEIGHT);
     RefPtr<FrameNode> GetItemFrameNode(int32_t index);
     RectF GetItemRect(int32_t index);
     RefPtr<GridItemPattern> GetItemPattern(int32_t index);
     RefPtr<FocusHub> GetItemFocusHub(int32_t index);
-    void UpdateCurrentOffset(float offset);
+    void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
     void MouseSelect(Offset start, Offset end);
     void MouseSelectRelease();
 
@@ -200,21 +199,11 @@ void GridTestNg::CreateSingleGridItem(
         ViewStackProcessor::GetInstance()->Pop();
 }
 
-void GridTestNg::CreateFixedGridItem(int32_t count)
-{
-    for (int32_t i = 0; i < count; i++) {
-        GridItemModelNG gridItemModel;
-        gridItemModel.Create();
-        SetHeight(Dimension(ITEM_HEIGHT));
-        SetWidth(Dimension(ITEM_WIDTH));
-        ViewStackProcessor::GetInstance()->Pop();
-    }
-}
-
 RefPtr<LayoutWrapper> GridTestNg::RunMeasureAndLayout(float width, float height)
 {
     RefPtr<LayoutWrapper> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
     layoutWrapper->SetActive();
+    layoutWrapper->SetRootMeasureNode();
     LayoutConstraintF LayoutConstraint;
     LayoutConstraint.parentIdealSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
     LayoutConstraint.percentReference = { DEVICE_WIDTH, DEVICE_HEIGHT };
@@ -226,9 +215,11 @@ RefPtr<LayoutWrapper> GridTestNg::RunMeasureAndLayout(float width, float height)
     return layoutWrapper;
 }
 
-void GridTestNg::UpdateLayoutWrapper(RefPtr<LayoutWrapper> layoutWrapper, float width, float height)
+void GridTestNg::UpdateLayoutWrapper(RefPtr<LayoutWrapper>& layoutWrapper, float width, float height)
 {
     LayoutConstraintF LayoutConstraint;
+    LayoutConstraint.parentIdealSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
+    LayoutConstraint.percentReference = { DEVICE_WIDTH, DEVICE_HEIGHT };
     LayoutConstraint.selfIdealSize = { width, height };
     LayoutConstraint.maxSize = { width, height };
     layoutWrapper->Measure(LayoutConstraint);
@@ -278,9 +269,9 @@ void GridTestNg::MouseSelectRelease()
     pattern_->HandleMouseEventWithoutKeyboard(info);
 }
 
-void GridTestNg::UpdateCurrentOffset(float offset)
+void GridTestNg::UpdateCurrentOffset(float offset, int32_t source)
 {
-    pattern_->UpdateCurrentOffset(offset, SCROLL_FROM_UPDATE);
+    pattern_->UpdateCurrentOffset(offset, source);
     RunMeasureAndLayout();
 }
 
@@ -768,6 +759,7 @@ HWTEST_F(GridTestNg, AttrLayoutDirection001, TestSize.Level1)
     GridModelNG gridModelNG;
     gridModelNG.Create(nullptr, nullptr);
     gridModelNG.SetLayoutDirection(FlexDirection::ROW);
+    gridModelNG.SetCellLength(ITEM_HEIGHT);
     constexpr int32_t minCount = 2;
     gridModelNG.SetMinCount(minCount);
     constexpr int32_t maxCount = 4;
@@ -777,7 +769,7 @@ HWTEST_F(GridTestNg, AttrLayoutDirection001, TestSize.Level1)
     const Dimension rowsGap = Dimension(5);
     gridModelNG.SetRowsGap(rowsGap);
     constexpr int32_t gridItemNumber = 10;
-    CreateFixedGridItem(gridItemNumber);
+    CreateGridItem(gridItemNumber, ITEM_WIDTH, ITEM_HEIGHT);
     GetInstance();
     RunMeasureAndLayout();
 
@@ -818,6 +810,7 @@ HWTEST_F(GridTestNg, AttrLayoutDirection002, TestSize.Level1)
     GridModelNG gridModelNG;
     gridModelNG.Create(nullptr, nullptr);
     gridModelNG.SetLayoutDirection(FlexDirection::ROW_REVERSE);
+    gridModelNG.SetCellLength(ITEM_HEIGHT);
     constexpr int32_t minCount = 2;
     gridModelNG.SetMinCount(minCount);
     constexpr int32_t maxCount = 4;
@@ -827,7 +820,7 @@ HWTEST_F(GridTestNg, AttrLayoutDirection002, TestSize.Level1)
     const Dimension rowsGap = Dimension(5);
     gridModelNG.SetRowsGap(rowsGap);
     constexpr int32_t gridItemNumber = 10;
-    CreateFixedGridItem(gridItemNumber);
+    CreateGridItem(gridItemNumber, ITEM_WIDTH, ITEM_HEIGHT);
     GetInstance();
     RunMeasureAndLayout();
 
@@ -870,6 +863,7 @@ HWTEST_F(GridTestNg, AttrLayoutDirection003, TestSize.Level1)
     GridModelNG gridModelNG;
     gridModelNG.Create(nullptr, nullptr);
     gridModelNG.SetLayoutDirection(FlexDirection::COLUMN);
+    gridModelNG.SetCellLength(ITEM_WIDTH);
     constexpr int32_t minCount = 2;
     gridModelNG.SetMinCount(minCount);
     constexpr int32_t maxCount = 4;
@@ -879,7 +873,7 @@ HWTEST_F(GridTestNg, AttrLayoutDirection003, TestSize.Level1)
     const Dimension rowsGap = Dimension(5);
     gridModelNG.SetRowsGap(rowsGap);
     constexpr int32_t gridItemNumber = 10;
-    CreateFixedGridItem(gridItemNumber);
+    CreateGridItem(gridItemNumber, ITEM_WIDTH, ITEM_HEIGHT);
     GetInstance();
     RunMeasureAndLayout();
 
@@ -914,6 +908,7 @@ HWTEST_F(GridTestNg, AttrLayoutDirection004, TestSize.Level1)
     GridModelNG gridModelNG;
     gridModelNG.Create(nullptr, nullptr);
     gridModelNG.SetLayoutDirection(FlexDirection::COLUMN_REVERSE);
+    gridModelNG.SetCellLength(ITEM_WIDTH);
     constexpr int32_t minCount = 2;
     gridModelNG.SetMinCount(minCount);
     constexpr int32_t maxCount = 4;
@@ -923,7 +918,7 @@ HWTEST_F(GridTestNg, AttrLayoutDirection004, TestSize.Level1)
     const Dimension rowsGap = Dimension(5);
     gridModelNG.SetRowsGap(rowsGap);
     constexpr int32_t gridItemNumber = 10;
-    CreateFixedGridItem(gridItemNumber);
+    CreateGridItem(gridItemNumber, ITEM_WIDTH, ITEM_HEIGHT);
     GetInstance();
     RunMeasureAndLayout();
 
@@ -2251,6 +2246,7 @@ HWTEST_F(GridTestNg, Drag002, TestSize.Level1)
     eventHub_->FireOnItemDragEnter(dragInfo);
     eventHub_->FireOnItemDragLeave(dragInfo, -1);
     EXPECT_EQ(pattern_->GetOriginalIndex(), itemCount);
+    RunMeasureAndLayout();
 
     /**
      * @tc.steps: step2. Drag 2nd item to 3rd item, Drag 3 item to 2 item.
@@ -2267,6 +2263,7 @@ HWTEST_F(GridTestNg, Drag002, TestSize.Level1)
     // SupportAnimation, ClearDragState
     eventHub_->FireOnItemDrop(dragInfo, 0, 1, true);
     EXPECT_EQ(pattern_->GetOriginalIndex(), -1);
+    RunMeasureAndLayout();
 
     /**
      * @tc.steps: step3. Move something to 3rd item.
@@ -2279,6 +2276,7 @@ HWTEST_F(GridTestNg, Drag002, TestSize.Level1)
     // SupportAnimation, ClearDragState
     eventHub_->FireOnItemDrop(dragInfo, -1, 1, true);
     EXPECT_EQ(pattern_->GetOriginalIndex(), -1);
+    RunMeasureAndLayout();
 
     /**
      * @tc.steps: step4. Move one item to wrong insertIndex.
@@ -2291,6 +2289,95 @@ HWTEST_F(GridTestNg, Drag002, TestSize.Level1)
     // insertIndex >= itemCount
     eventHub_->FireOnItemDragMove(dragInfo, 1, itemCount);
     EXPECT_EQ(pattern_->GetOriginalIndex(), -1);
+    RunMeasureAndLayout();
+}
+
+/**
+ * @tc.name: Drag003
+ * @tc.desc: Verify drag func with SetLayoutDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, Drag003, TestSize.Level1)
+{
+    GridModelNG gridModelNG;
+    gridModelNG.Create(nullptr, nullptr);
+    gridModelNG.SetLayoutDirection(FlexDirection::ROW);
+    gridModelNG.SetEditable(true);
+    gridModelNG.SetCellLength(ITEM_HEIGHT);
+    constexpr int32_t minCount = 2;
+    gridModelNG.SetMinCount(minCount);
+    constexpr int32_t maxCount = 4;
+    gridModelNG.SetMaxCount(maxCount);
+    gridModelNG.SetSupportAnimation(true);
+    const int32_t itemCount = 8;
+    CreateGridItem(itemCount, -1, ITEM_HEIGHT);
+    GetInstance();
+    RunMeasureAndLayout();
+    auto onItemDragStart = [](const ItemDragInfo&, int32_t) {
+        auto dragItem = AceType::MakeRefPtr<FrameNode>("test", 0, AceType::MakeRefPtr<Pattern>());
+        return AceType::DynamicCast<UINode>(dragItem);
+    };
+    eventHub_->onItemDragStart_ = onItemDragStart;
+
+    GestureEvent info;
+    Point globalPoint = Point(270.f, 50.f);
+    info.SetGlobalPoint(globalPoint);
+    eventHub_->HandleOnItemDragStart(info);
+
+    /**
+     * @tc.steps: step1. Drag 1st item to out of Grid.
+     * @tc.expected: GetOriginalIndex return number of GridItem.
+     */
+    ItemDragInfo dragInfo;
+    dragInfo.SetX(0.f);
+    dragInfo.SetY(0.f);
+    eventHub_->FireOnItemDragEnter(dragInfo);
+    eventHub_->FireOnItemDragLeave(dragInfo, -1);
+    EXPECT_EQ(pattern_->GetOriginalIndex(), itemCount);
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step2. Drag 2nd item to 3rd item, Drag 3 item to 2 item.
+     * @tc.expected: GetOriginalIndex changed.
+     */
+    eventHub_->FireOnItemDragEnter(dragInfo);
+    eventHub_->FireOnItemDragMove(dragInfo, 1, 2);
+    EXPECT_EQ(pattern_->GetOriginalIndex(), 2);
+    eventHub_->FireOnItemDragLeave(dragInfo, -1);
+    eventHub_->FireOnItemDragEnter(dragInfo);
+    // 3 to 2
+    eventHub_->FireOnItemDragMove(dragInfo, 2, 1);
+    EXPECT_EQ(pattern_->GetOriginalIndex(), 1);
+    // SupportAnimation, ClearDragState
+    eventHub_->FireOnItemDrop(dragInfo, 0, 1, true);
+    EXPECT_EQ(pattern_->GetOriginalIndex(), -1);
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step3. Move something to 3rd item.
+     * @tc.expected: GetOriginalIndex changed.
+     */
+    eventHub_->FireOnItemDragEnter(dragInfo);
+    eventHub_->FireOnItemDragLeave(dragInfo, -1);
+    eventHub_->FireOnItemDragMove(dragInfo, -1, 2);
+    EXPECT_EQ(pattern_->GetOriginalIndex(), 2);
+    // SupportAnimation, ClearDragState
+    eventHub_->FireOnItemDrop(dragInfo, -1, 1, true);
+    EXPECT_EQ(pattern_->GetOriginalIndex(), -1);
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step4. Move one item to wrong insertIndex.
+     * @tc.expected: GetOriginalIndex unchanged.
+     */
+    // insertIndex < 0
+    eventHub_->FireOnItemDragEnter(dragInfo);
+    eventHub_->FireOnItemDragMove(dragInfo, 1, -1);
+    EXPECT_EQ(pattern_->GetOriginalIndex(), -1);
+    // insertIndex >= itemCount
+    eventHub_->FireOnItemDragMove(dragInfo, 1, itemCount);
+    EXPECT_EQ(pattern_->GetOriginalIndex(), -1);
+    RunMeasureAndLayout();
 }
 
 /**
@@ -2654,65 +2741,67 @@ HWTEST_F(GridTestNg, GridPatternTest001, TestSize.Level1)
 {
     GridModelNG gridModelNG;
     gridModelNG.Create(nullptr, nullptr);
-    gridModelNG.SetRowsTemplate("1fr 1fr");
-    gridModelNG.SetRowsGap(GRID_ROWS_GAP);
-    CreateGridItem(10, -1, ITEM_HEIGHT);
+    gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateGridItem(14, -1, ITEM_HEIGHT);
     GetInstance();
-
-    auto layoutWrapper = frameNode_->CreateLayoutWrapper();
-    ASSERT_NE(layoutWrapper, nullptr);
-    DirtySwapConfig config;
-    config.skipMeasure = true;
-    config.skipLayout = true;
-    pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    bool result;
-    /**
-     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
-     * @tc.steps: case1: no scrollEffect, !isScrollContent
-     * @tc.expected: step2. equal.
-     */
-    result = pattern_->UpdateCurrentOffset(0, SCROLL_FROM_UPDATE);
-    EXPECT_EQ(pattern_->scrollState_, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(result);
+    auto layoutWrapper = RunMeasureAndLayout();
 
     /**
-     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
-     * @tc.steps: case2: no scrollEffect, isScrollContent
-     * @tc.expected: step2. equal.
+     * @tc.steps: step1. UpdateCurrentOffset to end, over start, over end
+     * @tc.expected: veridy currentOffset_.
      */
-    result = pattern_->UpdateCurrentOffset(0, SCROLL_FROM_BAR);
-    EXPECT_EQ(pattern_->scrollState_, SCROLL_FROM_BAR);
-    EXPECT_TRUE(result);
+    pattern_->UpdateCurrentOffset(-100.f, SCROLL_FROM_UPDATE);
+    RunMeasureAndLayout();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
+    pattern_->UpdateCurrentOffset(200.f, SCROLL_FROM_UPDATE);
+    RunMeasureAndLayout();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
+    pattern_->UpdateCurrentOffset(-200.f, SCROLL_FROM_UPDATE);
+    RunMeasureAndLayout();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
 
-    /**
-     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
-     * @tc.steps: case3: scrollEffect not Spring, !isScrollContent
-     * @tc.expected: step2. equal.
-     */
+    pattern_->UpdateCurrentOffset(-100.f, SCROLL_FROM_BAR);
+    RunMeasureAndLayout();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
+    pattern_->UpdateCurrentOffset(200.f, SCROLL_FROM_BAR);
+    RunMeasureAndLayout();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
+    pattern_->UpdateCurrentOffset(-200.f, SCROLL_FROM_BAR);
+    RunMeasureAndLayout();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
+
     pattern_->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::FADE);
-    result = pattern_->UpdateCurrentOffset(0, SCROLL_FROM_UPDATE);
-    EXPECT_EQ(pattern_->scrollState_, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(result);
+    pattern_->UpdateCurrentOffset(-100.f, SCROLL_FROM_UPDATE);
+    RunMeasureAndLayout();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
+    pattern_->UpdateCurrentOffset(200.f, SCROLL_FROM_UPDATE);
+    RunMeasureAndLayout();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
+    pattern_->UpdateCurrentOffset(-200.f, SCROLL_FROM_UPDATE);
+    RunMeasureAndLayout();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
 
-    /**
-     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
-     * @tc.steps: case4: scrollEffect Spring, !isScrollContent
-     * @tc.expected: step2. equal.
-     */
     pattern_->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
-    result = pattern_->UpdateCurrentOffset(0, SCROLL_FROM_UPDATE);
-    EXPECT_EQ(pattern_->scrollState_, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(result);
+    pattern_->UpdateCurrentOffset(-100.f, SCROLL_FROM_UPDATE);
+    RunMeasureAndLayout();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
+    pattern_->UpdateCurrentOffset(200.f, SCROLL_FROM_UPDATE);
+    RunMeasureAndLayout();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
+    pattern_->UpdateCurrentOffset(-200.f, SCROLL_FROM_UPDATE);
+    RunMeasureAndLayout();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
 
-    /**
-     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
-     * @tc.steps: case4: scrollEffect Spring, isScrollContent
-     * @tc.expected: step2. equal.
-     */
     pattern_->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
-    result = pattern_->UpdateCurrentOffset(0, SCROLL_FROM_BAR);
-    EXPECT_EQ(pattern_->scrollState_, SCROLL_FROM_BAR);
-    EXPECT_TRUE(result);
+    pattern_->UpdateCurrentOffset(-100.f, SCROLL_FROM_BAR);
+    RunMeasureAndLayout();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
+    pattern_->UpdateCurrentOffset(200.f, SCROLL_FROM_BAR);
+    RunMeasureAndLayout();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
+    pattern_->UpdateCurrentOffset(-200.f, SCROLL_FROM_BAR);
+    RunMeasureAndLayout();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
 }
 
 /**
@@ -3365,6 +3454,41 @@ HWTEST_F(GridTestNg, ScrollLayout002, TestSize.Level1)
     UpdateLayoutWrapper(layoutWrapper, DEVICE_WIDTH, smallerHeight);
     currentOffset = pattern_->gridLayoutInfo_.currentOffset_;
     EXPECT_FLOAT_EQ(currentOffset, 0.f);
+}
+
+/**
+ * @tc.name: AdaptiveLayout001
+ * @tc.desc: Test property AdaptiveLayout
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, AdaptiveLayout001, TestSize.Level1)
+{
+    GridModelNG gridModelNG;
+    gridModelNG.Create(nullptr, nullptr);
+    gridModelNG.SetLayoutDirection(FlexDirection::ROW);
+    gridModelNG.SetEditable(true);
+    gridModelNG.SetCellLength(ITEM_HEIGHT);
+    constexpr int32_t minCount = 4;
+    gridModelNG.SetMinCount(minCount);
+    constexpr int32_t maxCount = 2;
+    gridModelNG.SetMaxCount(maxCount);
+    constexpr int32_t gridItemNumber = 10;
+    CreateGridItem(gridItemNumber, ITEM_WIDTH, ITEM_HEIGHT);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. While the before set minCount > maxCount
+     * @tc.expected: would let std::swap(minCount, maxCount);
+     */
+    constexpr int32_t colsNumber = 4;
+    for (int32_t index = 0; index < gridItemNumber; index++) {
+        RectF childRect = GetItemRect(index);
+        float offsetX = index % colsNumber * ITEM_WIDTH;
+        float offsetY = floor(index / colsNumber) * ITEM_HEIGHT;
+        RectF expectRect = RectF(offsetX, offsetY, ITEM_WIDTH, ITEM_HEIGHT);
+        EXPECT_TRUE(IsEqualRect(childRect, expectRect)) << "index: " << index;
+    }
 }
 
 /**
