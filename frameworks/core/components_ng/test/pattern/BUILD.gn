@@ -87,6 +87,7 @@ group("pattern_unittest") {
     "time_picker:time_picker_test_ng",
     "toggle:toggle_pattern_test_ng",
     "video:video_pattern_test_ng",
+    "waterflow:water_flow_test_ng",
     "web:web_pattern_unit_test",
     "xcomponent:xcomponent_pattern_test_ng",
   ]
