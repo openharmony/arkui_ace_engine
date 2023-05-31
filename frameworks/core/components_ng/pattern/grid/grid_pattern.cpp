@@ -452,7 +452,11 @@ void GridPattern::CheckScrollable()
         (gridLayoutInfo_.GetTotalHeightOfItemsInView(GetMainGap()) > GetMainContentSize())) {
         scrollable_ = true;
     } else {
-        scrollable_ = false;
+        if (gridLayoutInfo_.startMainLineIndex_ != 0) {
+            scrollable_ = true;
+        } else {
+            scrollable_ = false;
+        }
     }
 
     SetScrollEnable(scrollable_);
@@ -1038,6 +1042,11 @@ void GridPattern::UpdateScrollBarOffset()
     }
 
     auto viewSize = geometryNode->GetFrameSize();
+    float lineHeight = 0;
+    if (info.startMainLineIndex_ != 0 && info.startIndex_ == 0) {
+        lineHeight = info.lineHeightMap_.find(0)->second;
+        offset = lineHeight - info.currentOffset_;
+    }
     Size mainSize = { viewSize.Width(), viewSize.Height() };
     UpdateScrollBarRegion(offset, estimatedHeight, mainSize, Offset(0.0, 0.0));
 }
