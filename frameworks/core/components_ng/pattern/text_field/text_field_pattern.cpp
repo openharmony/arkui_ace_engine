@@ -2718,7 +2718,7 @@ void TextFieldPattern::ProcessPasswordIcon()
         LoadNotifier hideIconLoadNotifier(CreateDataReadyCallback(textObscured_),
             CreateLoadSuccessCallback(textObscured_), CreateLoadFailCallback(textObscured_));
         hidePasswordImageLoadingCtx_ =
-            AceType::MakeRefPtr<ImageLoadingContext>(hidePasswordSourceInfo, std::move(hideIconLoadNotifier));
+            AceType::MakeRefPtr<ImageLoadingContext>(hidePasswordSourceInfo, std::move(hideIconLoadNotifier), true);
         hidePasswordImageLoadingCtx_->LoadImageData();
         return;
     }
@@ -2732,7 +2732,7 @@ void TextFieldPattern::ProcessPasswordIcon()
         LoadNotifier showIconLoadNotifier(CreateDataReadyCallback(textObscured_),
             CreateLoadSuccessCallback(textObscured_), CreateLoadFailCallback(textObscured_));
         showPasswordImageLoadingCtx_ =
-            AceType::MakeRefPtr<ImageLoadingContext>(showPasswordSourceInfo, std::move(showIconLoadNotifier));
+            AceType::MakeRefPtr<ImageLoadingContext>(showPasswordSourceInfo, std::move(showIconLoadNotifier), true);
         showPasswordImageLoadingCtx_->LoadImageData();
         return;
     }
@@ -2855,6 +2855,9 @@ void TextFieldPattern::OnImageLoadSuccess(bool checkHidePasswordIcon)
 {
     ACE_SCOPED_TRACE("TextFieldPattern::OnImageLoadSuccess");
     ImagePaintConfig config;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkNeedRenderOnly();
     if (checkHidePasswordIcon) {
         LOGI("Load hide icon successfully");
         hidePasswordCanvasImage_ = hidePasswordImageLoadingCtx_->MoveCanvasImage();
