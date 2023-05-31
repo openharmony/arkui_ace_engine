@@ -27,6 +27,9 @@
 #include "core/components_ng/pattern/menu/menu_paint_method.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select/select_model.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+
+constexpr int32_t DEFAULT_CLICK_DISTANCE = 15;
 
 namespace OHOS::Ace::NG {
 enum class MenuType {
@@ -35,8 +38,9 @@ enum class MenuType {
     CONTEXT_MENU, // corresponds to .bindContextMenu attribute, lives in a SubWindow
     SUB_MENU,     // secondary menu container in a multi-level menu
 
-    // ----- <Menu> Node ------
-    MULTI_MENU, // corresponds to the <Menu> tag in a Menu CustomBuilder
+    // ----- innerMenu Node, corersponds to <Menu> tag in the frontend ------
+    MULTI_MENU,   // called multi because it's a multi-leveled menu, its MenuItems can trigger subMenus
+    DESKTOP_MENU, // menu specialized for desktop UI, enabled when multiple sibiling <Menu> nodes are present
 
     // ----- special menu used in other components ------
     NAVIGATION_MENU,               // menu used in a Navigation component
@@ -47,8 +51,8 @@ class MenuPattern : public Pattern {
     DECLARE_ACE_TYPE(MenuPattern, Pattern);
 
 public:
-    MenuPattern(int32_t targetId, const std::string& tag, MenuType type)
-        : targetId_(targetId), targetTag_(tag), type_(type)
+    MenuPattern(int32_t targetId, std::string tag, MenuType type)
+        : targetId_(targetId), targetTag_(std::move(tag)), type_(type)
     {}
     ~MenuPattern() override = default;
 
@@ -73,8 +77,6 @@ public:
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
-
-    void BeforeCreateLayoutWrapper() override;
 
     MenuType GetMenuType() const
     {
@@ -176,6 +178,61 @@ public:
         return showedSubMenu_;
     }
     void HideSubMenu();
+    void OnModifyDone() override;
+
+protected:
+    void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
+    void SetAccessibilityAction();
+    void SetType(MenuType value)
+    {
+        type_ = value;
+    }
+    virtual void InitTheme(const RefPtr<FrameNode>& host);
+
+private:
+    void OnAttachToFrameNode() override;
+    void RegisterOnTouch();
+    void OnTouchEvent(const TouchEventInfo& info);
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void UpdateMenuHotArea();
+
+    uint32_t GetInnerMenuCount() const;
+    // If CustomBuilder is declared with <Menu> and <MenuItem>,
+    // reset outer menu container and only apply theme on the inner <Menu> node.
+    void ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktopMenu);
+
+    void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event) const;
+
+    void DisableTabInMenu();
+
+    RefPtr<FrameNode> GetMenuWrapper() const;
+
+    RefPtr<ClickEvent> onClick_;
+    RefPtr<TouchEventImpl> onTouch_;
+    std::optional<Offset> lastTouchOffset_;
+    const int32_t targetId_ = -1;
+    const std::string targetTag_;
+    MenuType type_ = MenuType::MENU;
+
+    RefPtr<FrameNode> parentMenuItem_;
+    RefPtr<FrameNode> showedSubMenu_;
+    std::vector<RefPtr<FrameNode>> options_;
+
+    bool isSelectMenu_ = false;
+
+    ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
+};
+
+// pattern of inner menu, corersponds to <Menu> tag in the frontend
+class InnerMenuPattern : public MenuPattern {
+    DECLARE_ACE_TYPE(InnerMenuPattern, MenuPattern);
+
+public:
+    InnerMenuPattern(int32_t targetId, std::string tag, MenuType type) : MenuPattern(targetId, std::move(tag), type) {}
+    ~InnerMenuPattern() override = default;
+    void OnModifyDone() override;
+    void BeforeCreateLayoutWrapper() override;
 
     const std::list<WeakPtr<UINode>>& GetItemsAndGroups() const
     {
@@ -183,46 +240,18 @@ public:
     }
 
 private:
-    void OnAttachToFrameNode() override;
-    void OnModifyDone() override;
-    void RegisterOnTouch();
-    void OnTouchEvent(const TouchEventInfo& info);
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void UpdateMenuHotArea();
+    void InitTheme(const RefPtr<FrameNode>& host) override;
+    uint32_t FindSiblingMenuCount();
+    void ApplyDesktopMenuTheme();
+    void ApplyMultiMenuTheme();
 
-    void InitTheme(const RefPtr<FrameNode>& host);
-    bool HasInnerMenu() const;
-    // If CustomBuilder is declared with <Menu> and <MenuItem>,
-    // reset outer menu container and only apply theme on the inner <Menu> node.
-    void ResetTheme(const RefPtr<FrameNode>& host, bool resetShadow);
-
-    void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
-    bool OnKeyEvent(const KeyEvent& event) const;
-    void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
-
-    void DisableTabInMenu();
-
-    RefPtr<FrameNode> GetMenuWrapper() const;
-    void SetAccessibilityAction();
     void RecordItemsAndGroups();
 
-    RefPtr<ClickEvent> onClick_;
-    RefPtr<TouchEventImpl> onTouch_;
-    std::optional<Offset> lastTouchOffset_;
-    int32_t targetId_ = -1;
-    std::string targetTag_;
-    MenuType type_ = MenuType::MENU;
-
-    RefPtr<FrameNode> parentMenuItem_;
-    RefPtr<FrameNode> showedSubMenu_;
-    std::vector<RefPtr<FrameNode>> options_;
     // Record menu's items and groups at first level,
     // use for group header and footer padding
     std::list<WeakPtr<UINode>> itemsAndGroups_;
 
-    bool isSelectMenu_ = false;
-
-    ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
+    ACE_DISALLOW_COPY_AND_MOVE(InnerMenuPattern);
 };
 } // namespace OHOS::Ace::NG
 

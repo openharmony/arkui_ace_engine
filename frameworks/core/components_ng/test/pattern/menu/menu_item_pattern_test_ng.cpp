@@ -518,5 +518,28 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestEvent001, TestSize.Level1)
     event(gestureEvent);
     EXPECT_FALSE(itemPattern->isSelected_);
 }
+
+/**
+    * @tc.name: CustomMenuItemPattern001
+    * @tc.desc: Test CustomMenuItem creation
+    * @tc.type: FUNC
+    */
+HWTEST_F(MenuItemPatternTestNg, CustomMenuItemPattern001, TestSize.Level1)
+{
+    MenuItemModelNG model;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto customNode = FrameNode::CreateFrameNode("", -1, AceType::MakeRefPtr<Pattern>());
+    model.Create(customNode);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_TRUE(itemNode);
+    auto pattern = itemNode->GetPattern<CustomMenuItemPattern>();
+    ASSERT_TRUE(pattern);
+    ASSERT_TRUE(itemNode->GetEventHub<EventHub>());
+    auto touch = itemNode->GetOrCreateGestureEventHub()->touchEventActuator_;
+    ASSERT_TRUE(touch);
+    ASSERT_FALSE(touch->touchEvents_.empty());
+}
 } // namespace
 } // namespace OHOS::Ace::NG

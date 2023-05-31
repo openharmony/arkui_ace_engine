@@ -857,7 +857,8 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg018, TestSize.Level1)
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg019, TestSize.Level1)
 {
-    MenuView::Create();
+    MenuModelNG model;
+    model.Create();
     auto multiMenu = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     auto menuWrapper = MenuView::Create(multiMenu, -1);
     ASSERT_NE(menuWrapper, nullptr);
@@ -878,7 +879,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg019, TestSize.Level1)
     ASSERT_NE(multiMenu->GetLayoutProperty()->GetPaddingProperty()->ToString(), PaddingProperty().ToString());
     ASSERT_NE(multiMenu->GetRenderContext()->GetBackgroundColor(), std::nullopt);
     // inner menu should have no shadow
-    ASSERT_EQ(multiMenu->GetRenderContext()->GetBackShadow(), std::nullopt);
+    ASSERT_EQ(multiMenu->GetRenderContext()->GetBackShadow(), ShadowConfig::NoneShadow);
 
     // MultiMenu should have its own layout algorithm
     auto layoutAlgorithm = multiMenu->GetPattern<MenuPattern>()->CreateLayoutAlgorithm();
@@ -1004,7 +1005,8 @@ HWTEST_F(MenuPatternTestNg, PerformActionTest002, TestSize.Level1)
      * @tc.steps: step1. Create menu, get menu frameNode and pattern, set callback function.
      * @tc.expected: FrameNode and pattern is not null, related function is called.
      */
-    MenuView::Create();
+    MenuModelNG model;
+    model.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto menuPattern = frameNode->GetPattern<MenuPattern>();
@@ -1087,6 +1089,41 @@ HWTEST_F(MenuPatternTestNg, MenuAccessibilityEventTestNg001, TestSize.Level1)
     GestureEvent gestureEvent;
     event(gestureEvent);
     EXPECT_EQ(optionPattern->index_, SELECTED_INDEX);
+}
+
+/**
+ * @tc.name: DesktopMenuPattern001
+ * @tc.desc: Test MenuPattern onModifyDone, switch between DesktopMenu and regular menu.
+ */
+HWTEST_F(MenuPatternTestNg, DesktopMenuPattern001, TestSize.Level1)
+{
+    MenuModelNG model;
+    model.Create();
+    auto menu1 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menu1, nullptr);
+    model.Create();
+    auto menu2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto container = FrameNode::CreateFrameNode("", -1, AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MENU));
+    auto mockScroll = FrameNode::CreateFrameNode("", -1, AceType::MakeRefPtr<Pattern>());
+    mockScroll->MountToParent(container);
+    menu1->MountToParent(mockScroll);
+    menu2->MountToParent(mockScroll);
+
+    auto pattern1 = menu1->GetPattern<InnerMenuPattern>();
+    auto pattern2 = menu2->GetPattern<InnerMenuPattern>();
+    auto containerPattern = container->GetPattern<MenuPattern>();
+    containerPattern->OnModifyDone();
+    pattern1->OnModifyDone();
+    pattern2->OnModifyDone();
+    EXPECT_EQ(pattern1->type_, MenuType::DESKTOP_MENU);
+    EXPECT_EQ(pattern2->type_, MenuType::DESKTOP_MENU);
+    EXPECT_EQ(container->GetRenderContext()->GetBackShadow(), ShadowConfig::NoneShadow);
+
+    mockScroll->RemoveChildAtIndex(1);
+    pattern1->OnModifyDone();
+    containerPattern->OnModifyDone();
+    EXPECT_EQ(pattern1->type_, MenuType::MULTI_MENU);
+    EXPECT_EQ(container->GetRenderContext()->GetBackShadow(), ShadowConfig::DefaultShadowM);
 }
 } // namespace
 } // namespace OHOS::Ace::NG
