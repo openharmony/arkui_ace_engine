@@ -1032,6 +1032,7 @@ void JsiDeclarativeEngine::RegisterWorker()
 
 bool JsiDeclarativeEngine::ExecuteAbc(const std::string& fileName)
 {
+    ACE_SCOPED_TRACE("JsiDeclarativeEngine::ExecuteAbc Execute Page code : %s", fileName.c_str());
     auto runtime = engineInstance_->GetJsRuntime();
     auto delegate = engineInstance_->GetDelegate();
     std::vector<uint8_t> content;
@@ -1138,7 +1139,7 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
 
 void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage)
 {
-    ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadJs");
+    ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadJs url : %s", url.c_str());
     LOGI("LoadJs page:%{public}d", page->GetPageId());
     ACE_DCHECK(engineInstance_);
     engineInstance_->SetStagingPage(page);
@@ -1249,6 +1250,7 @@ void JsiDeclarativeEngine::LoadPluginJsWithModule(std::string& urlName)
 void JsiDeclarativeEngine::LoadJsWithModule(
     std::string& urlName, const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
+    ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadJsWithModule Execute Page code : %s", urlName.c_str());
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());

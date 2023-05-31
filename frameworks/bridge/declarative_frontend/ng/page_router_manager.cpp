@@ -74,6 +74,7 @@ void PageRouterManager::LoadOhmUrl(const RouterPageInfo& target)
 
 void PageRouterManager::RunPage(const std::string& url, const std::string& params)
 {
+    ACE_SCOPED_TRACE("PageRouterManager::RunPage");
     CHECK_RUN_ON(JS);
     RouterPageInfo info { url, params };
 #if !defined(PREVIEW)
@@ -799,6 +800,7 @@ void PageRouterManager::BackCheckAlert(const RouterPageInfo& target)
 
 void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, bool needHideLast, bool needTransition)
 {
+    ACE_SCOPED_TRACE("PageRouterManager::LoadPage");
     CHECK_RUN_ON(JS);
     LOGI("PageRouterManager LoadPage[%{public}d]: %{public}s.", pageId, target.url.c_str());
     auto entryPageInfo = AceType::MakeRefPtr<EntryPageInfo>(pageId, target.url, target.path, target.params);
