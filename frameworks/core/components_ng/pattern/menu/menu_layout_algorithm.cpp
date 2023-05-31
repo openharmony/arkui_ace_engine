@@ -41,6 +41,7 @@ constexpr uint32_t GRID_COUNTS_6 = 6;
 constexpr uint32_t GRID_COUNTS_8 = 8;
 constexpr uint32_t GRID_COUNTS_12 = 12;
 constexpr Dimension MIN_MENU_WIDTH = Dimension(64.0, DimensionUnit::VP);
+constexpr int32_t PLATFORM_VERSION_TEN = 10;
 
 uint32_t GetMaxGridCounts(const RefPtr<GridColumnInfo>& columnInfo)
 {
@@ -215,6 +216,11 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         menuPosition += offset;
         position_ = menuPosition;
         menuPosition = MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && pipeline->GetIsAppWindow() &&
+            pipeline->GetIsLayoutFullScreen()) {
+            menuPosition += pageOffset_ * 2;
+        }
     }
     LOGD("Menu layout, offset = %{public}s", menuPosition.ToString().c_str());
     geometryNode->SetFrameOffset(menuPosition);
