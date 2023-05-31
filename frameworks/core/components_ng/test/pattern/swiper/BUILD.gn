@@ -141,8 +141,6 @@ ohos_unittest("swiper_indicator_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/property/accessibility_property.cpp",
-    "swiper_accessibility_property_test_ng.cpp",
-    "swiper_indicator_pattern_test_ng.cpp",
     "swiper_pattern_test_ng.cpp",
   ]
 
@@ -153,6 +151,7 @@ ohos_unittest("swiper_indicator_pattern_test_ng") {
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",
     "//third_party/googletest:gmock_main",
+    "$ace_root/frameworks/core/components/theme:build_theme_code",
   ]
 
   if (platform == "ohos") {
