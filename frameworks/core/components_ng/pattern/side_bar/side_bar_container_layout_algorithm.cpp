@@ -67,20 +67,24 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
      * content only display the first one, use itor from end
      */
     int index = 0;
+    RefPtr<LayoutWrapper> dividerLayoutWrapper = nullptr;
     for (auto it = children.rbegin(); it != children.rend(); ++it) {
         index++;
         if (index == INDEX_CONTRON_BUTTON) {
             auto imgLayoutWrapper = (*it);
             MeasureControlButton(layoutProperty, imgLayoutWrapper, parentWidth);
         } else if (index == INDEX_DIVIDER) {
-            auto dividerLayoutWrapper = (*it);
-            MeasureDivider(layoutProperty, dividerLayoutWrapper, parentWidth);
+            dividerLayoutWrapper = (*it);
         } else if (index == INDEX_SIDE_BAR) {
             auto sideBarLayoutWrapper = (*it);
             MeasureSideBar(layoutProperty, sideBarLayoutWrapper);
         } else { // other break
-            break;
+            continue;
         }
+    }
+
+    if (dividerLayoutWrapper) {
+        MeasureDivider(layoutProperty, dividerLayoutWrapper, parentWidth);
     }
 
     if (children.size() > DEFAULT_MIN_CHILDREN_SIZE) { // when sidebar only add one component, content is not display
