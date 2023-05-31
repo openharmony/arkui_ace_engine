@@ -1656,3 +1656,10 @@ var DragRet;
   DragRet[DragRet["DROP_ENABLED"] = 3] = "DROP_ENABLED";
   DragRet[DragRet["DROP_DISABLED"] = 4] = "DROP_DISABLED";
 })(DragRet || (DragRet = {}));
+
+var XComponentType;
+(function (XComponentType) {
+  XComponentType[XComponentType["SURFACE"] = 0] = "SURFACE";
+  XComponentType[XComponentType["COMPONENT"] = 1] = "COMPONENT";
+  XComponentType[XComponentType["TEXTURE"] = 2] = "TEXTURE";
+})(XComponentType || (XComponentType = {}));

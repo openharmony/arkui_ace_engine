@@ -25,6 +25,19 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 
 namespace OHOS::Ace {
+namespace {
+XComponentType ConvertToXComponentType(const std::string& type)
+{
+    if (type == "surface") {
+        return XComponentType::SURFACE;
+    }
+    if (type == "component") {
+        return XComponentType::COMPONENT;
+    }
+    LOGW("type: %{public}s is not valid, use 'surface' type as default", type.c_str());
+    return XComponentType::SURFACE;
+}
+} // namespace
 
 std::unique_ptr<XComponentModel> XComponentModel::instance_ = nullptr;
 std::mutex XComponentModel::mutex_;
@@ -68,11 +81,11 @@ void JSXComponent::JSBind(BindingTarget globalObj)
     JSClass<JSXComponent>::StaticMethod("onFocus", &JSXComponent::OmitEvent);
     JSClass<JSXComponent>::StaticMethod("onBlur", &JSXComponent::OmitEvent);
 
-    JSClass<JSXComponent>::StaticMethod("backgroundColor", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("backgroundColor", &JSXComponent::JsBackgroundColor);
     JSClass<JSXComponent>::StaticMethod("backgroundImage", &JSXComponent::OmitAttribute);
     JSClass<JSXComponent>::StaticMethod("backgroundImageSize", &JSXComponent::OmitAttribute);
     JSClass<JSXComponent>::StaticMethod("backgroundImagePosition", &JSXComponent::OmitAttribute);
-    JSClass<JSXComponent>::StaticMethod("opacity", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("opacity", &JSXComponent::JsOpacity);
     JSClass<JSXComponent>::StaticMethod("blur", &JSXComponent::OmitAttribute);
     JSClass<JSXComponent>::StaticMethod("backdropBlur", &JSXComponent::OmitAttribute);
     JSClass<JSXComponent>::StaticMethod("grayscale", &JSXComponent::OmitAttribute);
@@ -112,8 +125,14 @@ void JSXComponent::Create(const JSCallbackInfo& info)
             xcomponentController = jsXComponentController->GetController();
         }
     }
+    XComponentType xcomponentType = XComponentType::SURFACE;
+    if (type->IsString()) {
+        xcomponentType = ConvertToXComponentType(type->ToString());
+    } else if (type->IsNumber()) {
+        xcomponentType = static_cast<XComponentType>(type->ToNumber<int32_t>());
+    }
     XComponentModel::GetInstance()->Create(
-        id->ToString(), type->ToString(), libraryname->ToString(), xcomponentController);
+        id->ToString(), xcomponentType, libraryname->ToString(), xcomponentController);
 
     if (info.Length() > 1 && info[1]->IsString()) {
         auto soPath = info[1]->ToString();
@@ -153,6 +172,24 @@ void JSXComponent::JsOnDestroy(const JSCallbackInfo& args)
     XComponentModel::GetInstance()->SetOnDestroy(std::move(onDestroy));
 }
 
+void JSXComponent::JsBackgroundColor(const JSCallbackInfo& args)
+{
+    if (!XComponentModel::GetInstance()->IsTexture()) {
+        LOGW("not support backgroundColor attribute");
+        return;
+    }
+    JSViewAbstract::JsBackgroundColor(args);
+}
+
+void JSXComponent::JsOpacity(const JSCallbackInfo& args)
+{
+    if (!XComponentModel::GetInstance()->IsTexture()) {
+        LOGW("not support opacity attribute");
+        return;
+    }
+    JSViewAbstract::JsOpacity(args);
+}
+
 void JSXComponent::OmitEvent(const JSCallbackInfo& /*args*/)
 {
     LOGW("This event is omitted, please use apis of native_xcomponent instead");
@@ -162,5 +199,4 @@ void JSXComponent::OmitAttribute(const JSCallbackInfo& /* args */)
 {
     LOGW("This attribute is omitted.");
 }
-
 } // namespace OHOS::Ace::Framework

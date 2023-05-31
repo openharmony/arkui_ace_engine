@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_RENDER_SURFACE_H
 
 #ifdef OHOS_PLATFORM
+#include "ibuffer_consumer_listener.h"
+#include "iconsumer_surface.h"
 #include "surface.h"
 #include "surface_delegate.h"
 #include "window.h"
@@ -52,6 +54,13 @@ public:
 
     std::string GetUniqueId() const override;
 
+    void SetIsTexture(bool isTexture) override
+    {
+        isTexture_ = isTexture;
+    }
+    
+    void ConsumeBuffer();
+
 #ifdef OHOS_PLATFORM
     OHOS::sptr<OHOS::Surface> GetSurface() const
     {
@@ -66,14 +75,29 @@ public:
 private:
 #ifdef OHOS_PLATFORM
     OHOS::sptr<OHOS::Surface> producerSurface_ = nullptr;
+    OHOS::sptr<IConsumerSurface> consumerSurface_ = nullptr;
+    OHOS::sptr<IBufferConsumerListener> drawBufferListener_ = nullptr;
     struct NativeWindow* nativeWindow_ = nullptr;
     sptr<OHOS::SurfaceDelegate> surfaceDelegate_;
 #endif
     WeakPtr<NG::RenderContext> renderContext_ = nullptr;
     RefPtr<ExtSurfaceCallbackInterface> extSurfaceCallbackInterface_ = nullptr;
+    bool isTexture_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderSurface);
 };
+
+#ifdef OHOS_PLATFORM
+class DrawBufferListener : public IBufferConsumerListener {
+public:
+    explicit DrawBufferListener(const WeakPtr<NG::RosenRenderSurface>& renderSurface) : renderSurface_(renderSurface) {}
+    ~DrawBufferListener() override = default;
+    void OnBufferAvailable() override;
+
+private:
+    WeakPtr<NG::RosenRenderSurface> renderSurface_;
+};
+#endif
 
 #ifdef OHOS_PLATFORM
 class ExtSurfaceCallback : public OHOS::SurfaceDelegate::ISurfaceCallback {

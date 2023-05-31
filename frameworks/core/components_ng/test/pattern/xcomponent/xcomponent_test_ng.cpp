@@ -33,6 +33,7 @@
 #include "core/components_ng/test/mock/render/mock_render_surface.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -40,7 +41,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 struct TestProperty {
     std::optional<std::string> xcId = std::nullopt;
-    std::optional<std::string> xcType = std::nullopt;
+    std::optional<XComponentType> xcType = std::nullopt;
     std::optional<std::string> libraryName = std::nullopt;
     std::optional<std::string> soPath = std::nullopt;
     std::optional<LoadEvent> loadEvent = std::nullopt;
@@ -49,12 +50,11 @@ struct TestProperty {
 namespace {
 const std::string CHECK_KEY = "HI";
 const std::string XCOMPONENT_ID = "xcomponent";
-const std::string XCOMPONENT_SURFACE_TYPE = "surface";
-const std::string XCOMPONENT_COMPONENT_TYPE = "component";
 const std::string XCOMPONENT_LIBRARY_NAME = "native_render";
 const std::string XCOMPONENT_SO_PATH = "com.example.xcomponentmultihap/entry";
-const XComponentType XCOMPONENT_SURFACE_TYPE_VALUE = XComponentType::SURFACE;
-const XComponentType XCOMPONENT_COMPONENT_TYPE_VALUE = XComponentType::COMPONENT;
+constexpr XComponentType XCOMPONENT_SURFACE_TYPE_VALUE = XComponentType::SURFACE;
+constexpr XComponentType XCOMPONENT_COMPONENT_TYPE_VALUE = XComponentType::COMPONENT;
+constexpr XComponentType XCOMPONENT_TEXTURE_TYPE_VALUE = XComponentType::TEXTURE;
 const float CONTAINER_WIDTH = 300.0f;
 const float CONTAINER_HEIGHT = 300.0f;
 const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
@@ -117,23 +117,29 @@ OH_NativeXComponent_EventSourceType ConvertNativeXComponentEventSourceType(const
 }
 } // namespace
 
-class XComponentPropertyTestNg : public testing::Test {
+class XComponentTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
-    static void TearDownTestSuite() {};
+    static void TearDownTestSuite();
 
 protected:
     static RefPtr<FrameNode> CreateXComponentNode(TestProperty& testProperty);
 };
 
-void XComponentPropertyTestNg::SetUpTestSuite()
+void XComponentTestNg::SetUpTestSuite()
 {
+    MockPipelineBase::SetUp();
     testProperty.xcId = XCOMPONENT_ID;
     testProperty.libraryName = XCOMPONENT_LIBRARY_NAME;
     testProperty.soPath = XCOMPONENT_SO_PATH;
 }
 
-RefPtr<FrameNode> XComponentPropertyTestNg::CreateXComponentNode(TestProperty& testProperty)
+void XComponentTestNg::TearDownTestSuite()
+{
+    MockPipelineBase::TearDown();
+}
+
+RefPtr<FrameNode> XComponentTestNg::CreateXComponentNode(TestProperty& testProperty)
 {
     auto xcId = testProperty.xcId.value();
     auto xcType = testProperty.xcType.value();
@@ -160,7 +166,7 @@ RefPtr<FrameNode> XComponentPropertyTestNg::CreateXComponentNode(TestProperty& t
  * @tc.desc: Create XComponent, and test XComponent type, id, libraryName, soPath interface.
  * @tc.type: FUNC
  */
-HWTEST_F(XComponentPropertyTestNg, XComponentPropertyTest001, TestSize.Level1)
+HWTEST_F(XComponentTestNg, XComponentPropertyTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. construct a XComponentModelNG
@@ -173,7 +179,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentPropertyTest001, TestSize.Level1)
      *            case: type = XCOMPONENT_SURFACE_TYPE
      * @tc.expected: the properties are expected
      */
-    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE, XCOMPONENT_LIBRARY_NAME, xComponentController);
+    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
     xComponent.SetSoPath(XCOMPONENT_SO_PATH);
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -197,7 +203,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentPropertyTest001, TestSize.Level1)
      */
     const RefPtr<XComponentController> xComponentController2;
     XComponentModelNG xComponent2;
-    xComponent2.Create(XCOMPONENT_ID, XCOMPONENT_COMPONENT_TYPE, XCOMPONENT_LIBRARY_NAME, xComponentController);
+    xComponent2.Create(XCOMPONENT_ID, XCOMPONENT_COMPONENT_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
     xComponent2.SetSoPath(XCOMPONENT_SO_PATH);
 
     auto frameNode2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -217,7 +223,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentPropertyTest001, TestSize.Level1)
  * @tc.desc: Test XComponent onLoad and onDestroy event.
  * @tc.type: FUNC
  */
-HWTEST_F(XComponentPropertyTestNg, XComponentEventTest002, TestSize.Level1)
+HWTEST_F(XComponentTestNg, XComponentEventTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. set the testProperty and CreateXComponentNode
@@ -229,7 +235,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentEventTest002, TestSize.Level1)
     auto onLoad = [&onLoadKey](const std::string& /* xComponentId */) { onLoadKey = CHECK_KEY; };
     auto onDestroy = [&onDestroyKey]() { onDestroyKey = CHECK_KEY; };
 
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE;
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
     testProperty.loadEvent = std::move(onLoad);
     testProperty.destroyEvent = std::move(onDestroy);
     auto frameNode = CreateXComponentNode(testProperty);
@@ -255,7 +261,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentEventTest002, TestSize.Level1)
 
     auto onLoad2 = [&onLoadKey](const std::string& /* xComponentId */) { onLoadKey = ""; };
     auto onDestroy2 = [&onDestroyKey]() { onDestroyKey = ""; };
-    testProperty.xcType = XCOMPONENT_COMPONENT_TYPE;
+    testProperty.xcType = XCOMPONENT_COMPONENT_TYPE_VALUE;
     testProperty.loadEvent = std::move(onLoad2);
     testProperty.destroyEvent = std::move(onDestroy2);
 
@@ -274,11 +280,11 @@ HWTEST_F(XComponentPropertyTestNg, XComponentEventTest002, TestSize.Level1)
  * @tc.desc: Test XComponent NDK interfaces.
  * @tc.type: FUNC
  */
-HWTEST_F(XComponentPropertyTestNg, XComponentNDKTest003, TestSize.Level1)
+HWTEST_F(XComponentTestNg, XComponentNDKTest003, TestSize.Level1)
 {
     RefPtr<XComponentController> const xComponentController;
     XComponentModelNG xComponent;
-    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE, XCOMPONENT_LIBRARY_NAME, xComponentController);
+    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
     xComponent.SetSoPath(XCOMPONENT_SO_PATH);
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -306,11 +312,11 @@ HWTEST_F(XComponentPropertyTestNg, XComponentNDKTest003, TestSize.Level1)
  * @tc.desc: Test XComponent algorithm functions when XComponent type is surface.
  * @tc.type: FUNC
  */
-HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest004, TestSize.Level1)
+HWTEST_F(XComponentTestNg, XComponentLayoutAlgorithmTest004, TestSize.Level1)
 {
     RefPtr<XComponentController> const xComponentController;
     XComponentModelNG xComponent;
-    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE, XCOMPONENT_LIBRARY_NAME, xComponentController);
+    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
     xComponent.SetSoPath(XCOMPONENT_SO_PATH);
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -371,11 +377,11 @@ HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest004, TestSize.Le
  * @tc.desc: Test XComponent measure functions when XComponent type is component.
  * @tc.type: FUNC
  */
-HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest005, TestSize.Level1)
+HWTEST_F(XComponentTestNg, XComponentLayoutAlgorithmTest005, TestSize.Level1)
 {
     RefPtr<XComponentController> const xComponentController;
     XComponentModelNG xComponent;
-    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_COMPONENT_TYPE, XCOMPONENT_LIBRARY_NAME, xComponentController);
+    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_COMPONENT_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
     xComponent.SetSoPath(XCOMPONENT_SO_PATH);
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -402,7 +408,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest005, TestSize.Le
     //     corresponding ets code:
     //         XComponent({
     //           id: 'xcomponent',
-    //           type: 'surface',
+    //           type: 'component',
     //           controller: this.xcomponentController
     //         })
     //         {
@@ -424,6 +430,9 @@ HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest005, TestSize.Le
     frameNode->AddChild(childFrameNode);
     layoutWrapper.AppendChild(childLayoutWrapper);
 
+    auto contentSize =  xComponentLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
+    EXPECT_EQ(contentSize, std::nullopt);
+
     auto childLayoutWrapper2 = layoutWrapper.GetOrCreateChildByIndex(0);
     xComponentLayoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize(), CONTAINER_SIZE);
@@ -439,13 +448,13 @@ HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest005, TestSize.Le
  * @tc.desc: Test OnDirtyLayoutWrapperSwap
  * @tc.type: FUNC
  */
-HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest006, TestSize.Level1)
+HWTEST_F(XComponentTestNg, XComponentLayoutAlgorithmTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
      * @tc.expected: frameNode create successfully
      */
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE;
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
     auto frameNode = CreateXComponentNode(testProperty);
     ASSERT_TRUE(frameNode);
 
@@ -470,10 +479,16 @@ HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest006, TestSize.Le
     EXPECT_CALL(*(AceType::RawPtr(AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_))),
         SetBounds(0.0f, 0.0f, MAX_WIDTH, MAX_HEIGHT))
         .WillOnce(Return());
+    EXPECT_CALL(*(AceType::RawPtr(AceType::DynamicCast<MockRenderContext>(frameNode->GetRenderContext()))),
+        AddChild(pattern->renderContextForSurface_, 0))
+        .WillOnce(Return());
     EXPECT_CALL(*(AceType::RawPtr(AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_))), IsSurfaceValid())
         .WillOnce(Return(true))
         .WillOnce(Return(true))
-        .WillRepeatedly(Return(true));
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(*(AceType::RawPtr(AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_))),
+        AdjustNativeWindowSize(MAX_WIDTH, MAX_HEIGHT))
+        .WillOnce(Return());
     auto flag = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config); // IsSurfaceValid=true
     EXPECT_FALSE(flag);
     EXPECT_TRUE(pattern->hasXComponentInit_);
@@ -495,6 +510,9 @@ HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest006, TestSize.Le
     EXPECT_CALL(*(AceType::RawPtr(AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_))),
         SetBounds(0.0f, 0.0f, MAX_WIDTH, MAX_HEIGHT))
         .Times(4);
+    EXPECT_CALL(*(AceType::RawPtr(AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_))),
+        AdjustNativeWindowSize(MAX_WIDTH, MAX_HEIGHT))
+        .WillOnce(Return());
     pattern->type_ = XCOMPONENT_SURFACE_TYPE_VALUE;
     for (bool frameOffsetChange : frameOffsetChanges) {
         for (bool contentOffsetChange : contentOffsetChanges) {
@@ -508,6 +526,15 @@ HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest006, TestSize.Le
 
     /**
      * @tc.steps: step4. call OnDirtyLayoutWrapperSwap
+     *            case: size is zero
+     * @tc.expected: OnDirtyLayoutWrapperSwap return false
+     */
+    geometryNode->SetContentSize({ 0.0f, 0.0f });
+    flag = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_FALSE(flag);
+
+    /**
+     * @tc.steps: step5. call OnDirtyLayoutWrapperSwap
      *            case: type="component", config.skipMeasure = true, dirty->SkipMeasureContent() = true
      * @tc.expected: OnDirtyLayoutWrapperSwap return false
      */
@@ -527,17 +554,18 @@ HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest006, TestSize.Le
  * @tc.desc: Test MouseEvent
  * @tc.type: FUNC
  */
-HWTEST_F(XComponentPropertyTestNg, XComponentMouseEventTest007, TestSize.Level1)
+HWTEST_F(XComponentTestNg, XComponentMouseEventTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
      * @tc.expected: xcomponent frameNode create successfully
      */
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE;
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
     auto frameNode = CreateXComponentNode(testProperty);
     ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_TRUE(pattern);
+    pattern->hasXComponentInit_ = true;
 
     /**
      * @tc.steps: step2. prepare mouse info
@@ -573,13 +601,13 @@ HWTEST_F(XComponentPropertyTestNg, XComponentMouseEventTest007, TestSize.Level1)
  * @tc.desc: Test TouchEvent
  * @tc.type: FUNC
  */
-HWTEST_F(XComponentPropertyTestNg, XComponentTouchEventTest008, TestSize.Level1)
+HWTEST_F(XComponentTestNg, XComponentTouchEventTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
      * @tc.expected: xcomponent frameNode create successfully
      */
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE;
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
     auto frameNode = CreateXComponentNode(testProperty);
     ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<XComponentPattern>();
@@ -654,13 +682,13 @@ HWTEST_F(XComponentPropertyTestNg, XComponentTouchEventTest008, TestSize.Level1)
  * @tc.desc: Test TouchEvent
  * @tc.type: FUNC
  */
-HWTEST_F(XComponentPropertyTestNg, XComponentTouchEventTest009, TestSize.Level1)
+HWTEST_F(XComponentTestNg, XComponentTouchEventTest009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
      * @tc.expected: xcomponent frameNode create successfully
      */
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE;
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
     auto frameNode = CreateXComponentNode(testProperty);
     ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<XComponentPattern>();
@@ -677,13 +705,13 @@ HWTEST_F(XComponentPropertyTestNg, XComponentTouchEventTest009, TestSize.Level1)
  * @tc.desc: Test KeyEvent/FocusEvent/BlurEvent
  * @tc.type: FUNC
  */
-HWTEST_F(XComponentPropertyTestNg, XComponentKeyEventTest010, TestSize.Level1)
+HWTEST_F(XComponentTestNg, XComponentKeyEventTest010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
      * @tc.expected: xcomponent frameNode create successfully
      */
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE;
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
     auto frameNode = CreateXComponentNode(testProperty);
     ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<XComponentPattern>();
@@ -737,5 +765,38 @@ HWTEST_F(XComponentPropertyTestNg, XComponentKeyEventTest010, TestSize.Level1)
             EXPECT_EQ(nativeXComponentImpl->keyEvent_.action, ConvertNativeXComponentKeyAction(keyAction));
         }
     }
+}
+
+/**
+ * @tc.name: XComponentKeyEventTest011
+ * @tc.desc: Test XComponent type = XComponentType::TEXTURE
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, XComponentTextureTypeTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set type = XCOMPONENT_TEXTURE_TYPE_VALUE and call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    testProperty.xcType = XCOMPONENT_TEXTURE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(testProperty);
+    EXPECT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->hasXComponentInit_ = true;
+    EXPECT_EQ(pattern->type_, XCOMPONENT_TEXTURE_TYPE_VALUE);
+    EXPECT_TRUE(pattern->IsAtomicNode());
+
+    /**
+     * @tc.steps: step2. call InitNativeWindow
+     * @tc.expected: renderSurface_->AdjustNativeWindowSize is called
+     */
+    EXPECT_CALL(*(AceType::RawPtr(AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_))), IsSurfaceValid())
+        .WillOnce(Return(true));
+    EXPECT_CALL(*(AceType::RawPtr(AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_))),
+        AdjustNativeWindowSize(MAX_WIDTH, MAX_HEIGHT))
+        .WillOnce(Return());
+    pattern->InitNativeWindow(MAX_WIDTH, MAX_HEIGHT);
 }
 } // namespace OHOS::Ace::NG
