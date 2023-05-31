@@ -32,7 +32,7 @@ group("pattern_unittest") {
     "dialog:dialog_pattern_test_ng",
     "divider:divider_pattern_test_ng",
     "flex:flex_test_ng",
-    "form:form_pattern_test_ng",
+    "form:form_test_ng",
     "gauge:gauge_pattern_test_ng",
     "grid:grid_test_ng",
     "grid_col:grid_col_pattern_test_ng",

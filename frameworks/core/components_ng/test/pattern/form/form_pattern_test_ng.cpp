@@ -84,6 +84,8 @@ RefPtr<FrameNode> FormPatternTestNg::CreateFromNode()
 {
     formModelNG.Create(formInfo);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    pattern->frameNode_ = frameNode;
     return frameNode;
 }
 
@@ -603,7 +605,7 @@ HWTEST_F(FormPatternTestNg, FireOnEvent, TestSize.Level1)
     auto pattern = frameNode->GetPattern<FormPattern>();
     ASSERT_NE(pattern, nullptr);
     auto eventHub = frameNode->GetEventHub<FormEventHub>();
-    CHECK_NULL_VOID(eventHub);
+    ASSERT_NE(eventHub, nullptr);
 
     /**
      * @tc.steps: step2.Call SetOnError in FormEventHub.
@@ -630,18 +632,7 @@ HWTEST_F(FormPatternTestNg, FireOnEvent, TestSize.Level1)
     pattern->FireOnUninstallEvent(FORM_ID_OF_TDD);
 
     /**
-     * @tc.steps: step4.Call SetOnUninstall in FormEventHub.
-     * @tc.expected: all FireOnUninstallEvent in FormPattern.
-     */
-    eventHub->SetOnUninstall([](const std::string& string) {
-        auto json = JsonUtil::Create(true);
-        json->Put("id", std::to_string(FORM_ID_OF_TDD).c_str());
-        ASSERT_EQ(string, json->ToString());
-    });
-    pattern->FireOnUninstallEvent(FORM_ID_OF_TDD);
-
-    /**
-     * @tc.steps: step5.Call SetOnAcquired in FormEventHub.
+     * @tc.steps: step4.Call SetOnAcquired in FormEventHub.
      * @tc.expected: Call FireOnAcquiredEvent in FormPattern.
      */
     eventHub->SetOnAcquired([](const std::string& string) {
@@ -652,7 +643,7 @@ HWTEST_F(FormPatternTestNg, FireOnEvent, TestSize.Level1)
     pattern->FireOnAcquiredEvent(FORM_ID_OF_TDD);
 
     /**
-     * @tc.steps: step6.Call SetOnAcquired in FormEventHub.
+     * @tc.steps: step5.Call SetOnAcquired in FormEventHub.
      * @tc.expected: Call FireOnAcquiredEvent in FormPattern.
      */
     eventHub->SetOnRouter([](const std::string& string) {
@@ -667,10 +658,119 @@ HWTEST_F(FormPatternTestNg, FireOnEvent, TestSize.Level1)
     pattern->FireOnRouterEvent(json);
 
     /**
-     * @tc.steps: step7.Call SetOnLoad in FormEventHub.
+     * @tc.steps: step6.Call SetOnLoad in FormEventHub.
      * @tc.expected: Call FireOnLoadEvent in FormPattern.
      */
     eventHub->SetOnLoad([](const std::string& string) { ASSERT_EQ(string, ""); });
     pattern->FireOnLoadEvent();
+}
+
+/**
+ * @tc.name: OnActionEvent
+ * @tc.desc: Verify the OnActionEvent Interface of FormPattern work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTestNg, OnActionEvent, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a FormPattern and build a subContainer .
+     */
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetOnRouter([](const std::string& string) {
+        auto json = JsonUtil::Create(true);
+        json->Put("noaction", "");
+        json->Put("action", "router");
+        auto actionJson = JsonUtil::Create(true);
+        actionJson->Put("action", json);
+        ASSERT_EQ(string, actionJson->ToString());
+    });
+
+    /**
+     * @tc.steps: step2.the action is nullptr.
+     * @tc.expected: pattern will not call FireOnRouterEvent.
+     */
+    pattern->OnActionEvent("");
+
+    /**
+     * @tc.steps: step3.the action dose not contians "action".
+     * @tc.expected: pattern will not call FireOnRouterEvent.
+     */
+    auto action = JsonUtil::Create(true);
+    action->Put("noaction", "");
+    pattern->OnActionEvent(action->ToString());
+
+    /**
+     * @tc.steps: step4.the actionType in action dose not contians "router" or "message" or "call".
+     * @tc.expected: pattern will not call FireOnRouterEvent.
+     */
+    action->Put("action", "none");
+    pattern->OnActionEvent(action->ToString());
+
+    /**
+     * @tc.steps: step4.the actionType in action contians "router".
+     * @tc.expected: pattern will call FireOnRouterEvent.
+     */
+    action->Replace("action", "router");
+    pattern->OnActionEvent(action->ToString());
+
+    /**
+     * @tc.steps: step4.the actionType in action contians "message".
+     * @tc.expected: pattern will not call FireOnRouterEvent.
+     */
+    action->Replace("action", "message");
+    pattern->OnActionEvent(action->ToString());
+
+    /**
+     * @tc.steps: step4.the actionType in action contians "call".
+     * @tc.expected: pattern will not call FireOnRouterEvent.
+     */
+    action->Replace("action", "call");
+    pattern->OnActionEvent(action->ToString());
+}
+
+/**
+ * @tc.name: UpdateConfiguration
+ * @tc.desc: Verify the UpdateConfiguration Interface of FormPattern work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTestNg, UpdateConfiguration, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a FormPattern and build a subContainer .
+     */
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2.call UpdateConfiguration when localeTag == localeTag_ && subContainer_ is nullptr.
+     * @tc.expected: localeTag_ will not change.
+     */
+    pattern->UpdateConfiguration();
+    ASSERT_EQ(pattern->localeTag_, AceApplicationInfo::GetInstance().GetLocaleTag());
+
+    /**
+     * @tc.steps: step3.call UpdateConfiguration when localeTag != localeTag_ && subContainer_ is nullptr.
+     * @tc.expected:  localeTag_ will not change.
+     */
+    pattern->localeTag_ = "local";
+    pattern->UpdateConfiguration();
+    ASSERT_EQ(pattern->localeTag_, "local");
+
+    /**
+     * @tc.steps: step4.call UpdateConfiguration when localeTag != localeTag_ && subContainer_ != nullptr.
+     * @tc.expected:  localeTag_ will change.
+     */
+    pattern->localeTag_ = "local";
+    WeakPtr<PipelineBase> context = WeakPtr<PipelineBase>();
+    auto subContainer = AceType::MakeRefPtr<MockSubContainer>(context);
+    pattern->subContainer_ = subContainer;
+    pattern->UpdateConfiguration();
+    ASSERT_EQ(pattern->localeTag_, AceApplicationInfo::GetInstance().GetLocaleTag());
+    ASSERT_NE(pattern->localeTag_, "local");
 }
 } // namespace OHOS::Ace::NG
