@@ -19,6 +19,7 @@
 #include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
+#include "base/utils/utils.h"
 #include "core/components/button/button_component.h"
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
@@ -56,6 +57,8 @@ const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverf
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
+
+bool JSButton::isLabelButton_ = false;
 
 void JSButton::SetFontSize(const JSCallbackInfo& info)
 {
@@ -140,7 +143,7 @@ void JSButton::SetStateEffect(bool stateEffect)
     ButtonModel::GetInstance()->SetStateEffect(stateEffect);
 }
 
-void JSButton::GetFontContent(const JSRef<JSVal> font, ButtonParameters& buttonParameters)
+void JSButton::GetFontContent(JSRef<JSVal>& font, ButtonParameters& buttonParameters)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(font);
     JSRef<JSVal> size = obj->GetProperty("size");
@@ -162,7 +165,7 @@ void JSButton::GetFontContent(const JSRef<JSVal> font, ButtonParameters& buttonP
 
     JSRef<JSVal> style = obj->GetProperty("style");
     if (style->IsNumber()) {
-        int32_t value = style->ToNumber<int32_t>();
+        auto value = style->ToNumber<int32_t>();
         if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
             buttonParameters.fontStyle = FONT_STYLES[value];
         }
@@ -222,7 +225,7 @@ void JSButton::SetLableStyle(const JSCallbackInfo& info)
 
     JSRef<JSVal> maxLines = obj->GetProperty("maxLines");
     if (!maxLines->IsNull() && maxLines->IsNumber()) {
-        buttonParameters.maxLines = maxLines->ToNumber<int32_t>();
+        buttonParameters.maxLines = Positive(maxLines->ToNumber<int32_t>()) ? maxLines->ToNumber<int32_t>() : 1;
     }
 
     JSRef<JSVal> minFontSizeValue = obj->GetProperty("minFontSize");
@@ -330,6 +333,7 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
     para.labelSetInfoSecond = (info.Length() > 1) && info[1]->IsObject();
     ButtonModel::GetInstance()->CreateWithLabel(para, buttonChildren);
     ButtonModel::GetInstance()->Create(para, buttonChildren);
+    isLabelButton_ = true;
 }
 
 void JSButton::CreateWithChild(const JSCallbackInfo& info)
@@ -355,6 +359,7 @@ void JSButton::CreateWithChild(const JSCallbackInfo& info)
         para.stateEffectSecond = JSRef<JSObject>::Cast(info[1])->GetProperty("stateEffect")->ToBoolean();
     }
     ButtonModel::GetInstance()->CreateWithChild(para);
+    isLabelButton_ = false;
 }
 
 void JSButton::JsPadding(const JSCallbackInfo& info)
@@ -371,7 +376,7 @@ Edge JSButton::GetOldPadding(const JSCallbackInfo& info)
         LOGE("arg is not a string, number or object.");
         return padding;
     }
-    
+
     if (info[0]->IsNumber()) {
         CalcDimension edgeValue;
         if (ParseJsDimensionVp(info[0], edgeValue)) {
@@ -402,7 +407,14 @@ Edge JSButton::GetOldPadding(const JSCallbackInfo& info)
 
 NG::PaddingProperty JSButton::GetNewPadding(const JSCallbackInfo& info)
 {
-    NG::PaddingProperty padding;
+    NG::PaddingProperty padding = { NG::CalcLength(0.0), NG::CalcLength(0.0), NG::CalcLength(0.0),
+        NG::CalcLength(0.0) };
+    if (isLabelButton_) {
+        auto buttonTheme = GetTheme<ButtonTheme>();
+        auto defaultPadding = buttonTheme->GetPadding();
+        padding = { NG::CalcLength(defaultPadding.Left()), NG::CalcLength(defaultPadding.Right()),
+            NG::CalcLength(defaultPadding.Top()), NG::CalcLength(defaultPadding.Bottom()) };
+    }
     if (info[0]->IsObject()) {
         std::optional<CalcDimension> left;
         std::optional<CalcDimension> right;
@@ -432,13 +444,11 @@ NG::PaddingProperty JSButton::GetNewPadding(const JSCallbackInfo& info)
         }
     }
 
-    CalcDimension length;
-    if (!ParseJsDimensionVp(info[0], length)) {
-        // use default value.
-        length.Reset();
+    CalcDimension length(-1);
+    ParseJsDimensionVp(info[0], length);
+    if (length.IsNonNegative()) {
+        padding.SetEdges(NG::CalcLength(length));
     }
-
-    padding.SetEdges(NG::CalcLength(length.IsNonNegative() ? length : CalcDimension()));
     return padding;
 }
 
@@ -465,16 +475,16 @@ NG::PaddingProperty JSButton::SetPaddings(const std::optional<CalcDimension>& to
     }
     if (left.has_value()) {
         if (left.value().Unit() == DimensionUnit::CALC) {
-            paddings.left = NG::CalcLength(
-                left.value().IsNonNegative() ? left.value().CalcValue() : CalcDimension().CalcValue());
+            paddings.left =
+                NG::CalcLength(left.value().IsNonNegative() ? left.value().CalcValue() : CalcDimension().CalcValue());
         } else {
             paddings.left = NG::CalcLength(left.value().IsNonNegative() ? left.value() : CalcDimension());
         }
     }
     if (right.has_value()) {
         if (right.value().Unit() == DimensionUnit::CALC) {
-            paddings.right = NG::CalcLength(
-                right.value().IsNonNegative() ? right.value().CalcValue() : CalcDimension().CalcValue());
+            paddings.right =
+                NG::CalcLength(right.value().IsNonNegative() ? right.value().CalcValue() : CalcDimension().CalcValue());
         } else {
             paddings.right = NG::CalcLength(right.value().IsNonNegative() ? right.value() : CalcDimension());
         }
@@ -597,9 +607,7 @@ void JSButton::JsRadius(const JSCallbackInfo& info)
         return;
     }
     CalcDimension radius;
-    if (!ParseJsDimensionVp(info[0], radius)) {
-        return;
-    }
+    ParseJsDimensionVp(info[0], radius);
 
     ButtonModel::GetInstance()->SetBorderRadius(radius);
 }
@@ -622,11 +630,11 @@ CalcDimension JSButton::GetSizeValue(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
-        return CalcDimension(-1.0);
+        return {-1.0};
     }
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
-        return CalcDimension(-1.0);
+        return {-1.0};
     }
     return value;
 }
@@ -638,7 +646,7 @@ void JSButton::JsHoverEffect(const JSCallbackInfo& info)
         return;
     }
 
-    int32_t hoverEffectNum = info[0]->ToNumber<int32_t>();
+    auto hoverEffectNum = info[0]->ToNumber<int32_t>();
     ButtonModel::GetInstance()->SetHoverEffect(hoverEffectNum);
 }
 } // namespace OHOS::Ace::Framework
