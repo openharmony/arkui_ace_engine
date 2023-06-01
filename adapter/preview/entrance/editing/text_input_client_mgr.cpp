@@ -83,9 +83,6 @@ bool TextInputClientMgr::IsCurrentConnection(const TextInputConnection* connecti
 
 bool TextInputClientMgr::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent)
 {
-#if defined(PREVIEW)
-    return false;
-#else
     if (!currentConnection_ || currentConnection_->GetClientId() != clientId_) {
         return false;
     }
@@ -104,7 +101,6 @@ bool TextInputClientMgr::UpdateEditingValue(const std::shared_ptr<TextEditingVal
         },
         TaskExecutor::TaskType::UI);
     return true;
-#endif
 }
 
 bool TextInputClientMgr::PerformAction(const TextInputAction action)
