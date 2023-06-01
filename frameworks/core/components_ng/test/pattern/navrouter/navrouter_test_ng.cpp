@@ -829,8 +829,9 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0016, TestSize.Level1)
 
     auto navBar =
         NavBarNode::GetOrCreateNavBarNode("navBarNode", 99, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    navBar->titleBarNode_ = TitleBarNode::GetOrCreateTitleBarNode(
+    auto tb = TitleBarNode::GetOrCreateTitleBarNode(
         "titleBarNode98", 98, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    navBar->titleBarNode_ = tb;
     ASSERT_NE(navBar, nullptr);
     parent->parent_ = AceType::WeakClaim(AceType::RawPtr(navBar));
 
@@ -848,7 +849,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0016, TestSize.Level1)
     AceType::DynamicCast<NavDestinationGroupNode>(navRouterGroupNode->navDestinationNode_)->titleBarNode_ =
         TitleBarNode::GetOrCreateTitleBarNode(
             "titleBarNode34", 34, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
-
+    tb->renderContext_ = nullptr;
     navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(navRouterGroupNode->navDestinationNode_);
     auto backButton = FrameNode::CreateFrameNode("BackButton", 123, AceType::MakeRefPtr<ButtonPattern>());
     AceType::DynamicCast<TitleBarNode>(navDestinationNode->titleBarNode_)->backButton_ = backButton;
@@ -992,5 +993,204 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0017, TestSize.Level1)
     navRouterGroupNode->OnAttachToMainTree(false);
     navDestinationNode->GetNavDestinationBackButtonEvent()(gestureEvent);
     ASSERT_NE(buttonNode->GetEventHub<EventHub>()->gestureEventHub_, nullptr);
+}
+
+/**
+ * @tc.name: NavrouterTestNg0018
+ * @tc.desc: Test NavRouterGroupNode::SetOnStateChangeFalse.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navRouterGroupNode.
+     */
+    NavRouterModelNG model;
+    model.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navRouterGroupNode = AceType::DynamicCast<NavRouterGroupNode>(frameNode);
+    ASSERT_NE(navRouterGroupNode, nullptr);
+    auto parent = NavigationGroupNode::GetOrCreateGroupNode(
+        "parentNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto pre = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "preNavDestination", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "preNavDestination", 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navBar =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 44, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto contentNode = FrameNode::CreateFrameNode("BackButton", 123, AceType::MakeRefPtr<ButtonPattern>());
+    navBar->navBarContentNode_ = contentNode;
+    parent->navBarNode_ = navBar;
+
+    parent->SetOnStateChangeFalse(navDestination, navDestination);
+    ASSERT_NE(navDestination, nullptr);
+    parent->SetOnStateChangeFalse(pre, navDestination);
+    ASSERT_NE(navDestination, nullptr);
+    parent->SetOnStateChangeFalse(pre, navDestination, true);
+    ASSERT_NE(navDestination, nullptr);
+    /**
+     * @tc.steps: step2. fill navigationStack_ property.
+     */
+    auto stack = AceType::MakeRefPtr<NavigationStack>();
+    auto preNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "preNavDestination", 55, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    std::pair<std::string, RefPtr<UINode>> p("test", preNavDestination);
+    stack->navPathList_.push_back(p);
+    parent->GetPattern<NavigationPattern>()->navigationStack_ = stack;
+    navRouterGroupNode->GetPattern<NavRouterPattern>()->name_ = "test";
+    stack->navPathList_.push_back(p);
+    parent->SetOnStateChangeFalse(pre, navDestination, true);
+    ASSERT_NE(navDestination, nullptr);
+}
+
+/**
+ * @tc.name: NavrouterTestNg0019
+ * @tc.desc: Test NavRouterGroupNode::BackToNavBar.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navRouterGroupNode.
+     */
+    NavRouterModelNG model;
+    model.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navRouterGroupNode = AceType::DynamicCast<NavRouterGroupNode>(frameNode);
+    ASSERT_NE(navRouterGroupNode, nullptr);
+    auto parent = NavigationGroupNode::GetOrCreateGroupNode(
+        "parentNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "preNavDestination", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navBar =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 33, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto contentNode = FrameNode::CreateFrameNode("BackButton", 44, AceType::MakeRefPtr<ButtonPattern>());
+    parent->contentNode_ = contentNode;
+    parent->navBarNode_ = navBar;
+    navRouterGroupNode->navDestinationNode_ = navDestination;
+
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 55, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto destinationTitleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 66, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 77, AceType::MakeRefPtr<ButtonPattern>());
+
+    navDestination->titleBarNode_ = destinationTitleBarNode;
+    navBar->titleBarNode_ = titleBarNode;
+
+    EXPECT_FALSE(parent->GetIsOnAnimation());
+    parent->BackToNavBar(navDestination);
+    EXPECT_TRUE(parent->GetIsOnAnimation());
+
+    destinationTitleBarNode->backButton_ = backButton;
+    parent->BackToNavBar(navDestination);
+    EXPECT_TRUE(parent->GetIsOnAnimation());
+    parent->isOnAnimation_ = false;
+    parent->BackToNavBar(navDestination);
+    EXPECT_TRUE(parent->GetIsOnAnimation());
+}
+
+/**
+ * @tc.name: NavrouterTestNg0020
+ * @tc.desc: Test NavRouterGroupNode::BackToPreNavDestination.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navRouterGroupNode.
+     */
+    NavRouterModelNG model;
+    model.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navRouterGroupNode = AceType::DynamicCast<NavRouterGroupNode>(frameNode);
+    ASSERT_NE(navRouterGroupNode, nullptr);
+    auto parent = NavigationGroupNode::GetOrCreateGroupNode(
+        "parentNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "NavDestination", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto preNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "preNavDestination", 23, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navBar =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 33, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto contentNode = FrameNode::CreateFrameNode("BackButton", 44, AceType::MakeRefPtr<ButtonPattern>());
+    parent->contentNode_ = contentNode;
+    parent->navBarNode_ = navBar;
+    navRouterGroupNode->navDestinationNode_ = navDestination;
+
+    auto preDestinationTitleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 55, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto destinationTitleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 66, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 77, AceType::MakeRefPtr<ButtonPattern>());
+
+    preNavDestination->titleBarNode_ = preDestinationTitleBarNode;
+    navDestination->titleBarNode_ = destinationTitleBarNode;
+
+    parent->isOnAnimation_ = false;
+    parent->BackToPreNavDestination(
+        preNavDestination, navDestination, navRouterGroupNode->GetPattern<NavRouterPattern>());
+    EXPECT_TRUE(parent->isOnAnimation_);
+
+    destinationTitleBarNode->backButton_ = nullptr;
+    parent->isOnAnimation_ = false;
+    auto navDestinationPattern = preNavDestination->GetPattern<NavDestinationPattern>();
+    navDestinationPattern->routeInfo_ = AceType::MakeRefPtr<RouteInfo>();
+
+    parent->BackToPreNavDestination(
+        preNavDestination, navDestination, navRouterGroupNode->GetPattern<NavRouterPattern>());
+    EXPECT_TRUE(parent->isOnAnimation_);
+}
+
+/**
+ * @tc.name: NavrouterTestNg0021
+ * @tc.desc: Test NavRouterGroupNode::NavTransitionInAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navRouterGroupNode.
+     */
+    NavRouterModelNG model;
+    model.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navRouterGroupNode = AceType::DynamicCast<NavRouterGroupNode>(frameNode);
+    ASSERT_NE(navRouterGroupNode, nullptr);
+    auto parent = NavigationGroupNode::GetOrCreateGroupNode(
+        "parentNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "NavDestination", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto preNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "preNavDestination", 23, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navBar =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 33, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto contentNode = FrameNode::CreateFrameNode("BackButton", 44, AceType::MakeRefPtr<ButtonPattern>());
+    parent->contentNode_ = contentNode;
+    parent->navBarNode_ = navBar;
+    navRouterGroupNode->navDestinationNode_ = navDestination;
+
+    auto preDestinationTitleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 55, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto destinationTitleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 66, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 77, AceType::MakeRefPtr<ButtonPattern>());
+
+    preNavDestination->titleBarNode_ = preDestinationTitleBarNode;
+    navDestination->titleBarNode_ = destinationTitleBarNode;
+
+    parent->isOnAnimation_ = true;
+    parent->BackToPreNavDestination(
+        preNavDestination, navDestination, navRouterGroupNode->GetPattern<NavRouterPattern>());
+    parent->NavTransitionInAnimation(preNavDestination, navDestination);
+    EXPECT_TRUE(parent->isOnAnimation_);
+    parent->NavTransitionOutAnimation(preNavDestination, navDestination, navBar);
+    EXPECT_TRUE(parent->isOnAnimation_);
+    parent->NavTransitionBackToPreAnimation(preNavDestination, navDestination, navBar);
+    EXPECT_TRUE(parent->isOnAnimation_);
 }
 } // namespace OHOS::Ace::NG
