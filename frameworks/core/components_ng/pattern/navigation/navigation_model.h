@@ -32,6 +32,7 @@ public:
     virtual void Create() = 0;
     virtual void SetNavigationStack() = 0;
     virtual void SetNavigationStack(RefPtr<NG::NavigationStack>&& navigationStack) = 0;
+    virtual void SetNavigationStackProvided(bool provided) = 0;
     virtual bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const std::string& subtitle,
         const std::string& title) = 0;
     virtual void SetTitle(const std::string& title, bool hasSubTitle = false) = 0;

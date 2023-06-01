@@ -146,6 +146,21 @@ public:
         navigationStack_->Remove();
     }
 
+    void CleanStack()
+    {
+        navigationStack_->RemoveAll();
+    }
+
+    void SetNavigationStackProvided(bool provided)
+    {
+        navigationStackProvided_ = provided;
+    }
+
+    bool GetNavigationStackProvided() const
+    {
+        return navigationStackProvided_;
+    }
+
 private:
     RefPtr<RenderContext> GetTitleBarRenderContext();
     void DoAnimation(NavigationMode currentMode);
@@ -157,6 +172,7 @@ private:
     RefPtr<NavigationStack> navigationStack_;
     NavPathList preNavPathList_;
     NavPathList navPathList_;
+    bool navigationStackProvided_ = false;
 };
 
 } // namespace OHOS::Ace::NG

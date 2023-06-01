@@ -132,16 +132,21 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
 {
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(parent);
     CHECK_NULL_VOID(navigationNode);
-    auto navRouterPattern = GetPattern<NavRouterPattern>();
-    CHECK_NULL_VOID(navRouterPattern);
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
+    // get the navDestination under NavRouter
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode());
+    // do nothing if this navDestination is already at the top
+    if (navigationPattern->GetNavDestinationNode() == navDestination) {
+        LOGW("this navDestination is displaying");
+        return;
+    }
+    auto navRouterPattern = GetPattern<NavRouterPattern>();
+    CHECK_NULL_VOID(navRouterPattern);
     if (navigationNode->GetIsOnAnimation()) {
         LOGI("navigation is on animation");
         return;
     }
-    // get the navDestination under NavRouter
-    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode());
     auto navigationStack = navigationPattern->GetNavigationStack();
     auto routeInfo = navRouterPattern->GetRouteInfo();
     std::string name;
@@ -193,6 +198,12 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
     auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(navigationLayoutProperty);
     auto navRouteMode = navRouterPattern->GetNavRouteMode();
+    // deal with split mode without user provided navigation stack
+    if (navBarNode && navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::SPLIT &&
+        !navigationPattern->GetNavigationStackProvided()) {
+        navigationContentNode->Clean();
+        navigationPattern->CleanStack();
+    }
     if (!(navigationStack->Empty() &&
             navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::SPLIT)) {
         // add backButton except for the first level page in SPLIT mode
@@ -228,6 +239,7 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
             navigationNode->NavTransitionInAnimation(currentNavDestination, navDestination);
         }
     }
+
     // remove if this navDestinationNode is already in the NavigationStack and not at the top, as the latter will
     // later be modified by NavRouteMode
     navigationPattern->RemoveIfNeeded(name, navDestination);
@@ -238,6 +250,7 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
     } else {
         navigationPattern->AddNavDestinationNode(navRouterPattern->GetNavDestination(), navDestination, navRouteMode);
     }
+
     auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(eventHub);
     navigationNode->MarkModifyDone();
