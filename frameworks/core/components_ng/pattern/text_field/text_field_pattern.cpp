@@ -2924,6 +2924,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     SetEditingValueToProperty(textEditingValue_.text);
     UpdateEditingValueToRecord();
     caretUpdateType_ = CaretUpdateType::INPUT;
+    cursorVisible_ = true;
     selectionMode_ = SelectionMode::NONE;
     CloseSelectOverlay();
     auto host = GetHost();
