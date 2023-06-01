@@ -1189,16 +1189,25 @@ void RosenRenderOffscreenCanvas::Path2DRect(const PathArgs& args)
     double top = args.para2;
     double right = args.para3 + args.para1;
     double bottom = args.para4 + args.para2;
+#ifndef USE_ROSEN_DRAWING
     skPath2d_.addRect(SkRect::MakeLTRB(left, top, right, bottom));
+#else
+    path2d_.AddRect(RSRect(left, top, right, bottom));
+#endif
 }
 
 void RosenRenderOffscreenCanvas::Path2DClosePath(const PathArgs& args)
 {
+#ifndef USE_ROSEN_DRAWING
     skPath2d_.close();
+#else
+    path2d_.Close();
+#endif
 }
 
 void RosenRenderOffscreenCanvas::Path2DStroke()
 {
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint = GetStrokePaint();
     paint.setAntiAlias(antiAlias_);
     if (HasShadow()) {
@@ -1226,10 +1235,41 @@ void RosenRenderOffscreenCanvas::Path2DStroke()
 #endif
         cacheBitmap_.eraseColor(0);
     }
+#else
+    RSPen pen = GetStrokePaint();
+    pen.SetAntiAlias(antiAlias_);
+    if (HasShadow()) {
+        RosenDecorationPainter::PaintShadow(path2d_, shadow_, canvas_.get());
+    }
+    if (fillState_.GetGradient().IsValid()) {
+        UpdatePaintShader(pen, fillState_.GetGradient());
+    }
+    if (fillState_.GetPattern().IsValid()) {
+        UpdatePaintShader(fillState_.GetPattern(), pen);
+    }
+    if (globalState_.HasGlobalAlpha()) {
+        pen.SetAlphaF(globalState_.GetAlpha());
+    }
+    if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+        canvas_->AttachBrush(pen);
+        canvas_->DrawPath(path2d_);
+        canvas_->DetachBrush();
+    } else {
+        InitCachePaint();
+        cacheCanvas_->AttachPen(pen);
+        cacheCanvas_->DrawPath(path2d_);
+        cacheCanvas_->DetachPen();
+        canvas_->AttachPen(cachePen_);
+        canvas_->DrawBitmap(cacheBitmap_, 0, 0);
+        canvas_->DetachPen();
+        cacheBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+    }
+#endif
 }
 
 void RosenRenderOffscreenCanvas::Path2DFill()
 {
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setAntiAlias(antiAlias_);
     paint.setColor(fillState_.GetColor().GetValue());
@@ -1262,13 +1302,49 @@ void RosenRenderOffscreenCanvas::Path2DFill()
 #endif
         cacheBitmap_.eraseColor(0);
     }
+#else
+    RSBrush brush;
+    brush.SetAntiAlias(antiAlias_);
+    brush.SetColor(fillState_.GetColor().GetValue());
+    if (HasShadow()) {
+        RosenDecorationPainter::PaintShadow(path2d_, shadow_, canvas_.get());
+    }
+    if (fillState_.GetGradient().IsValid()) {
+        UpdatePaintShader(brush, fillState_.GetGradient());
+    }
+    if (fillState_.GetPattern().IsValid()) {
+        UpdatePaintShader(fillState_.GetPattern(), brush);
+    }
+    if (globalState_.HasGlobalAlpha()) {
+        brush.SetAlphaF(globalState_.GetAlpha());
+    }
+    if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+        canvas_->AttachBrush(brush);
+        canvas_->DrawPath(path2d_);
+        canvas_->DetachBrush();
+    } else {
+        InitCachePaint();
+        cacheCanvas_->AttachBrush(brush);
+        cacheCanvas_->DrawPath(path2d_);
+        cacheCanvas_->DetachBrush();
+        canvas_->AttachBrush(cacheBrush_);
+        canvas_->DrawBitmap(cacheBitmap_, 0, 0);
+        canvas_->DetachBrush();
+        cacheBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+    }
+#endif
 }
 
 void RosenRenderOffscreenCanvas::Path2DClip()
 {
+#ifndef USE_ROSEN_DRAWING
     skCanvas_->clipPath(skPath2d_);
+#else
+    canvas_->ClipPath(path2d_);
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderOffscreenCanvas::UpdateLineDash(SkPaint& paint)
 {
     if (!strokeState_.GetLineDash().lineDash.empty()) {
@@ -1281,6 +1357,21 @@ void RosenRenderOffscreenCanvas::UpdateLineDash(SkPaint& paint)
         paint.setPathEffect(SkDashPathEffect::Make(intervals, lineDashState.size(), phase));
     }
 }
+#else
+void RosenRenderOffscreenCanvas::UpdateLineDash(RSPen& pen)
+{
+    if (!strokeState_.GetLineDash().lineDash.empty()) {
+        auto lineDashState = strokeState_.GetLineDash().lineDash;
+        RSScalar intervals[lineDashState.size()];
+        for (size_t i = 0; i < lineDashState.size(); ++i) {
+            intervals[i] = static_cast<RSScalar>(lineDashState[i]);
+        }
+        RSScalar phase = static_cast<RSScalar>(strokeState_.GetLineDash().dashOffset);
+        pen.SetPathEffect(RSPathEffect::CreateDashPathEffect(intervals, lineDashState.size(), phase));
+    }
+}
+#endif
+
 void RosenRenderOffscreenCanvas::ArcTo(const ArcToParam& param)
 {
     double x1 = param.x1;
@@ -1288,25 +1379,47 @@ void RosenRenderOffscreenCanvas::ArcTo(const ArcToParam& param)
     double x2 = param.x2;
     double y2 = param.y2;
     double radius = param.radius;
+#ifndef USE_ROSEN_DRAWING
     skPath_.arcTo(SkDoubleToScalar(x1), SkDoubleToScalar(y1), SkDoubleToScalar(x2), SkDoubleToScalar(y2),
         SkDoubleToScalar(radius));
+#else
+    path_.ArcTo(static_cast<RSScalar>(x1), static_cast<RSScalar>(y1),
+        static_cast<RSScalar>(x2), static_cast<RSScalar>(y2),
+        static_cast<RSScalar>(radius));
+#endif
 }
 void RosenRenderOffscreenCanvas::MoveTo(double x, double y)
 {
+#ifndef USE_ROSEN_DRAWING
     skPath_.moveTo(SkDoubleToScalar(x), SkDoubleToScalar(y));
+#else
+    path_.MoveTo(static_cast<RSScalar>(x), static_cast<RSScalar>(y));
+#endif
 }
 void RosenRenderOffscreenCanvas::ClosePath()
 {
+#ifndef USE_ROSEN_DRAWING
     skPath_.close();
+#else
+    path_.Close();
+#endif
 }
 
 void RosenRenderOffscreenCanvas::Rotate(double angle)
 {
+#ifndef USE_ROSEN_DRAWING
     skCanvas_->rotate(angle * 180 / M_PI);
+#else
+    canvas_->Rotate(angle * 180 / M_PI);
+#endif
 }
 void RosenRenderOffscreenCanvas::Scale(double x, double y)
 {
+#ifndef USE_ROSEN_DRAWING
     skCanvas_->scale(x, y);
+#else
+    canvas_->Scale(x, y);
+#endif
 }
 
 void RosenRenderOffscreenCanvas::FillText(const std::string& text, double x, double y, const PaintState& state)
@@ -1338,8 +1451,12 @@ double RosenRenderOffscreenCanvas::MeasureText(const std::string& text, const Pa
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
     style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
+#ifndef USE_ROSEN_DRAWING
 #ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+#else
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+#endif
 #else
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
 #endif
@@ -1364,8 +1481,12 @@ double RosenRenderOffscreenCanvas::MeasureTextHeight(const std::string& text, co
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
     style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
+#ifndef USE_ROSEN_DRAWING
 #ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+#else
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+#endif
 #else
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
 #endif
@@ -1390,8 +1511,12 @@ TextMetrics RosenRenderOffscreenCanvas::MeasureTextMetrics(const std::string& te
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
     style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
+#ifndef USE_ROSEN_DRAWING
 #ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+#else
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+#endif
 #else
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
 #endif
@@ -1435,6 +1560,7 @@ void RosenRenderOffscreenCanvas::PaintText(const std::string& text, double x, do
         isStroke ? strokeState_.GetTextStyle().GetTextBaseline() : fillState_.GetTextStyle().GetTextBaseline();
     double dy = y + GetBaselineOffset(baseline, paragraph_);
 
+#ifndef USE_ROSEN_DRAWING
     if (hasShadow) {
         skCanvas_->save();
         auto shadowOffsetX = shadow_.GetOffset().GetX();
@@ -1444,6 +1570,17 @@ void RosenRenderOffscreenCanvas::PaintText(const std::string& text, double x, do
         return;
     }
     paragraph_->Paint(skCanvas_.get(), dx, dy);
+#else
+    if (hasShadow) {
+        canvas_->Save();
+        auto shadowOffsetX = shadow_.GetOffset().GetX();
+        auto shadowOffsetY = shadow_.GetOffset().GetY();
+        paragraph_->Paint(canvas_->GetCanvasData()->ExportSkCanvas(), dx + shadowOffsetX, dy + shadowOffsetY);
+        canvas_->Restore();
+        return;
+    }
+    paragraph_->Paint(canvas_->GetCanvasData()->ExportSkCanvas(), dx, dy);
+#endif
 }
 
 double RosenRenderOffscreenCanvas::GetAlignOffset(const std::string& text, TextAlign align,
@@ -1491,8 +1628,13 @@ TextDirection RosenRenderOffscreenCanvas::GetTextDirection(const std::string& te
 
 void RosenRenderOffscreenCanvas::InitCachePaint()
 {
+#ifndef USE_ROSEN_DRAWING
     cachePaint_.setBlendMode(
         ConvertEnumToSkEnum(globalState_.GetType(), SK_BLEND_MODE_TABLE, BLEND_MODE_SIZE, SkBlendMode::kSrcOver));
+#else
+    cachePen_.SetBlendMode(ConvertEnumToDrawingEnum(
+        globalState_.GetType(), DRAWING_BLEND_MODE_TABLE, BLEND_MODE_SIZE, RSBlendMode::SRC_OVER));
+#endif
 }
 
 bool RosenRenderOffscreenCanvas::UpdateOffParagraph(const std::string& text, bool isStroke,
@@ -1506,8 +1648,12 @@ bool RosenRenderOffscreenCanvas::UpdateOffParagraph(const std::string& text, boo
         style.text_align = ConvertTxtTextAlign(fillState_.GetTextAlign());
     }
     style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
+#ifndef USE_ROSEN_DRAWING
 #ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+#else
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+#endif
 #else
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
 #endif
@@ -1540,6 +1686,7 @@ void RosenRenderOffscreenCanvas::UpdateTextStyleForeground(
     bool isStroke, txt::TextStyle& txtStyle, bool hasShadow)
 {
     using namespace Constants;
+#ifndef USE_ROSEN_DRAWING
     if (!isStroke) {
         txtStyle.color = ConvertSkColor(fillState_.GetColor());
         txtStyle.font_size = fillState_.GetTextStyle().GetFontSize().Value();
@@ -1584,6 +1731,9 @@ void RosenRenderOffscreenCanvas::UpdateTextStyleForeground(
         txtStyle.foreground = paint;
         txtStyle.has_foreground = true;
     }
+#else
+    // TODO Drawing : about txt
+#endif
 }
 
 double RosenRenderOffscreenCanvas::GetBaselineOffset(TextBaseline baseline,
@@ -1617,18 +1767,33 @@ double RosenRenderOffscreenCanvas::GetBaselineOffset(TextBaseline baseline,
 }
 void RosenRenderOffscreenCanvas::LineTo(double x, double y)
 {
+#ifndef USE_ROSEN_DRAWING
     skPath_.lineTo(SkDoubleToScalar(x), SkDoubleToScalar(y));
+#else
+    path_.LineTo(static_cast<RSScalar>(x), static_cast<RSScalar>(y));
+#endif
 }
 void RosenRenderOffscreenCanvas::BezierCurveTo(const BezierCurveParam& param)
 {
+#ifndef USE_ROSEN_DRAWING
     skPath_.cubicTo(SkDoubleToScalar(param.cp1x), SkDoubleToScalar(param.cp1y),
         SkDoubleToScalar(param.cp2x), SkDoubleToScalar(param.cp2y),
         SkDoubleToScalar(param.x), SkDoubleToScalar(param.y));
+#else
+    path_.CubicTo(static_cast<RSScalar>(param.cp1x), static_cast<RSScalar>(param.cp1y),
+        static_cast<RSScalar>(param.cp2x), static_cast<RSScalar>(param.cp2y),
+        static_cast<RSScalar>(param.x), static_cast<RSScalar>(param.y));
+#endif
 }
 void RosenRenderOffscreenCanvas::QuadraticCurveTo(const QuadraticCurveParam& param)
 {
+#ifndef USE_ROSEN_DRAWING
     skPath_.quadTo(SkDoubleToScalar(param.cpx), SkDoubleToScalar(param.cpy),
         SkDoubleToScalar(param.x), SkDoubleToScalar(param.y));
+#else
+    path_.QuadTo(static_cast<RSScalar>(param.cpx), static_cast<RSScalar>(param.cpy),
+        static_cast<RSScalar>(param.x), static_cast<RSScalar>(param.y));
+#endif
 }
 void RosenRenderOffscreenCanvas::Ellipse(const EllipseParam& param)
 {
@@ -1657,6 +1822,7 @@ void RosenRenderOffscreenCanvas::Ellipse(const EllipseParam& param)
     double top = param.y - param.radiusY;
     double right = param.x + param.radiusX;
     double bottom = param.y + param.radiusY;
+#ifndef USE_ROSEN_DRAWING
     auto rect = SkRect::MakeLTRB(left, top, right, bottom);
     if (!NearZero(rotation)) {
         SkMatrix matrix;
@@ -1675,6 +1841,26 @@ void RosenRenderOffscreenCanvas::Ellipse(const EllipseParam& param)
         matrix.setRotate(rotation, param.x, param.y);
         skPath_.transform(matrix);
     }
+#else
+    auto rect = RSRect(left, top, right, bottom);
+    if (!NearZero(rotation)) {
+        RSMatrix matrix;
+        matrix.Rotate(-rotation, param.x, param.y);
+        path_.Transform(matrix);
+    }
+    if (NearZero(sweepAngle) && !NearZero(param.endAngle - param.startAngle)) {
+        // The entire ellipse needs to be drawn with two arcTo.
+        path_.ArcTo(rect, startAngle, HALF_CIRCLE_ANGLE, false);
+        path_.ArcTo(rect, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE, false);
+    } else {
+        path_.ArcTo(rect, startAngle, sweepAngle, false);
+    }
+    if (!NearZero(rotation)) {
+        RSMatrix matrix;
+        matrix.Rotate(rotation, param.x, param.y);
+        path_.Transform(matrix);
+    }
+#endif
 }
 void RosenRenderOffscreenCanvas::SetTransform(const TransformParam& param)
 {
@@ -1686,20 +1872,37 @@ void RosenRenderOffscreenCanvas::SetTransform(const TransformParam& param)
     // use physical pixel to store bitmap
     double viewScale = pipeline->GetViewScale();
 
+#ifndef USE_ROSEN_DRAWING
     SkMatrix skMatrix;
     skMatrix.setAll(param.scaleX * viewScale, param.skewY * viewScale, param.translateX, param.skewX * viewScale,
         param.scaleY * viewScale, param.translateY, 0, 0, 1);
     skCanvas_->setMatrix(skMatrix);
+#else
+    RSMatrix matrix;
+    matrix.SetMatrix(param.scaleX * viewScale, param.skewY * viewScale, param.translateX, param.skewX * viewScale,
+        param.scaleY * viewScale, param.translateY, 0, 0, 1);
+    canvas_->SetMatrix(matrix);
+#endif
 }
 void RosenRenderOffscreenCanvas::Transform(const TransformParam& param)
 {
+#ifndef USE_ROSEN_DRAWING
     SkMatrix skMatrix;
     skMatrix.setAll(param.scaleX, param.skewY, param.translateX, param.skewX, param.scaleY, param.translateY, 0, 0, 1);
     skCanvas_->concat(skMatrix);
+#else
+    RSMatrix matrix;
+    matrix.SetMatrix(param.scaleX, param.skewY, param.translateX, param.skewX, param.scaleY, param.translateY, 0, 0, 1);
+    canvas_->ConcatMatrix(matrix);
+#endif
 }
 void RosenRenderOffscreenCanvas::Translate(double x, double y)
 {
+#ifndef USE_ROSEN_DRAWING
     skCanvas_->translate(x, y);
+#else
+    canvas_->Translate(x, y);
+#endif
 }
 
 void RosenRenderOffscreenCanvas::TranspareCmdToPath(const RefPtr<CanvasPath2D>& path)
@@ -1758,6 +1961,7 @@ void RosenRenderOffscreenCanvas::TranspareCmdToPath(const RefPtr<CanvasPath2D>& 
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 bool RosenRenderOffscreenCanvas::IsPointInPathByColor(double x, double y, SkPath& path, SkColor colorMatch)
 {
     auto imageInfo = SkImageInfo::Make(width_, height_, SkColorType::kRGBA_8888_SkColorType,
@@ -1782,27 +1986,75 @@ bool RosenRenderOffscreenCanvas::IsPointInPathByColor(double x, double y, SkPath
     }
     return false;
 }
+#else
+bool RosenRenderOffscreenCanvas::IsPointInPathByColor(
+    double x, double y, RSPath& path, RSColorQuad colorMatch)
+{
+    RSBitmapFormat format { RSColorType::COLORTYPE_RGBA_8888,
+        RSAlphaType::ALPHATYPE_OPAQUE };
+
+    RSBitmap bitmap;
+    bitmap.Build(width_, height_, format);
+    std::unique_ptr<RSCanvas> canvas = std::make_unique<RSCanvas>();
+    canvas->Bind(bitmap);
+
+    RSBrush brush;
+    RSPen pen;
+    brush.SetColor(RSColor::COLOR_RED);
+    canvas->AttachBrush(brush);
+    canvas->DrawPath(path);
+    canvas->DetachBrush();
+
+    pen.SetColor(RSColor::COLOR_BLUE);
+    pen.SetWidth(static_cast<RSScalar>(strokeState_.GetLineWidth()));
+    canvas->AttachPen(pen);
+    canvas->DrawPath(path);
+    canvas->DetachPen();
+
+    RSColorQuad color = bitmap.GetColor(x, y);
+    if (color == colorMatch) {
+        return true;
+    }
+    return false;
+}
+#endif
 
 bool RosenRenderOffscreenCanvas::IsPointInPath(double x, double y)
 {
+#ifndef USE_ROSEN_DRAWING
     return IsPointInPathByColor(x, y, skPath_, SK_ColorRED);
+#else
+    return IsPointInPathByColor(x, y, path_, RSColor::COLOR_RED);
+#endif
 }
 
 bool RosenRenderOffscreenCanvas::IsPointInPath(const RefPtr<CanvasPath2D>& path, double x, double y)
 {
     TranspareCmdToPath(path);
+#ifndef USE_ROSEN_DRAWING
     return IsPointInPathByColor(x, y, skPath2d_, SK_ColorRED);
+#else
+    return IsPointInPathByColor(x, y, path2d_, RSColor::COLOR_RED);
+#endif
 }
 
 bool RosenRenderOffscreenCanvas::IsPointInStroke(double x, double y)
 {
+#ifndef USE_ROSEN_DRAWING
     return IsPointInPathByColor(x, y, skPath_, SK_ColorBLUE);
+#else
+    return IsPointInPathByColor(x, y, path_, RSColor::COLOR_BLUE);
+#endif
 }
 
 bool RosenRenderOffscreenCanvas::IsPointInStroke(const RefPtr<CanvasPath2D>& path, double x, double y)
 {
     TranspareCmdToPath(path);
+#ifndef USE_ROSEN_DRAWING
     return IsPointInPathByColor(x, y, skPath2d_, SK_ColorBLUE);
+#else
+    return IsPointInPathByColor(x, y, path2d_, RSColor::COLOR_BLUE);
+#endif
 }
 
 void RosenRenderOffscreenCanvas::InitFilterFunc()
@@ -2025,10 +2277,18 @@ void RosenRenderOffscreenCanvas::SetContrastFilter(const std::string& percent)
 
 void RosenRenderOffscreenCanvas::SetBlurFilter(const std::string& percent)
 {
+#ifndef USE_ROSEN_DRAWING
 #ifndef NEW_SKIA
     imagePaint_.setImageFilter(SkBlurImageFilter::Make(BlurStrToDouble(percent), BlurStrToDouble(percent), nullptr));
 #else
     imagePaint_.setImageFilter(SkImageFilters::Blur(BlurStrToDouble(percent), BlurStrToDouble(percent), nullptr));
+#endif
+#else
+    RSFilter filter;
+    filter.SetImageFilter(
+        RSImageFilter::CreateBlurImageFilter(
+            BlurStrToDouble(percent), BlurStrToDouble(percent), nullptr));
+    imagePen_.SetFilter(filter);
 #endif
 }
 
@@ -2126,6 +2386,7 @@ void RosenRenderOffscreenCanvas::SetHueRotateFilter(const std::string& filterPar
 
 void RosenRenderOffscreenCanvas::SetColorFilter(float matrix[20])
 {
+#ifndef USE_ROSEN_DRAWING
 #ifdef USE_SYSTEM_SKIA
     matrix[4] *= 255;
     matrix[9] *= 255;
@@ -2134,6 +2395,16 @@ void RosenRenderOffscreenCanvas::SetColorFilter(float matrix[20])
     imagePaint_.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
 #else
     imagePaint_.setColorFilter(SkColorFilters::Matrix(matrix));
+#endif
+#else
+    RSFilter filter;
+    RSColorMatrix colorMatrix;
+    matrix[4] *= 255;
+    matrix[9] *= 255;
+    matrix[14] *= 255;
+    matrix[19] *= 255;
+    colorMatrix.SetArray(matrix);
+    imagePen_.SetImageFilter(RSColorFilter::CreateMatrixColorFilter(colorMatrix));
 #endif
 }
 } // namespace OHOS::Ace
