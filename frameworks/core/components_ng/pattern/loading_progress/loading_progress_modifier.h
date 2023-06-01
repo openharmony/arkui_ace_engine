@@ -62,6 +62,7 @@ public:
     {
         CHECK_NULL_VOID(isVisible_ != isVisible);
         isVisible_ = isVisible;
+        LOGD("LoadingModifier SetVisible %d", isVisible_);
         isLoading_ = false;
     }
 
