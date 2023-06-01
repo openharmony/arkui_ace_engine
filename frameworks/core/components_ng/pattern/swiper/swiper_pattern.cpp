@@ -698,6 +698,7 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         LOGD("Pan event start");
         auto pattern = weak.Upgrade();
         if (pattern) {
+            pattern->SetIsPanUpdate(true);
             if (info.GetInputEventType() == InputEventType::AXIS) {
                 return;
             }
@@ -709,9 +710,11 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         auto pattern = weak.Upgrade();
         if (pattern) {
             if (info.GetInputEventType() == InputEventType::AXIS) {
-                if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
+                if (GreatNotEqual(info.GetMainDelta(), 0.0) && (pattern->IsPanUpdate())) {
                     pattern->ShowPrevious();
-                } else if (LessNotEqual(info.GetMainDelta(), 0.0)) {
+                    pattern->SetIsPanUpdate(false);
+                } else if (LessNotEqual(info.GetMainDelta(), 0.0) && (pattern->IsPanUpdate())) {
+                    pattern->SetIsPanUpdate(false);
                     pattern->ShowNext();
                 }
             } else {
@@ -724,6 +727,7 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         LOGD("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
         auto pattern = weak.Upgrade();
         if (pattern) {
+            pattern->SetIsPanUpdate(false);
             if (info.GetInputEventType() == InputEventType::AXIS) {
                 return;
             }
@@ -735,6 +739,7 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         LOGD("Pan event cancel");
         auto pattern = weak.Upgrade();
         if (pattern) {
+            pattern->SetIsPanUpdate(false);
             pattern->HandleDragEnd(0.0);
         }
     };
