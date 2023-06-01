@@ -93,7 +93,18 @@ void NavigationGroupNode::AddNavDestinationToNavigation()
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     CHECK_NULL_VOID(pattern);
     auto navDestinationNodes = pattern->GetAllNavDestinationNodes();
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(GetNavBarNode());
+    // let navBarNode lose focus
+    if (navDestinationNodes.size() == 1 && navBarNode) {
+        auto navBarContentNode = navBarNode->GetNavBarContentNode();
+        CHECK_NULL_VOID(navBarContentNode);
+        auto focusHub = AceType::DynamicCast<FrameNode>(navBarContentNode)->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetParentFocusable(false);
+        focusHub->LostFocus();
+    }
     auto navigationNode = AceType::WeakClaim(this).Upgrade();
+    CHECK_NULL_VOID(navigationNode);
     auto navigationContentNode = AceType::DynamicCast<FrameNode>(navigationNode->GetContentNode());
     CHECK_NULL_VOID(navigationContentNode);
     auto navigationStack = pattern->GetNavigationStack();
@@ -274,6 +285,14 @@ void NavigationGroupNode::BackToNavBar(const RefPtr<UINode>& navDestinationNode)
     if (backButtonNode) {
         BackButtonAnimation(backButtonNode, false);
     }
+    // let navBarNode request focus
+    auto navBarContentNode = navBarNode->GetNavBarContentNode();
+    CHECK_NULL_VOID(navBarContentNode);
+    auto focusHub = AceType::DynamicCast<FrameNode>(navBarContentNode)->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetParentFocusable(true);
+    focusHub->RequestFocus();
+
     auto navigationContentNode = AceType::DynamicCast<FrameNode>(navigationNode->GetContentNode());
     CHECK_NULL_VOID(navigationContentNode);
     NavTransitionOutAnimation(navBarNode, navDestination, navigationContentNode);
