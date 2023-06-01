@@ -138,7 +138,7 @@ void SideBarContainerPattern::OnModifyDone()
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
 
-    InitDragEvent(gestureHub);
+    InitPanEvent(gestureHub);
 
     auto layoutProperty = host->GetLayoutProperty<SideBarContainerLayoutProperty>();
     OnUpdateShowSideBar(layoutProperty);
@@ -146,7 +146,7 @@ void SideBarContainerPattern::OnModifyDone()
     OnUpdateShowDivider(layoutProperty, host);
 }
 
-void SideBarContainerPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
+void SideBarContainerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     CHECK_NULL_VOID_NOLOG(!dragEvent_);
 
@@ -174,10 +174,14 @@ void SideBarContainerPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestu
         pattern->HandleDragEnd();
     };
 
-    dragEvent_ = MakeRefPtr<DragEvent>(
+    if (dragEvent_) {
+        gestureHub->RemovePanEvent(dragEvent_);
+    }
+
+    dragEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     PanDirection panDirection = { .type = PanDirection::HORIZONTAL };
-    gestureHub->SetDragEvent(dragEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    gestureHub->AddPanEvent(dragEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
 
 void SideBarContainerPattern::InitSideBar()
