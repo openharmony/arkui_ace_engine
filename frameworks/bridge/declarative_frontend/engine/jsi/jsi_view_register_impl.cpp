@@ -113,6 +113,8 @@
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_search.h"
 #include "bridge/declarative_frontend/jsview/js_sec_location_button.h"
+#include "bridge/declarative_frontend/jsview/js_sec_paste_button.h"
+#include "bridge/declarative_frontend/jsview/js_sec_save_button.h"
 #include "bridge/declarative_frontend/jsview/js_select.h"
 #include "bridge/declarative_frontend/jsview/js_shape.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
@@ -523,6 +525,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "UIExtensionComponent", JSUIExtension::JSBind },
 #endif
     { "SecLocationButton", JSSecLocationButton::JSBind },
+    { "SecPasteButton", JSSecPasteButton::JSBind },
+    { "SecSaveButton", JSSecSaveButton::JSBind },
 #ifdef ABILITY_COMPONENT_SUPPORTED
     { "AbilityComponent", JSAbilityComponent::JSBind },
 #endif

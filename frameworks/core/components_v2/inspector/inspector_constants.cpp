@@ -500,4 +500,11 @@ const char UI_EXTENSION_COMPONENT_ETS_TAG[] = "UIExtensionComponent";
 const char SEC_LOCATION_BUTTON_COMPONENT_TAG[] = "SecLocationButtonComponent";
 const char SEC_LOCATION_BUTTON_ETS_TAG[] = "SecLocationButton";
 
+// SecPasteButton
+const char SEC_PASTE_BUTTON_COMPONENT_TAG[] = "SecPasteButtonComponent";
+const char SEC_PASTE_BUTTON_ETS_TAG[] = "SecPasteButton";
+
+// SecSaveButton
+const char SEC_SAVE_BUTTON_COMPONENT_TAG[] = "SecSaveButtonComponent";
+const char SEC_SAVE_BUTTON_ETS_TAG[] = "SecSaveButton";
 } // namespace OHOS::Ace::V2

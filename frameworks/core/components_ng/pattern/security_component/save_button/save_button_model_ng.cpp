@@ -13,42 +13,42 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/security_component/location_button/location_button_model_ng.h"
+#include "core/components_ng/pattern/security_component/save_button/save_button_model_ng.h"
 
 #include "base/log/ace_scoring_log.h"
 #include "base/resource/internal_resource.h"
-#include "core/components_ng/pattern/security_component/location_button/location_button_common.h"
+#include "core/components_ng/pattern/security_component/save_button/save_button_common.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-std::unique_ptr<LocationButtonModelNG> LocationButtonModelNG::instance_ = nullptr;
-std::mutex LocationButtonModelNG::mutex_;
+std::unique_ptr<SaveButtonModelNG> SaveButtonModelNG::instance_ = nullptr;
+std::mutex SaveButtonModelNG::mutex_;
 
 static const std::vector<uint32_t> ICON_RESOURCE_TABLE = {
-    static_cast<uint32_t>(InternalResource::ResourceId::LOCATION_BUTTON_FILLED_SVG),
-    static_cast<uint32_t>(InternalResource::ResourceId::LOCATION_BUTTON_LINE_SVG)
+    static_cast<uint32_t>(InternalResource::ResourceId::SAVE_BUTTON_FILLED_SVG),
+    static_cast<uint32_t>(InternalResource::ResourceId::SAVE_BUTTON_LINE_SVG)
 };
 
-LocationButtonModelNG* LocationButtonModelNG::GetInstance()
+SaveButtonModelNG* SaveButtonModelNG::GetInstance()
 {
     if (!instance_) {
         std::lock_guard<std::mutex> lock(mutex_);
         if (!instance_) {
-            instance_.reset(new LocationButtonModelNG());
+            instance_.reset(new SaveButtonModelNG());
         }
     }
     return instance_.get();
 }
 
-void LocationButtonModelNG::Create(int32_t text, int32_t icon,
+void SaveButtonModelNG::Create(int32_t text, int32_t icon,
     int32_t backgroundType)
 {
-    SecurityComponentModelNG::CreateCommon(V2::SEC_LOCATION_BUTTON_ETS_TAG,
+    SecurityComponentModelNG::CreateCommon(V2::SEC_SAVE_BUTTON_ETS_TAG,
         text, icon, backgroundType, []() { return AceType::MakeRefPtr<SecurityComponentPattern>(); });
 }
 
-bool LocationButtonModelNG::GetIconResource(int32_t iconStyle, InternalResource::ResourceId& id)
+bool SaveButtonModelNG::GetIconResource(int32_t iconStyle, InternalResource::ResourceId& id)
 {
     if ((iconStyle < 0) || (static_cast<uint32_t>(iconStyle) >= ICON_RESOURCE_TABLE.size())) {
         return false;
@@ -57,13 +57,13 @@ bool LocationButtonModelNG::GetIconResource(int32_t iconStyle, InternalResource:
     return true;
 }
 
-bool LocationButtonModelNG::GetTextResource(int32_t textStyle, std::string& text)
+bool SaveButtonModelNG::GetTextResource(int32_t textStyle, std::string& text)
 {
     auto theme = GetTheme();
     if (theme == nullptr) {
         return false;
     }
-    text = theme->GetLocationDescriptions(textStyle);
+    text = theme->GetSaveDescriptions(textStyle);
     return true;
 }
 } // namespace OHOS::Ace::NG
