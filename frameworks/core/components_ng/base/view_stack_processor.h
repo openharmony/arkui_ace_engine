@@ -325,6 +325,13 @@ public:
 
     RefPtr<UINode> GetNewUINode();
 
+    void GetAndPushFrameNode(const std::string& tag, int32_t elmtId)
+    {
+        LOGD("NG ViewStackProcessor GetAndPushFrameNode() tag: %s, elmtId: %d", tag.c_str(), elmtId);
+        auto frameNode = FrameNode::GetFrameNode(tag, elmtId);
+        Push(frameNode);
+    }
+
 private:
     ViewStackProcessor();
 
