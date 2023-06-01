@@ -1944,9 +1944,8 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
             adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
             styleOption.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
         }
-        double scale = 1.0;
         if (jsOption->GetProperty("scale")->IsNumber()) {
-            scale = jsOption->GetProperty("scale")->ToNumber<double>();
+            double scale = jsOption->GetProperty("scale")->ToNumber<double>();
             styleOption.scale = std::clamp(scale, 0.0, 1.0);
         }
     }
@@ -1981,9 +1980,8 @@ void JSViewAbstract::JsForegroundBlurStyle(const JSCallbackInfo& info)
             adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
             styleOption.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
         }
-        double scale = 1.0;
         if (jsOption->GetProperty("scale")->IsNumber()) {
-            scale = jsOption->GetProperty("scale")->ToNumber<double>();
+            double scale = jsOption->GetProperty("scale")->ToNumber<double>();
             styleOption.scale = std::clamp(scale, 0.0, 1.0);
         }
     }

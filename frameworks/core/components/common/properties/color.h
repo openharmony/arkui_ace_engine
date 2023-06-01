@@ -207,8 +207,9 @@ public:
 
     LinearColor operator*(double value) const
     {
-        return LinearColor(GetAlpha() * value, GetRed() * value,
-            GetGreen() * value, GetBlue() * value);
+        return LinearColor(static_cast<int16_t>(round(GetAlpha() * value)),
+            static_cast<int16_t>(round(GetRed() * value)), static_cast<int16_t>(round(GetGreen() * value)),
+            static_cast<int16_t>(round(GetBlue() * value)));
     }
 
     bool operator==(const LinearColor& color) const
