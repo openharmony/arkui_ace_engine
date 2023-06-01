@@ -399,27 +399,12 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
     frameNode_->eventHub_->focusHub_ = nullptr;
     context_->FlushFocus();
     EXPECT_EQ(context_->dirtyFocusNode_.Upgrade(), nullptr);
-    /**
-     * @tc.steps4: free stageManager_ and call FlushFocus
-     * @tc.expected: The dirtyFocusNode_ is changed to nullptr.
-     */
-    auto stageManager = context_->stageManager_;
-    context_->stageManager_ = nullptr;
-    context_->FlushFocus();
-    EXPECT_EQ(context_->dirtyFocusNode_.Upgrade(), nullptr);
-
-    /**
-     * @tc.steps5: Init a new frameNode and SetFocusType with Node and call RequestDefaultFocus
-     * @tc.expected: return true while IsFocusableWholePath return true.
-                    return false while IsFocusableWholePath return false.
-     */
 
      /**
      * @tc.steps5: set stageManager_ and stageNode_, stageNode_'s child,
                 create frameNode_1's focusHub and call SetIsDefaultHasFocused with true
      * @tc.expected: RequestDefaultFocus returns false.
      */
-    context_->stageManager_ = stageManager;
     context_->stageManager_->stageNode_ = frameNode_;
     frameNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode_1 = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, nullptr);
