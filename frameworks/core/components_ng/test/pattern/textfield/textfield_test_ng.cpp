@@ -467,7 +467,7 @@ HWTEST_F(TextFieldPatternTestNg, EditingValueFilter001, TestSize.Level1)
     EXPECT_EQ(valueToUpdate, "filter_value1test");
     layoutProperty->UpdateInputFilter("test");
     textFieldPattern->EditingValueFilter(valueToUpdate, result);
-    EXPECT_EQ(valueToUpdate, "1test");
+    EXPECT_EQ(valueToUpdate, "test");
 }
 
 /**
@@ -3800,18 +3800,29 @@ HWTEST_F(TextFieldPatternTestNg, SelectorTest001, TestSize.Level1)
     /**
      * @tc.steps: step2. set callback function.
      */
-    pattern->OnModifyDone();
+    auto textChange = false;
+    auto onTextSelectorChange = [&textChange]() { textChange = true; };
+    pattern->textSelector_.SetOnAccessibility(std::move(onTextSelectorChange));
 
     /**
      * @tc.steps: step3. call callback function.
      * @tc.expected: textSelector_ update successfully.
      */
+    pattern->textSelector_.baseOffset = 1;
+    pattern->textSelector_.destinationOffset = 5;
     pattern->textSelector_.Update(0);
-    EXPECT_EQ(pattern->textSelector_.baseOffset, 0);
-    
-    pattern->textSelector_.Update(0, 0);
+    EXPECT_TRUE(textChange);
     EXPECT_EQ(pattern->textSelector_.baseOffset, 0);
     EXPECT_EQ(pattern->textSelector_.destinationOffset, 0);
+
+    textChange = false;
+    pattern->textSelector_.baseOffset = 1;
+    pattern->textSelector_.destinationOffset = 5;
+    pattern->textSelector_.Update(0, 0);
+    EXPECT_TRUE(textChange);
+    EXPECT_EQ(pattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(pattern->textSelector_.destinationOffset, 0);
+    pattern->textSelector_.onAccessibilityCallback_ = nullptr;
 }
 
 /**
@@ -4216,6 +4227,11 @@ HWTEST_F(TextFieldPatternTestNg, UpdateSelectionOffset, TestSize.Level2)
      * @tc.steps: step2. setup condition parameters.
      * @tc.expected: Check the value of the updated property.
      */
+
+    /** set clipboard avoid nullpter */
+    auto pipeline = MockPipelineBase::GetCurrent();
+    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
+    pattern->clipboard_ = clipboard;
     pattern->SetInSelectMode(SelectionMode::SELECT_ALL);
     pattern->textSelector_.baseOffset = 5;
     pattern->textSelector_.destinationOffset = 6;
