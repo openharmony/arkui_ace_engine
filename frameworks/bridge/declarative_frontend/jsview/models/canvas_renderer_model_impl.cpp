@@ -686,8 +686,8 @@ void CanvasRendererModelImpl::SetFillRuleForPath(const BaseInfo& baseInfo, const
     }
 }
 
-void CanvasRendererModelImpl::SetFillRuleForPath2D(const BaseInfo& baseInfo, const CanvasFillRule& fillRule,
-    const RefPtr<CanvasPath2D>& path)
+void CanvasRendererModelImpl::SetFillRuleForPath2D(
+    const BaseInfo& baseInfo, const CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path)
 {
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<OffscreenCanvas>(baseInfo.offscreenPattern);
@@ -705,8 +705,8 @@ void CanvasRendererModelImpl::SetFillRuleForPath2D(const BaseInfo& baseInfo, con
     }
 }
 
-void CanvasRendererModelImpl::SetStrokeRuleForPath2D(const BaseInfo& baseInfo, const CanvasFillRule& fillRule,
-    const RefPtr<CanvasPath2D>& path)
+void CanvasRendererModelImpl::SetStrokeRuleForPath2D(
+    const BaseInfo& baseInfo, const CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path)
 {
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<OffscreenCanvas>(baseInfo.offscreenPattern);
@@ -760,8 +760,8 @@ void CanvasRendererModelImpl::SetClipRuleForPath(const BaseInfo& baseInfo, const
     }
 }
 
-void CanvasRendererModelImpl::SetClipRuleForPath2D(const BaseInfo& baseInfo, const CanvasFillRule& fillRule,
-    const RefPtr<CanvasPath2D>& path)
+void CanvasRendererModelImpl::SetClipRuleForPath2D(
+    const BaseInfo& baseInfo, const CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path)
 {
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<OffscreenCanvas>(baseInfo.offscreenPattern);

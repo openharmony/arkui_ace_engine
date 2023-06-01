@@ -20,17 +20,18 @@
 #define private public
 #define protected public
 
+#include "test/mock/core/common/mock_container.h"
+
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/pattern/canvas_renderer/canvas_renderer_model_ng.h"
+#include "core/components_ng/pattern/custom_paint/canvas_model_ng.h"
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
-#include "core/components_ng/pattern/custom_paint/custom_paint_view.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-#include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -43,23 +44,14 @@ class FontManager : public AceType {
 class ManagerInterface : public AceType {
     DECLARE_ACE_TYPE(ManagerInterface, AceType);
 };
-}
+} // namespace OHOS::Ace
 namespace OHOS::Ace::NG {
 namespace {
 const int32_t DEFAULT_INSTANCE_ID = 0;
 const int32_t CANVAS_WIDTH = 300;
 const int32_t CANVAS_HEIGHT = 300;
-const std::vector<std::string> FONT_FAMILY = {
-    "Arial",
-    "sans-serif",
-    "monospace",
-    "fantasy",
-    "serif",
-    "cursive",
-    "system-ui",
-    "emoji",
-    "math"
-};
+const std::vector<std::string> FONT_FAMILY = { "Arial", "sans-serif", "monospace", "fantasy", "serif", "cursive",
+    "system-ui", "emoji", "math" };
 const double DEFAULT_DOUBLE0 = 0.0;
 const double DEFAULT_DOUBLE1 = 1.0;
 const std::string NULL_STR = "";
@@ -72,7 +64,7 @@ const std::vector<double> CANDIDATE_DOUBLES = { 0.0, 1.0, 10.0, 100.0, 1000.0 };
 const double DEFAULT_DOUBLE10 = 10.0;
 const std::string URL_PREFIX = "data:";
 const std::string IMAGE_PNG = "image/png";
-}
+} // namespace
 class CanvasRendererTestNg : public testing::Test {
 public:
     static RefPtr<CustomPaintPattern> CreateCustomPaintView();
@@ -85,7 +77,8 @@ RefPtr<CustomPaintPattern> CanvasRendererTestNg::CreateCustomPaintView()
     RefPtr<PipelineBase> pipelineContext = AceType::MakeRefPtr<MockPipelineBase>();
     RefPtr<Container> container = AceType::MakeRefPtr<MockContainer>(pipelineContext);
     AceEngine::Get().AddContainer(DEFAULT_INSTANCE_ID, container);
-    return CustomPaintView::Create();
+    CanvasModelNG canvasModelNG;
+    return AceType::DynamicCast<CustomPaintPattern>(canvasModelNG.Create());
 }
 
 RefPtr<OffscreenCanvasPattern> CanvasRendererTestNg::CreateOffscreenCanvasPattern()
@@ -262,7 +255,7 @@ HWTEST_F(CanvasRendererTestNg, CanvasRendererTest003, TestSize.Level1)
     EXPECT_TRUE(paintMethod->saveStates_.empty());
     canvasRendererModelNG.CanvasRendererSave(baseInfo);
     EXPECT_FALSE(paintMethod->saveStates_.empty());
-    
+
     canvasRendererModelNG.Restore(baseInfo);
     EXPECT_TRUE(paintMethod->saveStates_.empty());
 }
@@ -743,4 +736,4 @@ HWTEST_F(CanvasRendererTestNg, CanvasRendererTest011, TestSize.Level1)
     canvasRendererModelNG.QuadraticCurveTo(baseInfo, quadraticCurveParam);
     EXPECT_TRUE(paintMethod->HasTask());
 }
-}
+} // namespace OHOS::Ace::NG

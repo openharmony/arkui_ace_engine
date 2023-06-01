@@ -378,6 +378,7 @@ void JSCanvasRenderer::JsStrokeText(const JSCallbackInfo& info)
         fillTextInfo.text = text;
         fillTextInfo.x = x;
         fillTextInfo.y = y;
+        fillTextInfo.maxWidth = maxWidth;
 
         CanvasRendererModel::GetInstance()->SetStrokeText(baseInfo, fillTextInfo);
     }
