@@ -2174,11 +2174,8 @@ void JSWeb::OnSslErrorRequest(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebSslErrorEvent>(info);
-        JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
-        if (message->IsBoolean()) {
-            return message->ToBoolean();
-        }
-        return false;
+        func->Execute(*eventInfo);
+        return true;
     };
     WebModel::GetInstance()->SetOnSslErrorRequest(jsCallback);
 }
