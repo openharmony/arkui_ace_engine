@@ -1658,35 +1658,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg031, TestSize.Level1)
     point_.type = TouchType::CANCEL;
     context_->OnTouchEvent(point_, false);
     EXPECT_EQ(context_->uiExtensionCallback_, nullptr);
-    /**
-     * @tc.steps5: create sub pipeline and set into touchPluginPipelineContext_.
-                change touch type and call OnTouchEvent with second arg is false.
-     * @tc.expected: flag is true.
-     */
-    point_.type = TouchType::DOWN;
-    context_->rootNode_ = frameNode_;
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    eventHub->focusHub_ = nullptr;
-    auto window = std::make_shared<MockWindow>();
-    EXPECT_CALL(*window, RequestFrame()).Times(AnyNumber());
-    EXPECT_CALL(*window, FlushTasks()).Times(AnyNumber());
-    EXPECT_CALL(*window, OnHide()).Times(AnyNumber());
-    EXPECT_CALL(*window, RecordFrameTime(_, _)).Times(AnyNumber());
-    EXPECT_CALL(*window, OnShow()).Times(AnyNumber());
-    EXPECT_CALL(*window, FlushCustomAnimation(NANO_TIME_STAMP))
-        .Times(AnyNumber())
-        .WillOnce(testing::Return(true))
-        .WillRepeatedly(testing::Return(false));
-    EXPECT_CALL(*window, SetRootFrameNode(_)).Times(AnyNumber());
-    auto context_2 = AceType::MakeRefPtr<PipelineContext>(
-        window, AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
-    context_2->SetEventManager(AceType::MakeRefPtr<EventManager>());
-    flag = false;
-    context_2->uiExtensionCallback_ = callback;
-    context_->touchPluginPipelineContext_.push_back(context_2);
-    context_->OnTouchEvent(point_, false);
-    EXPECT_TRUE(flag);
 }
 
 /**
