@@ -3413,6 +3413,9 @@ void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight,
          "height %{public}d",
         newWidth, newHeight, prevWidth, prevHeight);
     CloseSelectOverlay();
+    if (HasFocus()) {
+        StartTwinkling();
+    }
     textSelector_.Update(-1);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
