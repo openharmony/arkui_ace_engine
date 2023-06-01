@@ -266,6 +266,9 @@ void JsiPaEngine::InitJsRuntimeOptions(AbilityRuntime::Runtime::Options& options
     options.preload = false;
     options.isStageModel = false;
     options.hapPath = GetHapPath();
+    options.isDebugVersion = GetDebugMode();
+    options.packagePathStr = GetWorkerPath()->packagePathStr;
+    options.assetBasePathStr = GetWorkerPath()->assetBasePathStr;
 }
 
 bool JsiPaEngine::CreateJsRuntime(const AbilityRuntime::Runtime::Options& options)
@@ -390,66 +393,6 @@ JsiPaEngine::~JsiPaEngine()
     runtime_ = nullptr;
 }
 
-void JsiPaEngine::RegisterWorker()
-{
-    RegisterInitWorkerFunc();
-    RegisterAssetFunc();
-}
-
-void JsiPaEngine::RegisterInitWorkerFunc()
-{
-    auto nativeEngine = GetNativeEngine();
-    CHECK_NULL_VOID(nativeEngine);
-    auto&& initWorkerFunc = [weak = AceType::WeakClaim(this)](NativeEngine* nativeEngine) {
-        LOGI("WorkerCore RegisterInitWorkerFunc called");
-        auto paEngine = weak.Upgrade();
-        if (nativeEngine == nullptr) {
-            LOGE("nativeEngine is nullptr");
-            return;
-        }
-        auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine);
-        if (arkNativeEngine == nullptr) {
-            LOGE("arkNativeEngine is nullptr");
-            return;
-        }
-
-        auto runtime = paEngine->GetJsRuntime();
-
-        paEngine->RegisterConsoleModule(arkNativeEngine);
-
-#if !defined(PREVIEW)
-        for (const auto& [key, value] : paEngine->GetExtraNativeObject()) {
-            shared_ptr<JsValue> nativeValue = runtime->NewNativePointer(value);
-            runtime->GetGlobal()->SetProperty(runtime, key, nativeValue);
-        }
-#endif
-        // load jsfwk
-        if (!arkNativeEngine->ExecuteJsBin("/system/etc/strip.native.min.abc")) {
-            LOGE("Failed to load js framework!");
-        }
-    };
-    nativeEngine->SetInitWorkerFunc(initWorkerFunc);
-}
-
-void JsiPaEngine::RegisterAssetFunc()
-{
-    auto nativeEngine = GetNativeEngine();
-    CHECK_NULL_VOID(nativeEngine);
-    auto&& assetFunc = [weak = WeakPtr<JsBackendAssetManager>(jsBackendAssetManager_)](
-        const std::string& uri, std::vector<uint8_t>& content, std::string& ami) {
-        LOGI("WorkerCore RegisterAssetFunc called");
-        auto jsBackendAssetManager = weak.Upgrade();
-        CHECK_NULL_VOID(jsBackendAssetManager);
-        size_t index = uri.find_last_of(".");
-        if (index == std::string::npos) {
-            LOGE("invalid uri");
-        } else {
-            jsBackendAssetManager->GetResourceData(uri.substr(0, index) + ".abc", content, ami);
-        }
-    };
-    nativeEngine->SetGetAssetFunc(assetFunc);
-}
-
 bool JsiPaEngine::Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendType type)
 {
     ACE_SCOPED_TRACE("JsiPaEngine::Initialize");
@@ -494,7 +437,6 @@ bool JsiPaEngine::Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendTy
             arkNativeEngine->SetPackagePath(appLibPathKey, packagePath);
         }
     }
-    RegisterWorker();
     return true;
 }
 
