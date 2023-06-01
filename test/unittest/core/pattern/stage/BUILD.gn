@@ -16,7 +16,6 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("stage_test_ng") {
   ace_animation = true
   sources = [
-    "$ace_root/frameworks/core/common/ace_engine.cpp",
     "$ace_root/frameworks/core/components_ng/manager/shared_overlay/shared_overlay_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/shared_overlay/shared_transition_effect.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/checkbox/checkbox_accessibility_property.cpp",
@@ -49,7 +48,6 @@ ace_unittest("stage_test_ng") {
     "stage_test_ng.cpp",
 
     # mock
-    "$ace_root/frameworks/core/common/test/mock/mock_watch_dog.cpp",
     "$ace_root/frameworks/core/components/common/properties/test/mock/mock_motion_path_evaluator.cpp",
   ]
 }
