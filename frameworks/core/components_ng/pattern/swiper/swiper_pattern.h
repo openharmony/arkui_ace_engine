@@ -370,16 +370,6 @@ public:
         indicatorIsBoolean_ = isBoolean;
     }
 
-    bool IsPanUpdate() const
-    {
-        return isPanUpdate_;
-    }
-
-    void SetIsPanUpdate(bool isPanUpdate)
-    {
-        isPanUpdate_ = isPanUpdate;
-    }
-
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
@@ -505,7 +495,6 @@ private:
     bool isVisible_ = true;
     bool IsCustomSize_ = false;
     bool indicatorIsBoolean_ = true;
-    bool isPanUpdate_ = false;
 
     Axis direction_ = Axis::HORIZONTAL;
 
