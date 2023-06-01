@@ -105,9 +105,8 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
     rsSurfaceNode_ = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
     rsUIDirector_->SetRSSurfaceNode(rsSurfaceNode_);
 
-    rsUIDirector_->SetUITaskRunner([weakTaskExecutor = taskExecutor_, id = id_](const std::function<void()>& task) {
+    rsUIDirector_->SetUITaskRunner([taskExecutor, id = id_](const std::function<void()>& task) {
         ContainerScope scope(id);
-        auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID_NOLOG(taskExecutor);
         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
     });
