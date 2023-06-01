@@ -402,7 +402,12 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         return;
     }
     std::string udKey;
+    int32_t recordsSize = 1;
     auto unifiedData = event->GetData();
+    if (unifiedData) {
+        auto records = unifiedData->GetRecords();
+        recordsSize = records.size() > 1 ? records.size() : 1;
+    }
     SetDragData(unifiedData, udKey);
     auto udmfClient = UDMF::UdmfClient::GetInstance();
     UDMF::Summary summary;
@@ -433,8 +438,8 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     uint32_t width = pixelMap->GetWidth();
     uint32_t height = pixelMap->GetHeight();
     DragData dragData {{pixelMap, width * PIXELMAP_WIDTH_RATE, height * PIXELMAP_HEIGHT_RATE}, {}, udKey,
-        static_cast<int32_t>(info.GetSourceDevice()), 1, info.GetPointerId(), info.GetScreenLocation().GetX(),
-        info.GetScreenLocation().GetY(), info.GetDeviceId(), true};
+        static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(),
+        info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY(), info.GetDeviceId(), true};
     ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData, GetDragCallback());
     if (ret != 0) {
         LOGE("InteractionManager: drag start error");
