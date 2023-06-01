@@ -822,6 +822,23 @@ void SwiperPattern::StartAutoPlay()
     }
 }
 
+void SwiperPattern::OnVisibleChange(bool isVisible)
+{
+    isVisible_ = isVisible;
+    if (isInit_) {
+        return;
+    }
+
+    if (!isVisible_) {
+        StopAutoPlay();
+        return;
+    }
+
+    if (NeedStartAutoPlay()) {
+        StartAutoPlay();
+    }
+}
+
 void SwiperPattern::UpdateCurrentOffset(float offset)
 {
     currentOffset_ = currentOffset_ + offset;
@@ -1520,12 +1537,14 @@ void SwiperPattern::RegisterVisibleAreaChange()
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto swiperPattern = weak.Upgrade();
         CHECK_NULL_VOID(swiperPattern);
-        if (visible) {
-            swiperPattern->isVisible_ = true;
-            swiperPattern->StartAutoPlay();
-        } else {
-            swiperPattern->isVisible_ = false;
+        swiperPattern->isVisibleArea_ = visible;
+        if (!visible) {
             swiperPattern->translateTask_.Cancel();
+            return;
+        }
+
+        if (swiperPattern->NeedStartAutoPlay()) {
+            swiperPattern->StartAutoPlay();
         }
     };
     auto host = GetHost();
@@ -1578,14 +1597,15 @@ void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay)
 
 void SwiperPattern::OnWindowShow()
 {
-    if (isVisible_) {
+    isWindowShow_ = true;
+    if (NeedStartAutoPlay()) {
         StartAutoPlay();
     }
 }
 
 void SwiperPattern::OnWindowHide()
 {
-    isVisible_ = false;
+    isWindowShow_ = false;
     StopAutoPlay();
 }
 
@@ -1687,5 +1707,10 @@ void SwiperPattern::SetAccessibilityAction()
             }
             pattern->ShowPrevious();
         });
+}
+
+bool SwiperPattern::NeedStartAutoPlay() const
+{
+    return isWindowShow_ && isVisibleArea_ && isVisible_;
 }
 } // namespace OHOS::Ace::NG

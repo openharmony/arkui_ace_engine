@@ -277,6 +277,8 @@ public:
     void ShowPrevious();
     void SwipeTo(int32_t index);
 
+    void OnVisibleChange(bool isVisible) override;
+
     int32_t GetStartIndex() const
     {
         return startIndex_;
@@ -468,6 +470,7 @@ private:
     WeakPtr<FocusHub> NextFocus(const RefPtr<FocusHub>& curFocusNode);
     int32_t ComputeLoadCount(int32_t cacheCount);
     void SetAccessibilityAction();
+    bool NeedStartAutoPlay() const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -503,6 +506,8 @@ private:
     bool isInit_ = true;
     bool hasVisibleChangeRegistered_ = false;
     bool isVisible_ = true;
+    bool isVisibleArea_ = true;
+    bool isWindowShow_ = true;
     bool IsCustomSize_ = false;
     bool indicatorIsBoolean_ = true;
     bool isPanUpdate_ = false;
