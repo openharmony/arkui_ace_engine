@@ -79,7 +79,7 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     swiperLayoutProperty->UpdateShowIndicator(false);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
-    auto controller = swiperController;
+    auto controller = swiperController ? swiperController : swiperPattern->GetSwiperController();
     if (!controller) {
         controller = AceType::MakeRefPtr<SwiperController>();
     }
@@ -135,12 +135,12 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
         auto tabsFrameNode = AceType::DynamicCast<FrameNode>(tabsNode);
         CHECK_NULL_VOID(tabsFrameNode);
         auto tabsLayoutProperty = tabsFrameNode->GetLayoutProperty<TabsLayoutProperty>();
-        tabsLayoutProperty->UpdateIndex(index);
+        tabsLayoutProperty->UpdateIndex(index < 0 ? 0 : index);
         return;
     }
     auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
     auto preIndex = tabsLayoutProperty->GetIndexValue(0);
-    if (index != preIndex) {
+    if ((index != preIndex) && (index >= 0)) {
         SetIndex(index);
         auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
         tabBarPattern->SetMaskAnimationByCreate(true);
