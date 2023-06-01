@@ -69,6 +69,7 @@ void RestorePageNode(const RefPtr<NG::FrameNode>& pageNode)
 SerializeableObjectArray DistributedUI::DumpUITree()
 {
     LOGD("UITree DumpUITree start");
+    ResetDirtyNodes();
 
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN_NOLOG(context, SerializeableObjectArray());
@@ -97,7 +98,6 @@ void DistributedUI::UnSubscribeUpdate()
 {
     onUpdateCb_ = nullptr;
     status_ = StateMachine::STOP;
-    ResetDirtyNodes();
 }
 
 void DistributedUI::ProcessSerializeableInputEvent(const SerializeableObjectArray& array)
