@@ -386,12 +386,32 @@ void TextFieldPattern::CreateSingleHandle()
 {
     RectF secondHandle;
     auto secondHandleMetrics = CalcCursorOffsetByPosition(textEditingValue_.caretPosition);
-    OffsetF emptyOffset;
+    OffsetF secondHandleOffset(secondHandleMetrics.offset.GetX() + parentGlobalOffset_.GetX(),
+        secondHandleMetrics.offset.GetY() + parentGlobalOffset_.GetY());
     if (textEditingValue_.Empty()) {
-        emptyOffset = MakeEmptyOffset();
+        auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+        auto align = layoutProperty ? layoutProperty->GetTextAlignValue(TextAlign::START) : TextAlign::START;
+        float offsetX = contentRect_.GetX();
+        auto baseWidth = frameRect_.Width();
+        auto showingPasswordIcon = (layoutProperty ? layoutProperty->GetShowPasswordIcon().value_or(true) : false) &&
+                                   (layoutProperty ? layoutProperty->GetTextInputTypeValue(
+                                                         TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD
+                                                   : false);
+        baseWidth -= showingPasswordIcon ? GetIconSize() + GetIconRightOffset() : 0.0f;
+        switch (align) {
+            case TextAlign::CENTER:
+                offsetX = baseWidth * 0.5f;
+                break;
+            case TextAlign::END:
+                offsetX = baseWidth - GetPaddingRight();
+                break;
+            case TextAlign::START:
+            default:
+                break;
+        }
+        secondHandleOffset =
+            OffsetF(offsetX + parentGlobalOffset_.GetX(), contentRect_.GetY() + parentGlobalOffset_.GetY());
     }
-    OffsetF secondHandleOffset(secondHandleMetrics.offset.GetX() + parentGlobalOffset_.GetX() + emptyOffset.GetX(),
-        secondHandleMetrics.offset.GetY() + parentGlobalOffset_.GetY() + emptyOffset.GetY());
     textSelector_.secondHandleOffset_ = secondHandleOffset;
     SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
     secondHandle.SetOffset(secondHandleOffset);
