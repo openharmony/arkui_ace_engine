@@ -87,7 +87,10 @@ const std::string FORM_ES_MODULE_PATH = "ets/modules.abc";
 
 const std::string ASSET_PATH_PREFIX = "/data/storage/el1/bundle/";
 
+#ifdef PREVIEW
 constexpr uint32_t PREFIX_LETTER_NUMBER = 4;
+#endif
+
 std::mutex loadFormMutex_;
 
 // native implementation for js function: perfutil.print()
@@ -1070,7 +1073,7 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
             return false;
         }
         const std::string bundleName = frontEnd->GetBundleName();
-        const std::string moduleName = frontEnd->GetModuleName();
+        std::string moduleName = frontEnd->GetModuleName();
 #ifdef PREVIEW
         const std::string assetPath = delegate->GetAssetPath(FORM_ES_MODULE_CARD_PATH).append(FORM_ES_MODULE_CARD_PATH);
 #else
@@ -1085,10 +1088,12 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
         arkRuntime->SetAssetPath(assetPath);
         arkRuntime->SetBundle(false);
         arkRuntime->SetModuleName(moduleName);
-        abcPath = fileName;
-        if (fileName.rfind("ets/", 0) == 0) {
-            abcPath = fileName.substr(PREFIX_LETTER_NUMBER);
-        }
+#ifdef PREVIEW
+        // remove the prefix of "ets/"
+        abcPath = fileName.substr(PREFIX_LETTER_NUMBER);
+#else
+        abcPath = moduleName.append("/").append(fileName);
+#endif
         LOGI("JsiDeclarativeEngine::ExecuteCardAbc abcPath = %{public}s", abcPath.c_str());
         {
             std::lock_guard<std::mutex> lock(loadFormMutex_);
