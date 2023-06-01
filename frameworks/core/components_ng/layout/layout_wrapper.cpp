@@ -317,7 +317,7 @@ void LayoutWrapper::MountToHostOnMainThread()
 
 void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
 {
-    if (isActive_) {
+    if (GetHostTag() != V2::TAB_CONTENT_ITEM_ETS_TAG || isActive_) {
         for (const auto& child : children_) {
             if (!child) {
                 continue;
