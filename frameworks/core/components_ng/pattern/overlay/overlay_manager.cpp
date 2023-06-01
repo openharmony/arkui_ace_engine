@@ -531,6 +531,21 @@ void OverlayManager::ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& custo
     }
 }
 
+void OverlayManager::RemoveIndexerPopupById(int32_t targetId)
+{
+    if (customPopupMap_.empty()) {
+        return;
+    }
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto iter = customPopupMap_.find(targetId);
+    if (iter != customPopupMap_.end()) {
+        rootNode->RemoveChild(iter->second);
+        customPopupMap_.erase(iter);
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    }
+}
+
 void OverlayManager::RemoveIndexerPopup()
 {
     if (customPopupMap_.empty()) {

@@ -67,6 +67,13 @@ void IndexerPattern::OnModifyDone()
     } else {
         itemCount_ = 0;
     }
+    auto usePopup = layoutProperty->GetUsingPopup().value_or(false);
+    if (isPopup_ != usePopup) {
+        isPopup_ = usePopup;
+        if (!isPopup_) {
+            RemoveBubble();
+        }
+    }
     auto propSelect = layoutProperty->GetSelected().value();
     propSelect = (propSelect >= 0 && propSelect < itemCount_) ? propSelect : 0;
     auto selectChanged = false;
@@ -1210,5 +1217,16 @@ void IndexerPattern::SetAccessibilityAction()
                 indexerPattern->OnSelect(false);
             });
     }
+}
+
+void IndexerPattern::RemoveBubble()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->RemoveIndexerPopupById(host->GetId());
 }
 } // namespace OHOS::Ace::NG
