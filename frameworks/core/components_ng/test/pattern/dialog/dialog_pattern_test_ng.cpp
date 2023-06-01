@@ -25,6 +25,8 @@
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -39,7 +41,7 @@ const std::string FILE_SOURCE = "/common/icon.png";
 const std::string TITLE = "This is title";
 const std::string MESSAGE = "Message";
 const int32_t buttonIdx = 1;
-const double_t WIDTH_A = 32.0;
+const double_t WIDTH_A = 16.0;
 const double_t WIDTH_B = 48.0;
 const double_t WIDTH_C = 64.0;
 const double_t WIDTH_D = 80.0;
@@ -49,114 +51,68 @@ const double_t DIVISOR = 2.0;
 
 class DialogPatternTestNg : public testing::Test {
 public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetDialogTheme();
 protected:
     RefPtr<FrameNode> CreateDialog();
+private:
+    vector<ActionSheetInfo> sheetItems = {
+        ActionSheetInfo {
+            .title = SHEET_TITLE,
+            .icon = INTERNAL_SOURCE,
+        },
+        ActionSheetInfo {
+            .title = SHEET_TITLE_2,
+            .icon = INTERNAL_SOURCE,
+        },
+        ActionSheetInfo {
+            .title = SHEET_TITLE_3,
+            .icon = INTERNAL_SOURCE,
+        },
+    };
+    vector<ButtonInfo> btnItems = {
+        ButtonInfo {
+            .text = "main button",
+            .bgColor = Color::BLACK,
+        },
+        ButtonInfo {
+            .text = "second button",
+            .bgColor = Color::BLUE,
+        },
+    };
+    vector<DialogProperties> propsVectors = {
+        DialogProperties {
+            .type = DialogType::ACTION_SHEET,
+            .title = "dialog test",
+            .content = "dialog content test",
+            .sheetsInfo = sheetItems,
+        },
+        DialogProperties {
+            .type = DialogType::ACTION_SHEET,
+            .title = "dialog test",
+            .sheetsInfo = sheetItems,
+        },
+        DialogProperties {
+            .content = "dialog content test",
+        },
+    };
 };
 
-/**
- * @tc.name: DialogFrameNodeCreator001
- * @tc.desc: Test ActionSheet dialog with image icon (internal source)
- * @tc.type: FUNC
- * @tc.author: zhoutianer
- */
-HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator001, TestSize.Level1)
+void DialogPatternTestNg::SetUpTestCase()
 {
-    /**
-     * @tc.steps: step1. create Dialog with properties
-     */
-    vector<ActionSheetInfo> sheetItems = {
-        ActionSheetInfo {
-            .title = SHEET_TITLE,
-            .icon = INTERNAL_SOURCE,
-        },
-        ActionSheetInfo {
-            .title = SHEET_TITLE_2,
-            .icon = INTERNAL_SOURCE,
-        },
-        ActionSheetInfo {
-            .title = SHEET_TITLE_3,
-            .icon = INTERNAL_SOURCE,
-        },
-    };
-    DialogProperties props = {
-        .sheetsInfo = sheetItems,
-    };
-
-    auto dialog = DialogView::CreateDialogNode(props, nullptr);
-    EXPECT_EQ(dialog == nullptr, true);
+    MockPipelineBase::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
 }
-
-/**
- * @tc.name: DialogFrameNodeCreator002
- * @tc.desc: Test ActionSheet dialog with alignment
- * @tc.type: FUNC
- * @tc.author: zhoutianer
- */
-HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator002, TestSize.Level1)
+void DialogPatternTestNg::TearDownTestCase()
 {
-    /**
-     * @tc.steps: step1. create Dialog with properties
-     */
-    vector<ActionSheetInfo> sheetItems = {
-        ActionSheetInfo {
-            .title = SHEET_TITLE,
-            .icon = FILE_SOURCE,
-        },
-        ActionSheetInfo {
-            .title = SHEET_TITLE_2,
-            .icon = FILE_SOURCE,
-        },
-        ActionSheetInfo {
-            .title = SHEET_TITLE_3,
-            .icon = FILE_SOURCE,
-        },
-    };
-    DialogProperties props = {
-        .type = DialogType::ALERT_DIALOG,
-        .title = TITLE,
-        .content = MESSAGE,
-        .alignment = DialogAlignment::BOTTOM,
-        .sheetsInfo = sheetItems,
-    };
-
-    auto dialog = DialogView::CreateDialogNode(props, nullptr);
-    EXPECT_EQ(dialog == nullptr, true);
+    MockPipelineBase::TearDown();
 }
-
-/**
- * @tc.name: DialogFrameNodeCreator003
- * @tc.desc: Test ActionSheet dialog with image icon (internal source)
- * @tc.type: FUNC
- * @tc.author: zhoutianer
- */
-HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator003, TestSize.Level1)
+void DialogPatternTestNg::SetDialogTheme()
 {
-    /**
-     * @tc.steps: step1. create Dialog with properties
-     */
-    vector<ActionSheetInfo> sheetItems = {
-        ActionSheetInfo {
-            .title = SHEET_TITLE,
-            .icon = INTERNAL_SOURCE,
-        },
-        ActionSheetInfo {
-            .title = SHEET_TITLE_2,
-            .icon = INTERNAL_SOURCE,
-        },
-        ActionSheetInfo {
-            .title = SHEET_TITLE_3,
-            .icon = INTERNAL_SOURCE,
-        },
-    };
-    DialogProperties props = {
-        .type = DialogType::ACTION_SHEET,
-        .title = TITLE,
-        .content = MESSAGE,
-        .sheetsInfo = sheetItems,
-    };
-
-    auto dialog = DialogView::CreateDialogNode(props, nullptr);
-    EXPECT_EQ(dialog == nullptr, true);
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineBase::GetCurrent()->GetThemeManager());
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
 }
 
 /**
@@ -211,177 +167,6 @@ HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0007, TestSize.Level1)
     auto dialogEventHub = AceType::MakeRefPtr<DialogEventHub>();
     dialogEventHub->FireSuccessEvent(buttonIdx);
     EXPECT_EQ(dialogEventHub->onSuccess_ == nullptr, true);
-}
-
-/**
- * @tc.name: DialogFrameNodeCreator0008
- * @tc.desc: Test AlertDialog with button color and text color
- * @tc.type: FUNC
- * @tc.author: zhoutianer
- */
-HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0008, TestSize.Level1)
-{
-    auto columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::CAR_DIALOG);
-    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
-    auto Width = dialogLayoutAlgorithm->GetMaxWidthBasedOnGridType(columnInfo, GridSizeType::SM, DeviceType::WATCH);
-    EXPECT_EQ(Width, WIDTH_A);
-}
-
-/**
- * @tc.name: DialogFrameNodeCreator0009
- * @tc.desc: Test AlertDialog with button color and text color
- * @tc.type: FUNC
- * @tc.author: zhoutianer
- */
-HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0009, TestSize.Level1)
-{
-    auto columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::CAR_DIALOG);
-    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
-    auto Width = dialogLayoutAlgorithm->GetMaxWidthBasedOnGridType(columnInfo, GridSizeType::MD, DeviceType::WATCH);
-    EXPECT_EQ(Width, WIDTH_B);
-}
-
-/**
- * @tc.name: DialogFrameNodeCreator0010
- * @tc.desc: Test AlertDialog with button color and text color
- * @tc.type: FUNC
- * @tc.author: zhoutianer
- */
-HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0010, TestSize.Level1)
-{
-    auto columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::CAR_DIALOG);
-    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
-    auto Width = dialogLayoutAlgorithm->GetMaxWidthBasedOnGridType(columnInfo, GridSizeType::LG, DeviceType::WATCH);
-    EXPECT_EQ(Width, WIDTH_C);
-}
-
-/**
- * @tc.name: DialogFrameNodeCreator0011
- * @tc.desc: Test AlertDialog with button color and text color
- * @tc.type: FUNC
- * @tc.author: zhoutianer
- */
-HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0011, TestSize.Level1)
-{
-    auto columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::CAR_DIALOG);
-    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
-    auto Width =
-        dialogLayoutAlgorithm->GetMaxWidthBasedOnGridType(columnInfo, GridSizeType::UNDEFINED, DeviceType::WATCH);
-    EXPECT_EQ(Width, WIDTH_C);
-}
-
-/**
- * @tc.name: DialogFrameNodeCreator0012
- * @tc.desc: Test AlertDialog with button color and text color
- * @tc.type: FUNC
- * @tc.author: zhoutianer
- */
-HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0012, TestSize.Level1)
-{
-    auto columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::CAR_DIALOG);
-    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
-    auto Width = dialogLayoutAlgorithm->GetMaxWidthBasedOnGridType(columnInfo, GridSizeType::SM, DeviceType::PHONE);
-    EXPECT_EQ(Width, WIDTH_B);
-}
-
-/**
- * @tc.name: DialogFrameNodeCreator0013
- * @tc.desc: Test AlertDialog with button color and text color
- * @tc.type: FUNC
- * @tc.author: zhoutianer
- */
-HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0013, TestSize.Level1)
-{
-    auto columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::CAR_DIALOG);
-    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
-    auto Width = dialogLayoutAlgorithm->GetMaxWidthBasedOnGridType(columnInfo, GridSizeType::MD, DeviceType::PHONE);
-    EXPECT_EQ(Width, WIDTH_C);
-}
-
-/**
- * @tc.name: DialogFrameNodeCreator0014
- * @tc.desc: Test AlertDialog with button color and text color
- * @tc.type: FUNC
- * @tc.author: zhoutianer
- */
-HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0014, TestSize.Level1)
-{
-    auto columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::CAR_DIALOG);
-    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
-    auto Width = dialogLayoutAlgorithm->GetMaxWidthBasedOnGridType(columnInfo, GridSizeType::LG, DeviceType::PHONE);
-    EXPECT_EQ(Width, WIDTH_D);
-}
-
-/**
- * @tc.name: DialogFrameNodeCreator0015
- * @tc.desc: Test AlertDialog with button color and text color
- * @tc.type: FUNC
- * @tc.author: zhoutianer
- */
-HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0015, TestSize.Level1)
-{
-    auto columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::CAR_DIALOG);
-    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
-    auto Width =
-        dialogLayoutAlgorithm->GetMaxWidthBasedOnGridType(columnInfo, GridSizeType::UNDEFINED, DeviceType::PHONE);
-    EXPECT_EQ(Width, WIDTH_D);
-}
-
-/**
- * @tc.name: DialogFrameNodeCreator0016
- * @tc.desc: Test AlertDialog with button color and text color
- * @tc.type: FUNC
- * @tc.author: zhoutianer
- */
-HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0016, TestSize.Level1)
-{
-    auto columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::CAR_DIALOG);
-    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
-    auto Width = dialogLayoutAlgorithm->GetMaxWidthBasedOnGridType(columnInfo, GridSizeType::SM, DeviceType::CAR);
-    EXPECT_EQ(Width, WIDTH_B);
-}
-
-/**
- * @tc.name: DialogFrameNodeCreator0017
- * @tc.desc: Test AlertDialog with button color and text color
- * @tc.type: FUNC
- * @tc.author: zhoutianer
- */
-HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0017, TestSize.Level1)
-{
-    auto columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::CAR_DIALOG);
-    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
-    auto Width = dialogLayoutAlgorithm->GetMaxWidthBasedOnGridType(columnInfo, GridSizeType::MD, DeviceType::CAR);
-    EXPECT_EQ(Width, WIDTH_D);
-}
-
-/**
- * @tc.name: DialogFrameNodeCreator0018
- * @tc.desc: Test AlertDialog with button color and text color
- * @tc.type: FUNC
- * @tc.author: zhoutianer
- */
-HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0018, TestSize.Level1)
-{
-    auto columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::CAR_DIALOG);
-    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
-    auto Width = dialogLayoutAlgorithm->GetMaxWidthBasedOnGridType(columnInfo, GridSizeType::LG, DeviceType::CAR);
-    EXPECT_EQ(Width, WIDTH_E);
-}
-
-/**
- * @tc.name: DialogFrameNodeCreator0019
- * @tc.desc: Test AlertDialog with button color and text color
- * @tc.type: FUNC
- * @tc.author: zhoutianer
- */
-HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0019, TestSize.Level1)
-{
-    auto columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::CAR_DIALOG);
-    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
-    auto Width =
-        dialogLayoutAlgorithm->GetMaxWidthBasedOnGridType(columnInfo, GridSizeType::UNDEFINED, DeviceType::CAR);
-    EXPECT_EQ(Width, WIDTH_E);
 }
 
 /**
@@ -606,5 +391,175 @@ HWTEST_F(DialogPatternTestNg, DialogAccessibilityProperty002, TestSize.Level1)
     auto accessibilityProperty = dialog->GetAccessibilityProperty<NG::AccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(), TITLE + MESSAGE);
+}
+
+/**
+ * @tc.name: DialogPatternTest001
+ * @tc.desc: Test GetMaxWidthBasedOnGridType function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogPatternTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create params and DialogLayoutAlgorithm object.
+     */
+    const ScreenSizeType types[] = {
+        ScreenSizeType::SM,
+        ScreenSizeType::MD,
+        ScreenSizeType::LG,
+        ScreenSizeType::UNDEFINED
+    };
+    const DeviceType deviceTypes[] = {
+        DeviceType::WATCH,
+        DeviceType::PHONE,
+        DeviceType::CAR,
+        DeviceType::UNKNOWN
+    };
+    auto columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::CAR_DIALOG);
+    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
+    /**
+     * @tc.steps: step2. call GetMaxWidthBasedOnGridType function.
+     * @tc.expected: the result equal to WIDTH_A.
+     */
+    for (size_t i = 0; i < sizeof(deviceTypes) / sizeof(deviceTypes[0]); i++)
+    {
+        for (size_t j = 0; j < sizeof(types) / sizeof(types[0]); j++)
+        {
+            auto Width = dialogLayoutAlgorithm->GetMaxWidthBasedOnGridType(columnInfo, types[j], deviceTypes[i]);
+            EXPECT_EQ(Width, WIDTH_A);
+        }
+    }
+}
+
+/**
+ * @tc.name: DialogPatternTest002
+ * @tc.desc: Test CreateDialogNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogPatternTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set properties
+     */
+    const DialogType types[] = {
+        DialogType::ALERT_DIALOG,
+        DialogType::ACTION_SHEET,
+        DialogType::COMMON
+    };
+    SetDialogTheme();
+    /**
+     * @tc.steps: step2. call CreateDialogNode function with different props.
+     * @tc.expected: the dialog node created successfully.
+     */
+    for (size_t i = 0; i < sizeof(types) / sizeof(types[0]); i++)
+    {
+        DialogProperties props;
+        props.type = types[i];
+        if (i == 1)
+        {
+            props.title = "dialog test";
+            props.content = "dialog content test";
+            props.customStyle = true;
+            props.sheetsInfo = sheetItems;
+            props.isMenu = true;
+        }else if (i == 0)
+        {
+            props.buttons = btnItems;
+        }
+        auto dialog = DialogView::CreateDialogNode(props, nullptr);
+        ASSERT_NE(dialog, nullptr);
+    }
+}
+
+/**
+ * @tc.name: DialogPatternTest003
+ * @tc.desc: Test CreateDialogNode with customNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogPatternTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a custom node and childLayoutWrapper
+     */
+    auto customNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(customNode, nullptr);
+    auto childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        customNode, customNode->GetGeometryNode(), customNode->GetLayoutProperty());
+    ASSERT_NE(childLayoutWrapper, nullptr);
+    /**
+     * @tc.steps: step2. create dialog with a custom node and layoutWrapper.
+     * @tc.expected: the dialog node created successfully.
+     */
+    DialogProperties propsCustom;
+    propsCustom.type = DialogType::ACTION_SHEET;
+    propsCustom.title = "dialog test";
+    propsCustom.content = "dialog content test";
+    propsCustom.sheetsInfo = sheetItems;
+    propsCustom.buttons = btnItems;
+    auto dialogWithCustom = DialogView::CreateDialogNode(propsCustom, customNode);
+    ASSERT_NE(dialogWithCustom, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        dialogWithCustom, dialogWithCustom->GetGeometryNode(), dialogWithCustom->GetLayoutProperty());
+    layoutWrapper->AppendChild(childLayoutWrapper);
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+    dialogLayoutAlgorithm.Measure(layoutWrapper.rawPtr_);
+    /**
+     * @tc.steps: step3. change props to create dialog with a custom node.
+     * @tc.expected: the dialog node and layoutWrapper2 created successfully.
+     */
+    propsCustom.customStyle = true;
+    propsCustom.title = "";
+    propsCustom.content = "";
+    dialogWithCustom = DialogView::CreateDialogNode(propsCustom, customNode);
+    ASSERT_NE(dialogWithCustom, nullptr);
+    auto layoutWrapper2 = AceType::MakeRefPtr<LayoutWrapper>(
+        dialogWithCustom, dialogWithCustom->GetGeometryNode(), dialogWithCustom->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper2, nullptr);
+    layoutWrapper2->AppendChild(childLayoutWrapper);
+    DialogLayoutAlgorithm dialogLayoutAlgorithm2;
+    dialogLayoutAlgorithm2.Measure(layoutWrapper2.rawPtr_);
+}
+
+/**
+ * @tc.name: DialogPatternTest004
+ * @tc.desc: Test DialogLayoutAlgorithm::Measure function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogPatternTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DialogLayoutAlgorithm instance.
+     */
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+    for (auto& props : propsVectors)
+    {
+        /**
+         * @tc.steps: step2. create dialog node and layoutWrapper.
+         * @tc.expected: the dialog node created successfully.
+         */
+        auto dialog = DialogView::CreateDialogNode(props, nullptr);
+        ASSERT_NE(dialog, nullptr);
+        auto contentNode = AceType::DynamicCast<FrameNode>(dialog->GetFirstChild());
+        ASSERT_NE(contentNode, nullptr);
+        auto childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+            contentNode, contentNode->GetGeometryNode(), contentNode->GetLayoutProperty());
+        for (auto& node : contentNode->GetChildren()) {
+            auto frameNode = AceType::DynamicCast<FrameNode>(node);
+            auto grandsonLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+                frameNode, frameNode->GetGeometryNode(), frameNode->GetLayoutProperty());
+            childLayoutWrapper->AppendChild(grandsonLayoutWrapper);
+        }
+
+        auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+            dialog, dialog->GetGeometryNode(), dialog->GetLayoutProperty());
+        layoutWrapper->AppendChild(childLayoutWrapper);
+        /**
+         * @tc.steps: step3. test DialogLayoutAlgorithm's Measure function.
+         * @tc.expected: dialogLayoutAlgorithm.alignment_ equal to DialogAlignment::DEFAULT.
+         */
+        dialogLayoutAlgorithm.Measure(layoutWrapper.rawPtr_);
+        dialogLayoutAlgorithm.Layout(layoutWrapper.rawPtr_);
+        EXPECT_EQ(dialogLayoutAlgorithm.alignment_, DialogAlignment::DEFAULT);
+    }
 }
 } // namespace OHOS::Ace::NG
