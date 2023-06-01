@@ -108,7 +108,7 @@ private:
     void InitSideBar();
     void FireChangeEvent(bool isShow);
     void UpdateControlButtonIcon();
-    void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart();
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();
@@ -128,7 +128,7 @@ private:
     RefPtr<Animator> controller_;
     RefPtr<CurveAnimation<float>> rightToLeftAnimation_;
     RefPtr<CurveAnimation<float>> leftToRightAnimation_;
-    RefPtr<DragEvent> dragEvent_;
+    RefPtr<PanEvent> dragEvent_;
 
     float currentOffset_ = 0.0f;
     float realSideBarWidth_ = 0.0f;
