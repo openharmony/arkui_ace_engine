@@ -182,6 +182,7 @@ void JSNavigation::Create(const JSCallbackInfo& info)
     NavigationModel::GetInstance()->Create();
     auto navigationStack = AceType::MakeRefPtr<JSNavigationStack>();
     navigationStack->SetDataSourceObj(obj);
+    NavigationModel::GetInstance()->SetNavigationStackProvided(true);
     NavigationModel::GetInstance()->SetNavigationStack(std::move(navigationStack));
 }
 

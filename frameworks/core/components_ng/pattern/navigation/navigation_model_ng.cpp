@@ -993,6 +993,16 @@ void NavigationModelNG::SetNavigationStack()
     }
 }
 
+void NavigationModelNG::SetNavigationStackProvided(bool provided)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNavigationStackProvided(provided);
+}
+
 void NavigationModelNG::SetNavDestination(std::function<void(std::string)>&& builder)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
