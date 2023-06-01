@@ -402,9 +402,12 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         return;
     }
     std::string udKey;
+    int32_t recordsSize = 1;
     auto unifiedData = event->GetData();
-    auto records = unifiedData->GetRecords();
-    int32_t recordsSize = records.size() > 1 ? records.size() : 1;
+    if (unifiedData) {
+        auto records = unifiedData->GetRecords();
+        recordsSize = records.size() > 1 ? records.size() : 1;
+    }
     SetDragData(unifiedData, udKey);
     auto udmfClient = UDMF::UdmfClient::GetInstance();
     UDMF::Summary summary;
