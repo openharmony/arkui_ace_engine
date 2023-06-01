@@ -63,20 +63,20 @@ public:
     static void TearDownTestSuite() {};
     void SetUp() override;
     void TearDown() override;
+
+    PaddingProperty CreatePadding(float left, float top, float right, float bottom)
+    {
+        PaddingProperty padding;
+        padding.left = CalcLength(left);
+        padding.right = CalcLength(right);
+        padding.top = CalcLength(top);
+        padding.bottom = CalcLength(bottom);
+        return padding;
+    }
 };
 
 void DragBarPatternTestNg::SetUp() {}
 void DragBarPatternTestNg::TearDown() {}
-
-PaddingProperty CreatePadding(float left, float top, float right, float bottom)
-{
-    PaddingProperty padding;
-    padding.left = CalcLength(left);
-    padding.right = CalcLength(right);
-    padding.top = CalcLength(top);
-    padding.bottom = CalcLength(bottom);
-    return padding;
-}
 
 /**
  * @tc.name: DragBarPatternTest001

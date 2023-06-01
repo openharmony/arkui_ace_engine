@@ -31,6 +31,7 @@ ace_unittest("panel_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/panel/sliding_panel_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/flex/mock_flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/grid_container/mock_grid_container_layout_property.cpp",
+    "dragBar_pattern_test_ng.cpp",
     "panel_test_ng.cpp",
   ]
 }
