@@ -353,6 +353,7 @@ void LoadingProgressModifier::StartRecycle()
         date_->Set(0.0f);
         AnimationOption option = AnimationOption();
         RefPtr<Curve> curve = AceType::MakeRefPtr<LinearCurve>();
+        LOGD("Loading StartRecycle Visible %d", isVisible_);
         option.SetDuration(isVisible_ ? LOADING_DURATION : 0);
         option.SetDelay(0);
         option.SetCurve(curve);
