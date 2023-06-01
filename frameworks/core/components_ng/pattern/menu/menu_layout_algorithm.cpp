@@ -36,6 +36,7 @@
 namespace OHOS::Ace::NG {
 
 namespace {
+constexpr uint32_t MIN_GRID_COUNTS = 2;
 constexpr uint32_t GRID_COUNTS_4 = 4;
 constexpr uint32_t GRID_COUNTS_6 = 6;
 constexpr uint32_t GRID_COUNTS_8 = 8;
@@ -468,8 +469,13 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
     maxWidth = std::min(constraint.maxSize.Width(), maxWidth);
     constraint.maxSize.SetWidth(maxWidth);
     // set min width
-    auto minWidth = static_cast<float>(MIN_MENU_WIDTH.ConvertToPx());
     auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    float minWidth;
+    if (menuPattern && menuPattern->IsSelectOverlayExtensionMenu()) {
+        minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
+    } else {
+        minWidth = static_cast<float>(MIN_MENU_WIDTH.ConvertToPx());
+    }
     if (minWidth > constraint.maxSize.Width()) {
         minWidth = constraint.maxSize.Width();
     }
