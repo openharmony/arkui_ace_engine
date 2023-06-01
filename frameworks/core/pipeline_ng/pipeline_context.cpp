@@ -668,6 +668,43 @@ SafeAreaEdgeInserts PipelineContext::GetCurrentViewSafeArea() const
     return {};
 }
 
+void PipelineContext::SetSystemSafeArea(const SafeAreaEdgeInserts& systemSafeArea)
+{
+    CHECK_NULL_VOID_NOLOG(window_);
+    window_->SetSystemSafeArea(systemSafeArea);
+}
+
+SafeAreaEdgeInserts PipelineContext::GetSystemSafeArea() const
+{
+    if (window_) {
+        return window_->GetSystemSafeArea();
+    }
+    return {};
+}
+
+void PipelineContext::SetCutoutSafeArea(const SafeAreaEdgeInserts& cutoutSafeArea)
+{
+    CHECK_NULL_VOID_NOLOG(window_);
+    window_->SetCutoutSafeArea(cutoutSafeArea);
+}
+
+SafeAreaEdgeInserts PipelineContext::GetCutoutSafeArea() const
+{
+    if (window_) {
+        return window_->GetCutoutSafeArea();
+    }
+    return {};
+}
+
+SafeAreaEdgeInserts PipelineContext::GetViewSafeArea() const
+{
+    SafeAreaEdgeInserts safeArea;
+    CHECK_NULL_RETURN_NOLOG(window_, safeArea);
+    auto systemAvoidArea = window_->GetSystemSafeArea();
+    auto cutoutAvoidArea = window_->GetCutoutSafeArea();
+    return systemAvoidArea.CombineSafeArea(cutoutAvoidArea);
+}
+
 void PipelineContext::OnVirtualKeyboardHeightChange(
     float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
@@ -731,8 +768,8 @@ void PipelineContext::ResetViewSafeArea()
     const static int32_t PLATFORM_VERSION_TEN = 10;
     if (GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && layoutProperty) {
         if (!GetIgnoreViewSafeArea()) {
-            layoutProperty->SetSafeArea(GetCurrentViewSafeArea());
-            LOGI("OnAvoidAreaChanged viewSafeArea:%{public}s", layoutProperty->GetSafeArea().ToString().c_str());
+            layoutProperty->SetSafeArea(GetViewSafeArea());
+            LOGI("ResetViewSafeArea viewSafeArea:%{public}s", layoutProperty->GetSafeArea().ToString().c_str());
         } else {
             layoutProperty->SetSafeArea({});
         }

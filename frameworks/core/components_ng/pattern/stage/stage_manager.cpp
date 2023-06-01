@@ -400,6 +400,7 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
         if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && !pipeline->GetIgnoreViewSafeArea() &&
             layoutProperty) {
             layoutProperty->SetSafeArea(pipeline->GetCurrentViewSafeArea());
+            LOGI("FirePageShow SetSafeArea to page :%{public}s", layoutProperty->GetSafeArea().ToString().c_str());
         }
     }
     auto pageFocusHub = pageNode->GetFocusHub();
