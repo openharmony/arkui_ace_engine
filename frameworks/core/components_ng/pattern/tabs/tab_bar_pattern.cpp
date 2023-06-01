@@ -102,6 +102,9 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
             // over scroll in drag update from normal to over scroll.
             float overScroll = 0.0f;
             // over scroll in drag update during over scroll.
+            if (pattern->tabItemOffsets_.empty()) {
+                return false;
+            }
             auto startPos = pattern->tabItemOffsets_.begin()->GetX();
             auto host = pattern->GetHost();
             CHECK_NULL_RETURN(host, false);
@@ -815,6 +818,9 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
                        : backChildrenMainSize < space
                            ? host->GetGeometryNode()->GetFrameSize().Width() - childrenMainSize_
                            : space - frontChildrenMainSize;
+        if (tabItemOffsets_.empty()) {
+            return;
+        }
         PlayTranslateAnimation(originalPaintRect.GetX(),
             targetPaintRect.GetX() - tabItemOffsets_.front().GetX() + targetOffset, targetOffset);
     } else {
@@ -850,6 +856,9 @@ void TabBarPattern::HandleTouchEvent(const TouchLocationInfo& info)
 
 int32_t TabBarPattern::CalculateSelectedIndex(const Offset& info)
 {
+    if (tabItemOffsets_.empty()) {
+        return -1;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, -1);
     auto geometryNode = host->GetGeometryNode();
@@ -1426,6 +1435,9 @@ bool TabBarPattern::IsAtTop() const
 
 bool TabBarPattern::IsAtBottom() const
 {
+    if (tabItemOffsets_.empty()) {
+        return false;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     return LessOrEqual(tabItemOffsets_.back().GetX(), host->GetGeometryNode()->GetFrameSize().Width());
