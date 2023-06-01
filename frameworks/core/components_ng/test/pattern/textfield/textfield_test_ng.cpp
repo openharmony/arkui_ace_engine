@@ -3989,8 +3989,8 @@ HWTEST_F(TextFieldPatternTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level2)
     ASSERT_NE(geometryNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
-    ASSERT_NE(layoutWrapper, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        AceType::WeakClaim(AceType::RawPtr(frameNode)), geometryNode->Clone(), layoutProperty->Clone());
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
     auto layoutAlgorithm = AceType::MakeRefPtr<TextFieldLayoutAlgorithm>();
@@ -4018,6 +4018,116 @@ HWTEST_F(TextFieldPatternTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level2)
     auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
     textFieldPattern->clipboard_ = clipboard;
     EXPECT_TRUE(textFieldPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
+}
+
+/**
+ * @tc.name: MeasureContent
+ * @tc.desc: test MeasureContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, MeasureContent, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldLayoutProperty, TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto cloneLayoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(layoutProperty->Clone());
+    auto contentConstraint = LayoutConstraintF();
+    contentConstraint.selfIdealSize.SetWidth(20);
+    contentConstraint.selfIdealSize.SetHeight(20);
+    cloneLayoutProperty->contentConstraint_ = contentConstraint;
+    LayoutWrapper layoutWrapper(
+        AceType::WeakClaim(AceType::RawPtr(frameNode)), geometryNode->Clone(), cloneLayoutProperty);
+    auto layoutAlgorithm = AceType::MakeRefPtr<TextFieldLayoutAlgorithm>();
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+
+    /**
+     * @tc.steps: step2. set to TextArea and Call MeasureContent.
+     * @tc.expected: Check the return value.
+     */
+    auto size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    ASSERT_TRUE(size.has_value());
+    EXPECT_EQ(size.value().Width(), 20.0f);
+    EXPECT_EQ(size.value().Height(), 1.0f);
+
+    cloneLayoutProperty->UpdateValue(TEXT_VALUE);
+    cloneLayoutProperty->UpdateMaxLines(1);
+    layoutProperty->UpdateMaxLines(2);
+    cloneLayoutProperty->UpdateShowCounter(true);
+    cloneLayoutProperty->UpdateMaxLength(100);
+    cloneLayoutProperty->UpdateShowErrorText(true);
+    cloneLayoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(10), CalcLength(10)));
+    pattern->dragStatus_ = DragStatus::DRAGGING;
+    /** call CreateNodePaintMethod to ensure ContentModifier not nullptr */
+    pattern->CreateNodePaintMethod();
+    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    cloneLayoutProperty->UpdateCalcMaxSize(CalcSize(CalcLength(40), CalcLength(-40)));
+    pattern->dragContents_ = { "", "selected", "after"};
+    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    cloneLayoutProperty->UpdateCalcMaxSize(CalcSize(CalcLength(40), CalcLength(40)));
+    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    ASSERT_TRUE(size.has_value());
+    EXPECT_EQ(size.value().Width(), 20.0f);
+    EXPECT_EQ(size.value().Height(), 2.0f);
+    cloneLayoutProperty->UpdateCalcMaxSize(CalcSize(CalcLength(40), CalcLength(40, DimensionUnit::PERCENT)));
+    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    ASSERT_TRUE(size.has_value());
+    EXPECT_EQ(size.value().Width(), 20.0f);
+    EXPECT_EQ(size.value().Height(), 0.0f);
+
+    /**
+     * @tc.steps: step3. test not TextArea and Call MeasureContent.
+     * @tc.expected: Check the return value.
+     */
+    layoutProperty->UpdateMaxLines(1);
+    cloneLayoutProperty->UpdateWidthAuto(true);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    eventHub->SetEnabled(false);
+    cloneLayoutProperty->UpdateShowUnderline(true);
+    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    ASSERT_TRUE(size.has_value());
+    EXPECT_EQ(size.value().Width(), 1.0f);
+    EXPECT_EQ(size.value().Height(), 1.0f);
+    contentConstraint.minSize.SetWidth(5);
+    cloneLayoutProperty->UpdateShowUnderline(false);
+    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    ASSERT_TRUE(size.has_value());
+    EXPECT_EQ(size.value().Width(), 5.0f);
+    EXPECT_EQ(size.value().Height(), 1.0f);
+
+    /**
+     * @tc.steps: step4. set to show password and Call MeasureContent.
+     * @tc.expected: Check the return value.
+     */
+    cloneLayoutProperty->UpdateShowPasswordIcon(true);
+    cloneLayoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    cloneLayoutProperty->UpdateMaxLines(2);
+    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    ASSERT_TRUE(size.has_value());
+    EXPECT_EQ(size.value().Width(), 20.0f);
+    EXPECT_EQ(size.value().Height(), 0.0f);
+
+    cloneLayoutProperty->UpdateMaxLines(1);
+    layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    layoutProperty->UpdateShowPasswordIcon(true);
+    pattern->SetTextObscured(true);
+    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    pattern->ProcessPasswordIcon();
+    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    pattern->SetTextObscured(false);
+    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    ASSERT_TRUE(size.has_value());
+    EXPECT_EQ(size.value().Width(), 20.0f);
+    EXPECT_EQ(size.value().Height(), 1.0f);
 }
 
 /**
