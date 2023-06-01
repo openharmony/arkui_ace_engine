@@ -98,16 +98,15 @@ void SwapIfLarger(int32_t& a, int32_t& b)
     }
 }
 
-void RemoveErrorTextFromValue(const std::wstring& value, const std::wstring& errorText, std::string& result)
+void RemoveErrorTextFromValue(const std::string& value, const std::string& errorText, std::string& result)
 {
     int32_t valuePtr = 0;
     int32_t errorTextPtr = 0;
     auto valueSize = static_cast<int32_t>(value.length());
     auto errorTextSize = static_cast<int32_t>(errorText.length());
-    std::wstring wResult;
     while (errorTextPtr < errorTextSize) {
         while (value[valuePtr] != errorText[errorTextPtr] && valuePtr < valueSize) {
-            wResult += value[valuePtr];
+            result += value[valuePtr];
             valuePtr++;
         }
         // no more text left to remove in value
@@ -118,8 +117,7 @@ void RemoveErrorTextFromValue(const std::wstring& value, const std::wstring& err
         valuePtr++;
         errorTextPtr++;
     }
-    wResult += value.substr(valuePtr);
-    result = StringUtils::ToString(wResult);
+    result += value.substr(valuePtr);
 }
 
 std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
@@ -1878,7 +1876,12 @@ void TextFieldPattern::OnModifyDone()
             selectionMode_ = SelectionMode::SELECT;
         }
     }
-    FilterEditingValue();
+    if (layoutProperty->GetTypeChangedValue(false)) {
+        ClearEditingValue();
+        layoutProperty->ResetTypeChanged();
+        operationRecords_.clear();
+        redoOperationRecords_.clear();
+    }
     auto maxLength = GetMaxLength();
     if (GreatOrEqual(textWidth, maxLength)) {
         textEditingValue_.text = StringUtils::ToString(textEditingValue_.GetWideText().substr(0, maxLength));
@@ -1962,13 +1965,6 @@ bool TextFieldPattern::IsDisabled()
     auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_RETURN(eventHub, true);
     return !eventHub->IsEnabled();
-}
-
-void TextFieldPattern::FilterEditingValue()
-{
-    auto valueToUpdate = textEditingValue_.text;
-    ClearEditingValue();
-    InsertValue(valueToUpdate);
 }
 
 void TextFieldPattern::ProcessInnerPadding()
@@ -2982,13 +2978,10 @@ bool TextFieldPattern::FilterWithRegex(
     if (!needToEscape) {
         escapeFilter = filter;
     }
-    auto wEscapeFilter = StringUtils::ToWstring(escapeFilter);
-    std::wregex filterRegex(wEscapeFilter);
-    auto wValueToUpdate = StringUtils::ToWstring(valueToUpdate);
-    auto wErrorText = regex_replace(wValueToUpdate, filterRegex, L"");
-    RemoveErrorTextFromValue(wValueToUpdate, wErrorText, result);
-    auto errorText = StringUtils::ToString(wErrorText);
-    if (!wErrorText.empty()) {
+    std::regex filterRegex(escapeFilter);
+    auto errorText = regex_replace(valueToUpdate, filterRegex, "");
+    RemoveErrorTextFromValue(valueToUpdate, errorText, result);
+    if (!errorText.empty()) {
         auto textFieldEventHub = GetHost()->GetEventHub<TextFieldEventHub>();
         CHECK_NULL_RETURN(textFieldEventHub, false);
         LOGI("Error text %{private}s", errorText.c_str());
