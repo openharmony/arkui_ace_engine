@@ -118,7 +118,7 @@ static std::optional<Dimension> HandleDimensionType(napi_value ParameterNApi, na
         std::unique_ptr<char[]> ParameterTemp = std::make_unique<char[]>(ParameterLen);
         napi_get_value_string_utf8(env, ParameterNApi, ParameterTemp.get(), ParameterLen, &ret);
         ParameterStr = ParameterTemp.get();
-        Parameter = StringUtils::StringToDimensionWithUnit(ParameterStr, DimensionUnit::VP);
+        StringUtils::StringToDimensionWithUnit(ParameterStr, Parameter, DimensionUnit::VP);
     } else if (valueType == napi_object) {
         int32_t id = 0;
         int32_t type = 0;
@@ -131,7 +131,7 @@ static std::optional<Dimension> HandleDimensionType(napi_value ParameterNApi, na
             LOGE("can not get message from resource manager.");
             return std::nullopt;
         }
-        Parameter = StringUtils::StringToDimensionWithUnit(ParameterStr, DimensionUnit::VP);
+        StringUtils::StringToDimensionWithUnit(ParameterStr, Parameter, DimensionUnit::VP);
     } else {
         return std::nullopt;
     }
