@@ -70,9 +70,12 @@ class UIContext {
         return this.router_;
     }
 
-    getAnimator() {
-        this.animator_ = new Animator(this.instanceId_);
-        return this.animator_;
+    createAnimator(options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.animator_ = globalThis.requireNapi('animator');
+        let animatorResult = this.animator_.create(options);
+        __JSScopeUtil__.restoreInstanceId();
+        return animatorResult;
     }
     
     getPromptAction() {
@@ -227,25 +230,6 @@ class Router {
         let object = this.ohos_router.getParams();
         __JSScopeUtil__.restoreInstanceId();
         return object;
-    }
-}
-
-class Animator {
-    /**
-     * Construct new instance of Animator.
-     * initialzie with instanceId.
-     * @param instanceId obtained on the c++ side.
-     * @since 10
-     */
-    constructor(instanceId) {
-        this.instanceId_ = instanceId;
-        this.ohos_animator = globalThis.requireNapi('animator');
-    }
-    create(options) {
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        let animatorResult = this.ohos_animator.create(options);
-        __JSScopeUtil__.restoreInstanceId();
-        return animatorResult;
     }
 }
 
