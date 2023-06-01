@@ -454,8 +454,26 @@ struct SafeAreaEdgeInserts {
 
     SafeAreaEdgeInserts CombineSafeArea(const SafeAreaEdgeInserts& other) const
     {
-        return SafeAreaEdgeInserts(leftRect_.CombineRect(other.leftRect_), topRect_.CombineRect(other.topRect_),
-            rightRect_.CombineRect(other.rightRect_), bottomRect_.CombineRect(other.bottomRect_));
+        return SafeAreaEdgeInserts(CombineSafeAreaBySide(leftRect_, other.leftRect_),
+            CombineSafeAreaBySide(topRect_, other.topRect_), CombineSafeAreaBySide(rightRect_, other.rightRect_),
+            CombineSafeAreaBySide(bottomRect_, other.bottomRect_));
+    }
+
+    Rect CombineSafeAreaBySide(const Rect& rectX, const Rect& rectY) const
+    {
+        if (rectX.IsValid()) {
+            if (rectY.IsValid()) {
+                return rectX.CombineRect(rectY);
+            } else {
+                return rectX;
+            }
+        } else {
+            if (rectY.IsValid()) {
+                return rectY;
+            } else {
+                return Rect(0.0, 0.0, 0.0, 0.0);
+            }
+        }
     }
 };
 

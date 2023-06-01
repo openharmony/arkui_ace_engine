@@ -1342,24 +1342,24 @@ void AceContainer::InitWindowCallback()
 // Get SafeArea by Window
 SafeAreaEdgeInserts AceContainer::GetViewSafeArea(sptr<OHOS::Rosen::Window> window)
 {
-    SafeAreaEdgeInserts viewSafeArea;
-    CHECK_NULL_RETURN_NOLOG(window, viewSafeArea);
-
+    SafeAreaEdgeInserts systemSafeArea;
+    SafeAreaEdgeInserts cutoutSafeArea;
+    CHECK_NULL_RETURN_NOLOG(window, systemSafeArea);
     Rosen::AvoidArea systemAvoidArea;
     Rosen::AvoidArea cutoutAvoidArea;
     Rosen::WMError systemRet = window->GetAvoidAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM, systemAvoidArea);
     Rosen::WMError cutoutRet = window->GetAvoidAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT, cutoutAvoidArea);
-    Rect topRect;
     Rect leftRect;
+    Rect topRect;
     Rect rightRect;
     Rect bottomRect;
     if (systemRet == Rosen::WMError::WM_OK) {
-        topRect = Rect(static_cast<double>(systemAvoidArea.topRect_.posX_),
-            static_cast<double>(systemAvoidArea.topRect_.posY_), static_cast<double>(systemAvoidArea.topRect_.width_),
-            static_cast<double>(systemAvoidArea.topRect_.height_));
         leftRect = Rect(static_cast<double>(systemAvoidArea.leftRect_.posX_),
             static_cast<double>(systemAvoidArea.leftRect_.posY_), static_cast<double>(systemAvoidArea.leftRect_.width_),
             static_cast<double>(systemAvoidArea.leftRect_.height_));
+        topRect = Rect(static_cast<double>(systemAvoidArea.topRect_.posX_),
+            static_cast<double>(systemAvoidArea.topRect_.posY_), static_cast<double>(systemAvoidArea.topRect_.width_),
+            static_cast<double>(systemAvoidArea.topRect_.height_));
         rightRect = Rect(static_cast<double>(systemAvoidArea.rightRect_.posX_),
             static_cast<double>(systemAvoidArea.rightRect_.posY_),
             static_cast<double>(systemAvoidArea.rightRect_.width_),
@@ -1368,25 +1368,26 @@ SafeAreaEdgeInserts AceContainer::GetViewSafeArea(sptr<OHOS::Rosen::Window> wind
             static_cast<double>(systemAvoidArea.bottomRect_.posY_),
             static_cast<double>(systemAvoidArea.bottomRect_.width_),
             static_cast<double>(systemAvoidArea.bottomRect_.height_));
+        systemSafeArea.SetRect(leftRect, topRect, rightRect, bottomRect);
     }
     if (cutoutRet == Rosen::WMError::WM_OK) {
-        topRect = topRect.CombineRect(Rect(static_cast<double>(cutoutAvoidArea.topRect_.posX_),
-            static_cast<double>(cutoutAvoidArea.topRect_.posY_), static_cast<double>(cutoutAvoidArea.topRect_.width_),
-            static_cast<double>(cutoutAvoidArea.topRect_.height_)));
-        leftRect = leftRect.CombineRect(Rect(static_cast<double>(cutoutAvoidArea.leftRect_.posX_),
+        leftRect = Rect(static_cast<double>(cutoutAvoidArea.leftRect_.posX_),
             static_cast<double>(cutoutAvoidArea.leftRect_.posY_), static_cast<double>(cutoutAvoidArea.leftRect_.width_),
-            static_cast<double>(cutoutAvoidArea.leftRect_.height_)));
-        rightRect = rightRect.CombineRect(Rect(static_cast<double>(cutoutAvoidArea.rightRect_.posX_),
+            static_cast<double>(cutoutAvoidArea.leftRect_.height_));
+        topRect = Rect(static_cast<double>(cutoutAvoidArea.topRect_.posX_),
+            static_cast<double>(cutoutAvoidArea.topRect_.posY_), static_cast<double>(cutoutAvoidArea.topRect_.width_),
+            static_cast<double>(cutoutAvoidArea.topRect_.height_));
+        rightRect = Rect(static_cast<double>(cutoutAvoidArea.rightRect_.posX_),
             static_cast<double>(cutoutAvoidArea.rightRect_.posY_),
             static_cast<double>(cutoutAvoidArea.rightRect_.width_),
-            static_cast<double>(cutoutAvoidArea.rightRect_.height_)));
-        bottomRect = bottomRect.CombineRect(Rect(static_cast<double>(cutoutAvoidArea.bottomRect_.posX_),
+            static_cast<double>(cutoutAvoidArea.rightRect_.height_));
+        bottomRect = Rect(static_cast<double>(cutoutAvoidArea.bottomRect_.posX_),
             static_cast<double>(cutoutAvoidArea.bottomRect_.posY_),
             static_cast<double>(cutoutAvoidArea.bottomRect_.width_),
-            static_cast<double>(cutoutAvoidArea.bottomRect_.height_)));
+            static_cast<double>(cutoutAvoidArea.bottomRect_.height_));
+        cutoutSafeArea.SetRect(leftRect, topRect, rightRect, bottomRect);
     }
-    viewSafeArea.SetRect(leftRect, topRect, rightRect, bottomRect);
-    return viewSafeArea;
+    return systemSafeArea.CombineSafeArea(cutoutSafeArea);
 }
 
 SafeAreaEdgeInserts AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type)
