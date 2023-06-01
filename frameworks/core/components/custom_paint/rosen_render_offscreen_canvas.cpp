@@ -528,6 +528,7 @@ void RosenRenderOffscreenCanvas::DrawImage(const CanvasImage& canvasImage, doubl
         return;
     }
 
+#ifndef USE_ROSEN_DRAWING
     auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)
                         ? ImageProvider::GetSkImage(canvasImage.src, context, Size(width, height))
                         : ImageProvider::GetSkImage(canvasImage.src, context);
@@ -585,6 +586,64 @@ void RosenRenderOffscreenCanvas::DrawImage(const CanvasImage& canvasImage, doubl
 #endif
         cacheBitmap_.eraseColor(0);
     }
+#else
+    auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)
+                        ? ImageProvider::GetDrawingImage(canvasImage.src, context, Size(width, height))
+                        : ImageProvider::GetDrawingImage(canvasImage.src, context);
+    if (!image) {
+        LOGE("image is null");
+        return;
+    }
+    InitCachePaint();
+    const auto canvas =
+        globalState_.GetType() == CompositeOperation::SOURCE_OVER ? canvas_.get() : cacheCanvas_.get();
+    InitImagePaint();
+    if (HasImageShadow()) {
+        RSRect drawingRect = RSRect(canvasImage.dx, canvasImage.dy,
+            canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
+        RSRecordingPath path;
+        path.AddRect(drawingRect);
+        RosenDecorationPainter::PaintShadow(path, imageShadow_, canvas);
+    }
+
+    RSSamplingOptions sampling =
+        RSSamplingOptions(RSFilterMode::NEAREST, RSMipmapMode::NEAREST);
+
+    switch (canvasImage.flag) {
+        case 0:
+            canvas->DrawImage(*image, canvasImage.dx, canvasImage.dy, sampling);
+            break;
+        case 1: {
+            RSRect rect =
+                RSRect(canvasImage.dx, canvasImage.dy,
+                    canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
+            canvas->AttachBrush(imageBrush_);
+            canvas->DrawImageRect(*image, rect, sampling);
+            canvas->DetachBrush();
+            break;
+        }
+        case 2: {
+            RSRect dstRect =
+                RSRect(canvasImage.dx, canvasImage.dy,
+                    canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
+            RSRect srcRect =
+                RSRect(canvasImage.sx, canvasImage.sy,
+                    canvasImage.sWidth + canvasImage.sx, canvasImage.sHeight + canvasImage.sy);
+            canvas->AttachBrush(imageBrush_);
+            canvas->DrawImageRect(*image, srcRect, dstRect, sampling);
+            canvas->DetachBrush();
+            break;
+        }
+        default:
+            break;
+    }
+    if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
+        canvas_->AttachBrush(cacheBrush_);
+        canvas_->DrawBitmap(cacheBitmap_, 0, 0);
+        canvas_->DetachBrush();
+        cacheBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+    }
+#endif
 }
 
 void RosenRenderOffscreenCanvas::DrawPixelMap(RefPtr<PixelMap> pixelMap, const CanvasImage& canvasImage)
@@ -594,6 +653,7 @@ void RosenRenderOffscreenCanvas::DrawPixelMap(RefPtr<PixelMap> pixelMap, const C
         return;
     }
 
+#ifndef USE_ROSEN_DRAWING
     // get skImage form pixelMap
     auto imageInfo = ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
     SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
@@ -647,6 +707,61 @@ void RosenRenderOffscreenCanvas::DrawPixelMap(RefPtr<PixelMap> pixelMap, const C
 #endif
         cacheBitmap_.eraseColor(0);
     }
+#else
+    // get Image form pixelMap
+    RSPixmap imagePixmap;
+    RSPixmapFormat format;
+    imagePixmap.Build(reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes(), format);
+
+    // Step2: Create Image and draw it, using gpu or cpu
+    std::shared_ptr<RSImage> image;
+
+    image->BuildFromPixmap(imagePixmap);
+    if (!image) {
+        LOGE("image is null");
+        return;
+    }
+
+    InitCachePaint();
+    const auto drawingCanvas =
+        globalState_.GetType() == CompositeOperation::SOURCE_OVER ? canvas_.get() : cacheCanvas_.get();
+    InitImagePaint();
+    RSSamplingOptions sampling =
+        RSSamplingOptions(RSFilterMode::NEAREST, RSMipmapMode::NEAREST);
+    switch (canvasImage.flag) {
+        case 0:
+            drawingCanvas->DrawImage(*image, canvasImage.dx, canvasImage.dy, sampling);
+            break;
+        case 1: {
+            RSRect rect = RSRect(canvasImage.dx, canvasImage.dy,
+                canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
+            drawingCanvas->AttachBrush(imageBrush_);
+            drawingCanvas->DrawImageRect(*image, rect, sampling);
+            drawingCanvas->DetachBrush();
+            break;
+        }
+        case 2: {
+            RSRect dstRect =
+                RSRect(canvasImage.dx, canvasImage.dy,
+                    canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
+            RSRect srcRect =
+                RSRect(canvasImage.sx, canvasImage.sy,
+                    canvasImage.sWidth + canvasImage.sx, canvasImage.sHeight + canvasImage.sy);
+            drawingCanvas->AttachBrush(imageBrush_);
+            drawingCanvas->DrawImageRect(*image, srcRect, dstRect, sampling);
+            drawingCanvas->DetachBrush();
+            break;
+        }
+        default:
+            break;
+    }
+    if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
+        canvas_->AttachBrush(cacheBrush_);
+        canvas_->DrawBitmap(cacheBitmap_, 0, 0);
+        canvas_->DetachBrush();
+        cacheBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+    }
+#endif
 }
 
 std::unique_ptr<ImageData> RosenRenderOffscreenCanvas::GetImageData(double left, double top,
@@ -658,6 +773,7 @@ std::unique_ptr<ImageData> RosenRenderOffscreenCanvas::GetImageData(double left,
         viewScale = pipeline->GetViewScale();
     }
     // copy the bitmap to tempCanvas
+#ifndef USE_ROSEN_DRAWING
     auto imageInfo =
         SkImageInfo::Make(width, height, SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
     double scaledLeft = left * viewScale;
@@ -679,6 +795,27 @@ std::unique_ptr<ImageData> RosenRenderOffscreenCanvas::GetImageData(double left,
     // write color
     std::unique_ptr<uint8_t[]> pixels = std::make_unique<uint8_t[]>(size * 4);
     tempCanvas.readPixels(imageInfo, pixels.get(), dirtyWidth * imageInfo.bytesPerPixel(), 0, 0);
+#else
+    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888,
+        RSAlphaType::ALPHATYPE_OPAQUE };
+    RSBitmap bitmap;
+    bitmap.Build(width, height, format);
+    double scaledLeft = left * viewScale;
+    double scaledTop = top * viewScale;
+    double dirtyWidth = width >= 0 ? width : 0;
+    double dirtyHeight = height >= 0 ? height : 0;
+    int32_t size = dirtyWidth * dirtyHeight;
+    auto srcRect = RSRect(scaledLeft, scaledTop,
+        width * viewScale + scaledLeft, height * viewScale + scaledTop);
+    auto dstRect = RSRect(0.0, 0.0, dirtyWidth, dirtyHeight);
+    RSCanvas tempCanvas;
+    tempCanvas.Bind(tempCache);
+    RSSamplingOptions sampling =
+        RSSamplingOptions(RSFilterMode::NEAREST, RSMipmapMode::NEAREST);
+    tempCanvas.DrawBitmapRect(bitmap_, srcRect, dstRect, sampling);
+    // write color
+    canvas_->Bind(bitmap);
+#endif
     std::unique_ptr<ImageData> imageData = std::make_unique<ImageData>();
     imageData->dirtyWidth = dirtyWidth;
     imageData->dirtyHeight = dirtyHeight;
@@ -696,13 +833,21 @@ std::unique_ptr<ImageData> RosenRenderOffscreenCanvas::GetImageData(double left,
 void RosenRenderOffscreenCanvas::Save()
 {
     SaveStates();
+#ifndef USE_ROSEN_DRAWING
     skCanvas_->save();
+#else
+    canvas_->Save();
+#endif
 }
 
 void RosenRenderOffscreenCanvas::Restore()
 {
     RestoreStates();
+#ifndef USE_ROSEN_DRAWING
     skCanvas_->restore();
+#else
+    canvas_->Restore();
+#endif
 }
 
 std::string RosenRenderOffscreenCanvas::ToDataURL(const std::string& type, const double quality)
@@ -713,6 +858,7 @@ std::string RosenRenderOffscreenCanvas::ToDataURL(const std::string& type, const
     }
     std::string mimeType = GetMimeType(type);
     double qua = GetQuality(type, quality);
+#ifndef USE_ROSEN_DRAWING
     SkBitmap tempCache;
     tempCache.allocPixels(SkImageInfo::Make(width_, height_, SkColorType::kBGRA_8888_SkColorType,
         (mimeType == IMAGE_JPEG) ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kUnpremul_SkAlphaType));
@@ -762,9 +908,13 @@ std::string RosenRenderOffscreenCanvas::ToDataURL(const std::string& type, const
     }
     SkString info(len);
     SkBase64::Encode(result->data(), result->size(), info.writable_str());
+#else
+    // TODO Drawing : SkDynamicMemoryWStream SkWebpEncoder SkBase64
+#endif
     return std::string(URL_PREFIX).append(mimeType).append(URL_SYMBOL).append(info.c_str());
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderOffscreenCanvas::UpdatePaintShader(SkPaint& paint, const Gradient& gradient)
 {
     SkPoint beginPoint = SkPoint::Make(SkDoubleToScalar(gradient.GetBeginOffset().GetX()),
@@ -804,17 +954,64 @@ void RosenRenderOffscreenCanvas::UpdatePaintShader(SkPaint& paint, const Gradien
     }
     paint.setShader(skShader);
 }
+#else
+void RosenRenderOffscreenCanvas::UpdatePaintShader(RSPen& pen, const Gradient& gradient)
+{
+    RSPoint beginPoint =
+        RSPoint(static_cast<RSScalar>(gradient.GetBeginOffset().GetX()),
+            static_cast<RSScalar>(gradient.GetBeginOffset().GetY()));
+    RSPoint endPoint =
+        RSPoint(static_cast<RSScalar>(gradient.GetEndOffset().GetX()),
+            static_cast<RSScalar>(gradient.GetEndOffset().GetY()));
+    std::vector<RSPoint> pts = { beginPoint, endPoint };
+    auto gradientColors = gradient.GetColors();
+    std::stable_sort(gradientColors.begin(), gradientColors.end(),
+        [](auto& colorA, auto& colorB) { return colorA.GetDimension() < colorB.GetDimension(); });
+    uint32_t colorsSize = gradientColors.size();
+    std::vector<RSColorQuad> colors(gradientColors.size(), 0);
+    std::vector<RSScalar> pos(gradientColors.size(), 0);
+    for (uint32_t i = 0; i < colorsSize; ++i) {
+        const auto& gradientColor = gradientColors[i];
+        colors.at(i) = gradientColor.GetColor().GetValue();
+        pos.at(i) = gradientColor.GetDimension().Value();
+    }
+
+    auto mode = RSTileMode::CLAMP;
+    std::shared_ptr<RSShaderEffect> shaderEffect = nullptr;
+    if (gradient.GetType() == GradientType::LINEAR) {
+        shaderEffect = RSShaderEffect::CreateLinearGradient(pts.at(0), pts.at(1), colors, pos, mode);
+    } else {
+        if (gradient.GetInnerRadius() <= 0.0 && beginPoint == endPoint) {
+            shaderEffect = RSShaderEffect::CreateRadialGradient(
+                pts.at(1), gradient.GetOuterRadius(), colors, pos, mode);
+        } else {
+            shaderEffect = RSShaderEffect::CreateTwoPointConical(
+                pts.at(0), gradient.GetInnerRadius(), pts.at(1), gradient.GetOuterRadius(), colors, pos, mode);
+        }
+    }
+    pen.SetShaderEffect(shaderEffect);
+}
+#endif
 
 void RosenRenderOffscreenCanvas::BeginPath()
 {
+#ifndef USE_ROSEN_DRAWING
     skPath_.reset();
+#else
+    path_.Reset();
+#endif
 }
 
 void RosenRenderOffscreenCanvas::ResetTransform()
 {
+#ifndef USE_ROSEN_DRAWING
     skCanvas_->resetMatrix();
+#else
+    canvas_->ResetMatrix();
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderOffscreenCanvas::UpdatePaintShader(const Pattern& pattern, SkPaint& paint)
 {
     auto context = pipelineContext_.Upgrade();
@@ -879,6 +1076,65 @@ void RosenRenderOffscreenCanvas::UpdatePaintShader(const Pattern& pattern, SkPai
         staticPattern[operatorIter].value(image, paint);
     }
 }
+#else
+void RosenRenderOffscreenCanvas::UpdatePaintShader(const Pattern& pattern, RSPen& pen)
+{
+    auto context = pipelineContext_.Upgrade();
+    if (!context) {
+        return;
+    }
+
+    auto width = pattern.GetImageWidth();
+    auto height = pattern.GetImageHeight();
+    auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)
+                     ? ImageProvider::GetDrawingImage(pattern.GetImgSrc(), context, Size(width, height))
+                     : ImageProvider::GetDrawingImage(pattern.GetImgSrc(), context);
+    if (!image) {
+        LOGE("image is null");
+        return;
+    }
+    static const LinearMapNode<void (*)(std::shared_ptr<RSImage>, RSPen&)>
+        staticPattern[] = {
+            { "no-repeat",
+                [](std::shared_ptr<RSImage> image, RSBrush& pen) {
+                    pen.SetShaderEffect(RSShaderEffect::CreateImageShader(*image,
+                        RSTileMode::DECAL, RSTileMode::DECAL,
+                        RSSamplingOptions(
+                            RSFilterMode::NEAREST, RSMipmapMode::NEAREST),
+                        RSMatrix()));
+                } },
+            { "repeat",
+                [](std::shared_ptr<RSImage> image, RSBrush& pen) {
+                    pen.SetShaderEffect(RSShaderEffect::CreateImageShader(*image,
+                        RSTileMode::REPEAT, RSTileMode::REPEAT,
+                        RSSamplingOptions(
+                            RSFilterMode::NEAREST, RSMipmapMode::NEAREST),
+                        RSMatrix()));
+                } },
+            { "repeat-x",
+                [](std::shared_ptr<RSImage> image, RSBrush& pen) {
+                    pen.SetShaderEffect(RSShaderEffect::CreateImageShader(*image,
+                        RSTileMode::REPEAT, RSTileMode::DECAL,
+                        RSSamplingOptions(
+                            RSFilterMode::NEAREST, RSMipmapMode::NEAREST),
+                        RSMatrix()));
+                } },
+            { "repeat-y",
+                [](std::shared_ptr<RSImage> image, RSBrush& pen) {
+                    pen.SetShaderEffect(RSShaderEffect::CreateImageShader(*image,
+                        RSTileMode::DECAL, RSTileMode::REPEAT,
+                        RSSamplingOptions(
+                            RSFilterMode::NEAREST, RSMipmapMode::NEAREST),
+                        RSMatrix()));
+                } },
+        };
+    auto operatorIter = BinarySearchFindIndex(staticPattern, ArraySize(staticPattern), pattern.GetRepetition().c_str());
+    if (operatorIter != -1) {
+        staticPattern[operatorIter].value(image, pen);
+    }
+}
+#endif
+
 void RosenRenderOffscreenCanvas::Arc(const ArcParam& param)
 {
     double left = param.x - param.radius;
