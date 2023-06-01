@@ -57,57 +57,40 @@ void WindowScene::OnForeground()
 {
     CHECK_NULL_VOID(snapshotNode_);
 
-    auto uiTask = [weakThis = WeakClaim(this)]() {
-        auto windowScene = weakThis.Upgrade();
-        CHECK_NULL_VOID(windowScene);
-
-        auto host = windowScene->GetHost();
-        CHECK_NULL_VOID(host);
-
-        host->RemoveChild(windowScene->snapshotNode_);
-        windowScene->snapshotNode_.Reset();
-
-        host->AddChild(windowScene->contentNode_);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    };
-
     ContainerScope scope(instanceId_);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    host->RemoveChild(snapshotNode_);
+    snapshotNode_.Reset();
+    host->AddChild(contentNode_);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void WindowScene::OnBackground()
 {
-    auto uiTask = [weakThis = WeakClaim(this)]() {
-        auto windowScene = weakThis.Upgrade();
-        CHECK_NULL_VOID(windowScene);
-
-        windowScene->snapshotNode_ = FrameNode::CreateFrameNode(
-            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-        auto imageLayoutProperty = windowScene->snapshotNode_->GetLayoutProperty<ImageLayoutProperty>();
-        imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        windowScene->snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
-
-        auto host = windowScene->GetHost();
-        CHECK_NULL_VOID(host);
-        host->RemoveChild(windowScene->contentNode_);
-        host->AddChild(windowScene->snapshotNode_);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
-        CHECK_NULL_VOID(windowScene->session_);
-        auto snapshot = windowScene->session_->GetSnapshot();
-        auto pixelMap = PixelMap::CreatePixelMap(&snapshot);
-
-        CHECK_NULL_VOID(pixelMap);
-        imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
-        imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
-        windowScene->snapshotNode_->MarkModifyDone();
-    };
-
     ContainerScope scope(instanceId_);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
+
+    snapshotNode_ = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    auto imageLayoutProperty = snapshotNode_->GetLayoutProperty<ImageLayoutProperty>();
+    imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChild(contentNode_);
+    host->AddChild(snapshotNode_);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+    CHECK_NULL_VOID(session_);
+    auto snapshot = session_->GetSnapshot();
+    auto pixelMap = PixelMap::CreatePixelMap(&snapshot);
+
+    CHECK_NULL_VOID(pixelMap);
+    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
+    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
+    snapshotNode_->MarkModifyDone();
 }
 } // namespace OHOS::Ace::NG

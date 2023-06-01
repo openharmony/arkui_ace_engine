@@ -24,6 +24,7 @@
 #include "ui/rs_surface_node.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/window_extension.h"
 #include "core/components_ng/pattern/window_scene/scene/window_node.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
@@ -60,7 +61,7 @@ public:
 HWTEST_F(WindowPatternTest, WindowPatternTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create WindowPatternModel.
+     * @tc.steps: step1. Create WindowSceneModel.
      */
     auto model = WindowSceneModel();
     uint64_t persistentId = 0;
@@ -79,7 +80,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest001, TestSize.Level1)
 HWTEST_F(WindowPatternTest, WindowPatternTest002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create WindowPatternModel.
+     * @tc.steps: step1. Create WindowSceneModel.
      */
     auto model = WindowSceneModel();
 
@@ -104,7 +105,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest002, TestSize.Level1)
 HWTEST_F(WindowPatternTest, WindowPatternTest003, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create WindowPatternModel.
+     * @tc.steps: step1. Create WindowSceneModel.
      */
     MockPipelineBase::SetUp();
     MockContainer::SetUp();
@@ -148,7 +149,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest003, TestSize.Level1)
 HWTEST_F(WindowPatternTest, WindowPatternTest004, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create WindowPatternModel.
+     * @tc.steps: step1. Create WindowSceneModel.
      */
     MockPipelineBase::SetUp();
     MockContainer::SetUp();
@@ -207,7 +208,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest004, TestSize.Level1)
 HWTEST_F(WindowPatternTest, WindowPatternTest005, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create WindowPatternModel.
+     * @tc.steps: step1. Create WindowSceneModel.
      */
     MockPipelineBase::SetUp();
     MockContainer::SetUp();
@@ -250,7 +251,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest005, TestSize.Level1)
 HWTEST_F(WindowPatternTest, WindowPatternTest006, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create WindowPatternModel.
+     * @tc.steps: step1. Create WindowSceneModel.
      */
     MockPipelineBase::SetUp();
     MockContainer::SetUp();
@@ -373,5 +374,34 @@ HWTEST_F(WindowPatternTest, WindowPatternTest009, TestSize.Level1)
     auto frameNode3 = WindowNode::GetOrCreateWindowNode("WindowNode2", NODE_ID,
         []() { return AceType::MakeRefPtr<WindowExtension>(BUNDLE_NAME, ABILITY_NAME); });
     EXPECT_NE(frameNode2, frameNode3);
+}
+
+/**
+ * @tc.name: WindowPatternTest010
+ * @tc.desc: WindowPattern test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternTest, WindowPatternTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create WindowSceneModel.
+     */
+    auto model = WindowSceneModel();
+
+    Rosen::SessionInfo sessionInfo = {
+        .bundleName_ = BUNDLE_NAME,
+        .abilityName_ = ABILITY_NAME,
+        .isSystem_ = true
+    };
+    auto session = Rosen::SceneSessionManager::GetInstance().RequestSceneSession(sessionInfo);
+    uint64_t persistentId = session->GetPersistentId();
+    model.Create(persistentId);
+
+    auto frameNode =
+        AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    EXPECT_NE(frameNode, nullptr);
+
+    auto pattern = frameNode->GetPattern<SystemWindowScene>();
+    ASSERT_NE(pattern, nullptr);
 }
 } // namespace OHOS::Ace::NG
