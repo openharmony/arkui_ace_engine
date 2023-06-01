@@ -36,7 +36,7 @@ void WindowSceneModel::Create(uint64_t persistentId)
         auto stack = ViewStackProcessor::GetInstance();
         auto nodeId = stack->ClaimNodeId();
         auto node = FrameNode::GetOrCreateFrameNode(V2::WINDOW_SCENE_ETS_TAG, nodeId,
-            [&sceneSession]() { return AceType::MakeRefPtr<SystemWindowScene>(sceneSession); });
+            [sceneSession]() { return AceType::MakeRefPtr<SystemWindowScene>(sceneSession); });
         stack->Push(node);
         return;
     }
@@ -44,7 +44,7 @@ void WindowSceneModel::Create(uint64_t persistentId)
     auto stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto windowNode = WindowNode::GetOrCreateWindowNode(V2::WINDOW_SCENE_ETS_TAG, nodeId,
-        [&sceneSession]() { return AceType::MakeRefPtr<WindowScene>(sceneSession); });
+        [sceneSession]() { return AceType::MakeRefPtr<WindowScene>(sceneSession); });
     stack->Push(windowNode);
 
     auto windowScene = windowNode->GetPattern<WindowScene>();

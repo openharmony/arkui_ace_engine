@@ -20,22 +20,6 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
 namespace OHOS::Ace::NG {
-SystemWindowScene::SystemWindowScene(const sptr<Rosen::SceneSession>& session) : session_(session)
-{
-    CHECK_NULL_VOID(session_);
-    auto sessionInfo = session_->GetSessionInfo();
-    LOGD("SystemWindowScene: bundleName: %{public}s, abilityName: %{public}s",
-        sessionInfo.bundleName_.c_str(), sessionInfo.abilityName_.c_str());
-}
-
-SystemWindowScene::~SystemWindowScene()
-{
-    CHECK_NULL_VOID(session_);
-    auto sessionInfo = session_->GetSessionInfo();
-    LOGD("~SystemWindowScene: bundleName: %{public}s, abilityName: %{public}s",
-        sessionInfo.bundleName_.c_str(), sessionInfo.abilityName_.c_str());
-}
-
 void SystemWindowScene::OnAttachToFrameNode()
 {
     CHECK_NULL_VOID(session_);

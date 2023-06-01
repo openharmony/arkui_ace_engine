@@ -25,8 +25,8 @@ class SystemWindowScene : public StackPattern {
     DECLARE_ACE_TYPE(SystemWindowScene, StackPattern);
 
 public:
-    SystemWindowScene(const sptr<Rosen::SceneSession>& session);
-    ~SystemWindowScene() override;
+    explicit SystemWindowScene(const sptr<Rosen::SceneSession>& session) : session_(session) {}
+    ~SystemWindowScene() override = default;
 
     bool UseExternalRSNode() const override
     {
