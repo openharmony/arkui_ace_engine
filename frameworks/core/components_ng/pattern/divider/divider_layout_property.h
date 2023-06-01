@@ -45,7 +45,7 @@ public:
     {
         LayoutProperty::ToJsonValue(json);
         json->Put("vertical", propVertical_.value_or(true) ? "true" : "false");
-        json->Put("strokeWidth", propStrokeWidth_.value_or(Dimension(1, DimensionUnit::PX)).ToString().c_str());
+        json->Put("strokeWidth", propStrokeWidth_.value_or(Dimension(1, DimensionUnit::VP)).ToString().c_str());
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override
