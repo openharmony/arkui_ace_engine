@@ -2578,6 +2578,7 @@ void RosenRenderContext::ClickEffectPlayAnimation(const TouchType& touchType)
         auto defaultScale = VectorF(1.0f, 1.0f);
         auto currentScale = GetTransformScaleValue(defaultScale);
         currentScale_ = currentScale;
+        UpdateTransformScale(currentScale_);
         AnimationUtils::OpenImplicitAnimation(option, springCurve, nullptr);
         VectorF valueScale(scaleValue, scaleValue);
         UpdateTransformScale(valueScale);
