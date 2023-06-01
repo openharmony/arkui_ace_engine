@@ -208,6 +208,9 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("pan recognizer receives touch move event");
+    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
+        return;
+    }
     globalPoint_ = Point(event.x, event.y);
     lastTouchEvent_ = event;
     delta_ = (event.GetOffset() - touchPoints_[event.id].GetOffset()) / touchPoints_.size();
