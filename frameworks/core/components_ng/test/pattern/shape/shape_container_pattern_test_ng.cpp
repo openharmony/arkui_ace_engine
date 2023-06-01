@@ -48,6 +48,9 @@ const float TOP = -30.0f;
 const float ZERO = 0.0;
 const int32_t COLUMN = 2;
 const int32_t ROW = 3;
+static constexpr double STROKE_MITERLIMIT_FIRST = -0.1f;
+static constexpr double STROKE_MITERLIMIT_SECONG = 0.0f;
+static constexpr double STROKE_MITERLIMIT_THIRD = 4.0f;
 SizeF sizeF(80.0f, 20.0f);
 std::vector<double> MESH = { 1, 2, 4, 6, 4, 2, 1, 3, 5, 1, 3, 5, 6, 3, 2, 2, 4, 5, 5, 3, 2, 2, 2, 4 };
 } // namespace
@@ -180,5 +183,54 @@ HWTEST_F(ShapeContainerPatternTestNg, ViewPortTransform001, TestSize.Level1)
     auto context = node->GetRenderContext();
     EXPECT_EQ(context->HasOffset(), false);
     ViewStackProcessor::GetInstance()->Pop();
+}
+
+/**
+ * @tc.name: ViewPortTransform
+ * @tc.desc: check ShapeContainerPattern OnModifyDone
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ShapeContainerPatternTestNg, OnModifyDone001, TestSize.Level1)
+{
+    auto shapeModel01 = ShapeModelNG();
+    shapeModel01.Create();
+    RefPtr<UINode> uiNode01 = ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<FrameNode> frameNode01 = AceType::DynamicCast<FrameNode>(uiNode01);
+    auto pattern01 = frameNode01->GetPattern<ShapeContainerPattern>();
+    auto paintProperty01 = frameNode01->GetPaintProperty<ShapeContainerPaintProperty>();
+    /**
+     * @tc.desc: Call OnModifyDone(HasStrokeMiterLimit = false; first_if = false;
+     *           !child = false; third = false)
+     */
+    WeakPtr<FrameNode> childNode = frameNode01;
+    pattern01->AddChildShapeNode(childNode);
+    pattern01->OnModifyDone();
+    EXPECT_EQ(paintProperty01->HasStrokeMiterLimit(), false);
+    /**
+     * @tc.desc: Call OnModifyDone(HasStrokeMiterLimit = true; first_if = true;
+     *           Negative = true; NonNegative = false; second_if = true;
+     */
+    paintProperty01->UpdateStrokeMiterLimit(STROKE_MITERLIMIT_FIRST);
+    pattern01->OnModifyDone();
+    EXPECT_EQ(paintProperty01->HasStrokeMiterLimit(), true);
+    EXPECT_EQ(paintProperty01->GetStrokeMiterLimitValue(), ShapePaintProperty::STROKE_MITERLIMIT_DEFAULT);
+    EXPECT_NE(paintProperty01->GetStrokeMiterLimitValue(), ShapePaintProperty::STROKE_MITERLIMIT_MIN);
+    /**
+     * @tc.desc: Call OnModifyDone(HasStrokeMiterLimit = true; first_if = true;
+     *           Negative = false; NonNegative = true; second_if = true;
+     */
+    paintProperty01->UpdateStrokeMiterLimit(STROKE_MITERLIMIT_SECONG);
+    pattern01->OnModifyDone();
+    EXPECT_NE(paintProperty01->GetStrokeMiterLimitValue(), ShapePaintProperty::STROKE_MITERLIMIT_DEFAULT);
+    EXPECT_EQ(paintProperty01->GetStrokeMiterLimitValue(), ShapePaintProperty::STROKE_MITERLIMIT_MIN);
+    /**
+     * @tc.desc: Call OnModifyDone(HasStrokeMiterLimit = true; first_if = true;
+     *           Negative = false; NonNegative = false; second_if = false;
+     */
+    paintProperty01->UpdateStrokeMiterLimit(STROKE_MITERLIMIT_THIRD);
+    pattern01->OnModifyDone();
+    EXPECT_EQ(paintProperty01->GetStrokeMiterLimitValue(), ShapePaintProperty::STROKE_MITERLIMIT_DEFAULT);
+    EXPECT_NE(paintProperty01->GetStrokeMiterLimitValue(), ShapePaintProperty::STROKE_MITERLIMIT_MIN);
 }
 }
