@@ -1072,6 +1072,7 @@ void TextFieldPattern::HandleBlurEvent()
         auto renderContext = GetHost()->GetRenderContext();
         renderContext->UpdateBorderRadius(borderRadius_);
     }
+    needToRequestKeyboardInner_ = false;
     StopTwinkling();
     CloseKeyboard(true);
     auto pos = static_cast<int32_t>(textEditingValue_.GetWideText().length());
