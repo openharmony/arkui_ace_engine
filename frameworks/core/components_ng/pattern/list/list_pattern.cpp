@@ -1287,13 +1287,17 @@ void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("multiSelectable", multiSelectable_);
     json->Put("startIndex", startIndex_);
-    json->Put("startMainPos", startMainPos_);
+    if (!itemPosition_.empty()) {
+        json->Put("itemStartPos", itemPosition_.begin()->second.startPos);
+    }
 }
 
 void ListPattern::FromJson(const std::unique_ptr<JsonValue>& json)
 {
     ScrollToIndex(json->GetInt("startIndex"));
-    ScrollBy(-json->GetDouble("startMainPos"));
+    if (json->Contains("itemStartPos")) {
+        ScrollBy(-json->GetDouble("itemStartPos"));
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->UpdateClipEdge(true);
