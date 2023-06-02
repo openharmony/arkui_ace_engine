@@ -133,6 +133,9 @@ int32_t SpanItem::UpdateParagraph(
         CHECK_NULL_RETURN(pipelineContext, -1);
         TextStyle textStyle =
             CreateTextStyleUsingTheme(fontStyle, textLineStyle, pipelineContext->GetTheme<TextTheme>());
+        if (NearZero(textStyle.GetFontSize().Value())) {
+            return -1;
+        }
         builder->PushStyle(textStyle);
     }
     auto displayText = content;
