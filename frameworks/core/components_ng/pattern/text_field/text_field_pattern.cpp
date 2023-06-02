@@ -3944,6 +3944,9 @@ void TextFieldPattern::UpdateScrollBarOffset()
 
 bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
 {
+    if (source == SCROLL_FROM_START) {
+        return true;
+    }
     auto scrollBar = GetScrollBar();
     if (scrollBar && scrollBar->IsDriving()) {
         offset = scrollBar->CalcPatternOffset(offset);
