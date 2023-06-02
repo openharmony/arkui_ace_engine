@@ -421,6 +421,8 @@ build_component_ng("pattern_ng") {
     "time_picker/timepicker_row_accessibility_property.cpp",
     "time_picker/timepicker_row_pattern.cpp",
     "time_picker/toss_animation_controller.cpp",
+    "toast/toast_layout_algorithm.cpp",
+    "toast/toast_pattern.cpp",
     "toast/toast_view.cpp",
     "toggle/switch_accessibility_property.cpp",
     "toggle/switch_layout_algorithm.cpp",
