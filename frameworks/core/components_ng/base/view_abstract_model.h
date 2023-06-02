@@ -158,6 +158,8 @@ public:
     // effects
     virtual void SetMask(const RefPtr<BasicShape>& shape) = 0;
     virtual void SetBackdropBlur(const Dimension& radius) = 0;
+    virtual void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) = 0;
+    
     virtual void SetFrontBlur(const Dimension& radius) = 0;
     virtual void SetBackShadow(const std::vector<Shadow>& shadows) = 0;
     virtual void SetColorBlend(const Color& value) = 0;

@@ -2871,6 +2871,69 @@ void JSViewAbstract::JsBackdropBlur(const JSCallbackInfo& info)
     info.SetReturnValue(info.This());
 }
 
+void JSViewAbstract::JsLinearGradientBlur(const JSCallbackInfo& info)
+{
+    LOGE("[PP TS]JSViewAbstract::JsLinearGradientBlur: info length: %{public}d", info.Length());
+    if (info.Length() < 2) {
+        LOGE("The argv is wrong, it is supposed to have at least 2 argument");
+        return;
+    }
+    double blurRadius = 0.0;
+    if (!ParseJsDouble(info[0], blurRadius)) {
+        return;
+    }
+
+    if(!info[1]->IsObject()) {
+        LOGE("arg is not a object.");
+    }
+    auto argsPtrItem = JsonUtil::ParseJsonString(info[1]->ToString());
+    if (!argsPtrItem || argsPtrItem->IsNull()) {
+        LOGE("Js Parse object failed. argsPtr is null. %s", info[1]->ToString().c_str());
+        info.ReturnSelf();
+        return;
+    }
+    
+    // Parse fractionStops
+    auto array = argsPtrItem->GetValue("fractionStops");
+    if (!array || array->IsNull() || !array->IsArray()) {
+        LOGE("Js Parse object failed, fractionStops is null or not Array");
+        return;
+    }
+
+    std::vector<std::array<float, 2>> fractionStops; 
+    for (int32_t i = 0; i < array->GetArraySize(); i++) {
+        std::array<float, 2> fractionArray;
+        auto item = array->GetArrayItem(i);
+        if (item && !item->IsNull() && item->IsArray() && item->GetArraySize() >= 1) {
+            auto fraction = item->GetArrayItem(0);
+            double value = 0.0;
+            if (ParseJsonDouble(fraction, value)) {
+                value = std::clamp(value, 0.0, 1.0);
+                fractionArray[0] = static_cast<float>(value);
+            }
+
+            auto stop = item->GetArrayItem(1);
+            value = 0.0;
+            if (ParseJsonDouble(stop, value)) {
+                value = std::clamp(value, 0.0, 1.0);
+                fractionArray[1] = static_cast<float>(value);
+            }
+        }
+        LOGE("[PP TS]JSViewAbstract::JsGradientBlur: i: %{public}d, fraction: %{public}f, stop: %{public}f", i, fractionArray[0], fractionArray[1]);
+
+        fractionStops.push_back(fractionArray);
+    }
+    // Parse direction
+    auto direction = static_cast<GradientDirection>(argsPtrItem->GetInt("direction", 
+                                                    static_cast<int32_t>(GradientDirection::NONE)));
+
+    CalcDimension dimensionRadius(static_cast<float>(blurRadius), DimensionUnit::PX);
+    NG::LinearGradientBlurPara blurPara(dimensionRadius, fractionStops, static_cast<NG::GradientDirection>(direction));
+    LOGE("[PP TS]JSViewAbstract::JsGradientBlur: blurRadius: %{public}f, direction: %{public}d", static_cast<float>(blurRadius), static_cast<int>(direction));
+    SetLinearGradientBlur(blurPara);
+    info.SetReturnValue(info.This());
+}
+
 void JSViewAbstract::JsWindowBlur(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
@@ -4965,6 +5028,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("blur", &JSViewAbstract::JsBlur);
     JSClass<JSViewAbstract>::StaticMethod("colorBlend", &JSViewAbstract::JsColorBlend);
     JSClass<JSViewAbstract>::StaticMethod("backdropBlur", &JSViewAbstract::JsBackdropBlur);
+    JSClass<JSViewAbstract>::StaticMethod("linearGradientBlur", &JSViewAbstract::JsLinearGradientBlur);
     JSClass<JSViewAbstract>::StaticMethod("windowBlur", &JSViewAbstract::JsWindowBlur);
     JSClass<JSViewAbstract>::StaticMethod("visibility", &JSViewAbstract::SetVisibility);
     JSClass<JSViewAbstract>::StaticMethod("flexBasis", &JSViewAbstract::JsFlexBasis);
@@ -5223,6 +5287,11 @@ void JSViewAbstract::SetBackdropBlur(float radius)
 {
     CalcDimension dimensionRadius(radius, DimensionUnit::PX);
     ViewAbstractModel::GetInstance()->SetBackdropBlur(dimensionRadius);
+}
+
+void JSViewAbstract::SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara)
+{
+    ViewAbstractModel::GetInstance()->SetLinearGradientBlur(blurPara);
 }
 
 void JSViewAbstract::SetWindowBlur(float progress, WindowBlurStyle blurStyle)

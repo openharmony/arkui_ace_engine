@@ -116,6 +116,7 @@ public:
     static void JsBlur(const JSCallbackInfo& info);
     static void JsColorBlend(const JSCallbackInfo& info);
     static void JsBackdropBlur(const JSCallbackInfo& info);
+    static void JsLinearGradientBlur(const JSCallbackInfo& info);
     static void JsWindowBlur(const JSCallbackInfo& info);
     static void JsFlexBasis(const JSCallbackInfo& info);
     static void JsFlexGrow(const JSCallbackInfo& info);
@@ -296,6 +297,7 @@ public:
     static void SetBlur(float radius);
     static void SetColorBlend(Color color);
     static void SetBackdropBlur(float radius);
+    static void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara);
     static void SetWindowBlur(float progress, WindowBlurStyle blurStyle);
     static RefPtr<ThemeConstants> GetThemeConstants(const JSRef<JSObject>& jsObj = JSRef<JSObject>());
     static bool JsWidth(const JSRef<JSVal>& jsValue);
