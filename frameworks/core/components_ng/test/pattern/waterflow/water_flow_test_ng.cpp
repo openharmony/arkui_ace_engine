@@ -310,12 +310,16 @@ HWTEST_F(WaterFlowTestNg, Property003, TestSize.Level1)
     RunMeasureAndLayout();
 
     EXPECT_EQ(layoutProperty_->GetWaterflowDirectionStr(), "FlexDirection.Column");
+    EXPECT_FALSE(layoutProperty_->IsReverse());
+    EXPECT_EQ(layoutProperty_->GetAxis(), Axis::VERTICAL);
     layoutProperty_->UpdateWaterflowDirection(FlexDirection::ROW);
     EXPECT_EQ(layoutProperty_->GetWaterflowDirectionStr(), "FlexDirection.Row");
     layoutProperty_->UpdateWaterflowDirection(FlexDirection::COLUMN_REVERSE);
     EXPECT_EQ(layoutProperty_->GetWaterflowDirectionStr(), "FlexDirection.ColumnReverse");
     layoutProperty_->UpdateWaterflowDirection(FlexDirection::ROW_REVERSE);
     EXPECT_EQ(layoutProperty_->GetWaterflowDirectionStr(), "FlexDirection.RowReverse");
+    EXPECT_TRUE(layoutProperty_->IsReverse());
+    EXPECT_EQ(layoutProperty_->GetAxis(), Axis::HORIZONTAL);
 }
 
 /**
@@ -335,6 +339,60 @@ HWTEST_F(WaterFlowTestNg, Property004, TestSize.Level1)
     RunMeasureAndLayout();
 
     EXPECT_NE(pattern_->controller_, nullptr);
+}
+
+/**
+ * @tc.name: Property005
+ * @tc.desc: Test auto row/col template.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Property005, TestSize.Level1)
+{
+    WaterFlowModelNG waterFlowModelNG;
+    waterFlowModelNG.Create();
+    waterFlowModelNG.SetRowsTemplate("auto");
+    waterFlowModelNG.SetColumnsTemplate("auto");
+    CreateWaterFlowItem(10);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    EXPECT_EQ(pattern_->GetColumns(), 1);
+    EXPECT_EQ(pattern_->GetRows(), 3);
+}
+
+/**
+ * @tc.name: Property006
+ * @tc.desc: Test repeat col template.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Property006, TestSize.Level1)
+{
+    WaterFlowModelNG waterFlowModelNG;
+    waterFlowModelNG.Create();
+    waterFlowModelNG.SetColumnsTemplate("repeat(3, 2fr)");
+    CreateWaterFlowItem(10);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    EXPECT_EQ(pattern_->GetRows(), 3);
+}
+
+/**
+ * @tc.name: Property007
+ * @tc.desc: Test auto-fill row/col template.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Property007, TestSize.Level1)
+{
+    WaterFlowModelNG waterFlowModelNG;
+    waterFlowModelNG.Create();
+    waterFlowModelNG.SetRowsTemplate("repeat(auto-fill, 72px)");
+    waterFlowModelNG.SetColumnsTemplate("repeat(auto-fill, 113px)");
+    CreateWaterFlowItem(10);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    EXPECT_TRUE(true);
 }
 
 /**
@@ -550,5 +608,117 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest010, TestSize.Level1)
     layoutWrapper = RunMeasureAndLayout(DEFAULT_ROOT_WIDTH, 200.f);
     EXPECT_FALSE(layoutWrapper->GetOrCreateChildByIndex(9, false)->IsActive());
     EXPECT_TRUE(layoutWrapper->GetOrCreateChildByIndex(0, false)->IsActive());
+}
+
+/**
+ * @tc.name: PositionControllerCoverage001
+ * @tc.desc: For Coverage Rate, branches that are not normally covered.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, PositionControllerCoverage001, TestSize.Level1)
+{
+    WaterFlowModelNG waterFlowModelNG;
+    RefPtr<ScrollControllerBase> positionController = waterFlowModelNG.CreateScrollController();
+    waterFlowModelNG.Create();
+    waterFlowModelNG.SetScroller(positionController, nullptr);
+    waterFlowModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateWaterFlowItem(8);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. Supplement ScrollPage, GetCurrentOffset branch
+     */
+    auto controller = pattern_->controller_;
+    controller->ScrollPage(true, true);
+
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: PositionControllerCoverage002
+ * @tc.desc: Test positionController func in VERTICAL WaterFlow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, PositionControllerCoverage002, TestSize.Level1)
+{
+    WaterFlowModelNG waterFlowModelNG;
+    RefPtr<ScrollControllerBase> positionController = waterFlowModelNG.CreateScrollController();
+    RefPtr<ScrollProxy> scrollBarProxy = waterFlowModelNG.CreateScrollBarProxy();
+    waterFlowModelNG.Create();
+    waterFlowModelNG.SetScroller(positionController, scrollBarProxy);
+    waterFlowModelNG.SetColumnsTemplate("1fr 1fr 1fr");
+    CreateWaterFlowItem(14);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. Test JumpTo func.
+     * @tc.expected: Verify return value.
+     */
+    auto controller = pattern_->controller_;
+    controller->JumpTo(1, false, 0);
+    EXPECT_EQ(pattern_->layoutInfo_.jumpIndex_, 1);
+
+    /**
+     * @tc.steps: step2. Test ScrollPage func.
+     * @tc.expected: Verify currentOffset.
+     */
+    RunMeasureAndLayout();
+    controller->ScrollPage(true, true);
+    EXPECT_EQ(controller->GetCurrentOffset(), Offset(0, 0));
+
+    controller->ScrollPage(false, true);
+    EXPECT_EQ(controller->GetCurrentOffset(), Offset(0, 0));
+}
+
+/**
+ * @tc.name: WaterFlowPatternTest001
+ * @tc.desc: Test water flow pattern func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowPatternTest001, TestSize.Level1)
+{
+    WaterFlowModelNG waterFlowModelNG;
+    waterFlowModelNG.Create();
+    waterFlowModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateWaterFlowItem(14);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. Run pattern func.
+     * @tc.expected: The return_value is correct.
+     */
+    EXPECT_TRUE(pattern_->IsScrollable());
+    EXPECT_FALSE(pattern_->IsAtTop());
+    EXPECT_FALSE(pattern_->IsAtBottom());
+}
+
+/**
+ * @tc.name: WaterFlowAccessibilityTest001
+ * @tc.desc: Test Accessibility func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowAccessibilityTest001, TestSize.Level1)
+{
+    WaterFlowModelNG waterFlowModelNG;
+    waterFlowModelNG.Create();
+    waterFlowModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateWaterFlowItem(14);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. Run Accessibility func.
+     * @tc.expected: The return_value is correct.
+     */
+    accessibilityProperty_->SetSpecificSupportAction();
+    EXPECT_EQ(accessibilityProperty_->GetBeginIndex(), 0);
+    EXPECT_EQ(accessibilityProperty_->GetEndIndex(), 11);
+    EXPECT_EQ(accessibilityProperty_->GetCollectionItemCounts(), 14);
+    AceCollectionInfo info = accessibilityProperty_->GetCollectionInfo();
+    EXPECT_EQ(info.rows, 3);
+    EXPECT_EQ(info.columns, 4);
 }
 } // namespace OHOS::Ace::NG
