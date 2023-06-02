@@ -1371,4 +1371,45 @@ HWTEST_F(RadioTestNg, RadioEventHubChangeEventTest001, TestSize.Level1)
     eventHub->SetOnChangeEvent(std::move(onChange));
     eventHub->UpdateChangeEvent(true);
 }
+
+/**
+ * @tc.name: RadioPatternTest028
+ * @tc.desc: Test the distributed capability of Radio.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioPatternTest028, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    /**
+     * @tc.steps: step2. Get pattern .
+     * @tc.expected: Function ProvideRestoreInfo is called.
+     */
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto radioPaintProperty = pattern->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(radioPaintProperty, nullptr);
+    radioPaintProperty->UpdateRadioCheck(false);
+    std::string ret = pattern->ProvideRestoreInfo();
+    EXPECT_TRUE(ret == R"({"checked":false})");
+
+    /**
+     * @tc.steps: step3. Function OnRestoreInfo is called.
+     * @tc.expected: Passing invalid & valid JSON format.
+     */
+    std::string restoreInfo_ = R"({"checked":true})";
+    pattern->OnRestoreInfo(restoreInfo_);
+    EXPECT_TRUE(radioPaintProperty->GetRadioCheckValue(false));
+    restoreInfo_ = "invalid_json_string";
+    pattern->OnRestoreInfo(restoreInfo_);
+    ASSERT_NE(radioPaintProperty, nullptr);
+    EXPECT_TRUE(radioPaintProperty->GetRadioCheckValue(false));
+}
 } // namespace OHOS::Ace::NG

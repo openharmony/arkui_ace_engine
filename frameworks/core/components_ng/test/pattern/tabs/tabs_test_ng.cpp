@@ -4225,4 +4225,56 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleClick002, TestSize.Level1)
     tabBarPattern->tabItemOffsets_.emplace_back(c2);
     tabBarPattern->HandleClick(info);
 }
+
+/**
+ * @tc.name: TabBarDistributedTest001
+ * @tc.desc: Test the distributed capability of TabBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarDistributedTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and get pattern.
+     */
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    TabsItemDivider divider;
+    tabsModel.SetDivider(divider);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+    auto pattern = tabsNode->GetPattern<TabsPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto tabsLayoutProperty = tabBarPattern->GetLayoutProperty<TabsLayoutProperty>();
+
+    /**
+     * @tc.steps: step2. Set Indicator.
+     * @tc.expected: Function ProvideRestoreInfo is called.
+     */
+    tabBarPattern->UpdateIndicator(0);
+    std::string ret = tabBarPattern->ProvideRestoreInfo();
+    EXPECT_TRUE(ret == R"({"Index":0})");
+    
+    /**
+     * @tc.steps: step3. Function OnRestoreInfo is called.
+     * @tc.expected: Passing invalid & valid JSON format.
+     */
+    std::string restoreInfo_ = R"({"Index":0})";
+    pattern->OnRestoreInfo(restoreInfo_);
+    EXPECT_EQ(tabBarLayoutProperty->GetIndicator().value_or(0), 0);
+    restoreInfo_ = R"({"Index":1})";
+    pattern->OnRestoreInfo(restoreInfo_);
+    EXPECT_NE(tabBarLayoutProperty->GetIndicator().value_or(0), 0);
+    restoreInfo_ = "invalid_json_string";
+    pattern->OnRestoreInfo(restoreInfo_);
+    EXPECT_NE(tabBarLayoutProperty->GetIndicator().value_or(0), 0);
+}
 } // namespace OHOS::Ace::NG

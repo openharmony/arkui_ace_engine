@@ -4316,4 +4316,45 @@ HWTEST_F(SwiperPatternTestNg, DotIndicatorModifier003, TestSize.Level1)
     EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[2], SELECTED_ITEM_WIDTH);
     EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[3], SELECTED_ITEM_HEIGHT_LARGE);
 }
+
+/**
+ * @tc.name: SwiperDistributedTest001
+ * @tc.desc: Test the distributed capability of Swiper
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperDistributedTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and get pattern.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode = FrameNode::GetOrCreateFrameNode(
+    "Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    auto swiperLayoutProperty = pattern->GetLayoutProperty<SwiperLayoutProperty>();
+    ASSERT_NE(swiperLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Set Index.
+     * @tc.expected: Function ProvideRestoreInfo is called.
+     */
+    swiperLayoutProperty->UpdateIndex(1);
+    std::string ret = pattern->ProvideRestoreInfo();
+    EXPECT_TRUE(ret == R"({"Index":1})");
+
+    /**
+     * @tc.steps: step3. Function OnRestoreInfo is called.
+     * @tc.expected: Passing invalid & valid JSON format.
+     */
+    std::string restoreInfo_ = R"({"Index":1})";
+    pattern->OnRestoreInfo(restoreInfo_);
+    EXPECT_EQ(swiperLayoutProperty->GetIndexValue(0), 1);
+    restoreInfo_ =  R"({"Index":0})";
+    pattern->OnRestoreInfo(restoreInfo_);
+    EXPECT_EQ(swiperLayoutProperty->GetIndexValue(0), 0);
+    restoreInfo_ = "invalid_json_string";
+    pattern->OnRestoreInfo(restoreInfo_);
+    EXPECT_EQ(swiperLayoutProperty->GetIndexValue(0), 0);
+}
 } // namespace OHOS::Ace::NG
