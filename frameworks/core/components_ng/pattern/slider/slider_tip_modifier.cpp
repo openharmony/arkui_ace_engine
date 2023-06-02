@@ -192,7 +192,6 @@ void SliderTipModifier::onDraw(DrawingContext& context)
     if (tipFlag_->Get() || GreatNotEqual(sizeScale_->Get(), BUBBLE_SIZE_MIN_SCALE)) {
         BuildParagraph();
         UpdateBubbleSize();
-        SetBoundsRect(UpdateOverlayRect());
         PaintTip(context);
     }
 }
@@ -336,13 +335,13 @@ void SliderTipModifier::UpdateBubbleSize()
     textOffset_ = bubbleOffset_ + textOffsetInBubble;
 }
 
-RectF SliderTipModifier::UpdateOverlayRect()
+void SliderTipModifier::UpdateOverlayRect()
 {
     auto contentSize = contentSize_->Get();
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, RectF());
+    CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SliderTheme>();
-    CHECK_NULL_RETURN(theme, RectF());
+    CHECK_NULL_VOID(theme);
     auto distance = static_cast<float>(theme->GetBubbleToCircleCenterDistance().ConvertToPx());
     RectF rect;
     if (axis_ == Axis::HORIZONTAL) {
@@ -354,6 +353,7 @@ RectF SliderTipModifier::UpdateOverlayRect()
         rect.SetSize(SizeF(contentSize.Width() * HALF + bubbleSize_.Width() + distance,
             contentSize.Height() + bubbleSize_.Height() / HALF));
     }
-    return rect;
+
+    SetBoundsRect(rect);
 }
 } // namespace OHOS::Ace::NG

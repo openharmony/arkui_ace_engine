@@ -2435,9 +2435,17 @@ HWTEST_F(SliderPatternTestNg, SliderPaintMethodTest002, TestSize.Level1)
     pipeline->SetThemeManager(theme);
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
 
+    Testing::MockCanvas canvas;
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    MockParagraphFunction(paragraph, canvas);
+
     // call UpdateOverlayModifier function
     sliderPaintMethod.UpdateOverlayModifier(Referenced::RawPtr(paintWrapper));
     EXPECT_EQ(sliderTipModifier->axis_, Axis::VERTICAL);
+
+    AceType::DynamicCast<SliderPaintProperty>(paintWrapper->paintProperty_)->UpdateDirection(Axis::HORIZONTAL);
+    sliderPaintMethod.UpdateOverlayModifier(Referenced::RawPtr(paintWrapper));
+    EXPECT_EQ(sliderTipModifier->axis_, Axis::HORIZONTAL);
 }
 
 /**
