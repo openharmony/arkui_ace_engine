@@ -18,6 +18,7 @@
 #include "base/geometry/axis.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/animation/curves.h"
 #include "core/common/container.h"
@@ -64,6 +65,7 @@ void JSScroller::JSBind(BindingTarget globalObj)
     JSClass<JSScroller>::CustomMethod("currentOffset", &JSScroller::CurrentOffset);
     JSClass<JSScroller>::CustomMethod("scrollToIndex", &JSScroller::ScrollToIndex);
     JSClass<JSScroller>::CustomMethod("scrollBy", &JSScroller::ScrollBy);
+    JSClass<JSScroller>::CustomMethod("isAtEnd", &JSScroller::IsAtEnd);
     JSClass<JSScroller>::Bind(globalObj, JSScroller::Constructor, JSScroller::Destructor);
 }
 
@@ -261,4 +263,15 @@ void JSScroller::ScrollBy(const JSCallbackInfo& args)
     }
 }
 
+void JSScroller::IsAtEnd(const JSCallbackInfo& args)
+{
+    auto scrollController = controllerWeak_.Upgrade();
+    if (!scrollController) {
+        LOGE("controller_ is nullptr");
+        return;
+    }
+    bool isAtEnd = scrollController->IsAtEnd();
+    auto retVal = JSRef<JSVal>::Make(ToJSValue(isAtEnd));
+    args.SetReturnValue(retVal);
+}
 } // namespace OHOS::Ace::Framework

@@ -4545,6 +4545,29 @@ HWTEST_F(ListTestNg, ListPositionControllerTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListPositionControllerTest004
+ * @tc.desc: Test IsAtEnd function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListPositionControllerTest004, TestSize.Level1)
+{
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    RefPtr<ScrollControllerBase> scrollController = listModelNG.CreateScrollController();
+    RefPtr<ScrollProxy> proxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
+    listModelNG.SetScroller(scrollController, proxy);
+    CreateListItem(10);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    EXPECT_FALSE(scrollController->IsAtEnd());
+
+    const float delta = 200;
+    UpdateCurrentOffset(-delta);
+    EXPECT_TRUE(scrollController->IsAtEnd());
+}
+
+/**
  * @tc.name: AccessibilityEvent001
  * @tc.desc: Test AddStopListener callBack in animator
  * @tc.type: FUNC

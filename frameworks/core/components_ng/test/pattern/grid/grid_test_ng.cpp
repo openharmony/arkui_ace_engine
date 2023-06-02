@@ -1638,6 +1638,29 @@ HWTEST_F(GridTestNg, PositionController002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PositionController003
+ * @tc.desc: Test IsAtEnd func Grid
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, PositionController003, TestSize.Level1)
+{
+    GridModelNG gridModelNG;
+    RefPtr<ScrollControllerBase> positionController = gridModelNG.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = gridModelNG.CreateScrollBarProxy();
+    gridModelNG.Create(positionController, scrollBarProxy);
+    gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateGridItem(14, -1, ITEM_HEIGHT);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    EXPECT_FALSE(positionController->IsAtEnd());
+
+    positionController->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    RunMeasureAndLayout();
+    EXPECT_TRUE(positionController->IsAtEnd());
+}
+
+/**
  * @tc.name: LayoutInfo001
  * @tc.desc: Test UpdateEndLine func
  * @tc.type: FUNC

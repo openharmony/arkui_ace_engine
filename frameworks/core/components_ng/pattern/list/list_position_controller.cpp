@@ -109,4 +109,10 @@ Offset ListPositionController::GetCurrentOffset() const
     return offset;
 }
 
+bool ListPositionController::IsAtEnd() const
+{
+    auto listPattern = AceType::DynamicCast<ListPattern>(scroll_.Upgrade());
+    CHECK_NULL_RETURN_NOLOG(listPattern, false);
+    return listPattern->IsAtBottom();
+}
 } // namespace OHOS::Ace::NG

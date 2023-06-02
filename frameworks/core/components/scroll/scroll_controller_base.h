@@ -75,6 +75,10 @@ public:
     {
         return Offset();
     }
+    virtual bool IsAtEnd() const
+    {
+        return true;
+    }
 };
 } // namespace OHOS::Ace
 
