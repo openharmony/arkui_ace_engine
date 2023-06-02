@@ -267,9 +267,17 @@ void SubwindowOhos::HidePopupNG(int32_t targetId)
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
     CHECK_NULL_VOID(context);
+    auto rootNode = context->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
+    // Reset subwindow's hotarea to whole screen when popup hide
+    auto subWindowSize = rootNode->GetGeometryNode()->GetFrameSize();
+    auto subWindowRect = Rect(0.0f, 0.0f, subWindowSize.Width(), subWindowSize.Height());
     auto popupInfo = overlayManager->GetPopupInfo(targetId);
+    std::vector<Rect> rects;
+    rects.emplace_back(subWindowRect);
+    SetHotAreas(rects);
     popupInfo.popupId = -1;
     popupInfo.markNeedUpdate = true;
     overlayManager->HidePopup(targetId, popupInfo);
@@ -325,6 +333,10 @@ const RefPtr<NG::OverlayManager> SubwindowOhos::GetOverlayManager()
 
 void SubwindowOhos::ShowWindow()
 {
+    if (isShowed_) {
+        LOGI("Subwindow is on display");
+        return;
+    }
     LOGI("Show the subwindow");
     CHECK_NULL_VOID(window_);
     // Set min window hot area so that sub window can transparent event.
@@ -366,6 +378,10 @@ void SubwindowOhos::HideWindow()
         CHECK_NULL_VOID(context);
         auto rootNode = context->GetRootElement();
         CHECK_NULL_VOID(rootNode);
+        if (!rootNode->GetChildren().empty()) {
+            LOGW("there are still nodes mounted on root in subwindow");
+            return;
+        }
         auto focusHub = rootNode->GetFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->SetIsDefaultHasFocused(false);
