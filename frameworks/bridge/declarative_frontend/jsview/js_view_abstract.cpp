@@ -109,6 +109,7 @@ constexpr int32_t MIN_ROTATE_VECTOR_Z = 9;
 constexpr int32_t PARAMETER_LENGTH_FIRST = 1;
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
+const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 
 bool CheckJSCallbackInfo(
     const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
@@ -605,6 +606,19 @@ void SetPopupMessageOptions(const JSRef<JSObject> messageOptionsObj, const RefPt
         if (fontWeightValue->IsString()) {
             if (popupParam) {
                 popupParam->SetFontWeight(ConvertStrToFontWeight(fontWeightValue->ToString()));
+            } else {
+                LOGI("Empty popup.");
+            }
+        }
+        auto fontStyleValue = fontObj->GetProperty("style");
+        if (fontStyleValue->IsNumber()) {
+            int32_t value = fontStyleValue->ToNumber<int32_t>();
+            if (value < 0 || value >= static_cast<int32_t>(FONT_STYLES.size())) {
+                LOGI("Text fontStyle(%d) is invalid value", value);
+                return;
+            }
+            if (popupParam) {
+                popupParam->SetFontStyle(FONT_STYLES[value]);
             } else {
                 LOGI("Empty popup.");
             }
