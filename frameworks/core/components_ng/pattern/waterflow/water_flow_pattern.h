@@ -100,6 +100,7 @@ private:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
+    void InitScrollableEvent();
     WaterFlowLayoutInfo layoutInfo_;
     // just for hold WaterFlowPositionController
     RefPtr<WaterFlowPositionController> controller_;

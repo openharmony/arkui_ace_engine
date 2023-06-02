@@ -20,9 +20,9 @@
 
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components/scroll_bar/scroll_proxy.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace {
-using OnReachEvent = std::function<void()>;
 class WaterFlowModel {
 public:
     static WaterFlowModel* GetInstance();
@@ -50,6 +50,7 @@ public:
 
     virtual void SetOnReachStart(OnReachEvent&& onReachStart) = 0;
     virtual void SetOnReachEnd(OnReachEvent&& onReachEnd) = 0;
+    virtual void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& ScrollFrameBegin) = 0;
 
 private:
     static std::unique_ptr<WaterFlowModel> instance_;
