@@ -533,17 +533,32 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
 void TabBarPattern::HandleBottomTabBarChange(int32_t index)
 {
     if (indicator_ != index && (tabBarStyles_[indicator_] == TabBarStyle::BOTTOMTABBATSTYLE ||
-        tabBarStyles_[index] == TabBarStyle::BOTTOMTABBATSTYLE)) {
+                                   tabBarStyles_[index] == TabBarStyle::BOTTOMTABBATSTYLE)) {
         int32_t selectedIndex = -1;
         int32_t unselectedIndex = -1;
-        if (tabBarStyles_[indicator_] == TabBarStyle::BOTTOMTABBATSTYLE) {
+        if (tabBarStyles_[indicator_] == TabBarStyle::BOTTOMTABBATSTYLE && CheckSvg(indicator_)) {
             unselectedIndex = indicator_;
         }
-        if (tabBarStyles_[index] == TabBarStyle::BOTTOMTABBATSTYLE) {
+        if (tabBarStyles_[index] == TabBarStyle::BOTTOMTABBATSTYLE && CheckSvg(index)) {
             selectedIndex = index;
         }
         HandleBottomTabBarClick(selectedIndex, unselectedIndex);
     }
+}
+
+bool TabBarPattern::CheckSvg(int32_t index) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto columnNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(index));
+    CHECK_NULL_RETURN(columnNode, false);
+    auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
+    CHECK_NULL_RETURN(imageNode, false);
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(imageLayoutProperty, false);
+    ImageSourceInfo info;
+    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(info);
+    return imageSourceInfo.IsSvg();
 }
 
 void TabBarPattern::HandleBottomTabBarClick(int32_t selectedIndex, int32_t unselectedIndex)
