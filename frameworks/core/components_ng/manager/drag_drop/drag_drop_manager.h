@@ -96,7 +96,7 @@ public:
 
     void SetIsDragged(bool isDragged)
     {
-        isDragged_ = isDragged_;
+        isDragged_ = isDragged;
     }
 
 private:
