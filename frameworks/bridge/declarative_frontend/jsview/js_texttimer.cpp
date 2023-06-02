@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/text_timer_model_impl.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/declaration/texttimer/texttimer_declaration.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
@@ -78,6 +79,7 @@ void JSTextTimer::Create(const JSCallbackInfo& info)
                 if (inputCount > 0 && inputCount < MAX_COUNT_DOWN) {
                     TextTimerModel::GetInstance()->SetInputCount(inputCount);
                 } else {
+                    TextTimerModel::GetInstance()->SetInputCount(TIME_DEFAULT_COUNT);
                     LOGE("Parameter out of range, use default value.");
                 }
             }
