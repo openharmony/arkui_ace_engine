@@ -55,7 +55,7 @@ constexpr int32_t DEFAULT_ANIMATION_DURATION = 400;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
 const RefPtr<InterpolatingSpring> interpolatingSpringCurve =
-    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
+    AceType::MakeRefPtr<InterpolatingSpring>(18.0f, 1.0f, 324.0f, 36.0f);
 } // namespace
 RefPtr<NavigationGroupNode> NavigationGroupNode::GetOrCreateGroupNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
@@ -252,6 +252,7 @@ void NavigationGroupNode::SetBackButtonEvent(
                 navigation->BackToPreNavDestination(preNavDestination, navDestination, navRouterPattern);
                 navigation->SetOnStateChangeFalse(preNavDestination, navDestination, true);
                 layoutProperty->UpdateDestinationChange(false);
+                navigation->MarkModifyDone();
                 return;
             }
         }
@@ -314,19 +315,26 @@ void NavigationGroupNode::BackToPreNavDestination(const RefPtr<UINode>& preNavDe
     auto navigationContentNode = AceType::DynamicCast<FrameNode>(navigationNode->GetContentNode());
     CHECK_NULL_VOID(navigationContentNode);
 
-    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationNode);
-    auto preDestinationTitleBarNode = AceType::DynamicCast<TitleBarNode>(preNavDestination->GetTitleBarNode());
-    auto destinationTitleBarNode = AceType::DynamicCast<TitleBarNode>(navDestination->GetTitleBarNode());
-    if (preDestinationTitleBarNode || destinationTitleBarNode) {
-        TitleTransitionOutAnimation(preDestinationTitleBarNode, destinationTitleBarNode);
+    auto navigationLayoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(navigationLayoutProperty);
+    if (navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::STACK) {
+        auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationNode);
+        auto preDestinationTitleBarNode = AceType::DynamicCast<TitleBarNode>(preNavDestination->GetTitleBarNode());
+        auto destinationTitleBarNode = AceType::DynamicCast<TitleBarNode>(navDestination->GetTitleBarNode());
+        if (preDestinationTitleBarNode || destinationTitleBarNode) {
+            TitleTransitionOutAnimation(preDestinationTitleBarNode, destinationTitleBarNode);
+        }
+        auto backButtonNode = AceType::DynamicCast<FrameNode>(destinationTitleBarNode->GetBackButton());
+        if (backButtonNode) {
+            BackButtonAnimation(backButtonNode, false);
+        }
+        NavTransitionBackToPreAnimation(preNavDestination, navDestination, navigationContentNode);
     }
-    auto backButtonNode = AceType::DynamicCast<FrameNode>(destinationTitleBarNode->GetBackButton());
-    if (backButtonNode) {
-        BackButtonAnimation(backButtonNode, false);
-    }
-    NavTransitionBackToPreAnimation(preNavDestination, navDestination, navigationContentNode);
-
     navigationContentNode->AddChild(preNavDestination);
+    if (navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::SPLIT) {
+        navigationContentNode->MarkModifyDone();
+        navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
     auto navigationPattern = GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
     auto navDestinationPattern = preNavDestination->GetPattern<NavDestinationPattern>();
@@ -386,6 +394,7 @@ void NavigationGroupNode::NavTransitionInAnimation(
                             RectF(0.0f, 0.0f, Infinity<float>(), nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
                     }
                     navigationNode->SetIsOnAnimation(false);
+                    LOGI("navigation animation end");
                 },
                 TaskExecutor::TaskType::UI);
         });
@@ -398,6 +407,7 @@ void NavigationGroupNode::NavTransitionInAnimation(
         option,
         [transitionOutNodeContext, transitionInNodeContext, nodeWidth, nodeHeight, navigationNode]() {
             navigationNode->SetIsOnAnimation(true);
+            LOGI("navigation animation start");
             transitionOutNodeContext->OnTransformTranslateUpdate({ -nodeWidth * PARENT_PAGE_OFFSET, 0.0f, 0.0f });
             transitionInNodeContext->ClipWithRRect(
                 RectF(0.0f, 0.0f, nodeWidth, nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
@@ -451,6 +461,7 @@ void NavigationGroupNode::NavTransitionOutAnimation(const RefPtr<FrameNode>& nav
                     navigationNode->MarkModifyDone();
                     navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
                     navigationNode->SetIsOnAnimation(false);
+                    LOGI("navigation animation end");
                 },
                 TaskExecutor::TaskType::UI);
         });
@@ -462,6 +473,7 @@ void NavigationGroupNode::NavTransitionOutAnimation(const RefPtr<FrameNode>& nav
         option,
         [navDestinationContext, navigationContext, nodeWidth, nodeHeight, navigationNode]() {
             navigationNode->SetIsOnAnimation(true);
+            LOGI("navigation animation start");
             if (navDestinationContext) {
                 navDestinationContext->ClipWithRRect(
                     RectF(nodeWidth * HALF, 0.0f, nodeWidth, nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
@@ -528,6 +540,7 @@ void NavigationGroupNode::NavTransitionBackToPreAnimation(const RefPtr<FrameNode
                 navigationNode->MarkModifyDone();
                 navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
                 navigationNode->SetIsOnAnimation(false);
+                LOGI("navigation animation end");
             },
             TaskExecutor::TaskType::UI);
     });
@@ -539,6 +552,7 @@ void NavigationGroupNode::NavTransitionBackToPreAnimation(const RefPtr<FrameNode
         option,
         [navDestinationContext, preDestinationContext, nodeWidth, nodeHeight, navigationNode]() {
             navigationNode->SetIsOnAnimation(true);
+            LOGI("navigation animation start");
             if (navDestinationContext) {
                 navDestinationContext->ClipWithRRect(
                     RectF(nodeWidth * HALF, 0.0f, nodeWidth, nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
