@@ -466,6 +466,8 @@ HWTEST_F(TextFieldPatternTestNg, EditingValueFilter001, TestSize.Level1)
     textFieldPattern->EditingValueFilter(valueToUpdate, result);
     EXPECT_EQ(valueToUpdate, "filter_value1test");
     layoutProperty->UpdateInputFilter("test");
+    result = "";
+    valueToUpdate = "filter_value1test";
     textFieldPattern->EditingValueFilter(valueToUpdate, result);
     EXPECT_EQ(valueToUpdate, "test");
 }
@@ -4142,6 +4144,220 @@ HWTEST_F(TextFieldPatternTestNg, MeasureContent, TestSize.Level2)
 }
 
 /**
+ * @tc.name: TextFieldLayoutAlgorithmMeasure
+ * @tc.desc: test TextFieldLayoutAlgorithm.Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldLayoutAlgorithmMeasure, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldLayoutProperty, TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = CreatTextFieldNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and call Measure.
+     * @tc.expected: Check frame size of GeometryNode.
+     */
+    auto cloneLayoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(layoutProperty->Clone());
+    auto cloneGeometryNode = geometryNode->Clone();
+    auto layoutConstraint = LayoutConstraintF();
+    layoutConstraint.selfIdealSize.SetWidth(20);
+    layoutConstraint.selfIdealSize.SetHeight(20);
+    cloneLayoutProperty->layoutConstraint_ = layoutConstraint;
+    LayoutWrapper layoutWrapper(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    auto layoutAlgorithm = AceType::MakeRefPtr<TextFieldLayoutAlgorithm>();
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    layoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 20);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Height(), 20);
+
+    /**
+     * @tc.steps: step3. set pattern to TextArea and call Measure.
+     * @tc.expected: Check frame size of GeometryNode.
+     */
+    layoutProperty->UpdateMaxLines(2);
+    cloneGeometryNode->SetContentSize(SizeF(10, 10));
+    layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    layoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 20);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Height(), 20);
+
+    layoutConstraint.maxSize.SetHeight(30);
+    layoutConstraint.minSize.SetHeight(40);
+    layoutConstraint.maxSize.SetWidth(30);
+    layoutConstraint.minSize.SetWidth(40);
+    cloneLayoutProperty->layoutConstraint_ = layoutConstraint;
+    layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    layoutAlgorithm->Measure(&layoutWrapper);
+
+    layoutConstraint.selfIdealSize.Reset();
+    cloneLayoutProperty->layoutConstraint_ = layoutConstraint;
+    layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    layoutAlgorithm->Measure(&layoutWrapper);
+
+    layoutConstraint.selfIdealSize.Reset();
+    cloneLayoutProperty->layoutConstraint_ = layoutConstraint;
+    cloneLayoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    cloneLayoutProperty->calcLayoutConstraint_->maxSize = CalcSize(CalcLength(50), CalcLength(50));
+    layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    layoutAlgorithm->Measure(&layoutWrapper);
+
+    cloneLayoutProperty->calcLayoutConstraint_->maxSize.value().height_.reset();
+    layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    layoutAlgorithm->Measure(&layoutWrapper);
+
+    cloneLayoutProperty->calcLayoutConstraint_->Reset();
+    layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    layoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 40);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Height(), 40);
+
+    cloneLayoutProperty->calcLayoutConstraint_->Reset();
+    layoutConstraint.minSize.SetHeight(0);
+    cloneLayoutProperty->layoutConstraint_ = layoutConstraint;
+    layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    layoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 40);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Height(), 10);
+
+    /**
+     * @tc.steps: step4. Set pattern not be TextArea and call Measure.
+     * @tc.expected: Check frame size of GeometryNode.
+     */
+    layoutProperty->UpdateMaxLines(1);
+    layoutConstraint.selfIdealSize.height_.reset();
+    cloneLayoutProperty->layoutConstraint_ = layoutConstraint;
+    cloneLayoutProperty->UpdateWidthAuto(true);
+    layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    layoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 40);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Height(), 10);
+
+    cloneLayoutProperty->calcLayoutConstraint_->maxSize = CalcSize(CalcLength(50), CalcLength(50));
+    layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    layoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 40);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Height(), 30);
+
+    cloneLayoutProperty->calcLayoutConstraint_->Reset();
+    layoutConstraint.minSize.SetHeight(5);
+    cloneLayoutProperty->layoutConstraint_ = layoutConstraint;
+    layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    layoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 40);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Height(), 5);
+
+    layoutConstraint.maxSize.SetHeight(10);
+    layoutConstraint.minSize.SetHeight(20);
+    cloneLayoutProperty->calcLayoutConstraint_ = nullptr;
+    cloneLayoutProperty->UpdateShowUnderline(true);
+    cloneLayoutProperty->layoutConstraint_ = layoutConstraint;
+    layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    layoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 40);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Height(), 20);
+}
+
+/**
+ * @tc.name: TextFieldLayoutAlgorithmLayout
+ * @tc.desc: test TextFieldLayoutAlgorithm.Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldLayoutAlgorithmLayout, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldLayoutProperty, TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = CreatTextFieldNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and call Layout.
+     * @tc.expected: Check text rect of TextFieldLayoutAlgorithm.
+     */
+    auto cloneLayoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(layoutProperty->Clone());
+    auto cloneGeometryNode = geometryNode->Clone();
+    cloneGeometryNode->SetContentSize(SizeF(10, 10));
+    auto layoutConstraint = LayoutConstraintF();
+    layoutConstraint.selfIdealSize.SetWidth(20);
+    layoutConstraint.selfIdealSize.SetHeight(20);
+    cloneLayoutProperty->layoutConstraint_ = layoutConstraint;
+    LayoutWrapper layoutWrapper(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    auto layoutAlgorithm = AceType::MakeRefPtr<TextFieldLayoutAlgorithm>();
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    layoutAlgorithm->Layout(&layoutWrapper);
+
+    cloneLayoutProperty->UpdateShowUnderline(true);
+    cloneLayoutProperty->UpdateAlignment(Alignment::CENTER);
+    layoutProperty->UpdateMaxLines(2);
+    layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    layoutAlgorithm->textRect_.SetHeight(5);
+    layoutAlgorithm->Layout(&layoutWrapper);
+    EXPECT_EQ(layoutAlgorithm->textRect_.Height(), 5);
+
+    layoutAlgorithm->textRect_.SetHeight(20);
+    layoutAlgorithm->Layout(&layoutWrapper);
+    EXPECT_EQ(layoutAlgorithm->textRect_.Height(), 20);
+
+    cloneLayoutProperty->positionProperty_->ResetAlignment();
+    layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    layoutAlgorithm->Layout(&layoutWrapper);
+    EXPECT_EQ(layoutAlgorithm->textRect_.Height(), 20);
+
+    /**
+     * @tc.steps: step3. set non-TextArea and call Layout.
+     * @tc.expected: Check text rect of TextFieldLayoutAlgorithm.
+     */
+    layoutProperty->UpdateMaxLines(1);
+    pattern->caretUpdateType_ = CaretUpdateType::INPUT;
+    pattern->mouseStatus_ = MouseStatus::PRESSED;
+    pattern->isMousePressed_ = false;
+    layoutAlgorithm->imageRect_.SetWidth(5);
+    layoutAlgorithm->imageRect_.SetHeight(5);
+    cloneLayoutProperty->UpdateShowUnderline(true);
+    cloneLayoutProperty->UpdateShowErrorText(true);
+    layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    layoutProperty->UpdateShowPasswordIcon(true);
+    layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    layoutAlgorithm->Layout(&layoutWrapper);
+    EXPECT_EQ(layoutAlgorithm->textRect_.Height(), 20);
+
+    pattern->UpdateEditingValue(TEXT_VALUE, 0);
+    TextAlign textaligns[] = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::LEFT };
+    for (auto textAlign : textaligns) {
+        cloneLayoutProperty->UpdateTextAlign(textAlign);
+        layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+        layoutAlgorithm->Layout(&layoutWrapper);
+    }
+
+    cloneLayoutProperty->UpdateShowErrorText(false);
+    layoutWrapper.SetActive(true);
+    layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    layoutAlgorithm->Layout(&layoutWrapper);
+
+    layoutWrapper.SetActive(false);
+    layoutWrapper.Update(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    layoutAlgorithm->Layout(&layoutWrapper);
+    EXPECT_EQ(layoutAlgorithm->textRect_.Height(), 20);
+}
+
+/**
  * @tc.name: GetFontFamily
  * @tc.desc: test GetFontFamily.
  * @tc.type: FUNC
@@ -4412,6 +4628,7 @@ HWTEST_F(TextFieldPatternTestNg, GetMarginBottom, TestSize.Level2)
      * @tc.steps: step2. update margin property and call GetMarginBottom.
      * @tc.expected: Check the return value.
      */
+    layoutProperty->margin_ = nullptr;
     EXPECT_EQ(pattern->GetMarginBottom(), 0.0f);
 
     MarginProperty margin;
