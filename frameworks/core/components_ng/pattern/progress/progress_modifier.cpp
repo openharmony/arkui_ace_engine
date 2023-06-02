@@ -858,6 +858,7 @@ void ProgressModifier::PaintRingProgressOrShadow(
 
     RSPen pen;
     pen.SetWidth(thickness);
+    pen.SetAntiAlias(true);
     RSBrush startCirclePaint;
     startCirclePaint.SetAntiAlias(true);
     startCirclePaint.SetColor(gradientColors.back().GetLinearColor().GetValue());
