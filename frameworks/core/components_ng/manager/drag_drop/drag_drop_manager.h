@@ -94,6 +94,11 @@ public:
         return isDragged_;
     }
 
+    void SetIsDragged(bool isDragged)
+    {
+        isDragged_ = isDragged_;
+    }
+
 private:
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType);
     std::map<int32_t, RefPtr<FrameNode>> FindDragFrameNodeMapByPosition(
