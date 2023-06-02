@@ -428,7 +428,7 @@ void GridScrollLayoutAlgorithm::FillBlankAtEnd(
     // part of the viewport
     while (LessNotEqual(mainLength, mainSize)) {
         float lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
-        if (GreatNotEqual(lineHeight, 0.0)) {
+        if (GreatOrEqual(lineHeight, 0.0)) {
             mainLength += lineHeight;
             continue;
         }
@@ -573,12 +573,12 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
             gridLayoutInfo_.endIndex_ = tempEndIndex;
         }
 
-        if (lineHeight > 0) { // Means at least one item has been measured
+        if (GreatOrEqual(lineHeight, 0.0)) { // Means at least one item has been measured
             gridLayoutInfo_.lineHeightMap_[currentMainLineIndex_] = lineHeight;
             mainLength += (lineHeight + mainGap_);
         }
         // If a line moves up out of viewport, update [startIndex_], [currentOffset_] and [startMainLineIndex_]
-        if (LessOrEqual(mainLength, 0.0)) {
+        if (LessNotEqual(mainLength, 0.0)) {
             gridLayoutInfo_.currentOffset_ = mainLength;
             gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
             gridLayoutInfo_.startMainLineIndex_ = currentMainLineIndex_ + 1;
@@ -734,7 +734,7 @@ float GridScrollLayoutAlgorithm::FillNewLineForward(float crossSize, float mainS
         gridLayoutInfo_.startIndex_ = currentIndex;
     }
 
-    doneCreateNewLine = lineHeight > 0;
+    doneCreateNewLine = GreatOrEqual(lineHeight, 0.0);
     // If it fails to create new line when [FillNewLineForward] is called, it means that it reaches start
     gridLayoutInfo_.reachStart_ = !doneCreateNewLine;
 
