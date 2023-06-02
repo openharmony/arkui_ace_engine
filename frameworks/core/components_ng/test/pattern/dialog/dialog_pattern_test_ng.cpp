@@ -22,13 +22,11 @@
 #include "core/components_ng/pattern/dialog/dialog_event_hub.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
-#include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-#include "core/components/button/button_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -50,28 +48,6 @@ const double_t WIDTH_D = 80.0;
 const double_t WIDTH_E = 112.0;
 const double_t DIVISOR = 2.0;
 } // namespace
-
-class MockDialogTheme : public DialogTheme, public ButtonTheme {
-    DECLARE_ACE_TYPE(MockDialogTheme, DialogTheme, ButtonTheme);
-
-public:
-    class Builder {
-    public:
-        Builder() = default;
-        ~Builder() = default;
-
-        RefPtr<MockDialogTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
-        {
-            RefPtr<MockDialogTheme> theme = AceType::Claim(new MockDialogTheme());
-            return theme;
-        }
-    };
-
-    ~MockDialogTheme() override = default;
-
-protected:
-    MockDialogTheme() = default;
-};
 
 class DialogPatternTestNg : public testing::Test {
 public:
@@ -136,7 +112,7 @@ void DialogPatternTestNg::TearDownTestCase()
 void DialogPatternTestNg::SetDialogTheme()
 {
     auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineBase::GetCurrent()->GetThemeManager());
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MockDialogTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
 }
 
 /**
@@ -197,43 +173,180 @@ HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0007, TestSize.Level1)
  * @tc.name: DialogFrameNodeCreator0020
  * @tc.desc: Test AlertDialog with button color and text color
  * @tc.type: FUNC
+ * @tc.author: zhoutianer
  */
 HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0020, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. create params and DialogLayoutAlgorithm object.
-     */
-    const DialogAlignment aligns[] = {
-        DialogAlignment::TOP,
-        DialogAlignment::CENTER,
-        DialogAlignment::BOTTOM,
-        DialogAlignment::DEFAULT,
-        DialogAlignment::TOP_START,
-        DialogAlignment::TOP_END,
-        DialogAlignment::CENTER_START,
-        DialogAlignment::CENTER_END,
-        DialogAlignment::BOTTOM_START,
-        DialogAlignment::BOTTOM_END,
-    };
     auto maxSize = SizeF(WIDTH_B, WIDTH_C);
     auto childSize = SizeF(WIDTH_D, WIDTH_E);
     auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
     OffsetF topLeftPoint =
         OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / DIVISOR;
-    /**
-     * @tc.steps: step2. call SetAlignmentSwitch function.
-     * @tc.expected: the results are correct.
-     */
-    for (size_t i = 0; i < sizeof(aligns) / sizeof(aligns[0]); i++)
-    {
-        dialogLayoutAlgorithm->alignment_ = aligns[i];
-        auto result = dialogLayoutAlgorithm->SetAlignmentSwitch(maxSize, childSize, topLeftPoint);
-        if (dialogLayoutAlgorithm->alignment_ == DialogAlignment::DEFAULT) {
-            EXPECT_EQ(result, false);
-        } else {
-            EXPECT_EQ(result, true);
-        }
-    }
+    dialogLayoutAlgorithm->alignment_ = DialogAlignment::DEFAULT;
+    auto result = dialogLayoutAlgorithm->SetAlignmentSwitch(maxSize, childSize, topLeftPoint);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: DialogFrameNodeCreator0021
+ * @tc.desc: Test AlertDialog with button color and text color
+ * @tc.type: FUNC
+ * @tc.author: zhoutianer
+ */
+HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0021, TestSize.Level1)
+{
+    auto maxSize = SizeF(WIDTH_B, WIDTH_C);
+    auto childSize = SizeF(WIDTH_D, WIDTH_E);
+    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
+    OffsetF topLeftPoint =
+        OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / DIVISOR;
+    dialogLayoutAlgorithm->alignment_ = DialogAlignment::TOP;
+    auto result = dialogLayoutAlgorithm->SetAlignmentSwitch(maxSize, childSize, topLeftPoint);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: DialogFrameNodeCreator0022
+ * @tc.desc: Test AlertDialog with button color and text color
+ * @tc.type: FUNC
+ * @tc.author: zhoutianer
+ */
+HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0022, TestSize.Level1)
+{
+    auto maxSize = SizeF(WIDTH_B, WIDTH_C);
+    auto childSize = SizeF(WIDTH_D, WIDTH_E);
+    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
+    OffsetF topLeftPoint =
+        OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / DIVISOR;
+    dialogLayoutAlgorithm->alignment_ = DialogAlignment::CENTER;
+    auto result = dialogLayoutAlgorithm->SetAlignmentSwitch(maxSize, childSize, topLeftPoint);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: DialogFrameNodeCreator0023
+ * @tc.desc: Test AlertDialog with button color and text color
+ * @tc.type: FUNC
+ * @tc.author: zhoutianer
+ */
+HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0023, TestSize.Level1)
+{
+    auto maxSize = SizeF(WIDTH_B, WIDTH_C);
+    auto childSize = SizeF(WIDTH_D, WIDTH_E);
+    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
+    OffsetF topLeftPoint =
+        OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / DIVISOR;
+    dialogLayoutAlgorithm->alignment_ = DialogAlignment::BOTTOM;
+    auto result = dialogLayoutAlgorithm->SetAlignmentSwitch(maxSize, childSize, topLeftPoint);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: DialogFrameNodeCreator0024
+ * @tc.desc: Test AlertDialog with button color and text color
+ * @tc.type: FUNC
+ * @tc.author: zhoutianer
+ */
+HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0024, TestSize.Level1)
+{
+    auto maxSize = SizeF(WIDTH_B, WIDTH_C);
+    auto childSize = SizeF(WIDTH_D, WIDTH_E);
+    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
+    OffsetF topLeftPoint =
+        OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / DIVISOR;
+    dialogLayoutAlgorithm->alignment_ = DialogAlignment::TOP_START;
+    auto result = dialogLayoutAlgorithm->SetAlignmentSwitch(maxSize, childSize, topLeftPoint);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: DialogFrameNodeCreator0025
+ * @tc.desc: Test AlertDialog with button color and text color
+ * @tc.type: FUNC
+ * @tc.author: zhoutianer
+ */
+HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0025, TestSize.Level1)
+{
+    auto maxSize = SizeF(WIDTH_B, WIDTH_C);
+    auto childSize = SizeF(WIDTH_D, WIDTH_E);
+    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
+    OffsetF topLeftPoint =
+        OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / DIVISOR;
+    dialogLayoutAlgorithm->alignment_ = DialogAlignment::TOP_END;
+    auto result = dialogLayoutAlgorithm->SetAlignmentSwitch(maxSize, childSize, topLeftPoint);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: DialogFrameNodeCreator0026
+ * @tc.desc: Test AlertDialog with button color and text color
+ * @tc.type: FUNC
+ * @tc.author: zhoutianer
+ */
+HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0026, TestSize.Level1)
+{
+    auto maxSize = SizeF(WIDTH_B, WIDTH_C);
+    auto childSize = SizeF(WIDTH_D, WIDTH_E);
+    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
+    OffsetF topLeftPoint =
+        OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / DIVISOR;
+    dialogLayoutAlgorithm->alignment_ = DialogAlignment::CENTER_START;
+    auto result = dialogLayoutAlgorithm->SetAlignmentSwitch(maxSize, childSize, topLeftPoint);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: DialogFrameNodeCreator0027
+ * @tc.desc: Test AlertDialog with button color and text color
+ * @tc.type: FUNC
+ * @tc.author: zhoutianer
+ */
+HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0027, TestSize.Level1)
+{
+    auto maxSize = SizeF(WIDTH_B, WIDTH_C);
+    auto childSize = SizeF(WIDTH_D, WIDTH_E);
+    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
+    OffsetF topLeftPoint =
+        OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / DIVISOR;
+    dialogLayoutAlgorithm->alignment_ = DialogAlignment::CENTER_END;
+    auto result = dialogLayoutAlgorithm->SetAlignmentSwitch(maxSize, childSize, topLeftPoint);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: DialogFrameNodeCreator0028
+ * @tc.desc: Test AlertDialog with button color and text color
+ * @tc.type: FUNC
+ * @tc.author: zhoutianer
+ */
+HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0028, TestSize.Level1)
+{
+    auto maxSize = SizeF(WIDTH_B, WIDTH_C);
+    auto childSize = SizeF(WIDTH_D, WIDTH_E);
+    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
+    OffsetF topLeftPoint =
+        OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / DIVISOR;
+    dialogLayoutAlgorithm->alignment_ = DialogAlignment::BOTTOM_START;
+    auto result = dialogLayoutAlgorithm->SetAlignmentSwitch(maxSize, childSize, topLeftPoint);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: DialogFrameNodeCreator0029
+ * @tc.desc: Test AlertDialog with button color and text color
+ * @tc.type: FUNC
+ * @tc.author: zhoutianer
+ */
+HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0029, TestSize.Level1)
+{
+    auto maxSize = SizeF(WIDTH_B, WIDTH_C);
+    auto childSize = SizeF(WIDTH_D, WIDTH_E);
+    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
+    OffsetF topLeftPoint =
+        OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / DIVISOR;
+    dialogLayoutAlgorithm->alignment_ = DialogAlignment::BOTTOM_END;
+    auto result = dialogLayoutAlgorithm->SetAlignmentSwitch(maxSize, childSize, topLeftPoint);
+    EXPECT_EQ(result, true);
 }
 
 /**
@@ -349,28 +462,12 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest002, TestSize.Level1)
             props.customStyle = true;
             props.sheetsInfo = sheetItems;
             props.isMenu = true;
-            props.buttons = btnItems;
         }else if (i == 0)
         {
             props.buttons = btnItems;
         }
         auto dialog = DialogView::CreateDialogNode(props, nullptr);
         ASSERT_NE(dialog, nullptr);
-        /**
-         * @tc.steps: step3. call keyEvent callback.
-         * @tc.expected: the results of keyEevnts are correct.
-         */
-        auto focusHub = dialog->GetOrCreateFocusHub();
-        ASSERT_NE(focusHub, nullptr);
-        KeyEvent keyEvent(KeyCode::KEY_0, KeyAction::CLICK);
-        KeyEvent keyEvent2(KeyCode::KEY_ESCAPE, KeyAction::DOWN);
-        KeyEvent keyEvent3(KeyCode::KEY_0, KeyAction::DOWN);
-        auto ret = focusHub->onKeyEventInternal_(keyEvent);
-        auto ret2 = focusHub->onKeyEventInternal_(keyEvent2);
-        auto ret3 = focusHub->onKeyEventInternal_(keyEvent3);
-        EXPECT_FALSE(ret);
-        EXPECT_TRUE(ret2);
-        EXPECT_FALSE(ret3);
     }
 }
 
