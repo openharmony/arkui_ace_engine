@@ -885,7 +885,12 @@ RosenDecorationPainter::RosenDecorationPainter(
     : dipScale_(dipScale), paintRect_(paintRect), decoration_(decoration), paintSize_(paintSize)
 {}
 
+#ifndef USE_ROSEN_DRAWING
 void RosenDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* canvas, RenderContext& context)
+#else
+void RosenDecorationPainter::PaintDecoration(const Offset& offset, RSCanvas* canvas,
+    RenderContext& context)
+#endif
 {
     auto rsNode = static_cast<RosenRenderContext*>(&context)->GetRSNode();
     if (!canvas || !paintSize_.IsValid() || !rsNode) {
@@ -896,6 +901,7 @@ void RosenDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* can
     Border borderFour;
     Rosen::Vector4f cornerRadius;
     if (decoration_) {
+#ifndef USE_ROSEN_DRAWING
         SkPaint paint;
 
         if (opacity_ != UINT8_MAX) {
@@ -904,6 +910,16 @@ void RosenDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* can
 
         Border border = decoration_->GetBorder();
         PaintColorAndImage(offset, canvas, paint, context);
+#else
+        RSBrush brush;
+
+        if (opacity_ != UINT8_MAX) {
+            brush.SetAlpha(opacity_);
+        }
+
+        Border border = decoration_->GetBorder();
+        PaintColorAndImage(offset, canvas, brush, context);
+#endif
         if (border.HasRadius()) {
             cornerRadius.SetValues(
                 NormalizeToPx(border.TopLeftRadius().GetX()),
@@ -920,6 +936,7 @@ void RosenDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* can
     rsNode->SetCornerRadius(cornerRadius);
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenDecorationPainter::PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& decoration, Size& paintSize,
     const Offset& position, SkCanvas* canvas, const sk_sp<SkImage>& image, double dipScale)
 {
@@ -975,7 +992,67 @@ void RosenDecorationPainter::PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& dec
         canvas->restore();
     }
 }
+#else
+void RosenDecorationPainter::PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& decoration, Size& paintSize,
+    const Offset& position, RSCanvas* canvas, const std::shared_ptr<RSImage>& image,
+    double dipScale)
+{
+    if (!decoration->GetHasBorderImageSource() && !decoration->GetHasBorderImageGradient()) {
+        return;
+    }
+    // set AntiAlias
+    RSBrush brush;
+    brush.SetAntiAlias(true);
+    if (decoration->GetHasBorderImageSource()) {
+        if (!image) {
+            return;
+        }
+        canvas->Save();
 
+        BorderImagePainter borderImagePainter(paintSize, decoration, image, dipScale);
+        borderImagePainter.InitPainter();
+        borderImagePainter.PaintBorderImage(position, canvas, brush);
+        canvas->Restore();
+    }
+    if (decoration->GetHasBorderImageGradient()) {
+        Gradient gradient = decoration->GetBorderImageGradient();
+        if (!gradient.IsValid()) {
+            LOGE("Gradient not valid");
+            return;
+        }
+        if (NearZero(paintSize.Width()) || NearZero(paintSize.Height())) {
+            return;
+        }
+        canvas->Save();
+        RSSize drPaintSize(static_cast<float>(paintSize.Width()), static_cast<float>(paintSize.Height()));
+        auto shader = CreateGradientShader(gradient, drPaintSize, dipScale);
+        brush.SetShaderEffect(shader);
+
+        RSBitmapFormat bitmapFormat;
+        bitmapFormat.colorType = RSColorType::COLORTYPE_RGBA_8888;
+        bitmapFormat.alphaType = RSAlphaType::ALPHATYPE_OPAQUE;
+
+        RSBitmap bitmap;
+        bitmap.Build(paintSize.Width(), paintSize.Height(), bitmapFormat);
+        bitmap.AllocPixels();
+
+        std::unique_ptr<RSCanvas> drCanvas = std::make_unique<RSCanvas>();
+        drCanvas->Bind(bitmap);
+        drCanvas->DrawBackground(brush);
+
+        std::shared_ptr<RSImage> image;
+        image->BuildFromBitmap(bitmap);
+
+        BorderImagePainter borderImagePainter(paintSize, decoration, image, dipScale);
+        borderImagePainter.InitPainter();
+        borderImagePainter.PaintBorderImage(position, canvas, brush);
+        brush.SetShaderEffect(nullptr);
+        canvas->Restore();
+    }
+}
+#endif
+
+#ifndef USE_ROSEN_DRAWING
 void RosenDecorationPainter::PaintDecoration(
     const Offset& offset, SkCanvas* canvas, RenderContext& context, const sk_sp<SkImage>& image)
 {
@@ -1010,6 +1087,43 @@ void RosenDecorationPainter::PaintDecoration(
         canvas->restore();
     }
 }
+#else
+void RosenDecorationPainter::PaintDecoration(const Offset& offset, RSCanvas* canvas,
+    RenderContext& context, const std::shared_ptr<RSImage>& image)
+{
+    auto rsNode = static_cast<RosenRenderContext*>(&context)->GetRSNode();
+    if (!canvas || !rsNode) {
+        LOGE("PaintDecoration failed, canvas is null.");
+        return;
+    }
+    if (decoration_ && rsNode) {
+        canvas->Save();
+        RSBrush brush;
+
+        if (opacity_ != UINT8_MAX) {
+            brush.SetAlpha(opacity_);
+        }
+        Border border = decoration_->GetBorder();
+        PaintColorAndImage(offset, canvas, brush, context);
+        if (border.HasValue()) {
+            PaintBorder(rsNode, border, dipScale_);
+            Gradient gradient = decoration_->GetBorderImageGradient();
+            if (gradient.IsValid()) {
+                if (NearZero(paintSize_.Width()) || NearZero(paintSize_.Height())) {
+                    return;
+                }
+                auto size = RSSize(GetLayoutSize().Width(), GetLayoutSize().Width());
+                auto shader = CreateGradientShader(gradient, size);
+#ifdef OHOS_PLATFORM
+                rsNode->SetBackgroundShader(Rosen::RSShader::CreateRSShader(shader));
+#endif
+            }
+        }
+        canvas->Restore();
+    }
+}
+#endif
+
 void RosenDecorationPainter::CheckWidth(const Border& border)
 {
     if (NearZero(leftWidth_)) {
@@ -1026,6 +1140,7 @@ void RosenDecorationPainter::CheckWidth(const Border& border)
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenDecorationPainter::PaintGrayScale(
     const SkRRect& outerRRect, SkCanvas* canvas, const Dimension& grayscale, const Color& color)
 {
@@ -1052,7 +1167,38 @@ void RosenDecorationPainter::PaintGrayScale(
         }
     }
 }
+#else
+void RosenDecorationPainter::PaintGrayScale(const RSRoundRect& outerRRect, RSCanvas* canvas,
+    const Dimension& grayscale, const Color& color)
+{
+    double scale = grayscale.Value();
+    if (GreatNotEqual(scale, 0.0)) {
+        if (canvas) {
+            RSAutoCanvasRestore acr(canvas, true);
+            canvas->ClipRoundRect(outerRRect, RSClipOp::DIFFERENCE, true);
+            RSScalar matrix[20] = { 0 };
+            matrix[0] = matrix[5] = matrix[10] = 0.2126f * scale;
+            matrix[1] = matrix[6] = matrix[11] = 0.7152f * scale;
+            matrix[2] = matrix[7] = matrix[12] = 0.0722f * scale;
+            matrix[18] = 1.0f * scale;
+            RSColorMatrix colorMatrix;
+            colorMatrix.SetArray(matrix);
+            std::shared_ptr<RSColorFilter> colorFilter =
+                RSColorFilter::CreateMatrixColorFilter(colorMatrix);
+            RSFilter filter;
+            filter.SetColorFilter(colorFilter);
 
+            RSBrush brush;
+            brush.SetAntiAlias(true);
+            brush.SetFilter(filter);
+            RSSaveLayerRec slr(nullptr, &brush, RSSaveLayerFlagsSet::INIT_WITH_PREVIOUS);
+            canvas->SaveLayer(slr);
+        }
+    }
+}
+#endif
+
+#ifndef USE_ROSEN_DRAWING
 void RosenDecorationPainter::PaintBrightness(
     const SkRRect& outerRRect, SkCanvas* canvas, const Dimension& brightness, const Color& color)
 {
@@ -1082,7 +1228,39 @@ void RosenDecorationPainter::PaintBrightness(
         canvas->saveLayer(slr);
     }
 }
+#else
+void RosenDecorationPainter::PaintBrightness(const RSRoundRect& outerRRect,
+    RSCanvas* canvas, const Dimension& brightness, const Color& color)
+{
+    double bright = brightness.Value();
+    // brightness range = (0, 2)
+    // skip painting when brightness is normal
+    if (NearEqual(bright, 1.0)) {
+        return;
+    }
+    if (canvas) {
+        RSAutoCanvasRestore acr(canvas, true);
+        canvas->ClipRoundRect(outerRRect, RSClipOp::DIFFERENCE, true);
+        RSBrush brush;
+        brush.SetAntiAlias(true);
+        RSScalar matrix[20] = { 0 };
+        // shift brightness to (-1, 1)
+        bright = bright - 1;
+        matrix[0] = matrix[6] = matrix[12] = matrix[18] = 1.0f;
+        matrix[4] = matrix[9] = matrix[14] = bright;
+        RSColorMatrix colorMatrix;
+        colorMatrix.SetArray(matrix);
+        std::shared_ptr<RSColorFilter> colorFilter =
+            RSColorFilter::CreateMatrixColorFilter(colorMatrix);
+        RSFilter filter;
+        filter.SetColorFilter(colorFilter);
+        RSSaveLayerRec slr(nullptr, &brush, RSSaveLayerFlagsSet::INIT_WITH_PREVIOUS);
+        canvas->SaveLayer(slr);
+    }
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 void RosenDecorationPainter::PaintContrast(
     const SkRRect& outerRRect, SkCanvas* canvas, const Dimension& contrast, const Color& color)
 {
@@ -1110,7 +1288,38 @@ void RosenDecorationPainter::PaintContrast(
         canvas->saveLayer(slr);
     }
 }
+#else
+void RosenDecorationPainter::PaintContrast(const RSRoundRect& outerRRect, RSCanvas* canvas,
+    const Dimension& contrast, const Color& color)
+{
+    double contrasts = contrast.Value();
+    // skip painting if contrast is normal
+    if (NearEqual(contrasts, 1.0)) {
+        return;
+    }
+    if (canvas) {
+        RSAutoCanvasRestore acr(canvas, true);
+        canvas->ClipRoundRect(outerRRect, RSClipOp::DIFFERENCE, true);
+        RSBrush brush;
+        brush.SetAntiAlias(true);
+        RSScalar matrix[20] = { 0 };
+        matrix[0] = matrix[6] = matrix[12] = contrasts;
+        matrix[4] = matrix[9] = matrix[14] = 128 * (1 - contrasts) / 255;
+        matrix[18] = 1.0f;
+        RSColorMatrix colorMatrix;
+        colorMatrix.SetArray(matrix);
+        std::shared_ptr<RSColorFilter> colorFilter =
+            RSColorFilter::CreateMatrixColorFilter(colorMatrix);
+        RSFilter filter;
+        filter.SetColorFilter(colorFilter);
+        brush.SetFilter(filter);
+        RSSaveLayerRec slr(nullptr, &brush, RSSaveLayerFlagsSet::INIT_WITH_PREVIOUS);
+        canvas->SaveLayer(slr);
+    }
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 void RosenDecorationPainter::PaintColorBlend(
     const SkRRect& outerRRect, SkCanvas* canvas, const Color& colorBlend, const Color& color)
 {
@@ -1134,7 +1343,31 @@ void RosenDecorationPainter::PaintColorBlend(
         }
     }
 }
+#else
+void RosenDecorationPainter::PaintColorBlend(const RSRoundRect& outerRRect,
+    RSCanvas* canvas, const Color& colorBlend, const Color& color)
+{
+    if (colorBlend.GetValue() != COLOR_MASK) {
+        if (canvas) {
+            RSAutoCanvasRestore acr(canvas, true);
+            canvas->ClipRoundRect(outerRRect, RSClipOp::DIFFERENCE, true);
+            std::shared_ptr<RSColorFilter> colorFilter =
+                RSColorFilter::CreateBlendModeColorFilter(
+                    colorBlend.GetValue(), RSBlendMode::PLUS);
+            RSFilter filter;
+            filter.SetColorFilter(colorFilter);
 
+            RSBrush brush;
+            brush.SetAntiAlias(true);
+            brush.SetFilter(filter);
+            RSSaveLayerRec slr(nullptr, &brush, RSSaveLayerFlagsSet::INIT_WITH_PREVIOUS);
+            canvas->SaveLayer(slr);
+        }
+    }
+}
+#endif
+
+#ifndef USE_ROSEN_DRAWING
 void RosenDecorationPainter::PaintSaturate(
     const SkRRect& outerRRect, SkCanvas* canvas, const Dimension& saturate, const Color& color)
 {
@@ -1164,6 +1397,38 @@ void RosenDecorationPainter::PaintSaturate(
         }
     }
 }
+#else
+void RosenDecorationPainter::PaintSaturate(const RSRoundRect& outerRRect,
+    RSCanvas* canvas, const Dimension& saturate, const Color& color)
+{
+    double saturates = saturate.Value();
+    if (!NearEqual(saturates, 1.0) && GreatOrEqual(saturates, 0.0)) {
+        if (canvas) {
+            RSAutoCanvasRestore acr(canvas, true);
+            canvas->ClipRoundRect(outerRRect, RSClipOp::DIFFERENCE, true);
+            RSBrush brush;
+            brush.SetAntiAlias(true);
+            RSScalar matrix[20] = { 0 };
+            matrix[0] = 0.3086f * (1 - saturates) + saturates;
+            matrix[1] = matrix[11] = 0.6094f * (1 - saturates);
+            matrix[2] = matrix[7] = 0.0820f * (1 - saturates);
+            matrix[5] = matrix[10] = 0.3086f * (1 - saturates);
+            matrix[6] = 0.6094f * (1 - saturates) + saturates;
+            matrix[12] = 0.0820f * (1 - saturates) + saturates;
+            matrix[18] = 1.0f;
+            RSColorMatrix colorMatrix;
+            colorMatrix.SetArray(matrix);
+            std::shared_ptr<RSColorFilter> colorFilter =
+                RSColorFilter::CreateMatrixColorFilter(colorMatrix);
+            RSFilter filter;
+            filter.SetColorFilter(colorFilter);
+            brush.SetFilter(filter);
+            RSSaveLayerRec slr(nullptr, &brush, RSSaveLayerFlagsSet::INIT_WITH_PREVIOUS);
+            canvas->SaveLayer(slr);
+        }
+    }
+}
+#endif
 
 #ifndef USE_ROSEN_DRAWING
 void RosenDecorationPainter::PaintSepia(
