@@ -135,7 +135,7 @@ void NavigationPattern::OnModifyDone()
     navigationStack_->SetNavPathList(navPathList_);
     auto contentNode = hostNode->GetContentNode();
     contentNode->Clean();
-    hostNode->AddNavDestinationToNavigation(hostNode);
+    hostNode->AddNavDestinationToNavigation();
 
     auto newTopNavPath = GetTopNavPath();
     if (preTopNavPath != newTopNavPath) {
@@ -147,6 +147,10 @@ void NavigationPattern::OnModifyDone()
             auto eventHub = preTopNavDestination->GetEventHub<NavDestinationEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->FireOnHiddenEvent();
+            auto focusHub = AceType::DynamicCast<FrameNode>(preTop)->GetFocusHub();
+            CHECK_NULL_VOID(focusHub);
+            focusHub->SetParentFocusable(false);
+            focusHub->LostFocus();
         }
 
         // fire onShown event
@@ -157,6 +161,10 @@ void NavigationPattern::OnModifyDone()
             auto eventHub = newTopNavDestination->GetEventHub<NavDestinationEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->FireOnShownEvent();
+            auto focusHub = AceType::DynamicCast<FrameNode>(newTop)->GetFocusHub();
+            CHECK_NULL_VOID(focusHub);
+            focusHub->SetParentFocusable(true);
+            focusHub->RequestFocus();
         }
     }
 
