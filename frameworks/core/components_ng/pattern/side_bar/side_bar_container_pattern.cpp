@@ -325,9 +325,9 @@ void SideBarContainerPattern::DoAnimation()
         }
     });
     if (animDir_ == SideBarAnimationDirection::LTR) {
-        currentOffset_ = 0.0f;
+        currentOffset_ = 0.0f + realDividerWidth_;
     } else {
-        currentOffset_ = -realSideBarWidth_;
+        currentOffset_ = -realSideBarWidth_ - realDividerWidth_;
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     context->FlushUITasks();
@@ -397,7 +397,7 @@ void SideBarContainerPattern::UpdateSideBarPosition(float value)
         UpdateControlButtonIcon();
     }
 
-    currentOffset_ = value * realSideBarWidth_;
+    currentOffset_ = value * (realSideBarWidth_ + realDividerWidth_);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
