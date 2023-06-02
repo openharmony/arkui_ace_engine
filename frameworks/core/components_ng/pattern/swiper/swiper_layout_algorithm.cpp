@@ -299,7 +299,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(hostNode);
         auto swiperPattern = hostNode->GetPattern<SwiperPattern>();
         CHECK_NULL_VOID(swiperPattern);
-        auto indicatorWrapper = GetNodeLayoutWrapperByIndex(layoutWrapper, swiperPattern->GetIndicatorId());
+        auto indicatorWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_INDICATOR_ETS_TAG);
         if (indicatorWrapper) {
             auto indicatorLayoutConstraint = swiperLayoutProperty->CreateChildConstraint();
             indicatorLayoutConstraint.parentIdealSize = idealSize;
@@ -314,14 +314,12 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(swiperPattern);
 
         if (swiperPattern->HasLeftButtonNode() && swiperPattern->HasRightButtonNode()) {
-            auto leftArrowWrapper = GetNodeLayoutWrapperByIndex(layoutWrapper, swiperPattern->GetLeftButtonId());
-            auto rightArrowWrapper = GetNodeLayoutWrapperByIndex(layoutWrapper, swiperPattern->GetRightButtonId());
-            CHECK_NULL_VOID(leftArrowWrapper);
-            CHECK_NULL_VOID(rightArrowWrapper);
-            if (leftArrowWrapper->GetHostTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
+            auto leftArrowWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_LEFT_ARROW_ETS_TAG);
+            auto rightArrowWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_RIGHT_ARROW_ETS_TAG);
+            if (leftArrowWrapper && (leftArrowWrapper->GetHostTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG)) {
                 MeasureArrow(leftArrowWrapper, swiperLayoutProperty);
             }
-            if (rightArrowWrapper->GetHostTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
+            if (rightArrowWrapper && (rightArrowWrapper->GetHostTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG)) {
                 MeasureArrow(rightArrowWrapper, swiperLayoutProperty);
             }
         }
@@ -384,7 +382,7 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(hostNode);
         auto swiperPattern = hostNode->GetPattern<SwiperPattern>();
         CHECK_NULL_VOID(swiperPattern);
-        auto indicatorWrapper = GetNodeLayoutWrapperByIndex(layoutWrapper, swiperPattern->GetIndicatorId());
+        auto indicatorWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_INDICATOR_ETS_TAG);
         if (indicatorWrapper) {
             if (swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::DIGIT) {
                 PlaceDigitChild(indicatorWrapper, swiperLayoutProperty);
@@ -400,14 +398,12 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(swiperPattern);
 
         if (swiperPattern->HasLeftButtonNode() && swiperPattern->HasRightButtonNode()) {
-            auto leftArrowWrapper = GetNodeLayoutWrapperByIndex(layoutWrapper, swiperPattern->GetLeftButtonId());
-            auto rightArrowWrapper = GetNodeLayoutWrapperByIndex(layoutWrapper, swiperPattern->GetRightButtonId());
-            CHECK_NULL_VOID(leftArrowWrapper);
-            CHECK_NULL_VOID(rightArrowWrapper);
-            if (leftArrowWrapper->GetHostTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
+            auto leftArrowWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_LEFT_ARROW_ETS_TAG);
+            auto rightArrowWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_RIGHT_ARROW_ETS_TAG);
+            if (leftArrowWrapper && (leftArrowWrapper->GetHostTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG)) {
                 ArrowLayout(layoutWrapper, leftArrowWrapper, swiperLayoutProperty, axis);
             }
-            if (rightArrowWrapper->GetHostTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
+            if (rightArrowWrapper && (rightArrowWrapper->GetHostTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG)) {
                 ArrowLayout(layoutWrapper, rightArrowWrapper, swiperLayoutProperty, axis);
             }
         }
@@ -647,15 +643,47 @@ void SwiperLayoutAlgorithm::LayoutItems(
     }
 }
 
-RefPtr<LayoutWrapper> SwiperLayoutAlgorithm::GetNodeLayoutWrapperByIndex(
-    LayoutWrapper* layoutWrapper, int32_t index) const
+RefPtr<LayoutWrapper> SwiperLayoutAlgorithm::GetNodeLayoutWrapperByTag(
+    LayoutWrapper* layoutWrapper, const std::string& tagName) const
 {
     CHECK_NULL_RETURN(layoutWrapper, nullptr);
     auto hostNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(hostNode, nullptr);
-    auto nodeIndex = hostNode->GetChildIndexById(index) - 1;
-    auto nodeWrapper = layoutWrapper->GetOrCreateChildByIndex(totalCount_ + nodeIndex);
-    CHECK_NULL_RETURN(nodeWrapper, nullptr);
+    auto swiperPattern = hostNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(swiperPattern, nullptr);
+    auto indicatorIndex = -1;
+    auto leftArrowIndex = -1;
+    auto rightArrowIndex = -1;
+
+    if (swiperPattern->HasIndicatorNode() && swiperPattern->HasLeftButtonNode() &&
+        swiperPattern->HasRightButtonNode()) {
+        indicatorIndex = totalCount_;
+        leftArrowIndex = indicatorIndex + 1;
+        rightArrowIndex = leftArrowIndex + 1;
+    }
+    if (swiperPattern->HasIndicatorNode() && !swiperPattern->HasLeftButtonNode() &&
+        !swiperPattern->HasRightButtonNode()) {
+        indicatorIndex = totalCount_;
+    }
+    if (!swiperPattern->HasIndicatorNode() && swiperPattern->HasLeftButtonNode() &&
+        swiperPattern->HasRightButtonNode()) {
+        leftArrowIndex = totalCount_;
+        rightArrowIndex = leftArrowIndex + 1;
+    }
+
+    RefPtr<LayoutWrapper> nodeWrapper = nullptr;
+    if (tagName == V2::SWIPER_INDICATOR_ETS_TAG) {
+        nodeWrapper = layoutWrapper->GetOrCreateChildByIndex(indicatorIndex);
+        CHECK_NULL_RETURN(nodeWrapper, nullptr);
+    }
+    if (tagName == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
+        nodeWrapper = layoutWrapper->GetOrCreateChildByIndex(leftArrowIndex);
+        CHECK_NULL_RETURN(nodeWrapper, nullptr);
+    }
+    if (tagName == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
+        nodeWrapper = layoutWrapper->GetOrCreateChildByIndex(rightArrowIndex);
+        CHECK_NULL_RETURN(nodeWrapper, nullptr);
+    }
     return nodeWrapper;
 }
 
@@ -708,7 +736,7 @@ void SwiperLayoutAlgorithm::ArrowLayout(LayoutWrapper* layoutWrapper, const RefP
         CHECK_NULL_VOID(hostNode);
         auto swiperPattern = hostNode->GetPattern<SwiperPattern>();
         CHECK_NULL_VOID(swiperPattern);
-        auto indicatorWrapper = GetNodeLayoutWrapperByIndex(layoutWrapper, swiperPattern->GetIndicatorId());
+        auto indicatorWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_INDICATOR_ETS_TAG);
         CHECK_NULL_VOID(indicatorWrapper);
         auto indicatorGeometry = indicatorWrapper->GetGeometryNode();
         CHECK_NULL_VOID(indicatorGeometry);
