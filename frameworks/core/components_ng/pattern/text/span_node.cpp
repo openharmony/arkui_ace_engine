@@ -177,6 +177,10 @@ int32_t ImageSpanItem::UpdateParagraph(
         default:
             run.alignment = PlaceholderAlignment::BOTTOM;
     }
-    return builder->AddPlaceholder(run);
+    builder->PushStyle(textStyle);
+    LOGI("ImageSpan fontsize = %{public}f", textStyle.GetFontSize().Value());
+    int32_t index = builder->AddPlaceholder(run);
+    builder->PopStyle();
+    return index;
 }
 } // namespace OHOS::Ace::NG
