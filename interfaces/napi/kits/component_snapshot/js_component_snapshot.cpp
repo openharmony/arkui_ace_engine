@@ -186,7 +186,8 @@ static napi_value JSSnapshotGet(napi_env env, napi_callback_info info)
 
     // parse id
     std::string componentId;
-    GetNapiString(env, helper.GetArgv(0), componentId);
+    napi_valuetype valueType = napi_null;
+    GetNapiString(env, helper.GetArgv(0), componentId, valueType);
 
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (!delegate) {

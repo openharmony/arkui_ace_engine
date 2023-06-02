@@ -18,6 +18,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
+#include "base/utils/utils.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
@@ -83,11 +84,12 @@ public:
         const RefPtr<LayoutWrapper>& dirty, bool /*skipMeasure*/, bool /*skipLayout*/) override
     {
         auto geometryNode = dirty->GetGeometryNode();
-        offset_ = geometryNode->GetContentOffset();
-        size_ = geometryNode->GetContentSize();
-        if (isFirstAddhotZoneRect_) {
+        auto offset = geometryNode->GetContentOffset();
+        auto size = geometryNode->GetContentSize();
+        if (!NearEqual(offset, offset_) || !NearEqual(size, size_)) {
+            offset_ = offset;
+            size_ = size;
             AddHotZoneRect();
-            isFirstAddhotZoneRect_ = false;
         }
         return true;
     }
@@ -146,6 +148,9 @@ public:
     FocusPattern GetFocusPattern() const override;
     void UpdateUIStatus(bool check);
 
+    std::string ProvideRestoreInfo() override;
+    void OnRestoreInfo(const std::string& restoreInfo) override;
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -186,7 +191,6 @@ private:
     SizeF size_;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
-    bool isFirstAddhotZoneRect_ = true;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
 
     RefPtr<CheckBoxModifier> checkboxModifier_;

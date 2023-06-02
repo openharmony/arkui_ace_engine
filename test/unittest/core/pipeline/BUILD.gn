@@ -150,7 +150,6 @@ ohos_unittest("pipeline_context_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/multi_menu_layout_algorithm.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/menu/navigation_menu_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/sub_menu_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_method.cpp",
@@ -203,6 +202,7 @@ ohos_unittest("pipeline_context_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/pattern/image/mock/mock_image_pattern.cpp",
 
     # property
+    "$ace_root/frameworks/core/components_ng/property/border_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",
     "$ace_root/frameworks/core/components_ng/property/gradient_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/grid_property.cpp",

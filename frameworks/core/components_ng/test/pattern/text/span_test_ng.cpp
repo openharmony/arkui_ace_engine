@@ -498,7 +498,7 @@ HWTEST_F(SpanTestNg, Create001, TestSize.Level1)
     std::string moduleName;
     std::string src;
     RefPtr<PixelMap> pixMap = nullptr;
-    imageSpan.Create(src, true, pixMap, bundleName, moduleName);
+    imageSpan.Create(src, pixMap, bundleName, moduleName);
     ImageSpanView::SetObjectFit(ImageFit::FILL);
     ImageSpanView::SetVerticalAlign(VerticalAlign::TOP);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());

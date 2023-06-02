@@ -13,592 +13,614 @@
  * limitations under the License.
  */
 
-#include "gtest/gtest.h"
 #define private public
 #define protected public
-#include "core/common/flutter/flutter_asset_manager.h"
 #include "core/common/flutter/flutter_task_executor.h"
 #include "core/common/flutter/flutter_window.h"
-#undef private
-#undef protected
+#include "core/common/flutter/flutter_thread_model.h"
+
 #include "test/mock/core/common/mock_container.h"
 #include "core/components/plugin/file_asset_provider.h"
-#include "core/pipeline/base/render_node.h"
+#include "mock_flutter.h"
+
+#undef private
+#undef protected
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace {
-    const std::string UITASK = "ui task has executed";
-    const std::string UISYNCTASK = "ui sync task has executed";
-    const std::string PLATFORMTASK = "platform task has executed";
-    const std::string PLATFORMSYNCTASK = "platform sync task has executed";
-    const std::string IOTASK = "io task has executed";
-    const std::string IOSYNCTASK = "io sync task has executed";
-    const std::string GPUTASK = "gpu task has executed";
-    const std::string GPUSYNCTASK = "gpu sync task has executed";
-    const std::string JSTASK = "js task has executed";
-    const std::string JSSYNCTASK = "js sync task has executed";
-    const std::string BACKGROUNDTASK = "background task has executed";
-    const std::string BACKGROUNDSYNCTASK = "background sync task has executed";
-    const std::string LABEL = "task executor";
-    const std::string THREADFIRST = "thread_1";
-    const std::string THREADSECOND = "thread_2";
-    const std::string THREADTHIRD = "thread_3";
-    const std::string THREADFOURTH = "thread_4";
-    uint64_t g_result = 0;
-    int32_t instanceId = 1;
-    const std::string RET_TEST = "error";
-} // namespace
+const std::string UISYNCTASK = "ui task has executed";
+const std::string BACKGROUNDSYNCTASK = "background task has executed";
+const std::string LABEL_TEST = "task executor";
+const std::string THREAD_FIRST = "thread_first";
+const std::string THREAD_SECOND = "thread_second";
+const std::string THREAD_THIRD = "thread_third";
+const std::string THREAD_FOURTH = "thread_fourth";
+const std::string RET_TEST = "error";
+const std::string HAP_PATH = "test";
 
-// namespace
+uint64_t test_result = 2;
+int32_t instanceId = 1;
+MediaFileInfo FILE_INFO = { .fileName = RET_TEST, .offset = 1, .length = 1, .lastModTime = 1, .lastModDate = 1 };
+
+flutter::TaskRunners MakeTaskRunner()
+{
+    std::string label = LABEL_TEST;
+    std::unique_ptr<fml::Thread> threadFirst = std::make_unique<fml::Thread>(THREAD_FIRST);
+    std::unique_ptr<fml::Thread> threadSecond = std::make_unique<fml::Thread>(THREAD_SECOND);
+    std::unique_ptr<fml::Thread> threadThird = std::make_unique<fml::Thread>(THREAD_THIRD);
+    std::unique_ptr<fml::Thread> threadFourth = std::make_unique<fml::Thread>(THREAD_FOURTH);
+
+    fml::RefPtr<fml::TaskRunner> platform = threadFirst->GetTaskRunner();
+    fml::RefPtr<fml::TaskRunner> gpu = threadSecond->GetTaskRunner();
+    fml::RefPtr<fml::TaskRunner> ui = threadThird->GetTaskRunner();
+    fml::RefPtr<fml::TaskRunner> io = threadFourth->GetTaskRunner();
+    flutter::TaskRunners testTaskRunner(label, platform, gpu, ui, io);
+
+    RefPtr<FlutterTaskExecutor> taskExecutor = AceType::MakeRefPtr<FlutterTaskExecutor>(testTaskRunner);
+    taskExecutor->InitOtherThreads(testTaskRunner);
+
+    return testTaskRunner;
+};
+
+RefPtr<FlutterTaskExecutor> MakeTaskExecutor()
+{
+    auto taskRunner = MakeTaskRunner();
+    RefPtr<FlutterTaskExecutor> taskExecutor = AceType::MakeRefPtr<FlutterTaskExecutor>(taskRunner);
+
+    return taskExecutor;
+};
+}
+
 class FlutterTest : public testing::Test {
 public:
-    static void SetUpTestCase() {}
-    static void TearDownTestCase() {}
-    void SetUp() {}
-    void TearDown() {}
+    static void SetUpTestSuite()
+    {
+        MockContainer::SetUp();
+    }
+    static void TeardownTestSuite()
+    {
+        MockContainer::TearDown();
+    }
 };
 
 /**
- * @tc.name: CastToFlutterTest001
- * @tc.desc: Test cast to flutter.
+ * @tc.name: Flutter_Task_ExecutorTest01
+ * @tc.desc: Test the operation of flutter
  * @tc.type: FUNC
  */
-HWTEST_F(FlutterTest, CastToFlutterTest001, TestSize.Level1)
+HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest01, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Build a object is null.
-     * @tc.steps: step2. callback WillRunOnCurrentThread.
-     * @tc.expected: step2. The return run thread is false.
+     * @tc.steps1: Build a flutterTaskExecutor object is null.
      */
-    FlutterTaskExecutor object;
+    FlutterTaskExecutor flutterTaskExecutor;
 
-    auto test_platform = object.WillRunOnCurrentThread(TaskExecutor::TaskType::PLATFORM);
-    EXPECT_FALSE(test_platform);
-    auto test_ui = object.WillRunOnCurrentThread(TaskExecutor::TaskType::UI);
-    EXPECT_FALSE(test_ui);
-    auto test_io = object.WillRunOnCurrentThread(TaskExecutor::TaskType::IO);
-    EXPECT_FALSE(test_io);
-    auto test_gpu = object.WillRunOnCurrentThread(TaskExecutor::TaskType::GPU);
-    EXPECT_FALSE(test_gpu);
-    auto test_js = object.WillRunOnCurrentThread(TaskExecutor::TaskType::JS);
-    EXPECT_FALSE(test_js);
-    auto test_backgroud = object.WillRunOnCurrentThread(TaskExecutor::TaskType::BACKGROUND);
-    EXPECT_FALSE(test_backgroud);
-    auto test_unknown = object.WillRunOnCurrentThread(TaskExecutor::TaskType::UNKNOWN);
-    EXPECT_FALSE(test_unknown);
+    /**
+     * @tc.steps2: callback WillRunOnCurrentThread.
+     * @tc.expected: The return run thread is false.
+     */
+    for (int32_t id = 0; id < 7; id++) {
+        auto taskType = static_cast<TaskExecutor::TaskType>(id);
+        auto result = flutterTaskExecutor.WillRunOnCurrentThread(taskType);
+        switch (taskType) {
+            case TaskExecutor::TaskType::PLATFORM:
+            case TaskExecutor::TaskType::UI:
+            case TaskExecutor::TaskType::IO:
+            case TaskExecutor::TaskType::GPU:
+            case TaskExecutor::TaskType::JS:
+            case TaskExecutor::TaskType::BACKGROUND:
+                EXPECT_FALSE(result);
+                break;
+            default:
+                EXPECT_FALSE(result);
+        }
+    }
 }
 
 /**
- * @tc.name: CastToFlutterTest002
- * @tc.desc: Test cast to flutter.
+ * @tc.name: Flutter_Task_ExecutorTest02
+ * @tc.desc: Test the operation of flutter
  * @tc.type: FUNC
  */
-HWTEST_F(FlutterTest, CastToFlutterTest002, TestSize.Level1)
+HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest02, TestSize.Level1)
 {
-    std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
-    RefPtr<FlutterTaskExecutor> taskExecutor = AceType::MakeRefPtr<FlutterTaskExecutor>(taskRunner);
+    /**
+     * @tc.steps1: Build a flutterTaskExecutor object is not null.
+     */
+    auto flutterTaskExecutor = MakeTaskExecutor();
 
     /**
-     * @tc.steps: step1. Build a object is not null.
-     * @tc.steps: step2. callback WillRunOnCurrentThread.
-     * @tc.expected: step2. The return run thread is task type.
+     * @tc.steps2: callback WillRunOnCurrentThread.
+     * @tc.expected: The return run thread is task type.
      */
-    FlutterTaskExecutor object(taskExecutor);
-    auto test_platform = object.WillRunOnCurrentThread(TaskExecutor::TaskType::PLATFORM);
-    auto platformRun = object.platformRunner_->RunsTasksOnCurrentThread();
-    EXPECT_EQ(test_platform, platformRun);
-
-    auto test_ui = object.WillRunOnCurrentThread(TaskExecutor::TaskType::UI);
-    auto uiRun = object.uiRunner_->RunsTasksOnCurrentThread();
-    EXPECT_EQ(test_ui, uiRun);
-
-    auto test_io = object.WillRunOnCurrentThread(TaskExecutor::TaskType::IO);
-    auto ioRun = object.ioRunner_->RunsTasksOnCurrentThread();
-    EXPECT_EQ(test_io, ioRun);
-
-    auto test_gpu = object.WillRunOnCurrentThread(TaskExecutor::TaskType::GPU);
-    auto gpuRun = object.gpuRunner_->RunsTasksOnCurrentThread();
-    EXPECT_EQ(test_gpu, gpuRun);
-
-    auto test_js = object.WillRunOnCurrentThread(TaskExecutor::TaskType::JS);
-    auto jsRun = object.jsRunner_->RunsTasksOnCurrentThread();
-    EXPECT_EQ(test_js, jsRun);
+    for (int32_t id = 0; id < 7; id++) {
+        auto taskType = static_cast<TaskExecutor::TaskType>(id);
+        auto result = flutterTaskExecutor->WillRunOnCurrentThread(taskType);
+        switch (taskType) {
+            case TaskExecutor::TaskType::PLATFORM:
+                EXPECT_EQ(result, flutterTaskExecutor->platformRunner_->RunsTasksOnCurrentThread());
+                break;
+            case TaskExecutor::TaskType::UI:
+                EXPECT_EQ(result, flutterTaskExecutor->uiRunner_->RunsTasksOnCurrentThread());
+                break;
+            case TaskExecutor::TaskType::IO:
+                EXPECT_EQ(result, flutterTaskExecutor->ioRunner_->RunsTasksOnCurrentThread());
+                break;
+            case TaskExecutor::TaskType::GPU:
+                EXPECT_EQ(result, flutterTaskExecutor->gpuRunner_->RunsTasksOnCurrentThread());
+                break;
+            case TaskExecutor::TaskType::JS:
+                EXPECT_EQ(result, flutterTaskExecutor->jsRunner_->RunsTasksOnCurrentThread());
+                break;
+            case TaskExecutor::TaskType::BACKGROUND:
+                EXPECT_FALSE(result);
+                break;
+            default:
+                EXPECT_FALSE(result);
+        }
+    }
 }
 
 /**
- * @tc.name: CastToFlutterTest003
- * @tc.desc: Test cast to flutter.
+ * @tc.name: Flutter_Task_ExecutorTest03
+ * @tc.desc: Test the operation of flutter
  * @tc.type: FUNC
  */
-HWTEST_F(FlutterTest, CastToFlutterTest003, TestSize.Level1)
+HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest03, TestSize.Level1)
 {
-    std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
-    RefPtr<FlutterTaskExecutor> taskExecutor = AceType::MakeRefPtr<FlutterTaskExecutor>(taskRunner);
+    /**
+     * @tc.steps1: Build a flutterTaskExecutor object is not null.
+     */
+    auto flutterTaskExecutor = MakeTaskExecutor();
 
     /**
-     * @tc.steps: step1. Build a object is not null.
-     * @tc.steps: step2. callback InitJsThread.
-     * @tc.expected: step2. Return expected results.
+     * @tc.steps2: callback InitJsThread push newThread is true.
+     * @tc.expected: Return expected results.
      */
-    FlutterTaskExecutor object(taskExecutor);
-    taskExecutor->InitJsThread(true);
-    EXPECT_EQ(object.jsRunner_, object.jsThread_->GetTaskRunner());
-    taskExecutor->InitJsThread(false);
-    EXPECT_NE(object.jsRunner_, object.uiRunner_);
+    flutterTaskExecutor->InitJsThread(true);
+    EXPECT_EQ(flutterTaskExecutor->jsRunner_, flutterTaskExecutor->jsThread_->GetTaskRunner());
+
+    /**
+     * @tc.steps3: callback InitJsThread push newThread is false.
+     * @tc.expected: Return expected results.
+     */
+    flutterTaskExecutor->InitJsThread(false);
+    EXPECT_EQ(flutterTaskExecutor->jsRunner_, flutterTaskExecutor->uiRunner_);
 }
 
 /**
- * @tc.name: CastToFlutterTest004
- * @tc.desc: Test cast to flutter.
+ * @tc.name: Flutter_Task_ExecutorTest04
+ * @tc.desc: Test the operation of flutter
  * @tc.type: FUNC
  */
-HWTEST_F(FlutterTest, CastToFlutterTest004, TestSize.Level1)
+HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest04, TestSize.Level1)
 {
-    std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
-    RefPtr<FlutterTaskExecutor> taskExecutor = AceType::MakeRefPtr<FlutterTaskExecutor>(taskRunner);
+    /**
+     * @tc.steps1: Build a flutterTaskExecutor object is not null.
+     */
+    auto flutterTaskExecutor = MakeTaskExecutor();
 
     /**
-     * @tc.steps: step1. callback InitPlatformThread.
-     * @tc.expected: step1. Return expected results.
+     * @tc.steps2: callback InitPlatformThread push useCurrentEventRunner is true.
+     * @tc.expected: Return expected results.
      */
-    FlutterTaskExecutor object(taskExecutor);
-    taskExecutor->InitPlatformThread(true);
-    EXPECT_EQ(object.taskTypeTable_.size(), 0);
+    flutterTaskExecutor->InitPlatformThread(true);
+    EXPECT_EQ(flutterTaskExecutor->taskTypeTable_.size(), 1);
+
+    /**
+     * @tc.steps3: callback InitOtherThreads.
+     * @tc.expected: Return expected results.
+     */
+    flutter::TaskRunners taskRunner = MakeTaskRunner();
+    flutterTaskExecutor->InitOtherThreads(taskRunner);
+    EXPECT_EQ(flutterTaskExecutor->taskTypeTable_.size(), 1);
+    EXPECT_EQ(flutterTaskExecutor->taskTypeTable_.bucket_count(), 2);
 }
 
 /**
- * @tc.name: CastToFlutterTest005
- * @tc.desc: Test cast to flutter.
+ * @tc.name: Flutter_Task_ExecutorTest05
+ * @tc.desc: Test the operation of flutter
  * @tc.type: FUNC
  */
-HWTEST_F(FlutterTest, CastToFlutterTest005, TestSize.Level1)
+HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest05, TestSize.Level1)
 {
-    std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
-    RefPtr<FlutterTaskExecutor> taskExecutor = AceType::MakeRefPtr<FlutterTaskExecutor>(taskRunner);
+    /**
+     * @tc.steps1: Build a flutterTaskExecutor object is not null.
+     */
+    auto taskExecutor = MakeTaskExecutor();
+    FlutterTaskExecutor flutterTaskExecutor(taskExecutor);
 
     /**
-     * @tc.steps: step1. callback InitOtherThreads.
-     * @tc.expected: step1. Return expected results.
+     * @tc.steps2: callback InitOtherThreads push threadModel is null..
+     * @tc.expected: Return expected results.
      */
-    FlutterTaskExecutor object(taskExecutor);
-    taskExecutor->InitOtherThreads(taskRunner);
-    EXPECT_EQ(object.taskTypeTable_.size(), 0);
-    EXPECT_EQ(object.taskTypeTable_.bucket_count(), 0);
+    flutterTaskExecutor.InitOtherThreads(nullptr);
+    EXPECT_EQ(flutterTaskExecutor.taskTypeTable_.size(), 0);
 
     /**
-     * @tc.steps: step2. callback FillTaskTypeTable.
-     * @tc.expected: step2. Return expected results.
+     * @tc.steps3: create a threadHost, taskRunner = MakeTaskRunner().
      */
-    object.FillTaskTypeTable(taskExecutor, TaskExecutor::TaskType::UI);
-    EXPECT_EQ(object.taskTypeTable_.size(), 0);
+    flutter::ThreadHost threadHost;
+    threadHost.platform_thread = std::make_unique<fml::Thread>(THREAD_FIRST);
+    threadHost.ui_thread = std::make_unique<fml::Thread>(THREAD_SECOND);
+    threadHost.gpu_thread = std::make_unique<fml::Thread>(THREAD_THIRD);
+    threadHost.io_thread = std::make_unique<fml::Thread>(THREAD_FOURTH);
+    flutter::TaskRunners taskRunner = MakeTaskRunner();
 
-    object.FillTaskTypeTable(TaskExecutor::TaskType::UI);
-    EXPECT_EQ(object.taskTypeTable_.size(), 1);
-    EXPECT_EQ(object.taskTypeTable_.bucket_count(), 2);
-    FlutterTaskExecutor::ThreadInfo info = object.taskTypeTable_[TaskExecutor::TaskType::UI];
-    EXPECT_EQ(info.threadName, "flutter_test");
+    /**
+     * @tc.steps4: callback InitOtherThreads push threadModel is new value.
+     * @tc.expected: Return expected results.
+     */
+    FlutterThreadModel* threadModel = new FlutterThreadModel(std::move(threadHost), taskRunner);
+    flutterTaskExecutor.InitOtherThreads(threadModel);
+    EXPECT_EQ(flutterTaskExecutor.uiRunner_, taskRunner.GetUITaskRunner());
+    EXPECT_EQ(flutterTaskExecutor.ioRunner_, taskRunner.GetIOTaskRunner());
 }
 
 /**
- * @tc.name: CastToFlutterTest006
- * @tc.desc: Test cast to flutter.
+ * @tc.name: Flutter_Task_ExecutorTest06
+ * @tc.desc: Test the operation of flutter
  * @tc.type: FUNC
  */
-HWTEST_F(FlutterTest, CastToFlutterTest006, TestSize.Level1)
+HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest06, TestSize.Level1)
 {
-    std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
-    RefPtr<FlutterTaskExecutor> taskExecutor = AceType::MakeRefPtr<FlutterTaskExecutor>(taskRunner);
-    FlutterTaskExecutor object(taskExecutor);
+    /**
+     * @tc.steps1: Build a flutterTaskExecutor object is not null.
+     */
+    auto flutterTaskExecutor = MakeTaskExecutor();
 
     /**
-     * @tc.steps: step1. callback OnPostTask.set asynchronous task.TaskType is UI.
-     * @tc.expected: step1. task gets executed.
+     * @tc.steps2: callback FillTaskTypeTable push weak is null..
+     * @tc.expected: Return expected results.
      */
-    std::string uiTask;
-    bool uiTest = object.OnPostTask([&uiTask]() { uiTask = UISYNCTASK; }, TaskExecutor::TaskType::UI, 2);
-    EXPECT_TRUE(uiTest);
-    EXPECT_NE(uiTask, UISYNCTASK);
-    sleep(2);
-    EXPECT_EQ(uiTask, UISYNCTASK);
+    flutterTaskExecutor->FillTaskTypeTable(nullptr, TaskExecutor::TaskType::UI);
+    EXPECT_EQ(flutterTaskExecutor->taskTypeTable_.size(), 0);
 
     /**
-     * @tc.steps: step2. set asynchronous task.TaskType is PLATFORM.
-     * @tc.expected: step2. task gets executed.
+     * @tc.steps3: callback FillTaskTypeTable push weak is flutterTaskExecutor.
+     * @tc.expected: Return expected results.
      */
-    std::string platformTask;
-    bool platformTest = object.OnPostTask([&platformTask]() { platformTask = PLATFORMSYNCTASK; },
-        TaskExecutor::TaskType::PLATFORM, 2);
-    EXPECT_TRUE(platformTest);
-    EXPECT_NE(platformTask, PLATFORMSYNCTASK);
-    sleep(2);
-    EXPECT_EQ(platformTask, PLATFORMSYNCTASK);
-
-    /**
-     * @tc.steps: step3. set asynchronous task.TaskType is IO.
-     * @tc.expected: step3. task gets executed.
-     */
-    std::string ioTask;
-    bool ioTest = object.OnPostTask([&ioTask]() { ioTask = IOSYNCTASK; }, TaskExecutor::TaskType::IO, 2);
-    EXPECT_TRUE(ioTest);
-    EXPECT_NE(ioTask, IOSYNCTASK);
-    sleep(2);
-    EXPECT_EQ(ioTask, IOSYNCTASK);
-
-    /**
-     * @tc.steps: step4. set asynchronous task.TaskType is GPU.
-     * @tc.expected: step4. task gets executed.
-     */
-    std::string gpuTask;
-    bool gpuTest = object.OnPostTask([&gpuTask]() { gpuTask = GPUSYNCTASK; }, TaskExecutor::TaskType::GPU, 2);
-    EXPECT_TRUE(gpuTest);
-    EXPECT_NE(gpuTask, GPUSYNCTASK);
-    sleep(2);
-    EXPECT_EQ(gpuTask, GPUSYNCTASK);
-
-    /**
-     * @tc.steps: step5. set asynchronous task.TaskType is JS.
-     * @tc.expected: step5. task gets executed.
-     */
-    std::string jsTask;
-    bool jsTest = object.OnPostTask([&jsTask]() { jsTask = JSSYNCTASK; }, TaskExecutor::TaskType::JS, 2);
-    EXPECT_TRUE(jsTest);
-    EXPECT_NE(jsTask, JSSYNCTASK);
-    sleep(2);
-    EXPECT_EQ(jsTask, JSSYNCTASK);
-
-    /**
-     * @tc.steps: step6. set asynchronous task.TaskType is UNKNOWN.
-     * @tc.expected: step6. The expected result is false.
-     */
-    bool result = object.OnPostTask([] () {}, TaskExecutor::TaskType::UNKNOWN, 2);
-    EXPECT_FALSE(result);
+    flutterTaskExecutor->FillTaskTypeTable(flutterTaskExecutor, TaskExecutor::TaskType::UI);
+    EXPECT_EQ(flutterTaskExecutor->taskTypeTable_.size(), 1);
+    EXPECT_EQ(flutterTaskExecutor->taskTypeTable_.bucket_count(), 2);
 }
 
 /**
- * @tc.name: CastToFlutterTest007
- * @tc.desc: Test cast to flutter.
+ * @tc.name: Flutter_Task_ExecutorTest07
+ * @tc.desc: Test the operation of flutter
  * @tc.type: FUNC
  */
-HWTEST_F(FlutterTest, CastToFlutterTest007, TestSize.Level1)
+HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest07, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Build a object.
+     * @tc.steps1: Build a flutterTaskExecutor object is not null.
      */
-    std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
-    RefPtr<FlutterTaskExecutor> taskExecutor = AceType::MakeRefPtr<FlutterTaskExecutor>(taskRunner);
-    FlutterTaskExecutor object(taskExecutor);
+    auto flutterTaskExecutor = MakeTaskExecutor();
 
     /**
-     * @tc.steps: step2. callback RemoveTaskObserver for exception test
-     * @tc.expected: step2. expect the function is run ok.
+     * @tc.steps2: Create a callBack task.
      */
-    object.RemoveTaskObserver();
+    std::string uiTask = "";
+    auto callBack = [&uiTask]() {
+        uiTask = UISYNCTASK;
+    };
 
     /**
-     * @tc.steps: step3. SetCurrentId(-1).set asynchronous task.
-     * @tc.expected: step3. task gets executed.
+     * @tc.steps3: Set CurrentId_ >= 0.
+     * @tc.steps3: call OnPostTask.set asynchronous task.delayTime is 1.
+     * @tc.expected: task gets executed.
      */
-    std::string uiTask;
-    object.OnPostTask([&uiTask]() { uiTask = UISYNCTASK; }, TaskExecutor::TaskType::UI, 2);
-    EXPECT_NE(uiTask, UISYNCTASK);
-    sleep(2);
-    EXPECT_EQ(uiTask, UISYNCTASK);
+    for (int32_t id = 0; id < 7; id++) {
+        auto taskType = static_cast<TaskExecutor::TaskType>(id);
+        auto result = flutterTaskExecutor->OnPostTask(callBack, taskType, 1);
+        switch (taskType) {
+            case TaskExecutor::TaskType::PLATFORM:
+            case TaskExecutor::TaskType::UI:
+            case TaskExecutor::TaskType::IO:
+            case TaskExecutor::TaskType::GPU:
+            case TaskExecutor::TaskType::JS:
+            case TaskExecutor::TaskType::BACKGROUND:
+                EXPECT_TRUE(result);
+                break;
+            case TaskExecutor::TaskType::UNKNOWN:
+                EXPECT_FALSE(result);
+                break;
+            default:
+                EXPECT_FALSE(result);
+        }
+    }
+}
+
+/**
+ * @tc.name: Flutter_Task_ExecutorTest08
+ * @tc.desc: Test the operation of flutter
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest08, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Build a flutterTaskExecutor object is null.
+     */
+    FlutterTaskExecutor flutterTaskExecutor;
 
     /**
-     * @tc.steps: step4. set asynchronous task.TaskType is BACKGROUND.
-     * @tc.expected: step4. task gets executed.
+     * @tc.steps2: Create a callBack task.
      */
-    std::string backgroudTask;
-    bool backgroudTest = object.OnPostTask([&backgroudTask]() { backgroudTask = BACKGROUNDSYNCTASK; },
-        TaskExecutor::TaskType::BACKGROUND, 2);
-    EXPECT_TRUE(backgroudTest);
-    EXPECT_NE(backgroudTask, BACKGROUNDSYNCTASK);
+    std::string backgroudTask = "";
+    auto callBack = [&backgroudTask]() {
+        backgroudTask = BACKGROUNDSYNCTASK;
+    };
+
+    /**
+     * @tc.steps3: Set CurrentId_ < 0.
+     * @tc.steps3: call OnPostTask.set asynchronous task.TaskType is GPU.delayTime is 2.
+     * @tc.expected: task gets executed.
+     */
+    Container::UpdateCurrent(-1);
+    flutterTaskExecutor.OnPostTask(callBack, TaskExecutor::TaskType::BACKGROUND, 2);
+    EXPECT_EQ(backgroudTask, "");
     sleep(2);
     EXPECT_EQ(backgroudTask, BACKGROUNDSYNCTASK);
-}
-
-/**
- * @tc.name: CastToFlutterTest008
- * @tc.desc: Test cast to flutter.
- * @tc.type: FUNC
- */
-HWTEST_F(FlutterTest, CastToFlutterTest008, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Build a object.
-     */
-    std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
-    RefPtr<FlutterTaskExecutor> taskExecutor = AceType::MakeRefPtr<FlutterTaskExecutor>(taskRunner);
-    FlutterTaskExecutor object(taskExecutor);
 
     /**
-     * @tc.steps: step2. callback WrapTaskWithTraceId.
-     * @tc.expected: step2. Return expected results.
+     * @tc.steps4: call WrapTaskWithTraceId.
+     * @tc.expected: The return result is true.
      */
-    std::string uiTask;
-    auto result = taskExecutor->WrapTaskWithTraceId([&uiTask]() { uiTask = UISYNCTASK; }, 1);
+    flutterTaskExecutor.RemoveTaskObserver();
+    auto result = flutterTaskExecutor.WrapTaskWithTraceId(callBack, 1);
     EXPECT_TRUE(result);
 }
 
 /**
- * @tc.name: CastToFlutterTest009
- * @tc.desc: Test cast to flutter.
+ * @tc.name: Flutter_Thread_Model01
+ * @tc.desc: Test the operation of flutter
  * @tc.type: FUNC
  */
-HWTEST_F(FlutterTest, CastToFlutterTest009, TestSize.Level1)
+HWTEST_F(FlutterTest, Flutter_Thread_Model01, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Build a object.
-     * @tc.steps: step2. callback GetAsset input assetName is null.
-     * @tc.expected: step2. The expected result is null.
+     * @tc.steps1: Create a threadHost, taskRunner = MakeTaskRunner().
+     * @tc.steps1: New a threadModel with threadHost and taskRunner.
      */
-    FlutterAssetManager object;
-    auto result = object.GetAsset("");
-    EXPECT_EQ(result, nullptr);
+    flutter::ThreadHost threadHost;
+    threadHost.platform_thread = std::make_unique<fml::Thread>(THREAD_FIRST);
+    threadHost.ui_thread = std::make_unique<fml::Thread>(THREAD_SECOND);
+    threadHost.gpu_thread = std::make_unique<fml::Thread>(THREAD_THIRD);
+    threadHost.io_thread = std::make_unique<fml::Thread>(THREAD_FOURTH);
+    flutter::TaskRunners taskRunner = MakeTaskRunner();
+    FlutterThreadModel* threadModel = new FlutterThreadModel(std::move(threadHost), taskRunner);
 
     /**
-     * @tc.steps: step3. callback GetAsset input assetName is not null.
-     * @tc.expected: step3. The expected result is null.
+     * @tc.steps2: call CreateThreadModel push hasUiThread is true useGpuThread is false.
+     * @tc.expected: return expected results.
      */
-    auto assetProvider = AceType::MakeRefPtr<Plugin::FileAssetProvider>();
-    object.PushBack(std::move(assetProvider));
-    std::string assetName = RET_TEST;
-    auto testAsset = object.GetAsset(assetName);
-    EXPECT_EQ(testAsset, nullptr);
+    auto test_taskRunner = threadModel->taskRunners_;
+    threadModel->CreateThreadModel(true, true, false);
+    EXPECT_TRUE(test_taskRunner.GetUITaskRunner());
+
+    /**
+     * @tc.steps3: call CreateThreadModel, push hasUiThread is false useGpuThread is true.
+     * @tc.expected: return expected results.
+     */
+    threadModel->CreateThreadModel(true, false, true);
+    EXPECT_TRUE(test_taskRunner.GetGPUTaskRunner());
 }
 
 /**
- * @tc.name: CastToFlutterTest0010
- * @tc.desc: Test cast to flutter.
+ * @tc.name: Flutter_Asset_Manager01
+ * @tc.desc: Test the operation of flutter
  * @tc.type: FUNC
  */
-HWTEST_F(FlutterTest, CastToFlutterTest0010, TestSize.Level1)
+HWTEST_F(FlutterTest, Flutter_Asset_Manager01, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Build a object.
-     * @tc.steps: step2. callback GetAssetPath input assetName is not null.
-     * @tc.expected: step2. Return expected results..
+     * @tc.steps1: Create a flutterAssetManager.
      */
-    FlutterAssetManager object;
-    auto assetProvider = AceType::MakeRefPtr<Plugin::FileAssetProvider>();
-    object.PushBack(std::move(assetProvider));
-    std::string assetName = RET_TEST;
-    std::string result = object.GetAssetPath(assetName, true);
-    EXPECT_EQ(result, "");
-}
-
-/**
- * @tc.name: CastToFlutterTest0011
- * @tc.desc: Test cast to flutter.
- * @tc.type: FUNC
- */
-HWTEST_F(FlutterTest, CastToFlutterTest0011, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Build a object.
-     * @tc.steps: step2. callback GetAssetPath input assetName is not null.
-     * @tc.expected: step2. Return expected results..
-     */
-    FlutterAssetManager object;
-    auto assetProvider = AceType::MakeRefPtr<Plugin::FileAssetProvider>();
-    std::string hapPath = "/system/app/com.ohos.photos/Photos.hap";
-    std::vector<std::string> assetBasePaths;
-    assetBasePaths.push_back("resources/base/profile/");
-    assetProvider->Initialize(hapPath, assetBasePaths);
-    object.PushBack(std::move(assetProvider));
-    std::string assetName = "form_config.json";
-    std::string result = object.GetAssetPath(assetName, true);
-    EXPECT_EQ(result, "");
-}
-
-/**
- * @tc.name: CastToFlutterTest0012
- * @tc.desc: Test cast to flutter.
- * @tc.type: FUNC
- */
-HWTEST_F(FlutterTest, CastToFlutterTest0012, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Build a object.
-     * @tc.steps: step2. callback GetAssetList input assetName is not null.
-     * @tc.expected: step2. Return expected results..
-     */
-    FlutterAssetManager object;
-    auto assetProvider = AceType::MakeRefPtr<Plugin::FileAssetProvider>();
-    object.PushBack(std::move(assetProvider));
-    std::string path = RET_TEST;
+    auto flutterAssetManager = AceType::MakeRefPtr<FlutterAssetManager>();
     std::vector<std::string> assetList;
-    object.GetAssetList(path, assetList);
-    EXPECT_TRUE(assetList.empty());
-}
-
-/**
- * @tc.name: CastToFlutterTest0013
- * @tc.desc: Test cast to flutter.
- * @tc.type: FUNC
- */
-HWTEST_F(FlutterTest, CastToFlutterTest0013, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Build a object.
-     * @tc.steps: step2. callback GetFileInfo input assetName is not null.
-     * @tc.expected: step2. Return expected results..
-     */
-    FlutterAssetManager object;
-    auto assetProvider = AceType::MakeRefPtr<Plugin::FileAssetProvider>();
-    object.PushBack(std::move(assetProvider));
-    std::string path = RET_TEST;
-    MediaFileInfo fileInfo;
-    bool result = object.GetFileInfo(path, fileInfo);
-    EXPECT_FALSE(result);
-}
-
-/**
- * @tc.name: CastToFlutterTest0014
- * @tc.desc: Test cast to flutter.
- * @tc.type: FUNC
- */
-HWTEST_F(FlutterTest, CastToFlutterTest0014, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Build a flutter window.
-     */
-    Platform::FlutterWindow flutter(instanceId);
 
     /**
-     * @tc.steps: step2. callback Create.
-     * @tc.expected: step2. Return expected results..
+     * @tc.steps2: call GetAsset input assetName is "".
+     * @tc.expected: The expected result is null.
      */
-    auto result = flutter.Create(nullptr);
+    auto result = flutterAssetManager->GetAsset("");
     EXPECT_EQ(result, nullptr);
 
     /**
-     * @tc.steps: step3. callback Destroy.
-     * @tc.expected: step3. Return expected results..
+     * @tc.steps3: call PushBack with fileAssetProvider.
+     * @tc.steps3: call GetAsset input assetName is RET_TEST.
+     * @tc.expected: The expected result is null.
      */
-    flutter.Destroy();
-    EXPECT_EQ(flutter.vsyncCallbacks_.size(), 0);
+    auto fileAssetProvider = AceType::MakeRefPtr<Plugin::FileAssetProvider>();
+    flutterAssetManager->PushBack(std::move(fileAssetProvider));
+    auto ass_Result = flutterAssetManager->GetAsset(RET_TEST);
+    EXPECT_EQ(ass_Result, nullptr);
+
+    /**
+     * @tc.steps4: call GetAssetPath input providers_ is Default value.
+     * @tc.expected: The expected result is null.
+     */
+    std::string path_Result = flutterAssetManager->GetAssetPath(RET_TEST, true);
+    EXPECT_EQ(path_Result, "");
+
+    /**
+     * @tc.steps5: call GetAssetList input assetName is RET_TEST.
+     * @tc.expected: The assetList.empty().
+     */
+    flutterAssetManager->GetAssetList(RET_TEST, assetList);
+    EXPECT_TRUE(assetList.empty());
+
+    /**
+     * @tc.steps6: call GetFileInfo input providers_ is Default value.
+     * @tc.expected: The expected result is false.
+     */
+    bool info_Result = flutterAssetManager->GetFileInfo(RET_TEST, FILE_INFO);
+    EXPECT_FALSE(info_Result);
+    flutterAssetManager->ReloadProvider();
 }
 
 /**
- * @tc.name: CastToFlutterTest0015
- * @tc.desc: Test cast to flutter.
+ * @tc.name: Flutter_Asset_Manager02
+ * @tc.desc: Test the operation of flutter
  * @tc.type: FUNC
  */
-HWTEST_F(FlutterTest, CastToFlutterTest0015, TestSize.Level1)
+HWTEST_F(FlutterTest, Flutter_Asset_Manager02, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Build a flutter window.
+     * @tc.steps1: Create a flutterAssetManager.
      */
-    Platform::FlutterWindow flutter(instanceId);
+    auto flutterAssetManager = AceType::MakeRefPtr<FlutterAssetManager>();
 
     /**
-     * @tc.steps: step2. callback RequestFrame.
-     * @tc.expected: step2. RequestFrame success.
+     * @tc.steps2: Create a MockFileAssetProvider.
+     * @tc.steps2: call PushBack with MockFileAssetProvider.
      */
-    flutter.RequestFrame();
-    EXPECT_EQ(flutter.instanceId_, 1);
+    auto mockAssetProvider = AceType::MakeRefPtr<MockFileAssetProvider>();
+    EXPECT_CALL(*mockAssetProvider, IsValid()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*mockAssetProvider, GetAssetPath(RET_TEST, true)).Times(1).WillOnce(Return(HAP_PATH));
+    flutterAssetManager->PushBack(std::move(mockAssetProvider));
 
     /**
-     * @tc.steps: step3. callback SetRootRenderNode.
-     * @tc.expected: step3. SetRootRenderNode success.
+     * @tc.steps3: call GetAssetPath input assetName is RET_TEST.
+     * @tc.expected: The expected result is HAP_PATH.
      */
-    flutter.SetRootRenderNode(nullptr);
+    std::string path_Result = flutterAssetManager->GetAssetPath(RET_TEST, true);
+    EXPECT_EQ(path_Result, "test");
+
+    /**
+     * @tc.steps4: call GetAssetPath input assetName is RET_TEST.
+     * @tc.expected: The expected result is true.
+     * @tc.steps5: call ReloadProvider.
+     */
+    bool result = flutterAssetManager->GetFileInfo(RET_TEST, FILE_INFO);
+    EXPECT_TRUE(result);
+    flutterAssetManager->ReloadProvider();
 }
 
 /**
- * @tc.name: CastToFlutterTest0016
- * @tc.desc: Test cast to flutter.
+ * @tc.name: Flutter_Asset_Manager03
+ * @tc.desc: Test the operation of flutter
  * @tc.type: FUNC
  */
-HWTEST_F(FlutterTest, CastToFlutterTest0016, TestSize.Level1)
+HWTEST_F(FlutterTest, Flutter_Asset_Manager03, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Build a flutter window.
+     * @tc.steps1: Create a flutterAssetManager.
      */
-    Platform::FlutterWindow flutter(instanceId);
+    auto flutterAssetManager = AceType::MakeRefPtr<FlutterAssetManager>();
 
     /**
-     * @tc.steps: step2. callback RegisterVsyncCallback.
-     * @tc.expected: step2. Return expected results..
+     * @tc.steps2: Create a MockFileAssetProvider.
+     * @tc.steps2: call PushBack with MockFileAssetProvider.
      */
-    auto callback = [](uint64_t nanoTimestamp, uint32_t frameCount) {
-        g_result = nanoTimestamp;
+    auto mockAssetProvider = AceType::MakeRefPtr<MockFileAssetProvider>();
+    EXPECT_CALL(*mockAssetProvider, IsValid()).Times(1).WillOnce(Return(true));
+    flutterAssetManager->PushBack(std::move(mockAssetProvider));
+
+    /**
+     * @tc.steps3: call GetAsset input assetName is RET_TEST.
+     * @tc.expected: The expected result is not null.
+     * @tc.steps4: call ReloadProvider.
+     */
+    auto ass_Result = flutterAssetManager->GetAsset(RET_TEST);
+    ASSERT_NE(ass_Result, nullptr);
+    flutterAssetManager->ReloadProvider();
+}
+
+/**
+ * @tc.name: Flutter_window01
+ * @tc.desc: Test the operation of flutter
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlutterTest, Flutter_window01, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create a flutterWindow object.
+     */
+    Platform::FlutterWindow flutterWindow(instanceId);
+    auto* testview = new FlutterAssetManager();
+
+    /**
+     * @tc.steps2: call Create with nullptr.
+     * @tc.expected: expected Return result_one is null.
+     */
+    auto result_one = flutterWindow.Create(nullptr);
+    EXPECT_EQ(result_one, nullptr);
+
+    /**
+     * @tc.steps3: Create a MockContainer.call GetView Return testview
+     * @tc.steps3: Create a nativeView.
+     */
+    auto container = AceType::MakeRefPtr<MockContainer>();
+    EXPECT_CALL(*container, GetView()).Times(1).WillOnce(Return(testview));
+    auto nativeView = static_cast<AceView*>(container->GetView());
+
+    /**
+     * @tc.steps3: call Create with nativeView.
+     * @tc.expected: expected Return result_two is not null.
+     */
+    auto result_two = flutterWindow.Create(nativeView);
+    ASSERT_NE(result_two, nullptr);
+
+    /**
+     * @tc.steps3: callback Destroy.
+     * @tc.expected: Return expected results..
+     */
+    flutterWindow.Destroy();
+    EXPECT_EQ(flutterWindow.vsyncCallbacks_.size(), 0);
+}
+
+/**
+ * @tc.name: Flutter_window02
+ * @tc.desc: Test the operation of flutter
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlutterTest, Flutter_window02, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create a flutterWindow object.
+     */
+    Platform::FlutterWindow flutterWindow(instanceId);
+
+    /**
+     * @tc.steps2: call RequestFrame and SetRootRenderNode.
+     * @tc.expected: Return expected results..
+     */
+    flutterWindow.RequestFrame();
+    flutterWindow.SetRootRenderNode(nullptr);
+    EXPECT_EQ(flutterWindow.instanceId_, 1);
+}
+
+/**
+ * @tc.name: Flutter_window03
+ * @tc.desc: Test the operation of flutter
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlutterTest, Flutter_window03, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create a flutterWindow object.
+     */
+    Platform::FlutterWindow flutterWindow(instanceId);
+
+    /**
+     * @tc.steps2: callback RegisterVsyncCallback.
+     * @tc.expected: Return expected results..
+     */
+    auto callback = [](uint64_t timestamp, uint32_t frameCount) {
+        test_result = timestamp;
     };
-    flutter.RegisterVsyncCallback(callback);
-    EXPECT_EQ(g_result, 0);
+    flutterWindow.RegisterVsyncCallback(callback);
+    EXPECT_EQ(test_result, 2);
 
     /**
-     * @tc.steps: step3. callback OnVsyncCallback.
-     * @tc.expected: step3. Return expected results..
+     * @tc.steps3: call OnVsyncCallback with 5.
+     * @tc.expected: expected results test_result = 5.
      */
-    flutter.OnVsyncCallback(10);
-    EXPECT_EQ(g_result, 10);
+    flutterWindow.OnVsyncCallback(5);
+    EXPECT_EQ(test_result, 5);
 }
 } // namespace OHOS::Ace

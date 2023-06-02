@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,10 +35,17 @@ public:
     void PaintFocusForTABLET(const Offset& offset, double rrectRadius, const Size& boardSize, RenderContext& context);
     void PaintPress(
         const Offset& offset, double rrectRadius, const Size& boardSize, RenderContext& context);
+#ifndef USE_ROSEN_DRAWING
     void PaintRatingBar(RenderContext& context, SkCanvas* canvas);
     void PaintImageArea(RenderContext& context, const RefPtr<RenderImage>& renderImage, SkCanvas* canvas,
         const ImageAreaProperties& properties);
     void PaintHoverRect(SkCanvas* canvas);
+#else
+    void PaintRatingBar(RenderContext& context, RSCanvas* canvas);
+    void PaintImageArea(RenderContext& context, const RefPtr<RenderImage>& renderImage, RSCanvas* canvas,
+        const ImageAreaProperties& properties);
+    void PaintHoverRect(RSCanvas* canvas);
+#endif
 };
 
 } // namespace OHOS::Ace

@@ -161,6 +161,7 @@ void SliderPatternTestNg::MockCanvasFunction(Testing::MockCanvas& canvas)
 void SliderPatternTestNg::MockTipsCanvasFunction(Testing::MockCanvas& canvas)
 {
     EXPECT_CALL(canvas, Save()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, Scale(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, Translate(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
@@ -477,34 +478,34 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg006, TestSize.Level1)
      */
     KeyEvent event;
     event.action = KeyAction::UP;
-    EXPECT_EQ(sliderPattern->OnKeyEvent(event), false);
+    EXPECT_FALSE(sliderPattern->OnKeyEvent(event));
     /**
      * @tc.cases: case2. direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_LEFT, MoveStep(-1).
      */
     event.action = KeyAction::DOWN;
     event.code = KeyCode::KEY_DPAD_LEFT;
-    EXPECT_EQ(sliderPattern->OnKeyEvent(event), false);
+    EXPECT_TRUE(sliderPattern->OnKeyEvent(event));
     EXPECT_TRUE(NearEqual(sliderPattern->valueRatio_, 0.49f));
     /**
      * @tc.cases: case3. direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT, MoveStep(1).
      */
     event.code = KeyCode::KEY_DPAD_RIGHT;
     sliderLayoutProperty->UpdateSliderMode(SliderModel::SliderMode::INSET);
-    EXPECT_EQ(sliderPattern->OnKeyEvent(event), false);
+    EXPECT_TRUE(sliderPattern->OnKeyEvent(event));
     EXPECT_TRUE(NearEqual(sliderPattern->valueRatio_, 0.5f));
     /**
      * @tc.cases: case4. direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP, MoveStep(-1).
      */
     sliderPattern->direction_ = Axis::VERTICAL;
     event.code = KeyCode::KEY_DPAD_UP;
-    EXPECT_EQ(sliderPattern->OnKeyEvent(event), false);
+    EXPECT_TRUE(sliderPattern->OnKeyEvent(event));
     EXPECT_TRUE(NearEqual(sliderPattern->valueRatio_, 0.49f));
     /**
      * @tc.cases: case5. direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN, MoveStep(1).
      */
     event.code = KeyCode::KEY_DPAD_DOWN;
     sliderLayoutProperty->UpdateSliderMode(SliderModel::SliderMode::OUTSET);
-    EXPECT_EQ(sliderPattern->OnKeyEvent(event), false);
+    EXPECT_TRUE(sliderPattern->OnKeyEvent(event));
     EXPECT_TRUE(NearEqual(sliderPattern->valueRatio_, 0.5f));
 }
 
@@ -975,6 +976,35 @@ HWTEST_F(SliderPatternTestNg, SliderModelNgTest001, TestSize.Level1)
     EXPECT_EQ(sliderPaintProperty->GetBlockType(), SliderModel::BlockStyleType::IMAGE);
     EXPECT_EQ(sliderPaintProperty->GetBlockImage(), SLIDER_MODEL_NG_BLOCK_IMAGE);
     EXPECT_EQ(sliderPaintProperty->GetBlockShape(), basicShape);
+
+    /**
+     * @tc.steps: step3. reset the properties.
+     */
+    sliderModelNG.ResetBlockBorderColor();
+    sliderModelNG.ResetBlockBorderWidth();
+    sliderModelNG.ResetTrackBorderRadius();
+    sliderModelNG.ResetStepColor();
+    sliderModelNG.ResetStepSize();
+    sliderModelNG.ResetBlockType();
+    sliderModelNG.ResetBlockImage();
+    sliderModelNG.ResetBlockShape();
+    frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. check whether the properties is correct.
+     * @tc.expected: step4. check whether the properties is correct.
+     */
+    EXPECT_FALSE(sliderPaintProperty->GetBlockBorderColor().has_value());
+    EXPECT_FALSE(sliderPaintProperty->GetBlockBorderWidth().has_value());
+    EXPECT_FALSE(sliderPaintProperty->GetTrackBorderRadius().has_value());
+    EXPECT_FALSE(sliderPaintProperty->GetStepColor().has_value());
+    EXPECT_FALSE(sliderPaintProperty->GetStepSize().has_value());
+    EXPECT_FALSE(sliderPaintProperty->GetBlockType().has_value());
+    EXPECT_FALSE(sliderPaintProperty->GetBlockImage().has_value());
+    EXPECT_FALSE(sliderPaintProperty->GetBlockShape().has_value());
 }
 
 /**

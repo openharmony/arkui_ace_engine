@@ -107,7 +107,6 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ACE_PROPERTY_TO_JSON_VALUE(positionProperty_, PositionProperty);
     ACE_PROPERTY_TO_JSON_VALUE(magicItemProperty_, MagicItemProperty);
     ACE_PROPERTY_TO_JSON_VALUE(flexItemProperty_, FlexItemProperty);
-    ACE_PROPERTY_TO_JSON_VALUE(borderWidth_, BorderWidthProperty);
     ACE_PROPERTY_TO_JSON_VALUE(gridProperty_, GridProperty);
 
     if (padding_) {
@@ -224,18 +223,18 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
     if (calcLayoutConstraint_) {
         if (calcLayoutConstraint_->maxSize.has_value()) {
             layoutConstraint_->UpdateMaxSizeWithCheck(ConvertToSize(calcLayoutConstraint_->maxSize.value(),
-                layoutConstraint_->scaleProperty, layoutConstraint_->percentReference));
+                parentConstraint.scaleProperty, parentConstraint.percentReference));
         }
         if (calcLayoutConstraint_->minSize.has_value()) {
             layoutConstraint_->UpdateMinSizeWithCheck(ConvertToSize(calcLayoutConstraint_->minSize.value(),
-                layoutConstraint_->scaleProperty, layoutConstraint_->percentReference));
+                parentConstraint.scaleProperty, parentConstraint.percentReference));
         }
         if (calcLayoutConstraint_->selfIdealSize.has_value()) {
             LOGD("CalcLayoutConstraint->selfIdealSize = %{public}s",
                 calcLayoutConstraint_->selfIdealSize.value().ToString().c_str());
             layoutConstraint_->UpdateIllegalSelfIdealSizeWithCheck(
-                ConvertToOptionalSize(calcLayoutConstraint_->selfIdealSize.value(), layoutConstraint_->scaleProperty,
-                    layoutConstraint_->percentReference));
+                ConvertToOptionalSize(calcLayoutConstraint_->selfIdealSize.value(), parentConstraint.scaleProperty,
+                    parentConstraint.percentReference));
         }
     }
 

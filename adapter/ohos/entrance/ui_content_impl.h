@@ -42,7 +42,6 @@ public:
 
     // UI content lifeCycles
     void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) override;
-    void Initialize(const std::shared_ptr<Window>& aceWindow, const std::string& url, NativeValue* storage) override;
     void Foreground() override;
     void Background() override;
     void Focus() override;
@@ -147,10 +146,10 @@ public:
         std::vector<std::string>& assetBasePaths, std::string& resFolderName) override;
     void SetResourcePaths(const std::vector<std::string>& resourcesPaths, const std::string& assetRootPath,
         const std::vector<std::string>& assetBasePaths) override;
+    NativeValue* GetUIContext() override;
 
 private:
-    void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage,
-        const std::shared_ptr<Window>& aceWindow = nullptr);
+    void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void CommonInitializeForm(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
     void DestroyCallback() const;
@@ -173,6 +172,7 @@ private:
     bool isFormRenderInit_ = false;
     std::string bundleName_;
     std::string moduleName_;
+    std::string hapPath_;
     bool isBundle_ = false;
     int32_t minCompatibleVersionCode_ = 0;
     float formWidth_ = 0.0;

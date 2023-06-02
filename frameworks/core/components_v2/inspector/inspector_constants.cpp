@@ -490,7 +490,7 @@ const char MODEL_ETS_TAG[] = "Model";
 // window scene
 ACE_EXPORT extern const char ROOT_SCENE_ETS_TAG[] = "RootScene";
 ACE_EXPORT extern const char SCREEN_ETS_TAG[] = "Screen";
-ACE_EXPORT extern const char HOST_WINDOW_SCENE_ETS_TAG[] = "HostWindowScene";
+ACE_EXPORT extern const char WINDOW_SCENE_ETS_TAG[] = "WindowScene";
 
 // ui_extension_component
 const char UI_EXTENSION_COMPONENT_TAG[] = "UIExtensionComponent";
@@ -500,4 +500,11 @@ const char UI_EXTENSION_COMPONENT_ETS_TAG[] = "UIExtensionComponent";
 const char SEC_LOCATION_BUTTON_COMPONENT_TAG[] = "SecLocationButtonComponent";
 const char SEC_LOCATION_BUTTON_ETS_TAG[] = "SecLocationButton";
 
+// SecPasteButton
+const char SEC_PASTE_BUTTON_COMPONENT_TAG[] = "SecPasteButtonComponent";
+const char SEC_PASTE_BUTTON_ETS_TAG[] = "SecPasteButton";
+
+// SecSaveButton
+const char SEC_SAVE_BUTTON_COMPONENT_TAG[] = "SecSaveButtonComponent";
+const char SEC_SAVE_BUTTON_ETS_TAG[] = "SecSaveButton";
 } // namespace OHOS::Ace::V2

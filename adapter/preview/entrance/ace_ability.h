@@ -26,9 +26,13 @@
 #endif
 
 #include "adapter/preview/entrance/ace_run_args.h"
+#include "adapter/preview/external/window/window.h"
 #include "base/utils/macros.h"
-#include "core/event/key_event.h"
-#include "core/event/touch_event.h"
+#include "adapter/preview/external/multimodalinput/key_event.h"
+#include "adapter/preview/external/multimodalinput/axis_event.h"
+#include "adapter/preview/external/multimodalinput/pointer_event.h"
+#include "adapter/preview/entrance/clipboard/clipboard_impl.h"
+#include "adapter/preview/entrance/clipboard/clipboard_proxy_impl.h"
 
 namespace OHOS::Ace::Platform {
 
@@ -69,6 +73,13 @@ public:
     void InitEnv();    
     void Start();
     static void Stop();
+    void InitializeClipboard(CallbackSetClipboardData cbkSetData, CallbackGetClipboardData cbkGetData) const;
+    void OnBackPressed() const;
+    bool OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
+    bool OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
+    bool OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axisEvent) const;
+    bool OnInputMethodEvent(const unsigned int codePoint) const;
+
     void OnConfigurationChanged(const DeviceConfig& newConfig);
     void SurfaceChanged(
         const DeviceOrientation& orientation, const double& resolution, int32_t& width, int32_t& height);
@@ -81,6 +92,16 @@ public:
     GlfwController GetGlfwWindowController()
     {
         return controller_;
+    }
+
+    void SetWindow(sptr<OHOS::Rosen::Window> rsWindow)
+    {
+        rsWindow_ = rsWindow;
+    }
+
+    sptr<OHOS::Rosen::Window> GetWindow()
+    {
+        return rsWindow_;
     }
 
 private:
@@ -98,6 +119,7 @@ private:
     AceRunArgs runArgs_;
     ConfigChanges configChanges_;
     GlfwController controller_ = nullptr;
+    sptr<OHOS::Rosen::Window> rsWindow_;
 };
 
 } // namespace OHOS::Ace::Platform

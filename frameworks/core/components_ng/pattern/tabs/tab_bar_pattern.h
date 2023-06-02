@@ -269,7 +269,8 @@ public:
     bool IsAtTop() const;
 
     bool IsAtBottom() const;
-
+    std::string ProvideRestoreInfo() override;
+    void OnRestoreInfo(const std::string& restoreInfo) override;
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -299,6 +300,7 @@ private:
     void GetBottomTabBarImageSizeAndOffset(const std::vector<int32_t>& selectedIndexes,
         int32_t maskIndex, float& selectedImageSize, float& unselectedImageSize, OffsetF& originalSelectedMaskOffset,
         OffsetF& originalUnselectedMaskOffset);
+    bool CheckSvg(int32_t index) const;
 
     void HandleTouchDown(int32_t index);
     void HandleTouchUp(int32_t index);

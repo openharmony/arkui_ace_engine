@@ -45,7 +45,7 @@ public:
     virtual void SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback) = 0;
     virtual void SetOnError(std::function<void(const LoadImageFailEvent& info)>&& callback) = 0;
     virtual void SetSvgAnimatorFinishEvent(std::function<void()>&& callback) = 0;
-    virtual void Create(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap, const std::string& bundleName,
+    virtual void Create(const std::string& src, RefPtr<PixelMap>& pixmap, const std::string& bundleName,
         const std::string& moduleName) = 0;
     virtual void SetImageSourceSize(const std::pair<Dimension, Dimension>& size) = 0;
     virtual void SetImageFill(const Color& color) = 0;

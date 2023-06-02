@@ -406,7 +406,8 @@ private:
     RectF ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> touchHandle);
     std::optional<OffsetF> GetCoordinatePoint();
     void RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
-        std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
+        std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback,
+        std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params);
     OffsetF GetSelectPopupPostion(const OHOS::NWeb::SelectMenuBound& bounds);
 
     struct TouchInfo {

@@ -41,7 +41,6 @@ public:
     static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
     static void SetMaxLength(const JSCallbackInfo& info);
     static void SetFontSize(const JSCallbackInfo& info);
-    static void RequestKeyboardOnFocus(bool needToRequest);
     static void SetFontWeight(const std::string& value);
     static void SetTextColor(const JSCallbackInfo& info);
     static void SetFontStyle(int32_t value);
@@ -82,6 +81,7 @@ public:
     static void SetShowError(const JSCallbackInfo& info);
 
     static void SetShowUnderline(const JSCallbackInfo& info);
+    static void SetEnableKeyboardOnFocus(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

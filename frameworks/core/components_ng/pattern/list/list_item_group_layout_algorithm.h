@@ -89,6 +89,11 @@ public:
         jumpIndex_ = index;
     }
 
+    void SetTargetIndex(int32_t index)
+    {
+        targetIndex_ = index;
+    }
+
     int32_t GetStartIndex() const
     {
         return itemPosition_.empty() ? 0 : itemPosition_.begin()->first;
@@ -157,7 +162,10 @@ private:
     bool NeedMeasureItem() const;
     static void SetListItemIndex(const LayoutWrapper* groupLayoutWrapper,
         const RefPtr<LayoutWrapper>& itemLayoutWrapper, int32_t indexInGroup);
+    bool IsCardStyleForListItemGroup(const LayoutWrapper* groupLayoutWrapper);
+    float GetMaxGridWidth();
 
+    bool isCardStyle_ = false;
     int32_t headerIndex_;
     int32_t footerIndex_;
     int32_t itemStartIndex_;
@@ -172,15 +180,17 @@ private:
     float spaceWidth_ = 0.0f;
 
     std::optional<int32_t> jumpIndex_;
+    std::optional<int32_t> targetIndex_;
     int32_t totalItemCount_ = 0;
     float totalMainSize_ = 0.0f;
     float headerMainSize_ = 0.0f;
     float footerMainSize_ = 0.0f;
     float startPos_ = 0.0f;
+    float prevStartPos_ = 0.0f;
+    float prevEndPos_ = 0.0f;
     float endPos_ = 0.0f;
     float referencePos_ = 0.0f;
     bool forwardLayout_ = true;
-    bool lanesChanged_ = false;
 };
 } // namespace OHOS::Ace::NG
 

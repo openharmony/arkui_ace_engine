@@ -354,8 +354,11 @@ bool GestureEventHub::IsAllowedDrag(RefPtr<EventHub> eventHub)
 {
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_RETURN(pattern, false);
+
     if (frameNode->IsDraggable()) {
-        if (!eventHub->HasOnDragStart()) {
+        if (!eventHub->HasOnDragStart() && !pattern->DefaultSupportDrag()) {
             LOGE("Default support for drag and drop, but there is no onDragStart function.");
             return false;
         }
@@ -364,7 +367,7 @@ bool GestureEventHub::IsAllowedDrag(RefPtr<EventHub> eventHub)
             LOGE("User settings cannot be dragged");
             return false;
         }
-        if (!eventHub->HasOnDragStart()) {
+        if (!eventHub->HasOnDragStart() && !pattern->DefaultSupportDrag()) {
             LOGE("The default does not support drag and drop, and there is no onDragStart function.");
             return false;
         }
@@ -428,9 +431,12 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         return;
     }
     std::string udKey;
+    int32_t recordsSize = 1;
     auto unifiedData = event->GetData();
-    auto records = unifiedData->GetRecords();
-    int32_t recordsSize = std:min(records.size(), 1);
+    if (unifiedData) {
+        auto records = unifiedData->GetRecords();
+        recordsSize = records.size() > 1 ? records.size() : 1;
+    }
     SetDragData(unifiedData, udKey);
     auto udmfClient = UDMF::UdmfClient::GetInstance();
     UDMF::Summary summary;
@@ -449,13 +455,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     if (pixelMap == nullptr) {
         pixelMap = pixelMap_->GetPixelMapSharedPtr();
     }
-    if (pixelMap->GetWidth() > Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH ||
-        pixelMap->GetHeight() > Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) {
-            float scaleWidth = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH) / pixelMap->GetWidth();
-            float scaleHeight = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) / pixelMap->GetHeight();
-            float scale = std::min(scaleWidth, scaleHeight);
-            pixelMap->scale(scale, scale);
-    } else if (!GetTextDraggable()) {
+    if (!GetTextDraggable()) {
         pixelMap->scale(PIXELMAP_DRAG_SCALE, PIXELMAP_DRAG_SCALE);
     }
     uint32_t width = pixelMap->GetWidth();

@@ -52,10 +52,6 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
     bool isGroup = false;
     int32_t cnt = 0;
     int32_t lanes = lanes_ > 1 ? lanes_ : 1;
-    if (lanesChanged_) {
-        lanesChanged_ = false;
-        currentIndex = GetLanesFloor(layoutWrapper, currentIndex + 1) - 1;
-    }
     for (int32_t i = 0; i < lanes && currentIndex + 1 <= GetMaxListItemIndex(); i++) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex + 1);
         if (!wrapper) {
@@ -220,11 +216,7 @@ void ListLanesLayoutAlgorithm::CalculateLanes(const RefPtr<ListLayoutProperty>& 
         maxLaneLength_ = ConvertToPx(
             layoutProperty->GetLaneMaxLength().value(), layoutConstraint.scaleProperty, mainPercentRefer);
     }
-    lanes = CalculateLanesParam(minLaneLength_, maxLaneLength_, lanes, crossSizeOptional);
-    if (lanes != lanes_) {
-        lanes_ = lanes;
-        lanesChanged_ = true;
-    }
+    lanes_ = CalculateLanesParam(minLaneLength_, maxLaneLength_, lanes, crossSizeOptional);
 }
 
 void ListLanesLayoutAlgorithm::ModifyLaneLength(std::optional<float>& minLaneLength,

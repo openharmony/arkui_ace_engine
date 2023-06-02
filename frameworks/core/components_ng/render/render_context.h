@@ -220,6 +220,8 @@ public:
 
     virtual void DumpInfo() const {}
 
+    void ObscuredToJsonValue(std::unique_ptr<JsonValue>& json) const;
+
     void SetSharedTransitionOptions(const std::shared_ptr<SharedTransitionOption>& option)
     {
         sharedTransitionOption_ = option;
@@ -391,6 +393,9 @@ public:
     // freeze
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Freeze, bool);
 
+    // obscured
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Obscured, std::vector<ObscuredReasons>);
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
@@ -448,11 +453,11 @@ protected:
     virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}
     virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}
     virtual void OnFreezeUpdate(bool isFreezed) {}
+    virtual void OnObscuredUpdate(const std::vector<ObscuredReasons>& reasons) {}
 
 private:
     std::function<void()> requestFrame_;
     WeakPtr<FrameNode> host_;
-    bool needDebugBoundary_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderContext);
 };

@@ -93,6 +93,9 @@ void ExtSurface::CreateExtSurface(const std::function<void(int64_t)>& onCreate)
     if (onCreate) {
         onCreate(id_);
     }
+#if defined(IOS_PLATFORM)
+    CallResRegisterMethod(MakeMethodHash(SURFACE_METHOD_ONCREATE), "");
+#endif
 }
 
 void ExtSurface::SetBounds(int64_t surfaceId, int32_t left, int32_t top, int32_t width, int32_t height)

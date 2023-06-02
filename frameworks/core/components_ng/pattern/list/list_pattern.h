@@ -166,8 +166,10 @@ public:
 
     // scroller
     void AnimateTo(float position, float duration, const RefPtr<Curve>& curve);
-    void ScrollTo(float position);
-    void ScrollToIndex(int32_t index, ScrollIndexAlignment align = ScrollIndexAlignment::ALIGN_TOP);
+    void StartSpringMotion(float start, float end, float velocity);
+    void ScrollTo(float position, bool smooth);
+    void ScrollToIndex(int32_t index, bool smooth = false,
+                       ScrollIndexAlignment align = ScrollIndexAlignment::ALIGN_TOP);
     void ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollIndexAlignment align);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
     bool ScrollPage(bool reverse);
@@ -217,13 +219,17 @@ private:
     void FireOnScrollStart();
     void CheckRestartSpring();
     void StopAnimate();
+    void StartDefaultSpringMotion(float start, float end, float velocity);
 
     // multiSelectable
+    void UninitMouseEvent();
     void InitMouseEvent();
     void HandleMouseEventWithoutKeyboard(const MouseInfo& info);
+    void ClearMultiSelect();
     void ClearSelectedZone();
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     void MultiSelectWithoutKeyboard(const RectF& selectedZone);
+    void HandleCardModeSelectedEvent(const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode);
 
     void DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper);
     void SetAccessibilityAction();
@@ -244,9 +250,11 @@ private:
 
     float currentDelta_ = 0.0f;
     bool crossMatchChild_ = false;
+    bool smooth_ = false;
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
+    std::optional<int32_t> targetIndex_;
     ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
     bool scrollable_ = true;
     bool paintStateFlag_ = false;
@@ -270,13 +278,18 @@ private:
     // multiSelectable
     bool multiSelectable_ = false;
     bool isMouseEventInit_ = false;
+    bool mousePressed_ = false;
     OffsetF mouseStartOffset_;
     OffsetF mouseEndOffset_;
+    OffsetF mousePressOffset_;
 
     // ListItem swiperAction
     WeakPtr<ListItemPattern> swiperItem_;
+    RefPtr<SpringMotion> scrollToIndexMotion_;
 
     bool isScrollEnd_ = false;
+
+    RefPtr<SpringMotion> springMotion_;
 };
 } // namespace OHOS::Ace::NG
 

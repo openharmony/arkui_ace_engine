@@ -26,6 +26,7 @@
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/select_model_impl.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -48,8 +49,8 @@ SelectModel* SelectModel::GetInstance()
             } else {
                 instance_.reset(new Framework::SelectModelImpl());
             }
-        }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -560,7 +561,10 @@ void JSSelect::JsPadding(const JSCallbackInfo& info)
         if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
             bottom = bottomDimen;
         }
-        SelectModel::GetInstance()->SetPaddings(top, bottom, left, right);
+        if (left.has_value() || right.has_value() || top.has_value() || bottom.has_value()) {
+            ViewAbstractModel::GetInstance()->SetPaddings(top, bottom, left, right);
+            return;
+        }
     }
 
     CalcDimension value;

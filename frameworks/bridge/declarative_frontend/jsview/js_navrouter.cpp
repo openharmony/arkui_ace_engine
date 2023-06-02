@@ -55,14 +55,14 @@ void JSNavRouter::Create(const JSCallbackInfo& info)
         }
         JSRef<JSVal> name = jsObj->GetProperty("name");
         if (name->IsEmpty()) {
+            LOGW("name is empty");
+            return;
+        }
+        if (!name->IsString()) {
+            LOGW("name is not string");
             return;
         }
         JSRef<JSVal> param = jsObj->GetProperty("param");
-        if (!name->IsString()) {
-            LOGW("JSNavRouter::Create name is not string");
-            return;
-        }
-
         auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_VOID(frameNode);
         auto navRouterPattern = frameNode->GetPattern<NG::NavRouterPattern>();

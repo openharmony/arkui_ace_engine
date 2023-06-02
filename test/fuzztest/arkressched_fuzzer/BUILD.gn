@@ -47,6 +47,7 @@ ohos_fuzztest("ArkResschedFuzzTest") {
     "$ace_root/frameworks/base/",
     "$ace_root/frameworks",
     "$ace_root",
+    "$root_out_dir/arkui/framework",
     cjson_root,
   ]
 
@@ -63,6 +64,11 @@ ohos_fuzztest("ArkResschedFuzzTest") {
       "hilog:libhilog",
       "init_lite:libbegetutil",
     ]
+  }
+  ldflags = []
+  if (ace_engine_feature_enable_coverage) {
+    cflags += [ "--coverage" ]
+    ldflags += [ "--coverage" ]
   }
 }
 

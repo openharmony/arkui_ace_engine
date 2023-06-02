@@ -79,6 +79,9 @@ public:
         return arrowPlacement_;
     }
 
+protected:
+    OffsetF positionOffset_;
+
 private:
     enum class ErrorPositionType {
         NORMAL = 0,

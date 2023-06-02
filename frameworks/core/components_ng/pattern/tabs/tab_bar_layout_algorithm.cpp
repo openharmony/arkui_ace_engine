@@ -111,12 +111,11 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     geometryNode->SetFrameSize(idealSize.ConvertToSizeT());
 
     // Create layout constraint of children .
-    auto childCount = layoutWrapper->GetTotalChildCount();
-    if (childCount <= MASK_COUNT) {
+    auto childCount = layoutWrapper->GetTotalChildCount() - MASK_COUNT;
+    if (childCount <= 0) {
         LOGI("ChildCount is illegal.");
         return;
     }
-    childCount -= MASK_COUNT;
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     UpdateChildConstraint(childLayoutConstraint, layoutProperty, idealSize.ConvertToSizeT(), childCount, axis);
 

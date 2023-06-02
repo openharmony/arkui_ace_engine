@@ -46,10 +46,9 @@ void BlankModelNG::SetBlankMin(const Dimension& blankMin)
     auto layoutProperty = blankNode->GetLayoutProperty<BlankLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (blankMin.IsNegative()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, Dimension());
+        ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, MinSize, Dimension());
         return;
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, blankMin);
     ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, MinSize, blankMin);
 }
 

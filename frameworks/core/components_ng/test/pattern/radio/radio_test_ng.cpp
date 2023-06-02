@@ -89,7 +89,9 @@ HWTEST_F(RadioTestNg, RadioPaintPropertyTest001, TestSize.Level1)
     radioModelNG.SetChecked(CHECKED);
     radioModelNG.SetWidth(WIDTH);
     radioModelNG.SetHeight(HEIGHT);
-    radioModelNG.SetPadding(PADDING);
+    NG::PaddingProperty newPadding(
+        { NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp) });
+    radioModelNG.SetPadding(PADDING, newPadding);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
@@ -1160,17 +1162,17 @@ HWTEST_F(RadioTestNg, RadioPatternTest022, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     /**
      * test event.action != KeyAction::DOWN
-    */
+     */
     KeyEvent keyEventOne(KeyCode::KEY_A, KeyAction::UP);
     eventHub->onKeyEventInternal_(keyEventOne);
     /**
      * test event.action == KeyAction::DOWN and event.code == KeyCode::KEY_ENTER
-    */
+     */
     KeyEvent keyEventTwo(KeyCode::KEY_A, KeyAction::DOWN);
     eventHub->onKeyEventInternal_(keyEventTwo);
     /**
      * test event.action == KeyAction::DOWN and event.code != KeyCode::KEY_ENTER
-    */
+     */
     KeyEvent keyEventThr(KeyCode::KEY_ENTER, KeyAction::DOWN);
     eventHub->onKeyEventInternal_(keyEventThr);
 }
@@ -1218,24 +1220,25 @@ HWTEST_F(RadioTestNg, RadioPatternTest024, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     auto geometryNode = frameNode->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
 
-    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
-        frameNode, geometryNode, layoutProperty);
+    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
     ASSERT_NE(layoutWrapper, nullptr);
     /**
      * cover OnDirtyLayoutWrapperSwap
-    */
+     */
     DirtySwapConfig dirtySwapConfig;
     auto result = radioPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
     EXPECT_TRUE(result);
     /**
      * cover AddHotZoneRect
-    */
+     */
     radioPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
     EXPECT_EQ(frameNode->GetOrCreateGestureEventHub()->isResponseRegion_, true);
     /**
      * cover RemoveLastHotZoneRect
-    */
+     */
     radioPattern->RemoveLastHotZoneRect();
     EXPECT_EQ(frameNode->GetOrCreateGestureEventHub()->isResponseRegion_, false);
 }
@@ -1261,11 +1264,11 @@ HWTEST_F(RadioTestNg, RadioPatternTest025, TestSize.Level1)
     ASSERT_NE(gesture, nullptr);
     /**
      * fire click event
-    */
+     */
     gesture->ActClick();
     /**
      * fire touch event
-    */
+     */
     auto touchEventActuator = gesture->touchEventActuator_;
     ASSERT_NE(touchEventActuator, nullptr);
     auto events = touchEventActuator->touchEvents_;
@@ -1287,7 +1290,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest025, TestSize.Level1)
     }
     /**
      * fire mouse event
-    */
+     */
     auto eventHub = frameNode->GetEventHub<RadioEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     auto hoverEventActuator = inputHub->hoverEventActuator_;
@@ -1363,9 +1366,7 @@ HWTEST_F(RadioTestNg, RadioEventHubChangeEventTest001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    auto onChange = [](const bool check) {
-        EXPECT_TRUE(check);
-    };
+    auto onChange = [](const bool check) { EXPECT_TRUE(check); };
     radioModelNG.SetOnChangeEvent(onChange);
     eventHub->SetOnChangeEvent(std::move(onChange));
     eventHub->UpdateChangeEvent(true);

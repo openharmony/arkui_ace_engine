@@ -119,7 +119,8 @@ public:
         json->Put("value", value.c_str());
         json->Put("group", group.c_str());
     }
-
+    std::string ProvideRestoreInfo() override;
+    void OnRestoreInfo(const std::string& restoreInfo) override;
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -164,7 +165,6 @@ private:
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     bool isGroupChanged_ = false;
-    bool isFirstAddhotZoneRect_ = true;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
     bool isOnAnimationFlag_ = false;
 

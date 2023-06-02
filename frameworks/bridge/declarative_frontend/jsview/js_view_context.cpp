@@ -136,7 +136,8 @@ void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOp
 
 } // namespace
 
-const AnimationOption JSViewContext::CreateAnimation(const std::unique_ptr<JsonValue>& animationArgs, bool isForm)
+const AnimationOption JSViewContext::CreateAnimation(
+    const std::unique_ptr<JsonValue>& animationArgs, const std::function<float(float)>& jsFunc, bool isForm)
 {
     AnimationOption option = AnimationOption();
     if (!animationArgs) {
@@ -164,7 +165,14 @@ const AnimationOption JSViewContext::CreateAnimation(const std::unique_ptr<JsonV
             // Default AnimationOption which is invalid.
             return option;
         }
-        curve = CreateCurve(curveString->GetString());
+        auto aniTimFunc = curveString->GetString();
+
+        std::string customFuncName(DOM_ANIMATION_TIMING_FUNCTION_CUSTOM);
+        if (aniTimFunc == customFuncName) {
+            curve = CreateCurve(jsFunc);
+        } else {
+            curve = CreateCurve(aniTimFunc);
+        }
     } else {
         curve = Curves::EASE_IN_OUT;
     }
@@ -198,6 +206,32 @@ const AnimationOption JSViewContext::CreateAnimation(const std::unique_ptr<JsonV
     return option;
 }
 
+std::function<float(float)> ParseCallBackFunction(const JSRef<JSObject>& obj)
+{
+    std::function<float(float)> customCallBack = nullptr;
+    JSRef<JSVal> curveVal = obj->GetProperty("curve");
+    if (curveVal->IsObject()) {
+        JSRef<JSObject> curveobj = JSRef<JSObject>::Cast(curveVal);
+        JSRef<JSVal> onCallBack = curveobj->GetProperty("__curveCustomFunc");
+        if (onCallBack->IsFunction()) {
+            RefPtr<JsFunction> jsFuncCallBack =
+                AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCallBack));
+            customCallBack = [func = std::move(jsFuncCallBack), id = Container::CurrentId()](float time) -> float {
+                ContainerScope scope(id);
+                JSRef<JSVal> params[1];
+                params[0] = JSRef<JSVal>::Make(ToJSValue(time));
+                auto result = func->ExecuteJS(1, params);
+                auto resultValue = result->IsNumber() ? result->ToNumber<float>() : 1.0f;
+                if (resultValue < 0 || resultValue > 1) {
+                    LOGI("The interpolate return  value error = %{public}f ", resultValue);
+                }
+                return resultValue;
+            };
+        }
+    }
+    return customCallBack;
+}
+
 void JSViewContext::JSAnimation(const JSCallbackInfo& info)
 {
     LOGD("JSAnimation");
@@ -216,6 +250,10 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     CHECK_NULL_VOID(container);
     auto pipelineContextBase = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContextBase);
+    if (!pipelineContextBase->GetEnableImplicitAnimation() && pipelineContextBase->IsFormRender()) {
+        LOGW("Form need enable implicit animation in finish callback.");
+        return;
+    }
     if (info[0]->IsNull() || !info[0]->IsObject()) {
         ViewContextModel::GetInstance()->closeAnimation(option, true);
         return;
@@ -238,7 +276,8 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
         ViewContextModel::GetInstance()->closeAnimation(option, false);
         return;
     }
-    option = CreateAnimation(animationArgs, pipelineContextBase->IsFormRender());
+
+    option = CreateAnimation(animationArgs, ParseCallBackFunction(obj), pipelineContextBase->IsFormRender());
     option.SetOnFinishEvent(onFinishEvent);
     if (SystemProperties::GetRosenBackendEnabled()) {
         option.SetAllowRunningAsynchronously(true);
@@ -269,6 +308,15 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
         return;
     }
 
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (!pipelineContext->GetEnableImplicitAnimation() && pipelineContext->IsFormRender()) {
+        LOGW("Form need enable implicit animation in finish callback.");
+        return;
+    }
+
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
     std::function<void()> onFinishEvent;
@@ -288,12 +336,8 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
         return;
     }
 
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-
-    AnimationOption option = CreateAnimation(animationArgs, pipelineContext->IsFormRender());
+    AnimationOption option =
+        CreateAnimation(animationArgs, ParseCallBackFunction(obj), pipelineContext->IsFormRender());
     if (SystemProperties::GetRosenBackendEnabled()) {
         bool usingSharedRuntime = container->GetSettings().usingSharedRuntime;
         LOGD("RSAnimationInfo: Begin JSAnimateTo, usingSharedRuntime: %{public}d", usingSharedRuntime);

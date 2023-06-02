@@ -23,10 +23,25 @@
 #include "core/components_ng/render/media_player.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t DEFAULT_WIDTH = 100;
+constexpr int32_t DEFAULT_HEIGHT = 100;
+} // namespace
+
 class MockMediaPlayer : public MediaPlayer {
     DECLARE_ACE_TYPE(MockMediaPlayer, MediaPlayer)
 public:
     ~MockMediaPlayer() override = default;
+    
+    int32_t GetVideoWidth() override
+    {
+        return DEFAULT_WIDTH;
+    }
+
+    int32_t GetVideoHeight() override
+    {
+        return DEFAULT_HEIGHT;
+    }
 
     MOCK_METHOD0(IsMediaPlayerValid, bool());
     MOCK_METHOD1(SetSource, bool(const std::string&));
@@ -37,8 +52,6 @@ public:
     MOCK_METHOD0(Prepare, int32_t());
     MOCK_METHOD0(Stop, int32_t());
     MOCK_METHOD2(Seek, int32_t(int32_t, SeekMode));
-    MOCK_METHOD0(GetVideoWidth, int32_t());
-    MOCK_METHOD0(GetVideoHeight, int32_t());
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_MEDIA_PLAYER_H

@@ -69,7 +69,7 @@ void JSAbilityComponent::JSBind(BindingTarget globalObj)
 
 void JSAbilityComponent::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1 || !info[0]->IsObject()) {
+    if (!info[0]->IsObject()) {
         return;
     }
     auto obj = JSRef<JSObject>::Cast(info[0]);
@@ -104,6 +104,9 @@ void JSAbilityComponent::JsOnDestroy(const JSCallbackInfo& info)
 
 void JSAbilityComponent::JsOnConnect(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsFunction()) {
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto onConnect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -116,6 +119,9 @@ void JSAbilityComponent::JsOnConnect(const JSCallbackInfo& info)
 
 void JSAbilityComponent::JsOnDisconnect(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsFunction()) {
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto onDisConnect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

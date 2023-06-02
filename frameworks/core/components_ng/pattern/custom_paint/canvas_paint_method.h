@@ -65,8 +65,10 @@ public:
     std::string ToDataURL(const std::string& args);
     std::string GetJsonData(const std::string& path);
 
-    void FillText(PaintWrapper* paintWrapper, const std::string& text, double x, double y);
-    void StrokeText(PaintWrapper* paintWrapper, const std::string& text, double x, double y);
+    void FillText(
+        PaintWrapper* paintWrapper, const std::string& text, double x, double y, std::optional<double> maxWidth);
+    void StrokeText(
+        PaintWrapper* paintWrapper, const std::string& text, double x, double y, std::optional<double> maxWidth);
     double MeasureText(const std::string& text, const PaintState& state);
     double MeasureTextHeight(const std::string& text, const PaintState& state);
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
@@ -80,8 +82,8 @@ private:
     void ImageObjFailed() override;
     sk_sp<SkImage> GetImage(const std::string& src) override;
 
-    void PaintText(
-        const OffsetF& offset, const SizeF& contentSize, double x, double y, bool isStroke, bool hasShadow = false);
+    void PaintText(const OffsetF& offset, const SizeF& contentSize, double x, double y, std::optional<double> maxWidth,
+        bool isStroke, bool hasShadow = false);
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
     bool UpdateParagraph(const OffsetF& offset, const std::string& text, bool isStroke, bool hasShadow = false);
     void UpdateTextStyleForeground(const OffsetF& offset, bool isStroke, txt::TextStyle& txtStyle, bool hasShadow);

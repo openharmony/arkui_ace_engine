@@ -617,7 +617,9 @@ void RosenRenderContext::OnTransformTranslateUpdate(const TranslateOptions& tran
         xValue = translate.x.ConvertToPx();
         yValue = translate.y.ConvertToPx();
     }
-    rsNode_->SetTranslate(xValue, yValue, 0.0f);
+    // translateZ doesn't support percentage
+    float zValue = translate.z.ConvertToPx();
+    rsNode_->SetTranslate(xValue, yValue, zValue);
     RequestNextFrame();
 }
 
@@ -1388,6 +1390,7 @@ void RosenRenderContext::PaintFocusState(
 
 void RosenRenderContext::ClearFocusState()
 {
+    LOGD("ClearFocusState in.");
     CHECK_NULL_VOID(rsNode_);
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -1678,42 +1681,42 @@ void RosenRenderContext::PaintGraphics()
     }
     if (graphicProps->HasFrontGrayScale()) {
         auto grayScale = graphicProps->GetFrontGrayScaleValue();
-        SetGraphicModifier(graphics_->grayScale, grayScale.Value());
+        OnFrontGrayScaleUpdate(grayScale);
     }
 
     if (graphicProps->HasFrontBrightness()) {
         auto brightness = graphicProps->GetFrontBrightnessValue();
-        SetGraphicModifier(graphics_->brightness, brightness.Value());
+        OnFrontBrightnessUpdate(brightness);
     }
 
     if (graphicProps->HasFrontContrast()) {
         auto contrast = graphicProps->GetFrontContrastValue();
-        SetGraphicModifier(graphics_->contrast, contrast.Value());
+        OnFrontContrastUpdate(contrast);
     }
 
     if (graphicProps->HasFrontSaturate()) {
         auto saturate = graphicProps->GetFrontSaturateValue();
-        SetGraphicModifier(graphics_->saturate, saturate.Value());
+        OnFrontSaturateUpdate(saturate);
     }
 
     if (graphicProps->HasFrontSepia()) {
         auto sepia = graphicProps->GetFrontSepiaValue();
-        SetGraphicModifier(graphics_->sepia, sepia.Value());
+        OnFrontSepiaUpdate(sepia);
     }
 
     if (graphicProps->HasFrontInvert()) {
         auto invert = graphicProps->GetFrontInvertValue();
-        SetGraphicModifier(graphics_->invert, invert.Value());
+        OnFrontInvertUpdate(invert);
     }
 
     if (graphicProps->HasFrontHueRotate()) {
         auto hueRotate = graphicProps->GetFrontHueRotateValue();
-        SetGraphicModifier(graphics_->hueRotate, hueRotate);
+        OnFrontHueRotateUpdate(hueRotate);
     }
 
     if (graphicProps->HasFrontColorBlend()) {
         auto colorBlend = graphicProps->GetFrontColorBlendValue();
-        SetGraphicModifier(graphics_->colorBlend, ColorBlend(colorBlend));
+        OnFrontColorBlendUpdate(colorBlend);
     }
 }
 
@@ -1766,66 +1769,58 @@ void RosenRenderContext::UpdateGraphic(std::shared_ptr<T>& modifier, D data)
 
 void RosenRenderContext::OnFrontBrightnessUpdate(const Dimension& brightness)
 {
-    if (!graphics_) {
-        graphics_ = std::make_unique<GraphicModifiers>();
-    }
-    UpdateGraphic(graphics_->brightness, brightness.Value());
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetBrightness(brightness.Value());
+    RequestNextFrame();
 }
 
 void RosenRenderContext::OnFrontGrayScaleUpdate(const Dimension& grayScale)
 {
-    if (!graphics_) {
-        graphics_ = std::make_unique<GraphicModifiers>();
-    }
-    UpdateGraphic(graphics_->grayScale, grayScale.Value());
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetGrayScale(grayScale.Value());
+    RequestNextFrame();
 }
 
 void RosenRenderContext::OnFrontContrastUpdate(const Dimension& contrast)
 {
-    if (!graphics_) {
-        graphics_ = std::make_unique<GraphicModifiers>();
-    }
-    UpdateGraphic(graphics_->contrast, contrast.Value());
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetContrast(contrast.Value());
+    RequestNextFrame();
 }
 
 void RosenRenderContext::OnFrontSaturateUpdate(const Dimension& saturate)
 {
-    if (!graphics_) {
-        graphics_ = std::make_unique<GraphicModifiers>();
-    }
-    UpdateGraphic(graphics_->saturate, saturate.Value());
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetSaturate(saturate.Value());
+    RequestNextFrame();
 }
 
 void RosenRenderContext::OnFrontSepiaUpdate(const Dimension& sepia)
 {
-    if (!graphics_) {
-        graphics_ = std::make_unique<GraphicModifiers>();
-    }
-    UpdateGraphic(graphics_->sepia, sepia.Value());
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetSepia(sepia.Value());
+    RequestNextFrame();
 }
 
 void RosenRenderContext::OnFrontInvertUpdate(const Dimension& invert)
 {
-    if (!graphics_) {
-        graphics_ = std::make_unique<GraphicModifiers>();
-    }
-    UpdateGraphic(graphics_->invert, invert.Value());
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetInvert(invert.Value());
+    RequestNextFrame();
 }
 
 void RosenRenderContext::OnFrontHueRotateUpdate(float hueRotate)
 {
-    if (!graphics_) {
-        graphics_ = std::make_unique<GraphicModifiers>();
-    }
-    UpdateGraphic(graphics_->hueRotate, hueRotate);
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetHueRotate(hueRotate);
+    RequestNextFrame();
 }
 
 void RosenRenderContext::OnFrontColorBlendUpdate(const Color& colorBlend)
 {
-    if (!graphics_) {
-        graphics_ = std::make_unique<GraphicModifiers>();
-    }
-    UpdateGraphic(graphics_->colorBlend, ColorBlend(colorBlend));
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetColorBlend(colorBlend.GetValue());
+    RequestNextFrame();
 }
 
 void RosenRenderContext::UpdateTransition(const TransitionOptions& options)
@@ -2583,6 +2578,7 @@ void RosenRenderContext::ClickEffectPlayAnimation(const TouchType& touchType)
         auto defaultScale = VectorF(1.0f, 1.0f);
         auto currentScale = GetTransformScaleValue(defaultScale);
         currentScale_ = currentScale;
+        UpdateTransformScale(currentScale_);
         AnimationUtils::OpenImplicitAnimation(option, springCurve, nullptr);
         VectorF valueScale(scaleValue, scaleValue);
         UpdateTransformScale(valueScale);

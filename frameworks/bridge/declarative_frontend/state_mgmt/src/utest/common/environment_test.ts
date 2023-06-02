@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,19 +25,19 @@ const testEnvironment = tsuite("Environment", () => {
   ];
 
   tcase("Initialization", () => {
-    Environment.ConfigureBackend(mockEnv);
+    Environment.configureBackend(mockEnv);
     test("Environment initialized", true);
   });
 
   tcase("Injecting values", () => {
-    Environment.EnvProps(envProps);
+    Environment.envProps(envProps);
   });
 
   tcase("Get all value keys", () => {
-    const keys = Environment.Keys();
+    const keys = Environment.keys();
     console.debug("Environment variables:");
     for (let i in keys) {
-      console.debug(`${keys[i]} - strigified value: ${JSON.stringify(AppStorage.Get(keys[i]))}`);
+      console.debug(`${keys[i]} - strigified value: ${JSON.stringify(AppStorage.get(keys[i]))}`);
     }
 
     test("Environment number of keys returned corresponds with number of values registered", keys.length == envProps.length);
@@ -45,21 +45,21 @@ const testEnvironment = tsuite("Environment", () => {
 
   tcase("Value retrieval", () => {
     // the native backend treats bool as string
-    test("Environment value 'accessibilityEnabled' correct", AppStorage.Get<string>("accessibilityEnabled") == "false");
-    test("Environment value 'languageCode' correct", AppStorage.Get<string>("languageCode") == "cn");
+    test("Environment value 'accessibilityEnabled' correct", AppStorage.get<string>("accessibilityEnabled") == "false");
+    test("Environment value 'languageCode' correct", AppStorage.get<string>("languageCode") == "cn");
   });
 
   tcase("Value changes from backend", () => {
     mockEnv.simulateChange("accessibilityEnabled", true);
     mockEnv.simulateChange("languageCode", "en");
-    test("Environment value 'languageCode' after backend change", AppStorage.Get<string>("languageCode") == "en");
-    test("Environment value 'accessibilityEnabled' after backend change", AppStorage.Get<boolean>("accessibilityEnabled") === true);
+    test("Environment value 'languageCode' after backend change", AppStorage.get<string>("languageCode") == "en");
+    test("Environment value 'accessibilityEnabled' after backend change", AppStorage.get<boolean>("accessibilityEnabled") === true);
     test("Environment value change simulation ", true);
   });
 
 
   tcase("Teardown", () => {
-    Environment.AboutToBeDeleted();
+    Environment.aboutToBeDeleted();
     test("Environment instance destroyed", true);
   });
 });

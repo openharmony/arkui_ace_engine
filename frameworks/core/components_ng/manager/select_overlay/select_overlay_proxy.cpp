@@ -98,4 +98,11 @@ void SelectOverlayProxy::SetSelectInfo(const std::string& selectInfo) const
     pattern->SetSelectInfo(selectInfo);
 }
 
+void SelectOverlayProxy::ShowOrHiddenMenu(bool isHidden)
+{
+    auto pattern = GetSelectOverlayPattern(selectOverlayId_);
+    CHECK_NULL_VOID(pattern);
+    pattern->ShowOrHiddenMenu(isHidden);
+}
+
 } // namespace OHOS::Ace::NG

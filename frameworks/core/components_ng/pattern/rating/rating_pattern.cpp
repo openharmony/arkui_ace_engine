@@ -117,7 +117,6 @@ void RatingPattern::OnImageLoadSuccess(int32_t imageFlag)
         secondaryConfig_.dstRect_ = secondaryImageLoadingCtx_->GetDstRect();
         imageSuccessStateCode_ = imageFlag | imageSuccessStateCode_;
     }
-
     if (imageFlag == 0b100) {
         backgroundImageCanvas_ = backgroundImageLoadingCtx_->MoveCanvasImage();
         backgroundConfig_.srcRect_ = backgroundImageLoadingCtx_->GetSrcRect();
@@ -144,6 +143,25 @@ void RatingPattern::OnImageDataReady(int32_t imageFlag)
     }
 }
 
+void RatingPattern::UpdatePaintConfig()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameSize();
+    auto contentSize = geometryNode->GetContentSize();
+    foregroundConfig_.imageFit_ = ImageFit::FILL;
+    secondaryConfig_.imageFit_ = ImageFit::FILL;
+    backgroundConfig_.imageFit_ = ImageFit::FILL;
+    foregroundConfig_.scaleX_ = contentSize.Height() / frameSize.Width();
+    foregroundConfig_.scaleY_ = contentSize.Height() / frameSize.Height();
+    secondaryConfig_.scaleX_ = contentSize.Height() / frameSize.Width();
+    secondaryConfig_.scaleY_ = contentSize.Height() / frameSize.Height();
+    backgroundConfig_.scaleX_ = contentSize.Height() / frameSize.Width();
+    backgroundConfig_.scaleY_ = contentSize.Height() / frameSize.Height();
+}
+
 RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
 {
     CHECK_NULL_RETURN(foregroundImageCanvas_, nullptr);
@@ -153,9 +171,7 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     auto starNum =
         layoutProperty->GetStars().value_or(GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM));
-    foregroundConfig_.imageFit_ = ImageFit::TOP_LEFT;
-    secondaryConfig_.imageFit_ = ImageFit::TOP_LEFT;
-    backgroundConfig_.imageFit_ = ImageFit::TOP_LEFT;
+    UpdatePaintConfig();
     if (!ratingModifier_) {
         ratingModifier_ = AceType::MakeRefPtr<RatingModifier>();
     }
@@ -164,7 +180,7 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
     if (ratingModifier_->JudgeImageUri(
         layoutProperty->GetForegroundImageSourceInfo()->GetSrc(),
         layoutProperty->GetSecondaryImageSourceInfo()->GetSrc(),
-        layoutProperty->GetBackgroundImageSourceInfo()->GetSrc(), foregroundConfig_.dstRect_) &&
+        layoutProperty->GetBackgroundImageSourceInfo()->GetSrc(), foregroundConfig_) &&
         imageSuccessStateCode_ == RATING_IMAGE_SUCCESS_CODE) {
         ratingModifier_->UpdateImageUri(
             layoutProperty->GetForegroundImageSourceInfo()->GetSrc(),

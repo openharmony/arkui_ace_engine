@@ -217,6 +217,9 @@ public:
     virtual void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) = 0;
 
+    // obscured
+    virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;
+
     // popup and menu
     virtual void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) = 0;
     virtual void BindMenu(

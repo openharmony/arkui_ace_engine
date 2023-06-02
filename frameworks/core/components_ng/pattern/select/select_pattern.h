@@ -173,7 +173,8 @@ public:
     void SetMenuAlign(const MenuAlign& menuAlign);
 
     std::string GetValue();
-
+    std::string ProvideRestoreInfo() override;
+    void OnRestoreInfo(const std::string& restoreInfo) override;
 private:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -273,7 +274,7 @@ private:
 
     Color bgBlendColor_ = Color::TRANSPARENT;
     bool isHover_ = false;
-
+    bool isSelected_ = false;
     MenuAlign menuAlign_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectPattern);

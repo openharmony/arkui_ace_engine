@@ -71,6 +71,11 @@ public:
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override {}
 
+    std::string GetCustomTag() override
+    {
+        return jsViewName_;
+    }
+
 private:
     std::string viewKey_;
     RenderFunction renderFunction_;

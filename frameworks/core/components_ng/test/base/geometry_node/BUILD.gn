@@ -55,6 +55,7 @@ ohos_unittest("geometry_node_test_ng") {
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_builder.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
+    "$ace_root/frameworks/core/components_ng/property/border_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",
     "$ace_root/frameworks/core/components_ng/property/grid_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",

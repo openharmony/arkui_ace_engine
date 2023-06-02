@@ -156,6 +156,8 @@ const char DIALOG_MAX_BUTTON_WIDTH[] = "dialog_max_button_width";
 const char DIALOG_MIN_BUTTON_WIDTH[] = "dialog_min_button_width";
 const char DIALOG_ACTIONS_TOP_PADDING[] = "dialog_actions_top_padding";
 const char DIALOG_MASK_COLOR_END[] = "dialog_mask_color_end";
+const char DIALOG_DIVIDER_LENGTH[] = "dialog_divider_length";
+const char DIALOG_DIVIDER_BETWEEN_BUTTON_WIDTH[] = "dialog_divider_between_button_width";
 
 // pattern attributes for drag bar
 const char DRAG_BAR_COLOR[] = "drag_bar_color";
@@ -177,6 +179,7 @@ const char INDICATOR_TEXT_FONT_COLOR[] = "indicator_text_font_color";
 const char ERROR_TEXT_UNDERLINE_COLOR[] = "error_text_underline_color";
 const char UNDERLINE_COLOR[] = "underline_color";
 const char UNDERLINE_TEXT_COLOR[] = "underline_text_color";
+const char UNDERLINE_FONT_SIZE[] = "text_font_size";
 const char BORDER_RADIUS_SIZE[] = "border_radius_size";
 // swiper attributes for arrow
 const char ARROW_COLOR_BOARDCOLOR_HOVER[] = "arrow_color_boardColor_hover";

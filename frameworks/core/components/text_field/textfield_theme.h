@@ -140,6 +140,7 @@ public:
             theme->errorUnderlineColor_ = pattern->GetAttr<Color>(ERROR_UNDERLINE_COLOR, Color());
             theme->underlineColor_ = pattern->GetAttr<Color>(UNDERLINE_COLOR, defaultUnderlineColor);
             theme->underlineTextColor_ = pattern->GetAttr<Color>(UNDERLINE_TEXT_COLOR, defaultUnderlineTextColor);
+            theme->underlineFontSize_ = pattern->GetAttr<Dimension>(UNDERLINE_FONT_SIZE, 0.0_fp);
             theme->errorTextStyle_.SetTextColor(pattern->GetAttr<Color>(ERROR_UNDERLINE_TEXT_COLOR, Color()));
             theme->errorTextStyle_.SetFontSize(pattern->GetAttr<Dimension>(ERROR_UNDERLINE_TEXT_SIZE, 0.0_fp));
 
@@ -190,6 +191,11 @@ public:
     const Dimension& GetFontSize() const
     {
         return fontSize_;
+    }
+
+    const Dimension& GetUnderlineFontSize() const
+    {
+        return underlineFontSize_;
     }
 
     const FontWeight& GetFontWeight() const
@@ -419,6 +425,7 @@ private:
     Edge padding_;
     Dimension height_;
     Dimension fontSize_;
+    Dimension underlineFontSize_;
     FontWeight fontWeight_ = FontWeight::NORMAL;
     Radius borderRadius_;
 
