@@ -1191,7 +1191,7 @@ RefPtr<DialogComponent> PipelineContext::ShowDialog(
         return nullptr;
     }
     dialog->SetInspectorTag(inspectorTag);
-    auto customComponent = AceType::DynamicCast<Component>(dialogProperties.customComponent);
+    auto customComponent = dialogProperties.customComponent;
     if (customComponent) {
         dialog->SetCustomChild(customComponent);
     }
