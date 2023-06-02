@@ -41,7 +41,7 @@ public:
     void SetSize(const std::optional<Dimension>& width, const std::optional<Dimension>& height) override;
     void SetBorderRadius(const Dimension& radius) override;
     void SetHoverEffect(const int32_t& hoverEffectNum) override;
-    void SetRemoteMessage(RemoteCallback remoteCallback) override;
+    void SetRemoteMessage(RemoteCallback&& remoteCallback) override;
 
 private:
     static RefPtr<TextComponent> GetTextComponent();

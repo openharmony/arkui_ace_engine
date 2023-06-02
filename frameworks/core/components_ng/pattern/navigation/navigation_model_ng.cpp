@@ -813,7 +813,7 @@ void NavigationModelNG::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
     auto theme = NavigationGetTheme();
     auto mostMenuItemCount = theme->GetMostMenuItemCountInBar();
     bool needMoreButton = menuItems.size() > mostMenuItemCount ? true : false;
-    int32_t count = 0;
+    uint32_t count = 0;
     std::vector<OptionParam> params;
     for (const auto& menuItem : menuItems) {
         ++count;
