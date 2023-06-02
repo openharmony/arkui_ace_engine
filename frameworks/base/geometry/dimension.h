@@ -67,14 +67,6 @@ enum class DimensionUnit {
      * The value is expression.
      */
     CALC,
-    /*
-     * The value is viewport width.
-     */
-    VW,
-    /*
-     * The value is viewport height.
-     */
-    VH,
 };
 
 /*
