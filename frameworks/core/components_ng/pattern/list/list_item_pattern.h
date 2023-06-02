@@ -206,7 +206,7 @@ private:
     void HandlePressEvent(const TouchEventInfo& info, const RefPtr<NG::FrameNode>& itemNode);
     void InitDisableEvent();
     void SetAccessibilityAction();
-    void DoDeleteAnimation(const OnDeleteEvent& onDelete, bool isRightDelete);
+    void DoDeleteAnimation(bool isRightDelete);
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     V2::ListItemStyle listItemStyle_ = V2::ListItemStyle::NONE;
