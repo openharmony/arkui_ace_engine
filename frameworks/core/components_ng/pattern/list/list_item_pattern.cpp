@@ -269,26 +269,12 @@ float ListItemPattern::GetFriction()
     if (GreatNotEqual(curOffset_, 0.0f)) {
         float width = startNodeSize_;
         float itemWidth = GetContentSize().CrossSize(axis_);
-        if (hasStartDeleteArea_) {
-            if (width + startDeleteAreaDistance_ < curOffset_) {
-                return CalculateFriction(
-                    (curOffset_ - width - startDeleteAreaDistance_) / (itemWidth - width));
-            }
-            return 1.0f;
-        }
         if (width < curOffset_) {
             return CalculateFriction((curOffset_ - width) / (itemWidth - width));
         }
     } else if (LessNotEqual(curOffset_, 0.0f)) {
         float width = endNodeSize_;
         float itemWidth = GetContentSize().CrossSize(axis_);
-        if (hasEndDeleteArea_) {
-            if (width + endDeleteAreaDistance_ < -curOffset_) {
-                return CalculateFriction(
-                    (-curOffset_ - width - endDeleteAreaDistance_) / (itemWidth - width));
-            }
-            return 1.0f;
-        }
         if (width < -curOffset_) {
             return CalculateFriction((-curOffset_ - width) / (itemWidth - width));
         }
@@ -440,7 +426,7 @@ void ListItemPattern::StartSpringMotion(float start, float end, float velocity)
     });
 }
 
-void ListItemPattern::DoDeleteAnimation(const OnDeleteEvent& onDelete, bool isRightDelete)
+void ListItemPattern::DoDeleteAnimation(bool isRightDelete)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -457,7 +443,6 @@ void ListItemPattern::DoDeleteAnimation(const OnDeleteEvent& onDelete, bool isRi
     context->OpenImplicitAnimation(option, option.GetCurve(), nullptr);
     swiperIndex_ = isRightDelete ? ListItemSwipeIndex::SWIPER_START : ListItemSwipeIndex::SWIPER_END;
     curOffset_ = isRightDelete ? itemWidth : -itemWidth;
-    onDelete();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     context->FlushUITasks();
     context->CloseImplicitAnimation();
@@ -484,7 +469,8 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
             if (!useStartDefaultDeleteAnimation_) {
                 startOnDelete();
             } else {
-                DoDeleteAnimation(startOnDelete, true);
+                DoDeleteAnimation(true);
+                startOnDelete();
                 return;
             }
         }
@@ -503,7 +489,8 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
             if (!useEndDefaultDeleteAnimation_) {
                 endOnDelete();
             } else {
-                DoDeleteAnimation(endOnDelete, false);
+                DoDeleteAnimation(false);
+                endOnDelete();
                 return;
             }
         }

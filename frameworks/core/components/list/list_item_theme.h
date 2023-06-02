@@ -151,6 +151,10 @@ public:
     {
         return swipeSpringDamping_;
     }
+    const Dimension& GetDeleteDistance() const
+    {
+        return deleteDistance_;
+    }
 
 protected:
     ListItemTheme() = default;
@@ -178,6 +182,7 @@ private:
     double swipeSpringDamping_ = 30;
     Dimension itemSize_;
     Dimension groupImageSize_;
+    Dimension deleteDistance_ = 56.0_vp;
 };
 
 } // namespace OHOS::Ace

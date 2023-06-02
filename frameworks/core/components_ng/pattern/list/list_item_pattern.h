@@ -175,7 +175,7 @@ private:
     void ChangeDeleteAreaStage();
     void StartSpringMotion(float start, float end, float velocity);
     void SetAccessibilityAction();
-    void DoDeleteAnimation(const OnDeleteEvent& onDelete, bool isRightDelete);
+    void DoDeleteAnimation(bool isRightDelete);
 
     RefPtr<ShallowBuilder> shallowBuilder_;
 
