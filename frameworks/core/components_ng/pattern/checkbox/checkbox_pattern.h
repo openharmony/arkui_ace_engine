@@ -148,6 +148,9 @@ public:
     FocusPattern GetFocusPattern() const override;
     void UpdateUIStatus(bool check);
 
+    std::string ProvideRestoreInfo() override;
+    void OnRestoreInfo(const std::string& restoreInfo) override;
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

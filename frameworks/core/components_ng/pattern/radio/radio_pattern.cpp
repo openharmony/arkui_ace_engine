@@ -439,4 +439,26 @@ void RadioPattern::RemoveLastHotZoneRect() const
     CHECK_NULL_VOID(host);
     host->RemoveLastHotZoneRect();
 }
+
+std::string RadioPattern::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    auto radioPaintProperty = GetPaintProperty<RadioPaintProperty>();
+    CHECK_NULL_RETURN(radioPaintProperty, "");
+    jsonObj->Put("checked", radioPaintProperty->GetRadioCheck().value_or(false));
+    return jsonObj->ToString();
+}
+
+void RadioPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    auto radioPaintProperty = GetPaintProperty<RadioPaintProperty>();
+    CHECK_NULL_VOID(radioPaintProperty);
+    auto info = JsonUtil::ParseJsonString(restoreInfo);
+    if (!info->IsValid() || !info->IsObject()) {
+        return;
+    }
+    auto jsonChecked = info->GetValue("checked");
+    radioPaintProperty->UpdateRadioCheck(jsonChecked->GetBool()); 
+    OnModifyDone();
+}
 } // namespace OHOS::Ace::NG

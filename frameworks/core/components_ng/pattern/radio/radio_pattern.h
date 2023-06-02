@@ -119,7 +119,8 @@ public:
         json->Put("value", value.c_str());
         json->Put("group", group.c_str());
     }
-
+    std::string ProvideRestoreInfo() override;
+    void OnRestoreInfo(const std::string& restoreInfo) override;
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

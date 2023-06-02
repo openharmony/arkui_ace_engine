@@ -807,6 +807,28 @@ void SliderPattern::UpdateBlock()
     }
 }
 
+std::string SliderPattern::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_RETURN(sliderPaintProperty, "");
+    jsonObj->Put("value", sliderPaintProperty->GetValue().value_or(0.0f));
+    return jsonObj->ToString();
+}
+
+void SliderPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(sliderPaintProperty);
+    auto info = JsonUtil::ParseJsonString(restoreInfo);
+    if (!info->IsValid() || !info->IsObject()) {
+        return;
+    }
+    auto jsonValue = info->GetValue("value");
+    sliderPaintProperty->UpdateValue(jsonValue->GetDouble());
+    OnModifyDone();
+}
+
 void SliderPattern::LayoutImageNode()
 {
     auto host = GetHost();

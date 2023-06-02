@@ -105,6 +105,10 @@ public:
         return isOn_.value_or(false);
     }
 
+    std::string ProvideRestoreInfo() override;
+  
+    void OnRestoreInfo(const std::string& restoreInfo) override;
+    
 private:
     void OnModifyDone() override;
     void UpdateCurrentOffset(float offset);

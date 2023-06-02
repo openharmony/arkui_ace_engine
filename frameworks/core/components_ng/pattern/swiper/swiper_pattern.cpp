@@ -1708,4 +1708,26 @@ bool SwiperPattern::NeedStartAutoPlay() const
 {
     return isWindowShow_ && isVisibleArea_ && isVisible_;
 }
+
+std::string SwiperPattern::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, "");
+    jsonObj->Put("Index", swiperLayoutProperty->GetIndex().value_or(0));
+    return jsonObj->ToString();
+}
+
+void SwiperPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    auto info = JsonUtil::ParseJsonString(restoreInfo);
+    if (!info->IsValid() || !info->IsObject()) {
+        return;
+    }
+    auto jsonIsOn = info->GetValue("Index");
+    swiperLayoutProperty->UpdateIndex(jsonIsOn->GetInt());
+    OnModifyDone();
+}
 } // namespace OHOS::Ace::NG

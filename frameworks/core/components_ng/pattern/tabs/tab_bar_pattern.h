@@ -269,7 +269,8 @@ public:
     bool IsAtTop() const;
 
     bool IsAtBottom() const;
-
+    std::string ProvideRestoreInfo() override;
+    void OnRestoreInfo(const std::string& restoreInfo) override;
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
