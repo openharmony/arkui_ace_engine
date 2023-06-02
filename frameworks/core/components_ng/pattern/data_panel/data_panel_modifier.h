@@ -178,7 +178,7 @@ public:
         }
     };
 
-    void SetShadowColors(const std::vector<Gradient>& valueColors)
+    void SetShadowColors(const std::vector<Gradient>& valueColors, const size_t shadowColorsLastLength)
     {
         for (size_t i = 0; i < valueColors.size(); i++) {
             if (i >= MAX_COUNT) {
@@ -186,7 +186,7 @@ public:
             }
             shadowColors_[i]->Set(GradientArithmetic(valueColors[i]));
         }
-        shadowColorsLastLength_ = valueColors.size();
+        shadowColorsLastLength_ = shadowColorsLastLength;
     };
 
 private:
