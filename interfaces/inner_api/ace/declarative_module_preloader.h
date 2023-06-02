@@ -30,7 +30,8 @@ public:
     static void Preload(NativeEngine& runtime);
 
     // ArkTsCard start
-    static void PreloadCard(NativeEngine& runtime);
+    static void PreloadCard(NativeEngine& runtime, const std::string &bundleName);
+    static void ReloadCard(NativeEngine& runtime, const std::string &bundleName); // For card upgrade condition
     // ArkTsCard end
 };
 

@@ -177,7 +177,8 @@ public:
 #endif
 
 // ArkTsCard start
-    static void PreloadAceModuleCard(void* runtime);
+    static void PreloadAceModuleCard(void* runtime, const std::unordered_set<std::string>& formModuleList);
+    static void ReloadAceModuleCard(void* runtime, const std::unordered_set<std::string>& formModuleList);
 // ArkTsCard end
     static bool IsPlugin();
 private:
