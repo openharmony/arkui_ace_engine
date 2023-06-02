@@ -226,8 +226,7 @@ void JSDatePicker::JSBind(BindingTarget globalObj)
     JSClass<JSDatePicker>::StaticMethod("disappearTextStyle", &JSDatePicker::SetDisappearTextStyle);
     JSClass<JSDatePicker>::StaticMethod("textStyle", &JSDatePicker::SetTextStyle);
     JSClass<JSDatePicker>::StaticMethod("selectedTextStyle", &JSDatePicker::SetSelectedTextStyle);
-    JSClass<JSDatePicker>::Inherit<JSViewAbstract>();
-    JSClass<JSDatePicker>::Bind(globalObj);
+    JSClass<JSDatePicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSDatePicker::Create(const JSCallbackInfo& info)
@@ -445,9 +444,15 @@ PickerDate JSDatePicker::ParseDate(const JSRef<JSVal>& dateVal)
         return pickerDate;
     }
     auto dateObj = JSRef<JSObject>::Cast(dateVal);
-    auto yearFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getFullYear"));
-    auto monthFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getMonth"));
-    auto dateFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getDate"));
+    auto yearFuncJsVal = dateObj->GetProperty("getFullYear");
+    auto monthFuncJsVal = dateObj->GetProperty("getMonth");
+    auto dateFuncJsVal = dateObj->GetProperty("getDate");
+    if (!(yearFuncJsVal->IsFunction() && monthFuncJsVal->IsFunction() && dateFuncJsVal->IsFunction())) {
+        return pickerDate;
+    }
+    auto yearFunc = JSRef<JSFunc>::Cast(yearFuncJsVal);
+    auto monthFunc = JSRef<JSFunc>::Cast(monthFuncJsVal);
+    auto dateFunc = JSRef<JSFunc>::Cast(dateFuncJsVal);
     JSRef<JSVal> year = yearFunc->Call(dateObj);
     JSRef<JSVal> month = monthFunc->Call(dateObj);
     JSRef<JSVal> date = dateFunc->Call(dateObj);
@@ -467,9 +472,15 @@ PickerTime JSDatePicker::ParseTime(const JSRef<JSVal>& timeVal)
         return pickerTime;
     }
     auto timeObj = JSRef<JSObject>::Cast(timeVal);
-    auto hourFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getHours"));
-    auto minuteFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getMinutes"));
-    auto secondFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getSeconds"));
+    auto hourFuncJsVal = timeObj->GetProperty("getHours");
+    auto minuteFuncJsVal = timeObj->GetProperty("getMinutes");
+    auto secondFuncJsVal = timeObj->GetProperty("getSeconds");
+    if (!(hourFuncJsVal->IsFunction() && minuteFuncJsVal->IsFunction() && secondFuncJsVal->IsFunction())) {
+        return pickerTime;
+    }
+    auto hourFunc = JSRef<JSFunc>::Cast(hourFuncJsVal);
+    auto minuteFunc = JSRef<JSFunc>::Cast(minuteFuncJsVal);
+    auto secondFunc = JSRef<JSFunc>::Cast(secondFuncJsVal);
     JSRef<JSVal> hour = hourFunc->Call(timeObj);
     JSRef<JSVal> minute = minuteFunc->Call(timeObj);
     JSRef<JSVal> second = secondFunc->Call(timeObj);
@@ -880,8 +891,7 @@ void JSTimePicker::JSBind(BindingTarget globalObj)
     JSClass<JSTimePicker>::StaticMethod("disappearTextStyle", &JSTimePicker::SetDisappearTextStyle);
     JSClass<JSTimePicker>::StaticMethod("textStyle", &JSTimePicker::SetTextStyle);
     JSClass<JSTimePicker>::StaticMethod("selectedTextStyle", &JSTimePicker::SetSelectedTextStyle);
-    JSClass<JSTimePicker>::Inherit<JSViewAbstract>();
-    JSClass<JSTimePicker>::Bind(globalObj);
+    JSClass<JSTimePicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSTimePicker::Create(const JSCallbackInfo& info)

@@ -125,7 +125,7 @@ public:
     void SetSepia(const Dimension& value) override;
     void SetInvert(const Dimension& value) override;
     void SetHueRotate(float value) override;
-
+    void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override {}
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override;
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;
     void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) override;
@@ -168,6 +168,7 @@ public:
     void SetHitTestMode(NG::HitTestMode hitTestMode) override;
     void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) override {};
+    void SetObscured(const std::vector<ObscuredReasons>& reasons) override {};
 
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
     void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,

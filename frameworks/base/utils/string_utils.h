@@ -194,12 +194,6 @@ inline bool StringToDouble(const std::string& value, double& result)
         if (std::strcmp(pEnd, "%") == 0) {
             result = res / PERCENT_VALUE;
             return true;
-        } else if (std::strcmp(pEnd, "vw") == 0) {
-            result = res / PERCENT_VALUE;
-            return true;
-        } else if (std::strcmp(pEnd, "vh") == 0) {
-            result = res / PERCENT_VALUE;
-            return true;
         } else if (std::strcmp(pEnd, "") == 0) {
             result = res;
             return true;
@@ -229,9 +223,7 @@ static Dimension StringToDimensionWithUnit(const std::string& value, DimensionUn
     char* pEnd = nullptr;
     double result = std::strtod(value.c_str(), &pEnd);
     if (pEnd == value.c_str() || errno == ERANGE) {
-        Dimension resultOfDimension = Dimension(defaultValue, defaultUnit);
-        resultOfDimension.SetIllegal(true);
-        return resultOfDimension;
+        return Dimension(defaultValue, defaultUnit);
     }
     if (pEnd != nullptr) {
         if (std::strcmp(pEnd, "%") == 0) {
@@ -250,12 +242,6 @@ static Dimension StringToDimensionWithUnit(const std::string& value, DimensionUn
         if (std::strcmp(pEnd, "lpx") == 0) {
             return Dimension(result, DimensionUnit::LPX);
         }
-        if (std::strcmp(pEnd, "vw") == 0) {
-            return Dimension(result / PERCENT_VALUE, DimensionUnit::VW);
-        }
-        if (std::strcmp(pEnd, "vh") == 0) {
-            return Dimension(result / PERCENT_VALUE, DimensionUnit::VH);
-        }
         if ((std::strcmp(pEnd, "\0") == 0) && isCalc) {
             return Dimension(result, DimensionUnit::NONE);
         }
@@ -263,9 +249,7 @@ static Dimension StringToDimensionWithUnit(const std::string& value, DimensionUn
             return Dimension(result, DimensionUnit::INVALID);
         }
     }
-    Dimension resultOfDimension = Dimension(result, defaultUnit);
-    resultOfDimension.SetIllegal(true);
-    return resultOfDimension;
+    return Dimension(result, defaultUnit);
 }
 
 inline CalcDimension StringToCalcDimension(

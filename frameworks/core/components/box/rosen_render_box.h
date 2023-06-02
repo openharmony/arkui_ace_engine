@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BOX_ROSEN_RENDER_BOX_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BOX_ROSEN_RENDER_BOX_H
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkPath.h"
+#endif
 
 #include "base/memory/referenced.h"
 #include "core/components/box/render_box.h"
@@ -156,15 +158,25 @@ private:
     void SyncDecorationToRSNode();
 
     bool CheckBorderEdgeForRRect(const Border& border);
+#ifndef USE_ROSEN_DRAWING
     SkVector GetSkRadii(const Radius& radius, double shrinkFactor, double borderWidth);
     void UpdateBackgroundImage(const RefPtr<BackgroundImage>& image);
     void UpdateBlurRRect(const SkRRect& rRect, const Offset& offset);
     void UpdateBorderImageProvider(const RefPtr<BorderImage>& bImage);
     SkRRect GetBoxRRect(const Offset& offset, const Border& border, double shrinkFactor, bool isRound);
+#else
+    RSVector GetRadii(const Radius& radius, double shrinkFactor, double borderWidth);
+    void UpdateBackgroundImage(const RefPtr<BackgroundImage>& image);
+    void UpdateBlurRRect(const RSRoundRect& rRect, const Offset& offset);
+    void UpdateBorderImageProvider(const RefPtr<BorderImage>& bImage);
+    RSRoundRect GetBoxRRect(
+        const Offset& offset, const Border& border, double shrinkFactor, bool isRound);
+#endif
     float DimensionToPx(const Dimension& value, const Size& size, LengthMode type) const;
     void GetSizeAndPosition(GeometryBoxType geometryBoxType, Size& size, Offset& position);
     float GetFloatRadiusValue(const Dimension& src, const Dimension& dest, const Size& size, LengthMode type);
 
+#ifndef USE_ROSEN_DRAWING
     bool CreateSkPath(const RefPtr<BasicShape>& basicShape, GeometryBoxType geometryBoxType, SkPath* skPath);
     bool CreateInset(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath* skPath);
     bool CreateCircle(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath* skPath);
@@ -172,19 +184,43 @@ private:
     bool CreatePolygon(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath* skPath);
     bool CreatePath(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath* skPath);
     bool CreateRect(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath* skPath);
+#else
+    bool CreatePath(
+        const RefPtr<BasicShape>& basicShape, GeometryBoxType geometryBoxType, RSPath* drawingPath);
+    bool CreateInset(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position,
+        RSPath* drawingPath);
+    bool CreateCircle(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position,
+        RSPath* drawingPath);
+    bool CreateEllipse(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position,
+        RSPath* drawingPath);
+    bool CreatePolygon(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position,
+        RSPath* drawingPath);
+    bool CreatePath(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position,
+        RSPath* drawingPath);
+    bool CreateRect(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position,
+        RSPath* drawingPath);
+#endif
 
     void ImageDataPaintSuccess(const RefPtr<NG::CanvasImage>& image);
     void ImageObjReady(const RefPtr<ImageObject>& imageObj);
     void ImageObjFailed();
 
+#ifndef USE_ROSEN_DRAWING
     void PaintAccessibilityFocus(const SkRect& focusRect, RenderContext& context);
     void PaintFocus(const SkRect& focusRect, RenderContext& context);
-
+#else
+    void PaintAccessibilityFocus(const RSRect& focusRect, RenderContext& context);
+    void PaintFocus(const RSRect& focusRect, RenderContext& context);
+#endif
     void PaintBorderImage(const Offset& offset, SkCanvas* canvas, const sk_sp<SkImage>& image);
     RRect windowBlurRRect_;
     void FetchImageData();
     std::string borderSrc_;
+#ifndef USE_ROSEN_DRAWING
     sk_sp<SkImage> image_;
+#else
+	std::shared_ptr<RSImage> image_;
+#endif
     CancelableTask fetchImageObjTask_;
 
     ImageObjSuccessCallback imageObjSuccessCallback_;

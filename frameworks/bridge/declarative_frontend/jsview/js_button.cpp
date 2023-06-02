@@ -258,12 +258,7 @@ void JSButton::JsRemoteMessage(const JSCallbackInfo& info)
 {
     RemoteCallback remoteCallback;
     JSInteractableView::JsRemoteMessage(info, remoteCallback);
-    EventMarker remoteMessageEventId(std::move(remoteCallback));
-    auto stack = ViewStackProcessor::GetInstance();
-    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
-    if (buttonComponent) {
-        buttonComponent->SetRemoteMessageEventId(remoteMessageEventId);
-    }
+    ButtonModel::GetInstance()->SetRemoteMessage(remoteCallback);
 }
 
 void JSButton::JSBind(BindingTarget globalObj)
@@ -288,6 +283,7 @@ void JSButton::JSBind(BindingTarget globalObj)
     JSClass<JSButton>::StaticMethod("height", &JSButton::JsHeight);
     JSClass<JSButton>::StaticMethod("aspectRatio", &JSButton::JsAspectRatio);
     JSClass<JSButton>::StaticMethod("borderRadius", &JSButton::JsRadius);
+    JSClass<JSButton>::StaticMethod("border", &JSButton::JsBorder);
     JSClass<JSButton>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSButton>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSButton>::StaticMethod("size", &JSButton::JsSize);
@@ -296,9 +292,7 @@ void JSButton::JSBind(BindingTarget globalObj)
 
     JSClass<JSButton>::StaticMethod("createWithLabel", &JSButton::CreateWithLabel, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("createWithChild", &JSButton::CreateWithChild, MethodOptions::NONE);
-    JSClass<JSButton>::Inherit<JSContainerBase>();
-    JSClass<JSButton>::Inherit<JSViewAbstract>();
-    JSClass<JSButton>::Bind<>(globalObj);
+    JSClass<JSButton>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSButton::CreateWithLabel(const JSCallbackInfo& info)
@@ -323,7 +317,7 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
     if (info[1]->IsObject() && JSRef<JSObject>::Cast(info[1])->GetProperty("stateEffect")->IsBoolean()) {
         para.stateEffectSecond = JSRef<JSObject>::Cast(info[1])->GetProperty("stateEffect")->ToBoolean();
     }
-    if (para.parseSuccess) {
+    if (para.parseSuccess.value()) {
         labelSet = true;
     }
 
@@ -603,6 +597,20 @@ void JSButton::JsRadius(const JSCallbackInfo& info)
     }
 
     ButtonModel::GetInstance()->SetBorderRadius(radius);
+}
+
+void JSButton::JsBorder(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsBorder(info);
+    if (!info[0]->IsObject()) {
+        LOGE("args is not a object. %s", info[0]->ToString().c_str());
+        return;
+    }
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+    CalcDimension borderRadius;
+    auto valueRadius = object->GetProperty("radius");
+    ParseJsDimensionVp(valueRadius, borderRadius);
+    ButtonModel::GetInstance()->SetBorderRadius(borderRadius);
 }
 
 CalcDimension JSButton::GetSizeValue(const JSCallbackInfo& info)

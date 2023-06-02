@@ -52,7 +52,15 @@ namespace OHOS::Ace::Framework {
 
 void JSListItemGroup::Create(const JSCallbackInfo& args)
 {
-    ListItemGroupModel::GetInstance()->Create();
+    V2::ListItemGroupStyle listItemGroupStyle = V2::ListItemGroupStyle::NONE;
+    if (args.Length() >= 1 && args[0]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+        auto styleObject = obj->GetProperty("style");
+        listItemGroupStyle = styleObject->IsNumber()
+                                 ? static_cast<V2::ListItemGroupStyle>(styleObject->ToNumber<int32_t>())
+                                 : V2::ListItemGroupStyle::NONE;
+    }
+    ListItemGroupModel::GetInstance()->Create(listItemGroupStyle);
     if (args.Length() >= 1 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
 
@@ -116,9 +124,7 @@ void JSListItemGroup::JSBind(BindingTarget globalObj)
     JSClass<JSListItemGroup>::StaticMethod("aspectRatio", &JSListItemGroup::SetAspectRatio);
 
     JSClass<JSListItemGroup>::Inherit<JSInteractableView>();
-    JSClass<JSListItemGroup>::Inherit<JSContainerBase>();
-    JSClass<JSListItemGroup>::Inherit<JSViewAbstract>();
-    JSClass<JSListItemGroup>::Bind<>(globalObj);
+    JSClass<JSListItemGroup>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

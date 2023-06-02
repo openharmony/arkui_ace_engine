@@ -116,8 +116,9 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
     auto iconRenderWidth =
         layoutProperty->GetSearchIconUDSizeValue(Dimension(searchIconSizeMeasure_.Width())).ConvertToPx();
     auto constraint = layoutProperty->GetLayoutConstraint();
-    auto searchWidthMax = (constraint->selfIdealSize.Width().has_value()) ?
-        constraint->selfIdealSize.Width().value() : constraint->maxSize.Width();
+    auto searchWidthMax = (constraint->selfIdealSize.Width().has_value())
+                              ? std::min(constraint->selfIdealSize.Width().value(), constraint->maxSize.Width())
+                              : std::min(constraint->percentReference.Width(), constraint->maxSize.Width());
 
     auto searchWrapper = layoutWrapper->GetOrCreateChildByIndex(BUTTON_INDEX);
     auto searchButtonNode = searchWrapper->GetHostNode();
@@ -267,8 +268,10 @@ void SearchLayoutAlgorithm::SelfMeasure(LayoutWrapper* layoutWrapper)
 
     // update search height
     constraint->selfIdealSize.SetHeight(searchHeightAdapt);
-
-    auto idealSize = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(), true);
+    auto searchWidth = (constraint->selfIdealSize.Width().has_value())
+                           ? std::min(constraint->selfIdealSize.Width().value(), constraint->maxSize.Width())
+                           : std::min(constraint->percentReference.Width(), constraint->maxSize.Width());
+    SizeF idealSize(searchWidth, searchHeightAdapt);
     if (GreaterOrEqualToInfinity(idealSize.Width()) || GreaterOrEqualToInfinity(idealSize.Height())) {
         LOGW("Size is infinity.");
         geometryNode->SetFrameSize(SizeF());

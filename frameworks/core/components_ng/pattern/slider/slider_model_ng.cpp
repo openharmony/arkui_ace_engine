@@ -32,10 +32,18 @@ void SliderModelNG::Create(float value, float step, float min, float max)
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::SLIDER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SliderPattern>(); });
     stack->Push(frameNode);
-    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, Value, value);
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, Step, step);
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, Min, min);
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, Max, max);
+    SetSliderValue(value);
+}
+void SliderModelNG::SetSliderValue(float value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateValue(value);
 }
 void SliderModelNG::SetSliderMode(const SliderMode& value)
 {
@@ -176,5 +184,45 @@ void SliderModelNG::SetOnChangeEvent(SliderOnValueChangeEvent&& onChangeEvent)
     auto eventHub = frameNode->GetEventHub<SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChangeEvent(std::move(onChangeEvent));
+}
+
+void SliderModelNG::ResetBlockBorderColor()
+{
+    ACE_RESET_PAINT_PROPERTY(SliderPaintProperty, BlockBorderColor);
+}
+
+void SliderModelNG::ResetBlockBorderWidth()
+{
+    ACE_RESET_PAINT_PROPERTY(SliderPaintProperty, BlockBorderWidth);
+}
+
+void SliderModelNG::ResetStepColor()
+{
+    ACE_RESET_PAINT_PROPERTY(SliderPaintProperty, StepColor);
+}
+
+void SliderModelNG::ResetTrackBorderRadius()
+{
+    ACE_RESET_PAINT_PROPERTY(SliderPaintProperty, TrackBorderRadius);
+}
+
+void SliderModelNG::ResetBlockType()
+{
+    ACE_RESET_PAINT_PROPERTY(SliderPaintProperty, BlockType);
+}
+
+void SliderModelNG::ResetBlockImage()
+{
+    ACE_RESET_PAINT_PROPERTY(SliderPaintProperty, BlockImage);
+}
+
+void SliderModelNG::ResetBlockShape()
+{
+    ACE_RESET_PAINT_PROPERTY(SliderPaintProperty, BlockShape);
+}
+
+void SliderModelNG::ResetStepSize()
+{
+    ACE_RESET_PAINT_PROPERTY(SliderPaintProperty, StepSize);
 }
 } // namespace OHOS::Ace::NG

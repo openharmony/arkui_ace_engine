@@ -232,7 +232,7 @@ void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode)
         LOGI("Target remove node: %{public}s/%{public}d is current focus. Need change focus to another.",
             GetFrameName().c_str(), GetFrameId());
         // Try to goto next focus, otherwise goto previous focus.
-        if (!GoToNextFocusLinear(true) && !GoToNextFocusLinear(false)) {
+        if (!GoToNextFocusLinear(false) && !GoToNextFocusLinear(true)) {
             LOGD("Change focus failed. Remove self: %{public}s/%{public}d", GetFrameName().c_str(), GetFrameId());
             lastWeakFocusNode_ = nullptr;
             RemoveSelf();
@@ -281,7 +281,7 @@ bool FocusHub::IsFocusableScope()
 
 bool FocusHub::IsFocusableNode()
 {
-    return IsEnabled() && show_ && focusable_ && parentFocusable_;
+    return IsEnabled() && IsShow() && focusable_ && parentFocusable_;
 }
 
 void FocusHub::SetFocusable(bool focusable)
@@ -325,6 +325,23 @@ void FocusHub::SetEnabledScope(bool enabled)
     RefreshParentFocusable(IsFocusableNode());
 }
 
+bool FocusHub::IsShow() const
+{
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, true);
+    bool curIsVisible = frameNode->IsVisible();
+    auto parent = frameNode->GetParent();
+    while (parent) {
+        auto parentFrame = AceType::DynamicCast<FrameNode>(parent);
+        if (parentFrame && !parentFrame->IsVisible()) {
+            curIsVisible = false;
+            break;
+        }
+        parent = parent->GetParent();
+    }
+    return curIsVisible;
+}
+
 void FocusHub::SetShow(bool show)
 {
     if (focusType_ == FocusType::NODE) {
@@ -336,7 +353,6 @@ void FocusHub::SetShow(bool show)
 
 void FocusHub::SetShowNode(bool show)
 {
-    show_ = show;
     if (!show) {
         RefreshFocus();
     }
@@ -345,7 +361,6 @@ void FocusHub::SetShowNode(bool show)
 void FocusHub::SetShowScope(bool show)
 {
     SetShowNode(show);
-    RefreshParentFocusable(IsFocusableNode());
 }
 
 void FocusHub::SetIsFocusOnTouch(bool isFocusOnTouch)
@@ -507,6 +522,15 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
     }
 
     if (keyEvent.action != KeyAction::DOWN) {
+        return false;
+    }
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    if (!pipeline->GetIsFocusActive()) {
+        return false;
+    }
+    if (keyEvent.IsKey({ KeyCode::KEY_TAB }) && pipeline->IsTabJustTriggerOnKeyEvent()) {
         return false;
     }
 
@@ -786,8 +810,6 @@ void FocusHub::OnFocusNode()
     if (onFocusCallback) {
         onFocusCallback();
     }
-    // check focus state style.
-    CheckFocusStateStyle(true);
     PaintFocusState();
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID_NOLOG(frameNode);
@@ -809,8 +831,6 @@ void FocusHub::OnBlurNode()
     if (onBlurCallback) {
         onBlurCallback();
     }
-    // check focus state style.
-    CheckFocusStateStyle(false);
     if (blurReason_ != BlurReason::FRAME_DESTROY) {
         ClearFocusState();
     }
@@ -868,28 +888,35 @@ void FocusHub::OnBlurScope()
     }
 }
 
-void FocusHub::PaintFocusState()
+bool FocusHub::PaintFocusState(bool isNeedStateStyles)
 {
     auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
+    CHECK_NULL_RETURN(context, false);
+    if (isNeedStateStyles && context->GetIsFocusActive()) {
+        // check focus state style.
+        CheckFocusStateStyle(true);
+    }
     auto frameNode = GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, false);
     auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (focusStyleType_ == FocusStyleType::NONE || !context->GetIsNeedShowFocus()) {
-        return;
+    CHECK_NULL_RETURN(renderContext, false);
+    if (!context->GetIsFocusActive() || !IsNeedPaintFocusState()) {
+        return false;
     }
 
     if (focusStyleType_ == FocusStyleType::CUSTOM_REGION) {
-        CHECK_NULL_VOID(getInnerFocusRectFunc_);
+        CHECK_NULL_RETURN(getInnerFocusRectFunc_, false);
         RoundRect focusRectInner;
+        focusRectInner.SetRect({ -1, -1, -1, -1 });
         getInnerFocusRectFunc_(focusRectInner);
-        PaintInnerFocusState(focusRectInner);
-        return;
+        if (!focusRectInner.GetRect().IsValid()) {
+            return false;
+        }
+        return PaintInnerFocusState(focusRectInner);
     }
 
     auto appTheme = context->GetTheme<AppTheme>();
-    CHECK_NULL_VOID(appTheme);
+    CHECK_NULL_RETURN(appTheme, false);
     Color paintColor;
     if (HasPaintColor()) {
         paintColor = GetPaintColor();
@@ -906,10 +933,10 @@ void FocusHub::PaintFocusState()
     if (focusStyleType_ == FocusStyleType::CUSTOM_BORDER) {
         if (!HasPaintRect()) {
             LOGE("PaintFocusState: frame rect has no value while focus style is CUSTOMIZE");
-            return;
+            return false;
         }
         renderContext->PaintFocusState(GetPaintRect(), paintColor, paintWidth);
-        return;
+        return true;
     }
 
     Dimension focusPaddingVp = Dimension(0.0, DimensionUnit::VP);
@@ -927,32 +954,36 @@ void FocusHub::PaintFocusState()
     } else {
         renderContext->PaintFocusState(focusPaddingVp, paintColor, paintWidth);
     }
+    return true;
 }
 
-void FocusHub::PaintAllFocusState()
+bool FocusHub::PaintAllFocusState()
 {
-    PaintFocusState();
+    if (PaintFocusState()) {
+        return true;
+    }
     std::list<RefPtr<FocusHub>> focusNodes;
     FlushChildrenFocusHub(focusNodes);
     auto lastFocusNode = lastWeakFocusNode_.Upgrade();
     if (lastFocusNode) {
-        lastFocusNode->PaintAllFocusState();
+        return lastFocusNode->PaintAllFocusState();
     }
+    return false;
 }
 
-void FocusHub::PaintInnerFocusState(const RoundRect& paintRect)
+bool FocusHub::PaintInnerFocusState(const RoundRect& paintRect)
 {
     auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
+    CHECK_NULL_RETURN(context, false);
     auto frameNode = GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, false);
     auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (!context->GetIsNeedShowFocus()) {
-        return;
+    CHECK_NULL_RETURN(renderContext, false);
+    if (!context->GetIsFocusActive() || !IsNeedPaintFocusState()) {
+        return false;
     }
     auto appTheme = context->GetTheme<AppTheme>();
-    CHECK_NULL_VOID(appTheme);
+    CHECK_NULL_RETURN(appTheme, false);
     Color paintColor;
     if (HasPaintColor()) {
         paintColor = GetPaintColor();
@@ -967,10 +998,15 @@ void FocusHub::PaintInnerFocusState(const RoundRect& paintRect)
     }
     renderContext->ClearFocusState();
     renderContext->PaintFocusState(paintRect, paintColor, paintWidth);
+    return true;
 }
 
-void FocusHub::ClearFocusState()
+void FocusHub::ClearFocusState(bool isNeedStateStyles)
 {
+    if (isNeedStateStyles) {
+        // check focus state style.
+        CheckFocusStateStyle(false);
+    }
     if (focusStyleType_ != FocusStyleType::NONE) {
         auto frameNode = GetFrameNode();
         CHECK_NULL_VOID(frameNode);
@@ -989,6 +1025,20 @@ void FocusHub::ClearAllFocusState()
     if (lastFocusNode) {
         lastFocusNode->ClearAllFocusState();
     }
+}
+
+bool FocusHub::IsNeedPaintFocusState()
+{
+    if (focusType_ == FocusType::DISABLE || focusStyleType_ == FocusStyleType::NONE) {
+        return false;
+    }
+    if (focusType_ == FocusType::NODE) {
+        return true;
+    }
+    std::list<RefPtr<FocusHub>> focusNodes;
+    FlushChildrenFocusHub(focusNodes);
+    return std::none_of(focusNodes.begin(), focusNodes.end(),
+        [](const RefPtr<FocusHub>& node) { return node->IsNeedPaintFocusState(); });
 }
 
 bool FocusHub::AcceptFocusOfLastFocus()

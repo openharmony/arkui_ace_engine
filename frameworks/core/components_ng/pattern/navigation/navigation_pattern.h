@@ -136,7 +136,7 @@ public:
     {
         auto index = navigationStack_->FindIndex(name, navDestinationNode);
         // exit and not the top, need to be removed
-        if (index != -1 && index != navPathList_.size() - 1) {
+        if (index != -1 && index != static_cast<int32_t>(navPathList_.size()) - 1) {
             navigationStack_->Remove(name, navDestinationNode);
         }
     }
@@ -144,6 +144,21 @@ public:
     void RemoveNavDestination()
     {
         navigationStack_->Remove();
+    }
+
+    void CleanStack()
+    {
+        navigationStack_->RemoveAll();
+    }
+
+    void SetNavigationStackProvided(bool provided)
+    {
+        navigationStackProvided_ = provided;
+    }
+
+    bool GetNavigationStackProvided() const
+    {
+        return navigationStackProvided_;
     }
 
 private:
@@ -157,6 +172,7 @@ private:
     RefPtr<NavigationStack> navigationStack_;
     NavPathList preNavPathList_;
     NavPathList navPathList_;
+    bool navigationStackProvided_ = false;
 };
 
 } // namespace OHOS::Ace::NG

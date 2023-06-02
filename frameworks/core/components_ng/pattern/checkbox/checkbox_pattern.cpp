@@ -560,4 +560,26 @@ void CheckBoxPattern::RemoveLastHotZoneRect() const
     CHECK_NULL_VOID(host);
     host->RemoveLastHotZoneRect();
 }
+
+std::string CheckBoxPattern::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    auto checkBoxPaintProperty = GetPaintProperty<CheckBoxPaintProperty>();
+    CHECK_NULL_RETURN(checkBoxPaintProperty, "");
+    jsonObj->Put("isOn", checkBoxPaintProperty->GetCheckBoxSelect().value_or(false));
+    return jsonObj->ToString();
+}
+
+void CheckBoxPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    auto checkBoxPaintProperty = GetPaintProperty<CheckBoxPaintProperty>();
+    CHECK_NULL_VOID(checkBoxPaintProperty);
+    auto info = JsonUtil::ParseJsonString(restoreInfo);
+    if (!info->IsValid() || !info->IsObject()) {
+        return;
+    }
+    auto jsonCheckBoxSelect = info->GetValue("isOn");
+    checkBoxPaintProperty->UpdateCheckBoxSelect(jsonCheckBoxSelect->GetBool());
+}
+
 } // namespace OHOS::Ace::NG

@@ -129,6 +129,9 @@ RefPtr<CanvasImage> SkiaImage::Clone()
 {
     auto clone = MakeRefPtr<SkiaImage>(image_);
     clone->uniqueId_ = uniqueId_;
+    clone->compressData_ = std::move(compressData_);
+    clone->compressWidth_ = compressWidth_;
+    clone->compressHeight_ = compressHeight_;
     return clone;
 }
 
@@ -149,26 +152,18 @@ RefPtr<PixelMap> SkiaImage::GetPixelMap()
     return PixelMap::ConvertSkImageToPixmap(addr, length, width, height);
 }
 
-void SkiaImage::ClipRRect(RSCanvas& canvas, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
-{
-    std::vector<RSPoint> radius(ImagePainterUtils::RADIUS_POINTS_SIZE);
-    for (size_t i = 0; i < radius.size(); ++i) {
-        radius[i] = RSPoint(radiusXY[i].GetX(), radiusXY[i].GetY());
-    }
-    RSRoundRect rRect(dstRect, radius);
-    canvas.ClipRoundRect(rRect, RSClipOp::INTERSECT);
-}
-
 void SkiaImage::DrawToRSCanvas(
     RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
 {
     auto image = GetImage();
     CHECK_NULL_VOID(image || GetCompressData());
-    if (!DrawWithRecordingCanvas(canvas, srcRect, dstRect, radiusXY)) {
+    if (isDrawAnimate_) {
         RSImage rsImage(&image);
         RSSamplingOptions options;
-        ClipRRect(canvas, dstRect, radiusXY);
+        ImagePainterUtils::ClipRRect(canvas, dstRect, radiusXY);
         canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
+    } else {
+        DrawWithRecordingCanvas(canvas, srcRect, dstRect, radiusXY);
     }
 }
 
@@ -193,12 +188,6 @@ bool SkiaImage::DrawWithRecordingCanvas(
 #endif
     auto radii = ImagePainterUtils::ToSkRadius(radiusXY);
     recordingCanvas->ClipAdaptiveRRect(radii.get());
-    if (config.imageFit_ == ImageFit::TOP_LEFT) {
-        SkAutoCanvasRestore acr(recordingCanvas, true);
-        auto skSrcRect = SkRect::MakeXYWH(srcRect.GetLeft(), srcRect.GetTop(), srcRect.GetWidth(), srcRect.GetHeight());
-        auto skDstRect = SkRect::MakeXYWH(dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetWidth(), dstRect.GetHeight());
-        recordingCanvas->concat(SkMatrix::MakeRectToRect(skSrcRect, skDstRect, SkMatrix::kFill_ScaleToFit));
-    }
     recordingCanvas->scale(config.scaleX_, config.scaleY_);
 
     Rosen::RsImageInfo rsImageInfo((int)(config.imageFit_), (int)(config.imageRepeat_), radii.get(), 1.0, GetUniqueID(),

@@ -238,8 +238,6 @@ void SelectOverlayModifier::DrawbCircles(DrawingContext& drawingContext)
         canvas.Save();
         canvas.Rotate(rotationAngle_->Get(), menuOptionOffset_->Get().GetX(), menuOptionOffset_->Get().GetY());
         canvas.Translate(coordinate.GetX(), coordinate.GetY());
-        RSBrush brush;
-        brush.SetAntiAlias(true);
         brush.SetColor(iconColor_.GetValue());
         canvas.AttachBrush(brush);
         // The radius UX effect of the top circle is different from other circles.

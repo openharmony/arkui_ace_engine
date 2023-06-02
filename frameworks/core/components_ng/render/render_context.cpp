@@ -84,9 +84,42 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     pixelJsonValue->Put("bottom", pixStretchEffectOption.bottom.ToString().c_str());
     json->Put("pixelStretchEffect", pixelJsonValue);
     json->Put("foregroundColor", propForegroundColor_.value_or(Color::FOREGROUND).ColorToString().c_str());
+    if (propClickEffectLevel_.has_value()) {
+        auto clickEffectJsonValue = JsonUtil::Create(true);
+        clickEffectJsonValue->Put("level", std::to_string((int)propClickEffectLevel_.value().level).c_str());
+        clickEffectJsonValue->Put("scale", std::to_string((float)propClickEffectLevel_.value().scaleNumber).c_str());
+        json->Put("clickEffect", clickEffectJsonValue);
+    }
+    ObscuredToJsonValue(json);
+}
+
+void RenderContext::ObscuredToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    auto jsonObscuredArray = JsonUtil::CreateArray(true);
+    std::vector<ObscuredReasons> obscuredReasons = propObscured_.value_or(std::vector<ObscuredReasons>());
+    for (size_t i = 0; i < obscuredReasons.size(); i++) {
+        auto index = std::to_string(i);
+        auto value = std::to_string(static_cast<int32_t>(obscuredReasons[i]));
+        jsonObscuredArray->Put(index.c_str(), value.c_str());
+    }
+    json->Put("obscured", jsonObscuredArray);
 }
 
 void RenderContext::FromJson(const std::unique_ptr<JsonValue>& json)
 {
+    auto borderRadius = json->GetValue("borderRadius");
+    BorderRadiusProperty brp;
+    brp.radiusTopLeft = Dimension::FromString(borderRadius->GetString("topLeft"));
+    brp.radiusTopRight = Dimension::FromString(borderRadius->GetString("topRight"));
+    brp.radiusBottomLeft = Dimension::FromString(borderRadius->GetString("bottomLeft"));
+    brp.radiusBottomRight = Dimension::FromString(borderRadius->GetString("bottomRight"));
+    UpdateBorderRadius(brp);
+    UpdateBackgroundColor(Color::ColorFromString(json->GetString("backgroundColor")));
+    auto clip = json->GetString("clip");
+    if (clip == "true" || clip == "false") {
+        UpdateClipEdge(clip == "true" ? true : false);
+    } else {
+        LOGE("UITree |ERROR| invalid clip=%{public}s", clip.c_str());
+    }
 }
 } // namespace OHOS::Ace::NG

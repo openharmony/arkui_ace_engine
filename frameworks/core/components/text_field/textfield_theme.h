@@ -140,6 +140,7 @@ public:
             theme->errorUnderlineColor_ = pattern->GetAttr<Color>(ERROR_UNDERLINE_COLOR, Color());
             theme->underlineColor_ = pattern->GetAttr<Color>(UNDERLINE_COLOR, defaultUnderlineColor);
             theme->underlineTextColor_ = pattern->GetAttr<Color>(UNDERLINE_TEXT_COLOR, defaultUnderlineTextColor);
+            theme->underlineFontSize_ = pattern->GetAttr<Dimension>(UNDERLINE_FONT_SIZE, 0.0_fp);
             theme->errorTextStyle_.SetTextColor(pattern->GetAttr<Color>(ERROR_UNDERLINE_TEXT_COLOR, Color()));
             theme->errorTextStyle_.SetFontSize(pattern->GetAttr<Dimension>(ERROR_UNDERLINE_TEXT_SIZE, 0.0_fp));
 
@@ -165,7 +166,6 @@ public:
             theme->cursorWidth_ = pattern->GetAttr<Dimension>("cursor_width", 1.5_vp);
             theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, Color());
             theme->pressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, Color());
-            theme->borderColor_ = pattern->GetAttr<Color>(PATTERN_BRODER_COLOR, Color());
             theme->borderRadiusSize_ = Radius(pattern->GetAttr<Dimension>(BORDER_RADIUS_SIZE, 20.0_vp));
             theme->disabledIconFillColor_ = theme->bgColor_.BlendOpacity(theme->disableOpacityRatio_);
             theme->passwordErrorTextColor_ = pattern->GetAttr<Color>(ERROR_PASSWORD_CONTENT_COLOR, Color());
@@ -191,6 +191,11 @@ public:
     const Dimension& GetFontSize() const
     {
         return fontSize_;
+    }
+
+    const Dimension& GetUnderlineFontSize() const
+    {
+        return underlineFontSize_;
     }
 
     const FontWeight& GetFontWeight() const
@@ -266,11 +271,6 @@ public:
     const Color& GetPressColor() const
     {
         return pressColor_;
-    }
-
-    const Color& GetBorderColor() const
-    {
-        return borderColor_;
     }
 
     const Radius& GetBorderRadiusSize() const
@@ -425,11 +425,11 @@ private:
     Edge padding_;
     Dimension height_;
     Dimension fontSize_;
+    Dimension underlineFontSize_;
     FontWeight fontWeight_ = FontWeight::NORMAL;
     Radius borderRadius_;
 
     Color bgColor_;
-    Color borderColor_;
     Radius borderRadiusSize_;
     Color placeholderColor_;
     Color focusBgColor_;

@@ -105,12 +105,17 @@ public:
 
     void SetDataPanelType(size_t dataPanelType)
     {
-        dataPanelType_ = dataPanelType;
+        if (isFirstCreate_) {
+            dataPanelType_ = dataPanelType;
+            isFirstCreate_ = false;
+        }
     };
 
     void SetEffect(bool effect)
     {
-        effect_ = effect;
+        if (isEffect_) {
+            isEffect_->Set(effect);
+        }
     };
 
     void SetOffset(OffsetF offset)
@@ -147,6 +152,11 @@ public:
         isShadowVisible_ = isShadowVisible;
     };
 
+    void SetIsHasShadowValue(bool isHasShadowValue)
+    {
+        isHasShadowValue_ = isHasShadowValue;
+    };
+
     void SetShadowRadius(float shadowRadius)
     {
         if (shadowRadiusFloat_) {
@@ -168,7 +178,7 @@ public:
         }
     };
 
-    void SetShadowColors(const std::vector<Gradient>& valueColors)
+    void SetShadowColors(const std::vector<Gradient>& valueColors, const size_t shadowColorsLastLength)
     {
         for (size_t i = 0; i < valueColors.size(); i++) {
             if (i >= MAX_COUNT) {
@@ -176,17 +186,20 @@ public:
             }
             shadowColors_[i]->Set(GradientArithmetic(valueColors[i]));
         }
-        shadowColorsLastLength_ = valueColors.size();
+        shadowColorsLastLength_ = shadowColorsLastLength;
     };
 
 private:
     void PaintRainbowFilterMask(RSCanvas& canvas, double factor, ArcData arcData) const;
     void PaintColorSegmentFilterMask(RSCanvas& canvas, const LinearData& segmentLinearData) const;
+    Gradient SortGradientColorsOffset(const Gradient& srcGradient) const;
     RefPtr<AnimatablePropertyFloat> date_;
+    RefPtr<PropertyBool> isEffect_;
     size_t dataPanelType_;
-    bool effect_ = true;
     OffsetF offset_;
     bool isFirstAnimate_ = true;
+    bool isFirstCreate_ = true;
+    bool isHasShadowValue_ = false;
 
     RefPtr<AnimatablePropertyFloat> max_;
     std::vector<RefPtr<AnimatablePropertyFloat>> values_;

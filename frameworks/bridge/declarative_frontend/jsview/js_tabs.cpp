@@ -106,7 +106,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
     BarPosition barPosition = BarPosition::START;
     RefPtr<TabController> tabController;
     RefPtr<SwiperController> swiperController;
-    int32_t index = 0;
+    int32_t index = -1;
     JSRef<JSVal> changeEventVal;
     if (info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -128,6 +128,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
         JSRef<JSVal> indexVal = obj->GetProperty("index");
         if (indexVal->IsNumber()) {
             index = indexVal->ToNumber<int32_t>();
+            index = index < 0 ? 0 : index;
             if (!tabController) {
                 tabController = JSTabsController::CreateController();
             }
@@ -139,6 +140,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
             auto indexValueProperty = indexObj->GetProperty("value");
             if (indexValueProperty->IsNumber()) {
                 index = indexValueProperty->ToNumber<int32_t>();
+                index = index < 0 ? 0 : index;
             }
             changeEventVal = indexObj->GetProperty("changeEvent");
         }
@@ -261,12 +263,23 @@ void JSTabs::SetBarOverlap(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetBarOverlap(barOverlap);
 }
 
+void JSTabs::SetBarBackgroundColor(const JSCallbackInfo& info)
+{
+    Color backgroundColor = Color::BLACK.BlendOpacity(0.0f);
+    if (info.Length() < 1) {
+        LOGD("Invalid parameters. Use default parameters instead.");
+    } else if (!ConvertFromJSValue(info[0], backgroundColor)) {
+        LOGD("Invalid parameters. Use default parameters instead.");
+    }
+    TabsModel::GetInstance()->SetBarBackgroundColor(backgroundColor);
+}
+
 void JSTabs::SetDivider(const JSCallbackInfo& info)
 {
     TabsItemDivider divider;
     RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
-    CHECK_NULL_VOID (tabTheme);
-    
+    CHECK_NULL_VOID(tabTheme);
+
     if (info.Length() < 1) {
         LOGW("Invalid params");
     } else {
@@ -285,7 +298,7 @@ void JSTabs::SetDivider(const JSCallbackInfo& info)
                 divider.startMargin.Value() < 0.0f) {
                 divider.startMargin.Reset();
             }
-            
+
             if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin) ||
                 divider.endMargin.Value() < 0.0f) {
                 divider.endMargin.Reset();
@@ -293,6 +306,17 @@ void JSTabs::SetDivider(const JSCallbackInfo& info)
         }
     }
     TabsModel::GetInstance()->SetDivider(divider);
+}
+
+void JSTabs::SetClip(const JSCallbackInfo& info)
+{
+    if (info[0]->IsObject() || !Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsClip(info);
+        return;
+    }
+    if (info[0]->IsBoolean()) {
+        TabsModel::GetInstance()->SetClipEdge(info[0]->ToBoolean());
+    }
 }
 
 void JSTabs::JSBind(BindingTarget globalObj)
@@ -320,9 +344,10 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSTabs>::StaticMethod("fadingEdge", &JSTabs::SetFadingEdge);
     JSClass<JSTabs>::StaticMethod("barOverlap", &JSTabs::SetBarOverlap);
+    JSClass<JSTabs>::StaticMethod("barBackgroundColor", &JSTabs::SetBarBackgroundColor);
+    JSClass<JSTabs>::StaticMethod("clip", &JSTabs::SetClip);
 
-    JSClass<JSTabs>::Inherit<JSContainerBase>();
-    JSClass<JSTabs>::Bind<>(globalObj);
+    JSClass<JSTabs>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

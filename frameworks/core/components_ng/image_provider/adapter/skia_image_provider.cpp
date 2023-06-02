@@ -17,7 +17,9 @@
 #include <utility>
 
 #include "include/codec/SkCodec.h"
+#include "include/core/SkBitmap.h"
 #include "include/core/SkGraphics.h"
+#include "include/core/SkImage.h"
 
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
@@ -37,19 +39,19 @@
 namespace OHOS::Ace::NG {
 namespace {
 
-sk_sp<SkImage> ApplySizeToSkImage(const sk_sp<SkImage>& encodedImage, const SkImageInfo& info)
+sk_sp<SkImage> ForceResizeImage(const sk_sp<SkImage>& image, const SkImageInfo& info)
 {
     ACE_FUNCTION_TRACE();
     SkBitmap bitmap;
     bitmap.allocPixels(info);
 
 #ifdef NEW_SKIA
-    auto res = encodedImage->scalePixels(
+    auto res = image->scalePixels(
         bitmap.pixmap(), SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone), SkImage::kDisallow_CachingHint);
 #else
-    auto res = encodedImage->scalePixels(bitmap.pixmap(), kLow_SkFilterQuality, SkImage::kDisallow_CachingHint);
+    auto res = image->scalePixels(bitmap.pixmap(), kLow_SkFilterQuality, SkImage::kDisallow_CachingHint);
 #endif
-    CHECK_NULL_RETURN(res, encodedImage);
+    CHECK_NULL_RETURN(res, image);
 
     bitmap.setImmutable();
     return SkImage::MakeFromBitmap(bitmap);
@@ -67,9 +69,27 @@ sk_sp<SkImage> ResizeSkImage(const sk_sp<SkData>& data, const SizeF& targetSize,
     CHECK_NULL_RETURN(codec, {});
     auto info = codec->getInfo();
 
-    if ((info.width() > width && info.height() > height) || forceResize) {
+    // sourceSize is set by developer, then we will force scaling to [TargetSize] using SkImage::scalePixels,
+    // this method would succeed even if the codec doesn't support that size.
+    if (forceResize) {
         info = info.makeWH(width, height);
-        return ApplySizeToSkImage(encodedImage, info);
+        return ForceResizeImage(encodedImage, info);
+    }
+
+    if ((info.width() > width && info.height() > height)) {
+        // If the image is larger than the target size, we will scale it down to the target size.
+        // TargetSize might not be compatible with the codec, so we find the closest size supported by the codec
+        auto scale = std::max(static_cast<float>(width) / info.width(), static_cast<float>(height) / info.height());
+        auto idealSize = codec->getScaledDimensions(scale);
+        LOGD("targetSize = %{public}s, idealSize: %{public}dx%{public}d", targetSize.ToString().c_str(),
+            idealSize.width(), idealSize.height());
+
+        info = info.makeWH(idealSize.width(), idealSize.height());
+        SkBitmap bitmap;
+        bitmap.allocPixels(info);
+        auto res = codec->getPixels(info, bitmap.getPixels(), bitmap.rowBytes());
+        CHECK_NULL_RETURN(res == SkCodec::kSuccess, encodedImage);
+        return SkImage::MakeFromBitmap(bitmap);
     }
     return encodedImage;
 }
@@ -130,20 +150,20 @@ void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& objWp, const Wea
 namespace {
 RefPtr<CanvasImage> QueryCompressedCache(const sk_sp<SkData>& skData, const std::string& key, const SizeF& imageSize)
 {
+    auto cachedData = ImageLoader::LoadImageDataFromFileCache(key, ".astc");
+    CHECK_NULL_RETURN_NOLOG(cachedData, {});
+    auto skiaImageData = AceType::DynamicCast<SkiaImageData>(cachedData);
+    CHECK_NULL_RETURN(skiaImageData, {});
+    auto stripped = ImageCompressor::StripFileHeader(skiaImageData->GetSkData());
+
+    // round width and height to nearest int
+    int32_t dstWidth = std::lround(imageSize.Width());
+    int32_t dstHeight = std::lround(imageSize.Height());
+    LOGI("use astc cache %{public}s %{public}d×%{public}d", key.c_str(), dstWidth, dstHeight);
     // create encoded SkImage to use its uniqueId
     auto image = SkImage::MakeFromEncoded(skData);
     auto canvasImage = AceType::DynamicCast<SkiaImage>(CanvasImage::Create(&image));
 
-    auto cachedData = ImageLoader::LoadImageDataFromFileCache(key, ".astc");
-    CHECK_NULL_RETURN_NOLOG(cachedData, {});
-    // round width and height to nearest int
-    int32_t dstWidth = std::lround(imageSize.Width());
-    int32_t dstHeight = std::lround(imageSize.Height());
-
-    auto skiaImageData = AceType::DynamicCast<SkiaImageData>(cachedData);
-    CHECK_NULL_RETURN(skiaImageData, {});
-    auto stripped = ImageCompressor::StripFileHeader(skiaImageData->GetSkData());
-    LOGI("use astc cache %{public}s %{public}d×%{public}d", key.c_str(), dstWidth, dstHeight);
     canvasImage->SetCompressData(stripped, dstWidth, dstHeight);
     canvasImage->ReplaceSkImage(nullptr);
     return canvasImage;

@@ -16,17 +16,19 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_OSAL_RESOURCE_ADAPTER_IMPL_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_RESOURCE_ADAPTER_IMPL_H
 
-#include "resource_manager.h"
-
 #include <mutex>
 #include <shared_mutex>
 
+#include "resource_manager.h"
+
+#include "base/image/pixel_map.h"
 #include "core/components/theme/resource_adapter.h"
 
 namespace OHOS::Ace {
 
 class ResourceAdapterImpl : public ResourceAdapter {
     DECLARE_ACE_TYPE(ResourceAdapterImpl, ResourceAdapter);
+
 public:
     ResourceAdapterImpl() = default;
     ~ResourceAdapterImpl() override = default;
@@ -55,23 +57,30 @@ public:
     std::vector<uint32_t> GetIntArrayByName(const std::string& resName) const override;
     bool GetBoolean(uint32_t resId) const override;
     bool GetBooleanByName(const std::string& resName) const override;
+    std::shared_ptr<Media::PixelMap> GetPixelMap(uint32_t resId) override;
     std::string GetMediaPath(uint32_t resId) override;
     std::string GetMediaPathByName(const std::string& resName) override;
     std::string GetRawfile(const std::string& fileName) override;
-    bool GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]> &dest) override;
-    bool GetMediaData(uint32_t resId, size_t& len, std::unique_ptr<uint8_t[]> &dest) override;
-    bool GetMediaData(const std::string& resName, size_t& len, std::unique_ptr<uint8_t[]> &dest) override;
+    bool GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest) override;
+    bool GetMediaData(uint32_t resId, size_t& len, std::unique_ptr<uint8_t[]>& dest) override;
+    bool GetMediaData(const std::string& resName, size_t& len, std::unique_ptr<uint8_t[]>& dest) override;
     void UpdateResourceManager(const std::string& bundleName, const std::string& moduleName) override;
     bool GetRawFileDescription(const std::string& rawfileName, RawfileDescription& rawfileDescription) const override;
     bool GetMediaById(const int32_t& resId, std::string& mediaPath) const override;
 
 private:
     std::string GetActualResourceName(const std::string& resName) const;
+    inline std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager() const
+    {
+        std::shared_lock<std::shared_mutex> lock(resourceMutex_);
+        return resourceManager_;
+    }
 
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager_;
     std::shared_ptr<Global::Resource::ResourceManager> sysResourceManager_;
     std::map<std::pair<std::string, std::string>, std::shared_ptr<Global::Resource::ResourceManager>> resourceManagers_;
     std::string packagePathStr_;
+    // protect resourceManager_
     mutable std::shared_mutex resourceMutex_;
     std::shared_ptr<Global::Resource::ResConfig> resConfig_;
     ACE_DISALLOW_COPY_AND_MOVE(ResourceAdapterImpl);

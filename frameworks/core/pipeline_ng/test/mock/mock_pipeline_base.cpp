@@ -67,6 +67,8 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe) {}
 
 void PipelineContext::OnMouseEvent(const MouseEvent& event) {}
 
+void PipelineContext::FlushTouchEvents() {}
+
 void PipelineContext::OnAxisEvent(const AxisEvent& event) {}
 
 void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action) {}
@@ -276,14 +278,37 @@ std::unique_ptr<JsonValue> PipelineContext::GetStoredNodeInfo()
 
 void PipelineContext::StoreNode(int32_t restoreId, const WeakPtr<FrameNode>& node) {}
 
-std::string PipelineContext::GetRestoreInfo(int32_t restoreId)
+bool PipelineContext::GetRestoreInfo(int32_t restoreId, std::string& restoreInfo)
 {
-    return "";
+    return false;
 }
 
 void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode) {}
 
-void PipelineContext::OnAvoidAreaChanged() {}
+void PipelineContext::ResetViewSafeArea() {}
+
+void PipelineContext::AddWindowSizeChangeCallback(int32_t nodeId) {}
+
+void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId) {}
+
+void PipelineContext::SetSystemSafeArea(const SafeAreaEdgeInserts& systemSafeArea) {};
+
+SafeAreaEdgeInserts PipelineContext::GetSystemSafeArea() const
+{
+    return {};
+}
+
+void PipelineContext::SetCutoutSafeArea(const SafeAreaEdgeInserts& cutoutSafeArea) {};
+
+SafeAreaEdgeInserts PipelineContext::GetCutoutSafeArea() const
+{
+    return {};
+}
+
+SafeAreaEdgeInserts PipelineContext::GetViewSafeArea() const
+{
+    return {};
+}
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
@@ -367,8 +392,7 @@ bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& c
 
 void PipelineBase::Destroy() {}
 
-void PipelineBase::AddEtsCardTouchEventCallback(
-    int32_t ponitId, EtsCardTouchEventCallback&& callback) {}
+void PipelineBase::AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback) {}
 
 double PipelineBase::ConvertPxToVp(const Dimension& dimension) const
 {
@@ -385,5 +409,10 @@ void PipelineBase::RequestFrame() {}
 Rect PipelineBase::GetCurrentWindowRect() const
 {
     return { 0., 0., DISPLAY_WIDTH, DISPLAY_HEIGHT };
+}
+
+void PipelineBase::SetTextFieldManager(const RefPtr<ManagerInterface>& manager)
+{
+    textFieldManager_ = manager;
 }
 } // namespace OHOS::Ace

@@ -17,6 +17,7 @@
 
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
 
+#include "core/common/ace_application_info.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_paint_method.h"
 
 namespace OHOS::Ace::NG {
@@ -128,14 +129,16 @@ void OffscreenCanvasPattern::QuadraticCurveTo(const QuadraticCurveParam& param)
     offscreenPaintMethod_->QuadraticCurveTo(nullptr, param);
 }
 
-void OffscreenCanvasPattern::FillText(const std::string& text, double x, double y, const PaintState& state)
+void OffscreenCanvasPattern::FillText(
+    const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state)
 {
-    offscreenPaintMethod_->FillText(text, x, y, state);
+    offscreenPaintMethod_->FillText(text, x, y, maxWidth, state);
 }
 
-void OffscreenCanvasPattern::StrokeText(const std::string& text, double x, double y, const PaintState& state)
+void OffscreenCanvasPattern::StrokeText(
+    const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state)
 {
-    offscreenPaintMethod_->StrokeText(text, x, y, state);
+    offscreenPaintMethod_->StrokeText(text, x, y, maxWidth, state);
 }
 
 double OffscreenCanvasPattern::MeasureText(const std::string& text, const PaintState& state)
@@ -216,6 +219,9 @@ void OffscreenCanvasPattern::SetLineDash(const std::vector<double>& segments)
 
 void OffscreenCanvasPattern::SetTextDirection(TextDirection direction)
 {
+    if (direction == TextDirection::INHERIT) {
+        direction = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
+    }
     offscreenPaintMethod_->SetTextDirection(direction);
 }
 
@@ -387,5 +393,10 @@ void OffscreenCanvasPattern::SetFontSize(const Dimension& size)
 std::string OffscreenCanvasPattern::ToDataURL(const std::string& type, const double quality)
 {
     return offscreenPaintMethod_->ToDataURL(type, quality);
+}
+
+TransformParam OffscreenCanvasPattern::GetTransform() const
+{
+    return offscreenPaintMethod_->GetTransform();
 }
 } // namespace OHOS::Ace::NG

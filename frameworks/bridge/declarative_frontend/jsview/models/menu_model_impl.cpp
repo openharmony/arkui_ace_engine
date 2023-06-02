@@ -19,5 +19,6 @@ namespace OHOS::Ace::Framework {
 void MenuModelImpl::Create() {}
 void MenuModelImpl::SetFontSize(const Dimension& fontSize) {}
 void MenuModelImpl::SetFontWeight(FontWeight weight) {}
+void MenuModelImpl::SetFontStyle(Ace::FontStyle style) {}
 void MenuModelImpl::SetFontColor(const std::optional<Color>& color) {}
 } // namespace OHOS::Ace::Framework

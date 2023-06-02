@@ -145,30 +145,27 @@ void JSText::SetTextShadow(const JSCallbackInfo& info)
         TextModel::GetInstance()->SetTextShadow(shadow);
         return;
     }
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (!argsPtrItem || argsPtrItem->IsNull()) {
-        LOGW("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
-        info.ReturnSelf();
-        return;
-    }
-    double radius = 0.0;
-    ParseJsonDouble(argsPtrItem->GetValue("radius"), radius);
-    if (LessNotEqual(radius, 0.0)) {
-        radius = 0.0;
-    }
+
+    auto jsObject = JSRef<JSObject>::Cast(info[0]);
     Shadow shadow;
-    shadow.SetBlurRadius(radius);
-    CalcDimension offsetX;
-    if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetX"), offsetX)) {
-        shadow.SetOffsetX(offsetX.Value());
-    }
-    CalcDimension offsetY;
-    if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetY"), offsetY)) {
-        shadow.SetOffsetY(offsetY.Value());
-    }
-    Color color;
-    if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
-        shadow.SetColor(color);
+    double radius = 0.0;
+    if (ParseJsDouble(jsObject->GetProperty("radius"), radius)) {
+        if (LessNotEqual(radius, 0.0)) {
+            radius = 0.0;
+        }
+        shadow.SetBlurRadius(radius);
+        CalcDimension offsetX;
+        if (ParseJsDimensionVp(jsObject->GetProperty("offsetX"), offsetX)) {
+            shadow.SetOffsetX(offsetX.Value());
+        }
+        CalcDimension offsetY;
+        if (ParseJsDimensionVp(jsObject->GetProperty("offsetY"), offsetY)) {
+            shadow.SetOffsetY(offsetY.Value());
+        }
+        Color color;
+        if (ParseJsColor(jsObject->GetProperty("color"), color)) {
+            shadow.SetColor(color);
+        }
     }
     TextModel::GetInstance()->SetTextShadow(shadow);
 }
@@ -218,6 +215,7 @@ void JSText::SetTextIndent(const JSCallbackInfo& info)
     }
     CalcDimension value;
     if (!ParseJsDimensionFp(info[0], value)) {
+        TextModel::GetInstance()->SetTextIndent(value);
         return;
     }
     TextModel::GetInstance()->SetTextIndent(value);
@@ -257,8 +255,9 @@ void JSText::SetLineHeight(const JSCallbackInfo& info)
         return;
     }
     CalcDimension value;
-    if (!ParseJsDimensionFp(info[0], value)) {
-        return;
+    ParseJsDimensionFp(info[0], value);
+    if (value.IsNegative()) {
+        value.Reset();
     }
     TextModel::GetInstance()->SetLineHeight(value);
 }
@@ -599,9 +598,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("focusable", &JSText::JsFocusable);
     JSClass<JSText>::StaticMethod("draggable", &JSText::JsDraggable);
     JSClass<JSText>::StaticMethod("textMenuOptions", &JSText::JsMenuOptionsExtension);
-    JSClass<JSText>::Inherit<JSContainerBase>();
-    JSClass<JSText>::Inherit<JSViewAbstract>();
-    JSClass<JSText>::Bind<>(globalObj);
+    JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

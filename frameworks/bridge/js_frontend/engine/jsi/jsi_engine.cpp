@@ -2977,6 +2977,8 @@ bool JsiEngineInstance::InitJsEnv(bool debugger_mode, const std::unordered_map<s
         runtime_->GetGlobal()->SetProperty(runtime_, key, nativeValue);
     }
 
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
+    arkRuntime->SetLanguage("js");
     runtime_->StartDebugger();
 #endif
 
@@ -3230,12 +3232,13 @@ void JsiEngine::RegisterInitWorkerFunc()
             return;
         }
 #ifdef OHOS_PLATFORM
-        ConnectServerManager::Get().AddInstance(gettid());
+        ConnectServerManager::Get().AddInstance(gettid(), "js");
         auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
         auto workerPostTask = [nativeEngine](std::function<void()>&& callback) {
             nativeEngine->CallDebuggerPostTaskFunc(std::move(callback));
         };
-        panda::JSNApi::StartDebugger(libraryPath.c_str(), vm, debugMode, gettid(), workerPostTask);
+        panda::JSNApi::DebugOption debugOption = {libraryPath.c_str(), debugMode};
+        panda::JSNApi::StartDebugger(vm, debugOption, gettid(), workerPostTask);
 #endif
         instance->RegisterConsoleModule(arkNativeEngine);
         // load jsfwk

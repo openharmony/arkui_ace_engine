@@ -257,14 +257,16 @@ void SwiperModelNG::SetIndicatorIsBoolean(bool isBoolean)
 
 void SwiperModelNG::SetArrowStyle(const SwiperArrowParameters& swiperArrowParameters)
 {
-    if (swiperArrowParameters.isShowBoard.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, IsShowBoard, swiperArrowParameters.isShowBoard.value());
+    if (swiperArrowParameters.isShowBackground.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(
+            SwiperLayoutProperty, IsShowBackground, swiperArrowParameters.isShowBackground.value());
     }
-    if (swiperArrowParameters.boardSize.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, BoardSize, swiperArrowParameters.boardSize.value());
+    if (swiperArrowParameters.backgroundSize.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, BackgroundSize, swiperArrowParameters.backgroundSize.value());
     }
-    if (swiperArrowParameters.boardColor.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, BoardColor, swiperArrowParameters.boardColor.value());
+    if (swiperArrowParameters.backgroundColor.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(
+            SwiperLayoutProperty, BackgroundColor, swiperArrowParameters.backgroundColor.value());
     }
     if (swiperArrowParameters.arrowSize.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, ArrowSize, swiperArrowParameters.arrowSize.value());
@@ -272,9 +274,9 @@ void SwiperModelNG::SetArrowStyle(const SwiperArrowParameters& swiperArrowParame
     if (swiperArrowParameters.arrowColor.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, ArrowColor, swiperArrowParameters.arrowColor.value());
     }
-    if (swiperArrowParameters.isSiderMiddle.has_value()) {
+    if (swiperArrowParameters.isSidebarMiddle.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(
-            SwiperLayoutProperty, IsSiderMiddle, swiperArrowParameters.isSiderMiddle.value());
+            SwiperLayoutProperty, IsSidebarMiddle, swiperArrowParameters.isSidebarMiddle.value());
     }
 }
 

@@ -49,29 +49,49 @@ void IndexerModelNG::Create(std::vector<std::string>& arrayValue, int32_t select
     }
 }
 
-void IndexerModelNG::SetSelectedColor(const Color& selectedColor)
+void IndexerModelNG::SetSelectedColor(const std::optional<Color>& selectedColor)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, SelectedColor, selectedColor);
+    if (selectedColor.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, SelectedColor, selectedColor.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY(IndexerLayoutProperty, SelectedColor);
+    }
 }
 
-void IndexerModelNG::SetColor(const Color& color)
+void IndexerModelNG::SetColor(const std::optional<Color>& color)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, Color, color);
+    if (color.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, Color, color.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY(IndexerLayoutProperty, Color);
+    }
 }
 
-void IndexerModelNG::SetPopupColor(const Color& popupColor)
+void IndexerModelNG::SetPopupColor(const std::optional<Color>& popupColor)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupColor, popupColor);
+    if (popupColor.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupColor, popupColor.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupColor);
+    }
 }
 
-void IndexerModelNG::SetSelectedBackgroundColor(const Color& selectedBackgroundColor)
+void IndexerModelNG::SetSelectedBackgroundColor(const std::optional<Color>& selectedBackgroundColor)
 {
-    ACE_UPDATE_PAINT_PROPERTY(IndexerPaintProperty, SelectedBackgroundColor, selectedBackgroundColor);
+    if (selectedBackgroundColor.has_value()) {
+        ACE_UPDATE_PAINT_PROPERTY(IndexerPaintProperty, SelectedBackgroundColor, selectedBackgroundColor.value());
+    } else {
+        ACE_RESET_PAINT_PROPERTY(IndexerPaintProperty, SelectedBackgroundColor);
+    }
 }
 
-void IndexerModelNG::SetPopupBackground(const Color& popupBackground)
+void IndexerModelNG::SetPopupBackground(const std::optional<Color>& popupBackground)
 {
-    ACE_UPDATE_PAINT_PROPERTY(IndexerPaintProperty, PopupBackground, popupBackground);
+    if (popupBackground.has_value()) {
+        ACE_UPDATE_PAINT_PROPERTY(IndexerPaintProperty, PopupBackground, popupBackground.value());
+    } else {
+        ACE_RESET_PAINT_PROPERTY(IndexerPaintProperty, PopupBackground);
+    }
 }
 
 void IndexerModelNG::SetUsingPopup(bool usingPopup)
@@ -79,19 +99,25 @@ void IndexerModelNG::SetUsingPopup(bool usingPopup)
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, UsingPopup, usingPopup);
 }
 
-void IndexerModelNG::SetSelectedFont(const TextStyle& selectedFont)
+void IndexerModelNG::SetSelectedFont(std::function<void(TextStyle& textStyle)>&& getTextStyleFunc)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, SelectedFont, selectedFont);
+    TextStyle textStyle;
+    getTextStyleFunc(textStyle);
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, SelectedFont, textStyle);
 }
 
-void IndexerModelNG::SetPopupFont(const TextStyle& popupFont)
+void IndexerModelNG::SetPopupFont(std::function<void(TextStyle& textStyle)>&& getTextStyleFunc)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupFont, popupFont);
+    TextStyle textStyle;
+    getTextStyleFunc(textStyle);
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupFont, textStyle);
 }
 
-void IndexerModelNG::SetFont(const TextStyle& font)
+void IndexerModelNG::SetFont(std::function<void(TextStyle& textStyle)>&& getTextStyleFunc)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, Font, font);
+    TextStyle textStyle;
+    getTextStyleFunc(textStyle);
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, Font, textStyle);
 }
 
 void IndexerModelNG::SetItemSize(const Dimension& itemSize)

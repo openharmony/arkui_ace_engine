@@ -55,7 +55,6 @@ public:
         SetCalcValue(newDimension.CalcValue());
         SetValue(newDimension.Value());
         SetUnit(newDimension.Unit());
-        SetIllegal(newDimension.Illegal());
         return *this;
     }
 

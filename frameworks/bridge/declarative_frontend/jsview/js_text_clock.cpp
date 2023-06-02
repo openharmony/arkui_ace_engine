@@ -120,8 +120,7 @@ void JSTextClock::JSBind(BindingTarget globalObj)
     JSClass<JSTextClock>::StaticMethod("fontStyle", &JSText::SetFontStyle, opt);
     JSClass<JSTextClock>::StaticMethod("fontWeight", &JSText::SetFontWeight, opt);
     JSClass<JSTextClock>::StaticMethod("fontFamily", &JSText::SetFontFamily, opt);
-    JSClass<JSTextClock>::Inherit<JSViewAbstract>();
-    JSClass<JSTextClock>::Bind<>(globalObj);
+    JSClass<JSTextClock>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSTextClock::SetFormat(const JSCallbackInfo& info)

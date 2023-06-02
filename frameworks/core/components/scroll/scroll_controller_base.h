@@ -57,14 +57,14 @@ public:
     ScrollControllerBase() = default;
     ~ScrollControllerBase() override = default;
 
-    virtual void JumpTo(int32_t index, int32_t source = 3) {}
+    virtual void JumpTo(int32_t index, bool smooth = false, int32_t source = 3) {}
 
     virtual Axis GetScrollDirection() const
     {
         return Axis::NONE;
     }
 
-    virtual bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve)
+    virtual bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth)
     {
         return true;
     }

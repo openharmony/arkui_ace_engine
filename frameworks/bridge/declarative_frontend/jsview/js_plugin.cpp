@@ -203,7 +203,6 @@ void JSPlugin::JSBind(BindingTarget globalObj)
     JSClass<JSPlugin>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSPlugin>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
 
-    JSClass<JSPlugin>::Inherit<JSViewAbstract>();
-    JSClass<JSPlugin>::Bind<>(globalObj);
+    JSClass<JSPlugin>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

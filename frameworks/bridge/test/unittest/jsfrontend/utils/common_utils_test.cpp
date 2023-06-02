@@ -17,8 +17,8 @@
 
 #include "base/utils/string_utils.h"
 #include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 #include "frameworks/bridge/js_frontend/engine/common/base_animation_bridge.h"
+#include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 #include "frameworks/core/animation/curve.h"
 
 using namespace testing;
@@ -41,6 +41,7 @@ const std::string ANIMATION_EASING_RESPONSIVE = "responsive-spring-motion(1.0, 1
 const std::string ANIMATION_EASING_EASE = "ease";
 const std::string ANIMATION_EASING_STEPS_START = "steps(1, start)";
 const std::string ANIMATION_EASING_STEPS_END = "steps(1, end)";
+const std::string ANIMATION_EASING_CUSTOM = "customCallback";
 } // namespace
 
 class CommonUtilsTest : public testing::Test {
@@ -131,13 +132,12 @@ HWTEST_F(CommonUtilsTest, CommonUtilsTest002, TestSize.Level1)
     auto springCurve = AceType::DynamicCast<SpringCurve>(CreateCurve(ANIMATION_EASING_SPRING));
     EXPECT_TRUE(NearEqual(springCurve->MoveInternal(0.0), ANIMATION_ZERO_VALUE));
     EXPECT_TRUE(NearEqual(springCurve->MoveInternal(1.0), ANIMATION_SPRING_VALUE));
-    
+
     /**
      * @tc.steps: step5. parse the param of spring motion.
      * @tc.expected: step5. spring motion parsed success.
      */
-    auto springMotion =
-        AceType::DynamicCast<ResponsiveSpringMotion>(CreateCurve(ANIMATION_EASING_SPRING_MOTION));
+    auto springMotion = AceType::DynamicCast<ResponsiveSpringMotion>(CreateCurve(ANIMATION_EASING_SPRING_MOTION));
     EXPECT_EQ(springMotion->GetResponse(), ANIMATION_ONE_VALUE);
     EXPECT_EQ(springMotion->GetDampingRatio(), ANIMATION_ONE_VALUE);
     EXPECT_EQ(springMotion->GetBlendDuration(), ANIMATION_ONE_VALUE);
@@ -219,7 +219,7 @@ HWTEST_F(CommonUtilsTest, CommonUtilsTest004, TestSize.Level1)
     EXPECT_EQ(bgImgSize.GetSizeTypeX(), BackgroundImageSizeType::AUTO);
     EXPECT_EQ(bgImgSize.GetSizeValueY(), SIZE_VALUE_ZERO);
     EXPECT_EQ(bgImgSize.GetSizeTypeY(), BackgroundImageSizeType::AUTO);
-    
+
     /**
      * @tc.steps: step4. parse the param which is "auto".
      * @tc.expected: step4. The value of the params are as expected.
@@ -365,5 +365,24 @@ HWTEST_F(CommonUtilsTest, CommonUtilsTest008, TestSize.Level1)
     EXPECT_EQ(transitionType, TransitionType::DISAPPEARING);
     transitionType = ParseTransitionType("Modify");
     EXPECT_EQ(transitionType, TransitionType::ALL);
+}
+
+/**
+ * @tc.name: CommonUtilsTest009
+ * @tc.desc: Animation CreateCurve step check
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonUtilsTest, CommonUtilsTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. parse the param of Custom curve.
+     * @tc.expected: Custom curve parsed success.
+     */
+    auto customCallback = [](float time) -> float { return time; };
+    auto customCurve = AceType::DynamicCast<CustomCurve>(CreateCurve(customCallback));
+    ASSERT_NE(customCurve, nullptr);
+    EXPECT_TRUE(NearEqual(customCurve->MoveInternal(0.0), ANIMATION_ZERO_VALUE));
+    EXPECT_TRUE(NearEqual(customCurve->MoveInternal(1.0), ANIMATION_ONE_VALUE));
+    EXPECT_EQ(customCurve->ToString(), ANIMATION_EASING_CUSTOM);
 }
 } // namespace OHOS::Ace::Framework

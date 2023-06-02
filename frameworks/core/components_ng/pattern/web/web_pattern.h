@@ -300,6 +300,7 @@ public:
     void OnResizeNotWork();
     bool OnBackPressed() const;
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
+    bool NotifyStartDragTask();
 private:
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
@@ -357,7 +358,7 @@ private:
     void OnHorizontalScrollBarAccessEnabledUpdate(bool value);
     void OnVerticalScrollBarAccessEnabledUpdate(bool value);
     void OnScrollBarColorUpdate(const std::string& value);
-    
+
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
@@ -405,7 +406,8 @@ private:
     RectF ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> touchHandle);
     std::optional<OffsetF> GetCoordinatePoint();
     void RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
-        std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
+        std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback,
+        std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params);
     OffsetF GetSelectPopupPostion(const OHOS::NWeb::SelectMenuBound& bounds);
 
     struct TouchInfo {
@@ -461,6 +463,8 @@ private:
     int32_t parentNWebId_ = -1;
     bool isInWindowDrag_ = false;
     bool isWaiting_ = false;
+    bool isDisableDrag_ = false;
+    bool isMouseEvent_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG

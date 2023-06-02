@@ -19,11 +19,13 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <refbase.h>
 #include <string>
+#include <vector>
 
+#include "macros.h"
 #include "serializeable_object.h"
 #include "viewport_config.h"
-#include "foundation/multimedia/image_framework/interfaces/innerkits/include/pixel_map.h"
 
 namespace OHOS {
 
@@ -55,9 +57,9 @@ class KeyEvent;
 class AxisEvent;
 } // namespace MMI
 
-namespace Ace {
-class Window;
-} // namespace Ace
+namespace Media {
+class PixelMap;
+} // namespace Media
 
 } // namespace OHOS
 
@@ -66,14 +68,10 @@ class NativeValue;
 
 namespace OHOS::Ace {
 
-#ifndef ACE_EXPORT
-#define ACE_EXPORT __attribute__((visibility("default")))
-#endif
-
-class ACE_EXPORT UIContent {
+class ACE_EXPORT_WITH_PREVIEW UIContent {
 public:
-    static std::unique_ptr<UIContent> Create(OHOS::AbilityRuntime::Context* context, NativeEngine* runtime,
-                                             bool isFormRender);
+    static std::unique_ptr<UIContent> Create(
+        OHOS::AbilityRuntime::Context* context, NativeEngine* runtime, bool isFormRender);
     static std::unique_ptr<UIContent> Create(OHOS::AbilityRuntime::Context* context, NativeEngine* runtime);
     static std::unique_ptr<UIContent> Create(OHOS::AppExecFwk::Ability* ability);
     static void ShowDumpHelp(std::vector<std::string>& info);
@@ -82,7 +80,6 @@ public:
 
     // UI content life-cycles
     virtual void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) = 0;
-    virtual void Initialize(const std::shared_ptr<Window>& aceWindow, const std::string& url, NativeValue* storage) = 0;
     virtual void Foreground() = 0;
     virtual void Background() = 0;
     virtual void Focus() = 0;
@@ -127,8 +124,7 @@ public:
     virtual std::shared_ptr<Rosen::RSSurfaceNode> GetFormRootNode() = 0;
 
     virtual void UpdateFormData(const std::string& data) = 0;
-    virtual void UpdateFormSharedImage(
-        const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap) {}
+    virtual void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap) {}
 
     virtual void SetFormWidth(const float width) = 0;
     virtual void SetFormHeight(const float height) = 0;
@@ -158,6 +154,11 @@ public:
         std::vector<std::string>& assetBasePaths, std::string& resFolderName) {};
     virtual void SetResourcePaths(const std::vector<std::string>& resourcesPaths, const std::string& assetRootPath,
         const std::vector<std::string>& assetBasePaths) {};
+		
+    virtual NativeValue* GetUIContext()
+    {
+        return nullptr;
+    };
 };
 
 } // namespace OHOS::Ace

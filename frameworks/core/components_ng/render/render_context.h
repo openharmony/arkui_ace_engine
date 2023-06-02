@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -94,6 +94,9 @@ public:
     // will be unaffected by parent's transition.
     virtual void SetSandBox(const std::optional<OffsetF>& parentPosition) {};
 
+    virtual void RegisterSharedTransition(const RefPtr<RenderContext>& other) {}
+    virtual void UnregisterSharedTransition(const RefPtr<RenderContext>& other) {}
+
     virtual void OnModifyDone() {}
 
     virtual void InitContext(bool isRoot, const std::optional<std::string>& surfaceName, bool useExternalNode = false)
@@ -173,6 +176,7 @@ public:
     virtual void ResetPageTransitionEffect() {}
 
     virtual void AddChild(const RefPtr<RenderContext>& renderContext, int index) {}
+    virtual void RemoveChild(const RefPtr<RenderContext>& renderContext) {}
     virtual void SetBounds(float positionX, float positionY, float width, float height) {}
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
@@ -196,6 +200,11 @@ public:
         return {};
     }
 
+    virtual RectF GetPaintRectWithTranslate()
+    {
+        return {};
+    }
+
     virtual void GetPointWithTransform(PointF& point) {}
 
     virtual RectF GetPaintRectWithoutTransform()
@@ -210,6 +219,8 @@ public:
     virtual void ClearDrawCommands() {}
 
     virtual void DumpInfo() const {}
+
+    void ObscuredToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     void SetSharedTransitionOptions(const std::shared_ptr<SharedTransitionOption>& option)
     {
@@ -275,9 +286,11 @@ public:
     virtual void OnSphericalEffectUpdate(double radio) {}
     virtual void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) {}
     virtual void OnLightUpEffectUpdate(double radio) {}
+    virtual void OnClickEffectLevelUpdate(const ClickEffectInfo& info) {}
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SphericalEffect, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PixelStretchEffect, PixStretchEffectOption);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LightUpEffect, double);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ClickEffectLevel, ClickEffectInfo);
     virtual RefPtr<PixelMap> GetThumbnailPixelMap()
     {
         return nullptr;
@@ -380,6 +393,9 @@ public:
     // freeze
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Freeze, bool);
 
+    // obscured
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Obscured, std::vector<ObscuredReasons>);
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
@@ -437,11 +453,11 @@ protected:
     virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}
     virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}
     virtual void OnFreezeUpdate(bool isFreezed) {}
+    virtual void OnObscuredUpdate(const std::vector<ObscuredReasons>& reasons) {}
 
 private:
     std::function<void()> requestFrame_;
     WeakPtr<FrameNode> host_;
-    bool needDebugBoundary_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderContext);
 };

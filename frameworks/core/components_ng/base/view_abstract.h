@@ -214,6 +214,8 @@ public:
     static void SetDisplayIndex(int32_t value);
     static void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction);
+    // obscured
+    static void SetObscured(const std::vector<ObscuredReasons>& reasons);
 
     // Bind properties
     static void BindPopup(
@@ -252,6 +254,9 @@ public:
     // foregroundColor
     static void SetForegroundColor(const Color& color);
     static void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy);
+
+    // clickEffect
+    static void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue);
 
     // custom animatable property
     static void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,

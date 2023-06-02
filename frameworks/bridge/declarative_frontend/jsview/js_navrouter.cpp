@@ -55,14 +55,14 @@ void JSNavRouter::Create(const JSCallbackInfo& info)
         }
         JSRef<JSVal> name = jsObj->GetProperty("name");
         if (name->IsEmpty()) {
+            LOGW("name is empty");
+            return;
+        }
+        if (!name->IsString()) {
+            LOGW("name is not string");
             return;
         }
         JSRef<JSVal> param = jsObj->GetProperty("param");
-        if (!name->IsString()) {
-            LOGW("JSNavRouter::Create name is not string");
-            return;
-        }
-
         auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_VOID(frameNode);
         auto navRouterPattern = frameNode->GetPattern<NG::NavRouterPattern>();
@@ -91,7 +91,9 @@ void JSNavRouter::SetOnStateChange(const JSCallbackInfo& info)
             func->ExecuteJS(1, &param);
         };
         NavRouterModel::GetInstance()->SetOnStateChange(std::move(onStateChange));
+        return;
     }
+    info.ReturnSelf();
 }
 
 void JSNavRouter::SetNavRouteMode(const JSCallbackInfo& info)
@@ -113,8 +115,6 @@ void JSNavRouter::JSBind(BindingTarget globalObj)
     JSClass<JSNavRouter>::StaticMethod("create", &JSNavRouter::Create);
     JSClass<JSNavRouter>::StaticMethod("onStateChange", &JSNavRouter::SetOnStateChange);
     JSClass<JSNavRouter>::StaticMethod("mode", &JSNavRouter::SetNavRouteMode);
-    JSClass<JSNavRouter>::Inherit<JSContainerBase>();
-    JSClass<JSNavRouter>::Inherit<JSViewAbstract>();
-    JSClass<JSNavRouter>::Bind<>(globalObj);
+    JSClass<JSNavRouter>::InheritAndBind<JSContainerBase>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

@@ -73,6 +73,8 @@ extern const char _binary_stateMgmt_abc_start[];
 extern const char _binary_stateMgmt_abc_end[];
 extern const char _binary_jsEnumStyle_abc_start[];
 extern const char _binary_jsEnumStyle_abc_end[];
+extern const char _binary_jsUIContext_abc_start[];
+extern const char _binary_jsUIContext_abc_end[];
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -232,6 +234,8 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
         runtime_->GetGlobal()->SetProperty(runtime_, key, nativeValue);
     }
 
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
+    arkRuntime->SetLanguage("ets");
     runtime_->StartDebugger();
 #endif
 
@@ -296,7 +300,7 @@ void JsiDeclarativeEngineInstance::InitAceModule()
     if (!jsMockSystemPlugin) {
         LOGE("EvaluateJsCode jsMockSystemPlugin failed");
     }
-    const std::string filename = "js-mock/jsMockHmos.abc";
+    const std::string filename = "apiMock/jsMockHmos.abc";
     std::string content;
     if (!frontendDelegate_->GetAssetContent(filename, content)) {
         LOGW("Failed to get the content from the file %{public}s", filename.c_str());
@@ -392,6 +396,14 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     bool evalResult = arkRuntime->EvaluateJsCode(codeStart, codeLength);
     if (!evalResult) {
         LOGE("PreloadAceModule EvaluateJsCode stateMgmt failed");
+    }
+
+    // preload uiContext
+    uint8_t* tsCodeStart = (uint8_t*)_binary_jsUIContext_abc_start;
+    int32_t tsCodeLength = _binary_jsUIContext_abc_end - _binary_jsUIContext_abc_start;
+    bool jsUIContextResult = arkRuntime->EvaluateJsCode(tsCodeStart, tsCodeLength);
+    if (!jsUIContextResult) {
+        LOGE("PreloadAceModule EvaluateJsCode jsUIContextResult failed");
     }
 
     isModulePreloaded_ = evalResult;
@@ -716,6 +728,25 @@ shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::InnerGetCurrentRuntime()
     return engineInstance->GetJsRuntime();
 }
 
+shared_ptr<JsValue> JsiDeclarativeEngineInstance::CallGetUIContextFunc(const shared_ptr<JsRuntime>& runtime,
+    const std::vector<shared_ptr<JsValue>>& argv)
+{
+    shared_ptr<JsValue> global = runtime->GetGlobal();
+    shared_ptr<JsValue> func = global->GetProperty(runtime, "__getUIContext__");
+    if (!func->IsFunction(runtime)) {
+        LOGW("Call property \"getContext\" failed");
+        return nullptr;
+    }
+
+    shared_ptr<JsValue> retVal = func->Call(runtime, global, argv, argv.size());
+    if (!retVal) {
+        LOGW("Get ts uicontext instance failed");
+        return nullptr;
+    }
+
+    return retVal;
+}
+
 void JsiDeclarativeEngineInstance::PostJsTask(const shared_ptr<JsRuntime>& runtime, std::function<void()>&& task)
 {
     LOGD("PostJsTask");
@@ -790,6 +821,35 @@ void JsiDeclarativeEngineInstance::RegisterFaPlugin()
     }
     std::vector<shared_ptr<JsValue>> argv = { runtime_->NewString("FeatureAbility") };
     requireNapiFunc->Call(runtime_, global, argv, argv.size());
+}
+
+NativeValue* JsiDeclarativeEngineInstance::GetContextValue()
+{
+    auto runtime = GetJsRuntime();
+
+    // obtain uiContext instance
+    std::vector<shared_ptr<JsValue>> argv = { runtime->NewNumber(instanceId_) };
+    shared_ptr<JsValue> uiContext = CallGetUIContextFunc(runtime, argv);
+    if (uiContext) {
+        SetContextValue(uiContext);
+    }
+
+    auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (!arkJSRuntime) {
+        return nullptr;
+    }
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(uiContext_);
+    if (!arkJSValue) {
+        return nullptr;
+    }
+    auto arkNativeEngine = static_cast<ArkNativeEngine *>(GetNativeEngine());
+    if (!arkNativeEngine) {
+        return nullptr;
+    }
+    NativeValue *nativeValue = ArkNativeEngine::ArkValueToNativeValue(arkNativeEngine,
+        arkJSValue->GetValue(arkJSRuntime));
+
+    return nativeValue;
 }
 
 // -----------------------
@@ -953,12 +1013,13 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
             return;
         }
 #ifdef OHOS_PLATFORM
-        ConnectServerManager::Get().AddInstance(gettid());
+        ConnectServerManager::Get().AddInstance(gettid(), "ets");
         auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
         auto workerPostTask = [nativeEngine](std::function<void()>&& callback) {
             nativeEngine->CallDebuggerPostTaskFunc(std::move(callback));
         };
-        panda::JSNApi::StartDebugger(libraryPath.c_str(), vm, debugMode, gettid(), workerPostTask);
+        panda::JSNApi::DebugOption debugOption = {libraryPath.c_str(), debugMode};
+        panda::JSNApi::StartDebugger(vm, debugOption, gettid(), workerPostTask);
 #endif
         instance->InitConsoleModule(arkNativeEngine);
 
@@ -1029,6 +1090,7 @@ void JsiDeclarativeEngine::RegisterWorker()
 
 bool JsiDeclarativeEngine::ExecuteAbc(const std::string& fileName)
 {
+    ACE_SCOPED_TRACE("JsiDeclarativeEngine::ExecuteAbc Execute Page code : %s", fileName.c_str());
     auto runtime = engineInstance_->GetJsRuntime();
     auto delegate = engineInstance_->GetDelegate();
     std::vector<uint8_t> content;
@@ -1135,7 +1197,7 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
 
 void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage)
 {
-    ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadJs");
+    ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadJs url : %s", url.c_str());
     LOGI("LoadJs page:%{public}d", page->GetPageId());
     ACE_DCHECK(engineInstance_);
     engineInstance_->SetStagingPage(page);
@@ -1246,6 +1308,7 @@ void JsiDeclarativeEngine::LoadPluginJsWithModule(std::string& urlName)
 void JsiDeclarativeEngine::LoadJsWithModule(
     std::string& urlName, const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
+    ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadJsWithModule Execute Page code : %s", urlName.c_str());
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
@@ -1916,11 +1979,6 @@ void JsiDeclarativeEngine::OnCompleteContinuation(int32_t code)
 
     std::vector<shared_ptr<JsValue>> argv = { runtime->NewNumber(code) };
     CallAppFunc("onCompleteContinuation", argv);
-}
-
-void JsiDeclarativeEngine::ClearCache()
-{
-    JSNApi::CleanJSVMCache();
 }
 
 void JsiDeclarativeEngine::OnRemoteTerminated()

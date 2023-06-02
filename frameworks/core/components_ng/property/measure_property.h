@@ -25,6 +25,7 @@
 #include <utility>
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/json/json_util.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/property/calc_length.h"
 

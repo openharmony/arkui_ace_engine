@@ -105,6 +105,10 @@ public:
         return isOn_.value_or(false);
     }
 
+    std::string ProvideRestoreInfo() override;
+  
+    void OnRestoreInfo(const std::string& restoreInfo) override;
+    
 private:
     void OnModifyDone() override;
     void UpdateCurrentOffset(float offset);
@@ -163,7 +167,6 @@ private:
     SizeF size_;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
-    bool isFirstAddhotZoneRect_ = true;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
 
     RefPtr<SwitchModifier> switchModifier_;

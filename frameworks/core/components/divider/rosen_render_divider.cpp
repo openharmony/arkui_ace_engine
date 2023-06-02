@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,10 @@
 
 #include "core/components/divider/rosen_render_divider.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPaint.h"
+#endif
 
 #include "core/components/divider/render_divider.h"
 #include "core/pipeline/base/rosen_render_context.h"
@@ -34,6 +36,7 @@ void RosenRenderDivider::Paint(RenderContext& context, const Offset& offset)
         return;
     }
 
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setAntiAlias(true);
     paint.setColor(dividerColor_.GetValue());
@@ -51,16 +54,48 @@ void RosenRenderDivider::Paint(RenderContext& context, const Offset& offset)
         default:
             break;
     }
+#else
+    RSPen pen;
+    pen.SetAntiAlias(true);
+    pen.SetColor(dividerColor_.GetValue());
+    pen.SetWidth(constrainStrokeWidth_);
+
+    switch (lineCap_) {
+        case LineCap::BUTT:
+        case LineCap::SQUARE:
+            pen.SetCapStyle(RSPen::CapStyle::SQUARE_CAP);
+            break;
+        case LineCap::ROUND:
+            pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+            break;
+        default:
+            break;
+    }
+#endif
     dividerLength_ =
         vertical_ ? GetLayoutSize().Height() - constrainStrokeWidth_ : GetLayoutSize().Width() - constrainStrokeWidth_;
 
     auto startPointX = offset.GetX() + constrainStrokeWidth_ / 2;
     auto startPointY = offset.GetY() + constrainStrokeWidth_ / 2;
+#ifndef USE_ROSEN_DRAWING
     if (vertical_) {
         canvas->drawLine(startPointX, startPointY, startPointX, startPointY + dividerLength_, paint);
     } else {
         canvas->drawLine(startPointX, startPointY, startPointX + dividerLength_, startPointY, paint);
     }
+#else
+    canvas->AttachPen(pen);
+    if (vertical_) {
+        canvas->DrawLine(
+            RSPoint(startPointX, startPointY),
+            RSPoint(startPointX, startPointY + dividerLength_));
+    } else {
+        canvas->DrawLine(
+            RSPoint(startPointX, startPointY),
+            RSPoint(startPointX + dividerLength_, startPointY));
+    }
+    canvas->DetachPen();
+#endif
 }
 
 } // namespace OHOS::Ace

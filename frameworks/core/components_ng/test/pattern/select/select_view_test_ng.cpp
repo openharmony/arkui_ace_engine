@@ -44,6 +44,7 @@ const std::string OPTION_TEXT_2 = "BBB";
 const std::string OPTION_TEXT_3 = "CCC";
 const std::string INTERNAL_SOURCE = "$r('app.media.icon')";
 const std::string FILE_SOURCE = "/common/icon.png";
+const std::string DEFAULT_STR("2.0");
 } // namespace
 
 class SelectViewTestNg : public testing::Test {
@@ -55,6 +56,9 @@ public:
 void SelectViewTestNg::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 }
 
 void SelectViewTestNg::TearDownTestCase()
@@ -70,9 +74,7 @@ void SelectViewTestNg::TearDownTestCase()
 HWTEST_F(SelectViewTestNg, SelectSetSpaceTest001, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    
     auto select = FrameNode::GetOrCreateFrameNode(
         V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<SelectPattern>(); });
@@ -115,9 +117,7 @@ HWTEST_F(SelectViewTestNg, SelectSetSpaceTest001, TestSize.Level1)
 HWTEST_F(SelectViewTestNg, SelectSetArrowPositionTest001, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    
     auto select = FrameNode::GetOrCreateFrameNode(
         V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<SelectPattern>(); });
@@ -168,10 +168,7 @@ HWTEST_F(SelectViewTestNg, SelectSetArrowPositionTest001, TestSize.Level1)
 HWTEST_F(SelectViewTestNg, SelectSetArrowPositionTest002, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-
+    
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
     selectModelInstance.Create(params);
@@ -189,9 +186,6 @@ HWTEST_F(SelectViewTestNg, SelectSetArrowPositionTest002, TestSize.Level1)
 HWTEST_F(SelectViewTestNg, CreateMenu001, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 
     std::vector<SelectParam> params = {{ OPTION_TEXT, FILE_SOURCE }};
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
@@ -218,11 +212,8 @@ HWTEST_F(SelectViewTestNg, CreateMenu001, TestSize.Level1)
  */
 HWTEST_F(SelectViewTestNg, SelectSetMenuAlign001, TestSize.Level1)
 {
-    // create mock themeManager
     SelectModelNG selectModelInstance;
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+
     // create select
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
@@ -244,9 +235,6 @@ HWTEST_F(SelectViewTestNg, SelectSetMenuAlign001, TestSize.Level1)
 HWTEST_F(SelectViewTestNg, SelectModel001, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 
     std::vector<SelectParam> params = {{ OPTION_TEXT, FILE_SOURCE }};
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
@@ -279,15 +267,12 @@ HWTEST_F(SelectViewTestNg, SelectModel002, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
     SelectEvent eventOnSelect = [](int32_t intValue, const std::string& isSelect) {};
-    Dimension width = 20.0_vp;
-    Dimension height = 20.0_vp;
-    Dimension top = 20.0_vp;
-    Dimension bottom = 20.0_vp;
-    Dimension left = 20.0_vp;
-    Dimension right = 20.0_vp;
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    CalcDimension width = 20.0_vp;
+    CalcDimension height = 20.0_vp;
+    CalcDimension top = 20.0_vp;
+    CalcDimension bottom = 20.0_vp;
+    CalcDimension left = 20.0_vp;
+    CalcDimension right = 20.0_vp;
 
     std::vector<SelectParam> params = {{ OPTION_TEXT, FILE_SOURCE }};
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
@@ -300,11 +285,11 @@ HWTEST_F(SelectViewTestNg, SelectModel002, TestSize.Level1)
     selectModelInstance.SetHeight(height);
     selectModelInstance.SetSize(width, height);
     selectModelInstance.SetPaddings(top, bottom, left, right);
-    selectModelInstance.SetPadding(Dimension(20.00, DimensionUnit::VP));
-    selectModelInstance.SetPaddingLeft(Dimension(20.00, DimensionUnit::VP));
-    selectModelInstance.SetPaddingTop(Dimension(20.00, DimensionUnit::VP));
-    selectModelInstance.SetPaddingRight(Dimension(20.00, DimensionUnit::VP));
-    selectModelInstance.SetPaddingBottom(Dimension(20.00, DimensionUnit::VP));
+    selectModelInstance.SetPadding(CalcDimension(20.00, DimensionUnit::VP));
+    selectModelInstance.SetPaddingLeft(CalcDimension(20.00, DimensionUnit::VP));
+    selectModelInstance.SetPaddingTop(CalcDimension(20.00, DimensionUnit::VP));
+    selectModelInstance.SetPaddingRight(CalcDimension(20.00, DimensionUnit::VP));
+    selectModelInstance.SetPaddingBottom(CalcDimension(20.00, DimensionUnit::VP));
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(select, nullptr);
     auto pattern = select->GetPattern<SelectPattern>();
@@ -321,15 +306,12 @@ HWTEST_F(SelectViewTestNg, SelectModel003, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
     SelectEvent eventOnSelect = [](int32_t intValue, const std::string& isSelect) {};
-    Dimension width = -20.0_vp;
-    Dimension height = -20.0_vp;
-    Dimension top = -20.0_vp;
-    Dimension bottom = -20.0_vp;
-    Dimension left = -20.0_vp;
-    Dimension right = -20.0_vp;
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    CalcDimension width = -20.0_vp;
+    CalcDimension height = -20.0_vp;
+    CalcDimension top = -20.0_vp;
+    CalcDimension bottom = -20.0_vp;
+    CalcDimension left = -20.0_vp;
+    CalcDimension right = -20.0_vp;
 
     std::vector<SelectParam> params = {{ OPTION_TEXT, FILE_SOURCE }};
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
@@ -338,15 +320,54 @@ HWTEST_F(SelectViewTestNg, SelectModel003, TestSize.Level1)
     selectModelInstance.SetHeight(height);
     selectModelInstance.SetSize(width, height);
     selectModelInstance.SetPaddings(top, bottom, left, right);
-    selectModelInstance.SetPadding(Dimension(20.00, DimensionUnit::VP));
-    selectModelInstance.SetPaddingLeft(Dimension(20.00, DimensionUnit::VP));
-    selectModelInstance.SetPaddingTop(Dimension(20.00, DimensionUnit::VP));
-    selectModelInstance.SetPaddingRight(Dimension(20.00, DimensionUnit::VP));
-    selectModelInstance.SetPaddingBottom(Dimension(20.00, DimensionUnit::VP));
+    selectModelInstance.SetPadding(CalcDimension(20.00, DimensionUnit::VP));
+    selectModelInstance.SetPaddingLeft(CalcDimension(20.00, DimensionUnit::VP));
+    selectModelInstance.SetPaddingTop(CalcDimension(20.00, DimensionUnit::VP));
+    selectModelInstance.SetPaddingRight(CalcDimension(20.00, DimensionUnit::VP));
+    selectModelInstance.SetPaddingBottom(CalcDimension(20.00, DimensionUnit::VP));
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(select, nullptr);
     auto pattern = select->GetPattern<SelectPattern>();
     ASSERT_NE(pattern, nullptr);
     ASSERT_NE(pattern->GetMenuNode(), nullptr);
+}
+/**
+ * @tc.name: SelectModel004
+ * @tc.desc: Test Select Model
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectViewTestNg, SelectModel004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectModelInstance.
+     */
+    SelectModelNG selectModelInstance;
+    SelectEvent eventOnSelect = [](int32_t intValue, const std::string& isSelect) {};
+    
+    std::vector<SelectParam> params = {{ OPTION_TEXT, FILE_SOURCE }};
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. initialize paddings.
+     * @tc.steps: the values of select which is setted successfully.
+     */
+    CalcDimension calcDimension(DEFAULT_STR);
+    CalcDimension width = -20.0_vp;
+    CalcDimension height = -20.0_vp;
+    selectModelInstance.SetSize(width, height);
+    selectModelInstance.SetPaddingLeft(CalcDimension(DEFAULT_STR));
+    selectModelInstance.SetPaddingTop(CalcDimension(DEFAULT_STR));
+    selectModelInstance.SetPaddingRight(CalcDimension(DEFAULT_STR));
+    selectModelInstance.SetPaddingBottom(CalcDimension(DEFAULT_STR));
+    selectModelInstance.SetPaddings(calcDimension, calcDimension, calcDimension, calcDimension);
+    selectModelInstance.SetPadding(calcDimension);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto menu = pattern->GetMenuNode();
+    ASSERT_NE(menu, nullptr);
+    EXPECT_EQ(width.Value(), 0.0);
+    EXPECT_EQ(height.Value(), 0.0);
 }
 } // namespace OHOS::Ace::NG

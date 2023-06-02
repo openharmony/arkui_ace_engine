@@ -606,8 +606,8 @@ HWTEST_F(MenuItemViewTestNg, MenuItemSetSelectedChangeEvent001, TestSize.Level1)
     bool isSelected = false;
     auto changeEvent = [&isSelected](bool select) { isSelected = select; };
     MenuItemProperties itemOption;
-    MneuItemModelInstance.SetSelectedChangeEvent(changeEvent);
     MneuItemModelInstance.Create(itemOption);
+    MneuItemModelInstance.SetSelectedChangeEvent(changeEvent);
     
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
@@ -615,6 +615,80 @@ HWTEST_F(MenuItemViewTestNg, MenuItemSetSelectedChangeEvent001, TestSize.Level1)
     auto itemProperty = itemNode->GetEventHub<NG::MenuItemEventHub>();
     ASSERT_NE(itemProperty, nullptr);
     EXPECT_TRUE(itemProperty->GetSelectedChangeEvent());
+}
+
+/**
+ * @tc.name: MenuItemViewTestNgSetLabelFontStyle001
+ * @tc.desc: Verify SetLabelFontStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemViewTestNg, MenuItemViewTestNgSetLabelFontStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create MenuItemModelNG object and set LabelFontStyle properties.
+     */
+    MenuItemModelNG MneuItemModelInstance;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    MenuItemProperties itemOption;
+    MneuItemModelInstance.Create(itemOption);
+    MneuItemModelInstance.SetLabelFontStyle(Ace::FontStyle::ITALIC);
+
+    /**
+     * @tc.steps: step2. get the frameNode, menuItemPattern and menuItemLayoutProperty.
+     * @tc.expected: step2. check whether the objects is available.
+     */
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(itemProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. get the labelFontStyle properties of menuItemLayoutProperty.
+     * @tc.expected: step3. check whether the labelFontStyle properties is is correct.
+     */
+    ASSERT_TRUE(itemProperty->GetLabelItalicFontStyle().has_value());
+    EXPECT_EQ(itemProperty->GetLabelItalicFontStyle().value(), Ace::FontStyle::ITALIC);
+}
+
+/**
+ * @tc.name: MenuItemViewTestNgSetFontStyle001
+ * @tc.desc: Verify SetFontStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemViewTestNg, MenuItemViewTestNgSetFontStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create MenuItemModelNG object and set FontStyle properties.
+     */
+    MenuItemModelNG MneuItemModelInstance;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    MenuItemProperties itemOption;
+    MneuItemModelInstance.Create(itemOption);
+    MneuItemModelInstance.SetFontStyle(Ace::FontStyle::ITALIC);
+
+    /**
+     * @tc.steps: step2. get the frameNode, menuItemPattern and menuItemLayoutProperty.
+     * @tc.expected: step2. check whether the objects is available.
+     */
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(itemProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. get the FontStyle properties of menuItemLayoutProperty.
+     * @tc.expected: step3. check whether the FontStyle properties is is correct.
+     */
+    ASSERT_TRUE(itemProperty->GetItalicFontStyle().has_value());
+    EXPECT_EQ(itemProperty->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
 }
 }
 } // namespace OHOS::Ace::NG

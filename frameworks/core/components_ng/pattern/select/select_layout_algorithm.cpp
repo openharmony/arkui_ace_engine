@@ -27,7 +27,15 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto layoutProps = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProps);
-    layoutProps->UpdateAlignment(Alignment::CENTER);
+    auto layoutConstraint = layoutProps->GetLayoutConstraint();
+    if (layoutConstraint.has_value()) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(theme);
+        layoutConstraint->minSize.SetHeight(static_cast<float>(theme->GetSelectMinHeight().ConvertToPx()));
+        layoutProps->UpdateLayoutConstraint(layoutConstraint.value());
+    }
     auto childConstraint = layoutProps->CreateChildConstraint();
 
     // Measure child row to get row height and width.
@@ -44,11 +52,6 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(rowGeometry);
     auto rowWidth = textSize.Width() + space + spinnerSize.Width();
     auto rowHeight = std::max(textSize.Height(), spinnerSize.Height());
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    rowHeight = std::max(rowHeight, static_cast<float>(theme->GetSelectMinHeight().ConvertToPx()));
     rowGeometry->SetFrameSize(SizeF(rowWidth, rowHeight));
 
     // Measure same as box, base on the child row.

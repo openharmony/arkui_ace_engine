@@ -131,6 +131,7 @@ public:
     static void JsOnMouse(const JSCallbackInfo& info);
     static void JsOnHover(const JSCallbackInfo& info);
     static void JsOnClick(const JSCallbackInfo& info);
+    static void JsClickEffect(const JSCallbackInfo& info);
     static void JsRestoreId(int32_t restoreId);
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
     static void JsHitTestBehavior(const JSCallbackInfo& info);
@@ -148,6 +149,7 @@ public:
     static bool ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result);
     static bool ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result);
+    static bool ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color& result);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result);
     static bool ParseJsColorStrategy(const JSRef<JSVal>& jsValue, ForegroundColorStrategy& strategy);
     static bool ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
@@ -238,6 +240,8 @@ public:
     static void JsTransitionPassThrough(const JSCallbackInfo& info);
     static void JsKeyboardShortcut(const JSCallbackInfo& info);
 
+    static void JsObscured(const JSCallbackInfo& info);
+
     static void JsAccessibilityGroup(bool accessible);
     static void JsAccessibilityText(const std::string& text);
     static void JsAccessibilityDescription(const std::string& description);
@@ -257,7 +261,7 @@ public:
     /**
      * Binds the native methods to the the js object
      */
-    static void JSBind();
+    static void JSBind(BindingTarget globalObj);
 
     static RefPtr<PipelineBase> GetPipelineContext()
     {

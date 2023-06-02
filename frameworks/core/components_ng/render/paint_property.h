@@ -18,6 +18,7 @@
 
 #include <memory>
 
+#include "base/json/json_util.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/property/property.h"
 

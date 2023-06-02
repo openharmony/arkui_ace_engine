@@ -60,6 +60,7 @@ public:
         ResetErrorText();
         ResetShowErrorText();
         ResetShowCounter();
+        ResetShowUnderline();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -74,6 +75,7 @@ public:
         json->Put("errorText", propErrorText_.value_or("").c_str());
         json->Put("showErrorText", propShowErrorText_.value_or(false));
         json->Put("showCounter", propShowCounter_.value_or(false));
+        json->Put("showUnderline", propShowUnderline_.value_or(false));
     }
 
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);
@@ -118,6 +120,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InputFilter, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowPasswordIcon, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowCounter, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowUnderline, bool, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(WidthAuto, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TypeChanged, bool, PROPERTY_UPDATE_MEASURE);
@@ -153,6 +156,7 @@ protected:
         value->propErrorText_ = CloneErrorText();
         value->propShowErrorText_ = CloneShowErrorText();
         value->propShowCounter_ = CloneShowCounter();
+        value->propShowUnderline_ = CloneShowUnderline();
     }
 
 private:

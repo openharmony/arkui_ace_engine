@@ -103,6 +103,8 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         Pattern::ToJsonValue(json);
+        json->Put("currentIndex", GetCurrentIndex());
+        json->Put("currentOffset", currentOffset_);
 
         if (indicatorIsBoolean_) {
             return;
@@ -114,8 +116,6 @@ public:
         } else {
             json->Put("indicator", GetDigitIndicatorStyle().c_str());
         }
-        json->Put("currentIndex", GetCurrentIndex());
-        json->Put("currentOffset", currentOffset_);
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override
@@ -215,6 +215,8 @@ public:
     }
 
     void UpdateCurrentOffset(float offset);
+
+    bool NeedMarkDirtyNodeRenderIndicator();
 
     int32_t TotalCount() const;
 
@@ -379,6 +381,8 @@ public:
     bool IsEnabled() const;
     void OnWindowShow() override;
     void OnWindowHide() override;
+    std::string ProvideRestoreInfo() override;
+    void OnRestoreInfo(const std::string& restoreInfo) override;
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -420,6 +424,7 @@ private:
     void FinishAnimation();
     void StopTranslateAnimation();
     void StopSpringAnimation();
+    void StopFadeAnimation();
 
     void StopAutoPlay();
     void StartAutoPlay();
@@ -443,7 +448,7 @@ private:
     float GetTranslateLength() const;
     void OnIndexChange() const;
     bool IsOutOfHotRegion(const PointF& dragPoint) const;
-    bool IsOutOfIndicatorZone(const PointF& dragPoint) const;
+    bool IsOutOfIndicatorZone(const PointF& dragPoint);
     void SaveDotIndicatorProperty(const RefPtr<FrameNode> &indicatorNode);
     void SaveDigitIndicatorProperty(const RefPtr<FrameNode> &indicatorNode);
     void PostTranslateTask(uint32_t delayTime);
@@ -457,6 +462,7 @@ private:
     WeakPtr<FocusHub> NextFocus(const RefPtr<FocusHub>& curFocusNode);
     int32_t ComputeLoadCount(int32_t cacheCount);
     void SetAccessibilityAction();
+    bool NeedStartAutoPlay() const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -483,7 +489,6 @@ private:
     std::set<int32_t> preItemRange_;
 
     PanDirection panDirection_;
-    float distance_ = 0.0f;
 
     float currentOffset_ = 0.0f;
     float turnPageRate_ = 0.0f;
@@ -493,6 +498,8 @@ private:
     bool isInit_ = true;
     bool hasVisibleChangeRegistered_ = false;
     bool isVisible_ = true;
+    bool isVisibleArea_ = true;
+    bool isWindowShow_ = true;
     bool IsCustomSize_ = false;
     bool indicatorIsBoolean_ = true;
 

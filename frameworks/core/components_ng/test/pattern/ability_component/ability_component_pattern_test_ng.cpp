@@ -16,6 +16,7 @@
 #define private public
 #include "gtest/gtest.h"
 
+#include "adapter/ohos/capability/window_connection_ng/window_extension_connection_ohos_ng.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
@@ -25,6 +26,8 @@
 #include "core/components_ng/pattern/ability_component/ability_component_model_ng.h"
 #include "core/components_ng/pattern/ability_component/ability_component_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -258,5 +261,68 @@ HWTEST_F(AbilityComponentPatternTestNg, AbilityComponentTest005, TestSize.Level1
     layoutConstraint.selfIdealSize.SetSize(IDEAL_SIZE);
     refreshSize = layoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
     EXPECT_EQ(refreshSize.value_or(SizeF(0.0f, 0.0f)), IDEAL_SIZE);
+}
+
+/**
+ * @tc.name: AbilityComponentTest006
+ * @tc.desc: Test algorithm interface of refresh.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityComponentPatternTestNg, AbilityComponentTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set pipeline and create and get frameNode of abilityComponent.
+     */
+    MockPipelineBase::SetUp();
+    AbilityComponentModelNG modelNG;
+    modelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<AbilityComponentPattern> pattern = frameNode->GetPattern<AbilityComponentPattern>();
+    EXPECT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. get rect witch will be set into pattern->lastRect_
+     */
+    auto host = pattern->GetHost();
+    auto size = host->GetGeometryNode()->GetFrameSize();
+    auto offset = host->GetTransformRelativeOffset();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    Rect rect = pipeline->GetDisplayWindowRectInfo();
+    rect = Rect(offset.GetX() + rect.Left(), offset.GetY() + rect.Top(), size.Width(), size.Height());
+
+    /**
+     * @tc.steps: step3. set hasConnectionToAbility_ with true and call UpdateWindowRect
+     * @tc.expected: expect rect is not set
+     */
+    pattern->hasConnectionToAbility_ = true;
+    pattern->UpdateWindowRect();
+    EXPECT_NE(pattern->lastRect_, rect);
+
+    /**
+     * @tc.steps: step3. set adapter_ and call OnModifyDone
+     * @tc.expected: expect rect is set
+     */
+    pattern->adapter_ = AceType::MakeRefPtr<WindowExtensionConnectionAdapterOhosNG>();
+    pattern->OnModifyDone();
+    EXPECT_EQ(pattern->lastRect_, rect);
+
+    /**
+     * @tc.steps: step3. set lastRect_ and call OnModifyDone
+     * @tc.expected: expect rect is reset
+     */
+    pattern->lastRect_.SetRect(1, 1, 1, 1);
+    pattern->OnModifyDone();
+    EXPECT_EQ(pattern->lastRect_, rect);
+
+    /**
+     * @tc.steps: step3. set lastRect_ with rect and call OnModifyDone
+     * @tc.expected: expect rect is set
+     */
+    pattern->lastRect_ = rect;
+    pattern->OnModifyDone();
+    EXPECT_EQ(pattern->lastRect_, rect);
+
+    MockPipelineBase::TearDown();
 }
 } // namespace OHOS::Ace::NG

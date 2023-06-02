@@ -48,6 +48,7 @@ void SheetPresentationPattern::OnModifyDone()
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     if (sheetStyle.showDragBar.value()) {
         auto dragBar = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
+        CHECK_NULL_VOID(dragBar);
         auto dragBarPattern = dragBar->GetPattern<SheetDragBarPattern>();
         CHECK_NULL_VOID(dragBarPattern);
         if (!dragBarPattern->HasClickArrowCallback()) {
@@ -65,9 +66,13 @@ void SheetPresentationPattern::InitPageHeight()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto pageNode = pipeline->GetStageManager()->GetLastPage();
+    auto stageManager = pipeline->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto pageNode = stageManager->GetLastPage();
     CHECK_NULL_VOID(pageNode);
-    pageHeight_ = pageNode->GetGeometryNode()->GetFrameSize().Height();
+    auto geometryNode = pageNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    pageHeight_ = geometryNode->GetFrameSize().Height();
 }
 
 bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
@@ -82,6 +87,7 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapp
     auto sheetLayoutProperty = sheetDragBar->GetLayoutProperty();
     CHECK_NULL_RETURN(sheetDragBar, false);
     sheetLayoutProperty->UpdateVisibility(showDragIndicator ? VisibleType::VISIBLE : VisibleType::GONE);
+    sheetDragBar->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return true;
 }
 

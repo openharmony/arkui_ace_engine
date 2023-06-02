@@ -47,13 +47,7 @@ BadgeModel* BadgeModel::GetInstance()
 namespace OHOS::Ace::Framework {
 void JSBadge::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-
     if (!info[0]->IsObject()) {
-        LOGE("The argv is wrong, it is supposed to be a object");
         return;
     }
 
@@ -63,9 +57,11 @@ void JSBadge::Create(const JSCallbackInfo& info)
 
 BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
 {
-    auto obj = JSRef<JSObject>::Cast(info[0]);
-
     BadgeParameters badgeParameters;
+    if (!info[0]->IsObject()) {
+        return badgeParameters;
+    }
+    auto obj = JSRef<JSObject>::Cast(info[0]);
     auto value = obj->GetProperty("value");
     if (!value->IsNull() && value->IsString()) {
         auto label = value->ToString();
@@ -166,10 +162,7 @@ void JSBadge::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSBadge>::StaticMethod("create", &JSBadge::Create, opt);
 
-    JSClass<JSBadge>::Inherit<JSContainerBase>();
-    JSClass<JSBadge>::Inherit<JSViewAbstract>();
-
-    JSClass<JSBadge>::Bind(globalObj);
+    JSClass<JSBadge>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSBadge::SetDefaultTheme(OHOS::Ace::RefPtr<OHOS::Ace::BadgeComponent>& badge)

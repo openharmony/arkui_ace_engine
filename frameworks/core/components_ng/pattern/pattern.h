@@ -54,6 +54,11 @@ public:
         return true;
     }
 
+    virtual bool DefaultSupportDrag()
+    {
+        return false;
+    }
+
     virtual std::optional<std::string> GetSurfaceNodeName() const
     {
         return std::nullopt;
@@ -338,6 +343,15 @@ public:
     }
 
     virtual void OnRestoreInfo(const std::string& restoreInfo) {}
+
+    virtual bool IsNeedAdjustByAspectRatio()
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto layoutProperty = host->GetLayoutProperty();
+        CHECK_NULL_RETURN(host, false);
+        return layoutProperty->HasAspectRatio();
+    }
 
 protected:
     virtual void OnAttachToFrameNode() {}

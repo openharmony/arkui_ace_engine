@@ -19,6 +19,14 @@ template("libace_static") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    if (current_os == "ohos") {
+      sanitize = {
+        integer_overflow = true
+        boundary_sanitize = true
+        debug = ace_sanitize_debug
+      }
+    }
+
     deps = [ "$ace_root/frameworks/base:ace_base_$platform" ]
 
     if (enable_ng_build) {
@@ -49,6 +57,7 @@ template("libace_static") {
         ]
       }
     }
+    configs = [ "$ace_root:ace_coverage_config" ]
     part_name = ace_engine_part
     subsystem_name = ace_engine_subsystem
   }
@@ -59,7 +68,7 @@ template("ace_bridge_engine") {
   forward_variables_from(invoker, "*")
 
   ohos_shared_library(target_name) {
-    configs = []
+    configs = [ "$ace_root:ace_coverage_config" ]
     deps = []
 
     assert(defined(platform) && platform == "ohos",

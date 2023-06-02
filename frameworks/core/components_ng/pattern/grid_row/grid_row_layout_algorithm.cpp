@@ -20,7 +20,9 @@
 
 #include "grid_row_event_hub.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/grid_col/grid_col_layout_property.h"
+#include "core/components_ng/pattern/grid_row/grid_row_layout_property.h"
 #include "core/components_v2/grid_layout/grid_container_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -229,6 +231,7 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     gridColChildrenRows_.clear();
     gridColChildrenOfOneRow_.clear();
     const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    const auto& hostLayoutProperty = layoutWrapper->GetHostNode()->GetLayoutProperty<GridRowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto maxSize = CreateIdealSize(layoutProperty->GetLayoutConstraint().value_or(LayoutConstraintF()),
         Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
@@ -236,10 +239,10 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto context = NG::PipelineContext::GetCurrentContext();
     auto sizeType = GridContainerUtils::ProcessGridSizeType(
         layoutProperty->GetBreakPointsValue(), Size(maxSize.Width(), maxSize.Height()));
-    if (layoutProperty->GetSizeTypeValue(V2::GridSizeType::UNDEFINED) != sizeType) {
+    if (hostLayoutProperty->GetSizeTypeValue(V2::GridSizeType::UNDEFINED) != sizeType) {
         auto sizeTypeString = ConvertSizeTypeToString(sizeType);
         layoutWrapper->GetHostNode()->GetEventHub<GridRowEventHub>()->FireChangeEvent(sizeTypeString);
-        layoutProperty->UpdateSizeType(sizeType);
+        hostLayoutProperty->UpdateSizeType(sizeType);
     }
     auto gutter = GridContainerUtils::ProcessGutter(sizeType, layoutProperty->GetGutterValue());
     gutterInDouble_ =

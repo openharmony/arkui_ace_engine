@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <memory>
 
+
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -127,6 +128,15 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     CHECK_NULL_VOID(dirty);
     taskScheduler_.AddDirtyLayoutNode(dirty);
     ForceLayoutForImplicitAnimation();
+#ifdef UICAST_COMPONENT_SUPPORTED
+    do {
+        auto container = Container::Current();
+        CHECK_NULL_BREAK(container);
+        auto distributedUI = container->GetDistributedUI();
+        CHECK_NULL_BREAK(distributedUI);
+        distributedUI->AddDirtyLayoutNode(dirty->GetId());
+    } while (false);
+#endif
     hasIdleTasks_ = true;
     RequestFrame();
 }
@@ -137,6 +147,15 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     CHECK_NULL_VOID(dirty);
     taskScheduler_.AddDirtyRenderNode(dirty);
     ForceRenderForImplicitAnimation();
+#ifdef UICAST_COMPONENT_SUPPORTED
+    do {
+        auto container = Container::Current();
+        CHECK_NULL_BREAK(container);
+        auto distributedUI = container->GetDistributedUI();
+        CHECK_NULL_BREAK(distributedUI);
+        distributedUI->AddDirtyRenderNode(dirty->GetId());
+    } while (false);
+#endif
     hasIdleTasks_ = true;
     RequestFrame();
 }
@@ -195,6 +214,17 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
                                                ? AceApplicationInfo::GetInstance().GetPackageName()
                                                : AceApplicationInfo::GetInstance().GetProcessName();
     window_->RecordFrameTime(nanoTimestamp, abilityName);
+
+#ifdef UICAST_COMPONENT_SUPPORTED
+    do {
+        auto container = Container::Current();
+        CHECK_NULL_BREAK(container);
+        auto distributedUI = container->GetDistributedUI();
+        CHECK_NULL_BREAK(distributedUI);
+        distributedUI->ApplyOneUpdate();
+    } while (false);
+#endif
+
     FlushAnimation(GetTimeFromExternalTimer());
     FlushTouchEvents();
     FlushBuild();
@@ -213,6 +243,17 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     taskScheduler_.FlushTask();
     taskScheduler_.FinishRecordFrameInfo();
     TryCallNextFrameLayoutCallback();
+
+#ifdef UICAST_COMPONENT_SUPPORTED
+    do {
+        auto container = Container::Current();
+        CHECK_NULL_BREAK(container);
+        auto distributedUI = container->GetDistributedUI();
+        CHECK_NULL_BREAK(distributedUI);
+        distributedUI->OnTreeUpdate();
+    } while (false);
+#endif
+
     bool hasAnimation = window_->FlushCustomAnimation(nanoTimestamp);
     if (hasAnimation) {
         RequestFrame();
@@ -627,6 +668,14 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         rootContext->SyncGeometryProperties(RawPtr(rootNode_->GetGeometryNode()));
         RequestFrame();
     }
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+    // For cross-platform build, flush tasks when first resize, speed up for fisrt frame.
+    if (window_ && rootNode_->GetRenderContext() && !NearZero(width) && !NearZero(height)) {
+        rootNode_->GetRenderContext()->SetBounds(0.0, 0.0, width, height);
+        window_->FlushTasks();
+        FlushVsync(GetTimeFromExternalTimer(), 0);
+    }
+#endif
 }
 
 void PipelineContext::SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback)
@@ -642,6 +691,43 @@ SafeAreaEdgeInserts PipelineContext::GetCurrentViewSafeArea() const
         return window_->GetCurrentViewSafeArea();
     }
     return {};
+}
+
+void PipelineContext::SetSystemSafeArea(const SafeAreaEdgeInserts& systemSafeArea)
+{
+    CHECK_NULL_VOID_NOLOG(window_);
+    window_->SetSystemSafeArea(systemSafeArea);
+}
+
+SafeAreaEdgeInserts PipelineContext::GetSystemSafeArea() const
+{
+    if (window_) {
+        return window_->GetSystemSafeArea();
+    }
+    return {};
+}
+
+void PipelineContext::SetCutoutSafeArea(const SafeAreaEdgeInserts& cutoutSafeArea)
+{
+    CHECK_NULL_VOID_NOLOG(window_);
+    window_->SetCutoutSafeArea(cutoutSafeArea);
+}
+
+SafeAreaEdgeInserts PipelineContext::GetCutoutSafeArea() const
+{
+    if (window_) {
+        return window_->GetCutoutSafeArea();
+    }
+    return {};
+}
+
+SafeAreaEdgeInserts PipelineContext::GetViewSafeArea() const
+{
+    SafeAreaEdgeInserts safeArea;
+    CHECK_NULL_RETURN_NOLOG(window_, safeArea);
+    auto systemAvoidArea = window_->GetSystemSafeArea();
+    auto cutoutAvoidArea = window_->GetCutoutSafeArea();
+    return systemAvoidArea.CombineSafeArea(cutoutAvoidArea);
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(
@@ -695,19 +781,24 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
 #endif
 }
 
-void PipelineContext::OnAvoidAreaChanged()
+void PipelineContext::ResetViewSafeArea()
 {
     auto stageManager = GetStageManager();
     CHECK_NULL_VOID_NOLOG(stageManager);
+    auto stageNode = stageManager->GetStageNode();
+    CHECK_NULL_VOID_NOLOG(stageNode);
     auto pageNode = stageManager->GetLastPage();
     CHECK_NULL_VOID_NOLOG(pageNode);
     auto layoutProperty = pageNode->GetLayoutProperty();
     const static int32_t PLATFORM_VERSION_TEN = 10;
-    if (GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && !GetIgnoreViewSafeArea() && layoutProperty) {
-        layoutProperty->SetSafeArea(GetCurrentViewSafeArea());
-        LOGI("OnAvoidAreaChanged viewSafeArea:%{public}s",
-            layoutProperty->GetSafeArea().ToString().c_str());
-        pageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && layoutProperty) {
+        if (!GetIgnoreViewSafeArea()) {
+            layoutProperty->SetSafeArea(GetViewSafeArea());
+            LOGI("ResetViewSafeArea viewSafeArea:%{public}s", layoutProperty->GetSafeArea().ToString().c_str());
+        } else {
+            layoutProperty->SetSafeArea({});
+        }
+        stageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -834,6 +925,20 @@ RefPtr<FrameNode> PipelineContext::GetNavDestinationBackButtonNode()
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 {
     CHECK_RUN_ON(UI);
+
+#ifdef UICAST_COMPONENT_SUPPORTED
+    do {
+        auto container = Container::Current();
+        CHECK_NULL_BREAK(container);
+        auto distributedUI = container->GetDistributedUI();
+        CHECK_NULL_BREAK(distributedUI);
+        if (distributedUI->IsSinkMode()) {
+            distributedUI->BypassEvent(point, isSubPipe);
+            return;
+        }
+    } while (false);
+#endif
+
     HandleEtsCardTouchEvent(point);
     if (uiExtensionCallback_) {
         uiExtensionCallback_(point);
@@ -844,14 +949,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         scalePoint.type);
     eventManager_->SetInstanceId(GetInstanceId());
     if (scalePoint.type == TouchType::DOWN) {
-        isNeedShowFocus_ = false;
-        CHECK_NULL_VOID_NOLOG(rootNode_);
-        auto rootFocusHub = rootNode_->GetFocusHub();
-        if (rootFocusHub) {
-            rootFocusHub->ClearAllFocusState();
-        }
-
+        // Set focus state inactive while touch down event received。
+        SetIsFocusActive(false);
         LOGD("receive touch down event, first use touch test to collect touch event target");
+        // Remove the select overlay node when touched down.
+        auto rootOffset = GetRootRect().GetOffset();
+        eventManager_->HandleGlobalEventNG(scalePoint, selectOverlayManager_, rootOffset);
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
@@ -1035,6 +1138,11 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
 {
     CHECK_RUN_ON(UI);
 
+    if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
+        // Mouse right button press event set focus inactive here.
+        // Mouse left button press event will set focus inactive in touch process.
+        SetIsFocusActive(false);
+    }
     if ((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
             event.action == MouseAction::MOVE) &&
         (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) {
@@ -1079,16 +1187,10 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     if (event.action == KeyAction::DOWN) {
         eventManager_->DispatchKeyboardShortcut(event);
     }
-    // Need update while key tab pressed
-    if (!isNeedShowFocus_ && event.action == KeyAction::DOWN &&
-        (event.IsKey({ KeyCode::KEY_TAB }) || event.IsDirectionalKey())) {
-        isNeedShowFocus_ = true;
-        auto rootFocusHub = rootNode_->GetFocusHub();
-        if (rootFocusHub) {
-            rootFocusHub->PaintAllFocusState();
-        }
-        return true;
-    }
+    // TAB key set focus state from inactive to active.
+    // If return success. This tab key will just trigger onKeyEvent process.
+    isTabJustTriggerOnKeyEvent_ =
+        (event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB }) && SetIsFocusActive(true));
     auto lastPage = stageManager_->GetLastPage();
     auto mainNode = lastPage ? lastPage : rootNode_;
     CHECK_NULL_RETURN(mainNode, false);
@@ -1540,6 +1642,12 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
     manager->GetExtraInfoFromClipboard(extraInfo);
 #endif // ENABLE_DRAG_FRAMEWORK
     if (action == DragEventAction::DRAG_EVENT_END) {
+#ifdef ENABLE_DRAG_FRAMEWORK
+    if (manager->GetExtraInfo().empty()) {
+        manager->GetExtraInfoFromClipboard(extraInfo);
+        manager->SetExtraInfo(extraInfo);
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
         manager->OnDragEnd(static_cast<float>(x), static_cast<float>(y), extraInfo);
         manager->RestoreClipboardData();
         return;
@@ -1609,7 +1717,7 @@ void PipelineContext::RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo)
         LOGW("restore nodeInfo is invalid");
     }
     auto child = nodeInfo->GetChild();
-    while (child->IsObject()) {
+    while (child->IsValid()) {
         auto key = child->GetKey();
         auto value = child->GetString();
         restoreNodeInfo_.try_emplace(StringUtils::StringToInt(key), value);
@@ -1643,15 +1751,15 @@ void PipelineContext::StoreNode(int32_t restoreId, const WeakPtr<FrameNode>& nod
     }
 }
 
-std::string PipelineContext::GetRestoreInfo(int32_t restoreId)
+bool PipelineContext::GetRestoreInfo(int32_t restoreId, std::string& restoreInfo)
 {
     auto iter = restoreNodeInfo_.find(restoreId);
     if (iter != restoreNodeInfo_.end()) {
-        std::string restoreNodeInfo = iter->second;
+        restoreInfo = iter->second;
         restoreNodeInfo_.erase(iter);
-        return restoreNodeInfo;
+        return true;
     }
-    return "";
+    return false;
 }
 
 } // namespace OHOS::Ace::NG

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_MEDIA_PLAYER_CALLBACK_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_MEDIA_PLAYER_CALLBACK_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_VIDEO_PLAYER_CALLBACK_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_VIDEO_PLAYER_CALLBACK_H
 
 #include "base/log/log.h"
 
@@ -76,16 +76,6 @@ public:
 
     ~MediaPlayerCallback() = default;
 
-    // Below api9
-    void OnError(Media::PlayerErrorType errorType, int32_t errorCode) override
-    {
-        LOGE("OnError callback, errorType: %{public}d, errorCode: %{public}d", errorType, errorCode);
-        ContainerScope scope(instanceId_);
-        if (errorEvent_) {
-            errorEvent_();
-        }
-    }
-
     // Above api9
     void OnError(int32_t errorCode, const std::string &errorMsg) override
     {
@@ -98,40 +88,42 @@ public:
 
     void OnInfo(Media::PlayerOnInfoType type, int32_t extra, const Media::Format &InfoBody = {}) override
     {
-        LOGI("OnInfo type: %{public}d, extra: %{public}d", type, extra);
+        LOGD("video OnInfo type: %{public}d, extra: %{public}d", type, extra);
         ContainerScope scope(instanceId_);
         switch (type) {
             case OHOS::Media::INFO_TYPE_SEEKDONE:
-                LOGI("OnSeekDone callback");
+                LOGD("video OnSeekDone callback");
                 if (positionUpdatedEvent_) {
                     positionUpdatedEvent_(extra / MILLISECONDS_TO_SECONDS);
                 }
                 break;
             case OHOS::Media::INFO_TYPE_EOS:
-                LOGI("OnEndOfStream callback");
+                LOGD("video OnEndOfStream callback");
                 if (endOfStreamEvent_) {
                     endOfStreamEvent_();
                 }
                 break;
             case OHOS::Media::INFO_TYPE_STATE_CHANGE:
-                LOGI("OnStateChanged callback");
+                LOGD("video OnStateChanged callback");
                 PrintState(static_cast<OHOS::Media::PlayerStates>(extra));
                 if (stateChangedEvent_) {
                     stateChangedEvent_(ConvertToPlaybackStatus(extra));
                 }
                 break;
             case OHOS::Media::INFO_TYPE_POSITION_UPDATE:
+                LOGD("video INFO_TYPE_POSITION_UPDATE callback");
                 if (positionUpdatedEvent_) {
                     positionUpdatedEvent_(extra / MILLISECONDS_TO_SECONDS);
                 }
                 break;
             case OHOS::Media::INFO_TYPE_RESOLUTION_CHANGE:
+                LOGD("video INFO_TYPE_RESOLUTION_CHANGE callback");
                 if (resolutionChangeEvent_) {
                     resolutionChangeEvent_();
                 }
                 break;
             case OHOS::Media::INFO_TYPE_MESSAGE:
-                LOGI("OnMessage callback type: %{public}d", extra);
+                LOGD("OnMessage callback type: %{public}d", extra);
                 break;
             default:
                 break;
@@ -195,4 +187,4 @@ private:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_MEDIA_PLAYER_CALLBACK_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_VIDEO_PLAYER_CALLBACK_H

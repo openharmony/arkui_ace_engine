@@ -66,6 +66,7 @@ base_output_path = get_label_info(":gen_js_proxyclass", "target_out_dir")
 jsproxyclass_obj_path = base_output_path + "/js_proxy_class.o"
 jsenumstyle_obj_path = base_output_path + "/js_enum_style.o"
 jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.o"
+jsuicontext_obj_path = base_output_path + "/jsUIContext.o"
 
 gen_obj("js_proxyclass") {
   input = "engine/stateMgmt.js"
@@ -95,6 +96,15 @@ if (!is_cross_platform_build) {
     output = jsmocksystemplugin_obj_path
     snapshot_dep = [ "//ide/tools/previewer/automock:gen_snapshot_jsmock" ]
   }
+}
+
+gen_obj("js_uicontext") {
+  input = "engine/jsUIContext.js"
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
+    jsuicontext_obj_path = base_output_path + "/jsUIContext.c"
+  }
+  output = jsuicontext_obj_path
+  snapshot_dep = []
 }
 
 # build declarative javascript engine source
@@ -230,10 +240,14 @@ template("declarative_js_engine") {
       "jsview/js_rendering_context_settings.cpp",
       "jsview/js_row.cpp",
       "jsview/js_row_split.cpp",
+      "jsview/js_scope_util.cpp",
       "jsview/js_scroll.cpp",
       "jsview/js_scroller.cpp",
       "jsview/js_search.cpp",
+      "jsview/js_sec_button_base.cpp",
       "jsview/js_sec_location_button.cpp",
+      "jsview/js_sec_paste_button.cpp",
+      "jsview/js_sec_save_button.cpp",
       "jsview/js_select.cpp",
       "jsview/js_shape.cpp",
       "jsview/js_shape_abstract.cpp",
@@ -274,18 +288,21 @@ template("declarative_js_engine") {
 
       # Models implemenations for classic fw
       "jsview/models/action_sheet_model_impl.cpp",
+      "jsview/models/alert_dialog_model_impl.cpp",
       "jsview/models/animator_model_impl.cpp",
       "jsview/models/badge_model_impl.cpp",
       "jsview/models/blank_model_impl.cpp",
       "jsview/models/button_model_impl.cpp",
       "jsview/models/calendar_controller_model_impl.cpp",
       "jsview/models/calendar_model_impl.cpp",
+      "jsview/models/canvas_renderer_model_impl.cpp",
       "jsview/models/checkbox_model_impl.cpp",
       "jsview/models/checkboxgroup_model_impl.cpp",
       "jsview/models/circle_model_impl.cpp",
       "jsview/models/column_model_impl.cpp",
       "jsview/models/common_view_model_impl.cpp",
       "jsview/models/counter_model_impl.cpp",
+      "jsview/models/custom_dialog_controller_model_impl.cpp",
       "jsview/models/data_panel_model_impl.cpp",
       "jsview/models/divider_model_impl.cpp",
       "jsview/models/ellipse_model_impl.cpp",
@@ -313,7 +330,9 @@ template("declarative_js_engine") {
       "jsview/models/marquee_model_impl.cpp",
       "jsview/models/menu_item_model_impl.cpp",
       "jsview/models/menu_model_impl.cpp",
+      "jsview/models/navigation_model_impl.cpp",
       "jsview/models/navigator_model_impl.cpp",
+      "jsview/models/offscreen_context_model_impl.cpp",
       "jsview/models/page_transition_model_impl.cpp",
       "jsview/models/path_model_impl.cpp",
       "jsview/models/patternlock_model_impl.cpp",
@@ -349,6 +368,7 @@ template("declarative_js_engine") {
       "jsview/models/timepicker_model_impl.cpp",
       "jsview/models/toggle_model_impl.cpp",
       "jsview/models/view_abstract_model_impl.cpp",
+      "jsview/models/view_context_model_impl.cpp",
       "jsview/models/view_full_update_model_impl.cpp",
       "jsview/models/view_partial_update_model_impl.cpp",
       "jsview/models/water_flow_item_model_impl.cpp",
@@ -422,6 +442,8 @@ template("declarative_js_engine") {
         "jsview/js_richtext.cpp",
         "jsview/js_web.cpp",
         "jsview/js_web_controller.cpp",
+        "jsview/models/richtext_model_impl.cpp",
+        "jsview/models/web_model_impl.cpp",
       ]
     }
 
@@ -481,6 +503,7 @@ template("declarative_js_engine") {
     deps += [
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
+      ":gen_obj_src_js_uicontext",
     ]
 
     deps += uicast_configs.uicast_root_deps
@@ -520,9 +543,9 @@ template("declarative_js_engine") {
       if (defined(config.window_scene_support) && config.window_scene_support) {
         sources += [
           "jsview/js_ui_extension.cpp",
-          "jsview/window_scene/js_host_window_scene.cpp",
           "jsview/window_scene/js_root_scene.cpp",
           "jsview/window_scene/js_screen.cpp",
+          "jsview/window_scene/js_window_scene.cpp",
         ]
       }
     }
@@ -578,6 +601,7 @@ template("declarative_js_engine_ng") {
       "sharedata/js_share_data.cpp",
 
       # jsviews
+      "jsview/js_button.cpp",
       "jsview/js_column.cpp",
       "jsview/js_container_base.cpp",
       "jsview/js_counter.cpp",
@@ -598,7 +622,9 @@ template("declarative_js_engine_ng") {
       "jsview/js_navigator.cpp",
       "jsview/js_rating.cpp",
       "jsview/js_row.cpp",
+      "jsview/js_scope_util.cpp",
       "jsview/js_scroll.cpp",
+      "jsview/js_scroller.cpp",
       "jsview/js_span.cpp",
       "jsview/js_stack.cpp",
       "jsview/js_swiper.cpp",
@@ -607,9 +633,11 @@ template("declarative_js_engine_ng") {
       "jsview/js_tabs_controller.cpp",
       "jsview/js_text.cpp",
       "jsview/js_toggle.cpp",
+      "jsview/js_utils.cpp",
       "jsview/js_view.cpp",
       "jsview/js_view_abstract.cpp",
       "jsview/js_view_context.cpp",
+      "jsview/scroll_bar/js_scroll_bar.cpp",
     ]
 
     sources += [
@@ -650,6 +678,7 @@ template("declarative_js_engine_ng") {
     deps += [
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
+      ":gen_obj_src_js_uicontext",
     ]
 
     if (defined(config.enable_drag_framework) && config.enable_drag_framework) {

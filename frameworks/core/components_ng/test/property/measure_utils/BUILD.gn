@@ -19,8 +19,10 @@ ohos_unittest("measure_utils_test_ng") {
   sources = [
     "$ace_root/frameworks/base/geometry/dimension.cpp",
     "$ace_root/frameworks/base/utils/string_expression.cpp",
+    "$ace_root/frameworks/core/components/common/properties/color.cpp",
 
     # components_ng
+    "$ace_root/frameworks/core/components_ng/property/border_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",
     "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",
 
@@ -32,6 +34,7 @@ ohos_unittest("measure_utils_test_ng") {
   ]
 
   deps = [
+    "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/test/unittest:ace_unittest_log",
     "//third_party/googletest:gmock_main",
   ]

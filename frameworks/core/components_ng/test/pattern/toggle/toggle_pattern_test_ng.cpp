@@ -221,7 +221,9 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest004, TestSize.Level1)
     toggleModelNG.SetHeight(TOGGLE_HEIGH);
     toggleModelNG.SetBackgroundColor(BACKGROUND_COLOR);
     auto padding = CreatePadding(ZERO);
-    toggleModelNG.SetPadding(padding);
+    NG::PaddingProperty newPadding(
+        { NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp) });
+    toggleModelNG.SetPadding(padding, newPadding);
     auto buttonFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(buttonFrameNode, nullptr);
     EXPECT_EQ(buttonFrameNode->GetTag(), V2::TOGGLE_ETS_TAG);

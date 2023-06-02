@@ -87,7 +87,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSSearch>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSSearch>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
-    JSClass<JSSearch>::StaticMethod("requestKeyboardOnFocus", &JSSearch::RequestKeyboardOnFocus);
+    JSClass<JSSearch>::StaticMethod("requestKeyboardOnFocus", &JSSearch::SetEnableKeyboardOnFocus);
     JSClass<JSSearch>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSSearch>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSearch>::StaticMethod("onCopy", &JSSearch::SetOnCopy);
@@ -95,8 +95,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("onPaste", &JSSearch::SetOnPaste);
     JSClass<JSSearch>::StaticMethod("copyOption", &JSSearch::SetCopyOption);
     JSClass<JSSearch>::StaticMethod("textMenuOptions", &JSSearch::JsMenuOptionsExtension);
-    JSClass<JSSearch>::Inherit<JSViewAbstract>();
-    JSClass<JSSearch>::Bind(globalObj);
+    JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -126,15 +125,18 @@ void JSSearch::Create(const JSCallbackInfo& info)
         }
         std::string text;
         key = "";
-        if (param->GetProperty("value")->IsObject()) {
-            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(param->GetProperty("value"));
+        JSRef<JSVal> textValue = param->GetProperty("value");
+        if (textValue->IsObject()) {
+            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(textValue);
             changeEventVal = valueObj->GetProperty("changeEvent");
-            auto valueProperty = valueObj->GetProperty("value");
-            if (ParseJsString(valueProperty, text)) {
+            if (changeEventVal->IsFunction()) {
+                textValue = valueObj->GetProperty("value");
+            }
+            if (ParseJsString(textValue, text)) {
                 key = text;
             }
         } else {
-            if (ParseJsString(param->GetProperty("value"), text)) {
+            if (ParseJsString(textValue, text)) {
                 key = text;
             }
         }
@@ -158,41 +160,32 @@ void JSSearch::Create(const JSCallbackInfo& info)
     }
 }
 
-void JSSearch::RequestKeyboardOnFocus(bool needToRequest)
+void JSSearch::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
 {
-    SearchModel::GetInstance()->RequestKeyboardOnFocus(needToRequest);
+    if (info.Length() < 1) {
+        LOGW("EnableKeyboardOnFocus should have at least 1 param");
+        return;
+    }
+    if (info[0]->IsUndefined() || !info[0]->IsBoolean()) {
+        LOGI("The info of SetEnableKeyboardOnFocus is not correct, using default");
+        SearchModel::GetInstance()->RequestKeyboardOnFocus(true);
+        return;
+    }
+    SearchModel::GetInstance()->RequestKeyboardOnFocus(info[0]->ToBoolean());
 }
 
 void JSSearch::SetSearchButton(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGI("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-
     auto theme = GetTheme<SearchTheme>();
     CHECK_NULL_VOID_NOLOG(theme);
     std::string buttonValue;
-    if (info.Length() == 1) {
-        if (!ParseJsString(info[0], buttonValue)) {
-            LOGI("buttonValue is null");
-            return;
-        }
-        SearchModel::GetInstance()->SetSearchButton(buttonValue);
-        SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetFontSize());
-        SearchModel::GetInstance()->SetSearchButtonFontColor(theme->GetSearchButtonTextColor());
-    }
-
-    int32_t expect_argvs = 2;
-    if (info.Length() != expect_argvs) {
-        return;
-    }
-
     if (!ParseJsString(info[0], buttonValue)) {
-        LOGI("buttonValue is null");
         return;
     }
     SearchModel::GetInstance()->SetSearchButton(buttonValue);
+    SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetFontSize());
+    SearchModel::GetInstance()->SetSearchButtonFontColor(theme->GetSearchButtonTextColor());
+
     if (info[1]->IsObject()) {
         auto param = JSRef<JSObject>::Cast(info[1]);
 
@@ -300,13 +293,19 @@ void JSSearch::SetCancelButton(const JSCallbackInfo& info)
 
 void JSSearch::SetIconStyle(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsObject()) {
+        return;
+    }
     auto param = JSRef<JSObject>::Cast(info[0]);
-    auto theme = GetTheme<SearchTheme>();
-    auto iconParam = JSRef<JSObject>::Cast(param->GetProperty("icon"));
-
+    auto iconJsVal = param->GetProperty("icon");
+    if (!iconJsVal->IsObject()) {
+        return;
+    }
+    auto iconParam = JSRef<JSObject>::Cast(iconJsVal);
     // set icon size
     CalcDimension iconSize;
     auto iconSizeProp = iconParam->GetProperty("size");
+    auto theme = GetTheme<SearchTheme>();
     if (!iconSizeProp->IsUndefined() && !iconSizeProp->IsNull() && ParseJsDimensionVp(iconSizeProp, iconSize)) {
         if (LessNotEqual(iconSize.Value(), 0.0)) {
             iconSize = theme->GetIconHeight();
@@ -335,10 +334,6 @@ void JSSearch::SetIconStyle(const JSCallbackInfo& info)
 
 void JSSearch::SetTextColor(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
     auto theme = GetTheme<SearchTheme>();
     CHECK_NULL_VOID_NOLOG(theme);
 
@@ -392,7 +387,7 @@ void JSSearch::SetPlaceholderColor(const JSCallbackInfo& info)
 
 void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
+    if (!info[0]->IsObject()) {
         return;
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
@@ -404,7 +399,6 @@ void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
         CalcDimension size;
         if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
             font.fontSize = Dimension(-1);
-            LOGW("Parse to dimension FP failed.");
         } else {
             font.fontSize = size;
         }
@@ -449,7 +443,6 @@ void JSSearch::SetTextFont(const JSCallbackInfo& info)
         CalcDimension size;
         if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
             font.fontSize = Dimension(-1);
-            LOGW("Parse to dimension FP failed.");
         } else {
             font.fontSize = size;
         }
@@ -575,10 +568,6 @@ void JSSearch::OnChange(const JSCallbackInfo& info)
 void JSSearch::SetHeight(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsHeight(info);
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         LOGE("The arg is wrong, it is supposed to be a number arguments");

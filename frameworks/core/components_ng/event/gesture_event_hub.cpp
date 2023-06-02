@@ -354,8 +354,11 @@ bool GestureEventHub::IsAllowedDrag(RefPtr<EventHub> eventHub)
 {
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_RETURN(pattern, false);
+
     if (frameNode->IsDraggable()) {
-        if (!eventHub->HasOnDragStart()) {
+        if (!eventHub->HasOnDragStart() && !pattern->DefaultSupportDrag()) {
             LOGE("Default support for drag and drop, but there is no onDragStart function.");
             return false;
         }
@@ -364,7 +367,7 @@ bool GestureEventHub::IsAllowedDrag(RefPtr<EventHub> eventHub)
             LOGE("User settings cannot be dragged");
             return false;
         }
-        if (!eventHub->HasOnDragStart()) {
+        if (!eventHub->HasOnDragStart() && !pattern->DefaultSupportDrag()) {
             LOGE("The default does not support drag and drop, and there is no onDragStart function.");
             return false;
         }
@@ -372,11 +375,40 @@ bool GestureEventHub::IsAllowedDrag(RefPtr<EventHub> eventHub)
     return true;
 }
 
+void GestureEventHub::StartDragTaskForWeb()
+{
+    auto startTime = std::chrono::high_resolution_clock::now();
+    auto timeElapsed = startTime - gestureInfoForWeb_.GetTimeStamp();
+    auto timeElapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(timeElapsed);
+    // 100 : 100ms
+    if (timeElapsedMs.count() > 100) {
+        LOGW("start drag task for web failed, not received this drag action gesture info");
+        return;
+    }
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskScheduler = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskScheduler);
+
+    taskScheduler->PostTask(
+        [weak = WeakClaim(this)]() {
+            LOGI("web drag task start");
+            auto gestureHub = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(gestureHub);
+            auto dragEventActuator = gestureHub->dragEventActuator_;
+            CHECK_NULL_VOID_NOLOG(dragEventActuator);
+            dragEventActuator->StartDragTaskForWeb(gestureHub->gestureInfoForWeb_);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
 void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 {
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
     if (!IsAllowedDrag(eventHub)) {
+        gestureInfoForWeb_ = info;
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -399,7 +431,12 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         return;
     }
     std::string udKey;
+    int32_t recordsSize = 1;
     auto unifiedData = event->GetData();
+    if (unifiedData) {
+        auto records = unifiedData->GetRecords();
+        recordsSize = records.size() > 1 ? records.size() : 1;
+    }
     SetDragData(unifiedData, udKey);
     auto udmfClient = UDMF::UdmfClient::GetInstance();
     UDMF::Summary summary;
@@ -418,20 +455,14 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     if (pixelMap == nullptr) {
         pixelMap = pixelMap_->GetPixelMapSharedPtr();
     }
-    if (pixelMap->GetWidth() > Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH ||
-        pixelMap->GetHeight() > Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) {
-            float scaleWidth = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH) / pixelMap->GetWidth();
-            float scaleHeight = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) / pixelMap->GetHeight();
-            float scale = std::min(scaleWidth, scaleHeight);
-            pixelMap->scale(scale, scale);
-    } else if (!GetTextDraggable()) {
+    if (!GetTextDraggable()) {
         pixelMap->scale(PIXELMAP_DRAG_SCALE, PIXELMAP_DRAG_SCALE);
     }
     uint32_t width = pixelMap->GetWidth();
     uint32_t height = pixelMap->GetHeight();
     DragData dragData {{pixelMap, width * PIXELMAP_WIDTH_RATE, height * PIXELMAP_HEIGHT_RATE}, {}, udKey,
-        static_cast<int32_t>(info.GetSourceDevice()), 1, info.GetPointerId(), info.GetScreenLocation().GetX(),
-        info.GetScreenLocation().GetY(), info.GetDeviceId(), true};
+        static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(),
+        info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY(), info.GetDeviceId(), true};
     ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData, GetDragCallback());
     if (ret != 0) {
         LOGE("InteractionManager: drag start error");
@@ -464,6 +495,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 
 void GestureEventHub::HandleOnDragUpdate(const GestureEvent& info)
 {
+    gestureInfoForWeb_ = info;
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->OnDragMove(info);
 }

@@ -14,6 +14,7 @@
  */
 
 #include <utility>
+
 #include "base/geometry/ng/size_t.h"
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
@@ -112,6 +113,8 @@
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_search.h"
 #include "bridge/declarative_frontend/jsview/js_sec_location_button.h"
+#include "bridge/declarative_frontend/jsview/js_sec_paste_button.h"
+#include "bridge/declarative_frontend/jsview/js_sec_save_button.h"
 #include "bridge/declarative_frontend/jsview/js_select.h"
 #include "bridge/declarative_frontend/jsview/js_shape.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
@@ -144,6 +147,7 @@
 #include "bridge/declarative_frontend/jsview/js_water_flow_item.h"
 #include "bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
+#include "bridge/declarative_frontend/jsview/js_scope_util.h"
 #include "bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -205,9 +209,9 @@
 #endif
 
 #if defined(WINDOW_SCENE_SUPPORTED)
-#include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_host_window_scene.h"
 #include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_root_scene.h"
 #include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_screen.h"
+#include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_window_scene.h"
 #endif
 
 namespace OHOS::Ace::Framework {
@@ -277,7 +281,11 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
         CHECK_NULL_VOID(pagePattern);
         // Register RenderDone callback to jsView so that js view can notify pagePattern the render function has been
         // finish. The onPageShow life cycle must be after the InitialRender function execution.
-        view->RegisterRenderDoneCallback([pagePattern]() { pagePattern->MarkRenderDone(); });
+        view->RegisterRenderDoneCallback([weak = AceType::WeakClaim(AceType::RawPtr(pagePattern))]() {
+            auto pagePattern = weak.Upgrade();
+            CHECK_NULL_VOID(pagePattern);
+            pagePattern->MarkRenderDone();
+        });
         pagePattern->SetOnPageShow([weak = Referenced::WeakClaim(view)]() {
             auto view = weak.Upgrade();
             if (view) {
@@ -427,6 +435,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "CanvasGradient", JSCanvasGradient::JSBind },
     { "ImageBitmap", JSRenderImage::JSBind },
     { "ImageData", JSCanvasImageData::JSBind },
+    { "ImageAnimator", JSImageAnimator::JSBind },
     { "Path2D", JSPath2D::JSBind },
     { "RenderingContextSettings", JSRenderingContextSettings::JSBind },
     { "Sheet", JSSheet::JSBind },
@@ -516,6 +525,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "UIExtensionComponent", JSUIExtension::JSBind },
 #endif
     { "SecLocationButton", JSSecLocationButton::JSBind },
+    { "SecPasteButton", JSSecPasteButton::JSBind },
+    { "SecSaveButton", JSSecSaveButton::JSBind },
 #ifdef ABILITY_COMPONENT_SUPPORTED
     { "AbilityComponent", JSAbilityComponent::JSBind },
 #endif
@@ -628,9 +639,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Model", JSSceneView::JSBind },
 #endif
 #if defined(WINDOW_SCENE_SUPPORTED)
-    { "HostWindowScene", JSHostWindowScene::JSBind },
     { "RootScene", JSRootScene::JSBind },
     { "Screen", JSScreen::JSBind },
+    { "WindowScene", JSWindowScene::JSBind },
 #endif
 };
 
@@ -753,9 +764,9 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules)
 
 void JsBindFormViews(BindingTarget globalObj)
 {
-    JSViewAbstract::JSBind();
-    JSContainerBase::JSBind();
-    JSShapeAbstract::JSBind();
+    JSViewAbstract::JSBind(globalObj);
+    JSContainerBase::JSBind(globalObj);
+    JSShapeAbstract::JSBind(globalObj);
     JSView::JSBind(globalObj);
     JSLocalStorage::JSBind(globalObj);
 
@@ -782,9 +793,9 @@ void JsBindFormViews(BindingTarget globalObj)
 
 void JsBindViews(BindingTarget globalObj)
 {
-    JSViewAbstract::JSBind();
-    JSContainerBase::JSBind();
-    JSShapeAbstract::JSBind();
+    JSViewAbstract::JSBind(globalObj);
+    JSContainerBase::JSBind(globalObj);
+    JSShapeAbstract::JSBind(globalObj);
     JSView::JSBind(globalObj);
     JSLocalStorage::JSBind(globalObj);
 
@@ -803,6 +814,7 @@ void JsBindViews(BindingTarget globalObj)
     JSScroller::JSBind(globalObj);
 
     JSProfiler::JSBind(globalObj);
+    JSScopeUtil::JSBind(globalObj);
 
     auto delegate = JsGetFrontendDelegate();
     std::string jsModules;

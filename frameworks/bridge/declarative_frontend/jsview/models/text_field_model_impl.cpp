@@ -32,6 +32,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
 constexpr Dimension INNER_PADDING = 0.0_vp;
+constexpr uint32_t TEXTAREA_MAXLENGTH_VALUE_DEFAULT = std::numeric_limits<uint32_t>::max();
 } // namespace
 
 RefPtr<TextFieldControllerBase> TextFieldModelImpl::CreateTextInput(
@@ -65,6 +66,95 @@ RefPtr<TextFieldControllerBase> TextFieldModelImpl::CreateTextInput(
     }
 
     return textInputComponent->GetTextFieldController();
+}
+
+void InitTextAreaDefaultStyle()
+{
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto textAreaComponent = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+    if (!boxComponent || !textAreaComponent || !theme) {
+        LOGI("boxComponent or textAreaComponent or theme is null");
+        return;
+    }
+
+    textAreaComponent->SetTextMaxLines(TEXTAREA_MAXLENGTH_VALUE_DEFAULT);
+    textAreaComponent->SetCursorColor(theme->GetCursorColor());
+    textAreaComponent->SetPlaceholderColor(theme->GetPlaceholderColor());
+    textAreaComponent->SetFocusBgColor(theme->GetFocusBgColor());
+    textAreaComponent->SetFocusPlaceholderColor(theme->GetFocusPlaceholderColor());
+    textAreaComponent->SetFocusTextColor(theme->GetFocusTextColor());
+    textAreaComponent->SetBgColor(theme->GetBgColor());
+    textAreaComponent->SetTextColor(theme->GetTextColor());
+    textAreaComponent->SetSelectedColor(theme->GetSelectedColor());
+    textAreaComponent->SetHoverColor(theme->GetHoverColor());
+    textAreaComponent->SetPressColor(theme->GetPressColor());
+
+    TextStyle textStyle = textAreaComponent->GetTextStyle();
+    textStyle.SetTextColor(theme->GetTextColor());
+    textStyle.SetFontSize(theme->GetFontSize());
+    textStyle.SetFontWeight(theme->GetFontWeight());
+    textStyle.SetFontFamilies(INPUT_FONT_FAMILY_VALUE);
+    textAreaComponent->SetTextStyle(textStyle);
+    textAreaComponent->SetEditingStyle(textStyle);
+    textAreaComponent->SetPlaceHoldStyle(textStyle);
+
+    textAreaComponent->SetCountTextStyle(theme->GetCountTextStyle());
+    textAreaComponent->SetOverCountStyle(theme->GetOverCountStyle());
+    textAreaComponent->SetCountTextStyleOuter(theme->GetCountTextStyleOuter());
+    textAreaComponent->SetOverCountStyleOuter(theme->GetOverCountStyleOuter());
+    textAreaComponent->SetErrorBorderWidth(theme->GetErrorBorderWidth());
+    textAreaComponent->SetErrorBorderColor(theme->GetErrorBorderColor());
+
+    RefPtr<Decoration> backDecoration = AceType::MakeRefPtr<Decoration>();
+    backDecoration->SetPadding(theme->GetPadding());
+    backDecoration->SetBackgroundColor(theme->GetBgColor());
+    backDecoration->SetBorderRadius(theme->GetBorderRadius());
+    const auto& boxDecoration = boxComponent->GetBackDecoration();
+    if (boxDecoration) {
+        backDecoration->SetImage(boxDecoration->GetImage());
+        backDecoration->SetGradient(boxDecoration->GetGradient());
+    }
+    textAreaComponent->SetOriginBorder(backDecoration->GetBorder());
+    textAreaComponent->SetDecoration(backDecoration);
+    textAreaComponent->SetIconSize(theme->GetIconSize());
+    textAreaComponent->SetIconHotZoneSize(theme->GetIconHotZoneSize());
+    textAreaComponent->SetHeight(theme->GetHeight());
+
+    // text area need to extend height.
+    textAreaComponent->SetExtend(true);
+    boxComponent->SetHeight(-1.0, DimensionUnit::VP);
+}
+
+RefPtr<TextFieldControllerBase> TextFieldModelImpl::CreateTextArea(
+    const std::optional<std::string>& placeholder, const std::optional<std::string>& value)
+{
+    RefPtr<TextFieldComponent> textAreaComponent = AceType::MakeRefPtr<TextFieldComponent>();
+    textAreaComponent->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
+    textAreaComponent->SetTextInputType(TextInputType::MULTILINE);
+    textAreaComponent->SetHoverAnimationType(HoverAnimationType::BOARD);
+
+    ViewStackProcessor::GetInstance()->ClaimElementId(textAreaComponent);
+    ViewStackProcessor::GetInstance()->Push(textAreaComponent);
+    InitTextAreaDefaultStyle();
+    Border boxBorder;
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto theme = JSViewAbstract::GetTheme<TextFieldTheme>();
+    if (boxComponent->GetBackDecoration()) {
+        boxBorder = boxComponent->GetBackDecoration()->GetBorder();
+    }
+    if (value) {
+        textAreaComponent->SetValue(value.value());
+    }
+    if (placeholder) {
+        textAreaComponent->SetPlaceholder(placeholder.value());
+    }
+    UpdateDecoration(boxComponent, textAreaComponent, boxBorder, theme);
+
+    return textAreaComponent->GetTextFieldController();
 }
 
 void TextFieldModelImpl::InitTextInputDefaultStyle()
@@ -351,4 +441,118 @@ void TextFieldModelImpl::SetCopyOption(CopyOptions copyOption)
     JSViewSetProperty(&TextFieldComponent::SetCopyOption, copyOption);
 }
 
+void TextFieldModelImpl::SetBackgroundColor(const Color& color, bool tmp)
+{
+    if (tmp) {
+        return;
+    }
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(component);
+    component->SetBgColor(color);
+}
+
+void TextFieldModelImpl::SetHeight(const Dimension& value)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto textInputComponent = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(textInputComponent);
+    textInputComponent->SetHeight(value);
+}
+
+void TextFieldModelImpl::SetPadding(NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp)
+{
+    if (tmp) {
+        return;
+    }
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(component);
+    auto decoration = component->GetDecoration();
+    CHECK_NULL_VOID(decoration);
+    decoration->SetPadding(oldPadding);
+}
+
+void TextFieldModelImpl::SetBackBorder()
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(component);
+    auto decoration = component->GetDecoration();
+    CHECK_NULL_VOID(decoration);
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto boxDecoration = box->GetBackDecoration();
+    CHECK_NULL_VOID(boxDecoration);
+    decoration->SetBorder(boxDecoration->GetBorder());
+    Border border = {};
+    boxDecoration->SetBorder(border);
+    component->SetOriginBorder(decoration->GetBorder());
+}
+
+void TextFieldModelImpl::SetHoverEffect(HoverEffectType value)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(component);
+    component->SetHoverAnimationType(static_cast<HoverAnimationType>(value));
+}
+
+void TextFieldModelImpl::SetOnClick(std::function<void(const ClickInfo&)>&& func)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(component);
+    component->SetOnClick(std::move(func));
+}
+
+void TextFieldModelImpl::SetFocusableAndFocusNode()
+{
+    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
+    if (focusableComponent) {
+        focusableComponent->SetFocusable(true);
+    }
+
+    auto focusNodeComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
+    if (focusNodeComponent) {
+        focusNodeComponent->SetFocusNode(false);
+    }
+}
+
+void TextFieldModelImpl::UpdateDecoration(const RefPtr<BoxComponent>& boxComponent,
+    const RefPtr<TextFieldComponent>& component, const Border& boxBorder,
+    const OHOS::Ace::RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme)
+{
+    if (!textFieldTheme) {
+        LOGI("UpdateDecoration: textFieldTheme is null.");
+        return;
+    }
+
+    RefPtr<Decoration> decoration = component->GetDecoration();
+    RefPtr<Decoration> boxDecoration = boxComponent->GetBackDecoration();
+    if (!decoration) {
+        decoration = AceType::MakeRefPtr<Decoration>();
+    }
+    if (boxDecoration) {
+        Border border = decoration->GetBorder();
+        border.SetLeftEdge(boxBorder.Left());
+        border.SetRightEdge(boxBorder.Right());
+        border.SetTopEdge(boxBorder.Top());
+        border.SetBottomEdge(boxBorder.Bottom());
+        border.SetBorderRadius(textFieldTheme->GetBorderRadius());
+        decoration->SetBorder(border);
+        component->SetOriginBorder(decoration->GetBorder());
+
+        if (boxDecoration->GetImage() || boxDecoration->GetGradient().IsValid()) {
+            // clear box properties except background image and radius.
+            boxDecoration->SetBackgroundColor(Color::TRANSPARENT);
+            Border border;
+            border.SetBorderRadius(textFieldTheme->GetBorderRadius());
+            boxDecoration->SetBorder(border);
+        }
+    } else {
+        boxDecoration = AceType::MakeRefPtr<Decoration>();
+        boxDecoration->SetBorderRadius(textFieldTheme->GetBorderRadius());
+        boxComponent->SetBackDecoration(boxDecoration);
+    }
+}
 } // namespace OHOS::Ace::Framework

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,11 @@
 
 #include "core/components/select_popup/rosen_render_select_popup.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkMaskFilter.h"
 #include "include/core/SkRect.h"
 #include "include/effects/SkGradientShader.h"
+#endif
 
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/common/properties/shadow_config.h"
@@ -86,6 +88,7 @@ void RosenRenderSelectPopup::PaintGradient(RenderContext& context, bool isTop)
         LOGE("Paint canvas is null");
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     SkPaint paintGradient;
     Rect gradientRect;
     auto interval = NormalizeToPx(optionInterval_);
@@ -113,6 +116,34 @@ void RosenRenderSelectPopup::PaintGradient(RenderContext& context, bool isTop)
 #endif
     canvas->drawRect(
         { gradientRect.Left(), gradientRect.Top(), gradientRect.Right(), gradientRect.Bottom() }, paintGradient);
+#else
+    RSPen penGradient;
+    Rect gradientRect;
+    auto interval = NormalizeToPx(optionInterval_);
+    auto yPos = isTop ? GetOptionTop() : GetOptionBottom() - NormalizeToPx(GRADIENT_HEIGHT);
+    gradientRect.SetOffset(Offset(GetOptionLeft() + interval, yPos));
+    gradientRect.SetHeight(NormalizeToPx(GRADIENT_HEIGHT));
+    gradientRect.SetWidth(GetOptionWidth() - 2 * interval);
+    RSPoint beginPoint(static_cast<RSScalar>(gradientRect.Left()),
+        static_cast<RSScalar>(gradientRect.Top()));
+    RSPoint endPoint(static_cast<RSScalar>(gradientRect.Left()),
+        static_cast<RSScalar>(gradientRect.Bottom()));
+    std::vector<RSPoint> points = { beginPoint, endPoint };
+    // color with red 13, green 13, and blue 13 is used for color stop (0.85) in gradient
+    std::vector<RSColorQuad> colors = { tvBackColor_.ChangeAlpha(0).GetValue(),
+        Color::FromRGB(13, 13, 13).ChangeAlpha(GRADIENT_END_GRADIENT).GetValue() };
+    if (isTop) {
+        colors.at(0) = Color::FromRGB(13, 13, 13).ChangeAlpha(GRADIENT_END_GRADIENT).GetValue();
+        colors.at(1) = tvBackColor_.ChangeAlpha(0).GetValue();
+    }
+    const std::vector<RSScalar> stopPositions = { 0.0f, 0.85f };
+    penGradient.SetShaderEffect(RSShaderEffect::CreateLinearGradient(
+        points.at(0), points.at(1), colors, stopPositions, RSTileMode::MIRROR));
+    canvas->AttachPen(penGradient);
+    canvas->DrawRect(
+        RSRect(gradientRect.Left(), gradientRect.Top(), gradientRect.Right(), gradientRect.Bottom()));
+    canvas->DetachPen();
+#endif
 }
 
 void RosenRenderSelectPopup::Paint(RenderContext& context, const Offset& offset)
@@ -127,12 +158,23 @@ void RosenRenderSelectPopup::Paint(RenderContext& context, const Offset& offset)
             LOGE("Paint canvas is null");
             return;
         }
+#ifndef USE_ROSEN_DRAWING
         canvas->save();
         SkPaint paint;
         paint.setARGB(tvBackColor_.GetAlpha(), tvBackColor_.GetRed(), tvBackColor_.GetGreen(), tvBackColor_.GetBlue());
         auto size = GetLayoutSize();
         canvas->drawRect(SkRect::MakeWH(size.Width(), size.Height()), paint);
         canvas->restore();
+#else
+        canvas->Save();
+        RSPen pen;
+        pen.SetARGB(tvBackColor_.GetAlpha(), tvBackColor_.GetRed(), tvBackColor_.GetGreen(), tvBackColor_.GetBlue());
+        auto size = GetLayoutSize();
+        canvas->AttachPen(pen);
+        canvas->DrawRect(RSRect(0, 0, size.Width(), size.Height()));
+        canvas->DetachPen();
+        canvas->Restore();
+#endif
     }
     RenderNode::Paint(context, offset);
 

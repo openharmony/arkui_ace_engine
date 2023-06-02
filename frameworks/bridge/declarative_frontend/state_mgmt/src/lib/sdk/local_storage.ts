@@ -30,6 +30,16 @@ class LocalStorage extends NativeLocalStorage {
 
   protected storage_: Map<string, ObservedPropertyAbstract<any>>;
 
+  /*
+    get access to provded LocalStorage instance thru Stake model
+    @StageModelOnly
+    @form
+    @since 10
+  */
+  public static getShared(): LocalStorage {
+    return LocalStorage.GetShared();
+  }
+
   /**
    * Construct new instance of LocalStorage
    * initialzie with all properties and their values that Object.keys(params) returns

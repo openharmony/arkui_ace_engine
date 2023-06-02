@@ -37,7 +37,7 @@ public:
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         auto visibility = GetLayoutProperty<LayoutProperty>()->GetVisibility().value_or(VisibleType::VISIBLE);
-        if (visibility == VisibleType::GONE) {
+        if (visibility != VisibleType::VISIBLE) {
             return MakeRefPtr<NodePaintMethod>();
         }
 
@@ -98,7 +98,7 @@ public:
         return circleCenter_;
     }
 
-    const OffsetF GetAnimatableBlockCenter() const
+    OffsetF GetAnimatableBlockCenter() const
     {
         if (sliderContentModifier_ != nullptr) {
             return sliderContentModifier_->GetBlockCenter();
@@ -110,7 +110,11 @@ public:
     {
         return valueRatio_;
     }
+    
+    std::string ProvideRestoreInfo() override;
+    void OnRestoreInfo(const std::string& restoreInfo) override;
 
+    void UpdateValue(float value);
 private:
     void OnModifyDone() override;
     void CancelExceptionValue(float& min, float& max, float& step);
@@ -173,6 +177,7 @@ private:
     bool mouseHoverFlag_ = false;
     bool mousePressedFlag_ = false;
     bool focusFlag_ = false;
+    bool panMoveFlag_ = false;
 
     float stepRatio_ = 1.0f / 100.0f;
     float valueRatio_ = 0.0f;

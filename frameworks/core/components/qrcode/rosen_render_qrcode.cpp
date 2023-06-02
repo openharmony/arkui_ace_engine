@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,11 @@
 
 #include "core/components/qrcode/rosen_render_qrcode.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkImage.h"
 #include "include/core/SkRRect.h"
+#endif
 
 #include "core/pipeline/base/rosen_render_context.h"
 #include "core/pipeline/pipeline_context.h"
@@ -49,6 +51,7 @@ void RosenRenderQrcode::DrawQRCode(
     if (!qrcode_) {
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     if (qrcode_->GetType() == QrcodeType::CIRCLE) {
         SkRect clipRect = { topLeft.GetX(), topLeft.GetY(), topLeft.GetX() + size, topLeft.GetY() + size };
         auto clipLayer = SkRRect::MakeRectXY(clipRect, size / 2.0, size / 2.0);
@@ -71,6 +74,20 @@ void RosenRenderQrcode::DrawQRCode(
             topLeft.GetX() + (size - smallSquareWidth) / 2.0, topLeft.GetY() + (size - smallSquareWidth) / 2.0, SkSamplingOptions());
 #endif
     }
+#else
+    if (qrcode_->GetType() == QrcodeType::CIRCLE) {
+        RSRect clipRect = { topLeft.GetX(), topLeft.GetY(),
+            topLeft.GetX() + size, topLeft.GetY() + size };
+        auto clipLayer = RSRoundRect(clipRect, size / 2.0, size / 2.0);
+        canvas->ClipRoundRect(clipLayer, RSClipOp::INTERSECT, true);
+    }
+    canvas->DrawBitmap(ProcessQrcodeData(size, qrCode), topLeft.GetX(), topLeft.GetY());
+    if (qrcode_->GetType() == QrcodeType::CIRCLE) {
+        int32_t smallSquareWidth = size / sqrt(2);
+        canvas->DrawBitmap(ProcessQrcodeData(smallSquareWidth, qrCode),
+            topLeft.GetX() + (size - smallSquareWidth) / 2.0, topLeft.GetY() + (size - smallSquareWidth) / 2.0);
+    }
+#endif
 }
 
 uint32_t RosenRenderQrcode::ConvertColorFromHighToLow(const Color& color)
@@ -83,6 +100,7 @@ uint32_t RosenRenderQrcode::ConvertColorFromHighToLow(const Color& color)
     return convertedColor.value;
 }
 
+#ifndef USE_ROSEN_DRAWING
 SkBitmap RosenRenderQrcode::ProcessQrcodeData(int32_t width, const qrcodegen::QrCode& qrCode)
 {
     // each block width may smaller the width / qrCode.getSize(), because of precision loss.
@@ -105,5 +123,29 @@ SkBitmap RosenRenderQrcode::ProcessQrcodeData(int32_t width, const qrcodegen::Qr
     }
     return skBitmap;
 }
+#else
+RSBitmap RosenRenderQrcode::ProcessQrcodeData(int32_t width, const qrcodegen::QrCode& qrCode)
+{
+    // each block width may smaller the width / qrCode.getSize(), because of precision loss.
+    RSBitmapFormat format {RSColorType::COLORTYPE_RGBA_8888,
+        RSAlphaType::ALPHATYPE_OPAQUE};
+    RSBitmap bitmap;
+    if (!qrcode_) {
+        return bitmap;
+    }
+    bitmap.Build(width, width, format);
+    void* rawData = bitmap.GetPixels();
+    uint32_t* data = reinterpret_cast<uint32_t*>(rawData);
+    int32_t blockWidth = width / qrCode.getSize();
+    for (int32_t i = 0; i < width; i++) {
+        for (int32_t j = 0; j < width; j++) {
+            data[i * width + j] = qrCode.getModule(i / blockWidth, j / blockWidth)
+                                      ? ConvertColorFromHighToLow(qrcode_->GetQrcodeColor())
+                                      : ConvertColorFromHighToLow(qrcode_->GetBackgroundColor());
+        }
+    }
+    return bitmap;
+}
+#endif
 
 } // namespace OHOS::Ace

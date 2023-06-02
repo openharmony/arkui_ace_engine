@@ -26,6 +26,7 @@
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/select_model_impl.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -48,8 +49,8 @@ SelectModel* SelectModel::GetInstance()
             } else {
                 instance_.reset(new Framework::SelectModelImpl());
             }
-        }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -127,8 +128,7 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSSelect>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSSelect>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSSelect>::Inherit<JSViewAbstract>();
-    JSClass<JSSelect>::Bind(globalObj);
+    JSClass<JSSelect>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void ParseSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -157,8 +157,8 @@ void JSSelect::Selected(const JSCallbackInfo& info)
         value = info[0]->ToNumber<int32_t>();
     }
 
-    if (value <= 0) {
-        value = 0;
+    if (value < -1) {
+        value = -1;
     }
     if (info.Length() > 1 && info[1]->IsFunction()) {
         ParseSelectedObject(info, info[1]);
@@ -561,7 +561,10 @@ void JSSelect::JsPadding(const JSCallbackInfo& info)
         if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
             bottom = bottomDimen;
         }
-        SelectModel::GetInstance()->SetPaddings(top, bottom, left, right);
+        if (left.has_value() || right.has_value() || top.has_value() || bottom.has_value()) {
+            ViewAbstractModel::GetInstance()->SetPaddings(top, bottom, left, right);
+            return;
+        }
     }
 
     CalcDimension value;
@@ -637,7 +640,7 @@ void JSSelect::SetSpace(const JSCallbackInfo& info)
         LOGI("JSSelect set space value is mull");
         value = selectTheme->GetContentSpinnerPadding();
     }
-    if (LessNotEqual(value.Value(), 0.0)) {
+    if (LessNotEqual(value.Value(), 0.0) || value.Unit() == DimensionUnit::PERCENT) {
         LOGI("JSSelect set space value is to small");
         value = selectTheme->GetContentSpinnerPadding();
     }

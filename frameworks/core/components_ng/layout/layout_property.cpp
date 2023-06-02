@@ -107,7 +107,6 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ACE_PROPERTY_TO_JSON_VALUE(positionProperty_, PositionProperty);
     ACE_PROPERTY_TO_JSON_VALUE(magicItemProperty_, MagicItemProperty);
     ACE_PROPERTY_TO_JSON_VALUE(flexItemProperty_, FlexItemProperty);
-    ACE_PROPERTY_TO_JSON_VALUE(borderWidth_, BorderWidthProperty);
     ACE_PROPERTY_TO_JSON_VALUE(gridProperty_, GridProperty);
 
     if (padding_) {
@@ -224,18 +223,18 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
     if (calcLayoutConstraint_) {
         if (calcLayoutConstraint_->maxSize.has_value()) {
             layoutConstraint_->UpdateMaxSizeWithCheck(ConvertToSize(calcLayoutConstraint_->maxSize.value(),
-                layoutConstraint_->scaleProperty, layoutConstraint_->percentReference));
+                parentConstraint.scaleProperty, parentConstraint.percentReference));
         }
         if (calcLayoutConstraint_->minSize.has_value()) {
             layoutConstraint_->UpdateMinSizeWithCheck(ConvertToSize(calcLayoutConstraint_->minSize.value(),
-                layoutConstraint_->scaleProperty, layoutConstraint_->percentReference));
+                parentConstraint.scaleProperty, parentConstraint.percentReference));
         }
         if (calcLayoutConstraint_->selfIdealSize.has_value()) {
             LOGD("CalcLayoutConstraint->selfIdealSize = %{public}s",
                 calcLayoutConstraint_->selfIdealSize.value().ToString().c_str());
             layoutConstraint_->UpdateIllegalSelfIdealSizeWithCheck(
-                ConvertToOptionalSize(calcLayoutConstraint_->selfIdealSize.value(), layoutConstraint_->scaleProperty,
-                    layoutConstraint_->percentReference));
+                ConvertToOptionalSize(calcLayoutConstraint_->selfIdealSize.value(), parentConstraint.scaleProperty,
+                    parentConstraint.percentReference));
         }
     }
 
@@ -505,7 +504,7 @@ RefPtr<FrameNode> LayoutProperty::GetHost() const
     return host_.Upgrade();
 }
 
-void LayoutProperty::OnVisibilityUpdate(VisibleType visible)
+void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransition)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -515,6 +514,14 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible)
     // update visibility value.
     propVisibility_ = visible;
     host->OnVisibleChange(visible == VisibleType::VISIBLE);
+    if (allowTransition) {
+        if (preVisible == VisibleType::VISIBLE && visible == VisibleType::INVISIBLE) {
+            // only trigger transition when visibility changes between visible and invisible.
+            host->GetRenderContext()->OnNodeDisappear(false);
+        } else if (preVisible == VisibleType::INVISIBLE && visible == VisibleType::VISIBLE) {
+            host->GetRenderContext()->OnNodeAppear(false);
+        }
+    }
 
     auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);

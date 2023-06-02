@@ -169,6 +169,7 @@ public:
     virtual void SetSepia(const Dimension& value) = 0;
     virtual void SetInvert(const Dimension& value) = 0;
     virtual void SetHueRotate(float value) = 0;
+    virtual void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) = 0;
 
     // event
     virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) = 0;
@@ -215,6 +216,9 @@ public:
     virtual void SetHitTestMode(NG::HitTestMode hitTestMode) = 0;
     virtual void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) = 0;
+
+    // obscured
+    virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;
 
     // popup and menu
     virtual void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) = 0;

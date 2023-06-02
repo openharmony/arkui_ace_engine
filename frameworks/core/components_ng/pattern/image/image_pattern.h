@@ -71,6 +71,7 @@ public:
         return { FocusType::NODE, false };
     }
 
+    void CreateObscuredImageIfNeed();
     void LoadImageDataIfNeed();
     void OnNotifyMemoryLevel(int32_t level) override;
     void OnWindowHide() override;
@@ -79,6 +80,11 @@ public:
 
     void EnableDrag();
 
+    bool DefaultSupportDrag() override
+    {
+        return true;
+    }
+    
     void SetCopyOption(CopyOptions value)
     {
         copyOption_ = value;
@@ -91,6 +97,14 @@ public:
 
     void BeforeCreatePaintWrapper() override;
     void DumpInfo() override;
+
+private:
+    class ObscuredImage : public CanvasImage {
+        void DrawToRSCanvas(
+            RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) {}
+        int32_t GetWidth() const { return 0; }
+        int32_t GetHeight() const { return 0; }
+    };
 
 private:
     void OnAttachToFrameNode() override;
@@ -138,6 +152,8 @@ private:
     RefPtr<CanvasImage> image_;
     RectF dstRect_;
     RectF srcRect_;
+
+    RefPtr<CanvasImage> obscuredImage_;
 
     // clear alt data after [OnImageLoadSuccess] being called
     RefPtr<ImageLoadingContext> altLoadingCtx_;

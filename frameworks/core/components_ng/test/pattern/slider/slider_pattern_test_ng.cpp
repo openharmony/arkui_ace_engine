@@ -161,6 +161,7 @@ void SliderPatternTestNg::MockCanvasFunction(Testing::MockCanvas& canvas)
 void SliderPatternTestNg::MockTipsCanvasFunction(Testing::MockCanvas& canvas)
 {
     EXPECT_CALL(canvas, Save()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, Scale(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, Translate(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
@@ -477,34 +478,34 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg006, TestSize.Level1)
      */
     KeyEvent event;
     event.action = KeyAction::UP;
-    EXPECT_EQ(sliderPattern->OnKeyEvent(event), false);
+    EXPECT_FALSE(sliderPattern->OnKeyEvent(event));
     /**
      * @tc.cases: case2. direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_LEFT, MoveStep(-1).
      */
     event.action = KeyAction::DOWN;
     event.code = KeyCode::KEY_DPAD_LEFT;
-    EXPECT_EQ(sliderPattern->OnKeyEvent(event), false);
+    EXPECT_TRUE(sliderPattern->OnKeyEvent(event));
     EXPECT_TRUE(NearEqual(sliderPattern->valueRatio_, 0.49f));
     /**
      * @tc.cases: case3. direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT, MoveStep(1).
      */
     event.code = KeyCode::KEY_DPAD_RIGHT;
     sliderLayoutProperty->UpdateSliderMode(SliderModel::SliderMode::INSET);
-    EXPECT_EQ(sliderPattern->OnKeyEvent(event), false);
+    EXPECT_TRUE(sliderPattern->OnKeyEvent(event));
     EXPECT_TRUE(NearEqual(sliderPattern->valueRatio_, 0.5f));
     /**
      * @tc.cases: case4. direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP, MoveStep(-1).
      */
     sliderPattern->direction_ = Axis::VERTICAL;
     event.code = KeyCode::KEY_DPAD_UP;
-    EXPECT_EQ(sliderPattern->OnKeyEvent(event), false);
+    EXPECT_TRUE(sliderPattern->OnKeyEvent(event));
     EXPECT_TRUE(NearEqual(sliderPattern->valueRatio_, 0.49f));
     /**
      * @tc.cases: case5. direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN, MoveStep(1).
      */
     event.code = KeyCode::KEY_DPAD_DOWN;
     sliderLayoutProperty->UpdateSliderMode(SliderModel::SliderMode::OUTSET);
-    EXPECT_EQ(sliderPattern->OnKeyEvent(event), false);
+    EXPECT_TRUE(sliderPattern->OnKeyEvent(event));
     EXPECT_TRUE(NearEqual(sliderPattern->valueRatio_, 0.5f));
 }
 
@@ -975,6 +976,35 @@ HWTEST_F(SliderPatternTestNg, SliderModelNgTest001, TestSize.Level1)
     EXPECT_EQ(sliderPaintProperty->GetBlockType(), SliderModel::BlockStyleType::IMAGE);
     EXPECT_EQ(sliderPaintProperty->GetBlockImage(), SLIDER_MODEL_NG_BLOCK_IMAGE);
     EXPECT_EQ(sliderPaintProperty->GetBlockShape(), basicShape);
+
+    /**
+     * @tc.steps: step3. reset the properties.
+     */
+    sliderModelNG.ResetBlockBorderColor();
+    sliderModelNG.ResetBlockBorderWidth();
+    sliderModelNG.ResetTrackBorderRadius();
+    sliderModelNG.ResetStepColor();
+    sliderModelNG.ResetStepSize();
+    sliderModelNG.ResetBlockType();
+    sliderModelNG.ResetBlockImage();
+    sliderModelNG.ResetBlockShape();
+    frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. check whether the properties is correct.
+     * @tc.expected: step4. check whether the properties is correct.
+     */
+    EXPECT_FALSE(sliderPaintProperty->GetBlockBorderColor().has_value());
+    EXPECT_FALSE(sliderPaintProperty->GetBlockBorderWidth().has_value());
+    EXPECT_FALSE(sliderPaintProperty->GetTrackBorderRadius().has_value());
+    EXPECT_FALSE(sliderPaintProperty->GetStepColor().has_value());
+    EXPECT_FALSE(sliderPaintProperty->GetStepSize().has_value());
+    EXPECT_FALSE(sliderPaintProperty->GetBlockType().has_value());
+    EXPECT_FALSE(sliderPaintProperty->GetBlockImage().has_value());
+    EXPECT_FALSE(sliderPaintProperty->GetBlockShape().has_value());
 }
 
 /**
@@ -2655,5 +2685,52 @@ HWTEST_F(SliderPatternTestNg, SliderPatternChangeEventTestNg001, TestSize.Level1
     sliderEventHub->FireChangeEvent(1.0, 1);
     sliderEventHub->SetOnChangeEvent(nullptr);
     ASSERT_EQ(sliderEventHub->onChangeEvent_, nullptr);
+}
+
+/**
+ * @tc.name: PerformActionTest001
+ * @tc.desc: Slider Accessibility PerformAction test ScrollForward and ScrollBackward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, PerformActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create slider and initialize related properties.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+
+    /**
+     * @tc.steps: step2. Get slider frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    sliderPattern->showTips_ = false;
+    sliderPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step3. Get slider accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto sliderAccessibilityProperty = frameNode->GetAccessibilityProperty<SliderAccessibilityProperty>();
+    ASSERT_NE(sliderAccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. When slider is not showTips, call the callback function in sliderAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(sliderAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(sliderAccessibilityProperty->ActActionScrollBackward());
+
+    /**
+     * @tc.steps: step5. When slider is showTips, call the callback function in sliderAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    sliderPattern->showTips_ = true;
+    EXPECT_TRUE(sliderAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(sliderAccessibilityProperty->ActActionScrollBackward());
 }
 } // namespace OHOS::Ace::NG

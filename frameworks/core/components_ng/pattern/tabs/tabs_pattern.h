@@ -74,7 +74,11 @@ public:
     void SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& event);
 
     void OnModifyDone() override;
-
+	
+    std::string ProvideRestoreInfo() override;
+    
+    void OnRestoreInfo(const std::string& restoreInfo) override;
+	
     void SetOnIndexChangeEvent(std::function<void(const BaseEventInfo*)>&& event);
 
 private:

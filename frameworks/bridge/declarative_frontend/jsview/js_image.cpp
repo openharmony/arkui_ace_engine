@@ -91,6 +91,10 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
     if (!ParseJsMedia(args[0], src)) {
         return;
     }
+    if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK) {
+        LOGW("Alt doesn't support network image %{public}s", src.c_str());
+        return;
+    }
     ImageModel::GetInstance()->SetAlt(src);
 }
 
@@ -182,12 +186,14 @@ void JSImage::Create(const JSCallbackInfo& info)
 
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
+    bool isCard = context->IsFormRender();
+
     // Interim programme
     std::string bundleName;
     std::string moduleName;
     std::string src;
-    auto noPixmap = ParseJsMedia(info[0], src);
-    if (context->IsFormRender() && info[0]->IsString()) {
+    bool srcValid = ParseJsMedia(info[0], src);
+    if (isCard && info[0]->IsString()) {
         SrcType srcType = ImageSourceInfo::ResolveURIType(src);
         bool notSupport = (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
         if (notSupport) {
@@ -197,9 +203,11 @@ void JSImage::Create(const JSCallbackInfo& info)
     }
     GetJsMediaBundleInfo(info[0], bundleName, moduleName);
     RefPtr<PixelMap> pixmap = nullptr;
-    if (!noPixmap) {
+
+    // input is PixelMap / Drawable
+    if (!srcValid) {
 #if defined(PIXEL_MAP_SUPPORTED)
-        if (context->IsFormRender()) {
+        if (isCard) {
             LOGE("Not supported pixmap when form render");
         } else {
             if (IsDrawable(info[0])) {
@@ -212,7 +220,8 @@ void JSImage::Create(const JSCallbackInfo& info)
         LOGW("Pixmap not supported under this environment.");
 #endif
     }
-    ImageModel::GetInstance()->Create(src, noPixmap, pixmap, bundleName, moduleName);
+
+    ImageModel::GetInstance()->Create(src, pixmap, bundleName, moduleName);
 }
 
 // Interim programme
@@ -468,8 +477,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("opacity", &JSImage::JsOpacity);
     JSClass<JSImage>::StaticMethod("blur", &JSImage::JsBlur);
     JSClass<JSImage>::StaticMethod("transition", &JSImage::JsTransition);
-    JSClass<JSImage>::Inherit<JSViewAbstract>();
-    JSClass<JSImage>::Bind<>(globalObj);
+    JSClass<JSImage>::InheritAndBind<JSViewAbstract>(globalObj);
 
     JSClass<JSColorFilter>::Declare("ColorFilter");
     JSClass<JSColorFilter>::Bind(globalObj, JSColorFilter::ConstructorCallback, JSColorFilter::DestructorCallback);
@@ -482,6 +490,10 @@ void JSImage::JsSetDraggable(bool draggable)
 
 void JSImage::JsOnDragStart(const JSCallbackInfo& info)
 {
+    if (info.Length() != 1 || !info[0]->IsFunction()) {
+        LOGW("argument is invalid");
+        return;
+    }
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
@@ -512,7 +524,11 @@ void JSImage::JsOnDragStart(const JSCallbackInfo& info)
 
 void JSImage::JsOnDragEnter(const JSCallbackInfo& info)
 {
-    RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    if (info.Length() != 1 || !info[0]->IsFunction()) {
+        LOGW("argument is invalid");
+        return;
+    }
+    auto jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -524,7 +540,11 @@ void JSImage::JsOnDragEnter(const JSCallbackInfo& info)
 
 void JSImage::JsOnDragMove(const JSCallbackInfo& info)
 {
-    RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    if (info.Length() != 1 || !info[0]->IsFunction()) {
+        LOGW("argument is invalid");
+        return;
+    }
+    auto jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -536,7 +556,10 @@ void JSImage::JsOnDragMove(const JSCallbackInfo& info)
 
 void JSImage::JsOnDragLeave(const JSCallbackInfo& info)
 {
-    RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -548,7 +571,10 @@ void JSImage::JsOnDragLeave(const JSCallbackInfo& info)
 
 void JSImage::JsOnDrop(const JSCallbackInfo& info)
 {
-    RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
                         const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -560,19 +586,14 @@ void JSImage::JsOnDrop(const JSCallbackInfo& info)
 
 void JSImage::SetCopyOption(const JSCallbackInfo& info)
 {
-    if (info.Length() == 0) {
-        return;
-    }
     auto copyOptions = CopyOptions::None;
     if (info[0]->IsNumber()) {
         auto enumNumber = info[0]->ToNumber<int>();
         copyOptions = static_cast<CopyOptions>(enumNumber);
         if (copyOptions < CopyOptions::None || copyOptions > CopyOptions::Distributed) {
-            LOGW("copy option is invalid %{public}d", copyOptions);
             copyOptions = CopyOptions::None;
         }
     }
-    LOGI("copy option: %{public}d", copyOptions);
     ImageModel::GetInstance()->SetCopyOption(copyOptions);
 }
 

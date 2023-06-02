@@ -19,10 +19,6 @@
 #include <dlfcn.h>
 #endif
 
-#include "base/image/pixel_map.h"
-#include "base/log/ace_scoring_log.h"
-#include "base/log/ace_trace.h"
-#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
@@ -38,31 +34,26 @@ void JSImageSpan::Create(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have 1 argument");
         return;
     }
-    std::string bundleName;
-    std::string moduleName;
-    std::string src;
-    auto noPixmap = ParseJsMedia(info[0], src);
-    JSImage::GetJsMediaBundleInfo(info[0], bundleName, moduleName);
-    LOGI("JSImageSpan::Create src = %{public}s bundleName = %{public}s moduleName = %{public}s noPixmap = "
-         "%{public}d",
-        src.c_str(), bundleName.c_str(), moduleName.c_str(), noPixmap);
-    RefPtr<PixelMap> pixmap = nullptr;
-#if defined(PIXEL_MAP_SUPPORTED)
-    if (!noPixmap) {
-        pixmap = CreatePixelMapFromNapiValue(info[0]);
-    }
-#endif
-    ImageModel::GetInstance()->Create(src, noPixmap, pixmap, bundleName, moduleName);
+    JSImage::Create(info);
 }
 
-void JSImageSpan::SetObjectFit(int32_t value)
+void JSImageSpan::SetObjectFit(const JSCallbackInfo& info)
 {
-    auto fit = static_cast<ImageFit>(value);
-    if (fit < ImageFit::FILL || fit > ImageFit::SCALE_DOWN) {
-        LOGW("The value of objectFit is out of range %{public}d", value);
-        fit = ImageFit::COVER;
+    if (info.Length() != 1) {
+        LOGE("The arg is wrong, it is supposed to have 1 argument");
+        return;
     }
-    ImageModel::GetInstance()->SetImageFit(fit);
+
+    if (info[0]->IsNumber()) {
+        auto fit = static_cast<ImageFit>(info[0]->ToNumber<int32_t>());
+        if (fit < ImageFit::FILL || fit > ImageFit::SCALE_DOWN) {
+            LOGW("The value of objectFit is out of range %{public}d", fit);
+            fit = ImageFit::COVER;
+        }
+        ImageModel::GetInstance()->SetImageFit(fit);
+    } else {
+        ImageModel::GetInstance()->SetImageFit(ImageFit::COVER);
+    }
 }
 
 void JSImageSpan::SetVerticalAlign(int32_t verticalAlign)
@@ -80,9 +71,8 @@ void JSImageSpan::JSBind(BindingTarget globalObj)
     JSClass<JSImageSpan>::Declare("ImageSpan");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSImageSpan>::StaticMethod("create", &JSImageSpan::Create, opt);
-    JSClass<JSImageSpan>::StaticMethod("objectFit", &JSImageSpan::SetObjectFit, opt);
+    JSClass<JSImageSpan>::StaticMethod("objectFit", &JSImageSpan::SetObjectFit);
     JSClass<JSImageSpan>::StaticMethod("verticalAlign", &JSImageSpan::SetVerticalAlign);
-    JSClass<JSImageSpan>::Inherit<JSViewAbstract>();
-    JSClass<JSImageSpan>::Bind<>(globalObj);
+    JSClass<JSImageSpan>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

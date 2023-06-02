@@ -98,7 +98,12 @@ public:
     MOCK_METHOD2(AddEtsCardTouchEventCallback, void(int32_t ponitId, EtsCardTouchEventCallback&& callback));
     MOCK_METHOD1(RestoreNodeInfo, void(std::unique_ptr<JsonValue> nodeInfo));
     MOCK_METHOD0(GetStoredNodeInfo, std::unique_ptr<JsonValue>());
-    MOCK_METHOD0(OnAvoidAreaChanged, void());
+    MOCK_METHOD0(ResetViewSafeArea, void());
+    MOCK_METHOD1(SetSystemSafeArea, void(const SafeAreaEdgeInserts& systemSafeArea));
+    MOCK_CONST_METHOD0(GetSystemSafeArea, SafeAreaEdgeInserts());
+    MOCK_METHOD1(SetCutoutSafeArea, void(const SafeAreaEdgeInserts& cutoutSafeArea));
+    MOCK_CONST_METHOD0(GetCutoutSafeArea, SafeAreaEdgeInserts());
+    MOCK_CONST_METHOD0(GetViewSafeArea, SafeAreaEdgeInserts());
     static RefPtr<MockPipelineBase> pipeline_;
 
 protected:

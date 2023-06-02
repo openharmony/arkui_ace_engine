@@ -80,7 +80,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("onCut", &JSTextField::SetOnCut);
     JSClass<JSTextInput>::StaticMethod("onPaste", &JSTextField::SetOnPaste);
     JSClass<JSTextInput>::StaticMethod("onClick", &JSTextField::SetOnClick);
-    JSClass<JSTextInput>::StaticMethod("requestKeyboardOnFocus", &JSTextField::RequestKeyboardOnFocus);
+    JSClass<JSTextInput>::StaticMethod("requestKeyboardOnFocus", &JSTextField::SetEnableKeyboardOnFocus);
     JSClass<JSTextInput>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTextInput>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSTextInput>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
@@ -89,9 +89,9 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextInput>::StaticMethod("passwordIcon", &JSTextField::SetPasswordIcon);
     JSClass<JSTextInput>::StaticMethod("showUnderline", &JSTextField::SetShowUnderline);
+    JSClass<JSTextInput>::StaticMethod("enableKeyboardOnFocus", &JSTextField::SetEnableKeyboardOnFocus);
 
-    JSClass<JSTextInput>::Inherit<JSViewAbstract>();
-    JSClass<JSTextInput>::Bind(globalObj);
+    JSClass<JSTextInput>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSTextInput::Create(const JSCallbackInfo& info)

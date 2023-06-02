@@ -19,15 +19,15 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_event_hub.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_layout_algorithm.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_paint_property.h"
-#include "core/components_ng/pattern/window_scene/scene/host/host_window_extension.h"
+#include "core/components_ng/pattern/window_scene/scene/window_extension.h"
 
 namespace OHOS::Ace::NG {
-class UIExtensionPattern : public HostWindowExtension {
-    DECLARE_ACE_TYPE(UIExtensionPattern, HostWindowExtension);
+class UIExtensionPattern : public WindowExtension {
+    DECLARE_ACE_TYPE(UIExtensionPattern, WindowExtension);
 
 public:
     UIExtensionPattern(const std::string& bundleName, const std::string& abilityName)
-        : HostWindowExtension(bundleName, abilityName)
+        : WindowExtension(bundleName, abilityName)
     {}
 
     ~UIExtensionPattern() override = default;

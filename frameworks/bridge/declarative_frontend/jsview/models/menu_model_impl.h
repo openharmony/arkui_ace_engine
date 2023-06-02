@@ -24,6 +24,7 @@ public:
     void Create() override;
     void SetFontSize(const Dimension& fontSize) override;
     void SetFontWeight(FontWeight weight) override;
+    void SetFontStyle(Ace::FontStyle style) override;
     void SetFontColor(const std::optional<Color>& color) override;
 };
 } // namespace OHOS::Ace::Framework

@@ -80,6 +80,11 @@ public:
         jumpIndex_ = index;
     }
 
+    void SetTargetIndex(int32_t index)
+    {
+        targetIndex_ = index;
+    }
+
     void SetIndexInGroup(int32_t index)
     {
         jumpIndexInGroup_ = index;
@@ -198,7 +203,8 @@ public:
     {
         return 1;
     }
-
+    
+    void OffScreenLayoutDirection();
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -229,7 +235,7 @@ protected:
 private:
     void MeasureList(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
 
-    void CalculateEstimateOffset();
+    void CalculateEstimateOffset(bool isAlignTop);
 
     std::pair<int32_t, float> LayoutOrRecycleCachedItems(
         LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
@@ -245,6 +251,7 @@ private:
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
+    std::optional<int32_t> targetIndex_;
     ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
 
     PositionMap itemPosition_;
@@ -256,6 +263,8 @@ private:
     float spaceWidth_ = 0.0f;
     bool overScrollFeature_ = false;
     bool canOverScroll_ = false;
+    bool forwardFeature_ = false;
+    bool backwardFeature_ = false;
 
     int32_t totalItemCount_ = 0;
 

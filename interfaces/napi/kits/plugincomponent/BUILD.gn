@@ -43,6 +43,7 @@ ohos_shared_library("plugincomponent") {
   external_deps = [
     "ability_base:base",
     "ability_base:want",
+    "access_token:libtokenid_sdk",
     "bundle_framework:appexecfwk_core",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",

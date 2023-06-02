@@ -323,7 +323,6 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg007, TestSize.Level1)
      */
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
-    focusHub->show_ = true;
     focusHub->focusable_ = true;
     focusHub->parentFocusable_ = true;
 
@@ -511,7 +510,9 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0013, TestSize.Level1)
     /**
      * @tc.steps1: initialize parameters.
      */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
     auto context = PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
@@ -523,7 +524,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0013, TestSize.Level1)
     focusHub->SetFocusType(FocusType::NODE);
     focusHub->SetShow(true);
     focusHub->SetEnabled(true);
-    EXPECT_TRUE(focusHub->show_);
+    EXPECT_TRUE(focusHub->IsShow());
 
     /**
      * @tc.steps3: call the function SetShow with FocusType::SCOPE.
@@ -532,7 +533,8 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0013, TestSize.Level1)
     focusHub->SetFocusType(FocusType::SCOPE);
     focusHub->SetShow(false);
     focusHub->SetEnabled(false);
-    EXPECT_FALSE(focusHub->show_);
+    frameNode->layoutProperty_->propVisibility_ = VisibleType::INVISIBLE;
+    EXPECT_FALSE(focusHub->IsShow());
 
     /**
      * @tc.steps4: call the function SetShow with FocusType::DISABLE.
@@ -541,7 +543,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0013, TestSize.Level1)
     focusHub->SetFocusType(FocusType::DISABLE);
     focusHub->SetShow(true);
     focusHub->SetEnabled(true);
-    EXPECT_FALSE(focusHub->show_);
+    EXPECT_FALSE(focusHub->IsShow());
 }
 
 /**
@@ -838,7 +840,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0020, TestSize.Level1)
      * @tc.expected: The return value of the function is focusHub.
      */
     focusHub->SetFocusType(FocusType::NODE);
-    focusHub->show_ = true;
+    focusHub->SetShow(true);
     focusHub->focusable_ = true;
     focusHub->parentFocusable_ = true;
     focusHub->SetIsDefaultFocus(true);
@@ -848,7 +850,8 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0020, TestSize.Level1)
      * @tc.steps3: call the function GetChildFocusNodeByType with FocusNodeType::DEFAULT and show_ = false.
      * @tc.expected: The return value of the function is nullptr.
      */
-    focusHub->show_ = false;
+    focusHub->focusable_ = false;
+    focusHub->SetShow(false);
     EXPECT_EQ(focusHub->GetChildFocusNodeByType(FocusNodeType::DEFAULT), nullptr);
 
     /**
@@ -862,7 +865,8 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0020, TestSize.Level1)
      * @tc.steps5: call the function GetChildFocusNodeByType with FocusNodeType::DEFAULT and show_ = true.
      * @tc.expected: The return value of the function is focusHub.
      */
-    focusHub->show_ = true;
+    focusHub->SetShow(true);
+    focusHub->focusable_ = true;
     focusHub->SetIsDefaultGroupFocus(true);
     EXPECT_EQ(focusHub->GetChildFocusNodeByType(FocusNodeType::GROUP_DEFAULT), focusHub);
 
@@ -870,7 +874,8 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0020, TestSize.Level1)
      * @tc.steps6: call the function GetChildFocusNodeByType with FocusNodeType::DEFAULT and show_ = false.
      * @tc.expected: The return value of the function is nullptr.
      */
-    focusHub->show_ = false;
+    focusHub->focusable_ = false;
+    focusHub->SetShow(false);
     EXPECT_EQ(focusHub->GetChildFocusNodeByType(FocusNodeType::GROUP_DEFAULT), nullptr);
 
     /**
@@ -878,7 +883,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0020, TestSize.Level1)
      *             IsDefaultGroupFocus = false.
      * @tc.expected: The return value of the function is nullptr.
      */
-    focusHub->show_ = true;
+    focusHub->SetShow(true);
     focusHub->SetIsDefaultGroupFocus(false);
     EXPECT_EQ(focusHub->GetChildFocusNodeByType(FocusNodeType::GROUP_DEFAULT), nullptr);
 
@@ -945,7 +950,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0021, TestSize.Level1)
      * @tc.steps7: call the function GoToFocusByTabNodeIdx with the unempty TabIndexNodeList.
      * @tc.expected: The return value of the function is true.
      */
-    focusHub->show_ = true;
+    focusHub->SetShow(true);
     focusHub->focusable_ = true;
     focusHub->parentFocusable_ = true;
     EXPECT_TRUE(focusHub->GoToFocusByTabNodeIdx(tabIndexNodes, 1));
@@ -1100,7 +1105,7 @@ HWTEST_F(FocusHubTestNg, FocusHubSetIsFocusOnTouch001, TestSize.Level1)
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     eventHub->AttachHost(frameNode);
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
-    
+
     /**
      * @tc.steps3: test SetIsFocusOnTouch.
      * @tc.expected: create touchEvents and set FocusOnTouch success.
@@ -1131,6 +1136,16 @@ HWTEST_F(FocusHubTestNg, FocusHubSetIsFocusOnTouch001, TestSize.Level1)
     focusHub->focusOnTouchListener_ = nullptr;
     focusHub->SetIsFocusOnTouch(true);
     EXPECT_TRUE(focusHub->focusOnTouchListener_);
+    auto touchCallback = focusHub->focusOnTouchListener_;
+    TouchEventInfo touchEventInfo("onTouchUp");
+    (*touchCallback)(touchEventInfo);
+    TouchLocationInfo touchLocationInfo(1);
+    touchLocationInfo.SetTouchType(TouchType::UP);
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    focusHub->SetFocusType(FocusType::NODE);
+    focusHub->focusable_ = true;
+    (*touchCallback)(touchEventInfo);
+    EXPECT_TRUE(focusHub->currentFocus_);
 }
 
 /**
@@ -1164,9 +1179,7 @@ HWTEST_F(FocusHubTestNg, FocusHubOnKeyEvent002, TestSize.Level1)
         eventInfo.SetStopPropagation(true);
         return false;
     };
-    auto onKeyEvent = [](const KeyEvent& event) -> bool {
-        return true;
-    };
+    auto onKeyEvent = [](const KeyEvent& event) -> bool { return true; };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
     focusHub->SetOnKeyCallback(std::move(onKeyEventCallback));
     EXPECT_TRUE(focusHub->OnKeyEvent(keyEvent));
@@ -1193,7 +1206,7 @@ HWTEST_F(FocusHubTestNg, FocusHubOnKeyEvent003, TestSize.Level1)
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     eventHub->AttachHost(frameNode);
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
-    
+
     /**
      * @tc.steps3: create lastWeakFocusNode_.
      */
@@ -1213,9 +1226,7 @@ HWTEST_F(FocusHubTestNg, FocusHubOnKeyEvent003, TestSize.Level1)
      */
     focusHub->currentFocus_ = true;
     focusHub->SetFocusType(FocusType::SCOPE);
-    auto onKeyEvent = [](const KeyEvent& event) -> bool {
-        return true;
-    };
+    auto onKeyEvent = [](const KeyEvent& event) -> bool { return true; };
 
     /**
      * @tc.steps6: call the function OnKeyEvent with FocusType::SCOPE.
@@ -1273,6 +1284,9 @@ HWTEST_F(FocusHubTestNg, FocusHubOnKeyEvent004, TestSize.Level1)
 
     KeyEvent keyEvent;
     keyEvent.action = KeyAction::UP;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->isFocusActive_ = true;
+
     /**
      * @tc.steps5: test keyEvent with keyEvent.code == KeyCode::TV_CONTROL_UP.
      * @tc.expected: The return value of OnKeyEvent is false.
@@ -1291,6 +1305,12 @@ HWTEST_F(FocusHubTestNg, FocusHubOnKeyEvent004, TestSize.Level1)
     EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
 
     keyEvent.code = KeyCode::KEY_TAB;
+    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
+
+    keyEvent.pressedCodes.emplace_back(KeyCode::KEY_SHIFT_LEFT);
+    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
+
+    keyEvent.pressedCodes.emplace_back(KeyCode::KEY_TAB);
     EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
 
     keyEvent.code = KeyCode::KEY_MOVE_HOME;
@@ -1364,7 +1384,7 @@ HWTEST_F(FocusHubTestNg, PaintFocusState001, TestSize.Level1)
     ASSERT_NE(context, nullptr);
     auto renderContext = frameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    
+
     /**
      * @tc.steps3: create KeyEvent.
      */
@@ -1374,6 +1394,35 @@ HWTEST_F(FocusHubTestNg, PaintFocusState001, TestSize.Level1)
 
     focusHub->SetFocusType(FocusType::SCOPE);
     EXPECT_EQ(focusHub->focusStyleType_, FocusStyleType::NONE);
-    EXPECT_FALSE(context->GetIsNeedShowFocus());
+}
+
+/**
+ * @tc.name: FocusHubSetIsDefaultFocus001
+ * @tc.desc: Test the function SetIsDefaultFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, SetIsDefaultFocus001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create frameNode.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    ASSERT_NE(focusHub, nullptr);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto manager = pipeline->GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    auto rootNode = pipeline->GetRootElement();
+    EXPECT_EQ(rootNode, nullptr);
+
+    focusHub->focusCallbackEvents_ = nullptr;
+    focusHub->SetIsDefaultGroupFocus(false);
+    EXPECT_NE(focusHub->focusCallbackEvents_, nullptr);
 }
 } // namespace OHOS::Ace::NG

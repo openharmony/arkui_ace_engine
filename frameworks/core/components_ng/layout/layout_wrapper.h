@@ -215,9 +215,11 @@ public:
         outOfLayout_ = outOfLayout;
     }
 
+    // ------------------------------------------------------------------------
     // performance check
     void AddNodeFlexLayouts();
     void AddNodeLayoutTime(int64_t time);
+    // ------------------------------------------------------------------------
 
     // Check the flag attribute with descendant node
     bool CheckNeedForceMeasureAndLayout();

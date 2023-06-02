@@ -16,9 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PROGRESS_PROGRESS_MODIFIER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PROGRESS_PROGRESS_MODIFIER_H
 
-#include "base/memory/ace_type.h"
 #include "base/geometry/arc.h"
 #include "base/geometry/dimension.h"
+#include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
@@ -75,8 +75,8 @@ private:
     void PaintMoon(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
-    void PaintCapsuleLightSweep(RSCanvas& canvas, const SizeF& contentSize,
-        const OffsetF& offset, const RSPath& path, bool isVertical) const;
+    void PaintCapsuleLightSweep(
+        RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset, const RSPath& path, bool isVertical) const;
 
     void ProcessSweepingAnimation(ProgressType type, float value);
     void ProcessRingSweepingAnimation(float value);
@@ -95,8 +95,7 @@ private:
     void StopRingLoadingTailAnimation();
     float CalcRingProgressAdditionalAngle() const;
     float TrailingCoefficient(float base, uint32_t index, uint32_t totalPoints) const;
-    Color GenerateTrailingPointColor(
-        const Color& headColor, const Color& tailColor, uint32_t index, uint32_t totalPoints) const;
+    Color GenerateTrailingPointColor(const Color& headColor, uint32_t index, uint32_t totalPoints) const;
     void GenerateLinearSweepingGradientInfo(std::vector<RSColorQuad>& colors, std::vector<float>& pos) const;
     void GenerateRingSweepingGradientInfo(std::vector<RSColorQuad>& colors, std::vector<float>& pos) const;
     Gradient CreateCapsuleGradient() const;
@@ -124,7 +123,7 @@ private:
     RefPtr<PropertyBool> paintShadow_;
     RefPtr<PropertyInt> progressStatus_;
 
-    bool isVisible_  = true;
+    bool isVisible_ = true;
     float valueBackup_ = 0.0f;
     bool isLoading_ = false;
     bool isSweeping_ = false;

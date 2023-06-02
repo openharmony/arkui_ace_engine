@@ -18,10 +18,13 @@
 #include "uicast_interface/uicast_context_impl.h"
 #include "uicast_interface/uicast_impl.h"
 
+#include "base/log/ace_performance_check.h"
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
@@ -156,6 +159,11 @@ void JSView::RestoreInstanceId()
     ContainerScope::UpdateCurrent(restoreInstanceId_);
 }
 
+void JSView::GetInstanceId(const JSCallbackInfo& info)
+{
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(instanceId_)));
+}
+
 void JSView::JsSetCardId(int64_t cardId)
 {
     cardId_ = cardId;
@@ -185,6 +193,7 @@ RefPtr<AceType> JSViewFullUpdate::CreateViewNode()
     auto appearFunc = [weak = AceType::WeakClaim(this)] {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
+        ContainerScope scope(jsView->GetInstanceId());
         ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Appear");
         if (jsView->viewNode_.Invalid() && jsView->jsViewFunction_) {
             jsView->jsViewFunction_->ExecuteAppear();
@@ -193,7 +202,9 @@ RefPtr<AceType> JSViewFullUpdate::CreateViewNode()
 
     auto renderFunction = [weak = AceType::WeakClaim(this)]() -> RefPtr<AceType> {
         auto jsView = weak.Upgrade();
-        return jsView ? jsView->InternalRender() : nullptr;
+        CHECK_NULL_RETURN(jsView, nullptr);
+        ContainerScope scope(jsView->GetInstanceId());
+        return jsView->InternalRender();
     };
 
     auto pageTransitionFunction = [weak = AceType::WeakClaim(this)]() {
@@ -202,6 +213,7 @@ RefPtr<AceType> JSViewFullUpdate::CreateViewNode()
             return;
         }
         {
+            ContainerScope scope(jsView->GetInstanceId());
             ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Transition");
             jsView->jsViewFunction_->ExecuteTransition();
         }
@@ -217,6 +229,7 @@ RefPtr<AceType> JSViewFullUpdate::CreateViewNode()
     auto removeFunction = [weak = AceType::WeakClaim(this)]() -> void {
         auto jsView = weak.Upgrade();
         if (jsView && jsView->jsViewFunction_) {
+            ContainerScope scope(jsView->GetInstanceId());
             jsView->jsViewFunction_->ExecuteDisappear();
         }
     };
@@ -299,14 +312,14 @@ void JSViewFullUpdate::JSBind(BindingTarget object)
     JSClass<JSViewFullUpdate>::Method("markNeedUpdate", &JSViewFullUpdate::MarkNeedUpdate);
     JSClass<JSViewFullUpdate>::Method("syncInstanceId", &JSViewFullUpdate::SyncInstanceId);
     JSClass<JSViewFullUpdate>::Method("restoreInstanceId", &JSViewFullUpdate::RestoreInstanceId);
+    JSClass<JSViewFullUpdate>::CustomMethod("getInstanceId", &JSViewFullUpdate::GetInstanceId);
     JSClass<JSViewFullUpdate>::Method("needsUpdate", &JSViewFullUpdate::NeedsUpdate);
     JSClass<JSViewFullUpdate>::Method("markStatic", &JSViewFullUpdate::MarkStatic);
     JSClass<JSViewFullUpdate>::Method("setCardId", &JSViewFullUpdate::JsSetCardId);
     JSClass<JSViewFullUpdate>::CustomMethod("getCardId", &JSViewFullUpdate::JsGetCardId);
     JSClass<JSViewFullUpdate>::CustomMethod("findChildById", &JSViewFullUpdate::FindChildById);
     JSClass<JSViewFullUpdate>::CustomMethod("findChildByIdForPreview", &JSViewFullUpdate::FindChildByIdForPreview);
-    JSClass<JSViewFullUpdate>::Inherit<JSViewAbstract>();
-    JSClass<JSViewFullUpdate>::Bind(object, ConstructorCallback, DestructorCallback);
+    JSClass<JSViewFullUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);
 }
 
 void JSViewFullUpdate::FindChildById(const JSCallbackInfo& info)
@@ -711,6 +724,15 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         Framework::JSViewStackProcessor::SetViewMap(std::to_string(uiNode->GetId()), jsViewObject_);
     }
 #endif
+
+    if (SystemProperties::IsPerformanceCheckEnabled()) {
+        auto uiNode = AceType::DynamicCast<NG::UINode>(node);
+        if (uiNode) {
+            auto codeInfo = EngineHelper::GetPositionOnJsCode();
+            uiNode->SetRow(codeInfo.first);
+            uiNode->SetCol(codeInfo.second);
+        }
+    }
     return node;
 }
 
@@ -868,6 +890,7 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::Method("markNeedUpdate", &JSViewPartialUpdate::MarkNeedUpdate);
     JSClass<JSViewPartialUpdate>::Method("syncInstanceId", &JSViewPartialUpdate::SyncInstanceId);
     JSClass<JSViewPartialUpdate>::Method("restoreInstanceId", &JSViewPartialUpdate::RestoreInstanceId);
+    JSClass<JSViewPartialUpdate>::CustomMethod("getInstanceId", &JSViewPartialUpdate::GetInstanceId);
     JSClass<JSViewPartialUpdate>::Method("markStatic", &JSViewPartialUpdate::MarkStatic);
     JSClass<JSViewPartialUpdate>::Method("finishUpdateFunc", &JSViewPartialUpdate::JsFinishUpdateFunc);
     JSClass<JSViewPartialUpdate>::Method("setCardId", &JSViewPartialUpdate::JsSetCardId);
@@ -882,8 +905,7 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
         "findChildByIdForPreview", &JSViewPartialUpdate::FindChildByIdForPreview);
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "resetRecycleCustomNode", &JSViewPartialUpdate::JSResetRecycleCustomNode);
-    JSClass<JSViewPartialUpdate>::Inherit<JSViewAbstract>();
-    JSClass<JSViewPartialUpdate>::Bind(object, ConstructorCallback, DestructorCallback);
+    JSClass<JSViewPartialUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);
 }
 
 void JSViewPartialUpdate::ConstructorCallback(const JSCallbackInfo& info)

@@ -267,7 +267,7 @@ public:
 
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
 
-    OffsetF GetPaintRectOffsetWithoutTransform(bool excludeSelf = false) const;
+    OffsetF GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
 
     OffsetF GetPaintRectOffsetToPage() const;
 
@@ -328,8 +328,6 @@ public:
         CHECK_NULL_RETURN_NOLOG(renderContext_, false);
         return renderContext_->HasPosition() || renderContext_->HasOffset() || renderContext_->HasAnchor();
     }
-
-    bool OnRemoveFromParent() override;
 
     // The function is only used for fast preview.
     void FastPreviewUpdateChildDone() override
@@ -405,6 +403,9 @@ private:
 
     bool IsMeasureBoundary();
     bool IsRenderBoundary();
+
+    bool OnRemoveFromParent(bool allowTransition) override;
+    bool RemoveImmediately() const override;
 
     // dump self info.
     void DumpInfo() override;

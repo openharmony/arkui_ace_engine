@@ -168,7 +168,7 @@ public:
     {
         return focusType_;
     }
-    void SetSetFocusType(FocusType type)
+    void SetFocusType(FocusType type)
     {
         focusType_ = type;
     }
@@ -177,7 +177,7 @@ public:
     {
         return focusable_;
     }
-    void SetSetFocusable(bool focusable)
+    void SetFocusable(bool focusable)
     {
         focusable_ = focusable;
     }
@@ -525,10 +525,8 @@ public:
     void SetEnabled(bool enabled);
     void SetEnabledNode(bool enabled);
     void SetEnabledScope(bool enabled);
-    bool CanShow() const
-    {
-        return show_;
-    }
+
+    bool IsShow() const;
 
     bool IsEnabled() const;
 
@@ -712,11 +710,11 @@ public:
 
     std::optional<std::string> GetInspectorKey() const;
 
-    void PaintFocusState();
-    void PaintAllFocusState();
-    void ClearFocusState();
+    bool PaintFocusState(bool isNeedStateStyles = true);
+    bool PaintAllFocusState();
+    bool PaintInnerFocusState(const RoundRect& paintRect);
+    void ClearFocusState(bool isNeedStateStyles = true);
     void ClearAllFocusState();
-    void PaintInnerFocusState(const RoundRect& paintRect);
 
     void SetInnerFocusPaintRectCallback(const std::function<void(RoundRect&)>& callback)
     {
@@ -769,6 +767,8 @@ private:
 
     void CheckFocusStateStyle(bool onFocus);
 
+    bool IsNeedPaintFocusState();
+
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;
@@ -787,7 +787,6 @@ private:
     bool parentFocusable_ { true };
     bool currentFocus_ { false };
     bool isFirstFocusInPage_ { true };
-    bool show_ { true };
 
     FocusType focusType_ = FocusType::DISABLE;
     FocusStyleType focusStyleType_ = FocusStyleType::NONE;

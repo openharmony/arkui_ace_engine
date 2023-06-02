@@ -1075,14 +1075,17 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
         auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetFirstChild());
         CHECK_NULL_VOID(builder);
         if (builder->GetRenderContext()->HasTransition()) {
-            topModalNode->Clean();
+            topModalNode->Clean(false, true);
             topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
+        auto modalPresentationPattern = topModalNode->GetPattern<ModalPresentationPattern>();
+        CHECK_NULL_VOID(modalPresentationPattern);
+        modalTransition = modalPresentationPattern->GetType();
         if (modalTransition == ModalTransition::DEFAULT) {
             PlayDefaultModalTransition(topModalNode, false);
         } else if (modalTransition == ModalTransition::ALPHA) {
             PlayAlphaModalTransition(topModalNode, false);
-        } else {
+        } else if (!builder->GetRenderContext()->HasTransition()) {
             rootNode->RemoveChild(topModalNode);
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
@@ -1112,6 +1115,11 @@ void OverlayManager::PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNo
             }
         });
     } else {
+        auto lastModalNode = lastModalNode_.Upgrade();
+        CHECK_NULL_VOID(lastModalNode);
+        auto lastModalContext = lastModalNode->GetRenderContext();
+        CHECK_NULL_VOID(lastModalContext);
+        lastModalContext->UpdateOpacity(1.0);
         option.SetOnFinishEvent(
             [rootWeak = rootNodeWeak_, modalWK = WeakClaim(RawPtr(modalNode)), id = Container::CurrentId()] {
                 ContainerScope scope(id);
@@ -1129,6 +1137,7 @@ void OverlayManager::PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNo
                     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                     }, TaskExecutor::TaskType::UI);
             });
+        context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
         AnimationUtils::Animate(
             option,
             [context, pageHeight]() {
@@ -1155,6 +1164,7 @@ void OverlayManager::PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode
     if (isTransitionIn) {
         // last page animation
         lastModalContext->OpacityAnimation(option, 1, 0);
+        lastModalContext->UpdateOpacity(0);
 
         // current modal page animation
         context->OpacityAnimation(option, 0, 1);
@@ -1254,8 +1264,13 @@ void OverlayManager::PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTra
     CHECK_NULL_VOID(context);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto pageNode = pipeline->GetStageManager()->GetLastPage();
-    auto pageHeight = pageNode->GetGeometryNode()->GetFrameSize().Height();
+    auto stageManager = pipeline->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto pageNode = stageManager->GetLastPage();
+    CHECK_NULL_VOID(pageNode);
+    auto geometryNode = pageNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto pageHeight = geometryNode->GetFrameSize().Height();
     if (isTransitionIn) {
         auto offset = pageHeight - sheetHeight_;
         if (isFirstTransition) {
@@ -1300,8 +1315,13 @@ void OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto pageNode = pipeline->GetStageManager()->GetLastPage();
-    auto pageHeight = pageNode->GetGeometryNode()->GetFrameSize().Height();
+    auto stageManager = pipeline->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto pageNode = stageManager->GetLastPage();
+    CHECK_NULL_VOID(pageNode);
+    auto geometryNode = pageNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto pageHeight = geometryNode->GetFrameSize().Height();
     auto largeHeight = pageHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
     if (sheetStyle.sheetMode.has_value()) {
         if (sheetStyle.sheetMode == SheetMode::MEDIUM) {
@@ -1450,12 +1470,6 @@ void OverlayManager::UpdatePixelMapScale(float& scale)
     CHECK_NULL_VOID(hub);
     RefPtr<PixelMap> pixelMap = hub->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
-    if (pixelMap->GetWidth() > Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH ||
-        pixelMap->GetHeight() > Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) {
-        float scaleWidth = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH) / pixelMap->GetWidth();
-        float scaleHeight = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) / pixelMap->GetHeight();
-        scale = std::min(scaleWidth, scaleHeight);
-    }
 }
 
 void OverlayManager::RemoveFilter()
@@ -1469,13 +1483,7 @@ void OverlayManager::RemoveFilter()
     CHECK_NULL_VOID(rootNode);
     auto children = columnNode->GetChildren();
     rootNode->RemoveChild(columnNode);
-    int32_t slot = 0;
-    for (auto& child : children) {
-        columnNode->RemoveChild(child);
-        child->MountToParent(rootNode, slot);
-        slot++;
-    }
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    rootNode->RebuildRenderContextTree();
     hasFilter_ = false;
 }
 

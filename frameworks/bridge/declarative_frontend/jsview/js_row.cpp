@@ -122,9 +122,7 @@ void JSRow::JSBind(BindingTarget globalObj)
     JSClass<JSRow>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSRow>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRow>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
-    JSClass<JSRow>::Inherit<JSContainerBase>();
-    JSClass<JSRow>::Inherit<JSViewAbstract>();
-    JSClass<JSRow>::Bind<>(globalObj);
+    JSClass<JSRow>::InheritAndBind<JSContainerBase>(globalObj);
 
     JSClass<VerticalAlignDeclaration>::Declare("VerticalAlignDeclaration");
     JSClass<VerticalAlignDeclaration>::Bind(
