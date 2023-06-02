@@ -57,10 +57,12 @@ DataPanelModifier::DataPanelModifier()
     max_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(DEFAULT_MAX_VALUE);
     trackBackgroundColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(theme->GetBackgroundColor()));
     strokeWidth_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(theme->GetThickness().ConvertToPx());
+    isEffect_ = AceType::MakeRefPtr<PropertyBool>(true);
     AttachProperty(date_);
     AttachProperty(max_);
     AttachProperty(trackBackgroundColor_);
     AttachProperty(strokeWidth_);
+    AttachProperty(isEffect_);
 
     shadowRadiusFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(theme->GetTrackShadowRadius().ConvertToPx());
     shadowOffsetXFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(theme->GetTrackShadowOffsetX().ConvertToPx());
@@ -241,18 +243,18 @@ void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset, flo
     for (int32_t i = static_cast<int32_t>(valuesLastLength_) - 1; i >= 0; i--) {
         arcData.progressColors = valueColors_[i]->Get().GetGradient();
         float totalValuePre = totalValue * 1.0f;
-        if (effect_ && GreatNotEqual(totalValue, 0.0)) {
+        if (isEffect_->Get() && GreatNotEqual(totalValue, 0.0)) {
             arcData.progress = totalValue * date;
         } else {
             arcData.progress = totalValue;
         }
         totalValue -= values_[i]->Get() * proportions;
         arcData.gradientPointBase = (totalValue * 1.0f) / totalValuePre;
-        if ((effect_ || isShadowVisible_) && (i < shadowColorsLastLength_)) {
+        if ((isShadowVisible_ && (isHasShadowValue_ || isEffect_->Get())) && (i < shadowColorsLastLength_)) {
             arcData.shadowColor = shadowColors_[i]->Get().GetGradient();
             PaintRainbowFilterMask(canvas, factor * date, arcData);
         }
-        PaintProgress(canvas, arcData, effect_, false, 0.0);
+        PaintProgress(canvas, arcData, isEffect_->Get(), false, 0.0);
     }
 
     canvas.Restore();
@@ -263,57 +265,66 @@ void DataPanelModifier::PaintLinearProgress(DrawingContext& context, OffsetF off
     auto canvas = context.canvas;
     auto totalWidth = context.width;
     auto spaceWidth = SystemProperties::Vp2Px(FIXED_WIDTH);
-    auto segmentWidthSum = 0.0;
-    for (size_t i = 0; i < valuesLastLength_; i++) {
-        segmentWidthSum += values_[i]->Get();
-    }
+    auto segmentWidthSum = 0.0f;
     auto segmentSize = 0.0;
-    if (segmentWidthSum == max_->Get()) {
-        segmentSize = static_cast<double>(valuesLastLength_ - 1);
-    } else {
-        segmentSize = static_cast<double>(valuesLastLength_);
-    }
     for (size_t i = 0; i < valuesLastLength_; i++) {
-        if (NearEqual(values_[i]->Get(), 0.0)) {
-            segmentSize -= 1;
+        if (NearZero(values_[i]->Get())) {
+            continue;
+        }
+        segmentWidthSum += values_[i]->Get();
+        if (LessNotEqual(segmentWidthSum, max_->Get())) {
+            segmentSize++;
+        } else {
+            break;
         }
     }
+
     float scaleMaxValue = 0.0f;
-    if (max_->Get() > 0) {
+    if (Positive(max_->Get())) {
         scaleMaxValue = (totalWidth - segmentSize * spaceWidth) / max_->Get();
     }
 
     auto widthSegment = offset.GetX();
     PaintBackground(canvas, offset, totalWidth, context.height);
-
+    bool isStopPaint = false;
+    float totalPaintWidth = 0.0f;
+    float preWidthSegment = 0.0f;
     for (size_t i = 0; i < valuesLastLength_; i++) {
-        if (values_[i]->Get() > 0) {
-            LinearData segmentLinearData;
-            segmentLinearData.offset = offset;
-            segmentLinearData.height = context.height;
-            auto segmentWidth = values_[i]->Get();
-            if (NearEqual(segmentWidth, 0.0)) {
-                continue;
-            }
-            if (i == 0) {
-                segmentLinearData.isFirstData = true;
-            }
-            if ((i == (valuesLastLength_ - 1)) && (segmentWidthSum == max_->Get())) {
-                segmentLinearData.isEndData = true;
-            }
-            segmentLinearData.segmentColor = valueColors_[i]->Get().GetGradient();
-            segmentLinearData.segmentWidth = segmentWidth * scaleMaxValue;
-            segmentLinearData.xSegment = widthSegment;
-            if ((effect_ || isShadowVisible_) && (i < shadowColorsLastLength_)) {
-                segmentLinearData.segmentShadowColor = shadowColors_[i]->Get().GetGradient();
-                PaintColorSegmentFilterMask(canvas, segmentLinearData);
-            }
-            PaintColorSegment(canvas, segmentLinearData);
-            widthSegment += values_[i]->Get() * scaleMaxValue;
-            if (!segmentLinearData.isEndData) {
-                PaintSpace(canvas, offset, spaceWidth, widthSegment, segmentLinearData.height);
-                widthSegment += spaceWidth;
-            }
+        auto segmentWidth = values_[i]->Get();
+        if (NonPositive(segmentWidth)) {
+            continue;
+        }
+        LinearData segmentLinearData;
+        segmentLinearData.offset = offset;
+        segmentLinearData.height = context.height;
+        totalPaintWidth += segmentWidth;
+
+        if (i == 0) {
+            segmentLinearData.isFirstData = true;
+        }
+        if (GreatOrEqual(totalPaintWidth, max_->Get())) {
+            segmentLinearData.isEndData = true;
+            isStopPaint = true;
+        }
+        segmentLinearData.segmentColor = valueColors_[i]->Get().GetGradient();
+        segmentLinearData.segmentWidth = segmentWidth * scaleMaxValue;
+        segmentLinearData.xSegment = widthSegment;
+        preWidthSegment = widthSegment;
+        if (GreatOrEqual(segmentLinearData.segmentWidth + segmentLinearData.xSegment, totalWidth)) {
+            segmentLinearData.segmentWidth = totalWidth - preWidthSegment;
+        }
+        if ((isShadowVisible_ && (isHasShadowValue_ || isEffect_->Get())) && (i < shadowColorsLastLength_)) {
+            segmentLinearData.segmentShadowColor = shadowColors_[i]->Get().GetGradient();
+            PaintColorSegmentFilterMask(canvas, segmentLinearData);
+        }
+        PaintColorSegment(canvas, segmentLinearData);
+        if (isStopPaint) {
+            break;
+        }
+        widthSegment += values_[i]->Get() * scaleMaxValue;
+        if (!segmentLinearData.isEndData) {
+            PaintSpace(canvas, offset, spaceWidth, widthSegment, segmentLinearData.height);
+            widthSegment += spaceWidth;
         }
     }
 }
@@ -324,7 +335,8 @@ void DataPanelModifier::PaintBackground(RSCanvas& canvas, OffsetF offset, float 
     brush.SetColor(ToRSColor(trackBackgroundColor_->Get()));
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
-    RSRect rRect(offset.GetX(), offset.GetY(), totalWidth + offset.GetX(), height + offset.GetY());
+    RSRect rRect(offset.GetX() - (height * PERCENT_HALF), offset.GetY(),
+        totalWidth + offset.GetX() + (height * PERCENT_HALF), height + offset.GetY());
     RSRoundRect rrRect(rRect, height, height);
     canvas.DrawRoundRect(rrRect);
     canvas.DetachBrush();
@@ -344,7 +356,6 @@ void DataPanelModifier::PaintColorSegment(RSCanvas& canvas, const LinearData& se
     RSPoint segmentEndPoint;
     segmentEndPoint.SetX(rect.GetRight());
     segmentEndPoint.SetY(rect.GetBottom());
-
     std::vector<RSColorQuad> colors;
     std::vector<float> pos;
     size_t length = segmentLinearData.segmentColor.GetColors().size();
