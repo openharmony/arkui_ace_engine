@@ -539,8 +539,7 @@ void UIContentImpl::CommonInitializeForm(
         basePaths.emplace_back("");
         basePaths.emplace_back("js/");
         basePaths.emplace_back("ets/");
-        auto assetProvider =
-            CreateAssetProvider(hapPath_, basePaths, false);
+        auto assetProvider = CreateAssetProvider(hapPath_, basePaths, false);
         if (assetProvider) {
             LOGE("push card asset provider to queue.");
             flutterAssetManager->PushBack(std::move(assetProvider));
@@ -628,31 +627,6 @@ void UIContentImpl::CommonInitializeForm(
         }
     }
 
-    if (appInfo && flutterAssetManager && hapModuleInfo) {
-        /* Note: DO NOT modify the sequence of adding libPath  */
-        std::string nativeLibraryPath = appInfo->nativeLibraryPath;
-        std::string quickFixLibraryPath = appInfo->appQuickFix.deployedAppqfInfo.nativeLibraryPath;
-        std::vector<std::string> libPaths;
-        if (!quickFixLibraryPath.empty()) {
-            std::string libPath = GenerateFullPath(context->GetBundleCodeDir(), quickFixLibraryPath);
-            libPaths.push_back(libPath);
-            LOGI("napi quick fix lib path = %{private}s", libPath.c_str());
-        }
-        if (!nativeLibraryPath.empty()) {
-            std::string libPath = GenerateFullPath(context->GetBundleCodeDir(), nativeLibraryPath);
-            libPaths.push_back(libPath);
-            LOGI("napi lib path = %{private}s", libPath.c_str());
-        }
-        auto isLibIsolated = hapModuleInfo->isLibIsolated;
-        if (!libPaths.empty()) {
-            if (!isLibIsolated) {
-                flutterAssetManager->SetLibPath("default", libPaths);
-            } else {
-                std::string appLibPathKey = hapModuleInfo->bundleName + "/" + hapModuleInfo->moduleName;
-                flutterAssetManager->SetLibPath(appLibPathKey, libPaths);
-            }
-        }
-    }
     std::string hapPath; // hap path in sandbox
     if (!moduleHapPath.empty()) {
         if (moduleHapPath.find(ABS_BUNDLE_CODE_PATH) == std::string::npos) {
@@ -1112,31 +1086,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         }
     }
 
-    if (appInfo && flutterAssetManager && hapModuleInfo) {
-        /* Note: DO NOT modify the sequence of adding libPath  */
-        std::string nativeLibraryPath = appInfo->nativeLibraryPath;
-        std::string quickFixLibraryPath = appInfo->appQuickFix.deployedAppqfInfo.nativeLibraryPath;
-        std::vector<std::string> libPaths;
-        if (!quickFixLibraryPath.empty()) {
-            std::string libPath = GenerateFullPath(context->GetBundleCodeDir(), quickFixLibraryPath);
-            libPaths.push_back(libPath);
-            LOGI("napi quick fix lib path = %{private}s", libPath.c_str());
-        }
-        if (!nativeLibraryPath.empty()) {
-            std::string libPath = GenerateFullPath(context->GetBundleCodeDir(), nativeLibraryPath);
-            libPaths.push_back(libPath);
-            LOGI("napi lib path = %{private}s", libPath.c_str());
-        }
-        auto isLibIsolated = hapModuleInfo->isLibIsolated;
-        if (!libPaths.empty()) {
-            if (!isLibIsolated) {
-                flutterAssetManager->SetLibPath("default", libPaths);
-            } else {
-                std::string appLibPathKey = hapModuleInfo->bundleName + "/" + hapModuleInfo->moduleName;
-                flutterAssetManager->SetLibPath(appLibPathKey, libPaths);
-            }
-        }
-    }
     std::string hapPath; // hap path in sandbox
     if (!moduleHapPath.empty()) {
         if (moduleHapPath.find(ABS_BUNDLE_CODE_PATH) == std::string::npos) {
@@ -1350,8 +1299,8 @@ void UIContentImpl::ReloadForm()
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     auto flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->GetAssetManager());
     flutterAssetManager->ReloadProvider();
-    Platform::AceContainer::RunPage(instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(),
-        startUrl_, "");
+    Platform::AceContainer::RunPage(
+        instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
 }
 
 void UIContentImpl::Focus()
