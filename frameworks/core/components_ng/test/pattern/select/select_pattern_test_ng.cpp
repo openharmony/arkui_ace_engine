@@ -470,4 +470,43 @@ HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest005, TestSize.Level1)
     auto rowWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     EXPECT_EQ(rowWrapper, nullptr);
 }
+
+/**
+ * @tc.name: SelectDistributedTest001
+ * @tc.desc: Test the distributed capability of Select.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, SelectDistributedTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init select node
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Get pattern and set value.
+     * @tc.expected: Function ProvideRestoreInfo is called.
+     */
+    selectPattern->selected_ = 2;
+    selectPattern->isSelected_ = false;
+    std::string ret = selectPattern->ProvideRestoreInfo();
+    EXPECT_TRUE(ret == R"({"selected":2,"isSelected":false})");
+
+    /**
+     * @tc.steps: step3. Function OnRestoreInfo is called.
+     * @tc.expected: Passing invalid & valid JSON format.
+     */
+    std::string restoreInfo_ = R"({"selected":2,"isSelected":false})";
+    selectPattern->OnRestoreInfo(restoreInfo_);
+    EXPECT_EQ(selectPattern->GetSelected(), 2);
+    restoreInfo_ = R"({"selected":2,"isSelected":true})";
+    selectPattern->OnRestoreInfo(restoreInfo_);
+    EXPECT_EQ(selectPattern->GetSelected(), 2);
+    restoreInfo_ = "invalid_json_string";
+    selectPattern->OnRestoreInfo(restoreInfo_);
+    EXPECT_EQ(selectPattern->GetSelected(), 2);
+}
 } // namespace OHOS::Ace::NG

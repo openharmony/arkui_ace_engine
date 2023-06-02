@@ -2733,4 +2733,44 @@ HWTEST_F(SliderPatternTestNg, PerformActionTest001, TestSize.Level1)
     EXPECT_TRUE(sliderAccessibilityProperty->ActActionScrollForward());
     EXPECT_TRUE(sliderAccessibilityProperty->ActActionScrollBackward());
 }
+
+/**
+ * @tc.name: SliderPatternDistributed001
+ * @tc.desc: Test the distributed capability of Slider
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternDistributed001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPaintProperty = sliderPattern->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Get pattern and set value.
+     * @tc.expected: Function ProvideRestoreInfo is called.
+     */
+    sliderPaintProperty->UpdateValue(40);
+    std::string ret = sliderPattern->ProvideRestoreInfo();
+    EXPECT_TRUE(ret == R"({"value":40})");
+
+    /**
+     * @tc.steps: step3. Function OnRestoreInfo is called.
+     * @tc.expected: Passing invalid & valid JSON format.
+     */
+    std::string restoreInfo_ = R"({"value":40})";
+    sliderPattern->OnRestoreInfo(restoreInfo_);
+    EXPECT_EQ(sliderPaintProperty->GetValue().value_or(0), 40);
+    restoreInfo_ = R"({"value":2})";
+    sliderPattern->OnRestoreInfo(restoreInfo_);
+    EXPECT_EQ(sliderPaintProperty->GetValue().value_or(0), 2);
+    restoreInfo_ = "invalid_json_string";
+    sliderPattern->OnRestoreInfo(restoreInfo_);
+    EXPECT_EQ(sliderPaintProperty->GetValue().value_or(0), 2);
+}
 } // namespace OHOS::Ace::NG
