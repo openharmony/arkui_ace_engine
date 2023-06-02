@@ -106,7 +106,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
     BarPosition barPosition = BarPosition::START;
     RefPtr<TabController> tabController;
     RefPtr<SwiperController> swiperController;
-    int32_t index = 0;
+    int32_t index = -1;
     JSRef<JSVal> changeEventVal;
     if (info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -128,6 +128,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
         JSRef<JSVal> indexVal = obj->GetProperty("index");
         if (indexVal->IsNumber()) {
             index = indexVal->ToNumber<int32_t>();
+            index = index < 0 ? 0 : index;
             if (!tabController) {
                 tabController = JSTabsController::CreateController();
             }
@@ -139,6 +140,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
             auto indexValueProperty = indexObj->GetProperty("value");
             if (indexValueProperty->IsNumber()) {
                 index = indexValueProperty->ToNumber<int32_t>();
+                index = index < 0 ? 0 : index;
             }
             changeEventVal = indexObj->GetProperty("changeEvent");
         }
