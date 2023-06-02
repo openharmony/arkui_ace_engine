@@ -142,13 +142,8 @@ void TextContentModifier::SetDefaultBaselineOffset(const TextStyle& textStyle)
 
 void TextContentModifier::onDraw(DrawingContext& drawingContext)
 {
-    bool ifPaintObscuration = false;
-    for (const auto& reason : obscuredReasons_) {
-        if (reason == ObscuredReasons::PLACEHOLDER) {
-            ifPaintObscuration = true;
-            break;
-        }
-    }
+    bool ifPaintObscuration = std::any_of(obscuredReasons_.begin(), obscuredReasons_.end(),
+        [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
     if (ifPaintObscuration == false || ifHaveSpanItemChildren_ == true) {
         CHECK_NULL_VOID_NOLOG(paragraph_);
         auto canvas = drawingContext.canvas;

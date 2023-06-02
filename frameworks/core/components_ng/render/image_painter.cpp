@@ -128,14 +128,8 @@ void ImagePainter::DrawImage(RSCanvas& canvas, const OffsetF& offset, const Size
 {
     CHECK_NULL_VOID(canvasImage_);
     const auto config = canvasImage_->GetPaintConfig();
-    bool drawObscuration = false;
-    for (const auto& reason : config.obscuredReasons_) {
-        if (reason == ObscuredReasons::PLACEHOLDER) {
-            drawObscuration = true;
-            break;
-        }
-    }
-
+    bool drawObscuration = std::any_of(config.obscuredReasons_.begin(), config.obscuredReasons_.end(),
+        [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
     if (drawObscuration) {
         DrawObscuration(canvas, offset, contentSize);
     } else if (config.isSvg_) {
