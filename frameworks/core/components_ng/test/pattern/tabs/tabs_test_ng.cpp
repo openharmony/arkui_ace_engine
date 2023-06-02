@@ -3865,7 +3865,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleMouseEvent002, TestSize.Level1)
     ASSERT_NE(tabBarNode, nullptr);
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     ASSERT_NE(tabBarPattern, nullptr);
-    // tabBarPattern->GetHost()->Clean(false, false);
     tabBarNode->Clean(false, false);
     auto info = MouseInfo();
 
