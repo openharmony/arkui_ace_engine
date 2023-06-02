@@ -27,9 +27,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_render_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "frameworks/core/components/custom_paint/offscreen_canvas.h"
-#include "frameworks/core/components_ng/pattern/custom_paint/custom_paint_pattern.h"
-#include "frameworks/core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -152,53 +149,6 @@ public:
         isOffscreen_ = true;
     }
 
-    void SetCanvasPatternTemporary(const RefPtr<AceType>& obj)
-    {
-        // below is temporary code
-        auto customPaintPattern = AceType::DynamicCast<NG::CustomPaintPattern>(obj);
-        if (customPaintPattern) {
-            customPaintPattern_ = customPaintPattern;
-            canvasPattern_ = customPaintPattern;
-            isOffscreen_ = false;
-            return;
-        }
-        auto pool = AceType::DynamicCast<OHOS::Ace::CustomPaintComponent>(obj)->GetTaskPool();
-        if (pool) {
-            pool_ = pool;
-            canvasPattern_ = pool;
-            isOffscreen_ = false;
-            return;
-        }
-    }
-
-    void SetComponent(const RefPtr<CanvasTaskPool>& controller)
-    {
-        pool_ = controller;
-        isOffscreen_ = false;
-        SetCanvasPattern(controller);
-    }
-
-    void SetOffscreenCanvas(const RefPtr<OffscreenCanvas>& offscreenCanvas)
-    {
-        offscreenCanvas_ = offscreenCanvas;
-        isOffscreen_ = true;
-        SetOffscreenPattern(offscreenCanvas);
-    }
-
-    void SetCustomPaintPattern(const RefPtr<NG::CustomPaintPattern>& pattern)
-    {
-        customPaintPattern_ = pattern;
-        isOffscreen_ = false;
-        SetCanvasPattern(pattern);
-    }
-
-    void SetOffscreenCanvasPattern(const RefPtr<NG::OffscreenCanvasPattern>& pattern)
-    {
-        offscreenCanvasPattern_ = pattern;
-        isOffscreen_ = true;
-        SetOffscreenPattern(pattern);
-    }
-
     std::vector<uint32_t> GetLineDash() const
     {
         return lineDash_;
@@ -230,11 +180,7 @@ protected:
     void ParseStrokePattern(const JSCallbackInfo& info);
 
 protected:
-    RefPtr<CanvasTaskPool> pool_;
-    RefPtr<OffscreenCanvas> offscreenCanvas_;
     bool anti_ = false;
-    RefPtr<NG::CustomPaintPattern> customPaintPattern_;
-    RefPtr<NG::OffscreenCanvasPattern> offscreenCanvasPattern_;
 
     RefPtr<AceType> canvasPattern_;
     RefPtr<AceType> offscreenPattern_;

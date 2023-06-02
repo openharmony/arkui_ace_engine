@@ -31,21 +31,8 @@ public:
     static void Destructor(JSOffscreenRenderingContext* controller);
 
     void JsTransferToImageBitmap(const JSCallbackInfo& info);
-    static RefPtr<OffscreenCanvas> GetOffscreenCanvas(int32_t id)
-    {
-        auto tem = GetOffscreenPattern(id);
-        auto offscreenPattern = AceType::DynamicCast<OffscreenCanvas>(tem);
-        return offscreenPattern;
-    }
 
-    static RefPtr<NG::OffscreenCanvasPattern> GetOffscreenCanvasPattern(int32_t id)
-    {
-        auto tem = GetOffscreenPattern(id);
-        auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(tem);
-        return offscreenPattern;
-    }
-
-    static void AddOffscreenCanvasPattern(const RefPtr<NG::OffscreenCanvasPattern>& pattern)
+    static void AddOffscreenCanvasPattern(const RefPtr<AceType>& pattern)
     {
         CHECK_NULL_VOID(pattern);
         std::lock_guard<std::mutex> lock(mutex_);
