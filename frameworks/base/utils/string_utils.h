@@ -509,6 +509,7 @@ inline void TransformStrCase(std::string& str, int32_t textCase)
     }
 }
 
+bool IsAscii(const std::string& str);
 } // namespace OHOS::Ace::StringUtils
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_STRING_UTILS_H
