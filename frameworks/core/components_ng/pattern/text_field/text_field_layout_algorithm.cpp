@@ -172,6 +172,10 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     bool showPlaceHolder = false;
     auto idealWidth = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
     auto idealHeight = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height());
+    auto idealSize = SizeF { idealWidth, idealHeight };
+    idealSize.UpdateSizeWhenSmaller(contentConstraint.maxSize);
+    idealWidth = idealSize.Width();
+    idealHeight = idealSize.Height();
     auto layoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textFieldLayoutProperty, std::nullopt);
     if (!textFieldLayoutProperty->GetValueValue("").empty()) {
