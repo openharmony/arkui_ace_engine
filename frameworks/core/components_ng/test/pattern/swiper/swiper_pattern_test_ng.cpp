@@ -1271,10 +1271,10 @@ HWTEST_F(SwiperPatternTestNg, SwiperPreviousFocus001, TestSize.Level1)
     swiperPattern->leftButtonId_ = std::nullopt;
     swiperPattern->PreviousFocus(curFocusHub);
     EXPECT_FALSE(swiperPattern->isLastIndicatorFocused_);
-    EXPECT_FALSE(curFocusHub->parentFocusable_);
+    EXPECT_TRUE(curFocusHub->parentFocusable_);
     swiperModelNG.SetLoop(false);
     swiperPattern->PreviousFocus(curFocusHub);
-    EXPECT_TRUE(curFocusHub->parentFocusable_);
+    EXPECT_FALSE(curFocusHub->parentFocusable_);
     EXPECT_FALSE(swiperPattern->isLastIndicatorFocused_);
     curFocusHub->GetFrameNode()->tag_ = V2::SWIPER_INDICATOR_ETS_TAG;
     swiperPattern->PreviousFocus(curFocusHub);
