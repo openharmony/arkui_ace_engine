@@ -2417,10 +2417,20 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
                 auto context = weakThis.Upgrade();
                 CHECK_NULL_VOID(context);
                 ContainerScope scope(id);
-                LOGD("RosenTransitionEffect::NotifyTransition transition END, node %{public}d, isTransitionIn: OUT",
-                    nodeId);
-                // update transition out count
-                context->OnTransitionOutFinish();
+                auto pipeline = PipelineBase::GetCurrentContext();
+                CHECK_NULL_VOID(pipeline);
+                auto taskExecutor = pipeline->GetTaskExecutor();
+                CHECK_NULL_VOID(taskExecutor);
+                taskExecutor->PostTask(
+                    [id, nodeId, context]() {
+                        ContainerScope scope(id);
+                        LOGD("RosenTransitionEffect::NotifyTransition transition END, node %{public}d, "
+                             "isTransitionIn: OUT",
+                            nodeId);
+                        // update transition out count
+                        context->OnTransitionOutFinish();
+                    },
+                    TaskExecutor::TaskType::UI);
             },
             false);
     }
