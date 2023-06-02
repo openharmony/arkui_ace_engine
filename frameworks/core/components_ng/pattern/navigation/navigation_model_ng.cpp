@@ -188,6 +188,10 @@ void BuildMoreItemNodeAction(const RefPtr<BarItemNode>& barItemNode, const RefPt
         auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
         CHECK_NULL_VOID(menuLayoutProperty);
         menuLayoutProperty->UpdateTargetSize(imageSize);
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        // navigation menu show like select.
+        menuPattern->SetIsSelectMenu(true);
 
         imgOffset.SetX(imgOffset.GetX());
         imgOffset.SetY(imgOffset.GetY() + imageSize.Height());
