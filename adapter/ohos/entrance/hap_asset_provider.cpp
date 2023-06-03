@@ -122,6 +122,7 @@ std::string HapAssetProvider::GetAssetPath(const std::string& assetName, bool is
 void HapAssetProvider::GetAssetList(const std::string& path, std::vector<std::string>& assetList)
 {
     std::lock_guard<std::mutex> lock(mutex_);
+
     for (const auto& basePath : assetBasePaths_) {
         std::string assetPath = basePath + path;
         bool res = runtimeExtractor_->IsDirExist(assetPath);

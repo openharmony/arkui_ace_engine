@@ -83,21 +83,27 @@ void AceServiceAbility::OnStart(const OHOS::AAFwk::Want& want, sptr<AAFwk::Sessi
     // init service
     BackendType backendType = BackendType::SERVICE;
 
-    Platform::PaContainer::CreateContainer(abilityId_, backendType, this, moduleInfo->hapPath,
-        std::make_unique<ServicePlatformEventCallback>([this]() { TerminateAbility(); }));
+    std::shared_ptr<Platform::WorkerPath> workerPath = std::make_shared<Platform::WorkerPath>();
+    workerPath->packagePathStr = packagePathStr;
 
+    std::vector<std::string> assetBasePathStr;
     AceEngine::InitJsDumpHeadSignal();
     std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
     if (info != nullptr && !info->srcPath.empty()) {
         LOGI("AceServiceAbility::OnStar assetBasePathStr: %{public}s, parsedUrl: %{public}s",
             info->srcPath.c_str(), parsedUrl.c_str());
-        auto assetBasePathStr = { "assets/js/" + info->srcPath + "/", std::string("assets/js/") };
-        Platform::PaContainer::AddAssetPath(abilityId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
+        assetBasePathStr = { "assets/js/" + info->srcPath + "/", std::string("assets/js/") };
     } else {
         LOGI("AceServiceAbility::OnStar parsedUrl: %{public}s", parsedUrl.c_str());
-        auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
-        Platform::PaContainer::AddAssetPath(abilityId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
+        assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
     }
+
+    workerPath->assetBasePathStr = assetBasePathStr;
+    
+    Platform::PaContainer::CreateContainer(abilityId_, backendType, this, moduleInfo->hapPath,
+        std::make_unique<ServicePlatformEventCallback>([this]() { TerminateAbility(); }), workerPath);
+
+    Platform::PaContainer::AddAssetPath(abilityId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
 
     // run service
     Platform::PaContainer::RunPa(abilityId_, parsedUrl, want);
