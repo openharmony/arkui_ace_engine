@@ -223,6 +223,10 @@ public:
         static TextEditingValue value;
         return value;
     };
+    Offset GetGlobalOffset() const;
+    double GetEditingBoxY() const override;
+    double GetEditingBoxTopY() const override;
+    bool GetEditingBoxModel() const override;
 #endif
 
     void UpdateEditingValue(std::string value, int32_t caretPosition)
@@ -236,6 +240,7 @@ public:
     void UpdateCaretPositionByTouch(const Offset& offset);
     void UpdateCaretOffsetByEvent();
 
+    TextInputAction GetDefaultTextInputAction();
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
     bool CloseKeyboard(bool forceClose) override;
 

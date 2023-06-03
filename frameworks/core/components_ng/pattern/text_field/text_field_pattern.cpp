@@ -897,6 +897,43 @@ const TextEditingValueNG& TextFieldPattern::GetEditingValue() const
     return textEditingValue_;
 }
 
+#if defined(IOS_PLATFORM)
+Offset TextFieldPattern::GetGlobalOffset() const
+{
+    Offset offset;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, {});
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, {});
+    auto rootOffset = pipeline->GetRootRect().GetOffset();
+    auto globalOffset = host->GetPaintRectOffset() - rootOffset;
+    offset = Offset(globalOffset.GetX(), globalOffset.GetY());
+    return offset;
+}
+
+double TextFieldPattern::GetEditingBoxY() const
+{
+    return GetGlobalOffset().GetY() + frameRect_.Height();
+};
+
+double TextFieldPattern::GetEditingBoxTopY() const
+{
+    return GetGlobalOffset().GetY();
+};
+
+bool TextFieldPattern::GetEditingBoxModel() const
+{
+    bool isDeclarative = false;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
+    if (pipeline && pipeline->GetIsDeclarative()) {
+        isDeclarative = true;
+    }
+    return isDeclarative;
+};
+#endif
+
 void TextFieldPattern::HandleFocusEvent()
 {
     LOGI("TextField %{public}d on focus", GetHost()->GetId());
@@ -2637,6 +2674,19 @@ void TextFieldPattern::UpdateTextFieldManager(const Offset& offset, float height
     textFieldManager->SetOnFocusTextField(WeakClaim(this));
 }
 
+TextInputAction TextFieldPattern::GetDefaultTextInputAction()
+{
+    TextInputAction defaultTextInputAction = TextInputAction::DONE;
+    if (IsSearchParentNode()) {
+        defaultTextInputAction = TextInputAction::SEARCH;
+    } else if (IsTextArea()) {
+        defaultTextInputAction = TextInputAction::UNSPECIFIED;
+    } else {
+        defaultTextInputAction = TextInputAction::DONE;
+    }
+    return defaultTextInputAction;
+}
+
 bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
     auto host = GetHost();
@@ -2669,10 +2719,10 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
         if (!HasConnection()) {
             TextInputConfiguration config;
             config.type = keyboard_;
-            config.action = GetTextInputActionValue(TextInputAction::DONE);
+            config.action = GetTextInputActionValue(GetDefaultTextInputAction());
             config.obscureText = textObscured_;
             LOGI("Request keyboard configuration: type=%{private}d action=%{private}d obscureText=%{private}d",
-                keyboard_, action_, textObscured_);
+                keyboard_, config.action, textObscured_);
             connection_ = TextInputProxy::GetInstance().Attach(
                 WeakClaim(this), config, context->GetTaskExecutor(), GetInstanceId());
 
