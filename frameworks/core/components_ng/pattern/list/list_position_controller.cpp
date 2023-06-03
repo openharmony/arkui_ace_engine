@@ -24,17 +24,18 @@
 
 namespace OHOS::Ace::NG {
 
-void ListPositionController::JumpTo(int32_t index, int32_t source)
+void ListPositionController::JumpTo(int32_t index, bool smooth, int32_t source)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID_NOLOG(pattern);
     auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
     CHECK_NULL_VOID_NOLOG(listPattern);
     LOGW("jumpTo is not supported now");
-    listPattern->ScrollToIndex(index);
+    listPattern->ScrollToIndex(index, smooth);
 }
 
-bool ListPositionController::AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve)
+bool ListPositionController::AnimateTo(
+    const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_RETURN(pattern, false);
@@ -47,7 +48,7 @@ bool ListPositionController::AnimateTo(const Dimension& position, float duration
         if (Positive(duration)) {
             listPattern->AnimateTo(position.ConvertToPx(), duration, curve);
         } else {
-            listPattern->ScrollTo(position.ConvertToPx());
+            listPattern->ScrollTo(position.ConvertToPx(), smooth);
         }
         return true;
     }

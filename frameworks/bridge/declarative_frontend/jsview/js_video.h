@@ -31,15 +31,15 @@ public:
     static void JsLoop(const JSCallbackInfo& info);
     static void JsObjectFit(const JSCallbackInfo& info);
 
-    static void JsOnStart(const JSCallbackInfo& args);
-    static void JsOnPause(const JSCallbackInfo& args);
-    static void JsOnFinish(const JSCallbackInfo& args);
-    static void JsOnFullscreenChange(const JSCallbackInfo& args);
-    static void JsOnPrepared(const JSCallbackInfo& args);
-    static void JsOnSeeking(const JSCallbackInfo& args);
-    static void JsOnSeeked(const JSCallbackInfo& args);
-    static void JsOnUpdate(const JSCallbackInfo& args);
-    static void JsOnError(const JSCallbackInfo& args);
+    static void JsOnStart(const JSCallbackInfo& info);
+    static void JsOnPause(const JSCallbackInfo& info);
+    static void JsOnFinish(const JSCallbackInfo& info);
+    static void JsOnFullscreenChange(const JSCallbackInfo& info);
+    static void JsOnPrepared(const JSCallbackInfo& info);
+    static void JsOnSeeking(const JSCallbackInfo& info);
+    static void JsOnSeeked(const JSCallbackInfo& info);
+    static void JsOnUpdate(const JSCallbackInfo& info);
+    static void JsOnError(const JSCallbackInfo& info);
 
     static void JSBind(BindingTarget globalObj);
 

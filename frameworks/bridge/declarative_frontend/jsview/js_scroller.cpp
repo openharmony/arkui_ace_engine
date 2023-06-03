@@ -104,13 +104,19 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
         ConvertFromJSValue(animationObj->GetProperty("duration"), duration);
 
         std::string curveName;
-        if (ConvertFromJSValue(animationObj->GetProperty("curve"), curveName)) {
+        auto curveArgs = animationObj->GetProperty("curve");
+        if (ConvertFromJSValue(curveArgs, curveName)) {
             auto index = BinarySearchFindIndex(CURVE_MAP, ArraySize(CURVE_MAP), curveName.c_str());
             if (index >= 0) {
                 curve = CURVE_MAP[index].value;
             }
+        } else if (curveArgs->IsObject()) {
+            ParseCustomCurveParams(curve, curveArgs);
         }
     }
+
+    bool smooth = false;
+    ConvertFromJSValue(obj->GetProperty("smooth"), smooth);
 
     if (GreatNotEqual(duration, 0.0)) {
         LOGD("ScrollTo(%lf, %lf, %lf)", xOffset.Value(), yOffset.Value(), duration);
@@ -124,7 +130,16 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     }
     auto direction = scrollController->GetScrollDirection();
     auto position = direction == Axis::VERTICAL ? yOffset : xOffset;
-    scrollController->AnimateTo(position, static_cast<float>(duration), curve);
+    scrollController->AnimateTo(position, static_cast<float>(duration), curve, smooth);
+}
+
+void JSScroller::ParseCustomCurveParams(RefPtr<Curve>& curve, const JSRef<JSVal>& jsValue)
+{
+    auto icurveArgs = JsonUtil::ParseJsonString(jsValue->ToString());
+    if (icurveArgs->IsObject()) {
+        auto curveString = icurveArgs->GetValue("__curveString");
+        curve = CreateCurve(curveString->GetString());
+    }
 }
 
 void JSScroller::ScrollEdge(const JSCallbackInfo& args)
@@ -147,6 +162,7 @@ void JSScroller::ScrollEdge(const JSCallbackInfo& args)
 void JSScroller::ScrollToIndex(const JSCallbackInfo& args)
 {
     int32_t index = 0;
+    bool smooth = false;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], index) || index < 0) {
         LOGW("Invalid params");
         return;
@@ -156,7 +172,10 @@ void JSScroller::ScrollToIndex(const JSCallbackInfo& args)
         LOGE("controller_ is nullptr");
         return;
     }
-    scrollController->JumpTo(index, SCROLL_FROM_JUMP);
+    if (args.Length() == 2 && args[1]->IsBoolean()) {
+        smooth = args[1]->ToBoolean();
+    }
+    scrollController->JumpTo(index, smooth, SCROLL_FROM_JUMP);
 }
 
 void JSScroller::ScrollPage(const JSCallbackInfo& args)

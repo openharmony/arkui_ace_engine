@@ -25,6 +25,7 @@
 #include "core/animation/curves.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -91,6 +92,15 @@ void SelectPattern::ShowSelectMenu()
     CHECK_NULL_VOID(menuLayoutProps);
     menuLayoutProps->UpdateTargetSize(selectSize_);
     auto offset = GetHost()->GetPaintRectOffset();
+    auto isContainerModal = context->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
+                            context->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+    if (isContainerModal) {
+        auto newOffsetX = offset.GetX() + static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx() * 2) +
+                          static_cast<float>(CONTENT_PADDING.ConvertToPx() * 2);
+        auto newOffsetY = offset.GetY() + static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx());
+        offset.SetX(newOffsetX);
+        offset.SetY(newOffsetY);
+    }
     offset.AddY(selectSize_.Height());
     LOGD("select offset %{public}s size %{public}s", offset.ToString().c_str(), selectSize_.ToString().c_str());
     overlayManager->ShowMenu(GetHost()->GetId(), offset, menuWrapper_);
@@ -216,7 +226,7 @@ void SelectPattern::CreateSelectedCallback()
         CHECK_NULL_VOID(pattern);
         pattern->SetSelected(index);
         pattern->UpdateText(index);
-
+        pattern->isSelected_ = true;
         auto hub = host->GetEventHub<SelectEventHub>();
         CHECK_NULL_VOID(hub);
         // execute change event callback
@@ -864,4 +874,29 @@ void SelectPattern::SetMenuAlign(const MenuAlign& menuAlign)
     menuLayoutProps->UpdateAlignType(menuAlign.alignType);
     menuLayoutProps->UpdateOffset(menuAlign.offset);
 }
+
+std::string SelectPattern::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    jsonObj->Put("selected", selected_);
+    jsonObj->Put("isSelected", isSelected_);
+    return jsonObj->ToString();
+}
+
+void SelectPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    auto info = JsonUtil::ParseJsonString(restoreInfo);
+    if (!info->IsValid() || !info->IsObject()) {
+        return;
+    }
+    auto jsonIsOn = info->GetValue("selected");
+    auto jsonIsSelect = info->GetValue("isSelected");
+    if (jsonIsSelect->GetBool()) {
+        SetSelected(jsonIsOn->GetInt());
+        UpdateText(jsonIsOn->GetInt());
+    }
+
+}
+
+
 } // namespace OHOS::Ace::NG

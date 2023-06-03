@@ -169,6 +169,7 @@ public:
     void SetHitTestMode(NG::HitTestMode hitTestMode) override;
     void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) override {};
+    void SetObscured(const std::vector<ObscuredReasons>& reasons) override {};
 
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
     void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,

@@ -468,7 +468,7 @@ private:
     VerticalAlign verticalAlign_ { VerticalAlign::NONE };
     TextAlign textAlign_ { TextAlign::START };
     Color textColor_ { Color::BLACK };
-    Color textDecorationColor_ { Color::TRANSPARENT };
+    Color textDecorationColor_ { Color::BLACK };
     TextDecoration textDecoration_ { TextDecoration::NONE };
     std::vector<Shadow> textShadows_;
     WhiteSpace whiteSpace_{ WhiteSpace::PRE };

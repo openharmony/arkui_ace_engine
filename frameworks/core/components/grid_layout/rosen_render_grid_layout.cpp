@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,6 +50,7 @@ void RosenRenderGridLayout::PaintSelectedZone(RenderContext& context)
         return;
     }
 
+#ifndef USE_ROSEN_DRAWING
     SkRect skRect = SkRect::MakeXYWH(mouseStartOffset_.GetX(), mouseStartOffset_.GetY(),
         mouseEndOffset_.GetX()-mouseStartOffset_.GetX(), mouseEndOffset_.GetY()-mouseStartOffset_.GetY());
 
@@ -66,16 +67,41 @@ void RosenRenderGridLayout::PaintSelectedZone(RenderContext& context)
 
     canvas->drawRect(skRect, fillGeometry);
     canvas->drawRect(skRect, strokeGeometry);
+#else
+    RSRect rect = RSRect(mouseStartOffset_.GetX(), mouseStartOffset_.GetY(),
+        mouseEndOffset_.GetX(), mouseEndOffset_.GetY());
+    RSBrush fillGeometry;
+    fillGeometry.SetAntiAlias(true);
+    fillGeometry.SetColor(0x1A000000);
+
+    RSPen strokeGeometry;
+    strokeGeometry.SetAntiAlias(true);
+    strokeGeometry.SetColor(0x33FFFFFF);
+    strokeGeometry.SetWidth(NormalizeToPx(1.0_vp));
+
+    canvas->AttachBrush(fillGeometry);
+    canvas->DrawRect(rect);
+    canvas->DetachBrush();
+
+    canvas->AttachPen(strokeGeometry);
+    canvas->DrawRect(rect);
+    canvas->DetachPen();
+#endif
 }
 
 void RosenRenderGridLayout::PaintItemZone(RenderContext& context, const Rect& paintRect)
 {
     auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
     if (canvas == nullptr) {
+#ifndef USE_ROSEN_DRAWING
         LOGE("skia canvas is null");
+#else
+        LOGE("Drawing canvas is null");
+#endif
         return;
     }
 
+#ifndef USE_ROSEN_DRAWING
     SkRect skRect = SkRect::MakeXYWH(paintRect.GetOffset().GetX(), paintRect.GetOffset().GetY(),
         paintRect.Width(), paintRect.Height());
 
@@ -85,6 +111,18 @@ void RosenRenderGridLayout::PaintItemZone(RenderContext& context, const Rect& pa
     fillGeometry.setColor(0x1A0A59f7);
 
     canvas->drawRect(skRect, fillGeometry);
+#else
+    RSRect rect = RSRect(paintRect.GetOffset().GetX(), paintRect.GetOffset().GetY(),
+        paintRect.Width() + paintRect.GetOffset().GetX(), paintRect.Height() + paintRect.GetOffset().GetY());
+
+    RSBrush fillGeometry;
+    fillGeometry.SetAntiAlias(true);
+    fillGeometry.SetColor(0x1A0A59f7);
+
+    canvas->AttachBrush(fillGeometry);
+    canvas->DrawRect(rect);
+    canvas->DetachBrush();
+#endif
 }
 
 } // namespace OHOS::Ace

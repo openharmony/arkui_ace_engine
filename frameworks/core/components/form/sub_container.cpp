@@ -378,7 +378,7 @@ void SubContainer::ProcessSharedImage(const std::map<std::string, sptr<AppExecFw
     if (!imageDataMap.empty()) {
         for (auto& imageData : imageDataMap) {
             if (!imageData.second) {
-                LOGE("the point of FormAshmem about %{private}s is null, continue", imageData.first.c_str());
+                LOGI("the point of FormAshmem about %{private}s is null, continue", imageData.first.c_str());
                 continue;
             }
             picNameArray.push_back(imageData.first);
@@ -494,6 +494,13 @@ void SubContainer::UpdateCard(
     if (allowUpdate_) {
         frontend_->UpdateData(std::move(content));
         ProcessSharedImage(imageDataMap);
+    }
+}
+
+void SubContainer::UpdateConfiguration()
+{
+    if (frontend_) {
+        frontend_->OnMediaFeatureUpdate();
     }
 }
 

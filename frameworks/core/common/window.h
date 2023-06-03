@@ -45,31 +45,6 @@ public:
         return windowId_;
     }
 
-    const std::string& GetWindowName() const
-    {
-        return windowName_;
-    }
-
-    void SetWindowRect(Rect rect)
-    {
-        windowRect_ = rect;
-    }
-
-    Rect GetWindowRect() const
-    {
-        return windowRect_;
-    }
-
-    bool IsDecorEnable() const
-    {
-        return false;
-    }
-
-    bool IsFocused() const
-    {
-        return true;
-    }
-
     virtual void RequestFrame();
 
     virtual void SetTaskExecutor(const RefPtr<TaskExecutor>& taskExecutor) {}
@@ -171,12 +146,38 @@ public:
         return viewSafeArea_;
     }
 
-    void SetSafeArea(SafeAreaEdgeInserts viewSafeArea)
+    void SetSafeArea(const SafeAreaEdgeInserts& viewSafeArea)
     {
         viewSafeArea_ = viewSafeArea;
     }
 
     SafeAreaEdgeInserts viewSafeArea_;
+
+    void SetSystemSafeArea(const SafeAreaEdgeInserts& safeArea)
+    {
+        if (systemSafeArea_ == safeArea) {
+            return;
+        }
+        systemSafeArea_ = safeArea;
+    }
+
+    SafeAreaEdgeInserts GetSystemSafeArea() const
+    {
+        return systemSafeArea_;
+    }
+
+    void SetCutoutSafeArea(const SafeAreaEdgeInserts& safeArea)
+    {
+        if (cutoutSafeArea_ == safeArea) {
+            return;
+        }
+        cutoutSafeArea_ = safeArea;
+    }
+
+    SafeAreaEdgeInserts GetCutoutSafeArea() const
+    {
+        return cutoutSafeArea_;
+    }
 
     virtual void SetKeepScreenOn(bool keepScreenOn) {};
 
@@ -192,11 +193,10 @@ protected:
     std::list<struct VsyncCallback> callbacks_;
 
     uint64_t lastRequestVsyncTime_ = 0;
-
-    // window properties
-    std::string windowName_;
     uint32_t windowId_ = 0;
-    Rect windowRect_;
+
+    SafeAreaEdgeInserts systemSafeArea_;
+    SafeAreaEdgeInserts cutoutSafeArea_;
 
 private:
     std::function<Rect()> windowRectImpl_;

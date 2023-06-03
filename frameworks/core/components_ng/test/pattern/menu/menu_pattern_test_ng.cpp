@@ -45,6 +45,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t TARGET_ID = 3;
 constexpr MenuType TYPE = MenuType::MENU;
+constexpr int32_t SELECTED_INDEX = 10;
 class MenuPatternTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -176,6 +177,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg006, TestSize.Level1)
     MneuModelInstance.SetFontSize(Dimension(25.0));
     MneuModelInstance.SetFontColor(Color::RED);
     MneuModelInstance.SetFontWeight(FontWeight::BOLD);
+    MneuModelInstance.SetFontStyle(Ace::FontStyle::ITALIC);
 
     auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(menuNode, nullptr);
@@ -193,6 +195,8 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg006, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetFontWeight().value(), FontWeight::BOLD);
     ASSERT_TRUE(layoutProperty->GetFontColor().has_value());
     EXPECT_EQ(layoutProperty->GetFontColor().value(), Color::RED);
+    ASSERT_TRUE(layoutProperty->GetItalicFontStyle().has_value());
+    EXPECT_EQ(layoutProperty->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
 }
 
 /**
@@ -505,6 +509,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg011, TestSize.Level1)
     MenuItemProperties itemOption;
     itemOption.content = "content";
     MneuItemModelInstance.Create(itemOption);
+    MneuItemModelInstance.SetFontStyle(Ace::FontStyle::ITALIC);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
     auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
@@ -852,7 +857,8 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg018, TestSize.Level1)
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg019, TestSize.Level1)
 {
-    MenuView::Create();
+    MenuModelNG model;
+    model.Create();
     auto multiMenu = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     auto menuWrapper = MenuView::Create(multiMenu, -1);
     ASSERT_NE(menuWrapper, nullptr);
@@ -873,11 +879,73 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg019, TestSize.Level1)
     ASSERT_NE(multiMenu->GetLayoutProperty()->GetPaddingProperty()->ToString(), PaddingProperty().ToString());
     ASSERT_NE(multiMenu->GetRenderContext()->GetBackgroundColor(), std::nullopt);
     // inner menu should have no shadow
-    ASSERT_EQ(multiMenu->GetRenderContext()->GetBackShadow(), std::nullopt);
+    ASSERT_EQ(multiMenu->GetRenderContext()->GetBackShadow(), ShadowConfig::NoneShadow);
 
     // MultiMenu should have its own layout algorithm
     auto layoutAlgorithm = multiMenu->GetPattern<MenuPattern>()->CreateLayoutAlgorithm();
     ASSERT_NE(AceType::DynamicCast<MultiMenuLayoutAlgorithm>(layoutAlgorithm), nullptr);
+}
+
+/**
+ * @tc.name: MenuPatternTestNg020
+ * @tc.desc: Verify UpdateMenuItemChildren.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTestNg020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create MenuModelNG and MenuItemModelNG object and set FontStyle properties of MenuModelNG.
+     */
+    MenuModelNG MneuModelInstance;
+    MenuItemModelNG MneuItemModelInstance;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+
+    MneuModelInstance.Create();
+    MneuModelInstance.SetFontStyle(Ace::FontStyle::ITALIC);
+
+    /**
+     * @tc.steps: step2. get the frameNode, MenuPattern and MenuLayoutProperty.
+     * @tc.expected: step2. check whether the objects is available.
+     */
+    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. not set FontStyle properties of MenuModelNG.
+     */
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    MneuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    itemPattern->OnModifyDone();
+    itemNode->MountToParent(menuNode);
+    itemNode->OnMountToParentDone();
+
+    /**
+     * @tc.steps: step4. call OnModifyDone of MenuPattern to call UpdateMenuItemChildren
+     */
+    menuPattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step5. get the FontStyle properties of menuItemLayoutProperty.
+     * @tc.expected: step5. check whether the FontStyle properties is is correct.
+     */
+    auto contentNode = itemPattern->GetContentNode();
+    ASSERT_NE(contentNode, nullptr);
+    auto textProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProperty, nullptr);
+    ASSERT_TRUE(textProperty->GetItalicFontStyle().has_value());
+    EXPECT_EQ(textProperty->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
 }
 
 /**
@@ -937,7 +1005,8 @@ HWTEST_F(MenuPatternTestNg, PerformActionTest002, TestSize.Level1)
      * @tc.steps: step1. Create menu, get menu frameNode and pattern, set callback function.
      * @tc.expected: FrameNode and pattern is not null, related function is called.
      */
-    MenuView::Create();
+    MenuModelNG model;
+    model.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto menuPattern = frameNode->GetPattern<MenuPattern>();
@@ -982,6 +1051,79 @@ HWTEST_F(MenuPatternTestNg, PerformActionTest002, TestSize.Level1)
     textNode->MarkModifyDone();
     EXPECT_TRUE(menuAccessibilityProperty->ActActionScrollForward());
     EXPECT_TRUE(menuAccessibilityProperty->ActActionScrollBackward());
+}
+
+/**
+ * @tc.name: MenuAccessibilityEventTestNg001
+ * @tc.desc: Test Click Event for Option of Menu.
+ */
+HWTEST_F(MenuPatternTestNg, MenuAccessibilityEventTestNg001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Option for Menu.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+    ASSERT_NE(frameNode, nullptr);
+    auto optionPattern = frameNode->GetPattern<OptionPattern>();
+    ASSERT_NE(optionPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set callback function.
+     */
+    int testIndex = SELECTED_INDEX;
+    auto selectFunc = [optionPattern, testIndex](int index) { optionPattern->index_ = testIndex; };
+    auto optionEventHub = frameNode->GetEventHub<OptionEventHub>();
+    optionEventHub->SetOnSelect(selectFunc);
+    optionPattern->RegisterOnClick();
+
+    /**
+     * @tc.steps: step3. call callback function.
+     * @tc.expected: index_ is SELECTED_INDEX.
+     */
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    auto clickEventActuator = gestureHub->clickEventActuator_;
+    ASSERT_NE(clickEventActuator, nullptr);
+    auto event = clickEventActuator->GetClickEvent();
+    ASSERT_NE(event, nullptr);
+    GestureEvent gestureEvent;
+    event(gestureEvent);
+    EXPECT_EQ(optionPattern->index_, SELECTED_INDEX);
+}
+
+/**
+ * @tc.name: DesktopMenuPattern001
+ * @tc.desc: Test MenuPattern onModifyDone, switch between DesktopMenu and regular menu.
+ */
+HWTEST_F(MenuPatternTestNg, DesktopMenuPattern001, TestSize.Level1)
+{
+    MenuModelNG model;
+    model.Create();
+    auto menu1 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menu1, nullptr);
+    model.Create();
+    auto menu2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto container = FrameNode::CreateFrameNode("", -1, AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MENU));
+    auto mockScroll = FrameNode::CreateFrameNode("", -1, AceType::MakeRefPtr<Pattern>());
+    mockScroll->MountToParent(container);
+    menu1->MountToParent(mockScroll);
+    menu2->MountToParent(mockScroll);
+
+    auto pattern1 = menu1->GetPattern<InnerMenuPattern>();
+    auto pattern2 = menu2->GetPattern<InnerMenuPattern>();
+    auto containerPattern = container->GetPattern<MenuPattern>();
+    containerPattern->OnModifyDone();
+    pattern1->OnModifyDone();
+    pattern2->OnModifyDone();
+    EXPECT_EQ(pattern1->type_, MenuType::DESKTOP_MENU);
+    EXPECT_EQ(pattern2->type_, MenuType::DESKTOP_MENU);
+    EXPECT_EQ(container->GetRenderContext()->GetBackShadow(), ShadowConfig::NoneShadow);
+
+    mockScroll->RemoveChildAtIndex(1);
+    pattern1->OnModifyDone();
+    containerPattern->OnModifyDone();
+    EXPECT_EQ(pattern1->type_, MenuType::MULTI_MENU);
+    EXPECT_EQ(container->GetRenderContext()->GetBackShadow(), ShadowConfig::DefaultShadowM);
 }
 } // namespace
 } // namespace OHOS::Ace::NG

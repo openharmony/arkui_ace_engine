@@ -40,9 +40,6 @@ public:
     // create select's popup menu
     static RefPtr<FrameNode> Create(const std::vector<SelectParam>& params, int32_t targetId);
 
-    // create menu with menuItem and menuItemGroup
-    static void Create();
-
 private:
     static void UpdateWrapperPaintProperty(const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam,
         const MenuType& isContextMenu);

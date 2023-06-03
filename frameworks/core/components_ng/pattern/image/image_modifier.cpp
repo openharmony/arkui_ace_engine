@@ -28,6 +28,10 @@ void ImageModifier::onDraw(DrawingContext& context)
 {
     auto canvas = canvasImage_.Upgrade();
     CHECK_NULL_VOID(canvas);
+    if (isAltImage_) {
+        DrawImageWithoutAnimation(context);
+        return;
+    }
     if (isFirst_) {
         DrawImageWithoutAnimation(context);
         isFirst_ = false;
@@ -72,6 +76,11 @@ void ImageModifier::UpdateImageData(const WeakPtr<CanvasImage>& canvasImage,
 void ImageModifier::Modify()
 {
     flag_->Set(!flag_->Get());
+}
+
+void ImageModifier::SetIsAltImage(bool isAltImage)
+{
+    isAltImage_ = isAltImage;
 }
 
 float ImageModifier::GetValue(float value) const

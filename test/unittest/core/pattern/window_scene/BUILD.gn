@@ -91,6 +91,7 @@ ohos_unittest("window_scene_test") {
     "$ace_root/frameworks/core/components_ng/test/pattern/image/mock_icon_theme.cpp",
 
     # components_ng_property
+    "$ace_root/frameworks/core/components_ng/property/border_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",
     "$ace_root/frameworks/core/components_ng/property/grid_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",
@@ -121,11 +122,12 @@ ohos_unittest("window_scene_test") {
 
     # self
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/root/root_scene_model.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/host/host_window_extension.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/host/host_window_node.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/host/host_window_pattern.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/host/host_window_scene.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/host/host_window_scene_model.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/system_window_scene.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_extension.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_scene.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_scene_model.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/screen/screen_model.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/screen/screen_pattern.cpp",
 

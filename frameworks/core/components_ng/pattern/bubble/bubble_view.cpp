@@ -88,6 +88,10 @@ void UpdateTextProperties(const RefPtr<PopupParam>& param, const RefPtr<TextLayo
     if (fontWeight.has_value()) {
         textLayoutProps->UpdateFontWeight(fontWeight.value());
     }
+    auto fontStyle = param->GetFontStyle();
+    if (fontStyle.has_value()) {
+        textLayoutProps->UpdateItalicFontStyle(fontStyle.value());
+    }
 }
 } // namespace
 
@@ -115,6 +119,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     popupProp->UpdateEnableArrow(param->EnableArrow());
     popupProp->UpdatePlacement(param->GetPlacement());
     popupProp->UpdateShowInSubWindow(param->IsShowInSubWindow());
+    popupProp->UpdatePositionOffset(OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY()));
     popupProp->UpdateBlockEvent(param->IsBlockEvent());
     if (param->GetTargetSpace().has_value()) {
         popupProp->UpdateTargetSpace(param->GetTargetSpace().value());
@@ -191,6 +196,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     layoutProps->UpdateBlockEvent(param->IsBlockEvent());
     auto displayWindowOffset = GetDisplayWindowRectOffset();
     layoutProps->UpdateDisplayWindowOffset(displayWindowOffset);
+    layoutProps->UpdatePositionOffset(OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY()));
     if (param->GetTargetSpace().has_value()) {
         layoutProps->UpdateTargetSpace(param->GetTargetSpace().value());
     }
@@ -276,6 +282,7 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     }
     popupLayoutProp->UpdateShowInSubWindow(param->IsShowInSubWindow());
     popupLayoutProp->UpdateBlockEvent(param->IsBlockEvent());
+    popupLayoutProp->UpdatePositionOffset(OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY()));
     if (param->IsMaskColorSetted()) {
         popupPaintProp->UpdateMaskColor(param->GetMaskColor());
     }

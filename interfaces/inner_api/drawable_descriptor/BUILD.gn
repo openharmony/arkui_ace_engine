@@ -39,7 +39,7 @@ ohos_shared_library("drawable_descriptor") {
 
   configs = [
     "$ace_root:ace_config",
-    "$ace_root/test/unittest:ace_coverage_config",
+    "$ace_root:ace_coverage_config",
   ]
 
   sources = [
@@ -70,5 +70,6 @@ ohos_shared_library("drawable_descriptor") {
   ]
 
   subsystem_name = ace_engine_subsystem
+  innerapi_tags = [ "platformsdk" ]
   part_name = ace_engine_part
 }

@@ -40,8 +40,8 @@ SideBarContainerModel* SideBarContainerModel::GetInstance()
             } else {
                 instance_.reset(new Framework::SideBarContainerModelImpl());
             }
-        }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -125,6 +125,7 @@ void JSSideBar::JSBind(BindingTarget globalObj)
     JSClass<JSSideBar>::StaticMethod("autoHide", &JSSideBar::JsAutoHide);
     JSClass<JSSideBar>::StaticMethod("sideBarPosition", &JSSideBar::JsSideBarPosition);
     JSClass<JSSideBar>::StaticMethod("divider", &JSSideBar::JsDivider);
+    JSClass<JSSideBar>::StaticMethod("minContentWidth", &JSSideBar::JsMinContentWidth);
     JSClass<JSSideBar>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSideBar>::StaticMethod("width", SetWidth);
     JSClass<JSSideBar>::StaticMethod("height", SetHeight);
@@ -307,6 +308,26 @@ void JSSideBar::JsDivider(const JSCallbackInfo& info)
         }
         SideBarContainerModel::GetInstance()->SetDividerEndMargin(endMargin);
     }
+}
+
+void JSSideBar::JsMinContentWidth(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("JsMinContentWidth::Invalid params");
+        return;
+    }
+    if (info[0]->IsNull()) {
+        SideBarContainerModel::GetInstance()->SetMinContentWidth(-1.0_vp);
+        LOGW("JsMinContentWidth::info[0]->IsNull()");
+        return;
+    }
+    CalcDimension minContentWidth;
+    if (!JSViewAbstract::ParseJsDimensionVp(info[0], minContentWidth)) {
+        SideBarContainerModel::GetInstance()->SetMinContentWidth(-1.0_vp);
+        LOGW("JsMinContentWidth::ParseJsDimensionVp Fail!!!");
+        return;
+    }
+    SideBarContainerModel::GetInstance()->SetMinContentWidth(minContentWidth);
 }
 
 void JSSideBar::JsAutoHide(bool autoHide)

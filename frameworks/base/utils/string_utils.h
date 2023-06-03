@@ -194,12 +194,6 @@ inline bool StringToDouble(const std::string& value, double& result)
         if (std::strcmp(pEnd, "%") == 0) {
             result = res / PERCENT_VALUE;
             return true;
-        } else if (std::strcmp(pEnd, "vw") == 0) {
-            result = res / PERCENT_VALUE;
-            return true;
-        } else if (std::strcmp(pEnd, "vh") == 0) {
-            result = res / PERCENT_VALUE;
-            return true;
         } else if (std::strcmp(pEnd, "") == 0) {
             result = res;
             return true;
@@ -247,12 +241,6 @@ static Dimension StringToDimensionWithUnit(const std::string& value, DimensionUn
         }
         if (std::strcmp(pEnd, "lpx") == 0) {
             return Dimension(result, DimensionUnit::LPX);
-        }
-        if (std::strcmp(pEnd, "vw") == 0) {
-            return Dimension(result / PERCENT_VALUE, DimensionUnit::VW);
-        }
-        if (std::strcmp(pEnd, "vh") == 0) {
-            return Dimension(result / PERCENT_VALUE, DimensionUnit::VH);
         }
         if ((std::strcmp(pEnd, "\0") == 0) && isCalc) {
             return Dimension(result, DimensionUnit::NONE);
@@ -521,6 +509,7 @@ inline void TransformStrCase(std::string& str, int32_t textCase)
     }
 }
 
+bool IsAscii(const std::string& str);
 } // namespace OHOS::Ace::StringUtils
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_STRING_UTILS_H

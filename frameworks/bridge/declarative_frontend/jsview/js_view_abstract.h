@@ -150,6 +150,7 @@ public:
     static bool ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result);
     static bool ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result);
+    static bool ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color& result);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result);
     static bool ParseJsColorStrategy(const JSRef<JSVal>& jsValue, ForegroundColorStrategy& strategy);
     static bool ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
@@ -239,6 +240,8 @@ public:
     static void JsOpacityPassThrough(const JSCallbackInfo& info);
     static void JsTransitionPassThrough(const JSCallbackInfo& info);
     static void JsKeyboardShortcut(const JSCallbackInfo& info);
+
+    static void JsObscured(const JSCallbackInfo& info);
 
     static void JsAccessibilityGroup(bool accessible);
     static void JsAccessibilityText(const std::string& text);

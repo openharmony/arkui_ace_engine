@@ -406,11 +406,12 @@ FocusPattern RadioPattern::GetFocusPattern() const
 bool RadioPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& /*config*/)
 {
     auto geometryNode = dirty->GetGeometryNode();
-    offset_ = geometryNode->GetContentOffset();
-    size_ = geometryNode->GetContentSize();
-    if (isFirstAddhotZoneRect_) {
+    auto offset = geometryNode->GetContentOffset();
+    auto size = geometryNode->GetContentSize();
+    if (!NearEqual(offset, offset_) || !NearEqual(size, size_)) {
+        offset_ = offset;
+        size_ = size;
         AddHotZoneRect();
-        isFirstAddhotZoneRect_ = false;
     }
     return true;
 }
@@ -437,5 +438,27 @@ void RadioPattern::RemoveLastHotZoneRect() const
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->RemoveLastHotZoneRect();
+}
+
+std::string RadioPattern::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    auto radioPaintProperty = GetPaintProperty<RadioPaintProperty>();
+    CHECK_NULL_RETURN(radioPaintProperty, "");
+    jsonObj->Put("checked", radioPaintProperty->GetRadioCheck().value_or(false));
+    return jsonObj->ToString();
+}
+
+void RadioPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    auto radioPaintProperty = GetPaintProperty<RadioPaintProperty>();
+    CHECK_NULL_VOID(radioPaintProperty);
+    auto info = JsonUtil::ParseJsonString(restoreInfo);
+    if (!info->IsValid() || !info->IsObject()) {
+        return;
+    }
+    auto jsonChecked = info->GetValue("checked");
+    radioPaintProperty->UpdateRadioCheck(jsonChecked->GetBool()); 
+    OnModifyDone();
 }
 } // namespace OHOS::Ace::NG

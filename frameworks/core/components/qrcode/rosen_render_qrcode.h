@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_QRCODE_ROSEN_RENDER_QRCODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_QRCODE_ROSEN_RENDER_QRCODE_H
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkBitmap.h"
+#endif
 #include "qrcodegen.hpp"
 
 #include "core/components/qrcode/render_qrcode.h"
@@ -44,7 +46,11 @@ public:
     void Paint(RenderContext& context, const Offset& offset) override;
     void DrawQRCode(RenderContext& context, const Offset& topLeft, int32_t size, const qrcodegen::QrCode& qrCode);
     uint32_t ConvertColorFromHighToLow(const Color& color);
+#ifndef USE_ROSEN_DRAWING
     SkBitmap ProcessQrcodeData(int32_t width, const qrcodegen::QrCode& qrCode);
+#else
+    RSBitmap ProcessQrcodeData(int32_t width, const qrcodegen::QrCode& qrCode);
+#endif
 };
 
 } // namespace OHOS::Ace

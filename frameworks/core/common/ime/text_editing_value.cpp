@@ -83,6 +83,10 @@ void TextEditingValue::MoveLeft()
 void TextEditingValue::MoveRight()
 {
     auto utf16Text = StringUtils::Str8ToStr16(text);
+    if (utf16Text.length() < 1) {
+        LOGI("utf16Text length = 0");
+        return;
+    }
     if (static_cast<size_t>(selection.extentOffset) >= utf16Text.length() - 1) {
         selection.Update(utf16Text.length());
         return;

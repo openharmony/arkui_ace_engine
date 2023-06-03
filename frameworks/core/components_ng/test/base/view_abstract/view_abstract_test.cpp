@@ -22,6 +22,11 @@
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
+#include "test/mock/core/common/mock_container.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "core/components/popup/popup_theme.h"
+#include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #undef private
 #undef protected
 using namespace testing;
@@ -29,19 +34,20 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-const Dimension WIDTH {50.0, DimensionUnit::PX};
-const Dimension HEIGHT {100.0, DimensionUnit::PX};
-const Dimension MIN_WIDTH {10.0, DimensionUnit::PX};
-const Dimension MIN_HEIGHT {20.0, DimensionUnit::PX};
-const Dimension RADIUS {10.0, DimensionUnit::PX};
-const Dimension LEFT {10.0, DimensionUnit::PX};
-const Dimension TOP {20.0, DimensionUnit::PX};
-const Dimension RIGHT {10.0, DimensionUnit::PX};
-const Dimension BOTTOM {20.0, DimensionUnit::PX};
-const Dimension VALUE {-50.0, DimensionUnit::PX};
+const Dimension WIDTH { 50.0, DimensionUnit::PX };
+const Dimension HEIGHT { 100.0, DimensionUnit::PX };
+const Dimension MIN_WIDTH { 10.0, DimensionUnit::PX };
+const Dimension MIN_HEIGHT { 20.0, DimensionUnit::PX };
+const Dimension RADIUS { 10.0, DimensionUnit::PX };
+const Dimension LEFT { 10.0, DimensionUnit::PX };
+const Dimension TOP { 20.0, DimensionUnit::PX };
+const Dimension RIGHT { 10.0, DimensionUnit::PX };
+const Dimension BOTTOM { 20.0, DimensionUnit::PX };
+const Dimension VALUE { -50.0, DimensionUnit::PX };
+const Dimension ZERO { 0.0, DimensionUnit::PX };
 
-const OffsetF OFFSETF {1.0, 1.0};
-const Offset OFFSET {2.0, 2.0};
+const OffsetF OFFSETF { 1.0, 1.0 };
+const Offset OFFSET { 2.0, 2.0 };
 const float RATIO = 1.0f;
 const double OPACITYS = 10;
 const int32_t TEN = 10;
@@ -49,9 +55,9 @@ const int32_t FOUF = 4;
 const int32_t INDEX = 1;
 const Color BLUE = Color(0xff0000ff);
 
-const BackgroundImageSize BACKGROUNDSIZE {BackgroundImageSizeType::AUTO, 1.0};
-const BackgroundImagePosition BACKGROUNDPOSITION {BackgroundImagePositionType::PERCENT, -1.0,
-    BackgroundImagePositionType::PERCENT, 0.0};
+const BackgroundImageSize BACKGROUNDSIZE { BackgroundImageSizeType::AUTO, 1.0 };
+const BackgroundImagePosition BACKGROUNDPOSITION { BackgroundImagePositionType::PERCENT, -1.0,
+    BackgroundImagePositionType::PERCENT, 0.0 };
 
 constexpr char TAG_ROOT[] = "root";
 constexpr char TAG_CHILD[] = "child";
@@ -60,12 +66,39 @@ const auto FRAME_NODE_ROOT = FrameNode::CreateFrameNode(TAG_ROOT, 1, MOCK_PATTER
 const auto FRAME_NODE_CHILD = FrameNode::CreateFrameNode(TAG_CHILD, 2, MOCK_PATTERN_ROOT, false);
 
 std::string srcimages = "common/images/mmm.jpg";
+const std::string VALUE_EMPTY = "";
+const std::string VALUE_X = "X";
+const std::string VALUE_CX = "CX";
+ViewAbstractModelNG viewAbstractModelNG;
+auto callback = []() { srcimages = "test"; };
+int32_t flag = 0;
 
-auto callback = []() {
-    srcimages = "test";
-};
+void CallShowHideFunc()
+{
+    MockPipelineBase::GetCurrent()->GetOverlayManager()->CallOnShowMenuCallback();
+    MockPipelineBase::GetCurrent()->GetOverlayManager()->CallOnHideMenuCallback();
+    SubwindowManager::GetInstance()->onShowMenuCallback_();
+    SubwindowManager::GetInstance()->onHideMenuCallback_();
+}
 }; // namespace
-class ViewAbstractTest : public testing::Test {};
+class ViewAbstractTest : public testing::Test {
+public:
+    static void SetUpTestSuite()
+    {
+        MockPipelineBase::SetUp();
+        MockContainer::SetUp();
+        MockContainer::Current()->pipelineContext_ = PipelineBase::GetCurrentContext();
+        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+        PipelineBase::GetCurrentContext()->SetThemeManager(themeManager);
+        PipelineBase::GetCurrentContext()->SetEventManager(AceType::MakeRefPtr<EventManager>());
+        EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+    }
+    static void TearDownTestSuite()
+    {
+        MockContainer::Current()->pipelineContext_ = nullptr;
+        MockPipelineBase::TearDown();
+    }
+};
 
 /**
  * @tc.name: ViewAbstractTest001
@@ -430,9 +463,9 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest010, TestSize.Level1)
 
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
-    focusHub->show_ = true;
     focusHub->focusable_ = true;
     focusHub->parentFocusable_ = true;
+    ViewAbstract::SetVisibility(VisibleType::VISIBLE);
     ViewAbstract::SetEnabled(true);
 
     /**
@@ -473,20 +506,15 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest011, TestSize.Level1)
 
     std::vector<DimensionRect> responseRegion;
     ViewAbstract::SetResponseRegion(std::move(responseRegion));
-    std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&,
-        const std::string&)> onDragStart;
+    std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> onDragStart;
     ViewAbstract::SetOnDragStart(std::move(onDragStart));
-    std::function<void(const RefPtr<OHOS::Ace::DragEvent>&,
-        const std::string&)> onDragEnter;
+    std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> onDragEnter;
     ViewAbstract::SetOnDragEnter(std::move(onDragEnter));
-    std::function<void(const RefPtr<OHOS::Ace::DragEvent>&,
-        const std::string&)> onDragLeave;
+    std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> onDragLeave;
     ViewAbstract::SetOnDragLeave(std::move(onDragLeave));
-    std::function<void(const RefPtr<OHOS::Ace::DragEvent>&,
-        const std::string&)> onDragMove;
+    std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> onDragMove;
     ViewAbstract::SetOnDragMove(std::move(onDragMove));
-    std::function<void(const RefPtr<OHOS::Ace::DragEvent>&,
-        const std::string&)> onDrop;
+    std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> onDrop;
     ViewAbstract::SetOnDrop(std::move(onDrop));
     Alignment alignment;
     ViewAbstract::SetAlign(std::move(alignment));
@@ -522,20 +550,15 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest012, TestSize.Level1)
 
     std::vector<DimensionRect> responseRegion;
     ViewAbstract::SetResponseRegion(std::move(responseRegion));
-    std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&,
-        const std::string&)> onDragStart;
+    std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> onDragStart;
     ViewAbstract::SetOnDragStart(std::move(onDragStart));
-    std::function<void(const RefPtr<OHOS::Ace::DragEvent>&,
-        const std::string&)> onDragEnter;
+    std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> onDragEnter;
     ViewAbstract::SetOnDragEnter(std::move(onDragEnter));
-    std::function<void(const RefPtr<OHOS::Ace::DragEvent>&,
-        const std::string&)> onDragLeave;
+    std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> onDragLeave;
     ViewAbstract::SetOnDragLeave(std::move(onDragLeave));
-    std::function<void(const RefPtr<OHOS::Ace::DragEvent>&,
-        const std::string&)> onDragMove;
+    std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> onDragMove;
     ViewAbstract::SetOnDragMove(std::move(onDragMove));
-    std::function<void(const RefPtr<OHOS::Ace::DragEvent>&,
-        const std::string&)> onDrop;
+    std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> onDrop;
     ViewAbstract::SetOnDrop(std::move(onDrop));
     Alignment alignment;
     ViewAbstract::SetAlign(std::move(alignment));
@@ -570,7 +593,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest013, TestSize.Level1)
     ViewAbstract::SetOpacity(OPACITYS);
     ViewAbstract::SetZIndex(FOUF);
 
-    OffsetT<Dimension> value = {WIDTH, HEIGHT};
+    OffsetT<Dimension> value = { WIDTH, HEIGHT };
     ViewAbstract::SetPosition(value);
     ViewAbstract::SetOffset(value);
     ViewAbstract::MarkAnchor(value);
@@ -602,12 +625,11 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest014, TestSize.Level1)
     ViewAbstract::SetOpacity(OPACITYS);
     ViewAbstract::SetZIndex(FOUF);
 
-    OffsetT<Dimension> value = {WIDTH, HEIGHT};
+    OffsetT<Dimension> value = { WIDTH, HEIGHT };
     ViewAbstract::SetPosition(value);
     ViewAbstract::SetOffset(value);
     ViewAbstract::MarkAnchor(value);
-    VectorF scale(1.0f, 1.0f);
-    ViewAbstract::SetScale(scale);
+    viewAbstractModelNG.SetScale(-1.0f, -1.0f, 0.0f);
 
     /**
      * @tc.expected: Return expected results.
@@ -633,8 +655,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest015, TestSize.Level1)
     /**
      * @tc.steps: step1.The FrameNode is null, related function is called.
      */
-    DimensionOffset value = {WIDTH, HEIGHT};
-    ViewAbstract::SetPivot(value);
+    viewAbstractModelNG.SetPivot(WIDTH, HEIGHT, WIDTH);
     NG::TranslateOptions pttions;
     ViewAbstract::SetTranslate(std::move(pttions));
     Matrix4 matrix;
@@ -645,8 +666,8 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest015, TestSize.Level1)
 
     Vector4F scale(1.0f, 1.0f, 2.0f, 2.0f);
     ViewAbstract::SetRotate(scale);
-    ShadowStyle style {1};
-    Shadow shadow {RATIO, OFFSET, BLUE, style};
+    ShadowStyle style { 1 };
+    Shadow shadow { RATIO, OFFSET, BLUE, style };
     ViewAbstract::SetBackShadow(shadow);
 
     NG::Gradient gradient;
@@ -673,8 +694,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest016, TestSize.Level1)
     ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
     ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
 
-    DimensionOffset value = {WIDTH, HEIGHT};
-    ViewAbstract::SetPivot(value);
+    viewAbstractModelNG.SetPivot(WIDTH, HEIGHT, ZERO);
     NG::TranslateOptions pttions;
     ViewAbstract::SetTranslate(std::move(pttions));
     Matrix4 matrix;
@@ -686,8 +706,8 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest016, TestSize.Level1)
 
     Vector4F scale(1.0f, 1.0f, 2.0f, 2.0f);
     ViewAbstract::SetRotate(scale);
-    ShadowStyle style {1};
-    Shadow shadow {RATIO, OFFSET, BLUE, style};
+    ShadowStyle style { 1 };
+    Shadow shadow { RATIO, OFFSET, BLUE, style };
     ViewAbstract::SetBackShadow(shadow);
     NG::Gradient gradient;
     ViewAbstract::SetLinearGradient(std::move(gradient));
@@ -884,12 +904,10 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest021, TestSize.Level1)
     ViewAbstract::SetChainedTransition(std::move(effect));
     RefPtr<ProgressMaskProperty> progress;
     ViewAbstract::SetProgressMask(std::move(progress));
-    
+
     ViewAbstract::SetForegroundColor(BLUE);
     auto strategy = static_cast<ForegroundColorStrategy>(INDEX);
     ViewAbstract::SetForegroundColorStrategy(std::move(strategy));
-    std::vector<ModifierKey> keys;
-    ViewAbstract::SetKeyboardShortcut(srcimages, std::move(keys), callback);
     auto hoverEffect = static_cast<HoverEffectType>(INDEX);
     ViewAbstract::SetHoverEffectAuto(hoverEffect);
     ViewAbstract::SetDraggable(true);
@@ -926,8 +944,6 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest022, TestSize.Level1)
     ViewAbstract::SetForegroundColor(BLUE);
     auto strategy = static_cast<ForegroundColorStrategy>(INDEX);
     ViewAbstract::SetForegroundColorStrategy(std::move(strategy));
-    std::vector<ModifierKey> keys;
-    ViewAbstract::SetKeyboardShortcut(srcimages, std::move(keys), callback);
     ViewAbstract::SetBorderWidth(VALUE);
     ViewAbstract::SetHeight(NG::CalcLength(HEIGHT));
     ViewAbstract::SetWidth(NG::CalcLength(WIDTH));
@@ -959,8 +975,8 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest023, TestSize.Level1)
     /**
      * @tc.steps: step1.The FrameNode is null, related function is called.
      */
-    std::function<void(const RectF& oldRect, const OffsetF& oldOrigin,
-        const RectF& rect, const OffsetF& origin)> onAreaChanged;
+    std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>
+        onAreaChanged;
     ViewAbstract::SetOnAreaChanged(std::move(onAreaChanged));
     std::function<void(bool, double)> onVisibleChange;
     const std::vector<double> ratios;
@@ -993,8 +1009,8 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest024, TestSize.Level1)
     ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
     ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
 
-    std::function<void(const RectF& oldRect, const OffsetF& oldOrigin,
-        const RectF& rect, const OffsetF& origin)> onAreaChanged;
+    std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>
+        onAreaChanged;
     ViewAbstract::SetOnAreaChanged(std::move(onAreaChanged));
     std::function<void(bool, double)> onVisibleChange;
     const std::vector<double> ratios;
@@ -1023,45 +1039,108 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest024, TestSize.Level1)
 
 /**
  * @tc.name: ViewAbstractTest025
- * @tc.desc: Test the operation of View_Abstract.
+ * @tc.desc: Test the BindPopup of View_Abstract.
  * @tc.type: FUNC
  */
 HWTEST_F(ViewAbstractTest, ViewAbstractTest025, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create a FrameNode.
+     * @tc.steps: step1. Create some FrameNode and params.
      */
     const RefPtr<FrameNode> customNode = FrameNode::CreateFrameNode("one", 1, AceType::MakeRefPtr<Pattern>(), true);
-    const RefPtr<PopupParam> param;
+    const RefPtr<FrameNode> targetNode = FrameNode::CreateFrameNode("two", 2, AceType::MakeRefPtr<Pattern>());
+    const RefPtr<FrameNode> targetNode2 = FrameNode::CreateFrameNode("three", 3, AceType::MakeRefPtr<Pattern>());
+    auto param = AceType::MakeRefPtr<PopupParam>();
+    auto param2 = AceType::MakeRefPtr<PopupParam>();
 
     /**
-     * @tc.steps: step2. callback BindPopup.push targetNode is null.
-     * @tc.expected: Return expected results..
+     * @tc.steps: step2. get popupInfo and change some params.
      */
-    ViewAbstract::BindPopup(std::move(param), nullptr, customNode);
-    EXPECT_EQ(Container::Current(), nullptr);
+    auto overlayManager = MockPipelineBase::GetCurrent()->GetOverlayManager();
+    PopupInfo info = overlayManager->GetPopupInfo(targetNode->GetId());
+    info.isCurrentOnShow = true;
+    info.popupId = 1;
+    overlayManager->UpdatePopupNode(targetNode->GetId(), info);
+
+    /**
+     * @tc.steps: step3. Call BindPopup many times.
+     * @tc.expected: popupNode in overlayManager of targetNode not null
+     */
+    ViewAbstract::BindPopup(param, targetNode, customNode);
+    ViewAbstract::BindPopup(param, targetNode, customNode);
+    auto popupNode = overlayManager->GetPopupInfo(targetNode->GetId()).popupNode;
+    ASSERT_NE(popupNode, nullptr);
+    popupNode->GetPattern<BubblePattern>()->transitionStatus_ = BubblePattern::TransitionStatus::ENTERING;
+    ViewAbstract::BindPopup(param, targetNode, customNode);
+    param->SetIsShow(false);
+    ViewAbstract::BindPopup(param, targetNode, customNode);
+    param->SetShowInSubWindow(true);
+    ViewAbstract::BindPopup(param, targetNode, customNode);
+    EXPECT_NE(overlayManager->GetPopupInfo(targetNode->GetId()).popupNode, nullptr);
+
+    /**
+     * @tc.steps: step4. Call BindPopup with param use custom.
+     * @tc.expected: popupNode in overlayManager of targetNode not null
+     */
+    param2->SetUseCustomComponent(true);
+    ViewAbstract::BindPopup(param2, targetNode2, customNode);
+    ViewAbstract::BindPopup(param2, targetNode2, customNode);
+    param2->SetUseCustomComponent(false);
+    param2->SetShowInSubWindow(true);
+    ViewAbstract::BindPopup(param2, targetNode2, customNode);
+    param2->SetIsShow(false);
+    ViewAbstract::BindPopup(param2, targetNode2, customNode);
+    EXPECT_NE(overlayManager->GetPopupInfo(targetNode->GetId()).popupNode, nullptr);
 }
 
 /**
  * @tc.name: ViewAbstractTest026
- * @tc.desc: Test the operation of View_Abstract.
+ * @tc.desc: Test the SetKeyboardShortcut of View_Abstract.
  * @tc.type: FUNC
  */
 HWTEST_F(ViewAbstractTest, ViewAbstractTest026, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create a FrameNode.
+     * @tc.steps: step1. Create a FrameNode and get eventManager.
      */
-    const RefPtr<FrameNode> customNode = FrameNode::CreateFrameNode("one", 1, AceType::MakeRefPtr<Pattern>(), true);
-    const RefPtr<FrameNode> targetNode = FrameNode::CreateFrameNode("two", 2, AceType::MakeRefPtr<Pattern>());
-    const RefPtr<PopupParam> param;
+    const RefPtr<FrameNode> targetNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ViewStackProcessor::GetInstance()->Push(targetNode);
+    auto eventManager = PipelineContext::GetCurrentContext()->GetEventManager();
+    /**
+     * @tc.steps: step2. call SetKeyboardShortcut with ctrl + x.
+     * @tc.expected: add fail
+     */
+    std::vector<ModifierKey> keys;
+    keys.push_back(ModifierKey::CTRL);
+    ViewAbstract::SetKeyboardShortcut(VALUE_X, std::move(keys), callback);
+    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 0);
+    keys.clear();
+    /**
+     * @tc.steps: step3. call SetKeyboardShortcut with other wrong type.
+     * @tc.expected: add fail
+     */
+    ViewAbstract::SetKeyboardShortcut(VALUE_EMPTY, std::move(keys), callback);
+    ViewAbstract::SetKeyboardShortcut(VALUE_CX, std::move(keys), callback);
+    ViewAbstract::SetKeyboardShortcut(VALUE_X, std::move(keys), callback);
 
     /**
-     * @tc.steps: step2. callback SetEnabled.push targetNode is not null.
-     * @tc.expected: step2. Return expected results..
+     * @tc.steps: step4. and shift in keys and recall SetKeyboardShortcut .
+     * @tc.expected: add success
      */
-    ViewAbstract::BindPopup(std::move(param), targetNode, customNode);
-    EXPECT_EQ(Container::Current(), nullptr);
+    keys.push_back(ModifierKey::ALT);
+    ViewAbstract::SetKeyboardShortcut(VALUE_CX, std::move(keys), callback);
+    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
+
+    /**
+     * @tc.steps: step5. make other key and recall SetKeyboardShortcut .
+     * @tc.expected: add fail
+     */
+    keys.push_back(ModifierKey::SHIFT);
+    ViewAbstract::SetKeyboardShortcut(VALUE_CX, std::move(keys), callback);
+    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
+    keys.push_back(ModifierKey::ALT);
+    ViewAbstract::SetKeyboardShortcut(VALUE_CX, std::move(keys), callback);
+    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
 }
 
 /**
@@ -1071,19 +1150,28 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest026, TestSize.Level1)
  */
 HWTEST_F(ViewAbstractTest, ViewAbstractTest027, TestSize.Level1)
 {
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
     /**
-     * @tc.steps: step1. callback ShowMenu function.push isContextMenu is false.
+     * @tc.steps: step1. callback ShowMenu with two condition.
      */
-    std::shared_ptr<SubwindowManager> subwindow = SubwindowManager::GetInstance();
     ContainerScope sontainerScope(1);
-
     ViewAbstract::ShowMenu(INDEX, OFFSETF, false);
-
+    ViewAbstract::ShowMenu(INDEX, OFFSETF, true);
     /**
-     * @tc.expected: Return expected results..
+     * @tc.steps: step2. callback SetForegroundBlurStyle and ResetFlexShrink.
      */
-    EXPECT_EQ(Container::Current(), nullptr);
-    EXPECT_EQ(sontainerScope.currentId_, INDEX);
+    BlurStyleOption bgBlurStyle;
+    ViewAbstract::SetForegroundBlurStyle(bgBlurStyle);
+    ViewAbstract::ResetFlexShrink();
+    /**
+     * @tc.steps: step3. SetVisualState in ViewStackProcessor and recall the two function.
+     * @tc.expected: the blur radius in render context meet expectations.
+     */
+    ViewStackProcessor::GetInstance()->SetVisualState(VisualState::FOCUSED);
+    ViewAbstract::SetForegroundBlurStyle(bgBlurStyle);
+    ViewAbstract::ResetFlexShrink();
+    ASSERT_NE(FRAME_NODE_ROOT->GetRenderContext(), nullptr);
+    EXPECT_FALSE(FRAME_NODE_ROOT->GetRenderContext()->GetFrontBlurRadius().has_value());
 }
 
 /**
@@ -1238,7 +1326,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest032, TestSize.Level1)
     /**
      * @tc.steps: step2. related function is called.
      */
-    OffsetT<Dimension> values = {WIDTH, HEIGHT};
+    OffsetT<Dimension> values = { WIDTH, HEIGHT };
     ViewAbstract::SetPosition(values);
     ViewAbstract::SetOffset(values);
     ViewAbstract::MarkAnchor(values);
@@ -1276,7 +1364,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest033, TestSize.Level1)
     /**
      * @tc.steps: step2. related function is called.
      */
-    OffsetT<Dimension> values = {WIDTH, HEIGHT};
+    OffsetT<Dimension> values = { WIDTH, HEIGHT };
     ViewAbstract::SetPosition(values);
     ViewAbstract::SetOffset(values);
     ViewAbstract::MarkAnchor(values);
@@ -1359,10 +1447,9 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest035, TestSize.Level1)
     /**
      * @tc.steps: step2. related function is called.
      */
-    VectorF scale(1.0f, 1.0f);
-    ViewAbstract::SetScale(scale);
-    DimensionOffset value = {WIDTH, HEIGHT};
-    ViewAbstract::SetPivot(value);
+    viewAbstractModelNG.SetScale(1.0f, 1.0f, 0.0f);
+    DimensionOffset value = { WIDTH, HEIGHT };
+    viewAbstractModelNG.SetPivot(WIDTH, HEIGHT, ZERO);
     NG::TranslateOptions values;
     ViewAbstract::SetTranslate(std::move(values));
     Vector4F scales(1.0f, 1.0f, 2.0f, 2.0f);
@@ -1370,8 +1457,8 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest035, TestSize.Level1)
     Matrix4 matrix;
     ViewAbstract::SetTransformMatrix(std::move(matrix));
 
-    ShadowStyle style {1};
-    Shadow shadow {RATIO, OFFSET, BLUE, style};
+    ShadowStyle style { 1 };
+    Shadow shadow { RATIO, OFFSET, BLUE, style };
     ViewAbstract::SetBackShadow(shadow);
     NG::Gradient gradient;
     ViewAbstract::SetLinearGradient(std::move(gradient));
@@ -1458,8 +1545,6 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest037, TestSize.Level1)
     ViewAbstract::SetProgressMask(std::move(progress));
     auto strategy = static_cast<ForegroundColorStrategy>(INDEX);
     ViewAbstract::SetForegroundColorStrategy(std::move(strategy));
-    std::vector<ModifierKey> keys;
-    ViewAbstract::SetKeyboardShortcut(srcimages, std::move(keys), callback);
     OverlayOptions overlay;
     ViewAbstract::SetOverlay(std::move(overlay));
 
@@ -1532,5 +1617,71 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest039, TestSize.Level1)
     bool result = ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess();
     viewAbstract.SetClickEffectLevel(ClickEffectLevel::LIGHT, 1.0f);
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ViewAbstractTest040
+ * @tc.desc: Test the BindMenu and BindContextMenu of ViewAbstractModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTest, ViewAbstractTest040, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and put mainNode, then build some necessary params.
+     */
+    const RefPtr<FrameNode> mainNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+    ASSERT_NE(MockPipelineBase::GetCurrent()->GetOverlayManager(), nullptr);
+    ASSERT_NE(SubwindowManager::GetInstance(), nullptr);
+    std::function<void()> flagFunc = []() { flag++; };
+    std::vector<NG::OptionParam> params = {};
+    std::function<void()> buildFunc;
+    MenuParam menuParam;
+    /**
+     * @tc.steps: step2. call Bind and BindContextMenu multiple times with unless parameters
+     * @tc.expected: The show or hide method will not call flagFunc.
+     */
+    viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
+    EXPECT_FALSE(MockPipelineBase::GetCurrent()->GetOverlayManager()->onShowMenuCallback_);
+    buildFunc = []() {};
+    viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
+    EXPECT_TRUE(MockPipelineBase::GetCurrent()->GetOverlayManager()->onShowMenuCallback_);
+    params.push_back(OptionParam());
+    viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
+    viewAbstractModelNG.BindContextMenu(ResponseType::LONG_PRESS, std::move(buildFunc), menuParam);
+    CallShowHideFunc();
+    EXPECT_EQ(flag, 0);
+    /**
+     * @tc.steps: step3. set appear and disappear and recall BindMenu and BindContextMenu;
+     * @tc.expected: The flagFunc call times meet expectations.
+     */
+    menuParam.onAppear = flagFunc;
+    menuParam.onDisappear = flagFunc;
+    viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
+    viewAbstractModelNG.BindContextMenu(ResponseType::RIGHT_CLICK, std::move(buildFunc), menuParam);
+    CallShowHideFunc();
+    EXPECT_EQ(flag, 4);
+    /**
+     * @tc.steps: step4. create mouseInfo, set some useless params and call onMouseCallback_;
+     * @tc.expected: StopPropagation in mouseInfo is false.
+     */
+    auto inputHub = mainNode->GetOrCreateInputEventHub();
+    ASSERT_NE(inputHub, nullptr);
+    MouseInfo mouseInfo;
+    mouseInfo.SetButton(MouseButton::LEFT_BUTTON);
+    mouseInfo.SetAction(MouseAction::NONE);
+    inputHub->showMenu_->onMouseCallback_(mouseInfo);
+    mouseInfo.SetButton(MouseButton::RIGHT_BUTTON);
+    mouseInfo.SetAction(MouseAction::NONE);
+    inputHub->showMenu_->onMouseCallback_(mouseInfo);
+    EXPECT_FALSE(mouseInfo.IsStopPropagation());
+    /**
+     * @tc.steps: step4. create mouseInfo, set right param and call onMouseCallback_;
+     * @tc.expected: StopPropagation in mouseInfo is true.
+     */
+    mouseInfo.SetButton(MouseButton::RIGHT_BUTTON);
+    mouseInfo.SetAction(MouseAction::RELEASE);
+    inputHub->showMenu_->onMouseCallback_(mouseInfo);
+    EXPECT_TRUE(mouseInfo.IsStopPropagation());
 }
 } // namespace OHOS::Ace::NG

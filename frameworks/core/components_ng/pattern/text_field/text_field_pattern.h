@@ -113,11 +113,6 @@ struct CaretMetricsF {
     }
 };
 
-struct UnderLinePattern {
-    BorderRadiusProperty radius;
-    Color bgColor;
-};
-
 struct PasswordModeStyle {
     Color bgColor;
     Color textColor;
@@ -189,7 +184,11 @@ public:
     bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result);
 
     bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result) const;
-    bool IsSelectedAreaRedraw() const;
+
+    uint32_t GetDrawOverlayFlag() const
+    {
+        return drawOverlayFlag_;
+    }
 
     OffsetF MakeEmptyOffset() const;
 
@@ -242,7 +241,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyleType::MATCH_ACTIVE };
+        return { FocusType::NODE, true };
     }
 
     void UpdateConfiguration();
@@ -548,7 +547,7 @@ public:
     float GetIconHotZoneSize();
     float GetIconSize();
 
-    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) const;
+    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) const;
 
     void InitSurfaceChangedCallback();
@@ -786,9 +785,34 @@ public:
         underlineWidth_ = underlineWidth;
     }
 
+    bool IsSelectAll()
+    {
+        return abs(textSelector_.GetStart() - textSelector_.GetEnd()) >=
+               static_cast<int32_t>(StringUtils::ToWstring(textEditingValue_.text).length());
+    }
+
+    SelectMenuInfo GetSelectMenuInfo() const
+    {
+        return selectMenuInfo_;
+    }
+
+    void UpdateSelectMenuInfo(bool hasData)
+    {
+        selectMenuInfo_.showCopy = !GetEditingValue().text.empty() && AllowCopy() && InSelectMode();
+        selectMenuInfo_.showCut = selectMenuInfo_.showCopy && !GetEditingValue().text.empty() && InSelectMode();
+        selectMenuInfo_.showCopyAll = !GetEditingValue().text.empty() && !IsSelectAll();
+        selectMenuInfo_.showPaste = hasData;
+        selectMenuInfo_.menuIsShow = !GetEditingValue().text.empty() || hasData;
+    }
+
     bool IsSelected() const
     {
         return HasFocus();
+    }
+
+    void MarkRedrawOverlay()
+    {
+        ++drawOverlayFlag_;
     }
 
 private:
@@ -810,9 +834,9 @@ private:
     int32_t UpdateCaretPositionOnHandleMove(const OffsetF& localOffset);
     bool HasStateStyle(UIState state) const;
 
-    void AddScrollEvent();
     void OnTextAreaScroll(float offset);
     bool OnScrollCallback(float offset, int32_t source) override;
+    void OnScrollEndCallback() override;
     void InitMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
     void OnHover(bool isHover);
@@ -830,6 +854,8 @@ private:
     void ProcessOverlay();
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
+    // when moving one handle causes shift of textRect, update x position of the other handle
+    void UpdateOtherHandleOnMove(float dx, float dy);
     void SetHandlerOnMoveDone();
     void OnDetachFromFrameNode(FrameNode* node) override;
     bool UpdateCaretByPressOrLongPress();
@@ -852,6 +878,7 @@ private:
     void OnCursorTwinkling();
     void StartTwinkling();
     void StopTwinkling();
+    void CheckIfNeedToResetKeyboard();
 
     float PreferredTextHeight(bool isPlaceholder);
 
@@ -883,6 +910,8 @@ private:
     void OnImageLoadSuccess(bool checkHidePasswordIcon);
     void OnImageLoadFail(bool checkHidePasswordIcon);
 
+    void CalculateDefaultCursor();
+
     bool IsSearchParentNode() const;
     void RequestKeyboardOnFocus();
     void SetNeedToRequestKeyboardOnFocus();
@@ -891,6 +920,8 @@ private:
     void SetAccessibilityAction();
     void SetAccessibilityMoveTextAction();
     void SetAccessibilityScrollAction();
+
+    void UpdateCopyAllStatus();
 
     RectF frameRect_;
     RectF contentRect_;
@@ -957,20 +988,22 @@ private:
     bool isOnHover_ = false;
     bool needToRefreshSelectOverlay_ = false;
     bool needToRequestKeyboardInner_ = false;
-    bool needToRequestKeyboardOnFocus_ = false;
+    bool needToRequestKeyboardOnFocus_ = true;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 
     SelectionMode selectionMode_ = SelectionMode::NONE;
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
-    uint32_t twinklingInterval_ = 0;
-    int32_t obscureTickCountDown_ = 0;
     bool setSelectionFlag_ = false;
-    bool isSelectedAreaRedraw_ = false;
     bool setSelectAllFlag_ = true;
+    bool scrollable_ = true;
     int32_t selectionStart_ = 0;
     int32_t selectionEnd_ = 0;
-    bool scrollable_ = true;
+    // controls redraw of overlay modifier, update when need to redraw
+    int32_t drawOverlayFlag_ = 0;
+
+    uint32_t twinklingInterval_ = 0;
+    int32_t obscureTickCountDown_ = 0;
     float currentOffset_ = 0.0f;
     float unitWidth_ = 0.0f;
     float countHeight_ = 0.0f;
@@ -1002,8 +1035,10 @@ private:
     std::vector<TextSelector> textSelectorRecords_;
     std::vector<TextSelector> redoTextSelectorRecords_;
     std::vector<MenuOptionsParam> menuOptionItems_;
-    UnderLinePattern underLinePattern_;
+    BorderRadiusProperty borderRadius_;
     PasswordModeStyle passwordModeStyle_;
+
+    SelectMenuInfo selectMenuInfo_;
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> textChangeListener_;

@@ -166,6 +166,7 @@ void AceContainer::Destroy()
 
         // 2. Destroy Frontend on JS thread.
         RefPtr<Frontend> frontend;
+        LOGI("Frontend Swap");
         frontend_.Swap(frontend);
         if (GetSettings().usePlatformAsUIThread && GetSettings().useUIAsJSThread) {
             frontend->UpdateState(Frontend::State::ON_DESTROY);
@@ -657,13 +658,15 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterSurfaceDestroyCallback(surfaceDestroyCallback);
 
-    auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](
-                                   int32_t x, int32_t y, const DragEventAction& action) {
-        ContainerScope scope(id);
-        context->GetTaskExecutor()->PostTask(
-            [context, x, y, action]() { context->OnDragEvent(x, y, action); }, TaskExecutor::TaskType::UI);
-    };
-    aceView_->RegisterDragEventCallback(dragEventCallback);
+    if (!isFormRender_) {
+        auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](
+                                       int32_t x, int32_t y, const DragEventAction& action) {
+            ContainerScope scope(id);
+            context->GetTaskExecutor()->PostTask(
+                [context, x, y, action]() { context->OnDragEvent(x, y, action); }, TaskExecutor::TaskType::UI);
+        };
+        aceView_->RegisterDragEventCallback(dragEventCallback);
+    }
 }
 
 void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, const std::string& instanceName,
@@ -727,7 +730,6 @@ void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t
 #ifdef ENABLE_ROSEN_BACKEND
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-
     auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
 #else
     auto platformWindow = PlatformWindow::Create(view);
@@ -756,24 +758,6 @@ void AceContainer::SetViewNew(
         auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
         container->AttachView(window, view, density, width, height, rsWindow->GetWindowId(), nullptr);
     }
-#endif
-}
-
-void AceContainer::SetView(
-    AceView* view, double density, int32_t width, int32_t height, const std::shared_ptr<Window>& window)
-{
-#ifdef ENABLE_ROSEN_BACKEND
-    CHECK_NULL_VOID(view);
-    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(view->GetInstanceId()));
-    CHECK_NULL_VOID(container);
-    auto taskExecutor = container->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    CHECK_NULL_VOID(window);
-    window->SetTaskExecutor(taskExecutor);
-    window->SetInstanceId(view->GetInstanceId());
-    window->Init();
-
-    container->AttachView(window, view, density, width, height, window->GetWindowId(), nullptr);
 #endif
 }
 
@@ -809,19 +793,6 @@ bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string
     LOGD("RunPage content=[%{private}s]", content.c_str());
     front->RunPage(pageId, content, params);
     return true;
-}
-
-void AceContainer::ClearEngineCache(int32_t instanceId)
-{
-    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
-    CHECK_NULL_VOID(container);
-    ContainerScope scope(instanceId);
-    if (!container->IsFormRender()) {
-        return;
-    }
-    auto formFrontend = AceType::DynamicCast<FormFrontendDeclarative>(container->GetFrontend());
-    CHECK_NULL_VOID(formFrontend);
-    formFrontend->ClearEngineCache();
 }
 
 bool AceContainer::PushPage(int32_t instanceId, const std::string& content, const std::string& params)
@@ -1366,31 +1337,31 @@ void AceContainer::InitWindowCallback()
     });
 
     pipelineContext_->SetGetViewSafeAreaImpl([window = uiWindow_, this]() -> SafeAreaEdgeInserts {
-        return SetViewSafeArea(window);
+        return GetViewSafeArea(window);
     });
 }
 
 // Get SafeArea by Window
-SafeAreaEdgeInserts AceContainer::SetViewSafeArea(sptr<OHOS::Rosen::Window> window)
+SafeAreaEdgeInserts AceContainer::GetViewSafeArea(sptr<OHOS::Rosen::Window> window)
 {
-    SafeAreaEdgeInserts viewSafeArea;
-    CHECK_NULL_RETURN_NOLOG(window, viewSafeArea);
-
+    SafeAreaEdgeInserts systemSafeArea;
+    SafeAreaEdgeInserts cutoutSafeArea;
+    CHECK_NULL_RETURN_NOLOG(window, systemSafeArea);
     Rosen::AvoidArea systemAvoidArea;
     Rosen::AvoidArea cutoutAvoidArea;
     Rosen::WMError systemRet = window->GetAvoidAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM, systemAvoidArea);
     Rosen::WMError cutoutRet = window->GetAvoidAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT, cutoutAvoidArea);
-    Rect topRect;
     Rect leftRect;
+    Rect topRect;
     Rect rightRect;
     Rect bottomRect;
     if (systemRet == Rosen::WMError::WM_OK) {
-        topRect = Rect(static_cast<double>(systemAvoidArea.topRect_.posX_),
-            static_cast<double>(systemAvoidArea.topRect_.posY_), static_cast<double>(systemAvoidArea.topRect_.width_),
-            static_cast<double>(systemAvoidArea.topRect_.height_));
         leftRect = Rect(static_cast<double>(systemAvoidArea.leftRect_.posX_),
             static_cast<double>(systemAvoidArea.leftRect_.posY_), static_cast<double>(systemAvoidArea.leftRect_.width_),
             static_cast<double>(systemAvoidArea.leftRect_.height_));
+        topRect = Rect(static_cast<double>(systemAvoidArea.topRect_.posX_),
+            static_cast<double>(systemAvoidArea.topRect_.posY_), static_cast<double>(systemAvoidArea.topRect_.width_),
+            static_cast<double>(systemAvoidArea.topRect_.height_));
         rightRect = Rect(static_cast<double>(systemAvoidArea.rightRect_.posX_),
             static_cast<double>(systemAvoidArea.rightRect_.posY_),
             static_cast<double>(systemAvoidArea.rightRect_.width_),
@@ -1399,22 +1370,50 @@ SafeAreaEdgeInserts AceContainer::SetViewSafeArea(sptr<OHOS::Rosen::Window> wind
             static_cast<double>(systemAvoidArea.bottomRect_.posY_),
             static_cast<double>(systemAvoidArea.bottomRect_.width_),
             static_cast<double>(systemAvoidArea.bottomRect_.height_));
+        systemSafeArea.SetRect(leftRect, topRect, rightRect, bottomRect);
     }
     if (cutoutRet == Rosen::WMError::WM_OK) {
-        topRect.CombineRect(Rect(static_cast<double>(cutoutAvoidArea.topRect_.posX_),
-            static_cast<double>(cutoutAvoidArea.topRect_.posY_), static_cast<double>(cutoutAvoidArea.topRect_.width_),
-            static_cast<double>(cutoutAvoidArea.topRect_.height_)));
-        leftRect.CombineRect(Rect(static_cast<double>(cutoutAvoidArea.leftRect_.posX_),
+        leftRect = Rect(static_cast<double>(cutoutAvoidArea.leftRect_.posX_),
             static_cast<double>(cutoutAvoidArea.leftRect_.posY_), static_cast<double>(cutoutAvoidArea.leftRect_.width_),
-            static_cast<double>(cutoutAvoidArea.leftRect_.height_)));
-        rightRect.CombineRect(Rect(static_cast<double>(cutoutAvoidArea.rightRect_.posX_),
+            static_cast<double>(cutoutAvoidArea.leftRect_.height_));
+        topRect = Rect(static_cast<double>(cutoutAvoidArea.topRect_.posX_),
+            static_cast<double>(cutoutAvoidArea.topRect_.posY_), static_cast<double>(cutoutAvoidArea.topRect_.width_),
+            static_cast<double>(cutoutAvoidArea.topRect_.height_));
+        rightRect = Rect(static_cast<double>(cutoutAvoidArea.rightRect_.posX_),
             static_cast<double>(cutoutAvoidArea.rightRect_.posY_),
             static_cast<double>(cutoutAvoidArea.rightRect_.width_),
-            static_cast<double>(cutoutAvoidArea.rightRect_.height_)));
-        bottomRect.CombineRect(Rect(static_cast<double>(cutoutAvoidArea.bottomRect_.posX_),
+            static_cast<double>(cutoutAvoidArea.rightRect_.height_));
+        bottomRect = Rect(static_cast<double>(cutoutAvoidArea.bottomRect_.posX_),
             static_cast<double>(cutoutAvoidArea.bottomRect_.posY_),
             static_cast<double>(cutoutAvoidArea.bottomRect_.width_),
-            static_cast<double>(cutoutAvoidArea.bottomRect_.height_)));
+            static_cast<double>(cutoutAvoidArea.bottomRect_.height_));
+        cutoutSafeArea.SetRect(leftRect, topRect, rightRect, bottomRect);
+    }
+    return systemSafeArea.CombineSafeArea(cutoutSafeArea);
+}
+
+SafeAreaEdgeInserts AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type)
+{
+    SafeAreaEdgeInserts viewSafeArea;
+    CHECK_NULL_RETURN_NOLOG(uiWindow_, viewSafeArea);
+
+    Rosen::AvoidArea avoidArea;
+    Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(type, avoidArea);
+    Rect topRect;
+    Rect leftRect;
+    Rect rightRect;
+    Rect bottomRect;
+    if (ret == Rosen::WMError::WM_OK) {
+        topRect = Rect(static_cast<double>(avoidArea.topRect_.posX_), static_cast<double>(avoidArea.topRect_.posY_),
+            static_cast<double>(avoidArea.topRect_.width_), static_cast<double>(avoidArea.topRect_.height_));
+        leftRect = Rect(static_cast<double>(avoidArea.leftRect_.posX_), static_cast<double>(avoidArea.leftRect_.posY_),
+            static_cast<double>(avoidArea.leftRect_.width_), static_cast<double>(avoidArea.leftRect_.height_));
+        rightRect =
+            Rect(static_cast<double>(avoidArea.rightRect_.posX_), static_cast<double>(avoidArea.rightRect_.posY_),
+                static_cast<double>(avoidArea.rightRect_.width_), static_cast<double>(avoidArea.rightRect_.height_));
+        bottomRect =
+            Rect(static_cast<double>(avoidArea.bottomRect_.posX_), static_cast<double>(avoidArea.bottomRect_.posY_),
+                static_cast<double>(avoidArea.bottomRect_.width_), static_cast<double>(avoidArea.bottomRect_.height_));
     }
     viewSafeArea.SetRect(leftRect, topRect, rightRect, bottomRect);
     return viewSafeArea;
@@ -1543,11 +1542,6 @@ sptr<IRemoteObject> AceContainer::GetToken()
     }
     LOGE("fail to get Token");
     return nullptr;
-}
-
-std::shared_ptr<AbilityRuntime::Context> AceContainer::GetAbilityRuntimeContext()
-{
-    return runtimeContext_.lock();
 }
 
 // ArkTsCard start

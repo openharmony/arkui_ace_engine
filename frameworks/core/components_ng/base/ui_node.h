@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <list>
+#include <memory>
 #include <string>
 #include <unordered_map>
 
@@ -70,25 +71,6 @@ public:
     void DetachFromMainTree(bool recursive = false);
 
     int32_t TotalChildCount() const;
-
-    // performance check get child count, depth, flex layout times and layout time
-    void GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap);
-    void AddFlexLayouts()
-    {
-        flexLayouts_++;
-    }
-    void SetLayoutTime(int64_t time)
-    {
-        layoutTime_ = time;
-    }
-    int64_t GetLayoutTime()
-    {
-        return layoutTime_;
-    }
-    int32_t GetFlexLayouts()
-    {
-        return flexLayouts_;
-    }
 
     // Returns index in the flatten tree structure
     // of the node with given id and type
@@ -235,16 +217,6 @@ public:
     bool IsInDestroying() const
     {
         return isInDestroying_;
-    }
-
-    int32_t GetRow() const
-    {
-        return row_;
-    }
-
-    int32_t GetCol() const
-    {
-        return col_;
     }
 
     void SetChildrenInDestroying();
@@ -396,6 +368,55 @@ public:
         nodeId_ = newElmtId;
     }
 
+    // --------------------------------------------------------------------------------
+    // performance check get child count, depth, flex layout times and layout time
+    void GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap);
+    void SetLayoutTime(int64_t time)
+    {
+        nodeInfo_->layoutTime = time;
+    }
+    int64_t GetLayoutTime()
+    {
+        return nodeInfo_->layoutTime;
+    }
+    int32_t GetFlexLayouts()
+    {
+        return nodeInfo_->flexLayouts;
+    }
+    int32_t GetRow() const
+    {
+        return nodeInfo_->codeRow;
+    }
+    int32_t GetCol() const
+    {
+        return nodeInfo_->codeCol;
+    }
+    void SetRow(const int32_t row)
+    {
+        nodeInfo_->codeRow = row;
+    }
+    void SetCol(const int32_t col)
+    {
+        nodeInfo_->codeCol = col;
+    }
+    virtual std::string GetCustomTag()
+    {
+        return GetTag();
+    }
+    void SetBuildByJs(bool isBuildByJS)
+    {
+        isBuildByJS_ = isBuildByJS;
+    }
+    void SetForeachItem()
+    {
+        nodeInfo_->isForEachItem = true;
+    }
+    void AddFlexLayouts()
+    {
+        nodeInfo_->flexLayouts++;
+    }
+    // --------------------------------------------------------------------------------
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -439,23 +460,21 @@ private:
 
     std::list<RefPtr<UINode>> children_;
     std::list<std::pair<RefPtr<UINode>, uint32_t>> disappearingChildren_;
+    std::unique_ptr<PerformanceCheckNode> nodeInfo_;
     WeakPtr<UINode> parent_;
     std::string tag_ = "UINode";
-    int32_t row_ = -1;
-    int32_t col_ = -1;
     int32_t depth_ = 0;
     int32_t hostRootId_ = 0;
     int32_t hostPageId_ = 0;
     int32_t nodeId_ = 0;
     int32_t accessibilityId_ = -1;
     int32_t layoutPriority_ = 0;
-    int32_t flexLayouts_ = 0;
-    int64_t layoutTime_ = 0;
     bool isRoot_ = false;
     bool onMainTree_ = false;
     bool removeSilently_ = true;
     bool isInDestroying_ = false;
     bool isDisappearing_ = false;
+    bool isBuildByJS_ = false;
 
     int32_t childrenUpdatedFrom_ = -1;
     static thread_local int32_t currentAccessibilityId_;

@@ -58,6 +58,7 @@ public:
     void ReloadStage();
 
 private:
+    // ace performance check
     void PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout);
     void StopPageTransition();
 

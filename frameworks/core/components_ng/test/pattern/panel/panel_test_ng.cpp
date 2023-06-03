@@ -108,6 +108,16 @@ public:
     void SetUp() override;
     void TearDown() override;
 
+    PaddingProperty CreatePadding(float left, float top, float right, float bottom)
+    {
+        PaddingProperty padding;
+        padding.left = CalcLength(left);
+        padding.right = CalcLength(right);
+        padding.top = CalcLength(top);
+        padding.bottom = CalcLength(bottom);
+        return padding;
+    }
+
 protected:
     static RefPtr<FrameNode> CreateSlidingPanel(const TestProperty& testProperty);
 };
@@ -119,16 +129,6 @@ void PanelTestNg::SetUp()
 void PanelTestNg::TearDown()
 {
     MockPipelineBase::TearDown();
-}
-
-PaddingProperty CreatePadding(float left, float top, float right, float bottom)
-{
-    PaddingProperty padding;
-    padding.left = CalcLength(left);
-    padding.right = CalcLength(right);
-    padding.top = CalcLength(top);
-    padding.bottom = CalcLength(bottom);
-    return padding;
 }
 
 RefPtr<FrameNode> PanelTestNg::CreateSlidingPanel(const TestProperty& testProperty)

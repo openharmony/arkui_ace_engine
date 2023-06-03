@@ -135,7 +135,7 @@ public:
     {
         ViewAbstract::SetForegroundBlurStyle(fgBlurStyle);
     }
-    
+
     void SetSphericalEffect(double radio) override
     {
         ViewAbstract::SetSphericalEffect(radio);
@@ -257,6 +257,7 @@ public:
         borderRadius.radiusTopRight = radiusTopRight;
         borderRadius.radiusBottomLeft = radiusBottomLeft;
         borderRadius.radiusBottomRight = radiusBottomRight;
+        borderRadius.multiValued = true;
         ViewAbstract::SetBorderRadius(borderRadius);
     }
 
@@ -272,6 +273,7 @@ public:
         borderColors.rightColor = colorRight;
         borderColors.topColor = colorTop;
         borderColors.bottomColor = colorBottom;
+        borderColors.multiValued = true;
         ViewAbstract::SetBorderColor(borderColors);
     }
 
@@ -288,6 +290,7 @@ public:
         borderWidth.rightDimen = right;
         borderWidth.topDimen = top;
         borderWidth.bottomDimen = bottom;
+        borderWidth.multiValued = true;
         ViewAbstract::SetBorderWidth(borderWidth);
     }
 
@@ -304,6 +307,7 @@ public:
         borderStyles.styleRight = styleRight.value_or(BorderStyle::SOLID);
         borderStyles.styleTop = styleTop.value_or(BorderStyle::SOLID);
         borderStyles.styleBottom = styleBottom.value_or(BorderStyle::SOLID);
+        borderStyles.multiValued = true;
         ViewAbstract::SetBorderStyle(borderStyles);
     }
 
@@ -792,12 +796,14 @@ public:
         ViewAbstract::SetKeyboardShortcut(value, keys, std::move(onKeyboardShortcutAction));
     }
 
+    void SetObscured(const std::vector<ObscuredReasons>& reasons) override
+    {
+        ViewAbstract::SetObscured(reasons);
+    }
+
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override
     {
         auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-#ifdef ENABLE_DRAG_FRAMEWORK
-        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
-#endif // ENABLE_DRAG_FRAMEWORK
         ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
     }
 
@@ -826,6 +832,7 @@ public:
     {
         ViewAbstract::SetForegroundColorStrategy(strategy);
     }
+
 private:
     void RegisterMenuAppearCallback(
         std::vector<NG::OptionParam>& params, std::function<void()>&& buildFunc, const MenuParam& menuParam);

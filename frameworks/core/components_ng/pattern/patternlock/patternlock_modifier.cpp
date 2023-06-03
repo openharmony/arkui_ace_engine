@@ -107,7 +107,7 @@ void PatternLockModifier::PaintLockLine(RSCanvas& canvas, const OffsetF& offset)
     pen.SetAntiAlias(true);
     pen.SetColor(ToRSColor(pathColor));
     pen.SetWidth(pathStrokeWidth);
-    pen.SetCapStyle(RSPen::CapStyle::FLAT_CAP);
+    pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
 
     Color pathColorAlpha255 = pathColor.ToColor().ChangeAlpha(MAX_ALPHA);
     pen.SetColor(pathColorAlpha255.GetValue());

@@ -16,13 +16,17 @@
 #include "core/components_ng/render/image_painter.h"
 
 #include "base/utils/utils.h"
-#include "core/components_ng/render/adapter/svg_canvas_image.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 
 namespace {
+
+constexpr Color COLOR_PRIVATE_MODE = Color(0x66d7d7d7);
+constexpr Dimension RECT_BORDER_RADIUS = 2.0_vp;
+constexpr uint32_t RADIUS_POINT_COUNT = 4;
 
 void ApplyContain(const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
 {
@@ -93,14 +97,51 @@ const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0, 0, // red
     0, 0, 0, 1.0f, 0 };                                          // alpha transparency
 } // namespace
 
+void ImagePainter::DrawObscuration(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
+{
+    CHECK_NULL_VOID(canvasImage_);
+    const auto config = canvasImage_->GetPaintConfig();
+    RSBrush brush;
+    Color fillColor = COLOR_PRIVATE_MODE;
+    RSColor rSColor(fillColor.GetRed(), fillColor.GetGreen(), fillColor.GetBlue(), fillColor.GetAlpha());
+    brush.SetColor(rSColor);
+    std::vector<RSPoint> radiusXY(RADIUS_POINT_COUNT);
+    if (config.borderRadiusXY_) {
+        for (auto index = 0; index < radiusXY.size(); index++) {
+            radiusXY[index].SetX(static_cast<float>((*config.borderRadiusXY_)[index].GetX()));
+            radiusXY[index].SetY(static_cast<float>((*config.borderRadiusXY_)[index].GetY()));
+        }
+    } else if (config.isSvg_) {
+        // obscured SVGs need a default corner radius
+        for (auto& radius : radiusXY) {
+            radius.SetX(static_cast<float>(RECT_BORDER_RADIUS.ConvertToPx()));
+            radius.SetY(static_cast<float>(RECT_BORDER_RADIUS.ConvertToPx()));
+        }
+    }
+    canvas.AttachBrush(brush);
+    RSRoundRect rSRoundRect(RSRect(offset.GetX(), offset.GetY(), contentSize.Width() + offset.GetX(),
+                            contentSize.Height() + offset.GetY()), radiusXY);
+    canvas.DrawRoundRect(rSRoundRect);
+}
+
 void ImagePainter::DrawImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
 {
     CHECK_NULL_VOID(canvasImage_);
     const auto config = canvasImage_->GetPaintConfig();
-    if (config.isSvg_) {
+    bool drawObscuration = false;
+    for (const auto& reason : config.obscuredReasons_) {
+        if (reason == ObscuredReasons::PLACEHOLDER) {
+            drawObscuration = true;
+            break;
+        }
+    }
+
+    if (drawObscuration) {
+        DrawObscuration(canvas, offset, contentSize);
+    } else if (config.isSvg_) {
         DrawSVGImage(canvas, offset, contentSize);
     } else if (config.imageRepeat_ == ImageRepeat::NO_REPEAT) {
-        DrawStaticImage(canvas, offset);
+        DrawStaticImage(canvas, offset, contentSize);
     } else {
         RectF rect(offset.GetX(), offset.GetY(), contentSize.Width(), contentSize.Height());
         DrawImageWithRepeat(canvas, rect);
@@ -113,8 +154,8 @@ void ImagePainter::DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const S
     canvas.Save();
     canvas.Translate(offset.GetX(), offset.GetY());
     const auto config = canvasImage_->GetPaintConfig();
-    if (config.needFlipCanvasHorizontally_) {
-        ImagePainter::FlipHorizontal(canvas, offset.GetX(), config.dstRect_.Width());
+    if (config.flipHorizontally_) {
+        ImagePainter::FlipHorizontal(canvas, svgContainerSize);
     }
 
     RectF srcRect;
@@ -124,7 +165,7 @@ void ImagePainter::DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const S
     canvas.Restore();
 }
 
-void ImagePainter::DrawStaticImage(RSCanvas& canvas, const OffsetF& offset) const
+void ImagePainter::DrawStaticImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
 {
     CHECK_NULL_VOID(canvasImage_);
     RSBrush brush;
@@ -145,8 +186,8 @@ void ImagePainter::DrawStaticImage(RSCanvas& canvas, const OffsetF& offset) cons
     canvas.Save();
     canvas.Translate(offset.GetX(), offset.GetY());
 
-    if (config.needFlipCanvasHorizontally_) {
-        ImagePainter::FlipHorizontal(canvas, offset.GetX(), config.dstRect_.Width());
+    if (config.flipHorizontally_) {
+        ImagePainter::FlipHorizontal(canvas, contentSize);
     }
 
     brush.SetFilter(filter);
@@ -157,12 +198,11 @@ void ImagePainter::DrawStaticImage(RSCanvas& canvas, const OffsetF& offset) cons
     canvas.Restore();
 }
 
-void ImagePainter::FlipHorizontal(RSCanvas& canvas, double horizontalOffset, double drawRectWidth)
+void ImagePainter::FlipHorizontal(RSCanvas& canvas, const SizeF& contentSize)
 {
-    double horizontalMoveDelta = -1.0 * (horizontalOffset + drawRectWidth / 2.0);
-    canvas.Translate(-1.0 * horizontalMoveDelta, 0.0);
+    canvas.Translate(contentSize.Width() / 2, contentSize.Height() / 2);
     canvas.Scale(-1.0, 1.0);
-    canvas.Translate(horizontalMoveDelta, 0.0);
+    canvas.Translate(-contentSize.Width() / 2, -contentSize.Height() / 2);
 }
 
 void ImagePainter::DrawImageWithRepeat(RSCanvas& canvas, const RectF& contentRect) const
@@ -195,18 +235,18 @@ void ImagePainter::DrawImageWithRepeat(RSCanvas& canvas, const RectF& contentRec
     uint32_t down = 1;
     uint32_t left = 2;
     uint32_t right = 3;
-    auto drawRepeatYTask = [this, &canvas, &config, &dirRepeatNum, &singleImageHeight, &imageRepeatY](
+    auto drawRepeatYTask = [this, &canvas, &config, &dirRepeatNum, &singleImageHeight, &imageRepeatY, &contentRect](
                                OffsetF offsetTempY, uint32_t dir) {
         float downNum = (dir == 0) ? -1 : 1;
         for (size_t j = 0; j < dirRepeatNum[dir] && imageRepeatY; j++) {
             offsetTempY.SetY(static_cast<float>(offsetTempY.GetY() + singleImageHeight * downNum));
-            DrawStaticImage(canvas, offsetTempY);
+            DrawStaticImage(canvas, offsetTempY, contentRect.GetSize());
         }
     };
     auto offsetTempX = offset;
     // right
     for (size_t i = 0; i < dirRepeatNum[right]; i++) {
-        DrawStaticImage(canvas, offsetTempX);
+        DrawStaticImage(canvas, offsetTempX, contentRect.GetSize());
         drawRepeatYTask(offsetTempX, up);
         drawRepeatYTask(offsetTempX, down);
         offsetTempX.SetX(static_cast<float>(offsetTempX.GetX() + singleImageWidth));
@@ -215,7 +255,7 @@ void ImagePainter::DrawImageWithRepeat(RSCanvas& canvas, const RectF& contentRec
     offsetTempX = offset;
     for (size_t i = 0; i < dirRepeatNum[left] && imageRepeatX; i++) {
         offsetTempX.SetX(static_cast<float>(offsetTempX.GetX() - singleImageWidth));
-        DrawStaticImage(canvas, offsetTempX);
+        DrawStaticImage(canvas, offsetTempX, contentRect.GetSize());
         drawRepeatYTask(offsetTempX, up);
         drawRepeatYTask(offsetTempX, down);
     }

@@ -34,8 +34,8 @@ public:
     void ScrollBy(double pixelX, double pixelY, bool smooth) override;
     void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
     void ScrollPage(bool reverse, bool smooth) override;
-    void JumpTo(int32_t index, int32_t source) override;
-    bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve) override;
+    void JumpTo(int32_t index, bool smooth, int32_t source) override;
+    bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth) override;
 
     double GetCurrentPosition() const;
 };

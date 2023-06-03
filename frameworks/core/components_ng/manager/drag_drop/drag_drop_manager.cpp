@@ -330,7 +330,10 @@ void DragDropManager::OnDragMove(float globalX, float globalY, const std::string
     }
 
     if (preTargetFrameNode_) {
-        FireOnDragEvent(preTargetFrameNode_, point, DragEventType::LEAVE, extraInfo);
+        auto preRect = preTargetFrameNode_->GetRenderContext()->GetPaintRectWithTransform();
+        if (!preRect.IsInRegion(PointF(globalX, globalY))) {
+            FireOnDragEvent(preTargetFrameNode_, point, DragEventType::LEAVE, extraInfo);
+        }
     }
 
     FireOnDragEvent(dragFrameNode, point, DragEventType::ENTER, extraInfo);
@@ -687,7 +690,9 @@ void DragDropManager::AddDataToClipboard(const std::string& extraInfo)
         };
         addDataCallback_ = callback;
     }
-    clipboard_->GetData(addDataCallback_, true);
+    if (clipboard_) {
+        clipboard_->GetData(addDataCallback_, true);
+    }
 #ifdef ENABLE_DRAG_FRAMEWORK
     extraInfo_ = extraInfo;
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -713,7 +718,7 @@ void DragDropManager::GetExtraInfoFromClipboard(std::string& extraInfo)
         getDataCallback_ = callback;
     }
 
-    if (getDataCallback_) {
+    if (getDataCallback_ && clipboard_) {
         clipboard_->GetData(getDataCallback_, true);
     }
 
@@ -740,7 +745,9 @@ void DragDropManager::RestoreClipboardData()
         };
         deleteDataCallback_ = callback;
     }
-    clipboard_->GetData(deleteDataCallback_, true);
+    if (clipboard_) {
+        clipboard_->GetData(deleteDataCallback_, true);
+    }
 }
 
 void DragDropManager::DestroyDragWindow()

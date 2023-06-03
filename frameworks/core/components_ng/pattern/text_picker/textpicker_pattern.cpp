@@ -408,8 +408,11 @@ bool TextPickerPattern::OnKeyEvent(const KeyEvent& event)
         return false;
     }
 
-    if (event.code == KeyCode::KEY_SPACE || event.code == KeyCode::KEY_ESCAPE) {
-        operationOn_ = event.code == KeyCode::KEY_SPACE;
+    if (event.code == KeyCode::KEY_SPACE || event.code == KeyCode::KEY_ESCAPE || event.code == KeyCode::KEY_ENTER) {
+        if (!operationOn_ && event.code == KeyCode::KEY_ENTER) {
+            HandleDirectionKey(event.code);
+        }
+        operationOn_ = (event.code == KeyCode::KEY_SPACE) || (event.code == KeyCode::KEY_ENTER);
         return true;
     }
 
@@ -609,6 +612,11 @@ bool TextPickerPattern::HandleDirectionKey(KeyCode code)
 
         case KeyCode::KEY_DPAD_DOWN:
             textPickerColumnPattern->InnerHandleScroll(1, false);
+            break;
+
+        case KeyCode::KEY_ENTER:
+            focusKeyID_ = 0;
+            PaintFocusState();
             break;
 
         case KeyCode::KEY_DPAD_LEFT:

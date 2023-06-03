@@ -46,6 +46,8 @@ struct NodeInfoPU {
 
     bool hasMeasureOrLayout = false;
     bool isStatic = false;
+    int32_t codeRow = -1;
+    int32_t codeCol = -1;
 
     std::string jsViewName;
 };

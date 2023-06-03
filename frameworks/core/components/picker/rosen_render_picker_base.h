@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,9 +31,17 @@ public:
     void Paint(RenderContext& context, const Offset& offset) override;
 
 private:
+#ifndef USE_ROSEN_DRAWING
     void PaintGradient(SkCanvas* canvas, const Offset& offset, const Rect& rect, const RefPtr<PickerTheme>& theme);
+#else
+    void PaintGradient(RSCanvas* canvas, const Offset& offset, const Rect& rect, const RefPtr<PickerTheme>& theme);
+#endif
     Rect GetOptionsRect(const Offset& offset, const RefPtr<RenderPickerColumn>& pickerColumn);
+#ifndef USE_ROSEN_DRAWING
     void PaintFocusOptionBorder(SkCanvas* canvas);
+#else
+    void PaintFocusOptionBorder(RSCanvas* canvas);
+#endif
 };
 
 } // namespace OHOS::Ace

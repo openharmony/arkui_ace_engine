@@ -415,7 +415,14 @@ private:
 
 struct SafeAreaEdgeInserts {
     SafeAreaEdgeInserts() = default;
-    void SetRect(Rect leftRect, Rect topRect, Rect rightRect, Rect bottomRect)
+    ~SafeAreaEdgeInserts() = default;
+
+    SafeAreaEdgeInserts(const Rect& leftRect, const Rect& topRect, const Rect& rightRect, const Rect& bottomRect)
+    {
+        SetRect(leftRect, topRect, rightRect, bottomRect);
+    }
+
+    void SetRect(const Rect& leftRect, const Rect& topRect, const Rect& rightRect, const Rect& bottomRect)
     {
         leftRect_ = leftRect;
         topRect_ = topRect;
@@ -432,6 +439,41 @@ struct SafeAreaEdgeInserts {
     {
         return "SafeAreaEdgeInserts leftRect_: " + leftRect_.ToString() + ", topRect_: " + topRect_.ToString() +
                ", rightRect_: " + rightRect_.ToString() + ", bottomRect_: " + bottomRect_.ToString();
+    }
+
+    bool operator==(const SafeAreaEdgeInserts& safeArea) const
+    {
+        return (leftRect_ == safeArea.leftRect_) && ((topRect_ == safeArea.topRect_)) &&
+               ((rightRect_ == safeArea.rightRect_)) && ((bottomRect_ == safeArea.bottomRect_));
+    }
+
+    bool operator!=(const SafeAreaEdgeInserts& safeArea) const
+    {
+        return !operator==(safeArea);
+    }
+
+    SafeAreaEdgeInserts CombineSafeArea(const SafeAreaEdgeInserts& other) const
+    {
+        return SafeAreaEdgeInserts(CombineSafeAreaBySide(leftRect_, other.leftRect_),
+            CombineSafeAreaBySide(topRect_, other.topRect_), CombineSafeAreaBySide(rightRect_, other.rightRect_),
+            CombineSafeAreaBySide(bottomRect_, other.bottomRect_));
+    }
+
+    Rect CombineSafeAreaBySide(const Rect& rectX, const Rect& rectY) const
+    {
+        if (rectX.IsValid()) {
+            if (rectY.IsValid()) {
+                return rectX.CombineRect(rectY);
+            } else {
+                return rectX;
+            }
+        } else {
+            if (rectY.IsValid()) {
+                return rectY;
+            } else {
+                return Rect(0.0, 0.0, 0.0, 0.0);
+            }
+        }
     }
 };
 

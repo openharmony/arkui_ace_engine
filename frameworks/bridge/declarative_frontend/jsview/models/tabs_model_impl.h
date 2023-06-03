@@ -41,6 +41,7 @@ public:
     void SetBarOverlap(bool barOverlap) override {};
     void SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& onChangeEvent) override {};
     void SetBarBackgroundColor(const Color& backgroundColor) override {};
+    void SetClipEdge(bool clipEdge) override {};
 
 private:
     RefPtr<TabTheme> GetTheme() const;

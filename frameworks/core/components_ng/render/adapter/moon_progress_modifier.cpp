@@ -108,10 +108,9 @@ void MoonProgressModifier::SetMoonAnimate(float value) const
 {
     if (ratio_) {
         AnimationOption option = AnimationOption();
-        RefPtr<Curve> curve = AceType::MakeRefPtr<LinearCurve>();
         option.SetDuration(DIFFUSE_DURATION);
         option.SetDelay(0);
-        option.SetCurve(curve);
+        option.SetCurve(Curves::SHARP);
         AnimationUtils::Animate(option, [&]() { ratio_->Set(value); });
     }
 }

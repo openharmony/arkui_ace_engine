@@ -64,6 +64,11 @@ public:
         return MakeRefPtr<VideoAccessibilityProperty>();
     }
 
+    bool DefaultSupportDrag() override
+    {
+        return true;
+    }
+    
     void UpdateMuted(bool muted)
     {
         muted_ = muted;
@@ -115,6 +120,8 @@ public:
         return { FocusType::SCOPE, true };
     }
 
+    RefPtr<FrameNode> CreateControlBar(int32_t nodeId = -1);
+    
     void SetHiddenChangeEvent(HiddenChangeEvent&& hiddenChangeEvent)
     {
         hiddenChangeEvent_ = std::move(hiddenChangeEvent);
@@ -137,7 +144,8 @@ public:
     void OnAreaChangedInner() override;
 
     void UpdateMediaPlayer();
-    
+    void ResetMediaPlayer();
+
     void EnableDrag();
     void SetIsStop(bool isStop)
     {
@@ -185,10 +193,10 @@ private:
     void OnUpdateTime(uint32_t time, int pos) const;
     void OnFullScreenChange(bool isFullScreen);
 
-    void AddPreviewNodeIfNeeded();
-    void AddControlBarNodeIfNeeded();
+    void UpdatePreviewImage();
+    void UpdateControllerBar();
     void UpdateVideoProperty();
-    RefPtr<FrameNode> CreateControlBar();
+    
     static RefPtr<FrameNode> CreateSVG();
     static RefPtr<FrameNode> CreateText(uint32_t time);
     RefPtr<FrameNode> CreateSlider();
@@ -198,6 +206,7 @@ private:
     void ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode>& fullScreenBtn);
     void ResetStatus();
     void HiddenChange(bool hidden);
+    void PrintPlayerStatus(PlaybackStatus status);
 
     // Fire error manually, eg. src is not existed. It must run on ui.
     void FireError();

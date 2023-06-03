@@ -47,7 +47,7 @@ ohos_shared_library("ace_form_render") {
 
   configs = [
     "$ace_root:ace_config",
-    "$ace_root/test/unittest:ace_coverage_config",
+    "$ace_root:ace_coverage_config",
     "//commonlibrary/c_utils/base:utils_config",
   ]
 
@@ -72,5 +72,6 @@ ohos_shared_library("ace_form_render") {
   ]
 
   subsystem_name = ace_engine_subsystem
+  innerapi_tags = [ "platformsdk_indirect" ]
   part_name = ace_engine_part
 }

@@ -18,14 +18,14 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/vector.h"
+#include "core/components/common/properties/clip_path.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/shadow.h"
-#include "core/components/common/properties/clip_path.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/image/image_source_info.h"
 
@@ -124,46 +124,7 @@ struct BorderProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderStyle, BorderStyleProperty);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderWidth, BorderWidthProperty);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
-    {
-        static const char* BORDER_STYLE[] = {
-            "BorderStyle.Solid",
-            "BorderStyle.Dashed",
-            "BorderStyle.Dotted",
-        };
-        json->Put("borderStyle",
-            BORDER_STYLE[static_cast<int>(
-                propBorderStyle.value_or(BorderStyleProperty()).styleLeft.value_or(BorderStyle::SOLID))]);
-        json->Put("borderColor",
-            propBorderColor.value_or(BorderColorProperty()).leftColor.value_or(Color()).ColorToString().c_str());
-        auto jsonBorder = JsonUtil::Create(true);
-        jsonBorder->Put("width", propBorderWidth.value_or(BorderWidthProperty())
-            .leftDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
-        jsonBorder->Put("color",
-            propBorderColor.value_or(BorderColorProperty()).leftColor.value_or(Color()).ColorToString().c_str());
-        jsonBorder->Put("style",
-            BORDER_STYLE[static_cast<int>(
-                propBorderStyle.value_or(BorderStyleProperty()).styleLeft.value_or(BorderStyle::SOLID))]);
-        if (propBorderRadius.value_or(BorderRadiusProperty()).radiusFlag) {
-            json->Put("borderRadius", propBorderRadius.value_or(BorderRadiusProperty())
-                .radiusTopLeft.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
-            jsonBorder->Put("radius", propBorderRadius.value_or(BorderRadiusProperty())
-                .radiusTopLeft.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
-        } else {
-            auto jsonRadius = JsonUtil::Create(true);
-            jsonRadius->Put("topLeft", propBorderRadius.value_or(BorderRadiusProperty())
-                .radiusTopLeft.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
-            jsonRadius->Put("topRight", propBorderRadius.value_or(BorderRadiusProperty())
-                .radiusTopRight.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
-            jsonRadius->Put("bottomLeft", propBorderRadius.value_or(BorderRadiusProperty())
-                .radiusBottomLeft.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
-            jsonRadius->Put("bottomRight", propBorderRadius.value_or(BorderRadiusProperty())
-                .radiusBottomRight.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
-            json->Put("borderRadius", jsonRadius);
-            jsonBorder->Put("radius", jsonRadius);
-        }
-        json->Put("border", jsonBorder->ToString().c_str());
-    }
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 };
 
 struct TransformProperty {

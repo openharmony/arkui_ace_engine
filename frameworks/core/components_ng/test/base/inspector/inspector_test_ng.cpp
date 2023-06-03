@@ -13,28 +13,31 @@
  * limitations under the License.
  */
 #include <cstdint>
+#include <fcntl.h>
 #include <functional>
 #include <memory>
 #include <optional>
-#include <vector>
 #include <utility>
+#include <vector>
+
 #include "gtest/gtest.h"
 
 #define protected public
 #define private public
+#include "cJSON.h"
+#include "interfaces/inner_api/ace/ui_content.h"
+#include "test/mock/base/mock_task_executor.h"
+
+#include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/base/inspector.h"
 #include "core/common/ace_application_info.h"
+#include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-#include "core/components_ng/pattern/stage/stage_manager.h"
-#include "interfaces/inner_api/ace/ui_content.h"
-#include "cJSON.h"
-#undef private
-#undef protected
 
 using namespace testing;
 using namespace testing::ext;
@@ -129,7 +132,7 @@ HWTEST_F(InspectorTestNg, InspectorTestNg002, TestSize.Level1)
      */
     context1->rootNode_ = ONE;
     ASSERT_NE(context1, nullptr);
-    auto test2 =Inspector::GetInspectorNodeByKey(key);
+    auto test2 = Inspector::GetInspectorNodeByKey(key);
     EXPECT_EQ(test2, "");
     /**
      * @tc.steps: step3. callback GetInspectorNodeByKey
@@ -156,8 +159,14 @@ HWTEST_F(InspectorTestNg, InspectorTestNg003, TestSize.Level1)
 
     context1->GetStageManager()->GetLastPage()->GetParent()->SetParent(ONE);
 
+    /**
+     * @tc.steps: step2. call GetInspector
+     * @tc.expected: the return value is empty string
+     */
     auto test1 = Inspector::GetInspector(false);
+    EXPECT_NE(test1, "");
     auto test3 = Inspector::GetInspector(true);
+    EXPECT_NE(test3, "");
     context1->stageManager_ = nullptr;
 }
 
@@ -169,32 +178,20 @@ HWTEST_F(InspectorTestNg, InspectorTestNg003, TestSize.Level1)
 HWTEST_F(InspectorTestNg, InspectorTestNg004, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. callback SendEventByKey
-     * @tc.expected: expect the function is run ok
+     * @tc.steps: step1. set rootNode and taskExecutor call SendEventByKey
+     * @tc.expected: expect return true
      */
-    int action = 1;
-    std::string params = "params";
-    auto test = Inspector::SendEventByKey(key, action, params);
-    EXPECT_EQ(test, false);
-
-    /**
-     * @tc.steps: step2. callback SetUp
-     * @tc.expected: expect SendEventByKey is return false.
-     */
-    auto context1 = PipelineContext::GetCurrentContext();
-    auto test1 = Inspector::SendEventByKey(key, action, params);
-    EXPECT_EQ(test1, false);
-
-    /**
-     * @tc.steps: step3. callback SendEventByKey
-     * @tc.expected: expect nodePtr2 not null
-     */
-    context1->rootNode_ = ONE;
-    auto rootNode = context1->GetRootElement();
-    ASSERT_NE(rootNode, nullptr);
-    auto test2 = Inspector::SendEventByKey(key, action, params);
-    EXPECT_EQ(test2, false);
-    context1->rootNode_ = nullptr;
+    auto context = NG::PipelineContext::GetCurrentContext();
+    context->rootNode_ = FrameNode::CreateFrameNode("frameNode", 60, AceType::MakeRefPtr<Pattern>(), true);
+    context->rootNode_->SetGeometryNode(AceType::MakeRefPtr<GeometryNode>());
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto test3 = Inspector::SendEventByKey("", static_cast<int>(AceAction::ACTION_CLICK), "params");
+    EXPECT_EQ(test3, true);
+    test3 = Inspector::SendEventByKey("", static_cast<int>(AceAction::ACTION_LONG_CLICK), "params");
+    EXPECT_EQ(test3, true);
+    test3 = Inspector::SendEventByKey("", 31, "params");
+    EXPECT_EQ(test3, true);
+    context->rootNode_ = nullptr;
 }
 
 /**
@@ -234,13 +231,68 @@ HWTEST_F(InspectorTestNg, InspectorTestNg006, TestSize.Level1)
     auto context1 = PipelineContext::GetCurrentContext();
     ASSERT_NE(context1, nullptr);
     context1->stageManager_ = AceType::MakeRefPtr<StageManager>(ONE);
-    context1->GetStageManager()->GetLastPage()->GetParent()->SetParent(ONE);
 
-    std::vector<RefPtr<NG::UINode>> children;
-    children.push_back(TWO);
+    /**
+     * @tc.steps: step2 add child to two and create a temp node with tag "temp"
+                call GetInspector
+     * @tc.expected: the return value is empty string
+     */
+    ONE->children_.clear();
+    ONE->AddChild(TWO);
+    ASSERT_EQ(context1->GetStageManager()->GetLastPage(), TWO);
+    auto stageParent = FrameNode::CreateFrameNode("stageParent", 5, AceType::MakeRefPtr<Pattern>(), true);
+    stageParent->AddChild(ONE);
 
-    auto test = Inspector::GetInspector(false);
+    THREE->isInternal_ = true;
+    TWO->AddChild(PAGE);
+    TWO->AddChild(THREE);
+    TWO->AddChild(STAGE);
+    auto temp = FrameNode::CreateFrameNode("temp", 5, AceType::MakeRefPtr<Pattern>(), true);
+    STAGE->AddChild(temp);
+    ONE->tag_ = "stage";
+    auto test1 = Inspector::GetInspector(false);
+    EXPECT_NE(test1, "");
+
+    PAGE->hostPageId_ = TWO->GetPageId();
+    auto test2 = Inspector::GetInspector(false);
+    EXPECT_NE(test2, "");
+
+    PAGE->hostPageId_ = TWO->GetPageId() + 1;
+    test2 = Inspector::GetInspector(false);
+    EXPECT_NE(test2, "");
+
+    TWO->children_.clear();
+    auto test3 = Inspector::GetInspector(false);
+    EXPECT_NE(test3, "");
+
+    /**
+     *  ONE(stageNode)--TWO(GetLastPage())--PAGE
+     *                   |--THREE
+     *                   |--STAGE--temp
+     *                   |--frameNode
+     *                   |--frameNode2--frameNode3
+     */
+    /**
+     * @tc.steps: step3 add child to two and create a frame node tree
+            call GetInspector
+     * @tc.expected: the return value is not empty string
+     */
+    auto spanNode = SpanNode::GetOrCreateSpanNode(int32_t(191));
+    TWO->AddChild(spanNode);
+
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 6, AceType::MakeRefPtr<Pattern>(), true);
+    TWO->AddChild(frameNode);
+    frameNode->isActive_ = true;
+    auto frameNode2 = FrameNode::CreateFrameNode("frameNode2", 62, AceType::MakeRefPtr<Pattern>(), true);
+    TWO->AddChild(frameNode2);
+    frameNode2->isActive_ = false;
+    auto frameNode3 = FrameNode::CreateFrameNode("frameNode3", 63, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode2->AddChild(frameNode3);
+    test3 = Inspector::GetInspector(false);
+    EXPECT_NE(test3, "");
+
     context1->stageManager_ = nullptr;
+    ONE->tag_ = "one";
 }
 
 /**
@@ -265,8 +317,7 @@ HWTEST_F(InspectorTestNg, InspectorTestNg007, TestSize.Level1)
     ONE->children_.pop_back();
     auto pageRootNode = context1->GetStageManager()->GetLastPage();
     auto test = Inspector::GetInspector(false);
-    EXPECT_EQ(test,
-        "{\"$type\":\"root\",\"width\":\"0.000000\",\"height\":\"0.000000\",\"$resolution\":\"0.000000\"}");
+    EXPECT_EQ(test, "{\"$type\":\"root\",\"width\":\"0.000000\",\"height\":\"0.000000\",\"$resolution\":\"0.000000\"}");
     context1->stageManager_ = nullptr;
 }
 } // namespace OHOS::Ace::NG

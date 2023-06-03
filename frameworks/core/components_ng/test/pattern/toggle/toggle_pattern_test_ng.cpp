@@ -221,7 +221,9 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest004, TestSize.Level1)
     toggleModelNG.SetHeight(TOGGLE_HEIGH);
     toggleModelNG.SetBackgroundColor(BACKGROUND_COLOR);
     auto padding = CreatePadding(ZERO);
-    toggleModelNG.SetPadding(padding);
+    NG::PaddingProperty newPadding(
+        { NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp) });
+    toggleModelNG.SetPadding(padding, newPadding);
     auto buttonFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(buttonFrameNode, nullptr);
     EXPECT_EQ(buttonFrameNode->GetTag(), V2::TOGGLE_ETS_TAG);
@@ -1367,5 +1369,44 @@ HWTEST_F(TogglePatternTestNg, ToggleModelTest006, TestSize.Level1)
     frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     toggleModelNG3.OnChangeEvent(std::move(changeEvent));
+}
+
+/**
+ * @tc.name: ToggleModelDistributedTest001
+ * @tc.desc: Test the distributed capability of Toggle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TogglePatternTestNg, ToggleModelDistributedTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto switchPaintProperty = pattern->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(switchPaintProperty, nullptr);
+
+    /**
+     * @tc.expected: Function ProvideRestoreInfo is called.
+     */
+    pattern->isOn_ = false;
+    std::string ret = pattern->ProvideRestoreInfo();
+    EXPECT_TRUE(ret == R"({"IsOn":false})");
+
+    /**
+     * @tc.steps: step3. Function OnRestoreInfo is called.
+     * @tc.expected: Passing invalid & valid JSON format.
+     */
+    std::string restoreInfo_ = R"({"IsOn":true})";
+    pattern->OnRestoreInfo(restoreInfo_);
+    EXPECT_TRUE(switchPaintProperty->GetIsOnValue(false));
+    restoreInfo_ = "invalid_json_string";
+    pattern->OnRestoreInfo(restoreInfo_);
+    ASSERT_NE(switchPaintProperty, nullptr);
+    EXPECT_TRUE(switchPaintProperty->GetIsOnValue(false));
 }
 } // namespace OHOS::Ace::NG

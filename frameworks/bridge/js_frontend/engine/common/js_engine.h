@@ -25,6 +25,7 @@
 
 class NativeEngine;
 class NativeReference;
+class NativeValue;
 
 namespace OHOS::Ace::Framework {
 
@@ -185,8 +186,6 @@ public:
 
     virtual void DumpHeapSnapshot(bool isPrivate) {}
 
-    virtual void ClearCache() {}
-
     virtual std::string GetStacktraceMessage()
     {
         return "";
@@ -302,6 +301,10 @@ public:
 #endif
 
     virtual void FlushReload() {}
+    virtual NativeValue* GetContextValue()
+    {
+        return nullptr;
+    }
 
 protected:
     NativeEngine* nativeEngine_ = nullptr;

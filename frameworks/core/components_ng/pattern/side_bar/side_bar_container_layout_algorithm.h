@@ -93,11 +93,15 @@ private:
     void LayoutSideBarContent(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& contentLayoutWrapper);
     void LayoutDivider(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& dividerLayoutWrapper);
     void InitRealSideBarWidth(LayoutWrapper* layoutWrapper, float parentWidth);
+    void AutoMode(LayoutWrapper* layoutWrapper, float parentWidth, float minSideBarWidthPx, float dividerStrokeWidthPx);
+    void AutoChangeSideBarWidth(
+        LayoutWrapper* layoutWrapper, float parentWidth, float minSideBarWidthPx, float dividerStrokeWidthPx);
 
     float currentOffset_ = 0.0f;
     float realSideBarWidth_ = 0.0f;
     float realSideBarHeight_ = 0.0f;
     float realDividerWidth_ = 0.0f;
+    float minContentWidth_ = 0.0f;
     SideBarStatus sideBarStatus_ = SideBarStatus::SHOW;
     bool needInitRealSideBarWidth_ = true;
     OffsetF sideBarOffset_;

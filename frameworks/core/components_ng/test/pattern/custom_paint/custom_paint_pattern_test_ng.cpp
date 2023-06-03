@@ -30,12 +30,12 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/custom_paint/canvas_model_ng.h"
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/custom_paint_event_hub.h"
 #include "core/components_ng/pattern/custom_paint/custom_paint_layout_algorithm.h"
 #include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/custom_paint_pattern.h"
-#include "core/components_ng/pattern/custom_paint/custom_paint_view.h"
 #include "core/components_ng/test/pattern/custom_paint/common_constants.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_interface.h"
@@ -61,7 +61,8 @@ RefPtr<CustomPaintPattern> CustomPaintPatternTestNg::CreateCustomPaintPattern()
     RefPtr<PipelineBase> pipelineContext = AceType::MakeRefPtr<MockPipelineBase>();
     RefPtr<Container> container = AceType::MakeRefPtr<MockContainer>(pipelineContext);
     AceEngine::Get().AddContainer(DEFAULT_INSTANCE_ID, container);
-    return CustomPaintView::Create();
+    CanvasModelNG CanvasModelNG;
+    return AceType::DynamicCast<CustomPaintPattern>(CanvasModelNG.Create());
 }
 
 void CustomPaintPatternTestNg::SetUpTestCase()
@@ -109,7 +110,8 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg001, TestSize.Level1)
      * @tc.expected: The value of flagEventCbk is false.
      */
     // Set the onReadEvent as nullptr, the value of flagEventCbk keep false always.
-    CustomPaintView::SetOnReady(nullptr);
+    CanvasModelNG CanvasModelNG;
+    CanvasModelNG.SetOnReady([](uint32_t) {});
     eventHub->FireReadyEvent();
     EXPECT_FALSE(flagEventCbk);
 
@@ -117,7 +119,7 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg001, TestSize.Level1)
      * @tc.steps3: Set the onReadEvent as the function which changes the value of flagEventCbk.
      * @tc.expected: The value of flagEventCbk will be modified to false.
      */
-    CustomPaintView::SetOnReady([&flagEventCbk]() { flagEventCbk = true; });
+    CanvasModelNG.SetOnReady([&flagEventCbk](uint32_t) { flagEventCbk = true; });
     eventHub->FireReadyEvent();
     EXPECT_TRUE(flagEventCbk);
 }
@@ -248,7 +250,8 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg005, TestSize.Level1)
      * @tc.steps1: initialize parameters.
      * @tc.expected: Make sure entering the first if-branch.
      */
-    auto customPattern = CustomPaintView::Create();
+    CanvasModelNG CanvasModelNG;
+    auto customPattern = AceType::DynamicCast<CustomPaintPattern>(CanvasModelNG.Create());
     ASSERT_NE(customPattern, nullptr);
 
     /**
@@ -300,11 +303,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg006, TestSize.Level1)
      * @tc.steps2: Test functions about text.
      * @tc.expected: The task queue of paintMethod is changed to unempty.
      */
-    customPattern->FillText(DEFAULT_STR, DEFAULT_DOUBLE0, DEFAULT_DOUBLE0);
+    customPattern->FillText(DEFAULT_STR, DEFAULT_DOUBLE0, DEFAULT_DOUBLE0, std::optional<double>(0));
     EXPECT_TRUE(paintMethod->HasTask());
 
     paintMethod->tasks_.clear();
-    customPattern->StrokeText(DEFAULT_STR, DEFAULT_DOUBLE0, DEFAULT_DOUBLE0);
+    customPattern->StrokeText(DEFAULT_STR, DEFAULT_DOUBLE0, DEFAULT_DOUBLE0, std::optional<double>(0));
     EXPECT_TRUE(paintMethod->HasTask());
 
     TextAlign textAlign = TextAlign::CENTER;

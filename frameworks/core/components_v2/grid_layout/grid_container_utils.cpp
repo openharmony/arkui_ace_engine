@@ -16,6 +16,8 @@
 #include "core/components_v2/grid_layout/grid_container_utils.h"
 
 #include "core/components/common/layout/grid_system_manager.h"
+#include "core/components/container_modal/container_modal_constants.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
@@ -68,6 +70,11 @@ GridSizeType GridContainerUtils::ProcessGridSizeType(
     double windowWidth = 0.0;
     if (breakpoints->reference == BreakPointsReference::WindowSize) {
         windowWidth = GridSystemManager::GetInstance().GetScreenWidth();
+        auto windowManager = pipeline->GetWindowManager();
+        auto mode = windowManager->GetWindowMode();
+        if (mode == WindowMode::WINDOW_MODE_FLOATING) {
+            windowWidth -= static_cast<int32_t>(2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx());
+        }
     } else {
         windowWidth = size.Width();
     }

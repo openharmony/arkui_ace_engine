@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/event/ace_events.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
@@ -148,6 +149,19 @@ void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<
         targetNode->MarkNeedRender();
     }
     inSelectedRect_ = false;
+}
+
+void EventManager::HandleGlobalEventNG(const TouchEvent& touchPoint,
+    const RefPtr<NG::SelectOverlayManager>& selectOverlayManager, const NG::OffsetF& rootOffset)
+{
+    if (touchPoint.type != TouchType::DOWN || touchPoint.sourceType != SourceType::MOUSE) {
+        return;
+    }
+    const NG::PointF point { touchPoint.x - rootOffset.GetX(), touchPoint.y - rootOffset.GetY() };
+    CHECK_NULL_VOID_NOLOG(selectOverlayManager);
+    if (!selectOverlayManager->IsInSelectedOrSelectOverlayArea(point)) {
+        selectOverlayManager->DestroySelectOverlay();
+    }
 }
 
 void EventManager::HandleOutOfRectCallback(const Point& point, std::vector<RectCallback>& rectCallbackList)

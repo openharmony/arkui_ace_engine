@@ -536,7 +536,7 @@ void SliderPattern::PaintFocusState()
 bool SliderPattern::OnKeyEvent(const KeyEvent& event)
 {
     auto paintProperty = GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_RETURN(paintProperty, true);
+    CHECK_NULL_RETURN(paintProperty, false);
     auto reverse = paintProperty->GetReverseValue(false);
     if (event.action == KeyAction::DOWN) {
         if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_LEFT) ||
@@ -546,6 +546,7 @@ bool SliderPattern::OnKeyEvent(const KeyEvent& event)
                 InitializeBubble();
             }
             PaintFocusState();
+            return true;
         }
         if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT) ||
             (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
@@ -554,6 +555,7 @@ bool SliderPattern::OnKeyEvent(const KeyEvent& event)
                 InitializeBubble();
             }
             PaintFocusState();
+            return true;
         }
     } else if (event.action == KeyAction::UP) {
         if (showTips_) {
@@ -590,6 +592,7 @@ bool SliderPattern::MoveStep(int32_t stepCount)
     value_ = nextValue;
     sliderPaintProperty->UpdateValue(value_);
     valueRatio_ = (value_ - min) / (max - min);
+    FireChangeEvent(SliderChangeMode::Begin);
     FireChangeEvent(SliderChangeMode::End);
     LOGD("Move %{public}d steps, Value change to %{public}f", stepCount, value_);
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -802,6 +805,28 @@ void SliderPattern::UpdateBlock()
             imageFrameNode_ = nullptr;
         }
     }
+}
+
+std::string SliderPattern::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_RETURN(sliderPaintProperty, "");
+    jsonObj->Put("value", sliderPaintProperty->GetValue().value_or(0.0f));
+    return jsonObj->ToString();
+}
+
+void SliderPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(sliderPaintProperty);
+    auto info = JsonUtil::ParseJsonString(restoreInfo);
+    if (!info->IsValid() || !info->IsObject()) {
+        return;
+    }
+    auto jsonValue = info->GetValue("value");
+    sliderPaintProperty->UpdateValue(jsonValue->GetDouble());
+    OnModifyDone();
 }
 
 void SliderPattern::LayoutImageNode()

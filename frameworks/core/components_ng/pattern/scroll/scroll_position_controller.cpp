@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 
-void ScrollPositionController::JumpTo(int32_t index, int32_t source)
+void ScrollPositionController::JumpTo(int32_t index, bool /* smooth */, int32_t source)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID_NOLOG(pattern);
@@ -33,7 +33,8 @@ void ScrollPositionController::JumpTo(int32_t index, int32_t source)
     LOGW("jumpTo is not supported now");
 }
 
-bool ScrollPositionController::AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve)
+bool ScrollPositionController::AnimateTo(
+    const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_RETURN(pattern, false);

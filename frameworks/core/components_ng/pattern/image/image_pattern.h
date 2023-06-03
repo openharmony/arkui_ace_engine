@@ -25,7 +25,6 @@
 #include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/image/image_modifier.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/property.h"
@@ -72,6 +71,7 @@ public:
         return { FocusType::NODE, false };
     }
 
+    void CreateObscuredImageIfNeed();
     void LoadImageDataIfNeed();
     void OnNotifyMemoryLevel(int32_t level) override;
     void OnWindowHide() override;
@@ -80,6 +80,11 @@ public:
 
     void EnableDrag();
 
+    bool DefaultSupportDrag() override
+    {
+        return true;
+    }
+    
     void SetCopyOption(CopyOptions value)
     {
         copyOption_ = value;
@@ -92,6 +97,14 @@ public:
 
     void BeforeCreatePaintWrapper() override;
     void DumpInfo() override;
+
+private:
+    class ObscuredImage : public CanvasImage {
+        void DrawToRSCanvas(
+            RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) {}
+        int32_t GetWidth() const { return 0; }
+        int32_t GetHeight() const { return 0; }
+    };
 
 private:
     void OnAttachToFrameNode() override;
@@ -139,14 +152,14 @@ private:
     RefPtr<CanvasImage> image_;
     RectF dstRect_;
     RectF srcRect_;
-    RefPtr<ImageModifier> imageModifier_;
+
+    RefPtr<CanvasImage> obscuredImage_;
 
     // clear alt data after [OnImageLoadSuccess] being called
     RefPtr<ImageLoadingContext> altLoadingCtx_;
     RefPtr<CanvasImage> altImage_;
     std::unique_ptr<RectF> altDstRect_;
     std::unique_ptr<RectF> altSrcRect_;
-    RefPtr<ImageModifier> altImageModifier_;
 
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<ClickEvent> clickEvent_;

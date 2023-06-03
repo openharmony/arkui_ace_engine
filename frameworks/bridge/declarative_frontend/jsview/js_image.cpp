@@ -186,12 +186,14 @@ void JSImage::Create(const JSCallbackInfo& info)
 
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
+    bool isCard = context->IsFormRender();
+
     // Interim programme
     std::string bundleName;
     std::string moduleName;
     std::string src;
-    auto noPixmap = ParseJsMedia(info[0], src);
-    if (context->IsFormRender() && info[0]->IsString()) {
+    bool srcValid = ParseJsMedia(info[0], src);
+    if (isCard && info[0]->IsString()) {
         SrcType srcType = ImageSourceInfo::ResolveURIType(src);
         bool notSupport = (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
         if (notSupport) {
@@ -201,9 +203,11 @@ void JSImage::Create(const JSCallbackInfo& info)
     }
     GetJsMediaBundleInfo(info[0], bundleName, moduleName);
     RefPtr<PixelMap> pixmap = nullptr;
-    if (!noPixmap) {
+
+    // input is PixelMap / Drawable
+    if (!srcValid) {
 #if defined(PIXEL_MAP_SUPPORTED)
-        if (context->IsFormRender()) {
+        if (isCard) {
             LOGE("Not supported pixmap when form render");
         } else {
             if (IsDrawable(info[0])) {
@@ -216,7 +220,8 @@ void JSImage::Create(const JSCallbackInfo& info)
         LOGW("Pixmap not supported under this environment.");
 #endif
     }
-    ImageModel::GetInstance()->Create(src, noPixmap, pixmap, bundleName, moduleName);
+
+    ImageModel::GetInstance()->Create(src, pixmap, bundleName, moduleName);
 }
 
 // Interim programme
@@ -551,8 +556,7 @@ void JSImage::JsOnDragMove(const JSCallbackInfo& info)
 
 void JSImage::JsOnDragLeave(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1 || !info[0]->IsFunction()) {
-        LOGW("argument is invalid");
+    if (!info[0]->IsFunction()) {
         return;
     }
     auto jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
@@ -567,8 +571,7 @@ void JSImage::JsOnDragLeave(const JSCallbackInfo& info)
 
 void JSImage::JsOnDrop(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1 || !info[0]->IsFunction()) {
-        LOGW("argument is invalid");
+    if (!info[0]->IsFunction()) {
         return;
     }
     auto jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
@@ -583,19 +586,14 @@ void JSImage::JsOnDrop(const JSCallbackInfo& info)
 
 void JSImage::SetCopyOption(const JSCallbackInfo& info)
 {
-    if (info.Length() == 0) {
-        return;
-    }
     auto copyOptions = CopyOptions::None;
     if (info[0]->IsNumber()) {
         auto enumNumber = info[0]->ToNumber<int>();
         copyOptions = static_cast<CopyOptions>(enumNumber);
         if (copyOptions < CopyOptions::None || copyOptions > CopyOptions::Distributed) {
-            LOGW("copy option is invalid %{public}d", copyOptions);
             copyOptions = CopyOptions::None;
         }
     }
-    LOGI("copy option: %{public}d", copyOptions);
     ImageModel::GetInstance()->SetCopyOption(copyOptions);
 }
 

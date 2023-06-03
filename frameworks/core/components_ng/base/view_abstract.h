@@ -215,6 +215,8 @@ public:
     static void SetDisplayIndex(int32_t value);
     static void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction);
+    // obscured
+    static void SetObscured(const std::vector<ObscuredReasons>& reasons);
 
     // Bind properties
     static void BindPopup(

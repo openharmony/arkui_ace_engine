@@ -23,6 +23,7 @@
 
 namespace OHOS::Ace::NG {
 std::unique_ptr<LocationButtonModelNG> LocationButtonModelNG::instance_ = nullptr;
+std::mutex LocationButtonModelNG::mutex_;
 
 static const std::vector<uint32_t> ICON_RESOURCE_TABLE = {
     static_cast<uint32_t>(InternalResource::ResourceId::LOCATION_BUTTON_FILLED_SVG),
@@ -32,13 +33,16 @@ static const std::vector<uint32_t> ICON_RESOURCE_TABLE = {
 LocationButtonModelNG* LocationButtonModelNG::GetInstance()
 {
     if (!instance_) {
-        instance_.reset(new LocationButtonModelNG());
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
+            instance_.reset(new LocationButtonModelNG());
+        }
     }
     return instance_.get();
 }
 
 void LocationButtonModelNG::Create(int32_t text, int32_t icon,
-    SecurityComponentBackgroundType backgroundType)
+    int32_t backgroundType)
 {
     SecurityComponentModelNG::CreateCommon(V2::SEC_LOCATION_BUTTON_ETS_TAG,
         text, icon, backgroundType, []() { return AceType::MakeRefPtr<SecurityComponentPattern>(); });
@@ -47,7 +51,6 @@ void LocationButtonModelNG::Create(int32_t text, int32_t icon,
 bool LocationButtonModelNG::GetIconResource(int32_t iconStyle, InternalResource::ResourceId& id)
 {
     if ((iconStyle < 0) || (static_cast<uint32_t>(iconStyle) >= ICON_RESOURCE_TABLE.size())) {
-        LOGW("Icon type is invalid, can not get resource id");
         return false;
     }
     id = static_cast<InternalResource::ResourceId>(ICON_RESOURCE_TABLE[iconStyle]);
@@ -58,7 +61,6 @@ bool LocationButtonModelNG::GetTextResource(int32_t textStyle, std::string& text
 {
     auto theme = GetTheme();
     if (theme == nullptr) {
-        LOGE("theme in null");
         return false;
     }
     text = theme->GetLocationDescriptions(textStyle);

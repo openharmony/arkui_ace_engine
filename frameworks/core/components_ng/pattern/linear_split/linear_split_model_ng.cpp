@@ -33,6 +33,7 @@ void LinearSplitModelNG::Create(SplitType splitType)
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         tag, nodeId, [splitType]() { return AceType::MakeRefPtr<LinearSplitPattern>(splitType); });
     stack->Push(frameNode);
+    ACE_UPDATE_RENDER_CONTEXT(ClipEdge, true);
 }
 
 void LinearSplitModelNG::SetResizeable(NG::SplitType splitType, bool resizeable)

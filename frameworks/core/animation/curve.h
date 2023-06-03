@@ -210,10 +210,12 @@ public:
     ~CustomCurve() override = default;
     float MoveInternal(float time) override
     {
-        float value = interpolateFunc_(time);
-        return std::clamp(value, 0.f, 1.f);
+        return interpolateFunc_ ? interpolateFunc_(time) : 1.0f;
     }
-
+    const std::string ToString() override
+    {
+        return "customCallback";
+    }
 private:
     std::function<float(float)> interpolateFunc_;
 
