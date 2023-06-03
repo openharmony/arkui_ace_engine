@@ -220,8 +220,16 @@ void JSScroller::ScrollBy(const JSCallbackInfo& args)
     if (container) {
         auto context = container->GetPipelineContext();
         if (context) {
-            deltaX = context->NormalizeToPx(xOffset);
-            deltaY = context->NormalizeToPx(yOffset);
+            if (xOffset.Unit() == DimensionUnit::PERCENT) {
+                deltaX = 0.0;
+            } else {
+                deltaX = context->NormalizeToPx(xOffset);
+            }
+            if (yOffset.Unit() == DimensionUnit::PERCENT) {
+                deltaY = 0.0;
+            } else {
+                deltaY = context->NormalizeToPx(yOffset);
+            }
         }
     }
     auto scrollController = controllerWeak_.Upgrade();
