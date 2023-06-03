@@ -200,9 +200,13 @@ void ProgressPattern::OnModifyDone()
         CHECK_NULL_VOID_NOLOG(focusHub);
         InitOnKeyEvent(focusHub);
     }
+}
 
-    auto visibilityProp = progressLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE);
-    visibilityProp_ = visibilityProp;
+void ProgressPattern::OnVisibleChange(bool isVisible)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    visibilityProp_ = isVisible;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
