@@ -214,6 +214,8 @@ public:
         if (normalWidth_ != normalWidth) {
             normalWidthUpdate_ = true;
             normalWidth_ = normalWidth;
+            FlushBarWidth();
+            MarkNeedRender();
         }
     }
 
