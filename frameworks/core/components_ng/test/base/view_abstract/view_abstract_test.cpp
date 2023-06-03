@@ -410,7 +410,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest009, TestSize.Level1)
     ViewAbstract::SetOnTouch(std::move(touchEventFunc));
     OnMouseEventFunc onMouseEventFunc;
     ViewAbstract::SetOnMouse(std::move(onMouseEventFunc));
-    OnHoverEventFunc onHoverEventFunc;
+    OnHoverFunc onHoverEventFunc;
     ViewAbstract::SetOnHover(std::move(onHoverEventFunc));
     OnKeyCallbackFunc onKeyCallback;
     ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback));
@@ -448,7 +448,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest010, TestSize.Level1)
     ViewAbstract::SetOnTouch(std::move(touchEventFunc));
     OnMouseEventFunc onMouseEventFunc;
     ViewAbstract::SetOnMouse(std::move(onMouseEventFunc));
-    OnHoverEventFunc onHoverEventFunc;
+    OnHoverFunc onHoverEventFunc;
     ViewAbstract::SetOnHover(std::move(onHoverEventFunc));
     OnKeyCallbackFunc onKeyCallback;
     ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback));

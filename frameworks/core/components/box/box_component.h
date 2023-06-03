@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace {
 
-using OnHoverCallback = std::function<void(bool)>;
+using OnHoverCallback = std::function<void(bool, HoverInfo& info)>;
 using OnMouseCallback = std::function<void(MouseInfo& info)>;
 using OnNewDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>;
 

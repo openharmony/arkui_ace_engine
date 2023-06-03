@@ -170,7 +170,7 @@ public:
     static void SetOnClick(GestureEventFunc&& clickEventFunc);
     static void SetOnTouch(TouchEventFunc&& touchEventFunc);
     static void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc);
-    static void SetOnHover(OnHoverEventFunc&& onHoverEventFunc);
+    static void SetOnHover(OnHoverFunc&& onHoverEventFunc);
     static void SetHoverEffect(HoverEffectType hoverEffect);
     static void SetHoverEffectAuto(HoverEffectType hoverEffect);
     static void SetEnabled(bool enabled);
