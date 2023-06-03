@@ -1013,8 +1013,8 @@ bool TextPickerColumnPattern::InnerHandleScroll(int32_t step, bool isUpateProper
         return false;
     }
 
-    uint32_t currentIndex = GetCurrentIndex();
-    uint32_t prevIndex = currentIndex;
+    int32_t currentIndex = GetCurrentIndex();
+    int32_t prevIndex = currentIndex;
     RefPtr<TextPickerLayoutProperty> layout = GetParentLayout();
     CHECK_NULL_RETURN(host, false);
 
