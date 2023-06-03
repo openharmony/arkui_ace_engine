@@ -202,6 +202,7 @@ RefPtr<NG::ImageData> ImageLoader::LoadImageDataFromFileCache(const std::string&
 RefPtr<NG::ImageData> ImageLoader::GetImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
 {
+    ACE_FUNCTION_TRACE();
     if (imageSourceInfo.IsPixmap()) {
         return LoadDecodedImageData(imageSourceInfo, context);
     }

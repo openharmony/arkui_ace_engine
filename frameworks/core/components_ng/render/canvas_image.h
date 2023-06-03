@@ -74,6 +74,8 @@ public:
         return Claim(this);
     }
 
+    virtual void Cache(const std::string& key) {}
+
     void SetPaintConfig(const ImagePaintConfig& config)
     {
         paintConfig_ = std::make_unique<ImagePaintConfig>(config);

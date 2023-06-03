@@ -314,6 +314,8 @@ private:
     void PaintGraphics();
     void PaintOverlayText();
     void PaintBorderImage();
+    void PaintSkBgImage();
+    void PaintPixmapBgImage();
     void PaintBorderImageGradient();
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
     void SetBackBlurFilter();
