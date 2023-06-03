@@ -305,7 +305,7 @@ static bool InitChildInfo(SecCompBase& buttonInfo, RefPtr<FrameNode>& node)
 
         auto bgProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         CHECK_NULL_RETURN(bgProp, false);
-        auto& borderWidth = bgProp->GetBorderWidthProperty();
+        const auto& borderWidth = bgProp->GetBorderWidthProperty();
         if (borderWidth != nullptr) {
             buttonInfo.borderWidth_ = borderWidth->leftDimen.value().ConvertToVp();
         }
