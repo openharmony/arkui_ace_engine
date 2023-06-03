@@ -2916,6 +2916,39 @@ void JSViewAbstract::JsBackdropBlur(const JSCallbackInfo& info)
     info.SetReturnValue(info.This());
 }
 
+void JSViewAbstract::GetFractionStops(
+    std::vector<std::pair<float, float>>& fractionStops, const std::unique_ptr<JsonValue>& array)
+{
+    float tmpPos = -1.0;
+    for (int32_t i = 0; i < array->GetArraySize(); i++) {
+        std::pair<float, float> fractionStop;
+        auto item = array->GetArrayItem(i);
+        if (item && !item->IsNull() && item->IsArray() && item->GetArraySize() >= 1) {
+            auto fraction = item->GetArrayItem(0);
+            double value = 0.0;
+            if (ParseJsonDouble(fraction, value)) {
+                value = std::clamp(value, 0.0, 1.0);
+                fractionStop.first = static_cast<float>(value);
+            }
+            if (item->GetArraySize() <= 1) {
+                continue;
+            }
+            auto stop = item->GetArrayItem(1);
+            value = 0.0;
+            if (ParseJsonDouble(stop, value)) {
+                value = std::clamp(value, 0.0, 1.0);
+                fractionStop.second = static_cast<float>(value);
+            }
+        }
+        if (fractionStop.second <= tmpPos) {
+            LOGE("fraction stop postion is not incremental.");
+            fractionStops.clear();
+            return;
+        }
+        tmpPos = fractionStop.second;
+        fractionStops.push_back(fractionStop);
+    }
+}
 void JSViewAbstract::JsLinearGradientBlur(const JSCallbackInfo& info)
 {
     if (info.Length() < 2) { // 2 represents the least para num;
@@ -2945,35 +2978,9 @@ void JSViewAbstract::JsLinearGradientBlur(const JSCallbackInfo& info)
         return;
     }
 
-    float tmpPos = -1.0;
     std::vector<std::pair<float, float>> fractionStops;
-    for (int32_t i = 0; i < array->GetArraySize(); i++) {
-        std::pair<float, float> fractionStop;
-        auto item = array->GetArrayItem(i);
-        if (item && !item->IsNull() && item->IsArray() && item->GetArraySize() >= 1) {
-            auto fraction = item->GetArrayItem(0);
-            double value = 0.0;
-            if (ParseJsonDouble(fraction, value)) {
-                value = std::clamp(value, 0.0, 1.0);
-                fractionStop.first = static_cast<float>(value);
-            }
-            if (item->GetArraySize() <= 1) {
-                continue;
-            }
-            auto stop = item->GetArrayItem(1);
-            value = 0.0;
-            if (ParseJsonDouble(stop, value)) {
-                value = std::clamp(value, 0.0, 1.0);
-                fractionStop.second = static_cast<float>(value);
-            }
-        }
-        if (fractionStop.second <= tmpPos) {
-            LOGE("fraction stop postion is not incremental.");
-            return;
-        }
-        tmpPos = fractionStop.second;
-        fractionStops.push_back(fractionStop);
-    }
+    GetFractionStops(fractionStops, array);
+
     if (fractionStops.size() <= 1) {
         LOGE("fractionstops must greater than 1.");
         return;
