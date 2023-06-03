@@ -951,19 +951,13 @@ void ParseCustomPopupParam(
 
 } // namespace
 
-bool ColorAlphaAdapt(int64_t colorValue, Color& colorResult)
+uint32_t ColorAlphaAdapt(uint32_t origin)
 {
-    static const int64_t colorMaxValue = 0xFFFFFFFF;
-    if (colorValue < 0 || colorValue > colorMaxValue) {
-        LOGE("color Number is within an invalid range");
-        return false;
-    }
-    auto origin = static_cast<uint32_t>(colorValue);
+    uint32_t result = origin;
     if (origin >> COLOR_ALPHA_OFFSET == 0) {
-        origin |= COLOR_ALPHA_VALUE;
+        result = origin | COLOR_ALPHA_VALUE;
     }
-    colorResult = Color(origin);
-    return true;
+    return result;
 }
 
 void JSViewAbstract::JsScale(const JSCallbackInfo& info)
@@ -3168,8 +3162,9 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
     }
     if (!type->IsNull() && type->IsNumber() &&
         type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
-        auto value = themeConstants->GetInt(resId->ToNumber<int64_t>());
-        return ColorAlphaAdapt(value, result);
+        auto value = themeConstants->GetInt(resId->ToNumber<uint32_t>());
+        result = Color(ColorAlphaAdapt(value));
+        return true;
     }
     result = themeConstants->GetColor(resId->ToNumber<uint32_t>());
     return true;
@@ -3181,7 +3176,8 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
         return false;
     }
     if (jsValue->IsNumber()) {
-        return ColorAlphaAdapt(jsValue->ToNumber<int64_t>(), result);
+        result = Color(ColorAlphaAdapt(jsValue->ToNumber<uint32_t>()));
+        return true;
     }
     if (jsValue->IsString()) {
         return Color::ParseColorString(jsValue->ToString(), result);
@@ -5397,7 +5393,8 @@ bool JSViewAbstract::ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue,
         return false;
     }
     if (jsonValue->IsNumber()) {
-        return ColorAlphaAdapt(jsonValue->GetInt64(), result);
+        result = Color(ColorAlphaAdapt(jsonValue->GetUInt()));
+        return true;
     }
     if (jsonValue->IsString()) {
         result = Color::FromString(jsonValue->GetString());
