@@ -926,6 +926,8 @@ void TextFieldPattern::HandleFocusEvent()
         !textEditingValue_.GetWideText().empty()) {
         setSelectAllFlag_ = false;
         HandleOnSelectAll();
+    } else {
+        StartTwinkling();
     }
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
