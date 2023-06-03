@@ -1825,7 +1825,7 @@ void RosenRenderContext::OnFrontColorBlendUpdate(const Color& colorBlend)
 
 void RosenRenderContext::OnLinearGradientBlurUpdate(const NG::LinearGradientBlurPara& blurPara)
 {
-    float blurRadius = 0;
+    float blurRadius = 0.0f;
     if (blurPara.blurRadius_.IsValid()) {
         float radiusPx = blurPara.blurRadius_.ConvertToPx();
         blurRadius = radiusPx;

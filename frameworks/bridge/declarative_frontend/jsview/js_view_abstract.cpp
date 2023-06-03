@@ -2919,7 +2919,7 @@ void JSViewAbstract::JsBackdropBlur(const JSCallbackInfo& info)
 void JSViewAbstract::GetFractionStops(
     std::vector<std::pair<float, float>>& fractionStops, const std::unique_ptr<JsonValue>& array)
 {
-    float tmpPos = -1.0;
+    float tmpPos = -1.0f;
     for (int32_t i = 0; i < array->GetArraySize(); i++) {
         std::pair<float, float> fractionStop;
         auto item = array->GetArrayItem(i);
@@ -2963,11 +2963,11 @@ void JSViewAbstract::JsLinearGradientBlur(const JSCallbackInfo& info)
 
     if (!info[1]->IsObject()) {
         LOGE("arg is not a object.");
+        return;
     }
     auto argsPtrItem = JsonUtil::ParseJsonString(info[1]->ToString());
     if (!argsPtrItem || argsPtrItem->IsNull()) {
         LOGE("Js Parse object failed. argsPtr is null. %s", info[1]->ToString().c_str());
-        info.ReturnSelf();
         return;
     }
     
@@ -2995,7 +2995,6 @@ void JSViewAbstract::JsLinearGradientBlur(const JSCallbackInfo& info)
     CalcDimension dimensionRadius(static_cast<float>(blurRadius), DimensionUnit::PX);
     NG::LinearGradientBlurPara blurPara(dimensionRadius, fractionStops, static_cast<NG::GradientDirection>(direction));
     SetLinearGradientBlur(blurPara);
-    info.SetReturnValue(info.This());
 }
 
 void JSViewAbstract::JsWindowBlur(const JSCallbackInfo& info)
