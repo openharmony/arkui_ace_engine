@@ -2947,7 +2947,7 @@ void JSViewAbstract::JsLinearGradientBlur(const JSCallbackInfo& info)
 
     float tmpPos = -1.0;
     std::vector<std::pair<float, float>> fractionStops;
-    for (int32_t i = 0; i < array->GetArraySize(); i++) {  
+    for (int32_t i = 0; i < array->GetArraySize(); i++) {
         std::pair<float, float> fractionStop;
         auto item = array->GetArrayItem(i);
         if (item && !item->IsNull() && item->IsArray() && item->GetArraySize() >= 1) {

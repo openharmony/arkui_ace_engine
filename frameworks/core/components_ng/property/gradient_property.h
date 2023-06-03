@@ -525,10 +525,9 @@ public:
     std::vector<std::pair<float, float>> fractionStops_;
     GradientDirection direction_;
 
-    explicit LinearGradientBlurPara(
-        const Dimension blurRadius, const std::vector<std::pair<float, float>>fractionStops,
-        const GradientDirection direction) :
-                    blurRadius_(blurRadius), fractionStops_(fractionStops), direction_(direction) {}
+    explicit LinearGradientBlurPara(const Dimension blurRadius,
+        const std::vector<std::pair<float, float>>fractionStops, const GradientDirection direction)
+         : blurRadius_(blurRadius), fractionStops_(fractionStops), direction_(direction) {}
     bool operator==(const LinearGradientBlurPara& other) const
     {
         return NearEqual(blurRadius_, other.blurRadius_) && NearEqual(fractionStops_, other.fractionStops_) &&
