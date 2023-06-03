@@ -1006,7 +1006,7 @@ bool TextPickerColumnPattern::InnerHandleScroll(int32_t step, bool isUpateProper
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto totalOptionCount = GetOptionCount();
+    auto totalOptionCount = static_cast<int32_t>(GetOptionCount());
 
     CHECK_NULL_RETURN(host, false);
     if (totalOptionCount == 0) {
