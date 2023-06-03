@@ -730,8 +730,10 @@ OnDragCallback GestureEventHub::GetDragCallback()
     CHECK_NULL_RETURN(pipeline, ret);
     auto taskScheduler = pipeline->GetTaskExecutor();
     CHECK_NULL_RETURN(taskScheduler, ret);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_RETURN(dragDropManager, ret);
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    auto callback = [eventHub, dragEvent, taskScheduler](const DragNotifyMsg& notifyMessage) {
+    auto callback = [eventHub, dragEvent, taskScheduler, dragDropManager](const DragNotifyMsg& notifyMessage) {
         DragRet result = DragRet::DRAG_FAIL;
         switch (notifyMessage.result) {
             case DragResult::DRAG_SUCCESS:
@@ -745,7 +747,8 @@ OnDragCallback GestureEventHub::GetDragCallback()
         }
         dragEvent->SetResult(result);
         taskScheduler->PostTask(
-            [eventHub, dragEvent]() {
+            [eventHub, dragEvent, dragDropManager]() {
+                dragDropManager->SetIsDragged(false);
                 if (eventHub->HasOnDragEnd()) {
                     (eventHub->GetOnDragEnd())(dragEvent);
                 }
