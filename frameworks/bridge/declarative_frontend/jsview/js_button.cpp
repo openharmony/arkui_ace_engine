@@ -258,7 +258,7 @@ void JSButton::JsRemoteMessage(const JSCallbackInfo& info)
 {
     RemoteCallback remoteCallback;
     JSInteractableView::JsRemoteMessage(info, remoteCallback);
-    ButtonModel::GetInstance()->SetRemoteMessage(remoteCallback);
+    ButtonModel::GetInstance()->SetRemoteMessage(std::move(remoteCallback));
 }
 
 void JSButton::JSBind(BindingTarget globalObj)
