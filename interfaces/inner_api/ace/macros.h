@@ -16,12 +16,11 @@
 #ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_MACROS_H
 #define FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_MACROS_H
 
-// The macro "ACE_EXPORT_WITH_PREVIEW" is the extension of the macro "ACE_EXPORT"
-#ifndef ACE_EXPORT_WITH_PREVIEW
+#ifndef ACE_FORCE_EXPORT
 #ifndef WINDOWS_PLATFORM
-#define ACE_EXPORT_WITH_PREVIEW __attribute__((visibility("default")))
+#define ACE_FORCE_EXPORT __attribute__((visibility("default")))
 #else
-#define ACE_EXPORT_WITH_PREVIEW __declspec(dllexport)
+#define ACE_FORCE_EXPORT __declspec(dllexport)
 #endif
 #endif
 

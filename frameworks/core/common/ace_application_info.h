@@ -34,7 +34,7 @@ struct AceBundleInfo {
     std::string versionName;
 };
 
-class ACE_FORCE_EXPORT_WITH_PREVIEW AceApplicationInfo : public NonCopyable {
+class ACE_FORCE_EXPORT AceApplicationInfo : public NonCopyable {
 public:
     ACE_EXPORT static AceApplicationInfo& GetInstance();
 

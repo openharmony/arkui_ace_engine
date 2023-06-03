@@ -29,7 +29,7 @@
 
 namespace OHOS::Ace::Platform {
 
-class ACE_FORCE_EXPORT_WITH_PREVIEW EventDispatcher : public Singleton<EventDispatcher> {
+class ACE_FORCE_EXPORT EventDispatcher : public Singleton<EventDispatcher> {
     DECLARE_SINGLETON(EventDispatcher);
 
 public:

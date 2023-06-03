@@ -63,7 +63,7 @@ using GlfwController = FlutterDesktopWindowControllerRef;
 using GlfwController = std::shared_ptr<OHOS::Rosen::GlfwRenderContext>;
 #endif
 
-class ACE_FORCE_EXPORT_WITH_PREVIEW AceAbility {
+class ACE_FORCE_EXPORT AceAbility {
 public:
     explicit AceAbility(const AceRunArgs& runArgs);
     ~AceAbility();

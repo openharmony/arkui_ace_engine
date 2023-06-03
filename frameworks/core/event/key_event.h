@@ -450,7 +450,7 @@ const std::map<KeyCode, std::string> VISIBILITY_CODE = { { KeyCode::KEY_0, "0)" 
     { KeyCode::KEY_F7, "F7" }, { KeyCode::KEY_F8, "F8" }, { KeyCode::KEY_F9, "F9" }, { KeyCode::KEY_F10, "F10" },
     { KeyCode::KEY_F11, "F11" }, { KeyCode::KEY_F12, "F12" } };
 
-ACE_FORCE_EXPORT_WITH_PREVIEW const char* KeyToString(int32_t code);
+ACE_FORCE_EXPORT const char* KeyToString(int32_t code);
 
 struct KeyEvent final {
     KeyEvent() = default;
