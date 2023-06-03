@@ -2918,8 +2918,7 @@ void JSViewAbstract::JsBackdropBlur(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsLinearGradientBlur(const JSCallbackInfo& info)
 {
-    LOGE("[PP TS]JSViewAbstract::JsLinearGradientBlur: info length: %{public}d", info.Length());
-    if (info.Length() < 2) {
+    if (info.Length() < 2) { // 2 represents the least para num;
         LOGE("The argv is wrong, it is supposed to have at least 2 argument");
         return;
     }
@@ -2927,8 +2926,9 @@ void JSViewAbstract::JsLinearGradientBlur(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], blurRadius)) {
         return;
     }
+    blurRadius = std::clamp(blurRadius, 0.0, 100.0); // 100.0 represents largest blur radius;
 
-    if(!info[1]->IsObject()) {
+    if (!info[1]->IsObject()) {
         LOGE("arg is not a object.");
     }
     auto argsPtrItem = JsonUtil::ParseJsonString(info[1]->ToString());
@@ -2945,36 +2945,48 @@ void JSViewAbstract::JsLinearGradientBlur(const JSCallbackInfo& info)
         return;
     }
 
-    std::vector<std::array<float, 2>> fractionStops; 
-    for (int32_t i = 0; i < array->GetArraySize(); i++) {
-        std::array<float, 2> fractionArray;
+    float tmpPos = -1.0;
+    std::vector<std::pair<float, float>> fractionStops;
+    for (int32_t i = 0; i < array->GetArraySize(); i++) {  
+        std::pair<float, float> fractionStop;
         auto item = array->GetArrayItem(i);
         if (item && !item->IsNull() && item->IsArray() && item->GetArraySize() >= 1) {
             auto fraction = item->GetArrayItem(0);
             double value = 0.0;
             if (ParseJsonDouble(fraction, value)) {
                 value = std::clamp(value, 0.0, 1.0);
-                fractionArray[0] = static_cast<float>(value);
+                fractionStop.first = static_cast<float>(value);
             }
-
+            if (item->GetArraySize() <= 1) {
+                continue;
+            }
             auto stop = item->GetArrayItem(1);
             value = 0.0;
             if (ParseJsonDouble(stop, value)) {
                 value = std::clamp(value, 0.0, 1.0);
-                fractionArray[1] = static_cast<float>(value);
+                fractionStop.second = static_cast<float>(value);
             }
         }
-        LOGE("[PP TS]JSViewAbstract::JsGradientBlur: i: %{public}d, fraction: %{public}f, stop: %{public}f", i, fractionArray[0], fractionArray[1]);
-
-        fractionStops.push_back(fractionArray);
+        if (fractionStop.second <= tmpPos) {
+            LOGE("fraction stop postion is not incremental.");
+            return;
+        }
+        tmpPos = fractionStop.second;
+        fractionStops.push_back(fractionStop);
+    }
+    if (fractionStops.size() <= 1) {
+        LOGE("fractionstops must greater than 1.");
+        return;
     }
     // Parse direction
-    auto direction = static_cast<GradientDirection>(argsPtrItem->GetInt("direction", 
-                                                    static_cast<int32_t>(GradientDirection::NONE)));
+    auto direction = static_cast<GradientDirection>(
+        argsPtrItem->GetInt("direction", static_cast<int8_t>(GradientDirection::NONE)));
+    if (static_cast<int8_t>(direction) >= static_cast<int8_t>(GradientDirection::NONE)) {
+        direction = GradientDirection::BOTTOM;
+    }
 
     CalcDimension dimensionRadius(static_cast<float>(blurRadius), DimensionUnit::PX);
     NG::LinearGradientBlurPara blurPara(dimensionRadius, fractionStops, static_cast<NG::GradientDirection>(direction));
-    LOGE("[PP TS]JSViewAbstract::JsGradientBlur: blurRadius: %{public}f, direction: %{public}d", static_cast<float>(blurRadius), static_cast<int>(direction));
     SetLinearGradientBlur(blurPara);
     info.SetReturnValue(info.This());
 }

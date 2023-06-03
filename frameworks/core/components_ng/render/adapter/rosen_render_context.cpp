@@ -1828,14 +1828,13 @@ void RosenRenderContext::OnLinearGradientBlurUpdate(const NG::LinearGradientBlur
     float blurRadius = 0;
     if (blurPara.blurRadius_.IsValid()) {
         float radiusPx = blurPara.blurRadius_.ConvertToPx();
-        // blurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
         blurRadius = radiusPx;
-        LOGE("[PP TS]OnLinearGradientBlurUpdate gradientBlurRadius:%{public}f", blurRadius);
     }
 
     CHECK_NULL_VOID(rsNode_);
-    std::shared_ptr<Rosen::RSLinearGradientBlurPara> rsLinearGradientBlurPara(new Rosen::RSLinearGradientBlurPara(blurRadius, 
-                                            blurPara.fractionStops_, static_cast<Rosen::GradientDirection>(blurPara.direction_)));
+    std::shared_ptr<Rosen::RSLinearGradientBlurPara> rsLinearGradientBlurPara(
+        std::make_shared<Rosen::RSLinearGradientBlurPara>(blurRadius, blurPara.fractionStops_,
+                                            static_cast<Rosen::GradientDirection>(blurPara.direction_)));
 
     rsNode_->SetLinearGradientBlurPara(rsLinearGradientBlurPara);
     RequestNextFrame();
