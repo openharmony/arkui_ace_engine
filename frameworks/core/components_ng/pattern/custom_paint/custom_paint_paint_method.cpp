@@ -1687,7 +1687,7 @@ void CustomPaintPaintMethod::ResetTransformMatrix()
 void CustomPaintPaintMethod::RotateMatrix(double angle)
 {
     SkMatrix matrix;
-    matrix.setRotate(angle * 180.0 / M_PI);
+    matrix.setRotate(angle * HALF_CIRCLE_ANGLE / M_PI);
     matrix_.preConcat(matrix);
 }
 
