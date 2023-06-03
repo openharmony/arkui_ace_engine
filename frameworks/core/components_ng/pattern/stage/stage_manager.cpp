@@ -201,6 +201,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
 
 void StageManager::PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout)
 {
+    CHECK_NULL_VOID_NOLOG(pageNode);
     PerformanceCheckNodeMap nodeMap;
     pageNode->GetPerformanceCheckData(nodeMap);
     AceScopedPerformanceCheck::RecordPerformanceCheckData(nodeMap, vsyncTimeout);
