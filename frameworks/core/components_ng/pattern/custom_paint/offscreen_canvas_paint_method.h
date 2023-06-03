@@ -40,7 +40,7 @@ public:
     double MeasureTextHeight(const std::string& text, const PaintState& state);
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
     void SetTransform(const TransformParam& param) override;
-
+    TransformParam GetTransform() const override;
     int32_t GetWidth()
     {
         return width_;

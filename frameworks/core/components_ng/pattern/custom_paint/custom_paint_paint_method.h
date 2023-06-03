@@ -293,6 +293,15 @@ public:
         }
     }
 
+    void SaveMatrix();
+    void RestoreMatrix();
+    void ResetTransformMatrix();
+    void RotateMatrix(double angle);
+    void ScaleMatrix(double x, double y);
+    void SetTransformMatrix(const TransformParam& param);
+    void TransformMatrix(const TransformParam& param);
+    void TranslateMatrix(double tx, double ty);
+
 protected:
     std::optional<double> CalcTextScale(double maxIntrinsicWidth, std::optional<double> maxWidth);
     bool HasShadow() const;
@@ -372,6 +381,8 @@ protected:
 
     // PaintHolder includes fillState, strokeState, globalState and shadow for save
     std::stack<PaintHolder> saveStates_;
+    std::stack<SkMatrix> matrixStates_;
+    SkMatrix matrix_;
 
     bool smoothingEnabled_ = true;
     std::string smoothingQuality_ = "low";
