@@ -458,7 +458,12 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
 {
     RefPtr<GridColumnInfo> columnInfo;
     columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
-    columnInfo->GetParent()->BuildColumnWidth(wrapperSize_.Width());
+    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    if (menuPattern && menuPattern->IsSelectOverlayExtensionMenu()) {
+        columnInfo->GetParent()->BuildColumnWidth();
+    } else {
+        columnInfo->GetParent()->BuildColumnWidth(wrapperSize_.Width());
+    }
     // set max width
     auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(menuLayoutProperty);
@@ -469,7 +474,6 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
     maxWidth = std::min(constraint.maxSize.Width(), maxWidth);
     constraint.maxSize.SetWidth(maxWidth);
     // set min width
-    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
     float minWidth;
     if (menuPattern && menuPattern->IsSelectOverlayExtensionMenu()) {
         minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
