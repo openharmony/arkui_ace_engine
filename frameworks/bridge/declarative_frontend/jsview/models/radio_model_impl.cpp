@@ -115,4 +115,14 @@ void RadioModelImpl::SetPadding(const NG::PaddingPropertyF& args, const NG::Padd
     }
 }
 
+void RadioModelImpl::SetOnClickEvent(std::function<void()>&& onClick)
+{
+    auto component = AceType::DynamicCast<CheckableComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!component) {
+        LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<CheckableComponent>());
+        return;
+    }
+    component->SetOnClick(std::move(onClick));
+}
+
 } // namespace OHOS::Ace::Framework

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_MODEL_H
 
+#include <functional>
 #include <mutex>
 
 #include "core/components_ng/pattern/radio/radio_event_hub.h"
@@ -37,6 +38,7 @@ public:
     virtual void SetUncheckedBorderColor(const Color& color) {}
     virtual void SetIndicatorColor(const Color& color) {}
     virtual void SetOnChangeEvent(NG::ChangeEvent&& onChangeEvent) {};
+    virtual void SetOnClickEvent(std::function<void()>&& onClick) {};
 
 private:
     static std::unique_ptr<RadioModel> instance_;

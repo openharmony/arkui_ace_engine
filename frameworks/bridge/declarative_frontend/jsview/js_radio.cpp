@@ -19,16 +19,11 @@
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/radio_model_impl.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/checkable/checkable_component.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 
 namespace OHOS::Ace {
-namespace {
-constexpr int FOR_DIMENSION_BOX_CALCULATE_MULTIPLY_TWO = 2;
-} // namespace
 
 std::unique_ptr<RadioModel> RadioModel::instance_ = nullptr;
 std::mutex RadioModel::mutex_;
@@ -97,18 +92,6 @@ void JSRadio::JSBind(BindingTarget globalObj)
     JSClass<JSRadio>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSRadio>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRadio>::InheritAndBind<JSViewAbstract>(globalObj);
-}
-
-void JSRadio::Checked(bool checked)
-{
-    auto stack = ViewStackProcessor::GetInstance();
-    auto radioComponent = AceType::DynamicCast<RadioComponent<std::string>>(stack->GetMainComponent());
-    if (checked) {
-        radioComponent->SetGroupValue(radioComponent->GetValue());
-        radioComponent->SetOriginChecked(checked);
-    } else {
-        radioComponent->SetGroupValue("");
-    }
 }
 
 void ParseCheckedObject(const JSCallbackInfo& args, const JSRef<JSVal>& changeEventVal)
@@ -333,24 +316,6 @@ void JSRadio::JsRadioStyle(const JSCallbackInfo& info)
     }
 }
 
-void JSRadio::SetPadding(const CalcDimension& topDimen, const CalcDimension& leftDimen)
-{
-    auto stack = ViewStackProcessor::GetInstance();
-    auto radioComponent = AceType::DynamicCast<RadioComponent<std::string>>(stack->GetMainComponent());
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-
-    if (radioComponent) {
-        auto width = radioComponent->GetWidth();
-        auto height = radioComponent->GetHeight();
-        radioComponent->SetHeight(height);
-        radioComponent->SetWidth(width);
-        box->SetHeight(height + topDimen * FOR_DIMENSION_BOX_CALCULATE_MULTIPLY_TWO);
-        box->SetWidth(width + leftDimen * FOR_DIMENSION_BOX_CALCULATE_MULTIPLY_TWO);
-        radioComponent->SetHotZoneVerticalPadding(topDimen);
-        radioComponent->SetHorizontalPadding(leftDimen);
-    }
-}
-
 void JSRadio::OnChange(const JSCallbackInfo& args)
 {
     if (!args[0]->IsFunction()) {
@@ -374,10 +339,8 @@ void JSRadio::JsOnClick(const JSCallbackInfo& args)
         return;
     }
 
-    if (JSViewBindEvent(&CheckableComponent::SetOnClick, args)) {
-    } else {
-        LOGW("Failed to bind event");
-    }
+    RadioModel::GetInstance()->SetOnClickEvent(
+        JsEventCallback<void()>(args.GetExecutionContext(), JSRef<JSFunc>::Cast(args[0])));
 
     args.ReturnSelf();
 }
