@@ -415,7 +415,8 @@ private:
     void HandleTouchDown();
     void HandleTouchUp();
 
-    void PlayTranslateAnimation(float startPos, float endPos, int32_t nextIndex, bool restartAutoPlay = false);
+    void PlayTranslateAnimation(
+        float startPos, float endPos, int32_t nextIndex, bool restartAutoPlay = false, float velocity = 0.0f);
     void PlaySpringAnimation(double dragVelocity);
     void PlayFadeAnimation();
 
@@ -454,7 +455,7 @@ private:
     void PostTranslateTask(uint32_t delayTime);
     void RegisterVisibleAreaChange();
     bool NeedAutoPlay() const;
-    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay);
+    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool useSpringMotion);
     bool IsShowArrow() const;
     void SaveArrowProperty(const RefPtr<FrameNode>& arrowNode);
     RefPtr<FocusHub> GetFocusHubChild(std::string childFrameName);
