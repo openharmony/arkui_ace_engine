@@ -25,7 +25,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
 
   private source_: ObservedPropertyObjectAbstract<C>;
   private changeNotificationIsOngoing_: boolean = false;
-    
+        
   constructor(source: ObservedPropertyObjectAbstract<C>,
     owningChildView: IPropertySubscriber,
     thisPropertyName: PropertyInfo) {
@@ -56,7 +56,11 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     super.aboutToBeDeleted();
   }
 
-  private setObject(newValue: C): void {
+  private isStorageLinkProp() : boolean {
+    return  (this.source_ && this.source_ instanceof ObservedPropertyAbstract && (!(this.source_ instanceof ObservedPropertyAbstractPU)));
+  }
+
+private setObject(newValue: C): void {
     if (!this.source_) {
       throw new SyntaxError(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: setObject (assign a new value), \
             @Link/@Consume: no source variable in parent/ancestor @Component. Application error.`);

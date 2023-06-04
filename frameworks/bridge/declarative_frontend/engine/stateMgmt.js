@@ -3363,6 +3363,7 @@ class View extends NativeViewFullUpdate {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+var _a;
 /**
  * ObservedPropertyAbstractPU aka ObservedPropertyAbstract for partial update
  *
@@ -3373,6 +3374,8 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         super(subscriber, viewName);
         this.owningView_ = undefined;
         this.dependentElementIds_ = new Set();
+        // when owning ViewPU is inActive, delay notifying changes
+        this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay;
         Object.defineProperty(this, 'owningView_', { writable: true, enumerable: false });
         Object.defineProperty(this, 'subscriberRefs_', { writable: true, enumerable: false, value: new Set() });
         if (subscriber) {
@@ -3416,6 +3419,32 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         }
         super.unlinkSuscriber(id);
     }
+    /**
+     * put the property to delayed notification mode
+     * feature is only used for @StorageLink/Prop, @LocalStorageLink/Prop
+     */
+    enableDelayedNotification() {
+        if (this.delayedNotification_ != ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending) {
+            
+            this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_none_pending;
+        }
+    }
+    /*
+       when moving from inActive to active state the owning ViewPU calls this function
+       This solution is faster than ViewPU polling each variable to send back a viewPropertyHasChanged event
+       with the elmtIds
+  
+      returns undefined if variable has _not_ changed
+      returns dependentElementIds_ Set if changed. This Set is empty if variable is not used to construct the UI
+    */
+    moveElmtIdsForDelayedUpdate() {
+        const result = (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending)
+            ? this.dependentElementIds_
+            : undefined;
+        
+        this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay;
+        return result;
+    }
     notifyPropertyRead() {
         stateMgmtConsole.error(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: \
         notifyPropertyRead, DO NOT USE with PU. Use notifyPropertyHasBeenReadPU`);
@@ -3438,7 +3467,14 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     notifyPropertyHasChangedPU() {
         
         if (this.owningView_) {
-            this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElementIds_);
+            if (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay) {
+                // send viewPropertyHasChanged right away
+                this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElementIds_);
+            }
+            else {
+                // mark this @StorageLink/Prop or @LocalStorageLink/Prop variable has having changed and notification of viewPropertyHasChanged delivery pending
+                this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending;
+            }
         }
         this.subscriberRefs_.forEach((subscriber) => {
             if (subscriber) {
@@ -3452,8 +3488,8 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         });
     }
     markDependentElementsDirty(view) {
-        // TODO ace-ets2bundle, framework, compilated apps need to update together
-        // this function will be removed after a short transiition periode
+        // TODO ace-ets2bundle, framework, complicated apps need to update together
+        // this function will be removed after a short transition period.
         stateMgmtConsole.warn(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: markDependentElementsDirty no longer supported. App will work ok, but
         please update your ace-ets2bundle and recompile your application!`);
     }
@@ -3568,6 +3604,12 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         // need to overwrite impl of base class with empty function.
     }
 }
+ObservedPropertyAbstractPU.DelayedNotifyChangesEnum = (_a = class {
+    },
+    _a.do_not_delay = 0,
+    _a.delay_none_pending = 1,
+    _a.delay_notification_pending = 2,
+    _a);
 ObservedPropertyAbstractPU.mapDeco = new Map([
     ["ObservedPropertyObjectPU", "@State/@Provide"],
     ["ObservedPropertySimplePU", "@State/@Provide (error, should not be used)"],
@@ -4099,6 +4141,9 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
         }
         super.aboutToBeDeleted();
     }
+    isStorageLinkProp() {
+        return (this.source_ && this.source_ instanceof ObservedPropertyAbstract && (!(this.source_ instanceof ObservedPropertyAbstractPU)));
+    }
     setObject(newValue) {
         if (!this.source_) {
             throw new SyntaxError(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: setObject (assign a new value), \
@@ -4300,7 +4345,7 @@ class SynchedPropertyNesedObjectPU extends SynchedPropertyNestedObjectPU {
 */
 // denotes a missing elemntId, this is the case during initial render
 const UndefinedElmtId = -1;
-// Nativeview
+// NativeView
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
 class ViewPU extends NativeViewPartialUpdate {
@@ -4325,6 +4370,9 @@ class ViewPU extends NativeViewPartialUpdate {
         this.childrenWeakrefMap_ = new Map();
         // flag for initgial rendering or re-render on-going.
         this.isRenderInProgress = false;
+        // flag if active of inActive
+        // inActive means updates are delayed
+        this.isActive_ = true;
         this.watchedProps = new Map();
         this.recycleManager = undefined;
         // Set of dependent elmtIds that need partial update
@@ -4333,7 +4381,9 @@ class ViewPU extends NativeViewPartialUpdate {
         // registry of update functions
         // the key is the elementId of the Component/Element that's the result of this function
         this.updateFuncByElmtId = new Map();
-        // my LocalStorge instance, shared with ancestor Views.
+        // set of all @Local/StorageLink/Prop variables owned by this ViwPU
+        this.ownStorageLinksProps_ = new Set();
+        // my LocalStorage instance, shared with ancestor Views.
         // create a default instance on demand if none is initialized
         this.localStoragebackStore_ = undefined;
         // if set use the elmtId also as the ViewPU object's subscribable id.
@@ -4360,7 +4410,7 @@ class ViewPU extends NativeViewPartialUpdate {
     get localStorage_() {
         if (!this.localStoragebackStore_) {
             
-            this.localStoragebackStore_ = new LocalStorage({ /* emty */});
+            this.localStoragebackStore_ = new LocalStorage({ /* empty */});
         }
         return this.localStoragebackStore_;
     }
@@ -4396,6 +4446,7 @@ class ViewPU extends NativeViewPartialUpdate {
         this.updateFuncByElmtId.clear();
         this.watchedProps.clear();
         this.providedVars_.clear();
+        this.ownStorageLinksProps_.clear();
         if (this.parent_) {
             this.parent_.removeChild(this);
         }
@@ -4405,7 +4456,46 @@ class ViewPU extends NativeViewPartialUpdate {
    * @param active true for active, false for inactive
    */
     setActive(active) {
+        if (this.isActive_ == active) {
+            
+            return;
+        }
         
+        this.isActive_ = active;
+        if (this.isActive_) {
+            this.onActive();
+        }
+        else {
+            this.onInactive();
+        }
+    }
+    onActive() {
+        if (!this.isActive_) {
+            return;
+        }
+        
+        this.performDelayedUpdate();
+        for (const child of this.childrenWeakrefMap_.values()) {
+            const childViewPU = child.deref();
+            if (childViewPU) {
+                childViewPU.setActive(this.isActive_);
+            }
+        }
+    }
+    onInactive() {
+        if (this.isActive_) {
+            return;
+        }
+        
+        for (const storageProp of this.ownStorageLinksProps_) {
+            storageProp.enableDelayedNotification();
+        }
+        for (const child of this.childrenWeakrefMap_.values()) {
+            const childViewPU = child.deref();
+            if (childViewPU) {
+                childViewPU.setActive(this.isActive_);
+            }
+        }
     }
     setParent(parent) {
         if (this.parent_ && parent) {
@@ -4555,7 +4645,7 @@ class ViewPU extends NativeViewPartialUpdate {
             this.syncInstanceId();
             if (dependentElmtIds.size && !this.isFirstRender()) {
                 if (!this.dirtDescendantElementIds_.size) {
-                    // mark Composedelement dirty when first elmtIds are added
+                    // mark ComposedElement dirty when first elmtIds are added
                     // do not need to do this every time
                     this.markNeedUpdate();
                 }
@@ -4572,6 +4662,33 @@ class ViewPU extends NativeViewPartialUpdate {
             }
             this.restoreInstanceId();
         }, "ViewPU.viewPropertyHasChanged", this.constructor.name, varName, dependentElmtIds.size);
+    }
+    performDelayedUpdate() {
+        stateMgmtTrace.scopedTrace(() => {
+            
+            this.syncInstanceId();
+            for (const storageProp of this.ownStorageLinksProps_) {
+                const changedElmtIds = storageProp.moveElmtIdsForDelayedUpdate();
+                if (changedElmtIds) {
+                    const varName = storageProp.info();
+                    if (changedElmtIds.size && !this.isFirstRender()) {
+                        for (const elmtId of changedElmtIds) {
+                            this.dirtDescendantElementIds_.add(elmtId);
+                        }
+                    }
+                    
+                    const cb = this.watchedProps.get(varName);
+                    if (cb) {
+                        
+                        cb.call(this, varName);
+                    }
+                }
+            } // for all ownStorageLinksProps_
+            this.restoreInstanceId();
+            if (this.dirtDescendantElementIds_.size) {
+                this.markNeedUpdate();
+            }
+        }, "ViewPU.performDelayedUpdate", this.constructor.name);
     }
     /**
      * Function to be called from the constructor of the sub component
@@ -4850,32 +4967,40 @@ class ViewPU extends NativeViewPartialUpdate {
        * @returns SynchedPropertySimple/ObjectTwoWay/PU
        */
     createStorageLink(storagePropName, defaultValue, viewVariableName) {
-        return AppStorage.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
+        const appStorageLink = AppStorage.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
             : (source instanceof ObservedPropertySimple)
                 ? new SynchedPropertyObjectTwoWayPU(source, this, viewVariableName)
                 : new SynchedPropertyObjectTwoWayPU(source, this, viewVariableName));
+        this.ownStorageLinksProps_.add(appStorageLink);
+        return appStorageLink;
     }
     createStorageProp(storagePropName, defaultValue, viewVariableName) {
-        return AppStorage.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
+        const appStorageProp = AppStorage.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
             : (source instanceof ObservedPropertySimple)
                 ? new SynchedPropertyObjectOneWayPU(source, this, viewVariableName)
                 : new SynchedPropertyObjectOneWayPU(source, this, viewVariableName));
+        this.ownStorageLinksProps_.add(appStorageProp);
+        return appStorageProp;
     }
     createLocalStorageLink(storagePropName, defaultValue, viewVariableName) {
-        return this.localStorage_.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
+        const localStorageLink = this.localStorage_.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
             : (source instanceof ObservedPropertySimple)
                 ? new SynchedPropertyObjectTwoWayPU(source, this, viewVariableName)
                 : new SynchedPropertyObjectTwoWayPU(source, this, viewVariableName));
+        this.ownStorageLinksProps_.add(localStorageLink);
+        return localStorageLink;
     }
     createLocalStorageProp(storagePropName, defaultValue, viewVariableName) {
-        return this.localStorage_.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
+        const localStorageProp = this.localStorage_.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
             : (source instanceof ObservedPropertySimple)
                 ? new SynchedPropertyObjectOneWayPU(source, this, viewVariableName)
                 : new SynchedPropertyObjectOneWayPU(source, this, viewVariableName));
+        this.ownStorageLinksProps_.add(localStorageProp);
+        return localStorageProp;
     }
 }
 // Array.sort() converts array items to string to compare them, sigh!
