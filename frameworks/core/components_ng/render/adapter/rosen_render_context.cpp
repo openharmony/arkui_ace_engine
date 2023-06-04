@@ -1841,6 +1841,23 @@ void RosenRenderContext::OnFrontColorBlendUpdate(const Color& colorBlend)
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnLinearGradientBlurUpdate(const NG::LinearGradientBlurPara& blurPara)
+{
+    float blurRadius = 0.0f;
+    if (blurPara.blurRadius_.IsValid()) {
+        float radiusPx = blurPara.blurRadius_.ConvertToPx();
+        blurRadius = radiusPx;
+    }
+
+    CHECK_NULL_VOID(rsNode_);
+    std::shared_ptr<Rosen::RSLinearGradientBlurPara> rsLinearGradientBlurPara(
+        std::make_shared<Rosen::RSLinearGradientBlurPara>(blurRadius, blurPara.fractionStops_,
+                                            static_cast<Rosen::GradientDirection>(blurPara.direction_)));
+
+    rsNode_->SetLinearGradientBlurPara(rsLinearGradientBlurPara);
+    RequestNextFrame();
+}
+
 void RosenRenderContext::UpdateTransition(const TransitionOptions& options)
 {
     CHECK_NULL_VOID(rsNode_);

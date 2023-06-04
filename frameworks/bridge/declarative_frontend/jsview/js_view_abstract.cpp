@@ -2910,6 +2910,87 @@ void JSViewAbstract::JsBackdropBlur(const JSCallbackInfo& info)
     info.SetReturnValue(info.This());
 }
 
+void JSViewAbstract::GetFractionStops(
+    std::vector<std::pair<float, float>>& fractionStops, const std::unique_ptr<JsonValue>& array)
+{
+    float tmpPos = -1.0f;
+    for (int32_t i = 0; i < array->GetArraySize(); i++) {
+        std::pair<float, float> fractionStop;
+        auto item = array->GetArrayItem(i);
+        if (item && !item->IsNull() && item->IsArray() && item->GetArraySize() >= 1) {
+            auto fraction = item->GetArrayItem(0);
+            double value = 0.0;
+            if (ParseJsonDouble(fraction, value)) {
+                value = std::clamp(value, 0.0, 1.0);
+                fractionStop.first = static_cast<float>(value);
+            }
+            if (item->GetArraySize() <= 1) {
+                continue;
+            }
+            auto stop = item->GetArrayItem(1);
+            value = 0.0;
+            if (ParseJsonDouble(stop, value)) {
+                value = std::clamp(value, 0.0, 1.0);
+                fractionStop.second = static_cast<float>(value);
+            }
+        }
+        if (fractionStop.second <= tmpPos) {
+            LOGE("fraction stop postion is not incremental.");
+            fractionStops.clear();
+            return;
+        }
+        tmpPos = fractionStop.second;
+        fractionStops.push_back(fractionStop);
+    }
+}
+void JSViewAbstract::JsLinearGradientBlur(const JSCallbackInfo& info)
+{
+    if (info.Length() < 2) { // 2 represents the least para num;
+        LOGE("The argv is wrong, it is supposed to have at least 2 argument");
+        return;
+    }
+    double blurRadius = 0.0;
+    if (!ParseJsDouble(info[0], blurRadius)) {
+        return;
+    }
+    blurRadius = std::clamp(blurRadius, 0.0, 100.0); // 100.0 represents largest blur radius;
+
+    if (!info[1]->IsObject()) {
+        LOGE("arg is not a object.");
+        return;
+    }
+    auto argsPtrItem = JsonUtil::ParseJsonString(info[1]->ToString());
+    if (!argsPtrItem || argsPtrItem->IsNull()) {
+        LOGE("Js Parse object failed. argsPtr is null. %s", info[1]->ToString().c_str());
+        return;
+    }
+    
+    // Parse fractionStops
+    auto array = argsPtrItem->GetValue("fractionStops");
+    if (!array || array->IsNull() || !array->IsArray()) {
+        LOGE("Js Parse object failed, fractionStops is null or not Array");
+        return;
+    }
+
+    std::vector<std::pair<float, float>> fractionStops;
+    GetFractionStops(fractionStops, array);
+
+    if (fractionStops.size() <= 1) {
+        LOGE("fractionstops must greater than 1.");
+        return;
+    }
+    // Parse direction
+    auto direction = static_cast<GradientDirection>(
+        argsPtrItem->GetInt("direction", static_cast<int8_t>(GradientDirection::NONE)));
+    if (static_cast<int8_t>(direction) >= static_cast<int8_t>(GradientDirection::NONE)) {
+        direction = GradientDirection::BOTTOM;
+    }
+
+    CalcDimension dimensionRadius(static_cast<float>(blurRadius), DimensionUnit::PX);
+    NG::LinearGradientBlurPara blurPara(dimensionRadius, fractionStops, static_cast<NG::GradientDirection>(direction));
+    SetLinearGradientBlur(blurPara);
+}
+
 void JSViewAbstract::JsWindowBlur(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
@@ -5033,6 +5114,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("blur", &JSViewAbstract::JsBlur);
     JSClass<JSViewAbstract>::StaticMethod("colorBlend", &JSViewAbstract::JsColorBlend);
     JSClass<JSViewAbstract>::StaticMethod("backdropBlur", &JSViewAbstract::JsBackdropBlur);
+    JSClass<JSViewAbstract>::StaticMethod("linearGradientBlur", &JSViewAbstract::JsLinearGradientBlur);
     JSClass<JSViewAbstract>::StaticMethod("windowBlur", &JSViewAbstract::JsWindowBlur);
     JSClass<JSViewAbstract>::StaticMethod("visibility", &JSViewAbstract::SetVisibility);
     JSClass<JSViewAbstract>::StaticMethod("flexBasis", &JSViewAbstract::JsFlexBasis);
@@ -5292,6 +5374,11 @@ void JSViewAbstract::SetBackdropBlur(float radius)
 {
     CalcDimension dimensionRadius(radius, DimensionUnit::PX);
     ViewAbstractModel::GetInstance()->SetBackdropBlur(dimensionRadius);
+}
+
+void JSViewAbstract::SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara)
+{
+    ViewAbstractModel::GetInstance()->SetLinearGradientBlur(blurPara);
 }
 
 void JSViewAbstract::SetWindowBlur(float progress, WindowBlurStyle blurStyle)

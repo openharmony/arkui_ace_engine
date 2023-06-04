@@ -114,6 +114,7 @@ public:
     void SetMask(const RefPtr<BasicShape>& shape) override;
 
     void SetBackdropBlur(const Dimension& radius) override;
+    void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) override {};
     void SetFrontBlur(const Dimension& radius) override;
     void SetBackShadow(const std::vector<Shadow>& shadows) override;
     void SetColorBlend(const Color& value) override;

@@ -539,6 +539,11 @@ public:
         ViewAbstract::SetBackdropBlur(radius);
     }
 
+    void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) override
+    {
+        ViewAbstract::SetLinearGradientBlur(blurPara);
+    }
+
     void SetFrontBlur(const Dimension& radius) override
     {
         ViewAbstract::SetFrontBlur(radius);

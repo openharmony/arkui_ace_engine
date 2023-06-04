@@ -1097,6 +1097,15 @@ void ViewAbstract::SetBackdropBlur(const Dimension& radius)
     }
 }
 
+void ViewAbstract::SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(LinearGradientBlur, blurPara);
+}
+
 void ViewAbstract::SetFrontBlur(const Dimension& radius)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
