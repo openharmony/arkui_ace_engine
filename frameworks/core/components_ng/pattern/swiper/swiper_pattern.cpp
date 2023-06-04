@@ -26,7 +26,6 @@
 #include "core/animation/curve.h"
 #include "core/animation/curves.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/scroll/scrollable.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
@@ -1036,37 +1035,22 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
         nextIndex = std::clamp(nextIndex, 0, childrenSize - 1);
     }
 
-    PlayTranslateAnimation(start, end, nextIndex);
+    PlayTranslateAnimation(start, end, nextIndex, false, static_cast<float>(dragVelocity));
     moveDirection_ = dragVelocity <= 0;
 }
 
-void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t nextIndex, bool restartAutoPlay)
+void SwiperPattern::PlayTranslateAnimation(
+    float startPos, float endPos, int32_t nextIndex, bool restartAutoPlay, float velocity)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto curve = GetCurve();
-    if (!curve) {
-        curve = Curves::LINEAR;
-    }
 
     // If animation is still running, stop it before play new animation.
     StopSpringAnimation();
     StopFadeAnimation();
     StopTranslateAnimation();
     StopAutoPlay();
-
-    auto translate = AceType::MakeRefPtr<CurveAnimation<double>>(startPos, endPos, curve);
-    auto weak = AceType::WeakClaim(this);
-    translate->AddListener(Animation<double>::ValueCallback([weak, startPos, endPos](double value) {
-        auto swiper = weak.Upgrade();
-        CHECK_NULL_VOID(swiper);
-        if (!NearEqual(value, startPos) && !NearEqual(value, endPos) && !NearEqual(startPos, endPos)) {
-            float moveRate =
-                Curves::EASE_OUT->MoveInternal(static_cast<float>((value - startPos) / (endPos - startPos)));
-            value = startPos + (endPos - startPos) * moveRate;
-        }
-        swiper->UpdateCurrentOffset(static_cast<float>(value - swiper->currentOffset_));
-    }));
 
     if (!controller_) {
         controller_ = CREATE_ANIMATOR(host->GetContext());
@@ -1075,20 +1059,57 @@ void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t
     controller_->ClearStopListeners();
     controller_->ClearInterpolators();
 
+    auto weak = WeakClaim(this);
     controller_->AddStartListener([weak]() {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
         swiper->FireAnimationStartEvent();
     });
 
+    auto container = Container::Current();
+    bool isLauncherFeature = container ? container->IsLauncherContainer() : false;
+    if (!curve && !isLauncherFeature) {
+        curve = Curves::LINEAR;
+    }
+
+    if (curve) {
+        auto translate = AceType::MakeRefPtr<CurveAnimation<double>>(startPos, endPos, curve);
+        translate->AddListener(Animation<double>::ValueCallback([weak, startPos, endPos](double value) {
+            auto swiper = weak.Upgrade();
+            CHECK_NULL_VOID(swiper);
+            if (!NearEqual(value, startPos) && !NearEqual(value, endPos) && !NearEqual(startPos, endPos)) {
+                float moveRate =
+                    Curves::EASE_OUT->MoveInternal(static_cast<float>((value - startPos) / (endPos - startPos)));
+                value = startPos + (endPos - startPos) * moveRate;
+            }
+            swiper->UpdateCurrentOffset(static_cast<float>(value - swiper->currentOffset_));
+        }));
+        controller_->AddStopListener([weak, nextIndex, restartAutoPlay]() {
+            auto swiper = weak.Upgrade();
+            CHECK_NULL_VOID(swiper);
+            swiper->OnTranslateFinish(nextIndex, restartAutoPlay, false);
+        });
+        controller_->SetDuration(GetDuration());
+        controller_->AddInterpolator(translate);
+        controller_->Play();
+        return;
+    }
+    // use spring motion feature.
+    // interpolatingSpring: (mass: 1, stiffness:228, damping: 30)
+    static const auto springProperty = AceType::MakeRefPtr<SpringProperty>(1, 228, 30);
+    auto scrollMotion = AceType::MakeRefPtr<SpringMotion>(startPos, endPos, velocity, springProperty);
+    scrollMotion->AddListener([weak](double value) {
+        auto swiper = weak.Upgrade();
+        if (swiper) {
+            swiper->UpdateCurrentOffset(static_cast<float>(value) - swiper->currentOffset_);
+        }
+    });
     controller_->AddStopListener([weak, nextIndex, restartAutoPlay]() {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
-        swiper->OnTranslateFinish(nextIndex, restartAutoPlay);
+        swiper->OnTranslateFinish(nextIndex, restartAutoPlay, true);
     });
-    controller_->SetDuration(GetDuration());
-    controller_->AddInterpolator(translate);
-    controller_->Play();
+    controller_->PlayMotion(scrollMotion);
 }
 
 void SwiperPattern::PlaySpringAnimation(double dragVelocity)
@@ -1557,11 +1578,14 @@ bool SwiperPattern::NeedAutoPlay() const
     return IsAutoPlay() && !reachEnd && isVisible_;
 }
 
-void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay)
+void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool useSpringMotion)
 {
-    currentOffset_ = 0.0;
+    if (!useSpringMotion) {
+        currentOffset_ = 0.0;
+    }
     targetIndex_.reset();
     if (currentIndex_ != nextIndex) {
+        currentOffset_ = 0.0;
         currentIndex_ = nextIndex;
         auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);

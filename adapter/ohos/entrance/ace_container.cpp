@@ -1237,6 +1237,16 @@ std::weak_ptr<OHOS::AppExecFwk::Ability> AceContainer::GetAbilityInner() const
     return aceAbility_;
 }
 
+bool AceContainer::IsLauncherContainer()
+{
+    auto runtime = runtimeContext_.lock();
+    if (!runtime) {
+        return false;
+    }
+    auto info = runtime->GetApplicationInfo();
+    return info ? info->isLauncherApp : false;
+}
+
 void AceContainer::SetFontScale(int32_t instanceId, float fontScale)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
