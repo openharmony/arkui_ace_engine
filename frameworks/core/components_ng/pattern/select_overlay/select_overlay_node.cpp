@@ -254,7 +254,7 @@ RefPtr<FrameNode> BuildMoreOrBackButton(int32_t overlayId, bool isMoreButton)
         // When click button , change to extensionMenu or change to the default menu(selectMenu_).
         selectOverlay->MoreOrBackAnimation(isMore);
     });
-
+    button->MarkModifyDone();
     return button;
 }
 
