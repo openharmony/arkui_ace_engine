@@ -42,7 +42,6 @@ void ButtonPattern::OnAttachToFrameNode()
     SetDefaultAttributes(host, pipeline);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->SetClipToFrame(true);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     clickedColor_ = buttonTheme->GetClickedColor();
