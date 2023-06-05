@@ -42,15 +42,18 @@ void JSRelativeContainer::JSBind(BindingTarget globalObj)
 
 void JSRelativeContainer::Create(const JSCallbackInfo& info)
 {
+#ifdef NG_BUILD
+    NG::RelativeContainerView::Create();
+#else
     if (Container::IsCurrentUseNewPipeline()) {
         NG::RelativeContainerView::Create();
         return;
     }
-    
     std::list<RefPtr<Component>> children;
     RefPtr<OHOS::Ace::RelativeContainerComponent> component = AceType::MakeRefPtr<RelativeContainerComponent>(children);
     ViewStackProcessor::GetInstance()->Push(component);
     JSInteractableView::SetFocusNode(true);
+#endif
 }
 
 } // namespace OHOS::Ace::Framework
