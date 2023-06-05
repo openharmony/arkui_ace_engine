@@ -146,7 +146,7 @@ void NavigationPattern::OnModifyDone()
             auto eventHub = preTopNavDestination->GetEventHub<NavDestinationEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->FireOnHiddenEvent();
-            auto focusHub = AceType::DynamicCast<FrameNode>(preTop)->GetFocusHub();
+            auto focusHub = AceType::DynamicCast<FrameNode>(preTopNavDestination)->GetFocusHub();
             CHECK_NULL_VOID(focusHub);
             focusHub->SetParentFocusable(false);
             focusHub->LostFocus();
@@ -160,7 +160,7 @@ void NavigationPattern::OnModifyDone()
             auto eventHub = newTopNavDestination->GetEventHub<NavDestinationEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->FireOnShownEvent();
-            auto focusHub = AceType::DynamicCast<FrameNode>(newTop)->GetFocusHub();
+            auto focusHub = AceType::DynamicCast<FrameNode>(newTopNavDestination)->GetFocusHub();
             CHECK_NULL_VOID(focusHub);
             focusHub->SetParentFocusable(true);
             focusHub->RequestFocus();
