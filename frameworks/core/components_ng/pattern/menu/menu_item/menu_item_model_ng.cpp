@@ -50,6 +50,16 @@ void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
     menuItem->AddChild(customNode);
 }
 
+/*
+ * The structure of menu item is designed as follows :
+ * |--menu_item
+ *   |--left_row
+ *     |--icon
+ *     |--content
+ *   |--right_row
+ *     |--label
+ *     |--end_icon
+ */
 void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
 {
     auto* stack = ViewStackProcessor::GetInstance();
