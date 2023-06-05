@@ -107,7 +107,7 @@ void ImagePainter::DrawObscuration(RSCanvas& canvas, const OffsetF& offset, cons
     brush.SetColor(rSColor);
     std::vector<RSPoint> radiusXY(RADIUS_POINT_COUNT);
     if (config.borderRadiusXY_) {
-        for (auto index = 0; index < radiusXY.size(); index++) {
+        for (auto index = 0U; index < radiusXY.size(); index++) {
             radiusXY[index].SetX(static_cast<float>((*config.borderRadiusXY_)[index].GetX()));
             radiusXY[index].SetY(static_cast<float>((*config.borderRadiusXY_)[index].GetY()));
         }

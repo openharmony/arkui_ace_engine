@@ -2170,7 +2170,7 @@ std::weak_ptr<Ace::Pattern> JSCanvasRenderer::GetPatternNG(int32_t id)
 
 std::shared_ptr<Pattern> JSCanvasRenderer::GetPatternPtr(int32_t id)
 {
-    if (id < 0 || id >= pattern_.size()) {
+    if (id < 0 || id >= static_cast<int32_t>(pattern_.size())) {
         return std::shared_ptr<Pattern>();
     }
     return pattern_[id];
