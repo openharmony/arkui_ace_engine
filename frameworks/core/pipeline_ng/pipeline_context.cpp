@@ -1627,9 +1627,11 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
 #endif // ENABLE_DRAG_FRAMEWORK
     if (manager->IsDragged() && action != DragEventAction::DRAG_EVENT_END) {
         LOGI("current context is the source of drag");
+#ifdef ENABLE_DRAG_FRAMEWORK
         if (action == DragEventAction::DRAG_EVENT_START) {
             manager->RequireSummary();
         }
+#endif // ENABLE_DRAG_FRAMEWORK
         return;
     }
 
