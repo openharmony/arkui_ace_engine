@@ -264,8 +264,8 @@ WeakPtr<FocusHub> SwiperPattern::PreviousFocus(const RefPtr<FocusHub>& curFocusN
     }
     if (curFocusNode->GetFrameName() == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
         isLastIndicatorFocused_ = false;
-        (!IsLoop() && currentIndex_ == 0) ? curFocusNode->SetParentFocusable(true)
-                                          : curFocusNode->SetParentFocusable(false);
+        (!IsLoop() && currentIndex_ == 0) ? curFocusNode->SetParentFocusable(false)
+                                          : curFocusNode->SetParentFocusable(true);
         return nullptr;
     }
     if (curFocusNode->GetFrameName() == V2::SWIPER_INDICATOR_ETS_TAG) {
@@ -338,8 +338,8 @@ WeakPtr<FocusHub> SwiperPattern::NextFocus(const RefPtr<FocusHub>& curFocusNode)
     }
     if (curFocusNode->GetFrameName() == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
         isLastIndicatorFocused_ = false;
-        (!IsLoop() && currentIndex_ == TotalCount() - 1) ? curFocusNode->SetParentFocusable(true)
-                                                         : curFocusNode->SetParentFocusable(false);
+        (!IsLoop() && currentIndex_ == TotalCount() - 1) ? curFocusNode->SetParentFocusable(false)
+                                                         : curFocusNode->SetParentFocusable(true);
         return nullptr;
     }
     curFocusNode->SetParentFocusable(true);
@@ -1659,12 +1659,14 @@ void SwiperPattern::ArrowHover(bool hoverFlag)
         CHECK_NULL_VOID(leftArrowNode);
         auto leftArrowPattern = leftArrowNode->GetPattern<SwiperArrowPattern>();
         CHECK_NULL_VOID(leftArrowPattern);
+        leftArrowPattern->SetArrowHover(hoverFlag);
         leftArrowPattern->SetButtonVisible(hoverFlag);
         auto rightArrowNode =
             DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(GetRightButtonId())));
         CHECK_NULL_VOID(rightArrowNode);
         auto rightArrowPattern = rightArrowNode->GetPattern<SwiperArrowPattern>();
         CHECK_NULL_VOID(rightArrowPattern);
+        rightArrowPattern->SetArrowHover(hoverFlag);
         rightArrowPattern->SetButtonVisible(hoverFlag);
     }
 }

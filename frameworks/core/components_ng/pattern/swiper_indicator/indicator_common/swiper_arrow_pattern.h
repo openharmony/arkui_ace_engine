@@ -74,7 +74,7 @@ public:
 
     void ButtonOnHover(RefPtr<FrameNode> buttonNode, bool isHovered);
     void SetButtonVisible(bool visible);
-
+    void SetArrowHover(bool isHover);
 private:
     void OnModifyDone() override;
     void InitNavigationArrow();
