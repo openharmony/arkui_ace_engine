@@ -184,5 +184,4 @@ HWTEST_F(PanelPropertyTestNg, SlidingPanelLayoutPropertyTest007, TestSize.Level1
             static_cast<int32_t>(fullHeight.Value()));
     }
 }
-
 } // namespace OHOS::Ace::NG
