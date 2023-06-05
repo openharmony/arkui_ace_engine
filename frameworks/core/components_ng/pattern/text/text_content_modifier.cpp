@@ -212,7 +212,7 @@ void TextContentModifier::DrawObscuration(DrawingContext& drawingContext)
             /** nothing to do **/
         }
     }
-    for (auto i = 0; i < textLineWidth.size(); i++) {
+    for (auto i = 0U; i < textLineWidth.size(); i++) {
         RSRoundRect rSRoundRect(RSRect(0.0, offsetY + ((offsetY + fontSize) * i), textLineWidth[i],
             offsetY + ((offsetY + fontSize) * i) + fontSize), radiusXY);
         canvas.DrawRoundRect(rSRoundRect);
