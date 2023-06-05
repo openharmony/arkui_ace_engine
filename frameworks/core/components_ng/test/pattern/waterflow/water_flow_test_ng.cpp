@@ -23,6 +23,10 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/offset.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/scroll/scrollable.h"
+#include "core/components_ng/pattern/linear_layout/row_model_ng.h"
+#include "core/components_ng/pattern/pattern.h"
 #define protected public
 #define private public
 #include "core/components/button/button_theme.h"
@@ -82,8 +86,8 @@ protected:
     void UpdateCurrentOffset(float offset);
     void MouseSelect(Offset start, Offset end);
     void MouseSelectRelease();
-
-    testing::AssertionResult IsEqualNextFocusNode(int32_t currentIndex, std::map<FocusStep, int32_t> next);
+    std::function<void()> GetDefaultHeaderBuilder();
+    RefPtr<GeometryNode> GetChildGeometryNode(int32_t index);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<WaterFlowPattern> pattern_;
@@ -223,6 +227,29 @@ RefPtr<FocusHub> WaterFlowTestNg::GetItemFocusHub(int32_t index)
     auto item = frameNode_->GetChildAtIndex(index);
     auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
     return itemFrameNode->GetOrCreateFocusHub();
+}
+
+void WaterFlowTestNg::UpdateCurrentOffset(float offset)
+{
+    pattern_->UpdateCurrentOffset(offset, SCROLL_FROM_UPDATE);
+    RunMeasureAndLayout();
+}
+
+std::function<void()> WaterFlowTestNg::GetDefaultHeaderBuilder()
+{
+    return []() {
+        RowModelNG rowModel;
+        rowModel.Create(std::nullopt, nullptr, "");
+        SetWidth(Dimension(1.0, DimensionUnit::PERCENT));
+        SetHeight(Dimension(50.f));
+    };
+}
+
+RefPtr<GeometryNode> WaterFlowTestNg::GetChildGeometryNode(int32_t index)
+{
+    auto item = frameNode_->GetChildAtIndex(index);
+    auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
+    return itemFrameNode->GetGeometryNode();
 }
 
 /**
@@ -673,6 +700,42 @@ HWTEST_F(WaterFlowTestNg, PositionControllerCoverage002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PositionControllerCoverage003
+ * @tc.desc: Test positionController func in VERTICAL WaterFlow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, PositionControllerCoverage003, TestSize.Level1)
+{
+    WaterFlowModelNG waterFlowModelNG;
+    RefPtr<ScrollControllerBase> positionController = waterFlowModelNG.CreateScrollController();
+    RefPtr<ScrollProxy> scrollBarProxy = waterFlowModelNG.CreateScrollBarProxy();
+    waterFlowModelNG.Create();
+    waterFlowModelNG.SetScroller(positionController, scrollBarProxy);
+    waterFlowModelNG.SetColumnsTemplate("1fr 1fr 1fr");
+    CreateWaterFlowItem(14);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. Test JumpTo func.
+     * @tc.expected: Verify return value.
+     */
+    auto controller = pattern_->controller_;
+    pattern_->SetAxis(Axis::VERTICAL);
+    controller->JumpTo(1, false, 0);
+    EXPECT_EQ(pattern_->layoutInfo_.jumpIndex_, 1);
+
+    /**
+     * @tc.steps: step2. Test ScrollPage func.
+     * @tc.expected: Verify currentOffset.
+     */
+    RunMeasureAndLayout();
+    controller->ScrollPage(true, true);
+    RunMeasureAndLayout();
+    EXPECT_EQ(controller->GetCurrentOffset(), Offset(0, 0));
+}
+
+/**
  * @tc.name: WaterFlowPatternTest001
  * @tc.desc: Test water flow pattern func
  * @tc.type: FUNC
@@ -693,6 +756,35 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPatternTest001, TestSize.Level1)
     EXPECT_TRUE(pattern_->IsScrollable());
     EXPECT_FALSE(pattern_->IsAtTop());
     EXPECT_FALSE(pattern_->IsAtBottom());
+}
+
+/**
+ * @tc.name: WaterFlowPatternTest002
+ * @tc.desc: Test water flow pattern func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowPatternTest002, TestSize.Level1)
+{
+    WaterFlowModelNG waterFlowModelNG;
+    waterFlowModelNG.Create();
+    waterFlowModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    waterFlowModelNG.SetLayoutDirection(FlexDirection::COLUMN_REVERSE);
+    CreateWaterFlowItem(14);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. Run pattern func.
+     * @tc.expected: The return_value is correct.
+     */
+    pattern_->UpdateCurrentOffset(-100.f, SCROLL_FROM_UPDATE);
+    RunMeasureAndLayout();
+    pattern_->UpdateScrollBarOffset();
+    EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, 0.f);
+
+    pattern_->UpdateCurrentOffset(200.f, SCROLL_FROM_UPDATE);
+    RunMeasureAndLayout();
+    EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -100.f);
 }
 
 /**
@@ -720,5 +812,92 @@ HWTEST_F(WaterFlowTestNg, WaterFlowAccessibilityTest001, TestSize.Level1)
     AceCollectionInfo info = accessibilityProperty_->GetCollectionInfo();
     EXPECT_EQ(info.rows, 3);
     EXPECT_EQ(info.columns, 4);
+}
+
+/**
+ * @tc.name: WaterFlowAccessibilityTest002
+ * @tc.desc: Test Accessibility func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowAccessibilityTest002, TestSize.Level1)
+{
+    WaterFlowModelNG waterFlowModelNG;
+    waterFlowModelNG.Create();
+    waterFlowModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateWaterFlowItem(14);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. Run Accessibility func.
+     * @tc.expected: The return_value is correct.
+     */
+    pattern_->SetAccessibilityAction();
+    accessibilityProperty_->ActActionScrollForward();
+    accessibilityProperty_->ActActionScrollBackward();
+    EXPECT_FALSE(false);
+}
+
+/**
+ * @tc.name: WaterFlowFooterTest001
+ * @tc.desc: Test Footer func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowFooterTest001, TestSize.Level1)
+{
+    WaterFlowModelNG waterFlowModelNG;
+    waterFlowModelNG.Create();
+    waterFlowModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    auto footer = GetDefaultHeaderBuilder();
+    waterFlowModelNG.SetFooter(std::move(footer));
+    CreateWaterFlowItem(5);
+    ViewStackProcessor::GetInstance()->Pop();
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. Run footer func.
+     * @tc.expected: The return_value is correct.
+     */
+    auto footerNode = GetChildGeometryNode(0);
+    EXPECT_FLOAT_EQ(footerNode->GetFrameOffset().GetY(), 200.f);
+}
+
+/**
+ * @tc.name: Callback001
+ * @tc.desc: Test scroll callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Callback001, TestSize.Level1)
+{
+    WaterFlowModelNG waterFlowModelNG;
+    waterFlowModelNG.Create();
+    bool isReachStartCalled = false;
+    bool isReachEndCalled = false;
+    auto reachStart = [&isReachStartCalled]() { isReachStartCalled = true; };
+    auto reachEnd = [&isReachEndCalled]() { isReachEndCalled = true; };
+    waterFlowModelNG.SetOnReachStart(reachStart);
+    waterFlowModelNG.SetOnReachEnd(reachEnd);
+    CreateWaterFlowItem(8);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    constexpr float scrollUpOffset = DEFAULT_ITEM_HEIGHT;
+    constexpr float scrollDownOffset = -DEFAULT_ITEM_HEIGHT;
+
+    /**
+     * @tc.steps: step1. Scroll up 100px.
+     * @tc.expected: Callback is called.
+     */
+    pattern_->UpdateCurrentOffset(scrollUpOffset, SCROLL_FROM_ANIMATION);
+    RunMeasureAndLayout();
+    EXPECT_TRUE(isReachStartCalled);
+
+    /**
+     * @tc.steps: step2. Scroll down 500px.
+     * @tc.expected: Callback is not called.
+     */
+    UpdateCurrentOffset(scrollDownOffset * 5);
+    EXPECT_TRUE(isReachEndCalled);
 }
 } // namespace OHOS::Ace::NG
