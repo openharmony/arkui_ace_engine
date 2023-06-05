@@ -117,12 +117,14 @@ void TextTimerPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
     if (textLayoutProperty->GetPositionProperty()) {
         textLayoutProperty->UpdateAlignment(
             textLayoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER));
     } else {
         textLayoutProperty->UpdateAlignment(Alignment::CENTER);
     }
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
 
     isCountDown_ = GetIsCountDown();
     inputCount_ = GetInputCount();
