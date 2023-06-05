@@ -399,9 +399,7 @@ void PanRecognizer::OnResetStatus()
     MultiFingersRecognizer::OnResetStatus();
     touchPoints_.clear();
     averageDistance_.Reset();
-    for (auto& element : touchPointsDistance_) {
-        element.second.Reset();
-    }
+    touchPointsDistance_.clear();
 }
 
 void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
