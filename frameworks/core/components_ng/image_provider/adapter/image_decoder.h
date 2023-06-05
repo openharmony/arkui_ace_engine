@@ -24,7 +24,7 @@
 namespace OHOS::Ace::NG {
 class ImageDecoder : public virtual AceType {
 public:
-    ImageDecoder(const RefPtr<ImageObject>& objW, const SizeF& targetSize, bool forceResize);
+    ImageDecoder(const RefPtr<ImageObject>& obj, const SizeF& size, bool forceResize);
     // decode image using Skia, return true if process is successful.
     RefPtr<CanvasImage> MakeSkiaImage();
 

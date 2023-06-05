@@ -172,7 +172,7 @@ void ImageDecoder::TryCompress(const RefPtr<SkiaImage>& image)
 {
 #ifdef UPLOAD_GPU_DISABLED
     // If want to dump draw command or gpu disabled, should use CPU image.
-    return false;
+    return;
 #else
     // decode image to texture if not decoded
     auto skImage = image->GetImage();
