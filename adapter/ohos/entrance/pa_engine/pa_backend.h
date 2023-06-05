@@ -42,7 +42,7 @@ public:
     PaBackend() = default;
     ~PaBackend() override;
 
-    bool Initialize(BackendType type, const RefPtr<TaskExecutor>& taskExecutor) override;
+    bool Initialize(BackendType type, SrcLanguage language, const RefPtr<TaskExecutor>& taskExecutor) override;
 
     void LoadEngine(const char* libName, int32_t instanceId) override;
 
@@ -102,6 +102,7 @@ private:
     SingleTaskExecutor GetAnimationJsTask();
 
     BackendType type_ = BackendType::SERVICE;
+    SrcLanguage language_ = SrcLanguage::ETS;
 
     RefPtr<Framework::ManifestParser> manifestParser_ = nullptr;
     RefPtr<TaskExecutor> taskExecutor_ = nullptr;

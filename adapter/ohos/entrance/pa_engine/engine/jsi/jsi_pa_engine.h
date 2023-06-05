@@ -53,7 +53,7 @@ public:
     explicit JsiPaEngine(int32_t instanceId) : instanceId_(instanceId) {}
     ~JsiPaEngine() override;
 
-    bool Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendType type) override;
+    bool Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendType type, SrcLanguage language) override;
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override;
 
     // Load and initialize a JS bundle into the JS Framework
@@ -153,7 +153,6 @@ private:
 
     bool InitJsEnv(bool debuggerMode, const std::unordered_map<std::string, void*>& extraNativeObject);
     void RegisterPaModule();
-    void RegisterConsoleModule();
     void RegisterConsoleModule(ArkNativeEngine* engine);
     void RegisterUncaughtExceptionHandler();
     void EvaluateJsCode();
@@ -176,6 +175,7 @@ private:
     RefPtr<TaskExecutor> taskExecutor_ = nullptr;
     RefPtr<JsBackendAssetManager> jsBackendAssetManager_ = nullptr;
     BackendType type_ = BackendType::SERVICE;
+    SrcLanguage language_ = SrcLanguage::ETS;
     bool blockWaiting_ = false;
     shared_ptr<JsValue> asyncResult_ = nullptr;
     bool isDebugMode_ = true;

@@ -25,6 +25,8 @@ namespace OHOS::Ace {
 
 enum class BackendType { SERVICE, DATA, FORM };
 
+enum class SrcLanguage { ETS, JS };
+
 class ACE_EXPORT Backend : public AceType {
     DECLARE_ACE_TYPE(Backend, AceType);
 
@@ -36,7 +38,7 @@ public:
 
     static RefPtr<Backend> Create();
 
-    virtual bool Initialize(BackendType type, const RefPtr<TaskExecutor>& taskExecutor) = 0;
+    virtual bool Initialize(BackendType type, SrcLanguage language, const RefPtr<TaskExecutor>& taskExecutor) = 0;
 
     virtual void LoadEngine(const char* libName, int32_t instanceId) = 0;
 
