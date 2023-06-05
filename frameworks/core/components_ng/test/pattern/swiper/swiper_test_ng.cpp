@@ -101,9 +101,55 @@ constexpr int32_t SWIPER_MOUSECLICKINDEX = 5;
 const SizeF SWIPER_CHILD_SIZEF_SMALL = SizeF(20.0, 20.0);
 const SizeF SWIPER_CHILD_SIZEF_BIG = SizeF(30.0, 30.0);
 constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
+
+// swiper_property
+constexpr int32_t INDEX_DEFAULT = 1;
+constexpr int32_t SWIPER_LAYOUT_PROPERTY_INDEX_1 = -1;
+constexpr int32_t SWIPER_LAYOUT_PROPERTY_INDEX_2 = 0;
+constexpr int32_t SWIPER_LAYOUT_PROPERTY_INDEX_3 = 1;
+const std::vector<int32_t> SWIPER_LAYOUT_PROPERTY_INDEX = { SWIPER_LAYOUT_PROPERTY_INDEX_1,
+                                                            SWIPER_LAYOUT_PROPERTY_INDEX_2,
+                                                            SWIPER_LAYOUT_PROPERTY_INDEX_3 };
+
+const bool SWIPER_PAINT_PROPERTY_AUTOPLAY = false;
+constexpr int32_t SWIPER_PAINT_PROPERTY_INTERVAL_DEFAULT = 3000;
+constexpr int32_t SWIPER_PAINT_PROPERTY_INTERVAL_1 = 5000;
+constexpr int32_t SWIPER_PAINT_PROPERTY_INTERVAL_2 = -100;
+const std::vector<int32_t> SWIPER_PAINT_PROPERTY_INTERVAL = { SWIPER_PAINT_PROPERTY_INTERVAL_1,
+                                                              SWIPER_PAINT_PROPERTY_INTERVAL_2 };
+const bool SWIPER_LAYOUT_PROPERTY_SHOW_INDICATOR = false;
+const bool SWIPER_PAINT_PROPERTY_LOOP = false;
+const SwiperDisplayMode SWIPER_LAYOUT_PROPERTY_DISPLAY_MODE = SwiperDisplayMode::AUTO_LINEAR;
+const std::vector<EdgeEffect> SWIPER_PAINT_PROPERTY_EDGE_EFFECT = { EdgeEffect::FADE,
+                                                                    EdgeEffect::NONE,
+                                                                    EdgeEffect::SPRING };
+
+const RefPtr<Curve> LINEAR = AceType::MakeRefPtr<LinearCurve>();
+const RefPtr<Curve> SINE = AceType::MakeRefPtr<SineCurve>();
+const RefPtr<Curve> EASE = AceType::MakeRefPtr<CubicCurve>(0.25f, 0.1f, 0.25f, 1.0f);
+const RefPtr<Curve> SMOOTH = AceType::MakeRefPtr<CubicCurve>(0.4f, 0.0f, 0.4f, 1.0f);
+const RefPtr<Curve> ELASTICS = AceType::MakeRefPtr<ElasticsCurve>(2.0f);
+const std::vector<RefPtr<Curve>> SWIPER_PAINT_PROPERTY_CURVE = { LINEAR, SINE, EASE, SMOOTH, ELASTICS };
+
+const std::vector<int32_t> SWIPER_PAINT_PROPERTY_DURATION = { 100, 2000, 400 };
+constexpr Dimension SWIPER_PAINT_PROPERTY_ITEM_SPACE_1 = Dimension(0);
+constexpr Dimension SWIPER_PAINT_PROPERTY_ITEM_SPACE_2 = Dimension(1);
+constexpr Dimension SWIPER_PAINT_PROPERTY_ITEM_SPACE_3 = Dimension(10);
+const std::vector<Dimension> SWIPER_PAINT_PROPERTY_ITEM_SPACE = { SWIPER_PAINT_PROPERTY_ITEM_SPACE_1,
+                                                                  SWIPER_PAINT_PROPERTY_ITEM_SPACE_2,
+                                                                  SWIPER_PAINT_PROPERTY_ITEM_SPACE_3 };
+                                                                
+const std::vector<int32_t> SWIPER_PAINT_PROPERTY_CACHED_COUNT = { 2, 1, 5, 10 };
+const std::vector<int32_t> SWIPER_PAINT_PROPERTY_DISPLAY_COUNT = { 2, 5, 3, 10 };
+const bool SWIPER_LAYOUT_PROPERTY_SHOW_DISABLE_SWIPE = true;
+
+const std::vector<Axis> SWIPER_PAINT_PROPERTY_DIRECTION = { Axis::HORIZONTAL,
+                                                            Axis::FREE,
+                                                            Axis::NONE,
+                                                            Axis::VERTICAL };
 } // namespace
 
-class SwiperPatternTestNg : public testing::Test {
+class SwiperTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -124,24 +170,24 @@ public:
     RefPtr<SwiperAccessibilityProperty> swiperAccessibilityProperty_;
 };
 
-RefPtr<FrameNode> SwiperPatternTestNg::CreateSwiperFrameNode()
+RefPtr<FrameNode> SwiperTestNg::CreateSwiperFrameNode()
 {
     SwiperModelNG swiper;
     swiper.Create();
     return AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
 }
 
-void SwiperPatternTestNg::SetUpTestCase()
+void SwiperTestNg::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
 }
 
-void SwiperPatternTestNg::TearDownTestCase()
+void SwiperTestNg::TearDownTestCase()
 {
     MockPipelineBase::TearDown();
 }
 
-void SwiperPatternTestNg::CommomAttrInfo()
+void SwiperTestNg::CommomAttrInfo()
 {
     /**
     * @tc.steps: step1. Init Swiper node
@@ -160,7 +206,7 @@ void SwiperPatternTestNg::CommomAttrInfo()
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(swiperIndicatorTheme));
 }
 
-void SwiperPatternTestNg::InitLayoutWrapper(const RefPtr<FrameNode>& frameNode,
+void SwiperTestNg::InitLayoutWrapper(const RefPtr<FrameNode>& frameNode,
     RefPtr<LayoutAlgorithm>& algorithm, RefPtr<FrameNode>& indicatorNode, RefPtr<LayoutWrapper>& layoutWrapper)
 {
     indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
@@ -180,7 +226,7 @@ void SwiperPatternTestNg::InitLayoutWrapper(const RefPtr<FrameNode>& frameNode,
     layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
 }
 
-void SwiperPatternTestNg::InitChild(
+void SwiperTestNg::InitChild(
     RefPtr<LayoutWrapper>& indicatorNodeWrapper, const RefPtr<FrameNode>& indicatorNode)
 {
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -211,7 +257,7 @@ void SwiperPatternTestNg::InitChild(
     indicatorNodeWrapper->GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
 }
 
-void SwiperPatternTestNg::CreateChildWrapperAppendToHostWrapper(
+void SwiperTestNg::CreateChildWrapperAppendToHostWrapper(
     int32_t startIndex, int32_t endIndex, const RefPtr<LayoutWrapper>& hostWrapper)
 {
     ASSERT_NE(hostWrapper, nullptr);
@@ -236,9 +282,9 @@ void SwiperPatternTestNg::CreateChildWrapperAppendToHostWrapper(
     }
 }
 
-void SwiperPatternTestNg::SetUp() {}
+void SwiperTestNg::SetUp() {}
 
-void SwiperPatternTestNg::TearDown()
+void SwiperTestNg::TearDown()
 {
     frameNode_ = nullptr;
     swiperPattern_ = nullptr;
@@ -246,7 +292,7 @@ void SwiperPatternTestNg::TearDown()
     swiperAccessibilityProperty_ = nullptr;
 }
 
-void SwiperPatternTestNg::InitSwiperTestNg()
+void SwiperTestNg::InitSwiperTestNg()
 {
     frameNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
         []() { return AceType::MakeRefPtr<SwiperPattern>(); });
@@ -264,11 +310,334 @@ void SwiperPatternTestNg::InitSwiperTestNg()
 }
 
 /**
+ * @tc.name: SwiperLayoutPropertyTest001
+ * @tc.desc: Set one index value into SwiperLayoutProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperLayoutPropertyTest001, TestSize.Level1)
+{
+    SwiperModelNG swiper;
+    swiper.Create();
+    swiper.SetIndex(INDEX_DEFAULT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto swiperNode = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    EXPECT_FALSE(swiperNode == nullptr);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    EXPECT_FALSE(swiperLayoutProperty == nullptr);
+    EXPECT_EQ(swiperLayoutProperty->GetIndex().value_or(0), INDEX_DEFAULT);
+}
+
+/**
+ * @tc.name: SwiperLayoutPropertyTest002
+ * @tc.desc: set a lot of index values into SwiperLayoutProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperLayoutPropertyTest002, TestSize.Level1)
+{
+    for (int32_t i = 0; i < SWIPER_LAYOUT_PROPERTY_INDEX.size(); ++i) {
+        SwiperModelNG swiper;
+        swiper.Create();
+        swiper.SetIndex(SWIPER_LAYOUT_PROPERTY_INDEX[i]);
+        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+        EXPECT_EQ(frameNode == nullptr, false);
+        auto swiperNode = AceType::DynamicCast<NG::FrameNode>(frameNode);
+        EXPECT_FALSE(swiperNode == nullptr);
+        auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+        EXPECT_FALSE(swiperLayoutProperty == nullptr);
+        EXPECT_EQ(swiperLayoutProperty->GetIndex().value_or(0), SWIPER_LAYOUT_PROPERTY_INDEX[i]);
+    }
+}
+
+/**
+ * @tc.name: SwiperPaintPropertyTest003
+ * @tc.desc: set autoPlay value into SwiperLayoutProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPaintPropertyTest003, TestSize.Level1)
+{
+    SwiperModelNG swiper;
+    swiper.Create();
+    swiper.SetAutoPlay(SWIPER_PAINT_PROPERTY_AUTOPLAY);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_EQ(frameNode == nullptr, false);
+    auto swiperNode = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    EXPECT_FALSE(swiperNode == nullptr);
+    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+    EXPECT_FALSE(swiperPaintProperty == nullptr);
+    EXPECT_EQ(swiperPaintProperty->GetAutoPlay().value_or(false), SWIPER_PAINT_PROPERTY_AUTOPLAY);
+}
+
+/**
+ * @tc.name: SwiperPaintPropertyTest004
+ * @tc.desc: set a lot of intertval values into SwiperPaintProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPaintPropertyTest004, TestSize.Level1)
+{
+    for (const auto& interval : SWIPER_PAINT_PROPERTY_INTERVAL) {
+        SwiperModelNG swiper;
+        swiper.Create();
+        swiper.SetAutoPlayInterval(interval);
+        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+        EXPECT_EQ(frameNode == nullptr, false);
+        auto swiperNode = AceType::DynamicCast<NG::FrameNode>(frameNode);
+        EXPECT_FALSE(swiperNode == nullptr);
+        auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+        EXPECT_FALSE(swiperPaintProperty == nullptr);
+        EXPECT_EQ(swiperPaintProperty->GetAutoPlayInterval().value_or(SWIPER_PAINT_PROPERTY_INTERVAL_DEFAULT),
+            interval);
+    }
+}
+
+/**
+ * @tc.name: SwiperLayoutPropertyTest005
+ * @tc.desc: set showIndicator value into SwiperPaintProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperLayoutPropertyTest005, TestSize.Level1)
+{
+    SwiperModelNG swiper;
+    swiper.Create();
+    swiper.SetShowIndicator(SWIPER_LAYOUT_PROPERTY_SHOW_INDICATOR);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_EQ(frameNode == nullptr, false);
+    auto swiperNode = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    EXPECT_FALSE(swiperNode == nullptr);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    EXPECT_FALSE(swiperLayoutProperty == nullptr);
+    EXPECT_EQ(swiperLayoutProperty->GetShowIndicator().value_or(false), SWIPER_LAYOUT_PROPERTY_SHOW_INDICATOR);
+}
+
+/**
+ * @tc.name: SwiperPaintPropertyTest006
+ * @tc.desc: set loop value into SwiperPaintProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPaintPropertyTest006, TestSize.Level1)
+{
+    SwiperModelNG swiper;
+    swiper.Create();
+    swiper.SetLoop(SWIPER_PAINT_PROPERTY_LOOP);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_EQ(frameNode == nullptr, false);
+    auto swiperNode = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    EXPECT_FALSE(swiperNode == nullptr);
+    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+    EXPECT_FALSE(swiperPaintProperty == nullptr);
+    EXPECT_EQ(swiperPaintProperty->GetLoop().value_or(false), SWIPER_PAINT_PROPERTY_LOOP);
+}
+
+/**
+ * @tc.name: SwiperLayoutPropertyTest007
+ * @tc.desc: set one displayMode value into SwiperLayoutProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperLayoutPropertyTest007, TestSize.Level1)
+{
+    SwiperModelNG swiper;
+    swiper.Create();
+    swiper.SetDisplayMode(SWIPER_LAYOUT_PROPERTY_DISPLAY_MODE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto swiperNode = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    EXPECT_FALSE(swiperNode == nullptr);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    EXPECT_FALSE(swiperLayoutProperty == nullptr);
+    EXPECT_EQ(swiperLayoutProperty->GetDisplayMode().value_or(SwiperDisplayMode::STRETCH),
+        SWIPER_LAYOUT_PROPERTY_DISPLAY_MODE);
+}
+
+/**
+ * @tc.name: SwiperPaintPropertyTest008
+ * @tc.desc: set one effectMode value into SwiperPaintProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPaintPropertyTest008, TestSize.Level1)
+{
+    for (const auto& effectMode : SWIPER_PAINT_PROPERTY_EDGE_EFFECT) {
+        SwiperModelNG swiper;
+        swiper.Create();
+        swiper.SetEdgeEffect(effectMode);
+        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+        EXPECT_FALSE(frameNode == nullptr);
+        auto swiperNode = AceType::DynamicCast<NG::FrameNode>(frameNode);
+        EXPECT_FALSE(swiperNode == nullptr);
+        auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+        EXPECT_FALSE(swiperPaintProperty == nullptr);
+        EXPECT_EQ(swiperPaintProperty->GetEdgeEffect().value_or(EdgeEffect::FADE), effectMode);
+    }
+}
+
+/**
+ * @tc.name: SwiperPaintPropertyTest009
+ * @tc.desc: set curve value into SwiperPaintProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPaintPropertyTest009, TestSize.Level1)
+{
+    for (int32_t i = 0; i < static_cast<int32_t>(SWIPER_PAINT_PROPERTY_CURVE.size()); ++i) {
+        SwiperModelNG swiper;
+        swiper.Create();
+        swiper.SetCurve(SWIPER_PAINT_PROPERTY_CURVE[i]);
+        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+        EXPECT_EQ(frameNode == nullptr, false);
+        auto swiperNode = AceType::DynamicCast<NG::FrameNode>(frameNode);
+        EXPECT_FALSE(swiperNode == nullptr);
+        auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+        EXPECT_FALSE(swiperPaintProperty == nullptr);
+        EXPECT_EQ(swiperPaintProperty->GetCurve().value_or(Curves::EASE), SWIPER_PAINT_PROPERTY_CURVE[i]);
+    }
+}
+
+/**
+ * @tc.name: SwiperPaintPropertyTest0010
+ * @tc.desc: set duration value into SwiperPaintProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPaintPropertyTest0010, TestSize.Level1)
+{
+    for (const auto& duration : SWIPER_PAINT_PROPERTY_DURATION) {
+        SwiperModelNG swiper;
+        swiper.Create();
+        swiper.SetDuration(duration);
+        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+        EXPECT_EQ(frameNode == nullptr, false);
+        auto swiperNode = AceType::DynamicCast<NG::FrameNode>(frameNode);
+        EXPECT_FALSE(swiperNode == nullptr);
+        auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+        EXPECT_FALSE(swiperPaintProperty == nullptr);
+        EXPECT_EQ(swiperPaintProperty->GetDuration().value_or(Curves::EASE), duration);
+    }
+}
+
+/**
+ * @tc.name: SwiperLayoutPropertyTest0011
+ * @tc.desc: set a lot of itemSpace values into SwiperLayoutProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperLayoutPropertyTest0011, TestSize.Level1)
+{
+    for (const auto& itemSpace : SWIPER_PAINT_PROPERTY_ITEM_SPACE) {
+        SwiperModelNG swiper;
+        swiper.Create();
+        swiper.SetItemSpace(itemSpace);
+        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+        EXPECT_EQ(frameNode == nullptr, false);
+        auto swiperNode = AceType::DynamicCast<NG::FrameNode>(frameNode);
+        EXPECT_FALSE(swiperNode == nullptr);
+        auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+        EXPECT_FALSE(swiperLayoutProperty == nullptr);
+        EXPECT_EQ(swiperLayoutProperty->GetItemSpace().value_or(Dimension(0)).Value(),
+            static_cast<int32_t>(itemSpace.Value()));
+    }
+}
+
+/**
+ * @tc.name: SwiperLayoutPropertyTest0012
+ * @tc.desc: set a lot of cachedCount values into SwiperLayoutProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperLayoutPropertyTest0012, TestSize.Level1)
+{
+    for (int32_t i = 0; i < SWIPER_PAINT_PROPERTY_CACHED_COUNT.size(); ++i) {
+        SwiperModelNG swiper;
+        swiper.Create();
+        swiper.SetCachedCount(SWIPER_PAINT_PROPERTY_CACHED_COUNT[i]);
+        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+        EXPECT_EQ(frameNode == nullptr, false);
+        auto swiperNode = AceType::DynamicCast<NG::FrameNode>(frameNode);
+        EXPECT_FALSE(swiperNode == nullptr);
+        auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+        EXPECT_FALSE(swiperLayoutProperty == nullptr);
+        EXPECT_EQ(swiperLayoutProperty->GetCachedCount().value_or(1), SWIPER_PAINT_PROPERTY_CACHED_COUNT[i]);
+    }
+}
+
+/**
+ * @tc.name: SwiperLayoutPropertyTest0013
+ * @tc.desc: set a lot of displayCount values into SwiperLayoutProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperLayoutPropertyTest0013, TestSize.Level1)
+{
+    for (int32_t i = 0; i < SWIPER_PAINT_PROPERTY_DISPLAY_COUNT.size(); ++i) {
+        SwiperModelNG swiper;
+        swiper.Create();
+        swiper.SetDisplayCount(SWIPER_PAINT_PROPERTY_DISPLAY_COUNT[i]);
+        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+        EXPECT_EQ(frameNode == nullptr, false);
+        auto swiperNode = AceType::DynamicCast<NG::FrameNode>(frameNode);
+        EXPECT_FALSE(swiperNode == nullptr);
+        auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+        EXPECT_FALSE(swiperLayoutProperty == nullptr);
+        EXPECT_EQ(swiperLayoutProperty->GetDisplayCount().value_or(1), SWIPER_PAINT_PROPERTY_DISPLAY_COUNT[i]);
+    }
+}
+
+/**
+ * @tc.name: SwiperPaintPropertyTest0014
+ * @tc.desc: set disableSwipe value into SwiperPaintProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPaintPropertyTest0014, TestSize.Level1)
+{
+    SwiperModelNG swiper;
+    swiper.Create();
+    swiper.SetDisableSwipe(SWIPER_LAYOUT_PROPERTY_SHOW_DISABLE_SWIPE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_EQ(frameNode == nullptr, false);
+    auto swiperNode = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    EXPECT_FALSE(swiperNode == nullptr);
+    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+    EXPECT_FALSE(swiperPaintProperty == nullptr);
+    EXPECT_EQ(swiperPaintProperty->GetDisableSwipe().value_or(false), SWIPER_LAYOUT_PROPERTY_SHOW_DISABLE_SWIPE);
+}
+
+/**
+ * @tc.name: SwiperLayoutPropertyTest0015
+ * @tc.desc: set one direction value into SwiperPaintProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPaintPropertyTest0015, TestSize.Level1)
+{
+    for (const auto& direction : SWIPER_PAINT_PROPERTY_DIRECTION) {
+        SwiperModelNG swiper;
+        swiper.Create();
+        swiper.SetDirection(direction);
+        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+        EXPECT_FALSE(frameNode == nullptr);
+        auto swiperNode = AceType::DynamicCast<NG::FrameNode>(frameNode);
+        EXPECT_FALSE(swiperNode == nullptr);
+        auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+        EXPECT_FALSE(swiperLayoutProperty == nullptr);
+        EXPECT_EQ(swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL), direction);
+    }
+}
+
+/**
+ * @tc.name: SwiperPropertyTest0016
+ * @tc.desc: set id into Swiper and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPropertyTest0016, TestSize.Level1)
+{
+    SwiperModelNG swiper;
+    swiper.Create();
+    ViewAbstract::SetInspectorId(V2::SWIPER_ETS_TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto swiperNode = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    EXPECT_FALSE(swiperNode == nullptr);
+    EXPECT_EQ(swiperNode->GetInspectorId().value_or(""), V2::SWIPER_ETS_TAG);
+}
+
+/**
  * @tc.name: SwiperEvent001
  * @tc.desc: HandleTouchDown
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperEvent001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperEvent001, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto swiperNode =
@@ -308,7 +677,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperEvent001, TestSize.Level1)
  * @tc.desc: HandleTouchDown
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperEvent002, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperEvent002, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto swiperNode =
@@ -350,7 +719,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperEvent002, TestSize.Level1)
  * @tc.desc: Test Swiper measure and layout function, set prevMargin and nextMargin property is 50_px.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperUtilsTest001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperUtilsTest001, TestSize.Level1)
 {
     auto swiperFrameNode = CreateSwiperFrameNode();
     ASSERT_NE(swiperFrameNode, nullptr);
@@ -408,7 +777,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperUtilsTest001, TestSize.Level1)
  * @tc.desc: Verify the CreateChildConstraint function when DisplayCount is -1.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperUtilsTest002, TestSize.Level2)
+HWTEST_F(SwiperTestNg, SwiperUtilsTest002, TestSize.Level2)
 {
     auto swiperFrameNode = CreateSwiperFrameNode();
     ASSERT_NE(swiperFrameNode, nullptr);
@@ -428,7 +797,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperUtilsTest002, TestSize.Level2)
  * @tc.desc: Verify the CreateChildConstraint function when DisplayMode is AUTO_LINEAR.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperUtilsTest003, TestSize.Level2)
+HWTEST_F(SwiperTestNg, SwiperUtilsTest003, TestSize.Level2)
 {
     auto swiperFrameNode = CreateSwiperFrameNode();
     ASSERT_NE(swiperFrameNode, nullptr);
@@ -448,7 +817,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperUtilsTest003, TestSize.Level2)
  * @tc.desc: Verify the CreateChildConstraint function when NextMargin is normal and abnormal.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperUtilsTest004, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperUtilsTest004, TestSize.Level1)
 {
     auto swiperFrameNode = CreateSwiperFrameNode();
     ASSERT_NE(swiperFrameNode, nullptr);
@@ -478,7 +847,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperUtilsTest004, TestSize.Level1)
  * @tc.desc: Verify the CreateChildConstraint function does not set a value for setSize.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperUtilsTest005, TestSize.Level2)
+HWTEST_F(SwiperTestNg, SwiperUtilsTest005, TestSize.Level2)
 {
     auto swiperFrameNode = CreateSwiperFrameNode();
     ASSERT_NE(swiperFrameNode, nullptr);
@@ -504,7 +873,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperUtilsTest005, TestSize.Level2)
  * @tc.desc: Verify the CreateChildConstraint function when Direction is VERTICAL.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperUtilsTest006, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperUtilsTest006, TestSize.Level1)
 {
     auto swiperFrameNode = CreateSwiperFrameNode();
     ASSERT_NE(swiperFrameNode, nullptr);
@@ -534,7 +903,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperUtilsTest006, TestSize.Level1)
  * @tc.desc: Verify the CreateChildConstraint function when Direction is VERTICAL and does not set value for setSize.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperUtilsTest007, TestSize.Level2)
+HWTEST_F(SwiperTestNg, SwiperUtilsTest007, TestSize.Level2)
 {
     auto swiperFrameNode = CreateSwiperFrameNode();
     ASSERT_NE(swiperFrameNode, nullptr);
@@ -560,7 +929,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperUtilsTest007, TestSize.Level2)
  * @tc.desc: Verify the CreateChildConstraint function when Direction is FREE.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperUtilsTest008, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperUtilsTest008, TestSize.Level1)
 {
     auto swiperFrameNode = CreateSwiperFrameNode();
     ASSERT_NE(swiperFrameNode, nullptr);
@@ -586,7 +955,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperUtilsTest008, TestSize.Level1)
  * @tc.desc: InitIndicator
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperInit001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperInit001, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto swiperNode =
@@ -612,7 +981,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperInit001, TestSize.Level1)
  * @tc.desc: InitOnKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperInit002, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperInit002, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto swiperNode =
@@ -632,7 +1001,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperInit002, TestSize.Level1)
  * @tc.desc: OnKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperFunc001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperFunc001, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto swiperNode =
@@ -655,7 +1024,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperFunc001, TestSize.Level1)
  * @tc.desc: OnVisibleChange
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperFunc002, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperFunc002, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto swiperNode =
@@ -679,7 +1048,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperFunc002, TestSize.Level1)
  * @tc.desc: OnIndexChange
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperFunc003, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperFunc003, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto swiperNode =
@@ -703,7 +1072,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperFunc003, TestSize.Level1)
  * @tc.desc: HandleDragUpdate
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperFunc004, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperFunc004, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto swiperNode =
@@ -749,7 +1118,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperFunc004, TestSize.Level1)
  * @tc.desc: Swiper Accessibility PerformAction test ScrollForward and ScrollBackward.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, PerformActionTest001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, PerformActionTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create swiper and initialize related properties.
@@ -798,7 +1167,7 @@ HWTEST_F(SwiperPatternTestNg, PerformActionTest001, TestSize.Level1)
  * @tc.desc: Swiper Model NG.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperModelNg001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperModelNg001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create SwiperModelNG.
@@ -890,7 +1259,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperModelNg001, TestSize.Level1)
  * @tc.desc: Swiper Model NG.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperModelNg002, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperModelNg002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create SwiperModelNG.
@@ -970,7 +1339,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperModelNg002, TestSize.Level1)
  * @tc.desc: Swiper Model NG.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperModelNg003, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperModelNg003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create SwiperModelNG.
@@ -1076,7 +1445,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperModelNg003, TestSize.Level1)
  * @tc.desc: Swiper FlushFocus.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperFlushFocus001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperFlushFocus001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create frameNode, pattern.
@@ -1139,7 +1508,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperFlushFocus001, TestSize.Level1)
  * @tc.desc: Swiper GetNextFocusNode.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperGetNextFocusNode001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperGetNextFocusNode001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create frameNode, pattern.
@@ -1235,7 +1604,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperGetNextFocusNode001, TestSize.Level1)
  * @tc.desc: Swiper PreviousFocus.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperPreviousFocus001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperPreviousFocus001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create frameNode, pattern.
@@ -1293,7 +1662,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperPreviousFocus001, TestSize.Level1)
  * @tc.desc: Test GetCurrentIndex of swiper.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperAccessibilityPropertyGetCurrentIndex001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperAccessibilityPropertyGetCurrentIndex001, TestSize.Level1)
 {
     InitSwiperTestNg();
 
@@ -1312,7 +1681,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperAccessibilityPropertyGetCurrentIndex001, Tes
  * @tc.desc: Test GetBeginIndex of swiper.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperAccessibilityPropertyGetBeginIndex001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperAccessibilityPropertyGetBeginIndex001, TestSize.Level1)
 {
     InitSwiperTestNg();
 
@@ -1331,7 +1700,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperAccessibilityPropertyGetBeginIndex001, TestS
  * @tc.desc: Test GetEndIndex of swiper.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperAccessibilityPropertyGetEndIndex001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperAccessibilityPropertyGetEndIndex001, TestSize.Level1)
 {
     InitSwiperTestNg();
 
@@ -1350,7 +1719,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperAccessibilityPropertyGetEndIndex001, TestSiz
  * @tc.desc: Test GetAccessibilityValue of swiper.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperAccessibilityPropertyGetAccessibilityValue001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperAccessibilityPropertyGetAccessibilityValue001, TestSize.Level1)
 {
     InitSwiperTestNg();
 
@@ -1380,7 +1749,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperAccessibilityPropertyGetAccessibilityValue00
  * @tc.desc: Test IsScrollable of swiper.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperAccessibilityPropertyIsScrollable001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperAccessibilityPropertyIsScrollable001, TestSize.Level1)
 {
     InitSwiperTestNg();
 
@@ -1405,7 +1774,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperAccessibilityPropertyIsScrollable001, TestSi
  * @tc.desc: Test GetCollectionItemCounts of swiper.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperAccessibilityPropertyGetCollectionItemCounts001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperAccessibilityPropertyGetCollectionItemCounts001, TestSize.Level1)
 {
     InitSwiperTestNg();
 
@@ -1427,7 +1796,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperAccessibilityPropertyGetCollectionItemCounts
  * @tc.desc: Test GetSupportAction of swiper.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperAccessibilityPropertyGetSupportAction001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperAccessibilityPropertyGetSupportAction001, TestSize.Level1)
 {
     InitSwiperTestNg();
 
@@ -1468,7 +1837,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperAccessibilityPropertyGetSupportAction001, Te
  * @tc.desc: Test GetSupportAction of swiper.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperAccessibilityPropertySetSpecificSupportAction001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperAccessibilityPropertySetSpecificSupportAction001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. InitSwiperTestNg.
@@ -1514,7 +1883,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperAccessibilityPropertySetSpecificSupportActio
  * @tc.desc: Test for measure method of SwiperIndicatorLayoutAlgorithm.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperIndicatorLayoutAlgorithmMeasure001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperIndicatorLayoutAlgorithmMeasure001, TestSize.Level1)
 {
     indicatorDirection_ = Axis::HORIZONTAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -1555,7 +1924,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperIndicatorLayoutAlgorithmMeasure001, TestSize
  * @tc.desc: Test for measure method of SwiperIndicatorLayoutAlgorithm.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperIndicatorLayoutAlgorithmMeasure002, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperIndicatorLayoutAlgorithmMeasure002, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -1599,7 +1968,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperIndicatorLayoutAlgorithmMeasure002, TestSize
  * @tc.desc: Test for layout method of SwiperIndicatorLayoutAlgorithm.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperIndicatorLayoutAlgorithmLayout001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperIndicatorLayoutAlgorithmLayout001, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -1649,7 +2018,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperIndicatorLayoutAlgorithmLayout001, TestSize.
  * @tc.desc: Test for layout method of SwiperIndicatorLayoutAlgorithm.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperIndicatorLayoutAlgorithmLayout002, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperIndicatorLayoutAlgorithmLayout002, TestSize.Level1)
 {
     indicatorDirection_ = Axis::HORIZONTAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -1698,7 +2067,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperIndicatorLayoutAlgorithmLayout002, TestSize.
  * @tc.desc: Test for layout method of SwiperIndicatorLayoutAlgorithm.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperIndicatorLayoutAlgorithmLayout003, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperIndicatorLayoutAlgorithmLayout003, TestSize.Level1)
 {
     indicatorDirection_ = Axis::HORIZONTAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -1747,7 +2116,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperIndicatorLayoutAlgorithmLayout003, TestSize.
  * @tc.desc: Test for layout method of SwiperIndicatorLayoutAlgorithm.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperIndicatorLayoutAlgorithmLayout004, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperIndicatorLayoutAlgorithmLayout004, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -1796,7 +2165,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperIndicatorLayoutAlgorithmLayout004, TestSize.
  * @tc.desc: Test for layout method of SwiperIndicatorLayoutAlgorithm.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperIndicatorLayoutAlgorithmLayout005, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperIndicatorLayoutAlgorithmLayout005, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -1845,7 +2214,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperIndicatorLayoutAlgorithmLayout005, TestSize.
  * @tc.desc: Test for layout method of SwiperIndicatorLayoutAlgorithm.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperIndicatorLayoutAlgorithmLayout006, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperIndicatorLayoutAlgorithmLayout006, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -1893,7 +2262,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperIndicatorLayoutAlgorithmLayout006, TestSize.
  * @tc.desc: Test for layout method of SwiperIndicatorLayoutAlgorithmGetValidEdgeLength001.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperIndicatorLayoutAlgorithmGetValidEdgeLength001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperIndicatorLayoutAlgorithmGetValidEdgeLength001, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -1936,7 +2305,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperIndicatorLayoutAlgorithmGetValidEdgeLength00
  * @tc.desc: Test SwiperIndicator OnAttachToFrameNode
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperIndicatorOnAttachToFrameNodeTest001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperIndicatorOnAttachToFrameNodeTest001, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -1974,7 +2343,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperIndicatorOnAttachToFrameNodeTest001, TestSiz
  * @tc.desc: Test SwiperIndicator OnModifyDone
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperIndicatorOnModifyDone001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperIndicatorOnModifyDone001, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -2014,7 +2383,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperIndicatorOnModifyDone001, TestSize.Level1)
  * @tc.desc: Test SwiperIndicator InitClickEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperIndicatorInitClickEvent001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperIndicatorInitClickEvent001, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -2053,7 +2422,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperIndicatorInitClickEvent001, TestSize.Level1)
  * @tc.desc: Test SwiperIndicator HandleClick
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperIndicatorHandleClick001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperIndicatorHandleClick001, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -2085,7 +2454,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperIndicatorHandleClick001, TestSize.Level1)
  * @tc.desc: Test SwiperIndicator GetContentModifier
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperIndicatorGetContentModifier001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperIndicatorGetContentModifier001, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -2133,7 +2502,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperIndicatorGetContentModifier001, TestSize.Lev
  * @tc.desc: Test SwiperIndicator SelectedFontSize
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SelectedFontSize001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SelectedFontSize001, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DIGIT;
@@ -2193,7 +2562,7 @@ HWTEST_F(SwiperPatternTestNg, SelectedFontSize001, TestSize.Level1)
  * @tc.desc: Test SwiperIndicator SelectedFontSize
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SelectedFontSize002, TestSize.Level2)
+HWTEST_F(SwiperTestNg, SelectedFontSize002, TestSize.Level2)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DIGIT;
@@ -2246,7 +2615,7 @@ HWTEST_F(SwiperPatternTestNg, SelectedFontSize002, TestSize.Level2)
  * @tc.desc: Test SwiperIndicator FontSize
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, FontSize001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, FontSize001, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DIGIT;
@@ -2306,7 +2675,7 @@ HWTEST_F(SwiperPatternTestNg, FontSize001, TestSize.Level1)
  * @tc.desc: Test SwiperIndicator FontSize
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, FontSize002, TestSize.Level2)
+HWTEST_F(SwiperTestNg, FontSize002, TestSize.Level2)
 {
     indicatorDirection_ = Axis::HORIZONTAL;
     indicatorType_ = SwiperIndicatorType::DIGIT;
@@ -2362,7 +2731,7 @@ HWTEST_F(SwiperPatternTestNg, FontSize002, TestSize.Level2)
  * @tc.desc: Test SwiperIndicator FontColor
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, FontColor001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, FontColor001, TestSize.Level1)
 {
     indicatorDirection_ = Axis::HORIZONTAL;
     indicatorType_ = SwiperIndicatorType::DIGIT;
@@ -2421,7 +2790,7 @@ HWTEST_F(SwiperPatternTestNg, FontColor001, TestSize.Level1)
  * @tc.desc: Test SwiperIndicator FontColor
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, FontColor002, TestSize.Level2)
+HWTEST_F(SwiperTestNg, FontColor002, TestSize.Level2)
 {
     indicatorDirection_ = Axis::HORIZONTAL;
     indicatorType_ = SwiperIndicatorType::DIGIT;
@@ -2475,7 +2844,7 @@ HWTEST_F(SwiperPatternTestNg, FontColor002, TestSize.Level2)
  * @tc.desc: Test SwiperIndicator SelectedFontColor
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SelectedFontColor001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SelectedFontColor001, TestSize.Level1)
 {
     indicatorDirection_ = Axis::HORIZONTAL;
     indicatorType_ = SwiperIndicatorType::DIGIT;
@@ -2534,7 +2903,7 @@ HWTEST_F(SwiperPatternTestNg, SelectedFontColor001, TestSize.Level1)
  * @tc.desc: Test SwiperIndicator SelectedFontColor
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SelectedFontColor002, TestSize.Level2)
+HWTEST_F(SwiperTestNg, SelectedFontColor002, TestSize.Level2)
 {
     indicatorDirection_ = Axis::HORIZONTAL;
     indicatorType_ = SwiperIndicatorType::DIGIT;
@@ -2589,7 +2958,7 @@ HWTEST_F(SwiperPatternTestNg, SelectedFontColor002, TestSize.Level2)
  * @tc.desc: Test SwiperIndicator FontWeight
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, FontWeight001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, FontWeight001, TestSize.Level1)
 {
     indicatorDirection_ = Axis::HORIZONTAL;
     indicatorType_ = SwiperIndicatorType::DIGIT;
@@ -2647,7 +3016,7 @@ HWTEST_F(SwiperPatternTestNg, FontWeight001, TestSize.Level1)
  * @tc.desc: Test SwiperIndicator SelectedFontWeight
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SelectedFontWeight001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SelectedFontWeight001, TestSize.Level1)
 {
     indicatorDirection_ = Axis::HORIZONTAL;
     indicatorType_ = SwiperIndicatorType::DIGIT;
@@ -2705,7 +3074,7 @@ HWTEST_F(SwiperPatternTestNg, SelectedFontWeight001, TestSize.Level1)
  * @tc.desc: Test SwiperIndicator ItemWidth
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, ItemWidth001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, ItemWidth001, TestSize.Level1)
 {
     indicatorDirection_ = Axis::HORIZONTAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -2746,7 +3115,7 @@ HWTEST_F(SwiperPatternTestNg, ItemWidth001, TestSize.Level1)
  * @tc.desc: Test SwiperIndicator ItemWidth
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, ItemWidth002, TestSize.Level1)
+HWTEST_F(SwiperTestNg, ItemWidth002, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -2791,7 +3160,7 @@ HWTEST_F(SwiperPatternTestNg, ItemWidth002, TestSize.Level1)
  * @tc.desc: Test SwiperIndicator ItemHeight
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, ItemHeight001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, ItemHeight001, TestSize.Level1)
 {
     indicatorDirection_ = Axis::HORIZONTAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -2832,7 +3201,7 @@ HWTEST_F(SwiperPatternTestNg, ItemHeight001, TestSize.Level1)
  * @tc.desc: Test SwiperIndicator ItemHeight
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, ItemHeight002, TestSize.Level1)
+HWTEST_F(SwiperTestNg, ItemHeight002, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -2876,7 +3245,7 @@ HWTEST_F(SwiperPatternTestNg, ItemHeight002, TestSize.Level1)
  * @tc.desc: Test SwiperIndicator SelectedItemWidth
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SelectedItemWidth001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SelectedItemWidth001, TestSize.Level1)
 {
     indicatorDirection_ = Axis::HORIZONTAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -2917,7 +3286,7 @@ HWTEST_F(SwiperPatternTestNg, SelectedItemWidth001, TestSize.Level1)
  * @tc.desc: Test SwiperIndicator SelectedItemWidth
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SelectedItemWidth002, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SelectedItemWidth002, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -2962,7 +3331,7 @@ HWTEST_F(SwiperPatternTestNg, SelectedItemWidth002, TestSize.Level1)
  * @tc.desc: Test SwiperIndicator SelectedItemHeight
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SelectedItemHeight001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SelectedItemHeight001, TestSize.Level1)
 {
     indicatorDirection_ = Axis::HORIZONTAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -3003,7 +3372,7 @@ HWTEST_F(SwiperPatternTestNg, SelectedItemHeight001, TestSize.Level1)
  * @tc.desc: Test SwiperIndicator SelectedItemHeight
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SelectedItemHeight002, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SelectedItemHeight002, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -3048,7 +3417,7 @@ HWTEST_F(SwiperPatternTestNg, SelectedItemHeight002, TestSize.Level1)
  * @tc.desc: Test SwiperLayoutAlgorithm SwiperLayoutAlgorithmLayout
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperLayoutAlgorithmLayout001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayout001, TestSize.Level1)
 {
     indicatorDirection_ = Axis::HORIZONTAL;
     indicatorType_ = SwiperIndicatorType::DIGIT;
@@ -3094,7 +3463,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperLayoutAlgorithmLayout001, TestSize.Level1)
  * @tc.desc: Test SwiperLayoutAlgorithm SwiperLayoutAlgorithmLayout
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperLayoutAlgorithmLayout002, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayout002, TestSize.Level1)
 {
     indicatorDirection_ = Axis::HORIZONTAL;
     indicatorType_ = SwiperIndicatorType::DIGIT;
@@ -3140,7 +3509,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperLayoutAlgorithmLayout002, TestSize.Level1)
  * @tc.desc: Test SwiperLayoutAlgorithm SwiperLayoutAlgorithmLayout
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperLayoutAlgorithmLayout003, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayout003, TestSize.Level1)
 {
     indicatorDirection_ = Axis::HORIZONTAL;
     indicatorType_ = SwiperIndicatorType::DIGIT;
@@ -3189,7 +3558,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperLayoutAlgorithmLayout003, TestSize.Level1)
  * @tc.desc: Test SwiperLayoutAlgorithm SwiperLayoutAlgorithmLayout
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperLayoutAlgorithmLayout004, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayout004, TestSize.Level1)
 {
     indicatorDirection_ = Axis::HORIZONTAL;
     indicatorType_ = SwiperIndicatorType::DIGIT;
@@ -3236,7 +3605,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperLayoutAlgorithmLayout004, TestSize.Level1)
  * @tc.desc: Test DotIndicatorPaintMethod UpdateContentModifier
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperIndicatorUpdateContentModifier001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperIndicatorUpdateContentModifier001, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -3285,7 +3654,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperIndicatorUpdateContentModifier001, TestSize.
  * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorUpdateContentModifier
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperIndicatorUpdateContentModifier002, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperIndicatorUpdateContentModifier002, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -3334,7 +3703,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperIndicatorUpdateContentModifier002, TestSize.
  * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorPaintNormalIndicator
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperIndicatorPaintNormalIndicator001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperIndicatorPaintNormalIndicator001, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -3388,7 +3757,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperIndicatorPaintNormalIndicator001, TestSize.L
  * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorPaintNormalIndicator
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperIndicatorPaintNormalIndicator002, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperIndicatorPaintNormalIndicator002, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -3443,7 +3812,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperIndicatorPaintNormalIndicator002, TestSize.L
  * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorPaintPressIndicator
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperIndicatorPaintPressIndicator001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperIndicatorPaintPressIndicator001, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -3492,7 +3861,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperIndicatorPaintPressIndicator001, TestSize.Le
  * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorPaintPressIndicator
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperIndicatorPaintPressIndicator002, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperIndicatorPaintPressIndicator002, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -3543,7 +3912,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperIndicatorPaintPressIndicator002, TestSize.Le
  * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorPaintHoverIndicator
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperIndicatorPaintHoverIndicator001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperIndicatorPaintHoverIndicator001, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -3596,7 +3965,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperIndicatorPaintHoverIndicator001, TestSize.Le
  * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorPaintHoverIndicator
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperIndicatorPaintHoverIndicator002, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperIndicatorPaintHoverIndicator002, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -3646,7 +4015,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperIndicatorPaintHoverIndicator002, TestSize.Le
  * @tc.desc: Test LayoutWrapper SwiperDigitIndicatorLayoutAlgorithmMeasure
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperDigitIndicatorLayoutAlgorithmMeasure001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperDigitIndicatorLayoutAlgorithmMeasure001, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DIGIT;
@@ -3707,7 +4076,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperDigitIndicatorLayoutAlgorithmMeasure001, Tes
  * @tc.desc: Test TxtParagraph SwiperDigitIndicatorLayoutAlgorithmLayout
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperDigitIndicatorLayoutAlgorithmLayout002, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperDigitIndicatorLayoutAlgorithmLayout002, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DIGIT;
@@ -3771,7 +4140,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperDigitIndicatorLayoutAlgorithmLayout002, Test
  * @tc.desc: Test SwiperIndicatorPattern SwiperIndicatorHandleClick
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperIndicatorHandleClick002, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperIndicatorHandleClick002, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -3828,7 +4197,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperIndicatorHandleClick002, TestSize.Level1)
  * @tc.desc: Test SwiperIndicatorPattern SwiperIndicatorHandleClick
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperIndicatorHandleClick003, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperIndicatorHandleClick003, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -3870,7 +4239,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperIndicatorHandleClick003, TestSize.Level1)
  * @tc.desc: Test SwiperPattern SwiperInitIndicator
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperInitIndicator001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperInitIndicator001, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -3904,7 +4273,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperInitIndicator001, TestSize.Level1)
  * @tc.desc: Test SwiperPattern SwiperInitIndicator
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperInitIndicator002, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperInitIndicator002, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -3941,7 +4310,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperInitIndicator002, TestSize.Level1)
  * @tc.desc: Test SwiperPattern SwiperInitIndicator
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperInitIndicator003, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperInitIndicator003, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -3975,7 +4344,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperInitIndicator003, TestSize.Level1)
  * @tc.desc: Test SwiperPattern SwiperInitIndicator
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperInitIndicator004, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperInitIndicator004, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DOT;
@@ -4012,7 +4381,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperInitIndicator004, TestSize.Level1)
  * @tc.desc: Test SwiperPattern SwiperInitIndicator
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperInitIndicator005, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperInitIndicator005, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DIGIT;
@@ -4046,7 +4415,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperInitIndicator005, TestSize.Level1)
  * @tc.desc: Test SwiperModelNG SetDotIndicatorStyle
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SetDotIndicatorStyle001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SetDotIndicatorStyle001, TestSize.Level1)
 {
     SwiperModelNG mode;
     auto controller = mode.Create();
@@ -4071,7 +4440,7 @@ HWTEST_F(SwiperPatternTestNg, SetDotIndicatorStyle001, TestSize.Level1)
  * @tc.desc: Test SwiperModelNG SetDigitIndicatorStyle
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SetDigitIndicatorStyle001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SetDigitIndicatorStyle001, TestSize.Level1)
 {
     SwiperModelNG mode;
     auto controller = mode.Create();
@@ -4097,7 +4466,7 @@ HWTEST_F(SwiperPatternTestNg, SetDigitIndicatorStyle001, TestSize.Level1)
  * @tc.desc: Test DigitIndicatorLayoutAlgorithm SwiperDigitIndicatorLayoutAlgorithmLayout
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperDigitIndicatorLayoutAlgorithmLayout001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperDigitIndicatorLayoutAlgorithmLayout001, TestSize.Level1)
 {
     indicatorDirection_ = Axis::VERTICAL;
     indicatorType_ = SwiperIndicatorType::DIGIT;
@@ -4143,7 +4512,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperDigitIndicatorLayoutAlgorithmLayout001, Test
  * @tc.desc: Test DotIndicatorModifier
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, DotIndicatorModifier001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, DotIndicatorModifier001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create DotIndicatorModifier. Update PaintProperty.Call the function onDraw.
@@ -4213,7 +4582,7 @@ HWTEST_F(SwiperPatternTestNg, DotIndicatorModifier001, TestSize.Level1)
  * @tc.desc: Test DotIndicatorModifier
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, DotIndicatorModifier002, TestSize.Level1)
+HWTEST_F(SwiperTestNg, DotIndicatorModifier002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create DotIndicatorModifier. Update PaintProperty.Call the function onDraw.
@@ -4261,7 +4630,7 @@ HWTEST_F(SwiperPatternTestNg, DotIndicatorModifier002, TestSize.Level1)
  * @tc.desc: Test DotIndicatorModifier
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, DotIndicatorModifier003, TestSize.Level1)
+HWTEST_F(SwiperTestNg, DotIndicatorModifier003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create DotIndicatorModifier. Update PaintProperty.Call the function onDraw.
@@ -4322,7 +4691,7 @@ HWTEST_F(SwiperPatternTestNg, DotIndicatorModifier003, TestSize.Level1)
  * @tc.desc: Test the distributed capability of Swiper
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperPatternTestNg, SwiperDistributedTest001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperDistributedTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode and get pattern.
