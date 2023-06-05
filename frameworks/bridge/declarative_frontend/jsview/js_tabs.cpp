@@ -295,6 +295,17 @@ void JSTabs::SetDivider(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetDivider(divider);
 }
 
+void JSTabs::SetClip(const JSCallbackInfo& info)
+{
+    if (info[0]->IsObject() || !Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsClip(info);
+        return;
+    }
+    if (info[0]->IsBoolean()) {
+        TabsModel::GetInstance()->SetClipEdge(info[0]->ToBoolean());
+    }
+}
+
 void JSTabs::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTabs>::Declare("Tabs");
@@ -320,6 +331,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSTabs>::StaticMethod("fadingEdge", &JSTabs::SetFadingEdge);
     JSClass<JSTabs>::StaticMethod("barOverlap", &JSTabs::SetBarOverlap);
+    JSClass<JSTabs>::StaticMethod("clip", &JSTabs::SetClip);
 
     JSClass<JSTabs>::Inherit<JSContainerBase>();
     JSClass<JSTabs>::Bind<>(globalObj);
