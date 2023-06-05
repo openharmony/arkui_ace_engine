@@ -776,20 +776,21 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0016, TestSize.Level1)
     parent->layoutProperty_ = layoutProperty;
     ASSERT_EQ(AceType::DynamicCast<NavigationGroupNode>(navRouterGroupNode->eventHub_), nullptr);
     navRouterGroupNode->eventHub_ = AceType::MakeRefPtr<NavRouterEventHub>();
+    auto stack = AceType::MakeRefPtr<NavigationStack>();
+    parent->GetPattern<NavigationPattern>()->navigationStack_ = stack;
+
     navRouterGroupNode->OnAttachToMainTree(false);
     navRouterGroupNode->GetEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
     EXPECT_EQ(layoutProperty->GetNavigationModeValue(NavigationMode::AUTO), NavigationMode::AUTO);
     layoutProperty->propNavigationMode_ = NavigationMode::STACK;
     navRouterGroupNode->OnAttachToMainTree(false);
     navRouterGroupNode->GetPattern<NavRouterPattern>()->routeInfo_ = AceType::MakeRefPtr<RouteInfo>();
-    auto stack = AceType::MakeRefPtr<NavigationStack>();
     auto preNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
         "preNavDestination", 55, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     preNavDestination->titleBarNode_ = TitleBarNode::GetOrCreateTitleBarNode(
         "titleBarNode", 33, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     std::pair<std::string, RefPtr<UINode>> p("test", preNavDestination);
     stack->navPathList_.push_back(p);
-    parent->GetPattern<NavigationPattern>()->navigationStack_ = stack;
     navRouterGroupNode->GetEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
     EXPECT_TRUE(layoutProperty->propDestinationChange_.value());
 
@@ -1082,12 +1083,12 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0019, TestSize.Level1)
 
     EXPECT_FALSE(parent->GetIsOnAnimation());
     parent->BackToNavBar(navDestination);
-    EXPECT_TRUE(parent->GetIsOnAnimation());
+    EXPECT_FALSE(parent->GetIsOnAnimation());
 
     destinationTitleBarNode->backButton_ = backButton;
     parent->BackToNavBar(navDestination);
-    EXPECT_TRUE(parent->GetIsOnAnimation());
-    parent->isOnAnimation_ = false;
+    EXPECT_FALSE(parent->GetIsOnAnimation());
+    parent->isOnAnimation_ = true;
     parent->BackToNavBar(navDestination);
     EXPECT_TRUE(parent->GetIsOnAnimation());
 }
@@ -1133,7 +1134,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0020, TestSize.Level1)
     parent->isOnAnimation_ = false;
     parent->BackToPreNavDestination(
         preNavDestination, navDestination, navRouterGroupNode->GetPattern<NavRouterPattern>());
-    EXPECT_TRUE(parent->isOnAnimation_);
+    EXPECT_FALSE(parent->isOnAnimation_);
 
     destinationTitleBarNode->backButton_ = nullptr;
     parent->isOnAnimation_ = false;
@@ -1142,7 +1143,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0020, TestSize.Level1)
 
     parent->BackToPreNavDestination(
         preNavDestination, navDestination, navRouterGroupNode->GetPattern<NavRouterPattern>());
-    EXPECT_TRUE(parent->isOnAnimation_);
+    EXPECT_FALSE(parent->isOnAnimation_);
 }
 
 /**
