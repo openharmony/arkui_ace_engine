@@ -3843,6 +3843,108 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleMouseEvent001, TestSize.Level1)
     }
 }
 
+/*
+ * @tc.name: TabBarPatternHandleMouseEvent002
+ * @tc.desc: test HandleMouseEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternHandleMouseEvent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create TabBarPattern
+     */
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    tabBarNode->Clean(false, false);
+    auto info = MouseInfo();
+
+    /**
+     * @tc.steps: step2. Test function GetBottomTabBarImageSizeAndOffset.
+     * @tc.expected: Related function runs ok.
+     */
+    int32_t nodeId = 1;
+    tabBarPattern->HandleMouseEvent(info);
+    for (int i = 0; i <= 2; i++) {
+        auto tabsNode = TabsModelNG::GetOrCreateTabsNode(
+            V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
+        tabBarNode->AddChild(tabsNode);
+    }
+
+    Offset s1(0.1, 0.1);
+    OffsetF c1(0.1f, 0.1f);
+    OffsetF c2(0.2f, 0.2f);
+    info.SetLocalLocation(s1);
+    tabBarPattern->tabItemOffsets_.emplace_back(c1);
+    tabBarPattern->tabItemOffsets_.emplace_back(c2);
+    tabBarPattern->HandleMouseEvent(info);
+}
+
+/**
+ * @tc.name: TabBarPatternGetBottomTabBarImageSizeAndOffset001
+ * @tc.desc: test GetBottomTabBarImageSizeAndOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternGetBottomTabBarImageSizeAndOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create TabBarPattern
+     */
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    std::vector<int32_t> selectedIndexes(1, 1);
+    float selectedImageSize = 1.0f;
+    float unselectedImageSize = 1.1f;
+    OffsetF originalSelectedMaskOffset(1.0f, 1.1f);
+    OffsetF originalUnselectedMaskOffset(0.0f, 1.0f);
+
+    /**
+     * @tc.steps: step2. Test function HandleMouseEvent.
+     * @tc.expected: Related function runs ok.
+     */
+    int32_t maskIndex = 0;
+    for (int i = 0; i <= 1; i++) {
+        tabBarPattern->GetBottomTabBarImageSizeAndOffset(selectedIndexes, maskIndex, selectedImageSize,
+            unselectedImageSize, originalSelectedMaskOffset, originalUnselectedMaskOffset);
+        maskIndex = 1;
+    }
+
+    int32_t nodeId = 1;
+    for (int i = 0; i <= 2; i++) {
+        auto tabsNode = TabsModelNG::GetOrCreateTabsNode(
+            V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
+        tabBarNode->AddChild(tabsNode);
+    }
+    maskIndex = 0;
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            tabBarPattern->GetBottomTabBarImageSizeAndOffset(selectedIndexes, maskIndex, selectedImageSize,
+                unselectedImageSize, originalSelectedMaskOffset, originalUnselectedMaskOffset);
+            maskIndex = 1;
+        }
+        tabBarNode->Clean(false, false);
+    }
+}
+
 float fun_test01()
 {
     return 1.0f;
