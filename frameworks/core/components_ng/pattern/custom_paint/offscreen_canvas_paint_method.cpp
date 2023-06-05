@@ -87,6 +87,7 @@ OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(
     context_ = context;
     width_ = width;
     height_ = height;
+    matrix_.reset();
 
     auto imageInfo =
         SkImageInfo::Make(width, height, SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
@@ -622,5 +623,20 @@ std::string OffscreenCanvasPaintMethod::ToDataURL(const std::string& type, const
     SkString info(len);
     SkBase64::Encode(result->data(), result->size(), info.writable_str());
     return std::string(URL_PREFIX).append(mimeType).append(URL_SYMBOL).append(info.c_str());
+}
+
+TransformParam OffscreenCanvasPaintMethod::GetTransform() const
+{
+    TransformParam param;
+    if (skCanvas_ != nullptr) {
+        SkMatrix matrix = skCanvas_->getTotalMatrix();
+        param.scaleX = matrix.getScaleX();
+        param.scaleY = matrix.getScaleY();
+        param.skewX = matrix.getSkewX();
+        param.skewY = matrix.getSkewY();
+        param.translateX = matrix.getTranslateX();
+        param.translateY = matrix.getTranslateY();
+    }
+    return param;
 }
 } // namespace OHOS::Ace::NG

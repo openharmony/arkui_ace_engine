@@ -700,6 +700,7 @@ void CustomPaintPattern::Save()
         paintMethod.Save();
     };
     paintMethod_->PushTask(task);
+    paintMethod_->SaveMatrix();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -711,6 +712,7 @@ void CustomPaintPattern::Restore()
         paintMethod.Restore();
     };
     paintMethod_->PushTask(task);
+    paintMethod_->RestoreMatrix();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -722,6 +724,7 @@ void CustomPaintPattern::Scale(double x, double y)
         paintMethod.Scale(x, y);
     };
     paintMethod_->PushTask(task);
+    paintMethod_->ScaleMatrix(x, y);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -733,6 +736,7 @@ void CustomPaintPattern::Rotate(double angle)
         paintMethod.Rotate(angle);
     };
     paintMethod_->PushTask(task);
+    paintMethod_->RotateMatrix(angle);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -744,6 +748,7 @@ void CustomPaintPattern::SetTransform(const TransformParam& param)
         paintMethod.SetTransform(param);
     };
     paintMethod_->PushTask(task);
+    paintMethod_->SetTransformMatrix(param);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -755,6 +760,7 @@ void CustomPaintPattern::ResetTransform()
         paintMethod.ResetTransform();
     };
     paintMethod_->PushTask(task);
+    paintMethod_->ResetTransformMatrix();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -766,6 +772,7 @@ void CustomPaintPattern::Transform(const TransformParam& param)
         paintMethod.Transform(param);
     };
     paintMethod_->PushTask(task);
+    paintMethod_->TransformMatrix(param);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -777,6 +784,7 @@ void CustomPaintPattern::Translate(double x, double y)
         paintMethod.Translate(x, y);
     };
     paintMethod_->PushTask(task);
+    paintMethod_->TranslateMatrix(x, y);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
