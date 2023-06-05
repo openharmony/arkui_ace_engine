@@ -1052,6 +1052,10 @@ void SwiperPattern::PlayTranslateAnimation(
     StopTranslateAnimation();
     StopAutoPlay();
 
+#ifdef OHOS_PLATFORM
+    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+#endif
+
     if (!controller_) {
         controller_ = CREATE_ANIMATOR(host->GetContext());
     }
@@ -1612,6 +1616,10 @@ void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, b
         PostTranslateTask(delayTime);
     }
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+
+#ifdef OHOS_PLATFORM
+    ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+#endif
 }
 
 void SwiperPattern::OnWindowShow()
