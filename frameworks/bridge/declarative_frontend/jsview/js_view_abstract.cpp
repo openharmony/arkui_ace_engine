@@ -5721,6 +5721,7 @@ void JSViewAbstract::JsClickEffect(const JSCallbackInfo& info)
     }
     if (info[0]->IsUndefined() || info[0]->IsNull()) {
         LOGD("Parameter value error, not set effect.");
+        ViewAbstractModel::GetInstance()->SetClickEffectLevel(ClickEffectLevel::UNDEFINED, DEFAULT_SCALE_LIGHT);
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);

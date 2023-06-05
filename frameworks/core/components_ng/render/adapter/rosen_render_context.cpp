@@ -2597,10 +2597,7 @@ void RosenRenderContext::InitEventClickEffect()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto renderContext = weak.Upgrade();
         CHECK_NULL_VOID(renderContext);
-        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN ||
-            info.GetTouches().front().GetTouchType() == TouchType::UP) {
-            renderContext->ClickEffectPlayAnimation(info.GetTouches().front().GetTouchType());
-        }
+        renderContext->ClickEffectPlayAnimation(info.GetTouches().front().GetTouchType());
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     gesture->AddTouchEvent(touchListener_);
@@ -2608,7 +2605,7 @@ void RosenRenderContext::InitEventClickEffect()
 
 void RosenRenderContext::ClickEffectPlayAnimation(const TouchType& touchType)
 {
-    if (touchType != TouchType::DOWN && touchType != TouchType::UP) {
+    if (touchType != TouchType::DOWN && touchType != TouchType::UP && touchType != TouchType::CANCEL) {
         return;
     }
     auto value = GetClickEffectLevelValue();
@@ -2619,21 +2616,26 @@ void RosenRenderContext::ClickEffectPlayAnimation(const TouchType& touchType)
     AnimationOption option;
     option.SetCurve(springCurve);
 
-    if (touchType == TouchType::DOWN) {
-        auto defaultScale = VectorF(1.0f, 1.0f);
-        auto currentScale = GetTransformScaleValue(defaultScale);
-        currentScale_ = currentScale;
-        UpdateTransformScale(currentScale_);
-        AnimationUtils::OpenImplicitAnimation(option, springCurve, nullptr);
-        VectorF valueScale(scaleValue, scaleValue);
-        UpdateTransformScale(valueScale);
-        AnimationUtils::CloseImplicitAnimation();
+    if (touchType == TouchType::DOWN && level != ClickEffectLevel::UNDEFINED) {
+        if (isTouchUpFinished_) {
+            auto defaultScale = VectorF(1.0f, 1.0f);
+            auto currentScale = GetTransformScaleValue(defaultScale);
+            currentScale_ = currentScale;
+            UpdateTransformScale(currentScale_);
+
+            AnimationUtils::OpenImplicitAnimation(option, springCurve, nullptr);
+            VectorF valueScale(scaleValue, scaleValue);
+            UpdateTransformScale(valueScale);
+            AnimationUtils::CloseImplicitAnimation();
+        }
+        isTouchUpFinished_ = false;
     }
 
-    if (touchType == TouchType::UP) {
+    if ((touchType == TouchType::UP || touchType == TouchType::CANCEL) && level != ClickEffectLevel::UNDEFINED) {
         AnimationUtils::OpenImplicitAnimation(option, springCurve, nullptr);
         UpdateTransformScale(currentScale_);
         AnimationUtils::CloseImplicitAnimation();
+        isTouchUpFinished_ = true;
     }
 }
 

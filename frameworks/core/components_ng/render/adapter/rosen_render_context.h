@@ -408,6 +408,7 @@ private:
 
     RefPtr<TouchEventImpl> touchListener_;
     VectorF currentScale_ = VectorF(1.0f, 1.0f);
+    bool isTouchUpFinished_ = true;
 
     template<typename Modifier, typename PropertyType>
     friend class PropertyTransitionEffectTemplate;
