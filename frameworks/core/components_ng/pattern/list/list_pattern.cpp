@@ -123,8 +123,8 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     if (targetIndex_) {
         auto iter = itemPosition_.find(targetIndex_.value());
-        float targetPos = 0.0f;
         if (iter != itemPosition_.end()) {
+            float targetPos = 0.0f;
             switch (scrollIndexAlignment_) {
                 case ScrollIndexAlignment::ALIGN_TOP:
                     targetPos = iter->second.startPos;
@@ -809,7 +809,6 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollIndexAlignment
     StopAnimate();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
     auto totalItemCount = host->TotalChildCount();
     if ((index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM)) {
         currentDelta_ = 0;
