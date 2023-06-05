@@ -17,6 +17,7 @@
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
+#include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -44,7 +45,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_persistent.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_radio.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rating.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_rect.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scope_util.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroll.h"
@@ -190,6 +193,9 @@ void JsBindViews(BindingTarget globalObj)
     JSScroller::JSBind(globalObj);
     JSScrollBar::JSBind(globalObj);
     JSButton::JSBind(globalObj);
+    JSRadio::JSBind(globalObj);
+    JSRect::JSBind(globalObj);
+    JSShapeAbstract::JSBind(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

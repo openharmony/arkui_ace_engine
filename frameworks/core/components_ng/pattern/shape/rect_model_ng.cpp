@@ -102,7 +102,7 @@ void RectModelNG::SetBottomRightRadius(const Radius& bottomRightRadius)
     ACE_UPDATE_PAINT_PROPERTY(RectPaintProperty, BottomRightRadius, bottomRightRadius);
 }
 
-void RectModelNG::SetCallbackRadius(
+void RectModelNG::SetShapeRectRadius(
     const RefPtr<ShapeRect>& rect, const Dimension& radiusX, const Dimension& radiusY, int32_t index)
 {
     CHECK_NULL_VOID_NOLOG(rect);

@@ -16,7 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SHAPE_ABSTRACT_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SHAPE_ABSTRACT_H
 
-#include "core/components/shape/shape_component.h"
+#include "base/geometry/shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
