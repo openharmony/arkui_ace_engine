@@ -115,6 +115,7 @@ void SwiperPattern::OnModifyDone()
     RegisterVisibleAreaChange();
     InitSwiperController();
     InitTouchEvent(gestureHub);
+    InitHoverMouseEvent();
     if (IsDisableSwipe()) {
         if (panEvent_) {
             gestureHub->RemovePanEvent(panEvent_);
@@ -1763,5 +1764,77 @@ void SwiperPattern::OnRestoreInfo(const std::string& restoreInfo)
     auto jsonIsOn = info->GetValue("Index");
     swiperLayoutProperty->UpdateIndex(jsonIsOn->GetInt());
     OnModifyDone();
+}
+
+void SwiperPattern::InitHoverMouseEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+
+    auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->IsShowIndicator()) {
+            pattern->ArrowHover(isHover);
+        }
+    };
+
+    if (!hoverEvent_) {
+        hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
+        inputHub->AddOnHoverEvent(hoverEvent_);
+    }
+
+    inputHub->SetMouseEvent([weak = WeakClaim(this)](MouseInfo& info) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleMouseEvent(info);
+        }
+    });
+}
+
+void SwiperPattern::HandleMouseEvent(const MouseInfo& info)
+{
+    auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
+    auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
+    auto mousePoint = PointF(mouseOffsetX, mouseOffsetY);
+    if (IsShowIndicator()) {
+        CheckAndSetArrowHoverState(mousePoint);
+    }
+}
+
+void SwiperPattern::CheckAndSetArrowHoverState(const PointF& mousePoint)
+{
+    if (!HasLeftButtonNode() || !HasRightButtonNode()) {
+        return;
+    }
+
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetIsSidebarMiddleValue(false)) {
+        return;
+    }
+
+    auto leftArrowRect = GetArrowFrameRect(GetLeftButtonId());
+    auto rightArrowRect = GetArrowFrameRect(GetRightButtonId());
+    auto newRect = RectF(leftArrowRect.Left(), leftArrowRect.Top(), rightArrowRect.Right() - leftArrowRect.Left(),
+        rightArrowRect.Bottom() - leftArrowRect.Top());
+
+    isAtHotRegion_ = newRect.IsInRegion(mousePoint);
+    ArrowHover(isAtHotRegion_);
+}
+
+RectF SwiperPattern::GetArrowFrameRect(const int32_t index) const
+{
+    auto swiperNode = GetHost();
+    CHECK_NULL_RETURN(swiperNode, RectF(0, 0, 0, 0));
+    auto arrowNode = DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(index)));
+    CHECK_NULL_RETURN(arrowNode, RectF(0, 0, 0, 0));
+    auto arrowGeometryNode = arrowNode->GetGeometryNode();
+    CHECK_NULL_RETURN(arrowGeometryNode, RectF(0, 0, 0, 0));
+    return arrowGeometryNode->GetFrameRect();
 }
 } // namespace OHOS::Ace::NG

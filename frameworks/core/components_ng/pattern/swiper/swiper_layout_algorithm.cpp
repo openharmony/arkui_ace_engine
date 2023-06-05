@@ -451,6 +451,7 @@ void SwiperLayoutAlgorithm::PlaceDigitChild(
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID_NOLOG(swiperIndicatorTheme);
 
+    float dightPadding = std::abs(swiperIndicatorTheme->GetIndicatorDigitHeight().ConvertToPx() - indicatorHeight) / 2;
     if (LessNotEqual(indicatorHeight, swiperIndicatorTheme->GetIndicatorDigitHeight().ConvertToPx())) {
         indicatorHeight = swiperIndicatorTheme->GetIndicatorDigitHeight().ConvertToPx();
     }
@@ -500,7 +501,8 @@ void SwiperLayoutAlgorithm::PlaceDigitChild(
         position.SetY(swiperHeight - indicatorHeight - bottomValue - swiperPaddingBottom);
     } else {
         if (axis == Axis::HORIZONTAL) {
-            position.SetY(swiperHeight - indicatorHeight - swiperPaddingBottom);
+            position.SetY(swiperHeight - indicatorHeight - swiperPaddingBottom -
+                          swiperIndicatorTheme->GetIndicatorDigitVerticalPadding().ConvertToPx() + dightPadding);
         } else {
             position.SetY((swiperHeight - swiperPaddingBottom + swiperPaddingTop - indicatorHeight) * 0.5);
         }

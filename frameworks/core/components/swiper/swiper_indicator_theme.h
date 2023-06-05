@@ -32,6 +32,7 @@ constexpr Dimension SWIPER_ARROW_HORIZONTAL_MARGIN_DEFAULT = 8.0_vp;
 constexpr Dimension SWIPER_ARROW_VERTICAL_MARGIN_DEFAULT = 8.0_vp;
 constexpr Dimension SWIPER_FOCUSED_BORDER_WIDTH = 2.0_vp;
 constexpr Dimension SWIPER_INDICATOR_DIGIT_PADDING_DEFAULT = 8.0_vp;
+constexpr Dimension SWIPER_INDICATOR_DIGIT_VERTICAL_PADDING_DEFAULT = 16.0_vp;
 constexpr Dimension SWIPER_INDICATOR_DIGIT_HEIGHT = 32.0_vp;
 constexpr Dimension SWIPER_INDICATOR_DOT_PADDING_DEFAULT = 21.0_vp;
 constexpr float SWIPER_ARROW_ZOOM_OUT_SCALE = 1.33f;
@@ -125,6 +126,7 @@ public:
             theme->bigArrowColor_ = swiperPattern->GetAttr<Color>(ARROW_COLOR_PRIMARY, Color::TRANSPARENT);
             theme->arrowZoomOutScale_ = SWIPER_ARROW_ZOOM_OUT_SCALE;
             theme->indicatorDigitPadding_ = SWIPER_INDICATOR_DIGIT_PADDING_DEFAULT;
+            theme->indicatorDigitVerticalPadding_ = SWIPER_INDICATOR_DIGIT_VERTICAL_PADDING_DEFAULT;
             theme->indicatorDotPadding_ = SWIPER_INDICATOR_DOT_PADDING_DEFAULT;
             theme->indicatorDigitHeight_ = SWIPER_INDICATOR_DIGIT_HEIGHT;
         }
@@ -349,6 +351,10 @@ public:
         return indicatorDigitHeight_;
     }
 
+    const Dimension& GetIndicatorDigitVerticalPadding() const
+    {
+        return indicatorDigitVerticalPadding_;
+    }
 protected:
     SwiperIndicatorTheme() = default;
 
@@ -395,6 +401,7 @@ private:
     Dimension arrowVerticalMargin_;
     float arrowZoomOutScale_ = 1.33f;
     Dimension indicatorDigitPadding_;
+    Dimension indicatorDigitVerticalPadding_;
     Dimension indicatorDotPadding_;
     Dimension indicatorDigitHeight_;
 };
