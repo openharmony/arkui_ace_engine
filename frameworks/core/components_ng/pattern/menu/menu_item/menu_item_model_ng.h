@@ -21,6 +21,7 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT MenuItemModelNG : public OHOS::Ace::MenuItemModel {
 public:
+    void Create(const RefPtr<NG::UINode>& customNode) override;
     void Create(const MenuItemProperties& props) override;
     void SetSelected(bool isSelected = false) override;
     void SetSelectIcon(bool isShow = false) override;

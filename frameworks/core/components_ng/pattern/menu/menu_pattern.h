@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_PATTERN_H
 
 #include <optional>
+#include <vector>
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -72,6 +73,8 @@ public:
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
+
+    void BeforeCreateLayoutWrapper() override;
 
     MenuType GetMenuType() const
     {
@@ -174,6 +177,11 @@ public:
     }
     void HideSubMenu();
 
+    const std::list<WeakPtr<UINode>>& GetItemsAndGroups() const
+    {
+        return itemsAndGroups_;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
@@ -194,6 +202,7 @@ private:
 
     RefPtr<FrameNode> GetMenuWrapper() const;
     void SetAccessibilityAction();
+    void RecordItemsAndGroups();
 
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;
@@ -205,6 +214,9 @@ private:
     RefPtr<FrameNode> parentMenuItem_;
     RefPtr<FrameNode> showedSubMenu_;
     std::vector<RefPtr<FrameNode>> options_;
+    // Record menu's items and groups at first level,
+    // use for group header and footer padding
+    std::list<WeakPtr<UINode>> itemsAndGroups_;
 
     bool isSelectMenu_ = false;
 

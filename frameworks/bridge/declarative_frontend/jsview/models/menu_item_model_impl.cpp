@@ -16,6 +16,8 @@
 #include "bridge/declarative_frontend/jsview/models/menu_item_model_impl.h"
 
 namespace OHOS::Ace::Framework {
+void MenuItemModelImpl::Create(const RefPtr<NG::UINode>& customNode) {}
+
 void MenuItemModelImpl::Create(const MenuItemProperties& props) {}
 
 void MenuItemModelImpl::SetSelected(bool isSelected) {}
