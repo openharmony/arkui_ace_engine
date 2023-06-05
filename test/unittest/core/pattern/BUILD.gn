@@ -14,6 +14,8 @@
 group("core_pattern_unittest") {
   testonly = true
   deps = [
+    "ability_component:ability_component_test_ng",
+    "badge:badge_test_ng",
     "canvas_renderer:canvas_renderer_test_ng",
     "recycle_node:recycle_node_test_ng",
     "stage:stage_test_ng",
