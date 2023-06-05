@@ -1877,12 +1877,7 @@ void TextFieldPattern::OnModifyDone()
             selectionMode_ = SelectionMode::SELECT;
         }
     }
-    if (layoutProperty->GetTypeChangedValue(false)) {
-        ClearEditingValue();
-        layoutProperty->ResetTypeChanged();
-        operationRecords_.clear();
-        redoOperationRecords_.clear();
-    }
+    FilterEditingValue();
     auto maxLength = GetMaxLength();
     if (GreatOrEqual(textWidth, maxLength)) {
         textEditingValue_.text = StringUtils::ToString(textEditingValue_.GetWideText().substr(0, maxLength));
@@ -1966,6 +1961,13 @@ bool TextFieldPattern::IsDisabled()
     auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_RETURN(eventHub, true);
     return !eventHub->IsEnabled();
+}
+
+void TextFieldPattern::FilterEditingValue()
+{
+    auto valueToUpdate = textEditingValue_.text;
+    ClearEditingValue();
+    InsertValue(valueToUpdate);
 }
 
 void TextFieldPattern::ProcessInnerPadding()
