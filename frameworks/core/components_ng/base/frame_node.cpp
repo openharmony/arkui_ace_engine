@@ -790,7 +790,7 @@ RefPtr<LayoutWrapper> FrameNode::UpdateLayoutWrapper(
     }
 
     pattern_->BeforeCreateLayoutWrapper();
-    if (!isActive_ || forceMeasure) {
+    if (forceMeasure || (GetTag() == V2::TAB_CONTENT_ITEM_ETS_TAG && !isActive_)) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
     if (forceLayout) {
