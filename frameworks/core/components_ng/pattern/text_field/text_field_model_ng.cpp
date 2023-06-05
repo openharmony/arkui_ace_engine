@@ -30,8 +30,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr const double UNDERLINE_NORMAL_HEIGHT = 48.0;
-constexpr const double UNDERLINE_NORMAL_PADDING = 12.0;
+constexpr Dimension UNDERLINE_NORMAL_HEIGHT = 48.0_vp;
+constexpr Dimension UNDERLINE_NORMAL_PADDING = 12.0_vp;
 } // namespace
 void TextFieldModelNG::CreateNode(
     const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool isTextArea)
