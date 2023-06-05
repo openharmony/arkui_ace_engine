@@ -530,14 +530,21 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     }
     ExecuteSurfaceChangedCallbacks(width, height);
     // TODO: add adjust for textFieldManager when ime is show.
-    taskExecutor_->PostTask(
-        [weakFrontend = weakFrontend_, width, height]() {
-            auto frontend = weakFrontend.Upgrade();
-            if (frontend) {
-                frontend->OnSurfaceChanged(width, height);
-            }
-        },
-        TaskExecutor::TaskType::JS);
+    auto callback = [weakFrontend = weakFrontend_, width, height]() {
+        auto frontend = weakFrontend.Upgrade();
+        if (frontend) {
+            frontend->OnSurfaceChanged(width, height);
+        }
+    };
+    auto container = Container::Current();
+    if (!container) {
+        return;
+    }
+    if (container->IsUseStageModel()) {
+        callback();
+    } else {
+        taskExecutor_->PostTask(callback, TaskExecutor::TaskType::JS);
+    }
 
     FlushWindowSizeChangeCallback(width, height, type);
 
@@ -595,48 +602,8 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             break;
         }
         case WindowSizeChangeReason::ROTATION: {
-#ifdef ENABLE_ROSEN_BACKEND
-            if (rsTransaction) {
-                FlushMessages();
-                rsTransaction->Begin();
-            }
-#endif
-            LOGI("PipelineContext::Root node ROTATION animation, width = %{public}d, height = %{public}d", width,
-                height);
-            AnimationOption option;
-            constexpr int32_t duration = 600;
-            option.SetDuration(duration);
-            auto curve = MakeRefPtr<CubicCurve>(0.2, 0.0, 0.2, 1.0); // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
-            option.SetCurve(curve);
-            auto weak = WeakClaim(this);
-            Animate(
-                option, curve,
-                [width, height, weak]() {
-                    auto pipeline = weak.Upgrade();
-                    CHECK_NULL_VOID(pipeline);
-                    pipeline->SetRootRect(width, height, 0.0);
-                    pipeline->FlushUITasks();
-                },
-                [weak]() {
-                    auto pipeline = weak.Upgrade();
-                    CHECK_NULL_VOID(pipeline);
-                    pipeline->rotationAnimationCount_--;
-                    if (pipeline->rotationAnimationCount_ < 0) {
-                        LOGE("PipelineContext::Root node ROTATION animation callback"
-                             "rotationAnimationCount Invalid %{public}d",
-                            pipeline->rotationAnimationCount_);
-                    }
-                    if (pipeline->rotationAnimationCount_ == 0) {
-                        pipeline->window_->SetDrawTextAsBitmap(false);
-                    }
-                });
-            rotationAnimationCount_++;
-            window_->SetDrawTextAsBitmap(true);
-#ifdef ENABLE_ROSEN_BACKEND
-            if (rsTransaction) {
-                rsTransaction->Commit();
-            }
-#endif
+            SetRootRect(width, height, 0.0);
+            FlushUITasks();
             break;
         }
         case WindowSizeChangeReason::DRAG_START:
