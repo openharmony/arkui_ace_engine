@@ -41,7 +41,6 @@ constexpr uint32_t GRID_COUNTS_4 = 4;
 constexpr uint32_t GRID_COUNTS_6 = 6;
 constexpr uint32_t GRID_COUNTS_8 = 8;
 constexpr uint32_t GRID_COUNTS_12 = 12;
-constexpr Dimension MIN_MENU_WIDTH = Dimension(64.0, DimensionUnit::VP);
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
 
 uint32_t GetMaxGridCounts(const RefPtr<GridColumnInfo>& columnInfo)
@@ -474,12 +473,7 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
     maxWidth = std::min(constraint.maxSize.Width(), maxWidth);
     constraint.maxSize.SetWidth(maxWidth);
     // set min width
-    float minWidth;
-    if (menuPattern && menuPattern->IsSelectOverlayExtensionMenu()) {
-        minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
-    } else {
-        minWidth = static_cast<float>(MIN_MENU_WIDTH.ConvertToPx());
-    }
+    auto minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
     if (minWidth > constraint.maxSize.Width()) {
         minWidth = constraint.maxSize.Width();
     }
