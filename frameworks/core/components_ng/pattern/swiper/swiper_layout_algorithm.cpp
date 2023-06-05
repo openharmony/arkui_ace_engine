@@ -445,6 +445,16 @@ void SwiperLayoutAlgorithm::PlaceDigitChild(
             indicatorHeight = textFrameSize.Height();
         }
     }
+
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID_NOLOG(swiperIndicatorTheme);
+
+    if (LessNotEqual(indicatorHeight, swiperIndicatorTheme->GetIndicatorDigitHeight().ConvertToPx())) {
+        indicatorHeight = swiperIndicatorTheme->GetIndicatorDigitHeight().ConvertToPx();
+    }
+
     auto layoutPropertyConstraint = indicatorWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutPropertyConstraint);
     const auto& layoutConstraint = layoutPropertyConstraint->GetLayoutConstraint();
@@ -490,7 +500,7 @@ void SwiperLayoutAlgorithm::PlaceDigitChild(
         position.SetY(swiperHeight - indicatorHeight - bottomValue - swiperPaddingBottom);
     } else {
         if (axis == Axis::HORIZONTAL) {
-            position.SetY(swiperHeight - indicatorHeight - swiperPaddingBottom - INDICATOR_PADDING.ConvertToPx());
+            position.SetY(swiperHeight - indicatorHeight - swiperPaddingBottom);
         } else {
             position.SetY((swiperHeight - swiperPaddingBottom + swiperPaddingTop - indicatorHeight) * 0.5);
         }
