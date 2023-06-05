@@ -424,6 +424,7 @@ void ViewAbstract::SetBorderRadius(const Dimension& value)
     }
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(value);
+    borderRadius.multiValued = false;
     ACE_UPDATE_RENDER_CONTEXT(BorderRadius, borderRadius);
 }
 
@@ -524,7 +525,7 @@ void ViewAbstract::SetOnMouse(OnMouseEventFunc&& onMouseEventFunc)
     eventHub->SetMouseEvent(std::move(onMouseEventFunc));
 }
 
-void ViewAbstract::SetOnHover(OnHoverEventFunc&& onHoverEventFunc)
+void ViewAbstract::SetOnHover(OnHoverFunc&& onHoverEventFunc)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
     CHECK_NULL_VOID(eventHub);
@@ -784,6 +785,11 @@ void ViewAbstract::SetVisibility(VisibleType visible)
     auto layoutProperty = frameNode->GetLayoutProperty();
     if (layoutProperty) {
         layoutProperty->UpdateVisibility(visible, true);
+    }
+
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    if (focusHub) {
+        focusHub->SetShow(visible == VisibleType::VISIBLE);
     }
 }
 
@@ -1089,6 +1095,15 @@ void ViewAbstract::SetBackdropBlur(const Dimension& radius)
             target->UpdateBackBlurStyle(std::nullopt);
         }
     }
+}
+
+void ViewAbstract::SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(LinearGradientBlur, blurPara);
 }
 
 void ViewAbstract::SetFrontBlur(const Dimension& radius)
@@ -1486,5 +1501,17 @@ void ViewAbstract::UpdateAnimatableArithmeticProperty(const std::string& propert
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     frameNode->UpdateAnimatableArithmeticProperty(propertyName, value);
+}
+
+void ViewAbstract::SetObscured(const std::vector<ObscuredReasons>& reasons)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(Obscured, reasons);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 } // namespace OHOS::Ace::NG

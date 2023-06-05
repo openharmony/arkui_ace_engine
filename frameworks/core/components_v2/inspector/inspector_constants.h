@@ -501,7 +501,7 @@ ACE_EXPORT extern const char MODEL_ETS_TAG[];
 // window scene
 ACE_EXPORT extern const char ROOT_SCENE_ETS_TAG[];
 ACE_EXPORT extern const char SCREEN_ETS_TAG[];
-ACE_EXPORT extern const char HOST_WINDOW_SCENE_ETS_TAG[];
+ACE_EXPORT extern const char WINDOW_SCENE_ETS_TAG[];
 
 // ui_extension_component
 ACE_EXPORT extern const char UI_EXTENSION_COMPONENT_TAG[];
@@ -511,5 +511,12 @@ ACE_EXPORT extern const char UI_EXTENSION_COMPONENT_ETS_TAG[];
 ACE_EXPORT extern const char SEC_LOCATION_BUTTON_COMPONENT_TAG[];
 ACE_EXPORT extern const char SEC_LOCATION_BUTTON_ETS_TAG[];
 
+// PasteButton
+ACE_EXPORT extern const char SEC_PASTE_BUTTON_COMPONENT_TAG[];
+ACE_EXPORT extern const char SEC_PASTE_BUTTON_ETS_TAG[];
+
+// SaveButton
+ACE_EXPORT extern const char SEC_SAVE_BUTTON_COMPONENT_TAG[];
+ACE_EXPORT extern const char SEC_SAVE_BUTTON_ETS_TAG[];
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

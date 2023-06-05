@@ -57,10 +57,6 @@ class KeyEvent;
 class AxisEvent;
 } // namespace MMI
 
-namespace Ace {
-class Window;
-} // namespace Ace
-
 namespace Media {
 class PixelMap;
 } // namespace Media
@@ -84,7 +80,6 @@ public:
 
     // UI content life-cycles
     virtual void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) = 0;
-    virtual void Initialize(const std::shared_ptr<Window>& aceWindow, const std::string& url, NativeValue* storage) = 0;
     virtual void Foreground() = 0;
     virtual void Background() = 0;
     virtual void Focus() = 0;
@@ -159,6 +154,11 @@ public:
         std::vector<std::string>& assetBasePaths, std::string& resFolderName) {};
     virtual void SetResourcePaths(const std::vector<std::string>& resourcesPaths, const std::string& assetRootPath,
         const std::vector<std::string>& assetBasePaths) {};
+		
+    virtual NativeValue* GetUIContext()
+    {
+        return nullptr;
+    };
 };
 
 } // namespace OHOS::Ace

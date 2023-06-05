@@ -16,8 +16,8 @@
 #include "adapter/ohos/entrance/ace_container.h"
 
 namespace OHOS::Ace::Platform {
-std::shared_ptr<AbilityRuntime::Context> AceContainer::GetAbilityRuntimeContext()
+sptr<IRemoteObject> AceContainer::GetToken()
 {
-    return runtimeContext_.lock();
+    return token_;
 }
 } // namespace OHOS::Ace::Platform

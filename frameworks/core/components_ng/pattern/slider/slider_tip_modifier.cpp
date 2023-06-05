@@ -44,7 +44,6 @@ constexpr int32_t BUBBLE_DISPLAY_OPACITY_CHANGE_TIMER = 150;
 constexpr int32_t BUBBLE_DISAPPEAR_SIZE_CHANGE_TIMER = 250;
 constexpr int32_t BUBBLE_DISAPPEAR_OPACITY_CHANGE_TIMER = 250;
 constexpr Dimension BUBBLE_TEXT_OFFSET = 8.0_vp;
-constexpr int32_t MAX_COLUMNS_OF_BUBBLE = 6;
 } // namespace
 
 SliderTipModifier::SliderTipModifier(std::function<OffsetF()> getBubbleVertexFunc)
@@ -273,7 +272,12 @@ void SliderTipModifier::CreateParagraphAndLayout(const TextStyle& textStyle, con
     }
     CHECK_NULL_VOID(paragraph_);
     auto gridColumnType = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::BUBBLE_TYPE);
-    auto bubbleMaxWidth = static_cast<float>(gridColumnType->GetWidth(MAX_COLUMNS_OF_BUBBLE));
+    CHECK_NULL_VOID(gridColumnType);
+    auto parent = gridColumnType->GetParent();
+    if (parent) {
+        parent->BuildColumnWidth();
+    }
+    auto bubbleMaxWidth = static_cast<float>(gridColumnType->GetMaxWidth());
     auto maxWidth = bubbleMaxWidth - BUBBLE_TEXT_OFFSET.ConvertToPx() * 2;
     paragraph_->Layout(maxWidth);
 }

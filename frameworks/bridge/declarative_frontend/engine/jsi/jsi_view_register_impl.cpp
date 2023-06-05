@@ -113,6 +113,8 @@
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_search.h"
 #include "bridge/declarative_frontend/jsview/js_sec_location_button.h"
+#include "bridge/declarative_frontend/jsview/js_sec_paste_button.h"
+#include "bridge/declarative_frontend/jsview/js_sec_save_button.h"
 #include "bridge/declarative_frontend/jsview/js_select.h"
 #include "bridge/declarative_frontend/jsview/js_shape.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
@@ -145,6 +147,7 @@
 #include "bridge/declarative_frontend/jsview/js_water_flow_item.h"
 #include "bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
+#include "bridge/declarative_frontend/jsview/js_scope_util.h"
 #include "bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -206,9 +209,9 @@
 #endif
 
 #if defined(WINDOW_SCENE_SUPPORTED)
-#include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_host_window_scene.h"
 #include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_root_scene.h"
 #include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_screen.h"
+#include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_window_scene.h"
 #endif
 
 namespace OHOS::Ace::Framework {
@@ -396,7 +399,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
-    { "GridContainer", JSGridContainer::JSBind },
     { "Slider", JSSlider::JSBind },
     { "Stack", JSStack::JSBind },
     { "ForEach", JSForEach::JSBind },
@@ -432,6 +434,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "CanvasGradient", JSCanvasGradient::JSBind },
     { "ImageBitmap", JSRenderImage::JSBind },
     { "ImageData", JSCanvasImageData::JSBind },
+    { "ImageAnimator", JSImageAnimator::JSBind },
     { "Path2D", JSPath2D::JSBind },
     { "RenderingContextSettings", JSRenderingContextSettings::JSBind },
     { "Sheet", JSSheet::JSBind },
@@ -521,6 +524,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "UIExtensionComponent", JSUIExtension::JSBind },
 #endif
     { "SecLocationButton", JSSecLocationButton::JSBind },
+    { "SecPasteButton", JSSecPasteButton::JSBind },
+    { "SecSaveButton", JSSecSaveButton::JSBind },
 #ifdef ABILITY_COMPONENT_SUPPORTED
     { "AbilityComponent", JSAbilityComponent::JSBind },
 #endif
@@ -633,9 +638,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Model", JSSceneView::JSBind },
 #endif
 #if defined(WINDOW_SCENE_SUPPORTED)
-    { "HostWindowScene", JSHostWindowScene::JSBind },
     { "RootScene", JSRootScene::JSBind },
     { "Screen", JSScreen::JSBind },
+    { "WindowScene", JSWindowScene::JSBind },
 #endif
 };
 
@@ -697,6 +702,31 @@ void RegisterAllFormModule(BindingTarget globalObj)
     RegisterExtraViews(globalObj);
 }
 
+void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module)
+{
+    auto func = bindFuncs.find(module);
+    if (func == bindFuncs.end()) {
+        LOGI("JS module not exist, try to find in extra, name: %{public}s", module.c_str());
+        RegisterExtraViewByName(globalObj, module);
+        return;
+    }
+    if ((*func).first == "Swiper") {
+        JSSwiperController::JSBind(globalObj);
+    } else if ((*func).first == "Calendar") {
+        JSCalendarController::JSBind(globalObj);
+    } else if ((*func).first == "TextTimer") {
+        JSTextTimerController::JSBind(globalObj);
+    } else if ((*func).first == "Canvas") {
+        JSCanvasPattern::JSBind(globalObj);
+        JSCanvasGradient::JSBind(globalObj);
+        JSCanvasImageData::JSBind(globalObj);
+        JSMatrix2d::JSBind(globalObj);
+        JSRenderImage::JSBind(globalObj);
+    }
+
+    (*func).second(globalObj);
+}
+
 void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
 {
     auto func = bindFuncs.find(moduleName);
@@ -756,31 +786,36 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules)
     JSRenderingContextSettings::JSBind(globalObj);
 }
 
-void JsBindFormViews(BindingTarget globalObj)
+void JsBindFormViews(
+    BindingTarget globalObj, const std::unordered_set<std::string>& formModuleList, bool isReload)
 {
-    JSViewAbstract::JSBind(globalObj);
-    JSContainerBase::JSBind(globalObj);
-    JSShapeAbstract::JSBind(globalObj);
-    JSView::JSBind(globalObj);
-    JSLocalStorage::JSBind(globalObj);
+    if (!isReload) {
+        JSViewAbstract::JSBind(globalObj);
+        JSContainerBase::JSBind(globalObj);
+        JSShapeAbstract::JSBind(globalObj);
+        JSView::JSBind(globalObj);
+        JSLocalStorage::JSBind(globalObj);
 
-    JSEnvironment::JSBind(globalObj);
-    JSViewContext::JSBind(globalObj);
-    JSViewStackProcessor::JSBind(globalObj);
-    JSTouchHandler::JSBind(globalObj);
-    JSPersistent::JSBind(globalObj);
-    JSDistributed::JSBind(globalObj);
-    JSScroller::JSBind(globalObj);
+        JSEnvironment::JSBind(globalObj);
+        JSViewContext::JSBind(globalObj);
+        JSViewStackProcessor::JSBind(globalObj);
+        JSTouchHandler::JSBind(globalObj);
+        JSPersistent::JSBind(globalObj);
+        JSDistributed::JSBind(globalObj);
+        JSScroller::JSBind(globalObj);
 
-    JSProfiler::JSBind(globalObj);
+        JSProfiler::JSBind(globalObj);
+        JSCommonView::JSBind(globalObj);
+    }
 
-    auto delegate = JsGetFrontendDelegate();
-    std::string jsModules;
-    if (delegate && delegate->GetAssetContent("component_collection.txt", jsModules)) {
-        LOGI("JsRegisterViews register collection modules");
-        JsRegisterModules(globalObj, jsModules);
+    if (!formModuleList.empty()) {
+        LOGI("Register modules on demand.");
+        for (const std::string& module : formModuleList) {
+            LOGD("Register module: %{public}s", module.c_str());
+            RegisterFormModuleByName(globalObj, module);
+        }
     } else {
-        LOGI("JsRegisterViews register all modules");
+        LOGI("Register all modules");
         RegisterAllFormModule(globalObj);
     }
 }
@@ -808,6 +843,7 @@ void JsBindViews(BindingTarget globalObj)
     JSScroller::JSBind(globalObj);
 
     JSProfiler::JSBind(globalObj);
+    JSScopeUtil::JSBind(globalObj);
 
     auto delegate = JsGetFrontendDelegate();
     std::string jsModules;

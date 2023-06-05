@@ -95,8 +95,7 @@ private:
     void StopRingLoadingTailAnimation();
     float CalcRingProgressAdditionalAngle() const;
     float TrailingCoefficient(float base, uint32_t index, uint32_t totalPoints) const;
-    Color GenerateTrailingPointColor(
-        const Color& headColor, const Color& tailColor, uint32_t index, uint32_t totalPoints) const;
+    Color GenerateTrailingPointColor(const Color& headColor, uint32_t index, uint32_t totalPoints) const;
     void GenerateLinearSweepingGradientInfo(std::vector<RSColorQuad>& colors, std::vector<float>& pos) const;
     void GenerateRingSweepingGradientInfo(std::vector<RSColorQuad>& colors, std::vector<float>& pos) const;
     Gradient CreateCapsuleGradient() const;

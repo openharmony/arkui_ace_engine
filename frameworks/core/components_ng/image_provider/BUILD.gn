@@ -16,8 +16,8 @@ import(
 
 build_component_ng("image_provider_ng") {
   sources = [
+    "adapter/image_decoder.cpp",
     "adapter/skia_image_data.cpp",
-    "adapter/skia_image_provider.cpp",
     "adapter/skia_svg_dom.cpp",
     "animated_image_object.cpp",
     "image_data.cpp",

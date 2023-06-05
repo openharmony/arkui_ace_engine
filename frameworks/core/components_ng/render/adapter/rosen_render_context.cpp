@@ -51,6 +51,7 @@
 #include "core/components_ng/render/adapter/moon_progress_modifier.h"
 #include "core/components_ng/render/adapter/mouse_select_modifier.h"
 #include "core/components_ng/render/adapter/overlay_modifier.h"
+#include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
@@ -378,19 +379,13 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBgImageLoadSuccessCallback()
 
 void RosenRenderContext::PaintBackground()
 {
-    auto image = DynamicCast<NG::SkiaImage>(bgImage_);
-    CHECK_NULL_VOID(bgLoadingCtx_ && image);
-
-    auto rosenImage = std::make_shared<Rosen::RSImage>();
-    auto compressData = image->GetCompressData();
-    if (compressData) {
-        rosenImage->SetCompressData(
-            compressData, image->GetUniqueID(), image->GetCompressWidth(), image->GetCompressHeight());
+    if (InstanceOf<PixelMapImage>(bgImage_)) {
+        PaintPixmapBgImage();
+    } else if (InstanceOf<SkiaImage>(bgImage_)) {
+        PaintSkBgImage();
     } else {
-        rosenImage->SetImage(image->GetImage());
+        return;
     }
-    rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
-    rsNode_->SetBgImage(rosenImage);
 
     SizeF renderSize = ImagePainter::CalculateBgImageSize(
         GetHost()->GetGeometryNode()->GetFrameSize(), bgLoadingCtx_->GetImageSize(), GetBackgroundImageSize());
@@ -617,7 +612,9 @@ void RosenRenderContext::OnTransformTranslateUpdate(const TranslateOptions& tran
         xValue = translate.x.ConvertToPx();
         yValue = translate.y.ConvertToPx();
     }
-    rsNode_->SetTranslate(xValue, yValue, 0.0f);
+    // translateZ doesn't support percentage
+    float zValue = translate.z.ConvertToPx();
+    rsNode_->SetTranslate(xValue, yValue, zValue);
     RequestNextFrame();
 }
 
@@ -916,10 +913,18 @@ void RosenRenderContext::BdImagePaintTask(RSCanvas& canvas)
     auto dipScale = pipeline->GetDipScale();
 
     CHECK_NULL_VOID(bdImage_);
-    auto image = DynamicCast<SkiaImage>(bdImage_)->GetImage();
+    sk_sp<SkImage> image;
+    if (InstanceOf<SkiaImage>(bdImage_)) {
+        image = DynamicCast<SkiaImage>(bdImage_)->GetImage();
+    } else if (InstanceOf<PixelMapImage>(bdImage_)) {
+        auto pixmap = DynamicCast<PixelMapImage>(bdImage_)->GetPixelMap();
+        CHECK_NULL_VOID(pixmap);
+        image = SkiaImage::MakeSkImageFromPixmap(pixmap);
+    } else {
+        return;
+    }
     CHECK_NULL_VOID(image);
     RSImage rsImage(&image);
-
     BorderImagePainter borderImagePainter(*GetBdImage(), widthProp, paintRect.GetSize(), rsImage, dipScale);
     borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), canvas);
 }
@@ -1217,16 +1222,31 @@ void RosenRenderContext::GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddi
 
 void RosenRenderContext::OnPositionUpdate(const OffsetT<Dimension>& /*value*/)
 {
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     isPositionChanged_ = true;
 }
 
 void RosenRenderContext::OnOffsetUpdate(const OffsetT<Dimension>& /*value*/)
 {
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     isPositionChanged_ = true;
 }
 
 void RosenRenderContext::OnAnchorUpdate(const OffsetT<Dimension>& /*value*/)
 {
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     isPositionChanged_ = true;
 }
 
@@ -1388,6 +1408,7 @@ void RosenRenderContext::PaintFocusState(
 
 void RosenRenderContext::ClearFocusState()
 {
+    LOGD("ClearFocusState in.");
     CHECK_NULL_VOID(rsNode_);
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -1678,42 +1699,42 @@ void RosenRenderContext::PaintGraphics()
     }
     if (graphicProps->HasFrontGrayScale()) {
         auto grayScale = graphicProps->GetFrontGrayScaleValue();
-        SetGraphicModifier(graphics_->grayScale, grayScale.Value());
+        OnFrontGrayScaleUpdate(grayScale);
     }
 
     if (graphicProps->HasFrontBrightness()) {
         auto brightness = graphicProps->GetFrontBrightnessValue();
-        SetGraphicModifier(graphics_->brightness, brightness.Value());
+        OnFrontBrightnessUpdate(brightness);
     }
 
     if (graphicProps->HasFrontContrast()) {
         auto contrast = graphicProps->GetFrontContrastValue();
-        SetGraphicModifier(graphics_->contrast, contrast.Value());
+        OnFrontContrastUpdate(contrast);
     }
 
     if (graphicProps->HasFrontSaturate()) {
         auto saturate = graphicProps->GetFrontSaturateValue();
-        SetGraphicModifier(graphics_->saturate, saturate.Value());
+        OnFrontSaturateUpdate(saturate);
     }
 
     if (graphicProps->HasFrontSepia()) {
         auto sepia = graphicProps->GetFrontSepiaValue();
-        SetGraphicModifier(graphics_->sepia, sepia.Value());
+        OnFrontSepiaUpdate(sepia);
     }
 
     if (graphicProps->HasFrontInvert()) {
         auto invert = graphicProps->GetFrontInvertValue();
-        SetGraphicModifier(graphics_->invert, invert.Value());
+        OnFrontInvertUpdate(invert);
     }
 
     if (graphicProps->HasFrontHueRotate()) {
         auto hueRotate = graphicProps->GetFrontHueRotateValue();
-        SetGraphicModifier(graphics_->hueRotate, hueRotate);
+        OnFrontHueRotateUpdate(hueRotate);
     }
 
     if (graphicProps->HasFrontColorBlend()) {
         auto colorBlend = graphicProps->GetFrontColorBlendValue();
-        SetGraphicModifier(graphics_->colorBlend, ColorBlend(colorBlend));
+        OnFrontColorBlendUpdate(colorBlend);
     }
 }
 
@@ -1766,66 +1787,75 @@ void RosenRenderContext::UpdateGraphic(std::shared_ptr<T>& modifier, D data)
 
 void RosenRenderContext::OnFrontBrightnessUpdate(const Dimension& brightness)
 {
-    if (!graphics_) {
-        graphics_ = std::make_unique<GraphicModifiers>();
-    }
-    UpdateGraphic(graphics_->brightness, brightness.Value());
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetBrightness(brightness.Value());
+    RequestNextFrame();
 }
 
 void RosenRenderContext::OnFrontGrayScaleUpdate(const Dimension& grayScale)
 {
-    if (!graphics_) {
-        graphics_ = std::make_unique<GraphicModifiers>();
-    }
-    UpdateGraphic(graphics_->grayScale, grayScale.Value());
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetGrayScale(grayScale.Value());
+    RequestNextFrame();
 }
 
 void RosenRenderContext::OnFrontContrastUpdate(const Dimension& contrast)
 {
-    if (!graphics_) {
-        graphics_ = std::make_unique<GraphicModifiers>();
-    }
-    UpdateGraphic(graphics_->contrast, contrast.Value());
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetContrast(contrast.Value());
+    RequestNextFrame();
 }
 
 void RosenRenderContext::OnFrontSaturateUpdate(const Dimension& saturate)
 {
-    if (!graphics_) {
-        graphics_ = std::make_unique<GraphicModifiers>();
-    }
-    UpdateGraphic(graphics_->saturate, saturate.Value());
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetSaturate(saturate.Value());
+    RequestNextFrame();
 }
 
 void RosenRenderContext::OnFrontSepiaUpdate(const Dimension& sepia)
 {
-    if (!graphics_) {
-        graphics_ = std::make_unique<GraphicModifiers>();
-    }
-    UpdateGraphic(graphics_->sepia, sepia.Value());
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetSepia(sepia.Value());
+    RequestNextFrame();
 }
 
 void RosenRenderContext::OnFrontInvertUpdate(const Dimension& invert)
 {
-    if (!graphics_) {
-        graphics_ = std::make_unique<GraphicModifiers>();
-    }
-    UpdateGraphic(graphics_->invert, invert.Value());
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetInvert(invert.Value());
+    RequestNextFrame();
 }
 
 void RosenRenderContext::OnFrontHueRotateUpdate(float hueRotate)
 {
-    if (!graphics_) {
-        graphics_ = std::make_unique<GraphicModifiers>();
-    }
-    UpdateGraphic(graphics_->hueRotate, hueRotate);
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetHueRotate(hueRotate);
+    RequestNextFrame();
 }
 
 void RosenRenderContext::OnFrontColorBlendUpdate(const Color& colorBlend)
 {
-    if (!graphics_) {
-        graphics_ = std::make_unique<GraphicModifiers>();
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetColorBlend(colorBlend.GetValue());
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnLinearGradientBlurUpdate(const NG::LinearGradientBlurPara& blurPara)
+{
+    float blurRadius = 0.0f;
+    if (blurPara.blurRadius_.IsValid()) {
+        float radiusPx = blurPara.blurRadius_.ConvertToPx();
+        blurRadius = radiusPx;
     }
-    UpdateGraphic(graphics_->colorBlend, ColorBlend(colorBlend));
+
+    CHECK_NULL_VOID(rsNode_);
+    std::shared_ptr<Rosen::RSLinearGradientBlurPara> rsLinearGradientBlurPara(
+        std::make_shared<Rosen::RSLinearGradientBlurPara>(blurRadius, blurPara.fractionStops_,
+                                            static_cast<Rosen::GradientDirection>(blurPara.direction_)));
+
+    rsNode_->SetLinearGradientBlurPara(rsLinearGradientBlurPara);
+    RequestNextFrame();
 }
 
 void RosenRenderContext::UpdateTransition(const TransitionOptions& options)
@@ -2422,10 +2452,20 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
                 auto context = weakThis.Upgrade();
                 CHECK_NULL_VOID(context);
                 ContainerScope scope(id);
-                LOGD("RosenTransitionEffect::NotifyTransition transition END, node %{public}d, isTransitionIn: OUT",
-                    nodeId);
-                // update transition out count
-                context->OnTransitionOutFinish();
+                auto pipeline = PipelineBase::GetCurrentContext();
+                CHECK_NULL_VOID(pipeline);
+                auto taskExecutor = pipeline->GetTaskExecutor();
+                CHECK_NULL_VOID(taskExecutor);
+                taskExecutor->PostTask(
+                    [id, nodeId, context]() {
+                        ContainerScope scope(id);
+                        LOGD("RosenTransitionEffect::NotifyTransition transition END, node %{public}d, "
+                             "isTransitionIn: OUT",
+                            nodeId);
+                        // update transition out count
+                        context->OnTransitionOutFinish();
+                    },
+                    TaskExecutor::TaskType::UI);
             },
             false);
     }
@@ -2583,6 +2623,7 @@ void RosenRenderContext::ClickEffectPlayAnimation(const TouchType& touchType)
         auto defaultScale = VectorF(1.0f, 1.0f);
         auto currentScale = GetTransformScaleValue(defaultScale);
         currentScale_ = currentScale;
+        UpdateTransformScale(currentScale_);
         AnimationUtils::OpenImplicitAnimation(option, springCurve, nullptr);
         VectorF valueScale(scaleValue, scaleValue);
         UpdateTransformScale(valueScale);
@@ -2663,4 +2704,33 @@ inline void RosenRenderContext::ConvertRadius(const BorderRadiusProperty& value,
         static_cast<float>(value.radiusBottomRight.value_or(Dimension()).ConvertToPx()),
         static_cast<float>(value.radiusBottomLeft.value_or(Dimension()).ConvertToPx()));
 }
+
+void RosenRenderContext::PaintSkBgImage()
+{
+    auto image = DynamicCast<NG::SkiaImage>(bgImage_);
+    CHECK_NULL_VOID(bgLoadingCtx_ && image);
+
+    auto rosenImage = std::make_shared<Rosen::RSImage>();
+    auto compressData = image->GetCompressData();
+    if (compressData) {
+        rosenImage->SetCompressData(
+            compressData, image->GetUniqueID(), image->GetCompressWidth(), image->GetCompressHeight());
+    } else {
+        rosenImage->SetImage(image->GetImage());
+    }
+    rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
+    rsNode_->SetBgImage(rosenImage);
+}
+
+void RosenRenderContext::PaintPixmapBgImage()
+{
+    auto image = DynamicCast<NG::PixelMapImage>(bgImage_);
+    CHECK_NULL_VOID(bgLoadingCtx_ && image);
+
+    auto rosenImage = std::make_shared<Rosen::RSImage>();
+    rosenImage->SetPixelMap(image->GetPixelMap()->GetPixelMapSharedPtr());
+    rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
+    rsNode_->SetBgImage(rosenImage);
+}
+
 } // namespace OHOS::Ace::NG

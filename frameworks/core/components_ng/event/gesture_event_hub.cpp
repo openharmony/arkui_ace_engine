@@ -431,9 +431,12 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         return;
     }
     std::string udKey;
+    int32_t recordsSize = 1;
     auto unifiedData = event->GetData();
-    auto records = unifiedData->GetRecords();
-    int32_t recordsSize = std:min(records.size(), 1);
+    if (unifiedData) {
+        auto records = unifiedData->GetRecords();
+        recordsSize = records.size() > 1 ? records.size() : 1;
+    }
     SetDragData(unifiedData, udKey);
     auto udmfClient = UDMF::UdmfClient::GetInstance();
     UDMF::Summary summary;
@@ -452,13 +455,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     if (pixelMap == nullptr) {
         pixelMap = pixelMap_->GetPixelMapSharedPtr();
     }
-    if (pixelMap->GetWidth() > Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH ||
-        pixelMap->GetHeight() > Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) {
-            float scaleWidth = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH) / pixelMap->GetWidth();
-            float scaleHeight = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) / pixelMap->GetHeight();
-            float scale = std::min(scaleWidth, scaleHeight);
-            pixelMap->scale(scale, scale);
-    } else if (!GetTextDraggable()) {
+    if (!GetTextDraggable()) {
         pixelMap->scale(PIXELMAP_DRAG_SCALE, PIXELMAP_DRAG_SCALE);
     }
     uint32_t width = pixelMap->GetWidth();
@@ -733,8 +730,10 @@ OnDragCallback GestureEventHub::GetDragCallback()
     CHECK_NULL_RETURN(pipeline, ret);
     auto taskScheduler = pipeline->GetTaskExecutor();
     CHECK_NULL_RETURN(taskScheduler, ret);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_RETURN(dragDropManager, ret);
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    auto callback = [eventHub, dragEvent, taskScheduler](const DragNotifyMsg& notifyMessage) {
+    auto callback = [eventHub, dragEvent, taskScheduler, dragDropManager](const DragNotifyMsg& notifyMessage) {
         DragRet result = DragRet::DRAG_FAIL;
         switch (notifyMessage.result) {
             case DragResult::DRAG_SUCCESS:
@@ -748,7 +747,8 @@ OnDragCallback GestureEventHub::GetDragCallback()
         }
         dragEvent->SetResult(result);
         taskScheduler->PostTask(
-            [eventHub, dragEvent]() {
+            [eventHub, dragEvent, dragDropManager]() {
+                dragDropManager->SetIsDragged(false);
                 if (eventHub->HasOnDragEnd()) {
                     (eventHub->GetOnDragEnd())(dragEvent);
                 }

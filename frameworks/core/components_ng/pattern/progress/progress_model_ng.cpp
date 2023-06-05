@@ -64,9 +64,12 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
             CHECK_NULL_VOID(textNode);
             textNode->SetInternal();
-            SetTextDefaultStyle(textNode, value, max);
             textNode->MountToParent(frameNode);
         }
+        auto textHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
+        CHECK_NULL_VOID(textHost);
+        SetTextDefaultStyle(textHost, value, max);
+        textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         eventHub->SetHoverEffect(HoverEffectType::SCALE);
     } else {
         if (!frameNode->GetChildren().empty()) {
@@ -192,7 +195,7 @@ void ProgressModelNG::SetText(const std::optional<std::string>& value)
         auto curValue = progressPaintProperty->GetValue();
         int32_t curPercent = curValue.value() * 100 / maxValue.value();
         std::string number = std::to_string(curPercent) + "%";
-        textLayoutProperty->UpdateContent(number);
+        textLayoutProperty->UpdateContent("");
         context = number;
         pattern->SetTextFromUser(false);
     } else {
@@ -256,7 +259,7 @@ void ProgressModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, dou
         curPercent = value * 100 / maxValue;
     }
     std::string number = std::to_string(curPercent) + "%";
-    textProps->UpdateContent(number);
+    textProps->UpdateContent("");
     textProps->UpdateFontSize(progressTheme->GetTextSize());
     textProps->UpdateTextColor(progressTheme->GetTextColor());
     textProps->UpdateFontWeight(FontWeight::MEDIUM);
@@ -265,8 +268,8 @@ void ProgressModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, dou
     MarginProperty margin;
     margin.left = CalcLength(progressTheme->GetTextMargin());
     margin.right = CalcLength(progressTheme->GetTextMargin());
-    margin.top = CalcLength(progressTheme->GetTextMargin());
-    margin.bottom = CalcLength(progressTheme->GetTextMargin());
+    margin.top = CalcLength(0.0_vp);
+    margin.bottom = CalcLength(0.0_vp);
     textProps->UpdateMargin(margin);
     textNode->MarkModifyDone();
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Text, number);

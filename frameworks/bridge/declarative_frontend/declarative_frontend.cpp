@@ -25,7 +25,6 @@
 #include "core/common/thread_checker.h"
 #include "core/components/navigator/navigator_component.h"
 #include "frameworks/bridge/card_frontend/form_frontend_delegate_declarative.h"
-
 namespace OHOS::Ace {
 namespace {
 
@@ -655,6 +654,11 @@ void DeclarativeFrontend::TransferJsResponseData(int callbackId, int32_t code, s
     if (delegate_) {
         delegate_->TransferJsResponseData(callbackId, code, std::move(data));
     }
+}
+
+NativeValue* DeclarativeFrontend::GetContextValue()
+{
+    return jsEngine_->GetContextValue();
 }
 
 #if defined(PREVIEW)

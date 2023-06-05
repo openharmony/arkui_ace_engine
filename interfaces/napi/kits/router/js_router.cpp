@@ -156,8 +156,8 @@ static napi_value JSRouterPush(napi_env env, napi_callback_info info)
     return nullptr;
 }
 
-bool ParseParamWithCallback(
-    napi_env env, RouterAsyncContext* asyncContext, const size_t argc, napi_value* argv, napi_value* result)
+bool ParseParamWithCallback(napi_env env, std::shared_ptr<RouterAsyncContext> asyncContext, const size_t argc,
+    napi_value* argv, napi_value* result)
 {
     asyncContext->env = env;
     for (size_t i = 0; i < argc; i++) {
@@ -201,7 +201,7 @@ bool ParseParamWithCallback(
     return true;
 }
 
-void TriggerCallback(RouterAsyncContext* asyncContext)
+void TriggerCallback(std::shared_ptr<RouterAsyncContext> asyncContext)
 {
     LOGI("trigger callback start");
     napi_handle_scope scope = nullptr;
@@ -272,19 +272,20 @@ static napi_value JSRouterPushWithCallback(napi_env env, napi_callback_info info
         return result;
     }
 
-    auto* asyncContext = new RouterAsyncContext();
+    auto asyncContext = std::make_shared<RouterAsyncContext>();
     if (!ParseParamWithCallback(env, asyncContext, argc, argv, &result)) {
         LOGW("parse params failed");
-        delete asyncContext;
-        asyncContext = nullptr;
         return result;
     }
 
-    auto callback = [asyncContext](const std::string& message, int32_t errCode) {
+    auto callback = [asyncContext](const std::string& message, int32_t errCode) mutable {
+        if (!asyncContext) {
+            return;
+        }
         asyncContext->callbackCode = errCode;
         asyncContext->callbackMsg = message;
         TriggerCallback(asyncContext);
-        delete asyncContext;
+        asyncContext = nullptr;
     };
     delegate->PushWithCallback(asyncContext->uriString, asyncContext->paramsString, callback, asyncContext->mode);
     return result;
@@ -371,19 +372,20 @@ static napi_value JSRouterReplaceWithCallback(napi_env env, napi_callback_info i
         return result;
     }
 
-    auto* asyncContext = new RouterAsyncContext();
+    auto asyncContext = std::make_shared<RouterAsyncContext>();
     if (!ParseParamWithCallback(env, asyncContext, argc, argv, &result)) {
-        LOGE("parse params failed");
-        delete asyncContext;
-        asyncContext = nullptr;
+        LOGW("parse params failed");
         return result;
     }
 
-    auto callback = [asyncContext](const std::string& message, int32_t errCode) {
+    auto callback = [asyncContext](const std::string& message, int32_t errCode) mutable {
+        if (!asyncContext) {
+            return;
+        }
         asyncContext->callbackCode = errCode;
         asyncContext->callbackMsg = message;
         TriggerCallback(asyncContext);
-        delete asyncContext;
+        asyncContext = nullptr;
     };
     delegate->ReplaceWithCallback(asyncContext->uriString, asyncContext->paramsString, callback, asyncContext->mode);
     return result;
@@ -490,13 +492,13 @@ static napi_value JSRouterGetState(napi_env env, napi_callback_info info)
     return result;
 }
 
-void CallBackToJSTread(RouterAsyncContext* context)
+void CallBackToJSTread(std::shared_ptr<RouterAsyncContext> context)
 {
     uv_loop_s* loop = nullptr;
     napi_get_uv_event_loop(context->env, &loop);
 
     uv_work_t* work = new uv_work_t;
-    work->data = (void*)context;
+    work->data = (void*)context.get();
 
     uv_queue_work(
         loop, work, [](uv_work_t* work) {},
@@ -582,38 +584,42 @@ static napi_value JSRouterEnableAlertBeforeBackPage(napi_env env, napi_callback_
         return nullptr;
     }
 
-    auto routerAsyncContext = new RouterAsyncContext();
-    routerAsyncContext->env = env;
+    auto context = std::make_shared<RouterAsyncContext>();
+    context->env = env;
     napi_value successFunc = nullptr;
     napi_value failFunc = nullptr;
     napi_value completeFunc = nullptr;
     napi_get_named_property(env, argv, "success", &successFunc);
     napi_get_named_property(env, argv, "cancel", &failFunc);
     napi_get_named_property(env, argv, "complete", &completeFunc);
+    bool isNeedCallBack = false;
     napi_typeof(env, successFunc, &valueType);
     if (valueType == napi_function) {
-        napi_create_reference(env, successFunc, 1, &routerAsyncContext->callbackSuccess);
+        napi_create_reference(env, successFunc, 1, &context->callbackSuccess);
+        isNeedCallBack = true;
     }
 
     napi_typeof(env, failFunc, &valueType);
     if (valueType == napi_function) {
-        napi_create_reference(env, failFunc, 1, &routerAsyncContext->callbackFail);
+        napi_create_reference(env, failFunc, 1, &context->callbackFail);
+        isNeedCallBack = true;
     }
     napi_typeof(env, completeFunc, &valueType);
     if (valueType == napi_function) {
-        napi_create_reference(env, completeFunc, 1, &routerAsyncContext->callbackComplete);
+        napi_create_reference(env, completeFunc, 1, &context->callbackComplete);
+        isNeedCallBack = true;
     }
 
-    auto dilogCallback = [routerAsyncContext](int32_t callbackType) {
+    auto dilogCallback = [context, isNeedCallBack](int32_t callbackType) mutable {
         LOGI("callback after dialog click, callbackType = %{public}d", callbackType);
-        if (routerAsyncContext && Framework::AlertState(callbackType) == Framework::AlertState::RECOVERY) {
-            delete routerAsyncContext;
-            return;
+        if (context && isNeedCallBack) {
+            if (Framework::AlertState(callbackType) == Framework::AlertState::RECOVERY) {
+                context = nullptr;
+                return;
+            }
+            context->callbackType = callbackType;
+            CallBackToJSTread(context);
         }
-        if (routerAsyncContext) {
-            routerAsyncContext->callbackType = callbackType;
-        }
-        CallBackToJSTread(routerAsyncContext);
     };
     delegate->EnableAlertBeforeBackPage(messageChar.get(), std::move(dilogCallback));
 

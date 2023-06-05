@@ -13,25 +13,42 @@
  * limitations under the License.
  */
 
-#include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
-#include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
+
+#include "bridge/declarative_frontend/jsview/models/offscreen_context_model_impl.h"
+#include "core/components_ng/pattern/canvas_context/offscreen_context_model_ng.h"
+
+namespace OHOS::Ace {
+std::unique_ptr<OffscreenContextModel> OffscreenContextModel::instance_ = nullptr;
+std::mutex OffscreenContextModel::mutex_;
+OffscreenContextModel* OffscreenContextModel::GetInstance()
+{
+    if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
+#ifdef NG_BUILD
+            instance_.reset(new NG::OffscreenContextModelNG());
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::OffscreenContextModelNG());
+            } else {
+                instance_.reset(new Framework::OffscreenContextModelImpl());
+            }
+#endif
+        }
+    }
+    return instance_.get();
+}
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-std::unordered_map<uint32_t, RefPtr<OffscreenCanvas>> JSOffscreenRenderingContext::offscreenCanvasMap_;
-std::unordered_map<uint32_t, RefPtr<NG::OffscreenCanvasPattern>>
-    JSOffscreenRenderingContext::offscreenCanvasPatternMap_;
-uint32_t JSOffscreenRenderingContext::offscreenCanvasCount_ = 0;
-uint32_t JSOffscreenRenderingContext::offscreenCanvasPatternCount_ = 0;
 std::mutex JSOffscreenRenderingContext::mutex_;
+std::unordered_map<uint32_t, RefPtr<AceType>> JSOffscreenRenderingContext::offscreenPatternMap_;
+uint32_t JSOffscreenRenderingContext::offscreenPatternCount_ = 0;
 
 JSOffscreenRenderingContext::JSOffscreenRenderingContext()
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        id = offscreenCanvasPatternCount_;
-    } else {
-        id = offscreenCanvasCount_;
-    }
+    id = offscreenPatternCount_;
 }
 
 void JSOffscreenRenderingContext::JSBind(BindingTarget globalObj)
@@ -155,23 +172,11 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
         width = round(fWidth);
         height = round(fHeight);
 
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
-        if (Container::IsCurrentUseNewPipeline()) {
-            auto offscreenCanvasPattern = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(width, height);
-            jsRenderContext->SetOffscreenCanvasPattern(offscreenCanvasPattern);
-            LOGI("SetOffscreenCanvasPattern successfully");
-            std::lock_guard<std::mutex> lock(mutex_);
-            offscreenCanvasPatternMap_[offscreenCanvasPatternCount_++] = offscreenCanvasPattern;
-        } else {
-            auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-            CHECK_NULL_VOID(context);
-            auto offscreenCanvas = context->CreateOffscreenCanvas(width, height);
-            jsRenderContext->SetOffscreenCanvas(offscreenCanvas);
-            LOGI("SetOffscreenCanvas successfully");
-            std::lock_guard<std::mutex> lock(mutex_);
-            offscreenCanvasMap_[offscreenCanvasCount_++] = offscreenCanvas;
-        }
+        auto offscreenPattern = OffscreenContextModel::GetInstance()->CreateOffscreenPattern(width, height);
+        CHECK_NULL_VOID(offscreenPattern);
+        jsRenderContext->SetOffscreenPattern(offscreenPattern);
+        std::lock_guard<std::mutex> lock(mutex_);
+        offscreenPatternMap_[offscreenPatternCount_++] = offscreenPattern;
     }
     if (args[2]->IsObject()) {
         JSRenderingContextSettings* jsContextSetting
@@ -197,10 +202,7 @@ void JSOffscreenRenderingContext::Destructor(JSOffscreenRenderingContext* contex
         return;
     }
     std::lock_guard<std::mutex> lock(mutex_);
-    offscreenCanvasMap_.erase(contextId);
-    if (Container::IsCurrentUseNewPipeline()) {
-        offscreenCanvasPatternMap_.erase(contextId);
-    }
+    offscreenPatternMap_.erase(contextId);
 }
 
 void JSOffscreenRenderingContext::JsTransferToImageBitmap(const JSCallbackInfo& info)

@@ -356,20 +356,14 @@ HWTEST_F(StageTestNg, StageManagerTest003, TestSize.Level1)
     StageManager stageManager(stageNode);
 
     /**
-     * @tc.steps: step2. Call PushPage and PerformanceCheck function.
-     */
-
-    stageManager.PushPage(firstNode);
-    stageManager.PerformanceCheck(firstNode, 1);
-
-    /**
-     * @tc.steps: step3. Call CleanPageStack function.
+     * @tc.steps: step2. Call CleanPageStack function.
      * @tc.expected:Children just one and return false
      */
+    stageManager.PushPage(firstNode);
     EXPECT_FALSE(stageManager.CleanPageStack());
 
     /**
-     * @tc.steps: step4. Add second child node and recall CleanPageStack.
+     * @tc.steps: step3. Add second child node and recall CleanPageStack.
      * @tc.expected: return true
      */
     stageManager.PushPage(secondNode);

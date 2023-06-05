@@ -37,12 +37,17 @@
 
 namespace OHOS::Ace::Platform {
 
+struct WorkerPath {
+    std::string packagePathStr;
+    std::vector<std::string> assetBasePathStr;
+};
+
 class PaContainer : public Container, public JsMessageDispatcher {
     DECLARE_ACE_TYPE(PaContainer, Container, JsMessageDispatcher);
 
 public:
     PaContainer(int32_t instanceId, BackendType type, void* paAbility, const std::string& hapPath,
-        std::unique_ptr<PlatformEventCallback> callback);
+        std::unique_ptr<PlatformEventCallback> callback, std::shared_ptr<WorkerPath> workerPath);
     ~PaContainer() override = default;
 
     void Initialize() override {}
@@ -139,7 +144,7 @@ public:
 
     static bool Register();
     static void CreateContainer(int32_t instanceId, BackendType type, void* paAbility, const std::string& hapPath,
-        std::unique_ptr<PlatformEventCallback> callback);
+        std::unique_ptr<PlatformEventCallback> callback, std::shared_ptr<WorkerPath> workerPath);
     static void DestroyContainer(int32_t instanceId);
     static RefPtr<PaContainer> GetContainer(int32_t instanceId);
     static bool RunPa(int32_t instanceId, const std::string& content, const OHOS::AAFwk::Want& want);
@@ -189,7 +194,7 @@ private:
     std::unique_ptr<PlatformEventCallback> platformEventCallback_;
     void* paAbility_ = nullptr;
     std::string hapPath_;
-
+    std::shared_ptr<WorkerPath> workerPath_;
     ACE_DISALLOW_COPY_AND_MOVE(PaContainer);
 };
 

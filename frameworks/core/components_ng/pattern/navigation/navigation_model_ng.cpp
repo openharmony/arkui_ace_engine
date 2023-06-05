@@ -188,6 +188,10 @@ void BuildMoreItemNodeAction(const RefPtr<BarItemNode>& barItemNode, const RefPt
         auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
         CHECK_NULL_VOID(menuLayoutProperty);
         menuLayoutProperty->UpdateTargetSize(imageSize);
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        // navigation menu show like select.
+        menuPattern->SetIsSelectMenu(true);
 
         imgOffset.SetX(imgOffset.GetX());
         imgOffset.SetY(imgOffset.GetY() + imageSize.Height());
@@ -318,6 +322,9 @@ void NavigationModelNG::Create()
             int32_t navBarContentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
             auto navBarContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVBAR_CONTENT_ETS_TAG, navBarContentNodeId,
                 []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+            auto navBarContentRenderContext = navBarContentNode->GetRenderContext();
+            CHECK_NULL_VOID(navBarContentRenderContext);
+            navBarContentRenderContext->UpdateClipEdge(true);
             navBarNode->AddChild(navBarContentNode);
             navBarNode->SetNavBarContentNode(navBarContentNode);
         }
@@ -806,7 +813,7 @@ void NavigationModelNG::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
     auto theme = NavigationGetTheme();
     auto mostMenuItemCount = theme->GetMostMenuItemCountInBar();
     bool needMoreButton = menuItems.size() > mostMenuItemCount ? true : false;
-    int32_t count = 0;
+    uint32_t count = 0;
     std::vector<OptionParam> params;
     for (const auto& menuItem : menuItems) {
         ++count;
@@ -988,6 +995,16 @@ void NavigationModelNG::SetNavigationStack()
         auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
         pattern->SetNavigationStack(std::move(navigationStack));
     }
+}
+
+void NavigationModelNG::SetNavigationStackProvided(bool provided)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNavigationStackProvided(provided);
 }
 
 void NavigationModelNG::SetNavDestination(std::function<void(std::string)>&& builder)

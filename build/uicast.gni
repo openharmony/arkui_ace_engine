@@ -26,7 +26,7 @@ uicast_configs = {
 }
 
 if (exec_script(check_file_script, check_uicast_file_args, "string") ==
-    "True") {
+    "True" && product_name != "ohos-sdk") {
   uicast_configs.uicast_defines = [ "UICAST_COMPONENT_SUPPORTED" ]
   uicast_configs.uicast_enable = true
 }

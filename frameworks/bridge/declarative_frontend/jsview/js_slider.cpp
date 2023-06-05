@@ -334,6 +334,7 @@ void JSSlider::SetBlockBorderColor(const JSCallbackInfo& info)
 
     Color colorVal;
     if (!ParseJsColor(info[0], colorVal)) {
+        SliderModel::GetInstance()->ResetBlockBorderColor();
         return;
     }
     SliderModel::GetInstance()->SetBlockBorderColor(colorVal);
@@ -348,9 +349,11 @@ void JSSlider::SetBlockBorderWidth(const JSCallbackInfo& info)
 
     CalcDimension blockBorderWidth;
     if (!ParseJsDimensionVp(info[0], blockBorderWidth)) {
+        SliderModel::GetInstance()->ResetBlockBorderWidth();
         return;
     }
     if (LessNotEqual(blockBorderWidth.Value(), 0.0)) {
+        SliderModel::GetInstance()->ResetBlockBorderWidth();
         return;
     }
     SliderModel::GetInstance()->SetBlockBorderWidth(blockBorderWidth);
@@ -365,6 +368,7 @@ void JSSlider::SetStepColor(const JSCallbackInfo& info)
 
     Color colorVal;
     if (!ParseJsColor(info[0], colorVal)) {
+        SliderModel::GetInstance()->ResetStepColor();
         return;
     }
     SliderModel::GetInstance()->SetStepColor(colorVal);
@@ -379,9 +383,11 @@ void JSSlider::SetTrackBorderRadius(const JSCallbackInfo& info)
 
     CalcDimension trackBorderRadius;
     if (!ParseJsDimensionVp(info[0], trackBorderRadius)) {
+        SliderModel::GetInstance()->ResetTrackBorderRadius();
         return;
     }
     if (LessNotEqual(trackBorderRadius.Value(), 0.0)) {
+        SliderModel::GetInstance()->ResetTrackBorderRadius();
         return;
     }
     SliderModel::GetInstance()->SetTrackBorderRadius(trackBorderRadius);
@@ -429,18 +435,21 @@ void JSSlider::SetBlockStyle(const JSCallbackInfo& info)
 
     if (!info[0]->IsObject()) {
         LOGW("arg is not object.");
+        ResetBlockStyle();
         return;
     }
     auto jsObj = JSRef<JSObject>::Cast(info[0]);
     auto getType = jsObj->GetProperty("type");
     if (getType->IsNull() || !getType->IsNumber()) {
         LOGW("block type is not number.");
+        ResetBlockStyle();
         return;
     }
     auto type = static_cast<SliderModel::BlockStyleType>(getType->ToNumber<int32_t>());
     if (type == SliderModel::BlockStyleType::IMAGE) {
         std::string src;
         if (!ParseJsMedia(jsObj->GetProperty("image"), src)) {
+            ResetBlockStyle();
             return;
         }
         SliderModel::GetInstance()->SetBlockImage(src);
@@ -448,11 +457,13 @@ void JSSlider::SetBlockStyle(const JSCallbackInfo& info)
         auto shape = jsObj->GetProperty("shape");
         if (!shape->IsObject()) {
             LOGW("shape param is not an object.");
+            ResetBlockStyle();
             return;
         }
         JSShapeAbstract* shapeAbstract = JSRef<JSObject>::Cast(shape)->Unwrap<JSShapeAbstract>();
         if (shapeAbstract == nullptr) {
             LOGW("clipShape is null");
+            ResetBlockStyle();
             return;
         }
         SliderModel::GetInstance()->SetBlockShape(shapeAbstract->GetBasicShape());
@@ -469,6 +480,7 @@ void JSSlider::SetStepSize(const JSCallbackInfo& info)
 
     CalcDimension stepSize;
     if (!ParseJsDimensionVp(info[0], stepSize)) {
+        SliderModel::GetInstance()->ResetStepSize();
         return;
     }
     if (LessNotEqual(stepSize.Value(), 0.0)) {
@@ -494,4 +506,10 @@ void JSSlider::OnChange(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
+void JSSlider::ResetBlockStyle()
+{
+    SliderModel::GetInstance()->ResetBlockType();
+    SliderModel::GetInstance()->ResetBlockImage();
+    SliderModel::GetInstance()->ResetBlockShape();
+}
 } // namespace OHOS::Ace::Framework

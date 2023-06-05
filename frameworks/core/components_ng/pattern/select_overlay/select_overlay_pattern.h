@@ -110,6 +110,8 @@ public:
         }
     }
 
+    void ShowOrHiddenMenu(bool isHidden);
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void UpdateHandleHotZone();

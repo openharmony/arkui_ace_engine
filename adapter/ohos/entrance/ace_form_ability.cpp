@@ -84,19 +84,25 @@ void AceFormAbility::LoadFormEnv(const OHOS::AAFwk::Want& want)
     // init form ability
     BackendType backendType = BackendType::FORM;
 
-    Platform::PaContainer::CreateContainer(instanceId_, backendType, this, moduleInfo->hapPath,
-        std::make_unique<FormPlatformEventCallback>([this]() { TerminateAbility(); }));
+    std::shared_ptr<Platform::WorkerPath> workerPath = std::make_shared<Platform::WorkerPath>();
+    workerPath->packagePathStr = packagePathStr;
+    std::vector<std::string> assetBasePathStr;
 
     std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
     if (info != nullptr && !info->srcPath.empty()) {
         LOGI("AceFormAbility srcPath:%{public}s url:%{public}s", info->srcPath.c_str(), parsedUrl.c_str());
-        auto assetBasePathStr = { "assets/js/" + info->srcPath + "/", std::string("assets/js/") };
-        Platform::PaContainer::AddAssetPath(instanceId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
+        assetBasePathStr = { "assets/js/" + info->srcPath + "/", std::string("assets/js/") };
     } else {
         LOGI("AceFormAbility parsedUrl:%{public}s", parsedUrl.c_str());
-        auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
-        Platform::PaContainer::AddAssetPath(instanceId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
+        assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
     }
+
+    workerPath->assetBasePathStr = assetBasePathStr;
+
+    Platform::PaContainer::CreateContainer(instanceId_, backendType, this, moduleInfo->hapPath,
+        std::make_unique<FormPlatformEventCallback>([this]() { TerminateAbility(); }), workerPath);
+
+    Platform::PaContainer::AddAssetPath(instanceId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
 
     // run form ability
     Platform::PaContainer::RunPa(instanceId_, parsedUrl, want);

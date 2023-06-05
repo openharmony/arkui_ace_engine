@@ -256,16 +256,9 @@ void JSButton::SetLableStyle(const JSCallbackInfo& info)
 
 void JSButton::JsRemoteMessage(const JSCallbackInfo& info)
 {
-#ifndef NG_BUILD
     RemoteCallback remoteCallback;
     JSInteractableView::JsRemoteMessage(info, remoteCallback);
-    EventMarker remoteMessageEventId(std::move(remoteCallback));
-    auto stack = ViewStackProcessor::GetInstance();
-    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
-    if (buttonComponent) {
-        buttonComponent->SetRemoteMessageEventId(remoteMessageEventId);
-    }
-#endif
+    ButtonModel::GetInstance()->SetRemoteMessage(std::move(remoteCallback));
 }
 
 void JSButton::JSBind(BindingTarget globalObj)
@@ -324,7 +317,7 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
     if (info[1]->IsObject() && JSRef<JSObject>::Cast(info[1])->GetProperty("stateEffect")->IsBoolean()) {
         para.stateEffectSecond = JSRef<JSObject>::Cast(info[1])->GetProperty("stateEffect")->ToBoolean();
     }
-    if (para.parseSuccess) {
+    if (para.parseSuccess.value()) {
         labelSet = true;
     }
 

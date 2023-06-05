@@ -107,7 +107,10 @@ void GridModelNG::SetScrollBarColor(const std::string& value)
 
 void GridModelNG::SetScrollBarWidth(const std::string& value)
 {
-    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, StringUtils::StringToDimensionWithUnit(value));
+    Dimension result;
+    StringUtils::StringToDimensionWithUnit(value, result);
+    ACE_UPDATE_PAINT_PROPERTY(
+        ScrollablePaintProperty, ScrollBarWidth, result);
 }
 
 void GridModelNG::SetCachedCount(int32_t value)

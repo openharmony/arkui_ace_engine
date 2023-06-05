@@ -399,27 +399,12 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
     frameNode_->eventHub_->focusHub_ = nullptr;
     context_->FlushFocus();
     EXPECT_EQ(context_->dirtyFocusNode_.Upgrade(), nullptr);
-    /**
-     * @tc.steps4: free stageManager_ and call FlushFocus
-     * @tc.expected: The dirtyFocusNode_ is changed to nullptr.
-     */
-    auto stageManager = context_->stageManager_;
-    context_->stageManager_ = nullptr;
-    context_->FlushFocus();
-    EXPECT_EQ(context_->dirtyFocusNode_.Upgrade(), nullptr);
-
-    /**
-     * @tc.steps5: Init a new frameNode and SetFocusType with Node and call RequestDefaultFocus
-     * @tc.expected: return true while IsFocusableWholePath return true.
-                    return false while IsFocusableWholePath return false.
-     */
 
      /**
      * @tc.steps5: set stageManager_ and stageNode_, stageNode_'s child,
                 create frameNode_1's focusHub and call SetIsDefaultHasFocused with true
      * @tc.expected: RequestDefaultFocus returns false.
      */
-    context_->stageManager_ = stageManager;
     context_->stageManager_->stageNode_ = frameNode_;
     frameNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode_1 = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, nullptr);
@@ -442,7 +427,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
     focusHub->focusCallbackEvents_->SetDefaultFocusNode(newFocusHub);
     newFocusHub->SetFocusType(FocusType::NODE);
     frameNode_2->eventHub_->enabled_ = true;
-    newFocusHub->show_ = true;
     newFocusHub->focusable_ = true;
     newFocusHub->parentFocusable_ = true;
     EXPECT_TRUE(context_->RequestDefaultFocus());
@@ -1071,47 +1055,51 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     KeyEvent event;
 
     /**
-     * @tc.steps2: Call the function OnKeyEvent with isNeedShowFocus_ = false, action = KeyAction::DOWN and
+     * @tc.steps2: Call the function OnKeyEvent with isFocusActive_ = false, action = KeyAction::DOWN and
      #             pressedCodes = { KeyCode::KEY_TAB }.
      * @tc.expected: The return value of OnKeyEvent is true.
      */
     context_->SetIsFocusActive(false);
     event.action = KeyAction::DOWN;
+    event.code = KeyCode::KEY_TAB;
     event.pressedCodes = { KeyCode::KEY_TAB };
     EXPECT_TRUE(context_->OnKeyEvent(event));
     EXPECT_TRUE(context_->GetIsFocusActive());
 
     /**
-     * @tc.steps3: Call the function OnKeyEvent with isNeedShowFocus_ = false, action = KeyAction::DOWN and
+     * @tc.steps3: Call the function OnKeyEvent with isFocusActive_ = false, action = KeyAction::DOWN and
      #             pressedCodes = { KeyCode::KEY_DPAD_UP }.
      * @tc.expected: The return value of OnKeyEvent is true.
      */
     context_->SetIsFocusActive(false);
     event.pressedCodes = { KeyCode::KEY_DPAD_UP };
+    event.code = KeyCode::KEY_DPAD_UP;
     eventManager->SetInstanceId(DEFAULT_INT0);
-    EXPECT_FALSE(context_->OnKeyEvent(event));
+    EXPECT_TRUE(context_->OnKeyEvent(event));
     EXPECT_FALSE(context_->GetIsFocusActive());
 
     /**
-     * @tc.steps4: Call the function OnKeyEvent with isNeedShowFocus_ = false, action = KeyAction::UP and
+     * @tc.steps4: Call the function OnKeyEvent with isFocusActive_ = false, action = KeyAction::UP and
      #             pressedCodes = { KeyCode::KEY_CLEAR }.
      * @tc.expected: The return value of OnKeyEvent is true.
      */
     eventManager->SetInstanceId(DEFAULT_INT0);
     context_->SetIsFocusActive(false);
     event.action = KeyAction::UP;
+    event.code = KeyCode::KEY_CLEAR;
     event.pressedCodes = { KeyCode::KEY_CLEAR };
-    EXPECT_FALSE(context_->OnKeyEvent(event));
+    EXPECT_TRUE(context_->OnKeyEvent(event));
     EXPECT_FALSE(context_->GetIsFocusActive());
 
     /**
-     * @tc.steps4: Call the function OnKeyEvent with isNeedShowFocus_ = true, action = KeyAction::UP and
+     * @tc.steps4: Call the function OnKeyEvent with isFocusActive_ = true, action = KeyAction::UP and
      #             pressedCodes = { KeyCode::KEY_CLEAR }.
      * @tc.expected: The return value of OnKeyEvent is false.
      */
     eventManager->SetInstanceId(DEFAULT_INT1);
     context_->SetIsFocusActive(true);
     event.action = KeyAction::UP;
+    event.code = KeyCode::KEY_CLEAR;
     event.pressedCodes = { KeyCode::KEY_CLEAR };
     EXPECT_FALSE(context_->OnKeyEvent(event));
     EXPECT_TRUE(context_->GetIsFocusActive());
@@ -1670,35 +1658,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg031, TestSize.Level1)
     point_.type = TouchType::CANCEL;
     context_->OnTouchEvent(point_, false);
     EXPECT_EQ(context_->uiExtensionCallback_, nullptr);
-    /**
-     * @tc.steps5: create sub pipeline and set into touchPluginPipelineContext_.
-                change touch type and call OnTouchEvent with second arg is false.
-     * @tc.expected: flag is true.
-     */
-    point_.type = TouchType::DOWN;
-    context_->rootNode_ = frameNode_;
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    eventHub->focusHub_ = nullptr;
-    auto window = std::make_shared<MockWindow>();
-    EXPECT_CALL(*window, RequestFrame()).Times(AnyNumber());
-    EXPECT_CALL(*window, FlushTasks()).Times(AnyNumber());
-    EXPECT_CALL(*window, OnHide()).Times(AnyNumber());
-    EXPECT_CALL(*window, RecordFrameTime(_, _)).Times(AnyNumber());
-    EXPECT_CALL(*window, OnShow()).Times(AnyNumber());
-    EXPECT_CALL(*window, FlushCustomAnimation(NANO_TIME_STAMP))
-        .Times(AnyNumber())
-        .WillOnce(testing::Return(true))
-        .WillRepeatedly(testing::Return(false));
-    EXPECT_CALL(*window, SetRootFrameNode(_)).Times(AnyNumber());
-    auto context_2 = AceType::MakeRefPtr<PipelineContext>(
-        window, AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
-    context_2->SetEventManager(AceType::MakeRefPtr<EventManager>());
-    flag = false;
-    context_2->uiExtensionCallback_ = callback;
-    context_->touchPluginPipelineContext_.push_back(context_2);
-    context_->OnTouchEvent(point_, false);
-    EXPECT_TRUE(flag);
 }
 
 /**
@@ -1888,13 +1847,12 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg036, TestSize.Level1)
 
     /**
      * @tc.steps3: change host_,focusType_,enabled_,
-                    show_,focusable_,parentFocusable_,currentFocus_
+                    focusable_,parentFocusable_,currentFocus_
      */
     auto eventHub1 = frameNode_1->GetEventHub<EventHub>();
     eventHub1->host_ = nullptr;
     focusHub->focusType_ = FocusType::NODE;
     eventHub->enabled_ = true;
-    focusHub->show_ = true;
     focusHub->focusable_ = true;
     focusHub->parentFocusable_ = true;
     focusHub->currentFocus_ = true;

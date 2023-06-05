@@ -335,6 +335,10 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 
 void FrameNode::FromJson(const std::unique_ptr<JsonValue>& json)
 {
+    if (renderContext_) {
+        LOGD("UITree start decode renderContext");
+        renderContext_->FromJson(json);
+    }
     LOGD("UITree start decode accessibilityProperty");
     accessibilityProperty_->FromJson(json);
     LOGD("UITree start decode layoutProperty");
@@ -343,10 +347,6 @@ void FrameNode::FromJson(const std::unique_ptr<JsonValue>& json)
     paintProperty_->FromJson(json);
     LOGD("UITree start decode pattern");
     pattern_->FromJson(json);
-    if (renderContext_) {
-        LOGD("UITree start decode renderContext");
-        renderContext_->FromJson(json);
-    }
     if (eventHub_) {
         LOGD("UITree start decode eventHub");
         eventHub_->FromJson(json);
@@ -700,11 +700,9 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     if (!isRenderDirtyMarked_) {
         return std::nullopt;
     }
-    ACE_SCOPED_TRACE("CreateRenderTask:PrepareTask");
     auto wrapper = CreatePaintWrapper();
     CHECK_NULL_RETURN_NOLOG(wrapper, std::nullopt);
     auto task = [wrapper, paintProperty = paintProperty_]() {
-        ACE_SCOPED_TRACE("FrameNode::RenderTask");
         wrapper->FlushRender();
         paintProperty->CleanDirty();
     };
@@ -790,7 +788,7 @@ RefPtr<LayoutWrapper> FrameNode::UpdateLayoutWrapper(
     }
 
     pattern_->BeforeCreateLayoutWrapper();
-    if (!isActive_ || forceMeasure) {
+    if (forceMeasure || (GetTag() == V2::TAB_CONTENT_ITEM_ETS_TAG && !isActive_)) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
     if (forceLayout) {
@@ -1374,9 +1372,9 @@ RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub() const
     if (!pattern_) {
         return eventHub_->GetOrCreateFocusHub();
     }
-    return eventHub_->GetOrCreateFocusHub(pattern_->GetFocusPattern().GetFocusType(),
-        pattern_->GetFocusPattern().GetFocusable(), pattern_->GetFocusPattern().GetStyleType(),
-        pattern_->GetFocusPattern().GetFocusPaintParams());
+    auto focusPattern = pattern_->GetFocusPattern();
+    return eventHub_->GetOrCreateFocusHub(focusPattern.GetFocusType(), focusPattern.GetFocusable(),
+        focusPattern.GetStyleType(), focusPattern.GetFocusPaintParams());
 }
 
 void FrameNode::OnWindowShow()
@@ -1693,8 +1691,8 @@ void FrameNode::CreateAnimatableArithmeticProperty(const std::string& propertyNa
     nodeAnimatablePropertyMap_.emplace(propertyName, property);
 }
 
-void FrameNode::UpdateAnimatableArithmeticProperty(const std::string& propertyName,
-    RefPtr<CustomAnimatableArithmetic>& value)
+void FrameNode::UpdateAnimatableArithmeticProperty(
+    const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value)
 {
     auto iter = nodeAnimatablePropertyMap_.find(propertyName);
     if (iter == nodeAnimatablePropertyMap_.end()) {

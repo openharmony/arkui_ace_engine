@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_sec_location_button.h"
 
-#include "base/log/ace_scoring_log.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/text_style.h"
@@ -25,314 +24,31 @@
 
 using OHOS::Ace::NG::LocationButtonModelNG;
 using OHOS::Ace::NG::SecurityComponentTheme;
-namespace {
-static constexpr int TWO_PARAMS = 2;
-}
 
 namespace OHOS::Ace::Framework {
-void JSSecLocationButton::SetIconSize(const JSCallbackInfo& info)
+static ButtonType TransformSecCompBgType(SecurityComponentBackgroundType type)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
+    ButtonType buttonType = ButtonType::CAPSULE;
+    switch (type) {
+        case SecurityComponentBackgroundType::CAPSULE:
+            buttonType = ButtonType::CAPSULE;
+            break;
+        case SecurityComponentBackgroundType::CIRCLE:
+            buttonType = ButtonType::CIRCLE;
+            break;
+        case SecurityComponentBackgroundType::NORMAL:
+            buttonType = ButtonType::NORMAL;
+            break;
+        default:
+            break;
     }
-    auto theme = GetTheme<SecurityComponentTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
-
-    CalcDimension value;
-    if (!ParseJsDimensionVp(info[0], value) || (value.ConvertToVp() < theme->GetMinIconSize().ConvertToVp())) {
-        LocationButtonModelNG::GetInstance()->SetIconSize(theme->GetIconSize());
-    } else {
-        LocationButtonModelNG::GetInstance()->SetIconSize(value);
-    }
-}
-
-void JSSecLocationButton::SetIconColor(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    auto theme = GetTheme<SecurityComponentTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
-
-    Color color;
-    if (!ParseJsColor(info[0], color)) {
-        color = theme->GetIconColor();
-    }
-    LocationButtonModelNG::GetInstance()->SetIconColor(color);
-}
-
-void JSSecLocationButton::SetFontSize(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    auto theme = GetTheme<SecurityComponentTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
-
-    CalcDimension value;
-    if (!ParseJsDimensionVp(info[0], value) || (value.ConvertToVp() < theme->GetMinFontSize().ConvertToVp())) {
-        LocationButtonModelNG::GetInstance()->SetFontSize(theme->GetFontSize());
-    } else {
-        LocationButtonModelNG::GetInstance()->SetFontSize(value);
-    }
-}
-
-void JSSecLocationButton::SetFontStyle(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-
-    if (!info[0]->IsNumber()) {
-        LocationButtonModelNG::GetInstance()->SetFontStyle(Ace::FontStyle::NORMAL);
-        return;
-    }
-    uint32_t value = info[0]->ToNumber<uint32_t>();
-    if (value < static_cast<uint32_t>(Ace::FontStyle::NORMAL) ||
-        value > static_cast<uint32_t>(Ace::FontStyle::ITALIC)) {
-        LocationButtonModelNG::GetInstance()->SetFontStyle(Ace::FontStyle::NORMAL);
-        return;
-    }
-    LocationButtonModelNG::GetInstance()->SetFontStyle(static_cast<Ace::FontStyle>(value));
-}
-
-void JSSecLocationButton::SetFontWeight(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    if (!info[0]->IsString()) {
-        LocationButtonModelNG::GetInstance()->SetFontWeight(FontWeight::NORMAL);
-        return;
-    }
-    std::string value = info[0]->ToString();
-    LocationButtonModelNG::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
-}
-
-void JSSecLocationButton::SetFontFamily(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    std::vector<std::string> fontFamilies;
-    if (!ParseJsFontFamilies(info[0], fontFamilies)) {
-        fontFamilies.emplace_back("HarmonyOS Sans");
-        LocationButtonModelNG::GetInstance()->SetFontFamily(fontFamilies);
-        return;
-    }
-    LocationButtonModelNG::GetInstance()->SetFontFamily(fontFamilies);
-}
-
-void JSSecLocationButton::SetFontColor(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    auto theme = GetTheme<SecurityComponentTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
-
-    Color color;
-    if (!ParseJsColor(info[0], color)) {
-        color = theme->GetFontColor();
-    }
-    LocationButtonModelNG::GetInstance()->SetFontColor(color);
-}
-
-void JSSecLocationButton::SetLayoutDirection(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    if (!info[0]->IsNumber()) {
-        LocationButtonModelNG::GetInstance()->SetTextIconLayoutDirection(
-            SecurityComponentLayoutDirection::HORIZONTAL);
-        return;
-    }
-    int32_t value = info[0]->ToNumber<int32_t>();
-    if ((value < static_cast<int32_t>(SecurityComponentLayoutDirection::HORIZONTAL)) ||
-        (value > static_cast<int32_t>(SecurityComponentLayoutDirection::VERTICAL))) {
-        LocationButtonModelNG::GetInstance()->SetTextIconLayoutDirection(
-            SecurityComponentLayoutDirection::HORIZONTAL);
-        return;
-    }
-    LocationButtonModelNG::GetInstance()->SetTextIconLayoutDirection(
-        static_cast<SecurityComponentLayoutDirection>(value));
-}
-
-void JSSecLocationButton::SetlayoutOrder(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    if (!info[0]->IsNumber()) {
-        LocationButtonModelNG::GetInstance()->SetlayoutOrder(
-            SecSecurityComponentLayoutOrder::ICON_FIRST);
-        return;
-    }
-    int32_t value = info[0]->ToNumber<int32_t>();
-    if ((value < static_cast<int32_t>(SecSecurityComponentLayoutOrder::ICON_FIRST)) ||
-        (value > static_cast<int32_t>(SecSecurityComponentLayoutOrder::TEXT_FIRST))) {
-        LocationButtonModelNG::GetInstance()->SetlayoutOrder(
-            SecSecurityComponentLayoutOrder::ICON_FIRST);
-        return;
-    }
-    LocationButtonModelNG::GetInstance()->SetlayoutOrder(static_cast<SecSecurityComponentLayoutOrder>(value));
-}
-
-void JSSecLocationButton::SetBackgroundColor(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    auto theme = GetTheme<SecurityComponentTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
-
-    Color color;
-    if (!ParseJsColor(info[0], color)) {
-        color = theme->GetBackgroundColor();
-    }
-    LocationButtonModelNG::GetInstance()->SetBackgroundColor(color);
-}
-
-void JSSecLocationButton::SetBackgroundBorderStyle(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    if (!info[0]->IsNumber()) {
-        LocationButtonModelNG::GetInstance()->SetBackgroundBorderStyle(BorderStyle::NONE);
-        return;
-    }
-    int32_t value = info[0]->ToNumber<int32_t>();
-    if ((value < static_cast<int32_t>(BorderStyle::SOLID)) ||
-        (value > static_cast<int32_t>(BorderStyle::NONE))) {
-        LocationButtonModelNG::GetInstance()->SetBackgroundBorderStyle(BorderStyle::NONE);
-        return;
-    }
-    LocationButtonModelNG::GetInstance()->SetBackgroundBorderStyle(static_cast<BorderStyle>(value));
-}
-
-void JSSecLocationButton::SetBackgroundBorderWidth(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    auto theme = GetTheme<SecurityComponentTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
-
-    CalcDimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
-        LocationButtonModelNG::GetInstance()->SetBackgroundBorderWidth(theme->GetBorderWidth());
-    } else {
-        LocationButtonModelNG::GetInstance()->SetBackgroundBorderWidth(value);
-    }
-}
-
-void JSSecLocationButton::SetBackgroundBorderColor(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    auto theme = GetTheme<SecurityComponentTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
-
-    Color borderColor;
-    if (!ParseJsColor(info[0], borderColor)) {
-        borderColor = theme->GetBorderColor();
-    }
-    LocationButtonModelNG::GetInstance()->SetBackgroundBorderColor(borderColor);
-}
-
-void JSSecLocationButton::SetBackgroundBorderRadius(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    auto theme = GetTheme<SecurityComponentTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
-
-    CalcDimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
-        LocationButtonModelNG::GetInstance()->SetBackgroundBorderRadius(theme->GetBorderRadius());
-    } else {
-        LocationButtonModelNG::GetInstance()->SetBackgroundBorderRadius(value);
-    }
-}
-
-void JSSecLocationButton::SetBackgroundPadding(const JSCallbackInfo& info)
-{
-    if (info[0]->IsObject()) {
-        std::optional<CalcDimension> left;
-        std::optional<CalcDimension> right;
-        std::optional<CalcDimension> top;
-        std::optional<CalcDimension> bottom;
-        JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
-
-        CalcDimension leftDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("left"), leftDimen)) {
-            left = leftDimen;
-        }
-        CalcDimension rightDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("right"), rightDimen)) {
-            right = rightDimen;
-        }
-        CalcDimension topDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("top"), topDimen)) {
-            top = topDimen;
-        }
-        CalcDimension bottomDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
-            bottom = bottomDimen;
-        }
-        if (left.has_value() || right.has_value() || top.has_value() || bottom.has_value()) {
-            LocationButtonModelNG::GetInstance()->SetBackgroundPadding(left, right, top, bottom);
-            return;
-        }
-    }
-
-    CalcDimension length;
-    if (!ParseJsDimensionVp(info[0], length)) {
-        LocationButtonModelNG::GetInstance()->SetBackgroundPadding(std::nullopt);
-    } else {
-        LocationButtonModelNG::GetInstance()->SetBackgroundPadding(length);
-    }
-}
-
-void JSSecLocationButton::SetTextIconPadding(const JSCallbackInfo& info)
-{
-    if ((info.Length() < 1)) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    auto theme = GetTheme<SecurityComponentTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
-
-    CalcDimension length;
-    if (!ParseJsDimensionVp(info[0], length)) {
-        LocationButtonModelNG::GetInstance()->SetTextIconPadding(theme->GetTextIconPadding());
-    } else {
-        LocationButtonModelNG::GetInstance()->SetTextIconPadding(length);
-    }
+    return buttonType;
 }
 
 bool JSSecLocationButton::ParseComponentStyle(const JSCallbackInfo& info,
     LocationButtonLocationDescription& text, LocationButtonIconStyle& icon, SecurityComponentBackgroundType& bg)
 {
-    if ((info.Length() < 1) || !info[0]->IsObject()) {
+    if (!info[0]->IsObject()) {
         return false;
     }
 
@@ -342,7 +58,6 @@ bool JSSecLocationButton::ParseComponentStyle(const JSCallbackInfo& info,
         text = static_cast<LocationButtonLocationDescription>(value->ToNumber<int32_t>());
         if ((text < LocationButtonLocationDescription::CURRENT_LOCATION) ||
             (text > LocationButtonLocationDescription::CURRENT_POSITION)) {
-            LOGE("The arg is wrong, text type invalid");
             return false;
         }
     } else {
@@ -354,7 +69,6 @@ bool JSSecLocationButton::ParseComponentStyle(const JSCallbackInfo& info,
         icon = static_cast<LocationButtonIconStyle>(value->ToNumber<int32_t>());
         if ((icon < LocationButtonIconStyle::ICON_FULL_FILLED) ||
             (icon > LocationButtonIconStyle::ICON_LINE)) {
-            LOGE("The arg is wrong, icon type invalid");
             return false;
         }
     } else {
@@ -363,7 +77,6 @@ bool JSSecLocationButton::ParseComponentStyle(const JSCallbackInfo& info,
 
     if ((text == LocationButtonLocationDescription::TEXT_NULL) &&
         (icon == LocationButtonIconStyle::ICON_NULL)) {
-        LOGE("The arg is wrong, at least one of icon and text must exist");
         return false;
     }
 
@@ -372,7 +85,6 @@ bool JSSecLocationButton::ParseComponentStyle(const JSCallbackInfo& info,
         bg = static_cast<SecurityComponentBackgroundType>(value->ToNumber<int32_t>());
         if ((bg < SecurityComponentBackgroundType::CAPSULE) ||
             (bg > SecurityComponentBackgroundType::NORMAL)) {
-            LOGE("The arg is wrong, background type invalid");
             return false;
         }
     } else {
@@ -390,10 +102,15 @@ void JSSecLocationButton::Create(const JSCallbackInfo& info)
         LocationButtonModelNG::GetInstance()->Create(
             static_cast<int32_t>(LocationButtonLocationDescription::CURRENT_LOCATION),
             static_cast<int32_t>(LocationButtonIconStyle::ICON_FULL_FILLED),
-            SecurityComponentBackgroundType::CAPSULE);
+            static_cast<int32_t>(ButtonType::CAPSULE));
     } else {
-        LocationButtonModelNG::GetInstance()->Create(static_cast<int32_t>(textDesc),
-            static_cast<int32_t>(iconType), backgroundType);
+        if (backgroundType == SecurityComponentBackgroundType::BACKGROUND_NULL) {
+            LocationButtonModelNG::GetInstance()->Create(static_cast<int32_t>(textDesc),
+                static_cast<int32_t>(iconType), static_cast<int32_t>(backgroundType));
+        } else {
+            LocationButtonModelNG::GetInstance()->Create(static_cast<int32_t>(textDesc),
+                static_cast<int32_t>(iconType), static_cast<int32_t>(TransformSecCompBgType(backgroundType)));
+        }
     }
 }
 
@@ -429,13 +146,12 @@ void JsSecLocationButtonClickFunction::Execute(GestureEvent& info)
 #endif
     JSRef<JSVal> errorParam = JSRef<JSVal>::Make(ToJSValue(res));
     JSRef<JSVal> params[] = { errorParam, clickEventParam };
-    JsFunction::ExecuteJS(TWO_PARAMS, params);
+    JsFunction::ExecuteJS(2, params);
 }
 
 void JSSecLocationButton::JsOnClick(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
-        LOGW("the info is not click function");
         return;
     }
     auto jsOnClickFunc = AceType::MakeRefPtr<JsSecLocationButtonClickFunction>(JSRef<JSFunc>::Cast(info[0]));
@@ -453,22 +169,22 @@ void JSSecLocationButton::JSBind(BindingTarget globalObj)
     JSClass<JSSecLocationButton>::Declare("SecLocationButton");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSSecLocationButton>::StaticMethod("create", &JSSecLocationButton::Create, opt);
-    JSClass<JSSecLocationButton>::StaticMethod("iconSize", &JSSecLocationButton::SetIconSize);
-    JSClass<JSSecLocationButton>::StaticMethod("layoutDirection", &JSSecLocationButton::SetLayoutDirection);
-    JSClass<JSSecLocationButton>::StaticMethod("layoutOrder", &JSSecLocationButton::SetlayoutOrder);
-    JSClass<JSSecLocationButton>::StaticMethod("fontSize", &JSSecLocationButton::SetFontSize);
-    JSClass<JSSecLocationButton>::StaticMethod("fontStyle", &JSSecLocationButton::SetFontStyle);
-    JSClass<JSSecLocationButton>::StaticMethod("iconColor", &JSSecLocationButton::SetIconColor);
-    JSClass<JSSecLocationButton>::StaticMethod("fontWeight", &JSSecLocationButton::SetFontWeight);
-    JSClass<JSSecLocationButton>::StaticMethod("fontFamily", &JSSecLocationButton::SetFontFamily);
-    JSClass<JSSecLocationButton>::StaticMethod("fontColor", &JSSecLocationButton::SetFontColor);
-    JSClass<JSSecLocationButton>::StaticMethod("backgroundColor", &JSSecLocationButton::SetBackgroundColor);
-    JSClass<JSSecLocationButton>::StaticMethod("borderStyle", &JSSecLocationButton::SetBackgroundBorderStyle);
-    JSClass<JSSecLocationButton>::StaticMethod("borderWidth", &JSSecLocationButton::SetBackgroundBorderWidth);
-    JSClass<JSSecLocationButton>::StaticMethod("borderColor", &JSSecLocationButton::SetBackgroundBorderColor);
-    JSClass<JSSecLocationButton>::StaticMethod("borderRadius", &JSSecLocationButton::SetBackgroundBorderRadius);
-    JSClass<JSSecLocationButton>::StaticMethod("backgroundPadding", &JSSecLocationButton::SetBackgroundPadding);
-    JSClass<JSSecLocationButton>::StaticMethod("textIconPadding", &JSSecLocationButton::SetTextIconPadding);
+    JSClass<JSSecLocationButton>::StaticMethod("iconSize", &JSSecButtonBase::SetIconSize);
+    JSClass<JSSecLocationButton>::StaticMethod("layoutDirection", &JSSecButtonBase::SetLayoutDirection);
+    JSClass<JSSecLocationButton>::StaticMethod("layoutOrder", &JSSecButtonBase::SetlayoutOrder);
+    JSClass<JSSecLocationButton>::StaticMethod("fontSize", &JSSecButtonBase::SetFontSize);
+    JSClass<JSSecLocationButton>::StaticMethod("fontStyle", &JSSecButtonBase::SetFontStyle);
+    JSClass<JSSecLocationButton>::StaticMethod("iconColor", &JSSecButtonBase::SetIconColor);
+    JSClass<JSSecLocationButton>::StaticMethod("fontWeight", &JSSecButtonBase::SetFontWeight);
+    JSClass<JSSecLocationButton>::StaticMethod("fontFamily", &JSSecButtonBase::SetFontFamily);
+    JSClass<JSSecLocationButton>::StaticMethod("fontColor", &JSSecButtonBase::SetFontColor);
+    JSClass<JSSecLocationButton>::StaticMethod("backgroundColor", &JSSecButtonBase::SetBackgroundColor);
+    JSClass<JSSecLocationButton>::StaticMethod("borderStyle", &JSSecButtonBase::SetBackgroundBorderStyle);
+    JSClass<JSSecLocationButton>::StaticMethod("borderWidth", &JSSecButtonBase::SetBackgroundBorderWidth);
+    JSClass<JSSecLocationButton>::StaticMethod("borderColor", &JSSecButtonBase::SetBackgroundBorderColor);
+    JSClass<JSSecLocationButton>::StaticMethod("borderRadius", &JSSecButtonBase::SetBackgroundBorderRadius);
+    JSClass<JSSecLocationButton>::StaticMethod("backgroundPadding", &JSSecButtonBase::SetBackgroundPadding);
+    JSClass<JSSecLocationButton>::StaticMethod("textIconPadding", &JSSecButtonBase::SetTextIconSpace);
     JSClass<JSSecLocationButton>::StaticMethod("onClick", &JSSecLocationButton::JsOnClick);
     JSClass<JSSecLocationButton>::StaticMethod("position", &JSViewAbstract::JsPosition);
     JSClass<JSSecLocationButton>::StaticMethod("markAnchor", &JSViewAbstract::JsMarkAnchor);

@@ -158,6 +158,8 @@ public:
     // effects
     virtual void SetMask(const RefPtr<BasicShape>& shape) = 0;
     virtual void SetBackdropBlur(const Dimension& radius) = 0;
+    virtual void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) = 0;
+    
     virtual void SetFrontBlur(const Dimension& radius) = 0;
     virtual void SetBackShadow(const std::vector<Shadow>& shadows) = 0;
     virtual void SetColorBlend(const Color& value) = 0;
@@ -176,7 +178,7 @@ public:
     virtual void SetOnTouch(TouchEventFunc&& touchEventFunc) = 0;
     virtual void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) = 0;
     virtual void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) = 0;
-    virtual void SetOnHover(OnHoverEventFunc&& onHoverEventFunc) = 0;
+    virtual void SetOnHover(OnHoverFunc&& onHoverEventFunc) = 0;
     virtual void SetOnDelete(std::function<void()>&& onDeleteCallback) = 0;
     virtual void SetOnAppear(std::function<void()>&& onAppearCallback) = 0;
     virtual void SetOnDisAppear(std::function<void()>&& onDisAppearCallback) = 0;
@@ -216,6 +218,9 @@ public:
     virtual void SetHitTestMode(NG::HitTestMode hitTestMode) = 0;
     virtual void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) = 0;
+
+    // obscured
+    virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;
 
     // popup and menu
     virtual void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) = 0;

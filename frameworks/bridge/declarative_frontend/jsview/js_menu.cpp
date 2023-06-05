@@ -37,8 +37,8 @@ MenuModel* MenuModel::GetInstance()
             } else {
                 instance_.reset(new Framework::MenuModelImpl());
             }
-        }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -82,6 +82,17 @@ void JSMenu::Font(const JSCallbackInfo& info)
                 weight = std::to_string(jsWeight->ToNumber<int32_t>());
             } else {
                 ParseJsString(jsWeight, weight);
+            }
+        }
+
+        auto jsStyle = obj->GetProperty("style");
+        if (!jsStyle->IsNull()) {
+            if (jsStyle->IsNumber()) {
+                MenuModel::GetInstance()->SetFontStyle(static_cast<FontStyle>(jsStyle->ToNumber<int32_t>()));
+            } else {
+                std::string style;
+                ParseJsString(jsStyle, style);
+                MenuModel::GetInstance()->SetFontStyle(ConvertStrToFontStyle(style));
             }
         }
     }

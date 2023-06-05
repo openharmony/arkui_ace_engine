@@ -366,6 +366,19 @@ void SelectOverlayPattern::UpdateShowArea(const RectF& area)
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
+void SelectOverlayPattern::ShowOrHiddenMenu(bool isHidden)
+{
+    auto host = DynamicCast<SelectOverlayNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    if (info_->menuInfo.menuIsShow && isHidden) {
+        info_->menuInfo.menuIsShow = false;
+        host->UpdateToolBar(false);
+    } else if (!info_->menuInfo.menuIsShow && !isHidden && (info_->firstHandle.isShow || info_->secondHandle.isShow)) {
+        info_->menuInfo.menuIsShow = true;
+        host->UpdateToolBar(false);
+    }
+}
+
 bool SelectOverlayPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure || dirty->SkipMeasureContent()) {

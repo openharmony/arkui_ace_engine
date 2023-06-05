@@ -20,10 +20,10 @@
 #include "include/core/SkRSXform.h"
 #include "include/core/SkTextBlob.h"
 #include "include/effects/SkDashPathEffect.h"
+#include "include/effects/SkGradientShader.h"
 #include "include/effects/SkLumaColorFilter.h"
 #include "include/utils/SkParsePath.h"
 #include "render_service_client/core/ui/rs_node.h"
-#include "include/effects/SkGradientShader.h"
 
 #include "frameworks/core/components/svg/rosen_render_svg_pattern.h"
 #include "frameworks/core/components/transform/rosen_render_transform.h"
@@ -315,7 +315,12 @@ Offset RosenSvgPainter::UpdateText(SkCanvas* canvas, const SvgTextInfo& svgTextI
             font.setTypeface(fontTypeNormal_);
         }
         auto blob = SkTextBlob::MakeFromText(&temp, sizeof(temp), font, SkTextEncoding::kUTF16);
+#ifdef WINDOWS_PLATFORM
+        auto width = font.measureText(&temp, 4, SkTextEncoding::kUTF16);
+#else
         auto width = font.measureText(&temp, sizeof(temp), SkTextEncoding::kUTF16);
+#endif
+
         canvas->save();
         canvas->rotate(textDrawInfo.rotate, x, y);
         canvas->drawTextBlob(blob.get(), x, y, paint);
@@ -361,7 +366,11 @@ double RosenSvgPainter::UpdateTextPath(
         } else {
             font.setTypeface(fontTypeNormal_);
         }
+#ifdef WINDOWS_PLATFORM
+        auto width = font.measureText(&temp, 4, SkTextEncoding::kUTF16);
+#else
         auto width = font.measureText(&temp, sizeof(wchar_t), SkTextEncoding::kUTF16);
+#endif
         if (length < offset + width + space) {
             LOGD("path length is not enough, length:%{public}lf, next offset:%{public}lf", length,
                 offset + width + space);

@@ -159,6 +159,8 @@ extern const char DIALOG_MAX_BUTTON_WIDTH[];
 extern const char DIALOG_MIN_BUTTON_WIDTH[];
 extern const char DIALOG_ACTIONS_TOP_PADDING[];
 extern const char DIALOG_MASK_COLOR_END[];
+extern const char DIALOG_DIVIDER_LENGTH[];
+extern const char DIALOG_DIVIDER_BETWEEN_BUTTON_WIDTH[];
 
 // pattern attributes for drag bar
 extern const char DRAG_BAR_COLOR[];
@@ -180,6 +182,7 @@ extern const char INDICATOR_TEXT_FONT_COLOR[];
 extern const char ERROR_TEXT_UNDERLINE_COLOR[];
 extern const char UNDERLINE_COLOR[];
 extern const char UNDERLINE_TEXT_COLOR[];
+extern const char UNDERLINE_FONT_SIZE[];
 extern const char BORDER_RADIUS_SIZE[];
 // swiper attributes for arrow
 extern const char ARROW_COLOR_BOARDCOLOR_HOVER[];

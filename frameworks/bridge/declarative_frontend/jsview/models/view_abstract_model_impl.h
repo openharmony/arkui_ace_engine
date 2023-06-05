@@ -114,6 +114,7 @@ public:
     void SetMask(const RefPtr<BasicShape>& shape) override;
 
     void SetBackdropBlur(const Dimension& radius) override;
+    void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) override {};
     void SetFrontBlur(const Dimension& radius) override;
     void SetBackShadow(const std::vector<Shadow>& shadows) override;
     void SetColorBlend(const Color& value) override;
@@ -130,7 +131,7 @@ public:
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;
     void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) override;
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override;
-    void SetOnHover(OnHoverEventFunc&& onHoverEventFunc) override;
+    void SetOnHover(OnHoverFunc&& onHoverEventFunc) override;
     void SetOnDelete(std::function<void()>&& onDeleteCallback) override;
     void SetOnAppear(std::function<void()>&& onAppearCallback) override;
     void SetOnDisAppear(std::function<void()>&& onDisAppearCallback) override;
@@ -168,6 +169,7 @@ public:
     void SetHitTestMode(NG::HitTestMode hitTestMode) override;
     void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) override {};
+    void SetObscured(const std::vector<ObscuredReasons>& reasons) override {};
 
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
     void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,

@@ -63,7 +63,7 @@ public:
             return false;
         }
         for (size_t i = 0; i < linearVector.size(); ++i) {
-            if (this->at(i) != linearVector[i]) {
+            if (!NearEqual(this->at(i), linearVector[i])) {
                 return false;
             }
         }

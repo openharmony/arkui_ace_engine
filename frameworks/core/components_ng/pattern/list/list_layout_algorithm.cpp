@@ -197,6 +197,7 @@ void ListLayoutAlgorithm::MeasureList(
         endPos = itemPosition_.rbegin()->second.endPos;
         startIndex = std::min(GetStartIndex(), totalItemCount_ - 1);
         endIndex = std::min(GetEndIndex(), totalItemCount_ - 1);
+        OffScreenLayoutDirection();
         itemPosition_.clear();
         layoutWrapper->RemoveAllChildInRenderTree();
     }
@@ -213,7 +214,8 @@ void ListLayoutAlgorithm::MeasureList(
             jumpIndex_.value(), currentOffset_, startMainPos_, endMainPos_);
         if (scrollIndexAlignment_ == ScrollIndexAlignment::ALIGN_TOP) {
             jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value());
-            LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), 0);
+            startPos = (jumpIndex_.value() == 0) && Negative(startMainPos_) ? startMainPos_ : 0;
+            LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), startPos);
             if (jumpIndex_.value() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
                 LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() - 1, GetStartPosition());
             }
@@ -226,12 +228,25 @@ void ListLayoutAlgorithm::MeasureList(
             }
             CalculateEstimateOffset(false);
         }
+    } else if (targetIndex_.has_value()) {
+        if (LessOrEqual(startIndex, targetIndex_.value())) {
+            LayoutForward(layoutWrapper, layoutConstraint, axis, startIndex, startPos);
+            if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
+                LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
+            }
+        } else if (GreatNotEqual(startIndex, targetIndex_.value())) {
+            LayoutBackward(layoutWrapper, layoutConstraint, axis, endIndex, endPos);
+            if (GetEndIndex() < (totalItemCount_ - 1) && LessNotEqual(GetEndPosition(), endMainPos_)) {
+                LayoutForward(layoutWrapper, layoutConstraint, axis, GetEndIndex() + 1, GetEndPosition());
+            }
+        }
     } else {
         jumpIndexInGroup_.reset();
         LOGD("StartIndex index: %{public}d, offset is %{public}f, startMainPos: %{public}f, endMainPos: %{public}f",
             startIndex, currentOffset_, startMainPos_, endMainPos_);
         bool overScrollTop = startIndex == 0 && GreatNotEqual(startPos, startMainPos_);
         if ((!overScrollFeature_ && NonNegative(currentOffset_)) || (overScrollFeature_ && overScrollTop)) {
+            startIndex = GetLanesFloor(layoutWrapper, startIndex);
             LayoutForward(layoutWrapper, layoutConstraint, axis, startIndex, startPos);
             if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
                 LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
@@ -303,6 +318,10 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
     float currentEndPos = startPos;
     float currentStartPos = 0.0f;
     float endMainPos = overScrollFeature_ ? std::max(startPos + contentMainSize_, endMainPos_) : endMainPos_;
+    if (forwardFeature_ && targetIndex_ && NonNegative(targetIndex_.value())) {
+        endMainPos = Infinity<float>();
+    }
+
     auto currentIndex = startIndex - 1;
     auto chainOffset = 0.0f;
     do {
@@ -318,6 +337,11 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
         LOGD("LayoutForward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(currentIndex) : 0.0f;
+        // reach the valid target index
+        if (forwardFeature_ && targetIndex_ && GreatNotEqual(currentIndex, targetIndex_.value())) {
+            endMainPos = GetEndPosition() + contentMainSize_;
+            targetIndex_.reset();
+        }
     } while (LessNotEqual(currentEndPos + chainOffset, endMainPos));
 
     if (overScrollFeature_ && canOverScroll_) {
@@ -374,6 +398,9 @@ void ListLayoutAlgorithm::LayoutBackward(
     float currentStartPos = endPos;
     float currentEndPos = 0.0f;
     float startMainPos = overScrollFeature_ ? std::min(endPos - contentMainSize_, startMainPos_) : startMainPos_;
+    if (backwardFeature_ && targetIndex_ && NonNegative(targetIndex_.value())) {
+        startMainPos = -Infinity<float>();
+    }
     auto currentIndex = endIndex + 1;
     auto chainOffset = 0.0f;
     do {
@@ -389,6 +416,11 @@ void ListLayoutAlgorithm::LayoutBackward(
         LOGD("LayoutBackward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(currentIndex) : 0.0f;
+        // reach the valid target index
+        if (backwardFeature_ && targetIndex_ && LessOrEqual(currentIndex, targetIndex_.value())) {
+            startMainPos = GetStartPosition() - contentMainSize_;
+            targetIndex_.reset();
+        }
     } while (GreatNotEqual(currentStartPos + chainOffset, startMainPos));
 
     currentStartPos += chainOffset;
@@ -547,6 +579,9 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
     CHECK_NULL_VOID(itemGroup);
     itemGroup->SetListMainSize(startMainPos_, endMainPos_, referencePos, forwardLayout);
     itemGroup->SetListLayoutProperty(layoutProperty);
+    if (targetIndex_) {
+        itemGroup->SetTargetIndex(targetIndex_.value());
+    }
     if (jumpIndexInGroup_.has_value()) {
         itemGroup->SetJumpIndex(jumpIndexInGroup_.value());
         jumpIndexInGroup_.reset();
@@ -610,6 +645,22 @@ void ListLayoutAlgorithm::CreateItemGroupList(LayoutWrapper* layoutWrapper)
             auto wrapper = layoutWrapper->GetOrCreateChildByIndex(item.first);
             itemGroupList_.push_back(wrapper->GetWeakHostNode());
         }
+    }
+}
+
+void ListLayoutAlgorithm::OffScreenLayoutDirection()
+{
+    if (!targetIndex_ || itemPosition_.empty() || (itemPosition_.find(targetIndex_.value()) != itemPosition_.end())) {
+        forwardFeature_ = false;
+        backwardFeature_ = false;
+        return;
+    }
+    if (GreatNotEqual(targetIndex_.value(), GetEndIndex())) {
+        forwardFeature_ = true;
+        backwardFeature_ = false;
+    } else {
+        forwardFeature_ = false;
+        backwardFeature_ = true;
     }
 }
 } // namespace OHOS::Ace::NG

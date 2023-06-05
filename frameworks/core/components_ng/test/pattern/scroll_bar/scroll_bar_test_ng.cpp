@@ -43,11 +43,8 @@ constexpr float SCROLL_BAR_FLOAT_100 = 100.0f;
 constexpr float SCROLL_BAR_FLOAT_NEGATIVE_100 = -100.0f;
 constexpr double SCROLL_BAR_CHILD_WIDTH = 30.0;
 constexpr double SCROLL_BAR_CHILD_HEIGHT = 100.0;
-constexpr double SCROLL_BAR_CHILD_WIDTH_0 = 0.0;
-constexpr double SCROLL_BAR_CHILD_HEIGHT_0 = 0.0;
 const SizeF CONTAINER_SIZE(DEVICE_WIDTH, DEVICE_HEIGHT);
 const SizeF SCROLL_BAR_CHILD_SIZE(SCROLL_BAR_CHILD_WIDTH, SCROLL_BAR_CHILD_HEIGHT);
-const SizeF SCROLL_BAR_CHILD_SIZE_0(SCROLL_BAR_CHILD_WIDTH_0, SCROLL_BAR_CHILD_HEIGHT_0);
 const SizeF SCROLL_BAR_SELF_SIZE(30.0f, DEVICE_HEIGHT);
 } // namespace
 
@@ -66,7 +63,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest001, TestSize.Level1)
     RefPtr<ScrollProxy> scrollProxy;
     ScrollBarModelNG scrollBarModelNG;
     auto proxy = scrollBarModelNG.GetScrollBarProxy(scrollProxy);
-    scrollBarModelNG.Create(proxy, true, false, 0, 0);
+    scrollBarModelNG.Create(proxy, true, false,
+        static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::OFF));
 
     /**
      * @tc.steps: step2. Get scrollBar frameNode to create scrollBar layoutWrapper.
@@ -122,8 +120,15 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest001, TestSize.Level1)
      */
     auto childLayout = layoutWrapper->GetOrCreateChildByIndex(0);
     EXPECT_NE(childLayout, nullptr);
-    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SCROLL_BAR_SELF_SIZE);
-    EXPECT_EQ(childLayout->GetGeometryNode()->GetFrameSize(), SCROLL_BAR_CHILD_SIZE_0);
+    auto scrollBarSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    EXPECT_EQ(scrollBarSize, SCROLL_BAR_SELF_SIZE) <<
+        "scrollBarSize: " << scrollBarSize.ToString() <<
+        " SCROLL_BAR_SELF_SIZE: " << SCROLL_BAR_SELF_SIZE.ToString();
+    auto childSize = childLayout->GetGeometryNode()->GetFrameSize();
+    auto expectChildSize = SizeF(SCROLL_BAR_CHILD_WIDTH, SCROLL_BAR_CHILD_HEIGHT);
+    EXPECT_EQ(childSize, expectChildSize) <<
+        "childSize: " << childSize.ToString() <<
+        " expectChildSize: " << expectChildSize.ToString();
 
     /**
      * @tc.steps: step6. Verify the OnDirtyLayoutWrapperSwap function of scrollBar.
@@ -142,7 +147,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest001, TestSize.Level1)
     config.skipLayout = false;
     ret = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_EQ(ret, false);
-    EXPECT_EQ(pattern->scrollableDistance_, 1136.0f);
+    auto expectDistance = SCROLL_BAR_SELF_SIZE.Height() - SCROLL_BAR_CHILD_HEIGHT; // 1036
+    EXPECT_EQ(pattern->scrollableDistance_, expectDistance);
 }
 
 /**
@@ -159,7 +165,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest002, TestSize.Level1)
     RefPtr<ScrollProxy> scrollProxy;
     ScrollBarModelNG scrollBarModelNG;
     auto proxy = scrollBarModelNG.GetScrollBarProxy(scrollProxy);
-    scrollBarModelNG.Create(proxy, true, false, 1, 1);
+    scrollBarModelNG.Create(proxy, true, false,
+        static_cast<int>(Axis::HORIZONTAL), static_cast<int>(DisplayMode::AUTO));
 
     /**
      * @tc.steps: step2. Get scrollBar frameNode to create scrollBar layoutWrapper.
@@ -215,8 +222,17 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest002, TestSize.Level1)
      */
     auto childLayout = layoutWrapper->GetOrCreateChildByIndex(0);
     EXPECT_NE(childLayout, nullptr);
-    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(DEVICE_WIDTH, SCROLL_BAR_CHILD_WIDTH_0));
-    EXPECT_EQ(childLayout->GetGeometryNode()->GetFrameSize(), SCROLL_BAR_CHILD_SIZE_0);
+    auto scrollBarSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    // has no idealSize, scrollBarSize.height is child.height
+    EXPECT_EQ(scrollBarSize, SizeF(DEVICE_WIDTH, SCROLL_BAR_CHILD_HEIGHT)) <<
+        "scrollBarSize: " << scrollBarSize.ToString() <<
+        " SizeF(DEVICE_WIDTH, SCROLL_BAR_CHILD_HEIGHT): " <<
+        SizeF(DEVICE_WIDTH, SCROLL_BAR_CHILD_HEIGHT).ToString();
+    auto childSize = childLayout->GetGeometryNode()->GetFrameSize();
+    auto expectChildSize = SizeF(SCROLL_BAR_CHILD_WIDTH, SCROLL_BAR_CHILD_HEIGHT);
+    EXPECT_EQ(childSize, expectChildSize) <<
+        "childSize: " << childSize.ToString() <<
+        " expectChildSize: " << expectChildSize.ToString();
 
     /**
      * @tc.steps: step6. Verify the callback function in scrollBar under different conditions.
@@ -260,7 +276,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest003, TestSize.Level1)
     RefPtr<ScrollProxy> scrollProxy;
     ScrollBarModelNG scrollBarModelNG;
     auto proxy = scrollBarModelNG.GetScrollBarProxy(scrollProxy);
-    scrollBarModelNG.Create(proxy, true, false, 1, 2);
+    scrollBarModelNG.Create(proxy, true, false,
+        static_cast<int>(Axis::HORIZONTAL), static_cast<int>(DisplayMode::ON));
 
     /**
      * @tc.steps: step2. Get scrollBar frameNode to create scrollBar layoutWrapper.
@@ -317,8 +334,15 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest003, TestSize.Level1)
      */
     auto childLayout = layoutWrapper->GetOrCreateChildByIndex(0);
     EXPECT_NE(childLayout, nullptr);
-    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SCROLL_BAR_SELF_SIZE);
-    EXPECT_EQ(childLayout->GetGeometryNode()->GetFrameSize(), SCROLL_BAR_CHILD_SIZE_0);
+    auto scrollBarSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    EXPECT_EQ(scrollBarSize, SCROLL_BAR_SELF_SIZE) <<
+        "scrollBarSize: " << scrollBarSize.ToString() <<
+        " SCROLL_BAR_SELF_SIZE: " << SCROLL_BAR_SELF_SIZE.ToString();
+    auto childSize = childLayout->GetGeometryNode()->GetFrameSize();
+    auto expectChildSize = SizeF(SCROLL_BAR_CHILD_WIDTH, SCROLL_BAR_CHILD_HEIGHT);
+    EXPECT_EQ(childSize, expectChildSize) <<
+        "childSize: " << childSize.ToString() <<
+        " expectChildSize: " << expectChildSize.ToString();
 
     /**
      * @tc.steps: step6. Verify the callback function in scrollBar under different conditions.
@@ -356,7 +380,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest004, TestSize.Level1)
     RefPtr<ScrollProxy> scrollProxy;
     ScrollBarModelNG scrollBarModelNG;
     auto proxy = scrollBarModelNG.GetScrollBarProxy(scrollProxy);
-    scrollBarModelNG.Create(proxy, true, false, 0, -1);
+    scrollBarModelNG.Create(proxy, true, false,
+        static_cast<int>(Axis::VERTICAL), -1);
 
     /**
      * @tc.steps: step2. Get scrollBar frameNode to create scrollBar layoutWrapper.
@@ -412,8 +437,17 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest004, TestSize.Level1)
      */
     auto childLayout = layoutWrapper->GetOrCreateChildByIndex(0);
     EXPECT_NE(childLayout, nullptr);
-    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(SCROLL_BAR_CHILD_WIDTH_0, DEVICE_HEIGHT));
-    EXPECT_EQ(childLayout->GetGeometryNode()->GetFrameSize(), SCROLL_BAR_CHILD_SIZE_0);
+    auto scrollBarSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto expectScrollBarSize = SizeF(SCROLL_BAR_CHILD_WIDTH, DEVICE_HEIGHT);
+    // has no idealSize, scrollBarSize.width is child.width
+    EXPECT_EQ(scrollBarSize, expectScrollBarSize) <<
+        "scrollBarSize: " << scrollBarSize.ToString() <<
+        " expectScrollBarSize: " << expectScrollBarSize.ToString();
+    auto childSize = childLayout->GetGeometryNode()->GetFrameSize();
+    auto expectChildSize = SizeF(SCROLL_BAR_CHILD_WIDTH, SCROLL_BAR_CHILD_HEIGHT);
+    EXPECT_EQ(childSize, expectChildSize) <<
+        "childSize: " << childSize.ToString() <<
+        " expectChildSize: " << expectChildSize.ToString();
 
     /**
      * @tc.steps: step6. Create scrollbar proxy and verify the RegisterScrollableNode function and NotifyScrollableNode
@@ -668,5 +702,43 @@ HWTEST_F(ScrollBarTestNg, PerformActionTest001, TestSize.Level1)
     scrollBarPattern->scrollableDistance_ = 0.0;
     EXPECT_TRUE(scrollBarAccessibilityProperty->ActActionScrollForward());
     EXPECT_TRUE(scrollBarAccessibilityProperty->ActActionScrollBackward());
+}
+
+/**
+ * @tc.name: AccessibilityEventTest001
+ * @tc.desc: Test the ScrollEndCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, AccessibilityEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBar and initialize related properties.
+     */
+    RefPtr<ScrollProxy> scrollProxy;
+    ScrollBarModelNG scrollBarModelNG;
+    auto proxy = scrollBarModelNG.GetScrollBarProxy(scrollProxy);
+    scrollBarModelNG.Create(proxy, true, false,
+        static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::OFF));
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ScrollBarPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set callback function.
+     */
+    pattern->OnModifyDone();
+    ASSERT_NE(pattern->scrollableEvent_, nullptr);
+    auto callback = pattern->scrollableEvent_->GetScrollEndCallback();
+    ASSERT_NE(callback, nullptr);
+    EXPECT_EQ(pattern->scrollEndAnimator_, nullptr);
+
+    /**
+     * @tc.steps: step3. call callback function.
+     * @tc.expected: scrollEndAnimator_ is not nullptr.
+     */
+    pattern->displayMode_ = DisplayMode::AUTO;
+    callback();
+    EXPECT_NE(pattern->scrollEndAnimator_, nullptr);
 }
 } // namespace OHOS::Ace::NG

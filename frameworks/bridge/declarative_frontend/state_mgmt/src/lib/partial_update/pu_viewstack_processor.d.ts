@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-/** 
+/**
  * ViewStackProcessor declaration
- * 
+ *
  * Implemntation in C+ and exposed to JS
  *
  * all definitions in this file are framework internal
@@ -36,13 +36,13 @@ declare class ViewStackProcessor {
    * get the elmtId to which any get access shoudl be accounted
    * note this can be the same as the currently created elmtId (top of stack)
    * but also a different one (in case a whole subtree gets accounted its root elmtId)
-   * 
+   *
    * returns the elmtId given by StartGetAccessRecordingFor
    * -1 no access recording
    */
   public static GetElmtIdToAccountFor(): number;
 
-  // Stop get access recording 
+  // Stop get access recording
   // also invalidates any reserved but unclaimed elmtId for Component creation
   public static StopGetAccessRecording(): void;
 
@@ -77,4 +77,7 @@ declare class ViewStackProcessor {
    * calls UsesNewPipeline static function
    */
   public static UsesNewPipeline();
+
+  // Gets the framenode with tag and elmtId then pushes to the view stack.
+  public static GetAndPushFrameNode(tag: string, elmtId: number): void;
 }

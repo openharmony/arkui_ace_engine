@@ -102,6 +102,9 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
             // over scroll in drag update from normal to over scroll.
             float overScroll = 0.0f;
             // over scroll in drag update during over scroll.
+            if (pattern->tabItemOffsets_.empty()) {
+                return false;
+            }
             auto startPos = pattern->tabItemOffsets_.begin()->GetX();
             auto host = pattern->GetHost();
             CHECK_NULL_RETURN(host, false);
@@ -204,7 +207,10 @@ void TabBarPattern::HandleMouseEvent(const MouseInfo& info)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto totalCount = host->TotalChildCount();
+    auto totalCount = host->TotalChildCount() - MASK_COUNT;
+    if (totalCount < 0) {
+        return;
+    }
     auto index = CalculateSelectedIndex(info.GetLocalLocation());
     if (index < 0 || index >= totalCount) {
         if (hoverIndex_.has_value() && !touchingIndex_.has_value()) {
@@ -311,7 +317,7 @@ bool TabBarPattern::OnKeyEvent(const KeyEvent& event)
                               ? KeyCode::KEY_DPAD_RIGHT
                               : KeyCode::KEY_DPAD_DOWN) ||
         event.code == KeyCode::KEY_TAB) {
-        if (indicator >= host->TotalChildCount() - 1) {
+        if (indicator >= host->TotalChildCount() - MASK_COUNT - 1) {
             return false;
         }
         indicator += 1;
@@ -504,7 +510,10 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
         return;
     }
 
-    auto totalCount = host->TotalChildCount();
+    auto totalCount = host->TotalChildCount() - MASK_COUNT;
+    if (totalCount < 0) {
+        return;
+    }
 
     auto index = CalculateSelectedIndex(info.GetLocalLocation());
     if (index < 0 || index >= totalCount || !swiperController_ ||
@@ -620,6 +629,9 @@ void TabBarPattern::GetBottomTabBarImageSizeAndOffset(const std::vector<int32_t>
     auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(info);
     
     auto maskPosition = host->GetChildren().size() - MASK_COUNT;
+    if (maskPosition < 0) {
+        return;
+    }
     auto selectedMaskNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(maskPosition + maskIndex));
     CHECK_NULL_VOID(selectedMaskNode);
     if (maskIndex == 0) {
@@ -737,6 +749,9 @@ void TabBarPattern::ChangeMask(const RefPtr<FrameNode>& host, float imageSize,
         return;
     }
     auto maskPosition = host->GetChildren().size() - MASK_COUNT;
+    if (maskPosition < 0) {
+        return;
+    }
     auto selectedMaskNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(maskPosition + !isSelected));
     CHECK_NULL_VOID(selectedMaskNode);
 
@@ -803,6 +818,9 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
                        : backChildrenMainSize < space
                            ? host->GetGeometryNode()->GetFrameSize().Width() - childrenMainSize_
                            : space - frontChildrenMainSize;
+        if (tabItemOffsets_.empty()) {
+            return;
+        }
         PlayTranslateAnimation(originalPaintRect.GetX(),
             targetPaintRect.GetX() - tabItemOffsets_.front().GetX() + targetOffset, targetOffset);
     } else {
@@ -819,7 +837,10 @@ void TabBarPattern::HandleTouchEvent(const TouchLocationInfo& info)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto totalCount = host->TotalChildCount();
+    auto totalCount = host->TotalChildCount() - MASK_COUNT;
+    if (totalCount < 0) {
+        return;
+    }
     auto touchType = info.GetTouchType();
     auto index = CalculateSelectedIndex(info.GetLocalLocation());
     if (touchType == TouchType::DOWN && index >= 0 && index < totalCount) {
@@ -835,6 +856,9 @@ void TabBarPattern::HandleTouchEvent(const TouchLocationInfo& info)
 
 int32_t TabBarPattern::CalculateSelectedIndex(const Offset& info)
 {
+    if (tabItemOffsets_.empty()) {
+        return -1;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, -1);
     auto geometryNode = host->GetGeometryNode();
@@ -1350,7 +1374,7 @@ float TabBarPattern::CalculateBackChildrenMainSize(int32_t indicator)
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0.0f);
     float backChildrenMainSize = 0.0f;
-    auto childCount = host->GetChildren().size();
+    auto childCount = host->GetChildren().size() - MASK_COUNT;
     for (uint32_t index = static_cast<uint32_t>(indicator) + 1; index < childCount; ++index) {
         auto childFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(index));
         CHECK_NULL_RETURN(childFrameNode, 0.0f);
@@ -1411,6 +1435,9 @@ bool TabBarPattern::IsAtTop() const
 
 bool TabBarPattern::IsAtBottom() const
 {
+    if (tabItemOffsets_.empty()) {
+        return false;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     return LessOrEqual(tabItemOffsets_.back().GetX(), host->GetGeometryNode()->GetFrameSize().Width());
@@ -1443,7 +1470,7 @@ void TabBarPattern::SetAccessibilityAction()
         auto frameNode = pattern->GetHost();
         CHECK_NULL_VOID(frameNode);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
-            frameNode->TotalChildCount() > 1) {
+            frameNode->TotalChildCount() - MASK_COUNT > 1) {
             auto index = pattern->GetIndicator() + 1;
             pattern->PlayTabBarTranslateAnimation(index);
             pattern->FocusIndexChange(index);
@@ -1459,12 +1486,47 @@ void TabBarPattern::SetAccessibilityAction()
         auto frameNode = pattern->GetHost();
         CHECK_NULL_VOID(frameNode);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
-           frameNode->TotalChildCount() > 1) {
+           frameNode->TotalChildCount() - MASK_COUNT > 1) {
             auto index = pattern->GetIndicator() - 1;
             pattern->PlayTabBarTranslateAnimation(index);
             pattern->FocusIndexChange(index);
             frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         }
     });
+}
+
+std::string TabBarPattern::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_RETURN(tabBarLayoutProperty, "");
+    jsonObj->Put("Index", tabBarLayoutProperty->GetIndicator().value_or(0));
+    return jsonObj->ToString();
+}
+
+void TabBarPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    auto info = JsonUtil::ParseJsonString(restoreInfo);
+    if (!info->IsValid() || !info->IsObject()) {
+        return;
+    }
+    auto jsonIsOn = info->GetValue("Index");
+    auto index = jsonIsOn->GetInt();
+    auto totalCount = host->TotalChildCount();
+    if (index < 0 || index >= totalCount || !swiperController_ ||
+        indicator_ >= static_cast<int32_t>(tabBarStyles_.size())) {
+        return;
+    }
+    tabBarLayoutProperty->UpdateIndicator(index);
+    if (animationDuration_.has_value()) {
+        swiperController_->SwipeTo(index);
+    } else {
+        swiperController_->SwipeToWithoutAnimation(index);
+    }
+
 }
 } // namespace OHOS::Ace::NG

@@ -24,6 +24,8 @@
 
 #ifdef SECURITY_COMPONENT_ENABLE
 #include "location_button.h"
+#include "paste_button.h"
+#include "save_button.h"
 #include "sec_comp_err.h"
 #include "sec_comp_kit.h"
 #endif
@@ -31,6 +33,7 @@
 namespace OHOS::Ace::NG {
 #ifdef SECURITY_COMPONENT_ENABLE
 using namespace OHOS::Security;
+using namespace OHOS::Security::SecurityComponent;
 static bool GetDisplayOffset(RefPtr<FrameNode>& node, double& offsetX, double& offsetY)
 {
     double x = node->GetTransformRelativeOffset().GetX();
@@ -249,7 +252,32 @@ static bool CheckParentNodesEffect(RefPtr<FrameNode>& node)
     return false;
 }
 
-static bool InitChildInfo(SecurityComponent::LocationButton& buttonInfo, RefPtr<FrameNode>& node)
+static bool InitBaseInfo(SecCompBase& buttonInfo, RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, false);
+    buttonInfo.padding_.top = layoutProperty->GetBackgroundTopPadding().value().ConvertToVp();
+    buttonInfo.padding_.right = layoutProperty->GetBackgroundRightPadding().value().ConvertToVp();
+    buttonInfo.padding_.bottom = layoutProperty->GetBackgroundBottomPadding().value().ConvertToVp();
+    buttonInfo.padding_.left = layoutProperty->GetBackgroundLeftPadding().value().ConvertToVp();
+    buttonInfo.textIconSpace_ = layoutProperty->GetTextIconSpace().value().ConvertToVp();
+
+    if (!GetDisplayOffset(node, buttonInfo.rect_.x_, buttonInfo.rect_.y_)) {
+        LOGW("Get display offset failed");
+        return false;
+    }
+
+    auto render = node->GetRenderContext();
+    CHECK_NULL_RETURN(render, false);
+    auto rect = render->GetPaintRectWithTransform();
+    buttonInfo.rect_.width_ = rect.Width();
+    buttonInfo.rect_.height_ = rect.Height();
+
+    return true;
+}
+
+static bool InitChildInfo(SecCompBase& buttonInfo, RefPtr<FrameNode>& node)
 {
     RefPtr<FrameNode> iconNode = GetSecCompChildNode(node, V2::IMAGE_ETS_TAG);
     if (iconNode != nullptr) {
@@ -277,76 +305,86 @@ static bool InitChildInfo(SecurityComponent::LocationButton& buttonInfo, RefPtr<
 
         auto bgProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         CHECK_NULL_RETURN(bgProp, false);
-        auto& borderWidth = bgProp->GetBorderWidthProperty();
-        CHECK_NULL_RETURN(borderWidth, false);
-        buttonInfo.borderWidth_ = borderWidth->leftDimen.value().ConvertToVp();
+        const auto& borderWidth = bgProp->GetBorderWidthProperty();
+        if (borderWidth != nullptr) {
+            buttonInfo.borderWidth_ = borderWidth->leftDimen.value().ConvertToVp();
+        }
+    }
+    if (!InitBaseInfo(buttonInfo, node)) {
+        return false;
     }
     return true;
 }
 
-static bool InitButtonInfo(SecurityComponent::LocationButton& buttonInfo, RefPtr<FrameNode>& node)
+static bool InitButtonInfo(std::string& componentInfo, RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, false);
     auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, false);
-    buttonInfo.parentEffect_ = CheckParentNodesEffect(node);
-    buttonInfo.text_ = static_cast<SecurityComponent::LocationDesc>(
-        layoutProperty->GetSecurityComponentDescription().value());
-    buttonInfo.icon_ = static_cast<SecurityComponent::LocationIcon>(
-        layoutProperty->GetIconStyle().value());
-    buttonInfo.bg_ = static_cast<SecurityComponent::LocationBackground>(
-        layoutProperty->GetBackgroundType().value());
-
-    if (!InitChildInfo(buttonInfo, node)) {
-        LOGE("Init child info failed");
+    std::string type = node->GetTag();
+    if (type == V2::SEC_LOCATION_BUTTON_ETS_TAG) {
+        LocationButton buttonInfo;
+        buttonInfo.parentEffect_ = CheckParentNodesEffect(node);
+        buttonInfo.text_ = layoutProperty->GetSecurityComponentDescription().value();
+        buttonInfo.icon_ = layoutProperty->GetIconStyle().value();
+        buttonInfo.bg_ = static_cast<SecCompBackground>(
+            layoutProperty->GetBackgroundType().value());
+        buttonInfo.type_ = SecCompType::LOCATION_COMPONENT;
+        if (!InitChildInfo(buttonInfo, node)) {
+            return false;
+        }
+        componentInfo = buttonInfo.ToJsonStr();
+    } else if (type == V2::SEC_PASTE_BUTTON_ETS_TAG) {
+        PasteButton buttonInfo;
+        buttonInfo.parentEffect_ = CheckParentNodesEffect(node);
+        buttonInfo.text_ = layoutProperty->GetSecurityComponentDescription().value();
+        buttonInfo.icon_ = layoutProperty->GetIconStyle().value();
+        buttonInfo.bg_ = static_cast<SecCompBackground>(
+            layoutProperty->GetBackgroundType().value());
+        buttonInfo.type_ = SecCompType::PASTE_COMPONENT;
+        if (!InitChildInfo(buttonInfo, node)) {
+            return false;
+        }
+        componentInfo = buttonInfo.ToJsonStr();
+    } else if (type == V2::SEC_SAVE_BUTTON_ETS_TAG) {
+        SaveButton buttonInfo;
+        buttonInfo.parentEffect_ = CheckParentNodesEffect(node);
+        buttonInfo.text_ = layoutProperty->GetSecurityComponentDescription().value();
+        buttonInfo.icon_ = layoutProperty->GetIconStyle().value();
+        buttonInfo.bg_ = static_cast<SecCompBackground>(
+            layoutProperty->GetBackgroundType().value());
+        buttonInfo.type_ = SecCompType::SAVE_COMPONENT;
+        if (!InitChildInfo(buttonInfo, node)) {
+            return false;
+        }
+        componentInfo = buttonInfo.ToJsonStr();
+    } else {
         return false;
     }
-
-    buttonInfo.padding_.top = layoutProperty->GetBackgroundTopPadding().value().ConvertToVp();
-    buttonInfo.padding_.right = layoutProperty->GetBackgroundRightPadding().value().ConvertToVp();
-    buttonInfo.padding_.bottom = layoutProperty->GetBackgroundBottomPadding().value().ConvertToVp();
-    buttonInfo.padding_.left = layoutProperty->GetBackgroundLeftPadding().value().ConvertToVp();
-    buttonInfo.textIconPadding_ = layoutProperty->GetTextIconPadding().value().ConvertToVp();
-
-    if (!GetDisplayOffset(node, buttonInfo.rect_.x_, buttonInfo.rect_.y_)) {
-        LOGE("Get display offset failed");
-        return false;
-    }
-
-    auto render = node->GetRenderContext();
-    CHECK_NULL_RETURN(render, false);
-    auto rect = render->GetPaintRectWithTransform();
-    buttonInfo.rect_.width_ = rect.Width();
-    buttonInfo.rect_.height_ = rect.Height();
-    buttonInfo.type_ = SecurityComponent::SecCompType::LOCATION_COMPONENT;
     return true;
 }
 
 int32_t SecurityComponentHandler::RegisterSecurityComponent(RefPtr<FrameNode>& node, int32_t& scId)
 {
-    SecurityComponent::LocationButton buttonInfo;
-    if (!InitButtonInfo(buttonInfo, node)) {
-        LOGE("Init button info failed");
+    std::string componentInfo;
+    if (!InitButtonInfo(componentInfo, node)) {
         return -1;
     }
-    int32_t ret = SecurityComponent::SecCompKit::RegisterSecurityComponent(
-        SecurityComponent::SecCompType::LOCATION_COMPONENT, buttonInfo.ToJsonStr(), scId);
-    if (ret != SecurityComponent::SCErrCode::SC_OK) {
-        LOGE("Register security component failed, err is %{public}d", ret);
+    int32_t ret = SecCompKit::RegisterSecurityComponent(
+        SecCompType::LOCATION_COMPONENT, componentInfo, scId);
+    if (ret != SCErrCode::SC_OK) {
     }
     return ret;
 }
 
 int32_t SecurityComponentHandler::UpdateSecurityComponent(RefPtr<FrameNode>& node, int32_t scId)
 {
-    SecurityComponent::LocationButton buttonInfo;
-    if (!InitButtonInfo(buttonInfo, node)) {
-        LOGE("Init button info failed");
+    std::string componentInfo;
+    if (!InitButtonInfo(componentInfo, node)) {
         return -1;
     }
-    int32_t ret = SecurityComponent::SecCompKit::UpdateSecurityComponent(scId, buttonInfo.ToJsonStr());
-    if (ret != SecurityComponent::SCErrCode::SC_OK) {
-        LOGE("Update security component failed, err is %{public}d", ret);
+    int32_t ret = SecCompKit::UpdateSecurityComponent(scId, componentInfo);
+    if (ret != SCErrCode::SC_OK) {
     }
     return ret;
 }
@@ -354,12 +392,10 @@ int32_t SecurityComponentHandler::UpdateSecurityComponent(RefPtr<FrameNode>& nod
 int32_t SecurityComponentHandler::UnregisterSecurityComponent(int32_t scId)
 {
     if (scId == -1) {
-        LOGE("Security component is unregister or uninitialized");
         return -1;
     }
-    int32_t ret = SecurityComponent::SecCompKit::UnregisterSecurityComponent(scId);
-    if (ret != SecurityComponent::SCErrCode::SC_OK) {
-        LOGE("Unregister security component failed, err is %{public}d", ret);
+    int32_t ret = SecCompKit::UnregisterSecurityComponent(scId);
+    if (ret != SCErrCode::SC_OK) {
     }
     return ret;
 }
@@ -368,19 +404,17 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t scId
     RefPtr<FrameNode>& node, GestureEvent& event)
 {
     if (scId == -1) {
-        LOGE("Security component is unregister or uninitialized");
         return -1;
     }
-    SecurityComponent::LocationButton buttonInfo;
-    if (!InitButtonInfo(buttonInfo, node)) {
-        LOGE("Init button info failed");
+    std::string componentInfo;
+    if (!InitButtonInfo(componentInfo, node)) {
         return -1;
     }
-    SecurityComponent::SecCompClickEvent secEvent;
+    SecCompClickEvent secEvent;
     secEvent.touchX = event.GetDisplayX();
     secEvent.touchY = event.GetDisplayY();
     secEvent.timestamp = static_cast<uint64_t>(event.GetTimeStamp().time_since_epoch().count());
-    return SecurityComponent::SecCompKit::ReportSecurityComponentClickEvent(scId, buttonInfo.ToJsonStr(), secEvent);
+    return SecCompKit::ReportSecurityComponentClickEvent(scId, componentInfo, secEvent);
 }
 #else
 int32_t SecurityComponentHandler::RegisterSecurityComponent(RefPtr<FrameNode>& node, int32_t& scId)

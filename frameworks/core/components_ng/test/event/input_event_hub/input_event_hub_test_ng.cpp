@@ -161,7 +161,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubHoverEventTest003, TestSize.Level1)
      * @tc.steps: step3. Set HoverEvent.
      * @tc.expected: hoverEventActuator_ will be initialized.
      */
-    OnHoverEventFunc onHover = [](bool) {};
+    OnHoverFunc onHover = [](bool, HoverInfo) {};
     inputEventHub->SetHoverEvent(std::move(onHover));
     EXPECT_NE(inputEventHub->hoverEventActuator_, nullptr);
 
@@ -278,8 +278,8 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTest005, TestSize.Level1)
     /**
      * @tc.steps: step6. Set HoverEvent and hoverEventActuator_ and userCallback_ will be initialized.
      */
-    const OnHoverEventFunc onHover = [](bool) {};
-    OnHoverEventFunc onHover1 = onHover;
+    const OnHoverFunc onHover = [](bool, HoverInfo) {};
+    OnHoverFunc onHover1 = onHover;
     inputEventHub->SetHoverEvent(std::move(onHover1));
     EXPECT_NE(inputEventHub->hoverEventActuator_->userCallback_, nullptr);
 
@@ -295,7 +295,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTest005, TestSize.Level1)
     /**
      * @tc.steps: step8. Set HoverEvent and inputEvents_ will not be empty.
      */
-    OnHoverEventFunc onHover2 = onHover;
+    OnHoverFunc onHover2 = onHover;
     auto onHoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(onHover2));
     inputEventHub->AddOnHoverEvent(onHoverEvent);
     inputEventHub->AddOnHoverEvent(nullptr);

@@ -42,6 +42,7 @@ constexpr bool SHOW_CONTROL_BUTTON = true;
 constexpr Dimension SIDE_BAR_WIDTH = 50.0_vp;
 constexpr Dimension MIN_SIDE_BAR_WIDTH = 50.0_vp;
 constexpr Dimension MAX_SIDE_BAR_WIDTH = 50.0_vp;
+constexpr Dimension MIN_CONTENT_WIDTH = 50.0_vp;
 constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
 constexpr bool AUTO_HIDE = true;
@@ -109,6 +110,7 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg002, TestSize.Level1)
     SideBarContainerModelInstance.SetSideBarWidth(SIDE_BAR_WIDTH);
     SideBarContainerModelInstance.SetMinSideBarWidth(MIN_SIDE_BAR_WIDTH);
     SideBarContainerModelInstance.SetMaxSideBarWidth(MAX_SIDE_BAR_WIDTH);
+    SideBarContainerModelInstance.SetMinContentWidth(MIN_CONTENT_WIDTH);
     SideBarContainerModelInstance.SetAutoHide(AUTO_HIDE);
     SideBarContainerModelInstance.SetSideBarPosition(SIDE_BAR_POSITION);
     SideBarContainerModelInstance.SetControlButtonWidth(WIDTH);
@@ -136,6 +138,7 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg002, TestSize.Level1)
     EXPECT_EQ(sideBarLayoutProperty->GetSideBarWidth(), SIDE_BAR_WIDTH);
     EXPECT_EQ(sideBarLayoutProperty->GetMinSideBarWidth(), MIN_SIDE_BAR_WIDTH);
     EXPECT_EQ(sideBarLayoutProperty->GetMaxSideBarWidth(), MAX_SIDE_BAR_WIDTH);
+    EXPECT_EQ(sideBarLayoutProperty->GetMinContentWidth(), MIN_CONTENT_WIDTH);
     EXPECT_EQ(sideBarLayoutProperty->GetAutoHide(), AUTO_HIDE);
     EXPECT_EQ(sideBarLayoutProperty->GetSideBarPosition(), SIDE_BAR_POSITION);
     EXPECT_EQ(sideBarLayoutProperty->GetControlButtonWidth(), WIDTH);

@@ -317,7 +317,7 @@ void LayoutWrapper::MountToHostOnMainThread()
 
 void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
 {
-    if (isActive_) {
+    if (GetHostTag() != V2::TAB_CONTENT_ITEM_ETS_TAG || isActive_) {
         for (const auto& child : children_) {
             if (!child) {
                 continue;
@@ -378,10 +378,22 @@ void LayoutWrapper::AddNodeFlexLayouts()
     }
     auto host = GetHostNode();
     CHECK_NULL_VOID(host);
-    auto parent = host->GetParent();
-    CHECK_NULL_VOID(parent);
-    if (parent->GetTag() == V2::FLEX_ETS_TAG) {
-        host->AddFlexLayouts();
+    auto frameNodeParent = host->GetAncestorNodeOfFrame();
+    CHECK_NULL_VOID(frameNodeParent);
+    if (frameNodeParent->GetTag() == V2::FLEX_ETS_TAG) {
+        auto parent = host->GetParent();
+        CHECK_NULL_VOID(parent);
+        if (parent->GetTag() == V2::JS_VIEW_ETS_TAG) {
+            parent->AddFlexLayouts();
+        } else if (host->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
+            auto children = host->GetChildren();
+            if (!children.empty()) {
+                auto begin = children.begin();
+                (*begin)->AddFlexLayouts();
+            }
+        } else {
+            host->AddFlexLayouts();
+        }
     }
 }
 

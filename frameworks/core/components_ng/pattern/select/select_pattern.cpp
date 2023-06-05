@@ -226,7 +226,7 @@ void SelectPattern::CreateSelectedCallback()
         CHECK_NULL_VOID(pattern);
         pattern->SetSelected(index);
         pattern->UpdateText(index);
-
+        pattern->isSelected_ = true;
         auto hub = host->GetEventHub<SelectEventHub>();
         CHECK_NULL_VOID(hub);
         // execute change event callback
@@ -874,4 +874,29 @@ void SelectPattern::SetMenuAlign(const MenuAlign& menuAlign)
     menuLayoutProps->UpdateAlignType(menuAlign.alignType);
     menuLayoutProps->UpdateOffset(menuAlign.offset);
 }
+
+std::string SelectPattern::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    jsonObj->Put("selected", selected_);
+    jsonObj->Put("isSelected", isSelected_);
+    return jsonObj->ToString();
+}
+
+void SelectPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    auto info = JsonUtil::ParseJsonString(restoreInfo);
+    if (!info->IsValid() || !info->IsObject()) {
+        return;
+    }
+    auto jsonIsOn = info->GetValue("selected");
+    auto jsonIsSelect = info->GetValue("isSelected");
+    if (jsonIsSelect->GetBool()) {
+        SetSelected(jsonIsOn->GetInt());
+        UpdateText(jsonIsOn->GetInt());
+    }
+
+}
+
+
 } // namespace OHOS::Ace::NG

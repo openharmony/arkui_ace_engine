@@ -14,6 +14,7 @@
 group("core_pattern_unittest") {
   testonly = true
   deps = [
+    "canvas_renderer:canvas_renderer_test_ng",
     "recycle_node:recycle_node_test_ng",
     "stage:stage_test_ng",
     "ui_extension:ui_extension_pattern_test_ng",

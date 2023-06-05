@@ -125,6 +125,7 @@ public:
 
     // decoration
     static void SetBackdropBlur(const Dimension& radius);
+    static void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara);
     static void SetFrontBlur(const Dimension& radius);
     static void SetBackShadow(const Shadow& shadow);
 
@@ -170,7 +171,7 @@ public:
     static void SetOnClick(GestureEventFunc&& clickEventFunc);
     static void SetOnTouch(TouchEventFunc&& touchEventFunc);
     static void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc);
-    static void SetOnHover(OnHoverEventFunc&& onHoverEventFunc);
+    static void SetOnHover(OnHoverFunc&& onHoverEventFunc);
     static void SetHoverEffect(HoverEffectType hoverEffect);
     static void SetHoverEffectAuto(HoverEffectType hoverEffect);
     static void SetEnabled(bool enabled);
@@ -214,6 +215,8 @@ public:
     static void SetDisplayIndex(int32_t value);
     static void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction);
+    // obscured
+    static void SetObscured(const std::vector<ObscuredReasons>& reasons);
 
     // Bind properties
     static void BindPopup(

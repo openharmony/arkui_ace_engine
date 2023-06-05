@@ -38,8 +38,9 @@ struct ImagePaintConfig {
     ImageInterpolation imageInterpolation_ = ImageInterpolation::NONE;
     ImageRepeat imageRepeat_ = ImageRepeat::NO_REPEAT;
     ImageFit imageFit_ = ImageFit::COVER;
-    bool needFlipCanvasHorizontally_ = false;
+    bool flipHorizontally_ = false;
     bool isSvg_ = false;
+    std::vector<ObscuredReasons> obscuredReasons_;
 };
 
 struct RenderTaskHolder;
@@ -72,6 +73,8 @@ public:
     {
         return Claim(this);
     }
+
+    virtual void Cache(const std::string& key) {}
 
     void SetPaintConfig(const ImagePaintConfig& config)
     {

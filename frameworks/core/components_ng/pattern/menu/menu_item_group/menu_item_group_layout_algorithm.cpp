@@ -15,14 +15,14 @@
 
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_layout_algorithm.h"
 
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
-#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_paint_property.h"
-#include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -173,28 +173,17 @@ void MenuItemGroupLayoutAlgorithm::LayoutIndex(const RefPtr<LayoutWrapper>& wrap
     wrapper->Layout();
 }
 
+// Need head padding if left brother is menu item group
 bool MenuItemGroupLayoutAlgorithm::NeedHeaderPadding(const RefPtr<FrameNode>& host)
 {
-    int32_t hostId = host->GetId();
-    auto menu = AceType::DynamicCast<FrameNode>(host->GetParent());
-    CHECK_NULL_RETURN(menu, false);
-    int32_t index = menu->GetChildIndexById(hostId);
-    if (index == 0) {
-        return false;
-    }
-    auto brotherNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(index - 1));
+    auto brotherNode = GetBrotherNode(host);
     CHECK_NULL_RETURN_NOLOG(brotherNode, false);
     return brotherNode->GetTag() != V2::MENU_ITEM_GROUP_ETS_TAG;
 }
 
 bool MenuItemGroupLayoutAlgorithm::NeedFooterPadding(const RefPtr<FrameNode>& host)
 {
-    int32_t hostId = host->GetId();
-    auto menu = AceType::DynamicCast<FrameNode>(host->GetParent());
-    CHECK_NULL_RETURN(menu, false);
-    int32_t index = menu->GetChildIndexById(hostId);
-    int32_t menuCount = menu->TotalChildCount();
-    return index != (menuCount - 1);
+    return !IsLastNode(host);
 }
 
 float MenuItemGroupLayoutAlgorithm::GetChildrenMaxWidth(
@@ -208,5 +197,40 @@ float MenuItemGroupLayoutAlgorithm::GetChildrenMaxWidth(
         width = std::max(width, childSize.Width());
     }
     return width;
+}
+
+std::list<WeakPtr<UINode>> MenuItemGroupLayoutAlgorithm::GetItemsAndGroups(const RefPtr<FrameNode>& host) const
+{
+    std::list<WeakPtr<UINode>> itemsAndGroups;
+    auto pattern = host->GetPattern<MenuItemGroupPattern>();
+    CHECK_NULL_RETURN(pattern, itemsAndGroups);
+    auto menu = pattern->GetMenu();
+    CHECK_NULL_RETURN(menu, itemsAndGroups);
+    auto menuPattern = menu->GetPattern<InnerMenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, itemsAndGroups);
+    return menuPattern->GetItemsAndGroups();
+}
+
+// get the left brother node
+RefPtr<FrameNode> MenuItemGroupLayoutAlgorithm::GetBrotherNode(const RefPtr<FrameNode>& host)
+{
+    auto itemsAndGroups = GetItemsAndGroups(host);
+    if (itemsAndGroups.empty()) {
+        return nullptr;
+    }
+    auto iter = std::find(itemsAndGroups.begin(), itemsAndGroups.end(), host);
+    if (iter == itemsAndGroups.begin() || iter == itemsAndGroups.end()) {
+        return nullptr;
+    }
+    return DynamicCast<FrameNode>((--iter)->Upgrade());
+}
+
+bool MenuItemGroupLayoutAlgorithm::IsLastNode(const RefPtr<FrameNode>& host) const
+{
+    auto itemsAndGroups = GetItemsAndGroups(host);
+    if (itemsAndGroups.empty()) {
+        return true;
+    }
+    return host == itemsAndGroups.back().Upgrade();
 }
 } // namespace OHOS::Ace::NG

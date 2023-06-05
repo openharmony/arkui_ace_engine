@@ -40,6 +40,7 @@ enum class GridColumnType {
     TOOL_BAR,
     DIALOG,
     CAR_DIALOG,
+    LIST_CARD,
 };
 
 class GridLayoutInfo : public virtual AceType {

@@ -157,9 +157,10 @@ inline Dimension StringToDimension(const std::string& value)
     return StringUtils::StringToDimension(value);
 }
 
-inline Dimension StringToDimensionWithUnit(const std::string& value, DimensionUnit defaultUnit = DimensionUnit::PX)
+inline bool StringToDimensionWithUnit(
+    const std::string& value, Dimension& result, DimensionUnit defaultUnit = DimensionUnit::PX)
 {
-    return StringUtils::StringToDimensionWithUnit(value, defaultUnit);
+    return StringUtils::StringToDimensionWithUnit(value, result, defaultUnit);
 }
 
 inline int32_t StringToInt(const std::string& value)
@@ -429,6 +430,8 @@ ACE_EXPORT_WITH_PREVIEW RefPtr<Curve> CreateBuiltinCurve(const std::string& aniT
 
 ACE_EXPORT_WITH_PREVIEW RefPtr<Curve> CreateCustomCurve(const std::string& aniTimFunc);
 
+ACE_FORCE_EXPORT_WITH_PREVIEW RefPtr<Curve> CreateCurve(const std::function<float(float)>& jsFunc);
+
 ACE_FORCE_EXPORT_WITH_PREVIEW RefPtr<Curve> CreateCurve(const std::string& aniTimFunc, bool useDefault = true);
 
 ACE_EXPORT TransitionType ParseTransitionType(const std::string& transitionType);
@@ -624,7 +627,7 @@ inline void HandleEscapeCharaterInUtf8TextForJson(std::string& text)
             ((text.at(pos) >= ESCAPE_CHARATER_START) && (text.at(pos) <= ESCAPE_CHARATER_END))) {
             std::ostringstream is;
             is << UNICODE_HEAD << std::hex << std::setw(UNICODE_LENGTH) << std::setfill(UNICODE_BODY)
-                << int(text.at(pos));
+               << int(text.at(pos));
             text.replace(pos, 1, is.str());
         }
     }
@@ -678,8 +681,8 @@ inline void ReplacePlaceHolder(std::string& resultStr, const std::unique_ptr<Jso
     }
 }
 
-inline std::string ParserPluralResource(const std::unique_ptr<JsonValue>& argsPtr, const std::string& choice,
-    const std::string& count)
+inline std::string ParserPluralResource(
+    const std::unique_ptr<JsonValue>& argsPtr, const std::string& choice, const std::string& count)
 {
     std::string valueStr;
     std::string defaultPluralStr(DEFAULT_PLURAL_CHOICE);

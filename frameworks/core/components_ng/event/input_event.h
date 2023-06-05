@@ -30,6 +30,8 @@ public:
 
     explicit InputEvent(OnHoverEventFunc&& callback) : onHoverCallback_(std::move(callback)) {}
 
+    explicit InputEvent(OnHoverFunc&& callback) : onHoverEventCallback_(std::move(callback)) {}
+    
     explicit InputEvent(OnAxisEventFunc&& callback) : onAxisCallback_(std::move(callback)) {}
 
     ~InputEvent() override = default;
@@ -44,6 +46,11 @@ public:
         return onHoverCallback_;
     }
 
+    const OnHoverFunc& GetOnHoverFunc() const
+    {
+        return onHoverEventCallback_;
+    }
+
     const OnAxisEventFunc& GetOnAxisEventFunc() const
     {
         return onAxisCallback_;
@@ -56,6 +63,12 @@ public:
         }
     }
 
+    void operator()(bool state, HoverInfo& info) const
+    {
+        if (onHoverEventCallback_) {
+            onHoverEventCallback_(state, info);
+        }
+    }
     void operator()(bool state) const
     {
         if (onHoverCallback_) {
@@ -73,6 +86,7 @@ public:
 private:
     OnMouseEventFunc onMouseCallback_;
     OnHoverEventFunc onHoverCallback_;
+    OnHoverFunc onHoverEventCallback_;
     OnAxisEventFunc onAxisCallback_;
 };
 
@@ -89,13 +103,14 @@ public:
         }
         userCallback_ = MakeRefPtr<InputEvent>(std::move(callback));
     }
-    void ReplaceInputEvent(OnHoverEventFunc&& callback)
+    void ReplaceInputEvent(OnHoverFunc&& callback)
     {
         if (userCallback_) {
             userCallback_.Reset();
         }
         userCallback_ = MakeRefPtr<InputEvent>(std::move(callback));
     }
+
     void ReplaceInputEvent(OnAxisEventFunc&& callback)
     {
         if (userCallback_) {

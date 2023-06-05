@@ -39,6 +39,7 @@ public:
     MOCK_CONST_METHOD0(GetRawPixelMapPtr, void*());
     MOCK_METHOD0(GetId, std::string());
     MOCK_METHOD0(GetModifyId, std::string());
+    MOCK_METHOD0(GetPixelMapSharedPtr, std::shared_ptr<Media::PixelMap>());
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_TEST_MOCK_MOCK_PIXEL_MAP_H

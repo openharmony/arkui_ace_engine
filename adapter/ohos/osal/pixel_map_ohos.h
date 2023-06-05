@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_PIXEL_MAP_OHOS_H
 
 #include "pixel_map.h"
-#include "pixel_map_manager.h"
 
 #include "base/image/pixel_map.h"
 
@@ -27,8 +26,8 @@ class PixelMapOhos : public PixelMap {
     DECLARE_ACE_TYPE(PixelMapOhos, PixelMap)
 
 public:
-    explicit PixelMapOhos(std::shared_ptr<Media::PixelMap> pixmap) : pixmap_(pixmap) {}
-    ~PixelMapOhos() = default;
+    explicit PixelMapOhos(std::shared_ptr<Media::PixelMap> pixmap) : pixmap_(std::move(pixmap)) {}
+    ~PixelMapOhos() override = default;
     static PixelFormat PixelFormatConverter(Media::PixelFormat pixelFormat);
     static AlphaType AlphaTypeConverter(Media::AlphaType alphaType);
     int32_t GetWidth() const override;

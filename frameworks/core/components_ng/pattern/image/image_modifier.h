@@ -38,6 +38,7 @@ public:
     void SetImageFit(ImageFit imagefit);
     void UpdateImageData(const WeakPtr<CanvasImage>& canvasImage, const OffsetF& offset, const SizeF& contentSize);
     void Modify();
+    void SetIsAltImage(bool isAltImage);
 
 private:
     float GetValue(float value) const;
@@ -56,6 +57,7 @@ private:
     WeakPtr<CanvasImage> canvasImage_;
     RefPtr<AnimatablePropertyFloat> imageFit_;
     RefPtr<PropertyBool> flag_;
+    bool isAltImage_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImageModifier);
 };

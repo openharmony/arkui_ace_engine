@@ -1475,8 +1475,10 @@ void WebDelegate::InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<
         LOGI("source is nullptr, initialize with window");
         if (PrepareInitOHOSWeb(context)) {
             if (!isCreateWebView_) {
+#ifndef ENABLE_ROSEN_BACKEND
                 InitWebViewWithWindow();
                 isCreateWebView_ = true;
+#endif
             }
         } else {
             LOGE("prepare init web failed");

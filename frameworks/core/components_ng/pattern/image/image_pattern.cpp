@@ -215,16 +215,14 @@ void ImagePattern::SetImagePaintConfig(
 RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
 {
     if (image_) {
-        if (!imageModifier_) {
-            imageModifier_ = AceType::MakeRefPtr<ImageModifier>();
-        }
-        return MakeRefPtr<ImagePaintMethod>(image_, imageModifier_, selectOverlay_);
+        return MakeRefPtr<ImagePaintMethod>(image_, selectOverlay_);
     }
     if (altImage_ && altDstRect_ && altSrcRect_) {
-        if (!altImageModifier_) {
-            altImageModifier_ = AceType::MakeRefPtr<ImageModifier>();
-        }
-        return MakeRefPtr<ImagePaintMethod>(altImage_, altImageModifier_, selectOverlay_);
+        return MakeRefPtr<ImagePaintMethod>(altImage_, selectOverlay_);
+    }
+    CreateObscuredImageIfNeed();
+    if (obscuredImage_) {
+        return MakeRefPtr<ImagePaintMethod>(obscuredImage_, selectOverlay_);
     }
     return nullptr;
 }
@@ -235,6 +233,24 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
         return false;
     }
     return image_;
+}
+
+void ImagePattern::CreateObscuredImageIfNeed()
+{
+    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    auto layoutConstraint = imageLayoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    auto reasons = host->GetRenderContext()->GetObscured().value_or(std::vector<ObscuredReasons>());
+    if (reasons.size() && layoutConstraint->selfIdealSize.IsValid()) {
+        if (!obscuredImage_) {
+            obscuredImage_ = MakeRefPtr<ObscuredImage>();
+            SetImagePaintConfig(obscuredImage_, srcRect_, dstRect_, sourceInfo.IsSvg());
+        }
+    }
 }
 
 void ImagePattern::LoadImageDataIfNeed()

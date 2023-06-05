@@ -97,7 +97,7 @@ void RadioModelImpl::SetHeight(const Dimension& height)
     }
 }
 
-void RadioModelImpl::SetPadding(const NG::PaddingPropertyF& args)
+void RadioModelImpl::SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& /*newArgs*/)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto radioComponent = AceType::DynamicCast<RadioComponent<std::string>>(stack->GetMainComponent());

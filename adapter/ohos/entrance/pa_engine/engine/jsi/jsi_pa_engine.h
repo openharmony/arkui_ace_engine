@@ -151,9 +151,6 @@ private:
     void StartData();
     void StartForm(const OHOS::AAFwk::Want& want);
 
-    void RegisterWorker();
-    void RegisterInitWorkerFunc();
-    void RegisterAssetFunc();
     bool InitJsEnv(bool debuggerMode, const std::unordered_map<std::string, void*>& extraNativeObject);
     void RegisterPaModule();
     void RegisterConsoleModule();

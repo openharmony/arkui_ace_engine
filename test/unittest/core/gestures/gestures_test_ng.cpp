@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2014,6 +2014,7 @@ HWTEST_F(GesturesTestNg, PanRecognizerTest007, TestSize.Level1)
      */
     panRecognizer.direction_.type = PanDirection::DOWN;
     panRecognizer.averageDistance_ = Offset(-1, 1);
+    panRecognizer.touchPointsDistance_[0] = Offset(-1, 1);
     panRecognizer.distance_ = 0;
     result = panRecognizer.IsPanGestureAccept();
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
@@ -5897,5 +5898,57 @@ HWTEST_F(GesturesTestNg, PinchRecognizerTest011, TestSize.Level1)
     pinchRecognizer->refereeState_ = RefereeState::DETECTING;
     pinchRecognizer->HandleTouchMoveEvent(axisEvent);
     EXPECT_EQ(pinchRecognizer->scale_, axisEvent.pinchAxisScale);
+}
+
+/**
+ * @tc.name: GestureAccessibilityEventTest001
+ * @tc.desc: Test SetOnAccessibility in ClickRecognizer
+ */
+HWTEST_F(GesturesTestNg, GestureAccessibilityEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create clickRecognizer.
+     */
+    ClickRecognizer clickRecognizer = ClickRecognizer(SINGLE_FINGER_NUMBER, TAPPED_COUNT);
+
+    /**
+     * @tc.steps: step2. set callback function.
+     */
+    auto onAccessibilityEvent = [](AccessibilityEventType eventType) {};
+    clickRecognizer.SetOnAccessibility(onAccessibilityEvent);
+    ASSERT_NE(clickRecognizer.onAccessibilityEventFunc_, nullptr);
+
+    /**
+     * @tc.steps: step3. call callback function.
+     * @tc.expected: refereeState_ is SUCCEED.
+     */
+    clickRecognizer.OnAccepted();
+    EXPECT_EQ(clickRecognizer.refereeState_, RefereeState::SUCCEED);
+}
+
+/**
+ * @tc.name: GestureAccessibilityEventTest002
+ * @tc.desc: Test SetOnAccessibility in LongPressRecognizer
+ */
+HWTEST_F(GesturesTestNg, GestureAccessibilityEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create longPressRecognizer.
+     */
+    LongPressRecognizer longPressRecognizer = LongPressRecognizer(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+
+    /**
+     * @tc.steps: step2. set callback function.
+     */
+    auto onAccessibilityEvent = [](AccessibilityEventType eventType) {};
+    longPressRecognizer.SetOnAccessibility(onAccessibilityEvent);
+    ASSERT_NE(longPressRecognizer.onAccessibilityEventFunc_, nullptr);
+
+    /**
+     * @tc.steps: step3. call callback function.
+     * @tc.expected: refereeState_ is SUCCEED.
+     */
+    longPressRecognizer.OnAccepted();
+    EXPECT_EQ(longPressRecognizer.refereeState_, RefereeState::SUCCEED);
 }
 } // namespace OHOS::Ace::NG

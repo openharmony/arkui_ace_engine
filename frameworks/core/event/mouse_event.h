@@ -29,7 +29,6 @@ class MouseInfo;
 constexpr int32_t MOUSE_PRESS_LEFT = 1;
 static const int32_t MOUSE_BASE_ID = 1000;
 
-using OnHoverEventFunc = std::function<void(bool)>;
 using OnMouseEventFunc = std::function<void(MouseInfo& info)>;
 
 enum class MouseAction : int32_t {
@@ -278,6 +277,18 @@ private:
 
 using HoverEffectFunc = std::function<void(bool)>;
 
+class HoverInfo;
+class HoverInfo : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(HoverInfo, BaseEventInfo);
+
+public:
+    HoverInfo() : BaseEventInfo("onHover") {}
+    ~HoverInfo() override = default;
+};
+
+using OnHoverFunc = std::function<void(bool, HoverInfo& info)>;
+using OnHoverEventFunc = std::function<void(bool)>;
+
 class MouseEventTarget : public virtual TouchEventTarget {
     DECLARE_ACE_TYPE(MouseEventTarget, TouchEventTarget);
 
@@ -336,6 +347,22 @@ public:
     {
         onHoverCallback_ = onHoverCallback;
     }
+    void SetCallback(const OnHoverFunc& onHoverEventCallback)
+    {
+        onHoverEventCallback_ = onHoverEventCallback;
+    }
+
+    bool HandleHoverEvent(bool isHovered, HoverInfo& info)
+    {
+        if (!onHoverEventCallback_) {
+            return false;
+        }
+        onHoverEventCallback_(isHovered, info);
+        if (info.IsStopPropagation()) {
+            return false;
+        }
+        return true;
+    }
 
     bool HandleHoverEvent(bool isHovered)
     {
@@ -357,6 +384,7 @@ public:
 
 private:
     OnHoverEventFunc onHoverCallback_;
+    OnHoverFunc onHoverEventCallback_;
 };
 
 class HoverEffectTarget : public virtual TouchEventTarget {

@@ -93,7 +93,12 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
         outNodePos_ = outNodeParentPos_ + renderContext->GetPaintRectWithTransform().GetOffset();
     }
     if (isNodeIn && (frameNode != inNode_)) {
-        SwapInAndOut(inNode_.Upgrade());
+        auto inNode = inNode_.Upgrade();
+        if (inNode != nullptr && !inNode->IsRemoving() && !inNode->IsOnMainTree()) {
+            inNode_ = frameNode;
+            return;
+        }
+        SwapInAndOut(inNode != nullptr);
         inNode_ = frameNode;
         hasInAnim_ = true;
     }
@@ -306,7 +311,9 @@ void GeometryTransition::OnReSync()
     if (!renderContext || !renderContext->IsSynced() || !outNode->IsRemoving()) {
         return;
     }
-    auto inNodeAbsRect = RectF(inNode->GetPaintRectOffset(), renderContext->GetPaintRectWithTransform().GetSize());
+    auto paintRect = renderContext->GetPaintRectWithTransform();
+    auto inNodeAbsRect = RectF(inNode->GetPaintRectGlobalOffsetWithTranslate(true) + paintRect.GetOffset(),
+                               paintRect.GetSize());
     if (inNodeAbsRect != outNodeTargetAbsRect_) {
         hasOutAnim_ = true;
         outNode->GetLayoutProperty()->CleanDirty();

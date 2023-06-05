@@ -151,13 +151,13 @@ void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<
     inSelectedRect_ = false;
 }
 
-void EventManager::HandleGlobalEventNG(
-    const TouchEvent& touchPoint, const RefPtr<NG::SelectOverlayManager>& selectOverlayManager)
+void EventManager::HandleGlobalEventNG(const TouchEvent& touchPoint,
+    const RefPtr<NG::SelectOverlayManager>& selectOverlayManager, const NG::OffsetF& rootOffset)
 {
     if (touchPoint.type != TouchType::DOWN || touchPoint.sourceType != SourceType::MOUSE) {
         return;
     }
-    const NG::PointF point { touchPoint.x, touchPoint.y };
+    const NG::PointF point { touchPoint.x - rootOffset.GetX(), touchPoint.y - rootOffset.GetY() };
     CHECK_NULL_VOID_NOLOG(selectOverlayManager);
     if (!selectOverlayManager->IsInSelectedOrSelectOverlayArea(point)) {
         selectOverlayManager->DestroySelectOverlay();
@@ -631,18 +631,48 @@ void EventManager::DispatchMouseHoverAnimationNG(const MouseEvent& event)
 bool EventManager::DispatchMouseHoverEventNG(const MouseEvent& event)
 {
     LOGD("DispatchMouseHoverEventNG: button is %{public}d, action is %{public}d.", event.button, event.action);
+    auto lastHoverEndNode = lastHoverTestResults_.begin();
+    auto currHoverEndNode = currHoverTestResults_.begin();
+    RefPtr<HoverEventTarget> lastHoverEndNodeTarget;
+    uint32_t iterCount = 0;
+    HoverInfo hoverInfo;
     for (const auto& hoverResult : lastHoverTestResults_) {
-        // get all previous hover nodes while it's not in current hover nodes. Those nodes exit hover
-        auto it = std::find(currHoverTestResults_.begin(), currHoverTestResults_.end(), hoverResult);
-        if (it == currHoverTestResults_.end()) {
-            hoverResult->HandleHoverEvent(false);
+        // get valid part of previous hover nodes while it's not in current hover nodes. Those nodes exit hover
+        // there may have some nodes in currHoverTestResults_ but intercepted
+        iterCount++;
+        if (lastHoverEndNode != currHoverTestResults_.end()) {
+            lastHoverEndNode++;
+        }
+        if (std::find(currHoverTestResults_.begin(), currHoverTestResults_.end(), hoverResult)
+                == currHoverTestResults_.end()) {
+            hoverResult->HandleHoverEvent(false, hoverInfo);
+        }
+        if (iterCount >= lastHoverDispatchLength_) {
+            lastHoverEndNodeTarget = hoverResult;
+            break;
         }
     }
+    lastHoverDispatchLength_ = 0;
     for (const auto& hoverResult : currHoverTestResults_) {
-        // get all current hover nodes while it's not in previous hover nodes. Those nodes are new hover
-        auto it = std::find(lastHoverTestResults_.begin(), lastHoverTestResults_.end(), hoverResult);
-        if (it == lastHoverTestResults_.end()) {
-            hoverResult->HandleHoverEvent(true);
+        // get valid part of current hover nodes while it's not in previous hover nodes. Those nodes are new hover
+        // the valid part stops at first interception
+        lastHoverDispatchLength_++;
+        if (currHoverEndNode != currHoverTestResults_.end()) {
+            currHoverEndNode++;
+        }
+        if (std::find(lastHoverTestResults_.begin(), lastHoverEndNode, hoverResult) == lastHoverEndNode) {
+            if (!hoverResult->HandleHoverEvent(true, hoverInfo)) {
+                break;
+            }
+        }
+        if (hoverResult == lastHoverEndNodeTarget) {
+            break;
+        }
+    }
+    for (auto hoverResultIt = lastHoverTestResults_.begin(); hoverResultIt != lastHoverEndNode; ++hoverResultIt) {
+        // there may have previous hover nodes in the invalid part of current hover nodes. Those nodes exit hover also
+        if (std::find(currHoverEndNode, currHoverTestResults_.end(), *hoverResultIt) != currHoverTestResults_.end()) {
+            (*hoverResultIt)->HandleHoverEvent(false, hoverInfo);
         }
     }
     return true;

@@ -110,6 +110,9 @@ public:
     {
         return valueRatio_;
     }
+    
+    std::string ProvideRestoreInfo() override;
+    void OnRestoreInfo(const std::string& restoreInfo) override;
 
     void UpdateValue(float value);
 private:

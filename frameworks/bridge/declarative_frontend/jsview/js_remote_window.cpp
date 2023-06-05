@@ -36,8 +36,8 @@ RemoteWindowModel* RemoteWindowModel::GetInstance()
             } else {
                 instance_.reset(new Framework::RemoteWindowModelImpl());
             }
-        }
 #endif
+        }
     }
     return instance_.get();
 }

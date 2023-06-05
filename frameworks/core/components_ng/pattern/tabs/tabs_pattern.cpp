@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -157,5 +158,44 @@ void TabsPattern::SetOnIndexChangeEvent(std::function<void(const BaseEventInfo*)
         CHECK_NULL_VOID(eventHub);
         eventHub->AddOnChangeEvent(onIndexChangeEvent_);
     }
+}
+
+std::string TabsPattern::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_RETURN(tabsNode, "");
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_RETURN(tabBarNode, "");
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_RETURN(tabBarPattern, "");
+    return tabBarPattern->ProvideRestoreInfo();
+}
+
+void TabsPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    auto info = JsonUtil::ParseJsonString(restoreInfo);
+    if (!info->IsValid() || !info->IsObject()) {
+        LOGW("TabsPattern:: restore info is invalid");
+        return;
+    }
+    auto jsonIsOn = info->GetValue("Index");
+    swiperLayoutProperty->UpdateIndex(jsonIsOn->GetInt());
+    
+    swiperPattern->OnRestoreInfo(restoreInfo);
+    tabBarPattern->OnRestoreInfo(restoreInfo);
+  
 }
 } // namespace OHOS::Ace::NG

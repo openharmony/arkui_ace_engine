@@ -89,8 +89,12 @@ void RenderSurfaceImpl::SetExtSurfaceBounds(int32_t left, int32_t top, int32_t w
         width, height);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask([surface = extSurface_, id = surfaceId_, left, top, width,
-                               height]() { surface->SetBounds(id, left, top, width, height); },
+    taskExecutor->PostTask(
+        [surface = extSurface_, id = surfaceId_, left, top, width, height]() {
+            if (surface) {
+                surface->SetBounds(id, left, top, width, height);
+            }
+        },
         TaskExecutor::TaskType::PLATFORM);
 }
 

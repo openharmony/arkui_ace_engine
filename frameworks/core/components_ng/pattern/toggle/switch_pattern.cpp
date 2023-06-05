@@ -59,11 +59,12 @@ bool SwitchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     width_ = width;
     height_ = height;
     auto geometryNode = dirty->GetGeometryNode();
-    offset_ = geometryNode->GetContentOffset();
-    size_ = geometryNode->GetContentSize();
-    if (isFirstAddhotZoneRect_) {
+    auto offset = geometryNode->GetContentOffset();
+    auto size = geometryNode->GetContentSize();
+    if (!NearEqual(offset, offset_) || !NearEqual(size, size_)) {
+        offset_ = offset;
+        size_ = size;
         AddHotZoneRect();
-        isFirstAddhotZoneRect_ = false;
     }
     return true;
 }
@@ -527,5 +528,25 @@ void SwitchPattern::RemoveLastHotZoneRect() const
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->RemoveLastHotZoneRect();
+}
+
+std::string SwitchPattern::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    jsonObj->Put("IsOn", isOn_.value_or(false));
+    return jsonObj->ToString();
+}
+
+void SwitchPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    auto switchPaintProperty = GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_VOID(switchPaintProperty);
+    auto info = JsonUtil::ParseJsonString(restoreInfo);
+    if (!info->IsValid() || !info->IsObject()) {
+        return;
+    }
+    auto jsonIsOn = info->GetValue("IsOn");
+    switchPaintProperty->UpdateIsOn(jsonIsOn->GetBool());
+    OnModifyDone();
 }
 } // namespace OHOS::Ace::NG

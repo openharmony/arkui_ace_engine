@@ -22,8 +22,18 @@ RefPtr<ImageSource> ImageSource::Create(int32_t /* fd */)
     return nullptr;
 }
 
+RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size)
+{
+    return nullptr;
+}
+
 std::string ImageSourcePreview::GetProperty(const std::string& /* key */)
 {
     return "";
+}
+
+RefPtr<PixelMap> ImageSourcePreview::CreatePixelMap(int32_t width, int32_t height)
+{
+    return nullptr;
 }
 } // namespace OHOS::Ace

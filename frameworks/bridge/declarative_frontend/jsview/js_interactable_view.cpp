@@ -74,10 +74,11 @@ void JSInteractableView::JsOnHover(const JSCallbackInfo& info)
         return;
     }
     RefPtr<JsHoverFunction> jsOnHoverFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onHover = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverFunc)](bool param) {
+    auto onHover = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverFunc)](
+                       bool isHover, HoverInfo& hoverInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onHover");
-        func->Execute(param);
+        func->HoverExecute(isHover, hoverInfo);
     };
     ViewAbstractModel::GetInstance()->SetOnHover(std::move(onHover));
 }

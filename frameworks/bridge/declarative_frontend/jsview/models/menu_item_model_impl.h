@@ -29,9 +29,11 @@ public:
     void SetOnChange(std::function<void(bool)>&& onChange) override;
     void SetFontSize(const Dimension& fontSize) override;
     void SetFontWeight(FontWeight weight) override;
+    void SetFontStyle(Ace::FontStyle style) override;
     void SetFontColor(const std::optional<Color>& color) override;
     void SetLabelFontSize(const Dimension& fontSize) override;
     void SetLabelFontWeight(FontWeight weight) override;
+    void SetLabelFontStyle(Ace::FontStyle style) override;
     void SetLabelFontColor(const std::optional<Color>& color) override;
     void SetSelectedChangeEvent(std::function<void(bool)>&& selectedChangeEvent) override;
 };

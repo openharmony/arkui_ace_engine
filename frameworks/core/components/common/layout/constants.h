@@ -465,7 +465,7 @@ enum class CalendarType {
     SIMPLE,
 };
 
-enum class SideBarContainerType { EMBED, OVERLAY };
+enum class SideBarContainerType { EMBED, OVERLAY, AUTO };
 
 enum class SideBarPosition { START, END };
 
@@ -597,6 +597,10 @@ enum class FunctionKey {
     F10 = 10,
     F11 = 11,
     F12 = 12,
+};
+
+enum class ObscuredReasons {
+    PLACEHOLDER = 0,
 };
 
 } // namespace OHOS::Ace

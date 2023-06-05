@@ -1068,6 +1068,7 @@ void RenderBox::MouseHoverExitTest()
 
 void RenderBox::HandleMouseHoverEvent(MouseState mouseState)
 {
+    HoverInfo info = HoverInfo();
     std::string accessibilityEventType;
     if (mouseState == MouseState::HOVER) {
         accessibilityEventType = "mousehoverenter";
@@ -1077,7 +1078,7 @@ void RenderBox::HandleMouseHoverEvent(MouseState mouseState)
     SendAccessibilityEvent(accessibilityEventType);
 
     if (onHover_) {
-        onHover_(mouseState == MouseState::HOVER);
+        onHover_(mouseState == MouseState::HOVER, info);
     }
 }
 

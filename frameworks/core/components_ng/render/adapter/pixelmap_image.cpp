@@ -92,10 +92,29 @@ void PixelMapImage::DrawToRSCanvas(
 #ifndef NEW_SKIA
     recordingCanvas->DrawPixelMapWithParm(pixelMap_->GetPixelMapSharedPtr(), rsImageInfo, paint);
 #else
-    // TODO:Haw to set SamplingOptions?
     recordingCanvas->DrawPixelMapWithParm(pixelMap_->GetPixelMapSharedPtr(), rsImageInfo, options, paint);
 #endif
 #endif
 }
 
+void PixelMapImage::Cache(const std::string& key)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto cache = pipeline->GetImageCache();
+    CHECK_NULL_VOID(cache);
+    cache->CacheImageData(key, MakeRefPtr<PixmapCachedData>(pixelMap_));
+}
+
+RefPtr<CanvasImage> PixelMapImage::QueryFromCache(const std::string& key)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto cache = pipeline->GetImageCache();
+    CHECK_NULL_RETURN(cache, nullptr);
+    auto data = DynamicCast<PixmapCachedData>(cache->GetCacheImageData(key));
+    CHECK_NULL_RETURN_NOLOG(data, nullptr);
+    LOGD("pixelMap cache found %{public}s", key.c_str());
+    return MakeRefPtr<PixelMapImage>(data->pixmap_);
+}
 } // namespace OHOS::Ace::NG

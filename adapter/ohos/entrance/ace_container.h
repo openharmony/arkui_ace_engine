@@ -314,8 +314,6 @@ public:
         sptr<OHOS::Rosen::Window> rsWindow, UIEnvCallback callback = nullptr);
     static void SetViewNew(
         AceView* view, double density, int32_t width, int32_t height, sptr<OHOS::Rosen::Window> rsWindow);
-    static void SetView(AceView* view, double density, int32_t width, int32_t height,
-        const std::shared_ptr<Window>& window);
     static void SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow);
     static sptr<OHOS::Rosen::Window> GetUIWindow(int32_t instanceId);
     static OHOS::AppExecFwk::Ability* GetAbility(int32_t instanceId);
@@ -326,7 +324,6 @@ public:
 
     static RefPtr<AceContainer> GetContainer(int32_t instanceId);
     static bool UpdatePage(int32_t instanceId, int32_t pageId, const std::string& content);
-    static void ClearEngineCache(int32_t instanceId);
 
     // ArkTsCard
     static std::shared_ptr<Rosen::RSSurfaceNode> GetFormSurfaceNode(int32_t instanceId);
@@ -401,6 +398,8 @@ public:
         return webHapPath_;
     }
 
+    SafeAreaEdgeInserts GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type);
+
     // ArkTSCard
     void UpdateFormData(const std::string& data);
     void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap);
@@ -411,7 +410,7 @@ public:
     void GetImageDataFromAshmem(
         const std::string& picName, Ashmem& ashmem, const RefPtr<PipelineBase>& pipelineContext, int len);
 
-    std::shared_ptr<AbilityRuntime::Context> GetAbilityRuntimeContext();
+    bool IsLauncherContainer() override;
 
 private:
     void InitializeFrontend();
@@ -419,7 +418,7 @@ private:
     void InitializeTask();
     void InitWindowCallback();
 
-    SafeAreaEdgeInserts SetViewSafeArea(sptr<OHOS::Rosen::Window> window);
+    SafeAreaEdgeInserts GetViewSafeArea(sptr<OHOS::Rosen::Window> window);
 
     void AttachView(std::shared_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height,
         int32_t windowId, UIEnvCallback callback = nullptr);

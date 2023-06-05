@@ -1543,7 +1543,7 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDisappear(destructor);
 
-    WebPattern::RegisterSelectPopupCallback(menu, callback);
+    WebPattern::RegisterSelectPopupCallback(menu, callback, params);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->RegisterOnHideMenu([weak = WeakClaim(this), callback]() {
@@ -1558,8 +1558,11 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
 }
 
 void WebPattern::RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
-    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback)
+    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback,
+    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params)
 {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     auto menuContainer = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
     CHECK_NULL_VOID(menuContainer);
     auto menuPattern = menuContainer->GetPattern<MenuPattern>();
@@ -1573,10 +1576,12 @@ void WebPattern::RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
         auto optionNode = AceType::DynamicCast<FrameNode>(option);
         if (optionNode) {
             auto hub = optionNode->GetEventHub<OptionEventHub>();
-            if (!hub) {
+            auto optionPattern = optionNode->GetPattern<OptionPattern>();
+            if (!hub || !optionPattern) {
                 continue;
             }
             hub->SetOnSelect(std::move(selectCallback));
+            optionPattern->SetFontSize(Dimension(params->itemFontSize * pipeline->GetDipScale()));
             optionNode->MarkModifyDone();
         }
     }

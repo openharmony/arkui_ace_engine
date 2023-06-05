@@ -26,12 +26,14 @@
 
 namespace OHOS::Ace::NG {
 
-void ListItemGroupModelNG::Create()
+void ListItemGroupModelNG::Create(V2::ListItemGroupStyle listItemGroupStyle)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::LIST_ITEM_GROUP_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ListItemGroupPattern>(nullptr); });
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, nodeId, [itemGroupStyle = listItemGroupStyle]() {
+            return AceType::MakeRefPtr<ListItemGroupPattern>(nullptr, itemGroupStyle);
+        });
     stack->Push(frameNode);
 }
 

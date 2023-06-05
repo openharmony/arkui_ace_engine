@@ -533,7 +533,7 @@ RefPtr<NG::ChainedTransitionEffect> ParseChainedTransition(
     if (propAnimationOption->IsObject()) {
         auto animationOptionArgs = JsonUtil::ParseJsonString(propAnimationOption->ToString());
         auto animationOptionResult =
-            std::make_shared<AnimationOption>(JSViewContext::CreateAnimation(animationOptionArgs));
+            std::make_shared<AnimationOption>(JSViewContext::CreateAnimation(animationOptionArgs, nullptr));
         auto animationOptionObj = JSRef<JSObject>::Cast(propAnimationOption);
         JSRef<JSVal> onFinish = animationOptionObj->GetProperty("onFinish");
         if (onFinish->IsFunction()) {
@@ -800,6 +800,23 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
             LOGI("Empty.");
         }
     }
+
+    auto offsetVal = popupObj->GetProperty("offset");
+    if (offsetVal->IsObject()) {
+        auto offsetObj = JSRef<JSObject>::Cast(offsetVal);
+        auto xVal = offsetObj->GetProperty("x");
+        auto yVal = offsetObj->GetProperty("y");
+        Offset popupOffset;
+        if (xVal->IsNumber()) {
+            popupOffset.SetX(xVal->ToNumber<double>());
+        }
+        if (yVal->IsNumber()) {
+            popupOffset.SetY(yVal->ToNumber<double>());
+        }
+        if (popupParam) {
+            popupParam->SetTargetOffset(popupOffset);
+        }
+    }
 }
 
 void ParseCustomPopupParam(
@@ -910,6 +927,23 @@ void ParseCustomPopupParam(
                 func->Execute(keys, param);
             };
             popupParam->SetOnStateChange(onStateChangeCallback);
+        }
+    }
+
+    auto offsetVal = popupObj->GetProperty("offset");
+    if (offsetVal->IsObject()) {
+        auto offsetObj = JSRef<JSObject>::Cast(offsetVal);
+        auto xVal = offsetObj->GetProperty("x");
+        auto yVal = offsetObj->GetProperty("y");
+        Offset popupOffset;
+        if (xVal->IsNumber()) {
+            popupOffset.SetX(xVal->ToNumber<double>());
+        }
+        if (yVal->IsNumber()) {
+            popupOffset.SetY(yVal->ToNumber<double>());
+        }
+        if (popupParam) {
+            popupParam->SetTargetOffset(popupOffset);
         }
     }
 }
@@ -1212,9 +1246,7 @@ NG::TransitionOptions JSViewAbstract::ParseTransition(std::unique_ptr<JsonValue>
 
 void JSViewAbstract::JsTransition(const JSCallbackInfo& info)
 {
-    LOGD("JsTransition");
     if (info.Length() > 1) {
-        LOGE("Too many arguments");
         return;
     }
     if (info.Length() == 0) {
@@ -1255,6 +1287,7 @@ bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
         return true;
     }
     if (!ParseJsDimensionVp(jsValue, value)) {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
         return false;
     }
 
@@ -1268,11 +1301,6 @@ bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
 
 void JSViewAbstract::JsHeight(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
-
     JsHeight(info[0]);
 }
 
@@ -1284,6 +1312,7 @@ bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
         return true;
     }
     if (!ParseJsDimensionVp(jsValue, value)) {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
         return false;
     }
 
@@ -1911,9 +1940,8 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
             adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
             styleOption.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
         }
-        double scale = 1.0;
         if (jsOption->GetProperty("scale")->IsNumber()) {
-            scale = jsOption->GetProperty("scale")->ToNumber<double>();
+            double scale = jsOption->GetProperty("scale")->ToNumber<double>();
             styleOption.scale = std::clamp(scale, 0.0, 1.0);
         }
     }
@@ -1948,9 +1976,8 @@ void JSViewAbstract::JsForegroundBlurStyle(const JSCallbackInfo& info)
             adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
             styleOption.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
         }
-        double scale = 1.0;
         if (jsOption->GetProperty("scale")->IsNumber()) {
-            scale = jsOption->GetProperty("scale")->ToNumber<double>();
+            double scale = jsOption->GetProperty("scale")->ToNumber<double>();
             styleOption.scale = std::clamp(scale, 0.0, 1.0);
         }
     }
@@ -2885,6 +2912,87 @@ void JSViewAbstract::JsBackdropBlur(const JSCallbackInfo& info)
     info.SetReturnValue(info.This());
 }
 
+void JSViewAbstract::GetFractionStops(
+    std::vector<std::pair<float, float>>& fractionStops, const std::unique_ptr<JsonValue>& array)
+{
+    float tmpPos = -1.0f;
+    for (int32_t i = 0; i < array->GetArraySize(); i++) {
+        std::pair<float, float> fractionStop;
+        auto item = array->GetArrayItem(i);
+        if (item && !item->IsNull() && item->IsArray() && item->GetArraySize() >= 1) {
+            auto fraction = item->GetArrayItem(0);
+            double value = 0.0;
+            if (ParseJsonDouble(fraction, value)) {
+                value = std::clamp(value, 0.0, 1.0);
+                fractionStop.first = static_cast<float>(value);
+            }
+            if (item->GetArraySize() <= 1) {
+                continue;
+            }
+            auto stop = item->GetArrayItem(1);
+            value = 0.0;
+            if (ParseJsonDouble(stop, value)) {
+                value = std::clamp(value, 0.0, 1.0);
+                fractionStop.second = static_cast<float>(value);
+            }
+        }
+        if (fractionStop.second <= tmpPos) {
+            LOGE("fraction stop postion is not incremental.");
+            fractionStops.clear();
+            return;
+        }
+        tmpPos = fractionStop.second;
+        fractionStops.push_back(fractionStop);
+    }
+}
+void JSViewAbstract::JsLinearGradientBlur(const JSCallbackInfo& info)
+{
+    if (info.Length() < 2) { // 2 represents the least para num;
+        LOGE("The argv is wrong, it is supposed to have at least 2 argument");
+        return;
+    }
+    double blurRadius = 0.0;
+    if (!ParseJsDouble(info[0], blurRadius)) {
+        return;
+    }
+    blurRadius = std::clamp(blurRadius, 0.0, 100.0); // 100.0 represents largest blur radius;
+
+    if (!info[1]->IsObject()) {
+        LOGE("arg is not a object.");
+        return;
+    }
+    auto argsPtrItem = JsonUtil::ParseJsonString(info[1]->ToString());
+    if (!argsPtrItem || argsPtrItem->IsNull()) {
+        LOGE("Js Parse object failed. argsPtr is null. %s", info[1]->ToString().c_str());
+        return;
+    }
+    
+    // Parse fractionStops
+    auto array = argsPtrItem->GetValue("fractionStops");
+    if (!array || array->IsNull() || !array->IsArray()) {
+        LOGE("Js Parse object failed, fractionStops is null or not Array");
+        return;
+    }
+
+    std::vector<std::pair<float, float>> fractionStops;
+    GetFractionStops(fractionStops, array);
+
+    if (fractionStops.size() <= 1) {
+        LOGE("fractionstops must greater than 1.");
+        return;
+    }
+    // Parse direction
+    auto direction = static_cast<GradientDirection>(
+        argsPtrItem->GetInt("direction", static_cast<int8_t>(GradientDirection::NONE)));
+    if (static_cast<int8_t>(direction) >= static_cast<int8_t>(GradientDirection::NONE)) {
+        direction = GradientDirection::BOTTOM;
+    }
+
+    CalcDimension dimensionRadius(static_cast<float>(blurRadius), DimensionUnit::PX);
+    NG::LinearGradientBlurPara blurPara(dimensionRadius, fractionStops, static_cast<NG::GradientDirection>(direction));
+    SetLinearGradientBlur(blurPara);
+}
+
 void JSViewAbstract::JsWindowBlur(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
@@ -2920,8 +3028,7 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
         return true;
     }
     if (jsValue->IsString()) {
-        result = StringUtils::StringToCalcDimension(jsValue->ToString(), false, defaultUnit);
-        return true;
+        return StringUtils::StringToCalcDimension(jsValue->ToString(), result, false, defaultUnit);
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> resId = jsObj->GetProperty("id");
@@ -2954,14 +3061,12 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
     if (!type->IsNull() && type->IsNumber() &&
         type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRING)) {
         auto value = themeConstants->GetString(resId->ToNumber<uint32_t>());
-        result = StringUtils::StringToCalcDimension(value, false, defaultUnit);
-        return true;
+        return StringUtils::StringToCalcDimension(value, result, false, defaultUnit);
     }
     if (!type->IsNull() && type->IsNumber() &&
         type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
         auto value = std::to_string(themeConstants->GetInt(resId->ToNumber<uint32_t>()));
-        result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
-        return true;
+        return StringUtils::StringToDimensionWithUnit(value, result, defaultUnit);
     }
     result = themeConstants->GetDimension(resId->ToNumber<uint32_t>());
     return true;
@@ -3101,18 +3206,8 @@ bool JSViewAbstract::ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result)
     return true;
 }
 
-bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
+bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color& result)
 {
-    if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
-        return false;
-    }
-    if (jsValue->IsNumber()) {
-        result = Color(ColorAlphaAdapt(jsValue->ToNumber<uint32_t>()));
-        return true;
-    }
-    if (jsValue->IsString()) {
-        return Color::ParseColorString(jsValue->ToString(), result);
-    }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (!resId->IsNumber()) {
@@ -3139,8 +3234,35 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
         result = themeConstants->GetColorByName(param->ToString());
         return true;
     }
+    JSRef<JSVal> type = jsObj->GetProperty("type");
+    if (!type->IsNull() && type->IsNumber() &&
+        type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRING)) {
+        auto value = themeConstants->GetString(resId->ToNumber<uint32_t>());
+        return Color::ParseColorString(value, result);
+    }
+    if (!type->IsNull() && type->IsNumber() &&
+        type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        auto value = themeConstants->GetInt(resId->ToNumber<uint32_t>());
+        result = Color(ColorAlphaAdapt(value));
+        return true;
+    }
     result = themeConstants->GetColor(resId->ToNumber<uint32_t>());
     return true;
+}
+
+bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
+{
+    if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
+        return false;
+    }
+    if (jsValue->IsNumber()) {
+        result = Color(ColorAlphaAdapt(jsValue->ToNumber<uint32_t>()));
+        return true;
+    }
+    if (jsValue->IsString()) {
+        return Color::ParseColorString(jsValue->ToString(), result);
+    }
+    return ParseJsColorFromResource(jsValue, result);
 }
 
 bool JSViewAbstract::ParseJsColorStrategy(const JSRef<JSVal>& jsValue, ForegroundColorStrategy& strategy)
@@ -4780,6 +4902,9 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
     NG::SheetStyle sheetStyle;
     if (info.Length() == 3) { // 3 : parameter total
         ParseSheetStyle(info[2], sheetStyle); // 2 : The last parameter
+    } else {
+        sheetStyle.sheetMode = NG::SheetMode::LARGE;
+        sheetStyle.showDragBar = true;
     }
     ViewAbstractModel::GetInstance()->BindSheet(isShow, std::move(callback), std::move(buildFunc), sheetStyle);
 }
@@ -4797,7 +4922,7 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
             LOGW("show drag indicator failed.");
         }
     }
-
+    CalcDimension sheetHeight;
     if (height->IsNull() || height->IsUndefined()) {
         sheetStyle.sheetMode = NG::SheetMode::LARGE;
         sheetStyle.height.reset();
@@ -4816,10 +4941,19 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
                 sheetStyle.height.reset();
                 return;
             } else {
-                LOGI("sheet height is not default mode.");
+                if (heightStr.find("calc") != std::string::npos) {
+                    LOGI("calc value = %{public}s", heightStr.c_str());
+                    sheetHeight = CalcDimension(heightStr, DimensionUnit::CALC);
+                } else {
+                    StringUtils::StringToDimensionWithUnit(heightStr, sheetHeight, DimensionUnit::VP, -1.0);
+                }
+                if (sheetHeight.Value() < 0) {
+                    sheetStyle.sheetMode = NG::SheetMode::LARGE;
+                    sheetStyle.height.reset();
+                    return;
+                }
             }
         }
-        CalcDimension sheetHeight;
         if (!ParseJsDimensionVp(height, sheetHeight)) {
             sheetStyle.sheetMode = NG::SheetMode::LARGE;
             sheetStyle.height.reset();
@@ -4979,6 +5113,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("blur", &JSViewAbstract::JsBlur);
     JSClass<JSViewAbstract>::StaticMethod("colorBlend", &JSViewAbstract::JsColorBlend);
     JSClass<JSViewAbstract>::StaticMethod("backdropBlur", &JSViewAbstract::JsBackdropBlur);
+    JSClass<JSViewAbstract>::StaticMethod("linearGradientBlur", &JSViewAbstract::JsLinearGradientBlur);
     JSClass<JSViewAbstract>::StaticMethod("windowBlur", &JSViewAbstract::JsWindowBlur);
     JSClass<JSViewAbstract>::StaticMethod("visibility", &JSViewAbstract::SetVisibility);
     JSClass<JSViewAbstract>::StaticMethod("flexBasis", &JSViewAbstract::JsFlexBasis);
@@ -5056,6 +5191,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
     JSClass<JSViewAbstract>::StaticMethod("hitTestBehavior", &JSViewAbstract::JsHitTestBehavior);
     JSClass<JSViewAbstract>::StaticMethod("keyboardShortcut", &JSViewAbstract::JsKeyboardShortcut);
+    JSClass<JSViewAbstract>::StaticMethod("obscured", &JSViewAbstract::JsObscured);
     JSClass<JSViewAbstract>::StaticMethod("allowDrop", &JSViewAbstract::JsAllowDrop);
 
     JSClass<JSViewAbstract>::StaticMethod("createAnimatableProperty", &JSViewAbstract::JSCreateAnimatableProperty);
@@ -5224,7 +5360,7 @@ void JSViewAbstract::SetPaddingRight(const JSCallbackInfo& info)
 
 void JSViewAbstract::SetBlur(float radius)
 {
-    CalcDimension dimensionRadius(radius, DimensionUnit::VP);
+    CalcDimension dimensionRadius(radius, DimensionUnit::PX);
     ViewAbstractModel::GetInstance()->SetFrontBlur(dimensionRadius);
 }
 
@@ -5235,8 +5371,13 @@ void JSViewAbstract::SetColorBlend(Color color)
 
 void JSViewAbstract::SetBackdropBlur(float radius)
 {
-    CalcDimension dimensionRadius(radius, DimensionUnit::VP);
+    CalcDimension dimensionRadius(radius, DimensionUnit::PX);
     ViewAbstractModel::GetInstance()->SetBackdropBlur(dimensionRadius);
+}
+
+void JSViewAbstract::SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara)
+{
+    ViewAbstractModel::GetInstance()->SetLinearGradientBlur(blurPara);
 }
 
 void JSViewAbstract::SetWindowBlur(float progress, WindowBlurStyle blurStyle)
@@ -5260,8 +5401,7 @@ bool JSViewAbstract::ParseJsonDimension(
         return true;
     }
     if (jsonValue->IsString()) {
-        result = StringUtils::StringToCalcDimension(jsonValue->GetString(), false, defaultUnit);
-        return true;
+        return StringUtils::StringToCalcDimension(jsonValue->GetString(), result, false, defaultUnit);
     }
     auto resVal = JsonUtil::ParseJsonString(jsonValue->ToString());
     auto resId = resVal->GetValue("id");
@@ -5543,10 +5683,11 @@ void JSViewAbstract::JsOnHover(const JSCallbackInfo& info)
     }
 
     RefPtr<JsHoverFunction> jsOnHoverFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onHover = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverFunc)](bool param) {
+    auto onHover = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverFunc)](
+                       bool isHover, HoverInfo& hoverInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onHover");
-        func->Execute(param);
+        func->HoverExecute(isHover, hoverInfo);
     };
     ViewAbstractModel::GetInstance()->SetOnHover(std::move(onHover));
 }
@@ -5748,17 +5889,14 @@ bool JSViewAbstract::CheckColor(
 {
     // Color is undefined or null
     if (jsValue->IsUndefined() || jsValue->IsNull()) {
-        LOGW("%{public}s-%{public}s is undefined or null, using default color", componentName, propName);
         return false;
     }
     // input type is not in [number, string, Resource]
     if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
-        LOGW("%{public}s-%{public}s Color property input type is error, using default color", componentName, propName);
         return false;
     }
     // Correct type, incorrect value parsing
     if (!ParseJsColor(jsValue, result)) {
-        LOGW("%{public}s-%{public}s Color parses error, using default color", componentName, propName);
         return false;
     }
     return true;
@@ -5769,20 +5907,36 @@ bool JSViewAbstract::CheckLength(
 {
     // Length is undefined or null
     if (jsValue->IsUndefined() || jsValue->IsNull()) {
-        LOGW("%{public}s-%{public}s is undefined or null, using default length", componentName, propName);
         return false;
     }
     // input type is not in [number, string, Resource]
     if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
-        LOGW(
-            "%{public}s-%{public}s Length property input type is error, using default length", componentName, propName);
         return false;
     }
     // Correct type, incorrect value parsing
     if (!ParseJsDimensionVp(jsValue, result)) {
-        LOGW("%{public}s-%{public}s Length parses error, using default length", componentName, propName);
         return false;
     }
     return true;
+}
+
+void JSViewAbstract::JsObscured(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsArray()) {
+        return;
+    }
+
+    auto obscuredArray = JSRef<JSArray>::Cast(info[0]);
+    size_t size = obscuredArray->Length();
+    std::vector<ObscuredReasons> reasons(size);
+    reasons.clear();
+    for (size_t i = 0; i < size; i++) {
+        JSRef<JSVal> reason = obscuredArray->GetValueAt(i);
+        if (reason->IsNumber()) {
+            reasons.emplace_back(static_cast<ObscuredReasons>(reason->ToNumber<int32_t>()));
+        }
+    }
+
+    ViewAbstractModel::GetInstance()->SetObscured(reasons);
 }
 } // namespace OHOS::Ace::Framework

@@ -115,17 +115,13 @@ void AnimationUtils::StopAnimation(const std::shared_ptr<AnimationUtils::Animati
     }
 }
 
-bool AnimationUtils::IsRunning(const std::shared_ptr<AnimationUtils::Animation>& animation)
+void AnimationUtils::BlendBgColorAnimation(
+    RefPtr<NG::RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve)
 {
-    CHECK_NULL_RETURN(animation, false);
-    if (animation->animations_.size()) {
-        for (auto& ani : animation->animations_) {
-            if (ani->IsRunning()) {
-                return true;
-            }
-        }
-    }
-    return false;
+    AnimationOption option = AnimationOption();
+    option.SetCurve(curve);
+    option.SetDuration(duration);
+    AnimationUtils::Animate(option, [context = renderContext, color = endColor]() { context->BlendBgColor(color); });
 }
 
 void AnimationUtils::PauseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation)

@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <memory>
 
+
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -128,11 +129,13 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     taskScheduler_.AddDirtyLayoutNode(dirty);
     ForceLayoutForImplicitAnimation();
 #ifdef UICAST_COMPONENT_SUPPORTED
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto distributedUI = container->GetDistributedUI();
-    CHECK_NULL_VOID(distributedUI);
-    distributedUI->AddDirtyLayoutNode(dirty->GetId());
+    do {
+        auto container = Container::Current();
+        CHECK_NULL_BREAK(container);
+        auto distributedUI = container->GetDistributedUI();
+        CHECK_NULL_BREAK(distributedUI);
+        distributedUI->AddDirtyLayoutNode(dirty->GetId());
+    } while (false);
 #endif
     hasIdleTasks_ = true;
     RequestFrame();
@@ -145,11 +148,13 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     taskScheduler_.AddDirtyRenderNode(dirty);
     ForceRenderForImplicitAnimation();
 #ifdef UICAST_COMPONENT_SUPPORTED
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto distributedUI = container->GetDistributedUI();
-    CHECK_NULL_VOID(distributedUI);
-    distributedUI->AddDirtyRenderNode(dirty->GetId());
+    do {
+        auto container = Container::Current();
+        CHECK_NULL_BREAK(container);
+        auto distributedUI = container->GetDistributedUI();
+        CHECK_NULL_BREAK(distributedUI);
+        distributedUI->AddDirtyRenderNode(dirty->GetId());
+    } while (false);
 #endif
     hasIdleTasks_ = true;
     RequestFrame();
@@ -211,12 +216,13 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     window_->RecordFrameTime(nanoTimestamp, abilityName);
 
 #ifdef UICAST_COMPONENT_SUPPORTED
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto distributedUI = container->GetDistributedUI();
-    CHECK_NULL_VOID(distributedUI);
-    distributedUI->ApplyOneUpdate();
-    distributedUI->OnTreeUpdate();
+    do {
+        auto container = Container::Current();
+        CHECK_NULL_BREAK(container);
+        auto distributedUI = container->GetDistributedUI();
+        CHECK_NULL_BREAK(distributedUI);
+        distributedUI->ApplyOneUpdate();
+    } while (false);
 #endif
 
     FlushAnimation(GetTimeFromExternalTimer());
@@ -237,6 +243,17 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     taskScheduler_.FlushTask();
     taskScheduler_.FinishRecordFrameInfo();
     TryCallNextFrameLayoutCallback();
+
+#ifdef UICAST_COMPONENT_SUPPORTED
+    do {
+        auto container = Container::Current();
+        CHECK_NULL_BREAK(container);
+        auto distributedUI = container->GetDistributedUI();
+        CHECK_NULL_BREAK(distributedUI);
+        distributedUI->OnTreeUpdate();
+    } while (false);
+#endif
+
     bool hasAnimation = window_->FlushCustomAnimation(nanoTimestamp);
     if (hasAnimation) {
         RequestFrame();
@@ -651,6 +668,14 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         rootContext->SyncGeometryProperties(RawPtr(rootNode_->GetGeometryNode()));
         RequestFrame();
     }
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+    // For cross-platform build, flush tasks when first resize, speed up for fisrt frame.
+    if (window_ && rootNode_->GetRenderContext() && !NearZero(width) && !NearZero(height)) {
+        rootNode_->GetRenderContext()->SetBounds(0.0, 0.0, width, height);
+        window_->FlushTasks();
+        FlushVsync(GetTimeFromExternalTimer(), 0);
+    }
+#endif
 }
 
 void PipelineContext::SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback)
@@ -666,6 +691,43 @@ SafeAreaEdgeInserts PipelineContext::GetCurrentViewSafeArea() const
         return window_->GetCurrentViewSafeArea();
     }
     return {};
+}
+
+void PipelineContext::SetSystemSafeArea(const SafeAreaEdgeInserts& systemSafeArea)
+{
+    CHECK_NULL_VOID_NOLOG(window_);
+    window_->SetSystemSafeArea(systemSafeArea);
+}
+
+SafeAreaEdgeInserts PipelineContext::GetSystemSafeArea() const
+{
+    if (window_) {
+        return window_->GetSystemSafeArea();
+    }
+    return {};
+}
+
+void PipelineContext::SetCutoutSafeArea(const SafeAreaEdgeInserts& cutoutSafeArea)
+{
+    CHECK_NULL_VOID_NOLOG(window_);
+    window_->SetCutoutSafeArea(cutoutSafeArea);
+}
+
+SafeAreaEdgeInserts PipelineContext::GetCutoutSafeArea() const
+{
+    if (window_) {
+        return window_->GetCutoutSafeArea();
+    }
+    return {};
+}
+
+SafeAreaEdgeInserts PipelineContext::GetViewSafeArea() const
+{
+    SafeAreaEdgeInserts safeArea;
+    CHECK_NULL_RETURN_NOLOG(window_, safeArea);
+    auto systemAvoidArea = window_->GetSystemSafeArea();
+    auto cutoutAvoidArea = window_->GetCutoutSafeArea();
+    return systemAvoidArea.CombineSafeArea(cutoutAvoidArea);
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(
@@ -731,8 +793,8 @@ void PipelineContext::ResetViewSafeArea()
     const static int32_t PLATFORM_VERSION_TEN = 10;
     if (GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && layoutProperty) {
         if (!GetIgnoreViewSafeArea()) {
-            layoutProperty->SetSafeArea(GetCurrentViewSafeArea());
-            LOGI("OnAvoidAreaChanged viewSafeArea:%{public}s", layoutProperty->GetSafeArea().ToString().c_str());
+            layoutProperty->SetSafeArea(GetViewSafeArea());
+            LOGI("ResetViewSafeArea viewSafeArea:%{public}s", layoutProperty->GetSafeArea().ToString().c_str());
         } else {
             layoutProperty->SetSafeArea({});
         }
@@ -865,14 +927,16 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     CHECK_RUN_ON(UI);
 
 #ifdef UICAST_COMPONENT_SUPPORTED
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto distributedUI = container->GetDistributedUI();
-    CHECK_NULL_VOID(distributedUI);
-    if (distributedUI->IsSinkMode()) {
-        distributedUI->BypassEvent(point, isSubPipe);
-        return;
-    }
+    do {
+        auto container = Container::Current();
+        CHECK_NULL_BREAK(container);
+        auto distributedUI = container->GetDistributedUI();
+        CHECK_NULL_BREAK(distributedUI);
+        if (distributedUI->IsSinkMode()) {
+            distributedUI->BypassEvent(point, isSubPipe);
+            return;
+        }
+    } while (false);
 #endif
 
     HandleEtsCardTouchEvent(point);
@@ -889,7 +953,8 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         SetIsFocusActive(false);
         LOGD("receive touch down event, first use touch test to collect touch event target");
         // Remove the select overlay node when touched down.
-        eventManager_->HandleGlobalEventNG(scalePoint, selectOverlayManager_);
+        auto rootOffset = GetRootRect().GetOffset();
+        eventManager_->HandleGlobalEventNG(scalePoint, selectOverlayManager_, rootOffset);
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
@@ -1123,15 +1188,9 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         eventManager_->DispatchKeyboardShortcut(event);
     }
     // TAB key set focus state from inactive to active.
-    if (event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB }) && SetIsFocusActive(true)) {
-        // if current focus node show focus state. The key event won't trigger onKeyEvent.
-        return true;
-    }
-    if (!isFocusActive_) {
-        LOGD("KeyEvent: {%{public}d, %{public}d} won't be dispatched because current focus state is inactive.",
-            event.code, event.action);
-        return false;
-    }
+    // If return success. This tab key will just trigger onKeyEvent process.
+    isTabJustTriggerOnKeyEvent_ =
+        (event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB }) && SetIsFocusActive(true));
     auto lastPage = stageManager_->GetLastPage();
     auto mainNode = lastPage ? lastPage : rootNode_;
     CHECK_NULL_RETURN(mainNode, false);

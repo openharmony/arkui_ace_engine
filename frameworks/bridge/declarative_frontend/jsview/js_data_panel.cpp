@@ -77,13 +77,11 @@ void JSDataPanel::JSBind(BindingTarget globalObj)
 
 void JSDataPanel::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("toggle create error, info is non-valid");
+    if (!info[0]->IsObject()) {
         return;
     }
     auto param = JsonUtil::ParseJsonString(info[0]->ToString());
     if (!param || param->IsNull()) {
-        LOGE("JSDataPanel::Create param is null");
         return;
     }
     // max
@@ -91,7 +89,6 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
     // values
     auto values = param->GetValue("values");
     if (!values || !values->IsArray()) {
-        LOGE("JSDataPanel::Create values is not array");
         return;
     }
     auto type = param->GetValue("type");
@@ -101,7 +98,6 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
     for (size_t i = 0; i < length && i < MAX_COUNT; i++) {
         auto item = values->GetArrayItem(i);
         if (!item || !item->IsNumber()) {
-            LOGE("JSDataPanel::Create value is not number");
             continue;
         }
         auto value = item->GetDouble();
@@ -208,10 +204,15 @@ void JSDataPanel::StrokeWidth(const JSCallbackInfo& info)
 
 void JSDataPanel::ShadowOption(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
+    OHOS::Ace::NG::DataPanelShadow shadow;
+    if (info[0]->IsNull()) {
+        shadow.isShadowVisible = false;
+        DataPanelModel::GetInstance()->SetShadowOption(shadow);
         return;
     }
-
+    if (!info[0]->IsObject()) {
+        return;
+    }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> jsRadius = paramObject->GetProperty("radius");
     JSRef<JSVal> jsOffsetX = paramObject->GetProperty("offsetX");
@@ -220,6 +221,10 @@ void JSDataPanel::ShadowOption(const JSCallbackInfo& info)
     RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
     double radius = 0.0;
     if (!ParseJsDouble(jsRadius, radius)) {
+        radius = theme->GetTrackShadowRadius().ConvertToVp();
+    }
+
+    if (NonPositive(radius)) {
         radius = theme->GetTrackShadowRadius().ConvertToVp();
     }
 
@@ -249,7 +254,6 @@ void JSDataPanel::ShadowOption(const JSCallbackInfo& info)
         }
     }
 
-    OHOS::Ace::NG::DataPanelShadow shadow;
     shadow.radius = radius;
     shadow.offsetX = offsetX;
     shadow.offsetY = offsetY;

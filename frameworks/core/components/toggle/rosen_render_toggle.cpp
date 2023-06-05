@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,9 @@
 
 #include "core/components/toggle/rosen_render_toggle.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkRRect.h"
+#endif
 
 #include "core/pipeline/base/rosen_render_context.h"
 #ifdef OHOS_PLATFORM
@@ -51,7 +53,11 @@ void RosenRenderToggle::Paint(RenderContext& context, const Offset& offset)
     UpdateLayer();
 #ifdef OHOS_PLATFORM
     auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
+#ifndef USE_ROSEN_DRAWING
     recordingCanvas->concat(RosenSvgPainter::ToSkMatrix(transformLayer_));
+#else
+    recordingCanvas->ConcatMatrix(RosenSvgPainter::ToDrawingMatrix(transformLayer_));
+#endif
 #endif
     DrawToggle(canvas, offset);
     RenderNode::Paint(context, offset);
@@ -66,6 +72,7 @@ Size RosenRenderToggle::Measure()
     return toggleSize_;
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderToggle::DrawToggle(SkCanvas* canvas, const Offset& offset) const
 {
     SkPaint paint;
@@ -79,6 +86,24 @@ void RosenRenderToggle::DrawToggle(SkCanvas* canvas, const Offset& offset) const
     rRect.offset(offset.GetX(), offset.GetY());
     canvas->drawRRect(rRect, paint);
 }
+#else
+void RosenRenderToggle::DrawToggle(RSCanvas* canvas, const Offset& offset) const
+{
+    RSBrush brush;
+    brush.SetColor(GetStatusColor().GetValue());
+    brush.SetAntiAlias(true);
+
+    double radius = toggleSize_.Height() / 2;
+    RSRoundRect rRect(
+        RSRect(0, 0, static_cast<RSscalar>(toggleSize_.Width()),
+            static_cast<RSscalar>(toggleSize_.Height())),
+        radius, radius);
+    rRect.Offset(offset.GetX(), offset.GetY());
+    canvas->AttachBrush(brush);
+    canvas->DrawRoundRect(rRect);
+    canvas->DetachBrush();
+}
+#endif
 
 Color RosenRenderToggle::GetStatusColor() const
 {
