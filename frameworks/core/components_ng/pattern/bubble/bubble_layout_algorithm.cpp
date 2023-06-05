@@ -30,6 +30,7 @@
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
+#include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -120,7 +121,13 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto bubbleProp = DynamicCast<BubbleLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(bubbleProp);
-    InitTargetSizeAndPosition(bubbleProp);
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    CHECK_NULL_VOID(bubblePattern);
+    if (!bubblePattern->IsExiting()) {
+        InitTargetSizeAndPosition(bubbleProp);
+    }
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
         return;
@@ -468,6 +475,9 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(const RefPtr<BubbleLayoutP
 {
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
+    if (!targetNode->IsOnMainTree() || !targetNode->IsVisible()) {
+        return;
+    }
     auto geometryNode = targetNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     targetSize_ = geometryNode->GetFrameSize();
