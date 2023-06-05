@@ -15,8 +15,10 @@
 
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 
+#include "session_manager/include/scene_session_manager.h"
 #include "ui/rs_surface_node.h"
 
+#include "base/utils/system_properties.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -109,18 +111,32 @@ void WindowPattern::InitContent()
 
 void WindowPattern::CreateStartingNode()
 {
-    if (!HasStartingPage()) {
-        return;
-    }
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
     startingNode_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    startingNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    startingNode_->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
+    auto imageLayoutProperty = startingNode_->GetLayoutProperty<ImageLayoutProperty>();
+    imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     host->AddChild(startingNode_);
+
+    constexpr uint32_t BLACK = 0xff000000;
+    constexpr uint32_t WHITE = 0xffffffff;
+    auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? BLACK : WHITE;
+    if (!HasStartingPage()) {
+        startingNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
+        return;
+    }
+
+    std::shared_ptr<Media::PixelMap> startPage = nullptr;
+    Rosen::SceneSessionManager::GetInstance().GetStartPage(session_->GetSessionInfo(), startPage, backgroundColor);
+    startingNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
+    auto pixelMap = PixelMap::CreatePixelMap(&startPage);
+
+    CHECK_NULL_VOID(pixelMap);
+    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
+    imageLayoutProperty->UpdateImageFit(ImageFit::NONE);
+    startingNode_->MarkModifyDone();
 }
 
 void WindowPattern::CreateSnapshotNode()
