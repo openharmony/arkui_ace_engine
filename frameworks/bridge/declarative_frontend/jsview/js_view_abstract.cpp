@@ -2897,6 +2897,13 @@ void JSViewAbstract::JsColorBlend(const JSCallbackInfo& info)
     info.SetReturnValue(info.This());
 }
 
+void JSViewAbstract::JsUseEffect(const JSCallbackInfo& info)
+{
+    if (info[0]->IsBoolean()) {
+        ViewAbstractModel::GetInstance()->SetUseEffect(info[0]->ToBoolean());
+    }
+}
+
 void JSViewAbstract::JsBackdropBlur(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -5111,6 +5118,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("overlay", &JSViewAbstract::JsOverlay);
 
     JSClass<JSViewAbstract>::StaticMethod("blur", &JSViewAbstract::JsBlur);
+    JSClass<JSViewAbstract>::StaticMethod("useEffect", &JSViewAbstract::JsUseEffect);
     JSClass<JSViewAbstract>::StaticMethod("colorBlend", &JSViewAbstract::JsColorBlend);
     JSClass<JSViewAbstract>::StaticMethod("backdropBlur", &JSViewAbstract::JsBackdropBlur);
     JSClass<JSViewAbstract>::StaticMethod("linearGradientBlur", &JSViewAbstract::JsLinearGradientBlur);

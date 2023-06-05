@@ -126,6 +126,8 @@ public:
     void SetSepia(const Dimension& value) override;
     void SetInvert(const Dimension& value) override;
     void SetHueRotate(float value) override;
+    void SetUseEffect(bool) override {}
+
     void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override {}
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override;
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;

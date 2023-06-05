@@ -1525,8 +1525,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg030, TestSize.Level1)
     EXPECT_CALL(*mockPattern_, ProvideRestoreInfo())
         .Times(AnyNumber())
         .WillRepeatedly(testing::Return("Default restore info"));
-    EXPECT_CALL(*mockPattern_, GetSurfaceNodeName()).Times(AnyNumber()).WillRepeatedly(testing::Return(std::nullopt));
-    EXPECT_CALL(*mockPattern_, UseExternalRSNode()).Times(AnyNumber()).WillRepeatedly(testing::Return(false));
+    EXPECT_CALL(*mockPattern_, GetContextParam()).Times(AnyNumber()).WillRepeatedly(testing::Return(std::nullopt));
     EXPECT_CALL(*mockPattern_, CreatePaintProperty())
         .Times(AnyNumber())
         .WillRepeatedly(testing::Return(AceType::MakeRefPtr<PaintProperty>()));

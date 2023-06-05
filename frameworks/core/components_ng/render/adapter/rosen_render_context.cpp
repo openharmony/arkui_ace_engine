@@ -21,6 +21,7 @@
 #include "render_service_client/core/pipeline/rs_node_map.h"
 #include "render_service_client/core/transaction/rs_interfaces.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
+#include "render_service_client/core/ui/rs_effect_node.h"
 #include "render_service_client/core/ui/rs_root_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 
@@ -181,21 +182,40 @@ void RosenRenderContext::SetTransitionPivot(const SizeF& frameSize, bool transit
     SetPivot(xPivot, yPivot);
 }
 
-void RosenRenderContext::InitContext(bool isRoot, const std::optional<std::string>& surfaceName, bool useExternalNode)
+void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextParam>& param)
 {
-    // skip if useExternalNode is true or node already created
-    CHECK_NULL_VOID_NOLOG(!useExternalNode);
+    // skip if node already created
     CHECK_NULL_VOID_NOLOG(!rsNode_);
 
-    // create proper RSNode base on input
-    if (surfaceName.has_value()) {
-        struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceName.value() };
-        rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
-    } else if (isRoot) {
-        LOGI("create RSRootNode");
+    if (isRoot) {
         rsNode_ = Rosen::RSRootNode::Create();
-    } else {
+        return;
+    } else if (!param.has_value()) {
         rsNode_ = Rosen::RSCanvasNode::Create();
+        return;
+    }
+
+    // create proper RSNode base on input
+    switch (param->type) {
+        case ContextType::CANVAS:
+            rsNode_ = Rosen::RSCanvasNode::Create();
+            break;
+        case ContextType::ROOT:
+            rsNode_ = Rosen::RSRootNode::Create();
+            break;
+        case ContextType::SURFACE: {
+            Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or("") };
+            rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
+            break;
+        }
+        case ContextType::EFFECT:
+            rsNode_ = Rosen::RSEffectNode::Create();
+            break;
+        case ContextType::EXTERNAL:
+            break;
+        default:
+            LOGE("invalid context type");
+            break;
     }
 }
 
@@ -862,6 +882,12 @@ void RosenRenderContext::OnAccessibilityFocusUpdate(bool isAccessibilityFocus)
     }
     uiNode->OnAccessibilityEvent(isAccessibilityFocus ? AccessibilityEventType::ACCESSIBILITY_FOCUSED
                                                       : AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED);
+}
+
+void RosenRenderContext::OnUseEffectUpdate(bool useEffect)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetUseEffect(useEffect);
 }
 
 void RosenRenderContext::OnFreezeUpdate(bool isFreezed)

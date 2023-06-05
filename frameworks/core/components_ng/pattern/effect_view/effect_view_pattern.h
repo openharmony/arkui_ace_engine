@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_REMOTE_WINDOW_PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_REMOTE_WINDOW_PATTERN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_VIEW_PATTERN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_VIEW_PATTERN_H
 
 #include <utility>
 
@@ -23,35 +23,25 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
-
-class ACE_EXPORT RemoteWindowPattern : public Pattern {
-    DECLARE_ACE_TYPE(RemoteWindowPattern, Pattern);
+class ACE_EXPORT EffectViewPattern : public Pattern {
+    DECLARE_ACE_TYPE(EffectViewPattern, Pattern);
 
 public:
-    RemoteWindowPattern() = default;
-    ~RemoteWindowPattern() override = default;
-
-    bool IsMeasureBoundary() const override
-    {
-        return true;
-    }
+    EffectViewPattern() = default;
+    ~EffectViewPattern() override = default;
 
     bool IsAtomicNode() const override
     {
-        return true;
+        return false;
     }
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
-        return RenderContext::ContextParam { RenderContext::ContextType::EXTERNAL };
+        return RenderContext::ContextParam { RenderContext::ContextType::EFFECT};
     }
 
 private:
-    void OnAttachToFrameNode() override;
-
-    ACE_DISALLOW_COPY_AND_MOVE(RemoteWindowPattern);
+    ACE_DISALLOW_COPY_AND_MOVE(EffectViewPattern);
 };
-
 } // namespace OHOS::Ace::NG
-
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_REMOTE_WINDOW_PATTERN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_VIEW_PATTERN_H

@@ -51,7 +51,7 @@ namespace OHOS::Ace::NG {
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
     : UINode(tag, nodeId, isRoot), pattern_(pattern)
 {
-    renderContext_->InitContext(IsRootNode(), pattern_->GetSurfaceNodeName(), pattern_->UseExternalRSNode());
+    renderContext_->InitContext(IsRootNode(), pattern_->GetContextParam());
     paintProperty_ = pattern->CreatePaintProperty();
     layoutProperty_ = pattern->CreateLayoutProperty();
     eventHub_ = pattern->CreateEventHub();
@@ -419,7 +419,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     if (geometryTransition != nullptr && geometryTransition->IsRunning()) {
         geometryTransition->DidLayout(dirty);
     } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
-               (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
+               (pattern_->GetContextParam().has_value() && contentSizeChange)) {
         if (pattern_->NeedOverridePaintRect()) {
             renderContext_->SyncGeometryProperties(pattern_->GetOverridePaintRect().value_or(RectF()));
         } else {

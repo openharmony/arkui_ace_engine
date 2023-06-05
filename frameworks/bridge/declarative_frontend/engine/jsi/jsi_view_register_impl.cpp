@@ -158,6 +158,10 @@
 #include "bridge/declarative_frontend/jsview/js_remote_window.h"
 #endif
 
+#ifdef EFFECT_VIEW_SUPPORTED
+#include "bridge/declarative_frontend/jsview/js_effect_view.h"
+#endif
+
 #ifndef WEARABLE_PRODUCT
 #include "bridge/declarative_frontend/jsview/js_piece.h"
 #include "bridge/declarative_frontend/jsview/js_rating.h"
@@ -550,6 +554,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
 #ifdef REMOTE_WINDOW_SUPPORTED
     { "RemoteWindow", JSRemoteWindow::JSBind },
+#endif
+#ifdef EFFECT_VIEW_SUPPORTED
+    { "EffectView", JSEffectView::JSBind },
 #endif
 #ifndef WEARABLE_PRODUCT
     { "Camera", JSCamera::JSBind },
