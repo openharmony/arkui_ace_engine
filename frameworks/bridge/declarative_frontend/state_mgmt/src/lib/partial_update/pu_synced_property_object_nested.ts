@@ -14,13 +14,13 @@
  */
 
 /**
- * SynchedPropertyNesedObjectPU
+ * SynchedPropertyNestedObjectPU
  * implementation of @ObjectLink decorated variables
  * 
  * all definitions in this file are framework internal
  * 
  */
-class SynchedPropertyNesedObjectPU<C extends Object>
+class SynchedPropertyNestedObjectPU<C extends Object>
   extends ObservedPropertyObjectAbstractPU<C>
   implements ObservedObjectEventsPUReceiver<C> {
 
@@ -40,8 +40,7 @@ class SynchedPropertyNesedObjectPU<C extends Object>
     super(owningChildView, propertyName);
     this.obsObject_ = obsObject;
 
-    // register to the ObservedObject
-    ObservedObject.addOwningProperty(this.obsObject_, this);
+    this.setValueInternal(obsObject);
   }
 
   /*
@@ -55,27 +54,27 @@ class SynchedPropertyNesedObjectPU<C extends Object>
   }
 
   public objectPropertyHasChangedPU(eventSource: ObservedObject<C>, changedPropertyName: string) {
-    stateMgmtConsole.debug(`SynchedPropertyNesedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: \
+    stateMgmtConsole.debug(`SynchedPropertyNestedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: \
         objectPropertyHasChangedPU: contained ObservedObject property '${changedPropertyName}' has changed.`)
     this.notifyPropertyHasChangedPU();
   }
 
 
-  public objectPropertyHasBeenReadPU(souceObject: ObservedObject<C>, changedPropertyName : string) {
-    stateMgmtConsole.debug(`SynchedPropertyNesedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: \
+  public objectPropertyHasBeenReadPU(sourceObject: ObservedObject<C>, changedPropertyName : string) {
+    stateMgmtConsole.debug(`SynchedPropertyNestedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: \
     objectPropertyHasBeenReadPU: contained ObservedObject property '${changedPropertyName}' has been read.`);
     this.notifyPropertyHasBeenReadPU();
   }
   
   public getUnmonitored(): C {
-    stateMgmtConsole.debug(`SynchedPropertyNesedObject[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored.`);
-    // unmonitored get access , no call to otifyPropertyRead !
+    stateMgmtConsole.debug(`SynchedPropertyNestedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored.`);
+    // unmonitored get access , no call to notifyPropertyRead !
     return this.obsObject_;
   }
 
   // get 'read through` from the ObservedProperty
   public get(): C {
-    stateMgmtConsole.debug(`SynchedPropertyNesedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: get`)
+    stateMgmtConsole.debug(`SynchedPropertyNestedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: get`)
     this.notifyPropertyHasBeenReadPU()
     return this.obsObject_;
   }
@@ -83,21 +82,47 @@ class SynchedPropertyNesedObjectPU<C extends Object>
   // set 'writes through` to the ObservedProperty
   public set(newValue: C): void {
     if (this.obsObject_ == newValue) {
-      stateMgmtConsole.debug(`SynchedPropertyNesedObjectPu[${this.id__()}IP, '${this.info() || "unknown"}']: set @ObjectLink with unchanged value - nothing to do.`);
+      stateMgmtConsole.debug(`SynchedPropertyNestedObjectPU[${this.id__()}IP, '${this.info() || "unknown"}']: set @ObjectLink with unchanged value - nothing to do.`);
       return;
     }
 
-    stateMgmtConsole.debug(`SynchedPropertyNesedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: set: @ObjectLink set to new value: .`);
-
-    // unsubscribe from the old value ObservedObject
-    ObservedObject.removeOwningProperty(this.obsObject_, this);
-
-    this.obsObject_ = newValue;
-
-    // subscribe to the new value ObservedObject
-    ObservedObject.addOwningProperty(this.obsObject_, this);
+    stateMgmtConsole.debug(`SynchedPropertyNestedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: set: @ObjectLink set to new value: .`);
+    this.setValueInternal(newValue);
 
     // notify value change to subscribing View
     this.notifyPropertyHasChangedPU();
   }
+
+
+  private setValueInternal(newValue: C): void {
+    if (this.obsObject_ != undefined) {
+      if (this.obsObject_ instanceof SubscribableAbstract) {
+        // unregister from SubscribableAbstract object
+        (this.obsObject_ as SubscribableAbstract).removeOwningProperty(this);
+      } else if (ObservedObject.IsObservedObject(this.obsObject_)) {
+        // unregister from the ObservedObject
+        ObservedObject.removeOwningProperty(this.obsObject_, this);
+      }
+    }
+
+    this.obsObject_ = newValue;
+
+    if (this.obsObject_ != undefined) {
+      if (this.obsObject_ instanceof SubscribableAbstract) {
+        // register to  SubscribableAbstract object
+        (this.obsObject_ as SubscribableAbstract).addOwningProperty(this);
+      } else if (ObservedObject.IsObservedObject(this.obsObject_)) {
+        // register to the ObservedObject
+        ObservedObject.addOwningProperty(this.obsObject_, this);
+      } else {
+        stateMgmtConsole.error(`SynchedPropertyNestedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: set/init: @ObjectLink value is neither ObservedObject nor SubscribableAbstract. \
+      value changes will bot be observed and UI will not update. forgot @Observed class decorator? Application error.`);
+      }
+    }
+  }
+}
+
+/** backward compatibility after typo in classname fix */
+class SynchedPropertyNesedObjectPU<C extends Object> extends SynchedPropertyNestedObjectPU<C> {
+
 }

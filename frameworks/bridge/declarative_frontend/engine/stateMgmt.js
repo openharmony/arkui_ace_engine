@@ -1160,30 +1160,30 @@ class SubscribedAbstractProperty {
  */
 /**
  *
- * SubscriableAbstract
+ * SubscribableAbstract
  *
  * This class is part of the SDK.
- * @since 9
+ * @since 10
  *
- * SubscriableAbstract is an abstract class that manages subscribers
+ * SubscribableAbstract is an abstract class that manages subscribers
  * to value changes. These subscribers are the implementation of
  * @State, @Link, @Provide, @Consume decorated variables inside the
- * framework. Each using @State, @Link, etc., decorated varibale in
+ * framework. Each using @State, @Link, etc., decorated variable in
  * a @Component will make its own subscription. When the component
  * is created the subscription is added, and before the component
  * is deleted it unsubscribes
  *
- * An application may extend SubscriableAbstract for a custom class
+ * An application may extend SubscribableAbstract for a custom class
  * that manages state data. @State, @Link, @Provide, @Consume
  * decorated variables can hold an Object that is instance of
- * SubscribaleAbstract.
+ * SubscribableAbstract.
  *
  * About lifecycle: It is legal use for two @Components with two @State
- * decorated variables to share the same SubscribaleAbstract object.
+ * decorated variables to share the same SubscribableAbstract object.
  * Each such decorated variable implementation makes its own
- * subscription to the SubscribaleAbstract object. Hence, when both variables
- * have unsubscribed the SubscribaleAbstract custom class may do its own
- * de-initilialization, e.g. release held external resources.
+ * subscription to the SubscribableAbstract object. Hence, when both variables
+ * have unsubscribed the SubscribableAbstract custom class may do its own
+ * de-initialization, e.g. release held external resources.
  *
  * How to extend:
  * A subclass manages the get and set to one or several properties on its own.
@@ -1208,11 +1208,11 @@ class SubscribedAbstractProperty {
  * last subscriber.
  *
  */
-class SubscribaleAbstract {
+class SubscribableAbstract {
     /**
      * make sure to call super() from subclass constructor!
      *
-     * @since 9
+     * @since 10
      */
     constructor() {
         this.owningProperties_ = new Set();
@@ -1224,7 +1224,7 @@ class SubscribaleAbstract {
      * @param propName name of the change property
      * @param newValue the property value after the change
      *
-     * @since 9
+     * @since 10
      */
     notifyPropertyHasChanged(propName, newValue) {
         
@@ -1244,9 +1244,19 @@ class SubscribaleAbstract {
                 }
             }
             else {
-                stateMgmtConsole.error(`SubscribaleAbstract: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
+                stateMgmtConsole.error(`SubscribableAbstract: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
             }
         });
+    }
+    /**
+     * Provides the current number of subscribers.
+     * Application may use this function to determine a shared object has no more remaining subscribers and can be deleted.
+     * @returns number of current subscribers
+     *
+     * @since 10
+     */
+    numberOfSubscribers() {
+        return this.owningProperties_.size;
     }
     /**
      * Method used by the framework to add subscribing decorated variables
@@ -1255,20 +1265,20 @@ class SubscribaleAbstract {
      * @param subscriber new subscriber that implements ISinglePropertyChangeSubscriber
      * and/or IMultiPropertiesChangeSubscriber interfaces
      *
-     * @since 9
+     * @since 10
      */
     addOwningProperty(subscriber) {
         
         this.owningProperties_.add(subscriber.id__());
     }
     /**
-     * Method used by the framework to ubsubscribing decorated variables
+     * Method used by the framework to unsubscribing decorated variables
      * Subclass may overwrite this function but must call the function of the base
      * class from its own implementation.
      * @param subscriber subscriber that implements ISinglePropertyChangeSubscriber
      * and/or IMultiPropertiesChangeSubscriber interfaces
      *
-     * @since 9
+     * @since 10
      */
     removeOwningProperty(property) {
         return this.removeOwningPropertyById(property.id__());
@@ -1277,12 +1287,29 @@ class SubscribaleAbstract {
      * Same as @see removeOwningProperty() but by Subscriber id.
      * @param subscriberId
     *
-    * @since 9
+     * framework internal function, not to be used by applications.
      */
     removeOwningPropertyById(subscriberId) {
         
         this.owningProperties_.delete(subscriberId);
     }
+    /**
+     * flush all subscribers / owning properties
+     * This is needed when copying a SubscribableAbstract object to the localObject or @prop / SynchedPropertyObjectOneWay
+     * - shallowCopy: copies the _reference to original_ Set. Hence, we must not modify this Set but assign a new Set
+     * - deepCopy also (deep-) copies this class' owningProperties_ Set, incl. the numbers it includes. Assigning a new Set fixes.
+     *
+     */
+    clearOwningProperties() {
+        this.owningProperties_ = new Set();
+    }
+}
+/**
+ *  SubscribaleAbstract class with typo in its nam,e
+ *
+ * @depreciated, use SubscribableAbstract
+ */
+class SubscribaleAbstract extends SubscribableAbstract {
 }
 /*
  * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
@@ -3500,7 +3527,7 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
     }
     unsubscribeWrappedObject() {
         if (this.wrappedValue_) {
-            if (this.wrappedValue_ instanceof SubscribaleAbstract) {
+            if (this.wrappedValue_ instanceof SubscribableAbstract) {
                 this.wrappedValue_.removeOwningProperty(this);
             }
             else {
@@ -3528,15 +3555,15 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
             return false;
         }
         this.unsubscribeWrappedObject();
-        if (ObservedObject.IsObservedObject(newValue)) {
-            
-            ObservedObject.addOwningProperty(newValue, this);
-            this.wrappedValue_ = newValue;
-        }
-        else if (newValue instanceof SubscribaleAbstract) {
+        if (newValue instanceof SubscribableAbstract) {
             
             this.wrappedValue_ = newValue;
             this.wrappedValue_.addOwningProperty(this);
+        }
+        else if (ObservedObject.IsObservedObject(newValue)) {
+            
+            ObservedObject.addOwningProperty(newValue, this);
+            this.wrappedValue_ = newValue;
         }
         else {
             
@@ -3718,9 +3745,9 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
         }
         else {
             // code path for 
-            // 1- source is of same type C in parent, not that the value(!) is provided, not the ObservedPropertyAbstract<C>
-            // 2- nested Object/Array inside observed another object/array in parent
-            if (!ObservedObject.IsObservedObject(source)) {
+            // 1- source is of same type C in parent, source is its value, not the backing store ObservedPropertyObject
+            // 2- nested Object/Array inside observed another object/array in parent, source is its value
+            if (!((source instanceof SubscribableAbstract) || ObservedObject.IsObservedObject(source))) {
                 stateMgmtConsole.warn(`@Prop ${this.info()}  Provided source object's class 
            lacks @Observed class decorator. Object property changes will not be observed.`);
             }
@@ -3818,9 +3845,9 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
         }
     }
     /*
-      unsubscribe from previous wrappped ObjectObject
+      unsubscribe from previous wrapped ObjectObject
       take a shallow or (TODO) deep copy
-      copied Object might already be an ObservedObject (e.g. becuse of @Observed decroator) or might be raw
+      copied Object might already be an ObservedObject (e.g. becurse of @Observed decorator) or might be raw
       Therefore, conditionally wrap the object, then subscribe
       return value true only if localCopyObservedObject_ has been changed
     */
@@ -3831,13 +3858,25 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
             // if not undefined or null, then the provided newObservedObjectValue must be an Object 
             stateMgmtConsole.error(`SynchedPropertyOneWayObjectPU[${this.id__()}]: setLocalValue new value must be an Object.`);
         }
-        // unsubscribe from old wrappedValue ObservedOject  
-        ObservedObject.removeOwningProperty(this.localCopyObservedObject_, this);
+        // unsubscribe from old local copy 
+        if (this.localCopyObservedObject_ instanceof SubscribableAbstract) {
+            this.localCopyObservedObject_.removeOwningProperty(this);
+        }
+        else {
+            ObservedObject.removeOwningProperty(this.localCopyObservedObject_, this);
+        }
         // shallow/deep copy value 
         // needed whenever newObservedObjectValue comes from source
         // not needed on a local set (aka when called from set() method)
         let copy = needCopyObject ? this.copyObject(newObservedObjectValue, this.info_) : newObservedObjectValue;
-        if (ObservedObject.IsObservedObject(copy)) {
+        if (copy instanceof SubscribableAbstract) {
+            this.localCopyObservedObject_ = copy;
+            // deep copy will copy Set of subscribers as well. But local copy only has its own subscribers 
+            // not those of its parent value.
+            this.localCopyObservedObject_.clearOwningProperties();
+            this.localCopyObservedObject_.addOwningProperty(this);
+        }
+        else if (ObservedObject.IsObservedObject(copy)) {
             // case: new ObservedObject
             this.localCopyObservedObject_ = copy;
             ObservedObject.addOwningProperty(this.localCopyObservedObject_, this);
@@ -3884,17 +3923,17 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
             // subscribe, also Date gets wrapped / proxied by ObservedObject
             copy = ObservedObject.createNew(d, this);
         }
-        else if (rawValue instanceof SubscribaleAbstract) {
-            // case SubscriabableAbstract, no wrapping inside ObservedObject
+        else if (rawValue instanceof SubscribableAbstract) {
+            // case SubscribableAbstract, no wrapping inside ObservedObject
             copy = Object.assign({}, rawValue);
             Object.setPrototypeOf(copy, Object.getPrototypeOf(rawValue));
-            if (copy instanceof SubscribaleAbstract) {
+            if (copy instanceof SubscribableAbstract) {
                 // subscribe
                 copy.addOwningProperty(this);
             }
         }
         else if (typeof rawValue == "object") {
-            // case Object that is not Array, not Date, not SubscribaleAbstract
+            // case Object that is not Array, not Date, not SubscribableAbstract
             copy = ObservedObject.createNew(Object.assign({}, rawValue), this);
             Object.setPrototypeOf(copy, Object.getPrototypeOf(rawValue));
         }
@@ -3910,8 +3949,8 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
         let copy = SynchedPropertyObjectOneWayPU.deepCopyObjectInternal(obj, variable);
         // this subscribe to the top level object/array of the copy
         // same as shallowCopy does
-        if ((obj instanceof SubscribaleAbstract) &&
-            (copy instanceof SubscribaleAbstract)) {
+        if ((obj instanceof SubscribableAbstract) &&
+            (copy instanceof SubscribableAbstract)) {
             copy.addOwningProperty(this);
         }
         else if (ObservedObject.IsObservedObject(obj) && ObservedObject.IsObservedObject(copy)) {
@@ -4280,13 +4319,13 @@ class SynchedPropertySimpleTwoWayPU extends ObservedPropertySimpleAbstractPU {
  * limitations under the License.
  */
 /**
- * SynchedPropertyNesedObjectPU
+ * SynchedPropertyNestedObjectPU
  * implementation of @ObjectLink decorated variables
  *
  * all definitions in this file are framework internal
  *
  */
-class SynchedPropertyNesedObjectPU extends ObservedPropertyObjectAbstractPU {
+class SynchedPropertyNestedObjectPU extends ObservedPropertyObjectAbstractPU {
     /**
      * Construct a Property of a su component that links to a variable of parent view that holds an ObservedObject
      * example
@@ -4299,8 +4338,7 @@ class SynchedPropertyNesedObjectPU extends ObservedPropertyObjectAbstractPU {
     constructor(obsObject, owningChildView, propertyName) {
         super(owningChildView, propertyName);
         this.obsObject_ = obsObject;
-        // register to the ObservedObject
-        ObservedObject.addOwningProperty(this.obsObject_, this);
+        this.setValueInternal(obsObject);
     }
     /*
     like a destructor, need to call this before deleting
@@ -4315,13 +4353,13 @@ class SynchedPropertyNesedObjectPU extends ObservedPropertyObjectAbstractPU {
         
         this.notifyPropertyHasChangedPU();
     }
-    objectPropertyHasBeenReadPU(souceObject, changedPropertyName) {
+    objectPropertyHasBeenReadPU(sourceObject, changedPropertyName) {
         
         this.notifyPropertyHasBeenReadPU();
     }
     getUnmonitored() {
         
-        // unmonitored get access , no call to otifyPropertyRead !
+        // unmonitored get access , no call to notifyPropertyRead !
         return this.obsObject_;
     }
     // get 'read through` from the ObservedProperty
@@ -4337,14 +4375,40 @@ class SynchedPropertyNesedObjectPU extends ObservedPropertyObjectAbstractPU {
             return;
         }
         
-        // unsubscribe from the old value ObservedObject
-        ObservedObject.removeOwningProperty(this.obsObject_, this);
-        this.obsObject_ = newValue;
-        // subscribe to the new value ObservedObject
-        ObservedObject.addOwningProperty(this.obsObject_, this);
+        this.setValueInternal(newValue);
         // notify value change to subscribing View
         this.notifyPropertyHasChangedPU();
     }
+    setValueInternal(newValue) {
+        if (this.obsObject_ != undefined) {
+            if (this.obsObject_ instanceof SubscribableAbstract) {
+                // unregister from SubscribableAbstract object
+                this.obsObject_.removeOwningProperty(this);
+            }
+            else if (ObservedObject.IsObservedObject(this.obsObject_)) {
+                // unregister from the ObservedObject
+                ObservedObject.removeOwningProperty(this.obsObject_, this);
+            }
+        }
+        this.obsObject_ = newValue;
+        if (this.obsObject_ != undefined) {
+            if (this.obsObject_ instanceof SubscribableAbstract) {
+                // register to  SubscribableAbstract object
+                this.obsObject_.addOwningProperty(this);
+            }
+            else if (ObservedObject.IsObservedObject(this.obsObject_)) {
+                // register to the ObservedObject
+                ObservedObject.addOwningProperty(this.obsObject_, this);
+            }
+            else {
+                stateMgmtConsole.error(`SynchedPropertyNestedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: set/init: @ObjectLink value is neither ObservedObject nor SubscribableAbstract. \
+      value changes will bot be observed and UI will not update. forgot @Observed class decorator? Application error.`);
+            }
+        }
+    }
+}
+/** backward compatibility after typo in classname fix */
+class SynchedPropertyNesedObjectPU extends SynchedPropertyNestedObjectPU {
 }
 /*
  * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
