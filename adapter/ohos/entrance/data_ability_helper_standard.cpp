@@ -12,13 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "core/pipeline/pipeline_context.h"
 #if !defined(PREVIEW)
 #include <dlfcn.h>
 #endif
 
 #include "data_ability_helper.h"
 #include "datashare_helper.h"
-#include "pixel_map.h"
 
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "base/utils/string_utils.h"
@@ -26,11 +26,20 @@
 
 namespace OHOS::Ace {
 namespace {
+const std::string MEDIA_PLUGIN = "multimedia/libmedialibrary.z.so";
+const std::string FILE_PLUGIN = "filemanagement/libuserfilemanager.z.so";
+const std::string PHOTO_HEAD = "file://media/Photo";
+const std::string AUDIO_HEAD = "file://media/Audio";
 const std::string MEDIA_SERVER_HEAD = "datashare:///media";
 
 #if !defined(PREVIEW)
+bool UseFilePlugin(const std::string& uri)
+{
+    return StringUtils::StartWith(uri, PHOTO_HEAD) || StringUtils::StartWith(uri, AUDIO_HEAD);
+}
+
 using ThumbnailNapiEntry = void* (*)(const char*, void*);
-ThumbnailNapiEntry GetThumbnailNapiEntry()
+ThumbnailNapiEntry GetThumbnailNapiEntry(const std::string& uri)
 {
     static ThumbnailNapiEntry thumbnailNapiEntry = nullptr;
     if (!thumbnailNapiEntry) {
@@ -39,10 +48,8 @@ ThumbnailNapiEntry GetThumbnailNapiEntry()
 #else
         std::string prefix = "/system/lib/module/";
 #endif
-#ifdef OHOS_STANDARD_SYSTEM
-        std::string napiPluginName = "multimedia/libmedialibrary.z.so";
-#endif
-        auto napiPluginPath = prefix.append(napiPluginName);
+
+        auto napiPluginPath = prefix.append(UseFilePlugin(uri) ? FILE_PLUGIN : MEDIA_PLUGIN);
         void* handle = dlopen(napiPluginPath.c_str(), RTLD_LAZY);
         CHECK_NULL_RETURN(handle, nullptr);
         thumbnailNapiEntry = reinterpret_cast<ThumbnailNapiEntry>(dlsym(handle, "OHOS_MEDIA_NativeGetThumbnail"));
@@ -74,7 +81,7 @@ void* DataAbilityHelperStandard::QueryThumbnailResFromDataAbility(const std::str
 #ifdef PREVIEW
     return nullptr;
 #else
-    ThumbnailNapiEntry thumbnailNapiEntry = GetThumbnailNapiEntry();
+    ThumbnailNapiEntry thumbnailNapiEntry = GetThumbnailNapiEntry(uri);
     CHECK_NULL_RETURN(thumbnailNapiEntry, nullptr);
     auto runtimeContextSptr = runtimeContext_.lock();
     CHECK_NULL_RETURN(runtimeContextSptr, nullptr);
