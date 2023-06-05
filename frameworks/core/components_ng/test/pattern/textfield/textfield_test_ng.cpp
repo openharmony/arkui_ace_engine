@@ -577,6 +577,10 @@ HWTEST_F(TextFieldPatternTestNg, UpdateCaretPosition, TestSize.Level1)
         EXPECT_FALSE(textFieldPattern->UpdateCaretPosition());
     }
 
+    textFieldPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
+    textFieldPattern->isMousePressed_ = true;
+    EXPECT_FALSE(textFieldPattern->UpdateCaretPosition());
+
     textFieldPattern->caretUpdateType_ = CaretUpdateType::ICON_PRESSED;
     textFieldPattern->selectionMode_ = SelectionMode::SELECT;
     textFieldPattern->textSelector_.baseOffset = 0;
@@ -1387,6 +1391,40 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldPatternOnTextAreaScroll001, TestSize.L
     pattern->OnTextAreaScroll(TEXT_AREA_SCROLL_OFFSET);
     EXPECT_EQ(pattern->caretRect_.GetY(), oldCaretRectY + TEXT_AREA_SCROLL_OFFSET);
     EXPECT_EQ(pattern->textRect_.GetOffset(), OffsetF(pattern->textRect_.GetX(), pattern->currentOffset_));
+}
+
+/**
+ * @tc.name: MakeEmptyOffset
+ * @tc.desc: test MakeEmptyOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, MakeEmptyOffset, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the TextFieldPattern.
+     * @tc.expected: step1. Check the TextFieldPattern success.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call the MakeEmptyOffset.
+     * @tc.expected: step2. Check the return value.
+     */
+    auto width = pattern->contentRect_.Width();
+    std::pair<TextAlign, OffsetF> textAlignPairs[] = {
+        std::make_pair(TextAlign::CENTER, OffsetF(width * 0.5f, 0.0f)),
+        std::make_pair(TextAlign::END, OffsetF(width, 0.0f)),
+        std::make_pair(TextAlign::START, OffsetF()),
+        std::make_pair(TextAlign::JUSTIFY, OffsetF()) };
+    for (auto pair : textAlignPairs) {
+        layoutProperty->UpdateTextAlign(pair.first);
+        EXPECT_EQ(pattern->MakeEmptyOffset(), pair.second);
+    }
 }
 
 /**
@@ -2315,6 +2353,8 @@ HWTEST_F(TextFieldPatternTestNg, OnScrollCallback003, TestSize.Level1)
      */
     ret = textFieldPattern->OnScrollCallback(offset, source);
     EXPECT_TRUE(ret);
+    const int32_t SCROLL_FROM_START = 10;
+    EXPECT_TRUE(textFieldPattern->OnScrollCallback(offset, SCROLL_FROM_START));
 }
 
 /**
@@ -2660,6 +2700,42 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyGetSupportAction0
 }
 
 /**
+ * @tc.name: HandleExtendAction
+ * @tc.desc: Verify that the HandleExtendAction interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, HandleExtendAction, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call HandleExtendAction.
+     * @tc.expected: No exception occurred during the call.
+     */
+    auto pipeline = MockPipelineBase::GetCurrent();
+    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
+    textFieldPattern->clipboard_ = clipboard;
+    int32_t actions[] = {
+        0, // ACTION_SELECT_ALL
+        3, // ACTION_CUT
+        4, // ACTION_COPY
+        5, // ACTION_PASTE
+        6, // ACTION_SHARE
+    };
+
+    for (auto action : actions) {
+        textFieldPattern->HandleExtendAction(action);
+    }
+}
+
+/**
  * @tc.name: AdjustTextSelectionRectOffsetX001
  * @tc.desc: test AdjustTextSelectionRectOffsetX
  * @tc.type: FUNC
@@ -2886,6 +2962,8 @@ HWTEST_F(TextFieldPatternTestNg, HandleFocusEvent001, TestSize.Level1)
     ASSERT_NE(textFieldPattern, nullptr);
     auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
+    auto paintProperty = textFieldPattern->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
 
     /**
      * @tc.steps: step2. Set showUnderLine. Call function HandleFocusEvent.
@@ -2895,6 +2973,19 @@ HWTEST_F(TextFieldPatternTestNg, HandleFocusEvent001, TestSize.Level1)
     textFieldPattern->HandleFocusEvent();
     EXPECT_TRUE(layoutProperty->GetShowUnderlineValue(false));
     layoutProperty->UpdateShowUnderline(false);
+    textFieldPattern->HandleFocusEvent();
+    EXPECT_FALSE(layoutProperty->GetShowUnderlineValue(false));
+
+    textFieldPattern->caretUpdateType_ = CaretUpdateType::RIGHT_CLICK;
+    textFieldPattern->UpdateEditingValue("", 0);
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    textFieldPattern->HandleFocusEvent();
+
+    paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
+    textFieldPattern->HandleFocusEvent();
+
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    textFieldPattern->UpdateEditingValue(TEXT_VALUE, 0);
     textFieldPattern->HandleFocusEvent();
     EXPECT_FALSE(layoutProperty->GetShowUnderlineValue(false));
 }
