@@ -99,6 +99,9 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
             if (badgeSize.IsNonNegative() && badgeSize.Unit() != DimensionUnit::PERCENT) {
                 badgeParameters.badgeCircleSize = badgeSize;
             } else if (!badgeTheme) {
+                LOGW("Get badge theme error");
+                return BadgeParameters();
+            } else {
                 badgeParameters.badgeCircleSize = badgeTheme->GetBadgeCircleSize();
             }
         }
