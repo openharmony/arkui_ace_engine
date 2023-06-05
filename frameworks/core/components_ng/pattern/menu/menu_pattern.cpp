@@ -432,8 +432,6 @@ void MenuPattern::DisableTabInMenu()
 RefPtr<LayoutAlgorithm> MenuPattern::CreateLayoutAlgorithm()
 {
     switch (type_) {
-        case MenuType::NAVIGATION_MENU:
-            return MakeRefPtr<MenuLayoutAlgorithm>();
         case MenuType::MULTI_MENU:
             return MakeRefPtr<MultiMenuLayoutAlgorithm>();
         default:
