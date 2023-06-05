@@ -53,6 +53,8 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     childOffset_ = bubbleLayoutAlgorithm->GetChildOffset();
     childSize_ = bubbleLayoutAlgorithm->GetChildSize();
     touchRegion_ = bubbleLayoutAlgorithm->GetTouchRegion();
+    targetOffset_ = bubbleLayoutAlgorithm->GetTargetOffset();
+    targetSize_ = bubbleLayoutAlgorithm->GetTargetSize();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto paintProperty = host->GetPaintProperty<BubbleRenderProperty>();
@@ -463,6 +465,11 @@ void BubblePattern::StartAlphaExitingAnimation(std::function<void()> finish)
 bool BubblePattern::IsOnShow()
 {
     return (transitionStatus_ == TransitionStatus::ENTERING) || (transitionStatus_ == TransitionStatus::NORMAL);
+}
+
+bool BubblePattern::IsExiting()
+{
+    return transitionStatus_ == TransitionStatus::EXITING;
 }
 
 OffsetT<Dimension> BubblePattern::GetInvisibleOffset()

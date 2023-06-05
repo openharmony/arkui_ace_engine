@@ -64,7 +64,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<BubbleLayoutAlgorithm>(targetNodeId_, targetTag_);
+        return MakeRefPtr<BubbleLayoutAlgorithm>(targetNodeId_, targetTag_, targetOffset_, targetSize_);
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
@@ -90,6 +90,7 @@ public:
     void StartEnteringAnimation(std::function<void()> finish);
     void StartExitingAnimation(std::function<void()> finish);
     bool IsOnShow();
+    bool IsExiting();
 
 private:
     void OnModifyDone() override;
@@ -144,6 +145,9 @@ private:
     TransitionStatus transitionStatus_ = TransitionStatus::INVISIABLE;
 
     bool delayShow_ = false;
+
+    std::optional<OffsetF> targetOffset_;
+    std::optional<SizeF> targetSize_;
 
     ACE_DISALLOW_COPY_AND_MOVE(BubblePattern);
 };

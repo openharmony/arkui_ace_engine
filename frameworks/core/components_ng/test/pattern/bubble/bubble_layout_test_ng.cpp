@@ -124,6 +124,9 @@ RefPtr<FrameNode> BubbleLayoutTestNg::GetTargetNode()
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    if (frameNode) {
+        frameNode->onMainTree_ = true;
+    }
     return frameNode;
 }
 
@@ -501,5 +504,54 @@ HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest007, TestSize.Level1)
      */
     ASSERT_TRUE(property.GetPositionOffset().has_value());
     EXPECT_EQ(property.GetPositionOffset().value(), OffsetF(25.0f, 30.0f));
+}
+
+/**
+ * @tc.name: BubbleLayoutTest008
+ * @tc.desc: Test InitTargetSizeAndPosition while the target is not on the node tree.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create targetNode and get frameNode.
+     */
+    auto targetNode = GetTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+
+    /**
+     * @tc.steps: step2. get pattern and layoutAlgorithm.
+     */
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto bubbleLayoutProperty = bubblePattern->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(bubbleLayoutProperty, nullptr);
+    auto bubbleLayoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(bubbleLayoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step3. call InitTargetSizeAndPosition while the target node is still on the node tree.
+     */
+    RefPtr<GeometryNode> targetGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(targetGeometryNode, nullptr);
+    targetGeometryNode->SetFrameOffset(OffsetF(TARGET_X, TARGET_Y));
+    targetGeometryNode->SetFrameSize(SizeF(TARGET_WIDTH, TARGET_HEIGHT));
+    targetNode->SetGeometryNode(targetGeometryNode);
+    bubbleLayoutAlgorithm->InitTargetSizeAndPosition(bubbleLayoutProperty);
+    auto lastTargetOffset = bubbleLayoutAlgorithm->targetOffset_;
+    auto lastTargetSize = bubbleLayoutAlgorithm->targetSize_;
+
+    /**
+     * @tc.steps: step3. call InitTargetSizeAndPosition while the target node is not on the node tree.
+     * @tc.expected: targetOffset_ and targetSize_ has no change.
+     */
+    targetNode->onMainTree_ = false;
+    bubbleLayoutAlgorithm->InitTargetSizeAndPosition(bubbleLayoutProperty);
+    EXPECT_EQ(bubbleLayoutAlgorithm->targetOffset_, lastTargetOffset);
+    EXPECT_EQ(bubbleLayoutAlgorithm->targetSize_, lastTargetSize);
 }
 } // namespace OHOS::Ace::NG

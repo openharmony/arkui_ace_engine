@@ -15,6 +15,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BUBBLE_BUBBLE_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BUBBLE_BUBBLE_LAYOUT_ALGORITHM_H
 
+#include <optional>
 #include <string>
 
 #include "base/geometry/ng/offset_t.h"
@@ -32,7 +33,17 @@ class ACE_EXPORT BubbleLayoutAlgorithm : public LayoutAlgorithm {
 
 public:
     BubbleLayoutAlgorithm() = default;
-    BubbleLayoutAlgorithm(int32_t id, const std::string& tag) : targetNodeId_(id), targetTag_(tag) {}
+    BubbleLayoutAlgorithm(int32_t id, const std::string& tag, const std::optional<OffsetF>& targetOffset = std::nullopt,
+        const std::optional<SizeF>& targetSize = std::nullopt)
+        : targetNodeId_(id), targetTag_(tag)
+    {
+        if (targetOffset.has_value()) {
+            targetOffset_ = targetOffset.value();
+        }
+        if (targetSize.has_value()) {
+            targetSize_ = targetSize.value();
+        }
+    }
     ~BubbleLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
