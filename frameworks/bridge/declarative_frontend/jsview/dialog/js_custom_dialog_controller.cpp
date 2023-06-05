@@ -368,7 +368,7 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
     }
 
     auto containerId = this->ownerView_->GetInstanceId();
-    ContainerScope scope(containerId);
+    ContainerScope containerScope(containerId);
 
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
     if (!scopedDelegate) {
@@ -440,7 +440,7 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
     LOGI("JSCustomDialogController(JsCloseDialog)");
 
     auto containerId = this->ownerView_->GetInstanceId();
-    ContainerScope scope(containerId);
+    ContainerScope containerScope(containerId);
 
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
     if (!scopedDelegate) {
