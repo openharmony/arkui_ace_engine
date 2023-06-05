@@ -39,6 +39,8 @@ public:
     static void SetOnTitleModeChanged(const JSCallbackInfo& info);
     static void SetUsrNavigationMode(int32_t value);
     static void SetNavBarWidth(const JSCallbackInfo& info);
+    static void SetNavBarWidthRange(const JSCallbackInfo& info);
+    static void SetMinContentWidth(const JSCallbackInfo& info);
     static void SetNavBarPosition(int32_t value);
     static void SetHideNavBar(bool hide);
     static void SetBackButtonIcon(const JSCallbackInfo& info);

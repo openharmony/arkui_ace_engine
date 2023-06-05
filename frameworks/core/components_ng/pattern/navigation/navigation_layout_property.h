@@ -43,6 +43,9 @@ public:
         copy->propNavigationMode_ = CloneNavigationMode();
         copy->propUsrNavigationMode_ = CloneUsrNavigationMode();
         copy->propNavBarWidth_ = CloneNavBarWidth();
+        copy->propMinNavBarWidth_ = CloneMinNavBarWidth();
+        copy->propMaxNavBarWidth_ = CloneMaxNavBarWidth();
+        copy->propMinContentWidth_ = CloneMinContentWidth();
         copy->propNavBarPosition_ = CloneNavBarPosition();
         copy->propHideNavBar_ = CloneHideNavBar();
         copy->propDestinationChange_ = CloneDestinationChange();
@@ -58,6 +61,9 @@ public:
         ResetNavigationMode();
         ResetUsrNavigationMode();
         ResetNavBarWidth();
+        ResetMinNavBarWidth();
+        ResetMaxNavBarWidth();
+        ResetMinContentWidth();
         ResetNavBarPosition();
         ResetHideNavBar();
         ResetDestinationChange();
@@ -69,7 +75,11 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         LayoutProperty::ToJsonValue(json);
+        std::string navBarWidthRange = GetMinNavBarWidthValue(DEFAULT_MIN_NAV_BAR_WIDTH).ToString() + ", "
+            + GetMaxNavBarWidthValue(DEFAULT_MAX_NAV_BAR_WIDTH).ToString();
         json->Put("navBarWidth", GetNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH).ToString().c_str());
+        json->Put("navBarWidthRange", navBarWidthRange.c_str());
+        json->Put("minContentWidth", GetMinContentWidthValue(DEFAULT_MIN_CONTENT_WIDTH).ToString().c_str());
         json->Put("navBarPosition", GetNavBarPosition().value_or(NavBarPosition::START) ==
             NavBarPosition::START ? "NavBarPosition.Start" : "NavBarPosition.End");
         static const std::array<std::string, 3> NAVIGATION_MODE_TO_STRING = {
@@ -89,6 +99,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NavigationMode, NavigationMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UsrNavigationMode, NavigationMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NavBarWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MinNavBarWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaxNavBarWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MinContentWidth, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NavBarPosition, NavBarPosition, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideNavBar, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DestinationChange, bool, PROPERTY_UPDATE_MEASURE);
