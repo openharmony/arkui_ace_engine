@@ -78,6 +78,7 @@ public:
     virtual void SetFadingEdge(bool fadingEdge) = 0;
     virtual void SetBarOverlap(bool barOverlap) = 0;
     virtual void SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& onChangeEvent) = 0;
+    virtual void SetClipEdge(bool clipEdge) = 0;
 
 private:
     static std::unique_ptr<TabsModel> instance_;

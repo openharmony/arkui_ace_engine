@@ -39,6 +39,7 @@ public:
     static void SetFadingEdge(const JSCallbackInfo& info);
     static void SetDivider(const JSCallbackInfo& info);
     static void SetBarOverlap(const JSCallbackInfo& info);
+    static void SetClip(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework
