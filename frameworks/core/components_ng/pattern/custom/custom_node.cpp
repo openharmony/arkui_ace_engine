@@ -76,7 +76,6 @@ void CustomNode::FlushReload()
 
 void CustomNode::SetJSViewActive(bool active)
 {
-    LOGE("CustomNode::SetJSViewActive");
     FireSetActiveFunc(active);
 }
 
