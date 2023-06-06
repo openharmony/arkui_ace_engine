@@ -249,6 +249,9 @@ void MediaPlayerImpl::ProcessSurfaceCreate()
 void MediaPlayerImpl::ProcessSurfaceChange(int32_t width, int32_t height)
 {
     LOGI("Media player ProcessSurfaceChange (%{public}d, %{public}d)", width, height);
+    if (resolutionChangeCallback_) {
+        resolutionChangeCallback_();
+    }
 }
 
 } // namespace OHOS::Ace::NG

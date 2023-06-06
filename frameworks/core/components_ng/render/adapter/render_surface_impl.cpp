@@ -53,6 +53,13 @@ void RenderSurfaceImpl::InitSurface()
         CHECK_NULL_VOID(callback);
         callback->ProcessSurfaceCreate();
     });
+    extSurface_->SetSurfaceChanged([weak = WeakClaim(this)](int32_t width, int32_t height) {
+        auto surfaceImpl = weak.Upgrade();
+        CHECK_NULL_VOID(surfaceImpl);
+        auto callback = surfaceImpl->extSurfaceCallback_;
+        CHECK_NULL_VOID(callback);
+        callback->ProcessSurfaceChange(width, height);
+    });
 }
 
 void RenderSurfaceImpl::UpdateXComponentConfig() {}
