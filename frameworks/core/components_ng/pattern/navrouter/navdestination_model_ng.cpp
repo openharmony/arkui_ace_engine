@@ -42,9 +42,6 @@ void NavDestinationModelNG::Create()
     int32_t nodeId = stack->ClaimNodeId();
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
-    CHECK_NULL_VOID(navDestinationPattern);
-    navDestinationPattern->SetName(std::to_string(nodeId));
 
     // titleBar node
     if (!navDestinationNode->GetTitleBarNode()) {

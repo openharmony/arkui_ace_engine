@@ -100,13 +100,6 @@ void NavRouterGroupNode::OnAttachToMainTree(bool recursive)
         parent = parent->GetParent();
     }
     SetDestinationChangeEvent(parent);
-    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(parent);
-    CHECK_NULL_VOID(navigationNode);
-    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode());
-    CHECK_NULL_VOID(navDestinationNode);
-    auto navRouterPattern = GetPattern<NavRouterPattern>();
-    CHECK_NULL_VOID(navRouterPattern);
-    navigationNode->SetBackButtonEvent(navDestinationNode, navRouterPattern);
 }
 
 void NavRouterGroupNode::SetDestinationChangeEvent(const RefPtr<UINode>& parent)
@@ -137,7 +130,7 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
     // get the navDestination under NavRouter
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode());
     // do nothing if this navDestination is already at the top
-    if (navigationPattern->GetNavDestinationNode() == navDestination) {
+    if (navDestination && navigationPattern->GetNavDestinationNode() == navDestination) {
         LOGW("this navDestination is displaying");
         return;
     }
@@ -151,7 +144,7 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
     auto routeInfo = navRouterPattern->GetRouteInfo();
     std::string name;
     if (!navDestination && routeInfo) {
-        // create navDestination with routerInfo
+        // create navDestination with routeInfo
         name = routeInfo->GetName();
         auto uiNode = navigationStack->CreateNodeByRouteInfo(routeInfo);
         navDestination =
@@ -203,11 +196,6 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
         !navigationPattern->GetNavigationStackProvided()) {
         navigationContentNode->Clean();
         navigationPattern->CleanStack();
-    }
-    if (!(navigationStack->Empty() &&
-            navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::SPLIT)) {
-        // add backButton except for the first level page in SPLIT mode
-        navigationNode->SetBackButtonVisible(navDestination);
     }
     if (navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::STACK) {
         if (navBarNode) {
