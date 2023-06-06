@@ -20,6 +20,7 @@
 
 #include "unistd.h"
 
+#include "base/geometry/rect.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "core/common/ace_page.h"
@@ -160,6 +161,14 @@ const RefPtr<Subwindow>& SubwindowManager::GetCurrentWindow()
 {
     std::lock_guard<std::mutex> lock(currentSubwindowMutex_);
     return currentSubwindow_;
+}
+
+Rect SubwindowManager::GetParentWindowRect()
+{
+    std::lock_guard<std::mutex> lock(currentSubwindowMutex_);
+    Rect rect;
+    CHECK_NULL_RETURN(currentSubwindow_, rect);
+    return currentSubwindow_->GetParentWindowRect();
 }
 
 void SubwindowManager::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset)

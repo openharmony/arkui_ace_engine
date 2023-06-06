@@ -57,6 +57,9 @@ public:
     // Add interface for hot regions
     virtual void SetHotAreas(const std::vector<Rect>& rects) {};
 
+    // Add interface to provide the size and offset of the parent window
+    virtual Rect GetParentWindowRect() const = 0;
+
     int32_t GetSubwindowId() const
     {
         return subwindowId_;

@@ -155,7 +155,9 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             auto rect = Rect(childOffset_.GetX(), childOffset_.GetY(), childSize_.Width(), childSize_.Height());
             rects.emplace_back(rect);
         } else {
-            auto rect = Rect(0.0f, 0.0f, selfSize_.Width(), selfSize_.Height());
+            auto parentWindowRect = SubwindowManager::GetInstance()->GetParentWindowRect();
+            auto rect = Rect(childOffset_.GetX(), childOffset_.GetY(), childSize_.Width(), childSize_.Height());
+            rects.emplace_back(parentWindowRect);
             rects.emplace_back(rect);
         }
         SubwindowManager::GetInstance()->SetHotAreas(rects);
