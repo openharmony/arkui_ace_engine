@@ -1087,19 +1087,6 @@ void RosenRenderContext::OnModifyDone()
     if (HasClickEffectLevel()) {
         InitEventClickEffect();
     }
-    const auto& size = frameNode->GetGeometryNode()->GetFrameSize();
-    if (!size.IsPositive()) {
-        LOGD("first modify, make change in SyncGeometryProperties");
-        return;
-    }
-    CHECK_NULL_VOID_NOLOG(isPositionChanged_);
-    auto rect = AdjustPaintRect();
-    if (!rect.GetSize().IsPositive()) {
-        return;
-    }
-    rsNode_->SetBounds(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
-    rsNode_->SetFrame(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
-    isPositionChanged_ = false;
 }
 
 RectF RosenRenderContext::AdjustPaintRect()
@@ -1245,20 +1232,37 @@ void RosenRenderContext::GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddi
         parentPaddingTop = layoutProperty->GetPaddingProperty()->top.value_or(CalcLength(Dimension(0))).GetDimension();
     }
 }
+void RosenRenderContext::SetPositionToRSNode()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(rsNode_);
+    const auto& size = frameNode->GetGeometryNode()->GetFrameSize();
+    if (!size.IsPositive()) {
+        LOGD("first modify, make change in SyncGeometryProperties");
+        return;
+    }
+    auto rect = AdjustPaintRect();
+    if (!rect.GetSize().IsPositive()) {
+        return;
+    }
+    rsNode_->SetBounds(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+    rsNode_->SetFrame(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+}
 
 void RosenRenderContext::OnPositionUpdate(const OffsetT<Dimension>& /*value*/)
 {
-    isPositionChanged_ = true;
+    SetPositionToRSNode();
 }
 
 void RosenRenderContext::OnOffsetUpdate(const OffsetT<Dimension>& /*value*/)
 {
-    isPositionChanged_ = true;
+    SetPositionToRSNode();
 }
 
 void RosenRenderContext::OnAnchorUpdate(const OffsetT<Dimension>& /*value*/)
 {
-    isPositionChanged_ = true;
+    SetPositionToRSNode();
 }
 
 void RosenRenderContext::OnZIndexUpdate(int32_t value)
