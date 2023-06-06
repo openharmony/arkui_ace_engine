@@ -82,6 +82,7 @@ private:
     float moveX_ = 0.0f;
     float moveY_ = 0.0f;
     bool hasDeco_ = true;
+    bool isFocus_ = true;
 };
 
 } // namespace OHOS::Ace::NG

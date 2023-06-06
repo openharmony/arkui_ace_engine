@@ -75,7 +75,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco)
 
     auto renderContext = containerNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(CONTAINER_BACKGROUND_COLOR);
+    renderContext->UpdateBackgroundColor(isFocus_ ? CONTAINER_BACKGROUND_COLOR : CONTAINER_BACKGROUND_COLOR_LOST_FOCUS);
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(isShow ? CONTAINER_OUTER_RADIUS : 0.0_vp);
     renderContext->UpdateBorderRadius(borderRadius);
@@ -101,7 +101,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco)
 
     auto floatingLayoutProperty = floatingTitleNode->GetLayoutProperty();
     CHECK_NULL_VOID(floatingLayoutProperty);
-    ChangeFloatingTitle(floatingTitleNode);
+    ChangeFloatingTitle(floatingTitleNode, isFocus_);
     floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
 }
 
@@ -236,6 +236,7 @@ void ContainerModalPattern::OnWindowUnfocused()
 
 void ContainerModalPattern::WindowFocus(bool isFocus)
 {
+    isFocus_ = isFocus;
     auto containerNode = GetHost();
     CHECK_NULL_VOID(containerNode);
 
