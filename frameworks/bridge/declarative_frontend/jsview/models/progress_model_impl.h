@@ -42,6 +42,9 @@ public:
     void SetGradientColor(const NG::Gradient& value) override {}
     void SetPaintShadow(bool paintShadow) override {}
     void SetProgressStatus(NG::ProgressStatus status) override {}
+    void SetShowText(bool value) override {};
+    void SetRingSweepingEffect(bool value) override {};
+    void SetLinearSweepingEffect(bool value) override {};
 };
 
 } // namespace OHOS::Ace::Framework

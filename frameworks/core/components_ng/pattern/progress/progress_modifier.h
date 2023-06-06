@@ -61,6 +61,8 @@ public:
     void SetPaintShadow(bool paintShadow);
     void SetProgressStatus(ProgressStatus status);
     void SetVisible(bool isVisible);
+    void SetRingSweepEffect(bool value);
+    void SetLinearSweepEffect(bool value);
 
 private:
     void ContentDrawWithFunction(DrawingContext& context);
@@ -120,6 +122,8 @@ private:
     RefPtr<PropertyInt> progressType_;
     RefPtr<PropertyFloat> capsuleBorderWidth_;
     RefPtr<PropertyBool> sweepEffect_;
+    RefPtr<PropertyBool> ringSweepEffect_;
+    RefPtr<PropertyBool> linearSweepEffect_;
     RefPtr<PropertyBool> paintShadow_;
     RefPtr<PropertyInt> progressStatus_;
 
