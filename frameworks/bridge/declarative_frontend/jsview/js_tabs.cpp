@@ -200,9 +200,11 @@ void JSTabs::SetBarWidth(const JSCallbackInfo& info)
         return;
     }
 
-    CalcDimension width = Dimension(-1.0, DimensionUnit::VP);
+    CalcDimension width;
     if (!ParseJsDimensionVp(info[0], width)) {
         LOGE("The arg is wrong, fail to parse dimension");
+        TabsModel::GetInstance()->SetTabBarWidth(Dimension(-1.0, DimensionUnit::VP));
+        return;
     }
 
     TabsModel::GetInstance()->SetTabBarWidth(width);
@@ -214,9 +216,11 @@ void JSTabs::SetBarHeight(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    CalcDimension height = Dimension(-1.0, DimensionUnit::VP);
+    CalcDimension height;
     if (!ParseJsDimensionVp(info[0], height)) {
         LOGE("The arg is wrong, fail to parse dimension");
+        TabsModel::GetInstance()->SetTabBarHeight(Dimension(-1.0, DimensionUnit::VP));
+        return;
     }
 
     TabsModel::GetInstance()->SetTabBarHeight(height);
