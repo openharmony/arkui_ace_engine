@@ -371,7 +371,6 @@ private:
     std::shared_ptr<Rosen::RSNode> rsNode_;
     bool isHoveredScale_ = false;
     bool isHoveredBoard_ = false;
-    bool isPositionChanged_ = false;
     bool firstTransitionIn_ = false;
     bool isBreakingPoint_ = false;
     bool isBackBlurChanged_ = false;
