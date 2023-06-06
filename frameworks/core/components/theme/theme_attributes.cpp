@@ -202,4 +202,7 @@ const char ERROR_PASSWORD_TEXT_COLOR[] = "error_password_text_color";
 const char OVER_COUNT_TEXT_COLOR[] = "over_count_text_color";
 const char OVER_COUNT_TEXT_FONT_SIZE[] = "over_count_text_font_size";
 const char OVER_COUNT_BORDER_COLOR[] = "over_count_border_color";
+const char ERROR_PASSWORD_BORDER_ALPHA[] = "error_password_border_alpha";
+const char OVER_COUNT_BORDER_COLOR_ALPHA[] = "over_count_border_color_alpha";
+const char UNDERLINE_COLOR_ALPHA[] = "underline_color_alpha";
 } // namespace OHOS::Ace
