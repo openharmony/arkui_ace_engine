@@ -3961,16 +3961,14 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleSubTabBarClick002, TestSize.Level1)
     auto childFrameSize1 = childGeometryNode1->GetMarginFrameSize();
     childFrameSize1.SetMainSize(0.1f, Axis::HORIZONTAL);
     OffsetF c1(0.1f, 0.2f);
+    tabBarPattern->tabItemOffsets_.emplace_back(c1);
 
     /**
      * @tc.steps: step2. Test function HandleSubTabBarClick.
      * @tc.expected: Related function runs ok.
      */
     for (int32_t i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            tabBarPattern->HandleSubTabBarClick(layoutProperty, index);
-            tabBarPattern->tabItemOffsets_.emplace_back(c1);
-        }
+        tabBarPattern->HandleSubTabBarClick(layoutProperty, index);
         layoutProperty->UpdateTabBarMode(TabBarMode::FIXED);
     }
 }
