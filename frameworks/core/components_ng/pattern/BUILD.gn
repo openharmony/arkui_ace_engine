@@ -61,6 +61,7 @@ build_component_ng("pattern_ng") {
     "container_modal/container_modal_accessibility_property.cpp",
     "container_modal/container_modal_pattern.cpp",
     "container_modal/container_modal_view.cpp",
+    "counter/counter_layout_algorithm.cpp",
     "counter/counter_model_ng.cpp",
     "counter/counter_node.cpp",
     "custom/custom_measure_layout_node.cpp",
