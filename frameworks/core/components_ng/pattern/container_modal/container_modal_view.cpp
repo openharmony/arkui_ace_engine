@@ -211,6 +211,9 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
     imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(TITLE_ICON_SIZE), CalcLength(TITLE_ICON_SIZE)));
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    auto imageRenderProperty = imageIcon->getPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(imageRenderProperty, nullptr);
+    imageRenderProperty->UpdateImageInterpolation(ImageInterpolation::HIGH);
     imageIcon->MarkModifyDone();
 
     auto buttonNode = FrameNode::CreateFrameNode(
@@ -219,6 +222,76 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
     if (buttonFocus) {
         buttonFocus->SetFocusable(false);
     }
+
+    auto inputHub = buttonNode->GetOrCreateInputEventHub();
+    CHECK_NULL_RETURN(inputHub, nullptr);
+    auto hoverTask = [buttonNode, imageIcon](bool isHover) {
+        CHECK_NULL_VOID(buttonNode);
+        CHECK_NULL_VOID(imageIcon);
+        auto buttonPattern = AceType::DynamicCast<ButtonPattern>(buttonNode->GetPattern());
+        CHECK_NULL_VOID(buttonPattern);
+        buttonPattern->SetInHover(isHover);
+
+        float translateX = 0.0f;
+        float translateY = 0.0f;
+        float halfSize = TITLE_ICON_SIZE.Value() / 2.0f;
+        translateX = (buttonPattern->GetLocalLocation().GetX() - halfSize) / halfSize * 2;
+        translateY = (buttonPattern->GetLocalLocation().GetY() - halfSize) / halfSize * 2;
+
+        auto buttonNodeRenderContext = buttonNode->GetRenderContext();
+        auto imageIconRenderContext = imageIcon->GetRenderContext();
+        CHECK_NULL_VOID(buttonNodeRenderContext);
+        CHECK_NULL_VOID(imageIconRenderContext);
+        double imageScale = isHover ? 1.10 : 1.00;
+        AnimationOption option = AnimationOption();
+        option.setDuration(100);
+        std::string icurveString = "cubic-bezier(0.500000,0.000000,0.500000,1.000000)";
+        option.SetCurve(FrameWork::CreateCurve(icurveString));
+        if (isHover) {
+            AnimationUtils::Animate(option,[buttonNodeRenderContext,imageIconRenderContext,imageScale,translateX,translateY]() {
+                buttonNodeRenderContext->UpdateTranformScale(VictorF(imageScale, imageScale));
+                imageIconRenderContext->UpdateTranformScale(VictorF(1 / imageScale, 1 / imageScale));
+                imageIconRenderContext->UpdateTranformTranslate({translatex, translateY, 0.0f});
+            });
+        } else {
+            AnimationUtils::Animate(option,[buttonNodeRenderContext,imageIconRenderContext,imageScale,translateX,translateY]() {
+                buttonNodeRenderContext->UpdateTranformScale(VictorF(imageScale, imageScale));
+                imageIconRenderContext->UpdateTranformScale(VictorF(imageScale, imageScale));
+                imageIconRenderContext->UpdateTranformTranslate({0.0f, 0.0f, 0.0f});
+            });
+        }
+    };
+    auto hoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(hoverTask));
+    inputHub->AddOnHoverEvent(hoverEvent);
+
+    auto mouseTask = [buttonNode, imageIcon](MouseInfo& info) {
+        CHECK_NULL_VOID(buttonNode);
+        CHECK_NULL_VOID(imageIcon);
+        auto buttonPattern = AceType::DynamicCast<ButtonPattern>(buttonNode->GetPattern());
+        CHECK_NULL_VOID(buttonPattern);
+
+        if (info.GetAction() != MouseAction::MOVE || !buttonPattern->GetIsInHover()) {
+            buttonPattern->SetLocalLocation(info.GetLocalLocation());
+            return;
+        }
+
+        auto imageIconRenderContext = imageIcon->GetRenderContext();
+        CHECK_NULL_VOID(imageIconRenderContext);
+        float translateX = 0.0f;
+        float translateY = 0.0f;
+        float halfSize = TITLE_ICON_SIZE.Value() / 2.0f;
+        translateX = (info.GetLocalLocation().GetX() - halfSize) / halfSize * 2;
+        translateY = (info.GetLocalLocation().GetY() - halfSize) / halfSize * 2;
+        AnimationOption option = AnimationOption();
+        option.SetCurve(FrameWork::CreateCurve("responsive-spring-motion"));
+        AnimationUtils::Animate(option,[imageIconRenderContext,translateX,translateY]() {
+            imageIconRenderContext->UpdateTranformTranslate({translatex, translateY, 0.0f});
+        });
+
+    };
+    auto mouseEvent = AceType::MakeRefPtr<InputEvent>(std::move(mouseTask));
+    inputHub->AddOnMouseEvent(mouseEvent);
+
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackgroundColor(TITLE_BUTTON_BACKGROUND_COLOR);
