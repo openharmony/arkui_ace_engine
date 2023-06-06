@@ -103,7 +103,7 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         Pattern::ToJsonValue(json);
-        json->Put("currentIndex", GetCurrentIndex());
+        json->Put("currentIndex", currentIndex_);
         json->Put("currentOffset", currentOffset_);
 
         if (indicatorIsBoolean_) {
@@ -194,8 +194,10 @@ public:
         swiperController_ = swiperController;
     }
 
-    int32_t GetCurrentIndex() const
+    int32_t GetCurrentIndex()
     {
+        currentIndex_ = currentIndex_ < 0 || currentIndex_ > (TotalCount() - 1) ? 0 : currentIndex_;
+        currentIndex_ = IsLoop() ? currentIndex_ : std::clamp(currentIndex_, 0, TotalCount() - GetDisplayCount());
         return currentIndex_;
     }
 
