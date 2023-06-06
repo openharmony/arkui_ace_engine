@@ -155,8 +155,7 @@ void SwiperPattern::OnModifyDone()
         CHECK_NULL_VOID(gestureHub);
         gestureHub->AddTouchEvent(swiperPattern->touchEvent_);
         if (!swiperPattern->IsDisableSwipe()) {
-            gestureHub->AddPanEvent(
-                swiperPattern->panEvent_, swiperPattern->panDirection_, 1, DEFAULT_PAN_DISTANCE);
+            gestureHub->AddPanEvent(swiperPattern->panEvent_, swiperPattern->panDirection_, 1, DEFAULT_PAN_DISTANCE);
         }
     };
     swiperController_->SetAddSwiperEventCallback(std::move(addSwiperEventCallback));
@@ -466,7 +465,8 @@ void SwiperPattern::SwipeTo(int32_t index)
     LOGD("Swipe to index: %{public}d with animation, duration: %{public}d", index, GetDuration());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto targetIndex = std::clamp(index, 0, TotalCount() - 1);
+    auto targetIndex = (index < 0 || index > (TotalCount() - 1)) ? 0 : index;
+    targetIndex = IsLoop() ? targetIndex : std::clamp(targetIndex, 0, TotalCount() - GetDisplayCount());
     if (currentIndex_ == targetIndex || targetIndex_ == targetIndex) {
         LOGD("Target index is same with current index.");
         return;
