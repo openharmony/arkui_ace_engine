@@ -289,9 +289,16 @@ void JSGrid::SetEditMode(const JSCallbackInfo& info)
     GridModel::GetInstance()->SetEditable(editMode);
 }
 
-void JSGrid::SetMaxCount(double maxCount)
+void JSGrid::SetMaxCount(const JSCallbackInfo& info)
 {
-    GridModel::GetInstance()->SetMaxCount(static_cast<int32_t>(maxCount));
+    int32_t maxCount = Infinity<int32_t>();
+    if (!info[0]->IsUndefined() && info[0]->IsNumber()) {
+        ParseJsInt32(info[0], maxCount);
+        if (maxCount < 0) {
+            maxCount = Infinity<int32_t>();
+        }
+    }
+    GridModel::GetInstance()->SetMaxCount(maxCount);
 }
 
 void JSGrid::SetMinCount(double minCount)
