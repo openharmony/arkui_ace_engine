@@ -39,7 +39,7 @@ public:
     static void SetCachedCount(const JSCallbackInfo& info);
     static void SetEditMode(const JSCallbackInfo& info);
     static void SetMultiSelectable(bool multiSelectable);
-    static void SetMaxCount(double maxCount);
+    static void SetMaxCount(const JSCallbackInfo& info);
     static void SetMinCount(double minCount);
     static void CellLength(int32_t cellLength);
     static void SetLayoutDirection(int32_t value);
