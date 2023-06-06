@@ -14,13 +14,11 @@
  */
 
 #include <optional>
-#include <string>
-#include <vector>
 
 #include "gtest/gtest.h"
 
-#include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
+#include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -34,7 +32,6 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-
 namespace {
 constexpr float DEFAULT_SPAN_WIDTH = 100.0f;
 constexpr uint8_t DEFAULT_COLUMNS = 8;
@@ -43,7 +40,7 @@ constexpr uint8_t DEFAULT_OFFSET = 7;
 constexpr uint8_t DEFAULT_HEIGHT = 10;
 } // namespace
 
-class GridRowColPatternTestNg : public testing::Test {
+class GridRowTestNg : public testing::Test {
 public:
     void SetUp() override;
     void TearDown() override;
@@ -61,7 +58,7 @@ public:
     static const int32_t colNum_ = 2;
 };
 
-void GridRowColPatternTestNg::SetUpTestSuite()
+void GridRowTestNg::SetUpTestSuite()
 {
     /* Create framenode */
     GridRowModelNG gridRowModelNG;
@@ -78,14 +75,14 @@ void GridRowColPatternTestNg::SetUpTestSuite()
     MockPipelineBase::SetUp();
 }
 
-void GridRowColPatternTestNg::TearDownTestSuite()
+void GridRowTestNg::TearDownTestSuite()
 {
     rowNode_->Clean();
     colNodes_.clear();
     MockPipelineBase::TearDown();
 }
 
-void GridRowColPatternTestNg::SetUp()
+void GridRowTestNg::SetUp()
 {
     /* Set default grid-row properties */
     auto rowLayout = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
@@ -107,13 +104,13 @@ void GridRowColPatternTestNg::SetUp()
     colLayoutBack->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGHT)));
 }
 
-void GridRowColPatternTestNg::TearDown() {}
+void GridRowTestNg::TearDown() {}
 
-RefPtr<FrameNode> GridRowColPatternTestNg::rowNode_;
-std::vector<RefPtr<FrameNode>> GridRowColPatternTestNg::colNodes_;
-const int32_t GridRowColPatternTestNg::colNum_;
+RefPtr<FrameNode> GridRowTestNg::rowNode_;
+std::vector<RefPtr<FrameNode>> GridRowTestNg::colNodes_;
+const int32_t GridRowTestNg::colNum_;
 
-RefPtr<LayoutWrapper> GridRowColPatternTestNg::CreateLayoutWrapperAndLayout(bool needLayout = false)
+RefPtr<LayoutWrapper> GridRowTestNg::CreateLayoutWrapperAndLayout(bool needLayout = false)
 {
     auto layoutWrapper = rowNode_->CreateLayoutWrapper();
     LayoutConstraintF constraint;
@@ -135,7 +132,7 @@ RefPtr<LayoutWrapper> GridRowColPatternTestNg::CreateLayoutWrapperAndLayout(bool
 }
 
 /* Examine grid-col width */
-void GridRowColPatternTestNg::TestGridColWidth(uint8_t span, uint8_t expectWidth)
+void GridRowTestNg::TestGridColWidth(uint8_t span, uint8_t expectWidth)
 {
     // first grid-col occupies the first line to constrain the line-height of that line
     auto colNode = colNodes_.front();
@@ -150,7 +147,7 @@ void GridRowColPatternTestNg::TestGridColWidth(uint8_t span, uint8_t expectWidth
 }
 
 /* Examine the last grid-col position according to span/offset */
-testing::AssertionResult GridRowColPatternTestNg::TestGridColGeometry(
+testing::AssertionResult GridRowTestNg::TestGridColGeometry(
     uint8_t offset, uint8_t span, uint8_t expectOffsetX, uint8_t expectLines)
 {
     auto firstColNode = colNodes_.front();
@@ -169,7 +166,7 @@ testing::AssertionResult GridRowColPatternTestNg::TestGridColGeometry(
         " But expect offset: " << expectOffset.ToString();
 }
 
-OffsetF GridRowColPatternTestNg::GetColOffset(RefPtr<LayoutWrapper>& layoutWrapper, int32_t index)
+OffsetF GridRowTestNg::GetColOffset(RefPtr<LayoutWrapper>& layoutWrapper, int32_t index)
 {
     return layoutWrapper->GetOrCreateChildByIndex(index)->GetGeometryNode()->GetFrameOffset();
 }
@@ -179,7 +176,7 @@ OffsetF GridRowColPatternTestNg::GetColOffset(RefPtr<LayoutWrapper>& layoutWrapp
  * @tc.desc: Test GridRow Measure().
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowColPatternTestNg, Algorithm001, TestSize.Level1)
+HWTEST_F(GridRowTestNg, Algorithm001, TestSize.Level1)
 {
     TestGridColWidth(0, 0);
     TestGridColWidth(1, 1);
@@ -191,7 +188,7 @@ HWTEST_F(GridRowColPatternTestNg, Algorithm001, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with different span/offset.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowColPatternTestNg, Algorithm002, TestSize.Level1)
+HWTEST_F(GridRowTestNg, Algorithm002, TestSize.Level1)
 {
     // Set the first col: span + offset == columns
     // Test second col position
@@ -212,7 +209,7 @@ HWTEST_F(GridRowColPatternTestNg, Algorithm002, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with different sizetype.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowColPatternTestNg, Algorithm003, TestSize.Level1)
+HWTEST_F(GridRowTestNg, Algorithm003, TestSize.Level1)
 {
     /* update grid-row columns of LG size */
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
@@ -235,7 +232,7 @@ HWTEST_F(GridRowColPatternTestNg, Algorithm003, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with different gutter.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowColPatternTestNg, Algorithm004, TestSize.Level1)
+HWTEST_F(GridRowTestNg, Algorithm004, TestSize.Level1)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
     constexpr float gutterVal = 20.0f;
@@ -255,7 +252,7 @@ HWTEST_F(GridRowColPatternTestNg, Algorithm004, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with different direction.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowColPatternTestNg, Algorithm005, TestSize.Level1)
+HWTEST_F(GridRowTestNg, Algorithm005, TestSize.Level1)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
     layoutProperty->UpdateDirection(V2::GridRowDirection::RowReverse);
@@ -272,7 +269,7 @@ HWTEST_F(GridRowColPatternTestNg, Algorithm005, TestSize.Level1)
  * @tc.desc: Test GridCol layout order.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowColPatternTestNg, Algorithm006, TestSize.Level1)
+HWTEST_F(GridRowTestNg, Algorithm006, TestSize.Level1)
 {
     auto colLayoutFront = colNodes_.front()->GetLayoutProperty<GridColLayoutProperty>();
     colLayoutFront->UpdateOrder(V2::GridContainerSize(6));
@@ -291,7 +288,7 @@ HWTEST_F(GridRowColPatternTestNg, Algorithm006, TestSize.Level1)
  *           trigerring event when breakpoint changes.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowColPatternTestNg, Breakpoint, TestSize.Level1)
+HWTEST_F(GridRowTestNg, Breakpoint, TestSize.Level1)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
     constexpr int32_t mdCols = 6;
@@ -326,5 +323,139 @@ HWTEST_F(GridRowColPatternTestNg, Breakpoint, TestSize.Level1)
     columnWidth = frameRect.Width();
     EXPECT_EQ(columnWidth, DEFAULT_GRID_ROW_WIDTH / lgCols); // expect lg
     EXPECT_TRUE(eventTriggerFlag);
+}
+
+/**
+ * @tc.name: GridRowDefault001
+ * @tc.desc: Test the default values of GridRow's properties.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, GridRowDefault001, TestSize.Level1)
+{
+    GridRowModelNG gridRowModelNG;
+    gridRowModelNG.Create();
+    gridRowModelNG.SetOnBreakPointChange([](const std::string& size) {});
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<GridRowLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+
+    auto columns = layoutProperty->GetColumns();
+    EXPECT_TRUE(columns.has_value());
+    auto gutter = layoutProperty->GetGutter();
+    EXPECT_TRUE(gutter.has_value());
+    auto breakpoints = layoutProperty->GetBreakPoints();
+    EXPECT_TRUE(breakpoints.has_value());
+    auto direction = layoutProperty->GetDirection();
+    EXPECT_TRUE(direction.has_value());
+
+    constexpr int32_t testVal = 7;
+    layoutProperty->UpdateColumns(V2::GridContainerSize(testVal));
+    EXPECT_EQ(layoutProperty->GetColumnsValue().xs, testVal);
+    layoutProperty->UpdateGutter(V2::Gutter(Dimension(testVal)));
+    EXPECT_EQ(layoutProperty->GetGutterValue().yMd, Dimension(testVal));
+    V2::BreakPoints breakpointsVal;
+    breakpointsVal.breakpoints.assign({ "123vp" });
+    layoutProperty->UpdateBreakPoints(breakpointsVal);
+    EXPECT_EQ(layoutProperty->GetBreakPointsValue().breakpoints.front(), "123vp");
+    layoutProperty->UpdateDirection(V2::GridRowDirection::RowReverse);
+    EXPECT_EQ(layoutProperty->GetDirectionValue(), V2::GridRowDirection::RowReverse);
+
+    // rubbish code for coverity
+    auto clone = layoutProperty->Clone();
+    clone.Reset();
+    auto json = JsonUtil::Create(true);
+    layoutProperty->ToJsonValue(json);
+}
+
+/**
+ * @tc.name: GridRowDefault002
+ * @tc.desc: Test GridRow's properties.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, GridRowDefault002, TestSize.Level1)
+{
+    GridRowModelNG gridRowModelNG;
+
+    auto colVal = Referenced::MakeRefPtr<V2::GridContainerSize>();
+    auto gutterVal = Referenced::MakeRefPtr<V2::Gutter>();
+    auto breakpointsVal = Referenced::MakeRefPtr<V2::BreakPoints>();
+    auto directionVal = V2::GridRowDirection::Row;
+
+    gridRowModelNG.Create(colVal, gutterVal, breakpointsVal, directionVal);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<GridRowLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+
+    auto columns = layoutProperty->GetColumns();
+    EXPECT_TRUE(columns.has_value());
+    auto gutter = layoutProperty->GetGutter();
+    EXPECT_TRUE(gutter.has_value());
+    auto breakpoints = layoutProperty->GetBreakPoints();
+    EXPECT_TRUE(breakpoints.has_value());
+    auto direction = layoutProperty->GetDirection();
+    EXPECT_TRUE(direction.has_value());
+}
+
+/**
+ * @tc.name: GridColDefault001
+ * @tc.desc: Test the default values of GridCol's properties.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, GridColDefault001, TestSize.Level1)
+{
+    GridColModelNG gridColModelNG;
+    gridColModelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<GridColLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+
+    auto span = layoutProperty->GetSpan();
+    EXPECT_TRUE(span.has_value());
+    auto offset = layoutProperty->GetOffset();
+    EXPECT_TRUE(offset.has_value());
+    auto order = layoutProperty->GetOrder();
+    EXPECT_TRUE(order.has_value());
+
+    constexpr int32_t testVal = 7;
+    layoutProperty->UpdateSpan(V2::GridContainerSize(testVal));
+    EXPECT_EQ(layoutProperty->GetSpanValue().xs, testVal);
+    layoutProperty->UpdateOffset(V2::GridContainerSize(testVal));
+    EXPECT_EQ(layoutProperty->GetOffsetValue().md, testVal);
+    layoutProperty->UpdateOrder(V2::GridContainerSize(testVal));
+    EXPECT_EQ(layoutProperty->GetOrderValue().lg, testVal);
+
+    // rubbish code for coverity
+    auto clone = layoutProperty->Clone();
+    clone.Reset();
+    auto json = JsonUtil::Create(true);
+    layoutProperty->ToJsonValue(json);
+}
+
+/**
+ * @tc.name: GridColDefault002
+ * @tc.desc: Test GridCol's properties.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, GridColDefault002, TestSize.Level1)
+{
+    GridColModelNG gridColModelNG;
+    RefPtr<V2::GridContainerSize> spanVal = AceType::MakeRefPtr<V2::GridContainerSize>(1);
+    RefPtr<V2::GridContainerSize> offsetVal = AceType::MakeRefPtr<V2::GridContainerSize>(0);
+    RefPtr<V2::GridContainerSize> orderVal = AceType::MakeRefPtr<V2::GridContainerSize>(0);
+    gridColModelNG.Create(spanVal, offsetVal, orderVal);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<GridColLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+
+    auto span = layoutProperty->GetSpan();
+    EXPECT_TRUE(span.has_value());
+    auto offset = layoutProperty->GetOffset();
+    EXPECT_TRUE(offset.has_value());
+    auto order = layoutProperty->GetOrder();
+    EXPECT_TRUE(order.has_value());
 }
 } // namespace OHOS::Ace::NG

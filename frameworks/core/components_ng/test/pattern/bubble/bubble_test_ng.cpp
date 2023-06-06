@@ -26,6 +26,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/button/button_theme.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -41,7 +42,6 @@
 #include "core/components_ng/test/mock/rosen/testing_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
@@ -58,22 +58,31 @@ constexpr bool BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM_FALSE = false;
 constexpr bool BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM_TRUE = true;
 constexpr bool BUBBLE_PAINT_PROPERTY_AUTO_CANCEL_TRUE = true;
 constexpr bool BUBBLE_PAINT_PROPERTY_AUTO_CANCEL_FALSE = false;
+constexpr bool BUBBLE_LAYOUT_PROPERTY_SHOW_OUT_SUBWINDOW = false;
 
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 constexpr float CONTAINER_WIDTH = 600.0f;
 constexpr float CONTAINER_HEIGHT = 1000.0f;
-constexpr float BUBBLE_WIDTH = 80.0f;
+constexpr float BUBBLE_WIDTH = 100.0f;
 constexpr float BUBBLE_HEIGHT = 50.0f;
+constexpr float TARGET_WIDTH = 100.0f;
+constexpr float TARGET_HEIGHT = 200.0f;
+constexpr float TARGET_X = 100.0f;
+constexpr float TARGET_Y = 150.0f;
 
 const std::string BUBBLE_MESSAGE = "Hello World";
 const std::string BUBBLE_NEW_MESSAGE = "Good";
 const std::string STATE = "true";
 const OffsetF DISPLAY_WINDOW_OFFSET = OffsetF(ZERO, ZERO);
+const OffsetF TARGET_OFFSET(TARGET_X, TARGET_Y);
+const OffsetF MESSAGE_OFFSET = OffsetF(6, 16);
 const Color BUBBLE_PAINT_PROPERTY_MASK_COLOR = Color(0XFFFF0000);
 const Color BUBBLE_PAINT_PROPERTY_BACK_GROUND_COLOR = Color(0XFFFFFF00);
 const Color BUBBLE_PAINT_PROPERTY_TEXT_COLOR = Color(0XFFFF0000);
-const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+const SizeF TARGET_SIZE(TARGET_WIDTH, TARGET_HEIGHT);
+const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
 const Dimension BUBBLE_PAINT_PROPERTY_TARGET_SPACE = Dimension(20.1, DimensionUnit::PX);
 const Dimension BUBBLE_PAINT_PROPERTY_FONT_SIZE = Dimension(20.1, DimensionUnit::PX);
 const Ace::FontWeight BUBBLE_PAINT_PROPERTY_FONT_WEIGHT = Ace::FontWeight::W100;
@@ -137,7 +146,7 @@ protected:
     MockBubbleTheme() = default;
 };
 
-class BubblePatternTestNg : public testing::Test {
+class BubbleTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -147,11 +156,11 @@ protected:
     static RefPtr<FrameNode> CreateTargetNode();
 };
 
-void BubblePatternTestNg::SetUpTestCase()
+void BubbleTestNg::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
 }
-void BubblePatternTestNg::TearDownTestCase()
+void BubbleTestNg::TearDownTestCase()
 {
     MockPipelineBase::TearDown();
 }
@@ -166,14 +175,14 @@ PaddingProperty CreatePadding(float left, float top, float right, float bottom)
     return padding;
 }
 
-RefPtr<FrameNode> BubblePatternTestNg::CreateTargetNode()
+RefPtr<FrameNode> BubbleTestNg::CreateTargetNode()
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     return frameNode;
 }
 
-RefPtr<FrameNode> BubblePatternTestNg::CreateBubbleNode(const TestProperty& testProperty)
+RefPtr<FrameNode> BubbleTestNg::CreateBubbleNode(const TestProperty& testProperty)
 {
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
@@ -231,7 +240,7 @@ RefPtr<FrameNode> BubblePatternTestNg::CreateBubbleNode(const TestProperty& test
  * @tc.desc: Test all the properties of bubble.
  * @tc.type: FUNC
  */
-HWTEST_F(BubblePatternTestNg, BubblePatternTest001, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Initialize all properties of bubble.
@@ -284,7 +293,7 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest001, TestSize.Level1)
  * @tc.desc: Verify whether the layout property, layoutAlgorithm and event functions are created.
  * @tc.type: FUNC
  */
-HWTEST_F(BubblePatternTestNg, BubblePatternTest002, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -331,7 +340,7 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest002, TestSize.Level1)
  * @tc.desc: Test event function of bubble.
  * @tc.type: FUNC
  */
-HWTEST_F(BubblePatternTestNg, PanelPatternTest003, TestSize.Level1)
+HWTEST_F(BubbleTestNg, PanelPatternTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -374,7 +383,7 @@ HWTEST_F(BubblePatternTestNg, PanelPatternTest003, TestSize.Level1)
  * @tc.desc: Test bubble onModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(BubblePatternTestNg, BubblePatternTest004, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -424,7 +433,7 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest004, TestSize.Level1)
  * @tc.desc: Test bubble OnDirtyLayoutWrapperSwap.
  * @tc.type: FUNC
  */
-HWTEST_F(BubblePatternTestNg, BubblePatternTest005, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -462,8 +471,8 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest005, TestSize.Level1)
      * @tc.steps: step3. update layoutWrapper.
      */
     LayoutConstraintF parentLayoutConstraint;
-    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
-    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
     parentLayoutConstraint.selfIdealSize.SetSize(SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT));
 
     PaddingProperty noPadding = CreatePadding(ZERO, ZERO, ZERO, ZERO);
@@ -496,7 +505,7 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest005, TestSize.Level1)
  * @tc.desc: Test bubble pattern InitTouchEvent HandleTouchEvent HandleTouchDOWN.
  * @tc.type: FUNC
  */
-HWTEST_F(BubblePatternTestNg, BubblePatternTest006, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -549,7 +558,7 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest006, TestSize.Level1)
  * @tc.desc: Test CreateBubbleNode with message and Update.
  * @tc.type: FUNC
  */
-HWTEST_F(BubblePatternTestNg, BubblePatternTest007, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest007, TestSize.Level1)
 {
     // set value to popupParam
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
@@ -597,7 +606,7 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest007, TestSize.Level1)
  * @tc.desc: Test CreateCustomBubbleNode and Update.
  * @tc.type: FUNC
  */
-HWTEST_F(BubblePatternTestNg, BubblePatternTest008, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. set value to popupParam.
@@ -656,7 +665,7 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest008, TestSize.Level1)
  * @tc.desc: Test StartEnteringAnimation and StartExitingAnimation.
  * @tc.type: FUNC
  */
-HWTEST_F(BubblePatternTestNg, BubblePatternTest009, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create bubble.
@@ -708,7 +717,7 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest009, TestSize.Level1)
  * @tc.desc: Test IsOnShow.
  * @tc.type: FUNC
  */
-HWTEST_F(BubblePatternTestNg, BubblePatternTest010, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create bubble.
@@ -734,7 +743,7 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest010, TestSize.Level1)
  * @tc.desc: Test GetInvisibleOffset.
  * @tc.type: FUNC
  */
-HWTEST_F(BubblePatternTestNg, BubblePatternTest011, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest011, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create bubble.
@@ -797,7 +806,7 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest011, TestSize.Level1)
  * @tc.desc: Test start animation in OnDirtyLayoutWrapperSwap.
  * @tc.type: FUNC
  */
-HWTEST_F(BubblePatternTestNg, BubblePatternTest012, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest012, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create bubble.
@@ -839,7 +848,7 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest012, TestSize.Level1)
  * @tc.desc: Test BubblePaintMethod PaintBorder PaintBubble.
  * @tc.type: FUNC
  */
-HWTEST_F(BubblePatternTestNg, BubblePaintMethod001, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePaintMethod001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create the BubblePaintMethod.
@@ -922,7 +931,7 @@ HWTEST_F(BubblePatternTestNg, BubblePaintMethod001, TestSize.Level1)
  * @tc.desc: Test BubblePaintMethod UpdateArrowOffset.
  * @tc.type: FUNC
  */
-HWTEST_F(BubblePatternTestNg, BubblePaintMethod002, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePaintMethod002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create the BubblePaintMethod.
@@ -971,7 +980,7 @@ HWTEST_F(BubblePatternTestNg, BubblePaintMethod002, TestSize.Level1)
  * @tc.desc: Test BubblePaintMethod PaintMask.
  * @tc.type: FUNC
  */
-HWTEST_F(BubblePatternTestNg, BubblePaintMethod003, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePaintMethod003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create the BubblePaintMethod.
@@ -1011,7 +1020,7 @@ HWTEST_F(BubblePatternTestNg, BubblePaintMethod003, TestSize.Level1)
  * @tc.desc: Test bubble onModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(BubblePatternTestNg, BubblePatternTest013, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest013, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. set value to popupParam.
@@ -1070,7 +1079,7 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest013, TestSize.Level1)
  * @tc.desc: Test bubble hover and touch callback.
  * @tc.type: FUNC
  */
-HWTEST_F(BubblePatternTestNg, BubblePatternTest014, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest014, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. set value to popupParam.
@@ -1150,7 +1159,7 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest014, TestSize.Level1)
  * @tc.desc: Test CreateBubbleNode with Offset.
  * @tc.type: FUNC
  */
-HWTEST_F(BubblePatternTestNg, BubblePatternTest015, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest015, TestSize.Level1)
 {
 	/**
      * @tc.steps: step1. set popup value to popupParam.
@@ -1187,7 +1196,7 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest015, TestSize.Level1)
  * @tc.desc: Test CreateCustomBubbleNode with with Offset.
  * @tc.type: FUNC
  */
-HWTEST_F(BubblePatternTestNg, BubblePatternTest016, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest016, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. set popup value to popupParam.
@@ -1218,5 +1227,381 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest016, TestSize.Level1)
      */
     auto property = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
     EXPECT_EQ(property->GetPositionOffset().value(), BUBBLE_POSITION_OFFSET);
+}
+
+/**
+ * @tc.name: BubbleLayoutTest001
+ * @tc.desc: Test BubbleNode layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BubbleLayoutTest001, TestSize.Level1)
+{
+    // create targetNode and popupNode
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    popupParam->SetMessage(BUBBLE_MESSAGE);
+    auto targetNode = CreateTargetNode();
+    EXPECT_NE(targetNode, nullptr);
+    auto targetTag = targetNode->GetTag();
+    auto targetId = targetNode->GetId();
+    // set popupTheme and  buttonTheme to themeManager before using themeManager
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+    auto popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, popupParam);
+    EXPECT_NE(popupNode, nullptr);
+
+    // create layoutWrapper and update it
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        popupNode, geometryNode, AceType::DynamicCast<BubbleLayoutProperty>(popupNode->GetLayoutProperty()));
+    auto layoutProperty = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    // update layoutProperty
+    layoutProperty->UpdateEnableArrow(true);
+    layoutProperty->UpdateUseCustom(false);
+    layoutProperty->UpdatePlacement(Placement::BOTTOM);
+    layoutProperty->UpdateShowInSubWindow(false);
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(BUBBLE_WIDTH), CalcLength(BUBBLE_HEIGHT)));
+    auto popupLayoutAlgorithm = popupNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    EXPECT_NE(popupLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(popupLayoutAlgorithm));
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT));
+
+    PaddingProperty noPadding;
+    noPadding.left = CalcLength(ZERO);
+    noPadding.right = CalcLength(ZERO);
+    noPadding.top = CalcLength(ZERO);
+    noPadding.bottom = CalcLength(ZERO);
+    layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.maxSize = CONTAINER_SIZE;
+    childLayoutConstraint.minSize = SizeF(ZERO, ZERO);
+}
+
+/**
+ * @tc.name: BubbleLayoutTest002
+ * @tc.desc: Test Bubble Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BubbleLayoutTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create targetNode and get frameNode.
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    popupParam->SetMessage(BUBBLE_MESSAGE);
+    popupParam->SetUseCustomComponent(BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM_FALSE);
+    auto targetNode = CreateTargetNode();
+    EXPECT_NE(targetNode, nullptr);
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetNode->GetId(), targetNode->GetTag()));
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
+     * @tc.expected: step2. related function is called.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    EXPECT_FALSE(bubblePattern == nullptr);
+    auto bubbleLayoutProperty = bubblePattern->GetLayoutProperty<BubbleLayoutProperty>();
+    EXPECT_FALSE(bubbleLayoutProperty == nullptr);
+    auto bubbleLayoutAlgorithm = bubblePattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(bubbleLayoutAlgorithm == nullptr);
+
+    /**
+     * @tc.steps: step3. update layoutWrapper and layoutProperty.
+     */
+    bubbleLayoutProperty->UpdateEnableArrow(BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW_TRUE);
+    bubbleLayoutProperty->UpdateUseCustom(BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM_FALSE);
+    bubbleLayoutProperty->UpdatePlacement(BUBBLE_LAYOUT_PROPERTY_PLACEMENT);
+    bubbleLayoutProperty->UpdateUseCustom(BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM_FALSE);
+
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(FULL_SCREEN_HEIGHT)));
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    /**
+     * @tc.steps: step3. use layoutAlgorithm to measure and layout.
+     * @tc.expected: step3. check whether the value of geometry's frameSize and frameOffset is correct.
+     */
+    bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
+    bubbleLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), FULL_SCREEN_SIZE);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), DISPLAY_WINDOW_OFFSET);
+}
+
+/**
+ * @tc.name: BubbleLayoutTest003
+ * @tc.desc: Test the Bubble created by message Measure and Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BubbleLayoutTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create targetNode and get frameNode.
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    popupParam->SetMessage(BUBBLE_MESSAGE);
+    popupParam->SetUseCustomComponent(BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM_FALSE);
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    // set popupTheme and  buttonTheme to themeManager before using themeManager
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    EXPECT_FALSE(frameNode == nullptr);
+
+    /**
+     * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
+     * @tc.expected: step2. related function is called.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    EXPECT_FALSE(bubblePattern == nullptr);
+    auto bubbleLayoutProperty = bubblePattern->GetLayoutProperty<BubbleLayoutProperty>();
+    EXPECT_FALSE(bubbleLayoutProperty == nullptr);
+    auto bubbleLayoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    EXPECT_FALSE(bubbleLayoutAlgorithm == nullptr);
+    bubbleLayoutAlgorithm->targetTag_ = targetTag;
+    bubbleLayoutAlgorithm->targetNodeId_ = targetId;
+
+    /**
+     * @tc.steps: step3. update layoutWrapper and layoutProperty.
+     */
+    bubbleLayoutProperty->UpdateEnableArrow(BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW_TRUE);
+    bubbleLayoutProperty->UpdateUseCustom(BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM_FALSE);
+    bubbleLayoutProperty->UpdatePlacement(BUBBLE_LAYOUT_PROPERTY_PLACEMENT);
+    bubbleLayoutProperty->UpdateUseCustom(BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM_TRUE);
+    bubbleLayoutProperty->UpdateShowInSubWindow(BUBBLE_LAYOUT_PROPERTY_SHOW_IN_SUBWINDOW);
+
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(FULL_SCREEN_HEIGHT)));
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.maxSize = CONTAINER_SIZE;
+    childLayoutConstraint.minSize = SizeF(ZERO, ZERO);
+
+    /**
+     * @tc.steps: step4. create bubble child and child's layoutWrapper.
+     */
+    auto textFrameNode = BubbleView::CreateMessage(popupParam->GetMessage(), popupParam->IsUseCustom());
+    EXPECT_FALSE(textFrameNode == nullptr);
+    RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    textGeometryNode->Reset();
+    RefPtr<LayoutWrapper> textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
+    textLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    textLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(BUBBLE_WIDTH), CalcLength(BUBBLE_HEIGHT)));
+    auto boxLayoutAlgorithm = textFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    EXPECT_FALSE(boxLayoutAlgorithm == nullptr);
+    textLayoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
+    frameNode->AddChild(textFrameNode);
+    layoutWrapper->AppendChild(textLayoutWrapper);
+
+    /**
+     * @tc.steps: step5. use layoutAlgorithm to measure and layout.
+     * @tc.expected: step5. check whether the value of the bubble child's frameSize and frameOffset is correct.
+     */
+    bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
+    bubbleLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(BUBBLE_WIDTH, BUBBLE_HEIGHT));
+    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset(), MESSAGE_OFFSET);
+}
+
+/**
+ * @tc.name: BubbleLayoutTest004
+ * @tc.desc: Test  Bubble UpdateTouchRegion in different arrowPlacement
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BubbleLayoutTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create targetNode and get frameNode.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    /**
+     * @tc.steps: step2. get pattern and layoutAlgorithm.
+     * @tc.expected: step2. related function is called.
+     */
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    EXPECT_FALSE(bubblePattern == nullptr);
+    auto bubbleLayoutProperty = bubblePattern->GetLayoutProperty<BubbleLayoutProperty>();
+    EXPECT_FALSE(bubbleLayoutProperty == nullptr);
+    auto bubbleLayoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    EXPECT_FALSE(bubbleLayoutAlgorithm == nullptr);
+
+    /**
+     * @tc.steps: step3. update layoutProp and arrowPlacement.
+     * @tc.expected: step3. check whether the function is executed.
+     */
+    for (uint32_t i = 0; i < BUBBLE_LAYOUT_PROPERTY_PLACEMENTS.size(); ++i) {
+        if (i % 2 == 0) {
+            bubbleLayoutProperty->UpdateEnableArrow(BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW_TRUE);
+        } else {
+            bubbleLayoutProperty->UpdateEnableArrow(BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW_FALSE);
+        }
+        bubbleLayoutAlgorithm->arrowPlacement_ = BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i];
+        bubbleLayoutAlgorithm->UpdateTouchRegion();
+        bubbleLayoutAlgorithm->UpdateChildPosition(bubbleLayoutProperty);
+    }
+    bubbleLayoutAlgorithm->showArrow_ = true;
+    for (uint32_t i = 0; i < BUBBLE_LAYOUT_PROPERTY_PLACEMENTS.size(); ++i) {
+        bubbleLayoutAlgorithm->arrowPlacement_ = BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i];
+        bubbleLayoutAlgorithm->UpdateTouchRegion();
+    }
+}
+
+/**
+ * @tc.name: BubbleLayoutTest005
+ * @tc.desc: Test BubbleLayoutAlgorithm::Measure function
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BubbleLayoutTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create targetNode and get frameNode.
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    popupParam->SetMessage(BUBBLE_MESSAGE);
+    popupParam->SetUseCustomComponent(BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM_FALSE);
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    // set popupTheme and  buttonTheme to themeManager before using themeManager
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
+     * @tc.expected: related function is called.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    auto bubbleLayoutProperty = bubblePattern->GetLayoutProperty<BubbleLayoutProperty>();
+    auto bubbleLayoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(bubbleLayoutAlgorithm, nullptr);
+    bubbleLayoutAlgorithm->targetTag_ = targetTag;
+    bubbleLayoutAlgorithm->targetNodeId_ = targetId;
+    /**
+     * @tc.steps: step3. update layoutWrapper and layoutProperty.
+     */
+    bubbleLayoutProperty->UpdateEnableArrow(BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW_TRUE);
+    bubbleLayoutProperty->UpdatePlacement(BUBBLE_LAYOUT_PROPERTY_PLACEMENT);
+    bubbleLayoutProperty->UpdateUseCustom(BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM_TRUE);
+    bubbleLayoutProperty->UpdateShowInSubWindow(BUBBLE_LAYOUT_PROPERTY_SHOW_OUT_SUBWINDOW);
+
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(FULL_SCREEN_HEIGHT)));
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.maxSize = CONTAINER_SIZE;
+    childLayoutConstraint.minSize = SizeF(ZERO, ZERO);
+    /**
+     * @tc.steps: step5. use layoutAlgorithm to measure and layout.
+     */
+    bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
+}
+
+/**
+ * @tc.name: BubbleLayoutTest006
+ * @tc.desc: Test BubbleLayoutAlgorithm::GetPositionWithPlacement function
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BubbleLayoutTest006, TestSize.Level1)
+{
+    BubbleLayoutAlgorithm bubbleLayoutAlgorithm;
+    SizeF childSize(24, 24);
+    OffsetF topPosition(0, 10);
+    OffsetF bottomPosition(0, 34);
+    OffsetF topArrowPosition(0, 0);
+    OffsetF bottomArrowPosition(0, 44);
+
+    std::vector<double> placements = {4, 4, 0, 44, 0, 0, 0, 0, -8, 16, -8, 16};
+    for (uint32_t i = 0; i < BUBBLE_LAYOUT_PROPERTY_PLACEMENTS.size(); ++i) {
+        bubbleLayoutAlgorithm.placement_ = BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i];
+        bubbleLayoutAlgorithm.GetPositionWithPlacement(
+        childSize, topPosition, bottomPosition, topArrowPosition, bottomArrowPosition);
+        EXPECT_EQ(bubbleLayoutAlgorithm.arrowPosition_.GetY(), placements[i]);
+    }
+}
+
+/**
+ * @tc.name: BubbleLayoutTest007
+ * @tc.desc: Test GetPositionOffset,UpdatePositionOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BubbleLayoutTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. use UpdatePositionOffset() to update position offset.
+     */
+    BubbleLayoutProperty property;
+    EXPECT_FALSE(property.GetPositionOffset().has_value());
+    property.UpdatePositionOffset(OffsetF(25.0f, 30.0f));
+    
+    /**
+     * @tc.steps: step2. use GetPositionOffset() get popup position offset .
+     * @tc.expected: check whether popup offset is correct.
+     */
+    ASSERT_TRUE(property.GetPositionOffset().has_value());
+    EXPECT_EQ(property.GetPositionOffset().value(), OffsetF(25.0f, 30.0f));
 }
 } // namespace OHOS::Ace::NG
