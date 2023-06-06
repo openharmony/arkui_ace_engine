@@ -94,14 +94,15 @@ RefPtr<FrameNode> OptionView::CreateIcon(const std::string& icon, const RefPtr<F
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(iconNode, nullptr);
     auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
-    if (!icon.empty()) {
-        props->UpdateImageSourceInfo(ImageSourceInfo(icon));
-    }
-
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
+    if (!icon.empty()) {
+        ImageSourceInfo info(icon);
+        info.SetFillColor(theme->GetMenuIconColor());
+        props->UpdateImageSourceInfo(info);
+    }
     props->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(theme->GetIconSideLength()), CalcLength(theme->GetIconSideLength())));
     props->UpdateAlignment(Alignment::CENTER_LEFT);

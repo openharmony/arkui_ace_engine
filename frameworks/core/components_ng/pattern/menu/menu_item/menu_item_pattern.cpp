@@ -532,7 +532,7 @@ void MenuItemPattern::AddSelectIcon(RefPtr<FrameNode>& row)
     auto iconPath = userIcon.empty() ? iconTheme->GetIconPath(InternalResource::ResourceId::MENU_OK_SVG) : userIcon;
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
-    UpdateIconSrc(selectIcon_, iconPath, selectTheme->GetIconSideLength(), Color::BLACK);
+    UpdateIconSrc(selectIcon_, iconPath, selectTheme->GetIconSideLength(), selectTheme->GetMenuIconColor());
 
     auto renderContext = selectIcon_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
