@@ -151,6 +151,8 @@ public:
 
     bool AnimateTo(float position, float duration, const RefPtr<Curve>& curve);
 
+    void ScrollBy(float offset);
+
     bool OnScrollCallback(float offset, int32_t source) override;
 
     int32_t GetOriginalIndex() const;
@@ -197,6 +199,7 @@ private:
     void UpdateScrollBarOffset() override;
     void UpdateRectOfDraggedInItem(int32_t insertIndex);
     void SetAccessibilityAction();
+    void StopAnimate();
 
     GridLayoutInfo gridLayoutInfo_;
     RefPtr<GridPositionController> positionController_;

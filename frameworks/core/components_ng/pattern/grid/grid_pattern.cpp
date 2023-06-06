@@ -866,6 +866,25 @@ void GridPattern::ScrollToFocusNode(const WeakPtr<FocusHub>& focusNode)
     UpdateStartIndex(nextIndex);
 }
 
+void GridPattern::StopAnimate()
+{
+    if (!IsScrollableStopped()) {
+        StopScrollable();
+    }
+    if (animator_ && !animator_->IsStopped()) {
+        animator_->Stop();
+    }
+}
+
+void GridPattern::ScrollBy(float offset)
+{
+    StopAnimate();
+    UpdateCurrentOffset(-offset, SCROLL_FROM_JUMP);
+    auto host = GetHost();
+    CHECK_NULL_VOID_NOLOG(host);
+    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+}
+
 void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     Pattern::ToJsonValue(json);
