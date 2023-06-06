@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT_WITH_PREVIEW ProxyComponent : public SoleChildComponent {
+class ACE_FORCE_EXPORT ProxyComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(ProxyComponent, SoleChildComponent);
 
 public:

@@ -21,7 +21,7 @@
 #include "base/utils/macros.h"
 namespace OHOS::Ace {
 
-class ACE_EXPORT_WITH_PREVIEW Base64Util final {
+class ACE_FORCE_EXPORT Base64Util final {
 public:
     Base64Util() = delete;
     ~Base64Util() = delete;

@@ -25,7 +25,7 @@ class NativeEngine;
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT_WITH_PREVIEW DeclarativeModulePreloader {
+class ACE_FORCE_EXPORT DeclarativeModulePreloader {
 public:
     static void Preload(NativeEngine& runtime);
 

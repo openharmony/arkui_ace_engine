@@ -35,7 +35,7 @@ struct SystemGridInfo {
     SystemGridInfo(GridSizeType sizeType, const Dimension& gutter, const Dimension& margin, int32_t columns)
         : sizeType(sizeType), gutter(gutter), margin(margin), columns(columns), maxColumns(columns)
     {}
-    ACE_FORCE_EXPORT_WITH_PREVIEW std::string ToString() const;
+    ACE_FORCE_EXPORT std::string ToString() const;
 
     GridSizeType sizeType = GridSizeType::UNDEFINED;
     Dimension gutter;
@@ -44,7 +44,7 @@ struct SystemGridInfo {
     int32_t maxColumns = 0;
 };
 
-class ACE_FORCE_EXPORT_WITH_PREVIEW GridSystemManager final {
+class ACE_FORCE_EXPORT GridSystemManager final {
 public:
     ~GridSystemManager() = default;
     ACE_EXPORT static GridSystemManager& GetInstance();

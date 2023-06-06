@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::Platform {
 
-class ACE_FORCE_EXPORT_WITH_PREVIEW ClipboardProxyImpl : public ClipboardInterface {
+class ACE_FORCE_EXPORT ClipboardProxyImpl : public ClipboardInterface {
 public:
     ClipboardProxyImpl(CallbackSetClipboardData callbackSetData, CallbackGetClipboardData callbackGetData);
     ~ClipboardProxyImpl() = default;

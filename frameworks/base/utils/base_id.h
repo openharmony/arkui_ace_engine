@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_FORCE_EXPORT_WITH_PREVIEW BaseId {
+class ACE_FORCE_EXPORT BaseId {
 public:
     using IdType = uint64_t;
 

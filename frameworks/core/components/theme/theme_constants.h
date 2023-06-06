@@ -33,7 +33,7 @@
 #include "core/components/theme/theme_style.h"
 namespace OHOS::Ace {
 
-class ACE_FORCE_EXPORT_WITH_PREVIEW ThemeConstants : public AceType {
+class ACE_FORCE_EXPORT ThemeConstants : public AceType {
     DECLARE_ACE_TYPE(ThemeConstants, AceType);
 
 public:
