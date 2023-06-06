@@ -52,6 +52,7 @@ const LinearMapNode<RefPtr<Curve>> CURVE_MAP[] = {
     { "linear", Curves::LINEAR },
 };
 
+constexpr double DEFAULT_DURATION = 1000.0;
 } // namespace
 
 void JSScroller::JSBind(BindingTarget globalObj)
@@ -97,26 +98,21 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     }
 
     double duration = 0.0;
+    bool smooth = false;
     RefPtr<Curve> curve = Curves::EASE;
     auto animationValue = obj->GetProperty("animation");
     if (animationValue->IsObject()) {
         auto animationObj = JSRef<JSObject>::Cast(animationValue);
         ConvertFromJSValue(animationObj->GetProperty("duration"), duration);
-
-        std::string curveName;
-        auto curveArgs = animationObj->GetProperty("curve");
-        if (ConvertFromJSValue(curveArgs, curveName)) {
-            auto index = BinarySearchFindIndex(CURVE_MAP, ArraySize(CURVE_MAP), curveName.c_str());
-            if (index >= 0) {
-                curve = CURVE_MAP[index].value;
-            }
-        } else if (curveArgs->IsObject()) {
-            ParseCustomCurveParams(curve, curveArgs);
+        if (NearEqual(duration, 0.0)) {
+            duration = DEFAULT_DURATION;
         }
-    }
 
-    bool smooth = false;
-    ConvertFromJSValue(obj->GetProperty("smooth"), smooth);
+        auto curveArgs = animationObj->GetProperty("curve");
+        ParseCurveParams(curve, curveArgs);
+    } else if (animationValue->IsBoolean()) {
+        smooth = animationValue->ToBoolean();
+    }
 
     if (GreatNotEqual(duration, 0.0)) {
         LOGD("ScrollTo(%lf, %lf, %lf)", xOffset.Value(), yOffset.Value(), duration);
@@ -133,12 +129,20 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     scrollController->AnimateTo(position, static_cast<float>(duration), curve, smooth);
 }
 
-void JSScroller::ParseCustomCurveParams(RefPtr<Curve>& curve, const JSRef<JSVal>& jsValue)
+void JSScroller::ParseCurveParams(RefPtr<Curve>& curve, const JSRef<JSVal>& jsValue)
 {
-    auto icurveArgs = JsonUtil::ParseJsonString(jsValue->ToString());
-    if (icurveArgs->IsObject()) {
-        auto curveString = icurveArgs->GetValue("__curveString");
-        curve = CreateCurve(curveString->GetString());
+    std::string curveName;
+    if (ConvertFromJSValue(jsValue, curveName)) {
+        auto index = BinarySearchFindIndex(CURVE_MAP, ArraySize(CURVE_MAP), curveName.c_str());
+        if (index >= 0) {
+            curve = CURVE_MAP[index].value;
+        }
+    } else if (jsValue->IsObject()) {
+        auto icurveArgs = JsonUtil::ParseJsonString(jsValue->ToString());
+        if (icurveArgs->IsObject()) {
+            auto curveString = icurveArgs->GetValue("__curveString");
+            curve = CreateCurve(curveString->GetString());
+        }
     }
 }
 
