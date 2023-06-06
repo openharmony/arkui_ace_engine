@@ -232,6 +232,11 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     auto textRectNotNeedToChange = UpdateCaretPosition();
     UpdateCaretInfoToController();
+    auto hostLayoutProperty =
+        dirty->GetHostNode() ? dirty->GetHostNode()->GetLayoutProperty<TextFieldLayoutProperty>() : nullptr;
+    if (hostLayoutProperty) {
+        hostLayoutProperty->ResetTextAlignChanged();
+    }
     if (needToRefreshSelectOverlay_) {
         ProcessOverlay();
         StopTwinkling();
