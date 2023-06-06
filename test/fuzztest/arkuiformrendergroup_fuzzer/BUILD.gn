@@ -37,7 +37,10 @@ ohos_fuzztest("ArkuiFormRenderGroupFuzzTest") {
   ]
   sources = [ "arkuiformrendergroup_fuzzer.cpp" ]
 
-  deps = [ "$ace_root/interfaces/inner_api/form_render:ace_form_render" ]
+  deps = [
+    "$ace_root/interfaces/inner_api/form_render:ace_form_render",
+    "$graphic_standard_path/rosen/modules/render_service_client:librender_service_client",
+  ]
 
   external_deps = [
     "ability_base:want",
