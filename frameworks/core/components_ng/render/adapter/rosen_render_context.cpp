@@ -1248,31 +1248,16 @@ void RosenRenderContext::GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddi
 
 void RosenRenderContext::OnPositionUpdate(const OffsetT<Dimension>& /*value*/)
 {
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto layoutProperty = frameNode->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     isPositionChanged_ = true;
 }
 
 void RosenRenderContext::OnOffsetUpdate(const OffsetT<Dimension>& /*value*/)
 {
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto layoutProperty = frameNode->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     isPositionChanged_ = true;
 }
 
 void RosenRenderContext::OnAnchorUpdate(const OffsetT<Dimension>& /*value*/)
 {
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto layoutProperty = frameNode->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     isPositionChanged_ = true;
 }
 
