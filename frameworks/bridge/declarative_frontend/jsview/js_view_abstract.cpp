@@ -1287,7 +1287,6 @@ bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
         return true;
     }
     if (!ParseJsDimensionVp(jsValue, value)) {
-        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
         return false;
     }
 
@@ -1312,7 +1311,6 @@ bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
         return true;
     }
     if (!ParseJsDimensionVp(jsValue, value)) {
-        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
         return false;
     }
 
@@ -3035,7 +3033,8 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
         return true;
     }
     if (jsValue->IsString()) {
-        return StringUtils::StringToCalcDimension(jsValue->ToString(), result, false, defaultUnit);
+        result = StringUtils::StringToCalcDimension(jsValue->ToString(), false, defaultUnit);
+        return true;
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> resId = jsObj->GetProperty("id");
@@ -3068,12 +3067,14 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
     if (!type->IsNull() && type->IsNumber() &&
         type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRING)) {
         auto value = themeConstants->GetString(resId->ToNumber<uint32_t>());
-        return StringUtils::StringToCalcDimension(value, result, false, defaultUnit);
+        result = StringUtils::StringToCalcDimension(value, false, defaultUnit);
+        return true;
     }
     if (!type->IsNull() && type->IsNumber() &&
         type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
         auto value = std::to_string(themeConstants->GetInt(resId->ToNumber<uint32_t>()));
-        return StringUtils::StringToDimensionWithUnit(value, result, defaultUnit);
+        result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
+        return true;
     }
     result = themeConstants->GetDimension(resId->ToNumber<uint32_t>());
     return true;
@@ -4952,7 +4953,7 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
                     LOGI("calc value = %{public}s", heightStr.c_str());
                     sheetHeight = CalcDimension(heightStr, DimensionUnit::CALC);
                 } else {
-                    StringUtils::StringToDimensionWithUnit(heightStr, sheetHeight, DimensionUnit::VP, -1.0);
+                    sheetHeight = StringUtils::StringToDimensionWithUnit(heightStr, DimensionUnit::VP, -1.0);
                 }
                 if (sheetHeight.Value() < 0) {
                     sheetStyle.sheetMode = NG::SheetMode::LARGE;
@@ -5409,7 +5410,8 @@ bool JSViewAbstract::ParseJsonDimension(
         return true;
     }
     if (jsonValue->IsString()) {
-        return StringUtils::StringToCalcDimension(jsonValue->GetString(), result, false, defaultUnit);
+        result = StringUtils::StringToCalcDimension(jsonValue->GetString(), false, defaultUnit);
+        return true;
     }
     auto resVal = JsonUtil::ParseJsonString(jsonValue->ToString());
     auto resId = resVal->GetValue("id");

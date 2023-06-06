@@ -262,8 +262,7 @@ bool CalculateExpImpl(const std::vector<std::string>& rpnexp, const std::functio
     for (auto& i : rpnexp) {
         if (ops.find(i) == ops.npos) {
             std::string value = i;
-            Dimension dim;
-            StringUtils::StringToDimensionWithUnit(value, dim, DimensionUnit::PX, 0.0f, true);
+            Dimension dim = StringUtils::StringToDimensionWithUnit(value, DimensionUnit::PX, 0.0f, true);
             if (dim.Unit() == DimensionUnit::INVALID) {
                 return false;
             }
