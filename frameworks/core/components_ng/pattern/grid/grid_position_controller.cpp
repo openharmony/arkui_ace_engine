@@ -30,6 +30,7 @@ void GridPositionController::JumpTo(int32_t index, bool /* smooth */, int32_t /*
     gridPattern->UpdateStartIndex(index);
 }
 
+// scroller to
 bool GridPositionController::AnimateTo(
     const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth)
 {
@@ -39,7 +40,15 @@ bool GridPositionController::AnimateTo(
     return gridPattern->AnimateTo(position.ConvertToPx(), duration, curve);
 }
 
-void GridPositionController::ScrollBy(double /* pixelX */, double /* pixelY */, bool /* smooth */) {}
+void GridPositionController::ScrollBy(double pixelX, double pixelY, bool smooth)
+{
+    auto pattern = scroll_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto gridPattern = AceType::DynamicCast<GridPattern>(pattern);
+    CHECK_NULL_VOID(gridPattern);
+    auto offset = gridPattern->GetAxis() == Axis::VERTICAL ? pixelY : pixelX;
+    gridPattern->ScrollBy(static_cast<float>(offset));
+}
 
 Axis GridPositionController::GetScrollDirection() const
 {
