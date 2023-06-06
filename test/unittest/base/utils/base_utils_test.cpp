@@ -541,8 +541,7 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest021, TestSize.Level1)
 {
     const std::string stringToDimensionValue = "auto";
     auto dim = StringUtils::StringToDimension(stringToDimensionValue, true);
-    CalcDimension calcDim;
-    StringUtils::StringToCalcDimension(stringToDimensionValue, calcDim, true);
+    auto calcDim = StringUtils::StringToCalcDimension(stringToDimensionValue, true);
     ASSERT_EQ(dim.Value(), 0);
     ASSERT_EQ(dim.Unit(), DimensionUnit::AUTO);
     ASSERT_EQ(calcDim.Value(), 0);
@@ -558,8 +557,7 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest022, TestSize.Level1)
 {
     const std::string stringToDimensionValue = "100.0calc";
     auto dim = StringUtils::StringToDimension(stringToDimensionValue, true);
-    CalcDimension calcDim;
-    StringUtils::StringToCalcDimension(stringToDimensionValue, calcDim, true);
+    auto calcDim = StringUtils::StringToCalcDimension(stringToDimensionValue, true);
     ASSERT_EQ(dim.Unit(), DimensionUnit::VP);
     ASSERT_EQ(calcDim.CalcValue(), STRING_TO_CALC_DIMENSION_RESULT);
     ASSERT_EQ(calcDim.Unit(), DimensionUnit::CALC);

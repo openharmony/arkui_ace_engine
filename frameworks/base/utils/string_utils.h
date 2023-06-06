@@ -212,79 +212,63 @@ inline float StringToFloat(const std::string& value)
         return result;
     }
 }
-static bool StringToDimensionWithUnit(const std::string& value, Dimension& dimensionResult,
-    DimensionUnit defaultUnit = DimensionUnit::PX, float defaultValue = 0.0f, bool isCalc = false)
+
+static Dimension StringToDimensionWithUnit(const std::string& value, DimensionUnit defaultUnit = DimensionUnit::PX,
+    float defaultValue = 0.0f, bool isCalc = false)
 {
     errno = 0;
     if (std::strcmp(value.c_str(), "auto") == 0) {
-        dimensionResult = Dimension(defaultValue, DimensionUnit::AUTO);
-        return true;
+        return Dimension(defaultValue, DimensionUnit::AUTO);
     }
     char* pEnd = nullptr;
     double result = std::strtod(value.c_str(), &pEnd);
     if (pEnd == value.c_str() || errno == ERANGE) {
-        dimensionResult = Dimension(defaultValue, defaultUnit);
-        return false;
+        return Dimension(defaultValue, defaultUnit);
     }
     if (pEnd != nullptr) {
         if (std::strcmp(pEnd, "%") == 0) {
             // Parse percent, transfer from [0, 100] to [0, 1]
-            dimensionResult = Dimension(result / 100.0, DimensionUnit::PERCENT);
-            return true;
+            return Dimension(result / 100.0, DimensionUnit::PERCENT);
         }
         if (std::strcmp(pEnd, "px") == 0) {
-            dimensionResult = Dimension(result, DimensionUnit::PX);
-            return true;
+            return Dimension(result, DimensionUnit::PX);
         }
         if (std::strcmp(pEnd, "vp") == 0) {
-            dimensionResult = Dimension(result, DimensionUnit::VP);
-            return true;
+            return Dimension(result, DimensionUnit::VP);
         }
         if (std::strcmp(pEnd, "fp") == 0) {
-            dimensionResult = Dimension(result, DimensionUnit::FP);
-            return true;
+            return Dimension(result, DimensionUnit::FP);
         }
         if (std::strcmp(pEnd, "lpx") == 0) {
-            dimensionResult = Dimension(result, DimensionUnit::LPX);
-            return true;
+            return Dimension(result, DimensionUnit::LPX);
         }
         if ((std::strcmp(pEnd, "\0") == 0) && isCalc) {
-            dimensionResult = Dimension(result, DimensionUnit::NONE);
-            return true;
+            return Dimension(result, DimensionUnit::NONE);
         }
         if (isCalc) {
-            dimensionResult = Dimension(result, DimensionUnit::INVALID);
-            return true;
-        }
-        if ((std::strcmp(pEnd, "\0") != 0)) {
-            dimensionResult = Dimension(result, DimensionUnit::NONE);
-            return false;
+            return Dimension(result, DimensionUnit::INVALID);
         }
     }
-    dimensionResult = Dimension(result, defaultUnit);
-    return true;
+    return Dimension(result, defaultUnit);
 }
 
-inline bool StringToCalcDimension(
-    const std::string& value, CalcDimension& result, bool useVp = false, DimensionUnit defaultUnit = DimensionUnit::PX)
+inline CalcDimension StringToCalcDimension(
+    const std::string& value, bool useVp = false, DimensionUnit defaultUnit = DimensionUnit::PX)
 {
     if (value.find("calc") != std::string::npos) {
         LOGI("StringToCalcDimension calc value = %{public}s", value.c_str());
-        result = CalcDimension(value, DimensionUnit::CALC);
-        return true;
+        return CalcDimension(value, DimensionUnit::CALC);
     } else {
         if (useVp) {
-            return StringToDimensionWithUnit(value, result, DimensionUnit::VP);
+            return StringToDimensionWithUnit(value, DimensionUnit::VP);
         }
-        return StringToDimensionWithUnit(value, result, defaultUnit);
+        return StringToDimensionWithUnit(value, defaultUnit);
     }
 }
 
 inline Dimension StringToDimension(const std::string& value, bool useVp = false)
 {
-    Dimension result;
-    StringToDimensionWithUnit(value, result, useVp ? DimensionUnit::VP : DimensionUnit::PX);
-    return result;
+    return StringToDimensionWithUnit(value, useVp ? DimensionUnit::VP : DimensionUnit::PX);
 }
 
 inline Dimension StringToDimensionWithThemeValue(const std::string& value, bool useVp, const Dimension& themeValue)
@@ -295,9 +279,8 @@ inline Dimension StringToDimensionWithThemeValue(const std::string& value, bool 
     if (pEnd == value.c_str() || errno == ERANGE) {
         return themeValue;
     }
-    Dimension result;
-    StringToDimensionWithUnit(value, result, useVp ? DimensionUnit::VP : DimensionUnit::PX);
-    return result;
+
+    return StringToDimensionWithUnit(value, useVp ? DimensionUnit::VP : DimensionUnit::PX);
 }
 
 inline double StringToDegree(const std::string& value)
