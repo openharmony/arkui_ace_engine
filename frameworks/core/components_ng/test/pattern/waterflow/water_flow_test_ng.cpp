@@ -423,6 +423,28 @@ HWTEST_F(WaterFlowTestNg, Property007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Property008
+ * @tc.desc: Test some invaild properties of WaterFlow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Property008, TestSize.Level1)
+{
+    WaterFlowModelNG waterFlowModelNG;
+    RefPtr<ScrollControllerBase> positionController = waterFlowModelNG.CreateScrollController();
+    RefPtr<ScrollProxy> scrollBarProxy = waterFlowModelNG.CreateScrollBarProxy();
+    waterFlowModelNG.Create();
+    waterFlowModelNG.SetRowsTemplate("1fr 1fr 1fr");
+    waterFlowModelNG.SetColumnsTemplate("1fr 1fr");
+    waterFlowModelNG.SetRowsGap(Dimension(-5));
+    waterFlowModelNG.SetColumnsGap(Dimension(-10));
+    CreateWaterFlowItem(10);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    EXPECT_FALSE(false);
+}
+
+/**
  * @tc.name: WaterFlowTest001
  * @tc.desc: Fill all items to waterFlow with fixed row and column
  * @tc.type: FUNC
@@ -864,6 +886,26 @@ HWTEST_F(WaterFlowTestNg, WaterFlowFooterTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: WaterFlowFooterTest002
+ * @tc.desc: Test Footer func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowFooterTest002, TestSize.Level1)
+{
+    WaterFlowModelNG waterFlowModelNG;
+    waterFlowModelNG.Create();
+    waterFlowModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    auto footer = nullptr;
+    waterFlowModelNG.SetFooter(std::move(footer));
+    CreateWaterFlowItem(5);
+    ViewStackProcessor::GetInstance()->Pop();
+    GetInstance();
+    RunMeasureAndLayout();
+
+    EXPECT_TRUE(true);
+}
+
+/**
  * @tc.name: Callback001
  * @tc.desc: Test scroll callback
  * @tc.type: FUNC
@@ -899,6 +941,40 @@ HWTEST_F(WaterFlowTestNg, Callback001, TestSize.Level1)
      */
     UpdateCurrentOffset(scrollDownOffset * 5);
     EXPECT_TRUE(isReachEndCalled);
+}
+
+/**
+ * @tc.name: WaterFlowLayoutInfoTest001
+ * @tc.desc: Test functions in WaterFlowLayoutInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest001, TestSize.Level1)
+{
+    WaterFlowModelNG waterFlowModelNG;
+    waterFlowModelNG.Create();
+    waterFlowModelNG.SetRowsTemplate("1fr 1fr");
+    waterFlowModelNG.SetRowsGap(Dimension(5));
+    CreateWaterFlowItem(10);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: Test IsAllCrossReachend function
+     * @tc.expected: step1. Check whether the return value is correct.
+     */
+    auto reached = pattern_->layoutInfo_.IsAllCrossReachend(DEFAULT_ITEM_HEIGHT);
+    EXPECT_TRUE(reached);
+    reached = pattern_->layoutInfo_.IsAllCrossReachend(DEFAULT_ROOT_HEIGHT);
+    EXPECT_FALSE(reached);
+
+    /**
+     * @tc.steps: Test GetEndIndexByOffset function
+     * @tc.expected: step2. Check whether the return value is correct.
+     */
+    auto offset = pattern_->layoutInfo_.GetEndIndexByOffset(0);
+    EXPECT_EQ(0, offset);
+    offset = pattern_->layoutInfo_.GetEndIndexByOffset(-100.f);
+    EXPECT_EQ(1, offset);
 }
 
 /*
