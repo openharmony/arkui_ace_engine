@@ -29,25 +29,38 @@ constexpr int32_t STANDARD_FRAME_DURATION = 100;
 constexpr int32_t FORM_REPEAT_COUNT = 1;
 } // namespace
 
-AnimatedImage::AnimatedImage(std::unique_ptr<SkCodec> codec, std::string url)
-    : codec_(std::move(codec)), cacheKey_(std::move(url))
+RefPtr<CanvasImage> AnimatedImage::Create(const RefPtr<SkiaImageData>& data, const SizeF& size, const std::string& url)
 {
-    // set up animator
-    int32_t totalDuration = 0;
+    CHECK_NULL_RETURN(data, nullptr);
+    auto skData = data->GetSkData();
+    CHECK_NULL_RETURN(skData, nullptr);
+    auto codec = SkCodec::MakeFromData(skData);
+    CHECK_NULL_RETURN(codec, nullptr);
+    if (SystemProperties::GetImageFrameworkEnabled()) {
+        auto src = ImageSource::Create(skData->bytes(), skData->size());
+        CHECK_NULL_RETURN(src, nullptr);
+        return MakeRefPtr<AnimatedPixmap>(codec, src, size, url);
+    }
+    return MakeRefPtr<AnimatedSkImage>(std::move(codec), url);
+}
+
+AnimatedImage::AnimatedImage(const std::unique_ptr<SkCodec>& codec, std::string url) : cacheKey_(std::move(url))
+{
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     animator_ = CREATE_ANIMATOR(pipelineContext);
-    CHECK_NULL_VOID(animator_);
 
-    auto info = codec_->getFrameInfo();
-    for (int32_t i = 0; i < codec_->getFrameCount(); ++i) {
+    // set up animator
+    int32_t totalDuration = 0;
+    auto info = codec->getFrameInfo();
+    for (int32_t i = 0; i < codec->getFrameCount(); ++i) {
         if (info[i].fDuration <= 0) {
             info[i].fDuration = STANDARD_FRAME_DURATION;
         }
         totalDuration += info[i].fDuration;
     }
     animator_->SetDuration(totalDuration);
-    animator_->SetIteration(codec_->getRepetitionCount());
+    animator_->SetIteration(codec->getRepetitionCount());
     if (pipelineContext->IsFormRender() && animator_->GetIteration() != 0) {
         animator_->SetIteration(FORM_REPEAT_COUNT);
     }
@@ -55,7 +68,7 @@ AnimatedImage::AnimatedImage(std::unique_ptr<SkCodec> codec, std::string url)
     // initialize PictureAnimation interpolator
     auto picAnimation = MakeRefPtr<PictureAnimation<uint32_t>>();
     CHECK_NULL_VOID(picAnimation);
-    for (int32_t i = 0; i < codec_->getFrameCount(); ++i) {
+    for (int32_t i = 0; i < codec->getFrameCount(); ++i) {
         picAnimation->AddPicture(static_cast<float>(info[i].fDuration) / totalDuration, i);
     }
     picAnimation->AddListener([weak = WeakClaim(this)](const uint32_t idx) {
@@ -69,19 +82,9 @@ AnimatedImage::AnimatedImage(std::unique_ptr<SkCodec> codec, std::string url)
     animator_->Play();
 }
 
-sk_sp<SkImage> AnimatedImage::GetImage() const
+void AnimatedImage::ControlAnimation(bool play)
 {
-    std::scoped_lock<std::mutex> lock(frameMtx_);
-    return currentFrame_;
-}
-
-RefPtr<CanvasImage> AnimatedImage::Create(const RefPtr<ImageData>& data, const std::string& url)
-{
-    auto skData = DynamicCast<SkiaImageData>(data);
-    CHECK_NULL_RETURN(skData, nullptr);
-    auto codec = SkCodec::MakeFromData(skData->GetSkData());
-    CHECK_NULL_RETURN(codec, nullptr);
-    return MakeRefPtr<AnimatedImage>(std::move(codec), url);
+    (play) ? animator_->Play() : animator_->Pause();
 }
 
 void AnimatedImage::RenderFrame(uint32_t idx)
@@ -90,20 +93,61 @@ void AnimatedImage::RenderFrame(uint32_t idx)
         return;
     }
     ImageUtils::PostToBg([weak = WeakClaim(this), idx] {
+        ACE_SCOPED_TRACE("decode frame %d", idx);
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
         self->DecodeFrame(idx);
     });
 }
 
-// Background thread
+// runs on Background thread
 void AnimatedImage::DecodeFrame(uint32_t idx)
 {
-    ACE_SCOPED_TRACE("decode frame %d", idx);
     std::scoped_lock<std::mutex> lock(decodeMtx_);
+    DecodeImpl(idx);
 
+    ImageUtils::PostToUI([weak = WeakClaim(this)] {
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self && self->redraw_);
+        self->redraw_();
+    });
+
+    CacheFrame(cacheKey_ + std::to_string(idx));
+}
+
+bool AnimatedImage::GetCachedFrame(uint32_t idx)
+{
+    auto image = GetCachedFrameImpl(cacheKey_ + std::to_string(idx));
+    CHECK_NULL_RETURN_NOLOG(image, false);
+
+    if (!decodeMtx_.try_lock()) {
+        // last frame still decoding, skip this frame to avoid blocking UI thread
+        return true;
+    }
+    UseCachedFrame(std::move(image));
+
+    decodeMtx_.unlock();
+    LOGD("frame cache found src = %{public}s, frame = %{public}d", cacheKey_.c_str(), idx);
+
+    if (redraw_) {
+        redraw_();
+    }
+    return true;
+}
+
+// ----------------------------------------------------------
+// AnimatedSkImage implementation
+// ----------------------------------------------------------
+
+sk_sp<SkImage> AnimatedSkImage::GetImage() const
+{
+    std::scoped_lock<std::mutex> lock(frameMtx_);
+    return currentFrame_;
+}
+
+void AnimatedSkImage::DecodeImpl(uint32_t idx)
+{
     SkImageInfo imageInfo = codec_->getInfo();
-
     SkBitmap bitmap;
 
     SkCodec::Options options;
@@ -134,21 +178,9 @@ void AnimatedImage::DecodeFrame(uint32_t idx)
         std::scoped_lock<std::mutex> lock(frameMtx_);
         currentFrame_ = SkImage::MakeFromBitmap(bitmap);
     }
-    ImageUtils::PostToUI([weak = WeakClaim(this)] {
-        auto self = weak.Upgrade();
-        CHECK_NULL_VOID(self && self->redraw_);
-        self->redraw_();
-    });
-
-    CacheFrame(idx);
 }
 
-void AnimatedImage::ControlAnimation(bool play)
-{
-    (play) ? animator_->Play() : animator_->Pause();
-}
-
-void AnimatedImage::CacheFrame(uint32_t idx)
+void AnimatedSkImage::CacheFrame(const std::string& key)
 {
     auto ctx = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(ctx);
@@ -159,34 +191,55 @@ void AnimatedImage::CacheFrame(uint32_t idx)
         std::scoped_lock<std::mutex> lock(frameMtx_);
         cacheNode = std::make_shared<CachedImage>(currentFrame_);
     }
-    cache->CacheImageNG(cacheKey_ + std::to_string(idx), cacheNode);
+    cache->CacheImage(key, cacheNode);
 }
 
-bool AnimatedImage::GetCachedFrame(uint32_t idx)
+RefPtr<CanvasImage> AnimatedSkImage::GetCachedFrameImpl(const std::string& key)
+{
+    return SkiaImage::QueryFromCache(key);
+}
+
+void AnimatedSkImage::UseCachedFrame(RefPtr<CanvasImage>&& image)
+{
+    std::scoped_lock<std::mutex> lock(frameMtx_);
+    currentFrame_ = DynamicCast<SkiaImage>(image)->GetImage();
+}
+
+// ----------------------------------------------------------
+// AnimatedPixmap implementation
+// ----------------------------------------------------------
+
+RefPtr<PixelMap> AnimatedPixmap::GetPixelMap() const
+{
+    std::scoped_lock<std::mutex> lock(frameMtx_);
+    return currentFrame_;
+}
+
+void AnimatedPixmap::DecodeImpl(uint32_t idx)
+{
+    std::scoped_lock<std::mutex> lock(frameMtx_);
+    currentFrame_ = src_->CreatePixelMap(idx, width_, height_);
+}
+
+void AnimatedPixmap::CacheFrame(const std::string& key)
 {
     auto ctx = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(ctx, false);
+    CHECK_NULL_VOID(ctx);
     auto cache = ctx->GetImageCache();
-    CHECK_NULL_RETURN(cache, false);
-    auto image = cache->GetCacheImageNG(cacheKey_ + std::to_string(idx));
-    CHECK_NULL_RETURN_NOLOG(image && image->imagePtr, false);
+    CHECK_NULL_VOID(cache);
 
-    if (!decodeMtx_.try_lock()) {
-        // last frame still decoding, skip this frame to avoid blocking UI thread
-        return true;
-    }
+    std::scoped_lock<std::mutex> lock(frameMtx_);
+    cache->CacheImageData(key, MakeRefPtr<PixmapCachedData>(currentFrame_));
+}
 
-    {
-        std::scoped_lock<std::mutex> lock(frameMtx_);
-        currentFrame_ = image->imagePtr;
-    }
+RefPtr<CanvasImage> AnimatedPixmap::GetCachedFrameImpl(const std::string& key)
+{
+    return PixelMapImage::QueryFromCache(key);
+}
 
-    decodeMtx_.unlock();
-    LOGD("frame cache found src = %{public}s, frame = %{public}d", cacheKey_.c_str(), idx);
-
-    if (redraw_) {
-        redraw_();
-    }
-    return true;
+void AnimatedPixmap::UseCachedFrame(RefPtr<CanvasImage>&& image)
+{
+    std::scoped_lock<std::mutex> lock(frameMtx_);
+    currentFrame_ = DynamicCast<PixelMapImage>(image)->GetPixelMap();
 }
 } // namespace OHOS::Ace::NG

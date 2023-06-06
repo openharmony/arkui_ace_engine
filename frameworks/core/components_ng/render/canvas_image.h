@@ -61,7 +61,7 @@ public:
     // now we make [SkImage] from [PixelMap] and use [drawImageRect] to draw image
     static RefPtr<CanvasImage> Create(const RefPtr<PixelMap>& pixelMap);
 
-    virtual RefPtr<PixelMap> GetPixelMap()
+    virtual RefPtr<PixelMap> GetPixelMap() const
     {
         return nullptr;
     }
@@ -74,6 +74,7 @@ public:
         return Claim(this);
     }
 
+    // cache this CanvasImage
     virtual void Cache(const std::string& key) {}
 
     void SetPaintConfig(const ImagePaintConfig& config)
