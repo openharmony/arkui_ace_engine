@@ -48,8 +48,8 @@ build_component("camera") {
 
     external_deps = [
       "c_utils:utils",
-      "ipc:ipc_core",
       "camera_framework:camera_framework",
+      "ipc:ipc_core",
       "player_framework:media_client",
     ]
   } else {
