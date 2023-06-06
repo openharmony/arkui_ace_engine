@@ -171,6 +171,7 @@ void StepperPattern::CreateLeftButtonNode()
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateFontWeight(stepperTheme->GetTextStyle().GetFontWeight());
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateMaxLines(stepperTheme->GetTextMaxLines());
     textNode->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
+    textNode->GetFocusHub()->SetFocusable(true);
     textNode->MountToParent(rowNode);
     textNode->MarkModifyDone();
 }
@@ -286,6 +287,7 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateFontWeight(stepperTheme->GetTextStyle().GetFontWeight());
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateMaxLines(stepperTheme->GetTextMaxLines());
     textNode->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
+    textNode->GetFocusHub()->SetFocusable(true);
     textNode->MountToParent(rowNode);
     textNode->MarkModifyDone();
     // Create imageNode
@@ -347,6 +349,7 @@ void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, const std::st
     textNode->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
     textNode->GetLayoutProperty()->UpdateMargin(
         { CalcLength(stepperTheme->GetControlPadding()), CalcLength(stepperTheme->GetControlPadding()) });
+    textNode->GetFocusHub()->SetFocusable(true);
     textNode->MountToParent(buttonNode);
     textNode->MarkModifyDone();
 }
