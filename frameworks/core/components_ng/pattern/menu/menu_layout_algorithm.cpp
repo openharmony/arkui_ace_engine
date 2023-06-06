@@ -415,6 +415,7 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(
     float x = 0.0f;
     float y = 0.0f;
     if (menuProp->GetMenuPlacement().has_value() && (targetSize_.Width() > 0.0 || targetSize_.Height() > 0.0)) {
+        placement_ = menuProp->GetMenuPlacement().value();
         auto childOffset = GetChildPosition(size, menuProp, menuPattern->IsContextMenu());
         x = childOffset.GetX() + positionOffset_.GetX();
         y = childOffset.GetY() + positionOffset_.GetY();
