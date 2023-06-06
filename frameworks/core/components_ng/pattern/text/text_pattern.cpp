@@ -71,10 +71,12 @@ void TextPattern::CloseSelectOverlay()
 void TextPattern::ResetSelection()
 {
     showSelectOverlay_ = false;
-    textSelector_.Update(-1, -1);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (textSelector_.IsValid()) {
+        textSelector_.Update(-1, -1);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 int32_t TextPattern::GetGraphemeClusterLength(int32_t extend) const
@@ -704,7 +706,6 @@ void TextPattern::OnModifyDone()
         // measure flag changed, reset paragraph.
         paragraph_.Reset();
     }
-
 
     std::string textCache = textForDisplay_;
     textForDisplay_ = textLayoutProperty->GetContent().value_or("");
