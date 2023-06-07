@@ -84,12 +84,13 @@ private:
     void ProcessRingSweepingAnimation(float value);
     void ProcessLinearSweepingAnimation(float value);
     void StartRingSweepingAnimation(float value);
-    void StartRingSweepingAnimationImpl(float date);
+    void StartRingSweepingAnimationImpl(float date, float speed);
+    void StartContinuousSweepingAnimation(float currentDate, float newDate, float speed);
     void StartLinearSweepingAnimation(float value);
-    void StartLinearSweepingAnimationImpl(float date);
+    void StartLinearSweepingAnimationImpl(float date, float speed);
     void StartCapsuleSweepingAnimation(float value);
-    void StartCapsuleSweepingAnimationImpl(float value);
-    void StopSweepingAnimation();
+    void StartCapsuleSweepingAnimationImpl(float value, float speed);
+    void StopSweepingAnimation(float date = 0.0f);
     void StartRingLoadingAnimation();
     void StartRingLoadingHeadAnimation();
     void StartRingLoadingTailAnimation();
@@ -101,6 +102,7 @@ private:
     void GenerateLinearSweepingGradientInfo(std::vector<RSColorQuad>& colors, std::vector<float>& pos) const;
     void GenerateRingSweepingGradientInfo(std::vector<RSColorQuad>& colors, std::vector<float>& pos) const;
     Gradient CreateCapsuleGradient() const;
+    bool PostTask(const TaskExecutor::Task& task);
 
     // Animatable
     RefPtr<AnimatablePropertyFloat> strokeWidth_; // After adjusting to the content width and height
@@ -132,7 +134,7 @@ private:
     bool isLoading_ = false;
     bool isSweeping_ = false;
     float sweepingDateBackup_ = 0.0f;
-    bool sweepingDateUpdated_ = false;
+    uint32_t continuousSweepingCounter_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressModifier);
 };
