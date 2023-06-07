@@ -303,6 +303,7 @@ template("declarative_js_engine") {
       "jsview/models/column_model_impl.cpp",
       "jsview/models/common_view_model_impl.cpp",
       "jsview/models/counter_model_impl.cpp",
+      "jsview/models/custom_dialog_controller_model_impl.cpp",
       "jsview/models/data_panel_model_impl.cpp",
       "jsview/models/divider_model_impl.cpp",
       "jsview/models/ellipse_model_impl.cpp",
