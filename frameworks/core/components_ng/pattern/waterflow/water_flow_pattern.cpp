@@ -64,7 +64,9 @@ void WaterFlowPattern::OnModifyDone()
     CHECK_NULL_VOID(layoutProperty);
     // SetAxis for scroll event
     SetAxis(layoutProperty->GetAxis());
-    AddScrollEvent();
+    if (!GetScrollableEvent()) {
+        InitScrollableEvent();
+    }
     SetAccessibilityAction();
 }
 
@@ -113,6 +115,20 @@ void WaterFlowPattern::SetPositionController(RefPtr<WaterFlowPositionController>
     controller_ = control;
     if (control) {
         control->SetScrollPattern(AceType::WeakClaim<WaterFlowPattern>(this));
+    }
+}
+
+void WaterFlowPattern::InitScrollableEvent()
+{
+    AddScrollEvent();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<WaterFlowEventHub>();
+    auto onScrollFrameBegin = eventHub->GetOnScrollFrameBegin();
+    if (onScrollFrameBegin) {
+        auto scrollableEvent = GetScrollableEvent();
+        CHECK_NULL_VOID(scrollableEvent);
+        scrollableEvent->SetScrollFrameBeginCallback(std::move(onScrollFrameBegin));
     }
 }
 

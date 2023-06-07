@@ -23,6 +23,7 @@
 #include "core/animation/friction_motion.h"
 #include "core/animation/scroll_motion.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/event/axis_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/pan_recognizer.h"
@@ -32,41 +33,6 @@
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
-
-enum class ScrollState {
-    IDLE = 0,
-    SCROLL,
-    FLING,
-};
-
-struct ScrollInfo {
-    Dimension dx;
-    Dimension dy;
-
-    bool operator==(const ScrollInfo& scrollInfo) const
-    {
-        return dx == scrollInfo.dx && dy == scrollInfo.dy;
-    }
-};
-
-struct ScrollFrameInfo {
-    Dimension offset;
-    ScrollState state;
-
-    bool operator==(const ScrollFrameInfo& scrollInfo) const
-    {
-        return offset == scrollInfo.offset && state == scrollInfo.state;
-    }
-};
-
-struct ScrollFrameResult {
-    Dimension offset;
-
-    bool operator==(const ScrollFrameResult& scrollRes) const
-    {
-        return offset == scrollRes.offset;
-    }
-};
 
 constexpr int32_t SCROLL_FROM_NONE = 0;
 constexpr int32_t SCROLL_FROM_UPDATE = 1;

@@ -22,15 +22,9 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
-
-using OnScrollEvent = std::function<void(Dimension, ScrollState)>;
-using OnScrollBeginEvent = std::function<ScrollInfo(Dimension, Dimension)>;
-using OnScrollFrameBeginEvent = std::function<ScrollFrameResult(Dimension, ScrollState)>;
-using OnScrollStartEvent = std::function<void()>;
-using OnScrollStopEvent = std::function<void()>;
-using OnScrollIndexEvent = std::function<void(int32_t, int32_t)>;
 
 class TextFieldEventHub : public EventHub {
     DECLARE_ACE_TYPE(TextFieldEventHub, EventHub)

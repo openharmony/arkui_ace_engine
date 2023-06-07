@@ -17,9 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_EVENT_HUB_H
 
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
-using OnReachEvent = std::function<void()>;
 class WaterFlowEventHub : public EventHub {
     DECLARE_ACE_TYPE(WaterFlowEventHub, EventHub)
 
@@ -44,9 +44,20 @@ public:
         return onReachEndEvent_;
     }
 
+    void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin)
+    {
+        onScrollFrameBeginEvent_ = std::move(onScrollFrameBegin);
+    }
+
+    const OnScrollFrameBeginEvent& GetOnScrollFrameBegin() const
+    {
+        return onScrollFrameBeginEvent_;
+    }
+
 private:
     OnReachEvent onReachStartEvent_;
     OnReachEvent onReachEndEvent_;
+    OnScrollFrameBeginEvent onScrollFrameBeginEvent_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_EVENT_HUB_H
