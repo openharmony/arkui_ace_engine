@@ -18,7 +18,8 @@
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 
 namespace OHOS::Ace::NG {
-void WaterFlowPositionController::JumpTo(int32_t index, bool /* smooth */, int32_t /* source */)
+void WaterFlowPositionController::JumpTo(int32_t index, bool /* smooth */, ScrollAlign /* align */,
+    int32_t /* source */)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
