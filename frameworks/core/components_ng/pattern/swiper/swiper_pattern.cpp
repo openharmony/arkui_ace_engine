@@ -392,6 +392,7 @@ void SwiperPattern::CalculateCacheRange()
     auto cacheCount = layoutProperty->GetCachedCount().value_or(1);
     auto loadCount = ComputeLoadCount(cacheCount);
     auto totalCount = TotalCount();
+    auto currentIndex = GetCurrentIndex();
     if (totalCount <= 0) {
         LOGE("Total count of swiper children is not positive.");
         return;
@@ -405,11 +406,11 @@ void SwiperPattern::CalculateCacheRange()
     }
 
     if (!IsLoop()) {
-        startIndex_ = std::max(currentIndex_ - cacheCount, 0);
-        endIndex_ = std::min(currentIndex_ + displayCount + cacheCount - 1, totalCount - 1);
+        startIndex_ = std::max(currentIndex - cacheCount, 0);
+        endIndex_ = std::min(currentIndex + displayCount + cacheCount - 1, totalCount - 1);
     } else {
-        startIndex_ = (currentIndex_ - cacheCount + totalCount) % totalCount;
-        endIndex_ = (currentIndex_ + displayCount + cacheCount - 1 + totalCount) % totalCount;
+        startIndex_ = (currentIndex - cacheCount + totalCount) % totalCount;
+        endIndex_ = (currentIndex + displayCount + cacheCount - 1 + totalCount) % totalCount;
     }
 
     LOGD("Cache range [%{public}d - %{public}d], totalCount: %{public}d", startIndex_, endIndex_, totalCount);
