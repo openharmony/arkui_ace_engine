@@ -20,25 +20,27 @@
 #include "core/components_ng/pattern/calendar/calendar_controller_model_ng.h"
 
 namespace OHOS::Ace {
-
 std::unique_ptr<CalendarControllerModel> CalendarControllerModel::instance_ = nullptr;
+std::mutex CalendarControllerModel::mutex_;
 
 CalendarControllerModel* CalendarControllerModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::CalendarControllerModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::CalendarControllerModelNG());
-        } else {
-            instance_.reset(new Framework::CalendarControllerModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::CalendarControllerModelNG());
+            } else {
+                instance_.reset(new Framework::CalendarControllerModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
-
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
