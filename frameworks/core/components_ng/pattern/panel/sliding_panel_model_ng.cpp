@@ -211,7 +211,22 @@ void SlidingPanelModelNG::Pop()
         if (!isFirstChildDragBar) {
             auto dragBarNode = FrameNode::GetOrCreateFrameNode(V2::DRAG_BAR_ETS_TAG,
                 ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<DragBarPattern>(); });
-            auto layoutProp = dragBarNode->GetLayoutProperty<DragBarPaintProperty>();
+            auto paintProperty = dragBarNode->GetPaintProperty<DragBarPaintProperty>();
+            CHECK_NULL_VOID(paintProperty);
+            auto panelMode = layoutProperty->GetPanelModeValue(PanelMode::HALF);
+            auto type = layoutProperty->GetPanelTypeValue(PanelType::FOLDABLE_BAR);
+            // This parameter does not take effect when PanelMode is set to Half and PanelType is set to minibar
+            if (panelMode == PanelMode::HALF && type == PanelType::MINI_BAR) {
+                panelMode = PanelMode::MINI;
+            }
+            // This parameter does not take effect when PanelMode is set to Mini and PanelType is set to temporary
+            if (panelMode == PanelMode::MINI && type == PanelType::TEMP_DISPLAY) {
+                panelMode = PanelMode::HALF;
+            }
+            paintProperty->UpdatePanelMode(panelMode);
+            auto dragBarPattern = dragBarNode->GetPattern<DragBarPattern>();
+            CHECK_NULL_VOID(dragBarPattern);
+            dragBarPattern->SetIsFirstUpdate(true);
             dragBarNode->MountToParent(columnNode, 0);
             dragBarNode->MarkModifyDone();
         }

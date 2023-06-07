@@ -85,6 +85,11 @@ public:
         clickArrowCallback_ = callback;
     }
 
+    void SetIsFirstUpdate(bool isFirstUpdate)
+    {
+        isFirstUpdate_ = isFirstUpdate;
+    }
+
     void InitProps();
     void ShowArrow(bool show);
     void ShowInPanelMode(PanelMode mode);
