@@ -1448,7 +1448,9 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco)
     }
     auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
     CHECK_NULL_VOID(containerNode);
-    containerNode->GetPattern<ContainerModalPattern>()->ShowTitle(isShow, hasDeco);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->ShowTitle(isShow, hasDeco);
 }
 
 void PipelineContext::SetContainerWindow(bool isShow)
@@ -1495,7 +1497,9 @@ void PipelineContext::SetAppTitle(const std::string& title)
     }
     auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
     CHECK_NULL_VOID(containerNode);
-    containerNode->GetPattern<ContainerModalPattern>()->SetAppTitle(title);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->SetAppTitle(title);
 }
 
 void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon)
@@ -1506,7 +1510,9 @@ void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon)
     }
     auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
     CHECK_NULL_VOID(containerNode);
-    containerNode->GetPattern<ContainerModalPattern>()->SetAppIcon(icon);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->SetAppIcon(icon);
 }
 
 void PipelineContext::FlushReload()
@@ -1786,6 +1792,19 @@ bool PipelineContext::GetRestoreInfo(int32_t restoreId, std::string& restoreInfo
         return true;
     }
     return false;
+}
+
+void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        LOGW("SetAppIcon failed, Window modal is not container.");
+        return;
+    }
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->SetContainerButtonHide(hideSplit, hideMaximize, hideMinimize);
 }
 
 } // namespace OHOS::Ace::NG

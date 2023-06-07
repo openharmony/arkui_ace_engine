@@ -318,9 +318,9 @@ void ContainerModalPattern::ChangeFloatingTitle(const RefPtr<FrameNode>& floatin
         isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT
                 : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_SPLIT_LEFT, isFocus);
 
-    // hide leftSplit button when window mode is WINDOW_MODE_SPLIT_PRIMARY type
-    leftSplitButton->GetLayoutProperty()->UpdateVisibility(
-        windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ? VisibleType::INVISIBLE : VisibleType::VISIBLE);
+    // hide leftSplit button when window mode is WINDOW_MODE_SPLIT_PRIMARY type or split button can not show
+    bool hideLeftSplit = hideSplitButton_ || windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
+    leftSplitButton->GetLayoutProperty()->UpdateVisibility(hideLeftSplit ? VisibleType::GONE : VisibleType::VISIBLE);
 
     // update maxRecover button
     auto maxRecoverIconFocused = windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN
@@ -416,6 +416,41 @@ void ContainerModalPattern::SetAppIcon(const RefPtr<PixelMap>& icon)
     auto floatingTitleIcon = AceType::DynamicCast<FrameNode>(floatingNode->GetChildren().front());
     floatingTitleIcon->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(imageSourceInfo);
     floatingTitleIcon->MarkModifyDone();
+}
+
+void ContainerModalPattern::SetTitleButtonHide(
+    const RefPtr<FrameNode>& titleNode, bool hideSplit, bool hideMaximize, bool hideMinimize)
+{
+    auto leftSplitButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(LEFT_SPLIT_BUTTON_INDEX));
+    CHECK_NULL_VOID(leftSplitButton);
+    leftSplitButton->GetLayoutProperty()->UpdateVisibility(hideSplit ? VisibleType::GONE : VisibleType::VISIBLE);
+    leftSplitButton->MarkDirtyNode();
+
+    auto maximizeButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(MAX_RECOVER_BUTTON_INDEX));
+    CHECK_NULL_VOID(maximizeButton);
+    maximizeButton->GetLayoutProperty()->UpdateVisibility(hideMaximize ? VisibleType::GONE : VisibleType::VISIBLE);
+    maximizeButton->MarkDirtyNode();
+
+    auto minimizeButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(MINIMIZE_BUTTON_INDEX));
+    CHECK_NULL_VOID(minimizeButton);
+    minimizeButton->GetLayoutProperty()->UpdateVisibility(hideMinimize ? VisibleType::GONE : VisibleType::VISIBLE);
+    minimizeButton->MarkDirtyNode();
+}
+
+void ContainerModalPattern::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto titleNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front()->GetChildren().front());
+    CHECK_NULL_VOID(titleNode);
+    SetTitleButtonHide(titleNode, hideSplit, hideMaximize, hideMinimize);
+    auto floatingTitleNode = AceType::DynamicCast<FrameNode>(host->GetChildren().back());
+    CHECK_NULL_VOID(floatingTitleNode);
+    SetTitleButtonHide(floatingTitleNode, hideSplit, hideMaximize, hideMinimize);
+    hideSplitButton_ = hideSplit;
+    LOGI("Set containerModal button status successfully, hideSplit: %{public}d, hideMaximize: %{public}d, "
+         "hideMinimize: %{public}d",
+        hideSplit, hideMaximize, hideMinimize);
 }
 
 } // namespace OHOS::Ace::NG

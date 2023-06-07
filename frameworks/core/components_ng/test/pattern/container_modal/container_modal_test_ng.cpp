@@ -15,17 +15,21 @@
 #include "gtest/gtest.h"
 
 #define private public
+#define protected public
 #include "base/log/log_wrapper.h"
 #include "core/components/container_modal/container_modal_constants.h"
+#include "core/components/test/mock/mock_resource_adapter.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
+#include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
@@ -36,6 +40,9 @@ namespace {
 const std::string CONTAINER_MODAL_NODE_TAG = "ContainerModalNode";
 const std::string TITLE_NODE_TAG = "TitleNode";
 const std::string TITLE_LABEL_NODE_TAG = "TitleLabelNode";
+constexpr int32_t LEFT_SPLIT_BUTTON_INDEX = 2;
+constexpr int32_t MAX_RECOVER_BUTTON_INDEX = 3;
+constexpr int32_t MINIMIZE_BUTTON_INDEX = 4;
 } // namespace
 class ContainerModelTestNg : public testing::Test {
 public:
@@ -249,7 +256,7 @@ HWTEST_F(ContainerModelTestNg, ContainerModalPatternTest007, TestSize.Level1)
 }
 
 /**
- * @tc.name: ContainerModalPatternTest009
+ * @tc.name: ContainerModalPatternTest008
  * @tc.desc: Test ChangeFloatingTitle.
  * @tc.type: FUNC
  */
@@ -264,7 +271,7 @@ HWTEST_F(ContainerModelTestNg, ContainerModalPatternTest008, TestSize.Level1)
 }
 
 /**
- * @tc.name: ContainerModalPatternTest010
+ * @tc.name: ContainerModalPatternTest009
  * @tc.desc: Test ChangeTitleButtonIcon.
  * @tc.type: FUNC
  */
@@ -279,6 +286,91 @@ HWTEST_F(ContainerModelTestNg, ContainerModalPatternTest009, TestSize.Level1)
     auto containerModalPattern = AceType::MakeRefPtr<ContainerModalPattern>();
     containerModalPattern->ChangeTitleButtonIcon(
         frameNode, InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT, true);
+}
+
+/**
+ * @tc.name: ContainerModalPatternTest010
+ * @tc.desc: Test ContainerModalPattern::SetContainerButtonHide.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, ContainerModalPatternTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize themeManager and windowManager before call ContainerModalView::Create func.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipeline, nullptr);
+    pipeline->windowManager_ = AceType::MakeRefPtr<WindowManager>();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(themeManager);
+    auto resourceAdapter = AceType::MakeRefPtr<MockResourceAdapter>();
+    auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(resourceAdapter);
+    EXPECT_CALL(*themeManager, GetThemeConstants()).WillRepeatedly(Return(themeConstants));
+    /**
+     * @tc.steps2: initialize containerModal node structure. Test ContainerModalView::Create func.
+     * @tc.expected: the tree structure of containerModal is established correctly.
+     */
+    auto stageNode = AceType::MakeRefPtr<FrameNode>(V2::STAGE_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto containerModalNode = ContainerModalView::Create(stageNode);
+    ASSERT_NE(containerModalNode, nullptr);
+    EXPECT_NE(containerModalNode, stageNode);
+    auto containerModalPattern = containerModalNode->GetPattern<ContainerModalPattern>();
+    ASSERT_NE(containerModalPattern, nullptr);
+    auto columnNode = containerModalNode->GetChildren().front();
+    ASSERT_NE(columnNode, nullptr);
+    auto titleNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
+    ASSERT_NE(titleNode, nullptr);
+    auto floatingTitleNode = AceType::DynamicCast<FrameNode>(containerModalNode->GetChildren().back());
+    ASSERT_NE(floatingTitleNode, nullptr);
+    auto leftSplitButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(LEFT_SPLIT_BUTTON_INDEX));
+    ASSERT_NE(leftSplitButton, nullptr);
+    ASSERT_NE(leftSplitButton->GetLayoutProperty(), nullptr);
+    auto maximizeButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(MAX_RECOVER_BUTTON_INDEX));
+    ASSERT_NE(maximizeButton, nullptr);
+    ASSERT_NE(maximizeButton->GetLayoutProperty(), nullptr);
+    auto minimizeButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(MINIMIZE_BUTTON_INDEX));
+    ASSERT_NE(minimizeButton, nullptr);
+    ASSERT_NE(minimizeButton->GetLayoutProperty(), nullptr);
+    auto leftSplitButtonFloating =
+        AceType::DynamicCast<FrameNode>(floatingTitleNode->GetChildAtIndex(LEFT_SPLIT_BUTTON_INDEX));
+    ASSERT_NE(leftSplitButtonFloating, nullptr);
+    ASSERT_NE(leftSplitButtonFloating->GetLayoutProperty(), nullptr);
+    auto maximizeButtonFloating =
+        AceType::DynamicCast<FrameNode>(floatingTitleNode->GetChildAtIndex(MAX_RECOVER_BUTTON_INDEX));
+    ASSERT_NE(maximizeButtonFloating, nullptr);
+    ASSERT_NE(maximizeButtonFloating->GetLayoutProperty(), nullptr);
+    auto minimizeButtonFloating =
+        AceType::DynamicCast<FrameNode>(floatingTitleNode->GetChildAtIndex(MINIMIZE_BUTTON_INDEX));
+    ASSERT_NE(minimizeButtonFloating, nullptr);
+    ASSERT_NE(minimizeButtonFloating->GetLayoutProperty(), nullptr);
+    /**
+     * @tc.steps3: call SetContainerButtonHide(false, false, false).
+     * @tc.expected: corresponding buttons are visible.
+     */
+    containerModalPattern->SetContainerButtonHide(false, false, false);
+    EXPECT_EQ(leftSplitButton->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+    EXPECT_EQ(maximizeButton->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+    EXPECT_EQ(minimizeButton->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+    EXPECT_EQ(
+        leftSplitButtonFloating->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+    EXPECT_EQ(
+        maximizeButtonFloating->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+    EXPECT_EQ(
+        minimizeButtonFloating->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+    /**
+     * @tc.steps4: call SetContainerButtonHide(true, true, true).
+     * @tc.expected: corresponding buttons are not visible.
+     */
+    containerModalPattern->SetContainerButtonHide(true, true, true);
+    EXPECT_NE(leftSplitButton->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+    EXPECT_NE(maximizeButton->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+    EXPECT_NE(minimizeButton->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+    EXPECT_NE(
+        leftSplitButtonFloating->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+    EXPECT_NE(
+        maximizeButtonFloating->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+    EXPECT_NE(
+        minimizeButtonFloating->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
 }
 
 /**

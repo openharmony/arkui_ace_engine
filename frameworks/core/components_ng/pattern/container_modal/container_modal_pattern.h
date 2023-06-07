@@ -66,6 +66,8 @@ public:
 
     void SetAppIcon(const RefPtr<PixelMap>& icon);
 
+    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize);
+
 private:
     void WindowFocus(bool isFocus);
 
@@ -76,6 +78,9 @@ private:
     static void ChangeTitleButtonIcon(
         const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus = true);
 
+    static void SetTitleButtonHide(
+        const RefPtr<FrameNode>& titleNode, bool hideSplit, bool hideMaximize, bool hideMinimize);
+
     bool CanShowFloatingTitle();
 
     WindowMode windowMode_;
@@ -83,6 +88,7 @@ private:
     float moveY_ = 0.0f;
     bool hasDeco_ = true;
     bool isFocus_ = true;
+    bool hideSplitButton_ = false;
 };
 
 } // namespace OHOS::Ace::NG

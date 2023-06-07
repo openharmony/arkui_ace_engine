@@ -58,4 +58,9 @@ void ContainerModalPattern::SetAppIcon(const RefPtr<PixelMap>& icon)
 {
     moveX_ = 1.0;
 }
+
+void ContainerModalPattern::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
+{
+    hideSplitButton_ = hideSplit;
+}
 } // namespace OHOS::Ace::NG
