@@ -399,7 +399,7 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
         LOGI("FirePageShow MinPlatformVersion:%{public}d, IgnoreViewSafeArea:%{public}u",
             pipeline->GetMinPlatformVersion(), pipeline->GetIgnoreViewSafeArea());
         if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && !pipeline->GetIgnoreViewSafeArea() &&
-            layoutProperty) {
+            !pipeline->GetInstallationFree() && layoutProperty) {
             layoutProperty->SetSafeArea(pipeline->GetCurrentViewSafeArea());
             LOGI("FirePageShow SetSafeArea to page :%{public}s", layoutProperty->GetSafeArea().ToString().c_str());
         }
