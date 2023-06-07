@@ -322,7 +322,6 @@ void MenuItemPattern::RegisterOnHover()
     };
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnHoverEvent(mouseEvent);
-    inputHub->SetHoverEffect(HoverEffectType::BOARD);
 }
 
 void MenuItemPattern::RegisterOnKeyEvent()
@@ -415,6 +414,13 @@ bool MenuItemPattern::OnKeyEvent(const KeyEvent& event)
         return true;
     }
     if (event.code == KeyCode::KEY_DPAD_RIGHT && GetSubBuilder() && !isSubMenuShowed_) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        auto theme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_RETURN(theme, false);
+        SetBgBlendColor(theme->GetHoverColor());
+        PlayBgColorAnimation();
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         ShowSubMenu();
         return true;
     }
