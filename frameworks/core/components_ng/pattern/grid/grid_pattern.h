@@ -117,7 +117,11 @@ public:
 
     void ResetGridLayoutInfo()
     {
-        gridLayoutInfo_ = GridLayoutInfo();
+        gridLayoutInfo_.lineHeightMap_.clear();
+        gridLayoutInfo_.gridMatrix_.clear();
+        gridLayoutInfo_.endIndex_ = -1;
+        gridLayoutInfo_.endMainLineIndex_ = 0;
+        gridLayoutInfo_.ResetPositionFlags();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
