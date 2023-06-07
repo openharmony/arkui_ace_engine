@@ -384,6 +384,10 @@ float TextFieldPattern::GetIconRightOffset()
 
 void TextFieldPattern::CreateSingleHandle()
 {
+    auto renderContext = GetHost()->GetRenderContext();
+    if (renderContext) {
+        AnimatePressAndHover(renderContext, 0.0f);
+    }
     RectF secondHandle;
     auto secondHandleMetrics = CalcCursorOffsetByPosition(textEditingValue_.caretPosition);
     OffsetF emptyOffset;
@@ -2078,13 +2082,13 @@ void TextFieldPattern::ProcessOverlay()
     if (caretUpdateType_ != CaretUpdateType::RIGHT_CLICK) {
         StopTwinkling();
     }
-    auto renderContext = GetHost()->GetRenderContext();
-    if (renderContext) {
-        AnimatePressAndHover(renderContext, 0.0f);
-    }
     if (textEditingValue_.text.empty()) {
         CreateSingleHandle();
         return;
+    }
+    auto renderContext = GetHost()->GetRenderContext();
+    if (renderContext) {
+        AnimatePressAndHover(renderContext, 0.0f);
     }
     selectionMode_ = SelectionMode::SELECT;
     if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
