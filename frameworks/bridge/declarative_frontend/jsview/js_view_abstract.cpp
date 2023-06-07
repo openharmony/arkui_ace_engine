@@ -2829,6 +2829,17 @@ void JSViewAbstract::JsBorderStyle(const JSCallbackInfo& info)
 {
     ParseBorderStyle(info[0]);
 }
+namespace {
+BorderStyle ConvertBorderStyle(int32_t value)
+{
+    auto style = static_cast<BorderStyle>(value);
+    if (style < BorderStyle::SOLID || style > BorderStyle::NONE) {
+        LOGW("border style(%{public}d) is invalid, use default value.", value);
+        style = BorderStyle::SOLID;
+    }
+    return style;
+}
+} // namespace
 
 void JSViewAbstract::ParseBorderStyle(const JSRef<JSVal>& args)
 {
@@ -2845,24 +2856,24 @@ void JSViewAbstract::ParseBorderStyle(const JSRef<JSVal>& args)
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         auto leftValue = object->GetProperty("left");
         if (!leftValue->IsUndefined() && leftValue->IsNumber()) {
-            styleLeft = static_cast<BorderStyle>(leftValue->ToNumber<int32_t>());
+            styleLeft = ConvertBorderStyle(leftValue->ToNumber<int32_t>());
         }
         auto rightValue = object->GetProperty("right");
         if (!rightValue->IsUndefined() && rightValue->IsNumber()) {
-            styleRight = static_cast<BorderStyle>(rightValue->ToNumber<int32_t>());
+            styleRight = ConvertBorderStyle(rightValue->ToNumber<int32_t>());
         }
         auto topValue = object->GetProperty("top");
         if (!topValue->IsUndefined() && topValue->IsNumber()) {
-            styleTop = static_cast<BorderStyle>(topValue->ToNumber<int32_t>());
+            styleTop = ConvertBorderStyle(topValue->ToNumber<int32_t>());
         }
         auto bottomValue = object->GetProperty("bottom");
         if (!bottomValue->IsUndefined() && bottomValue->IsNumber()) {
-            styleBottom = static_cast<BorderStyle>(bottomValue->ToNumber<int32_t>());
+            styleBottom = ConvertBorderStyle(bottomValue->ToNumber<int32_t>());
         }
         ViewAbstractModel::GetInstance()->SetBorderStyle(styleLeft, styleRight, styleTop, styleBottom);
         return;
     }
-    auto borderStyle = static_cast<BorderStyle>(args->ToNumber<int32_t>());
+    auto borderStyle = ConvertBorderStyle(args->ToNumber<int32_t>());
     ViewAbstractModel::GetInstance()->SetBorderStyle(borderStyle);
 }
 
@@ -2964,7 +2975,7 @@ void JSViewAbstract::JsLinearGradientBlur(const JSCallbackInfo& info)
         LOGE("Js Parse object failed. argsPtr is null. %s", info[1]->ToString().c_str());
         return;
     }
-    
+
     // Parse fractionStops
     auto array = argsPtrItem->GetValue("fractionStops");
     if (!array || array->IsNull() || !array->IsArray()) {
@@ -2980,8 +2991,8 @@ void JSViewAbstract::JsLinearGradientBlur(const JSCallbackInfo& info)
         return;
     }
     // Parse direction
-    auto direction = static_cast<GradientDirection>(
-        argsPtrItem->GetInt("direction", static_cast<int8_t>(GradientDirection::NONE)));
+    auto direction =
+        static_cast<GradientDirection>(argsPtrItem->GetInt("direction", static_cast<int8_t>(GradientDirection::NONE)));
     if (static_cast<int8_t>(direction) >= static_cast<int8_t>(GradientDirection::NONE)) {
         direction = GradientDirection::BOTTOM;
     }
@@ -3968,7 +3979,7 @@ void JSViewAbstract::JsOnDragEnd(const JSCallbackInfo& info)
     RefPtr<JsDragFunction> jsOnDragEndFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
 
     auto onDragEnd = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEndFunc)](
-                           const RefPtr<OHOS::Ace::DragEvent>& info) {
+                         const RefPtr<OHOS::Ace::DragEvent>& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDragEnd");
         func->Execute(info);
@@ -4901,7 +4912,7 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
 
     // parse SheetStyle
     NG::SheetStyle sheetStyle;
-    if (info.Length() == 3) { // 3 : parameter total
+    if (info.Length() == 3) {                 // 3 : parameter total
         ParseSheetStyle(info[2], sheetStyle); // 2 : The last parameter
     } else {
         sheetStyle.sheetMode = NG::SheetMode::LARGE;
@@ -4984,8 +4995,8 @@ void JSViewAbstract::JSCreateAnimatableProperty(const JSCallbackInfo& info)
         float numValue = info[1]->ToNumber<float>();
         std::function<void(float)> onCallbackEvent;
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(callback));
-        onCallbackEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-                            id = Container::CurrentId()](const float val) {
+        onCallbackEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), id = Container::CurrentId()](
+                              const float val) {
             ContainerScope scope(id);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             LOGD("onCallbackEvent(number) execute js func. val: %f", val);
@@ -4997,13 +5008,13 @@ void JSViewAbstract::JSCreateAnimatableProperty(const JSCallbackInfo& info)
         LOGD("JSCreateAnimatableProperty handle animatable arithmetic");
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[1]);
         RefPtr<JSAnimatableArithmetic> animatableArithmeticImpl =
-            AceType::MakeRefPtr<JSAnimatableArithmetic>(obj,  info.GetExecutionContext());
+            AceType::MakeRefPtr<JSAnimatableArithmetic>(obj, info.GetExecutionContext());
         RefPtr<CustomAnimatableArithmetic> animatableArithmetic =
             AceType::DynamicCast<CustomAnimatableArithmetic>(animatableArithmeticImpl);
         std::function<void(const RefPtr<NG::CustomAnimatableArithmetic>&)> onCallbackEvent;
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(callback));
-        onCallbackEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-                            id = Container::CurrentId()](const RefPtr<NG::CustomAnimatableArithmetic>& value) {
+        onCallbackEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), id = Container::CurrentId()](
+                              const RefPtr<NG::CustomAnimatableArithmetic>& value) {
             ContainerScope scope(id);
             RefPtr<JSAnimatableArithmetic> impl = AceType::DynamicCast<JSAnimatableArithmetic>(value);
             if (!impl) {
@@ -5013,8 +5024,8 @@ void JSViewAbstract::JSCreateAnimatableProperty(const JSCallbackInfo& info)
             auto newJSVal = JSRef<JSVal>(impl->GetObject());
             func->ExecuteJS(1, &newJSVal);
         };
-        ViewAbstractModel::GetInstance()->CreateAnimatableArithmeticProperty(propertyName,
-            animatableArithmetic, onCallbackEvent);
+        ViewAbstractModel::GetInstance()->CreateAnimatableArithmeticProperty(
+            propertyName, animatableArithmetic, onCallbackEvent);
     } else {
         LOGE("JSCreateAnimatableProperty: The value param type is invalid.");
     }
@@ -5036,7 +5047,7 @@ void JSViewAbstract::JSUpdateAnimatableProperty(const JSCallbackInfo& info)
         LOGD("JSUpdateAnimatableProperty handle animatable arithmetic");
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[1]);
         RefPtr<JSAnimatableArithmetic> animatableArithmeticImpl =
-            AceType::MakeRefPtr<JSAnimatableArithmetic>(obj,  info.GetExecutionContext());
+            AceType::MakeRefPtr<JSAnimatableArithmetic>(obj, info.GetExecutionContext());
         RefPtr<CustomAnimatableArithmetic> animatableArithmetic =
             AceType::DynamicCast<CustomAnimatableArithmetic>(animatableArithmeticImpl);
         ViewAbstractModel::GetInstance()->UpdateAnimatableArithmeticProperty(propertyName, animatableArithmetic);
