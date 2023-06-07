@@ -74,6 +74,8 @@ ProgressModifier::ProgressModifier()
       progressType_(AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(ProgressType::LINEAR))),
       capsuleBorderWidth_(AceType::MakeRefPtr<PropertyFloat>(DEFAULT_CAPSULE_BORDER_WIDTH)),
       sweepEffect_(AceType::MakeRefPtr<PropertyBool>(false)),
+      ringSweepEffect_(AceType::MakeRefPtr<PropertyBool>(false)),
+      linearSweepEffect_(AceType::MakeRefPtr<PropertyBool>(false)),
       paintShadow_(AceType::MakeRefPtr<PropertyBool>(false)),
       progressStatus_(AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(ProgressStatus::PROGRESSING)))
 {
@@ -95,6 +97,8 @@ ProgressModifier::ProgressModifier()
     AttachProperty(sweepingDate_);
     AttachProperty(paintShadow_);
     AttachProperty(progressStatus_);
+    AttachProperty(ringSweepEffect_);
+    AttachProperty(linearSweepEffect_);
 }
 
 void ProgressModifier::onDraw(DrawingContext& context)
@@ -138,8 +142,18 @@ void ProgressModifier::ProcessSweepingAnimation(ProgressType type, float value)
         return;
     }
 
-    if (type == ProgressType::CAPSULE) {
-        StartCapsuleSweepingAnimation(value);
+    switch (type) {
+        case ProgressType::RING:
+            ProcessRingSweepingAnimation(value);
+            break;
+        case ProgressType::LINEAR:
+            ProcessLinearSweepingAnimation(value);
+            break;
+        case ProgressType::CAPSULE:
+            StartCapsuleSweepingAnimation(value);
+            break;
+        default:
+            break;
     }
 }
 
@@ -392,8 +406,10 @@ void ProgressModifier::StartRingSweepingAnimation(float value)
     float additionalAngle = CalcRingProgressAdditionalAngle();
     date += additionalAngle * 2;
 
-    if (!isSweeping_) {
+    if (!isSweeping_ && ringSweepEffect_->Get()) {
         StartRingSweepingAnimationImpl(date);
+    } else if (!ringSweepEffect_->Get()) {
+        StopSweepingAnimation();
     } else {
         sweepingDate_->Set(date);
         if (!NearEqual(sweepingDateBackup_, date)) {
@@ -429,6 +445,7 @@ void ProgressModifier::StartRingSweepingAnimationImpl(float date)
                     auto modifier = weak.Upgrade();
                     CHECK_NULL_VOID(modifier);
                     CHECK_NULL_VOID(modifier->isVisible_);
+                    CHECK_NULL_VOID(modifier->ringSweepEffect_->Get());
                     if (modifier->sweepingDateUpdated_) {
                         modifier->sweepingDateUpdated_ = false;
                         modifier->StartRingSweepingAnimationImpl(modifier->sweepingDateBackup_);
@@ -499,8 +516,10 @@ void ProgressModifier::StartLinearSweepingAnimation(float value)
 
     date = dateLength + strokeWidth_->Get() + LINEAR_SWEEPING_LEN.ConvertToPx();
 
-    if (!isSweeping_) {
+    if (!isSweeping_ && linearSweepEffect_->Get()) {
         StartLinearSweepingAnimationImpl(date);
+    } else if (!linearSweepEffect_->Get()) {
+        StopSweepingAnimation();
     } else {
         sweepingDate_->Set(date);
         if (!NearEqual(sweepingDateBackup_, date)) {
@@ -538,6 +557,7 @@ void ProgressModifier::StartLinearSweepingAnimationImpl(float date)
                     auto modifier = weak.Upgrade();
                     CHECK_NULL_VOID(modifier);
                     CHECK_NULL_VOID(modifier->isVisible_);
+                    CHECK_NULL_VOID(modifier->linearSweepEffect_->Get());
                     if (modifier->sweepingDateUpdated_) {
                         modifier->sweepingDateUpdated_ = false;
                         modifier->StartLinearSweepingAnimationImpl(modifier->sweepingDateBackup_);
@@ -624,6 +644,16 @@ void ProgressModifier::SetBorderWidth(float width)
 void ProgressModifier::SetSweepEffect(bool value)
 {
     sweepEffect_->Set(value);
+}
+
+void ProgressModifier::SetRingSweepEffect(bool value)
+{
+    ringSweepEffect_->Set(value);
+}
+
+void ProgressModifier::SetLinearSweepEffect(bool value)
+{
+    linearSweepEffect_->Set(value);
 }
 
 void ProgressModifier::ContentDrawWithFunction(DrawingContext& context)

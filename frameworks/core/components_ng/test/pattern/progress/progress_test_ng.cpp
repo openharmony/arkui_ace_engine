@@ -72,6 +72,9 @@ struct TestProperty {
     std::optional<bool> paintShadow;
     std::optional<ProgressStatus> progressStatus;
     std::optional<Gradient> gradient;
+    std::optional<bool> ringSweepEffect;
+    std::optional<bool> linearSweepEffect;
+    std::optional<bool> showText;
 };
 
 namespace {
@@ -254,6 +257,18 @@ RefPtr<FrameNode> ProgressTestNg::CreateProgressParagraph(const TestProperty& te
         progressModel.SetGradientColor(testProperty.gradient.value());
     }
 
+    if (testProperty.ringSweepEffect.has_value()) {
+        progressModel.SetRingSweepingEffect(testProperty.ringSweepEffect.value());
+    }
+
+    if (testProperty.linearSweepEffect.has_value()) {
+        progressModel.SetLinearSweepingEffect(testProperty.linearSweepEffect.value());
+    }
+
+    if (testProperty.showText.has_value()) {
+        progressModel.SetShowText(testProperty.showText.value());
+    }
+
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
 
     return frameNode;
@@ -333,6 +348,18 @@ void ProgressTestNg::CheckValue(const RefPtr<FrameNode>& frameNode, const TestPr
 
     if (testProperty.gradient.has_value()) {
         EXPECT_EQ(progresspaintProperty->GetGradientColor(), testProperty.gradient.value());
+    }
+
+    if (testProperty.ringSweepEffect.has_value()) {
+        EXPECT_EQ(progresspaintProperty->GetEnableRingScanEffect(), testProperty.ringSweepEffect.value());
+    }
+
+    if (testProperty.linearSweepEffect.has_value()) {
+        EXPECT_EQ(progresspaintProperty->GetEnableLinearScanEffect(), testProperty.linearSweepEffect.value());
+    }
+
+    if (testProperty.showText.has_value()) {
+        EXPECT_EQ(progresspaintProperty->GetEnableShowText(), testProperty.showText.value());
     }
 }
 
@@ -1407,6 +1434,9 @@ HWTEST_F(ProgressTestNg, ProgressModelTest001, TestSize.Level1)
     testProperty.fontWeight = std::make_optional(FONT_WEIGHT);
     testProperty.fontFamily = std::make_optional(FONT_FAMILY);
     testProperty.fontStyle = std::make_optional(Ace::FontStyle::ITALIC);
+    testProperty.ringSweepEffect = std::make_optional(true);
+    testProperty.linearSweepEffect = std::make_optional(true);
+    testProperty.showText = std::make_optional(true);
 
     /**
      * @tc.steps: step2. create progress frameNode and check the progress properties with expected value .
@@ -1877,6 +1907,7 @@ HWTEST_F(ProgressTestNg, RingProgressModifier001, TestSize.Level1)
     progressModifier.SetProgressType(PROGRESS_TYPE_RING);
     progressModifier.SetProgressStatus(ProgressStatus::PROGRESSING);
     progressModifier.SetStrokeWidth(PROGRESS_STROKE_WIDTH);
+    progressModifier.SetRingSweepEffect(true);
     EXPECT_EQ(progressModifier.progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_RING));
     EXPECT_EQ(progressModifier.strokeWidth_->Get(), PROGRESS_STROKE_WIDTH);
     LinearColor linearColor;
@@ -2157,6 +2188,12 @@ HWTEST_F(ProgressTestNg, RingProgressModifier005, TestSize.Level1)
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawArc(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
 
     /**
      * @tc.steps: step2. Disable shadow and make stroke width smaller than the radius, then call function onDraw.
@@ -2234,6 +2271,7 @@ HWTEST_F(ProgressTestNg, LinearProgressModifier001, TestSize.Level1)
     ProgressModifier progressModifier;
     progressModifier.SetStrokeWidth(PROGRESS_STROKE_WIDTH);
     LinearColor linearColor;
+    progressModifier.SetLinearSweepEffect(true);
     progressModifier.SetBackgroundColor(linearColor);
     EXPECT_EQ(progressModifier.bgColor_->Get(), linearColor);
     progressModifier.SetBorderColor(linearColor);

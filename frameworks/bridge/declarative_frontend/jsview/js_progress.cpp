@@ -169,6 +169,9 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
     }
 
     switch (g_progressType) {
+        case ProgressType::LINEAR:
+            JsSetLinearStyleOptions(info);
+            break;
         case ProgressType::RING:
             JsSetRingStyleOptions(info);
             break;
@@ -271,6 +274,13 @@ void JSProgress::JsSetRingStyleOptions(const JSCallbackInfo& info)
     }
 
     ProgressModel::GetInstance()->SetProgressStatus(static_cast<NG::ProgressStatus>(progressStatus));
+
+    auto jsSweepingEffect = paramObject->GetProperty("enableScanEffect");
+    bool sweepingEffect = false;
+    if (!ParseJsBool(jsSweepingEffect, sweepingEffect)) {
+        sweepingEffect = false;
+    }
+    ProgressModel::GetInstance()->SetRingSweepingEffect(sweepingEffect);
 }
 
 void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
@@ -322,11 +332,18 @@ void JSProgress::JsSetCapsuleStyle(const JSCallbackInfo& info)
     ProgressModel::GetInstance()->SetBorderColor(colorVal);
 
     auto jsSweepingEffect = paramObject->GetProperty("enableScanEffect");
-    bool sweepingEffect;
+    bool sweepingEffect = false;
     if (!ParseJsBool(jsSweepingEffect, sweepingEffect)) {
         sweepingEffect = false;
     }
     ProgressModel::GetInstance()->SetSweepingEffect(sweepingEffect);
+
+    auto jsShowDefaultPercentage = paramObject->GetProperty("showDefaultPercentage");
+    bool showDefaultPercentage = false;
+    if (!ParseJsBool(jsShowDefaultPercentage, showDefaultPercentage)) {
+        showDefaultPercentage = false;
+    }
+    ProgressModel::GetInstance()->SetShowText(showDefaultPercentage);
 
     auto jsContext = paramObject->GetProperty("content");
     std::string text;
@@ -436,6 +453,33 @@ bool JSProgress::ConvertGradientColor(const JsiRef<JsiValue>& param, OHOS::Ace::
         gradient.AddColor(gradientColor);
     }
     return true;
+}
+
+void JSProgress::JsSetLinearStyleOptions(const JSCallbackInfo& info)
+{
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+
+    // Parse stroke width
+    CalcDimension strokeWidthDimension;
+    auto strokeWidth = paramObject->GetProperty("strokeWidth");
+    if (strokeWidth->IsUndefined() || strokeWidth->IsNull() ||
+        !ParseJsDimensionVp(strokeWidth, strokeWidthDimension)) {
+        strokeWidthDimension = theme->GetTrackThickness();
+    }
+
+    if (LessOrEqual(strokeWidthDimension.Value(), 0.0f) || strokeWidthDimension.Unit() == DimensionUnit::PERCENT) {
+        strokeWidthDimension = theme->GetTrackThickness();
+    }
+
+    ProgressModel::GetInstance()->SetStrokeWidth(strokeWidthDimension);
+
+    auto jsSweepingEffect = paramObject->GetProperty("enableScanEffect");
+    bool sweepingEffect = false;
+    if (!ParseJsBool(jsSweepingEffect, sweepingEffect)) {
+        sweepingEffect = false;
+    }
+    ProgressModel::GetInstance()->SetLinearSweepingEffect(sweepingEffect);
 }
 
 } // namespace OHOS::Ace::Framework

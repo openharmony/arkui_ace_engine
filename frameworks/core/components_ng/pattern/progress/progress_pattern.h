@@ -104,6 +104,7 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>& json) const;
+    void ToJsonValueForLinearStyleOptions(std::unique_ptr<JsonValue>& json) const;
     static std::string ConvertProgressStatusToString(const ProgressStatus status);
 
     double strokeWidth_ = 2;
