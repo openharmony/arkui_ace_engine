@@ -371,6 +371,10 @@ void FrameNode::OnAttachToMainTree(bool recursive)
     if (!hasPendingRequest_) {
         return;
     }
+    // node may have been measured before AttachToMainTree
+    if (geometryNode_->GetParentLayoutConstraint().has_value()) {
+        layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
+    }
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     context->RequestFrame();
