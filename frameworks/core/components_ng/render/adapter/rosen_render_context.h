@@ -302,6 +302,7 @@ private:
     void RemoveDefaultTransition();
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot);
+    void SetPositionToRSNode();
 
     RefPtr<PageTransitionEffect> GetDefaultPageTransition(PageTransitionType type);
     RefPtr<PageTransitionEffect> GetPageTransitionEffect(const RefPtr<PageTransitionEffect>& transition);
@@ -370,7 +371,6 @@ private:
     std::shared_ptr<Rosen::RSNode> rsNode_;
     bool isHoveredScale_ = false;
     bool isHoveredBoard_ = false;
-    bool isPositionChanged_ = false;
     bool firstTransitionIn_ = false;
     bool isBreakingPoint_ = false;
     bool isBackBlurChanged_ = false;
