@@ -26,6 +26,11 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr uint32_t COLOR_BLACK = 0xff000000;
+constexpr uint32_t COLOR_WHITE = 0xffffffff;
+} // namespace
+
 class LifecycleListener : public Rosen::ILifecycleListener {
 public:
     explicit LifecycleListener(const WeakPtr<WindowPattern>& windowPattern)
@@ -111,6 +116,10 @@ void WindowPattern::InitContent()
 
 void WindowPattern::CreateStartingNode()
 {
+    if (!HasStartingPage()) {
+        return;
+    }
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
@@ -120,21 +129,15 @@ void WindowPattern::CreateStartingNode()
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     host->AddChild(startingNode_);
 
-    constexpr uint32_t BLACK = 0xff000000;
-    constexpr uint32_t WHITE = 0xffffffff;
-    auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? BLACK : WHITE;
-    if (!HasStartingPage()) {
-        startingNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
-        return;
-    }
+    std::string startPagePath;
+    auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
+    auto sessionInfo = session_->GetSessionInfo();
+    Rosen::SceneSessionManager::GetInstance().GetStartPage(sessionInfo, startPagePath, backgroundColor);
+    LOGI("start page path %{public}s, background color %{public}x", startPagePath.c_str(), backgroundColor);
 
-    std::shared_ptr<Media::PixelMap> startPage = nullptr;
-    Rosen::SceneSessionManager::GetInstance().GetStartPage(session_->GetSessionInfo(), startPage, backgroundColor);
     startingNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
-    auto pixelMap = PixelMap::CreatePixelMap(&startPage);
-
-    CHECK_NULL_VOID(pixelMap);
-    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
+    imageLayoutProperty->UpdateImageSourceInfo(
+        ImageSourceInfo(startPagePath, sessionInfo.bundleName_, sessionInfo.moduleName_));
     imageLayoutProperty->UpdateImageFit(ImageFit::NONE);
     startingNode_->MarkModifyDone();
 }
@@ -145,7 +148,8 @@ void WindowPattern::CreateSnapshotNode()
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = snapshotNode_->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
+    auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
+    snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
