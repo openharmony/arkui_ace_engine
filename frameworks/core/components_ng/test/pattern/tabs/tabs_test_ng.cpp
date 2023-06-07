@@ -4686,6 +4686,7 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleTouchUp002, TestSize.Level1)
         for (int j = 0; j <= 1; j++) {
             for (int k = 0; k <= 1; k++) {
                 tabBarPattern->HandleTouchUp(index);
+                tabBarPattern->SetTouching(true);
                 tabBarPattern->swiperController_->SetAddSwiperEventCallback(funcTest);
                 tabBarPattern->hoverIndex_.reset();
                 EXPECT_FALSE(tabBarPattern->hoverIndex_.has_value());
@@ -4698,6 +4699,7 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleTouchUp002, TestSize.Level1)
     tabBarPattern->hoverIndex_.reset();
     for (int i = 0; i <= 1; i++) {
         tabBarPattern->HandleTouchUp(index);
+        tabBarPattern->SetTouching(true);
         tabBarPattern->hoverIndex_.emplace(1);
     }
 }
