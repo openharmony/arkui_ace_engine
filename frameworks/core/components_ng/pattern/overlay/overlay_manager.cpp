@@ -24,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/spring_curve.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/select/select_theme.h"
@@ -346,6 +347,7 @@ void OverlayManager::ShowToast(
     option.SetCurve(curve);
     option.SetDuration(TOAST_ANIMATION_DURATION);
     option.SetFillMode(FillMode::FORWARDS);
+    duration = std::max(duration, AceApplicationInfo::GetInstance().GetBarrierfreeDuration());
     auto&& callback = [weak = WeakClaim(this), toastId, duration, id = Container::CurrentId()]() {
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID(overlayManager);
