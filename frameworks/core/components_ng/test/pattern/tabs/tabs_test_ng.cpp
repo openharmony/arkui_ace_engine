@@ -4672,19 +4672,14 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleTouchUp002, TestSize.Level1)
     int32_t index = 1;
     tabBarPattern->swiperController_->SetAddSwiperEventCallback(nullptr);
     tabBarPattern->SetTouching(true);
-
-    std::optional<int32_t> index_test1(1);
-    EXPECT_EQ(index_test1.value(), 1);
-    std::optional<int32_t> index_test2(2);
-    EXPECT_EQ(index_test2.value(), 2);
     tabBarPattern->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE };
 
     /**
      * @tc.steps: step2. Test function HandleTouchUp.
      * @tc.expected: Related functions run ok.
      */
-    tabBarPattern->hoverIndex_.emplace(index_test1);
-    tabBarPattern->touchingIndex_.emplace(index_test1);
+    tabBarPattern->hoverIndex_.emplace(1);
+    tabBarPattern->touchingIndex_.emplace(1);
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
             for (int k = 0; k <= 1; k++) {
@@ -4692,14 +4687,14 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleTouchUp002, TestSize.Level1)
                 tabBarPattern->swiperController_->SetAddSwiperEventCallback(funcTest);
                 tabBarPattern->hoverIndex_.reset();
             }
-            tabBarPattern->touchingIndex_.emplace(index_test2);
+            tabBarPattern->touchingIndex_.emplace(2);
         }
-        tabBarPattern->hoverIndex_.emplace(index_test1);
+        tabBarPattern->hoverIndex_.emplace(1);
     }
     tabBarPattern->hoverIndex_.reset();
     for (int i = 0; i <= 1; i++) {
         tabBarPattern->HandleTouchUp(index);
-        tabBarPattern->hoverIndex_.emplace(index_test1);
+        tabBarPattern->hoverIndex_.emplace(1);
     }
 }
 
