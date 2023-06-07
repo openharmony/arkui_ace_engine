@@ -19,6 +19,8 @@
 
 #include "gtest/gtest.h"
 
+#include "base/window/drag_window.h"
+
 #define private public
 #define protected public
 #include "base/memory/ace_type.h"
@@ -28,6 +30,8 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/navigation/bar_item_layout_algorithm.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -1271,7 +1275,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0023, TestSize.Level1)
     navigation->AddNavDestinationToNavigation();
     EXPECT_TRUE(stack->navPathList_.empty());
     ASSERT_EQ(navigation->navBarNode_, nullptr);
-    
+
     std::pair<std::string, RefPtr<UINode>> p("test", preNavDestination);
     stack->navPathList_.push_back(p);
 
@@ -1424,5 +1428,178 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0026, TestSize.Level1)
     navigation->NavTransitionOutAnimation(navBar, navDestination, contentNode);
     ASSERT_NE(backButton->renderContext_, nullptr);
     navigation->BackButtonAnimation(backButton, true);
+}
+
+/**
+ * @tc.name: NavrouterTestNg0027
+ * @tc.desc: Test BarItemLayoutAlgorithm::Layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0027, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<BarItemLayoutAlgorithm>();
+    auto barItem = AceType::MakeRefPtr<BarItemNode>("barItem", 11);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    auto textNode = FrameNode::CreateFrameNode("textNode", 22, AceType::MakeRefPtr<TextPattern>());
+
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(AceType::WeakClaim(AceType::RawPtr(barItem)), geometryNode, layoutProperty);
+
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(barItem->text_, nullptr);
+    barItem->text_ = textNode;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_NE(barItem->text_, nullptr);
+}
+
+/**
+ * @tc.name: NavrouterTestNg0028
+ * @tc.desc: Test TitleBarNode::FastPreviewUpdateChild.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0028, TestSize.Level1)
+{
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 55, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto menu = FrameNode::CreateFrameNode("menu", 22, AceType::MakeRefPtr<TextPattern>());
+    auto newChild = FrameNode::CreateFrameNode("newChild", 33, AceType::MakeRefPtr<TextPattern>());
+
+    ASSERT_TRUE(titleBarNode->children_.empty());
+    titleBarNode->FastPreviewUpdateChild(0, newChild);
+    ASSERT_FALSE(titleBarNode->children_.empty());
+    titleBarNode->FastPreviewUpdateChild(1, menu);
+    ASSERT_EQ(titleBarNode->children_.size(), 2);
+    titleBarNode->FastPreviewUpdateChild(2, newChild);
+    ASSERT_EQ(titleBarNode->children_.size(), 2);
+}
+
+/**
+ * @tc.name: NavrouterTestNg0029
+ * @tc.desc: Test NavBarNode::AddChildToGroup && GetBarItemsString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navBar newChild then call AddChildToGroup.
+     */
+    auto navBar =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto newChild = FrameNode::CreateFrameNode("newChild", 22, AceType::MakeRefPtr<TextPattern>());
+
+    ASSERT_EQ(navBar->navBarContentNode_, nullptr);
+    navBar->AddChildToGroup(newChild);
+    ASSERT_NE(navBar->navBarContentNode_, nullptr);
+    navBar->AddChildToGroup(newChild);
+    ASSERT_EQ(navBar->navBarContentNode_->children_.size(), 1);
+
+    /**
+     * @tc.steps: step2. create menu then construct navBar->menu_->children_.
+     */
+    auto menu = FrameNode::CreateFrameNode("menu", 33, AceType::MakeRefPtr<TextPattern>());
+    auto child1 = FrameNode::CreateFrameNode("child1", 44, AceType::MakeRefPtr<TextPattern>());
+    auto barItem = AceType::MakeRefPtr<BarItemNode>("barItem", 55);
+    auto barItem2 = AceType::MakeRefPtr<BarItemNode>("barItem", 66);
+    auto barItem3 = AceType::MakeRefPtr<BarItemNode>("barItem", 67);
+    auto barItem4 = AceType::MakeRefPtr<BarItemNode>("barItem", 68);
+
+    auto icon = FrameNode::CreateFrameNode("icon", 77, AceType::MakeRefPtr<ImagePattern>());
+    auto text = FrameNode::CreateFrameNode("text", 88, AceType::MakeRefPtr<TextPattern>());
+
+    auto icon3 = FrameNode::CreateFrameNode("icon", 78, AceType::MakeRefPtr<ImagePattern>());
+    auto text3 = FrameNode::CreateFrameNode("text", 89, AceType::MakeRefPtr<TextPattern>());
+
+    auto icon4 = FrameNode::CreateFrameNode("icon", 80, AceType::MakeRefPtr<ImagePattern>());
+    auto text4 = FrameNode::CreateFrameNode("text", 81, AceType::MakeRefPtr<TextPattern>());
+
+    auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
+    auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+
+    imageLayoutProperty->propImageSourceInfo_ = ImageSourceInfo();
+
+    barItem2->icon_ = icon;
+    barItem2->text_ = text;
+
+    barItem3->icon_ = icon3;
+    barItem3->text_ = text3;
+
+    barItem4->icon_ = icon4;
+    barItem4->text_ = text4;
+
+    icon3->layoutProperty_ = imageLayoutProperty;
+    text3->layoutProperty_ = textLayoutProperty;
+    text->layoutProperty_ = nullptr;
+    icon4->layoutProperty_ = nullptr;
+
+    /**
+     * @tc.steps: step3. call navBar->GetBarItemsString.
+     */
+    navBar->menu_ = menu;
+    navBar->GetBarItemsString(true);
+    ASSERT_TRUE(navBar->menu_->children_.empty());
+
+    navBar->menu_->children_.push_back(child1);
+    navBar->menu_->children_.push_back(barItem);
+    navBar->menu_->children_.push_back(barItem2);
+    navBar->menu_->children_.push_back(barItem3);
+    navBar->menu_->children_.push_back(barItem4);
+    navBar->GetBarItemsString(true);
+    ASSERT_EQ(navBar->menu_->children_.size(), 5);
+}
+
+/**
+ * @tc.name: NavrouterTestNg0030
+ * @tc.desc: Test NavBarLayoutAlgorithm.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0030, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavBarLayoutAlgorithm>();
+    auto navBar =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProperty = AceType::MakeRefPtr<NavBarLayoutProperty>();
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(AceType::WeakClaim(AceType::RawPtr(navBar)), geometryNode, layoutProperty);
+
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 22, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto text4 = FrameNode::CreateFrameNode("text", 22, AceType::MakeRefPtr<TextPattern>());
+    auto titleGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto titleLayoutProperty = AceType::MakeRefPtr<TitleBarLayoutProperty>();
+    auto titleBarNode2 = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 23, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        AceType::WeakClaim(AceType::RawPtr(titleBarNode2)), titleGeometryNode, titleLayoutProperty);
+
+    LayoutConstraintF constraint;
+    LayoutConstraintF constraint2;
+    constraint.selfIdealSize.width_ = 20.0f;
+    constraint.selfIdealSize.height_ = 30.0f;
+    layoutProperty->layoutConstraint_ = constraint;
+    layoutProperty->propHideTitleBar_ = true;
+    layoutProperty->contentConstraint_ = constraint2;
+
+    navBar->titleBarNode_ = titleBarNode;
+    navBar->children_.push_back(text4);
+    layoutWrapper->childrenMap_[0] = childWrapper;
+    layoutWrapper->currentChildCount_ = 1;
+
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_TRUE(layoutProperty->propHideTitleBar_.value());
+
+    layoutProperty->propHideTitleBar_ = false;
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleHeight_ = Dimension();
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_FALSE(layoutProperty->propHideTitleBar_.value());
+    ASSERT_TRUE(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->HasTitleHeight());
+
+    layoutProperty->propHideTitleBar_ = false;
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleHeight_ = std::nullopt;
+    layoutProperty->propTitleMode_ = NavigationTitleMode::MINI;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_FALSE(layoutProperty->propHideTitleBar_.value());
+    ASSERT_FALSE(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->HasTitleHeight());
 }
 } // namespace OHOS::Ace::NG
