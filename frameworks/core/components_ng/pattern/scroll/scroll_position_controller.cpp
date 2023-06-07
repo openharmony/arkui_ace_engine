@@ -113,4 +113,10 @@ Offset ScrollPositionController::GetCurrentOffset() const
     return offset;
 }
 
+bool ScrollPositionController::IsAtEnd() const
+{
+    auto scrollPattern = AceType::DynamicCast<ScrollPattern>(scroll_.Upgrade());
+    CHECK_NULL_RETURN_NOLOG(scrollPattern, false);
+    return scrollPattern->IsAtBottom();
+}
 } // namespace OHOS::Ace::NG

@@ -900,4 +900,28 @@ HWTEST_F(WaterFlowTestNg, Callback001, TestSize.Level1)
     UpdateCurrentOffset(scrollDownOffset * 5);
     EXPECT_TRUE(isReachEndCalled);
 }
+
+/*
+ * @tc.name: PositionController001
+ * @tc.desc: Test property about scroller.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, PositionController001, TestSize.Level1)
+{
+    WaterFlowModelNG waterFlowModelNG;
+    waterFlowModelNG.Create();
+    RefPtr<ScrollControllerBase> scrollController = waterFlowModelNG.CreateScrollController();
+    RefPtr<ScrollProxy> proxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
+    waterFlowModelNG.SetScroller(scrollController, proxy);
+    waterFlowModelNG.SetColumnsTemplate("1fr 1fr 1fr");
+    CreateWaterFlowItem(10);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    EXPECT_FALSE(scrollController->IsAtEnd());
+
+    pattern_->UpdateCurrentOffset(-100.f, SCROLL_FROM_UPDATE);
+    RunMeasureAndLayout();
+    EXPECT_TRUE(scrollController->IsAtEnd());
+}
 } // namespace OHOS::Ace::NG

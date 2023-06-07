@@ -105,4 +105,10 @@ Offset GridPositionController::GetCurrentOffset() const
     return (axis == Axis::HORIZONTAL) ? Offset(vpOffset, 0) : Offset(0, vpOffset);
 }
 
+bool GridPositionController::IsAtEnd() const
+{
+    auto gridPattern = AceType::DynamicCast<GridPattern>(scroll_.Upgrade());
+    CHECK_NULL_RETURN_NOLOG(gridPattern, false);
+    return gridPattern->IsAtBottom();
+}
 } // namespace OHOS::Ace::NG

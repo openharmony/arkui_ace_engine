@@ -697,6 +697,23 @@ HWTEST_F(ScrollTestNg, ScrollPositionControlle002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollPositionController003
+ * @tc.desc: Test IsAtEnd function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollPositionController003, TestSize.Level1)
+{
+    CreateScroll();
+
+    auto controller = pattern_->GetScrollPositionController();
+    EXPECT_FALSE(controller->IsAtEnd());
+
+    const float delta = COLUMN_HEIGHT - ROOT_HEIGHT;
+    UpdateCurrentOffset(-delta);
+    EXPECT_TRUE(controller->IsAtEnd());
+}
+
+/**
  * @tc.name: ModelNG001
  * @tc.desc: Test ModelNG
  * @tc.type: FUNC
