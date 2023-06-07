@@ -27,6 +27,7 @@ const char SURFACE_ERRORCODE_CREATEFAIL[] = "error_video_000001";
 const char SURFACE_ERRORMSG_CREATEFAIL[] = "Unable to initialize video player.";
 
 const char SURFACE_METHOD_ONCREATE[] = "onCreate";
+const char SURFACE_METHOD_ONCHANGED[] = "onChanged";
 
 const char SET_SURFACE_BOUNDS[] = "setSurfaceBounds";
 const char SURFACE_ID[] = "surfaceId";
@@ -90,11 +91,21 @@ void ExtSurface::CreateExtSurface(const std::function<void(int64_t)>& onCreate)
             }
         });
 
+    resRegister->RegisterEvent(
+        MakeEventHash(SURFACE_METHOD_ONCHANGED), [weak = WeakClaim(this)](const std::string& param) {
+            auto surface = weak.Upgrade();
+            if (surface) {
+                auto width = surface->GetIntParam(param, SURFACE_WIDTH);
+                auto height = surface->GetIntParam(param, SURFACE_HEIGHT);
+                surface->OnSurfaceChanged(width, height);
+            }
+        });
+
     if (onCreate) {
         onCreate(id_);
     }
 #if defined(IOS_PLATFORM)
-    CallResRegisterMethod(MakeMethodHash(SURFACE_METHOD_ONCREATE), "");
+    OnSurfaceCreated();
 #endif
 }
 
@@ -112,6 +123,14 @@ void ExtSurface::OnSurfaceCreated()
 {
     if (onSurfaceCreated_) {
         onSurfaceCreated_();
+    }
+}
+
+void ExtSurface::OnSurfaceChanged(int32_t width, int32_t height)
+{
+    LOGI("OnSurfaceChanged. width: %{public}d height: %{public}d", width, height);
+    if (onSurfaceChanged_) {
+        onSurfaceChanged_(width, height);
     }
 }
 

@@ -39,11 +39,18 @@ public:
     {
         onSurfaceCreated_ = std::move(callback);
     }
+    void SetSurfaceChanged(std::function<void(int32_t, int32_t)>&& callback)
+    {
+        onSurfaceChanged_ = std::move(callback);
+    }
+    
 
 private:
     void OnSurfaceCreated();
+    void OnSurfaceChanged(int32_t width, int32_t height);
 
     std::function<void()> onSurfaceCreated_;
+    std::function<void(int32_t, int32_t)> onSurfaceChanged_;
 };
 
 } // namespace OHOS::Ace
