@@ -267,6 +267,9 @@ public:
         displayMode_ = displayMode;
         if (displayMode_ == DisplayMode::AUTO) {
             PlayBarEndAnimation();
+        } else if (displayMode_ == DisplayMode::ON) {
+            CHECK_NULL_VOID_NOLOG(scrollEndAnimator_ || scrollEndAnimator_->IsStopped());
+            scrollEndAnimator_->Stop();
         }
     }
 
