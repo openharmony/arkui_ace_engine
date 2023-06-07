@@ -252,6 +252,11 @@ void TextFieldModelNG::SetSelectedBackgroundColor(const Color& value)
 
 void TextFieldModelNG::SetTextAlign(TextAlign value)
 {
+    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    if (layoutProperty->GetTextAlignValue(TextAlign::START) != value) {
+        layoutProperty->UpdateTextAlignChanged(true);
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextAlign, value);
 }
 void TextFieldModelNG::SetMaxLength(uint32_t value)
@@ -442,7 +447,7 @@ void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
         backgroundColor = theme->GetBgColor();
         return;
     }
-    
+
     NG::ViewAbstract::SetBackgroundColor(color);
 }
 
@@ -464,32 +469,30 @@ void TextFieldModelNG::SetPadding(NG::PaddingProperty& newPadding, Edge oldPaddi
         NG::PaddingProperty paddings;
         if (top.Value()) {
             if (top.Unit() == DimensionUnit::CALC) {
-                paddings.top = NG::CalcLength(
-                    top.IsNonNegative() ? top.CalcValue() : CalcDimension().CalcValue());
+                paddings.top = NG::CalcLength(top.IsNonNegative() ? top.CalcValue() : CalcDimension().CalcValue());
             } else {
                 paddings.top = NG::CalcLength(top.IsNonNegative() ? top : CalcDimension());
             }
         }
         if (bottom.Value()) {
             if (bottom.Unit() == DimensionUnit::CALC) {
-                paddings.bottom = NG::CalcLength(
-                    bottom.IsNonNegative() ? bottom.CalcValue() : CalcDimension().CalcValue());
+                paddings.bottom =
+                    NG::CalcLength(bottom.IsNonNegative() ? bottom.CalcValue() : CalcDimension().CalcValue());
             } else {
                 paddings.bottom = NG::CalcLength(bottom.IsNonNegative() ? bottom : CalcDimension());
             }
         }
         if (left.Value()) {
             if (left.Unit() == DimensionUnit::CALC) {
-                paddings.left = NG::CalcLength(
-                    left.IsNonNegative() ? left.CalcValue() : CalcDimension().CalcValue());
+                paddings.left = NG::CalcLength(left.IsNonNegative() ? left.CalcValue() : CalcDimension().CalcValue());
             } else {
                 paddings.left = NG::CalcLength(left.IsNonNegative() ? left : CalcDimension());
             }
         }
         if (right.Value()) {
             if (right.Unit() == DimensionUnit::CALC) {
-                paddings.right = NG::CalcLength(
-                    right.IsNonNegative() ? right.CalcValue() : CalcDimension().CalcValue());
+                paddings.right =
+                    NG::CalcLength(right.IsNonNegative() ? right.CalcValue() : CalcDimension().CalcValue());
             } else {
                 paddings.right = NG::CalcLength(right.IsNonNegative() ? right : CalcDimension());
             }
