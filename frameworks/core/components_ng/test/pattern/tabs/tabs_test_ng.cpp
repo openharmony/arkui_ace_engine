@@ -4547,7 +4547,7 @@ HWTEST_F(TabsTestNg, TabBarDistributedTest001, TestSize.Level1)
      */
     tabBarPattern->UpdateIndicator(0);
     std::string ret = tabBarPattern->ProvideRestoreInfo();
-    EXPECT_TRUE(ret != R"({"Index":0})");
+    EXPECT_TRUE(ret == R"({"Index":0})");
 
     /**
      * @tc.steps: step3. Function OnRestoreInfo is called.
