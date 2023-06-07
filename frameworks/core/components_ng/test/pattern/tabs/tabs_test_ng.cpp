@@ -4691,7 +4691,7 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleTouchUp002, TestSize.Level1)
                 tabBarPattern->hoverIndex_.reset();
                 EXPECT_FALSE(tabBarPattern->hoverIndex_.has_value());
             }
-            tabBarPattern->touchingIndex_.emplace(2);
+            tabBarPattern->touchingIndex_.emplace(0);
         }
         tabBarPattern->hoverIndex_.emplace(1);
     }
