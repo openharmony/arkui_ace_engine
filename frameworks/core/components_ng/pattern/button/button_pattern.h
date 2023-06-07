@@ -182,7 +182,7 @@ public:
         return result;
     }
 
-    void SetLocalLocation(const Offset& localLocatioin)
+    void SetLocalLocation(const Offset& localLocation)
     {
         localLocation_ = localLocation;
     }
