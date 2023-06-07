@@ -186,6 +186,36 @@ void JSGrid::JsOnScrollIndex(const JSCallbackInfo& info)
     GridModel::GetInstance()->SetOnScrollToIndex(std::move(onScrollIndex));
 }
 
+void JSGrid::JsOnScrollBarUpdate(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto onScrollBarUpdate = [execCtx = info.GetExecutionContext(),
+                                 func = AceType::MakeRefPtr<JsFunction>(
+                                     JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]))](int32_t index, float offset) {
+        JSRef<JSVal> itemIndex = JSRef<JSVal>::Make(ToJSValue(index));
+        JSRef<JSVal> itemOffset = JSRef<JSVal>::Make(ToJSValue(offset));
+        JSRef<JSVal> params[2] = { itemIndex, itemOffset };
+        auto result = func->ExecuteJS(2, params);
+        if (result->IsObject()) {
+            JSRef<JSObject> obj = JSRef<JSObject>::Cast(result);
+            JSRef<JSVal> totalOffset = obj->GetProperty("totalOffset");
+            JSRef<JSVal> totalLength = obj->GetProperty("totalLength");
+            if (totalOffset->IsNumber() && totalLength->IsNumber()) {
+                float totalOffset_ = totalOffset->ToNumber<float>();
+                float totalLength_ = totalLength->ToNumber<float>();
+                return std::pair<float, float>(totalOffset_, totalLength_);
+            } else {
+                return std::pair<float, float>(0, 0);
+            }
+        }
+        return std::pair<float, float>(0, 0);
+    };
+    GridModel::GetInstance()->SetOnScrollBarUpdate(std::move(onScrollBarUpdate));
+}
+
 void JSGrid::JSBind(BindingTarget globalObj)
 {
     LOGD("JSGrid:Bind");
@@ -210,6 +240,7 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("scrollBarWidth", &JSGrid::SetScrollBarWidth, opt);
     JSClass<JSGrid>::StaticMethod("scrollBarColor", &JSGrid::SetScrollBarColor, opt);
     JSClass<JSGrid>::StaticMethod("onScrollIndex", &JSGrid::JsOnScrollIndex);
+    JSClass<JSGrid>::StaticMethod("onScrollBarUpdate", &JSGrid::JsOnScrollBarUpdate);
     JSClass<JSGrid>::StaticMethod("cachedCount", &JSGrid::SetCachedCount);
     JSClass<JSGrid>::StaticMethod("editMode", &JSGrid::SetEditMode, opt);
     JSClass<JSGrid>::StaticMethod("multiSelectable", &JSGrid::SetMultiSelectable, opt);

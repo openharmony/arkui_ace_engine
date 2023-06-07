@@ -36,6 +36,7 @@ public:
     static void SetScrollBarColor(const std::string& color);
     static void SetScrollBarWidth(const JSCallbackInfo& scrollWidth);
     static void JsOnScrollIndex(const JSCallbackInfo& info);
+    static void JsOnScrollBarUpdate(const JSCallbackInfo& info);
     static void SetCachedCount(const JSCallbackInfo& info);
     static void SetEditMode(const JSCallbackInfo& info);
     static void SetMultiSelectable(bool multiSelectable);
