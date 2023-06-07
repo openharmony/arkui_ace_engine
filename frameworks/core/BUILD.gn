@@ -692,10 +692,15 @@ template("ace_core_ng_source_set") {
       "pipeline/pipeline_base.cpp",
 
       # image
+      "image/animated_image_player.cpp",
       "image/flutter_image_cache.cpp",
       "image/image_cache.cpp",
       "image/image_compressor.cpp",
       "image/image_loader.cpp",
+      "image/image_object.cpp",
+      "image/image_object_animated.cpp",
+      "image/image_object_svg.cpp",
+      "image/image_provider.cpp",
       "image/image_source_info.cpp",
 
       # textfield
@@ -708,6 +713,7 @@ template("ace_core_ng_source_set") {
       "common/ime/text_input_type.cpp",
 
       # properties
+      "components/common/painter/rosen_decoration_painter.cpp",
       "components/common/properties/alignment.cpp",
       "components/common/properties/animatable_path.cpp",
       "components/common/properties/border.cpp",
