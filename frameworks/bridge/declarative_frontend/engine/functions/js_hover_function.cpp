@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_hover_function.h"
 
 #include "base/log/log.h"
+
 namespace OHOS::Ace::Framework {
 void JsHoverFunction::HoverExecute(bool isHover, HoverInfo& hoverInfo)
 {
@@ -25,9 +26,14 @@ void JsHoverFunction::HoverExecute(bool isHover, HoverInfo& hoverInfo)
     objectTemplate->SetInternalFieldCount(1);
     JSRef<JSObject> hoverObj = objectTemplate->NewInstance();
     hoverObj->SetPropertyObject("stopPropagation", JSRef<JSFunc>::New<FunctionCallback>(JsStopPropagation));
+    hoverObj->SetProperty<double>(
+        "timestamp", static_cast<double>(hoverInfo.GetTimeStamp().time_since_epoch().count()));
+    hoverObj->SetProperty<double>("source", static_cast<int32_t>(hoverInfo.GetSourceDevice()));
+    auto target = CreateEventTargetObject(hoverInfo);
+    hoverObj->SetPropertyObject("target", target);
     hoverObj->Wrap<HoverInfo>(&hoverInfo);
     JSRef<JSVal> hoverVal = JSRef<JSObject>::Cast(hoverObj);
-    JSRef<JSVal> params[] = {isHoverParam, hoverVal};
+    JSRef<JSVal> params[] = { isHoverParam, hoverVal };
     JsFunction::ExecuteJS((sizeof(params) / sizeof(params[0])), params);
 }
 

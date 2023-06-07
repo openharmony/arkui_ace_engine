@@ -352,13 +352,17 @@ public:
         onHoverEventCallback_ = onHoverEventCallback;
     }
 
-    bool HandleHoverEvent(bool isHovered, HoverInfo& info)
+    bool HandleHoverEvent(bool isHovered, const MouseEvent& event)
     {
         if (!onHoverEventCallback_) {
             return false;
         }
-        onHoverEventCallback_(isHovered, info);
-        if (info.IsStopPropagation()) {
+        HoverInfo hoverInfo;
+        hoverInfo.SetTimeStamp(event.time);
+        hoverInfo.SetDeviceId(event.deviceId);
+        hoverInfo.SetSourceDevice(event.sourceType);
+        onHoverEventCallback_(isHovered, hoverInfo);
+        if (hoverInfo.IsStopPropagation()) {
             return false;
         }
         return true;
