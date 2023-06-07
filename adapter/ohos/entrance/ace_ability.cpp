@@ -495,9 +495,10 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         context->SetMinPlatformVersion(apiCompatibleVersion);
 
         const static int32_t PLATFORM_VERSION_TEN = 10;
-        if (apiCompatibleVersion >= PLATFORM_VERSION_TEN) {
+        if (apiCompatibleVersion >= PLATFORM_VERSION_TEN && context->GetIsAppWindow()) {
             context->SetSystemSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM));
             context->SetCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
+            context->AppBarAdaptToSafeArea();
         }
     }
 
@@ -902,9 +903,8 @@ void AceAbility::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID_NOLOG(pipelineContext);
     const static int32_t PLATFORM_VERSION_TEN = 10;
-    if (pipelineContext->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(pipelineContext->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN &&
+                          pipelineContext->GetIsAppWindow());
     LOGI("AceAbility::OnAvoidAreaChanged type:%{public}d, avoidArea:topRect:x:%{public}d, y:%{public}d, "
          "width:%{public}d, height%{public}d",
         type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,

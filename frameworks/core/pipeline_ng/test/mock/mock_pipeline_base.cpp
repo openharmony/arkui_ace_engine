@@ -309,6 +309,8 @@ SafeAreaEdgeInserts PipelineContext::GetViewSafeArea() const
 {
     return {};
 }
+
+void PipelineContext::AppBarAdaptToSafeArea() {};
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
