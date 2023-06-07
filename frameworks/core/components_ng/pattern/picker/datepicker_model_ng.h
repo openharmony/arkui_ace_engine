@@ -44,6 +44,13 @@ private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateButtonNode();
 };
+
+class ACE_EXPORT DatePickerDialogModelNG : public DatePickerDialogModel {
+public:
+    void SetDatePickerDialogShow(PickerDialogInfo& pickerDialog, NG::DatePickerSettingData& settingData,
+        std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
+        std::function<void(const std::string&)>&& onChange, DatePickerType pickerType) override;
+};
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DATE_PICKER_DATE_PICKER_MODEL_NG_VIEW_H
