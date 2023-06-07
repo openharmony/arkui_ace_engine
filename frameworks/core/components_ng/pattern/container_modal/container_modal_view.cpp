@@ -211,7 +211,7 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
     imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(TITLE_ICON_SIZE), CalcLength(TITLE_ICON_SIZE)));
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    auto imageRenderProperty = imageIcon->getPaintProperty<ImageRenderProperty>();
+    auto imageRenderProperty = imageIcon->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_RETURN(imageRenderProperty, nullptr);
     imageRenderProperty->UpdateImageInterpolation(ImageInterpolation::HIGH);
     imageIcon->MarkModifyDone();
@@ -244,20 +244,20 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
         CHECK_NULL_VOID(imageIconRenderContext);
         double imageScale = isHover ? 1.10 : 1.00;
         AnimationOption option = AnimationOption();
-        option.setDuration(100);
+        option.SetDuration(100);
         std::string icurveString = "cubic-bezier(0.500000,0.000000,0.500000,1.000000)";
-        option.SetCurve(FrameWork::CreateCurve(icurveString));
+        option.SetCurve(Framework::CreateCurve(icurveString));
         if (isHover) {
-            AnimationUtils::Animate(option,[buttonNodeRenderContext,imageIconRenderContext,imageScale,translateX,translateY]() {
-                buttonNodeRenderContext->UpdateTranformScale(VictorF(imageScale, imageScale));
-                imageIconRenderContext->UpdateTranformScale(VictorF(1 / imageScale, 1 / imageScale));
-                imageIconRenderContext->UpdateTranformTranslate({translatex, translateY, 0.0f});
+            AnimationUtils::Animate(option,[buttonNodeRenderContext,imageIconRenderContext,imageScale,translatex,translateY]() {
+                buttonNodeRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
+                imageIconRenderContext->UpdateTransformScale(VictorF(1 / imageScale, 1 / imageScale));
+                imageIconRenderContext->UpdateTransformTranslate({translatex, translateY, 0.0f});
             });
         } else {
             AnimationUtils::Animate(option,[buttonNodeRenderContext,imageIconRenderContext,imageScale,translateX,translateY]() {
-                buttonNodeRenderContext->UpdateTranformScale(VictorF(imageScale, imageScale));
-                imageIconRenderContext->UpdateTranformScale(VictorF(imageScale, imageScale));
-                imageIconRenderContext->UpdateTranformTranslate({0.0f, 0.0f, 0.0f});
+                buttonNodeRenderContext->UpdateTransformScale(VictorF(imageScale, imageScale));
+                imageIconRenderContext->UpdateTransformScale(VictorF(imageScale, imageScale));
+                imageIconRenderContext->UpdateTransformTranslate({0.0f, 0.0f, 0.0f});
             });
         }
     };
@@ -283,9 +283,9 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
         translateX = (info.GetLocalLocation().GetX() - halfSize) / halfSize * 2;
         translateY = (info.GetLocalLocation().GetY() - halfSize) / halfSize * 2;
         AnimationOption option = AnimationOption();
-        option.SetCurve(FrameWork::CreateCurve("responsive-spring-motion"));
-        AnimationUtils::Animate(option,[imageIconRenderContext,translateX,translateY]() {
-            imageIconRenderContext->UpdateTranformTranslate({translatex, translateY, 0.0f});
+        option.SetCurve(Framework::CreateCurve("responsive-spring-motion"));
+        AnimationUtils::Animate(option,[imageIconrenderContext,translateX,translateY]() {
+            imageIconRenderContext->UpdateTransformTranslate({translatex, translateY, 0.0f});
         });
 
     };
