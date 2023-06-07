@@ -4672,7 +4672,13 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleTouchUp002, TestSize.Level1)
     int32_t index = 1;
     tabBarPattern->swiperController_->SetAddSwiperEventCallback(nullptr);
     tabBarPattern->SetTouching(true);
+    IndicatorStyle indicatorStyle1;
+    IndicatorStyle indicatorStyle2;
+    indicatorStyle1.color = Color::BLACK;
+    indicatorStyle2.color = Color::RED;
     tabBarPattern->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE };
+    tabBarPattern->selectedModes_ = { SelectedMode::BOARD, SelectedMode::INDICATOR };
+    tabBarPattern->indicatorStyles_ = { indicatorStyle1, indicatorStyle2 };
 
     /**
      * @tc.steps: step2. Test function HandleTouchUp.
@@ -4733,7 +4739,13 @@ HWTEST_F(TabsTestNg, TabBarPatternPlayPressAnimation002, TestSize.Level1)
     auto pressColor = Color();
     pressColor.SetValue(1);
     auto animationType = AnimationType::HOVERTOPRESS;
+    IndicatorStyle indicatorStyle1;
+    IndicatorStyle indicatorStyle2;
+    indicatorStyle1.color = Color::BLACK;
+    indicatorStyle2.color = Color::RED;
     tabBarPattern->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE };
+    tabBarPattern->selectedModes_ = { SelectedMode::BOARD, SelectedMode::INDICATOR };
+    tabBarPattern->indicatorStyles_ = { indicatorStyle1, indicatorStyle2 };
 
     /**
      * @tc.steps: step2. Test function PlayPressAnimation.
