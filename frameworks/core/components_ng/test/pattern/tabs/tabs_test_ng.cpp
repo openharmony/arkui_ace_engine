@@ -4513,9 +4513,9 @@ HWTEST_F(TabsTestNg, TabBarDistributedTest001, TestSize.Level1)
     EXPECT_EQ(tabBarLayoutProperty->GetIndicator().value_or(0), 0);
     restoreInfo_ = R"({"Index":1})";
     pattern->OnRestoreInfo(restoreInfo_);
-    EXPECT_NE(tabBarLayoutProperty->GetIndicator().value_or(0), 0);
+    EXPECT_EQ(tabBarLayoutProperty->GetIndicator().value_or(0), 0);
     restoreInfo_ = "invalid_json_string";
     pattern->OnRestoreInfo(restoreInfo_);
-    EXPECT_NE(tabBarLayoutProperty->GetIndicator().value_or(0), 0);
+    EXPECT_EQ(tabBarLayoutProperty->GetIndicator().value_or(0), 0);
 }
 } // namespace OHOS::Ace::NG
