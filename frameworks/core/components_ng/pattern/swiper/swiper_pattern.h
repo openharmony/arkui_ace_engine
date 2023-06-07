@@ -79,6 +79,7 @@ public:
         layoutAlgorithm->SetMaxChildSize(maxChildSize_);
         layoutAlgorithm->SetDisplayCount(GetDisplayCount());
         layoutAlgorithm->SetHoverRatio(hoverRatio_);
+        layoutAlgorithm->SetIsDragged(isDragging_);
         return layoutAlgorithm;
     }
 
@@ -513,6 +514,7 @@ private:
     bool IsCustomSize_ = false;
     bool indicatorIsBoolean_ = true;
     bool isAtHotRegion_ = false;
+    bool isDragging_ = false;
 
     Axis direction_ = Axis::HORIZONTAL;
 

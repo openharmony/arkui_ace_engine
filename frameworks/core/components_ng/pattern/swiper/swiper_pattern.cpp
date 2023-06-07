@@ -926,6 +926,7 @@ void SwiperPattern::HandleDragStart()
     ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
 #endif
     currentOffset_ = std::fmod(currentOffset_, MainSize());
+    isDragging_ = true;
 }
 
 void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
@@ -1589,6 +1590,7 @@ void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, b
         currentOffset_ = 0.0;
     }
     targetIndex_.reset();
+    isDragging_ = false;
     if (currentIndex_ != nextIndex) {
         currentOffset_ = 0.0;
         currentIndex_ = nextIndex;
