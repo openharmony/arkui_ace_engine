@@ -54,7 +54,8 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     CHECK_NULL_RETURN(context, nullptr);
     auto textId = ElementRegister::GetInstance()->MakeUniqueId();
     auto toastId = ElementRegister::GetInstance()->MakeUniqueId();
-    LOGI("begin to show toast, toast id is %{public}d, message is %{public}s", toastId, message.c_str());
+    LOGI("begin to show toast, toast id is %{public}d, message is %{public}s, bottom is %{public}s", toastId,
+        message.c_str(), bottom.c_str());
     // make toast node
     auto toastNode =
         FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, toastId, AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -82,8 +83,9 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     if ((bottomPosition.Unit() == DimensionUnit::PERCENT)) {
         bottomPosition = rootHeight * bottomPosition.Value();
     }
-    auto toastBottom = Dimension(
-        GreatOrEqual(bottomPosition.Value(), 0.0) ? bottomPosition.Value() : toastTheme->GetBottom().ConvertToPx());
+    auto toastBottom =
+        Dimension(GreatOrEqual(bottomPosition.ConvertToPx(), 0.0) ? bottomPosition.ConvertToPx()
+                                                                  : toastTheme->GetBottom().ConvertToPx());
     UpdateTextLayoutProperty(textNode, message, isRightToLeft);
     UpdateTextContext(textNode);
     toastNode->MarkModifyDone();
