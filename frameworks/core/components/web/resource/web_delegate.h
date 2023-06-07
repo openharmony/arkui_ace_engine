@@ -492,6 +492,11 @@ public:
         const std::string& origin, const std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface>& callback);
     void OnCompleteSwapWithNewSize();
     void OnResizeNotWork();
+    void OnDateTimeChooserPopup(
+        const NWeb::DateTimeChooser& chooser,
+        const std::vector<OHOS::NWeb::DateTimeSuggestion>& suggestions,
+        std::shared_ptr<OHOS::NWeb::NWebDateTimeChooserCallback> callback);
+    void OnDateTimeChooserClose();
     void OnRequestFocus();
     bool OnCommonDialog(const std::shared_ptr<BaseEventInfo>& info, DialogEventType dialogEventType);
     bool OnHttpAuthRequest(const std::shared_ptr<BaseEventInfo>& info);
