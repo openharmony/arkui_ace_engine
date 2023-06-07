@@ -502,6 +502,10 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
 
     if (GreatNotEqual(curOffset_, 0.0) && HasStartNode()) {
         float width = startNodeSize_;
+        if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD && reachLeftSpeed) {
+            StartSpringMotion(curOffset_, 0, info.GetMainVelocity() * friction);
+            return;
+        }
         if (hasStartDeleteArea_ && startOnDelete && GreatOrEqual(curOffset_, width + startDeleteAreaDistance_)) {
             if (!useStartDefaultDeleteAnimation_) {
                 startOnDelete();
@@ -522,6 +526,10 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
         end = width * static_cast<int32_t>(swiperIndex_);
     } else if (LessNotEqual(curOffset_, 0.0) && HasEndNode()) {
         float width = endNodeSize_;
+        if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD && reachRightSpeed) {
+            StartSpringMotion(curOffset_, 0, info.GetMainVelocity() * friction);
+            return;
+        }
         if (hasEndDeleteArea_ && endOnDelete && GreatOrEqual(-curOffset_, width + endDeleteAreaDistance_)) {
             if (!useEndDefaultDeleteAnimation_) {
                 endOnDelete();
