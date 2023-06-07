@@ -169,7 +169,7 @@ void JSCounter::SetSize(const JSCallbackInfo& args)
         Dimension height;
         if (ConvertFromJSValue(obj->GetProperty("height"), height) && height.IsValid()) {
             if (GreatOrEqual(height.Value(), 0.0)) {
-                CounterModel::GetInstance()->SetWidth(height);
+                CounterModel::GetInstance()->SetHeight(height);
             }
         }
 
