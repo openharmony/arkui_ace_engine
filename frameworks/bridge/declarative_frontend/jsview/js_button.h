@@ -39,7 +39,6 @@ public:
     static void SetLableStyle(const JSCallbackInfo& info);
     static void JsBackgroundColor(const JSCallbackInfo& info);
     static void JsRadius(const JSCallbackInfo& info);
-    static void JsBorder(const JSCallbackInfo& info);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
     static void JsAspectRatio(const JSCallbackInfo& info);

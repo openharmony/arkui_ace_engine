@@ -127,7 +127,8 @@ void StepperPattern::CreateLeftButtonNode()
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateType(ButtonType::NORMAL);
     buttonNode->GetRenderContext()->UpdateBackgroundColor(stepperTheme->GetMouseHoverColor().ChangeOpacity(0));
     buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-    buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateBorderRadius(stepperTheme->GetRadius());
+    auto buttonRadius = stepperTheme->GetRadius();
+    buttonNode->GetRenderContext()->UpdateBorderRadius({ buttonRadius, buttonRadius, buttonRadius, buttonRadius });
     buttonNode->MountToParent(hostNode);
     buttonNode->MarkModifyDone();
     InitButtonOnHoverEvent(buttonNode, true);
@@ -254,7 +255,8 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
         rightIsHover_ ? stepperTheme->GetMouseHoverColor() : stepperTheme->GetMouseHoverColor().ChangeOpacity(0);
     buttonNode->GetRenderContext()->UpdateBackgroundColor(buttonBackgroundColor);
     buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-    buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateBorderRadius(stepperTheme->GetRadius());
+    auto buttonRadius = stepperTheme->GetRadius();
+    buttonNode->GetRenderContext()->UpdateBorderRadius({ buttonRadius, buttonRadius, buttonRadius, buttonRadius });
     buttonNode->MountToParent(hostNode);
     buttonNode->MarkModifyDone();
     InitButtonOnHoverEvent(buttonNode, false);
@@ -329,7 +331,8 @@ void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, const std::st
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateType(ButtonType::NORMAL);
     buttonNode->GetRenderContext()->UpdateBackgroundColor(buttonBackgroundColor);
     buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-    buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateBorderRadius(stepperTheme->GetRadius());
+    auto buttonRadius = stepperTheme->GetRadius();
+    buttonNode->GetRenderContext()->UpdateBorderRadius({ buttonRadius, buttonRadius, buttonRadius, buttonRadius });
     buttonNode->MountToParent(hostNode);
     buttonNode->MarkModifyDone();
     InitButtonOnHoverEvent(buttonNode, false);
