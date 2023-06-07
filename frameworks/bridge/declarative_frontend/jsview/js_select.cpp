@@ -69,20 +69,15 @@ void JSSelect::Create(const JSCallbackInfo& info)
         for (size_t i = 0; i < size; i++) {
             std::string value;
             std::string icon;
-                JSRef<JSVal> indexVal = paramArray->GetValueAt(i);
-                if (!indexVal->IsObject()) {
-                    LOGE("element of paramArray is not an object.");
-                    return;
-                }
-                auto indexObject = JSRef<JSObject>::Cast(indexVal);
-                auto selectValue = indexObject->GetProperty("value");
-                auto selectIcon = indexObject->GetProperty("icon");
-                if (!ParseJsString(selectValue, value)) {
-                    LOGW("selectValue is null");
-                }
-                if (!ParseJsMedia(selectIcon, icon)) {
-                    LOGI("selectIcon is null");
-                }
+            JSRef<JSVal> indexVal = paramArray->GetValueAt(i);
+            if (!indexVal->IsObject()) {
+                return;
+            }
+            auto indexObject = JSRef<JSObject>::Cast(indexVal);
+            auto selectValue = indexObject->GetProperty("value");
+            auto selectIcon = indexObject->GetProperty("icon");
+            ParseJsString(selectValue, value);
+            ParseJsMedia(selectIcon, icon);
 
             params[i] = { value, icon };
         }
@@ -203,37 +198,40 @@ void JSSelect::Font(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         return;
     }
-
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
     auto param = JSRef<JSObject>::Cast(info[0]);
+    // set select value font size
+    CalcDimension fontSize = theme->GetFontSize();
     auto size = param->GetProperty("size");
-    if (!size->IsNull()) {
-        CalcDimension fontSize;
-        if (ParseJsDimensionFp(size, fontSize)) {
-            SelectModel::GetInstance()->SetFontSize(fontSize);
-        }
-    }
-    std::string weight;
+    ParseJsDimensionFp(size, fontSize);
+    SelectModel::GetInstance()->SetFontSize(fontSize);
+    // set select value font weight
+    FontWeight weight = theme->GetFontWeight();
     auto fontWeight = param->GetProperty("weight");
-    if (!fontWeight->IsNull()) {
-        if (fontWeight->IsNumber()) {
-            weight = std::to_string(fontWeight->ToNumber<int32_t>());
-        } else {
-            ParseJsString(fontWeight, weight);
-        }
-        SelectModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight));
+    std::string weightStr;
+    if (fontWeight->IsNumber()) {
+        weight = ConvertStrToFontWeight(std::to_string(fontWeight->ToNumber<int32_t>()));
+    } else if (ParseJsString(fontWeight, weightStr)) {
+        weight = ConvertStrToFontWeight(weightStr);
     }
-
+    SelectModel::GetInstance()->SetFontWeight(weight);
+    // set select value font family
+    std::vector<std::string> fontFamily;
     auto family = param->GetProperty("family");
     if (!family->IsNull() && family->IsString()) {
-        auto familyVal = family->ToString();
-        SelectModel::GetInstance()->SetFontFamily(ConvertStrToFontFamilies(familyVal));
+        fontFamily = ConvertStrToFontFamilies(family->ToString());
     }
-
+    SelectModel::GetInstance()->SetFontFamily(fontFamily);
+    // set select value font style
+    FontStyle fontStyle = FontStyle::NORMAL;
     auto style = param->GetProperty("style");
     if (!style->IsNull() && style->IsNumber()) {
-        auto styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
-        SelectModel::GetInstance()->SetItalicFontStyle(styleVal);
+        fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
     }
+    SelectModel::GetInstance()->SetItalicFontStyle(fontStyle);
 }
 
 void JSSelect::FontColor(const JSCallbackInfo& info)
@@ -242,20 +240,13 @@ void JSSelect::FontColor(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
 
-    Color textColor;
-    if (!ParseJsColor(info[0], textColor)) {
-        if (info[0]->IsNull() || info[0]->IsUndefined()) {
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID_NOLOG(pipeline);
-            auto theme = pipeline->GetTheme<SelectTheme>();
-            CHECK_NULL_VOID_NOLOG(theme);
-            textColor = theme->GetFontColor();
-        } else {
-            return;
-        }
-    }
-
+    Color textColor = theme->GetFontColor();
+    ParseJsColor(info[0], textColor);
     SelectModel::GetInstance()->SetFontColor(textColor);
 }
 
@@ -285,42 +276,45 @@ void JSSelect::SelectedOptionFont(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         return;
     }
-    auto param = JSRef<JSObject>::Cast(info[0]);
-
     if (info.Length() < 1) {
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
 
+    auto param = JSRef<JSObject>::Cast(info[0]);
+    // set selected option font size
+    CalcDimension fontSize = theme->GetFontSize();
     auto size = param->GetProperty("size");
-    if (!size->IsNull()) {
-        CalcDimension fontSize;
-        if (ParseJsDimensionFp(size, fontSize)) {
-            SelectModel::GetInstance()->SetSelectedOptionFontSize(fontSize);
-        }
-    }
-    std::string weight;
+    ParseJsDimensionFp(size, fontSize);
+    SelectModel::GetInstance()->SetSelectedOptionFontSize(fontSize);
+    // set selected option font weight
+    FontWeight weight = theme->GetFontWeight();
     auto fontWeight = param->GetProperty("weight");
-    if (!fontWeight->IsNull()) {
-        if (fontWeight->IsNumber()) {
-            weight = std::to_string(fontWeight->ToNumber<int32_t>());
-        } else {
-            ParseJsString(fontWeight, weight);
-        }
-        SelectModel::GetInstance()->SetSelectedOptionFontWeight(ConvertStrToFontWeight(weight));
+    std::string weightStr;
+    if (fontWeight->IsNumber()) {
+        weight = ConvertStrToFontWeight(std::to_string(fontWeight->ToNumber<int32_t>()));
+    } else if (ParseJsString(fontWeight, weightStr)) {
+        weight = ConvertStrToFontWeight(weightStr);
     }
-
+    SelectModel::GetInstance()->SetSelectedOptionFontWeight(weight);
+    // set selected option font family
+    std::vector<std::string> fontFamily;
     auto family = param->GetProperty("family");
     if (!family->IsNull() && family->IsString()) {
-        auto familyVal = family->ToString();
-        SelectModel::GetInstance()->SetSelectedOptionFontFamily(ConvertStrToFontFamilies(familyVal));
+        fontFamily = ConvertStrToFontFamilies(family->ToString());
     }
-
+    SelectModel::GetInstance()->SetSelectedOptionFontFamily(fontFamily);
+    // set selected option font style
+    FontStyle fontStyle = FontStyle::NORMAL;
     auto style = param->GetProperty("style");
     if (!style->IsNull() && style->IsNumber()) {
-        auto styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
-        SelectModel::GetInstance()->SetSelectedOptionItalicFontStyle(styleVal);
+        fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
     }
+    SelectModel::GetInstance()->SetSelectedOptionItalicFontStyle(fontStyle);
 }
 
 void JSSelect::SelectedOptionFontColor(const JSCallbackInfo& info)
@@ -329,18 +323,13 @@ void JSSelect::SelectedOptionFontColor(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Color textColor;
-    if (!ParseJsColor(info[0], textColor)) {
-        if (info[0]->IsNull() || info[0]->IsUndefined()) {
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID_NOLOG(pipeline);
-            auto theme = pipeline->GetTheme<SelectTheme>();
-            CHECK_NULL_VOID_NOLOG(theme);
-            textColor = theme->GetSelectedColorText();
-        } else {
-            return;
-        }
-    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+
+    Color textColor = theme->GetSelectedColorText();
+    ParseJsColor(info[0], textColor);
     SelectModel::GetInstance()->SetSelectedOptionFontColor(textColor);
 }
 
@@ -350,11 +339,12 @@ void JSSelect::OptionBgColor(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Color bgColor;
-    if (!ParseJsColor(info[0], bgColor)) {
-        return;
-    }
-
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+    Color bgColor = theme->GetBackgroundColor();
+    ParseJsColor(info[0], bgColor);
     SelectModel::GetInstance()->SetOptionBgColor(bgColor);
 }
 
@@ -363,37 +353,40 @@ void JSSelect::OptionFont(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         return;
     }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
     auto param = JSRef<JSObject>::Cast(info[0]);
-
+    // set option font size
+    CalcDimension fontSize = theme->GetFontSize();
     auto size = param->GetProperty("size");
-    if (!size->IsNull()) {
-        CalcDimension fontSize;
-        if (ParseJsDimensionFp(size, fontSize)) {
-            SelectModel::GetInstance()->SetOptionFontSize(fontSize);
-        }
-    }
-    std::string weight;
+    ParseJsDimensionFp(size, fontSize);
+    SelectModel::GetInstance()->SetOptionFontSize(fontSize);
+    // set option font weight
+    FontWeight weight = theme->GetFontWeight();
+    std::string weightStr;
     auto fontWeight = param->GetProperty("weight");
-    if (!fontWeight->IsNull()) {
-        if (fontWeight->IsNumber()) {
-            weight = std::to_string(fontWeight->ToNumber<int32_t>());
-        } else {
-            ParseJsString(fontWeight, weight);
-        }
-        SelectModel::GetInstance()->SetOptionFontWeight(ConvertStrToFontWeight(weight));
+    if (fontWeight->IsNumber()) {
+        weight = ConvertStrToFontWeight(std::to_string(fontWeight->ToNumber<int32_t>()));
+    } else if (ParseJsString(fontWeight, weightStr)) {
+        weight = ConvertStrToFontWeight(weightStr);
     }
-
+    SelectModel::GetInstance()->SetOptionFontWeight(weight);
+    // set option font family
+    std::vector<std::string> fontFamily;
     auto family = param->GetProperty("family");
     if (!family->IsNull() && family->IsString()) {
-        auto familyVal = family->ToString();
-        SelectModel::GetInstance()->SetOptionFontFamily(ConvertStrToFontFamilies(familyVal));
+        fontFamily = ConvertStrToFontFamilies(family->ToString());
     }
-
+    SelectModel::GetInstance()->SetOptionFontFamily(fontFamily);
+    // set option font style
+    FontStyle fontStyle = FontStyle::NORMAL;
     auto style = param->GetProperty("style");
     if (!style->IsNull() && style->IsNumber()) {
-        auto styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
-        SelectModel::GetInstance()->SetOptionItalicFontStyle(styleVal);
+        fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
     }
+    SelectModel::GetInstance()->SetOptionItalicFontStyle(fontStyle);
 }
 
 void JSSelect::OptionFontColor(const JSCallbackInfo& info)
@@ -402,11 +395,13 @@ void JSSelect::OptionFontColor(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Color textColor;
-    if (!ParseJsColor(info[0], textColor)) {
-        return;
-    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
 
+    Color textColor = theme->GetFontColor();
+    ParseJsColor(info[0], textColor);
     SelectModel::GetInstance()->SetOptionFontColor(textColor);
 }
 
