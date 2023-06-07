@@ -33,22 +33,26 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
-
 std::unique_ptr<TextPickerModel> TextPickerModel::textPickerInstance_ = nullptr;
 std::unique_ptr<TextPickerDialogModel> TextPickerDialogModel::textPickerDialogInstance_ = nullptr;
+std::mutex TextPickerModel::mutex_;
+std::mutex TextPickerDialogModel::mutex_;
 
 TextPickerModel* TextPickerModel::GetInstance()
 {
     if (!textPickerInstance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!textPickerInstance_) {
 #ifdef NG_BUILD
-        textPickerInstance_.reset(new NG::TextPickerModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             textPickerInstance_.reset(new NG::TextPickerModelNG());
-        } else {
-            textPickerInstance_.reset(new Framework::TextPickerModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                textPickerInstance_.reset(new NG::TextPickerModelNG());
+            } else {
+                textPickerInstance_.reset(new Framework::TextPickerModelImpl());
+            }
 #endif
+        }
     }
     return textPickerInstance_.get();
 }
@@ -56,15 +60,18 @@ TextPickerModel* TextPickerModel::GetInstance()
 TextPickerDialogModel* TextPickerDialogModel::GetInstance()
 {
     if (!textPickerDialogInstance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!textPickerDialogInstance_) {
 #ifdef NG_BUILD
-        textPickerDialogInstance_.reset(new NG::TextPickerDialogModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             textPickerDialogInstance_.reset(new NG::TextPickerDialogModelNG());
-        } else {
-            textPickerDialogInstance_.reset(new Framework::TextPickerDialogModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                textPickerDialogInstance_.reset(new NG::TextPickerDialogModelNG());
+            } else {
+                textPickerDialogInstance_.reset(new Framework::TextPickerDialogModelImpl());
+            }
 #endif
+        }
     }
     return textPickerDialogInstance_.get();
 }

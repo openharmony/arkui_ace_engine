@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_PICKER_TEXT_PICKER_MODEL_H
 
 #include <functional>
+#include <mutex>
 
 #include "base/geometry/dimension.h"
 #include "core/components/picker/picker_theme.h"
@@ -67,6 +68,7 @@ public:
 
 private:
     static std::unique_ptr<TextPickerModel> textPickerInstance_;
+    static std::mutex mutex_;
 };
 
 class TextPickerDialogModel {
@@ -81,6 +83,7 @@ public:
 
 private:
     static std::unique_ptr<TextPickerDialogModel> textPickerDialogInstance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_PICKER_TEXT_PICKER_MODEL_H

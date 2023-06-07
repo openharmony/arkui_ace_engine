@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PICKER_PICKER_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PICKER_PICKER_MODEL_H
 
+#include <mutex>
+
 #include "core/components/picker/picker_data.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
@@ -56,6 +58,7 @@ public:
 
 private:
     static std::unique_ptr<DatePickerModel> datePickerInstance_;
+    static std::mutex mutex_;
 };
 
 class DatePickerDialogModel {
@@ -69,6 +72,7 @@ public:
 
 private:
     static std::unique_ptr<DatePickerDialogModel> datePickerDialogInstance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PICKER_PICKER_MODEL_H
