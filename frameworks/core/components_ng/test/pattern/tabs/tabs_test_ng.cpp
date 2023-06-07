@@ -4593,7 +4593,7 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleTouchDown001, TestSize.Level1)
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     ASSERT_NE(tabBarPattern, nullptr);
     int32_t index = 1;
-    tabBarPattern->swiperController_->SetRemoveTabBarEventCallback(nullptr);
+    tabBarPattern->swiperController_->SetRemoveSwiperEventCallback(nullptr);
     tabBarPattern->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE };
 
     /**
@@ -4602,7 +4602,7 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleTouchDown001, TestSize.Level1)
      */
     for (int i = 0; i <= 1; i++) {
         tabBarPattern->HandleTouchDown(index);
-        tabBarPattern->swiperController_->SetRemoveTabBarEventCallback(funcTest);
+        tabBarPattern->swiperController_->SetRemoveSwiperEventCallback(funcTest);
     }
 }
 
@@ -4673,8 +4673,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleTouchUp002, TestSize.Level1)
     tabBarPattern->swiperController_->SetAddSwiperEventCallback(nullptr);
     tabBarPattern->SetTouching(true);
 
-    std::optional<int32_t> index_test;
-    EXPECT_FALSE(index_test.has_value());
     std::optional<int32_t> index_test1(1);
     EXPECT_EQ(index_test1.value(), 1);
     std::optional<int32_t> index_test2(2);
@@ -4685,24 +4683,23 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleTouchUp002, TestSize.Level1)
      * @tc.steps: step2. Test function HandleTouchUp.
      * @tc.expected: Related functions run ok.
      */
-    tabBarPattern->hoverIndex_ = index_test1;
-    tabBarPattern->touchingIndex_ = index_test1;
+    tabBarPattern->hoverIndex_.emplace(index_test1);
+    tabBarPattern->touchingIndex_.emplace(index_test1);
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
             for (int k = 0; k <= 1; k++) {
                 tabBarPattern->HandleTouchUp(index);
                 tabBarPattern->swiperController_->SetAddSwiperEventCallback(funcTest);
-                tabBarPattern->hoverIndex_ = index_test;
+                tabBarPattern->hoverIndex_.reset();
             }
-            tabBarPattern->touchingIndex_ = index_test2;
+            tabBarPattern->touchingIndex_.emplace(index_test2);
         }
-        tabBarPattern->hoverIndex_ = index_test1;
-        tabBarPattern->touchingIndex_ = index_test2;
+        tabBarPattern->hoverIndex_.emplace(index_test1);
     }
-    tabBarPattern->hoverIndex_ = index_test;
+    tabBarPattern->hoverIndex_.reset();
     for (int i = 0; i <= 1; i++) {
         tabBarPattern->HandleTouchUp(index);
-        tabBarPattern->hoverIndex_ = index_test1;
+        tabBarPattern->hoverIndex_.emplace(index_test1);
     }
 }
 
