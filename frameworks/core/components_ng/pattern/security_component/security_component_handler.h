@@ -18,6 +18,9 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
+#ifdef SECURITY_COMPONENT_ENABLE
+#include "sec_comp_kit.h"
+#endif
 
 namespace OHOS::Ace::NG {
 class SecurityComponentHandler {
@@ -26,6 +29,9 @@ public:
     static int32_t UpdateSecurityComponent(RefPtr<FrameNode>& node, int32_t scId);
     static int32_t UnregisterSecurityComponent(int32_t scId);
     static int32_t ReportSecurityComponentClickEvent(int32_t scId, RefPtr<FrameNode>& node, GestureEvent& event);
+#ifdef SECURITY_COMPONENT_ENABLE
+    static OHOS::Security::SecurityComponent::SecCompUiRegister uiRegister;
+#endif
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SECURITY_COMPONENT_HANDLER_H

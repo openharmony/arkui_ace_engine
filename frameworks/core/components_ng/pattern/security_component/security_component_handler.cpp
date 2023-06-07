@@ -27,13 +27,22 @@
 #include "paste_button.h"
 #include "save_button.h"
 #include "sec_comp_err.h"
-#include "sec_comp_kit.h"
 #endif
 
 namespace OHOS::Ace::NG {
 #ifdef SECURITY_COMPONENT_ENABLE
 using namespace OHOS::Security;
 using namespace OHOS::Security::SecurityComponent;
+
+static std::vector<uintptr_t> g_callList = {
+    reinterpret_cast<uintptr_t>(SecurityComponentHandler::RegisterSecurityComponent),
+    reinterpret_cast<uintptr_t>(SecurityComponentHandler::UpdateSecurityComponent),
+    reinterpret_cast<uintptr_t>(SecurityComponentHandler::UnregisterSecurityComponent),
+    reinterpret_cast<uintptr_t>(SecurityComponentHandler::ReportSecurityComponentClickEvent)
+};
+
+SecurityComponent::SecCompUiRegister uiRegister(g_callList);
+
 static bool GetDisplayOffset(RefPtr<FrameNode>& node, double& offsetX, double& offsetY)
 {
     double x = node->GetTransformRelativeOffset().GetX();
