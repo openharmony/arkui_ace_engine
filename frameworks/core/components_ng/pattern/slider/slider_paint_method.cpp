@@ -84,5 +84,9 @@ void SliderPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     sliderTipModifier_->SetContentOffset(paintWrapper->GetContentOffset());
     sliderTipModifier_->SetContentSize(paintWrapper->GetContentSize());
     sliderTipModifier_->SetBubbleVertex(tipParameters_.bubbleVertex_);
+
+    sliderTipModifier_->BuildParagraph();
+    sliderTipModifier_->UpdateBubbleSize();
+    sliderTipModifier_->UpdateOverlayRect();
 }
 } // namespace OHOS::Ace::NG

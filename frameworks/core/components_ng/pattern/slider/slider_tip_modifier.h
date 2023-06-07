@@ -103,17 +103,18 @@ public:
         textOffset_ = textOffset;
     }
 
+    void BuildParagraph();
+    void UpdateBubbleSize();
+    void UpdateOverlayRect();
+
 private:
     void PaintBezier(bool isLeft, Axis axis, RSPath& path, const OffsetF& arrowCenter, const OffsetF& arrowEdge);
     void SetBubbleDisplayAnimation();
     void SetBubbleDisappearAnimation();
-    void BuildParagraph();
     void CreateParagraphAndLayout(
         const TextStyle& textStyle, const std::string& content);
     bool CreateParagraph(const TextStyle& textStyle, std::string content);
     OffsetF GetBubbleVertex();
-    void UpdateBubbleSize();
-    RectF UpdateOverlayRect();
 
 private:
     RefPtr<PropertyBool> tipFlag_;
