@@ -1453,7 +1453,7 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
 }
 
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
-    const std::function<void()>& listener, const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
 {
     LOGI("UIContentImpl: UpdateViewportConfig %{public}s", config.ToString().c_str());
     SystemProperties::SetResolution(config.Density());
@@ -1462,7 +1462,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    auto task = [config, container, reason, listener, rsTransaction, rsWindow = window_]() {
+    auto task = [config, container, reason, rsTransaction, rsWindow = window_]() {
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
         if (pipelineContext) {
@@ -1471,15 +1471,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             if (rsWindow) {
                 pipelineContext->SetIsLayoutFullScreen(rsWindow->IsLayoutFullScreen());
             }
-            if (listener) {
-                pipelineContext->FlushBuild();
-                listener();
-                pipelineContext->FlushBuild();
-            }
-        } else {
-            if (listener) {
-                listener();
-            }
+            pipelineContext->FlushBuild();
         }
         auto aceView = static_cast<Platform::AceViewOhos*>(container->GetAceView());
         CHECK_NULL_VOID(aceView);
