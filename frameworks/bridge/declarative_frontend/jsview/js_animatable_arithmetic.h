@@ -32,11 +32,11 @@ public:
     explicit JSAnimatableArithmetic(const JSRef<JSObject>& jsObject, JSExecutionContext ctx)
         : jsObject_(jsObject), ctx_(ctx)
     {
-        auto addVal = jsObject_->GetProperty("add");
+        auto addVal = jsObject_->GetProperty("plus");
         if (addVal->IsFunction()) {
             addFunc_ = JSRef<JSFunc>::Cast(addVal);
         } else {
-            LOGD("'add' function does not exist on AnimatableArithmetic object");
+            LOGD("'plus' function does not exist on AnimatableArithmetic object");
         }
         auto minusVal = jsObject_->GetProperty("subtract");
         if (minusVal->IsFunction()) {
