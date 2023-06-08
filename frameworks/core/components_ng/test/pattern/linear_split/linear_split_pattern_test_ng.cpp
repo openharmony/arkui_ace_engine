@@ -254,6 +254,14 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest004, TestSize.Level1)
     linearSplitPattern->HandlePanStart(info);
     linearSplitPattern->HandlePanUpdate(info);
     EXPECT_FALSE(linearSplitPattern->isDraged_);
+
+    /**
+     * @tc.steps: step4. Construct MouseEvent and Call HandleMouseEvent.
+     * @tc.expected: functions exit normally
+     */
+    MouseInfo info2;
+    linearSplitPattern->HandleMouseEvent(info2);
+    EXPECT_FALSE(linearSplitPattern->isDraged_);
 }
 /**
  * @tc.name: LinearSplitPatternTest005
@@ -446,6 +454,29 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
         EXPECT_EQ(childSize, SizeF(RK356_WIDTH, SMALL_ITEM_HEIGHT));
         EXPECT_EQ(childOffset, OffsetF(ZERO, verticalRemaining / 2 + i * (SMALL_ITEM_HEIGHT + DEFAULT_SPLIT_HEIGHT)));
     }
+    linearSplitPattern->splitRects_ = linearLayoutAlgorithm->GetSplitRects();
+    EXPECT_TRUE(linearSplitPattern->splitRects_[1].IsInRegion(Point(10, 543)));
+
+    /**
+     * @tc.steps: step5. Construct GestureEvent and Call HandlePanEvent function.
+     * @tc.expected: functions exit normally when gestureEventInfo is not in splitRects region
+     */
+    GestureEvent info;
+    Offset globalLocation(0, 500);
+    info.SetGlobalLocation(globalLocation);
+    linearSplitPattern->HandlePanStart(info);
+    EXPECT_TRUE(linearSplitPattern->isDraged_);
+    linearSplitPattern->HandlePanUpdate(info);
+    EXPECT_EQ(linearSplitPattern->preOffset_, info.GetOffsetY());
+
+    /**
+     * @tc.steps: step6. Construct MouseInfo and Call HandleMouseEvent function.
+     * @tc.expected: return normally when isDraged is true
+     */
+    MouseInfo mouseInfo;
+    mouseInfo.SetGlobalLocation(globalLocation);
+    linearSplitPattern->HandleMouseEvent(mouseInfo);
+    EXPECT_EQ(linearSplitPattern->mouseDragedSplitIndex_, DEFAULT_DRAG_INDEX);
 }
 /**
  * @tc.name: LinearSplitPatternTest008
@@ -549,5 +580,46 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest008, TestSize.Level1)
         EXPECT_EQ(childSize, SizeF(SMALL_ITEM_WIDTH, COLUMN_HEIGHT));
         EXPECT_EQ(childOffset, OffsetF(horizontalRemaining / 2 + i * (SMALL_ITEM_WIDTH + DEFAULT_SPLIT_WIDTH), ZERO));
     }
+}
+/**
+ * @tc.name: LinearSplitPatternTest009
+ * @tc.desc: Test linerSplit pattern HandleMouseEvent  when resizeable is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create columnSplit and initialize related properties.
+     */
+    LinearSplitModelNG model;
+    model.Create(SplitType::COLUMN_SPLIT);
+    model.SetResizeable(SplitType::COLUMN_SPLIT, true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. Get linearSplitPattern.
+     */
+    RefPtr<LinearSplitPattern> linearSplitPattern = frameNode->GetPattern<LinearSplitPattern>();
+    ASSERT_NE(linearSplitPattern, nullptr);
+    linearSplitPattern->HandleHoverEvent(true);
+    /**
+     * @tc.steps: step3. Construct MouseEvent and Call HandleMouseEvent function.
+     * @tc.expected: function exits normally when splitRects is empty
+     */
+    MouseInfo info;
+    Offset globalLocation(0, 500);
+    info.SetGlobalLocation(globalLocation);
+    linearSplitPattern->HandleHoverEvent(false);
+    linearSplitPattern->HandleMouseEvent(info);
+    EXPECT_EQ(linearSplitPattern->mouseDragedSplitIndex_, DEFAULT_DRAG_INDEX);
+    /**
+     * @tc.steps: step4. Construct GestureEvent and Call HandlePanEnd function.
+     * @tc.expected: function exits normally when sourceDevice is SourceType::MOUSE
+     */
+    GestureEvent gestureInfo;
+    gestureInfo.SetSourceDevice(SourceType::MOUSE);
+    gestureInfo.SetGlobalLocation(globalLocation);
+    linearSplitPattern->HandlePanEnd(gestureInfo);
+    EXPECT_EQ(linearSplitPattern->dragedSplitIndex_, DEFAULT_DRAG_INDEX);
 }
 } // namespace OHOS::Ace::NG
