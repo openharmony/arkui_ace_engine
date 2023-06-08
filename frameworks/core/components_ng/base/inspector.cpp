@@ -37,8 +37,6 @@ const char INSPECTOR_RESOLUTION[] = "$resolution";
 const char INSPECTOR_CHILDREN[] = "$children";
 
 const uint32_t LONG_PRESS_DELAY = 1000;
-const std::unordered_set<std::string> trustList { V2::SPAN_ETS_TAG, V2::JS_IF_ELSE_ETS_TAG, V2::JS_SYNTAX_ITEM_ETS_TAG,
-    V2::NAVBAR_CONTENT_ETS_TAG, V2::SWIPER_ETS_TAG, V2::TOOL_BAR_ETS_TAG };
 RectF deviceRect;
 
 RefPtr<UINode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::string& key)
@@ -96,7 +94,7 @@ void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<RefPtr<N
             return;
         }
     } else {
-        if (!uiNode->GetDebugLine().empty() || trustList.find(uiNode->GetTag()) != trustList.end()) {
+        if (!uiNode->GetDebugLine().empty()) {
             children.emplace_back(uiNode);
             return;
         }
