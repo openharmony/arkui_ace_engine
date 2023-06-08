@@ -255,7 +255,8 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
     return buttonNode;
 }
 
-void ContainerModalView::AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode) {
+void ContainerModalView::AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode)
+{
     auto inputHub = buttonNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
     auto hoverTask = [buttonNode, imageNode](bool isHover) {
@@ -276,17 +277,16 @@ void ContainerModalView::AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
         option.SetCurve(Framework::CreateCurve(icurveString));
         if (isHover) {
             AnimationUtils::Animate(option,
-                [buttonNodeRenderContext,imageIconRenderContext, imageScale, translateX, translateY]() {
+                [buttonNodeRenderContext, imageIconRenderContext, imageScale, translateX, translateY]() {
                     buttonNodeRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
                     imageIconRenderContext->UpdateTransformScale(VectorF(1 / imageScale, 1 / imageScale));
-                    imageIconRenderContext->UpdateTransformTranslate({translateX, translateY, 0.0f});
-                }
-            );
+                    imageIconRenderContext->UpdateTransformTranslate({ translateX, translateY, 0.0f });
+                });
         } else {
             AnimationUtils::Animate(option,[buttonNodeRenderContext, imageIconRenderContext, imageScale]() {
                 buttonNodeRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
                 imageIconRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
-                imageIconRenderContext->UpdateTransformTranslate({0.0f, 0.0f, 0.0f});
+                imageIconRenderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
             });
         }
     };
@@ -294,7 +294,8 @@ void ContainerModalView::AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
     inputHub->AddOnHoverEvent(hoverEvent);
 }
 
-void ContainerModalView::AddButtonMouse(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode) {
+void ContainerModalView::AddButtonMouse(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode)
+{
     auto inputHub = buttonNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
     auto mouseTask = [buttonNode, imageNode](MouseInfo& info) {
@@ -311,7 +312,7 @@ void ContainerModalView::AddButtonMouse(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
         float translateY = (info.GetLocalLocation().GetY() - halfSize) / halfSize * 2;
         AnimationOption option = AnimationOption();
         option.SetCurve(Framework::CreateCurve("responsive-spring-motion"));
-        AnimationUtils::Animate( option, [imageIconRenderContext, translateX, translateY]() {
+        AnimationUtils::Animate(option, [imageIconRenderContext, translateX, translateY]() {
                 imageIconRenderContext->UpdateTransformTranslate({ translateX, translateY, 0.0f });
             });
     };
