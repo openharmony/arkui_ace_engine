@@ -273,8 +273,8 @@ void ContainerModalView::AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
         double imageScale = isHover ? 1.10 : 1.0;
         AnimationOption option = AnimationOption();
         option.SetDuration(100);
-        std::string icurveString = "cubic-bezier(0.500000,0.000000,0.500000,1.000000)";
-        option.SetCurve(Framework::CreateCurve(icurveString));
+        auto icurve = AceType::MakeRefPtr<CubicCurve>(0.5f, 0.0f, 0.5f, 1.0f);
+        option.SetCurve(icurve);
         if (isHover) {
             AnimationUtils::Animate(option,
                 [buttonNodeRenderContext, imageIconRenderContext, imageScale, translateX, translateY]() {
@@ -310,8 +310,12 @@ void ContainerModalView::AddButtonMouse(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
         float halfSize = TITLE_ICON_SIZE.Value() / 2.0f;
         float translateX = (info.GetLocalLocation().GetX() - halfSize) / halfSize * 2;
         float translateY = (info.GetLocalLocation().GetY() - halfSize) / halfSize * 2;
+        float response = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_RESPONSE;
+        float dampingRatio = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_DAMPING_RATIO;
+        float blendDuration = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_BLEND_DURATION;
+        auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(response, dampingRatio, blendDuration);
         AnimationOption option = AnimationOption();
-        option.SetCurve(Framework::CreateCurve("responsive-spring-motion"));
+        option.SetCurve(motion);
         AnimationUtils::Animate(option, [imageIconRenderContext, translateX, translateY]() {
             imageIconRenderContext->UpdateTransformTranslate({translateX, translateY, 0.0f});
         });
