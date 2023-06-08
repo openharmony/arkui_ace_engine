@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_style.h"
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkBlendMode.h"
 #include "include/core/SkColor.h"
 #include "include/core/SkMaskFilter.h"
@@ -37,6 +38,7 @@
 #include "include/encode/SkWebpEncoder.h"
 #include "include/utils/SkBase64.h"
 #include "include/utils/SkParsePath.h"
+#endif
 
 #include "base/i18n/localization.h"
 #include "base/image/pixel_map.h"
@@ -58,12 +60,21 @@
 namespace OHOS::Ace {
 namespace {
 constexpr double HANGING_PERCENT = 0.8;
+#ifndef USE_ROSEN_DRAWING
 template<typename T, typename N>
     N ConvertEnumToSkEnum(T key, const LinearEnumMapNode<T, N>* map, size_t length, N defaultValue)
     {
         int64_t index = BinarySearchFindIndex(map, length, key);
         return index != -1 ? map[index].value : defaultValue;
     }
+#else
+template<typename T, typename N>
+    N ConvertEnumToDrawingEnum(T key, const LinearEnumMapNode<T, N>* map, size_t length, N defaultValue)
+    {
+        int64_t index = BinarySearchFindIndex(map, length, key);
+        return index != -1 ? map[index].value : defaultValue;
+    }
+#endif
 
 constexpr double DEFAULT_QUALITY = 0.92;
 constexpr int32_t MAX_LENGTH = 2048 * 2048;
@@ -100,6 +111,7 @@ double GetQuality(const std::string& args, const double quality)
     return quality;
 }
 
+#ifndef USE_ROSEN_DRAWING
 const LinearEnumMapNode<CompositeOperation, SkBlendMode> SK_BLEND_MODE_TABLE[] = {
     { CompositeOperation::SOURCE_OVER, SkBlendMode::kSrcOver },
     { CompositeOperation::SOURCE_ATOP, SkBlendMode::kSrcATop },
@@ -114,6 +126,22 @@ const LinearEnumMapNode<CompositeOperation, SkBlendMode> SK_BLEND_MODE_TABLE[] =
     { CompositeOperation::XOR, SkBlendMode::kXor },
 };
 constexpr size_t BLEND_MODE_SIZE = ArraySize(SK_BLEND_MODE_TABLE);
+#else
+const LinearEnumMapNode<CompositeOperation, RSBlendMode> DRAWING_BLEND_MODE_TABLE[] = {
+    { CompositeOperation::SOURCE_OVER, RSBlendMode::SRC_OVER },
+    { CompositeOperation::SOURCE_ATOP, RSBlendMode::SRC_ATOP },
+    { CompositeOperation::SOURCE_IN, RSBlendMode::SRC_IN },
+    { CompositeOperation::SOURCE_OUT, RSBlendMode::SRC_OUT },
+    { CompositeOperation::DESTINATION_OVER, RSBlendMode::DST_OVER },
+    { CompositeOperation::DESTINATION_ATOP, RSBlendMode::DST_ATOP },
+    { CompositeOperation::DESTINATION_IN, RSBlendMode::DST_IN },
+    { CompositeOperation::DESTINATION_OUT, RSBlendMode::DST_OUT },
+    { CompositeOperation::LIGHTER, RSBlendMode::LIGHTEN },
+    { CompositeOperation::COPY, RSBlendMode::SRC },
+    { CompositeOperation::XOR, RSBlendMode::XOR },
+};
+constexpr size_t BLEND_MODE_SIZE = ArraySize(DRAWING_BLEND_MODE_TABLE);
+#endif
 } // namespace
 
 RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas(const WeakPtr<PipelineBase>& context,
@@ -122,6 +150,7 @@ RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas(const WeakPtr<PipelineBas
     pipelineContext_ = context;
     width_ = width;
     height_ = height;
+#ifndef USE_ROSEN_DRAWING
     auto imageInfo = SkImageInfo::Make(width, height, SkColorType::kRGBA_8888_SkColorType,
         SkAlphaType::kOpaque_SkAlphaType);
     skBitmap_.allocPixels(imageInfo);
@@ -130,18 +159,34 @@ RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas(const WeakPtr<PipelineBas
     cacheBitmap_.eraseColor(SK_ColorTRANSPARENT);
     skCanvas_ = std::make_unique<SkCanvas>(skBitmap_);
     cacheCanvas_ = std::make_unique<SkCanvas>(cacheBitmap_);
+#else
+    RSBitmapFormat format { RSColorType::COLORTYPE_RGBA_8888,
+        RSAlphaType::ALPHATYPE_OPAQUE };
+    bitmap_.Build(width, height, format);
+    cacheBitmap_.Build(width, height, format);
+    bitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+    cacheBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+    canvas_->Bind(bitmap_);
+    cacheCanvas_->Bind(cacheBitmap_);
+#endif
     InitFilterFunc();
     InitImageCallbacks();
 }
 void RosenRenderOffscreenCanvas::AddRect(const Rect& rect)
 {
+#ifndef USE_ROSEN_DRAWING
     SkRect skRect = SkRect::MakeLTRB(rect.Left(), rect.Top(),
         rect.Right(), rect.Bottom());
     skPath_.addRect(skRect);
+#else
+    RSRect drawingRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom());
+    path_.AddRect(drawingRect);
+#endif
 }
 
 void RosenRenderOffscreenCanvas::SetFillRuleForPath(const CanvasFillRule& rule)
 {
+#ifndef USE_ROSEN_DRAWING
     if (rule == CanvasFillRule::NONZERO) {
 #ifndef NEW_SKIA
         skPath_.setFillType(SkPath::FillType::kWinding_FillType);
@@ -154,11 +199,19 @@ void RosenRenderOffscreenCanvas::SetFillRuleForPath(const CanvasFillRule& rule)
 #else
         skPath_.setFillType(SkPathFillType::kEvenOdd);
 #endif
+#else
+    if (rule == CanvasFillRule::NONZERO) {
+        path_.SetFillStyle(RSPathFillType::WINDING);
+    } else if (rule == CanvasFillRule::EVENODD) {
+        path_.SetFillStyle(RSPathFillType::EVEN_ODD);
+    }
+#endif
     }
 }
 
 void RosenRenderOffscreenCanvas::SetFillRuleForPath2D(const CanvasFillRule& rule)
 {
+#ifndef USE_ROSEN_DRAWING
     if (rule == CanvasFillRule::NONZERO) {
 #ifndef NEW_SKIA
         skPath2d_.setFillType(SkPath::FillType::kWinding_FillType);
@@ -172,6 +225,13 @@ void RosenRenderOffscreenCanvas::SetFillRuleForPath2D(const CanvasFillRule& rule
         skPath2d_.setFillType(SkPathFillType::kEvenOdd);
 #endif
     }
+#else
+    if (rule == CanvasFillRule::NONZERO) {
+        path2d_.SetFillStyle(RSPathFillType::WINDING);
+    } else if (rule == CanvasFillRule::EVENODD) {
+        path2d_.SetFillStyle(RSPathFillType::EVEN_ODD);
+    }
+#endif
 }
 
 void RosenRenderOffscreenCanvas::ParsePath2D(const RefPtr<CanvasPath2D>& path)
@@ -231,6 +291,7 @@ void RosenRenderOffscreenCanvas::ParsePath2D(const RefPtr<CanvasPath2D>& path)
 
 void RosenRenderOffscreenCanvas::Fill()
 {
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setAntiAlias(antiAlias_);
     paint.setColor(fillState_.GetColor().GetValue());
@@ -263,6 +324,36 @@ void RosenRenderOffscreenCanvas::Fill()
 #endif
         cacheBitmap_.eraseColor(0);
     }
+#else
+    RSBrush brush;
+    brush.SetAntiAlias(antiAlias_);
+    brush.SetColor(fillState_.GetColor().GetValue());
+    if (HasShadow()) {
+        RosenDecorationPainter::PaintShadow(path_, shadow_, canvas_.get());
+    }
+    if (fillState_.GetGradient().IsValid()) {
+        UpdatePaintShader(brush, fillState_.GetGradient());
+    }
+    if (fillState_.GetPattern().IsValid()) {
+        UpdatePaintShader(fillState_.GetPattern(), brush);
+    }
+    if (globalState_.HasGlobalAlpha()) {
+        brush.SetAlphaF(globalState_.GetAlpha());
+    }
+    canvas_->AttachBrush(brush);
+    if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+        canvas_->DrawPath(path_);
+        canvas_->DetachBrush();
+    } else {
+        InitCachePaint();
+        cacheCanvas_->DrawPath(path_);
+        canvas_->DetachBrush();
+        canvas_->AttachBrush(cacheBrush_);
+        canvas_->DrawBitmap(cacheBitmap_, 0, 0);
+        canvas_->DetachBrush();
+        cacheBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+    }
+#endif
 }
 
 void RosenRenderOffscreenCanvas::Fill(const RefPtr<CanvasPath2D>& path)
@@ -273,12 +364,20 @@ void RosenRenderOffscreenCanvas::Fill(const RefPtr<CanvasPath2D>& path)
     }
     ParsePath2D(path);
     Path2DFill();
+#ifndef USE_ROSEN_DRAWING
     skPath2d_.reset();
+#else
+    path2d_.Reset();
+#endif
 }
 
 void RosenRenderOffscreenCanvas::Clip()
 {
+#ifndef USE_ROSEN_DRAWING
     skCanvas_->clipPath(skPath_);
+#else
+    canvas_->ClipPath(path_, false);
+#endif
 }
 
 void RosenRenderOffscreenCanvas::Clip(const RefPtr<CanvasPath2D>& path)
@@ -289,11 +388,16 @@ void RosenRenderOffscreenCanvas::Clip(const RefPtr<CanvasPath2D>& path)
     }
     ParsePath2D(path);
     Path2DClip();
+#ifndef USE_ROSEN_DRAWING
     skPath2d_.reset();
+#else
+    path2d_.Reset();
+#endif
 }
 
 void RosenRenderOffscreenCanvas::FillRect(Rect rect)
 {
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setAntiAlias(antiAlias_);
     paint.setColor(fillState_.GetColor().GetValue());
@@ -329,6 +433,40 @@ void RosenRenderOffscreenCanvas::FillRect(Rect rect)
 #endif
         cacheBitmap_.eraseColor(0);
     }
+#else
+    RSBrush brush;
+    brush.SetAntiAlias(antiAlias_);
+    brush.SetColor(fillState_.GetColor().GetValue());
+    RSRect drawingRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom());
+    if (HasShadow()) {
+        RSRecordingPath path;
+        path.AddRect(drawingRect);
+        RosenDecorationPainter::PaintShadow(path, shadow_, canvas_.get());
+    }
+    if (fillState_.GetGradient().IsValid()) {
+        UpdatePaintShader(brush, fillState_.GetGradient());
+    }
+    if (fillState_.GetPattern().IsValid()) {
+        UpdatePaintShader(fillState_.GetPattern(), brush);
+    }
+    if (globalState_.HasGlobalAlpha()) {
+        brush.SetAlphaF(globalState_.GetAlpha()); // update the global alpha after setting the color
+    }
+    if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+        canvas_->AttachBrush(brush);
+        canvas_->DrawRect(drawingRect);
+        canvas_->DetachBrush();
+    } else {
+        InitCachePaint();
+        cacheCanvas_->AttachBrush(brush);
+        cacheCanvas_->DrawRect(drawingRect);
+        cacheCanvas_->DetachBrush();
+        canvas_->AttachBrush(cacheBrush_);
+        canvas_->DrawBitmap(cacheBitmap_, 0, 0);
+        canvas_->DetachBrush();
+        cacheBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+    }
+#endif
 }
 
 void RosenRenderOffscreenCanvas::PutImageData(const ImageData& imageData)
@@ -344,6 +482,7 @@ void RosenRenderOffscreenCanvas::PutImageData(const ImageData& imageData)
     for (uint32_t i = 0; i < imageData.data.size(); ++i) {
         data[i] = imageData.data[i].GetValue();
     }
+#ifndef USE_ROSEN_DRAWING
     SkBitmap skBitmap;
     auto imageInfo = SkImageInfo::Make(imageData.dirtyWidth, imageData.dirtyHeight, SkColorType::kBGRA_8888_SkColorType,
         SkAlphaType::kOpaque_SkAlphaType);
@@ -354,6 +493,14 @@ void RosenRenderOffscreenCanvas::PutImageData(const ImageData& imageData)
 #else
     skCanvas_->drawImage(skBitmap.asImage(), imageData.x, imageData.y, SkSamplingOptions());
 #endif
+#else
+    RSBitmap bitmap;
+    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888,
+        RSAlphaType::ALPHATYPE_OPAQUE };
+    bitmap.Build(imageData.dirtyWidth, imageData.dirtyHeight, format);
+    bitmap.SetPixels(data);
+    canvas_->DrawBitmap(bitmap, imageData.x, imageData.y);
+#endif
     delete[] data;
 }
 
@@ -361,6 +508,7 @@ void RosenRenderOffscreenCanvas::SetPaintImage()
 {
     float matrix[20] = {0};
     matrix[0] = matrix[6] = matrix[12] = matrix[18] = 1.0f;
+#ifndef USE_ROSEN_DRAWING
 #ifdef USE_SYSTEM_SKIA
     imagePaint_.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
 #else
@@ -372,6 +520,15 @@ void RosenRenderOffscreenCanvas::SetPaintImage()
     imagePaint_.setImageFilter(SkBlurImageFilter::Make(0, 0, nullptr));
 #else
     imagePaint_.setImageFilter(SkImageFilters::Blur(0, 0, nullptr));
+#endif
+#else
+    RSFilter filter;
+    RSColorMatrix colorMatrix;
+    colorMatrix.SetArray(matrix);
+    filter.SetColorFilter(RSColorFilter::CreateMatrixColorFilter(colorMatrix));
+    filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, 0));
+    filter.SetImageFilter(RSImageFilter::CreateBlurImageFilter(0, 0, nullptr));
+    imagePen_.SetFilter(filter);
 #endif
 
     SetDropShadowFilter("0px 0px 0px black");
@@ -386,6 +543,7 @@ void RosenRenderOffscreenCanvas::SetPaintImage()
 
 void RosenRenderOffscreenCanvas::InitImagePaint()
 {
+#ifndef USE_ROSEN_DRAWING
 #ifndef NEW_SKIA
     if (smoothingEnabled_) {
         if (smoothingQuality_ == "low") {
@@ -413,6 +571,26 @@ void RosenRenderOffscreenCanvas::InitImagePaint()
         }
     } else {
         options_ = SkSamplingOptions(SkFilterMode::kNearest, SkMipmapMode::kNone);
+    }
+#endif
+#else
+    RSFilter filter;
+    if (smoothingEnabled_) {
+        if (smoothingQuality_ == "low") {
+            filter.SetFilterQuality(RSFilter::FilterQuality::LOW);
+            imagePaint_.SetFilter(filter);
+        } else if (smoothingQuality_ == "medium") {
+            filter.SetFilterQuality(RSFilter::FilterQuality::MEDIUM);
+            imagePaint_.SetFilter(filter);
+        } else if (smoothingQuality_ == "high") {
+            filter.SetFilterQuality(RSFilter::FilterQuality::HIGH);
+            imagePaint_.SetFilter(filter);
+        } else {
+            LOGE("Unsupported Quality type:%{public}s", smoothingQuality_.c_str());
+        }
+    } else {
+        filter.SetFilterQuality(RSFilter::FilterQuality::NONE);
+        imagePaint_.SetFilter(filter);
     }
 #endif
     SetPaintImage();
@@ -446,7 +624,11 @@ void RosenRenderOffscreenCanvas::InitImageCallbacks()
 void RosenRenderOffscreenCanvas::ImageObjReady(const RefPtr<ImageObject>& imageObj)
 {
     if (imageObj->IsSvg()) {
+#ifndef USE_ROSEN_DRAWING
         skiaDom_ = AceType::DynamicCast<SvgSkiaImageObject>(imageObj)->GetSkiaDom();
+#else
+        drawingDom_ = AceType::DynamicCast<SvgDrawingImageObject>(imageObj)->GetSvgDom();
+#endif
         currentSource_ = loadingSource_;
     } else {
         LOGE("image is not svg");
@@ -457,11 +639,16 @@ void RosenRenderOffscreenCanvas::ImageObjFailed()
 {
     loadingSource_.SetSrc("");
     currentSource_.SetSrc("");
+#ifndef USE_ROSEN_DRAWING
     skiaDom_ = nullptr;
+#else
+    drawingDom_ = nullptr;
+#endif
 }
 
 void RosenRenderOffscreenCanvas::DrawSvgImage(const CanvasImage& canvasImage)
 {
+#ifndef USE_ROSEN_DRAWING
     const auto skCanvas =
         globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
 
@@ -513,6 +700,65 @@ void RosenRenderOffscreenCanvas::DrawSvgImage(const CanvasImage& canvasImage)
         skiaDom_->render(skCanvas);
         skCanvas->restore();
     }
+#else
+    const auto drawingCanvas =
+        globalState_.GetType() == CompositeOperation::SOURCE_OVER ? canvas_.get() : cacheCanvas_.get();
+
+    // Make the ImageSourceInfo
+    canvasImage_ = canvasImage;
+    loadingSource_ = ImageSourceInfo(canvasImage.src);
+
+    // get the ImageObject
+    if (currentSource_ != loadingSource_) {
+        ImageProvider::FetchImageObject(loadingSource_, imageObjSuccessCallback_, uploadSuccessCallback_,
+            failedCallback_, pipelineContext_, true, true, true, renderTaskHolder_, onPostBackgroundTask_);
+    }
+
+    // draw the svg
+    if (drawingDom_) {
+        RSRect srcRect;
+        RSRect dstRect;
+        Offset startPoint;
+        double scaleX = 1.0f;
+        double scaleY = 1.0f;
+        switch (canvasImage.flag) {
+            case 0:
+                srcRect = RSRect(0, 0,
+                    drawingDom_->GetContainerSize().Width(), drawingDom_->GetContainerSize().Height());
+                dstRect = RSRect(canvasImage.dx, canvasImage.dy,
+                    drawingDom_->GetContainerSize().Width() + canvasImage.dx,
+                    drawingDom_->GetContainerSize().Height() + canvasImage.dy);
+                break;
+            case 1: {
+                srcRect = RSRect(0, 0,
+                    drawingDom_->GetContainerSize().Width(), drawingDom_->GetContainerSize().Height());
+                dstRect = RSRect(canvasImage.dx, canvasImage.dy,
+                    canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
+                break;
+            }
+            case 2: {
+                srcRect = RSRect(canvasImage.sx, canvasImage.sy,
+                    canvasImage.sWidth + canvasImage.sx, canvasImage.sHeight + canvasImage.sy);
+                dstRect = RSRect(canvasImage.dx, canvasImage.dy,
+                    canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
+                break;
+            }
+            default:
+                break;
+        }
+        scaleX = dstRect.GetWidth() / srcRect.GetWidth();
+        scaleY = dstRect.GetHeight() / srcRect.GetHeight();
+        startPoint = Offset(dstRect.GetLeft(), dstRect.GetTop())
+           - Offset(srcRect.GetLeft() * scaleX, srcRect.GetTop() * scaleY);
+
+        drawingCanvas->Save();
+        drawingCanvas->ClipRect(dstRect, false);
+        drawingCanvas->Translate(startPoint.GetX(), startPoint.GetY());
+        drawingCanvas->Scale(scaleX, scaleY);
+        drawingDom_->Render(*drawingCanvas);
+        drawingCanvas->Restore();
+    }
+#endif
 }
 
 void RosenRenderOffscreenCanvas::DrawImage(const CanvasImage& canvasImage, double width, double height)
