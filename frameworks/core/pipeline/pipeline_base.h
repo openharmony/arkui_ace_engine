@@ -438,6 +438,11 @@ public:
         installationFree_ = installationFree;
     }
 
+    bool GetInstallationFree() const
+    {
+        return installationFree_;
+    }
+
     void SetSharePanelCallback(SharePanelCallback&& callback)
     {
         sharePanelCallback_ = std::move(callback);
@@ -735,6 +740,8 @@ public:
     }
 
     virtual void ResetViewSafeArea() {}
+
+    virtual void AppBarAdaptToSafeArea() {}
 
     void SetPluginOffset(const Offset& offset)
     {

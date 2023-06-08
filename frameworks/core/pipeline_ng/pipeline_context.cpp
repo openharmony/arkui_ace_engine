@@ -389,11 +389,11 @@ void PipelineContext::SetupRootElement()
 
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
-    auto appBarNode = installationFree_ ? AppBarView::Create(stageNode) : nullptr;
+    appBarNode_ = installationFree_ ? AppBarView::Create(stageNode) : nullptr;
     if (windowModal_ == WindowModal::CONTAINER_MODAL) {
-        rootNode_->AddChild(ContainerModalView::Create(appBarNode ? appBarNode : stageNode));
+        rootNode_->AddChild(ContainerModalView::Create(appBarNode_ ? appBarNode_ : stageNode));
     } else {
-        rootNode_->AddChild(appBarNode ? appBarNode : stageNode);
+        rootNode_->AddChild(appBarNode_ ? appBarNode_ : stageNode);
     }
 #ifdef ENABLE_ROSEN_BACKEND
     if (!IsJsCard() && !isFormRender_) {
@@ -705,6 +705,47 @@ SafeAreaEdgeInserts PipelineContext::GetViewSafeArea() const
     return systemAvoidArea.CombineSafeArea(cutoutAvoidArea);
 }
 
+void PipelineContext::AppBarAdaptToSafeArea()
+{
+    CHECK_NULL_VOID_NOLOG(appBarNode_);
+    auto layoutProperty = appBarNode_->GetLayoutProperty();
+    CHECK_NULL_VOID_NOLOG(layoutProperty);
+    NG::PaddingProperty paddings;
+    if (!GetIgnoreViewSafeArea()) {
+        SafeAreaEdgeInserts safeArea = GetViewSafeArea();
+        LOGI("AppBarAdaptToSafeArea ViewSafeArea:%{public}s", safeArea.ToString().c_str());
+        paddings.top = NG::CalcLength(safeArea.topRect_.Height());
+        paddings.bottom = NG::CalcLength(safeArea.bottomRect_.Height());
+        paddings.left = NG::CalcLength(safeArea.leftRect_.Height());
+        paddings.right = NG::CalcLength(safeArea.rightRect_.Height());
+    }
+    layoutProperty->UpdatePadding(paddings);
+}
+
+void PipelineContext::ResetViewSafeArea()
+{
+    CHECK_NULL_VOID_NOLOG(GetIsLayoutFullScreen());
+    if (installationFree_) {
+        AppBarAdaptToSafeArea();
+    } else {
+        auto stageManager = GetStageManager();
+        CHECK_NULL_VOID_NOLOG(stageManager);
+        auto stageNode = stageManager->GetStageNode();
+        CHECK_NULL_VOID_NOLOG(stageNode);
+        auto pageNode = stageManager->GetLastPage();
+        CHECK_NULL_VOID_NOLOG(pageNode);
+        auto layoutProperty = pageNode->GetLayoutProperty();
+        CHECK_NULL_VOID_NOLOG(layoutProperty);
+        if (!GetIgnoreViewSafeArea()) {
+            layoutProperty->SetSafeArea(GetViewSafeArea());
+            LOGI("ResetViewSafeArea viewSafeArea:%{public}s", layoutProperty->GetSafeArea().ToString().c_str());
+        } else {
+            layoutProperty->SetSafeArea({});
+        }
+    }
+    rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 void PipelineContext::OnVirtualKeyboardHeightChange(
     float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
@@ -756,26 +797,6 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
 #endif
 }
 
-void PipelineContext::ResetViewSafeArea()
-{
-    auto stageManager = GetStageManager();
-    CHECK_NULL_VOID_NOLOG(stageManager);
-    auto stageNode = stageManager->GetStageNode();
-    CHECK_NULL_VOID_NOLOG(stageNode);
-    auto pageNode = stageManager->GetLastPage();
-    CHECK_NULL_VOID_NOLOG(pageNode);
-    auto layoutProperty = pageNode->GetLayoutProperty();
-    const static int32_t PLATFORM_VERSION_TEN = 10;
-    if (GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && layoutProperty) {
-        if (!GetIgnoreViewSafeArea()) {
-            layoutProperty->SetSafeArea(GetViewSafeArea());
-            LOGI("ResetViewSafeArea viewSafeArea:%{public}s", layoutProperty->GetSafeArea().ToString().c_str());
-        } else {
-            layoutProperty->SetSafeArea({});
-        }
-        stageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    }
-}
 
 bool PipelineContext::OnBackPressed()
 {

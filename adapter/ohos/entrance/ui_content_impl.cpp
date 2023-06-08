@@ -172,7 +172,7 @@ public:
 
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
     {
-        LOGI("UIContent::OnAvoidAreaChanged type:%{public}d, avoidArea:topRect:x:%{public}d, y:%{public}d, "
+        LOGI("UIContent::OnAvoidAreaChanged type:%{public}d, avoidArea:x:%{public}d, y:%{public}d, "
              "width:%{public}d, height%{public}d",
             type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
             (int32_t)avoidArea.topRect_.height_);
@@ -1349,11 +1349,12 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         }
     }
     const static int32_t PLATFORM_VERSION_TEN = 10;
-    if (pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && pipeline->GetIsAppWindow()) {
         avoidAreaChangedListener_ = new AvoidAreaChangedListener(instanceId_);
         window_->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
         pipeline->SetSystemSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM));
         pipeline->SetCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
+        pipeline->AppBarAdaptToSafeArea();
     }
 
     LayoutInspector::SetCallback(instanceId_);
@@ -1575,6 +1576,10 @@ void UIContentImpl::SetIgnoreViewSafeArea(bool ignoreViewSafeArea)
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);
+    auto pipeline = container->GetPipelineContext();
+    const static int32_t PLATFORM_VERSION_TEN = 10;
+    CHECK_NULL_VOID_NOLOG(
+        pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && pipeline->GetIsAppWindow());
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostSyncTask(

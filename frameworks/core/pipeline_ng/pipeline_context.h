@@ -203,6 +203,8 @@ public:
 
     void ResetViewSafeArea() override;
 
+    void AppBarAdaptToSafeArea() override;
+
     const RefPtr<FullScreenManager>& GetFullScreenManager();
 
     const RefPtr<StageManager>& GetStageManager();
@@ -428,6 +430,7 @@ private:
     std::list<TouchEvent> touchEvents_;
 
     RefPtr<FrameNode> rootNode_;
+    RefPtr<FrameNode> appBarNode_;
 
     int32_t callbackId_ = 0;
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
