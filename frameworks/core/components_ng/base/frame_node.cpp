@@ -1113,6 +1113,16 @@ void FrameNode::MarkResponseRegion(bool isResponseRegion)
     }
 }
 
+RectF FrameNode::GetPaintRectWithTransform() const
+{
+    return renderContext_->GetPaintRectWithTransform();
+}
+
+VectorF FrameNode::GetTransformScale() const
+{
+    return renderContext_->GetTransformScaleValue({ 1.0f, 1.0f });
+}
+
 bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint)
 {
     bool isInChildRegion = false;

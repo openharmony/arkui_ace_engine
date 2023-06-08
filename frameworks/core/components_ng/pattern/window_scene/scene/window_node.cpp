@@ -15,84 +15,37 @@
 
 #include "core/components_ng/pattern/window_scene/scene/window_node.h"
 
+#include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "pointer_event.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-const std::unordered_map<SourceType, int32_t> SOURCE_TYPE_MAP = {
-    { SourceType::TOUCH, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN },
-    { SourceType::TOUCH_PAD, MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD },
-    { SourceType::MOUSE, MMI::PointerEvent::SOURCE_TYPE_MOUSE },
-};
-
-const std::unordered_map<TouchType, int32_t> TOUCH_TYPE_MAP = {
-    { TouchType::CANCEL, MMI::PointerEvent::POINTER_ACTION_CANCEL },
-    { TouchType::DOWN, MMI::PointerEvent::POINTER_ACTION_DOWN },
-    { TouchType::MOVE, MMI::PointerEvent::POINTER_ACTION_MOVE },
-    { TouchType::UP, MMI::PointerEvent::POINTER_ACTION_UP },
-};
-
-std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, const TouchEvent& point)
-{
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
-
-    OHOS::MMI::PointerEvent::PointerItem item;
-    item.SetWindowX(static_cast<int32_t>(point.x - offsetF.GetX()));
-    item.SetWindowY(static_cast<int32_t>(point.y - offsetF.GetY()));
-    item.SetDisplayX(static_cast<int32_t>(point.screenX));
-    item.SetDisplayY(static_cast<int32_t>(point.screenY));
-    item.SetPointerId(point.id);
-    pointerEvent->AddPointerItem(item);
-
-    int32_t sourceType = MMI::PointerEvent::SOURCE_TYPE_UNKNOWN;
-    auto sourceTypeIter = SOURCE_TYPE_MAP.find(point.sourceType);
-    if (sourceTypeIter != SOURCE_TYPE_MAP.end()) {
-        sourceType = sourceTypeIter->second;
-    }
-    pointerEvent->SetSourceType(sourceType);
-
-    int32_t pointerAction = OHOS::MMI::PointerEvent::POINTER_ACTION_UNKNOWN;
-    auto pointerActionIter = TOUCH_TYPE_MAP.find(point.type);
-    if (pointerActionIter != TOUCH_TYPE_MAP.end()) {
-        pointerAction = pointerActionIter->second;
-    }
-    pointerEvent->SetPointerAction(pointerAction);
-    pointerEvent->SetPointerId(point.id);
-    return pointerEvent;
-}
-}
-
 HitTestResult WindowNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
-    const auto& rect = GetGeometryNode()->GetFrameRect();
-    if (!rect.IsInRegion(parentLocalPoint)) {
+    auto rectWithTransform = GetPaintRectWithTransform();
+    if (!rectWithTransform.IsInRegion(parentLocalPoint)) {
         return HitTestResult::OUT_OF_REGION;
     }
-
     auto context = GetContext();
     CHECK_NULL_RETURN(context, HitTestResult::BUBBLING);
-
-    DispatchPointerEvent(touchRestrict.touchEvent);
-    auto callback = [weak = WeakClaim(this)] (const TouchEvent& point) {
+    DispatchPointerEvent(touchRestrict.touchEvent, rectWithTransform);
+    auto callback = [weak = WeakClaim(this), rectWithTransform] (const TouchEvent& point) {
         auto windowNode = weak.Upgrade();
         CHECK_NULL_VOID(windowNode);
-        windowNode->DispatchPointerEvent(point);
+        windowNode->DispatchPointerEvent(point, rectWithTransform);
     };
     context->AddUIExtensionCallback(callback);
     return HitTestResult::BUBBLING;
 }
 
-void WindowNode::DispatchPointerEvent(const TouchEvent& point) const
+void WindowNode::DispatchPointerEvent(const TouchEvent& point, const RectF& rectWithTransform) const
 {
-    auto pattern = GetPattern<WindowPattern>();
-    CHECK_NULL_VOID(pattern);
     auto selfGlobalOffset = GetTransformRelativeOffset();
-    auto pointerEvent = ConvertPointerEvent(selfGlobalOffset, point);
-    pattern->DispatchPointerEvent(pointerEvent);
+    auto pointerEvent = Platform::ConvertPointerEvent(selfGlobalOffset, point, GetTransformScale());
+    GetPattern<WindowPattern>()->DispatchPointerEvent(pointerEvent);
 }
 
 RefPtr<WindowNode> WindowNode::GetOrCreateWindowNode(

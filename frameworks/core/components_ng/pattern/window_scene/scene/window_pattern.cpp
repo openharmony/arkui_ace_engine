@@ -217,7 +217,6 @@ void WindowPattern::OnAttachToFrameNode()
 bool WindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (!config.frameSizeChange) {
-        LOGI("frame size not changed, just return");
         return false;
     }
     CHECK_NULL_RETURN(dirty, false);

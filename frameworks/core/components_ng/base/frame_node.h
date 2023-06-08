@@ -271,6 +271,10 @@ public:
 
     OffsetF GetPaintRectOffsetToPage() const;
 
+    RectF GetPaintRectWithTransform() const;
+
+    VectorF GetTransformScale() const;
+
     void AdjustGridOffset();
 
     void SetActive(bool active) override;

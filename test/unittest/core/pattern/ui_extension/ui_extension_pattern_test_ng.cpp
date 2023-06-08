@@ -51,36 +51,11 @@ public:
 
 /**
  * @tc.name: UIExtensionCreator001
- * @tc.desc: create UIExtension
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(UIExtensionPatternTestNg, UIExtensionCreator001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create UIExtension Component.
-     */
-    auto model = UIExtensionModelNG();
-    model.Create(BUNDLE_NAME, ABILITY_NAME);
-    model.SetWant(WANT);
-
-    /**
-     * @tc.steps: step1. Create UIExtension component.
-     * @tc.expected: expect paintProperty want
-     */
-    auto uiExtensionNode =
-        AceType::DynamicCast<UIExtensionNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    auto paintProperty = uiExtensionNode->GetPaintProperty<UIExtensionPaintProperty>();
-    EXPECT_EQ(paintProperty->GetWantValue(), WANT);
-}
-
-/**
- * @tc.name: UIExtensionCreator002
  * @tc.desc: create UIExtension and get uiExtensionNode to dispatch event
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(UIExtensionPatternTestNg, UIExtensionCreator002, TestSize.Level1)
+HWTEST_F(UIExtensionPatternTestNg, UIExtensionCreator001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create or create UIExtension component.
@@ -99,12 +74,12 @@ HWTEST_F(UIExtensionPatternTestNg, UIExtensionCreator002, TestSize.Level1)
 }
 
 /**
- * @tc.name: UIExtensionCreator003
+ * @tc.name: UIExtensionCreator002
  * @tc.desc: create UIExtension and run GetOrCreateUIExtensionNode success
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(UIExtensionPatternTestNg, UIExtensionCreator003, TestSize.Level1)
+HWTEST_F(UIExtensionPatternTestNg, UIExtensionCreator002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create or create UIExtension component.
@@ -149,12 +124,12 @@ HWTEST_F(UIExtensionPatternTestNg, UIExtensionCreator003, TestSize.Level1)
 }
 
 /**
- * @tc.name: UIExtensionCreator004
+ * @tc.name: UIExtensionCreator005
  * @tc.desc: create UIExtension and run TouchTest success
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(UIExtensionPatternTestNg, UIExtensionCreator004, TestSize.Level1)
+HWTEST_F(UIExtensionPatternTestNg, UIExtensionCreator005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Set up pipeline and container

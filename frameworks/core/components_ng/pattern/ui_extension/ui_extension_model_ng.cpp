@@ -37,18 +37,11 @@ void UIExtensionModelNG::Create(const std::string& bundleName, const std::string
     pipeline->AddWindowStateChangedCallback(nodeId);
 }
 
-void UIExtensionModelNG::SetWant(const std::string& want)
-{
-    ACE_UPDATE_PAINT_PROPERTY(UIExtensionPaintProperty, Want, want);
-}
-
 void UIExtensionModelNG::SetOnConnect(std::function<void()>&& onConnect) {}
 
 void UIExtensionModelNG::SetOnDisconnect(std::function<void()>&& onDisconnect) {}
 
 void UIExtensionModelNG::SetOnError(std::function<void()>&& onError) {}
-
-void UIExtensionModelNG::SetOnCall(std::function<void()>&& onCall) {}
 
 void UIExtensionModelNG::SetOnResult(std::function<void()>&& onResult) {}
 } // namespace OHOS::Ace::NG
