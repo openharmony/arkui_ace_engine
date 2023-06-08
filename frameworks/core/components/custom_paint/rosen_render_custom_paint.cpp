@@ -2128,7 +2128,11 @@ void RosenRenderCustomPaint::ImageObjReady(const RefPtr<ImageObject>& imageObj)
 {
     imageObj_ = imageObj;
     if (imageObj_->IsSvg()) {
+#ifndef USE_ROSEN_DRAWING
         skiaDom_ = AceType::DynamicCast<SvgSkiaImageObject>(imageObj_)->GetSkiaDom();
+#else
+        drawingDom_ = AceType::DynamicCast<SvgDrawingImageObject>(imageObj_)->GetSvgDom();
+#endif
         currentSource_ = loadingSource_;
         CanvasImage canvasImage = canvasImage_;
         TaskFunc func = [canvasImage](RenderCustomPaint& iface, const Offset& offset) {
@@ -2149,6 +2153,7 @@ void RosenRenderCustomPaint::ImageObjFailed()
 
 void RosenRenderCustomPaint::DrawSvgImage(const Offset& offset, const CanvasImage& canvasImage)
 {
+#ifndef USE_ROSEN_DRAWING
     const auto skCanvas = skCanvas_.get();
     // Make the ImageSourceInfo
     canvasImage_ = canvasImage;
@@ -2197,6 +2202,62 @@ void RosenRenderCustomPaint::DrawSvgImage(const Offset& offset, const CanvasImag
         skiaDom_->render(skCanvas);
         skCanvas->restore();
     }
+#else
+    const auto drawingCanvas = drawingCanvas_;
+    // Make the ImageSourceInfo
+    canvasImage_ = canvasImage;
+    loadingSource_ = ImageSourceInfo(canvasImage.src);
+    // get the ImageObject
+    if (currentSource_ != loadingSource_) {
+        ImageProvider::FetchImageObject(loadingSource_, imageObjSuccessCallback_, uploadSuccessCallback_,
+            failedCallback_, GetContext(), true, true, true, renderTaskHolder_, onPostBackgroundTask_);
+    }
+
+    // draw the svg
+    if (skiaDom_) {
+        RSRect srcRect;
+        RSRect dstRect;
+        Offset startPoint;
+        double scaleX = 1.0f;
+        double scaleY = 1.0f;
+        switch (canvasImage.flag) {
+            case 0:
+                srcRect = RSRect(0, 0,
+                    drawingDom_->GetContainerSize().Width(), drawingDom_->GetContainerSize().Height());
+                dstRect = RSRect(canvasImage.dx, canvasImage.dy,
+                    drawingDom_->GetContainerSize().Width() + canvasImage.dx,
+                    drawingDom_->GetContainerSize().Height() + canvasImage.dy);
+                break;
+            case 1: {
+                srcRect = RSRect(0, 0,
+                    drawingDom_->GetContainerSize().Width(), drawingDom_->GetContainerSize().Height());
+                dstRect = RSRects(canvasImage.dx, canvasImage.dy,
+                    canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
+                break;
+            }
+            case 2: {
+                srcRect = RSRect(canvasImage.sx, canvasImage.sy,
+                    canvasImage.sWidth + canvasImage.sx, canvasImage.sHeight + canvasImage.sy);
+                dstRect = RSRect(canvasImage.dx, canvasImage.dy,
+                    canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
+                break;
+            }
+            default:
+                break;
+        }
+        scaleX = dstRect.GetWidth() / srcRect.GetWidth();
+        scaleY = dstRect.GetHeight() / srcRect.GetHeight();
+        startPoint = offset  + Offset(dstRect.GetLeft(), dstRect.GetTop())
+            - Offset(srcRect.GetLeft() * scaleX, srcRect.GetTop() * scaleY);
+
+        drawingCanvas->Save();
+        drawingCanvas->ClipRect(dstRect, false);
+        drawingCanvas->Translate(startPoint.GetX(), startPoint.GetY());
+        drawingCanvas->Scale(scaleX, scaleY);
+        skiaDom_->Render(*drawingCanvas);
+        drawingCanvas->Restore();
+    }
+#endif
 }
 
 void RosenRenderCustomPaint::DrawImage(
@@ -2215,6 +2276,7 @@ void RosenRenderCustomPaint::DrawImage(
         return;
     }
     InitImagePaint();
+#ifndef USE_ROSEN_DRAWING
     InitPaintBlend(imagePaint_);
 
     switch (canvasImage.flag) {
@@ -2243,6 +2305,40 @@ void RosenRenderCustomPaint::DrawImage(
         default:
             break;
     }
+#else
+    InitPaintBlend(imagePen_);
+
+    RSSamplingOptions sampling =
+        RSSamplingOptions(RSFilterMode::NEAREST, RSMipmapMode::NEAREST);
+
+    switch (canvasImage.flag) {
+        case 0:
+            drawingCanvas_->DrawImage(*image, canvasImage.dx, canvasImage.dy, sampling);
+            break;
+        case 1: {
+            RSRect rect = RSRect(canvasImage.dx, canvasImage.dy,
+                canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
+            drawingCanvas_->AttachPen(imagePen_);
+            drawingCanvas_->DrawImageRect(*image, rect, sampling);
+            drawingCanvas_->DetachPen();
+            break;
+        }
+        case 2: {
+            RSRect dstRect =
+                RSRect(canvasImage.dx, canvasImage.dy,
+                    canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
+            RSRect srcRect =
+                RSRect(canvasImage.sx, canvasImage.sy,
+                    canvasImage.sWidth + canvasImage.sx, canvasImage.sHeight + canvasImage.sy);
+            drawingCanvas_->AttachPen(imagePen_);
+            drawingCanvas_->DrawImageRect(*image, srcRect, dstRect, sampling);
+            drawingCanvas_->DetachPen();
+            break;
+        }
+        default:
+            break;
+    }
+#endif
 }
 
 void RosenRenderCustomPaint::DrawPixelMap(RefPtr<PixelMap> pixelMap, const CanvasImage& canvasImage)
@@ -2252,6 +2348,7 @@ void RosenRenderCustomPaint::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Canva
         return;
     }
 
+#ifndef USE_ROSEN_DRAWING
     // get skImage form pixelMap
     auto imageInfo = ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
     SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
@@ -2291,8 +2388,12 @@ void RosenRenderCustomPaint::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Canva
         default:
             break;
     }
+#else
+    // TODO Drawing : Pixmap
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderCustomPaint::UpdatePaintShader(const Pattern& pattern, SkPaint& paint)
 {
     auto context = GetContext().Upgrade();
@@ -2356,6 +2457,64 @@ void RosenRenderCustomPaint::UpdatePaintShader(const Pattern& pattern, SkPaint& 
         staticPattern[operatorIter].value(image, paint);
     }
 }
+#else
+void RosenRenderCustomPaint::UpdatePaintShader(const Pattern& pattern, RSBrush& brush)
+{
+    auto context = GetContext().Upgrade();
+    if (!context) {
+        return;
+    }
+
+    auto width = pattern.GetImageWidth();
+    auto height = pattern.GetImageHeight();
+    auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)
+                     ? ImageProvider::GetDrawingImage(pattern.GetImgSrc(), context, Size(width, height))
+                     : ImageProvider::GetDrawingImage(pattern.GetImgSrc(), context);
+    if (!image) {
+        LOGE("image is null");
+        return;
+    }
+    static const LinearMapNode<void (*)(std::shared_ptr<RSImage>, RSBrush&)>
+        staticPattern[] = {
+            { "no-repeat",
+                [](std::shared_ptr<RSImage> image, RSBrush& brush) {
+                    brush.SetShaderEffect(RSShaderEffect::CreateImageShader(*image,
+                        RSTileMode::DECAL, RSTileMode::DECAL,
+                        RSSamplingOptions(
+                            RSFilterMode::NEAREST, RSMipmapMode::NEAREST),
+                        RSMatrix()));
+                } },
+            { "repeat",
+                [](std::shared_ptr<RSImage> image, RSBrush& brush) {
+                    brush.SetShaderEffect(RSShaderEffect::CreateImageShader(*image,
+                        RSTileMode::REPEAT, RSTileMode::REPEAT,
+                        RSSamplingOptions(
+                            RSFilterMode::NEAREST, RSMipmapMode::NEAREST),
+                        RSMatrix()));
+                } },
+            { "repeat-x",
+                [](std::shared_ptr<RSImage> image, RSBrush& brush) {
+                    brush.SetShaderEffect(RSShaderEffect::CreateImageShader(*image,
+                        RSTileMode::REPEAT, RSTileMode::DECAL,
+                        RSSamplingOptions(
+                            RSFilterMode::NEAREST, RSMipmapMode::NEAREST),
+                        RSMatrix()));
+                } },
+            { "repeat-y",
+                [](std::shared_ptr<RSImage> image, RSBrush& brush) {
+                    brush.SetShaderEffect(RSShaderEffect::CreateImageShader(*image,
+                        RSTileMode::DECAL, RSTileMode::REPEAT,
+                        RSSamplingOptions(
+                            RSFilterMode::NEAREST, RSMipmapMode::NEAREST),
+                        RSMatrix()));
+                } },
+        };
+    auto operatorIter = BinarySearchFindIndex(staticPattern, ArraySize(staticPattern), pattern.GetRepetition().c_str());
+    if (operatorIter != -1) {
+        staticPattern[operatorIter].value(image, brush);
+    }
+}
+#endif
 
 void RosenRenderCustomPaint::PutImageData(const Offset& offset, const ImageData& imageData)
 {
