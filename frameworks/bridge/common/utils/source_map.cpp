@@ -44,7 +44,7 @@ constexpr int32_t SPACE_LEN = 26;
 
 MappingInfo RevSourceMap::Find(int32_t row, int32_t col, bool isColPrecise)
 {
-    if (row < 1 || col < 1) {
+    if (row < 1 || col < 1 || afterPos_.empty()) {
         LOGE("the input pos is wrong");
         return MappingInfo {};
     }

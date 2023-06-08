@@ -373,31 +373,61 @@ public:
     void GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap);
     void SetLayoutTime(int64_t time)
     {
-        nodeInfo_->layoutTime = time;
+        if (nodeInfo_) {
+            nodeInfo_->layoutTime = time;
+        }
     }
     int64_t GetLayoutTime()
     {
-        return nodeInfo_->layoutTime;
+        if (nodeInfo_) {
+            return nodeInfo_->layoutTime;
+        }
+        return 0;
     }
     int32_t GetFlexLayouts()
     {
-        return nodeInfo_->flexLayouts;
+        if (nodeInfo_) {
+            return nodeInfo_->flexLayouts;
+        }
+        return 0;
     }
     int32_t GetRow() const
     {
-        return nodeInfo_->codeRow;
+        if (nodeInfo_) {
+            return nodeInfo_->codeRow;
+        }
+        return 0;
     }
     int32_t GetCol() const
     {
-        return nodeInfo_->codeCol;
+        if (nodeInfo_) {
+            return nodeInfo_->codeCol;
+        }
+        return 0;
     }
     void SetRow(const int32_t row)
     {
-        nodeInfo_->codeRow = row;
+        if (nodeInfo_) {
+            nodeInfo_->codeRow = row;
+        }
     }
     void SetCol(const int32_t col)
     {
-        nodeInfo_->codeCol = col;
+        if (nodeInfo_) {
+            nodeInfo_->codeCol = col;
+        }
+    }
+    void SetForeachItem()
+    {
+        if (nodeInfo_) {
+            nodeInfo_->isForEachItem = true;
+        }
+    }
+    void AddFlexLayouts()
+    {
+        if (nodeInfo_) {
+            nodeInfo_->flexLayouts++;
+        }
     }
     virtual std::string GetCustomTag()
     {
@@ -406,14 +436,6 @@ public:
     void SetBuildByJs(bool isBuildByJS)
     {
         isBuildByJS_ = isBuildByJS;
-    }
-    void SetForeachItem()
-    {
-        nodeInfo_->isForEachItem = true;
-    }
-    void AddFlexLayouts()
-    {
-        nodeInfo_->flexLayouts++;
     }
     // --------------------------------------------------------------------------------
 
