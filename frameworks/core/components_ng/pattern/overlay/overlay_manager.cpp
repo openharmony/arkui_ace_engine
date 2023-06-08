@@ -819,6 +819,7 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     CloseDialogAnimation(dialogNode);
     dialogNode->OnAccessibilityEvent(
         AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+    CallOnHideDialogCallback();
 }
 
 bool OverlayManager::RemoveOverlay()

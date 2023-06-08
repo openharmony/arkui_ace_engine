@@ -121,6 +121,11 @@ public:
         onShowMenuCallback_ = callback;
     }
 
+    void RegisterOnHideDialog(std::function<void()> callback)
+    {
+        onHideDialogCallback_ = callback;
+    }
+
     void CallOnShowMenuCallback()
     {
         if (onShowMenuCallback_) {
@@ -132,6 +137,13 @@ public:
     {
         if (onHideMenuCallback_) {
             onHideMenuCallback_();
+        }
+    }
+
+    void CallOnHideDialogCallback()
+    {
+        if (onHideDialogCallback_) {
+            onHideDialogCallback_();
         }
     }
 
@@ -262,6 +274,7 @@ private:
 #endif // ENABLE_DRAG_FRAMEWORK
 
     std::function<void()> onHideMenuCallback_ = nullptr;
+    std::function<void()> onHideDialogCallback_ = nullptr;
     std::function<void()> onShowMenuCallback_;
     CancelableCallback<void()> continuousTask_;
     std::function<bool()> backPressEvent_ = nullptr;
