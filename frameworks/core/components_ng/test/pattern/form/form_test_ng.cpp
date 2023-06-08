@@ -47,6 +47,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float NORMAL_LENGTH = 100.0f;
 constexpr int64_t FORM_ID_OF_TDD = 123456;
+constexpr int32_t NODE_ID_OF_PARENT_NODE = 654321;
 RequestFormInfo formInfo;
 DirtySwapConfig config;
 FormModelNG formModelNG;
@@ -54,7 +55,7 @@ FormModelNG formModelNG;
 
 struct TestProperty {};
 
-class FormPatternTestNg : public testing::Test {
+class FormTestNg : public testing::Test {
 public:
     static void SetUpTestSuite() {};
     static void TearDownTestSuite() {};
@@ -65,7 +66,7 @@ protected:
     static RefPtr<FrameNode> CreateFromNode();
 };
 
-void FormPatternTestNg::SetUp()
+void FormTestNg::SetUp()
 {
     MockPipelineBase::SetUp();
     formInfo.id = 1;
@@ -75,12 +76,12 @@ void FormPatternTestNg::SetUp()
     formInfo.moduleName = "module";
     formInfo.allowUpdate = true;
 }
-void FormPatternTestNg::TearDown()
+void FormTestNg::TearDown()
 {
     MockPipelineBase::TearDown();
 }
 
-RefPtr<FrameNode> FormPatternTestNg::CreateFromNode()
+RefPtr<FrameNode> FormTestNg::CreateFromNode()
 {
     formModelNG.Create(formInfo);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -94,7 +95,7 @@ RefPtr<FrameNode> FormPatternTestNg::CreateFromNode()
  * @tc.desc: create form node
  * @tc.type: FUNC
  */
-HWTEST_F(FormPatternTestNg, FormNodeTest001, TestSize.Level1)
+HWTEST_F(FormTestNg, FormNodeTest001, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto frameNode = FormNode::GetOrCreateFormNode(
@@ -107,7 +108,7 @@ HWTEST_F(FormPatternTestNg, FormNodeTest001, TestSize.Level1)
  * @tc.desc: Test OnDirtyLayoutWrapperSwap in Form Pattern.
  * @tc.type: FUNC
  */
-HWTEST_F(FormPatternTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level1)
+HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level1)
 {
     RefPtr<FrameNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
@@ -179,7 +180,7 @@ HWTEST_F(FormPatternTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level1)
  * @tc.desc: create form node
  * @tc.type: FUNC
  */
-HWTEST_F(FormPatternTestNg, FormModelNGTest001, TestSize.Level1)
+HWTEST_F(FormTestNg, FormModelNGTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init FormModelNG object
@@ -211,7 +212,7 @@ HWTEST_F(FormPatternTestNg, FormModelNGTest001, TestSize.Level1)
  * @tc.desc: create form node
  * @tc.type: FUNC
  */
-HWTEST_F(FormPatternTestNg, FormModelNGTest002, TestSize.Level1)
+HWTEST_F(FormTestNg, FormModelNGTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init FormModelNG object
@@ -259,7 +260,7 @@ HWTEST_F(FormPatternTestNg, FormModelNGTest002, TestSize.Level1)
  * @tc.desc: Test OnDirtyLayoutWrapperSwap in Form Pattern.
  * @tc.type: FUNC
  */
-HWTEST_F(FormPatternTestNg, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
+HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init FormModelNG object
@@ -329,7 +330,7 @@ HWTEST_F(FormPatternTestNg, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
  * @tc.desc: Test OnDirtyLayoutWrapperSwap in Form Pattern.
  * @tc.type: FUNC
  */
-HWTEST_F(FormPatternTestNg, OnDirtyLayoutWrapperSwap003, TestSize.Level1)
+HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init FormModelNG object
@@ -375,7 +376,7 @@ HWTEST_F(FormPatternTestNg, OnDirtyLayoutWrapperSwap003, TestSize.Level1)
  * @tc.desc: Verify the InitFormManagerDelegate Interface of FormPattern work correctly.
  * @tc.type: FUNC
  */
-HWTEST_F(FormPatternTestNg, InitFormManagerDelegate001, TestSize.Level1)
+HWTEST_F(FormTestNg, InitFormManagerDelegate001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Build a FormPattern and build a subContainer .
@@ -420,7 +421,7 @@ HWTEST_F(FormPatternTestNg, InitFormManagerDelegate001, TestSize.Level1)
  * @tc.desc: Verify the CreateCardContainer Interface of FormPattern work correctly.
  * @tc.type: FUNC
  */
-HWTEST_F(FormPatternTestNg, CreateCardContainer001, TestSize.Level1)
+HWTEST_F(FormTestNg, CreateCardContainer001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Build a FormPattern and build a subContainer .
@@ -456,7 +457,7 @@ HWTEST_F(FormPatternTestNg, CreateCardContainer001, TestSize.Level1)
  * @tc.desc: Verify the CreateCardContainer Interface of FormPattern work correctly.
  * @tc.type: FUNC
  */
-HWTEST_F(FormPatternTestNg, CreateCardContainer002, TestSize.Level1)
+HWTEST_F(FormTestNg, CreateCardContainer002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Build a FormPattern and build a subContainer .
@@ -529,7 +530,7 @@ HWTEST_F(FormPatternTestNg, CreateCardContainer002, TestSize.Level1)
  * @tc.desc: Verify the OnRebuildFrame Interface of FormPattern work correctly.
  * @tc.type: FUNC
  */
-HWTEST_F(FormPatternTestNg, OnRebuildFrame, TestSize.Level1)
+HWTEST_F(FormTestNg, OnRebuildFrame, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Build a FormPattern and build a subContainer .
@@ -550,7 +551,7 @@ HWTEST_F(FormPatternTestNg, OnRebuildFrame, TestSize.Level1)
  * @tc.desc: Verify the RemoveSubContainer Interface of FormPattern work correctly.
  * @tc.type: FUNC
  */
-HWTEST_F(FormPatternTestNg, RemoveSubContainer, TestSize.Level1)
+HWTEST_F(FormTestNg, RemoveSubContainer, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Build a FormPattern and build a subContainer .
@@ -572,7 +573,7 @@ HWTEST_F(FormPatternTestNg, RemoveSubContainer, TestSize.Level1)
  * @tc.desc: Verify the ISAllowUpdate Interface of FormPattern work correctly.
  * @tc.type: FUNC
  */
-HWTEST_F(FormPatternTestNg, ISAllowUpdate, TestSize.Level1)
+HWTEST_F(FormTestNg, ISAllowUpdate, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Build a FormPattern and build a subContainer .
@@ -596,7 +597,7 @@ HWTEST_F(FormPatternTestNg, ISAllowUpdate, TestSize.Level1)
  * @tc.desc: Verify the FireOnEvent Interface of FormPattern work correctly.
  * @tc.type: FUNC
  */
-HWTEST_F(FormPatternTestNg, FireOnEvent, TestSize.Level1)
+HWTEST_F(FormTestNg, FireOnEvent, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Build a FormPattern and get a FormEventHub .
@@ -670,7 +671,7 @@ HWTEST_F(FormPatternTestNg, FireOnEvent, TestSize.Level1)
  * @tc.desc: Verify the OnActionEvent Interface of FormPattern work correctly.
  * @tc.type: FUNC
  */
-HWTEST_F(FormPatternTestNg, OnActionEvent, TestSize.Level1)
+HWTEST_F(FormTestNg, OnActionEvent, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Build a FormPattern and build a subContainer .
@@ -737,7 +738,7 @@ HWTEST_F(FormPatternTestNg, OnActionEvent, TestSize.Level1)
  * @tc.desc: Verify the UpdateConfiguration Interface of FormPattern work correctly.
  * @tc.type: FUNC
  */
-HWTEST_F(FormPatternTestNg, UpdateConfiguration, TestSize.Level1)
+HWTEST_F(FormTestNg, UpdateConfiguration, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Build a FormPattern and build a subContainer .
@@ -772,5 +773,110 @@ HWTEST_F(FormPatternTestNg, UpdateConfiguration, TestSize.Level1)
     pattern->UpdateConfiguration();
     ASSERT_EQ(pattern->localeTag_, AceApplicationInfo::GetInstance().GetLocaleTag());
     ASSERT_NE(pattern->localeTag_, "local");
+}
+
+/**
+ * @tc.name: formModelNG
+ * @tc.desc: Test function in form_model_ng when RequestFormInfo has not been setted
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, formModelNG, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a form node by GetOrCreateFormNode.
+     * @tc.expected: Create node success.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FormNode::GetOrCreateFormNode(
+        "FormComponent", stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<FormPattern>(); });
+    stack->Push(frameNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto property = frameNode->GetLayoutProperty<FormLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+
+    /**
+     * @tc.steps: step2. Test function in form_model_ng when RequestFormInfo has not been setted.
+     */
+    formModelNG.SetDimension(0);
+    formModelNG.AllowUpdate(true);
+    formModelNG.SetModuleName("");
+    formModelNG.SetVisible(VisibleType::INVISIBLE);
+    ASSERT_EQ(property->HasRequestFormInfo(), false);
+
+    /**
+     * @tc.steps: step3. Test SetVisibility in form_model_ng when isLoaded is false  and visible is
+     *                   VisibleType::VISIBLE.
+     */
+    auto formPattern = frameNode->GetPattern<FormPattern>();
+    CHECK_NULL_VOID(formPattern);
+    formPattern->isLoaded_ = false;
+    formModelNG.SetVisibility(VisibleType::VISIBLE);
+    ASSERT_EQ(property->GetVisibility(), VisibleType::INVISIBLE);
+
+    /**
+     * @tc.steps: step4. Test SetVisibility in form_model_ng when isLoaded is false  and visible is
+     *                   VisibleType::INVISIBLE.
+     */
+    formPattern->isLoaded_ = true;
+    formModelNG.SetVisibility(VisibleType::GONE);
+    ASSERT_EQ(property->GetVisibility(), VisibleType::GONE);
+}
+
+/**
+ * @tc.name: GetOrCreateFormNode001
+ * @tc.desc: create form node
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, GetOrCreateFormNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a form node by GetOrCreateFormNode.
+     * @tc.expected: Create node success.
+     */
+    auto frameNode = FormNode::GetOrCreateFormNode(
+        "FormComponent", FORM_ID_OF_TDD, []() { return AceType::MakeRefPtr<FormPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Get a form node by GetOrCreateFormNode with same nodeId.
+     * @tc.expected: Get same node success.
+     */
+    auto sameFormNode = FormNode::GetOrCreateFormNode(
+        "FormComponent", FORM_ID_OF_TDD, []() { return AceType::MakeRefPtr<FormPattern>(); });
+    EXPECT_EQ(frameNode == sameFormNode, true);
+
+    /**
+     * @tc.steps: step3. Remove a form node by GetOrCreateFormNode with different tag when parent is nullptr.
+     * @tc.expected: Get a different node success.
+     */
+    auto diffFormNode = FormNode::GetOrCreateFormNode(
+        "FormComponent1", FORM_ID_OF_TDD, []() { return AceType::MakeRefPtr<FormPattern>(); });
+    EXPECT_NE(frameNode == diffFormNode, true);
+
+    /**
+     * @tc.steps: step4. Remove a form node by GetOrCreateFormNode with different tag.
+     * @tc.expected: Get a different node success and remove the node from parent.
+     */
+    auto parentFormNode = FormNode::GetOrCreateFormNode(
+        "FormComponent", NODE_ID_OF_PARENT_NODE, []() { return AceType::MakeRefPtr<FormPattern>(); });
+    ASSERT_NE(parentFormNode, nullptr);
+    auto formNode = FormNode::GetOrCreateFormNode(
+        "FormComponent", FORM_ID_OF_TDD, []() { return AceType::MakeRefPtr<FormPattern>(); });
+    formNode->SetParent(parentFormNode);
+    parentFormNode->AddChild(formNode);
+    ASSERT_EQ(parentFormNode->GetFirstChild(), formNode);
+    diffFormNode = FormNode::GetOrCreateFormNode(
+        "FormComponent1", FORM_ID_OF_TDD, []() { return AceType::MakeRefPtr<FormPattern>(); });
+    EXPECT_NE(formNode == diffFormNode, true);
+    ASSERT_EQ(AceType::TypeName(diffFormNode->pattern_), "FormPattern");
+    ASSERT_EQ(parentFormNode->GetFirstChild(), nullptr);
+
+    /**
+     * @tc.steps: step5. Remove a form node by GetOrCreateFormNode without  patternCreator.
+     * @tc.expected: Get a different node success.
+     */
+    formNode = FormNode::GetOrCreateFormNode("FormComponent", FORM_ID_OF_TDD, nullptr);
+    auto pattrn = formNode->pattern_;
+    ASSERT_EQ(AceType::TypeName(pattrn), "Pattern");
 }
 } // namespace OHOS::Ace::NG
