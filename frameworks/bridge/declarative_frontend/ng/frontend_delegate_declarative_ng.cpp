@@ -371,9 +371,19 @@ void FrontendDelegateDeclarativeNG::ClearTimer(const std::string& callbackId)
 void FrontendDelegateDeclarativeNG::PushWithMode(const std::string& uri, const std::string& params, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    // TODO: router mode support
-    pageRouterManager_->Push(NG::RouterPageInfo({ uri, params }));
+    pageRouterManager_->Push(NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode) }));
     OnMediaQueryUpdate();
+    return;
+}
+
+void FrontendDelegateDeclarativeNG::PushWithCallback(const std::string& uri, const std::string& params,
+    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    pageRouterManager_->Push(
+        NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+    OnMediaQueryUpdate();
+    return;
 }
 
 void FrontendDelegateDeclarativeNG::Replace(const std::string& uri, const std::string& params)
@@ -386,17 +396,19 @@ void FrontendDelegateDeclarativeNG::ReplaceWithMode(
     const std::string& uri, const std::string& params, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    // TODO: router mode support
-    pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params }));
+    pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode) }));
+    OnMediaQueryUpdate();
+    return;
 }
 
 void FrontendDelegateDeclarativeNG::ReplaceWithCallback(const std::string& uri, const std::string& params,
     const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    // TODO: router mode support
-    pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params }));
+    pageRouterManager_->Replace(
+        NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
     OnMediaQueryUpdate();
+    return;
 }
 
 void FrontendDelegateDeclarativeNG::Back(const std::string& uri, const std::string& params)
