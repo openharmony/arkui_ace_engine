@@ -5544,6 +5544,32 @@ HWTEST_F(TextFieldPatternTestNg, OnAreaChangedInner, TestSize.Level2)
 }
 
 /**
+ * @tc.name: CreateSingleHandle
+ * @tc.desc: test CreateSingleHandle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, CreateSingleHandle, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. call CreateSingleHandle.
+     * @tc.expected: Check the value of the updated property.
+     */
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->OnModifyDone();
+    pattern->textEditingValue_.Reset();
+    EXPECT_TRUE(pattern->textEditingValue_.Empty());
+    pattern->CreateSingleHandle();
+}
+
+/**
  * @tc.name: UpdateEditingValue
  * @tc.desc: test UpdateEditingValue.
  * @tc.type: FUNC
