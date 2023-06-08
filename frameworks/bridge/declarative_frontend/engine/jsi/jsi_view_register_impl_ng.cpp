@@ -260,6 +260,7 @@ void JsBindViews(BindingTarget globalObj)
     JSViewStackProcessor::JSBind(globalObj);
     JSContainerBase::JSBind(globalObj);
     JSView::JSBind(globalObj);
+    JSShapeAbstract::JSBind(globalObj);
     JSText::JSBind(globalObj);
     JSColumn::JSBind(globalObj);
     JSRow::JSBind(globalObj);
@@ -329,7 +330,6 @@ void JsBindViews(BindingTarget globalObj)
     JSButton::JSBind(globalObj);
     JSRadio::JSBind(globalObj);
     JSRect::JSBind(globalObj);
-    JSShapeAbstract::JSBind(globalObj);
     JSAnimator::JSBind(globalObj);
     JSListItemGroup::JSBind(globalObj);
     JSLoadingProgress::JSBind(globalObj);
