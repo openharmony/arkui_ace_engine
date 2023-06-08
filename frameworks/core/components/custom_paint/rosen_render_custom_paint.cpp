@@ -24,6 +24,7 @@
 
 #include "securec.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkBlendMode.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
@@ -38,6 +39,7 @@
 #include "include/encode/SkWebpEncoder.h"
 #include "include/utils/SkBase64.h"
 #include "include/utils/SkParsePath.h"
+#endif
 
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
@@ -114,13 +116,23 @@ double GetQuality(const std::string& args)
     return quality;
 }
 
+#ifndef USE_ROSEN_DRAWING
 template<typename T, typename N>
 N ConvertEnumToSkEnum(T key, const LinearEnumMapNode<T, N>* map, size_t length, N defaultValue)
 {
     int64_t index = BinarySearchFindIndex(map, length, key);
     return index != -1 ? map[index].value : defaultValue;
 }
+#else
+template<typename T, typename N>
+N ConvertEnumToDrawingEnum(T key, const LinearEnumMapNode<T, N>* map, size_t length, N defaultValue)
+{
+    int64_t index = BinarySearchFindIndex(map, length, key);
+    return index != -1 ? map[index].value : defaultValue;
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 const LinearEnumMapNode<CompositeOperation, SkBlendMode> SK_BLEND_MODE_TABLE[] = {
     { CompositeOperation::SOURCE_OVER, SkBlendMode::kSrcOver },
     { CompositeOperation::SOURCE_ATOP, SkBlendMode::kSrcATop },
@@ -135,6 +147,22 @@ const LinearEnumMapNode<CompositeOperation, SkBlendMode> SK_BLEND_MODE_TABLE[] =
     { CompositeOperation::XOR, SkBlendMode::kXor },
 };
 constexpr size_t BLEND_MODE_SIZE = ArraySize(SK_BLEND_MODE_TABLE);
+#else
+const LinearEnumMapNode<CompositeOperation, RSBlendMode> DRAWING_BLEND_MODE_TABLE[] = {
+    { CompositeOperation::SOURCE_OVER, RSBlendMode::SRC_OVER },
+    { CompositeOperation::SOURCE_ATOP, RSBlendMode::SRC_ATOP },
+    { CompositeOperation::SOURCE_IN, RSBlendMode::SRC_IN },
+    { CompositeOperation::SOURCE_OUT, RSBlendMode::SRC_OUT },
+    { CompositeOperation::DESTINATION_OVER, RSBlendMode::DST_OVER },
+    { CompositeOperation::DESTINATION_ATOP, RSBlendMode::DST_ATOP },
+    { CompositeOperation::DESTINATION_IN, RSBlendMode::DST_IN },
+    { CompositeOperation::DESTINATION_OUT, RSBlendMode::DST_OUT },
+    { CompositeOperation::LIGHTER, RSBlendMode::LIGHTEN },
+    { CompositeOperation::COPY, RSBlendMode::SRC },
+    { CompositeOperation::XOR, RSBlendMode::XOR },
+};
+constexpr size_t BLEND_MODE_SIZE = ArraySize(DRAWING_BLEND_MODE_TABLE);
+#endif
 
 } // namespace
 
@@ -147,6 +175,7 @@ RosenRenderCustomPaint::~RosenRenderCustomPaint() {}
 
 void RosenRenderCustomPaint::CreateBitmap(double viewScale)
 {
+#ifndef USE_ROSEN_DRAWING
     auto imageInfo = SkImageInfo::Make(GetLayoutSize().Width() * viewScale, GetLayoutSize().Height() * viewScale,
         SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
     canvasCache_.reset();
@@ -157,6 +186,18 @@ void RosenRenderCustomPaint::CreateBitmap(double viewScale)
     cacheBitmap_.eraseColor(SK_ColorTRANSPARENT);
     skCanvas_ = std::make_unique<SkCanvas>(canvasCache_);
     cacheCanvas_ = std::make_unique<SkCanvas>(cacheBitmap_);
+#else
+    RSBitmapFormat format { RSCOLORTYPE_RGBA_8888,
+        RSAlphaType::ALPHATYPE_UNPREMUL };
+    canvasCache_.Reset();
+    cacheBitmap_.Reset();
+    canvasCache_.Build(GetLayoutSize().Width() * viewScale, GetLayoutSize().Height() * viewScale, format);
+    cacheBitmap_.Build(GetLayoutSize().Width() * viewScale, GetLayoutSize().Height() * viewScale, format);
+    canvasCache_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+    cacheBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+    drawingCanvas_->Bind(canvasCache_);
+    cacheCanvas_->Bind(cacheBitmap_);
+#endif
 }
 
 void RosenRenderCustomPaint::Paint(RenderContext& context, const Offset& offset)
@@ -182,6 +223,7 @@ void RosenRenderCustomPaint::Paint(RenderContext& context, const Offset& offset)
         CreateBitmap(viewScale);
         lastLayoutSize_ = GetLayoutSize();
     }
+#ifndef USE_ROSEN_DRAWING
     if (!skCanvas_) {
         LOGE("skCanvas_ is null");
         return;
@@ -203,8 +245,28 @@ void RosenRenderCustomPaint::Paint(RenderContext& context, const Offset& offset)
     canvas->drawImage(canvasCache_.asImage(), 0.0f, 0.0f, SkSamplingOptions());
 #endif
     canvas->restore();
+#else
+    if (!drawingCanvas_) {
+        LOGE("drawingCanvas_ is null");
+        return;
+    }
+    drawingCanvas_->Scale(viewScale, viewScale);
+    TriggerOnReadyEvent();
+
+    for (const auto& task : tasks_) {
+        task(*this, offset);
+    }
+    drawingCanvas_->Scale(1.0 / viewScale, 1.0 / viewScale);
+    tasks_.clear();
+
+    canvas->Save();
+    canvas->Scale(1.0 / viewScale, 1.0 / viewScale);
+    canvas->DrawBitmap(canvasCache_, 0.0f, 0.0f);
+    canvas->Restore();
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 SkPaint RosenRenderCustomPaint::GetStrokePaint()
 {
     static const LinearEnumMapNode<LineJoinStyle, SkPaint::Join> skLineJoinTable[] = {
@@ -236,6 +298,39 @@ SkPaint RosenRenderCustomPaint::GetStrokePaint()
     }
     return paint;
 }
+#else
+RSPen RosenRenderCustomPaint::GetStrokePaint()
+{
+    static const LinearEnumMapNode<LineJoinStyle, RSPen::JoinStyle> skLineJoinTable[] = {
+        { LineJoinStyle::MITER, RSPen::JoinStyle::MITER_JOIN },
+        { LineJoinStyle::ROUND, RSPen::JoinStyle::ROUND_JOIN },
+        { LineJoinStyle::BEVEL, RSPen::JoinStyle::BEVEL_JOIN },
+    };
+    static const LinearEnumMapNode<LineCapStyle, RSPen::CapStyle> skLineCapTable[] = {
+        { LineCapStyle::BUTT, RSPen::CapStyle::BUTT_CAP },
+        { LineCapStyle::ROUND, RSPen::CapStyle::ROUND_CAP },
+        { LineCapStyle::SQUARE, RSPen::CapStyle::SQUARE_CAP },
+    };
+    RSPen pen;
+    pen.SetColor(strokeState_.GetColor().GetValue());
+    pen.SetJoinStyle(ConvertEnumToDrawingEnum(
+        strokeState_.GetLineJoin(), skLineJoinTable,
+        ArraySize(skLineJoinTable), RSPen::JoinStyle::MITER_JOIN));
+    pen.SetCapStyle(ConvertEnumToDrawingEnum(
+        strokeState_.GetLineCap(), skLineCapTable, ArraySize(skLineCapTable), RSPen::CapStyle::BUTT_CAP));
+    pen.SetWidth(static_cast<RSScalar>(strokeState_.GetLineWidth()));
+    pen.SetMiterLimit(static_cast<RSScalar>(strokeState_.GetMiterLimit()));
+
+    // set line Dash
+    UpdateLineDash(pen);
+
+    // set global alpha
+    if (globalState_.HasGlobalAlpha()) {
+        pen.SetAlphaF(globalState_.GetAlpha());
+    }
+    return pen;
+}
+#endif
 
 std::string RosenRenderCustomPaint::ToDataURL(const std::string& args)
 {
@@ -243,6 +338,7 @@ std::string RosenRenderCustomPaint::ToDataURL(const std::string& args)
     double quality = GetQuality(args);
     double width = GetLayoutSize().Width();
     double height = GetLayoutSize().Height();
+#ifndef USE_ROSEN_DRAWING
     SkBitmap tempCache;
     tempCache.allocPixels(SkImageInfo::Make(width, height, SkColorType::kBGRA_8888_SkColorType,
         (mimeType == IMAGE_JPEG) ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kUnpremul_SkAlphaType));
@@ -294,6 +390,9 @@ std::string RosenRenderCustomPaint::ToDataURL(const std::string& args)
     }
     SkString info(len);
     SkBase64::Encode(result->data(), result->size(), info.writable_str());
+#else
+    // TODO Drawing : SkDynamicMemoryWStream SkWebpEncoder SkBase64
+#endif
     return std::string(URL_PREFIX).append(mimeType).append(URL_SYMBOL).append(info.c_str());
 }
 
@@ -314,6 +413,7 @@ void RosenRenderCustomPaint::TransferFromImageBitmap(const RefPtr<OffscreenCanva
 
 void RosenRenderCustomPaint::FillRect(const Offset& offset, const Rect& rect)
 {
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setAntiAlias(antiAlias_);
     paint.setColor(fillState_.GetColor().GetValue());
@@ -346,10 +446,44 @@ void RosenRenderCustomPaint::FillRect(const Offset& offset, const Rect& rect)
 #endif
         cacheBitmap_.eraseColor(0);
     }
+#else
+    RSBrush brush;
+    brush.SetAntiAlias(antiAlias_);
+    brush.SetColor(fillState_.GetColor().GetValue());
+    RSRect drawingRect(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
+        rect.Right() + offset.GetX(), offset.GetY() + rect.Bottom());
+    if (HasShadow()) {
+        RSRecordingPath path;
+        path.AddRect(drawingRect);
+        RosenDecorationPainter::PaintShadow(path, shadow_, drawingCanvas_.get());
+    }
+    if (fillState_.GetGradient().IsValid()) {
+        UpdatePaintShader(offset, brush, fillState_.GetGradient());
+    }
+    if (fillState_.GetPattern().IsValid()) {
+        UpdatePaintShader(fillState_.GetPattern(), brush);
+    }
+    if (globalState_.HasGlobalAlpha()) {
+        paint.SetAlphaF(globalState_.GetAlpha()); // update the global alpha after setting the color
+    }
+    if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+        drawingCanvas_->AttachBrush(brush);
+        drawingCanvas_->DrawRect(drawingRect);
+        drawingCanvas_->DetachBrush();
+    } else {
+        InitPaintBlend(cacheBrush_);
+        cacheCanvas_->AttachBrush(brush);
+        cacheCanvas_->DrawRect(drawingRect);
+        cacheCanvas_->DetachBrush();
+        drawingCanvas_->DrawBitmap(cacheBitmap_, 0, 0);
+        cacheBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+    }
+#endif
 }
 
 void RosenRenderCustomPaint::StrokeRect(const Offset& offset, const Rect& rect)
 {
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint = GetStrokePaint();
     paint.setAntiAlias(antiAlias_);
     SkRect skRect = SkRect::MakeLTRB(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
@@ -377,16 +511,56 @@ void RosenRenderCustomPaint::StrokeRect(const Offset& offset, const Rect& rect)
 #endif
         cacheBitmap_.eraseColor(0);
     }
+#else
+    RSPen pen = GetStrokePaint();
+    pen.SetAntiAlias(antiAlias_);
+    RSRect drawingRect(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
+        rect.Right() + offset.GetX(), offset.GetY() + rect.Bottom());
+    if (HasShadow()) {
+        RSRecordingPath path;
+        path.AddRect(drawingRect);
+        RosenDecorationPainter::PaintShadow(path, shadow_, drawingCanvas_);
+    }
+    if (strokeState_.GetGradient().IsValid()) {
+        UpdatePaintShader(offset, pen, strokeState_.GetGradient());
+    }
+    if (strokeState_.GetPattern().IsValid()) {
+        UpdatePaintShader(strokeState_.GetPattern(), pen);
+    }
+    if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+        drawingCanvas_->AttachPen(pen);
+        drawingCanvas_->DrawRect(drawingRect);
+        drawingCanvas_->DetachPen();
+    } else {
+        InitPaintBlend(cacheBrush_);
+        cacheCanvas_->AttachPen(pen);
+        cacheCanvas_->DrawRect(drawingRect);
+        cacheCanvas_->DetachPen();
+        drawingCanvas_->DrawBitmap(cacheBitmap_, 0, 0);
+        cacheBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+    }
+#endif
 }
 
 void RosenRenderCustomPaint::ClearRect(const Offset& offset, const Rect& rect)
 {
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setAntiAlias(antiAlias_);
     paint.setBlendMode(SkBlendMode::kClear);
     auto skRect = SkRect::MakeLTRB(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
         rect.Right() + offset.GetX(), rect.Bottom() + offset.GetY());
     skCanvas_->drawRect(skRect, paint);
+#else
+    RSBrush brush;
+    brush.SetAntiAlias(antiAlias_);
+    brush.SetBlendMode(RSBlendMode::CLEAR);
+    RSRect drawingRect(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
+        rect.Right() + offset.GetX(), rect.Bottom() + offset.GetY());
+    drawingCanvas_->Attachbrush(brush);
+    drawingCanvas_->DrawRect(drawingRect);
+    drawingCanvas_->DetachBrush();
+#endif
 }
 
 void RosenRenderCustomPaint::FillText(const Offset& offset, const std::string& text, double x, double y)
