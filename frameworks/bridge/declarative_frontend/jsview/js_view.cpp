@@ -15,9 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 
-#include "uicast_interface/uicast_context_impl.h"
-#include "uicast_interface/uicast_impl.h"
-
 #include "base/log/ace_performance_check.h"
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
@@ -90,26 +87,6 @@ ViewPartialUpdateModel* ViewPartialUpdateModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 
-void JSView::MarkStatic()
-{
-    isStatic_ = true;
-    {
-        UICastImpl::CacheCmd("UICast::View::markStatic", std::to_string(uniqueId_));
-    }
-}
-
-bool JSView::NeedsUpdate()
-{
-    {
-        if (UICastContextImpl::NeedsRebuild()) {
-            isStatic_ = false;
-            return true;
-        }
-    }
-
-    return needsUpdate_;
-}
-
 void JSView::JSBind(BindingTarget object)
 {
     JSViewPartialUpdate::JSBind(object);
@@ -124,9 +101,6 @@ void JSView::RenderJSExecution()
         return;
     }
     {
-        {
-            UICastImpl::CacheCmd("UICast::View::locate", std::to_string(uniqueId_));
-        }
         ACE_SCORING_EVENT("Component.AboutToRender");
         jsViewFunction_->ExecuteAboutToRender();
     }
@@ -139,9 +113,6 @@ void JSView::RenderJSExecution()
     {
         ACE_SCORING_EVENT("Component.OnRenderDone");
         jsViewFunction_->ExecuteOnRenderDone();
-        {
-            UICastImpl::SendCmd();
-        }
         if (notifyRenderDone_) {
             notifyRenderDone_();
         }
@@ -296,9 +267,6 @@ void JSViewFullUpdate::Create(const JSCallbackInfo& info)
             return;
         }
         ViewStackModel::GetInstance()->Push(view->CreateViewNode(), true);
-        {
-            UICastImpl::ViewCreate(view->UICastGetViewId(), view->uniqueId_, view);
-        }
     } else {
         LOGE("JSView Object is expected.");
     }
@@ -393,24 +361,15 @@ void JSViewFullUpdate::ConstructorCallback(const JSCallbackInfo& info)
         instance->SetContext(context);
         instance->IncRefCount();
         info.SetReturnValue(AceType::RawPtr(instance));
-        std::string parentViewId = "";
-        int parentUniqueId = -1;
         if (!info[1]->IsUndefined() && info[1]->IsObject()) {
             JSRef<JSObject> parentObj = JSRef<JSObject>::Cast(info[1]);
             auto* parentView = parentObj->Unwrap<JSViewFullUpdate>();
             if (parentView != nullptr) {
                 auto id = parentView->AddChildById(viewId, info.This());
                 instance->id_ = id;
-                parentViewId = parentView->viewId_;
-                parentUniqueId = parentView->uniqueId_;
             }
         }
         LOGD("JSView ConstructorCallback: %{public}s", instance->id_.c_str());
-        {
-            instance->uniqueId_ = UICastImpl::GetViewUniqueID(parentUniqueId);
-            UICastImpl::ViewConstructor(
-                instance->viewId_, instance->uniqueId_, parentViewId, parentUniqueId, AceType::RawPtr(instance));
-        }
     } else {
         LOGE("JSView creation with invalid arguments.");
         JSException::Throw("%s", "JSView creation with invalid arguments.");

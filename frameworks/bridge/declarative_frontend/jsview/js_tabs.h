@@ -26,6 +26,7 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void Pop();
 
+protected:
     static void CreateForNG(const JSCallbackInfo& info);
     static void SetIndex(int32_t index);
     static void SetVertical(const std::string& value);

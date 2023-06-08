@@ -19,8 +19,6 @@
 #include <regex>
 #include <string>
 
-#include "uicast_interface/uicast_context_impl.h"
-
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
@@ -1039,9 +1037,6 @@ void FrontendDelegateDeclarative::StartPush(const PageTarget& target, const std:
     LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
     if (!pagePath.empty()) {
         LoadPage(GenerateNextPageId(), PageTarget(target, pagePath), false, params);
-        {
-            UICastContextImpl::HandleRouterPageCall("UICast::Page::push", target.url);
-        }
         if (errorCallback != nullptr) {
             errorCallback("", ERROR_CODE_NO_ERROR);
         }
@@ -1085,9 +1080,6 @@ void FrontendDelegateDeclarative::StartReplace(const PageTarget& target, const s
     LOGD("router.Replace pagePath = %{private}s", pagePath.c_str());
     if (!pagePath.empty()) {
         LoadReplacePage(GenerateNextPageId(), PageTarget(target, pagePath), params);
-        {
-            UICastContextImpl::HandleRouterPageCall("UICast::Page::replace", target.url);
-        }
         if (errorCallback != nullptr) {
             errorCallback("", ERROR_CODE_NO_ERROR);
         }
@@ -1176,9 +1168,6 @@ void FrontendDelegateDeclarative::BackWithTarget(const PageTarget& target, const
 
 void FrontendDelegateDeclarative::StartBack(const PageTarget& target, const std::string& params)
 {
-    {
-        UICastContextImpl::HandleRouterPageCall("UICast::Page::back", target.url);
-    }
     if (target.url.empty()) {
         std::string pagePath;
         {
@@ -1341,9 +1330,6 @@ Size FrontendDelegateDeclarative::MeasureTextSize(const MeasureContext& context)
 void FrontendDelegateDeclarative::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
 {
     LOGD("FrontendDelegateDeclarative ShowToast.");
-    {
-        UICastContextImpl::ShowToast(message, duration, bottom);
-    }
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::IsCurrentUseNewPipeline()) {
@@ -1436,9 +1422,6 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
         .buttons = buttons,
     };
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
-    {
-        UICastContextImpl::ShowDialog(dialogProperties);
-    }
 }
 
 void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std::string& message,
@@ -1453,9 +1436,6 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
         .onStatusChanged = std::move(onStatusChanged),
     };
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
-    {
-        UICastContextImpl::ShowDialog(dialogProperties);
-    }
 }
 
 void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogProperties,
@@ -1523,9 +1503,6 @@ void FrontendDelegateDeclarative::ShowActionMenu(
         .buttons = button,
     };
     ShowActionMenuInner(dialogProperties, button, std::move(callback));
-    {
-        UICastContextImpl::ShowDialog(dialogProperties);
-    }
 }
 
 void FrontendDelegateDeclarative::ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
@@ -1539,9 +1516,6 @@ void FrontendDelegateDeclarative::ShowActionMenu(const std::string& title, const
         .onStatusChanged = std::move(onStatusChanged),
     };
     ShowActionMenuInner(dialogProperties, button, std::move(callback));
-    {
-        UICastContextImpl::ShowDialog(dialogProperties);
-    }
 }
 
 void FrontendDelegateDeclarative::EnableAlertBeforeBackPage(

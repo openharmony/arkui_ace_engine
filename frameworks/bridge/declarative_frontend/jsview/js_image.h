@@ -61,6 +61,7 @@ public:
     static void SetCopyOption(const JSCallbackInfo& info);
     static void GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName);
 
+protected:
     static void SetBorder(const Border& border);
     static void SetAutoResize(bool autoResize);
 

@@ -34,7 +34,6 @@ public:
     ~ResourceAdapterImpl() override = default;
 
     void Init(const ResourceInfo& resourceInfo) override;
-    void Reload() override;
     void UpdateConfig(const ResourceConfiguration& config) override;
 
     RefPtr<ThemeStyle> GetTheme(int32_t themeId) override;

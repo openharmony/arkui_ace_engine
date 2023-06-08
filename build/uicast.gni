@@ -22,7 +22,8 @@ check_uicast_file_args = [
 ]
 
 uicast_configs = {
-  import("../uicast_interface/config.gni")
+  uicast_defines = []
+  uicast_enable = false
 }
 
 if (exec_script(check_file_script, check_uicast_file_args, "string") ==

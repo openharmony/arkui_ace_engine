@@ -311,13 +311,6 @@ public:
         }
     }
 
-    void ReloadResource()
-    {
-        if (resAdapter_) {
-            resAdapter_->Reload();
-        }
-    }
-
 private:
     static const ResValueWrapper* GetPlatformConstants(uint32_t key);
     static const ResValueWrapper* styleMapDefault[];
