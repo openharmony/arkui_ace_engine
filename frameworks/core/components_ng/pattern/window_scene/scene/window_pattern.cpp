@@ -116,7 +116,7 @@ void WindowPattern::InitContent()
 
 void WindowPattern::CreateStartingNode()
 {
-    if (!HasStartingPage()) {
+    if (CreatePersistentNode() || !HasStartingPage()) {
         return;
     }
 
@@ -245,5 +245,26 @@ void WindowPattern::DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEv
 {
     CHECK_NULL_VOID(session_);
     session_->TransferKeyEvent(keyEvent);
+}
+
+bool WindowPattern::CreatePersistentNode()
+{
+    CHECK_NULL_RETURN(session_, false);
+    snapshotNode_ = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    auto imageLayoutProperty = snapshotNode_->GetLayoutProperty<ImageLayoutProperty>();
+    imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    host->AddChild(snapshotNode_);
+    if (session_->GetScenePersistence() != nullptr && session_->GetScenePersistence()->IsSnapshotExisted()) {
+        imageLayoutProperty->UpdateImageSourceInfo(
+            ImageSourceInfo(std::string("file:/").append(session_->GetScenePersistence()->GetSnapshotFilePath())));
+        imageLayoutProperty->UpdateImageFit(ImageFit::COVER);
+        snapshotNode_->MarkModifyDone();
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG
