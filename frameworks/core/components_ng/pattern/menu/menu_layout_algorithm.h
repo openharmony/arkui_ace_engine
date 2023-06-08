@@ -22,7 +22,6 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
-#include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_property.h"
 
@@ -44,11 +43,13 @@ public:
 protected:
     float VerticalLayout(const SizeF& size, float clickPosition);
     float HorizontalLayout(const SizeF& size, float clickPosition, bool IsSelectMenu = false);
-    
+
     RefPtr<MenuWrapperPaintProperty> GetWrapperPaintProperty(const LayoutWrapper* layoutWrapper);
 
     OffsetF position_;
     OffsetF positionOffset_;
+    SizeF wrapperSize_;
+    OffsetF pageOffset_;
 
 private:
     enum class ErrorPositionType {
@@ -62,19 +63,12 @@ private:
     void UpdateConstraintHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     void UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     void UpdateOptionConstraint(std::list<RefPtr<LayoutWrapper>>& options, float width);
-    void UpdateConstraintBaseOnMenuItems(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
 
     void ComputeMenuPositionByAlignType(const RefPtr<MenuLayoutProperty>& menuProp, const SizeF& menuSize);
     OffsetF ComputeMenuPositionByOffset(
         const RefPtr<MenuLayoutProperty>& menuProp, const RefPtr<GeometryNode>& geometryNode);
     OffsetF MenuLayoutAvoidAlgorithm(
         const RefPtr<MenuLayoutProperty>& menuProp, const RefPtr<MenuPattern>& menuPattern, const SizeF& size);
-
-    void LayoutSubMenu(LayoutWrapper* layoutWrapper);
-    float VerticalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize);
-    float HorizontalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize);
-
-    float GetChildrenMaxWidth(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
 
     void LayoutArrow(const LayoutWrapper* layoutWrapper);
     OffsetF GetArrowPositionWithPlacement(const SizeF& menuSize, const OffsetF& menuPostion);
@@ -109,10 +103,8 @@ private:
     Placement placement_ = Placement::BOTTOM;
     int32_t targetNodeId_ = -1;
     std::string targetTag_;
-    SizeF wrapperSize_;
 
     // current page offset relative to window.
-    OffsetF pageOffset_;
     float topSpace_ = 0.0f;
     float bottomSpace_ = 0.0f;
     float leftSpace_ = 0.0f;

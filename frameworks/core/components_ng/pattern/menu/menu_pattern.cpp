@@ -15,12 +15,18 @@
 
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 
+#include <stack>
+
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
+#include "core/components_ng/pattern/menu/sub_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/option/option_view.h"
@@ -144,6 +150,12 @@ void MenuPattern::OnModifyDone()
         host->GetLayoutProperty()->UpdatePadding(padding);
     }
     SetAccessibilityAction();
+}
+
+void MenuPattern::BeforeCreateLayoutWrapper()
+{
+    CHECK_NULL_VOID_NOLOG(IsMultiMenu());
+    RecordItemsAndGroups();
 }
 
 // close menu on touch up
@@ -434,6 +446,8 @@ RefPtr<LayoutAlgorithm> MenuPattern::CreateLayoutAlgorithm()
     switch (type_) {
         case MenuType::MULTI_MENU:
             return MakeRefPtr<MultiMenuLayoutAlgorithm>();
+        case MenuType::SUB_MENU:
+            return MakeRefPtr<SubMenuLayoutAlgorithm>();
         default:
             return MakeRefPtr<MenuLayoutAlgorithm>(targetId_, targetTag_);
     }
@@ -508,5 +522,29 @@ void MenuPattern::SetAccessibilityAction()
             scrollPattern->ScrollPage(true, true);
         }
     });
+}
+
+void MenuPattern::RecordItemsAndGroups()
+{
+    itemsAndGroups_.clear();
+    auto host = GetHost();
+    std::stack<RefPtr<UINode>> nodeStack;
+    nodeStack.push(host);
+    bool isMenu = true;
+
+    while (!nodeStack.empty()) {
+        auto currentNode = nodeStack.top();
+        nodeStack.pop();
+        // push items and item groups, skip menu node
+        if (!isMenu && AceType::InstanceOf<FrameNode>(currentNode)) {
+            itemsAndGroups_.emplace_back(WeakClaim(RawPtr(currentNode)));
+            continue;
+        }
+        isMenu = false;
+        // skip other type UiNode, such as ForEachNode
+        for (int32_t index = currentNode->GetChildren().size() - 1; index >= 0; index--) {
+            nodeStack.push(currentNode->GetChildAtIndex(index));
+        }
+    }
 }
 } // namespace OHOS::Ace::NG
