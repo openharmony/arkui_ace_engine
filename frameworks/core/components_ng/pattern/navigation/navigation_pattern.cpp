@@ -124,7 +124,7 @@ void NavigationPattern::OnModifyDone()
     for (size_t i = 0; i < pathNames.size(); ++i) {
         auto pathName = pathNames[i];
         RefPtr<UINode> uiNode = navigationStack_->Get(pathName);
-        // get navdestination node under navrouter
+        navigationStack_->RemoveInNavPathList(pathName, uiNode);
         if (uiNode) {
             navPathList_.emplace_back(std::make_pair(pathName, uiNode));
             continue;
@@ -259,10 +259,11 @@ bool NavigationPattern::CheckExistPreStack(const std::string& name)
 RefPtr<UINode> NavigationPattern::GetNodeAndRemoveByName(const std::string& name)
 {
     RefPtr<UINode> uiNode;
-    for (auto iter = preNavPathList_.rbegin(); iter != preNavPathList_.rend(); iter++) {
+    // match from bottom to top
+    for (auto iter = preNavPathList_.begin(); iter != preNavPathList_.end(); iter++) {
         if (iter->first == name) {
             uiNode = iter->second;
-            preNavPathList_.erase(std::next(iter).base());
+            preNavPathList_.erase(iter);
             break;
         }
     }
