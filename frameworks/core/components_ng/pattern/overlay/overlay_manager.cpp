@@ -573,13 +573,18 @@ void OverlayManager::HideAllPopups()
     for (const auto& popup : popupMap_) {
         auto popupInfo = popup.second;
         if (popupInfo.isCurrentOnShow && popupInfo.target.Upgrade()) {
-            popupInfo.markNeedUpdate = true;
-            popupInfo.popupId = -1;
             auto targetNodeId = popupInfo.target.Upgrade()->GetId();
             auto popupNode = popupInfo.popupNode;
             CHECK_NULL_VOID(popupNode);
             auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
             CHECK_NULL_VOID(layoutProp);
+            auto useCustom = layoutProp->GetUseCustom().value_or(false);
+            // if use popup with option, skip
+            if (!useCustom) {
+                continue;
+            }
+            popupInfo.markNeedUpdate = true;
+            popupInfo.popupId = -1;
             auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
             if (showInSubWindow) {
                 SubwindowManager::GetInstance()->HidePopupNG(targetNodeId);

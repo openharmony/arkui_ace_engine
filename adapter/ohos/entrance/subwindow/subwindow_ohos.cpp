@@ -81,6 +81,7 @@ void SubwindowOhos::InitContainer()
         auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
         sptr<OHOS::Rosen::Window> parentWindow = OHOS::Rosen::Window::Find(parentWindowName);
         CHECK_NULL_VOID_NOLOG(parentWindow);
+        parentWindow_ = parentWindow;
         auto windowType = parentWindow->GetType();
         if (windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_FLOAT);
@@ -942,6 +943,14 @@ void SubwindowOhos::ShowActionMenu(
     } else {
         ShowActionMenuForAbility(title, button, std::move(callback));
     }
+}
+
+Rect SubwindowOhos::GetParentWindowRect() const
+{
+    Rect rect;
+    CHECK_NULL_RETURN(parentWindow_, rect);
+    auto parentWindowRect = parentWindow_->GetRect();
+    return Rect(parentWindowRect.posX_, parentWindowRect.posY_, parentWindowRect.width_, parentWindowRect.height_);
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
