@@ -1420,6 +1420,8 @@ void TextFieldPattern::HandleOnCut()
     caretUpdateType_ = CaretUpdateType::EVENT;
     CloseSelectOverlay();
     UpdateEditingValueToRecord();
+    UpdateSelection(0);
+    cursorVisible_ = true;
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -3289,6 +3291,8 @@ void TextFieldPattern::Delete(int32_t start, int32_t end)
     selectionMode_ = SelectionMode::NONE;
     caretUpdateType_ = CaretUpdateType::DEL;
     CloseSelectOverlay();
+    UpdateSelection(0);
+    cursorVisible_ = true;
     UpdateEditingValueToRecord();
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -3573,6 +3577,8 @@ void TextFieldPattern::DeleteBackward(int32_t length)
     selectionMode_ = SelectionMode::NONE;
     caretUpdateType_ = CaretUpdateType::DEL;
     CloseSelectOverlay();
+    UpdateSelection(0);
+    cursorVisible_ = true;
     UpdateEditingValueToRecord();
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
