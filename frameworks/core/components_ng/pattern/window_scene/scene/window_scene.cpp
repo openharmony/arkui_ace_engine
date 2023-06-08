@@ -22,6 +22,11 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr uint32_t COLOR_BLACK = 0xff000000;
+constexpr uint32_t COLOR_WHITE = 0xffffffff;
+} // namespace
+
 WindowScene::WindowScene(const sptr<Rosen::Session>& session)
 {
     session_ = session;
@@ -76,7 +81,8 @@ void WindowScene::OnBackground()
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = snapshotNode_->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
+    auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
+    snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
