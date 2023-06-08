@@ -253,18 +253,18 @@ bool WindowPattern::CreatePersistentNode()
     if (session_->GetScenePersistence() == nullptr || !session_->GetScenePersistence()->IsSnapshotExisted()) {
         return false;
     }
-    snapshotNode_ = FrameNode::CreateFrameNode(
+    startingNode_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    auto imageLayoutProperty = snapshotNode_->GetLayoutProperty<ImageLayoutProperty>();
+    auto imageLayoutProperty = startingNode_->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    host->AddChild(snapshotNode_);
+    host->AddChild(startingNode_);
     imageLayoutProperty->UpdateImageSourceInfo(
         ImageSourceInfo(std::string("file:/").append(session_->GetScenePersistence()->GetSnapshotFilePath())));
     imageLayoutProperty->UpdateImageFit(ImageFit::COVER);
-    snapshotNode_->MarkModifyDone();
+    startingNode_->MarkModifyDone();
     return true;
 }
 } // namespace OHOS::Ace::NG
