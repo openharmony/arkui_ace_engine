@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TIME_PICKER_TIME_PICKER_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TIME_PICKER_TIME_PICKER_MODEL_H
 
+#include <mutex>
+
 #include "core/components/picker/picker_data.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/picker/picker_model.h"
@@ -40,6 +42,7 @@ public:
 
 private:
     static std::unique_ptr<TimePickerModel> timePickerInstance_;
+    static std::mutex mutex_;
 };
 
 class TimePickerDialogModel {
@@ -53,6 +56,7 @@ public:
 
 private:
     static std::unique_ptr<TimePickerDialogModel> timePickerDialogInstance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TIME_PICKER_TIME_PICKER_MODEL_H
