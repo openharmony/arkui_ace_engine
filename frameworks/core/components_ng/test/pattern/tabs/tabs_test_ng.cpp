@@ -4794,4 +4794,79 @@ HWTEST_F(TabsTestNg, TabBarPatternUpdateTextColor001, TestSize.Level1)
      */
     tabBarPattern->UpdateTextColor(index);
 }
+
+/**
+ * @tc.name: TabBarPatternStopTabBarTranslateAnimation001
+ * @tc.desc: test StopTabBarTranslateAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternStopTabBarTranslateAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create TabBarPattern
+     */
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    TabsItemDivider divider;
+    tabsModel.SetDivider(divider);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    tabBarNode->GetLayoutProperty<TabBarLayoutProperty>()->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    tabBarPattern->tabBarTranslateController_ = AceType::MakeRefPtr<Animator>();
+    tabBarPattern->tabBarTranslateController_->status_ = Animator::Status::RUNNING;
+
+    /**
+     * @tc.steps: step2. Test function StopTabBarTranslateAnimation.
+     * @tc.expected: Related function runs ok.
+     */
+    for (int i = 0; i <= 1; i++) {
+        tabBarPattern->StopTabBarTranslateAnimation();
+        tabBarPattern->tabBarTranslateController_->status_ = Animator::Status::STOPPED;
+    }
+}
+
+/**
+ * @tc.name: TabBarPatternSetEdgeEffect001
+ * @tc.desc: test SetEdgeEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternSetEdgeEffect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create TabBarPattern
+     */
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    TabsItemDivider divider;
+    tabsModel.SetDivider(divider);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    tabBarNode->GetLayoutProperty<TabBarLayoutProperty>()->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test function SetEdgeEffect.
+     * @tc.expected: Related function runs ok.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    ASSERT_NE(gestureHub, nullptr);
+    tabBarPattern->SetEdgeEffect(gestureHub);
+}
 } // namespace OHOS::Ace::NG
