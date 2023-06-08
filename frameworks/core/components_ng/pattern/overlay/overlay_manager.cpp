@@ -107,7 +107,7 @@ void OnDialogCloseEvent(const RefPtr<FrameNode>& node)
 
     auto container = Container::Current();
     CHECK_NULL_VOID_NOLOG(container);
-    if (container->IsDialogContainer() || (container->IsSubContainer() && isShowInSubWindow)) {
+    if (container->IsDialogContainer() || isShowInSubWindow) {
         SubwindowManager::GetInstance()->HideSubWindowNG();
     }
 }
