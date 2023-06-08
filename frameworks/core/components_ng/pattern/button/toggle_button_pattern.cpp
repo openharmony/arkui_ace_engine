@@ -186,8 +186,10 @@ void ToggleButtonPattern::InitButtonAndText()
             !layoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height().has_value())) {
         layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(buttonHeight_)));
     }
-    if (!layoutProperty->HasBorderRadius()) {
-        layoutProperty->UpdateBorderRadius(buttonRadius_);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!renderContext->HasBorderRadius()) {
+        renderContext->UpdateBorderRadius({ buttonRadius_, buttonRadius_, buttonRadius_, buttonRadius_ });
     }
     if (!host->GetFirstChild()) {
         return;
