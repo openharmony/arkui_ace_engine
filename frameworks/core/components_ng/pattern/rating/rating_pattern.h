@@ -99,6 +99,7 @@ public:
     }
 
 private:
+    void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     void ConstrainsRatingScore();
     void LoadForeground();

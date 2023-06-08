@@ -154,12 +154,12 @@ void RatingPattern::UpdatePaintConfig()
     foregroundConfig_.imageFit_ = ImageFit::FILL;
     secondaryConfig_.imageFit_ = ImageFit::FILL;
     backgroundConfig_.imageFit_ = ImageFit::FILL;
-    foregroundConfig_.scaleX_ = contentSize.Height() / frameSize.Width();
-    foregroundConfig_.scaleY_ = contentSize.Height() / frameSize.Height();
-    secondaryConfig_.scaleX_ = contentSize.Height() / frameSize.Width();
-    secondaryConfig_.scaleY_ = contentSize.Height() / frameSize.Height();
-    backgroundConfig_.scaleX_ = contentSize.Height() / frameSize.Width();
-    backgroundConfig_.scaleY_ = contentSize.Height() / frameSize.Height();
+    foregroundConfig_.scaleX_ = contentSize.Width() > 0 ? contentSize.Height() / frameSize.Width() : 0;
+    foregroundConfig_.scaleY_ = contentSize.Height() > 0 ? contentSize.Height() / frameSize.Height() : 0;
+    secondaryConfig_.scaleX_ = contentSize.Width() > 0 ? contentSize.Height() / frameSize.Width() : 0;
+    secondaryConfig_.scaleY_ = contentSize.Height() > 0 ? contentSize.Height() / frameSize.Height() : 0;
+    backgroundConfig_.scaleX_ = contentSize.Width() > 0 ? contentSize.Height() / frameSize.Width() : 0;
+    backgroundConfig_.scaleY_ = contentSize.Height() > 0 ? contentSize.Height() / frameSize.Height() : 0;
 }
 
 RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
@@ -752,5 +752,12 @@ void RatingPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
             ratingLayoutProperty->GetBackgroundImageSourceInfo().value_or(ImageSourceInfo(""));
         json->Put("backgroundImageSourceInfo", backgroundImageSourceInfo.ToString().c_str());
     }
+}
+
+void RatingPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->SetClipToBounds(true);
 }
 } // namespace OHOS::Ace::NG
