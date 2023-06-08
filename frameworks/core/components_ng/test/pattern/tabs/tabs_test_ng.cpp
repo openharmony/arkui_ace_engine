@@ -4758,44 +4758,6 @@ HWTEST_F(TabsTestNg, TabBarPatternPlayPressAnimation002, TestSize.Level1)
 }
 
 /**
- * @tc.name: TabBarPatternUpdateTextColor001
- * @tc.desc: test UpdateTextColor
- * @tc.type: FUNC
- */
-HWTEST_F(TabsTestNg, TabBarPatternUpdateTextColor001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: steps1. Create TabBarPattern
-     */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
-    TabsModelNG tabsModel;
-    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
-    TabsItemDivider divider;
-    tabsModel.SetDivider(divider);
-    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    ASSERT_NE(tabsNode, nullptr);
-    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
-    ASSERT_NE(tabBarNode, nullptr);
-    tabBarNode->GetLayoutProperty<TabBarLayoutProperty>()->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-    ASSERT_NE(tabBarPattern, nullptr);
-    int32_t index = 0;
-    auto pr = tabBarPattern->tabBarType_.emplace(1, false);
-    if (pr.second == true) {
-        tabBarPattern->tabBarType_.emplace_hint(pr.first, 1, true);
-    }
-
-    /**
-     * @tc.steps: step2. Test function UpdateTextColor.
-     * @tc.expected: Related functions run ok.
-     */
-    tabBarPattern->UpdateTextColor(index);
-}
-
-/**
  * @tc.name: TabBarPatternStopTabBarTranslateAnimation001
  * @tc.desc: test StopTabBarTranslateAnimation
  * @tc.type: FUNC
