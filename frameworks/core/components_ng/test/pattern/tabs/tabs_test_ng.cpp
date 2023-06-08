@@ -3398,7 +3398,7 @@ HWTEST_F(TabsTestNg, PerformActionTest001, TestSize.Level1)
     auto tabBarPattern = frameNode->GetPattern<TabBarPattern>();
     ASSERT_NE(tabBarPattern, nullptr);
     auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
-    CHECK_NULL_VOID(tabBarLayoutProperty);
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
     tabBarLayoutProperty->UpdateTabBarMode(TabBarMode::FIXED);
     tabBarPattern->SetAccessibilityAction();
 
@@ -3557,9 +3557,9 @@ HWTEST_F(TabsTestNg, TabBarPatternInitClick001, TestSize.Level1)
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     ASSERT_NE(tabBarPattern, nullptr);
     auto eventHub = AceType::MakeRefPtr<EventHub>();
-    CHECK_NULL_VOID(eventHub);
+    ASSERT_NE(eventHub, nullptr);
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-    CHECK_NULL_VOID(gestureHub);
+    ASSERT_NE(gestureHub, nullptr);
     tabBarPattern->clickEvent_ = nullptr;
 
     /**
@@ -3598,9 +3598,9 @@ HWTEST_F(TabsTestNg, TabBarPatternInitScrollable001, TestSize.Level1)
     auto axis_test = Axis::HORIZONTAL;
     tabBarPattern->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(axis_test);
     auto eventHub = AceType::MakeRefPtr<EventHub>();
-    CHECK_NULL_VOID(eventHub);
+    ASSERT_NE(eventHub, nullptr);
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-    CHECK_NULL_VOID(gestureHub);
+    ASSERT_NE(gestureHub, nullptr);
 
     /**
      * @tc.steps: step2. Test function InitScrollable.
@@ -3648,9 +3648,9 @@ HWTEST_F(TabsTestNg, TabBarPatternInitTouche001, TestSize.Level1)
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     ASSERT_NE(tabBarPattern, nullptr);
     auto eventHub = AceType::MakeRefPtr<EventHub>();
-    CHECK_NULL_VOID(eventHub);
+    ASSERT_NE(eventHub, nullptr);
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-    CHECK_NULL_VOID(gestureHub);
+    ASSERT_NE(gestureHub, nullptr);
     tabBarPattern->touchEvent_ = AceType::MakeRefPtr<TouchEventImpl>(test_func);
     tabBarPattern->hoverEvent_ = AceType::MakeRefPtr<InputEvent>(test_func01);
     tabBarPattern->mouseEvent_ = AceType::MakeRefPtr<InputEvent>(test_func01);
@@ -3687,9 +3687,9 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleMouseEvent001, TestSize.Level1)
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     ASSERT_NE(tabBarPattern, nullptr);
     auto eventHub = AceType::MakeRefPtr<EventHub>();
-    CHECK_NULL_VOID(eventHub);
+    ASSERT_NE(eventHub, nullptr);
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-    CHECK_NULL_VOID(gestureHub);
+    ASSERT_NE(gestureHub, nullptr);
     auto info = MouseInfo();
     Offset s1(0.1, 0.1);
     OffsetF c1(0.1f, 0.1f);
