@@ -68,7 +68,6 @@ ohos_unittest("text_clock_test_ng") {
     "$ace_root/test/mock/core/common/mock_container.cpp",
 
     # self
-    "text_clock_accessibility_property_test_ng.cpp",
     "text_clock_test_ng.cpp",
   ]
 

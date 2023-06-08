@@ -20,13 +20,19 @@
 #include "gtest/gtest.h"
 
 #include "base/utils/time_util.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text_clock/text_clock_layout_property.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#define private public
+#define protected public
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
+#undef private
+#undef protected
 
 using namespace testing;
 using namespace testing::ext;
+using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -38,6 +44,8 @@ inline const std::string UTC_1 = "1000000000000";
 inline const std::string UTC_2 = "2000000000000";
 inline const std::string FORMAT_DATA = "08:00:00";
 inline const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
+const std::string EMPTY_TEXT = "";
+const std::string TEXTCLOCK_CONTENT = "08:00:00";
 
 int32_t GetSystemTimeZone()
 {
@@ -248,5 +256,28 @@ HWTEST_F(TextClockTestNG, TextClockTest004, TestSize.Level1)
         ASSERT_NE(pattern, nullptr);
         EXPECT_EQ(pattern->GetHoursWest(), params[turn][1]);
     }
+}
+
+/**
+ * @tc.name: TextClockAccessibilityPropertyIsScrollable001
+ * @tc.desc: Test IsScrollable of textClockAccessibilityProperty.
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(TextClockTestNG, TextClockAccessibilityPropertyIsScrollable001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXTCLOCK_ETS_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<TextClockPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(textLayoutProperty, nullptr);
+    auto textClockAccessibilityProperty = frameNode->GetAccessibilityProperty<TextClockAccessibilityProperty>();
+    ASSERT_NE(textClockAccessibilityProperty, nullptr);
+    textClockAccessibilityProperty->SetHost(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+
+    EXPECT_EQ(textClockAccessibilityProperty->GetText(), EMPTY_TEXT);
+
+    textLayoutProperty->UpdateContent(TEXTCLOCK_CONTENT);
+    EXPECT_EQ(textClockAccessibilityProperty->GetText(), TEXTCLOCK_CONTENT);
 }
 } // namespace OHOS::Ace::NG
