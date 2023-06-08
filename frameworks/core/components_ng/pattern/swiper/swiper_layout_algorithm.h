@@ -98,6 +98,12 @@ public:
     {
         hoverRatio_ = hoverRatio;
     }
+
+    void SetIsDragged(bool isDragging)
+    {
+        isDragging_ = isDragging;
+    }
+
 private:
     void InitItemRange(LayoutWrapper* layoutWrapper);
     void AddToItemRange(int32_t index);
@@ -119,6 +125,7 @@ private:
     void MeasureArrow(const RefPtr<LayoutWrapper>& arrowWrapper, const RefPtr<LayoutProperty>& layoutProperty) const;
     void ArrowLayout(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& arrowWrapper) const;
     bool isLoop_ = true;
+    bool isDragging_ = false;
     int32_t currentIndex_ = 0;
     int32_t startIndex_;
     int32_t endIndex_;
