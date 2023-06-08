@@ -562,6 +562,14 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target)
     }
 
     LoadPage(GenerateNextPageId(), info);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pageUrlChecker = container->GetPageUrlChecker();
+    CHECK_NULL_VOID(pageUrlChecker);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [pageUrlChecker, target]() { pageUrlChecker->CheckPreload(target.url); }, TaskExecutor::TaskType::BACKGROUND);
 }
 
 void PageRouterManager::StartPush(const RouterPageInfo& target)
@@ -655,6 +663,14 @@ void PageRouterManager::ReplaceOhmUrl(const RouterPageInfo& target)
     }
 
     LoadPage(GenerateNextPageId(), info, false, false);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pageUrlChecker = container->GetPageUrlChecker();
+    CHECK_NULL_VOID(pageUrlChecker);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [pageUrlChecker, target]() { pageUrlChecker->CheckPreload(target.url); }, TaskExecutor::TaskType::BACKGROUND);
 }
 
 void PageRouterManager::StartReplace(const RouterPageInfo& target)
