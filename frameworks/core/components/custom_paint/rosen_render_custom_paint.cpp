@@ -792,6 +792,7 @@ void RosenRenderCustomPaint::PaintText(const Offset& offset, double x, double y,
         isStroke ? strokeState_.GetTextStyle().GetTextBaseline() : fillState_.GetTextStyle().GetTextBaseline();
     double dy = offset.GetY() + y + GetBaselineOffset(baseline, paragraph_);
 
+#ifndef USE_ROSEN_DRAWING
     if (hasShadow) {
         skCanvas_->save();
         auto shadowOffsetX = shadow_.GetOffset().GetX();
@@ -802,6 +803,18 @@ void RosenRenderCustomPaint::PaintText(const Offset& offset, double x, double y,
     }
 
     paragraph_->Paint(skCanvas_.get(), dx, dy);
+#else
+    if (hasShadow) {
+        drawingCanvas_->Save();
+        auto shadowOffsetX = shadow_.GetOffset().GetX();
+        auto shadowOffsetY = shadow_.GetOffset().GetY();
+        paragraph_->Paint(drawingCanvas_->GetCanvasData()->ExportSkCanvas(), dx + shadowOffsetX, dy + shadowOffsetY);
+        drawingCanvas_->Restore();
+        return;
+    }
+
+    paragraph_->Paint(drawingCanvas_->GetCanvasData()->ExportSkCanvas(), dx, dy);
+#endif
 }
 
 double RosenRenderCustomPaint::GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph)
@@ -861,25 +874,51 @@ double RosenRenderCustomPaint::GetBaselineOffset(TextBaseline baseline, std::uni
 
 void RosenRenderCustomPaint::MoveTo(const Offset& offset, double x, double y)
 {
+#ifndef USE_ROSEN_DRAWING
     skPath_.moveTo(SkDoubleToScalar(x + offset.GetX()), SkDoubleToScalar(y + offset.GetY()));
+#else
+    drawingPath_.MoveTo(
+        static_cast<RSScalar>(x + offset.GetX()), static_cast<RSScalar>(y + offset.GetY()));
+#endif
 }
 
 void RosenRenderCustomPaint::LineTo(const Offset& offset, double x, double y)
 {
+#ifndef USE_ROSEN_DRAWING
     skPath_.lineTo(SkDoubleToScalar(x + offset.GetX()), SkDoubleToScalar(y + offset.GetY()));
+#else
+    drawingPath_.LineTo(
+        static_cast<RSScalar>(x + offset.GetX()), static_cast<RSScalar>(y + offset.GetY()));
+#endif
 }
 
 void RosenRenderCustomPaint::BezierCurveTo(const Offset& offset, const BezierCurveParam& param)
 {
+#ifndef USE_ROSEN_DRAWING
     skPath_.cubicTo(SkDoubleToScalar(param.cp1x + offset.GetX()), SkDoubleToScalar(param.cp1y + offset.GetY()),
         SkDoubleToScalar(param.cp2x + offset.GetX()), SkDoubleToScalar(param.cp2y + offset.GetY()),
         SkDoubleToScalar(param.x + offset.GetX()), SkDoubleToScalar(param.y + offset.GetY()));
+#else
+    drawingPath_.CubicTo(static_cast<RSScalar>(param.cp1x + offset.GetX()),
+        static_cast<RSScalar>(param.cp1y + offset.GetY()),
+        static_cast<RSScalar>(param.cp2x + offset.GetX()),
+        static_cast<RSScalar>(param.cp2y + offset.GetY()),
+        static_cast<RSScalar>(param.x + offset.GetX()),
+        static_cast<RSScalar>(param.y + offset.GetY()));
+#endif
 }
 
 void RosenRenderCustomPaint::QuadraticCurveTo(const Offset& offset, const QuadraticCurveParam& param)
 {
+#ifndef USE_ROSEN_DRAWING
     skPath_.quadTo(SkDoubleToScalar(param.cpx + offset.GetX()), SkDoubleToScalar(param.cpy + offset.GetY()),
         SkDoubleToScalar(param.x + offset.GetX()), SkDoubleToScalar(param.y + offset.GetY()));
+#else
+    drawingPath_.QuadTo(static_cast<RSScalar>(param.cpx + offset.GetX()),
+        static_cast<RSScalar>(param.cpy + offset.GetY()),
+        static_cast<RSScalar>(param.x + offset.GetX()),
+        static_cast<RSScalar>(param.y + offset.GetY()));
+#endif
 }
 
 void RosenRenderCustomPaint::Arc(const Offset& offset, const ArcParam& param)
@@ -898,6 +937,7 @@ void RosenRenderCustomPaint::Arc(const Offset& offset, const ArcParam& param)
         sweepAngle =
             endAngle > startAngle ? sweepAngle : (std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) + FULL_CIRCLE_ANGLE);
     }
+#ifndef USE_ROSEN_DRAWING
     auto rect = SkRect::MakeLTRB(left, top, right, bottom);
     if (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && !NearEqual(startAngle, endAngle)) {
         // draw circle
@@ -912,6 +952,28 @@ void RosenRenderCustomPaint::Arc(const Offset& offset, const ArcParam& param)
     } else {
         skPath_.arcTo(rect, SkDoubleToScalar(startAngle), SkDoubleToScalar(sweepAngle), false);
     }
+#else
+    RSRect rect(left, top, right, bottom);
+    if (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && !NearEqual(startAngle, endAngle)) {
+        // draw circle
+        double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
+        drawingPath_.ArcTo(
+            rect, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(half), false);
+        drawingPath_.ArcTo(rect, static_cast<RSScalar>(half + startAngle),
+            static_cast<RSScalar>(half), false);
+    } else if (!NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && abs(sweepAngle) > FULL_CIRCLE_ANGLE) {
+        double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
+        drawingPath_.ArcTo(
+            rect, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(half), false);
+        drawingPath_.ArcTo(rect, static_cast<RSScalar>(half + startAngle),
+            static_cast<RSScalar>(half), false);
+        drawingPath_.ArcTo(rect, static_cast<RSScalar>(half + half + startAngle),
+            static_cast<RSScalar>(sweepAngle), false);
+    } else {
+        drawingPath_.ArcTo(rect, static_cast<RSScalar>(startAngle),
+            static_cast<RSScalar>(sweepAngle), false);
+    }
+#endif
 }
 
 void RosenRenderCustomPaint::ArcTo(const Offset& offset, const ArcToParam& param)
@@ -921,8 +983,14 @@ void RosenRenderCustomPaint::ArcTo(const Offset& offset, const ArcToParam& param
     double x2 = param.x2 + offset.GetX();
     double y2 = param.y2 + offset.GetY();
     double radius = param.radius;
+#ifndef USE_ROSEN_DRAWING
     skPath_.arcTo(SkDoubleToScalar(x1), SkDoubleToScalar(y1), SkDoubleToScalar(x2), SkDoubleToScalar(y2),
         SkDoubleToScalar(radius));
+#else
+    drawingPath_.ArcTo(static_cast<RSScalar>(x1), static_cast<RSScalar>(y1),
+        static_cast<RSScalar>(x2), static_cast<RSScalar>(y2),
+        static_cast<RSScalar>(radius));
+#endif
 }
 
 void RosenRenderCustomPaint::Ellipse(const Offset& offset, const EllipseParam& param)
@@ -952,6 +1020,7 @@ void RosenRenderCustomPaint::Ellipse(const Offset& offset, const EllipseParam& p
     double top = param.y - param.radiusY + offset.GetY();
     double right = param.x + param.radiusX + offset.GetX();
     double bottom = param.y + param.radiusY + offset.GetY();
+#ifndef USE_ROSEN_DRAWING
     auto rect = SkRect::MakeLTRB(left, top, right, bottom);
     if (!NearZero(rotation)) {
         SkMatrix matrix;
@@ -970,17 +1039,44 @@ void RosenRenderCustomPaint::Ellipse(const Offset& offset, const EllipseParam& p
         matrix.setRotate(rotation, param.x + offset.GetX(), param.y + offset.GetY());
         skPath_.transform(matrix);
     }
+#else
+    auto rect = RSRect(left, top, right, bottom);
+    if (!NearZero(rotation)) {
+        RSMatrix matrix;
+        matrix.Rotate(-rotation, param.x + offset.GetX(), param.y + offset.GetY());
+        drawingPath_.Transform(matrix);
+    }
+    if (NearZero(sweepAngle) && !NearZero(param.endAngle - param.startAngle)) {
+        // The entire ellipse needs to be drawn with two arcTo.
+        drawingPath_.ArcTo(rect, startAngle, HALF_CIRCLE_ANGLE, false);
+        drawingPath_.ArcTo(rect, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE, false);
+    } else {
+        drawingPath_.ArcTo(rect, startAngle, sweepAngle, false);
+    }
+    if (!NearZero(rotation)) {
+        RSMatrix matrix;
+        matrix.Rotate(rotation, param.x + offset.GetX(), param.y + offset.GetY());
+        drawingPath_.Transform(matrix);
+    }
+#endif
 }
 
 void RosenRenderCustomPaint::AddRect(const Offset& offset, const Rect& rect)
 {
+#ifndef USE_ROSEN_DRAWING
     SkRect skRect = SkRect::MakeLTRB(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
         rect.Right() + offset.GetX(), offset.GetY() + rect.Bottom());
     skPath_.addRect(skRect);
+#else
+    RSRect drawingRect(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
+        rect.Right() + offset.GetX(), offset.GetY() + rect.Bottom());
+    drawingPath_.AddRect(drawingRect);
+#endif
 }
 
 void RosenRenderCustomPaint::SetFillRuleForPath(const CanvasFillRule& rule)
 {
+#ifndef USE_ROSEN_DRAWING
     if (rule == CanvasFillRule::NONZERO) {
 #ifndef NEW_SKIA
         skPath_.setFillType(SkPath::FillType::kWinding_FillType);
@@ -994,10 +1090,18 @@ void RosenRenderCustomPaint::SetFillRuleForPath(const CanvasFillRule& rule)
         skPath_.setFillType(SkPathFillType::kEvenOdd);
 #endif
     }
+#else
+    if (rule == CanvasFillRule::NONZERO) {
+        drawingPath_.SetFillStyle(RSPathFillType::WINDING);
+    } else if (rule == CanvasFillRule::EVENODD) {
+        drawingPath_.SetFillStyle(RSPathFillType::EVEN_ODD);
+    }
+#endif
 }
 
 void RosenRenderCustomPaint::SetFillRuleForPath2D(const CanvasFillRule& rule)
 {
+#ifndef USE_ROSEN_DRAWING
     if (rule == CanvasFillRule::NONZERO) {
 #ifndef NEW_SKIA
         skPath2d_.setFillType(SkPath::FillType::kWinding_FillType);
@@ -1011,6 +1115,13 @@ void RosenRenderCustomPaint::SetFillRuleForPath2D(const CanvasFillRule& rule)
         skPath_.setFillType(SkPathFillType::kEvenOdd);
 #endif
     }
+#else
+    if (rule == CanvasFillRule::NONZERO) {
+        drawingPath2d_.SetFillStyle(RSPathFillType::WINDING);
+    } else if (rule == CanvasFillRule::EVENODD) {
+        drawingPath2d_.SetFillStyle(RSPathFillType::EVEN_ODD);
+    }
+#endif
 }
 
 void RosenRenderCustomPaint::ParsePath2D(const Offset& offset, const RefPtr<CanvasPath2D>& path)
@@ -1070,6 +1181,7 @@ void RosenRenderCustomPaint::ParsePath2D(const Offset& offset, const RefPtr<Canv
 
 void RosenRenderCustomPaint::Fill(const Offset& offset)
 {
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setAntiAlias(antiAlias_);
     paint.setColor(fillState_.GetColor().GetValue());
@@ -1098,6 +1210,35 @@ void RosenRenderCustomPaint::Fill(const Offset& offset)
 #endif
         cacheBitmap_.eraseColor(0);
     }
+#else
+    RSBrush brush;
+    brush.SetAntiAlias(antiAlias_);
+    brush.SetColor(fillState_.GetColor().GetValue());
+    if (HasShadow()) {
+        RosenDecorationPainter::PaintShadow(drawingPath_, shadow_, drawingCanvas_);
+    }
+    if (fillState_.GetGradient().IsValid()) {
+        UpdatePaintShader(offset, brush, fillState_.GetGradient());
+    }
+    if (fillState_.GetPattern().IsValid()) {
+        UpdatePaintShader(fillState_.GetPattern(), brush);
+    }
+    if (globalState_.HasGlobalAlpha()) {
+        brush.SetAlphaF(globalState_.GetAlpha());
+    }
+    if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+        drawingCanvas_->AttachBrush(brush);
+        drawingCanvas_->DrawPath(drawingPath_);
+        drawingCanvas_->DetachBrush();
+    } else {
+        InitPaintBlend(cacheBrush_);
+        cacheCanvas_->AttachBrush(brush);
+        cacheCanvas_->DrawPath(drawingPath_);
+        cacheCanvas_->DetachBrush();
+        drawingCanvas_->DrawBitmap(cacheBitmap_, 0, 0);
+        cacheBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+    }
+#endif
 }
 
 void RosenRenderCustomPaint::Fill(const Offset& offset, const RefPtr<CanvasPath2D>& path)
@@ -1108,11 +1249,16 @@ void RosenRenderCustomPaint::Fill(const Offset& offset, const RefPtr<CanvasPath2
     }
     ParsePath2D(offset, path);
     Path2DFill(offset);
+#ifndef USE_ROSEN_DRAWING
     skPath2d_.reset();
+#else
+    drawingPath2d_.Reset();
+#endif
 }
 
 void RosenRenderCustomPaint::Stroke(const Offset& offset)
 {
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint = GetStrokePaint();
     paint.setAntiAlias(antiAlias_);
     if (HasShadow()) {
@@ -1136,6 +1282,31 @@ void RosenRenderCustomPaint::Stroke(const Offset& offset)
 #endif
         cacheBitmap_.eraseColor(0);
     }
+#else
+    RSPen pen = GetStrokePaint();
+    pen.SetAntiAlias(antiAlias_);
+    if (HasShadow()) {
+        RosenDecorationPainter::PaintShadow(drawingPath_, shadow_, drawingCanvas_);
+    }
+    if (strokeState_.GetGradient().IsValid()) {
+        UpdatePaintShader(offset, pen, strokeState_.GetGradient());
+    }
+    if (strokeState_.GetPattern().IsValid()) {
+        UpdatePaintShader(strokeState_.GetPattern(), pen);
+    }
+    if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+        drawingCanvas_->AttachPen(pen);
+        drawingCanvas_->DrawPath(drawingPath_);
+        drawingCanvas_->DetachPen();
+    } else {
+        InitPaintBlend(cacheBrush_);
+        cacheCanvas_->AttachPen(pen);
+        cacheCanvas_->DrawPath(drawingPath_);
+        cacheCanvas_->DetachPen();
+        drawingCanvas_->DrawBitmap(cacheBitmap_, 0, 0);
+        cacheBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+    }
+#endif
 }
 
 void RosenRenderCustomPaint::Stroke(const Offset& offset, const RefPtr<CanvasPath2D>& path)
@@ -1146,18 +1317,29 @@ void RosenRenderCustomPaint::Stroke(const Offset& offset, const RefPtr<CanvasPat
     }
     ParsePath2D(offset, path);
     Path2DStroke(offset);
+#ifndef USE_ROSEN_DRAWING
     skPath2d_.reset();
+#else
+    drawingPath2d_.Reset();
+#endif
 }
 
 void RosenRenderCustomPaint::Path2DAddPath(const Offset& offset, const PathArgs& args)
 {
+#ifndef USE_ROSEN_DRAWING
     SkPath out;
     SkParsePath::FromSVGString(args.cmds.c_str(), &out);
     skPath2d_.addPath(out);
+#else
+    RSRecordingPath out;
+    out.FromSVGString(args.cmds.c_str());
+    drawingPath2d_.AddPath(out);
+#endif
 }
 
 void RosenRenderCustomPaint::Path2DSetTransform(const Offset& offset, const PathArgs& args)
 {
+#ifndef USE_ROSEN_DRAWING
     SkMatrix skMatrix;
     double scaleX = args.para1;
     double skewX = args.para2;
@@ -1167,20 +1349,39 @@ void RosenRenderCustomPaint::Path2DSetTransform(const Offset& offset, const Path
     double translateY = args.para6;
     skMatrix.setAll(scaleX, skewY, translateX, skewX, scaleY, translateY, 0, 0, 1);
     skPath2d_.transform(skMatrix);
+#else
+    RSMatrix matrix;
+    double scaleX = args.para1;
+    double skewX = args.para2;
+    double skewY = args.para3;
+    double scaleY = args.para4;
+    double translateX = args.para5;
+    double translateY = args.para6;
+    matrix.SetMatrix(scaleX, skewY, translateX, skewX, scaleY, translateY, 0, 0, 1);
+    drawingPath2d_.Transform(matrix);
+#endif
 }
 
 void RosenRenderCustomPaint::Path2DMoveTo(const Offset& offset, const PathArgs& args)
 {
     double x = args.para1 + offset.GetX();
     double y = args.para2 + offset.GetY();
+#ifndef USE_ROSEN_DRAWING
     skPath2d_.moveTo(x, y);
+#else
+    drawingPath2d_.MoveTo(x, y);
+#endif
 }
 
 void RosenRenderCustomPaint::Path2DLineTo(const Offset& offset, const PathArgs& args)
 {
     double x = args.para1 + offset.GetX();
     double y = args.para2 + offset.GetY();
+#ifndef USE_ROSEN_DRAWING
     skPath2d_.lineTo(x, y);
+#else
+    drawingPath2d_.LineTo(x, y);
+#endif
 }
 
 void RosenRenderCustomPaint::Path2DArc(const Offset& offset, const PathArgs& args)
@@ -1188,8 +1389,13 @@ void RosenRenderCustomPaint::Path2DArc(const Offset& offset, const PathArgs& arg
     double x = args.para1;
     double y = args.para2;
     double r = args.para3;
+#ifndef USE_ROSEN_DRAWING
     auto rect =
         SkRect::MakeLTRB(x - r + offset.GetX(), y - r + offset.GetY(), x + r + offset.GetX(), y + r + offset.GetY());
+#else
+    RSRect rect(
+        x - r + offset.GetX(), y - r + offset.GetY(), x + r + offset.GetX(), y + r + offset.GetY());
+#endif
     double startAngle = args.para4 * HALF_CIRCLE_ANGLE / M_PI;
     double endAngle = args.para5 * HALF_CIRCLE_ANGLE / M_PI;
     double sweepAngle = endAngle - startAngle;
@@ -1200,6 +1406,7 @@ void RosenRenderCustomPaint::Path2DArc(const Offset& offset, const PathArgs& arg
         sweepAngle =
             endAngle > startAngle ? sweepAngle : (std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) + FULL_CIRCLE_ANGLE);
     }
+#ifndef USE_ROSEN_DRAWING
     if (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && !NearEqual(startAngle, endAngle)) {
         skPath2d_.arcTo(rect, startAngle, HALF_CIRCLE_ANGLE, false);
         skPath2d_.arcTo(rect, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE, false);
@@ -1210,6 +1417,18 @@ void RosenRenderCustomPaint::Path2DArc(const Offset& offset, const PathArgs& arg
     } else {
         skPath2d_.arcTo(rect, startAngle, sweepAngle, false);
     }
+#else
+    if (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && !NearEqual(startAngle, endAngle)) {
+        drawingPath2d_.ArcTo(rect, startAngle, HALF_CIRCLE_ANGLE, false);
+        drawingPath2d_.ArcTo(rect, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE, false);
+    } else if (!NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && abs(sweepAngle) > FULL_CIRCLE_ANGLE) {
+        drawingPath2d_.ArcTo(rect, startAngle, HALF_CIRCLE_ANGLE, false);
+        drawingPath2d_.ArcTo(rect, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE, false);
+        drawingPath2d_.ArcTo(rect, startAngle + HALF_CIRCLE_ANGLE + HALF_CIRCLE_ANGLE, sweepAngle, false);
+    } else {
+        drawingPath2d_.ArcTo(rect, startAngle, sweepAngle, false);
+    }
+#endif
 }
 
 void RosenRenderCustomPaint::Path2DArcTo(const Offset& offset, const PathArgs& args)
@@ -1219,7 +1438,11 @@ void RosenRenderCustomPaint::Path2DArcTo(const Offset& offset, const PathArgs& a
     double x2 = args.para3 + offset.GetX();
     double y2 = args.para4 + offset.GetY();
     double r = args.para5;
+#ifndef USE_ROSEN_DRAWING
     skPath2d_.arcTo(x1, y1, x2, y2, r);
+#else
+    drawingPath2d_.ArcTo(x1, y1, x2, y2, r);
+#endif
 }
 
 void RosenRenderCustomPaint::Path2DQuadraticCurveTo(const Offset& offset, const PathArgs& args)
@@ -1228,7 +1451,11 @@ void RosenRenderCustomPaint::Path2DQuadraticCurveTo(const Offset& offset, const 
     double cpy = args.para2 + offset.GetY();
     double x = args.para3 + offset.GetX();
     double y = args.para4 + offset.GetY();
+#ifndef USE_ROSEN_DRAWING
     skPath2d_.quadTo(cpx, cpy, x, y);
+#else
+    drawingPath2d_.QuadTo(cpx, cpy, x, y);
+#endif
 }
 
 void RosenRenderCustomPaint::Path2DBezierCurveTo(const Offset& offset, const PathArgs& args)
@@ -1239,7 +1466,11 @@ void RosenRenderCustomPaint::Path2DBezierCurveTo(const Offset& offset, const Pat
     double cp2y = args.para4 + offset.GetY();
     double x = args.para5 + offset.GetX();
     double y = args.para6 + offset.GetY();
+#ifndef USE_ROSEN_DRAWING
     skPath2d_.cubicTo(cp1x, cp1y, cp2x, cp2y, x, y);
+#else
+    drawingPath2d_.CubicTo(cp1x, cp1y, cp2x, cp2y, x, y);
+#endif
 }
 
 void RosenRenderCustomPaint::Path2DEllipse(const Offset& offset, const PathArgs& args)
