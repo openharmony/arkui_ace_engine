@@ -802,6 +802,9 @@ template("declarative_js_engine_ng") {
     if (is_cross_platform_build) {
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
       deps += [ "$ark_ets_path:libark_jsruntime_static" ]
+      if (defined(config.pixel_map_support) && config.pixel_map_support) {
+        configs += [ "//foundation/multimedia/image_framework/interfaces/innerkits:image_external_config" ]
+      }
     } else {
       external_deps += [ "ets_runtime:libark_jsruntime" ]
     }
