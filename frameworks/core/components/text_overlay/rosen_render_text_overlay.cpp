@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,11 @@
 
 #include "core/components/text_overlay/rosen_render_text_overlay.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkImage.h"
 #include "include/core/SkMaskFilter.h"
 #include "include/core/SkPath.h"
+#endif
 
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/common/properties/shadow_config.h"
@@ -90,6 +92,7 @@ void RosenRenderTextOverlay::PaintHandles(RenderContext& context) const
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderTextOverlay::PaintHandle(SkCanvas* skCanvas, Offset centerOffset, bool isLeftHandle) const
 {
     if (!skCanvas) {
@@ -123,6 +126,48 @@ void RosenRenderTextOverlay::PaintHandle(SkCanvas* skCanvas, Offset centerOffset
     skCanvas->drawLine(startPoint.GetX(), startPoint.GetY(), endPoint.GetX(), endPoint.GetY(), paint);
     skCanvas->restore();
 }
+#else
+void RosenRenderTextOverlay::PaintHandle(RSCanvas* canvas, Offset centerOffset, bool isLeftHandle) const
+{
+    if (!canvas) {
+        return;
+    }
+
+    RSPen pen;
+    pen.SetAntiAlias(true);
+    canvas->Save();
+    canvas->Translate(centerOffset.GetX(), centerOffset.GetY());
+    // Paint outer circle.
+    pen.SetColor(handleColor_.GetValue());
+    canvas->AttachPen(pen);
+    canvas->DrawCircle(RSPoint(0.0, 0.0), NormalizeToPx(handleRadius_));
+    canvas->DetachPen();
+    // Paint inner circle.
+    pen.SetColor(handleColorInner_.GetValue());
+    canvas->AttachPen(pen);
+    canvas->DrawCircle(RSPoint(0.0, 0.0), NormalizeToPx(handleRadiusInner_));
+    canvas->DetachPen();
+    // Paint line of handle.
+    pen.SetAntiAlias(true);
+    pen.SetColor(handleColor_.GetValue());
+    pen.SetWidth(NormalizeToPx(HANDLE_LINE_WIDTH));
+    pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+    // 1.0 is avoid separation of handle circle and handle line.
+    Offset startPoint(Offset(0.0, NormalizeToPx(-handleRadius_) + 1.0));
+    // 1.0_dp is designed by UX, handle line is higher than height of select region.
+    Offset endPoint(Offset(0.0,
+        NormalizeToPx(-handleRadius_) - endHandleHeight_.value_or(lineHeight_) - NormalizeToPx(1.0_vp)));
+    if (isLeftHandle) {
+        startPoint.SetY(NormalizeToPx(handleRadius_) - 1.0);
+        endPoint.SetY(NormalizeToPx(handleRadius_) + startHandleHeight_.value_or(lineHeight_) + NormalizeToPx(1.0_vp));
+    }
+    canvas->AttachPen(pen);
+    canvas->DrawLine(
+        RSPoint(startPoint.GetX(), startPoint.GetY()), RSPoint(endPoint.GetX(), endPoint.GetY()));
+    canvas->DetachPen();
+    canvas->Restore();
+}
+#endif
 
 void RosenRenderTextOverlay::PaintMagnifier(RenderContext& context)
 {
@@ -171,6 +216,7 @@ void RosenRenderTextOverlay::PaintMagnifier(RenderContext& context)
     globalX = LessOrEqual(globalX, 0.0) ? 0.0 : globalX;
     globalY = LessOrEqual(globalY, 0.0) ? 0.0 : globalY;
 
+#ifndef USE_ROSEN_DRAWING
     SkRRect rrect = SkRRect::MakeRectXY(
         SkRect::MakeXYWH(globalX, globalY, NormalizeToPx(MAGNIFIER_WIDTH), NormalizeToPx(MAGNIFIER_WIDTH)),
         NormalizeToPx(MAGNIFIER_WIDTH), NormalizeToPx(MAGNIFIER_WIDTH));
@@ -206,8 +252,49 @@ void RosenRenderTextOverlay::PaintMagnifier(RenderContext& context)
             SkSamplingOptions(), nullptr, SkCanvas::kStrict_SrcRectConstraint);
 #endif
     canvas->restore();
+#else
+    RSRoundRect rrect(
+        RSRect(globalX, globalY,
+            NormalizeToPx(MAGNIFIER_WIDTH) + globalX, NormalizeToPx(MAGNIFIER_WIDTH) + globalY),
+        NormalizeToPx(MAGNIFIER_WIDTH), NormalizeToPx(MAGNIFIER_WIDTH));
+    RSRecordingPath path;
+    path.AddRoundRect(rrect);
+
+    RosenDecorationPainter::PaintShadow(
+        path, ShadowConfig::DefaultShadowM, static_cast<RosenRenderContext*>(&context)->GetRSNode());
+
+    RSRoundRect ScaleRrect(
+        RSRect(globalX * viewScale, globalY * viewScale,
+            NormalizeToPx(MAGNIFIER_WIDTH) * viewScale + globalX * viewScale,
+            NormalizeToPx(MAGNIFIER_WIDTH) * viewScale + globalY * viewScale),
+        NormalizeToPx(MAGNIFIER_WIDTH) * viewScale, NormalizeToPx(MAGNIFIER_WIDTH) * viewScale);
+
+    canvas->Save();
+    canvas->Scale(1.0 / viewScale, 1.0 / viewScale);
+    RSPen pen;
+    canvas->ClipRoundRect(ScaleRrect, RSClipOp::INTERSECT, true);
+
+    pen.SetColor(RSColor::COLOR_WHITE);
+    pen.SetAntiAlias(true);
+    canvas->AttachPen(pen);
+    canvas->DrawRoundRect(ScaleRrect);
+    canvas->DetachPen();
+
+    RSSamplingOptions sampling =
+        RSSamplingOptions(RSFilterMode::NEAREST, RSMipmapMode::NEAREST);
+    canvas->DrawBitmapRect(bitmap,
+        RSRect(x * viewScale * MAGNIFIER_GAIN + FIXED_OFFSET, y * viewScale * MAGNIFIER_GAIN + FIXED_OFFSET,
+            NormalizeToPx(MAGNIFIER_WIDTH) * viewScale + (x * viewScale * MAGNIFIER_GAIN + FIXED_OFFSET),
+            NormalizeToPx(MAGNIFIER_WIDTH) * viewScale + (y * viewScale * MAGNIFIER_GAIN + FIXED_OFFSET)),
+        RSRect(globalX * viewScale, globalY * viewScale,
+            NormalizeToPx(MAGNIFIER_WIDTH) * viewScale + globalX * viewScale,
+            NormalizeToPx(MAGNIFIER_WIDTH) * viewScale + globalY * viewScale),
+        sampling);
+    canvas->Restore();
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderTextOverlay::PaintClipLine(SkCanvas* skCanvas, SkPaint paint)
 {
     if (!skCanvas) {
@@ -226,6 +313,28 @@ void RosenRenderTextOverlay::PaintClipLine(SkCanvas* skCanvas, SkPaint paint)
     linePath.rLineTo(SkDoubleToScalar(NormalizeToPx(CLIP_LENGTH)), SkDoubleToScalar(NormalizeToPx(CLIP_LENGTH)));
     skCanvas->drawPath(linePath, paint);
 }
+#else
+void RosenRenderTextOverlay::PaintClipLine(RSCanvas* canvas, RSPen pen)
+{
+    if (!canvas) {
+        LOGE("Paint canvas is null");
+        return;
+    }
+
+    if (LessOrEqual(clipWidth_, 0.0)) {
+        return;
+    }
+
+    pen.SetWidth(NormalizeToPx(Dimension(clipWidth_, DimensionUnit::VP)));
+    pen.SetColor(clipColor_.GetValue());
+    RSRecordingPath linePath;
+    linePath.MoveTo(static_cast<float>(NormalizeToPx(CLIP_ORIGIN_X)), static_cast<float>(NormalizeToPx(CLIP_ORIGIN_Y)));
+    linePath.RLineTo(static_cast<float>(NormalizeToPx(CLIP_LENGTH)), static_cast<float>(NormalizeToPx(CLIP_LENGTH)));
+    canvas->AttachPen(pen);
+    canvas->DrawPath(linePath);
+    canvas->DetachPen();
+}
+#endif
 
 void RosenRenderTextOverlay::InitMoreButtonPaintColor()
 {
@@ -300,6 +409,7 @@ void RosenRenderTextOverlay::PaintMore(RenderContext& context)
     InitMoreButtonPaintColor();
     Offset moreOffset = CalculateMoreButtonCenter();
     Offset center = (DOT1_POSITION + DOT4_POSITION) * dipScale * HALF;
+#ifndef USE_ROSEN_DRAWING
     canvas->save();
     canvas->translate(moreOffset.GetX() + center.GetX(), moreOffset.GetY() + center.GetY());
     if (textDirection_ == TextDirection::RTL) {
@@ -334,6 +444,43 @@ void RosenRenderTextOverlay::PaintMore(RenderContext& context)
 
     PaintClipLine(canvas, skPaint);
     canvas->restore();
+#else
+    canvas->Save();
+    canvas->Translate(moreOffset.GetX() + center.GetX(), moreOffset.GetY() + center.GetY());
+    if (textDirection_ == TextDirection::RTL) {
+        // mirror effect
+        canvas->Scale(-1.0, 1.0);
+    }
+    canvas->Rotate(rotateDegree_);
+    canvas->Translate(-center.GetX(), -center.GetY());
+
+    Offset topLeft = (DOT1_POSITION + dot1StartOffset_) * dipScale;
+    Offset topRight = (DOT2_POSITION + dot2StartOffset_) * dipScale;
+    Offset bottomLeft = (DOT3_POSITION + dot3StartOffset_) * dipScale;
+    Offset bottomRight = (DOT4_POSITION + dot4StartOffset_) * dipScale;
+
+    RSPen pen;
+    pen.SetAntiAlias(true);
+    pen.SetColor(arrowColor_.GetValue());
+    pen.SetWidth(NormalizeToPx(strokeWidth_));
+    pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+
+    RSRecordingPath path;
+    path.MoveTo(static_cast<float>(topLeft.GetX()), static_cast<float>(topLeft.GetY()));
+    path.LineTo(static_cast<float>(topLeft.GetX()), static_cast<float>(topLeft.GetY()));
+    path.MoveTo(static_cast<float>(topRight.GetX()), static_cast<float>(topRight.GetY()));
+    path.RLineTo(static_cast<float>(dot2Offset_.GetX() * dipScale), static_cast<float>(0.0));
+    path.MoveTo(static_cast<float>(bottomLeft.GetX()), static_cast<float>(bottomLeft.GetY()));
+    path.RLineTo(static_cast<float>(0.0), static_cast<float>(dot3Offset_.GetY() * dipScale));
+    path.MoveTo(static_cast<float>(bottomRight.GetX()), static_cast<float>(bottomRight.GetY()));
+    path.RLineTo(static_cast<float>(dot4Offset_.GetX() * dipScale), static_cast<float>(dot4Offset_.GetY() * dipScale));
+    canvas->AttachPen(pen);
+    canvas->DrawPath(path);
+    canvas->DetachPen();
+
+    PaintClipLine(canvas, pen);
+    canvas->Restore();
+#endif
 }
 
 void RosenRenderTextOverlay::AdjustForAnimation()
