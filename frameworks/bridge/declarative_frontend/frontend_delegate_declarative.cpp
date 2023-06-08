@@ -785,10 +785,12 @@ void FrontendDelegateDeclarative::GetStageSourceMap(
     }
 }
 
-void FrontendDelegateDeclarative::InitializeRouterManager(NG::LoadPageCallback&& loadPageCallback)
+void FrontendDelegateDeclarative::InitializeRouterManager(
+    NG::LoadPageCallback&& loadPageCallback, NG::LoadNamedRouterCallback&& loadNamedRouterCallback)
 {
     pageRouterManager_ = AceType::MakeRefPtr<NG::PageRouterManager>();
     pageRouterManager_->SetLoadJsCallback(std::move(loadPageCallback));
+    pageRouterManager_->SetLoadNamedRouterCallback(std::move(loadNamedRouterCallback));
 }
 
 // Start FrontendDelegate overrides.
@@ -828,6 +830,15 @@ void FrontendDelegateDeclarative::PushWithCallback(const std::string& uri, const
     Push(PageTarget(uri, static_cast<RouterMode>(routerMode)), params, errorCallback);
 }
 
+void FrontendDelegateDeclarative::PushNamedRoute(const std::string& uri, const std::string& params,
+    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    pageRouterManager_->PushNamedRoute(
+        NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+    OnMediaQueryUpdate();
+}
+
 void FrontendDelegateDeclarative::Replace(const std::string& uri, const std::string& params)
 {
     if (Container::IsCurrentUseNewPipeline()) {
@@ -862,6 +873,15 @@ void FrontendDelegateDeclarative::ReplaceWithCallback(const std::string& uri, co
         return;
     }
     Replace(PageTarget(uri, static_cast<RouterMode>(routerMode)), params, errorCallback);
+}
+
+void FrontendDelegateDeclarative::ReplaceNamedRoute(const std::string& uri, const std::string& params,
+    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    pageRouterManager_->ReplaceNamedRoute(
+        NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+    OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarative::Back(const std::string& uri, const std::string& params)

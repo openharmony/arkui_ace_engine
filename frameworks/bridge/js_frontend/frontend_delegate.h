@@ -61,10 +61,16 @@ public:
     virtual void PushWithCallback(const std::string& uri, const std::string& params,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0)
     {}
+    virtual void PushNamedRoute(const std::string& uri, const std::string& params,
+        const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0)
+    {}
     // Jump to the specified page, but current page will be removed from the stack.
     virtual void Replace(const std::string& uri, const std::string& params) = 0;
     virtual void ReplaceWithMode(const std::string& uri, const std::string& params, uint32_t routerMode) {}
     virtual void ReplaceWithCallback(const std::string& uri, const std::string& params,
+        const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0)
+    {}
+    virtual void ReplaceNamedRoute(const std::string& uri, const std::string& params,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0)
     {}
     // Back to specified page or the previous page if url not set.

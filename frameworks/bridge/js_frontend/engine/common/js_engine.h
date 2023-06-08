@@ -102,6 +102,11 @@ public:
         return false;
     }
 
+    virtual bool LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs)
+    {
+        return false;
+    }
+
     // Update running page
     virtual void UpdateRunningPage(const RefPtr<JsAcePage>& page) = 0;
 

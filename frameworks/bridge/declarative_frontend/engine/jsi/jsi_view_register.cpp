@@ -233,6 +233,43 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtim
     return panda::JSValueRef::Undefined(vm);
 }
 
+panda::Local<panda::JSValueRef> JsRegisterNamedRoute(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    LOGD("Register NamedRoute start");
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    // will need three arguments
+    if (argc != 3) {
+        LOGE("The arg is wrong, must have three arguments");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsFunction()) {
+        LOGE("The arg is wrong, value must be function");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    if (!secondArg->IsString()) {
+        LOGE("The arg is wrong, value must be string");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(2);
+    if (!thirdArg->IsObject()) {
+        LOGE("The arg is wrong, value must be object");
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    auto engine = EngineHelper::GetEngine(Container::CurrentId());
+    CHECK_NULL_RETURN(engine, panda::JSValueRef::Undefined(vm));
+    auto jsiEngine = AceType::DynamicCast<JsiDeclarativeEngine>(engine);
+    CHECK_NULL_RETURN(jsiEngine, panda::JSValueRef::Undefined(vm));
+
+    jsiEngine->AddToNamedRouterMap(panda::Global<panda::FunctionRef>(vm, Local<panda::FunctionRef>(firstArg)),
+        secondArg->ToString(vm)->ToString(), thirdArg->ToObject(vm));
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
 panda::Local<panda::JSValueRef> JSPostCardAction(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -1265,6 +1302,8 @@ void JsRegisterViews(BindingTarget globalObj)
     focusControlObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "requestFocus"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RequestFocus));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "focusControl"), focusControlObj);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "registerNamedRoute"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsRegisterNamedRoute));
 
     JsBindViews(globalObj);
 
