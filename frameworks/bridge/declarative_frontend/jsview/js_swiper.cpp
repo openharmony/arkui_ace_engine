@@ -664,11 +664,8 @@ void JSSwiper::SetPreviousMargin(const JSCallbackInfo& info)
     }
 
     CalcDimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
-        return;
-    }
-
-    if (LessNotEqual(value.Value(), 0.0)) {
+    if (!ParseJsDimensionVp(info[0], value) || info[0]->IsNull() || info[0]->IsUndefined() ||
+        LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
     SwiperModel::GetInstance()->SetPreviousMargin(value);
@@ -682,11 +679,8 @@ void JSSwiper::SetNextMargin(const JSCallbackInfo& info)
     }
 
     CalcDimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
-        return;
-    }
-
-    if (LessNotEqual(value.Value(), 0.0)) {
+    if (!ParseJsDimensionVp(info[0], value) || info[0]->IsNull() || info[0]->IsUndefined() ||
+        LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
     SwiperModel::GetInstance()->SetNextMargin(value);
