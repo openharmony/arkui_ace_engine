@@ -1815,6 +1815,9 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
 
 void TextFieldPattern::ScheduleCursorTwinkling()
 {
+    if (isTransparent_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
@@ -1838,6 +1841,9 @@ void TextFieldPattern::ScheduleCursorTwinkling()
 
 void TextFieldPattern::StartTwinkling()
 {
+    if (isTransparent_) {
+        return;
+    }
     // Ignore the result because all ops are called on this same thread (ACE UI).
     // The only reason failed is that the task has finished.
     cursorTwinklingTask_.Cancel();
@@ -1906,6 +1912,10 @@ void TextFieldPattern::OnModifyDone()
     if (layoutProperty->GetShowUnderlineValue(false)) {
         SaveUnderlineStates();
     }
+    
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    isTransparent_ = renderContext->GetOpacityValue(1.0f) == 0.0f;
     SavePasswordModeStates();
     InitClickEvent();
     InitLongPressEvent();
@@ -1929,7 +1939,6 @@ void TextFieldPattern::OnModifyDone()
     textRect_.SetOffset(OffsetF(GetPaddingLeft(), GetPaddingTop()));
     CalculateDefaultCursor();
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
-    auto renderContext = GetHost()->GetRenderContext();
     if (renderContext->HasBackgroundColor()) {
         paintProperty->UpdateBackgroundColor(renderContext->GetBackgroundColorValue());
     }
@@ -2193,6 +2202,9 @@ void TextFieldPattern::ShowSelectOverlay(
     const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle)
 {
     CloseSelectOverlay();
+    if (isTransparent_) {
+        return;
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto hasDataCallback = [weak = WeakClaim(this), pipeline, firstHandle, secondHandle](bool hasData) {

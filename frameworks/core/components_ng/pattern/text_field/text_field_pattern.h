@@ -994,6 +994,7 @@ private:
     bool needToRefreshSelectOverlay_ = false;
     bool needToRequestKeyboardInner_ = false;
     bool needToRequestKeyboardOnFocus_ = true;
+    bool isTransparent_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 
