@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_BUTTON_MODEL_IMPL_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_BUTTON_MODEL_IMPL_H
 
+#include "core/components/button/button_component.h"
 #include "core/components/text/text_component.h"
 #include "core/components_ng/pattern/button/button_model.h"
 
