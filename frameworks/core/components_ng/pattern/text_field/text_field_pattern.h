@@ -1050,9 +1050,6 @@ private:
     bool imeShown_ = false;
 #endif
     int32_t instanceId_ = -1;
-#if defined(PREVIEW)
-    std::vector<std::wstring> clipRecords_;
-#endif
 };
 } // namespace OHOS::Ace::NG
 
