@@ -807,11 +807,13 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
         auto xVal = offsetObj->GetProperty("x");
         auto yVal = offsetObj->GetProperty("y");
         Offset popupOffset;
-        if (xVal->IsNumber()) {
-            popupOffset.SetX(xVal->ToNumber<double>());
+        CalcDimension dx;
+        CalcDimension dy;
+        if (JSViewAbstract::ParseJsDimensionVp(xVal, dx)) {
+            popupOffset.SetX(dx.ConvertToPx());
         }
-        if (yVal->IsNumber()) {
-            popupOffset.SetY(yVal->ToNumber<double>());
+        if (JSViewAbstract::ParseJsDimensionVp(yVal, dy)) {
+            popupOffset.SetY(dy.ConvertToPx());
         }
         if (popupParam) {
             popupParam->SetTargetOffset(popupOffset);
@@ -936,11 +938,13 @@ void ParseCustomPopupParam(
         auto xVal = offsetObj->GetProperty("x");
         auto yVal = offsetObj->GetProperty("y");
         Offset popupOffset;
-        if (xVal->IsNumber()) {
-            popupOffset.SetX(xVal->ToNumber<double>());
+        CalcDimension dx;
+        CalcDimension dy;
+        if (JSViewAbstract::ParseJsDimensionVp(xVal, dx)) {
+            popupOffset.SetX(dx.ConvertToPx());
         }
-        if (yVal->IsNumber()) {
-            popupOffset.SetY(yVal->ToNumber<double>());
+        if (JSViewAbstract::ParseJsDimensionVp(yVal, dy)) {
+            popupOffset.SetY(dy.ConvertToPx());
         }
         if (popupParam) {
             popupParam->SetTargetOffset(popupOffset);
