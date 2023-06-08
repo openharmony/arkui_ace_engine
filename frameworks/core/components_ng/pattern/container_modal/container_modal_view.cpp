@@ -280,13 +280,13 @@ void ContainerModalView::AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
                 [buttonNodeRenderContext, imageIconRenderContext, imageScale, translateX, translateY]() {
                     buttonNodeRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
                     imageIconRenderContext->UpdateTransformScale(VectorF(1 / imageScale, 1 / imageScale));
-                    imageIconRenderContext->UpdateTransformTranslate({translateX, translateY, 0.0f} );
+                    imageIconRenderContext->UpdateTransformTranslate({translateX, translateY, 0.0f});
                 });
         } else {
             AnimationUtils::Animate(option, [buttonNodeRenderContext, imageIconRenderContext, imageScale]() {
                 buttonNodeRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
                 imageIconRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
-                imageIconRenderContext->UpdateTransformTranslate( { 0.0f, 0.0f, 0.0f } );
+                imageIconRenderContext->UpdateTransformTranslate({0.0f, 0.0f, 0.0f});
             });
         }
     };
@@ -313,8 +313,8 @@ void ContainerModalView::AddButtonMouse(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
         AnimationOption option = AnimationOption();
         option.SetCurve(Framework::CreateCurve("responsive-spring-motion"));
         AnimationUtils::Animate(option, [imageIconRenderContext, translateX, translateY]() {
-                imageIconRenderContext->UpdateTransformTranslate({translateX, translateY, 0.0f});
-            });
+            imageIconRenderContext->UpdateTransformTranslate({translateX, translateY, 0.0f});
+        });
     };
     auto mouseEvent =  AceType::MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnMouseEvent(mouseEvent);
