@@ -224,74 +224,8 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
         buttonFocus->SetFocusable(false);
     }
 
-    auto inputHub = buttonNode->GetOrCreateInputEventHub();
-    CHECK_NULL_RETURN(inputHub, nullptr);
-    auto hoverTask = [buttonNode, imageIcon](bool isHover) {
-        CHECK_NULL_VOID(buttonNode);
-        CHECK_NULL_VOID(imageIcon);
-        auto buttonPattern = AceType::DynamicCast<ButtonPattern>(buttonNode->GetPattern());
-        CHECK_NULL_VOID(buttonPattern);
-        buttonPattern->SetInHover(isHover);
-
-        float translateX = 0.0f;
-        float translateY = 0.0f;
-        float halfSize = TITLE_ICON_SIZE.Value() / 2.0f;
-        translateX = (buttonPattern->GetLocalLocation().GetX() - halfSize) / halfSize * 2;
-        translateY = (buttonPattern->GetLocalLocation().GetY() - halfSize) / halfSize * 2;
-
-        auto buttonNodeRenderContext = buttonNode->GetRenderContext();
-        auto imageIconRenderContext = imageIcon->GetRenderContext();
-        CHECK_NULL_VOID(buttonNodeRenderContext);
-        CHECK_NULL_VOID(imageIconRenderContext);
-        double imageScale = isHover ? 1.10 : 1.00;
-        AnimationOption option = AnimationOption();
-        option.SetDuration(100);
-        std::string icurveString = "cubic-bezier(0.500000,0.000000,0.500000,1.000000)";
-        option.SetCurve(Framework::CreateCurve(icurveString));
-        if (isHover) {
-            AnimationUtils::Animate(option,[buttonNodeRenderContext,imageIconRenderContext,imageScale,translateX,translateY]() {
-                buttonNodeRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
-                imageIconRenderContext->UpdateTransformScale(VectorF(1 / imageScale, 1 / imageScale));
-                imageIconRenderContext->UpdateTransformTranslate({translateX, translateY, 0.0f});
-            });
-        } else {
-            AnimationUtils::Animate(option,[buttonNodeRenderContext,imageIconRenderContext,imageScale]() {
-                buttonNodeRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
-                imageIconRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
-                imageIconRenderContext->UpdateTransformTranslate({0.0f, 0.0f, 0.0f});
-            });
-        }
-    };
-    auto hoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(hoverTask));
-    inputHub->AddOnHoverEvent(hoverEvent);
-
-    auto mouseTask = [buttonNode, imageIcon](MouseInfo& info) {
-        CHECK_NULL_VOID(buttonNode);
-        CHECK_NULL_VOID(imageIcon);
-        auto buttonPattern = AceType::DynamicCast<ButtonPattern>(buttonNode->GetPattern());
-        CHECK_NULL_VOID(buttonPattern);
-
-        if (info.GetAction() != MouseAction::MOVE || !buttonPattern->GetIsInHover()) {
-            buttonPattern->SetLocalLocation(info.GetLocalLocation());
-            return;
-        }
-
-        auto imageIconRenderContext = imageIcon->GetRenderContext();
-        CHECK_NULL_VOID(imageIconRenderContext);
-        float translateX = 0.0f;
-        float translateY = 0.0f;
-        float halfSize = TITLE_ICON_SIZE.Value() / 2.0f;
-        translateX = (info.GetLocalLocation().GetX() - halfSize) / halfSize * 2;
-        translateY = (info.GetLocalLocation().GetY() - halfSize) / halfSize * 2;
-        AnimationOption option = AnimationOption();
-        option.SetCurve(Framework::CreateCurve("responsive-spring-motion"));
-        AnimationUtils::Animate(option,[imageIconRenderContext,translateX,translateY]() {
-            imageIconRenderContext->UpdateTransformTranslate({translateX, translateY, 0.0f});
-        });
-
-    };
-    auto mouseEvent = AceType::MakeRefPtr<InputEvent>(std::move(mouseTask));
-    inputHub->AddOnMouseEvent(mouseEvent);
+    AddButtonHover(buttonNode, imageIcon);
+    AddButtonMouse(buttonNode, imageIcon);
 
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
@@ -319,6 +253,70 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
 
     buttonNode->AddChild(imageIcon);
     return buttonNode;
+}
+
+void ContainerModalView::AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode) {
+    auto inputHub = buttonNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    auto hoverTask = [buttonNode, imageNode](bool isHover) {
+        auto buttonPattern = AceType::DynamicCast<ButtonPattern>(buttonNode->GetPattern());
+        CHECK_NULL_VOID(buttonPattern);
+        buttonPattern->SetInHover(isHover);
+        float halfSize = TITLE_ICON_SIZE.Value() / 2.0f;
+        float translateX = (buttonPattern->GetLocalLocation().GetX() - halfSize) / halfSize * 2;
+        float translateY = (buttonPattern->GetLocalLocation().GetY() - halfSize) / halfSize * 2;
+        auto buttonNodeRenderContext = buttonNode->GetRenderContext();
+        auto imageIconRenderContext = imageNode->GetRenderContext();
+        CHECK_NULL_VOID(buttonNodeRenderContext);
+        CHECK_NULL_VOID(imageIconRenderContext);
+        double imageScale = isHover ? 1.10 : 1.0;
+        AnimationOption option = AnimationOption();
+        option.SetDuration(100);
+        std::string icurveString = "cubic-bezier(0.500000,0.000000,0.500000,1.000000)";
+        option.SetCurve(Framework::CreateCurve(icurveString));
+        if (isHover) {
+            AnimationUtils::Animate(option,
+                [buttonNodeRenderContext,imageIconRenderContext, imageScale, translateX, translateY]() {
+                    buttonNodeRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
+                    imageIconRenderContext->UpdateTransformScale(VectorF(1 / imageScale, 1 / imageScale));
+                    imageIconRenderContext->UpdateTransformTranslate({translateX, translateY, 0.0f});
+                }
+            );
+        } else {
+            AnimationUtils::Animate(option,[buttonNodeRenderContext, imageIconRenderContext, imageScale]() {
+                buttonNodeRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
+                imageIconRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
+                imageIconRenderContext->UpdateTransformTranslate({0.0f, 0.0f, 0.0f});
+            });
+        }
+    };
+    auto hoverEvent =  AceType::MakeRefPtr<InputEvent>(std::move(hoverTask));
+    inputHub->AddOnHoverEvent(hoverEvent);
+}
+
+void ContainerModalView::AddButtonMouse(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode) {
+    auto inputHub = buttonNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    auto mouseTask = [buttonNode, imageNode](MouseInfo& info) {
+        auto buttonPattern = AceType::DynamicCast<ButtonPattern>(buttonNode->GetPattern());
+        CHECK_NULL_VOID(buttonPattern);
+        if (info.GetAction() != MouseAction::MOVE || !buttonPattern->GetIsInHover()) {
+            buttonPattern->SetLocalLocation(info.GetLocalLocation());
+            return;
+        }
+        auto imageIconRenderContext = imageNode->GetRenderContext();
+        CHECK_NULL_VOID(imageIconRenderContext);
+        float halfSize = TITLE_ICON_SIZE.Value() / 2.0f;
+        float translateX = (info.GetLocalLocation().GetX() - halfSize) / halfSize * 2;
+        float translateY = (info.GetLocalLocation().GetY() - halfSize) / halfSize * 2;
+        AnimationOption option = AnimationOption();
+        option.SetCurve(Framework::CreateCurve("responsive-spring-motion"));
+        AnimationUtils::Animate( option, [imageIconRenderContext, translateX, translateY]() {
+                imageIconRenderContext->UpdateTransformTranslate({ translateX, translateY, 0.0f });
+            });
+    };
+    auto mouseEvent =  AceType::MakeRefPtr<InputEvent>(std::move(mouseTask));
+    inputHub->AddOnMouseEvent(mouseEvent);
 }
 
 } // namespace OHOS::Ace::NG
