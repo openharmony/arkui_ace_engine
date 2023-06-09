@@ -3398,7 +3398,7 @@ HWTEST_F(TabsTestNg, PerformActionTest001, TestSize.Level1)
     auto tabBarPattern = frameNode->GetPattern<TabBarPattern>();
     ASSERT_NE(tabBarPattern, nullptr);
     auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
-    CHECK_NULL_VOID(tabBarLayoutProperty);
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
     tabBarLayoutProperty->UpdateTabBarMode(TabBarMode::FIXED);
     tabBarPattern->SetAccessibilityAction();
 
@@ -3557,9 +3557,9 @@ HWTEST_F(TabsTestNg, TabBarPatternInitClick001, TestSize.Level1)
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     ASSERT_NE(tabBarPattern, nullptr);
     auto eventHub = AceType::MakeRefPtr<EventHub>();
-    CHECK_NULL_VOID(eventHub);
+    ASSERT_NE(eventHub, nullptr);
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-    CHECK_NULL_VOID(gestureHub);
+    ASSERT_NE(gestureHub, nullptr);
     tabBarPattern->clickEvent_ = nullptr;
 
     /**
@@ -3598,9 +3598,9 @@ HWTEST_F(TabsTestNg, TabBarPatternInitScrollable001, TestSize.Level1)
     auto axis_test = Axis::HORIZONTAL;
     tabBarPattern->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(axis_test);
     auto eventHub = AceType::MakeRefPtr<EventHub>();
-    CHECK_NULL_VOID(eventHub);
+    ASSERT_NE(eventHub, nullptr);
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-    CHECK_NULL_VOID(gestureHub);
+    ASSERT_NE(gestureHub, nullptr);
 
     /**
      * @tc.steps: step2. Test function InitScrollable.
@@ -3648,9 +3648,9 @@ HWTEST_F(TabsTestNg, TabBarPatternInitTouche001, TestSize.Level1)
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     ASSERT_NE(tabBarPattern, nullptr);
     auto eventHub = AceType::MakeRefPtr<EventHub>();
-    CHECK_NULL_VOID(eventHub);
+    ASSERT_NE(eventHub, nullptr);
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-    CHECK_NULL_VOID(gestureHub);
+    ASSERT_NE(gestureHub, nullptr);
     tabBarPattern->touchEvent_ = AceType::MakeRefPtr<TouchEventImpl>(test_func);
     tabBarPattern->hoverEvent_ = AceType::MakeRefPtr<InputEvent>(test_func01);
     tabBarPattern->mouseEvent_ = AceType::MakeRefPtr<InputEvent>(test_func01);
@@ -3687,9 +3687,9 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleMouseEvent001, TestSize.Level1)
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     ASSERT_NE(tabBarPattern, nullptr);
     auto eventHub = AceType::MakeRefPtr<EventHub>();
-    CHECK_NULL_VOID(eventHub);
+    ASSERT_NE(eventHub, nullptr);
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-    CHECK_NULL_VOID(gestureHub);
+    ASSERT_NE(gestureHub, nullptr);
     auto info = MouseInfo();
     Offset s1(0.1, 0.1);
     OffsetF c1(0.1f, 0.1f);
@@ -4758,11 +4758,11 @@ HWTEST_F(TabsTestNg, TabBarPatternPlayPressAnimation002, TestSize.Level1)
 }
 
 /**
- * @tc.name: TabBarPatternUpdateTextColor001
- * @tc.desc: test UpdateTextColor
+ * @tc.name: TabBarPatternStopTabBarTranslateAnimation001
+ * @tc.desc: test StopTabBarTranslateAnimation
  * @tc.type: FUNC
  */
-HWTEST_F(TabsTestNg, TabBarPatternUpdateTextColor001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabBarPatternStopTabBarTranslateAnimation001, TestSize.Level1)
 {
     /**
      * @tc.steps: steps1. Create TabBarPattern
@@ -4782,16 +4782,53 @@ HWTEST_F(TabsTestNg, TabBarPatternUpdateTextColor001, TestSize.Level1)
     tabBarNode->GetLayoutProperty<TabBarLayoutProperty>()->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     ASSERT_NE(tabBarPattern, nullptr);
-    int32_t index = 0;
-    auto pr = tabBarPattern->tabBarType_.emplace(1, false);
-    if (pr.second == true) {
-        tabBarPattern->tabBarType_.emplace_hint(pr.first, 1, true);
-    }
+    tabBarPattern->tabBarTranslateController_ = AceType::MakeRefPtr<Animator>();
+    tabBarPattern->tabBarTranslateController_->status_ = Animator::Status::RUNNING;
 
     /**
-     * @tc.steps: step2. Test function UpdateTextColor.
-     * @tc.expected: Related functions run ok.
+     * @tc.steps: step2. Test function StopTabBarTranslateAnimation.
+     * @tc.expected: Related function runs ok.
      */
-    tabBarPattern->UpdateTextColor(index);
+    for (int i = 0; i <= 1; i++) {
+        tabBarPattern->StopTabBarTranslateAnimation();
+        tabBarPattern->tabBarTranslateController_->status_ = Animator::Status::STOPPED;
+    }
+}
+
+/**
+ * @tc.name: TabBarPatternSetEdgeEffect001
+ * @tc.desc: test SetEdgeEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternSetEdgeEffect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create TabBarPattern
+     */
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    TabsItemDivider divider;
+    tabsModel.SetDivider(divider);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    tabBarNode->GetLayoutProperty<TabBarLayoutProperty>()->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test function SetEdgeEffect.
+     * @tc.expected: Related function runs ok.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    ASSERT_NE(gestureHub, nullptr);
+    tabBarPattern->SetEdgeEffect(gestureHub);
 }
 } // namespace OHOS::Ace::NG
