@@ -408,7 +408,7 @@ bool TextPickerPattern::OnKeyEvent(const KeyEvent& event)
         return false;
     }
 
-    if (event.code == KeyCode::KEY_SPACE || event.code == KeyCode::KEY_ESCAPE || event.code == KeyCode::KEY_ENTER) {
+    if (event.code == KeyCode::KEY_SPACE || event.code == KeyCode::KEY_ENTER) {
         if (!operationOn_ && event.code == KeyCode::KEY_ENTER) {
             HandleDirectionKey(event.code);
         }
@@ -417,7 +417,8 @@ bool TextPickerPattern::OnKeyEvent(const KeyEvent& event)
     }
 
     if (event.code == KeyCode::KEY_TAB) {
-        return operationOn_;
+        operationOn_ = false;
+        return false;
     }
 
     if (event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_DOWN ||
