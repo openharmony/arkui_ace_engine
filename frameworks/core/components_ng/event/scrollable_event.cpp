@@ -54,6 +54,7 @@ void ScrollableActuator::InitializeScrollable()
     CHECK_NULL_VOID(host);
     for (const auto& [axis, event] : scrollableEvents_) {
         auto scrollable = MakeRefPtr<Scrollable>(event->GetScrollPositionCallback(), axis);
+        scrollable->SetNodeId(host->GetAccessibilityId());
         scrollable->SetOnScrollBegin(event->GetScrollBeginCallback());
         scrollable->SetOnScrollFrameBegin(event->GetScrollFrameBeginCallback());
         scrollable->SetScrollEndCallback(event->GetScrollEndCallback());
