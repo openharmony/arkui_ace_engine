@@ -36,4 +36,9 @@ RefPtr<PixelMap> ImageSourcePreview::CreatePixelMap(int32_t width, int32_t heigh
 {
     return nullptr;
 }
+
+RefPtr<PixelMap> ImageSourcePreview::CreatePixelMap(uint32_t index, int32_t width, int32_t height)
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace

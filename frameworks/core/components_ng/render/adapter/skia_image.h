@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 
-class SkiaImage : public CanvasImage {
+class SkiaImage : public virtual CanvasImage {
     DECLARE_ACE_TYPE(SkiaImage, CanvasImage)
 public:
     explicit SkiaImage(const sk_sp<SkImage>& image) : image_(image) {}
@@ -79,7 +79,7 @@ public:
 
     void Cache(const std::string& key) override;
 
-    RefPtr<PixelMap> GetPixelMap() override;
+    RefPtr<PixelMap> GetPixelMap() const override;
 
     void ReplaceSkImage(sk_sp<SkImage> newImage);
     int32_t GetWidth() const override;

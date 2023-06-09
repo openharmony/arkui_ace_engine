@@ -18,13 +18,15 @@
 
 #include <utility>
 
+#include "base/utils/noncopyable.h"
 #include "core/components_ng/render/canvas_image.h"
 
 namespace OHOS::Ace::NG {
 
-class PixelMapImage : public CanvasImage {
+class PixelMapImage : public virtual CanvasImage {
     DECLARE_ACE_TYPE(PixelMapImage, CanvasImage)
 public:
+    PixelMapImage() = default;
     explicit PixelMapImage(RefPtr<PixelMap> pixelMap) : pixelMap_(std::move(pixelMap)) {}
 
     ~PixelMapImage() override = default;
@@ -32,7 +34,7 @@ public:
     int32_t GetWidth() const override;
     int32_t GetHeight() const override;
 
-    RefPtr<PixelMap> GetPixelMap() override
+    RefPtr<PixelMap> GetPixelMap() const override
     {
         return pixelMap_;
     }
@@ -45,7 +47,9 @@ public:
     static RefPtr<CanvasImage> QueryFromCache(const std::string& key);
 
 private:
-    const RefPtr<PixelMap> pixelMap_;
+    RefPtr<PixelMap> pixelMap_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(PixelMapImage);
 };
 } // namespace OHOS::Ace::NG
 

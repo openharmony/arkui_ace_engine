@@ -145,7 +145,7 @@ void SkiaImage::Cache(const std::string& key)
     auto cache = pipelineCtx->GetImageCache();
     CHECK_NULL_VOID(cache);
 
-    auto cached = std::make_shared<Ace::CachedImage>(GetImage());
+    auto cached = std::make_shared<CachedImage>(GetImage());
     cached->uniqueId = GetUniqueID();
     pipelineCtx->GetImageCache()->CacheImage(key, cached);
 }
@@ -166,7 +166,7 @@ RefPtr<CanvasImage> SkiaImage::QueryFromCache(const std::string& key)
     return skiaImage;
 }
 
-RefPtr<PixelMap> SkiaImage::GetPixelMap()
+RefPtr<PixelMap> SkiaImage::GetPixelMap() const
 {
     CHECK_NULL_RETURN(GetImage(), nullptr);
     auto rasterImage = GetImage()->makeRasterImage();

@@ -30,13 +30,6 @@ struct CachedImage {
     uint32_t uniqueId = 0;
 };
 
-namespace NG {
-struct CachedImage {
-    explicit CachedImage(sk_sp<SkImage> image) : imagePtr(std::move(image)) {}
-    sk_sp<SkImage> imagePtr;
-};
-} // namespace NG
-
 struct SkiaCachedImageData : public CachedImageData {
     DECLARE_ACE_TYPE(SkiaCachedImageData, CachedImageData);
 

@@ -16,8 +16,9 @@
 #include "image_source_ohos.h"
 
 #include "image_source.h"
-#include "media_errors.h"
 #include "image_type.h"
+#include "media_errors.h"
+
 #include "base/image/pixel_map.h"
 
 namespace OHOS::Ace {
@@ -57,13 +58,18 @@ std::string ImageSourceOhos::GetProperty(const std::string& key)
 
 RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(int32_t width, int32_t height)
 {
+    return CreatePixelMap(0, width, height);
+}
+
+RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(uint32_t index, int32_t width, int32_t height)
+{
     Media::DecodeOptions options {
         .desiredSize = { width, height },
     };
     uint32_t errorCode;
-    auto pixmap = imageSource_->CreatePixelMap(options, errorCode);
+    auto pixmap = imageSource_->CreatePixelMapEx(index, options, errorCode);
     if (errorCode != Media::SUCCESS) {
-        LOGE("create PixelMap from ImageSource failed, errorCode = %{public}u", errorCode);
+        LOGE("create PixelMap from ImageSource failed, index = %{public}u, errorCode = %{public}u", index, errorCode);
         return nullptr;
     }
     return PixelMap::Create(std::move(pixmap));
