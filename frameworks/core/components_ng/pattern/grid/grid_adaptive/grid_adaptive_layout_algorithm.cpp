@@ -65,7 +65,8 @@ void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto minCount = std::max(gridLayoutProperty->GetMinCount().value_or(1), 1);
     auto maxCount = std::max(gridLayoutProperty->GetMaxCount().value_or(Infinity<int32_t>()), 1);
     if (minCount > maxCount) {
-        std::swap(minCount, maxCount);
+        minCount = 1;
+        maxCount = Infinity<int32_t>();
     }
     auto maxSize = gridLayoutProperty->GetLayoutConstraint()->maxSize;
     auto refWidth = idealSize.Width().has_value() ? idealSize.Width().value() : maxSize.Width();
