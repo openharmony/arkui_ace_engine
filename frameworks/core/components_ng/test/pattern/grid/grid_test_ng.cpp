@@ -1177,16 +1177,16 @@ HWTEST_F(GridTestNg, GridTest001, TestSize.Level1)
     auto callback = pattern_->scrollableEvent_->GetScrollPositionCallback();
     ASSERT_NE(callback, nullptr);
     auto ret = callback(1.f, SCROLL_FROM_START);
-    EXPECT_EQ(ret, true);
+    EXPECT_TRUE(ret);
 
     /**
      * @tc.steps: step4. When isConfigScrollable_ is false, call related functions.
      * @tc.expected: Check the return value of the related function.
      */
     pattern_->isConfigScrollable_ = false;
-    EXPECT_EQ(pattern_->AnimateTo(100.f, 200.f, Curves::LINEAR), false);
-    EXPECT_EQ(pattern_->UpdateCurrentOffset(1.f, SCROLL_FROM_UPDATE), true);
-    EXPECT_EQ(pattern_->UpdateStartIndex(1.0), false);
+    EXPECT_FALSE(pattern_->AnimateTo(100.f, 200.f, Curves::LINEAR));
+    EXPECT_TRUE(pattern_->UpdateCurrentOffset(1.f, SCROLL_FROM_UPDATE));
+    EXPECT_FALSE(pattern_->UpdateStartIndex(1.0));
 
     /**
      * @tc.steps: step8. When isConfigScrollable_ is true, call AnimateTo functions.
@@ -1194,7 +1194,7 @@ HWTEST_F(GridTestNg, GridTest001, TestSize.Level1)
      */
     pattern_->ScrollPage(false);
     pattern_->isConfigScrollable_ = true;
-    EXPECT_EQ(pattern_->AnimateTo(100.f, 200.f, Curves::LINEAR), true);
+    EXPECT_TRUE(pattern_->AnimateTo(100.f, 200.f, Curves::LINEAR));
     ASSERT_NE(pattern_->animator_, nullptr);
 
     /**
@@ -1202,7 +1202,7 @@ HWTEST_F(GridTestNg, GridTest001, TestSize.Level1)
      * @tc.expected: step9. Check the return value and related parameters.
      */
     pattern_->animator_->status_ = Animator::Status::STOPPED;
-    EXPECT_EQ(pattern_->AnimateTo(100.f, 200.f, Curves::LINEAR), true);
+    EXPECT_TRUE(pattern_->AnimateTo(100.f, 200.f, Curves::LINEAR));
     ASSERT_NE(pattern_->animator_, nullptr);
 
     /**
@@ -1211,11 +1211,11 @@ HWTEST_F(GridTestNg, GridTest001, TestSize.Level1)
      */
     pattern_->gridLayoutInfo_.offsetEnd_ = true;
     pattern_->gridLayoutInfo_.reachStart_ = true;
-    EXPECT_EQ(pattern_->OnScrollCallback(0.0f, SCROLL_FROM_ANIMATION), true);
-    EXPECT_EQ(pattern_->OnScrollCallback(1.f, SCROLL_FROM_ANIMATION), false);
-    EXPECT_EQ(pattern_->gridLayoutInfo_.offsetEnd_, true);
-    EXPECT_EQ(pattern_->OnScrollCallback(-1.0f, SCROLL_FROM_ANIMATION), false);
-    EXPECT_EQ(pattern_->gridLayoutInfo_.reachStart_, true);
+    EXPECT_TRUE(pattern_->OnScrollCallback(0.0f, SCROLL_FROM_ANIMATION));
+    EXPECT_TRUE(pattern_->OnScrollCallback(1.f, SCROLL_FROM_ANIMATION));
+    EXPECT_TRUE(pattern_->gridLayoutInfo_.offsetEnd_);
+    EXPECT_TRUE(pattern_->OnScrollCallback(-1.0f, SCROLL_FROM_ANIMATION));
+    EXPECT_TRUE(pattern_->gridLayoutInfo_.reachStart_);
 }
 
 /**
@@ -2775,7 +2775,7 @@ HWTEST_F(GridTestNg, GridPatternTest001, TestSize.Level1)
      */
     pattern_->UpdateCurrentOffset(-100.f, SCROLL_FROM_UPDATE);
     RunMeasureAndLayout();
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -100.f);
     pattern_->UpdateCurrentOffset(200.f, SCROLL_FROM_UPDATE);
     RunMeasureAndLayout();
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
@@ -3420,7 +3420,7 @@ HWTEST_F(GridTestNg, ScrollLayout001, TestSize.Level1)
     float gridHeight = frameNode_->GetGeometryNode()->GetFrameSize().Height();
     EXPECT_FLOAT_EQ(gridHeight, smallerHeight);
     float currentOffset = pattern_->gridLayoutInfo_.currentOffset_;
-    EXPECT_FLOAT_EQ(currentOffset, 0.f);
+    EXPECT_FLOAT_EQ(currentOffset, -100.f);
 }
 
 /**

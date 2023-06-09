@@ -27,11 +27,11 @@ class MockThemeManager : public ThemeManager {
 public:
     MockThemeManager() = default;
     ~MockThemeManager() override = default;
-    MOCK_METHOD1(GetTheme, RefPtr<Theme>(ThemeType type));
-    MOCK_CONST_METHOD0(GetBackgroundColor, Color());
-    MOCK_CONST_METHOD0(GetThemeConstants, RefPtr<ThemeConstants>());
-    MOCK_CONST_METHOD2(
-        GetThemeConstants, RefPtr<ThemeConstants>(const std::string& bundleName, const std::string& moduleName));
+    MOCK_METHOD(RefPtr<Theme>, GetTheme, (ThemeType type));
+    MOCK_METHOD(Color, GetBackgroundColor, (), (const));
+    MOCK_METHOD(RefPtr<ThemeConstants>, GetThemeConstants, (), (const));
+    MOCK_METHOD(RefPtr<ThemeConstants>, GetThemeConstants,
+        (const std::string& bundleName, const std::string& moduleName), (const));
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_THEME_MOCK_THEME_MANAGER_H
