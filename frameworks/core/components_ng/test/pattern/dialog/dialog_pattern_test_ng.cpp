@@ -258,6 +258,28 @@ HWTEST_F(DialogPatternTestNg, DialogAccessibilityProperty001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ToJsonValue
+ * @tc.desc: Test AlertDialog with button color and text color
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, ToJsonValue, TestSize.Level1)
+{
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(
+        V2::ACTION_SHEET_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialog, nullptr);
+
+    auto pattern = dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->title_ = TITLE;
+    pattern->message_ = MESSAGE;
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    pattern->ToJsonValue(json);
+    EXPECT_EQ(json->GetKey(),"");
+}
+
+/**
  * @tc.name: DialogAccessibilityProperty002
  * @tc.desc: Test Alert Accessibility Property
  * @tc.type: FUNC
