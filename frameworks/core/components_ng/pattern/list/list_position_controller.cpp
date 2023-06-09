@@ -24,14 +24,14 @@
 
 namespace OHOS::Ace::NG {
 
-void ListPositionController::JumpTo(int32_t index, bool smooth, int32_t source)
+void ListPositionController::JumpTo(int32_t index, bool smooth, ScrollAlign align, int32_t source)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID_NOLOG(pattern);
     auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
     CHECK_NULL_VOID_NOLOG(listPattern);
     LOGW("jumpTo is not supported now");
-    listPattern->ScrollToIndex(index, smooth);
+    listPattern->ScrollToIndex(index, smooth, align);
 }
 
 bool ListPositionController::AnimateTo(

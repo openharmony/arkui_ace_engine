@@ -1527,7 +1527,7 @@ HWTEST_F(GridTestNg, PositionController001, TestSize.Level1)
      * @tc.expected: Verify return value.
      */
     auto controller = pattern_->positionController_;
-    controller->JumpTo(1, false, 0);
+    controller->JumpTo(1, false, ScrollAlign::START, 3);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, 1);
 
     /**

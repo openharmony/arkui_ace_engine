@@ -169,8 +169,8 @@ public:
     void StartSpringMotion(float start, float end, float velocity);
     void ScrollTo(float position, bool smooth);
     void ScrollToIndex(int32_t index, bool smooth = false,
-                       ScrollIndexAlignment align = ScrollIndexAlignment::ALIGN_TOP);
-    void ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollIndexAlignment align);
+                       ScrollAlign align = ScrollAlign::START);
+    void ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollAlign align);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
     bool ScrollPage(bool reverse);
     void ScrollBy(float offset);
@@ -200,6 +200,7 @@ private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    float CalculateTargetPos(float startPos, float endPos, ScrollAutoType scrollAutoType);
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
@@ -258,7 +259,7 @@ private:
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
     std::optional<int32_t> targetIndex_;
-    ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
+    ScrollAlign scrollAlign_ = ScrollAlign::START;
     bool scrollable_ = true;
     bool paintStateFlag_ = false;
     bool isFramePaintStateValid_ = false;

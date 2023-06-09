@@ -706,7 +706,7 @@ HWTEST_F(WaterFlowTestNg, PositionControllerCoverage002, TestSize.Level1)
      * @tc.expected: Verify return value.
      */
     auto controller = pattern_->controller_;
-    controller->JumpTo(1, false, 0);
+    controller->JumpTo(1, false, ScrollAlign::START, 3);
     EXPECT_EQ(pattern_->layoutInfo_.jumpIndex_, 1);
 
     /**
@@ -744,7 +744,7 @@ HWTEST_F(WaterFlowTestNg, PositionControllerCoverage003, TestSize.Level1)
      */
     auto controller = pattern_->controller_;
     pattern_->SetAxis(Axis::VERTICAL);
-    controller->JumpTo(1, false, 0);
+    controller->JumpTo(1, false, ScrollAlign::START, 3);
     EXPECT_EQ(pattern_->layoutInfo_.jumpIndex_, 1);
 
     /**

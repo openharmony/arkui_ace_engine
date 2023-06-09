@@ -2715,12 +2715,12 @@ HWTEST_F(ListTestNg, PositionController001, TestSize.Level1)
 
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
     EXPECT_EQ(pattern_->jumpIndex_, -1);
-    EXPECT_EQ(pattern_->scrollIndexAlignment_, ScrollIndexAlignment::ALIGN_BOTTOM);
+    EXPECT_EQ(pattern_->scrollAlign_, ScrollAlign::END);
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
     EXPECT_EQ(pattern_->jumpIndex_, 0);
-    EXPECT_EQ(pattern_->scrollIndexAlignment_, ScrollIndexAlignment::ALIGN_TOP);
+    EXPECT_EQ(pattern_->scrollAlign_, ScrollAlign::START);
 
-    controller->JumpTo(1, false, 0);
+    controller->JumpTo(1, false, ScrollAlign::START, 3);
     EXPECT_EQ(pattern_->jumpIndex_, 1);
 
     EXPECT_FALSE(controller->AnimateTo(Dimension(1, DimensionUnit::PERCENT), 0, nullptr, false));
@@ -2768,12 +2768,12 @@ HWTEST_F(ListTestNg, PositionController002, TestSize.Level1)
 
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
     EXPECT_EQ(pattern_->jumpIndex_, -1);
-    EXPECT_EQ(pattern_->scrollIndexAlignment_, ScrollIndexAlignment::ALIGN_BOTTOM);
+    EXPECT_EQ(pattern_->scrollAlign_, ScrollAlign::END);
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
     EXPECT_EQ(pattern_->jumpIndex_, 0);
-    EXPECT_EQ(pattern_->scrollIndexAlignment_, ScrollIndexAlignment::ALIGN_TOP);
+    EXPECT_EQ(pattern_->scrollAlign_, ScrollAlign::START);
 
-    controller->JumpTo(1, false, 0);
+    controller->JumpTo(1, false, ScrollAlign::START, 3);
     EXPECT_EQ(pattern_->jumpIndex_, 1);
 
     EXPECT_FALSE(controller->AnimateTo(Dimension(1, DimensionUnit::PERCENT), 0, nullptr, false));
@@ -2817,7 +2817,7 @@ HWTEST_F(ListTestNg, PositionController003, TestSize.Level1)
     controller->ScrollPage(false, true);
     EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 50.f)));
 
-    controller->JumpTo(1, false, 0);
+    controller->JumpTo(1, false, ScrollAlign::START, 3);
     EXPECT_EQ(pattern_->jumpIndex_, 1);
 
     EXPECT_FALSE(controller->AnimateTo(Dimension(1, DimensionUnit::PERCENT), 0, nullptr, false));
@@ -3459,18 +3459,18 @@ HWTEST_F(ListTestNg, Pattern010, TestSize.Level1)
     /**
      * @tc.steps: step1. Test ScrollToIndex.
      */
-    pattern_->ScrollToIndex(1, 0, ScrollIndexAlignment::ALIGN_BOTTOM);
-    EXPECT_EQ(pattern_->scrollIndexAlignment_, ScrollIndexAlignment::ALIGN_BOTTOM);
+    pattern_->ScrollToIndex(1, 0, ScrollAlign::END);
+    EXPECT_EQ(pattern_->scrollAlign_, ScrollAlign::END);
     EXPECT_EQ(pattern_->currentDelta_, 0);
     EXPECT_EQ(pattern_->jumpIndex_, 1);
 
-    pattern_->ScrollToIndex(-1, 0, ScrollIndexAlignment::ALIGN_BOTTOM);
+    pattern_->ScrollToIndex(-1, 0, ScrollAlign::END);
     EXPECT_EQ(pattern_->jumpIndex_, -1);
 
-    pattern_->ScrollToIndex(-2, 0, ScrollIndexAlignment::ALIGN_BOTTOM);
+    pattern_->ScrollToIndex(-2, 0, ScrollAlign::END);
     EXPECT_EQ(pattern_->jumpIndex_, -1);
 
-    pattern_->ScrollToIndex(-2, false, ScrollIndexAlignment::ALIGN_BOTTOM);
+    pattern_->ScrollToIndex(-2, false, ScrollAlign::END);
     EXPECT_EQ(pattern_->jumpIndex_, -1);
 }
 
@@ -4267,7 +4267,7 @@ HWTEST_F(ListTestNg, ListPattern_ScrollToIndex001, TestSize.Level1)
      * @tc.expected: Related function is called.
      */
     pattern_->ScrollToIndex(-2, true);
-    EXPECT_EQ(pattern_->scrollIndexAlignment_, ScrollIndexAlignment::ALIGN_TOP);
+    EXPECT_EQ(pattern_->scrollAlign_, ScrollAlign::START);
     EXPECT_EQ(pattern_->currentDelta_, 0.0);
     EXPECT_FALSE(pattern_->targetIndex_.has_value());
 
@@ -4330,11 +4330,11 @@ HWTEST_F(ListTestNg, ListPattern_OnDirtyLayoutWrapperSwap001, TestSize.Level1)
     EXPECT_FALSE(pattern_->targetIndex_.has_value());
 
     /**
-     * @tc.steps: step3. Take different values for scrollIndexAlignment_ and test OnDirtyLayoutWrapperSwap.
+     * @tc.steps: step3. Take different values for scrollAlign_ and test OnDirtyLayoutWrapperSwap.
      * @tc.expected: Related function is called.
      */
     pattern_->targetIndex_ = VIEWPORT_NUMBER -1;
-    pattern_->scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_BOTTOM;
+    pattern_->scrollAlign_ = ScrollAlign::END;
     EXPECT_TRUE(pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
 }
 
