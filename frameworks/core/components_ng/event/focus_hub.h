@@ -45,6 +45,7 @@ enum class FocusNodeType : int32_t {
 enum class ScopeType : int32_t {
     OTHERS = 0,
     FLEX = 1,
+    PROJECT_AREA = 2,
 };
 enum class FocusStep : int32_t {
     NONE = 0x0,
@@ -739,6 +740,8 @@ public:
         return (static_cast<uint32_t>(step) & MASK_FOCUS_STEP_FORWARD) != 0;
     }
 
+    static double GetProjectAreaOnRect(const RectF& rect, const RectF& projectRect, FocusStep step);
+
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     bool OnKeyEventNode(const KeyEvent& keyEvent);
@@ -768,6 +771,8 @@ private:
     void CheckFocusStateStyle(bool onFocus);
 
     bool IsNeedPaintFocusState();
+
+    RefPtr<FocusHub> GetNearestNodeByProjectArea(const std::list<RefPtr<FocusHub>>& allNodes, FocusStep step);
 
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;

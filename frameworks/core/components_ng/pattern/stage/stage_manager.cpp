@@ -72,6 +72,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
                 CHECK_NULL_VOID(pattern);
                 pattern->SetPageInTransition(false);
                 pattern->ProcessHideState();
+                context->MarkNeedFlushMouseEvent();
             });
         return;
     }
@@ -92,6 +93,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             pageFocusHub->RequestFocus();
             auto context = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(context);
+            context->MarkNeedFlushMouseEvent();
         });
 }
 } // namespace
@@ -386,6 +388,7 @@ void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType t
 
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID_NOLOG(context);
+    context->MarkNeedFlushMouseEvent();
 }
 
 void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType)
@@ -417,6 +420,7 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
 
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID_NOLOG(context);
+    context->MarkNeedFlushMouseEvent();
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
         auto container = Container::Current();

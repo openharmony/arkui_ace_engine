@@ -594,6 +594,19 @@ bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
     }
     SetScopeFocusAlgorithm();
     if (!focusAlgorithm_.getNextFocusNode) {
+        if (focusAlgorithm_.scopeType == ScopeType::PROJECT_AREA) {
+            auto lastFocusNode = lastWeakFocusNode_.Upgrade();
+            CHECK_NULL_RETURN(lastFocusNode, false);
+            auto nextFocusHub = lastFocusNode->GetNearestNodeByProjectArea(GetChildren(), moveStep);
+            if (!nextFocusHub) {
+                LOGI("Request next focus failed becase cannot find next node by project area.");
+                return false;
+            }
+            auto ret = nextFocusHub->RequestFocusImmediately();
+            LOGI("Request next focus by project area. Next focus node is %{public}s/%{public}d. Return %{public}d",
+                nextFocusHub->GetFrameName().c_str(), nextFocusHub->GetFrameId(), ret);
+            return ret;
+        }
         if (focusAlgorithm_.isVertical != vertical) {
             LOGI("Request next focus failed because direction of node(%{pubic}d) is different with step(%{public}d).",
                 focusAlgorithm_.isVertical, vertical);
@@ -1370,4 +1383,88 @@ bool FocusHub::HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusHu
     }
     return GoToFocusByTabNodeIdx(tabIndexNodes, curTabFocusIndex);
 }
+
+double FocusHub::GetProjectAreaOnRect(const RectF& rect, const RectF& projectRect, FocusStep step)
+{
+    float areaWidth = 0.0;
+    float areaHeight = 0.0;
+    switch (step) {
+        case FocusStep::UP:
+            if (rect.Top() < projectRect.Top() && rect.Right() > projectRect.Left() &&
+                rect.Left() < projectRect.Right()) {
+                areaWidth = std::min(rect.Right(), projectRect.Right()) - std::max(rect.Left(), projectRect.Left());
+                areaHeight = std::min(rect.Bottom(), projectRect.Top()) - rect.Top();
+            }
+            break;
+        case FocusStep::DOWN:
+            if (rect.Bottom() > projectRect.Bottom() && rect.Right() > projectRect.Left() &&
+                rect.Left() < projectRect.Right()) {
+                areaWidth = std::min(rect.Right(), projectRect.Right()) - std::max(rect.Left(), projectRect.Left());
+                areaHeight = rect.Bottom() - std::max(rect.Top(), projectRect.Bottom());
+            }
+            break;
+        case FocusStep::LEFT:
+            if (rect.Left() < projectRect.Left() && rect.Bottom() > projectRect.Top() &&
+                rect.Top() < projectRect.Bottom()) {
+                areaWidth = std::min(rect.Right(), projectRect.Left()) - rect.Left();
+                areaHeight = std::min(rect.Bottom(), projectRect.Bottom()) - std::max(rect.Top(), projectRect.Top());
+            }
+            break;
+        case FocusStep::RIGHT:
+            if (rect.Right() > projectRect.Right() && rect.Bottom() > projectRect.Top() &&
+                rect.Top() < projectRect.Bottom()) {
+                areaWidth = rect.Right() - std::max(rect.Left(), projectRect.Right());
+                areaHeight = std::min(rect.Bottom(), projectRect.Bottom()) - std::max(rect.Top(), projectRect.Top());
+            }
+            break;
+        default:
+            break;
+    }
+    return areaWidth * areaHeight;
+}
+
+RefPtr<FocusHub> FocusHub::GetNearestNodeByProjectArea(const std::list<RefPtr<FocusHub>>& allNodes, FocusStep step)
+{
+    CHECK_NULL_RETURN(!allNodes.empty(), nullptr);
+    auto curFrameNode = GetFrameNode();
+    CHECK_NULL_RETURN(curFrameNode, nullptr);
+    auto curFrameOffset = curFrameNode->GetOffsetRelativeToWindow();
+    auto curGeometryNode = curFrameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(curGeometryNode, nullptr);
+    RectF curFrameRect = RectF(curFrameOffset, curGeometryNode->GetFrameRect().GetSize());
+    curFrameRect.SetOffset(curFrameOffset);
+    LOGD("Current focus node is %{public}s/%{public}d. Rect is {%{public}f,%{public}f,%{public}f,%{public}f}.",
+        GetFrameName().c_str(), GetFrameId(), curFrameRect.Left(), curFrameRect.Top(), curFrameRect.Right(),
+        curFrameRect.Bottom());
+    double minDistance = std::numeric_limits<double>::max();
+    RefPtr<FocusHub> nextNode;
+    for (const auto& node : allNodes) {
+        if (!node || AceType::RawPtr(node) == this) {
+            continue;
+        }
+        auto frameNode = node->GetFrameNode();
+        if (!frameNode) {
+            continue;
+        }
+        auto frameOffset = frameNode->GetOffsetRelativeToWindow();
+        auto geometryNode = frameNode->GetGeometryNode();
+        if (!geometryNode) {
+            continue;
+        }
+        RectF frameRect = RectF(frameOffset, geometryNode->GetFrameRect().GetSize());
+        auto projectArea = GetProjectAreaOnRect(frameRect, curFrameRect, step);
+        if (Positive(projectArea)) {
+            OffsetF vec = frameRect.Center() - curFrameRect.Center();
+            double val = (vec.GetX() * vec.GetX()) + (vec.GetY() * vec.GetY());
+            if (val < minDistance) {
+                minDistance = val;
+                nextNode = node;
+            }
+        }
+    }
+    LOGD("Next focus node is %{public}s/%{public}d. Min distance is %{public}f.",
+        nextNode ? nextNode->GetFrameName().c_str() : "NULL", nextNode ? nextNode->GetFrameId() : -1, minDistance);
+    return nextNode;
+}
+
 } // namespace OHOS::Ace::NG

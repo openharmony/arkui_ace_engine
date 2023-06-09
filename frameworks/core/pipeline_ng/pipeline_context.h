@@ -91,6 +91,9 @@ public:
     // Called by view when mouse event received.
     void OnMouseEvent(const MouseEvent& event) override;
 
+    // Do mouse event actively.
+    void FlushMouseEvent();
+
     // Called by view when axis event received.
     void OnAxisEvent(const AxisEvent& event) override;
 
@@ -353,6 +356,11 @@ public:
         }
     }
 
+    void MarkNeedFlushMouseEvent()
+    {
+        isNeedFlushMouseEvent_ = true;
+    }
+
     // restore
     void RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo) override;
     std::unique_ptr<JsonValue> GetStoredNodeInfo() override;
@@ -456,6 +464,8 @@ private:
     bool isTabJustTriggerOnKeyEvent_ = false;
     bool onShow_ = false;
     bool onFocus_ = true;
+    bool isNeedFlushMouseEvent_ = false;
+    std::unique_ptr<MouseEvent> lastMouseEvent_;
 
     std::unordered_map<int32_t, WeakPtr<FrameNode>> storeNode_;
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;
