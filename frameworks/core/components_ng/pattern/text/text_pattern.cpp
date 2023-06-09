@@ -704,6 +704,7 @@ void TextPattern::OnModifyDone()
 
     if (CheckNeedMeasure(textLayoutProperty->GetPropertyChangeFlag())) {
         // measure flag changed, reset paragraph.
+        LOGI("OnModifyDone paragraph_.Reset()");
         paragraph_.Reset();
     }
 
@@ -768,6 +769,7 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         LOGD("on layout process, just return");
         return false;
     }
+    LOGI("paragraph_ = textLayoutAlgorithm->GetParagraph()");
     paragraph_ = textLayoutAlgorithm->GetParagraph();
     baselineOffset_ = textLayoutAlgorithm->GetBaselineOffset();
     contentRect_ = dirty->GetGeometryNode()->GetContentRect();
@@ -800,6 +802,7 @@ void TextPattern::BeforeCreateLayoutWrapper()
     }
 
     if (paragraph_) {
+        LOGI("BeforeCreateLayoutWrapper paragraph_.Reset()");
         paragraph_.Reset();
     }
     spanItemChildren_.clear();
