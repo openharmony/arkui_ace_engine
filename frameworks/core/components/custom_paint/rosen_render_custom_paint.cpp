@@ -2888,18 +2888,13 @@ void RosenRenderCustomPaint::Mesh(RSBitmap& bitmap, int column, int row,
     if (pen) {
         tempPen = *pen;
     }
-    std::shared_ptr<RSColorFilter> colorFter;
-    std::shared_ptr<RSShaderEffect> shader;
-    std::shared_ptr<RSImage> image;
+    auto image = std::shared_ptr<RSImage>();
     image->BuildFromBitmap(bitmap);
     RSSamplingOptions sampling =
         RSSamplingOptions(RSFilterMode::NEAREST, RSMipmapMode::NEAREST);
     RSMatrix matrix;
-    shader = shader->CreateImageShader(
+    auto shader = RSShaderEffect::CreateImageShader(
         *image, RSTileMode::CLAMP, RSTileMode::CLAMP, sampling, matrix);
-    if (colorFter) {
-        shader = shader->CreateShaderWithColorFilter(*colorFter);
-    }
     tempPen.SetShaderEffect(shader);
     drawingCanvas_->AttachPen(tempPen);
     drawingCanvas_->DrawVertices(builder, RSBlendMode::MODULATE);
