@@ -1886,7 +1886,7 @@ void WebPattern::UpdateLocale()
 
 void WebPattern::OnWindowShow()
 {
-    if (isWindowShow_) {
+    if (isWindowShow_ || !isVisible_) {
         return;
     }
 
@@ -1898,7 +1898,7 @@ void WebPattern::OnWindowShow()
 
 void WebPattern::OnWindowHide()
 {
-    if (!isWindowShow_) {
+    if (!isWindowShow_ || !isVisible_) {
         return;
     }
 
@@ -2006,9 +2006,18 @@ void WebPattern::OnActive()
 
 void WebPattern::OnVisibleChange(bool isVisible)
 {
-    if (!isVisible) {
+    if (isVisible_ == isVisible) {
+        return;
+    }
+
+    isVisible_ = isVisible;
+    if (!isVisible_) {
         LOGI("web is not visible");
         CloseSelectOverlay();
+        OnInActive();
+    } else {
+        LOGI("web is visible");
+        OnActive();
     }
 }
 
