@@ -25,11 +25,9 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT UIExtensionModelNG : public UIExtensionModel {
 public:
     void Create(const std::string& bundleName, const std::string& abilityName) override;
-    void SetWant(const std::string& want) override;
     void SetOnConnect(std::function<void()>&& onConnect) override;
     void SetOnDisconnect(std::function<void()>&& onDisconnect) override;
     void SetOnError(std::function<void()>&& onError) override;
-    void SetOnCall(std::function<void()>&& onCall) override;
     void SetOnResult(std::function<void()>&& onResult) override;
 };
 } // namespace OHOS::Ace::NG

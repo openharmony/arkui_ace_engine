@@ -90,8 +90,7 @@ float RosenRenderContext::ConvertDimensionToScaleBySize(const Dimension& dimensi
     if (dimension.Unit() == DimensionUnit::PERCENT) {
         return static_cast<float>(dimension.Value());
     }
-    const float defaultPivot = 0.5f;
-    return size > 0.0f ? static_cast<float>(dimension.ConvertToPx() / size) : defaultPivot;
+    return size > 0.0f ? static_cast<float>(dimension.ConvertToPx() / size) : 0.5f;
 }
 
 RosenRenderContext::~RosenRenderContext()

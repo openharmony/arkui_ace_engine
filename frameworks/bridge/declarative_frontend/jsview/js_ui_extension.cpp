@@ -39,7 +39,6 @@ UIExtensionModel* UIExtensionModel::GetInstance()
             if (Container::IsCurrentUseNewPipeline()) {
                 instance_.reset(new NG::UIExtensionModelNG());
             } else {
-                LOGE("The old frameworks does not support UIExtensionComponent");
                 return nullptr;
             }
 #endif
@@ -64,8 +63,7 @@ void JSUIExtension::JSBind(BindingTarget globalObj)
 
 void JSUIExtension::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1 || !info[0]->IsObject()) {
-        LOGE("input data is not valid");
+    if (!info[0]->IsObject()) {
         return;
     }
 
@@ -74,22 +72,17 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
     auto want = JSRef<JSObject>::Cast(obj->GetProperty("want"));
     if (want->GetProperty("bundleName")->IsNull() || want->GetProperty("bundleName")->IsUndefined() ||
         want->GetProperty("abilityName")->IsNull() || want->GetProperty("abilityName")->IsUndefined()) {
-        LOGE("bundleName or abilityName is undefined");
         return;
     }
     std::string bundleName = want->GetProperty("bundleName")->ToString();
     std::string abilityName = want->GetProperty("abilityName")->ToString();
-    LOGI("JSUIExtension::Create, bundleName=%{public}s, abilityName=%{public}s", bundleName.c_str(),
-        abilityName.c_str());
 
     UIExtensionModel::GetInstance()->Create(bundleName, abilityName);
-    UIExtensionModel::GetInstance()->SetWant(obj->GetProperty("want")->ToString());
 }
 
 void JSUIExtension::SetOnConnect(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1 || !info[0]->IsFunction()) {
-        LOGE("Incorrect definition of callback onConnected method");
+    if (!info[0]->IsFunction()) {
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
@@ -103,8 +96,7 @@ void JSUIExtension::SetOnConnect(const JSCallbackInfo& info)
 
 void JSUIExtension::SetOnDisconnect(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1 || !info[0]->IsFunction()) {
-        LOGE("Incorrect definition of callback onDisconnected method");
+    if (!info[0]->IsFunction()) {
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
@@ -118,8 +110,7 @@ void JSUIExtension::SetOnDisconnect(const JSCallbackInfo& info)
 
 void JSUIExtension::SetOnError(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1 || !info[0]->IsFunction()) {
-        LOGE("Incorrect definition of callback onError method");
+    if (!info[0]->IsFunction()) {
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
@@ -127,8 +118,7 @@ void JSUIExtension::SetOnError(const JSCallbackInfo& info)
 
 void JSUIExtension::SetOnResult(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1 || !info[0]->IsFunction()) {
-        LOGE("Incorrect definition of callback onResult method");
+    if (!info[0]->IsFunction()) {
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));

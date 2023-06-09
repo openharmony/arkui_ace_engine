@@ -29,11 +29,9 @@ public:
     virtual ~UIExtensionModel() = default;
 
     virtual void Create(const std::string& bundleName, const std::string& abilityName);
-    virtual void SetWant(const std::string& want);
     virtual void SetOnConnect(std::function<void()>&& onConnect);
     virtual void SetOnDisconnect(std::function<void()>&& onDisconnect);
     virtual void SetOnError(std::function<void()>&& onError);
-    virtual void SetOnCall(std::function<void()>&& onCall);
     virtual void SetOnResult(std::function<void()>&& onResult);
 
 private:

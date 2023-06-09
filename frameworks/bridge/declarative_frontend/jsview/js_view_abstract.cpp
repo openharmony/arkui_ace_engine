@@ -966,7 +966,6 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
 
 void JSViewAbstract::JsScale(const JSCallbackInfo& info)
 {
-    LOGD("JsScale");
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsScale", info, checkList)) {
         return;
@@ -975,7 +974,6 @@ void JSViewAbstract::JsScale(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
         if (!argsPtrItem || argsPtrItem->IsNull()) {
-            LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
             return;
         }
         if (argsPtrItem->Contains("x") || argsPtrItem->Contains("y") || argsPtrItem->Contains("z")) {

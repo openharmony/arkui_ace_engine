@@ -15,6 +15,8 @@
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 
+#include "base/utils/utils.h"
+
 namespace OHOS::Ace::Platform {
 
 SourceTool GetSourceTool(int32_t orgToolType)
@@ -335,13 +337,20 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
     }
 }
 
-std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const NG::OffsetF& offsetF, const TouchEvent& point)
+std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(
+    const NG::OffsetF& offsetF, const TouchEvent& point, const NG::VectorF& scale)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
 
     OHOS::MMI::PointerEvent::PointerItem item;
-    item.SetWindowX(static_cast<int32_t>(point.x - offsetF.GetX()));
-    item.SetWindowY(static_cast<int32_t>(point.y - offsetF.GetY()));
+
+    float xRelative = point.x - offsetF.GetX();
+    float yRelative = point.y - offsetF.GetY();
+    float xBeforeScale = NearZero(scale.x) ? xRelative : xRelative / scale.x;
+    float yBeforeScale = NearZero(scale.y) ? yRelative : yRelative / scale.y;
+
+    item.SetWindowX(static_cast<int32_t>(xBeforeScale));
+    item.SetWindowY(static_cast<int32_t>(yBeforeScale));
     item.SetDisplayX(static_cast<int32_t>(point.screenX));
     item.SetDisplayY(static_cast<int32_t>(point.screenY));
     item.SetPointerId(point.id);
