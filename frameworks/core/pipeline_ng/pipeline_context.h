@@ -293,6 +293,7 @@ public:
     void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
 
     void SetContainerWindow(bool isShow) override;
+    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
 
     void AddNodesToNotifyMemoryLevel(int32_t nodeId);
     void RemoveNodesToNotifyMemoryLevel(int32_t nodeId);

@@ -1786,6 +1786,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg034, TestSize.Level1)
      * @tc.steps3: reset window_ and call SetGetViewSafeAreaImpl and GetCurrentViewSafeArea.
      * @tc.expected: flag is still true.
      */
+    auto windowTemp = context_->window_;
     context_->window_ = nullptr;
     context_->SetGetViewSafeAreaImpl([&flag]() {
         flag = !flag;
@@ -1793,6 +1794,10 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg034, TestSize.Level1)
     });
     context_->GetCurrentViewSafeArea();
     EXPECT_TRUE(flag);
+    /**
+     * @tc.steps4: restore window_ for next testCase.
+     */
+    context_->window_ = windowTemp;
 }
 
 /**
@@ -1948,6 +1953,40 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg039, TestSize.Level1)
     context_->dumpFrameInfos_.push_back({});
     auto rt = context_->GetCurrentFrameInfo(DEFAULT_UINT64_1, DEFAULT_UINT64_2);
     EXPECT_NE(rt, nullptr);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg040
+ * @tc.desc: Test SetContainerButtonHide function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg040, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize root node and containerModal node.
+     * @tc.expected: root node and containerModal node are not null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetWindowModal(WindowModal::CONTAINER_MODAL);
+    ASSERT_NE(context_->window_, nullptr);
+    context_->SetupRootElement();
+    ASSERT_NE(context_->GetRootElement(), nullptr);
+    auto containerNode = AceType::DynamicCast<FrameNode>(context_->GetRootElement()->GetChildren().front());
+    ASSERT_NE(containerNode, nullptr);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    ASSERT_NE(containerPattern, nullptr);
+    /**
+     * @tc.steps2: call SetContainerButtonHide with params true, true, false.
+     * @tc.expected: depends on first param, hideSplitButton value is true.
+     */
+    context_->SetContainerButtonHide(true, true, false);
+    EXPECT_TRUE(containerPattern->hideSplitButton_ == true);
+    /**
+     * @tc.steps3: call SetContainerButtonHide with params false, true, false.
+     * @tc.expected: depends on first param, hideSplitButton value is false.
+     */
+    context_->SetContainerButtonHide(false, true, false);
+    EXPECT_TRUE(containerPattern->hideSplitButton_ == false);
 }
 
 /**
