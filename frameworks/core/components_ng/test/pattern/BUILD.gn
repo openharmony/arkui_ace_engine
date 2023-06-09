@@ -87,6 +87,6 @@ group("pattern_unittest") {
     "video:video_pattern_test_ng",
     "waterflow:water_flow_test_ng",
     "web:web_pattern_unit_test",
-    "xcomponent:xcomponent_pattern_test_ng",
+    "xcomponent:xcomponent_test_ng",
   ]
 }

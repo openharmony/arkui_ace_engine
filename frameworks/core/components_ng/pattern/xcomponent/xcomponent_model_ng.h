@@ -22,11 +22,12 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT XComponentModelNG : public OHOS::Ace::XComponentModel {
 public:
-    void Create(const std::string& id, const std::string& type, const std::string& libraryname,
+    void Create(const std::string& id, XComponentType type, const std::string& libraryname,
         const RefPtr<XComponentController>& xcomponentController) override;
     void SetSoPath(const std::string& soPath) override;
     void SetOnLoad(LoadEvent&& onLoad) override;
     void SetOnDestroy(DestroyEvent&& onDestroy) override;
+    bool IsTexture() override;
 };
 
 } // namespace OHOS::Ace::NG
