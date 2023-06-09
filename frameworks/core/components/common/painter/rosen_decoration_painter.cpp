@@ -556,12 +556,20 @@ private:
 
 class RadialGradientShader final : public GradientShader {
 public:
+#ifndef USE_ROSEN_DRAWING
     RadialGradientShader(const Gradient& gradient, const SkPoint& center, float radius0, float radius1, float ratio)
         : GradientShader(gradient), center_(center), radius0_(radius0), radius1_(radius1), ratio_(ratio)
     {}
+#else
+    RadialGradientShader(const Gradient& gradient, const RSPoint& center,
+        float radius0, float radius1, float ratio)
+        : GradientShader(gradient), center_(center), radius0_(radius0), radius1_(radius1), ratio_(ratio)
+    {}
+#endif
 
     ~RadialGradientShader() = default;
 
+#ifndef USE_ROSEN_DRAWING
     sk_sp<SkShader> CreateGradientShader() override
     {
         SkMatrix matrix = SkMatrix::I();
@@ -598,7 +606,38 @@ public:
         return SkGradientShader::MakeTwoPointConical(
             center_, radius0_, center_, radius1_, &colors[0], &pos[0], colors.size(), tileMode, 0, &matrix);
     }
+#else
+    std::shared_ptr<RSShaderEffect> CreateGradientShader() override
+    {
+        RSMatrix matrix;
+        ratio_ = NearZero(ratio_) ? 1.0f : ratio_;
+        if (ratio_ != 1.0f) {
+            matrix.PreScale(1.0f, 1 / ratio_, center_.GetX(), center_.GetY());
+        }
+        AddColorStops(radius1_);
+        if (NeedAdjustColorStops()) {
+            auto startOffset = colorStops_.front().offset;
+            auto endOffset = colorStops_.back().offset;
+            AdjustColorStops();
+            AdjustRadius(startOffset, endOffset);
+        }
 
+        RSTileMode tileMode = RSTileMode::CLAMP;
+        if (isRepeat_) {
+            ClampNegativeOffsets();
+            tileMode = RSTileMode::REPEAT;
+        }
+        std::vector<RSScalar> pos;
+        std::vector<RSColorQuad> colors;
+        ToDrawingColors(pos, colors);
+        radius0_ = std::max(radius0_, 0.0f);
+        radius1_ = std::max(radius1_, 0.0f);
+        return RSShaderEffect::CreateTwoPointConical(center_, radius0_,
+            center_, radius1_, colors, pos, tileMode, 0, &matrix);
+    }
+#endif
+
+#ifndef USE_ROSEN_DRAWING
     static std::unique_ptr<GradientShader> CreateRadialGradient(
         const Gradient& gradient, const SkSize& size, float dipScale)
     {
@@ -615,6 +654,24 @@ public:
         }
         return std::make_unique<RadialGradientShader>(gradient, center, radius0, radius1, ratio);
     }
+#else
+    static std::unique_ptr<GradientShader> CreateRadialGradient(
+        const Gradient& gradient, const RSSize& size, float dipScale)
+    {
+        auto radialGradient = gradient.GetRadialGradient();
+        RSPoint center = GetCenter(radialGradient, size, dipScale);
+        RSSize circleSize = GetCircleSize(radialGradient, size, center, dipScale);
+        bool isDegenerate = NearZero(circleSize.Width()) || NearZero(circleSize.Height());
+        float ratio = NearZero(circleSize.Height()) ? 1.0f : circleSize.Width() / circleSize.Height();
+        float radius0 = 0.0f;
+        float radius1 = circleSize.Width();
+        if (isDegenerate) {
+            ratio = 1.0f;
+            radius1 = 0.0f;
+        }
+        return std::make_unique<RadialGradientShader>(gradient, center, radius0, radius1, ratio);
+    }
+#endif
 
 private:
     void AdjustRadius(float firstOffset, float lastOffset)
@@ -651,6 +708,7 @@ private:
         }
     }
 
+#ifndef USE_ROSEN_DRAWING
     static SkPoint GetCenter(const RadialGradient& radialGradient, const SkSize& size, float dipScale)
     {
         SkPoint center = SkPoint::Make(size.width() / 2.0f, size.height() / 2.0f);
@@ -667,7 +725,26 @@ private:
         }
         return center;
     }
+#else
+    static RSPoint GetCenter(const RadialGradient& radialGradient,
+        const RSSize& size, float dipScale)
+    {
+        RSPoint center = RSPoint(size.Width() / 2.0f, size.Height() / 2.0f);
+        if (radialGradient.radialCenterX) {
+            const auto& value = radialGradient.radialCenterX.value();
+            center.SetX(static_cast<float>(value.Unit() == DimensionUnit::PERCENT
+                ? value.Value() / 100.0 * size.Width() : value.ConvertToPx(dipScale)));
+        }
+        if (radialGradient.radialCenterY) {
+            const auto& value = radialGradient.radialCenterY.value();
+            center.SetY(static_cast<float>(value.Unit() ==
+                DimensionUnit::PERCENT ? value.Value() / 100.0 * size.Height() : value.ConvertToPx(dipScale)));
+        }
+        return center;
+    }
+#endif
 
+#ifndef USE_ROSEN_DRAWING
     static SkSize GetCircleSize(
         const RadialGradient& radialGradient, const SkSize& size, const SkPoint& center, float dipScale)
     {
@@ -711,9 +788,56 @@ private:
         }
         return circleSize;
     }
+#else
+    static RSSize GetCircleSize(const RadialGradient& radialGradient, const RSSize& size,
+        const RSPoint& center, float dipScale)
+    {
+        RSSize circleSize { 0.0f, 0.0f };
+        if (radialGradient.radialHorizontalSize) {
+            const auto& hValue = radialGradient.radialHorizontalSize.value();
+            RSScalar value = static_cast<float>(
+                hValue.Unit() == DimensionUnit::PERCENT ? hValue.Value() * size.Width() : hValue.ConvertToPx(dipScale));
+            circleSize.SetWidth(value);
+            circleSize.SetHeight(value);
+            if (radialGradient.radialVerticalSize) {
+                const auto& wValue = radialGradient.radialVerticalSize.value();
+                value = static_cast<float>(wValue.Unit() == DimensionUnit::PERCENT ? wValue.Value() * size.Height()
+                    : wValue.ConvertToPx(dipScale));
+                circleSize.SetHeight(value);
+            }
+        } else {
+            RadialShapeType shape = RadialShapeType::ELLIPSE;
+            if ((radialGradient.radialShape && radialGradient.radialShape.value() == RadialShapeType::CIRCLE) ||
+                (!radialGradient.radialShape && !radialGradient.radialSizeType && radialGradient.radialHorizontalSize &&
+                !radialGradient.radialVerticalSize)) {
+                shape = RadialShapeType::CIRCLE;
+            }
+            auto sizeType =
+                radialGradient.radialSizeType ? radialGradient.radialSizeType.value() : RadialSizeType::NONE;
+            switch (sizeType) {
+                case RadialSizeType::CLOSEST_SIDE:
+                    circleSize = RadiusToSide(center, size, shape, std::less<>());
+                    break;
+                case RadialSizeType::FARTHEST_SIDE:
+                    circleSize = RadiusToSide(center, size, shape, std::greater<>());
+                    break;
+                case RadialSizeType::CLOSEST_CORNER:
+                    circleSize = RadiusToCorner(center, size, shape, std::less<>());
+                    break;
+                case RadialSizeType::FARTHEST_CORNER:
+                case RadialSizeType::NONE:
+                default:
+                    circleSize = RadiusToCorner(center, size, shape, std::greater<>());
+                    break;
+            }
+        }
+        return circleSize;
+    }
+#endif
 
     using CompareType = std::function<bool(float, float)>;
 
+#ifndef USE_ROSEN_DRAWING
     static SkSize RadiusToSide(
         const SkPoint& center, const SkSize& size, RadialShapeType type, const CompareType& compare)
     {
@@ -730,7 +854,26 @@ private:
         }
         return SkSize::Make(dx, dy);
     }
+#else
+    static RSSize RadiusToSide(const RSPoint& center,
+        const RSSize& size, RadialShapeType type, const CompareType& compare)
+    {
+        auto dx1 = static_cast<float>(std::fabs(center.GetX()));
+        auto dy1 = static_cast<float>(std::fabs(center.GetY()));
+        auto dx2 = static_cast<float>(std::fabs(center.GetX() - size.Width()));
+        auto dy2 = static_cast<float>(std::fabs(center.GetY() - size.Height()));
 
+        auto dx = compare(dx1, dx2) ? dx1 : dx2;
+        auto dy = compare(dy1, dy2) ? dy1 : dy2;
+
+        if (type == RadialShapeType::CIRCLE) {
+            return compare(dx, dy) ? RSSize(dx, dx) : RSSize(dy, dy);
+        }
+        return RSSize(dx, dy);
+    }
+#endif
+
+#ifndef USE_ROSEN_DRAWING
     static inline SkSize EllipseRadius(const SkPoint& p, float ratio)
     {
         if (NearZero(ratio) || std::isinf(ratio)) {
@@ -742,7 +885,21 @@ private:
         float a = sqrtf(p.fX * p.fX + p.fY * p.fY * ratio * ratio);
         return SkSize::Make(a, a / ratio);
     }
+#else
+    static inline RSSize EllipseRadius(const RSPoint& p, float ratio)
+    {
+        if (NearZero(ratio) || std::isinf(ratio)) {
+            return RSSize { 0.0f, 0.0f };
+        }
+        // x^2/a^2 + y^2/b^2 = 1
+        // a/b = ratio, b = a/ratio
+        // a = sqrt(x^2 + y^2/(1/r^2))
+        float a = sqrtf(p.GetX() * p.GetX() + p.GetY() * p.GetY() * ratio * ratio);
+        return RSSize(a, a / ratio);
+    }
+#endif
 
+#ifndef USE_ROSEN_DRAWING
     static SkSize RadiusToCorner(
         const SkPoint& center, const SkSize& size, RadialShapeType type, const CompareType& compare)
     {
@@ -771,9 +928,43 @@ private:
         return EllipseRadius(corners[cornerIndex] - center,
             NearZero(sideRadius.height()) ? 1.0f : sideRadius.width() / sideRadius.height());
     }
+#else
+    static RSSize RadiusToCorner(const RSPoint& center,
+        const RSSize& size, RadialShapeType type, const CompareType& compare)
+    {
+        const RSPoint corners[4] = {
+            RSPoint(0.0f, 0.0f),
+            RSPoint(size.Width(), 0.0f),
+            RSPoint(size.Width(), size.Height()),
+            RSPoint(0.0f, size.Height()),
+        };
+
+        int32_t cornerIndex = 0;
+        float distance = (center - corners[cornerIndex]).GetLength();
+        for (int32_t i = 1; i < 4; i++) {
+            float newDistance = (center - corners[i]).GetLength();
+            if (compare(newDistance, distance)) {
+                cornerIndex = i;
+                distance = newDistance;
+            }
+        }
+
+        if (type == RadialShapeType::CIRCLE) {
+            return RSSize(distance, distance);
+        }
+
+        RSSize sideRadius = RadiusToSide(center, size, RadialShapeType::ELLIPSE, compare);
+        return EllipseRadius(corners[cornerIndex] - center,
+            NearZero(sideRadius.Height()) ? 1.0f : sideRadius.Width() / sideRadius.Height());
+    }
+#endif
 
 private:
+#ifndef USE_ROSEN_DRAWING
     SkPoint center_ { 0.0f, 0.0f };
+#else
+    RSPoint center_ { 0.0f, 0.0f };
+#endif
     float radius0_ { 0.0f };
     float radius1_ { 0.0f };
     float ratio_ { 1.0f };
@@ -781,12 +972,20 @@ private:
 
 class SweepGradientShader final : public GradientShader {
 public:
+#ifndef USE_ROSEN_DRAWING
     SweepGradientShader(
         const Gradient& gradient, const SkPoint& center, float startAngle, float endAngle, float rotation)
         : GradientShader(gradient), center_(center), startAngle_(startAngle), endAngle_(endAngle), rotation_(rotation)
     {}
+#else
+    SweepGradientShader(const Gradient& gradient, const RSPoint& center,
+        float startAngle, float endAngle, float rotation)
+        : GradientShader(gradient), center_(center), startAngle_(startAngle), endAngle_(endAngle), rotation_(rotation)
+    {}
+#endif
     ~SweepGradientShader() = default;
 
+#ifndef USE_ROSEN_DRAWING
     sk_sp<SkShader> CreateGradientShader() override
     {
         AddColorStops(1.0f);
@@ -820,12 +1019,48 @@ public:
         return SkGradientShader::MakeSweep(
             center_.fX, center_.fY, &colors[0], &pos[0], colors.size(), tileMode, startAngle_, endAngle_, 0, &matrix);
     }
+#else
+    std::shared_ptr<RSShaderEffect> CreateGradientShader() override
+    {
+        AddColorStops(1.0f);
+        if (NeedAdjustColorStops()) {
+            auto startOffset = colorStops_.front().offset;
+            auto endOffset = colorStops_.back().offset;
+            AdjustColorStops();
+            AdjustAngle(startOffset, endOffset);
+        }
 
+        RSMatrix matrix;
+        if (!NearZero(rotation_)) {
+            matrix.PreRotate(rotation_, center_.GetX(), center_.GetY());
+        }
+
+        std::vector<RSScalar> pos;
+        std::vector<RSColorQuad> colors;
+        ToDrawingColors(pos, colors);
+        RSTileMode tileMode = RSTileMode::CLAMP;
+        if (isRepeat_) {
+            tileMode = RSTileMode::REPEAT;
+        }
+        return RSShaderEffect::CreateSweepGradientByMatrix(
+            center_, colors, pos, tileMode, startAngle_, endAngle_, 0, &matrix);
+    }
+#endif
+
+#ifndef USE_ROSEN_DRAWING
     static std::unique_ptr<GradientShader> CreateSweepGradient(
         const Gradient& gradient, const SkSize& size, float dipScale)
+#else
+    static std::unique_ptr<GradientShader> CreateSweepGradient(
+        const Gradient& gradient, const RSSize& size, float dipScale)
+#endif
     {
         auto sweepGradient = gradient.GetSweepGradient();
+#ifndef USE_ROSEN_DRAWING
         SkPoint center = GetCenter(sweepGradient, size, dipScale);
+#else
+        RSPoint center = GetCenter(sweepGradient, size, dipScale);
+#endif
         float rotationAngle = 0.0f;
         if (sweepGradient.rotation) {
             rotationAngle = fmod(sweepGradient.rotation.value().Value(), 360.0f);
@@ -845,6 +1080,7 @@ public:
     }
 
 private:
+#ifndef USE_ROSEN_DRAWING
     static SkPoint GetCenter(const SweepGradient& sweepGradient, const SkSize& size, float dipScale)
     {
         SkPoint center = SkPoint::Make(size.width() / 2.0f, size.height() / 2.0f);
@@ -863,6 +1099,25 @@ private:
         }
         return center;
     }
+#else
+    static RSPoint GetCenter(const SweepGradient& sweepGradient,
+        const RSSize& size, float dipScale)
+    {
+        RSPoint center = RSPoint(size.Width() / 2.0f, size.Height() / 2.0f);
+
+        if (sweepGradient.centerX) {
+            const auto& value = sweepGradient.centerX.value();
+            center.SetX(static_cast<float>(value.Unit() == DimensionUnit::PERCENT
+                ? value.Value() / 100.0f * size.Width() : value.ConvertToPx(dipScale)));
+        }
+        if (sweepGradient.centerY) {
+            const auto& value = sweepGradient.centerY.value();
+            center.SetY(static_cast<float>(value.Unit() == DimensionUnit::PERCENT
+                ? value.Value() / 100.0f * size.Height() : value.ConvertToPx(dipScale)));
+        }
+        return center;
+    }
+#endif
 
     void AdjustAngle(float firstOffset, float lastOffset)
     {
@@ -872,7 +1127,11 @@ private:
     }
 
 private:
+#ifndef USE_ROSEN_DRAWING
     SkPoint center_ { 0.0f, 0.0f };
+#else
+    RSPoint center_ { 0.0f, 0.0f };
+#endif
     float startAngle_ { 0.0f };
     float endAngle_ { 0.0f };
     float rotation_ { 0.0f };
@@ -1040,7 +1299,7 @@ void RosenDecorationPainter::PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& dec
         drCanvas->Bind(bitmap);
         drCanvas->DrawBackground(brush);
 
-        std::shared_ptr<RSImage> image;
+        auto image = std::make_shared<RSImage>();
         image->BuildFromBitmap(bitmap);
 
         BorderImagePainter borderImagePainter(paintSize, decoration, image, dipScale);
