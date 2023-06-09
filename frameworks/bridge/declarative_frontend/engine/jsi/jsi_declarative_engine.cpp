@@ -2126,7 +2126,6 @@ void JsiDeclarativeEngineInstance::ReloadAceModuleCard(
         LOGE("ReloadAceModuleCard null runtime");
         return;
     }
-    std::shared_ptr<ArkJSRuntime> arkRuntime = std::make_shared<ArkJSRuntime>();
     auto nativeArkEngine = static_cast<ArkNativeEngine*>(sharedRuntime);
     EcmaVM* vm = const_cast<EcmaVM*>(nativeArkEngine->GetEcmaVm());
     if (vm == nullptr) {
