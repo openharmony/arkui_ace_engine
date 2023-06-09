@@ -404,12 +404,13 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
 
 bool ListPattern::IsAtTop() const
 {
-    return (startIndex_ == 0) && NonNegative(startMainPos_ + GetChainDelta(0));
+    return (startIndex_ == 0) && NonNegative(startMainPos_ - currentDelta_ + GetChainDelta(0));
 }
 
 bool ListPattern::IsAtBottom() const
 {
-    return endIndex_ == maxListItemIndex_ && LessOrEqual(endMainPos_ + GetChainDelta(endIndex_), contentMainSize_);
+    return endIndex_ == maxListItemIndex_ &&
+        LessOrEqual(endMainPos_ - currentDelta_ + GetChainDelta(endIndex_), contentMainSize_);
 }
 
 bool ListPattern::OutBoundaryCallback()
@@ -422,6 +423,38 @@ bool ListPattern::OutBoundaryCallback()
         dragFromSpring_ = true;
     }
     return outBoundary;
+}
+
+OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
+{
+    OverScrollOffset offset = { 0, 0 };
+    if (startIndex_ == 0) {
+        auto startPos = startMainPos_ + GetChainDelta(0);
+        auto newStartPos = startPos + delta;
+        if (startPos > 0 && newStartPos > 0) {
+            offset.start = delta;
+        }
+        if (startPos > 0 && newStartPos <= 0) {
+            offset.start = -startPos;
+        }
+        if (startPos <= 0 && newStartPos > 0) {
+            offset.start = newStartPos;
+        }
+    }
+    if (endIndex_ == maxListItemIndex_) {
+        auto endPos = endMainPos_ + GetChainDelta(endIndex_);
+        auto newEndPos = endPos + delta;
+        if (endPos < contentMainSize_ && newEndPos < contentMainSize_) {
+            offset.end = delta;
+        }
+        if (endPos < contentMainSize_ && newEndPos >= contentMainSize_) {
+            offset.end = contentMainSize_ - endPos;
+        }
+        if (endPos >= contentMainSize_ && newEndPos < contentMainSize_) {
+            offset.end = newEndPos - contentMainSize_;
+        }
+    }
+    return offset;
 }
 
 bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)

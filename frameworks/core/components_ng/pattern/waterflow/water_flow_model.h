@@ -47,6 +47,7 @@ public:
     virtual void SetRowsGap(const Dimension& value) = 0;
 
     virtual void SetLayoutDirection(FlexDirection value) = 0;
+    virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) = 0;
 
     virtual void SetOnReachStart(OnReachEvent&& onReachStart) = 0;
     virtual void SetOnReachEnd(OnReachEvent&& onReachEnd) = 0;

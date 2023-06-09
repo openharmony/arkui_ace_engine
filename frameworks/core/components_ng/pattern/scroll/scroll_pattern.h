@@ -152,6 +152,7 @@ public:
 
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
+    OverScrollOffset GetOverScrollOffset(double delta) const override;
 
     bool UpdateCurrentOffset(float offset, int32_t source) override;
     void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool limitDuration = true,

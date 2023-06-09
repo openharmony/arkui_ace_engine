@@ -140,6 +140,8 @@ public:
         return gridLayoutInfo_.offsetEnd_;
     }
 
+    OverScrollOffset GetOverScrollOffset(double delta) const override;
+
     void SetScrollState(int32_t scrollState)
     {
         scrollState_ = scrollState;
