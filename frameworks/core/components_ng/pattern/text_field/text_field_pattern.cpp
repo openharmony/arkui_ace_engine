@@ -984,13 +984,16 @@ void TextFieldPattern::HandleFocusEvent()
     CloseSelectOverlay();
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetShowUnderlineValue(false)) {
+    auto visible = layoutProperty->GetShowErrorTextValue(false);
+    if (!visible && layoutProperty->GetShowUnderlineValue(false)) {
         auto renderContext = GetHost()->GetRenderContext();
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(textFieldTheme);
         auto radius = textFieldTheme->GetBorderRadiusSize();
+        underlineColor_ = textFieldTheme->GetUnderlineTypingColor();
+        underlineWidth_ = TYPING_UNDERLINE_WIDTH;
         renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
     }
     GetHost()->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
@@ -1139,9 +1142,16 @@ void TextFieldPattern::HandleBlurEvent()
     }
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetShowUnderlineValue(false)) {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto visible = layoutProperty->GetShowErrorTextValue(false);
+    if (!visible && layoutProperty->GetShowUnderlineValue(false)) {
         auto renderContext = GetHost()->GetRenderContext();
         renderContext->UpdateBorderRadius(borderRadius_);
+        underlineColor_ = textFieldTheme->GetUnderlineColor();
+        underlineWidth_ = UNDERLINE_WIDTH;
     }
     needToRequestKeyboardInner_ = false;
     StopTwinkling();
@@ -1474,7 +1484,8 @@ void TextFieldPattern::FireEventHubOnChange(const std::string& text)
     CHECK_NULL_VOID(textFieldTheme);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetShowUnderlineValue(false)) {
+    auto visible = layoutProperty->GetShowErrorTextValue(false);
+    if (!visible && layoutProperty->GetShowUnderlineValue(false)) {
         underlineColor_ = textFieldTheme->GetUnderlineTypingColor();
         underlineWidth_ = TYPING_UNDERLINE_WIDTH;
     }
@@ -1906,8 +1917,14 @@ void TextFieldPattern::OnModifyDone()
     instanceId_ = context->GetInstanceId();
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
     CheckIfNeedToResetKeyboard();
     if (layoutProperty->GetShowUnderlineValue(false)) {
+        underlineWidth_ = UNDERLINE_WIDTH;
+        underlineColor_ = textFieldTheme->GetUnderlineColor();
         SaveUnderlineStates();
     }
     SavePasswordModeStates();

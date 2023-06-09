@@ -386,20 +386,6 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         errorMargin.bottom = CalcLength(ERROR_TEXT_CAPSULE_MARGIN);
         frameNode->GetLayoutProperty()->UpdateMargin(errorMargin);
     }
-    if (layoutProperty->GetShowUnderlineValue(false)) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID(textFieldTheme);
-        if (!layoutProperty->GetShowErrorTextValue(false) && layoutWrapper->IsActive()) {
-            pattern->SetUnderlineWidth(ACTIVED_UNDERLINE_WIDTH);
-            pattern->SetUnderlineColor(textFieldTheme->GetUnderlineActivedColor());
-        }
-        if (!layoutProperty->GetShowErrorTextValue(false) && !layoutWrapper->IsActive()) {
-            pattern->SetUnderlineWidth(UNDERLINE_WIDTH);
-            pattern->SetUnderlineColor(textFieldTheme->GetUnderlineColor());
-        }
-    }
     UpdateUnitLayout(layoutWrapper);
 }
 
