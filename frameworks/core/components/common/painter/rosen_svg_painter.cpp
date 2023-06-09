@@ -439,6 +439,7 @@ void RosenSvgPainter::CheckFontType()
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 double RosenSvgPainter::GetPathLength(const std::string& path)
 {
     SkPath skPath;
@@ -447,7 +448,17 @@ double RosenSvgPainter::GetPathLength(const std::string& path)
     SkScalar length = pathMeasure.getLength();
     return length;
 }
+#else
+double RosenSvgPainter::GetPathLength(const std::string& path)
+{
+    RSRecordingPath drawPath;
+    drawPath.BuildFromSVGString(path.c_str());
+    auto length = drawPath.GetLength(false);
+    return length;
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 Offset RosenSvgPainter::GetPathOffset(const std::string& path, double current)
 {
     SkPath skPath;
@@ -459,12 +470,26 @@ Offset RosenSvgPainter::GetPathOffset(const std::string& path, double current)
     }
     return Offset(position.fX, position.fY);
 }
+#else
+Offset RosenSvgPainter::GetPathOffset(const std::string& path, double current)
+{
+    RSRecordingPath drawPath;
+    drawPath.BuildFromSVGString(path.c_str());
+    RSPoint position;
+    RSVector tangent;
+    if (!drawPath.GetPosTan(current, position, tangent, false)) {
+        return Offset(0.0, 0.0);
+    }
+    return Offset(position.GetX(), position.GetY());
+}
+#endif
 
 bool RosenSvgPainter::GetMotionPathPosition(const std::string& path, double percent, MotionPathPosition& result)
 {
     if (path.empty()) {
         return false;
     }
+#ifndef USE_ROSEN_DRAWING
     SkPath motion;
     SkParsePath::FromSVGString(path.c_str(), &motion);
     SkPathMeasure pathMeasure(motion, false);
@@ -477,9 +502,23 @@ bool RosenSvgPainter::GetMotionPathPosition(const std::string& path, double perc
     result.rotate = SkRadiansToDegrees(std::atan2(tangent.y(), tangent.x()));
     result.offset.SetX(position.x());
     result.offset.SetY(position.y());
+#else
+    RSRecordingPath motion;
+    motion.BuildFromSVGString(path.c_str());
+    RSPoint position;
+    RSScalar degrees;
+    bool ret = motion.GetPosTan(motion.GetLength() * percent, position, degrees, false);
+    if (!ret) {
+        return false;
+    }
+    result.rotate = ConvertRadiansToDegrees(std::atan2(tangent.y(), tangent.x()));
+    result.offset.SetX(position.GetX());
+    result.offset.SetY(position.GetY());
+#endif
     return true;
 }
 
+#ifndef USE_ROSEN_DRAWING
 Offset RosenSvgPainter::UpdateText(SkCanvas* canvas, const SvgTextInfo& svgTextInfo, const TextDrawInfo& textDrawInfo)
 {
     Offset offset = textDrawInfo.offset;
@@ -529,7 +568,11 @@ Offset RosenSvgPainter::UpdateText(SkCanvas* canvas, const SvgTextInfo& svgTextI
 
     return Offset(x, y);
 }
+#else
+    // TODO Drawing ： about txt SkTextBlob
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 double RosenSvgPainter::UpdateTextPath(
     SkCanvas* canvas, const SvgTextInfo& svgTextInfo, const PathDrawInfo& pathDrawInfo)
 {
@@ -600,7 +643,11 @@ double RosenSvgPainter::UpdateTextPath(
 
     return offset;
 }
+#else
+    // TODO Drawing ： about txt SkTextBlob
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 Offset RosenSvgPainter::MeasureTextBounds(
     const SvgTextInfo& svgTextInfo, const TextDrawInfo& textDrawInfo, Rect& bounds)
 {
@@ -630,7 +677,11 @@ Offset RosenSvgPainter::MeasureTextBounds(
 
     return Offset(x, y);
 }
+#else
+    // TODO Drawing ： about txt SkFont
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 double RosenSvgPainter::MeasureTextPathBounds(
     const SvgTextInfo& svgTextInfo, const PathDrawInfo& pathDrawInfo, Rect& bounds)
 {
@@ -668,6 +719,9 @@ double RosenSvgPainter::MeasureTextPathBounds(
     bounds.SetHeight(fmax(pathBounds.bottom(), bounds.Height()));
     return offset;
 }
+#else
+    // TODO Drawing ： about txt SkFont
+#endif
 
 static const char* SkipSpace(const char str[])
 {
@@ -706,7 +760,11 @@ static const char* FindDoubleValue(const char str[], double& value)
     return stop;
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenSvgPainter::StringToPoints(const char str[], std::vector<SkPoint>& points)
+#else
+void RosenSvgPainter::StringToPoints(const char str[], std::vector<RSPoint>& points)
+#endif
 {
     for (;;) {
         double x = 0.0;
@@ -720,7 +778,11 @@ void RosenSvgPainter::StringToPoints(const char str[], std::vector<SkPoint>& poi
         if (str == nullptr) {
             break;
         }
+#ifndef USE_ROSEN_DRAWING
         points.emplace_back(SkPoint::Make(x, y));
+#else
+        points.emplace_back(RSPoint(x, y));
+#endif
     }
 }
 
@@ -730,6 +792,7 @@ void RosenSvgPainter::UpdateMotionMatrix(
     if (path.empty() || rsNode == nullptr) {
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     SkPath motion;
     SkParsePath::FromSVGString(path.c_str(), &motion);
     SkPathMeasure pathMeasure(motion, false);
@@ -752,8 +815,32 @@ void RosenSvgPainter::UpdateMotionMatrix(
     rsNode->SetRotation(degrees, 0., 0.);
     auto frame = rsNode->GetStagingProperties().GetFrame();
     rsNode->SetPivot(position.x() / frame.x_, position.y() / frame.y_);
+#else
+    RSRecordingPath motion;
+    motion.BuildFromSVGString(path.c_str());
+    RSPoint position;
+    RSVector tangent;
+    bool ret = motion.GetPosTan(motion.GetLength() * percent, position, tangent, false);
+    if (!ret) {
+        return;
+    }
+    float degrees = 0.0f;
+    if (rotate == ROTATE_TYPE_AUTO) {
+        degrees = ConvertRadiansToDegrees(std::atan2(tangent.GetY(), tangent.GetX()));
+    } else if (rotate == ROTATE_TYPE_REVERSE) {
+        degrees = ConvertRadiansToDegrees(std::atan2(tangent.GetY(), tangent.GetX())) + FLAT_ANGLE;
+    } else {
+        degrees = StringUtils::StringToDouble(rotate);
+    }
+    // reset quaternion
+    rsNode->SetRotation({ 0., 0., 0., 1. });
+    rsNode->SetRotation(degrees, 0., 0.);
+    auto frame = rsNode->GetStagingProperties().GetFrame();
+    rsNode->SetPivot(position.GetX() / frame.x_, position.GetY() / frame.y_);
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 SkMatrix RosenSvgPainter::ToSkMatrix(const Matrix4& matrix4)
 {
     // Mappings from SkMatrix-index to input-index.
@@ -779,5 +866,32 @@ SkMatrix RosenSvgPainter::ToSkMatrix(const Matrix4& matrix4)
     }
     return skMatrix;
 }
+#else
+RSMatrix RosenSvgPainter::ToDrawingMatrix(const Matrix4& matrix4)
+{
+    // Mappings from DrawingMatrix-index to input-index.
+    static const int32_t K_DRAWING_MATRIX_INDEX_TO_MATRIX4_INDEX[] = {
+        0,
+        4,
+        12,
+        1,
+        5,
+        13,
+        3,
+        7,
+        15,
+    };
+
+    RSMatrix matrix;
+    for (std::size_t i = 0; i < ArraySize(K_DRAWING_MATRIX_INDEX_TO_MATRIX4_INDEX); ++i) {
+        int32_t matrixIndex = K_DRAWING_MATRIX_INDEX_TO_MATRIX4_INDEX[i];
+        if (matrixIndex < matrix4.Count())
+            matrix[i] = matrix4[matrixIndex];
+        else
+            matrix[i] = 0.0;
+    }
+    return matrix;
+}
+#endif
 
 } // namespace OHOS::Ace
