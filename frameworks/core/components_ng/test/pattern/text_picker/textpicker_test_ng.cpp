@@ -3731,13 +3731,16 @@ HWTEST_F(TextPickerTestNg, TextPickerKeyEvent001, TestSize.Level1)
     // tab key down when opeartion is on
     event.code = KeyCode::KEY_TAB;
     result = textPickerPattern->OnKeyEvent(event);
-    EXPECT_EQ(result, true);
+    operationOn = textPickerPattern->operationOn_;
+    EXPECT_EQ(operationOn, false);
+    EXPECT_EQ(result, false);
     // escape key down, operation off
+    textPickerPattern->operationOn_ = true;
     event.code = KeyCode::KEY_ESCAPE;
     result = textPickerPattern->OnKeyEvent(event);
     operationOn = textPickerPattern->operationOn_;
-    EXPECT_EQ(operationOn, false);
-    EXPECT_EQ(result, true);
+    EXPECT_EQ(operationOn, true);
+    EXPECT_EQ(result, false);
 }
 
 /**

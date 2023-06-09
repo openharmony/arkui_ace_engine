@@ -33,6 +33,8 @@
 #include "core/components_ng/base/view_abstract_model.h"
 
 namespace OHOS::Ace::NG {
+    
+RefPtr<FrameNode> TextPickerDialogView::dialogNode_ = nullptr;
 
 RefPtr<FrameNode> TextPickerDialogView::Show(const DialogProperties& dialogProperties,
     const TextPickerSettingData& settingData,
@@ -89,10 +91,13 @@ RefPtr<FrameNode> TextPickerDialogView::RangeShow(const DialogProperties& dialog
         overlayManager->CloseDialog(dialogNode);
     };
     auto contentRow = CreateButtonNode(textPickerNode, dialogEvent, std::move(dialogCancelEvent), closeCallback);
-
     contentRow->AddChild(CreateDividerNode(textPickerNode), 1);
     contentRow->MountToParent(contentColumn);
+    auto focusHub = contentColumn->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, nullptr);
+    InitOnKeyEvent(focusHub);
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    dialogNode_ = dialogNode;
     return dialogNode;
 }
 
@@ -568,4 +573,26 @@ void TextPickerDialogView::SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNo
     eventHub->SetDialogAcceptEvent(std::move(onChange));
 }
 
+void TextPickerDialogView::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onKeyEvent = [](const KeyEvent& event) -> bool {
+        return TextPickerDialogView::OnKeyEvent(event);
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+bool TextPickerDialogView::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+
+    if (event.code == KeyCode::KEY_ESCAPE) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        auto overlayManager = pipeline->GetOverlayManager();
+        overlayManager->CloseDialog(dialogNode_);
+        return true;
+    }
+
+    return false;
+}
 } // namespace OHOS::Ace::NG
