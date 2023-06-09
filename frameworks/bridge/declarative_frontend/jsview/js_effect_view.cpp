@@ -37,8 +37,8 @@ EffectViewModel* EffectViewModel::GetInstance()
                 // empty implementation
                 instance_.reset(new Framework::EffectViewModelImpl());
             }
-        }
 #endif
+        }
     }
     return instance_.get();
 }
