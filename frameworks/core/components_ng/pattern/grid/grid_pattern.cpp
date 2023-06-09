@@ -433,6 +433,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(eventhub, false);
     if (gridLayoutInfo_.startMainLineIndex_ != gridLayoutInfo.startMainLineIndex_) {
         eventhub->FireOnScrollToIndex(gridLayoutInfo.startIndex_);
+        scrollbarInfo_ = eventhub->FireOnScrollBarUpdate(gridLayoutInfo.startIndex_, gridLayoutInfo.currentOffset_);
         FlushFocusOnScroll(gridLayoutInfo);
     }
     gridLayoutInfo_ = gridLayoutInfo;
@@ -1012,31 +1013,36 @@ void GridPattern::UpdateScrollBarOffset()
 
     float heightSum = 0;
     int32_t itemCount = 0;
-    auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
-    for (const auto& item : info.lineHeightMap_) {
-        auto line = info.gridMatrix_.find(item.first);
-        if (line == info.gridMatrix_.end()) {
-            continue;
-        }
-        if (line->second.empty()) {
-            continue;
-        }
-        auto lineStart = line->second.begin()->second;
-        auto lineEnd = line->second.rbegin()->second;
-        itemCount += (lineEnd - lineStart + 1);
-        heightSum += item.second + mainGap;
-    }
-
-    auto averageHeight = heightSum / itemCount;
-    float offset = info.startIndex_ * averageHeight - info.currentOffset_;
+    float offset = 0;
     float estimatedHeight = 0.f;
-    if (itemCount >= (info.childrenCount_ - 1)) {
-        estimatedHeight = heightSum - mainGap;
-        offset = info.GetStartLineOffset(mainGap);
+    if (scrollbarInfo_.first.has_value() && scrollbarInfo_.second.has_value()) {
+        offset = scrollbarInfo_.first.value();
+        estimatedHeight = scrollbarInfo_.second.value();
     } else {
-        estimatedHeight = heightSum + (info.childrenCount_ - itemCount) * averageHeight;
-    }
+        auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
+        for (const auto& item : info.lineHeightMap_) {
+            auto line = info.gridMatrix_.find(item.first);
+            if (line == info.gridMatrix_.end()) {
+                continue;
+            }
+            if (line->second.empty()) {
+                continue;
+            }
+            auto lineStart = line->second.begin()->second;
+            auto lineEnd = line->second.rbegin()->second;
+            itemCount += (lineEnd - lineStart + 1);
+            heightSum += item.second + mainGap;
+        }
 
+        auto averageHeight = heightSum / itemCount;
+        offset = info.startIndex_ * averageHeight - info.currentOffset_;
+        if (itemCount >= (info.childrenCount_ - 1)) {
+            estimatedHeight = heightSum - mainGap;
+            offset = info.GetStartLineOffset(mainGap);
+        } else {
+            estimatedHeight = heightSum + (info.childrenCount_ - itemCount) * averageHeight;
+        }
+    }
     auto viewSize = geometryNode->GetFrameSize();
     Size mainSize = { viewSize.Width(), viewSize.Height() };
     UpdateScrollBarRegion(offset, estimatedHeight, mainSize, Offset(0.0, 0.0));

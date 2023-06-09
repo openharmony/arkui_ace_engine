@@ -221,6 +221,8 @@ private:
     OffsetF mouseEndOffset_;
     OffsetF mousePressOffset_;
 
+    std::pair<std::optional<float>, std::optional<float>> scrollbarInfo_;
+
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);
 };
 

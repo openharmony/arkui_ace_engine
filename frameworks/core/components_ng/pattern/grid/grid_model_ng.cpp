@@ -176,6 +176,15 @@ void GridModelNG::SetOnScrollToIndex(ScrollToIndexFunc&& value)
     eventHub->SetOnScrollToIndex(std::move(value));
 }
 
+void GridModelNG::SetOnScrollBarUpdate(ScrollBarUpdateFunc&& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollBarUpdate(std::move(value));
+}
+
 void GridModelNG::SetOnItemDragStart(std::function<void(const ItemDragInfo&, int32_t)>&& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

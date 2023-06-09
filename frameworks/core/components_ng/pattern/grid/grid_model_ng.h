@@ -52,6 +52,7 @@ public:
     void SetSupportDragAnimation(bool value) override;
     void SetEdgeEffect(EdgeEffect edgeEffect) override;
     void SetOnScrollToIndex(ScrollToIndexFunc&& value) override;
+    void SetOnScrollBarUpdate(ScrollBarUpdateFunc&& value) override;
     void SetOnItemDragStart(std::function<void(const ItemDragInfo&, int32_t)>&& value) override;
     void SetOnItemDragEnter(ItemDragEnterFunc&& value) override;
     void SetOnItemDragMove(ItemDragMoveFunc&& value) override;
