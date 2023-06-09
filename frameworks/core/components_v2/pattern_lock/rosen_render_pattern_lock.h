@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_PATTERN_LOCK_ROSEN_RENDER_PATTERN_LOCK_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_PATTERN_LOCK_ROSEN_RENDER_PATTERN_LOCK_H
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
+#endif
 
 #include "core/components_v2/pattern_lock/render_pattern_lock.h"
 
@@ -30,8 +32,13 @@ public:
     void Paint(RenderContext& context, const Offset& offset) override;
 
 private:
+#ifndef USE_ROSEN_DRAWING
     void PaintLockCircle(SkCanvas* canvas, const Offset& offset, int16_t x, int16_t y);
     void PaintLockLine(SkCanvas* canvas, const Offset& offset);
+#else
+    void PaintLockCircle(RSCanvas* canvas, const Offset& offset, int16_t x, int16_t y);
+    void PaintLockLine(RSCanvas* canvas, const Offset& offset);
+#endif
 };
 } // namespace OHOS::Ace::V2
 

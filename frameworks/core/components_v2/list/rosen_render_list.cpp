@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,6 +35,7 @@ void RosenRenderList::Update(const RefPtr<Component>& component)
     rsNode->SetClipToFrame(true);
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderList::DrawDividerOnNode(const std::shared_ptr<RSNode>& rsNode, const SkPaint& paint, bool isVertical,
     double startCrossAxis, double mainAxis, double endCrossAxis)
 {
@@ -52,6 +53,27 @@ void RosenRenderList::DrawDividerOnNode(const std::shared_ptr<RSNode>& rsNode, c
             canvas->drawLine(startX, startY, endX, endY, paint);
         });
 }
+#else
+void RosenRenderList::DrawDividerOnNode(const std::shared_ptr<RSNode>& rsNode, const RSPen& pen,
+    bool isVertical, double startCrossAxis, double mainAxis, double endCrossAxis)
+{
+    rsNode->DrawOnNode(Rosen::RSModifierType::CONTENT_STYLE,
+        [isVertical = vertical_, startX = startCrossAxis, startY = mainAxis, endX = endCrossAxis, endY = mainAxis,
+            pen](const std::shared_ptr<RSCanvas>& canvas) mutable {
+            if (!canvas) {
+                LOGE("drawing canvas is nullptr when try pen divider for list");
+                return;
+            }
+            if (!isVertical) {
+                std::swap(startX, startY);
+                std::swap(endX, endY);
+            }
+            canvas->AttachPen(pen);
+            canvas->DrawLine(RSPoint(startX, startY), RSPoint(endX, endY));
+            canvas->DetachPen();
+        });
+}
+#endif
 
 void RosenRenderList::Paint(RenderContext& context, const Offset& offset)
 {
@@ -148,11 +170,18 @@ void RosenRenderList::PaintDivider(const std::shared_ptr<RSNode>& rsNode)
     const double startMargin = NormalizePercentToPx(divider->startMargin, !vertical_);
     const double endMargin = NormalizePercentToPx(divider->endMargin, !vertical_);
 
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setAntiAlias(true);
     paint.setColor(divider->color.GetValue());
     paint.setStyle(SkPaint::Style::kStroke_Style);
     paint.setStrokeWidth(strokeWidth);
+#else
+    RSPen pen;
+    pen.SetAntiAlias(true);
+    pen.SetColor(divider->color.GetValue());
+    pen.SetWidth(strokeWidth);
+#endif
     bool lastIsItemGroup = false;
     bool isFirstItem = (startIndex_ == 0);
     int lane = 0;
@@ -162,6 +191,7 @@ void RosenRenderList::PaintDivider(const std::shared_ptr<RSNode>& rsNode)
         double mainAxis = GetMainAxis(child->GetPosition());
         if (!isFirstItem && child != selectedItem_) {
             mainAxis -= halfSpaceWidth;
+#ifndef USE_ROSEN_DRAWING
             if (GetLanes() > 1 && !lastIsItemGroup && !isItemGroup) {
                 double start = crossSize / GetLanes() * lane + startMargin;
                 double end = crossSize / GetLanes() * (lane + 1) - endMargin;
@@ -169,6 +199,15 @@ void RosenRenderList::PaintDivider(const std::shared_ptr<RSNode>& rsNode)
             } else {
                 DrawDividerOnNode(rsNode, paint, vertical_, startMargin, mainAxis, crossSize - endMargin);
             }
+#else
+            if (GetLanes() > 1 && !lastIsItemGroup && !isItemGroup) {
+                double start = crossSize / GetLanes() * lane + startMargin;
+                double end = crossSize / GetLanes() * (lane + 1) - endMargin;
+                DrawDividerOnNode(rsNode, pen, vertical_, start, mainAxis, end);
+            } else {
+                DrawDividerOnNode(rsNode, pen, vertical_, startMargin, mainAxis, crossSize - endMargin);
+            }
+#endif
         }
         lastIsItemGroup = isItemGroup;
         lane = (GetLanes() <= 1 || (lane + 1) >= GetLanes() || isItemGroup) ? 0 : lane + 1;
@@ -177,7 +216,11 @@ void RosenRenderList::PaintDivider(const std::shared_ptr<RSNode>& rsNode)
 
     if (selectedItem_) {
         double mainAxis = targetMainAxis_ - halfSpaceWidth;
+#ifndef USE_ROSEN_DRAWING
         DrawDividerOnNode(rsNode, paint, vertical_, startMargin, mainAxis, crossSize - endMargin);
+#else
+        DrawDividerOnNode(rsNode, pen, vertical_, startMargin, mainAxis, crossSize - endMargin);
+#endif
     }
 }
 
@@ -189,6 +232,7 @@ void RosenRenderList::PaintSelectedZone(RenderContext& context)
         return;
     }
 
+#ifndef USE_ROSEN_DRAWING
     SkRect skRect = SkRect::MakeXYWH(mouseStartOffset_.GetX(), mouseStartOffset_.GetY(),
         mouseEndOffset_.GetX() - mouseStartOffset_.GetX(), mouseEndOffset_.GetY() - mouseStartOffset_.GetY());
 
@@ -205,6 +249,27 @@ void RosenRenderList::PaintSelectedZone(RenderContext& context)
 
     canvas->drawRect(skRect, fillGeometry);
     canvas->drawRect(skRect, strokeGeometry);
+#else
+    RSRect rect = RSRect(
+        mouseStartOffset_.GetX(), mouseStartOffset_.GetY(), mouseEndOffset_.GetX(), mouseEndOffset_.GetY());
+
+    RSBrush fillGeometry;
+    fillGeometry.SetAntiAlias(true);
+    fillGeometry.SetColor(0x1A000000);
+
+    RSPen strokeGeometry;
+    strokeGeometry.SetAntiAlias(true);
+    strokeGeometry.SetColor(0x33FFFFFF);
+    strokeGeometry.SetWidth(NormalizeToPx(1.0_vp));
+
+    canvas->AttachBrush(fillGeometry);
+    canvas->DrawRect(rect);
+    canvas->DetachBrush();
+
+    canvas->AttachPen(strokeGeometry);
+    canvas->DrawRect(rect);
+    canvas->DetachPen();
+#endif
 }
 
 void RosenRenderList::PaintItemZone(RenderContext& context, const RefPtr<RenderListItem>& item)
@@ -215,6 +280,7 @@ void RosenRenderList::PaintItemZone(RenderContext& context, const RefPtr<RenderL
         return;
     }
 
+#ifndef USE_ROSEN_DRAWING
     SkRect skRect = SkRect::MakeXYWH(item->GetPaintRect().GetOffset().GetX(), item->GetPaintRect().GetOffset().GetY(),
         item->GetPaintRect().Width(), item->GetPaintRect().Height());
 
@@ -236,6 +302,32 @@ void RosenRenderList::PaintItemZone(RenderContext& context, const RefPtr<RenderL
     fillGeometry.setColor(0x1A0A59f7);
 
     canvas->drawRRect(rrect, fillGeometry);
+#else
+    RSRect rect = RSRect(item->GetPaintRect().GetOffset().GetX(),
+        item->GetPaintRect().GetOffset().GetY(),
+        item->GetPaintRect().Width() + item->GetPaintRect().GetOffset().GetX(),
+        item->GetPaintRect().Height() + item->GetPaintRect().GetOffset().GetY());
+
+    std::vector<RSPoint> rectRadii;
+    rectRadii.push_back(
+        RSPoint(NormalizeToPx(item->GetBorderRadius()), NormalizeToPx(item->GetBorderRadius())));
+    rectRadii.push_back(
+        RSPoint(NormalizeToPx(item->GetBorderRadius()), NormalizeToPx(item->GetBorderRadius())));
+    rectRadii.push_back(
+        RSPoint(NormalizeToPx(item->GetBorderRadius()), NormalizeToPx(item->GetBorderRadius())));
+    rectRadii.push_back(
+        RSPoint(NormalizeToPx(item->GetBorderRadius()), NormalizeToPx(item->GetBorderRadius())));
+
+    RSRoundRect rrect(rect, rectRadii);
+
+    RSBrush fillGeometry;
+    fillGeometry.SetAntiAlias(true);
+    fillGeometry.SetColor(0x1A0A59f7);
+
+    canvas->AttachBrush(fillGeometry);
+    canvas->DrawRoundRect(rrect);
+    canvas->DetachBrush();
+#endif
 }
 
 } // namespace OHOS::Ace::V2
