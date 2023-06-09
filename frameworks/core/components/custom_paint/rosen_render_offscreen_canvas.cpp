@@ -955,15 +955,14 @@ void RosenRenderOffscreenCanvas::DrawPixelMap(RefPtr<PixelMap> pixelMap, const C
     }
 #else
     // get Image form pixelMap
-    RSPixmap imagePixmap;
-    RSPixmapFormat format;
-    imagePixmap.Build(reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes(), format);
+    auto rsBitmapFormat = ImageProvider::MakeRSBitmapFormatFromPixelMap(pixelMap);
+    auto rsBitmap = std::make_shared<RSBitmap>();
+    rsBitmap->Build(pixelMap->GetWidth(), pixelMap->GetHeight(), rsBitmapFormat);
+    rsBitmap->SetPixels(const_cast<void*>(reinterpret_cast<const void*>(pixelMap->GetPixels())));
 
     // Step2: Create Image and draw it, using gpu or cpu
-    std::shared_ptr<RSImage> image;
-
-    image->BuildFromPixmap(imagePixmap);
-    if (!image) {
+    auto image = std::make_shared<RSImage>();
+    if (!image->BuildFromBitmap(*rsBitmap)) {
         LOGE("image is null");
         return;
     }
