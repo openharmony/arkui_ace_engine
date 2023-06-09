@@ -35,6 +35,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_canvas.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_gradient.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_image_data.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_pattern.h"
@@ -48,6 +49,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_counter.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_data_panel.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ellipse.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_environment.h"
@@ -83,6 +85,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigation.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navrouter.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_canvas.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_page_transition.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path.h"
@@ -126,6 +129,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_textpicker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_texttimer.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_toggle.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
@@ -331,6 +335,8 @@ void JsBindViews(BindingTarget globalObj)
     JSRadio::JSBind(globalObj);
     JSRect::JSBind(globalObj);
     JSAnimator::JSBind(globalObj);
+    JSCanvas::JSBind(globalObj);
+    JSOffscreenCanvas::JSBind(globalObj);
     JSListItemGroup::JSBind(globalObj);
     JSLoadingProgress::JSBind(globalObj);
     JSImageAnimator::JSBind(globalObj);
@@ -350,6 +356,12 @@ void JsBindViews(BindingTarget globalObj)
     JSPolygon::JSBind(globalObj);
     JSPolyline::JSBind(globalObj);
     JSEllipse::JSBind(globalObj);
+    JSTextPicker::JSBind(globalObj);
+    JSTimePicker::JSBind(globalObj);
+    JSTextPickerDialog::JSBind(globalObj);
+    JSTimePickerDialog::JSBind(globalObj);
+    JSDatePicker::JSBind(globalObj);
+    JSDatePickerDialog::JSBind(globalObj);
     JSPageTransition::JSBind(globalObj);
     JSRowSplit::JSBind(globalObj);
     JSColumnSplit::JSBind(globalObj);
