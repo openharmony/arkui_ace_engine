@@ -428,18 +428,22 @@ void TextFieldPattern::CreateSingleHandle()
 
 bool TextFieldPattern::UpdateCaretByPressOrLongPress()
 {
-    UpdateCaretPositionByPressOffset();
-    if (caretUpdateType_ != CaretUpdateType::LONG_PRESSED && !isMousePressed_) {
+    if (CaretPositionCloseToTouchPosition() && !SelectOverlayIsOn() &&
+        caretUpdateType_ != CaretUpdateType::LONG_PRESSED && !isMousePressed_) {
         isSingleHandle_ = true;
         CreateSingleHandle();
         return true;
     }
-    if (isMousePressed_) {
+    // caret offset updated by gesture will not cause textRect to change offset
+    UpdateCaretPositionByPressOffset();
+    if (caretUpdateType_ == CaretUpdateType::PRESSED) {
         StartTwinkling();
         return true;
     }
     // in long press case, we have caret and one handle at pressed location and another handle at -1 or +1 position
-    ProcessOverlay();
+    if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
+        ProcessOverlay();
+    }
     return true;
 }
 
@@ -1140,6 +1144,7 @@ void TextFieldPattern::HandleBlurEvent()
         renderContext->UpdateBorderRadius(borderRadius_);
     }
     needToRequestKeyboardInner_ = false;
+    caretRect_.Reset();
     StopTwinkling();
     CloseKeyboard(true);
     auto pos = static_cast<int32_t>(textEditingValue_.GetWideText().length());
@@ -3497,13 +3502,9 @@ void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight,
          "height %{public}d",
         newWidth, newHeight, prevWidth, prevHeight);
     CloseSelectOverlay();
-    if (HasFocus()) {
+    if (HasFocus() && isSingleHandle_) {
         StartTwinkling();
     }
-    textSelector_.Update(-1);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     UpdateCaretInfoToController();
 }
 
