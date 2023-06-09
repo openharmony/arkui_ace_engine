@@ -46,7 +46,7 @@ public:
     static void SetDirection(const std::string& dir);
     static void SetSupportAnimation(bool supportAnimation);
     static void SetDragAnimation(bool value);
-    static void SetEdgeEffect(int32_t value);
+    static void SetEdgeEffect(const JSCallbackInfo& info);
     static void JsOnGridDragEnter(const JSCallbackInfo& info);
     static void JsOnGridDragMove(const JSCallbackInfo& info);
     static void JsOnGridDragLeave(const JSCallbackInfo& info);
