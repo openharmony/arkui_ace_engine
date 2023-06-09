@@ -44,6 +44,7 @@
 #include "bridge/js_frontend/js_frontend.h"
 #include "core/common/ace_engine.h"
 #include "core/common/connect_server_manager.h"
+#include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 #include "core/common/flutter/flutter_task_executor.h"
@@ -612,16 +613,23 @@ void AceContainer::InitializeCallback()
                                     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
-        context->GetTaskExecutor()->PostTask(
-            [context, width, height, type, rsTransaction, id]() {
-                context->OnSurfaceChanged(width, height, type, rsTransaction);
-                if (type == WindowSizeChangeReason::ROTATION) {
-                    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(id);
-                    CHECK_NULL_VOID_NOLOG(subwindow);
-                    subwindow->ResizeWindow();
-                }
-            },
-            TaskExecutor::TaskType::UI);
+        auto callback = [context, width, height, type, rsTransaction, id]() {
+            context->OnSurfaceChanged(width, height, type, rsTransaction);
+            if (type == WindowSizeChangeReason::ROTATION) {
+                auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(id);
+                CHECK_NULL_VOID_NOLOG(subwindow);
+                subwindow->ResizeWindow();
+            }
+        };
+        auto container = Container::Current();
+        if (!container) {
+            return;
+        }
+        if (container->IsUseStageModel() && type == WindowSizeChangeReason::ROTATION) {
+            callback();
+        } else {
+            context->GetTaskExecutor()->PostTask(callback, TaskExecutor::TaskType::UI);
+        }
     };
     aceView_->RegisterViewChangeCallback(viewChangeCallback);
 
