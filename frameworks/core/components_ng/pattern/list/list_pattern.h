@@ -219,7 +219,7 @@ private:
     void FireOnScrollStart();
     void CheckRestartSpring();
     void StopAnimate();
-    void StartDefaultSpringMotion(float start, float end, float velocity);
+    void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
 
     // multiSelectable
     void UninitMouseEvent();
@@ -233,6 +233,9 @@ private:
 
     void DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper);
     void SetAccessibilityAction();
+
+    bool CheckWhetherCurvesRelyOnDuration(const RefPtr<Curve>& curve);
+    void PlayCustomSpringCurverDoNotRelyOnDuration(float position, const RefPtr<Curve>& curve);
 
     RefPtr<ListContentModifier> listContentModifier_;
 

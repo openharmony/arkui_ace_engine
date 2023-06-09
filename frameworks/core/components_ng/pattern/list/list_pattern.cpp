@@ -714,6 +714,11 @@ WeakPtr<FocusHub> ListPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, in
 void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve)
 {
     LOGI("AnimateTo:%f, duration:%f", position, duration);
+    if (CheckWhetherCurvesRelyOnDuration(curve)) {
+        PlayCustomSpringCurverDoNotRelyOnDuration(position, curve);
+        return;
+    }
+
     if (!IsScrollableStopped()) {
         scrollAbort_ = true;
         StopScrollable();
@@ -744,6 +749,24 @@ void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
     FireOnScrollStart();
 }
 
+bool ListPattern::CheckWhetherCurvesRelyOnDuration(const RefPtr<Curve>& curve)
+{
+    auto interpolatingSpringCurve = AceType::DynamicCast<InterpolatingSpring>(curve);
+    if (interpolatingSpringCurve) {
+        return true;
+    }
+    return false;
+}
+
+void ListPattern::PlayCustomSpringCurverDoNotRelyOnDuration(float position, const RefPtr<Curve>& curve)
+{
+    StopAnimate();
+    auto interpolatingSpringCurve = AceType::DynamicCast<InterpolatingSpring>(curve);
+    CHECK_NULL_VOID(interpolatingSpringCurve);
+    StartDefaultOrCustomSpringMotion(GetTotalOffset(), position, interpolatingSpringCurve);
+    isScrollEnd_ = true;
+}
+
 void ListPattern::StopAnimate()
 {
     if (!IsScrollableStopped()) {
@@ -759,22 +782,29 @@ void ListPattern::ScrollTo(float position, bool smooth)
     LOGI("ScrollTo:%{public}f", position);
     StopAnimate();
     if (smooth) {
-        StartDefaultSpringMotion(currentOffset_, position, LIST_SCROLL_TO_VELOCITY);
+        auto curve = AceType::MakeRefPtr<InterpolatingSpring>(
+            LIST_SCROLL_TO_VELOCITY, LIST_SCROLL_TO_MASS, LIST_SCROLL_TO_STIFFNESS, LIST_SCROLL_TO_DAMPING);
+        CHECK_NULL_VOID(curve);
+        StartDefaultOrCustomSpringMotion(GetTotalOffset(), position, curve);
     } else {
         UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
     }
     isScrollEnd_ = true;
 }
 
-void ListPattern::StartDefaultSpringMotion(float start, float end, float velocity)
+void ListPattern::StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve)
 {
     if (!animator_) {
         animator_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
     }
 
-    float mass = LIST_SCROLL_TO_MASS;
-    float stiffness = LIST_SCROLL_TO_STIFFNESS;
-    float damping = LIST_SCROLL_TO_DAMPING;
+    float velocity = curve->GetVelocity();
+    float mass = curve->GetMass();
+    float stiffness = curve->GetStiffness();
+    float damping = curve->GetDamping();
+    LOGD("velocity : %{public}f, mass : %{public}f, stiffness : %{public}f, damping : %{public}f", velocity, mass,
+        stiffness, damping);
+
     const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
         AceType::MakeRefPtr<SpringProperty>(mass, stiffness, damping);
     if (!springMotion_) {
