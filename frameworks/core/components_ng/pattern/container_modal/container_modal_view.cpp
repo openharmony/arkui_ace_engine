@@ -283,13 +283,13 @@ void ContainerModalView::AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
                 [buttonNodeRenderContext, imageIconRenderContext, imageScale, translate]() {
                     buttonNodeRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
                     imageIconRenderContext->UpdateTransformScale(VectorF(1 / imageScale, 1 / imageScale));
-                    imageIconRenderContext->UpdateTransformTranslate(translate.value());
+                    imageIconRenderContext->UpdateTransformTranslate(translate);
                 });
         } else {
             AnimationUtils::Animate(option, [buttonNodeRenderContext, imageIconRenderContext, imageScale, translate]() {
                 buttonNodeRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
                 imageIconRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
-                imageIconRenderContext->UpdateTransformTranslate(translate.value());
+                imageIconRenderContext->UpdateTransformTranslate(translate);
             });
         }
     };
@@ -323,7 +323,7 @@ void ContainerModalView::AddButtonMouse(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
         translate.x = translateX;
         translate.y = translateY;
         AnimationUtils::Animate(option, [imageIconRenderContext, translate]() {
-            imageIconRenderContext->UpdateTransformTranslate(translate.value());
+            imageIconRenderContext->UpdateTransformTranslate(translate);
         });
     };
     auto mouseEvent =  AceType::MakeRefPtr<InputEvent>(std::move(mouseTask));
