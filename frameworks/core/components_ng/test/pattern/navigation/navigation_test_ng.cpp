@@ -486,7 +486,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_006, TestSize.Level1)
     auto layoutWrapper4 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper4, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper4, static_cast<float>(SPLIT_WIDTH.ConvertToPx()));
-    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
 }
 
 /**
@@ -679,7 +679,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_009, TestSize.Level1)
     auto layoutWrapper4 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper4, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper4, static_cast<float>(SPLIT_WIDTH.ConvertToPx()));
-    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
 }
 
 /**

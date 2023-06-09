@@ -23,6 +23,8 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "base/web/webview/ohos_nweb/include/nweb_handler.h"
+#include "core/components/dialog/dialog_properties.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components/web/web_property.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
@@ -282,6 +284,11 @@ public:
     bool OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info);
     void OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
+    void OnDateTimeChooserPopup(
+        const NWeb::DateTimeChooser& chooser,
+        const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+        std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
+    void OnDateTimeChooserClose();
     void UpdateTouchHandleForOverlay();
     bool IsSelectOverlayDragging()
     {
@@ -419,6 +426,16 @@ private:
     void InitEnhanceSurfaceFlag();
     void UpdateBackgroundColorRightNow(int32_t color);
     void UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty);
+    DialogProperties GetDialogProperties(const RefPtr<DialogTheme>& theme);
+    bool ShowDateTimeDialog(const NWeb::DateTimeChooser& chooser,
+        const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+        std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
+    bool ShowTimeDialog(const NWeb::DateTimeChooser& chooser,
+        const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+        std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
+    bool ShowDateTimeSuggestionDialog(const NWeb::DateTimeChooser& chooser,
+        const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+        std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;

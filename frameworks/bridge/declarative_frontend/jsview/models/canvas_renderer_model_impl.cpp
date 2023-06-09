@@ -897,6 +897,10 @@ void CanvasRendererModelImpl::SetTransform(const BaseInfo& baseInfo, TransformPa
         return;
     }
 
+    auto temp = param.skewX;
+    param.skewX = param.skewY;
+    param.skewY = temp;
+
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<OffscreenCanvas>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);

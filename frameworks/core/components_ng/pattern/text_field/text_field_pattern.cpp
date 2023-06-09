@@ -1259,14 +1259,7 @@ void TextFieldPattern::HandleOnCopy()
     }
     if (layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) != CopyOptions::None) {
         LOGI("Copy value is %{private}s", value.c_str());
-#if defined(PREVIEW)
-        if (clipRecords_.size() >= RECORD_MAX_LENGTH) {
-            clipRecords_.erase(clipRecords_.begin());
-        }
-        clipRecords_.emplace_back(StringUtils::ToWstring(value));
-#else
         clipboard_->SetData(value, layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed));
-#endif
     }
 
     UpdateCaretPositionWithClamp(textSelector_.GetEnd());
@@ -1357,12 +1350,8 @@ void TextFieldPattern::HandleOnPaste()
                                                                                      : PROPERTY_UPDATE_MEASURE);
         textfield->StartTwinkling();
     };
-#if defined(PREVIEW)
-    pasteCallback(clipRecords_.empty() ? "" : StringUtils::ToString((*clipRecords_.rbegin())));
-#else
     CHECK_NULL_VOID(clipboard_);
     clipboard_->GetData(pasteCallback);
-#endif
 }
 
 void TextFieldPattern::StripNextLine(std::wstring& data)
@@ -1407,14 +1396,7 @@ void TextFieldPattern::HandleOnCut()
     auto selectedText = value.GetSelectedText(start, end);
     if (layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) != CopyOptions::None) {
         LOGI("Cut value is %{private}s", selectedText.c_str());
-#if defined(PREVIEW)
-        if (clipRecords_.size() >= RECORD_MAX_LENGTH) {
-            clipRecords_.erase(clipRecords_.begin());
-        }
-        clipRecords_.emplace_back(StringUtils::ToWstring(selectedText));
-#else
         clipboard_->SetData(selectedText, layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed));
-#endif
     }
     textEditingValue_.text =
         textEditingValue_.GetValueBeforePosition(start) + textEditingValue_.GetValueAfterPosition(end);
@@ -1424,6 +1406,8 @@ void TextFieldPattern::HandleOnCut()
     caretUpdateType_ = CaretUpdateType::EVENT;
     CloseSelectOverlay();
     UpdateEditingValueToRecord();
+    UpdateSelection(0);
+    cursorVisible_ = true;
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2281,11 +2265,7 @@ void TextFieldPattern::ShowSelectOverlay(
         auto end = pattern->GetTextSelector().GetEnd();
         selectOverlay->SetSelectInfo(pattern->GetTextEditingValue().GetSelectedText(start, end));
     };
-#if defined(PREVIEW)
-    hasDataCallback(!clipRecords_.empty());
-#else
     clipboard_->HasData(hasDataCallback);
-#endif
 }
 
 bool TextFieldPattern::AllowCopy()
@@ -3293,6 +3273,8 @@ void TextFieldPattern::Delete(int32_t start, int32_t end)
     selectionMode_ = SelectionMode::NONE;
     caretUpdateType_ = CaretUpdateType::DEL;
     CloseSelectOverlay();
+    UpdateSelection(0);
+    cursorVisible_ = true;
     UpdateEditingValueToRecord();
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -3577,6 +3559,8 @@ void TextFieldPattern::DeleteBackward(int32_t length)
     selectionMode_ = SelectionMode::NONE;
     caretUpdateType_ = CaretUpdateType::DEL;
     CloseSelectOverlay();
+    UpdateSelection(0);
+    cursorVisible_ = true;
     UpdateEditingValueToRecord();
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);

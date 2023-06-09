@@ -153,8 +153,10 @@ void SwiperLayoutAlgorithm::InitItemRange(LayoutWrapper* layoutWrapper)
     auto translateLength = axis == Axis::HORIZONTAL ? maxChildSize_.Width() : maxChildSize_.Height();
     translateLength += itemSpace;
 
-    /* Load next index while swiping */
-    LoadItemWithDrag(translateLength);
+    if (isDragging_) {
+        /* Load next index while dragging */
+        LoadItemWithDrag(translateLength);
+    }
 
     if (startIndex_ <= endIndex_) {
         for (auto index = startIndex_; index <= endIndex_; ++index) {

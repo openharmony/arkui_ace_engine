@@ -929,9 +929,6 @@ void CanvasRendererModelNG::CanvasRendererScale(const BaseInfo& baseInfo, double
 
 void CanvasRendererModelNG::SetTransform(const BaseInfo& baseInfo, TransformParam& param, bool lengthFlag)
 {
-    auto temp = param.skewX;
-    param.skewX = param.skewY;
-    param.skewY = temp;
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);

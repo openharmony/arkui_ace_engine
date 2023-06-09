@@ -4847,4 +4847,21 @@ void WebDelegate::OnResizeNotWork()
     CHECK_NULL_VOID(webPattern);
     webPattern->OnResizeNotWork();
 }
+
+void WebDelegate::OnDateTimeChooserPopup(
+    const OHOS::NWeb::DateTimeChooser& chooser,
+    const std::vector<OHOS::NWeb::DateTimeSuggestion>& suggestions,
+    std::shared_ptr<OHOS::NWeb::NWebDateTimeChooserCallback> callback)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnDateTimeChooserPopup(chooser, suggestions, callback);
+}
+
+void WebDelegate::OnDateTimeChooserClose()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnDateTimeChooserClose();
+}
 } // namespace OHOS::Ace

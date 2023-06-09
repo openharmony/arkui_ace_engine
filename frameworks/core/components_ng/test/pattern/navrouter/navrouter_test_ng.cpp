@@ -1358,6 +1358,17 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0025, TestSize.Level1)
     navigation->BackToPreNavDestination(preNavDestination, navDestination, nullptr);
     ASSERT_EQ(
         navigation->GetLayoutProperty<NavigationLayoutProperty>()->propNavigationMode_.value(), NavigationMode::STACK);
+
+    navigation->isOnAnimation_ = false;
+    destinationTitleBarNode->backButton_ = nullptr;
+    navigation->GetLayoutProperty<NavigationLayoutProperty>()->propNavigationMode_ = NavigationMode::STACK;
+    navigation->BackToPreNavDestination(preNavDestination, navDestination, nullptr);
+
+    navigation->isOnAnimation_ = false;
+    navigation->GetLayoutProperty<NavigationLayoutProperty>()->propNavigationMode_ = NavigationMode::SPLIT;
+    navigation->BackToPreNavDestination(preNavDestination, navDestination, nullptr);
+    ASSERT_EQ(
+        navigation->GetLayoutProperty<NavigationLayoutProperty>()->propNavigationMode_.value(), NavigationMode::SPLIT);
 }
 
 /**
@@ -1518,7 +1529,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0029, TestSize.Level1)
 
 /**
  * @tc.name: NavrouterTestNg0030
- * @tc.desc: Test NavBarLayoutAlgorithm.
+ * @tc.desc: Test NavBarLayoutAlgorithm MeasureTitleBar.
  * @tc.type: FUNC
  */
 HWTEST_F(NavrouterTestNg, NavrouterTestNg0030, TestSize.Level1)
@@ -1542,6 +1553,9 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0030, TestSize.Level1)
         AceType::WeakClaim(AceType::RawPtr(titleBarNode2)), titleGeometryNode, titleLayoutProperty);
     auto subTitle =
         TitleBarNode::GetOrCreateTitleBarNode("subTitle", 22, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto toolBarNode = FrameNode::CreateFrameNode("text", 22, AceType::MakeRefPtr<TextPattern>());
+    auto navBarContentNode = FrameNode::CreateFrameNode("text", 22, AceType::MakeRefPtr<TextPattern>());
+    auto toolBarChild = FrameNode::CreateFrameNode("text", 99, AceType::MakeRefPtr<TextPattern>());
 
     LayoutConstraintF constraint;
     LayoutConstraintF constraint2;
@@ -1550,21 +1564,30 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0030, TestSize.Level1)
     layoutProperty->layoutConstraint_ = constraint;
     layoutProperty->propHideTitleBar_ = true;
     layoutProperty->contentConstraint_ = constraint2;
+    // toolBarNode_ navBarContentNode_
 
+    navBar->navBarContentNode_ = navBarContentNode;
+    navBar->toolBarNode_ = toolBarNode;
     navBar->titleBarNode_ = titleBarNode;
     navBar->children_.push_back(text4);
     layoutWrapper->childrenMap_[0] = childWrapper;
     layoutWrapper->currentChildCount_ = 1;
+    layoutProperty->propHideToolBar_ = false;
 
     algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
     ASSERT_TRUE(layoutProperty->propHideTitleBar_.value());
 
+    layoutProperty->propHideToolBar_ = true;
     layoutProperty->propHideTitleBar_ = false;
     titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleHeight_ = Dimension();
     algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
     ASSERT_FALSE(layoutProperty->propHideTitleBar_.value());
     ASSERT_TRUE(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->HasTitleHeight());
 
+    layoutProperty->propHideToolBar_ = false;
+    toolBarNode->children_.push_back(toolBarChild);
     layoutProperty->propHideTitleBar_ = false;
     titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleHeight_ = std::nullopt;
     layoutProperty->propTitleMode_ = NavigationTitleMode::MINI;
@@ -1599,6 +1622,15 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0030, TestSize.Level1)
 
     titleBarNode->GetPattern<TitleBarPattern>()->tempTitleBarHeight_ = 5.0f;
     navBar->subtitle_ = subTitle;
+    layoutProperty->propHideTitleBar_ = false;
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleHeight_ = std::nullopt;
+    layoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_FALSE(layoutProperty->propHideTitleBar_.value());
+    ASSERT_FALSE(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->HasTitleHeight());
+
+    titleBarNode->GetPattern<TitleBarPattern>()->tempTitleBarHeight_ = 0.0f;
+    navBar->subtitle_ = nullptr;
     layoutProperty->propHideTitleBar_ = false;
     titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleHeight_ = std::nullopt;
     layoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
@@ -1646,5 +1678,39 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0031, TestSize.Level1)
     navigation->GetLayoutProperty<NavigationLayoutProperty>()->propPixelMap_ = mockPixelMap;
     navigation->AddBackButtonIconToNavDestination(navDestination);
     ASSERT_FALSE(navDestination->GetLayoutProperty<NavDestinationLayoutProperty>()->GetNoPixMapValue());
+}
+
+/**
+ * @tc.name: NavrouterTestNg0032
+ * @tc.desc: Test NavBarPattern::OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navBar.
+     */
+    auto navBar =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 11, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 22, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<ButtonPattern>());
+    auto toolBarNode = FrameNode::CreateFrameNode("BackButton", 44, AceType::MakeRefPtr<ButtonPattern>());
+
+    auto pattern = navBar->GetPattern<NavBarPattern>();
+
+    navBar->toolBarNode_ = toolBarNode;
+    navBar->titleBarNode_ = titleBarNode;
+    /**
+     * @tc.steps: step2. call pattern->OnModifyDone();.
+     */
+    
+    navBar->backButton_ = backButton;
+    pattern->OnModifyDone();
+    navBar->propToolBarNodeOperation_ = ChildNodeOperation::REPLACE;
+    navBar->GetLayoutProperty<NavBarLayoutProperty>()->propHideTitleBar_ = true;
+    navBar->GetLayoutProperty<NavBarLayoutProperty>()->propHideToolBar_ = true;
+    pattern->OnModifyDone();
+    ASSERT_EQ(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propVisibility_.value(), VisibleType::GONE);
 }
 } // namespace OHOS::Ace::NG

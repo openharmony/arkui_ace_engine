@@ -37,6 +37,7 @@ private:
     void PerformMeasureSelf(LayoutWrapper* layoutWrapper);
     void HandleLabelCircleButtonFrameSize(const LayoutConstraintF& layoutConstraint, SizeF& frameSize);
     void MeasureCircleButton(LayoutWrapper* layoutWrapper);
+    Dimension GetFirstValidRadius(const BorderRadiusProperty& borderRadius);
 
     SizeF childSize_;
     bool isNeedToSetDefaultHeight_ = false;

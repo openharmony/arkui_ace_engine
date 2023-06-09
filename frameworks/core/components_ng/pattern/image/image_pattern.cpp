@@ -70,7 +70,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
-        LOGI("Image Load Success %{private}s", sourceInfo.ToString().c_str());
+        LOGI("Image Load Success %{public}s", sourceInfo.ToString().c_str());
         pattern->OnImageLoadSuccess();
     };
 }

@@ -24,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/spring_curve.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/select/select_theme.h"
@@ -107,7 +108,7 @@ void OnDialogCloseEvent(const RefPtr<FrameNode>& node)
 
     auto container = Container::Current();
     CHECK_NULL_VOID_NOLOG(container);
-    if (container->IsDialogContainer() || (container->IsSubContainer() && isShowInSubWindow)) {
+    if (container->IsDialogContainer() || isShowInSubWindow) {
         SubwindowManager::GetInstance()->HideSubWindowNG();
     }
 }
@@ -346,6 +347,7 @@ void OverlayManager::ShowToast(
     option.SetCurve(curve);
     option.SetDuration(TOAST_ANIMATION_DURATION);
     option.SetFillMode(FillMode::FORWARDS);
+    duration = std::max(duration, AceApplicationInfo::GetInstance().GetBarrierfreeDuration());
     auto&& callback = [weak = WeakClaim(this), toastId, duration, id = Container::CurrentId()]() {
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID(overlayManager);
@@ -819,6 +821,7 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     CloseDialogAnimation(dialogNode);
     dialogNode->OnAccessibilityEvent(
         AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+    CallOnHideDialogCallback();
 }
 
 bool OverlayManager::RemoveOverlay()

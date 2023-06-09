@@ -171,7 +171,7 @@ public:
             theme->pressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, Color());
             theme->borderRadiusSize_ = Radius(pattern->GetAttr<Dimension>(BORDER_RADIUS_SIZE, 20.0_vp));
             theme->disabledIconFillColor_ = theme->bgColor_.BlendOpacity(theme->disableOpacityRatio_);
-            theme->passwordErrorTextColor_ = pattern->GetAttr<Color>(ERROR_PASSWORD_CONTENT_COLOR, Color());
+            theme->passwordErrorTextColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color());
             theme->passwordErrorInputColor_ = pattern->GetAttr<Color>(ERROR_PASSWORD_INPUT_COLOR, Color());
             theme->passwordErrorBorderColor_ = pattern->GetAttr<Color>(ERROR_PASSWORD_BORDER_COLOR, Color())
                 .BlendOpacity(pattern->GetAttr<double>(ERROR_PASSWORD_BORDER_ALPHA, defaultErrorAlpha));
