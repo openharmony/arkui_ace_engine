@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,8 +17,12 @@
 #include "core/image/image_object.h"
 
 namespace OHOS::Ace {
+#ifndef USE_ROSEN_DRAWING
 RefPtr<ImageObject> GetImageSvgDomObj(ImageSourceInfo source, const std::unique_ptr<SkMemoryStream >& svgStream,
     const RefPtr<PipelineBase>& context, std::optional<Color>& color)
+#else
+    // TODO Drawing : SkMemoryStream
+#endif
 {
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, AceType::DynamicCast<PipelineContext>(context), color);
     return svgDom ? AceType::MakeRefPtr<SvgImageObject>(source, Size(), 1, svgDom) : nullptr;
