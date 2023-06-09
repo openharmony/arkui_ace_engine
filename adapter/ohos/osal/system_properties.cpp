@@ -501,7 +501,7 @@ bool SystemProperties::GetAllowWindowOpenMethodEnabled()
 
 bool SystemProperties::GetImageFrameworkEnabled()
 {
-    return system::GetBoolParameter("persist.ace.image.framework.enabled", false);
+    return system::GetBoolParameter("persist.ace.image.framework.enabled", true);
 }
 
 ACE_WEAK_SYM bool SystemProperties::GetIsUseMemoryMonitor()
