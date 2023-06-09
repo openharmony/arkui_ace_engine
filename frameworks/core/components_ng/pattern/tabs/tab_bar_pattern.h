@@ -271,6 +271,10 @@ public:
     bool IsAtBottom() const;
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void FromJson(const std::unique_ptr<JsonValue>& json) override;
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
