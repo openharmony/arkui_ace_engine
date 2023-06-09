@@ -1338,6 +1338,21 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldPatternSearchNodeTest001, TestSize.Lev
 }
 
 /**
+ * @tc.name: OffsetInContentRegion
+ * @tc.desc: Verify the parent search node branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, OffsetInContentRegion, TestSize.Level2)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    Offset offset;
+    EXPECT_TRUE(pattern->OffsetInContentRegion(offset));
+}
+
+/**
  * @tc.name: TextFieldPatternOnTextAreaScroll001
  * @tc.desc: Verify that the AddScrollEvent interface calls normally and exits without exception.
  * @tc.type: FUNC
