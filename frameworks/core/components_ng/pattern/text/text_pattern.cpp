@@ -701,6 +701,8 @@ void TextPattern::OnModifyDone()
     CHECK_NULL_VOID(textLayoutProperty);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
 
     if (CheckNeedMeasure(textLayoutProperty->GetPropertyChangeFlag())) {
         // measure flag changed, reset paragraph.
@@ -712,7 +714,13 @@ void TextPattern::OnModifyDone()
     if (textCache != textForDisplay_) {
         host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
     }
-    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
+
+    auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
+    bool ifHaveObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
+        [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
+    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE || ifHaveObscured) {
+        CloseSelectOverlay();
+        ResetSelection();
         copyOption_ = CopyOptions::None;
         return;
     }
