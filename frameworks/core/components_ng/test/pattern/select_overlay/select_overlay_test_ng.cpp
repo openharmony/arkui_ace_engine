@@ -632,4 +632,85 @@ HWTEST_F(SelectOverlayTestNg, SelectOverlayLayout001, TestSize.Level1)
         selectOverlayLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     }
 }
+/**
+ * @tc.name: SelectOverlayNodeTest001
+ * @tc.desc: Test IsInSelectedOrSelectOverlayArea with menuOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectOverlayNodeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize selectOverlayInfo properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.singleLineHeight = NODE_ID;
+    selectInfo.menuOptionItems = GetMenuOptionItems();
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    /**
+     * @tc.steps: step2. Create pattern and initialize HandleRegion
+     */
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->firstHandleRegion_ = FIRST_HANDLE_REGION;
+    pattern->secondHandleRegion_ = SECOND_HANDLE_REGION;
+    /**
+     * @tc.steps: step3. Construct Point and Call IsInSelectedOrSelectOverlayArea.
+     * @tc.expected: return false
+     */
+    const NG::PointF point { 9.0f, 12.0f };
+    auto result = selectOverlayNode->IsInSelectedOrSelectOverlayArea(point);
+    EXPECT_FALSE(result);
+    /**
+     * @tc.steps: step4. Construct Point and Call IsInSelectedOrSelectOverlayArea.
+     * @tc.expected: return true
+     */
+    const NG::PointF point2 { 12.0f, 12.0f };
+    auto result2 = selectOverlayNode->IsInSelectedOrSelectOverlayArea(point2);
+    EXPECT_TRUE(result2);
+}
+
+/**
+ * @tc.name: SelectOverlayNodeTest002
+ * @tc.desc: Test IsInSelectedOrSelectOverlayArea without menuOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectOverlayNodeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize selectOverlayInfo properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.singleLineHeight = NODE_ID;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    /**
+     * @tc.steps: step2. Create pattern and initialize HandleRegion
+     */
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->firstHandleRegion_ = FIRST_HANDLE_REGION;
+    pattern->secondHandleRegion_ = SECOND_HANDLE_REGION;
+    /**
+     * @tc.steps: step3. Construct Point and Call IsInSelectedOrSelectOverlayArea.
+     * @tc.expected: return false
+     */
+    const NG::PointF point { 9.0f, 12.0f };
+    auto result = selectOverlayNode->IsInSelectedOrSelectOverlayArea(point);
+    EXPECT_FALSE(result);
+    /**
+     * @tc.steps: step4. Construct Point and Call IsInSelectedOrSelectOverlayArea.
+     * @tc.expected: return true
+     */
+    const NG::PointF point2 { 12.0f, 12.0f };
+    auto result2 = selectOverlayNode->IsInSelectedOrSelectOverlayArea(point2);
+    EXPECT_TRUE(result2);
+}
 } // namespace OHOS::Ace::NG
