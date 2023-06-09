@@ -634,20 +634,20 @@ bool EventManager::DispatchMouseHoverEventNG(const MouseEvent& event)
     auto lastHoverEndNode = lastHoverTestResults_.begin();
     auto currHoverEndNode = currHoverTestResults_.begin();
     RefPtr<HoverEventTarget> lastHoverEndNodeTarget;
-    uint32_t iterCount = 0;
-    HoverInfo hoverInfo;
+    uint32_t iterCountLast = 0;
+    uint32_t iterCountCurr = 0;
     for (const auto& hoverResult : lastHoverTestResults_) {
         // get valid part of previous hover nodes while it's not in current hover nodes. Those nodes exit hover
         // there may have some nodes in currHoverTestResults_ but intercepted
-        iterCount++;
+        iterCountLast++;
         if (lastHoverEndNode != currHoverTestResults_.end()) {
             lastHoverEndNode++;
         }
         if (std::find(currHoverTestResults_.begin(), currHoverTestResults_.end(), hoverResult)
                 == currHoverTestResults_.end()) {
-            hoverResult->HandleHoverEvent(false, hoverInfo);
+            hoverResult->HandleHoverEvent(false, event);
         }
-        if (iterCount >= lastHoverDispatchLength_) {
+        if ((iterCountLast >= lastHoverDispatchLength_) && (lastHoverDispatchLength_ != 0)) {
             lastHoverEndNodeTarget = hoverResult;
             break;
         }
@@ -656,23 +656,25 @@ bool EventManager::DispatchMouseHoverEventNG(const MouseEvent& event)
     for (const auto& hoverResult : currHoverTestResults_) {
         // get valid part of current hover nodes while it's not in previous hover nodes. Those nodes are new hover
         // the valid part stops at first interception
-        lastHoverDispatchLength_++;
+        iterCountCurr++;
         if (currHoverEndNode != currHoverTestResults_.end()) {
             currHoverEndNode++;
         }
         if (std::find(lastHoverTestResults_.begin(), lastHoverEndNode, hoverResult) == lastHoverEndNode) {
-            if (!hoverResult->HandleHoverEvent(true, hoverInfo)) {
+            if (!hoverResult->HandleHoverEvent(true, event)) {
+                lastHoverDispatchLength_ = iterCountCurr;
                 break;
             }
         }
         if (hoverResult == lastHoverEndNodeTarget) {
+            lastHoverDispatchLength_ = iterCountCurr;
             break;
         }
     }
     for (auto hoverResultIt = lastHoverTestResults_.begin(); hoverResultIt != lastHoverEndNode; ++hoverResultIt) {
         // there may have previous hover nodes in the invalid part of current hover nodes. Those nodes exit hover also
         if (std::find(currHoverEndNode, currHoverTestResults_.end(), *hoverResultIt) != currHoverTestResults_.end()) {
-            (*hoverResultIt)->HandleHoverEvent(false, hoverInfo);
+            (*hoverResultIt)->HandleHoverEvent(false, event);
         }
     }
     return true;
