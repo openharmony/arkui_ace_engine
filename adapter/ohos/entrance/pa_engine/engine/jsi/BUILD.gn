@@ -85,6 +85,11 @@ template("js_pa_engine_ark") {
       "samgr:samgr_proxy",
     ]
 
+    if (is_standard_system) {
+      defines += [ "ENABLE_HITRACE" ]
+      external_deps += [ "hitrace_native:libhitracechain" ]
+    }
+
     sources = [
       "$ace_root/adapter/ohos/entrance/pa_engine/engine/common/js_backend_asset_manager.cpp",
       "$ace_root/adapter/ohos/entrance/pa_engine/engine/common/js_backend_timer_module.cpp",
