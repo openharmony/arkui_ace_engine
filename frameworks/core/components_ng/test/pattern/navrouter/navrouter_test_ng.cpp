@@ -1282,7 +1282,8 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0024, TestSize.Level1)
     pattern->navigationStack_ = stack;
     navDestination->GetPattern<NavDestinationPattern>()->name_ = "test";
     ASSERT_EQ(pattern->navigationStack_->navPathList_.size(), 2);
-    ASSERT_NE(AceType::DynamicCast<NavDestinationGroupNode>(pattern->GetPreNavDestination("test")), nullptr);
+    ASSERT_NE(AceType::DynamicCast<NavDestinationGroupNode>(pattern->GetPreNavDestination("test", preNavDestination)),
+        nullptr);
 
     GestureEvent event;
     navDestination->backButtonEvent_(event);

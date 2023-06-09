@@ -118,6 +118,7 @@ void NavigationGroupNode::AddNavDestinationToNavigation()
         auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(navDestinationPattern);
         navDestinationPattern->SetName(childNode.first);
+        navDestinationPattern->SetNavDestinationNode(uiNode);
         if (!(navigationContentNode->GetChildren().empty() &&
                 navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::SPLIT)) {
             // add backButton except for the first level page in SPLIT mode
@@ -140,6 +141,9 @@ void NavigationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 
 RefPtr<UINode> NavigationGroupNode::GetNavDestinationNode(RefPtr<UINode> uiNode)
 {
+    if (!uiNode) {
+        return nullptr;
+    }
     // create NavDestinationNode from uiNode stored in NavigationStack
     while (uiNode) {
         if (AceType::DynamicCast<FrameNode>(uiNode) && uiNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
@@ -244,7 +248,9 @@ void NavigationGroupNode::SetBackButtonEvent(
         CHECK_NULL_VOID(layoutProperty);
         auto navigationPattern = navigation->GetPattern<NavigationPattern>();
         CHECK_NULL_VOID(navigationPattern);
-        auto preNavDestinationNode = navigationPattern->GetPreNavDestination(navDestinationPattern->GetName());
+        auto navDestinationNode = navDestinationPattern->GetNavDestinationNode();
+        auto preNavDestinationNode =
+            navigationPattern->GetPreNavDestination(navDestinationPattern->GetName(), navDestinationNode);
         auto preNavDestination =
             AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(preNavDestinationNode));
         if (layoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::STACK) {

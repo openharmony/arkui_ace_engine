@@ -74,6 +74,16 @@ public:
         return name_;
     }
 
+    void SetNavDestinationNode(const RefPtr<UINode>& navDestinationNode)
+    {
+        navDestinationNode_ = navDestinationNode;
+    }
+
+    const RefPtr<UINode>& GetNavDestinationNode() const
+    {
+        return navDestinationNode_;
+    }
+
     void SetRouteInfo(const RefPtr<RouteInfo>& routeInfo)
     {
         routeInfo_ = routeInfo;
@@ -93,6 +103,7 @@ private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
     RefPtr<RouteInfo> routeInfo_;
+    RefPtr<UINode> navDestinationNode_;
 };
 
 } // namespace OHOS::Ace::NG

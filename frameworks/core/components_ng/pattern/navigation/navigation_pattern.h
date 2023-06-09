@@ -116,9 +116,9 @@ public:
         return navigationStack_->Get();
     }
 
-    RefPtr<UINode> GetPreNavDestination(const std::string& current)
+    RefPtr<UINode> GetPreNavDestination(const std::string& name, const RefPtr<UINode>& navDestinationNode)
     {
-        return navigationStack_->GetPre(current);
+        return navigationStack_->GetPre(name, navDestinationNode);
     }
 
     const std::vector<std::pair<std::string, RefPtr<UINode>>>& GetAllNavDestinationNodes()
