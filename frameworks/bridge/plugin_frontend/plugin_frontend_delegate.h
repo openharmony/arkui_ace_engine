@@ -196,6 +196,10 @@ public:
 
     void RegisterFont(const std::string& familyName, const std::string& familySrc) override;
 
+    void GetSystemFontList(std::vector<std::string>& fontList) override;
+
+    bool GetSystemFont(const std::string& fontName, FontInfo& fontInfo) override;
+
     void HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback) override;
 
     void GetSnapshot(const std::string& componentId,

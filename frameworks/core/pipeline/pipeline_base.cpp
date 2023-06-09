@@ -218,6 +218,21 @@ void PipelineBase::RegisterFont(const std::string& familyName, const std::string
     }
 }
 
+void PipelineBase::GetSystemFontList(std::vector<std::string>& fontList)
+{
+    if (fontManager_) {
+        fontManager_->GetSystemFontList(fontList);
+    }
+}
+
+bool PipelineBase::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
+{
+    if (fontManager_) {
+        return fontManager_->GetSystemFont(fontName, fontInfo);
+    }
+    return false;
+}
+
 void PipelineBase::HyperlinkStartAbility(const std::string& address) const
 {
     CHECK_RUN_ON(UI);

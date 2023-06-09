@@ -2580,6 +2580,16 @@ void FrontendDelegateDeclarative::RegisterFont(const std::string& familyName, co
     pipelineContextHolder_.Get()->RegisterFont(familyName, familySrc);
 }
 
+void FrontendDelegateDeclarative::GetSystemFontList(std::vector<std::string>& fontList)
+{
+    pipelineContextHolder_.Get()->GetSystemFontList(fontList);
+}
+
+bool FrontendDelegateDeclarative::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
+{
+    return pipelineContextHolder_.Get()->GetSystemFont(fontName, fontInfo);
+}
+
 void FrontendDelegateDeclarative::HandleImage(
     const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback)
 {

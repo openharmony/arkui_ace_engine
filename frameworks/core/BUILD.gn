@@ -423,7 +423,10 @@ template("ace_core_source_set") {
         "animation/native_curve_helper.cpp",
         "common/rosen/rosen_convert_helper.cpp",
       ]
-
+      if (is_ohos) {
+        deps += [ "$ace_graphic/rosen/modules/texgine:libtexgine" ]
+        defines += [ "TEXGINE_SUPPORT_FOR_OHOS" ]
+      }
       if (is_cross_platform_build) {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
       } else {
@@ -529,7 +532,6 @@ template("ace_core_source_set") {
         "//foundation/appframework/ability/ability_runtime/cross_platform/interfaces/inner_api/error",
       ]
     }
-
     if (!is_wearable_product) {
       deps += [
         "$ace_root/frameworks/core/components/camera:ace_core_components_camera_$platform",
@@ -819,7 +821,6 @@ template("ace_core_ng_source_set") {
         deps += [ "$ace_napi:ace_container_scope" ]
       }
     }
-
     deps += [
       "$ace_root/frameworks/core/components_ng/animation:ace_core_components_animation_ng_$platform",
       "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_$platform",
@@ -855,6 +856,10 @@ template("ace_core_ng_source_set") {
         "animation/native_curve_helper.cpp",
         "common/rosen/rosen_convert_helper.cpp",
       ]
+      if (is_ohos) {
+        deps += [ "$ace_graphic/rosen/modules/texgine:libtexgine" ]
+        defines += [ "TEXGINE_SUPPORT_FOR_OHOS" ]
+      }
       if (is_cross_platform_build) {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
       } else {
