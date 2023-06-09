@@ -275,18 +275,21 @@ void ContainerModalView::AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
         option.SetDuration(100);
         auto icurve = AceType::MakeRefPtr<CubicCurve>(0.5f, 0.0f, 0.5f, 1.0f);
         option.SetCurve(icurve);
+        TranslateOptions translate;
+        translate.x = isHover ? translateX : 0.0f;
+        translate.y = isHover ? translateY : 0.0f;
         if (isHover) {
             AnimationUtils::Animate(option,
-                [buttonNodeRenderContext, imageIconRenderContext, imageScale, translateX, translateY]() {
+                [buttonNodeRenderContext, imageIconRenderContext, imageScale, translate]() {
                     buttonNodeRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
                     imageIconRenderContext->UpdateTransformScale(VectorF(1 / imageScale, 1 / imageScale));
-                    imageIconRenderContext->UpdateTransformTranslate({ translateX, translateY, 0.0f });
+                    imageIconRenderContext->UpdateTransformTranslate(translate.value());
                 });
         } else {
-            AnimationUtils::Animate(option, [buttonNodeRenderContext, imageIconRenderContext, imageScale]() {
+            AnimationUtils::Animate(option, [buttonNodeRenderContext, imageIconRenderContext, imageScale, translate]() {
                 buttonNodeRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
                 imageIconRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
-                imageIconRenderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
+                imageIconRenderContext->UpdateTransformTranslate(translate.value());
             });
         }
     };
@@ -316,8 +319,11 @@ void ContainerModalView::AddButtonMouse(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
         auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(response, dampingRatio, blendDuration);
         AnimationOption option = AnimationOption();
         option.SetCurve(motion);
-        AnimationUtils::Animate(option, [imageIconRenderContext, translateX, translateY]() {
-            imageIconRenderContext->UpdateTransformTranslate({ translateX, translateY, 0.0f });
+        TranslateOptions translate;
+        translate.x = translateX;
+        translate.y = translateY;
+        AnimationUtils::Animate(option, [imageIconRenderContext, translate]() {
+            imageIconRenderContext->UpdateTransformTranslate(translate.value());
         });
     };
     auto mouseEvent =  AceType::MakeRefPtr<InputEvent>(std::move(mouseTask));
