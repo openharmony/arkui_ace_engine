@@ -15,7 +15,6 @@ import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
-import("../../../build/uicast.gni")
 
 # declarative frontend source
 template("declarative_frontend") {
@@ -377,9 +376,6 @@ template("declarative_js_engine") {
       "jsview/models/water_flow_model_impl.cpp",
     ]
 
-    defines += uicast_configs.uicast_defines
-    sources += uicast_configs.uicast_frontend_sources
-
     if (defined(config.model_component_support) &&
         config.model_component_support) {
       sources += [ "jsview/models/model_view_impl.cpp" ]
@@ -515,10 +511,7 @@ template("declarative_js_engine") {
       ":gen_obj_src_js_uicontext",
     ]
 
-    deps += uicast_configs.uicast_root_deps
-
     include_dirs = [ "//foundation/window/window_manager/interfaces/innerkits" ]
-    include_dirs += uicast_configs.uicast_root_include
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
     if (is_cross_platform_build) {
@@ -812,9 +805,6 @@ template("declarative_js_engine_ng") {
     } else {
       external_deps += [ "ets_runtime:libark_jsruntime" ]
     }
-
-    defines += uicast_configs.uicast_defines
-    sources += uicast_configs.uicast_frontend_sources
 
     deps += [ "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform" ]
 

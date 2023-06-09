@@ -94,7 +94,6 @@
 #include "core/pipeline/base/composed_element.h"
 #include "core/pipeline/base/factories/flutter_render_factory.h"
 #include "core/pipeline/base/render_context.h"
-#include "uicast_interface/uicast_context_impl.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -151,9 +150,6 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     renderFactory_ = AceType::MakeRefPtr<FlutterRenderFactory>();
     eventManager_ = AceType::MakeRefPtr<EventManager>();
     UpdateFontWeightScale();
-    {
-        UICastContextImpl::Init(AceType::WeakClaim(this));
-    }
     eventManager_->SetInstanceId(instanceId);
     textOverlayManager_ = AceType::MakeRefPtr<TextOverlayManager>(WeakClaim(this));
 }
@@ -170,9 +166,6 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     cardTransitionController_ = AceType::MakeRefPtr<CardTransitionController>(AceType::WeakClaim(this));
     renderFactory_ = AceType::MakeRefPtr<FlutterRenderFactory>();
     UpdateFontWeightScale();
-    {
-        UICastContextImpl::Init(AceType::WeakClaim(this));
-    }
     textOverlayManager_ = AceType::MakeRefPtr<TextOverlayManager>(WeakClaim(this));
 }
 
@@ -214,10 +207,6 @@ void PipelineContext::FlushBuild()
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
-    {
-        UICastContextImpl::OnFlushBuildStart();
-    }
-
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushBuild();
     }
@@ -257,10 +246,6 @@ void PipelineContext::FlushBuild()
 
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushBuild();
-    }
-
-    {
-        UICastContextImpl::OnFlushBuildFinish();
     }
 #if !defined(PREVIEW)
     LayoutInspector::SupportInspector();
@@ -1360,12 +1345,6 @@ bool PipelineContext::CallRouterBackToPopPage()
         return false;
     }
 
-    {
-        if (UICastContextImpl::CallRouterBackToPopPage()) {
-            return true;
-        }
-    }
-
     if (frontend->OnBackPressed()) {
         // if user accept
         LOGI("CallRouterBackToPopPage(): user consume the back key event");
@@ -2021,9 +2000,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACK();
-    {
-        UICastContextImpl::CheckEvent();
-    }
 #if defined(ENABLE_NATIVE_VIEW)
     if (frameCount_ < 2) {
         frameCount_++;

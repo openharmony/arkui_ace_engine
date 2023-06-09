@@ -31,6 +31,7 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& args);
 
+protected:
 #ifdef NG_BUILD
 #define ACE_DEFINE_SET_COMPONENT_SIZE(name) \
     static void SetComponent##name(const JSCallbackInfo& info) {}

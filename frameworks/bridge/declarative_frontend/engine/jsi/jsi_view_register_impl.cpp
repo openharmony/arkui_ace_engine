@@ -171,10 +171,6 @@
 #endif
 #endif
 
-#ifdef UICAST_COMPONENT_SUPPORTED
-#include "uicast_interface/js_uicast.h"
-#endif
-
 #if defined(XCOMPONENT_SUPPORTED)
 #include "bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
@@ -538,9 +534,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextClock", JSTextClock::JSBind },
     { "SideBarContainer", JSSideBar::JSBind },
     { "QRCode", JSQRCode::JSBind },
-#ifdef UICAST_COMPONENT_SUPPORTED
-    { "UICast", JSUICast::JSBind },
-#endif
 #ifdef FORM_SUPPORTED
     { "FormComponent", JSForm::JSBind },
 #endif
