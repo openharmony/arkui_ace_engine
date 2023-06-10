@@ -2959,7 +2959,7 @@ void JSViewAbstract::JsLinearGradientBlur(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], blurRadius)) {
         return;
     }
-    blurRadius = std::clamp(blurRadius, 0.0, 100.0); // 100.0 represents largest blur radius;
+    blurRadius = std::clamp(blurRadius, 0.0, 60.0); // 60.0 represents largest blur radius;
 
     if (!info[1]->IsObject()) {
         LOGE("arg is not a object.");
