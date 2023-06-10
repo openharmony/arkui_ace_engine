@@ -63,7 +63,7 @@ public:
         const std::string& key, const std::unique_ptr<JsonValue>& jsonValue, std::optional<float>& angle);
     static void GetGradientColorStops(Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
     static void GetFractionStops(
-        std::vector<std::pair<float, float>>& fractionStops, const std::unique_ptr<JsonValue>& array);
+        std::vector<std::pair<float, float>>& fractionStops, const std::unique_ptr<JsonValue>& array, bool& flag);
     static void NewGetGradientColorStops(NG::Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
 
     static void JsScale(const JSCallbackInfo& info);
