@@ -48,6 +48,7 @@
 #include "core/components_ng/render/adapter/border_image_modifier.h"
 #include "core/components_ng/render/adapter/debug_boundary_modifier.h"
 #include "core/components_ng/render/adapter/focus_state_modifier.h"
+#include "core/components_ng/render/adapter/gradient_style_modifier.h"
 #include "core/components_ng/render/adapter/graphic_modifier.h"
 #include "core/components_ng/render/adapter/moon_progress_modifier.h"
 #include "core/components_ng/render/adapter/mouse_select_modifier.h"
@@ -1920,25 +1921,31 @@ std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWi
     return effect;
 }
 
-void RosenRenderContext::PaintGradient(const SizeF& frameSize)
+void RosenRenderContext::PaintGradient(const SizeF& /*frameSize*/)
 {
     CHECK_NULL_VOID(rsNode_);
     auto& gradientProperty = GetOrCreateGradient();
+    Gradient gradient;
     if (gradientProperty->HasLinearGradient()) {
-        auto gradient = gradientProperty->GetLinearGradientValue();
-        auto shader = SkiaDecorationPainter::CreateGradientShader(gradient, frameSize);
-        rsNode_->SetBackgroundShader(Rosen::RSShader::CreateRSShader(shader));
+        gradient = gradientProperty->GetLinearGradientValue();
     }
     if (gradientProperty->HasRadialGradient()) {
-        auto gradient = gradientProperty->GetRadialGradientValue();
-        auto shader = SkiaDecorationPainter::CreateGradientShader(gradient, frameSize);
-        rsNode_->SetBackgroundShader(Rosen::RSShader::CreateRSShader(shader));
+        gradient = gradientProperty->GetRadialGradientValue();
     }
     if (gradientProperty->HasSweepGradient()) {
-        auto gradient = gradientProperty->GetSweepGradientValue();
-        auto shader = SkiaDecorationPainter::CreateGradientShader(gradient, frameSize);
-        rsNode_->SetBackgroundShader(Rosen::RSShader::CreateRSShader(shader));
+        gradient = gradientProperty->GetSweepGradientValue();
     }
+    if (!gradientStyleModifier_) {
+        gradientStyleModifier_ = std::make_shared<GradientStyleModifier>();
+        rsNode_->AddModifier(gradientStyleModifier_);
+    }
+    auto borderRadius = GetBorderRadius();
+    if (borderRadius.has_value()) {
+        Rosen::Vector4f rsRadius;
+        ConvertRadius(*borderRadius, rsRadius);
+        gradientStyleModifier_->SetCornerRadius(rsRadius);
+    }
+    gradientStyleModifier_->SetGradient(gradient);
 }
 
 void RosenRenderContext::OnLinearGradientUpdate(const NG::Gradient& gradient)
