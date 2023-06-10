@@ -15,8 +15,6 @@
 
 #include "core/components_ng/render/adapter/gradient_style_modifier.h"
 
-#include <cmath>
-
 #include "base/geometry/dimension.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
