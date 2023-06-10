@@ -5151,7 +5151,43 @@ HWTEST_F(TabsTestNg, TabBarPatternInitHoverEvent001, TestSize.Level1)
     tabBarPattern->InitMouseEvent();
     ASSERT_NE(tabBarPattern->hoverEvent_, nullptr);
     ASSERT_NE(tabBarPattern->mouseEvent_, nullptr);
-    *(tabBarPattern->hoverEvent_)(true); 
-    *(tabBarPattern->mouseEvent_)(info); 
+    tabBarPattern->hoverEvent_->onHoverCallback_(true);
+    tabBarPattern->mouseEvent_->onMouseCallback_(info);
+}
+
+/**
+ * @tc.name: TabBarPatternInitOnKeyEvent001
+ * @tc.desc: test InitOnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternInitOnKeyEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create TabBarPattern
+     */
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    auto focusHub = tabBarNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    auto event = KeyEvent();
+    auto paintRect = RoundRect();
+
+    /**
+     * @tc.steps: step2. Test function InitOnKeyEvent.
+     * @tc.expected: Related function runs ok.
+     */
+    tabBarPattern->InitOnKeyEvent(focusHub);
+    focusHub->onKeyEventInternal_(event);
+    focusHub->getInnerFocusRectFunc_(paintRect);
 }
 } // namespace OHOS::Ace::NG
