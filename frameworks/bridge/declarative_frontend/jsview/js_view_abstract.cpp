@@ -2917,7 +2917,7 @@ void JSViewAbstract::JsBackdropBlur(const JSCallbackInfo& info)
 }
 
 void JSViewAbstract::GetFractionStops(
-    std::vector<std::pair<float, float>>& fractionStops, const std::unique_ptr<JsonValue>& array)
+    std::vector<std::pair<float, float>>& fractionStops, const std::unique_ptr<JsonValue>& array, bool& flag)
 {
     float tmpPos = -1.0f;
     for (int32_t i = 0; i < array->GetArraySize(); i++) {
@@ -2942,6 +2942,7 @@ void JSViewAbstract::GetFractionStops(
         }
         if (fractionStop.second <= tmpPos) {
             LOGE("fraction stop postion is not incremental.");
+            flag = false;
             fractionStops.clear();
             return;
         }
@@ -2977,12 +2978,14 @@ void JSViewAbstract::JsLinearGradientBlur(const JSCallbackInfo& info)
         LOGE("Js Parse object failed, fractionStops is null or not Array");
         return;
     }
-
+    bool incrementalFlag = true;
     std::vector<std::pair<float, float>> fractionStops;
-    GetFractionStops(fractionStops, array);
+    GetFractionStops(fractionStops, array, incrementalFlag);
 
     if (fractionStops.size() <= 1) {
-        LOGE("fractionstops must greater than 1.");
+        if (incrementalFlag) {
+            LOGE("fractionstops must greater than 1.");
+        }    
         return;
     }
     // Parse direction
