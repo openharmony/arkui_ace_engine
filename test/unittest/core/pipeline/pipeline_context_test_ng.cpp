@@ -1609,7 +1609,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg031, TestSize.Level1)
      * @tc.expected: flag is false.
      */
     bool flag = false;
-    auto callback = [&flag](const TouchEvent& point) { flag = !flag; };
     context_->OnTouchEvent(point_, true);
     EXPECT_FALSE(flag);
     /**
@@ -1626,37 +1625,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg031, TestSize.Level1)
     point_.type = TouchType::UP;
     context_->OnTouchEvent(point_, false);
     EXPECT_TRUE(context_->hasIdleTasks_);
-    /**
-     * @tc.steps4: init uiExtensionCallback_ and call OnTouchEvent with second arg is false.
-     * @tc.expected: flag is true, hasIdleTasks_ is true and touchEvents_ is not empty.
-     */
-    context_->uiExtensionCallback_ = callback;
-    point_.type = TouchType::MOVE;
-    context_->OnTouchEvent(point_, false);
-    EXPECT_TRUE(flag);
-    EXPECT_TRUE(context_->hasIdleTasks_);
-    EXPECT_FALSE(context_->touchEvents_.empty());
-    /**
-     * @tc.steps5: change id and call OnTouchEvent with second arg is false.
-                change touch type and call OnTouchEvent with second arg is false.
-     * @tc.expected: touchEvents_ is not empty and uiExtensionCallback_ is nullptr.
-     */
-    point_.id += 1;
-    context_->OnTouchEvent(point_, false);
-    EXPECT_FALSE(context_->touchEvents_.empty());
-    point_.type = TouchType::UP;
-    context_->OnTouchEvent(point_, false);
-    EXPECT_FALSE(context_->touchEvents_.empty());
-    EXPECT_EQ(context_->uiExtensionCallback_, nullptr);
-    /**
-     * @tc.steps5: change id and call OnTouchEvent with second arg is false.
-                change touch type and call OnTouchEvent with second arg is false.
-     * @tc.expected: touchEvents_ is not empty, uiExtensionCallback_ is nullptr.
-     */
-    context_->uiExtensionCallback_ = callback;
-    point_.type = TouchType::CANCEL;
-    context_->OnTouchEvent(point_, false);
-    EXPECT_EQ(context_->uiExtensionCallback_, nullptr);
 }
 
 /**

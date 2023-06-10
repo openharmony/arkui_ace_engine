@@ -15,11 +15,12 @@
 
 #include "core/components_ng/pattern/window_scene/scene/window_node.h"
 
+#include "pointer_event.h"
+
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "pointer_event.h"
 
 namespace OHOS::Ace::NG {
 HitTestResult WindowNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
@@ -32,12 +33,12 @@ HitTestResult WindowNode::TouchTest(const PointF& globalPoint, const PointF& par
     auto context = GetContext();
     CHECK_NULL_RETURN(context, HitTestResult::BUBBLING);
     DispatchPointerEvent(touchRestrict.touchEvent, rectWithTransform);
-    auto callback = [weak = WeakClaim(this), rectWithTransform] (const TouchEvent& point) {
+    auto callback = [weak = WeakClaim(this), rectWithTransform](const TouchEvent& point) {
         auto windowNode = weak.Upgrade();
         CHECK_NULL_VOID(windowNode);
         windowNode->DispatchPointerEvent(point, rectWithTransform);
     };
-    context->AddUIExtensionCallback(callback);
+    context->AddUIExtensionTouchEventCallback(touchRestrict.touchEvent.id, callback);
     return HitTestResult::BUBBLING;
 }
 

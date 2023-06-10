@@ -27,7 +27,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_node.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_paint_property.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/event/touch_event.h"
@@ -140,9 +139,9 @@ HWTEST_F(UIExtensionPatternTestNg, UIExtensionCreator005, TestSize.Level1)
     MockContainer::SetUp();
     MockContainer::container_->pipelineContext_ = MockPipelineBase::pipeline_;
     auto container = Container::Current();
-    EXPECT_NE(container, nullptr);
+    ASSERT_NE(container, nullptr);
     auto context = container->GetPipelineContext();
-    EXPECT_NE(context, nullptr);
+    ASSERT_NE(context, nullptr);
     auto model = UIExtensionModelNG();
     model.Create(BUNDLE_NAME, ABILITY_NAME);
 

@@ -23,16 +23,6 @@ RefPtr<LayoutAlgorithm> UIExtensionPattern::CreateLayoutAlgorithm()
     return MakeRefPtr<UIExtensionLayoutAlgorithm>();
 }
 
-RefPtr<PaintProperty> UIExtensionPattern::CreatePaintProperty()
-{
-    return MakeRefPtr<UIExtensionPaintProperty>();
-}
-
-RefPtr<EventHub> UIExtensionPattern::CreateEventHub()
-{
-    return MakeRefPtr<UIExtensionEventHub>();
-}
-
 void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     auto id = frameNode->GetId();
