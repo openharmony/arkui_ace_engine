@@ -5095,7 +5095,6 @@ HWTEST_F(TabsTestNg, TabBarPatternInitScrollable003, TestSize.Level1)
                 tabBarPattern->scrollableEvent_->callback_(0.1, SCROLL_FROM_NONE);
                 tabBarPattern->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
                 tabBarPattern->axis_ = Axis::HORIZONTAL;
-
             }
             tabBarPattern->axis_ = Axis::VERTICAL;
             tabBarNode->GetLayoutProperty<TabBarLayoutProperty>()->UpdateAxis(Axis::HORIZONTAL);
@@ -5152,7 +5151,7 @@ HWTEST_F(TabsTestNg, TabBarPatternInitHoverEvent001, TestSize.Level1)
     tabBarPattern->InitMouseEvent();
     ASSERT_NE(tabBarPattern->hoverEvent_, nullptr);
     ASSERT_NE(tabBarPattern->mouseEvent_, nullptr);
-    (*(tabBarPattern->hoverEvent_))(true); 
-    (*(tabBarPattern->mouseEvent_))(info); 
+    *(tabBarPattern->hoverEvent_)(true); 
+    *(tabBarPattern->mouseEvent_)(info); 
 }
 } // namespace OHOS::Ace::NG
