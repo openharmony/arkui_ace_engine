@@ -2985,7 +2985,7 @@ void JSViewAbstract::JsLinearGradientBlur(const JSCallbackInfo& info)
     if (fractionStops.size() <= 1) {
         if (incrementalFlag) {
             LOGE("fractionstops must greater than 1.");
-        }    
+        }
         return;
     }
     // Parse direction
