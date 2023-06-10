@@ -45,6 +45,12 @@ public:
             theme->backgroundColor_ = themeConstants->GetColor(THEME_LIST_BACKGROUND_COLOR);
             theme->scrollDistance_ = themeConstants->GetDouble(THEME_LIST_SCROLL_DISTANCE);
             theme->dividerColor_ = themeConstants->GetColor(THEME_LIST_DIVIDER_COLOR);
+            theme->chainMinSpace_ = themeConstants->GetDimension(THEME_LIST_CHAIN_MIN_SPACE);
+            theme->chainMaxSpace_ = themeConstants->GetDimension(THEME_LIST_CHAIN_MAX_SPACE);
+            theme->chainConductivity_ = themeConstants->GetDouble(THEME_LIST_CHAIN_CONDUCTIVITY);
+            theme->chainIntensity_ = themeConstants->GetDouble(THEME_LIST_CHAIN_INTENSITY);
+            theme->chainStiffness_ = themeConstants->GetDouble(THEME_LIST_CHAIN_STIFFNESS);
+            theme->chainDamping_ = themeConstants->GetDouble(THEME_LIST_CHAIN_DAMPING);
             return theme;
         }
     };
@@ -71,6 +77,31 @@ public:
         return scrollDistance_;
     }
 
+    Dimension GetChainMinSpace() const
+    {
+        return chainMinSpace_;
+    }
+    Dimension GetChainMaxSpace() const
+    {
+        return chainMaxSpace_;
+    }
+    double GetChainConductivity() const
+    {
+        return chainConductivity_;
+    }
+    double GetChainIntensity() const
+    {
+        return chainIntensity_;
+    }
+    double GetChainStiffness() const
+    {
+        return chainStiffness_;
+    }
+    double GetChainDamping() const
+    {
+        return chainDamping_;
+    }
+
 protected:
     ListTheme() = default;
 
@@ -79,6 +110,12 @@ private:
     Color backgroundColor_;
     Color dividerColor_;
     double scrollDistance_ = 0.0;
+    Dimension chainMinSpace_;
+    Dimension chainMaxSpace_;
+    double chainConductivity_ = 0.0;
+    double chainIntensity_ = 0.0;
+    double chainStiffness_ = 0.0;
+    double chainDamping_ = 0.0;
 };
 
 } // namespace OHOS::Ace

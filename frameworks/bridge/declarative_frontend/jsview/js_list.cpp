@@ -142,18 +142,26 @@ void JSList::SetChainAnimationOptions(const JSCallbackInfo& info)
     }
 
     if (info[0]->IsObject()) {
+        RefPtr<ListTheme> listTheme = GetTheme<ListTheme>();
+        CHECK_NULL_VOID(listTheme);
+        ChainAnimationOptions options = {
+            .minSpace = listTheme->GetChainMinSpace(),
+            .maxSpace = listTheme->GetChainMaxSpace(),
+            .conductivity = listTheme->GetChainConductivity(),
+            .intensity = listTheme->GetChainIntensity(),
+            .edgeEffect = 0,
+            .stiffness = listTheme->GetChainStiffness(),
+            .damping = listTheme->GetChainDamping(),
+        };
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
-        CalcDimension minSpace = 10.0_vp;
-        ParseJsDimensionVp(jsObj->GetProperty("minSpace"), minSpace);
-        CalcDimension maxSpace = 40.0_vp;
-        ParseJsDimensionVp(jsObj->GetProperty("maxSpace"), maxSpace);
-        double conductivity = 0.7f;
-        JSViewAbstract::ParseJsDouble(jsObj->GetProperty("conductivity"), conductivity);
-        double intensity = 0.3f;
-        JSViewAbstract::ParseJsDouble(jsObj->GetProperty("intensity"), intensity);
-        int32_t edgeEffect = 0;
-        JSViewAbstract::ParseJsInt32(jsObj->GetProperty("edgeEffect"), edgeEffect);
-        ListModel::GetInstance()->SetChainAnimationOptions(minSpace, maxSpace, conductivity, intensity, edgeEffect);
+        ParseJsDimensionVp(jsObj->GetProperty("minSpace"), options.minSpace);
+        ParseJsDimensionVp(jsObj->GetProperty("maxSpace"), options.maxSpace);
+        JSViewAbstract::ParseJsDouble(jsObj->GetProperty("conductivity"), options.conductivity);
+        JSViewAbstract::ParseJsDouble(jsObj->GetProperty("intensity"), options.intensity);
+        JSViewAbstract::ParseJsInt32(jsObj->GetProperty("edgeEffect"), options.edgeEffect);
+        JSViewAbstract::ParseJsDouble(jsObj->GetProperty("stiffness"), options.stiffness);
+        JSViewAbstract::ParseJsDouble(jsObj->GetProperty("damping"), options.damping);
+        ListModel::GetInstance()->SetChainAnimationOptions(options);
     }
 }
 
