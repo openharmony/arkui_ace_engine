@@ -85,6 +85,7 @@ constexpr int32_t ERROR_CODE_SYSTEMCAP_ERROR = 801;   // The specified SystemCap
 constexpr int32_t ERROR_CODE_INTERNAL_ERROR = 100001;      // Internal error.
 constexpr int32_t ERROR_CODE_URI_ERROR = 100002;           // Uri error.
 constexpr int32_t ERROR_CODE_PAGE_STACK_FULL = 100003;     // The pages are pushed too much.
+constexpr int32_t ERROR_CODE_NAMED_ROUTE_ERROR = 100004;           // Named route error.
 constexpr int32_t ERROR_CODE_URI_ERROR_LITE = 200002;      // Uri error for lite.
 
 template<class T>
