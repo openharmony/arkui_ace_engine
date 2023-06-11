@@ -31,7 +31,6 @@ void GradientStyleModifier::Draw(RSDrawingContext& context) const
     CHECK_NULL_VOID(colorStops_);
     std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas* /* unused */) {} };
     RSCanvas rsCanvas(&skCanvas);
-    CHECK_NULL_VOID(&rsCanvas);
     SizeF contentSize(context.width, context.height);
     PaintGradient(rsCanvas, contentSize);
 }
@@ -111,7 +110,6 @@ void GradientStyleModifier::SetGradient(const Gradient& gradient)
 
 ColorAnimatableArithmetic::ColorAnimatableArithmetic(const Gradient& gradient)
 {
-    colors_.clear();
     for (auto color : gradient.GetColors()) {
         colors_.push_back(color.GetColor());
     }
@@ -201,7 +199,6 @@ bool ColorAnimatableArithmetic::IsEqual(const ColorAnimatableArithmetic& value) 
 
 ColorStopAnimatableArithmetic::ColorStopAnimatableArithmetic(const Gradient& gradient)
 {
-    colorStops_.clear();
     for (auto colorStop : gradient.GetColors()) {
         colorStops_.push_back(colorStop.GetDimension());
     }

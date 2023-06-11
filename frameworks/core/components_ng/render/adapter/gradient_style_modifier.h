@@ -35,7 +35,7 @@ public:
     ColorAnimatableArithmetic Minus(const ColorAnimatableArithmetic& value) const override;
     ColorAnimatableArithmetic Multiply(const float scale) const override;
     bool IsEqual(const ColorAnimatableArithmetic& value) const override;
-    std::vector<Color> GetColors() const
+    const std::vector<Color>& GetColors() const
     {
         return colors_;
     }
@@ -53,7 +53,7 @@ public:
     ColorStopAnimatableArithmetic Minus(const ColorStopAnimatableArithmetic& value) const override;
     ColorStopAnimatableArithmetic Multiply(const float scale) const override;
     bool IsEqual(const ColorStopAnimatableArithmetic& value) const override;
-    std::vector<Dimension> GetColorStops() const
+    const std::vector<Dimension>& GetColorStops() const
     {
         return colorStops_;
     }
