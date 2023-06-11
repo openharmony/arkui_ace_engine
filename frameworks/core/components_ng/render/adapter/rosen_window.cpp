@@ -62,9 +62,10 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID_NOLOG(pipeline);
             pipeline->OnIdle(timeStampNanos + refreshPeriod);
-            int64_t now = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+            int64_t now = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                std::chrono::steady_clock::now().time_since_epoch()).count();
             int64_t duration = now - timeStampNanos;
-            double jank = duration / refreshPeriod;
+            double jank = double(duration) / refreshPeriod;
             if (jank > 1.0f) {
                 EventReport::JankFrameReport(timeStampNanos, duration, jank);
             }
