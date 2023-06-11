@@ -21,8 +21,16 @@ build_component_ng("ui_extension_pattern_ng") {
     "ui_extension_pattern.cpp",
   ]
 
-  external_deps = [
-    "input:libmmi-client",
-    "window_manager:scene_session",
-  ]
+  if (is_ohos_standard_system) {
+    deps = [ "$graphic_standard_path/rosen/modules/render_service_client:librender_service_client" ]
+
+    external_deps = [
+      "ability_runtime:abilitykit_native",
+      "input:libmmi-client",
+      "ipc:ipc_single",
+      "window_manager:libwm",
+      "window_manager:scene_session",
+      "window_manager:scene_session_manager",
+    ]
+  }
 }
