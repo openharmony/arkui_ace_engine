@@ -33,6 +33,7 @@
 #ifndef NG_BUILD
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #endif
+#include "bridge/declarative_frontend/jsview/js_text.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/text/span_model.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
@@ -71,6 +72,13 @@ const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALI
 const std::vector<TextCase> TEXT_CASES = { TextCase::NORMAL, TextCase::LOWERCASE, TextCase::UPPERCASE };
 
 } // namespace
+
+void JSSpan::SetFont(const JSCallbackInfo& info)
+{
+    Font font;
+    JSText::GetFontInfo(info, font);
+    SpanModel::GetInstance()->SetFont(font);
+}
 
 void JSSpan::SetFontSize(const JSCallbackInfo& info)
 {
@@ -251,6 +259,7 @@ void JSSpan::JSBind(BindingTarget globalObj)
     JSClass<JSSpan>::Declare("Span");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSSpan>::StaticMethod("create", &JSSpan::Create, opt);
+    JSClass<JSSpan>::StaticMethod("font", &JSSpan::SetFont, opt);
     JSClass<JSSpan>::StaticMethod("fontColor", &JSSpan::SetTextColor, opt);
     JSClass<JSSpan>::StaticMethod("fontSize", &JSSpan::SetFontSize, opt);
     JSClass<JSSpan>::StaticMethod("fontWeight", &JSSpan::SetFontWeight, opt);

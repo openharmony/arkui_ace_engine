@@ -126,6 +126,10 @@ constexpr int32_t UNKNOWN_REASON = 1;
 constexpr float TEXT_RECT_WIDTH = 10.0f;
 constexpr float TEXT_RECT_TOP_ONE = 10.0f;
 constexpr float TEXT_RECT_TOP_TWO = 20.0f;
+const std::string TEXT_DEFAULT_VALUE = "{\"style\":\"FontStyle.Normal\",\"size\":\"16.00fp\",\"weight\":"
+                                       "\"FontWeight.Normal\",\"family\":\"HarmonyOS Sans\"}";
+const std::string TEXT_EQUALS_VALUE =
+    R"({"style":"FontStyle.Italic","size":"20.10px","weight":"FontWeight.Bold","family":"cursive"})";
 
 using OnClickCallback = std::function<void(const BaseEventInfo* info)>;
 using DragDropBaseCallback = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
@@ -3801,5 +3805,78 @@ HWTEST_F(TextTestNg, TextContentModifier004, TestSize.Level1)
      */
     textContentModifier->DrawObscuration(context);
     EXPECT_EQ(textContentModifier->drawObscuredRects_, drawObscuredRects);
+}
+
+/*
+ * @tc.name: TextModelSetFont001
+ * @tc.desc: Test if SetFont is successful
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextModelSetFont001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textModelNG and FrameNode
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    Font font;
+    font.fontSize = FONT_SIZE_VALUE;
+    font.fontWeight = FontWeight::BOLD;
+    font.fontFamilies = FONT_FAMILY_VALUE;
+    font.fontStyle = ITALIC_FONT_STYLE_VALUE;
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. call SetFont and Gets the relevant properties of the Font
+     * @tc.expected: step2. Check the font value
+     */
+    textModelNG.SetFont(font);
+    EXPECT_EQ(textLayoutProperty->GetFontSize(), FONT_SIZE_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetFontWeight().value(), FontWeight::BOLD);
+    EXPECT_EQ(textLayoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
+}
+
+/**
+ * @tc.name: TextModelGetFont001
+ * @tc.desc: Test if GetFont is successful
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextModelGetFont001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textModelNG and FrameNode
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. not set and Gets the relevant properties of the Font
+     * @tc.expected: step2. Check the font value
+     */
+    EXPECT_EQ(textLayoutProperty->GetFont(), TEXT_DEFAULT_VALUE);
+
+    /**
+     * @tc.steps: step2. call SetFont and Gets the relevant properties of the Font
+     * @tc.expected: step2. Check the font value
+     */
+    Font font;
+    font.fontSize = FONT_SIZE_VALUE;
+    font.fontWeight = FontWeight::BOLD;
+    font.fontFamilies = FONT_FAMILY_VALUE;
+    font.fontStyle = ITALIC_FONT_STYLE_VALUE;
+    textModelNG.SetFont(font);
+    EXPECT_EQ(textLayoutProperty->GetFont(), TEXT_EQUALS_VALUE);
 }
 } // namespace OHOS::Ace::NG

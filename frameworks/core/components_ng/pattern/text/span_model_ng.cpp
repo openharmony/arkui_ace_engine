@@ -43,6 +43,22 @@ void SpanModelNG::Create(const std::string& content)
     ACE_UPDATE_SPAN_PROPERTY(Content, content, PropertyInfo::NONE);
 }
 
+void SpanModelNG::SetFont(const Font& value)
+{
+    if (value.fontSize.has_value()) {
+        SetFontSize(value.fontSize.value());
+    }
+    if (value.fontWeight.has_value()) {
+        SetFontWeight(value.fontWeight.value());
+    }
+    if (!value.fontFamilies.empty()) {
+        SetFontFamily(value.fontFamilies);
+    }
+    if (value.fontStyle.has_value()) {
+        SetItalicFontStyle(value.fontStyle.value());
+    }
+}
+
 void SpanModelNG::SetFontSize(const Dimension& value)
 {
     ACE_UPDATE_SPAN_PROPERTY(FontSize, value, PropertyInfo::FONTSIZE);
