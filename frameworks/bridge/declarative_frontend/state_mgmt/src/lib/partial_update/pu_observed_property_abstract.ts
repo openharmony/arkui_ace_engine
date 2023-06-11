@@ -128,6 +128,81 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     return this.subscriberRefs_.size + (this.owningView_ ? 1 : 0);
   }
 
+  /*
+   type checking for any supported type, as required for union type support
+    see 1st parameter for explanation what is allowed
+
+    FIXME this expects the Map, Set patch to go in
+  */
+
+  protected checkIsSupportedValue(value: T): boolean {
+    return this.checkNewValue(
+      `undefined, null, number, boolean, string, or Object but not function`,
+      value,
+      () => ((typeof value == "object" && typeof value != "function")
+        || typeof value == "number" || typeof value == "string" || typeof value == "boolean")
+        || (value == undefined || value == null)
+    );
+  }
+
+  /*
+    type checking for allowed Object type value
+    see 1st parameter for explanation what is allowed
+
+      FIXME this expects the Map, Set patch to go in
+    */
+  protected checkIsObject(value: T): boolean {
+    return this.checkNewValue(
+      `undefined, null, Object including Array and instance of SubscribableAbstract and excluding function, Set, and Map`,
+      value,
+      () => (value == undefined || value == null || (typeof value == "object"))
+    );
+  }
+
+  /*
+    type checking for allowed simple types value
+    see 1st parameter for explanation what is allowed
+ */
+  protected checkIsSimple(value: T): boolean {
+    return this.checkNewValue(
+      `undefined, number, boolean, string`,
+      value,
+      () => (value == undefined || typeof value == "number" || typeof value == "string" || typeof value == "boolean")
+    );
+  }
+    
+  private static readonly mapDeco = new Map<string, string>([
+    ["ObservedPropertyObjectPU", "@State/@Provide"],
+    ["ObservedPropertySimplePU", "@State/@Provide (error, should not be used)"],
+    ["SynchedPropertyObjectOneWayPU", "@Prop"],
+    ["SynchedPropertySimpleOneWayPU", "@Prop  (error, should not be used)"],
+    ["SynchedPropertyObjectTwoWayPU", "@Link/@Consume"],
+    ["SynchedPropertySimpleTwoWayPU", "@Link/@Consume (error, should not be used)"],
+    ["SynchedPropertyNestedObjectPU", "@ObjectLink (only class-objects supported"],
+    ["SynchedPropertyNesedObjectPU", "@ObjectLink (only class-objects supported"]
+  ]);
+
+  protected checkNewValue(isAllowedComment : string, newValue: T, validator: (value: T) => boolean) : boolean {
+    if (validator(newValue)) {
+      return true;
+    } 
+
+    // report error
+    // current implementation throws an Exception
+    errorReport.varValueCheckFailed({
+      customComponent: this.owningView_? this.owningView_.constructor.name : "unknown owningView / internal error",
+      variableDeco: ObservedPropertyAbstractPU.mapDeco.get(this.constructor.name),
+      variableName: this.info(),
+      expectedType: isAllowedComment,
+      value: newValue
+    });
+
+    // never gets here if errorReport.varValueCheckFailed throws an exception
+    // but should nto depend on its implementation
+    return false;
+  }
+
+  
   /**
    * factory function for concrete 'object' or 'simple' ObservedProperty object
    * depending if value is Class object
