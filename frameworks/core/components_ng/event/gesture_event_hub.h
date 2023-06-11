@@ -34,11 +34,11 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-namespace OHOS::UDMF {
-class UnifiedData;
-}
 namespace OHOS::Msdp::DeviceStatus {
 struct DragNotifyMsg;
+}
+namespace OHOS::Ace {
+class UnifiedData;
 }
 #endif
 namespace OHOS::Ace::NG {
@@ -373,7 +373,7 @@ public:
     }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-    int32_t SetDragData(std::shared_ptr<UDMF::UnifiedData>& unifiedData, std::string& udKey);
+    int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
     OnDragCallback GetDragCallback();
 #endif // ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();

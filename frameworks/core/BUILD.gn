@@ -485,7 +485,6 @@ template("ace_core_source_set") {
 
     if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
       sources += [ "gestures/gesture_info.cpp" ]
-      external_deps += [ "udmf:udmf_client" ]
     }
 
     if (defined(config.remote_window_support) && config.remote_window_support) {
@@ -807,7 +806,6 @@ template("ace_core_ng_source_set") {
 
     if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
       sources += [ "gestures/gesture_info.cpp" ]
-      external_deps = [ "udmf:udmf_client" ]
     }
 
     if (defined(config.build_container_scope_lib) &&

@@ -34,9 +34,7 @@
 #include "core/gestures/gesture_info.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-#include "text.h"
-#include "unified_data.h"
-
+#include "core/common/udmf/udmf_client.h"
 #include "core/common/ace_engine_ext.h"
 #endif
 
@@ -592,11 +590,8 @@ DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, const
     DragDropInfo itemInfo;
     auto selectedStr = GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     itemInfo.extraInfo = selectedStr;
-    UDMF::UDVariant udmfValue(selectedStr);
-    UDMF::UDDetails udmfDetails = { { "value", udmfValue } };
-    auto record = std::make_shared<UDMF::Text>(udmfDetails);
-    auto unifiedData = std::make_shared<UDMF::UnifiedData>();
-    unifiedData->AddRecord(record);
+    RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
+    UdmfClient::GetInstance()->AddTextRecord(unifiedData, selectedStr);
     event->SetData(unifiedData);
 
     AceEngineExt::GetInstance().DragStartExt();

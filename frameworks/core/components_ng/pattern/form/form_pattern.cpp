@@ -29,9 +29,7 @@
 #include "pointer_event.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-#include "foundation/distributeddatamgr/udmf/interfaces/innerkits/common/unified_types.h"
-#include "foundation/distributeddatamgr/udmf/interfaces/innerkits/data/system_defined_form.h"
-#include "foundation/distributeddatamgr/udmf/interfaces/innerkits/data/unified_data.h"
+#include "core/common/udmf/udmf_client.h"
 #endif // ENABLE_DRAG_FRAMEWORK
 
 namespace OHOS::Ace::NG {
@@ -670,16 +668,8 @@ void FormPattern::EnableDrag()
         auto subcontainer = form->GetSubContainer();
         CHECK_NULL_RETURN(subcontainer, info);
 
-        auto formRecord = std::make_shared<UDMF::SystemDefinedForm>();
-        formRecord->SetFormId(subcontainer->GetRunningCardId());
-        formRecord->SetFormName(form->cardInfo_.cardName);
-        formRecord->SetBundleName(form->cardInfo_.bundleName);
-        formRecord->SetAbilityName(form->cardInfo_.abilityName);
-        formRecord->SetModule(form->cardInfo_.moduleName);
-        formRecord->SetType(UDMF::UDType::SYSTEM_DEFINED_FORM);
-
-        auto unifiedData = std::make_shared<UDMF::UnifiedData>();
-        unifiedData->AddRecord(formRecord);
+        RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
+        UdmfClient::GetInstance()->AddFormRecord(unifiedData, subcontainer->GetRunningCardId(), form->cardInfo_);
         event->SetData(unifiedData);
 #endif // ENABLE_DRAG_FRAMEWORK
 
