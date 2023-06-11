@@ -263,6 +263,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     }
     HandleOnAreaChangeEvent();
     HandleVisibleAreaChangeEvent();
+    if (isNeedFlushMouseEvent_) {
+        FlushMouseEvent();
+        isNeedFlushMouseEvent_ = false;
+    }
     // Keep the call sent at the end of the function
     ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_COMPLETE_EVENT);
 }
@@ -1164,6 +1168,16 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
 {
     CHECK_RUN_ON(UI);
 
+    if (!lastMouseEvent_) {
+        lastMouseEvent_ = std::make_unique<MouseEvent>();
+    }
+    lastMouseEvent_->x = event.x;
+    lastMouseEvent_->y = event.y;
+    lastMouseEvent_->button = event.button;
+    lastMouseEvent_->action = event.action;
+    lastMouseEvent_->sourceType = event.sourceType;
+    lastMouseEvent_->time = event.time;
+
     if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
         // Mouse right button press event set focus inactive here.
         // Mouse left button press event will set focus inactive in touch process.
@@ -1189,6 +1203,31 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     eventManager_->DispatchMouseHoverEventNG(scaleEvent);
     eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
     RequestFrame();
+}
+
+void PipelineContext::FlushMouseEvent()
+{
+    if (!lastMouseEvent_ || lastMouseEvent_->action == MouseAction::WINDOW_LEAVE) {
+        return;
+    }
+    MouseEvent event;
+    event.x = lastMouseEvent_->x;
+    event.y = lastMouseEvent_->y;
+    event.time = lastMouseEvent_->time;
+    event.action = MouseAction::MOVE;
+    event.button = MouseButton::NONE_BUTTON;
+    event.sourceType = SourceType::MOUSE;
+
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(rootNode_);
+    auto scaleEvent = event.CreateScaleEvent(viewScale_);
+    TouchRestrict touchRestrict { TouchRestrict::NONE };
+    touchRestrict.sourceType = event.sourceType;
+    touchRestrict.hitTestType = SourceType::MOUSE;
+    eventManager_->MouseTest(scaleEvent, rootNode_, touchRestrict);
+    eventManager_->DispatchMouseEventNG(scaleEvent);
+    eventManager_->DispatchMouseHoverEventNG(scaleEvent);
+    eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
 }
 
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
