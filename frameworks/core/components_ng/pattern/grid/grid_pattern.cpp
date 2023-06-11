@@ -431,9 +431,9 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     const auto& gridLayoutInfo = gridLayoutAlgorithm->GetGridLayoutInfo();
     auto eventhub = GetEventHub<GridEventHub>();
     CHECK_NULL_RETURN(eventhub, false);
+    scrollbarInfo_ = eventhub->FireOnScrollBarUpdate(gridLayoutInfo.startIndex_, gridLayoutInfo.currentOffset_);
     if (gridLayoutInfo_.startMainLineIndex_ != gridLayoutInfo.startMainLineIndex_) {
         eventhub->FireOnScrollToIndex(gridLayoutInfo.startIndex_);
-        scrollbarInfo_ = eventhub->FireOnScrollBarUpdate(gridLayoutInfo.startIndex_, gridLayoutInfo.currentOffset_);
         FlushFocusOnScroll(gridLayoutInfo);
     }
     gridLayoutInfo_ = gridLayoutInfo;
