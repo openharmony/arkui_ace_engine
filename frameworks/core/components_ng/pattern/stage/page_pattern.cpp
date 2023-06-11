@@ -146,6 +146,7 @@ void PagePattern::OnShow()
     CHECK_NULL_VOID_NOLOG(!isOnShow_);
     CHECK_NULL_VOID_NOLOG(Container::IsForeground());
     isOnShow_ = true;
+    AceApplicationInfo::GetInstance().SetCurrentPage(pageInfo_->GetPageUrl());
     if (onPageShow_) {
         onPageShow_();
     }

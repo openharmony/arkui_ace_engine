@@ -301,13 +301,14 @@ const std::string& GetJankStatus(double jank)
 }
 } // namespace
 
-void EventReport::JankFrameReport(int64_t startTime, int64_t duration, double jank, const std::string& pageUrl, uint32_t jankStatusVersion)
+void EventReport::JankFrameReport(int64_t startTime, int64_t duration, double jank, uint32_t jankStatusVersion)
 {
     std::string eventName = "JANK_STATS_APP";
     auto app_version_code = AceApplicationInfo::GetInstance().GetAppVersionCode();
     auto app_version_name = AceApplicationInfo::GetInstance().GetAppVersionName();
     auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
     auto abilityName = AceApplicationInfo::GetInstance().GetAbilityName();
+    auto pageUrl = AceApplicationInfo::GetInstance().GetCurrentPage();
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
         OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
         EVENT_KEY_STARTTIME, std::to_string(startTime),
