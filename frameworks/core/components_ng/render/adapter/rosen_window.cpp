@@ -26,6 +26,7 @@
 #include "core/common/window.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "frameworks/base/log/event_report.h"
 
 namespace {
 constexpr int32_t IDLE_TASK_DELAY_MILLISECOND = 51;
@@ -61,6 +62,12 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID_NOLOG(pipeline);
             pipeline->OnIdle(timeStampNanos + refreshPeriod);
+            int64_t now = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+            int64_t duration = now - timeStampNanos;
+            double jank = duration / refreshPeriod;
+            if (jank > 1.0f) {
+                EventReport::JankFrameReport(timeStampNanos, duration, jank);
+            }
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {

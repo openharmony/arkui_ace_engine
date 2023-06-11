@@ -16,6 +16,7 @@
 #include "base/log/event_report.h"
 
 #include <ctime>
+#include <map>
 #include <string>
 #include <unistd.h>
 
@@ -40,6 +41,14 @@ constexpr char EVENT_KEY_REASON[] = "REASON";
 constexpr char EVENT_KEY_SUMMARY[] = "SUMMARY";
 constexpr char EVENT_NAME_JS_ERROR[] = "JS_ERROR";
 constexpr char STATISTIC_DURATION[] = "DURATION";
+constexpr char EVENT_KEY_STARTTIME[] = "STARTTIME";
+constexpr char EVENT_KEY_VERSION_CODE[] = "VERSION_CODE";
+constexpr char EVENT_KEY_VERSION_NAME[] = "VERSION_NAME";
+constexpr char EVENT_KEY_BUNDLE_NAME[] = "BUNDLE_NAME";
+constexpr char EVENT_KEY_ABILITY_NAME[] = "ABILITY_NAME";
+constexpr char EVENT_KEY_PAGE_URL[] = "PAGE_URL";
+constexpr char EVENT_KEY_JANK_STATS[] = "JANK_STATS";
+constexpr char EVENT_KEY_JANK_STATS_VER[] = "JANK_STATS_VER";
 
 constexpr int32_t MAX_PACKAGE_NAME_LENGTH = 128;
 
@@ -245,6 +254,71 @@ void EventReport::ANRShowDialog(int32_t uid, const std::string& packageName,
         EVENT_KEY_PACKAGE_NAME, packageName,
         EVENT_KEY_PROCESS_NAME, processName,
         EVENT_KEY_MESSAGE, msg);
+}
+
+namespace {
+enum class JankStatus {
+    JANK_FRAME_6_FREQ,
+    JANK_FRAME_15_FREQ,
+    JANK_FRAME_20_FREQ,
+    JANK_FRAME_36_FREQ,
+    JANK_FRAME_48_FREQ,
+    JANK_FRAME_60_FREQ,
+    JANK_FRAME_120_FREQ,
+    JANK_FRAME_180_FREQ,
+};
+
+std::map<JankStatus, std::string> JankStatusVal = {
+    {JankStatus::JANK_FRAME_6_FREQ, "jank_frame_6_freq"},
+    {JankStatus::JANK_FRAME_15_FREQ, "jank_frame_15_freq"},
+    {JankStatus::JANK_FRAME_20_FREQ, "jank_frame_20_freq"},
+    {JankStatus::JANK_FRAME_36_FREQ, "jank_frame_36_freq"},
+    {JankStatus::JANK_FRAME_48_FREQ, "jank_frame_48_freq"},
+    {JankStatus::JANK_FRAME_60_FREQ, "jank_frame_60_freq"},
+    {JankStatus::JANK_FRAME_120_FREQ, "jank_frame_120_freq"},
+    {JankStatus::JANK_FRAME_180_FREQ, "jank_frame_180_freq"},
+};
+
+const std::string& GetJankStatus(double jank)
+{
+    if (jank < 6.0f) {
+        return JankStatusVal[JankStatus::JANK_FRAME_6_FREQ];
+    } else if (jank < 15.0f) {
+        return JankStatusVal[JankStatus::JANK_FRAME_15_FREQ];
+    } else if (jank < 20.0f) {
+        return JankStatusVal[JankStatus::JANK_FRAME_20_FREQ];
+    } else if (jank < 36.0f) {
+        return JankStatusVal[JankStatus::JANK_FRAME_36_FREQ];
+    } else if (jank < 48.0f) {
+        return JankStatusVal[JankStatus::JANK_FRAME_48_FREQ];
+    } else if (jank < 60.0f) {
+        return JankStatusVal[JankStatus::JANK_FRAME_60_FREQ];
+    } else if (jank < 120.0f) {
+        return JankStatusVal[JankStatus::JANK_FRAME_120_FREQ];
+    } else {
+        return JankStatusVal[JankStatus::JANK_FRAME_180_FREQ];
+    }
+}
+} // namespace
+
+void EventReport::JankFrameReport(int64_t startTime, int64_t duration, double jank, const std::string& pageUrl, uint32_t jankStatusVersion)
+{
+    std::string eventName = "JANK_STATS_APP";
+    auto app_version_code = AceApplicationInfo::GetInstance().GetAppVersionCode();
+    auto app_version_name = AceApplicationInfo::GetInstance().GetAppVersionName();
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto abilityName = AceApplicationInfo::GetInstance().GetAbilityName();
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        EVENT_KEY_STARTTIME, std::to_string(startTime),
+        STATISTIC_DURATION, std::to_string(duration),
+        EVENT_KEY_VERSION_CODE, std::to_string(app_version_code),
+        EVENT_KEY_VERSION_NAME, app_version_name,
+        EVENT_KEY_BUNDLE_NAME, packageName,
+        EVENT_KEY_ABILITY_NAME, abilityName,
+        EVENT_KEY_PAGE_URL, pageUrl,
+        EVENT_KEY_JANK_STATS, GetJankStatus(jank),
+        EVENT_KEY_JANK_STATS_VER, std::to_string(jankStatusVersion));
 }
 
 void EventReport::SendEventInner(const EventInfo& eventInfo)
