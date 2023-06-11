@@ -106,6 +106,7 @@ struct GridLayoutInfo {
     bool reachStart_ = false;
 
     bool offsetEnd_ = false;
+    int32_t zeroEndLine_ = 0;
 
     // Map structure: [mainIndex, [crossIndex, index]],
     // when vertical, mainIndex is rowIndex and crossIndex is columnIndex.
