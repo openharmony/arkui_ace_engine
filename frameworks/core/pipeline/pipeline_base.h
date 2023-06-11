@@ -22,6 +22,7 @@
 #include <shared_mutex>
 #include <stack>
 #include <string>
+#include <unordered_map>
 #include <utility>
 
 #include "base/geometry/dimension.h"
@@ -71,6 +72,7 @@ enum class FrontendType;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AceVsyncCallback = std::function<void(uint64_t, uint32_t)>;
 using EtsCardTouchEventCallback = std::function<void(const TouchEvent&)>;
+
 class ACE_EXPORT PipelineBase : public AceType {
     DECLARE_ACE_TYPE(PipelineBase, AceType);
 
@@ -834,11 +836,6 @@ public:
 
     void RemoveEtsCardTouchEventCallback(int32_t ponitId);
 
-    void AddUIExtensionCallback(std::function<void(const TouchEvent&)>&& callback)
-    {
-        uiExtensionCallback_ = std::move(callback);
-    }
-
     void SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId);
 
     void RemoveSubWindowVsyncCallback(int32_t subWindowId);
@@ -908,8 +905,9 @@ protected:
     virtual void SetRootRect(double width, double height, double offset = 0.0) = 0;
     virtual void FlushPipelineWithoutAnimation() = 0;
 
-    virtual void OnVirtualKeyboardHeightChange(float keyboardHeight,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) {}
+    virtual void OnVirtualKeyboardHeightChange(
+        float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr)
+    {}
 
     void UpdateRootSizeAndScale(int32_t width, int32_t height);
 
@@ -978,14 +976,12 @@ protected:
 
     std::vector<WeakPtr<PipelineBase>> touchPluginPipelineContext_;
     std::unordered_map<int32_t, EtsCardTouchEventCallback> etsCardTouchEventCallback_;
-    std::function<void(const TouchEvent&)> uiExtensionCallback_;
 
     RefPtr<Clipboard> clipboard_;
     std::function<void(const std::string&)> clipboardCallback_ = nullptr;
     Rect displayWindowRectInfo_;
     AnimationOption animationOption_;
     KeyboardAnimationConfig keyboardAnimationConfig_;
-
 
     std::function<void()> nextFrameLayoutCallback_ = nullptr;
     SharePanelCallback sharePanelCallback_ = nullptr;

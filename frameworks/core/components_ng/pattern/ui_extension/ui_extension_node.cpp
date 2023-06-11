@@ -36,7 +36,7 @@ HitTestResult UIExtensionNode::TouchTest(const PointF& globalPoint, const PointF
         CHECK_NULL_VOID(uiExtensionNode);
         uiExtensionNode->DispatchPointerEvent(point, rectWithTransform);
     };
-    context->AddUIExtensionCallback(callback);
+    context->AddUIExtensionTouchEventCallback(touchRestrict.touchEvent.id, callback);
     return HitTestResult::BUBBLING;
 }
 

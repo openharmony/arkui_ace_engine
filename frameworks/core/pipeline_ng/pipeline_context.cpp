@@ -20,7 +20,6 @@
 #include <cstdint>
 #include <memory>
 
-
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -790,7 +789,6 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
 #endif
 }
 
-
 bool PipelineContext::OnBackPressed()
 {
     LOGD("OnBackPressed");
@@ -929,9 +927,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 #endif
 
     HandleEtsCardTouchEvent(point);
-    if (uiExtensionCallback_) {
-        uiExtensionCallback_(point);
-    }
+    HandleUIExtensionTouchEvent(point);
 
     auto scalePoint = point.CreateScalePoint(GetViewScale());
     LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
@@ -995,12 +991,53 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         // need to reset touchPluginPipelineContext_ for next touch down event.
         touchPluginPipelineContext_.clear();
         RemoveEtsCardTouchEventCallback(point.id);
-        uiExtensionCallback_ = nullptr;
+        RemoveUIExtensionTouchEvetnCallback(point.id);
     }
 
     hasIdleTasks_ = true;
     RequestFrame();
 }
+
+// ---------------- UIExtesion touchEvent callback handler -------------------------
+void PipelineContext::AddUIExtensionTouchEventCallback(int32_t pointId, UIExtensionTouchEventCallback&& callback)
+{
+    if (!callback || pointId < 0) {
+        return;
+    }
+
+    uiExtensionTouchEventCallback_[pointId] = std::move(callback);
+}
+
+void PipelineContext::RemoveUIExtensionTouchEvetnCallback(int32_t pointId)
+{
+    if (pointId < 0) {
+        return;
+    }
+
+    auto iter = uiExtensionTouchEventCallback_.find(pointId);
+    if (iter == uiExtensionTouchEventCallback_.end()) {
+        return;
+    }
+
+    uiExtensionTouchEventCallback_.erase(iter);
+}
+
+void PipelineContext::HandleUIExtensionTouchEvent(const TouchEvent& point)
+{
+    if (point.id < 0) {
+        return;
+    }
+
+    auto iter = uiExtensionTouchEventCallback_.find(point.id);
+    if (iter == uiExtensionTouchEventCallback_.end()) {
+        return;
+    }
+
+    if (iter->second) {
+        iter->second(point);
+    }
+}
+// ----------------------------------------------------------------------------------
 
 void PipelineContext::OnSurfaceDensityChanged(double density)
 {
@@ -1643,10 +1680,10 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
 #endif // ENABLE_DRAG_FRAMEWORK
     if (action == DragEventAction::DRAG_EVENT_END) {
 #ifdef ENABLE_DRAG_FRAMEWORK
-    if (manager->GetExtraInfo().empty()) {
-        manager->GetExtraInfoFromClipboard(extraInfo);
-        manager->SetExtraInfo(extraInfo);
-    }
+        if (manager->GetExtraInfo().empty()) {
+            manager->GetExtraInfoFromClipboard(extraInfo);
+            manager->SetExtraInfo(extraInfo);
+        }
 #endif // ENABLE_DRAG_FRAMEWORK
         manager->OnDragEnd(static_cast<float>(x), static_cast<float>(y), extraInfo);
         manager->RestoreClipboardData();

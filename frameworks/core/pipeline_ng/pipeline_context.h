@@ -38,6 +38,8 @@
 
 namespace OHOS::Ace::NG {
 
+using UIExtensionTouchEventCallback = std::function<void(const TouchEvent&)>;
+
 class ACE_EXPORT PipelineContext : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
 
@@ -364,6 +366,14 @@ public:
         storeNode_.erase(restoreId);
     }
 
+    // ---------------- UIExtesion TouchEvent Callback Handler ----------------
+    void AddUIExtensionTouchEventCallback(int32_t pointId, UIExtensionTouchEventCallback&& callback);
+
+    void RemoveUIExtensionTouchEvetnCallback(int32_t pointId);
+
+    void HandleUIExtensionTouchEvent(const TouchEvent& point);
+    // -------------------------------------------------------------------------
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -436,6 +446,7 @@ private:
     int32_t callbackId_ = 0;
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
     SurfacePositionChangedCallbackMap surfacePositionChangedCallbackMap_;
+    std::unordered_map<int32_t, UIExtensionTouchEventCallback> uiExtensionTouchEventCallback_;
 
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
