@@ -446,7 +446,7 @@ void Animator::Pause()
     if (scheduler_ && scheduler_->IsActive()) {
         scheduler_->Stop();
     }
-    JankFrameReport::SetFrameJankRecord(false);
+    JankFrameReport::ClearFrameJankFlag(JANK_RUNNING_ANIMATOR);
     status_ = Status::PAUSED;
     asyncTrace_ = nullptr;
     StatusListenable::NotifyPauseListener();
@@ -470,7 +470,7 @@ void Animator::Resume()
     if (scheduler_ && !scheduler_->IsActive()) {
         scheduler_->Start();
     }
-    JankFrameReport::SetFrameJankRecord(true);
+    JankFrameReport::SetFrameJankFlag(JANK_RUNNING_ANIMATOR);
     status_ = Status::RUNNING;
     if (!motion_) {
         asyncTrace_ = std::make_shared<AceAsyncScopedTrace>(animatorName_.c_str());
@@ -502,7 +502,7 @@ void Animator::Stop()
         return;
     }
     LOGD("animation stop. id: %{public}d", controllerId_);
-    JankFrameReport::SetFrameJankRecord(false);
+    JankFrameReport::ClearFrameJankFlag(JANK_RUNNING_ANIMATOR);
 
     elapsedTime_ = 0;
     repeatTimesLeft_ = repeatTimes_;
@@ -705,7 +705,7 @@ void Animator::StartInner(bool alwaysNotify)
         }
     }
     StatusListenable::NotifyStartListener();
-    JankFrameReport::SetFrameJankRecord(true);
+    JankFrameReport::SetFrameJankFlag(JANK_RUNNING_ANIMATOR);
     status_ = Status::RUNNING;
     if (!motion_) {
         asyncTrace_ = std::make_shared<AceAsyncScopedTrace>(animatorName_.c_str());

@@ -22,10 +22,17 @@
 #include <vector>
 
 namespace OHOS::Ace {
+using JankFrameFlag = uint32_t;
+
+inline constexpr JankFrameFlag JANK_IDLE = 0;
+inline constexpr JankFrameFlag JANK_RUNNING_SCROLL = 1;
+inline constexpr JankFrameFlag JANK_RUNNING_ANIMATOR = 1 << 1;
+
 class ACE_FORCE_EXPORT JankFrameReport {
 public:
     static void JankFrameRecord(double jank);
-    static void SetFrameJankRecord(bool flag);
+    static void SetFrameJankFlag(JankFrameFlag flag);
+    static void ClearFrameJankFlag(JankFrameFlag flag);
     static void StartRecord(const std::string& pageUrl);
     static void FlushRecord();
 
@@ -34,7 +41,7 @@ private:
     static void ClearFrameJankRecord();
 
     static std::vector<uint16_t> frameJankRecord_;
-    static bool recordStatus_;
+    static JankFrameFlag recordStatus_;
     static int64_t startTime_;
     static std::string pageUrl_;
     static bool needReport_;

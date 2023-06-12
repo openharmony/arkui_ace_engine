@@ -33,7 +33,7 @@ enum {
 };
 
 std::vector<uint16_t> JankFrameReport::frameJankRecord_(JANK_SIZE, 0);
-bool JankFrameReport::recordStatus_ = false;
+JankFrameFlag JankFrameReport::recordStatus_ = JANK_IDLE;
 int64_t JankFrameReport::startTime_ = 0;
 std::string JankFrameReport::pageUrl_;
 bool JankFrameReport::needReport_ = false;
@@ -66,11 +66,17 @@ void JankFrameReport::JankFrameRecord(double jank)
 void JankFrameReport::ClearFrameJankRecord()
 {
     std::fill(frameJankRecord_.begin(), frameJankRecord_.end(), 0);
+    recordStatus_ = JANK_IDLE;
 }
 
-void JankFrameReport::SetFrameJankRecord(bool flag)
+void JankFrameReport::SetFrameJankFlag(JankFrameFlag flag)
 {
-    recordStatus_ = flag;
+    recordStatus_ |= flag;
+}
+
+void JankFrameReport::ClearFrameJankFlag(JankFrameFlag flag)
+{
+    recordStatus_ &= (~flag);
 }
 
 void JankFrameReport::StartRecord(const std::string& pageUrl)

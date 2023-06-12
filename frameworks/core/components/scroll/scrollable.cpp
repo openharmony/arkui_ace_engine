@@ -19,6 +19,7 @@
 
 #include "base/log/ace_trace.h"
 #include "base/log/frame_report.h"
+#include "base/log/jank_frame_report.h"
 #include "base/log/log.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/time_util.h"
@@ -325,6 +326,7 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
         }
     }
 #endif
+    JankFrameReport::SetFrameJankFlag(JANK_RUNNING_SCROLL);
     UpdateScrollPosition(dragPositionInMainAxis, SCROLL_FROM_START);
     auto parent = parent_.Upgrade();
     if (parent && nestedOpt_.NeedParent()) {
@@ -556,6 +558,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     double correctVelocity = std::clamp(info.GetMainVelocity(), MIN_VELOCITY + slipFactor_, MAX_VELOCITY - slipFactor_);
     correctVelocity = correctVelocity * sVelocityScale_;
     currentVelocity_ = correctVelocity;
+    JankFrameReport::ClearFrameJankFlag(JANK_RUNNING_SCROLL);
     if (dragEndCallback_) {
         dragEndCallback_();
     }
