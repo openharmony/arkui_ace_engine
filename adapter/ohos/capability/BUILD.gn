@@ -62,6 +62,7 @@ template("ace_capability_ohos_source_set") {
         "input:libmmi-client",
         "ipc:ipc_core",
         "window_manager:libwindow_extension_client",
+        "window_manager:scene_session",
       ]
       deps = [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
       sources += [
