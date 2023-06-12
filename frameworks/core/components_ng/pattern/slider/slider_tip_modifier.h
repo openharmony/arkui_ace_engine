@@ -103,9 +103,19 @@ public:
         textOffset_ = textOffset;
     }
 
+    void SetSliderMode(const SliderModel::SliderMode& sliderMode)
+    {
+        sliderMode_ = sliderMode;
+    }
+
+    void SetBlockSize(const SizeF& blockSize)
+    {
+        blockSize_ = blockSize;
+    }
+
     void BuildParagraph();
     void UpdateBubbleSize();
-    void UpdateOverlayRect();
+    void UpdateOverlayRect(const SizeF& frameSize);
 
 private:
     void PaintBezier(bool isLeft, Axis axis, RSPath& path, const OffsetF& arrowCenter, const OffsetF& arrowEdge);
@@ -127,10 +137,12 @@ private:
     RefPtr<PropertyString> content_;
     RefPtr<PropertyOffsetF> bubbleVertex_;
 
+    SizeF blockSize_;
     SizeF bubbleSize_;
     OffsetF bubbleOffset_;
     OffsetF textOffset_;
     Axis axis_ = Axis::HORIZONTAL;
+    SliderModel::SliderMode sliderMode_ = SliderModelNG::SliderMode::OUTSET;
     Color tipColor_ = Color::BLACK;
     Color textColor_ = Color::TRANSPARENT;
     Dimension textFontSize_;
