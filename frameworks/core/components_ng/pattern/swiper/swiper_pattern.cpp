@@ -1811,7 +1811,7 @@ void SwiperPattern::HandleMouseEvent(const MouseInfo& info)
 
 void SwiperPattern::CheckAndSetArrowHoverState(const PointF& mousePoint)
 {
-    if (!HasLeftButtonNode() || !HasRightButtonNode()) {
+    if (!HasLeftButtonNode() || !HasRightButtonNode() || !HasIndicatorNode()) {
         return;
     }
 
@@ -1821,12 +1821,24 @@ void SwiperPattern::CheckAndSetArrowHoverState(const PointF& mousePoint)
         return;
     }
 
-    auto leftArrowRect = GetArrowFrameRect(GetLeftButtonId());
-    auto rightArrowRect = GetArrowFrameRect(GetRightButtonId());
-    auto newRect = RectF(leftArrowRect.Left(), leftArrowRect.Top(), rightArrowRect.Right() - leftArrowRect.Left(),
-        rightArrowRect.Bottom() - leftArrowRect.Top());
+    RectF leftNodeRect;
+    RectF rightNodeRect;
 
-    isAtHotRegion_ = newRect.IsInRegion(mousePoint);
+    leftNodeRect = GetArrowFrameRect(GetLeftButtonId());
+    rightNodeRect = GetArrowFrameRect(GetRightButtonId());
+
+    if (!IsLoop() && currentIndex_ == 0) {
+        leftNodeRect = GetArrowFrameRect(GetIndicatorId());
+    }
+
+    if (!IsLoop() && currentIndex_ == TotalCount() - 1) {
+        rightNodeRect = GetArrowFrameRect(GetIndicatorId());
+    }
+
+    auto newNodeRect = RectF(leftNodeRect.Left(), leftNodeRect.Top(), rightNodeRect.Right() - leftNodeRect.Left(),
+        std::min(rightNodeRect.Height(), leftNodeRect.Height()));
+
+    isAtHotRegion_ = newNodeRect.IsInRegion(mousePoint);
     ArrowHover(isAtHotRegion_);
 }
 

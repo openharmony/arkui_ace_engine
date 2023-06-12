@@ -84,7 +84,6 @@ private:
     void ButtonTouchEvent(RefPtr<FrameNode> buttonNode, TouchType touchType);
     void ButtonClickEvent();
     void UpdateArrowContent();
-    void SetArrowEnable(bool isEnable);
     int32_t TotalCount() const;
     RefPtr<ClickEvent> buttonClickListenr_;
     RefPtr<TouchEventImpl> buttonTouchListenr_;
