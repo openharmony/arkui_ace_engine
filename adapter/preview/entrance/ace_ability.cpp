@@ -147,6 +147,7 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
         return;
     }
     container->InitDeviceInfo(ACE_INSTANCE_ID, runArgs);
+    container->SetContainerSdkPath(runArgs.containerSdkPath);
     SetConfigChanges(runArgs.configChanges);
     auto resConfig = container->GetResourceConfiguration();
     resConfig.SetOrientation(SystemProperties::GetDeviceOrientation());
