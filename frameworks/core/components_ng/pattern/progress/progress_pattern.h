@@ -99,6 +99,7 @@ private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     void InitTouchEvent();
+    void RemoveTouchEvent();
     void OnPress(const TouchEventInfo& info);
     void HandleEnabled();
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
