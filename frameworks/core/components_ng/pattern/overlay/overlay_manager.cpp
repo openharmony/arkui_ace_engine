@@ -69,6 +69,7 @@ constexpr float PIXELMAP_ANIMATION_WIDTH_RATE = 0.5f;
 constexpr float PIXELMAP_ANIMATION_HEIGHT_RATE = 0.2f;
 constexpr float PIXELMAP_DRAG_SCALE = 1.0f;
 constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
+constexpr float PIXELMAP_ANIMATION_DEFALUT_LIMIT_SCALE = 0.5f;
 #endif // ENABLE_DRAG_FRAMEWORK
 
 constexpr int32_t FULL_MODAL_ALPHA_ANIMATION_DURATION = 200;
@@ -1496,6 +1497,14 @@ void OverlayManager::UpdatePixelMapScale(float& scale)
     CHECK_NULL_VOID(hub);
     RefPtr<PixelMap> pixelMap = hub->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
+    auto minDeviceLength = std::min(SystemProperties::GetDeviceHeight(), SystemProperties::GetDeviceWidth());
+    if ((SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT &&
+            pixelMap->GetHeight() > minDeviceLength * PIXELMAP_ANIMATION_DEFALUT_LIMIT_SCALE) ||
+        (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE &&
+            pixelMap->GetHeight() > minDeviceLength * PIXELMAP_ANIMATION_DEFALUT_LIMIT_SCALE &&
+            pixelMap->GetWidth() > minDeviceLength)) {
+        scale = static_cast<float>(minDeviceLength * PIXELMAP_ANIMATION_DEFALUT_LIMIT_SCALE) / pixelMap->GetHeight();
+    }
 }
 
 void OverlayManager::RemoveFilter()
