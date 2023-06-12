@@ -313,7 +313,10 @@ public:
     void Finish(bool autoFinish) const override;
     RectF GetRootRect()
     {
-        return rootNode_->GetGeometryNode()->GetFrameRect();
+        CHECK_NULL_RETURN(rootNode_, RectF());
+        auto geometryNode = rootNode_->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, RectF());
+        return geometryNode->GetFrameRect();
     }
 
     void FlushReload() override;
