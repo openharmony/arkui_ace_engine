@@ -319,7 +319,7 @@ void JSProgress::JsSetCapsuleStyle(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(jsBorderWidth, borderWidth)) {
         borderWidth = theme->GetBorderWidth();
     }
-    if (LessNotEqual(borderWidth.Value(), 0.0)) {
+    if (LessNotEqual(borderWidth.Value(), 0.0) || borderWidth.Unit() == DimensionUnit::PERCENT) {
         borderWidth = theme->GetBorderWidth();
     }
     ProgressModel::GetInstance()->SetBorderWidth(borderWidth);
@@ -399,7 +399,7 @@ void JSProgress::JsSetFont(const JSRef<JSObject>& textObject)
     if (!ParseJsDimensionFp(size, fontSize)) {
         fontSize = theme->GetTextSize();
     }
-    if (LessNotEqual(fontSize.Value(), 0.0)) {
+    if (LessNotEqual(fontSize.Value(), 0.0) || fontSize.Unit() == DimensionUnit::PERCENT) {
         fontSize = theme->GetTextSize();
     }
     ProgressModel::GetInstance()->SetFontSize(fontSize);
