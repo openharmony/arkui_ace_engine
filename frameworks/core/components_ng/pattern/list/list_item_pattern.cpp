@@ -47,7 +47,6 @@ void ListItemPattern::OnAttachToFrameNode()
     if (listItemStyle_ == V2::ListItemStyle::CARD) {
         SetListItemDefaultAttributes(host);
     }
-    host->GetRenderContext()->SetClipToBounds(true);
 }
 
 void ListItemPattern::SetListItemDefaultAttributes(const RefPtr<FrameNode>& listItemNode)
