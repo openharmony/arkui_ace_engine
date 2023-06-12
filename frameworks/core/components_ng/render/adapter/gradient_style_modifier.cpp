@@ -110,7 +110,7 @@ void GradientStyleModifier::SetGradient(const Gradient& gradient)
 
 ColorAnimatableArithmetic::ColorAnimatableArithmetic(const Gradient& gradient)
 {
-    for (auto color : gradient.GetColors()) {
+    for (const auto& color : gradient.GetColors()) {
         colors_.push_back(color.GetColor());
     }
 }
@@ -199,7 +199,7 @@ bool ColorAnimatableArithmetic::IsEqual(const ColorAnimatableArithmetic& value) 
 
 ColorStopAnimatableArithmetic::ColorStopAnimatableArithmetic(const Gradient& gradient)
 {
-    for (auto colorStop : gradient.GetColors()) {
+    for (const auto& colorStop : gradient.GetColors()) {
         colorStops_.push_back(colorStop.GetDimension());
     }
 }
