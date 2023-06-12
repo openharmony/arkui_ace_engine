@@ -280,6 +280,26 @@ HWTEST_F(DialogPatternTestNg, ToJsonValue, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PopDialog
+ * @tc.desc: Dialog already in close
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, PopDialog, TestSize.Level1)
+{
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(
+        V2::ACTION_SHEET_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialog, nullptr);
+
+    auto pattern = dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->title_ = TITLE;
+    pattern->message_ = MESSAGE;
+    pattern->PopDialog(0);
+}
+
+/**
  * @tc.name: DialogAccessibilityProperty002
  * @tc.desc: Test Alert Accessibility Property
  * @tc.type: FUNC
