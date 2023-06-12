@@ -46,7 +46,50 @@ const RefPtr<FrameNode> THREE = FrameNode::CreateFrameNode("three", 3, AceType::
 const RefPtr<FrameNode> FOUR = FrameNode::CreateFrameNode("four", 4, AceType::MakeRefPtr<Pattern>());
 const RefPtr<FrameNode> FIVE = FrameNode::CreateFrameNode("five", 5, AceType::MakeRefPtr<Pattern>());
 const RefPtr<FrameNode> F_ONE = FrameNode::CreateFrameNode("one", 5, AceType::MakeRefPtr<Pattern>());
+const int32_t TEST_ID_ONE = 21;
+const int32_t TEST_ID_TWO = 22;
 } // namespace
+
+class TestNode : public UINode {
+    DECLARE_ACE_TYPE(TestNode, UINode);
+
+public:
+    static RefPtr<TestNode> CreateTestNode(int32_t nodeId)
+    {
+        auto spanNode = MakeRefPtr<TestNode>(nodeId);
+        return spanNode;
+    }
+
+    bool IsAtomicNode() const override
+    {
+        return true;
+    }
+
+    explicit TestNode(int32_t nodeId) : UINode("TestNode", nodeId) {}
+
+    HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+        const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId) override
+    {
+        return hitTestResult_;
+    }
+
+    HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint, MouseTestResult& onMouseResult,
+        MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode) override
+    {
+        return hitTestResult_;
+    }
+
+    HitTestResult AxisTest(
+        const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult) override
+    {
+        return hitTestResult_;
+    }
+
+    ~TestNode() override = default;
+
+private:
+    HitTestResult hitTestResult_;
+};
 
 class UINodeTestNg : public testing::Test {
 public:
@@ -73,23 +116,25 @@ HWTEST_F(UINodeTestNg, UINodeTestNg001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. AddChild
-     * @tc.expected: step1. children_.size = 2
+     * @tc.expected: children_.size = 2
      */
     ONE->AddChild(TWO, 1, false);
-    ONE->AddChild(TWO, 1, false);
-    ONE->AddChild(THREE, 1, false);
-    EXPECT_EQ(ONE->children_.size(), 2);
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto testNode2 = TestNode::CreateTestNode(TEST_ID_TWO);
+    ONE->AddChild(testNode, 1, false);
+    ONE->AddChild(testNode, 1, false);
+    ONE->AddChild(testNode2, 1, false);
+    EXPECT_EQ(ONE->children_.size(), 3);
     /**
      * @tc.steps: step2. remove child three
-     * @tc.expected: step2. children_.size =
      */
     auto iter = ONE->RemoveChild(FOUR);
     EXPECT_EQ(iter, ONE->children_.end());
-    auto nextIter = ONE->RemoveChild(THREE);
-    EXPECT_EQ(nextIter, ONE->children_.end());
+    ONE->RemoveChild(testNode);
+    ONE->RemoveChild(testNode2, true);
     /**
      * @tc.steps: step3. remove child two
-     * @tc.expected: step3. distance = 0
+     * @tc.expected: distance = 0
      */
     auto distance = ONE->RemoveChildAndReturnIndex(TWO);
     EXPECT_EQ(distance, 0);
@@ -106,13 +151,13 @@ HWTEST_F(UINodeTestNg, UINodeTestNg002, TestSize.Level1)
     ONE->AddChild(TWO, 1, false);
     /**
      * @tc.steps: step1. RemoveChildAtIndex
-     * @tc.expected: step1. children_.size = 0
+     * @tc.expected: children_.size = 0
      */
     ONE->RemoveChildAtIndex(0);
     EXPECT_EQ(ONE->children_.size(), 0);
     /**
      * @tc.steps: step2. GetChildAtIndex
-     * @tc.expected: step2. return nullptr
+     * @tc.expected: return nullptr
      */
     auto result = ONE->GetChildAtIndex(0);
     EXPECT_EQ(result, nullptr);
@@ -131,14 +176,14 @@ HWTEST_F(UINodeTestNg, UINodeTestNg003, TestSize.Level1)
     ONE->AddChild(TWO, 1, false);
     /**
      * @tc.steps: step1. ReplaceChild
-     * @tc.expected: step1. size = 2
+     * @tc.expected: size = 2
      */
     ONE->ReplaceChild(nullptr, THREE);
     ONE->ReplaceChild(TWO, FOUR);
     EXPECT_EQ(ONE->children_.size(), 2);
     /**
      * @tc.steps: step2. set TWO's hostPageId_ 1 and Clean
-     * @tc.expected: step2. children_ = 0
+     * @tc.expected: children_ = 0
      */
     TWO->hostPageId_ = 1;
     ONE->MountToParent(TWO, 1, false);
@@ -155,7 +200,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. GetFocusParent
-     * @tc.expected: step1. parent is nullptr
+     * @tc.expected: parent is nullptr
      */
     auto frameNode = ONE->GetFocusParent();
     EXPECT_EQ(frameNode, nullptr);
@@ -164,7 +209,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg004, TestSize.Level1)
     RefPtr<FrameNode> frameNodes[3] = { parent, nullptr, nullptr };
     /**
      * @tc.steps: step2. GetFocusParent adjust FocusType
-     * @tc.expected: step2. result is parent and nullptr
+     * @tc.expected: result is parent and nullptr
      */
     for (int i = 0; i < 3; ++i) {
         auto eventHub = AceType::MakeRefPtr<EventHub>();
@@ -175,6 +220,20 @@ HWTEST_F(UINodeTestNg, UINodeTestNg004, TestSize.Level1)
         auto result = ONE->GetFocusParent();
         EXPECT_EQ(result, frameNodes[i]);
     }
+    /**
+     * @tc.steps: step3. create test node and try GetFirstFocusHubChild
+     * @tc.expected: result is null
+     */
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    EXPECT_EQ(testNode->GetFirstFocusHubChild(), nullptr);
+    /**
+     * @tc.steps: step4. config node parent and GetFocusParent;
+     * @tc.expected: result is null
+     */
+    ONE->parent_ = testNode;
+    testNode->parent_ = parent;
+    auto result = ONE->GetFocusParent();
+    EXPECT_EQ(result, nullptr);
 }
 
 /**
@@ -186,7 +245,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. GetFocusChildren
-     * @tc.expected: step1. THREE's children size is 2
+     * @tc.expected: THREE's children size is 2
      */
     std::list<RefPtr<FrameNode>> children;
     auto eventHubTwo = AceType::MakeRefPtr<EventHub>();
@@ -199,8 +258,9 @@ HWTEST_F(UINodeTestNg, UINodeTestNg005, TestSize.Level1)
     FOUR->eventHub_ = eventHubFour;
     THREE->AddChild(TWO, 1, false);
     THREE->AddChild(FOUR, 1, false);
+    THREE->AddChild(TestNode::CreateTestNode(TEST_ID_ONE), 1, false);
     THREE->GetFocusChildren(children);
-    EXPECT_EQ(THREE->children_.size(), 2);
+    EXPECT_EQ(THREE->children_.size(), 3);
     THREE->Clean();
 }
 
@@ -213,7 +273,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. AttachToMainTree and DetachFromMainTree
-     * @tc.expected: step1. onMainTree_ is false
+     * @tc.expected: onMainTree_ is false
      */
     bool mainTrees[2] = { true, false };
     TWO->AddChild(THREE, 1, false);
@@ -223,6 +283,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg006, TestSize.Level1)
         TWO->DetachFromMainTree();
         EXPECT_FALSE(TWO->onMainTree_);
     }
+    TWO->Clean();
 }
 
 /**
@@ -234,16 +295,17 @@ HWTEST_F(UINodeTestNg, UINodeTestNg007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. MovePosition
-     * @tc.expected: step1. children_.size is 2
+     * @tc.expected: children_.size is 2
      */
-    int32_t slots[3] = { -1, 1, 3 };
-    THREE->AddChild(FOUR, 1, false);
-    THREE->AddChild(FIVE, 1, false);
+    int32_t slots[4] = { 1, -1, 1, 2 };
+    THREE->AddChild(FOUR);
+    THREE->AddChild(FIVE);
     TWO->parent_ = THREE;
-    for (int i = 0; i < 3; ++i) {
+    for (int i = 0; i < 4; ++i) {
         TWO->MovePosition(slots[i]);
     }
-    EXPECT_EQ(TWO->children_.size(), 2);
+    EXPECT_EQ(THREE->children_.size(), 3);
+    THREE->Clean();
 }
 
 /**
@@ -278,7 +340,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. FrameCount and GetChildIndexById
-     * @tc.expected: step1. count is 2, pos is 0
+     * @tc.expected: count is 2, pos is 0
      */
     int32_t count = ONE->FrameCount();
     EXPECT_EQ(count, 1);
@@ -288,7 +350,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg009, TestSize.Level1)
     EXPECT_EQ(id2, 0);
     /**
      * @tc.steps: step2. GetChildFlatIndex
-     * @tc.expected: step2. count is 2, pos is 0
+     * @tc.expected: count is 2, pos is 0
      */
     auto pair1 = ONE->GetChildFlatIndex(1);
     EXPECT_EQ(pair1.second, 0);
@@ -305,7 +367,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. call the GetChildIndex and set input is null
-     * @tc.expected: step1. the return value is -1
+     * @tc.expected: the return value is -1
      */
     int retIndex = ZERO->GetChildIndex(nullptr);
     EXPECT_EQ(retIndex, -1);
@@ -318,14 +380,14 @@ HWTEST_F(UINodeTestNg, UINodeTestNg010, TestSize.Level1)
     EXPECT_EQ(retIndex, 0);
     /**
      * @tc.steps: step3. add two child for ZERO and call GetChildIndex
-     * @tc.expected: step3. the return value is 1
+     * @tc.expected: the return value is 1
      */
     ZERO->AddChild(TWO);
     retIndex = ZERO->GetChildIndex(TWO);
     EXPECT_EQ(retIndex, 1);
     /**
      * @tc.steps: step4. add three child for ZERO and call GetChildIndex
-     * @tc.expected: step4. the return value is 2
+     * @tc.expected: the return value is 2
      */
     ZERO->AddChild(THREE);
     retIndex = ZERO->GetChildIndex(THREE);
@@ -341,12 +403,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg010, TestSize.Level1)
 HWTEST_F(UINodeTestNg, UINodeTestNg011, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. call the MountToParent and set input is null
-     * @tc.expected: step1. mount failure
-     */
-    ZERO->MountToParent(nullptr, 1, false);
-    /**
-     * @tc.steps: step2. call the MountToParent and set hostPageId_ is 0
+     * @tc.steps: step1. call the MountToParent and set hostPageId_ is 0
      * @tc.expected: step2. mount failure
      */
     ZERO->hostPageId_ = 0;
@@ -355,10 +412,11 @@ HWTEST_F(UINodeTestNg, UINodeTestNg011, TestSize.Level1)
     EXPECT_NE(retPageId, 0);
     ONE->Clean();
     /**
-     * @tc.steps: step3. call the MountToParent and set hostPageId_ is 0
-     * @tc.expected: step3. mount sucess and pageid is 1
+     * @tc.steps: step2. call the MountToParent and set hostPageId_ is 0
+     * @tc.expected: mount sucess and pageid is 1
      */
     ZERO->hostPageId_ = 1;
+    ZERO->SetInDestroying();
     ONE->MountToParent(ZERO, 1, false);
     retPageId = ONE->GetPageId();
     EXPECT_EQ(retPageId, 1);
@@ -375,13 +433,13 @@ HWTEST_F(UINodeTestNg, UINodeTestNg012, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. call the GetFirstFocusHubChild function
-     * @tc.expected: step1. the return value is null
+     * @tc.expected: the return value is null
      */
     RefPtr<FocusHub> retFirstFocusHubChild = ZERO->GetFirstFocusHubChild();
     EXPECT_EQ(retFirstFocusHubChild, nullptr);
     /**
      * @tc.steps: step2. call the GetFirstFocusHubChild functionand and set focus type is DISABLE
-     * @tc.expected: step2. the return value is null
+     * @tc.expected: the return value is null
      */
     auto eventHubZero = AceType::MakeRefPtr<EventHub>();
     auto focusHubZero = AceType::MakeRefPtr<FocusHub>(eventHubZero, FocusType::DISABLE);
@@ -392,7 +450,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg012, TestSize.Level1)
     EXPECT_EQ(retFirstFocusHubChild, nullptr);
     /**
      * @tc.steps: step3. call the GetFirstFocusHubChild functionand set focus type is NODE
-     * @tc.expected: step3. the return focusHub type is NODE
+     * @tc.expected: the return focusHub type is NODE
      */
     focusHubZero = AceType::MakeRefPtr<FocusHub>(eventHubZero, FocusType::NODE);
 
@@ -403,7 +461,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg012, TestSize.Level1)
     ZERO->Clean();
     /**
      * @tc.steps: step4. call the GetFirstFocusHubChild functionand set focus type is SCOPE
-     * @tc.expected: step4. the return focusHub type is SCOPE
+     * @tc.expected: the return focusHub type is SCOPE
      */
     focusHubZero = AceType::MakeRefPtr<FocusHub>(eventHubZero, FocusType::SCOPE);
 
@@ -423,7 +481,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg013, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. add one child to ZERO and set focus type is NODE
-     * @tc.expected: step1. the return focusHub type is NODE
+     * @tc.expected: the return focusHub type is NODE
      */
     auto eventHubZero = AceType::MakeRefPtr<EventHub>();
     auto focusHubZero = AceType::MakeRefPtr<FocusHub>(eventHubZero, FocusType::DISABLE);
@@ -441,7 +499,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg013, TestSize.Level1)
     ZERO->Clean();
     /**
      * @tc.steps: step2. add one child to ZERO and set focus type is DISABLE
-     * @tc.expected: step2. the return value is null
+     * @tc.expected: the return value is null
      */
     focusHubOne = AceType::MakeRefPtr<FocusHub>(eventHubOne, FocusType::DISABLE);
 
@@ -462,7 +520,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg014, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. add one child to ZERO and set focus type is SCOPE
-     * @tc.expected: step1. the return focusHub type is SCOPE
+     * @tc.expected: the return focusHub type is SCOPE
      */
     auto eventHubZero = AceType::MakeRefPtr<EventHub>();
     auto focusHubZero = AceType::MakeRefPtr<FocusHub>(eventHubZero, FocusType::DISABLE);
@@ -480,7 +538,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg014, TestSize.Level1)
     ZERO->Clean();
     /**
      * @tc.steps: step2. add one child to ZERO and set focus type is DISABLE
-     * @tc.expected: step2. the return value is null
+     * @tc.expected: the return value is null
      */
     focusHubOne = AceType::MakeRefPtr<FocusHub>(eventHubOne, FocusType::DISABLE);
 
@@ -501,7 +559,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg015, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. call the MovePosition and set parent_ is null
-     * @tc.expected: step1. parentNode is null
+     * @tc.expected: parentNode is null
      */
     ZERO->parent_ = nullptr;
     ZERO->MovePosition(1);
@@ -518,7 +576,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg016, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. set propertyChangeFlag_ is PROPERTY_UPDATE_NORMAL and call the MarkDirtyNode
-     * @tc.expected: step1. the MarkDirtyNode function is run ok and children_.size() is 1
+     * @tc.expected: the MarkDirtyNode function is run ok and children_.size() is 1
      */
     PropertyChangeFlag extraFLAG = PROPERTY_UPDATE_NORMAL;
     ZERO->layoutProperty_->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
@@ -530,7 +588,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg016, TestSize.Level1)
     ZERO->Clean();
     /**
      * @tc.steps: step2. set propertyChangeFlag_ is PROPERTY_UPDATE_MEASURE and call the MarkDirtyNode
-     * @tc.expected: step2. the MarkDirtyNode function is run ok and children_.size() is 1
+     * @tc.expected: the MarkDirtyNode function is run ok and children_.size() is 1
      */
     extraFLAG = PROPERTY_UPDATE_MEASURE;
     ZERO->layoutProperty_->propertyChangeFlag_ = PROPERTY_UPDATE_MEASURE;
@@ -541,7 +599,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg016, TestSize.Level1)
     ZERO->Clean();
     /**
      * @tc.steps: step3. set propertyChangeFlag_ is PROPERTY_UPDATE_LAYOUT and call the MarkDirtyNode
-     * @tc.expected: step3. the MarkDirtyNode function is run ok and children_.size() is 1
+     * @tc.expected: the MarkDirtyNode function is run ok and children_.size() is 1
      */
     extraFLAG = PROPERTY_UPDATE_LAYOUT;
     ZERO->layoutProperty_->propertyChangeFlag_ = PROPERTY_UPDATE_LAYOUT;
@@ -561,7 +619,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg017, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. set propertyChangeFlag_ is PROPERTY_UPDATE_NORMAL and call the MarkNeedFrameFlushDirty
-     * @tc.expected: step1. the MarkNeedFrameFlushDirty function is run ok
+     * @tc.expected: the MarkNeedFrameFlushDirty function is run ok
      */
     PropertyChangeFlag extraFLAG = PROPERTY_UPDATE_NORMAL;
     ZERO->layoutProperty_->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
@@ -571,7 +629,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg017, TestSize.Level1)
     EXPECT_EQ(ZERO->parent_.Upgrade(), nullptr);
     /**
      * @tc.steps: step2. set one parent_ for ONE and call the MarkNeedFrameFlushDirty
-     * @tc.expected: step2. the MarkNeedFrameFlushDirty function is run ok and parent_ is not null
+     * @tc.expected: the MarkNeedFrameFlushDirty function is run ok and parent_ is not null
      */
     ZERO->parent_ = ONE;
     ZERO->UINode::MarkNeedFrameFlushDirty(extraFLAG);
@@ -580,7 +638,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg017, TestSize.Level1)
     ZERO->parent_.Reset();
     /**
      * @tc.steps: step3. set propertyChangeFlag_ is PROPERTY_UPDATE_MEASURE and call the MarkNeedFrameFlushDirty
-     * @tc.expected: step3. the MarkNeedFrameFlushDirty function is run ok
+     * @tc.expected: the MarkNeedFrameFlushDirty function is run ok
      */
     extraFLAG = PROPERTY_UPDATE_MEASURE;
     ZERO->layoutProperty_->propertyChangeFlag_ = PROPERTY_UPDATE_MEASURE;
@@ -590,7 +648,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg017, TestSize.Level1)
     EXPECT_EQ(ZERO->parent_.Upgrade(), nullptr);
     /**
      * @tc.steps: step4. set one parent_ for ONE and call the MarkNeedFrameFlushDirty
-     * @tc.expected: step4. the MarkNeedFrameFlushDirty function is run ok and parent_ is not null
+     * @tc.expected: the MarkNeedFrameFlushDirty function is run ok and parent_ is not null
      */
     ZERO->parent_ = ONE;
     ZERO->UINode::MarkNeedFrameFlushDirty(extraFLAG);
@@ -599,7 +657,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg017, TestSize.Level1)
     ZERO->parent_.Reset();
     /**
      * @tc.steps: step5. set propertyChangeFlag_ is PROPERTY_UPDATE_LAYOUT and call the MarkNeedFrameFlushDirty
-     * @tc.expected: step5. the MarkNeedFrameFlushDirty function is run ok
+     * @tc.expected: the MarkNeedFrameFlushDirty function is run ok
      */
     extraFLAG = PROPERTY_UPDATE_LAYOUT;
     ZERO->layoutProperty_->propertyChangeFlag_ = PROPERTY_UPDATE_LAYOUT;
@@ -609,7 +667,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg017, TestSize.Level1)
     EXPECT_EQ(ZERO->parent_.Upgrade(), nullptr);
     /**
      * @tc.steps: step6. set one parent_ for ONE and call the MarkNeedFrameFlushDirty
-     * @tc.expected: step6. the MarkNeedFrameFlushDirty function is run ok and parent_ is not null
+     * @tc.expected: the MarkNeedFrameFlushDirty function is run ok and parent_ is not null
      */
     ZERO->parent_ = ONE;
     ZERO->UINode::MarkNeedFrameFlushDirty(extraFLAG);
@@ -627,13 +685,13 @@ HWTEST_F(UINodeTestNg, UINodeTestNg018, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. set ZERO->parent_ is null and call MarkNeedSyncRenderTree
-     * @tc.expected: step1. the MarkNeedSyncRenderTree function is run ok
+     * @tc.expected: the MarkNeedSyncRenderTree function is run ok
      */
     ZERO->UINode::MarkNeedSyncRenderTree();
     EXPECT_EQ(ZERO->parent_.Upgrade(), nullptr);
     /**
      * @tc.steps: step2. set ZERO->parent_ is null and call RebuildRenderContextTree
-     * @tc.expected: step2. the RebuildRenderContextTree function is run ok
+     * @tc.expected: the RebuildRenderContextTree function is run ok
      */
     ZERO->UINode::RebuildRenderContextTree();
     EXPECT_EQ(ZERO->parent_.Upgrade(), nullptr);
@@ -648,7 +706,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg019, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. call the DetachFromMainTree
-     * @tc.expected: step1. onMainTree_ is false
+     * @tc.expected: onMainTree_ is false
      */
     bool mainTree = true;
     ZERO->onMainTree_ = mainTree;
@@ -667,7 +725,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg020, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. add one child for ZERO and call AdjustLayoutWrapperTree
-     * @tc.expected: step1. children_.size is 1 and the AdjustLayoutWrapperTree function is run ok
+     * @tc.expected: children_.size is 1 and the AdjustLayoutWrapperTree function is run ok
      */
     ZERO->AddChild(ONE, 1, false);
     RefPtr<LayoutWrapper> retLayoutWrapper = ZERO->UINode::CreateLayoutWrapper(true, true);
@@ -685,7 +743,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg021, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. add one child for ZERO and call GenerateOneDepthVisibleFrame
-     * @tc.expected: step1. children_.size is 1 and the GenerateOneDepthVisibleFrame function is run ok
+     * @tc.expected: children_.size is 1 and the GenerateOneDepthVisibleFrame function is run ok
      */
     std::list<RefPtr<FrameNode>> visibleList;
 
@@ -704,7 +762,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg022, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. add one child for ZERO and call GenerateOneDepthAllFrame
-     * @tc.expected: step1. children_.size is 1 and the GenerateOneDepthAllFrame function is run ok
+     * @tc.expected: children_.size is 1 and the GenerateOneDepthAllFrame function is run ok
      */
     std::list<RefPtr<FrameNode>> visibleList;
 
@@ -723,17 +781,22 @@ HWTEST_F(UINodeTestNg, UINodeTestNg023, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. add one child for ZERO and call TouchTest
-     * @tc.expected: step1. the return value is OUT_OF_REGION
+     * @tc.expected: the return value is meetings expectations
      */
     TouchTestResult result;
     TouchRestrict restrict;
-
     const PointF GLOBAL_POINT { 20.0f, 20.0f };
     const PointF LOCAL_POINT { 15.0f, 15.0f };
-
-    ZERO->AddChild(ONE, 1, false);
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    ZERO->AddChild(testNode, 1, false);
     HitTestResult retResult = ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, std::move(restrict), result, 1);
     EXPECT_EQ(retResult, HitTestResult::OUT_OF_REGION);
+    testNode->hitTestResult_ = HitTestResult::STOP_BUBBLING;
+    retResult = ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, std::move(restrict), result, 1);
+    EXPECT_EQ(retResult, HitTestResult::STOP_BUBBLING);
+    testNode->hitTestResult_ = HitTestResult::BUBBLING;
+    retResult = ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, std::move(restrict), result, 1);
+    EXPECT_EQ(retResult, HitTestResult::BUBBLING);
     ZERO->Clean();
 }
 
@@ -745,20 +808,23 @@ HWTEST_F(UINodeTestNg, UINodeTestNg023, TestSize.Level1)
 HWTEST_F(UINodeTestNg, UINodeTestNg024, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. add one child for ZERO and call TouchTest
-     * @tc.expected: step1. the return value is OUT_OF_REGION
+     * @tc.steps: step1. CreateFrameNode and call MouseTest
+     * @tc.expected: the return value is meetings expectations
      */
-    MouseTestResult onMouseResult;
-    MouseTestResult onHoverResult;
-    RefPtr<FrameNode> TEST_HOVERNODE =
-        FrameNode::CreateFrameNode("hovernode", 100, AceType::MakeRefPtr<Pattern>(), true);
-
+    MouseTestResult result;
     const PointF GLOBAL_POINT { 20.0f, 20.0f };
     const PointF LOCAL_POINT { 15.0f, 15.0f };
-
-    ZERO->AddChild(TEST_HOVERNODE, 1, false);
-    HitTestResult retResult =
-        ZERO->UINode::MouseTest(GLOBAL_POINT, LOCAL_POINT, onMouseResult, onHoverResult, TEST_HOVERNODE);
+    RefPtr<FrameNode> TEST_HOVERNODE =
+        FrameNode::CreateFrameNode("hovernode", 100, AceType::MakeRefPtr<Pattern>(), true);
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    ZERO->AddChild(testNode, 1, false);
+    HitTestResult retResult = ZERO->UINode::MouseTest(GLOBAL_POINT, LOCAL_POINT, result, result, TEST_HOVERNODE);
+    EXPECT_EQ(retResult, HitTestResult::OUT_OF_REGION);
+    testNode->hitTestResult_ = HitTestResult::STOP_BUBBLING;
+    retResult = ZERO->UINode::MouseTest(GLOBAL_POINT, LOCAL_POINT, result, result, TEST_HOVERNODE);
+    EXPECT_EQ(retResult, HitTestResult::STOP_BUBBLING);
+    testNode->hitTestResult_ = HitTestResult::BUBBLING;
+    retResult = ZERO->UINode::MouseTest(GLOBAL_POINT, LOCAL_POINT, result, result, TEST_HOVERNODE);
     EXPECT_EQ(retResult, HitTestResult::BUBBLING);
     ZERO->Clean();
 }
@@ -772,16 +838,26 @@ HWTEST_F(UINodeTestNg, UINodeTestNg025, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. add one child for ZERO and call AxisTest
-     * @tc.expected: step1. the return value is OUT_OF_REGION
+     * @tc.expected: the return value is OUT_OF_REGION
      */
-    AxisTestResult onAxisResult;
-
+    /**
+     * @tc.steps: step1. CreateFrameNode and call MouseTest
+     * @tc.expected: the return value is meetings expectations
+     */
+    AxisTestResult result;
+    TouchRestrict restrict;
     const PointF GLOBAL_POINT { 20.0f, 20.0f };
     const PointF LOCAL_POINT { 15.0f, 15.0f };
-
-    ZERO->AddChild(ONE, 1, false);
-    HitTestResult retResult = ZERO->UINode::AxisTest(GLOBAL_POINT, LOCAL_POINT, onAxisResult);
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    ZERO->AddChild(testNode, 1, false);
+    HitTestResult retResult = ZERO->UINode::AxisTest(GLOBAL_POINT, LOCAL_POINT, result);
     EXPECT_EQ(retResult, HitTestResult::OUT_OF_REGION);
+    testNode->hitTestResult_ = HitTestResult::STOP_BUBBLING;
+    retResult = ZERO->UINode::AxisTest(GLOBAL_POINT, LOCAL_POINT, result);
+    EXPECT_EQ(retResult, HitTestResult::STOP_BUBBLING);
+    testNode->hitTestResult_ = HitTestResult::BUBBLING;
+    retResult = ZERO->UINode::AxisTest(GLOBAL_POINT, LOCAL_POINT, result);
+    EXPECT_EQ(retResult, HitTestResult::BUBBLING);
     ZERO->Clean();
 }
 
@@ -794,28 +870,28 @@ HWTEST_F(UINodeTestNg, UINodeTestNg026, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. add one child for ZERO and call TotalChildCount
-     * @tc.expected: step1. the return retCount is 1
+     * @tc.expected: the return retCount is 1
      */
     ZERO->AddChild(ONE, 1, false);
     int32_t retCount = ZERO->UINode::FrameCount();
     EXPECT_EQ(retCount, 1);
     /**
      * @tc.steps: step2. add two child for ZERO and call TotalChildCount
-     * @tc.expected: step2. the return retCount is 2
+     * @tc.expected: the return retCount is 2
      */
     ZERO->AddChild(TWO, 2, false);
     retCount = ZERO->TotalChildCount();
     EXPECT_EQ(retCount, 2);
     /**
      * @tc.steps: step3. add three child for ZERO and call TotalChildCount
-     * @tc.expected: step3. the return retCount is 3
+     * @tc.expected: the return retCount is 3
      */
     ZERO->AddChild(THREE, 3, false);
     retCount = ZERO->TotalChildCount();
     EXPECT_EQ(retCount, 3);
     /**
-     * @tc.steps: step4add fourild for ZERO and call TotalChildCount
-     * @tc.expected: step4 the return retCount is 4
+     * @tc.steps: step4. add four child for ZERO and call TotalChildCount
+     * @tc.expected: the return retCount is 4
      */
     ZERO->AddChild(FOUR, 4, false);
     retCount = ZERO->TotalChildCount();
@@ -823,7 +899,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg026, TestSize.Level1)
     ZERO->Clean();
     /**
      * @tc.steps: step5. clean ZERO's child and TotalChildCount
-     * @tc.expected: step5. the return retCount is 0
+     * @tc.expected: the return retCount is 0
      */
     retCount = ZERO->TotalChildCount();
     EXPECT_EQ(retCount, 0);
@@ -838,7 +914,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg027, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. add one child for ZERO and call Build
-     * @tc.expected: step1. the Build function is run ok
+     * @tc.expected: the Build function is run ok
      */
     ZERO->AddChild(ONE, 1, false);
     ZERO->Build();
@@ -855,7 +931,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg028, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. add one child for ZERO and call SetActive
-     * @tc.expected: step1. the SetActive function is run ok
+     * @tc.expected: the SetActive function is run ok
      */
     ZERO->AddChild(ONE, 1, false);
     ZERO->UINode::SetActive(true);
@@ -872,7 +948,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg029, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. add one child for ZERO and call OnVisibleChange
-     * @tc.expected: step1. the OnVisibleChange function is run ok
+     * @tc.expected: the OnVisibleChange function is run ok
      */
     ZERO->AddChild(ONE, 1, false);
     ZERO->UINode::OnVisibleChange(true);
@@ -889,7 +965,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg030, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. add ONE child for ZERO and call GetChildFlatIndex
-     * @tc.expected: step1. the return pair1.first is true and pair1.second is 0
+     * @tc.expected: pair1.second is 0
      */
     ZERO->AddChild(ONE, 1, false);
     auto pair = ZERO->GetChildFlatIndex(1);
@@ -898,7 +974,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg030, TestSize.Level1)
     ZERO->Clean();
     /**
      * @tc.steps: step1. AddChild TESTUINode to ZERO and GetChildFlatIndex
-     * @tc.expected: step1. the return pair1.first is false and pair1.second is 1
+     * @tc.expected: the return pair1.first is false and pair1.second is 1
      */
     ZERO->AddChild(TEN0, 1, false);
     pair = ZERO->GetChildFlatIndex(10);
@@ -916,7 +992,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg031, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. add one child to ZERO and ChildrenUpdatedFrom
-     * @tc.expected: step1. childrenUpdatedFrom_ is 1
+     * @tc.expected: childrenUpdatedFrom_ is 1
      */
     ZERO->ChildrenUpdatedFrom(1);
     EXPECT_EQ(ZERO->childrenUpdatedFrom_, 1);
@@ -932,7 +1008,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg032, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. add one child to ZERO and MarkRemoving
-     * @tc.expected: step1. the return retMark is false
+     * @tc.expected: the return retMark is false
      */
     ZERO->AddChild(ONE, 1, false);
     bool retMark = ZERO->UINode::MarkRemoving();
@@ -949,19 +1025,21 @@ HWTEST_F(UINodeTestNg, UINodeTestNg033, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. call the SetChildrenInDestroying
-     * @tc.expected: step1. children_.size = 0
+     * @tc.expected: children_.size = 0
      */
     ZERO->SetChildrenInDestroying();
     EXPECT_EQ(ZERO->children_.size(), 0);
     ZERO->Clean();
     /**
      * @tc.steps: step1. add two child to ZERO and call SetChildrenInDestroying
-     * @tc.expected: step1. children_.size = 2
+     * @tc.expected: step1. children_.size = 3
      */
     ZERO->AddChild(ONE, 1, false);
     ZERO->AddChild(TWO, 2, false);
+    ZERO->children_.emplace_back(nullptr);
     ZERO->SetChildrenInDestroying();
-    EXPECT_EQ(ZERO->children_.size(), 2);
+    EXPECT_EQ(ZERO->children_.size(), 3);
+    ZERO->children_.clear();
     ZERO->Clean();
 }
 
@@ -974,7 +1052,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg034, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. add two child to ZERO and call RemoveChildAtIndex
-     * @tc.expected: step1. children_.size = 1
+     * @tc.expected: children_.size = 1
      */
     ZERO->AddChild(ONE, 1, false);
     ZERO->RemoveChildAtIndex(1);
@@ -991,19 +1069,19 @@ HWTEST_F(UINodeTestNg, UINodeTestNg035, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. call the AddChild funtion and set child is null
-     * @tc.expected: step1. children_.size = 0
+     * @tc.expected: children_.size = 0
      */
     ZERO->AddChild(nullptr, 1, false);
     EXPECT_EQ(ZERO->children_.size(), 0);
     /**
      * @tc.steps: step2. AddChild
-     * @tc.expected: step2. children_.size = 1
+     * @tc.expected: children_.size = 1
      */
     ZERO->AddChild(TWO, 1, false);
     EXPECT_EQ(ZERO->children_.size(), 1);
     /**
      * @tc.steps: step3. call the RemoveChild funtion and set input is null
-     * @tc.expected: step3. the return value is children_.end()
+     * @tc.expected: the return value is children_.end()
      */
     auto interator = ZERO->RemoveChild(nullptr);
     EXPECT_EQ(interator, ZERO->children_.end());
@@ -1019,7 +1097,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg036, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. GetChildAtIndex and set input is -1
-     * @tc.expected: step1. the return value is return nullptr
+     * @tc.expected: the return value is return nullptr
      */
     RefPtr<UINode> retChildAtIndex = ZERO->GetChildAtIndex(-1);
     EXPECT_EQ(retChildAtIndex, nullptr);
@@ -1034,7 +1112,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg037, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. ReplaceChild
-     * @tc.expected: step1. children_.size() is 0
+     * @tc.expected: children_.size() is 0
      */
     ZERO->ReplaceChild(nullptr, nullptr);
     EXPECT_EQ(ZERO->children_.size(), 0);
@@ -1049,7 +1127,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg038, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. call the MarkDirtyNode.
-     * @tc.expected: step1. the MarkDirtyNode function is run ok.
+     * @tc.expected: the MarkDirtyNode function is run ok.
      */
     PropertyChangeFlag FLAG = PROPERTY_UPDATE_NORMAL;
     ZERO->layoutProperty_->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
@@ -1073,15 +1151,18 @@ HWTEST_F(UINodeTestNg, UINodeTestNg039, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. call the CreateLayoutWrapper
-     * @tc.expected: step1. the return value is null
+     * @tc.expected: the return value is null
      */
     RefPtr<LayoutWrapper> retLayoutWrapper = ZERO->UINode::CreateLayoutWrapper(true, true);
     EXPECT_EQ(retLayoutWrapper, nullptr);
     /**
-     * @tc.steps: step1. add one child for ZERO and call CreateLayoutWrapper
-     * @tc.expected: step1. the return value is null
+     * @tc.steps: step2. add one child for ZERO and call CreateLayoutWrapper
+     * @tc.expected: the return value is null
      */
-    ZERO->AddChild(ONE, 1, false);
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    ZERO->AddChild(testNode, 1, false);
+    retLayoutWrapper = ZERO->UINode::CreateLayoutWrapper(true, true);
+    testNode->AddChild(ONE, 1, false);
     retLayoutWrapper = ZERO->UINode::CreateLayoutWrapper(true, true);
     EXPECT_NE(retLayoutWrapper, nullptr);
     ZERO->Clean();
@@ -1096,12 +1177,83 @@ HWTEST_F(UINodeTestNg, UINodeTestNg040, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. set onMainTree_ is true and call AddChild
-     * @tc.expected: step1. children_.size() is 2
+     * @tc.expected: children_.size() is 2
      */
     auto it = std::find(ZERO->children_.begin(), ZERO->children_.end(), ZERO);
     ZERO->onMainTree_ = true;
     ZERO->DoAddChild(it, ONE, false);
     ZERO->DoAddChild(it, TWO, true);
     EXPECT_EQ(ZERO->children_.size(), 2);
+}
+
+/**
+ * @tc.name: UINodeTestNg041
+ * @tc.desc: Test ui node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestNg041, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create some node
+     */
+    SystemProperties::performanceProps_ = std::make_unique<PerformanceCheckParameter>();
+    auto parent = FrameNode::CreateFrameNode(V2::JS_FOR_EACH_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto current = FrameNode::CreateFrameNode(V2::COMMON_VIEW_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    auto child = FrameNode::CreateFrameNode(V2::COMMON_VIEW_ETS_TAG, 3, AceType::MakeRefPtr<Pattern>());
+    auto child2 = FrameNode::CreateFrameNode(V2::COMMON_VIEW_ETS_TAG, 4, AceType::MakeRefPtr<Pattern>());
+    auto child3 = FrameNode::CreateFrameNode(V2::OPTION_COMPONENT_TAG, 5, AceType::MakeRefPtr<Pattern>());
+    child3->SetBuildByJs(true);
+    /**
+     * @tc.steps: step2. root parent node do GetPerformanceCheckData
+     * @tc.expected: nodeMap.size() is 0
+     */
+    PerformanceCheckNodeMap nodeMap;
+    parent->GetPerformanceCheckData(nodeMap);
+    EXPECT_EQ(nodeMap.size(), 0);
+    /**
+     * @tc.steps: step3. add a node to parent node and do GetPerformanceCheckData
+     * @tc.expected: nodeMap.size() is 0
+     */
+    parent->AddChild(current);
+    current->GetPerformanceCheckData(nodeMap);
+    EXPECT_EQ(nodeMap.size(), 0);
+    /**
+     * @tc.steps: step4. config a simple node tree and do GetPerformanceCheckData
+     * @tc.expected: nodeMap.size() is 1
+     */
+    current->AddChild(child);
+    current->AddChild(child2);
+    child->AddChild(child3);
+    current->GetPerformanceCheckData(nodeMap);
+    EXPECT_EQ(nodeMap.size(), 1);
+}
+
+/**
+ * @tc.name: UINodeTestNg042
+ * @tc.desc: Test ui node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestNg042, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create some node
+     */
+    auto parent = FrameNode::CreateFrameNode(V2::COMMON_VIEW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto child = FrameNode::CreateFrameNode(V2::COMMON_VIEW_ETS_TAG, 3, AceType::MakeRefPtr<Pattern>());
+    auto child2 = FrameNode::CreateFrameNode(V2::COMMON_VIEW_ETS_TAG, 4, AceType::MakeRefPtr<Pattern>());
+    /**
+     * @tc.steps: step2. root parent node do GetPerformanceCheckData
+     */
+    parent->AddDisappearingChild(child);
+    child2->isDisappearing_ = true;
+    parent->AddDisappearingChild(child2);
+    parent->AddDisappearingChild(child);
+    /**
+     * @tc.steps: step3. root parent node do GetPerformanceCheckData
+     * @tc.expected: nodeMap.size() is 0
+     */
+    parent->RemoveDisappearingChild(child);
+    child->isDisappearing_ = true;
+    parent->RemoveDisappearingChild(child);
 }
 } // namespace OHOS::Ace::NG
