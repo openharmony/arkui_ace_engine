@@ -16,7 +16,7 @@
 #define private public
 #include "gtest/gtest.h"
 
-#include "adapter/ohos/capability/window_connection_ng/window_extension_connection_ohos_ng.h"
+#include "test/mock/window_ng/mock_window_extension_connection_adapter_ng.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
@@ -297,13 +297,13 @@ HWTEST_F(AbilityComponentPatternTestNg, AbilityComponentTest006, TestSize.Level1
      */
     pattern->hasConnectionToAbility_ = true;
     pattern->UpdateWindowRect();
-    EXPECT_NE(pattern->lastRect_, rect);
+    EXPECT_EQ(pattern->lastRect_, rect);
 
     /**
      * @tc.steps: step3. set adapter_ and call OnModifyDone
      * @tc.expected: expect rect is set
      */
-    pattern->adapter_ = AceType::MakeRefPtr<WindowExtensionConnectionAdapterOhosNG>();
+    pattern->adapter_ = AceType::MakeRefPtr<MockWindowExtensionConnectionAdapterNG>();
     pattern->OnModifyDone();
     EXPECT_EQ(pattern->lastRect_, rect);
 
