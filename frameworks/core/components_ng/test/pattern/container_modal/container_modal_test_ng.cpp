@@ -22,11 +22,14 @@
 #include "core/components/theme/theme_constants.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
@@ -37,30 +40,320 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float DEVICE_WIDTH = 480.f;
+constexpr float DEVICE_HEIGHT = 800.f;
 const std::string CONTAINER_MODAL_NODE_TAG = "ContainerModalNode";
 const std::string TITLE_NODE_TAG = "TitleNode";
 const std::string TITLE_LABEL_NODE_TAG = "TitleLabelNode";
-constexpr int32_t LEFT_SPLIT_BUTTON_INDEX = 2;
-constexpr int32_t MAX_RECOVER_BUTTON_INDEX = 3;
-constexpr int32_t MINIMIZE_BUTTON_INDEX = 4;
 } // namespace
 class ContainerModelTestNg : public testing::Test {
-public:
+protected:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    void SetUp() override;
+    void TearDown() override;
+    void GetInstance();
+    RefPtr<LayoutWrapper> RunMeasureAndLayout(float width = DEVICE_WIDTH, float height = DEVICE_HEIGHT);
+    static void SetWidth(const Dimension& width);
+    static void SetHeight(const Dimension& height);
+    RefPtr<FrameNode> CreateContent();
+    void SetMockWindow(WindowMode windowMode);
+    void CreateContainerModal();
+    void Touch(TouchLocationInfo locationInfo);
+    void Touch(Offset downOffset, Offset moveOffset, Offset upOffset);
+    void Mouse(MouseInfo mouseInfo);
+    void Mouse(Offset moveOffset);
+
+    RefPtr<FrameNode> frameNode_;
+    RefPtr<ContainerModalPattern> pattern_;
+    RefPtr<LayoutProperty> layoutProperty_;
+    RefPtr<ContainerModalAccessibilityProperty> accessibilityProperty_;
 };
 
 void ContainerModelTestNg::SetUpTestSuite()
 {
-    const std::string tag = "test";
-    const auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, 0, AceType::MakeRefPtr<Pattern>());
-    ViewStackProcessor::GetInstance()->Push(frameNode);
     MockPipelineBase::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(nullptr));
+    EXPECT_CALL(*themeManager, GetThemeConstants()).WillRepeatedly(Return(themeConstants));
 }
 
 void ContainerModelTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
+}
+
+void ContainerModelTestNg::SetUp()
+{
+    SetMockWindow(WindowMode::WINDOW_MODE_FULLSCREEN);
+}
+
+void ContainerModelTestNg::TearDown()
+{
+    frameNode_ = nullptr;
+    pattern_ = nullptr;
+    layoutProperty_ = nullptr;
+    accessibilityProperty_ = nullptr;
+}
+
+void ContainerModelTestNg::GetInstance()
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    frameNode_ = AceType::DynamicCast<FrameNode>(element);
+    pattern_ = frameNode_->GetPattern<ContainerModalPattern>();
+    layoutProperty_ = frameNode_->GetLayoutProperty();
+    accessibilityProperty_ = frameNode_->GetAccessibilityProperty<ContainerModalAccessibilityProperty>();
+}
+
+RefPtr<LayoutWrapper> ContainerModelTestNg::RunMeasureAndLayout(float width, float height)
+{
+    RefPtr<LayoutWrapper> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
+    layoutWrapper->SetActive();
+    LayoutConstraintF LayoutConstraint;
+    LayoutConstraint.parentIdealSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
+    LayoutConstraint.percentReference = { DEVICE_WIDTH, DEVICE_HEIGHT };
+    LayoutConstraint.selfIdealSize = { width, height };
+    LayoutConstraint.maxSize = { width, height };
+    layoutWrapper->Measure(LayoutConstraint);
+    layoutWrapper->Layout();
+    layoutWrapper->MountToHostOnMainThread();
+    return layoutWrapper;
+}
+
+void ContainerModelTestNg::SetWidth(const Dimension& width)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(width), std::nullopt));
+}
+
+void ContainerModelTestNg::SetHeight(const Dimension& height)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(height)));
+}
+
+RefPtr<FrameNode> ContainerModelTestNg::CreateContent()
+{
+    return AceType::MakeRefPtr<FrameNode>("content", 0, AceType::MakeRefPtr<Pattern>());
+}
+
+void ContainerModelTestNg::SetMockWindow(WindowMode windowMode)
+{
+    const auto windowManager = AceType::MakeRefPtr<WindowManager>();
+    auto windowModeCallback = [windowMode]() { return windowMode; };
+    windowManager->SetWindowGetModeCallBack(std::move(windowModeCallback));
+    auto pipeline = MockPipelineBase::GetCurrent();
+    pipeline->windowManager_ = windowManager;
+}
+
+void ContainerModelTestNg::CreateContainerModal()
+{
+    ContainerModalView view;
+    RefPtr<FrameNode> content = CreateContent();
+    auto frameNode = view.Create(content);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    GetInstance();
+    RunMeasureAndLayout();
+}
+
+void ContainerModelTestNg::Touch(TouchLocationInfo locationInfo)
+{
+    auto touchEventHub = frameNode_->GetOrCreateGestureEventHub();
+    auto touchEvent = touchEventHub->touchEventActuator_->userCallback_->GetTouchEventCallback();
+    TouchEventInfo eventInfo("touch");
+    eventInfo.AddChangedTouchLocationInfo(std::move(locationInfo));
+    touchEvent(eventInfo);
+}
+
+void ContainerModelTestNg::Touch(Offset downOffset, Offset moveOffset, Offset upOffset)
+{
+    TouchLocationInfo locationInfo(1);
+    locationInfo.SetTouchType(TouchType::DOWN);
+    locationInfo.SetGlobalLocation(downOffset);
+    Touch(locationInfo);
+    locationInfo.SetTouchType(TouchType::MOVE);
+    locationInfo.SetGlobalLocation(moveOffset);
+    Touch(locationInfo);
+    locationInfo.SetTouchType(TouchType::UP);
+    locationInfo.SetGlobalLocation(upOffset);
+    Touch(locationInfo);
+}
+
+void ContainerModelTestNg::Mouse(MouseInfo mouseInfo)
+{
+    auto mouseEventHub = frameNode_->GetOrCreateInputEventHub();
+    auto mouseEvent = mouseEventHub->mouseEventActuator_->userCallback_->GetOnMouseEventFunc();
+    mouseEvent(mouseInfo);
+}
+
+void ContainerModelTestNg::Mouse(Offset moveOffset)
+{
+    MouseInfo mouseInfo;
+    mouseInfo.SetAction(MouseAction::MOVE);
+    mouseInfo.SetLocalLocation(moveOffset);
+    Mouse(mouseInfo);
+}
+
+/**
+ * @tc.name: Test001
+ * @tc.desc: Test ContainerModel Child
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, Test001, TestSize.Level1)
+{
+    /**
+     * The structure of container_modal is designed as follows :
+     * |--container_modal(stack)
+     *   |--column
+     *      |--container_modal_title(row)
+     *          |--icon(image), label(text), [leftSplit, maxRecover, minimize, close](button)
+     *      |--stack
+     *          |--container_modal_content(stage)
+     *              |--page
+     *          |--dialog(when show)
+     *   |--container_modal_floating_title(row)
+     *          |--icon(image), label(text), [leftSplit, maxRecover, minimize, close](button)
+     */
+    CreateContainerModal();
+
+    EXPECT_EQ(frameNode_->GetTag(), "ContainerModal");
+    EXPECT_EQ(frameNode_->GetChildren().size(), 2);
+    auto column = frameNode_->GetChildAtIndex(0);
+    EXPECT_EQ(column->GetTag(), V2::COLUMN_ETS_TAG);
+    EXPECT_EQ(column->GetChildren().size(), 2);
+    auto container_modal_title = column->GetChildAtIndex(0);
+    EXPECT_EQ(container_modal_title->GetTag(), V2::ROW_ETS_TAG);
+    EXPECT_EQ(container_modal_title->GetChildren().size(), 6);
+    auto stack = column->GetChildAtIndex(1);
+    EXPECT_EQ(stack->GetTag(), V2::STACK_ETS_TAG);
+    EXPECT_EQ(stack->GetChildren().size(), 1);
+    auto container_modal_content = stack->GetChildAtIndex(0);
+    EXPECT_EQ(container_modal_content->GetTag(), "content");
+    auto container_modal_floating_title = frameNode_->GetChildAtIndex(1);
+    EXPECT_EQ(container_modal_floating_title->GetTag(), V2::ROW_ETS_TAG);
+    EXPECT_EQ(container_modal_title->GetChildren().size(), 6);
+}
+
+/**
+ * @tc.name: Test002
+ * @tc.desc: Test InitContainerEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, Test002, TestSize.Level1)
+{
+    CreateContainerModal();
+
+    /**
+     * @tc.steps: step1. When hasDeco_ is false
+     * @tc.expected: Do nothing
+     */
+    pattern_->ShowTitle(true, false);
+    auto floatingTitleNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildren().back());
+    auto floatingLayoutProperty = floatingTitleNode->GetLayoutProperty();
+    Touch(Offset::Zero(), Offset::Zero(), Offset::Zero());
+    EXPECT_EQ(floatingLayoutProperty->GetVisibility(), VisibleType::GONE);
+
+    Mouse(Offset::Zero());
+    EXPECT_EQ(floatingLayoutProperty->GetVisibility(), VisibleType::GONE);
+
+    /**
+     * @tc.steps: step2. When MouseAction is not MOVE
+     * @tc.expected: Do nothing
+     */
+    MouseInfo mouseInfo;
+    mouseInfo.SetAction(MouseAction::PRESS);
+    mouseInfo.SetLocalLocation(Offset(0, 0));
+    Mouse(mouseInfo);
+    EXPECT_EQ(floatingLayoutProperty->GetVisibility(), VisibleType::GONE);
+
+    /**
+     * @tc.steps: step3. Set hasDeco_ to true
+     */
+    pattern_->ShowTitle(true, true);
+
+    /**
+     * @tc.steps: step4. Touch outSide
+     * @tc.expected: Do nothing
+     */
+    constexpr double movePopupDistanceX = 10.0;
+    constexpr double movePopupDistanceY = 20.0;
+    constexpr double titlePopupDistance = 37.0;
+
+    Offset outOffset = Offset(0, titlePopupDistance + 1);
+    Touch(outOffset, outOffset, outOffset);
+    EXPECT_EQ(floatingLayoutProperty->GetVisibility(), VisibleType::GONE);
+
+    /**
+     * @tc.steps: step5. Touch inSide but deltaMoveY < movePopupDistanceY
+     * @tc.expected: Do nothing
+     */
+    Offset inOffset_1 = Offset(movePopupDistanceX, movePopupDistanceY - 1);
+    Touch(Offset::Zero(), inOffset_1, inOffset_1);
+    EXPECT_EQ(floatingLayoutProperty->GetVisibility(), VisibleType::GONE);
+
+    /**
+     * @tc.steps: step6. Touch inSide but deltaMoveX > movePopupDistanceX
+     * @tc.expected: Do nothing
+     */
+    Offset inOffset_2 = Offset(movePopupDistanceX + 1, movePopupDistanceY);
+    Touch(Offset::Zero(), inOffset_2, inOffset_2);
+    EXPECT_EQ(floatingLayoutProperty->GetVisibility(), VisibleType::GONE);
+
+    /**
+     * @tc.steps: step7. Touch inSide
+     * @tc.expected: float node would VISIBLE
+     */
+    Offset inOffset_3 = Offset(movePopupDistanceX, movePopupDistanceY);
+    Touch(Offset::Zero(), inOffset_3, inOffset_3);
+    EXPECT_EQ(floatingLayoutProperty->GetVisibility(), VisibleType::VISIBLE);
+
+    /**
+     * @tc.steps: step8. Touch outSide
+     * @tc.expected: float node would GONE by Animate()
+     */
+    Touch(outOffset, outOffset, outOffset);
+    floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
+
+    /**
+     * @tc.steps: step9. Mouse move > mouseMovePopupDistance
+     * @tc.expected: Do nothing
+     */
+    constexpr double mouseMovePopupDistance = 5.0;
+    
+    Mouse(Offset(0, mouseMovePopupDistance + 1));
+    EXPECT_EQ(floatingLayoutProperty->GetVisibility(), VisibleType::GONE);
+
+    /**
+     * @tc.steps: step10. Mouse move outSide
+     * @tc.expected: Do nothing
+     */
+    Mouse(Offset(0, titlePopupDistance));
+    EXPECT_EQ(floatingLayoutProperty->GetVisibility(), VisibleType::GONE);
+
+    /**
+     * @tc.steps: step11. Mouse move <= mouseMovePopupDistance
+     * @tc.expected: float node would VISIBLE
+     */
+    Mouse(Offset(0, mouseMovePopupDistance));
+    EXPECT_EQ(floatingLayoutProperty->GetVisibility(), VisibleType::VISIBLE);
+
+    /**
+     * @tc.steps: step12. Mouse move <= mouseMovePopupDistance again
+     * @tc.expected: The CanShowFloatingTitle() is false, Do nothing
+     */
+    Mouse(Offset(0, mouseMovePopupDistance));
+    EXPECT_EQ(floatingLayoutProperty->GetVisibility(), VisibleType::VISIBLE);
+
+    /**
+     * @tc.steps: step13. Mouse move outSide
+     * @tc.expected: float node would GONE by Animate()
+     */
+    Mouse(Offset(0, titlePopupDistance));
+    floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
 }
 
 /**
@@ -73,186 +366,6 @@ HWTEST_F(ContainerModelTestNg, ContainerModalPatternTest001, TestSize.Level1)
     auto containerModalPattern = AceType::MakeRefPtr<ContainerModalPattern>();
     EXPECT_TRUE(containerModalPattern->IsMeasureBoundary());
     EXPECT_FALSE(containerModalPattern->IsAtomicNode());
-}
-
-/**
- * @tc.name: ContainerModalPatternTest002
- * @tc.desc: Test OnWindowFocused and OnWindowUnfocused.
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerModelTestNg, ContainerModalPatternTest002, TestSize.Level1)
-{
-    auto containerModalPattern = AceType::MakeRefPtr<ContainerModalPattern>();
-    std::string tag = "test";
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, 0, AceType::MakeRefPtr<Pattern>());
-    frameNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
-    ViewStackProcessor::GetInstance()->Push(frameNode);
-    ASSERT_NE(frameNode, nullptr);
-
-    auto frameNodeChild = AceType::MakeRefPtr<FrameNode>(tag, 1, AceType::MakeRefPtr<Pattern>());
-    frameNodeChild->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
-    ASSERT_NE(frameNodeChild, nullptr);
-    frameNode->AddChild(frameNodeChild);
-    containerModalPattern->OnWindowFocused();
-    containerModalPattern->OnWindowUnfocused();
-}
-
-/**
- * @tc.name: ContainerModalPatternTest003
- * @tc.desc: Test InitContainerEvent.
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerModelTestNg, ContainerModalPatternTest003, TestSize.Level1)
-{
-    std::string tag = "test";
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, 0, AceType::MakeRefPtr<Pattern>());
-    frameNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
-    ViewStackProcessor::GetInstance()->Push(frameNode);
-    ASSERT_NE(frameNode, nullptr);
-
-    auto frameNodeChild = AceType::MakeRefPtr<FrameNode>(tag, 1, AceType::MakeRefPtr<Pattern>());
-    frameNodeChild->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
-    ASSERT_NE(frameNodeChild, nullptr);
-    frameNode->AddChild(frameNodeChild);
-
-    ContainerModalPattern containerModalPattern;
-    containerModalPattern.AttachToFrameNode(frameNode);
-    containerModalPattern.InitContainerEvent();
-}
-
-/**
- * @tc.name: ContainerModalPatternTest004
- * @tc.desc: Test ShowTitle is true.
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerModelTestNg, ContainerModalPatternTest004, TestSize.Level1)
-{
-    std::string tag = "test";
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, 0, AceType::MakeRefPtr<Pattern>());
-    frameNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
-    ViewStackProcessor::GetInstance()->Push(frameNode);
-    ASSERT_NE(frameNode, nullptr);
-
-    auto frameNodeChild = AceType::MakeRefPtr<FrameNode>(tag, 1, AceType::MakeRefPtr<Pattern>());
-    frameNodeChild->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
-    ASSERT_NE(frameNodeChild, nullptr);
-
-    auto frameNodeChildTwo = AceType::MakeRefPtr<FrameNode>(tag, 2, AceType::MakeRefPtr<Pattern>());
-    frameNodeChildTwo->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
-    ASSERT_NE(frameNodeChildTwo, nullptr);
-
-    frameNode->AddChild(frameNodeChild);
-    frameNode->AddChild(frameNodeChildTwo);
-    auto containerNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    ASSERT_NE(containerNode, nullptr);
-    EXPECT_NE(AceType::DynamicCast<FrameNode>(frameNode->GetChildren().back()), nullptr);
-
-    ContainerModalPattern containerModalPattern;
-    containerModalPattern.AttachToFrameNode(frameNode);
-    containerModalPattern.ShowTitle(true);
-}
-
-/**
- * @tc.name: ContainerModalPatternTest005
- * @tc.desc: Test ShowTitle is false.
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerModelTestNg, ContainerModalPatternTest005, TestSize.Level1)
-{
-    std::string tag = "test";
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, 0, AceType::MakeRefPtr<Pattern>());
-    frameNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
-    ViewStackProcessor::GetInstance()->Push(frameNode);
-    ASSERT_NE(frameNode, nullptr);
-
-    auto frameNodeChild = AceType::MakeRefPtr<FrameNode>(tag, 1, AceType::MakeRefPtr<Pattern>());
-    frameNodeChild->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
-    ASSERT_NE(frameNodeChild, nullptr);
-
-    auto frameNodeChildTwo = AceType::MakeRefPtr<FrameNode>(tag, 2, AceType::MakeRefPtr<Pattern>());
-    frameNodeChildTwo->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
-    ASSERT_NE(frameNodeChildTwo, nullptr);
-
-    frameNode->AddChild(frameNodeChild);
-    frameNode->AddChild(frameNodeChildTwo);
-    auto containerNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    ASSERT_NE(containerNode, nullptr);
-    ASSERT_NE(AceType::DynamicCast<FrameNode>(frameNode->GetChildren().back()), nullptr);
-
-    ContainerModalPattern containerModalPattern;
-    containerModalPattern.AttachToFrameNode(frameNode);
-    containerModalPattern.ShowTitle(false);
-}
-
-/**
- * @tc.name: ContainerModalPatternTest006
- * @tc.desc: Test ShowTitle CHECK_NULL_VOID.
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerModelTestNg, ContainerModalPatternTest006, TestSize.Level1)
-{
-    ContainerModalPattern containerModalPattern;
-    containerModalPattern.ShowTitle(false);
-    std::string tag = "test";
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, 0, AceType::MakeRefPtr<Pattern>());
-    frameNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
-    ViewStackProcessor::GetInstance()->Push(frameNode);
-
-    ASSERT_NE(frameNode, nullptr);
-    containerModalPattern.AttachToFrameNode(frameNode);
-    containerModalPattern.ShowTitle(false);
-
-    auto frameNodeChild = AceType::MakeRefPtr<FrameNode>(tag, 1, AceType::MakeRefPtr<Pattern>());
-    frameNodeChild->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
-    ASSERT_NE(frameNodeChild, nullptr);
-
-    auto frameNodeChildTwo = AceType::MakeRefPtr<FrameNode>(tag, 2, AceType::MakeRefPtr<Pattern>());
-    frameNodeChildTwo->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
-    ASSERT_NE(frameNodeChildTwo, nullptr);
-
-    frameNode->AddChild(frameNodeChild);
-    frameNode->AddChild(frameNodeChildTwo);
-    auto containerNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    ASSERT_NE(containerNode, nullptr);
-    ASSERT_NE(AceType::DynamicCast<FrameNode>(frameNode->GetChildren().back()), nullptr);
-
-    containerModalPattern.AttachToFrameNode(frameNode);
-    containerModalPattern.ShowTitle(false);
-}
-
-/**
- * @tc.name: ContainerModalPatternTest007
- * @tc.desc: Test SetAppIcon.
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerModelTestNg, ContainerModalPatternTest007, TestSize.Level1)
-{
-    std::string tag = "test";
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, 0, AceType::MakeRefPtr<Pattern>());
-    frameNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
-    ViewStackProcessor::GetInstance()->Push(frameNode);
-    ASSERT_NE(frameNode, nullptr);
-
-    auto frameNodeChild = AceType::MakeRefPtr<FrameNode>(tag, 1, AceType::MakeRefPtr<Pattern>());
-    frameNodeChild->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
-    ViewStackProcessor::GetInstance()->Push(frameNodeChild);
-    ASSERT_NE(frameNodeChild, nullptr);
-
-    auto frameNodeChildTwo = AceType::MakeRefPtr<FrameNode>(tag, 2, AceType::MakeRefPtr<Pattern>());
-    frameNodeChildTwo->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
-    ViewStackProcessor::GetInstance()->Push(frameNodeChildTwo);
-    ASSERT_NE(frameNodeChildTwo, nullptr);
-
-    frameNode->AddChild(frameNodeChild);
-    frameNodeChild->AddChild(frameNodeChildTwo);
-    auto containerNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    ASSERT_NE(AceType::DynamicCast<FrameNode>(frameNode->GetChildren().back()), nullptr);
-
-    ContainerModalPattern containerModalPattern;
-    containerModalPattern.AttachToFrameNode(frameNode);
-
-    RefPtr<PixelMap> pixelMap;
-    containerModalPattern.SetAppIcon(pixelMap);
 }
 
 /**
@@ -286,91 +399,6 @@ HWTEST_F(ContainerModelTestNg, ContainerModalPatternTest009, TestSize.Level1)
     auto containerModalPattern = AceType::MakeRefPtr<ContainerModalPattern>();
     containerModalPattern->ChangeTitleButtonIcon(
         frameNode, InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT, true);
-}
-
-/**
- * @tc.name: ContainerModalPatternTest010
- * @tc.desc: Test ContainerModalPattern::SetContainerButtonHide.
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerModelTestNg, ContainerModalPatternTest010, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize themeManager and windowManager before call ContainerModalView::Create func.
-     */
-    auto pipeline = PipelineContext::GetCurrentContext();
-    EXPECT_NE(pipeline, nullptr);
-    pipeline->windowManager_ = AceType::MakeRefPtr<WindowManager>();
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    pipeline->SetThemeManager(themeManager);
-    auto resourceAdapter = AceType::MakeRefPtr<MockResourceAdapter>();
-    auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(resourceAdapter);
-    EXPECT_CALL(*themeManager, GetThemeConstants()).WillRepeatedly(Return(themeConstants));
-    /**
-     * @tc.steps2: initialize containerModal node structure. Test ContainerModalView::Create func.
-     * @tc.expected: the tree structure of containerModal is established correctly.
-     */
-    auto stageNode = AceType::MakeRefPtr<FrameNode>(V2::STAGE_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto containerModalNode = ContainerModalView::Create(stageNode);
-    ASSERT_NE(containerModalNode, nullptr);
-    EXPECT_NE(containerModalNode, stageNode);
-    auto containerModalPattern = containerModalNode->GetPattern<ContainerModalPattern>();
-    ASSERT_NE(containerModalPattern, nullptr);
-    auto columnNode = containerModalNode->GetChildren().front();
-    ASSERT_NE(columnNode, nullptr);
-    auto titleNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
-    ASSERT_NE(titleNode, nullptr);
-    auto floatingTitleNode = AceType::DynamicCast<FrameNode>(containerModalNode->GetChildren().back());
-    ASSERT_NE(floatingTitleNode, nullptr);
-    auto leftSplitButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(LEFT_SPLIT_BUTTON_INDEX));
-    ASSERT_NE(leftSplitButton, nullptr);
-    ASSERT_NE(leftSplitButton->GetLayoutProperty(), nullptr);
-    auto maximizeButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(MAX_RECOVER_BUTTON_INDEX));
-    ASSERT_NE(maximizeButton, nullptr);
-    ASSERT_NE(maximizeButton->GetLayoutProperty(), nullptr);
-    auto minimizeButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(MINIMIZE_BUTTON_INDEX));
-    ASSERT_NE(minimizeButton, nullptr);
-    ASSERT_NE(minimizeButton->GetLayoutProperty(), nullptr);
-    auto leftSplitButtonFloating =
-        AceType::DynamicCast<FrameNode>(floatingTitleNode->GetChildAtIndex(LEFT_SPLIT_BUTTON_INDEX));
-    ASSERT_NE(leftSplitButtonFloating, nullptr);
-    ASSERT_NE(leftSplitButtonFloating->GetLayoutProperty(), nullptr);
-    auto maximizeButtonFloating =
-        AceType::DynamicCast<FrameNode>(floatingTitleNode->GetChildAtIndex(MAX_RECOVER_BUTTON_INDEX));
-    ASSERT_NE(maximizeButtonFloating, nullptr);
-    ASSERT_NE(maximizeButtonFloating->GetLayoutProperty(), nullptr);
-    auto minimizeButtonFloating =
-        AceType::DynamicCast<FrameNode>(floatingTitleNode->GetChildAtIndex(MINIMIZE_BUTTON_INDEX));
-    ASSERT_NE(minimizeButtonFloating, nullptr);
-    ASSERT_NE(minimizeButtonFloating->GetLayoutProperty(), nullptr);
-    /**
-     * @tc.steps3: call SetContainerButtonHide(false, false, false).
-     * @tc.expected: corresponding buttons are visible.
-     */
-    containerModalPattern->SetContainerButtonHide(false, false, false);
-    EXPECT_EQ(leftSplitButton->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
-    EXPECT_EQ(maximizeButton->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
-    EXPECT_EQ(minimizeButton->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
-    EXPECT_EQ(
-        leftSplitButtonFloating->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
-    EXPECT_EQ(
-        maximizeButtonFloating->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
-    EXPECT_EQ(
-        minimizeButtonFloating->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
-    /**
-     * @tc.steps4: call SetContainerButtonHide(true, true, true).
-     * @tc.expected: corresponding buttons are not visible.
-     */
-    containerModalPattern->SetContainerButtonHide(true, true, true);
-    EXPECT_NE(leftSplitButton->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
-    EXPECT_NE(maximizeButton->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
-    EXPECT_NE(minimizeButton->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
-    EXPECT_NE(
-        leftSplitButtonFloating->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
-    EXPECT_NE(
-        maximizeButtonFloating->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
-    EXPECT_NE(
-        minimizeButtonFloating->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
 }
 
 /**
