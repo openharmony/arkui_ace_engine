@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -211,6 +212,9 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
     imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(TITLE_ICON_SIZE), CalcLength(TITLE_ICON_SIZE)));
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    auto imageRenderProperty = imageIcon->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(imageRenderProperty, nullptr);
+    imageRenderProperty->UpdateImageInterpolation(ImageInterpolation::HIGH);
     imageIcon->MarkModifyDone();
 
     auto buttonNode = FrameNode::CreateFrameNode(
@@ -219,6 +223,10 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
     if (buttonFocus) {
         buttonFocus->SetFocusable(false);
     }
+
+    AddButtonHover(buttonNode, imageIcon);
+    AddButtonMouse(buttonNode, imageIcon);
+
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackgroundColor(TITLE_BUTTON_BACKGROUND_COLOR);
@@ -245,6 +253,81 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
 
     buttonNode->AddChild(imageIcon);
     return buttonNode;
+}
+
+void ContainerModalView::AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode)
+{
+    auto inputHub = buttonNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    auto hoverTask = [buttonNode, imageNode](bool isHover) {
+        auto buttonPattern = AceType::DynamicCast<ButtonPattern>(buttonNode->GetPattern());
+        CHECK_NULL_VOID(buttonPattern);
+        buttonPattern->SetInHover(isHover);
+        float halfSize = TITLE_ICON_SIZE.Value() / 2.0f;
+        float translateX = (buttonPattern->GetLocalLocation().GetX() - halfSize) / halfSize * 2;
+        float translateY = (buttonPattern->GetLocalLocation().GetY() - halfSize) / halfSize * 2;
+        auto buttonNodeRenderContext = buttonNode->GetRenderContext();
+        auto imageIconRenderContext = imageNode->GetRenderContext();
+        CHECK_NULL_VOID(buttonNodeRenderContext);
+        CHECK_NULL_VOID(imageIconRenderContext);
+        double imageScale = isHover ? 1.10 : 1.0;
+        AnimationOption option = AnimationOption();
+        option.SetDuration(100);
+        auto icurve = AceType::MakeRefPtr<CubicCurve>(0.5f, 0.0f, 0.5f, 1.0f);
+        option.SetCurve(icurve);
+        TranslateOptions translate;
+        translate.x = isHover ? translateX : 0.0f;
+        translate.y = isHover ? translateY : 0.0f;
+        if (isHover) {
+            AnimationUtils::Animate(option,
+                [buttonNodeRenderContext, imageIconRenderContext, imageScale, translate]() {
+                    buttonNodeRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
+                    imageIconRenderContext->UpdateTransformScale(VectorF(1 / imageScale, 1 / imageScale));
+                    imageIconRenderContext->UpdateTransformTranslate(translate);
+                });
+        } else {
+            AnimationUtils::Animate(option, [buttonNodeRenderContext, imageIconRenderContext, imageScale, translate]() {
+                buttonNodeRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
+                imageIconRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
+                imageIconRenderContext->UpdateTransformTranslate(translate);
+            });
+        }
+    };
+    auto hoverEvent =  AceType::MakeRefPtr<InputEvent>(std::move(hoverTask));
+    inputHub->AddOnHoverEvent(hoverEvent);
+}
+
+void ContainerModalView::AddButtonMouse(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode)
+{
+    auto inputHub = buttonNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    auto mouseTask = [buttonNode, imageNode](MouseInfo& info) {
+        auto buttonPattern = AceType::DynamicCast<ButtonPattern>(buttonNode->GetPattern());
+        CHECK_NULL_VOID(buttonPattern);
+        if (info.GetAction() != MouseAction::MOVE || !buttonPattern->GetIsInHover()) {
+            buttonPattern->SetLocalLocation(info.GetLocalLocation());
+            return;
+        }
+        auto imageIconRenderContext = imageNode->GetRenderContext();
+        CHECK_NULL_VOID(imageIconRenderContext);
+        float halfSize = TITLE_ICON_SIZE.Value() / 2.0f;
+        float translateX = (info.GetLocalLocation().GetX() - halfSize) / halfSize * 2;
+        float translateY = (info.GetLocalLocation().GetY() - halfSize) / halfSize * 2;
+        float response = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_RESPONSE;
+        float dampingRatio = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_DAMPING_RATIO;
+        float blendDuration = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_BLEND_DURATION;
+        auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(response, dampingRatio, blendDuration);
+        AnimationOption option = AnimationOption();
+        option.SetCurve(motion);
+        TranslateOptions translate;
+        translate.x = translateX;
+        translate.y = translateY;
+        AnimationUtils::Animate(option, [imageIconRenderContext, translate]() {
+            imageIconRenderContext->UpdateTransformTranslate(translate);
+        });
+    };
+    auto mouseEvent =  AceType::MakeRefPtr<InputEvent>(std::move(mouseTask));
+    inputHub->AddOnMouseEvent(mouseEvent);
 }
 
 } // namespace OHOS::Ace::NG

@@ -29,6 +29,8 @@ private:
     static RefPtr<FrameNode> BuildTitle(RefPtr<FrameNode>& containerNode, bool isFloatingTitle = false);
     static RefPtr<FrameNode> BuildControlButton(
         InternalResource::ResourceId icon, GestureEventFunc&& clickCallback, bool isCloseButton = false);
+    static void AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode);
+    static void AddButtonMouse(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode);
 };
 
 } // namespace OHOS::Ace::NG
