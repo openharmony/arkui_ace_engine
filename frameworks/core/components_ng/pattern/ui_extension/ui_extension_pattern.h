@@ -42,8 +42,17 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
+    FocusPattern GetFocusPattern() const override;
+
 private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+
+    void OnModifyDone() override;
+    void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event);
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    bool KeyEventConsumed(const KeyEvent& event);
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };

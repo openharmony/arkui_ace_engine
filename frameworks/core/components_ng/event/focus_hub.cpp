@@ -984,6 +984,9 @@ bool FocusHub::PaintAllFocusState()
     if (lastFocusNode) {
         return lastFocusNode->PaintAllFocusState();
     }
+    if (onPaintFocusStateCallback_) {
+        return onPaintFocusStateCallback_();
+    }
     return false;
 }
 
@@ -1022,6 +1025,9 @@ void FocusHub::ClearFocusState(bool isNeedStateStyles)
     if (isNeedStateStyles) {
         // check focus state style.
         CheckFocusStateStyle(false);
+    }
+    if (onClearFocusStateCallback_) {
+        onClearFocusStateCallback_();
     }
     if (focusStyleType_ != FocusStyleType::NONE) {
         auto frameNode = GetFrameNode();

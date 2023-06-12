@@ -1411,7 +1411,7 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
 
 bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& touchEvent)
 {
-    LOGD("UIContentImpl: OnKeyUp called,touchEvent info: keyCode is %{private}d,"
+    LOGD("UIContentImpl: OnKeyUp called, keyEvent info: keyCode is %{public}d,"
          "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
         touchEvent->GetKeyCode(), touchEvent->GetKeyAction(), touchEvent->GetActionTime());
     auto container = AceEngine::Get().GetContainer(instanceId_);
@@ -1747,5 +1747,21 @@ void UIContentImpl::SetResourcePaths(const std::vector<std::string>& resourcesPa
             }
         },
         TaskExecutor::TaskType::PLATFORM);
+}
+
+void UIContentImpl::SetIsFocusActive(bool isFocusActive)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container, isFocusActive]() {
+            auto pipelineContext =  AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->SetIsFocusActive(isFocusActive);
+        },
+        TaskExecutor::TaskType::UI);
 }
 } // namespace OHOS::Ace

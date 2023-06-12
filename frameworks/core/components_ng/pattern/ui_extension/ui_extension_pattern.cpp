@@ -99,4 +99,91 @@ void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID_NOLOG(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
 }
+
+FocusPattern UIExtensionPattern::GetFocusPattern() const
+{
+    return { FocusType::NODE, true, FocusStyleType::NONE };
+}
+
+void UIExtensionPattern::OnModifyDone()
+{
+    Pattern::OnModifyDone();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    InitOnKeyEvent(focusHub);
+}
+
+void UIExtensionPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    focusHub->SetOnFocusInternal([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleFocusEvent();
+        }
+    });
+
+    focusHub->SetOnBlurInternal([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleBlurEvent();
+        }
+    });
+
+    focusHub->SetOnClearFocusStateInternal([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->DisPatchFocusActiveEvent(false);
+        }
+    });
+    focusHub->SetOnPaintFocusStateInternal([weak = WeakClaim(this)]() -> bool {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->DisPatchFocusActiveEvent(true);
+            return true;
+        }
+        return false;
+    });
+
+    focusHub->SetOnKeyEventInternal([wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            return pattern->OnKeyEvent(event);
+        }
+        return false;
+    });
+}
+
+void UIExtensionPattern::HandleFocusEvent()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline->GetIsFocusActive()) {
+        WindowPattern::DisPatchFocusActiveEvent(true);
+    }
+}
+
+void UIExtensionPattern::HandleBlurEvent()
+{
+    WindowPattern::DisPatchFocusActiveEvent(false);
+}
+
+bool UIExtensionPattern::KeyEventConsumed(const KeyEvent& event)
+{
+    bool isConsumed = false;
+    WindowPattern::DispatchKeyEventForConsumed(event.rawKeyEvent, isConsumed);
+    return isConsumed;
+}
+
+bool UIExtensionPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.code == KeyCode::KEY_TAB &&  event.action == KeyAction::DOWN) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        // tab trigger consume the key event
+        return pipeline->IsTabJustTriggerOnKeyEvent();
+    } else {
+        return KeyEventConsumed(event);
+    }
+}
 } // namespace OHOS::Ace::NG

@@ -296,6 +296,7 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
 
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event)
 {
+    event.rawKeyEvent = keyEvent;
     event.code = static_cast<KeyCode>(keyEvent->GetKeyCode());
     if (keyEvent->GetKeyAction() == OHOS::MMI::KeyEvent::KEY_ACTION_UP) {
         event.action = KeyAction::UP;
@@ -377,5 +378,4 @@ std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(
     pointerEvent->SetPointerId(point.id);
     return pointerEvent;
 }
-
 } // namespace OHOS::Ace::Platform
