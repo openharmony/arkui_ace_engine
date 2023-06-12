@@ -1661,10 +1661,10 @@ bool WebPattern::ShowDateTimeDialog(const NWeb::DateTimeChooser& chooser,
     DialogProperties properties = GetDialogProperties(theme);
     std::map<std::string, PickerDate> datePickerProperty;
     std::map<std::string, PickerTime> timePickerProperty;
-    settingData.datePickerProperty["start"] =
-        PickerDate(chooser.minimum.year, chooser.minimum.month, chooser.minimum.day);
-    settingData.datePickerProperty["end"] =
-        PickerDate(chooser.maximum.year, chooser.maximum.month, chooser.maximum.day);
+    settingData.datePickerProperty["start"] = PickerDate(
+        chooser.minimum.year, chooser.minimum.month + 1, chooser.minimum.day);
+    settingData.datePickerProperty["end"] = PickerDate(
+        chooser.maximum.year, chooser.maximum.month + 1, chooser.maximum.day);
     if (chooser.hasSelected) {
         int32_t day = (chooser.dialogValue.day == 0) ? 1 : chooser.dialogValue.day;
         settingData.datePickerProperty["selected"] =
