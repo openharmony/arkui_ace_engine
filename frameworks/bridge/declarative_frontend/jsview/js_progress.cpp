@@ -441,12 +441,22 @@ bool JSProgress::ConvertGradientColor(const JsiRef<JsiValue>& param, OHOS::Ace::
     }
 
     JSLinearGradient* jsLinearGradient = JSRef<JSObject>::Cast(param)->Unwrap<JSLinearGradient>();
-    if (!jsLinearGradient) {
+    if (!jsLinearGradient || jsLinearGradient->GetGradient().empty()) {
         return false;
     }
 
-    size_t colorLength = jsLinearGradient->GetGradient().size();
-    for (size_t colorIndex = 0; colorIndex < colorLength; colorIndex++) {
+    size_t size = jsLinearGradient->GetGradient().size();
+    if (size == 1) {
+        // If there is only one color, then this color is used for both the begin and end side.
+        OHOS::Ace::NG::GradientColor gradientColor;
+        gradientColor.SetLinearColor(LinearColor(jsLinearGradient->GetGradient().front().first));
+        gradientColor.SetDimension(jsLinearGradient->GetGradient().front().second);
+        gradient.AddColor(gradientColor);
+        gradient.AddColor(gradientColor);
+        return true;
+    }
+
+    for (size_t colorIndex = 0; colorIndex < size; colorIndex++) {
         OHOS::Ace::NG::GradientColor gradientColor;
         gradientColor.SetLinearColor(LinearColor(jsLinearGradient->GetGradient().at(colorIndex).first));
         gradientColor.SetDimension(jsLinearGradient->GetGradient().at(colorIndex).second);
