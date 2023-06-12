@@ -143,7 +143,8 @@ template("ace_unittest") {
         "$ace_root/test/unittest:ace_components_syntax",
       ]
 
-      configs = ace_unittest_config
+      configs = []
+      configs += ace_unittest_config
 
       if (defined(invoker.configs)) {
         configs += invoker.configs
@@ -162,7 +163,8 @@ template("ace_unittest") {
       deps = ace_unittest_deps
       deps += [ "$ace_root/test/unittest:ace_base" ]
 
-      configs = ace_unittest_config
+      configs = []
+      configs += ace_unittest_config
 
       if (defined(invoker.configs)) {
         configs += invoker.configs
