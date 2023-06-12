@@ -352,12 +352,18 @@ void JSGrid::SetDragAnimation(bool value)
     GridModel::GetInstance()->SetSupportDragAnimation(value);
 }
 
-void JSGrid::SetEdgeEffect(int32_t value)
+void JSGrid::SetEdgeEffect(const JSCallbackInfo& info)
 {
-    if (value < 0 || value >= static_cast<int32_t>(EDGE_EFFECT.size())) {
+    if (info.Length() < 1) {
+        LOGE("args is invalid");
         return;
     }
-    GridModel::GetInstance()->SetEdgeEffect(EDGE_EFFECT[value]);
+    int32_t edgeEffect;
+    if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsInt32(info[0], edgeEffect) ||
+        edgeEffect < static_cast<int32_t>(EdgeEffect::SPRING) || edgeEffect > static_cast<int32_t>(EdgeEffect::NONE)) {
+        edgeEffect = static_cast<int32_t>(EdgeEffect::NONE);
+    }
+    GridModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect));
 }
 
 void JSGrid::SetLayoutDirection(int32_t value)
