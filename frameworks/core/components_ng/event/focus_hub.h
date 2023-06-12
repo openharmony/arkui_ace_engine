@@ -491,6 +491,7 @@ public:
     bool HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusHub>& mainFocusHub);
     RefPtr<FocusHub> GetChildFocusNodeByType(FocusNodeType nodeType = FocusNodeType::DEFAULT);
     RefPtr<FocusHub> GetChildFocusNodeById(const std::string& id);
+    void HandleParentScroll() const;
     int32_t GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes);
     bool RequestFocusImmediatelyById(const std::string& id);
 

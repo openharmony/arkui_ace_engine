@@ -313,6 +313,11 @@ public:
         return ScopeFocusAlgorithm();
     }
 
+    virtual bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
+    {
+        return false;
+    }
+
     // out of viewport or visible is none or gone.
     virtual void OnInActive() {}
     virtual void OnActive() {}
