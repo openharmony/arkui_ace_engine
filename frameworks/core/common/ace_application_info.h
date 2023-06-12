@@ -183,14 +183,6 @@ public:
     {
         return pid_;
     }
-    void SetCurrentPage(const std::string& page)
-    {
-        currentPage_ = page;
-    }
-    const std::string& GetCurrentPage() const
-    {
-        return currentPage_;
-    }
 
 protected:
     std::string countryOrRegion_;
@@ -219,8 +211,6 @@ protected:
     int32_t apiVersion_ = 0;
     std::string versionName_;
     uint32_t versionCode_ = 0;
-
-    std::string currentPage_;
 };
 
 } // namespace OHOS::Ace
