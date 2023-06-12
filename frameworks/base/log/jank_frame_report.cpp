@@ -17,6 +17,7 @@
 #include "base/log/jank_frame_report.h"
 
 #include <algorithm>
+#include <chrono>
 #include <string>
 
 namespace OHOS::Ace {

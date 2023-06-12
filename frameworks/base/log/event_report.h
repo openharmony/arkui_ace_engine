@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_EVENT_REPORT_H
 
 #include <string>
+#include <vector>
 
 #include "base/utils/macros.h"
 
