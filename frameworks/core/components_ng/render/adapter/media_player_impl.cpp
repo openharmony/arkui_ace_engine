@@ -240,6 +240,14 @@ int32_t MediaPlayerImpl::Seek(int32_t mSeconds, OHOS::Ace::SeekMode mode)
     return 0;
 }
 
+int32_t MediaPlayerImpl::FullScreenChange(bool isFullScreen)
+{
+    CHECK_NULL_RETURN(player_, -1);
+    LOGI("Media player change fullscreen");
+    player_->SetFullScreenChange(isFullScreen);
+    return 0;
+}
+
 void MediaPlayerImpl::ProcessSurfaceCreate()
 {
     LOGI("Media player ProcessSurfaceCreate.");

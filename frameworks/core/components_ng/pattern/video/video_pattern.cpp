@@ -1237,6 +1237,7 @@ void VideoPattern::OnFullScreenChange(bool isFullScreen)
             break;
         }
     }
+    mediaPlayer_->FullScreenChange(isFullScreen);
 }
 
 void VideoPattern::FullScreen()

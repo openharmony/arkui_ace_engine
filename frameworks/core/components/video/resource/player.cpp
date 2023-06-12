@@ -568,6 +568,15 @@ void Player::OnPopListener()
     }
 }
 
+void Player::SetFullScreenChange(bool isFullScreen)
+{
+    std::stringstream paramStream;
+    paramStream << PARAM_VALUE << PARAM_EQUALS << (isFullScreen ? "1" : "0");
+
+    std::string param = paramStream.str();
+    CallResRegisterMethod(fullscreenMethod_, param);
+}
+
 void Player::Release(const std::function<void(bool)>& onRelease)
 {
     // The destructor will be executed at platform thread, so destroy scheduler at here.

@@ -109,6 +109,7 @@ public:
     void SetSpeed(float speed);
     void SetDirection(std::string& direction);
     void SetLandscape();
+    void SetFullScreenChange(bool isFullScreen);
     void Release(const std::function<void(bool)>& onRelease = nullptr) override;
 
 private:
