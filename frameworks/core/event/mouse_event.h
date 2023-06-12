@@ -87,6 +87,7 @@ struct MouseEvent final {
     int32_t pressedButtons = 0; // combined by MouseButtons
     TimeStamp time;
     int64_t deviceId = 0;
+    int32_t targetDisplayId = 0;
     SourceType sourceType = SourceType::NONE;
 
     Offset GetOffset() const
@@ -127,6 +128,7 @@ struct MouseEvent final {
                 .pressedButtons = pressedButtons,
                 .time = time,
                 .deviceId = deviceId,
+                .targetDisplayId = targetDisplayId,
                 .sourceType = sourceType };
         }
 
@@ -146,6 +148,7 @@ struct MouseEvent final {
             .pressedButtons = pressedButtons,
             .time = time,
             .deviceId = deviceId,
+            .targetDisplayId = targetDisplayId,
             .sourceType = sourceType };
     }
 
@@ -179,6 +182,7 @@ struct MouseEvent final {
             .time = time,
             .size = 0.0,
             .deviceId = deviceId,
+            .targetDisplayId = targetDisplayId,
             .sourceType = sourceType };
         event.pointers.emplace_back(std::move(point));
         return event;
@@ -202,6 +206,7 @@ struct MouseEvent final {
             .pressedButtons = pressedButtons,
             .time = time,
             .deviceId = deviceId,
+            .targetDisplayId = targetDisplayId,
             .sourceType = sourceType };
     }
 };
@@ -316,6 +321,7 @@ public:
         info.SetScreenLocation(event.GetScreenOffset());
         info.SetTimeStamp(event.time);
         info.SetDeviceId(event.deviceId);
+        info.SetTargetDisplayId(event.targetDisplayId);
         info.SetSourceDevice(event.sourceType);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
         onMouseCallback_(info);
