@@ -1317,8 +1317,8 @@ void TextFieldPattern::HandleOnPaste()
         std::wstring pasteData;
         std::wstring wData = StringUtils::ToWstring(result);
         textfield->StripNextLine(wData);
-        if (wData.length() + valueLength > textfield->GetMaxLength()) {
-            pasteData = wData.substr(0, textfield->GetMaxLength() - valueLength);
+        if (wData.length() + valueLength - (end - start) > textfield->GetMaxLength()) {
+            pasteData = wData.substr(0, textfield->GetMaxLength() - valueLength + (end - start));
         } else {
             pasteData = wData;
         }
