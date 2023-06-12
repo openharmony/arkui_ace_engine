@@ -141,7 +141,7 @@ public:
         scrollableActuator_->RemoveScrollableEvent(scrollableEvent);
     }
 
-    void AddScrollEdgeEffect(const Axis& axis, const RefPtr<ScrollEdgeEffect>& scrollEffect)
+    void AddScrollEdgeEffect(const Axis& axis, RefPtr<ScrollEdgeEffect>& scrollEffect)
     {
         if (!scrollableActuator_) {
             scrollableActuator_ = MakeRefPtr<ScrollableActuator>(WeakClaim(this));

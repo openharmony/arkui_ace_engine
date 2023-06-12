@@ -224,6 +224,36 @@ bool ScrollPattern::IsAtBottom() const
     return atBottom;
 }
 
+OverScrollOffset ScrollPattern::GetOverScrollOffset(double delta) const
+{
+    OverScrollOffset offset = { 0, 0 };
+    auto startPos = currentOffset_;
+    auto newStartPos = startPos + delta;
+    if (startPos > 0 && newStartPos > 0) {
+        offset.start = delta;
+    }
+    if (startPos > 0 && newStartPos <= 0) {
+        offset.start = -startPos;
+    }
+    if (startPos <= 0 && newStartPos > 0) {
+        offset.start = newStartPos;
+    }
+
+    auto endPos = currentOffset_;
+    auto newEndPos = endPos + delta;
+    auto endRefences = -scrollableDistance_;
+    if (endPos < endRefences && newEndPos < endRefences) {
+        offset.end = delta;
+    }
+    if (endPos < endRefences && newEndPos >= endRefences) {
+        offset.end = endRefences - endPos;
+    }
+    if (endPos >= endRefences && newEndPos < endRefences) {
+        offset.end = newEndPos - endRefences;
+    }
+    return offset;
+}
+
 bool ScrollPattern::ScrollPageCheck(float delta, int32_t source)
 {
     return true;
@@ -363,7 +393,7 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     if (NearZero(delta)) {
-        return false;
+        return true;
     }
     // TODO: ignore handle refresh
     if (!HandleEdgeEffect(delta, source, viewPort_)) {

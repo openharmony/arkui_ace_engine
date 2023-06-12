@@ -123,6 +123,7 @@ public:
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
     bool OutBoundaryCallback() override;
+    OverScrollOffset GetOverScrollOffset(double delta) const override;
 
     FocusPattern GetFocusPattern() const override
     {

@@ -146,6 +146,7 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     FillViewport(mainSize_, layoutWrapper);
+    layoutInfo_.lastMainSize_ = mainSize_;
 }
 
 void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -326,6 +327,7 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
         footerMainSize_ = MeasuerFooter(layoutWrapper);
         maxItemHeight += footerMainSize_;
     }
+    layoutInfo_.maxHeight_ = maxItemHeight;
 
     if (mainSize >= maxItemHeight) {
         layoutInfo_.currentOffset_ = 0;

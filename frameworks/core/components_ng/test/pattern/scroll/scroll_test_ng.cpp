@@ -863,7 +863,7 @@ HWTEST_F(ScrollTestNg, ScrollTest002, TestSize.Level1)
     auto scrollBarProxy = pattern_->GetScrollBarProxy();
     EXPECT_FALSE(scrollBarProxy->scrollableNodes_.empty());
     bool ret = scrollBarProxy->scrollableNodes_.back().onPositionChanged(0.0, SCROLL_FROM_BAR);
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
     ret = scrollBarProxy->scrollableNodes_.back().onPositionChanged(0.0, SCROLL_FROM_START);
     EXPECT_TRUE(ret);
 }

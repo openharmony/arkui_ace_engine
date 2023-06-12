@@ -24,11 +24,14 @@ void ScrollableActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, c
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {}
 
-void ScrollableActuator::AddScrollEdgeEffect(const Axis& axis, const RefPtr<ScrollEdgeEffect>& effect)
+void ScrollableActuator::AddScrollEdgeEffect(const Axis& axis, RefPtr<ScrollEdgeEffect>& effect)
 {}
 
 bool ScrollableActuator::RemoveScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& effect)
 {
     return true;
 }
+
+void ScrollableActuator::InitializeScrollable(RefPtr<ScrollableEvent> event)
+{}
 } // namespace OHOS::Ace::NG

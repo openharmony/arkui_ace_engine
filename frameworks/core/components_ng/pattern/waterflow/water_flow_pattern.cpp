@@ -51,6 +51,38 @@ bool WaterFlowPattern::IsAtBottom() const
 {
     return layoutInfo_.offsetEnd_;
 };
+OverScrollOffset WaterFlowPattern::GetOverScrollOffset(double delta) const
+{
+    OverScrollOffset offset = { 0, 0 };
+    if (layoutInfo_.startIndex_ == 0) {
+        auto startPos = layoutInfo_.currentOffset_;
+        auto newStartPos = startPos + delta;
+        if (startPos > 0 && newStartPos > 0) {
+            offset.start = delta;
+        }
+        if (startPos > 0 && newStartPos <= 0) {
+            offset.start = -startPos;
+        }
+        if (startPos <= 0 && newStartPos > 0) {
+            offset.start = newStartPos;
+        }
+    }
+    if (layoutInfo_.itemEnd_) {
+        auto endPos = layoutInfo_.currentOffset_ + layoutInfo_.maxHeight_;
+        auto newEndPos = endPos + delta;
+        if (endPos < layoutInfo_.lastMainSize_ && newEndPos < layoutInfo_.lastMainSize_) {
+            offset.end = delta;
+        }
+        if (endPos < layoutInfo_.lastMainSize_ && newEndPos >= layoutInfo_.lastMainSize_) {
+            offset.end = layoutInfo_.lastMainSize_ - endPos;
+        }
+        if (endPos >= layoutInfo_.lastMainSize_ && newEndPos < layoutInfo_.lastMainSize_) {
+            offset.end = newEndPos - layoutInfo_.lastMainSize_;
+        }
+    }
+    return offset;
+}
+
 void WaterFlowPattern::UpdateScrollBarOffset() {};
 
 RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()

@@ -89,6 +89,7 @@ struct GridLayoutInfo {
     float currentOffset_ = 0.0f;
     float prevOffset_ = 0.0f;
     float lastMainSize_ = 0.0f;
+    float totalHeightOfItemsInView_ = 0.0f;
 
     // index of first and last GridItem in viewport
     int32_t startIndex_ = 0;

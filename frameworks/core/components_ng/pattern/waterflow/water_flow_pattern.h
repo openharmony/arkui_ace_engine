@@ -32,6 +32,7 @@ public:
     bool IsScrollable() const override;
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
+    OverScrollOffset GetOverScrollOffset(double delta) const override;
     void UpdateScrollBarOffset() override;
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;

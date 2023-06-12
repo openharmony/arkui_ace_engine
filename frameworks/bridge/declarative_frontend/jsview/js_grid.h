@@ -54,6 +54,7 @@ public:
     static void JsOnGridDragStart(const JSCallbackInfo& info);
     static void JsOnGridDrop(const JSCallbackInfo& info);
     static void JsGridHeight(const JSCallbackInfo& info);
+    static void SetNestedScroll(const JSCallbackInfo& args);
 };
 
 } // namespace OHOS::Ace::Framework

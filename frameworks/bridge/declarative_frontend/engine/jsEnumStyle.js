@@ -1679,3 +1679,11 @@ var XComponentType;
   XComponentType[XComponentType["COMPONENT"] = 1] = "COMPONENT";
   XComponentType[XComponentType["TEXTURE"] = 2] = "TEXTURE";
 })(XComponentType || (XComponentType = {}));
+
+var NestedScrollMode;
+(function (NestedScrollMode) {
+  NestedScrollMode[NestedScrollMode["SELF_ONLY"] = 0] = "SELF_ONLY";
+  NestedScrollMode[NestedScrollMode["SELF_FIRST"] = 1] = "SELF_FIRST";
+  NestedScrollMode[NestedScrollMode["PARENT_FIRST"] = 2] = "PARENT_FIRST";
+  NestedScrollMode[NestedScrollMode["PARALLEL"] = 3] = "PARALLEL";
+})(NestedScrollMode || (NestedScrollMode = {}));

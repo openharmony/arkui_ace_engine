@@ -26,6 +26,13 @@ enum class ScrollState {
     FLING,
 };
 
+enum class NestedScrollMode {
+    SELF_ONLY = 0,
+    SELF_FIRST,
+    PARENT_FIRST,
+    PARALLEL,
+};
+
 struct ScrollInfo {
     Dimension dx;
     Dimension dy;
@@ -52,6 +59,16 @@ struct ScrollFrameResult {
     bool operator==(const ScrollFrameResult& scrollRes) const
     {
         return offset == scrollRes.offset;
+    }
+};
+
+struct NestedScrollOptions {
+    NestedScrollMode forward;
+    NestedScrollMode backward;
+
+    bool NeedParent() const
+    {
+        return forward != NestedScrollMode::SELF_ONLY || backward != NestedScrollMode::SELF_ONLY;
     }
 };
 

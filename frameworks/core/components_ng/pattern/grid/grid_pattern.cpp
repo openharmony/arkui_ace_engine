@@ -94,9 +94,6 @@ void GridPattern::OnModifyDone()
     auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_VOID(gridLayoutProperty);
 
-    auto edgeEffect = gridLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::NONE);
-    SetEdgeEffect(edgeEffect);
-
     if (multiSelectable_ && !isMouseEventInit_) {
         InitMouseEvent();
     }
@@ -113,6 +110,9 @@ void GridPattern::OnModifyDone()
     }
     SetAxis(gridLayoutInfo_.axis_);
     AddScrollEvent();
+
+    auto edgeEffect = gridLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::NONE);
+    SetEdgeEffect(edgeEffect);
 
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
@@ -1154,6 +1154,38 @@ void GridPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
 bool GridPattern::OutBoundaryCallback()
 {
     return IsOutOfBoundary();
+}
+
+OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
+{
+    OverScrollOffset offset = { 0, 0 };
+    if (gridLayoutInfo_.startIndex_ == 0) {
+        auto startPos = gridLayoutInfo_.currentOffset_;
+        auto newStartPos = startPos + delta;
+        if (startPos > 0 && newStartPos > 0) {
+            offset.start = delta;
+        }
+        if (startPos > 0 && newStartPos <= 0) {
+            offset.start = -startPos;
+        }
+        if (startPos <= 0 && newStartPos > 0) {
+            offset.start = newStartPos;
+        }
+    }
+    if (gridLayoutInfo_.endIndex_ == gridLayoutInfo_.childrenCount_ - 1) {
+        auto endPos = gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_;
+        auto newEndPos = endPos + delta;
+        if (endPos < gridLayoutInfo_.lastMainSize_ && newEndPos < gridLayoutInfo_.lastMainSize_) {
+            offset.end = delta;
+        }
+        if (endPos < gridLayoutInfo_.lastMainSize_ && newEndPos >= gridLayoutInfo_.lastMainSize_) {
+            offset.end = gridLayoutInfo_.lastMainSize_ - endPos;
+        }
+        if (endPos >= gridLayoutInfo_.lastMainSize_ && newEndPos < gridLayoutInfo_.lastMainSize_) {
+            offset.end = newEndPos - gridLayoutInfo_.lastMainSize_;
+        }
+    }
+    return offset;
 }
 
 void GridPattern::SetAccessibilityAction()

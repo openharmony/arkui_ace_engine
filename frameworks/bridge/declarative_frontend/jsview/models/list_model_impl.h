@@ -48,6 +48,7 @@ public:
     void SetHasWidth(bool hasWidth) override;
     void SetHasHeight(bool hasHeight) override;
     void SetSticky(V2::StickyStyle stickyStyle) override;
+    void SetNestedScroll(const NestedScrollOptions& nestedOpt) override {};
     void SetOnScroll(OnScrollEvent&& onScroll) override;
     void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin) override;
     void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin) override;
