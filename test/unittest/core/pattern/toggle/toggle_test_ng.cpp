@@ -59,7 +59,7 @@ const Alignment ALIGNMENT = Alignment::BOTTOM_RIGHT;
 const std::vector<NG::ToggleType> TOGGLE_TYPE = { ToggleType::CHECKBOX, ToggleType::BUTTON, ToggleType::SWITCH };
 } // namespace
 
-class TogglePatternTestNg : public testing::Test {
+class ToggleTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -68,17 +68,17 @@ protected:
     static PaddingPropertyF CreatePadding(Dimension length);
 };
 
-void TogglePatternTestNg::SetUpTestCase()
+void ToggleTestNg::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
 }
 
-void TogglePatternTestNg::TearDownTestCase()
+void ToggleTestNg::TearDownTestCase()
 {
     MockPipelineBase::TearDown();
 }
 
-PaddingPropertyF TogglePatternTestNg::CreatePadding(Dimension length)
+PaddingPropertyF ToggleTestNg::CreatePadding(Dimension length)
 {
     PaddingPropertyF padding;
     padding.left = length.ConvertToPx();
@@ -93,7 +93,7 @@ PaddingPropertyF TogglePatternTestNg::CreatePadding(Dimension length)
  * @tc.desc: test the process of toggle created with checkbox.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, TogglePatternTest001, TestSize.Level1)
+HWTEST_F(ToggleTestNg, TogglePatternTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create toggle and get frameNode.
@@ -152,7 +152,7 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest001, TestSize.Level1)
  * @tc.desc: test the process of toggle created with button.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, TogglePatternTest002, TestSize.Level1)
+HWTEST_F(ToggleTestNg, TogglePatternTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create toggle and get frameNode.
@@ -178,7 +178,7 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest002, TestSize.Level1)
  * @tc.desc: test the process of toggle created with switch.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, TogglePatternTest003, TestSize.Level1)
+HWTEST_F(ToggleTestNg, TogglePatternTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create toggle and get frameNode.
@@ -209,7 +209,7 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest003, TestSize.Level1)
  * @tc.desc: test toggle created SetWidth SetHeight SetBackgroundColor.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, TogglePatternTest004, TestSize.Level1)
+HWTEST_F(ToggleTestNg, TogglePatternTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create toggle and get frameNode.
@@ -243,7 +243,7 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest004, TestSize.Level1)
  * @tc.desc: Test event function of toggle with checkbox.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, TogglePatternTest005, TestSize.Level1)
+HWTEST_F(ToggleTestNg, TogglePatternTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create toggle and get frameNode.
@@ -281,7 +281,7 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest005, TestSize.Level1)
  * @tc.desc: Test event function of toggle with button.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, TogglePatternTest006, TestSize.Level1)
+HWTEST_F(ToggleTestNg, TogglePatternTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create toggle and get frameNode.
@@ -319,7 +319,7 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest006, TestSize.Level1)
  * @tc.desc: Test event function of toggle with switch.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, TogglePatternTest007, TestSize.Level1)
+HWTEST_F(ToggleTestNg, TogglePatternTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create toggle and get frameNode.
@@ -355,7 +355,7 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest007, TestSize.Level1)
  * @tc.desc: Test toggle OnModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, TogglePatternTest008, TestSize.Level1)
+HWTEST_F(ToggleTestNg, TogglePatternTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create switch and get frameNode.
@@ -412,7 +412,7 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest008, TestSize.Level1)
  * @tc.desc: Test toggle OnDirtyLayoutWrapperSwap.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, TogglePatternTest009, TestSize.Level1)
+HWTEST_F(ToggleTestNg, TogglePatternTest009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create switch and get frameNode.
@@ -469,7 +469,7 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest009, TestSize.Level1)
  * @tc.desc: Test toggle OnDirtyLayoutWrapperSwap.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, TogglePatternTest0010, TestSize.Level1)
+HWTEST_F(ToggleTestNg, TogglePatternTest0010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create switch and get frameNode.
@@ -574,7 +574,7 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0010, TestSize.Level1)
  * @tc.desc: Test toggle SetSelectedColor(undefined).
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, TogglePatternTest0011, TestSize.Level1)
+HWTEST_F(ToggleTestNg, TogglePatternTest0011, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create switch and get frameNode.
@@ -644,7 +644,7 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0011, TestSize.Level1)
  * @tc.desc: Test toggle OnModifyDone default margin.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, TogglePatternTest0012, TestSize.Level1)
+HWTEST_F(ToggleTestNg, TogglePatternTest0012, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create switch and get frameNode.
@@ -700,7 +700,7 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0012, TestSize.Level1)
  * @tc.desc: Test Toggle pattern method HandleMouseEvent, OnTouchUp and OnTouchDown.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, TogglePatternTest0013, TestSize.Level1)
+HWTEST_F(ToggleTestNg, TogglePatternTest0013, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init Toggle node
@@ -752,7 +752,7 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0013, TestSize.Level1)
  * @tc.desc: Test toggle layout.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, ToggleLayoutTest001, TestSize.Level1)
+HWTEST_F(ToggleTestNg, ToggleLayoutTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create switch and get frameNode.
@@ -828,7 +828,7 @@ HWTEST_F(TogglePatternTestNg, ToggleLayoutTest001, TestSize.Level1)
  * @tc.desc: Test toggle PaintContent.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, TogglePaintTest001, TestSize.Level1)
+HWTEST_F(ToggleTestNg, TogglePaintTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create switch and get frameNode.
@@ -874,7 +874,7 @@ HWTEST_F(TogglePatternTestNg, TogglePaintTest001, TestSize.Level1)
  * @tc.desc: Test Toggle UpdateAnimatableProperty and SetBoardColor.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, TogglePaintTest002, TestSize.Level1)
+HWTEST_F(ToggleTestNg, TogglePaintTest002, TestSize.Level1)
 {
     auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
     switchModifier->hoverColor_ = Color::RED;
@@ -902,7 +902,7 @@ HWTEST_F(TogglePatternTestNg, TogglePaintTest002, TestSize.Level1)
  * @tc.desc: Test SwitchPaintMethod GetContentModifier UpdateContentModifier.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, TogglePaintTest004, TestSize.Level1)
+HWTEST_F(ToggleTestNg, TogglePaintTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create switch and get frameNode.
@@ -944,7 +944,7 @@ HWTEST_F(TogglePatternTestNg, TogglePaintTest004, TestSize.Level1)
  * @tc.desc: Test SwitchPaintMethod GetSwitchWidth.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, TogglePaintTest003, TestSize.Level1)
+HWTEST_F(ToggleTestNg, TogglePaintTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create switch and get frameNode.
@@ -955,7 +955,7 @@ HWTEST_F(TogglePatternTestNg, TogglePaintTest003, TestSize.Level1)
     ASSERT_NE(switchFrameNode, nullptr);
     auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(IS_ON, SELECTED_COLOR, 0.0f);
     SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(switchModifier);
-    
+
     auto switchTheme = MockPipelineBase::GetCurrent()->GetTheme<SwitchTheme>();
     ASSERT_NE(switchTheme, nullptr);
     switchTheme->height_ = TOGGLE_HEIGH;
@@ -971,7 +971,7 @@ HWTEST_F(TogglePatternTestNg, TogglePaintTest003, TestSize.Level1)
  * @tc.desc: Test toggle AddHotZoneRect RemoveLastHotZoneRect.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, TogglePatternTest0017, TestSize.Level1)
+HWTEST_F(ToggleTestNg, TogglePatternTest0017, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create switch and get frameNode.
@@ -991,8 +991,8 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0017, TestSize.Level1)
     auto layoutProperty = switchFrameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
 
-    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
-        switchFrameNode, geometryNode, layoutProperty);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(switchFrameNode, geometryNode, layoutProperty);
     ASSERT_NE(layoutWrapper, nullptr);
     auto switchLayoutAlgorithm = AceType::MakeRefPtr<SwitchLayoutAlgorithm>();
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
@@ -1002,20 +1002,19 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0017, TestSize.Level1)
     EXPECT_TRUE(result);
     /**
      * cover method AddHotZoneRect
-    */
+     */
     switchPattern->AddHotZoneRect();
     EXPECT_EQ(switchPattern->hotZoneOffset_.GetX(), 0.0f);
     EXPECT_EQ(switchPattern->hotZoneSize_.Width(), 80.0f);
     /**
      * cover method RemoveLastHotZoneRect
-    */
+     */
     switchPattern->RemoveLastHotZoneRect();
     int count = switchFrameNode->GetOrCreateGestureEventHub()->responseRegion_.size();
-    for (size_t i = 0; i < count; i++)
-    {
+    for (size_t i = 0; i < count; i++) {
         switchPattern->RemoveLastHotZoneRect();
     }
-    
+
     EXPECT_EQ(switchFrameNode->GetOrCreateGestureEventHub()->isResponseRegion_, false);
 }
 
@@ -1024,7 +1023,7 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0017, TestSize.Level1)
  * @tc.desc: Test toggle clickCallback of InitClickEvent InitMouseEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, TogglePatternTest0014, TestSize.Level1)
+HWTEST_F(ToggleTestNg, TogglePatternTest0014, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create switch and get frameNode.
@@ -1039,11 +1038,11 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0014, TestSize.Level1)
     ASSERT_NE(gesture, nullptr);
     /**
      * fire click event
-    */
+     */
     gesture->ActClick();
     /**
      * fire mouse event
-    */
+     */
     auto eventHub = switchFrameNode->GetEventHub<SwitchEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     ASSERT_NE(inputHub, nullptr);
@@ -1061,7 +1060,7 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0014, TestSize.Level1)
  * @tc.desc: Test toggle clickCallback of InitOnKeyEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, TogglePatternTest0015, TestSize.Level1)
+HWTEST_F(ToggleTestNg, TogglePatternTest0015, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create switch and get frameNode.
@@ -1076,17 +1075,17 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0015, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     /**
      * test event.action != KeyAction::DOWN
-    */
+     */
     KeyEvent keyEventOne(KeyCode::KEY_A, KeyAction::UP);
     eventHub->onKeyEventInternal_(keyEventOne);
     /**
      * test event.action == KeyAction::DOWN and event.code == KeyCode::KEY_ENTER
-    */
+     */
     KeyEvent keyEventTwo(KeyCode::KEY_A, KeyAction::DOWN);
     eventHub->onKeyEventInternal_(keyEventTwo);
     /**
      * test event.action == KeyAction::DOWN and event.code != KeyCode::KEY_ENTER
-    */
+     */
     KeyEvent keyEventThr(KeyCode::KEY_ENTER, KeyAction::DOWN);
     eventHub->onKeyEventInternal_(keyEventThr);
 }
@@ -1096,7 +1095,7 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0015, TestSize.Level1)
  * @tc.desc: Test toggle GetInnerFocusPaintRect.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, TogglePatternTest0016, TestSize.Level1)
+HWTEST_F(ToggleTestNg, TogglePatternTest0016, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create switch and get frameNode.
@@ -1118,10 +1117,9 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0016, TestSize.Level1)
  * @tc.desc: Test toggle create.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, ToggleModelTest001, TestSize.Level1)
+HWTEST_F(ToggleTestNg, ToggleModelTest001, TestSize.Level1)
 {
-    const RefPtr<FrameNode> frameParent =
-    FrameNode::CreateFrameNode("parent", 0, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> frameParent = FrameNode::CreateFrameNode("parent", 0, AceType::MakeRefPtr<Pattern>(), true);
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
     /**
      * @tc.steps: step1. create switch and get frameNode.
@@ -1134,7 +1132,7 @@ HWTEST_F(TogglePatternTestNg, ToggleModelTest001, TestSize.Level1)
     switchFrameNode->SetParent(frameParent);
     /**
      * Create again,cover all branches in function Create for switch
-    */
+     */
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
     toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
@@ -1150,10 +1148,9 @@ HWTEST_F(TogglePatternTestNg, ToggleModelTest001, TestSize.Level1)
  * @tc.desc: Test toggle create.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, ToggleModelTest002, TestSize.Level1)
+HWTEST_F(ToggleTestNg, ToggleModelTest002, TestSize.Level1)
 {
-    const RefPtr<FrameNode> frameParent =
-    FrameNode::CreateFrameNode("parent", 0, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> frameParent = FrameNode::CreateFrameNode("parent", 0, AceType::MakeRefPtr<Pattern>(), true);
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
     /**
      * @tc.steps: step1. create checkbox and get frameNode.
@@ -1166,7 +1163,7 @@ HWTEST_F(TogglePatternTestNg, ToggleModelTest002, TestSize.Level1)
     switchFrameNode->SetParent(frameParent);
     /**
      * Create again,cover all branches in function Create for checkbox
-    */
+     */
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
     toggleModelNG.Create(TOGGLE_TYPE[0], IS_ON);
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
@@ -1182,10 +1179,9 @@ HWTEST_F(TogglePatternTestNg, ToggleModelTest002, TestSize.Level1)
  * @tc.desc: Test toggle create.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, ToggleModelTest003, TestSize.Level1)
+HWTEST_F(ToggleTestNg, ToggleModelTest003, TestSize.Level1)
 {
-    const RefPtr<FrameNode> frameParent =
-    FrameNode::CreateFrameNode("parent", 0, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> frameParent = FrameNode::CreateFrameNode("parent", 0, AceType::MakeRefPtr<Pattern>(), true);
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
     /**
      * @tc.steps: step1. create ToggleButton and get frameNode.
@@ -1198,7 +1194,7 @@ HWTEST_F(TogglePatternTestNg, ToggleModelTest003, TestSize.Level1)
     switchFrameNode->SetParent(frameParent);
     /**
      * Create again,cover all branches in function Create for ToggleButton
-    */
+     */
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
     toggleModelNG.Create(TOGGLE_TYPE[1], IS_ON);
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
@@ -1214,7 +1210,7 @@ HWTEST_F(TogglePatternTestNg, ToggleModelTest003, TestSize.Level1)
  * @tc.desc: Test toggle PlayTranslateAnimation callback.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, TogglePatternTest0018, TestSize.Level1)
+HWTEST_F(ToggleTestNg, TogglePatternTest0018, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create switch and get frameNode.
@@ -1239,17 +1235,17 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0018, TestSize.Level1)
     }
     /**
      * @tc.steps: step4. call the NotifyStopListener.
-    */
+     */
     pattern->controller_->NotifyStopListener();
     /**
      * cover changeFlag_ == true branch.
-    */
+     */
     pattern->changeFlag_ = true;
     pattern->currentOffset_ = 0.0f;
     pattern->controller_->NotifyStopListener();
     /**
      * cover isOn_ == false branch.
-    */
+     */
     pattern->isOn_ = false;
     pattern->controller_->NotifyStopListener();
     pattern->isOn_ = false;
@@ -1262,7 +1258,7 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0018, TestSize.Level1)
  * @tc.desc: Test toggle HandleDragEnd.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, TogglePatternTest0019, TestSize.Level1)
+HWTEST_F(ToggleTestNg, TogglePatternTest0019, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create switch and get frameNode.
@@ -1282,7 +1278,7 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0019, TestSize.Level1)
     EXPECT_TRUE(pattern->changeFlag_);
     /**
      * cover isOn_ == false branch.
-    */
+     */
     pattern->isOn_ = false;
     pattern->HandleDragEnd();
     EXPECT_FALSE(pattern->changeFlag_);
@@ -1293,7 +1289,7 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0019, TestSize.Level1)
  * @tc.desc: Test checkbox create twice.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, ToggleModelTest004, TestSize.Level1)
+HWTEST_F(ToggleTestNg, ToggleModelTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create the first checkbox.
@@ -1316,7 +1312,7 @@ HWTEST_F(TogglePatternTestNg, ToggleModelTest004, TestSize.Level1)
  * @tc.desc: Test ToggleButton create twice.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, ToggleModelTest005, TestSize.Level1)
+HWTEST_F(ToggleTestNg, ToggleModelTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create the first ToggleButton.
@@ -1339,7 +1335,7 @@ HWTEST_F(TogglePatternTestNg, ToggleModelTest005, TestSize.Level1)
  * @tc.desc: Test OnChangeEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, ToggleModelTest006, TestSize.Level1)
+HWTEST_F(ToggleTestNg, ToggleModelTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. generate ChangeEvent.
@@ -1376,7 +1372,7 @@ HWTEST_F(TogglePatternTestNg, ToggleModelTest006, TestSize.Level1)
  * @tc.desc: Test the distributed capability of Toggle
  * @tc.type: FUNC
  */
-HWTEST_F(TogglePatternTestNg, ToggleModelDistributedTest001, TestSize.Level1)
+HWTEST_F(ToggleTestNg, ToggleModelDistributedTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create switch and get frameNode.
@@ -1408,5 +1404,53 @@ HWTEST_F(TogglePatternTestNg, ToggleModelDistributedTest001, TestSize.Level1)
     pattern->OnRestoreInfo(restoreInfo_);
     ASSERT_NE(switchPaintProperty, nullptr);
     EXPECT_TRUE(switchPaintProperty->GetIsOnValue(false));
+}
+
+/**
+ * @tc.name: ToggleAccessibilityPropertyTestNg001
+ * @tc.desc: Test the IsCheckable and IsChecked properties of ToggleButton.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, ToggleAccessibilityPropertyTestNg001, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::BUTTON, true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto accessibility = frameNode->GetAccessibilityProperty<ToggleButtonAccessibilityProperty>();
+    ASSERT_NE(accessibility, nullptr);
+    EXPECT_TRUE(accessibility->IsCheckable());
+    EXPECT_TRUE(accessibility->IsChecked());
+
+    auto paintProperty = frameNode->GetPaintProperty<ToggleButtonPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateIsOn(false);
+    EXPECT_FALSE(accessibility->IsChecked());
+}
+
+/**
+ * @tc.name: ToggleAccessibilityPropertyTestNg002
+ * @tc.desc: Test the IsCheckable and IsChecked properties of Switch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, ToggleAccessibilityPropertyTestNg002, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto accessibility = frameNode->GetAccessibilityProperty<SwitchAccessibilityProperty>();
+    ASSERT_NE(accessibility, nullptr);
+    EXPECT_TRUE(accessibility->IsCheckable());
+
+    auto pattern = AceType::DynamicCast<SwitchPattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+    pattern->isOn_ = false;
+    EXPECT_FALSE(accessibility->IsChecked());
+
+    pattern->isOn_ = true;
+    EXPECT_TRUE(accessibility->IsChecked());
 }
 } // namespace OHOS::Ace::NG
