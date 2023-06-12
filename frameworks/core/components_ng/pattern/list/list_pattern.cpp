@@ -856,12 +856,6 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
             }
         } else {
             jumpIndex_ = index;
-            if (index == ListLayoutAlgorithm::LAST_ITEM) {
-                jumpIndex_ = totalItemCount - 1;
-            } else if ((LessNotEqual(jumpIndex_.value(), 0)) ||
-                       (GreatOrEqual(jumpIndex_.value(), totalItemCount))) {
-                jumpIndex_.reset();
-            }
         }
         scrollAlign_ = align;
         MarkDirtyNodeSelf();

@@ -18,9 +18,11 @@
 
 #include "gtest/gtest.h"
 
+#include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/utils/utils.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -4588,5 +4590,89 @@ HWTEST_F(ListTestNg, AccessibilityEvent001, TestSize.Level1)
     pattern_->AnimateTo(0, 0, nullptr);
     pattern_->animator_->NotifyStopListener();
     EXPECT_TRUE(pattern_->isScrollEnd_);
+}
+
+/**
+ * @tc.name: ScrollToIndexAlign001
+ * @tc.desc: Test ScrollToIndex with assigning align
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ScrollToIndexAlign001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list and initialize related properties.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    listModelNG.SetInitialIndex(0);
+    CreateListItem(TOTAL_NUMBER);
+    GetInstance();
+    auto layoutWrapper = RunMeasureAndLayout();
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. Call ScrollToIndex func.
+     * @tc.expected index and align is accurate.
+     */
+    pattern_->ScrollToIndex(TOTAL_NUMBER - 2, false, ScrollAlign::AUTO);
+    EXPECT_EQ(pattern_->scrollAlign_, ScrollAlign::AUTO);
+    EXPECT_EQ(pattern_->jumpIndex_, TOTAL_NUMBER - 2);
+    EXPECT_FALSE(pattern_->targetIndex_.has_value());
+    
+    /**
+     * @tc.steps: step3. Create listLayoutAlgorithm then measure and layout.
+     * @tc.expected: Related function is called and layout is accurate.
+     */
+    auto listLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+    EXPECT_EQ(listLayoutAlgorithm->jumpIndex_, TOTAL_NUMBER - 2);
+    EXPECT_EQ(listLayoutAlgorithm->scrollAlign_, ScrollAlign::AUTO);
+    EXPECT_EQ(listLayoutAlgorithm->GetStartIndex(), 0);
+    layoutWrapper = RunMeasureAndLayout();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(layoutWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithmWrapper, nullptr);
+    listLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+    EXPECT_NE(listLayoutAlgorithm->GetStartIndex(), 0);
+    EXPECT_EQ(listLayoutAlgorithm->GetEndIndex(), TOTAL_NUMBER - 2);
+    EXPECT_EQ(listLayoutAlgorithm->itemPosition_.rbegin()->second.endPos, listLayoutAlgorithm->contentMainSize_);
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    config.skipLayout = false;
+    EXPECT_TRUE(pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+    
+    /**
+     * @tc.steps: step4. Take different values for index, smooth and scrollAlign_ and test.
+     * @tc.expected: Related function is called.
+     */
+    pattern_->ScrollToIndex(TOTAL_NUMBER - 1, true, ScrollAlign::AUTO);
+    EXPECT_FALSE(pattern_->jumpIndex_.has_value());
+    EXPECT_EQ(pattern_->targetIndex_, TOTAL_NUMBER - 1);
+    EXPECT_EQ(pattern_->scrollAlign_, ScrollAlign::AUTO);
+    layoutWrapper = RunMeasureAndLayout();
+    ASSERT_NE(layoutWrapper, nullptr);
+    EXPECT_TRUE(pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+    pattern_->scrollAlign_ = ScrollAlign::END;
+    EXPECT_TRUE(pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+    pattern_->scrollAlign_ = ScrollAlign::CENTER;
+    EXPECT_TRUE(pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+    pattern_->scrollAlign_ = ScrollAlign::START;
+    EXPECT_TRUE(pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+
+    /**
+     * @tc.steps: step5. Call CalculateEstimateOffset in listLayoutAlgorithm.
+     * @tc.expected: Related function is called.
+     */
+    listLayoutAlgorithm->jumpIndex_ = 1;
+    listLayoutAlgorithm->scrollAlign_ = ScrollAlign::AUTO;
+    listLayoutAlgorithm->scrollAutoType_ = ScrollAutoType::NOT_CHANGE;
+    listLayoutAlgorithm->CalculateEstimateOffset(ScrollAlign::AUTO);
+    listLayoutAlgorithm->scrollAutoType_ = ScrollAutoType::START;
+    listLayoutAlgorithm->CalculateEstimateOffset(ScrollAlign::AUTO);
+    EXPECT_NE(listLayoutAlgorithm->estimateOffset_, 0.0f);
+    listLayoutAlgorithm->itemPosition_.clear();
+    listLayoutAlgorithm->CalculateEstimateOffset(ScrollAlign::AUTO);
+    EXPECT_EQ(listLayoutAlgorithm->estimateOffset_, 0.0f);
 }
 } // namespace OHOS::Ace::NG
