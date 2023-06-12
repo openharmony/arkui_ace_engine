@@ -93,7 +93,8 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
     TimeStamp time(microseconds);
     TouchEvent event { touchPoint.id, touchPoint.x, touchPoint.y, touchPoint.screenX, touchPoint.screenY,
         TouchType::UNKNOWN, TouchType::UNKNOWN, time, touchPoint.size, touchPoint.force, touchPoint.tiltX,
-        touchPoint.tiltY, pointerEvent->GetDeviceId(), pointerEvent->GetTargetDisplayId(), SourceType::NONE, touchPoint.sourceTool };
+        touchPoint.tiltY, pointerEvent->GetDeviceId(), pointerEvent->GetTargetDisplayId(), SourceType::NONE,
+        touchPoint.sourceTool };
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
     int32_t orgAction = pointerEvent->GetPointerAction();
