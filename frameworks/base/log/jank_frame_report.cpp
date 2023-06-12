@@ -13,25 +13,24 @@
  * limitations under the License.
  */
 
-#include "base/log/event_report.h"
 #include "base/log/jank_frame_report.h"
 
-#include <algorithm>
 #include <chrono>
-#include <string>
+
+#include "base/log/event_report.h"
 
 namespace OHOS::Ace {
-enum {
-    JANK_FRAME_6_FREQ = 0,
-    JANK_FRAME_15_FREQ,
-    JANK_FRAME_20_FREQ,
-    JANK_FRAME_36_FREQ,
-    JANK_FRAME_48_FREQ,
-    JANK_FRAME_60_FREQ,
-    JANK_FRAME_120_FREQ,
-    JANK_FRAME_180_FREQ,
-    JANK_SIZE,
-};
+namespace {
+inline constexpr int JANK_FRAME_6_FREQ = 0;
+inline constexpr int JANK_FRAME_15_FREQ = 1;
+inline constexpr int JANK_FRAME_20_FREQ = 2;
+inline constexpr int JANK_FRAME_36_FREQ = 3;
+inline constexpr int JANK_FRAME_48_FREQ = 4;
+inline constexpr int JANK_FRAME_60_FREQ = 5;
+inline constexpr int JANK_FRAME_120_FREQ = 6;
+inline constexpr int JANK_FRAME_180_FREQ = 7;
+inline constexpr int JANK_SIZE = 7;
+} // namespace
 
 std::vector<uint16_t> JankFrameReport::frameJankRecord_(JANK_SIZE, 0);
 JankFrameFlag JankFrameReport::recordStatus_ = JANK_IDLE;
@@ -104,5 +103,4 @@ void JankFrameReport::FlushRecord()
     EventReport::JankFrameReport(startTime_, GetDuration(), frameJankRecord_, pageUrl_);
     ClearFrameJankRecord();
 }
-
 } // namespace OHOS::Ace

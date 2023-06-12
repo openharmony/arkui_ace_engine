@@ -256,7 +256,7 @@ void EventReport::ANRShowDialog(int32_t uid, const std::string& packageName,
         EVENT_KEY_MESSAGE, msg);
 }
 
-void EventReport::JankFrameReport(int64_t startTime, int64_t duration,const std::vector<uint16_t>& jank,
+void EventReport::JankFrameReport(int64_t startTime, int64_t duration, const std::vector<uint16_t>& jank,
     const std::string& pageUrl, uint32_t jankStatusVersion)
 {
     std::string eventName = "JANK_STATS_APP";
