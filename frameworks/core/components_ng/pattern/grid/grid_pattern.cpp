@@ -431,9 +431,9 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     const auto& gridLayoutInfo = gridLayoutAlgorithm->GetGridLayoutInfo();
     auto eventhub = GetEventHub<GridEventHub>();
     CHECK_NULL_RETURN(eventhub, false);
-    scrollbarInfo_ = eventhub->FireOnScrollBarUpdate(gridLayoutInfo.startIndex_, gridLayoutInfo.currentOffset_);
     if (gridLayoutInfo_.startMainLineIndex_ != gridLayoutInfo.startMainLineIndex_) {
         eventhub->FireOnScrollToIndex(gridLayoutInfo.startIndex_);
+        scrollbarInfo_ = eventhub->FireOnScrollBarUpdate(gridLayoutInfo.startIndex_, gridLayoutInfo.currentOffset_);
         FlushFocusOnScroll(gridLayoutInfo);
     }
     gridLayoutInfo_ = gridLayoutInfo;
@@ -453,11 +453,7 @@ void GridPattern::CheckScrollable()
         (gridLayoutInfo_.GetTotalHeightOfItemsInView(GetMainGap()) > GetMainContentSize())) {
         scrollable_ = true;
     } else {
-        if (gridLayoutInfo_.startMainLineIndex_ != 0) {
-            scrollable_ = true;
-        } else {
-            scrollable_ = false;
-        }
+        scrollable_ = false;
     }
 
     SetScrollEnable(scrollable_);
@@ -1026,7 +1022,10 @@ void GridPattern::UpdateScrollBarOffset()
         auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
         for (const auto& item : info.lineHeightMap_) {
             auto line = info.gridMatrix_.find(item.first);
-            if ((line == info.gridMatrix_.end()) || (line->second.empty())) {
+            if (line == info.gridMatrix_.end()) {
+                continue;
+            }
+            if (line->second.empty()) {
                 continue;
             }
             auto lineStart = line->second.begin()->second;
@@ -1045,13 +1044,6 @@ void GridPattern::UpdateScrollBarOffset()
         }
     }
     auto viewSize = geometryNode->GetFrameSize();
-    float lineHeight = 0;
-    if (info.startMainLineIndex_ != 0 && info.startIndex_ == 0) {
-        for (int32_t lineIndex = info.startMainLineIndex_ - 1; lineIndex >= 0; lineIndex--) {
-            lineHeight += info.lineHeightMap_.find(lineIndex)->second;
-        }
-        offset = lineHeight - info.currentOffset_;
-    }
     Size mainSize = { viewSize.Width(), viewSize.Height() };
     UpdateScrollBarRegion(offset, estimatedHeight, mainSize, Offset(0.0, 0.0));
 }
