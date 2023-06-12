@@ -16,6 +16,7 @@
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 #include "core/pipeline/pipeline_base.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -251,6 +252,8 @@ const RefPtr<OverlayManager>& PipelineContext::GetOverlayManager()
 void PipelineContext::AddPredictTask(PredictTask&& task) {}
 
 void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task) {}
+
+void PipelineContext::AddUIExtensionTouchEventCallback(int32_t pointId, UIExtensionTouchEventCallback&& callback) {}
 
 void PipelineContext::FlushPipelineImmediately() {}
 

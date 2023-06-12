@@ -20,7 +20,6 @@
 #include <cstdint>
 #include <memory>
 
-
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -264,6 +263,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     }
     HandleOnAreaChangeEvent();
     HandleVisibleAreaChangeEvent();
+    if (isNeedFlushMouseEvent_) {
+        FlushMouseEvent();
+        isNeedFlushMouseEvent_ = false;
+    }
     // Keep the call sent at the end of the function
     ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_COMPLETE_EVENT);
 }
@@ -790,7 +793,6 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
 #endif
 }
 
-
 bool PipelineContext::OnBackPressed()
 {
     LOGD("OnBackPressed");
@@ -824,7 +826,7 @@ bool PipelineContext::OnBackPressed()
         [weakOverlay = AceType::WeakClaim(AceType::RawPtr(overlayManager_)), &hasOverlay]() {
             auto overlay = weakOverlay.Upgrade();
             CHECK_NULL_VOID_NOLOG(overlay);
-            hasOverlay = overlay->RemoveOverlay();
+            hasOverlay = overlay->RemoveOverlay(true);
         },
         TaskExecutor::TaskType::UI);
     if (hasOverlay) {
@@ -929,9 +931,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 #endif
 
     HandleEtsCardTouchEvent(point);
-    if (uiExtensionCallback_) {
-        uiExtensionCallback_(point);
-    }
+    HandleUIExtensionTouchEvent(point);
 
     auto scalePoint = point.CreateScalePoint(GetViewScale());
     LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
@@ -995,12 +995,53 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         // need to reset touchPluginPipelineContext_ for next touch down event.
         touchPluginPipelineContext_.clear();
         RemoveEtsCardTouchEventCallback(point.id);
-        uiExtensionCallback_ = nullptr;
+        RemoveUIExtensionTouchEvetnCallback(point.id);
     }
 
     hasIdleTasks_ = true;
     RequestFrame();
 }
+
+// ---------------- UIExtesion touchEvent callback handler -------------------------
+void PipelineContext::AddUIExtensionTouchEventCallback(int32_t pointId, UIExtensionTouchEventCallback&& callback)
+{
+    if (!callback || pointId < 0) {
+        return;
+    }
+
+    uiExtensionTouchEventCallback_[pointId] = std::move(callback);
+}
+
+void PipelineContext::RemoveUIExtensionTouchEvetnCallback(int32_t pointId)
+{
+    if (pointId < 0) {
+        return;
+    }
+
+    auto iter = uiExtensionTouchEventCallback_.find(pointId);
+    if (iter == uiExtensionTouchEventCallback_.end()) {
+        return;
+    }
+
+    uiExtensionTouchEventCallback_.erase(iter);
+}
+
+void PipelineContext::HandleUIExtensionTouchEvent(const TouchEvent& point)
+{
+    if (point.id < 0) {
+        return;
+    }
+
+    auto iter = uiExtensionTouchEventCallback_.find(point.id);
+    if (iter == uiExtensionTouchEventCallback_.end()) {
+        return;
+    }
+
+    if (iter->second) {
+        iter->second(point);
+    }
+}
+// ----------------------------------------------------------------------------------
 
 void PipelineContext::OnSurfaceDensityChanged(double density)
 {
@@ -1127,6 +1168,16 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
 {
     CHECK_RUN_ON(UI);
 
+    if (!lastMouseEvent_) {
+        lastMouseEvent_ = std::make_unique<MouseEvent>();
+    }
+    lastMouseEvent_->x = event.x;
+    lastMouseEvent_->y = event.y;
+    lastMouseEvent_->button = event.button;
+    lastMouseEvent_->action = event.action;
+    lastMouseEvent_->sourceType = event.sourceType;
+    lastMouseEvent_->time = event.time;
+
     if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
         // Mouse right button press event set focus inactive here.
         // Mouse left button press event will set focus inactive in touch process.
@@ -1152,6 +1203,31 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     eventManager_->DispatchMouseHoverEventNG(scaleEvent);
     eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
     RequestFrame();
+}
+
+void PipelineContext::FlushMouseEvent()
+{
+    if (!lastMouseEvent_ || lastMouseEvent_->action == MouseAction::WINDOW_LEAVE) {
+        return;
+    }
+    MouseEvent event;
+    event.x = lastMouseEvent_->x;
+    event.y = lastMouseEvent_->y;
+    event.time = lastMouseEvent_->time;
+    event.action = MouseAction::MOVE;
+    event.button = MouseButton::NONE_BUTTON;
+    event.sourceType = SourceType::MOUSE;
+
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(rootNode_);
+    auto scaleEvent = event.CreateScaleEvent(viewScale_);
+    TouchRestrict touchRestrict { TouchRestrict::NONE };
+    touchRestrict.sourceType = event.sourceType;
+    touchRestrict.hitTestType = SourceType::MOUSE;
+    eventManager_->MouseTest(scaleEvent, rootNode_, touchRestrict);
+    eventManager_->DispatchMouseEventNG(scaleEvent);
+    eventManager_->DispatchMouseHoverEventNG(scaleEvent);
+    eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
 }
 
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
@@ -1184,7 +1260,12 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     auto mainNode = lastPage ? lastPage : rootNode_;
     CHECK_NULL_RETURN(mainNode, false);
     if (!eventManager_->DispatchTabIndexEventNG(event, rootNode_, mainNode)) {
-        return eventManager_->DispatchKeyEventNG(event, rootNode_);
+        if (!eventManager_->DispatchKeyEventNG(event, rootNode_) && event.code == KeyCode::KEY_ESCAPE &&
+            event.action == KeyAction::DOWN) {
+            CHECK_NULL_RETURN(overlayManager_, false);
+            auto result = overlayManager_->RemoveOverlay(false);
+            return result;
+        }
     }
     return true;
 }
@@ -1643,10 +1724,10 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
 #endif // ENABLE_DRAG_FRAMEWORK
     if (action == DragEventAction::DRAG_EVENT_END) {
 #ifdef ENABLE_DRAG_FRAMEWORK
-    if (manager->GetExtraInfo().empty()) {
-        manager->GetExtraInfoFromClipboard(extraInfo);
-        manager->SetExtraInfo(extraInfo);
-    }
+        if (manager->GetExtraInfo().empty()) {
+            manager->GetExtraInfoFromClipboard(extraInfo);
+            manager->SetExtraInfo(extraInfo);
+        }
 #endif // ENABLE_DRAG_FRAMEWORK
         manager->OnDragEnd(static_cast<float>(x), static_cast<float>(y), extraInfo);
         manager->RestoreClipboardData();

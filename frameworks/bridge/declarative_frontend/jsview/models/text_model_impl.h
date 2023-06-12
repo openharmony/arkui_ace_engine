@@ -26,6 +26,7 @@ namespace OHOS::Ace::Framework {
 class ACE_EXPORT TextModelImpl : public TextModel {
 public:
     void Create(const std::string& content) override;
+    void SetFont(const Font& value) override;
     void SetFontSize(const Dimension& value) override;
     void SetTextColor(const Color& value) override;
     void SetTextShadow(const Shadow& value) override;

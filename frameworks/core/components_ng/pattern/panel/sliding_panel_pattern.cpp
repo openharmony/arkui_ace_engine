@@ -179,6 +179,9 @@ void SlidingPanelPattern::FirstLayout()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->RequestFocus();
     isFirstLayout_ = false;
     auto layoutProperty = GetLayoutProperty<SlidingPanelLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -211,6 +214,13 @@ void SlidingPanelPattern::IsShowChanged(bool isShow)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (isShow) {
+        focusHub->RequestFocus();
+    } else {
+        focusHub->RemoveSelf();
+    }
     auto layoutProperty = GetLayoutProperty<SlidingPanelLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto hasDragBar = layoutProperty->GetHasDragBarValue(true);

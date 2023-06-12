@@ -38,6 +38,8 @@
 
 namespace OHOS::Ace::NG {
 
+using UIExtensionTouchEventCallback = std::function<void(const TouchEvent&)>;
+
 class ACE_EXPORT PipelineContext : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
 
@@ -90,6 +92,9 @@ public:
 
     // Called by view when mouse event received.
     void OnMouseEvent(const MouseEvent& event) override;
+
+    // Do mouse event actively.
+    void FlushMouseEvent();
 
     // Called by view when axis event received.
     void OnAxisEvent(const AxisEvent& event) override;
@@ -354,6 +359,11 @@ public:
         }
     }
 
+    void MarkNeedFlushMouseEvent()
+    {
+        isNeedFlushMouseEvent_ = true;
+    }
+
     // restore
     void RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo) override;
     std::unique_ptr<JsonValue> GetStoredNodeInfo() override;
@@ -363,6 +373,14 @@ public:
     {
         storeNode_.erase(restoreId);
     }
+
+    // ---------------- UIExtesion TouchEvent Callback Handler ----------------
+    void AddUIExtensionTouchEventCallback(int32_t pointId, UIExtensionTouchEventCallback&& callback);
+
+    void RemoveUIExtensionTouchEvetnCallback(int32_t pointId);
+
+    void HandleUIExtensionTouchEvent(const TouchEvent& point);
+    // -------------------------------------------------------------------------
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -436,6 +454,7 @@ private:
     int32_t callbackId_ = 0;
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
     SurfacePositionChangedCallbackMap surfacePositionChangedCallbackMap_;
+    std::unordered_map<int32_t, UIExtensionTouchEventCallback> uiExtensionTouchEventCallback_;
 
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
@@ -456,6 +475,8 @@ private:
     bool isTabJustTriggerOnKeyEvent_ = false;
     bool onShow_ = false;
     bool onFocus_ = true;
+    bool isNeedFlushMouseEvent_ = false;
+    std::unique_ptr<MouseEvent> lastMouseEvent_;
 
     std::unordered_map<int32_t, WeakPtr<FrameNode>> storeNode_;
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;

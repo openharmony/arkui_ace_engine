@@ -28,7 +28,10 @@ public:
     ~UIExtensionLayoutAlgorithm() override = default;
 
     std::optional<SizeF> MeasureContent(
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* /* layoutWrapper */) override
+    {
+        return contentConstraint.selfIdealSize.ConvertToSizeT();
+    }
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionLayoutAlgorithm);

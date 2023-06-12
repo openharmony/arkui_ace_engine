@@ -62,6 +62,11 @@ public:
         return MakeRefPtr<SlidingPanelEventHub>();
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
     void OnAnimationStop();
     void UpdateCurrentOffset(float offset);
     void UpdateCurrentOffsetOnAnimate(float currentOffset);

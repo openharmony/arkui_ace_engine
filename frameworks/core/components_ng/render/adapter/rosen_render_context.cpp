@@ -41,6 +41,7 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/property/calc_length.h"
@@ -792,7 +793,9 @@ void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTr
     // OnTransitionInFinish. and OnTransitionOutFinish.
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    if (isBreakingPoint_ && !transitionEffect_ && pipeline->GetSyncAnimationOption().IsValid()) {
+    if (isBreakingPoint_ && !transitionEffect_ &&
+        (pipeline->GetSyncAnimationOption().IsValid() ||
+            ViewStackProcessor::GetInstance()->GetImplicitAnimationOption().IsValid())) {
         hasDefaultTransition_ = true;
         transitionEffect_ = RosenTransitionEffect::CreateDefaultRosenTransitionEffect();
         RSNode::ExecuteWithoutAnimation([this, isTransitionIn]() {

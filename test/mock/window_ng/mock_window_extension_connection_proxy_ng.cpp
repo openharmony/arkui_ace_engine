@@ -12,13 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "core/common/window_ng/window_extension_connection_proxy_ng.h"
+#include "test/mock/window_ng/mock_window_extension_connection_adapter_ng.h"
 
-#include "core/components_ng/pattern/ui_extension/ui_extension_layout_algorithm.h"
-
-namespace OHOS::Ace::NG {
-std::optional<SizeF> UIExtensionLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* /* layoutWrapper */)
+namespace OHOS::Ace {
+RefPtr<WindowExtensionConnectionAdapterNG> WindowExtensionConnectionProxyNG::CreateAdapter()
 {
-    return contentConstraint.selfIdealSize.ConvertToSizeT();
+    return AceType::MakeRefPtr<MockWindowExtensionConnectionAdapterNG>();
 }
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace

@@ -14,10 +14,8 @@
 group("pattern_unittest") {
   testonly = true
   deps = [
-    "ability_component:ability_component_pattern_test_ng",
     "animator:animator_test_ng",
     "app_bar:app_bar_test_ng",
-    "badge:badge_pattern_test_ng",
     "blank:blank_pattern_test_ng",
     "bubble:bubble_test_ng",
     "button:button_test_ng",
@@ -75,7 +73,6 @@ group("pattern_unittest") {
     "side_bar:side_bar_pattern_test_ng",
     "slider:slider_pattern_test_ng",
     "stack:stack_test_ng",
-    "stage:stage_pattern_test_ng",
     "stepper:stepper_pattern_test_ng",
     "swiper:swiper_test_ng",
     "tabs:tabs_test_ng",
@@ -86,8 +83,6 @@ group("pattern_unittest") {
     "textfield:textfield_test_ng",
     "texttimer:text_timer_pattern_unit_test",
     "time_picker:time_picker_test_ng",
-    "toggle:toggle_pattern_test_ng",
-    "video:video_pattern_test_ng",
     "waterflow:water_flow_test_ng",
     "web:web_pattern_unit_test",
     "xcomponent:xcomponent_test_ng",
