@@ -856,7 +856,9 @@ bool SwiperPattern::NeedMarkDirtyNodeRenderIndicator()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    if (host->GetLastChild()->GetTag() != V2::SWIPER_INDICATOR_ETS_TAG || indicatorDoingAnimation_) {
+    auto child = host->GetLastChild();
+    CHECK_NULL_RETURN(child, false);
+    if (child->GetTag() != V2::SWIPER_INDICATOR_ETS_TAG || indicatorDoingAnimation_) {
         return false;
     }
     if (!IsLoop() &&
