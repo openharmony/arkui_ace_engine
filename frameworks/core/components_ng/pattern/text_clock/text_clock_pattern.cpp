@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
 
+#include <ctime>
 #include <string>
 #include <sys/time.h>
 
@@ -26,6 +27,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t TOTAL_MINUTE_OF_HOUR = 60;
 constexpr int32_t TOTAL_SECONDS_OF_HOUR = 60 * 60;
 constexpr int32_t BASE_YEAR = 1900;
 constexpr int32_t INTERVAL_OF_U_SECOND = 1000000;
@@ -34,8 +36,10 @@ const std::string DEFAULT_FORMAT = "hms";
 
 int32_t GetSystemTimeZone()
 {
-    // timezone is a global variable defined in time.h, in seconds
-    int32_t hoursWest = timezone / TOTAL_SECONDS_OF_HOUR;
+    struct timeval currentTime {};
+    struct timezone timeZone {};
+    gettimeofday(&currentTime, &timeZone);
+    int32_t hoursWest = timeZone.tz_minuteswest / TOTAL_MINUTE_OF_HOUR;
     return hoursWest;
 }
 } // namespace
@@ -156,8 +160,8 @@ void TextClockPattern::UpdateTimeTextCallBack()
 std::string TextClockPattern::GetCurrentFormatDateTime()
 {
     time_t utc = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    auto tz = GetSystemTimeZone();
-    time_t localTime = (hourWest_ == tz) ? utc : utc - ((hourWest_ - tz) * TOTAL_SECONDS_OF_HOUR);
+    time_t localTime = (hourWest_ == GetSystemTimeZone()) ? utc : utc - (hourWest_ * TOTAL_SECONDS_OF_HOUR);
+
     auto* timeZoneTime = std::localtime(&localTime);
     CHECK_NULL_RETURN(timeZoneTime, "");
     // This is for i18n date time.
