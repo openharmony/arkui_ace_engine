@@ -825,6 +825,7 @@ void FocusHub::OnFocusNode()
     if (onFocusCallback) {
         onFocusCallback();
     }
+    HandleParentScroll(); // If current focus node has a scroll parent. Handle the scroll event.
     PaintFocusState();
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID_NOLOG(frameNode);
@@ -833,7 +834,7 @@ void FocusHub::OnFocusNode()
 
 void FocusHub::OnBlurNode()
 {
-    LOGD("FocusHub: Node(%{public}s/%{public}d) on blur", GetFrameName().c_str(), GetFrameId());
+    LOGI("FocusHub: Node(%{public}s/%{public}d) on blur", GetFrameName().c_str(), GetFrameId());
     if (onBlurInternal_) {
         onBlurInternal_();
     }
@@ -1307,6 +1308,30 @@ RefPtr<FocusHub> FocusHub::GetChildFocusNodeById(const std::string& id)
         }
     }
     return nullptr;
+}
+
+void FocusHub::HandleParentScroll() const
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    if (!context->GetIsFocusActive() || focusType_ != FocusType::NODE) {
+        return;
+    }
+    auto parent = GetParentFocusHub();
+    RefPtr<FrameNode> parentFrame;
+    RefPtr<Pattern> parentPattern;
+    while (parent) {
+        parentFrame = parent->GetFrameNode();
+        if (!parentFrame) {
+            parent = parent->GetParentFocusHub();
+            continue;
+        }
+        parentPattern = parentFrame->GetPattern();
+        if (parentPattern && parentPattern->ScrollToNode(GetFrameNode())) {
+            return;
+        }
+        parent = parent->GetParentFocusHub();
+    }
 }
 
 bool FocusHub::RequestFocusImmediatelyById(const std::string& id)

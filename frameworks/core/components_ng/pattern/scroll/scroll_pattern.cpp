@@ -39,7 +39,7 @@ constexpr int32_t SCROLL_TOUCH_UP = 2;
 constexpr float SCROLL_RATIO = 0.52f;
 constexpr float SCROLL_BY_SPEED = 250.0f; // move 250 pixels per second
 constexpr float SCROLL_MAX_TIME = 300.0f; // Scroll Animate max time 0.3 second
-constexpr float UNIT_CONVERT = 1000.0f;    // 1s convert to 1000ms
+constexpr float UNIT_CONVERT = 1000.0f;   // 1s convert to 1000ms
 
 float CalculateFriction(float gamma)
 {
@@ -565,4 +565,72 @@ void ScrollPattern::SetAccessibilityAction()
         }
     });
 }
+
+OffsetF ScrollPattern::GetOffsetToScroll(const RefPtr<FrameNode>& childFrame) const
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, OffsetF());
+    CHECK_NULL_RETURN(childFrame, OffsetF());
+    auto childGeometryNode = childFrame->GetGeometryNode();
+    CHECK_NULL_RETURN(childGeometryNode, OffsetF());
+    OffsetF result = childGeometryNode->GetFrameOffset();
+    auto parent = childFrame->GetParent();
+    while (parent) {
+        auto parentFrame = AceType::DynamicCast<FrameNode>(parent);
+        if (!parentFrame) {
+            parent = parent->GetParent();
+            continue;
+        }
+        if (parentFrame == frameNode) {
+            return result;
+        }
+        auto parentGeometryNode = parentFrame->GetGeometryNode();
+        if (!parentGeometryNode) {
+            parent = parent->GetParent();
+            continue;
+        }
+        result += parentGeometryNode->GetFrameOffset();
+        parent = parent->GetParent();
+    }
+    return OffsetF(0.0, 0.0);
+}
+
+bool ScrollPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
+{
+    CHECK_NULL_RETURN(focusFrameNode, false);
+    auto focusGeometryNode = focusFrameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(focusGeometryNode, false);
+    auto focusNodeSize = focusGeometryNode->GetFrameSize();
+    auto focusNodeOffsetToScrolll = GetOffsetToScroll(focusFrameNode);
+    auto scrollFrame = GetHost();
+    CHECK_NULL_RETURN(scrollFrame, false);
+    auto scrollGeometry = scrollFrame->GetGeometryNode();
+    CHECK_NULL_RETURN(scrollGeometry, false);
+    auto scrollFrameSize = scrollGeometry->GetFrameSize();
+    LOGD("Child: %{public}s/%{public}d on focus. Size is (%{public}f,%{public}f). Offset to Scroll is "
+         "(%{public}f,%{public}f). Scroll size is (%{public}f,%{public}f)",
+        focusFrameNode->GetTag().c_str(), focusFrameNode->GetId(), focusNodeSize.Width(), focusNodeSize.Height(),
+        focusNodeOffsetToScrolll.GetX(), focusNodeOffsetToScrolll.GetY(), scrollFrameSize.Width(),
+        scrollFrameSize.Height());
+
+    float focusNodeDiffToScroll =
+        GetAxis() == Axis::VERTICAL ? focusNodeOffsetToScrolll.GetY() : focusNodeOffsetToScrolll.GetX();
+    if (NearZero(focusNodeDiffToScroll)) {
+        return false;
+    }
+    float focusNodeLength = GetAxis() == Axis::VERTICAL ? focusNodeSize.Height() : focusNodeSize.Width();
+    float scrollFrameLength = GetAxis() == Axis::VERTICAL ? scrollFrameSize.Height() : scrollFrameSize.Width();
+    float moveOffset = 0.0;
+    if (LessNotEqual(focusNodeDiffToScroll, 0)) {
+        moveOffset = -focusNodeDiffToScroll;
+    } else if (GreatNotEqual(focusNodeDiffToScroll + focusNodeLength, scrollFrameLength)) {
+        moveOffset = scrollFrameLength - focusNodeDiffToScroll - focusNodeLength;
+    }
+    if (!NearZero(moveOffset)) {
+        LOGD("Scroll offset: %{public}f on axis: %{public}d", moveOffset, GetAxis());
+        return OnScrollCallback(moveOffset, SCROLL_FROM_FOCUS_JUMP);
+    }
+    return false;
+}
+
 } // namespace OHOS::Ace::NG

@@ -150,6 +150,13 @@ public:
         direction_ = direction;
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
+    bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode) override;
+
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
 
@@ -190,6 +197,7 @@ private:
     void FireOnScrollStart();
     void FireOnScrollStop();
     void SetAccessibilityAction();
+    OffsetF GetOffsetToScroll(const RefPtr<FrameNode>& childFrame) const;
 
     RefPtr<Animator> animator_;
     RefPtr<ScrollPositionController> positionController_;
