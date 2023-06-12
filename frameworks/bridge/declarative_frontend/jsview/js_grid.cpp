@@ -325,16 +325,23 @@ void JSGrid::SetMaxCount(const JSCallbackInfo& info)
     int32_t maxCount = Infinity<int32_t>();
     if (!info[0]->IsUndefined() && info[0]->IsNumber()) {
         ParseJsInt32(info[0], maxCount);
-        if (maxCount < 0) {
+        if (maxCount < 1) {
             maxCount = Infinity<int32_t>();
         }
     }
     GridModel::GetInstance()->SetMaxCount(maxCount);
 }
 
-void JSGrid::SetMinCount(double minCount)
+void JSGrid::SetMinCount(const JSCallbackInfo& info)
 {
-    GridModel::GetInstance()->SetMinCount(static_cast<int32_t>(minCount));
+    int32_t minCount = 1;
+    if (!info[0]->IsUndefined() && info[0]->IsNumber()) {
+        ParseJsInt32(info[0], minCount);
+        if (minCount < 1) {
+            minCount = 1;
+        }
+    }
+    GridModel::GetInstance()->SetMinCount(minCount);
 }
 
 void JSGrid::CellLength(int32_t cellLength)

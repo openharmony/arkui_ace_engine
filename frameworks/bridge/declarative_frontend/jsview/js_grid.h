@@ -41,7 +41,7 @@ public:
     static void SetEditMode(const JSCallbackInfo& info);
     static void SetMultiSelectable(bool multiSelectable);
     static void SetMaxCount(const JSCallbackInfo& info);
-    static void SetMinCount(double minCount);
+    static void SetMinCount(const JSCallbackInfo& info);
     static void CellLength(int32_t cellLength);
     static void SetLayoutDirection(int32_t value);
     static void SetDirection(const std::string& dir);
