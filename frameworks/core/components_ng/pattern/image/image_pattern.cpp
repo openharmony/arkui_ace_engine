@@ -29,12 +29,8 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-#include "image.h"
-#include "system_defined_pixelmap.h"
-#include "unified_data.h"
-#include "unified_record.h"
-
 #include "core/common/ace_engine_ext.h"
+#include "core/common/udmf/udmf_client.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -638,7 +634,7 @@ void ImagePattern::DumpInfo()
 void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
 {
 #ifdef ENABLE_DRAG_FRAMEWORK
-    std::shared_ptr<UDMF::UnifiedRecord> record = nullptr;
+    RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
     CHECK_NULL_VOID(loadingCtx_ && image_);
     if (loadingCtx_->GetSourceInfo().IsPixmap()) {
         auto pixelMap = image_->GetPixelMap();
@@ -647,12 +643,10 @@ void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
         CHECK_NULL_VOID(pixels);
         int32_t length = pixelMap->GetByteCount();
         std::vector<uint8_t> data(pixels, pixels + length);
-        record = std::make_shared<UDMF::SystemDefinedPixelMap>(data);
+        UdmfClient::GetInstance()->AddPixelMapRecord(unifiedData, data);
     } else {
-        record = std::make_shared<UDMF::Image>(loadingCtx_->GetSourceInfo().GetSrc());
+        UdmfClient::GetInstance()->AddImageRecord(unifiedData, loadingCtx_->GetSourceInfo().GetSrc());
     }
-    auto unifiedData = std::make_shared<UDMF::UnifiedData>();
-    unifiedData->AddRecord(record);
     event->SetData(unifiedData);
 #endif
 }

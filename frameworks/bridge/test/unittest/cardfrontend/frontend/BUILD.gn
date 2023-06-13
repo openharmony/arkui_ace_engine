@@ -38,7 +38,9 @@ ohos_unittest("CardFrontendTest") {
     "$ace_root/build:ace_ohos_unittest_base",
     "$ace_root/frameworks/bridge/js_frontend/engine:js_engine_ark_ohos",
     "$ace_root/frameworks/bridge/js_frontend/engine/jsi:js_engine_bridge_ark_ohos",
+    "//third_party/googletest:gmock_main",
   ]
+  sources += [ "$ace_root/test/mock/core/common/mock_udmf.cpp" ]
 
   part_name = ace_engine_part
 }

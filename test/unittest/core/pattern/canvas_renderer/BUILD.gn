@@ -29,6 +29,8 @@ ohos_unittest("canvas_renderer_test_ng") {
     ":config_canvas_renderer_test",
     "$ace_root/test/unittest:ace_unittest_config",
   ]
+  defines = [ "ENABLE_DRAG_FRAMEWORK" ]
+  sources += [ "$ace_root/test/mock/core/common/mock_udmf.cpp" ]
 }
 
 config("config_canvas_renderer_test") {

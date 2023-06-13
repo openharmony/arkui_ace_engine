@@ -65,8 +65,7 @@
 #endif
 #endif
 #ifdef ENABLE_DRAG_FRAMEWORK
-#include "text.h"
-#include "unified_data.h"
+#include "core/common/udmf/udmf_client.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -1626,11 +1625,8 @@ void TextFieldPattern::InitDragDropEvent()
         std::string afterStr = textEditingValue.GetValueAfterPosition(pattern->dragTextEnd_);
         pattern->dragContents_ = { beforeStr, selectedStr, afterStr };
         itemInfo.extraInfo = selectedStr;
-        UDMF::UDVariant udmfValue(selectedStr);
-        UDMF::UDDetails udmfDetails = { { "value", udmfValue } };
-        auto record = std::make_shared<UDMF::Text>(udmfDetails);
-        auto unifiedData = std::make_shared<UDMF::UnifiedData>();
-        unifiedData->AddRecord(record);
+        RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
+        UdmfClient::GetInstance()->AddTextRecord(unifiedData, selectedStr);
         event->SetData(unifiedData);
         host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                      : PROPERTY_UPDATE_MEASURE);
@@ -1682,7 +1678,6 @@ void TextFieldPattern::InitDragDropEvent()
         pattern->StopTwinkling();
     };
     eventHub->SetOnDragLeave(std::move(onDragLeave));
-
     auto onDrop = [weakPtr = WeakClaim(this)](
                       const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
@@ -1700,16 +1695,7 @@ void TextFieldPattern::InitDragDropEvent()
         }
         auto data = event->GetData();
         CHECK_NULL_VOID(data);
-        auto records = data->GetRecords();
-        std::string str = "";
-        if (records.size() == 1 && records[0]->GetType() == UDMF::UDType::TEXT) {
-            UDMF::Text* text = reinterpret_cast<UDMF::Text*>(records[0].get());
-            UDMF::UDDetails udmfDetails = text->GetDetails();
-            auto value = udmfDetails.find("value");
-            if (value != udmfDetails.end()) {
-                str = std::get<std::string>(value->second);
-            }
-        }
+        std::string str = UdmfClient::GetInstance()->GetSingleTextRecord(data);
         if (pattern->dragStatus_ == DragStatus::NONE) {
             pattern->InsertValue(str);
         } else {
@@ -1925,7 +1911,7 @@ void TextFieldPattern::OnModifyDone()
         underlineColor_ = textFieldTheme->GetUnderlineColor();
         SaveUnderlineStates();
     }
-    
+
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     isTransparent_ = renderContext->GetOpacityValue(1.0f) == 0.0f;
