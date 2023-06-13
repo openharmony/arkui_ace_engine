@@ -161,6 +161,8 @@ void ScrollablePattern::AddScrollEvent()
     scrollableEvent_->SetMouseLeftButtonScroll(std::move(mouseLeftButtonScroll));
     gestureHub->AddScrollableEvent(scrollableEvent_);
 
+    auto scrollable = scrollableEvent_->GetScrollable();
+    CHECK_NULL_VOID_NOLOG(scrollable);
     auto func = [weak = AceType::WeakClaim(this)](double offset) -> OverScrollOffset {
         auto pattern = weak.Upgrade();
         if (pattern) {
@@ -168,8 +170,8 @@ void ScrollablePattern::AddScrollEvent()
         }
         return { 0, 0 };
     };
-    scrollableEvent_->GetScrollable()->SetOverScrollOffsetCallback_(func);
-    scrollableEvent_->GetScrollable()->SetNestedScrollOptions(nestedScroll_);
+    scrollable->SetOverScrollOffsetCallback(std::move(func));
+    scrollable->SetNestedScrollOptions(nestedScroll_);
 }
 
 void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)

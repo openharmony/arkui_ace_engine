@@ -348,7 +348,7 @@ public:
     {
         nestedOpt_ = opt;
     }
-    void SetOverScrollOffsetCallback_(std::function<OverScrollOffset(double)>&& overScroll)
+    void SetOverScrollOffsetCallback(std::function<OverScrollOffset(double)>&& overScroll)
     {
         overScrollOffsetCallback_ = std::move(overScroll);
     }
