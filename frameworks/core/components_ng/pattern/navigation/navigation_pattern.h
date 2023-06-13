@@ -64,11 +64,6 @@ public:
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
-    void SetNavigationMode(NavigationMode navigationMode)
-    {
-        navigationMode_ = navigationMode;
-    }
-
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };

@@ -205,8 +205,6 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(navigationLayoutProperty);
     const auto& constraint = navigationLayoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(constraint);
-    auto pattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
-    CHECK_NULL_VOID(pattern);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     auto size = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
     auto parentSize = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
@@ -232,7 +230,11 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             navigationLayoutProperty->UpdateNavigationMode(navigationMode_);
         }
     } else {
-        pattern->SetNavigationMode(navigationMode_);
+        auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(layoutWrapper->GetLayoutAlgorithm());
+        CHECK_NULL_VOID(layoutAlgorithmWrapper);
+        auto navigationLayoutAlgorithm =
+            DynamicCast<NavigationLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+        navigationLayoutAlgorithm->SetNavigationMode(navigationMode_);
     }
 
     auto navBarWidth = navBarWidthValue.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
