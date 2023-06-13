@@ -1859,6 +1859,7 @@ void WebPattern::UpdateTouchHandleForOverlay()
         selectOverlayProxy_->UpdateFirstSelectHandleInfo(firstHandleInfo);
         selectOverlayProxy_->UpdateSecondSelectHandleInfo(secondHandleInfo);
         selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
+        selectOverlayProxy_->SetHandleReverse(false);
     }
 }
 
