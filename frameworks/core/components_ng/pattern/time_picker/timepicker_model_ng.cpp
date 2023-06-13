@@ -236,7 +236,11 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     dialogEvent["changeId"] = onChange;
     dialogEvent["acceptId"] = onAccept;
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
-    auto func = [onCancel](const GestureEvent& /* info */) { onCancel(); };
+    auto func = [onCancel](const GestureEvent& /* info */) {
+        if (onCancel) {
+            onCancel();
+        }
+    };
     dialogCancelEvent["cancelId"] = func;
     DialogProperties properties;
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
