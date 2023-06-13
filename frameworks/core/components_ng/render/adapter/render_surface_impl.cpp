@@ -110,4 +110,18 @@ void RenderSurfaceImpl::SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInt
     extSurfaceCallback_ = extSurfaceCallback;
 }
 
+void RenderSurfaceImpl::SetIsFullScreen(bool isFullScreen)
+{
+    LOGI("SetIsFullScreen (%{public}d)", isFullScreen);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [surface = extSurface_, fullScreen = isFullScreen]() {
+            if (surface) {
+                surface->SetIsFullScreen(fullScreen);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 } // namespace OHOS::Ace::NG
