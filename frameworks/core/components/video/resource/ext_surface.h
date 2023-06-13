@@ -35,6 +35,7 @@ public:
     void Create(const std::function<void(int64_t)>& onCreate);
     void CreateExtSurface(const std::function<void(int64_t)>& onCreate);
     void SetBounds(int64_t surfaceId, int32_t left, int32_t top, int32_t width, int32_t height);
+    void SetIsFullScreen(bool isFullScreen);
     void SetCreateCallback(std::function<void()>&& callback)
     {
         onSurfaceCreated_ = std::move(callback);

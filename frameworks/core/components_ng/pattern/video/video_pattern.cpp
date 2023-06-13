@@ -1238,6 +1238,9 @@ void VideoPattern::OnFullScreenChange(bool isFullScreen)
         }
     }
     mediaPlayer_->FullScreenChange(isFullScreen);
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        renderSurface_->SetIsFullScreen(isFullScreen);
+    }
 }
 
 void VideoPattern::FullScreen()
