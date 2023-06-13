@@ -425,6 +425,7 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
             .SetLocalLocation(Offset(globalPoint_.GetX(), globalPoint_.GetY()) - coordinateOffset_);
         info.SetDeviceId(deviceId_);
         info.SetSourceDevice(deviceType_);
+        info.SetTargetDisplayId(touchPoint.targetDisplayId);
         info.SetDelta(delta_);
         info.SetMainDelta(mainDelta_);
         if (inputEventType_ == InputEventType::AXIS) {

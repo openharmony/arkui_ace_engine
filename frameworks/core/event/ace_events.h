@@ -105,6 +105,15 @@ public:
         deviceId_ = deviceId;
     }
 
+    int32_t GetTargetDisplayId() const
+    {
+        return targetDisplayId_;
+    }
+    void SetTargetDisplayId(int32_t targetDisplayId)
+    {
+        targetDisplayId_ = targetDisplayId;
+    }
+
     SourceType GetSourceDevice() const
     {
         return deviceType_;
@@ -171,6 +180,7 @@ protected:
     std::optional<float> tiltY_;
     SourceTool sourceTool_ = SourceTool::UNKNOWN;
     int64_t deviceId_ = 0;
+    int32_t targetDisplayId_ = 0;
     bool stopPropagation_ = false;
 };
 
