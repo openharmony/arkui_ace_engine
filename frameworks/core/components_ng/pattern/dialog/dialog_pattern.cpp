@@ -157,7 +157,7 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
     contentRenderContext->SetClipToBounds(true);
 }
 
-RefPtr<FrameNode> CreateDialogScroll()
+RefPtr<FrameNode> DialogPattern::CreateDialogScroll(const DialogProperties& dialogProps)
 {
     auto scroll = FrameNode::CreateFrameNode(
         V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
@@ -165,7 +165,12 @@ RefPtr<FrameNode> CreateDialogScroll()
     auto props = scroll->GetLayoutProperty<ScrollLayoutProperty>();
     props->UpdateAxis(Axis::VERTICAL);
     props->UpdateAlignment(Alignment::CENTER_LEFT);
-
+    // If title not exist, set scroll align center so that text align center.
+    if (dialogProps.title.empty() || SystemProperties::GetDeviceType() == DeviceType::WATCH) {
+        props->UpdateAlignSelf(FlexAlign::CENTER);
+    } else {
+        props->UpdateAlignSelf(FlexAlign::FLEX_START);
+    }
     return scroll;
 }
 
@@ -202,7 +207,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
         auto content = BuildContent(props);
         CHECK_NULL_VOID(content);
         // create a scroll
-        auto scroll = CreateDialogScroll();
+        auto scroll = CreateDialogScroll(props);
         CHECK_NULL_VOID(scroll);
         content->MountToParent(scroll);
         scroll->MountToParent(contentColumn);
@@ -297,12 +302,8 @@ RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& props)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto contentProp = AceType::DynamicCast<TextLayoutProperty>(contentNode->GetLayoutProperty());
     CHECK_NULL_RETURN(contentProp, nullptr);
-    // textAlign center if title doesn't exist; always align center on watch
-    if (props.title.empty() || SystemProperties::GetDeviceType() == DeviceType::WATCH) {
-        contentProp->UpdateTextAlign(TextAlign::CENTER);
-    } else {
-        contentProp->UpdateTextAlign(TextAlign::START);
-    }
+    // textAlign always align start. When text line count 1 and title doesn't exist, set text center position.
+    contentProp->UpdateTextAlign(TextAlign::START);
     contentProp->UpdateContent(props.content);
     auto contentStyle = dialogTheme_->GetContentTextStyle();
     contentProp->UpdateFontSize(contentStyle.GetFontSize());
