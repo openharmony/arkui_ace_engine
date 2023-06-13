@@ -338,7 +338,6 @@ std::string RosenRenderCustomPaint::ToDataURL(const std::string& args)
     double quality = GetQuality(args);
     double width = GetLayoutSize().Width();
     double height = GetLayoutSize().Height();
-#ifndef USE_ROSEN_DRAWING
     SkBitmap tempCache;
     tempCache.allocPixels(SkImageInfo::Make(width, height, SkColorType::kBGRA_8888_SkColorType,
         (mimeType == IMAGE_JPEG) ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kUnpremul_SkAlphaType));
@@ -390,9 +389,6 @@ std::string RosenRenderCustomPaint::ToDataURL(const std::string& args)
     }
     SkString info(len);
     SkBase64::Encode(result->data(), result->size(), info.writable_str());
-#else
-    // TODO Drawing : SkDynamicMemoryWStream SkWebpEncoder SkBase64
-#endif
     return std::string(URL_PREFIX).append(mimeType).append(URL_SYMBOL).append(info.c_str());
 }
 
