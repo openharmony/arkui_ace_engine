@@ -21,15 +21,15 @@
 
 namespace OHOS::Ace {
 namespace {
-inline constexpr int JANK_FRAME_6_FREQ = 0;
-inline constexpr int JANK_FRAME_15_FREQ = 1;
-inline constexpr int JANK_FRAME_20_FREQ = 2;
-inline constexpr int JANK_FRAME_36_FREQ = 3;
-inline constexpr int JANK_FRAME_48_FREQ = 4;
-inline constexpr int JANK_FRAME_60_FREQ = 5;
-inline constexpr int JANK_FRAME_120_FREQ = 6;
-inline constexpr int JANK_FRAME_180_FREQ = 7;
-inline constexpr int JANK_SIZE = 7;
+constexpr int JANK_FRAME_6_FREQ = 0;
+constexpr int JANK_FRAME_15_FREQ = 1;
+constexpr int JANK_FRAME_20_FREQ = 2;
+constexpr int JANK_FRAME_36_FREQ = 3;
+constexpr int JANK_FRAME_48_FREQ = 4;
+constexpr int JANK_FRAME_60_FREQ = 5;
+constexpr int JANK_FRAME_120_FREQ = 6;
+constexpr int JANK_FRAME_180_FREQ = 7;
+constexpr int JANK_SIZE = 7;
 } // namespace
 
 std::vector<uint16_t> JankFrameReport::frameJankRecord_(JANK_SIZE, 0);
@@ -46,21 +46,33 @@ void JankFrameReport::JankFrameRecord(double jank)
     needReport_ = true;
     if (jank < 6.0f) {
         frameJankRecord_[JANK_FRAME_6_FREQ]++;
-    } else if (jank < 15.0f) {
-        frameJankRecord_[JANK_FRAME_15_FREQ]++;
-    } else if (jank < 20.0f) {
-        frameJankRecord_[JANK_FRAME_20_FREQ]++;
-    } else if (jank < 36.0f) {
-        frameJankRecord_[JANK_FRAME_36_FREQ]++;
-    } else if (jank < 48.0f) {
-        frameJankRecord_[JANK_FRAME_48_FREQ]++;
-    } else if (jank < 60.0f) {
-        frameJankRecord_[JANK_FRAME_60_FREQ]++;
-    } else if (jank < 120.0f) {
-        frameJankRecord_[JANK_FRAME_120_FREQ]++;
-    } else {
-        frameJankRecord_[JANK_FRAME_180_FREQ]++;
+        return;
     }
+    if (jank < 15.0f) {
+        frameJankRecord_[JANK_FRAME_15_FREQ]++;
+        return;
+    }
+    if (jank < 20.0f) {
+        frameJankRecord_[JANK_FRAME_20_FREQ]++;
+        return;
+    }
+    if (jank < 36.0f) {
+        frameJankRecord_[JANK_FRAME_36_FREQ]++;
+        return;
+    }
+    if (jank < 48.0f) {
+        frameJankRecord_[JANK_FRAME_48_FREQ]++;
+        return;
+    }
+    if (jank < 60.0f) {
+        frameJankRecord_[JANK_FRAME_60_FREQ]++;
+        return;
+    }
+    if (jank < 120.0f) {
+        frameJankRecord_[JANK_FRAME_120_FREQ]++;
+        return;
+    }
+    frameJankRecord_[JANK_FRAME_180_FREQ]++;
 }
 
 void JankFrameReport::ClearFrameJankRecord()

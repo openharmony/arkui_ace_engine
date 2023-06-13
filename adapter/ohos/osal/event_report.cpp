@@ -16,7 +16,6 @@
 #include "base/log/event_report.h"
 
 #include <ctime>
-#include <map>
 #include <string>
 #include <unistd.h>
 
