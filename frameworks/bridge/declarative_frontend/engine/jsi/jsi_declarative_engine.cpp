@@ -1450,15 +1450,18 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, 
             size_t moduleEndPos = namedRoute.find('/', moduleStartPos);
             moduleName = namedRoute.substr(moduleStartPos, moduleEndPos - moduleStartPos);
             url = namedRoute.substr(moduleEndPos + strlen("/ets/"));
-        } else
-#endif
-        {
+        } else {
             bundleName = AceApplicationInfo::GetInstance().GetPackageName();
             auto container = Container::Current();
             CHECK_NULL_RETURN(container, false);
             moduleName = container->GetModuleName();
         }
-
+#else
+        bundleName = bundleName_;
+        moduleName = moduleName_;
+#endif
+        LOGD("bundleName = %{public}s moduleName = %{public}s url = %{public}s", bundleName.c_str(), moduleName.c_str(),
+            url.c_str());
         iter = std::find_if(namedRouterRegisterMap.begin(), namedRouterRegisterMap.end(),
             [&bundleName, &moduleName, &url](const auto& item) {
                 return item.second.bundleName == bundleName && item.second.moduleName == moduleName &&
