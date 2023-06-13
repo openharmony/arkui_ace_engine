@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
+#include "base/log/jank_frame_report.h"
 #include "base/utils/utils.h"
 #include "core/animation/animator.h"
 #include "core/common/container.h"
@@ -146,6 +147,7 @@ void PagePattern::OnShow()
     CHECK_NULL_VOID_NOLOG(!isOnShow_);
     CHECK_NULL_VOID_NOLOG(Container::IsForeground());
     isOnShow_ = true;
+    JankFrameReport::StartRecord(pageInfo_->GetPageUrl());
     if (onPageShow_) {
         onPageShow_();
     }
@@ -154,6 +156,7 @@ void PagePattern::OnShow()
 void PagePattern::OnHide()
 {
     CHECK_NULL_VOID_NOLOG(isOnShow_);
+    JankFrameReport::FlushRecord();
     isOnShow_ = false;
     if (onPageHide_) {
         onPageHide_();

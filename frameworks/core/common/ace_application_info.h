@@ -83,6 +83,26 @@ public:
         return apiVersion_;
     }
 
+    void SetAppVersionName(const std::string& versionName)
+    {
+        versionName_ = versionName;
+    }
+
+    const std::string& GetAppVersionName() const
+    {
+        return versionName_;
+    }
+
+    void SetAppVersionCode(uint32_t versionCode)
+    {
+        versionCode_ = versionCode;
+    }
+
+    uint32_t GetAppVersionCode() const
+    {
+        return versionCode_;
+    }
+
     virtual bool GetBundleInfo(const std::string& packageName, AceBundleInfo& bundleInfo) = 0;
     virtual double GetLifeTime() const = 0;
 
@@ -189,6 +209,8 @@ protected:
     bool isAccessibilityEnabled_ = false;
 
     int32_t apiVersion_ = 0;
+    std::string versionName_;
+    uint32_t versionCode_ = 0;
 };
 
 } // namespace OHOS::Ace
