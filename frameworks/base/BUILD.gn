@@ -75,14 +75,18 @@ template("ace_base_source_set") {
       include_dirs = [ "//third_party/bounds_checking_function/include" ]
       if (is_cross_platform_build) {
         deps += [ "//third_party/bounds_checking_function:libsec_static" ]
-        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
       } else {
         deps += [ "//third_party/bounds_checking_function:libsec_shared" ]
-        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
       }
     } else {
       defines -= [ "UNICODE" ]
       libs = [ "//prebuilts/mingw-w64/ohos/linux-x86_64/clang-mingw/x86_64-w64-mingw32/lib/libshlwapi.a" ]
+    }
+
+    if (is_cross_platform_build) {
+      deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
+    } else {
+      deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
     }
 
     # curl download manager
