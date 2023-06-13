@@ -3322,6 +3322,25 @@ void WebDelegate::SetShouldFrameSubmissionBeforeDraw(bool should)
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::NotifyMemoryLevel(int32_t level)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), level]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->NotifyMemoryLevel(level);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::Zoom(float factor)
 {
     auto context = context_.Upgrade();
