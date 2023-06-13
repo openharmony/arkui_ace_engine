@@ -312,19 +312,27 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
     auto context = context_.Upgrade();
     CHECK_NULL_RETURN(context, nullptr);
     viewScale = context->GetViewScale();
-    // copy the bitmap to tempCanvas
-    auto imageInfo =
-        SkImageInfo::Make(width, height, SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
-    SkBitmap tempCache;
+    double dirtyWidth = std::abs(width);
+    double dirtyHeight = std::abs(height);
     double scaledLeft = left * viewScale;
     double scaledTop = top * viewScale;
-    double dirtyWidth = width >= 0 ? width : 0;
-    double dirtyHeight = height >= 0 ? height : 0;
+    if (Negative(width)) {
+        scaledLeft += dirtyWidth;
+    }
+    if (Negative(height)) {
+        scaledTop += height;
+    }
+    // copy the bitmap to tempCanvas
+    auto imageInfo =
+        SkImageInfo::Make(dirtyWidth, dirtyHeight,
+        SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
+    SkBitmap tempCache;
+
     tempCache.allocPixels(imageInfo);
     int32_t size = dirtyWidth * dirtyHeight;
     const uint8_t* pixels = nullptr;
     SkCanvas tempCanvas(tempCache);
-    auto srcRect = SkRect::MakeXYWH(scaledLeft, scaledTop, width * viewScale, height * viewScale);
+    auto srcRect = SkRect::MakeXYWH(scaledLeft, scaledTop, dirtyWidth * viewScale, dirtyWidth * viewScale);
     auto dstRect = SkRect::MakeXYWH(0.0, 0.0, dirtyWidth, dirtyHeight);
 #ifndef NEW_SKIA
     tempCanvas.drawBitmapRect(canvasCache_, srcRect, dstRect, nullptr);
