@@ -532,6 +532,16 @@ void FrontendDelegateDeclarativeNG::RegisterFont(const std::string& familyName, 
     pipelineContextHolder_.Get()->RegisterFont(familyName, familySrc);
 }
 
+void FrontendDelegateDeclarativeNG::GetSystemFontList(std::vector<std::string>& fontList)
+{
+    pipelineContextHolder_.Get()->GetSystemFontList(fontList);
+}
+
+bool FrontendDelegateDeclarativeNG::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
+{
+    return pipelineContextHolder_.Get()->GetSystemFont(fontName, fontInfo);
+}
+
 double FrontendDelegateDeclarativeNG::MeasureText(const MeasureContext& context)
 {
     return MeasureUtil::MeasureText(context);

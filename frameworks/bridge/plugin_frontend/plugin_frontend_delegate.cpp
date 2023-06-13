@@ -1630,6 +1630,16 @@ void PluginFrontendDelegate::RegisterFont(const std::string& familyName, const s
     pipelineContextHolder_.Get()->RegisterFont(familyName, familySrc);
 }
 
+void PluginFrontendDelegate::GetSystemFontList(std::vector<std::string>& fontList)
+{
+    pipelineContextHolder_.Get()->GetSystemFontList(fontList);
+}
+
+bool PluginFrontendDelegate::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
+{
+    return pipelineContextHolder_.Get()->GetSystemFont(fontName, fontInfo);
+}
+
 void PluginFrontendDelegate::HandleImage(
     const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback)
 {
