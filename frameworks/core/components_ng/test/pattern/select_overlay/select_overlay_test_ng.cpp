@@ -713,4 +713,41 @@ HWTEST_F(SelectOverlayTestNg, SelectOverlayNodeTest002, TestSize.Level1)
     auto result2 = selectOverlayNode->IsInSelectedOrSelectOverlayArea(point2);
     EXPECT_TRUE(result2);
 }
+/**
+ * @tc.name: SelectFrameNodeAnimationTest002
+ * @tc.desc: Test MoreAnimation and BackAnimation when isShowInDefaultMenu is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectFrameNodeAnimationTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.menuDisable = true;
+    selectInfo.menuInfo.showCut = false;
+    selectInfo.menuInfo.showPaste = false;
+    auto menuOptionItems = GetMenuOptionItems();
+    selectInfo.menuOptionItems = menuOptionItems;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    EXPECT_NE(selectOverlayNode, nullptr);
+    /**
+     * @tc.steps: step2. Create default menu and extension menu .
+     * @tc.expected: The default menu and extended menu are created successfully.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    selectOverlayNode->CreateToolBar();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    selectOverlayNode->CreateExtensionToolBar();
+    for (int i = 0; i < 7; i++) {
+        selectOverlayNode->isShowInDefaultMenu_[i] = false;
+    }
+    selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
+    EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
+    EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
+}
 } // namespace OHOS::Ace::NG
