@@ -75,8 +75,10 @@ template("ace_base_source_set") {
       include_dirs = [ "//third_party/bounds_checking_function/include" ]
       if (is_cross_platform_build) {
         deps += [ "//third_party/bounds_checking_function:libsec_static" ]
+        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
       } else {
         deps += [ "//third_party/bounds_checking_function:libsec_shared" ]
+        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
       }
     } else {
       defines -= [ "UNICODE" ]
