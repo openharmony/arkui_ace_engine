@@ -433,7 +433,7 @@ double Scrollable::HandleScrollSelfOnly(double& offset, int32_t source, NestedSt
     if (state == NestedState::CHILD_SCROLL) {
         offset -= overOffset;
     } else if (state == NestedState::GESTURE) {
-        canOverScroll = !NearZero(overOffset);
+        canOverScroll = !NearZero(overOffset) && edgeEffect_ != EdgeEffect::NONE;
     } else if (edgeEffect_ != EdgeEffect::NONE) {
         remainOffset = 0;
     }
@@ -840,10 +840,8 @@ bool Scrollable::HandleOverScroll(double velocity)
         return false;
     }
     // parent handle over scroll first
-    if ((velocity < 0 && (nestedOpt_.forward == NestedScrollMode::SELF_FIRST ||
-        nestedOpt_.forward == NestedScrollMode::PARALLEL)) ||
-        (velocity > 0 && (nestedOpt_.backward == NestedScrollMode::SELF_FIRST ||
-        nestedOpt_.forward == NestedScrollMode::PARALLEL))) {
+    if ((velocity < 0 && (nestedOpt_.forward == NestedScrollMode::SELF_FIRST)) ||
+        (velocity > 0 && (nestedOpt_.backward == NestedScrollMode::SELF_FIRST))) {
         if (parent->HandleOverScroll(velocity)) {
             return true;
         }
