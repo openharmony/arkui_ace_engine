@@ -824,7 +824,7 @@ bool PipelineContext::OnBackPressed()
         [weakOverlay = AceType::WeakClaim(AceType::RawPtr(overlayManager_)), &hasOverlay]() {
             auto overlay = weakOverlay.Upgrade();
             CHECK_NULL_VOID_NOLOG(overlay);
-            hasOverlay = overlay->RemoveOverlay(true);
+            hasOverlay = overlay->RemoveOverlay();
         },
         TaskExecutor::TaskType::UI);
     if (hasOverlay) {
@@ -1184,12 +1184,7 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     auto mainNode = lastPage ? lastPage : rootNode_;
     CHECK_NULL_RETURN(mainNode, false);
     if (!eventManager_->DispatchTabIndexEventNG(event, rootNode_, mainNode)) {
-        if (!eventManager_->DispatchKeyEventNG(event, rootNode_) && event.code == KeyCode::KEY_ESCAPE &&
-            event.action == KeyAction::DOWN) {
-            CHECK_NULL_RETURN(overlayManager_, false);
-            auto result = overlayManager_->RemoveOverlay(false);
-            return result;
-        }
+        return eventManager_->DispatchKeyEventNG(event, rootNode_);
     }
     return true;
 }

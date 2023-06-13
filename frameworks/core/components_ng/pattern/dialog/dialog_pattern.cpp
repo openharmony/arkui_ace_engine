@@ -648,6 +648,10 @@ bool DialogPattern::OnKeyEvent(const KeyEvent& event)
     if (event.action != KeyAction::DOWN) {
         return false;
     }
+    if (event.code == KeyCode::KEY_ESCAPE) {
+        PopDialog();
+        return true;
+    }
     return false;
 }
 

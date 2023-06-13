@@ -826,7 +826,7 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     CallOnHideDialogCallback();
 }
 
-bool OverlayManager::RemoveOverlay(bool isBackPressed)
+bool OverlayManager::RemoveOverlay()
 {
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(rootNode, true);
@@ -847,9 +847,7 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed)
                 hub->FireCancelEvent();
             }
             CloseDialog(overlay);
-            if (isBackPressed) {
-                SetBackPressEvent(nullptr);
-            }
+            SetBackPressEvent(nullptr);
             return true;
         } else if (AceType::DynamicCast<BubblePattern>(pattern)) {
             auto popupNode = AceType::DynamicCast<NG::FrameNode>(rootNode->GetChildAtIndex(childrenSize - 1));
@@ -997,20 +995,6 @@ void OverlayManager::FocusOverlayNode(const RefPtr<FrameNode>& overlayNode, bool
 void OverlayManager::BlurOverlayNode(bool isInSubWindow)
 {
     LOGI("OverlayManager::BlurOverlayNode");
-    auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(rootNode);
-    if (rootNode->GetChildren().size() > 1) {
-        auto collection = rootNode->GetChildren();
-        for (auto iter = collection.rbegin(); iter != collection.rend(); ++iter) {
-            auto overlay = DynamicCast<FrameNode>(*iter);
-            CHECK_NULL_VOID(overlay);
-            auto pattern = overlay->GetPattern();
-            if (AceType::InstanceOf<DialogPattern>(pattern) || AceType::InstanceOf<MenuWrapperPattern>(pattern)) {
-                FocusOverlayNode(overlay, isInSubWindow);
-                return;
-            }
-        }
-    }
     if (isInSubWindow) {
         // no need to set page request focus in sub window.
         return;

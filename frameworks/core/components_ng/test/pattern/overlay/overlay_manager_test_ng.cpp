@@ -24,16 +24,14 @@
 #define private public
 #define protected public
 #include "base/geometry/ng/offset_t.h"
-#include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/toast/toast_theme.h"
+#include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/dialog/dialog_pattern.h"
-#include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
@@ -42,12 +40,11 @@
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
-#include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -137,9 +134,9 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover001, TestSize.Level1)
      * @tc.steps: step2. create target node.
      */
     auto builderFunc = []() -> RefPtr<UINode> {
-        auto frameNode =
-            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto frameNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
         frameNode->AddChild(childFrameNode);
@@ -186,9 +183,9 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover002, TestSize.Level1)
      * @tc.steps: step2. create target node.
      */
     auto builderFunc = []() -> RefPtr<UINode> {
-        auto frameNode =
-            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto frameNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
         frameNode->AddChild(childFrameNode);
@@ -224,6 +221,7 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover002, TestSize.Level1)
     EXPECT_EQ(type, ModalTransition::DEFAULT);
 }
 
+
 /**
  * @tc.name: BindContentCover003
  * @tc.desc: Test OverlayManager::BindContentCover destroy modal node.
@@ -247,9 +245,9 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover003, TestSize.Level1)
      * @tc.steps: step2. create modal page node.
      */
     auto builderFunc = []() -> RefPtr<UINode> {
-        auto frameNode =
-            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto frameNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
         frameNode->AddChild(childFrameNode);
@@ -275,7 +273,7 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover003, TestSize.Level1)
 /**
  * @tc.name: BindSheet001
  * @tc.desc: Test OverlayManager::BindSheet create sheet page.
- * @tc.type: FUNC
+ * @tc.type: FUNC 
  */
 HWTEST_F(OverlayManagerTestNg, BindSheet001, TestSize.Level1)
 {
@@ -295,9 +293,9 @@ HWTEST_F(OverlayManagerTestNg, BindSheet001, TestSize.Level1)
      * @tc.steps: step2. create builder func.
      */
     auto builderFunc = []() -> RefPtr<UINode> {
-        auto frameNode =
-            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto frameNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
         frameNode->AddChild(childFrameNode);
@@ -355,9 +353,9 @@ HWTEST_F(OverlayManagerTestNg, BindSheet002, TestSize.Level1)
      * @tc.steps: step2. create builder.
      */
     auto builderFunc = []() -> RefPtr<UINode> {
-        auto frameNode =
-            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto frameNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
         frameNode->AddChild(childFrameNode);
@@ -424,9 +422,9 @@ HWTEST_F(OverlayManagerTestNg, BindSheet003, TestSize.Level1)
      * @tc.steps: step2. create builder.
      */
     auto builderFunc = []() -> RefPtr<UINode> {
-        auto frameNode =
-            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto frameNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
         frameNode->AddChild(childFrameNode);
@@ -456,4 +454,5 @@ HWTEST_F(OverlayManagerTestNg, BindSheet003, TestSize.Level1)
     overlayManager->BindSheet(!isShow, nullptr, nullptr, sheetStyle, targetId);
     EXPECT_TRUE(overlayManager->modalStack_.empty());
 }
+
 } // namespace OHOS::Ace::NG
