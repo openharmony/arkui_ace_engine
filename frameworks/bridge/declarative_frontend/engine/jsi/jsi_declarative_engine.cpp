@@ -948,16 +948,6 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
 #if !defined(PREVIEW)
         nativeEngine_->CheckUVLoop();
 #endif
-
-        if (delegate && delegate->GetAssetManager()) {
-            std::vector<std::string> packagePath = delegate->GetAssetManager()->GetLibPath();
-            auto appLibPathKey = delegate->GetAssetManager()->GetAppLibPathKey();
-            if (!packagePath.empty()) {
-                auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
-                arkNativeEngine->SetPackagePath(appLibPathKey, packagePath);
-            }
-        }
-
         RegisterWorker();
         engineInstance_->RegisterFaPlugin();
     } else {
