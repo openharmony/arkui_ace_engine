@@ -455,7 +455,15 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     if (pixelMap == nullptr) {
         pixelMap = pixelMap_->GetPixelMapSharedPtr();
     }
-    if (!GetTextDraggable()) {
+    auto minDeviceLength = std::min(SystemProperties::GetDeviceHeight(), SystemProperties::GetDeviceWidth());
+    if ((SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT &&
+            pixelMap->GetHeight() > minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE) ||
+        (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE &&
+            pixelMap->GetHeight() > minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE &&
+            pixelMap->GetWidth() > minDeviceLength)) {
+        float scale = static_cast<float>(minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE) / pixelMap->GetHeight();
+        pixelMap->scale(scale, scale);
+    } else if (!GetTextDraggable()) {
         pixelMap->scale(PIXELMAP_DRAG_SCALE, PIXELMAP_DRAG_SCALE);
     }
     uint32_t width = pixelMap->GetWidth();

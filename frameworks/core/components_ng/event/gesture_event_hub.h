@@ -107,6 +107,7 @@ using DragNotifyMsg = Msdp::DeviceStatus::DragNotifyMsg;
 using OnDragCallback = std::function<void(const DragNotifyMsg&)>;
 constexpr float PIXELMAP_WIDTH_RATE = -0.5f;
 constexpr float PIXELMAP_HEIGHT_RATE = -0.2f;
+constexpr float PIXELMAP_DEFALUT_LIMIT_SCALE = 0.5f;
 #endif
 class EventHub;
 
