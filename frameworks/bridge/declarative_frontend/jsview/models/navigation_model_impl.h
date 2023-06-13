@@ -49,9 +49,6 @@ public:
     void SetUsrNavigationMode(NG::NavigationMode mode) override;
     void SetNavBarPosition(NG::NavBarPosition mode) override;
     void SetNavBarWidth(const Dimension& value) override;
-    void SetMinNavBarWidth(const Dimension& value) override {}
-    void SetMaxNavBarWidth(const Dimension& value) override {}
-    void SetMinContentWidth(const Dimension& value) override {}
     void SetOnNavBarStateChange(std::function<void(bool)>&& onNavBarStateChange) override;
     void SetNavigationMode(NG::NavigationMode mode) override;
     void SetNavDestination(std::function<void(std::string)>&& builder) override;
