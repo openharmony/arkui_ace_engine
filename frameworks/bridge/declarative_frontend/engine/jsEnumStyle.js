@@ -1687,3 +1687,11 @@ var NestedScrollMode;
   NestedScrollMode[NestedScrollMode["PARENT_FIRST"] = 2] = "PARENT_FIRST";
   NestedScrollMode[NestedScrollMode["PARALLEL"] = 3] = "PARALLEL";
 })(NestedScrollMode || (NestedScrollMode = {}));
+
+var ScrollAlign;
+(function (ScrollAlign) {
+  ScrollAlign[ScrollAlign["START"] = 0] = "START";
+  ScrollAlign[ScrollAlign["CENTER"] = 1] = "CENTER";
+  ScrollAlign[ScrollAlign["END"] = 2] = "END";
+  ScrollAlign[ScrollAlign["AUTO"] = 3] = "AUTO";
+})(ScrollAlign || (ScrollAlign = {}));
