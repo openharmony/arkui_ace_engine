@@ -42,6 +42,17 @@ public:
     void OnDetachFromMainTree(bool) override;
 
     OffsetF GetFormOffset() const;
+
+    int32_t GetImageId()
+    {
+        if (!imageId_.has_value()) {
+            imageId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return imageId_.value();
+    }
+
+private:
+    std::optional<int32_t> imageId_;
 };
 
 } // namespace OHOS::Ace::NG
