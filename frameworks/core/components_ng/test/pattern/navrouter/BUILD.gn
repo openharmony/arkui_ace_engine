@@ -124,7 +124,6 @@ ace_unittest("navrouter_test_ng") {
 
     # "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
     # navigation
-    "$ace_root/frameworks/base/test/mock/mock_mouse_style.cpp",
     "$ace_root/frameworks/base/test/mock/mock_pixel_map.cpp",
 
     # self

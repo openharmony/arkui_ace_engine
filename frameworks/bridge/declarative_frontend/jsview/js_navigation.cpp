@@ -29,7 +29,6 @@
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
-#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<NavigationModel> NavigationModel::instance_ = nullptr;
@@ -61,9 +60,6 @@ constexpr int32_t TITLE_MODE_RANGE = 2;
 constexpr int32_t NAVIGATION_MODE_RANGE = 2;
 constexpr int32_t NAV_BAR_POSITION_RANGE = 1;
 constexpr int32_t DEFAULT_NAV_BAR_WIDTH = 200;
-constexpr Dimension DEFAULT_MIN_NAV_BAR_WIDTH = 240.0_vp;
-constexpr Dimension DEFAULT_MAX_NAV_BAR_WIDTH = 280.0_vp;
-constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
 
 JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent& eventInfo)
 {
@@ -207,8 +203,6 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("onTitleModeChange", &JSNavigation::SetOnTitleModeChanged);
     JSClass<JSNavigation>::StaticMethod("mode", &JSNavigation::SetUsrNavigationMode);
     JSClass<JSNavigation>::StaticMethod("navBarWidth", &JSNavigation::SetNavBarWidth);
-    JSClass<JSNavigation>::StaticMethod("minContentWidth", &JSNavigation::SetMinContentWidth);
-    JSClass<JSNavigation>::StaticMethod("navBarWidthRange", &JSNavigation::SetNavBarWidthRange);
     JSClass<JSNavigation>::StaticMethod("navBarPosition", &JSNavigation::SetNavBarPosition);
     JSClass<JSNavigation>::StaticMethod("hideNavBar", &JSNavigation::SetHideNavBar);
     JSClass<JSNavigation>::StaticMethod("backButtonIcon", &JSNavigation::SetBackButtonIcon);
@@ -473,61 +467,6 @@ void JSNavigation::SetNavBarWidth(const JSCallbackInfo& info)
     }
 
     NavigationModel::GetInstance()->SetNavBarWidth(navBarWidth);
-}
-
-void JSNavigation::SetMinContentWidth(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-
-    CalcDimension minContentWidth;
-    if (!ParseJsDimensionVp(info[0], minContentWidth)) {
-        NavigationModel::GetInstance()->SetMinContentWidth(DEFAULT_MIN_CONTENT_WIDTH);
-        return;
-    }
-
-    if (LessNotEqual(minContentWidth.Value(), 0.0)) {
-        minContentWidth = DEFAULT_MIN_CONTENT_WIDTH;
-    }
-
-    NavigationModel::GetInstance()->SetMinContentWidth(minContentWidth);
-}
-
-void JSNavigation::SetNavBarWidthRange(const JSCallbackInfo& info)
-{
-
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-
-    auto rangeArray = JSRef<JSArray>::Cast(info[0]);
-    JSRef<JSVal> min = rangeArray->GetValueAt(0);
-    JSRef<JSVal> max = rangeArray->GetValueAt(1);
-
-    CalcDimension minNavBarWidth;
-    if (!ParseJsDimensionVp(min, minNavBarWidth)) {
-        minNavBarWidth = DEFAULT_MIN_NAV_BAR_WIDTH;
-    }
-
-    CalcDimension maxNavBarWidth;
-    if (!ParseJsDimensionVp(max, maxNavBarWidth)) {
-        maxNavBarWidth = DEFAULT_MAX_NAV_BAR_WIDTH;
-    }
-
-    if (LessNotEqual(minNavBarWidth.Value(), 0.0)) {
-        minNavBarWidth = DEFAULT_MIN_NAV_BAR_WIDTH;
-    }
-
-    if (LessNotEqual(maxNavBarWidth.Value(), 0.0)) {
-        maxNavBarWidth = DEFAULT_MAX_NAV_BAR_WIDTH;
-    }
-
-    NavigationModel::GetInstance()->SetMinNavBarWidth(minNavBarWidth);
-    NavigationModel::GetInstance()->SetMaxNavBarWidth(maxNavBarWidth);
-
 }
 
 void JSNavigation::SetOnNavBarStateChange(const JSCallbackInfo& info)

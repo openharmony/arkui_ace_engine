@@ -54,10 +54,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        auto layoutAlgorithm = MakeRefPtr<NavigationLayoutAlgorithm>();
-        layoutAlgorithm->SetRealNavBarWidth(realNavBarWidth_);
-        layoutAlgorithm->SetIfNeedInit(ifNeedInit_);
-        return layoutAlgorithm;
+        return MakeRefPtr<NavigationLayoutAlgorithm>();
     }
 
     void OnModifyDone() override;
@@ -149,8 +146,6 @@ public:
         navigationStack_->Remove();
     }
 
-    void InitDividerMouseEvent(const RefPtr<InputEventHub>& inputHub);
-
     void CleanStack()
     {
         navigationStack_->RemoveAll();
@@ -172,26 +167,11 @@ private:
     bool CheckExistPreStack(const std::string& name);
     RefPtr<UINode> GetNodeAndRemoveByName(const std::string& name);
     RefPtr<UINode> GenerateUINodeByIndex(int32_t index);
-    void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleDragStart();
-    void HandleDragUpdate(float xOffset);
-    void HandleDragEnd();
-    void OnHover(bool isHover);
-    void UpdateResponseRegion(float realDividerWidth, float realNavBarWidth,
-    float dragRegionHeight, OffsetF dragRectOffset);
-    void AddDividerHotZoneRect(const RefPtr<NavigationLayoutAlgorithm>& layoutAlgorithm);
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
     RefPtr<NavigationStack> navigationStack_;
     NavPathList preNavPathList_;
     NavPathList navPathList_;
-    RefPtr<InputEvent> hoverEvent_;
-    RefPtr<DragEvent> dragEvent_;
-    RectF dragRect_;
-    bool ifNeedInit_ = true;
-    float preNavBarWidth_ = 0.0f;
-    float realNavBarWidth_ = 360.0f;
-    float realDividerWidth_ = 2.0f;
     bool navigationStackProvided_ = false;
 };
 

@@ -22,8 +22,6 @@
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
-#include "core/components_ng/pattern/navigation/navigation_group_node.h"
-#include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -46,47 +44,10 @@ public:
         navigationMode_ = navigationMode;
     }
 
-    void SetRealNavBarWidth(float realNavBarWidth)
-    {
-        realNavBarWidth_ = realNavBarWidth;
-    }
-
-    float GetRealNavBarWidth()
-    {
-        return realNavBarWidth_;
-    }
-
-    void SetIfNeedInit(bool ifNeedInit)
-    {
-        ifNeedInit_ = ifNeedInit;
-    }
-
-    float GetRealNavBarHeight() const
-    {
-        return realNavBarHeight_;
-    }
-
-    float GetRealDividerWidth() const
-    {
-        return realDividerWidth_;
-    }
-
-    OffsetF GetNavBarOffset() const
-    {
-        return navBarOffset_;
-    }
-
 private:
     NavigationMode usrNavigationMode_ = NavigationMode::AUTO;
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     ACE_DISALLOW_COPY_AND_MOVE(NavigationLayoutAlgorithm);
-    void MeasureNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
-        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& navBarSize);
-    float realNavBarWidth_ = 0.0f;
-    float realDividerWidth_ = 0.0f;
-    float realNavBarHeight_ = 0.0f;
-    bool ifNeedInit_ = true;
-    OffsetF navBarOffset_;
 };
 
 } // namespace OHOS::Ace::NG
