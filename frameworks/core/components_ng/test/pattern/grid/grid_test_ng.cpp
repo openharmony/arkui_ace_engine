@@ -3757,4 +3757,30 @@ HWTEST_F(GridTestNg, PerformActionTest002, TestSize.Level1)
     EXPECT_TRUE(gridAccessibilityProperty->ActActionScrollForward());
     EXPECT_TRUE(gridAccessibilityProperty->ActActionScrollBackward());
 }
+
+/**
+ * @tc.name: GridScrollTest001
+ * @tc.desc: Test FireOnScrollBarUpdate Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridScrollTest001, TestSize.Level1)
+{
+    GridModelNG gridModelNG;
+    gridModelNG.Create(nullptr, nullptr);
+    gridModelNG.SetRowsTemplate("1fr 1fr");
+    gridModelNG.SetRowsGap(GRID_ROWS_GAP);
+    ScrollBarUpdateFunc scrollFunc = [](int32_t index, float offset) {
+        std::optional<float> horizontalOffset = offset;
+        std::optional<float> verticalOffset = offset;
+        return std::make_pair(horizontalOffset, verticalOffset);
+    };
+    gridModelNG.SetOnScrollBarUpdate(std::move(scrollFunc));
+    CreateSingleGridItem(1, 1, 1, 2);
+    CreateGridItem(2, -1, ITEM_HEIGHT);
+    GetInstance();
+    RunMeasureAndLayout();
+    auto fireOnScroll = eventHub_->FireOnScrollBarUpdate(1.0, 1.0);
+    EXPECT_FLOAT_EQ(fireOnScroll.first.value(), 1.0f);
+    EXPECT_FLOAT_EQ(fireOnScroll.second.value(), 1.0f);
+}
 } // namespace OHOS::Ace::NG
