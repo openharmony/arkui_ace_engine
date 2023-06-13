@@ -15,14 +15,12 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/models/ability_component_model_impl.h"
 
-#include <utility>
-
 #include "frameworks/base/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/core/event/ace_event_handler.h"
 
 namespace OHOS::Ace::Framework {
-void AbilityComponentModelImpl::Create()
+void AbilityComponentModelImpl::Create(const std::string& bundleName, const std::string& abilityName)
 {
     auto abilityComponent = AceType::MakeRefPtr<OHOS::Ace::V2::AbilityComponent>();
     ViewStackProcessor::GetInstance()->ClaimElementId(abilityComponent);

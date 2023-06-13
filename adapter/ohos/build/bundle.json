@@ -42,7 +42,9 @@
                 "graphic",
                 "bytrace",
                 "startup_l2",
-                "hiview"
+                "hiview",
+                "input",
+                "window_manager"
             ],
             "third_party": [
                 "json",
