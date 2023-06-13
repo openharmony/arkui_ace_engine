@@ -83,6 +83,12 @@ template("ace_base_source_set") {
       libs = [ "//prebuilts/mingw-w64/ohos/linux-x86_64/clang-mingw/x86_64-w64-mingw32/lib/libshlwapi.a" ]
     }
 
+    if (is_cross_platform_build) {
+      deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
+    } else {
+      deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+    }
+
     # curl download manager
     if (defined(config.use_curl_download) && config.use_curl_download) {
       configs += [ "//third_party/curl:curl_config" ]

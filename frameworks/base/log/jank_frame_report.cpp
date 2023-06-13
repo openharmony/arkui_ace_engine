@@ -14,6 +14,7 @@
  */
 
 #include "base/log/jank_frame_report.h"
+#include "render_service_client/core/transaction/rs_interfaces.h"
 
 #include <chrono>
 
@@ -112,6 +113,7 @@ void JankFrameReport::FlushRecord()
         ClearFrameJankRecord();
         return;
     }
+    Rosen::RSInterfaces::GetInstance().ReportJankStats();
     EventReport::JankFrameReport(startTime_, GetDuration(), frameJankRecord_, pageUrl_);
     ClearFrameJankRecord();
 }
