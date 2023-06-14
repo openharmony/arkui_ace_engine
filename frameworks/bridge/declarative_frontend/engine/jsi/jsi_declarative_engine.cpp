@@ -401,7 +401,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     }
 
     // preload uiContext
-    uint8_t* tsCodeStart = (uint8_t*)_binary_jsUIContext_abc_start;
+    uint8_t* tsCodeStart = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(_binary_jsUIContext_abc_start));
     int32_t tsCodeLength = _binary_jsUIContext_abc_end - _binary_jsUIContext_abc_start;
     bool jsUIContextResult = arkRuntime->EvaluateJsCode(tsCodeStart, tsCodeLength);
     if (!jsUIContextResult) {
