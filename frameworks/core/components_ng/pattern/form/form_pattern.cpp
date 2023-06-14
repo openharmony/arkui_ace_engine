@@ -45,7 +45,7 @@ constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT = 5000;
 
 class FormSnapshotCallback : public Rosen::SurfaceCaptureCallback {
 public:
-    explicit FormSnapshotCallback(WeakPtr<FormPattern> node) : weakFormPattern_(node) {}
+    explicit FormSnapshotCallback(const WeakPtr<FormPattern>& node) : weakFormPattern_(node) {}
     ~FormSnapshotCallback() override = default;
     void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelMap) override
     {
@@ -243,8 +243,6 @@ void FormPattern::UpdateImageNode()
     layoutConstraint.selfIdealSize = idealSize;
     layoutConstraint.maxSize = idealSize;
     imageNode->UpdateLayoutConstraint(layoutConstraint);
-
-    imageNode->GetRenderContext()->UpdateBackgroundColor(Color::RED);
     pixelLayoutProperty->UpdateImageSourceInfo(pixelSourceInfo);
 
     imageNode->MarkModifyDone();
@@ -300,7 +298,6 @@ void FormPattern::OnVisibleChange(bool isVisible)
 
 bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    LOGI("OnDirtyLayoutWrapperSwap");
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
