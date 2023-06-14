@@ -277,6 +277,9 @@ void JSTabs::SetBarBackgroundColor(const JSCallbackInfo& info)
 void JSTabs::SetDivider(const JSCallbackInfo& info)
 {
     TabsItemDivider divider;
+    CalcDimension dividerStrokeWidth;
+    CalcDimension dividerStartMargin;
+    CalcDimension dividerEndMargin;
     RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
 
@@ -287,21 +290,26 @@ void JSTabs::SetDivider(const JSCallbackInfo& info)
         if (info[0]->IsNull()) {
             divider.isNull = true;
         } else {
-            if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth) ||
-                divider.strokeWidth.Value() < 0.0f) {
+            if (!info[0]->IsObject() || !ParseJsDimensionVp(obj->GetProperty("strokeWidth"), dividerStrokeWidth) ||
+                dividerStrokeWidth.Value() < 0.0f || dividerStrokeWidth.Unit() == DimensionUnit::PERCENT) {
                 divider.strokeWidth.Reset();
+            } else {
+                divider.strokeWidth = dividerStrokeWidth;
             }
             if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
                 divider.color = tabTheme->GetDividerColor();
             }
-            if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin) ||
-                divider.startMargin.Value() < 0.0f) {
+            if (!info[0]->IsObject() || !ParseJsDimensionVp(obj->GetProperty("startMargin"), dividerStartMargin) ||
+                dividerStartMargin.Value() < 0.0f || dividerStartMargin.Unit() == DimensionUnit::PERCENT) {
                 divider.startMargin.Reset();
+            } else {
+                divider.startMargin = dividerStartMargin;
             }
-
-            if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin) ||
-                divider.endMargin.Value() < 0.0f) {
+            if (!info[0]->IsObject() || !ParseJsDimensionVp(obj->GetProperty("endMargin"), dividerEndMargin) ||
+                dividerEndMargin.Value() < 0.0f || dividerEndMargin.Unit() == DimensionUnit::PERCENT) {
                 divider.endMargin.Reset();
+            } else {
+                divider.endMargin = dividerEndMargin;
             }
         }
     }
