@@ -71,6 +71,10 @@ public:
     RefPtr<NG::FrameNode> ShowDialogNG(
         const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode) override;
     void HideSubWindowNG() override;
+    bool GetShown() override
+    {
+        return isShowed_;
+    }
 
     void SetHotAreas(const std::vector<Rect>& rects) override;
 

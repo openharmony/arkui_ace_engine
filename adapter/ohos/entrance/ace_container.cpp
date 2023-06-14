@@ -1330,13 +1330,24 @@ void AceContainer::InitWindowCallback()
     }
     windowManager->SetWindowMinimizeCallBack([window = uiWindow_]() { window->Minimize(); });
     windowManager->SetWindowMaximizeCallBack([window = uiWindow_]() { window->Maximize(); });
+    windowManager->SetWindowMaximizeFloatingCallBack([window = uiWindow_]() { window->MaximizeFloating(); });
     windowManager->SetWindowRecoverCallBack([window = uiWindow_]() { window->Recover(); });
     windowManager->SetWindowCloseCallBack([window = uiWindow_]() { window->Close(); });
     windowManager->SetWindowStartMoveCallBack([window = uiWindow_]() { window->StartMove(); });
-    windowManager->SetWindowSplitCallBack(
+    windowManager->SetWindowSplitPrimaryCallBack(
         [window = uiWindow_]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY); });
+    windowManager->SetWindowSplitSecondaryCallBack(
+        [window = uiWindow_]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY); });
     windowManager->SetWindowGetModeCallBack(
         [window = uiWindow_]() -> WindowMode { return static_cast<WindowMode>(window->GetMode()); });
+    windowManager->SetWindowSetMaximizeModeCallBack(
+        [window = uiWindow_](MaximizeMode mode) {
+            window->SetGlobalMaximizeMode(static_cast<Rosen::MaximizeMode>(mode));
+        });
+    windowManager->SetWindowGetMaximizeModeCallBack(
+        [window = uiWindow_]() -> MaximizeMode {
+            return static_cast<MaximizeMode>(window->GetGlobalMaximizeMode());
+        });
 
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
         Rect rect;
