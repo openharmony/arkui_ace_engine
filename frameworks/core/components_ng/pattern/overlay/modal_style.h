@@ -13,36 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_SHEET_STYLE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_SHEET_STYLE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_MODAL_STYLE_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_MODAL_STYLE_H
 
 #include <optional>
 
-#include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace::NG {
-const Dimension SHEET_RADIUS = 32.0_vp;
-const Dimension SHEET_DRAG_BAR_WIDTH = 64.0_vp;
-const Dimension SHEET_DRAG_BAR_HEIGHT = 24.0_vp;
-const Dimension SHEET_BLANK_MINI_HEIGHT = 8.0_vp;
-const double SHEET_VELOCITY_THRESHOLD = 1000.0; // Move 1000px per second.
-
-enum SheetMode {
-    MEDIUM,
-    LARGE,
+enum ModalTransition {
+    DEFAULT,
+    NONE,
+    ALPHA,
 };
 
-struct SheetStyle {
-    std::optional<Dimension> height;
-    std::optional<SheetMode> sheetMode;
-    std::optional<bool> showDragBar;
+struct ModalStyle {
+    std::optional<ModalTransition> modalTransition;
     std::optional<Color> backgroundColor;
 
-    bool operator==(const SheetStyle& sheetStyle) const
+    bool operator==(const ModalStyle& modelStyle) const
     {
-        return !(height != sheetStyle.height || sheetMode != sheetStyle.sheetMode ||
-                 showDragBar != sheetStyle.showDragBar || backgroundColor != sheetStyle.backgroundColor);
+        return !(modalTransition != modelStyle.modalTransition || backgroundColor != modelStyle.backgroundColor);
     }
 };
 } // namespace OHOS::Ace::NG
