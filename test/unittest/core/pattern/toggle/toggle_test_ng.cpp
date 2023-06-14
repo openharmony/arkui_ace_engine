@@ -401,10 +401,8 @@ HWTEST_F(ToggleTestNg, TogglePatternTest008, TestSize.Level1)
     switchPattern->isOn_ = false;
     paintProperty->UpdateIsOn(true);
     switchPattern->OnModifyDone();
-    EXPECT_EQ(switchPattern->isOn_, false);
+    EXPECT_EQ(switchPattern->isOn_, true);
     EXPECT_EQ(paintProperty->GetIsOnValue(), true);
-    paintProperty->UpdateCurve(Curves::LINEAR);
-    switchPattern->PlayTranslateAnimation(0.0f, 1.0f);
 }
 
 /**
@@ -564,8 +562,6 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0010, TestSize.Level1)
     switchPattern->HandleDragEnd();
     switchPattern->isOn_ = true;
     switchPattern->HandleDragEnd();
-    switchPattern->controller_ = CREATE_ANIMATOR();
-    switchPattern->controller_->status_ = Animator::Status::RUNNING;
     switchPattern->OnClick();
 }
 
@@ -895,6 +891,11 @@ HWTEST_F(ToggleTestNg, TogglePaintTest002, TestSize.Level1)
     switchModifier->touchHoverType_ = TouchHoverAnimationType::PRESS;
     switchModifier->UpdateAnimatableProperty();
     EXPECT_EQ(switchModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
+    EXPECT_EQ(switchModifier->isFirstCreated_, false);
+    switchModifier->isDragEvent_ = true;
+    switchModifier->SetDragOffsetX(0.0f);
+    switchModifier->UpdateAnimatableProperty();
+    EXPECT_EQ(switchModifier->pointOffset_->Get(), 0.0f);
 }
 
 /**
@@ -1206,54 +1207,6 @@ HWTEST_F(ToggleTestNg, ToggleModelTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: TogglePatternTest0018
- * @tc.desc: Test toggle PlayTranslateAnimation callback.
- * @tc.type: FUNC
- */
-HWTEST_F(ToggleTestNg, TogglePatternTest0018, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create switch and get frameNode.
-     */
-    ToggleModelNG toggleModelNG;
-    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
-    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(switchFrameNode, nullptr);
-
-    auto pattern = switchFrameNode->GetPattern<SwitchPattern>();
-    ASSERT_NE(pattern, nullptr);
-    /**
-     * @tc.steps: step2. call method PlayTranslateAnimation.
-     */
-    pattern->PlayTranslateAnimation(0.0f, 0.8f);
-    /**
-     * @tc.steps: step3. call the translate callback.
-     */
-    auto& interpolators_ = pattern->controller_->interpolators_;
-    for (auto& interpolator : interpolators_) {
-        interpolator->OnInitNotify(0.4f, false);
-    }
-    /**
-     * @tc.steps: step4. call the NotifyStopListener.
-     */
-    pattern->controller_->NotifyStopListener();
-    /**
-     * cover changeFlag_ == true branch.
-     */
-    pattern->changeFlag_ = true;
-    pattern->currentOffset_ = 0.0f;
-    pattern->controller_->NotifyStopListener();
-    /**
-     * cover isOn_ == false branch.
-     */
-    pattern->isOn_ = false;
-    pattern->controller_->NotifyStopListener();
-    pattern->isOn_ = false;
-    pattern->changeFlag_ = false;
-    pattern->controller_->NotifyStopListener();
-}
-
-/**
  * @tc.name: TogglePatternTest0019
  * @tc.desc: Test toggle HandleDragEnd.
  * @tc.type: FUNC
@@ -1274,14 +1227,19 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0019, TestSize.Level1)
     /**
      * @tc.steps: step2. call function HandleDragEnd.
      */
+    pattern->dragOffsetX_ = 0;
     pattern->HandleDragEnd();
-    EXPECT_TRUE(pattern->changeFlag_);
+    pattern->dragOffsetX_ = SWITCH_WIDTH;
+    pattern->HandleDragEnd();
+    EXPECT_FALSE(pattern->isDragEvent_);
     /**
      * cover isOn_ == false branch.
      */
     pattern->isOn_ = false;
     pattern->HandleDragEnd();
-    EXPECT_FALSE(pattern->changeFlag_);
+    pattern->dragOffsetX_ = 0;
+    pattern->HandleDragEnd();
+    EXPECT_FALSE(pattern->isDragEvent_);
 }
 
 /**
