@@ -405,7 +405,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 {
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
-    if (!IsAllowedDrag(eventHub)) {
+    if (!IsAllowedDrag(eventHub) || (info.GetSourceTool() == SourceTool::PEN)) {
         gestureInfoForWeb_ = info;
         return;
     }
