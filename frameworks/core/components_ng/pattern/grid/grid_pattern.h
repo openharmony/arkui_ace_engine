@@ -218,6 +218,7 @@ private:
     bool scrollable_ = true;
     int32_t scrollState_ = SCROLL_FROM_NONE;
     bool mousePressed_ = false;
+    bool firstShow_ = false;
 
     int32_t lastFocusItemMainIndex_ = 0;
     int32_t lastFocusItemCrossIndex_ = 0;
