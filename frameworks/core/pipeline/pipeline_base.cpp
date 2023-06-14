@@ -158,15 +158,22 @@ void PipelineBase::SetRootSize(double density, int32_t width, int32_t height)
 {
     ACE_SCOPED_TRACE("SetRootSize(%lf, %d, %d)", density, width, height);
     density_ = density;
-    taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), density, width, height]() {
-            auto context = weak.Upgrade();
-            if (!context) {
-                return;
-            }
-            context->SetRootRect(width, height);
-        },
-        TaskExecutor::TaskType::UI);
+    auto task = [weak = AceType::WeakClaim(this), density, width, height]() {
+        auto context = weak.Upgrade();
+        if (!context) {
+            return;
+        }
+        context->SetRootRect(width, height);
+    };
+#ifdef NG_BUILD
+    if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        task();
+    } else {
+        taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI);
+    }
+#else
+    taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI);
+#endif
 }
 
 void PipelineBase::SetFontScale(float fontScale)
