@@ -24,9 +24,12 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ContainerModalView {
 public:
     static RefPtr<FrameNode> Create(RefPtr<FrameNode>& content);
-
-private:
+   
+protected:
+    static RefPtr<FrameNode> AddControlButtons(RefPtr<FrameNode>& containerTitleRow);
+    static RefPtr<FrameNode> BuildTitleContainer(RefPtr<FrameNode>& containerNode, bool isFloatingTitle = false);
     static RefPtr<FrameNode> BuildTitle(RefPtr<FrameNode>& containerNode, bool isFloatingTitle = false);
+    static RefPtr<FrameNode> BuildTitleRow(bool isFloatingTitle = false);
     static RefPtr<FrameNode> BuildControlButton(
         InternalResource::ResourceId icon, GestureEventFunc&& clickCallback, bool isCloseButton = false);
     static void AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode);

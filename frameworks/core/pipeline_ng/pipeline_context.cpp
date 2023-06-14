@@ -53,6 +53,7 @@
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
+#include "core/components_ng/pattern/container_modal/container_modal_view_factory.h"
 #include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -411,7 +412,7 @@ void PipelineContext::SetupRootElement()
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
     appBarNode_ = installationFree_ ? AppBarView::Create(stageNode) : nullptr;
     if (windowModal_ == WindowModal::CONTAINER_MODAL) {
-        rootNode_->AddChild(ContainerModalView::Create(appBarNode_ ? appBarNode_ : stageNode));
+        rootNode_->AddChild(ContainerModalViewFactory::GetView(appBarNode_ ? appBarNode_ : stageNode));
     } else {
         rootNode_->AddChild(appBarNode_ ? appBarNode_ : stageNode);
     }

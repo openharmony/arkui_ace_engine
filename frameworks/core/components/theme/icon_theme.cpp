@@ -91,7 +91,17 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::IC_SELECT_ALL_SVG, "ic_public_select_all" },
     { InternalResource::ResourceId::IC_SHARE_SVG, "ic_public_share" },
     { InternalResource::ResourceId::IC_TRANSLATE_SVG, "ic_public_translate_c2e" },
-    { InternalResource::ResourceId::IC_SEARCH_SVG, "ic_public_search_filled" }
+    { InternalResource::ResourceId::IC_SEARCH_SVG, "ic_public_search_filled" },
+    { InternalResource::ResourceId::MENU_OK_SVG, "ic_public_ok" },
+    { InternalResource::ResourceId::IC_WINDOW_CLOSE, "ic_window_close" },
+    { InternalResource::ResourceId::IC_WINDOW_MAX, "ic_window_max" },
+    { InternalResource::ResourceId::IC_WINDOW_MENU_FULLSCREEN, "ic_window_menu_fullscreen" },
+    { InternalResource::ResourceId::IC_WINDOW_MENU_MAXIMIZE, "ic_window_menu_maximize" },
+    { InternalResource::ResourceId::IC_WINDOW_MENU_OK, "ic_window_menu_ok" },
+    { InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_L, "ic_window_menu_screen_l" },
+    { InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_N, "ic_window_menu_screen_n" },
+    { InternalResource::ResourceId::IC_WINDOW_MIN, "ic_window_min" },
+    { InternalResource::ResourceId::IC_WINDOW_RESTORES, "ic_window_restores" }
 };
 }
 
