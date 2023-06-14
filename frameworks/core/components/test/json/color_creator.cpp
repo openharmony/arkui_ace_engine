@@ -58,7 +58,6 @@ Color ColorCreator::CreateFromJson(const JsonValue& componentJson)
 
 Color ColorCreator::CreateFromString(const std::string& colorValue)
 {
-    LOGI("CreateFromJson color, colorValue %{public}s", colorValue.c_str());
     return Color::FromString(colorValue);
 }
 
