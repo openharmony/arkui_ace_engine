@@ -38,6 +38,8 @@ SourceTool GetSourceTool(int32_t orgToolType)
             return SourceTool::MOUSE;
         case OHOS::MMI::PointerEvent::TOOL_TYPE_LENS:
             return SourceTool::LENS;
+        case OHOS::MMI::PointerEvent::TOOL_TYPE_TOUCHPAD:
+            return SourceTool::TOUCHPAD;
         default:
             LOGW("unknown tool type");
             return SourceTool::UNKNOWN;
@@ -278,15 +280,16 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     GetAxisEventAction(orgAction, event);
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
+    event.sourceTool = GetSourceTool(item.GetToolType());
 
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
     TimeStamp time(microseconds);
     event.time = time;
     LOGD("ConvertAxisEvent: id: %{public}d, (x,y): (%{public}f,%{public}f). HorizontalAxis: %{public}f. VerticalAxis: "
          "%{public}f. "
-         "Action: %{public}d. DeviceType: %{public}d. Time: %{public}lld",
+         "Action: %{public}d. SourceType: %{public}d. ToolType: %{public}d. Time: %{public}lld",
         event.id, event.x, event.y, event.horizontalAxis, event.verticalAxis, event.action, event.sourceType,
-        (long long)pointerEvent->GetActionTime());
+        event.sourceTool, (long long)pointerEvent->GetActionTime());
 }
 
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event)

@@ -61,6 +61,7 @@ struct AxisEvent final {
     TimeStamp time;
     int64_t deviceId = 0;
     SourceType sourceType = SourceType::NONE;
+    SourceTool sourceTool = SourceTool::UNKNOWN;
 
     AxisEvent CreateScaleEvent(float scale) const
     {
@@ -74,7 +75,8 @@ struct AxisEvent final {
                 .action = action,
                 .time = time,
                 .deviceId = deviceId,
-                .sourceType = sourceType };
+                .sourceType = sourceType,
+                .sourceTool = sourceTool };
         }
         return { .id = id,
             .x = x / scale,
@@ -85,7 +87,8 @@ struct AxisEvent final {
             .action = action,
             .time = time,
             .deviceId = deviceId,
-            .sourceType = sourceType };
+            .sourceType = sourceType,
+            .sourceTool = sourceTool };
     }
 
     Offset GetOffset() const
