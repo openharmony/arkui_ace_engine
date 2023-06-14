@@ -462,10 +462,11 @@ template("declarative_js_engine") {
       ]
     }
 
-    if (defined(config.effect_view_support) && config.effect_view_support) {
+    if (defined(config.effect_component_support) &&
+        config.effect_component_support) {
       sources += [
-        "jsview/js_effect_view.cpp",
-        "jsview/models/effect_view_model_impl.cpp",
+        "jsview/js_effect_component.cpp",
+        "jsview/models/effect_component_model_impl.cpp",
       ]
     }
 

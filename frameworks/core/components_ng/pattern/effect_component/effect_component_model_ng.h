@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_VIEW_MODEL_NG_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_VIEW_MODEL_NG_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_COMPONENT_MODEL_NG_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_COMPONENT_MODEL_NG_H
 
-#include "core/components_ng/pattern/effect_view/effect_view_model.h"
+#include "core/components_ng/pattern/effect_component/effect_component_model.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT EffectViewModelNG : public OHOS::Ace::EffectViewModel {
+class ACE_EXPORT EffectComponentModelNG : public OHOS::Ace::EffectComponentModel {
 public:
     void Create() override;
 };
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_VIEW_MODEL_NG_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_COMPONENT_MODEL_NG_H

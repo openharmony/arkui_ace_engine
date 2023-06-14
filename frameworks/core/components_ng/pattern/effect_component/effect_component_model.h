@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_VIEW_MODEL_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_VIEW_MODEL_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_COMPONENT_MODEL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_COMPONENT_MODEL_H
 
 #include <memory>
 #include <string>
@@ -22,19 +22,19 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/effect_view/effect_view_pattern.h"
+#include "core/components_ng/pattern/effect_component/effect_component_pattern.h"
 
 namespace OHOS::Ace {
-class EffectViewModel {
+class EffectComponentModel {
 public:
-    static EffectViewModel* GetInstance();
-    virtual ~EffectViewModel() = default;
+    static EffectComponentModel* GetInstance();
+    virtual ~EffectComponentModel() = default;
 
     virtual void Create();
     
 private:
-    static std::unique_ptr<EffectViewModel> instance_;
+    static std::unique_ptr<EffectComponentModel> instance_;
     static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_VIEW_MODEL_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_COMPONENT_MODEL_H

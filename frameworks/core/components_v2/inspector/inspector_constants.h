@@ -495,7 +495,7 @@ ACE_EXPORT extern const char POPUP_ETS_TAG[];
 ACE_EXPORT extern const char REMOTE_WINDOW_ETS_TAG[];
 
 // effect view
-ACE_EXPORT extern const char EFFECT_VIEW_ETS_TAG[];
+ACE_EXPORT extern const char EFFECT_COMPONENT_ETS_TAG[];
 
 // button
 ACE_EXPORT extern const char MODEL_COMPONENT_TAG[];
