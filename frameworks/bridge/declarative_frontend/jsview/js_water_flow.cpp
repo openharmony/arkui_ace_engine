@@ -53,7 +53,6 @@ const std::vector<FlexDirection> LAYOUT_DIRECTION = { FlexDirection::ROW, FlexDi
 
 void JSWaterFlow::Create(const JSCallbackInfo& args)
 {
-    LOGI("Create component: WaterFLow");
     if (args.Length() > 1) {
         LOGW("Arg is wrong, it is supposed to have at most one argument");
         return;

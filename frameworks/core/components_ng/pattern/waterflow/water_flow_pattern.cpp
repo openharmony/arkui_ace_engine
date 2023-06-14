@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm.h"
+#include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
 
 namespace OHOS::Ace::NG {
 bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t /* source */)
@@ -90,6 +91,16 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
     return AceType::MakeRefPtr<WaterFlowLayoutAlgorithm>(layoutInfo_);
 }
 
+RefPtr<NodePaintMethod> WaterFlowPattern::CreateNodePaintMethod()
+{
+    auto paint = MakeRefPtr<WaterFlowPaintMethod>();
+    if (!contentModifier_) {
+        contentModifier_ = AceType::MakeRefPtr<WaterFlowContentModifier>();
+    }
+    paint->SetContentModifier(contentModifier_);
+    return paint;
+}
+
 void WaterFlowPattern::OnModifyDone()
 {
     auto layoutProperty = GetLayoutProperty<WaterFlowLayoutProperty>();
@@ -109,9 +120,9 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     auto layoutAlgorithmWrapper = dirty->GetLayoutAlgorithm();
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
-    auto gridLayoutAlgorithm = DynamicCast<WaterFlowLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(gridLayoutAlgorithm, false);
-    auto layoutInfo = gridLayoutAlgorithm->GetLayoutInfo();
+    auto layoutAlgorithm = DynamicCast<WaterFlowLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutAlgorithm, false);
+    auto layoutInfo = layoutAlgorithm->GetLayoutInfo();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto eventHub = host->GetEventHub<WaterFlowEventHub>();
@@ -132,7 +143,10 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     layoutInfo_ = std::move(layoutInfo);
     layoutInfo_.UpdateStartIndex();
-    return false;
+
+    auto property = host->GetLayoutProperty();
+    CHECK_NULL_RETURN_NOLOG(host, false);
+    return property->GetPaddingProperty() != nullptr;
 }
 
 void WaterFlowPattern::OnAttachToFrameNode()
