@@ -57,7 +57,7 @@ const std::unordered_map<std::string, int32_t> FONT_FEATURES {
     {"dlig ", 0}
 };
 
-const std::map<std::string, DimensionUnit> dimensionUnitMap {
+const std::unordered_map<std::string, DimensionUnit> dimensionUnitMap {
     {"px", DimensionUnit::PX},
     {"vp", DimensionUnit::VP},
     {"fp", DimensionUnit::FP},
@@ -65,7 +65,7 @@ const std::map<std::string, DimensionUnit> dimensionUnitMap {
     {"lpx", DimensionUnit::LPX},
 };
 
-const std::map<int, TextCase> textCaseMap {
+const std::unordered_map<int, TextCase> textCaseMap {
     {0, TextCase::NORMAL},
     {1, TextCase::LOWERCASE},
     {2, TextCase::UPPERCASE}
