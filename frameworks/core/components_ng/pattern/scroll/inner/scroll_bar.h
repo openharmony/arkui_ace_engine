@@ -266,7 +266,7 @@ public:
     {
         displayMode_ = displayMode;
         if (displayMode_ == DisplayMode::AUTO) {
-            PlayBarEndAnimation();
+            OnScrollEnd();
         } else if (displayMode_ == DisplayMode::ON) {
             if (scrollEndAnimator_ && !scrollEndAnimator_->IsStopped()) {
                 scrollEndAnimator_->Stop();
@@ -328,7 +328,7 @@ public:
 
     void OnScrollEnd()
     {
-        if (displayMode_ == DisplayMode::AUTO) {
+        if (displayMode_ == DisplayMode::AUTO && isScrollable_) {
             PlayBarEndAnimation();
         }
     }
