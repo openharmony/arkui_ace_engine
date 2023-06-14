@@ -264,10 +264,12 @@ void ListLayoutAlgorithm::MeasureList(
             case ScrollAlign::START:
             case ScrollAlign::CENTER:
                 jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value());
-                if (scrollAlign_ == ScrollAlign::START) startPos = 0.0f;
-                else {
+                if (scrollAlign_ == ScrollAlign::START) {
+                    startPos = 0.0f;
+                } else {
                     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(jumpIndex_.value());
                     CHECK_NULL_VOID(wrapper);
+                    wrapper->Measure(layoutConstraint);
                     float mainLen = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis);
                     startPos = (contentMainSize_ - mainLen) / 2.0f;
                 }
