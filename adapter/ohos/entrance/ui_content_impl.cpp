@@ -30,7 +30,6 @@
 #include "service_extension_context.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
-#include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
 
@@ -1463,29 +1462,25 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    auto task = [config, container, reason, rsTransaction, rsWindow = window_]() {
-        container->SetWindowPos(config.Left(), config.Top());
-        auto pipelineContext = container->GetPipelineContext();
-        if (pipelineContext) {
-            pipelineContext->SetDisplayWindowRectInfo(
-                Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
-            if (rsWindow) {
-                pipelineContext->SetIsLayoutFullScreen(rsWindow->IsLayoutFullScreen());
+    taskExecutor->PostTask(
+        [config, container, reason, rsTransaction, rsWindow = window_]() {
+            container->SetWindowPos(config.Left(), config.Top());
+            auto pipelineContext = container->GetPipelineContext();
+            if (pipelineContext) {
+                pipelineContext->SetDisplayWindowRectInfo(
+                    Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
+                if (rsWindow) {
+                    pipelineContext->SetIsLayoutFullScreen(rsWindow->IsLayoutFullScreen());
+                }
             }
-            pipelineContext->FlushBuild();
-        }
-        auto aceView = static_cast<Platform::AceViewOhos*>(container->GetAceView());
-        CHECK_NULL_VOID(aceView);
-        Platform::AceViewOhos::SetViewportMetrics(aceView, config);
-        Platform::AceViewOhos::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
-            static_cast<WindowSizeChangeReason>(reason), rsTransaction);
-        Platform::AceViewOhos::SurfacePositionChanged(aceView, config.Left(), config.Top());
-    };
-    if (container->IsUseStageModel() && reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
-        task();
-    } else {
-        taskExecutor->PostTask(task, TaskExecutor::TaskType::PLATFORM);
-    }
+            auto aceView = static_cast<Platform::AceViewOhos*>(container->GetAceView());
+            CHECK_NULL_VOID(aceView);
+            Platform::AceViewOhos::SetViewportMetrics(aceView, config);
+            Platform::AceViewOhos::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
+                static_cast<WindowSizeChangeReason>(reason), rsTransaction);
+            Platform::AceViewOhos::SurfacePositionChanged(aceView, config.Left(), config.Top());
+        },
+        TaskExecutor::TaskType::PLATFORM);
 }
 
 void UIContentImpl::SetIgnoreViewSafeArea(bool ignoreViewSafeArea)
