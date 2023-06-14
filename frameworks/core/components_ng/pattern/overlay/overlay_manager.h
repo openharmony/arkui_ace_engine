@@ -57,6 +57,7 @@ public:
         popupMap_.clear();
     }
     void ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& customNode);
+    void RemoveIndexerPopupById(int32_t targetId);
     void RemoveIndexerPopup();
     void UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo);
     void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
