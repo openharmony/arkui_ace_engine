@@ -46,6 +46,6 @@ private:
     static std::string pageUrl_;
     static bool needReport_;
 };
-} // namespace OHOS::ACE
+} // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_JANK_FRAME_REPORT_H
