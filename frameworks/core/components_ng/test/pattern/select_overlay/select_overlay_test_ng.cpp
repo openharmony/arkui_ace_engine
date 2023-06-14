@@ -750,4 +750,80 @@ HWTEST_F(SelectOverlayTestNg, SelectFrameNodeAnimationTest002, TestSize.Level1)
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
 }
+/**
+ * @tc.name: SelectOverlayLayout002
+ * @tc.desc: Test selectOverlay layout when checkIsInShowArea is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectOverlayLayout002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize selectOverlayInfo properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.singleLineHeight = NODE_ID;
+    selectInfo.menuOptionItems = GetMenuOptionItems();
+    selectInfo.menuInfo.menuIsShow = true;
+    selectInfo.useFullScreen = false;
+    bool isSingleHandle[2] = { false, true };
+    for (int i = 0; i < 2; i++) {
+        selectInfo.isSingleHandle = isSingleHandle[i];
+        selectInfo.firstHandle.paintRect = FIRST_HANDLE_REGION;
+        selectInfo.secondHandle.paintRect = SECOND_HANDLE_REGION;
+        selectInfo.showArea = FIRST_HANDLE_REGION;
+        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+        MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+        EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+        auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+        auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+        auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+        ASSERT_NE(selectOverlayNode, nullptr);
+        /**
+         * @tc.steps: step2. Create pattern and geometryNode.
+         */
+        auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+        ASSERT_NE(pattern, nullptr);
+        RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+        /**
+         * @tc.steps: step3. Get layoutWrapper and layoutAlgorithm.
+         * @tc.expected: layoutWrapper and layoutAlgorithm are created successfully
+         */
+        LayoutWrapper* layoutWrapper =
+            new LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+        auto selectOverlayLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+        ASSERT_NE(selectOverlayLayoutAlgorithm, nullptr);
+        layoutWrapper->SetLayoutAlgorithm(
+            AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(selectOverlayLayoutAlgorithm));
+
+        auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+        childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
+        // create menu
+        auto item = FrameNode::GetOrCreateFrameNode(
+            V2::MENU_ETS_TAG, -1, []() { return AceType::MakeRefPtr<MenuPattern>(1, "Test", TYPE); });
+        // add item to selectOverlayNode
+        selectOverlayNode->AddChild(item);
+        RefPtr<GeometryNode> itemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+        itemGeometryNode->Reset();
+        RefPtr<LayoutWrapper> itemLayoutWrapper =
+            AceType::MakeRefPtr<LayoutWrapper>(item, itemGeometryNode, item->GetLayoutProperty());
+        EXPECT_FALSE(itemLayoutWrapper == nullptr);
+        auto itemPattern = item->GetPattern<MenuPattern>();
+        EXPECT_FALSE(itemPattern == nullptr);
+        itemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+        auto itemLayoutAlgorithm = itemPattern->CreateLayoutAlgorithm();
+        EXPECT_FALSE(itemLayoutAlgorithm == nullptr);
+        itemLayoutWrapper->SetLayoutAlgorithm(
+            AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(itemLayoutAlgorithm));
+        itemLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
+        layoutWrapper->AppendChild(itemLayoutWrapper);
+        /**
+         * @tc.steps: step4. use layoutAlgorithm to measure and layout.
+         * @tc.expected: RemoveChildInRenderTree is executed successfully when checkIsInShowArea is false.
+         */
+        EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+        selectOverlayLayoutAlgorithm->Layout(layoutWrapper);
+        EXPECT_TRUE(layoutWrapper->GetOrCreateChildByIndex(0)->isActive_);
+    }
+}
 } // namespace OHOS::Ace::NG
