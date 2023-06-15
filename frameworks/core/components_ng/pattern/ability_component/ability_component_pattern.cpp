@@ -88,8 +88,7 @@ void AbilityComponentPattern::UpdateWindowRect()
     if (adapter_ && rect != lastRect_) {
         LOGI("ConnectExtension: %{public}f %{public}f %{public}f %{public}f",
             offset.GetX(), offset.GetY(), size.Width(), size.Height());
-        Rosen::WSRect wsRect = { rect.Left(), rect.Top(), rect.Width(), rect.Height() };
-        session_->UpdateRect(wsRect, Rosen::SizeChangeReason::UNDEFINED);
+        adapter_->UpdateRect(rect);
         lastRect_ = rect;
     }
 }
