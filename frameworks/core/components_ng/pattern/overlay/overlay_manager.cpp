@@ -176,10 +176,8 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(theme);
-    // if this dialog node is currently holding focus, blur it and set focus to last page
-    if (node->GetFocusHub() && node->GetFocusHub()->IsCurrentFocus()) {
-        BlurOverlayNode();
-    }
+    // blur dialog node, set focus to last page
+    BlurOverlayNode();
 
     // default opacity animation params
     AnimationOption option;
