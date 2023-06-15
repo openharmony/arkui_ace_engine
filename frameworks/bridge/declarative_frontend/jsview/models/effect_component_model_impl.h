@@ -13,13 +13,17 @@
  * limitations under the License.
  */
 
-#include "bridge/declarative_frontend/jsview/models/effect_view_model_impl.h"
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_EFFECT_COMPONENT_MODEL_IMPL_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_EFFECT_COMPONENT_MODEL_IMPL_H
 
-#include "bridge/declarative_frontend/view_stack_processor.h"
+#include <string>
+
+#include "core/components_ng/pattern/effect_component/effect_component_model.h"
 
 namespace OHOS::Ace::Framework {
-void EffectViewModelImpl::Create()
-{
-    // empty implementation
-}
+class EffectComponentModelImpl : public EffectComponentModel {
+public:
+    void Create() override;
+};
 } // namespace OHOS::Ace::Framework
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_EFFECT_COMPONENT_MODEL_IMPL_H

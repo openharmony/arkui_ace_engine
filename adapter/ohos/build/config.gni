@@ -60,7 +60,7 @@ rich_components_support = true
 advance_components_support = false
 form_components_support = true
 remote_window_support = true
-effect_view_support = true
+effect_component_support = true
 plugin_components_support = true
 xcomponent_components_support = true
 pixel_map_support = true
@@ -136,8 +136,8 @@ if (remote_window_support) {
   defines += [ "REMOTE_WINDOW_SUPPORTED" ]
 }
 
-if (effect_view_support) {
-  defines += [ "EFFECT_VIEW_SUPPORTED" ]
+if (effect_component_support) {
+  defines += [ "EFFECT_COMPONENT_SUPPORTED" ]
 }
 
 if (xcomponent_components_support) {

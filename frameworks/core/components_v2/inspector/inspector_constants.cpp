@@ -484,7 +484,7 @@ const char POPUP_ETS_TAG[] = "Popup";
 const char REMOTE_WINDOW_ETS_TAG[] = "RemoteWindow";
 
 // effect view
-const char EFFECT_VIEW_ETS_TAG[] = "EffectView";
+const char EFFECT_COMPONENT_ETS_TAG[] = "EffectComponent";
 
 // Model
 const char MODEL_COMPONENT_TAG[] = "ModelComponent";

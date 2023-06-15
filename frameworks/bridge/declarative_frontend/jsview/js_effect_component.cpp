@@ -13,29 +13,29 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_effect_view.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_effect_component.h"
 
-#include "bridge/declarative_frontend/jsview/models/effect_view_model_impl.h"
-#include "core/components_ng/pattern/effect_view/effect_view_model_ng.h"
+#include "bridge/declarative_frontend/jsview/models/effect_component_model_impl.h"
+#include "core/components_ng/pattern/effect_component/effect_component_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 
 namespace OHOS::Ace {
-std::unique_ptr<EffectViewModel> EffectViewModel::instance_ = nullptr;
-std::mutex EffectViewModel::mutex_;
+std::unique_ptr<EffectComponentModel> EffectComponentModel::instance_ = nullptr;
+std::mutex EffectComponentModel::mutex_;
 
-EffectViewModel* EffectViewModel::GetInstance()
+EffectComponentModel* EffectComponentModel::GetInstance()
 {
     if (!instance_) {
         std::lock_guard<std::mutex> lock(mutex_);
         if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::EffectViewModelNG());
+            instance_.reset(new NG::EffectComponentModelNG());
 #else
             if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::EffectViewModelNG());
+                instance_.reset(new NG::EffectComponentModelNG());
             } else {
                 // empty implementation
-                instance_.reset(new Framework::EffectViewModelImpl());
+                instance_.reset(new Framework::EffectComponentModelImpl());
             }
 #endif
         }
@@ -45,17 +45,17 @@ EffectViewModel* EffectViewModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-void JSEffectView::Create()
+void JSEffectComponent::Create()
 {
-    EffectViewModel::GetInstance()->Create();
+    EffectComponentModel::GetInstance()->Create();
 }
 
-void JSEffectView::JSBind(BindingTarget globalObj)
+void JSEffectComponent::JSBind(BindingTarget globalObj)
 {
-    JSClass<JSEffectView>::Declare("EffectView");
+    JSClass<JSEffectComponent>::Declare("EffectComponent");
     MethodOptions opt = MethodOptions::NONE;
-    JSClass<JSEffectView>::StaticMethod("create", &JSEffectView::Create, opt);
+    JSClass<JSEffectComponent>::StaticMethod("create", &JSEffectComponent::Create, opt);
 
-    JSClass<JSEffectView>::InheritAndBind<JSViewAbstract>(globalObj);
+    JSClass<JSEffectComponent>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

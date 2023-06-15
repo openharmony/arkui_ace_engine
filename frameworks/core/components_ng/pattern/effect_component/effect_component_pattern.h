@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_VIEW_PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_VIEW_PATTERN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_COMPONENT_PATTERN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_COMPONENT_PATTERN_H
 
 #include <utility>
 
@@ -23,12 +23,12 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT EffectViewPattern : public Pattern {
-    DECLARE_ACE_TYPE(EffectViewPattern, Pattern);
+class ACE_EXPORT EffectComponentPattern : public Pattern {
+    DECLARE_ACE_TYPE(EffectComponentPattern, Pattern);
 
 public:
-    EffectViewPattern() = default;
-    ~EffectViewPattern() override = default;
+    EffectComponentPattern() = default;
+    ~EffectComponentPattern() override = default;
 
     bool IsAtomicNode() const override
     {
@@ -41,7 +41,7 @@ public:
     }
 
 private:
-    ACE_DISALLOW_COPY_AND_MOVE(EffectViewPattern);
+    ACE_DISALLOW_COPY_AND_MOVE(EffectComponentPattern);
 };
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_VIEW_PATTERN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_COMPONENT_PATTERN_H

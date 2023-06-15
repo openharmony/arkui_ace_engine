@@ -13,17 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_EFFECT_VIEW_MODEL_IMPL_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_EFFECT_VIEW_MODEL_IMPL_H
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_EFFECT_COMPONENT_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_EFFECT_COMPONENT_H
 
-#include <string>
-
-#include "core/components_ng/pattern/effect_view/effect_view_model.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
-class EffectViewModelImpl : public EffectViewModel {
+class JSEffectComponent : public JSViewAbstract {
 public:
-    void Create() override;
+    static void JSBind(BindingTarget globalObj);
+    static void Create();
 };
 } // namespace OHOS::Ace::Framework
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_EFFECT_VIEW_MODEL_IMPL_H
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_EFFECT_COMPONENT_H
