@@ -355,6 +355,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest001,
     auto borderStyle = buttonRender->GetBorderStyle().value_or(BorderStyleProperty());
     EXPECT_EQ(borderStyle.styleLeft.value_or(BorderStyle::SOLID), BorderStyle::NONE);
 
+    EXPECT_EQ(buttonProp->GetBorderRadius().value_or(Dimension(0.0)).ConvertToVp(), DEFAULT_BORDER_RADIUS);
     EXPECT_EQ(buttonRender->GetBackgroundColor().value_or(Color()), Color::BLUE);
     EXPECT_EQ(buttonProp->GetType().value_or(ButtonType::NORMAL), ButtonType::CAPSULE);
 }
@@ -484,6 +485,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest004,
     EXPECT_EQ(widthProp->leftDimen.value_or(Dimension(0.0)).ConvertToVp(), 15.0); // 15.0 vp
     auto borderStyle = buttonRender->GetBorderStyle().value_or(BorderStyleProperty());
     EXPECT_EQ(borderStyle.styleLeft.value_or(BorderStyle::SOLID), BorderStyle::DOTTED);
+    EXPECT_EQ(buttonProp->GetBorderRadius().value_or(Dimension(0.0)).ConvertToVp(), 15.0); // 15.0 vp
     EXPECT_EQ(buttonRender->GetBackgroundColor().value_or(Color()), Color::GRAY);
 }
 
@@ -543,6 +545,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest005,
     EXPECT_EQ(widthProp->leftDimen.value_or(Dimension(0.0)).ConvertToVp(), 15.0); // 15.0 vp
     auto borderStyle = buttonRender->GetBorderStyle().value_or(BorderStyleProperty());
     EXPECT_EQ(borderStyle.styleLeft.value_or(BorderStyle::SOLID), BorderStyle::DOTTED);
+    EXPECT_EQ(buttonProp->GetBorderRadius().value_or(Dimension(0.0)).ConvertToVp(), 15.0); // 15.0 vp
     EXPECT_EQ(buttonRender->GetBackgroundColor().value_or(Color()), Color::GRAY);
 }
 
@@ -787,6 +790,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest001, Tes
     auto borderStyle = buttonRender->GetBorderStyle().value_or(BorderStyleProperty());
     EXPECT_EQ(borderStyle.styleLeft.value_or(BorderStyle::SOLID), BorderStyle::NONE);
 
+    EXPECT_EQ(buttonProp->GetBorderRadius().value_or(Dimension(0.0)).ConvertToVp(), DEFAULT_BORDER_RADIUS);
     EXPECT_EQ(buttonRender->GetBackgroundColor().value_or(Color()), Color::BLUE);
     EXPECT_EQ(buttonProp->GetType().value_or(ButtonType::NORMAL), ButtonType::CAPSULE);
 }
@@ -916,6 +920,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest004, Tes
     EXPECT_EQ(widthProp->leftDimen.value_or(Dimension(0.0)).ConvertToVp(), 15.0); // 15.0 vp
     auto borderStyle = buttonRender->GetBorderStyle().value_or(BorderStyleProperty());
     EXPECT_EQ(borderStyle.styleLeft.value_or(BorderStyle::SOLID), BorderStyle::DOTTED);
+    EXPECT_EQ(buttonProp->GetBorderRadius().value_or(Dimension(0.0)).ConvertToVp(), 15.0); // 15.0 vp
     EXPECT_EQ(buttonRender->GetBackgroundColor().value_or(Color()), Color::GRAY);
 }
 
@@ -975,6 +980,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest005, Tes
     EXPECT_EQ(widthProp->leftDimen.value_or(Dimension(0.0)).ConvertToVp(), 15.0); // 15.0 vp
     auto borderStyle = buttonRender->GetBorderStyle().value_or(BorderStyleProperty());
     EXPECT_EQ(borderStyle.styleLeft.value_or(BorderStyle::SOLID), BorderStyle::DOTTED);
+    EXPECT_EQ(buttonProp->GetBorderRadius().value_or(Dimension(0.0)).ConvertToVp(), 15.0); // 15.0 vp
     EXPECT_EQ(buttonRender->GetBackgroundColor().value_or(Color()), Color::GRAY);
 }
 
@@ -1211,6 +1217,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest001, Te
     auto borderStyle = buttonRender->GetBorderStyle().value_or(BorderStyleProperty());
     EXPECT_EQ(borderStyle.styleLeft.value_or(BorderStyle::SOLID), BorderStyle::NONE);
 
+    EXPECT_EQ(buttonProp->GetBorderRadius().value_or(Dimension(0.0)).ConvertToVp(), DEFAULT_BORDER_RADIUS);
     EXPECT_EQ(buttonRender->GetBackgroundColor().value_or(Color()), Color::BLUE);
     EXPECT_EQ(buttonProp->GetType().value_or(ButtonType::NORMAL), ButtonType::CAPSULE);
 }
@@ -1340,6 +1347,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest004, Te
     EXPECT_EQ(widthProp->leftDimen.value_or(Dimension(0.0)).ConvertToVp(), 15.0); // 15.0 vp
     auto borderStyle = buttonRender->GetBorderStyle().value_or(BorderStyleProperty());
     EXPECT_EQ(borderStyle.styleLeft.value_or(BorderStyle::SOLID), BorderStyle::DOTTED);
+    EXPECT_EQ(buttonProp->GetBorderRadius().value_or(Dimension(0.0)).ConvertToVp(), 15.0); // 15.0 vp
     EXPECT_EQ(buttonRender->GetBackgroundColor().value_or(Color()), Color::GRAY);
 }
 
@@ -1399,6 +1407,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest005, Te
     EXPECT_EQ(widthProp->leftDimen.value_or(Dimension(0.0)).ConvertToVp(), 15.0); // 15.0 vp
     auto borderStyle = buttonRender->GetBorderStyle().value_or(BorderStyleProperty());
     EXPECT_EQ(borderStyle.styleLeft.value_or(BorderStyle::SOLID), BorderStyle::DOTTED);
+    EXPECT_EQ(buttonProp->GetBorderRadius().value_or(Dimension(0.0)).ConvertToVp(), 15.0); // 15.0 vp
     EXPECT_EQ(buttonRender->GetBackgroundColor().value_or(Color()), Color::GRAY);
 }
 
