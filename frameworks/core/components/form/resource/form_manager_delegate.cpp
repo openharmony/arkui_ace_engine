@@ -52,10 +52,10 @@ constexpr char ALLOW_UPDATE[] = "allowUpdate";
 constexpr char IS_DYNAMIC[] = "isDynamic";
 
 bool GetFormInfo(
-    std::string &bundleName,
-    std::string &moduleName,
-    const std::string &cardName,
-    OHOS::AppExecFwk::FormInfo &formInfo)
+    std::string& bundleName,
+    std::string& moduleName,
+    const std::string& cardName,
+    OHOS::AppExecFwk::FormInfo& formInfo)
 {
     std::vector<OHOS::AppExecFwk::FormInfo> formInfos;
     auto result = OHOS::AppExecFwk::FormMgr::GetInstance()
@@ -423,13 +423,14 @@ void FormManagerDelegate::AddUnTrustFormCallback(const UnTrustFormCallback& call
     unTrustFormCallback_ = callback;
 }
 
-void FormManagerDelegate::AddSnapshotCallback(const SnapshotCallback& callback)
+void FormManagerDelegate::AddSnapshotCallback(SnapshotCallback&& callback)
 {
     if (!callback || state_ == State::RELEASED) {
         LOGE("callback is null or has released");
         return;
     }
-    snapshotCallback_ = callback;
+
+    snapshotCallback_ = std::move(callback);
 }
 
 bool FormManagerDelegate::ParseAction(const std::string &action, const std::string& type, AAFwk::Want &want)

@@ -82,7 +82,7 @@ public:
     void AddFormSurfaceChangeCallback(OnFormSurfaceChangeCallback&& callback);
     void AddActionEventHandle(const ActionEventHandle& callback);
     void AddUnTrustFormCallback(const UnTrustFormCallback& callback);
-    void AddSnapshotCallback(const SnapshotCallback& callback);
+    void AddSnapshotCallback(SnapshotCallback&& callback);
     void OnActionEventHandle(const std::string& action);
     void SetAllowUpdate(bool allowUpdate);
     void OnActionEvent(const std::string& action);

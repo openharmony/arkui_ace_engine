@@ -69,7 +69,7 @@ void FormManagerDelegate::NotifySurfaceChange(float width, float height) {}
 
 void FormManagerDelegate::AddFormSurfaceChangeCallback(OnFormSurfaceChangeCallback &&callback) {}
 
-void FormManagerDelegate::AddSnapshotCallback(const SnapshotCallback& callback) {}
+void FormManagerDelegate::AddSnapshotCallback(SnapshotCallback&& callback) {}
 
 void FormManagerDelegate::ResetForm() {}
 
