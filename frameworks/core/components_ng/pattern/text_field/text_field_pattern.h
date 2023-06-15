@@ -701,7 +701,7 @@ public:
         auto position = ConvertTouchOffsetToCaretPosition(offset);
         auto selectStart = std::min(textSelector_.GetStart(), textSelector_.GetEnd());
         auto selectEnd = std::max(textSelector_.GetStart(), textSelector_.GetEnd());
-        return (position >= selectStart) && (position < selectEnd);
+        return offset.GetX() >= 0 && (position >= selectStart) && (position < selectEnd);
     }
 
     // xts
