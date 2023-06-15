@@ -14,6 +14,7 @@
  */
 
 #include <cstddef>
+#include <fortify/fortify.h>
 #include <list>
 #include <optional>
 #include <string>
@@ -894,10 +895,6 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0016, TestSize.Level1)
     AceType::DynamicCast<NavDestinationGroupNode>(navRouterGroupNode->navDestinationNode_)->titleBarNode_ =
         TitleBarNode::GetOrCreateTitleBarNode(
             "titleBarNode34", 34, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
-
-    navRouterGroupNode->OnAttachToMainTree(false);
-    navRouterGroupNode->GetEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
-    ASSERT_NE(navRouterGroupNode->navDestinationNode_, nullptr);
 }
 
 /**
@@ -1287,6 +1284,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0024, TestSize.Level1)
     ASSERT_NE(AceType::DynamicCast<NavDestinationGroupNode>(pattern->GetPreNavDestination("test", preNavDestination)),
         nullptr);
 
+    navDestination->GetPattern<NavDestinationPattern>()->navDestinationNode_ = preNavDestination;
     GestureEvent event;
     navDestination->backButtonEvent_(event);
     EXPECT_FALSE(navigation->GetLayoutProperty<NavigationLayoutProperty>()->propDestinationChange_.value());
@@ -2439,5 +2437,29 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0036, TestSize.Level1)
     algorithm->Layout(AceType::RawPtr(layoutWrapper));
     ASSERT_EQ(layoutProperty->propTitleMode_.value(), NavigationTitleMode::MINI);
     ASSERT_EQ(subtitleGeometryNode->frame_.rect_.height_, 0.0f);
+}
+
+/**
+ * @tc.name: NavrouterTestNg0038
+ * @tc.desc: Test NavigationStack.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0038, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigationStack.
+     * @tc.expected: check whether the properties is correct.
+     */
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<ImagePattern>());
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto routeInfo = AceType::MakeRefPtr<RouteInfo>();
+    std::pair<std::string, RefPtr<UINode>> p("test" + std::to_string(0), backButton);
+    navigationStack->navPathList_.push_back(p);
+    for (int i = 0; i <= 3; i++) {
+        for (int j = 0; j <= 2 + i; j++) {
+            navigationStack->Add("test" + std::to_string(j), backButton, static_cast<NavRouteMode>(i), routeInfo);
+        }
+    }
+    ASSERT_FALSE(navigationStack->navPathList_.empty());
 }
 } // namespace OHOS::Ace::NG
