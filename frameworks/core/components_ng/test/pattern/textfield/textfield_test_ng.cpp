@@ -4045,10 +4045,10 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldModelNGProcessDefaultPadding, TestSize
     textFieldModelNG.ProcessDefaultPadding(paddingProperty);
     Dimension vertical { 12.0, DimensionUnit::PX };
     Dimension horizontal { 0.0, DimensionUnit::PX };
-    EXPECT_EQ(paddingProperty.top.value().GetDimension(), vertical);
-    EXPECT_EQ(paddingProperty.bottom.value().GetDimension(), vertical);
-    EXPECT_EQ(paddingProperty.left.value().GetDimension(), horizontal);
-    EXPECT_EQ(paddingProperty.right.value().GetDimension(), horizontal);
+    EXPECT_EQ(paddingProperty.top.value().GetDimension().ConvertToPx(), vertical.ConvertToPx());
+    EXPECT_EQ(paddingProperty.bottom.value().GetDimension().ConvertToPx(), vertical.ConvertToPx());
+    EXPECT_EQ(paddingProperty.left.value().GetDimension().ConvertToPx(), horizontal.ConvertToPx());
+    EXPECT_EQ(paddingProperty.right.value().GetDimension().ConvertToPx(), horizontal.ConvertToPx());
 
     /**
      * @tc.steps: step3. let ShowUnderLine be false.
