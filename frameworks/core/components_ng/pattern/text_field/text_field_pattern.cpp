@@ -654,11 +654,21 @@ CaretMetricsF TextFieldPattern::CalcCursorOffsetByPosition(int32_t position)
     CaretMetricsF result;
     if (!(ComputeOffsetForCaretDownstream(position, result) || ComputeOffsetForCaretUpstream(position, result))) {
         LOGW("Get caret offset failed, set it to text start");
-        if (IsTextArea()) {
-            result.offset = OffsetF(contentRect_.GetX(), textRect_.GetY());
-        } else {
-            result.offset = OffsetF(textRect_.GetX(), contentRect_.GetY());
+        auto offsetX = contentRect_.GetX();
+        auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+        switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
+            case TextAlign::CENTER:
+                offsetX = static_cast<float>(contentRect_.GetX()) + contentRect_.Width() / 2.0f;
+                break;
+            case TextAlign::END:
+                offsetX = static_cast<float>(contentRect_.GetX()) + contentRect_.Width() -
+                          static_cast<float>(CURSOR_WIDTH.ConvertToPx());
+                break;
+            default:
+                offsetX = contentRect_.GetX();
+                break;
         }
+        result.offset = OffsetF(offsetX, contentRect_.GetY());
         result.height = textBoxes_.empty() ? PreferredLineHeight() : textBoxes_.begin()->rect_.GetHeight();
         return result;
     }
