@@ -56,7 +56,6 @@ public:
 private:
     OffsetF ComputeSelectMenuPosition(LayoutWrapper* layoutWrapper);
     OffsetF ComputeExtensionMenuPosition(LayoutWrapper* layoutWrapper, const OffsetF& offset);
-    void RemeasureExtensionMenu(LayoutWrapper* layoutWrapper, const OffsetF& offset);
     bool IsTextAreaSelectAll();
 
     std::shared_ptr<SelectOverlayInfo> info_;
