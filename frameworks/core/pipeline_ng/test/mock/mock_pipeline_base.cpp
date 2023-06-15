@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
+#include "base/utils/utils.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -263,7 +264,11 @@ void PipelineContext::DumpPipelineInfo() const {}
 
 void PipelineContext::AddVisibleAreaChangeNode(
     const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback, bool isUserCallback)
-{}
+{
+    CHECK_NULL_VOID(callback);
+    callback(false, 0.0);
+    callback(true, ratio);
+}
 void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
 
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
