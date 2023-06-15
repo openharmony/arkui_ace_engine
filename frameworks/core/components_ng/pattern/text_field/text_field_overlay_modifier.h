@@ -45,7 +45,6 @@ public:
     void SetContentSize(SizeF& value);
     void SetContentOffset(OffsetF& value);
     void SetCursorOffset(OffsetF& value);
-    void SetCursorOffsetX(float value);
     void SetInputStyle(InputStyle& value);
     void SetFrameSize(const SizeF& value);
     void SetCurrentOffset(float value);
@@ -67,7 +66,7 @@ private:
     RefPtr<AnimatablePropertyColor> cursorColor_;
     RefPtr<AnimatablePropertyFloat> cursorWidth_;
     RefPtr<AnimatablePropertyColor> selectedColor_;
-    RefPtr<AnimatablePropertyFloat> cursorOffsetX_;
+    RefPtr<PropertyOffsetF> cursorOffset_;
     RefPtr<PropertyBool> cursorVisible_;
     RefPtr<PropertySizeF> contentSize_;
     RefPtr<PropertyOffsetF> contentOffset_;
