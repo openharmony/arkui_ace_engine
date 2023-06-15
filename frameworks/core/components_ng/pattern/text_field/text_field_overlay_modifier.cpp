@@ -116,33 +116,33 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
     auto textBoxes = textFieldPattern->GetTextBoxes();
     auto textRect = textFieldPattern->GetTextRect();
     bool isTextArea = textFieldPattern->IsTextArea();
+    float clipRectHeight = 0.0f;
+    if (showCounter_->Get() && textFieldPattern->GetCounterParagraph()) {
+        clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height() - textFieldPattern->GetCountHeight();
+    } else {
+        clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height();
+    }
+    RSRect clipInnerRect;
     if (inputStyle_ == InputStyle::DEFAULT) {
-        float clipRectHeight = 0.0f;
-        if (showCounter_->Get() && textFieldPattern->GetCounterParagraph()) {
-            clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height() - textFieldPattern->GetCountHeight();
-        } else {
-            clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height();
-        }
-        RSRect clipInnerRect(
+        clipInnerRect = RSRect(
             paintOffset.GetX(), paintOffset.GetY(), paintOffset.GetX() + contentSize_->Get().Width(), clipRectHeight);
         canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
-        // for default style, selection height is equal to the content height
-        for (const auto& textBox : textBoxes) {
-            canvas.DrawRect(
-                RSRect(textBox.rect_.GetLeft() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
-                    textBox.rect_.GetTop() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()),
-                    textBox.rect_.GetRight() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
-                    textBox.rect_.GetBottom() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY())));
-        }
     } else {
-        if (!textBoxes.empty()) {
-            auto theOnlyBox = *textBoxes.begin();
-            // for inline style, selection height is equal to the frame height
-            canvas.DrawRect(RSRect(theOnlyBox.rect_.GetLeft() + textRect.GetX(), 0.0f,
-                theOnlyBox.rect_.GetRight() + textRect.GetX(), textFieldPattern->GetFrameRect().Height()));
-        }
+        clipInnerRect = RSRect(paintOffset.GetX(), 0.0f, paintOffset.GetX() + contentSize_->Get().Width(),
+            textFieldPattern->GetFrameRect().Height());
+        canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     }
-
+    // for default style, selection height is equal to the content height
+    for (const auto& textBox : textBoxes) {
+        canvas.DrawRect(RSRect(textBox.rect_.GetLeft() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
+            inputStyle_ == InputStyle::DEFAULT
+                ? (textBox.rect_.GetTop() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()))
+                : 0.0f,
+            textBox.rect_.GetRight() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
+            inputStyle_ == InputStyle::DEFAULT
+                ? (textBox.rect_.GetBottom() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()))
+                : textFieldPattern->GetFrameRect().Height()));
+    }
     canvas.Restore();
 }
 
