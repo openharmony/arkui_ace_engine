@@ -88,6 +88,7 @@ private:
     void AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper);
     void getFlexFunc(std::function<float(const RefPtr<LayoutWrapper>&)>& getFlex, float remainSpace,
         float& spacePerFlex, FlexItemProperties& flexItemProperties, RefPtr<LayoutWrapper>& lastChild);
+    void CheckBlankAndKeepMin(const RefPtr<LayoutWrapper>& childLayoutWrapper, float& flexSize);
 
     OptionalSizeF realSize_;
     float mainAxisSize_ = 0.0f;
