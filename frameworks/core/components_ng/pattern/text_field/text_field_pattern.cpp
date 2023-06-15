@@ -2986,7 +2986,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     auto wideInsertValue = StringUtils::ToWstring(insertValue);
     LOGD("Insert length %{public}d", static_cast<int32_t>(wideInsertValue.length()));
     auto originLength = static_cast<uint32_t>(textEditingValue_.GetWideText().length());
-    if (originLength >= GetMaxLength()) {
+    if (originLength >= GetMaxLength() && !InSelectMode()) {
         LOGW("Max length reached");
         return;
     }
