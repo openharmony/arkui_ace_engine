@@ -784,4 +784,18 @@ bool GestureEventHub::IsAccessibilityLongClickable()
     }
     return ret;
 }
+
+void GestureEventHub::ClearUserOnClick()
+{
+    if (clickEventActuator_) {
+        clickEventActuator_->ClearUserCallback();
+    }
+}
+
+void GestureEventHub::ClearUserOnTouch()
+{
+    if (touchEventActuator_) {
+        touchEventActuator_->ClearUserCallback();
+    }
+}
 } // namespace OHOS::Ace::NG

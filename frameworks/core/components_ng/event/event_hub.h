@@ -108,10 +108,18 @@ public:
         }
     }
 
+    void ClearUserOnAppear()
+    {
+        if (onAppear_) {
+            onAppear_ = nullptr;
+        }
+    }
+
     void SetOnAppear(std::function<void()>&& onAppear)
     {
         onAppear_ = std::move(onAppear);
     }
+
     void FireOnAppear()
     {
         if (onAppear_) {
@@ -131,14 +139,29 @@ public:
         }
     }
 
+    void ClearUserOnDisAppear()
+    {
+        if (onDisappear_) {
+            onDisappear_ = nullptr;
+        }
+    }
+
     void SetOnDisappear(std::function<void()>&& onDisappear)
     {
         onDisappear_ = std::move(onDisappear);
     }
+
     void FireOnDisappear()
     {
         if (onDisappear_) {
             onDisappear_();
+        }
+    }
+
+    void ClearUserOnAreaChanged()
+    {
+        if (onAreaChanged_) {
+            onAreaChanged_ = nullptr;
         }
     }
 

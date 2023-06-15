@@ -198,6 +198,10 @@ public:
     // Set by user define, which will replace old one.
     void SetUserOnClick(GestureEventFunc&& clickEvent);
 
+    // When the event param is undefined, it will clear the callback.
+    void ClearUserOnClick();
+    void ClearUserOnTouch();
+
     void AddClickEvent(const RefPtr<ClickEvent>& clickEvent);
 
     void RemoveClickEvent(const RefPtr<ClickEvent>& clickEvent)

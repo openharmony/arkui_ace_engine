@@ -244,19 +244,35 @@ public:
     FocusCallbackEvents() = default;
     ~FocusCallbackEvents() override = default;
 
+    void ClearOnFocusCallback()
+    {
+        if (onFocusCallback_) {
+            onFocusCallback_ = nullptr;
+        }
+    }
+
     void SetOnFocusCallback(OnFocusFunc&& onFocusCallback)
     {
         onFocusCallback_ = std::move(onFocusCallback);
     }
+
     const OnFocusFunc& GetOnFocusCallback()
     {
         return onFocusCallback_;
+    }
+
+    void ClearOnBlurCallback()
+    {
+        if (onBlurCallback_) {
+            onBlurCallback_ = nullptr;
+        }
     }
 
     void SetOnBlurCallback(OnBlurFunc&& onBlurCallback)
     {
         onBlurCallback_ = std::move(onBlurCallback);
     }
+
     const OnBlurFunc& GetOnBlurCallback()
     {
         return onBlurCallback_;
@@ -266,6 +282,14 @@ public:
     {
         onKeyEventCallback_ = std::move(onKeyEventCallback);
     }
+
+    void ClearOnKeyEventCallback()
+    {
+        if (onKeyEventCallback_) {
+            onKeyEventCallback_ = nullptr;
+        }
+    }
+
     const OnKeyCallbackFunc& GetOnKeyEventCallback()
     {
         return onKeyEventCallback_;
@@ -275,6 +299,7 @@ public:
     {
         onClickEventCallback_ = std::move(onClickEventCallback);
     }
+
     const GestureEventFunc& GetOnClickCallback()
     {
         return onClickEventCallback_;
@@ -284,6 +309,7 @@ public:
     {
         return tabIndex_;
     }
+
     void SetTabIndex(int32_t tabIndex)
     {
         tabIndex_ = tabIndex;
@@ -293,6 +319,7 @@ public:
     {
         return isDefaultFocus_;
     }
+
     void SetIsDefaultFocus(bool isDefaultFocus)
     {
         isDefaultFocus_ = isDefaultFocus;
@@ -302,6 +329,7 @@ public:
     {
         return isDefaultGroupFocus_;
     }
+
     void SetIsDefaultGroupFocus(bool isDefaultGroupFocus)
     {
         isDefaultGroupFocus_ = isDefaultGroupFocus;
@@ -311,6 +339,7 @@ public:
     {
         return defaultFocusNode_;
     }
+
     void SetDefaultFocusNode(const WeakPtr<FocusHub>& node)
     {
         defaultFocusNode_ = node;
@@ -320,6 +349,7 @@ public:
     {
         return isFocusOnTouch_;
     }
+
     void SetIsFocusOnTouch(bool isFocusOnTouch)
     {
         isFocusOnTouch_ = isFocusOnTouch;
@@ -329,6 +359,7 @@ public:
     {
         isDefaultHasFocused_ = isDefaultHasFocused;
     }
+
     bool IsDefaultHasFocused() const
     {
         return isDefaultHasFocused_;
@@ -338,6 +369,7 @@ public:
     {
         isDefaultGroupHasFocused_ = isDefaultGroupHasFocused;
     }
+
     bool IsDefaultGroupHasFocused() const
     {
         return isDefaultGroupHasFocused_;
@@ -535,6 +567,13 @@ public:
         return currentFocus_;
     }
 
+    void ClearUserOnFocus()
+    {
+        if (focusCallbackEvents_) {
+            focusCallbackEvents_->ClearOnFocusCallback();
+        }
+    }
+
     void SetOnFocusCallback(OnFocusFunc&& onFocusCallback)
     {
         if (!focusCallbackEvents_) {
@@ -547,6 +586,13 @@ public:
         return focusCallbackEvents_ ? focusCallbackEvents_->GetOnFocusCallback() : nullptr;
     }
 
+    void ClearUserOnBlur()
+    {
+        if (focusCallbackEvents_) {
+            focusCallbackEvents_->ClearOnBlurCallback();
+        }
+    }
+
     void SetOnBlurCallback(OnBlurFunc&& onBlurCallback)
     {
         if (!focusCallbackEvents_) {
@@ -554,6 +600,7 @@ public:
         }
         focusCallbackEvents_->SetOnBlurCallback(std::move(onBlurCallback));
     }
+
     OnBlurFunc GetOnBlurCallback()
     {
         return focusCallbackEvents_ ? focusCallbackEvents_->GetOnBlurCallback() : nullptr;
@@ -566,6 +613,14 @@ public:
         }
         focusCallbackEvents_->SetOnKeyEventCallback(std::move(onKeyCallback));
     }
+
+    void ClearUserOnKey()
+    {
+        if (focusCallbackEvents_) {
+            focusCallbackEvents_->ClearOnKeyEventCallback();
+        }
+    }
+
     OnKeyCallbackFunc GetOnKeyCallback()
     {
         return focusCallbackEvents_ ? focusCallbackEvents_->GetOnKeyEventCallback() : nullptr;
