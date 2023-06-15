@@ -40,7 +40,7 @@ void NavigationStack::Remove(const std::string& name)
     }
     for (auto it = navPathList_.begin(); it != navPathList_.end();) {
         if (((*it).first) == name) {
-            navPathList_.erase(it++);
+            it = navPathList_.erase(it);
         } else {
             ++it;
         }
