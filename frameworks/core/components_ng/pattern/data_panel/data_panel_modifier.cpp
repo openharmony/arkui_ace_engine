@@ -230,8 +230,13 @@ void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset, flo
     }
     double totalValue = 0.0;
     float factor = 1.0;
+    size_t tempSize = valuesLastLength_;
     for (size_t i = 0; i < valuesLastLength_; i++) {
         totalValue += values_[i]->Get();
+        if (totalValue >= maxValue) {
+            tempSize = i + 1;
+            break;
+        }
     }
     if (GreatNotEqual(totalValue, maxValue)) {
         factor = maxValue / totalValue;
@@ -240,7 +245,7 @@ void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset, flo
         proportions = maxValue == 0 ? 1.0 : DEFAULT_MAX_VALUE / maxValue;
     }
     totalValue = totalValue * proportions;
-    for (int32_t i = static_cast<int32_t>(valuesLastLength_) - 1; i >= 0; i--) {
+    for (int32_t i = static_cast<int32_t>(tempSize) - 1; i >= 0; i--) {
         arcData.progressColors = SortGradientColorsOffset(valueColors_[i]->Get().GetGradient());
         float totalValuePre = totalValue * 1.0f;
         if (isEffect_->Get() && GreatNotEqual(totalValue, 0.0)) {
