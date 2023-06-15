@@ -52,6 +52,8 @@ void TextFieldModelNG::CreateNode(
     if (!isTextArea) {
         textFieldLayoutProperty->UpdateMaxLines(1);
         textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
+    } else {
+        textFieldLayoutProperty->UpdatePlaceholderMaxLines(Infinity<uint32_t>());
     }
     pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
