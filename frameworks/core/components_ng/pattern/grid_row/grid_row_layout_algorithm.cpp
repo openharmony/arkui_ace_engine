@@ -91,7 +91,6 @@ void GridRowLayoutAlgorithm::MeasureSelf(LayoutWrapper* layoutWrapper, float chi
 
     auto idealSize = CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
     idealSize.SetHeight(childHeight + padding.Height());
-    idealSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize.ConvertToSizeT());
 }
 
