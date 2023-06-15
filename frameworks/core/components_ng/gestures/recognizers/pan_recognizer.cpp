@@ -431,9 +431,11 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         if (inputEventType_ == InputEventType::AXIS) {
             info.SetVelocity(Velocity());
             info.SetMainVelocity(0.0);
+            info.SetSourceTool(lastAxisEvent_.sourceTool);
         } else {
             info.SetVelocity(velocityTracker_.GetVelocity());
             info.SetMainVelocity(velocityTracker_.GetMainAxisVelocity());
+            info.SetSourceTool(lastTouchEvent_.sourceTool);
         }
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
         info.SetInputEventType(inputEventType_);
@@ -444,7 +446,6 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         if (lastTouchEvent_.tiltY.has_value()) {
             info.SetTiltY(lastTouchEvent_.tiltY.value());
         }
-        info.SetSourceTool(lastTouchEvent_.sourceTool);
         (*callback)(info);
     }
 }
