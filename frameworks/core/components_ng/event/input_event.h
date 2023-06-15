@@ -96,6 +96,13 @@ public:
     explicit InputEventActuator(const WeakPtr<InputEventHub>& inputEventHub);
     ~InputEventActuator() override = default;
 
+    void ClearUserCallback()
+    {
+        if (userCallback_) {
+            userCallback_.Reset();
+        }
+    }
+
     void ReplaceInputEvent(OnMouseEventFunc&& callback)
     {
         if (userCallback_) {

@@ -252,6 +252,18 @@ public:
 
     static void Pop();
 
+    // Disable event
+    static void DisableOnClick();
+    static void DisableOnTouch();
+    static void DisableOnKeyEvent();
+    static void DisableOnHover();
+    static void DisableOnMouse();
+    static void DisableOnAppear();
+    static void DisableOnDisAppear();
+    static void DisableOnAreaChange();
+    static void DisableOnFocus();
+    static void DisableOnBlur();
+
     // useEffect
     static void SetUseEffect(bool useEffect);
 

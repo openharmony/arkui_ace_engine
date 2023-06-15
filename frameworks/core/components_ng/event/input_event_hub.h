@@ -139,6 +139,20 @@ public:
     // register showMenu callback (always replace)
     void BindContextMenu(OnMouseEventFunc&& showMenu);
 
+    void ClearUserOnHover()
+    {
+        if (hoverEventActuator_) {
+            hoverEventActuator_->ClearUserCallback();
+        }
+    }
+
+    void ClearUserOnMouse()
+    {
+        if (mouseEventActuator_) {
+            mouseEventActuator_->ClearUserCallback();
+        }
+    }
+
 private:
     WeakPtr<EventHub> eventHub_;
     RefPtr<InputEventActuator> mouseEventActuator_;

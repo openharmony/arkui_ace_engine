@@ -491,6 +491,13 @@ void FrameNode::AdjustGridOffset()
     }
 }
 
+void FrameNode::ClearUserOnAreaChange()
+{
+    if (eventHub_) {
+        eventHub_->ClearUserOnAreaChanged();
+    }
+}
+
 void FrameNode::SetOnAreaChangeCallback(OnAreaChangedFunc&& callback)
 {
     if (!lastFrameRect_) {
