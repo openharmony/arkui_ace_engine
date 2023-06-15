@@ -262,7 +262,20 @@ public:
     void SetEnabled(bool enabled)
     {
         enabled_ = enabled;
+        developerEnabled_ = enabled;
     }
+
+    void SetEnabledInternal(bool enabled)
+    {
+        enabled_ = enabled;
+    }
+
+    // restore enabled value to what developer sets
+    void RestoreEnabled()
+    {
+        enabled_ = developerEnabled_;
+    }
+
     // get XTS inspector value
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 
@@ -348,6 +361,7 @@ private:
     OnNewDragFunc onDragEnd_;
 
     bool enabled_ { true };
+    bool developerEnabled_ { true };
     std::vector<KeyboardShortcut> keyboardShortcut_;
 
     ACE_DISALLOW_COPY_AND_MOVE(EventHub);
