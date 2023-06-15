@@ -2992,7 +2992,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     }
 
     std::string valueToUpdate;
-    if (originLength + wideInsertValue.length() >= GetMaxLength()) {
+    if (originLength + wideInsertValue.length() >= GetMaxLength() && !InSelectMode()) {
         valueToUpdate = StringUtils::ToString(wideInsertValue.substr(0, GetMaxLength() - originLength));
     } else {
         valueToUpdate = insertValue;
