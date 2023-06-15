@@ -565,24 +565,8 @@ void WebPattern::WebRequestFocus()
     focusHub->RequestFocusImmediately();
 }
 
-void WebPattern::UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty)
-{
-    CHECK_NULL_VOID(dirty);
-    auto geometryNode = dirty->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto paddingOffset = geometryNode->GetPaddingOffset();
-    auto webContentSize = geometryNode->GetContentSize();
-    renderContext->SetBounds(paddingOffset.GetX(), paddingOffset.GetY(),
-        webContentSize.Width(), webContentSize.Height());
-}
-
 bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    UpdateContentOffset(dirty);
     if (!config.contentSizeChange) {
         return false;
     }
