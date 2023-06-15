@@ -763,9 +763,11 @@ void WebModelNG::SetVerticalScrollBarAccessEnabled(bool isVerticalScrollBarAcces
     webPattern->UpdateVerticalScrollBarAccessEnabled(isVerticalScrollBarAccessEnabled);
 }
 
-void WebModelNG::SetOnControllerAttached(std::function<void()>&& callback_, std::function<void()>&& callback)
+void WebModelNG::SetOnControllerAttached(std::function<void()>&& callback)
 {
-    callback_ = callback;
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetOnControllerAttachedCallback(std::move(callback));
 }
 
 void WebModelNG::NotifyPopupWindowResult(int32_t webId, bool result)

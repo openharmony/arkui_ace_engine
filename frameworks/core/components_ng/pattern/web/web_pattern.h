@@ -72,7 +72,7 @@ public:
     using SetWebIdCallback = std::function<void(int32_t)>;
     using SetHapPathCallback = std::function<void(const std::string&)>;
     using JsProxyCallback = std::function<void()>;
-
+    using OnControllerAttachedCallback = std::function<void()>;
     WebPattern();
     WebPattern(std::string webSrc, const RefPtr<WebController>& webController);
     WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallback);
@@ -178,6 +178,16 @@ public:
     SetWebIdCallback GetSetWebIdCallback() const
     {
         return setWebIdCallback_;
+    }
+
+    void SetOnControllerAttachedCallback(OnControllerAttachedCallback&& callback)
+    {
+        onControllerAttachedCallback_ = std::move(callback);
+    }
+
+    OnControllerAttachedCallback GetOnControllerAttachedCallback()
+    {
+        return onControllerAttachedCallback_;
     }
 
     void SetSetHapPathCallback(SetHapPathCallback&& callback)
@@ -444,6 +454,7 @@ private:
     SetWebIdCallback setWebIdCallback_ = nullptr;
     SetHapPathCallback setHapPathCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;
+    OnControllerAttachedCallback onControllerAttachedCallback_ = nullptr;
     RefPtr<WebDelegate> delegate_;
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
     RefPtr<TouchEventImpl> touchEvent_;

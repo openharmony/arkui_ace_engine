@@ -68,7 +68,6 @@ WebModel* WebModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-JSwebEventCallback JSWeb::OnControllerAttachedCallback_ = nullptr;
 bool JSWeb::webDebuggingAccess_ = false;
 class JSWebDialog : public Referenced {
 public:
@@ -1839,9 +1838,6 @@ void JSWeb::Create(const JSCallbackInfo& info)
                                  int32_t webId) {
             JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(webId)) };
             func->Call(webviewController, 1, argv);
-            if (JSWeb::OnControllerAttachedCallback_) {
-                JSWeb::OnControllerAttachedCallback_();
-            }
         };
 
         auto setHapPathFunction = controller->GetProperty("innerSetHapPath");
@@ -3478,6 +3474,7 @@ void JSWeb::OnFirstContentfulPaint(const JSCallbackInfo& args)
     };
     WebModel::GetInstance()->SetFirstContentfulPaintId(std::move(uiCallback));
 }
+
 void JSWeb::OnControllerAttached(const JSCallbackInfo& args)
 {
     LOGI("JSWeb OnControllerAttached");
@@ -3497,6 +3494,6 @@ void JSWeb::OnControllerAttached(const JSCallbackInfo& args)
             postFunc->Execute();
         });
     };
-    WebModel::GetInstance()->SetOnControllerAttached(std::move(JSWeb::OnControllerAttachedCallback_), uiCallback);
+    WebModel::GetInstance()->SetOnControllerAttached(std::move(uiCallback));
 }
 } // namespace OHOS::Ace::Framework
