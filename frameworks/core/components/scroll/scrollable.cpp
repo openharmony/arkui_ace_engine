@@ -489,6 +489,7 @@ double Scrollable::HandleScroll(double offset, int32_t source, NestedState state
         ExecuteScrollBegin(offset);
         ExecuteScrollFrameBegin(offset, ScrollState::SCROLL);
         moved_ = UpdateScrollPosition(offset, source);
+        canOverScroll_ = false;
         return 0;
     }
     auto remainOffset = 0.0;
