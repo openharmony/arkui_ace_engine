@@ -37,7 +37,6 @@ public:
     static void FlushRecord();
 
 private:
-    static int64_t GetDuration();
     static void ClearFrameJankRecord();
 
     static std::vector<uint16_t> frameJankRecord_;
