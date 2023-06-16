@@ -153,13 +153,8 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(RefPtr<FrameNode>
     CHECK_NULL_RETURN(windowManager, nullptr);
     RefPtr<FrameNode> maximizeBtn = BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE,
         {});
-    // maximizeBtn add empty panEvent to over fater container event
-    auto maximizeBtnEventHub = maximizeBtn->GetOrCreateGestureEventHub();
-    auto panEvent = AceType::MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr, nullptr);
-    PanDirection panDirection;
-    panDirection.type = PanDirection::ALL;
-    maximizeBtnEventHub->AddPanEvent(panEvent, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
-    BondingMaxBtnEvent(maximizeBtn, containerNode);
+    BondingMaxBtnGestureEvent(maximizeBtn, containerNode);
+    BondingMaxBtnInputEvent(maximizeBtn, containerNode);
     containerTitleRow->AddChild(maximizeBtn);
     
     RefPtr<FrameNode> minimizeBtn = BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE,
@@ -170,6 +165,9 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(RefPtr<FrameNode>
         });
     // minimizeBtn add empty panEvent to over fater container event
     auto minimizeBtnEventHub = minimizeBtn->GetOrCreateGestureEventHub();
+    auto panEvent = AceType::MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr, nullptr);
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
     minimizeBtnEventHub->AddPanEvent(panEvent, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
     containerTitleRow->AddChild(minimizeBtn);
 
@@ -188,10 +186,12 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(RefPtr<FrameNode>
     return containerTitleRow;
 }
 
-void ContainerModalViewEnhance::BondingMaxBtnEvent(RefPtr<FrameNode>& maximizeBtn, RefPtr<FrameNode>& containerNode)
+void ContainerModalViewEnhance::BondingMaxBtnGestureEvent(RefPtr<FrameNode>& maximizeBtn,
+    RefPtr<FrameNode>& containerNode)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     auto windowManager = pipeline->GetWindowManager();
+    // add click event
     auto event = [containerNode, windowManager](GestureEvent &info) {
         ResetHoverTimer();
         auto mode = windowManager->GetWindowMode();
@@ -207,24 +207,54 @@ void ContainerModalViewEnhance::BondingMaxBtnEvent(RefPtr<FrameNode>& maximizeBt
     };
     auto hub = maximizeBtn->GetOrCreateGestureEventHub();
     hub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(std::move(event)));
-    auto hoverEventHub = maximizeBtn->GetOrCreateInputEventHub();
+
+    // add long press event
+    auto longPressCallback = [maximizeBtn](GestureEvent& info) {
+        LOGD("maximize btn long press,call showMaxMenu func");
+        auto menuPosX = info.GetScreenLocation().GetX() - info.GetLocalLocation().GetX() - MENU_FLOAT_X.ConvertToPx();
+        auto menuPosY = info.GetScreenLocation().GetY() - info.GetLocalLocation().GetY() + MENU_FLOAT_Y.ConvertToPx();
+        OffsetF menuPosition {menuPosX, menuPosY};
+        ShowMaxMenu(maximizeBtn, menuPosition);
+    };
+    // diable mouse left!
+    auto longPressEvent = AceType::MakeRefPtr<LongPressEvent>(longPressCallback);
+    hub->SetLongPressEvent(longPressEvent, false, true);
+
+    // add empty panEvent to over fater container event
+    auto panEvent = AceType::MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr, nullptr);
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    hub->AddPanEvent(panEvent, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+}
+
+void ContainerModalViewEnhance::BondingMaxBtnInputEvent(RefPtr<FrameNode>& maximizeBtn,
+    RefPtr<FrameNode>& containerNode)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto windowManager = pipeline->GetWindowManager();
+    auto hub = maximizeBtn->GetOrCreateInputEventHub();
     auto hoverMoveFuc = [maximizeBtn, pipeline](MouseInfo& info) {
-            LOGD("container window on hover event action_ = %{public}d sIsMenuPending_ %{public}d",
-                info.GetAction(), sIsMenuPending_);
-            if (!sIsMenuPending_ && info.GetAction() == MouseAction::MOVE) {
-                auto&& callback = [maximizeBtn, info]() {
-                    ShowMaxMenu(maximizeBtn, info);
-                };
-                sContextTimer_.Reset(callback);
-                pipeline->GetTaskExecutor()->PostDelayedTask(sContextTimer_, TaskExecutor::TaskType::UI,
-                    MENU_TASK_DELAY_TIME);
-                sIsMenuPending_ = true;
-            }
-        };
-    hoverEventHub->AddOnMouseEvent(AceType::MakeRefPtr<InputEvent>(std::move(hoverMoveFuc)));
+        LOGD("container window on hover event action_ = %{public}d sIsMenuPending_ %{public}d", info.GetAction(),
+            sIsMenuPending_);
+        if (!sIsMenuPending_ && info.GetAction() == MouseAction::MOVE) {
+            auto&& callback = [maximizeBtn, info]() {
+                auto menuPosX = info.GetScreenLocation().GetX() - info.GetLocalLocation().GetX() -
+                    MENU_FLOAT_X.ConvertToPx();
+                auto menuPosY = info.GetScreenLocation().GetY() - info.GetLocalLocation().GetY() +
+                    MENU_FLOAT_Y.ConvertToPx();
+                OffsetF menuPosition {menuPosX, menuPosY};
+                ShowMaxMenu(maximizeBtn, menuPosition);
+            };
+            sContextTimer_.Reset(callback);
+            pipeline->GetTaskExecutor()->PostDelayedTask(sContextTimer_, TaskExecutor::TaskType::UI,
+                MENU_TASK_DELAY_TIME);
+            sIsMenuPending_ = true;
+        }
+    };
+    hub->AddOnMouseEvent(AceType::MakeRefPtr<InputEvent>(std::move(hoverMoveFuc)));
 
     // add hover in out event
-    auto hoverEventFuc = [maximizeBtn, pipeline](bool hover, HoverInfo& hoverInfo) {
+    auto hoverEventFuc = [maximizeBtn, pipeline](bool hover) {
         // update container modal background
         if (hover) {
             sIsHovering = true;
@@ -232,10 +262,10 @@ void ContainerModalViewEnhance::BondingMaxBtnEvent(RefPtr<FrameNode>& maximizeBt
             ResetHoverTimer();
         }
     };
-    hoverEventHub->AddOnHoverEvent(AceType::MakeRefPtr<InputEvent>(std::move(hoverEventFuc)));
+    hub->AddOnHoverEvent(AceType::MakeRefPtr<InputEvent>(std::move(hoverEventFuc)));
 }
 
-RefPtr<FrameNode> ContainerModalViewEnhance::ShowMaxMenu(const RefPtr<FrameNode>& targetNode, const MouseInfo& info)
+RefPtr<FrameNode> ContainerModalViewEnhance::ShowMaxMenu(const RefPtr<FrameNode>& targetNode, OffsetF menuPosition)
 {
     LOGD("ShowMaxMenu called");
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -255,10 +285,6 @@ RefPtr<FrameNode> ContainerModalViewEnhance::ShowMaxMenu(const RefPtr<FrameNode>
     menuList->AddChild(BuildDividerMenuItem());
     menuList->AddChild(BuildLeftSplitMenuItem());
     menuList->AddChild(BuildRightSplitMenuItem());
-
-    auto menuPosX = info.GetScreenLocation().GetX() - info.GetLocalLocation().GetX() - MENU_FLOAT_X.ConvertToPx();
-    auto menuPosY = info.GetScreenLocation().GetY() - info.GetLocalLocation().GetY() + MENU_FLOAT_Y.ConvertToPx();
-    OffsetF menuPosition {menuPosX, menuPosY};
 
     if ((!SubwindowManager::GetInstance()->GetCurrentWindow()
         || !SubwindowManager::GetInstance()->GetCurrentWindow()->GetShown())) {
