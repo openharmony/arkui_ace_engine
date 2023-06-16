@@ -48,18 +48,20 @@ SingleTaskExecutor PaBackend::GetAnimationJsTask()
     return SingleTaskExecutor::Make(taskExecutor_, TaskExecutor::TaskType::JS);
 }
 
-bool PaBackend::Initialize(BackendType type, const RefPtr<TaskExecutor>& taskExecutor)
+bool PaBackend::Initialize(BackendType type, SrcLanguage language, const RefPtr<TaskExecutor>& taskExecutor)
 {
     LOGI("PaBackend initialize begin.");
     CHECK_NULL_RETURN(taskExecutor, false);
     type_ = type;
+    language_ = language;
     taskExecutor_ = taskExecutor;
 
     taskExecutor->PostTask(
-        [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), taskExecutor = taskExecutor_, type = type_] {
+        [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), taskExecutor = taskExecutor_, type = type_,
+            language = language_] {
             auto jsBackendEngine = weakEngine.Upgrade();
             CHECK_NULL_VOID_NOLOG(jsBackendEngine);
-            jsBackendEngine->Initialize(taskExecutor, type);
+            jsBackendEngine->Initialize(taskExecutor, type, language);
         }, TaskExecutor::TaskType::JS);
 
     LOGI("PaBackend initialize end.");

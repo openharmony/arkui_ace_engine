@@ -53,8 +53,8 @@ constexpr int32_t CHECK_BOX_ID_THIRD = 6;
 constexpr int32_t CHECK_BOX_ID_FOURTH = 6;
 constexpr int32_t TEST_CONTAINER_ID = 100;
 constexpr int32_t AT_LEAST_TIME = 3;
-using OnPageShow = void (*)();
-using OnPageHide = void (*)();
+int32_t flag = 0;
+std::function<void()> FLAG_FUNC = []() { flag++; };
 } // namespace
 
 class StageTestNg : public testing::Test {
@@ -69,12 +69,16 @@ public:
         EXPECT_CALL(*pipeline, FlushPipelineImmediately()).Times(testing::AtLeast(AT_LEAST_TIME));
         MockContainer::SetUp();
         ContainerScope::UpdateCurrent(TEST_CONTAINER_ID);
-        AceEngine::Get().AddContainer(TEST_CONTAINER_ID, MockContainer::Current());
     }
     static void TearDownTestSuite()
     {
         MockPipelineBase::TearDown();
     }
+    void SetUp()
+    {
+        flag = 0;
+    }
+    void TearDown() {}
 };
 
 /**
@@ -356,20 +360,14 @@ HWTEST_F(StageTestNg, StageManagerTest003, TestSize.Level1)
     StageManager stageManager(stageNode);
 
     /**
-     * @tc.steps: step2. Call PushPage and PerformanceCheck function.
-     */
-
-    stageManager.PushPage(firstNode);
-    stageManager.PerformanceCheck(firstNode, 1);
-
-    /**
-     * @tc.steps: step3. Call CleanPageStack function.
+     * @tc.steps: step2. Call CleanPageStack function.
      * @tc.expected:Children just one and return false
      */
+    stageManager.PushPage(firstNode);
     EXPECT_FALSE(stageManager.CleanPageStack());
 
     /**
-     * @tc.steps: step4. Add second child node and recall CleanPageStack.
+     * @tc.steps: step3. Add second child node and recall CleanPageStack.
      * @tc.expected: return true
      */
     stageManager.PushPage(secondNode);
@@ -475,53 +473,52 @@ HWTEST_F(StageTestNg, PagePatternTest001, TestSize.Level1)
      * @tc.steps: step1. Create a PagePattern.
      */
     PagePattern pattern(AceType::MakeRefPtr<PageInfo>());
-
     /**
      * @tc.steps: step2. Calling the SetFirstBuildCallback function.
      * @tc.expected: The callback firstBuildCallback_ in the pagePattern not nullptr.
      */
-    pattern.SetFirstBuildCallback([]() {});
+    pattern.SetFirstBuildCallback(std::move(FLAG_FUNC));
     EXPECT_NE(pattern.firstBuildCallback_, nullptr);
-
     /**
-     * @tc.steps: step3. Build a DirtySwapConfig and call the OnDirtyLayoutWrapperSwap function.
-     * @tc.expected: he callback firstBuildCallback_ in the pagePattern cleared.
+     * @tc.steps: step3. try call OnDirtyLayoutWrapperSwap with different condition.
+     * @tc.expected: the callback firstBuildCallback_ in the pagePattern cleared.
      */
     DirtySwapConfig config;
     pattern.OnDirtyLayoutWrapperSwap(nullptr, config);
-    EXPECT_EQ(pattern.firstBuildCallback_, nullptr);
-
+    pattern.isFirstLoad_ = true;
+    pattern.OnDirtyLayoutWrapperSwap(nullptr, config);
+    pattern.OnDirtyLayoutWrapperSwap(nullptr, config);
+    EXPECT_EQ(flag, 1);
     /**
      * @tc.steps: step4. Call SetFirstBuildCallback again.
-     * @tc.expected: The callback firstBuildCallback_ in the pagePattern is nullptr .
+     * @tc.expected: The callback will be executed immediately.
      */
-    pattern.SetFirstBuildCallback([]() {});
-    EXPECT_EQ(pattern.firstBuildCallback_, nullptr);
+    pattern.SetFirstBuildCallback(std::move(FLAG_FUNC));
+    EXPECT_EQ(flag, 2);
 }
 
 /**
  * @tc.name: PagePatternTest002
- * @tc.desc: Testing OnDirtyLayoutWrapperSwap of PagePattern work correctly.
+ * @tc.desc: Testing BuildSharedTransitionMap of PagePattern work correctly.
  * @tc.type: FUNC
  */
 HWTEST_F(StageTestNg, PagePatternTest002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create some node and PagePattern.
+     * @tc.steps: step1. Create a parent and some child node ,config the page.
      */
     auto node = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<StagePattern>());
     auto child = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 1, AceType::MakeRefPtr<StagePattern>());
+    child->GetRenderContext()->SetShareId("shareId");
+    auto child2 = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 2, AceType::MakeRefPtr<StagePattern>());
+    auto child3 = CustomNode::CreateCustomNode(3, "child");
     node->AddChild(child);
+    node->AddChild(child2);
+    node->AddChild(child3);
     PagePattern pattern(AceType::MakeRefPtr<PageInfo>());
     pattern.AttachToFrameNode(node);
-
     /**
-     * @tc.steps: step2. get child node renderContext and set shareId.
-     */
-    child->GetRenderContext()->SetShareId("shareId");
-
-    /**
-     * @tc.steps: step3. Calling the BuildSharedTransitionMap function.
+     * @tc.steps: step2. Calling the BuildSharedTransitionMap function.
      * @tc.expected: The property sharedTransitionMap_ in the pagePattern size meets expectations.
      */
     pattern.BuildSharedTransitionMap();
@@ -569,6 +566,7 @@ HWTEST_F(StageTestNg, PagePatternTest003, TestSize.Level1)
  */
 HWTEST_F(StageTestNg, PagePatternTest004, TestSize.Level1)
 {
+    Container::Current()->state_ = Frontend::State::ON_SHOW;
     /**
      * @tc.steps: step1. Create some node and PagePattern.
      */
@@ -579,46 +577,29 @@ HWTEST_F(StageTestNg, PagePatternTest004, TestSize.Level1)
     node->AddChild(child);
     PagePattern pattern(AceType::MakeRefPtr<PageInfo>());
     pattern.AttachToFrameNode(node);
-
     /**
      * @tc.steps: step2. Calling the MarkRenderDone function.
      * @tc.expected: The property isRenderDone_ in the pagePattern is true
      */
     pattern.MarkRenderDone();
     EXPECT_TRUE(pattern.isRenderDone_);
-
     /**
-     * @tc.steps: step3. Calling the SetOnPageShow function.
-     * @tc.expected: The property onPageShow_ in the pagePattern not nullptr
-     */
-    pattern.SetOnPageShow([]() {});
-    EXPECT_NE(pattern.onPageShow_, nullptr);
-
-    /**
-     * @tc.steps: step4. Calling the SetOnPageHide function.
-     * @tc.expected: The property onPageHide_ in the pagePattern not nullptr
-     */
-    pattern.SetOnPageHide([]() {});
-    EXPECT_NE(pattern.onPageHide_, nullptr);
-
-    /**
-     * @tc.steps: step5. Get container and set state_ Frontend::State::ON_SHOW.
-     */
-    Container::Current()->state_ = Frontend::State::ON_SHOW;
-
-    /**
-     * @tc.steps: step6. Calling the OnShow function.
-     * @tc.expected: The property isOnShow_ in the pagePattern is true.
+     * @tc.steps: step3. Calling the OnShow and OnHide.
+     * @tc.expected: The property isOnShow_ meets expectations.
      */
     pattern.OnShow();
     EXPECT_TRUE(pattern.isOnShow_);
-
-    /**
-     * @tc.steps: step7. Calling the OnHide function.
-     * @tc.expected: The property isOnShow_ in the pagePattern is false.
-     */
     pattern.OnHide();
     EXPECT_FALSE(pattern.isOnShow_);
+    /**
+     * @tc.steps: step4. set show hide callback and call show hide again.
+     * @tc.expected: The callback call times meets expectation.
+     */
+    pattern.SetOnPageShow(std::move(FLAG_FUNC));
+    pattern.SetOnPageHide(std::move(FLAG_FUNC));
+    pattern.OnShow();
+    pattern.OnHide();
+    EXPECT_EQ(flag, 2);
 }
 
 /**
@@ -658,32 +639,30 @@ HWTEST_F(StageTestNg, PagePatternTest005, TestSize.Level1)
      * @tc.steps: step4. Calling the TriggerPageTransition function.
      * @tc.expected: Attribute pageTransitionFinish_ not nullptr.
      */
-    pattern.TriggerPageTransition(PageTransitionType::ENTER_POP, []() {});
+    pattern.TriggerPageTransition(PageTransitionType::NONE, FLAG_FUNC);
     EXPECT_NE(pattern.pageTransitionFinish_, nullptr);
 
     /**
-     * @tc.steps: step5. Calling the StopPageTransition function.
-     * @tc.expected: Attribute pageTransitionFinish_ is nullptr.
-     */
-    pattern.StopPageTransition();
-    EXPECT_EQ(pattern.pageTransitionFinish_, nullptr);
-
-    /**
-     * @tc.steps: step6.The PageTransitionEffect SetUserCallback and PagePattern SetPageTransitionFunc.
+     * @tc.steps: step5. SetUserCallback and recall TriggerPageTransition and StopPageTransition.
      */
     effect->SetUserCallback([](RouteType routeType, const float& value) {});
-    pattern.SetPageTransitionFunc([]() {});
-
-    /**
-     * @tc.steps: step7.Calling the TriggerPageTransition function and stop it.
-     * @tc.expected: Attribute pageTransitionFinish_ not nullptr.
-     */
-    pattern.TriggerPageTransition(PageTransitionType::ENTER_POP, []() {});
+    pattern.SetPageTransitionFunc(std::move(FLAG_FUNC));
+    pattern.TriggerPageTransition(PageTransitionType::ENTER_POP, FLAG_FUNC);
     pattern.StopPageTransition();
-    EXPECT_NE(pattern.pageTransitionFinish_, nullptr);
-
     /**
-     * @tc.steps: step8.Calling the ClearPageTransitionEffect function.
+     * @tc.steps: step6.change some params ,recall TriggerPageTransition and StopPageTransition.
+     * @tc.expected: The FLAG_FUNC call times meets expectation.
+     */
+    ASSERT_NE(pattern.controller_, nullptr);
+    pattern.controller_->Stop();
+    auto innerEffect = pattern.FindPageTransitionEffect(PageTransitionType::ENTER_POP);
+    ASSERT_NE(effect, nullptr);
+    innerEffect->animationOption_.delay = -1;
+    pattern.TriggerPageTransition(PageTransitionType::ENTER_POP, FLAG_FUNC);
+    pattern.StopPageTransition();
+    EXPECT_EQ(flag, 3);
+    /**
+     * @tc.steps: step7.Calling the ClearPageTransitionEffect function.
      * @tc.expected: The GetTopTransition function returns a nullptr.
      */
     pattern.ClearPageTransitionEffect();

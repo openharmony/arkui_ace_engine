@@ -51,7 +51,7 @@ constexpr int32_t INSTANCE_ID_UNDEFINED = -1;
 constexpr int32_t INSTANCE_ID_PLATFORM = -2;
 constexpr int32_t MIN_PLUGIN_SUBCONTAINER_ID = 2000000;
 
-class ACE_FORCE_EXPORT_WITH_PREVIEW Container : public virtual AceType {
+class ACE_FORCE_EXPORT Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);
 
 public:
@@ -326,6 +326,11 @@ public:
     std::shared_ptr<NG::DistributedUI>& GetDistributedUI()
     {
         return distributedUI_;
+    }
+
+    virtual bool IsLauncherContainer()
+    {
+        return false;
     }
 
 protected:

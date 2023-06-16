@@ -94,13 +94,6 @@ struct ItemDivider final {
 };
 } // namespace V2
 
-using OnScrollEvent = std::function<void(Dimension, ScrollState)>;
-using OnScrollBeginEvent = std::function<ScrollInfo(Dimension, Dimension)>;
-using OnScrollFrameBeginEvent = std::function<ScrollFrameResult(Dimension, ScrollState)>;
-using OnScrollStartEvent = std::function<void()>;
-using OnScrollStopEvent = std::function<void()>;
-using OnScrollIndexEvent = std::function<void(int32_t, int32_t)>;
-using OnReachEvent = std::function<void()>;
 using OnItemDeleteEvent = std::function<bool(int32_t)>;
 using OnItemMoveEvent = std::function<bool(int32_t, int32_t)>;
 using OnItemDragStartFunc = std::function<RefPtr<AceType>(const ItemDragInfo&, int32_t)>;

@@ -68,7 +68,6 @@ WebModel* WebModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-JSwebEventCallback JSWeb::OnControllerAttachedCallback_ = nullptr;
 bool JSWeb::webDebuggingAccess_ = false;
 class JSWebDialog : public Referenced {
 public:
@@ -1839,9 +1838,6 @@ void JSWeb::Create(const JSCallbackInfo& info)
                                  int32_t webId) {
             JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(webId)) };
             func->Call(webviewController, 1, argv);
-            if (JSWeb::OnControllerAttachedCallback_) {
-                JSWeb::OnControllerAttachedCallback_();
-            }
         };
 
         auto setHapPathFunction = controller->GetProperty("innerSetHapPath");
@@ -2174,11 +2170,8 @@ void JSWeb::OnSslErrorRequest(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebSslErrorEvent>(info);
-        JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
-        if (message->IsBoolean()) {
-            return message->ToBoolean();
-        }
-        return false;
+        func->Execute(*eventInfo);
+        return true;
     };
     WebModel::GetInstance()->SetOnSslErrorRequest(jsCallback);
 }
@@ -3158,10 +3151,10 @@ void JSWeb::OnPageVisible(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
-        context->PostAsyncEvent([execCtx, func = func, info]() {
+        context->PostAsyncEvent([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<PageVisibleEvent>(info.get());
-            func->Execute(*eventInfo);
+            postFunc->Execute(*eventInfo);
         });
     };
     WebModel::GetInstance()->SetPageVisibleId(std::move(uiCallback));
@@ -3219,10 +3212,10 @@ void JSWeb::OnDataResubmitted(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
-        context->PostSyncEvent([execCtx, func = func, info]() {
+        context->PostSyncEvent([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<DataResubmittedEvent>(info.get());
-            func->Execute(*eventInfo);
+            postFunc->Execute(*eventInfo);
         });
     };
     WebModel::GetInstance()->SetOnDataResubmitted(uiCallback);
@@ -3324,10 +3317,10 @@ void JSWeb::OnFaviconReceived(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
-        context->PostAsyncEvent([execCtx, func = func, info]() {
+        context->PostAsyncEvent([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<FaviconReceivedEvent>(info.get());
-            func->Execute(*eventInfo);
+            postFunc->Execute(*eventInfo);
         });
     };
     WebModel::GetInstance()->SetFaviconReceivedId(uiCallback);
@@ -3356,10 +3349,10 @@ void JSWeb::OnTouchIconUrlReceived(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
-        context->PostAsyncEvent([execCtx, func = func, info]() {
+        context->PostAsyncEvent([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<TouchIconUrlEvent>(info.get());
-            func->Execute(*eventInfo);
+            postFunc->Execute(*eventInfo);
         });
     };
     WebModel::GetInstance()->SetTouchIconUrlId(uiCallback);
@@ -3473,14 +3466,15 @@ void JSWeb::OnFirstContentfulPaint(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
-        context->PostAsyncEvent([execCtx, func = func, info]() {
+        context->PostAsyncEvent([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<FirstContentfulPaintEvent>(info.get());
-            func->Execute(*eventInfo);
+            postFunc->Execute(*eventInfo);
         });
     };
     WebModel::GetInstance()->SetFirstContentfulPaintId(std::move(uiCallback));
 }
+
 void JSWeb::OnControllerAttached(const JSCallbackInfo& args)
 {
     LOGI("JSWeb OnControllerAttached");
@@ -3495,11 +3489,11 @@ void JSWeb::OnControllerAttached(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
-        context->PostAsyncEvent([execCtx, func = func]() {
+        context->PostAsyncEvent([execCtx, postFunc = func]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->Execute();
+            postFunc->Execute();
         });
     };
-    WebModel::GetInstance()->SetOnControllerAttached(std::move(JSWeb::OnControllerAttachedCallback_), uiCallback);
+    WebModel::GetInstance()->SetOnControllerAttached(std::move(uiCallback));
 }
 } // namespace OHOS::Ace::Framework

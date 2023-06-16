@@ -51,7 +51,7 @@ namespace OHOS::Ace::NG {
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
     : UINode(tag, nodeId, isRoot), pattern_(pattern)
 {
-    renderContext_->InitContext(IsRootNode(), pattern_->GetSurfaceNodeName(), pattern_->UseExternalRSNode());
+    renderContext_->InitContext(IsRootNode(), pattern_->GetContextParam());
     paintProperty_ = pattern->CreatePaintProperty();
     layoutProperty_ = pattern->CreateLayoutProperty();
     eventHub_ = pattern->CreateEventHub();
@@ -335,6 +335,10 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 
 void FrameNode::FromJson(const std::unique_ptr<JsonValue>& json)
 {
+    if (renderContext_) {
+        LOGD("UITree start decode renderContext");
+        renderContext_->FromJson(json);
+    }
     LOGD("UITree start decode accessibilityProperty");
     accessibilityProperty_->FromJson(json);
     LOGD("UITree start decode layoutProperty");
@@ -343,10 +347,6 @@ void FrameNode::FromJson(const std::unique_ptr<JsonValue>& json)
     paintProperty_->FromJson(json);
     LOGD("UITree start decode pattern");
     pattern_->FromJson(json);
-    if (renderContext_) {
-        LOGD("UITree start decode renderContext");
-        renderContext_->FromJson(json);
-    }
     if (eventHub_) {
         LOGD("UITree start decode eventHub");
         eventHub_->FromJson(json);
@@ -370,6 +370,10 @@ void FrameNode::OnAttachToMainTree(bool recursive)
     }
     if (!hasPendingRequest_) {
         return;
+    }
+    // node may have been measured before AttachToMainTree
+    if (geometryNode_->GetParentLayoutConstraint().has_value()) {
+        layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
     }
     auto context = GetContext();
     CHECK_NULL_VOID(context);
@@ -419,7 +423,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     if (geometryTransition != nullptr && geometryTransition->IsRunning()) {
         geometryTransition->DidLayout(dirty);
     } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
-               (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
+               (pattern_->GetContextParam().has_value() && contentSizeChange)) {
         if (pattern_->NeedOverridePaintRect()) {
             renderContext_->SyncGeometryProperties(pattern_->GetOverridePaintRect().value_or(RectF()));
         } else {
@@ -484,6 +488,13 @@ void FrameNode::AdjustGridOffset()
         renderContext_->UpdateOffset(OffsetT<Dimension>());
         renderContext_->UpdateAnchor(OffsetT<Dimension>());
         renderContext_->SyncGeometryProperties(RawPtr(GetGeometryNode()));
+    }
+}
+
+void FrameNode::ClearUserOnAreaChange()
+{
+    if (eventHub_) {
+        eventHub_->ClearUserOnAreaChanged();
     }
 }
 
@@ -788,7 +799,7 @@ RefPtr<LayoutWrapper> FrameNode::UpdateLayoutWrapper(
     }
 
     pattern_->BeforeCreateLayoutWrapper();
-    if (!isActive_ || forceMeasure) {
+    if (forceMeasure || (GetTag() == V2::TAB_CONTENT_ITEM_ETS_TAG && !isActive_)) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
     if (forceLayout) {
@@ -1107,6 +1118,16 @@ void FrameNode::MarkResponseRegion(bool isResponseRegion)
     if (gestureHub) {
         gestureHub->MarkResponseRegion(isResponseRegion);
     }
+}
+
+RectF FrameNode::GetPaintRectWithTransform() const
+{
+    return renderContext_->GetPaintRectWithTransform();
+}
+
+VectorF FrameNode::GetTransformScale() const
+{
+    return renderContext_->GetTransformScaleValue({ 1.0f, 1.0f });
 }
 
 bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint)
@@ -1691,8 +1712,8 @@ void FrameNode::CreateAnimatableArithmeticProperty(const std::string& propertyNa
     nodeAnimatablePropertyMap_.emplace(propertyName, property);
 }
 
-void FrameNode::UpdateAnimatableArithmeticProperty(const std::string& propertyName,
-    RefPtr<CustomAnimatableArithmetic>& value)
+void FrameNode::UpdateAnimatableArithmeticProperty(
+    const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value)
 {
     auto iter = nodeAnimatablePropertyMap_.find(propertyName);
     if (iter == nodeAnimatablePropertyMap_.end()) {

@@ -19,6 +19,7 @@
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_sec_button_base.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components_ng/pattern/security_component/location_button/location_button_common.h"
 #include "core/event/mouse_event.h"
@@ -42,24 +43,7 @@ public:
 
 class JSSecLocationButton : public JSViewAbstract, public JSInteractableView {
 public:
-    static void SetIconSize(const JSCallbackInfo& info);
-    static void SetIconColor(const JSCallbackInfo& info);
-    static void SetFontSize(const JSCallbackInfo& info);
-    static void SetFontStyle(const JSCallbackInfo& info);
-    static void SetFontWeight(const JSCallbackInfo& info);
-    static void SetFontFamily(const JSCallbackInfo& info);
-    static void SetFontColor(const JSCallbackInfo& info);
-    static void SetLayoutDirection(const JSCallbackInfo& info);
-    static void SetlayoutOrder(const JSCallbackInfo& info);
-    static void SetBackgroundColor(const JSCallbackInfo& info);
-    static void SetBackgroundPadding(const JSCallbackInfo& info);
-    static void SetTextIconPadding(const JSCallbackInfo& info);
-    static void SetBackgroundBorderStyle(const JSCallbackInfo& info);
-    static void SetBackgroundBorderWidth(const JSCallbackInfo& info);
-    static void SetBackgroundBorderColor(const JSCallbackInfo& info);
-    static void SetBackgroundBorderRadius(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
-
     static bool ParseComponentStyle(const JSCallbackInfo& info, LocationButtonLocationDescription& text,
         LocationButtonIconStyle& icon, SecurityComponentBackgroundType& bg);
     static void Create(const JSCallbackInfo& info);

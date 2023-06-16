@@ -25,9 +25,11 @@
 #include "core/components_ng/pattern/texttimer/text_timer_layout_property.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
 using namespace testing::ext;
+using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -39,6 +41,8 @@ const std::string UTC_1 = "1000000000000";
 const std::string UTC_2 = "2000000000000";
 const std::string ELAPSED_TIME_1 = "100";
 const std::string ELAPSED_TIME_2 = "200";
+const std::string EMPTY_TEXT = "";
+const std::string TEXTTIMER_CONTENT = "08:00:00";
 const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
 const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
 const Ace::FontStyle ITALIC_FONT_STYLE_VALUE = Ace::FontStyle::ITALIC;
@@ -58,6 +62,10 @@ struct TestProperty {
 };
 
 class TextTimerPatternTestNg : public testing::Test {
+public:
+    static void SetUpTestCase() {};
+    static void TearDownTestCase() {};
+
 protected:
     static RefPtr<FrameNode> CreateTextTimerParagraph(const TestProperty& testProperty);
 };
@@ -269,5 +277,27 @@ HWTEST_F(TextTimerPatternTestNg, TextTimerTest003, TestSize.Level1)
     eventHub->FireChangeEvent(UTC_2, ELAPSED_TIME_2);
     EXPECT_EQ(utc, UTC_2);
     EXPECT_EQ(elapsedTime, ELAPSED_TIME_2);
+}
+
+/**
+ * @tc.name: TextTimerAccessibilityPropertyIsScrollable001
+ * @tc.desc: Test IsScrollable of textTimerAccessibilityProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerPatternTestNg, TextTimerAccessibilityPropertyIsScrollable001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXTTIMER_ETS_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<TextTimerPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(textLayoutProperty, nullptr);
+    auto textTimerAccessibilityProperty = frameNode->GetAccessibilityProperty<TextTimerAccessibilityProperty>();
+    ASSERT_NE(textTimerAccessibilityProperty, nullptr);
+    textTimerAccessibilityProperty->SetHost(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+
+    EXPECT_EQ(textTimerAccessibilityProperty->GetText(), EMPTY_TEXT);
+
+    textLayoutProperty->UpdateContent(TEXTTIMER_CONTENT);
+    EXPECT_EQ(textTimerAccessibilityProperty->GetText(), TEXTTIMER_CONTENT);
 }
 } // namespace OHOS::Ace::NG

@@ -105,19 +105,12 @@ void JSRating::Create(const JSCallbackInfo& info)
 
 void JSRating::SetStars(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("the arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
-
     if (!info[0]->IsNumber()) {
-        LOGE("arg is not number.");
         return;
     }
 
     auto stars = info[0]->ToNumber<int32_t>();
     if (stars <= 0) {
-        LOGW("stars is invalid, and it will use 5 by default.");
         stars = STARS_DEFAULT;
     }
     RatingModel::GetInstance()->SetStars(stars);
@@ -125,19 +118,12 @@ void JSRating::SetStars(const JSCallbackInfo& info)
 
 void JSRating::SetStepSize(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("the arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
-
     if (!info[0]->IsNumber()) {
-        LOGE("arg is not number.");
         return;
     }
-
+    static const double stepSizeMin = 0.1;
     auto steps = info[0]->ToNumber<double>();
-    if (steps <= 0) {
-        LOGW("steps is invalid, and it will use 0.5 by default.");
+    if (LessNotEqual(steps, stepSizeMin)) {
         steps = STEPS_DEFAULT;
     }
     RatingModel::GetInstance()->SetStepSize(steps);
@@ -145,11 +131,9 @@ void JSRating::SetStepSize(const JSCallbackInfo& info)
 
 void JSRating::SetStarStyle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("the arg is wrong, it is supposed to have at least 1 arguments");
+    if (!info[0]->IsObject()) {
         return;
     }
-
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto getBackgroundUri = paramObject->GetProperty("backgroundUri");
     auto getForegroundUri = paramObject->GetProperty("foregroundUri");
@@ -159,24 +143,20 @@ void JSRating::SetStarStyle(const JSCallbackInfo& info)
         backgroundUri = getBackgroundUri->ToString();
         RatingModel::GetInstance()->SetBackgroundSrc(backgroundUri, false);
     } else {
-        LOGE("backgroundUri error, because the backgroundUri is not string, and will load default star.");
         RatingModel::GetInstance()->SetBackgroundSrc("", true);
     }
 
     if (getForegroundUri->IsString()) {
         RatingModel::GetInstance()->SetForegroundSrc(getForegroundUri->ToString(), false);
     } else {
-        LOGE("foregroundUri error, because the foregroundUri is not string, and will load default star");
         RatingModel::GetInstance()->SetForegroundSrc("", true);
     }
 
     if (getSecondaryUri->IsString()) {
         RatingModel::GetInstance()->SetSecondarySrc(getSecondaryUri->ToString(), false);
     } else if (getBackgroundUri->IsString()) {
-        LOGE("secondaryUri error, because the secondaryUri is not string, and will load backgroundUri");
         RatingModel::GetInstance()->SetSecondarySrc(backgroundUri, false);
     } else {
-        LOGE("secondaryUri error, because the secondaryUri is not string, and will load default star");
         RatingModel::GetInstance()->SetSecondarySrc("", true);
     }
 }
@@ -184,7 +164,6 @@ void JSRating::SetStarStyle(const JSCallbackInfo& info)
 void JSRating::SetOnChange(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
-        LOGE("failed to bind onChange Event to Rating due to it is not a function");
         return;
     }
 

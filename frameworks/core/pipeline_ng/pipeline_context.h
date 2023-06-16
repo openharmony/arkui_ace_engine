@@ -38,6 +38,8 @@
 
 namespace OHOS::Ace::NG {
 
+using UIExtensionTouchEventCallback = std::function<void(const TouchEvent&)>;
+
 class ACE_EXPORT PipelineContext : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
 
@@ -90,7 +92,8 @@ public:
 
     // Called by view when mouse event received.
     void OnMouseEvent(const MouseEvent& event) override;
-    // A temporary solution: triggers once mouse move action
+
+    // Do mouse event actively.
     void FlushMouseEvent();
 
     // Called by view when axis event received.
@@ -193,7 +196,19 @@ public:
 
     SafeAreaEdgeInserts GetCurrentViewSafeArea() const override;
 
+    void SetSystemSafeArea(const SafeAreaEdgeInserts& systemSafeArea) override;
+
+    SafeAreaEdgeInserts GetSystemSafeArea() const override;
+
+    void SetCutoutSafeArea(const SafeAreaEdgeInserts& cutoutSafeArea) override;
+
+    SafeAreaEdgeInserts GetCutoutSafeArea() const override;
+
+    SafeAreaEdgeInserts GetViewSafeArea() const override;
+
     void ResetViewSafeArea() override;
+
+    void AppBarAdaptToSafeArea() override;
 
     const RefPtr<FullScreenManager>& GetFullScreenManager();
 
@@ -283,6 +298,7 @@ public:
     void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
 
     void SetContainerWindow(bool isShow) override;
+    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
 
     void AddNodesToNotifyMemoryLevel(int32_t nodeId);
     void RemoveNodesToNotifyMemoryLevel(int32_t nodeId);
@@ -297,7 +313,10 @@ public:
     void Finish(bool autoFinish) const override;
     RectF GetRootRect()
     {
-        return rootNode_->GetGeometryNode()->GetFrameRect();
+        CHECK_NULL_RETURN(rootNode_, RectF());
+        auto geometryNode = rootNode_->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, RectF());
+        return geometryNode->GetFrameRect();
     }
 
     void FlushReload() override;
@@ -343,6 +362,11 @@ public:
         }
     }
 
+    void MarkNeedFlushMouseEvent()
+    {
+        isNeedFlushMouseEvent_ = true;
+    }
+
     // restore
     void RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo) override;
     std::unique_ptr<JsonValue> GetStoredNodeInfo() override;
@@ -352,6 +376,14 @@ public:
     {
         storeNode_.erase(restoreId);
     }
+
+    // ---------------- UIExtesion TouchEvent Callback Handler ----------------
+    void AddUIExtensionTouchEventCallback(int32_t pointId, UIExtensionTouchEventCallback&& callback);
+
+    void RemoveUIExtensionTouchEvetnCallback(int32_t pointId);
+
+    void HandleUIExtensionTouchEvent(const TouchEvent& point);
+    // -------------------------------------------------------------------------
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -420,10 +452,12 @@ private:
     std::list<TouchEvent> touchEvents_;
 
     RefPtr<FrameNode> rootNode_;
+    RefPtr<FrameNode> appBarNode_;
 
     int32_t callbackId_ = 0;
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
     SurfacePositionChangedCallbackMap surfacePositionChangedCallbackMap_;
+    std::unordered_map<int32_t, UIExtensionTouchEventCallback> uiExtensionTouchEventCallback_;
 
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
@@ -445,7 +479,8 @@ private:
     bool isTabJustTriggerOnKeyEvent_ = false;
     bool onShow_ = false;
     bool onFocus_ = true;
-    MouseEvent lastMouseEvent_;
+    bool isNeedFlushMouseEvent_ = false;
+    std::unique_ptr<MouseEvent> lastMouseEvent_;
 
     std::unordered_map<int32_t, WeakPtr<FrameNode>> storeNode_;
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;

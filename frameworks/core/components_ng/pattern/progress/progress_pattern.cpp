@@ -60,6 +60,7 @@ void ProgressPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     jsonValue->Put("scaleWidth", paintProperty->GetScaleWidthValue(theme->GetScaleWidth()).ToString().c_str());
     json->Put("style", jsonValue->ToString().c_str());
     ToJsonValueForRingStyleOptions(json);
+    ToJsonValueForLinearStyleOptions(json);
 }
 
 void ProgressPattern::InitTouchEvent()
@@ -80,6 +81,17 @@ void ProgressPattern::InitTouchEvent()
     gesture->AddTouchEvent(touchListener_);
 }
 
+void ProgressPattern::RemoveTouchEvent()
+{
+    if (touchListener_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto gesture = host->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gesture);
+        gesture->RemoveTouchEvent(touchListener_);
+        touchListener_ = nullptr;
+    }
+}
 void ProgressPattern::HandleEnabled()
 {
     auto host = GetHost();
@@ -199,6 +211,8 @@ void ProgressPattern::OnModifyDone()
         auto focusHub = hub->GetFocusHub();
         CHECK_NULL_VOID_NOLOG(focusHub);
         InitOnKeyEvent(focusHub);
+    } else {
+        RemoveTouchEvent();
     }
 }
 
@@ -219,10 +233,24 @@ void ProgressPattern::ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>&
 
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("strokeWidth", layoutProperty->GetStrokeWidthValue(theme->GetTrackThickness()).ToString().c_str());
+    jsonValue->Put("enableScanEffect", (paintProperty->GetEnableRingScanEffect().value_or(false)) ? "true" : "false");
     jsonValue->Put("shadow", paintProperty->GetPaintShadowValue(false) ? "true" : "false");
     jsonValue->Put("status",
         ConvertProgressStatusToString(paintProperty->GetProgressStatusValue(ProgressStatus::PROGRESSING)).c_str());
     json->Put("ringStyle", jsonValue);
+}
+
+void ProgressPattern::ToJsonValueForLinearStyleOptions(std::unique_ptr<JsonValue>& json) const
+{
+    auto layoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
+    auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    auto theme = pipeline->GetTheme<ProgressTheme>();
+
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("strokeWidth", layoutProperty->GetStrokeWidthValue(theme->GetTrackThickness()).ToString().c_str());
+    jsonValue->Put("enableScanEffect", (paintProperty->GetEnableLinearScanEffect().value_or(false)) ? "true" : "false");
+    json->Put("linearStyle", jsonValue);
 }
 
 std::string ProgressPattern::ConvertProgressStatusToString(const ProgressStatus status)

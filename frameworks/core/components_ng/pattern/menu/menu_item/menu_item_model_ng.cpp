@@ -19,11 +19,9 @@
 #include "base/utils/utils.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
-#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -34,7 +32,7 @@ void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
     auto menuItem = FrameNode::GetOrCreateFrameNode(
-        V2::MENU_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MenuItemPattern>(); });
+        V2::MENU_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CustomMenuItemPattern>(); });
     CHECK_NULL_VOID(menuItem);
     stack->Push(menuItem);
 
@@ -77,7 +75,7 @@ void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
     CHECK_NULL_VOID(leftRow);
     auto leftRowLayoutProps = leftRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(leftRowLayoutProps);
-    leftRowLayoutProps->UpdateMainAxisAlign(FlexAlign::CENTER);
+    leftRowLayoutProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
     leftRowLayoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
     leftRowLayoutProps->UpdateSpace(theme->GetIconContentPadding());
 

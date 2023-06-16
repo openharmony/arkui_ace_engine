@@ -126,7 +126,8 @@ public:
         return instanceId_;
     }
     void HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<TextOverlayManager>& textOverlayManager);
-    void HandleGlobalEventNG(const TouchEvent& touchPoint, const RefPtr<NG::SelectOverlayManager>& selectOverlayManager);
+    void HandleGlobalEventNG(const TouchEvent& touchPoint, const RefPtr<NG::SelectOverlayManager>& selectOverlayManager,
+        const NG::OffsetF& rootOffset);
 
     void CollectTabIndexNodes(const RefPtr<FocusNode>& rootNode);
 
@@ -188,6 +189,7 @@ private:
     WeakPtr<RenderNode> mouseHoverNode_;
     WeakPtr<RenderNode> axisNode_;
     int32_t instanceId_ = 0;
+    uint32_t lastHoverDispatchLength_ = 0;
     bool inSelectedRect_ = false;
     RefPtr<GestureReferee> referee_;
     RefPtr<NG::GestureReferee> refereeNG_;

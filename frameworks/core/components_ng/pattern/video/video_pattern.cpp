@@ -49,9 +49,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-#include "unified_data.h"
-#include "unified_record.h"
-#include "video.h"
+#include "core/common/udmf/udmf_client.h"
 #endif
 namespace OHOS::Ace::NG {
 namespace {
@@ -168,6 +166,9 @@ void VideoPattern::ResetStatus()
 {
     isInitialState_ = true;
     isPlaying_ = false;
+#ifndef OHOS_PLATFORM
+    isStop_ = false;
+#endif
 }
 
 void VideoPattern::UpdateMediaPlayer()
@@ -640,7 +641,8 @@ void VideoPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContextForMediaPlayer_->InitContext(false, "MediaPlayerSurface");
+    static RenderContext::ContextParam param = { RenderContext::ContextType::SURFACE, "MediaPlayerSurface" };
+    renderContextForMediaPlayer_->InitContext(false, param);
     renderContext->UpdateBackgroundColor(Color::BLACK);
     renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
     renderContext->SetClipToBounds(true);
@@ -1233,6 +1235,10 @@ void VideoPattern::OnFullScreenChange(bool isFullScreen)
             break;
         }
     }
+    mediaPlayer_->FullScreenChange(isFullScreen);
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        renderSurface_->SetIsFullScreen(isFullScreen);
+    }
 }
 
 void VideoPattern::FullScreen()
@@ -1297,23 +1303,20 @@ void VideoPattern::EnableDrag()
     auto dragEnd = [this, videoSrcBefore](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto videoLayoutProperty = this->GetLayoutProperty<VideoLayoutProperty>();
         CHECK_NULL_VOID(videoLayoutProperty);
-        std::shared_ptr<UDMF::UnifiedData> unifiedData = event->GetData();
+        auto unifiedData = event->GetData();
         std::string videoSrc = "";
         if (unifiedData != nullptr) {
-            auto records = unifiedData->GetRecords();
-            if (records.size() == 0) {
+            int ret = UdmfClient::GetInstance()->GetVideoRecordUri(unifiedData, videoSrc);
+            if (ret != 0) {
                 LOGE("unifiedRecords is empty");
                 return;
             }
-            auto video = reinterpret_cast<UDMF::Video*>(records[0].get());
-            videoSrc = video->GetUri();
         } else {
             auto json = JsonUtil::ParseJsonString(extraParams);
             std::string key = "extraInfo";
             videoSrc = json->GetString(key);
         }
 
-        bool isInitialState = this->isInitialState_;
         if (videoSrc == videoSrcBefore) {
             return;
         }

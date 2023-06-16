@@ -146,9 +146,13 @@ public:
     void PushWithMode(const std::string& uri, const std::string& params, uint32_t routerMode) override;
     void PushWithCallback(const std::string& uri, const std::string& params,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
+    void PushNamedRoute(const std::string& uri, const std::string& params,
+        const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
     void Replace(const std::string& uri, const std::string& params) override;
     void ReplaceWithMode(const std::string& uri, const std::string& params, uint32_t routerMode) override;
     void ReplaceWithCallback(const std::string& uri, const std::string& params,
+        const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
+    void ReplaceNamedRoute(const std::string& uri, const std::string& params,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
     void Back(const std::string& uri, const std::string& params) override;
     void Clear() override;
@@ -233,6 +237,10 @@ public:
 
     void RegisterFont(const std::string& familyName, const std::string& familySrc) override;
 
+    void GetSystemFontList(std::vector<std::string>& fontList) override;
+
+    bool GetSystemFont(const std::string& fontName, FontInfo& fontInfo) override;
+
     void HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback) override;
 
     void GetSnapshot(const std::string& componentId,
@@ -289,7 +297,8 @@ public:
     void GetStageSourceMap(
         std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMap);
 
-    void InitializeRouterManager(NG::LoadPageCallback&& loadPageCallback);
+    void InitializeRouterManager(
+        NG::LoadPageCallback&& loadPageCallback, NG::LoadNamedRouterCallback&& loadNamedRouterCallback);
 
     const RefPtr<NG::PageRouterManager>& GetPageRouterManager() const
     {

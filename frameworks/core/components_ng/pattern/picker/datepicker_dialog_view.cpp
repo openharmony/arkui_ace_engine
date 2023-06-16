@@ -388,6 +388,9 @@ RefPtr<FrameNode> DatePickerDialogView::CreateDateNode(int32_t dateNodeId,
     CHECK_NULL_RETURN(context, nullptr);
     auto themeManager = context->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, nullptr);
+    auto dialogTheme = themeManager->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, nullptr);
+    datePickerPattern->SetBackgroundColor(dialogTheme->GetBackgroundColor());
     auto pickerTheme = themeManager->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, nullptr);
     uint32_t showCount = pickerTheme->GetShowOptionCount();

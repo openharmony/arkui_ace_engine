@@ -29,7 +29,6 @@ class MouseInfo;
 constexpr int32_t MOUSE_PRESS_LEFT = 1;
 static const int32_t MOUSE_BASE_ID = 1000;
 
-using OnHoverEventFunc = std::function<void(bool)>;
 using OnMouseEventFunc = std::function<void(MouseInfo& info)>;
 
 enum class MouseAction : int32_t {
@@ -88,6 +87,7 @@ struct MouseEvent final {
     int32_t pressedButtons = 0; // combined by MouseButtons
     TimeStamp time;
     int64_t deviceId = 0;
+    int32_t targetDisplayId = 0;
     SourceType sourceType = SourceType::NONE;
 
     Offset GetOffset() const
@@ -128,6 +128,7 @@ struct MouseEvent final {
                 .pressedButtons = pressedButtons,
                 .time = time,
                 .deviceId = deviceId,
+                .targetDisplayId = targetDisplayId,
                 .sourceType = sourceType };
         }
 
@@ -147,6 +148,7 @@ struct MouseEvent final {
             .pressedButtons = pressedButtons,
             .time = time,
             .deviceId = deviceId,
+            .targetDisplayId = targetDisplayId,
             .sourceType = sourceType };
     }
 
@@ -180,6 +182,7 @@ struct MouseEvent final {
             .time = time,
             .size = 0.0,
             .deviceId = deviceId,
+            .targetDisplayId = targetDisplayId,
             .sourceType = sourceType };
         event.pointers.emplace_back(std::move(point));
         return event;
@@ -203,6 +206,7 @@ struct MouseEvent final {
             .pressedButtons = pressedButtons,
             .time = time,
             .deviceId = deviceId,
+            .targetDisplayId = targetDisplayId,
             .sourceType = sourceType };
     }
 };
@@ -278,6 +282,18 @@ private:
 
 using HoverEffectFunc = std::function<void(bool)>;
 
+class HoverInfo;
+class HoverInfo : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(HoverInfo, BaseEventInfo);
+
+public:
+    HoverInfo() : BaseEventInfo("onHover") {}
+    ~HoverInfo() override = default;
+};
+
+using OnHoverFunc = std::function<void(bool, HoverInfo& info)>;
+using OnHoverEventFunc = std::function<void(bool)>;
+
 class MouseEventTarget : public virtual TouchEventTarget {
     DECLARE_ACE_TYPE(MouseEventTarget, TouchEventTarget);
 
@@ -305,6 +321,7 @@ public:
         info.SetScreenLocation(event.GetScreenOffset());
         info.SetTimeStamp(event.time);
         info.SetDeviceId(event.deviceId);
+        info.SetTargetDisplayId(event.targetDisplayId);
         info.SetSourceDevice(event.sourceType);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
         onMouseCallback_(info);
@@ -336,6 +353,26 @@ public:
     {
         onHoverCallback_ = onHoverCallback;
     }
+    void SetCallback(const OnHoverFunc& onHoverEventCallback)
+    {
+        onHoverEventCallback_ = onHoverEventCallback;
+    }
+
+    bool HandleHoverEvent(bool isHovered, const MouseEvent& event)
+    {
+        if (!onHoverEventCallback_) {
+            return false;
+        }
+        HoverInfo hoverInfo;
+        hoverInfo.SetTimeStamp(event.time);
+        hoverInfo.SetDeviceId(event.deviceId);
+        hoverInfo.SetSourceDevice(event.sourceType);
+        onHoverEventCallback_(isHovered, hoverInfo);
+        if (hoverInfo.IsStopPropagation()) {
+            return false;
+        }
+        return true;
+    }
 
     bool HandleHoverEvent(bool isHovered)
     {
@@ -357,6 +394,7 @@ public:
 
 private:
     OnHoverEventFunc onHoverCallback_;
+    OnHoverFunc onHoverEventCallback_;
 };
 
 class HoverEffectTarget : public virtual TouchEventTarget {

@@ -37,11 +37,23 @@
 
 namespace OHOS::Ace::Platform {
 
+struct WorkerPath {
+    std::string packagePathStr;
+    std::vector<std::string> assetBasePathStr;
+};
+
+struct PaContainerOptions {
+    BackendType type;
+    SrcLanguage language = SrcLanguage::ETS;
+    std::string hapPath = "";
+    std::shared_ptr<WorkerPath> workerPath = nullptr;
+};
+
 class PaContainer : public Container, public JsMessageDispatcher {
     DECLARE_ACE_TYPE(PaContainer, Container, JsMessageDispatcher);
 
 public:
-    PaContainer(int32_t instanceId, BackendType type, void* paAbility, const std::string& hapPath,
+    PaContainer(int32_t instanceId, void* paAbility, const PaContainerOptions& options,
         std::unique_ptr<PlatformEventCallback> callback);
     ~PaContainer() override = default;
 
@@ -138,7 +150,7 @@ public:
     }
 
     static bool Register();
-    static void CreateContainer(int32_t instanceId, BackendType type, void* paAbility, const std::string& hapPath,
+    static void CreateContainer(int32_t instanceId, void* paAbility, const PaContainerOptions& options,
         std::unique_ptr<PlatformEventCallback> callback);
     static void DestroyContainer(int32_t instanceId);
     static RefPtr<PaContainer> GetContainer(int32_t instanceId);
@@ -177,7 +189,7 @@ public:
         const std::string& method, const std::string& arg, const AppExecFwk::PacMap& pacMap);
 
 private:
-    void InitializeBackend();
+    void InitializeBackend(SrcLanguage language);
     void InitializeCallback();
 
     RefPtr<TaskExecutor> taskExecutor_;
@@ -189,7 +201,7 @@ private:
     std::unique_ptr<PlatformEventCallback> platformEventCallback_;
     void* paAbility_ = nullptr;
     std::string hapPath_;
-
+    std::shared_ptr<WorkerPath> workerPath_;
     ACE_DISALLOW_COPY_AND_MOVE(PaContainer);
 };
 

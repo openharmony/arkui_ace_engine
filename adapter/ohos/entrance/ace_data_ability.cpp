@@ -80,24 +80,41 @@ void AceDataAbility::OnStart(const OHOS::AAFwk::Want& want, sptr<AAFwk::SessionI
     auto moduleInfo = GetHapModuleInfo();
     CHECK_NULL_VOID_NOLOG(moduleInfo);
     packagePathStr += "/" + moduleInfo->package + "/";
+    std::shared_ptr<AbilityInfo> abilityInfo = GetAbilityInfo();
+
     // init data ability
     BackendType backendType = BackendType::DATA;
+    SrcLanguage srcLanguage = SrcLanguage::ETS;
+    if (abilityInfo != nullptr && !abilityInfo->srcLanguage.empty()) {
+        if (abilityInfo->srcLanguage == "js") {
+            srcLanguage = SrcLanguage::JS;
+        }
+    }
 
-    Platform::PaContainer::CreateContainer(abilityId_, backendType, this, moduleInfo->hapPath,
-        std::make_unique<DataPlatformEventCallback>([this]() { TerminateAbility(); }));
+    std::shared_ptr<Platform::WorkerPath> workerPath = std::make_shared<Platform::WorkerPath>();
+    workerPath->packagePathStr = packagePathStr;
+    std::vector<std::string> assetBasePathStr;
 
     AceEngine::InitJsDumpHeadSignal();
-    std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
-    if (info != nullptr && !info->srcPath.empty()) {
+    if (abilityInfo != nullptr && !abilityInfo->srcPath.empty()) {
         LOGI("AceDataAbility::OnStart assetBasePathStr: %{public}s, parsedUrl: %{public}s",
-            info->srcPath.c_str(), parsedUrl.c_str());
-        auto assetBasePathStr = { "assets/js/" + info->srcPath + "/", std::string("assets/js/") };
-        Platform::PaContainer::AddAssetPath(abilityId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
+            abilityInfo->srcPath.c_str(), parsedUrl.c_str());
+        assetBasePathStr = { "assets/js/" + abilityInfo->srcPath + "/", std::string("assets/js/") };
     } else {
         LOGI("AceDataAbility::OnStart parsedUrl: %{public}s", parsedUrl.c_str());
-        auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
-        Platform::PaContainer::AddAssetPath(abilityId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
+        assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
     }
+    workerPath->assetBasePathStr = assetBasePathStr;
+
+    Platform::PaContainerOptions options;
+    options.type = backendType;
+    options.language = srcLanguage;
+    options.hapPath = moduleInfo->hapPath;
+    options.workerPath = workerPath;
+
+    Platform::PaContainer::CreateContainer(abilityId_, this, options,
+        std::make_unique<DataPlatformEventCallback>([this]() { TerminateAbility(); }));
+    Platform::PaContainer::AddAssetPath(abilityId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
 
     // run data ability
     Platform::PaContainer::RunPa(abilityId_, parsedUrl, want);

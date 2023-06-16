@@ -539,6 +539,11 @@ public:
         ViewAbstract::SetBackdropBlur(radius);
     }
 
+    void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) override
+    {
+        ViewAbstract::SetLinearGradientBlur(blurPara);
+    }
+
     void SetFrontBlur(const Dimension& radius) override
     {
         ViewAbstract::SetFrontBlur(radius);
@@ -593,6 +598,11 @@ public:
         ViewAbstract::SetHueRotate(value);
     }
 
+    void SetUseEffect(bool useEffect) override
+    {
+        ViewAbstract::SetUseEffect(useEffect);
+    }
+
     void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override
     {
         ViewAbstract::SetClickEffectLevel(level, scaleValue);
@@ -618,7 +628,7 @@ public:
         ViewAbstract::SetOnMouse(std::move(onMouseEventFunc));
     }
 
-    void SetOnHover(OnHoverEventFunc&& onHoverEventFunc) override
+    void SetOnHover(OnHoverFunc&& onHoverEventFunc) override
     {
         ViewAbstract::SetOnHover(std::move(onHoverEventFunc));
     }
@@ -791,12 +801,14 @@ public:
         ViewAbstract::SetKeyboardShortcut(value, keys, std::move(onKeyboardShortcutAction));
     }
 
+    void SetObscured(const std::vector<ObscuredReasons>& reasons) override
+    {
+        ViewAbstract::SetObscured(reasons);
+    }
+
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override
     {
         auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-#ifdef ENABLE_DRAG_FRAMEWORK
-        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
-#endif // ENABLE_DRAG_FRAMEWORK
         ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
     }
 
@@ -824,6 +836,56 @@ public:
     void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) override
     {
         ViewAbstract::SetForegroundColorStrategy(strategy);
+    }
+
+    void DisableOnClick() override
+    {
+        ViewAbstract::DisableOnClick();
+    }
+
+    void DisableOnTouch() override
+    {
+        ViewAbstract::DisableOnTouch();
+    }
+
+    void DisableOnKeyEvent() override
+    {
+        ViewAbstract::DisableOnKeyEvent();
+    }
+
+    void DisableOnHover() override
+    {
+        ViewAbstract::DisableOnHover();
+    }
+
+    void DisableOnMouse() override
+    {
+        ViewAbstract::DisableOnMouse();
+    }
+
+    void DisableOnAppear() override
+    {
+        ViewAbstract::DisableOnAppear();
+    }
+
+    void DisableOnDisAppear() override
+    {
+        ViewAbstract::DisableOnDisAppear();
+    }
+
+    void DisableOnAreaChange() override
+    {
+        ViewAbstract::DisableOnAreaChange();
+    }
+
+    void DisableOnFocus() override
+    {
+        ViewAbstract::DisableOnFocus();
+    }
+
+    void DisableOnBlur() override
+    {
+        ViewAbstract::DisableOnBlur();
     }
 
 private:

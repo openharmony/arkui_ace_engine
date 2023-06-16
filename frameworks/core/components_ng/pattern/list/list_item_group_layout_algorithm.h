@@ -89,6 +89,11 @@ public:
         jumpIndex_ = index;
     }
 
+    void SetTargetIndex(int32_t index)
+    {
+        targetIndex_ = index;
+    }
+
     int32_t GetStartIndex() const
     {
         return itemPosition_.empty() ? 0 : itemPosition_.begin()->first;
@@ -175,11 +180,14 @@ private:
     float spaceWidth_ = 0.0f;
 
     std::optional<int32_t> jumpIndex_;
+    std::optional<int32_t> targetIndex_;
     int32_t totalItemCount_ = 0;
     float totalMainSize_ = 0.0f;
     float headerMainSize_ = 0.0f;
     float footerMainSize_ = 0.0f;
     float startPos_ = 0.0f;
+    float prevStartPos_ = 0.0f;
+    float prevEndPos_ = 0.0f;
     float endPos_ = 0.0f;
     float referencePos_ = 0.0f;
     bool forwardLayout_ = true;

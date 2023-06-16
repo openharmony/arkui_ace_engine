@@ -1656,15 +1656,68 @@ std::optional<double> CustomPaintPaintMethod::CalcTextScale(double maxIntrinsicW
 TransformParam CustomPaintPaintMethod::GetTransform() const
 {
     TransformParam param;
-    if (skCanvas_ != nullptr) {
-        SkMatrix matrix = skCanvas_->getTotalMatrix();
-        param.scaleX = matrix.getScaleX();
-        param.scaleY = matrix.getScaleY();
-        param.skewX = matrix.getSkewX();
-        param.skewY = matrix.getSkewY();
-        param.translateX = matrix.getTranslateX();
-        param.translateY = matrix.getTranslateY();
-    }
+    param.scaleX = matrix_.getScaleX();
+    param.scaleY = matrix_.getScaleY();
+    param.skewX = matrix_.getSkewX();
+    param.skewY = matrix_.getSkewY();
+    param.translateX = matrix_.getTranslateX();
+    param.translateY = matrix_.getTranslateY();
     return param;
+}
+
+void CustomPaintPaintMethod::SaveMatrix()
+{
+    matrixStates_.push(matrix_);
+}
+
+void CustomPaintPaintMethod::RestoreMatrix()
+{
+    if (matrixStates_.empty()) {
+        return;
+    }
+    matrix_ = matrixStates_.top();
+    matrixStates_.pop();
+}
+
+void CustomPaintPaintMethod::ResetTransformMatrix()
+{
+    matrix_.reset();
+}
+
+void CustomPaintPaintMethod::RotateMatrix(double angle)
+{
+    SkMatrix matrix;
+    matrix.setRotate(angle * HALF_CIRCLE_ANGLE / M_PI);
+    matrix_.preConcat(matrix);
+}
+
+void CustomPaintPaintMethod::ScaleMatrix(double sx, double sy)
+{
+    SkMatrix matrix;
+    matrix.setScale(sx, sy);
+    matrix_.preConcat(matrix);
+}
+
+void CustomPaintPaintMethod::SetTransformMatrix(const TransformParam& param)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    double viewScale = context->GetViewScale();
+    matrix_.setAll(param.scaleX * viewScale, param.skewX * viewScale, param.translateX * viewScale,
+        param.skewY * viewScale, param.scaleY * viewScale, param.translateY * viewScale, 0, 0, 1);
+}
+
+void CustomPaintPaintMethod::TransformMatrix(const TransformParam& param)
+{
+    SkMatrix matrix;
+    matrix.setAll(param.scaleX, param.skewY, param.translateX, param.skewX, param.scaleY, param.translateY, 0, 0, 1);
+    matrix_.preConcat(matrix);
+}
+
+void CustomPaintPaintMethod::TranslateMatrix(double tx, double ty)
+{
+    if (tx || ty) {
+        matrix_.preTranslate(tx, ty);
+    }
 }
 } // namespace OHOS::Ace::NG

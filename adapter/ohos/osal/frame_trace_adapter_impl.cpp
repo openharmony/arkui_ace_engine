@@ -19,9 +19,9 @@
 
 namespace OHOS::Ace {
 #ifdef __aarch64__
-const char* FRAME_TRACE_SO_PATH = "/system/lib64/libframe_trace_intf.z.so";
+const char* FRAME_TRACE_SO_PATH = "/system/lib64/platformsdk/libframe_trace_intf.z.so";
 #else
-const char* FRAME_TRACE_SO_PATH = "/system/lib/libframe_trace_intf.z.so";
+const char* FRAME_TRACE_SO_PATH = "/system/lib/platformsdk/libframe_trace_intf.z.so";
 #endif
 
 static bool g_judgeFrameTrace = false;

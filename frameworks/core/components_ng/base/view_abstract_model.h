@@ -158,6 +158,8 @@ public:
     // effects
     virtual void SetMask(const RefPtr<BasicShape>& shape) = 0;
     virtual void SetBackdropBlur(const Dimension& radius) = 0;
+    virtual void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) = 0;
+    
     virtual void SetFrontBlur(const Dimension& radius) = 0;
     virtual void SetBackShadow(const std::vector<Shadow>& shadows) = 0;
     virtual void SetColorBlend(const Color& value) = 0;
@@ -170,13 +172,14 @@ public:
     virtual void SetInvert(const Dimension& value) = 0;
     virtual void SetHueRotate(float value) = 0;
     virtual void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) = 0;
+    virtual void SetUseEffect(bool useEffect) = 0;
 
     // event
     virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) = 0;
     virtual void SetOnTouch(TouchEventFunc&& touchEventFunc) = 0;
     virtual void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) = 0;
     virtual void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) = 0;
-    virtual void SetOnHover(OnHoverEventFunc&& onHoverEventFunc) = 0;
+    virtual void SetOnHover(OnHoverFunc&& onHoverEventFunc) = 0;
     virtual void SetOnDelete(std::function<void()>&& onDeleteCallback) = 0;
     virtual void SetOnAppear(std::function<void()>&& onAppearCallback) = 0;
     virtual void SetOnDisAppear(std::function<void()>&& onDisAppearCallback) = 0;
@@ -199,6 +202,18 @@ public:
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
             onAreaChanged) = 0;
 
+    // Disable event when the param is undefined.
+    virtual void DisableOnClick() = 0;
+    virtual void DisableOnTouch() = 0;
+    virtual void DisableOnKeyEvent() = 0;
+    virtual void DisableOnHover() = 0;
+    virtual void DisableOnMouse() = 0;
+    virtual void DisableOnAppear() = 0;
+    virtual void DisableOnDisAppear() = 0;
+    virtual void DisableOnAreaChange() = 0;
+    virtual void DisableOnFocus() = 0;
+    virtual void DisableOnBlur() = 0;
+
     // interact
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) = 0;
     virtual void SetEnabled(bool enabled) = 0;
@@ -216,6 +231,9 @@ public:
     virtual void SetHitTestMode(NG::HitTestMode hitTestMode) = 0;
     virtual void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) = 0;
+
+    // obscured
+    virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;
 
     // popup and menu
     virtual void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) = 0;

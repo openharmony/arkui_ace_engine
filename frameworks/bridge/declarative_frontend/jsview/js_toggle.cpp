@@ -119,7 +119,7 @@ void JSToggle::Create(const JSCallbackInfo& info)
     } else {
         isOn = tempIsOn->IsBoolean() ? tempIsOn->ToBoolean() : false;
     }
-    
+
     ToggleModel::GetInstance()->Create(NG::ToggleType(toggleTypeInt), isOn);
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
         ParseToggleIsOnObject(info, changeEventVal);
@@ -138,16 +138,18 @@ void JSToggle::JsWidth(const JSCallbackInfo& info)
 
 void JSToggle::JsWidth(const JSRef<JSVal>& jsValue)
 {
-    CalcDimension value;
-    if (!ParseJsDimensionVp(jsValue, value)) {
-        return;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+    CHECK_NULL_VOID(switchTheme);
+    auto defaultWidth = switchTheme->GetWidth();
+    auto horizontalPadding = switchTheme->GetHotZoneHorizontalPadding();
+    auto width = defaultWidth - horizontalPadding * 2;
+    CalcDimension value(width);
+    ParseJsDimensionVp(jsValue, value);
+    if (value.IsNegative()) {
+        value = width;
     }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsWidth(jsValue);
-        return;
-    }
-
     ToggleModel::GetInstance()->SetWidth(value);
 }
 
@@ -163,14 +165,17 @@ void JSToggle::JsHeight(const JSCallbackInfo& info)
 
 void JSToggle::JsHeight(const JSRef<JSVal>& jsValue)
 {
-    CalcDimension value;
-    if (!ParseJsDimensionVp(jsValue, value)) {
-        return;
-    }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsHeight(jsValue);
-        return;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+    CHECK_NULL_VOID(switchTheme);
+    auto defaultHeight = switchTheme->GetHeight();
+    auto verticalPadding = switchTheme->GetHotZoneVerticalPadding();
+    auto height = defaultHeight - verticalPadding * 2;
+    CalcDimension value(height);
+    ParseJsDimensionVp(jsValue, value);
+    if (value.IsNegative()) {
+        value = height;
     }
     ToggleModel::GetInstance()->SetHeight(value);
 }
@@ -247,20 +252,19 @@ void JSToggle::JsPadding(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    if (!info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject()) {
-        LOGE("arg is not a string, number or object.");
-        return;
-    }
-    if (Container::IsCurrentUseNewPipeline() || ToggleModel::GetInstance()->IsToggle()) {
-        JSViewAbstract::JsPadding(info);
-        return;
-    }
+    NG::PaddingPropertyF oldPadding = GetOldPadding(info);
+    NG::PaddingProperty newPadding = GetNewPadding(info);
+    ToggleModel::GetInstance()->SetPadding(oldPadding, newPadding);
+}
 
+NG::PaddingPropertyF JSToggle::GetOldPadding(const JSCallbackInfo& info)
+{
+    NG::PaddingPropertyF padding({ 0.0f, 0.0f, 0.0f, 0.0f });
     if (info[0]->IsObject()) {
         auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
         if (!argsPtrItem || argsPtrItem->IsNull()) {
             LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
-            return;
+            return padding;
         }
         if (argsPtrItem->Contains("top") || argsPtrItem->Contains("bottom") || argsPtrItem->Contains("left") ||
             argsPtrItem->Contains("right")) {
@@ -281,25 +285,58 @@ void JSToggle::JsPadding(const JSCallbackInfo& info)
             if (leftDimen == 0.0_vp) {
                 leftDimen = topDimen;
             }
-            NG::PaddingPropertyF padding;
+
             padding.left = leftDimen.ConvertToPx();
             padding.right = rightDimen.ConvertToPx();
             padding.top = topDimen.ConvertToPx();
             padding.bottom = bottomDimen.ConvertToPx();
-            ToggleModel::GetInstance()->SetPadding(padding);
-            return;
+            return padding;
         }
     }
+
     CalcDimension length;
-    if (!JSViewAbstract::ParseJsDimensionVp(info[0], length)) {
-        return;
+    if (!ParseJsDimensionVp(info[0], length)) {
+        return padding;
     }
-    NG::PaddingPropertyF padding;
+
     padding.left = length.ConvertToPx();
     padding.right = length.ConvertToPx();
     padding.top = length.ConvertToPx();
     padding.bottom = length.ConvertToPx();
-    ToggleModel::GetInstance()->SetPadding(padding);
+    return padding;
+}
+
+NG::PaddingProperty JSToggle::GetNewPadding(const JSCallbackInfo& info)
+{
+    NG::PaddingProperty padding(
+        { NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp) });
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
+        CalcDimension leftDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("left"), leftDimen)) {
+            padding.left = NG::CalcLength(leftDimen.IsNonNegative() ? leftDimen : CalcDimension());
+        }
+        CalcDimension rightDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("right"), rightDimen)) {
+            padding.right = NG::CalcLength(rightDimen.IsNonNegative() ? rightDimen : CalcDimension());
+        }
+        CalcDimension topDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("top"), topDimen)) {
+            padding.top = NG::CalcLength(topDimen.IsNonNegative() ? topDimen : CalcDimension());
+        }
+        CalcDimension bottomDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
+            padding.bottom = NG::CalcLength(bottomDimen.IsNonNegative() ? bottomDimen : CalcDimension());
+        }
+        return padding;
+    }
+    CalcDimension length;
+    if (!ParseJsDimensionVp(info[0], length)) {
+        length.Reset();
+    }
+
+    padding.SetEdges(NG::CalcLength(length.IsNonNegative() ? length : CalcDimension()));
+    return padding;
 }
 
 void JSToggle::SetBackgroundColor(const JSCallbackInfo& info)

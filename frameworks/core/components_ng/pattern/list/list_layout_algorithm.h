@@ -30,15 +30,16 @@
 namespace OHOS::Ace::NG {
 class PipelineContext;
 
-enum class ScrollIndexAlignment {
-    ALIGN_TOP = 0,
-    ALIGN_BOTTOM = 1,
-};
-
 struct ListItemInfo {
     float startPos;
     float endPos;
     bool isGroup;
+};
+
+enum class ScrollAutoType {
+    NOT_CHANGE = 0,
+    START,
+    END,
 };
 
 // TextLayoutAlgorithm acts as the underlying text layout.
@@ -80,14 +81,19 @@ public:
         jumpIndex_ = index;
     }
 
+    void SetTargetIndex(int32_t index)
+    {
+        targetIndex_ = index;
+    }
+
     void SetIndexInGroup(int32_t index)
     {
         jumpIndexInGroup_ = index;
     }
 
-    void SetIndexAlignment(ScrollIndexAlignment align)
+    void SetIndexAlignment(ScrollAlign align)
     {
-        scrollIndexAlignment_ = align;
+        scrollAlign_ = align;
     }
 
     void SetCurrentDelta(float offset)
@@ -214,11 +220,23 @@ public:
     void LayoutBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
         int32_t endIndex, float endPos);
 
+    void BeginLayoutForward(float startPos, LayoutWrapper* layoutWrapper,
+        const LayoutConstraintF& layoutConstraint, Axis axis);
+
+    void BeginLayoutBackward(float startPos, LayoutWrapper* layoutWrapper,
+        const LayoutConstraintF& layoutConstraint, Axis axis);
+
     virtual int32_t GetLanes() const
     {
         return 1;
     }
+    
+    void OffScreenLayoutDirection();
 
+    ScrollAutoType GetScrollAutoType() const
+    {
+        return scrollAutoType_;
+    }
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -249,7 +267,7 @@ protected:
 private:
     void MeasureList(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
 
-    void CalculateEstimateOffset(bool isAlignTop);
+    void CalculateEstimateOffset(ScrollAlign align);
 
     std::pair<int32_t, float> LayoutOrRecycleCachedItems(
         LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
@@ -265,7 +283,9 @@ private:
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
-    ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
+    std::optional<int32_t> targetIndex_;
+    ScrollAlign scrollAlign_ = ScrollAlign::START;
+    ScrollAutoType scrollAutoType_ = ScrollAutoType::NOT_CHANGE;
 
     PositionMap itemPosition_;
     float currentOffset_ = 0.0f;
@@ -277,6 +297,8 @@ private:
     float spaceWidth_ = 0.0f;
     bool overScrollFeature_ = false;
     bool canOverScroll_ = false;
+    bool forwardFeature_ = false;
+    bool backwardFeature_ = false;
 
     int32_t totalItemCount_ = 0;
 

@@ -31,10 +31,10 @@ ohos_unittest("stepper_pattern_test_ng") {
     "$ace_root/frameworks/core/animation/spring_model.cpp",
     "$ace_root/frameworks/core/animation/spring_motion.cpp",
     "$ace_root/frameworks/core/common/clipboard/clipboard_proxy.cpp",
-    "$ace_root/frameworks/core/common/container.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/components/common/properties/shadow_config.cpp",
     "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
+    "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
 
     # components_ng_event
     "$ace_root/frameworks/core/components_ng/event/long_press_event.cpp",
@@ -196,6 +196,7 @@ ohos_unittest("stepper_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/syntax/mock_for_each_node.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
+    "$ace_root/test/mock/core/common/mock_container.cpp",
   ]
 
   deps = [

@@ -24,14 +24,14 @@
 
 namespace OHOS::Ace::NG {
 
-void ListPositionController::JumpTo(int32_t index, int32_t source)
+void ListPositionController::JumpTo(int32_t index, bool smooth, ScrollAlign align, int32_t source)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID_NOLOG(pattern);
     auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
     CHECK_NULL_VOID_NOLOG(listPattern);
     LOGW("jumpTo is not supported now");
-    listPattern->ScrollToIndex(index);
+    listPattern->ScrollToIndex(index, smooth, align);
 }
 
 bool ListPositionController::AnimateTo(
@@ -109,4 +109,10 @@ Offset ListPositionController::GetCurrentOffset() const
     return offset;
 }
 
+bool ListPositionController::IsAtEnd() const
+{
+    auto listPattern = AceType::DynamicCast<ListPattern>(scroll_.Upgrade());
+    CHECK_NULL_RETURN_NOLOG(listPattern, false);
+    return listPattern->IsAtBottom();
+}
 } // namespace OHOS::Ace::NG

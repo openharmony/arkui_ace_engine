@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 
+#include <memory>
+
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
@@ -108,13 +110,22 @@ void MenuItemPattern::OnMountToParentDone()
     UpdateTextNodes();
 }
 
-void MenuItemPattern::OnModifyDone()
+void MenuItemPattern::OnAttachToFrameNode()
 {
-    Pattern::OnModifyDone();
     RegisterOnClick();
     RegisterOnTouch();
     RegisterOnHover();
     RegisterOnKeyEvent();
+}
+
+void CustomMenuItemPattern::OnAttachToFrameNode()
+{
+    RegisterOnTouch();
+}
+
+void MenuItemPattern::OnModifyDone()
+{
+    Pattern::OnModifyDone();
     /*
      * The structure of menu item is designed as follows :
      * |--menu_item
@@ -292,7 +303,7 @@ void MenuItemPattern::RegisterOnTouch()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->OnPress(info);
+        pattern->OnTouch(info);
     };
     auto touchEvent = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     gestureHub->AddTouchEvent(touchEvent);
@@ -311,7 +322,6 @@ void MenuItemPattern::RegisterOnHover()
     };
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnHoverEvent(mouseEvent);
-    inputHub->SetHoverEffect(HoverEffectType::BOARD);
 }
 
 void MenuItemPattern::RegisterOnKeyEvent()
@@ -328,8 +338,9 @@ void MenuItemPattern::RegisterOnKeyEvent()
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 }
 
-void MenuItemPattern::OnPress(const TouchEventInfo& info)
+void MenuItemPattern::OnTouch(const TouchEventInfo& info)
 {
+    // change menu item paint props on press
     auto touchType = info.GetTouches().front().GetTouchType();
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -348,6 +359,24 @@ void MenuItemPattern::OnPress(const TouchEventInfo& info)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomMenuItemPattern::OnTouch(const TouchEventInfo& info)
+{
+    auto touchType = info.GetTouches().front().GetTouchType();
+
+    // close menu when touch up
+    // can't use onClick because that conflicts with interactions developers might set to the customNode
+    // recognize gesture as click if touch up position is close to last touch down position
+    if (touchType == TouchType::DOWN) {
+        lastTouchOffset_ = std::make_unique<Offset>(info.GetTouches().front().GetLocalLocation());
+    } else if (touchType == TouchType::UP) {
+        auto touchUpOffset = info.GetTouches().front().GetLocalLocation();
+        if (lastTouchOffset_ && (touchUpOffset - *lastTouchOffset_).GetDistance() <= DEFAULT_CLICK_DISTANCE) {
+            CloseMenu();
+        }
+        lastTouchOffset_.reset();
+    }
 }
 
 void MenuItemPattern::OnHover(bool isHover)
@@ -385,6 +414,13 @@ bool MenuItemPattern::OnKeyEvent(const KeyEvent& event)
         return true;
     }
     if (event.code == KeyCode::KEY_DPAD_RIGHT && GetSubBuilder() && !isSubMenuShowed_) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        auto theme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_RETURN(theme, false);
+        SetBgBlendColor(theme->GetHoverColor());
+        PlayBgColorAnimation();
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         ShowSubMenu();
         return true;
     }
@@ -502,7 +538,7 @@ void MenuItemPattern::AddSelectIcon(RefPtr<FrameNode>& row)
     auto iconPath = userIcon.empty() ? iconTheme->GetIconPath(InternalResource::ResourceId::MENU_OK_SVG) : userIcon;
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
-    UpdateIconSrc(selectIcon_, iconPath, selectTheme->GetIconSideLength(), Color::BLACK);
+    UpdateIconSrc(selectIcon_, iconPath, selectTheme->GetIconSideLength(), selectTheme->GetMenuIconColor());
 
     auto renderContext = selectIcon_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);

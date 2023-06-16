@@ -209,6 +209,8 @@ public:
 
     static int32_t GetSvgMode();
 
+    static bool GetImageFrameworkEnabled();
+
     static bool GetRosenBackendEnabled()
     {
         return rosenBackendEnabled_;

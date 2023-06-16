@@ -30,7 +30,7 @@ constexpr double SQUARE = 2.0;
 
 // The running time of the curve needs to be normalized to the interval of 0.0 to 1.0;
 // Relatively, the corresponding value of the curve also needs to be normalized to the interval of 0.0 to 1.0;
-class ACE_EXPORT_WITH_PREVIEW Curve : public AceType {
+class ACE_FORCE_EXPORT Curve : public AceType {
     DECLARE_ACE_TYPE(Curve, AceType);
 
 public:
@@ -210,10 +210,12 @@ public:
     ~CustomCurve() override = default;
     float MoveInternal(float time) override
     {
-        float value = interpolateFunc_(time);
-        return std::clamp(value, 0.f, 1.f);
+        return interpolateFunc_ ? interpolateFunc_(time) : 1.0f;
     }
-
+    const std::string ToString() override
+    {
+        return "customCallback";
+    }
 private:
     std::function<float(float)> interpolateFunc_;
 

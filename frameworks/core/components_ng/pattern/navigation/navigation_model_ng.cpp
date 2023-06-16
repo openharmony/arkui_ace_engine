@@ -188,6 +188,10 @@ void BuildMoreItemNodeAction(const RefPtr<BarItemNode>& barItemNode, const RefPt
         auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
         CHECK_NULL_VOID(menuLayoutProperty);
         menuLayoutProperty->UpdateTargetSize(imageSize);
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        // navigation menu show like select.
+        menuPattern->SetIsSelectMenu(true);
 
         imgOffset.SetX(imgOffset.GetX());
         imgOffset.SetY(imgOffset.GetY() + imageSize.Height());
@@ -368,7 +372,9 @@ void NavigationModelNG::Create()
 
     stack->Push(navigationGroupNode);
     auto navigationLayoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
-    navigationLayoutProperty->UpdateNavigationMode(NavigationMode::AUTO);
+    if (!navigationLayoutProperty->HasNavigationMode()) {
+        navigationLayoutProperty->UpdateNavigationMode(NavigationMode::AUTO);
+    }
     navigationLayoutProperty->UpdateNavBarWidth(DEFAULT_NAV_BAR_WIDTH);
 }
 
@@ -545,11 +551,11 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
         backButtonLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()), CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
         backButtonLayoutProperty->UpdateType(ButtonType::NORMAL);
-        backButtonLayoutProperty->UpdateBorderRadius(BUTTON_RADIUS);
         backButtonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
         auto renderContext = backButtonNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        renderContext->UpdateBorderRadius({ BUTTON_RADIUS, BUTTON_RADIUS, BUTTON_RADIUS, BUTTON_RADIUS });
 
         auto eventHub = backButtonNode->GetOrCreateInputEventHub();
         CHECK_NULL_VOID(eventHub);
@@ -809,7 +815,7 @@ void NavigationModelNG::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
     auto theme = NavigationGetTheme();
     auto mostMenuItemCount = theme->GetMostMenuItemCountInBar();
     bool needMoreButton = menuItems.size() > mostMenuItemCount ? true : false;
-    int32_t count = 0;
+    uint32_t count = 0;
     std::vector<OptionParam> params;
     for (const auto& menuItem : menuItems) {
         ++count;
@@ -824,10 +830,10 @@ void NavigationModelNG::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
             menuItemLayoutProperty->UpdateUserDefinedIdealSize(
                 CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()), CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
             menuItemLayoutProperty->UpdateType(ButtonType::NORMAL);
-            menuItemLayoutProperty->UpdateBorderRadius(BUTTON_RADIUS);
             auto renderContext = menuItemNode->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+            renderContext->UpdateBorderRadius({ BUTTON_RADIUS, BUTTON_RADIUS, BUTTON_RADIUS, BUTTON_RADIUS });
 
             auto eventHub = menuItemNode->GetOrCreateInputEventHub();
             CHECK_NULL_VOID(eventHub);
@@ -877,10 +883,10 @@ void NavigationModelNG::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
         menuItemLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()), CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
         menuItemLayoutProperty->UpdateType(ButtonType::NORMAL);
-        menuItemLayoutProperty->UpdateBorderRadius(BUTTON_RADIUS);
         auto renderContext = menuItemNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        renderContext->UpdateBorderRadius({ BUTTON_RADIUS, BUTTON_RADIUS, BUTTON_RADIUS, BUTTON_RADIUS });
 
         auto eventHub = menuItemNode->GetOrCreateInputEventHub();
         CHECK_NULL_VOID(eventHub);
@@ -991,6 +997,16 @@ void NavigationModelNG::SetNavigationStack()
         auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
         pattern->SetNavigationStack(std::move(navigationStack));
     }
+}
+
+void NavigationModelNG::SetNavigationStackProvided(bool provided)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNavigationStackProvided(provided);
 }
 
 void NavigationModelNG::SetNavDestination(std::function<void(std::string)>&& builder)

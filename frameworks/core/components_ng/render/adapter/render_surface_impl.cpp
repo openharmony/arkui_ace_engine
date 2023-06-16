@@ -53,6 +53,13 @@ void RenderSurfaceImpl::InitSurface()
         CHECK_NULL_VOID(callback);
         callback->ProcessSurfaceCreate();
     });
+    extSurface_->SetSurfaceChanged([weak = WeakClaim(this)](int32_t width, int32_t height) {
+        auto surfaceImpl = weak.Upgrade();
+        CHECK_NULL_VOID(surfaceImpl);
+        auto callback = surfaceImpl->extSurfaceCallback_;
+        CHECK_NULL_VOID(callback);
+        callback->ProcessSurfaceChange(width, height);
+    });
 }
 
 void RenderSurfaceImpl::UpdateXComponentConfig() {}
@@ -89,14 +96,32 @@ void RenderSurfaceImpl::SetExtSurfaceBounds(int32_t left, int32_t top, int32_t w
         width, height);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask([surface = extSurface_, id = surfaceId_, left, top, width,
-                               height]() { surface->SetBounds(id, left, top, width, height); },
+    taskExecutor->PostTask(
+        [surface = extSurface_, id = surfaceId_, left, top, width, height]() {
+            if (surface) {
+                surface->SetBounds(id, left, top, width, height);
+            }
+        },
         TaskExecutor::TaskType::PLATFORM);
 }
 
 void RenderSurfaceImpl::SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInterface>& extSurfaceCallback)
 {
     extSurfaceCallback_ = extSurfaceCallback;
+}
+
+void RenderSurfaceImpl::SetIsFullScreen(bool isFullScreen)
+{
+    LOGI("SetIsFullScreen (%{public}d)", isFullScreen);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [surface = extSurface_, fullScreen = isFullScreen]() {
+            if (surface) {
+                surface->SetIsFullScreen(fullScreen);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
 }
 
 } // namespace OHOS::Ace::NG

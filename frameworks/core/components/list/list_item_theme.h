@@ -194,6 +194,10 @@ public:
     {
         return swipeSpringDamping_;
     }
+    const Dimension& GetDeleteDistance() const
+    {
+        return deleteDistance_;
+    }
     const Color& GetItemGroupDefaultColor() const
     {
         return defaultColor_;
@@ -293,6 +297,7 @@ private:
     double swipeSpringDamping_ = 30;
     Dimension itemSize_;
     Dimension groupImageSize_;
+    Dimension deleteDistance_ = 56.0_vp;
     Color defaultColor_;
     Color itemDefaultColor_;
     Dimension defaultHeight_ = 48.0_vp;

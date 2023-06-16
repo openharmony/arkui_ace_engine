@@ -23,6 +23,21 @@
 #include "bridge/js_frontend/engine/common/js_engine.h"
 
 namespace OHOS::Ace::Napi {
+namespace {
+constexpr size_t STR_BUFFER_SIZE = 1024;
+constexpr int32_t FONT_INFO_INDEX_PATH = 0;
+constexpr int32_t FONT_INFO_INDEX_POST_SCRIPT_NAME = 1;
+constexpr int32_t FONT_INFO_INDEX_FULL_NAME = 2;
+constexpr int32_t FONT_INFO_INDEX_FAMILY = 3;
+constexpr int32_t FONT_INFO_INDEX_SUB_FAMILY = 4;
+constexpr int32_t FONT_INFO_INDEX_WEIGHT = 5;
+constexpr int32_t FONT_INFO_INDEX_WIDTH = 6;
+constexpr int32_t FONT_INFO_INDEX_ITALIC = 7;
+constexpr int32_t FONT_INFO_INDEX_MONOSPACE = 8;
+constexpr int32_t FONT_INFO_INDEX_SYMBOLIC = 9;
+constexpr int32_t FONT_INFO_INDEX_MAX = 10;
+}
+
 static napi_value JSRegisterFont(napi_env env, napi_callback_info info)
 {
     size_t argc = 1;
@@ -77,10 +92,93 @@ static napi_value JSRegisterFont(napi_env env, napi_callback_info info)
     return nullptr;
 }
 
+static napi_value JSgetSystemFontList(napi_env env, napi_callback_info info)
+{
+    napi_value arrayResult = nullptr;
+    napi_create_array(env, &arrayResult);
+    bool isArray = false;
+    if (napi_is_array(env, arrayResult, &isArray) != napi_ok || !isArray) {
+        return arrayResult;
+    }
+    std::vector<std::string> fontList;
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (!delegate) {
+        return nullptr;
+    }
+    delegate->GetSystemFontList(fontList);
+
+    int32_t index = 0;
+    for (const std::string& font : fontList) {
+        napi_value result = nullptr;
+        napi_create_string_utf8(env, font.c_str(), font.length(), &result);
+        napi_set_element(env, arrayResult, index++, result);
+    }
+    return arrayResult;
+}
+
+static napi_value JSgetFontByName(napi_env env, napi_callback_info info)
+{
+    size_t argc = 1;
+    napi_value argv = nullptr;
+    napi_value thisVar = nullptr;
+    void* data = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, &argv, &thisVar, &data));
+    NAPI_ASSERT(env, argc == 1, "requires 1 parameter");
+
+    napi_valuetype type;
+    NAPI_CALL(env, napi_typeof(env, argv, &type));
+    NAPI_ASSERT(env, type == napi_string, "type mismatch");
+    char fontName[STR_BUFFER_SIZE] = { 0 };
+    size_t len = 0;
+    napi_get_value_string_utf8(env, argv, fontName, STR_BUFFER_SIZE, &len);
+    NAPI_ASSERT(env, len < STR_BUFFER_SIZE, "condition string too long");
+    std::string fontNameStr(fontName, len);
+
+    FontInfo fontInfo;
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (!delegate) {
+        return nullptr;
+    }
+    if (!delegate->GetSystemFont(fontNameStr, fontInfo)) {
+        return nullptr;
+    }
+
+    napi_value resultArray[FONT_INFO_INDEX_MAX] = { 0 };
+    napi_create_string_utf8(env, fontInfo.path.c_str(), NAPI_AUTO_LENGTH, &resultArray[FONT_INFO_INDEX_PATH]);
+    napi_create_string_utf8(env, fontInfo.postScriptName.c_str(), NAPI_AUTO_LENGTH,
+        &resultArray[FONT_INFO_INDEX_POST_SCRIPT_NAME]);
+    napi_create_string_utf8(env, fontInfo.fullName.c_str(), NAPI_AUTO_LENGTH, &resultArray[FONT_INFO_INDEX_FULL_NAME]);
+    napi_create_string_utf8(env, fontInfo.family.c_str(), NAPI_AUTO_LENGTH, &resultArray[FONT_INFO_INDEX_FAMILY]);
+    napi_create_string_utf8(env, fontInfo.subfamily.c_str(), NAPI_AUTO_LENGTH,
+        &resultArray[FONT_INFO_INDEX_SUB_FAMILY]);
+    napi_create_int32(env, fontInfo.weight, &resultArray[FONT_INFO_INDEX_WEIGHT]);
+    napi_create_int32(env, fontInfo.width, &resultArray[FONT_INFO_INDEX_WIDTH]);
+    napi_create_int32(env, fontInfo.italic, &resultArray[FONT_INFO_INDEX_ITALIC]);
+    napi_create_int32(env, fontInfo.monoSpace, &resultArray[FONT_INFO_INDEX_MONOSPACE]);
+    napi_create_int32(env, fontInfo.symbolic, &resultArray[FONT_INFO_INDEX_SYMBOLIC]);
+
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+    napi_set_named_property(env, result, "path", resultArray[FONT_INFO_INDEX_PATH]);
+    napi_set_named_property(env, result, "postScriptName", resultArray[FONT_INFO_INDEX_POST_SCRIPT_NAME]);
+    napi_set_named_property(env, result, "fullName", resultArray[FONT_INFO_INDEX_FULL_NAME]);
+    napi_set_named_property(env, result, "family", resultArray[FONT_INFO_INDEX_FAMILY]);
+    napi_set_named_property(env, result, "subfamily", resultArray[FONT_INFO_INDEX_SUB_FAMILY]);
+    napi_set_named_property(env, result, "weight", resultArray[FONT_INFO_INDEX_WEIGHT]);
+    napi_set_named_property(env, result, "width", resultArray[FONT_INFO_INDEX_WIDTH]);
+    napi_set_named_property(env, result, "italic", resultArray[FONT_INFO_INDEX_ITALIC]);
+    napi_set_named_property(env, result, "monoSpace", resultArray[FONT_INFO_INDEX_MONOSPACE]);
+    napi_set_named_property(env, result, "symbolic", resultArray[FONT_INFO_INDEX_SYMBOLIC]);
+
+    return result;
+}
+
 static napi_value FontExport(napi_env env, napi_value exports)
 {
     napi_property_descriptor fontDesc[] = {
         DECLARE_NAPI_FUNCTION("registerFont", JSRegisterFont),
+        DECLARE_NAPI_FUNCTION("getSystemFontList", JSgetSystemFontList),
+        DECLARE_NAPI_FUNCTION("getFontByName", JSgetFontByName)
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(fontDesc) / sizeof(fontDesc[0]), fontDesc));
     return exports;

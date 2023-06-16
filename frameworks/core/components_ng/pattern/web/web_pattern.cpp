@@ -15,21 +15,26 @@
 
 #include "core/components_ng/pattern/web/web_pattern.h"
 
+#include <securec.h>
+
 #include "base/geometry/ng/offset_t.h"
 #include "base/mousestyle/mouse_style.h"
+#include "base/utils/date_util.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
+#include "core/components/dialog/dialog_theme.h"
+#include "core/components/picker/picker_data.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_property.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/utils/system_properties.h"
-
-#include "core/components_ng/pattern/menu/menu_view.h"
-#include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -72,6 +77,51 @@ const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] =
     { OHOS::NWeb::CursorType::CT_MIDDLE_PANNING_VERTICAL, MouseFormat::MIDDLE_BTN_NORTH_SOUTH },
     { OHOS::NWeb::CursorType::CT_MIDDLE_PANNING_HORIZONTAL, MouseFormat::MIDDLE_BTN_NORTH_SOUTH_WEST_EAST },
 };
+
+bool ParseDateTimeJson(const std::string& timeJson, NWeb::DateTime& result)
+{
+    auto sourceJson = JsonUtil::ParseJsonString(timeJson);
+    if (!sourceJson || sourceJson->IsNull()) {
+        LOGE("invalid selected date value.");
+        return false;
+    }
+
+    auto year = sourceJson->GetValue("year");
+    if (year && year->IsNumber()) {
+        result.year = year->GetInt();
+    }
+    auto month = sourceJson->GetValue("month");
+    if (month && month->IsNumber()) {
+        result.month = month->GetInt();
+    }
+    auto day = sourceJson->GetValue("day");
+    if (day && day->IsNumber()) {
+        result.day = day->GetInt();
+    }
+    auto hour = sourceJson->GetValue("hour");
+    if (hour && hour->IsNumber()) {
+        result.hour = hour->GetInt();
+    }
+    auto minute = sourceJson->GetValue("minute");
+    if (minute && minute->IsNumber()) {
+        result.minute = minute->GetInt();
+    }
+    return true;
+}
+
+std::string ParseTextJsonValue(const std::string& textJson)
+{
+    auto sourceJson = JsonUtil::ParseJsonString(textJson);
+    if (!sourceJson || sourceJson->IsNull()) {
+        LOGE("invalid selected date value.");
+        return "";
+    }
+    auto value = sourceJson->GetValue("value");
+    if (value && value->IsString()) {
+        return value->GetString();
+    }
+    return "";
+}
 } // namespace
 
 constexpr int32_t SINGLE_CLICK_NUM = 1;
@@ -97,6 +147,9 @@ void WebPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
 }
 
 void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -111,6 +164,7 @@ void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->RemoveWindowSizeChangeCallback(id);
+    pipeline->RemoveNodesToNotifyMemoryLevel(id);
 }
 
 void WebPattern::InitEvent()
@@ -371,7 +425,7 @@ bool WebPattern::NotifyStartDragTask()
     CHECK_NULL_RETURN_NOLOG(taskScheduler, false);
     if (isMouseEvent_) {
         taskScheduler->PostDelayedTask(
-            [weak = WeakClaim(this)] () {
+            [weak = WeakClaim(this)]() {
                 auto webPattern = weak.Upgrade();
                 CHECK_NULL_VOID_NOLOG(webPattern);
                 if (!(webPattern->isDragging_)) {
@@ -627,8 +681,8 @@ void WebPattern::UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty)
     CHECK_NULL_VOID(renderContext);
     auto paddingOffset = geometryNode->GetPaddingOffset();
     auto webContentSize = geometryNode->GetContentSize();
-    renderContext->SetBounds(paddingOffset.GetX(), paddingOffset.GetY(),
-        webContentSize.Width(), webContentSize.Height());
+    renderContext->SetBounds(
+        paddingOffset.GetX(), paddingOffset.GetY(), webContentSize.Width(), webContentSize.Height());
 }
 
 bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -1222,6 +1276,7 @@ void WebPattern::RequestFullScreen()
     CHECK_NULL_VOID(fullScreenManager);
     fullScreenManager->RequestFullScreen(host);
     isFullScreen_ = true;
+    WebRequestFocus();
 }
 
 void WebPattern::ExitFullScreen()
@@ -1242,6 +1297,7 @@ void WebPattern::ExitFullScreen()
     auto rootWidth = PipelineContext::GetCurrentRootWidth();
     auto rootHeight = PipelineContext::GetCurrentRootHeight();
     UpdateWebLayoutSize(rootWidth, rootHeight);
+    WebRequestFocus();
 }
 
 bool WebPattern::IsTouchHandleValid(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle)
@@ -1543,7 +1599,7 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDisappear(destructor);
 
-    WebPattern::RegisterSelectPopupCallback(menu, callback);
+    WebPattern::RegisterSelectPopupCallback(menu, callback, params);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->RegisterOnHideMenu([weak = WeakClaim(this), callback]() {
@@ -1557,9 +1613,198 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
     overlayManager->ShowMenu(id, offset, menu);
 }
 
-void WebPattern::RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
-    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback)
+void WebPattern::OnDateTimeChooserPopup(const NWeb::DateTimeChooser& chooser,
+    const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+    std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
 {
+    bool result = false;
+    if (suggestions.size() != 0) {
+        result = ShowDateTimeSuggestionDialog(chooser, suggestions, callback);
+    } else if (chooser.type == NWeb::DTC_TIME) {
+        result = ShowTimeDialog(chooser, suggestions, callback);
+    } else {
+        result = ShowDateTimeDialog(chooser, suggestions, callback);
+    }
+    if (!result) {
+        callback->Continue(false, OHOS::NWeb::DateTime());
+    }
+}
+
+DialogProperties WebPattern::GetDialogProperties(const RefPtr<DialogTheme>& theme)
+{
+    DialogProperties properties;
+    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+        properties.alignment = DialogAlignment::BOTTOM;
+    } else {
+        properties.alignment = DialogAlignment::CENTER;
+    }
+    properties.customStyle = false;
+    properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+    return properties;
+}
+
+bool WebPattern::ShowDateTimeDialog(const NWeb::DateTimeChooser& chooser,
+    const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+    std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = AccessibilityManager::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto executor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_RETURN(executor, false);
+    auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
+    auto overlayManager = context ? context->GetOverlayManager() : nullptr;
+    CHECK_NULL_RETURN(overlayManager, false);
+    auto theme = pipelineContext->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    NG::DatePickerSettingData settingData;
+    settingData.isLunar = false;
+    settingData.showTime = chooser.type == NWeb::DTC_DATETIME_LOCAL;
+    settingData.useMilitary = true;
+    DialogProperties properties = GetDialogProperties(theme);
+    std::map<std::string, PickerDate> datePickerProperty;
+    std::map<std::string, PickerTime> timePickerProperty;
+    settingData.datePickerProperty["start"] = PickerDate(
+        chooser.minimum.year, chooser.minimum.month + 1, chooser.minimum.day);
+    settingData.datePickerProperty["end"] = PickerDate(
+        chooser.maximum.year, chooser.maximum.month + 1, chooser.maximum.day);
+    if (chooser.hasSelected) {
+        int32_t day = (chooser.dialogValue.day == 0) ? 1 : chooser.dialogValue.day;
+        settingData.datePickerProperty["selected"] =
+            PickerDate(chooser.dialogValue.year, chooser.dialogValue.month + 1, day);
+    }
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    auto acceptId = [callback](const std::string& info) {
+        OHOS::NWeb::DateTime result;
+        bool success = ParseDateTimeJson(info, result);
+        callback->Continue(success, result);
+    };
+    dialogEvent["acceptId"] = acceptId;
+    auto cancelId = [callback](const GestureEvent&) { callback->Continue(false, OHOS::NWeb::DateTime()); };
+    dialogCancelEvent["cancelId"] = cancelId;
+    overlayManager->RegisterOnHideDialog([callback] { callback->Continue(false, OHOS::NWeb::DateTime()); });
+    executor->PostTask(
+        [properties, settingData, dialogEvent, dialogCancelEvent, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->ShowDateDialog(properties, settingData, dialogEvent, dialogCancelEvent);
+        },
+        TaskExecutor::TaskType::UI);
+    return true;
+}
+
+bool WebPattern::ShowTimeDialog(const NWeb::DateTimeChooser& chooser,
+    const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+    std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = AccessibilityManager::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto executor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_RETURN(executor, false);
+    auto theme = pipelineContext->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
+    auto overlayManager = context ? context->GetOverlayManager() : nullptr;
+    CHECK_NULL_RETURN(overlayManager, false);
+    NG::TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = true;
+    DialogProperties properties = GetDialogProperties(theme);
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["start"] = PickerTime(chooser.minimum.hour, chooser.minimum.minute, chooser.minimum.second);
+    timePickerProperty["selected"] = PickerTime(chooser.maximum.hour, chooser.maximum.minute, chooser.maximum.second);
+    if (chooser.hasSelected) {
+        timePickerProperty["selected"] =
+            PickerTime(chooser.dialogValue.hour, chooser.dialogValue.minute, chooser.dialogValue.second);
+    }
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    auto acceptId = [callback](const std::string& info) {
+        OHOS::NWeb::DateTime result;
+        bool success = ParseDateTimeJson(info, result);
+        callback->Continue(success, result);
+    };
+    dialogEvent["acceptId"] = acceptId;
+    auto cancelId = [callback](const GestureEvent&) { callback->Continue(false, OHOS::NWeb::DateTime()); };
+    dialogCancelEvent["cancelId"] = cancelId;
+    overlayManager->RegisterOnHideDialog([callback] { callback->Continue(false, OHOS::NWeb::DateTime()); });
+    executor->PostTask(
+        [properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent,
+            weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->ShowTimeDialog(properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent);
+        },
+        TaskExecutor::TaskType::UI);
+    return true;
+}
+
+bool WebPattern::ShowDateTimeSuggestionDialog(const NWeb::DateTimeChooser& chooser,
+    const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+    std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = AccessibilityManager::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto executor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_RETURN(executor, false);
+    auto theme = pipelineContext->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
+    auto overlayManager = context ? context->GetOverlayManager() : nullptr;
+    CHECK_NULL_RETURN(overlayManager, false);
+    NG::TextPickerSettingData settingData;
+    if (memset_s(&settingData, sizeof(NG::TextPickerSettingData), 0, sizeof(NG::TextPickerSettingData)) != EOK) {
+        return false;
+    }
+    std::map<std::string, OHOS::NWeb::DateTime> suggestionMap;
+    for (size_t i = 0; i < suggestions.size(); i++) {
+        settingData.rangeVector.push_back({ "", suggestions[i].localizedValue });
+        settingData.values.push_back(suggestions[i].localizedValue);
+        suggestionMap.emplace(std::make_pair(suggestions[i].localizedValue, suggestions[i].value));
+    }
+    settingData.columnKind = NG::TEXT;
+    settingData.selected = chooser.suggestionIndex;
+    DialogProperties properties = GetDialogProperties(theme);
+    std::map<std::string, NG::DialogTextEvent> dialogEvent;
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    auto cancelId = [callback](const GestureEvent&) { callback->Continue(false, OHOS::NWeb::DateTime()); };
+    auto acceptId = [suggestionMap, callback](const std::string& info) {
+        std::string value = ParseTextJsonValue(info);
+        if (suggestionMap.find(value) != suggestionMap.end()) {
+            callback->Continue(true, suggestionMap.at(value));
+        } else {
+            callback->Continue(false, OHOS::NWeb::DateTime());
+        }
+    };
+    dialogEvent["acceptId"] = acceptId;
+    dialogCancelEvent["cancelId"] = cancelId;
+    overlayManager->RegisterOnHideDialog([callback] { callback->Continue(false, OHOS::NWeb::DateTime()); });
+    executor->PostTask(
+        [properties, settingData, dialogEvent, dialogCancelEvent, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->ShowTextDialog(properties, settingData, dialogEvent, dialogCancelEvent);
+        },
+        TaskExecutor::TaskType::UI);
+    return true;
+}
+
+void WebPattern::OnDateTimeChooserClose()
+{
+    LOGD("OnDateTimeChooserClose");
+}
+
+void WebPattern::RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
+    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback,
+    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     auto menuContainer = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
     CHECK_NULL_VOID(menuContainer);
     auto menuPattern = menuContainer->GetPattern<MenuPattern>();
@@ -1573,10 +1818,12 @@ void WebPattern::RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
         auto optionNode = AceType::DynamicCast<FrameNode>(option);
         if (optionNode) {
             auto hub = optionNode->GetEventHub<OptionEventHub>();
-            if (!hub) {
+            auto optionPattern = optionNode->GetPattern<OptionPattern>();
+            if (!hub || !optionPattern) {
                 continue;
             }
             hub->SetOnSelect(std::move(selectCallback));
+            optionPattern->SetFontSize(Dimension(params->itemFontSize * pipeline->GetDipScale()));
             optionNode->MarkModifyDone();
         }
     }
@@ -1616,6 +1863,7 @@ void WebPattern::UpdateTouchHandleForOverlay()
         selectOverlayProxy_->UpdateFirstSelectHandleInfo(firstHandleInfo);
         selectOverlayProxy_->UpdateSecondSelectHandleInfo(secondHandleInfo);
         selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
+        selectOverlayProxy_->SetHandleReverse(false);
     }
 }
 
@@ -1627,7 +1875,7 @@ void WebPattern::UpdateLocale()
 
 void WebPattern::OnWindowShow()
 {
-    if (isWindowShow_) {
+    if (isWindowShow_ || !isVisible_) {
         return;
     }
 
@@ -1639,7 +1887,7 @@ void WebPattern::OnWindowShow()
 
 void WebPattern::OnWindowHide()
 {
-    if (!isWindowShow_) {
+    if (!isWindowShow_ || !isVisible_) {
         return;
     }
 
@@ -1747,9 +1995,18 @@ void WebPattern::OnActive()
 
 void WebPattern::OnVisibleChange(bool isVisible)
 {
-    if (!isVisible) {
+    if (isVisible_ == isVisible) {
+        return;
+    }
+
+    isVisible_ = isVisible;
+    if (!isVisible_) {
         LOGI("web is not visible");
         CloseSelectOverlay();
+        OnInActive();
+    } else {
+        LOGI("web is visible");
+        OnActive();
     }
 }
 
@@ -1760,5 +2017,11 @@ void WebPattern::UpdateBackgroundColorRightNow(int32_t color)
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackgroundColor(Color(static_cast<uint32_t>(color)));
+}
+
+void WebPattern::OnNotifyMemoryLevel(int32_t level)
+{
+    CHECK_NULL_VOID(delegate_);
+    delegate_->NotifyMemoryLevel(level);
 }
 } // namespace OHOS::Ace::NG

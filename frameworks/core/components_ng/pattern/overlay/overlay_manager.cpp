@@ -24,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/spring_curve.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/select/select_theme.h"
@@ -68,6 +69,7 @@ constexpr float PIXELMAP_ANIMATION_WIDTH_RATE = 0.5f;
 constexpr float PIXELMAP_ANIMATION_HEIGHT_RATE = 0.2f;
 constexpr float PIXELMAP_DRAG_SCALE = 1.0f;
 constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
+constexpr float PIXELMAP_ANIMATION_DEFALUT_LIMIT_SCALE = 0.5f;
 #endif // ENABLE_DRAG_FRAMEWORK
 
 constexpr int32_t FULL_MODAL_ALPHA_ANIMATION_DURATION = 200;
@@ -107,7 +109,7 @@ void OnDialogCloseEvent(const RefPtr<FrameNode>& node)
 
     auto container = Container::Current();
     CHECK_NULL_VOID_NOLOG(container);
-    if (container->IsDialogContainer() || (container->IsSubContainer() && isShowInSubWindow)) {
+    if (container->IsDialogContainer() || isShowInSubWindow) {
         SubwindowManager::GetInstance()->HideSubWindowNG();
     }
 }
@@ -231,20 +233,16 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInS
             ContainerScope scope(id);
             auto pipeline = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID_NOLOG(pipeline);
-            auto pipelineContext = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID_NOLOG(pipelineContext);
             auto taskExecutor = pipeline->GetTaskExecutor();
             CHECK_NULL_VOID_NOLOG(taskExecutor);
             taskExecutor->PostTask(
-                [weak, menuWK, id, isInSubWindow, pipelineContext]() {
+                [weak, menuWK, id, isInSubWindow]() {
                     auto menu = menuWK.Upgrade();
                     auto overlayManager = weak.Upgrade();
                     CHECK_NULL_VOID_NOLOG(menu && overlayManager);
                     ContainerScope scope(id);
                     overlayManager->FocusOverlayNode(menu, isInSubWindow);
                     overlayManager->CallOnShowMenuCallback();
-                    // Trigger mouse move action
-                    pipelineContext->FlushMouseEvent();
                 },
                 TaskExecutor::TaskType::UI);
         });
@@ -350,6 +348,7 @@ void OverlayManager::ShowToast(
     option.SetCurve(curve);
     option.SetDuration(TOAST_ANIMATION_DURATION);
     option.SetFillMode(FillMode::FORWARDS);
+    duration = std::max(duration, AceApplicationInfo::GetInstance().GetBarrierfreeDuration());
     auto&& callback = [weak = WeakClaim(this), toastId, duration, id = Container::CurrentId()]() {
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID(overlayManager);
@@ -531,6 +530,21 @@ void OverlayManager::ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& custo
     }
 }
 
+void OverlayManager::RemoveIndexerPopupById(int32_t targetId)
+{
+    if (customPopupMap_.empty()) {
+        return;
+    }
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto iter = customPopupMap_.find(targetId);
+    if (iter != customPopupMap_.end()) {
+        rootNode->RemoveChild(iter->second);
+        customPopupMap_.erase(iter);
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    }
+}
+
 void OverlayManager::RemoveIndexerPopup()
 {
     if (customPopupMap_.empty()) {
@@ -577,13 +591,18 @@ void OverlayManager::HideAllPopups()
     for (const auto& popup : popupMap_) {
         auto popupInfo = popup.second;
         if (popupInfo.isCurrentOnShow && popupInfo.target.Upgrade()) {
-            popupInfo.markNeedUpdate = true;
-            popupInfo.popupId = -1;
             auto targetNodeId = popupInfo.target.Upgrade()->GetId();
             auto popupNode = popupInfo.popupNode;
             CHECK_NULL_VOID(popupNode);
             auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
             CHECK_NULL_VOID(layoutProp);
+            auto useCustom = layoutProp->GetUseCustom().value_or(false);
+            // if use popup with option, skip
+            if (!useCustom) {
+                continue;
+            }
+            popupInfo.markNeedUpdate = true;
+            popupInfo.popupId = -1;
             auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
             if (showInSubWindow) {
                 SubwindowManager::GetInstance()->HidePopupNG(targetNodeId);
@@ -818,6 +837,7 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     CloseDialogAnimation(dialogNode);
     dialogNode->OnAccessibilityEvent(
         AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+    CallOnHideDialogCallback();
 }
 
 bool OverlayManager::RemoveOverlay()
@@ -1474,6 +1494,14 @@ void OverlayManager::UpdatePixelMapScale(float& scale)
     CHECK_NULL_VOID(hub);
     RefPtr<PixelMap> pixelMap = hub->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
+    auto minDeviceLength = std::min(SystemProperties::GetDeviceHeight(), SystemProperties::GetDeviceWidth());
+    if ((SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT &&
+            pixelMap->GetHeight() > minDeviceLength * PIXELMAP_ANIMATION_DEFALUT_LIMIT_SCALE) ||
+        (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE &&
+            pixelMap->GetHeight() > minDeviceLength * PIXELMAP_ANIMATION_DEFALUT_LIMIT_SCALE &&
+            pixelMap->GetWidth() > minDeviceLength)) {
+        scale = static_cast<float>(minDeviceLength * PIXELMAP_ANIMATION_DEFALUT_LIMIT_SCALE) / pixelMap->GetHeight();
+    }
 }
 
 void OverlayManager::RemoveFilter()

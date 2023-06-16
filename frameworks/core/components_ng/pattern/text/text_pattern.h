@@ -151,6 +151,16 @@ public:
 
     void OnVisibleChange(bool isVisible) override;
 
+    std::list<RefPtr<SpanItem>> GetSpanItemChildren()
+    {
+        return spanItemChildren_;
+    }
+
+    int32_t GetDisplayWideTextLength()
+    {
+        return StringUtils::ToWstring(textForDisplay_).length();
+    }
+
     // ===========================================================
     // TextDragBase implementations
 

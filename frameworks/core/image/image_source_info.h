@@ -30,7 +30,7 @@ namespace OHOS::Ace {
 class ImageSourceInfo {
 public:
     // add constructor method for decompressed hap
-    explicit ImageSourceInfo(std::string imageSrc, std::string bundleName, std::string moduleName,
+    ImageSourceInfo(std::string imageSrc, std::string bundleName, std::string moduleName,
         Dimension width = Dimension(-1), Dimension height = Dimension(-1),
         InternalResource::ResourceId resourceId = InternalResource::ResourceId::NO_ID,
         const RefPtr<PixelMap>& pixmap = nullptr);

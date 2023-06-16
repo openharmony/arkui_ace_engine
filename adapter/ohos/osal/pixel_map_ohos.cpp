@@ -18,6 +18,7 @@
 #include <sstream>
 
 #include "drawable_descriptor.h"
+#include "pixel_map_manager.h"
 
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
@@ -70,9 +71,14 @@ AlphaType PixelMapOhos::AlphaTypeConverter(Media::AlphaType alphaType)
     }
 }
 
+RefPtr<PixelMap> PixelMap::Create(std::unique_ptr<Media::PixelMap>&& pixmap)
+{
+    return AceType::MakeRefPtr<PixelMapOhos>(std::move(pixmap));
+}
+
 RefPtr<PixelMap> PixelMap::CreatePixelMap(void* rawPtr)
 {
-    std::shared_ptr<Media::PixelMap>* pixmapPtr = reinterpret_cast<std::shared_ptr<Media::PixelMap>*>(rawPtr);
+    auto* pixmapPtr = reinterpret_cast<std::shared_ptr<Media::PixelMap>*>(rawPtr);
     if (pixmapPtr == nullptr || *pixmapPtr == nullptr) {
         LOGW("pixmap pointer is nullptr when CreatePixelMap.");
         return nullptr;
@@ -161,7 +167,7 @@ std::string PixelMapOhos::GetId()
 
 std::string PixelMapOhos::GetModifyId()
 {
-    return std::string();
+    return {};
 }
 
 std::shared_ptr<Media::PixelMap> PixelMapOhos::GetPixelMapSharedPtr()

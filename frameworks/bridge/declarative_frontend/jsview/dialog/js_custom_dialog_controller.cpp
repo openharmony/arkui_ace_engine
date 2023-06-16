@@ -196,6 +196,10 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
         LOGE("Builder of CustomDialog is null.");
         return;
     }
+
+    auto containerId = this->ownerView_->GetInstanceId();
+    ContainerScope containerScope(containerId);
+
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
@@ -218,13 +222,17 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
     });
 
     CustomDialogControllerModel::GetInstance()->SetOpenDialog(dialogProperties_, dialogs_, pending_, isShown_,
-        std::move(cancelTask), buildFunc, dialogComponent_, customDialog_, dialogOperation_);
+        std::move(cancelTask), std::move(buildFunc), dialogComponent_, customDialog_, dialogOperation_);
     return;
 }
 
 void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
 {
     LOGI("JSCustomDialogController(JsCloseDialog)");
+
+    auto containerId = this->ownerView_->GetInstanceId();
+    ContainerScope containerScope(containerId);
+
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.

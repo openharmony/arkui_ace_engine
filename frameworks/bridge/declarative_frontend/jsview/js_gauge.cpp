@@ -158,11 +158,6 @@ void JSGauge::SetStrokeWidth(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], strokeWidth)) {
         strokeWidth = CalcDimension(0);
     }
-    if (strokeWidth.Value() <= 0.0 || strokeWidth.Unit() == DimensionUnit::PERCENT) {
-        RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
-        CHECK_NULL_VOID(theme);
-        strokeWidth = theme->GetTrackThickness();
-    }
     GaugeModel::GetInstance()->SetStrokeWidth(strokeWidth);
 }
 

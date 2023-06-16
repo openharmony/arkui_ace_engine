@@ -25,7 +25,6 @@
 #define NEAR_ZERO(value) ((value > 0.0) ? ((value - 0.0) <= 0.000001f) : ((0.0 - value) <= 0.000001f))
 
 namespace OHOS::Ace {
-
 enum class DimensionUnit {
     /*
      * Unit is invalid.

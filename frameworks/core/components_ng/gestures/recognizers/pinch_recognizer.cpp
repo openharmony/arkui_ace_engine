@@ -137,15 +137,14 @@ void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("pinch recognizer receives touch move event");
 
-    if (isPinchEnd_) {
-        return;
-    }
-
     touchPoints_[event.id] = event;
     lastTouchEvent_ = event;
     currentDev_ = ComputeAverageDeviation();
     time_ = event.time;
 
+    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
+        return;
+    }
     if (refereeState_ == RefereeState::DETECTING) {
         if (GreatOrEqual(fabs(currentDev_ - initialDev_), distance_)) {
             scale_ = currentDev_ / initialDev_;
@@ -173,9 +172,6 @@ void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 {
     LOGD("pinch recognizer receives axis update event");
 
-    if (isPinchEnd_) {
-        return;
-    }
     if (NearZero(event.pinchAxisScale) && !IsCtrlBeingPressed()) {
         if (refereeState_ == RefereeState::DETECTING) {
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -190,6 +186,9 @@ void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
     }
 
     time_ = event.time;
+    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
+        return;
+    }
     if (refereeState_ == RefereeState::DETECTING || refereeState_ == RefereeState::SUCCEED) {
         if (event.pinchAxisScale != 0.0) {
             scale_ = event.pinchAxisScale;

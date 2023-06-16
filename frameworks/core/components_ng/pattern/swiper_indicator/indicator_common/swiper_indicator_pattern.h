@@ -111,6 +111,7 @@ public:
         auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
         CHECK_NULL_RETURN(swiperTheme, FocusPattern());
         FocusPaintParam paintParam;
+        paintParam.SetPaintWidth(swiperTheme->GetFocusedBorderWidth());
         paintParam.SetPaintColor(swiperTheme->GetFocusedColor());
         return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, paintParam };
     }

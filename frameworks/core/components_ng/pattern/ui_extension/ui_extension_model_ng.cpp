@@ -21,7 +21,6 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_node.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -36,19 +35,4 @@ void UIExtensionModelNG::Create(const std::string& bundleName, const std::string
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
 }
-
-void UIExtensionModelNG::SetWant(const std::string& want)
-{
-    ACE_UPDATE_PAINT_PROPERTY(UIExtensionPaintProperty, Want, want);
-}
-
-void UIExtensionModelNG::SetOnConnect(std::function<void()>&& onConnect) {}
-
-void UIExtensionModelNG::SetOnDisconnect(std::function<void()>&& onDisconnect) {}
-
-void UIExtensionModelNG::SetOnError(std::function<void()>&& onError) {}
-
-void UIExtensionModelNG::SetOnCall(std::function<void()>&& onCall) {}
-
-void UIExtensionModelNG::SetOnResult(std::function<void()>&& onResult) {}
 } // namespace OHOS::Ace::NG

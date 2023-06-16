@@ -37,6 +37,13 @@
 
 namespace OHOS::Ace::Framework {
 
+struct NamedRouterProperty {
+    panda::Global<panda::FunctionRef> pageGenerator;
+    std::string bundleName;
+    std::string moduleName;
+    std::string pagePath;
+};
+
 class JsiDeclarativeEngineInstance final : public AceType, public JsEngineInstance {
     DECLARE_ACE_TYPE(JsiDeclarativeEngineInstance, AceType)
 public:
@@ -57,6 +64,7 @@ public:
     void DestroyRootViewHandle(int32_t pageId);
     void DestroyAllRootViewHandle();
     void FlushReload();
+    NativeValue* GetContextValue();
 
     static std::unique_ptr<JsonValue> GetI18nStringResource(
         const std::string& targetStringKey, const std::string& targetStringValue);
@@ -143,6 +151,11 @@ public:
 
     void RegisterFaPlugin(); // load ReatureAbility plugin
 
+    void SetContextValue(shared_ptr<JsValue> uiContext)
+    {
+        uiContext_ = uiContext;
+    }
+
 #if defined(PREVIEW)
     bool CallCurlFunction(const OHOS::Ace::RequestData& requestData, int32_t callbackId)
     {
@@ -171,7 +184,8 @@ public:
 #endif
 
 // ArkTsCard start
-    static void PreloadAceModuleCard(void* runtime);
+    static void PreloadAceModuleCard(void* runtime, const std::unordered_set<std::string>& formModuleList);
+    static void ReloadAceModuleCard(void* runtime, const std::unordered_set<std::string>& formModuleList);
 // ArkTsCard end
     static bool IsPlugin();
 private:
@@ -184,6 +198,8 @@ private:
     void InitJsContextModuleObject();
     void InitGroupJsBridge();
     static shared_ptr<JsRuntime> InnerGetCurrentRuntime();
+    shared_ptr<JsValue> CallGetUIContextFunc(const shared_ptr<JsRuntime>& runtime,
+        const std::vector<shared_ptr<JsValue>>& argv);
 
     std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> rootViewMap_;
     static std::unique_ptr<JsonValue> currentConfigResourceData_;
@@ -212,6 +228,7 @@ private:
     static bool isModulePreloaded_;
     static bool isModuleInitialized_;
     static shared_ptr<JsRuntime> globalRuntime_;
+    shared_ptr<JsValue> uiContext_;
 
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngineInstance);
 };
@@ -358,7 +375,11 @@ public:
     {
         pluginModuleName_ = pluginModuleName;
     }
-    
+
+    NativeValue* GetContextValue() override
+    {
+        return engineInstance_->GetContextValue();
+    }
 #if defined(PREVIEW)
     void ReplaceJSContent(const std::string& url, const std::string componentName) override;
     RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID) override;
@@ -373,6 +394,9 @@ public:
         isBundle_ = isBundle;
     }
 #endif
+    void AddToNamedRouterMap(panda::Global<panda::FunctionRef> pageGenerator, const std::string& namedRoute,
+        panda::Local<panda::ObjectRef> params);
+    bool LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs) override;
 
 private:
     bool CallAppFunc(const std::string& appFuncName);
@@ -409,6 +433,7 @@ private:
 #endif
     std::string pluginBundleName_;
     std::string pluginModuleName_;
+    std::unordered_map<std::string, NamedRouterProperty> namedRouterRegisterMap;
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngine);
 };
 

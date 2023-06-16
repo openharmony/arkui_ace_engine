@@ -20,7 +20,9 @@ class AnimationUtils::Animation {};
 
 void AnimationUtils::OpenImplicitAnimation(
     const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& wrapFinishCallback)
-{}
+{
+    wrapFinishCallback();
+}
 
 bool AnimationUtils::CloseImplicitAnimation()
 {
@@ -49,7 +51,10 @@ void AnimationUtils::AddKeyFrame(float fraction, const RefPtr<Curve>& curve, con
 {
     callback();
 }
-void AnimationUtils::AddKeyFrame(float fraction, const PropertyCallback& callback) {}
+void AnimationUtils::AddKeyFrame(float fraction, const PropertyCallback& callback) 
+{
+    callback();
+}
 
 void AnimationUtils::AnimateWithCurrentOptions(
     const PropertyCallback& callback, const FinishCallback& finishCallback, bool timingSensitive)

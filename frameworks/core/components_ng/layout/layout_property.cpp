@@ -107,7 +107,6 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ACE_PROPERTY_TO_JSON_VALUE(positionProperty_, PositionProperty);
     ACE_PROPERTY_TO_JSON_VALUE(magicItemProperty_, MagicItemProperty);
     ACE_PROPERTY_TO_JSON_VALUE(flexItemProperty_, FlexItemProperty);
-    ACE_PROPERTY_TO_JSON_VALUE(borderWidth_, BorderWidthProperty);
     ACE_PROPERTY_TO_JSON_VALUE(gridProperty_, GridProperty);
 
     if (padding_) {
@@ -212,19 +211,14 @@ void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
 void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint)
 {
     layoutConstraint_ = parentConstraint;
-    bool hasWidth = calcLayoutConstraint_ && calcLayoutConstraint_->selfIdealSize.has_value() &&
-                    calcLayoutConstraint_->selfIdealSize.value().Width().has_value();
-    bool hasHeight = calcLayoutConstraint_ && calcLayoutConstraint_->selfIdealSize.has_value() &&
-                     calcLayoutConstraint_->selfIdealSize.value().Height().has_value();
-    if (margin_ && (!hasWidth || !hasHeight)) {
+    if (margin_) {
         // TODO: add margin is negative case.
         auto margin = CreateMargin();
-        Axis reserveAxis = !hasWidth && !hasHeight ? Axis::NONE : !hasWidth ? Axis::VERTICAL : Axis::HORIZONTAL;
-        MinusPaddingToSize(margin, layoutConstraint_->maxSize, reserveAxis);
-        MinusPaddingToSize(margin, layoutConstraint_->minSize, reserveAxis);
-        MinusPaddingToSize(margin, layoutConstraint_->percentReference, reserveAxis);
-        MinusPaddingToSize(margin, layoutConstraint_->selfIdealSize, reserveAxis);
-        MinusPaddingToSize(margin, layoutConstraint_->parentIdealSize, reserveAxis);
+        MinusPaddingToSize(margin, layoutConstraint_->maxSize);
+        MinusPaddingToSize(margin, layoutConstraint_->minSize);
+        MinusPaddingToSize(margin, layoutConstraint_->percentReference);
+        MinusPaddingToSize(margin, layoutConstraint_->selfIdealSize);
+        MinusPaddingToSize(margin, layoutConstraint_->parentIdealSize);
     }
     if (calcLayoutConstraint_) {
         if (calcLayoutConstraint_->maxSize.has_value()) {
@@ -521,10 +515,11 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
     propVisibility_ = visible;
     host->OnVisibleChange(visible == VisibleType::VISIBLE);
     if (allowTransition) {
-        if (preVisible == VisibleType::VISIBLE && visible == VisibleType::INVISIBLE) {
+        if (preVisible == VisibleType::VISIBLE && (visible == VisibleType::INVISIBLE || visible == VisibleType::GONE)) {
             // only trigger transition when visibility changes between visible and invisible.
             host->GetRenderContext()->OnNodeDisappear(false);
-        } else if (preVisible == VisibleType::INVISIBLE && visible == VisibleType::VISIBLE) {
+        } else if ((preVisible == VisibleType::INVISIBLE || preVisible == VisibleType::GONE) &&
+                   visible == VisibleType::VISIBLE) {
             host->GetRenderContext()->OnNodeAppear(false);
         }
     }

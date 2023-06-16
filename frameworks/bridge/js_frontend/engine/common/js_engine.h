@@ -25,6 +25,7 @@
 
 class NativeEngine;
 class NativeReference;
+class NativeValue;
 
 namespace OHOS::Ace::Framework {
 
@@ -97,6 +98,11 @@ public:
     // Load the js file of the page in NG structure..
     virtual bool LoadPageSource(const std::string& /*url*/,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr)
+    {
+        return false;
+    }
+
+    virtual bool LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs)
     {
         return false;
     }
@@ -300,6 +306,10 @@ public:
 #endif
 
     virtual void FlushReload() {}
+    virtual NativeValue* GetContextValue()
+    {
+        return nullptr;
+    }
 
 protected:
     NativeEngine* nativeEngine_ = nullptr;

@@ -123,6 +123,7 @@ public:
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
     bool OutBoundaryCallback() override;
+    OverScrollOffset GetOverScrollOffset(double delta) const override;
 
     FocusPattern GetFocusPattern() const override
     {
@@ -166,9 +167,11 @@ public:
 
     // scroller
     void AnimateTo(float position, float duration, const RefPtr<Curve>& curve);
+    void StartSpringMotion(float start, float end, float velocity);
     void ScrollTo(float position, bool smooth);
-    void ScrollToIndex(int32_t index, ScrollIndexAlignment align = ScrollIndexAlignment::ALIGN_TOP);
-    void ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollIndexAlignment align);
+    void ScrollToIndex(int32_t index, bool smooth = false,
+                       ScrollAlign align = ScrollAlign::START);
+    void ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollAlign align);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
     bool ScrollPage(bool reverse);
     void ScrollBy(float offset);
@@ -198,6 +201,7 @@ private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    float CalculateTargetPos(float startPos, float endPos, ScrollAutoType scrollAutoType);
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
@@ -217,7 +221,7 @@ private:
     void FireOnScrollStart();
     void CheckRestartSpring();
     void StopAnimate();
-    void StartDefaultSpringMotion(float start, float end, float velocity);
+    void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
 
     // multiSelectable
     void UninitMouseEvent();
@@ -231,6 +235,9 @@ private:
 
     void DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper);
     void SetAccessibilityAction();
+
+    bool CheckWhetherCurvesRelyOnDuration(const RefPtr<Curve>& curve);
+    void PlayCustomSpringCurverDoNotRelyOnDuration(float position, const RefPtr<Curve>& curve);
 
     RefPtr<ListContentModifier> listContentModifier_;
 
@@ -250,10 +257,12 @@ private:
 
     float currentDelta_ = 0.0f;
     bool crossMatchChild_ = false;
+    bool smooth_ = false;
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
-    ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
+    std::optional<int32_t> targetIndex_;
+    ScrollAlign scrollAlign_ = ScrollAlign::START;
     bool scrollable_ = true;
     bool paintStateFlag_ = false;
     bool isFramePaintStateValid_ = false;
@@ -283,6 +292,7 @@ private:
 
     // ListItem swiperAction
     WeakPtr<ListItemPattern> swiperItem_;
+    RefPtr<SpringMotion> scrollToIndexMotion_;
 
     bool isScrollEnd_ = false;
 

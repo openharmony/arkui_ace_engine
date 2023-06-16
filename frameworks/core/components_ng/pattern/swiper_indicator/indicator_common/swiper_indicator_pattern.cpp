@@ -228,7 +228,7 @@ void SwiperIndicatorPattern::HandleHoverEvent(bool isHover)
     CHECK_NULL_VOID(swiperPattern);
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
-    if (swiperLayoutProperty->GetHoverShowValue(false)) {
+    if (swiperLayoutProperty->GetHoverShowValue(false) && !swiperPattern->GetIsAtHotRegion()) {
         swiperPattern->ArrowHover(isHover_);
     }
     if (swiperIndicatorType_ == SwiperIndicatorType::DOT) {

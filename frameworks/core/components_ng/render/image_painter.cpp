@@ -18,10 +18,15 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 
 namespace {
+
+constexpr Color COLOR_PRIVATE_MODE = Color(0x66d7d7d7);
+constexpr Dimension RECT_BORDER_RADIUS = 2.0_vp;
+constexpr uint32_t RADIUS_POINT_COUNT = 4;
 
 void ApplyContain(const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
 {
@@ -92,11 +97,42 @@ const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0, 0, // red
     0, 0, 0, 1.0f, 0 };                                          // alpha transparency
 } // namespace
 
+void ImagePainter::DrawObscuration(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
+{
+    CHECK_NULL_VOID(canvasImage_);
+    const auto config = canvasImage_->GetPaintConfig();
+    RSBrush brush;
+    Color fillColor = COLOR_PRIVATE_MODE;
+    RSColor rSColor(fillColor.GetRed(), fillColor.GetGreen(), fillColor.GetBlue(), fillColor.GetAlpha());
+    brush.SetColor(rSColor);
+    std::vector<RSPoint> radiusXY(RADIUS_POINT_COUNT);
+    if (config.borderRadiusXY_) {
+        for (auto index = 0U; index < radiusXY.size(); index++) {
+            radiusXY[index].SetX(static_cast<float>((*config.borderRadiusXY_)[index].GetX()));
+            radiusXY[index].SetY(static_cast<float>((*config.borderRadiusXY_)[index].GetY()));
+        }
+    } else if (config.isSvg_) {
+        // obscured SVGs need a default corner radius
+        for (auto& radius : radiusXY) {
+            radius.SetX(static_cast<float>(RECT_BORDER_RADIUS.ConvertToPx()));
+            radius.SetY(static_cast<float>(RECT_BORDER_RADIUS.ConvertToPx()));
+        }
+    }
+    canvas.AttachBrush(brush);
+    RSRoundRect rSRoundRect(RSRect(offset.GetX(), offset.GetY(), contentSize.Width() + offset.GetX(),
+                            contentSize.Height() + offset.GetY()), radiusXY);
+    canvas.DrawRoundRect(rSRoundRect);
+}
+
 void ImagePainter::DrawImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
 {
     CHECK_NULL_VOID(canvasImage_);
     const auto config = canvasImage_->GetPaintConfig();
-    if (config.isSvg_) {
+    bool drawObscuration = std::any_of(config.obscuredReasons_.begin(), config.obscuredReasons_.end(),
+        [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
+    if (drawObscuration) {
+        DrawObscuration(canvas, offset, contentSize);
+    } else if (config.isSvg_) {
         DrawSVGImage(canvas, offset, contentSize);
     } else if (config.imageRepeat_ == ImageRepeat::NO_REPEAT) {
         DrawStaticImage(canvas, offset, contentSize);

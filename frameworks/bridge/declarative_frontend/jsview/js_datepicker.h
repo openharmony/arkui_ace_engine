@@ -79,6 +79,7 @@ public:
     static void SetDisappearTextStyle(const JSCallbackInfo& info);
     static void SetTextStyle(const JSCallbackInfo& info);
     static void SetSelectedTextStyle(const JSCallbackInfo& info);
+
 private:
     static void CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);
     static void SetDefaultAttributes();

@@ -29,12 +29,8 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-#include "image.h"
-#include "system_defined_pixelmap.h"
-#include "unified_data.h"
-#include "unified_record.h"
-
 #include "core/common/ace_engine_ext.h"
+#include "core/common/udmf/udmf_client.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -70,7 +66,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
-        LOGI("Image Load Success %{private}s", sourceInfo.ToString().c_str());
+        LOGI("Image Load Success %{public}s", sourceInfo.ToString().c_str());
         pattern->OnImageLoadSuccess();
     };
 }
@@ -215,18 +211,14 @@ void ImagePattern::SetImagePaintConfig(
 RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
 {
     if (image_) {
-        if (!imageModifier_) {
-            imageModifier_ = AceType::MakeRefPtr<ImageModifier>();
-        }
-        imageModifier_->SetIsAltImage(false);
-        return MakeRefPtr<ImagePaintMethod>(image_, imageModifier_, selectOverlay_);
+        return MakeRefPtr<ImagePaintMethod>(image_, selectOverlay_);
     }
     if (altImage_ && altDstRect_ && altSrcRect_) {
-        if (!imageModifier_) {
-            imageModifier_ = AceType::MakeRefPtr<ImageModifier>();
-        }
-        imageModifier_->SetIsAltImage(true);
-        return MakeRefPtr<ImagePaintMethod>(altImage_, imageModifier_, selectOverlay_);
+        return MakeRefPtr<ImagePaintMethod>(altImage_, selectOverlay_);
+    }
+    CreateObscuredImageIfNeed();
+    if (obscuredImage_) {
+        return MakeRefPtr<ImagePaintMethod>(obscuredImage_, selectOverlay_);
     }
     return nullptr;
 }
@@ -237,6 +229,24 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
         return false;
     }
     return image_;
+}
+
+void ImagePattern::CreateObscuredImageIfNeed()
+{
+    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    auto layoutConstraint = imageLayoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    auto reasons = host->GetRenderContext()->GetObscured().value_or(std::vector<ObscuredReasons>());
+    if (reasons.size() && layoutConstraint->selfIdealSize.IsValid()) {
+        if (!obscuredImage_) {
+            obscuredImage_ = MakeRefPtr<ObscuredImage>();
+            SetImagePaintConfig(obscuredImage_, srcRect_, dstRect_, sourceInfo.IsSvg());
+        }
+    }
 }
 
 void ImagePattern::LoadImageDataIfNeed()
@@ -624,7 +634,7 @@ void ImagePattern::DumpInfo()
 void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
 {
 #ifdef ENABLE_DRAG_FRAMEWORK
-    std::shared_ptr<UDMF::UnifiedRecord> record = nullptr;
+    RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
     CHECK_NULL_VOID(loadingCtx_ && image_);
     if (loadingCtx_->GetSourceInfo().IsPixmap()) {
         auto pixelMap = image_->GetPixelMap();
@@ -633,12 +643,10 @@ void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
         CHECK_NULL_VOID(pixels);
         int32_t length = pixelMap->GetByteCount();
         std::vector<uint8_t> data(pixels, pixels + length);
-        record = std::make_shared<UDMF::SystemDefinedPixelMap>(data);
+        UdmfClient::GetInstance()->AddPixelMapRecord(unifiedData, data);
     } else {
-        record = std::make_shared<UDMF::Image>(loadingCtx_->GetSourceInfo().GetSrc());
+        UdmfClient::GetInstance()->AddImageRecord(unifiedData, loadingCtx_->GetSourceInfo().GetSrc());
     }
-    auto unifiedData = std::make_shared<UDMF::UnifiedData>();
-    unifiedData->AddRecord(record);
     event->SetData(unifiedData);
 #endif
 }

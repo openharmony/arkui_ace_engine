@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT_WITH_PREVIEW ClipboardProxy : public ClipboardInterface {
+class ACE_FORCE_EXPORT ClipboardProxy : public ClipboardInterface {
 public:
     static ClipboardProxy* GetInstance();
     ClipboardProxy() = default;

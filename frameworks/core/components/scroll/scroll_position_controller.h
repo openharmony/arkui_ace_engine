@@ -109,7 +109,7 @@ public:
     double GetCurrentPosition() const;
     Axis GetScrollDirection() const override;
 
-    void JumpTo(int32_t index, int32_t source) override;
+    void JumpTo(int32_t index, bool smooth, ScrollAlign align, int32_t source) override;
     void JumpTo(double position);
     bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth) override;
     bool AnimateTo(double position, float duration, const RefPtr<Curve>& curve, bool limitDuration = true,

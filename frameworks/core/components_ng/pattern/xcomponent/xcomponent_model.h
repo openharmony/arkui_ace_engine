@@ -29,11 +29,15 @@ public:
     static XComponentModel* GetInstance();
     virtual ~XComponentModel() = default;
 
-    virtual void Create(const std::string& id, const std::string& type, const std::string& libraryname,
+    virtual void Create(const std::string& id, XComponentType type, const std::string& libraryname,
         const RefPtr<XComponentController>& xcomponentController) = 0;
     virtual void SetSoPath(const std::string& soPath) = 0;
     virtual void SetOnLoad(LoadEvent&& onLoad) = 0;
     virtual void SetOnDestroy(DestroyEvent&& onDestroy) = 0;
+    virtual bool IsTexture()
+    {
+        return false;
+    }
 
 private:
     static std::unique_ptr<XComponentModel> instance_;

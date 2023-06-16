@@ -23,11 +23,12 @@ class ACE_EXPORT LocationButtonModelNG : public SecurityComponentModelNG {
 public:
     static LocationButtonModelNG* GetInstance();
     void Create(int32_t text, int32_t icon,
-        SecurityComponentBackgroundType backgroundType) override;
+        int32_t backgroundType) override;
     virtual bool GetIconResource(int32_t iconStyle, InternalResource::ResourceId& id) override;
     virtual bool GetTextResource(int32_t textStyle, std::string& text) override;
 private:
     static std::unique_ptr<LocationButtonModelNG> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LOCATION_BUTTON_LOCATION_BUTTON_MODEL_NG_H

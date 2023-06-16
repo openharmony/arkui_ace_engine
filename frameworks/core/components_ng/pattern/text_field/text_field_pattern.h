@@ -113,11 +113,6 @@ struct CaretMetricsF {
     }
 };
 
-struct UnderLinePattern {
-    BorderRadiusProperty radius;
-    Color bgColor;
-};
-
 struct PasswordModeStyle {
     Color bgColor;
     Color textColor;
@@ -228,6 +223,10 @@ public:
         static TextEditingValue value;
         return value;
     };
+    Offset GetGlobalOffset() const;
+    double GetEditingBoxY() const override;
+    double GetEditingBoxTopY() const override;
+    bool GetEditingBoxModel() const override;
 #endif
 
     void UpdateEditingValue(std::string value, int32_t caretPosition)
@@ -241,6 +240,7 @@ public:
     void UpdateCaretPositionByTouch(const Offset& offset);
     void UpdateCaretOffsetByEvent();
 
+    TextInputAction GetDefaultTextInputAction();
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
     bool CloseKeyboard(bool forceClose) override;
 
@@ -701,7 +701,7 @@ public:
         auto position = ConvertTouchOffsetToCaretPosition(offset);
         auto selectStart = std::min(textSelector_.GetStart(), textSelector_.GetEnd());
         auto selectEnd = std::max(textSelector_.GetStart(), textSelector_.GetEnd());
-        return (position >= selectStart) && (position < selectEnd);
+        return offset.GetX() >= 0 && (position >= selectStart) && (position < selectEnd);
     }
 
     // xts
@@ -803,8 +803,8 @@ public:
 
     void UpdateSelectMenuInfo(bool hasData)
     {
-        selectMenuInfo_.showCopy = !GetEditingValue().text.empty() && AllowCopy();
-        selectMenuInfo_.showCut = selectMenuInfo_.showCopy && !GetEditingValue().text.empty();
+        selectMenuInfo_.showCopy = !GetEditingValue().text.empty() && AllowCopy() && InSelectMode();
+        selectMenuInfo_.showCut = selectMenuInfo_.showCopy && !GetEditingValue().text.empty() && InSelectMode();
         selectMenuInfo_.showCopyAll = !GetEditingValue().text.empty() && !IsSelectAll();
         selectMenuInfo_.showPaste = hasData;
         selectMenuInfo_.menuIsShow = !GetEditingValue().text.empty() || hasData;
@@ -883,6 +883,7 @@ private:
     void OnCursorTwinkling();
     void StartTwinkling();
     void StopTwinkling();
+    void CheckIfNeedToResetKeyboard();
 
     float PreferredTextHeight(bool isPlaceholder);
 
@@ -913,6 +914,8 @@ private:
     void OnImageDataReady(bool checkHidePasswordIcon);
     void OnImageLoadSuccess(bool checkHidePasswordIcon);
     void OnImageLoadFail(bool checkHidePasswordIcon);
+
+    void CalculateDefaultCursor();
 
     bool IsSearchParentNode() const;
     void RequestKeyboardOnFocus();
@@ -991,6 +994,7 @@ private:
     bool needToRefreshSelectOverlay_ = false;
     bool needToRequestKeyboardInner_ = false;
     bool needToRequestKeyboardOnFocus_ = true;
+    bool isTransparent_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 
@@ -1037,7 +1041,7 @@ private:
     std::vector<TextSelector> textSelectorRecords_;
     std::vector<TextSelector> redoTextSelectorRecords_;
     std::vector<MenuOptionsParam> menuOptionItems_;
-    UnderLinePattern underLinePattern_;
+    BorderRadiusProperty borderRadius_;
     PasswordModeStyle passwordModeStyle_;
 
     SelectMenuInfo selectMenuInfo_;
@@ -1052,9 +1056,6 @@ private:
     bool imeShown_ = false;
 #endif
     int32_t instanceId_ = -1;
-#if defined(PREVIEW)
-    std::vector<std::wstring> clipRecords_;
-#endif
 };
 } // namespace OHOS::Ace::NG
 

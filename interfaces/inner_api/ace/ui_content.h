@@ -68,7 +68,7 @@ class NativeValue;
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT_WITH_PREVIEW UIContent {
+class ACE_FORCE_EXPORT UIContent {
 public:
     static std::unique_ptr<UIContent> Create(
         OHOS::AbilityRuntime::Context* context, NativeEngine* runtime, bool isFormRender);
@@ -154,6 +154,11 @@ public:
         std::vector<std::string>& assetBasePaths, std::string& resFolderName) {};
     virtual void SetResourcePaths(const std::vector<std::string>& resourcesPaths, const std::string& assetRootPath,
         const std::vector<std::string>& assetBasePaths) {};
+		
+    virtual NativeValue* GetUIContext()
+    {
+        return nullptr;
+    };
 };
 
 } // namespace OHOS::Ace

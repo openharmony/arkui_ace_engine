@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_MODEL_H
 
+#include <functional>
 #include <mutex>
 
 #include "core/components_ng/pattern/radio/radio_event_hub.h"
@@ -32,11 +33,12 @@ public:
     virtual void SetOnChange(NG::ChangeEvent&& onChange);
     virtual void SetWidth(const Dimension& width);
     virtual void SetHeight(const Dimension& height);
-    virtual void SetPadding(const NG::PaddingPropertyF& args);
+    virtual void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs);
     virtual void SetCheckedBackgroundColor(const Color& color) {}
     virtual void SetUncheckedBorderColor(const Color& color) {}
     virtual void SetIndicatorColor(const Color& color) {}
     virtual void SetOnChangeEvent(NG::ChangeEvent&& onChangeEvent) {};
+    virtual void SetOnClickEvent(std::function<void()>&& onClick) {};
 
 private:
     static std::unique_ptr<RadioModel> instance_;

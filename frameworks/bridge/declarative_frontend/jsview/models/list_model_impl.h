@@ -50,6 +50,7 @@ public:
     void SetSticky(V2::StickyStyle stickyStyle) override;
     void SetContentStartOffset(float startOffset) override;
     void SetContentEndOffset(float endOffset) override;
+    void SetNestedScroll(const NestedScrollOptions& nestedOpt) override {};
     void SetOnScroll(OnScrollEvent&& onScroll) override;
     void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin) override;
     void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin) override;

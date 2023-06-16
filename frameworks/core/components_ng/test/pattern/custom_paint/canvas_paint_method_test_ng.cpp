@@ -240,11 +240,14 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg003, TestSize.Level1)
 
     paintMethod_->SetLineDash(CANDIDATE_DOUBLES);
     for (uint32_t i = 1; i < CANDIDATE_DOUBLES.size(); ++i) {
-        EXPECT_DOUBLE_EQ(paintMethod_->GetLineDash().lineDash[i], CANDIDATE_DOUBLES[i]);
+        auto lineDash = paintMethod_->strokeState_.GetLineDash();
+        EXPECT_DOUBLE_EQ(lineDash.lineDash[i], CANDIDATE_DOUBLES[i]);
     }
+
     for (double item : CANDIDATE_DOUBLES) {
         paintMethod_->SetLineDashOffset(item);
-        EXPECT_DOUBLE_EQ(paintMethod_->GetLineDash().dashOffset, item);
+        auto lineDash = paintMethod_->strokeState_.GetLineDash();
+        EXPECT_DOUBLE_EQ(lineDash.dashOffset, item);
     }
 
     for (auto textAlign : CANDIDATE_TEXT_ALIGNS) {

@@ -839,8 +839,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest010, TestSize.Level1)
     dragDropManager->OnItemDragStart(GLOBAL_X, GLOBAL_Y, frameNode);
     preGridTargetNode = dragDropManager->preGridTargetFrameNode_;
     EXPECT_TRUE(preGridTargetNode);
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragDropManager->dragWindow_)), MoveTo(GLOBAL_X, GLOBAL_Y))
-        .Times(1);
     dragDropManager->OnItemDragMove(GLOBAL_X, GLOBAL_Y, DRAGGED_INDEX, DRAG_TYPE_LIST);
     EXPECT_EQ(itemInfoMove, "");
     // to force call the FireOnItemDragEvent with DragType::LIST and DragEventType::MOVE
@@ -930,6 +928,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest011, TestSize.Level1)
      * @tc.expected: step3. preTargetFrameNode_ is null and draggedFrameNode_ is not null
      */
     dragDropManager->OnDragStart(GLOBAL_X, GLOBAL_Y, frameNode);
+    dragDropManager->extraInfo_ = EXTRA_INFO;
     dragDropManager->OnDragEnd(GLOBAL_X, GLOBAL_Y, EXTRA_INFO);
     auto preTargetFrameNode = dragDropManager->preTargetFrameNode_;
     auto draggedFrameNode = dragDropManager->draggedFrameNode_;

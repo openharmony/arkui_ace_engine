@@ -36,6 +36,7 @@ if (ace_enable_gpu) {
 declare_args() {
   ace_engine_feature_enable_accessibility = false
   ace_engine_feature_enable_web = false
+  ace_engine_feature_container_modal_enhance = false
 }
 
 if (ace_engine_feature_enable_accessibility) {
@@ -44,6 +45,10 @@ if (ace_engine_feature_enable_accessibility) {
 
 if (ace_engine_feature_enable_web) {
   web_components_support = true
+}
+
+if (ace_engine_feature_container_modal_enhance) {
+  defines += [ "CONTAINER_MODAL_ENHANCE" ]
 }
 
 use_build_in_js_engine = true
@@ -55,6 +60,7 @@ rich_components_support = true
 advance_components_support = false
 form_components_support = true
 remote_window_support = true
+effect_component_support = true
 plugin_components_support = true
 xcomponent_components_support = true
 pixel_map_support = true
@@ -63,7 +69,7 @@ connect_server_support = true
 hdc_register_support = true
 pa_engine_path = "adapter/ohos/entrance/pa_engine"
 enable_rosen_backend = true
-enable_drag_framework = false
+enable_drag_framework = true
 if (defined(global_parts_info.inputmethod_imf)) {
   enable_standard_input = true
 } else {
@@ -128,6 +134,10 @@ if (form_components_support) {
 
 if (remote_window_support) {
   defines += [ "REMOTE_WINDOW_SUPPORTED" ]
+}
+
+if (effect_component_support) {
+  defines += [ "EFFECT_COMPONENT_SUPPORTED" ]
 }
 
 if (xcomponent_components_support) {

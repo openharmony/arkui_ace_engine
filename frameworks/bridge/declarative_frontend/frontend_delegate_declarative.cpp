@@ -19,8 +19,6 @@
 #include <regex>
 #include <string>
 
-#include "uicast_interface/uicast_context_impl.h"
-
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
@@ -787,10 +785,12 @@ void FrontendDelegateDeclarative::GetStageSourceMap(
     }
 }
 
-void FrontendDelegateDeclarative::InitializeRouterManager(NG::LoadPageCallback&& loadPageCallback)
+void FrontendDelegateDeclarative::InitializeRouterManager(
+    NG::LoadPageCallback&& loadPageCallback, NG::LoadNamedRouterCallback&& loadNamedRouterCallback)
 {
     pageRouterManager_ = AceType::MakeRefPtr<NG::PageRouterManager>();
     pageRouterManager_->SetLoadJsCallback(std::move(loadPageCallback));
+    pageRouterManager_->SetLoadNamedRouterCallback(std::move(loadNamedRouterCallback));
 }
 
 // Start FrontendDelegate overrides.
@@ -830,6 +830,15 @@ void FrontendDelegateDeclarative::PushWithCallback(const std::string& uri, const
     Push(PageTarget(uri, static_cast<RouterMode>(routerMode)), params, errorCallback);
 }
 
+void FrontendDelegateDeclarative::PushNamedRoute(const std::string& uri, const std::string& params,
+    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    pageRouterManager_->PushNamedRoute(
+        NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+    OnMediaQueryUpdate();
+}
+
 void FrontendDelegateDeclarative::Replace(const std::string& uri, const std::string& params)
 {
     if (Container::IsCurrentUseNewPipeline()) {
@@ -864,6 +873,15 @@ void FrontendDelegateDeclarative::ReplaceWithCallback(const std::string& uri, co
         return;
     }
     Replace(PageTarget(uri, static_cast<RouterMode>(routerMode)), params, errorCallback);
+}
+
+void FrontendDelegateDeclarative::ReplaceNamedRoute(const std::string& uri, const std::string& params,
+    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    pageRouterManager_->ReplaceNamedRoute(
+        NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+    OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarative::Back(const std::string& uri, const std::string& params)
@@ -1039,9 +1057,6 @@ void FrontendDelegateDeclarative::StartPush(const PageTarget& target, const std:
     LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
     if (!pagePath.empty()) {
         LoadPage(GenerateNextPageId(), PageTarget(target, pagePath), false, params);
-        {
-            UICastContextImpl::HandleRouterPageCall("UICast::Page::push", target.url);
-        }
         if (errorCallback != nullptr) {
             errorCallback("", ERROR_CODE_NO_ERROR);
         }
@@ -1085,9 +1100,6 @@ void FrontendDelegateDeclarative::StartReplace(const PageTarget& target, const s
     LOGD("router.Replace pagePath = %{private}s", pagePath.c_str());
     if (!pagePath.empty()) {
         LoadReplacePage(GenerateNextPageId(), PageTarget(target, pagePath), params);
-        {
-            UICastContextImpl::HandleRouterPageCall("UICast::Page::replace", target.url);
-        }
         if (errorCallback != nullptr) {
             errorCallback("", ERROR_CODE_NO_ERROR);
         }
@@ -1176,9 +1188,6 @@ void FrontendDelegateDeclarative::BackWithTarget(const PageTarget& target, const
 
 void FrontendDelegateDeclarative::StartBack(const PageTarget& target, const std::string& params)
 {
-    {
-        UICastContextImpl::HandleRouterPageCall("UICast::Page::back", target.url);
-    }
     if (target.url.empty()) {
         std::string pagePath;
         {
@@ -1341,9 +1350,6 @@ Size FrontendDelegateDeclarative::MeasureTextSize(const MeasureContext& context)
 void FrontendDelegateDeclarative::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
 {
     LOGD("FrontendDelegateDeclarative ShowToast.");
-    {
-        UICastContextImpl::ShowToast(message, duration, bottom);
-    }
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::IsCurrentUseNewPipeline()) {
@@ -1436,9 +1442,6 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
         .buttons = buttons,
     };
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
-    {
-        UICastContextImpl::ShowDialog(dialogProperties);
-    }
 }
 
 void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std::string& message,
@@ -1453,9 +1456,6 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
         .onStatusChanged = std::move(onStatusChanged),
     };
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
-    {
-        UICastContextImpl::ShowDialog(dialogProperties);
-    }
 }
 
 void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogProperties,
@@ -1523,9 +1523,6 @@ void FrontendDelegateDeclarative::ShowActionMenu(
         .buttons = button,
     };
     ShowActionMenuInner(dialogProperties, button, std::move(callback));
-    {
-        UICastContextImpl::ShowDialog(dialogProperties);
-    }
 }
 
 void FrontendDelegateDeclarative::ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
@@ -1539,9 +1536,6 @@ void FrontendDelegateDeclarative::ShowActionMenu(const std::string& title, const
         .onStatusChanged = std::move(onStatusChanged),
     };
     ShowActionMenuInner(dialogProperties, button, std::move(callback));
-    {
-        UICastContextImpl::ShowDialog(dialogProperties);
-    }
 }
 
 void FrontendDelegateDeclarative::EnableAlertBeforeBackPage(
@@ -2577,6 +2571,16 @@ RefPtr<JsAcePage> FrontendDelegateDeclarative::GetPage(int32_t pageId) const
 void FrontendDelegateDeclarative::RegisterFont(const std::string& familyName, const std::string& familySrc)
 {
     pipelineContextHolder_.Get()->RegisterFont(familyName, familySrc);
+}
+
+void FrontendDelegateDeclarative::GetSystemFontList(std::vector<std::string>& fontList)
+{
+    pipelineContextHolder_.Get()->GetSystemFontList(fontList);
+}
+
+bool FrontendDelegateDeclarative::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
+{
+    return pipelineContextHolder_.Get()->GetSystemFont(fontName, fontInfo);
 }
 
 void FrontendDelegateDeclarative::HandleImage(

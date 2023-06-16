@@ -134,7 +134,7 @@ const char RESPONSIVE_SPRING_MOTION[] = "responsiveSpringMotion";
 const char DOM_ANIMATION_TIMING_FUNCTION_SPRING_MOTION[] = "spring-motion";
 const char DOM_ANIMATION_TIMING_FUNCTION_RESPONSIVE_SPRING_MOTION[] = "responsive-spring-motion";
 const char DOM_ANIMATION_TIMING_FUNCTION_INTERPOLATING_SPRING[] = "interpolating-spring";
-
+const char CURVES_CUSTOM[] = "customCurve";
 // for grid
 const char GRID_GET_SYSTEM_LAYOUT_INFO[] = "getSystemLayoutInfo";
 // for plugin

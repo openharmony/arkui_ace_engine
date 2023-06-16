@@ -47,13 +47,7 @@ BadgeModel* BadgeModel::GetInstance()
 namespace OHOS::Ace::Framework {
 void JSBadge::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-
     if (!info[0]->IsObject()) {
-        LOGE("The argv is wrong, it is supposed to be a object");
         return;
     }
 
@@ -63,9 +57,11 @@ void JSBadge::Create(const JSCallbackInfo& info)
 
 BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
 {
-    auto obj = JSRef<JSObject>::Cast(info[0]);
-
     BadgeParameters badgeParameters;
+    if (!info[0]->IsObject()) {
+        return badgeParameters;
+    }
+    auto obj = JSRef<JSObject>::Cast(info[0]);
     auto value = obj->GetProperty("value");
     if (!value->IsNull() && value->IsString()) {
         auto label = value->ToString();
@@ -103,6 +99,9 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
             if (badgeSize.IsNonNegative() && badgeSize.Unit() != DimensionUnit::PERCENT) {
                 badgeParameters.badgeCircleSize = badgeSize;
             } else if (!badgeTheme) {
+                LOGW("Get badge theme error");
+                return BadgeParameters();
+            } else {
                 badgeParameters.badgeCircleSize = badgeTheme->GetBadgeCircleSize();
             }
         }

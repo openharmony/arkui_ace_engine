@@ -16,6 +16,7 @@
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 #include "core/pipeline/pipeline_base.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -66,6 +67,8 @@ void PipelineContext::SetupRootElement() {}
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe) {}
 
 void PipelineContext::OnMouseEvent(const MouseEvent& event) {}
+
+void PipelineContext::FlushTouchEvents() {}
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event) {}
 
@@ -149,6 +152,8 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
 void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
 
 void PipelineContext::FlushReload() {}
+
+void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) {}
 
 const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
 {
@@ -248,6 +253,8 @@ void PipelineContext::AddPredictTask(PredictTask&& task) {}
 
 void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task) {}
 
+void PipelineContext::AddUIExtensionTouchEventCallback(int32_t pointId, UIExtensionTouchEventCallback&& callback) {}
+
 void PipelineContext::FlushPipelineImmediately() {}
 
 FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp)
@@ -288,6 +295,27 @@ void PipelineContext::ResetViewSafeArea() {}
 void PipelineContext::AddWindowSizeChangeCallback(int32_t nodeId) {}
 
 void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId) {}
+
+void PipelineContext::SetSystemSafeArea(const SafeAreaEdgeInserts& systemSafeArea) {};
+
+SafeAreaEdgeInserts PipelineContext::GetSystemSafeArea() const
+{
+    return {};
+}
+
+void PipelineContext::SetCutoutSafeArea(const SafeAreaEdgeInserts& cutoutSafeArea) {};
+
+SafeAreaEdgeInserts PipelineContext::GetCutoutSafeArea() const
+{
+    return {};
+}
+
+SafeAreaEdgeInserts PipelineContext::GetViewSafeArea() const
+{
+    return {};
+}
+
+void PipelineContext::AppBarAdaptToSafeArea() {};
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
@@ -371,8 +399,7 @@ bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& c
 
 void PipelineBase::Destroy() {}
 
-void PipelineBase::AddEtsCardTouchEventCallback(
-    int32_t ponitId, EtsCardTouchEventCallback&& callback) {}
+void PipelineBase::AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback) {}
 
 double PipelineBase::ConvertPxToVp(const Dimension& dimension) const
 {

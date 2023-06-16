@@ -37,7 +37,7 @@ public:
         RefPtr<OHOS::Ace::CustomPaintComponent> mockComponent = AceType::MakeRefPtr<OHOS::Ace::CustomPaintComponent>();
         auto jsContext = Referenced::MakeRefPtr<JSRenderingContext>();
         jsContext->SetAnti(true);
-        jsContext->SetComponent(mockComponent->GetTaskPool());
+        jsContext->SetCanvasPattern(mockComponent->GetTaskPool());
         jsContext->SetAntiAlias();
         mockComponent->GetTaskPool()->UpdateFontSize(DEFAULT_FONT_SIZE);
         mockComponent->GetTaskPool()->FillText(

@@ -1080,7 +1080,7 @@ void ViewAbstractModelImpl::SetOnMouse(OnMouseEventFunc&& onMouseEventFunc)
     box->SetOnMouseId(onMouseId);
 }
 
-void ViewAbstractModelImpl::SetOnHover(OnHoverEventFunc&& onHoverEventFunc)
+void ViewAbstractModelImpl::SetOnHover(OnHoverFunc&& onHoverEventFunc)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     box->SetOnHoverId(onHoverEventFunc);

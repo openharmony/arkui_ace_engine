@@ -39,7 +39,6 @@ public:
     static void SetLableStyle(const JSCallbackInfo& info);
     static void JsBackgroundColor(const JSCallbackInfo& info);
     static void JsRadius(const JSCallbackInfo& info);
-    static void JsBorder(const JSCallbackInfo& info);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
     static void JsAspectRatio(const JSCallbackInfo& info);
@@ -49,13 +48,12 @@ public:
     static void JsPadding(const JSCallbackInfo& info);
     static void JsHoverEffect(const JSCallbackInfo& info);
 
-public:
     static void JSBind(BindingTarget globalObj);
     static void CreateWithChild(const JSCallbackInfo& info);
     static void CreateWithLabel(const JSCallbackInfo& info);
 
 private:
-    static void GetFontContent(const JSRef<JSVal> obj, ButtonParameters& buttonParameters);
+    static void GetFontContent(JSRef<JSVal>& font, ButtonParameters& buttonParameters);
     static void CompleteParameters(ButtonParameters& buttonParameters);
     static CalcDimension GetSizeValue(const JSCallbackInfo& info);
     static NG::PaddingProperty GetNewPadding(const JSCallbackInfo& info);
@@ -63,6 +61,7 @@ private:
     static NG::PaddingProperty SetPaddings(const std::optional<CalcDimension>& top,
         const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
         const std::optional<CalcDimension>& right);
+    static bool isLabelButton_;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_BUTTON_H

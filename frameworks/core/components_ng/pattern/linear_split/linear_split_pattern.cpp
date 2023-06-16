@@ -315,7 +315,9 @@ MouseFormat LinearSplitPattern::GetMouseFormat()
 {
     MouseFormat format = MouseFormat::DEFAULT;
     if (splitType_ == SplitType::ROW_SPLIT) {
-        if (isOverParent_) {
+        if (isOverParent_ && NearZero(dragSplitOffset_[mouseDragedSplitIndex_])) {
+            format = MouseFormat::DEFAULT;
+        } else if (isOverParent_) {
             format = MouseFormat::WEST;
         } else if (NearZero(dragSplitOffset_[mouseDragedSplitIndex_])) {
             format = MouseFormat::EAST;
@@ -323,7 +325,9 @@ MouseFormat LinearSplitPattern::GetMouseFormat()
             format = MouseFormat::WEST_EAST;
         }
     } else {
-        if (isOverParent_) {
+        if (isOverParent_ && NearZero(dragSplitOffset_[mouseDragedSplitIndex_])) {
+            format = MouseFormat::DEFAULT;
+        } else if (isOverParent_) {
             format = MouseFormat::NORTH;
         } else if (NearZero(dragSplitOffset_[mouseDragedSplitIndex_])) {
             format = MouseFormat::SOUTH;

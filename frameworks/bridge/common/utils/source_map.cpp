@@ -42,9 +42,9 @@ constexpr int32_t NAMES_VAL = 4;
 constexpr int32_t P0S_SPACE_LENGTH = 20;
 constexpr int32_t SPACE_LEN = 26;
 
-MappingInfo RevSourceMap::Find(int32_t row, int32_t col)
+MappingInfo RevSourceMap::Find(int32_t row, int32_t col, bool isColPrecise)
 {
-    if (row < 1 || col < 1) {
+    if (row < 1 || col < 1 || afterPos_.empty()) {
         LOGE("the input pos is wrong");
         return MappingInfo {};
     }
@@ -54,6 +54,7 @@ MappingInfo RevSourceMap::Find(int32_t row, int32_t col)
     int32_t left = 0;
     int32_t right = static_cast<int32_t>(afterPos_.size()) - 1;
     int32_t res = 0;
+    bool isRightBig = false;
     if (row > afterPos_[afterPos_.size() - 1].afterRow) {
         return MappingInfo { row + 1, col + 1, files_[0] };
     }
@@ -61,11 +62,25 @@ MappingInfo RevSourceMap::Find(int32_t row, int32_t col)
         int32_t mid = (right + left) / 2;
         if ((afterPos_[mid].afterRow == row && afterPos_[mid].afterColumn > col) || afterPos_[mid].afterRow > row) {
             right = mid - 1;
+            isRightBig = true;
         } else {
             res = mid;
             left = mid + 1;
         }
     }
+
+    /*
+     * real:[56:7]->[250:21]
+     * [row:col]->[afterRow:afterColumn]
+     * 0:[53:14]->[237:77]
+     * 1:[53:14]->[237:78]
+     * 2:[56:7]->[250:39]
+     * 3:[56:14]->[250:40]
+    */
+    if (!isColPrecise && isRightBig && right > 0 && afterPos_[right].afterRow < row) {
+        res = right + 1;
+    }
+
     int32_t sourcesSize = static_cast<int32_t>(sources_.size());
     if (afterPos_[res].sourcesVal < 0 || afterPos_[res].sourcesVal >= sourcesSize) {
         LOGE("sourcesVal invalid");

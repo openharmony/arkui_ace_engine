@@ -224,6 +224,8 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         AceApplicationInfo::GetInstance().SetPackageName(abilityContext->GetBundleName());
         AceApplicationInfo::GetInstance().SetDataFileDirPath(abilityContext->GetFilesDir());
         AceApplicationInfo::GetInstance().SetApiTargetVersion(abilityContext->GetApplicationInfo()->apiTargetVersion);
+        AceApplicationInfo::GetInstance().SetAppVersionName(abilityContext->GetApplicationInfo()->versionName);
+        AceApplicationInfo::GetInstance().SetAppVersionCode(abilityContext->GetApplicationInfo()->versionCode);
         AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
         AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingPid());
         ImageCache::SetImageCacheFilePath(cacheDir);
@@ -493,6 +495,13 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
             rsConfig.durationOut_ };
         context->SetKeyboardAnimationConfig(config);
         context->SetMinPlatformVersion(apiCompatibleVersion);
+
+        const static int32_t PLATFORM_VERSION_TEN = 10;
+        if (apiCompatibleVersion >= PLATFORM_VERSION_TEN && context->GetIsAppWindow()) {
+            context->SetSystemSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM));
+            context->SetCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
+            context->AppBarAdaptToSafeArea();
+        }
     }
 
     // get url
@@ -891,22 +900,47 @@ uint32_t AceAbility::GetBackgroundColor()
 
 void AceAbility::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
 {
-    if (type == OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM || type == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) {
-        LOGI("AceAbility::OnAvoidAreaChanged type:%{public}d", type);
-        auto container = Platform::AceContainer::GetContainer(abilityId_);
-        CHECK_NULL_VOID(container);
-        auto taskExecutor = container->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
-            [container, abilityId = abilityId_] {
-                CHECK_NULL_VOID(container);
-                ContainerScope scope(abilityId);
-                auto context = container->GetPipelineContext();
-                CHECK_NULL_VOID_NOLOG(context);
-                context->ResetViewSafeArea();
-            },
-            TaskExecutor::TaskType::UI);
+    auto container = Platform::AceContainer::GetContainer((abilityId_));
+    CHECK_NULL_VOID_NOLOG(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    const static int32_t PLATFORM_VERSION_TEN = 10;
+    CHECK_NULL_VOID_NOLOG(pipelineContext->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN &&
+                          pipelineContext->GetIsAppWindow());
+    LOGI("AceAbility::OnAvoidAreaChanged type:%{public}d, avoidArea:topRect:x:%{public}d, y:%{public}d, "
+         "width:%{public}d, height%{public}d",
+        type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
+        (int32_t)avoidArea.topRect_.height_);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    Rect leftRect(static_cast<double>(avoidArea.leftRect_.posX_), static_cast<double>(avoidArea.leftRect_.posY_),
+        static_cast<double>(avoidArea.leftRect_.width_), static_cast<double>(avoidArea.leftRect_.height_));
+    Rect topRect(static_cast<double>(avoidArea.topRect_.posX_), static_cast<double>(avoidArea.topRect_.posY_),
+        static_cast<double>(avoidArea.topRect_.width_), static_cast<double>(avoidArea.topRect_.height_));
+    Rect rightRect(static_cast<double>(avoidArea.rightRect_.posX_), static_cast<double>(avoidArea.rightRect_.posY_),
+        static_cast<double>(avoidArea.rightRect_.width_), static_cast<double>(avoidArea.rightRect_.height_));
+    Rect bottomRect(static_cast<double>(avoidArea.bottomRect_.posX_), static_cast<double>(avoidArea.bottomRect_.posY_),
+        static_cast<double>(avoidArea.bottomRect_.width_), static_cast<double>(avoidArea.bottomRect_.height_));
+    SafeAreaEdgeInserts safeArea(leftRect, topRect, rightRect, bottomRect);
+    if (type == OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM) {
+        CHECK_NULL_VOID_NOLOG(safeArea != pipelineContext->GetSystemSafeArea());
+        pipelineContext->SetSystemSafeArea(safeArea);
+    } else if (type == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) {
+        CHECK_NULL_VOID_NOLOG(safeArea != pipelineContext->GetCutoutSafeArea());
+        pipelineContext->SetCutoutSafeArea(safeArea);
+    } else {
+        return;
     }
+
+    taskExecutor->PostTask(
+        [container, abilityId = abilityId_] {
+            CHECK_NULL_VOID(container);
+            ContainerScope scope(abilityId);
+            auto context = container->GetPipelineContext();
+            CHECK_NULL_VOID_NOLOG(context);
+            context->ResetViewSafeArea();
+        },
+        TaskExecutor::TaskType::UI);
 }
 } // namespace Ace
 } // namespace OHOS

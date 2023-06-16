@@ -61,11 +61,6 @@ public:
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
-    void SetNavigationMode(NavigationMode navigationMode)
-    {
-        navigationMode_ = navigationMode;
-    }
-
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
@@ -113,9 +108,9 @@ public:
         return navigationStack_->Get();
     }
 
-    RefPtr<UINode> GetPreNavDestination(const std::string& current)
+    RefPtr<UINode> GetPreNavDestination(const std::string& name, const RefPtr<UINode>& navDestinationNode)
     {
-        return navigationStack_->GetPre(current);
+        return navigationStack_->GetPre(name, navDestinationNode);
     }
 
     const std::vector<std::pair<std::string, RefPtr<UINode>>>& GetAllNavDestinationNodes()
@@ -146,6 +141,21 @@ public:
         navigationStack_->Remove();
     }
 
+    void CleanStack()
+    {
+        navigationStack_->RemoveAll();
+    }
+
+    void SetNavigationStackProvided(bool provided)
+    {
+        navigationStackProvided_ = provided;
+    }
+
+    bool GetNavigationStackProvided() const
+    {
+        return navigationStackProvided_;
+    }
+
 private:
     RefPtr<RenderContext> GetTitleBarRenderContext();
     void DoAnimation(NavigationMode currentMode);
@@ -157,6 +167,7 @@ private:
     RefPtr<NavigationStack> navigationStack_;
     NavPathList preNavPathList_;
     NavPathList navPathList_;
+    bool navigationStackProvided_ = false;
 };
 
 } // namespace OHOS::Ace::NG

@@ -235,20 +235,19 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto maxSize = CreateIdealSize(layoutProperty->GetLayoutConstraint().value_or(LayoutConstraintF()),
         Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
-    CreateChildrenConstraint(maxSize, layoutProperty->CreateMargin());
+    CreateChildrenConstraint(maxSize, layoutProperty->CreatePaddingAndBorder());
     auto context = NG::PipelineContext::GetCurrentContext();
     auto sizeType = GridContainerUtils::ProcessGridSizeType(
-        hostLayoutProperty->GetBreakPointsValue(), Size(maxSize.Width(), maxSize.Height()));
+        layoutProperty->GetBreakPointsValue(), Size(maxSize.Width(), maxSize.Height()));
     if (hostLayoutProperty->GetSizeTypeValue(V2::GridSizeType::UNDEFINED) != sizeType) {
         auto sizeTypeString = ConvertSizeTypeToString(sizeType);
         layoutWrapper->GetHostNode()->GetEventHub<GridRowEventHub>()->FireChangeEvent(sizeTypeString);
-        layoutProperty->UpdateSizeType(sizeType);
+        hostLayoutProperty->UpdateSizeType(sizeType);
     }
     auto gutter = GridContainerUtils::ProcessGutter(sizeType, layoutProperty->GetGutterValue());
     gutterInDouble_ =
         std::make_pair<double, double>(context->NormalizeToPx(gutter.first), context->NormalizeToPx(gutter.second));
     int32_t columnNum = GridContainerUtils::ProcessColumn(sizeType, layoutProperty->GetColumnsValue());
-    CreateChildrenConstraint(maxSize, layoutProperty->CreatePaddingAndBorder());
     columnUnitWidth_ = GridContainerUtils::ProcessColumnWidth(gutterInDouble_, columnNum, maxSize.Width());
     float childrenHeight =
         MeasureChildren(layoutWrapper, columnUnitWidth_, maxSize.Height(), gutterInDouble_, sizeType, columnNum);

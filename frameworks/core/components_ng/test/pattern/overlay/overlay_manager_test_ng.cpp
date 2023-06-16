@@ -24,9 +24,9 @@
 #define private public
 #define protected public
 #include "base/geometry/ng/offset_t.h"
+#include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/toast/toast_theme.h"
-#include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
@@ -43,8 +43,8 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -92,6 +92,9 @@ void OverlayManagerTestNg::CreateSheetStyle(SheetStyle& sheetStyle)
  */
 HWTEST_F(OverlayManagerTestNg, PopupTest001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
     auto targetTag = targetNode->GetTag();
@@ -103,12 +106,28 @@ HWTEST_F(OverlayManagerTestNg, PopupTest001, TestSize.Level1)
     popupInfo.popupNode = popupNode;
     popupInfo.target = targetNode;
     popupInfo.markNeedUpdate = true;
+    popupInfo.isCurrentOnShow = true;
 
+    /**
+     * @tc.steps: step2. create overlayManager and call UpdatePopupNode.
+     * @tc.expected: popupMap's data is updated successfully
+     */
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     popupNode->MountToParent(rootNode);
     rootNode->MarkDirtyNode();
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->UpdatePopupNode(targetId, popupInfo);
+    EXPECT_FALSE(overlayManager->popupMap_[targetId].isCurrentOnShow);
+
+    /**
+     * @tc.steps: step3. call HidePopup, ErasePopup, HideAllPopups
+     * @tc.expected: popupMap's data is updated successfully
+     */
+    overlayManager->HidePopup(targetId, popupInfo);
+    EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
+    overlayManager->ErasePopup(targetId);
+    overlayManager->HideAllPopups();
+    EXPECT_TRUE(overlayManager->popupMap_.empty());
 }
 
 /**
@@ -134,9 +153,9 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover001, TestSize.Level1)
      * @tc.steps: step2. create target node.
      */
     auto builderFunc = []() -> RefPtr<UINode> {
-        auto frameNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
         frameNode->AddChild(childFrameNode);
@@ -145,7 +164,7 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover001, TestSize.Level1)
 
     /**
      * @tc.steps: step3. create modal node and get modal node, get pattern.
-     * @tc.expected: step3. related function is called.
+     * @tc.expected: related function is called.
      */
     int32_t modalTransition = 1;
     bool isShow = true;
@@ -183,9 +202,9 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover002, TestSize.Level1)
      * @tc.steps: step2. create target node.
      */
     auto builderFunc = []() -> RefPtr<UINode> {
-        auto frameNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
         frameNode->AddChild(childFrameNode);
@@ -194,7 +213,7 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover002, TestSize.Level1)
 
     /**
      * @tc.steps: step3. create modal node and get modal node, get pattern.
-     * @tc.expected: step3. related function is called.
+     * @tc.expected: related function is called.
      */
     int32_t modalTransition = 1;
     bool isShow = true;
@@ -209,7 +228,8 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover002, TestSize.Level1)
     EXPECT_EQ(type, ModalTransition::NONE);
 
     /**
-     * @tc.steps: step4. Change the ModalTransion.
+     * @tc.steps: step4. Change the ModalTransition.
+     * @tc.expected: the ModalTransition is updated successfully
      */
     modalTransition = 0;
     overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalTransition, targetId);
@@ -220,7 +240,6 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover002, TestSize.Level1)
     type = topModalPattern->GetType();
     EXPECT_EQ(type, ModalTransition::DEFAULT);
 }
-
 
 /**
  * @tc.name: BindContentCover003
@@ -245,9 +264,9 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover003, TestSize.Level1)
      * @tc.steps: step2. create modal page node.
      */
     auto builderFunc = []() -> RefPtr<UINode> {
-        auto frameNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
         frameNode->AddChild(childFrameNode);
@@ -265,6 +284,7 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover003, TestSize.Level1)
 
     /**
      * @tc.steps: step4. destroy modal page.
+     * @tc.expected: destroy successfully
      */
     overlayManager->BindContentCover(!isShow, nullptr, nullptr, modalTransition, targetId);
     EXPECT_TRUE(overlayManager->modalStack_.empty());
@@ -273,7 +293,7 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover003, TestSize.Level1)
 /**
  * @tc.name: BindSheet001
  * @tc.desc: Test OverlayManager::BindSheet create sheet page.
- * @tc.type: FUNC 
+ * @tc.type: FUNC
  */
 HWTEST_F(OverlayManagerTestNg, BindSheet001, TestSize.Level1)
 {
@@ -293,9 +313,9 @@ HWTEST_F(OverlayManagerTestNg, BindSheet001, TestSize.Level1)
      * @tc.steps: step2. create builder func.
      */
     auto builderFunc = []() -> RefPtr<UINode> {
-        auto frameNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
         frameNode->AddChild(childFrameNode);
@@ -304,7 +324,7 @@ HWTEST_F(OverlayManagerTestNg, BindSheet001, TestSize.Level1)
 
     /**
      * @tc.steps: step3. create sheet node and get sheet node, get pattern.
-     * @tc.expected: step3. related function is called.
+     * @tc.expected: related function is called.
      */
     SheetStyle sheetStyle;
     CreateSheetStyle(sheetStyle);
@@ -353,9 +373,9 @@ HWTEST_F(OverlayManagerTestNg, BindSheet002, TestSize.Level1)
      * @tc.steps: step2. create builder.
      */
     auto builderFunc = []() -> RefPtr<UINode> {
-        auto frameNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
         frameNode->AddChild(childFrameNode);
@@ -364,7 +384,7 @@ HWTEST_F(OverlayManagerTestNg, BindSheet002, TestSize.Level1)
 
     /**
      * @tc.steps: step3. create sheet node and get sheet node, get pattern.
-     * @tc.expected: step3. related function is called.
+     * @tc.expected: related function is called.
      */
     SheetStyle sheetStyle;
     CreateSheetStyle(sheetStyle);
@@ -385,6 +405,7 @@ HWTEST_F(OverlayManagerTestNg, BindSheet002, TestSize.Level1)
 
     /**
      * @tc.steps: step4. Change the sheetStyle.
+     * @tc.expected: the sheetStyle is updated successfully
      */
     sheetStyle.sheetMode = SheetMode::LARGE;
     sheetStyle.showDragBar = false;
@@ -422,9 +443,9 @@ HWTEST_F(OverlayManagerTestNg, BindSheet003, TestSize.Level1)
      * @tc.steps: step2. create builder.
      */
     auto builderFunc = []() -> RefPtr<UINode> {
-        auto frameNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
         frameNode->AddChild(childFrameNode);
@@ -450,9 +471,60 @@ HWTEST_F(OverlayManagerTestNg, BindSheet003, TestSize.Level1)
 
     /**
      * @tc.steps: step4. destroy modal page.
+     * @tc.expected: destroy modal successfully.
      */
     overlayManager->BindSheet(!isShow, nullptr, nullptr, sheetStyle, targetId);
     EXPECT_TRUE(overlayManager->modalStack_.empty());
 }
+/**
+ * @tc.name: PopupTest002
+ * @tc.desc: Test OverlayManager::PopupEvent functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, PopupTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    for (int i = 0; i < 2; i++) {
+        auto targetNode = CreateTargetNode();
+        ASSERT_NE(targetNode, nullptr);
+        targetNodes.emplace_back(targetNode);
+        auto targetId = targetNodes[i]->GetId();
+        auto targetTag = targetNodes[i]->GetTag();
 
+        auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto popupNode = FrameNode::CreateFrameNode(
+            V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+        PopupInfo popupInfo;
+        popupInfo.popupId = popupId;
+        popupInfo.popupNode = popupNode;
+        popupInfo.target = targetNode;
+        popupInfo.markNeedUpdate = true;
+        popupInfo.isBlockEvent = false;
+        popups.emplace_back(popupInfo);
+    }
+    /**
+     * @tc.steps: step2. create overlayManager and call UpdatePopupNode.
+     * @tc.expected: Push popup successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId1 = targetNodes[0]->GetId();
+    auto targetId2 = targetNodes[1]->GetId();
+    overlayManager->UpdatePopupNode(targetId1, popups[0]);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+    overlayManager->UpdatePopupNode(targetId2, popups[1]);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+    /**
+     * @tc.steps: step3. call HidePopup when childCount is 2
+     * @tc.expected: popupMap's data is updated successfully
+     */
+    overlayManager->HidePopup(targetId2, popups[1]);
+    EXPECT_FALSE(overlayManager->popupMap_[targetId2].markNeedUpdate);
+    overlayManager->HideAllPopups();
+    EXPECT_FALSE(overlayManager->popupMap_.empty());
+}
 } // namespace OHOS::Ace::NG

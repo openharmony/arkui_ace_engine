@@ -113,23 +113,30 @@ public:
 
     void SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty);
 
+    // Clear the user callback.
+    void ClearUserOnAreaChange();
+
     void SetOnAreaChangeCallback(OnAreaChangedFunc&& callback);
+
     void TriggerOnAreaChangeCallback();
 
     void AddVisibleAreaUserCallback(double ratio, const VisibleCallbackInfo& callback)
     {
         visibleAreaUserCallbacks_[ratio] = callback;
     }
+
     void AddVisibleAreaInnerCallback(double ratio, const VisibleCallbackInfo& callback)
     {
         visibleAreaInnerCallbacks_[ratio] = callback;
     }
+
     void TriggerVisibleAreaChangeCallback(bool forceDisappear = false);
 
     const RefPtr<GeometryNode>& GetGeometryNode() const
     {
         return geometryNode_;
     }
+
     void SetGeometryNode(const RefPtr<GeometryNode>& node);
 
     const RefPtr<RenderContext>& GetRenderContext() const
@@ -270,6 +277,10 @@ public:
     OffsetF GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
 
     OffsetF GetPaintRectOffsetToPage() const;
+
+    RectF GetPaintRectWithTransform() const;
+
+    VectorF GetTransformScale() const;
 
     void AdjustGridOffset();
 

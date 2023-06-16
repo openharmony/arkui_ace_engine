@@ -15,6 +15,8 @@
 
 #include "core/components_ng/base/ui_node.h"
 
+#include <memory>
+
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_performance_check.h"
 #include "base/log/ace_trace.h"
@@ -37,8 +39,9 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
 {
     if (SystemProperties::IsPerformanceCheckEnabled()) {
         auto pos = EngineHelper::GetPositionOnJsCode();
-        row_ = pos.first;
-        col_ = pos.second;
+        nodeInfo_ = std::make_unique<PerformanceCheckNode>();
+        nodeInfo_->codeRow = pos.first;
+        nodeInfo_->codeCol = pos.second;
     }
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
@@ -517,41 +520,6 @@ int32_t UINode::TotalChildCount() const
     return count;
 }
 
-void UINode::GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap)
-{
-    // record current node
-    auto parent = GetParent();
-    if (parent && parent->GetTag() == V2::JS_FOR_EACH_ETS_TAG) {
-        // At this point, all of the children_ belong to the child nodes of syntaxItem
-        for (const auto& child : children_) {
-            PerformanceCheckNode node;
-            node.pageDepth = child->GetDepth();
-            node.childrenSize = child->GetChildren().size();
-            node.codeCol = child->GetCol();
-            node.codeRow = child->GetRow();
-            node.layoutTime = child->GetLayoutTime();
-            node.flexLayouts = child->GetFlexLayouts();
-            node.nodeTag = child->GetTag();
-            node.isForEachItem = true;
-            nodeMap.insert({ child->GetId(), node });
-        }
-    } else {
-        PerformanceCheckNode node;
-        node.pageDepth = depth_;
-        node.childrenSize = children_.size();
-        node.codeCol = col_;
-        node.codeRow = row_;
-        node.nodeTag = tag_;
-        node.layoutTime = layoutTime_;
-        node.flexLayouts = flexLayouts_;
-        nodeMap.insert({ nodeId_, node });
-    }
-    for (const auto& child : children_) {
-        // recursion children
-        child->GetPerformanceCheckData(nodeMap);
-    }
-}
-
 int32_t UINode::GetChildIndexById(int32_t id)
 {
     int32_t pos = 0;
@@ -713,5 +681,44 @@ bool UINode::RemoveImmediately() const
 {
     return std::all_of(
         children_.begin(), children_.end(), [](const auto& child) { return child->RemoveImmediately(); });
+}
+
+void UINode::GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap)
+{
+    auto parent = GetParent();
+    if (parent && parent->GetTag() == V2::JS_FOR_EACH_ETS_TAG) {
+        // At this point, all of the children_
+        // belong to the child nodes of syntaxItem
+        for (const auto& child : GetChildren()) {
+            if (child->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
+                auto children = child->GetChildren();
+                if (!children.empty()) {
+                    auto begin = children.begin();
+                    (*begin)->SetForeachItem();
+                }
+            } else {
+                child->SetForeachItem();
+            }
+        }
+    }
+
+    if (tag_ == V2::COMMON_VIEW_ETS_TAG) {
+        if (!children_.empty()) {
+            auto begin = children_.begin();
+            nodeInfo_->nodeTag = (*begin)->GetCustomTag();
+        }
+    } else {
+        nodeInfo_->nodeTag = GetCustomTag();
+    }
+
+    nodeInfo_->pageDepth = depth_;
+    nodeInfo_->childrenSize = children_.size();
+    if (isBuildByJS_) {
+        nodeMap.insert({ GetId(), *(nodeInfo_) });
+    }
+    for (const auto& child : children_) {
+        // Recursively traverse the child nodes of each node
+        child->GetPerformanceCheckData(nodeMap);
+    }
 }
 } // namespace OHOS::Ace::NG

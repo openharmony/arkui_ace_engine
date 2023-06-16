@@ -134,6 +134,8 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void JsOnLoad(const JSCallbackInfo& args);
     static void JsOnDestroy(const JSCallbackInfo& args);
+    static void JsBackgroundColor(const JSCallbackInfo& args);
+    static void JsOpacity(const JSCallbackInfo& args);
     static void OmitEvent(const JSCallbackInfo& args);
     static void OmitAttribute(const JSCallbackInfo& args);
 };

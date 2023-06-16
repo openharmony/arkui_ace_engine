@@ -28,9 +28,7 @@
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "base/geometry/rect.h"
 #include "base/msdp/device_status/interfaces/innerkits/interaction/include/interaction_manager.h"
-#include "unified_data.h"
-#include "udmf_client.h"
-#include "unified_types.h"
+#include "core/common/udmf/udmf_client.h"
 #endif // ENABLE_DRAG_FRAMEWORK
 
 namespace OHOS::Ace::NG {
@@ -170,7 +168,7 @@ void DragDropManager::UpdatePixelMapPosition(int32_t globalX, int32_t globalY)
         }
         RefPtr<PixelMap> pixelMap = hub->GetPixelMap();
         CHECK_NULL_VOID(pixelMap);
-        float scale = pixelMap->GetWidth() / width;
+        float scale = pixelMap->GetWidth() / (NearZero(width) ? 1.0f : width);
         imageContext->UpdatePosition(NG::OffsetT<Dimension>(
             Dimension(globalX - width * PIXELMAP_POSITION_WIDTH * scale - width / 2.0f + width * scale / 2.0f),
             Dimension(globalY - height * PIXELMAP_POSITION_HEIGHT * scale - height / 2.0f + height * scale / 2.0f)));
@@ -232,7 +230,7 @@ std::map<int32_t, RefPtr<FrameNode>> DragDropManager::FindDragFrameNodeMapByPosi
 {
     std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes;
     std::set<WeakPtr<FrameNode>> frameNodes;
-    
+
     switch (dragType) {
         case DragType::COMMON:
             frameNodes = dragFrameNodes_;
@@ -366,7 +364,6 @@ void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string&
     for (auto iter = frameNodes.rbegin(); iter != frameNodes.rend(); ++iter) {
         auto dragFrameNode = iter->second;
         CHECK_NULL_VOID_NOLOG(dragFrameNode);
-  
         auto eventHub = dragFrameNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -385,8 +382,8 @@ void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string&
         UpdateDragEvent(event, globalX, globalY);
         eventHub->FireOnDrop(event, extraParams);
 #ifdef ENABLE_DRAG_FRAMEWORK
-        InteractionManager::GetInstance()->StopDrag(TranslateDragResult(event->GetResult()),
-            event->IsUseCustomAnimation());
+        InteractionManager::GetInstance()->StopDrag(
+            TranslateDragResult(event->GetResult()), event->IsUseCustomAnimation());
 #endif // ENABLE_DRAG_FRAMEWORK
         break;
     }
@@ -407,16 +404,12 @@ void DragDropManager::RequireSummary()
     if (udKey.empty()) {
         LOGW("OnDragStart: InteractionManager GetUdKey is null");
     }
-
-    auto udmfClient = UDMF::UdmfClient::GetInstance();
-    UDMF::Summary summary;
-    UDMF::QueryOption queryOption;
-    queryOption.key = udKey;
-    int32_t ret = udmfClient.GetSummary(queryOption, summary);
+    std::map<std::string, int64_t> summary;
+    int32_t ret = UdmfClient::GetInstance()->GetSummary(udKey, summary);
     if (ret != 0) {
         LOGW("OnDragStart: UDMF GetSummary failed: %{public}d", ret);
     }
-    summaryMap_ = summary.summary;
+    summaryMap_ = summary;
 }
 
 void DragDropManager::ClearSummary()
@@ -690,7 +683,9 @@ void DragDropManager::AddDataToClipboard(const std::string& extraInfo)
         };
         addDataCallback_ = callback;
     }
-    clipboard_->GetData(addDataCallback_, true);
+    if (clipboard_) {
+        clipboard_->GetData(addDataCallback_, true);
+    }
 #ifdef ENABLE_DRAG_FRAMEWORK
     extraInfo_ = extraInfo;
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -716,7 +711,7 @@ void DragDropManager::GetExtraInfoFromClipboard(std::string& extraInfo)
         getDataCallback_ = callback;
     }
 
-    if (getDataCallback_) {
+    if (getDataCallback_ && clipboard_) {
         clipboard_->GetData(getDataCallback_, true);
     }
 
@@ -743,7 +738,9 @@ void DragDropManager::RestoreClipboardData()
         };
         deleteDataCallback_ = callback;
     }
-    clipboard_->GetData(deleteDataCallback_, true);
+    if (clipboard_) {
+        clipboard_->GetData(deleteDataCallback_, true);
+    }
 }
 
 void DragDropManager::DestroyDragWindow()
@@ -787,15 +784,12 @@ void DragDropManager::UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, float
     if (udKey.empty()) {
         LOGW("InteractionManager GetUdkey is null");
     }
-    auto udmfClient = UDMF::UdmfClient::GetInstance();
-    UDMF::UnifiedData udData;
-    UDMF::QueryOption queryOption;
-    queryOption.key = udKey;
-    int ret = udmfClient.GetData(queryOption, udData);
+    RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->CreateUnifiedData();
+    int ret = UdmfClient::GetInstance()->GetData(udData, udKey);
     if (ret != 0) {
         LOGW("UDMF GetData failed: %{public}d", ret);
     }
-    auto unifiedData = std::make_shared<UDMF::UnifiedData>(udData);
+    auto unifiedData = udData;
     event->SetData(unifiedData);
     int x = -1;
     int y = -1;

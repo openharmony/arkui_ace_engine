@@ -24,26 +24,26 @@ namespace OHOS::Ace::NG {
 HitTestResult UIExtensionNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
-    const auto& rect = GetGeometryNode()->GetFrameRect();
-    if (!rect.IsInRegion(parentLocalPoint)) {
+    auto rectWithTransform = GetPaintRectWithTransform();
+    if (!rectWithTransform.IsInRegion(parentLocalPoint)) {
         return HitTestResult::OUT_OF_REGION;
     }
     auto context = GetContext();
     CHECK_NULL_RETURN(context, HitTestResult::BUBBLING);
-    DispatchPointerEvent(touchRestrict.touchEvent);
-    auto callback = [weak = WeakClaim(this)](const TouchEvent& point) {
+    DispatchPointerEvent(touchRestrict.touchEvent, rectWithTransform);
+    auto callback = [weak = WeakClaim(this), rectWithTransform](const TouchEvent& point) {
         auto uiExtensionNode = weak.Upgrade();
         CHECK_NULL_VOID(uiExtensionNode);
-        uiExtensionNode->DispatchPointerEvent(point);
+        uiExtensionNode->DispatchPointerEvent(point, rectWithTransform);
     };
-    context->AddUIExtensionCallback(callback);
+    context->AddUIExtensionTouchEventCallback(touchRestrict.touchEvent.id, callback);
     return HitTestResult::BUBBLING;
 }
 
-void UIExtensionNode::DispatchPointerEvent(const TouchEvent& point) const
+void UIExtensionNode::DispatchPointerEvent(const TouchEvent& point, const RectF& rectWithTransform) const
 {
     auto selfGlobalOffset = GetTransformRelativeOffset();
-    auto pointerEvent = Platform::ConvertPointerEvent(selfGlobalOffset, point);
+    auto pointerEvent = Platform::ConvertPointerEvent(selfGlobalOffset, point, GetTransformScale());
     GetPattern<UIExtensionPattern>()->DispatchPointerEvent(pointerEvent);
 }
 

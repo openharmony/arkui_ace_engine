@@ -126,3 +126,12 @@ config("ace_test_config") {
     ldflags += [ "--coverage" ]
   }
 }
+
+config("ace_coverage_config") {
+  cflags = []
+  ldflags = []
+  if (ace_engine_feature_enable_coverage) {
+    cflags += [ "--coverage" ]
+    ldflags += [ "--coverage" ]
+  }
+}

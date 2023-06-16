@@ -86,6 +86,11 @@ public:
     */
     static int32_t JsGetApiVersion();
 
+    /**
+     * Gets framenode and pushes to VSP.
+    */
+    static void JsGetAndPushFrameNode(const JSCallbackInfo& info);
+
 private:
     static void JSVisualState(const JSCallbackInfo& info);
     static std::map<std::string, JSRef<JSObject>> viewMap_;

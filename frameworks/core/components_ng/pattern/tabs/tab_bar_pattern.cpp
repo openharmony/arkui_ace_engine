@@ -102,6 +102,9 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
             // over scroll in drag update from normal to over scroll.
             float overScroll = 0.0f;
             // over scroll in drag update during over scroll.
+            if (pattern->tabItemOffsets_.empty()) {
+                return false;
+            }
             auto startPos = pattern->tabItemOffsets_.begin()->GetX();
             auto host = pattern->GetHost();
             CHECK_NULL_RETURN(host, false);
@@ -815,6 +818,9 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
                        : backChildrenMainSize < space
                            ? host->GetGeometryNode()->GetFrameSize().Width() - childrenMainSize_
                            : space - frontChildrenMainSize;
+        if (tabItemOffsets_.empty()) {
+            return;
+        }
         PlayTranslateAnimation(originalPaintRect.GetX(),
             targetPaintRect.GetX() - tabItemOffsets_.front().GetX() + targetOffset, targetOffset);
     } else {
@@ -850,6 +856,9 @@ void TabBarPattern::HandleTouchEvent(const TouchLocationInfo& info)
 
 int32_t TabBarPattern::CalculateSelectedIndex(const Offset& info)
 {
+    if (tabItemOffsets_.empty()) {
+        return -1;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, -1);
     auto geometryNode = host->GetGeometryNode();
@@ -1394,7 +1403,7 @@ void TabBarPattern::SetEdgeEffect(const RefPtr<GestureEventHub>& gestureHub)
         // add callback to springEdgeEffect
         SetEdgeEffectCallback(springEffect);
         scrollEffect_ = springEffect;
-        gestureHub->AddScrollEdgeEffect(Axis::HORIZONTAL, scrollEffect_);
+        gestureHub->AddScrollEdgeEffect(axis_, scrollEffect_);
     }
 }
 
@@ -1426,6 +1435,9 @@ bool TabBarPattern::IsAtTop() const
 
 bool TabBarPattern::IsAtBottom() const
 {
+    if (tabItemOffsets_.empty()) {
+        return false;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     return LessOrEqual(tabItemOffsets_.back().GetX(), host->GetGeometryNode()->GetFrameSize().Width());
@@ -1481,5 +1493,112 @@ void TabBarPattern::SetAccessibilityAction()
             frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         }
     });
+}
+
+std::string TabBarPattern::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_RETURN(tabBarLayoutProperty, "");
+    jsonObj->Put("Index", tabBarLayoutProperty->GetIndicator().value_or(0));
+    return jsonObj->ToString();
+}
+
+void TabBarPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    auto info = JsonUtil::ParseJsonString(restoreInfo);
+    if (!info->IsValid() || !info->IsObject()) {
+        return;
+    }
+    auto jsonIsOn = info->GetValue("Index");
+    auto index = jsonIsOn->GetInt();
+    auto totalCount = host->TotalChildCount();
+    if (index < 0 || index >= totalCount || !swiperController_ ||
+        indicator_ >= static_cast<int32_t>(tabBarStyles_.size())) {
+        return;
+    }
+    tabBarLayoutProperty->UpdateIndicator(index);
+    if (animationDuration_.has_value()) {
+        swiperController_->SwipeTo(index);
+    } else {
+        swiperController_->SwipeToWithoutAnimation(index);
+    }
+
+}
+
+void TabBarPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    Pattern::ToJsonValue(json);
+    auto selectedModes = JsonUtil::CreateArray(true);
+    for (const auto& selectedMode : selectedModes_) {
+        auto mode = JsonUtil::Create(true);
+        mode->Put("mode", selectedMode == SelectedMode::INDICATOR ? "INDICATOR" : "BOARD");
+        selectedModes->Put(mode);
+    }
+    json->Put("selectedModes", selectedModes->ToString().c_str());
+
+    auto indicatorStyles = JsonUtil::CreateArray(true);
+    for (const auto& indicatorStyle : indicatorStyles_) {
+        auto indicator = JsonUtil::Create(true);
+        indicator->Put("color", indicatorStyle.color.ColorToString().c_str());
+        indicator->Put("height", indicatorStyle.height.ToString().c_str());
+        indicator->Put("width", indicatorStyle.width.ToString().c_str());
+        indicator->Put("borderRadius", indicatorStyle.borderRadius.ToString().c_str());
+        indicator->Put("marginTop", indicatorStyle.marginTop.ToString().c_str());
+        indicatorStyles->Put(indicator);
+    }
+    json->Put("indicatorStyles", indicatorStyles->ToString().c_str());
+
+    auto tabBarStyles = JsonUtil::CreateArray(true);
+    for (const auto& tabBarStyle : tabBarStyles_) {
+        auto style = JsonUtil::Create(true);
+        style->Put("style", tabBarStyle == TabBarStyle::NOSTYLE          ? "NOSTYLE"
+                            : tabBarStyle == TabBarStyle::SUBTABBATSTYLE ? "SUBTABBATSTYLE"
+                                                                         : "BOTTOMTABBATSTYLE");
+        tabBarStyles->Put(style);
+    }
+    json->Put("tabBarStyles", tabBarStyles->ToString().c_str());
+}
+
+void TabBarPattern::FromJson(const std::unique_ptr<JsonValue>& json)
+{
+    auto selectedModes = JsonUtil::ParseJsonString(json->GetString("selectedModes"));
+    for (int32_t i = 0; i < selectedModes->GetArraySize(); i++) {
+        auto selectedMode = selectedModes->GetArrayItem(i);
+        auto mode = selectedMode->GetString("mode");
+        SetSelectedMode(mode == "INDICATOR" ? SelectedMode::INDICATOR : SelectedMode::BOARD, i);
+    }
+
+    auto indicatorStyles = JsonUtil::ParseJsonString(json->GetString("indicatorStyles"));
+    for (int32_t i = 0; i < indicatorStyles->GetArraySize(); i++) {
+        auto indicatorStyle = indicatorStyles->GetArrayItem(i);
+        IndicatorStyle style;
+        style.color = Color::ColorFromString(indicatorStyle->GetString("color"));
+        style.height = Dimension::FromString(indicatorStyle->GetString("height"));
+        style.width = Dimension::FromString(indicatorStyle->GetString("width"));
+        style.borderRadius = Dimension::FromString(indicatorStyle->GetString("borderRadius"));
+        style.marginTop = Dimension::FromString(indicatorStyle->GetString("marginTop"));
+        SetIndicatorStyle(style, i);
+    }
+
+    auto tabBarStyles = JsonUtil::ParseJsonString(json->GetString("tabBarStyles"));
+    for (int32_t i = 0; i < tabBarStyles->GetArraySize(); i++) {
+        auto tabBarStyle = tabBarStyles->GetArrayItem(i);
+        auto style = tabBarStyle->GetString("style");
+        SetTabBarStyle(style == "NOSTYLE"          ? TabBarStyle::NOSTYLE
+                       : style == "SUBTABBATSTYLE" ? TabBarStyle::SUBTABBATSTYLE
+                                                   : TabBarStyle::BOTTOMTABBATSTYLE,
+            i);
+    }
+
+    auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto indicatorValue = layoutProperty->GetIndicatorValue(0);
+    UpdateIndicator(indicatorValue);
+    Pattern::FromJson(json);
 }
 } // namespace OHOS::Ace::NG

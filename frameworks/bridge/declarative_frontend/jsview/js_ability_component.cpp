@@ -69,27 +69,23 @@ void JSAbilityComponent::JSBind(BindingTarget globalObj)
 
 void JSAbilityComponent::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1 || !info[0]->IsObject()) {
+    if (!info[0]->IsObject()) {
         return;
     }
     auto obj = JSRef<JSObject>::Cast(info[0]);
     // Parse want
-    JSRef<JSVal> wantValue = obj->GetProperty("want");
-    if (wantValue->IsObject()) {
-        AbilityComponentModel::GetInstance()->Create();
-        AbilityComponentModel::GetInstance()->SetWant(wantValue->ToString());
-    } else {
-        auto jsonStr = JsonUtil::Create(true);
-        if (obj->GetProperty("bundleName")->IsNull() || obj->GetProperty("bundleName")->IsUndefined() ||
-            obj->GetProperty("abilityName")->IsNull() || obj->GetProperty("abilityName")->IsUndefined()) {
-            LOGI("bundleName or abilityName is undefined");
-            return;
-        }
-        jsonStr->Put("bundleName", obj->GetProperty("bundleName")->ToString().c_str());
-        jsonStr->Put("abilityName", obj->GetProperty("abilityName")->ToString().c_str());
-        AbilityComponentModel::GetInstance()->Create();
-        AbilityComponentModel::GetInstance()->SetWant(jsonStr->ToString());
+    auto want = JSRef<JSObject>::Cast(obj->GetProperty("want"));
+    if (want->GetProperty("bundleName")->IsNull() || want->GetProperty("bundleName")->IsUndefined() ||
+        want->GetProperty("abilityName")->IsNull() || want->GetProperty("abilityName")->IsUndefined()) {
+        LOGI("bundleName or abilityName is undefined");
+        return;
     }
+    std::string bundleName = want->GetProperty("bundleName")->ToString();
+    std::string abilityName = want->GetProperty("abilityName")->ToString();
+    LOGI("JSAbilityComponent::Create bundleName=%{public}s, abilityName=%{public}s", bundleName.c_str(),
+        abilityName.c_str());
+    AbilityComponentModel::GetInstance()->Create(bundleName, abilityName);
+    AbilityComponentModel::GetInstance()->SetWant(obj->GetProperty("want")->ToString());
 }
 
 void JSAbilityComponent::JsOnReady(const JSCallbackInfo& info)
@@ -104,6 +100,9 @@ void JSAbilityComponent::JsOnDestroy(const JSCallbackInfo& info)
 
 void JSAbilityComponent::JsOnConnect(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsFunction()) {
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto onConnect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -116,6 +115,9 @@ void JSAbilityComponent::JsOnConnect(const JSCallbackInfo& info)
 
 void JSAbilityComponent::JsOnDisconnect(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsFunction()) {
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto onDisConnect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

@@ -74,11 +74,11 @@ void TextPickerPattern::SetButtonIdeaSize()
         auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
         buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
-        buttonLayoutProperty->UpdateBorderRadius(PRESS_RADIUS);
         buttonLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx()),
             CalcLength(CalculateHeight() - PRESS_INTERVAL.ConvertToPx())));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        buttonConfirmRenderContext->UpdateBorderRadius({ PRESS_RADIUS, PRESS_RADIUS, PRESS_RADIUS, PRESS_RADIUS });
         buttonNode->MarkModifyDone();
         buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
@@ -408,13 +408,17 @@ bool TextPickerPattern::OnKeyEvent(const KeyEvent& event)
         return false;
     }
 
-    if (event.code == KeyCode::KEY_SPACE || event.code == KeyCode::KEY_ESCAPE) {
-        operationOn_ = event.code == KeyCode::KEY_SPACE;
+    if (event.code == KeyCode::KEY_SPACE || event.code == KeyCode::KEY_ENTER) {
+        if (!operationOn_ && event.code == KeyCode::KEY_ENTER) {
+            HandleDirectionKey(event.code);
+        }
+        operationOn_ = (event.code == KeyCode::KEY_SPACE) || (event.code == KeyCode::KEY_ENTER);
         return true;
     }
 
     if (event.code == KeyCode::KEY_TAB) {
-        return operationOn_;
+        operationOn_ = false;
+        return false;
     }
 
     if (event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_DOWN ||
@@ -609,6 +613,11 @@ bool TextPickerPattern::HandleDirectionKey(KeyCode code)
 
         case KeyCode::KEY_DPAD_DOWN:
             textPickerColumnPattern->InnerHandleScroll(1, false);
+            break;
+
+        case KeyCode::KEY_ENTER:
+            focusKeyID_ = 0;
+            PaintFocusState();
             break;
 
         case KeyCode::KEY_DPAD_LEFT:

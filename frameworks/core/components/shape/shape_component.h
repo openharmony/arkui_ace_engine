@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SHAPE_SHAPE_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SHAPE_SHAPE_COMPONENT_H
 
+#include "base/geometry/shape.h"
 #include "core/pipeline/base/measurable.h"
 #include "frameworks/core/components/common/properties/animatable_path.h"
 #include "frameworks/core/components/common/properties/radius.h"
@@ -23,19 +24,6 @@
 #include "frameworks/core/pipeline/base/render_component.h"
 
 namespace OHOS::Ace {
-
-using ShapePoint = std::pair<Dimension, Dimension>;
-using ShapePoints = std::vector<ShapePoint>;
-
-enum class ShapeType {
-    RECT = 0,
-    CIRCLE,
-    ELLIPSE,
-    LINE,
-    POLYGON,
-    POLYLINE,
-    PATH,
-};
 
 // keep same as the doc
 static const char* SHAPE_TYPE_STRINGS[] = { "Rect", "Circle", "Ellipse", "Line", "Polygon", "Polyline", "Path"};

@@ -571,6 +571,7 @@ enum class ACE_EXPORT BackgroundImageSizeType {
 };
 
 enum class ACE_EXPORT ClickEffectLevel {
+    UNDEFINED = -1,
     LIGHT = 0,
     MIDDLE,
     HEAVY,

@@ -15,6 +15,8 @@
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 
+#include "base/utils/utils.h"
+
 namespace OHOS::Ace::Platform {
 
 SourceTool GetSourceTool(int32_t orgToolType)
@@ -36,6 +38,8 @@ SourceTool GetSourceTool(int32_t orgToolType)
             return SourceTool::MOUSE;
         case OHOS::MMI::PointerEvent::TOOL_TYPE_LENS:
             return SourceTool::LENS;
+        case OHOS::MMI::PointerEvent::TOOL_TYPE_TOUCHPAD:
+            return SourceTool::TOUCHPAD;
         default:
             LOGW("unknown tool type");
             return SourceTool::UNKNOWN;
@@ -91,7 +95,8 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
     TimeStamp time(microseconds);
     TouchEvent event { touchPoint.id, touchPoint.x, touchPoint.y, touchPoint.screenX, touchPoint.screenY,
         TouchType::UNKNOWN, TouchType::UNKNOWN, time, touchPoint.size, touchPoint.force, touchPoint.tiltX,
-        touchPoint.tiltY, pointerEvent->GetDeviceId(), SourceType::NONE, touchPoint.sourceTool };
+        touchPoint.tiltY, pointerEvent->GetDeviceId(), pointerEvent->GetTargetDisplayId(), SourceType::NONE,
+        touchPoint.sourceTool };
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
     int32_t orgAction = pointerEvent->GetPointerAction();
@@ -215,6 +220,7 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, M
     GetMouseEventButton(orgButton, events);
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, events);
+    events.targetDisplayId = pointerEvent->GetTargetDisplayId();
 
     std::set<int32_t> pressedSet = pointerEvent->GetPressedButtons();
     uint32_t pressedButtons = 0;
@@ -276,15 +282,16 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     GetAxisEventAction(orgAction, event);
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
+    event.sourceTool = GetSourceTool(item.GetToolType());
 
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
     TimeStamp time(microseconds);
     event.time = time;
     LOGD("ConvertAxisEvent: id: %{public}d, (x,y): (%{public}f,%{public}f). HorizontalAxis: %{public}f. VerticalAxis: "
          "%{public}f. "
-         "Action: %{public}d. DeviceType: %{public}d. Time: %{public}lld",
+         "Action: %{public}d. SourceType: %{public}d. ToolType: %{public}d. Time: %{public}lld",
         event.id, event.x, event.y, event.horizontalAxis, event.verticalAxis, event.action, event.sourceType,
-        (long long)pointerEvent->GetActionTime());
+        event.sourceTool, (long long)pointerEvent->GetActionTime());
 }
 
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event)
@@ -335,13 +342,20 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
     }
 }
 
-std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const NG::OffsetF& offsetF, const TouchEvent& point)
+std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(
+    const NG::OffsetF& offsetF, const TouchEvent& point, const NG::VectorF& scale)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
 
     OHOS::MMI::PointerEvent::PointerItem item;
-    item.SetWindowX(static_cast<int32_t>(point.x - offsetF.GetX()));
-    item.SetWindowY(static_cast<int32_t>(point.y - offsetF.GetY()));
+
+    float xRelative = point.x - offsetF.GetX();
+    float yRelative = point.y - offsetF.GetY();
+    float xBeforeScale = NearZero(scale.x) ? xRelative : xRelative / scale.x;
+    float yBeforeScale = NearZero(scale.y) ? yRelative : yRelative / scale.y;
+
+    item.SetWindowX(static_cast<int32_t>(xBeforeScale));
+    item.SetWindowY(static_cast<int32_t>(yBeforeScale));
     item.SetDisplayX(static_cast<int32_t>(point.screenX));
     item.SetDisplayY(static_cast<int32_t>(point.screenY));
     item.SetPointerId(point.id);

@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 
-class SkiaImage : public CanvasImage {
+class SkiaImage : public virtual CanvasImage {
     DECLARE_ACE_TYPE(SkiaImage, CanvasImage)
 public:
     explicit SkiaImage(const sk_sp<SkImage>& image) : image_(image) {}
@@ -75,10 +75,11 @@ public:
         uniqueId_ = id;
     }
 
-
     RefPtr<CanvasImage> Clone() override;
 
-    RefPtr<PixelMap> GetPixelMap() override;
+    void Cache(const std::string& key) override;
+
+    RefPtr<PixelMap> GetPixelMap() const override;
 
     void ReplaceSkImage(sk_sp<SkImage> newImage);
     int32_t GetWidth() const override;
@@ -87,15 +88,16 @@ public:
     void DrawToRSCanvas(
         RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) override;
 
-    static SkImageInfo MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap);
+    static RefPtr<CanvasImage> QueryFromCache(const std::string& key);
+
+    static sk_sp<SkImage> MakeSkImageFromPixmap(const RefPtr<PixelMap>& pixmap);
     static sk_sp<SkColorSpace> ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap);
     static SkAlphaType AlphaTypeToSkAlphaType(const RefPtr<PixelMap>& pixmap);
     static SkColorType PixelFormatToSkColorType(const RefPtr<PixelMap>& pixmap);
 
 private:
     void ClipRRect(RSCanvas& canvas, const RSRect& dstRect, const BorderRadiusArray& radiusXY);
-    bool DrawWithRecordingCanvas(
-        RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY);
+    bool DrawWithRecordingCanvas(RSCanvas& canvas, const BorderRadiusArray& radiusXY);
 
     uint32_t uniqueId_ = 0;
     sk_sp<SkImage> image_;

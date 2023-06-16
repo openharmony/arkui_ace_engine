@@ -125,11 +125,6 @@ void JSListItem::SetSticky(int32_t sticky)
 
 void JSListItem::SetEditable(const JSCallbackInfo& args)
 {
-    if (args.Length() < 1) {
-        LOGW("Not enough params");
-        return;
-    }
-
     if (args[0]->IsBoolean()) {
         uint32_t value = args[0]->ToBoolean() ? V2::EditMode::DELETABLE | V2::EditMode::MOVABLE : V2::EditMode::SHAM;
         ListItemModel::GetInstance()->SetEditMode(value);
@@ -141,7 +136,6 @@ void JSListItem::SetEditable(const JSCallbackInfo& args)
         ListItemModel::GetInstance()->SetEditMode(value);
         return;
     }
-    LOGW("Invalid params, unknown type");
 }
 
 void JSListItem::SetSelectable(bool selectable)
@@ -152,6 +146,7 @@ void JSListItem::SetSelectable(bool selectable)
 void JSListItem::JsParseDeleteArea(const JSCallbackInfo& args, const JSRef<JSVal>& jsValue, bool isStartArea)
 {
     auto deleteAreaObj = JSRef<JSObject>::Cast(jsValue);
+    auto listItemTheme = GetTheme<ListItemTheme>();
 
     std::function<void()> builderAction;
     auto builderObject = deleteAreaObj->GetProperty("builder");
@@ -192,7 +187,9 @@ void JSListItem::JsParseDeleteArea(const JSCallbackInfo& args, const JSRef<JSVal
     }
     auto deleteAreaDistance = deleteAreaObj->GetProperty("deleteAreaDistance");
     CalcDimension length;
-    ParseJsDimensionVp(deleteAreaDistance, length);
+    if (!ParseJsDimensionVp(deleteAreaDistance, length)) {
+        length = listItemTheme->GetDeleteDistance();
+    }
 
     ListItemModel::GetInstance()->SetDeleteArea(std::move(builderAction), useDefaultDeleteAnimation,
         std::move(onDeleteCallback), std::move(onEnterDeleteAreaCallback), std::move(onExitDeleteAreaCallback), length,
@@ -202,7 +199,6 @@ void JSListItem::JsParseDeleteArea(const JSCallbackInfo& args, const JSRef<JSVal
 void JSListItem::SetSwiperAction(const JSCallbackInfo& args)
 {
     if (!args[0]->IsObject()) {
-        LOGE("fail to bind SwiperAction event due to info is not object");
         return;
     }
 
@@ -236,7 +232,6 @@ void JSListItem::SetSwiperAction(const JSCallbackInfo& args)
 void JSListItem::SelectCallback(const JSCallbackInfo& args)
 {
     if (!args[0]->IsFunction()) {
-        LOGE("fail to bind onSelect event due to info is not function");
         return;
     }
 
@@ -260,6 +255,9 @@ void JSListItem::JsBorderRadius(const JSCallbackInfo& info)
 
 void JSListItem::JsOnDragStart(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsFunction()) {
+        return;
+    }
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
                            const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
@@ -268,12 +266,10 @@ void JSListItem::JsOnDragStart(const JSCallbackInfo& info)
 
         auto ret = func->Execute(info, extraParams);
         if (!ret->IsObject()) {
-            LOGE("builder param is not an object.");
             return itemInfo;
         }
         auto node = ParseDragNode(ret);
         if (node) {
-            LOGI("use custom builder param.");
             itemInfo.node = node;
             return itemInfo;
         }

@@ -15,13 +15,13 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 
-#include "uicast_interface/uicast_context_impl.h"
-#include "uicast_interface/uicast_impl.h"
-
+#include "base/log/ace_performance_check.h"
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
@@ -87,26 +87,6 @@ ViewPartialUpdateModel* ViewPartialUpdateModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 
-void JSView::MarkStatic()
-{
-    isStatic_ = true;
-    {
-        UICastImpl::CacheCmd("UICast::View::markStatic", std::to_string(uniqueId_));
-    }
-}
-
-bool JSView::NeedsUpdate()
-{
-    {
-        if (UICastContextImpl::NeedsRebuild()) {
-            isStatic_ = false;
-            return true;
-        }
-    }
-
-    return needsUpdate_;
-}
-
 void JSView::JSBind(BindingTarget object)
 {
     JSViewPartialUpdate::JSBind(object);
@@ -121,9 +101,6 @@ void JSView::RenderJSExecution()
         return;
     }
     {
-        {
-            UICastImpl::CacheCmd("UICast::View::locate", std::to_string(uniqueId_));
-        }
         ACE_SCORING_EVENT("Component.AboutToRender");
         jsViewFunction_->ExecuteAboutToRender();
     }
@@ -136,9 +113,6 @@ void JSView::RenderJSExecution()
     {
         ACE_SCORING_EVENT("Component.OnRenderDone");
         jsViewFunction_->ExecuteOnRenderDone();
-        {
-            UICastImpl::SendCmd();
-        }
         if (notifyRenderDone_) {
             notifyRenderDone_();
         }
@@ -154,6 +128,11 @@ void JSView::SyncInstanceId()
 void JSView::RestoreInstanceId()
 {
     ContainerScope::UpdateCurrent(restoreInstanceId_);
+}
+
+void JSView::GetInstanceId(const JSCallbackInfo& info)
+{
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(instanceId_)));
 }
 
 void JSView::JsSetCardId(int64_t cardId)
@@ -288,9 +267,6 @@ void JSViewFullUpdate::Create(const JSCallbackInfo& info)
             return;
         }
         ViewStackModel::GetInstance()->Push(view->CreateViewNode(), true);
-        {
-            UICastImpl::ViewCreate(view->UICastGetViewId(), view->uniqueId_, view);
-        }
     } else {
         LOGE("JSView Object is expected.");
     }
@@ -304,6 +280,7 @@ void JSViewFullUpdate::JSBind(BindingTarget object)
     JSClass<JSViewFullUpdate>::Method("markNeedUpdate", &JSViewFullUpdate::MarkNeedUpdate);
     JSClass<JSViewFullUpdate>::Method("syncInstanceId", &JSViewFullUpdate::SyncInstanceId);
     JSClass<JSViewFullUpdate>::Method("restoreInstanceId", &JSViewFullUpdate::RestoreInstanceId);
+    JSClass<JSViewFullUpdate>::CustomMethod("getInstanceId", &JSViewFullUpdate::GetInstanceId);
     JSClass<JSViewFullUpdate>::Method("needsUpdate", &JSViewFullUpdate::NeedsUpdate);
     JSClass<JSViewFullUpdate>::Method("markStatic", &JSViewFullUpdate::MarkStatic);
     JSClass<JSViewFullUpdate>::Method("setCardId", &JSViewFullUpdate::JsSetCardId);
@@ -384,24 +361,15 @@ void JSViewFullUpdate::ConstructorCallback(const JSCallbackInfo& info)
         instance->SetContext(context);
         instance->IncRefCount();
         info.SetReturnValue(AceType::RawPtr(instance));
-        std::string parentViewId = "";
-        int parentUniqueId = -1;
         if (!info[1]->IsUndefined() && info[1]->IsObject()) {
             JSRef<JSObject> parentObj = JSRef<JSObject>::Cast(info[1]);
             auto* parentView = parentObj->Unwrap<JSViewFullUpdate>();
             if (parentView != nullptr) {
                 auto id = parentView->AddChildById(viewId, info.This());
                 instance->id_ = id;
-                parentViewId = parentView->viewId_;
-                parentUniqueId = parentView->uniqueId_;
             }
         }
         LOGD("JSView ConstructorCallback: %{public}s", instance->id_.c_str());
-        {
-            instance->uniqueId_ = UICastImpl::GetViewUniqueID(parentUniqueId);
-            UICastImpl::ViewConstructor(
-                instance->viewId_, instance->uniqueId_, parentViewId, parentUniqueId, AceType::RawPtr(instance));
-        }
     } else {
         LOGE("JSView creation with invalid arguments.");
         JSException::Throw("%s", "JSView creation with invalid arguments.");
@@ -715,6 +683,15 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         Framework::JSViewStackProcessor::SetViewMap(std::to_string(uiNode->GetId()), jsViewObject_);
     }
 #endif
+
+    if (SystemProperties::IsPerformanceCheckEnabled()) {
+        auto uiNode = AceType::DynamicCast<NG::UINode>(node);
+        if (uiNode) {
+            auto codeInfo = EngineHelper::GetPositionOnJsCode();
+            uiNode->SetRow(codeInfo.first);
+            uiNode->SetCol(codeInfo.second);
+        }
+    }
     return node;
 }
 
@@ -872,6 +849,7 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::Method("markNeedUpdate", &JSViewPartialUpdate::MarkNeedUpdate);
     JSClass<JSViewPartialUpdate>::Method("syncInstanceId", &JSViewPartialUpdate::SyncInstanceId);
     JSClass<JSViewPartialUpdate>::Method("restoreInstanceId", &JSViewPartialUpdate::RestoreInstanceId);
+    JSClass<JSViewPartialUpdate>::CustomMethod("getInstanceId", &JSViewPartialUpdate::GetInstanceId);
     JSClass<JSViewPartialUpdate>::Method("markStatic", &JSViewPartialUpdate::MarkStatic);
     JSClass<JSViewPartialUpdate>::Method("finishUpdateFunc", &JSViewPartialUpdate::JsFinishUpdateFunc);
     JSClass<JSViewPartialUpdate>::Method("setCardId", &JSViewPartialUpdate::JsSetCardId);

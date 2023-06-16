@@ -15,8 +15,10 @@
 
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 
+#include "session_manager/include/scene_session_manager.h"
 #include "ui/rs_surface_node.h"
 
+#include "base/utils/system_properties.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -24,6 +26,11 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr uint32_t COLOR_BLACK = 0xff000000;
+constexpr uint32_t COLOR_WHITE = 0xffffffff;
+} // namespace
+
 class LifecycleListener : public Rosen::ILifecycleListener {
 public:
     explicit LifecycleListener(const WeakPtr<WindowPattern>& windowPattern)
@@ -109,7 +116,7 @@ void WindowPattern::InitContent()
 
 void WindowPattern::CreateStartingNode()
 {
-    if (!HasStartingPage()) {
+    if (!HasStartingPage() || CreatePersistentNode()) {
         return;
     }
 
@@ -118,9 +125,21 @@ void WindowPattern::CreateStartingNode()
 
     startingNode_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    startingNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    startingNode_->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
+    auto imageLayoutProperty = startingNode_->GetLayoutProperty<ImageLayoutProperty>();
+    imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     host->AddChild(startingNode_);
+
+    std::string startPagePath;
+    auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
+    auto sessionInfo = session_->GetSessionInfo();
+    Rosen::SceneSessionManager::GetInstance().GetStartPage(sessionInfo, startPagePath, backgroundColor);
+    LOGI("start page path %{public}s, background color %{public}x", startPagePath.c_str(), backgroundColor);
+
+    startingNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
+    imageLayoutProperty->UpdateImageSourceInfo(
+        ImageSourceInfo(startPagePath, sessionInfo.bundleName_, sessionInfo.moduleName_));
+    imageLayoutProperty->UpdateImageFit(ImageFit::NONE);
+    startingNode_->MarkModifyDone();
 }
 
 void WindowPattern::CreateSnapshotNode()
@@ -129,7 +148,8 @@ void WindowPattern::CreateSnapshotNode()
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = snapshotNode_->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
+    auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
+    snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -197,7 +217,6 @@ void WindowPattern::OnAttachToFrameNode()
 bool WindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (!config.frameSizeChange) {
-        LOGI("frame size not changed, just return");
         return false;
     }
     CHECK_NULL_RETURN(dirty, false);
@@ -225,5 +244,26 @@ void WindowPattern::DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEv
 {
     CHECK_NULL_VOID(session_);
     session_->TransferKeyEvent(keyEvent);
+}
+
+bool WindowPattern::CreatePersistentNode()
+{
+    CHECK_NULL_RETURN(session_, false);
+    if (session_->GetScenePersistence() == nullptr || !session_->GetScenePersistence()->IsSnapshotExisted()) {
+        return false;
+    }
+    startingNode_ = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    auto imageLayoutProperty = startingNode_->GetLayoutProperty<ImageLayoutProperty>();
+    imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    host->AddChild(startingNode_);
+    imageLayoutProperty->UpdateImageSourceInfo(
+        ImageSourceInfo(std::string("file:/").append(session_->GetScenePersistence()->GetSnapshotFilePath())));
+    imageLayoutProperty->UpdateImageFit(ImageFit::COVER);
+    startingNode_->MarkModifyDone();
+    return true;
 }
 } // namespace OHOS::Ace::NG

@@ -36,11 +36,12 @@
 namespace OHOS::Ace::NG {
 
 namespace {
+constexpr uint32_t MIN_GRID_COUNTS = 2;
 constexpr uint32_t GRID_COUNTS_4 = 4;
 constexpr uint32_t GRID_COUNTS_6 = 6;
 constexpr uint32_t GRID_COUNTS_8 = 8;
 constexpr uint32_t GRID_COUNTS_12 = 12;
-constexpr Dimension MIN_MENU_WIDTH = Dimension(64.0, DimensionUnit::VP);
+constexpr int32_t PLATFORM_VERSION_TEN = 10;
 
 uint32_t GetMaxGridCounts(const RefPtr<GridColumnInfo>& columnInfo)
 {
@@ -215,6 +216,11 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         menuPosition += offset;
         position_ = menuPosition;
         menuPosition = MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && pipeline->GetIsAppWindow() &&
+            pipeline->GetIsLayoutFullScreen()) {
+            menuPosition += pageOffset_ * 2;
+        }
     }
     LOGD("Menu layout, offset = %{public}s", menuPosition.ToString().c_str());
     geometryNode->SetFrameOffset(menuPosition);
@@ -409,6 +415,7 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(
     float x = 0.0f;
     float y = 0.0f;
     if (menuProp->GetMenuPlacement().has_value() && (targetSize_.Width() > 0.0 || targetSize_.Height() > 0.0)) {
+        placement_ = menuProp->GetMenuPlacement().value();
         auto childOffset = GetChildPosition(size, menuProp, menuPattern->IsContextMenu());
         x = childOffset.GetX() + positionOffset_.GetX();
         y = childOffset.GetY() + positionOffset_.GetY();
@@ -451,7 +458,12 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
 {
     RefPtr<GridColumnInfo> columnInfo;
     columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
-    columnInfo->GetParent()->BuildColumnWidth(wrapperSize_.Width());
+    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    if (menuPattern && menuPattern->IsSelectOverlayExtensionMenu()) {
+        columnInfo->GetParent()->BuildColumnWidth();
+    } else {
+        columnInfo->GetParent()->BuildColumnWidth(wrapperSize_.Width());
+    }
     // set max width
     auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(menuLayoutProperty);
@@ -462,8 +474,7 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
     maxWidth = std::min(constraint.maxSize.Width(), maxWidth);
     constraint.maxSize.SetWidth(maxWidth);
     // set min width
-    auto minWidth = static_cast<float>(MIN_MENU_WIDTH.ConvertToPx());
-    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    auto minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
     if (minWidth > constraint.maxSize.Width()) {
         minWidth = constraint.maxSize.Width();
     }

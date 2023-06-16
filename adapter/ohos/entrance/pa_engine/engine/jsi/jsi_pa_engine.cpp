@@ -179,21 +179,6 @@ void JsiPaEngine::RegisterUncaughtExceptionHandler()
     jsAbilityRuntime_->RegisterUncaughtExceptionHandler(uncaughtExceptionInfo);
 }
 
-void JsiPaEngine::RegisterConsoleModule()
-{
-    ACE_SCOPED_TRACE("JsiPaEngine::RegisterConsoleModule");
-    shared_ptr<JsValue> global = runtime_->GetGlobal();
-
-    // app log method
-    shared_ptr<JsValue> consoleObj = runtime_->NewObject();
-    consoleObj->SetProperty(runtime_, "log", runtime_->NewFunction(JsiBaseUtils::AppInfoLogPrint));
-    consoleObj->SetProperty(runtime_, "debug", runtime_->NewFunction(JsiBaseUtils::AppDebugLogPrint));
-    consoleObj->SetProperty(runtime_, "info", runtime_->NewFunction(JsiBaseUtils::AppInfoLogPrint));
-    consoleObj->SetProperty(runtime_, "warn", runtime_->NewFunction(JsiBaseUtils::AppWarnLogPrint));
-    consoleObj->SetProperty(runtime_, "error", runtime_->NewFunction(JsiBaseUtils::AppErrorLogPrint));
-    global->SetProperty(runtime_, "console", consoleObj);
-}
-
 void JsiPaEngine::RegisterConsoleModule(ArkNativeEngine* engine)
 {
     ACE_SCOPED_TRACE("JsiPaEngine::RegisterConsoleModule");
@@ -249,7 +234,7 @@ void JsiPaEngine::EvaluateJsCode()
     ACE_SCOPED_TRACE("JsiPaEngine::EvaluateJsCode");
     CHECK_NULL_VOID(jsAbilityRuntime_);
     // load jsfwk
-    if (!jsAbilityRuntime_->LoadScript("/system/etc/strip.native.min.abc")) {
+    if (language_ == SrcLanguage::JS && !jsAbilityRuntime_->LoadScript("/system/etc/strip.native.min.abc")) {
         LOGE("Failed to load js framework!");
     }
     // load paMgmt.js
@@ -266,6 +251,10 @@ void JsiPaEngine::InitJsRuntimeOptions(AbilityRuntime::Runtime::Options& options
     options.preload = false;
     options.isStageModel = false;
     options.hapPath = GetHapPath();
+    options.isDebugVersion = GetDebugMode();
+    options.packagePathStr = GetWorkerPath()->packagePathStr;
+    options.assetBasePathStr = GetWorkerPath()->assetBasePathStr;
+    options.isJsFramework = language_ == SrcLanguage::JS;
 }
 
 bool JsiPaEngine::CreateJsRuntime(const AbilityRuntime::Runtime::Options& options)
@@ -304,6 +293,7 @@ bool JsiPaEngine::InitJsEnv(bool debuggerMode, const std::unordered_map<std::str
 
 #if !defined(PREVIEW)
     for (const auto& [key, value] : extraNativeObject) {
+        LOGD("Set property, key: %{public}s.", key.c_str());
         shared_ptr<JsValue> nativeValue = runtime_->NewNativePointer(value);
         runtime_->GetGlobal()->SetProperty(runtime_, key, nativeValue);
     }
@@ -311,9 +301,7 @@ bool JsiPaEngine::InitJsEnv(bool debuggerMode, const std::unordered_map<std::str
 
     // Register pa native functions
     RegisterPaModule();
-    if (jsAbilityRuntime_) {
-        jsAbilityRuntime_->InitConsoleModule();
-    }
+
     // load abc file
     EvaluateJsCode();
 
@@ -390,67 +378,7 @@ JsiPaEngine::~JsiPaEngine()
     runtime_ = nullptr;
 }
 
-void JsiPaEngine::RegisterWorker()
-{
-    RegisterInitWorkerFunc();
-    RegisterAssetFunc();
-}
-
-void JsiPaEngine::RegisterInitWorkerFunc()
-{
-    auto nativeEngine = GetNativeEngine();
-    CHECK_NULL_VOID(nativeEngine);
-    auto&& initWorkerFunc = [weak = AceType::WeakClaim(this)](NativeEngine* nativeEngine) {
-        LOGI("WorkerCore RegisterInitWorkerFunc called");
-        auto paEngine = weak.Upgrade();
-        if (nativeEngine == nullptr) {
-            LOGE("nativeEngine is nullptr");
-            return;
-        }
-        auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine);
-        if (arkNativeEngine == nullptr) {
-            LOGE("arkNativeEngine is nullptr");
-            return;
-        }
-
-        auto runtime = paEngine->GetJsRuntime();
-
-        paEngine->RegisterConsoleModule(arkNativeEngine);
-
-#if !defined(PREVIEW)
-        for (const auto& [key, value] : paEngine->GetExtraNativeObject()) {
-            shared_ptr<JsValue> nativeValue = runtime->NewNativePointer(value);
-            runtime->GetGlobal()->SetProperty(runtime, key, nativeValue);
-        }
-#endif
-        // load jsfwk
-        if (!arkNativeEngine->ExecuteJsBin("/system/etc/strip.native.min.abc")) {
-            LOGE("Failed to load js framework!");
-        }
-    };
-    nativeEngine->SetInitWorkerFunc(initWorkerFunc);
-}
-
-void JsiPaEngine::RegisterAssetFunc()
-{
-    auto nativeEngine = GetNativeEngine();
-    CHECK_NULL_VOID(nativeEngine);
-    auto&& assetFunc = [weak = WeakPtr<JsBackendAssetManager>(jsBackendAssetManager_)](
-        const std::string& uri, std::vector<uint8_t>& content, std::string& ami) {
-        LOGI("WorkerCore RegisterAssetFunc called");
-        auto jsBackendAssetManager = weak.Upgrade();
-        CHECK_NULL_VOID(jsBackendAssetManager);
-        size_t index = uri.find_last_of(".");
-        if (index == std::string::npos) {
-            LOGE("invalid uri");
-        } else {
-            jsBackendAssetManager->GetResourceData(uri.substr(0, index) + ".abc", content, ami);
-        }
-    };
-    nativeEngine->SetGetAssetFunc(assetFunc);
-}
-
-bool JsiPaEngine::Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendType type)
+bool JsiPaEngine::Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendType type, SrcLanguage language)
 {
     ACE_SCOPED_TRACE("JsiPaEngine::Initialize");
     LOGD("JsiPaEngine initialize");
@@ -458,6 +386,7 @@ bool JsiPaEngine::Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendTy
     ACE_DCHECK(taskExecutor);
     taskExecutor_ = taskExecutor;
     type_ = type;
+    language_ = language;
 
     AbilityRuntime::Runtime::Options options;
     InitJsRuntimeOptions(options);
@@ -481,7 +410,11 @@ bool JsiPaEngine::Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendTy
         CHECK_NULL_VOID(nativeEngine);
         nativeEngine->Loop(LOOP_NOWAIT);
     });
-    JsBackendTimerModule::GetInstance()->InitTimerModule(nativeEngine, taskExecutor);
+
+    if (language_ == SrcLanguage::JS) {
+        JsBackendTimerModule::GetInstance()->InitTimerModule(nativeEngine, taskExecutor);
+    }
+
     SetPostTask(nativeEngine);
 #if !defined(PREVIEW)
     nativeEngine->CheckUVLoop();
@@ -494,7 +427,6 @@ bool JsiPaEngine::Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendTy
             arkNativeEngine->SetPackagePath(appLibPathKey, packagePath);
         }
     }
-    RegisterWorker();
     return true;
 }
 

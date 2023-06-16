@@ -658,13 +658,15 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterSurfaceDestroyCallback(surfaceDestroyCallback);
 
-    auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](
-                                   int32_t x, int32_t y, const DragEventAction& action) {
-        ContainerScope scope(id);
-        context->GetTaskExecutor()->PostTask(
-            [context, x, y, action]() { context->OnDragEvent(x, y, action); }, TaskExecutor::TaskType::UI);
-    };
-    aceView_->RegisterDragEventCallback(dragEventCallback);
+    if (!isFormRender_) {
+        auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](
+                                       int32_t x, int32_t y, const DragEventAction& action) {
+            ContainerScope scope(id);
+            context->GetTaskExecutor()->PostTask(
+                [context, x, y, action]() { context->OnDragEvent(x, y, action); }, TaskExecutor::TaskType::UI);
+        };
+        aceView_->RegisterDragEventCallback(dragEventCallback);
+    }
 }
 
 void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, const std::string& instanceName,
@@ -1235,6 +1237,16 @@ std::weak_ptr<OHOS::AppExecFwk::Ability> AceContainer::GetAbilityInner() const
     return aceAbility_;
 }
 
+bool AceContainer::IsLauncherContainer()
+{
+    auto runtime = runtimeContext_.lock();
+    if (!runtime) {
+        return false;
+    }
+    auto info = runtime->GetApplicationInfo();
+    return info ? info->isLauncherApp : false;
+}
+
 void AceContainer::SetFontScale(int32_t instanceId, float fontScale)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
@@ -1318,13 +1330,24 @@ void AceContainer::InitWindowCallback()
     }
     windowManager->SetWindowMinimizeCallBack([window = uiWindow_]() { window->Minimize(); });
     windowManager->SetWindowMaximizeCallBack([window = uiWindow_]() { window->Maximize(); });
+    windowManager->SetWindowMaximizeFloatingCallBack([window = uiWindow_]() { window->MaximizeFloating(); });
     windowManager->SetWindowRecoverCallBack([window = uiWindow_]() { window->Recover(); });
     windowManager->SetWindowCloseCallBack([window = uiWindow_]() { window->Close(); });
     windowManager->SetWindowStartMoveCallBack([window = uiWindow_]() { window->StartMove(); });
-    windowManager->SetWindowSplitCallBack(
+    windowManager->SetWindowSplitPrimaryCallBack(
         [window = uiWindow_]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY); });
+    windowManager->SetWindowSplitSecondaryCallBack(
+        [window = uiWindow_]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY); });
     windowManager->SetWindowGetModeCallBack(
         [window = uiWindow_]() -> WindowMode { return static_cast<WindowMode>(window->GetMode()); });
+    windowManager->SetWindowSetMaximizeModeCallBack(
+        [window = uiWindow_](MaximizeMode mode) {
+            window->SetGlobalMaximizeMode(static_cast<Rosen::MaximizeMode>(mode));
+        });
+    windowManager->SetWindowGetMaximizeModeCallBack(
+        [window = uiWindow_]() -> MaximizeMode {
+            return static_cast<MaximizeMode>(window->GetGlobalMaximizeMode());
+        });
 
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
         Rect rect;
@@ -1335,31 +1358,31 @@ void AceContainer::InitWindowCallback()
     });
 
     pipelineContext_->SetGetViewSafeAreaImpl([window = uiWindow_, this]() -> SafeAreaEdgeInserts {
-        return SetViewSafeArea(window);
+        return GetViewSafeArea(window);
     });
 }
 
 // Get SafeArea by Window
-SafeAreaEdgeInserts AceContainer::SetViewSafeArea(sptr<OHOS::Rosen::Window> window)
+SafeAreaEdgeInserts AceContainer::GetViewSafeArea(sptr<OHOS::Rosen::Window> window)
 {
-    SafeAreaEdgeInserts viewSafeArea;
-    CHECK_NULL_RETURN_NOLOG(window, viewSafeArea);
-
+    SafeAreaEdgeInserts systemSafeArea;
+    SafeAreaEdgeInserts cutoutSafeArea;
+    CHECK_NULL_RETURN_NOLOG(window, systemSafeArea);
     Rosen::AvoidArea systemAvoidArea;
     Rosen::AvoidArea cutoutAvoidArea;
     Rosen::WMError systemRet = window->GetAvoidAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM, systemAvoidArea);
     Rosen::WMError cutoutRet = window->GetAvoidAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT, cutoutAvoidArea);
-    Rect topRect;
     Rect leftRect;
+    Rect topRect;
     Rect rightRect;
     Rect bottomRect;
     if (systemRet == Rosen::WMError::WM_OK) {
-        topRect = Rect(static_cast<double>(systemAvoidArea.topRect_.posX_),
-            static_cast<double>(systemAvoidArea.topRect_.posY_), static_cast<double>(systemAvoidArea.topRect_.width_),
-            static_cast<double>(systemAvoidArea.topRect_.height_));
         leftRect = Rect(static_cast<double>(systemAvoidArea.leftRect_.posX_),
             static_cast<double>(systemAvoidArea.leftRect_.posY_), static_cast<double>(systemAvoidArea.leftRect_.width_),
             static_cast<double>(systemAvoidArea.leftRect_.height_));
+        topRect = Rect(static_cast<double>(systemAvoidArea.topRect_.posX_),
+            static_cast<double>(systemAvoidArea.topRect_.posY_), static_cast<double>(systemAvoidArea.topRect_.width_),
+            static_cast<double>(systemAvoidArea.topRect_.height_));
         rightRect = Rect(static_cast<double>(systemAvoidArea.rightRect_.posX_),
             static_cast<double>(systemAvoidArea.rightRect_.posY_),
             static_cast<double>(systemAvoidArea.rightRect_.width_),
@@ -1368,22 +1391,50 @@ SafeAreaEdgeInserts AceContainer::SetViewSafeArea(sptr<OHOS::Rosen::Window> wind
             static_cast<double>(systemAvoidArea.bottomRect_.posY_),
             static_cast<double>(systemAvoidArea.bottomRect_.width_),
             static_cast<double>(systemAvoidArea.bottomRect_.height_));
+        systemSafeArea.SetRect(leftRect, topRect, rightRect, bottomRect);
     }
     if (cutoutRet == Rosen::WMError::WM_OK) {
-        topRect.CombineRect(Rect(static_cast<double>(cutoutAvoidArea.topRect_.posX_),
-            static_cast<double>(cutoutAvoidArea.topRect_.posY_), static_cast<double>(cutoutAvoidArea.topRect_.width_),
-            static_cast<double>(cutoutAvoidArea.topRect_.height_)));
-        leftRect.CombineRect(Rect(static_cast<double>(cutoutAvoidArea.leftRect_.posX_),
+        leftRect = Rect(static_cast<double>(cutoutAvoidArea.leftRect_.posX_),
             static_cast<double>(cutoutAvoidArea.leftRect_.posY_), static_cast<double>(cutoutAvoidArea.leftRect_.width_),
-            static_cast<double>(cutoutAvoidArea.leftRect_.height_)));
-        rightRect.CombineRect(Rect(static_cast<double>(cutoutAvoidArea.rightRect_.posX_),
+            static_cast<double>(cutoutAvoidArea.leftRect_.height_));
+        topRect = Rect(static_cast<double>(cutoutAvoidArea.topRect_.posX_),
+            static_cast<double>(cutoutAvoidArea.topRect_.posY_), static_cast<double>(cutoutAvoidArea.topRect_.width_),
+            static_cast<double>(cutoutAvoidArea.topRect_.height_));
+        rightRect = Rect(static_cast<double>(cutoutAvoidArea.rightRect_.posX_),
             static_cast<double>(cutoutAvoidArea.rightRect_.posY_),
             static_cast<double>(cutoutAvoidArea.rightRect_.width_),
-            static_cast<double>(cutoutAvoidArea.rightRect_.height_)));
-        bottomRect.CombineRect(Rect(static_cast<double>(cutoutAvoidArea.bottomRect_.posX_),
+            static_cast<double>(cutoutAvoidArea.rightRect_.height_));
+        bottomRect = Rect(static_cast<double>(cutoutAvoidArea.bottomRect_.posX_),
             static_cast<double>(cutoutAvoidArea.bottomRect_.posY_),
             static_cast<double>(cutoutAvoidArea.bottomRect_.width_),
-            static_cast<double>(cutoutAvoidArea.bottomRect_.height_)));
+            static_cast<double>(cutoutAvoidArea.bottomRect_.height_));
+        cutoutSafeArea.SetRect(leftRect, topRect, rightRect, bottomRect);
+    }
+    return systemSafeArea.CombineSafeArea(cutoutSafeArea);
+}
+
+SafeAreaEdgeInserts AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type)
+{
+    SafeAreaEdgeInserts viewSafeArea;
+    CHECK_NULL_RETURN_NOLOG(uiWindow_, viewSafeArea);
+
+    Rosen::AvoidArea avoidArea;
+    Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(type, avoidArea);
+    Rect topRect;
+    Rect leftRect;
+    Rect rightRect;
+    Rect bottomRect;
+    if (ret == Rosen::WMError::WM_OK) {
+        topRect = Rect(static_cast<double>(avoidArea.topRect_.posX_), static_cast<double>(avoidArea.topRect_.posY_),
+            static_cast<double>(avoidArea.topRect_.width_), static_cast<double>(avoidArea.topRect_.height_));
+        leftRect = Rect(static_cast<double>(avoidArea.leftRect_.posX_), static_cast<double>(avoidArea.leftRect_.posY_),
+            static_cast<double>(avoidArea.leftRect_.width_), static_cast<double>(avoidArea.leftRect_.height_));
+        rightRect =
+            Rect(static_cast<double>(avoidArea.rightRect_.posX_), static_cast<double>(avoidArea.rightRect_.posY_),
+                static_cast<double>(avoidArea.rightRect_.width_), static_cast<double>(avoidArea.rightRect_.height_));
+        bottomRect =
+            Rect(static_cast<double>(avoidArea.bottomRect_.posX_), static_cast<double>(avoidArea.bottomRect_.posY_),
+                static_cast<double>(avoidArea.bottomRect_.width_), static_cast<double>(avoidArea.bottomRect_.height_));
     }
     viewSafeArea.SetRect(leftRect, topRect, rightRect, bottomRect);
     return viewSafeArea;

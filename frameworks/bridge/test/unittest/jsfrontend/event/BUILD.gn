@@ -29,9 +29,13 @@ ohos_unittest("CommonEventTest") {
     "$ace_root:ace_test_config",
   ]
 
-  deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
+  deps = [
+    "$ace_root/build:ace_ohos_unittest_base",
+    "//third_party/googletest:gmock_main",
+  ]
 
   part_name = ace_engine_part
+  sources += [ "$ace_root/test/mock/core/common/mock_udmf.cpp" ]
 }
 
 config("config_domnode_test") {

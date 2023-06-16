@@ -18,12 +18,23 @@
 #include "base/log/log.h"
 
 namespace OHOS::Ace::Framework {
-
-void JsHoverFunction::Execute(bool isHover)
+void JsHoverFunction::HoverExecute(bool isHover, HoverInfo& hoverInfo)
 {
-    JSRef<JSVal> params[1];
-    params[0] = JSRef<JSVal>::Make(ToJSValue(isHover));
-    JsFunction::ExecuteJS(1, params);
+    JSRef<JSVal> isHoverParam = JSRef<JSVal>::Make(ToJSValue(isHover));
+
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    objectTemplate->SetInternalFieldCount(1);
+    JSRef<JSObject> hoverObj = objectTemplate->NewInstance();
+    hoverObj->SetPropertyObject("stopPropagation", JSRef<JSFunc>::New<FunctionCallback>(JsStopPropagation));
+    hoverObj->SetProperty<double>(
+        "timestamp", static_cast<double>(hoverInfo.GetTimeStamp().time_since_epoch().count()));
+    hoverObj->SetProperty<double>("source", static_cast<int32_t>(hoverInfo.GetSourceDevice()));
+    auto target = CreateEventTargetObject(hoverInfo);
+    hoverObj->SetPropertyObject("target", target);
+    hoverObj->Wrap<HoverInfo>(&hoverInfo);
+    JSRef<JSVal> hoverVal = JSRef<JSObject>::Cast(hoverObj);
+    JSRef<JSVal> params[] = { isHoverParam, hoverVal };
+    JsFunction::ExecuteJS((sizeof(params) / sizeof(params[0])), params);
 }
 
 } // namespace OHOS::Ace::Framework

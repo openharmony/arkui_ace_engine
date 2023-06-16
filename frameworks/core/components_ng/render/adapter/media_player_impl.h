@@ -49,6 +49,7 @@ public:
     int32_t Pause() override;
     int32_t Stop() override;
     int32_t Seek(int32_t mSeconds, OHOS::Ace::SeekMode mode) override;
+    int32_t FullScreenChange(bool isFullScreen) override;
 
     void ProcessSurfaceCreate() override;
     void ProcessSurfaceChange(int32_t width, int32_t height) override;

@@ -15,6 +15,7 @@
     "src/lib/common/i_storage.ts",
 
     // sdk
+    "src/lib/sdk/i_animatable_arithmetic.ts",
     "src/lib/sdk/i_data_source.d.ts",
     "src/lib/sdk/i_property_subscriber.ts",
     "src/lib/sdk/local_storage.ts",
@@ -61,7 +62,7 @@
     "src/lib/partial_update/pu_view.ts",
     "src/lib/partial_update/pu_recycle_manager.ts",
     "src/lib/partial_update/pu_builder_proxy.ts",
-  
+
     // init
     "src/index.ts",
   ],

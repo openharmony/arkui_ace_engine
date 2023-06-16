@@ -228,4 +228,29 @@ void PageUrlCheckerOhos::LoadPageUrl(const std::string& url, const std::function
         }
     }
 }
+
+void PageUrlCheckerOhos::CheckPreload(const std::string& url)
+{
+    if (url.substr(0, strlen(BUNDLE_TAG)) != BUNDLE_TAG) {
+        return;
+    }
+
+    size_t bundleEndPos = url.find('/');
+    std::string bundleName = url.substr(BUNDLE_START_POS, bundleEndPos - BUNDLE_START_POS);
+    size_t moduleStartPos = bundleEndPos + 1;
+    size_t moduleEndPos = url.find('/', moduleStartPos);
+    std::string moduleName = url.substr(moduleStartPos, moduleEndPos - moduleStartPos);
+
+    auto appInfo = context_->GetApplicationInfo();
+    CHECK_NULL_VOID(appInfo);
+    if (appInfo->CheckNeedPreload(moduleName)) {
+        auto bms = GetBundleManager();
+        CHECK_NULL_VOID(bms);
+        AAFwk::Want want;
+        // only need to Transfer bundleName and moduleName
+        want.SetElementName("", bundleName, "", moduleName);
+        want.SetParam("uid", appInfo->uid);
+        bms->ProcessPreload(want);
+    }
+}
 } // namespace OHOS::Ace

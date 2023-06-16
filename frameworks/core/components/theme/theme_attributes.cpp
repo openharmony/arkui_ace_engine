@@ -179,6 +179,7 @@ const char INDICATOR_TEXT_FONT_COLOR[] = "indicator_text_font_color";
 const char ERROR_TEXT_UNDERLINE_COLOR[] = "error_text_underline_color";
 const char UNDERLINE_COLOR[] = "underline_color";
 const char UNDERLINE_TEXT_COLOR[] = "underline_text_color";
+const char UNDERLINE_FONT_SIZE[] = "text_font_size";
 const char BORDER_RADIUS_SIZE[] = "border_radius_size";
 // swiper attributes for arrow
 const char ARROW_COLOR_BOARDCOLOR_HOVER[] = "arrow_color_boardColor_hover";
@@ -201,4 +202,7 @@ const char ERROR_PASSWORD_TEXT_COLOR[] = "error_password_text_color";
 const char OVER_COUNT_TEXT_COLOR[] = "over_count_text_color";
 const char OVER_COUNT_TEXT_FONT_SIZE[] = "over_count_text_font_size";
 const char OVER_COUNT_BORDER_COLOR[] = "over_count_border_color";
+const char ERROR_PASSWORD_BORDER_ALPHA[] = "error_password_border_alpha";
+const char OVER_COUNT_BORDER_COLOR_ALPHA[] = "over_count_border_color_alpha";
+const char UNDERLINE_COLOR_ALPHA[] = "underline_color_alpha";
 } // namespace OHOS::Ace

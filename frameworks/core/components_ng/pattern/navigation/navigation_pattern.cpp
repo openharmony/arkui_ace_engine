@@ -117,7 +117,7 @@ void NavigationPattern::OnModifyDone()
     for (size_t i = 0; i < pathNames.size(); ++i) {
         auto pathName = pathNames[i];
         RefPtr<UINode> uiNode = navigationStack_->Get(pathName);
-        // get navdestination node under navrouter
+        navigationStack_->RemoveInNavPathList(pathName, uiNode);
         if (uiNode) {
             navPathList_.emplace_back(std::make_pair(pathName, uiNode));
             continue;
@@ -134,7 +134,7 @@ void NavigationPattern::OnModifyDone()
     navigationStack_->SetNavPathList(navPathList_);
     auto contentNode = hostNode->GetContentNode();
     contentNode->Clean();
-    hostNode->AddNavDestinationToNavigation(hostNode);
+    hostNode->AddNavDestinationToNavigation();
 
     auto newTopNavPath = GetTopNavPath();
     if (preTopNavPath != newTopNavPath) {
@@ -146,6 +146,10 @@ void NavigationPattern::OnModifyDone()
             auto eventHub = preTopNavDestination->GetEventHub<NavDestinationEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->FireOnHiddenEvent();
+            auto focusHub = AceType::DynamicCast<FrameNode>(preTopNavDestination)->GetFocusHub();
+            CHECK_NULL_VOID(focusHub);
+            focusHub->SetParentFocusable(false);
+            focusHub->LostFocus();
         }
 
         // fire onShown event
@@ -156,6 +160,10 @@ void NavigationPattern::OnModifyDone()
             auto eventHub = newTopNavDestination->GetEventHub<NavDestinationEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->FireOnShownEvent();
+            auto focusHub = AceType::DynamicCast<FrameNode>(newTopNavDestination)->GetFocusHub();
+            CHECK_NULL_VOID(focusHub);
+            focusHub->SetParentFocusable(true);
+            focusHub->RequestFocus();
         }
     }
 
@@ -227,10 +235,11 @@ bool NavigationPattern::CheckExistPreStack(const std::string& name)
 RefPtr<UINode> NavigationPattern::GetNodeAndRemoveByName(const std::string& name)
 {
     RefPtr<UINode> uiNode;
-    for (auto iter = preNavPathList_.rbegin(); iter != preNavPathList_.rend(); iter++) {
+    // match from bottom to top
+    for (auto iter = preNavPathList_.begin(); iter != preNavPathList_.end(); iter++) {
         if (iter->first == name) {
             uiNode = iter->second;
-            preNavPathList_.erase(std::next(iter).base());
+            preNavPathList_.erase(iter);
             break;
         }
     }

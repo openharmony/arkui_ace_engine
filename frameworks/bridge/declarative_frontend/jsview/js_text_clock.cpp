@@ -19,6 +19,7 @@
 #include <string>
 
 #include "base/log/ace_scoring_log.h"
+#include "base/utils/string_utils.h"
 #include "bridge/declarative_frontend/jsview/js_text.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -56,6 +57,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const int32_t TWENTY_FOUR_HOUR_BASE = 24;
+const std::string DEFAULT_FORMAT = "hms";
 constexpr int32_t HOURS_WEST_LOWER_LIMIT = -14;
 constexpr int32_t HOURS_WEST_UPPER_LIMIT = 12;
 constexpr int32_t HOURS_WEST_GEOGRAPHICAL_LOWER_LIMIT = -12;
@@ -129,7 +131,19 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
         return;
     }
+    if (!info[0]->IsString()) {
+        LOGE("The arg is not string,it is supposed to be a string.");
+        return;
+    }
+
     std::string value;
+    auto format = info[0]->ToString();
+    if (format.length() == 0 || !StringUtils::IsAscii(format)) {
+        format = DEFAULT_FORMAT;
+        TextClockModel::GetInstance()->SetFormat(format);
+        return;
+    }
+
     if (!ParseJsString(info[0], value)) {
         return;
     }

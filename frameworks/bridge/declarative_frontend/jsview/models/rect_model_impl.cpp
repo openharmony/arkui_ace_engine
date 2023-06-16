@@ -76,30 +76,4 @@ void RectModelImpl::SetRadiusValue(const Dimension& radiusX, const Dimension& ra
     }
 }
 
-void RectModelImpl::SetCallbackRadius(
-    const RefPtr<ShapeComponent>& component, const Dimension& radiusX, const Dimension& radiusY, int32_t index)
-{
-    if (!component) {
-        return;
-    }
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    Radius newRadius = Radius(AnimatableDimension(radiusX, option), AnimatableDimension(radiusY, option));
-    switch (index) {
-        case TOP_LEFT_RADIUS:
-            component->SetTopLeftRadius(newRadius);
-            break;
-        case TOP_RIGHT_RADIUS:
-            component->SetTopRightRadius(newRadius);
-            break;
-        case BOTTOM_RIGHT_RADIUS:
-            component->SetBottomRightRadius(newRadius);
-            break;
-        case BOTTOM_LEFT_RADIUS:
-            component->SetBottomLeftRadius(newRadius);
-            break;
-        default:
-            break;
-    }
-}
-
 } // namespace OHOS::Ace::Framework

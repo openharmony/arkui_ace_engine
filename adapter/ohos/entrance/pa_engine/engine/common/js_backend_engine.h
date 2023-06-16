@@ -25,6 +25,7 @@
 #include "iremote_object.h"
 #include "napi_remote_object.h"
 #include "pac_map.h"
+#include "adapter/ohos/entrance/pa_container.h"
 #include "values_bucket.h"
 #include "want.h"
 
@@ -38,7 +39,7 @@ public:
     JsBackendEngine() = default;
     virtual ~JsBackendEngine() = default;
 
-    virtual bool Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendType type) = 0;
+    virtual bool Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendType type, SrcLanguage language) = 0;
 
     virtual void SetAssetManager(const RefPtr<AssetManager>& assetManager) = 0;
 
@@ -129,6 +130,16 @@ public:
         return hapPath_;
     }
 
+    void SetWorkerPath(std::shared_ptr<Platform::WorkerPath> workerPath)
+    {
+        workerPath_ = workerPath;
+    }
+
+    std::shared_ptr<Platform::WorkerPath> GetWorkerPath()
+    {
+        return workerPath_;
+    }
+
 private:
     std::string instanceName_;
     AppExecFwk::FormProviderData formProviderData_;
@@ -138,6 +149,7 @@ private:
     // if debug, '-D' means need debug breakpoint, by default, do not enter breakpoint.
     bool needDebugBreakPoint_ = false;
     std::string hapPath_;
+    std::shared_ptr<Platform::WorkerPath> workerPath_;
 };
 
 } // namespace OHOS::Ace

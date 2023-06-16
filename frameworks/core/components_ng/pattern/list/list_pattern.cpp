@@ -45,6 +45,10 @@ constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
 constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
 constexpr float DEFAULT_MIN_SPACE_SCALE = 0.75f;
 constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
+constexpr float SCROLL_TO_INDEX_MASS = 1.0f;
+constexpr float SCROLL_TO_INDEX_STIFFNESS = 227.0f;
+constexpr float SCROLL_TO_INDEX_DAMPING = 33.0f;
+constexpr float SCROLL_TO_INDEX_VELOCITY = 7.0f;
 constexpr Color CARD_ITEM_FILL_COLOR = Color(0x1A007DFF);
 constexpr float LIST_SCROLL_TO_MASS = 1.0f;
 constexpr float LIST_SCROLL_TO_STIFFNESS = 227.0f;
@@ -118,10 +122,40 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         isJump = true;
         jumpIndex_.reset();
     }
-    if (listLayoutAlgorithm->GetStartIndex() == 0) {
-        currentOffset_ = -listLayoutAlgorithm->GetStartPosition();
+    if (targetIndex_) {
+        auto iter = itemPosition_.find(targetIndex_.value());
+        if (iter != itemPosition_.end()) {
+            float targetPos = 0.0f;
+            switch (scrollAlign_) {
+                case ScrollAlign::START:
+                    targetPos = iter->second.startPos;
+                    break;
+                case ScrollAlign::CENTER:
+                    targetPos = (iter->second.endPos + iter->second.startPos) / 2.0f - contentMainSize_ / 2.0f;
+                    break;
+                case ScrollAlign::END:
+                    targetPos = iter->second.endPos - contentMainSize_;
+                    break;
+                case ScrollAlign::AUTO:
+                    ScrollAutoType scrollAutoType = listLayoutAlgorithm->GetScrollAutoType();
+                    targetPos = CalculateTargetPos(iter->second.startPos, iter->second.endPos, scrollAutoType);
+                    break;
+            }
+            // correct the currentOffset when the startIndex is 0.
+            if (listLayoutAlgorithm->GetStartIndex() == 0) {
+                currentOffset_ = -itemPosition_.begin()->second.startPos;
+            } else {
+                currentOffset_ = currentOffset_ + relativeOffset;
+            }
+            StartSpringMotion(currentOffset_, targetPos + currentOffset_, SCROLL_TO_INDEX_VELOCITY);
+        }
+        targetIndex_.reset();
     } else {
-        currentOffset_ = currentOffset_ + relativeOffset;
+        if (listLayoutAlgorithm->GetStartIndex() == 0) {
+            currentOffset_ = -itemPosition_.begin()->second.startPos;
+        } else {
+            currentOffset_ = currentOffset_ + relativeOffset;
+        }
     }
     if (isScrollEnd_) {
         auto host = GetHost();
@@ -159,6 +193,23 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     SetScrollState(SCROLL_FROM_NONE);
     isInitialized_ = true;
     return true;
+}
+
+float ListPattern::CalculateTargetPos(float startPos, float endPos, ScrollAutoType scrollAutoType)
+{
+    float targetPos = 0.0f;
+    switch (scrollAutoType) {
+        case ScrollAutoType::NOT_CHANGE:
+            LOGI("item is fully visible, no need to scroll.");
+            break;
+        case ScrollAutoType::START:
+            targetPos = startPos;
+            break;
+        case ScrollAutoType::END:
+            targetPos = endPos - contentMainSize_;
+            break;
+    }
+    return targetPos;
 }
 
 RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
@@ -321,7 +372,11 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     }
     if (jumpIndex_) {
         listLayoutAlgorithm->SetIndex(jumpIndex_.value());
-        listLayoutAlgorithm->SetIndexAlignment(scrollIndexAlignment_);
+        listLayoutAlgorithm->SetIndexAlignment(scrollAlign_);
+    }
+    if (targetIndex_) {
+        listLayoutAlgorithm->SetTargetIndex(targetIndex_.value());
+        listLayoutAlgorithm->SetIndexAlignment(scrollAlign_);
     }
     if (jumpIndexInGroup_) {
         listLayoutAlgorithm->SetIndexInGroup(jumpIndexInGroup_.value());
@@ -354,12 +409,13 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
 
 bool ListPattern::IsAtTop() const
 {
-    return (startIndex_ == 0) && NonNegative(startMainPos_ + GetChainDelta(0));
+    return (startIndex_ == 0) && NonNegative(startMainPos_ - currentDelta_ + GetChainDelta(0));
 }
 
 bool ListPattern::IsAtBottom() const
 {
-    return endIndex_ == maxListItemIndex_ && LessOrEqual(endMainPos_ + GetChainDelta(endIndex_), contentMainSize_);
+    return endIndex_ == maxListItemIndex_ &&
+        LessOrEqual(endMainPos_ - currentDelta_ + GetChainDelta(endIndex_), contentMainSize_);
 }
 
 bool ListPattern::OutBoundaryCallback()
@@ -374,10 +430,42 @@ bool ListPattern::OutBoundaryCallback()
     return outBoundary;
 }
 
+OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
+{
+    OverScrollOffset offset = { 0, 0 };
+    if (startIndex_ == 0) {
+        auto startPos = startMainPos_ + GetChainDelta(0);
+        auto newStartPos = startPos + delta;
+        if (startPos > 0 && newStartPos > 0) {
+            offset.start = delta;
+        }
+        if (startPos > 0 && newStartPos <= 0) {
+            offset.start = -startPos;
+        }
+        if (startPos <= 0 && newStartPos > 0) {
+            offset.start = newStartPos;
+        }
+    }
+    if (endIndex_ == maxListItemIndex_) {
+        auto endPos = endMainPos_ + GetChainDelta(endIndex_);
+        auto newEndPos = endPos + delta;
+        if (endPos < contentMainSize_ && newEndPos < contentMainSize_) {
+            offset.end = delta;
+        }
+        if (endPos < contentMainSize_ && newEndPos >= contentMainSize_) {
+            offset.end = contentMainSize_ - endPos;
+        }
+        if (endPos >= contentMainSize_ && newEndPos < contentMainSize_) {
+            offset.end = newEndPos - contentMainSize_;
+        }
+    }
+    return offset;
+}
+
 bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
 {
     // check edgeEffect is not springEffect
-    if (!jumpIndex_.has_value() && !HandleEdgeEffect(offset, source, GetContentSize())) {
+    if (!jumpIndex_.has_value() && !targetIndex_.has_value() && !HandleEdgeEffect(offset, source, GetContentSize())) {
         return false;
     }
     SetScrollState(source);
@@ -641,13 +729,13 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
         }
 
         if (nextIndex < curIndex && nextIndex < startIndex_) {
-            ScrollToIndex(nextIndex, ScrollIndexAlignment::ALIGN_TOP);
+            ScrollToIndex(nextIndex, smooth_, ScrollAlign::START);
             auto pipeline = PipelineContext::GetCurrentContext();
             if (pipeline) {
                 pipeline->FlushUITasks();
             }
         } else if (nextIndex > curIndex && nextIndex > endIndex_) {
-            ScrollToIndex(nextIndex, ScrollIndexAlignment::ALIGN_BOTTOM);
+            ScrollToIndex(nextIndex, smooth_, ScrollAlign::END);
             auto pipeline = PipelineContext::GetCurrentContext();
             if (pipeline) {
                 pipeline->FlushUITasks();
@@ -700,6 +788,11 @@ WeakPtr<FocusHub> ListPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, in
 void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve)
 {
     LOGI("AnimateTo:%f, duration:%f", position, duration);
+    if (CheckWhetherCurvesRelyOnDuration(curve)) {
+        PlayCustomSpringCurverDoNotRelyOnDuration(position, curve);
+        return;
+    }
+
     if (!IsScrollableStopped()) {
         scrollAbort_ = true;
         StopScrollable();
@@ -730,6 +823,24 @@ void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
     FireOnScrollStart();
 }
 
+bool ListPattern::CheckWhetherCurvesRelyOnDuration(const RefPtr<Curve>& curve)
+{
+    auto interpolatingSpringCurve = AceType::DynamicCast<InterpolatingSpring>(curve);
+    if (interpolatingSpringCurve) {
+        return true;
+    }
+    return false;
+}
+
+void ListPattern::PlayCustomSpringCurverDoNotRelyOnDuration(float position, const RefPtr<Curve>& curve)
+{
+    StopAnimate();
+    auto interpolatingSpringCurve = AceType::DynamicCast<InterpolatingSpring>(curve);
+    CHECK_NULL_VOID(interpolatingSpringCurve);
+    StartDefaultOrCustomSpringMotion(GetTotalOffset(), position, interpolatingSpringCurve);
+    isScrollEnd_ = true;
+}
+
 void ListPattern::StopAnimate()
 {
     if (!IsScrollableStopped()) {
@@ -744,23 +855,33 @@ void ListPattern::ScrollTo(float position, bool smooth)
 {
     LOGI("ScrollTo:%{public}f", position);
     StopAnimate();
+    jumpIndex_.reset();
+    targetIndex_.reset();
+    currentDelta_ = 0.0f;
     if (smooth) {
-        StartDefaultSpringMotion(currentOffset_, position, LIST_SCROLL_TO_VELOCITY);
+        auto curve = AceType::MakeRefPtr<InterpolatingSpring>(
+            LIST_SCROLL_TO_VELOCITY, LIST_SCROLL_TO_MASS, LIST_SCROLL_TO_STIFFNESS, LIST_SCROLL_TO_DAMPING);
+        CHECK_NULL_VOID(curve);
+        StartDefaultOrCustomSpringMotion(GetTotalOffset(), position, curve);
     } else {
         UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
     }
     isScrollEnd_ = true;
 }
 
-void ListPattern::StartDefaultSpringMotion(float start, float end, float velocity)
+void ListPattern::StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve)
 {
     if (!animator_) {
         animator_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
     }
 
-    float mass = LIST_SCROLL_TO_MASS;
-    float stiffness = LIST_SCROLL_TO_STIFFNESS;
-    float damping = LIST_SCROLL_TO_DAMPING;
+    float velocity = curve->GetVelocity();
+    float mass = curve->GetMass();
+    float stiffness = curve->GetStiffness();
+    float damping = curve->GetDamping();
+    LOGD("velocity : %{public}f, mass : %{public}f, stiffness : %{public}f, damping : %{public}f", velocity, mass,
+        stiffness, damping);
+
     const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
         AceType::MakeRefPtr<SpringProperty>(mass, stiffness, damping);
     if (!springMotion_) {
@@ -789,20 +910,34 @@ void ListPattern::StartDefaultSpringMotion(float start, float end, float velocit
     });
 }
 
-void ListPattern::ScrollToIndex(int32_t index, ScrollIndexAlignment align)
+void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 {
     LOGI("ScrollToIndex:%{public}d", index);
     StopAnimate();
-    if (index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM) {
-        currentDelta_ = 0;
-        jumpIndex_ = index;
-        scrollIndexAlignment_ = align;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto totalItemCount = host->TotalChildCount();
+    if ((index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM)) {
+        currentDelta_ = 0.0f;
+        smooth_ = smooth;
+        if (smooth_) {
+            targetIndex_ = index;
+            if (index == ListLayoutAlgorithm::LAST_ITEM) {
+                targetIndex_ = totalItemCount - 1;
+            } else if ((LessNotEqual(targetIndex_.value(), 0)) ||
+                       (GreatOrEqual(targetIndex_.value(), totalItemCount))) {
+                targetIndex_.reset();
+            }
+        } else {
+            jumpIndex_ = index;
+        }
+        scrollAlign_ = align;
         MarkDirtyNodeSelf();
     }
     isScrollEnd_ = true;
 }
 
-void ListPattern::ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollIndexAlignment align)
+void ListPattern::ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollAlign align)
 {
     LOGI("ScrollToIndex:%{public}d, %{public}d", index, indexInGroup);
     StopAnimate();
@@ -810,7 +945,7 @@ void ListPattern::ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollIndex
         currentDelta_ = 0;
         jumpIndex_ = index;
         jumpIndexInGroup_ = indexInGroup;
-        scrollIndexAlignment_ = align;
+        scrollAlign_ = align;
         MarkDirtyNodeSelf();
     }
     isScrollEnd_ = true;
@@ -820,9 +955,9 @@ void ListPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType)
 {
     LOGI("ScrollToEdge:%{public}zu", scrollEdgeType);
     if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
-        ScrollToIndex(0, ScrollIndexAlignment::ALIGN_TOP);
+        ScrollToIndex(0, smooth_, ScrollAlign::START);
     } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
-        ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, ScrollIndexAlignment::ALIGN_BOTTOM);
+        ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, smooth_, ScrollAlign::END);
     }
 }
 
@@ -881,7 +1016,7 @@ void ListPattern::SetChainAnimation()
     auto listLayoutProperty = GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(listLayoutProperty);
     auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
-    int32_t lanes = listLayoutProperty->GetLanes().value_or(1);
+    int32_t lanes = std::max(listLayoutProperty->GetLanes().value_or(1), 1);
     bool autoLanes = listLayoutProperty->HasLaneMinLength() || listLayoutProperty->HasLaneMaxLength();
     bool animation = listLayoutProperty->GetChainAnimation().value_or(false);
     bool enable = edgeEffect == EdgeEffect::SPRING && lanes == 1 && !autoLanes && animation;
@@ -1218,17 +1353,57 @@ int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset)
     return 0;
 }
 
+void ListPattern::StartSpringMotion(float start, float end, float velocity)
+{
+    if (!animator_) {
+        animator_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
+    }
+    float mass = SCROLL_TO_INDEX_MASS;
+    float stiffness = SCROLL_TO_INDEX_STIFFNESS;
+    float damping = SCROLL_TO_INDEX_DAMPING;
+    const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
+        AceType::MakeRefPtr<SpringProperty>(mass, stiffness, damping);
+    if (!scrollToIndexMotion_) {
+        scrollToIndexMotion_ = AceType::MakeRefPtr<SpringMotion>(start, end, velocity, DEFAULT_OVER_SPRING_PROPERTY);
+    } else {
+        scrollToIndexMotion_->Reset(start, end, velocity, DEFAULT_OVER_SPRING_PROPERTY);
+        scrollToIndexMotion_->ClearListeners();
+    }
+    scrollToIndexMotion_->AddListener([weakScroll = AceType::WeakClaim(this), start, end](double position) {
+        auto list = weakScroll.Upgrade();
+        CHECK_NULL_VOID(list);
+        if (NearEqual(end, start) || NearEqual(position, end)) {
+            list->animator_->ClearStopListeners();
+            list->animator_->Stop();
+            position = end;
+            return;
+        }
+        list->UpdateCurrentOffset(list->GetTotalOffset() - position, SCROLL_FROM_JUMP);
+    });
+    animator_->ClearStopListeners();
+    animator_->PlayMotion(scrollToIndexMotion_);
+    animator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
+        auto list = weak.Upgrade();
+        CHECK_NULL_VOID(list);
+        list->MarkDirtyNodeSelf();
+    });
+}
+
 void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("multiSelectable", multiSelectable_);
     json->Put("startIndex", startIndex_);
-    json->Put("startMainPos", startMainPos_);
+    if (!itemPosition_.empty()) {
+        json->Put("itemStartPos", itemPosition_.begin()->second.startPos);
+    }
 }
 
 void ListPattern::FromJson(const std::unique_ptr<JsonValue>& json)
 {
     ScrollToIndex(json->GetInt("startIndex"));
-    ScrollBy(-json->GetDouble("startMainPos"));
+    if (json->Contains("itemStartPos")) {
+        ScrollBy(-json->GetDouble("itemStartPos"));
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->UpdateClipEdge(true);

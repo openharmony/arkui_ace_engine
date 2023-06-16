@@ -33,6 +33,7 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
+    void MeasureRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint);
     std::optional<float> GetIdealWidth(LayoutWrapper* layoutWrapper);
     float horInterval_ = 0.0f;
 

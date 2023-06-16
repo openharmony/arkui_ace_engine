@@ -16,12 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORK_JAVASCRIPT_BRIDGE_JS_VIEW_JS_OFFSCREEN_RENDERING_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORK_JAVASCRIPT_BRIDGE_JS_VIEW_JS_OFFSCREEN_RENDERING_CONTEXT_H
 
-#include "base/memory/referenced.h"
-#include "bridge/declarative_frontend/engine/bindings_defines.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_renderer.h"
-
 #include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -35,23 +31,18 @@ public:
     static void Destructor(JSOffscreenRenderingContext* controller);
 
     void JsTransferToImageBitmap(const JSCallbackInfo& info);
-    static RefPtr<OffscreenCanvas> GetOffscreenCanvas(int32_t id)
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        return offscreenCanvasMap_[id];
-    }
 
-    static RefPtr<NG::OffscreenCanvasPattern> GetOffscreenCanvasPattern(int32_t id)
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        return offscreenCanvasPatternMap_[id];
-    }
-
-    static void AddOffscreenCanvasPattern(const RefPtr<NG::OffscreenCanvasPattern>& pattern)
+    static void AddOffscreenCanvasPattern(const RefPtr<AceType>& pattern)
     {
         CHECK_NULL_VOID(pattern);
         std::lock_guard<std::mutex> lock(mutex_);
-        offscreenCanvasPatternMap_[offscreenCanvasPatternCount_++] = pattern;
+        offscreenPatternMap_[offscreenPatternCount_++] = pattern;
+    }
+
+    static RefPtr<AceType> GetOffscreenPattern(int32_t id)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return offscreenPatternMap_[id];
     }
 
     uint32_t GetId()
@@ -63,13 +54,10 @@ public:
 
 private:
     static std::mutex mutex_;
-    static std::unordered_map<uint32_t, RefPtr<OffscreenCanvas>> offscreenCanvasMap_;
-    static std::unordered_map<uint32_t, RefPtr<NG::OffscreenCanvasPattern>> offscreenCanvasPatternMap_;
-    static uint32_t offscreenCanvasCount_;
-    static uint32_t offscreenCanvasPatternCount_;
     uint32_t id;
+
+    static std::unordered_map<uint32_t, RefPtr<AceType>> offscreenPatternMap_;
+    static uint32_t offscreenPatternCount_;
 };
-
 } // namespace OHOS::Ace::Framework
-
 #endif // FOUNDATION_ACE_FRAMEWORK_JAVASCRIPT_BRIDGE_JS_VIEW_JS_OFFSCREEN_RENDERING_CONTEXT_H

@@ -19,10 +19,6 @@
 #include <dlfcn.h>
 #endif
 
-#include "base/image/pixel_map.h"
-#include "base/log/ace_scoring_log.h"
-#include "base/log/ace_trace.h"
-#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
@@ -38,21 +34,7 @@ void JSImageSpan::Create(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have 1 argument");
         return;
     }
-    std::string bundleName;
-    std::string moduleName;
-    std::string src;
-    auto noPixmap = ParseJsMedia(info[0], src);
-    JSImage::GetJsMediaBundleInfo(info[0], bundleName, moduleName);
-    LOGI("JSImageSpan::Create src = %{public}s bundleName = %{public}s moduleName = %{public}s noPixmap = "
-         "%{public}d",
-        src.c_str(), bundleName.c_str(), moduleName.c_str(), noPixmap);
-    RefPtr<PixelMap> pixmap = nullptr;
-#if defined(PIXEL_MAP_SUPPORTED)
-    if (!noPixmap) {
-        pixmap = CreatePixelMapFromNapiValue(info[0]);
-    }
-#endif
-    ImageModel::GetInstance()->Create(src, noPixmap, pixmap, bundleName, moduleName);
+    JSImage::Create(info);
 }
 
 void JSImageSpan::SetObjectFit(const JSCallbackInfo& info)

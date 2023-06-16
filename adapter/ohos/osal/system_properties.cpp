@@ -499,6 +499,11 @@ bool SystemProperties::GetAllowWindowOpenMethodEnabled()
     return system::GetBoolParameter("persist.web.allowWindowOpenMethod.enabled", false);
 }
 
+bool SystemProperties::GetImageFrameworkEnabled()
+{
+    return system::GetBoolParameter("persist.ace.image.framework.enabled", true);
+}
+
 ACE_WEAK_SYM bool SystemProperties::GetIsUseMemoryMonitor()
 {
     static bool isUseMemoryMonitor = IsUseMemoryMonitor();

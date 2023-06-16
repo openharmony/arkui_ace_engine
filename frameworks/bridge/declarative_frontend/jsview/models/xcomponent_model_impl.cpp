@@ -22,12 +22,12 @@
 
 namespace OHOS::Ace::Framework {
 
-void XComponentModelImpl::Create(const std::string& id, const std::string& type, const std::string& libraryname,
+void XComponentModelImpl::Create(const std::string& id, XComponentType /* type */, const std::string& libraryname,
     const RefPtr<XComponentController>& xcomponentController)
 {
     auto xcomponentComponent = AceType::MakeRefPtr<OHOS::Ace::XComponentComponent>("xcomponent");
     xcomponentComponent->SetId(id);
-    xcomponentComponent->SetXComponentType(type);
+    xcomponentComponent->SetXComponentType("surface");
     xcomponentComponent->SetLibraryName(libraryname);
     if (xcomponentController) {
         xcomponentComponent->SetXComponentController(xcomponentController);

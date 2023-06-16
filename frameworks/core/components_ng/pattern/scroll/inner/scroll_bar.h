@@ -214,6 +214,8 @@ public:
         if (normalWidth_ != normalWidth) {
             normalWidthUpdate_ = true;
             normalWidth_ = normalWidth;
+            FlushBarWidth();
+            MarkNeedRender();
         }
     }
 
@@ -264,7 +266,12 @@ public:
     {
         displayMode_ = displayMode;
         if (displayMode_ == DisplayMode::AUTO) {
-            PlayBarEndAnimation();
+            OnScrollEnd();
+        } else if (displayMode_ == DisplayMode::ON) {
+            if (scrollEndAnimator_ && !scrollEndAnimator_->IsStopped()) {
+                scrollEndAnimator_->Stop();
+            }
+            opacity_ = UINT8_MAX;
         }
     }
 
@@ -321,7 +328,7 @@ public:
 
     void OnScrollEnd()
     {
-        if (displayMode_ == DisplayMode::AUTO) {
+        if (displayMode_ == DisplayMode::AUTO && isScrollable_) {
             PlayBarEndAnimation();
         }
     }

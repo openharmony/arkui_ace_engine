@@ -39,7 +39,16 @@ void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callb
         TaskExecutor::TaskType::UI);
 }
 
-void ClipboardImpl::HasData(const std::function<void(bool hasData)>& callback) {}
+void ClipboardImpl::HasData(const std::function<void(bool hasData)>& callback)
+{
+    if (!taskExecutor_ || !callbackGetClipboardData_ || !callback) {
+        LOGE("Failed to know if data exists from clipboard.");
+        return;
+    }
+    taskExecutor_->PostTask([callbackGetClipboardData = callbackGetClipboardData_,
+                                callback] { callback(callbackGetClipboardData().empty()); },
+        TaskExecutor::TaskType::UI);
+}
 
 void ClipboardImpl::SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions copyOption)
 {

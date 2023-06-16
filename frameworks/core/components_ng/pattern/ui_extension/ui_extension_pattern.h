@@ -16,27 +16,31 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_PATTERN_H
 
-#include "core/components_ng/pattern/ui_extension/ui_extension_event_hub.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_layout_algorithm.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_paint_property.h"
-#include "core/components_ng/pattern/window_scene/scene/window_extension.h"
+#include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 
 namespace OHOS::Ace::NG {
-class UIExtensionPattern : public WindowExtension {
-    DECLARE_ACE_TYPE(UIExtensionPattern, WindowExtension);
+class UIExtensionPattern : public WindowPattern {
+    DECLARE_ACE_TYPE(UIExtensionPattern, WindowPattern);
 
 public:
-    UIExtensionPattern(const std::string& bundleName, const std::string& abilityName)
-        : WindowExtension(bundleName, abilityName)
-    {}
+    UIExtensionPattern(const std::string& bundleName, const std::string& abilityName);
+    ~UIExtensionPattern() override;
 
-    ~UIExtensionPattern() override = default;
+    void OnWindowShow() override;
+    void OnWindowHide() override;
+
+    bool HasStartingPage() override
+    {
+        return false;
+    }
+
+    void OnConnect() override;
+
+    void RequestExtensionSessionActivation();
+    void RequestExtensionSessionBackground();
+    void RequestExtensionSessionDestruction();
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
-
-    RefPtr<PaintProperty> CreatePaintProperty() override;
-
-    RefPtr<EventHub> CreateEventHub() override;
 
 private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

@@ -150,8 +150,16 @@ public:
         direction_ = direction;
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
+    bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode) override;
+
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
+    OverScrollOffset GetOverScrollOffset(double delta) const override;
 
     bool UpdateCurrentOffset(float offset, int32_t source) override;
     void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool limitDuration = true,
@@ -190,6 +198,7 @@ private:
     void FireOnScrollStart();
     void FireOnScrollStop();
     void SetAccessibilityAction();
+    OffsetF GetOffsetToScroll(const RefPtr<FrameNode>& childFrame) const;
 
     RefPtr<Animator> animator_;
     RefPtr<ScrollPositionController> positionController_;

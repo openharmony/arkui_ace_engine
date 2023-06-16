@@ -56,9 +56,9 @@ public:
 private:
     void CreateToolBar();
     void CreateExtensionToolBar();
-    bool AddSystemDefaultOptions(float defaultOptionWidth, float fontWidth, float maxWidth, float& allocatedSize);
+    bool AddSystemDefaultOptions(float maxWidth, float& allocatedSize);
     void AddExtensionMenuOptions(const std::vector<MenuOptionsParam>& menuOptionItems, int32_t index);
-    void GetDefaultButtonAndMenuWidth(float& defaultOptionWidth, float& fontWidth, float& maxWidth);
+    void GetDefaultButtonAndMenuWidth(float& maxWidth);
 
     void MoreAnimation();
     void BackAnimation();
@@ -83,8 +83,8 @@ private:
     // default menus.
     bool isExtensionMenu_ = false;
 
-    // Label whether the menu default button needs to appear within the extended menu.
-    bool isShowInExtension_[3] = { false };
+    // Label whether the menu default button needs to appear within the extended menu
+    bool isShowInDefaultMenu_[7] = { true };
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayNode);
 };

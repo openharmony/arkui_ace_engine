@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/geometry/rect.h"
 #include "base/subwindow/subwindow_manager.h"
 namespace OHOS::Ace {
 namespace {
@@ -45,5 +46,10 @@ void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects) {}
 const RefPtr<Subwindow>& SubwindowManager::GetCurrentWindow()
 {
     return g_currentWindow;
+}
+
+Rect SubwindowManager::GetParentWindowRect()
+{
+    return Rect();
 }
 } // namespace OHOS::Ace

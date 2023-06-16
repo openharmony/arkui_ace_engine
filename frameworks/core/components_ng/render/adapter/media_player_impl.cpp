@@ -236,7 +236,15 @@ int32_t MediaPlayerImpl::Seek(int32_t mSeconds, OHOS::Ace::SeekMode mode)
 {
     CHECK_NULL_RETURN(player_, -1);
     LOGI("Media player start to seek.");
-    player_->SeekTo(mSeconds);
+    player_->SeekTo(mSeconds, static_cast<uint32_t>(mode));
+    return 0;
+}
+
+int32_t MediaPlayerImpl::FullScreenChange(bool isFullScreen)
+{
+    CHECK_NULL_RETURN(player_, -1);
+    LOGI("Media player change fullscreen");
+    player_->SetFullScreenChange(isFullScreen);
     return 0;
 }
 
@@ -249,6 +257,9 @@ void MediaPlayerImpl::ProcessSurfaceCreate()
 void MediaPlayerImpl::ProcessSurfaceChange(int32_t width, int32_t height)
 {
     LOGI("Media player ProcessSurfaceChange (%{public}d, %{public}d)", width, height);
+    if (resolutionChangeCallback_) {
+        resolutionChangeCallback_();
+    }
 }
 
 } // namespace OHOS::Ace::NG

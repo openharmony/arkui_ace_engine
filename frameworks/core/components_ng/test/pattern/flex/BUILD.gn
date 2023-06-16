@@ -109,6 +109,7 @@ ohos_unittest("flex_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/flex/wrap_layout_algorithm.cpp",
+    "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
     "flex_test_ng.cpp",
   ]
 

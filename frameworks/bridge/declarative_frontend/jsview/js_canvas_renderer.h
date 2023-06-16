@@ -27,9 +27,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_render_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "frameworks/core/components/custom_paint/offscreen_canvas.h"
-#include "frameworks/core/components_ng/pattern/custom_paint/custom_paint_pattern.h"
-#include "frameworks/core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -140,27 +137,15 @@ public:
     void JsGetDirection(const JSCallbackInfo& info);
     void JsSetDirection(const JSCallbackInfo& info);
 
-    void SetComponent(const RefPtr<CanvasTaskPool>& controller)
+    void SetCanvasPattern(const RefPtr<AceType>& canvas)
     {
-        pool_ = controller;
+        canvasPattern_ = canvas;
         isOffscreen_ = false;
     }
 
-    void SetOffscreenCanvas(const RefPtr<OffscreenCanvas>& offscreenCanvas)
+    void SetOffscreenPattern(const RefPtr<AceType>& offscreenCanvas)
     {
-        offscreenCanvas_ = offscreenCanvas;
-        isOffscreen_ = true;
-    }
-
-    void SetCustomPaintPattern(const RefPtr<NG::CustomPaintPattern>& pattern)
-    {
-        customPaintPattern_ = pattern;
-        isOffscreen_ = false;
-    }
-
-    void SetOffscreenCanvasPattern(const RefPtr<NG::OffscreenCanvasPattern>& pattern)
-    {
-        offscreenCanvasPattern_ = pattern;
+        offscreenPattern_ = offscreenCanvas;
         isOffscreen_ = true;
     }
 
@@ -195,11 +180,10 @@ protected:
     void ParseStrokePattern(const JSCallbackInfo& info);
 
 protected:
-    RefPtr<CanvasTaskPool> pool_;
-    RefPtr<OffscreenCanvas> offscreenCanvas_;
     bool anti_ = false;
-    RefPtr<NG::CustomPaintPattern> customPaintPattern_;
-    RefPtr<NG::OffscreenCanvasPattern> offscreenCanvasPattern_;
+
+    RefPtr<AceType> canvasPattern_;
+    RefPtr<AceType> offscreenPattern_;
 
 private:
     void ExtractInfoToImage(CanvasImage& image, const JSCallbackInfo& info, bool isImage);
@@ -212,7 +196,9 @@ private:
     std::weak_ptr<Ace::Pattern> GetPatternNG(int32_t id);
     Pattern GetPattern(unsigned int id);
     std::vector<uint32_t> lineDash_;
+    ImageData imageData_;
     bool isOffscreen_ = false;
+    std::shared_ptr<Pattern> GetPatternPtr(int32_t id);
 };
 
 } // namespace OHOS::Ace::Framework

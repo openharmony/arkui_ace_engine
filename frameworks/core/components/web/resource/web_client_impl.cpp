@@ -804,4 +804,23 @@ void WebClientImpl::OnGetTouchHandleHotZone(NWeb::TouchHandleHotZone& hotZone)
     CHECK_NULL_VOID(delegate);
     delegate->OnGetTouchHandleHotZone(hotZone);
 }
+
+void WebClientImpl::OnDateTimeChooserPopup(
+    const NWeb::DateTimeChooser& chooser,
+    const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+    std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnDateTimeChooserPopup(chooser, suggestions, callback);
+}
+
+void WebClientImpl::OnDateTimeChooserClose()
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnDateTimeChooserClose();
+}
 } // namespace OHOS::Ace

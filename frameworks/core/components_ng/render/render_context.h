@@ -99,7 +99,12 @@ public:
 
     virtual void OnModifyDone() {}
 
-    virtual void InitContext(bool isRoot, const std::optional<std::string>& surfaceName, bool useExternalNode = false)
+    enum class ContextType : int8_t { CANVAS, ROOT, SURFACE, EFFECT, EXTERNAL };
+    struct ContextParam {
+        ContextType type;
+        std::optional<std::string> surfaceName;
+    };
+    virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param)
     {}
 
     virtual void StartRecording() {}
@@ -219,6 +224,8 @@ public:
     virtual void ClearDrawCommands() {}
 
     virtual void DumpInfo() const {}
+
+    void ObscuredToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     void SetSharedTransitionOptions(const std::shared_ptr<SharedTransitionOption>& option)
     {
@@ -340,6 +347,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontInvert, Dimension);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontHueRotate, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontColorBlend, Color);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, LinearGradientBlur, NG::LinearGradientBlurPara);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackShadow, Shadow);
 
     // BorderRadius.
@@ -388,8 +396,14 @@ public:
     // accessibility
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocus, bool);
 
+    // useEffect
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseEffect, bool);
+
     // freeze
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Freeze, bool);
+
+    // obscured
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Obscured, std::vector<ObscuredReasons>);
 
 protected:
     RenderContext() = default;
@@ -443,11 +457,14 @@ protected:
     virtual void OnFrontInvertUpdate(const Dimension& value) {}
     virtual void OnFrontHueRotateUpdate(float value) {}
     virtual void OnFrontColorBlendUpdate(const Color& value) {}
+    virtual void OnLinearGradientBlurUpdate(const NG::LinearGradientBlurPara& blurPara) {}
     virtual void OnBackShadowUpdate(const Shadow& shadow) {}
 
     virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}
     virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}
+    virtual void OnUseEffectUpdate(bool useEffect) {}
     virtual void OnFreezeUpdate(bool isFreezed) {}
+    virtual void OnObscuredUpdate(const std::vector<ObscuredReasons>& reasons) {}
 
 private:
     std::function<void()> requestFrame_;

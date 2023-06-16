@@ -90,6 +90,19 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         clickEffectJsonValue->Put("scale", std::to_string((float)propClickEffectLevel_.value().scaleNumber).c_str());
         json->Put("clickEffect", clickEffectJsonValue);
     }
+    ObscuredToJsonValue(json);
+}
+
+void RenderContext::ObscuredToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    auto jsonObscuredArray = JsonUtil::CreateArray(true);
+    std::vector<ObscuredReasons> obscuredReasons = propObscured_.value_or(std::vector<ObscuredReasons>());
+    for (size_t i = 0; i < obscuredReasons.size(); i++) {
+        auto index = std::to_string(i);
+        auto value = std::to_string(static_cast<int32_t>(obscuredReasons[i]));
+        jsonObscuredArray->Put(index.c_str(), value.c_str());
+    }
+    json->Put("obscured", jsonObscuredArray);
 }
 
 void RenderContext::FromJson(const std::unique_ptr<JsonValue>& json)

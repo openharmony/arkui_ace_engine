@@ -99,8 +99,14 @@ RefPtr<FrameNode> MenuItemGroupPattern::GetMenu()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto menu = AceType::DynamicCast<FrameNode>(host->GetParent());
-    return menu ? menu : nullptr;
+    auto parent = host->GetParent();
+    while (parent) {
+        if (parent->GetTag() == V2::MENU_ETS_TAG) {
+            return DynamicCast<FrameNode>(parent);
+        }
+        parent = parent->GetParent();
+    }
+    return nullptr;
 }
 
 std::string MenuItemGroupPattern::GetHeaderContent()

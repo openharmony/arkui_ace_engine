@@ -28,7 +28,7 @@ public:
     ~WaterFlowPositionController() override = default;
     Axis GetScrollDirection() const override;
 
-    void JumpTo(int32_t index, int32_t source) override;
+    void JumpTo(int32_t index, bool smooth, ScrollAlign align, int32_t source) override;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(WaterFlowPositionController);

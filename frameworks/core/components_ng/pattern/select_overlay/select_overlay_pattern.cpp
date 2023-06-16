@@ -302,6 +302,15 @@ void SelectOverlayPattern::CheckHandleReverse()
     }
 }
 
+void SelectOverlayPattern::SetHandleReverse(bool reverse)
+{
+    info_->handleReverse = reverse;
+    UpdateHandleHotZone();
+    auto host = DynamicCast<SelectOverlayNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void SelectOverlayPattern::UpdateFirstSelectHandleInfo(const SelectHandleInfo& info)
 {
     if (info_->firstHandle == info) {

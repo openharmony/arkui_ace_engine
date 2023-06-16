@@ -85,10 +85,6 @@ void LongPressRecognizer::ThumbnailTimer(int32_t time)
 
 void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    if (IsRefereeFinished()) {
-        LOGD("referee has already receives the result");
-        return;
-    }
     if (isDisableMouseLeft_ && event.sourceType == SourceType::MOUSE) {
         LOGI("mouse left button is disabled for long press recognizer.");
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -202,6 +198,9 @@ void LongPressRecognizer::DeadlineTimer(int32_t time, bool isCatchMode)
 
 void LongPressRecognizer::DoRepeat()
 {
+    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
+        return;
+    }
     if (refereeState_ == RefereeState::SUCCEED) {
         SendCallbackMsg(onAction_, true);
         StartRepeatTimer();
@@ -248,6 +247,7 @@ void LongPressRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc
         }
         info.SetSourceDevice(deviceType_);
         info.SetDeviceId(deviceId_);
+        info.SetTargetDisplayId(trackPoint.targetDisplayId);
         info.SetGlobalPoint(globalPoint_);
         info.SetScreenLocation(trackPoint.GetScreenOffset());
         info.SetGlobalLocation(trackPoint.GetOffset()).SetLocalLocation(trackPoint.GetOffset() - coordinateOffset_);

@@ -117,7 +117,11 @@ public:
 
     void ResetGridLayoutInfo()
     {
-        gridLayoutInfo_ = GridLayoutInfo();
+        gridLayoutInfo_.lineHeightMap_.clear();
+        gridLayoutInfo_.gridMatrix_.clear();
+        gridLayoutInfo_.endIndex_ = -1;
+        gridLayoutInfo_.endMainLineIndex_ = 0;
+        gridLayoutInfo_.ResetPositionFlags();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
@@ -136,6 +140,8 @@ public:
         return gridLayoutInfo_.offsetEnd_;
     }
 
+    OverScrollOffset GetOverScrollOffset(double delta) const override;
+
     void SetScrollState(int32_t scrollState)
     {
         scrollState_ = scrollState;
@@ -150,6 +156,8 @@ public:
     bool UpdateStartIndex(int32_t index);
 
     bool AnimateTo(float position, float duration, const RefPtr<Curve>& curve);
+
+    void ScrollBy(float offset);
 
     bool OnScrollCallback(float offset, int32_t source) override;
 
@@ -182,8 +190,7 @@ private:
     void FlushCurrentFocus();
     void FlushFocusOnScroll(const GridLayoutInfo& gridLayoutInfo);
     std::pair<bool, bool> IsFirstOrLastFocusableChild(int32_t curMainIndex, int32_t curCrossIndex);
-    std::pair<FocusStep, FocusStep> GetFocusSteps(
-        int32_t curMainIndex, int32_t curCrossIndex, FocusStep step);
+    std::pair<FocusStep, FocusStep> GetFocusSteps(int32_t curMainIndex, int32_t curCrossIndex, FocusStep step);
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
@@ -197,6 +204,7 @@ private:
     void UpdateScrollBarOffset() override;
     void UpdateRectOfDraggedInItem(int32_t insertIndex);
     void SetAccessibilityAction();
+    void StopAnimate();
 
     GridLayoutInfo gridLayoutInfo_;
     RefPtr<GridPositionController> positionController_;
@@ -210,6 +218,7 @@ private:
     bool scrollable_ = true;
     int32_t scrollState_ = SCROLL_FROM_NONE;
     bool mousePressed_ = false;
+    bool firstShow_ = false;
 
     int32_t lastFocusItemMainIndex_ = 0;
     int32_t lastFocusItemCrossIndex_ = 0;
@@ -217,6 +226,8 @@ private:
     OffsetF mouseStartOffset_;
     OffsetF mouseEndOffset_;
     OffsetF mousePressOffset_;
+
+    std::pair<std::optional<float>, std::optional<float>> scrollbarInfo_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);
 };

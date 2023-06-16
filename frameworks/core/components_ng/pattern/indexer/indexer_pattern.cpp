@@ -67,6 +67,13 @@ void IndexerPattern::OnModifyDone()
     } else {
         itemCount_ = 0;
     }
+    auto usePopup = layoutProperty->GetUsingPopup().value_or(false);
+    if (isPopup_ != usePopup) {
+        isPopup_ = usePopup;
+        if (!isPopup_) {
+            RemoveBubble();
+        }
+    }
     auto propSelect = layoutProperty->GetSelected().value();
     propSelect = (propSelect >= 0 && propSelect < itemCount_) ? propSelect : 0;
     auto selectChanged = false;
@@ -699,10 +706,13 @@ void IndexerPattern::UpdateBubbleListView(std::vector<std::string>& currentListD
         listNode->Clean();
     }
     auto divider = V2::ItemDivider();
-    divider.strokeWidth = Dimension(INDEXER_LIST_DIVIDER, DimensionUnit::VP);
+    divider.strokeWidth = Dimension(INDEXER_LIST_DIVIDER, DimensionUnit::PX);
     divider.color = indexerTheme->GetPopupSeparateColor();
     listLayoutProperty->UpdateDivider(divider);
     listLayoutProperty->UpdateListDirection(Axis::VERTICAL);
+    auto listPaintProperty = listNode->GetPaintProperty<ListPaintProperty>();
+    CHECK_NULL_VOID(listPaintProperty);
+    listPaintProperty->UpdateBarDisplayMode(DisplayMode::OFF);
     auto listRenderContext = listNode->GetRenderContext();
     CHECK_NULL_VOID(listRenderContext);
     listRenderContext->SetClipToBounds(true);
@@ -1207,5 +1217,16 @@ void IndexerPattern::SetAccessibilityAction()
                 indexerPattern->OnSelect(false);
             });
     }
+}
+
+void IndexerPattern::RemoveBubble()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->RemoveIndexerPopupById(host->GetId());
 }
 } // namespace OHOS::Ace::NG

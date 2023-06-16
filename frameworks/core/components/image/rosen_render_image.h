@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_ROSEN_RENDER_IMAGE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_ROSEN_RENDER_IMAGE_H
 
+#ifndef USE_ROSEN_DRAWING
 #ifdef NEW_SKIA
 #include "modules/svg/include/SkSVGDOM.h"
 #else
 #include "experimental/svg/model/SkSVGDOM.h"
+#endif
 #endif
 
 #include "core/components/image/render_image.h"
@@ -54,10 +56,17 @@ public:
 
     bool IsSourceWideGamut() const override;
     bool RetryLoading() override;
+#ifndef USE_ROSEN_DRAWING
     static SkColorType PixelFormatToSkColorType(const RefPtr<PixelMap>& pixmap);
     static SkAlphaType AlphaTypeToSkAlphaType(const RefPtr<PixelMap>& pixmap);
     static SkImageInfo MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap);
     static sk_sp<SkColorSpace> ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap);
+#else
+    static RSColorType PixelFormatToColorType(const RefPtr<PixelMap>& pixmap);
+    static RSAlphaType AlphaTypeToAlphaType(const RefPtr<PixelMap>& pixmap);
+    static RSPixmapFormat MakePixmapFormatFromPixelMap(const RefPtr<PixelMap>& pixmap);
+    static std::shared_ptr<RSColorSpace> ColorSpaceToColorSpace(const RefPtr<PixelMap>& pixmap);
+#endif
     static void UploadImageObjToGpuForRender(const RefPtr<ImageObject>& imageObj,
         const WeakPtr<PipelineContext> context, UploadSuccessCallback uploadSuccessCallback,
         FailedCallback failedCallback, Size resizeTarget, bool forceResize, bool syncMode = false);
@@ -90,33 +99,64 @@ protected:
     bool MaybeRelease() override;
     void ClearRenderObject() override;
     void LayoutImageObject() override;
-    void* GetSkImage() override
+#ifndef USE_ROSEN_DRAWING
+    void* GetSkImage() override 
     {
         return reinterpret_cast<void *>(&image_);
     }
 
     RefPtr<PixelMap> GetPixmapFromSkImage() override;
     SkPixmap CloneSkPixmap(SkPixmap& srcPixmap);
-
+#else
+    void* GetDrawingImage() override
+    {
+        return reinterpret_cast<void *>(&image_);
+    }
+    // TODO Drawing : SkPixmap
+#endif
 private:
     void InitializeCallbacks();
     Size Measure() override;
     void UpdateRenderAltImage(const RefPtr<Component>& component);
+#ifndef USE_ROSEN_DRAWING
     void SetSkRadii(const Radius& radius, SkVector& radii);
+#else
+    void SetRadii(const Radius& radius, RSVector& radii);
+#endif
     void SetClipRadius();
+#ifndef USE_ROSEN_DRAWING
     void CanvasDrawImageRect(SkPaint& paint, const Offset& offset, SkCanvas* canvas, const Rect& paintRect);
     void DrawImageOnCanvas(const Rect& srcRect, const Rect& dstRect, const SkPaint& paint, SkCanvas* canvas) const;
     void PaintSVGImage(const sk_sp<SkData>& skData, bool onlyLayoutSelf = false);
     void DrawSVGImage(const Offset& offset, SkCanvas* canvas);
+#else
+    void CanvasDrawImageRect(RSBrush& brush,
+        const Offset& offset, RSCanvas* canvas, const Rect& paintRect);
+    void DrawImageOnCanvas(const Rect& srcRect, const Rect& dstRect,
+        const RSBrush& brush, RSCanvas* canvas) const;
+    void PaintSVGImage(const std::shared_ptr<RSData> drawingData, bool onlyLayoutSelf = false);
+    void DrawSVGImage(const Offset& offset, RSCanvas* canvas);
+#endif
     void DrawSVGImageCustom(RenderContext& context, const Offset& offset);
     void UpdateLoadSuccessState();
     Rect RecalculateSrcRect(const Size& realImageSize);
+#ifndef USE_ROSEN_DRAWING
     void ApplyColorFilter(SkPaint& paint);
     void ApplyInterpolation(SkPaint& paint);
     void ApplyBorderRadius(const Offset& offset, const Rect& paintRect, SkCanvas* canvas);
+#else
+    void ApplyColorFilter(RSBrush& brush);
+    void ApplyInterpolation(RSBrush& brush);
+    void ApplyBorderRadius(const Offset& offset, const Rect& paintRect, RSCanvas* canvas);
+#endif
     void AddSvgChild();
+#ifndef USE_ROSEN_DRAWING
     void CreateAnimatedPlayer(const RefPtr<ImageProvider>& provider, SkCodec* codecPtr, bool forceResize);
     bool VerifySkImageDataFromPixmap(const RefPtr<PixelMap>& pixmap) const;
+#else
+    // TODO Drawing : SkCodec
+    bool VerifyImageDataFromPixmap(const RefPtr<PixelMap>& pixmap) const;
+#endif
     void CreateSvgNodes();
     void SyncCreateSvgNodes(bool isReady = false);
     void RebuildSvgRenderTree(const SvgRenderTree& svgRenderTree, const RefPtr<SvgDom>& svgDom);
@@ -133,10 +173,18 @@ private:
 #ifdef NEW_SKIA
     SkSamplingOptions options_;
 #endif
+#ifndef USE_ROSEN_DRAWING
     sk_sp<SkSVGDOM> skiaDom_;
+#else
+    std::shared_ptr<RSSVGDOM> drawingSvgDom_;
+#endif
     RefPtr<SvgDom> svgDom_;
     RefPtr<NG::CanvasImage> image_;
+#ifndef USE_ROSEN_DRAWING
     SkVector radii_[4] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
+#else
+    std::vector<RSVector> radii_ = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
+#endif
     Size formerRawImageSize_;
     bool imageDataNotReady_ = false;
 

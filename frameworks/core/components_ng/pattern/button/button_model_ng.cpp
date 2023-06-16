@@ -135,30 +135,12 @@ void ButtonModelNG::CreateWithLabel(const std::string& label)
     auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     auto padding = buttonTheme->GetPadding();
-    PaddingProperty defaultPadding = {
-        CalcLength(padding.Left()),
-        CalcLength(padding.Right()),
-        CalcLength(padding.Top()),
-        CalcLength(padding.Bottom())
-    };
+    PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
+        CalcLength(padding.Top()), CalcLength(padding.Bottom()) };
     ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding);
 }
 
-void ButtonModelNG::Create(const CreateWithPara& para, std::list<RefPtr<Component>>& buttonChildren)
-{
-    if (para.parseSuccess.value()) {
-        return;
-    }
-
-    std::string tagName = "Button";
-    Create(tagName);
-    if (para.labelSetInfoFirst.value()) {
-        SetTypeAndStateEffect(para.typeFirst, para.stateEffectFirst);
-    }
-    if (para.labelSetInfoSecond.value()) {
-        SetTypeAndStateEffect(para.typeSecond, para.stateEffectSecond);
-    }
-}
+void ButtonModelNG::Create(const CreateWithPara& para, std::list<RefPtr<Component>>& buttonChildren) {}
 
 void ButtonModelNG::CreateWithChild(const CreateWithPara& para)
 {
@@ -206,7 +188,7 @@ void ButtonModelNG::SetSize(const std::optional<Dimension>& width, const std::op
 
 void ButtonModelNG::SetBorderRadius(const Dimension& radius)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, BorderRadius, radius);
+    NG::ViewAbstract::SetBorderRadius(radius);
 }
 
 void ButtonModelNG::SetHoverEffect(const int32_t& hoverEffectNum)
@@ -214,8 +196,7 @@ void ButtonModelNG::SetHoverEffect(const int32_t& hoverEffectNum)
     NG::ViewAbstract::SetHoverEffect(static_cast<HoverEffectType>(hoverEffectNum));
 }
 
-void ButtonModelNG::SetTypeAndStateEffect(const std::optional<ButtonType>& type,
-    const std::optional<bool>& stateEffect)
+void ButtonModelNG::SetTypeAndStateEffect(const std::optional<ButtonType>& type, const std::optional<bool>& stateEffect)
 {
     if (type.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, type.value());

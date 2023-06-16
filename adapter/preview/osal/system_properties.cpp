@@ -217,4 +217,9 @@ bool SystemProperties::IsFormAnimationLimited()
 {
     return true;
 }
+
+bool SystemProperties::GetImageFrameworkEnabled()
+{
+    return false;
+}
 } // namespace OHOS::Ace

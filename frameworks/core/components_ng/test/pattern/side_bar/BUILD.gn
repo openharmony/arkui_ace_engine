@@ -38,6 +38,7 @@ ohos_unittest("side_bar_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/divider/divider_modifier.cpp",
     "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
     "$ace_root/frameworks/core/image/image_source_info.cpp",
+    "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
 
     # components_ng_pattern
     "$ace_root/frameworks/core/components_ng/pattern/divider/divider_layout_algorithm.cpp",

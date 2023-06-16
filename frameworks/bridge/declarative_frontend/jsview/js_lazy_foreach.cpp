@@ -38,7 +38,6 @@
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/syntax/lazy_for_each_model.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
-#include "uicast_interface/uicast_impl.h"
 
 namespace OHOS::Ace {
 
@@ -186,15 +185,6 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
     actuator->SetDataSourceObj(dataSourceObj);
     actuator->SetItemGenerator(itemGenerator, std::move(keyGenFunc));
     LazyForEachModel::GetInstance()->Create(actuator);
-
-    {
-        auto parentView = parentViewObj->Unwrap<JSView>();
-        std::string pviewID = parentView ? std::to_string(parentView->UICastGetUniqueId()) : "-1";
-        int totalCount = static_cast<int>(actuator->GetTotalIndexCount());
-        std::string para = R"({"viewId":")" + viewId + R"(","parentViewId":")" +
-            pviewID + R"(","totalCount":)" + std::to_string(totalCount) + R"(})";
-        UICastImpl::CreateLazyForEach(pviewID, totalCount, para);
-    }
 }
 
 void JSLazyForEach::Pop()

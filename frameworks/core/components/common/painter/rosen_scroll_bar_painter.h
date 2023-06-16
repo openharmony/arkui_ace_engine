@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,14 +31,27 @@ public:
     RosenScrollBarPainter() = default;
     ~RosenScrollBarPainter() = default;
 
+#ifndef USE_ROSEN_DRAWING
     void PaintBar(SkCanvas* canvas, const Offset& offset, const Rect& paintRect, const RefPtr<ScrollBar>& scrollBar,
         const Offset& globalOffset, int32_t alpha);
+#else
+    void PaintBar(RSCanvas* canvas, const Offset& offset,
+    const Rect& paintRect, const RefPtr<ScrollBar>& scrollBar, const Offset& globalOffset, int32_t alpha);
+#endif
 
 private:
+#ifndef USE_ROSEN_DRAWING
     void RenderScrollBarBoundary(SkCanvas* canvas, const Offset& offset, double width, double height);
     void PaintCircleBar(
         SkCanvas* canvas, const Offset& offset, const Rect& paintRect, const RefPtr<ScrollBar>& scrollBar);
     void PaintRectBar(SkCanvas* canvas, const Offset& offset, const RefPtr<ScrollBar>& scrollBar, int32_t alpha);
+#else
+    void RenderScrollBarBoundary(RSCanvas* canvas, const Offset& offset, double width, double height);
+    void PaintCircleBar(RSCanvas* canvas, const Offset& offset,
+        const Rect& paintRect, const RefPtr<ScrollBar>& scrollBar);
+    void PaintRectBar(RSCanvas* canvas, const Offset& offset,
+        const RefPtr<ScrollBar>& scrollBar, int32_t alpha);
+#endif
 };
 
 } // namespace OHOS::Ace

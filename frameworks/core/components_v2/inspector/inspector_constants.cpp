@@ -483,6 +483,9 @@ const char POPUP_ETS_TAG[] = "Popup";
 // remote window
 const char REMOTE_WINDOW_ETS_TAG[] = "RemoteWindow";
 
+// effect view
+const char EFFECT_COMPONENT_ETS_TAG[] = "EffectComponent";
+
 // Model
 const char MODEL_COMPONENT_TAG[] = "ModelComponent";
 const char MODEL_ETS_TAG[] = "Model";
@@ -500,4 +503,11 @@ const char UI_EXTENSION_COMPONENT_ETS_TAG[] = "UIExtensionComponent";
 const char SEC_LOCATION_BUTTON_COMPONENT_TAG[] = "SecLocationButtonComponent";
 const char SEC_LOCATION_BUTTON_ETS_TAG[] = "SecLocationButton";
 
+// SecPasteButton
+const char SEC_PASTE_BUTTON_COMPONENT_TAG[] = "SecPasteButtonComponent";
+const char SEC_PASTE_BUTTON_ETS_TAG[] = "SecPasteButton";
+
+// SecSaveButton
+const char SEC_SAVE_BUTTON_COMPONENT_TAG[] = "SecSaveButtonComponent";
+const char SEC_SAVE_BUTTON_ETS_TAG[] = "SecSaveButton";
 } // namespace OHOS::Ace::V2

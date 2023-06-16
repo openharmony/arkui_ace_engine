@@ -99,6 +99,12 @@ public:
     MOCK_METHOD1(RestoreNodeInfo, void(std::unique_ptr<JsonValue> nodeInfo));
     MOCK_METHOD0(GetStoredNodeInfo, std::unique_ptr<JsonValue>());
     MOCK_METHOD0(ResetViewSafeArea, void());
+    MOCK_METHOD1(SetSystemSafeArea, void(const SafeAreaEdgeInserts& systemSafeArea));
+    MOCK_CONST_METHOD0(GetSystemSafeArea, SafeAreaEdgeInserts());
+    MOCK_METHOD1(SetCutoutSafeArea, void(const SafeAreaEdgeInserts& cutoutSafeArea));
+    MOCK_CONST_METHOD0(GetCutoutSafeArea, SafeAreaEdgeInserts());
+    MOCK_CONST_METHOD0(GetViewSafeArea, SafeAreaEdgeInserts());
+    MOCK_METHOD0(AppBarAdaptToSafeArea, void());
     static RefPtr<MockPipelineBase> pipeline_;
 
 protected:

@@ -31,9 +31,7 @@
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "base/msdp/device_status/interfaces/innerkits/interaction/include/interaction_manager.h"
-#include "unified_data.h"
-#include "udmf_client.h"
-#include "unified_types.h"
+#include "core/common/udmf/udmf_client.h"
 #endif // ENABLE_DRAG_FRAMEWORK
 namespace OHOS::Ace::NG {
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -405,6 +403,12 @@ void GestureEventHub::StartDragTaskForWeb()
 
 void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 {
+#ifdef ENABLE_DRAG_FRAMEWORK
+    if (info.GetSourceTool() == SourceTool::PEN) {
+        LOGI("HandleOnDragStart: The stylus does not support drag and drop!");
+        return;
+    }
+#endif
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
     if (!IsAllowedDrag(eventHub)) {
@@ -431,19 +435,19 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         return;
     }
     std::string udKey;
+    int32_t recordsSize = 1;
     auto unifiedData = event->GetData();
-    auto records = unifiedData->GetRecords();
-    int32_t recordsSize = std:min(records.size(), 1);
+    if (unifiedData) {
+        auto recordSize = unifiedData->GetSize();
+        recordsSize = recordSize > 1 ? recordSize : 1;
+    }
     SetDragData(unifiedData, udKey);
-    auto udmfClient = UDMF::UdmfClient::GetInstance();
-    UDMF::Summary summary;
-    UDMF::QueryOption queryOption;
-    queryOption.key = udKey;
-    int32_t ret = udmfClient.GetSummary(queryOption, summary);
+    std::map<std::string, int64_t> summary;
+    int32_t ret = UdmfClient::GetInstance()->GetSummary(udKey, summary);
     if (ret != 0) {
         LOGW("HandleOnDragStart: UDMF GetSummary failed, ret %{public}d", ret);
     }
-    dragDropManager->SetSummaryMap(summary.summary);
+    dragDropManager->SetSummaryMap(summary);
     CHECK_NULL_VOID(pixelMap_);
     std::shared_ptr<Media::PixelMap> pixelMap;
     if (dragDropInfo.pixelMap) {
@@ -452,14 +456,22 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     if (pixelMap == nullptr) {
         pixelMap = pixelMap_->GetPixelMapSharedPtr();
     }
-    if (!GetTextDraggable()) {
+    auto minDeviceLength = std::min(SystemProperties::GetDeviceHeight(), SystemProperties::GetDeviceWidth());
+    if ((SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT &&
+            pixelMap->GetHeight() > minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE) ||
+        (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE &&
+            pixelMap->GetHeight() > minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE &&
+            pixelMap->GetWidth() > minDeviceLength)) {
+        float scale = static_cast<float>(minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE) / pixelMap->GetHeight();
+        pixelMap->scale(scale, scale);
+    } else if (!GetTextDraggable()) {
         pixelMap->scale(PIXELMAP_DRAG_SCALE, PIXELMAP_DRAG_SCALE);
     }
     uint32_t width = pixelMap->GetWidth();
     uint32_t height = pixelMap->GetHeight();
     DragData dragData {{pixelMap, width * PIXELMAP_WIDTH_RATE, height * PIXELMAP_HEIGHT_RATE}, {}, udKey,
         static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(),
-        info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY(), info.GetDeviceId(), true};
+        info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY(), info.GetTargetDisplayId(), true};
     ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData, GetDragCallback());
     if (ret != 0) {
         LOGE("InteractionManager: drag start error");
@@ -703,16 +715,13 @@ bool GestureEventHub::KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-int32_t GestureEventHub::SetDragData(std::shared_ptr<UDMF::UnifiedData>& unifiedData, std::string& udKey)
+int32_t GestureEventHub::SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey)
 {
     if (unifiedData == nullptr) {
         LOGE("HandleOnDragStart: SetDragData unifiedData is null");
         return -1;
     }
-    auto udmfClient = UDMF::UdmfClient::GetInstance();
-    UDMF::CustomOption udCustomOption;
-    udCustomOption.intention = UDMF::Intention::UD_INTENTION_DRAG;
-    int32_t ret = udmfClient.SetData(udCustomOption, *unifiedData, udKey);
+    int32_t ret = UdmfClient::GetInstance()->SetData(unifiedData, udKey);
     if (ret != 0) {
         LOGE("HandleOnDragStart: UDMF Setdata failed:%{public}d", ret);
     }
@@ -727,8 +736,10 @@ OnDragCallback GestureEventHub::GetDragCallback()
     CHECK_NULL_RETURN(pipeline, ret);
     auto taskScheduler = pipeline->GetTaskExecutor();
     CHECK_NULL_RETURN(taskScheduler, ret);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_RETURN(dragDropManager, ret);
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    auto callback = [eventHub, dragEvent, taskScheduler](const DragNotifyMsg& notifyMessage) {
+    auto callback = [eventHub, dragEvent, taskScheduler, dragDropManager](const DragNotifyMsg& notifyMessage) {
         DragRet result = DragRet::DRAG_FAIL;
         switch (notifyMessage.result) {
             case DragResult::DRAG_SUCCESS:
@@ -742,7 +753,8 @@ OnDragCallback GestureEventHub::GetDragCallback()
         }
         dragEvent->SetResult(result);
         taskScheduler->PostTask(
-            [eventHub, dragEvent]() {
+            [eventHub, dragEvent, dragDropManager]() {
+                dragDropManager->SetIsDragged(false);
                 if (eventHub->HasOnDragEnd()) {
                     (eventHub->GetOnDragEnd())(dragEvent);
                 }
@@ -777,5 +789,19 @@ bool GestureEventHub::IsAccessibilityLongClickable()
         }
     }
     return ret;
+}
+
+void GestureEventHub::ClearUserOnClick()
+{
+    if (clickEventActuator_) {
+        clickEventActuator_->ClearUserCallback();
+    }
+}
+
+void GestureEventHub::ClearUserOnTouch()
+{
+    if (touchEventActuator_) {
+        touchEventActuator_->ClearUserCallback();
+    }
 }
 } // namespace OHOS::Ace::NG

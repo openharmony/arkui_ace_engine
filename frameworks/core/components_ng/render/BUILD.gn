@@ -55,6 +55,7 @@ build_component_ng("render_ng") {
 
   rosen_sources = [
     "adapter/component_snapshot.cpp",
+    "adapter/gradient_style_modifier.cpp",
     "adapter/moon_progress_modifier.cpp",
     "adapter/rosen_animation_utils.cpp",
     "adapter/rosen_media_player.cpp",

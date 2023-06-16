@@ -17,13 +17,12 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_XCOMPONENT_MODEL_IMPL_H
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_model.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 
 namespace OHOS::Ace::Framework {
 
 class XComponentModelImpl : public OHOS::Ace::XComponentModel {
 public:
-    void Create(const std::string& id, const std::string& type, const std::string& libraryname,
+    void Create(const std::string& id, XComponentType type, const std::string& libraryname,
         const RefPtr<XComponentController>& xcomponentController) override;
     void SetSoPath(const std::string& soPath) override;
     void SetOnLoad(LoadEvent&& onLoad) override;

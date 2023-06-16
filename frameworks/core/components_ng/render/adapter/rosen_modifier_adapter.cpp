@@ -69,23 +69,23 @@ void ContentModifierAdapter::Draw(RSDrawingContext& context) const
     modifier->onDraw(context_);
 }
 
-#define CONVERT_PROP(prop, srcType, propType)                                                 \
-    if (AceType::InstanceOf<srcType>(prop)) {                                                 \
-        auto castProp = AceType::DynamicCast<srcType>(prop);                                  \
-        auto rsProp = std::make_shared<RSProperty<propType>>(castProp->Get());                \
-        castProp->SetUpCallbacks([rsProp]() -> propType { return rsProp->Get(); },            \
-            [rsProp](const propType& value) { rsProp->Set(value); });                         \
-        return rsProp;                                                                        \
+#define CONVERT_PROP(prop, srcType, propType)                                      \
+    if (AceType::InstanceOf<srcType>(prop)) {                                      \
+        auto castProp = AceType::DynamicCast<srcType>(prop);                       \
+        auto rsProp = std::make_shared<RSProperty<propType>>(castProp->Get());     \
+        castProp->SetUpCallbacks([rsProp]() -> propType { return rsProp->Get(); }, \
+            [rsProp](const propType& value) { rsProp->Set(value); });              \
+        return rsProp;                                                             \
     }
 
-#define CONVERT_ANIMATABLE_PROP(prop, srcType, propType)                                      \
-    if (AceType::InstanceOf<srcType>(prop)) {                                                 \
-        auto castProp = AceType::DynamicCast<srcType>(prop);                                  \
-        auto rsProp = std::make_shared<RSAnimatableProperty<propType>>(castProp->Get());      \
-        castProp->SetUpCallbacks([rsProp]() -> propType { return rsProp->Get(); },            \
-            [rsProp](const propType& value) { rsProp->Set(value); });                         \
-        rsProp->SetUpdateCallback(castProp->GetUpdateCallback());                             \
-        return rsProp;                                                                        \
+#define CONVERT_ANIMATABLE_PROP(prop, srcType, propType)                                 \
+    if (AceType::InstanceOf<srcType>(prop)) {                                            \
+        auto castProp = AceType::DynamicCast<srcType>(prop);                             \
+        auto rsProp = std::make_shared<RSAnimatableProperty<propType>>(castProp->Get()); \
+        castProp->SetUpCallbacks([rsProp]() -> propType { return rsProp->Get(); },       \
+            [rsProp](const propType& value) { rsProp->Set(value); });                    \
+        rsProp->SetUpdateCallback(castProp->GetUpdateCallback());                        \
+        return rsProp;                                                                   \
     }
 
 inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<PropertyBase>& property)
@@ -107,18 +107,19 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Property
 
     if (AceType::InstanceOf<AnimatableArithmeticProperty>(property)) {
         auto castProp = AceType::DynamicCast<AnimatableArithmeticProperty>(property);
+        if (!castProp && !castProp->Get()) {
+            LOGE("ConvertToRSProperty: Failed converting to RSProperty - AnimatableArithmeticProperty is null");
+            return nullptr;
+        }
         AnimatableArithmeticProxy proxy(castProp->Get());
         auto rsProp = std::make_shared<RSAnimatableProperty<AnimatableArithmeticProxy>>(proxy);
-        auto getter = [rsProp]() -> RefPtr<CustomAnimatableArithmetic> {
-            return rsProp->Get().GetObject();
-        };
+        auto getter = [rsProp]() -> RefPtr<CustomAnimatableArithmetic> { return rsProp->Get().GetObject(); };
         auto setter = [rsProp](const RefPtr<CustomAnimatableArithmetic>& value) {
             rsProp->Set(AnimatableArithmeticProxy(value));
         };
         castProp->SetUpCallbacks(getter, setter);
-        rsProp->SetUpdateCallback([cb = castProp->GetUpdateCallback()](const AnimatableArithmeticProxy& value) {
-            cb(value.GetObject());
-        });
+        rsProp->SetUpdateCallback(
+            [cb = castProp->GetUpdateCallback()](const AnimatableArithmeticProxy& value) { cb(value.GetObject()); });
         return rsProp;
     }
 

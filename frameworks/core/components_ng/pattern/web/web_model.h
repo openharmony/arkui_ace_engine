@@ -132,7 +132,7 @@ public:
     virtual void SetHorizontalScrollBarAccessEnabled(bool isHorizontalScrollBarAccessEnabled) {};
     virtual void SetVerticalScrollBarAccessEnabled(bool isVerticalScrollBarAccessEnabled) {};
 
-    virtual void SetOnControllerAttached(std::function<void()>&& callback_, std::function<void()>&& callback) {};
+    virtual void SetOnControllerAttached(std::function<void()>&& callback) {};
     virtual void NotifyPopupWindowResult(int32_t webId, bool result) {};
     virtual void SetAudioResumeInterval(int32_t resumeInterval) {};
     virtual void SetAudioExclusive(bool audioExclusive) {};

@@ -146,6 +146,7 @@ public:
         std::vector<std::string>& assetBasePaths, std::string& resFolderName) override;
     void SetResourcePaths(const std::vector<std::string>& resourcesPaths, const std::string& assetRootPath,
         const std::vector<std::string>& assetBasePaths) override;
+    NativeValue* GetUIContext() override;
 
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
@@ -171,6 +172,7 @@ private:
     bool isFormRenderInit_ = false;
     std::string bundleName_;
     std::string moduleName_;
+    std::string hapPath_;
     bool isBundle_ = false;
     int32_t minCompatibleVersionCode_ = 0;
     float formWidth_ = 0.0;

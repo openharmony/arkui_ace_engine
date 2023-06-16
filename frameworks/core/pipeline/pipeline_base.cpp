@@ -158,15 +158,22 @@ void PipelineBase::SetRootSize(double density, int32_t width, int32_t height)
 {
     ACE_SCOPED_TRACE("SetRootSize(%lf, %d, %d)", density, width, height);
     density_ = density;
-    taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), density, width, height]() {
-            auto context = weak.Upgrade();
-            if (!context) {
-                return;
-            }
-            context->SetRootRect(width, height);
-        },
-        TaskExecutor::TaskType::UI);
+    auto task = [weak = AceType::WeakClaim(this), density, width, height]() {
+        auto context = weak.Upgrade();
+        if (!context) {
+            return;
+        }
+        context->SetRootRect(width, height);
+    };
+#ifdef NG_BUILD
+    if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        task();
+    } else {
+        taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI);
+    }
+#else
+    taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI);
+#endif
 }
 
 void PipelineBase::SetFontScale(float fontScale)
@@ -216,6 +223,21 @@ void PipelineBase::RegisterFont(const std::string& familyName, const std::string
     if (fontManager_) {
         fontManager_->RegisterFont(familyName, familySrc, AceType::Claim(this));
     }
+}
+
+void PipelineBase::GetSystemFontList(std::vector<std::string>& fontList)
+{
+    if (fontManager_) {
+        fontManager_->GetSystemFontList(fontList);
+    }
+}
+
+bool PipelineBase::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
+{
+    if (fontManager_) {
+        return fontManager_->GetSystemFont(fontName, fontInfo);
+    }
+    return false;
 }
 
 void PipelineBase::HyperlinkStartAbility(const std::string& address) const

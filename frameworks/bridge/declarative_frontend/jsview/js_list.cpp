@@ -215,12 +215,12 @@ void JSList::SetSticky(int32_t sticky)
     ListModel::GetInstance()->SetSticky(static_cast<V2::StickyStyle>(sticky));
 }
 
-void JSList::SetContentStartOffset(int32_t startOffset)
+void JSList::SetContentStartOffset(float startOffset)
 {
     ListModel::GetInstance()->SetContentStartOffset(startOffset);
 }
 
-void JSList::SetContentEndOffset(int32_t endOffset)
+void JSList::SetContentEndOffset(float endOffset)
 {
     ListModel::GetInstance()->SetContentEndOffset(endOffset);
 }
@@ -249,6 +249,38 @@ void JSList::SetDivider(const JSCallbackInfo& args)
     ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin);
     ListModel::GetInstance()->SetDivider(divider);
 
+    args.ReturnSelf();
+}
+
+void JSList::SetNestedScroll(const JSCallbackInfo& args)
+{
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_ONLY,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        ListModel::GetInstance()->SetNestedScroll(nestedOpt);
+        LOGW("Invalid params");
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    int32_t froward = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollForward"), froward);
+    if (froward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
+        froward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
+        LOGW("ScrollFroward params invalid");
+        froward = 0;
+    }
+    int32_t backward = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollBackward"), backward);
+    if (backward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
+        backward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
+        LOGW("ScrollFroward params invalid");
+        backward = 0;
+    }
+    nestedOpt.forward = static_cast<NestedScrollMode>(froward);
+    nestedOpt.backward = static_cast<NestedScrollMode>(backward);
+    ListModel::GetInstance()->SetNestedScroll(nestedOpt);
     args.ReturnSelf();
 }
 
@@ -558,6 +590,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("sticky", &JSList::SetSticky);
     JSClass<JSList>::StaticMethod("contentStartOffset", &JSList::SetContentStartOffset);
     JSClass<JSList>::StaticMethod("contentEndOffset", &JSList::SetContentEndOffset);
+    JSClass<JSList>::StaticMethod("nestedScroll", &JSList::SetNestedScroll);
 
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
     JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);

@@ -401,7 +401,7 @@ void ButtonModelImpl::SetDefaultAttributes(const RefPtr<ButtonComponent>& button
     buttonComponent->SetHoverColor(buttonTheme->GetHoverColor());
 }
 
-void ButtonModelImpl::SetRemoteMessage(RemoteCallback remoteCallback)
+void ButtonModelImpl::SetRemoteMessage(RemoteCallback&& remoteCallback)
 {
     EventMarker remoteMessageEventId(std::move(remoteCallback));
     auto stack = ViewStackProcessor::GetInstance();

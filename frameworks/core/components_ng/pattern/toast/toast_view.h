@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,11 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ToastView {
 public:
     static RefPtr<FrameNode> CreateToastNode(const std::string& message, const std::string& bottom, bool isRightToLeft);
+
+private:
+    static void UpdateTextLayoutProperty(
+        const RefPtr<FrameNode>& textNode, const std::string& message, bool isRightToLeft);
+    static void UpdateTextContext(const RefPtr<FrameNode>& textNode);
 };
 } // namespace OHOS::Ace::NG
 
