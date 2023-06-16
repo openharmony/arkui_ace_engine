@@ -246,8 +246,11 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // Measure children.
     auto layoutConstraint = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, idealSize);
-    prevMargin_ = static_cast<float>(swiperLayoutProperty->GetPrevMarginValue(0.0_px).ConvertToPx());
-    nextMargin_ = static_cast<float>(swiperLayoutProperty->GetNextMarginValue(0.0_px).ConvertToPx());
+    if (SwiperUtils::IsStretch(swiperLayoutProperty)) {
+        prevMargin_ = static_cast<float>(swiperLayoutProperty->GetPrevMarginValue(0.0_px).ConvertToPx());
+        nextMargin_ = static_cast<float>(swiperLayoutProperty->GetNextMarginValue(0.0_px).ConvertToPx());
+    }
+
     auto crossSize = 0.0f;
     auto mainSize = 0.0f;
     InitItemRange(layoutWrapper);
