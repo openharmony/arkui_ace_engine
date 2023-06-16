@@ -47,6 +47,7 @@ build_component_ng("window_scene") {
       "ability_runtime:abilitykit_native",
       "input:libmmi-client",
       "ipc:ipc_single",
+      "power_manager:powermgr_client",
       "window_manager:libwm",
       "window_manager:scene_session",
       "window_manager:scene_session_manager",
