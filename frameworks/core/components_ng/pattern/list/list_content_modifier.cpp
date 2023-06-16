@@ -87,7 +87,7 @@ void ListContentModifier::PaintDivider(
     if (!lastLineIndex.empty() && *lastLineIndex.rbegin() < dividerInfo.totalItemCount - 1) {
         int32_t laneIdx = 0;
         for (auto index : lastLineIndex) {
-            if (NearEqual(index + lanes, dividerInfo.totalItemCount)) {
+            if (index + lanes >= dividerInfo.totalItemCount) {
                 break;
             }
             float divOffset = (dividerInfo.space - dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
