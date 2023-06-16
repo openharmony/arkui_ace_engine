@@ -273,7 +273,7 @@ using ErrorCallback = std::function<void(const std::string&, int32_t)>;
 using RouterWithCallbackFunc = std::function<void(std::shared_ptr<RouterAsyncContext>, const ErrorCallback&)>;
 
 static napi_value CommonRouterWithCallbackProcess(
-    napi_env env, napi_callback_info info, const RouterWithCallbackFunc& callback, const std::string keyForUrl)
+    napi_env env, napi_callback_info info, const RouterWithCallbackFunc& callback, const std::string& keyForUrl)
 {
     napi_value result = nullptr;
     napi_get_undefined(env, &result);
