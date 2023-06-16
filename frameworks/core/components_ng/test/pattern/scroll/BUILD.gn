@@ -69,7 +69,6 @@ ohos_unittest("scroll_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/scroll/scroll_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll/scroll_position_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll/scroll_spring_effect.cpp",
-    "scroll_accessibility_property_test_ng.cpp",
     "scroll_test_ng.cpp",
   ]
 

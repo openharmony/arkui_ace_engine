@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include <cstdint>
 #include <memory>
 #include <utility>
@@ -63,6 +62,10 @@ constexpr float COLUMN_WIDTH = COLUMN_CHILD_WIDTH * CHILD_NUMBER;
 constexpr float COLUMN_HEIGHT = COLUMN_CHILD_HEIGHT * CHILD_NUMBER;
 constexpr int32_t BAR_EXPAND_DURATION = 150; // 150ms, scroll bar width expands from 4dp to 8dp
 constexpr int32_t BAR_SHRINK_DURATION = 250; // 250ms, scroll bar width shrinks from 8dp to 4dp
+constexpr float SCROLLABLE_DISTANCE = 10.0f;
+constexpr float CURRENT_DISTANCE = -5.0f;
+constexpr float CURRENT_DISTANCE_TOP = 0.0f;
+constexpr float CURRENT_DISTANCE_BOTTOM = -SCROLLABLE_DISTANCE;
 } // namespace
 
 class ScrollTestNg : public testing::Test {
@@ -83,13 +86,13 @@ public:
     RefPtr<LayoutWrapper> CreateScroll(Axis axis, NG::ScrollEdgeEvent&& event);
     RefPtr<LayoutWrapper> CreateScroll(Axis axis, OnScrollStartEvent&& event);
     void CreateContent(Axis axis = Axis::VERTICAL);
-    RefPtr<LayoutWrapper> RunMeasureAndLayout(
-        float width = ROOT_WIDTH, float height = ROOT_HEIGHT);
+    RefPtr<LayoutWrapper> RunMeasureAndLayout(float width = ROOT_WIDTH, float height = ROOT_HEIGHT);
     RefPtr<FrameNode> GetContentChild(int32_t index);
     void Touch(TouchLocationInfo locationInfo, SourceType sourceType);
     void Touch(TouchType touchType, Offset offset, SourceType sourceType);
     void Mouse(MouseInfo mouseInfo);
     void Mouse(Offset moveOffset);
+    RefPtr<FrameNode> GetColumnChild(int32_t index);
     void UpdateCurrentOffset(float offset);
     testing::AssertionResult IsEqualCurrentOffset(Offset expectOffset);
     testing::AssertionResult IsEqualOverScrollOffset(OverScrollOffset offset, OverScrollOffset expectOffset);
@@ -334,7 +337,6 @@ void ScrollTestNg::Mouse(Offset moveOffset)
     Mouse(mouseInfo);
 }
 
-
 testing::AssertionResult ScrollTestNg::IsEqualCurrentOffset(Offset expectOffset)
 {
     RunMeasureAndLayout();
@@ -342,10 +344,8 @@ testing::AssertionResult ScrollTestNg::IsEqualCurrentOffset(Offset expectOffset)
     if (expectOffset == currentOffset) {
         return testing::AssertionSuccess();
     }
-    return testing::AssertionFailure() <<
-        "GetCurrentOffset(): " << currentOffset.ToString() <<
-        " != " <<
-        "expectOffset: " << expectOffset.ToString();
+    return testing::AssertionFailure() << "GetCurrentOffset(): " << currentOffset.ToString() << " != "
+                                       << "expectOffset: " << expectOffset.ToString();
 }
 
 testing::AssertionResult ScrollTestNg::IsEqualOverScrollOffset(OverScrollOffset offset, OverScrollOffset expectOffset)
@@ -353,10 +353,11 @@ testing::AssertionResult ScrollTestNg::IsEqualOverScrollOffset(OverScrollOffset 
     if (NearEqual(offset.start, expectOffset.start) && NearEqual(offset.end, expectOffset.end)) {
         return testing::AssertionSuccess();
     }
-    return testing::AssertionFailure() <<
-        "offset: " << "{ " << offset.start << " , " << offset.end << " }" <<
-        " != " <<
-        "expectOffset: " << "{ " << expectOffset.start << " , " << expectOffset.end << " }";
+    return testing::AssertionFailure() << "offset: "
+                                       << "{ " << offset.start << " , " << offset.end << " }"
+                                       << " != "
+                                       << "expectOffset: "
+                                       << "{ " << expectOffset.start << " , " << expectOffset.end << " }";
 }
 
 testing::AssertionResult ScrollTestNg::IsEqualRect(Rect rect, Rect expectRect)
@@ -364,10 +365,8 @@ testing::AssertionResult ScrollTestNg::IsEqualRect(Rect rect, Rect expectRect)
     if (rect == expectRect) {
         return testing::AssertionSuccess();
     }
-    return testing::AssertionFailure() <<
-        "rect: " << rect.ToString() <<
-        " != " <<
-        "expectRect: " << expectRect.ToString();
+    return testing::AssertionFailure() << "rect: " << rect.ToString() << " != "
+                                       << "expectRect: " << expectRect.ToString();
 }
 
 /**
@@ -508,8 +507,8 @@ HWTEST_F(ScrollTestNg, Event001, TestSize.Level1)
      * @tc.steps: step1. When set event
      * @tc.expected: scrollableEvent would has event that setted
      */
-    EXPECT_NE(eventHub_->GetScrollFrameBeginEvent(), nullptr);
-    EXPECT_NE(eventHub_->GetScrollBeginEvent(), nullptr);
+    ASSERT_NE(eventHub_->GetScrollFrameBeginEvent(), nullptr);
+    ASSERT_NE(eventHub_->GetScrollBeginEvent(), nullptr);
 }
 
 /**
@@ -850,9 +849,9 @@ HWTEST_F(ScrollTestNg, ScrollTest003, TestSize.Level1)
      */
     pattern_->SetEdgeEffect(EdgeEffect::SPRING);
     RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
-    EXPECT_NE(scrollEdgeEffect, nullptr);
+    ASSERT_NE(scrollEdgeEffect, nullptr);
     auto springEffect = AceType::DynamicCast<ScrollSpringEffect>(scrollEdgeEffect);
-    EXPECT_NE(springEffect, nullptr);
+    ASSERT_NE(springEffect, nullptr);
     pattern_->currentOffset_ = 100.f;
     pattern_->scrollableDistance_ = 100.f;
     auto isOutBoundary = springEffect->outBoundaryCallback_();
@@ -917,13 +916,13 @@ HWTEST_F(ScrollTestNg, ScrollTest004, TestSize.Level1)
      */
     pattern_->SetEdgeEffect(EdgeEffect::FADE);
     RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
-    EXPECT_NE(scrollEdgeEffect, nullptr);
+    ASSERT_NE(scrollEdgeEffect, nullptr);
     pattern_->currentOffset_ = 100.f;
     pattern_->scrollableDistance_ = 100.f;
     auto scrollFade = AceType::DynamicCast<ScrollFadeEffect>(scrollEdgeEffect);
-    EXPECT_NE(scrollFade, nullptr);
+    ASSERT_NE(scrollFade, nullptr);
     scrollFade->handleOverScrollCallback_();
-    EXPECT_NE(scrollFade->fadeController_, nullptr);
+    ASSERT_NE(scrollFade->fadeController_, nullptr);
     pattern_->SetEdgeEffect(EdgeEffect::NONE);
     EXPECT_EQ(pattern_->scrollEffect_, nullptr);
 }
@@ -1096,7 +1095,7 @@ HWTEST_F(ScrollTestNg, ScrollFadeEffect001, TestSize.Level1)
     scrollFadeEffect->fadeController_ = nullptr;
     scrollFadeEffect->HandleOverScroll(Axis::VERTICAL, -1.f, viewPort);
     EXPECT_EQ(scrollFadeEffect->fadePainter_->direction_, OverScrollDirection::UP);
-    EXPECT_NE(scrollFadeEffect->fadeController_, nullptr);
+    ASSERT_NE(scrollFadeEffect->fadeController_, nullptr);
     scrollFadeEffect->fadeController_->DecelerateListener(1.0);
 
     scrollFadeEffect->scrollable_->currentVelocity_ = 1000.0;
@@ -1116,7 +1115,6 @@ HWTEST_F(ScrollTestNg, ScrollFadeEffect001, TestSize.Level1)
      */
     scrollFadeEffect->scrollable_ = nullptr;
     scrollFadeEffect->HandleOverScroll(Axis::HORIZONTAL, -1.f, viewPort);
-
 
     /**
      * @tc.steps: step5. Call CalculateOverScroll()
@@ -1177,7 +1175,7 @@ HWTEST_F(ScrollTestNg, FadeController001, TestSize.Level1)
      * @tc.steps: step1. Create ScrollFadeController and set callback function.
      */
     auto fadeController = AceType::MakeRefPtr<ScrollFadeController>();
-    EXPECT_NE(fadeController, nullptr);
+    ASSERT_NE(fadeController, nullptr);
     double param1 = 10.f;
     double param2 = -10.0;
     auto callback = [&param1, &param2](double parameter1, double parameter2) {
@@ -1265,7 +1263,7 @@ HWTEST_F(ScrollTestNg, ScrollBar001, TestSize.Level1)
      * @tc.expected: step1. Check whether relevant parameters are correct.
      */
     auto scrollBar = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
-    EXPECT_NE(scrollBar, nullptr);
+    ASSERT_NE(scrollBar, nullptr);
     scrollBar->shapeMode_ = ShapeMode::RECT;
     scrollBar->positionMode_ = PositionMode::LEFT;
     scrollBar->UpdateScrollBarRegion(Offset::Zero(), Size(100.0, 100.0), Offset(1.f, 1.f), 1.0);
@@ -1493,28 +1491,18 @@ HWTEST_F(ScrollTestNg, ScrollBar003, TestSize.Level1)
     CreateScroll(Dimension(barWidth));
     auto scrollBar = pattern_->GetScrollBar();
 
-    EXPECT_TRUE(IsEqualRect(scrollBar->touchRegion_, Rect(
-        ROOT_WIDTH - barWidth,
-        0.f,
-        barWidth,
-        ROOT_HEIGHT / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER
-    )));
+    EXPECT_TRUE(IsEqualRect(scrollBar->touchRegion_,
+        Rect(ROOT_WIDTH - barWidth, 0.f, barWidth, ROOT_HEIGHT / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER)));
 
     UpdateCurrentOffset(-COLUMN_CHILD_HEIGHT);
-    EXPECT_TRUE(IsEqualRect(scrollBar->touchRegion_, Rect(
-        ROOT_WIDTH - barWidth,
-        COLUMN_CHILD_HEIGHT / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER,
-        barWidth,
-        ROOT_HEIGHT / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER
-    )));
+    EXPECT_TRUE(IsEqualRect(
+        scrollBar->touchRegion_, Rect(ROOT_WIDTH - barWidth, COLUMN_CHILD_HEIGHT / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER,
+                                     barWidth, ROOT_HEIGHT / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER)));
 
     UpdateCurrentOffset(-COLUMN_CHILD_HEIGHT);
-    EXPECT_TRUE(IsEqualRect(scrollBar->touchRegion_, Rect(
-        ROOT_WIDTH - barWidth,
-        COLUMN_CHILD_HEIGHT * 2 / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER,
-        barWidth,
-        ROOT_HEIGHT / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER
-    )));
+    EXPECT_TRUE(IsEqualRect(scrollBar->touchRegion_,
+        Rect(ROOT_WIDTH - barWidth, COLUMN_CHILD_HEIGHT * 2 / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER, barWidth,
+            ROOT_HEIGHT / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER)));
 
     /**
      * @tc.steps: step2. Test Bar in HORIZONTAL
@@ -1523,28 +1511,18 @@ HWTEST_F(ScrollTestNg, ScrollBar003, TestSize.Level1)
     CreateScroll(Dimension(barWidth), Axis::HORIZONTAL);
     scrollBar = pattern_->GetScrollBar();
 
-    EXPECT_TRUE(IsEqualRect(scrollBar->touchRegion_, Rect(
-        0.f,
-        ROOT_HEIGHT - barWidth,
-        ROOT_WIDTH / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER,
-        barWidth
-    )));
+    EXPECT_TRUE(IsEqualRect(scrollBar->touchRegion_,
+        Rect(0.f, ROOT_HEIGHT - barWidth, ROOT_WIDTH / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER, barWidth)));
 
     UpdateCurrentOffset(-COLUMN_CHILD_WIDTH);
-    EXPECT_TRUE(IsEqualRect(scrollBar->touchRegion_, Rect(
-        COLUMN_CHILD_WIDTH / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER,
-        ROOT_HEIGHT - barWidth,
-        ROOT_WIDTH / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER,
-        barWidth
-    )));
+    EXPECT_TRUE(IsEqualRect(
+        scrollBar->touchRegion_, Rect(COLUMN_CHILD_WIDTH / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER, ROOT_HEIGHT - barWidth,
+                                     ROOT_WIDTH / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER, barWidth)));
 
     UpdateCurrentOffset(-COLUMN_CHILD_WIDTH);
-    EXPECT_TRUE(IsEqualRect(scrollBar->touchRegion_, Rect(
-        COLUMN_CHILD_WIDTH * 2 / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER,
-        ROOT_HEIGHT - barWidth,
-        ROOT_WIDTH / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER,
-        barWidth
-    )));
+    EXPECT_TRUE(IsEqualRect(scrollBar->touchRegion_,
+        Rect(COLUMN_CHILD_WIDTH * 2 / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER, ROOT_HEIGHT - barWidth,
+            ROOT_WIDTH / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER, barWidth)));
 }
 
 /**
@@ -1575,9 +1553,8 @@ HWTEST_F(ScrollTestNg, Measure001, TestSize.Level1)
     layoutWrapper->MountToHostOnMainThread();
     auto scrollSize = frameNode_->GetGeometryNode()->GetFrameSize();
     auto expectSize = SizeF(ROOT_WIDTH, COLUMN_HEIGHT);
-    EXPECT_EQ(scrollSize, expectSize) <<
-        "scrollSize: " << scrollSize.ToString() <<
-        " expectSize: " << expectSize.ToString();
+    EXPECT_EQ(scrollSize, expectSize) << "scrollSize: " << scrollSize.ToString()
+                                      << " expectSize: " << expectSize.ToString();
 }
 
 /**
@@ -1600,9 +1577,8 @@ HWTEST_F(ScrollTestNg, Layout001, TestSize.Level1)
     auto colNode = AceType::DynamicCast<FrameNode>(col);
     auto colOffset = colNode->GetGeometryNode()->GetMarginFrameOffset();
     auto expectOffset = OffsetF(0, 0);
-    EXPECT_EQ(colOffset, expectOffset) <<
-        "colOffset: " << colOffset.ToString() <<
-        " expectOffset: " << expectOffset.ToString();
+    EXPECT_EQ(colOffset, expectOffset) << "colOffset: " << colOffset.ToString()
+                                       << " expectOffset: " << expectOffset.ToString();
 }
 
 /**
@@ -1739,9 +1715,9 @@ HWTEST_F(ScrollTestNg, Pattern001, TestSize.Level1)
      * @tc.expected: Has ScrollableEvent, has AccessibilityAction
      */
     CreateScroll();
-    EXPECT_NE(pattern_->GetScrollableEvent(), nullptr);
-    EXPECT_NE(accessibilityProperty_->actionScrollForwardImpl_, nullptr);
-    EXPECT_NE(accessibilityProperty_->actionScrollBackwardImpl_, nullptr);
+    ASSERT_NE(pattern_->GetScrollableEvent(), nullptr);
+    ASSERT_NE(accessibilityProperty_->actionScrollForwardImpl_, nullptr);
+    ASSERT_NE(accessibilityProperty_->actionScrollBackwardImpl_, nullptr);
 
     /**
      * @tc.steps: step1. Change axis and trigger OnModifyDone
@@ -1750,7 +1726,7 @@ HWTEST_F(ScrollTestNg, Pattern001, TestSize.Level1)
     layoutProperty_->UpdateAxis(Axis::HORIZONTAL);
     pattern_->OnModifyDone();
     EXPECT_EQ(pattern_->GetAxis(), Axis::HORIZONTAL);
-    EXPECT_NE(pattern_->GetScrollableEvent(), nullptr);
+    ASSERT_NE(pattern_->GetScrollableEvent(), nullptr);
 }
 
 /**
@@ -1811,7 +1787,7 @@ HWTEST_F(ScrollTestNg, Pattern004, TestSize.Level1)
      * @tc.expected: ScrollPage forward, would trigger AnimateTo()
      */
     accessibilityProperty_->actionScrollForwardImpl_();
-    EXPECT_NE(pattern_->animator_, nullptr);
+    ASSERT_NE(pattern_->animator_, nullptr);
 
     /**
      * @tc.steps: step9. Trigger actionScrollBackwardImpl_
@@ -1819,7 +1795,7 @@ HWTEST_F(ScrollTestNg, Pattern004, TestSize.Level1)
      */
     pattern_->animator_ = nullptr;
     accessibilityProperty_->actionScrollBackwardImpl_();
-    EXPECT_NE(pattern_->animator_, nullptr);
+    ASSERT_NE(pattern_->animator_, nullptr);
 }
 
 /**
@@ -1864,7 +1840,8 @@ HWTEST_F(ScrollTestNg, Pattern008, TestSize.Level1)
      * @tc.expected: animator_ would be create
      */
     pattern_->CreateOrStopAnimator();
-    EXPECT_NE(pattern_->animator_, nullptr);
+    ASSERT_NE(pattern_->animator_, nullptr);
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
 
     /**
      * @tc.steps: step2. animator is running and Trigger CreateOrStopAnimator
@@ -1965,34 +1942,141 @@ HWTEST_F(ScrollTestNg, Test001, TestSize.Level1)
 {
     CreateScroll();
 
-    EXPECT_TRUE(IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(COLUMN_CHILD_HEIGHT), {COLUMN_CHILD_HEIGHT, 0}));
-    EXPECT_TRUE(IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(0.f), {0, 0}));
-    EXPECT_TRUE(IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(-COLUMN_CHILD_HEIGHT), {0, 0}));
+    EXPECT_TRUE(
+        IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(COLUMN_CHILD_HEIGHT), { COLUMN_CHILD_HEIGHT, 0 }));
+    EXPECT_TRUE(IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(0.f), { 0, 0 }));
+    EXPECT_TRUE(IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(-COLUMN_CHILD_HEIGHT), { 0, 0 }));
 
     UpdateCurrentOffset(-COLUMN_CHILD_HEIGHT);
     EXPECT_TRUE(
-        IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(COLUMN_CHILD_HEIGHT * 2), {COLUMN_CHILD_HEIGHT, 0}));
-    EXPECT_TRUE(IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(0.f), {0, 0}));
+        IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(COLUMN_CHILD_HEIGHT * 2), { COLUMN_CHILD_HEIGHT, 0 }));
+    EXPECT_TRUE(IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(0.f), { 0, 0 }));
     EXPECT_TRUE(
-        IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(-COLUMN_CHILD_HEIGHT * 2), {0, -COLUMN_CHILD_HEIGHT}));
+        IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(-COLUMN_CHILD_HEIGHT * 2), { 0, -COLUMN_CHILD_HEIGHT }));
 
     UpdateCurrentOffset(-COLUMN_CHILD_HEIGHT);
-    EXPECT_TRUE(IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(COLUMN_CHILD_HEIGHT), {0, 0}));
-    EXPECT_TRUE(IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(0.f), {0, 0}));
+    EXPECT_TRUE(IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(COLUMN_CHILD_HEIGHT), { 0, 0 }));
+    EXPECT_TRUE(IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(0.f), { 0, 0 }));
     EXPECT_TRUE(
-        IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(-COLUMN_CHILD_HEIGHT), {0, -COLUMN_CHILD_HEIGHT}));
+        IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(-COLUMN_CHILD_HEIGHT), { 0, -COLUMN_CHILD_HEIGHT }));
 
     pattern_->currentOffset_ = COLUMN_CHILD_HEIGHT;
-    EXPECT_TRUE(IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(COLUMN_CHILD_HEIGHT), {COLUMN_CHILD_HEIGHT, 0}));
-    EXPECT_TRUE(IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(0.f), {0, 0}));
     EXPECT_TRUE(
-        IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(-COLUMN_CHILD_HEIGHT * 2), {-COLUMN_CHILD_HEIGHT, 0}));
+        IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(COLUMN_CHILD_HEIGHT), { COLUMN_CHILD_HEIGHT, 0 }));
+    EXPECT_TRUE(IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(0.f), { 0, 0 }));
+    EXPECT_TRUE(
+        IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(-COLUMN_CHILD_HEIGHT * 2), { -COLUMN_CHILD_HEIGHT, 0 }));
 
     pattern_->currentOffset_ = -COLUMN_CHILD_HEIGHT * 3;
     EXPECT_TRUE(
-        IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(COLUMN_CHILD_HEIGHT * 2), {0, COLUMN_CHILD_HEIGHT}));
-    EXPECT_TRUE(IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(0.f), {0, 0}));
+        IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(COLUMN_CHILD_HEIGHT * 2), { 0, COLUMN_CHILD_HEIGHT }));
+    EXPECT_TRUE(IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(0.f), { 0, 0 }));
     EXPECT_TRUE(
-        IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(-COLUMN_CHILD_HEIGHT), {0, -COLUMN_CHILD_HEIGHT}));
+        IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(-COLUMN_CHILD_HEIGHT), { 0, -COLUMN_CHILD_HEIGHT }));
+}
+
+/**
+ * @tc.name: ScrollAccessibilityPropertyIsScrollable001
+ * @tc.desc: Test IsScrollable of scrollAccessibilityProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollAccessibilityPropertyIsScrollable001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::SCROLL_ETS_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<ScrollPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto scrollPattern = frameNode->GetPattern<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto scrollAccessibilityProperty = frameNode->GetAccessibilityProperty<ScrollAccessibilityProperty>();
+    ASSERT_NE(scrollAccessibilityProperty, nullptr);
+    EXPECT_FALSE(scrollAccessibilityProperty->IsScrollable());
+
+    scrollPattern->SetAxis(Axis::VERTICAL);
+    scrollPattern->scrollableDistance_ = SCROLLABLE_DISTANCE;
+    EXPECT_TRUE(scrollAccessibilityProperty->IsScrollable());
+
+    scrollPattern->SetAxis(Axis::NONE);
+    EXPECT_FALSE(scrollAccessibilityProperty->IsScrollable());
+}
+
+/**
+ * @tc.name: ScrollAccessibilityPropertyGetSupportAction001
+ * @tc.desc: Test GetSupportAction of scrollAccessibilityProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollAccessibilityPropertyGetSupportAction001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode, scrollPattern, scrollAccessibilityProperty.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::SCROLL_ETS_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<ScrollPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto scrollPattern = frameNode->GetPattern<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto scrollAccessibilityProperty = frameNode->GetAccessibilityProperty<ScrollAccessibilityProperty>();
+    ASSERT_NE(scrollAccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set scrollPattern property for test.
+     */
+    scrollPattern->axis_ = Axis::VERTICAL;
+    scrollPattern->scrollableDistance_ = SCROLLABLE_DISTANCE;
+    scrollPattern->currentOffset_ = CURRENT_DISTANCE;
+
+    /**
+     * @tc.steps: step3. callback ResetSupportAction then GetSupportAction. Contrast actions and expectActions.
+     * @tc.expected: expect actions equals to expectActions.
+     */
+    scrollAccessibilityProperty->ResetSupportAction();
+    std::unordered_set<AceAction> supportAceActions = scrollAccessibilityProperty->GetSupportAction();
+    uint64_t actions = 0, expectActions = 0;
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, expectActions);
+
+    /**
+     * @tc.steps: step4. change scrollPattern property and retrieve actions. Contrast again.
+     * @tc.expected: expect actions equals to expectActions.
+     */
+    scrollPattern->currentOffset_ = CURRENT_DISTANCE_TOP;
+    scrollAccessibilityProperty->ResetSupportAction();
+    supportAceActions = scrollAccessibilityProperty->GetSupportAction();
+    actions = 0, expectActions = 0;
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, expectActions);
+
+    /**
+     * @tc.steps: step5. change scrollPattern property and retrieve actions. Contrast again.
+     * @tc.expected: expect actions equals to expectActions.
+     */
+    scrollPattern->currentOffset_ = CURRENT_DISTANCE_BOTTOM;
+    scrollAccessibilityProperty->ResetSupportAction();
+    supportAceActions = scrollAccessibilityProperty->GetSupportAction();
+    actions = 0, expectActions = 0;
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, expectActions);
+
+    /**
+     * @tc.steps: step6. change scrollPattern property and retrieve actions. Contrast again.
+     * @tc.expected: expect actions equals to expectActions.
+     */
+    scrollPattern->axis_ = Axis::NONE;
+    scrollAccessibilityProperty->ResetSupportAction();
+    supportAceActions = scrollAccessibilityProperty->GetSupportAction();
+    actions = 0, expectActions = 0;
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, expectActions);
 }
 } // namespace OHOS::Ace::NG
