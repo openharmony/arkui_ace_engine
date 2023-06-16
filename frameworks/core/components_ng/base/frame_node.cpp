@@ -1169,10 +1169,12 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     if (SystemProperties::GetDebugEnabled()) {
         LOGD("TouchTest: point is %{public}s in %{public}s, depth: %{public}d", parentLocalPoint.ToString().c_str(),
             GetTag().c_str(), GetDepth());
+#ifdef ACE_DEBUG_LOG
         for (const auto& rect : responseRegionList) {
             LOGD("TouchTest: responseRegionList is %{public}s, point is %{public}s", rect.ToString().c_str(),
                 parentLocalPoint.ToString().c_str());
         }
+#endif
     }
     {
         ACE_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");

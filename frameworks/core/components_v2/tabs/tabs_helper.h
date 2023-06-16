@@ -369,7 +369,9 @@ public:
         }
 
         auto controller = tabContent->GetTabController();
+#ifdef ACE_DEBUG_LOG
         auto old = controller->GetTotalCount();
+#endif
         controller->SetTotalCount(controller->GetTotalCount() + count);
 
         auto tabContentRenderNode = AceType::DynamicCast<RenderTabContent>(tabContentProxyElement->GetRenderNode());
@@ -377,7 +379,9 @@ public:
             LOGE("GetRenderNode failed");
             return;
         }
+#ifdef ACE_DEBUG_LOG
         LOGD("Count %{public}d --> %{public}d", old, controller->GetTotalCount());
+#endif
         tabContentRenderNode->UpdateContentCount(controller->GetTotalCount());
     }
 
