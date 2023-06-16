@@ -259,8 +259,10 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     float dx = AdjustTextRectOffsetX();
     float dy = AdjustTextAreaOffsetY();
     UpdateSelectionOffset();
-    if (caretUpdateType_ == CaretUpdateType::HANDLE_MOVE && (!NearZero(dx) || !NearZero(dy))) {
-        UpdateOtherHandleOnMove(dx, dy);
+    if (caretUpdateType_ == CaretUpdateType::HANDLE_MOVE) {
+        if (!NearZero(dx) || !NearZero(dy)) {
+            UpdateOtherHandleOnMove(dx, dy);
+        }
         // trigger selection box repaint
         MarkRedrawOverlay();
     } else if (caretUpdateType_ == CaretUpdateType::HANDLE_MOVE_DONE) {
