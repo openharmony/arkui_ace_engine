@@ -108,7 +108,7 @@ public:
      *
      *   @return    true if popup was removed, false if no overlay exists
      */
-    bool RemoveOverlay();
+    bool RemoveOverlay(bool isBackPressed);
     bool RemoveModalInOverlay();
     bool RemoveOverlayInSubwindow();
 
