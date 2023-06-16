@@ -927,6 +927,7 @@ private:
     void SetAccessibilityScrollAction();
 
     void UpdateCopyAllStatus();
+    void FilterExistText();
 
     RectF frameRect_;
     RectF contentRect_;
