@@ -37,6 +37,9 @@ void GradientStyleModifier::Draw(RSDrawingContext& context) const
 
 void GradientStyleModifier::PaintGradient(RSCanvas& canvas, const SizeF& frameSize) const
 {
+    if (Negative(frameSize.Height()) || Negative(frameSize.Width())) {
+        return;
+    }
     auto shader = SkiaDecorationPainter::CreateGradientShader(GetGradient(), frameSize);
     SkPaint paint;
     paint.setAntiAlias(true);
