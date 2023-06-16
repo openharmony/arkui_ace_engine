@@ -60,7 +60,8 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     listContentModifier_->SetClipSize(frameSize);
     listContentModifier_->SetClip(clip);
     
-    if (!divider_.strokeWidth.IsValid() || totalItemCount_ <= 0) {
+    if (!divider_.strokeWidth.IsValid() || totalItemCount_ <= 0 ||
+        divider_.strokeWidth.Unit() == DimensionUnit::PERCENT) {
         listContentModifier_->ResetDividerInfo();
         return;
     }
