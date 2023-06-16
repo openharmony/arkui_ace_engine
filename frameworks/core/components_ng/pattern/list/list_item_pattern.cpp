@@ -655,8 +655,7 @@ void ListItemPattern::UpdateListItemAlignToCenter()
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto itemAlign = layoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
-    if (itemAlign != V2::ListItemAlign::CENTER) {
+    if (!layoutProperty->HasListItemAlign()) {
         layoutProperty->UpdateListItemAlign(V2::ListItemAlign::CENTER);
     }
 }
