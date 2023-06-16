@@ -82,6 +82,9 @@ const char TEXT_ETS_TAG[] = "Text";
 const char TEXT_ATTRS_OVER_FLOW[] = "textOverflow";
 const char TEXT_ATTRS_MAX_LINES[] = "maxLines";
 
+// rich editor
+const char RICH_EDITOR_ETS_TAG[] = "RichEditor";
+
 // stack
 const char STACK_COMPONENT_TAG[] = "StackComponent";
 const char STACK_ETS_TAG[] = "Stack";
