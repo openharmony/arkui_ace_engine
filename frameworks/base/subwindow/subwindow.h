@@ -50,6 +50,7 @@ public:
     virtual RefPtr<NG::FrameNode> ShowDialogNG(
         const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode) = 0;
     virtual void HideSubWindowNG() = 0;
+    virtual int32_t GetChildContainerId() const = 0;
 
     // Add interface for hot regions
     virtual void SetHotAreas(const std::vector<Rect>& rects) {};
