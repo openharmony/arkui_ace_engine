@@ -2677,6 +2677,7 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
         caretUpdateType_ = CaretUpdateType::EVENT;
         lastTouchOffset_ = info.GetLocalLocation();
         mouseStatus_ = MouseStatus::MOVE;
+        MarkRedrawOverlay();
         GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 }
