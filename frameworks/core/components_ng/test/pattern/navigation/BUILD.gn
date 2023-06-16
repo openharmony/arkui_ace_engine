@@ -18,6 +18,13 @@ ohos_unittest("navigation_test_ng") {
   module_out_path = pattern_test_output_path
 
   sources = [
+    # custom
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_measure_layout_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node_base.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node_pattern.cpp",
+
     # inner
     "$ace_root/frameworks/base/geometry/dimension.cpp",
     "$ace_root/frameworks/base/geometry/least_square_impl.cpp",
