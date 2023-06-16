@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_VIEW_ENHANCE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_VIEW_ENHANCE_H
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
@@ -26,8 +27,9 @@ public:
 protected:
     static RefPtr<FrameNode> BuildTitle(RefPtr<FrameNode>& containerNode, bool isFloatingTitle = false);
     static RefPtr<FrameNode> AddControlButtons(RefPtr<FrameNode>& containerNode, RefPtr<FrameNode>& containerTitleRow);
-    static void BondingMaxBtnEvent(RefPtr<FrameNode>& maximizeBtn, RefPtr<FrameNode>& containerNode);
-    static RefPtr<FrameNode> ShowMaxMenu(const RefPtr<FrameNode>& targetNode, const MouseInfo& info);
+    static void BondingMaxBtnGestureEvent(RefPtr<FrameNode>& maximizeBtn, RefPtr<FrameNode>& containerNode);
+    static void BondingMaxBtnInputEvent(RefPtr<FrameNode>& maximizeBtn, RefPtr<FrameNode>& containerNode);
+    static RefPtr<FrameNode> ShowMaxMenu(const RefPtr<FrameNode>& targetNode, OffsetF menuPosition);
     static RefPtr<FrameNode> BuildMenuItem(std::string title, InternalResource::ResourceId resourceId,
         RefPtr<ClickEvent> event, bool chooseCurrent);
     static RefPtr<FrameNode> BuildMaximizeMenuItem();
