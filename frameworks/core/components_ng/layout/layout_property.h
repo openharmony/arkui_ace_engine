@@ -46,7 +46,7 @@ namespace OHOS::Ace::NG {
 
 class FrameNode;
 
-class ACE_EXPORT LayoutProperty : public Property {
+class ACE_FORCE_EXPORT LayoutProperty : public Property {
     DECLARE_ACE_TYPE(LayoutProperty, Property);
 
 public:

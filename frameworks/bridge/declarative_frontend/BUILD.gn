@@ -677,7 +677,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_polygon.cpp",
       "jsview/js_polyline.cpp",
       "jsview/js_progress.cpp",
-      "jsview/js_qrcode.cpp",
       "jsview/js_radio.cpp",
       "jsview/js_rating.cpp",
       "jsview/js_rect.cpp",
@@ -727,6 +726,10 @@ template("declarative_js_engine_ng") {
     sources += [
       "$ace_root/frameworks/bridge/js_frontend/engine/common/js_engine.cpp",
     ]
+
+    if (!defined(config.use_components_lib) || !config.use_components_lib) {
+      sources += [ "jsview/js_qrcode.cpp" ]
+    }
 
     if (defined(config.video_components_support) &&
         config.video_components_support) {

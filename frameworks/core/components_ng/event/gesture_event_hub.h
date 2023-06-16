@@ -112,7 +112,7 @@ constexpr float PIXELMAP_DEFALUT_LIMIT_SCALE = 0.5f;
 class EventHub;
 
 // The gesture event hub is mainly used to handle common gesture events.
-class ACE_EXPORT GestureEventHub : public Referenced {
+class ACE_FORCE_EXPORT GestureEventHub : public Referenced {
 public:
     explicit GestureEventHub(const WeakPtr<EventHub>& eventHub);
     ~GestureEventHub() override = default;

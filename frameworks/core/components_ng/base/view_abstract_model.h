@@ -52,7 +52,7 @@ enum class ResponseType : int32_t {
     LONG_PRESS,
 };
 
-class ACE_EXPORT ViewAbstractModel {
+class ACE_FORCE_EXPORT ViewAbstractModel {
 public:
     static ViewAbstractModel* GetInstance();
     virtual ~ViewAbstractModel() = default;

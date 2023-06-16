@@ -58,6 +58,7 @@ cflags_cc = [
   "-Wno-thread-safety-analysis",
   "-Wno-ignored-attributes",
   "-Wno-unknown-pragmas",
+  "-g1",
 ]
 
 defines = [ "UNICODE" ]
