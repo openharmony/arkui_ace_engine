@@ -665,7 +665,6 @@ CaretMetricsF TextFieldPattern::CalcCursorOffsetByPosition(int32_t position)
                           static_cast<float>(CURSOR_WIDTH.ConvertToPx());
                 break;
             default:
-                offsetX = contentRect_.GetX();
                 break;
         }
         result.offset = OffsetF(offsetX, contentRect_.GetY());
