@@ -147,6 +147,9 @@ void WebPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
 }
 
 void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -161,6 +164,7 @@ void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->RemoveWindowSizeChangeCallback(id);
+    pipeline->RemoveNodesToNotifyMemoryLevel(id);
 }
 
 void WebPattern::InitEvent()
@@ -2013,5 +2017,11 @@ void WebPattern::UpdateBackgroundColorRightNow(int32_t color)
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackgroundColor(Color(static_cast<uint32_t>(color)));
+}
+
+void WebPattern::OnNotifyMemoryLevel(int32_t level)
+{
+    CHECK_NULL_VOID(delegate_);
+    delegate_->NotifyMemoryLevel(level);
 }
 } // namespace OHOS::Ace::NG

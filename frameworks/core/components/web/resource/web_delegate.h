@@ -474,6 +474,7 @@ public:
     {
         backgroundColor_ = backgroundColor;
     }
+    void NotifyMemoryLevel(int32_t level);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);

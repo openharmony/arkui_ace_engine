@@ -333,6 +333,7 @@ private:
     void OnActive() override;
     void OnVisibleChange(bool isVisible) override;
     void OnAreaChangedInner() override;
+    void OnNotifyMemoryLevel(int32_t level) override;
 
     void OnWebSrcUpdate();
     void OnWebDataUpdate();
