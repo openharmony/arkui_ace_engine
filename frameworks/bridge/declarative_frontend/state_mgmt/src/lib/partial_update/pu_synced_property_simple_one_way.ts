@@ -32,12 +32,13 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
   constructor(source: ObservedPropertyAbstract<T> | T, subscribeMe?: IPropertySubscriber, thisPropertyName?: PropertyInfo) {
     super(subscribeMe, thisPropertyName);
 
+    // Check that source is ObservedPropertyAbstruct
     if (source && (typeof (source) === "object") && ("notifyHasChanged" in source) && ("subscribeMe" in source)) {
       // code path for @(Local)StorageProp
-      this.source_ = source as ObservedPropertyAbstract<T>;
+      this.source_ = source;
       this.sourceIsOwnObject = false;
+      this.source_.addSubscriber(this);
       // subscribe to receive value change updates from LocalStorage source property
-      this.source_.subscribeMe(this);
     } else {
       // code path for @Prop
       this.source_ = new ObservedPropertySimplePU<T>(source as T, this, thisPropertyName);
@@ -55,7 +56,7 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
   */
   aboutToBeDeleted() {
     if (this.source_) {
-      this.source_.unlinkSuscriber(this.id__());
+      this.source_.removeSubscriber(this);
       if (this.sourceIsOwnObject == true && this.source_.numberOfSubscrbers()==0){
          stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: aboutToBeDeleted. owning source_ ObservedPropertySimplePU, calling its aboutToBeDeleted`);
          this.source_.aboutToBeDeleted();
