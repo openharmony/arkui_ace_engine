@@ -43,6 +43,19 @@ void GridItemPattern::MarkIsSelected(bool isSelected)
     }
 }
 
+void GridItemPattern::SetSelectable(bool selectable)
+{
+    if (isSelected_ && selectable_ && !selectable) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+        MarkIsSelected(true);
+    }
+    selectable_ = selectable;
+}
+
 void GridItemPattern::SetAccessibilityAction()
 {
     auto host = GetHost();
