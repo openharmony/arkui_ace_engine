@@ -1886,12 +1886,10 @@ bool JsiDeclarativeEngine::CallAppFunc(const std::string& appFuncName, std::vect
     shared_ptr<JsValue> global = runtime->GetGlobal();
     shared_ptr<JsValue> exportsObject = global->GetProperty(runtime, "exports");
     if (!exportsObject->IsObject(runtime)) {
-        LOGE("property \"exports\" is not a object");
         return false;
     }
     shared_ptr<JsValue> defaultObject = exportsObject->GetProperty(runtime, "default");
     if (!defaultObject->IsObject(runtime)) {
-        LOGE("property \"default\" is not a object");
         return false;
     }
     shared_ptr<JsValue> func = defaultObject->GetProperty(runtime, appFuncName);
