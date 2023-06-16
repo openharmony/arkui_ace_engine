@@ -38,7 +38,6 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension INDICATOR_PADDING = 8.0_vp;
 constexpr uint32_t INDICATOR_HAS_CHILD = 2;
-constexpr int32_t PRESTRAIN_CHILD_COUNT = 2;
 constexpr uint32_t SWIPER_HAS_CHILD = 3;
 } // namespace
 
@@ -103,13 +102,7 @@ void SwiperLayoutAlgorithm::InitInActiveItems(float translateLength)
 
     int32_t displayCount = 0;
     if (NearZero(currentOffset_)) {
-        if (Positive(prevMargin_) && Positive(nextMargin_)) {
-            displayCount = displayCount_ + PRESTRAIN_CHILD_COUNT;
-        } else if (NonPositive(prevMargin_) && NonPositive(nextMargin_)) {
-            displayCount = displayCount_;
-        } else {
-            displayCount = displayCount_ + 1;
-        }
+        displayCount = TotalDisplayCount();
     } else {
         displayCount = displayCount_ + 1;
     }
@@ -579,8 +572,13 @@ void SwiperLayoutAlgorithm::SortItems(std::list<int32_t>& preItems, std::list<in
     displayCount = std::clamp(displayCount, 0, itemCount);
     auto cacheCount = static_cast<int32_t>(ceilf(static_cast<float>(itemCount - displayCount) / 2.0f));
     auto loopIndex = (currentIndex_ - 1 + totalCount_) % totalCount_;
+    int32_t prevTargetIndex = CaculatePrevTargetIndex();
+    int32_t nextTargetIndex = CaculateNextTargetIndex();
     int32_t count = 0;
     while (itemRange_.find(loopIndex) != itemRange_.end() && count < cacheCount) {
+        if (NearEqual(loopIndex, nextTargetIndex)) {
+            break;
+        }
         preItems.emplace_back(loopIndex);
         loopIndex = (loopIndex - 1 + totalCount_) % totalCount_;
         count++;
@@ -591,6 +589,9 @@ void SwiperLayoutAlgorithm::SortItems(std::list<int32_t>& preItems, std::list<in
     while (itemRange_.find(loopIndex) != itemRange_.end() && count < (displayCount + cacheCount)) {
         nextItems.emplace_back(loopIndex);
         loopIndex = (loopIndex + 1) % totalCount_;
+        if (NearEqual(loopIndex, prevTargetIndex)) {
+            break;
+        }
         count++;
     }
 
@@ -806,5 +807,21 @@ void SwiperLayoutAlgorithm::ArrowLayout(LayoutWrapper* layoutWrapper, const RefP
     }
     arrowGeometryNode->SetMarginFrameOffset(arrowOffset);
     arrowWrapper->Layout();
+}
+
+int32_t SwiperLayoutAlgorithm::CaculatePrevTargetIndex() const
+{
+    int32_t totalDisplayCount = TotalDisplayCount();
+    int32_t firstDisplayIndex = Positive(prevMargin_) ? (currentIndex_ - 1 + totalCount_) % totalCount_ : currentIndex_;
+    return GreatOrEqual(totalCount_, totalDisplayCount) ? firstDisplayIndex : currentIndex_;
+}
+
+int32_t SwiperLayoutAlgorithm::CaculateNextTargetIndex() const
+{
+    int32_t totalDisplayCount = TotalDisplayCount();
+    int32_t firstDisplayIndex = Positive(prevMargin_) ? (currentIndex_ - 1 + totalCount_) % totalCount_ : currentIndex_;
+    int32_t lastDisplayIndex = (firstDisplayIndex + totalDisplayCount - 1 + totalCount_) % totalCount_;
+    return GreatOrEqual(totalCount_, totalDisplayCount) ? lastDisplayIndex :
+                                                          (currentIndex_ - 1 + totalCount_) % totalCount_;
 }
 } // namespace OHOS::Ace::NG
