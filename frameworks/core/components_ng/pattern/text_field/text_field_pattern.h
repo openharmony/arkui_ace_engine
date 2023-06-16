@@ -179,7 +179,7 @@ public:
     void UpdateCaretPositionByPressOffset();
     void UpdateSelectionOffset();
 
-    CaretMetricsF CalcCursorOffsetByPosition(int32_t position);
+    CaretMetricsF CalcCursorOffsetByPosition(int32_t position, bool isStart = true);
 
     bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result);
 

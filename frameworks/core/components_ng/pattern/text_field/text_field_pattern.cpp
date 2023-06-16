@@ -648,11 +648,17 @@ void TextFieldPattern::UpdateCaretPositionByPressOffset()
     layoutProperty->UpdateCaretPosition(textEditingValue_.caretPosition);
 }
 
-CaretMetricsF TextFieldPattern::CalcCursorOffsetByPosition(int32_t position)
+CaretMetricsF TextFieldPattern::CalcCursorOffsetByPosition(int32_t position, bool isStart)
 {
     // this function will calculate caret offset and height by caret position
     CaretMetricsF result;
-    if (!(ComputeOffsetForCaretDownstream(position, result) || ComputeOffsetForCaretUpstream(position, result))) {
+    CaretMetricsF resultDownstream;
+    CaretMetricsF resultUpstream;
+    auto isSuccessDownstream = ComputeOffsetForCaretDownstream(position, resultDownstream);
+    auto isSuccessUpstream = ComputeOffsetForCaretUpstream(position, resultUpstream);
+    LOGD("position : %{public}d resultDownstream: %{public}s resultUpstream: %{public}s", position,
+        resultDownstream.offset.ToString().c_str(), resultUpstream.offset.ToString().c_str());
+    if (!(isSuccessDownstream || isSuccessUpstream)) {
         LOGW("Get caret offset failed, set it to text start");
         if (IsTextArea()) {
             result.offset = OffsetF(contentRect_.GetX(), textRect_.GetY());
@@ -662,6 +668,18 @@ CaretMetricsF TextFieldPattern::CalcCursorOffsetByPosition(int32_t position)
         result.height = textBoxes_.empty() ? PreferredLineHeight() : textBoxes_.begin()->rect_.GetHeight();
         return result;
     }
+    if (isSuccessDownstream && isStart && resultUpstream.offset.GetY() < resultDownstream.offset.GetY()) {
+        result = resultDownstream;
+    } else if (isSuccessUpstream && !isStart && resultUpstream.offset.GetY() < resultDownstream.offset.GetY()) {
+        result = resultUpstream;
+    } else {
+        if (isSuccessDownstream) {
+            result = resultDownstream;
+        } else {
+            result = resultUpstream;
+        }
+    }
+    LOGD("result stream: %{public}s ", result.ToString().c_str());
     result.offset.AddX(IsTextArea() ? contentRect_.GetX() : textRect_.GetX());
     result.offset.AddY(IsTextArea() ? textRect_.GetY() : contentRect_.GetY());
     return result;
@@ -2183,7 +2201,7 @@ void TextFieldPattern::CreateHandles()
     OffsetF firstHandleOffset(firstHandlePosition.offset.GetX() + parentGlobalOffset_.GetX(),
         firstHandlePosition.offset.GetY() + parentGlobalOffset_.GetY());
     textSelector_.firstHandleOffset_ = firstHandleOffset;
-    auto secondHandlePosition = CalcCursorOffsetByPosition(textSelector_.GetEnd());
+    auto secondHandlePosition = CalcCursorOffsetByPosition(textSelector_.GetEnd(), false);
     OffsetF secondHandleOffset(secondHandlePosition.offset.GetX() + parentGlobalOffset_.GetX(),
         secondHandlePosition.offset.GetY() + parentGlobalOffset_.GetY());
     textSelector_.secondHandleOffset_ = secondHandleOffset;
@@ -2462,8 +2480,8 @@ void TextFieldPattern::SetHandlerOnMoveDone()
 {
     SelectHandleInfo info;
     auto newHandleOffset = parentGlobalOffset_;
-    auto handleOffset =
-        CalcCursorOffsetByPosition(isFirstHandle_ ? textSelector_.baseOffset : textSelector_.destinationOffset);
+    auto handleOffset = CalcCursorOffsetByPosition(
+        isFirstHandle_ ? textSelector_.baseOffset : textSelector_.destinationOffset, isFirstHandle_ ? true : false);
     newHandleOffset += handleOffset.offset;
     SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
     RectF newHandle;
@@ -3458,7 +3476,8 @@ void TextFieldPattern::OnAreaChangedInner()
         UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
         CHECK_NULL_VOID_NOLOG(SelectOverlayIsOn());
         textSelector_.selectionBaseOffset.SetX(CalcCursorOffsetByPosition(textSelector_.GetStart()).offset.GetX());
-        textSelector_.selectionDestinationOffset.SetX(CalcCursorOffsetByPosition(textSelector_.GetEnd()).offset.GetX());
+        textSelector_.selectionDestinationOffset.SetX(
+            CalcCursorOffsetByPosition(textSelector_.GetEnd(), false).offset.GetX());
         UpdateSelection(textSelector_.GetStart(), textSelector_.GetEnd());
         if (isSingleHandle_) {
             CreateSingleHandle();
