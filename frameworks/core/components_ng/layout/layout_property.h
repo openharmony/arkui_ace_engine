@@ -39,6 +39,7 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/position_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -404,14 +405,36 @@ public:
             (layoutProperty->gridProperty_) ? std::make_unique<GridProperty>(*layoutProperty->gridProperty_) : nullptr;
     }
 
-    SafeAreaEdgeInserts GetSafeArea() const
+    const std::unique_ptr<SafeAreaInsets>& GetSafeAreaInsets() const
     {
-        return safeArea_;
+        return safeAreaInsets_;
     }
 
-    void SetSafeArea(SafeAreaEdgeInserts safeArea)
+    void UpdateSafeAreaInsets(const SafeAreaInsets& safeArea)
     {
-        safeArea_ = safeArea;
+        if (!safeAreaInsets_) {
+            safeAreaInsets_ = std::make_unique<SafeAreaInsets>();
+        }
+        if (*safeAreaInsets_ != safeArea) {
+            *safeAreaInsets_ = safeArea;
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+        }
+    }
+
+    const std::unique_ptr<SafeAreaExpandOpts>& GetSafeAreaExpandOpts() const
+    {
+        return safeAreaExpandOpts_;
+    }
+
+    void UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts)
+    {
+        if (!safeAreaExpandOpts_) {
+            safeAreaExpandOpts_ = std::make_unique<SafeAreaExpandOpts>();
+        }
+        if (*safeAreaExpandOpts_ != opts) {
+            *safeAreaExpandOpts_ = opts;
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+        }
     }
 
     bool IsUsingPosition() const
@@ -443,6 +466,10 @@ private:
     std::unique_ptr<MeasureProperty> calcLayoutConstraint_;
     std::unique_ptr<PaddingProperty> padding_;
     std::unique_ptr<MarginProperty> margin_;
+
+    std::unique_ptr<SafeAreaExpandOpts> safeAreaExpandOpts_;
+    std::unique_ptr<SafeAreaInsets> safeAreaInsets_;
+
     std::unique_ptr<BorderWidthProperty> borderWidth_;
     std::unique_ptr<MagicItemProperty> magicItemProperty_;
     std::unique_ptr<PositionProperty> positionProperty_;
@@ -455,7 +482,6 @@ private:
 
     WeakPtr<FrameNode> host_;
 
-    SafeAreaEdgeInserts safeArea_;
     bool usingPosition_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);
 };

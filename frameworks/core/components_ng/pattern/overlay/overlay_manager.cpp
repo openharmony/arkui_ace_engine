@@ -460,24 +460,6 @@ void OverlayManager::PopToast(int32_t toastId)
     pipeline->SendEventToAccessibility(event);
 }
 
-void OverlayManager::AdaptToSafeArea(const RefPtr<FrameNode>& node)
-{
-    CHECK_NULL_VOID_NOLOG(node);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    const static int32_t PLATFORM_VERSION_TEN = 10;
-    auto layoutProperty = node->GetLayoutProperty();
-    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && pipeline->GetIsAppWindow() &&
-        pipeline->GetIsLayoutFullScreen() && !pipeline->GetIgnoreViewSafeArea() && layoutProperty) {
-        NG::MarginProperty margins;
-        SafeAreaEdgeInserts safeArea = pipeline->GetCurrentViewSafeArea();
-        margins.top = NG::CalcLength(safeArea.topRect_.Height());
-        margins.bottom = NG::CalcLength(safeArea.bottomRect_.Height());
-        margins.left = NG::CalcLength(safeArea.leftRect_.Width());
-        margins.right = NG::CalcLength(safeArea.rightRect_.Width());
-        layoutProperty->UpdateMargin(margins);
-    }
-}
-
 void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo)
 {
     popupMap_[targetId] = popupInfo;
@@ -800,7 +782,6 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
     LOGI("OverlayManager::ShowDialog");
     auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
     BeforeShowDialog(dialog);
-    AdaptToSafeArea(dialog);
     OpenDialogAnimation(dialog);
     return dialog;
 }
@@ -809,7 +790,6 @@ void OverlayManager::ShowCustomDialog(const RefPtr<FrameNode>& customNode)
 {
     LOGI("OverlayManager::ShowCustomDialog");
     BeforeShowDialog(customNode);
-    AdaptToSafeArea(customNode);
     OpenDialogAnimation(customNode);
 }
 
@@ -820,7 +800,6 @@ void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const D
     auto dialogNode = DatePickerDialogView::Show(
         dialogProps, std::move(settingData), std::move(dialogEvent), std::move(dialogCancelEvent));
     BeforeShowDialog(dialogNode);
-    AdaptToSafeArea(dialogNode);
     OpenDialogAnimation(dialogNode);
 }
 
@@ -832,7 +811,6 @@ void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps, const T
     auto dialogNode = TimePickerDialogView::Show(
         dialogProps, settingData, std::move(timePickerProperty), std::move(dialogEvent), std::move(dialogCancelEvent));
     BeforeShowDialog(dialogNode);
-    AdaptToSafeArea(dialogNode);
     OpenDialogAnimation(dialogNode);
 }
 
@@ -844,7 +822,6 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const T
     auto dialogNode =
         TextPickerDialogView::Show(dialogProps, settingData, std::move(dialogEvent), std::move(dialogCancelEvent));
     BeforeShowDialog(dialogNode);
-    AdaptToSafeArea(dialogNode);
     OpenDialogAnimation(dialogNode);
 }
 

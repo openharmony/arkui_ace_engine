@@ -19,7 +19,6 @@
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 // StagePattern is the base class for root render node to perform page switch.
@@ -40,15 +39,7 @@ public:
         return false;
     }
 
-    void OnAttachToFrameNode() override
-    {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        host->GetRenderContext()->UpdateBackgroundColor(pipeline->GetAppBgColor());
-    }
+    void OnAttachToFrameNode() override;
 
     void OnRebuildFrame() override
     {

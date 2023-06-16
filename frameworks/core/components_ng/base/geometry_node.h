@@ -25,6 +25,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/property/geometry_property.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -179,6 +180,11 @@ public:
         return margin_;
     }
 
+    const std::unique_ptr<PaddingPropertyF>& GetPadding() const
+    {
+        return padding_;
+    }
+
     void UpdateMargin(const MarginPropertyF& margin)
     {
         if (!margin_) {
@@ -254,6 +260,13 @@ public:
         return baselineDistance_.value_or(frame_.rect_.GetY());
     }
 
+    const std::unique_ptr<RectF>& GetPreviousState() const
+    {
+        return previousState_;
+    }
+    void Restore();
+    void Save();
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
 private:
@@ -270,6 +283,9 @@ private:
     std::unique_ptr<MarginPropertyF> padding_;
     // the size of content rect in current node local coordinate.
     std::unique_ptr<GeometryProperty> content_;
+
+    // save node's state before SafeArea expansion
+    std::unique_ptr<RectF> previousState_;
 
     OffsetF parentGlobalOffset_;
 };

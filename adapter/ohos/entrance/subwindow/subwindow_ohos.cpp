@@ -23,6 +23,7 @@
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "base/geometry/rect.h"
 #include "core/components/root/root_element.h"
+#include "core/components_ng/base/ui_node.h"
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
@@ -185,30 +186,6 @@ void SubwindowOhos::ResizeWindow()
     if (ret != Rosen::WMError::WM_OK) {
         LOGE("Resize window by default display failed with errCode: %{public}d", static_cast<int32_t>(ret));
         return;
-    }
-    auto pipeline = GetChildPipelineContext();
-    CHECK_NULL_VOID(pipeline);
-    SafeAreaEdgeInserts safeArea = pipeline->GetCurrentViewSafeArea();
-
-    if (safeArea.leftRect_.IsValid() && safeArea.topRect_.IsValid()) {
-        auto retMove = window_->MoveTo(static_cast<int32_t>(window_->GetRect().posX_ + safeArea.leftRect_.Right()),
-            static_cast<int32_t>(window_->GetRect().posY_ + safeArea.topRect_.Bottom()));
-        if (retMove != Rosen::WMError::WM_OK) {
-            LOGE("Move window failed with errCode: %{public}d", static_cast<int32_t>(retMove));
-            return;
-        }
-    }
-
-    if (safeArea.leftRect_.IsValid() && safeArea.topRect_.IsValid() && safeArea.rightRect_.IsValid() &&
-        safeArea.bottomRect_.IsValid()) {
-        auto retResize = window_->Resize(window_->GetRect().width_ - static_cast<int32_t>(safeArea.leftRect_.Width()) -
-                                             static_cast<int32_t>(safeArea.rightRect_.Width()),
-            window_->GetRect().height_ - static_cast<int32_t>(safeArea.topRect_.Height()) -
-                static_cast<int32_t>(safeArea.bottomRect_.Height()));
-        if (retResize != Rosen::WMError::WM_OK) {
-            LOGE("Resize window failed with errCode: %{public}d", static_cast<int32_t>(retResize));
-            return;
-        }
     }
     LOGI("SubwindowOhos window rect is resized to x: %{public}d, y: %{public}d, width: %{public}u, height: %{public}u",
         window_->GetRect().posX_, window_->GetRect().posY_, window_->GetRect().width_, window_->GetRect().height_);

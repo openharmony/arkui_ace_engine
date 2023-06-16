@@ -25,6 +25,7 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -181,12 +182,17 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     if (layoutProperty->flexItemProperty_) {
         flexItemProperty_ = std::make_unique<FlexItemProperty>(*layoutProperty->flexItemProperty_);
     }
+    if (layoutProperty->safeAreaInsets_) {
+        safeAreaInsets_ = std::make_unique<SafeAreaInsets>(*layoutProperty->safeAreaInsets_);
+    }
+    if (layoutProperty->safeAreaExpandOpts_) {
+        safeAreaExpandOpts_ = std::make_unique<SafeAreaExpandOpts>(*layoutProperty->safeAreaExpandOpts_);
+    }
     geometryTransition_ = layoutProperty->geometryTransition_;
     propVisibility_ = layoutProperty->GetVisibility();
     measureType_ = layoutProperty->measureType_;
     layoutDirection_ = layoutProperty->layoutDirection_;
     propertyChangeFlag_ = layoutProperty->propertyChangeFlag_;
-    safeArea_ = layoutProperty->safeArea_;
 #ifdef ENABLE_DRAG_FRAMEWORK
     propIsBindOverlay_ = layoutProperty->propIsBindOverlay_;
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -412,12 +418,12 @@ void LayoutProperty::UpdateContentConstraint()
     if (padding_) {
         auto paddingF = ConvertToPaddingPropertyF(
             *padding_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
-        contentConstraint_->MinusPaddingOnBothSize(paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
+        contentConstraint_->MinusPadding(paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
     }
     if (borderWidth_) {
         auto borderWidthF = ConvertToBorderWidthPropertyF(
             *borderWidth_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
-        contentConstraint_->MinusPaddingOnBothSize(
+        contentConstraint_->MinusPadding(
             borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
     }
 }
@@ -489,7 +495,7 @@ MarginPropertyF LayoutProperty::CreateMargin()
         return ConvertToMarginPropertyF(
             margin_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
     }
-
+    // root node
     return ConvertToMarginPropertyF(
         margin_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
 }

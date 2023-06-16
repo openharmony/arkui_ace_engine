@@ -161,6 +161,7 @@ ohos_unittest("select_overlay_test_ng") {
     "$ace_root/frameworks/core/components_ng/property/grid_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",
     "$ace_root/frameworks/core/components_ng/property/property.cpp",
+    "$ace_root/frameworks/core/components_ng/property/safe_area_insets.cpp",
     "$ace_root/frameworks/core/components_ng/render/drawing_prop_convertor.cpp",
     "$ace_root/frameworks/core/components_ng/render/paint_wrapper.cpp",
 

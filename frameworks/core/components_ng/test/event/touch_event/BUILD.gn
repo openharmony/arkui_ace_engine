@@ -46,6 +46,7 @@ ohos_unittest("touch_event_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/layout/mock_box_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/layout/mock_layout_property.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/layout/mock_layout_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",

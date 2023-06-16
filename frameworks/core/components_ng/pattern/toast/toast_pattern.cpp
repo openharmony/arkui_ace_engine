@@ -40,16 +40,18 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     auto toastNode = dirty->GetHostNode();
     auto toastContext = toastNode->GetRenderContext();
     CHECK_NULL_RETURN(toastContext, false);
-    if (PipelineBase::GetCurrentContext() &&
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > API_VERSION_9) {
-        toastContext->UpdateOffset(
-            OffsetT<Dimension>(Dimension((rootWidth - text->GetGeometryNode()->GetMarginFrameSize().Width()) / 2.0f),
-                Dimension(rootHeight - toastBottom - dirty->GetGeometryNode()->GetMarginFrameSize().Height())));
+    auto pipeline = PipelineContext::GetCurrentContext();
+    OffsetT<Dimension> offset { Dimension((rootWidth - text->GetGeometryNode()->GetMarginFrameSize().Width()) / 2.0f),
+        {} };
+    if (context->GetMinPlatformVersion() > API_VERSION_9) {
+        auto safeArea = context->GetSafeArea();
+        offset.SetY(Dimension { rootHeight - toastBottom - dirty->GetGeometryNode()->GetMarginFrameSize().Height() -
+                                safeArea.bottom_.Length() });
     } else {
-        toastContext->UpdateOffset(
-            OffsetT<Dimension>(Dimension((rootWidth - text->GetGeometryNode()->GetMarginFrameSize().Width()) / 2.0f),
-                Dimension(rootHeight - toastBottom)));
+        offset.SetY(Dimension { rootHeight - toastBottom });
     }
+    toastContext->UpdateOffset(offset);
+
     return true;
 }
 } // namespace OHOS::Ace::NG

@@ -47,9 +47,13 @@ ohos_unittest("counter_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/text/text_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_styles.cpp",
+    "$ace_root/frameworks/core/components_ng/property/safe_area_insets.cpp",
     "$ace_root/frameworks/core/components_ng/render/render_context.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
+
+    # components_ng_manager
+    "$ace_root/frameworks/core/components_ng/manager/safe_area/safe_area_manager.cpp",
 
     # components_ng_base
     "$ace_root/frameworks/core/components_ng/base/frame_node.cpp",
