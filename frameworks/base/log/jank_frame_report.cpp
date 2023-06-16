@@ -121,12 +121,17 @@ void JankFrameReport::ClearFrameJankFlag(JankFrameFlag flag)
     }
 }
 
+void JankFrameReport::ResetFrameJankClock()
+{
+    startTime_ = GetSystemTimestamp<std::chrono::milliseconds>();
+    SteadyTimeRecorder::Begin();
+}
+
 void JankFrameReport::StartRecord(const std::string& pageUrl)
 {
     if (startTime_ == 0) {
-        startTime_ = GetSystemTimestamp<std::chrono::milliseconds>();
+        ResetFrameJankClock();
     }
-    SteadyTimeRecorder::Begin();
     pageUrl_ = pageUrl;
 }
 
@@ -137,6 +142,6 @@ void JankFrameReport::FlushRecord()
         EventReport::JankFrameReport(startTime_, SteadyTimeRecorder::End(), frameJankRecord_, pageUrl_);
     }
     ClearFrameJankRecord();
-    startTime_ = GetSystemTimestamp<std::chrono::milliseconds>();
+    ResetFrameJankClock();
 }
 } // namespace OHOS::Ace

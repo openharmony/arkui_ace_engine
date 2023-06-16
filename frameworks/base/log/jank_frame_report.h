@@ -38,6 +38,7 @@ public:
 
 private:
     static void ClearFrameJankRecord();
+    static void ResetFrameJankClock();
 
     static std::vector<uint16_t> frameJankRecord_;
     static JankFrameFlag recordStatus_;
