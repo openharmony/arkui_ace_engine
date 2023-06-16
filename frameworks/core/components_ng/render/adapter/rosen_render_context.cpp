@@ -42,6 +42,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/property/calc_length.h"
@@ -119,14 +120,16 @@ void RosenRenderContext::StopRecordingIfNeeded()
 void RosenRenderContext::OnNodeAppear(bool recursive)
 {
     isDisappearing_ = false;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // restore eventHub state when node appears.
+    host->GetEventHub<EventHub>()->RestoreEnabled();
     if (recursive && !propTransitionAppearing_ && !transitionEffect_) {
         // recursive and has no transition, no need to handle transition.
         return;
     }
 
     auto rect = GetPaintRectWithoutTransform();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     isBreakingPoint_ = !recursive;
     if (rect.IsValid() && !CheckNeedRequestMeasureAndLayout(host->GetLayoutProperty()->GetPropertyChangeFlag())) {
         // has set size before and do not need layout, trigger transition directly.
@@ -146,6 +149,10 @@ void RosenRenderContext::OnNodeDisappear(bool recursive)
         return;
     }
     CHECK_NULL_VOID(rsNode_);
+    auto host = GetHost();
+    if (host && host->GetEventHub<EventHub>()) {
+        host->GetEventHub<EventHub>()->SetEnabledInternal(false);
+    }
     auto rect = GetPaintRectWithoutTransform();
     // only start default transition on the break point of render node tree.
     isBreakingPoint_ = !recursive;

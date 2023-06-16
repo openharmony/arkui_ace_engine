@@ -36,9 +36,9 @@ void FullScreenManager::RequestFullScreen(const RefPtr<FrameNode>& frameNode)
         LOGE("FrameNode has existed");
         return;
     }
-    frameNode->MountToParent(rootNode);
     CHECK_NULL_VOID(parentNode);
     auto slot = parentNode->RemoveChildAndReturnIndex(frameNode);
+    frameNode->MountToParent(rootNode);
     auto resultForParent = originalParent_.try_emplace(nodeId, parentNode, slot);
     if (!resultForParent.second) {
         return;
