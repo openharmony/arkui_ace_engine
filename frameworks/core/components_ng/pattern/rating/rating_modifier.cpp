@@ -28,6 +28,7 @@ RatingModifier::RatingModifier()
       drawScore_(AceType::MakeRefPtr<PropertyFloat>(.0f)),
       stepSize_(AceType::MakeRefPtr<PropertyFloat>(.0f)),
       contentOffset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
+      contentSize_(AceType::MakeRefPtr<PropertySizeF>(SizeF())),
       boardColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT)))
 {
     AttachProperty(needDraw_);
@@ -36,6 +37,7 @@ RatingModifier::RatingModifier()
     AttachProperty(drawScore_);
     AttachProperty(stepSize_);
     AttachProperty(contentOffset_);
+    AttachProperty(contentSize_);
     AttachProperty(boardColor_);
 }
 
@@ -62,8 +64,8 @@ void RatingModifier::PaintBoard(DrawingContext& context)
     auto& canvas = context.canvas;
 
     auto singleStarImagePaintConfig = foregroundImageCanvas_->GetPaintConfig();
-    const float singleStarWidth = singleStarImagePaintConfig.dstRect_.Width();
-    const float singleStarHeight = singleStarImagePaintConfig.dstRect_.Height();
+    const float singleStarWidth = contentSize_->Get().Width() / static_cast<float>(starNum_->Get());
+    const float singleStarHeight = contentSize_->Get().Height();
     auto offset = contentOffset_->Get();
     auto touchStar = touchStar_->Get();
     auto starNum = starNum_->Get();
@@ -92,8 +94,8 @@ void RatingModifier::PaintStar(DrawingContext& context)
     auto starNum = starNum_->Get();
     auto drawScore = drawScore_->Get();
     auto config = foregroundImageCanvas_->GetPaintConfig();
-    const float singleStarWidth = config.dstRect_.Width();
-    const float singleStarHeight = config.dstRect_.Height();
+    const float singleStarWidth = contentSize_->Get().Width() / static_cast<float>(starNum_->Get());
+    const float singleStarHeight = contentSize_->Get().Height();
     // step2: calculate 3 images repeat times.
     const int32_t foregroundImageRepeatNum = ceil(drawScore);
     const float secondaryImageRepeatNum = foregroundImageRepeatNum - drawScore;
@@ -122,7 +124,7 @@ void RatingModifier::PaintStar(DrawingContext& context)
         canvas.ClipRect(clipRect2, RSClipOp::INTERSECT);
         offsetTemp.SetX(static_cast<float>(offsetTemp.GetX() - singleStarWidth));
         secondaryImagePainter.DrawImage(canvas, offsetTemp, contentSize);
-        offsetTemp.SetX(offsetTemp.GetX() + config.dstRect_.Width());
+        offsetTemp.SetX(offsetTemp.GetX() + singleStarWidth);
         canvas.Restore();
     }
 
@@ -130,7 +132,7 @@ void RatingModifier::PaintStar(DrawingContext& context)
     for (int32_t i = 0; i < backgroundImageRepeatNum; i++) {
         backgroundPainter.DrawImage(canvas, offsetTemp, contentSize);
         if (i < backgroundImageRepeatNum - 1) {
-            offsetTemp.SetX(offsetTemp.GetX() + config.dstRect_.Width());
+            offsetTemp.SetX(offsetTemp.GetX() + singleStarWidth);
         }
     }
 }
