@@ -21,7 +21,7 @@ config("config_shape_test") {
   include_dirs = [
     "//commonlibrary/c_utils/base/include",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",

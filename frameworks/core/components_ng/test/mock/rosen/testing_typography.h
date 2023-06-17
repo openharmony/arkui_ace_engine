@@ -55,7 +55,7 @@ public:
         return 1.0;
     }
 
-    virtual double GetLongestLine()
+    virtual double GetActualWidth()
     {
         return 1.0;
     }
@@ -67,22 +67,22 @@ public:
 
     virtual void Paint(TestingCanvas* canvas, double x, double y) {}
 
-    virtual std::vector<TestingTypographyProperties::TextBox> GetRectsForRange(size_t /* start */, size_t /* end */,
-        TestingTypographyProperties::RectHeightStyle /* height */,
-        TestingTypographyProperties::RectWidthStyle /* width */)
+    virtual std::vector<TestingTypographyProperties::TextRect> GetTextRectsByBoundary(size_t /* start */, size_t /* end */,
+        TestingTypographyProperties::TextRectHeightStyle /* height */,
+        TestingTypographyProperties::TextRectWidthStyle /* width */)
     {
         return {};
     }
 
-    virtual TestingTypographyProperties::PositionAndAffinity GetGlyphPositionAtCoordinateWithCluster(double x, double y)
+    virtual TestingTypographyProperties::IndexAndAffinity GetGlyphIndexByCoordinate(double x, double y)
     {
-        TestingTypographyProperties::PositionAndAffinity res(1, TestingTypographyProperties::Affinity::UPSTREAM);
+        TestingTypographyProperties::IndexAndAffinity res(1, TestingTypographyProperties::Affinity::PREV);
         return res;
     }
 
-    virtual TestingTypographyProperties::PositionAndAffinity GetGlyphPositionAtCoordinate(double x, double y)
+    virtual TestingTypographyProperties::IndexAndAffinity GetGlyphPositionAtCoordinate(double x, double y)
     {
-        TestingTypographyProperties::PositionAndAffinity res(1, TestingTypographyProperties::Affinity::UPSTREAM);
+        TestingTypographyProperties::IndexAndAffinity res(1, TestingTypographyProperties::Affinity::PREV);
         return res;
     }
 };

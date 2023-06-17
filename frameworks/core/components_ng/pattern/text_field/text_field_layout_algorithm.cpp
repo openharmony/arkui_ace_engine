@@ -259,7 +259,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         if (isInlineStyle && pattern->GetTextInputFlag()) {
             idealHeight = pattern->GetSingleLineHeight() *
                 layoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
-            idealWidth = paragraph_->GetLongestLine();
+            idealWidth = paragraph_->GetActualWidth();
         }
         if (isInlineStyle) {
             textRect_.SetSize(SizeF(idealWidth, paragraph_->GetHeight()));
@@ -272,7 +272,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     // check password image size.
     auto showPasswordIcon = textFieldLayoutProperty->GetShowPasswordIcon().value_or(true);
     if (!showPasswordIcon || !isPasswordType) {
-        textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), preferredHeight));
+        textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetActualWidth()), preferredHeight));
         imageRect_.Reset();
         if (textFieldLayoutProperty->GetWidthAutoValue(false)) {
             if (LessOrEqual(contentConstraint.minSize.Width(), 0.0f)) {
@@ -292,7 +292,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (textStyle.GetMaxLines() > 1 || pattern->IsTextArea()) {
         // for textArea, need to delete imageWidth and remeasure.
         paragraph_->Layout(idealWidth - imageSize);
-        textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), preferredHeight));
+        textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetActualWidth()), preferredHeight));
         imageRect_.SetSize(SizeF(0.0f, 0.0f));
         return SizeF(idealWidth, imageSize);
     }
@@ -303,7 +303,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         pattern->GetShowPasswordIconCtx()->MakeCanvasImage(imageRect_.GetSize(), true, ImageFit::NONE);
     }
     preferredHeight = std::min(static_cast<float>(paragraph_->GetHeight()), idealHeight);
-    textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), static_cast<float>(preferredHeight)));
+    textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetActualWidth()), static_cast<float>(preferredHeight)));
     auto imageHotZoneWidth = imageSize + pattern->GetIconRightOffset();
     paragraph_->Layout(idealWidth - pattern->GetScrollBarWidth() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx()
         - imageHotZoneWidth);
@@ -490,30 +490,30 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
     bool needObscureText, bool disableTextAlign)
 {
     RSParagraphStyle paraStyle;
-    paraStyle.textDirection_ = ToRSTextDirection(GetTextDirection(content));
+    paraStyle.textDirection = ToRSTextDirection(GetTextDirection(content));
     if (!disableTextAlign) {
-        paraStyle.textAlign_ = ToRSTextAlign(textStyle.GetTextAlign());
+        paraStyle.textAlign = ToRSTextAlign(textStyle.GetTextAlign());
     }
-    paraStyle.maxLines_ = textStyle.GetMaxLines();
-    paraStyle.locale_ = Localization::GetInstance()->GetFontLocale();
-    paraStyle.wordBreakType_ = ToRSWordBreakType(textStyle.GetWordBreak());
-    paraStyle.fontSize_ = textStyle.GetFontSize().ConvertToPx();
-    paraStyle.fontFamily_ = textStyle.GetFontFamilies().at(0);
+    paraStyle.maxLines = textStyle.GetMaxLines();
+    paraStyle.locale = Localization::GetInstance()->GetFontLocale();
+    paraStyle.wordBreakType = ToRSWordBreakType(textStyle.GetWordBreak());
+    paraStyle.fontSize = textStyle.GetFontSize().ConvertToPx();
+    paraStyle.fontFamily = textStyle.GetFontFamilies().at(0);
     if (textStyle.GetTextOverflow() == TextOverflow::ELLIPSIS) {
-        paraStyle.ellipsis_ = StringUtils::Str8ToStr16(StringUtils::ELLIPSIS);
+        paraStyle.ellipsis = StringUtils::Str8ToStr16(StringUtils::ELLIPSIS);
     }
-    auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance(false));
+    auto builder = RSParagraphBuilder::Create(paraStyle, RSFontCollection::Create());
     builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), textStyle));
     StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
     if (!content.empty() && needObscureText) {
-        builder->AddText(
+        builder->AppendText(
             TextFieldPattern::CreateObscuredText(static_cast<int32_t>(StringUtils::ToWstring(content).length())));
     } else {
-        builder->AddText(StringUtils::Str8ToStr16(content));
+        builder->AppendText(StringUtils::Str8ToStr16(content));
     }
-    builder->Pop();
+    builder->PopStyle();
 
-    auto paragraph = builder->Build();
+    auto paragraph = builder->CreateTypography();
     paragraph_.reset(paragraph.release());
 }
 
@@ -522,19 +522,19 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const std::vector<TextStyle>& tex
 {
     auto textStyle = textStyles.begin();
     RSParagraphStyle paraStyle;
-    paraStyle.textDirection_ = ToRSTextDirection(GetTextDirection(content));
+    paraStyle.textDirection = ToRSTextDirection(GetTextDirection(content));
     if (!disableTextAlign) {
-        paraStyle.textAlign_ = ToRSTextAlign(textStyle->GetTextAlign());
+        paraStyle.textAlign = ToRSTextAlign(textStyle->GetTextAlign());
     }
-    paraStyle.maxLines_ = textStyle->GetMaxLines();
-    paraStyle.locale_ = Localization::GetInstance()->GetFontLocale();
-    paraStyle.wordBreakType_ = ToRSWordBreakType(textStyle->GetWordBreak());
-    paraStyle.fontSize_ = textStyle->GetFontSize().ConvertToPx();
-    paraStyle.fontFamily_ = textStyle->GetFontFamilies().at(0);
+    paraStyle.maxLines = textStyle->GetMaxLines();
+    paraStyle.locale = Localization::GetInstance()->GetFontLocale();
+    paraStyle.wordBreakType = ToRSWordBreakType(textStyle->GetWordBreak());
+    paraStyle.fontSize = textStyle->GetFontSize().ConvertToPx();
+    paraStyle.fontFamily = textStyle->GetFontFamilies().at(0);
     if (textStyle->GetTextOverflow() == TextOverflow::ELLIPSIS) {
-        paraStyle.ellipsis_ = StringUtils::Str8ToStr16(StringUtils::ELLIPSIS);
+        paraStyle.ellipsis = StringUtils::Str8ToStr16(StringUtils::ELLIPSIS);
     }
-    auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance(false));
+    auto builder = RSParagraphBuilder::Create(paraStyle, RSFontCollection::Create());
     for (size_t i = 0; i < contents.size(); i++) {
         std::string splitStr = contents[i];
         if (splitStr.empty()) {
@@ -544,15 +544,15 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const std::vector<TextStyle>& tex
         builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), style));
         StringUtils::TransformStrCase(splitStr, static_cast<int32_t>(style.GetTextCase()));
         if (needObscureText) {
-            builder->AddText(
+            builder->AppendText(
                 TextFieldPattern::CreateObscuredText(static_cast<int32_t>(StringUtils::ToWstring(splitStr).length())));
         } else {
-            builder->AddText(StringUtils::Str8ToStr16(splitStr));
+            builder->AppendText(StringUtils::Str8ToStr16(splitStr));
         }
     }
-    builder->Pop();
+    builder->PopStyle();
 
-    auto paragraph = builder->Build();
+    auto paragraph = builder->CreateTypography();
     paragraph_.reset(paragraph.release());
 }
 
@@ -563,16 +563,16 @@ void TextFieldLayoutAlgorithm::CreateCounterParagraph(
     TextStyle countTextStyle = (textLength != maxLength) ? theme->GetCountTextStyle() : theme->GetOverCountTextStyle();
     std::string counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
     RSParagraphStyle paraStyle;
-    paraStyle.fontSize_ = countTextStyle.GetFontSize().ConvertToPx();
-    paraStyle.textAlign_ = ToRSTextAlign(TextAlign::END);
-    paraStyle.maxLines_ = COUNTER_TEXT_MAXLINE;
-    auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance(false));
+    paraStyle.fontSize = countTextStyle.GetFontSize().ConvertToPx();
+    paraStyle.textAlign = ToRSTextAlign(TextAlign::END);
+    paraStyle.maxLines = COUNTER_TEXT_MAXLINE;
+    auto builder = RSParagraphBuilder::Create(paraStyle, RSFontCollection::Create());
     builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), countTextStyle));
     StringUtils::TransformStrCase(counterText, static_cast<int32_t>(countTextStyle.GetTextCase()));
-    builder->AddText(StringUtils::Str8ToStr16(counterText));
-    builder->Pop();
+    builder->AppendText(StringUtils::Str8ToStr16(counterText));
+    builder->PopStyle();
 
-    auto paragraph = builder->Build();
+    auto paragraph = builder->CreateTypography();
     counterParagraph_.reset(paragraph.release());
 }
 
@@ -582,15 +582,15 @@ void TextFieldLayoutAlgorithm::CreateErrorParagraph(const std::string& content, 
     TextStyle errorTextStyle = theme->GetErrorTextStyle();
     std::string counterText = content;
     RSParagraphStyle paraStyle;
-    paraStyle.fontSize_ = errorTextStyle.GetFontSize().ConvertToPx();
-    paraStyle.textAlign_ = ToRSTextAlign(TextAlign::START);
-    auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance(false));
+    paraStyle.fontSize = errorTextStyle.GetFontSize().ConvertToPx();
+    paraStyle.textAlign = ToRSTextAlign(TextAlign::START);
+    auto builder = RSParagraphBuilder::Create(paraStyle, RSFontCollection::Create());
     builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), errorTextStyle));
     StringUtils::TransformStrCase(counterText, static_cast<int32_t>(errorTextStyle.GetTextCase()));
-    builder->AddText(StringUtils::Str8ToStr16(counterText));
-    builder->Pop();
+    builder->AppendText(StringUtils::Str8ToStr16(counterText));
+    builder->PopStyle();
 
-    auto paragraph = builder->Build();
+    auto paragraph = builder->CreateTypography();
     errorParagraph_.reset(paragraph.release());
 }
 

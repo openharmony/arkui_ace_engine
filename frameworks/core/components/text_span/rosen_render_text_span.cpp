@@ -15,16 +15,13 @@
 
 #include "core/components/text_span/rosen_render_text_span.h"
 
-#include "txt/paragraph_builder.h"
-#include "txt/paragraph_txt.h"
-
 #include "base/utils/string_utils.h"
 #include "core/components/calendar/rosen_render_calendar.h"
 #include "core/components/font/constants_converter.h"
 
 namespace OHOS::Ace {
 
-void RosenRenderTextSpan::UpdateText(txt::ParagraphBuilder& builder,
+void RosenRenderTextSpan::UpdateText(Rosen::TypographyCreate& builder,
     std::map<int32_t, std::map<GestureType, EventMarker>>& touchRegions, std::string& textValue)
 {
     if (!spanComponent_) {
@@ -37,14 +34,14 @@ void RosenRenderTextSpan::UpdateText(txt::ParagraphBuilder& builder,
     }
     if (spanComponent_->HasNewStyle()) {
         LOGD("test span has new style");
-        txt::TextStyle style;
+        Rosen::TextStyle style;
         Constants::ConvertTxtStyle(spanStyle_, context_, style);
         builder.PushStyle(style);
     }
     UpdateTouchRegions(touchRegions);
     auto displayText = spanComponent_->GetSpanData();
     StringUtils::TransformStrCase(displayText, (int32_t)spanStyle_.GetTextCase());
-    builder.AddText(StringUtils::Str8ToStr16(displayText));
+    builder.AppendText(StringUtils::Str8ToStr16(displayText));
     textValue.append(displayText);
     for (const auto& child : GetChildren()) {
         auto rosenRenderTextSpan = AceType::DynamicCast<RosenRenderTextSpan>(child);
@@ -53,7 +50,7 @@ void RosenRenderTextSpan::UpdateText(txt::ParagraphBuilder& builder,
         }
     }
     if (spanComponent_->HasNewStyle()) {
-        builder.Pop();
+        builder.PopStyle();
     }
 }
 

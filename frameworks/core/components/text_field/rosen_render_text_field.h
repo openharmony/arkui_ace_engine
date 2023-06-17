@@ -19,10 +19,12 @@
 #include <memory>
 #include <string>
 
-#include "txt/paragraph_txt.h"
+#include "rosen_text/font_collection.h"
+#include "rosen_text/typography.h"
+#include "rosen_text/typography_style.h"
 #ifndef USE_ROSEN_DRAWING
-#include "include/core/SkBitmap.h"
-#include "include/core/SkCanvas.h"
+#include "third_party/skia/include/core/SkBitmap.h"
+#include "third_party/skia/include/core/SkCanvas.h"
 #else
 #include "core/components_ng/render/drawing.h"
 #endif
@@ -30,11 +32,11 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/text_field/render_text_field.h"
 
-namespace txt {
+namespace OHOS::Rosen {
 class FontCollection;
-class ParagraphStyle;
-class TextStyle;
-} // namespace txt
+struct TypographyStyle;
+struct TextStyle;
+} // namespace OHOS::Rosen
 namespace OHOS::Ace {
 
 class Component;
@@ -78,8 +80,8 @@ protected:
     void ResetStatus() override;
 
 private:
-    std::unique_ptr<txt::ParagraphStyle> CreateParagraphStyle(bool isErrorText = false);
-    std::unique_ptr<txt::TextStyle> CreateTextStyle(const TextStyle& style, bool isPlaceholder = false);
+    std::unique_ptr<Rosen::TypographyStyle> CreateParagraphStyle(bool isErrorText = false);
+    std::unique_ptr<Rosen::TextStyle> CreateTextStyle(const TextStyle& style, bool isPlaceholder = false);
 
     double PreferredLineHeight() override;
     void UpdateCaretProto();
@@ -91,7 +93,7 @@ private:
     Offset MakeEmptyOffset() const;
     Size Measure() override;
     double MeasureParagraph(
-        const std::unique_ptr<txt::ParagraphStyle>& paragraphStyle, std::unique_ptr<txt::TextStyle>& txtStyle);
+        const std::unique_ptr<Rosen::TypographyStyle>& paragraphStyle, std::unique_ptr<Rosen::TextStyle>& txtStyle);
     Size ComputeLayoutSize(const Size& size, double decorationHeight);
 
     Rect GetInnerRect(const Decoration& decoration, const Rect& outer, double dipScale) const;
@@ -100,14 +102,14 @@ private:
     void ComputeOffsetAfterLayout();
     // Compute the offset to align text and icon to vertical center.
     Offset ComputeVerticalOffsetForCenter(double outerHeight, double innerHeight) const;
-    void SetShaderIfNeeded(std::unique_ptr<txt::ParagraphStyle> paragraphStyle,
-        std::unique_ptr<txt::TextStyle> txtStyle, double textAreaWidth);
+    void SetShaderIfNeeded(std::unique_ptr<Rosen::TypographyStyle> paragraphStyle,
+        std::unique_ptr<Rosen::TextStyle> txtStyle, double textAreaWidth);
 #ifndef USE_ROSEN_DRAWING
     sk_sp<SkShader> MakeGradientShader(double shadeWidth) const;
 #else
     std::shared_ptr<RSShaderEffect> MakeGradientShader(double shadeWidth) const;
 #endif
-    std::shared_ptr<txt::FontCollection> GetFontCollection();
+    std::shared_ptr<Rosen::FontCollection> GetFontCollection();
     void ResetParagraphIfNeeded();
     void ComputeExtendHeight(double decorationHeight);
     double GetBoundaryOfParagraph(bool isLeftBoundary) const;
@@ -145,12 +147,12 @@ private:
 #endif
     void PaintFocus(const Offset& offset, const Size& widthHeight, RenderContext& context);
 
-    std::unique_ptr<txt::Paragraph> paragraph_;
-    std::unique_ptr<txt::Paragraph> errorParagraph_;
-    std::unique_ptr<txt::Paragraph> countParagraph_;
-    std::unique_ptr<txt::Paragraph> placeholderParagraph_;
+    std::unique_ptr<Rosen::Typography> paragraph_;
+    std::unique_ptr<Rosen::Typography> errorParagraph_;
+    std::unique_ptr<Rosen::Typography> countParagraph_;
+    std::unique_ptr<Rosen::Typography> placeholderParagraph_;
     // Used to estimate size.
-    std::unique_ptr<txt::Paragraph> template_;
+    std::unique_ptr<Rosen::Typography> template_;
 
     Rect startCaretRect_;
     Size lastLayoutSize_;

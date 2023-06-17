@@ -22,7 +22,6 @@
 #else
 #include "experimental/svg/model/SkSVGDOM.h"
 #endif
-#include "txt/paragraph.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPath.h"
 
@@ -35,6 +34,7 @@
 #include "core/image/image_object.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "rosen_text/typography.h"
 
 namespace OHOS::Rosen {
 class RSRecordingCanvas;
@@ -426,8 +426,8 @@ protected:
         return OffsetF(0.0f, 0.0f);
     }
 
-    double GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
-    txt::TextAlign GetEffectiveAlign(txt::TextAlign align, txt::TextDirection direction) const;
+    double GetAlignOffset(TextAlign align, std::unique_ptr<OHOS::Rosen::Typography>& paragraph);
+    OHOS::Rosen::TextAlign GetEffectiveAlign(OHOS::Rosen::TextAlign align, OHOS::Rosen::TextDirection direction) const;
 
     PaintState fillState_;
     StrokePaintState strokeState_;
@@ -444,7 +444,7 @@ protected:
     std::string smoothingQuality_ = "low";
     bool antiAlias_ = false;
     Shadow shadow_;
-    std::unique_ptr<txt::Paragraph> paragraph_;
+    std::unique_ptr<Rosen::Typography> paragraph_;
 
     WeakPtr<PipelineBase> context_;
 

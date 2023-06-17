@@ -35,7 +35,8 @@ RefPtr<FontCollection> FontCollection::Current()
 
 TxtFontCollection::TxtFontCollection()
 {
-    collection_ = RosenFontCollection::GetInstance().GetFontCollection();
+    collection_ = Rosen::FontCollection::Create();
+    /* texgine not support
     dynamicFontManager_ = RosenFontCollection::GetInstance().GetDynamicFontManager();
     if (collection_) {
         std::string emptyLocale;
@@ -43,9 +44,10 @@ TxtFontCollection::TxtFontCollection()
         collection_->MatchFallbackFont(0x4e2d, emptyLocale);
         collection_->GetMinikinFontCollectionForFamilies({ "sans-serif" }, emptyLocale);
     }
+    */
 }
 
-TxtFontCollection::TxtFontCollection(const std::shared_ptr<txt::FontCollection>& fontCollection)
+TxtFontCollection::TxtFontCollection(const std::shared_ptr<Rosen::FontCollection>& fontCollection)
     : collection_(fontCollection)
 {}
 

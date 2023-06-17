@@ -53,6 +53,7 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
 #include "core/gestures/gesture_info.h"
+#include "rosen_text/typography.h"
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
@@ -466,7 +467,7 @@ public:
     void HandleExtendAction(int32_t action);
     void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip);
 
-    std::vector<RSTypographyProperties::TextBox> GetTextBoxes() override
+    std::vector<RSTextRect> GetTextBoxes() override
     {
         return textBoxes_;
     }
@@ -971,7 +972,7 @@ private:
     bool FilterWithRegex(
         const std::string& filter, const std::string& valueToUpdate, std::string& result, bool needToEscape = false);
     void EditingValueFilter(std::string& valueToUpdate, std::string& result);
-    void GetTextRectsInRange(int32_t begin, int32_t end, std::vector<RSTypographyProperties::TextBox>& textBoxes);
+    void GetTextRectsInRange(int32_t begin, int32_t end, std::vector<RSTextRect>& textBoxes);
     bool CursorInContentRegion();
     bool OffsetInContentRegion(const Offset& offset);
     void SetDisabledStyle();
@@ -1103,7 +1104,7 @@ private:
     TextEditingValueNG textEditingValue_;
     TextSelector textSelector_;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_;
-    std::vector<RSTypographyProperties::TextBox> textBoxes_;
+    std::vector<RSTextRect> textBoxes_;
     RefPtr<TextFieldOverlayModifier> textFieldOverlayModifier_;
     RefPtr<TextFieldContentModifier> textFieldContentModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldPattern);

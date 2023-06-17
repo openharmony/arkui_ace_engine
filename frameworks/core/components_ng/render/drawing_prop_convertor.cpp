@@ -140,7 +140,7 @@ RSTextDecoration ToRSTextDecoration(TextDecoration textDecoration)
             rsTextDecoration = RSTextDecoration::OVERLINE;
             break;
         case TextDecoration::LINE_THROUGH:
-            rsTextDecoration = RSTextDecoration::LINETHROUGH;
+            rsTextDecoration = RSTextDecoration::LINE_THROUGH;
             break;
         case TextDecoration::UNDERLINE:
             rsTextDecoration = RSTextDecoration::UNDERLINE;
@@ -155,59 +155,59 @@ RSTextDecoration ToRSTextDecoration(TextDecoration textDecoration)
 RSTextStyle ToRSTextStyle(const RefPtr<PipelineBase>& context, const TextStyle& textStyle)
 {
     RSTextStyle rsTextStyle;
-    rsTextStyle.color_ = ToRSColor(textStyle.GetTextColor());
-    rsTextStyle.decoration_ = ToRSTextDecoration(textStyle.GetTextDecoration());
-    rsTextStyle.decorationColor_ = ToRSColor(textStyle.GetTextDecorationColor());
+    rsTextStyle.color = ToRSColor(textStyle.GetTextColor());
+    rsTextStyle.decoration = ToRSTextDecoration(textStyle.GetTextDecoration());
+    rsTextStyle.decorationColor = ToRSColor(textStyle.GetTextDecorationColor());
     // TODO: convert fontFamily and other styles.
 
     // TODO: convert missing textBaseline
-    rsTextStyle.fontWeight_ = ToRSFontWeight(textStyle.GetFontWeight());
-    rsTextStyle.fontStyle_ = static_cast<RSFontStyle>(textStyle.GetFontStyle());
-    rsTextStyle.textBaseline_ = static_cast<RSTextBaseline>(textStyle.GetTextBaseline());
-    rsTextStyle.fontFamilies_ = textStyle.GetFontFamilies();
+    rsTextStyle.fontWeight = ToRSFontWeight(textStyle.GetFontWeight());
+    rsTextStyle.fontStyle = static_cast<RSFontStyle>(textStyle.GetFontStyle());
+    rsTextStyle.baseline = static_cast<RSTextBaseline>(textStyle.GetTextBaseline());
+    rsTextStyle.fontFamilies = textStyle.GetFontFamilies();
     if (textStyle.GetTextOverflow() == TextOverflow::ELLIPSIS) {
-        rsTextStyle.ellipsis_ = StringUtils::Str8ToStr16(StringUtils::ELLIPSIS);
+        rsTextStyle.ellipsis = StringUtils::Str8ToStr16(StringUtils::ELLIPSIS);
     }
     if (context) {
-        rsTextStyle.fontSize_ = context->NormalizeToPx(textStyle.GetFontSize());
+        rsTextStyle.fontSize = context->NormalizeToPx(textStyle.GetFontSize());
         if (textStyle.IsAllowScale() || textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
-            rsTextStyle.fontSize_ = context->NormalizeToPx(textStyle.GetFontSize() * context->GetFontScale());
+            rsTextStyle.fontSize = context->NormalizeToPx(textStyle.GetFontSize() * context->GetFontScale());
         }
     } else {
-        rsTextStyle.fontSize_ = textStyle.GetFontSize().Value();
+        rsTextStyle.fontSize = textStyle.GetFontSize().Value();
     }
     if (context) {
-        rsTextStyle.letterSpacing_ = context->NormalizeToPx(textStyle.GetLetterSpacing());
+        rsTextStyle.letterSpacing = context->NormalizeToPx(textStyle.GetLetterSpacing());
     }
     if (textStyle.GetWordSpacing().Unit() == DimensionUnit::PERCENT) {
-        rsTextStyle.wordSpacing_ = textStyle.GetWordSpacing().Value() * rsTextStyle.fontSize_;
+        rsTextStyle.wordSpacing = textStyle.GetWordSpacing().Value() * rsTextStyle.fontSize;
     } else {
         if (context) {
-            rsTextStyle.wordSpacing_ = context->NormalizeToPx(textStyle.GetWordSpacing());
+            rsTextStyle.wordSpacing = context->NormalizeToPx(textStyle.GetWordSpacing());
         } else {
-            rsTextStyle.wordSpacing_ = textStyle.GetWordSpacing().Value();
+            rsTextStyle.wordSpacing = textStyle.GetWordSpacing().Value();
         }
     }
 
     if (textStyle.GetLineHeight().Unit() == DimensionUnit::PERCENT) {
-        rsTextStyle.hasHeightOverride_ = true;
-        rsTextStyle.height_ = textStyle.GetLineHeight().Value();
+        rsTextStyle.heightOnly = true;
+        rsTextStyle.heightScale = textStyle.GetLineHeight().Value();
     } else {
-        double fontSize = rsTextStyle.fontSize_;
+        double fontSize = rsTextStyle.fontSize;
         double lineHeight = textStyle.GetLineHeight().Value();
         if (context) {
             lineHeight = context->NormalizeToPx(textStyle.GetLineHeight());
         }
-        rsTextStyle.hasHeightOverride_ = textStyle.HasHeightOverride();
+        rsTextStyle.heightOnly = textStyle.HasHeightOverride();
         if (!NearEqual(lineHeight, fontSize) && (lineHeight > 0.0) && (!NearZero(fontSize))) {
-            rsTextStyle.height_ = lineHeight / fontSize;
+            rsTextStyle.heightScale = lineHeight / fontSize;
         } else {
             LOGD("use default text style height value.");
-            rsTextStyle.height_ = 1;
+            rsTextStyle.heightScale = 1;
             static const int32_t BEGIN_VERSION = 6;
             auto isBeginVersion = context && context->GetMinPlatformVersion() >= BEGIN_VERSION;
             if (NearZero(lineHeight) || (!isBeginVersion && NearEqual(lineHeight, fontSize))) {
-                rsTextStyle.hasHeightOverride_ = false;
+                rsTextStyle.heightOnly = false;
             }
         }
     }

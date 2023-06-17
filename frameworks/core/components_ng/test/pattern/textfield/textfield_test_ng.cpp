@@ -1535,10 +1535,10 @@ HWTEST_F(TextFieldPatternTestNg, PaintSelection003, TestSize.Level1)
     pattern->selectionMode_ = SelectionMode::SELECT;
     pattern->textSelector_.baseOffset = 1;
     pattern->textSelector_.destinationOffset = 0;
-    std::vector<RSTypographyProperties::TextBox> textBoxes;
-    RSTypographyProperties::TextBox textBox;
-    textBoxes.emplace_back(textBox);
-    pattern->textBoxes_ = textBoxes;
+    std::vector<RSTypographyProperties::TextRect> textBoxs;
+    RSTypographyProperties::TextRect textBox;
+    textBoxs.emplace_back(textBox);
+    pattern->textBoxes_ = textBoxs;
     auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
@@ -2769,28 +2769,28 @@ HWTEST_F(TextFieldPatternTestNg, AdjustTextSelectionRectOffsetX, TestSize.Level1
     textFieldPattern->contentRect_.SetLeft(0.0f);
     textFieldPattern->contentRect_.SetWidth(100.0f);
     textFieldPattern->textRect_.SetLeft(0.0f);
-    RSTypographyProperties::TextBox textBox;
+    RSTypographyProperties::TextRect textBox;
     textFieldPattern->textBoxes_.emplace_back(textBox);
 
-    textFieldPattern->textBoxes_.begin()->rect_.SetRight(50.0f);
+    textFieldPattern->textBoxes_.begin()->rect.SetRight(50.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
 
-    textFieldPattern->textBoxes_.begin()->rect_.SetLeft(-20.0f);
-    textFieldPattern->textBoxes_.begin()->rect_.SetRight(-10.0f);
+    textFieldPattern->textBoxes_.begin()->rect.SetLeft(-20.0f);
+    textFieldPattern->textBoxes_.begin()->rect.SetRight(-10.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
-    textFieldPattern->textBoxes_.begin()->rect_.SetLeft(0.0f);
+    textFieldPattern->textBoxes_.begin()->rect.SetLeft(0.0f);
     textFieldPattern->textRect_.SetLeft(0.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
 
-    textFieldPattern->textBoxes_.begin()->rect_.SetLeft(100.0f);
-    textFieldPattern->textBoxes_.begin()->rect_.SetRight(200.0f);
+    textFieldPattern->textBoxes_.begin()->rect.SetLeft(100.0f);
+    textFieldPattern->textBoxes_.begin()->rect.SetRight(200.0f);
     textFieldPattern->textRect_.SetLeft(0.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
-    textFieldPattern->textBoxes_.begin()->rect_.SetLeft(300.0f);
+    textFieldPattern->textBoxes_.begin()->rect.SetLeft(300.0f);
     textFieldPattern->textRect_.SetLeft(0.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
@@ -3496,8 +3496,8 @@ HWTEST_F(TextFieldPatternTestNg, PaintSelection004, TestSize.Level1)
     pattern->selectionMode_ = SelectionMode::SELECT;
     pattern->textSelector_.baseOffset = 1;
     pattern->textSelector_.destinationOffset = 0;
-    std::vector<RSTypographyProperties::TextBox> textBoxes;
-    RSTypographyProperties::TextBox textBox;
+    std::vector<RSTypographyProperties::TextRect> textBoxes;
+    RSTypographyProperties::TextRect textBox;
     textBoxes.emplace_back(textBox);
     pattern->textBoxes_ = textBoxes;
     auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
@@ -4533,9 +4533,9 @@ HWTEST_F(TextFieldPatternTestNg, UpdateSelectionOffset, TestSize.Level2)
     EXPECT_EQ(pattern->GetTextSelector().selectionBaseOffset.GetX(), 4);
     EXPECT_EQ(pattern->GetTextSelector().selectionDestinationOffset.GetX(), 8);
 
-    std::vector<RSTypographyProperties::TextBox> textBoxes;
-    RSTypographyProperties::TextBox firstTextBox;
-    RSTypographyProperties::TextBox secondTextBox;
+    std::vector<RSTypographyProperties::TextRect> textBoxes;
+    RSTypographyProperties::TextRect firstTextBox;
+    RSTypographyProperties::TextRect secondTextBox;
     textBoxes.emplace_back(firstTextBox);
     textBoxes.emplace_back(secondTextBox);
     pattern->textBoxes_ = textBoxes;

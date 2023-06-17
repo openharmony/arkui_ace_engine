@@ -48,7 +48,7 @@ float TextPattern::GetLineHeight() const
     return {};
 }
 
-std::vector<RSTypographyProperties::TextBox> TextPattern::GetTextBoxes()
+std::vector<RSTextRect> TextPattern::GetTextBoxes()
 {
     return {};
 }

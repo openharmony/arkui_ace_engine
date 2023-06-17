@@ -55,17 +55,17 @@ public:
     {
 #ifndef USE_ROSEN_DRAWING
         roundRect_.SetRect(
-            rosen::Rect(rect.GetRect().Left(), rect.GetRect().Top(), rect.GetRect().Right(), rect.GetRect().Bottom()));
-        roundRect_.SetCornerRadius(rosen::RoundRect::CornerPos::TOP_LEFT_POS,
+            RSRect(rect.GetRect().Left(), rect.GetRect().Top(), rect.GetRect().Right(), rect.GetRect().Bottom()));
+        roundRect_.SetCornerRadius(RSRoundRect::CornerPos::TOP_LEFT_POS,
             rect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).x,
             rect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).y);
-        roundRect_.SetCornerRadius(rosen::RoundRect::CornerPos::TOP_RIGHT_POS,
+        roundRect_.SetCornerRadius(RSRoundRect::CornerPos::TOP_RIGHT_POS,
             rect.GetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS).x,
             rect.GetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS).y);
-        roundRect_.SetCornerRadius(rosen::RoundRect::CornerPos::BOTTOM_LEFT_POS,
+        roundRect_.SetCornerRadius(RSRoundRect::CornerPos::BOTTOM_LEFT_POS,
             rect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS).x,
             rect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS).y);
-        roundRect_.SetCornerRadius(rosen::RoundRect::CornerPos::BOTTOM_RIGHT_POS,
+        roundRect_.SetCornerRadius(RSRoundRect::CornerPos::BOTTOM_RIGHT_POS,
             rect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS).x,
             rect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS).y);
 #else

@@ -17,6 +17,20 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ohos_unittest("custom_paint_test_ng") {
   module_out_path = pattern_test_output_path
 
+  include_dirs = [
+    "//commonlibrary/c_utils/base/include",
+    "$ace_root",
+    "$ace_root/frameworks",
+    "$skia_root_new",
+    "$flutter_root/skia",
+    "$flutter_root/engine",
+    "$flutter_root/engine/flutter",
+    "$flutter_root/skia/third_party/externals/harfbuzz/src",
+    "$ace_graphic/rosen/modules/2d_engine/rosen_text/export",
+    "$ace_graphic/rosen/modules/2d_graphics/include",
+    "$ace_graphic/rosen/modules/2d_graphics/src",
+    "$ace_graphic/rosen/modules/2d_graphics/src/drawing/engine_adapter",
+  ]
   sources = [
     "canvas_paint_method_test_ng.cpp",
     "common_constants.cpp",
@@ -31,6 +45,7 @@ ohos_unittest("custom_paint_test_ng") {
     "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "//third_party/googletest:gmock_main",
+    "//third_party/skia:skia_ohos",
   ]
   if (is_ohos_standard_system) {
     deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]

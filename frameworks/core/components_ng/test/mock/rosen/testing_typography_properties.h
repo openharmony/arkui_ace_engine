@@ -28,57 +28,57 @@ enum class TextDirection {
 
 class TestingTypographyProperties {
 public:
-    enum class RectWidthStyle {
+    enum class TextRectWidthStyle {
         TIGHT,
         MAX,
     };
 
     enum class Affinity {
-        UPSTREAM,
-        DOWNSTREAM,
+        PREV,
+        NEXT,
     };
 
-    enum class RectHeightStyle {
+    enum class TextRectHeightStyle {
         TIGHT,
-        MAX,
-        INCLUDELINESPACEMIDDLE,
-        INCLUDELINESPACETOP,
-        INCLUDELINESPACEBOTTOM,
-        STRUCT,
+        COVER_TOP_AND_BOTTOM,
+        COVER_HALF_TOP_AND_BOTTOM,
+        COVER_TOP,
+        COVER_BOTTOM,
+        FOLLOW_BY_STRUT,
     };
 
-    struct TextBox {
-        TextDirection direction_;
-        TestingRect rect_;
-        TextBox() = default;
-        TextBox(TestingRect rect, TextDirection direction) : direction_(direction), rect_(rect) {}
+    struct TextRect {
+        TextDirection direction;
+        TestingRect rect;
+        TextRect() = default;
+        TextRect(TestingRect testRect, TextDirection testDirection) : direction(testDirection), rect(testRect) {}
     };
 
-    struct PositionAndAffinity {
-        const size_t pos_;
-        const Affinity affinity_;
-        PositionAndAffinity(size_t pos, Affinity affinity) : pos_(pos), affinity_(affinity) {}
+    struct IndexAndAffinity {
+        const size_t index;
+        const Affinity affinity;
+        IndexAndAffinity(size_t pos, Affinity affinity) : index(pos), affinity(affinity) {}
     };
 
     template<typename T>
-    struct Range {
-        T start_, end_;
-        Range() : start_(), end_() {}
-        Range(T a, T b) : start_(a), end_(b) {}
-        bool operator==(const Range<T>& rhs) const
+    struct Boundary {
+        T leftIndex, rightIndex;
+        Boundary() : leftIndex(), rightIndex() {}
+        Boundary(T a, T b) : leftIndex(a), rightIndex(b) {}
+        bool operator==(const Boundary<T>& rhs) const
         {
-            return start_ == rhs.start_ && end_ == rhs.end_;
+            return leftIndex == rhs.leftIndex && rightIndex == rhs.rightIndex;
         }
 
         T Width() const
         {
-            return end_ - start_;
+            return rightIndex - leftIndex;
         }
 
         void Shift(T offset)
         {
-            start_ += offset;
-            end_ += offset;
+            leftIndex += offset;
+            rightIndex += offset;
         }
     };
 };
