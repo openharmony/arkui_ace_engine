@@ -401,11 +401,20 @@ void TextFieldModelNG::SetPasswordIcon(const PasswordIcon& passwordIcon)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetShowResultImageInfo(
-        ImageSourceInfo(passwordIcon.showResult, passwordIcon.showBundleName, passwordIcon.showModuleName));
-    pattern->SetHideResultImageInfo(
-        ImageSourceInfo(passwordIcon.hideResult, passwordIcon.hideBundleName, passwordIcon.hideModuleName));
-    pattern->SetShowUserDefinedIcon();
+    if (passwordIcon.showResult == "") {
+        pattern->SetShowUserDefinedIcon(false);
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordSourceInfo,
+            ImageSourceInfo(passwordIcon.showResult, passwordIcon.showBundleName, passwordIcon.showModuleName));
+        pattern->SetShowUserDefinedIcon(true);
+    }
+    if (passwordIcon.hideResult == "") {
+        pattern->SetHideUserDefinedIcon(false);
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HidePasswordSourceInfo,
+            ImageSourceInfo(passwordIcon.hideResult, passwordIcon.hideBundleName, passwordIcon.hideModuleName));
+        pattern->SetHideUserDefinedIcon(true);
+    }
 }
 
 void TextFieldModelNG::SetShowUnit(std::function<void()>&& unitFunction)

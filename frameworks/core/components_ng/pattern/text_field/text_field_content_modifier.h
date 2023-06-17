@@ -54,6 +54,8 @@ public:
     bool NeedMeasureUpdate(PropertyChangeFlag& flag);
     void SetShowErrorState(bool value);
     void SetShowUnderlineState(bool value);
+    void SetShowPasswordIcon(const std::string& value);
+    void SetHidePasswordIcon(const std::string& value);
 
 private:
     void SetDefaultFontSize(const TextStyle& textStyle);
@@ -85,6 +87,8 @@ private:
     RefPtr<PropertyBool> showCounter_;
     RefPtr<PropertyBool> showErrorState_;
     RefPtr<PropertyBool> showUnderline_;
+    RefPtr<PropertyString> showPasswordIconSrc_;
+    RefPtr<PropertyString> hidePasswordIconSrc_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldContentModifier);
 };
