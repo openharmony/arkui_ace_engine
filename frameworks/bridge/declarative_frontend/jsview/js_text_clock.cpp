@@ -133,6 +133,7 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
     }
     if (!info[0]->IsString()) {
         LOGE("The arg is not string,it is supposed to be a string.");
+        TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT);
         return;
     }
 

@@ -130,7 +130,8 @@ void JSTextTimer::SetFormat(const JSCallbackInfo& info)
     }
 
     if (!info[0]->IsString()) {
-        LOGE("arg is not string.");
+        LOGE("The arg is not string, it is supposed to be a string");
+        TextTimerModel::GetInstance()->SetFormat(DEFAULT_FORMAT);
         return;
     }
 
