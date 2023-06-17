@@ -61,6 +61,8 @@ public:
         ResetShowErrorText();
         ResetShowCounter();
         ResetShowUnderline();
+        ResetShowPasswordSourceInfo();
+        ResetHidePasswordSourceInfo();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -157,6 +159,8 @@ protected:
         value->propShowErrorText_ = CloneShowErrorText();
         value->propShowCounter_ = CloneShowCounter();
         value->propShowUnderline_ = CloneShowUnderline();
+        value->propShowPasswordSourceInfo_ = CloneShowPasswordSourceInfo();
+        value->propHidePasswordSourceInfo_ = CloneHidePasswordSourceInfo();
     }
 
 private:

@@ -191,6 +191,8 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     textAlign_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(TextAlign::START));
     showCounter_ = AceType::MakeRefPtr<PropertyBool>(false);
     showErrorState_ = AceType::MakeRefPtr<PropertyBool>(false);
+    showPasswordIconSrc_ = AceType::MakeRefPtr<PropertyString>("");
+    hidePasswordIconSrc_ = AceType::MakeRefPtr<PropertyString>("");
     AttachProperty(contentOffset_);
     AttachProperty(contentSize_);
     AttachProperty(textValue_);
@@ -204,6 +206,8 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     AttachProperty(showCounter_);
     AttachProperty(showErrorState_);
     AttachProperty(showUnderline_);
+    AttachProperty(showPasswordIconSrc_);
+    AttachProperty(hidePasswordIconSrc_);
 }
 
 void TextFieldContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
@@ -357,6 +361,20 @@ void TextFieldContentModifier::SetShowUnderlineState(bool value)
 {
     if (showUnderline_) {
         showUnderline_->Set(value);
+    }
+}
+
+void TextFieldContentModifier::SetShowPasswordIcon(const std::string& value)
+{
+    if (showPasswordIconSrc_->Get() != value) {
+        showPasswordIconSrc_->Set(value);
+    }
+}
+
+void TextFieldContentModifier::SetHidePasswordIcon(const std::string& value)
+{
+    if (hidePasswordIconSrc_->Get() != value) {
+        hidePasswordIconSrc_->Set(value);
     }
 }
 
