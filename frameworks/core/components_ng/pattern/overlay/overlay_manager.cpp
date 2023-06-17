@@ -176,8 +176,10 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(theme);
-    // blur dialog node, set focus to last page
-    BlurOverlayNode();
+    // if this dialog node is currently holding focus, blur it and set focus to last page
+    if (!DialogInMapHoldingFocus()) {
+        BlurOverlayNode();
+    }
 
     // default opacity animation params
     AnimationOption option;
@@ -777,11 +779,22 @@ void OverlayManager::CleanMenuInSubWindow()
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
+void OverlayManager::BeforeShowDialog(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    if (dialogMap_.find(node->GetId()) != dialogMap_.end()) {
+        LOGW("dialog #%{public}d exists", node->GetId());
+        return;
+    }
+    dialogMap_[node->GetId()] = node;
+}
+
 RefPtr<FrameNode> OverlayManager::ShowDialog(
     const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft)
 {
     LOGI("OverlayManager::ShowDialog");
     auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
+    BeforeShowDialog(dialog);
     AdaptToSafeArea(dialog);
     OpenDialogAnimation(dialog);
     return dialog;
@@ -790,6 +803,7 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
 void OverlayManager::ShowCustomDialog(const RefPtr<FrameNode>& customNode)
 {
     LOGI("OverlayManager::ShowCustomDialog");
+    BeforeShowDialog(customNode);
     AdaptToSafeArea(customNode);
     OpenDialogAnimation(customNode);
 }
@@ -800,6 +814,7 @@ void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const D
     LOGI("OverlayManager::ShowDateDialogPicker");
     auto dialogNode = DatePickerDialogView::Show(
         dialogProps, std::move(settingData), std::move(dialogEvent), std::move(dialogCancelEvent));
+    BeforeShowDialog(dialogNode);
     AdaptToSafeArea(dialogNode);
     OpenDialogAnimation(dialogNode);
 }
@@ -811,6 +826,7 @@ void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps, const T
     LOGI("OverlayManager::ShowTimeDialogPicker");
     auto dialogNode = TimePickerDialogView::Show(
         dialogProps, settingData, std::move(timePickerProperty), std::move(dialogEvent), std::move(dialogCancelEvent));
+    BeforeShowDialog(dialogNode);
     AdaptToSafeArea(dialogNode);
     OpenDialogAnimation(dialogNode);
 }
@@ -822,13 +838,41 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const T
     LOGI("OverlayManager::ShowTextDialogPicker");
     auto dialogNode =
         TextPickerDialogView::Show(dialogProps, settingData, std::move(dialogEvent), std::move(dialogCancelEvent));
+    BeforeShowDialog(dialogNode);
     AdaptToSafeArea(dialogNode);
     OpenDialogAnimation(dialogNode);
+}
+
+void OverlayManager::RemoveDialogFromMap(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    if (dialogMap_.find(node->GetId()) == dialogMap_.end()) {
+        LOGW("dialog #%{public}d node in map", node->GetId());
+        return;
+    }
+    dialogMap_.erase(node->GetId());
+}
+
+bool OverlayManager::DialogInMapHoldingFocus()
+{
+    if (dialogMap_.empty()) {
+        return false;
+    }
+    auto iter = dialogMap_.begin();
+    while (iter != dialogMap_.end()) {
+        auto dialogNode = (*iter).second;
+        if (dialogNode && dialogNode->GetFocusHub() && dialogNode->GetFocusHub()->IsCurrentFocus()) {
+            return true;
+        }
+        iter++;
+    }
+    return false;
 }
 
 void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
 {
     LOGI("OverlayManager::CloseDialog");
+    RemoveDialogFromMap(dialogNode);
     if (dialogNode->IsRemoving()) {
         // already in close animation
         return;
