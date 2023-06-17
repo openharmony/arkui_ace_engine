@@ -117,12 +117,13 @@ void SwitchPattern::OnModifyDone()
     CHECK_NULL_VOID(switchPaintProperty);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    if (!isOn_.has_value()) {
-        isOn_ = switchPaintProperty->GetIsOnValue(false);
+    if (!isOn_.has_value() || (isOn_.has_value() && NearZero(geometryNode->GetContentSize().Width()) &&
+                                  NearZero(geometryNode->GetContentSize().Height()))) {
+        isOn_ = switchPaintProperty->GetIsOnValue();
     }
-    auto isOn = switchPaintProperty->GetIsOnValue(false);
-    if (isOn != isOn_.value_or(false)) {
-        isOn_ = isOn;
+    auto isOn = switchPaintProperty->GetIsOnValue();
+    isOnBeforeAnimate_ = isOn;
+    if (isOn != isOn_.value()) {
         OnChange();
     }
     InitClickEvent();
@@ -132,6 +133,70 @@ void SwitchPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
+}
+
+void SwitchPattern::UpdateCurrentOffset(float offset)
+{
+    currentOffset_ = currentOffset_ + offset;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SwitchPattern::PlayTranslateAnimation(float startPos, float endPos)
+{
+    LOGI("Play translate animation startPos: %{public}lf, endPos: %{public}lf", startPos, endPos);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto curve = GetCurve();
+    if (!curve) {
+        curve = Curves::FAST_OUT_SLOW_IN;
+    }
+
+    // If animation is still running, stop it before play new animation.
+    StopTranslateAnimation();
+
+    auto translate = AceType::MakeRefPtr<CurveAnimation<double>>(startPos, endPos, curve);
+    auto weak = AceType::WeakClaim(this);
+    translate->AddListener(Animation<double>::ValueCallback([weak, startPos, endPos](double value) {
+        auto switchPattern = weak.Upgrade();
+        CHECK_NULL_VOID(switchPattern);
+        if (!NearEqual(value, startPos) && !NearEqual(value, endPos) && !NearEqual(startPos, endPos)) {
+            float moveRate =
+                Curves::EASE_OUT->MoveInternal(static_cast<float>((value - startPos) / (endPos - startPos)));
+            value = startPos + (endPos - startPos) * moveRate;
+        }
+        switchPattern->UpdateCurrentOffset(static_cast<float>(value - switchPattern->currentOffset_));
+    }));
+
+    if (!controller_) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        controller_ = CREATE_ANIMATOR(pipeline);
+    }
+    controller_->ClearStopListeners();
+    controller_->ClearInterpolators();
+    controller_->AddStopListener([weak]() {
+        auto switchPattern = weak.Upgrade();
+        CHECK_NULL_VOID(switchPattern);
+        if (!switchPattern->isOn_.value()) {
+            if (NearEqual(switchPattern->currentOffset_, switchPattern->GetSwitchWidth()) &&
+                switchPattern->changeFlag_) {
+                switchPattern->isOn_ = true;
+                switchPattern->UpdateChangeEvent();
+            }
+        } else {
+            if (NearEqual(switchPattern->currentOffset_, 0) && switchPattern->changeFlag_) {
+                switchPattern->isOn_ = false;
+                switchPattern->UpdateChangeEvent();
+            }
+        }
+        switchPattern->isOnBeforeAnimate_ = switchPattern->isOn_;
+        switchPattern->GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    });
+    controller_->SetDuration(GetDuration());
+    controller_->AddInterpolator(translate);
+    controller_->Play();
 }
 
 RefPtr<Curve> SwitchPattern::GetCurve() const
@@ -148,15 +213,28 @@ int32_t SwitchPattern::GetDuration() const
     return switchPaintProperty->GetDuration().value_or(DEFAULT_DURATION);
 }
 
+void SwitchPattern::StopTranslateAnimation()
+{
+    if (controller_ && !controller_->IsStopped()) {
+        controller_->Stop();
+    }
+}
+
 void SwitchPattern::OnChange()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
-    CHECK_NULL_VOID(switchPaintProperty);
-    switchPaintProperty->UpdateIsOn(isOn_.value_or(false));
-    UpdateChangeEvent();
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto translateOffset = GetSwitchWidth();
+    StopTranslateAnimation();
+    changeFlag_ = true;
+    isOnBeforeAnimate_ = !isOn_.value();
+    if (!isOn_.value()) {
+        PlayTranslateAnimation(0.0f, translateOffset);
+    } else {
+        PlayTranslateAnimation(translateOffset, 0.0f);
+    }
 }
 
 float SwitchPattern::GetSwitchWidth() const
@@ -169,15 +247,6 @@ float SwitchPattern::GetSwitchWidth() const
     return switchWidth;
 }
 
-float SwitchPattern::GetSwitchContentOffsetX() const
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, 0.0f);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, 0.0f);
-    return geometryNode->GetContentOffset().GetX();
-}
-
 void SwitchPattern::UpdateChangeEvent() const
 {
     auto switchEventHub = GetEventHub<SwitchEventHub>();
@@ -187,7 +256,13 @@ void SwitchPattern::UpdateChangeEvent() const
 
 void SwitchPattern::OnClick()
 {
-    isOn_ = !isOn_.value_or(false);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (controller_ && !controller_->IsStopped()) {
+        // Clear stop listener before stop, otherwise the previous swipe will be considered complete.
+        controller_->ClearStopListeners();
+        controller_->Stop();
+    }
     OnChange();
 }
 
@@ -230,7 +305,6 @@ void SwitchPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         if (info.GetInputEventType() == InputEventType::AXIS) {
             return;
         }
-        pattern->HandleDragStart();
     };
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
@@ -394,32 +468,39 @@ void SwitchPattern::HandleMouseEvent(bool isHover)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void SwitchPattern::HandleDragStart()
-{
-    isDragEvent_ = true;
-}
-
 void SwitchPattern::HandleDragUpdate(const GestureEvent& info)
 {
-    dragOffsetX_ = static_cast<float>(info.GetLocalLocation().GetX());
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto mainDelta = static_cast<float>(info.GetMainDelta());
+    auto isOutOfBoundary = IsOutOfBoundary(mainDelta + currentOffset_);
+    if (isOutOfBoundary) {
+        LOGD("Switch has reached boundary, can't drag any more.");
+        return;
+    }
+    UpdateCurrentOffset(static_cast<float>(mainDelta));
 }
 
 void SwitchPattern::HandleDragEnd()
 {
+    LOGD("Drag end currentOffset: %{public}lf", currentOffset_);
+    // Play translate animation.
     auto mainSize = GetSwitchWidth();
-    auto contentOffset = GetSwitchContentOffsetX();
-    if ((isOn_.value() && dragOffsetX_ - contentOffset < mainSize / 2) ||
-        (!isOn_.value() && dragOffsetX_ - contentOffset >= mainSize / 2)) {
-        OnClick();
+    if (std::abs(currentOffset_) >= mainSize / 2) {
+        if (!isOn_.value()) {
+            changeFlag_ = true;
+            PlayTranslateAnimation(mainSize, mainSize);
+        } else {
+            changeFlag_ = false;
+            PlayTranslateAnimation(currentOffset_, mainSize);
+        }
+    } else if (std::abs(currentOffset_) < mainSize / 2) {
+        if (isOn_.value()) {
+            changeFlag_ = true;
+            PlayTranslateAnimation(0.0f, 0.0f);
+        } else {
+            changeFlag_ = false;
+            PlayTranslateAnimation(currentOffset_, 0.0f);
+        }
     }
-    isDragEvent_ = false;
-    dragOffsetX_ = 0.0f;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 bool SwitchPattern::IsOutOfBoundary(double mainOffset) const
