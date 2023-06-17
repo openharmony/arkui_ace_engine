@@ -17,6 +17,9 @@
 
 #include <climits>
 #include <cstdint>
+#include <cstring>
+#include <optional>
+#include <string>
 
 #include "base/geometry/dimension.h"
 #include "base/json/json_util.h"
@@ -36,6 +39,7 @@
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
+#include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
@@ -46,10 +50,13 @@
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
+#include "core/components_ng/pattern/relative_container/relative_container_view.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
@@ -59,7 +66,6 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-
 constexpr int32_t SHEET_INFO_IDX = -2;
 constexpr Dimension SHEET_IMAGE_MARGIN = 16.0_vp;
 constexpr Dimension SHEET_DIVIDER_WIDTH = 1.0_px;
@@ -68,6 +74,10 @@ constexpr Dimension DIALOG_BUTTON_TEXT_SIZE = 16.0_fp;
 constexpr Color DEFAULT_BUTTON_COLOR = Color(0xff007dff);
 const CalcLength SHEET_IMAGE_SIZE(40.0_vp);
 constexpr int32_t TWO_BUTTON_MODE = 2;
+constexpr char DIALOG_BUTTONS_CONTAINER_ID[] = "__container__";
+constexpr char DIALOG_DIVIDER_ID[] = "Dialog_Divider";
+constexpr char DIALOG_BUTTON0_ID[] = "Button0";
+constexpr char DIALOG_BUTTON1_ID[] = "Button1";
 
 } // namespace
 
@@ -343,7 +353,37 @@ void DialogPattern::BindCloseCallBack(const RefPtr<GestureEventHub>& hub, int32_
     hub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(closeCallback));
 }
 
-RefPtr<FrameNode> DialogPattern::CreateButton(const ButtonInfo& params, int32_t index, bool isCancel)
+void DialogPattern::AnalysisLayoutPropertyOfButton(RefPtr<OHOS::Ace::NG::FrameNode> buttonNode,
+    RefPtr<OHOS::Ace::NG::LayoutProperty> layoutProps, bool useRelativeLayout, int index)
+{
+    if (useRelativeLayout) {
+        std::map<AlignDirection, AlignRule> alignRules;
+        if (index == 0) {
+            alignRules[AlignDirection::LEFT] =
+                AlignRule { DIALOG_BUTTONS_CONTAINER_ID, { .horizontal = HorizontalAlign::START } };
+            alignRules[AlignDirection::RIGHT] =
+                AlignRule { DIALOG_DIVIDER_ID, { .horizontal = HorizontalAlign::START } };
+            alignRules[AlignDirection::CENTER] =
+                AlignRule { DIALOG_BUTTONS_CONTAINER_ID, { .vertical = VerticalAlign::CENTER } };
+            layoutProps->UpdateAlignRules(alignRules);
+            buttonNode->UpdateInspectorId(DIALOG_BUTTON0_ID);
+        } else {
+            alignRules[AlignDirection::RIGHT] =
+                AlignRule { DIALOG_BUTTONS_CONTAINER_ID, { .horizontal = HorizontalAlign::END } };
+            alignRules[AlignDirection::LEFT] = AlignRule { DIALOG_DIVIDER_ID, { .horizontal = HorizontalAlign::END } };
+            alignRules[AlignDirection::CENTER] =
+                AlignRule { DIALOG_BUTTONS_CONTAINER_ID, { .vertical = VerticalAlign::CENTER } };
+            layoutProps->UpdateAlignRules(alignRules);
+            buttonNode->UpdateInspectorId(DIALOG_BUTTON1_ID);
+        }
+    } else {
+        layoutProps->UpdateFlexGrow(1.0);
+        layoutProps->UpdateFlexShrink(1.0);
+    }
+}
+
+RefPtr<FrameNode> DialogPattern::CreateButton(
+    const ButtonInfo& params, int32_t index, bool isCancel, bool useRelativeLayout)
 {
     auto buttonNode = FrameNode::CreateFrameNode(
         V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<ButtonPattern>());
@@ -400,8 +440,8 @@ RefPtr<FrameNode> DialogPattern::CreateButton(const ButtonInfo& params, int32_t 
     // set flex grow to fill horizontal space
     auto layoutProps = buttonNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProps, nullptr);
-    layoutProps->UpdateFlexGrow(1.0);
-    layoutProps->UpdateFlexShrink(1.0);
+    AnalysisLayoutPropertyOfButton(buttonNode, layoutProps, useRelativeLayout, index);
+
     // set button default height
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
@@ -431,6 +471,21 @@ RefPtr<FrameNode> DialogPattern::CreateDivider(const Dimension dividerLength, co
     dividerProps->UpdateVertical(true);
     dividerProps->UpdateStrokeWidth(dividerWidth);
     dividerProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(dividerLength)));
+
+    // add divider margin
+    MarginProperty margin = {
+        .left = CalcLength(4.0_vp),
+        .right = CalcLength(4.0_vp),
+    };
+    dividerProps->UpdateMargin(margin);
+
+    std::map<AlignDirection, AlignRule> alignRules;
+    alignRules[AlignDirection::MIDDLE] =
+        AlignRule { DIALOG_BUTTONS_CONTAINER_ID, { .horizontal = HorizontalAlign::CENTER } };
+    alignRules[AlignDirection::CENTER] =
+        AlignRule { DIALOG_BUTTONS_CONTAINER_ID, { .vertical = VerticalAlign::CENTER } };
+    dividerProps->UpdateAlignRules(alignRules);
+    dividerNode->UpdateInspectorId(DIALOG_DIVIDER_ID);
     return dividerNode;
 }
 
@@ -439,46 +494,65 @@ RefPtr<FrameNode> DialogPattern::BuildButtons(const std::vector<ButtonInfo>& but
 {
     auto Id = ElementRegister::GetInstance()->MakeUniqueId();
     RefPtr<FrameNode> container;
-    if (buttons.size() <= 2) {
-        container = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, Id, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    if (buttons.size() == TWO_BUTTON_MODE) {
+        container = FrameNode::CreateFrameNode(
+            V2::RELATIVE_CONTAINER_ETS_TAG, Id, AceType::MakeRefPtr<RelativeContainerPattern>());
+        CHECK_NULL_RETURN(container, nullptr);
+        container->UpdateInspectorId(DIALOG_BUTTONS_CONTAINER_ID);
+        auto buttonPipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(buttonPipeline, nullptr);
+        auto buttonTheme = buttonPipeline->GetTheme<ButtonTheme>();
+        CHECK_NULL_RETURN(buttonTheme, nullptr);
+        MeasureProperty layoutConstraint;
+        auto padding = dialogTheme_->GetActionsPadding();
+        layoutConstraint.UpdateMaxSizeWithCheck(
+            CalcSize(std::nullopt, CalcLength(padding.Top() + padding.Bottom() + buttonTheme->GetHeight())));
+        container->UpdateLayoutConstraint(layoutConstraint);
     } else {
         // if more than 2 buttons, use vertical layout
         container = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, Id, AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    }
-    if (container) {
         auto layoutProps = container->GetLayoutProperty<LinearLayoutProperty>();
-        if (buttons.size() <= 2) {
-            layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_AROUND);
-            layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-        } else {
-            layoutProps->UpdateCrossAxisAlign(FlexAlign::STRETCH);
-            layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
-        }
+        layoutProps->UpdateCrossAxisAlign(FlexAlign::STRETCH);
+        layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
     }
-
     CHECK_NULL_RETURN(container, nullptr);
     // set action's padding
     PaddingProperty actionPadding;
     auto padding = dialogTheme_->GetActionsPadding();
-    auto dividerLength = dialogTheme_->GetDividerLength();
-    auto dividerWidth = dialogTheme_->GetDividerBetweenButtonWidth_();
     actionPadding.left = CalcLength(padding.Left());
     actionPadding.right = CalcLength(padding.Right());
     actionPadding.top = CalcLength(padding.Top());
     actionPadding.bottom = CalcLength(padding.Bottom());
     container->GetLayoutProperty()->UpdatePadding(actionPadding);
 
+    AddButtonAndDivider(buttons, container);
+
+    return container;
+}
+
+void DialogPattern::AddButtonAndDivider(
+    const std::vector<ButtonInfo>& buttons, RefPtr<OHOS::Ace::NG::FrameNode> container)
+{
+    auto dividerLength = dialogTheme_->GetDividerLength();
+    auto dividerWidth = dialogTheme_->GetDividerBetweenButtonWidth_();
     for (size_t i = 0; i < buttons.size(); ++i) {
-        auto buttonNode = CreateButton(buttons[i], i);
-        CHECK_NULL_RETURN(buttonNode, nullptr);
-        buttonNode->MountToParent(container);
-        buttonNode->MarkModifyDone();
-        if (buttons.size() == TWO_BUTTON_MODE && i == 0) {
-            auto dividerNode = CreateDivider(dividerLength, dividerWidth);
-            dividerNode->MountToParent(container);
+        if (buttons.size() == TWO_BUTTON_MODE) {
+            auto buttonNode = CreateButton(buttons[i], i, false, true);
+            CHECK_NULL_VOID(buttonNode);
+            buttonNode->MountToParent(container);
+            buttonNode->MarkModifyDone();
+            container->AddChild(buttonNode);
+            if (i == 0) {
+                auto dividerNode = CreateDivider(dividerLength, dividerWidth);
+                container->AddChild(dividerNode);
+            }
+        } else {
+            auto buttonNode = CreateButton(buttons[i], i);
+            CHECK_NULL_VOID(buttonNode);
+            buttonNode->MountToParent(container);
+            buttonNode->MarkModifyDone();
         }
     }
-    return container;
 }
 
 RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const std::string& colorStr)
