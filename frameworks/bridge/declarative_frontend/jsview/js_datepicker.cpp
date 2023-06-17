@@ -485,6 +485,13 @@ void JSDatePicker::CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSOb
     }
     auto parseStartDate = ParseDate(startDate);
     auto parseEndDate = ParseDate(endDate);
+    auto startDays = parseStartDate.ToDays();
+    auto endDays = parseEndDate.ToDays();
+    if (startDays > endDays) {
+        LOGW("startDate and endDate error");
+        parseStartDate.SetYear(0);
+        parseEndDate.SetYear(0);
+    }
     auto theme = GetTheme<PickerTheme>();
     if (!theme) {
         LOGE("datePicker Theme is null");
@@ -507,11 +514,9 @@ void JSDatePicker::CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSOb
         } else {
             parseSelectedDate = ParseDate(selectedDate);
         }
-        auto startDays = parseStartDate.ToDays();
-        auto endDays = parseEndDate.ToDays();
         auto selectedDays = parseSelectedDate.ToDays();
-        if (startDays > endDays || selectedDays < startDays || selectedDays > endDays) {
-            LOGE("date error");
+        if (selectedDays < startDays || selectedDays > endDays) {
+            LOGW("selectedDate error");
         }
         DatePickerModel::GetInstance()->SetSelectedDate(parseSelectedDate);
     }
@@ -750,8 +755,13 @@ void JSDatePickerDialog::CreateDatePicker(RefPtr<Component>& component, const JS
     auto startDays = parseStartDate.ToDays();
     auto endDays = parseEndDate.ToDays();
     auto selectedDays = parseSelectedDate.ToDays();
-    if (startDays > endDays || selectedDays < startDays || selectedDays > endDays) {
-        LOGE("date error");
+    if (startDays > endDays) {
+        LOGW("startDate and endDate error");
+        parseStartDate.SetYear(0);
+        parseEndDate.SetYear(0);
+    }
+    if (selectedDays < startDays || selectedDays > endDays) {
+        LOGW("selectedDate error");
     }
     if (startDate->IsObject()) {
         datePicker->SetStartDate(parseStartDate);
