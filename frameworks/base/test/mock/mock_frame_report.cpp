@@ -120,4 +120,14 @@ void FrameReport::EndListFling()
 {
     endListFlingFunc_ = nullptr;
 }
+
+void FrameReport::FlushBegin()
+{
+    flushBeginFunc_ = nullptr;
+}
+
+void FrameReport::FlushEnd()
+{
+    flushEndFunc_ = nullptr;
+}
 } // namespace OHOS::Ace
