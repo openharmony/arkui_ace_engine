@@ -21,10 +21,11 @@
 
 #include "ability.h"
 #include "ability_loader.h"
+#include "want.h"
+#include "window.h"
+
 #include "core/common/window_animation_config.h"
 #include "core/event/touch_event.h"
-#include "want.h"
-#include "wm/window.h"
 
 namespace OHOS::Ace {
 class AceAbility;
@@ -60,6 +61,7 @@ public:
 
     // override Rosen::IAvoidAreaChangedListener virtual callback function
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override;
+
 private:
     std::shared_ptr<AceAbility> callbackOwner_;
 };

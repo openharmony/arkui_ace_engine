@@ -1338,6 +1338,21 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldPatternSearchNodeTest001, TestSize.Lev
 }
 
 /**
+ * @tc.name: OffsetInContentRegion
+ * @tc.desc: Verify the parent search node branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, OffsetInContentRegion, TestSize.Level2)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    Offset offset;
+    EXPECT_TRUE(pattern->OffsetInContentRegion(offset));
+}
+
+/**
  * @tc.name: TextFieldPatternOnTextAreaScroll001
  * @tc.desc: Verify that the AddScrollEvent interface calls normally and exits without exception.
  * @tc.type: FUNC
@@ -4030,10 +4045,10 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldModelNGProcessDefaultPadding, TestSize
     textFieldModelNG.ProcessDefaultPadding(paddingProperty);
     Dimension vertical { 12.0, DimensionUnit::PX };
     Dimension horizontal { 0.0, DimensionUnit::PX };
-    EXPECT_EQ(paddingProperty.top.value().GetDimension(), vertical);
-    EXPECT_EQ(paddingProperty.bottom.value().GetDimension(), vertical);
-    EXPECT_EQ(paddingProperty.left.value().GetDimension(), horizontal);
-    EXPECT_EQ(paddingProperty.right.value().GetDimension(), horizontal);
+    EXPECT_EQ(paddingProperty.top.value().GetDimension().ConvertToPx(), vertical.ConvertToPx());
+    EXPECT_EQ(paddingProperty.bottom.value().GetDimension().ConvertToPx(), vertical.ConvertToPx());
+    EXPECT_EQ(paddingProperty.left.value().GetDimension().ConvertToPx(), horizontal.ConvertToPx());
+    EXPECT_EQ(paddingProperty.right.value().GetDimension().ConvertToPx(), horizontal.ConvertToPx());
 
     /**
      * @tc.steps: step3. let ShowUnderLine be false.
@@ -5541,6 +5556,32 @@ HWTEST_F(TextFieldPatternTestNg, OnAreaChangedInner, TestSize.Level2)
     pattern->isSingleHandle_ = false;
     pattern->OnAreaChangedInner();
     EXPECT_EQ(pattern->selectionMode_, SelectionMode::NONE);
+}
+
+/**
+ * @tc.name: CreateSingleHandle
+ * @tc.desc: test CreateSingleHandle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, CreateSingleHandle, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. call CreateSingleHandle.
+     * @tc.expected: Check the value of the updated property.
+     */
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->OnModifyDone();
+    pattern->textEditingValue_.Reset();
+    EXPECT_TRUE(pattern->textEditingValue_.Empty());
+    pattern->CreateSingleHandle();
 }
 
 /**

@@ -36,8 +36,9 @@ RefPtr<CanvasImage> CanvasImage::Create(const RefPtr<PixelMap>& pixelMap)
 
 int32_t PixelMapImage::GetWidth() const
 {
-    if (pixelMap_) {
-        return pixelMap_->GetWidth();
+    auto pixmap = GetPixelMap();
+    if (pixmap) {
+        return pixmap->GetWidth();
     }
     LOGW("pixelMap_ is nullptr, return width 0.");
     return 0;
@@ -45,8 +46,9 @@ int32_t PixelMapImage::GetWidth() const
 
 int32_t PixelMapImage::GetHeight() const
 {
-    if (pixelMap_) {
-        return pixelMap_->GetHeight();
+    auto pixmap = GetPixelMap();
+    if (pixmap) {
+        return pixmap->GetHeight();
     }
     LOGW("rsCanvas is nullptr, return height 0.");
     return 0;
@@ -55,9 +57,8 @@ int32_t PixelMapImage::GetHeight() const
 void PixelMapImage::DrawToRSCanvas(
     RSCanvas& canvas, const RSRect& /* srcRect */, const RSRect& /* dstRect */, const BorderRadiusArray& radiusXY)
 {
-    if (!pixelMap_) {
-        return;
-    }
+    auto pixmap = GetPixelMap();
+    CHECK_NULL_VOID_NOLOG(pixmap);
 
 #ifdef ENABLE_ROSEN_BACKEND
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
@@ -90,9 +91,9 @@ void PixelMapImage::DrawToRSCanvas(
     Rosen::RsImageInfo rsImageInfo((int)(config.imageFit_), (int)(config.imageRepeat_), radii.get(), 1.0, 0, 0, 0);
 
 #ifndef NEW_SKIA
-    recordingCanvas->DrawPixelMapWithParm(pixelMap_->GetPixelMapSharedPtr(), rsImageInfo, paint);
+    recordingCanvas->DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, paint);
 #else
-    recordingCanvas->DrawPixelMapWithParm(pixelMap_->GetPixelMapSharedPtr(), rsImageInfo, options, paint);
+    recordingCanvas->DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options, paint);
 #endif
 #endif
 }
@@ -103,7 +104,7 @@ void PixelMapImage::Cache(const std::string& key)
     CHECK_NULL_VOID(pipeline);
     auto cache = pipeline->GetImageCache();
     CHECK_NULL_VOID(cache);
-    cache->CacheImageData(key, MakeRefPtr<PixmapCachedData>(pixelMap_));
+    cache->CacheImageData(key, MakeRefPtr<PixmapCachedData>(GetPixelMap()));
 }
 
 RefPtr<CanvasImage> PixelMapImage::QueryFromCache(const std::string& key)

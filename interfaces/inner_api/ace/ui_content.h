@@ -68,7 +68,7 @@ class NativeValue;
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT_WITH_PREVIEW UIContent {
+class ACE_FORCE_EXPORT UIContent {
 public:
     static std::unique_ptr<UIContent> Create(
         OHOS::AbilityRuntime::Context* context, NativeEngine* runtime, bool isFormRender);

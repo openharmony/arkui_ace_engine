@@ -23,6 +23,7 @@
 #include "base/memory/ace_type.h"
 #define private public
 #define protected public
+#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/scrollable_event.h"
@@ -101,7 +102,8 @@ HWTEST_F(ScrollableEventTestNg, ScrollableEventCreateTest001, TestSize.Level1)
      * @tc.steps: step2. Add ScrollEdgeEffect when ScrollEdgeEffect is nullptr.
      * @tc.expected: AddScrollEdgeEffect function will return directly, and scrollEffects_ size is 0.
      */
-    scrollableActuator->AddScrollEdgeEffect(SCROLLABLE_EVENT_AXIS, nullptr);
+    RefPtr<ScrollEdgeEffect> edgeEffect;
+    scrollableActuator->AddScrollEdgeEffect(SCROLLABLE_EVENT_AXIS, edgeEffect);
     EXPECT_EQ(scrollableActuator->scrollEffects_.size(), SCROLL_EFFECTS_SIZE);
 
     /**
@@ -113,12 +115,12 @@ HWTEST_F(ScrollableEventTestNg, ScrollableEventCreateTest001, TestSize.Level1)
 
     /**
      * @tc.steps: step4. Add ScrollEdgeEffect when ScrollEdgeEffect is not nullptr.
-     * @tc.expected: Add ScrollEdgeEffect to scrollEffects_ which size will increased by one and the initialized_ is
-     * assigned with false.
+     * @tc.expected: Add ScrollEdgeEffect to scrollEffects_ which size will increased by one
      */
+    auto scrollableEvent = AceType::MakeRefPtr<ScrollableEvent>(SCROLLABLE_EVENT_AXIS);
+    scrollableActuator->AddScrollableEvent(scrollableEvent);
     scrollableActuator->AddScrollEdgeEffect(SCROLLABLE_EVENT_AXIS, scrollEdgeEffect);
     EXPECT_EQ(scrollableActuator->scrollEffects_.size(), SCROLL_EFFECTS_SIZE_1);
-    EXPECT_FALSE(scrollableActuator->initialized_);
 }
 
 /**
@@ -154,6 +156,8 @@ HWTEST_F(ScrollableEventTestNg, ScrollableEventRemoveScrollEdgeEffectTest002, Te
      * @tc.steps: step4. Add ScrollEdgeEffect.
      * @tc.expected: Add ScrollEdgeEffect to scrollEffects_ which size will not be empty.
      */
+    auto scrollableEvent = AceType::MakeRefPtr<ScrollableEvent>(SCROLLABLE_EVENT_AXIS);
+    scrollableActuator->AddScrollableEvent(scrollableEvent);
     scrollableActuator->AddScrollEdgeEffect(SCROLLABLE_EVENT_AXIS, scrollEdgeEffect);
     EXPECT_EQ(scrollableActuator->scrollEffects_.size(), SCROLL_EFFECTS_SIZE_1);
 

@@ -40,28 +40,72 @@ RefPtr<SkiaSvgDom> SkiaSvgDom::CreateSkiaSvgDom(SkStream& svgStream, const std::
     return AceType::MakeRefPtr<SkiaSvgDom>(skiaDom);
 }
 
+void SkiaSvgDom::FitImage(SkCanvas* canvas, const ImageFit& imageFit, const Size& layout)
+{
+    double scaleX = 1.0;
+    double scaleY = 1.0;
+    float tx = 0.0;
+    float ty = 0.0;
+    constexpr float HALF = 0.5;
+    const size_t RADII_SIZE = 4; // 4 corners for round rectangle
+
+    if (!layout.IsEmpty()) {
+        layout_ = layout;
+    }
+    if (!layout_.IsEmpty() && (svgSize_.IsValid() && !svgSize_.IsInfinite())) {
+        ApplyImageFit(imageFit, scaleX, scaleY);
+    }
+
+    auto rect = SkRect::MakeWH(layout_.Width(), layout_.Height());
+    if (radius_) {
+        SkRRect rrect;
+        SkVector radii[RADII_SIZE];
+        for (size_t i = 0; i < RADII_SIZE; ++i) {
+            radii[i] = SkPoint::Make((*radius_)[i].GetX(), (*radius_)[i].GetY());
+        }
+        rrect.setRectRadii(rect, radii);
+        canvas->clipRRect(rrect, SkClipOp::kIntersect, true);
+    } else {
+        canvas->clipRect(rect, SkClipOp::kIntersect, true);
+    }
+
+    // Move the svg viewport to center of the container.
+    if (svgSize_.IsValid() && !svgSize_.IsInfinite() && !layout_.IsEmpty()) {
+        tx = (layout_.Width() - svgSize_.Width() * scaleX) * HALF;
+        ty = (layout_.Height() - svgSize_.Height() * scaleY) * HALF;
+    }
+
+    canvas->translate(tx, ty);
+
+    if (NearZero(scaleX) || NearZero(scaleY)) {
+        return;
+    }
+
+    canvas->scale(scaleX, scaleY);
+}
+
+void SkiaSvgDom::FitViewPort(const Size& layout)
+{
+    if (!svgSize_.IsValid() || svgSize_.IsInfinite()) {
+        svgSize_ = layout;
+        skiaDom_->setContainerSize(SkSize::Make(layout.Width(), layout.Height()));
+    }
+}
+
 void SkiaSvgDom::DrawImage(
-    RSCanvas& canvas, const ImageFit& /*imageFit*/, const Size& layout, const std::optional<Color>& /*color*/)
+    RSCanvas& canvas, const ImageFit& imageFit, const Size& layout, const std::optional<Color>&)
 {
     CHECK_NULL_VOID(skiaDom_);
     auto rsCanvas = canvas.GetImpl<Rosen::Drawing::SkiaCanvas>();
     CHECK_NULL_VOID(rsCanvas);
     auto* skCanvas = rsCanvas->ExportSkCanvas();
+
+    skCanvas->save();
     // TODO:use graphics_2d to paint SVG
-    auto svgContainerSize = SizeF(layout.Width(), layout.Height());
-    if (svgContainerSize.IsNegative()) {
-        // when layout size is invalid, try the container size of svg
-        if (GetContainerSize().IsNegative()) {
-            return;
-        }
-        svgContainerSize = GetContainerSize();
-    }
-    // TODO:svg ObjectFit
-    double width = svgContainerSize.Width();
-    double height = svgContainerSize.Height();
-    SetContainerSize(svgContainerSize);
-    skCanvas->clipRect({ 0, 0, width, height }, SkClipOp::kIntersect, true);
+    FitViewPort(layout);
+    FitImage(skCanvas, imageFit, layout);
     Render(skCanvas);
+    skCanvas->restore();
 }
 
 const sk_sp<SkSVGDOM>& SkiaSvgDom::GetSkiaSvgDom() const

@@ -2045,6 +2045,8 @@ void JSCanvasRenderer::JsSetTransform(const JSCallbackInfo& info)
         }
         TransformParam param;
         JSViewAbstract::ParseJsDouble(info[0], param.scaleX);
+        JSViewAbstract::ParseJsDouble(info[1], param.skewY);
+        JSViewAbstract::ParseJsDouble(info[2], param.skewX);
         JSViewAbstract::ParseJsDouble(info[3], param.scaleY);
         JSViewAbstract::ParseJsDouble(info[4], param.translateX);
         JSViewAbstract::ParseJsDouble(info[5], param.translateY);

@@ -21,6 +21,7 @@
 #include "render_service_client/core/pipeline/rs_node_map.h"
 #include "render_service_client/core/transaction/rs_interfaces.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
+#include "render_service_client/core/ui/rs_effect_node.h"
 #include "render_service_client/core/ui/rs_root_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 
@@ -40,6 +41,8 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/property/calc_length.h"
@@ -47,6 +50,7 @@
 #include "core/components_ng/render/adapter/border_image_modifier.h"
 #include "core/components_ng/render/adapter/debug_boundary_modifier.h"
 #include "core/components_ng/render/adapter/focus_state_modifier.h"
+#include "core/components_ng/render/adapter/gradient_style_modifier.h"
 #include "core/components_ng/render/adapter/graphic_modifier.h"
 #include "core/components_ng/render/adapter/moon_progress_modifier.h"
 #include "core/components_ng/render/adapter/mouse_select_modifier.h"
@@ -89,8 +93,7 @@ float RosenRenderContext::ConvertDimensionToScaleBySize(const Dimension& dimensi
     if (dimension.Unit() == DimensionUnit::PERCENT) {
         return static_cast<float>(dimension.Value());
     }
-    const float defaultPivot = 0.5f;
-    return size > 0.0f ? static_cast<float>(dimension.ConvertToPx() / size) : defaultPivot;
+    return size > 0.0f ? static_cast<float>(dimension.ConvertToPx() / size) : 0.5f;
 }
 
 RosenRenderContext::~RosenRenderContext()
@@ -117,14 +120,16 @@ void RosenRenderContext::StopRecordingIfNeeded()
 void RosenRenderContext::OnNodeAppear(bool recursive)
 {
     isDisappearing_ = false;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // restore eventHub state when node appears.
+    host->GetEventHub<EventHub>()->RestoreEnabled();
     if (recursive && !propTransitionAppearing_ && !transitionEffect_) {
         // recursive and has no transition, no need to handle transition.
         return;
     }
 
     auto rect = GetPaintRectWithoutTransform();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     isBreakingPoint_ = !recursive;
     if (rect.IsValid() && !CheckNeedRequestMeasureAndLayout(host->GetLayoutProperty()->GetPropertyChangeFlag())) {
         // has set size before and do not need layout, trigger transition directly.
@@ -144,6 +149,10 @@ void RosenRenderContext::OnNodeDisappear(bool recursive)
         return;
     }
     CHECK_NULL_VOID(rsNode_);
+    auto host = GetHost();
+    if (host && host->GetEventHub<EventHub>()) {
+        host->GetEventHub<EventHub>()->SetEnabledInternal(false);
+    }
     auto rect = GetPaintRectWithoutTransform();
     // only start default transition on the break point of render node tree.
     isBreakingPoint_ = !recursive;
@@ -181,21 +190,40 @@ void RosenRenderContext::SetTransitionPivot(const SizeF& frameSize, bool transit
     SetPivot(xPivot, yPivot);
 }
 
-void RosenRenderContext::InitContext(bool isRoot, const std::optional<std::string>& surfaceName, bool useExternalNode)
+void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextParam>& param)
 {
-    // skip if useExternalNode is true or node already created
-    CHECK_NULL_VOID_NOLOG(!useExternalNode);
+    // skip if node already created
     CHECK_NULL_VOID_NOLOG(!rsNode_);
 
-    // create proper RSNode base on input
-    if (surfaceName.has_value()) {
-        struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceName.value() };
-        rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
-    } else if (isRoot) {
-        LOGI("create RSRootNode");
+    if (isRoot) {
         rsNode_ = Rosen::RSRootNode::Create();
-    } else {
+        return;
+    } else if (!param.has_value()) {
         rsNode_ = Rosen::RSCanvasNode::Create();
+        return;
+    }
+
+    // create proper RSNode base on input
+    switch (param->type) {
+        case ContextType::CANVAS:
+            rsNode_ = Rosen::RSCanvasNode::Create();
+            break;
+        case ContextType::ROOT:
+            rsNode_ = Rosen::RSRootNode::Create();
+            break;
+        case ContextType::SURFACE: {
+            Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or("") };
+            rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
+            break;
+        }
+        case ContextType::EFFECT:
+            rsNode_ = Rosen::RSEffectNode::Create();
+            break;
+        case ContextType::EXTERNAL:
+            break;
+        default:
+            LOGE("invalid context type");
+            break;
     }
 }
 
@@ -772,7 +800,9 @@ void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTr
     // OnTransitionInFinish. and OnTransitionOutFinish.
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    if (isBreakingPoint_ && !transitionEffect_ && pipeline->GetSyncAnimationOption().IsValid()) {
+    if (isBreakingPoint_ && !transitionEffect_ &&
+        (pipeline->GetSyncAnimationOption().IsValid() ||
+            ViewStackProcessor::GetInstance()->GetImplicitAnimationOption().IsValid())) {
         hasDefaultTransition_ = true;
         transitionEffect_ = RosenTransitionEffect::CreateDefaultRosenTransitionEffect();
         RSNode::ExecuteWithoutAnimation([this, isTransitionIn]() {
@@ -862,6 +892,12 @@ void RosenRenderContext::OnAccessibilityFocusUpdate(bool isAccessibilityFocus)
     }
     uiNode->OnAccessibilityEvent(isAccessibilityFocus ? AccessibilityEventType::ACCESSIBILITY_FOCUSED
                                                       : AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED);
+}
+
+void RosenRenderContext::OnUseEffectUpdate(bool useEffect)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetUseEffect(useEffect);
 }
 
 void RosenRenderContext::OnFreezeUpdate(bool isFreezed)
@@ -1061,19 +1097,6 @@ void RosenRenderContext::OnModifyDone()
     if (HasClickEffectLevel()) {
         InitEventClickEffect();
     }
-    const auto& size = frameNode->GetGeometryNode()->GetFrameSize();
-    if (!size.IsPositive()) {
-        LOGD("first modify, make change in SyncGeometryProperties");
-        return;
-    }
-    CHECK_NULL_VOID_NOLOG(isPositionChanged_);
-    auto rect = AdjustPaintRect();
-    if (!rect.GetSize().IsPositive()) {
-        return;
-    }
-    rsNode_->SetBounds(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
-    rsNode_->SetFrame(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
-    isPositionChanged_ = false;
 }
 
 RectF RosenRenderContext::AdjustPaintRect()
@@ -1219,35 +1242,37 @@ void RosenRenderContext::GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddi
         parentPaddingTop = layoutProperty->GetPaddingProperty()->top.value_or(CalcLength(Dimension(0))).GetDimension();
     }
 }
-
-void RosenRenderContext::OnPositionUpdate(const OffsetT<Dimension>& /*value*/)
+void RosenRenderContext::SetPositionToRSNode()
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    auto layoutProperty = frameNode->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
-    isPositionChanged_ = true;
+    CHECK_NULL_VOID(rsNode_);
+    const auto& size = frameNode->GetGeometryNode()->GetFrameSize();
+    if (!size.IsPositive()) {
+        LOGD("first modify, make change in SyncGeometryProperties");
+        return;
+    }
+    auto rect = AdjustPaintRect();
+    if (!rect.GetSize().IsPositive()) {
+        return;
+    }
+    rsNode_->SetBounds(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+    rsNode_->SetFrame(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+}
+
+void RosenRenderContext::OnPositionUpdate(const OffsetT<Dimension>& /*value*/)
+{
+    SetPositionToRSNode();
 }
 
 void RosenRenderContext::OnOffsetUpdate(const OffsetT<Dimension>& /*value*/)
 {
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto layoutProperty = frameNode->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
-    isPositionChanged_ = true;
+    SetPositionToRSNode();
 }
 
 void RosenRenderContext::OnAnchorUpdate(const OffsetT<Dimension>& /*value*/)
 {
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto layoutProperty = frameNode->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
-    isPositionChanged_ = true;
+    SetPositionToRSNode();
 }
 
 void RosenRenderContext::OnZIndexUpdate(int32_t value)
@@ -1906,25 +1931,31 @@ std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWi
     return effect;
 }
 
-void RosenRenderContext::PaintGradient(const SizeF& frameSize)
+void RosenRenderContext::PaintGradient(const SizeF& /*frameSize*/)
 {
     CHECK_NULL_VOID(rsNode_);
     auto& gradientProperty = GetOrCreateGradient();
+    Gradient gradient;
     if (gradientProperty->HasLinearGradient()) {
-        auto gradient = gradientProperty->GetLinearGradientValue();
-        auto shader = SkiaDecorationPainter::CreateGradientShader(gradient, frameSize);
-        rsNode_->SetBackgroundShader(Rosen::RSShader::CreateRSShader(shader));
+        gradient = gradientProperty->GetLinearGradientValue();
     }
     if (gradientProperty->HasRadialGradient()) {
-        auto gradient = gradientProperty->GetRadialGradientValue();
-        auto shader = SkiaDecorationPainter::CreateGradientShader(gradient, frameSize);
-        rsNode_->SetBackgroundShader(Rosen::RSShader::CreateRSShader(shader));
+        gradient = gradientProperty->GetRadialGradientValue();
     }
     if (gradientProperty->HasSweepGradient()) {
-        auto gradient = gradientProperty->GetSweepGradientValue();
-        auto shader = SkiaDecorationPainter::CreateGradientShader(gradient, frameSize);
-        rsNode_->SetBackgroundShader(Rosen::RSShader::CreateRSShader(shader));
+        gradient = gradientProperty->GetSweepGradientValue();
     }
+    if (!gradientStyleModifier_) {
+        gradientStyleModifier_ = std::make_shared<GradientStyleModifier>();
+        rsNode_->AddModifier(gradientStyleModifier_);
+    }
+    auto borderRadius = GetBorderRadius();
+    if (borderRadius.has_value()) {
+        Rosen::Vector4f rsRadius;
+        ConvertRadius(*borderRadius, rsRadius);
+        gradientStyleModifier_->SetCornerRadius(rsRadius);
+    }
+    gradientStyleModifier_->SetGradient(gradient);
 }
 
 void RosenRenderContext::OnLinearGradientUpdate(const NG::Gradient& gradient)
@@ -2597,10 +2628,7 @@ void RosenRenderContext::InitEventClickEffect()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto renderContext = weak.Upgrade();
         CHECK_NULL_VOID(renderContext);
-        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN ||
-            info.GetTouches().front().GetTouchType() == TouchType::UP) {
-            renderContext->ClickEffectPlayAnimation(info.GetTouches().front().GetTouchType());
-        }
+        renderContext->ClickEffectPlayAnimation(info.GetTouches().front().GetTouchType());
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     gesture->AddTouchEvent(touchListener_);
@@ -2608,7 +2636,7 @@ void RosenRenderContext::InitEventClickEffect()
 
 void RosenRenderContext::ClickEffectPlayAnimation(const TouchType& touchType)
 {
-    if (touchType != TouchType::DOWN && touchType != TouchType::UP) {
+    if (touchType != TouchType::DOWN && touchType != TouchType::UP && touchType != TouchType::CANCEL) {
         return;
     }
     auto value = GetClickEffectLevelValue();
@@ -2619,21 +2647,26 @@ void RosenRenderContext::ClickEffectPlayAnimation(const TouchType& touchType)
     AnimationOption option;
     option.SetCurve(springCurve);
 
-    if (touchType == TouchType::DOWN) {
-        auto defaultScale = VectorF(1.0f, 1.0f);
-        auto currentScale = GetTransformScaleValue(defaultScale);
-        currentScale_ = currentScale;
-        UpdateTransformScale(currentScale_);
-        AnimationUtils::OpenImplicitAnimation(option, springCurve, nullptr);
-        VectorF valueScale(scaleValue, scaleValue);
-        UpdateTransformScale(valueScale);
-        AnimationUtils::CloseImplicitAnimation();
+    if (touchType == TouchType::DOWN && level != ClickEffectLevel::UNDEFINED) {
+        if (isTouchUpFinished_) {
+            auto defaultScale = VectorF(1.0f, 1.0f);
+            auto currentScale = GetTransformScaleValue(defaultScale);
+            currentScale_ = currentScale;
+            UpdateTransformScale(currentScale_);
+
+            AnimationUtils::OpenImplicitAnimation(option, springCurve, nullptr);
+            VectorF valueScale(scaleValue, scaleValue);
+            UpdateTransformScale(valueScale);
+            AnimationUtils::CloseImplicitAnimation();
+        }
+        isTouchUpFinished_ = false;
     }
 
-    if (touchType == TouchType::UP) {
+    if ((touchType == TouchType::UP || touchType == TouchType::CANCEL) && level != ClickEffectLevel::UNDEFINED) {
         AnimationUtils::OpenImplicitAnimation(option, springCurve, nullptr);
         UpdateTransformScale(currentScale_);
         AnimationUtils::CloseImplicitAnimation();
+        isTouchUpFinished_ = true;
     }
 }
 

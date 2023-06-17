@@ -158,6 +158,10 @@
 #include "bridge/declarative_frontend/jsview/js_remote_window.h"
 #endif
 
+#ifdef EFFECT_COMPONENT_SUPPORTED
+#include "bridge/declarative_frontend/jsview/js_effect_component.h"
+#endif
+
 #ifndef WEARABLE_PRODUCT
 #include "bridge/declarative_frontend/jsview/js_piece.h"
 #include "bridge/declarative_frontend/jsview/js_rating.h"
@@ -165,10 +169,6 @@
 #include "bridge/declarative_frontend/jsview/js_video.h"
 #include "bridge/declarative_frontend/jsview/js_video_controller.h"
 #endif
-#endif
-
-#ifdef UICAST_COMPONENT_SUPPORTED
-#include "uicast_interface/js_uicast.h"
 #endif
 
 #if defined(XCOMPONENT_SUPPORTED)
@@ -534,9 +534,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextClock", JSTextClock::JSBind },
     { "SideBarContainer", JSSideBar::JSBind },
     { "QRCode", JSQRCode::JSBind },
-#ifdef UICAST_COMPONENT_SUPPORTED
-    { "UICast", JSUICast::JSBind },
-#endif
 #ifdef FORM_SUPPORTED
     { "FormComponent", JSForm::JSBind },
 #endif
@@ -550,6 +547,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
 #ifdef REMOTE_WINDOW_SUPPORTED
     { "RemoteWindow", JSRemoteWindow::JSBind },
+#endif
+#ifdef EFFECT_COMPONENT_SUPPORTED
+    { "EffectComponent", JSEffectComponent::JSBind },
 #endif
 #ifndef WEARABLE_PRODUCT
     { "Camera", JSCamera::JSBind },

@@ -717,6 +717,44 @@ HWTEST_F(RatingPatternTestNg, RatingPatternTest012, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RatingMeasureTest013
+ * @tc.desc: Test rating MeasureContent when rating component's width or height is not fully valid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingPatternTestNg, RatingMeasureTest013, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RatingTheme>()));
+    /**
+     * @tc.steps: step1. Create LayoutWrapper and RatingLayoutAlgorithm.
+     */
+    auto ratingLayoutProperty = AceType::MakeRefPtr<RatingLayoutProperty>();
+    ratingLayoutProperty->UpdateIndicator(true);
+    ratingLayoutProperty->UpdateStars(DEFAULT_STAR_NUM);
+    ASSERT_NE(ratingLayoutProperty, nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(nullptr, nullptr, ratingLayoutProperty);
+    auto ratingLayoutAlgorithm = AceType::MakeRefPtr<RatingLayoutAlgorithm>(nullptr, nullptr, nullptr);
+    ASSERT_NE(ratingLayoutAlgorithm, nullptr);
+    LayoutConstraintF layoutConstraint;
+    /**
+    //     corresponding ets code:
+    //         Rating().width(300)
+    */
+    layoutConstraint.selfIdealSize.SetWidth(CONTAINER_WIDTH);
+    EXPECT_EQ(ratingLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper),
+        SizeF(CONTAINER_WIDTH, CONTAINER_WIDTH / DEFAULT_STAR_NUM));
+    /**
+    //     corresponding ets code:
+    //         Rating().height(300)
+    */
+    layoutConstraint.selfIdealSize.Reset();
+    layoutConstraint.selfIdealSize.SetHeight(CONTAINER_HEIGHT);
+    EXPECT_EQ(ratingLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper),
+        SizeF(CONTAINER_HEIGHT * DEFAULT_STAR_NUM, CONTAINER_HEIGHT));
+}
+
+/**
  * @tc.name: RatingOnChangeEventTest001
  * @tc.desc: Test setting out-of-bounds ratingScore and starNum values.
  * @tc.type: FUNC

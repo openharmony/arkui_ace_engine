@@ -37,6 +37,13 @@
 
 namespace OHOS::Ace::Framework {
 
+struct NamedRouterProperty {
+    panda::Global<panda::FunctionRef> pageGenerator;
+    std::string bundleName;
+    std::string moduleName;
+    std::string pagePath;
+};
+
 class JsiDeclarativeEngineInstance final : public AceType, public JsEngineInstance {
     DECLARE_ACE_TYPE(JsiDeclarativeEngineInstance, AceType)
 public:
@@ -387,6 +394,9 @@ public:
         isBundle_ = isBundle;
     }
 #endif
+    void AddToNamedRouterMap(panda::Global<panda::FunctionRef> pageGenerator, const std::string& namedRoute,
+        panda::Local<panda::ObjectRef> params);
+    bool LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs) override;
 
 private:
     bool CallAppFunc(const std::string& appFuncName);
@@ -423,6 +433,7 @@ private:
 #endif
     std::string pluginBundleName_;
     std::string pluginModuleName_;
+    std::unordered_map<std::string, NamedRouterProperty> namedRouterRegisterMap;
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngine);
 };
 

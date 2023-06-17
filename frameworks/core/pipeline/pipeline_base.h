@@ -22,6 +22,7 @@
 #include <shared_mutex>
 #include <stack>
 #include <string>
+#include <unordered_map>
 #include <utility>
 
 #include "base/geometry/dimension.h"
@@ -62,6 +63,19 @@ struct KeyboardAnimationConfig {
     uint32_t durationOut_ = 0;
 };
 
+struct FontInfo {
+    std::string path;
+    std::string postScriptName;
+    std::string fullName;
+    std::string family;
+    std::string subfamily;
+    uint32_t weight = 0;
+    uint32_t width = 0;
+    bool italic = false;
+    bool monoSpace = false;
+    bool symbolic = false;
+};
+
 class Frontend;
 class OffscreenCanvas;
 class Window;
@@ -71,6 +85,7 @@ enum class FrontendType;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AceVsyncCallback = std::function<void(uint64_t, uint32_t)>;
 using EtsCardTouchEventCallback = std::function<void(const TouchEvent&)>;
+
 class ACE_EXPORT PipelineBase : public AceType {
     DECLARE_ACE_TYPE(PipelineBase, AceType);
 
@@ -438,6 +453,11 @@ public:
         installationFree_ = installationFree;
     }
 
+    bool GetInstallationFree() const
+    {
+        return installationFree_;
+    }
+
     void SetSharePanelCallback(SharePanelCallback&& callback)
     {
         sharePanelCallback_ = std::move(callback);
@@ -625,6 +645,10 @@ public:
 
     void RegisterFont(const std::string& familyName, const std::string& familySrc);
 
+    void GetSystemFontList(std::vector<std::string>& fontList);
+
+    bool GetSystemFont(const std::string& fontName, FontInfo& fontInfo);
+
     void TryLoadImageInfo(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& loadCallback);
 
     RefPtr<OffscreenCanvas> CreateOffscreenCanvas(int32_t width, int32_t height);
@@ -736,6 +760,8 @@ public:
 
     virtual void ResetViewSafeArea() {}
 
+    virtual void AppBarAdaptToSafeArea() {}
+
     void SetPluginOffset(const Offset& offset)
     {
         pluginOffset_ = offset;
@@ -827,11 +853,6 @@ public:
 
     void RemoveEtsCardTouchEventCallback(int32_t ponitId);
 
-    void AddUIExtensionCallback(std::function<void(const TouchEvent&)>&& callback)
-    {
-        uiExtensionCallback_ = std::move(callback);
-    }
-
     void SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId);
 
     void RemoveSubWindowVsyncCallback(int32_t subWindowId);
@@ -901,8 +922,9 @@ protected:
     virtual void SetRootRect(double width, double height, double offset = 0.0) = 0;
     virtual void FlushPipelineWithoutAnimation() = 0;
 
-    virtual void OnVirtualKeyboardHeightChange(float keyboardHeight,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) {}
+    virtual void OnVirtualKeyboardHeightChange(
+        float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr)
+    {}
 
     void UpdateRootSizeAndScale(int32_t width, int32_t height);
 
@@ -971,14 +993,12 @@ protected:
 
     std::vector<WeakPtr<PipelineBase>> touchPluginPipelineContext_;
     std::unordered_map<int32_t, EtsCardTouchEventCallback> etsCardTouchEventCallback_;
-    std::function<void(const TouchEvent&)> uiExtensionCallback_;
 
     RefPtr<Clipboard> clipboard_;
     std::function<void(const std::string&)> clipboardCallback_ = nullptr;
     Rect displayWindowRectInfo_;
     AnimationOption animationOption_;
     KeyboardAnimationConfig keyboardAnimationConfig_;
-
 
     std::function<void()> nextFrameLayoutCallback_ = nullptr;
     SharePanelCallback sharePanelCallback_ = nullptr;

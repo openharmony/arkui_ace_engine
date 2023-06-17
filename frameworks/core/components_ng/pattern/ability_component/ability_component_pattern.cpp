@@ -18,6 +18,8 @@
 #include "frameworks/base/utils/utils.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/pipeline_ng/ui_task_scheduler.h"
+#include "session/host/include/extension_session.h"
+
 
 namespace OHOS::Ace::NG {
 
@@ -33,7 +35,8 @@ void AbilityComponentPattern::OnModifyDone()
         CHECK_NULL_VOID(host);
         adapter_ = WindowExtensionConnectionProxyNG::CreateAdapter();
         CHECK_NULL_VOID(adapter_);
-        adapter_->ConnectExtension(GetHost(), windowId);
+        sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
+        adapter_->ConnectExtension(GetHost(), windowId, extensionSession);
         pipelineContext->AddOnAreaChangeNode(host->GetId());
         pipelineContext->AddWindowStateChangedCallback(host->GetId());
         LOGI("connect to windows extension begin %{public}s", GetHost()->GetTag().c_str());

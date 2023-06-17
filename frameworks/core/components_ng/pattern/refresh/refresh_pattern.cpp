@@ -80,7 +80,9 @@ void RefreshPattern::OnModifyDone()
     if (layoutProperty->GetIsCustomBuilderExistValue()) {
         CustomBuilderReset();
         if (refreshingProp) {
-            TriggerRefresh();
+            if (isRefreshing_ != refreshingProp) {
+                TriggerRefresh();
+            }
             CustomBuilderAppear();
         } else {
             CustomBuilderExit();

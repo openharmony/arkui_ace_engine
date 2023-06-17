@@ -18,6 +18,7 @@
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/models/canvas_model_impl.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/custom_paint/canvas_model_ng.h"
 
 namespace OHOS::Ace {
@@ -90,9 +91,9 @@ void JSCanvas::OnReady(const JSCallbackInfo& info)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Canvas.onReady");
             LOGD("Canvas elmtId %{public}d executing JS onReady function - start", accountableCanvasElement);
-            ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(accountableCanvasElement);
+            ViewStackModel::GetInstance()->StartGetAccessRecordingFor(accountableCanvasElement);
             func->Execute();
-            ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+            ViewStackModel::GetInstance()->StopGetAccessRecording();
             LOGD("Canvas elmtId %{public}d executing JS onReady function - end", accountableCanvasElement);
         };
     } else {

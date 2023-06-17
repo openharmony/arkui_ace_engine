@@ -16,7 +16,8 @@
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 
 namespace OHOS::Ace::Platform {
-std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const NG::OffsetF& offsetF, const TouchEvent& point)
+std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(
+    const NG::OffsetF& offsetF, const TouchEvent& point, const NG::VectorF& scale)
 {
     return nullptr;
 }

@@ -34,6 +34,7 @@ ohos_unittest("stepper_pattern_test_ng") {
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/components/common/properties/shadow_config.cpp",
     "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
+    "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
 
     # components_ng_event
     "$ace_root/frameworks/core/components_ng/event/long_press_event.cpp",

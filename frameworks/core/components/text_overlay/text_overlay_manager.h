@@ -130,7 +130,11 @@ public:
     void ChangeSelection(int32_t start, int32_t end);
     void InitAnimation(const WeakPtr<PipelineContext>& pipelineContext);
     bool GetCaretRect(int32_t extent, Rect& caretRect, double caretHeightOffset = 0.0) const;
+#ifndef USE_ROSEN_DRAWING
     void PaintSelection(SkCanvas* canvas, const Offset& globalOffset);
+#else
+    void PaintSelection(RSCanvas* canvas, const Offset& globalOffset);
+#endif
     virtual void InitSelection(const Offset& pos, const Offset& globalOffset);
     virtual void UpdateStartSelection(int32_t end, const Offset& pos, const Offset& globalOffset);
     virtual void UpdateEndSelection(int32_t start, const Offset& pos, const Offset& globalOffset);

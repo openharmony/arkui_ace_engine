@@ -696,7 +696,7 @@ public:
         auto position = ConvertTouchOffsetToCaretPosition(offset);
         auto selectStart = std::min(textSelector_.GetStart(), textSelector_.GetEnd());
         auto selectEnd = std::max(textSelector_.GetStart(), textSelector_.GetEnd());
-        return (position >= selectStart) && (position < selectEnd);
+        return offset.GetX() >= 0 && (position >= selectStart) && (position < selectEnd);
     }
 
     // xts
@@ -990,6 +990,7 @@ private:
     bool needToRefreshSelectOverlay_ = false;
     bool needToRequestKeyboardInner_ = false;
     bool needToRequestKeyboardOnFocus_ = true;
+    bool isTransparent_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 
@@ -1051,9 +1052,6 @@ private:
     bool imeShown_ = false;
 #endif
     int32_t instanceId_ = -1;
-#if defined(PREVIEW)
-    std::vector<std::wstring> clipRecords_;
-#endif
 };
 } // namespace OHOS::Ace::NG
 

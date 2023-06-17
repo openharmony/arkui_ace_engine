@@ -85,10 +85,6 @@ const std::string RESOURCE_VIDEO_CAPTURE = "TYPE_VIDEO_CAPTURE";
 const std::string RESOURCE_AUDIO_CAPTURE = "TYPE_AUDIO_CAPTURE";
 const std::string RESOURCE_PROTECTED_MEDIA_ID = "TYPE_PROTECTED_MEDIA_ID";
 const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
-
-// web parameters
-const std::string MULTI_RENDER_PROCESS = "persist.web.multiple_render_processes_enable";
-const std::string BACKGROUMD_MEDIA_SUSPEND = "persist.web.background_media_should_suspend";
 } // namespace
 
 #define EGLCONFIG_VERSION 3
@@ -1814,6 +1810,10 @@ void WebDelegate::RunSetWebIdAndHapPathCallback()
         auto setWebIdCallback = pattern->GetSetWebIdCallback();
         CHECK_NULL_VOID(setWebIdCallback);
         setWebIdCallback(webId);
+        auto onControllerAttachedCallback = pattern->GetOnControllerAttachedCallback();
+        if (onControllerAttachedCallback) {
+            onControllerAttachedCallback();
+        }
         if (!hapPath_.empty()) {
             auto setHapPathCallback = pattern->GetSetHapPathCallback();
             CHECK_NULL_VOID(setHapPathCallback);
@@ -2397,10 +2397,6 @@ void WebDelegate::InitWebViewWithSurface()
             }
             initArgs.web_engine_args_to_add.push_back(
                 std::string("--init-background-color=").append(std::to_string(delegate->backgroundColor_)));
-            if (!system::GetBoolParameter(BACKGROUMD_MEDIA_SUSPEND, true)) {
-                initArgs.web_engine_args_to_add.emplace_back(std::string("--disable-background-media-suspend"));
-            }
-            initArgs.multi_renderer_process = system::GetBoolParameter(MULTI_RENDER_PROCESS, false);
             if (isEnhanceSurface) {
                 LOGI("Create webview with isEnhanceSurface");
                 delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
@@ -3325,6 +3321,25 @@ void WebDelegate::SetShouldFrameSubmissionBeforeDraw(bool should)
             }
             if (delegate->nweb_) {
                 delegate->nweb_->SetShouldFrameSubmissionBeforeDraw(should);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::NotifyMemoryLevel(int32_t level)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), level]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->NotifyMemoryLevel(level);
             }
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -4846,5 +4861,22 @@ void WebDelegate::OnResizeNotWork()
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     webPattern->OnResizeNotWork();
+}
+
+void WebDelegate::OnDateTimeChooserPopup(
+    const OHOS::NWeb::DateTimeChooser& chooser,
+    const std::vector<OHOS::NWeb::DateTimeSuggestion>& suggestions,
+    std::shared_ptr<OHOS::NWeb::NWebDateTimeChooserCallback> callback)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnDateTimeChooserPopup(chooser, suggestions, callback);
+}
+
+void WebDelegate::OnDateTimeChooserClose()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnDateTimeChooserClose();
 }
 } // namespace OHOS::Ace

@@ -1403,7 +1403,7 @@ void TabBarPattern::SetEdgeEffect(const RefPtr<GestureEventHub>& gestureHub)
         // add callback to springEdgeEffect
         SetEdgeEffectCallback(springEffect);
         scrollEffect_ = springEffect;
-        gestureHub->AddScrollEdgeEffect(Axis::HORIZONTAL, scrollEffect_);
+        gestureHub->AddScrollEdgeEffect(axis_, scrollEffect_);
     }
 }
 
@@ -1528,5 +1528,77 @@ void TabBarPattern::OnRestoreInfo(const std::string& restoreInfo)
         swiperController_->SwipeToWithoutAnimation(index);
     }
 
+}
+
+void TabBarPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    Pattern::ToJsonValue(json);
+    auto selectedModes = JsonUtil::CreateArray(true);
+    for (const auto& selectedMode : selectedModes_) {
+        auto mode = JsonUtil::Create(true);
+        mode->Put("mode", selectedMode == SelectedMode::INDICATOR ? "INDICATOR" : "BOARD");
+        selectedModes->Put(mode);
+    }
+    json->Put("selectedModes", selectedModes->ToString().c_str());
+
+    auto indicatorStyles = JsonUtil::CreateArray(true);
+    for (const auto& indicatorStyle : indicatorStyles_) {
+        auto indicator = JsonUtil::Create(true);
+        indicator->Put("color", indicatorStyle.color.ColorToString().c_str());
+        indicator->Put("height", indicatorStyle.height.ToString().c_str());
+        indicator->Put("width", indicatorStyle.width.ToString().c_str());
+        indicator->Put("borderRadius", indicatorStyle.borderRadius.ToString().c_str());
+        indicator->Put("marginTop", indicatorStyle.marginTop.ToString().c_str());
+        indicatorStyles->Put(indicator);
+    }
+    json->Put("indicatorStyles", indicatorStyles->ToString().c_str());
+
+    auto tabBarStyles = JsonUtil::CreateArray(true);
+    for (const auto& tabBarStyle : tabBarStyles_) {
+        auto style = JsonUtil::Create(true);
+        style->Put("style", tabBarStyle == TabBarStyle::NOSTYLE          ? "NOSTYLE"
+                            : tabBarStyle == TabBarStyle::SUBTABBATSTYLE ? "SUBTABBATSTYLE"
+                                                                         : "BOTTOMTABBATSTYLE");
+        tabBarStyles->Put(style);
+    }
+    json->Put("tabBarStyles", tabBarStyles->ToString().c_str());
+}
+
+void TabBarPattern::FromJson(const std::unique_ptr<JsonValue>& json)
+{
+    auto selectedModes = JsonUtil::ParseJsonString(json->GetString("selectedModes"));
+    for (int32_t i = 0; i < selectedModes->GetArraySize(); i++) {
+        auto selectedMode = selectedModes->GetArrayItem(i);
+        auto mode = selectedMode->GetString("mode");
+        SetSelectedMode(mode == "INDICATOR" ? SelectedMode::INDICATOR : SelectedMode::BOARD, i);
+    }
+
+    auto indicatorStyles = JsonUtil::ParseJsonString(json->GetString("indicatorStyles"));
+    for (int32_t i = 0; i < indicatorStyles->GetArraySize(); i++) {
+        auto indicatorStyle = indicatorStyles->GetArrayItem(i);
+        IndicatorStyle style;
+        style.color = Color::ColorFromString(indicatorStyle->GetString("color"));
+        style.height = Dimension::FromString(indicatorStyle->GetString("height"));
+        style.width = Dimension::FromString(indicatorStyle->GetString("width"));
+        style.borderRadius = Dimension::FromString(indicatorStyle->GetString("borderRadius"));
+        style.marginTop = Dimension::FromString(indicatorStyle->GetString("marginTop"));
+        SetIndicatorStyle(style, i);
+    }
+
+    auto tabBarStyles = JsonUtil::ParseJsonString(json->GetString("tabBarStyles"));
+    for (int32_t i = 0; i < tabBarStyles->GetArraySize(); i++) {
+        auto tabBarStyle = tabBarStyles->GetArrayItem(i);
+        auto style = tabBarStyle->GetString("style");
+        SetTabBarStyle(style == "NOSTYLE"          ? TabBarStyle::NOSTYLE
+                       : style == "SUBTABBATSTYLE" ? TabBarStyle::SUBTABBATSTYLE
+                                                   : TabBarStyle::BOTTOMTABBATSTYLE,
+            i);
+    }
+
+    auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto indicatorValue = layoutProperty->GetIndicatorValue(0);
+    UpdateIndicator(indicatorValue);
+    Pattern::FromJson(json);
 }
 } // namespace OHOS::Ace::NG

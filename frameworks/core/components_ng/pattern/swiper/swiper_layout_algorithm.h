@@ -98,6 +98,23 @@ public:
     {
         hoverRatio_ = hoverRatio;
     }
+
+    void SetIsDragged(bool isDragging)
+    {
+        isDragging_ = isDragging;
+    }
+
+    int32_t TotalDisplayCount() const
+    {
+        int displayCount = displayCount_;
+        if (Positive(prevMargin_)) {
+            displayCount++;
+        }
+        if (Positive(nextMargin_)) {
+            displayCount++;
+        }
+        return displayCount;
+    }
 private:
     void InitItemRange(LayoutWrapper* layoutWrapper);
     void AddToItemRange(int32_t index);
@@ -118,7 +135,10 @@ private:
     RefPtr<LayoutWrapper> GetNodeLayoutWrapperByTag(LayoutWrapper* layoutWrapper, const std::string& tagName) const;
     void MeasureArrow(const RefPtr<LayoutWrapper>& arrowWrapper, const RefPtr<LayoutProperty>& layoutProperty) const;
     void ArrowLayout(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& arrowWrapper) const;
+    int32_t CaculatePrevTargetIndex() const;
+    int32_t CaculateNextTargetIndex() const;
     bool isLoop_ = true;
+    bool isDragging_ = false;
     int32_t currentIndex_ = 0;
     int32_t startIndex_;
     int32_t endIndex_;

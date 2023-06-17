@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 
-void ScrollPositionController::JumpTo(int32_t index, bool /* smooth */, int32_t source)
+void ScrollPositionController::JumpTo(int32_t index, bool /* smooth */, ScrollAlign /* align */, int32_t source)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID_NOLOG(pattern);
@@ -113,4 +113,10 @@ Offset ScrollPositionController::GetCurrentOffset() const
     return offset;
 }
 
+bool ScrollPositionController::IsAtEnd() const
+{
+    auto scrollPattern = AceType::DynamicCast<ScrollPattern>(scroll_.Upgrade());
+    CHECK_NULL_RETURN_NOLOG(scrollPattern, false);
+    return scrollPattern->IsAtBottom();
+}
 } // namespace OHOS::Ace::NG

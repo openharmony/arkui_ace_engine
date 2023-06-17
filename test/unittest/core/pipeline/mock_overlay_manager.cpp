@@ -86,4 +86,5 @@ void OverlayManager::ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& custo
     customPopupMap_[targetId] = customNode;
 }
 
+void OverlayManager::RemoveIndexerPopupById(int32_t targetId) {}
 } // namespace OHOS::Ace::NG

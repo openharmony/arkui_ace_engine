@@ -199,31 +199,33 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
 
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto size = geometryNode->GetMarginFrameSize();
-    bool didNeedArrow = GetIfNeedArrow(layoutWrapper, size);
-    if (menuPattern->IsSelectMenu()) {
-        ComputeMenuPositionByAlignType(menuProp, size);
-    }
-    auto menuPosition = MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size);
-    arrowPosition_ = GetArrowPositionWithPlacement(size, menuPosition);
-    if (didNeedArrow && arrowPlacement_ != Placement::NONE) {
-        LayoutArrow(layoutWrapper);
-    }
-    if (menuPattern->IsSelectMenu()) {
-        auto offset = ComputeMenuPositionByOffset(menuProp, geometryNode);
-        menuPosition += offset;
-        position_ = menuPosition;
-        menuPosition = MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && pipeline->GetIsAppWindow() &&
-            pipeline->GetIsLayoutFullScreen()) {
-            menuPosition += pageOffset_ * 2;
+    if (!menuPattern->IsSelectOverlayExtensionMenu()) {
+        auto geometryNode = layoutWrapper->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto size = geometryNode->GetMarginFrameSize();
+        bool didNeedArrow = GetIfNeedArrow(layoutWrapper, size);
+        if (menuPattern->IsSelectMenu()) {
+            ComputeMenuPositionByAlignType(menuProp, size);
         }
+        auto menuPosition = MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size);
+        arrowPosition_ = GetArrowPositionWithPlacement(size, menuPosition);
+        if (didNeedArrow && arrowPlacement_ != Placement::NONE) {
+            LayoutArrow(layoutWrapper);
+        }
+        if (menuPattern->IsSelectMenu()) {
+            auto offset = ComputeMenuPositionByOffset(menuProp, geometryNode);
+            menuPosition += offset;
+            position_ = menuPosition;
+            menuPosition = MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size);
+            auto pipeline = PipelineContext::GetCurrentContext();
+            if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && pipeline->GetIsAppWindow() &&
+                pipeline->GetIsLayoutFullScreen()) {
+                menuPosition += pageOffset_ * 2;
+            }
+        }
+        LOGD("Menu layout, offset = %{public}s", menuPosition.ToString().c_str());
+        geometryNode->SetFrameOffset(menuPosition);
     }
-    LOGD("Menu layout, offset = %{public}s", menuPosition.ToString().c_str());
-    geometryNode->SetFrameOffset(menuPosition);
 
     // translate each option by the height of previous options
     OffsetF translate;
@@ -415,6 +417,7 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(
     float x = 0.0f;
     float y = 0.0f;
     if (menuProp->GetMenuPlacement().has_value() && (targetSize_.Width() > 0.0 || targetSize_.Height() > 0.0)) {
+        placement_ = menuProp->GetMenuPlacement().value();
         auto childOffset = GetChildPosition(size, menuProp, menuPattern->IsContextMenu());
         x = childOffset.GetX() + positionOffset_.GetX();
         y = childOffset.GetY() + positionOffset_.GetY();

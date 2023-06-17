@@ -191,7 +191,6 @@ void SliderTipModifier::onDraw(DrawingContext& context)
     if (tipFlag_->Get() || GreatNotEqual(sizeScale_->Get(), BUBBLE_SIZE_MIN_SCALE)) {
         BuildParagraph();
         UpdateBubbleSize();
-        SetBoundsRect(UpdateOverlayRect());
         PaintTip(context);
     }
 }
@@ -340,24 +339,31 @@ void SliderTipModifier::UpdateBubbleSize()
     textOffset_ = bubbleOffset_ + textOffsetInBubble;
 }
 
-RectF SliderTipModifier::UpdateOverlayRect()
+void SliderTipModifier::UpdateOverlayRect(const SizeF& frameSize)
 {
     auto contentSize = contentSize_->Get();
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, RectF());
+    CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SliderTheme>();
-    CHECK_NULL_RETURN(theme, RectF());
+    CHECK_NULL_VOID(theme);
     auto distance = static_cast<float>(theme->GetBubbleToCircleCenterDistance().ConvertToPx());
+    auto hotShadowWidth = sliderMode_ == SliderModel::SliderMode::OUTSET
+                              ? theme->GetOutsetHotBlockShadowWidth().ConvertToPx()
+                              : theme->GetInsetHotBlockShadowWidth().ConvertToPx();
+    auto circleSize = SizeF(blockSize_.Width() + hotShadowWidth / HALF, blockSize_.Height() + hotShadowWidth / HALF);
     RectF rect;
     if (axis_ == Axis::HORIZONTAL) {
+        auto maxWidth = std::max(circleSize.Height(), frameSize.Height());
         rect.SetOffset(OffsetF(-bubbleSize_.Width(), -bubbleSize_.Height() - distance));
-        rect.SetSize(SizeF(contentSize.Width() + bubbleSize_.Width() / HALF,
-            contentSize.Height() * HALF + bubbleSize_.Height() + distance));
+        rect.SetSize(
+            SizeF(contentSize.Width() + bubbleSize_.Width() / HALF, maxWidth + bubbleSize_.Height() + distance));
     } else {
+        auto maxWidth = std::max(circleSize.Width(), frameSize.Width());
         rect.SetOffset(OffsetF(-bubbleSize_.Width() - distance, -bubbleSize_.Height()));
-        rect.SetSize(SizeF(contentSize.Width() * HALF + bubbleSize_.Width() + distance,
-            contentSize.Height() + bubbleSize_.Height() / HALF));
+        rect.SetSize(
+            SizeF(maxWidth + bubbleSize_.Width() + distance, contentSize.Height() + bubbleSize_.Height() / HALF));
     }
-    return rect;
+
+    SetBoundsRect(rect);
 }
 } // namespace OHOS::Ace::NG

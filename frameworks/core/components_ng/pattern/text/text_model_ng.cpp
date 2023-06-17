@@ -41,6 +41,22 @@ void TextModelNG::Create(const std::string& content)
     textPattern->InitSurfaceChangedCallback();
 }
 
+void TextModelNG::SetFont(const Font& value)
+{
+    if (value.fontSize.has_value()) {
+        SetFontSize(value.fontSize.value());
+    }
+    if (value.fontWeight.has_value()) {
+        SetFontWeight(value.fontWeight.value());
+    }
+    if (!value.fontFamilies.empty()) {
+        SetFontFamily(value.fontFamilies);
+    }
+    if (value.fontStyle.has_value()) {
+        SetItalicFontStyle(value.fontStyle.value());
+    }
+}
+
 void TextModelNG::SetFontSize(const Dimension& value)
 {
     if (!value.IsValid()) {

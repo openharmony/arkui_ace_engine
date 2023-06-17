@@ -402,9 +402,7 @@ void PanRecognizer::OnResetStatus()
     MultiFingersRecognizer::OnResetStatus();
     touchPoints_.clear();
     averageDistance_.Reset();
-    for (auto& element : touchPointsDistance_) {
-        element.second.Reset();
-    }
+    touchPointsDistance_.clear();
 }
 
 void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
@@ -427,14 +425,17 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
             .SetLocalLocation(Offset(globalPoint_.GetX(), globalPoint_.GetY()) - coordinateOffset_);
         info.SetDeviceId(deviceId_);
         info.SetSourceDevice(deviceType_);
+        info.SetTargetDisplayId(touchPoint.targetDisplayId);
         info.SetDelta(delta_);
         info.SetMainDelta(mainDelta_);
         if (inputEventType_ == InputEventType::AXIS) {
             info.SetVelocity(Velocity());
             info.SetMainVelocity(0.0);
+            info.SetSourceTool(lastAxisEvent_.sourceTool);
         } else {
             info.SetVelocity(velocityTracker_.GetVelocity());
             info.SetMainVelocity(velocityTracker_.GetMainAxisVelocity());
+            info.SetSourceTool(lastTouchEvent_.sourceTool);
         }
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
         info.SetInputEventType(inputEventType_);
@@ -445,7 +446,6 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         if (lastTouchEvent_.tiltY.has_value()) {
             info.SetTiltY(lastTouchEvent_.tiltY.value());
         }
-        info.SetSourceTool(lastTouchEvent_.sourceTool);
         (*callback)(info);
     }
 }

@@ -132,7 +132,7 @@ public:
     void SetHorizontalScrollBarAccessEnabled(bool isHorizontalScrollBarAccessEnabled) override;
     void SetVerticalScrollBarAccessEnabled(bool isVerticalScrollBarAccessEnabled) override;
 
-    void SetOnControllerAttached(std::function<void()>&& callback_, std::function<void()>&& callback) override;
+    void SetOnControllerAttached(std::function<void()>&& callback) override;
     void NotifyPopupWindowResult(int32_t webId, bool result) override;
     void SetAudioResumeInterval(int32_t resumeInterval) override;
     void SetAudioExclusive(bool audioExclusive) override;

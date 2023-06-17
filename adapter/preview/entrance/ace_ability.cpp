@@ -147,6 +147,7 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
         return;
     }
     container->InitDeviceInfo(ACE_INSTANCE_ID, runArgs);
+    container->SetContainerSdkPath(runArgs.containerSdkPath);
     SetConfigChanges(runArgs.configChanges);
     auto resConfig = container->GetResourceConfiguration();
     resConfig.SetOrientation(SystemProperties::GetDeviceOrientation());
@@ -300,12 +301,8 @@ void AceAbility::InitEnv()
 void AceAbility::InitEnv()
 {
 #ifdef INIT_ICU_DATA_PATH
-    char realPath[PATH_MAX] = { 0x00 };
     std::string icuPath = ".";
-    if (!RealPath(icuPath, realPath)) {
-        return;
-    }
-    u_setDataDirectory(realPath);
+    u_setDataDirectory(icuPath.c_str());
 #endif
     std::vector<std::string> paths;
     paths.push_back(runArgs_.assetPath);

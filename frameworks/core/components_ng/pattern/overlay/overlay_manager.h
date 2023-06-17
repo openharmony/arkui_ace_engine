@@ -57,6 +57,7 @@ public:
         popupMap_.clear();
     }
     void ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& customNode);
+    void RemoveIndexerPopupById(int32_t targetId);
     void RemoveIndexerPopup();
     void UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo);
     void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
@@ -121,6 +122,11 @@ public:
         onShowMenuCallback_ = callback;
     }
 
+    void RegisterOnHideDialog(std::function<void()> callback)
+    {
+        onHideDialogCallback_ = callback;
+    }
+
     void CallOnShowMenuCallback()
     {
         if (onShowMenuCallback_) {
@@ -132,6 +138,13 @@ public:
     {
         if (onHideMenuCallback_) {
             onHideMenuCallback_();
+        }
+    }
+
+    void CallOnHideDialogCallback()
+    {
+        if (onHideDialogCallback_) {
+            onHideDialogCallback_();
         }
     }
 
@@ -262,6 +275,7 @@ private:
 #endif // ENABLE_DRAG_FRAMEWORK
 
     std::function<void()> onHideMenuCallback_ = nullptr;
+    std::function<void()> onHideDialogCallback_ = nullptr;
     std::function<void()> onShowMenuCallback_;
     CancelableCallback<void()> continuousTask_;
     std::function<bool()> backPressEvent_ = nullptr;

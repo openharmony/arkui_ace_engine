@@ -15,10 +15,9 @@ import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-action_sheet_test_output_path = "ace_engine/action_sheet"
 pattern_test_output_path = "ace_engine/components"
 gestures_test_output_path = "ace_engine/gestures"
-event_test_output_path = "ace_engine/evnets"
+event_test_output_path = "ace_engine/events"
 base_test_output_path = "ace_engine/base"
 syntax_test_output_path = "ace_engine/syntaxs"
 image_test_output_path = "ace_engine/image"
@@ -144,7 +143,8 @@ template("ace_unittest") {
         "$ace_root/test/unittest:ace_components_syntax",
       ]
 
-      configs = ace_unittest_config
+      configs = []
+      configs += ace_unittest_config
 
       if (defined(invoker.configs)) {
         configs += invoker.configs
@@ -163,7 +163,8 @@ template("ace_unittest") {
       deps = ace_unittest_deps
       deps += [ "$ace_root/test/unittest:ace_base" ]
 
-      configs = ace_unittest_config
+      configs = []
+      configs += ace_unittest_config
 
       if (defined(invoker.configs)) {
         configs += invoker.configs

@@ -34,6 +34,7 @@ namespace OHOS::Ace::NG {
 using LoadPageCallback = std::function<bool(const std::string&,
     const std::function<void(const std::string&, int32_t)>&)>;
 using LoadCardCallback = std::function<bool(const std::string&, int64_t cardId)>;
+using LoadNamedRouterCallback = std::function<bool(const std::string&, bool isTriggeredByJs)>;
 
 enum class RouterMode {
     STANDARD = 0,
@@ -46,6 +47,7 @@ struct RouterPageInfo {
     RouterMode routerMode = RouterMode::STANDARD;
     std::function<void(const std::string&, int32_t)> errorCallback;
     std::string path;
+    bool isNamedRouterMode = false;
 };
 
 class PageRouterManager : public AceType {
@@ -72,14 +74,21 @@ public:
         loadCard_ = callback;
     }
 
+    void SetLoadNamedRouterCallback(LoadNamedRouterCallback&& callback)
+    {
+        loadNamedRouter_ = callback;
+    }
+
     void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback);
 
     void DisableAlertBeforeBackPage();
 
     // router operation
     void Push(const RouterPageInfo& target);
+    void PushNamedRoute(const RouterPageInfo& target);
     bool Pop();
     void Replace(const RouterPageInfo& target);
+    void ReplaceNamedRoute(const RouterPageInfo& target);
     void BackWithTarget(const RouterPageInfo& target);
     void Clear();
     int32_t GetStackSize() const;
@@ -148,8 +157,8 @@ private:
 
     // page operations
     void LoadPage(int32_t pageId, const RouterPageInfo& target, bool needHideLast = true, bool needTransition = true);
-    void MovePageToFront(int32_t index, const RefPtr<FrameNode>& pageNode, const std::string& params, bool needHideLast,
-        bool forceShowCurrent = false, bool needTransition = true);
+    void MovePageToFront(int32_t index, const RefPtr<FrameNode>& pageNode, const RouterPageInfo& target,
+        bool needHideLast, bool forceShowCurrent = false, bool needTransition = true);
     void PopPage(const std::string& params, bool needShowNext, bool needTransition);
     void PopPageToIndex(int32_t index, const std::string& params, bool needShowNext, bool needTransition);
 
@@ -167,6 +176,7 @@ private:
     bool inRouterOpt_ = false;
     LoadPageCallback loadJs_;
     LoadCardCallback loadCard_;
+    LoadNamedRouterCallback loadNamedRouter_;
     bool isCardRouter_ = false;
     int32_t pageId_ = 0;
     std::list<WeakPtr<FrameNode>> pageRouterStack_;

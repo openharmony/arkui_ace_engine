@@ -56,7 +56,8 @@ public:
         switchModifier_->SetEnabled(enabled_);
         switchModifier_->SetIsSelect(isSelect_);
         switchModifier_->SetTouchHoverAnimationType(touchHoverType_);
-        switchModifier_->SetMainDelta(mainDelta_);
+        switchModifier_->SetDragOffsetX(dragOffsetX_);
+        switchModifier_->SetIsDragEvent(isDragEvent_);
         switchModifier_->UpdateAnimatableProperty();
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -91,9 +92,9 @@ public:
         enabled_ = enabled;
     }
 
-    void SetMainDelta(float mainDelta)
+    void SetDragOffsetX(float dragOffsetX)
     {
-        mainDelta_ = mainDelta;
+        dragOffsetX_ = dragOffsetX;
     }
 
     void SetIsSelect(bool isSelect)
@@ -111,8 +112,13 @@ public:
         touchHoverType_ = touchHoverType;
     }
 
+    void SetIsDragEvent(bool isDragEvent)
+    {
+        isDragEvent_ = isDragEvent;
+    }
+
 private:
-    float mainDelta_ = 0.0f;
+    float dragOffsetX_ = 0.0f;
     float hoverPercent_ = 0.0f;
     const Dimension radiusGap_ = 2.0_vp;
     bool enabled_ = true;
@@ -125,6 +131,7 @@ private:
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
+    bool isDragEvent_ = false;
 
     RefPtr<SwitchModifier> switchModifier_;
 

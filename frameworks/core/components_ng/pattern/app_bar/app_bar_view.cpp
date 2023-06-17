@@ -182,7 +182,10 @@ RefPtr<FrameNode> AppBarView::BuildIconButton(
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
     buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
-    buttonLayoutProperty->UpdateBorderRadius(appBarTheme->GetIconCornerRadius());
+    auto buttonRenderContext = buttonNode->GetRenderContext();
+    CHECK_NULL_RETURN(buttonRenderContext, nullptr);
+    auto butttonRadius = appBarTheme->GetIconCornerRadius();
+    buttonRenderContext->UpdateBorderRadius({ butttonRadius, butttonRadius, butttonRadius, butttonRadius });
     buttonLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(appBarTheme->GetIconSize() * 2), CalcLength(appBarTheme->GetIconSize() * 2)));
     MarginProperty margin;

@@ -286,7 +286,6 @@ void JSButton::JSBind(BindingTarget globalObj)
     JSClass<JSButton>::StaticMethod("height", &JSButton::JsHeight);
     JSClass<JSButton>::StaticMethod("aspectRatio", &JSButton::JsAspectRatio);
     JSClass<JSButton>::StaticMethod("borderRadius", &JSButton::JsRadius);
-    JSClass<JSButton>::StaticMethod("border", &JSButton::JsBorder);
     JSClass<JSButton>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSButton>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSButton>::StaticMethod("size", &JSButton::JsSize);
@@ -605,20 +604,6 @@ void JSButton::JsRadius(const JSCallbackInfo& info)
     ParseJsDimensionVp(info[0], radius);
 
     ButtonModel::GetInstance()->SetBorderRadius(radius);
-}
-
-void JSButton::JsBorder(const JSCallbackInfo& info)
-{
-    JSViewAbstract::JsBorder(info);
-    if (!info[0]->IsObject()) {
-        LOGE("args is not a object. %s", info[0]->ToString().c_str());
-        return;
-    }
-    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
-    CalcDimension borderRadius;
-    auto valueRadius = object->GetProperty("radius");
-    ParseJsDimensionVp(valueRadius, borderRadius);
-    ButtonModel::GetInstance()->SetBorderRadius(borderRadius);
 }
 
 CalcDimension JSButton::GetSizeValue(const JSCallbackInfo& info)

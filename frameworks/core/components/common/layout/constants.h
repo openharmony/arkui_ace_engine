@@ -560,7 +560,7 @@ enum class PositionMode {
     BOTTOM,
 };
 
-enum class XComponentType { SURFACE = 0, COMPONENT };
+enum class XComponentType { SURFACE = 0, COMPONENT, TEXTURE };
 
 inline constexpr uint32_t STATE_NORMAL = 0;
 inline constexpr uint32_t STATE_PRESSED = 1;
@@ -601,6 +601,12 @@ enum class FunctionKey {
 
 enum class ObscuredReasons {
     PLACEHOLDER = 0,
+};
+
+enum class MaximizeMode : uint32_t {
+    MODE_AVOID_SYSTEM_BAR,
+    MODE_FULL_FILL,
+    MODE_RECOVER,
 };
 
 } // namespace OHOS::Ace

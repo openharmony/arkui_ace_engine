@@ -31,7 +31,10 @@ void ContainerModalPattern::OnWindowFocused() {}
 
 void ContainerModalPattern::OnWindowUnfocused() {}
 
-void ContainerModalPattern::WindowFocus(bool isFocus) {}
+void ContainerModalPattern::WindowFocus(bool isFocus)
+{
+    isFocus_ = isFocus;
+}
 
 void ContainerModalPattern::ChangeTitle(const RefPtr<FrameNode>& titleNode, bool isFocus) {}
 
@@ -54,5 +57,10 @@ void ContainerModalPattern::SetAppTitle(const std::string& title)
 void ContainerModalPattern::SetAppIcon(const RefPtr<PixelMap>& icon)
 {
     moveX_ = 1.0;
+}
+
+void ContainerModalPattern::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
+{
+    hideSplitButton_ = hideSplit;
 }
 } // namespace OHOS::Ace::NG

@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
+#include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -60,11 +61,6 @@ public:
     void OnModifyDone() override;
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-
-    void SetNavigationMode(NavigationMode navigationMode)
-    {
-        navigationMode_ = navigationMode;
-    }
 
     FocusPattern GetFocusPattern() const override
     {
@@ -113,9 +109,9 @@ public:
         return navigationStack_->Get();
     }
 
-    RefPtr<UINode> GetPreNavDestination(const std::string& current)
+    RefPtr<UINode> GetPreNavDestination(const std::string& name, const RefPtr<UINode>& navDestinationNode)
     {
-        return navigationStack_->GetPre(current);
+        return navigationStack_->GetPre(name, navDestinationNode);
     }
 
     const std::vector<std::pair<std::string, RefPtr<UINode>>>& GetAllNavDestinationNodes()

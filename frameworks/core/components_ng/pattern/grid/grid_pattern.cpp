@@ -94,9 +94,6 @@ void GridPattern::OnModifyDone()
     auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_VOID(gridLayoutProperty);
 
-    auto edgeEffect = gridLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::NONE);
-    SetEdgeEffect(edgeEffect);
-
     if (multiSelectable_ && !isMouseEventInit_) {
         InitMouseEvent();
     }
@@ -113,6 +110,9 @@ void GridPattern::OnModifyDone()
     }
     SetAxis(gridLayoutInfo_.axis_);
     AddScrollEvent();
+
+    auto edgeEffect = gridLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::NONE);
+    SetEdgeEffect(edgeEffect);
 
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
@@ -431,9 +431,11 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     const auto& gridLayoutInfo = gridLayoutAlgorithm->GetGridLayoutInfo();
     auto eventhub = GetEventHub<GridEventHub>();
     CHECK_NULL_RETURN(eventhub, false);
-    if (gridLayoutInfo_.startMainLineIndex_ != gridLayoutInfo.startMainLineIndex_) {
+    scrollbarInfo_ = eventhub->FireOnScrollBarUpdate(gridLayoutInfo.startIndex_, gridLayoutInfo.currentOffset_);
+    if (firstShow_ || gridLayoutInfo_.startMainLineIndex_ != gridLayoutInfo.startMainLineIndex_) {
         eventhub->FireOnScrollToIndex(gridLayoutInfo.startIndex_);
         FlushFocusOnScroll(gridLayoutInfo);
+        firstShow_ = false;
     }
     gridLayoutInfo_ = gridLayoutInfo;
     gridLayoutInfo_.childrenCount_ = dirty->GetTotalChildCount();
@@ -866,6 +868,25 @@ void GridPattern::ScrollToFocusNode(const WeakPtr<FocusHub>& focusNode)
     UpdateStartIndex(nextIndex);
 }
 
+void GridPattern::StopAnimate()
+{
+    if (!IsScrollableStopped()) {
+        StopScrollable();
+    }
+    if (animator_ && !animator_->IsStopped()) {
+        animator_->Stop();
+    }
+}
+
+void GridPattern::ScrollBy(float offset)
+{
+    StopAnimate();
+    UpdateCurrentOffset(-offset, SCROLL_FROM_JUMP);
+    auto host = GetHost();
+    CHECK_NULL_VOID_NOLOG(host);
+    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+}
+
 void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     Pattern::ToJsonValue(json);
@@ -993,31 +1014,36 @@ void GridPattern::UpdateScrollBarOffset()
 
     float heightSum = 0;
     int32_t itemCount = 0;
-    auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
-    for (const auto& item : info.lineHeightMap_) {
-        auto line = info.gridMatrix_.find(item.first);
-        if (line == info.gridMatrix_.end()) {
-            continue;
-        }
-        if (line->second.empty()) {
-            continue;
-        }
-        auto lineStart = line->second.begin()->second;
-        auto lineEnd = line->second.rbegin()->second;
-        itemCount += (lineEnd - lineStart + 1);
-        heightSum += item.second + mainGap;
-    }
-
-    auto averageHeight = heightSum / itemCount;
-    float offset = info.startIndex_ * averageHeight - info.currentOffset_;
+    float offset = 0;
     float estimatedHeight = 0.f;
-    if (itemCount >= (info.childrenCount_ - 1)) {
-        estimatedHeight = heightSum - mainGap;
-        offset = info.GetStartLineOffset(mainGap);
+    if (scrollbarInfo_.first.has_value() && scrollbarInfo_.second.has_value()) {
+        offset = scrollbarInfo_.first.value();
+        estimatedHeight = scrollbarInfo_.second.value();
     } else {
-        estimatedHeight = heightSum + (info.childrenCount_ - itemCount) * averageHeight;
-    }
+        auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
+        for (const auto& item : info.lineHeightMap_) {
+            auto line = info.gridMatrix_.find(item.first);
+            if (line == info.gridMatrix_.end()) {
+                continue;
+            }
+            if (line->second.empty()) {
+                continue;
+            }
+            auto lineStart = line->second.begin()->second;
+            auto lineEnd = line->second.rbegin()->second;
+            itemCount += (lineEnd - lineStart + 1);
+            heightSum += item.second + mainGap;
+        }
 
+        auto averageHeight = heightSum / itemCount;
+        offset = info.startIndex_ * averageHeight - info.currentOffset_;
+        if (itemCount >= (info.childrenCount_ - 1)) {
+            estimatedHeight = heightSum - mainGap;
+            offset = info.GetStartLineOffset(mainGap);
+        } else {
+            estimatedHeight = heightSum + (info.childrenCount_ - itemCount) * averageHeight;
+        }
+    }
     auto viewSize = geometryNode->GetFrameSize();
     Size mainSize = { viewSize.Width(), viewSize.Height() };
     UpdateScrollBarRegion(offset, estimatedHeight, mainSize, Offset(0.0, 0.0));
@@ -1129,6 +1155,38 @@ void GridPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
 bool GridPattern::OutBoundaryCallback()
 {
     return IsOutOfBoundary();
+}
+
+OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
+{
+    OverScrollOffset offset = { 0, 0 };
+    if (gridLayoutInfo_.startIndex_ == 0) {
+        auto startPos = gridLayoutInfo_.currentOffset_;
+        auto newStartPos = startPos + delta;
+        if (startPos > 0 && newStartPos > 0) {
+            offset.start = delta;
+        }
+        if (startPos > 0 && newStartPos <= 0) {
+            offset.start = -startPos;
+        }
+        if (startPos <= 0 && newStartPos > 0) {
+            offset.start = newStartPos;
+        }
+    }
+    if (gridLayoutInfo_.endIndex_ == gridLayoutInfo_.childrenCount_ - 1) {
+        auto endPos = gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_;
+        auto newEndPos = endPos + delta;
+        if (endPos < gridLayoutInfo_.lastMainSize_ && newEndPos < gridLayoutInfo_.lastMainSize_) {
+            offset.end = delta;
+        }
+        if (endPos < gridLayoutInfo_.lastMainSize_ && newEndPos >= gridLayoutInfo_.lastMainSize_) {
+            offset.end = gridLayoutInfo_.lastMainSize_ - endPos;
+        }
+        if (endPos >= gridLayoutInfo_.lastMainSize_ && newEndPos < gridLayoutInfo_.lastMainSize_) {
+            offset.end = newEndPos - gridLayoutInfo_.lastMainSize_;
+        }
+    }
+    return offset;
 }
 
 void GridPattern::SetAccessibilityAction()

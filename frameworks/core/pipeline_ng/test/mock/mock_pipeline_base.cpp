@@ -16,6 +16,7 @@
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 #include "core/pipeline/pipeline_base.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -152,6 +153,8 @@ void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
 
 void PipelineContext::FlushReload() {}
 
+void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) {}
+
 const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
 {
     if (selectOverlayManager_) {
@@ -250,6 +253,8 @@ void PipelineContext::AddPredictTask(PredictTask&& task) {}
 
 void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task) {}
 
+void PipelineContext::AddUIExtensionTouchEventCallback(int32_t pointId, UIExtensionTouchEventCallback&& callback) {}
+
 void PipelineContext::FlushPipelineImmediately() {}
 
 FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp)
@@ -309,6 +314,8 @@ SafeAreaEdgeInserts PipelineContext::GetViewSafeArea() const
 {
     return {};
 }
+
+void PipelineContext::AppBarAdaptToSafeArea() {};
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {

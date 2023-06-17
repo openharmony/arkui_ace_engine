@@ -1345,7 +1345,6 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern001, TestSize.Level1)
         auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         EXPECT_EQ(buttonLayoutProperty->GetMeasureType(), MeasureType::MATCH_PARENT_MAIN_AXIS);
         EXPECT_EQ(buttonLayoutProperty->GetTypeValue(), ButtonType::NORMAL);
-        EXPECT_EQ(buttonLayoutProperty->GetBorderRadiusValue(), PRESS_RADIUS);
         auto calcSize = buttonLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.value();
         EXPECT_EQ(calcSize.Width().value(), CalcLength(defaultWidth - PRESS_INTERVAL.ConvertToPx()));
         EXPECT_EQ(calcSize.Height().value(), CalcLength(height - PRESS_INTERVAL));

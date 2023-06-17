@@ -28,6 +28,7 @@ public:
     CanvasPaintMethod() = default;
     explicit CanvasPaintMethod(const WeakPtr<PipelineBase> context)
     {
+        matrix_.reset();
         context_ = context;
         imageShadow_ = std::make_unique<Shadow>();
         InitImageCallbacks();

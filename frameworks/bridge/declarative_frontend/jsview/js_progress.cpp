@@ -169,6 +169,9 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
     }
 
     switch (g_progressType) {
+        case ProgressType::LINEAR:
+            JsSetLinearStyleOptions(info);
+            break;
         case ProgressType::RING:
             JsSetRingStyleOptions(info);
             break;
@@ -271,6 +274,13 @@ void JSProgress::JsSetRingStyleOptions(const JSCallbackInfo& info)
     }
 
     ProgressModel::GetInstance()->SetProgressStatus(static_cast<NG::ProgressStatus>(progressStatus));
+
+    auto jsSweepingEffect = paramObject->GetProperty("enableScanEffect");
+    bool sweepingEffect = false;
+    if (!ParseJsBool(jsSweepingEffect, sweepingEffect)) {
+        sweepingEffect = false;
+    }
+    ProgressModel::GetInstance()->SetRingSweepingEffect(sweepingEffect);
 }
 
 void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
@@ -309,7 +319,7 @@ void JSProgress::JsSetCapsuleStyle(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(jsBorderWidth, borderWidth)) {
         borderWidth = theme->GetBorderWidth();
     }
-    if (LessNotEqual(borderWidth.Value(), 0.0)) {
+    if (LessNotEqual(borderWidth.Value(), 0.0) || borderWidth.Unit() == DimensionUnit::PERCENT) {
         borderWidth = theme->GetBorderWidth();
     }
     ProgressModel::GetInstance()->SetBorderWidth(borderWidth);
@@ -322,11 +332,18 @@ void JSProgress::JsSetCapsuleStyle(const JSCallbackInfo& info)
     ProgressModel::GetInstance()->SetBorderColor(colorVal);
 
     auto jsSweepingEffect = paramObject->GetProperty("enableScanEffect");
-    bool sweepingEffect;
+    bool sweepingEffect = false;
     if (!ParseJsBool(jsSweepingEffect, sweepingEffect)) {
         sweepingEffect = false;
     }
     ProgressModel::GetInstance()->SetSweepingEffect(sweepingEffect);
+
+    auto jsShowDefaultPercentage = paramObject->GetProperty("showDefaultPercentage");
+    bool showDefaultPercentage = false;
+    if (!ParseJsBool(jsShowDefaultPercentage, showDefaultPercentage)) {
+        showDefaultPercentage = false;
+    }
+    ProgressModel::GetInstance()->SetShowText(showDefaultPercentage);
 
     auto jsContext = paramObject->GetProperty("content");
     std::string text;
@@ -382,7 +399,7 @@ void JSProgress::JsSetFont(const JSRef<JSObject>& textObject)
     if (!ParseJsDimensionFp(size, fontSize)) {
         fontSize = theme->GetTextSize();
     }
-    if (LessNotEqual(fontSize.Value(), 0.0)) {
+    if (LessNotEqual(fontSize.Value(), 0.0) || fontSize.Unit() == DimensionUnit::PERCENT) {
         fontSize = theme->GetTextSize();
     }
     ProgressModel::GetInstance()->SetFontSize(fontSize);
@@ -424,18 +441,55 @@ bool JSProgress::ConvertGradientColor(const JsiRef<JsiValue>& param, OHOS::Ace::
     }
 
     JSLinearGradient* jsLinearGradient = JSRef<JSObject>::Cast(param)->Unwrap<JSLinearGradient>();
-    if (!jsLinearGradient) {
+    if (!jsLinearGradient || jsLinearGradient->GetGradient().empty()) {
         return false;
     }
 
-    size_t colorLength = jsLinearGradient->GetGradient().size();
-    for (size_t colorIndex = 0; colorIndex < colorLength; colorIndex++) {
+    size_t size = jsLinearGradient->GetGradient().size();
+    if (size == 1) {
+        // If there is only one color, then this color is used for both the begin and end side.
+        OHOS::Ace::NG::GradientColor gradientColor;
+        gradientColor.SetLinearColor(LinearColor(jsLinearGradient->GetGradient().front().first));
+        gradientColor.SetDimension(jsLinearGradient->GetGradient().front().second);
+        gradient.AddColor(gradientColor);
+        gradient.AddColor(gradientColor);
+        return true;
+    }
+
+    for (size_t colorIndex = 0; colorIndex < size; colorIndex++) {
         OHOS::Ace::NG::GradientColor gradientColor;
         gradientColor.SetLinearColor(LinearColor(jsLinearGradient->GetGradient().at(colorIndex).first));
         gradientColor.SetDimension(jsLinearGradient->GetGradient().at(colorIndex).second);
         gradient.AddColor(gradientColor);
     }
     return true;
+}
+
+void JSProgress::JsSetLinearStyleOptions(const JSCallbackInfo& info)
+{
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+
+    // Parse stroke width
+    CalcDimension strokeWidthDimension;
+    auto strokeWidth = paramObject->GetProperty("strokeWidth");
+    if (strokeWidth->IsUndefined() || strokeWidth->IsNull() ||
+        !ParseJsDimensionVp(strokeWidth, strokeWidthDimension)) {
+        strokeWidthDimension = theme->GetTrackThickness();
+    }
+
+    if (LessOrEqual(strokeWidthDimension.Value(), 0.0f) || strokeWidthDimension.Unit() == DimensionUnit::PERCENT) {
+        strokeWidthDimension = theme->GetTrackThickness();
+    }
+
+    ProgressModel::GetInstance()->SetStrokeWidth(strokeWidthDimension);
+
+    auto jsSweepingEffect = paramObject->GetProperty("enableScanEffect");
+    bool sweepingEffect = false;
+    if (!ParseJsBool(jsSweepingEffect, sweepingEffect)) {
+        sweepingEffect = false;
+    }
+    ProgressModel::GetInstance()->SetLinearSweepingEffect(sweepingEffect);
 }
 
 } // namespace OHOS::Ace::Framework

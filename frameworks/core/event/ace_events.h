@@ -46,6 +46,7 @@ enum class SourceTool : int32_t {
     AIRBRUSH = 6,
     MOUSE = 7,
     LENS = 8,
+    TOUCHPAD = 9,
 };
 
 struct EventTarget final {
@@ -103,6 +104,15 @@ public:
     void SetDeviceId(int64_t deviceId)
     {
         deviceId_ = deviceId;
+    }
+
+    int32_t GetTargetDisplayId() const
+    {
+        return targetDisplayId_;
+    }
+    void SetTargetDisplayId(int32_t targetDisplayId)
+    {
+        targetDisplayId_ = targetDisplayId;
     }
 
     SourceType GetSourceDevice() const
@@ -171,6 +181,7 @@ protected:
     std::optional<float> tiltY_;
     SourceTool sourceTool_ = SourceTool::UNKNOWN;
     int64_t deviceId_ = 0;
+    int32_t targetDisplayId_ = 0;
     bool stopPropagation_ = false;
 };
 

@@ -67,12 +67,16 @@ public:
         scaleWidth_ = paintProperty->GetScaleWidth().value_or(Dimension(scaleWidth_)).ConvertToPx();
         capsuleBorderWidth_ = paintProperty->GetBorderWidth().value_or(capsuleBorderWidth_);
         sweepEffect_ = paintProperty->GetEnableScanEffect().value_or(false);
+        ringSweepEffect_ = paintProperty->GetEnableRingScanEffect().value_or(false);
+        linearSweepEffect_ = paintProperty->GetEnableLinearScanEffect().value_or(false);
         bool paintShadow = paintProperty->GetPaintShadow().value_or(false);
         ProgressStatus progressStatus = paintProperty->GetProgressStatus().value_or(ProgressStatus::PROGRESSING);
         progressModifier_->SetContentOffset(paintWrapper->GetContentOffset());
         progressModifier_->SetContentSize(paintWrapper->GetContentSize());
         CalculateStrokeWidth(paintWrapper->GetContentSize());
         progressModifier_->SetSweepEffect(sweepEffect_);
+        progressModifier_->SetRingSweepEffect(ringSweepEffect_);
+        progressModifier_->SetLinearSweepEffect(linearSweepEffect_);
         progressModifier_->SetStrokeWidth(strokeWidth_);
         progressModifier_->SetBorderWidth(capsuleBorderWidth_.ConvertToPx());
         progressModifier_->SetColor(LinearColor(color_));
@@ -110,6 +114,8 @@ private:
     ProgressType progressType_ = ProgressType::LINEAR;
     RefPtr<ProgressModifier> progressModifier_;
     bool sweepEffect_ = false;
+    bool ringSweepEffect_ = false;
+    bool linearSweepEffect_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPaintMethod);
 };

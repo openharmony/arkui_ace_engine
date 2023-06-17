@@ -48,12 +48,14 @@
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_group_js_bridge.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_context_module.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_module_manager.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_syscap_module.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_timer_module.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_api_perf.h"
@@ -859,6 +861,11 @@ JsiDeclarativeEngine::~JsiDeclarativeEngine()
 {
     CHECK_RUN_ON(JS);
     LOG_DESTROY();
+
+    for (auto item : namedRouterRegisterMap) {
+        item.second.pageGenerator.FreeGlobalHandleAddr();
+    }
+    namedRouterRegisterMap.clear();
 }
 
 void JsiDeclarativeEngine::Destroy()
@@ -941,16 +948,6 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
 #if !defined(PREVIEW)
         nativeEngine_->CheckUVLoop();
 #endif
-
-        if (delegate && delegate->GetAssetManager()) {
-            std::vector<std::string> packagePath = delegate->GetAssetManager()->GetLibPath();
-            auto appLibPathKey = delegate->GetAssetManager()->GetAppLibPathKey();
-            if (!packagePath.empty()) {
-                auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
-                arkNativeEngine->SetPackagePath(appLibPathKey, packagePath);
-            }
-        }
-
         RegisterWorker();
         engineInstance_->RegisterFaPlugin();
     } else {
@@ -1390,6 +1387,103 @@ bool JsiDeclarativeEngine::LoadPageSource(
     return ExecuteAbc(urlName.value());
 }
 
+void JsiDeclarativeEngine::AddToNamedRouterMap(panda::Global<panda::FunctionRef> pageGenerator,
+    const std::string& namedRoute, panda::Local<panda::ObjectRef> params)
+{
+    CHECK_NULL_VOID(engineInstance_);
+    auto runtime = engineInstance_->GetJsRuntime();
+    auto vm = const_cast<EcmaVM*>(std::static_pointer_cast<ArkJSRuntime>(runtime)->GetEcmaVm());
+    auto bundleName = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"));
+    if (!bundleName->IsString()) {
+        LOGW("bundleName need to be string type");
+        return;
+    }
+    auto moduleName = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"));
+    if (!moduleName->IsString()) {
+        LOGW("moduleName need to be string type");
+        return;
+    }
+    auto pagePath = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "pagePath"));
+    if (!pagePath->IsString()) {
+        LOGW("pagePath need to be string type");
+        return;
+    }
+    NamedRouterProperty namedRouterProperty({ pageGenerator, bundleName->ToString(vm)->ToString(),
+        moduleName->ToString(vm)->ToString(), pagePath->ToString(vm)->ToString() });
+    auto ret = namedRouterRegisterMap.insert(std::make_pair(namedRoute, namedRouterProperty));
+    if (!ret.second) {
+        ret.first->second.pageGenerator.FreeGlobalHandleAddr();
+        namedRouterRegisterMap[namedRoute] = namedRouterProperty;
+    }
+    LOGI("AddToNamedRouterMap name = %{public}s", namedRoute.c_str());
+}
+
+bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs)
+{
+    CHECK_NULL_RETURN(!namedRouterRegisterMap.empty(), false);
+    auto iter = namedRouterRegisterMap.find(namedRoute);
+    if (isTriggeredByJs && iter == namedRouterRegisterMap.end()) {
+        LOGW("namedRouter can not find target with name");
+        return false;
+    }
+    // if this triggering is not from js named router api,
+    // 'namedRoute' will be used as url to find the page in 'main_pages.json'
+    if (!isTriggeredByJs) {
+        std::string bundleName;
+        std::string moduleName;
+        std::string url = namedRoute;
+#if !defined(PREVIEW)
+        if (namedRoute.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
+            size_t bundleEndPos = namedRoute.find('/');
+            bundleName = namedRoute.substr(strlen(BUNDLE_TAG), bundleEndPos - strlen(BUNDLE_TAG));
+            size_t moduleStartPos = bundleEndPos + 1;
+            size_t moduleEndPos = namedRoute.find('/', moduleStartPos);
+            moduleName = namedRoute.substr(moduleStartPos, moduleEndPos - moduleStartPos);
+            url = namedRoute.substr(moduleEndPos + strlen("/ets/"));
+        } else {
+            bundleName = AceApplicationInfo::GetInstance().GetPackageName();
+            auto container = Container::Current();
+            CHECK_NULL_RETURN(container, false);
+            moduleName = container->GetModuleName();
+        }
+#else
+        bundleName = bundleName_;
+        moduleName = moduleName_;
+#endif
+        LOGD("bundleName = %{public}s moduleName = %{public}s url = %{public}s", bundleName.c_str(), moduleName.c_str(),
+            url.c_str());
+        iter = std::find_if(namedRouterRegisterMap.begin(), namedRouterRegisterMap.end(),
+            [&bundleName, &moduleName, &url](const auto& item) {
+                return item.second.bundleName == bundleName && item.second.moduleName == moduleName &&
+                       item.second.pagePath == url;
+            });
+    }
+    if (iter == namedRouterRegisterMap.end()) {
+        LOGW("namedRouter can not find target with pagePath");
+        return false;
+    }
+
+    CHECK_NULL_RETURN(engineInstance_, false);
+    auto runtime = engineInstance_->GetJsRuntime();
+    auto vm = const_cast<EcmaVM*>(std::static_pointer_cast<ArkJSRuntime>(runtime)->GetEcmaVm());
+    std::vector<Local<JSValueRef>> argv;
+    JSViewStackProcessor::JsStartGetAccessRecordingFor(JSViewStackProcessor::JsAllocateNewElmetIdForNextComponent());
+    auto ret = iter->second.pageGenerator->Call(vm, JSNApi::GetGlobalObject(vm), argv.data(), 0);
+    if (!ret->IsObject()) {
+        LOGW("The ret is wrong, value must be object");
+        return false;
+    }
+#if defined(PREVIEW)
+    panda::Global<panda::ObjectRef> rootView(vm, ret->ToObject(vm));
+    shared_ptr<ArkJSRuntime> arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    arkRuntime->AddRootView(rootView);
+#endif
+    UpdateRootComponent(ret->ToObject(vm));
+    JSViewStackProcessor::JsStopGetAccessRecording();
+    LOGI("LoadNamedRouterSource name = %{public}s", namedRoute.c_str());
+    return true;
+}
+
 bool JsiDeclarativeEngine::LoadCard(const std::string& url, int64_t cardId)
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadCard");
@@ -1792,12 +1886,10 @@ bool JsiDeclarativeEngine::CallAppFunc(const std::string& appFuncName, std::vect
     shared_ptr<JsValue> global = runtime->GetGlobal();
     shared_ptr<JsValue> exportsObject = global->GetProperty(runtime, "exports");
     if (!exportsObject->IsObject(runtime)) {
-        LOGE("property \"exports\" is not a object");
         return false;
     }
     shared_ptr<JsValue> defaultObject = exportsObject->GetProperty(runtime, "default");
     if (!defaultObject->IsObject(runtime)) {
-        LOGE("property \"default\" is not a object");
         return false;
     }
     shared_ptr<JsValue> func = defaultObject->GetProperty(runtime, appFuncName);
@@ -2126,7 +2218,6 @@ void JsiDeclarativeEngineInstance::ReloadAceModuleCard(
         LOGE("ReloadAceModuleCard null runtime");
         return;
     }
-    std::shared_ptr<ArkJSRuntime> arkRuntime = std::make_shared<ArkJSRuntime>();
     auto nativeArkEngine = static_cast<ArkNativeEngine*>(sharedRuntime);
     EcmaVM* vm = const_cast<EcmaVM*>(nativeArkEngine->GetEcmaVm());
     if (vm == nullptr) {

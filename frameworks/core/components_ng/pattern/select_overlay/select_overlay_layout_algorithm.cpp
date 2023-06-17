@@ -26,7 +26,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
+namespace {
+constexpr Dimension MORE_MENU_INTERVAL = 8.0_vp;
+}
 void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
@@ -39,8 +41,8 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     menu->GetGeometryNode()->SetMarginFrameOffset(menuOffset);
     menu->Layout();
 
-    auto exetensionMenu = layoutWrapper->GetOrCreateChildByIndex(1);
-    CHECK_NULL_VOID(exetensionMenu);
+    auto button = layoutWrapper->GetOrCreateChildByIndex(1);
+    CHECK_NULL_VOID(button);
     auto menuNode = menu->GetHostNode();
     CHECK_NULL_VOID(menuNode);
     auto menuContext = menuNode->GetRenderContext();
@@ -55,24 +57,14 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
     hasExtensitonMenu_ = true;
-    // Adjust the constraint of extensionMenu
-    RemeasureExtensionMenu(layoutWrapper, offset);
+    button->GetGeometryNode()->SetMarginFrameOffset(menuOffset);
+    button->Layout();
     auto extensionMenuOffset = ComputeExtensionMenuPosition(layoutWrapper, offset);
-    exetensionMenu->GetGeometryNode()->SetMarginFrameOffset(extensionMenuOffset);
-    exetensionMenu->Layout();
-}
 
-void SelectOverlayLayoutAlgorithm::RemeasureExtensionMenu(LayoutWrapper* layoutWrapper, const OffsetF& offset)
-{
-    auto extensionItem = layoutWrapper->GetOrCreateChildByIndex(1);
-    CHECK_NULL_VOID(extensionItem);
-
-    auto layoutConstraint = extensionItem->GetLayoutProperty()->GetLayoutConstraint();
-    auto layoutConstraintMaxSize = layoutConstraint->maxSize;
-
-    layoutConstraint->maxSize =
-        SizeF(defaultMenuEndOffset_.GetX(), layoutConstraintMaxSize.Height() - defaultMenuEndOffset_.GetY());
-    extensionItem->Measure(layoutConstraint);
+    auto extensionMenu = layoutWrapper->GetOrCreateChildByIndex(2);
+    CHECK_NULL_VOID(extensionMenu);
+    extensionMenu->GetGeometryNode()->SetMarginFrameOffset(extensionMenuOffset);
+    extensionMenu->Layout();
 }
 
 bool SelectOverlayLayoutAlgorithm::CheckInShowArea(const std::shared_ptr<SelectOverlayInfo>& info)
@@ -155,19 +147,22 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
 
 OffsetF SelectOverlayLayoutAlgorithm::ComputeExtensionMenuPosition(LayoutWrapper* layoutWrapper, const OffsetF& offset)
 {
-    auto extensionItem = layoutWrapper->GetOrCreateChildByIndex(1);
+    auto extensionItem = layoutWrapper->GetOrCreateChildByIndex(2);
     CHECK_NULL_RETURN(extensionItem, OffsetF());
-    auto menu = extensionItem->GetHostNode();
-    CHECK_NULL_RETURN(menu, OffsetF());
-    auto menuPattern = menu->GetPattern<LinearLayoutPattern>();
-    CHECK_NULL_RETURN(menuPattern, OffsetF());
-    auto property = menuPattern->GetLayoutProperty<LinearLayoutProperty>();
-    auto visibility = property->GetVisibilityValue();
-    if (visibility != VisibleType::VISIBLE) {
-        return OffsetF();
-    }
+    auto extensionLayoutConstraint = extensionItem->GetLayoutProperty()->GetLayoutConstraint();
+    auto extensionLayoutConstraintMaxSize = extensionLayoutConstraint->maxSize;
     auto extensionWidth = extensionItem->GetGeometryNode()->GetMarginFrameSize().Width();
-    return (defaultMenuEndOffset_ - OffsetF(extensionWidth, 0.0f));
+    auto extensionHeight = extensionItem->GetGeometryNode()->GetMarginFrameSize().Height();
+    auto menuItem = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_RETURN(menuItem, OffsetF());
+    auto menuHeight = menuItem->GetGeometryNode()->GetMarginFrameSize().Height();
+    auto extensionOffset =
+        defaultMenuEndOffset_ - OffsetF(extensionWidth, -menuHeight - MORE_MENU_INTERVAL.ConvertToPx());
+    if (extensionOffset.GetY() + extensionHeight > extensionLayoutConstraintMaxSize.Height()) {
+        extensionOffset =
+            defaultMenuEndOffset_ - OffsetF(extensionWidth, extensionHeight + MORE_MENU_INTERVAL.ConvertToPx());
+    }
+    return extensionOffset;
 }
 
 bool SelectOverlayLayoutAlgorithm::IsTextAreaSelectAll()

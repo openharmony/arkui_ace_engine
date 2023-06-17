@@ -45,6 +45,5 @@ void QRCodeModelNG::SetQRCodeColor(Color color)
 void QRCodeModelNG::SetQRBackgroundColor(Color color)
 {
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, color);
-    ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, color);
 }
 } // namespace OHOS::Ace::NG

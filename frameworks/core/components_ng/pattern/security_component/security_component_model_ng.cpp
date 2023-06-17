@@ -17,6 +17,7 @@
 
 #include "base/i18n/localization.h"
 #include "base/log/ace_scoring_log.h"
+#include "base/utils/utils.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -180,7 +181,8 @@ void SecurityComponentModelNG::SetDefaultBackgroundButton(const RefPtr<FrameNode
     BorderStyleProperty style;
     style.SetBorderStyle(BorderStyle::NONE);
     renderContext->UpdateBorderStyle(style);
-    buttonLayoutProperty->UpdateBorderRadius(secCompTheme->GetBorderRadius());
+    auto buttonRadius = secCompTheme->GetBorderRadius();
+    renderContext->UpdateBorderRadius({ buttonRadius, buttonRadius, buttonRadius, buttonRadius });
     renderContext->UpdateBackgroundColor(secCompTheme->GetBackgroundColor());
     buttonLayoutProperty->UpdateType(static_cast<ButtonType>(type));
 }
@@ -330,10 +332,11 @@ void SecurityComponentModelNG::SetBackgroundBorderRadius(const Dimension& value)
         LOGW("background is not exist");
         return;
     }
-
-    auto bgProp = GetChildLayoutProprty<ButtonLayoutProperty>(V2::BUTTON_ETS_TAG);
-    CHECK_NULL_VOID(bgProp);
-    bgProp->UpdateBorderRadius(value);
+    auto node = GetCurSecCompChildNode(V2::BUTTON_ETS_TAG);
+    CHECK_NULL_VOID(node);
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBorderRadius({ value, value, value, value });
 }
 
 void SecurityComponentModelNG::SetBackgroundPadding(const std::optional<Dimension>& left,

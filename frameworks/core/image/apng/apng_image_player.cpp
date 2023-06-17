@@ -20,8 +20,10 @@
 #include "base/log/log.h"
 #include "core/components/image/flutter_render_image.h"
 #include "core/image/image_provider.h"
+#ifndef USE_ROSEN_DRAWING
 #include "include/codec/SkCodecAnimation.h"
 #include "include/core/SkPixelRef.h"
+#endif
 
 namespace OHOS::Ace {
 APngImagePlayer::APngImagePlayer(
@@ -244,6 +246,7 @@ void APngImagePlayer::RenderFrame(const int32_t &index)
                     return;
                 }
 
+#ifndef USE_ROSEN_DRAWING
                 sk_sp<SkImage> skImage = frameInfo->image;
                 if (dstWidth > 0 && dstHeight > 0) {
                     skImage = ImageProvider::ApplySizeToSkImage(skImage, dstWidth, dstHeight);
@@ -253,6 +256,17 @@ void APngImagePlayer::RenderFrame(const int32_t &index)
                     return;
                 }
                 auto canvasImage = NG::CanvasImage::Create(&skImage);
+#else
+                std::shared_ptr<RSImage> dImage = frameInfo->image;
+                if (dstWidth > 0 && dstHeight > 0) {
+                    dImage = ImageProvider::ApplySizeToDrawingImage(dImage, dstWidth, dstHeight);
+                }
+                if (!dImage) {
+                    LOGW("animated player cannot get the %{public}d dImage!", index);
+                    return;
+                }
+                auto canvasImage = NG::CanvasImage::Create(&dImage);
+#endif
 
                 taskExecutor->PostTask([callback = player->successCallback_, canvasImage,
                                                source = player->imageSource_] { callback(source, canvasImage); },
@@ -264,6 +278,7 @@ void APngImagePlayer::RenderFrame(const int32_t &index)
 /**
  * Get Frame Image mybe the image need draw in a new canvas
  * **/
+#ifndef USE_ROSEN_DRAWING
 sk_sp<SkImage> APngImagePlayer::GetImage(const int32_t& index, bool extendToCanvas)
 {
     uint32_t size = 0;
@@ -302,13 +317,16 @@ sk_sp<SkImage> APngImagePlayer::GetImage(const int32_t& index, bool extendToCanv
 
     return rawImage;
 }
-
+#else
+    // TODO Drawing : SkData::MakeWithProc
+#endif
 void APngImagePlayer::ClearCanvasRect(const APngAnimatedFrameInfo *frameInfo)
 {
     if (!frameInfo || !blendCanvas_) {
         return;
     }
 
+#ifndef USE_ROSEN_DRAWING
     SkRect unBlendRect = SkRect::MakeXYWH(frameInfo->offsetX,
                                           frameInfo->offsetY,
                                           frameInfo->width,
@@ -318,10 +336,22 @@ void APngImagePlayer::ClearCanvasRect(const APngAnimatedFrameInfo *frameInfo)
     paint.setStyle(SkPaint::kFill_Style);
     paint.setColor(SK_ColorTRANSPARENT);
     blendCanvas_->drawRect(unBlendRect, paint);
+#else
+    RSRect unBlendRect =
+        RSRect(frameInfo->offsetX, frameInfo->offsetY,
+            frameInfo->width + frameInfo->offsetX, frameInfo->height + frameInfo->offsetY);
+
+    RSBrush brush;
+    brush.SetColor(RSColor::COLOR_TRANSPARENT);
+    blendCanvas_->AttachBrush(brush);
+    blendCanvas_->DrawRect(unBlendRect);
+    blendCanvas_->DetachBrush();
+#endif
 }
 
 void APngImagePlayer::BlendImage(const APngAnimatedFrameInfo *frameInfo)
 {
+#ifndef USE_ROSEN_DRAWING
     sk_sp<SkImage> image = nullptr;
 
     if (!frameInfo) {
@@ -354,6 +384,35 @@ void APngImagePlayer::BlendImage(const APngAnimatedFrameInfo *frameInfo)
             }
         }
     }
+#else
+    if (!frameInfo) {
+        return;
+    }
+
+    RSRect unBlendRect =
+        RSRect(frameInfo->offsetX, frameInfo->offsetY,
+            frameInfo->width + frameInfo->offsetX, frameInfo->height + frameInfo->offsetY);
+
+    RSSamplingOptions sampling =
+        RSSamplingOptions(RSFilterMode::NEAREST, RSMipmapMode::NEAREST);
+    if (frameInfo->dispose == ImageDisposePrevious) {
+    } else if (frameInfo->dispose == ImageDisposeBackground) {
+        ClearCanvasRect(frameInfo);
+    } else {
+        if (frameInfo->blend == ImageBlendOver) {
+            std::shared_ptr<RSImage> unblendImage = GetImage(frameInfo->index, false);
+            if (unblendImage) {
+                blendCanvas_->DrawImageRect(*unblendImage, unBlendRect, sampling);
+            }
+        } else {
+            ClearCanvasRect(frameInfo);
+            std::shared_ptr<RSImage> unblendImage = GetImage(frameInfo->index, false);
+            if (unblendImage) {
+                blendCanvas_->DrawImageRect(*unblendImage, unBlendRect, sampling);
+            }
+        }
+    }
+#endif
 }
 
 /**
@@ -363,12 +422,21 @@ void APngImagePlayer::DrawTest()
 {
     const uint32_t TestWidth = 10;
     const uint32_t TestX = 10;
+#ifndef USE_ROSEN_DRAWING
     SkPaint pt;
     pt.setStyle(SkPaint::kFill_Style);
     pt.setColor(SK_ColorRED);
     blendCanvas_->drawRect(SkRect::MakeXYWH(TestX, TestX, TestWidth, TestWidth), pt);
+#else
+    RSBrush brush;
+    brush.SetColor(RSColor::COLOR_RED);
+    blendCanvas_->AttachBrush(brush);
+    blendCanvas_->DrawRect(RSRect::MakeXYWH(TestX, TestX, TestWidth, TestWidth));
+    blendCanvas_->DetachBrush();
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 void APngImagePlayer::DrawTestBorder(SkRect& rect)
 {
     SkPaint pt;
@@ -377,12 +445,24 @@ void APngImagePlayer::DrawTestBorder(SkRect& rect)
     pt.setStrokeWidth(1);
     blendCanvas_->drawRect(rect, pt);
 }
+#else
+void APngImagePlayer::DrawTestBorder(RSRect& rect)
+{
+    RSPen pen;
+    pen.SetColor(RSColor::COLOR_RED);
+    pen.SetWidth(1);
+    blendCanvas_->AttachPen(pen);
+    blendCanvas_->DrawRect(rect);
+    blendCanvas_->DetachPen();
+}
+#endif
 
 /**
  * Get decoded Image with frameinfo
  * @param frameInfo
  * @return
  */
+#ifndef USE_ROSEN_DRAWING
 sk_sp<SkImage> APngImagePlayer::GetImage(const APngAnimatedFrameInfo *frameInfo)
 {
     sk_sp<SkImage> image = nullptr;
@@ -495,12 +575,118 @@ sk_sp<SkImage> APngImagePlayer::GetImage(const APngAnimatedFrameInfo *frameInfo)
 
     return image;
 }
+#else
+std::shared_ptr<RSImage> APngImagePlayer::GetImage(const APngAnimatedFrameInfo *frameInfo)
+{
+    std::shared_ptr<RSImage> image = nullptr;
+    RSSamplingOptions sampling =
+        RSSamplingOptions(RSFilterMode::NEAREST, RSMipmapMode::NEAREST);
+
+    if (!frameInfo) {
+        return nullptr;
+    }
+
+    if (frameInfo->dispose == ImageDisposePrevious) {
+        RSRect unBlendRect =
+            RSRect(frameInfo->offsetX, frameInfo->offsetY,
+                frameInfo->width + frameInfo->offsetX, frameInfo->height + frameInfo->offsetY);
+
+        RSBitmap bitmap;
+        CopyTo(&bitmap, bitmap_);
+        auto previousImage = std::make_shared<RSImage> ();
+        previousImage->BuildFromBitmap(bitmap);
+        std::shared_ptr<RSImage> unblendImage = GetImage(frameInfo->index, false);
+
+        if (frameInfo->blend == ImageBlendOver) {
+            if (unblendImage) {
+                blendCanvas_->DrawImageRect(*unblendImage, unBlendRect, sampling);
+            }
+
+            RSBitmap bitmap;
+            CopyTo(&bitmap, bitmap_);
+            image->BuildFromBitmap(bitmap);
+
+            blendCanvas_->Clear(RSColor::COLOR_TRANSPARENT);
+            if (previousImage) {
+                blendCanvas_->DrawImage(*previousImage, 0, 0, sampling);
+            }
+        } else {
+            if (unblendImage) {
+                ClearCanvasRect(frameInfo);
+                blendCanvas_->DrawImageRect(*unblendImage, unBlendRect, sampling);
+            }
+
+            RSBitmap bitmap;
+            CopyTo(&bitmap, bitmap_);
+            image->BuildFromBitmap(bitmap);
+            blendCanvas_->Clear(RSColor::COLOR_TRANSPARENT);
+            if (previousImage) {
+                blendCanvas_->DrawImage(*previousImage, 0, 0, sampling);
+            }
+        }
+    } else if (frameInfo->dispose == ImageDisposeBackground) {
+        std::shared_ptr<RSImage> unblendImage = GetImage(frameInfo->index, false);
+        RSRect unBlendRect =
+            RSRect(frameInfo->offsetX, frameInfo->offsetY,
+                frameInfo->width + frameInfo->offsetX, frameInfo->height + frameInfo->offsetY);
+        if (frameInfo->blend == ImageBlendOver) {
+            if (unblendImage) {
+                blendCanvas_->DrawImageRect(*unblendImage,
+                                            unBlendRect,
+                                            sampling);
+            }
+
+            RSBitmap bitmap;
+            CopyTo(&bitmap, bitmap_);
+            image->BuildFromBitmap(bitmap);
+            blendCanvas_->Clear(RSColor::COLOR_TRANSPARENT);
+        } else {
+            if (unblendImage) {
+                ClearCanvasRect(frameInfo);
+
+                blendCanvas_->DrawImageRect(*unblendImage, unBlendRect, sampling);
+            }
+
+            RSBitmap bitmap;
+            CopyTo(&bitmap, bitmap_);
+            image->BuildFromBitmap(bitmap);
+            blendCanvas_->Clear(RSColor::COLOR_TRANSPARENT);
+        }
+    } else {
+        std::shared_ptr<RSImage> unblendImage = GetImage(frameInfo->index, false);
+        RSRect unBlendRect = RSRect(frameInfo->offsetX, frameInfo->offsetY,
+            frameInfo->width + frameInfo->offsetX, frameInfo->height + frameInfo->offsetY);
+        if (frameInfo->blend == ImageBlendOver) {
+            if (unblendImage) {
+                blendCanvas_->DrawImageRect(*unblendImage, unBlendRect, sampling);
+            }
+
+            RSBitmap bitmap;
+            CopyTo(&bitmap, bitmap_);
+            image->BuildFromBitmap(bitmap);
+        } else {
+            if (unblendImage) {
+                ClearCanvasRect(frameInfo);
+
+                blendCanvas_->DrawImageRect(*unblendImage, unBlendRect, sampling);
+            }
+
+            RSBitmap bitmap;
+            CopyTo(&bitmap, bitmap_);
+            image->BuildFromBitmap(bitmap);
+        }
+    }
+
+    return image;
+}
+#endif
 
 bool APngImagePlayer::PreDecodeAllFrames()
 {
     return false;
 }
 
+#ifndef USE_ROSEN_DRAWING
 SkCanvas *APngImagePlayer::CreateBlendCanvas()
 {
     if (!blendCanvas_) {
@@ -511,6 +697,18 @@ SkCanvas *APngImagePlayer::CreateBlendCanvas()
 
     return blendCanvas_;
 }
+#else
+RSCanvas *APngImagePlayer::CreateBlendCanvas()
+{
+    if (!blendCanvas_) {
+        blendFrameIndex_ = -1;
+        // TODO Drawing : There may be a problem here
+        blendCanvas_ = new RSCanvas(width_, height_);
+    }
+
+    return blendCanvas_;
+}
+#endif
 
 
 /**
@@ -529,7 +727,11 @@ APngAnimatedFrameInfo *APngImagePlayer::DecodeFrameImage(const int32_t& index)
         return frameInfo;
     }
 
+#ifndef USE_ROSEN_DRAWING
     SkBitmap bitmap;
+#else
+    RSBitmap bitmap;
+#endif
     APngAnimatedFrameInfo *frameInfo = &frameInfos_[index];
     bool extendToCanvas = true;
 
@@ -539,7 +741,11 @@ APngAnimatedFrameInfo *APngImagePlayer::DecodeFrameImage(const int32_t& index)
 
     if (!needBlend_) {
         if (!frameInfo->image) {
+#ifndef USE_ROSEN_DRAWING
             sk_sp<SkImage> image = GetImage(index, true);
+#else
+            std::shared_ptr<RSImage> image = GetImage(index, true);
+#endif
             if (!image) {
                 return nullptr;
             }
@@ -555,7 +761,11 @@ APngAnimatedFrameInfo *APngImagePlayer::DecodeFrameImage(const int32_t& index)
         return nullptr;
     }
 
+#ifndef USE_ROSEN_DRAWING
     sk_sp<SkImage> image = nullptr;
+#else
+    std::shared_ptr<RSImage> image = nullptr;
+#endif
 
     if (blendFrameIndex_ + 1 == frameInfo->index) {
         image = GetImage(frameInfo);
@@ -565,6 +775,7 @@ APngAnimatedFrameInfo *APngImagePlayer::DecodeFrameImage(const int32_t& index)
         blendCanvas_->clear(SK_ColorTRANSPARENT);
 
         if (frameInfo->blendFromIndex == frameInfo->index) {
+#ifndef USE_ROSEN_DRAWING
             SkRect unBlendRect = SkRect::MakeXYWH(frameInfo->offsetX,
                                                   frameInfo->offsetY,
                                                   frameInfo->width,
@@ -586,6 +797,29 @@ APngAnimatedFrameInfo *APngImagePlayer::DecodeFrameImage(const int32_t& index)
                 paint.setColor(SK_ColorTRANSPARENT);
                 blendCanvas_->drawRect(unBlendRect, paint);
             }
+#else
+            RSRect unBlendRect = RSRect(frameInfo->offsetX, frameInfo->offsetY,
+                frameInfo->width + frameInfo->offsetX, frameInfo->height + frameInfo->offsetY);
+            RSSamplingOptions sampling = RSSamplingOptions(
+                RSFilterMode::NEAREST, RSMipmapMode::NEAREST);
+            std::shared_ptr<RSImage> unblendImage = GetImage(frameInfo->index, false);
+            if (unblendImage) {
+                blendCanvas_->DrawImageRect(*unblendImage, unBlendRect, sampling);
+            }
+
+            RSBitmap bitmap;
+            CopyTo(&bitmap, bitmap_);
+            image = std::make_shared<RSImage>();
+            image->BuildFromBitmap(bitmap);
+
+            if (frameInfo->dispose == ImageDisposeBackground) {
+                RSBrush brush;
+                brush.SetColor(RSColor::COLOR_TRANSPARENT);
+                blendCanvas_->AttachBrush(brush);
+                blendCanvas_->DrawRect(unBlendRect);
+                blendCanvas_->DetachBrush();
+            }
+#endif
 
             blendFrameIndex_ = index;
         }
@@ -631,6 +865,7 @@ APngAnimatedFrameInfo *APngImagePlayer::DecodeFrameImage(const int32_t& index)
  * @param src
  * @return
  */
+#ifndef USE_ROSEN_DRAWING
 bool APngImagePlayer::CopyTo(SkBitmap *dst, const SkBitmap& src)
 {
     SkPixmap srcPixmap;
@@ -660,6 +895,9 @@ bool APngImagePlayer::CopyTo(SkBitmap *dst, const SkBitmap& src)
     dst->swap(tempDstBitmap);
     return true;
 }
+#else
+    // TODO Drawing : SkPixmap
+#endif
 
 /**
  * back animate render method use for optimization

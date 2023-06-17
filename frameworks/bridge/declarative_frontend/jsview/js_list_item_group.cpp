@@ -34,7 +34,7 @@ ListItemGroupModel* ListItemGroupModel::GetInstance()
         std::lock_guard<std::mutex> lock(mutex_);
         if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::ListItemModelNG());
+            instance_.reset(new NG::ListItemGroupModelNG());
 #else
             if (Container::IsCurrentUseNewPipeline()) {
                 instance_.reset(new NG::ListItemGroupModelNG());

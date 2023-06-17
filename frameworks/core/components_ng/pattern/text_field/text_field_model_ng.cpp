@@ -30,8 +30,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr const double UNDERLINE_NORMAL_HEIGHT = 48.0;
-constexpr const double UNDERLINE_NORMAL_PADDING = 12.0;
+constexpr Dimension UNDERLINE_NORMAL_HEIGHT = 48.0_vp;
+constexpr Dimension UNDERLINE_NORMAL_PADDING = 12.0_vp;
 } // namespace
 void TextFieldModelNG::CreateNode(
     const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool isTextArea)
@@ -52,6 +52,8 @@ void TextFieldModelNG::CreateNode(
     if (!isTextArea) {
         textFieldLayoutProperty->UpdateMaxLines(1);
         textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
+    } else {
+        textFieldLayoutProperty->UpdatePlaceholderMaxLines(Infinity<uint32_t>());
     }
     pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
@@ -252,6 +254,11 @@ void TextFieldModelNG::SetSelectedBackgroundColor(const Color& value)
 
 void TextFieldModelNG::SetTextAlign(TextAlign value)
 {
+    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    if (layoutProperty->GetTextAlignValue(TextAlign::START) != value) {
+        layoutProperty->UpdateTextAlignChanged(true);
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextAlign, value);
 }
 void TextFieldModelNG::SetMaxLength(uint32_t value)
@@ -451,7 +458,7 @@ void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
         backgroundColor = theme->GetBgColor();
         return;
     }
-    
+
     NG::ViewAbstract::SetBackgroundColor(color);
 }
 
@@ -473,32 +480,30 @@ void TextFieldModelNG::SetPadding(NG::PaddingProperty& newPadding, Edge oldPaddi
         NG::PaddingProperty paddings;
         if (top.Value()) {
             if (top.Unit() == DimensionUnit::CALC) {
-                paddings.top = NG::CalcLength(
-                    top.IsNonNegative() ? top.CalcValue() : CalcDimension().CalcValue());
+                paddings.top = NG::CalcLength(top.IsNonNegative() ? top.CalcValue() : CalcDimension().CalcValue());
             } else {
                 paddings.top = NG::CalcLength(top.IsNonNegative() ? top : CalcDimension());
             }
         }
         if (bottom.Value()) {
             if (bottom.Unit() == DimensionUnit::CALC) {
-                paddings.bottom = NG::CalcLength(
-                    bottom.IsNonNegative() ? bottom.CalcValue() : CalcDimension().CalcValue());
+                paddings.bottom =
+                    NG::CalcLength(bottom.IsNonNegative() ? bottom.CalcValue() : CalcDimension().CalcValue());
             } else {
                 paddings.bottom = NG::CalcLength(bottom.IsNonNegative() ? bottom : CalcDimension());
             }
         }
         if (left.Value()) {
             if (left.Unit() == DimensionUnit::CALC) {
-                paddings.left = NG::CalcLength(
-                    left.IsNonNegative() ? left.CalcValue() : CalcDimension().CalcValue());
+                paddings.left = NG::CalcLength(left.IsNonNegative() ? left.CalcValue() : CalcDimension().CalcValue());
             } else {
                 paddings.left = NG::CalcLength(left.IsNonNegative() ? left : CalcDimension());
             }
         }
         if (right.Value()) {
             if (right.Unit() == DimensionUnit::CALC) {
-                paddings.right = NG::CalcLength(
-                    right.IsNonNegative() ? right.CalcValue() : CalcDimension().CalcValue());
+                paddings.right =
+                    NG::CalcLength(right.IsNonNegative() ? right.CalcValue() : CalcDimension().CalcValue());
             } else {
                 paddings.right = NG::CalcLength(right.IsNonNegative() ? right : CalcDimension());
             }

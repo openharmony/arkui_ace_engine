@@ -66,6 +66,10 @@ public:
 
     virtual void SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInterface>& extSurfaceCallback) {}
 
+    virtual void SetIsTexture(bool isTexture) {}
+
+    virtual void SetIsFullScreen(bool isFullScreen) {}
+
 protected:
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderSurface);

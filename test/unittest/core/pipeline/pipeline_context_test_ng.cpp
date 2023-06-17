@@ -1525,8 +1525,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg030, TestSize.Level1)
     EXPECT_CALL(*mockPattern_, ProvideRestoreInfo())
         .Times(AnyNumber())
         .WillRepeatedly(testing::Return("Default restore info"));
-    EXPECT_CALL(*mockPattern_, GetSurfaceNodeName()).Times(AnyNumber()).WillRepeatedly(testing::Return(std::nullopt));
-    EXPECT_CALL(*mockPattern_, UseExternalRSNode()).Times(AnyNumber()).WillRepeatedly(testing::Return(false));
+    EXPECT_CALL(*mockPattern_, GetContextParam()).Times(AnyNumber()).WillRepeatedly(testing::Return(std::nullopt));
     EXPECT_CALL(*mockPattern_, CreatePaintProperty())
         .Times(AnyNumber())
         .WillRepeatedly(testing::Return(AceType::MakeRefPtr<PaintProperty>()));
@@ -1610,7 +1609,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg031, TestSize.Level1)
      * @tc.expected: flag is false.
      */
     bool flag = false;
-    auto callback = [&flag](const TouchEvent& point) { flag = !flag; };
     context_->OnTouchEvent(point_, true);
     EXPECT_FALSE(flag);
     /**
@@ -1627,37 +1625,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg031, TestSize.Level1)
     point_.type = TouchType::UP;
     context_->OnTouchEvent(point_, false);
     EXPECT_TRUE(context_->hasIdleTasks_);
-    /**
-     * @tc.steps4: init uiExtensionCallback_ and call OnTouchEvent with second arg is false.
-     * @tc.expected: flag is true, hasIdleTasks_ is true and touchEvents_ is not empty.
-     */
-    context_->uiExtensionCallback_ = callback;
-    point_.type = TouchType::MOVE;
-    context_->OnTouchEvent(point_, false);
-    EXPECT_TRUE(flag);
-    EXPECT_TRUE(context_->hasIdleTasks_);
-    EXPECT_FALSE(context_->touchEvents_.empty());
-    /**
-     * @tc.steps5: change id and call OnTouchEvent with second arg is false.
-                change touch type and call OnTouchEvent with second arg is false.
-     * @tc.expected: touchEvents_ is not empty and uiExtensionCallback_ is nullptr.
-     */
-    point_.id += 1;
-    context_->OnTouchEvent(point_, false);
-    EXPECT_FALSE(context_->touchEvents_.empty());
-    point_.type = TouchType::UP;
-    context_->OnTouchEvent(point_, false);
-    EXPECT_FALSE(context_->touchEvents_.empty());
-    EXPECT_EQ(context_->uiExtensionCallback_, nullptr);
-    /**
-     * @tc.steps5: change id and call OnTouchEvent with second arg is false.
-                change touch type and call OnTouchEvent with second arg is false.
-     * @tc.expected: touchEvents_ is not empty, uiExtensionCallback_ is nullptr.
-     */
-    context_->uiExtensionCallback_ = callback;
-    point_.type = TouchType::CANCEL;
-    context_->OnTouchEvent(point_, false);
-    EXPECT_EQ(context_->uiExtensionCallback_, nullptr);
 }
 
 /**
@@ -1787,6 +1754,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg034, TestSize.Level1)
      * @tc.steps3: reset window_ and call SetGetViewSafeAreaImpl and GetCurrentViewSafeArea.
      * @tc.expected: flag is still true.
      */
+    auto windowTemp = context_->window_;
     context_->window_ = nullptr;
     context_->SetGetViewSafeAreaImpl([&flag]() {
         flag = !flag;
@@ -1794,6 +1762,10 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg034, TestSize.Level1)
     });
     context_->GetCurrentViewSafeArea();
     EXPECT_TRUE(flag);
+    /**
+     * @tc.steps4: restore window_ for next testCase.
+     */
+    context_->window_ = windowTemp;
 }
 
 /**
@@ -1949,6 +1921,40 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg039, TestSize.Level1)
     context_->dumpFrameInfos_.push_back({});
     auto rt = context_->GetCurrentFrameInfo(DEFAULT_UINT64_1, DEFAULT_UINT64_2);
     EXPECT_NE(rt, nullptr);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg040
+ * @tc.desc: Test SetContainerButtonHide function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg040, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize root node and containerModal node.
+     * @tc.expected: root node and containerModal node are not null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetWindowModal(WindowModal::CONTAINER_MODAL);
+    ASSERT_NE(context_->window_, nullptr);
+    context_->SetupRootElement();
+    ASSERT_NE(context_->GetRootElement(), nullptr);
+    auto containerNode = AceType::DynamicCast<FrameNode>(context_->GetRootElement()->GetChildren().front());
+    ASSERT_NE(containerNode, nullptr);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    ASSERT_NE(containerPattern, nullptr);
+    /**
+     * @tc.steps2: call SetContainerButtonHide with params true, true, false.
+     * @tc.expected: depends on first param, hideSplitButton value is true.
+     */
+    context_->SetContainerButtonHide(true, true, false);
+    EXPECT_TRUE(containerPattern->hideSplitButton_ == true);
+    /**
+     * @tc.steps3: call SetContainerButtonHide with params false, true, false.
+     * @tc.expected: depends on first param, hideSplitButton value is false.
+     */
+    context_->SetContainerButtonHide(false, true, false);
+    EXPECT_TRUE(containerPattern->hideSplitButton_ == false);
 }
 
 /**

@@ -188,7 +188,7 @@ void ButtonModelNG::SetSize(const std::optional<Dimension>& width, const std::op
 
 void ButtonModelNG::SetBorderRadius(const Dimension& radius)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, BorderRadius, radius);
+    NG::ViewAbstract::SetBorderRadius(radius);
 }
 
 void ButtonModelNG::SetHoverEffect(const int32_t& hoverEffectNum)

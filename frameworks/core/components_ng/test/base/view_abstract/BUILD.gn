@@ -217,6 +217,7 @@ ohos_unittest("view_abstract_test") {
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
     "$ace_root/frameworks/core/image/image_source_info.cpp",
     "$ace_root/frameworks/core/pipeline/base/element_register.cpp",
+    "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
     "view_abstract_test.cpp",
   ]
 

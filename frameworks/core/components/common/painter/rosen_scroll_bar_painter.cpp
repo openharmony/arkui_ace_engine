@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,8 +17,10 @@
 
 #include <cmath>
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPaint.h"
+#endif
 
 namespace OHOS::Ace {
 namespace {
@@ -27,8 +29,13 @@ constexpr double FULL_ALPHA = 255.0;
 
 } // namespace
 
+#ifndef USE_ROSEN_DRAWING
 void RosenScrollBarPainter::PaintBar(SkCanvas* canvas, const Offset& offset, const Rect& paintRect,
     const RefPtr<ScrollBar>& scrollBar, const Offset& globalOffset, int32_t alpha)
+#else
+void RosenScrollBarPainter::PaintBar(RSCanvas* canvas, const Offset& offset,
+    const Rect& paintRect, const RefPtr<ScrollBar>& scrollBar, const Offset& globalOffset, int32_t alpha)
+#endif
 {
     if ((canvas != nullptr) && scrollBar && scrollBar->NeedScrollBar()) {
         if (scrollBar->GetShapeMode() == ShapeMode::RECT) {
@@ -39,6 +46,7 @@ void RosenScrollBarPainter::PaintBar(SkCanvas* canvas, const Offset& offset, con
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenScrollBarPainter::PaintCircleBar(
     SkCanvas* canvas, const Offset& offset, const Rect& paintRect, const RefPtr<ScrollBar>& scrollBar)
 {
@@ -74,7 +82,51 @@ void RosenScrollBarPainter::PaintCircleBar(
         canvas->drawArc(arcRect, scrollBar->GetTrickStartAngle(), scrollBar->GetTrickSweepAngle(), false, paint);
     }
 }
+#else
+void RosenScrollBarPainter::PaintCircleBar(RSCanvas* canvas, const Offset& offset,
+    const Rect& paintRect, const RefPtr<ScrollBar>& scrollBar)
+{
+    if (canvas && scrollBar->GetTrickSweepAngle() > 0.0) {
+        RSPen pen;
+        pen.SetBlendMode(RSBlendMode::SRC_OVER);
+        pen.SetAntiAlias(true);
+        pen.SetWidth(scrollBar->GetNormalWidthToPx());
+        pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
 
+        auto rootSize = scrollBar->GetRootSize();
+        // do not draw scrollbar when central is out of scroll viewport
+        if (rootSize.Height() * RSSCALAR_HALF < offset.GetY() ||
+            rootSize.Height() * RSSCALAR_HALF > offset.GetY() + paintRect.Height()) {
+            return;
+        }
+        double scrollBarWidth = scrollBar->GetNormalWidthToPx();
+        double diameter = rootSize.Width() - scrollBarWidth;
+        RSRect arcRect = RSRect(
+            scrollBarWidth * RSSCALAR_HALF,
+            scrollBarWidth * RSSCALAR_HALF,
+            diameter + scrollBarWidth * RSSCALAR_HALF,
+            diameter + scrollBarWidth * RSSCALAR_HALF);
+        // paint background
+        double deltaAngle = scrollBar->GetBottomAngle() - scrollBar->GetTopAngle();
+        pen.SetColor(scrollBar->GetBackgroundColor().GetValue());
+        canvas->AttachPen(pen);
+        if (scrollBar->GetPositionMode() == PositionMode::LEFT) {
+            canvas->DrawArc(arcRect, deltaAngle * RSSCALAR_HALF - STRAIGHT_ANGLE, -deltaAngle);
+        } else {
+            canvas->DrawArc(arcRect, -deltaAngle * RSSCALAR_HALF, deltaAngle);
+        }
+        canvas->DetachPen();
+
+        // paint foreground
+        pen.SetColor(scrollBar->GetForegroundColor().GetValue());
+        canvas->AttachPen(pen);
+        canvas->DrawArc(arcRect, scrollBar->GetTrickStartAngle(), scrollBar->GetTrickSweepAngle());
+        canvas->DetachPen();
+    }
+}
+#endif
+
+#ifndef USE_ROSEN_DRAWING
 void RosenScrollBarPainter::PaintRectBar(
     SkCanvas* canvas, const Offset& offset, const RefPtr<ScrollBar>& scrollBar, int32_t alpha)
 {
@@ -101,8 +153,56 @@ void RosenScrollBarPainter::PaintRectBar(
         RenderScrollBarBoundary(canvas, activeRect.GetOffset(), activeRect.Width(), activeRect.Height());
     }
 }
+#else
+void RosenScrollBarPainter::PaintRectBar(
+    RSCanvas* canvas, const Offset& offset, const RefPtr<ScrollBar>& scrollBar, int32_t alpha)
+{
+    Rect activeRect = scrollBar->GetActiveRect();
+    Rect barRect = scrollBar->GetBarRect();
+    if (canvas && !NearZero(activeRect.Height()) && !NearZero(barRect.Height())) {
+        RSPen pen;
+        pen.SetBlendMode(RSBlendMode::SRC_OVER);
+        pen.SetAntiAlias(true);
+        pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+        RSBrush brush;
+        brush.SetBlendMode(RSBlendMode::SRC_OVER);
+        brush.SetAntiAlias(true);
 
+        // paint background
+        RSRect backgroundRect = RSRect(
+            barRect.Left(), barRect.Top(), barRect.Right(), barRect.Bottom());
+        pen.SetColor(scrollBar->GetBackgroundColor().GetValue());
+        brush.SetColor(scrollBar->GetBackgroundColor().GetValue());
+        double filletRadius = backgroundRect.GetWidth() * RSSCALAR_HALF;
+        canvas->AttachPen(pen);
+        canvas->AttachBrush(brush);
+        RSRoundRect backRoundRect(backgroundRect, filletRadius, filletRadius);
+        canvas->DrawRoundRect(backRoundRect);
+        canvas->DetachPen();
+        canvas->DetachBrush();
+
+        // paint foreground
+        pen.SetColor(scrollBar->GetForegroundColor().BlendOpacity(alpha / FULL_ALPHA).GetValue());
+        brush.SetColor(scrollBar->GetForegroundColor().BlendOpacity(alpha / FULL_ALPHA).GetValue());
+        RSRect foregroundRect = RSRect(
+            activeRect.Left(), activeRect.Top(), activeRect.Right(), activeRect.Bottom());
+        RSRoundRect foreRoundRect(foregroundRect, filletRadius, filletRadius);
+        canvas->AttachPen(pen);
+        canvas->AttachBrush(brush);
+        canvas->DrawRoundRect(foreRoundRect);
+        canvas->DetachPen();
+        canvas->DetachBrush();
+        RenderScrollBarBoundary(canvas, activeRect.GetOffset(), activeRect.Width(), activeRect.Height());
+    }
+}
+#endif
+
+#ifndef USE_ROSEN_DRAWING
 void RosenScrollBarPainter::RenderScrollBarBoundary(SkCanvas* canvas, const Offset& offset, double width, double height)
+#else
+void RosenScrollBarPainter::RenderScrollBarBoundary(RSCanvas* canvas, const Offset& offset,
+    double width, double height)
+#endif
 {
     if (SystemProperties::GetDebugBoundaryEnabled()) {
         if (canvas == nullptr) {

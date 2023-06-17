@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUTTON_BUTTON_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUTTON_BUTTON_MODEL_H
 
-#include "core/components/button/button_component.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/button/button_request_data.h"

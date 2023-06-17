@@ -85,6 +85,7 @@ constexpr int32_t ERROR_CODE_SYSTEMCAP_ERROR = 801;   // The specified SystemCap
 constexpr int32_t ERROR_CODE_INTERNAL_ERROR = 100001;      // Internal error.
 constexpr int32_t ERROR_CODE_URI_ERROR = 100002;           // Uri error.
 constexpr int32_t ERROR_CODE_PAGE_STACK_FULL = 100003;     // The pages are pushed too much.
+constexpr int32_t ERROR_CODE_NAMED_ROUTE_ERROR = 100004;           // Named route error.
 constexpr int32_t ERROR_CODE_URI_ERROR_LITE = 200002;      // Uri error for lite.
 
 template<class T>
@@ -157,10 +158,9 @@ inline Dimension StringToDimension(const std::string& value)
     return StringUtils::StringToDimension(value);
 }
 
-inline bool StringToDimensionWithUnit(
-    const std::string& value, Dimension& result, DimensionUnit defaultUnit = DimensionUnit::PX)
+inline Dimension StringToDimensionWithUnit(const std::string& value, DimensionUnit defaultUnit = DimensionUnit::PX)
 {
-    return StringUtils::StringToDimensionWithUnit(value, result, defaultUnit);
+    return StringUtils::StringToDimensionWithUnit(value, defaultUnit);
 }
 
 inline int32_t StringToInt(const std::string& value)
@@ -426,13 +426,13 @@ inline TabBarMode ConvertStrToTabBarMode(const std::string& value)
     return temp == "fixed" ? TabBarMode::FIXED : TabBarMode::SCROLLABLE;
 }
 
-ACE_EXPORT_WITH_PREVIEW RefPtr<Curve> CreateBuiltinCurve(const std::string& aniTimFunc);
+ACE_FORCE_EXPORT RefPtr<Curve> CreateBuiltinCurve(const std::string& aniTimFunc);
 
-ACE_EXPORT_WITH_PREVIEW RefPtr<Curve> CreateCustomCurve(const std::string& aniTimFunc);
+ACE_FORCE_EXPORT RefPtr<Curve> CreateCustomCurve(const std::string& aniTimFunc);
 
-ACE_FORCE_EXPORT_WITH_PREVIEW RefPtr<Curve> CreateCurve(const std::function<float(float)>& jsFunc);
+ACE_FORCE_EXPORT RefPtr<Curve> CreateCurve(const std::function<float(float)>& jsFunc);
 
-ACE_FORCE_EXPORT_WITH_PREVIEW RefPtr<Curve> CreateCurve(const std::string& aniTimFunc, bool useDefault = true);
+ACE_FORCE_EXPORT RefPtr<Curve> CreateCurve(const std::string& aniTimFunc, bool useDefault = true);
 
 ACE_EXPORT TransitionType ParseTransitionType(const std::string& transitionType);
 
@@ -627,7 +627,7 @@ inline void HandleEscapeCharaterInUtf8TextForJson(std::string& text)
             ((text.at(pos) >= ESCAPE_CHARATER_START) && (text.at(pos) <= ESCAPE_CHARATER_END))) {
             std::ostringstream is;
             is << UNICODE_HEAD << std::hex << std::setw(UNICODE_LENGTH) << std::setfill(UNICODE_BODY)
-               << int(text.at(pos));
+                << int(text.at(pos));
             text.replace(pos, 1, is.str());
         }
     }
@@ -681,8 +681,8 @@ inline void ReplacePlaceHolder(std::string& resultStr, const std::unique_ptr<Jso
     }
 }
 
-inline std::string ParserPluralResource(
-    const std::unique_ptr<JsonValue>& argsPtr, const std::string& choice, const std::string& count)
+inline std::string ParserPluralResource(const std::unique_ptr<JsonValue>& argsPtr, const std::string& choice,
+    const std::string& count)
 {
     std::string valueStr;
     std::string defaultPluralStr(DEFAULT_PLURAL_CHOICE);

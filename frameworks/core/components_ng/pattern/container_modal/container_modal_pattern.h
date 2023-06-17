@@ -22,7 +22,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
 class ACE_EXPORT ContainerModalPattern : public Pattern {
     DECLARE_ACE_TYPE(ContainerModalPattern, Pattern);
 
@@ -66,15 +65,26 @@ public:
 
     void SetAppIcon(const RefPtr<PixelMap>& icon);
 
+    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize);
+
+protected:
+    virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& titleNode, int32_t originIndex)
+    {
+        return titleNode->GetChildAtIndex(originIndex);
+    }
+
 private:
     void WindowFocus(bool isFocus);
 
     void ChangeFloatingTitle(const RefPtr<FrameNode>& floatingNode, bool isFocus = true);
 
-    static void ChangeTitle(const RefPtr<FrameNode>& titleNode, bool isFocus = true);
+    void ChangeTitle(const RefPtr<FrameNode>& titleNode, bool isFocus = true);
 
-    static void ChangeTitleButtonIcon(
+    void ChangeTitleButtonIcon(
         const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus = true);
+
+    void SetTitleButtonHide(
+        const RefPtr<FrameNode>& titleNode, bool hideSplit, bool hideMaximize, bool hideMinimize);
 
     bool CanShowFloatingTitle();
 
@@ -82,6 +92,8 @@ private:
     float moveX_ = 0.0f;
     float moveY_ = 0.0f;
     bool hasDeco_ = true;
+    bool isFocus_ = true;
+    bool hideSplitButton_ = false;
 };
 
 } // namespace OHOS::Ace::NG

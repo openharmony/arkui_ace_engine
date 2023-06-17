@@ -79,9 +79,12 @@ void SubwindowOhos::InitContainer()
         auto parentWindowName = parentContainer->GetWindowName();
         auto parentWindowId = parentContainer->GetWindowId();
         auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-        sptr<OHOS::Rosen::Window> parentWindow = OHOS::Rosen::Window::Find(parentWindowName);
+        sptr<OHOS::Rosen::Window> parentWindow = parentContainer->GetUIWindow(parentContainerId_);
         CHECK_NULL_VOID_NOLOG(parentWindow);
+        parentWindow_ = parentWindow;
         auto windowType = parentWindow->GetType();
+        LOGI("Find parent window success, name: %{public}s, windowId: %{public}u, type: %{public}u",
+            parentWindow->GetWindowName().c_str(), parentWindow->GetWindowId(), static_cast<uint32_t>(windowType));
         if (windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_FLOAT);
         } else if (windowType >= Rosen::WindowType::SYSTEM_WINDOW_BASE) {
@@ -267,9 +270,17 @@ void SubwindowOhos::HidePopupNG(int32_t targetId)
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
     CHECK_NULL_VOID(context);
+    auto rootNode = context->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
+    // Reset subwindow's hotarea to whole screen when popup hide
+    auto subWindowSize = rootNode->GetGeometryNode()->GetFrameSize();
+    auto subWindowRect = Rect(0.0f, 0.0f, subWindowSize.Width(), subWindowSize.Height());
     auto popupInfo = overlayManager->GetPopupInfo(targetId);
+    std::vector<Rect> rects;
+    rects.emplace_back(subWindowRect);
+    SetHotAreas(rects);
     popupInfo.popupId = -1;
     popupInfo.markNeedUpdate = true;
     overlayManager->HidePopup(targetId, popupInfo);
@@ -325,6 +336,10 @@ const RefPtr<NG::OverlayManager> SubwindowOhos::GetOverlayManager()
 
 void SubwindowOhos::ShowWindow()
 {
+    if (isShowed_) {
+        LOGI("Subwindow is on display");
+        return;
+    }
     LOGI("Show the subwindow");
     CHECK_NULL_VOID(window_);
     // Set min window hot area so that sub window can transparent event.
@@ -366,6 +381,10 @@ void SubwindowOhos::HideWindow()
         CHECK_NULL_VOID(context);
         auto rootNode = context->GetRootElement();
         CHECK_NULL_VOID(rootNode);
+        if (!rootNode->GetChildren().empty()) {
+            LOGW("there are still nodes mounted on root in subwindow");
+            return;
+        }
         auto focusHub = rootNode->GetFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->SetIsDefaultHasFocused(false);
@@ -926,6 +945,14 @@ void SubwindowOhos::ShowActionMenu(
     } else {
         ShowActionMenuForAbility(title, button, std::move(callback));
     }
+}
+
+Rect SubwindowOhos::GetParentWindowRect() const
+{
+    Rect rect;
+    CHECK_NULL_RETURN(parentWindow_, rect);
+    auto parentWindowRect = parentWindow_->GetRect();
+    return Rect(parentWindowRect.posX_, parentWindowRect.posY_, parentWindowRect.width_, parentWindowRect.height_);
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK

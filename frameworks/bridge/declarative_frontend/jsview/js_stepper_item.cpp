@@ -31,7 +31,7 @@ StepperItemModel* StepperItemModel::GetInstance()
         std::lock_guard<std::mutex> lock(mutex_);
         if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::ImageModelNG());
+            instance_.reset(new NG::StepperItemModelNG());
 #else
             if (Container::IsCurrentUseNewPipeline()) {
                 instance_.reset(new NG::StepperItemModelNG());

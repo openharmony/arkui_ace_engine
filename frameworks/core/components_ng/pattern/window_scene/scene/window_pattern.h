@@ -58,6 +58,7 @@ protected:
 private:
     void CreateStartingNode();
     void CreateSnapshotNode();
+    bool CreatePersistentNode();
 
     void BufferAvailableCallback();
 

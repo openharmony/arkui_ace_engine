@@ -68,7 +68,7 @@ void InputEventActuator::OnCollectHoverEvent(
         CHECK_NULL_VOID(actuator);
         for (const auto& callback : actuator->inputEvents_) {
             if (callback) {
-                (*callback)(info, hoverInfo);
+                (*callback)(info);
             }
         }
         if (actuator->userCallback_) {

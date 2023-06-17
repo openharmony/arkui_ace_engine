@@ -40,9 +40,7 @@ class ObservedPropertySimplePU<T> extends ObservedPropertySimpleAbstractPU<T>
   }
 
   aboutToBeDeleted(unsubscribeMe?: IPropertySubscriber) {
-    if (unsubscribeMe) {
-      this.unlinkSuscriber(unsubscribeMe.id__());
-    }
+    this.removeSubscriber(unsubscribeMe);
     super.aboutToBeDeleted();
   }
 

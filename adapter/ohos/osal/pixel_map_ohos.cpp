@@ -167,7 +167,7 @@ std::string PixelMapOhos::GetId()
 
 std::string PixelMapOhos::GetModifyId()
 {
-    return std::string();
+    return {};
 }
 
 std::shared_ptr<Media::PixelMap> PixelMapOhos::GetPixelMapSharedPtr()

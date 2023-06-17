@@ -71,6 +71,10 @@ public:
     RefPtr<NG::FrameNode> ShowDialogNG(
         const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode) override;
     void HideSubWindowNG() override;
+    bool GetShown() override
+    {
+        return isShowed_;
+    }
 
     void SetHotAreas(const std::vector<Rect>& rects) override;
 
@@ -101,6 +105,9 @@ public:
     }
 
     void UpdateAceView(int32_t width, int32_t height, float density, int32_t containerId);
+
+    // Gets parent window's size and offset
+    Rect GetParentWindowRect() const override;
 
 private:
     RefPtr<StackElement> GetStack();
@@ -151,6 +158,7 @@ private:
     bool isToastWindow_ = false;
     int32_t popupTargetId_ = -1;
     bool isShowed_ = false;
+    sptr<OHOS::Rosen::Window> parentWindow_ = nullptr;
 };
 
 } // namespace OHOS::Ace

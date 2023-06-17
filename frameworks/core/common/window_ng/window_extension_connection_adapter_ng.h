@@ -22,6 +22,7 @@
 #include "base/memory/referenced.h"
 #include "base/thread/task_executor.h"
 #include "core/components_ng/base/frame_node.h"
+#include "session/host/include/extension_session.h"
 
 namespace OHOS::Ace {
 class ACE_EXPORT WindowExtensionConnectionAdapterNG : public AceType {
@@ -31,7 +32,8 @@ public:
     virtual void Show() {}
     virtual void Hide() {}
     virtual void RequestFocus() {}
-    virtual void ConnectExtension(const RefPtr<NG::FrameNode>& node, int32_t windowId) = 0;
+    virtual void ConnectExtension(const RefPtr<NG::FrameNode>& node, int32_t windowId,
+        sptr<Rosen::ExtensionSession>& extensionSession) = 0;
     virtual void UpdateRect(const Rect& rect) = 0;
     virtual void RemoveExtension() = 0;
 };

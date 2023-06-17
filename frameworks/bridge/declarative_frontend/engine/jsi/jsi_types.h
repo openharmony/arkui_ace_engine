@@ -200,14 +200,13 @@ struct JsiExecutionContext {
 class JsiCallbackInfo {
 public:
     JsiCallbackInfo(panda::JsiRuntimeCallInfo* info);
-    JsiCallbackInfo() = default;
     ~JsiCallbackInfo() = default;
     JsiCallbackInfo(const JsiCallbackInfo&) = delete;
     JsiCallbackInfo& operator=(const JsiCallbackInfo&) = delete;
 
-    virtual JsiRef<JsiValue> operator[](size_t index) const;
-    virtual JsiRef<JsiObject> This() const;
-    virtual int Length() const;
+    JsiRef<JsiValue> operator[](size_t index) const;
+    JsiRef<JsiObject> This() const;
+    int Length() const;
 
     template<typename T>
     void SetReturnValue(T* instance) const;
@@ -215,28 +214,27 @@ public:
     template<typename T>
     void SetReturnValue(JsiRef<T> val) const;
 
-    virtual void ReturnSelf() const;
+    void ReturnSelf() const;
 
     std::variant<void*, panda::CopyableGlobal<panda::JSValueRef>> GetReturnValue()
     {
         return retVal_;
     }
 
-    virtual JsiExecutionContext GetExecutionContext() const
+    JsiExecutionContext GetExecutionContext() const
     {
         return JsiExecutionContext { info_->GetVM() };
     }
 
-    virtual panda::ecmascript::EcmaVM* GetVm() const
+    panda::ecmascript::EcmaVM* GetVm() const
     {
         return info_->GetVM();
     }
 
-protected:
-    mutable std::variant<void*, panda::CopyableGlobal<panda::JSValueRef>> retVal_;
-
 private:
     panda::JsiRuntimeCallInfo* info_ = nullptr;
+
+    mutable std::variant<void*, panda::CopyableGlobal<panda::JSValueRef>> retVal_;
 };
 
 class JsiGCMarkCallbackInfo {

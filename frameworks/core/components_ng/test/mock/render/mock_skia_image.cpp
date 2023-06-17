@@ -27,7 +27,7 @@ RefPtr<CanvasImage> SkiaImage::Clone()
     return Claim(this);
 }
 
-RefPtr<PixelMap> SkiaImage::GetPixelMap()
+RefPtr<PixelMap> SkiaImage::GetPixelMap() const
 {
     return nullptr;
 }

@@ -14,6 +14,7 @@
 group("render_unittest") {
   testonly = true
   deps = [
+    "border_image_painter:border_image_painter_test_ng",
     "circle_painter:circle_painter_test_ng",
     "drawing_prop_convertor:drawing_prop_convertor_test_ng",
     "ellipse_painter:ellipse_painter_test_ng",

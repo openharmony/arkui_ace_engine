@@ -254,6 +254,7 @@ void JsiPaEngine::InitJsRuntimeOptions(AbilityRuntime::Runtime::Options& options
     options.isDebugVersion = GetDebugMode();
     options.packagePathStr = GetWorkerPath()->packagePathStr;
     options.assetBasePathStr = GetWorkerPath()->assetBasePathStr;
+    options.isJsFramework = language_ == SrcLanguage::JS;
 }
 
 bool JsiPaEngine::CreateJsRuntime(const AbilityRuntime::Runtime::Options& options)

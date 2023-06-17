@@ -179,13 +179,16 @@ void SlidingPanelPattern::FirstLayout()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->RequestFocus();
     isFirstLayout_ = false;
     auto layoutProperty = GetLayoutProperty<SlidingPanelLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto maxSize = host->GetGeometryNode()->GetFrameSize();
     if (layoutProperty->GetIsShowValue(false) == true) {
         CheckPanelModeAndType();
-        UpdateCurrentOffset(maxSize.Height());
+        currentOffset_ = maxSize.Height();
         AnimateTo(defaultBlankHeights_[mode_.value_or(PanelMode::HALF)], mode_.value_or(PanelMode::HALF));
         if (previousMode_ != mode_.value_or(PanelMode::HALF)) {
             FireSizeChangeEvent();
@@ -203,7 +206,6 @@ void SlidingPanelPattern::FirstLayout()
     auto rootHeight = PipelineContext::GetCurrentRootHeight();
     CheckPanelModeAndType();
     currentOffset_ = rootHeight;
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     isShow_ = false;
 }
 
@@ -211,6 +213,13 @@ void SlidingPanelPattern::IsShowChanged(bool isShow)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (isShow) {
+        focusHub->RequestFocus();
+    } else {
+        focusHub->RemoveSelf();
+    }
     auto layoutProperty = GetLayoutProperty<SlidingPanelLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto hasDragBar = layoutProperty->GetHasDragBarValue(true);

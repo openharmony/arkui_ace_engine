@@ -24,7 +24,7 @@
 namespace OHOS::Ace {
 
 template<typename T>
-class ACE_EXPORT_WITH_PREVIEW CurveAnimation : public Animation<T> {
+class ACE_FORCE_EXPORT CurveAnimation : public Animation<T> {
 public:
     CurveAnimation(const T& begin, const T& end, const RefPtr<Curve>& curve)
         : begin_(begin), end_(end), currentValue_(begin)

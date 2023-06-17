@@ -515,10 +515,11 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
     propVisibility_ = visible;
     host->OnVisibleChange(visible == VisibleType::VISIBLE);
     if (allowTransition) {
-        if (preVisible == VisibleType::VISIBLE && visible == VisibleType::INVISIBLE) {
+        if (preVisible == VisibleType::VISIBLE && (visible == VisibleType::INVISIBLE || visible == VisibleType::GONE)) {
             // only trigger transition when visibility changes between visible and invisible.
             host->GetRenderContext()->OnNodeDisappear(false);
-        } else if (preVisible == VisibleType::INVISIBLE && visible == VisibleType::VISIBLE) {
+        } else if ((preVisible == VisibleType::INVISIBLE || preVisible == VisibleType::GONE) &&
+                   visible == VisibleType::VISIBLE) {
             host->GetRenderContext()->OnNodeAppear(false);
         }
     }

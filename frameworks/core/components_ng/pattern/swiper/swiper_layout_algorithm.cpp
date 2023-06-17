@@ -38,7 +38,6 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension INDICATOR_PADDING = 8.0_vp;
 constexpr uint32_t INDICATOR_HAS_CHILD = 2;
-constexpr int32_t PRESTRAIN_CHILD_COUNT = 2;
 constexpr uint32_t SWIPER_HAS_CHILD = 3;
 } // namespace
 
@@ -103,13 +102,7 @@ void SwiperLayoutAlgorithm::InitInActiveItems(float translateLength)
 
     int32_t displayCount = 0;
     if (NearZero(currentOffset_)) {
-        if (Positive(prevMargin_) && Positive(nextMargin_)) {
-            displayCount = displayCount_ + PRESTRAIN_CHILD_COUNT;
-        } else if (NonPositive(prevMargin_) && NonPositive(nextMargin_)) {
-            displayCount = displayCount_;
-        } else {
-            displayCount = displayCount_ + 1;
-        }
+        displayCount = TotalDisplayCount();
     } else {
         displayCount = displayCount_ + 1;
     }
@@ -153,8 +146,10 @@ void SwiperLayoutAlgorithm::InitItemRange(LayoutWrapper* layoutWrapper)
     auto translateLength = axis == Axis::HORIZONTAL ? maxChildSize_.Width() : maxChildSize_.Height();
     translateLength += itemSpace;
 
-    /* Load next index while swiping */
-    LoadItemWithDrag(translateLength);
+    if (isDragging_) {
+        /* Load next index while dragging */
+        LoadItemWithDrag(translateLength);
+    }
 
     if (startIndex_ <= endIndex_) {
         for (auto index = startIndex_; index <= endIndex_; ++index) {
@@ -223,8 +218,6 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
-    auto cacheCount = swiperLayoutProperty->GetCachedCount().value_or(1);
-    layoutWrapper->SetCacheCount(cacheCount);
 
     auto axis = swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
     const auto& constraint = swiperLayoutProperty->GetLayoutConstraint();
@@ -246,8 +239,11 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // Measure children.
     auto layoutConstraint = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, idealSize);
-    prevMargin_ = static_cast<float>(swiperLayoutProperty->GetPrevMarginValue(0.0_px).ConvertToPx());
-    nextMargin_ = static_cast<float>(swiperLayoutProperty->GetNextMarginValue(0.0_px).ConvertToPx());
+    if (SwiperUtils::IsStretch(swiperLayoutProperty)) {
+        prevMargin_ = static_cast<float>(swiperLayoutProperty->GetPrevMarginValue(0.0_px).ConvertToPx());
+        nextMargin_ = static_cast<float>(swiperLayoutProperty->GetNextMarginValue(0.0_px).ConvertToPx());
+    }
+
     auto crossSize = 0.0f;
     auto mainSize = 0.0f;
     InitItemRange(layoutWrapper);
@@ -445,6 +441,17 @@ void SwiperLayoutAlgorithm::PlaceDigitChild(
             indicatorHeight = textFrameSize.Height();
         }
     }
+
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID_NOLOG(swiperIndicatorTheme);
+
+    float dightPadding = std::abs(swiperIndicatorTheme->GetIndicatorDigitHeight().ConvertToPx() - indicatorHeight) / 2;
+    if (LessNotEqual(indicatorHeight, swiperIndicatorTheme->GetIndicatorDigitHeight().ConvertToPx())) {
+        indicatorHeight = swiperIndicatorTheme->GetIndicatorDigitHeight().ConvertToPx();
+    }
+
     auto layoutPropertyConstraint = indicatorWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutPropertyConstraint);
     const auto& layoutConstraint = layoutPropertyConstraint->GetLayoutConstraint();
@@ -490,7 +497,8 @@ void SwiperLayoutAlgorithm::PlaceDigitChild(
         position.SetY(swiperHeight - indicatorHeight - bottomValue - swiperPaddingBottom);
     } else {
         if (axis == Axis::HORIZONTAL) {
-            position.SetY(swiperHeight - indicatorHeight - swiperPaddingBottom - INDICATOR_PADDING.ConvertToPx());
+            position.SetY(swiperHeight - indicatorHeight - swiperPaddingBottom -
+                          swiperIndicatorTheme->GetIndicatorDigitVerticalPadding().ConvertToPx() + dightPadding);
         } else {
             position.SetY((swiperHeight - swiperPaddingBottom + swiperPaddingTop - indicatorHeight) * 0.5);
         }
@@ -564,8 +572,13 @@ void SwiperLayoutAlgorithm::SortItems(std::list<int32_t>& preItems, std::list<in
     displayCount = std::clamp(displayCount, 0, itemCount);
     auto cacheCount = static_cast<int32_t>(ceilf(static_cast<float>(itemCount - displayCount) / 2.0f));
     auto loopIndex = (currentIndex_ - 1 + totalCount_) % totalCount_;
+    int32_t prevTargetIndex = CaculatePrevTargetIndex();
+    int32_t nextTargetIndex = CaculateNextTargetIndex();
     int32_t count = 0;
     while (itemRange_.find(loopIndex) != itemRange_.end() && count < cacheCount) {
+        if (NearEqual(loopIndex, nextTargetIndex)) {
+            break;
+        }
         preItems.emplace_back(loopIndex);
         loopIndex = (loopIndex - 1 + totalCount_) % totalCount_;
         count++;
@@ -576,6 +589,9 @@ void SwiperLayoutAlgorithm::SortItems(std::list<int32_t>& preItems, std::list<in
     while (itemRange_.find(loopIndex) != itemRange_.end() && count < (displayCount + cacheCount)) {
         nextItems.emplace_back(loopIndex);
         loopIndex = (loopIndex + 1) % totalCount_;
+        if (NearEqual(loopIndex, prevTargetIndex)) {
+            break;
+        }
         count++;
     }
 
@@ -791,5 +807,21 @@ void SwiperLayoutAlgorithm::ArrowLayout(LayoutWrapper* layoutWrapper, const RefP
     }
     arrowGeometryNode->SetMarginFrameOffset(arrowOffset);
     arrowWrapper->Layout();
+}
+
+int32_t SwiperLayoutAlgorithm::CaculatePrevTargetIndex() const
+{
+    int32_t totalDisplayCount = TotalDisplayCount();
+    int32_t firstDisplayIndex = Positive(prevMargin_) ? (currentIndex_ - 1 + totalCount_) % totalCount_ : currentIndex_;
+    return GreatOrEqual(totalCount_, totalDisplayCount) ? firstDisplayIndex : currentIndex_;
+}
+
+int32_t SwiperLayoutAlgorithm::CaculateNextTargetIndex() const
+{
+    int32_t totalDisplayCount = TotalDisplayCount();
+    int32_t firstDisplayIndex = Positive(prevMargin_) ? (currentIndex_ - 1 + totalCount_) % totalCount_ : currentIndex_;
+    int32_t lastDisplayIndex = (firstDisplayIndex + totalDisplayCount - 1 + totalCount_) % totalCount_;
+    return GreatOrEqual(totalCount_, totalDisplayCount) ? lastDisplayIndex :
+                                                          (currentIndex_ - 1 + totalCount_) % totalCount_;
 }
 } // namespace OHOS::Ace::NG

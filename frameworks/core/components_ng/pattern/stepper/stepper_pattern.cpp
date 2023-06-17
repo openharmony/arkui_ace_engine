@@ -65,7 +65,13 @@ void StepperPattern::OnModifyDone()
     auto swiperEventHub = swiperNode->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     maxIndex_ = TotalCount();
-    CHECK_NULL_VOID_NOLOG(maxIndex_ > -1);
+    if (index_ > maxIndex_) {
+        index_ = 0;
+        hostNode->GetLayoutProperty<StepperLayoutProperty>()->UpdateIndex(index_);
+        swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateIndex(index_);
+        swiperNode->MarkModifyDone();
+        swiperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
     InitSwiperChangeEvent(swiperEventHub);
     UpdateOrCreateLeftButtonNode(index_);
     UpdateOrCreateRightButtonNode(index_);
@@ -127,7 +133,8 @@ void StepperPattern::CreateLeftButtonNode()
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateType(ButtonType::NORMAL);
     buttonNode->GetRenderContext()->UpdateBackgroundColor(stepperTheme->GetMouseHoverColor().ChangeOpacity(0));
     buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-    buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateBorderRadius(stepperTheme->GetRadius());
+    auto buttonRadius = stepperTheme->GetRadius();
+    buttonNode->GetRenderContext()->UpdateBorderRadius({ buttonRadius, buttonRadius, buttonRadius, buttonRadius });
     buttonNode->MountToParent(hostNode);
     buttonNode->MarkModifyDone();
     InitButtonOnHoverEvent(buttonNode, true);
@@ -171,6 +178,7 @@ void StepperPattern::CreateLeftButtonNode()
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateFontWeight(stepperTheme->GetTextStyle().GetFontWeight());
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateMaxLines(stepperTheme->GetTextMaxLines());
     textNode->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
+    textNode->GetFocusHub()->SetFocusable(true);
     textNode->MountToParent(rowNode);
     textNode->MarkModifyDone();
 }
@@ -254,7 +262,8 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
         rightIsHover_ ? stepperTheme->GetMouseHoverColor() : stepperTheme->GetMouseHoverColor().ChangeOpacity(0);
     buttonNode->GetRenderContext()->UpdateBackgroundColor(buttonBackgroundColor);
     buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-    buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateBorderRadius(stepperTheme->GetRadius());
+    auto buttonRadius = stepperTheme->GetRadius();
+    buttonNode->GetRenderContext()->UpdateBorderRadius({ buttonRadius, buttonRadius, buttonRadius, buttonRadius });
     buttonNode->MountToParent(hostNode);
     buttonNode->MarkModifyDone();
     InitButtonOnHoverEvent(buttonNode, false);
@@ -286,6 +295,7 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateFontWeight(stepperTheme->GetTextStyle().GetFontWeight());
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateMaxLines(stepperTheme->GetTextMaxLines());
     textNode->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
+    textNode->GetFocusHub()->SetFocusable(true);
     textNode->MountToParent(rowNode);
     textNode->MarkModifyDone();
     // Create imageNode
@@ -329,7 +339,8 @@ void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, const std::st
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateType(ButtonType::NORMAL);
     buttonNode->GetRenderContext()->UpdateBackgroundColor(buttonBackgroundColor);
     buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-    buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateBorderRadius(stepperTheme->GetRadius());
+    auto buttonRadius = stepperTheme->GetRadius();
+    buttonNode->GetRenderContext()->UpdateBorderRadius({ buttonRadius, buttonRadius, buttonRadius, buttonRadius });
     buttonNode->MountToParent(hostNode);
     buttonNode->MarkModifyDone();
     InitButtonOnHoverEvent(buttonNode, false);
@@ -347,6 +358,7 @@ void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, const std::st
     textNode->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
     textNode->GetLayoutProperty()->UpdateMargin(
         { CalcLength(stepperTheme->GetControlPadding()), CalcLength(stepperTheme->GetControlPadding()) });
+    textNode->GetFocusHub()->SetFocusable(true);
     textNode->MountToParent(buttonNode);
     textNode->MarkModifyDone();
 }

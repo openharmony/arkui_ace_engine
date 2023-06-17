@@ -69,6 +69,9 @@ private:
     static void OptionsShowInternal(const RefPtr<TextPickerPattern>& textPickerPattern,
         const TextPickerSettingData& settingData, const RefPtr<FrameNode>& textPickerNode,
         uint32_t showCount, RefPtr<PickerTheme> pickerTheme);
+    static void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    static bool OnKeyEvent(const KeyEvent& event);
+    static RefPtr<FrameNode> dialogNode_;
 };
 } // namespace OHOS::Ace::NG
 

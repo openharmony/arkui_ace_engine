@@ -36,7 +36,7 @@ public:
     static RefPtr<UIExtensionNode> GetOrCreateUIExtensionNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
-    void DispatchPointerEvent(const TouchEvent& point) const;
+    void DispatchPointerEvent(const TouchEvent& point, const RectF& rectWithTransform) const;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_NODE_H

@@ -22,19 +22,21 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
-#ifdef SECURITY_COMPONENT_ENABLE
-#include "location_button.h"
-#include "paste_button.h"
-#include "save_button.h"
-#include "sec_comp_err.h"
-#include "sec_comp_kit.h"
-#endif
-
 namespace OHOS::Ace::NG {
 #ifdef SECURITY_COMPONENT_ENABLE
 using namespace OHOS::Security;
 using namespace OHOS::Security::SecurityComponent;
-static bool GetDisplayOffset(RefPtr<FrameNode>& node, double& offsetX, double& offsetY)
+
+static std::vector<uintptr_t> g_callList = {
+    reinterpret_cast<uintptr_t>(SecurityComponentHandler::RegisterSecurityComponent),
+    reinterpret_cast<uintptr_t>(SecurityComponentHandler::UpdateSecurityComponent),
+    reinterpret_cast<uintptr_t>(SecurityComponentHandler::UnregisterSecurityComponent),
+    reinterpret_cast<uintptr_t>(SecurityComponentHandler::ReportSecurityComponentClickEvent)
+};
+
+SecurityComponent::SecCompUiRegister uiRegister(g_callList);
+
+bool SecurityComponentHandler::GetDisplayOffset(RefPtr<FrameNode>& node, double& offsetX, double& offsetY)
 {
     double x = node->GetTransformRelativeOffset().GetX();
     double y = node->GetTransformRelativeOffset().GetY();
@@ -48,7 +50,7 @@ static bool GetDisplayOffset(RefPtr<FrameNode>& node, double& offsetX, double& o
     return true;
 }
 
-static bool CheckOpacity(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
+bool SecurityComponentHandler::CheckOpacity(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetOpacity().has_value() &&
         !NearEqual(renderContext->GetOpacity().value(), 1.0f)) {
@@ -58,7 +60,8 @@ static bool CheckOpacity(const RefPtr<FrameNode>& node, const RefPtr<RenderConte
     return false;
 }
 
-static bool CheckBrightness(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
+bool SecurityComponentHandler::CheckBrightness(const RefPtr<FrameNode>& node,
+    const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetFrontBrightness().has_value() &&
         !NearEqual(renderContext->GetFrontBrightness().value().ConvertToVp(), 1.0f)) {
@@ -68,7 +71,7 @@ static bool CheckBrightness(const RefPtr<FrameNode>& node, const RefPtr<RenderCo
     return false;
 }
 
-static bool CheckVisibility(const RefPtr<FrameNode>& node, RefPtr<LayoutProperty>& layoutProperty)
+bool SecurityComponentHandler::CheckVisibility(const RefPtr<FrameNode>& node, RefPtr<LayoutProperty>& layoutProperty)
 {
     if (layoutProperty->GetVisibility().has_value() &&
         (layoutProperty->GetVisibility().value() != VisibleType::VISIBLE)) {
@@ -78,7 +81,7 @@ static bool CheckVisibility(const RefPtr<FrameNode>& node, RefPtr<LayoutProperty
     return false;
 }
 
-static bool CheckBlur(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
+bool SecurityComponentHandler::CheckBlur(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetFrontBlurRadius().has_value() &&
         GreatNotEqual(renderContext->GetFrontBlurRadius().value().ConvertToPx(), 0.0f)) {
@@ -88,7 +91,7 @@ static bool CheckBlur(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>
     return false;
 }
 
-static bool CheckGrayScale(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
+bool SecurityComponentHandler::CheckGrayScale(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetFrontGrayScale().has_value() &&
         GreatNotEqual(renderContext->GetFrontGrayScale().value().ConvertToVp(), 0.0f)) {
@@ -98,7 +101,7 @@ static bool CheckGrayScale(const RefPtr<FrameNode>& node, const RefPtr<RenderCon
     return false;
 }
 
-static bool CheckSaturate(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
+bool SecurityComponentHandler::CheckSaturate(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetFrontSaturate().has_value() &&
         !NearEqual(renderContext->GetFrontSaturate().value().ConvertToVp(), 1.0f)) {
@@ -108,7 +111,7 @@ static bool CheckSaturate(const RefPtr<FrameNode>& node, const RefPtr<RenderCont
     return false;
 }
 
-static bool CheckContrast(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
+bool SecurityComponentHandler::CheckContrast(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetFrontContrast().has_value() &&
         !NearEqual(renderContext->GetFrontContrast().value().ConvertToVp(), 1.0f)) {
@@ -118,7 +121,7 @@ static bool CheckContrast(const RefPtr<FrameNode>& node, const RefPtr<RenderCont
     return false;
 }
 
-static bool CheckInvert(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
+bool SecurityComponentHandler::CheckInvert(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetFrontInvert().has_value() &&
         !NearEqual(renderContext->GetFrontInvert().value().ConvertToVp(), 0.0f)) {
@@ -128,7 +131,7 @@ static bool CheckInvert(const RefPtr<FrameNode>& node, const RefPtr<RenderContex
     return false;
 }
 
-static bool CheckSepia(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
+bool SecurityComponentHandler::CheckSepia(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetFrontSepia().has_value() &&
         !NearEqual(renderContext->GetFrontSepia().value().ConvertToVp(), 0.0f)) {
@@ -138,7 +141,7 @@ static bool CheckSepia(const RefPtr<FrameNode>& node, const RefPtr<RenderContext
     return false;
 }
 
-static bool CheckHueRotate(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
+bool SecurityComponentHandler::CheckHueRotate(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetFrontHueRotate().has_value() &&
         !NearEqual(renderContext->GetFrontHueRotate().value(), 0.0f) &&
@@ -149,7 +152,8 @@ static bool CheckHueRotate(const RefPtr<FrameNode>& node, const RefPtr<RenderCon
     return false;
 }
 
-static bool CheckColorBlend(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
+bool SecurityComponentHandler::CheckColorBlend(const RefPtr<FrameNode>& node,
+    const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetFrontColorBlend().has_value() &&
         (renderContext->GetFrontColorBlend().value() != Color::TRANSPARENT)) {
@@ -159,7 +163,7 @@ static bool CheckColorBlend(const RefPtr<FrameNode>& node, const RefPtr<RenderCo
     return false;
 }
 
-static bool CheckClipEdge(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
+bool SecurityComponentHandler::CheckClipEdge(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetClipEdge().has_value()) {
         LOGW("Parent %{public}s set clip edge, security component is invalid", node->GetTag().c_str());
@@ -168,7 +172,7 @@ static bool CheckClipEdge(const RefPtr<FrameNode>& node, const RefPtr<RenderCont
     return false;
 }
 
-static bool CheckClipMask(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
+bool SecurityComponentHandler::CheckClipMask(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetClipMask().has_value()) {
         LOGW("Parent %{public}s set clip mask, security component is invalid", node->GetTag().c_str());
@@ -177,7 +181,8 @@ static bool CheckClipMask(const RefPtr<FrameNode>& node, const RefPtr<RenderCont
     return false;
 }
 
-static bool CheckForegroundColor(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
+bool SecurityComponentHandler::CheckForegroundColor(const RefPtr<FrameNode>& node,
+    const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetForegroundColor().has_value() &&
         (renderContext->GetForegroundColor().value() != Color::TRANSPARENT)) {
@@ -187,7 +192,8 @@ static bool CheckForegroundColor(const RefPtr<FrameNode>& node, const RefPtr<Ren
     return false;
 }
 
-static bool CheckSphericalEffect(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
+bool SecurityComponentHandler::CheckSphericalEffect(const RefPtr<FrameNode>& node,
+    const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetSphericalEffect().has_value() &&
         !NearEqual(renderContext->GetSphericalEffect().value(), 0.0f)) {
@@ -197,7 +203,8 @@ static bool CheckSphericalEffect(const RefPtr<FrameNode>& node, const RefPtr<Ren
     return false;
 }
 
-static bool CheckLightUpEffect(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
+bool SecurityComponentHandler::CheckLightUpEffect(const RefPtr<FrameNode>& node,
+    const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetLightUpEffect().has_value()) {
         LOGW("Parent %{public}s set light up effect, security component is invalid", node->GetTag().c_str());
@@ -206,7 +213,8 @@ static bool CheckLightUpEffect(const RefPtr<FrameNode>& node, const RefPtr<Rende
     return false;
 }
 
-static bool CheckPixelStretchEffect(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
+bool SecurityComponentHandler::CheckPixelStretchEffect(const RefPtr<FrameNode>& node,
+    const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetPixelStretchEffect().has_value()) {
         LOGW("Parent %{public}s set PixelStretchEffect, security component is invalid", node->GetTag().c_str());
@@ -215,7 +223,7 @@ static bool CheckPixelStretchEffect(const RefPtr<FrameNode>& node, const RefPtr<
     return false;
 }
 
-static bool CheckRenderEffect(RefPtr<FrameNode>& node)
+bool SecurityComponentHandler::CheckRenderEffect(RefPtr<FrameNode>& node)
 {
     const auto& renderContext = node->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
@@ -236,7 +244,7 @@ static bool CheckRenderEffect(RefPtr<FrameNode>& node)
     return false;
 }
 
-static bool CheckParentNodesEffect(RefPtr<FrameNode>& node)
+bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node)
 {
     auto parent = node->GetParent();
     while (parent != nullptr) {
@@ -252,7 +260,8 @@ static bool CheckParentNodesEffect(RefPtr<FrameNode>& node)
     return false;
 }
 
-static bool InitBaseInfo(SecCompBase& buttonInfo, RefPtr<FrameNode>& node)
+bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
+    RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, false);
     auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
@@ -277,7 +286,8 @@ static bool InitBaseInfo(SecCompBase& buttonInfo, RefPtr<FrameNode>& node)
     return true;
 }
 
-static bool InitChildInfo(SecCompBase& buttonInfo, RefPtr<FrameNode>& node)
+bool SecurityComponentHandler::InitChildInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
+    RefPtr<FrameNode>& node)
 {
     RefPtr<FrameNode> iconNode = GetSecCompChildNode(node, V2::IMAGE_ETS_TAG);
     if (iconNode != nullptr) {
@@ -316,7 +326,7 @@ static bool InitChildInfo(SecCompBase& buttonInfo, RefPtr<FrameNode>& node)
     return true;
 }
 
-static bool InitButtonInfo(std::string& componentInfo, RefPtr<FrameNode>& node)
+bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, false);
     auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
@@ -372,8 +382,6 @@ int32_t SecurityComponentHandler::RegisterSecurityComponent(RefPtr<FrameNode>& n
     }
     int32_t ret = SecCompKit::RegisterSecurityComponent(
         SecCompType::LOCATION_COMPONENT, componentInfo, scId);
-    if (ret != SCErrCode::SC_OK) {
-    }
     return ret;
 }
 
@@ -384,8 +392,6 @@ int32_t SecurityComponentHandler::UpdateSecurityComponent(RefPtr<FrameNode>& nod
         return -1;
     }
     int32_t ret = SecCompKit::UpdateSecurityComponent(scId, componentInfo);
-    if (ret != SCErrCode::SC_OK) {
-    }
     return ret;
 }
 
@@ -395,8 +401,6 @@ int32_t SecurityComponentHandler::UnregisterSecurityComponent(int32_t scId)
         return -1;
     }
     int32_t ret = SecCompKit::UnregisterSecurityComponent(scId);
-    if (ret != SCErrCode::SC_OK) {
-    }
     return ret;
 }
 

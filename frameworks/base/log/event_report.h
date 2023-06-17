@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_EVENT_REPORT_H
 
 #include <string>
+#include <vector>
 
 #include "base/utils/macros.h"
 
@@ -170,6 +171,8 @@ public:
         const std::string& processName, const std::string& msg = " ");
     static void ANRShowDialog(int32_t uid, const std::string& packageName,
         const std::string& processName, const std::string& msg = "");
+    static void JankFrameReport(int64_t startTime, int64_t duration, const std::vector<uint16_t>& jank,
+        const std::string& pageUrl, uint32_t jankStatusVersion = 1);
 
 private:
     static void SendEventInner(const EventInfo& eventInfo);

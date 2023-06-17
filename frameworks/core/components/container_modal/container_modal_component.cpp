@@ -38,10 +38,10 @@ constexpr int32_t FLOATING_TITLE_ROW = ROOT_DECOR_BASE + 1;
 constexpr int32_t TITLE_LABEL = ROOT_DECOR_BASE + 2;
 constexpr int32_t FLOATING_TITLE_LABEL = ROOT_DECOR_BASE + 3;
 constexpr int32_t WINDOW_SPLIT_BUTTON = ROOT_DECOR_BASE + 4;
-constexpr int32_t WINDOW_MAX_RECOVER_BUTTON = ROOT_DECOR_BASE + 5;
-constexpr int32_t WINDOW_MINIMIZE_BUTTON = ROOT_DECOR_BASE + 6;
-constexpr int32_t WINDOW_CLOSE_BUTTON = ROOT_DECOR_BASE + 7;
-constexpr int32_t WINDOW_BUTTON_INVALID = ROOT_DECOR_BASE + 8;
+constexpr int32_t WINDOW_MAX_RECOVER_BUTTON = ROOT_DECOR_BASE + 6;
+constexpr int32_t WINDOW_MINIMIZE_BUTTON = ROOT_DECOR_BASE + 8;
+constexpr int32_t WINDOW_CLOSE_BUTTON = ROOT_DECOR_BASE + 10;
+constexpr int32_t WINDOW_BUTTON_INVALID = ROOT_DECOR_BASE + 12;
 }
 
 RefPtr<Component> ContainerModalComponent::Create(
@@ -176,7 +176,7 @@ RefPtr<Component> ContainerModalComponent::BuildControlButton(
         auto buttonId = WINDOW_BUTTON_INVALID;
         auto iter = controlButtonIdMap.find(icon);
         if (iter != controlButtonIdMap.end()) {
-            buttonId = iter->second;
+            buttonId = isFloating ? iter->second + 1 : iter->second;
         }
         CreateAccessibilityNode(DOM_NODE_TAG_BUTTON, buttonId, isFloating ? FLOATING_TITLE_ROW : TITLE_ROW);
         return AceType::MakeRefPtr<ComposedComponent>(std::to_string(buttonId), DOM_NODE_TAG_BUTTON, button);

@@ -141,6 +141,7 @@ private:
     void ItemSelectedOutAnimation(RefPtr<FrameNode>& itemNode);
     void FireOnSelect(int32_t selectIndex, bool fromPress);
     void SetAccessibilityAction();
+    void RemoveBubble();
     
     RefPtr<FrameNode> popupNode_;
     RefPtr<TouchEventImpl> touchListener_;
@@ -150,6 +151,7 @@ private:
     bool isKeyEventRegisted_ = false;
     bool isTouch_ = false;
     bool isHover_ = false;
+    bool isPopup_ = false;
 
     std::vector<std::string> arrayValue_;
     int32_t itemCount_ = 0;

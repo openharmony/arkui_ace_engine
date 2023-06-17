@@ -55,6 +55,7 @@ template("ace_base_source_set") {
       "log/ace_trace.cpp",
       "log/ace_tracker.cpp",
       "log/dump_log.cpp",
+      "log/jank_frame_report.cpp",
       "memory/memory_monitor.cpp",
       "ressched/ressched_report.cpp",
       "subwindow/subwindow_manager.cpp",
@@ -80,6 +81,12 @@ template("ace_base_source_set") {
     } else {
       defines -= [ "UNICODE" ]
       libs = [ "//prebuilts/mingw-w64/ohos/linux-x86_64/clang-mingw/x86_64-w64-mingw32/lib/libshlwapi.a" ]
+    }
+
+    if (is_cross_platform_build) {
+      deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
+    } else {
+      deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
     }
 
     # curl download manager

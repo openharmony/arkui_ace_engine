@@ -30,6 +30,7 @@ public:
 
     virtual std::string GetProperty(const std::string& key) = 0;
     virtual RefPtr<PixelMap> CreatePixelMap(int32_t width, int32_t height) = 0;
+    virtual RefPtr<PixelMap> CreatePixelMap(uint32_t index, int32_t width, int32_t height) = 0;
 };
 } // namespace OHOS::Ace
 

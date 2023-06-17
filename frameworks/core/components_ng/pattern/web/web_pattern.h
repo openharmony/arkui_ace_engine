@@ -23,6 +23,8 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "base/web/webview/ohos_nweb/include/nweb_handler.h"
+#include "core/components/dialog/dialog_properties.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components/web/web_property.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
@@ -70,7 +72,7 @@ public:
     using SetWebIdCallback = std::function<void(int32_t)>;
     using SetHapPathCallback = std::function<void(const std::string&)>;
     using JsProxyCallback = std::function<void()>;
-
+    using OnControllerAttachedCallback = std::function<void()>;
     WebPattern();
     WebPattern(std::string webSrc, const RefPtr<WebController>& webController);
     WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallback);
@@ -83,9 +85,9 @@ public:
         VK_HIDE
     };
 
-    std::optional<std::string> GetSurfaceNodeName() const override
+    std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
-        return "RosenWeb";
+        return RenderContext::ContextParam { RenderContext::ContextType::SURFACE, "RosenWeb" };
     }
 
     bool IsAtomicNode() const override
@@ -176,6 +178,16 @@ public:
     SetWebIdCallback GetSetWebIdCallback() const
     {
         return setWebIdCallback_;
+    }
+
+    void SetOnControllerAttachedCallback(OnControllerAttachedCallback&& callback)
+    {
+        onControllerAttachedCallback_ = std::move(callback);
+    }
+
+    OnControllerAttachedCallback GetOnControllerAttachedCallback()
+    {
+        return onControllerAttachedCallback_;
     }
 
     void SetSetHapPathCallback(SetHapPathCallback&& callback)
@@ -282,6 +294,11 @@ public:
     bool OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info);
     void OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
+    void OnDateTimeChooserPopup(
+        const NWeb::DateTimeChooser& chooser,
+        const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+        std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
+    void OnDateTimeChooserClose();
     void UpdateTouchHandleForOverlay();
     bool IsSelectOverlayDragging()
     {
@@ -316,6 +333,7 @@ private:
     void OnActive() override;
     void OnVisibleChange(bool isVisible) override;
     void OnAreaChangedInner() override;
+    void OnNotifyMemoryLevel(int32_t level) override;
 
     void OnWebSrcUpdate();
     void OnWebDataUpdate();
@@ -419,6 +437,16 @@ private:
     void InitEnhanceSurfaceFlag();
     void UpdateBackgroundColorRightNow(int32_t color);
     void UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty);
+    DialogProperties GetDialogProperties(const RefPtr<DialogTheme>& theme);
+    bool ShowDateTimeDialog(const NWeb::DateTimeChooser& chooser,
+        const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+        std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
+    bool ShowTimeDialog(const NWeb::DateTimeChooser& chooser,
+        const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+        std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
+    bool ShowDateTimeSuggestionDialog(const NWeb::DateTimeChooser& chooser,
+        const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+        std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -427,6 +455,7 @@ private:
     SetWebIdCallback setWebIdCallback_ = nullptr;
     SetHapPathCallback setHapPathCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;
+    OnControllerAttachedCallback onControllerAttachedCallback_ = nullptr;
     RefPtr<WebDelegate> delegate_;
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
     RefPtr<TouchEventImpl> touchEvent_;
@@ -465,6 +494,7 @@ private:
     bool isWaiting_ = false;
     bool isDisableDrag_ = false;
     bool isMouseEvent_ = false;
+    bool isVisible_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG

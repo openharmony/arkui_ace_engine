@@ -34,9 +34,7 @@
 #include "core/gestures/gesture_info.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-#include "text.h"
-#include "unified_data.h"
-
+#include "core/common/udmf/udmf_client.h"
 #include "core/common/ace_engine_ext.h"
 #endif
 
@@ -71,10 +69,12 @@ void TextPattern::CloseSelectOverlay()
 void TextPattern::ResetSelection()
 {
     showSelectOverlay_ = false;
-    textSelector_.Update(-1, -1);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (textSelector_.IsValid()) {
+        textSelector_.Update(-1, -1);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 int32_t TextPattern::GetGraphemeClusterLength(int32_t extend) const
@@ -590,11 +590,8 @@ DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, const
     DragDropInfo itemInfo;
     auto selectedStr = GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     itemInfo.extraInfo = selectedStr;
-    UDMF::UDVariant udmfValue(selectedStr);
-    UDMF::UDDetails udmfDetails = { { "value", udmfValue } };
-    auto record = std::make_shared<UDMF::Text>(udmfDetails);
-    auto unifiedData = std::make_shared<UDMF::UnifiedData>();
-    unifiedData->AddRecord(record);
+    RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
+    UdmfClient::GetInstance()->AddTextRecord(unifiedData, selectedStr);
     event->SetData(unifiedData);
 
     AceEngineExt::GetInstance().DragStartExt();
@@ -699,19 +696,27 @@ void TextPattern::OnModifyDone()
     CHECK_NULL_VOID(textLayoutProperty);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
 
     if (CheckNeedMeasure(textLayoutProperty->GetPropertyChangeFlag())) {
         // measure flag changed, reset paragraph.
+        LOGI("OnModifyDone paragraph_.Reset()");
         paragraph_.Reset();
     }
-
 
     std::string textCache = textForDisplay_;
     textForDisplay_ = textLayoutProperty->GetContent().value_or("");
     if (textCache != textForDisplay_) {
         host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
     }
-    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
+
+    auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
+    bool ifHaveObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
+        [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
+    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE || ifHaveObscured) {
+        CloseSelectOverlay();
+        ResetSelection();
         copyOption_ = CopyOptions::None;
         return;
     }
@@ -767,6 +772,7 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         LOGD("on layout process, just return");
         return false;
     }
+    LOGI("paragraph_ = textLayoutAlgorithm->GetParagraph()");
     paragraph_ = textLayoutAlgorithm->GetParagraph();
     baselineOffset_ = textLayoutAlgorithm->GetBaselineOffset();
     contentRect_ = dirty->GetGeometryNode()->GetContentRect();
@@ -799,6 +805,7 @@ void TextPattern::BeforeCreateLayoutWrapper()
     }
 
     if (paragraph_) {
+        LOGI("BeforeCreateLayoutWrapper paragraph_.Reset()");
         paragraph_.Reset();
     }
     spanItemChildren_.clear();

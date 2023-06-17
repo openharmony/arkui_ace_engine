@@ -19,6 +19,7 @@
 
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -29,12 +30,8 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-#include "image.h"
-#include "system_defined_pixelmap.h"
-#include "unified_data.h"
-#include "unified_record.h"
-
 #include "core/common/ace_engine_ext.h"
+#include "core/common/udmf/udmf_client.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -70,7 +67,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
-        LOGI("Image Load Success %{private}s", sourceInfo.ToString().c_str());
+        LOGI("Image Load Success %{public}s", sourceInfo.ToString().c_str());
         pattern->OnImageLoadSuccess();
     };
 }
@@ -92,20 +89,26 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
     };
 }
 
-void ImagePattern::PrepareAnimation()
+void ImagePattern::PrepareAnimation(const RefPtr<CanvasImage>& image)
 {
-    if (image_->IsStatic()) {
+    if (image->IsStatic()) {
         return;
     }
-    SetRedrawCallback();
+    SetRedrawCallback(image);
     RegisterVisibleAreaChange();
+    auto layoutProps = GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    // pause animation if prop is initially set to invisible
+    if (layoutProps->GetVisibility().value_or(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+        image->ControlAnimation(false);
+    }
 }
 
-void ImagePattern::SetRedrawCallback()
+void ImagePattern::SetRedrawCallback(const RefPtr<CanvasImage>& image)
 {
-    CHECK_NULL_VOID_NOLOG(image_);
+    CHECK_NULL_VOID_NOLOG(image);
     // set animation flush function for svg / gif
-    image_->SetRedrawCallback([weak = WeakClaim(RawPtr(GetHost()))] {
+    image->SetRedrawCallback([weak = WeakClaim(RawPtr(GetHost()))] {
         auto imageNode = weak.Upgrade();
         CHECK_NULL_VOID(imageNode);
         imageNode->MarkNeedRenderOnly();
@@ -147,7 +150,7 @@ void ImagePattern::OnImageLoadSuccess()
     dstRect_ = loadingCtx_->GetDstRect();
 
     SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo().IsSvg());
-    PrepareAnimation();
+    PrepareAnimation(image_);
     if (host->IsDraggable()) {
         EnableDrag();
     }
@@ -156,8 +159,7 @@ void ImagePattern::OnImageLoadSuccess()
     altImage_ = nullptr;
     altDstRect_.reset();
     altSrcRect_.reset();
-    // TODO: only do paint task when the pattern is active
-    // figure out why here is always inactive
+
     host->MarkNeedRenderOnly();
 }
 
@@ -354,22 +356,25 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         CHECK_NULL_VOID(pattern->altLoadingCtx_);
-        auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
-        auto currentAltSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
-        if (currentAltSourceInfo != sourceInfo) {
+        auto layoutProps = pattern->GetLayoutProperty<ImageLayoutProperty>();
+        auto currentAltSrc = layoutProps->GetAlt().value_or(ImageSourceInfo(""));
+        if (currentAltSrc != sourceInfo) {
             LOGW("alt image sourceInfo does not match, ignore current callback. current: %{public}s vs callback's: "
                  "%{public}s",
-                currentAltSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
+                currentAltSrc.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         pattern->altImage_ = pattern->altLoadingCtx_->MoveCanvasImage();
         pattern->altSrcRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetSrcRect());
         pattern->altDstRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetDstRect());
         pattern->SetImagePaintConfig(pattern->altImage_, *pattern->altSrcRect_, *pattern->altDstRect_,
             pattern->altLoadingCtx_->GetSourceInfo().IsSvg());
+
+        pattern->PrepareAnimation(pattern->altImage_);
+
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     };
 }
 
@@ -436,9 +441,12 @@ void ImagePattern::OnVisibleChange(bool visible)
     if (!visible) {
         CloseSelectOverlay();
     }
-    CHECK_NULL_VOID_NOLOG(image_);
     // control svg / gif animation
-    image_->ControlAnimation(visible);
+    if (image_) {
+        image_->ControlAnimation(visible);
+    } else if (altImage_) {
+        altImage_->ControlAnimation(visible);
+    }
 }
 
 void ImagePattern::OnAttachToFrameNode()
@@ -638,7 +646,7 @@ void ImagePattern::DumpInfo()
 void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
 {
 #ifdef ENABLE_DRAG_FRAMEWORK
-    std::shared_ptr<UDMF::UnifiedRecord> record = nullptr;
+    RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
     CHECK_NULL_VOID(loadingCtx_ && image_);
     if (loadingCtx_->GetSourceInfo().IsPixmap()) {
         auto pixelMap = image_->GetPixelMap();
@@ -647,12 +655,10 @@ void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
         CHECK_NULL_VOID(pixels);
         int32_t length = pixelMap->GetByteCount();
         std::vector<uint8_t> data(pixels, pixels + length);
-        record = std::make_shared<UDMF::SystemDefinedPixelMap>(data);
+        UdmfClient::GetInstance()->AddPixelMapRecord(unifiedData, data);
     } else {
-        record = std::make_shared<UDMF::Image>(loadingCtx_->GetSourceInfo().GetSrc());
+        UdmfClient::GetInstance()->AddImageRecord(unifiedData, loadingCtx_->GetSourceInfo().GetSrc());
     }
-    auto unifiedData = std::make_shared<UDMF::UnifiedData>();
-    unifiedData->AddRecord(record);
     event->SetData(unifiedData);
 #endif
 }

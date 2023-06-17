@@ -172,6 +172,7 @@ public:
     virtual void SetInvert(const Dimension& value) = 0;
     virtual void SetHueRotate(float value) = 0;
     virtual void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) = 0;
+    virtual void SetUseEffect(bool useEffect) = 0;
 
     // event
     virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) = 0;
@@ -200,6 +201,18 @@ public:
     virtual void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
             onAreaChanged) = 0;
+
+    // Disable event when the param is undefined.
+    virtual void DisableOnClick() = 0;
+    virtual void DisableOnTouch() = 0;
+    virtual void DisableOnKeyEvent() = 0;
+    virtual void DisableOnHover() = 0;
+    virtual void DisableOnMouse() = 0;
+    virtual void DisableOnAppear() = 0;
+    virtual void DisableOnDisAppear() = 0;
+    virtual void DisableOnAreaChange() = 0;
+    virtual void DisableOnFocus() = 0;
+    virtual void DisableOnBlur() = 0;
 
     // interact
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) = 0;

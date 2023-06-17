@@ -35,7 +35,7 @@ constexpr uint8_t ENABLED_ALPHA = 255;
 constexpr uint8_t DISABLED_ALPHA = 102;
 } // namespace
 
-SwitchModifier::SwitchModifier(bool isSelect, const Color& boardColor, float mainDelta)
+SwitchModifier::SwitchModifier(bool isSelect, const Color& boardColor, float dragOffsetX)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -44,7 +44,8 @@ SwitchModifier::SwitchModifier(bool isSelect, const Color& boardColor, float mai
     animatableBoardColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(boardColor));
     animateTouchHoverColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
     animatePointColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(switchTheme->GetPointColor()));
-    mainDelta_ = AceType::MakeRefPtr<PropertyFloat>(mainDelta);
+    pointOffset_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f);
+    dragOffsetX_ = AceType::MakeRefPtr<PropertyFloat>(dragOffsetX);
     isSelect_ = AceType::MakeRefPtr<PropertyBool>(isSelect);
     isHover_ = AceType::MakeRefPtr<PropertyBool>(false);
     offset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
@@ -54,7 +55,8 @@ SwitchModifier::SwitchModifier(bool isSelect, const Color& boardColor, float mai
     AttachProperty(animatableBoardColor_);
     AttachProperty(animateTouchHoverColor_);
     AttachProperty(animatePointColor_);
-    AttachProperty(mainDelta_);
+    AttachProperty(pointOffset_);
+    AttachProperty(dragOffsetX_);
     AttachProperty(isSelect_);
     AttachProperty(isHover_);
     AttachProperty(offset_);
@@ -78,6 +80,7 @@ void SwitchModifier::InitializeParam()
     hoverToTouchDuration_ = switchTheme->GetHoverToTouchDuration();
     touchDuration_ = switchTheme->GetTouchDuration();
     colorAnimationDuration_ = switchTheme->GetColorAnimationDuration();
+    pointAnimationDuration_ = switchTheme->GetPointAnimationDuration();
 }
 
 void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize)
@@ -137,7 +140,7 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
     canvas.AttachBrush(brush);
 
     RSPoint point;
-    point.SetX(xOffset + actualGap + pointRadius_ + mainDelta_->Get());
+    point.SetX(xOffset + actualGap + pointRadius_ + pointOffset_->Get());
     point.SetY(yOffset + radius);
     canvas.DrawCircle(point, pointRadius_);
 }

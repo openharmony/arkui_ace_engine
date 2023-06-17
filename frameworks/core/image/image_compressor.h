@@ -25,9 +25,11 @@
 #define USE_OPENCL_WRAPPER
 #include "opencl_wrapper.h"
 #endif // ENABLE_OPENCL
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkData.h"
 #include "include/core/SkGraphics.h"
 #include "include/core/SkPixmap.h"
+#endif
 
 namespace OHOS::Ace {
 #define MAGIC_FILE_CONSTANT 0x5CA1AB13
@@ -48,10 +50,19 @@ public:
     static const int32_t releaseTimeMs = 1000;
 
     bool CanCompress();
+#ifndef USE_ROSEN_DRAWING
     sk_sp<SkData> GpuCompress(std::string key, SkPixmap& pixmap, int32_t width, int32_t height);
+#else
+    // TODO Drawing : SkPixmap
+#endif
     std::function<void()> ScheduleReleaseTask();
+#ifndef USE_ROSEN_DRAWING
     void WriteToFile(std::string key, sk_sp<SkData> compressdImage, Size size);
     static sk_sp<SkData> StripFileHeader(sk_sp<SkData> fileData);
+#else
+    void WriteToFile(std::string key, std::shared_ptr<RSData> compressdImage, Size size);
+    static std::shared_ptr<RSData> StripFileHeader(std::shared_ptr<RSData> fileData);
+#endif
 #ifdef FUZZTEST
     void PartDoing();
 #endif

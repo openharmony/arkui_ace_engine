@@ -496,14 +496,22 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
     delegate_->SetGroupJsBridge(jsEngine_->GetGroupJsBridge());
     if (Container::IsCurrentUseNewPipeline()) {
         auto loadPageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& url,
-            const std::function<void(const std::string&, int32_t)>& errorCallback) {
+                                    const std::function<void(const std::string&, int32_t)>& errorCallback) {
             auto jsEngine = weakEngine.Upgrade();
             if (!jsEngine) {
                 return false;
             }
             return jsEngine->LoadPageSource(url, errorCallback);
         };
-        delegate_->InitializeRouterManager(std::move(loadPageCallback));
+        auto loadNamedRouterCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                           const std::string& namedRouter, bool isTriggeredByJs) {
+            auto jsEngine = weakEngine.Upgrade();
+            if (!jsEngine) {
+                return false;
+            }
+            return jsEngine->LoadNamedRouterSource(namedRouter, isTriggeredByJs);
+        };
+        delegate_->InitializeRouterManager(std::move(loadPageCallback), std::move(loadNamedRouterCallback));
     }
 }
 

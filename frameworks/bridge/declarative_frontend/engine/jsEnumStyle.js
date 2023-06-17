@@ -1574,14 +1574,6 @@ var BackgroundButtonType;
   BackgroundButtonType[BackgroundButtonType["NORMAL_BACKGROUND"] = 2] = "NORMAL_BACKGROUND";
 })(BackgroundButtonType || (BackgroundButtonType = {}));
 
-var SecLocationButtonOnClickResult;
-(function (SecLocationButtonOnClickResult) {
-  SecLocationButtonOnClickResult[SecLocationButtonOnClickResult["LOCATION_BUTTON_CLICK_SUCCESS"] = 0] =
-    "LOCATION_BUTTON_CLICK_SUCCESS";
-  SecLocationButtonOnClickResult[SecLocationButtonOnClickResult["LOCATION_BUTTON_CLICK_GRANT_FAILED"] = 1] =
-    "LOCATION_BUTTON_CLICK_GRANT_FAILED ";
-})(SecLocationButtonOnClickResult || (SecLocationButtonOnClickResult = {}));
-
 var LocationIconStyle;
 (function (LocationIconStyle) {
   LocationIconStyle[LocationIconStyle["FULL_FILLED"] = 0] = "FULL_FILLED";
@@ -1603,6 +1595,14 @@ var LocationDescription;
   LocationDescription[LocationDescription["CURRENT_POSITION"] = 10] = "CURRENT_POSITION";
 })(LocationDescription || (LocationDescription = {}));
 
+var SecLocationButtonOnClickResult;
+(function (SecLocationButtonOnClickResult) {
+  SecLocationButtonOnClickResult[SecLocationButtonOnClickResult["LOCATION_BUTTON_CLICK_SUCCESS"] = 0] =
+    "LOCATION_BUTTON_CLICK_SUCCESS";
+  SecLocationButtonOnClickResult[SecLocationButtonOnClickResult["LOCATION_BUTTON_CLICK_GRANT_FAILED"] = 1] =
+    "LOCATION_BUTTON_CLICK_GRANT_FAILED ";
+})(SecLocationButtonOnClickResult || (SecLocationButtonOnClickResult = {}));
+
 var PasteIconStyle;
 (function (PasteIconStyle) {
   PasteIconStyle[PasteIconStyle["LINES"] = 0] = "LINES";
@@ -1612,6 +1612,14 @@ var PasteDescription;
 (function (PasteDescription) {
   PasteDescription[PasteDescription["PASTE"] = 0] = "PASTE";
 })(PasteDescription || (PasteDescription = {}));
+
+var SecPasteButtonOnClickResult;
+(function (SecPasteButtonOnClickResult) {
+  SecPasteButtonOnClickResult[SecPasteButtonOnClickResult["SUCCESS"] = 0] =
+    "SUCCESS";
+  SecPasteButtonOnClickResult[SecPasteButtonOnClickResult["TEMPORARY_AUTHORIZATION_FAILED"] = 1] =
+    "TEMPORARY_AUTHORIZATION_FAILED ";
+})(SecPasteButtonOnClickResult || (SecPasteButtonOnClickResult = {}));
 
 var SaveIconStyle;
 (function (SaveIconStyle) {
@@ -1630,6 +1638,14 @@ var SaveDescription;
   SaveDescription[SaveDescription["RECEIVE"] = 6] = "RECEIVE";
   SaveDescription[SaveDescription["CONTINUE_TO_RECEIVE"] = 7] = "CONTINUE_TO_RECEIVE";
 })(SaveDescription || (SaveDescription = {}));
+
+var SecSaveButtonOnClickResult;
+(function (SecSaveButtonOnClickResult) {
+  SecSaveButtonOnClickResult[SecSaveButtonOnClickResult["SUCCESS"] = 0] =
+    "SUCCESS";
+  SecSaveButtonOnClickResult[SecSaveButtonOnClickResult["TEMPORARY_AUTHORIZATION_FAILED"] = 1] =
+    "TEMPORARY_AUTHORIZATION_FAILED ";
+})(SecSaveButtonOnClickResult || (SecSaveButtonOnClickResult = {}));
 
 var ObscuredReasons;
 (function (ObscuredReasons) {
@@ -1656,3 +1672,26 @@ var DragRet;
   DragRet[DragRet["DROP_ENABLED"] = 3] = "DROP_ENABLED";
   DragRet[DragRet["DROP_DISABLED"] = 4] = "DROP_DISABLED";
 })(DragRet || (DragRet = {}));
+
+var XComponentType;
+(function (XComponentType) {
+  XComponentType[XComponentType["SURFACE"] = 0] = "SURFACE";
+  XComponentType[XComponentType["COMPONENT"] = 1] = "COMPONENT";
+  XComponentType[XComponentType["TEXTURE"] = 2] = "TEXTURE";
+})(XComponentType || (XComponentType = {}));
+
+var NestedScrollMode;
+(function (NestedScrollMode) {
+  NestedScrollMode[NestedScrollMode["SELF_ONLY"] = 0] = "SELF_ONLY";
+  NestedScrollMode[NestedScrollMode["SELF_FIRST"] = 1] = "SELF_FIRST";
+  NestedScrollMode[NestedScrollMode["PARENT_FIRST"] = 2] = "PARENT_FIRST";
+  NestedScrollMode[NestedScrollMode["PARALLEL"] = 3] = "PARALLEL";
+})(NestedScrollMode || (NestedScrollMode = {}));
+
+var ScrollAlign;
+(function (ScrollAlign) {
+  ScrollAlign[ScrollAlign["START"] = 0] = "START";
+  ScrollAlign[ScrollAlign["CENTER"] = 1] = "CENTER";
+  ScrollAlign[ScrollAlign["END"] = 2] = "END";
+  ScrollAlign[ScrollAlign["AUTO"] = 3] = "AUTO";
+})(ScrollAlign || (ScrollAlign = {}));

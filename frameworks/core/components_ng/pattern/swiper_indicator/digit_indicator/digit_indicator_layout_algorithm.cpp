@@ -54,6 +54,16 @@ void DigitIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             indicatorHeight = textFrameSize.Height();
         }
     }
+
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID_NOLOG(swiperIndicatorTheme);
+
+    if (LessNotEqual(indicatorHeight, swiperIndicatorTheme->GetIndicatorDigitHeight().ConvertToPx())) {
+        indicatorHeight = swiperIndicatorTheme->GetIndicatorDigitHeight().ConvertToPx();
+    }
+
     SizeF frameSize = { indicatorWidth, indicatorHeight };
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);

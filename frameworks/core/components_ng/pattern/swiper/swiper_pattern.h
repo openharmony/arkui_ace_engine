@@ -79,6 +79,7 @@ public:
         layoutAlgorithm->SetMaxChildSize(maxChildSize_);
         layoutAlgorithm->SetDisplayCount(GetDisplayCount());
         layoutAlgorithm->SetHoverRatio(hoverRatio_);
+        layoutAlgorithm->SetIsDragged(isDragging_);
         return layoutAlgorithm;
     }
 
@@ -103,7 +104,7 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         Pattern::ToJsonValue(json);
-        json->Put("currentIndex", GetCurrentIndex());
+        json->Put("currentIndex", currentIndex_);
         json->Put("currentOffset", currentOffset_);
 
         if (indicatorIsBoolean_) {
@@ -194,8 +195,10 @@ public:
         swiperController_ = swiperController;
     }
 
-    int32_t GetCurrentIndex() const
+    int32_t GetCurrentIndex()
     {
+        currentIndex_ = currentIndex_ < 0 || currentIndex_ > (TotalCount() - 1) ? 0 : currentIndex_;
+        currentIndex_ = IsLoop() ? currentIndex_ : std::clamp(currentIndex_, 0, TotalCount() - GetDisplayCount());
         return currentIndex_;
     }
 
@@ -372,6 +375,11 @@ public:
         indicatorIsBoolean_ = isBoolean;
     }
 
+    bool GetIsAtHotRegion() const
+    {
+        return isAtHotRegion_;
+    }
+
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
@@ -393,7 +401,7 @@ private:
 
     // Init touch event, stop animation when touch down.
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
-
+    void InitHoverMouseEvent();
     // Init on key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
@@ -415,6 +423,7 @@ private:
     void HandleTouchDown();
     void HandleTouchUp();
 
+    void HandleMouseEvent(const MouseInfo& info);
     void PlayTranslateAnimation(
         float startPos, float endPos, int32_t nextIndex, bool restartAutoPlay = false, float velocity = 0.0f);
     void PlaySpringAnimation(double dragVelocity);
@@ -464,9 +473,12 @@ private:
     int32_t ComputeLoadCount(int32_t cacheCount);
     void SetAccessibilityAction();
     bool NeedStartAutoPlay() const;
+    void CheckAndSetArrowHoverState(const PointF& mousePoint);
+    RectF GetArrowFrameRect(const int32_t index) const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
+    RefPtr<InputEvent> hoverEvent_;
 
     // Control translate animation when drag end.
     RefPtr<Animator> controller_;
@@ -503,6 +515,8 @@ private:
     bool isWindowShow_ = true;
     bool IsCustomSize_ = false;
     bool indicatorIsBoolean_ = true;
+    bool isAtHotRegion_ = false;
+    bool isDragging_ = false;
 
     Axis direction_ = Axis::HORIZONTAL;
 

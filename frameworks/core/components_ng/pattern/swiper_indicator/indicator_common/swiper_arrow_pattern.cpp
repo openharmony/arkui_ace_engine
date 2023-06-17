@@ -207,7 +207,6 @@ void SwiperArrowPattern::ButtonOnHover(RefPtr<FrameNode> buttonNode, bool isHove
     if (swiperLayoutProperty->GetHoverShowValue(false)) {
         swiperPattern->ArrowHover(isHover_);
     }
-
     if (isHovered) {
         if (isTouch_) {
             backgroundColor = swiperIndicatorTheme->GetHoverArrowBackgroundColor().BlendColor(
@@ -239,18 +238,24 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
     auto swiperArrowLayoutProperty = GetSwiperArrowLayoutProperty();
     CHECK_NULL_VOID(swiperArrowLayoutProperty);
     auto isHoverShow = swiperArrowLayoutProperty->GetHoverShowValue(false);
+    auto hostFocusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(hostFocusHub);
     if ((host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG && index_ == 0) ||
         (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG && index_ == TotalCount())) {
         if (!swiperArrowLayoutProperty->GetLoopValue(true)) {
             renderContext->SetVisible(false);
-            auto hostFocusHub = host->GetFocusHub();
-            CHECK_NULL_VOID(hostFocusHub);
             hostFocusHub->SetParentFocusable(false);
             hostFocusHub->LostSelfFocus();
             return;
         }
     }
-    visible = isHoverShow ? visible : true;
+    if (isHoverShow) {
+        hostFocusHub->SetParentFocusable(false);
+        hostFocusHub->LostSelfFocus();
+    } else {
+        hostFocusHub->SetParentFocusable(true);
+        visible = true;
+    }
     renderContext->SetVisible(visible);
 }
 
@@ -308,5 +313,10 @@ void SwiperArrowPattern::UpdateArrowContent()
     }
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     imageNode->MarkModifyDone();
+}
+
+void SwiperArrowPattern::SetArrowHover(bool isHover)
+{
+    isHover_ = isHover;
 }
 } // namespace OHOS::Ace::NG

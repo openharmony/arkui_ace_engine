@@ -34,6 +34,7 @@ ohos_unittest("view_abstract_model_test_ng") {
     "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
+    "$ace_root/frameworks/core/gestures/gesture_info.cpp",
     "$ace_root/frameworks/core/pipeline/base/constants.cpp",
 
     # components_ng
@@ -67,6 +68,7 @@ ohos_unittest("view_abstract_model_test_ng") {
     # mock
     "$ace_root/frameworks/base/test/mock/mock_mouse_style.cpp",
     "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
+    "$ace_root/test/mock/core/common/mock_udmf.cpp",
 
     # self
     "$ace_root/adapter/ohos/osal/ace_engine_ext.cpp",
@@ -102,6 +104,7 @@ ohos_unittest("view_abstract_model_test_ng") {
     "$ace_root/frameworks/core/components/common/properties/border_edge.cpp",
     "$ace_root/frameworks/core/components/common/properties/border_image.cpp",
     "$ace_root/frameworks/core/components/common/properties/decoration.cpp",
+    "$ace_root/frameworks/core/components/common/properties/shadow.cpp",
     "$ace_root/frameworks/core/components/common/properties/shadow_config.cpp",
     "$ace_root/frameworks/core/components/font/constants_converter.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/subwindow_mock.cpp",
@@ -151,6 +154,6 @@ ohos_unittest("view_abstract_model_test_ng") {
     "$cjson_root:cjson",
     "//third_party/googletest:gmock_main",
   ]
-
+  defines = [ "ENABLE_DRAG_FRAMEWORK" ]
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }

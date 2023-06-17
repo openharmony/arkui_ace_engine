@@ -16,7 +16,6 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_RECT_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_RECT_H
 
-#include "core/components/shape/shape_component.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 
@@ -24,6 +23,7 @@ namespace OHOS::Ace::Framework {
 
 class JSRect : public JSShapeAbstract {
     DECLARE_ACE_TYPE(JSRect, JSShapeAbstract);
+
 public:
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
@@ -39,14 +39,10 @@ public:
     void ObjectRadius(const JSCallbackInfo& info);
 
 private:
-    template<class T>
-    static void SetRadiusValue(const RefPtr<T>& component, const CalcDimension& radiusX,
-        const CalcDimension& radiusY, int32_t index);
-    template<class T>
-    static void SetRadiusWithArrayValue(const RefPtr<T>& component,
-        const JSRef<JSVal>& jsVal);
-    template<class T>
-    static void SetRadiusWithJsVal(const RefPtr<T>& component, const JSRef<JSVal>& jsVal);
+    static void SetRadiusValue(
+        const RefPtr<ShapeRect>& shapeRect, const CalcDimension& radiusX, const CalcDimension& radiusY, int32_t index);
+    static void SetRadiusWithArrayValue(const RefPtr<ShapeRect>& shapeRect, const JSRef<JSVal>& jsVal);
+    static void SetRadiusWithJsVal(const RefPtr<ShapeRect>& shapeRect, const JSRef<JSVal>& jsVal);
 };
 
 } // namespace OHOS::Ace::Framework

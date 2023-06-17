@@ -41,9 +41,9 @@ public:
         return true;
     }
 
-    bool UseExternalRSNode() const override
+    std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
-        return true;
+        return RenderContext::ContextParam { RenderContext::ContextType::EXTERNAL };
     }
 
 private:

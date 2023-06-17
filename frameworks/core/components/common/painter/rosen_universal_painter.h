@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_ROSEN_UNIVERSAL_PAINTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_ROSEN_UNIVERSAL_PAINTER_H
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
+#endif
 
 #include "core/pipeline/base/render_node.h"
 
@@ -27,11 +29,19 @@ public:
     RosenUniversalPainter() = default;
     ~RosenUniversalPainter() = default;
 
+#ifndef USE_ROSEN_DRAWING
     static void DrawHoverBackground(
         SkCanvas* canvas, const Rect& paintRect, uint32_t hoverBackgroundColor, double borderRadius);
 
     static void DrawRRectBackground(
         SkCanvas* canvas, const RRect& paintRRect, uint32_t backgroundColor, double dipScale);
+#else
+    static void DrawHoverBackground(
+        RSCanvas* canvas, const Rect& paintRect, uint32_t hoverBackgroundColor, double borderRadius);
+
+    static void DrawRRectBackground(
+        RSCanvas* canvas, const RRect& paintRRect, uint32_t backgroundColor, double dipScale);
+#endif
 
     static double NormalizeToPx(const Dimension& dimension, double scale);
 };

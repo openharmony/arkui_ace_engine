@@ -196,7 +196,7 @@ void JSShapeAbstract::SetStrokeWidth(const JSCallbackInfo& info)
     CalcDimension lineWidth = 1.0_vp;
     if (info[0]->IsString()) {
         const std::string& value = info[0]->ToString();
-        StringUtils::StringToDimensionWithUnit(value, lineWidth, DimensionUnit::VP, 1.0);
+        lineWidth = StringUtils::StringToDimensionWithUnit(value, DimensionUnit::VP, 1.0);
     } else {
         ParseJsDimensionVp(info[0], lineWidth);
     }

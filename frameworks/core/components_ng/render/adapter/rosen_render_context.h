@@ -47,13 +47,14 @@ class MoonProgressModifier;
 class FocusStateModifier;
 class PageTransitionEffect;
 class OverlayTextModifier;
+class GradientStyleModifier;
 class RosenRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext)
 public:
     RosenRenderContext() = default;
     ~RosenRenderContext() override;
 
-    void InitContext(bool isRoot, const std::optional<std::string>& surfaceName, bool useExternalNode) override;
+    void InitContext(bool isRoot, const std::optional<ContextParam>& param) override;
 
     void SyncGeometryProperties(GeometryNode* geometryNode) override;
 
@@ -283,6 +284,7 @@ private:
     void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
     void OnMotionPathUpdate(const MotionPathOption& motionPath) override;
 
+    void OnUseEffectUpdate(bool useEffect) override;
     void OnFreezeUpdate(bool isFreezed) override;
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
@@ -301,6 +303,7 @@ private:
     void RemoveDefaultTransition();
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot);
+    void SetPositionToRSNode();
 
     RefPtr<PageTransitionEffect> GetDefaultPageTransition(PageTransitionType type);
     RefPtr<PageTransitionEffect> GetPageTransitionEffect(const RefPtr<PageTransitionEffect>& transition);
@@ -369,7 +372,6 @@ private:
     std::shared_ptr<Rosen::RSNode> rsNode_;
     bool isHoveredScale_ = false;
     bool isHoveredBoard_ = false;
-    bool isPositionChanged_ = false;
     bool firstTransitionIn_ = false;
     bool isBreakingPoint_ = false;
     bool isBackBlurChanged_ = false;
@@ -392,6 +394,7 @@ private:
     std::shared_ptr<Rosen::RSProperty<Rosen::Vector2f>> pivotProperty_;
     std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;
     std::shared_ptr<OverlayTextModifier> modifier_ = nullptr;
+    std::shared_ptr<GradientStyleModifier> gradientStyleModifier_;
 
     // graphics modifiers
     struct GraphicModifiers {
@@ -408,6 +411,7 @@ private:
 
     RefPtr<TouchEventImpl> touchListener_;
     VectorF currentScale_ = VectorF(1.0f, 1.0f);
+    bool isTouchUpFinished_ = true;
 
     template<typename Modifier, typename PropertyType>
     friend class PropertyTransitionEffectTemplate;

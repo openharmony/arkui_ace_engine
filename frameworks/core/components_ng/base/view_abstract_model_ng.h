@@ -598,6 +598,11 @@ public:
         ViewAbstract::SetHueRotate(value);
     }
 
+    void SetUseEffect(bool useEffect) override
+    {
+        ViewAbstract::SetUseEffect(useEffect);
+    }
+
     void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override
     {
         ViewAbstract::SetClickEffectLevel(level, scaleValue);
@@ -831,6 +836,56 @@ public:
     void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) override
     {
         ViewAbstract::SetForegroundColorStrategy(strategy);
+    }
+
+    void DisableOnClick() override
+    {
+        ViewAbstract::DisableOnClick();
+    }
+
+    void DisableOnTouch() override
+    {
+        ViewAbstract::DisableOnTouch();
+    }
+
+    void DisableOnKeyEvent() override
+    {
+        ViewAbstract::DisableOnKeyEvent();
+    }
+
+    void DisableOnHover() override
+    {
+        ViewAbstract::DisableOnHover();
+    }
+
+    void DisableOnMouse() override
+    {
+        ViewAbstract::DisableOnMouse();
+    }
+
+    void DisableOnAppear() override
+    {
+        ViewAbstract::DisableOnAppear();
+    }
+
+    void DisableOnDisAppear() override
+    {
+        ViewAbstract::DisableOnDisAppear();
+    }
+
+    void DisableOnAreaChange() override
+    {
+        ViewAbstract::DisableOnAreaChange();
+    }
+
+    void DisableOnFocus() override
+    {
+        ViewAbstract::DisableOnFocus();
+    }
+
+    void DisableOnBlur() override
+    {
+        ViewAbstract::DisableOnBlur();
     }
 
 private:

@@ -31,11 +31,6 @@ public:
         themeConstants_->InitResource(resourceInfo);
     }
 
-    void ReloadResource() override
-    {
-        themeConstants_->ReloadResource();
-    }
-
     void UpdateConfig(const ResourceConfiguration& config) override
     {
         themeConstants_->UpdateConfig(config);

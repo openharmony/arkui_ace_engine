@@ -51,7 +51,7 @@ namespace OHOS::Ace::NG {
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
     : UINode(tag, nodeId, isRoot), pattern_(pattern)
 {
-    renderContext_->InitContext(IsRootNode(), pattern_->GetSurfaceNodeName(), pattern_->UseExternalRSNode());
+    renderContext_->InitContext(IsRootNode(), pattern_->GetContextParam());
     paintProperty_ = pattern->CreatePaintProperty();
     layoutProperty_ = pattern->CreateLayoutProperty();
     eventHub_ = pattern->CreateEventHub();
@@ -371,6 +371,10 @@ void FrameNode::OnAttachToMainTree(bool recursive)
     if (!hasPendingRequest_) {
         return;
     }
+    // node may have been measured before AttachToMainTree
+    if (geometryNode_->GetParentLayoutConstraint().has_value()) {
+        layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
+    }
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     context->RequestFrame();
@@ -419,7 +423,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     if (geometryTransition != nullptr && geometryTransition->IsRunning()) {
         geometryTransition->DidLayout(dirty);
     } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
-               (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
+               (pattern_->GetContextParam().has_value() && contentSizeChange)) {
         if (pattern_->NeedOverridePaintRect()) {
             renderContext_->SyncGeometryProperties(pattern_->GetOverridePaintRect().value_or(RectF()));
         } else {
@@ -484,6 +488,13 @@ void FrameNode::AdjustGridOffset()
         renderContext_->UpdateOffset(OffsetT<Dimension>());
         renderContext_->UpdateAnchor(OffsetT<Dimension>());
         renderContext_->SyncGeometryProperties(RawPtr(GetGeometryNode()));
+    }
+}
+
+void FrameNode::ClearUserOnAreaChange()
+{
+    if (eventHub_) {
+        eventHub_->ClearUserOnAreaChanged();
     }
 }
 
@@ -1107,6 +1118,16 @@ void FrameNode::MarkResponseRegion(bool isResponseRegion)
     if (gestureHub) {
         gestureHub->MarkResponseRegion(isResponseRegion);
     }
+}
+
+RectF FrameNode::GetPaintRectWithTransform() const
+{
+    return renderContext_->GetPaintRectWithTransform();
+}
+
+VectorF FrameNode::GetTransformScale() const
+{
+    return renderContext_->GetTransformScaleValue({ 1.0f, 1.0f });
 }
 
 bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint)

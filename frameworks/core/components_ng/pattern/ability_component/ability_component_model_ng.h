@@ -29,7 +29,7 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT AbilityComponentModelNG : public AbilityComponentModel {
 public:
-    void Create() override;
+    void Create(const std::string& bundleName, const std::string& abilityName) override;
     void SetWant(const std::string& want) override;
     void SetOnConnect(std::function<void()>&& onConnect) override;
     void SetOnDisConnect(std::function<void()>&& onDisConnect) override;

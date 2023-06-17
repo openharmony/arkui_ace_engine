@@ -67,6 +67,15 @@ public:
         userCallback_ = MakeRefPtr<ClickEvent>(std::move(callback));
     }
 
+    void ClearUserCallback()
+    {
+        // When the event param is undefined, it will clear the callback.
+        LOGI("Clear user callback.");
+        if (userCallback_) {
+            userCallback_.Reset();
+        }
+    }
+
     void AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
     {
         if (clickEvents_.empty()) {

@@ -20,7 +20,6 @@
 #include <cstdint>
 #include <memory>
 
-
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -54,6 +53,7 @@
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
+#include "core/components_ng/pattern/container_modal/container_modal_view_factory.h"
 #include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -264,6 +264,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     }
     HandleOnAreaChangeEvent();
     HandleVisibleAreaChangeEvent();
+    if (isNeedFlushMouseEvent_) {
+        FlushMouseEvent();
+        isNeedFlushMouseEvent_ = false;
+    }
     // Keep the call sent at the end of the function
     ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_COMPLETE_EVENT);
 }
@@ -406,11 +410,11 @@ void PipelineContext::SetupRootElement()
 
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
-    auto appBarNode = installationFree_ ? AppBarView::Create(stageNode) : nullptr;
+    appBarNode_ = installationFree_ ? AppBarView::Create(stageNode) : nullptr;
     if (windowModal_ == WindowModal::CONTAINER_MODAL) {
-        rootNode_->AddChild(ContainerModalView::Create(appBarNode ? appBarNode : stageNode));
+        rootNode_->AddChild(ContainerModalViewFactory::GetView(appBarNode_ ? appBarNode_ : stageNode));
     } else {
-        rootNode_->AddChild(appBarNode ? appBarNode : stageNode);
+        rootNode_->AddChild(appBarNode_ ? appBarNode_ : stageNode);
     }
 #ifdef ENABLE_ROSEN_BACKEND
     if (!IsJsCard() && !isFormRender_) {
@@ -730,6 +734,47 @@ SafeAreaEdgeInserts PipelineContext::GetViewSafeArea() const
     return systemAvoidArea.CombineSafeArea(cutoutAvoidArea);
 }
 
+void PipelineContext::AppBarAdaptToSafeArea()
+{
+    CHECK_NULL_VOID_NOLOG(appBarNode_);
+    auto layoutProperty = appBarNode_->GetLayoutProperty();
+    CHECK_NULL_VOID_NOLOG(layoutProperty);
+    NG::PaddingProperty paddings;
+    if (!GetIgnoreViewSafeArea()) {
+        SafeAreaEdgeInserts safeArea = GetViewSafeArea();
+        LOGI("AppBarAdaptToSafeArea ViewSafeArea:%{public}s", safeArea.ToString().c_str());
+        paddings.top = NG::CalcLength(safeArea.topRect_.Height());
+        paddings.bottom = NG::CalcLength(safeArea.bottomRect_.Height());
+        paddings.left = NG::CalcLength(safeArea.leftRect_.Height());
+        paddings.right = NG::CalcLength(safeArea.rightRect_.Height());
+    }
+    layoutProperty->UpdatePadding(paddings);
+}
+
+void PipelineContext::ResetViewSafeArea()
+{
+    CHECK_NULL_VOID_NOLOG(GetIsLayoutFullScreen());
+    if (installationFree_) {
+        AppBarAdaptToSafeArea();
+    } else {
+        auto stageManager = GetStageManager();
+        CHECK_NULL_VOID_NOLOG(stageManager);
+        auto stageNode = stageManager->GetStageNode();
+        CHECK_NULL_VOID_NOLOG(stageNode);
+        auto pageNode = stageManager->GetLastPage();
+        CHECK_NULL_VOID_NOLOG(pageNode);
+        auto layoutProperty = pageNode->GetLayoutProperty();
+        CHECK_NULL_VOID_NOLOG(layoutProperty);
+        if (!GetIgnoreViewSafeArea()) {
+            layoutProperty->SetSafeArea(GetViewSafeArea());
+            LOGI("ResetViewSafeArea viewSafeArea:%{public}s", layoutProperty->GetSafeArea().ToString().c_str());
+        } else {
+            layoutProperty->SetSafeArea({});
+        }
+    }
+    rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 void PipelineContext::OnVirtualKeyboardHeightChange(
     float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
@@ -779,27 +824,6 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
         rsTransaction->Commit();
     }
 #endif
-}
-
-void PipelineContext::ResetViewSafeArea()
-{
-    auto stageManager = GetStageManager();
-    CHECK_NULL_VOID_NOLOG(stageManager);
-    auto stageNode = stageManager->GetStageNode();
-    CHECK_NULL_VOID_NOLOG(stageNode);
-    auto pageNode = stageManager->GetLastPage();
-    CHECK_NULL_VOID_NOLOG(pageNode);
-    auto layoutProperty = pageNode->GetLayoutProperty();
-    const static int32_t PLATFORM_VERSION_TEN = 10;
-    if (GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && layoutProperty) {
-        if (!GetIgnoreViewSafeArea()) {
-            layoutProperty->SetSafeArea(GetViewSafeArea());
-            LOGI("ResetViewSafeArea viewSafeArea:%{public}s", layoutProperty->GetSafeArea().ToString().c_str());
-        } else {
-            layoutProperty->SetSafeArea({});
-        }
-        stageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    }
 }
 
 bool PipelineContext::OnBackPressed()
@@ -940,9 +964,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 #endif
 
     HandleEtsCardTouchEvent(point);
-    if (uiExtensionCallback_) {
-        uiExtensionCallback_(point);
-    }
+    HandleUIExtensionTouchEvent(point);
 
     auto scalePoint = point.CreateScalePoint(GetViewScale());
     LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
@@ -1006,12 +1028,53 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         // need to reset touchPluginPipelineContext_ for next touch down event.
         touchPluginPipelineContext_.clear();
         RemoveEtsCardTouchEventCallback(point.id);
-        uiExtensionCallback_ = nullptr;
+        RemoveUIExtensionTouchEvetnCallback(point.id);
     }
 
     hasIdleTasks_ = true;
     RequestFrame();
 }
+
+// ---------------- UIExtesion touchEvent callback handler -------------------------
+void PipelineContext::AddUIExtensionTouchEventCallback(int32_t pointId, UIExtensionTouchEventCallback&& callback)
+{
+    if (!callback || pointId < 0) {
+        return;
+    }
+
+    uiExtensionTouchEventCallback_[pointId] = std::move(callback);
+}
+
+void PipelineContext::RemoveUIExtensionTouchEvetnCallback(int32_t pointId)
+{
+    if (pointId < 0) {
+        return;
+    }
+
+    auto iter = uiExtensionTouchEventCallback_.find(pointId);
+    if (iter == uiExtensionTouchEventCallback_.end()) {
+        return;
+    }
+
+    uiExtensionTouchEventCallback_.erase(iter);
+}
+
+void PipelineContext::HandleUIExtensionTouchEvent(const TouchEvent& point)
+{
+    if (point.id < 0) {
+        return;
+    }
+
+    auto iter = uiExtensionTouchEventCallback_.find(point.id);
+    if (iter == uiExtensionTouchEventCallback_.end()) {
+        return;
+    }
+
+    if (iter->second) {
+        iter->second(point);
+    }
+}
+// ----------------------------------------------------------------------------------
 
 void PipelineContext::OnSurfaceDensityChanged(double density)
 {
@@ -1138,6 +1201,16 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
 {
     CHECK_RUN_ON(UI);
 
+    if (!lastMouseEvent_) {
+        lastMouseEvent_ = std::make_unique<MouseEvent>();
+    }
+    lastMouseEvent_->x = event.x;
+    lastMouseEvent_->y = event.y;
+    lastMouseEvent_->button = event.button;
+    lastMouseEvent_->action = event.action;
+    lastMouseEvent_->sourceType = event.sourceType;
+    lastMouseEvent_->time = event.time;
+
     if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
         // Mouse right button press event set focus inactive here.
         // Mouse left button press event will set focus inactive in touch process.
@@ -1163,6 +1236,31 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     eventManager_->DispatchMouseHoverEventNG(scaleEvent);
     eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
     RequestFrame();
+}
+
+void PipelineContext::FlushMouseEvent()
+{
+    if (!lastMouseEvent_ || lastMouseEvent_->action == MouseAction::WINDOW_LEAVE) {
+        return;
+    }
+    MouseEvent event;
+    event.x = lastMouseEvent_->x;
+    event.y = lastMouseEvent_->y;
+    event.time = lastMouseEvent_->time;
+    event.action = MouseAction::MOVE;
+    event.button = MouseButton::NONE_BUTTON;
+    event.sourceType = SourceType::MOUSE;
+
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(rootNode_);
+    auto scaleEvent = event.CreateScaleEvent(viewScale_);
+    TouchRestrict touchRestrict { TouchRestrict::NONE };
+    touchRestrict.sourceType = event.sourceType;
+    touchRestrict.hitTestType = SourceType::MOUSE;
+    eventManager_->MouseTest(scaleEvent, rootNode_, touchRestrict);
+    eventManager_->DispatchMouseEventNG(scaleEvent);
+    eventManager_->DispatchMouseHoverEventNG(scaleEvent);
+    eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
 }
 
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
@@ -1427,7 +1525,9 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco)
     }
     auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
     CHECK_NULL_VOID(containerNode);
-    containerNode->GetPattern<ContainerModalPattern>()->ShowTitle(isShow, hasDeco);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->ShowTitle(isShow, hasDeco);
 }
 
 void PipelineContext::SetContainerWindow(bool isShow)
@@ -1474,7 +1574,9 @@ void PipelineContext::SetAppTitle(const std::string& title)
     }
     auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
     CHECK_NULL_VOID(containerNode);
-    containerNode->GetPattern<ContainerModalPattern>()->SetAppTitle(title);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->SetAppTitle(title);
 }
 
 void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon)
@@ -1485,7 +1587,9 @@ void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon)
     }
     auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
     CHECK_NULL_VOID(containerNode);
-    containerNode->GetPattern<ContainerModalPattern>()->SetAppIcon(icon);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->SetAppIcon(icon);
 }
 
 void PipelineContext::FlushReload()
@@ -1627,6 +1731,11 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
 #endif // ENABLE_DRAG_FRAMEWORK
     if (manager->IsDragged() && action != DragEventAction::DRAG_EVENT_END) {
         LOGI("current context is the source of drag");
+#ifdef ENABLE_DRAG_FRAMEWORK
+        if (action == DragEventAction::DRAG_EVENT_START) {
+            manager->RequireSummary();
+        }
+#endif // ENABLE_DRAG_FRAMEWORK
         return;
     }
 
@@ -1643,10 +1752,10 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
 #endif // ENABLE_DRAG_FRAMEWORK
     if (action == DragEventAction::DRAG_EVENT_END) {
 #ifdef ENABLE_DRAG_FRAMEWORK
-    if (manager->GetExtraInfo().empty()) {
-        manager->GetExtraInfoFromClipboard(extraInfo);
-        manager->SetExtraInfo(extraInfo);
-    }
+        if (manager->GetExtraInfo().empty()) {
+            manager->GetExtraInfoFromClipboard(extraInfo);
+            manager->SetExtraInfo(extraInfo);
+        }
 #endif // ENABLE_DRAG_FRAMEWORK
         manager->OnDragEnd(static_cast<float>(x), static_cast<float>(y), extraInfo);
         manager->RestoreClipboardData();
@@ -1760,6 +1869,19 @@ bool PipelineContext::GetRestoreInfo(int32_t restoreId, std::string& restoreInfo
         return true;
     }
     return false;
+}
+
+void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        LOGW("SetAppIcon failed, Window modal is not container.");
+        return;
+    }
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->SetContainerButtonHide(hideSplit, hideMaximize, hideMinimize);
 }
 
 } // namespace OHOS::Ace::NG

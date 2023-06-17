@@ -3250,9 +3250,7 @@ Dimension Declaration::ParseDimension(const std::string& value, bool useVp) cons
 CalcDimension Declaration::ParseCalcDimension(const std::string& value, bool useVp) const
 {
     if (value.find("calc") != std::string::npos) {
-        CalcDimension result;
-        StringUtils::StringToCalcDimension(value, result, useVp);
-        return result;
+        return StringUtils::StringToCalcDimension(value, useVp);
     } else {
         return ParseDimension(value, useVp);
     }

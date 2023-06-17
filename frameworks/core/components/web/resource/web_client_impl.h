@@ -178,6 +178,11 @@ public:
     void OnCompleteSwapWithNewSize() override;
     void OnResizeNotWork() override;
     void OnGetTouchHandleHotZone(NWeb::TouchHandleHotZone& hotZone) override;
+    void OnDateTimeChooserPopup(
+        const NWeb::DateTimeChooser& chooser,
+        const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+        std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback) override;
+    void OnDateTimeChooserClose() override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {
