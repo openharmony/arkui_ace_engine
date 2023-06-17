@@ -144,6 +144,8 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     layoutInfo_ = std::move(layoutInfo);
     layoutInfo_.UpdateStartIndex();
 
+    SetScrollEnable(IsScrollable());
+
     auto property = host->GetLayoutProperty();
     CHECK_NULL_RETURN_NOLOG(host, false);
     return property->GetPaddingProperty() != nullptr;
