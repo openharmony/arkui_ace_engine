@@ -1122,6 +1122,7 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
         SaveLastModalNode();
         modalNode->MountToParent(rootNode);
         modalNode->AddChild(builder);
+        AdaptToSafeArea(modalNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         if (modalTransition == ModalTransition::DEFAULT) {
             PlayDefaultModalTransition(modalNode, true);
@@ -1289,6 +1290,7 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
         builder->GetRenderContext()->SetIsModalRootNode(true);
         // create modal page
         auto sheetNode = SheetView::CreateSheetPage(targetId, builder, std::move(callback), sheetStyle);
+        AdaptToSafeArea(sheetNode);
         ComputeSheetOffset(sheetStyle);
         modalStack_.push(WeakClaim(RawPtr(sheetNode)));
         SaveLastModalNode();
