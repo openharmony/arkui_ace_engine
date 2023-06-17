@@ -5438,7 +5438,7 @@ HWTEST_F(TabsTestNg, TabBarPatternPlayMaskAnimation001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Test function PlayMaskAnimation.
-     * @tc.expected: Related functions run ok.
+     * @tc.expected: Related function runs ok.
      */
     float selectedImageSize = 0.1f;
     OffsetF originalSelectedMaskOffset(0.1f, 0.2f);
@@ -5510,6 +5510,214 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleTouchEvent004, TestSize.Level1)
             touchLocationInfo.SetTouchType(TouchType::DOWN);
         }
         tabBarPattern->touchingIndex_.reset();
+    }
+}
+
+/**
+ * @tc.name: TabBarPatternPlayTranslateAnimation001
+ * @tc.desc: test PlayTranslateAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternPlayTranslateAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create TabBarPattern
+     */
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test function PlayTranslateAnimation.
+     * @tc.expected: Related function runs ok.
+     */
+    float startPos = 0.1f;
+    float endPos = 0.2f;
+    float targetCurrentOffset = 0.3f;
+    double value = 0;
+    auto offset = 0.1f;
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            for (int k = 0; k <= 1; k++) {
+                tabBarPattern->currentOffset_ = offset;
+                tabBarPattern->PlayTranslateAnimation(startPos, endPos, targetCurrentOffset);
+                ASSERT_NE(tabBarPattern->controller_, nullptr);
+                auto interpolator = tabBarPattern->controller_->interpolators_.front();
+                ASSERT_NE(interpolator, nullptr);
+                auto* translate = static_cast<CurveAnimation<double>*>(AceType::RawPtr(interpolator));
+                ASSERT_NE(translate, nullptr);
+                Animation<double>::ValueCallback valueCallback = translate->callbacks_.begin()->second;
+                valueCallback.callback_(value);
+                tabBarPattern->controller_->ClearInterpolators();
+                value = 0;
+                startPos = 0.0f;
+                endPos = 0.0f;
+            }
+            endPos = 0.1f;
+        }
+        endPos = 0.0f;
+        startPos = 0.1f;
+    }
+
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            for (int k = 0; k <= 1; k++) {
+                tabBarPattern->currentOffset_ = offset;
+                tabBarPattern->PlayTranslateAnimation(startPos, endPos, targetCurrentOffset);
+                ASSERT_NE(tabBarPattern->controller_, nullptr);
+                auto interpolator = tabBarPattern->controller_->interpolators_.back();
+                ASSERT_NE(interpolator, nullptr);
+                auto* tabBarTranslate = static_cast<CurveAnimation<double>*>(AceType::RawPtr(interpolator));
+                ASSERT_NE(tabBarTranslate, nullptr);
+                Animation<double>::ValueCallback valueCallback = tabBarTranslate->callbacks_.begin()->second;
+                valueCallback.callback_(value);
+                tabBarPattern->controller_->ClearInterpolators();
+                value = 0;
+                offset = 0.0f;
+                targetCurrentOffset = 0.0f;
+            }
+            offset = 0.1f;
+        }
+        offset = 0.0f;
+        targetCurrentOffset = 0.1f;
+    }
+}
+
+/**
+ * @tc.name: TabBarPatternSetEdgeEffect002
+ * @tc.desc: test SetEdgeEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternSetEdgeEffect002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create TabBarPattern
+     */
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    TabsItemDivider divider;
+    tabsModel.SetDivider(divider);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    tabBarNode->GetLayoutProperty<TabBarLayoutProperty>()->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    tabBarPattern->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>();
+
+    /**
+     * @tc.steps: step2. Test function SetEdgeEffect.
+     * @tc.expected: Related function runs ok.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    ASSERT_NE(gestureHub, nullptr);
+    tabBarPattern->SetEdgeEffect(gestureHub);
+}
+
+/**
+ * @tc.name: TabBarPatternPlayTabBarTranslateAnimation001
+ * @tc.desc: test PlayTabBarTranslateAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternPlayTabBarTranslateAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create TabBarPattern
+     */
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    TabsItemDivider divider;
+    tabsModel.SetDivider(divider);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    int32_t targetIndex = 1;
+    tabBarPattern->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>();
+    tabBarNode->GetGeometryNode()->SetFrameSize(SizeF(1.0f, 1.0f));
+    tabBarPattern->childrenMainSize_ = 0.1f;
+    AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(targetIndex))
+        ->GetGeometryNode()
+        ->SetFrameSize(SizeF(0.0f, 0.0f));
+    AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(targetIndex - 1))
+        ->GetGeometryNode()
+        ->SetFrameSize(SizeF(0.0f, 0.0f));
+    int32_t nodeId = 1;
+    for (int i = 0; i <= 2; i++) {
+        auto tabsNode = TabsModelNG::GetOrCreateTabsNode(
+            V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
+        tabBarNode->AddChild(tabsNode);
+    }
+    AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(targetIndex + 1))
+        ->GetGeometryNode()
+        ->SetFrameSize(SizeF(0.0f, 0.0f));
+
+    /**
+     * @tc.steps: step2. Test function PlayTabBarTranslateAnimation.
+     * @tc.expected: Related function runs ok.
+     */
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            for (int k = 0; k <= 1; k++) {
+                tabBarPattern->PlayTabBarTranslateAnimation(targetIndex);
+                tabBarPattern->childrenMainSize_ = 2.0f;
+            }
+            AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(targetIndex - 1))
+                ->GetGeometryNode()
+                ->SetFrameSize(SizeF(2.0f, 2.0f));
+        }
+        AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(targetIndex + 1))
+            ->GetGeometryNode()
+            ->SetFrameSize(SizeF(2.0f, 2.0f));
+    }
+
+    double value = 0.0;
+    float offset = 0.0f;
+    AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(targetIndex - 1))
+        ->GetGeometryNode()
+        ->SetFrameSize(SizeF(0.0f, 0.0f));
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            for (int k = 0; k <= 1; k++) {
+                tabBarPattern->currentOffset_ = offset;
+                tabBarPattern->PlayTabBarTranslateAnimation(targetIndex);
+                ASSERT_NE(tabBarPattern->controller_, nullptr);
+                auto interpolator = tabBarPattern->controller_->interpolators_.front();
+                ASSERT_NE(interpolator, nullptr);
+                auto* tabBarTranslate = static_cast<CurveAnimation<double>*>(AceType::RawPtr(interpolator));
+                ASSERT_NE(tabBarTranslate, nullptr);
+                Animation<double>::ValueCallback valueCallback = tabBarTranslate->callbacks_.begin()->second;
+                valueCallback.callback_(value);
+                tabBarPattern->controller_->ClearInterpolators();
+                value = 1.0;
+                offset = 2.0f;
+            }
+            offset = 0.0f;
+        }
+        offset = 2.0f;
+        value = 0.0;
     }
 }
 } // namespace OHOS::Ace::NG
