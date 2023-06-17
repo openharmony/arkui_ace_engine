@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_paint_method.h"
+#include "core/components_ng/pattern/menu/menu_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -77,6 +78,16 @@ public:
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
+
+    RefPtr<PaintProperty> CreatePaintProperty() override
+    {
+        return MakeRefPtr<MenuPaintProperty>();
+    }
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        return AceType::MakeRefPtr<MenuPaintMethod>();
+    }
 
     MenuType GetMenuType() const
     {
@@ -195,6 +206,7 @@ private:
     void OnTouchEvent(const TouchEventInfo& info);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void UpdateMenuHotArea();
+    void UpdateMenuClip(const RefPtr<LayoutWrapper>& dirty);
 
     uint32_t GetInnerMenuCount() const;
     // If CustomBuilder is declared with <Menu> and <MenuItem>,

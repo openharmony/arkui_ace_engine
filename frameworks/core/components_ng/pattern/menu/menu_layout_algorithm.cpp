@@ -208,7 +208,7 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             ComputeMenuPositionByAlignType(menuProp, size);
         }
         auto menuPosition = MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size);
-        arrowPosition_ = GetArrowPositionWithPlacement(size, menuPosition);
+        arrowPosition_ = GetArrowPositionWithPlacement(size);
         if (didNeedArrow && arrowPlacement_ != Placement::NONE) {
             LayoutArrow(layoutWrapper);
         }
@@ -246,19 +246,17 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 void MenuLayoutAlgorithm::LayoutArrow(const LayoutWrapper* layoutWrapper)
 {
-    auto wrapperPaintProperty = GetWrapperPaintProperty(layoutWrapper);
-    CHECK_NULL_VOID(wrapperPaintProperty);
-    wrapperPaintProperty->UpdateArrowPosition(arrowPosition_);
-    wrapperPaintProperty->UpdateArrowPlacement(arrowPlacement_);
+    auto paintProperty = GetPaintProperty(layoutWrapper);
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateArrowPosition(arrowPosition_);
+    paintProperty->UpdateArrowPlacement(arrowPlacement_);
 }
 
-RefPtr<MenuWrapperPaintProperty> MenuLayoutAlgorithm::GetWrapperPaintProperty(const LayoutWrapper* layoutWrapper)
+RefPtr<MenuPaintProperty> MenuLayoutAlgorithm::GetPaintProperty(const LayoutWrapper* layoutWrapper)
 {
     auto menuNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(menuNode, nullptr);
-    auto wrapperNode = AceType::DynamicCast<FrameNode>(menuNode->GetParent());
-    CHECK_NULL_RETURN(wrapperNode, nullptr);
-    auto paintProperty = wrapperNode->GetPaintProperty<MenuWrapperPaintProperty>();
+    auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, nullptr);
     return paintProperty;
 }
@@ -272,9 +270,9 @@ bool MenuLayoutAlgorithm::GetIfNeedArrow(const LayoutWrapper* layoutWrapper, con
     CHECK_NULL_RETURN(menuPattern, false);
     auto menuProp = DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(menuProp, false);
-    auto wrapperPaintProperty = GetWrapperPaintProperty(layoutWrapper);
-    CHECK_NULL_RETURN(wrapperPaintProperty, false);
-    propNeedArrow_ = wrapperPaintProperty->GetEnableArrow().value_or(false);
+    auto paintProperty = GetPaintProperty(layoutWrapper);
+    CHECK_NULL_RETURN(paintProperty, false);
+    propNeedArrow_ = paintProperty->GetEnableArrow().value_or(false);
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
@@ -285,11 +283,11 @@ bool MenuLayoutAlgorithm::GetIfNeedArrow(const LayoutWrapper* layoutWrapper, con
         return false;
     }
 
-    propArrowOffset_ = wrapperPaintProperty->GetArrowOffset().value_or(Dimension(0));
+    propArrowOffset_ = paintProperty->GetArrowOffset().value_or(Dimension(0));
     menuRadius_ = selectThemePtr->GetMenuBorderRadius().ConvertToPx();
     arrowMinLimit_ = menuRadius_ + ARROW_WIDTH.ConvertToPx() / 2.0;
     arrowWidth_ = ARROW_WIDTH.ConvertToPx();
-    auto targetSpaceReal = TARGET_SPACE.ConvertToPx() + ARROW_HIGHT.ConvertToPx();
+    auto targetSpaceReal = TARGET_SPACE.ConvertToPx();
 
     if (setHorizontal_.find(placement_) != setHorizontal_.end()) {
         if (menuSize.Height() >= menuRadius_ * 2 + arrowWidth_) {
@@ -615,32 +613,32 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacement(
     return childPosition;
 }
 
-OffsetF MenuLayoutAlgorithm::GetArrowPositionWithPlacement(const SizeF& menuSize, const OffsetF& menuPostion)
+OffsetF MenuLayoutAlgorithm::GetArrowPositionWithPlacement(const SizeF& menuSize)
 {
     UpdateArrowOffsetWithMenuLimit(menuSize);
     auto addArrowOffsetToArrowMin = arrowOffset_ + arrowMinLimit_;
-    auto space_ = targetSpace_ - TARGET_SPACE.ConvertToPx() - ARROW_FIX_HIGHT.ConvertToPx();
+    auto space_ = ARROW_HIGHT.ConvertToPx();
     OffsetF childPosition;
     switch (arrowPlacement_) {
         case Placement::TOP:
         case Placement::TOP_LEFT:
         case Placement::TOP_RIGHT:
-            childPosition = menuPostion + OffsetF(addArrowOffsetToArrowMin, menuSize.Height() + space_);
+            childPosition = OffsetF(addArrowOffsetToArrowMin, menuSize.Height() + space_);
             break;
         case Placement::BOTTOM:
         case Placement::BOTTOM_LEFT:
         case Placement::BOTTOM_RIGHT:
-            childPosition = menuPostion + OffsetF(addArrowOffsetToArrowMin, -space_);
+            childPosition = OffsetF(addArrowOffsetToArrowMin, -space_);
             break;
         case Placement::LEFT:
         case Placement::LEFT_TOP:
         case Placement::LEFT_BOTTOM:
-            childPosition = menuPostion + OffsetF(menuSize.Width() + space_, addArrowOffsetToArrowMin);
+            childPosition = OffsetF(menuSize.Width() + space_, addArrowOffsetToArrowMin);
             break;
         case Placement::RIGHT:
         case Placement::RIGHT_TOP:
         case Placement::RIGHT_BOTTOM:
-            childPosition = menuPostion + OffsetF(-space_, addArrowOffsetToArrowMin);
+            childPosition = OffsetF(-space_, addArrowOffsetToArrowMin);
             break;
         default:
             break;

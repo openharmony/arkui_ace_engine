@@ -23,7 +23,7 @@
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
-#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_property.h"
+#include "core/components_ng/pattern/menu/menu_paint_property.h"
 
 namespace OHOS::Ace::NG {
 class MenuLayoutProperty;
@@ -44,7 +44,7 @@ protected:
     float VerticalLayout(const SizeF& size, float clickPosition);
     float HorizontalLayout(const SizeF& size, float clickPosition, bool IsSelectMenu = false);
 
-    RefPtr<MenuWrapperPaintProperty> GetWrapperPaintProperty(const LayoutWrapper* layoutWrapper);
+    RefPtr<MenuPaintProperty> GetPaintProperty(const LayoutWrapper* layoutWrapper);
 
     OffsetF position_;
     OffsetF positionOffset_;
@@ -71,7 +71,7 @@ private:
         const RefPtr<MenuLayoutProperty>& menuProp, const RefPtr<MenuPattern>& menuPattern, const SizeF& size);
 
     void LayoutArrow(const LayoutWrapper* layoutWrapper);
-    OffsetF GetArrowPositionWithPlacement(const SizeF& menuSize, const OffsetF& menuPostion);
+    OffsetF GetArrowPositionWithPlacement(const SizeF& menuSize);
     bool GetIfNeedArrow(const LayoutWrapper* layoutWrapper, const SizeF& menuSize);
     void UpdateArrowOffsetWithMenuLimit(const SizeF& menuSize);
     void UpdatePropArrowOffset();

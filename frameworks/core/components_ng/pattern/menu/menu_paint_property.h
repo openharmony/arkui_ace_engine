@@ -13,35 +13,36 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_WRAPPER_PAINT_PROPERTY_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_WRAPPER_PAINT_PROPERTY_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_PAINT_PROPERTY_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_PAINT_PROPERTY_H
 
-#include "base/utils/utils.h"
 #include "base/geometry/dimension.h"
+#include "base/utils/utils.h"
+#include "core/components/common/properties/placement.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/components_v2/inspector/utils.h"
-#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-    constexpr Dimension ARROW_WIDTH = 32.0_vp;
-    constexpr Dimension ARROW_HIGHT = 8.0_vp;
-    constexpr Dimension TARGET_SPACE = 8.0_vp;
-    constexpr Dimension ARROW_FIX_HIGHT = 0.1_vp;
-    constexpr Dimension ARROW_ZERO_PERCENT_VALUE = Dimension(0.0, DimensionUnit::PERCENT);
-    constexpr Dimension ARROW_HALF_PERCENT_VALUE = Dimension(0.5, DimensionUnit::PERCENT);
-    constexpr Dimension ARROW_ONE_HUNDRED_PERCENT_VALUE = Dimension(1.0, DimensionUnit::PERCENT);
-}
-class ACE_EXPORT MenuWrapperPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(MenuWrapperPaintProperty, PaintProperty)
+constexpr Dimension ARROW_WIDTH = 32.0_vp;
+// arrow actual display height against shadow
+constexpr Dimension ARROW_HIGHT = 7.4_vp;
+// space from menu to target for arrow display
+constexpr Dimension TARGET_SPACE = 16.0_vp;
+constexpr Dimension ARROW_ZERO_PERCENT_VALUE = Dimension(0.0, DimensionUnit::PERCENT);
+constexpr Dimension ARROW_HALF_PERCENT_VALUE = Dimension(0.5, DimensionUnit::PERCENT);
+constexpr Dimension ARROW_ONE_HUNDRED_PERCENT_VALUE = Dimension(1.0, DimensionUnit::PERCENT);
+} // namespace
+class ACE_EXPORT MenuPaintProperty : public PaintProperty {
+    DECLARE_ACE_TYPE(MenuPaintProperty, PaintProperty)
 
 public:
-    MenuWrapperPaintProperty() = default;
-    ~MenuWrapperPaintProperty() override = default;
+    MenuPaintProperty() = default;
+    ~MenuPaintProperty() override = default;
 
     RefPtr<PaintProperty> Clone() const override
     {
-        auto paintProperty = MakeRefPtr<MenuWrapperPaintProperty>();
+        auto paintProperty = MakeRefPtr<MenuPaintProperty>();
         paintProperty->propEnableArrow_ = CloneEnableArrow();
         paintProperty->propArrowOffset_ = CloneArrowOffset();
         paintProperty->propArrowPosition_ = CloneArrowPosition();
@@ -86,17 +87,15 @@ public:
         json->Put("enableArrow", V2::ConvertBoolToString(GetEnableArrow().value_or(false)).c_str());
         json->Put("arrowOffset", GetArrowOffset().value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
         json->Put("arrowPosition", GetArrowPosition().value_or(OffsetF(0.0f, 0.0f)).ToString().c_str());
-        json->Put("arrowPlacement", ConvertPlacementToString(GetArrowPlacement()
-            .value_or(Placement::NONE)).c_str());
+        json->Put("arrowPlacement", ConvertPlacementToString(GetArrowPlacement().value_or(Placement::NONE)).c_str());
     }
-
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableArrow, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowOffset, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowPosition, OffsetF, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowPlacement, Placement, PROPERTY_UPDATE_RENDER);
-    ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPaintProperty);
+    ACE_DISALLOW_COPY_AND_MOVE(MenuPaintProperty);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_WRAPPER_PAINT_PROPERTY_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_PAINT_PROPERTY_H

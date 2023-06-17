@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,11 +36,19 @@ public:
     CanvasDrawFunction GetOverlayDrawFunction(PaintWrapper* paintWrapper) override;
 
 private:
-
-    void PaintGradient(RSCanvas& canvas, PaintWrapper* paintWrapper, bool isTop);
-
+    float horizonOffsetFirst_;
+    float horizonOffsetSecond_;
+    float horizonOffsetThird_;
+    float horizonOffsetForth_;
+    float verticalOffsetFirst_;
+    float verticalOffsetSecond_;
+    float verticalOffsetThird_;
+    void UpdateArrowPath(Placement placement, float arrowX, float arrowY, RSPath& path);
+    void GetTopPath(float arrowX, float arrowY, RSPath& path);
+    void GetBottomPath(float arrowX, float arrowY, RSPath& path);
+    void GetRightPath(float arrowX, float arrowY, RSPath& path);
+    void GetLeftPath(float arrowX, float arrowY, RSPath& path);
     ACE_DISALLOW_COPY_AND_MOVE(MenuPaintMethod);
-
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MENU_MENU_PAINT_METHOD_H

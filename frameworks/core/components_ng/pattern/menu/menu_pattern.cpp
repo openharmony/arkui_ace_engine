@@ -567,6 +567,7 @@ void MenuPattern::SetAccessibilityAction()
 bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     UpdateMenuHotArea();
+    UpdateMenuClip(dirty);
     return false;
 }
 
@@ -600,6 +601,32 @@ void MenuPattern::UpdateMenuHotArea()
         rects.emplace_back(Rect(menuHotArea.GetX(), menuHotArea.GetY(), menuHotArea.Width(), menuHotArea.Height()));
     }
     SubwindowManager::GetInstance()->SetHotAreas(rects);
+}
+
+void MenuPattern::UpdateMenuClip(const RefPtr<LayoutWrapper>& dirty)
+{
+    // context menu is necessary condition for arrow display
+    // if scroll does not display, do not clip menu and scroll
+    if (IsContextMenu()) {
+        auto scrollParentNode = dirty->GetHostNode();
+        auto scrollNode = DynamicCast<FrameNode>(scrollParentNode->GetFirstChild());
+        CHECK_NULL_VOID(scrollNode);
+        auto scrollContentNode = DynamicCast<FrameNode>(scrollNode->GetFirstChild());
+        CHECK_NULL_VOID(scrollContentNode);
+        auto scrollContentGeometryNode = scrollContentNode->GetGeometryNode();
+        CHECK_NULL_VOID(scrollContentGeometryNode);
+        auto scrollContentSize = scrollContentGeometryNode->GetFrameSize();
+        auto scrollParentGeometryNode = scrollParentNode->GetGeometryNode();
+        auto parentSize = scrollParentGeometryNode->GetFrameSize();
+
+        auto clip = GreatNotEqual(scrollContentSize.Height(), parentSize.Height());
+        auto scrollParentContext = scrollParentNode->GetRenderContext();
+        CHECK_NULL_VOID(scrollParentContext);
+        scrollParentContext->SetClipToBounds(clip);
+        auto scrollContentContext = scrollContentNode->GetRenderContext();
+        CHECK_NULL_VOID(scrollContentContext);
+        scrollContentContext->SetClipToBounds(clip);
+    }
 }
 
 void InnerMenuPattern::RecordItemsAndGroups()
