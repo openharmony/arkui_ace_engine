@@ -39,6 +39,7 @@ public:
     static void SetLableStyle(const JSCallbackInfo& info);
     static void JsBackgroundColor(const JSCallbackInfo& info);
     static void JsRadius(const JSCallbackInfo& info);
+    static void JsBorder(const JSCallbackInfo& info);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
     static void JsAspectRatio(const JSCallbackInfo& info);
@@ -53,6 +54,7 @@ public:
     static void CreateWithLabel(const JSCallbackInfo& info);
 
 private:
+    static void HandleDifferentRadius(const JSRef<JSVal>& args);
     static void GetFontContent(JSRef<JSVal>& font, ButtonParameters& buttonParameters);
     static void CompleteParameters(ButtonParameters& buttonParameters);
     static CalcDimension GetSizeValue(const JSCallbackInfo& info);

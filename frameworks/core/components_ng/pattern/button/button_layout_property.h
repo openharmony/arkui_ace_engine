@@ -47,6 +47,7 @@ public:
         value->propFontFamily_ = CloneFontFamily();
         value->propFontStyle_ = CloneFontStyle();
         value->propLabel_ = CloneLabel();
+        value->propBorderRadius_ = CloneBorderRadius();
         value->propTextOverflow_ = CloneTextOverflow();
         value->propMaxLines_ = CloneMaxLines();
         value->propMinFontSize_ = CloneMinFontSize();
@@ -65,6 +66,7 @@ public:
         ResetFontFamily();
         ResetFontStyle();
         ResetLabel();
+        ResetBorderRadius();
         ResetTextOverflow();
         ResetMaxLines();
         ResetMinFontSize();
@@ -80,6 +82,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontFamily, std::vector<std::string>, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontStyle, Ace::FontStyle, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Label, std::string, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderRadius, NG::BorderRadiusProperty, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaxLines, uint32_t, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MinFontSize, Dimension, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaxFontSize, Dimension, PROPERTY_UPDATE_NORMAL);

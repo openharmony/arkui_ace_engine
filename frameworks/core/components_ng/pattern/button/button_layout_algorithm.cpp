@@ -188,6 +188,10 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
     } else if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CAPSULE) {
         radius.SetValue(frameSize.Height() / 2.0);
         renderContext->UpdateBorderRadius({ radius, radius, radius, radius });
+    } else {
+        auto normalRadius =
+            buttonLayoutProperty->GetBorderRadiusValue(BorderRadiusProperty({ 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp }));
+        renderContext->UpdateBorderRadius(normalRadius);
     }
 }
 

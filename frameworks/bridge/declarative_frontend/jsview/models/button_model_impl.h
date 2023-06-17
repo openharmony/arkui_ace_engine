@@ -41,14 +41,17 @@ public:
     void SetAspectRatio(const double& ratio) override;
     void SetSize(const std::optional<Dimension>& width, const std::optional<Dimension>& height) override;
     void SetBorderRadius(const Dimension& radius) override;
+    void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft, const std::optional<Dimension>& radiusTopRight,
+        const std::optional<Dimension>& radiusBottomLeft,
+        const std::optional<Dimension>& radiusBottomRight) override {};
     void SetHoverEffect(const int32_t& hoverEffectNum) override;
     void SetRemoteMessage(RemoteCallback&& remoteCallback) override;
 
 private:
     static RefPtr<TextComponent> GetTextComponent();
     static void ResetButtonHeight();
-    static void SetTypeAndStateEffect(const std::optional<ButtonType>& type,
-        const std::optional<bool>& stateEffect, const RefPtr<ButtonComponent>& buttonComponent);
+    static void SetTypeAndStateEffect(const std::optional<ButtonType>& type, const std::optional<bool>& stateEffect,
+        const RefPtr<ButtonComponent>& buttonComponent);
     static void SetDefaultAttributes(const RefPtr<ButtonComponent>& buttonComponent);
 };
 } // namespace OHOS::Ace::Framework

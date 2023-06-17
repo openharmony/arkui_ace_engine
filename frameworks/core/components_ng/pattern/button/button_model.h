@@ -45,6 +45,9 @@ public:
     virtual void SetAspectRatio(const double& ratio) {}
     virtual void SetSize(const std::optional<Dimension>& width, const std::optional<Dimension>& height) = 0;
     virtual void SetBorderRadius(const Dimension& radius) = 0;
+    virtual void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
+        const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
+        const std::optional<Dimension>& radiusBottomRight) = 0;
     virtual void SetHoverEffect(const int32_t& hoverEffectNum) = 0;
     virtual void SetRemoteMessage(RemoteCallback&& remoteCallback) {}
 
