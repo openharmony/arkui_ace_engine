@@ -37,6 +37,7 @@ build_component("form") {
       "bundle_framework:appexecfwk_core",
       "form_fwk:fmskit_native",
       "form_fwk:form_manager",
+      "graphic_standard:librender_service_client",
       "input:libmmi-client",
       "ipc:ipc_core",
     ]
@@ -47,7 +48,6 @@ build_component("form") {
     deps = [
       "//foundation/arkui/ace_engine/interfaces/inner_api/form_render:ace_form_render",
       "//foundation/graphic/graphic_2d:libsurface",
-      "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     ]
   }
   if (ace_use_new_skia) {

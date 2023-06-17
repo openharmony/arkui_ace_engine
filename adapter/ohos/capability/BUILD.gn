@@ -63,6 +63,7 @@ template("ace_capability_ohos_source_set") {
         "bundle_framework:appexecfwk_base",
         "c_utils:utils",
         "eventhandler:libeventhandler",
+        "graphic_standard:librender_service_client",
         "graphic_standard:surface",
         "hiviewdfx_hilog_native:libhilog",
         "input:libmmi-client",
@@ -70,7 +71,6 @@ template("ace_capability_ohos_source_set") {
         "window_manager:libwindow_extension_client",
         "window_manager:scene_session",
       ]
-      deps = [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
       sources += [
         "window_connection/window_extension_connection_ohos.cpp",
         "window_connection/window_extension_connection_proxy.cpp",

@@ -245,6 +245,8 @@ template("ace_core_source_set") {
       "pipeline_ng:ace_core_pipeline_ng_$platform",
     ]
 
+    external_deps = []
+
     if (ace_use_new_skia) {
       if (is_ohos) {
         sources += [
@@ -430,7 +432,7 @@ template("ace_core_source_set") {
       if (is_cross_platform_build) {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
       } else {
-        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+        external_deps += [ "graphic_standard:librender_service_client" ]
       }
     }
 
@@ -473,7 +475,6 @@ template("ace_core_source_set") {
       deps += [ "$ace_root/frameworks/core/image/apng:ace_core_apng_$platform" ]
     }
 
-    external_deps = []
     if (defined(config.form_components_support) &&
         config.form_components_support) {
       if (!use_mingw_win && !use_mac && !use_linux) {
@@ -505,7 +506,7 @@ template("ace_core_source_set") {
       if (is_cross_platform_build) {
         deps += [ "$ace_napi:ace_container_scope_static" ]
       } else {
-        deps += [ "$ace_napi:ace_container_scope" ]
+        external_deps += [ "napi:ace_container_scope" ]
       }
     }
 
@@ -516,7 +517,7 @@ template("ace_core_source_set") {
         "$ace_root/frameworks/core/components_ng/pattern/plugin:ace_core_components_plugin_pattern_ng_$platform",
       ]
       sources += [ "common/plugin_manager.cpp" ]
-      deps += [ "//commonlibrary/c_utils/base:utils" ]
+      external_deps += [ "c_utils:utils" ]
     }
 
     if (defined(config.preview_support) && config.preview_support) {
@@ -792,7 +793,7 @@ template("ace_core_ng_source_set") {
       "$ace_root/frameworks/core/components/theme:build_theme_code",
       "pipeline_ng:ace_core_pipeline_ng_$platform",
     ]
-
+    external_deps = []
     if (ace_use_new_skia) {
       configs += [ "$ace_flutter_engine_root:flutter_config" ]
       deps += [
@@ -816,7 +817,7 @@ template("ace_core_ng_source_set") {
       if (is_cross_platform_build) {
         deps += [ "$ace_napi:ace_container_scope_static" ]
       } else {
-        deps += [ "$ace_napi:ace_container_scope" ]
+        external_deps += [ "napi:ace_container_scope" ]
       }
     }
     deps += [
@@ -861,7 +862,7 @@ template("ace_core_ng_source_set") {
       if (is_cross_platform_build) {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
       } else {
-        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+        external_deps += [ "graphic_standard:librender_service_client" ]
       }
     }
     cflags_cc = []

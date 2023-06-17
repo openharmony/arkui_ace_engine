@@ -34,10 +34,11 @@ template("napi_font_static") {
     sources = [ "js_font.cpp" ]
 
     deps = []
+    external_deps = []
     if (platform != "" && is_cross_platform_build) {
       deps += [ "//plugins/libs/napi:napi_$platform" ]
     } else {
-      deps += [ "//foundation/arkui/napi/:ace_napi" ]
+      external_deps += [ "napi:ace_napi" ]
     }
 
     if (defined(config.libace_target)) {
