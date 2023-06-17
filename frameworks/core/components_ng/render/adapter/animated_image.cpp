@@ -217,8 +217,9 @@ RefPtr<PixelMap> AnimatedPixmap::GetPixelMap() const
 
 void AnimatedPixmap::DecodeImpl(uint32_t idx)
 {
+    auto frame = src_->CreatePixelMap(idx, width_, height_);
     std::scoped_lock<std::mutex> lock(frameMtx_);
-    currentFrame_ = src_->CreatePixelMap(idx, width_, height_);
+    currentFrame_ = frame;
 }
 
 void AnimatedPixmap::CacheFrame(const std::string& key)

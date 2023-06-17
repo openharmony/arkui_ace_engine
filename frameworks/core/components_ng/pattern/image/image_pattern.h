@@ -121,8 +121,8 @@ private:
         const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect, bool isSvg);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
 
-    void PrepareAnimation();
-    void SetRedrawCallback();
+    void PrepareAnimation(const RefPtr<CanvasImage>& image);
+    void SetRedrawCallback(const RefPtr<CanvasImage>& image);
     void RegisterVisibleAreaChange();
 
     void InitCopy();
