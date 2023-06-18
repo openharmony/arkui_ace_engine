@@ -469,6 +469,11 @@ public:
         ViewAbstract::SetMotionPath(option);
     }
 
+    void SetRenderGroup(bool isRenderGroup) override
+    {
+        ViewAbstract::SetRenderGroup(isRenderGroup);
+    }
+
     void SetFlexBasis(const Dimension& value) override
     {
         ViewAbstract::SetFlexBasis(value);

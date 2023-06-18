@@ -2777,4 +2777,10 @@ void RosenRenderContext::PaintPixmapBgImage()
     rsNode_->SetBgImage(rosenImage);
 }
 
+void RosenRenderContext::OnRenderGroupUpdate(bool isRenderGroup)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->MarkNodeGroup(isRenderGroup);
+}
+
 } // namespace OHOS::Ace::NG

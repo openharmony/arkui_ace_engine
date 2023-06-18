@@ -158,6 +158,8 @@ public:
 
     // render position
     static void SetZIndex(int32_t value);
+    // renderGroup
+    static void SetRenderGroup(bool isRenderGroup);
 
     // transform
     static void SetScale(const NG::VectorF& value);

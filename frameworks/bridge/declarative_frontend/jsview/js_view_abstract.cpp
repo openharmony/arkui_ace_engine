@@ -5221,6 +5221,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
 
     JSClass<JSViewAbstract>::StaticMethod("createAnimatableProperty", &JSViewAbstract::JSCreateAnimatableProperty);
     JSClass<JSViewAbstract>::StaticMethod("updateAnimatableProperty", &JSViewAbstract::JSUpdateAnimatableProperty);
+    JSClass<JSViewAbstract>::StaticMethod("renderGroup", &JSViewAbstract::JSRenderGroup);
 
     JSClass<JSViewAbstract>::Bind(globalObj);
 }
@@ -5966,4 +5967,18 @@ void JSViewAbstract::JsObscured(const JSCallbackInfo& info)
 
     ViewAbstractModel::GetInstance()->SetObscured(reasons);
 }
+
+void JSViewAbstract::JSRenderGroup(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        LOGW("renderGroup needs one parameter");
+        return;
+    }
+    bool isRenderGroup = false;
+    if (info[0]->IsBoolean()) {
+        isRenderGroup = info[0]->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetRenderGroup(isRenderGroup);
+}
+
 } // namespace OHOS::Ace::Framework
