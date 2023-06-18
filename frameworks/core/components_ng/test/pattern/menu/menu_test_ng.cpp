@@ -32,8 +32,6 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
-#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_method.h"
-#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_property.h"
 #include "core/components_ng/pattern/menu/sub_menu_layout_algorithm.h"
 #include "core/components_ng/syntax/lazy_for_each_model.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
@@ -122,7 +120,7 @@ public:
     void TearDown() override;
     void InitMenuTestNg();
     void InitMenuItemTestNg();
-    PaintWrapper* GetPaintWrapper(RefPtr<MenuWrapperPaintProperty> paintProperty);
+    PaintWrapper* GetPaintWrapper(RefPtr<MenuPaintProperty> paintProperty);
     RefPtr<FrameNode> menuFrameNode_;
     RefPtr<MenuAccessibilityProperty> menuAccessibilityProperty_;
     RefPtr<FrameNode> menuItemFrameNode_;
@@ -175,9 +173,9 @@ void MenuTestNg::InitMenuItemTestNg()
     ASSERT_NE(menuItemAccessibilityProperty_, nullptr);
 }
 
-PaintWrapper* MenuTestNg::GetPaintWrapper(RefPtr<MenuWrapperPaintProperty> paintProperty)
+PaintWrapper* MenuTestNg::GetPaintWrapper(RefPtr<MenuPaintProperty> paintProperty)
 {
-    RefPtr<MenuWrapperPaintProperty> paintProp = AceType::MakeRefPtr<MenuWrapperPaintProperty>();
+    RefPtr<MenuPaintProperty> paintProp = AceType::MakeRefPtr<MenuPaintProperty>();
     WeakPtr<RenderContext> renderContext;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
@@ -4232,17 +4230,17 @@ HWTEST_F(MenuTestNg, MenuViewTestNgSetMenuPlacement002, TestSize.Level1)
 }
 
 /**
- * @tc.name: MenuWrapperPaintMethodTestNg001
+ * @tc.name: MenuPaintMethodTestNg001
  * @tc.desc: Verify GetOverlayDrawFunction.
  * @tc.type: FUNC
  */
-HWTEST_F(MenuTestNg, MenuWrapperPaintMethodTestNg001, TestSize.Level1)
+HWTEST_F(MenuTestNg, MenuPaintMethodTestNg001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. prepare paint method object.
      */
-    RefPtr<MenuWrapperPaintProperty> paintProp = AceType::MakeRefPtr<MenuWrapperPaintProperty>();
-    RefPtr<MenuWrapperPaintMethod> paintMethod = AceType::MakeRefPtr<MenuWrapperPaintMethod>();
+    RefPtr<MenuPaintProperty> paintProp = AceType::MakeRefPtr<MenuPaintProperty>();
+    RefPtr<MenuPaintMethod> paintMethod = AceType::MakeRefPtr<MenuPaintMethod>();
     PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
     /**
      * @tc.steps: step2. excute GetOverlayDrawFunction.
@@ -4255,29 +4253,24 @@ HWTEST_F(MenuTestNg, MenuWrapperPaintMethodTestNg001, TestSize.Level1)
 }
 
 /**
- * @tc.name: MenuWrapperPaintMethodTestNg002
+ * @tc.name: MenuPaintMethodTestNg002
  * @tc.desc: Verify UpdateArrowPath.
  * @tc.type: FUNC
  */
-HWTEST_F(MenuTestNg, MenuWrapperPaintMethodTestNg002, TestSize.Level1)
+HWTEST_F(MenuTestNg, MenuPaintMethodTestNg002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. prepare paint method object.
      */
-    RefPtr<MenuWrapperPaintProperty> paintProp = AceType::MakeRefPtr<MenuWrapperPaintProperty>();
-    RefPtr<MenuWrapperPaintMethod> paintMethod = AceType::MakeRefPtr<MenuWrapperPaintMethod>();
+    RefPtr<MenuPaintProperty> paintProp = AceType::MakeRefPtr<MenuPaintProperty>();
+    RefPtr<MenuPaintMethod> paintMethod = AceType::MakeRefPtr<MenuPaintMethod>();
     /**
      * @tc.steps: step2. update paint property and excute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
      */
     paintProp->UpdateEnableArrow(true);
     paintProp->UpdateArrowPosition(OffsetF(10.0f, 10.0f));
-    Placement placements[] = {
-        Placement::TOP,
-        Placement::BOTTOM,
-        Placement::RIGHT,
-        Placement::LEFT
-    };
+    Placement placements[] = { Placement::TOP, Placement::BOTTOM, Placement::RIGHT, Placement::LEFT };
     for (Placement placementValue : placements) {
         paintProp->UpdateArrowPlacement(placementValue);
         PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
@@ -4289,17 +4282,17 @@ HWTEST_F(MenuTestNg, MenuWrapperPaintMethodTestNg002, TestSize.Level1)
 }
 
 /**
- * @tc.name: MenuWrapperPaintPropertyTestNg001
+ * @tc.name: MenuPaintPropertyTestNg001
  * @tc.desc: Verify GetEnableArrow.
  * @tc.type: FUNC
  */
-HWTEST_F(MenuTestNg, MenuWrapperPaintPropertyTestNg001, TestSize.Level1)
+HWTEST_F(MenuTestNg, MenuPaintPropertyTestNg001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Build a object MenuWrapperPaintProperty.
+     * @tc.steps: step1. Build a object MenuPaintProperty.
      * @tc.expected: enableArrow has not value.
      */
-    MenuWrapperPaintProperty property;
+    MenuPaintProperty property;
     EXPECT_FALSE(property.GetEnableArrow().has_value());
     /**
      * @tc.steps: step2. update enableArrow
@@ -4311,17 +4304,17 @@ HWTEST_F(MenuTestNg, MenuWrapperPaintPropertyTestNg001, TestSize.Level1)
 }
 
 /**
- * @tc.name: MenuWrapperPaintPropertyTestNg002
+ * @tc.name: MenuPaintPropertyTestNg002
  * @tc.desc: Verify GetArrowOffset.
  * @tc.type: FUNC
  */
-HWTEST_F(MenuTestNg, MenuWrapperPaintPropertyTestNg002, TestSize.Level1)
+HWTEST_F(MenuTestNg, MenuPaintPropertyTestNg002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Build a object MenuWrapperPaintProperty.
+     * @tc.steps: step1. Build a object MenuPaintProperty.
      * @tc.expected: arrowOffset has not value.
      */
-    MenuWrapperPaintProperty property;
+    MenuPaintProperty property;
     EXPECT_FALSE(property.GetArrowOffset().has_value());
     /**
      * @tc.steps: step2. update arrowOffset
@@ -4333,17 +4326,17 @@ HWTEST_F(MenuTestNg, MenuWrapperPaintPropertyTestNg002, TestSize.Level1)
 }
 
 /**
- * @tc.name: MenuWrapperPaintPropertyTestNg003
+ * @tc.name: MenuPaintPropertyTestNg003
  * @tc.desc: Verify GetArrowPosition.
  * @tc.type: FUNC
  */
-HWTEST_F(MenuTestNg, MenuWrapperPaintPropertyTestNg003, TestSize.Level1)
+HWTEST_F(MenuTestNg, MenuPaintPropertyTestNg003, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Build a object MenuWrapperPaintProperty.
+     * @tc.steps: step1. Build a object MenuPaintProperty.
      * @tc.expected: arrowPosition has not value.
      */
-    MenuWrapperPaintProperty property;
+    MenuPaintProperty property;
     EXPECT_FALSE(property.GetArrowPosition().has_value());
     /**
      * @tc.steps: step2. update arrowPosition
@@ -4355,17 +4348,17 @@ HWTEST_F(MenuTestNg, MenuWrapperPaintPropertyTestNg003, TestSize.Level1)
 }
 
 /**
- * @tc.name: MenuWrapperPaintPropertyTestNg004
+ * @tc.name: MenuPaintPropertyTestNg004
  * @tc.desc: Verify GetArrowPlacement.
  * @tc.type: FUNC
  */
-HWTEST_F(MenuTestNg, MenuWrapperPaintPropertyTestNg004, TestSize.Level1)
+HWTEST_F(MenuTestNg, MenuPaintPropertyTestNg004, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Build a object MenuWrapperPaintProperty.
+     * @tc.steps: step1. Build a object MenuPaintProperty.
      * @tc.expected: arrowPlacement has not value.
      */
-    MenuWrapperPaintProperty property;
+    MenuPaintProperty property;
     EXPECT_FALSE(property.GetArrowPlacement().has_value());
     /**
      * @tc.steps: step2. update arrowPlacement
@@ -4377,17 +4370,17 @@ HWTEST_F(MenuTestNg, MenuWrapperPaintPropertyTestNg004, TestSize.Level1)
 }
 
 /**
- * @tc.name: MenuWrapperPaintPropertyTestNg005
+ * @tc.name: MenuPaintPropertyTestNg005
  * @tc.desc: Verify Reset.
  * @tc.type: FUNC
  */
-HWTEST_F(MenuTestNg, MenuWrapperPaintPropertyTestNg005, TestSize.Level1)
+HWTEST_F(MenuTestNg, MenuPaintPropertyTestNg005, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Build a object MenuWrapperPaintProperty, update property
+     * @tc.steps: step1. Build a object MenuPaintProperty, update property
      * @tc.expected: property value are as expected.
      */
-    MenuWrapperPaintProperty property;
+    MenuPaintProperty property;
     property.UpdateEnableArrow(true);
     property.UpdateArrowOffset(Dimension(10.0f));
     property.UpdateArrowPosition(OffsetF(10.0f, 10.0f));
@@ -4408,16 +4401,16 @@ HWTEST_F(MenuTestNg, MenuWrapperPaintPropertyTestNg005, TestSize.Level1)
 }
 
 /**
- * @tc.name: MenuWrapperPaintPropertyTestNg006
+ * @tc.name: MenuPaintPropertyTestNg006
  * @tc.desc: Verify Clone.
  * @tc.type: FUNC
  */
-HWTEST_F(MenuTestNg, MenuWrapperPaintPropertyTestNg006, TestSize.Level1)
+HWTEST_F(MenuTestNg, MenuPaintPropertyTestNg006, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Build a object MenuWrapperPaintProperty, update property
+     * @tc.steps: step1. Build a object MenuPaintProperty, update property
      */
-    MenuWrapperPaintProperty property;
+    MenuPaintProperty property;
     property.UpdateEnableArrow(true);
     property.UpdateArrowOffset(Dimension(10.0f));
     property.UpdateArrowPosition(OffsetF(10.0f, 10.0f));
@@ -4426,7 +4419,7 @@ HWTEST_F(MenuTestNg, MenuWrapperPaintPropertyTestNg006, TestSize.Level1)
      * @tc.steps: step2. clone property
      * @tc.expected: property value are as expected.
      */
-    auto cloneProperty = AceType::DynamicCast<MenuWrapperPaintProperty>(property.Clone());
+    auto cloneProperty = AceType::DynamicCast<MenuPaintProperty>(property.Clone());
     ASSERT_NE(cloneProperty, nullptr);
     EXPECT_EQ(property.GetEnableArrow().value(), cloneProperty->GetEnableArrow().value());
     EXPECT_EQ(property.GetArrowOffset().value(), cloneProperty->GetArrowOffset().value());
@@ -4435,16 +4428,16 @@ HWTEST_F(MenuTestNg, MenuWrapperPaintPropertyTestNg006, TestSize.Level1)
 }
 
 /**
- * @tc.name: MenuWrapperPaintPropertyTestNg007
+ * @tc.name: MenuPaintPropertyTestNg007
  * @tc.desc: Verify ToJsonValue.
  * @tc.type: FUNC
  */
-HWTEST_F(MenuTestNg, MenuWrapperPaintPropertyTestNg007, TestSize.Level1)
+HWTEST_F(MenuTestNg, MenuPaintPropertyTestNg007, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Build a object MenuWrapperPaintProperty, update property
+     * @tc.steps: step1. Build a object MenuPaintProperty, update property
      */
-    MenuWrapperPaintProperty property;
+    MenuPaintProperty property;
     property.UpdateEnableArrow(true);
     property.UpdateArrowOffset(Dimension(10.0f));
     property.UpdateArrowPosition(OffsetF(10.0f, 10.0f));
@@ -4462,16 +4455,16 @@ HWTEST_F(MenuTestNg, MenuWrapperPaintPropertyTestNg007, TestSize.Level1)
 }
 
 /**
- * @tc.name: MenuWrapperPaintPropertyTestNg008
+ * @tc.name: MenuPaintPropertyTestNg008
  * @tc.desc: Verify ToJsonValue default value.
  * @tc.type: FUNC
  */
-HWTEST_F(MenuTestNg, MenuWrapperPaintPropertyTestNg008, TestSize.Level1)
+HWTEST_F(MenuTestNg, MenuPaintPropertyTestNg008, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Build a object MenuWrapperPaintProperty
+     * @tc.steps: step1. Build a object MenuPaintProperty
      */
-    MenuWrapperPaintProperty property;
+    MenuPaintProperty property;
     /**
      * @tc.steps: step2. property to json
      * @tc.expected: property jsonValue are as expected.
