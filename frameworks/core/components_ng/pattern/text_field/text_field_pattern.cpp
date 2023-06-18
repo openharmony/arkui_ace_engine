@@ -89,6 +89,8 @@ const std::string DIGIT_WHITE_LIST = "[0-9]";
 const std::string PHONE_WHITE_LIST = "[\\d\\-\\+\\*\\#]+";
 const std::string EMAIL_WHITE_LIST = "[\\w.]";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
+const std::string SHOW_PASSWORD_SVG = "SYS_SHOW_PASSWORD_SVG";
+const std::string HIDE_PASSWORD_SVG = "SYS_HIDE_PASSWORD_SVG";
 
 void SwapIfLarger(int32_t& a, int32_t& b)
 {
@@ -1932,6 +1934,7 @@ void TextFieldPattern::OnModifyDone()
     InitFocusEvent();
     InitMouseEvent();
     InitTouchEvent();
+    FilterExistText();
     SetAccessibilityAction();
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::VISIBLE_PASSWORD) {
@@ -2005,6 +2008,16 @@ void TextFieldPattern::OnModifyDone()
     }
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                  : PROPERTY_UPDATE_MEASURE);
+}
+
+void TextFieldPattern::FilterExistText()
+{
+    auto currentText = textEditingValue_.text;
+    ClearEditingValue();
+    InsertValue(currentText);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateNeedFireOnChangeWhenCreate(true);
 }
 
 void TextFieldPattern::CalculateDefaultCursor()
@@ -2496,9 +2509,6 @@ void TextFieldPattern::InitEditingValueText(std::string content)
     textEditingValue_.text = std::move(content);
     textEditingValue_.caretPosition = textEditingValue_.GetWideText().length();
     SetEditingValueToProperty(textEditingValue_.text);
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateNeedFireOnChangeWhenCreate(true);
 }
 
 void TextFieldPattern::InitCaretPosition(std::string content)
@@ -2812,9 +2822,9 @@ void TextFieldPattern::ProcessPasswordIcon()
     if (!showPasswordIcon) {
         return;
     }
-    if ((!layoutProperty->HasHidePasswordSourceInfo() || !hidePasswordImageLoadingCtx_) && textObscured_) {
+    if (textObscured_) {
         ImageSourceInfo hidePasswordSourceInfo = GetImageSourceInfoFromTheme(textObscured_);
-        if (showUserDefinedIcon_) {
+        if (hideUserDefinedIcon_) {
             UpdateUserDefineResource(hidePasswordSourceInfo);
         } else {
             UpdateInternalResource(hidePasswordSourceInfo);
@@ -2826,7 +2836,7 @@ void TextFieldPattern::ProcessPasswordIcon()
         hidePasswordImageLoadingCtx_->LoadImageData();
         return;
     }
-    if ((!layoutProperty->HasShowPasswordSourceInfo() || !showPasswordImageLoadingCtx_) && !textObscured_) {
+    if (!textObscured_) {
         ImageSourceInfo showPasswordSourceInfo = GetImageSourceInfoFromTheme(textObscured_);
         if (showUserDefinedIcon_) {
             UpdateUserDefineResource(showPasswordSourceInfo);
@@ -2849,12 +2859,17 @@ ImageSourceInfo TextFieldPattern::GetImageSourceInfoFromTheme(bool checkHidePass
     ImageSourceInfo imageSourceInfo;
     auto theme = context->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(theme, imageSourceInfo);
-    if (showUserDefinedIcon_) {
-        return checkHidePasswordIcon ? hideResultImageInfo_ : showResultImageInfo_;
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, imageSourceInfo);
+    if (checkHidePasswordIcon && hideUserDefinedIcon_) {
+        return layoutProperty->GetHidePasswordSourceInfoValue(imageSourceInfo);
     }
     if (checkHidePasswordIcon) {
         imageSourceInfo.SetResourceId(InternalResource::ResourceId::HIDE_PASSWORD_SVG);
         return imageSourceInfo;
+    }
+    if (showUserDefinedIcon_) {
+        return layoutProperty->GetShowPasswordSourceInfoValue(imageSourceInfo);
     }
     imageSourceInfo.SetResourceId(InternalResource::ResourceId::SHOW_PASSWORD_SVG);
     return imageSourceInfo;
@@ -2869,8 +2884,6 @@ void TextFieldPattern::UpdateUserDefineResource(ImageSourceInfo& sourceInfo)
         LOGE("Icon path empty");
         return;
     }
-    auto theme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(theme);
     sourceInfo.SetDimension(DEFAULT_FONT, DEFAULT_FONT);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -2985,7 +2998,11 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
 {
     LOGD("Insert value '%{public}s'", insertValue.c_str());
     auto wideInsertValue = StringUtils::ToWstring(insertValue);
-    LOGD("Insert length %{public}d", static_cast<int32_t>(wideInsertValue.length()));
+    if (wideInsertValue.empty()) {
+        LOGW("Cannot insert empty text");
+        return;
+    }
+    LOGI("Insert length %{public}d", static_cast<int32_t>(wideInsertValue.length()));
     auto originLength = static_cast<uint32_t>(textEditingValue_.GetWideText().length());
     if (originLength >= GetMaxLength() && !InSelectMode()) {
         LOGW("Max length reached");
@@ -3337,6 +3354,9 @@ void TextFieldPattern::SetEditingValueToProperty(const std::string& newValueText
 
 void TextFieldPattern::ClearEditingValue()
 {
+    if (textEditingValue_.text.empty()) {
+        return;
+    }
     textEditingValue_.Reset();
     SetEditingValueToProperty("");
     UpdateEditingValueToRecord();
@@ -4317,6 +4337,26 @@ float TextFieldPattern::GetMarginBottom() const
     return 0.0f;
 }
 
+std::string TextFieldPattern::GetShowResultImageSrc() const
+{
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "");
+    if (showUserDefinedIcon_ && layoutProperty->HasShowPasswordSourceInfo()) {
+        return layoutProperty->GetShowPasswordSourceInfo()->GetSrc();
+    }
+    return SHOW_PASSWORD_SVG;
+}
+
+std::string TextFieldPattern::GetHideResultImageSrc() const
+{
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "");
+    if (hideUserDefinedIcon_ && layoutProperty->HasHidePasswordSourceInfo()) {
+        return layoutProperty->GetHidePasswordSourceInfo()->GetSrc();
+    }
+    return HIDE_PASSWORD_SVG;
+}
+
 void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("placeholder", GetPlaceHolder().c_str());
@@ -4338,8 +4378,8 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("copyOption", GetCopyOptionString().c_str());
     json->Put("style", GetInputStyleString().c_str());
     auto jsonValue = JsonUtil::Create(true);
-    jsonValue->Put("onIconSrc", showResultImageInfo_.GetSrc().c_str());
-    jsonValue->Put("offIconSrc", hideResultImageInfo_.GetSrc().c_str());
+    jsonValue->Put("onIconSrc", GetShowResultImageSrc().c_str());
+    jsonValue->Put("offIconSrc", GetHideResultImageSrc().c_str());
     json->Put("passwordIcon", jsonValue->ToString().c_str());
     json->Put("showError", GetErrorTextState() ? GetErrorTextString().c_str() : "undefined");
     auto maxLines = GetMaxLines();

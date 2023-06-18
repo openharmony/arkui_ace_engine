@@ -108,7 +108,7 @@ public:
      *
      *   @return    true if popup was removed, false if no overlay exists
      */
-    bool RemoveOverlay();
+    bool RemoveOverlay(bool isBackPressed);
     bool RemoveModalInOverlay();
     bool RemoveOverlayInSubwindow();
 
@@ -255,10 +255,15 @@ private:
 
     void ComputeSheetOffset(NG::SheetStyle& sheetStyle);
 
+    void BeforeShowDialog(const RefPtr<FrameNode>& dialogNode);
+    void RemoveDialogFromMap(const RefPtr<FrameNode>& node);
+    bool DialogInMapHoldingFocus();
+
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
     // K: target frameNode ID, V: menuNode
     std::unordered_map<int32_t, RefPtr<FrameNode>> menuMap_;
+    std::unordered_map<int32_t, RefPtr<FrameNode>> dialogMap_;
     std::unordered_map<int32_t, RefPtr<FrameNode>> customPopupMap_;
     std::stack<WeakPtr<FrameNode>> modalStack_;
     WeakPtr<FrameNode> lastModalNode_;

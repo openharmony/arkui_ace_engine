@@ -61,6 +61,8 @@ public:
         ResetShowErrorText();
         ResetShowCounter();
         ResetShowUnderline();
+        ResetShowPasswordSourceInfo();
+        ResetHidePasswordSourceInfo();
         ResetTextAlignChanged();
     }
 
@@ -159,6 +161,8 @@ protected:
         value->propShowErrorText_ = CloneShowErrorText();
         value->propShowCounter_ = CloneShowCounter();
         value->propShowUnderline_ = CloneShowUnderline();
+        value->propShowPasswordSourceInfo_ = CloneShowPasswordSourceInfo();
+        value->propHidePasswordSourceInfo_ = CloneHidePasswordSourceInfo();
         value->propTextAlignChanged_ = CloneTextAlignChanged();
     }
 

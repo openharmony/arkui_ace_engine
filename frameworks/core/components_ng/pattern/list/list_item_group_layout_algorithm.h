@@ -163,7 +163,7 @@ private:
     static void SetListItemIndex(const LayoutWrapper* groupLayoutWrapper,
         const RefPtr<LayoutWrapper>& itemLayoutWrapper, int32_t indexInGroup);
     bool IsCardStyleForListItemGroup(const LayoutWrapper* groupLayoutWrapper);
-    float GetMaxGridWidth();
+    float GetListItemGroupMaxWidth(const OptionalSizeF& parentIdealSize, RefPtr<LayoutProperty> layoutProperty);
 
     bool isCardStyle_ = false;
     int32_t headerIndex_;

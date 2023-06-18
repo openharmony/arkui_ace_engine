@@ -845,8 +845,19 @@ void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
         return;
     }
     CHECK_NULL_VOID(rsNode_);
+    auto paintRect = AdjustPaintRect();
+    if (isDisappearing_ && !paintRect.IsValid()) {
+        return;
+    }
+    double radiusX = paintRect.Width();
     Rosen::Vector4f cornerRadius;
-    ConvertRadius(value, cornerRadius);
+    // When the unit of radius is percent, the length and width of rect should be calculated at the same time,
+    // but currently SetCornerRadius only supports Vector4f parameter passing.
+    // Graphic should provide support .
+    cornerRadius.SetValues(static_cast<float>(value.radiusTopLeft.value_or(Dimension()).ConvertToPxWithSize(radiusX)),
+        static_cast<float>(value.radiusTopRight.value_or(Dimension()).ConvertToPxWithSize(radiusX)),
+        static_cast<float>(value.radiusBottomRight.value_or(Dimension()).ConvertToPxWithSize(radiusX)),
+        static_cast<float>(value.radiusBottomLeft.value_or(Dimension()).ConvertToPxWithSize(radiusX)));
     rsNode_->SetCornerRadius(cornerRadius);
     RequestNextFrame();
 }

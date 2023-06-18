@@ -93,10 +93,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RowsGap, Dimension, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(CachedCount, int32_t);
-    void OnCachedCountUpdate(int32_t /*cachedCount*/) const
-    {
-        ResetGridLayoutInfoAndMeasure();
-    }
+    void OnCachedCountUpdate(int32_t /*cachedCount*/) const {}
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(GridDirection, FlexDirection);
     void OnGridDirectionUpdate(FlexDirection /*gridDirection*/) const

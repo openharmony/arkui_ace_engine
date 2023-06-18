@@ -230,10 +230,6 @@ bool MenuPattern::OnKeyEvent(const KeyEvent& event) const
         wrapperPattern->HideSubMenu();
         return true;
     }
-    if (event.code == KeyCode::KEY_ESCAPE) {
-        HideMenu();
-        return true;
-    }
     return false;
 }
 

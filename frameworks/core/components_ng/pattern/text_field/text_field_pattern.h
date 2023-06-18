@@ -492,16 +492,6 @@ public:
         return hidePasswordCanvasImage_;
     }
 
-    void SetShowResultImageInfo(ImageSourceInfo showResultImageInfo)
-    {
-        showResultImageInfo_ = showResultImageInfo;
-    }
-
-    void SetHideResultImageInfo(ImageSourceInfo hideResultImageInfo)
-    {
-        hideResultImageInfo_ = hideResultImageInfo;
-    }
-
     bool GetTextObscured() const
     {
         return textObscured_;
@@ -532,9 +522,14 @@ public:
                layoutProperty->GetShowPasswordIconValue(true);
     }
 
-    void SetShowUserDefinedIcon()
+    void SetShowUserDefinedIcon(bool enable)
     {
-        showUserDefinedIcon_ = true;
+        showUserDefinedIcon_ = enable;
+    }
+
+    void SetHideUserDefinedIcon(bool enable)
+    {
+        hideUserDefinedIcon_ = enable;
     }
 
     void SetEnableTouchAndHoverEffect(bool enable)
@@ -819,6 +814,8 @@ public:
     {
         ++drawOverlayFlag_;
     }
+    std::string GetShowResultImageSrc() const;
+    std::string GetHideResultImageSrc() const;
 
 private:
     bool HasFocus() const;
@@ -927,6 +924,7 @@ private:
     void SetAccessibilityScrollAction();
 
     void UpdateCopyAllStatus();
+    void FilterExistText();
 
     RectF frameRect_;
     RectF contentRect_;
@@ -967,13 +965,12 @@ private:
     PaddingPropertyF utilPadding_;
     OffsetF rightClickOffset_;
 
-    ImageSourceInfo showResultImageInfo_;
-    ImageSourceInfo hideResultImageInfo_;
     bool setBorderFlag_ = true;
     BorderWidthProperty lastDiffBorderWidth_;
     BorderColorProperty lastDiffBorderColor_;
 
     bool showUserDefinedIcon_ = false;
+    bool hideUserDefinedIcon_ = false;
     bool isSingleHandle_ = false;
     bool isFirstHandle_ = false;
     float baselineOffset_ = 0.0f;
