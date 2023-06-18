@@ -36,18 +36,18 @@ public:
     CanvasDrawFunction GetOverlayDrawFunction(PaintWrapper* paintWrapper) override;
 
 private:
-    float horizonOffsetFirst_;
-    float horizonOffsetSecond_;
-    float horizonOffsetThird_;
-    float horizonOffsetForth_;
-    float verticalOffsetFirst_;
-    float verticalOffsetSecond_;
-    float verticalOffsetThird_;
     void UpdateArrowPath(Placement placement, float arrowX, float arrowY, RSPath& path);
     void GetTopPath(float arrowX, float arrowY, RSPath& path);
     void GetBottomPath(float arrowX, float arrowY, RSPath& path);
     void GetRightPath(float arrowX, float arrowY, RSPath& path);
     void GetLeftPath(float arrowX, float arrowY, RSPath& path);
+    float horizonOffsetFirst_ = 0.0f;
+    float horizonOffsetSecond_ = 0.0f;
+    float horizonOffsetThird_ = 0.0f;
+    float horizonOffsetForth_ = 0.0f;
+    float verticalOffsetFirst_ = 0.0f;
+    float verticalOffsetSecond_ = 0.0f;
+    float verticalOffsetThird_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(MenuPaintMethod);
 };
 } // namespace OHOS::Ace::NG
