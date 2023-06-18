@@ -727,8 +727,8 @@ void RosenRenderBox::CalculateRepeatParam()
 SkVector RosenRenderBox::GetSkRadii(const Radius& radius, double shrinkFactor, double borderWidth)
 {
     SkVector fRadii;
-    fRadii.set(SkDoubleToScalar(std::max(NormalizeToPx(radius.GetX()) - shrinkFactor * borderWidth, 0.0)),
-        SkDoubleToScalar(std::max(NormalizeToPx(radius.GetY()) - shrinkFactor * borderWidth, 0.0)));
+    fRadii.set(SkDoubleToScalar(std::max(NormalizePercentToPx(radius.GetX(), false) - shrinkFactor * borderWidth, 0.0)),
+        SkDoubleToScalar(std::max(NormalizePercentToPx(radius.GetY(), true) - shrinkFactor * borderWidth, 0.0)));
     return fRadii;
 }
 #else
@@ -1533,10 +1533,10 @@ void RosenRenderBox::SyncDecorationToRSNode()
             border = backDecoration_->GetBorder();
         }
         if (backDecoration_->GetBorder().HasRadius()) {
-            cornerRadius.SetValues(NormalizeToPx(backDecoration_->GetBorder().TopLeftRadius().GetX()),
-                NormalizeToPx(backDecoration_->GetBorder().TopRightRadius().GetX()),
-                NormalizeToPx(backDecoration_->GetBorder().BottomRightRadius().GetX()),
-                NormalizeToPx(backDecoration_->GetBorder().BottomLeftRadius().GetX()));
+            cornerRadius.SetValues(NormalizePercentToPx(backDecoration_->GetBorder().TopLeftRadius().GetX(), false),
+                NormalizePercentToPx(backDecoration_->GetBorder().TopRightRadius().GetX(), false),
+                NormalizePercentToPx(backDecoration_->GetBorder().BottomRightRadius().GetX(), false),
+                NormalizePercentToPx(backDecoration_->GetBorder().BottomLeftRadius().GetX(), false));
         }
         RosenDecorationPainter::PaintBoxShadows(backDecoration_->GetShadows(), rsNode);
         auto rosenBlurStyleValue = GetRosenBlurStyleValue(backDecoration_->GetBlurStyle());
@@ -1556,10 +1556,10 @@ void RosenRenderBox::SyncDecorationToRSNode()
             border = frontDecoration_->GetBorder();
         }
         if (frontDecoration_->GetBorder().HasRadius()) {
-            cornerRadius.SetValues(NormalizeToPx(frontDecoration_->GetBorder().TopLeftRadius().GetX()),
-                NormalizeToPx(frontDecoration_->GetBorder().TopRightRadius().GetX()),
-                NormalizeToPx(frontDecoration_->GetBorder().BottomRightRadius().GetX()),
-                NormalizeToPx(frontDecoration_->GetBorder().BottomLeftRadius().GetX()));
+            cornerRadius.SetValues(NormalizePercentToPx(frontDecoration_->GetBorder().TopLeftRadius().GetX(), false),
+                NormalizePercentToPx(frontDecoration_->GetBorder().TopRightRadius().GetX(), false),
+                NormalizePercentToPx(frontDecoration_->GetBorder().BottomRightRadius().GetX(), false),
+                NormalizePercentToPx(frontDecoration_->GetBorder().BottomLeftRadius().GetX(), false));
         }
         if (frontDecoration_->GetBlurRadius().IsValid()) {
             float radius = NormalizeToPx(frontDecoration_->GetBlurRadius());
