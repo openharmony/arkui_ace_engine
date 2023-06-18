@@ -23,6 +23,7 @@
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/log/frame_info.h"
+#include "base/log/frame_report.h"
 #include "base/memory/referenced.h"
 #include "core/common/frontend.h"
 #include "core/components_ng/base/frame_node.h"

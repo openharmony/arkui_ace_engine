@@ -33,7 +33,6 @@
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
-#include "base/log/frame_report.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/ressched/ressched_report.h"
@@ -258,6 +257,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     if (hasAnimation) {
         RequestFrame();
     }
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().FlushEnd();
+    }
     FlushMessages();
     if (!isFormRender_ && onShow_ && onFocus_) {
         FlushFocus();
@@ -279,7 +281,11 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
     if (scheduleTasks_.empty()) {
         return;
     }
-
+    FrameReport& fr = FrameReport::GetInstance();
+    if (fr.GetEnable()) {
+        fr.FlushBegin();
+        fr.BeginFlushAnimation();
+    }
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushAnimation();
     }
