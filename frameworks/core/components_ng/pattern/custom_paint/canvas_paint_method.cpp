@@ -202,9 +202,14 @@ void CanvasPaintMethod::DrawImage(
     }
 
     switch (canvasImage.flag) {
-        case 0:
+        case 0: {
+#ifndef NEW_SKIA
             skCanvas_->drawImage(image, canvasImage.dx, canvasImage.dy);
+#else
+            skCanvas_->drawImage(image, canvasImage.dx, canvasImage.dy, sampleOptions_, &imagePaint_);
+#endif
             break;
+        }
         case 1: {
             SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
 #ifndef NEW_SKIA
