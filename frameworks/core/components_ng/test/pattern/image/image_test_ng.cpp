@@ -688,6 +688,7 @@ HWTEST_F(ImageTestNg, ImagePaintMethod002, TestSize.Level1)
     config = *imagePaintMethod.canvasImage_->paintConfig_;
     EXPECT_NE(config.borderRadiusXY_->at(0).GetX(), RADIUS_EXTREME);
     EXPECT_EQ(config.borderRadiusXY_->at(0).GetX(), WIDTH / 2);
+    EXPECT_EQ(config.borderRadiusXY_->at(0).GetY(), WIDTH / 2);
 }
 
 /**

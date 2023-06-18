@@ -30,13 +30,14 @@ namespace OHOS::Ace::NG {
 namespace {
 void NormalizeRadius(BorderRadiusArray& radius, const SizeF& size)
 {
+    auto maxRadius = std::min(size.Width(), size.Height()) / 2;
     // radius shouldn't be larger than half of image size
     for (auto&& corner : radius) {
-        if (corner.GetX() > size.Width() / 2) {
-            corner.SetX(size.Width() / 2);
+        if (corner.GetX() > maxRadius) {
+            corner.SetX(maxRadius);
         }
-        if (corner.GetY() > size.Height() / 2) {
-            corner.SetY(size.Height() / 2);
+        if (corner.GetY() > maxRadius) {
+            corner.SetY(maxRadius);
         }
     }
 }
