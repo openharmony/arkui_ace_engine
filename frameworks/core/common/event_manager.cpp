@@ -498,6 +498,7 @@ bool EventManager::DispatchMouseHoverEvent(const MouseEvent& event)
 
 void EventManager::LogPrintMouseTest()
 {
+#ifdef ACE_DEBUG_LOG
     if (!SystemProperties::GetDebugEnabled()) {
         return;
     }
@@ -530,6 +531,7 @@ void EventManager::LogPrintMouseTest()
     LOGD("Mouse test last/current hoverEffect node: %{public}s/%{public}d / %{public}s/%{public}d",
         lastNode ? lastNode->GetTag().c_str() : "NULL", lastNode ? lastNode->GetId() : -1,
         currNode ? currNode->GetTag().c_str() : "NULL", currNode ? currNode->GetId() : -1);
+#endif
 }
 
 void EventManager::MouseTest(

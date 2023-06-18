@@ -55,9 +55,11 @@ void LoadAceApplicationContext(std::unordered_map<std::string, std::string>& pay
     payload[UID] = std::to_string(aceApplicationInfo.GetUid());
     payload[BUNDLE_NAME] = aceApplicationInfo.GetPackageName();
     payload[ABILITY_NAME] = aceApplicationInfo.GetAbilityName();
+#ifdef ACE_DEBUG_LOG
     for (auto& pair : payload) {
         LOGD("DataReport:  %{public}s :  %{public}s", pair.first.c_str(), pair.second.c_str());
     }
+#endif
 }
 }
 
