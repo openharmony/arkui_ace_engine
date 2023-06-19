@@ -225,6 +225,7 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     int32_t itemIndex = 0;
     itemsPosition_.clear();
     gridLayoutInfo_.gridMatrix_.clear();
+    gridLayoutInfo_.startIndex_ = 0;
     for (int32_t index = 0; index < mainCount_ * crossCount_; ++index) {
         auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!childLayoutWrapper) {
@@ -270,6 +271,9 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
         ++itemIndex;
     }
+    gridLayoutInfo_.endIndex_ = itemIndex - 1;
+    gridLayoutInfo_.startMainLineIndex_ = 0;
+    gridLayoutInfo_.endMainLineIndex_ = rowIndex;
 }
 
 void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
