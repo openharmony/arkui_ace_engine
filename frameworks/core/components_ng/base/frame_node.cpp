@@ -80,6 +80,8 @@ FrameNode::~FrameNode()
         pipeline->ChangeMouseStyle(GetId(), MouseFormat::DEFAULT);
         pipeline->FreeMouseStyleHoldNode(GetId());
         pipeline->RemoveStoredNode(GetRestoreId());
+        auto dragManager = pipeline->GetDragDropManager();
+        dragManager->RemoveDragFrameNode(AceType::WeakClaim(this));
     }
 }
 
