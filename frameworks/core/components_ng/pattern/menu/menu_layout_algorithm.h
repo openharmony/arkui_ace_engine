@@ -98,6 +98,8 @@ private:
     OffsetF GetPositionWithPlacementRightTop(const SizeF&, const OffsetF&, const OffsetF&);
     OffsetF GetPositionWithPlacementRightBottom(const SizeF&, const OffsetF&, const OffsetF&);
 
+    RefPtr<PipelineContext> GetCurrentPipelineContext();
+
     OffsetF targetOffset_;
     SizeF targetSize_;
     Placement placement_ = Placement::BOTTOM;

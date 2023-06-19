@@ -18,6 +18,7 @@ ace_unittest("menu_test_ng") {
   sources = [
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_engine.cpp",
 
     # option
     # stage

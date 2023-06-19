@@ -23,6 +23,7 @@
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_engine.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/container_modal/container_modal_constants.h"
@@ -32,7 +33,6 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
-
 namespace OHOS::Ace::NG {
 
 namespace {
@@ -132,7 +132,8 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
         rightSpace_ = wrapperSize_.Width() - leftSpace_;
     }
 
-    auto context = PipelineContext::GetCurrentContext();
+    placement_ = props->GetMenuPlacement().value_or(Placement::BOTTOM);
+    auto context = GetCurrentPipelineContext();
     CHECK_NULL_VOID(context);
     auto stageManager = context->GetStageManager();
     CHECK_NULL_VOID(stageManager);
@@ -141,7 +142,6 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     pageOffset_ = page->GetOffsetRelativeToWindow();
     topSpace_ -= pageOffset_.GetY();
     leftSpace_ -= pageOffset_.GetX();
-    placement_ = props->GetMenuPlacement().value_or(Placement::BOTTOM);
 }
 
 // Called to perform layout render node and child.
@@ -407,6 +407,21 @@ OffsetF MenuLayoutAlgorithm::ComputeMenuPositionByOffset(
     return menuTrimOffset;
 }
 
+RefPtr<PipelineContext> MenuLayoutAlgorithm::GetCurrentPipelineContext()
+{
+    auto containerId = Container::CurrentId();
+    RefPtr<PipelineContext> context;
+    if (containerId >= MIN_SUBCONTAINER_ID) {
+        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+        auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
+        CHECK_NULL_RETURN(parentContainer, nullptr);
+        context = DynamicCast<PipelineContext>(parentContainer->GetPipelineContext());
+    } else {
+        context = PipelineContext::GetCurrentContext();
+    }
+    return context;
+}
+
 OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(
     const RefPtr<MenuLayoutProperty>& menuProp, const RefPtr<MenuPattern>& menuPattern, const SizeF& size)
 {
@@ -415,11 +430,10 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(
     float x = 0.0f;
     float y = 0.0f;
     if (menuProp->GetMenuPlacement().has_value() && (targetSize_.Width() > 0.0 || targetSize_.Height() > 0.0)) {
-        placement_ = menuProp->GetMenuPlacement().value();
         auto childOffset = GetChildPosition(size, menuProp, menuPattern->IsContextMenu());
         x = childOffset.GetX() + positionOffset_.GetX();
         y = childOffset.GetY() + positionOffset_.GetY();
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto pipelineContext = GetCurrentPipelineContext();
         if (pipelineContext && menuPattern->IsContextMenu()) {
             auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
             float windowsOffsetX = windowGlobalRect.GetOffset().GetX();
@@ -653,7 +667,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const RefPtr<MenuLayoutPrope
     auto geometryNode = targetNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     targetSize_ = geometryNode->GetFrameSize();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
                             pipelineContext->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
@@ -682,7 +696,7 @@ OffsetF MenuLayoutAlgorithm::FitToScreen(const OffsetF& fitPosition, const SizeF
 {
     float x = fitPosition.GetX() + positionOffset_.GetX();
     float y = fitPosition.GetY() + positionOffset_.GetY();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = GetCurrentPipelineContext();
     if (pipelineContext && isContextMenu) {
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
         float windowsOffsetX = windowGlobalRect.GetOffset().GetX();

@@ -84,6 +84,7 @@ ohos_unittest("textfield_test_ng") {
     "$ace_root/frameworks/core/components_ng/render/image_painter.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/image/mock/mock_image_pattern.cpp",
     "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_engine.cpp",
 
     # mock
     "$ace_root/frameworks/base/test/mock/mock_drag_window.cpp",

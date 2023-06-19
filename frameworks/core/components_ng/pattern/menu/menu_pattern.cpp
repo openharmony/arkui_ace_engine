@@ -625,6 +625,16 @@ void MenuPattern::UpdateMenuClip(const RefPtr<LayoutWrapper>& dirty)
     }
 }
 
+RefPtr<MenuPattern> MenuPattern::GetMainMenuPattern() const
+{
+    auto wrapperFrameNode = GetMenuWrapper();
+    CHECK_NULL_RETURN(wrapperFrameNode, nullptr);
+    auto mainMenuUINode = wrapperFrameNode->GetChildAtIndex(0);
+    CHECK_NULL_RETURN(mainMenuUINode, nullptr);
+    auto mainMenuFrameNode = AceType::DynamicCast<FrameNode>(mainMenuUINode);
+    return mainMenuFrameNode->GetPattern<MenuPattern>();
+}
+
 void InnerMenuPattern::RecordItemsAndGroups()
 {
     itemsAndGroups_.clear();
