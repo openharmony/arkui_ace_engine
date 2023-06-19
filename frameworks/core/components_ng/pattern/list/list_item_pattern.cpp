@@ -820,8 +820,7 @@ void ListItemPattern::InitDisableEvent()
         if (selectable_) {
             selectable_ = false;
         }
-        auto blendOpacityColor = currentBackgroundColor_.BlendOpacity(theme->GetItemDisabledAlpha());
-        renderContext->UpdateBackgroundColor(blendOpacityColor);
+        renderContext->UpdateOpacity(theme->GetItemDisabledAlpha());
     }
 }
 } // namespace OHOS::Ace::NG
