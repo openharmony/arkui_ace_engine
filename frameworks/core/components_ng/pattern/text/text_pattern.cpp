@@ -39,12 +39,18 @@
 #endif
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t API_PROTEXTION_GREATER_NINE = 9;
+};
 
 void TextPattern::OnAttachToFrameNode()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToFrame(true);
+    if (PipelineContext::GetCurrentContext() &&
+        PipelineContext::GetCurrentContext()->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->GetRenderContext()->SetClipToFrame(true);
+    }
 }
 
 void TextPattern::OnDetachFromFrameNode(FrameNode* node)
@@ -705,6 +711,12 @@ void TextPattern::OnModifyDone()
         paragraph_.Reset();
     }
 
+    if (!(PipelineContext::GetCurrentContext() &&
+            PipelineContext::GetCurrentContext()->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE)) {
+        bool shouldClipToContent =
+            textLayoutProperty->GetTextOverflow().value_or(TextOverflow::CLIP) == TextOverflow::CLIP;
+        host->GetRenderContext()->SetClipToFrame(shouldClipToContent);
+    }
     std::string textCache = textForDisplay_;
     textForDisplay_ = textLayoutProperty->GetContent().value_or("");
     if (textCache != textForDisplay_) {
