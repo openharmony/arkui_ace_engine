@@ -21,7 +21,10 @@
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/texttimer/text_timer_layout_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -84,7 +87,9 @@ void TextTimerPattern::InitTimerDisplay()
                 LOGW("empty timer, skip tick callback.");
             }
         };
-        scheduler_ = SchedulerBuilder::Build(callback, host->GetContext());
+        auto context = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        scheduler_ = SchedulerBuilder::Build(callback, context);
         auto count = isCountDown_ ? inputCount_ : 0;
         UpdateTextTimer(static_cast<uint32_t>(count));
     } else {
@@ -111,11 +116,34 @@ void TextTimerPattern::Tick(uint64_t duration)
     UpdateTextTimer(static_cast<uint32_t>(tmpValue));
 }
 
+void TextTimerPattern::UpdateTextLayoutProperty(
+    RefPtr<TextTimerLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    if (layoutProperty->GetFontSize().has_value()) {
+        textLayoutProperty->UpdateFontSize(layoutProperty->GetFontSize().value());
+    }
+    if (layoutProperty->GetFontWeight().has_value()) {
+        textLayoutProperty->UpdateFontWeight(layoutProperty->GetFontWeight().value());
+    }
+    if (layoutProperty->GetTextColor().has_value()) {
+        textLayoutProperty->UpdateTextColor(layoutProperty->GetTextColor().value());
+    }
+    if (layoutProperty->GetFontFamily().has_value()) {
+        textLayoutProperty->UpdateFontFamily(layoutProperty->GetFontFamily().value());
+    }
+    if (layoutProperty->GetItalicFontStyle().has_value()) {
+        textLayoutProperty->UpdateItalicFontStyle(layoutProperty->GetItalicFontStyle().value());
+    }
+}
+
 void TextTimerPattern::OnModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+
+    auto textNode = GetTextNode();
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
     if (textLayoutProperty->GetPositionProperty()) {
@@ -124,20 +152,29 @@ void TextTimerPattern::OnModifyDone()
     } else {
         textLayoutProperty->UpdateAlignment(Alignment::CENTER);
     }
+    auto textTimerProperty = host->GetLayoutProperty<TextTimerLayoutProperty>();
+    CHECK_NULL_VOID(textTimerProperty);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
-
+    UpdateTextLayoutProperty(textTimerProperty, textLayoutProperty);
+    auto textContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(textContext);
+    textContext->SetClipToFrame(false);  
+    textContext->UpdateClipEdge(false);   
     isCountDown_ = GetIsCountDown();
     inputCount_ = GetInputCount();
 
     InitTextTimerController();
     InitTimerDisplay();
+    textNode->MarkModifyDone();
 }
 
 void TextTimerPattern::UpdateTextTimer(uint32_t elapsedTime)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    auto textNode = GetTextNode();
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
 
     // format time text.
@@ -150,8 +187,8 @@ void TextTimerPattern::UpdateTextTimer(uint32_t elapsedTime)
     }
 
     textLayoutProperty->UpdateContent(timerText); // Update time text.
+    textNode->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    TextPattern::OnModifyDone();
 }
 
 std::string TextTimerPattern::GetFormat() const
@@ -197,5 +234,17 @@ void TextTimerPattern::HandleReset()
     elapsedTime_ = 0;
     auto count = isCountDown_ ? inputCount_ : 0;
     UpdateTextTimer(static_cast<uint32_t>(count));
+}
+
+RefPtr<FrameNode> TextTimerPattern::GetTextNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(host->GetLastChild());
+    CHECK_NULL_RETURN(textNode, nullptr);
+    if (textNode->GetTag() != V2::TEXT_ETS_TAG) {
+        return nullptr;
+    }
+    return textNode;
 }
 } // namespace OHOS::Ace::NG
