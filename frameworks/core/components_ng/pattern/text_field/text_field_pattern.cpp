@@ -1969,7 +1969,6 @@ void TextFieldPattern::OnModifyDone()
     InitFocusEvent();
     InitMouseEvent();
     InitTouchEvent();
-    FilterExistText();
     SetAccessibilityAction();
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::VISIBLE_PASSWORD) {
@@ -2043,16 +2042,6 @@ void TextFieldPattern::OnModifyDone()
     }
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                  : PROPERTY_UPDATE_MEASURE);
-}
-
-void TextFieldPattern::FilterExistText()
-{
-    auto currentText = textEditingValue_.text;
-    ClearEditingValue();
-    InsertValue(currentText);
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateNeedFireOnChangeWhenCreate(true);
 }
 
 void TextFieldPattern::CalculateDefaultCursor()
@@ -2545,6 +2534,9 @@ void TextFieldPattern::InitEditingValueText(std::string content)
     textEditingValue_.text = std::move(content);
     textEditingValue_.caretPosition = textEditingValue_.GetWideText().length();
     SetEditingValueToProperty(textEditingValue_.text);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateNeedFireOnChangeWhenCreate(true);
 }
 
 void TextFieldPattern::InitCaretPosition(std::string content)
@@ -3034,11 +3026,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
 {
     LOGD("Insert value '%{public}s'", insertValue.c_str());
     auto wideInsertValue = StringUtils::ToWstring(insertValue);
-    if (wideInsertValue.empty()) {
-        LOGW("Cannot insert empty text");
-        return;
-    }
-    LOGI("Insert length %{public}d", static_cast<int32_t>(wideInsertValue.length()));
+    LOGD("Insert length %{public}d", static_cast<int32_t>(wideInsertValue.length()));
     auto originLength = static_cast<uint32_t>(textEditingValue_.GetWideText().length());
     if (originLength >= GetMaxLength() && !InSelectMode()) {
         LOGW("Max length reached");
@@ -3390,9 +3378,6 @@ void TextFieldPattern::SetEditingValueToProperty(const std::string& newValueText
 
 void TextFieldPattern::ClearEditingValue()
 {
-    if (textEditingValue_.text.empty()) {
-        return;
-    }
     textEditingValue_.Reset();
     SetEditingValueToProperty("");
     UpdateEditingValueToRecord();
