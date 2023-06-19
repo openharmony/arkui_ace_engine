@@ -166,7 +166,13 @@ float TextFieldPattern::GetTextOrPlaceHolderFontSize()
     return std::min(static_cast<float>(fontSize.ConvertToPx()), contentRect_.Height());
 }
 
-TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS) {}
+TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
+{
+    // add version protection, enable keyboard as default start from API 10 or higher
+    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9) {
+        needToRequestKeyboardOnFocus_ = true;
+    }
+}
 
 TextFieldPattern::~TextFieldPattern()
 {
