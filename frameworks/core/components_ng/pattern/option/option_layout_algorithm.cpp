@@ -45,13 +45,12 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // measure child
     auto childConstraint = props->CreateChildConstraint();
     childConstraint.maxSize.SetWidth(maxChildWidth);
-    childConstraint.percentReference.SetWidth(maxChildWidth);
     // set self size based on childNode size;
     auto minOptionHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
     childConstraint.minSize.SetHeight(minOptionHeight);
     auto child = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(child);
-    child->Measure(childConstraint);
+    MeasureRow(child, childConstraint);
 
     auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
     childSize.AddWidth(horInterval_ * 2.0f);
@@ -89,5 +88,31 @@ std::optional<float> OptionLayoutAlgorithm::GetIdealWidth(LayoutWrapper* layoutW
         return idealWidth;
     }
     return std::nullopt;
+}
+
+void OptionLayoutAlgorithm::MeasureRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint)
+{
+    auto children = row->GetAllChildrenWithBuild();
+    CHECK_NULL_VOID_NOLOG(!children.empty());
+
+    float spaceWidth = constraint.maxSize.Width();
+    float rowWidth = 0.0f;
+    float roWHeight = 0.0f;
+    for (const auto& child : children) {
+        if (child != children.back()) {
+            // not content node
+            child->Measure(constraint);
+        } else {
+            // content node update constraint max width
+            auto contentConstraint = constraint;
+            contentConstraint.maxSize.SetWidth(spaceWidth);
+            child->Measure(contentConstraint);
+        }
+        auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
+        spaceWidth -= childSize.Width();
+        rowWidth += childSize.Width();
+        roWHeight = std::max(roWHeight, childSize.Height());
+    }
+    row->GetGeometryNode()->SetFrameSize(SizeF(rowWidth, roWHeight));
 }
 } // namespace OHOS::Ace::NG
