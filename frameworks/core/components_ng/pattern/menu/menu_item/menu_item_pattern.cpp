@@ -126,16 +126,6 @@ void CustomMenuItemPattern::OnAttachToFrameNode()
 void MenuItemPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
-    /*
-     * The structure of menu item is designed as follows :
-     * |--menu_item
-     *   |--left_row
-     *     |--icon
-     *     |--content
-     *   |--right_row
-     *     |--label
-     *     |--end_icon
-     */
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     RefPtr<FrameNode> leftRow =
