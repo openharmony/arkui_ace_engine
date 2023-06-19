@@ -275,6 +275,16 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         MarkRedrawOverlay();
     } else if (caretUpdateType_ == CaretUpdateType::HANDLE_MOVE_DONE) {
         SetHandlerOnMoveDone();
+    } else if ((!NearZero(dx) || !NearZero(dy)) && SelectOverlayIsOn()) {
+        SelectHandleInfo firstInfo, secondInfo;
+        SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
+        textSelector_.firstHandleOffset_.AddX(dx);
+        textSelector_.firstHandleOffset_.AddY(dy);
+        firstInfo.paintRect = { textSelector_.firstHandleOffset_, handlePaintSize };
+        textSelector_.secondHandleOffset_.AddX(dx);
+        textSelector_.secondHandleOffset_.AddY(dy);
+        secondInfo.paintRect = { textSelector_.secondHandleOffset_, handlePaintSize };
+        selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstInfo, secondInfo);
     }
 
     CheckScrollable();
