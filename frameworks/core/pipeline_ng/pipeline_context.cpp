@@ -1299,8 +1299,8 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     auto mainNode = lastPage ? lastPage : rootNode_;
     CHECK_NULL_RETURN(mainNode, false);
     if (!eventManager_->DispatchTabIndexEventNG(event, rootNode_, mainNode)) {
-        if (!eventManager_->DispatchKeyEventNG(event, rootNode_) && event.code == KeyCode::KEY_ESCAPE &&
-            event.action == KeyAction::DOWN) {
+        auto result = eventManager_->DispatchKeyEventNG(event, rootNode_);
+        if (!result && event.code == KeyCode::KEY_ESCAPE && event.action == KeyAction::DOWN) {
             CHECK_NULL_RETURN(overlayManager_, false);
             auto currentContainer = Container::Current();
             if (currentContainer->IsSubContainer() || currentContainer->IsDialogContainer()) {
@@ -1308,6 +1308,8 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
             } else {
                 return overlayManager_->RemoveOverlay(false);
             }
+        } else {
+            return result;
         }
     }
     return true;
