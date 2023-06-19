@@ -33,7 +33,7 @@ template("ace_base_source_set") {
       "i18n:ace_base_i18n_$platform",
       "resource:ace_resource",
     ]
-
+    external_deps = []
     configs = [ "$ace_root:ace_config" ]
 
     # add base source file here
@@ -86,7 +86,7 @@ template("ace_base_source_set") {
     if (is_cross_platform_build) {
       deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
     } else {
-      deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+      external_deps += [ "graphic_standard:librender_service_client" ]
     }
 
     # curl download manager
@@ -135,7 +135,8 @@ foreach(item, ace_platforms) {
 
   ohos_source_set("ace_memory_monitor_" + item.name) {
     platform = item.name
-
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
     defines = []
     cflags_cc = []
     config = {

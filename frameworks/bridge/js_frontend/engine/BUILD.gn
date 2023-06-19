@@ -31,6 +31,7 @@ template("js_engine") {
       defines += [ "SIMULATOR_64" ]
     }
     deps = []
+    external_deps = []
     configs = [ "$ace_root:ace_config" ]
 
     if (use_js_debug) {
@@ -43,7 +44,7 @@ template("js_engine") {
     # if support napi
     sources = [ "common/js_engine.cpp" ]
 
-    deps += [ "$ace_napi:ace_napi" ]
+    external_deps += [ "napi:ace_napi" ]
 
     if (defined(config.use_build_in_js_engine) &&
         config.use_build_in_js_engine) {
@@ -55,7 +56,7 @@ template("js_engine") {
         if (is_cross_platform_build) {
           deps += [ "$ace_napi:ace_container_scope_static" ]
         } else {
-          deps += [ "$ace_napi:ace_container_scope" ]
+          external_deps += [ "napi:ace_container_scope" ]
         }
       }
     }

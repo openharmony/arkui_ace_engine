@@ -22,10 +22,9 @@ build_component_ng("ui_extension_pattern_ng") {
   ]
 
   if (is_ohos_standard_system) {
-    deps = [ "$graphic_standard_path/rosen/modules/render_service_client:librender_service_client" ]
-
     external_deps = [
       "ability_runtime:abilitykit_native",
+      "graphic_standard:librender_service_client",
       "input:libmmi-client",
       "ipc:ipc_single",
       "window_manager:libwm",
