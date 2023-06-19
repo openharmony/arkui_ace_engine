@@ -500,7 +500,7 @@ ScrollResult Scrollable::HandleScroll(double offset, int32_t source, NestedState
     auto parent = parent_.Upgrade();
     auto overOffsets = overScrollOffsetCallback_(offset);
     double backOverOffset = offset > 0 ? overOffsets.end : overOffsets.start;
-    if (!NearZero(backOverOffset)) {
+    if (NearZero(offset) || !NearZero(backOverOffset)) {
         ExecuteScrollFrameBegin(offset, scrollState);
     } else if (parent && ((offset < 0 && nestedOpt_.forward == NestedScrollMode::PARENT_FIRST) ||
         (offset > 0 && nestedOpt_.backward == NestedScrollMode::PARENT_FIRST))) {
