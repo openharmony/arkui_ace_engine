@@ -180,6 +180,9 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     idealHeight = idealSize.Height();
     auto layoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textFieldLayoutProperty, std::nullopt);
+    auto showPasswordIcon = textFieldLayoutProperty->GetShowPasswordIcon().value_or(true);
+    float imageSize = showPasswordIcon ? pattern->GetIconSize() : 0.0f;
+    auto imageHotZoneWidth = imageSize + pattern->GetIconRightOffset();
     if (!textFieldLayoutProperty->GetValueValue("").empty()) {
         UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetValueValue("");
@@ -211,7 +214,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         paragraph_->Layout(std::numeric_limits<double>::infinity());
     } else {
         // for text area or placeholder, max width is content width without password icon
-        paragraph_->Layout(idealWidth - pattern->GetScrollBarWidth() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx());
+        paragraph_->Layout(idealWidth - pattern->GetScrollBarWidth() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx()
+            - imageHotZoneWidth);
     }
     if (layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength()) {
         auto textLength = showPlaceHolder ? 0 : StringUtils::ToWstring(textContent).length();
@@ -247,7 +251,6 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
             paragraph_->GetHeight()));
         return SizeF(idealWidth, std::min(idealHeight, useHeight));
     }
-    auto showPasswordIcon = textFieldLayoutProperty->GetShowPasswordIcon().value_or(true);
     // check password image size.
     if (!showPasswordIcon || !isPasswordType) {
         textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), preferredHeight));
@@ -264,8 +267,6 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         }
         return SizeF(idealWidth, std::min(preferredHeight, idealHeight));
     }
-    float imageSize = 0.0f;
-    imageSize = showPasswordIcon ? pattern->GetIconSize() : 0.0f;
 
     if (textStyle.GetMaxLines() > 1 || pattern->IsTextArea()) {
         // for textArea, need to delete imageWidth and remeasure.
@@ -282,7 +283,6 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     }
     preferredHeight = std::min(static_cast<float>(paragraph_->GetHeight()), idealHeight);
     textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), static_cast<float>(preferredHeight)));
-    auto imageHotZoneWidth = imageSize + pattern->GetIconRightOffset();
     return SizeF(idealWidth - imageHotZoneWidth, std::min(idealHeight, preferredHeight));
 }
 
