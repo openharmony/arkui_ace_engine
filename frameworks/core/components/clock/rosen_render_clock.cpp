@@ -27,7 +27,10 @@
 namespace OHOS::Ace {
 namespace {
 constexpr double HOUR_ANGLE_UNIT = 360.0 / 12;
+constexpr double HOUR_ANGLE_UNIT_OF_MINUTE = HOUR_ANGLE_UNIT / 60;
+constexpr double HOUR_ANGLE_UNIT_OF_SECOND = HOUR_ANGLE_UNIT_OF_MINUTE / 60;
 constexpr double MINUTE_ANGLE_UNIT = 360.0 / 60;
+constexpr double MINUTE_ANGLE_UNIT_OF_SECOND = MINUTE_ANGLE_UNIT / 60;
 constexpr double SECOND_ANGLE_UNIT = 360.0 / 60;
 constexpr int32_t INTERVAL_OF_USECOND = 1000000;
 constexpr int32_t MICROSECONDS_OF_MILLISECOND = 1000;
@@ -190,8 +193,11 @@ void RosenRenderClockHand::PerformLayout()
     }
     auto clockSize = GetLayoutSize();
     auto handOffset = Offset((clockSize.Width() - renderHourHand_->GetLayoutSize().Width()) / 2.0, 0.0);
-    LayoutHand(handOffset, renderMinuteHand_, timeOfNow.minute_ * MINUTE_ANGLE_UNIT);
-    LayoutHand(handOffset, renderHourHand_, timeOfNow.hour12_ * HOUR_ANGLE_UNIT);
+    LayoutHand(handOffset, renderMinuteHand_,
+        timeOfNow.minute_ * MINUTE_ANGLE_UNIT + timeOfNow.second_ * MINUTE_ANGLE_UNIT_OF_SECOND);
+    LayoutHand(handOffset, renderHourHand_,
+        timeOfNow.hour12_ * HOUR_ANGLE_UNIT + timeOfNow.minute_ * HOUR_ANGLE_UNIT_OF_MINUTE +
+            timeOfNow.second_ * HOUR_ANGLE_UNIT_OF_SECOND);
     LayoutHand(handOffset, renderSecondHand_, timeOfNow.second_ * SECOND_ANGLE_UNIT);
 }
 

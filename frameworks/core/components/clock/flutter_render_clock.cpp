@@ -30,7 +30,10 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr double HOUR_ANGLE_UNIT = 360.0 / 12;
+constexpr double HOUR_ANGLE_UNIT_OF_MINUTE = HOUR_ANGLE_UNIT / 60;
+constexpr double HOUR_ANGLE_UNIT_OF_SECOND = HOUR_ANGLE_UNIT_OF_MINUTE / 60;
 constexpr double MINUTE_ANGLE_UNIT = 360.0 / 60;
+constexpr double MINUTE_ANGLE_UNIT_OF_SECOND = MINUTE_ANGLE_UNIT / 60;
 constexpr double SECOND_ANGLE_UNIT = 360.0 / 60;
 constexpr int32_t INTERVAL_OF_USECOND = 1000000;
 constexpr int32_t MICROSECONDS_OF_MILLISECOND = 1000;
@@ -177,8 +180,11 @@ void FlutterRenderClockHand::Paint(RenderContext& context, const Offset& offset)
     auto handOffset = offset + Offset((clockSize.Width() - renderHourHand_->GetLayoutSize().Width()) / 2.0, 0.0);
     Offset rotateCenter = offset + Offset(clockSize.Width() / 2.0, clockSize.Height() / 2.0);
 
-    RenderHand(context, handOffset, renderMinuteHand_, rotateCenter, timeOfNow.minute_ * MINUTE_ANGLE_UNIT);
-    RenderHand(context, handOffset, renderHourHand_, rotateCenter, timeOfNow.hour12_ * HOUR_ANGLE_UNIT);
+    RenderHand(context, handOffset, renderMinuteHand_, rotateCenter,
+        timeOfNow.minute_ * MINUTE_ANGLE_UNIT + timeOfNow.second_ * MINUTE_ANGLE_UNIT_OF_SECOND);
+    RenderHand(context, handOffset, renderHourHand_, rotateCenter,
+        timeOfNow.hour12_ * HOUR_ANGLE_UNIT + timeOfNow.minute_ * HOUR_ANGLE_UNIT_OF_MINUTE +
+            timeOfNow.second_ * HOUR_ANGLE_UNIT_OF_SECOND);
     RenderHand(context, handOffset, renderSecondHand_, rotateCenter, timeOfNow.second_ * SECOND_ANGLE_UNIT);
 }
 
