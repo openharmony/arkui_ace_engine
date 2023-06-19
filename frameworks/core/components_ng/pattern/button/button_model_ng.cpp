@@ -189,6 +189,27 @@ void ButtonModelNG::SetSize(const std::optional<Dimension>& width, const std::op
 void ButtonModelNG::SetBorderRadius(const Dimension& radius)
 {
     NG::ViewAbstract::SetBorderRadius(radius);
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = radius;
+    borderRadius.radiusTopRight = radius;
+    borderRadius.radiusBottomLeft = radius;
+    borderRadius.radiusBottomRight = radius;
+    borderRadius.multiValued = true;
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, BorderRadius, borderRadius);
+}
+
+void ButtonModelNG::SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
+    const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
+    const std::optional<Dimension>& radiusBottomRight)
+{
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = radiusTopLeft;
+    borderRadius.radiusTopRight = radiusTopRight;
+    borderRadius.radiusBottomLeft = radiusBottomLeft;
+    borderRadius.radiusBottomRight = radiusBottomRight;
+    borderRadius.multiValued = true;
+    NG::ViewAbstract::SetBorderRadius(borderRadius);
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, BorderRadius, borderRadius);
 }
 
 void ButtonModelNG::SetHoverEffect(const int32_t& hoverEffectNum)
