@@ -81,8 +81,7 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     spaceWidth_ = ConvertToPx(space, layoutConstraint.scaleProperty, mainPercentRefer).value_or(0);
     if (layoutProperty->GetDivider().has_value()) {
         auto divider = layoutProperty->GetDivider().value();
-        std::optional<float> dividerSpace =
-            ConvertToPx(divider.strokeWidth, layoutConstraint.scaleProperty, mainPercentRefer);
+        std::optional<float> dividerSpace = divider.strokeWidth.ConvertToPx();
         if (dividerSpace.has_value()) {
             spaceWidth_ = std::max(spaceWidth_, dividerSpace.value());
         }
