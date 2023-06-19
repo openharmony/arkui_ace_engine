@@ -340,7 +340,9 @@ void ScrollBar::SetGestureEvent()
                     scrollBar->PlayShrinkAnimation();
                 }
                 scrollBar->SetPressed(false);
-                scrollBar->OnScrollEnd();
+                if (scrollBar->GetOpacity() == UINT8_MAX) {
+                    scrollBar->OnScrollEnd();
+                }
                 scrollBar->MarkNeedRender();
             }
         });
