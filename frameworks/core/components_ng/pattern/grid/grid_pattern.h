@@ -205,6 +205,7 @@ private:
     void UpdateRectOfDraggedInItem(int32_t insertIndex);
     void SetAccessibilityAction();
     void StopAnimate();
+    float EstimateHeight();
 
     GridLayoutInfo gridLayoutInfo_;
     RefPtr<GridPositionController> positionController_;
