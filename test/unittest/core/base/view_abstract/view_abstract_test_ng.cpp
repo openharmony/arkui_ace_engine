@@ -81,7 +81,7 @@ void CallShowHideFunc()
     SubwindowManager::GetInstance()->onHideMenuCallback_();
 }
 }; // namespace
-class ViewAbstractTest : public testing::Test {
+class ViewAbstractTestNg : public testing::Test {
 public:
     static void SetUpTestSuite()
     {
@@ -105,7 +105,7 @@ public:
  * @tc.desc: Test the operation of View_Abstract
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest001, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.The FrameNode is null, related function is called.
@@ -129,7 +129,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest001, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract.
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest002, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.push FrameNode is not null, related function is called.
@@ -164,7 +164,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest002, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest003, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.The FrameNode is null, related function is called.
@@ -200,7 +200,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest003, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract.
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest004, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.push FrameNode is not null, related function is called.
@@ -247,7 +247,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest004, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest005, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.The FrameNode is null, related function is called.
@@ -278,7 +278,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest005, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract.
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest006, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.push FrameNode is not null, related function is called.
@@ -320,7 +320,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest006, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest007, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.The FrameNode is null, related function is called.
@@ -354,7 +354,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest007, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract.
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest008, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.push FrameNode is not null, related function is called.
@@ -399,7 +399,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest008, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest009, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.The FrameNode is null, related function is called.
@@ -434,7 +434,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest009, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract.
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest010, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.push FrameNode is not null, related function is called.
@@ -488,7 +488,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest010, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest011, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest011, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.The FrameNode is null, related function is called.
@@ -530,7 +530,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest011, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract.
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest012, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest012, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.push FrameNode is not null, related function is called.
@@ -582,7 +582,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest012, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest013, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest013, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.The FrameNode is null, related function is called.
@@ -611,7 +611,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest013, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract.
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest014, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest014, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.push FrameNode is not null, related function is called.
@@ -650,7 +650,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest014, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest015, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest015, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.The FrameNode is null, related function is called.
@@ -686,7 +686,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest015, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract.
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest016, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest016, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.push FrameNode is not null, related function is called.
@@ -733,7 +733,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest016, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest017, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest017, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.The FrameNode is null, related function is called.
@@ -767,7 +767,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest017, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract.
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest018, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest018, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.push FrameNode is not null, related function is called.
@@ -812,7 +812,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest018, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest019, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest019, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.The FrameNode is null, related function is called.
@@ -844,7 +844,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest019, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract.
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest020, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest020, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.push FrameNode is not null, related function is called.
@@ -889,7 +889,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest020, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest021, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest021, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.The FrameNode is null, related function is called.
@@ -923,7 +923,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest021, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract.
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest022, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest022, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.push FrameNode is not null, related function is called.
@@ -970,7 +970,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest022, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest023, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest023, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.The FrameNode is null, related function is called.
@@ -1001,7 +1001,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest023, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract.
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest024, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest024, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.push FrameNode is not null, related function is called.
@@ -1042,7 +1042,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest024, TestSize.Level1)
  * @tc.desc: Test the BindPopup of View_Abstract.
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest025, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest025, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create some FrameNode and params.
@@ -1098,7 +1098,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest025, TestSize.Level1)
  * @tc.desc: Test the SetKeyboardShortcut of View_Abstract.
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest026, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest026, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create a FrameNode and get eventManager.
@@ -1148,7 +1148,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest026, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract.
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest027, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest027, TestSize.Level1)
 {
     ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
     /**
@@ -1179,7 +1179,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest027, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract.
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest028, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest028, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.push FrameNode is not null, callback Pop function.
@@ -1200,7 +1200,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest028, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest029, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest029, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.ClearStack.
@@ -1236,7 +1236,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest029, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest030, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest030, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.ClearStack.
@@ -1278,7 +1278,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest030, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest031, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest031, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.ClearStack.
@@ -1314,7 +1314,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest031, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest032, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest032, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.ClearStack.
@@ -1352,7 +1352,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest032, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest033, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest033, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.ClearStack.
@@ -1399,7 +1399,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest033, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest034, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest034, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.ClearStack.
@@ -1435,7 +1435,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest034, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest035, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest035, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.ClearStack.
@@ -1482,7 +1482,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest035, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest036, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest036, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.ClearStack.
@@ -1523,7 +1523,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest036, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest037, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest037, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.ClearStack.
@@ -1560,7 +1560,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest037, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract.
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest038, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest038, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Build a object viewAbstract.
@@ -1597,7 +1597,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest038, TestSize.Level1)
  * @tc.desc: Test the operation of View_Abstract
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest039, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest039, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Build a object viewAbstract.
@@ -1624,7 +1624,7 @@ HWTEST_F(ViewAbstractTest, ViewAbstractTest039, TestSize.Level1)
  * @tc.desc: Test the BindMenu and BindContextMenu of ViewAbstractModelNG
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTest, ViewAbstractTest040, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest040, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create and put mainNode, then build some necessary params.

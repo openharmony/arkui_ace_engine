@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ohos_unittest("view_abstract_test") {
+ohos_unittest("view_abstract_test_ng") {
   module_out_path = base_test_output_path
 
   sources = [
@@ -217,11 +217,12 @@ ohos_unittest("view_abstract_test") {
     "$ace_root/frameworks/core/image/image_source_info.cpp",
     "$ace_root/frameworks/core/pipeline/base/element_register.cpp",
     "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
-    "view_abstract_test.cpp",
+    "view_abstract_test_ng.cpp",
   ]
 
   deps = [
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
+    "$ace_root/frameworks/core/components/theme:build_theme_code",
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
