@@ -117,6 +117,7 @@ private:
 
     RefPtr<FrameNode> BuildTitle(const DialogProperties& dialogProperties);
     RefPtr<FrameNode> BuildContent(const DialogProperties& dialogProperties);
+    RefPtr<FrameNode> CreateDialogScroll(const DialogProperties& dialogProps);
 
     void UpdateDialogButtonProperty(RefPtr<FrameNode>& buttonNode);
     RefPtr<FrameNode> BuildButtons(const std::vector<ButtonInfo>& buttons);
