@@ -181,7 +181,7 @@ void TextClockPattern::FireChangeEvent() const
 {
     auto textClockEventHub = GetEventHub<TextClockEventHub>();
     CHECK_NULL_VOID(textClockEventHub);
-    textClockEventHub->FireChangeEvent(std::to_string(GetMilliseconds()));
+    textClockEventHub->FireChangeEvent(std::to_string(GetMilliseconds() / MICROSECONDS_OF_MILLISECOND));
 }
 
 std::string TextClockPattern::GetFormat() const
