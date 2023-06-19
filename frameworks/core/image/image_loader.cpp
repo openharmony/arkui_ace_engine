@@ -393,6 +393,11 @@ sk_sp<SkData> NetworkImageLoader::LoadImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
 {
     auto uri = imageSourceInfo.GetSrc();
+    auto pipelineContext = context.Upgrade();
+    if (!pipelineContext || pipelineContext->IsJsCard()) {
+        LOGW("network image in JS card is forbidden.");
+        return nullptr;
+    }
     // 1. find in cache file path.
     auto skData = ImageLoader::LoadDataFromCachedFile(uri);
     if (skData) {
