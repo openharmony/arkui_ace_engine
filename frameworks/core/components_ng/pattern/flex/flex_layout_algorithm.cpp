@@ -27,6 +27,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/blank/blank_layout_property.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -596,6 +597,7 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
                 if (!NearZero(flexSize) && childLayoutWrapper->IsActive()) {
                     flexSize += GetChildMainAxisSize(childLayoutWrapper);
                     (*iter).needSecondMeasure = true;
+                    CheckBlankAndKeepMin(childLayoutWrapper, flexSize);
                     if (LessOrEqual(flexSize, 0.0f)) {
                         (*iter).layoutWrapper->SetActive(false);
                         flexItemProperties.totalShrink -=
@@ -665,6 +667,22 @@ void FlexLayoutAlgorithm::getFlexFunc(std::function<float(const RefPtr<LayoutWra
         };
         spacePerFlex = NearZero(flexItemProperties.totalShrink) ? 0.0f : remainSpace / flexItemProperties.totalShrink;
         lastChild = flexItemProperties.lastShrinkChild;
+    }
+}
+
+void FlexLayoutAlgorithm::CheckBlankAndKeepMin(const RefPtr<LayoutWrapper>& childLayoutWrapper, float& flexSize)
+{
+    auto child = childLayoutWrapper->GetHostNode();
+    if (!child) {
+        return;
+    }
+    if (child->GetTag() != V2::BLANK_ETS_TAG) {
+        return;
+    }
+    auto blankProperty = child->GetLayoutProperty<BlankLayoutProperty>();
+    auto blankMin = blankProperty->GetMinSize();
+    if (GreatOrEqual(blankMin->ConvertToPx(), flexSize)) {
+        flexSize = blankMin->ConvertToPx();
     }
 }
 
