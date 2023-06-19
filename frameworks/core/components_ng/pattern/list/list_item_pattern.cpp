@@ -293,6 +293,9 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
 
 void ListItemPattern::HandleDragStart(const GestureEvent& info)
 {
+    if (info.GetInputEventType() == InputEventType::AXIS) {
+        return;
+    }
     if (springController_ && !springController_->IsStopped()) {
         // clear stop listener before stop
         springController_->ClearStopListeners();
@@ -416,6 +419,9 @@ void ListItemPattern::UpdatePostion(float delta)
 
 void ListItemPattern::HandleDragUpdate(const GestureEvent& info)
 {
+    if (info.GetInputEventType() == InputEventType::AXIS) {
+        return;
+    }
     auto layoutProperty = GetLayoutProperty<ListItemLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     hasStartDeleteArea_ = false;
@@ -506,6 +512,9 @@ void ListItemPattern::DoDeleteAnimation(bool isRightDelete)
 
 void ListItemPattern::HandleDragEnd(const GestureEvent& info)
 {
+    if (info.GetInputEventType() == InputEventType::AXIS) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
