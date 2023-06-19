@@ -2392,6 +2392,7 @@ bool TextFieldPattern::SelectOverlayIsOn()
 void TextFieldPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
 {
     CHECK_NULL_VOID_NOLOG(SelectOverlayIsOn());
+    CHECK_NULL_VOID_NOLOG(!textEditingValue_.Empty());
     isFirstHandle_ = isFirstHandle;
     auto localOffset = handleRect.GetOffset() - parentGlobalOffset_;
     auto position = UpdateCaretPositionOnHandleMove(localOffset);
