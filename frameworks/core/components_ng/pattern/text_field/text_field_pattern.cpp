@@ -1458,6 +1458,7 @@ void TextFieldPattern::HandleOnCut()
     CloseSelectOverlay();
     UpdateEditingValueToRecord();
     UpdateSelection(0);
+    MarkRedrawOverlay();
     cursorVisible_ = true;
 
     auto host = GetHost();
