@@ -374,8 +374,8 @@ public:
     std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityContextByModule(const std::string& bundle,
         const std::string& module);
 
-    void UpdateConfiguration(
-        const std::string& colorMode, const std::string& inputDevice, const std::string& languageTag);
+    void UpdateConfiguration(const std::string& colorMode, const std::string& inputDevice,
+        const std::string& languageTag, const std::string& configuration);
 
     void NotifyConfigurationChange(bool needReloadTransition) override;
     void HotReload() override;
