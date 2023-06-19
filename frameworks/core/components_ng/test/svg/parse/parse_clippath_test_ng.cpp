@@ -21,6 +21,8 @@
 #include "base/memory/ace_type.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/svg/parse/svg_clip_path.h"
+#include "core/components_ng/svg/parse/svg_animation.h"
+#include "core/components/declaration/svg/svg_animate_declaration.h"
 #include "core/components_ng/svg/parse/svg_defs.h"
 #include "core/components_ng/svg/parse/svg_svg.h"
 #include "core/components_ng/svg/svg_dom.h"
@@ -39,6 +41,28 @@ const std::string SVG_LABEL =
 const std::string ID = "myClip";
 } // namespace
 class ParseClipPathTestNg : public testing::Test {};
+
+/**
+ * @tc.name: ParseAnimation
+ * @tc.desc: parse animation path label
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ParseClipPathTestNg, ParseAnimation, TestSize.Level1)
+{
+    SvgAnimation *svgAnimation = new SvgAnimation(SvgAnimateType::ANIMATE);
+    EXPECT_NE(svgAnimation, nullptr);
+    auto svgAnimate = svgAnimation->Create();
+    EXPECT_NE(svgAnimate, nullptr);
+    auto svgMotion = svgAnimation->CreateAnimateMotion();
+    EXPECT_NE(svgMotion, nullptr);
+    auto svgTransform = svgAnimation->CreateAnimateTransform();
+    EXPECT_NE(svgTransform, nullptr);
+    svgAnimation->SetAttr(ID, SVG_LABEL);
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->ConvertCalcMode(ID), CalcMode::LINEAR);
+    delete svgAnimation;
+}
 
 /**
  * @tc.name: ParseTest001
