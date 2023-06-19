@@ -55,11 +55,14 @@ namespace {
 constexpr float ROOT_WIDTH = 720.0f;
 constexpr float ROOT_HEIGHT = 1136.0f;
 constexpr Dimension FILL_LENGTH = Dimension(1.0, DimensionUnit::PERCENT);
-constexpr float COLUMN_CHILD_WIDTH = ROOT_WIDTH / 10;
-constexpr float COLUMN_CHILD_HEIGHT = ROOT_HEIGHT / 10;
+constexpr int32_t VIEWPORT_CHILD_NUMBER = 10;
+constexpr float COLUMN_CHILD_WIDTH = ROOT_WIDTH / VIEWPORT_CHILD_NUMBER;
+constexpr float COLUMN_CHILD_HEIGHT = ROOT_HEIGHT / VIEWPORT_CHILD_NUMBER;
 constexpr int32_t CHILD_NUMBER = 12;
 constexpr float COLUMN_WIDTH = COLUMN_CHILD_WIDTH * CHILD_NUMBER;
 constexpr float COLUMN_HEIGHT = COLUMN_CHILD_HEIGHT * CHILD_NUMBER;
+constexpr int32_t BAR_EXPAND_DURATION = 150; // 150ms, scroll bar width expands from 4dp to 8dp
+constexpr int32_t BAR_SHRINK_DURATION = 250; // 250ms, scroll bar width shrinks from 8dp to 4dp
 } // namespace
 
 class ScrollTestNg : public testing::Test {
@@ -74,7 +77,7 @@ public:
     RefPtr<LayoutWrapper> CreateScroll(Axis axis = Axis::VERTICAL);
     RefPtr<LayoutWrapper> CreateScroll(NG::DisplayMode displayMode);
     RefPtr<LayoutWrapper> CreateScroll(Color color);
-    RefPtr<LayoutWrapper> CreateScroll(Dimension barWidth);
+    RefPtr<LayoutWrapper> CreateScroll(Dimension barWidth, Axis axis = Axis::VERTICAL);
     RefPtr<LayoutWrapper> CreateScroll(EdgeEffect edgeEffect);
     RefPtr<LayoutWrapper> CreateScroll(Axis axis, NG::ScrollEvent&& event);
     RefPtr<LayoutWrapper> CreateScroll(Axis axis, NG::ScrollEdgeEvent&& event);
@@ -83,9 +86,14 @@ public:
     RefPtr<LayoutWrapper> RunMeasureAndLayout(
         float width = ROOT_WIDTH, float height = ROOT_HEIGHT);
     RefPtr<FrameNode> GetContentChild(int32_t index);
+    void Touch(TouchLocationInfo locationInfo, SourceType sourceType);
+    void Touch(TouchType touchType, Offset offset, SourceType sourceType);
+    void Mouse(MouseInfo mouseInfo);
+    void Mouse(Offset moveOffset);
     void UpdateCurrentOffset(float offset);
     testing::AssertionResult IsEqualCurrentOffset(Offset expectOffset);
     testing::AssertionResult IsEqualOverScrollOffset(OverScrollOffset offset, OverScrollOffset expectOffset);
+    testing::AssertionResult IsEqualRect(Rect rect, Rect expectRect);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<ScrollPattern> pattern_;
@@ -176,12 +184,13 @@ RefPtr<LayoutWrapper> ScrollTestNg::CreateScroll(Color color)
     return RunMeasureAndLayout();
 }
 
-RefPtr<LayoutWrapper> ScrollTestNg::CreateScroll(Dimension barWidth)
+RefPtr<LayoutWrapper> ScrollTestNg::CreateScroll(Dimension barWidth, Axis axis)
 {
     ScrollModelNG scrollModel;
     scrollModel.Create();
+    scrollModel.SetAxis(axis);
     scrollModel.SetScrollBarWidth(barWidth);
-    CreateContent();
+    CreateContent(axis);
     GetInstance();
     return RunMeasureAndLayout();
 }
@@ -290,6 +299,42 @@ RefPtr<FrameNode> ScrollTestNg::GetContentChild(int32_t index)
     return contentChild;
 }
 
+void ScrollTestNg::Touch(TouchLocationInfo locationInfo, SourceType sourceType)
+{
+    auto touchEventHub = frameNode_->GetOrCreateGestureEventHub();
+    RefPtr<TouchEventImpl> touchEventImpl = touchEventHub->touchEventActuator_->touchEvents_.front();
+    auto touchEvent = touchEventImpl->GetTouchEventCallback();
+    TouchEventInfo eventInfo("touch");
+    eventInfo.SetSourceDevice(sourceType);
+    eventInfo.AddTouchLocationInfo(std::move(locationInfo));
+    touchEvent(eventInfo);
+}
+
+void ScrollTestNg::Touch(TouchType touchType, Offset offset, SourceType sourceType)
+{
+    TouchLocationInfo locationInfo(1);
+    locationInfo.SetTouchType(touchType);
+    locationInfo.SetLocalLocation(offset);
+    Touch(locationInfo, sourceType);
+}
+
+void ScrollTestNg::Mouse(MouseInfo mouseInfo)
+{
+    auto mouseEventHub = frameNode_->GetOrCreateInputEventHub();
+    RefPtr<InputEvent> inputEvent = mouseEventHub->mouseEventActuator_->inputEvents_.front();
+    auto mouseEvent = inputEvent->GetOnMouseEventFunc();
+    mouseEvent(mouseInfo);
+}
+
+void ScrollTestNg::Mouse(Offset moveOffset)
+{
+    MouseInfo mouseInfo;
+    mouseInfo.SetAction(MouseAction::MOVE);
+    mouseInfo.SetLocalLocation(moveOffset);
+    Mouse(mouseInfo);
+}
+
+
 testing::AssertionResult ScrollTestNg::IsEqualCurrentOffset(Offset expectOffset)
 {
     RunMeasureAndLayout();
@@ -312,6 +357,17 @@ testing::AssertionResult ScrollTestNg::IsEqualOverScrollOffset(OverScrollOffset 
         "offset: " << "{ " << offset.start << " , " << offset.end << " }" <<
         " != " <<
         "expectOffset: " << "{ " << expectOffset.start << " , " << expectOffset.end << " }";
+}
+
+testing::AssertionResult ScrollTestNg::IsEqualRect(Rect rect, Rect expectRect)
+{
+    if (rect == expectRect) {
+        return testing::AssertionSuccess();
+    }
+    return testing::AssertionFailure() <<
+        "rect: " << rect.ToString() <<
+        " != " <<
+        "expectRect: " << expectRect.ToString();
 }
 
 /**
@@ -1281,6 +1337,217 @@ HWTEST_F(ScrollTestNg, ScrollBar001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollBar002
+ * @tc.desc: Test SetGestureEvent() / SetMouseEvent()
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollBar002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Touch in bar
+     * @tc.expected: touchAnimator_ is take effect
+     */
+    // pattern_->GetScrollBar()->touchRegion_ == Rect (710.00, 0.00) - [10.00 x 946.67]
+    const float barWidth = 10.f;
+    CreateScroll(Dimension(barWidth));
+    auto scrollBar = pattern_->GetScrollBar();
+    const Offset downInBar = Offset(ROOT_WIDTH - 1.f, 0.f);
+    const Offset moveInBar = Offset(ROOT_WIDTH - 1.f, 10.f);
+    const Offset upInBar = moveInBar;
+    const Offset upOutBar = Offset(ROOT_WIDTH - barWidth - 1.f, 10.f);
+
+    Touch(TouchType::DOWN, downInBar, SourceType::TOUCH);
+    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), BAR_EXPAND_DURATION);
+    EXPECT_TRUE(scrollBar->IsPressed());
+    Touch(TouchType::MOVE, moveInBar, SourceType::TOUCH);
+    EXPECT_TRUE(scrollBar->IsPressed());
+    Touch(TouchType::UP, upInBar, SourceType::TOUCH);
+    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), BAR_SHRINK_DURATION);
+    EXPECT_FALSE(scrollBar->IsPressed());
+
+    /**
+     * @tc.steps: step2. Touch in bar and up out of bar
+     * @tc.expected: touchAnimator_ is take effect
+     */
+    Touch(TouchType::DOWN, downInBar, SourceType::TOUCH);
+    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), BAR_EXPAND_DURATION);
+    EXPECT_TRUE(scrollBar->IsPressed());
+    Touch(TouchType::MOVE, moveInBar, SourceType::TOUCH);
+    EXPECT_TRUE(scrollBar->IsPressed());
+    Touch(TouchType::UP, upOutBar, SourceType::TOUCH);
+    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), BAR_SHRINK_DURATION);
+    EXPECT_FALSE(scrollBar->IsPressed());
+
+    /**
+     * @tc.steps: step3. Touch in bar with SourceType::MOUSE
+     * @tc.expected: touchAnimator_ is take effect
+     */
+    Touch(TouchType::DOWN, downInBar, SourceType::MOUSE);
+    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), BAR_EXPAND_DURATION);
+    EXPECT_TRUE(scrollBar->IsPressed());
+    Touch(TouchType::MOVE, moveInBar, SourceType::MOUSE);
+    EXPECT_TRUE(scrollBar->IsPressed());
+    Touch(TouchType::UP, upInBar, SourceType::MOUSE);
+    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), BAR_SHRINK_DURATION);
+    EXPECT_FALSE(scrollBar->IsPressed());
+
+    /**
+     * @tc.steps: step4. Touch in bar with SourceType::TOUCH_PAD
+     * @tc.expected: touchAnimator_ is not take effect
+     */
+    scrollBar->touchAnimator_->SetDuration(0);
+    Touch(TouchType::DOWN, downInBar, SourceType::TOUCH_PAD);
+    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    EXPECT_FALSE(scrollBar->IsPressed());
+    Touch(TouchType::MOVE, moveInBar, SourceType::TOUCH_PAD);
+    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    EXPECT_FALSE(scrollBar->IsPressed());
+    Touch(TouchType::UP, upInBar, SourceType::TOUCH_PAD);
+    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    EXPECT_FALSE(scrollBar->IsPressed());
+
+    /**
+     * @tc.steps: step5. Touch out of bar
+     * @tc.expected: touchAnimator_ is not take effect
+     */
+    scrollBar->touchAnimator_->SetDuration(0);
+    Touch(TouchType::DOWN, Offset::Zero(), SourceType::TOUCH);
+    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    EXPECT_FALSE(scrollBar->IsPressed());
+    Touch(TouchType::MOVE, moveInBar, SourceType::TOUCH);
+    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    EXPECT_FALSE(scrollBar->IsPressed());
+    Touch(TouchType::UP, upInBar, SourceType::TOUCH);
+    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    EXPECT_FALSE(scrollBar->IsPressed());
+
+    /**
+     * @tc.steps: step6. Touch in bar and scrollBar->IsHover() is true
+     * @tc.expected: touchAnimator_ is not take effect
+     */
+    scrollBar->touchAnimator_->SetDuration(0);
+    scrollBar->SetHover(true);
+    Touch(TouchType::DOWN, downInBar, SourceType::TOUCH);
+    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    EXPECT_TRUE(scrollBar->IsPressed());
+    Touch(TouchType::MOVE, moveInBar, SourceType::TOUCH);
+    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    EXPECT_TRUE(scrollBar->IsPressed());
+    Touch(TouchType::UP, upInBar, SourceType::TOUCH);
+    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    EXPECT_FALSE(scrollBar->IsPressed());
+
+    /**
+     * @tc.steps: step7. Mouse in bar and move out of bar (out->in->in->out)
+     * @tc.expected: touchAnimator_ is take effect
+     */
+    CreateScroll(Dimension(barWidth));
+    scrollBar = pattern_->GetScrollBar();
+    const Offset moveOutBar = Offset(ROOT_WIDTH - barWidth - 1.f, 0.f);
+
+    Mouse(moveOutBar);
+    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    EXPECT_FALSE(scrollBar->IsHover());
+    Mouse(moveInBar);
+    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), BAR_EXPAND_DURATION);
+    EXPECT_TRUE(scrollBar->IsHover());
+    Mouse(moveInBar);
+    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), BAR_EXPAND_DURATION);
+    EXPECT_TRUE(scrollBar->IsHover());
+    Mouse(moveOutBar);
+    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), BAR_SHRINK_DURATION);
+    EXPECT_FALSE(scrollBar->IsHover());
+
+    /**
+     * @tc.steps: step8. (out->in->in->out) and scrollBar->IsPressed() is true
+     * @tc.expected: touchAnimator_ is not take effect
+     */
+    scrollBar->touchAnimator_->SetDuration(0);
+    scrollBar->SetPressed(true);
+    Mouse(moveOutBar);
+    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    EXPECT_FALSE(scrollBar->IsHover());
+    Mouse(moveInBar);
+    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    EXPECT_TRUE(scrollBar->IsHover());
+    Mouse(moveInBar);
+    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    EXPECT_TRUE(scrollBar->IsHover());
+    Mouse(moveOutBar);
+    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    EXPECT_FALSE(scrollBar->IsHover());
+}
+
+/**
+ * @tc.name: ScrollBar003
+ * @tc.desc: Test bar rect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollBar003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test Bar in VERTICAL
+     * @tc.expected: Verify bar rect
+     */
+    const float barWidth = 10.f;
+    CreateScroll(Dimension(barWidth));
+    auto scrollBar = pattern_->GetScrollBar();
+
+    EXPECT_TRUE(IsEqualRect(scrollBar->touchRegion_, Rect(
+        ROOT_WIDTH - barWidth,
+        0.f,
+        barWidth,
+        ROOT_HEIGHT / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER
+    )));
+
+    UpdateCurrentOffset(-COLUMN_CHILD_HEIGHT);
+    EXPECT_TRUE(IsEqualRect(scrollBar->touchRegion_, Rect(
+        ROOT_WIDTH - barWidth,
+        COLUMN_CHILD_HEIGHT / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER,
+        barWidth,
+        ROOT_HEIGHT / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER
+    )));
+
+    UpdateCurrentOffset(-COLUMN_CHILD_HEIGHT);
+    EXPECT_TRUE(IsEqualRect(scrollBar->touchRegion_, Rect(
+        ROOT_WIDTH - barWidth,
+        COLUMN_CHILD_HEIGHT * 2 / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER,
+        barWidth,
+        ROOT_HEIGHT / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER
+    )));
+
+    /**
+     * @tc.steps: step2. Test Bar in HORIZONTAL
+     * @tc.expected: Verify bar rect
+     */
+    CreateScroll(Dimension(barWidth), Axis::HORIZONTAL);
+    scrollBar = pattern_->GetScrollBar();
+
+    EXPECT_TRUE(IsEqualRect(scrollBar->touchRegion_, Rect(
+        0.f,
+        ROOT_HEIGHT - barWidth,
+        ROOT_WIDTH / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER,
+        barWidth
+    )));
+
+    UpdateCurrentOffset(-COLUMN_CHILD_WIDTH);
+    EXPECT_TRUE(IsEqualRect(scrollBar->touchRegion_, Rect(
+        COLUMN_CHILD_WIDTH / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER,
+        ROOT_HEIGHT - barWidth,
+        ROOT_WIDTH / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER,
+        barWidth
+    )));
+
+    UpdateCurrentOffset(-COLUMN_CHILD_WIDTH);
+    EXPECT_TRUE(IsEqualRect(scrollBar->touchRegion_, Rect(
+        COLUMN_CHILD_WIDTH * 2 / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER,
+        ROOT_HEIGHT - barWidth,
+        ROOT_WIDTH / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER,
+        barWidth
+    )));
+}
+
+/**
  * @tc.name: Measure001
  * @tc.desc: Test Measure
  * @tc.type: FUNC
@@ -1593,26 +1860,26 @@ HWTEST_F(ScrollTestNg, Pattern008, TestSize.Level1)
     CreateScroll();
 
     /**
-     * @tc.steps: step1. Trigger CreateOrStopAnimator by ScrollToEdge
+     * @tc.steps: step1. Trigger CreateOrStopAnimator
      * @tc.expected: animator_ would be create
      */
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    pattern_->CreateOrStopAnimator();
     EXPECT_NE(pattern_->animator_, nullptr);
 
     /**
-     * @tc.steps: step2. animator is running and Trigger CreateOrStopAnimator by ScrollToEdge again
+     * @tc.steps: step2. animator is running and Trigger CreateOrStopAnimator
      * @tc.expected: animator_ would be stop
      */
     pattern_->animator_->Resume();
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    pattern_->CreateOrStopAnimator();
     EXPECT_TRUE(pattern_->scrollAbort_);
     EXPECT_TRUE(pattern_->animator_->IsStopped());
 
     /**
-     * @tc.steps: step3. animator is stop and Trigger CreateOrStopAnimator by ScrollToEdge again
+     * @tc.steps: step3. animator is stop and Trigger CreateOrStopAnimator
      * @tc.expected: animator_ would be stop
      */
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    pattern_->CreateOrStopAnimator();
     EXPECT_TRUE(pattern_->scrollAbort_);
     EXPECT_TRUE(pattern_->animator_->IsStopped());
 }
