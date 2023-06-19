@@ -214,12 +214,18 @@ public:
     {
         surfaceChangedCallbackId_ = id;
     }
+protected:
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleClickEvent(GestureEvent& info);
 
+    std::list<RefPtr<SpanItem>> spanItemChildren_;
+    float baselineOffset_ = 0.0f;
+    RefPtr<Paragraph> paragraph_;
+    std::optional<TextStyle> textStyle_;
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
     void OnAttachToFrameNode() override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-
     void HandleLongPress(GestureEvent& info);
     void HandleOnSelectAll();
     void HandleOnCopy();
@@ -230,8 +236,6 @@ private:
     void InitMouseEvent();
     void HandleMouseEvent(const MouseInfo& info);
     void OnHandleTouchUp();
-    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleClickEvent(GestureEvent& info);
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandlePanStart(const GestureEvent& info);
     void HandlePanUpdate(const GestureEvent& info);
@@ -260,10 +264,8 @@ private:
     void ActSetSelection(int32_t start, int32_t end);
     void SetAccessibilityAction();
 
-    std::list<RefPtr<SpanItem>> spanItemChildren_;
     std::string textForDisplay_;
     std::vector<MenuOptionsParam> menuOptionItems_;
-    RefPtr<Paragraph> paragraph_;
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_;
     RefPtr<Clipboard> clipboard_;
@@ -274,12 +276,10 @@ private:
     TextSelector textSelector_;
     OffsetF contentOffset_;
     RectF contentRect_;
-    float baselineOffset_ = 0.0f;
     bool clickEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
     bool panEventInitialized_ = false;
     bool showSelectOverlay_ = false;
-    std::optional<TextStyle> textStyle_;
     std::optional<int32_t> surfaceChangedCallbackId_;
 
     RefPtr<TextContentModifier> textContentModifier_;
