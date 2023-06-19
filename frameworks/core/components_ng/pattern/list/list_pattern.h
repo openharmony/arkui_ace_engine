@@ -35,14 +35,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-struct ChainAnimationOptions {
-    Dimension minSpace;
-    Dimension maxSpace;
-    float conductivity;
-    float intensity;
-    int32_t edgeEffect;
-};
-
 class ListPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(ListPattern, ScrollablePattern);
 

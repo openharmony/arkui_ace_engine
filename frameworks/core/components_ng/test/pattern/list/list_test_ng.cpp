@@ -76,6 +76,8 @@ constexpr float MOVE_DELTA_20 = 20.f;
 constexpr float MOVE_DELTA_80 = 80.f;
 constexpr float MOVE_DELTA_100 = 100.f;
 constexpr Dimension GROUP_MARGIN = 12.0_vp;
+constexpr float DEFAULT_STIFFNESS = 228;
+constexpr float DEFAULT_DAMPING = 30;
 } // namespace
 
 class ListTestNg : public testing::Test {
@@ -2187,7 +2189,8 @@ HWTEST_F(ListTestNg, Callback002, TestSize.Level1)
     ListModelNG listModelNG;
     listModelNG.Create();
     listModelNG.SetChainAnimation(true);
-    listModelNG.SetChainAnimationOptions(Dimension(0), Dimension(10), 0, 0, 0);
+    listModelNG.SetChainAnimationOptions(
+        { Dimension(0), Dimension(10), 0, 0, 0, DEFAULT_STIFFNESS, DEFAULT_DAMPING });
     bool isScrollStartCalled = false;
     bool isScrollStopCalled = false;
     auto scrollStart = [&isScrollStartCalled]() { isScrollStartCalled = true; };
@@ -3271,7 +3274,7 @@ HWTEST_F(ListTestNg, Pattern005, TestSize.Level1)
     listModelNG.SetSpace(Dimension(space));
     listModelNG.SetChainAnimation(true);
     listModelNG.SetChainAnimationOptions(
-        Dimension(minSpace), Dimension(maxSpace), conductivity, intensity, 0);
+        { Dimension(minSpace), Dimension(maxSpace), conductivity, intensity, 0, DEFAULT_STIFFNESS, DEFAULT_DAMPING });
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
     RunMeasureAndLayout();
@@ -3282,6 +3285,8 @@ HWTEST_F(ListTestNg, Pattern005, TestSize.Level1)
         .conductivity = conductivity,
         .intensity = intensity,
         .edgeEffect = 0,
+        .stiffness = DEFAULT_STIFFNESS,
+        .damping = DEFAULT_DAMPING,
     };
     pattern_->SetChainAnimationOptions(options);
 
@@ -3324,7 +3329,7 @@ HWTEST_F(ListTestNg, Pattern006, TestSize.Level1)
     listModelNG.SetSpace(Dimension(space));
     listModelNG.SetChainAnimation(true);
     listModelNG.SetChainAnimationOptions(
-        Dimension(minSpace), Dimension(maxSpace), conductivity, intensity, 0);
+        { Dimension(minSpace), Dimension(maxSpace), conductivity, intensity, 0, DEFAULT_STIFFNESS, DEFAULT_DAMPING });
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
     RunMeasureAndLayout();
@@ -3335,6 +3340,8 @@ HWTEST_F(ListTestNg, Pattern006, TestSize.Level1)
         .conductivity = conductivity,
         .intensity = intensity,
         .edgeEffect = 0,
+        .stiffness = DEFAULT_STIFFNESS,
+        .damping = DEFAULT_DAMPING,
     };
     pattern_->SetChainAnimationOptions(options);
 
@@ -3377,7 +3384,7 @@ HWTEST_F(ListTestNg, Pattern007, TestSize.Level1)
     listModelNG.SetSpace(Dimension(space));
     listModelNG.SetChainAnimation(true);
     listModelNG.SetChainAnimationOptions(
-        Dimension(minSpace), Dimension(maxSpace), conductivity, intensity, 0);
+        { Dimension(minSpace), Dimension(maxSpace), conductivity, intensity, 0, DEFAULT_STIFFNESS, DEFAULT_DAMPING });
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
     RunMeasureAndLayout();
@@ -3388,6 +3395,8 @@ HWTEST_F(ListTestNg, Pattern007, TestSize.Level1)
         .conductivity = conductivity,
         .intensity = intensity,
         .edgeEffect = 0,
+        .stiffness = DEFAULT_STIFFNESS,
+        .damping = DEFAULT_DAMPING,
     };
     pattern_->SetChainAnimationOptions(options);
 
@@ -3434,7 +3443,8 @@ HWTEST_F(ListTestNg, Pattern019, TestSize.Level1)
     ListModelNG listModelNG;
     listModelNG.Create();
     listModelNG.SetChainAnimation(true);
-    listModelNG.SetChainAnimationOptions(Dimension(0), Dimension(10), 0, 0, 0);
+    listModelNG.SetChainAnimationOptions(
+        { Dimension(0), Dimension(10), 0, 0, 0, DEFAULT_STIFFNESS, DEFAULT_DAMPING });
     CreateListItem(10);
     GetInstance();
     RunMeasureAndLayout();
