@@ -1595,4 +1595,13 @@ void ViewAbstract::SetObscured(const std::vector<ObscuredReasons>& reasons)
     CHECK_NULL_VOID(frameNode);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
+
+void ViewAbstract::SetRenderGroup(bool isRenderGroup)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(RenderGroup, isRenderGroup);
+}
 } // namespace OHOS::Ace::NG

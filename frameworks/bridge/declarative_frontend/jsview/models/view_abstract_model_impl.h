@@ -97,6 +97,7 @@ public:
         const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) override;
     void SetGeometryTransition(const std::string& id) override;
     void SetMotionPath(const MotionPathOption& option) override;
+    void SetRenderGroup(bool isRenderGroup) override {}
 
     void SetFlexBasis(const Dimension& value) override;
     void SetAlignSelf(FlexAlign value) override;
