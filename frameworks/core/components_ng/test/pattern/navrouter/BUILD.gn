@@ -59,6 +59,7 @@ ace_unittest("navrouter_test_ng") {
 
     # ime
     "$ace_root/frameworks/core/common/ime/text_input_proxy.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_engine.cpp",
 
     # search
     "$ace_root/frameworks/core/components_ng/pattern/search/search_event_hub.cpp",

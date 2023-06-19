@@ -191,6 +191,9 @@ public:
     void HideSubMenu();
     void OnModifyDone() override;
 
+    // acquire first menu node in wrapper node by submenu node
+    RefPtr<MenuPattern> GetMainMenuPattern() const;
+
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
     void SetAccessibilityAction();
