@@ -23,10 +23,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t STOP_DURATION = 2000; // 2000ms
-constexpr float KEY_TIME_START = 0.0f;
-constexpr float KEY_TIME_MIDDLE = 0.7f;
-constexpr float KEY_TIME_END = 1.0f;
+constexpr int32_t END_DURATION = 400; // 2000ms
+constexpr int32_t END_DELAY_DURATION = 2000;
 constexpr int32_t BAR_EXPAND_DURATION = 150; // 150ms, scroll bar width expands from 4dp to 8dp
 constexpr int32_t BAR_SHRINK_DURATION = 250; // 250ms, scroll bar width shrinks from 8dp to 4dp
 constexpr int32_t BAR_ADAPT_DURATION = 400;  // 400ms, scroll bar adapts to the size changes of components
@@ -491,16 +489,7 @@ void ScrollBar::PlayBarEndAnimation()
     }
 
     scrollEndAnimator_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
-    auto hiddenStartKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEY_TIME_START, UINT8_MAX);
-    auto hiddenMiddleKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEY_TIME_MIDDLE, UINT8_MAX);
-    auto hiddenEndKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEY_TIME_END, 0);
-    hiddenMiddleKeyframe->SetCurve(Curves::LINEAR);
-    hiddenEndKeyframe->SetCurve(Curves::FRICTION);
-
-    auto animation = AceType::MakeRefPtr<KeyframeAnimation<int32_t>>();
-    animation->AddKeyframe(hiddenStartKeyframe);
-    animation->AddKeyframe(hiddenMiddleKeyframe);
-    animation->AddKeyframe(hiddenEndKeyframe);
+    auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(UINT8_MAX, 0, Curves::SHARP);
     animation->AddListener([weakBar = AceType::WeakClaim(this)](int32_t value) {
         auto scrollBar = weakBar.Upgrade();
         if (scrollBar && scrollBar->opacity_ != value) {
@@ -509,7 +498,8 @@ void ScrollBar::PlayBarEndAnimation()
         }
     });
     scrollEndAnimator_->AddInterpolator(animation);
-    scrollEndAnimator_->SetDuration(STOP_DURATION);
+    scrollEndAnimator_->SetDuration(END_DURATION);
+    scrollEndAnimator_->SetStartDelay(END_DELAY_DURATION);
     scrollEndAnimator_->Play();
 }
 } // namespace OHOS::Ace::NG
