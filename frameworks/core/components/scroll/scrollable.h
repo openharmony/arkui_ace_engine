@@ -58,6 +58,11 @@ struct OverScrollOffset {
     double end;
 };
 
+struct ScrollResult {
+    double remain;
+    bool reachEdge;
+};
+
 using ScrollPositionCallback = std::function<bool(double, int32_t source)>;
 using ScrollEventCallback = std::function<void()>;
 using OutBoundaryCallback = std::function<bool()>;
@@ -174,11 +179,11 @@ public:
     void HandleDragEnd(const GestureEvent& info);
     void HandleScrollEnd();
     bool HandleOverScroll(double velocity);
-    double HandleScroll(double offset, int32_t source, NestedState state);
-    double HandleScrollParentFirst(double& offset, int32_t source, NestedState state);
-    double HandleScrollSelfFirst(double& offset, int32_t source, NestedState state);
-    double HandleScrollSelfOnly(double& offset, int32_t source, NestedState state);
-    double HandleScrollParallel(double& offset, int32_t source, NestedState state);
+    ScrollResult HandleScroll(double offset, int32_t source, NestedState state);
+    ScrollResult HandleScrollParentFirst(double& offset, int32_t source, NestedState state);
+    ScrollResult HandleScrollSelfFirst(double& offset, int32_t source, NestedState state);
+    ScrollResult HandleScrollSelfOnly(double& offset, int32_t source, NestedState state);
+    ScrollResult HandleScrollParallel(double& offset, int32_t source, NestedState state);
 
     void ProcessScrollMotionStop();
 

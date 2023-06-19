@@ -339,7 +339,7 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     }
 }
 
-double Scrollable::HandleScrollParentFirst(double& offset, int32_t source, NestedState state)
+ScrollResult Scrollable::HandleScrollParentFirst(double& offset, int32_t source, NestedState state)
 {
     auto parent = parent_.Upgrade();
     ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
@@ -348,50 +348,51 @@ double Scrollable::HandleScrollParentFirst(double& offset, int32_t source, Neste
             return parent->HandleScroll(offset, source, NestedState::CHILD_OVER_SCROLL);
         }
         ExecuteScrollFrameBegin(offset, scrollState);
-        return 0;
+        return { 0, true };
     }
-    offset = parent->HandleScroll(offset, source, NestedState::CHILD_SCROLL);
+    auto result = parent->HandleScroll(offset, source, NestedState::CHILD_SCROLL);
+    offset = result.remain;
     if (NearZero(offset)) {
         canOverScroll_ = false;
-        return 0;
+        return { 0, false };
     }
     double allOffset = offset;
     ExecuteScrollFrameBegin(offset, scrollState);
     auto remainOffset = allOffset - offset;
     auto overOffsets = overScrollOffsetCallback_(offset);
     auto overOffset = offset > 0 ? overOffsets.start : overOffsets.end;
-    remainOffset += offset > 0 ? overOffsets.start : overOffsets.end;
+    remainOffset += overOffset;
     if (NearZero(remainOffset)) {
         canOverScroll_ = false;
-        return 0;
+        return { 0, false };
     }
     if (state == NestedState::CHILD_SCROLL) {
         offset -= overOffset;
         canOverScroll_ = false;
-        return remainOffset;
+        return { remainOffset, !NearZero(overOffset) };
     }
     if (edgeEffect_ == EdgeEffect::NONE) {
         parent->HandleScroll(remainOffset, source, NestedState::CHILD_OVER_SCROLL);
     }
     canOverScroll_ = !NearZero(overOffset);
-    return 0;
+    return { 0, canOverScroll_ };
 }
 
-double Scrollable::HandleScrollSelfFirst(double& offset, int32_t source, NestedState state)
+ScrollResult Scrollable::HandleScrollSelfFirst(double& offset, int32_t source, NestedState state)
 {
     auto parent = parent_.Upgrade();
     ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
     if (state == NestedState::CHILD_OVER_SCROLL) {
-        auto remain = parent->HandleScroll(offset, source, NestedState::CHILD_OVER_SCROLL);
-        if (NearZero(remain)) {
+        auto result = parent->HandleScroll(offset, source, NestedState::CHILD_OVER_SCROLL);
+        if (NearZero(result.remain)) {
             offset = 0;
-            return 0;
+            return result;
         }
         ExecuteScrollFrameBegin(offset, scrollState);
         if (edgeEffect_ == EdgeEffect::NONE) {
-            return remain;
+            return result;
         }
-        return 0;
+        return { 0, true };
     }
     double allOffset = offset;
     ExecuteScrollFrameBegin(offset, scrollState);
@@ -400,25 +401,26 @@ double Scrollable::HandleScrollSelfFirst(double& offset, int32_t source, NestedS
     auto overOffset = offset > 0 ? overOffsets.start : overOffsets.end;
     if (NearZero(overOffset)) {
         canOverScroll_ = false;
-        return 0;
+        return { 0, false };
     }
     offset -= overOffset;
-    remainOffset += parent->HandleScroll(overOffset, source, NestedState::CHILD_SCROLL);
+    auto result = parent->HandleScroll(overOffset, source, NestedState::CHILD_SCROLL);
+    remainOffset += result.remain;
     if (NearZero(remainOffset)) {
         canOverScroll_ = false;
-        return 0;
+        return { 0, false };
     }
     if (state == NestedState::CHILD_SCROLL) {
         canOverScroll_ = false;
-        return remainOffset;
+        return { remainOffset, result.reachEdge };
     }
-    auto remain = parent->HandleScroll(remainOffset, source, NestedState::CHILD_OVER_SCROLL);
-    offset += remain;
-    canOverScroll_ = !NearZero(overOffset);
-    return 0;
+    auto overRes = parent->HandleScroll(remainOffset, source, NestedState::CHILD_OVER_SCROLL);
+    offset += overRes.remain;
+    canOverScroll_ = !NearZero(overOffset) && result.reachEdge;
+    return { 0, canOverScroll_ };
 }
 
-double Scrollable::HandleScrollSelfOnly(double& offset, int32_t source, NestedState state)
+ScrollResult Scrollable::HandleScrollSelfOnly(double& offset, int32_t source, NestedState state)
 {
     double allOffset = offset;
     ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
@@ -429,7 +431,7 @@ double Scrollable::HandleScrollSelfOnly(double& offset, int32_t source, NestedSt
     remainOffset += overOffset;
     if (NearZero(remainOffset)) {
         canOverScroll_ = false;
-        return 0;
+        return { 0, false };
     }
     bool canOverScroll = false;
     if (state == NestedState::CHILD_SCROLL) {
@@ -440,38 +442,39 @@ double Scrollable::HandleScrollSelfOnly(double& offset, int32_t source, NestedSt
         remainOffset = 0;
     }
     canOverScroll_ = canOverScroll;
-    return remainOffset;
+    return { remainOffset, !NearZero(overOffset) };
 }
 
-double Scrollable::HandleScrollParallel(double& offset, int32_t source, NestedState state)
+ScrollResult Scrollable::HandleScrollParallel(double& offset, int32_t source, NestedState state)
 {
     auto remainOffset = 0.0;
     auto parent = parent_.Upgrade();
     ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
     if (state == NestedState::CHILD_OVER_SCROLL) {
         if (edgeEffect_ == EdgeEffect::NONE) {
-            remainOffset = parent->HandleScroll(offset, source, NestedState::CHILD_OVER_SCROLL);
+            auto result = parent->HandleScroll(offset, source, NestedState::CHILD_OVER_SCROLL);
+            remainOffset = result.remain;
             offset = 0;
         } else {
             ExecuteScrollFrameBegin(offset, scrollState);
         }
-        return remainOffset;
+        return { remainOffset, true };
     }
 
     bool canOverScroll = false;
     double parentOffset = offset;
     ExecuteScrollFrameBegin(offset, scrollState);
-    auto parentRemain = parent->HandleScroll(parentOffset, source, NestedState::CHILD_SCROLL);
+    auto result = parent->HandleScroll(parentOffset, source, NestedState::CHILD_SCROLL);
 
     auto overOffsets = overScrollOffsetCallback_(offset);
     auto overOffset = offset > 0 ? overOffsets.start : overOffsets.end;
-    if (!NearZero(overOffset) && !NearZero(parentRemain)) {
+    if (!NearZero(overOffset) && result.reachEdge) {
         if (state == NestedState::CHILD_SCROLL) {
             remainOffset = overOffset;
             offset = offset - overOffset;
         } else if (edgeEffect_ == EdgeEffect::NONE) {
-            auto remain = parent->HandleScroll(parentRemain, source, NestedState::CHILD_OVER_SCROLL);
-            canOverScroll = NearZero(remain);
+            parent->HandleScroll(result.remain, source, NestedState::CHILD_OVER_SCROLL);
+            canOverScroll = true;
             offset = offset - overOffset;
         } else {
             canOverScroll = true;
@@ -480,19 +483,19 @@ double Scrollable::HandleScrollParallel(double& offset, int32_t source, NestedSt
         offset = offset - overOffset;
     }
     canOverScroll_ = canOverScroll;
-    return remainOffset;
+    return { remainOffset, !NearZero(overOffset) && result.reachEdge };
 }
 
-double Scrollable::HandleScroll(double offset, int32_t source, NestedState state)
+ScrollResult Scrollable::HandleScroll(double offset, int32_t source, NestedState state)
 {
     if (!overScrollOffsetCallback_) {
         ExecuteScrollBegin(offset);
         ExecuteScrollFrameBegin(offset, ScrollState::SCROLL);
         moved_ = UpdateScrollPosition(offset, source);
         canOverScroll_ = false;
-        return 0;
+        return { 0, false };
     }
-    auto remainOffset = 0.0;
+    ScrollResult result = { 0, false };
     ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
     auto parent = parent_.Upgrade();
     auto overOffsets = overScrollOffsetCallback_(offset);
@@ -501,18 +504,18 @@ double Scrollable::HandleScroll(double offset, int32_t source, NestedState state
         ExecuteScrollFrameBegin(offset, scrollState);
     } else if (parent && ((offset < 0 && nestedOpt_.forward == NestedScrollMode::PARENT_FIRST) ||
         (offset > 0 && nestedOpt_.backward == NestedScrollMode::PARENT_FIRST))) {
-        remainOffset = HandleScrollParentFirst(offset, source, state);
+        result = HandleScrollParentFirst(offset, source, state);
     } else if (parent && ((offset < 0 && nestedOpt_.forward == NestedScrollMode::SELF_FIRST) ||
         (offset > 0 && nestedOpt_.backward == NestedScrollMode::SELF_FIRST))) {
-        remainOffset = HandleScrollSelfFirst(offset, source, state);
+        result = HandleScrollSelfFirst(offset, source, state);
     } else if (parent && ((offset < 0 && nestedOpt_.forward == NestedScrollMode::PARALLEL) ||
         (offset > 0 && nestedOpt_.backward == NestedScrollMode::PARALLEL))) {
-        remainOffset = HandleScrollParallel(offset, source, state);
+        result = HandleScrollParallel(offset, source, state);
     } else {
-        remainOffset = HandleScrollSelfOnly(offset, source, state);
+        result = HandleScrollSelfOnly(offset, source, state);
     }
     moved_ = UpdateScrollPosition(offset, source);
-    return remainOffset;
+    return result;
 }
 
 void Scrollable::HandleDragUpdate(const GestureEvent& info)
@@ -580,6 +583,9 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     } else if (canOverScroll_) {
         HandleOverScroll(correctVelocity);
     } else {
+        if (springController_ && !springController_->IsStopped()) {
+            springController_->Stop();
+        }
         double mainPosition = GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY()));
         LOGD("[scrollMotion]position(%{public}lf), velocity(%{public}lf)", mainPosition, correctVelocity);
         if (motion_) {
