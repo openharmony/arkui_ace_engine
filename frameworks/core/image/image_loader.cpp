@@ -441,6 +441,11 @@ std::shared_ptr<RSData> NetworkImageLoader::LoadImageData(
 #endif
 {
     auto uri = imageSourceInfo.GetSrc();
+    auto pipelineContext = context.Upgrade();
+    if (!pipelineContext || pipelineContext->IsJsCard()) {
+        LOGW("network image in JS card is forbidden.");
+        return nullptr;
+    }
     // 1. find in cache file path.
 #ifndef USE_ROSEN_DRAWING
     auto skData = ImageLoader::LoadDataFromCachedFile(uri);
