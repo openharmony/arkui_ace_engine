@@ -87,16 +87,15 @@ OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(
     context_ = context;
     width_ = width;
     height_ = height;
+    lastLayoutSize_.SetWidth(static_cast<float>(width));
+    lastLayoutSize_.SetHeight(static_cast<float>(height));
     matrix_.reset();
 
     auto imageInfo =
         SkImageInfo::Make(width, height, SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
     canvasCache_.allocPixels(imageInfo);
-    cacheBitmap_.allocPixels(imageInfo);
     canvasCache_.eraseColor(SK_ColorTRANSPARENT);
-    cacheBitmap_.eraseColor(SK_ColorTRANSPARENT);
     skCanvas_ = std::make_unique<SkCanvas>(canvasCache_);
-    cacheCanvas_ = std::make_unique<SkCanvas>(cacheBitmap_);
 
     imageShadow_ = std::make_unique<Shadow>();
     InitImageCallbacks();
@@ -132,14 +131,21 @@ void OffscreenCanvasPaintMethod::DrawImage(
                      ? Ace::ImageProvider::GetSkImage(canvasImage.src, context_, Size(width, height))
                      : Ace::ImageProvider::GetSkImage(canvasImage.src, context_);
     CHECK_NULL_VOID(image);
-    InitPaintBlend(cachePaint_);
-    const auto skCanvas =
-        globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
+
+    const auto skCanvas = skCanvas_.get();
+    SkPaint compositeOperationpPaint;
+    InitPaintBlend(compositeOperationpPaint);
+    if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
+        skCanvas_->saveLayer(
+            SkRect::MakeXYWH(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height()), &compositeOperationpPaint);
+    }
+
 #ifndef NEW_SKIA
     InitImagePaint(imagePaint_);
 #else
     InitImagePaint(imagePaint_, sampleOptions_);
 #endif
+
     if (HasImageShadow()) {
         SkRect skRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
         SkPath path;
@@ -179,13 +185,9 @@ void OffscreenCanvasPaintMethod::DrawImage(
         default:
             break;
     }
+
     if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
-#ifndef NEW_SKIA
-        skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
-#else
-        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, sampleOptions_, &cachePaint_);
-#endif
-        cacheBitmap_.eraseColor(0);
+        skCanvas_->restore();
     }
 }
 
@@ -201,9 +203,14 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
     image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
     CHECK_NULL_VOID(image);
 
-    InitPaintBlend(cachePaint_);
-    const auto skCanvas =
-        globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
+    const auto skCanvas = skCanvas_.get();
+    SkPaint compositeOperationpPaint;
+    InitPaintBlend(compositeOperationpPaint);
+    if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
+        skCanvas_->saveLayer(
+            SkRect::MakeXYWH(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height()), &compositeOperationpPaint);
+    }
+
 #ifndef NEW_SKIA
     InitImagePaint(imagePaint_);
 #else
@@ -238,13 +245,9 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
         default:
             break;
     }
+
     if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
-#ifndef NEW_SKIA
-        skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
-#else
-        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, sampleOptions_, &cachePaint_);
-#endif
-        cacheBitmap_.eraseColor(0);
+        skCanvas_->restore();
     }
 }
 

@@ -39,6 +39,10 @@
 #include "core/components_ng/render/render_property.h"
 #include "core/pipeline/base/constants.h"
 
+namespace OHOS::Rosen {
+class DrawCmdList;
+}
+
 namespace OHOS::Ace::NG {
 class GeometryNode;
 class RenderPropertyNode;
@@ -99,7 +103,7 @@ public:
 
     virtual void OnModifyDone() {}
 
-    enum class ContextType : int8_t { CANVAS, ROOT, SURFACE, EFFECT, EXTERNAL };
+    enum class ContextType : int8_t { CANVAS, ROOT, SURFACE, EFFECT, EXTERNAL, INCREMENTAL_CANVAS };
     struct ContextParam {
         ContextType type;
         std::optional<std::string> surfaceName;
@@ -256,6 +260,7 @@ public:
     {
         isModalRootNode_ = isModalRootNode;
     }
+
     std::optional<BlurStyleOption> GetBackBlurStyle() const
     {
         return GetBackground() ? GetBackground()->propBlurStyleOption : std::nullopt;
@@ -301,6 +306,7 @@ public:
     {
         return nullptr;
     }
+
     virtual void SetActualForegroundColor(const Color& value) {}
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
@@ -406,6 +412,8 @@ public:
 
     // obscured
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Obscured, std::vector<ObscuredReasons>);
+
+    virtual void SetFrameForCanvas() {}
 
 protected:
     RenderContext() = default;
