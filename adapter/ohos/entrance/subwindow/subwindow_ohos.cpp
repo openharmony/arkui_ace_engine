@@ -96,8 +96,8 @@ void SubwindowOhos::InitContainer()
         }
         windowOption->SetWindowRect({ 0, 0, defaultDisplay->GetWidth(), defaultDisplay->GetHeight() });
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
-        window_ = OHOS::Rosen::Window::Create(
-            "ARK_APP_SUBWINDOW_" + parentWindowName + std::to_string(windowId_), windowOption);
+        window_ = OHOS::Rosen::Window::Create("ARK_APP_SUBWINDOW_" + parentWindowName + std::to_string(windowId_),
+            windowOption, parentWindow->GetContext());
         CHECK_NULL_VOID(window_);
     }
     std::string url = "";
