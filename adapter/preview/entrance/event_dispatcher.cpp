@@ -196,13 +196,7 @@ bool EventDispatcher::DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
 
     KeyEvent event;
     ConvertKeyEvent(keyEvent, event);
-#ifdef USE_GLFW_WINDOW
-    container->GetTaskExecutor()->PostTask(
-        [aceView, event]() { aceView->HandleKeyEvent(event); }, TaskExecutor::TaskType::UI);
-    return true;
-#else
     return aceView->HandleKeyEvent(event);
-#endif
 }
 
 bool EventDispatcher::HandleTextKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -247,14 +241,10 @@ bool EventDispatcher::HandleTextKeyEvent(const std::shared_ptr<MMI::KeyEvent>& k
     } else {
         return false;
     }
-#ifdef USE_GLFW_WINDOW
-    return true;
-#else
     if (keyEvent->action != MMI::KeyAction::DOWN) {
         return true;
     }
     return TextInputClientMgr::GetInstance().AddCharacter(keyChar);
-#endif
 }
 
 } // namespace OHOS::Ace::Platform
