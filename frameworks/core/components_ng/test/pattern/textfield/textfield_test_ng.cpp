@@ -3338,10 +3338,10 @@ HWTEST_F(TextFieldPatternTestNg, HandleBlurEvent001, TestSize.Level1)
      */
     layoutProperty->UpdateShowUnderline(true);
     textFieldPattern->HandleBlurEvent();
-    EXPECT_TRUE(layoutProperty->GetShowUnderlineValue(false));
+    EXPECT_EQ(textFieldPattern->selectionMode_, SelectionMode::NONE);
     layoutProperty->UpdateShowUnderline(false);
     textFieldPattern->HandleBlurEvent();
-    EXPECT_FALSE(layoutProperty->GetShowUnderlineValue(false));
+    EXPECT_EQ(textFieldPattern->caretUpdateType_, CaretUpdateType::EVENT);
 }
 
 /**
