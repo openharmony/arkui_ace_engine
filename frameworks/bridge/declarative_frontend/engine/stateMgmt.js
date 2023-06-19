@@ -81,6 +81,15 @@
  * @since 9
  */
 class LocalStorage extends NativeLocalStorage {
+    /*
+      get access to provded LocalStorage instance thru Stake model
+      @StageModelOnly
+      @form
+      @since 10
+    */
+    static getShared() {
+        return LocalStorage.GetShared();
+    }
     /**
      * Construct new instance of LocalStorage
      * initialzie with all properties and their values that Object.keys(params) returns
@@ -96,15 +105,6 @@ class LocalStorage extends NativeLocalStorage {
         if (Object.keys(initializingProperties).length) {
             this.initializeProps(initializingProperties);
         }
-    }
-    /*
-      get access to provded LocalStorage instance thru Stake model
-      @StageModelOnly
-      @form
-      @since 10
-    */
-    static getShared() {
-        return LocalStorage.GetShared();
     }
     /**
      * clear storage and init with given properties
@@ -494,13 +494,6 @@ class LocalStorage extends NativeLocalStorage {
  * @since 7
  */
 class AppStorage extends LocalStorage {
-    /** singleton class, app can not create instances
-    *
-    * not a public / sdk function
-    */
-    constructor(initializingProperties) {
-        super(initializingProperties);
-    }
     /**
     * create and initialize singleton
     * initialzie with all properties and their values that Object.keys(params) returns
@@ -911,6 +904,13 @@ class AppStorage extends LocalStorage {
         }
         return AppStorage.instance_;
     }
+    /** singleton class, app can not create instances
+    *
+    * not a public / sdk function
+    */
+    constructor(initializingProperties) {
+        super(initializingProperties);
+    }
 }
 // instance functions below:
 // Should all be protected, but TS lang does not allow access from static member to protected member
@@ -934,16 +934,6 @@ AppStorage.instance_ = undefined;
  * public API to manage IPropertySubscriber
  */
 class SubscriberManager {
-    /**
-     * SubscriberManager is a singleton created by the framework
-     * do not use
-     *
-     * internal method
-     */
-    constructor() {
-        this.subscriberById_ = new Map();
-        
-    }
     /**
       * check subscriber is known
       * same as ES6 Map.prototype.has()
@@ -1120,6 +1110,16 @@ class SubscriberManager {
      */
     makeId() {
         return ViewStackProcessor.MakeUniqueId();
+    }
+    /**
+     * SubscriberManager is a singleton created by the framework
+     * do not use
+     *
+     * internal method
+     */
+    constructor() {
+        this.subscriberById_ = new Map();
+        
     }
 }
 /*
@@ -1348,14 +1348,6 @@ class SubscribaleAbstract extends SubscribableAbstract {
  */
 class PersistentStorage {
     /**
-     * all following methods are framework internal
-     */
-    constructor() {
-        this.links_ = new Map();
-        this.id_ = SubscriberManager.MakeId();
-        SubscriberManager.Add(this);
-    }
-    /**
      *
      * @param storage method to be used by the framework to set the backend
      * this is to be done during startup
@@ -1494,6 +1486,14 @@ class PersistentStorage {
         
         PersistentStorage.storage_.set(propName, PersistentStorage.getOrCreate().links_.get(propName).get());
     }
+    /**
+     * all following methods are framework internal
+     */
+    constructor() {
+        this.links_ = new Map();
+        this.id_ = SubscriberManager.MakeId();
+        SubscriberManager.Add(this);
+    }
     keys() {
         return this.links_.keys();
     }
@@ -1604,10 +1604,6 @@ PersistentStorage.instance_ = undefined;
  *
  */
 class Environment {
-    constructor() {
-        this.props_ = new Map();
-        Environment.envBackend_.onValueChanged(this.onValueChanged.bind(this));
-    }
     static getOrCreate() {
         if (Environment.instance_) {
             // already initialized
@@ -1669,6 +1665,10 @@ class Environment {
      */
     static Keys() {
         return Environment.getOrCreate().keys();
+    }
+    constructor() {
+        this.props_ = new Map();
+        Environment.envBackend_.onValueChanged(this.onValueChanged.bind(this));
     }
     envProp(key, value) {
         let prop = AppStorage.prop(key);
@@ -2210,23 +2210,6 @@ class ExtendableProxy {
 }
 class ObservedObject extends ExtendableProxy {
     /**
-     * To create a new ObservableObject use CreateNew function
-     *
-     * constructor create a new ObservableObject and subscribe its owner to propertyHasChanged
-     * notifications
-     * @param obj  raw Object, if obj is a ObservableOject throws an error
-     * @param objectOwner
-     */
-    constructor(obj, handler, objectOwningProperty) {
-        super(obj, handler);
-        if (ObservedObject.IsObservedObject(obj)) {
-            stateMgmtConsole.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
-        }
-        if (objectOwningProperty != undefined) {
-            this[SubscribableHandler.SUBSCRIBE] = objectOwningProperty;
-        }
-    } // end of constructor
-    /**
      * Factory function for ObservedObjects /
      *  wrapping of objects for proxying
      *
@@ -2391,6 +2374,23 @@ class ObservedObject extends ExtendableProxy {
             ? Object.getPrototypeOf(proto.constructor.prototype)
             : proto;
     }
+    /**
+     * To create a new ObservableObject use CreateNew function
+     *
+     * constructor create a new ObservableObject and subscribe its owner to propertyHasChanged
+     * notifications
+     * @param obj  raw Object, if obj is a ObservableOject throws an error
+     * @param objectOwner
+     */
+    constructor(obj, handler, objectOwningProperty) {
+        super(obj, handler);
+        if (ObservedObject.IsObservedObject(obj)) {
+            stateMgmtConsole.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
+        }
+        if (objectOwningProperty != undefined) {
+            this[SubscribableHandler.SUBSCRIBE] = objectOwningProperty;
+        }
+    } // end of constructor
 }
 ObservedObject.__IS_OBSERVED_OBJECT = Symbol("_____is_observed_object__");
 ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT = Symbol("_____raw_object__");
@@ -3178,6 +3178,23 @@ class SynchedPropertyNesedObject extends ObservedPropertyObjectAbstract {
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
 class View extends NativeViewFullUpdate {
+    get localStorage_() {
+        if (!this.localStoragebackStore_) {
+            
+            this.localStoragebackStore_ = new LocalStorage({ /* emty */});
+        }
+        return this.localStoragebackStore_;
+    }
+    set localStorage_(instance) {
+        if (!instance) {
+            // setting to undefined not allowed
+            return;
+        }
+        if (this.localStoragebackStore_) {
+            stateMgmtConsole.error(`${this.constructor.name} is setting LocalStorage instance twice`);
+        }
+        this.localStoragebackStore_ = instance;
+    }
     /**
      * Create a View
      *
@@ -3220,23 +3237,6 @@ class View extends NativeViewFullUpdate {
         }
         SubscriberManager.Add(this);
         
-    }
-    get localStorage_() {
-        if (!this.localStoragebackStore_) {
-            
-            this.localStoragebackStore_ = new LocalStorage({ /* emty */});
-        }
-        return this.localStoragebackStore_;
-    }
-    set localStorage_(instance) {
-        if (!instance) {
-            // setting to undefined not allowed
-            return;
-        }
-        if (this.localStoragebackStore_) {
-            stateMgmtConsole.error(`${this.constructor.name} is setting LocalStorage instance twice`);
-        }
-        this.localStoragebackStore_ = instance;
     }
     // globally unique id, this is different from compilerAssignedUniqueChildId!
     id__() {
@@ -4349,6 +4349,27 @@ const UndefinedElmtId = -1;
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
 class ViewPU extends NativeViewPartialUpdate {
+    get localStorage_() {
+        if (!this.localStoragebackStore_ && this.parent_) {
+            
+            this.localStoragebackStore_ = this.parent_.localStorage_;
+        }
+        if (!this.localStoragebackStore_) {
+            
+            this.localStoragebackStore_ = new LocalStorage({ /* empty */});
+        }
+        return this.localStoragebackStore_;
+    }
+    set localStorage_(instance) {
+        if (!instance) {
+            // setting to undefined not allowed
+            return;
+        }
+        if (this.localStoragebackStore_) {
+            stateMgmtConsole.error(`${this.constructor.name} is setting LocalStorage instance twice`);
+        }
+        this.localStoragebackStore_ = instance;
+    }
     /**
      * Create a View
      *
@@ -4407,27 +4428,6 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         SubscriberManager.Add(this);
         
-    }
-    get localStorage_() {
-        if (!this.localStoragebackStore_ && this.parent_) {
-            
-            this.localStoragebackStore_ = this.parent_.localStorage_;
-        }
-        if (!this.localStoragebackStore_) {
-            
-            this.localStoragebackStore_ = new LocalStorage({ /* empty */});
-        }
-        return this.localStoragebackStore_;
-    }
-    set localStorage_(instance) {
-        if (!instance) {
-            // setting to undefined not allowed
-            return;
-        }
-        if (this.localStoragebackStore_) {
-            stateMgmtConsole.error(`${this.constructor.name} is setting LocalStorage instance twice`);
-        }
-        this.localStoragebackStore_ = instance;
     }
     // globally unique id, this is different from compilerAssignedUniqueChildId!
     id__() {
@@ -4810,13 +4810,37 @@ class ViewPU extends NativeViewPartialUpdate {
         
         
     }
-    // the current executed update function
+    // executed on first render only
+    // kept for backward compatibility with old ace-ets2bundle
     observeComponentCreation(compilerAssignedUpdateFunc) {
         const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
         
-        compilerAssignedUpdateFunc(elmtId, /* is first rneder */ true);
+        compilerAssignedUpdateFunc(elmtId, /* is first render */ true);
         this.updateFuncByElmtId.set(elmtId, compilerAssignedUpdateFunc);
         
+    }
+    // executed on first render only
+    // added July 2023, replaces observeComponentCreation
+    // classObject is the ES6 class object , mandatory to specify even the class lacks the pop function.
+    // - prototype : Object is present for every ES6 class
+    // - pop : () => void, static function present for JSXXX classes such as Column, TapGesture, etc.
+    observeComponentCreation2(compilerAssignedUpdateFunc, classObject) {
+        const _componentName = (classObject && "name" in classObject) ? classObject.name : "unspecified UINode";
+        const _popFunc = (classObject && "pop" in classObject) ? classObject.pop : () => { };
+        const updateFunc = (elmtId, isFirstRender) => {
+            
+            ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+            compilerAssignedUpdateFunc(elmtId, isFirstRender);
+            if (!isFirstRender) {
+                _popFunc();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+            
+        };
+        const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
+        
+        updateFunc(elmtId, /* is first render */ true);
+        this.updateFuncByElmtId.set(elmtId, updateFunc);
     }
     getOrCreateRecycleManager() {
         if (!this.recycleManager) {

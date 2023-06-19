@@ -323,7 +323,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     if ((updateFunc == undefined) || (typeof updateFunc !== "function")) {
       stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
     } else {
-      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: updateDirtyElements: update function on elmtId ${elmtId} start ...`);
+      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: updateDirtyElements: update on elmtId ${elmtId} start ...`);
       this.isRenderInProgress = true;
       updateFunc(elmtId, /* isFirstRender */ false);
       // continue in native JSView
@@ -331,7 +331,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       // this function appends no longer used elmtIds (as recrded by VSP) to the given allRmElmtIds array
       this.finishUpdateFunc(elmtId);
       this.isRenderInProgress = false;
-      stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}: ViewPU.updateDirtyElements: update function on ElementId ${elmtId} done`);
+      stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}: ViewPU.updateDirtyElements: update on elmtId ${elmtId} - DONE`);
     }
   }
 
@@ -599,15 +599,43 @@ abstract class ViewPU extends NativeViewPartialUpdate
     stateMgmtConsole.debug(`   ... remaining update funcs for elmtIds ${JSON.stringify([... this.updateFuncByElmtId.keys()])} .`);
   }
 
-  // the current executed update function
+  // executed on first render only
+  // kept for backward compatibility with old ace-ets2bundle
   public observeComponentCreation(compilerAssignedUpdateFunc: UpdateFunc): void {
     const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
     stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: First render for elmtId ${elmtId} start ....`);
-    compilerAssignedUpdateFunc(elmtId, /* is first rneder */ true);
+    compilerAssignedUpdateFunc(elmtId, /* is first render */ true);
 
     this.updateFuncByElmtId.set(elmtId, compilerAssignedUpdateFunc);
     stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: First render for elmtId ${elmtId} - DONE.`);
   }
+
+  // executed on first render only
+  // added July 2023, replaces observeComponentCreation
+  // classObject is the ES6 class object , mandatory to specify even the class lacks the pop function.
+  // - prototype : Object is present for every ES6 class
+  // - pop : () => void, static function present for JSXXX classes such as Column, TapGesture, etc.
+  public observeComponentCreation2(compilerAssignedUpdateFunc: UpdateFunc, classObject: { prototype : Object, pop?: () => void }): void {
+    const _componentName : string =  (classObject && "name" in classObject) ? classObject.name as string : "unspecified UINode";
+    const _popFunc : () => void = (classObject && "pop" in classObject) ? classObject.pop! : () => {};
+    const updateFunc = (elmtId: number, isFirstRender: boolean) => {
+      stateMgmtConsole.debug(`${this.constructor.name}[elmtId: ${this.id__()}]: ${isFirstRender ? `First render` : `Re-render/update`} for ${_componentName} elmtId ${elmtId} start ....`);
+      ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+      compilerAssignedUpdateFunc(elmtId, isFirstRender);
+      if (!isFirstRender) {
+        _popFunc();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+      stateMgmtConsole.debug(`${this.constructor.name}[elmtId: ${this.id__()}]: ${isFirstRender ? `First render` : `Re-render/update`} for ${_componentName} elmtId ${elmtId} - DONE ....`);
+    };
+
+    const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
+    stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: First render for ${_componentName} elmtId ${elmtId} start ....`);
+
+    updateFunc(elmtId, /* is first render */ true );
+    this.updateFuncByElmtId.set(elmtId, updateFunc);
+  }
+
 
   getOrCreateRecycleManager(): RecycleManager {
     if (!this.recycleManager) {
