@@ -2446,7 +2446,11 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
     LOGD("RosenTransitionEffect::NotifyTransition transition BEGIN, node %{public}d, isTransitionIn: %{public}d",
         frameNode->GetId(), isTransitionIn);
 
-    RSNode::ExecuteWithoutAnimation([this, &frameNode]() {
+    RSNode::ExecuteWithoutAnimation([this, &frameNode, isTransitionIn]() {
+        if (isTransitionIn && disappearingTransitionCount_ == 0) {
+            // transitionIn, reset to state before attaching in case of node reappear
+            transitionEffect_->Attach(Claim(this), true);
+        }
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         SizeF rootSize(pipeline->GetRootWidth(), pipeline->GetRootHeight());
