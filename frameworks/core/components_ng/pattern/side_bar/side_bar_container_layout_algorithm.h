@@ -96,6 +96,7 @@ private:
     void AutoMode(LayoutWrapper* layoutWrapper, float parentWidth, float minSideBarWidthPx, float dividerStrokeWidthPx);
     void AutoChangeSideBarWidth(
         LayoutWrapper* layoutWrapper, float parentWidth, float minSideBarWidthPx, float dividerStrokeWidthPx);
+    void UpdateDefaultValueByVersion();
 
     float currentOffset_ = 0.0f;
     float realSideBarWidth_ = 0.0f;
