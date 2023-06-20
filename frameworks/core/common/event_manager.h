@@ -177,6 +177,7 @@ private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
     MouseTestResult currMouseTestResults_;
+    MouseTestResult pressMouseTestResults_;
     HoverTestResult currHoverTestResults_;
     HoverTestResult lastHoverTestResults_;
     AxisTestResult axisTestResults_;
