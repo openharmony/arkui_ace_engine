@@ -1333,6 +1333,14 @@ float SwiperPattern::CalculateVisibleSize() const
     auto prevMargin = GetPrevMargin();
     auto nextMargin = GetNextMargin();
     auto itemSpace = GetItemSpace();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 0.0);
+    auto mainSize = geometryNode->GetFrameSize().MainSize(GetDirection());
+    if (itemSpace > mainSize) {
+        itemSpace = 0.0f;
+    }
     if (prevMargin != 0.0f) {
         if (nextMargin != 0.0f) {
             return contentMainSize_ - prevMargin - nextMargin - 2 * itemSpace;

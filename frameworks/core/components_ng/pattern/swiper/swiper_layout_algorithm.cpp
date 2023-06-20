@@ -98,7 +98,8 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         contentMainSize_ = GetMainAxisSize(contentIdealSize.ConvertToSizeT(), axis);
         mainSizeIsDefined_ = true;
     }
-    spaceWidth_ = SwiperUtils::GetItemSpace(swiperLayoutProperty);
+    auto itemSpace = SwiperUtils::GetItemSpace(swiperLayoutProperty);
+    spaceWidth_ = itemSpace > (contentMainSize_ + paddingBeforeContent_ + paddingAfterContent_) ? 0.0f : itemSpace;
 
     if (totalItemCount_ > 0) {
         currentOffset_ = currentDelta_;
@@ -366,7 +367,6 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
     }
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
-    auto itemSpace = SwiperUtils::GetItemSpace(swiperLayoutProperty);
 
     auto currentIndex = startIndex - 1;
     do {
@@ -394,7 +394,7 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
             currentTargetIndex_ = targetIndex_.value();
             targetIndex_.reset();
         }
-    } while (LessNotEqual(currentEndPos, nextMargin_ != 0.0f ? endMainPos + nextMargin_ + itemSpace : endMainPos));
+    } while (LessNotEqual(currentEndPos, nextMargin_ != 0.0f ? endMainPos + nextMargin_ + spaceWidth_ : endMainPos));
 
     if (overScrollFeature_ && canOverScroll_) {
         LOGD("during over scroll, just return in LayoutForward");
@@ -434,16 +434,15 @@ void SwiperLayoutAlgorithm::SetInactive(
 {
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
-    auto itemSpace = SwiperUtils::GetItemSpace(swiperLayoutProperty);
     std::list<int32_t> removeIndexes;
     for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
         if (targetIndex.has_value() && targetIndex.value() == pos->first) {
             continue;
         }
         if (LessOrEqual(
-                pos->second.endPos, prevMargin_ != 0.0f ? startMainPos - prevMargin_ - itemSpace : startMainPos) ||
+                pos->second.endPos, prevMargin_ != 0.0f ? startMainPos - prevMargin_ - spaceWidth_ : startMainPos) ||
             GreatOrEqual(
-                pos->second.startPos, nextMargin_ != 0.0f ? endMainPos + nextMargin_ + itemSpace : endMainPos)) {
+                pos->second.startPos, nextMargin_ != 0.0f ? endMainPos + nextMargin_ + spaceWidth_ : endMainPos)) {
             layoutWrapper->RemoveChildInRenderTree(pos->first);
             removeIndexes.emplace_back(pos->first);
         }
@@ -466,7 +465,6 @@ void SwiperLayoutAlgorithm::LayoutBackward(
 
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
-    auto itemSpace = SwiperUtils::GetItemSpace(swiperLayoutProperty);
     do {
         currentEndPos = currentStartPos;
         auto result =
@@ -486,7 +484,7 @@ void SwiperLayoutAlgorithm::LayoutBackward(
             targetIndex_.reset();
         }
     } while (
-        GreatNotEqual(currentStartPos, prevMargin_ != 0.0f ? startMainPos - prevMargin_ - itemSpace : startMainPos) ||
+        GreatNotEqual(currentStartPos, prevMargin_ != 0.0f ? startMainPos - prevMargin_ - spaceWidth_ : startMainPos) ||
         (currentTargetIndex_.has_value() && (currentIndex - 1) == currentTargetIndex_.value()));
 
     // adjust offset. If edgeEffect is SPRING, jump adjust to allow swiper scroll through boundary
@@ -543,17 +541,16 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         float crossOffset = 0.0f;
         pos.second.startPos -= currentOffset_;
         pos.second.endPos -= currentOffset_;
-        auto itemSpace = SwiperUtils::GetItemSpace(swiperLayoutProperty);
 
         if (axis == Axis::VERTICAL) {
             offset += OffsetF(crossOffset, pos.second.startPos);
             if (prevMargin_ != 0.0f) {
-                offset += OffsetF(0.0f, prevMargin_ + itemSpace);
+                offset += OffsetF(0.0f, prevMargin_ + spaceWidth_);
             }
         } else {
             offset += OffsetF(pos.second.startPos, crossOffset);
             if (prevMargin_ != 0.0f) {
-                offset += OffsetF(prevMargin_ + itemSpace, 0.0f);
+                offset += OffsetF(prevMargin_ + spaceWidth_, 0.0f);
             }
         }
         wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
