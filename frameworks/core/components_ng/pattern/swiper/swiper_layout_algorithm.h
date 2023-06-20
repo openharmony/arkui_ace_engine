@@ -178,6 +178,11 @@ public:
         return mainSizeIsMeasured_;
     }
 
+    int32_t GetCurrentIndex() const
+    {
+        return currentIndex_;
+    }
+
 private:
     void MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
     void SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cachedCount);
@@ -217,6 +222,7 @@ private:
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;
     std::optional<int32_t> currentTargetIndex_;
+    int32_t currentIndex_;
 };
 
 } // namespace OHOS::Ace::NG
