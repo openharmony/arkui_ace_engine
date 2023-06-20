@@ -695,7 +695,6 @@ HWTEST_F(VideoTestNg, VideoPatternTest010, TestSize.Level1)
     /**
      * @tc.steps: step2. Prepare the childNode & videoEvent
      */
-    // frameNode->RemoveChildAtIndex(0); // remove the controlBar created in onModifyDone
     auto controlBar = frameNode->GetChildAtIndex(1);
     ASSERT_TRUE(controlBar);
 
