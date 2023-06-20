@@ -317,10 +317,10 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
     double scaledLeft = left * viewScale;
     double scaledTop = top * viewScale;
     if (Negative(width)) {
-        scaledLeft += dirtyWidth;
+        scaledLeft += width * viewScale;
     }
     if (Negative(height)) {
-        scaledTop += height;
+        scaledTop += height * viewScale;
     }
     // copy the bitmap to tempCanvas
     auto imageInfo =
@@ -332,7 +332,7 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
     int32_t size = dirtyWidth * dirtyHeight;
     const uint8_t* pixels = nullptr;
     SkCanvas tempCanvas(tempCache);
-    auto srcRect = SkRect::MakeXYWH(scaledLeft, scaledTop, dirtyWidth * viewScale, dirtyWidth * viewScale);
+    auto srcRect = SkRect::MakeXYWH(scaledLeft, scaledTop, dirtyWidth * viewScale, dirtyHeight * viewScale);
     auto dstRect = SkRect::MakeXYWH(0.0, 0.0, dirtyWidth, dirtyHeight);
 #ifndef NEW_SKIA
     tempCanvas.drawBitmapRect(canvasCache_, srcRect, dstRect, nullptr);
