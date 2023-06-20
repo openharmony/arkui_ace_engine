@@ -265,21 +265,7 @@ public:
         return isFocusActive_;
     }
 
-    bool SetIsFocusActive(bool isFocusActive)
-    {
-        if (isFocusActive_ == isFocusActive) {
-            return false;
-        }
-        isFocusActive_ = isFocusActive;
-        CHECK_NULL_RETURN_NOLOG(rootNode_, false);
-        auto rootFocusHub = rootNode_->GetFocusHub();
-        CHECK_NULL_RETURN_NOLOG(rootFocusHub, false);
-        if (isFocusActive_) {
-            return rootFocusHub->PaintAllFocusState();
-        }
-        rootFocusHub->ClearAllFocusState();
-        return true;
-    }
+    bool SetIsFocusActive(bool isFocusActive);
 
     bool IsTabJustTriggerOnKeyEvent() const
     {

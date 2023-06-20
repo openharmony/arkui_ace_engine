@@ -899,6 +899,7 @@ public:
 
     // restore
     virtual void RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo) {}
+
     virtual std::unique_ptr<JsonValue> GetStoredNodeInfo()
     {
         return nullptr;

@@ -68,6 +68,7 @@ public:
     MOCK_METHOD1(SetErrorEventHandler,
         void(std::function<void(const std::string& code, const std::string& msg)>&& actionCallback));
     MOCK_METHOD0(ReloadForm, void());
+    MOCK_METHOD1(SetIsFocusActive, void(bool isFocusActive));
 };
 } // namespace Ace
 } // namespace OHOS

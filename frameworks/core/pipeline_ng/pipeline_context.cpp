@@ -952,6 +952,22 @@ RefPtr<FrameNode> PipelineContext::GetNavDestinationBackButtonNode()
     return navDestinationNode;
 }
 
+bool PipelineContext::SetIsFocusActive(bool isFocusActive)
+{
+    if (isFocusActive_ == isFocusActive) {
+        return false;
+    }
+    isFocusActive_ = isFocusActive;
+    CHECK_NULL_RETURN_NOLOG(rootNode_, false);
+    auto rootFocusHub = rootNode_->GetFocusHub();
+    CHECK_NULL_RETURN_NOLOG(rootFocusHub, false);
+    if (isFocusActive_) {
+        return rootFocusHub->PaintAllFocusState();
+    }
+    rootFocusHub->ClearAllFocusState();
+    return true;
+}
+
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 {
     CHECK_RUN_ON(UI);

@@ -20,6 +20,10 @@
 
 #include "core/event/ace_events.h"
 
+namespace OHOS::MMI {
+class KeyEvent;
+}
+
 namespace OHOS::Ace {
 
 enum class KeyCode : int32_t {
@@ -563,6 +567,7 @@ struct KeyEvent final {
     int32_t metaKey = 0;
     int64_t deviceId = 0;
     SourceType sourceType { SourceType::NONE };
+    std::shared_ptr<MMI::KeyEvent> rawKeyEvent;
 };
 
 class ACE_EXPORT KeyEventInfo : public BaseEventInfo {
@@ -618,6 +623,8 @@ enum class BlurReason : int32_t {
 using OnKeyEventFunc = std::function<bool(const KeyEvent&)>;
 using OnKeyCallbackFunc = std::function<void(KeyEventInfo&)>;
 using OnFocusFunc = std::function<void()>;
+using OnClearFocusStateFunc = std::function<void()>;
+using OnPaintFocusStateFunc = std::function<bool()>;
 using OnBlurFunc = std::function<void()>;
 using OnBlurReasonFunc = std::function<void(BlurReason reason)>;
 using OnPreFocusFunc = std::function<void()>;

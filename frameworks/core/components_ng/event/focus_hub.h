@@ -656,6 +656,17 @@ public:
     {
         onPreFocusCallback_ = std::move(onPreFocusCallback);
     }
+
+    void SetOnClearFocusStateInternal(OnClearFocusStateFunc&& onClearFocusCallback)
+    {
+        onClearFocusStateCallback_ = std::move(onClearFocusCallback);
+    }
+
+    void SetOnPaintFocusStateInternal(OnPaintFocusStateFunc&& onPaintFocusCallback)
+    {
+        onPaintFocusStateCallback_ = std::move(onPaintFocusCallback);
+    }
+
     void SetOnKeyEventInternal(OnKeyEventFunc&& onKeyEventInternal)
     {
         onKeyEventInternal_ = std::move(onKeyEventInternal);
@@ -791,6 +802,7 @@ public:
     {
         return (static_cast<uint32_t>(step) & 0x1) == 0;
     }
+
     static inline bool IsFocusStepForward(FocusStep step)
     {
         return (static_cast<uint32_t>(step) & MASK_FOCUS_STEP_FORWARD) != 0;
@@ -835,6 +847,8 @@ private:
     OnBlurReasonFunc onBlurReasonInternal_;
     OnKeyEventFunc onKeyEventInternal_;
     OnPreFocusFunc onPreFocusCallback_;
+    OnClearFocusStateFunc onClearFocusStateCallback_;
+    OnPaintFocusStateFunc onPaintFocusStateCallback_;
 
     RefPtr<FocusCallbackEvents> focusCallbackEvents_;
 

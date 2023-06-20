@@ -266,4 +266,16 @@ bool WindowPattern::CreatePersistentNode()
     startingNode_->MarkModifyDone();
     return true;
 }
+
+void WindowPattern::DispatchKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferKeyEventForConsumed(keyEvent, isConsumed);
+}
+
+void WindowPattern::DisPatchFocusActiveEvent(bool isFocusActive)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferFocusActiveEvent(isFocusActive);
+}
 } // namespace OHOS::Ace::NG
