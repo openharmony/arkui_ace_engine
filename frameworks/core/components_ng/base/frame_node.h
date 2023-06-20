@@ -53,7 +53,7 @@ class StateModifyTask;
 class UITask;
 
 // FrameNode will display rendering region in the screen.
-class ACE_EXPORT FrameNode : public UINode {
+class ACE_FORCE_EXPORT FrameNode : public UINode {
     DECLARE_ACE_TYPE(FrameNode, UINode);
 
 public:

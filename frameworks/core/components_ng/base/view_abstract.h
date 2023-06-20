@@ -76,7 +76,7 @@ struct MenuParam {
     std::optional<Dimension> arrowOffset;
 };
 
-class ACE_EXPORT ViewAbstract {
+class ACE_FORCE_EXPORT ViewAbstract {
 public:
     static void SetWidth(const CalcLength& width);
     static void SetHeight(const CalcLength& height);

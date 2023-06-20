@@ -46,7 +46,7 @@ class FrameNode;
 
 using LazyBuildFunction = std::function<void(RefPtr<LayoutWrapper>)>;
 
-class ACE_EXPORT LayoutWrapper : public AceType {
+class ACE_FORCE_EXPORT LayoutWrapper : public AceType {
     DECLARE_ACE_TYPE(LayoutWrapper, AceType)
 public:
     LayoutWrapper(WeakPtr<FrameNode> hostNode, RefPtr<GeometryNode> geometryNode, RefPtr<LayoutProperty> layoutProperty)

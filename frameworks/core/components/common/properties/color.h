@@ -51,7 +51,7 @@ enum class ForegroundColorStrategy : uint32_t {
 };
 
 // A color value present by 32 bit.
-class ACE_EXPORT Color {
+class ACE_FORCE_EXPORT Color {
 public:
     Color() = default;
     constexpr explicit Color(uint32_t value) : colorValue_(ColorParam { .value = value }) {}

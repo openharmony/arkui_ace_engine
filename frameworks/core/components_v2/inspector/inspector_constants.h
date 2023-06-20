@@ -197,7 +197,7 @@ ACE_EXPORT extern const char PANEL_ETS_TAG[];
 
 // pattern-lock
 ACE_EXPORT extern const char PATTERN_LOCK_COMPONENT_TAG[];
-ACE_EXPORT extern const char PATTERN_LOCK_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char PATTERN_LOCK_ETS_TAG[];
 
 // row
 ACE_EXPORT extern const char ROW_COMPONENT_TAG[];
@@ -242,7 +242,7 @@ ACE_EXPORT extern const char IMAGE_ETS_TAG[];
 
 // qrcode
 ACE_EXPORT extern const char QRCODE_COMPONENT_TAG[];
-ACE_EXPORT extern const char QRCODE_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char QRCODE_ETS_TAG[];
 
 // span
 ACE_EXPORT extern const char SPAN_COMPONENT_TAG[];
@@ -388,7 +388,7 @@ ACE_EXPORT extern const char GRID_ROW_ETS_TAG[];
 
 // relativeContainer
 ACE_EXPORT extern const char RELATIVE_CONTAINER_COMPONENT_TAG[];
-ACE_EXPORT extern const char RELATIVE_CONTAINER_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char RELATIVE_CONTAINER_ETS_TAG[];
 
 // menu
 ACE_EXPORT extern const char MENU_COMPONENT_TAG[];
