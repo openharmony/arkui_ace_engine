@@ -752,8 +752,7 @@ HWTEST_F(IndexerTestNg, IndexerPopupTouchDown001, TestSize.Level1)
     pattern_->OnPopupTouchDown(touchEventInfo);
     ASSERT_NE(pattern_->popupNode_, nullptr);
     auto columnLayoutProperty = pattern_->popupNode_->GetLayoutProperty<LinearLayoutProperty>();
-    // If Visibility never changed, the value is default value.
-    EXPECT_EQ(columnLayoutProperty->GetVisibility(), std::nullopt);
+    EXPECT_EQ(columnLayoutProperty->GetVisibility(), VisibleType::GONE);
 }
 
 /**
