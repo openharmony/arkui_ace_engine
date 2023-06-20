@@ -860,6 +860,8 @@ void IndexerPattern::AddListItemClickListener(RefPtr<FrameNode>& listItemNode, i
         CHECK_NULL_VOID(indexerPattern);
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             indexerPattern->OnListItemClick(index);
+        } else if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+            indexerPattern->ClearClickStatus();
         }
     };
     gestureHub->AddTouchEvent(MakeRefPtr<TouchEventImpl>(std::move(touchCallback)));
@@ -876,6 +878,11 @@ void IndexerPattern::OnListItemClick(int32_t index)
         onPopupSelected(index);
     }
     ChangeListItemsSelectedStyle(index);
+}
+
+void IndexerPattern::ClearClickStatus()
+{
+    ChangeListItemsSelectedStyle(-1);
 }
 
 void IndexerPattern::OnPopupTouchDown(const TouchEventInfo& info)
