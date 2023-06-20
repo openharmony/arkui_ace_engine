@@ -122,7 +122,7 @@ template("ace_osal_ohos_source_set") {
       "ability_runtime:abilitykit_native",
       "ability_runtime:runtime",
       "bundle_framework:appexecfwk_core",
-      "hicollie_native:libhicollie",
+      "hicollie:libhicollie",
       "hisysevent_native:libhisysevent",
       "hitrace_native:libhitracechain",
     ]
