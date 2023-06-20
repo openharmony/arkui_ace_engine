@@ -1006,8 +1006,8 @@ void ProgressModifier::GenerateRingSweepingGradientInfo(
     gradientColorEnd.SetDimension(Dimension(0.0, DimensionUnit::PERCENT));
     gradient.AddColor(gradientColorEnd);
 
-    // The sweep layer is a 45-degree white gradient with an opacity of 0.6 at 35 degrees and 0 at both ends.
-    Color sweepingColorMiddle = sweepingColorBase.ChangeOpacity(0.6f);
+    // The sweep layer is a 45-degree white gradient with an opacity of 0.4 at 35 degrees and 0 at both ends.
+    Color sweepingColorMiddle = sweepingColorBase.ChangeOpacity(0.4f);
     GradientColor gradientColorMiddle;
     gradientColorMiddle.SetColor(sweepingColorMiddle);
     gradientColorMiddle.SetDimension(Dimension(35.0f / ANGLE_45, DimensionUnit::PERCENT));
