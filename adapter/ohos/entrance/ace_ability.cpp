@@ -617,7 +617,6 @@ void AceAbility::OnConfigurationUpdated(const Configuration& configuration)
 {
     LOGI("AceAbility::OnConfigurationUpdated called ");
     Ability::OnConfigurationUpdated(configuration);
-    Platform::AceContainer::OnConfigurationUpdated(abilityId_, configuration.GetName());
 
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     CHECK_NULL_VOID(container);
@@ -630,7 +629,7 @@ void AceAbility::OnConfigurationUpdated(const Configuration& configuration)
             auto colorMode = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
             auto deviceAccess = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
             auto languageTag = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
-            container->UpdateConfiguration(colorMode, deviceAccess, languageTag);
+            container->UpdateConfiguration(colorMode, deviceAccess, languageTag, configuration.GetName());
         },
         TaskExecutor::TaskType::UI);
     LOGI("AceAbility::OnConfigurationUpdated called End, name:%{public}s", configuration.GetName().c_str());

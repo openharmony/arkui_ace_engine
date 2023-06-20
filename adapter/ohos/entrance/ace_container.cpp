@@ -1448,8 +1448,8 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
     return context->CreateModuleContext(bundle, module);
 }
 
-void AceContainer::UpdateConfiguration(
-    const std::string& colorMode, const std::string& deviceAccess, const std::string& languageTag)
+void AceContainer::UpdateConfiguration(const std::string& colorMode, const std::string& deviceAccess,
+    const std::string& languageTag, const std::string& configuration)
 {
     if (colorMode.empty() && deviceAccess.empty() && languageTag.empty()) {
         LOGW("AceContainer::OnConfigurationUpdated param is empty");
@@ -1487,6 +1487,9 @@ void AceContainer::UpdateConfiguration(
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);
     themeManager->LoadResourceThemes();
+    auto front = GetFrontend();
+    CHECK_NULL_VOID(front);
+    front->OnConfigurationUpdated(configuration);
     OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
     NotifyConfigurationChange(!deviceAccess.empty());
 }
