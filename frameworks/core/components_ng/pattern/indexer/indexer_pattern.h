@@ -117,6 +117,7 @@ private:
     void OnPopupTouchDown(const TouchEventInfo& info);
     void AddListItemClickListener(RefPtr<FrameNode>& listItemNode, int32_t index);
     void OnListItemClick(int32_t index);
+    void ClearClickStatus();
     void ChangeListItemsSelectedStyle(int32_t clickIndex);
     RefPtr<FrameNode> CreatePopupNode();
     void UpdateBubbleView();
