@@ -99,12 +99,10 @@ bool HandleTouchEvent(const std::vector<uint8_t>& data)
 void TouchEventHandler::InitialTouchEventCallback(const GlfwController &controller)
 {
     LOGI("Initial callback function of touch event.");
-#ifdef USE_GLFW_WINDOW
     auto touchEventCallback = [](std::unique_ptr<flutter::PointerDataPacket>& packet)->bool {
         return packet && HandleTouchEvent(packet->data());
     };
     FlutterEngineRegisterHandleTouchEventCallback(std::move(touchEventCallback));
-#endif
 }
 
 } // namespace OHOS::Ace::Platform
