@@ -816,6 +816,10 @@ public:
     }
     std::string GetShowResultImageSrc() const;
     std::string GetHideResultImageSrc() const;
+    void OnAttachToFrameNode() override
+    {
+        caretUpdateType_ = CaretUpdateType::EVENT;
+    }
 
 private:
     bool HasFocus() const;
