@@ -129,11 +129,16 @@ private:
     void OnAppearAnimationFinish();
     void UpdateLoadingMarginTop(float top);
     void SetAccessibilityAction();
+    void InitOnKeyEvent();
+    void OnKeyEvent(const KeyEvent& event);
+    void QuickEndFresh();
+    void QuickStartFresh();
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     RefPtr<PanEvent> panEvent_;
     OffsetF scrollOffset_;
 
     bool isRefreshing_ = false;
+    bool isKeyEventRegisted_ = false;
     float triggerLoadingDistance_ = 0.0f;
     RefPtr<FrameNode> progressChild_;
     RefPtr<FrameNode> customBuilder_;
