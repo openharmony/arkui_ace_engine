@@ -87,7 +87,7 @@ public:
     void CloseDialog(int32_t instanceId) override;
     const RefPtr<NG::OverlayManager> GetOverlayManager() override;
 
-    int32_t GetChildContainerId() const
+    int32_t GetChildContainerId() const override
     {
         return childContainerId_;
     }
