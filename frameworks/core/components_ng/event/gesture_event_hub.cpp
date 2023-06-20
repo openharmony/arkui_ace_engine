@@ -403,12 +403,6 @@ void GestureEventHub::StartDragTaskForWeb()
 
 void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 {
-#ifdef ENABLE_DRAG_FRAMEWORK
-    if (info.GetSourceTool() == SourceTool::PEN) {
-        LOGI("HandleOnDragStart: The stylus does not support drag and drop!");
-        return;
-    }
-#endif
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
     if (!IsAllowedDrag(eventHub)) {
