@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_paint_method.h"
@@ -45,10 +46,16 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "test/mock/base/mock_task_executor.h"
 
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
+namespace {
+constexpr MenuType TYPE = MenuType::MENU;
+const OffsetF MENU_OFFSET(10.0, 10.0);
+} // namespace
 class OverlayManagerTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -522,9 +529,210 @@ HWTEST_F(OverlayManagerTestNg, PopupTest002, TestSize.Level1)
      * @tc.steps: step3. call HidePopup when childCount is 2
      * @tc.expected: popupMap's data is updated successfully
      */
-    overlayManager->HidePopup(targetId2, popups[1]);
-    EXPECT_FALSE(overlayManager->popupMap_[targetId2].markNeedUpdate);
     overlayManager->HideAllPopups();
     EXPECT_FALSE(overlayManager->popupMap_.empty());
+}
+/**
+ * @tc.name: PopupTest003
+ * @tc.desc: Test OverlayManager::HidePopup.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, PopupTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.markNeedUpdate = true;
+    popupInfo.isCurrentOnShow = true;
+
+    /**
+     * @tc.steps: step2. create overlayManager and call HidePopup.
+     * @tc.expected: popupMap's data is updated successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    popupNode->MountToParent(rootNode);
+    rootNode->MarkDirtyNode();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->HidePopup(targetId, popupInfo);
+    EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
+    auto rootChildren = rootNode->GetChildren();
+    auto iter = std::find(rootChildren.begin(), rootChildren.end(), popupInfo.popupNode);
+    EXPECT_TRUE(iter == rootChildren.end());
+}
+/**
+ * @tc.name: MenuTest001
+ * @tc.desc: Test OverlayManager::ShowMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, MenuTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menu node and root node.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    auto menuId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto menuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, menuId, AceType::MakeRefPtr<MenuPattern>(1, "Test", TYPE));
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    menuNode->MountToParent(rootNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. call showMenu when menuNode already appended.
+     * @tc.expected: function exits rightly
+     */
+    auto targetId = rootNode->GetId();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
+    overlayManager->HideMenu(targetId);
+    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
+    overlayManager->HideMenuInSubWindow(rootNode->GetId());
+    overlayManager->HideMenuInSubWindow();
+    EXPECT_FALSE(overlayManager->menuMap_.empty());
+
+    /**
+     * @tc.steps: step3. call HideMenu related functions after menuNode already erased.
+     * @tc.expected: return normally
+     */
+    overlayManager->HideAllMenus();
+    overlayManager->DeleteMenu(targetId);
+    overlayManager->HideMenu(targetId);
+    overlayManager->HideMenuInSubWindow(targetId);
+    overlayManager->HideMenuInSubWindow();
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
+
+    /**
+     * @tc.steps: step4. call DeleteMenu again after menuNode already erased.
+     * @tc.expected: return normally
+     */
+    overlayManager->DeleteMenu(targetId);
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
+}
+/**
+ * @tc.name: PopupTest004
+ * @tc.desc: Test OverlayManager::HideAllPopups when useCustom is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, PopupTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.markNeedUpdate = true;
+    auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    layoutProp->UpdateUseCustom(true);
+
+    /**
+     * @tc.steps: step2. create overlayManager and call HideAllPopups when ShowInSubwindow is false.
+     * @tc.expected: popupMap's data is updated successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->UpdatePopupNode(targetId, popupInfo);
+    overlayManager->HideAllPopups();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
+
+    /**
+     * @tc.steps: step3. update ShowInSubwindow and call HideAllPopups again.
+     * @tc.expected: popupMap's data is updated successfully
+     */
+    layoutProp->UpdateShowInSubWindow(true);
+    overlayManager->UpdatePopupNode(targetId, popupInfo);
+    overlayManager->HideAllPopups();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
+
+    /**
+     * @tc.steps: step4. call ShowIndexerPopup and RemoveIndexerPopup.
+     * @tc.expected: mount and remove successfully,Repeatedly calling the function exits normally
+     */
+    EXPECT_TRUE(overlayManager->customPopupMap_.empty());
+    overlayManager->ShowIndexerPopup(targetId, popupNode);
+    EXPECT_FALSE(overlayManager->customPopupMap_.empty());
+    overlayManager->ShowIndexerPopup(targetId, popupNode);
+    EXPECT_EQ(overlayManager->customPopupMap_[targetId], popupNode);
+    overlayManager->RemoveIndexerPopup();
+    EXPECT_TRUE(overlayManager->customPopupMap_.empty());
+    overlayManager->RemoveIndexerPopup();
+    EXPECT_TRUE(overlayManager->customPopupMap_.empty());
+}
+/**
+ * @tc.name: MenuTest002
+ * @tc.desc: Test OverlayManager::ShowMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, MenuTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menu node and root node.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto targetId = rootNode->GetId();
+    auto menuId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto menuNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, menuId, AceType::MakeRefPtr<MenuWrapperPattern>(targetId));
+    auto subMenuId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto subMenuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, subMenuId, AceType::MakeRefPtr<MenuPattern>(1, "Test", TYPE));
+    menuNode->AddChild(subMenuNode);
+    /**
+     * @tc.steps: step2. call showMenu when menuNode is nullptr and menuMap is empty.
+     * @tc.expected: function exits normally
+     */
+    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    ASSERT_NE(taskExecutor, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    pipeline->taskExecutor_ = taskExecutor;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->ShowMenu(targetId, MENU_OFFSET, nullptr);
+    overlayManager->ShowMenuInSubWindow(targetId, MENU_OFFSET, nullptr);
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    /**
+     * @tc.steps: step3. call showMenu when menuNode is not appended.
+     * @tc.expected: menuNode mounted successfully
+     */
+    overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
+    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    /**
+     * @tc.steps: step4. call showMenu when menuNode is nullptr and menuMap is not empty.
+     * @tc.expected: function exits normally
+     */
+    overlayManager->ShowMenu(targetId, MENU_OFFSET, nullptr);
+    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    /**
+     * @tc.steps: step5. call HideAllMenus.
+     * @tc.expected: function exits normally
+     */
+    overlayManager->HideAllMenus();
+    overlayManager->CleanMenuInSubWindow();
+    EXPECT_FALSE(overlayManager->menuMap_.empty());
 }
 } // namespace OHOS::Ace::NG
