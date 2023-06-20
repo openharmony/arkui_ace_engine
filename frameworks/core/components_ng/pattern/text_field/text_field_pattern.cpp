@@ -3304,12 +3304,15 @@ bool TextFieldPattern::CursorMoveUp()
     LOGI("Handle cursor move up");
     CHECK_NULL_RETURN_NOLOG(IsTextArea(), false);
     auto originCaretPosition = textEditingValue_.caretPosition;
-    float verticalOffset = caretRect_.GetY() - PreferredLineHeight();
+    auto offsetX = caretRect_.GetX() - contentRect_.GetX();
+    auto offsetY = caretRect_.GetY() - textRect_.GetY();
+    // multiply by 0.5f to convert to the grapheme center point of the previous line.
+    float verticalOffset = offsetY - PreferredLineHeight() * 0.5f;
     textEditingValue_.caretPosition = static_cast<int32_t>(
 #ifndef NEW_SKIA
         paragraph_->GetGlyphPositionAtCoordinateWithCluster(caretRect_.GetX(), verticalOffset).pos_);
 #else
-        paragraph_->GetGlyphPositionAtCoordinate(caretRect_.GetX(), verticalOffset).pos_);
+        paragraph_->GetGlyphPositionAtCoordinate(offsetX, verticalOffset).pos_);
 #endif
     OnCursorMoveDone();
     if (originCaretPosition == textEditingValue_.caretPosition) {
@@ -3323,12 +3326,15 @@ bool TextFieldPattern::CursorMoveDown()
     LOGI("Handle cursor move down");
     CHECK_NULL_RETURN_NOLOG(IsTextArea(), false);
     auto originCaretPosition = textEditingValue_.caretPosition;
-    float verticalOffset = caretRect_.GetY() + PreferredLineHeight();
+    auto offsetX = caretRect_.GetX() - contentRect_.GetX();
+    auto offsetY = caretRect_.GetY() - textRect_.GetY();
+    // multiply by 1.5f to convert to the grapheme center point of the next line.
+    float verticalOffset = offsetY + PreferredLineHeight() * 1.5f;
     textEditingValue_.caretPosition = static_cast<int32_t>(
 #ifndef NEW_SKIA
         paragraph_->GetGlyphPositionAtCoordinateWithCluster(caretRect_.GetX(), verticalOffset).pos_);
 #else
-        paragraph_->GetGlyphPositionAtCoordinate(caretRect_.GetX(), verticalOffset).pos_);
+        paragraph_->GetGlyphPositionAtCoordinate(offsetX, verticalOffset).pos_);
 #endif
     OnCursorMoveDone();
     if (originCaretPosition == textEditingValue_.caretPosition) {

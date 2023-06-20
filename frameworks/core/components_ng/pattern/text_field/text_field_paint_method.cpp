@@ -109,8 +109,8 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(textFieldPattern);
     auto cursorVisible = textFieldPattern->GetCursorVisible();
     textFieldOverlayModifier_->SetCursorVisible(cursorVisible);
-    auto cursorOffsetX = textFieldPattern->GetCaretOffsetX();
-    textFieldOverlayModifier_->SetCursorOffsetX(cursorOffsetX);
+    auto cursorOffset = textFieldPattern->GetCaretOffset();
+    textFieldOverlayModifier_->SetCursorOffset(cursorOffset);
     auto currentOffset = textFieldPattern->GetCurrentOffset();
     textFieldOverlayModifier_->SetCurrentOffset(currentOffset);
 

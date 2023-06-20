@@ -310,6 +310,11 @@ public:
         return textSelector_.selectionDestinationOffset.GetX();
     }
 
+    OffsetF GetCaretOffset() const
+    {
+        return OffsetF(caretRect_.GetX(), caretRect_.GetY());
+    }
+
     float GetCaretOffsetX() const
     {
         return caretRect_.GetX();
