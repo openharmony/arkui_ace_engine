@@ -38,6 +38,7 @@ public:
 
 private:
     static bool GetDisplayOffset(RefPtr<FrameNode>& node, double& offsetX, double& offsetY);
+    static bool GetWindowRect(RefPtr<FrameNode>& node, OHOS::Security::SecurityComponent::SecCompRect& winRect);
     static bool CheckOpacity(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
     static bool CheckBrightness(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
     static bool CheckVisibility(const RefPtr<FrameNode>& node, RefPtr<LayoutProperty>& layoutProperty);
