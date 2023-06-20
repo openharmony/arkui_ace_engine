@@ -2785,6 +2785,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
             TextInputConfiguration config;
             config.type = keyboard_;
             config.action = GetTextInputActionValue(GetDefaultTextInputAction());
+            config.inputFilter = GetInputFilter();
             config.obscureText = textObscured_;
             LOGI("Request keyboard configuration: type=%{private}d action=%{private}d obscureText=%{private}d",
                 keyboard_, config.action, textObscured_);
