@@ -408,6 +408,7 @@ float TextFieldPattern::GetIconRightOffset()
 
 void TextFieldPattern::CreateSingleHandle()
 {
+    isSingleHandle_ = true;
     auto renderContext = GetHost()->GetRenderContext();
     if (renderContext) {
         AnimatePressAndHover(renderContext, 0.0f);
@@ -2013,7 +2014,6 @@ void TextFieldPattern::OnModifyDone()
         SetEditingValueToProperty(textEditingValue_.text);
     }
     FireOnChangeIfNeeded();
-    caretUpdateType_ = CaretUpdateType::EVENT;
     if (IsTextArea()) {
         SetAxis(Axis::VERTICAL);
         if (!GetScrollableEvent()) {
@@ -2213,8 +2213,12 @@ void TextFieldPattern::ProcessOverlay()
     if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
         if (textEditingValue_.caretPosition == 0 && GetLastTouchOffset().GetX() < textRect_.GetX()) {
             UpdateSelection(0, 0);
-        } else if (textEditingValue_.CaretAtLast()) {
+            CreateSingleHandle();
+            return;
+        } else if (textEditingValue_.CaretAtLast() && GetLastTouchOffset().GetX() > textRect_.GetX()) {
             UpdateSelection(textEditingValue_.caretPosition, textEditingValue_.caretPosition);
+            CreateSingleHandle();
+            return;
         } else {
             UpdateSelectorByPosition(textEditingValue_.caretPosition);
         }
