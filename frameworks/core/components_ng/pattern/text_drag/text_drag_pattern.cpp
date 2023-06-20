@@ -30,9 +30,9 @@ bool TextDragPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     return true;
 }
 
-void TextDragPattern::CreateDragNode(RefPtr<FrameNode> hostNode)
+RefPtr<FrameNode> TextDragPattern::CreateDragNode(const RefPtr<FrameNode>& hostNode)
 {
-    CHECK_NULL_VOID(hostNode);
+    CHECK_NULL_RETURN(hostNode, nullptr);
     auto hostPattern = hostNode->GetPattern<TextDragBase>();
     const auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto dragNode = FrameNode::GetOrCreateFrameNode(
@@ -46,13 +46,12 @@ void TextDragPattern::CreateDragNode(RefPtr<FrameNode> hostNode)
         dragContext->UpdateForegroundColorStrategy(hostContext->GetForegroundColorStrategy().value());
     }
     auto dragPattern = dragNode->GetPattern<TextDragPattern>();
-    CHECK_NULL_VOID(dragPattern);
     auto data = CalculateTextDragData(hostPattern, dragContext);
     dragPattern->Initialize(hostPattern->GetDragParagraph(), data);
 
     CalcSize size(NG::CalcLength(dragPattern->GetFrameWidth()), NG::CalcLength(dragPattern->GetFrameHeight()));
     dragNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(size);
-    hostPattern->SetDragNode(dragNode);
+    return dragNode;
 }
 
 TextDragData TextDragPattern::CalculateTextDragData(

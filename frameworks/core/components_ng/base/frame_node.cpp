@@ -130,6 +130,7 @@ RefPtr<FrameNode> FrameNode::CreateFrameNode(
 void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
+    // to trigger OnAttachToMainTree
     node->AttachToMainTree();
     node->MarkModifyDone();
     node->UpdateLayoutPropertyFlag();
