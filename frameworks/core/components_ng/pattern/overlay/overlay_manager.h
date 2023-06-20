@@ -172,6 +172,11 @@ public:
         hasPixelMap_ = hasPixelMap;
     }
 
+    RefPtr<FrameNode> GetPixelMapNode()
+    {
+        return pixmapColumnNodeWeak_.Upgrade();
+    }
+
     bool GetHasFilter()
     {
         return hasFilter_;
@@ -207,7 +212,7 @@ public:
         filterColumnNodeWeak_ = columnNode;
     }
 
-    void MountPixelmapToRootNode(const RefPtr<FrameNode>& columnNode);
+    void MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode);
     void MountEventToRootNode(const RefPtr<FrameNode>& columnNode);
     void RemovePixelMap();
     void RemovePixelMapAnimation(bool startDrag, double x, double y);
@@ -274,7 +279,7 @@ private:
     bool hasFilter_ {false};
     bool hasEvent_ {false};
     bool isOnAnimation_ {false};
-    WeakPtr<FrameNode> pixelmapColumnNodeWeak_;
+    WeakPtr<FrameNode> pixmapColumnNodeWeak_;
     WeakPtr<FrameNode> filterColumnNodeWeak_;
     WeakPtr<FrameNode> eventColumnNodeWeak_;
 #endif // ENABLE_DRAG_FRAMEWORK

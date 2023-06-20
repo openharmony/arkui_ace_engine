@@ -69,7 +69,7 @@ constexpr float PIXELMAP_ANIMATION_WIDTH_RATE = 0.5f;
 constexpr float PIXELMAP_ANIMATION_HEIGHT_RATE = 0.2f;
 constexpr float PIXELMAP_DRAG_SCALE = 1.0f;
 constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
-constexpr float PIXELMAP_ANIMATION_DEFALUT_LIMIT_SCALE = 0.5f;
+constexpr float PIXELMAP_ANIMATION_DEFAULT_LIMIT_SCALE = 0.5f;
 #endif // ENABLE_DRAG_FRAMEWORK
 
 constexpr int32_t FULL_MODAL_ALPHA_ANIMATION_DURATION = 200;
@@ -1451,24 +1451,20 @@ void OverlayManager::DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t ta
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-void OverlayManager::MountPixelmapToRootNode(const RefPtr<FrameNode>& columnNode)
+void OverlayManager::MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode)
 {
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto rootNode = context->GetRootElement();
+    auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     columnNode->MountToParent(rootNode);
     columnNode->OnMountToParentDone();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-    pixelmapColumnNodeWeak_ = columnNode;
+    pixmapColumnNodeWeak_ = columnNode;
     hasPixelMap_ = true;
 }
 
 void OverlayManager::MountEventToRootNode(const RefPtr<FrameNode>& columnNode)
 {
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto rootNode = context->GetRootElement();
+    auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     columnNode->MountToParent(rootNode, 1);
     columnNode->OnMountToParentDone();
@@ -1481,7 +1477,7 @@ void OverlayManager::RemovePixelMap()
     if (!hasPixelMap_) {
         return;
     }
-    auto columnNode = pixelmapColumnNodeWeak_.Upgrade();
+    auto columnNode = pixmapColumnNodeWeak_.Upgrade();
     CHECK_NULL_VOID(columnNode);
     auto rootNode = columnNode->GetParent();
     CHECK_NULL_VOID(rootNode);
@@ -1497,7 +1493,7 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y)
     if (isOnAnimation_ || !hasPixelMap_) {
         return;
     }
-    auto columnNode = pixelmapColumnNodeWeak_.Upgrade();
+    auto columnNode = pixmapColumnNodeWeak_.Upgrade();
     CHECK_NULL_VOID(columnNode);
     auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetFirstChild());
     CHECK_NULL_VOID(imageNode);
@@ -1548,7 +1544,7 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y)
 
 void OverlayManager::UpdatePixelMapScale(float& scale)
 {
-    auto columnNode = pixelmapColumnNodeWeak_.Upgrade();
+    auto columnNode = pixmapColumnNodeWeak_.Upgrade();
     CHECK_NULL_VOID(columnNode);
     auto hub = columnNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(hub);
@@ -1556,11 +1552,11 @@ void OverlayManager::UpdatePixelMapScale(float& scale)
     CHECK_NULL_VOID(pixelMap);
     auto minDeviceLength = std::min(SystemProperties::GetDeviceHeight(), SystemProperties::GetDeviceWidth());
     if ((SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT &&
-            pixelMap->GetHeight() > minDeviceLength * PIXELMAP_ANIMATION_DEFALUT_LIMIT_SCALE) ||
+            pixelMap->GetHeight() > minDeviceLength * PIXELMAP_ANIMATION_DEFAULT_LIMIT_SCALE) ||
         (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE &&
-            pixelMap->GetHeight() > minDeviceLength * PIXELMAP_ANIMATION_DEFALUT_LIMIT_SCALE &&
+            pixelMap->GetHeight() > minDeviceLength * PIXELMAP_ANIMATION_DEFAULT_LIMIT_SCALE &&
             pixelMap->GetWidth() > minDeviceLength)) {
-        scale = static_cast<float>(minDeviceLength * PIXELMAP_ANIMATION_DEFALUT_LIMIT_SCALE) / pixelMap->GetHeight();
+        scale = static_cast<float>(minDeviceLength * PIXELMAP_ANIMATION_DEFAULT_LIMIT_SCALE) / pixelMap->GetHeight();
     }
 }
 

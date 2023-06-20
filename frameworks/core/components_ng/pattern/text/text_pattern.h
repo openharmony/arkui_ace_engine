@@ -178,13 +178,9 @@ public:
     std::vector<RSTypographyProperties::TextBox> GetTextBoxes() override;
     OffsetF GetParentGlobalOffset() const override;
 
-    void SetDragNode(const RefPtr<FrameNode>& dragNode) override
+    RefPtr<FrameNode> MoveDragNode() override
     {
-        dragNode_ = dragNode;
-    }
-    const RefPtr<FrameNode>& GetDragNode() const override
-    {
-        return dragNode_;
+        return std::move(dragNode_);
     }
 
     ParagraphT GetDragParagraph() const override
@@ -229,7 +225,6 @@ private:
     void HandleLongPress(GestureEvent& info);
     void HandleOnSelectAll();
     void HandleOnCopy();
-    void HandleOnOverlayClose();
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);

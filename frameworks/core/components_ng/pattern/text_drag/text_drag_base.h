@@ -44,8 +44,7 @@ public:
     virtual OffsetF GetParentGlobalOffset() const = 0;
     virtual bool BetweenSelectedPosition(const Offset& globalOffset) = 0;
 
-    virtual void SetDragNode(const RefPtr<FrameNode>& dragNode) = 0;
-    virtual const RefPtr<FrameNode>& GetDragNode() const = 0;
+    virtual RefPtr<FrameNode> MoveDragNode() = 0;
 
     virtual ParagraphT GetDragParagraph() const = 0;
 

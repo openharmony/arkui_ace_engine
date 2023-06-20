@@ -650,11 +650,6 @@ public:
         return parentGlobalOffset_;
     }
 
-    void SetDragNode(const RefPtr<FrameNode>& dragNode) override
-    {
-        dragNode_ = dragNode;
-    }
-
     const RectF& GetTextContentRect() const override
     {
         return contentRect_;
@@ -665,9 +660,9 @@ public:
         return { dragParagraph_ };
     }
 
-    const RefPtr<FrameNode>& GetDragNode() const override
+    RefPtr<FrameNode> MoveDragNode() override
     {
-        return dragNode_;
+        return std::move(dragNode_);
     }
 
     const std::vector<std::string>& GetDragContents() const
