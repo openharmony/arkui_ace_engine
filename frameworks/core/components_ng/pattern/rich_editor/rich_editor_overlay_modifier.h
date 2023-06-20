@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_RICH_EDITOR_OVERLAY_MODIFIER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_RICH_EDITOR_OVERLAY_MODIFIER_H
 
+#include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/text/text_overlay_modifier.h"
 
 namespace OHOS::Ace::NG {
@@ -24,6 +25,20 @@ class RichEditorOverlayModifier : public TextOverlayModifier {
 
 public:
     RichEditorOverlayModifier();
+    void SetCaretOffsetAndHeight(const OffsetF& cursorOffset, float height);
+    void SetCaretColor(uint32_t caretColor);
+    void SetCaretWidth(float width);
+    void SetCaretVisible(bool value);
+    void onDraw(DrawingContext& drawingContext) override;
+
+private:
+    void PaintCaret(DrawingContext& drawingContext) const;
+
+    RefPtr<PropertyBool> caretVisible_;
+    RefPtr<PropertyOffsetF> caretOffset_;
+    RefPtr<PropertyFloat> caretHeight_;
+    RefPtr<PropertyFloat> caretWidth_;
+    RefPtr<PropertyInt> caretColor_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorOverlayModifier);
 };
 } // namespace OHOS::Ace::NG

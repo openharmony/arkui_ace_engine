@@ -218,6 +218,7 @@ protected:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleClickEvent(GestureEvent& info);
+    OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight);
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;
     float baselineOffset_ = 0.0f;
@@ -257,7 +258,6 @@ private:
     bool IsDraggable(const Offset& localOffset);
 
     int32_t GetGraphemeClusterLength(int32_t extend) const;
-    OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight);
     std::string GetSelectedText(int32_t start, int32_t end) const;
     std::wstring GetWideText() const;
     void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
