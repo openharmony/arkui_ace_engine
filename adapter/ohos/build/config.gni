@@ -36,7 +36,6 @@ if (ace_enable_gpu) {
 declare_args() {
   ace_engine_feature_enable_accessibility = false
   ace_engine_feature_enable_web = false
-  ace_engine_feature_container_modal_enhance = false
 }
 
 if (ace_engine_feature_enable_accessibility) {
@@ -45,10 +44,6 @@ if (ace_engine_feature_enable_accessibility) {
 
 if (ace_engine_feature_enable_web) {
   web_components_support = true
-}
-
-if (ace_engine_feature_container_modal_enhance) {
-  defines += [ "CONTAINER_MODAL_ENHANCE" ]
 }
 
 use_build_in_js_engine = true

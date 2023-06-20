@@ -269,6 +269,7 @@ ohos_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/core/common/mock_window.cpp",
     "$ace_root/test/mock/core/pattern/container_modal/mock_container_modal_pattern.cpp",
     "$ace_root/test/mock/core/pattern/container_modal/mock_container_modal_view.cpp",
+    "$ace_root/test/mock/core/pattern/container_modal/mock_container_modal_view_enhance.cpp",
     "$ace_root/test/mock/core/render/mock_font_collection.cpp",
     "$ace_root/test/mock/core/render/mock_paragraph.cpp",
     "$ace_root/test/unittest/core/pipeline/mock_drag_drop_manager.cpp",

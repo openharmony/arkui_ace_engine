@@ -180,7 +180,7 @@ public:
         if (windowGetMaximizeModeCallback_) {
             return windowGetMaximizeModeCallback_();
         }
-        return MaximizeMode::MODE_FULL_FILL;
+        return MaximizeMode::MODE_RECOVER;
     }
 
     MaximizeMode GetCurrentWindowMaximizeMode() const
