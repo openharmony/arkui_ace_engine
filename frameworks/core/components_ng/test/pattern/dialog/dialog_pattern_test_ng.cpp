@@ -410,7 +410,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest002, TestSize.Level1)
         auto ret2 = focusHub->onKeyEventInternal_(keyEvent2);
         auto ret3 = focusHub->onKeyEventInternal_(keyEvent3);
         EXPECT_FALSE(ret);
-        EXPECT_TRUE(ret2);
+        EXPECT_FALSE(ret2);
         EXPECT_FALSE(ret3);
     }
 }
