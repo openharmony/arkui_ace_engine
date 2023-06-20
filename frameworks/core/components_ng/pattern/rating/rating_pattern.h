@@ -169,6 +169,7 @@ private:
     bool isHover_ = false;
     double lastRatingScore_ = 0.0;
     RatingModifier::RatingAnimationType state_;
+    float singleStarWidth_ = .0f;
 
     bool isForegroundImageInfoFromTheme_ = false;
     bool isSecondaryImageInfoFromTheme_ = false;

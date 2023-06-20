@@ -449,7 +449,7 @@ HWTEST_F(RatingPatternTestNg, RatingMeasureTest009, TestSize.Level1)
     auto ratingLayoutAlgorithm = ratingPattern->CreateLayoutAlgorithm();
     EXPECT_NE(ratingLayoutAlgorithm, nullptr);
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(ratingLayoutAlgorithm));
-
+    frameNode->SetGeometryNode(geometryNode);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RatingTheme>()));
@@ -691,7 +691,7 @@ HWTEST_F(RatingPatternTestNg, RatingPatternTest012, TestSize.Level1)
     auto paintMethod2 = ratingPattern->CreateNodePaintMethod();
     ASSERT_NE(paintMethod2, nullptr);
     ASSERT_NE(ratingPattern->ratingModifier_, nullptr);
-    auto scaleX = CONTAINER_SIZE.Height() / FRAME_WIDTH;
+    auto scaleX = CONTAINER_SIZE.Height() / FRAME_WIDTH / DEFAULT_STAR_NUM;
     auto scaleY = CONTAINER_SIZE.Height() / FRAME_HEIGHT;
     EXPECT_EQ(ratingPattern->foregroundConfig_.scaleX_, scaleX);
     EXPECT_EQ(ratingPattern->foregroundConfig_.scaleY_, scaleY);
