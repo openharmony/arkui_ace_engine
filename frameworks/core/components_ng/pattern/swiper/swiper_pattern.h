@@ -67,21 +67,7 @@ public:
         return MakeRefPtr<SwiperAccessibilityProperty>();
     }
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        CalculateCacheRange();
-        auto layoutAlgorithm = MakeRefPtr<SwiperLayoutAlgorithm>(currentIndex_, startIndex_, endIndex_);
-        layoutAlgorithm->SetCurrentOffset(currentOffset_);
-        layoutAlgorithm->SetTargetIndex(targetIndex_);
-        layoutAlgorithm->SetTotalCount(TotalCount());
-        layoutAlgorithm->SetPreItemRange(preItemRange_);
-        layoutAlgorithm->SetIsLoop(IsLoop());
-        layoutAlgorithm->SetMaxChildSize(maxChildSize_);
-        layoutAlgorithm->SetDisplayCount(GetDisplayCount());
-        layoutAlgorithm->SetHoverRatio(hoverRatio_);
-        layoutAlgorithm->SetIsDragged(isDragging_);
-        return layoutAlgorithm;
-    }
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
@@ -89,8 +75,8 @@ public:
         CHECK_NULL_RETURN(layoutProperty, nullptr);
         const auto& paddingProperty = layoutProperty->GetPaddingProperty();
         bool needClipPadding = paddingProperty != nullptr;
-        bool needPaintFade = !IsLoop() && GetEdgeEffect() == EdgeEffect::FADE && IsOutOfBoundary(currentOffset_);
-        auto paintMethod = MakeRefPtr<SwiperPaintMethod>(GetDirection(), currentOffset_);
+        bool needPaintFade = !IsLoop() && GetEdgeEffect() == EdgeEffect::FADE && !NearZero(fadeOffset_);
+        auto paintMethod = MakeRefPtr<SwiperPaintMethod>(GetDirection(), fadeOffset_);
         paintMethod->SetNeedPaintFade(needPaintFade);
         paintMethod->SetNeedClipPadding(needClipPadding);
         return paintMethod;
@@ -165,18 +151,30 @@ public:
         jsonValue->Put("top", swiperDigitalParameters_->dimTop.value_or(0.0_vp).ToString().c_str());
         jsonValue->Put("right", swiperDigitalParameters_->dimRight.value_or(0.0_vp).ToString().c_str());
         jsonValue->Put("bottom", swiperDigitalParameters_->dimBottom.value_or(0.0_vp).ToString().c_str());
-        jsonValue->Put("fontSize", swiperDigitalParameters_->fontSize.value_or(
-            swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize()).ToString().c_str());
-        jsonValue->Put("fontColor", swiperDigitalParameters_->fontColor.value_or(
-            swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor()).ColorToString().c_str());
-        jsonValue->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(
-            swiperDigitalParameters_->fontWeight.value_or(FontWeight::NORMAL)).c_str());
-        jsonValue->Put("selectedFontSize", swiperDigitalParameters_->selectedFontSize.value_or(
-            swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize()).ToString().c_str());
-        jsonValue->Put("selectedFontColor", swiperDigitalParameters_->selectedFontColor.value_or(
-            swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor()).ColorToString().c_str());
-        jsonValue->Put("selectedFontWeight", V2::ConvertWrapFontWeightToStirng(
-            swiperDigitalParameters_->selectedFontWeight.value_or(FontWeight::NORMAL)).c_str());
+        jsonValue->Put("fontSize", swiperDigitalParameters_->fontSize
+                                       .value_or(swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize())
+                                       .ToString()
+                                       .c_str());
+        jsonValue->Put("fontColor", swiperDigitalParameters_->fontColor
+                                        .value_or(swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor())
+                                        .ColorToString()
+                                        .c_str());
+        jsonValue->Put("fontWeight",
+            V2::ConvertWrapFontWeightToStirng(swiperDigitalParameters_->fontWeight.value_or(FontWeight::NORMAL))
+                .c_str());
+        jsonValue->Put(
+            "selectedFontSize", swiperDigitalParameters_->selectedFontSize
+                                    .value_or(swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize())
+                                    .ToString()
+                                    .c_str());
+        jsonValue->Put(
+            "selectedFontColor", swiperDigitalParameters_->selectedFontColor
+                                     .value_or(swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor())
+                                     .ColorToString()
+                                     .c_str());
+        jsonValue->Put("selectedFontWeight",
+            V2::ConvertWrapFontWeightToStirng(swiperDigitalParameters_->selectedFontWeight.value_or(FontWeight::NORMAL))
+                .c_str());
         return jsonValue->ToString();
     }
 
@@ -193,6 +191,11 @@ public:
     void SetSwiperController(const RefPtr<SwiperController>& swiperController)
     {
         swiperController_ = swiperController;
+    }
+
+    int32_t GetCurrentFirstIndex() const
+    {
+        return currentFirstIndex_;
     }
 
     int32_t GetCurrentIndex()
@@ -391,6 +394,7 @@ public:
     void OnWindowHide() override;
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -438,14 +442,18 @@ private:
 
     void StopAutoPlay();
     void StartAutoPlay();
-    bool IsOutOfBoundary(float mainOffset) const;
+    bool IsOutOfBoundary(float mainOffset = 0.0f) const;
+    float GetRemainingOffset() const;
     float MainSize() const;
     void FireChangeEvent() const;
     void FireAnimationStartEvent() const;
     void FireAnimationEndEvent() const;
-    void CalculateCacheRange();
 
     float GetItemSpace() const;
+    float GetPrevMargin() const;
+    float GetNextMargin() const;
+    float CalculateVisibleSize() const;
+    int32_t GetLoopIndex(int32_t originalIndex) const;
     int32_t CurrentIndex() const;
     int32_t GetDisplayCount() const;
     int32_t GetDuration() const;
@@ -456,11 +464,12 @@ private:
     bool IsDisableSwipe() const;
     bool IsShowIndicator() const;
     float GetTranslateLength() const;
+    std::pair<int32_t, SwiperItemInfo> GetFirstItemInfoInVisibleArea() const;
     void OnIndexChange() const;
     bool IsOutOfHotRegion(const PointF& dragPoint) const;
     bool IsOutOfIndicatorZone(const PointF& dragPoint);
-    void SaveDotIndicatorProperty(const RefPtr<FrameNode> &indicatorNode);
-    void SaveDigitIndicatorProperty(const RefPtr<FrameNode> &indicatorNode);
+    void SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
+    void SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
     void PostTranslateTask(uint32_t delayTime);
     void RegisterVisibleAreaChange();
     bool NeedAutoPlay() const;
@@ -489,8 +498,6 @@ private:
     // Control fade animation when drag beyond boundary and drag end.
     RefPtr<Animator> fadeController_;
 
-    RefPtr<Scheduler> scheduler_;
-
     RefPtr<SwiperController> swiperController_;
 
     bool isLastIndicatorFocused_ = false;
@@ -498,13 +505,13 @@ private:
     int32_t endIndex_ = 0;
     int32_t currentIndex_ = 0;
     int32_t oldIndex_ = 0;
-    std::optional<int32_t> targetIndex_;
-    std::set<int32_t> preItemRange_;
 
     PanDirection panDirection_;
 
     float currentOffset_ = 0.0f;
+    float fadeOffset_ = 0.0f;
     float turnPageRate_ = 0.0f;
+    int32_t currentFirstIndex_ = 0;
 
     bool moveDirection_ = false;
     bool indicatorDoingAnimation_ = false;
@@ -516,7 +523,6 @@ private:
     bool IsCustomSize_ = false;
     bool indicatorIsBoolean_ = true;
     bool isAtHotRegion_ = false;
-    bool isDragging_ = false;
 
     Axis direction_ = Axis::HORIZONTAL;
 
@@ -525,7 +531,6 @@ private:
 
     mutable std::shared_ptr<SwiperParameters> swiperParameters_;
     mutable std::shared_ptr<SwiperDigitalParameters> swiperDigitalParameters_;
-    SizeF maxChildSize_;
 
     WeakPtr<FrameNode> lastWeakShowNode_;
 
@@ -536,6 +541,21 @@ private:
     std::optional<int32_t> leftButtonId_;
     std::optional<int32_t> rightButtonId_;
     std::optional<SwiperIndicatorType> lastSwiperIndicatorType_;
+
+    float startMainPos_ = 0.0f;
+    float endMainPos_ = 0.0f;
+    float contentMainSize_ = 0.0f;
+    float contentCrossSize_ = 0.0f;
+
+    std::optional<int32_t> jumpIndex_;
+    std::optional<int32_t> targetIndex_;
+    std::optional<int32_t> preTargetIndex_;
+    float currentDelta_ = 0.0f;
+    SwiperLayoutAlgorithm::PositionMap itemPosition_;
+    std::optional<int32_t> preIndex_;
+    std::optional<float> velocity_;
+
+    bool mainSizeIsMeasured_ = false;
 };
 } // namespace OHOS::Ace::NG
 
