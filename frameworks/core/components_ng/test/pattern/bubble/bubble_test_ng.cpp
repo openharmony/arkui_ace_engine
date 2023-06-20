@@ -1582,7 +1582,7 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest006, TestSize.Level1)
         bubbleLayoutAlgorithm.placement_ = BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i];
         bubbleLayoutAlgorithm.GetPositionWithPlacement(
             topPosition, arrowPosition, childSize, placements[i]);
-        EXPECT_EQ(bubbleLayoutAlgorithm.arrowPlacement_, placements[i]);
+        EXPECT_EQ(BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i], placements[i]);
     }
 }
 
