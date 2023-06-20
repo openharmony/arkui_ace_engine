@@ -215,6 +215,11 @@ public:
         surfaceChangedCallbackId_ = id;
     }
 
+    void SetOnClickEvent(GestureEventFunc&& onClick)
+    {
+        onClick_ = std::move(onClick);
+    }
+
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
     void OnAttachToFrameNode() override;
@@ -252,6 +257,7 @@ private:
 
     bool IsDraggable(const Offset& localOffset);
 
+    GestureEventFunc onClick_;
     int32_t GetGraphemeClusterLength(int32_t extend) const;
     OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight);
     std::string GetSelectedText(int32_t start, int32_t end) const;
