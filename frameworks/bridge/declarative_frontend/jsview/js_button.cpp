@@ -167,6 +167,10 @@ void JSButton::HandleDifferentRadius(const JSRef<JSVal>& args)
         if (ParseJsDimensionVp(object->GetProperty("bottomRight"), bottomRight)) {
             radiusBottomRight = bottomRight;
         }
+        if (!radiusTopLeft.has_value() && !radiusTopRight.has_value() && !radiusBottomLeft.has_value() &&
+            !radiusBottomRight.has_value()) {
+            return;
+        }
         ButtonModel::GetInstance()->SetBorderRadius(radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
     }
 }

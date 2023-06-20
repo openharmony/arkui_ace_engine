@@ -78,6 +78,7 @@ void JSDivider::SetDividerColor(const JSCallbackInfo& info)
         return;
     }
     auto theme = GetTheme<DividerTheme>();
+    CHECK_NULL_VOID(theme);
     Color dividerColor = theme->GetColor();
     ParseJsColor(info[0], dividerColor);
     DividerModel::GetInstance()->DividerColor(dividerColor);
@@ -90,6 +91,7 @@ void JSDivider::SetStrokeWidth(const JSCallbackInfo& info)
         return;
     }
     auto theme = GetTheme<DividerTheme>();
+    CHECK_NULL_VOID(theme);
     CalcDimension strokeWidth = theme->GetStokeWidth();
     ParseJsDimensionVp(info[0], strokeWidth);
     DividerModel::GetInstance()->StrokeWidth(strokeWidth);
