@@ -1395,7 +1395,9 @@ void FrameNode::OnAccessibilityEvent(AccessibilityEventType eventType) const
         AccessibilityEvent event;
         event.type = eventType;
         event.nodeId = GetAccessibilityId();
-        PipelineContext::GetCurrentContext()->SendEventToAccessibility(event);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SendEventToAccessibility(event);
     }
 }
 

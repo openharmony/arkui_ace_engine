@@ -382,6 +382,7 @@ std::string ConvertInputTypeToString(AceTextCategory type)
 
 bool FindAccessibilityFocus(const RefPtr<AccessibilityNode>& node, RefPtr<AccessibilityNode>& resultNode)
 {
+    CHECK_NULL_RETURN_NOLOG(node, false);
     if (node->GetAccessibilityFocusedState()) {
         resultNode = node;
         LOGI("FindFocus nodeId(%{public}d)", resultNode->GetNodeId());
@@ -404,6 +405,7 @@ bool FindAccessibilityFocus(const RefPtr<AccessibilityNode>& node, RefPtr<Access
 
 RefPtr<NG::FrameNode> FindAccessibilityFocus(const RefPtr<NG::UINode>& node)
 {
+    CHECK_NULL_RETURN_NOLOG(node, false);
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
     if (frameNode) {
         if (frameNode->GetRenderContext()->GetAccessibilityFocus().value_or(false)) {
@@ -578,6 +580,7 @@ int32_t GetParentId(const RefPtr<NG::UINode>& uiNode)
 
 void FillEventInfo(const RefPtr<NG::FrameNode>& node, AccessibilityEventInfo& eventInfo)
 {
+    CHECK_NULL_VOID_NOLOG(node);
     eventInfo.SetComponentType(node->GetTag());
     eventInfo.SetPageId(node->GetPageId());
     eventInfo.AddContent(node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetText());
@@ -599,6 +602,7 @@ void FillEventInfo(const RefPtr<AccessibilityNode>& node, AccessibilityEventInfo
 
 void UpdateSupportAction(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo)
 {
+    CHECK_NULL_VOID_NOLOG(node);
     auto gestureEventHub = node->GetEventHub<NG::EventHub>()->GetGestureEventHub();
     if (gestureEventHub) {
         nodeInfo.SetClickable(gestureEventHub->IsClickable());
@@ -621,6 +625,7 @@ void UpdateSupportAction(const RefPtr<NG::FrameNode>& node, AccessibilityElement
 void UpdateAccessibilityElementInfo(
     const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty, AccessibilityElementInfo& nodeInfo)
 {
+    CHECK_NULL_VOID_NOLOG(node);
     NG::RectF rect;
     if (node->IsActive()) {
         rect = node->GetTransformRectRelativeToWindow();
