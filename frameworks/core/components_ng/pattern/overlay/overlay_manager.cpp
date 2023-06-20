@@ -73,6 +73,7 @@ constexpr float PIXELMAP_ANIMATION_DEFALUT_LIMIT_SCALE = 0.5f;
 #endif // ENABLE_DRAG_FRAMEWORK
 
 constexpr int32_t FULL_MODAL_ALPHA_ANIMATION_DURATION = 200;
+constexpr int32_t FOCUS_TRAVERSAL_START = 2;
 
 // dialog animation params
 const RefPtr<Curve> SHOW_SCALE_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>(0.38f, 1.33f, 0.6f, 1.0f);
@@ -1059,7 +1060,7 @@ void OverlayManager::BlurOverlayNode(bool isInSubWindow)
     CHECK_NULL_VOID(rootNode);
     if (rootNode->GetChildren().size() > 1) {
         auto collection = rootNode->GetChildren();
-        for (auto iter = collection.rbegin(); iter != collection.rend(); ++iter) {
+        for (auto iter = std::prev(collection.end(), FOCUS_TRAVERSAL_START); iter != collection.begin(); --iter) {
             auto overlay = DynamicCast<FrameNode>(*iter);
             CHECK_NULL_VOID(overlay);
             auto pattern = overlay->GetPattern();
