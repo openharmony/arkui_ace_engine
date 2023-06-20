@@ -464,35 +464,41 @@ bool JSSwiper::GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& s
     Color color;
     if (swiperArrowParameters.isSidebarMiddle.value()) {
         parseOk = ParseJsDimensionVp(backgroundSizeValue, dimension);
-        swiperArrowParameters.backgroundSize = parseOk && GreatOrEqual(dimension.ConvertToVp(), 0.0)
-                                                   ? dimension
-                                                   : swiperIndicatorTheme->GetBigArrowBackgroundSize();
+        swiperArrowParameters.backgroundSize =
+            parseOk && GreatNotEqual(dimension.ConvertToVp(), 0.0) && !(dimension.Unit() == DimensionUnit::PERCENT)
+                ? dimension
+                : swiperIndicatorTheme->GetBigArrowBackgroundSize();
         parseOk = ParseJsColor(backgroundColorValue, color);
         swiperArrowParameters.backgroundColor = parseOk ? color : swiperIndicatorTheme->GetBigArrowBackgroundColor();
         if (swiperArrowParameters.isShowBackground.value()) {
             swiperArrowParameters.arrowSize = swiperArrowParameters.backgroundSize.value() * ARROW_SIZE_COEFFICIENT;
         } else {
             parseOk = ParseJsDimensionVp(arrowSizeValue, dimension);
-            swiperArrowParameters.arrowSize = parseOk && GreatOrEqual(dimension.ConvertToVp(), 0.0)
-                                                  ? dimension
-                                                  : swiperIndicatorTheme->GetBigArrowSize();
+            swiperArrowParameters.arrowSize =
+                parseOk && GreatNotEqual(dimension.ConvertToVp(), 0.0) && !(dimension.Unit() == DimensionUnit::PERCENT)
+                    ? dimension
+                    : swiperIndicatorTheme->GetBigArrowSize();
+            swiperArrowParameters.backgroundSize = swiperArrowParameters.arrowSize;
         }
         parseOk = ParseJsColor(arrowColorValue, color);
         swiperArrowParameters.arrowColor = parseOk ? color : swiperIndicatorTheme->GetBigArrowColor();
     } else {
         parseOk = ParseJsDimensionVp(backgroundSizeValue, dimension);
-        swiperArrowParameters.backgroundSize = parseOk && GreatOrEqual(dimension.ConvertToVp(), 0.0)
-                                                   ? dimension
-                                                   : swiperIndicatorTheme->GetSmallArrowBackgroundSize();
+        swiperArrowParameters.backgroundSize =
+            parseOk && GreatNotEqual(dimension.ConvertToVp(), 0.0) && !(dimension.Unit() == DimensionUnit::PERCENT)
+                ? dimension
+                : swiperIndicatorTheme->GetSmallArrowBackgroundSize();
         parseOk = ParseJsColor(backgroundColorValue, color);
         swiperArrowParameters.backgroundColor = parseOk ? color : swiperIndicatorTheme->GetSmallArrowBackgroundColor();
         if (swiperArrowParameters.isShowBackground.value()) {
             swiperArrowParameters.arrowSize = swiperArrowParameters.backgroundSize.value() * ARROW_SIZE_COEFFICIENT;
         } else {
             parseOk = ParseJsDimensionVp(arrowSizeValue, dimension);
-            swiperArrowParameters.arrowSize = parseOk && GreatOrEqual(dimension.ConvertToVp(), 0.0)
-                                                  ? dimension
-                                                  : swiperIndicatorTheme->GetSmallArrowSize();
+            swiperArrowParameters.arrowSize =
+                parseOk && GreatNotEqual(dimension.ConvertToVp(), 0.0) && !(dimension.Unit() == DimensionUnit::PERCENT)
+                    ? dimension
+                    : swiperIndicatorTheme->GetSmallArrowSize();
+            swiperArrowParameters.backgroundSize = swiperArrowParameters.arrowSize;
         }
         parseOk = ParseJsColor(arrowColorValue, color);
         swiperArrowParameters.arrowColor = parseOk ? color : swiperIndicatorTheme->GetSmallArrowColor();
