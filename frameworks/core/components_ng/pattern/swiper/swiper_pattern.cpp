@@ -450,8 +450,13 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         auto indicatorNode = DynamicCast<FrameNode>(host->GetLastChild());
         indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
     if (jumpIndex_) {
         isJump = true;
+        currentIndex_ = swiperLayoutAlgorithm->GetCurrentIndex();
+        layoutProperty->UpdateIndexWithoutMeasure(currentIndex_);
+        OnIndexChange();
         jumpIndex_.reset();
     } else if (targetIndex_) {
         auto iter = itemPosition_.find(targetIndex_.value());
@@ -474,8 +479,6 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     endIndex_ = swiperLayoutAlgorithm->GetEndIndex();
 
     oldIndex_ = currentIndex_;
-    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, false);
     const auto& paddingProperty = layoutProperty->GetPaddingProperty();
     return GetEdgeEffect() == EdgeEffect::FADE || paddingProperty != nullptr;
 }

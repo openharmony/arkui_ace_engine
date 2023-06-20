@@ -247,6 +247,7 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
         if (jumpIndex_.value() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
             LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() - 1, GetStartPosition());
         }
+        currentIndex_ = jumpIndex_.value();
     } else if (targetIndex_.has_value()) {
         if (LessOrEqual(startIndex, targetIndex_.value())) {
             LayoutForward(layoutWrapper, layoutConstraint, axis, startIndex, startPos);
