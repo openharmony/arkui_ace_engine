@@ -162,6 +162,11 @@ void ListModelNG::SetMultiSelectable(bool selectable)
     pattern->SetMultiSelectable(selectable);
 }
 
+void ListModelNG::SetScrollEnabled(bool scrollEnabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollEnabled, scrollEnabled);
+}
+
 void ListModelNG::SetOnScroll(OnScrollEvent&& onScroll)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

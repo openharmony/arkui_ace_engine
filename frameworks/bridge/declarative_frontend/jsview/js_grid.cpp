@@ -216,6 +216,11 @@ void JSGrid::JsOnScrollBarUpdate(const JSCallbackInfo& info)
     GridModel::GetInstance()->SetOnScrollBarUpdate(std::move(onScrollBarUpdate));
 }
 
+void JSGrid::SetScrollEnabled(bool scrollEnabled)
+{
+    GridModel::GetInstance()->SetScrollEnabled(scrollEnabled);
+}
+
 void JSGrid::JSBind(BindingTarget globalObj)
 {
     LOGD("JSGrid:Bind");
@@ -260,6 +265,7 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("onItemDrop", &JSGrid::JsOnGridDrop);
     JSClass<JSGrid>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSGrid>::StaticMethod("nestedScroll", &JSGrid::SetNestedScroll);
+    JSClass<JSGrid>::StaticMethod("enableScrollInteraction", &JSGrid::SetScrollEnabled);
     JSClass<JSGrid>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

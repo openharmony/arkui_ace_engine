@@ -282,6 +282,11 @@ void JSList::SetNestedScroll(const JSCallbackInfo& args)
     args.ReturnSelf();
 }
 
+void JSList::SetScrollEnabled(bool scrollEnabled)
+{
+    ListModel::GetInstance()->SetScrollEnabled(scrollEnabled);
+}
+
 void JSList::ScrollCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
@@ -587,6 +592,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("lanes", &JSList::SetLanes);
     JSClass<JSList>::StaticMethod("sticky", &JSList::SetSticky);
     JSClass<JSList>::StaticMethod("nestedScroll", &JSList::SetNestedScroll);
+    JSClass<JSList>::StaticMethod("enableScrollInteraction", &JSList::SetScrollEnabled);
 
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
     JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);

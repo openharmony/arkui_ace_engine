@@ -82,6 +82,7 @@ void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     } else {
         json->Put("sticky", "StickyStyle.None");
     }
+    json->Put("enableScrollInteraction", propScrollEnabled_.value_or(true));
 }
 
 void ListLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
