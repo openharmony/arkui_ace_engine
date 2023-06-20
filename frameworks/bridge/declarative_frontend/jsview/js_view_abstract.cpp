@@ -2084,8 +2084,9 @@ void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
         }
         CalcDimension width;
         CalcDimension height;
-        ParseJsonDimensionVp(imageArgs->GetValue("width"), width);
-        ParseJsonDimensionVp(imageArgs->GetValue("height"), height);
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+        ParseJsDimensionVp(object->GetProperty("width"), width);
+        ParseJsDimensionVp(object->GetProperty("height"), height);
         double valueWidth = width.ConvertToPx();
         double valueHeight = height.ConvertToPx();
         BackgroundImageSizeType typeWidth = BackgroundImageSizeType::LENGTH;
