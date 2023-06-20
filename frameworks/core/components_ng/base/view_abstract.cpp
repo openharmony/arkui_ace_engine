@@ -506,6 +506,7 @@ void ViewAbstract::SetBorderStyle(const BorderStyleProperty& value)
 
 void ViewAbstract::DisableOnClick()
 {
+    LOGD("Disable OnClick event");
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->ClearUserOnClick();
@@ -513,6 +514,7 @@ void ViewAbstract::DisableOnClick()
 
 void ViewAbstract::DisableOnTouch()
 {
+    LOGD("Disable OnTouch event");
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->ClearUserOnTouch();
@@ -520,6 +522,7 @@ void ViewAbstract::DisableOnTouch()
 
 void ViewAbstract::DisableOnKeyEvent()
 {
+    LOGD("Disable OnKey event");
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->ClearUserOnKey();
@@ -527,6 +530,7 @@ void ViewAbstract::DisableOnKeyEvent()
 
 void ViewAbstract::DisableOnHover()
 {
+    LOGD("Disable OnHover event");
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearUserOnHover();
@@ -534,6 +538,7 @@ void ViewAbstract::DisableOnHover()
 
 void ViewAbstract::DisableOnMouse()
 {
+    LOGD("Disable OnMouse event");
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearUserOnMouse();
@@ -541,6 +546,7 @@ void ViewAbstract::DisableOnMouse()
 
 void ViewAbstract::DisableOnAppear()
 {
+    LOGD("Disable OnAppear event");
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearUserOnAppear();
@@ -548,6 +554,7 @@ void ViewAbstract::DisableOnAppear()
 
 void ViewAbstract::DisableOnDisAppear()
 {
+    LOGD("Disable OnDisAppear event");
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearUserOnDisAppear();
@@ -555,6 +562,7 @@ void ViewAbstract::DisableOnDisAppear()
 
 void ViewAbstract::DisableOnAreaChange()
 {
+    LOGD("Disable OnAreaChange event");
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -564,6 +572,7 @@ void ViewAbstract::DisableOnAreaChange()
 
 void ViewAbstract::DisableOnFocus()
 {
+    LOGD("Disable OnFocus event");
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->ClearUserOnFocus();
@@ -571,6 +580,7 @@ void ViewAbstract::DisableOnFocus()
 
 void ViewAbstract::DisableOnBlur()
 {
+    LOGD("Disable OnBlur event");
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->ClearUserOnBlur();
