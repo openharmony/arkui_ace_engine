@@ -522,7 +522,8 @@ int32_t PageRouterManager::GenerateNextPageId()
 
 std::pair<int32_t, RefPtr<FrameNode>> PageRouterManager::FindPageInStack(const std::string& url)
 {
-    auto iter = std::find_if(pageRouterStack_.rbegin(), pageRouterStack_.rend(), [url](const WeakPtr<FrameNode>& item) {
+    auto iter = std::find_if(++pageRouterStack_.rbegin(), pageRouterStack_.rend(),
+        [url](const WeakPtr<FrameNode>& item) {
         auto pageNode = item.Upgrade();
         CHECK_NULL_RETURN(pageNode, false);
         auto pagePattern = pageNode->GetPattern<PagePattern>();
