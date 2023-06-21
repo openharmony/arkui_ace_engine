@@ -1806,24 +1806,31 @@ void FrontendDelegateDeclarative::OnMediaQueryUpdate()
         return;
     }
 
-    taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this)] {
-            auto delegate = weak.Upgrade();
-            if (!delegate) {
-                return;
-            }
-            const auto& info = delegate->mediaQueryInfo_->GetMediaQueryInfo();
-            // request css mediaquery
-            std::string param("\"viewsizechanged\",");
-            param.append(info);
-            delegate->asyncEvent_("_root", param);
+    auto callback = [weak = AceType::WeakClaim(this)] {
+        auto delegate = weak.Upgrade();
+        if (!delegate) {
+            return;
+        }
+        const auto& info = delegate->mediaQueryInfo_->GetMediaQueryInfo();
+        // request css mediaquery
+        std::string param("\"viewsizechanged\",");
+        param.append(info);
+        delegate->asyncEvent_("_root", param);
 
-            // request js media query
-            const auto& listenerId = delegate->mediaQueryInfo_->GetListenerId();
-            delegate->mediaQueryCallback_(listenerId, info);
-            delegate->mediaQueryInfo_->ResetListenerId();
-        },
-        TaskExecutor::TaskType::JS);
+        // request js media query
+        const auto& listenerId = delegate->mediaQueryInfo_->GetListenerId();
+        delegate->mediaQueryCallback_(listenerId, info);
+        delegate->mediaQueryInfo_->ResetListenerId();
+    };
+    auto container = Container::Current();
+    if (!container) {
+        return;
+    }
+    if (container->IsUseStageModel()) {
+        callback();
+        return;
+    }
+    taskExecutor_->PostTask(callback, TaskExecutor::TaskType::JS);
 }
 
 void FrontendDelegateDeclarative::OnPageReady(
