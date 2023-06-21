@@ -242,34 +242,6 @@ void SideBarContainerPattern::InitControlButtonTouchEvent(const RefPtr<GestureEv
     gestureHub->AddClickEvent(controlButtonClickEvent_);
 }
 
-void SideBarContainerPattern::InitSideBarContentEvent(const RefPtr<GestureEventHub>& gestureHub)
-{
-    CHECK_NULL_VOID_NOLOG(!panEvent_);
-    CHECK_NULL_VOID_NOLOG(gestureHub);
-
-    auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
-
-    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {};
-    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {};
-    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
-        pattern->HandlePanEventEnd();
-    };
-    auto actionCancelTask = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
-        pattern->HandlePanEventEnd();
-    };
-    PanDirection panDirection;
-    panDirection.type = (sideBarPosition == SideBarPosition::START) ? PanDirection::RIGHT : PanDirection::LEFT;
-    panEvent_ = MakeRefPtr<PanEvent>(
-        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
-}
-
 void SideBarContainerPattern::UpdateAnimDir()
 {
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();

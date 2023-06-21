@@ -98,7 +98,6 @@ public:
     }
 
     void InitControlButtonTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void InitSideBarContentEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitDividerMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void UpdateSideBarPosition(float value);
 
