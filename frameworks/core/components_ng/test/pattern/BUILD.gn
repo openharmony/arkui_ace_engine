@@ -76,7 +76,7 @@ group("pattern_unittest") {
     "stepper:stepper_pattern_test_ng",
     "tabs:tabs_test_ng",
     "text:text_test_ng",
-    "text_clock:text_clock_pattern_unit_test",
+    "text_clock:text_clock_test_ng",
     "text_drag:text_drag_test_ng",
     "text_picker:text_picker_test_ng",
     "textfield:textfield_test_ng",
