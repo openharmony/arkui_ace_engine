@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/web/web_paint_property.h"
 #include "core/components_ng/pattern/web/web_pattern_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/render/render_surface.h"
 
 namespace OHOS::Ace::NG {
@@ -65,8 +66,8 @@ enum WebOverlayType { INSERT_OVERLAY, SELECTION_OVERLAY, INVALID_OVERLAY };
 #endif
 } // namespace
 
-class WebPattern : public Pattern {
-    DECLARE_ACE_TYPE(WebPattern, Pattern);
+class WebPattern : public Pattern, public SelectionHost {
+    DECLARE_ACE_TYPE(WebPattern, Pattern, SelectionHost);
 
 public:
     using SetWebIdCallback = std::function<void(int32_t)>;
@@ -236,6 +237,11 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<WebLayoutAlgorithm>();
+    }
+
+    bool BetweenSelectedPosition(const Offset& globalOffset) override
+    {
+        return false;
     }
 
     ACE_DEFINE_PROPERTY_GROUP(WebProperty, WebPatternProperty);

@@ -2332,7 +2332,8 @@ void TextFieldPattern::ShowSelectOverlay(
         auto gesture = host->GetOrCreateGestureEventHub();
         gesture->RemoveTouchEvent(pattern->GetTouchListener());
 
-        pattern->SetSelectOverlay(pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo));
+        pattern->SetSelectOverlay(
+            pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(RawPtr(pattern))));
 
         auto selectOverlay = pattern->GetSelectOverlay();
         CHECK_NULL_VOID_NOLOG(selectOverlay);

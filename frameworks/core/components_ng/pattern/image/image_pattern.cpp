@@ -21,13 +21,9 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/theme/icon_theme.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/ace_engine_ext.h"
@@ -496,6 +492,14 @@ void ImagePattern::EnableDrag()
     eventHub->SetOnDragStart(std::move(dragStart));
 }
 
+bool ImagePattern::BetweenSelectedPosition(const Offset& globalOffset)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto globalRect = host->GetTransformRectRelativeToWindow();
+    return globalRect.IsInRegion(PointF { globalOffset.GetX(), globalOffset.GetY() });
+}
+
 void ImagePattern::BeforeCreatePaintWrapper()
 {
     auto host = GetHost();
@@ -565,7 +569,7 @@ void ImagePattern::OpenSelectOverlay()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     LOGI("Opening select overlay");
-    selectOverlay_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(info);
+    selectOverlay_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(info, WeakClaim(this));
 
     // paint selected mask effect
     host->MarkNeedRenderOnly();

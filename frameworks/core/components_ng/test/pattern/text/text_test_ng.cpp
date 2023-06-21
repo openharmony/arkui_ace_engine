@@ -548,7 +548,7 @@ HWTEST_F(TextTestNg, OnDetachFromFrameNode002, TestSize.Level1)
      * @tc.steps: step2. call CreateAndShowSelectOverlay
      * @tc.expected: return the proxy which has the right SelectOverlayId
      */
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
     pattern->selectOverlayProxy_ = proxy;
     pattern->OnDetachFromFrameNode(nullptr);
     EXPECT_NE(pattern->selectOverlayProxy_, nullptr);
@@ -577,7 +577,7 @@ HWTEST_F(TextTestNg, OnDetachFromFrameNode003, TestSize.Level1)
      * @tc.steps: step2. call CreateAndShowSelectOverlay
      * @tc.expected: return the proxy which has the right SelectOverlayId
      */
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
     pattern->selectOverlayProxy_ = proxy;
     proxy->selectOverlayId_ = 1;
     pattern->OnDetachFromFrameNode(nullptr);
@@ -618,7 +618,7 @@ HWTEST_F(TextTestNg, OnHandleMoveDone001, TestSize.Level1)
      * @tc.steps: step4. call CreateAndShowSelectOverlay
      * @tc.expected: return the proxy which has the right SelectOverlayId
      */
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
     pattern->selectOverlayProxy_ = proxy;
     EXPECT_NE(pattern->selectOverlayProxy_, nullptr);
 
@@ -654,7 +654,7 @@ HWTEST_F(TextTestNg, ShowSelectOverlay001, TestSize.Level1)
      * @tc.steps: step2. call CreateAndShowSelectOverlay
      * @tc.expected: return the proxy which has the right SelectOverlayId
      */
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
     auto current = selectOverlayManager->selectOverlayItem_.Upgrade();
     ASSERT_NE(current, nullptr);
     proxy->selectOverlayId_ = current->GetId();
@@ -988,7 +988,7 @@ HWTEST_F(TextTestNg, OnHandleMove001, TestSize.Level1)
      * @tc.steps: step2. call CreateAndShowSelectOverlay
      * @tc.expected: return the proxy which has the right SelectOverlayId
      */
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
     pattern->selectOverlayProxy_ = proxy;
     EXPECT_NE(pattern->selectOverlayProxy_, nullptr);
 }
@@ -2883,6 +2883,8 @@ HWTEST_F(TextTestNg, IsDraggable001, TestSize.Level1)
     pattern->copyOption_ = CopyOptions::Distributed;
     pattern->paragraph_ = AceType::MakeRefPtr<TxtParagraph>(ParagraphStyle {}, nullptr);
     host->draggable_ = true;
+    host->eventHub_->SetOnDragStart(
+        [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
 
     /**
      * @tc.steps: step1. set selected rect to [0, 0] - [20, 20]
@@ -3365,6 +3367,8 @@ HWTEST_F(TextTestNg, HandleLongPress002, TestSize.Level1)
     auto [frameNode, pattern] = Init();
 
     frameNode->draggable_ = true;
+    frameNode->eventHub_->SetOnDragStart(
+        [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
     pattern->paragraph_ = AceType::MakeRefPtr<TxtParagraph>(ParagraphStyle {}, nullptr);
     pattern->copyOption_ = CopyOptions::InApp;
     pattern->textSelector_.Update(0, 3);
@@ -3496,7 +3500,7 @@ HWTEST_F(TextTestNg, HandleOnSelectAll002, TestSize.Level1)
      * @tc.steps: step3. call CreateAndShowSelectOverlay
      * @tc.expected: return the proxy which has the right SelectOverlayId
      */
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
     pattern->selectOverlayProxy_ = proxy;
     pattern->textForDisplay_ = "TestHandleOnSelectAll";
 

@@ -1514,7 +1514,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     selectInfo.menuInfo.menuIsShow = true;
     RegisterSelectOverlayCallback(selectInfo, params, callback);
     RegisterSelectOverlayEvent(selectInfo);
-    selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo);
+    selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
     selectMenuInfo_ = selectInfo.menuInfo;
     insertHandle_ = insertTouchHandle;
     startSelectionHandle_ = beginTouchHandle;
@@ -1555,7 +1555,8 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
             selectInfo.menuInfo.menuIsShow = false;
             selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
             RegisterSelectOverlayEvent(selectInfo);
-            selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo);
+            selectOverlayProxy_ =
+                pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
         }
     } else {
         if (overlayType == INSERT_OVERLAY) {

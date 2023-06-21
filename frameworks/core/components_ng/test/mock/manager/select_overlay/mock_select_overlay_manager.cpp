@@ -21,7 +21,8 @@ namespace {
 constexpr int32_t SELECT_OVERLAY_ID = 143;
 } // namespace
 
-RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(const SelectOverlayInfo& info)
+RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
+    const SelectOverlayInfo& info, const WeakPtr<SelectionHost>& host)
 {
     return MakeRefPtr<SelectOverlayProxy>(0);
 }
