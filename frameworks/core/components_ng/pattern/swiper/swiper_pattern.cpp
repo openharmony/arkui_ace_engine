@@ -541,10 +541,6 @@ void SwiperPattern::SwipeTo(int32_t index)
     }
 
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    if (pipeline) {
-        pipeline->FlushUITasks();
-    }
 }
 
 void SwiperPattern::ShowNext()
