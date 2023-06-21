@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -194,6 +194,7 @@ ACE_EXPORT extern const char NAVIGATOR_ETS_TAG[];
 // panel
 ACE_EXPORT extern const char PANEL_COMPONENT_TAG[];
 ACE_EXPORT extern const char PANEL_ETS_TAG[];
+ACE_EXPORT extern const char PANEL_CLOSE_ICON_ETS_TAG[];
 
 // pattern-lock
 ACE_EXPORT extern const char PATTERN_LOCK_COMPONENT_TAG[];

@@ -32,6 +32,7 @@ const char THEME_PATTERN_TOGGLE[] = "toggle_pattern";
 const char THEME_PATTERN_TOAST[] = "toast_pattern";
 const char THEME_PATTERN_DIALOG[] = "dialog_pattern";
 const char THEME_PATTERN_DRAG_BAR[] = "drag_bar_pattern";
+const char THEME_PATTERN_CLOSE_ICON[] = "close_icon_pattern";
 const char THEME_PATTERN_SEMI_MODAL[] = "semi_modal_pattern";
 const char THEME_PATTERN_BADGE[] = "badge_pattern";
 const char THEME_PATTERN_CALENDAR[] = "calendar_pattern";
@@ -161,6 +162,13 @@ const char DIALOG_DIVIDER_BETWEEN_BUTTON_WIDTH[] = "dialog_divider_between_butto
 
 // pattern attributes for drag bar
 const char DRAG_BAR_COLOR[] = "drag_bar_color";
+
+// pattern attributes for close icon
+const char CLOSE_ICON_WIDTH[] = "close_icon_width";
+const char CLOSE_ICON_Height[] = "close_icon_height";
+const char CLOSE_ICON_MARGIN_TOP[] = "close_icon_margin_top";
+const char CLOSE_ICON_MARGIN_RIGHT[] = "close_icon_margin_right";
+const char CLOSE_ICON_RADIUS[] = "close_icon_radius";
 
 // pattern attributes for popup
 const char POPUP_BORDER_RADIUS[] = "popup_border_radius";

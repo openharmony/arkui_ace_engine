@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -188,6 +188,7 @@ const char NAVIGATOR_ETS_TAG[] = "Navigator";
 // panel
 const char PANEL_COMPONENT_TAG[] = "SlidingPanelComponentV2";
 const char PANEL_ETS_TAG[] = "Panel";
+const char PANEL_CLOSE_ICON_ETS_TAG[] = "CloseIcon";
 
 // pattern-lock
 const char PATTERN_LOCK_COMPONENT_TAG[] = "PatternLockComponent";

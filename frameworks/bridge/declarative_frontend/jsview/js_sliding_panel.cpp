@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,6 +61,7 @@ const std::vector<VisibleType> PANEL_VISIBLE_TYPES = { VisibleType::GONE, Visibl
     VisibleType::INVISIBLE };
 
 const static bool DEFAULT_HASDRAGBAR = true;
+const static bool DEFAULT_SHOWCLOSEICON = false;
 const static PanelMode DEFAULT_PANELMODE = PanelMode::HALF;
 const static PanelType DEFAULT_PANELTYPE = PanelType::FOLDABLE_BAR;
 
@@ -84,6 +85,7 @@ void JSSlidingPanel::JSBind(BindingTarget globalObj)
     JSClass<JSSlidingPanel>::StaticMethod("pop", &JSSlidingPanel::Pop, opt);
     JSClass<JSSlidingPanel>::StaticMethod("dragBar", &JSSlidingPanel::SetHasDragBar, opt);
     JSClass<JSSlidingPanel>::StaticMethod("show", &JSSlidingPanel::SetShow, opt);
+    JSClass<JSSlidingPanel>::StaticMethod("showCloseIcon", &JSSlidingPanel::SetShowCloseIcon, opt);
     JSClass<JSSlidingPanel>::StaticMethod("mode", &JSSlidingPanel::SetPanelMode, opt);
     JSClass<JSSlidingPanel>::StaticMethod("type", &JSSlidingPanel::SetPanelType, opt);
     JSClass<JSSlidingPanel>::StaticMethod("backgroundMask", &JSSlidingPanel::SetBackgroundMask, opt);
@@ -312,6 +314,19 @@ void JSSlidingPanel::SetHasDragBar(const JSCallbackInfo& info)
         hasDragBar = info[0]->ToBoolean();
     }
     SlidingPanelModel::GetInstance()->SetHasDragBar(hasDragBar);
+}
+
+void JSSlidingPanel::SetShowCloseIcon(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The info is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    auto showCloseIcon = DEFAULT_SHOWCLOSEICON;
+    if (info[0]->IsBoolean()) {
+        showCloseIcon = info[0]->ToBoolean();
+    }
+    SlidingPanelModel::GetInstance()->SetShowCloseIcon(showCloseIcon);
 }
 
 void JSSlidingPanel::SetShow(bool isShow)
