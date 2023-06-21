@@ -52,6 +52,8 @@ public:
 private:
     void CreateAndMountControlButton(const RefPtr<NG::FrameNode>& parentNode) override;
     void CreateAndMountDivider(const RefPtr<NG::FrameNode>& parentNode) override;
+    void InitSideBarContentEvent(const RefPtr<NG::FrameNode>& parentNode,
+        const RefPtr<NG::FrameNode>& sideBarContentFrameNode) override;
     void MarkNeedInitRealSideBarWidth() override;
 };
 } // namespace OHOS::Ace::Framework

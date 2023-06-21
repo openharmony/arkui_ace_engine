@@ -70,9 +70,28 @@ void SideBarContainerModelNG::Pop()
     sideBarNode->MovePosition(DEFAULT_NODE_SLOT);
     sideBarContainerNode->RebuildRenderContextTree();
 
+    auto begin = children.begin();
+    // when side bar only have one component, no need to init side bar content
+    if (children.size() > DEFAULT_MIN_CHILDREN_SIZE_WITHOUT_BUTTON_AND_DIVIDER) {
+        InitSideBarContentEvent(sideBarContainerNode, AceType::DynamicCast<FrameNode>(*(++begin)));
+    }
+
     CreateAndMountDivider(sideBarContainerNode);
     CreateAndMountControlButton(sideBarContainerNode);
     NG::ViewStackProcessor::GetInstance()->PopContainer();
+}
+
+void SideBarContainerModelNG::InitSideBarContentEvent(const RefPtr<NG::FrameNode>& parentNode,
+    const RefPtr<NG::FrameNode>& sideBarContentFrameNode)
+{
+    CHECK_NULL_VOID(parentNode);
+    CHECK_NULL_VOID(sideBarContentFrameNode);
+    auto gestureHub = sideBarContentFrameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto parentPattern = parentNode->GetPattern<SideBarContainerPattern>();
+    CHECK_NULL_VOID(parentPattern);
+    parentPattern->InitSideBarContentEvent(gestureHub);
+    sideBarContentFrameNode->MarkModifyDone();
 }
 
 void SideBarContainerModelNG::CreateAndMountControlButton(const RefPtr<NG::FrameNode>& parentNode)
