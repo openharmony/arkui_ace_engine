@@ -107,16 +107,6 @@ public:
         isDragged_ = isDragged;
     }
 
-    bool IsMousePressed() const
-    {
-        return isMousePressed_;
-    }
-
-    void SetIsMousePressed(bool isMousePressed)
-    {
-        isMousePressed_ = isMousePressed;
-    }
-
     RefPtr<FrameNode> FindTargetInChildNodes(const RefPtr<UINode> parentNode,
         std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes);
 
@@ -156,7 +146,7 @@ private:
     int64_t currentId_ = -1;
 
     bool isDragged_ = false;
-    bool isMousePressed_ = false;
+
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };
 } // namespace OHOS::Ace::NG

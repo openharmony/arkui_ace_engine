@@ -755,7 +755,6 @@ OnDragCallback GestureEventHub::GetDragCallback()
         taskScheduler->PostTask(
             [eventHub, dragEvent, dragDropManager]() {
                 dragDropManager->SetIsDragged(false);
-                dragDropManager->SetIsMousePressed(false);
                 if (eventHub->HasOnDragEnd()) {
                     (eventHub->GetOnDragEnd())(dragEvent);
                 }

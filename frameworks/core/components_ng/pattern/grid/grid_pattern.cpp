@@ -172,10 +172,6 @@ void GridPattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
         return;
     }
 
-    if (mousePressed_ && !manager->IsMousePressed()) {
-        OnMouseRelease();
-    }
-
     auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
     auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
     if (info.GetAction() == MouseAction::PRESS) {
@@ -184,7 +180,6 @@ void GridPattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
         mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
         mousePressOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
         mousePressed_ = true;
-        manager->SetIsMousePressed(true);
         // do not select when click
     } else if (info.GetAction() == MouseAction::MOVE) {
         if (!mousePressed_) {
@@ -200,11 +195,11 @@ void GridPattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
         }
     } else if (info.GetAction() == MouseAction::RELEASE) {
         OnMouseRelease();
-        manager->SetIsMousePressed(false);
     }
 }
 
-void GridPattern::OnMouseRelease(){
+void GridPattern::OnMouseRelease()
+{
     mouseStartOffset_.Reset();
     mouseEndOffset_.Reset();
     mousePressed_ = false;
