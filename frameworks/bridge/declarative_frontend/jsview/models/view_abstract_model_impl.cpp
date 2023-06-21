@@ -670,7 +670,10 @@ void ViewAbstractModelImpl::SetRotate(float x, float y, float z, float angle)
     RefPtr<TransformComponent> transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     if (!option.IsValid()) {
-        option = PipelineBase::GetCurrentContext()->GetSyncAnimationOption();
+        auto pipeline = PipelineBase::GetCurrentContext();
+        if (pipeline) {
+            option = pipeline->GetSyncAnimationOption();
+        }
     }
 
     option.SetAllowRunningAsynchronously(false);
