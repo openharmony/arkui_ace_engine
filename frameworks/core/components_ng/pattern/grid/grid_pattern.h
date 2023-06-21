@@ -199,6 +199,7 @@ private:
     void HandleMouseEventWithoutKeyboard(const MouseInfo& info);
     void ClearMultiSelect();
     void ClearSelectedZone();
+    void OnMouseRelease();
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     void MultiSelectWithoutKeyboard(const RectF& selectedZone);
     void UpdateScrollBarOffset() override;

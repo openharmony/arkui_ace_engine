@@ -166,7 +166,14 @@ void GridPattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
     if (manager->IsDragged()) {
+        if (mousePressed_) {
+            OnMouseRelease();
+        }
         return;
+    }
+
+    if (mousePressed_ && !manager->IsMousePressed()) {
+        OnMouseRelease();
     }
 
     auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
@@ -177,6 +184,7 @@ void GridPattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
         mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
         mousePressOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
         mousePressed_ = true;
+        manager->SetIsMousePressed(true);
         // do not select when click
     } else if (info.GetAction() == MouseAction::MOVE) {
         if (!mousePressed_) {
@@ -191,11 +199,16 @@ void GridPattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
             MultiSelectWithoutKeyboard(selectedZone);
         }
     } else if (info.GetAction() == MouseAction::RELEASE) {
-        mouseStartOffset_.Reset();
-        mouseEndOffset_.Reset();
-        mousePressed_ = false;
-        ClearSelectedZone();
+        OnMouseRelease();
+        manager->SetIsMousePressed(false);
     }
+}
+
+void GridPattern::OnMouseRelease(){
+    mouseStartOffset_.Reset();
+    mouseEndOffset_.Reset();
+    mousePressed_ = false;
+    ClearSelectedZone();
 }
 
 void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
