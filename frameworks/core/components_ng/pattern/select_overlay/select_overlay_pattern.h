@@ -111,6 +111,7 @@ public:
     }
 
     void ShowOrHiddenMenu(bool isHidden);
+    void DisableMenu(bool isDisabled);
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;

@@ -62,6 +62,7 @@ public:
         ResetShowCounter();
         ResetShowUnderline();
         ResetTextAlignChanged();
+        ResetSelectionMenuHidden();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -136,6 +137,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowPasswordSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HidePasswordSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CaretPosition, int32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectionMenuHidden, bool, PROPERTY_UPDATE_MEASURE);
 
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
@@ -160,6 +162,7 @@ protected:
         value->propShowCounter_ = CloneShowCounter();
         value->propShowUnderline_ = CloneShowUnderline();
         value->propTextAlignChanged_ = CloneTextAlignChanged();
+        value->propSelectionMenuHidden_ = CloneSelectionMenuHidden();
     }
 
 private:
