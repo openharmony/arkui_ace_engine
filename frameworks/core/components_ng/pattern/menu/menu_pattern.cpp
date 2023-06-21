@@ -147,6 +147,16 @@ void MenuPattern::OnModifyDone()
 void InnerMenuPattern::BeforeCreateLayoutWrapper()
 {
     RecordItemsAndGroups();
+
+    // determine menu type based on sibling menu count
+    auto count = FindSiblingMenuCount();
+    if (count > 0) {
+        SetType(MenuType::DESKTOP_MENU);
+        ApplyDesktopMenuTheme();
+    } else {
+        SetType(MenuType::MULTI_MENU);
+        ApplyMultiMenuTheme();
+    }
 }
 
 void InnerMenuPattern::OnModifyDone()
@@ -156,15 +166,6 @@ void InnerMenuPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     UpdateMenuItemChildren(host);
     SetAccessibilityAction();
-
-    auto count = FindSiblingMenuCount();
-    if (count > 0) {
-        SetType(MenuType::DESKTOP_MENU);
-        ApplyDesktopMenuTheme();
-    } else {
-        SetType(MenuType::MULTI_MENU);
-        ApplyMultiMenuTheme();
-    }
 }
 
 // close menu on touch up
