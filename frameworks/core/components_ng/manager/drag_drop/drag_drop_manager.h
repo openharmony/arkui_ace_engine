@@ -107,6 +107,9 @@ public:
         isDragged_ = isDragged;
     }
 
+    RefPtr<FrameNode> FindTargetInChildNodes(const RefPtr<UINode> parentNode,
+        std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes);
+
 private:
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType);
     std::map<int32_t, RefPtr<FrameNode>> FindDragFrameNodeMapByPosition(
