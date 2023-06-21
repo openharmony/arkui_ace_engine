@@ -15,15 +15,6 @@
 
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 
-#include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
-void StagePattern::OnAttachToFrameNode()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    host->GetRenderContext()->UpdateBackgroundColor(pipeline->GetAppBgColor());
-}
+void StagePattern::OnAttachToFrameNode() {}
 } // namespace OHOS::Ace::NG

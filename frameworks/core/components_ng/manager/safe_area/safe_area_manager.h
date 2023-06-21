@@ -85,31 +85,12 @@ public:
         geoRestoreNodes_.swap(nodes);
     }
 
-    // Reset after RestoreGeoState
-    void ResetLastKeyboardOffset()
-    {
-        lastKeyboardOffset_ = 0.0f;
-    }
-
-    // Save during AvoidKeyboard
-    void SaveLastKeyboardOffset()
-    {
-        lastKeyboardOffset_ = keyboardOffset_;
-    }
-
-    float GetLastKeyboardOffset() const
-    {
-        return lastKeyboardOffset_;
-    }
-
 private:
     SafeAreaInsets systemSafeArea_;
     SafeAreaInsets cutoutSafeArea_;
     std::vector<WeakPtr<FrameNode>> geoRestoreNodes_;
     std::vector<WeakPtr<LayoutWrapper>> wrappersToAdjust_;
     float keyboardOffset_ = 0.0f;
-    // used to restore node position when keyboard is hidden
-    float lastKeyboardOffset_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(SafeAreaManager);
 };

@@ -238,10 +238,6 @@ private:
     void CreateRootConstraint();
     void ApplyConstraint(LayoutConstraintF constraint);
 
-    // save geometry state before SafeArea expansion / keyboard avoidance (whichever comes first).
-    void SaveSelfGeoState();
-    void RestoreSelfGeoState();
-
     void ExpandSafeAreaInner();
     // keyboard avoidance is done by offsetting, to expand into keyboard area, reverse the offset.
     void ExpandIntoKeyboard();

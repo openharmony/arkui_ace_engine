@@ -1780,7 +1780,7 @@ bool FrameNode::IsContentRoot()
         return false;
     }
     // overlay root
-    if (GetDepth() == 2 && GetTag() != V2::STAGE_ETS_TAG && GetTag() != "ContainerModal") {
+    if (GetDepth() == 2 && GetTag() != V2::STAGE_ETS_TAG) {
         return true;
     }
     // page root

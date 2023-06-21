@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_STAGE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_STAGE_PATTERN_H
 
+#include "stage_layout_algorithm.h"
+
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
@@ -46,6 +48,11 @@ public:
         if (onRebuildFrameCallback_) {
             onRebuildFrameCallback_();
         }
+    }
+
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return MakeRefPtr<StageLayoutAlgorithm>();
     }
 
     void SetOnRebuildFrameCallback(std::function<void()>&& callback)

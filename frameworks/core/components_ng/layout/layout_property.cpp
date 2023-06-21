@@ -543,4 +543,25 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
     parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void LayoutProperty::UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts)
+{
+    if (!safeAreaExpandOpts_) {
+        safeAreaExpandOpts_ = std::make_unique<SafeAreaExpandOpts>();
+    }
+    if (*safeAreaExpandOpts_ != opts) {
+        *safeAreaExpandOpts_ = opts;
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void LayoutProperty::UpdateSafeAreaInsets(const SafeAreaInsets& safeArea)
+{
+    if (!safeAreaInsets_) {
+        safeAreaInsets_ = std::make_unique<SafeAreaInsets>();
+    }
+    if (*safeAreaInsets_ != safeArea) {
+        *safeAreaInsets_ = safeArea;
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+    }
+}
 } // namespace OHOS::Ace::NG

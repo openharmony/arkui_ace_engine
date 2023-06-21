@@ -79,15 +79,11 @@ void LayoutWrapper::Layout() {}
 
 void LayoutWrapper::RestoreGeoState(int32_t rootDepth) {}
 
-void LayoutWrapper::RestoreSelfGeoState() {}
-
 void LayoutWrapper::AvoidKeyboard() {}
 
 void LayoutWrapper::ExpandSafeArea() {}
 
 void LayoutWrapper::SaveGeoState() {}
-void LayoutWrapper::SaveSelfGeoState() {}
-
 void LayoutWrapper::ExpandSafeAreaInner() {}
 
 void LayoutWrapper::ExpandIntoKeyboard() {}

@@ -13,48 +13,31 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/root/root_layout_algorithm.h"
+#include "core/components_ng/pattern/stage/stage_layout_algorithm.h"
 
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-void RootLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void StageLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    // apply safe area to page nodes
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    auto&& children = layoutWrapper->GetAllChildrenWithBuild();
-    if (children.size() == 1) {
-        // Stage node only
-        (*children.begin())->Measure(layoutConstraint);
-        PerformMeasureSelf(layoutWrapper);
-        return;
-    }
-
     auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     childInsets_ = pipeline->GetSafeArea();
-    auto safeAreaConstraint = layoutConstraint;
-    LayoutWrapper::ApplySafeArea(childInsets_, safeAreaConstraint);
-    for (auto&& child : children) {
-        // Stage displays app background color and needs to be full screen.
-        if (child->GetHostTag() == V2::STAGE_ETS_TAG) {
-            child->Measure(layoutConstraint);
-        } else {
-            child->Measure(safeAreaConstraint);
-        }
+    LayoutWrapper::ApplySafeArea(childInsets_, layoutConstraint);
+    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        child->Measure(layoutConstraint);
     }
     PerformMeasureSelf(layoutWrapper);
 }
 
-void RootLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void StageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     PerformLayout(layoutWrapper);
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        if (child->GetHostTag() != V2::STAGE_ETS_TAG) {
-            child->GetGeometryNode()->SetFrameOffset(OffsetF(childInsets_.left_.Length(), childInsets_.top_.Length()));
-        }
+        child->GetGeometryNode()->SetFrameOffset(OffsetF(childInsets_.left_.Length(), childInsets_.top_.Length()));
         child->Layout();
     }
 }

@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ROOT_ROOT_LAYOUT_ALGORITHM_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ROOT_ROOT_LAYOUT_ALGORITHM_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_STAGE_LAYOUT_ALGORITHM_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_STAGE_LAYOUT_ALGORITHM_H
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/property/safe_area_insets.h"
 
 namespace OHOS::Ace::NG {
-class RootLayoutAlgorithm : public BoxLayoutAlgorithm {
-    DECLARE_ACE_TYPE(RootLayoutAlgorithm, BoxLayoutAlgorithm);
+class StageLayoutAlgorithm : public BoxLayoutAlgorithm {
+    DECLARE_ACE_TYPE(StageLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:
-    RootLayoutAlgorithm() = default;
-    ~RootLayoutAlgorithm() override = default;
+    StageLayoutAlgorithm() = default;
+    ~StageLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
@@ -34,8 +34,8 @@ public:
 private:
     SafeAreaInsets childInsets_;
 
-    ACE_DISALLOW_COPY_AND_MOVE(RootLayoutAlgorithm);
+    ACE_DISALLOW_COPY_AND_MOVE(StageLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ROOT_ROOT_LAYOUT_ALGORITHM_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_STAGE_LAYOUT_ALGORITHM_H

@@ -345,34 +345,13 @@ void LayoutWrapper::RestoreGeoState(int32_t rootDepth)
         if (node->GetDepth() >= rootDepth) {
             auto wrapper = node->GetLayoutWrapper().Upgrade();
             if (wrapper) {
-                wrapper->RestoreSelfGeoState();
+                wrapper->geometryNode_->Restore();
             }
         } else {
             untraversedNodes.emplace_back(nodeWk);
         }
     }
     manager->SwapGeoRestoreNodes(untraversedNodes);
-
-    manager->ResetLastKeyboardOffset();
-}
-
-void LayoutWrapper::RestoreSelfGeoState()
-{
-    CHECK_NULL_VOID(geometryNode_->GetPreviousState());
-
-    auto expanded = geometryNode_->GetFrameOffset();
-    geometryNode_->Restore();
-
-    // reverse offset for children, so that they stay in the same position. But for keyboard offset, children move with
-    // the parent node; that portion of the offset needs to be negated
-    auto offset = geometryNode_->GetFrameOffset() - expanded;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    // parent subtracted LastKeyboardOffset in Restore(), so in reverse, children add it back
-    offset.AddY(pipeline->GetSafeAreaManager()->GetLastKeyboardOffset());
-    for (auto&& child : children_) {
-        child->geometryNode_->SetFrameOffset(child->geometryNode_->GetFrameOffset() - offset);
-    }
 }
 
 void LayoutWrapper::AvoidKeyboard()
@@ -393,7 +372,6 @@ void LayoutWrapper::AvoidKeyboard()
                 wrapper->geometryNode_->GetFrameOffset() + OffsetF(0, manager->GetKeyboardOffset()));
         }
     }
-    manager->SaveLastKeyboardOffset();
 }
 
 void LayoutWrapper::ExpandSafeArea()
@@ -431,8 +409,6 @@ void LayoutWrapper::SaveGeoState()
     }
 }
 
-void LayoutWrapper::SaveSelfGeoState() {}
-
 void LayoutWrapper::ExpandSafeAreaInner()
 {
     auto&& opts = layoutProperty_->GetSafeAreaExpandOpts();
@@ -440,7 +416,6 @@ void LayoutWrapper::ExpandSafeAreaInner()
 
     // get frame in global offset
     auto frame = geometryNode_->GetFrameRect() + geometryNode_->GetParentGlobalOffset();
-    LOGD("initial frame = %{public}s", frame.ToString().c_str());
     auto safeArea = opts->GetCombinedSafeArea();
     if ((opts->edges & SAFE_AREA_EDGE_START) && safeArea.left_.IsValid() && frame.Left() <= safeArea.left_.end) {
         frame.SetWidth(frame.Width() + frame.Left() - safeArea.left_.start);
@@ -458,7 +433,6 @@ void LayoutWrapper::ExpandSafeAreaInner()
         frame.Bottom() >= safeArea.bottom_.start) {
         frame.SetHeight(frame.Height() + (safeArea.bottom_.end - frame.Bottom()));
     }
-    LOGD("expanded frame to %{public}s", frame.ToString().c_str());
 
     // restore to local offset
     frame -= geometryNode_->GetParentGlobalOffset();
@@ -467,15 +441,13 @@ void LayoutWrapper::ExpandSafeAreaInner()
         geometryNode_->SetFrameSize(frame.GetSize());
         geometryNode_->SetFrameOffset(frame.GetOffset());
 
-        // adjust child offset in the opposite direction so that its absolute position remains unchanged
         for (auto&& child : GetAllChildrenWithBuild()) {
             auto geo = child->GetGeometryNode();
-            geo->SetFrameOffset(geo->GetFrameOffset() - topLeftExpansion);
             geo->SetParentGlobalOffset(geo->GetParentGlobalOffset() + topLeftExpansion);
         }
     }
 
-    if (opts->edges & SAFE_AREA_EDGE_BOTTOM && opts->type & SAFE_AREA_TYPE_KEYBOARD) {
+    if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && (opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
         ExpandIntoKeyboard();
     }
 }
@@ -488,7 +460,6 @@ void LayoutWrapper::ExpandIntoKeyboard()
         geometryNode_->GetFrameOffset() - OffsetF(0, pipeline->GetSafeAreaManager()->GetKeyboardOffset()));
     for (auto&& child : GetAllChildrenWithBuild()) {
         auto geo = child->GetGeometryNode();
-        geo->SetFrameOffset(geo->GetFrameOffset() + OffsetF(0, pipeline->GetSafeAreaManager()->GetKeyboardOffset()));
         geo->SetParentGlobalOffset(
             geo->GetParentGlobalOffset() - OffsetF(0, pipeline->GetSafeAreaManager()->GetKeyboardOffset()));
     }

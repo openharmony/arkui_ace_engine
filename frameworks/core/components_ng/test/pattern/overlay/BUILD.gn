@@ -76,6 +76,7 @@ ohos_unittest("overlay_manager_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/scroll/scroll_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/stage/stage_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/stage/stage_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/stage/stage_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_picker/textpicker_dialog_view.cpp",
