@@ -1103,7 +1103,7 @@ HWTEST_F(SwiperTestNg, SwiperInit002, TestSize.Level1)
     pattern->InitOnKeyEvent(focusHub);
     KeyEvent event = KeyEvent();
     event.action = KeyAction::DOWN;
-    EXPECT_FALSE(focusHub->onKeyEventInternal_(event));
+    EXPECT_FALSE(focusHub->ProcessOnKeyEventInternal(event));
 }
 
 /**
