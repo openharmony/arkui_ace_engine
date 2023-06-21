@@ -2683,7 +2683,6 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
         lastTouchOffset_ = info.GetLocalLocation();
         caretUpdateType_ = CaretUpdateType::PRESSED;
         selectionMode_ = SelectionMode::NONE;
-        UpdateCaretPositionByPressOffset();
         if (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately()) {
             LOGE("Request focus failed, cannot open input method");
             StopTwinkling();
