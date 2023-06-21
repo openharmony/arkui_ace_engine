@@ -87,16 +87,25 @@ public:
 
 private:
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
+    void HandleBlurEvent();
+    void HandleFocusEvent();
     void HandleClickEvent(GestureEvent& info);
+    void ScheduleCaretTwinkling();
+    void OnCaretTwinkling();
+    void StartTwinkling();
+    void StopTwinkling();
 
     bool clickEventInitialized_ = false;
+    bool focusEventInitialized_ = false;
     RefPtr<RichEditorContentModifier> richEditorContentModifier_;
     RefPtr<RichEditorOverlayModifier> richEditorOverlayModifier_;
     bool isRichEditorInit_ = false;
     RefPtr<RichEditorController> richEditorController_;
     int32_t caretPosition_ = 0;
     int32_t instanceId_ = -1;
-    bool caretVisible_ = true;
+    bool caretVisible_ = false;
+    CancelableCallback<void()> caretTwinklingTask_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };
