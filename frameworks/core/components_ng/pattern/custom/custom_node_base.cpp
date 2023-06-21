@@ -31,10 +31,10 @@ CustomNodeBase::~CustomNodeBase()
 
 void CustomNodeBase::Update()
 {
+    needRebuild_ = false;
     if (updateFunc_) {
         updateFunc_();
     }
-    needRebuild_ = false;
 }
 
 void CustomNodeBase::MarkNeedUpdate()
