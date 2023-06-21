@@ -21,6 +21,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/spring_curve.h"
@@ -244,6 +245,9 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInS
                     auto overlayManager = weak.Upgrade();
                     CHECK_NULL_VOID_NOLOG(menu && overlayManager);
                     ContainerScope scope(id);
+                    if (isInSubWindow) {
+                        SubwindowManager::GetInstance()->RequestFocusSubwindow(id);
+                    }
                     overlayManager->FocusOverlayNode(menu, isInSubWindow);
                     overlayManager->CallOnShowMenuCallback();
                 },

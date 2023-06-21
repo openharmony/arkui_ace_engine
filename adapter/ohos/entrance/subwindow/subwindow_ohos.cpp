@@ -353,7 +353,7 @@ void SubwindowOhos::ShowWindow()
         LOGE("Show window failed with errCode: %{public}d", static_cast<int32_t>(ret));
         return;
     }
-    window_->RequestFocus();
+    RequestFocus();
     LOGI("Show the subwindow successfully.");
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
@@ -953,6 +953,20 @@ Rect SubwindowOhos::GetParentWindowRect() const
     CHECK_NULL_RETURN(parentWindow_, rect);
     auto parentWindowRect = parentWindow_->GetRect();
     return Rect(parentWindowRect.posX_, parentWindowRect.posY_, parentWindowRect.width_, parentWindowRect.height_);
+}
+
+void SubwindowOhos::RequestFocus()
+{
+    if (window_->IsFocused()) {
+        // already focused, no need to focus
+        return;
+    }
+    OHOS::Rosen::WMError ret = window_->RequestFocus();
+    if (ret != OHOS::Rosen::WMError::WM_OK) {
+        LOGW("Window request focus failed with errCode: %{public}d", static_cast<int32_t>(ret));
+        return;
+    }
+    LOGD("The window request focus successfully.");
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK

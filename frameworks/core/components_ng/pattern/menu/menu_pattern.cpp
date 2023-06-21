@@ -583,8 +583,8 @@ void MenuPattern::UpdateMenuHotArea()
         return;
     }
     std::vector<Rect> rects;
-    for (auto child = children.begin(); child != children.end(); ++child) {
-        auto menuNode = DynamicCast<FrameNode>(*child);
+    for (const auto & child : children) {
+        auto menuNode = DynamicCast<FrameNode>(child);
         CHECK_NULL_VOID(menuNode);
         auto menuPattern = menuNode->GetPattern<MenuPattern>();
         CHECK_NULL_VOID(menuPattern);
@@ -594,7 +594,7 @@ void MenuPattern::UpdateMenuHotArea()
         auto menuContext = menuNode->GetRenderContext();
         CHECK_NULL_VOID(menuContext);
         auto menuHotArea = menuContext->GetPaintRectWithTransform();
-        rects.emplace_back(Rect(menuHotArea.GetX(), menuHotArea.GetY(), menuHotArea.Width(), menuHotArea.Height()));
+        rects.emplace_back(menuHotArea.GetX(), menuHotArea.GetY(), menuHotArea.Width(), menuHotArea.Height());
     }
     SubwindowManager::GetInstance()->SetHotAreas(rects);
 }

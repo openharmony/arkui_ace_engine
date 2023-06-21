@@ -109,6 +109,8 @@ public:
     // Gets parent window's size and offset
     Rect GetParentWindowRect() const override;
 
+    void RequestFocus() override;
+
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);
