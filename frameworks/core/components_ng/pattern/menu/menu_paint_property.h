@@ -27,6 +27,7 @@ namespace {
 constexpr Dimension ARROW_WIDTH = 32.0_vp;
 // arrow actual display height against shadow
 constexpr Dimension ARROW_HIGHT = 7.4_vp;
+constexpr Dimension TARGET_SECURITY = 8.0_vp;
 // space from menu to target for arrow display
 constexpr Dimension TARGET_SPACE = 16.0_vp;
 constexpr Dimension ARROW_ZERO_PERCENT_VALUE = Dimension(0.0, DimensionUnit::PERCENT);
