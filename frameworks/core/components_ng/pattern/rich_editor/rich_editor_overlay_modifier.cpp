@@ -15,6 +15,72 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 
+#include "core/components_ng/render/drawing.h"
+
 namespace OHOS::Ace::NG {
-RichEditorOverlayModifier::RichEditorOverlayModifier() : TextOverlayModifier() {}
+RichEditorOverlayModifier::RichEditorOverlayModifier() : TextOverlayModifier()
+{
+    caretVisible_ = AceType::MakeRefPtr<PropertyBool>(false);
+    AttachProperty(caretVisible_);
+    caretOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
+    AttachProperty(caretOffset_);
+    caretHeight_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
+    AttachProperty(caretHeight_);
+    caretWidth_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
+    AttachProperty(caretWidth_);
+    caretColor_ = AceType::MakeRefPtr<PropertyInt>(0);
+    AttachProperty(caretColor_);
+}
+
+void RichEditorOverlayModifier::SetCaretOffsetAndHeight(const OffsetF& cursorOffset, float height)
+{
+    caretOffset_->Set(cursorOffset);
+    if (height > 0.0f) {
+        caretHeight_->Set(height);
+    }
+}
+
+void RichEditorOverlayModifier::SetCaretColor(uint32_t caretColor)
+{
+    CHECK_NULL_VOID(caretColor_);
+    caretColor_->Set(static_cast<int32_t>(caretColor));
+}
+
+void RichEditorOverlayModifier::SetCaretWidth(float width)
+{
+    if (width <= 0.0f) {
+        return;
+    }
+    caretWidth_->Set(width);
+}
+
+void RichEditorOverlayModifier::SetCaretVisible(bool value)
+{
+    caretVisible_->Set(value);
+}
+
+void RichEditorOverlayModifier::PaintCaret(DrawingContext& drawingContext) const
+{
+    if (!caretVisible_->Get()) {
+        return;
+    }
+    auto offset = caretOffset_->Get();
+    drawingContext.canvas.Save();
+    RSBrush brush;
+    brush.SetAntiAlias(true);
+    brush.SetColor(caretColor_->Get());
+    drawingContext.canvas.AttachBrush(brush);
+
+    drawingContext.canvas.DrawRect(
+        RSRect(offset.GetX(), offset.GetY(), offset.GetX() + caretWidth_->Get(), offset.GetY() + caretHeight_->Get()));
+
+    drawingContext.canvas.DetachBrush();
+    drawingContext.canvas.Restore();
+}
+
+void RichEditorOverlayModifier::onDraw(DrawingContext& drawingContext)
+{
+    PaintCaret(drawingContext);
+    TextOverlayModifier::onDraw(drawingContext);
+}
 } // namespace OHOS::Ace::NG

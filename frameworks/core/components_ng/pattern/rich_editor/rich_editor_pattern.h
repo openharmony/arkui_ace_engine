@@ -48,6 +48,11 @@ public:
         return MakeRefPtr<RichEditorLayoutAlgorithm>(spanItemChildren_, paragraph_);
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+    }
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         if (!richEditorContentModifier_) {
@@ -70,15 +75,29 @@ public:
         richEditorController_ = controller;
     }
 
+    int32_t GetTextContentLength();
     void OnModifyDone() override;
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    int32_t GetInstanceId() const;
+    int32_t GetCaretPosition();
+    void SetCaretPosition(int32_t pos);
+    bool GetCaretVisible() const;
+    OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight);
 
 private:
+    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleClickEvent(GestureEvent& info);
+
+    bool clickEventInitialized_ = false;
     RefPtr<RichEditorContentModifier> richEditorContentModifier_;
     RefPtr<RichEditorOverlayModifier> richEditorOverlayModifier_;
     bool isRichEditorInit_ = false;
     RefPtr<RichEditorController> richEditorController_;
+    int32_t caretPosition_ = 0;
+    int32_t instanceId_ = -1;
+    bool caretVisible_ = true;
+
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };
 } // namespace OHOS::Ace::NG

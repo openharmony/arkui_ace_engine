@@ -30,6 +30,11 @@ public:
         RefPtr<RichEditorOverlayModifier> richEditorOverlayModifier);
 
     ~RichEditorPaintMethod() override;
+    void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
+
+private:
+    WeakPtr<Pattern> pattern_;
+    RefPtr<RichEditorOverlayModifier> richEditorOverlayModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPaintMethod);
 };
 } // namespace OHOS::Ace::NG
