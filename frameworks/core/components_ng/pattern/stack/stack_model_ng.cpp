@@ -37,12 +37,17 @@ void StackModelNG::Create()
 void StackModelNG::Create(Alignment alignment)
 {
     Create();
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
+    ACE_UPDATE_LAYOUT_PROPERTY(StackLayoutProperty, AlignmentContent, alignment);
 }
 
 void StackModelNG::SetAlignment(Alignment alignment)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
+    ACE_UPDATE_LAYOUT_PROPERTY(StackLayoutProperty, Alignment, alignment);
 }
 
+void StackModelNG::SetAlignmentContent(Alignment alignment)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(StackLayoutProperty, AlignmentContent, alignment);
+}
 } // namespace OHOS::Ace::NG

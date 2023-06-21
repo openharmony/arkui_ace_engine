@@ -115,8 +115,7 @@ HWTEST_F(StackTestNg, StackTestNgTest001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<StackLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    ASSERT_NE(layoutProperty->GetPositionProperty(), nullptr);
-    auto alignment = layoutProperty->GetPositionProperty()->GetAlignment();
+    auto alignment = layoutProperty->GetAlignment();
     ASSERT_EQ(alignment, Alignment::TOP_LEFT);
 
     /**
@@ -180,13 +179,12 @@ HWTEST_F(StackTestNg, StackTestNgTest002, TestSize.Level1)
     */
     StackModelNG stackModelNG;
     stackModelNG.Create();
-    stackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    stackModelNG.SetAlignmentContent(Alignment::TOP_LEFT);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<StackLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    ASSERT_NE(layoutProperty->GetPositionProperty(), nullptr);
-    auto alignmentContent = layoutProperty->GetPositionProperty()->GetAlignment();
+    auto alignmentContent = layoutProperty->GetAlignmentContent();
     ASSERT_EQ(alignmentContent, Alignment::TOP_LEFT);
     layoutProperty->UpdateLayoutDirection(TextDirection::LTR);
 

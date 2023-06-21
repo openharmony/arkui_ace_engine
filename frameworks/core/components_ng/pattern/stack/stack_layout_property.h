@@ -31,29 +31,33 @@ public:
     {
         auto layoutProperty = MakeRefPtr<StackLayoutProperty>();
         layoutProperty->UpdateLayoutProperty(this);
+        layoutProperty->propAlignmentContent_ = CloneAlignmentContent();
+        layoutProperty->propAlignment_ = CloneAlignment();
         return layoutProperty;
     }
 
     void Reset() override
     {
         LayoutProperty::Reset();
+        ResetAlignmentContent();
+        ResetAlignment();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         LayoutProperty::ToJsonValue(json);
-        auto align = Alignment::CENTER;
-        if (GetPositionProperty()) {
-            align = GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER);
-        }
-        json->Put("alignContent", align.GetAlignmentStr(TextDirection::LTR).c_str());
+        json->Put("alignContent",
+            propAlignmentContent_.value_or(Alignment::CENTER).GetAlignmentStr(TextDirection::LTR).c_str());
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override
     {
-        UpdateAlignment(Alignment::GetAlignment(TextDirection::LTR, json->GetString("alignContent")));
+        UpdateAlignmentContent(Alignment::GetAlignment(TextDirection::LTR, json->GetString("alignContent")));
         LayoutProperty::FromJson(json);
     }
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AlignmentContent, Alignment, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Alignment, Alignment, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(StackLayoutProperty);
