@@ -56,14 +56,15 @@ void ScrollBarModelNG::Create(const RefPtr<ScrollProxy>& proxy, bool infoflag, b
             pattern->SetScrollBarProxy(scrollBarProxy);
         }
 
-        if (directionValue != -1) {
-            ACE_UPDATE_LAYOUT_PROPERTY(ScrollBarLayoutProperty, Axis, AXIS[directionValue]);
+        if (directionValue < 0 || directionValue >= static_cast<int32_t>(AXIS.size())) {
+            directionValue = static_cast<int32_t>(Axis::VERTICAL);
         }
 
         if (stateValue < 0 || stateValue >= static_cast<int32_t>(DISPLAY_MODE.size())) {
-            return;
+            stateValue = static_cast<int32_t>(DisplayMode::AUTO);
         }
 
+        ACE_UPDATE_LAYOUT_PROPERTY(ScrollBarLayoutProperty, Axis, AXIS[directionValue]);
         ACE_UPDATE_LAYOUT_PROPERTY(ScrollBarLayoutProperty, DisplayMode, DISPLAY_MODE[stateValue]);
         auto visible = (DISPLAY_MODE[stateValue] == DisplayMode::OFF) ? VisibleType::INVISIBLE : VisibleType::VISIBLE;
         ACE_UPDATE_LAYOUT_PROPERTY(ScrollBarLayoutProperty, Visibility, visible);
