@@ -35,6 +35,7 @@
 #endif
 #include "core/components/font/rosen_font_collection.h"
 #include "core/components_ng/image_provider/image_object.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/image/flutter_image_cache.h"
 
@@ -87,25 +88,15 @@ double GetQuality(const std::string& args)
 }
 } // namespace
 
-CanvasDrawFunction CanvasPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
+void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
-    auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
-        auto customPaint = weak.Upgrade();
-        CHECK_NULL_VOID(customPaint);
-        customPaint->PaintCustomPaint(canvas, paintWrapper);
-    };
-
-    return paintFunc;
-}
-
-void CanvasPaintMethod::PaintCustomPaint(RSCanvas& canvas, PaintWrapper* paintWrapper)
-{
+    CHECK_NULL_VOID(paintWrapper);
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
-    SkCanvas* skCanvas = canvas.GetImpl<Rosen::Drawing::SkiaCanvas>()->ExportSkCanvas();
+    auto viewScale = context->GetViewScale();
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
     if (lastLayoutSize_ != frameSize) {
-        CreateBitmap(frameSize);
+        UpdateRecordingCanvas(frameSize.Width() * viewScale, frameSize.Height() * viewScale);
         lastLayoutSize_.SetSizeT(frameSize);
     }
     if (!skCanvas_) {
@@ -113,40 +104,21 @@ void CanvasPaintMethod::PaintCustomPaint(RSCanvas& canvas, PaintWrapper* paintWr
         return;
     }
 
-    auto viewScale = context->GetViewScale();
-    skCanvas_->scale(viewScale, viewScale);
+    if (tasks_.empty()) {
+        return;
+    }
 
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetFrameForCanvas();
+
+    skCanvas_->scale(viewScale, viewScale);
     for (const auto& task : tasks_) {
         task(*this, paintWrapper);
     }
-    skCanvas_->scale(1.0 / viewScale, 1.0 / viewScale);
     tasks_.clear();
-
-    skCanvas->save();
-    skCanvas->scale(1.0 / viewScale, 1.0 / viewScale);
-#ifndef NEW_SKIA
-    skCanvas->drawBitmap(canvasCache_, 0.0f, 0.0f);
-#else
-    skCanvas->drawImage(canvasCache_.asImage(), 0.0f, 0.0f);
-#endif
-    skCanvas->restore();
-}
-
-void CanvasPaintMethod::CreateBitmap(SizeF frameSize)
-{
-    auto context = context_.Upgrade();
-    CHECK_NULL_VOID(context);
-    auto viewScale = context->GetViewScale();
-    auto imageInfo = SkImageInfo::Make(frameSize.Width() * viewScale, frameSize.Height() * viewScale,
-        SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
-    canvasCache_.reset();
-    cacheBitmap_.reset();
-    canvasCache_.allocPixels(imageInfo);
-    cacheBitmap_.allocPixels(imageInfo);
-    canvasCache_.eraseColor(SK_ColorTRANSPARENT);
-    cacheBitmap_.eraseColor(SK_ColorTRANSPARENT);
-    skCanvas_ = std::make_unique<SkCanvas>(canvasCache_);
-    cacheCanvas_ = std::make_unique<SkCanvas>(cacheBitmap_);
+    CHECK_NULL_VOID(contentModifier_);
+    contentModifier_->MarkModifierDirty();
 }
 
 void CanvasPaintMethod::ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj)
@@ -188,8 +160,8 @@ void CanvasPaintMethod::DrawImage(
     InitImagePaint(imagePaint_, sampleOptions_);
 #endif
     InitPaintBlend(imagePaint_);
-    const auto skCanvas =
-        globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
+
+    const auto skCanvas = skCanvas_.get();
     if (HasImageShadow()) {
         SkRect skRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
         SkPath path;
@@ -310,9 +282,10 @@ void CanvasPaintMethod::CloseImageBitmap(const std::string& src)
     }
 }
 
-std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
+std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(RefPtr<RosenRenderContext> renderContext,
     double left, double top, double width, double height)
 {
+    CHECK_NULL_RETURN(renderContext, nullptr);
     double viewScale = 1.0;
     auto context = context_.Upgrade();
     CHECK_NULL_RETURN(context, nullptr);
@@ -332,18 +305,28 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
         SkImageInfo::Make(dirtyWidth, dirtyHeight,
         SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
     SkBitmap tempCache;
-
     tempCache.allocPixels(imageInfo);
+
+    SkBitmap currentBitmap;
+    CHECK_NULL_RETURN(rsRecordingCanvas_, nullptr);
+    auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
+    bool res = renderContext->GetBitmap(currentBitmap, rsRecordingCanvas_->GetDrawCmdList());
+    if (!res || currentBitmap.empty()) {
+        LOGE("Bitmap is empty");
+        return nullptr;
+    }
+    rsRecordingCanvas_->Clear();
+
     int32_t size = dirtyWidth * dirtyHeight;
     const uint8_t* pixels = nullptr;
     SkCanvas tempCanvas(tempCache);
     auto srcRect = SkRect::MakeXYWH(scaledLeft, scaledTop, dirtyWidth * viewScale, dirtyHeight * viewScale);
     auto dstRect = SkRect::MakeXYWH(0.0, 0.0, dirtyWidth, dirtyHeight);
 #ifndef NEW_SKIA
-    tempCanvas.drawBitmapRect(canvasCache_, srcRect, dstRect, nullptr);
+    tempCanvas.drawBitmapRect(currentBitmap, srcRect, dstRect, nullptr);
 #else
     tempCanvas.drawImageRect(
-        canvasCache_.asImage(), srcRect, dstRect, SkSamplingOptions(), nullptr, SkCanvas::kStrict_SrcRectConstraint);
+        currentBitmap.asImage(), srcRect, dstRect, SkSamplingOptions(), nullptr, SkCanvas::kStrict_SrcRectConstraint);
 #endif
     pixels = tempCache.pixmap().addr8();
     CHECK_NULL_RETURN(pixels, nullptr);
@@ -374,7 +357,7 @@ void CanvasPaintMethod::FillText(
     PaintWrapper* paintWrapper, const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
     CHECK_NULL_VOID(paintWrapper);
-    auto offset = paintWrapper->GetContentOffset();
+    OffsetF offset = GetContentOffset(paintWrapper);
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
 
     auto success = UpdateParagraph(offset, text, false, HasShadow());
@@ -386,7 +369,7 @@ void CanvasPaintMethod::StrokeText(
     PaintWrapper* paintWrapper, const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
     CHECK_NULL_VOID(paintWrapper);
-    auto offset = paintWrapper->GetContentOffset();
+    OffsetF offset = GetContentOffset(paintWrapper);
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
 
     if (HasShadow()) {
@@ -680,8 +663,9 @@ void CanvasPaintMethod::SetTransform(const TransformParam& param)
     skCanvas_->setMatrix(skMatrix);
 }
 
-std::string CanvasPaintMethod::ToDataURL(const std::string& args)
+std::string CanvasPaintMethod::ToDataURL(RefPtr<RosenRenderContext> renderContext, const std::string& args)
 {
+    CHECK_NULL_RETURN(renderContext, UNSUPPORTED);
     std::string mimeType = GetMimeType(args);
     double quality = GetQuality(args);
     double width = lastLayoutSize_.Width();
@@ -689,17 +673,24 @@ std::string CanvasPaintMethod::ToDataURL(const std::string& args)
     SkBitmap tempCache;
     tempCache.allocPixels(SkImageInfo::Make(width, height, SkColorType::kBGRA_8888_SkColorType,
         (mimeType == IMAGE_JPEG) ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kUnpremul_SkAlphaType));
-    bool success = false;
-    if (canvasCache_.empty()) {
+
+    SkBitmap currentBitmap;
+    CHECK_NULL_RETURN(rsRecordingCanvas_, UNSUPPORTED);
+    auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
+    bool res = renderContext->GetBitmap(currentBitmap, rsRecordingCanvas_->GetDrawCmdList());
+    if (!res || currentBitmap.empty()) {
         LOGE("Bitmap is empty");
         return UNSUPPORTED;
     }
+    rsRecordingCanvas_->Clear();
+    bool success = false;
 #ifndef NEW_SKIA
-    success = canvasCache_.pixmap().scalePixels(tempCache.pixmap(), SkFilterQuality::kHigh_SkFilterQuality);
+    success = currentBitmap.pixmap().scalePixels(tempCache.pixmap(), SkFilterQuality::kHigh_SkFilterQuality);
 #else
-    success = canvasCache_.pixmap().scalePixels(
+    success = currentBitmap.pixmap().scalePixels(
         tempCache.pixmap(), SkSamplingOptions(SkCubicResampler { 1 / 3.0f, 1 / 3.0f }));
 #endif
+
     CHECK_NULL_RETURN(success, UNSUPPORTED);
     SkPixmap src = tempCache.pixmap();
     SkDynamicMemoryWStream dst;
@@ -726,6 +717,7 @@ std::string CanvasPaintMethod::ToDataURL(const std::string& args)
     }
     SkString info(len);
     SkBase64::Encode(result->data(), result->size(), info.writable_str());
+
     return std::string(URL_PREFIX).append(mimeType).append(URL_SYMBOL).append(info.c_str());
 }
 

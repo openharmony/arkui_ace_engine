@@ -29,11 +29,16 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/components_ng/pattern/custom_paint/rendering_context2d_modifier.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/image/image_loader.h"
 #include "core/image/image_object.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
+
+namespace OHOS::Rosen {
+class RSRecordingCanvas;
+}
 
 namespace OHOS::Ace::NG {
 enum class FilterType {
@@ -59,6 +64,11 @@ class CustomPaintPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(CustomPaintPaintMethod, NodePaintMethod)
 public:
     ~CustomPaintPaintMethod() override = default;
+
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
+    {
+        return contentModifier_;
+    }
 
     void SetFillRuleForPath(const CanvasFillRule& rule);
     void SetFillRuleForPath2D(const CanvasFillRule& rule);
@@ -302,6 +312,8 @@ public:
     void TransformMatrix(const TransformParam& param);
     void TranslateMatrix(double tx, double ty);
 
+    void UpdateRecordingCanvas(float width, float height);
+
 protected:
     std::optional<double> CalcTextScale(double maxIntrinsicWidth, std::optional<double> maxWidth);
     bool HasShadow() const;
@@ -398,11 +410,8 @@ protected:
 #ifdef NEW_SKIA
     SkSamplingOptions sampleOptions_;
 #endif
-    SkPaint cachePaint_;
-    SkBitmap cacheBitmap_;
     SkBitmap canvasCache_;
-    std::unique_ptr<SkCanvas> skCanvas_;
-    std::unique_ptr<SkCanvas> cacheCanvas_;
+    std::shared_ptr<SkCanvas> skCanvas_;
 
     sk_sp<SkSVGDOM> skiaDom_ = nullptr;
     Ace::CanvasImage canvasImage_;
@@ -415,6 +424,11 @@ protected:
     UploadSuccessCallback uploadSuccessCallback_;
     OnPostBackgroundTask onPostBackgroundTask_;
     FailedCallback failedCallback_;
+
+    RefPtr<RenderingContext2DModifier> contentModifier_;
+    std::shared_ptr<OHOS::Rosen::RSRecordingCanvas> rsRecordingCanvas_;
+
+    SizeF lastLayoutSize_;
 };
 } // namespace OHOS::Ace::NG
 

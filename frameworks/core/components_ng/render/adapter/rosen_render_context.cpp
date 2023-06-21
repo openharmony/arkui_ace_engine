@@ -20,6 +20,7 @@
 #include "render_service_client/core/modifier/rs_property_modifier.h"
 #include "render_service_client/core/pipeline/rs_node_map.h"
 #include "render_service_client/core/transaction/rs_interfaces.h"
+#include "render_service_client/core/ui/rs_canvas_drawing_node.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_effect_node.h"
 #include "render_service_client/core/ui/rs_root_node.h"
@@ -218,6 +219,9 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
         }
         case ContextType::EFFECT:
             rsNode_ = Rosen::RSEffectNode::Create();
+            break;
+        case ContextType::INCREMENTAL_CANVAS:
+            rsNode_ = Rosen::RSCanvasDrawingNode::Create();
             break;
         case ContextType::EXTERNAL:
             break;
@@ -614,6 +618,15 @@ RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap()
     std::unique_lock<std::mutex> lock(g_mutex);
     thumbnailGet.wait(lock);
     return g_pixelMap;
+}
+
+bool RosenRenderContext::GetBitmap(SkBitmap& bitmap, std::shared_ptr<OHOS::Rosen::DrawCmdList> drawCmdList)
+{
+    auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode_);
+    if (!rsCanvasDrawingNode) {
+        return false;
+    }
+    return rsCanvasDrawingNode->GetBitmap(bitmap, drawCmdList);
 }
 
 void RosenRenderContext::OnTransformScaleUpdate(const VectorF& scale)
@@ -2304,6 +2317,25 @@ void RosenRenderContext::SetBounds(float positionX, float positionY, float width
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetBounds(positionX, positionY, width, height);
+}
+
+void RosenRenderContext::SetFrameForCanvas()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(rsNode_);
+    auto rect = AdjustPaintRect();
+    if (!rect.GetSize().IsPositive()) {
+        return;
+    }
+    auto contentRect = frameNode->GetGeometryNode()->GetContentRect();
+    if (!contentRect.GetSize().IsPositive()) {
+        LOGD("content size is invalid");
+        return;
+    }
+    contentRect.SetLeft(contentRect.GetX() + rect.GetX());
+    contentRect.SetTop(contentRect.GetY() + rect.GetY());
+    rsNode_->SetFrame(contentRect.GetX(), contentRect.GetY(), contentRect.Width(), contentRect.Height());
 }
 
 void RosenRenderContext::ClearDrawCommands()
