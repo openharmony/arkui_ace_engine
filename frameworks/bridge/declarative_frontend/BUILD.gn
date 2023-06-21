@@ -384,7 +384,8 @@ template("declarative_js_engine") {
     }
 
     external_deps = []
-    if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
+    if (defined(config.enable_drag_framework) && config.enable_drag_framework &&
+        defined(global_parts_info.distributeddatamgr_udmf)) {
       external_deps += [
         "udmf:udmf_client",
         "udmf:udmf_data_napi",
@@ -822,7 +823,8 @@ template("declarative_js_engine_ng") {
       ":gen_obj_src_js_uicontext",
     ]
 
-    if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
+    if (defined(config.enable_drag_framework) && config.enable_drag_framework &&
+        defined(global_parts_info.distributeddatamgr_udmf)) {
       external_deps += [
         "udmf:udmf_client",
         "udmf:udmf_data_napi",
