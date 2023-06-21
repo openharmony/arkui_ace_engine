@@ -29,7 +29,9 @@ void DragDropProxy::OnTextDragStart(const std::string& extraInfo)
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
+#ifndef ENABLE_DRAG_FRAMEWORK
     manager->AddDataToClipboard(extraInfo);
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void DragDropProxy::OnDragStart(
@@ -43,8 +45,9 @@ void DragDropProxy::OnDragStart(
 
     manager->OnDragStart(
         static_cast<float>(info.GetGlobalPoint().GetX()), static_cast<float>(info.GetGlobalPoint().GetY()), frameNode);
-
+#ifndef ENABLE_DRAG_FRAMEWORK
     manager->AddDataToClipboard(extraInfo);
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void DragDropProxy::OnDragMove(const GestureEvent& info)
@@ -82,8 +85,9 @@ void DragDropProxy::OnDragEnd(const GestureEvent& info, bool isTextDragEnd)
         manager->OnDragEnd(static_cast<float>(info.GetGlobalPoint().GetX()),
             static_cast<float>(info.GetGlobalPoint().GetY()), extraInfo);
     }
-
+#ifndef ENABLE_DRAG_FRAMEWORK
     manager->RestoreClipboardData();
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void DragDropProxy::onDragCancel()
