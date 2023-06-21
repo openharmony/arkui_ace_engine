@@ -411,8 +411,15 @@ void ScrollPattern::AnimateTo(float position, float duration, const RefPtr<Curve
         StopScrollable();
     }
     CreateOrStopAnimator();
+    CHECK_NULL_VOID_NOLOG(!NearEqual(position, currentOffset_));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (LessOrEqual(duration, 0.0)) {
+        LOGD("scroll pattern: duration == 0.0, jump to position");
+        JumpToPosition(position);
+        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        return;
+    }
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
     auto animation = AceType::MakeRefPtr<CurveAnimation<float>>(currentOffset_, position, curve);
     animation->AddListener([weakScroll = AceType::WeakClaim(this)](float value) {
