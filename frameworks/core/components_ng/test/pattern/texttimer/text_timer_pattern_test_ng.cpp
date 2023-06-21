@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -64,12 +65,22 @@ struct TestProperty {
 
 class TextTimerPatternTestNg : public testing::Test {
 public:
-    static void SetUpTestCase() {};
-    static void TearDownTestCase() {};
+    static void SetUpTestCase();
+    static void TearDownTestCase();
 
 protected:
     static RefPtr<FrameNode> CreateTextTimerParagraph(const TestProperty& testProperty);
 };
+
+void TextTimerPatternTestNg::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
+
+void TextTimerPatternTestNg::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
 
 RefPtr<FrameNode> TextTimerPatternTestNg::CreateTextTimerParagraph(const TestProperty& testProperty)
 {
