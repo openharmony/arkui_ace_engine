@@ -50,10 +50,6 @@ PaContainer::PaContainer(int32_t instanceId, void* paAbility, const PaContainerO
     : instanceId_(instanceId), paAbility_(paAbility)
 {
     ACE_DCHECK(callback);
-    auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
-    flutterTaskExecutor->InitPlatformThread();
-    flutterTaskExecutor->InitJsThread();
-    taskExecutor_ = flutterTaskExecutor;
     type_ = options.type;
     hapPath_ = options.hapPath;
     workerPath_ =  options.workerPath;
@@ -79,7 +75,7 @@ void PaContainer::InitializeBackend(SrcLanguage language)
     paBackend->SetJsEngine(jsEngine);
 
     ACE_DCHECK(backend_);
-    backend_->Initialize(type_, language, taskExecutor_);
+    backend_->Initialize(type_, language);
 }
 
 RefPtr<PaContainer> PaContainer::GetContainer(int32_t instanceId)
@@ -435,17 +431,6 @@ Uri PaContainer::DenormalizeUri(int32_t instanceId, const Uri& uri)
     CHECK_NULL_RETURN_NOLOG(back, ret);
     ret = back->DenormalizeUri(uri);
     return ret;
-}
-
-void PaContainer::Dispatch(
-    const std::string& group, std::vector<uint8_t>&& data, int32_t id, bool replyToComponent) const
-{
-    return;
-}
-
-void PaContainer::DispatchPluginError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const
-{
-    return;
 }
 
 sptr<IRemoteObject> PaContainer::OnConnect(int32_t instanceId, const OHOS::AAFwk::Want& want)
