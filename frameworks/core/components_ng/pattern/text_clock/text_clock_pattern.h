@@ -32,9 +32,8 @@
 
 namespace OHOS::Ace::NG {
 using TimeCallback = std::function<void()>;
-
-class TextClockPattern : public TextPattern {
-    DECLARE_ACE_TYPE(TextClockPattern, TextPattern);
+class TextClockPattern : public Pattern {
+    DECLARE_ACE_TYPE(TextClockPattern, Pattern);
 
 public:
     TextClockPattern();
@@ -60,6 +59,14 @@ public:
         return textClockController_;
     }
 
+    int32_t GetTextId()
+    {
+        if (!textId_.has_value()) {
+            textId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return textId_.value();
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -71,14 +78,18 @@ private:
     void RequestUpdateForNextSecond();
     void FireChangeEvent() const;
     std::string GetCurrentFormatDateTime();
+    static void UpdateTextLayoutProperty(
+        RefPtr<TextClockLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
 
     std::string GetFormat() const;
     int32_t GetHoursWest() const;
+    RefPtr<FrameNode> GetTextNode();
 
     RefPtr<TextClockController> textClockController_;
     TimeCallback timeCallback_;
     bool isStart_ = true;
     int32_t hourWest_ = 0;
+    std::optional<int32_t> textId_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextClockPattern);
 };
