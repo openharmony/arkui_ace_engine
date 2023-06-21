@@ -72,8 +72,7 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto dividerStrokeWidthPx = ConvertToPx(dividerStrokeWidth, scaleProperty, parentWidth).value_or(1);
     AutoChangeSideBarWidth(layoutWrapper, parentWidth, minSideBarWidthPx, dividerStrokeWidthPx);
 
-    auto type = layoutProperty->GetSideBarContainerType().value_or(SideBarContainerType::EMBED);
-    if (type == SideBarContainerType::AUTO) {
+    if (type_ == SideBarContainerType::AUTO) {
         AutoMode(layoutWrapper, parentWidth, minSideBarWidthPx, dividerStrokeWidthPx);
     }
 
@@ -181,9 +180,9 @@ void SideBarContainerLayoutAlgorithm::AutoMode(
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     if (parentWidth < (minSideBarWidthPx + minContentWidth_ + dividerStrokeWidthPx)) {
-        layoutProperty->UpdateSideBarContainerType(SideBarContainerType::OVERLAY);
+        type_ = SideBarContainerType::OVERLAY;
     } else {
-        layoutProperty->UpdateSideBarContainerType(SideBarContainerType::EMBED);
+        type_ = SideBarContainerType::EMBED;
     }
 }
 
@@ -233,12 +232,11 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBarContent(
     const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<LayoutWrapper>& contentLayoutWrapper,
     float parentWidth)
 {
-    auto type = layoutProperty->GetSideBarContainerType().value_or(SideBarContainerType::EMBED);
     auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto contentWidth = parentWidth;
 
-    if (type == SideBarContainerType::EMBED) {
+    if (type_ == SideBarContainerType::EMBED) {
         if (sideBarStatus_ == SideBarStatus::SHOW) {
             contentWidth -= (realSideBarWidth_ + realDividerWidth_);
         } else if (sideBarStatus_ == SideBarStatus::CHANGING) {
@@ -399,11 +397,10 @@ void SideBarContainerLayoutAlgorithm::LayoutSideBarContent(
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
 
-    auto type = layoutProperty->GetSideBarContainerType().value_or(SideBarContainerType::EMBED);
     auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
 
     float contentOffsetX = 0.0f;
-    if (type == SideBarContainerType::EMBED && sideBarPosition == SideBarPosition::START) {
+    if (type_ == SideBarContainerType::EMBED && sideBarPosition == SideBarPosition::START) {
         if (sideBarStatus_ == SideBarStatus::SHOW) {
             contentOffsetX = realSideBarWidth_ + realDividerWidth_;
         } else if (sideBarStatus_ == SideBarStatus::CHANGING) {

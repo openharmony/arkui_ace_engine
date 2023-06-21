@@ -53,6 +53,11 @@ public:
         layoutAlgorithm->SetNeedInitRealSideBarWidth(needInitRealSideBarWidth_);
         layoutAlgorithm->SetRealSideBarWidth(realSideBarWidth_);
         layoutAlgorithm->SetRealDividerWidth(realDividerWidth_);
+        auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
+        if (layoutProperty) {
+            layoutAlgorithm->SetSideBarContainerType(
+                layoutProperty->GetSideBarContainerType().value_or(SideBarContainerType::EMBED));
+        }
         return layoutAlgorithm;
     }
 
