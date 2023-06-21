@@ -44,6 +44,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
+#include "core/components_ng/pattern/list/list_paint_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
@@ -586,8 +587,8 @@ RefPtr<FrameNode> DialogPattern::BuildSheet(const std::vector<ActionSheetInfo>& 
         .top = padding,
         .bottom = padding,
     };
-    auto listFrame = AceType::DynamicCast<FrameNode>(list);
-    listFrame->GetLayoutProperty()->UpdatePadding(sheetPadding);
+    list->GetLayoutProperty()->UpdatePadding(sheetPadding);
+    list->GetPaintProperty<ListPaintProperty>()->UpdateBarDisplayMode(DisplayMode::OFF);
 
     for (auto&& item : sheets) {
         auto itemNode = BuildSheetItem(item);
