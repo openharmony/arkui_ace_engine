@@ -4500,7 +4500,7 @@ void WebDelegate::OnFocus()
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
-        nweb_->OnFocus();
+        nweb_->OnFocus(OHOS::NWeb::FocusReason::EVENT_REQUEST);
     }
 }
 
