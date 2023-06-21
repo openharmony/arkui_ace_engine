@@ -680,6 +680,7 @@ void FlexLayoutAlgorithm::CheckBlankAndKeepMin(const RefPtr<LayoutWrapper>& chil
         return;
     }
     auto blankProperty = child->GetLayoutProperty<BlankLayoutProperty>();
+    CHECK_NULL_VOID(blankProperty);
     auto blankMin = blankProperty->GetMinSize();
     if (GreatOrEqual(blankMin->ConvertToPx(), flexSize)) {
         flexSize = blankMin->ConvertToPx();
