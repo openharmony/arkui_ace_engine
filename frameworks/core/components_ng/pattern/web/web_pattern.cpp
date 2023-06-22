@@ -140,6 +140,18 @@ WebPattern::WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallb
     : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback)
 {}
 
+WebPattern::~WebPattern()
+{
+    LOGI("WebPattern::~WebPattern");
+    if (observer_) {
+        LOGI("WebPattern::~WebPattern NotifyDestory");
+        observer_->NotifyDestory();
+    }
+    if (isActive_) {
+        OnInActive();
+    }
+}
+
 void WebPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -1075,6 +1087,10 @@ void WebPattern::OnModifyDone()
     if (!delegate_) {
         // first create case,
         delegate_ = AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContext(), nullptr, "");
+        CHECK_NULL_VOID(delegate_);
+        observer_ = AceType::MakeRefPtr<WebDelegateObserver>(delegate_, PipelineContext::GetCurrentContext());
+        CHECK_NULL_VOID(observer_);
+        delegate_->SetObserver(observer_);
         InitEnhanceSurfaceFlag();
         delegate_->SetNGWebPattern(Claim(this));
         delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);

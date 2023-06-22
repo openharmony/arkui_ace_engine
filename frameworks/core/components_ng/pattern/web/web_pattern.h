@@ -38,6 +38,10 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/render_surface.h"
 
+namespace OHOS::Ace {
+class WebDelegateObserver;
+}
+
 namespace OHOS::Ace::NG {
 namespace {
 
@@ -77,7 +81,7 @@ public:
     WebPattern(std::string webSrc, const RefPtr<WebController>& webController);
     WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallback);
 
-    ~WebPattern() override = default;
+    ~WebPattern() override;
 
     enum class VkState {
         VK_NONE,
@@ -457,7 +461,6 @@ private:
     SetHapPathCallback setHapPathCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;
     OnControllerAttachedCallback onControllerAttachedCallback_ = nullptr;
-    RefPtr<WebDelegate> delegate_;
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
@@ -497,6 +500,8 @@ private:
     bool isDisableDrag_ = false;
     bool isMouseEvent_ = false;
     bool isVisible_ = true;
+    RefPtr<WebDelegate> delegate_;
+    RefPtr<WebDelegateObserver> observer_;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG
