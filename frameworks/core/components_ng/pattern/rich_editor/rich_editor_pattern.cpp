@@ -63,6 +63,245 @@ int32_t RichEditorPattern::GetInstanceId() const
     return instanceId_;
 }
 
+std::function<ImageSourceInfo()> RichEditorPattern::CreateImageSourceInfo(const ImageSpanOptions& options)
+{
+    std::string src;
+    RefPtr<PixelMap> pixMap = nullptr;
+    std::string bundleName;
+    std::string moduleName;
+    if (options.image.has_value()) {
+        src = options.image.value();
+    }
+    if (options.imagePixelMap.has_value()) {
+        pixMap = options.imagePixelMap.value();
+    }
+    if (options.bundleName.has_value()) {
+        bundleName = options.bundleName.value();
+    }
+    if (options.moduleName.has_value()) {
+        moduleName = options.moduleName.value();
+    }
+    auto createSourceInfoFunc = [&src, noPixMap = !options.imagePixelMap.has_value(), &pixMap, &bundleName,
+                                    &moduleName]() -> ImageSourceInfo {
+#if defined(PIXEL_MAP_SUPPORTED)
+        if (noPixMap) {
+            return ImageSourceInfo(src, bundleName, moduleName);
+        }
+        return ImageSourceInfo(pixMap);
+#else
+        return ImageSourceInfo(src, bundleName, moduleName);
+#endif
+    };
+    return std::move(createSourceInfoFunc);
+}
+
+void RichEditorPattern::AddImageSpan(const ImageSpanOptions& options)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto imageNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    if (options.offset.has_value()) {
+        imageNode->MountToParent(host, TextSpanSplit(options.offset.value()));
+    } else {
+        spanIndex_ = host->GetChildren().size();
+        imageNode->MountToParent(host);
+    }
+    std::function<ImageSourceInfo()> createSourceInfoFunc = CreateImageSourceInfo(options);
+    imageLayoutProperty->UpdateImageSourceInfo(createSourceInfoFunc());
+    if (options.imageAttribute.has_value()) {
+        if (options.imageAttribute.value().size.has_value()) {
+            imageLayoutProperty->UpdateUserDefinedIdealSize(
+                CalcSize(CalcLength(options.imageAttribute.value().size.value().width.Value()),
+                    CalcLength(options.imageAttribute.value().size.value().height.Value())));
+        }
+        if (options.imageAttribute.value().verticalAlign.has_value()) {
+            imageLayoutProperty->UpdateVerticalAlign(options.imageAttribute.value().verticalAlign.value());
+        }
+        if (options.imageAttribute.value().objectFit.has_value()) {
+            imageLayoutProperty->UpdateImageFit(options.imageAttribute.value().objectFit.value());
+        }
+    }
+    imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    imageNode->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkModifyDone();
+}
+
+void RichEditorPattern::AddTextSpan(const TextSpanOptions& options)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto spanNode = SpanNode::GetOrCreateSpanNode(nodeId);
+    if (options.offset.has_value()) {
+        spanNode->MountToParent(host, TextSpanSplit(options.offset.value()));
+    } else {
+        spanIndex_ = host->GetChildren().size();
+        spanNode->MountToParent(host);
+    }
+    spanNode->UpdateContent(options.value);
+    spanNode->AddPropertyInfo(PropertyInfo::NONE);
+    if (options.style.has_value()) {
+        spanNode->UpdateTextColor(options.style.value().GetTextColor());
+        spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);
+        spanNode->UpdateFontSize(options.style.value().GetFontSize());
+        spanNode->AddPropertyInfo(PropertyInfo::FONTSIZE);
+        spanNode->UpdateItalicFontStyle(options.style.value().GetFontStyle());
+        spanNode->AddPropertyInfo(PropertyInfo::FONTSTYLE);
+        spanNode->UpdateFontWeight(options.style.value().GetFontWeight());
+        spanNode->AddPropertyInfo(PropertyInfo::FONTWEIGHT);
+        spanNode->UpdateFontFamily(options.style.value().GetFontFamilies());
+        spanNode->AddPropertyInfo(PropertyInfo::FONTFAMILY);
+        spanNode->UpdateTextDecoration(options.style.value().GetTextDecoration());
+        spanNode->AddPropertyInfo(PropertyInfo::TEXTDECORATION);
+        spanNode->UpdateTextDecorationColor(options.style.value().GetTextDecorationColor());
+        spanNode->AddPropertyInfo(PropertyInfo::NONE);
+    }
+}
+
+SpanPositionInfo RichEditorPattern::GetSpanPositionInfo(int32_t position)
+{
+    SpanPositionInfo spanPositionInfo(-1, -1, -1, -1);
+    if (!spanItemChildren_.empty()) {
+        position = std::clamp(position, 0, GetTextContentLength());
+        // find the spanItem where the position is
+        auto it = std::find_if(
+            spanItemChildren_.begin(), spanItemChildren_.end(), [position](const RefPtr<SpanItem>& spanItem) {
+                return (spanItem->position - static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length()) <=
+                           position) &&
+                       (position < spanItem->position);
+            });
+        // the position is at the end
+        if (it == spanItemChildren_.end()) {
+            return spanPositionInfo;
+        }
+
+        spanPositionInfo.spanIndex_ = std::distance(spanItemChildren_.begin(), it);
+        auto contentLen = StringUtils::ToWstring((*it)->content).length();
+        spanPositionInfo.spanStart_ = (*it)->position - contentLen;
+        spanPositionInfo.spanEnd_ = (*it)->position;
+        spanPositionInfo.spanOffset_ = position - spanPositionInfo.spanStart_;
+    }
+    return spanPositionInfo;
+}
+
+void RichEditorPattern::CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target)
+{
+    CHECK_NULL_VOID(source);
+    CHECK_NULL_VOID(target);
+
+    if (source->HasFontSize()) {
+        target->UpdateFontSize(source->GetFontSizeValue(Dimension()));
+        target->AddPropertyInfo(PropertyInfo::FONTSIZE);
+    }
+
+    if (source->HasTextColor()) {
+        target->UpdateTextColor(source->GetTextColorValue(Color::BLACK));
+        target->AddPropertyInfo(PropertyInfo::FONTCOLOR);
+    }
+
+    if (source->HasItalicFontStyle()) {
+        target->UpdateItalicFontStyle(source->GetItalicFontStyleValue(OHOS::Ace::FontStyle::NORMAL));
+        target->AddPropertyInfo(PropertyInfo::FONTSTYLE);
+    }
+
+    if (source->HasFontWeight()) {
+        target->UpdateFontWeight(source->GetFontWeightValue(FontWeight::NORMAL));
+        target->AddPropertyInfo(PropertyInfo::FONTWEIGHT);
+    }
+
+    if (source->HasFontFamily()) {
+        target->UpdateFontFamily(source->GetFontFamilyValue({ "HarmonyOS Sans" }));
+        target->AddPropertyInfo(PropertyInfo::FONTFAMILY);
+    }
+
+    if (source->HasTextDecoration()) {
+        target->UpdateTextDecoration(source->GetTextDecorationValue(TextDecoration::NONE));
+        target->AddPropertyInfo(PropertyInfo::TEXTDECORATION);
+    }
+
+    if (source->HasTextDecorationColor()) {
+        target->UpdateTextDecorationColor(source->GetTextDecorationColorValue(Color::BLACK));
+        target->AddPropertyInfo(PropertyInfo::NONE);
+    }
+
+    if (source->HasTextCase()) {
+        target->UpdateTextCase(source->GetTextCaseValue(TextCase::NORMAL));
+        target->AddPropertyInfo(PropertyInfo::TEXTCASE);
+    }
+
+    if (source->HasLetterSpacing()) {
+        target->UpdateLetterSpacing(source->GetLetterSpacingValue(Dimension()));
+        target->AddPropertyInfo(PropertyInfo::LETTERSPACE);
+    }
+
+    if (source->HasLineHeight()) {
+        target->UpdateLineHeight(source->GetLineHeightValue(Dimension()));
+        target->AddPropertyInfo(PropertyInfo::LINEHEIGHT);
+    }
+}
+
+int32_t RichEditorPattern::TextSpanSplit(int32_t position)
+{
+    int32_t spanIndex = 0;
+    int32_t spanStart = 0;
+    int32_t spanOffset = 0;
+
+    if (spanItemChildren_.empty()) {
+        return -1;
+    }
+
+    auto positionInfo = GetSpanPositionInfo(position);
+    spanIndex = positionInfo.spanIndex_;
+    spanStart = positionInfo.spanStart_;
+    spanOffset = positionInfo.spanOffset_;
+
+    if (spanOffset == 0 || spanOffset == -1) {
+        spanIndex_ = spanIndex;
+        return spanIndex;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1);
+    auto it = host->GetChildren().begin();
+    std::advance(it, spanIndex);
+
+    auto spanNode = DynamicCast<SpanNode>(*it);
+    CHECK_NULL_RETURN(spanNode, -1);
+    auto spanItem = spanNode->GetSpanItem();
+    auto newContent = StringUtils::ToWstring(spanItem->content).substr(spanOffset);
+    auto deleteContent = StringUtils::ToWstring(spanItem->content).substr(0, spanOffset);
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_RETURN(stack, -1);
+    auto nodeId = stack->ClaimNodeId();
+    auto newSpanNode = SpanNode::GetOrCreateSpanNode(nodeId);
+    CHECK_NULL_RETURN(newSpanNode, -1);
+
+    auto newSpanItem = newSpanNode->GetSpanItem();
+    newSpanItem->position = spanStart + spanOffset;
+    auto spanIter = spanItemChildren_.begin();
+    std::advance(spanIter, spanIndex);
+    spanItemChildren_.insert(spanIter, newSpanItem);
+
+    spanNode->UpdateContent(StringUtils::ToString(newContent));
+    newSpanNode->UpdateContent(StringUtils::ToString(deleteContent));
+
+    CopyTextSpanStyle(spanNode, newSpanNode);
+    newSpanNode->MountToParent(host, spanIndex);
+
+    spanIndex_ = spanIndex + 1;
+
+    return spanIndex + 1;
+}
+
 int32_t RichEditorPattern::GetTextContentLength()
 {
     if (!spanItemChildren_.empty()) {
@@ -70,6 +309,11 @@ int32_t RichEditorPattern::GetTextContentLength()
         return (*it)->position;
     }
     return 0;
+}
+
+int32_t RichEditorPattern::GetSpanIndex()
+{
+    return spanIndex_;
 }
 
 int32_t RichEditorPattern::GetCaretPosition()

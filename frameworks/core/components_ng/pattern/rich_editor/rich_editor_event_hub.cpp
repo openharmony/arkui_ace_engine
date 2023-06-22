@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 
+#include "core/components_ng/base/frame_node.h"
 namespace OHOS::Ace::NG {
 void RichEditorEventHub::SetOnReady(std::function<void()>&& func)
 {
@@ -25,6 +26,9 @@ void RichEditorEventHub::FireOnReady()
 {
     if (onReady_) {
         onReady_();
+        auto host = GetFrameNode();
+        CHECK_NULL_VOID(host);
+        host->PostTask([host]() { host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); });
     }
 }
 } // namespace OHOS::Ace::NG
