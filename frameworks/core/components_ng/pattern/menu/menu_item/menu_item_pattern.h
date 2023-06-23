@@ -84,7 +84,7 @@ public:
         return subBuilderFunc_;
     }
 
-    bool IsSubMenuShowed()
+    bool IsSubMenuShowed() const
     {
         return isSubMenuShowed_;
     }
@@ -94,7 +94,7 @@ public:
         isSubMenuShowed_ = isSubMenuShowed;
     }
 
-    bool IsSubMenuHovered()
+    bool IsSubMenuHovered() const
     {
         return isSubMenuHovered_;
     }
@@ -156,6 +156,15 @@ public:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     void OnMountToParentDone() override;
+
+    bool HasSelectIcon() const
+    {
+        return selectIcon_ != nullptr;
+    }
+    bool HasStartIcon() const
+    {
+        return startIcon_ != nullptr;
+    }
 
 protected:
     void RegisterOnTouch();
