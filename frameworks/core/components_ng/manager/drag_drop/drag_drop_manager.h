@@ -42,6 +42,13 @@ public:
         dragFrameNodes_.insert(dragFrameNode);
     }
 
+    void RemoveDragFrameNode(const WeakPtr<FrameNode>& dragFrameNode)
+    {
+        dragFrameNodes_.erase(dragFrameNode);
+        gridDragFrameNodes_.erase(dragFrameNode);
+        listDragFrameNodes_.erase(dragFrameNode);
+    }
+
     void AddGridDragFrameNode(const WeakPtr<FrameNode>& dragFrameNode)
     {
         gridDragFrameNodes_.insert(dragFrameNode);
