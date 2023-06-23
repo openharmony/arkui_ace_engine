@@ -999,6 +999,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         return;
     }
 
+    if (scalePoint.type == TouchType::UP) {
+        lastTouchTime_ = GetTimeFromExternalTimer();
+    }
+
     std::optional<TouchEvent> lastMoveEvent;
     if (scalePoint.type == TouchType::UP && !touchEvents_.empty()) {
         for (auto iter = touchEvents_.begin(); iter != touchEvents_.end(); ++iter) {
