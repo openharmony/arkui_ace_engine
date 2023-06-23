@@ -158,6 +158,7 @@ void TimePickerRowPattern::CreateAmPmNode()
         amPmColumnNode->MountToParent(stackAmPmNode);
         auto layoutProperty = stackAmPmNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
         stackAmPmNode->MountToParent(host, 0);
         if (SetAmPmButtonIdeaSize() > 0) {
             auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
