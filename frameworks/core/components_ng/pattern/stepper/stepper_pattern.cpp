@@ -134,7 +134,7 @@ void StepperPattern::CreateLeftButtonNode()
     buttonNode->GetRenderContext()->UpdateBackgroundColor(stepperTheme->GetMouseHoverColor().ChangeOpacity(0));
     buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
     auto buttonRadius = stepperTheme->GetRadius();
-    buttonNode->GetRenderContext()->UpdateBorderRadius({ buttonRadius, buttonRadius, buttonRadius, buttonRadius });
+    buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateBorderRadius(BorderRadiusProperty(buttonRadius));
     buttonNode->MountToParent(hostNode);
     buttonNode->MarkModifyDone();
     InitButtonOnHoverEvent(buttonNode, true);
@@ -263,7 +263,7 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     buttonNode->GetRenderContext()->UpdateBackgroundColor(buttonBackgroundColor);
     buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
     auto buttonRadius = stepperTheme->GetRadius();
-    buttonNode->GetRenderContext()->UpdateBorderRadius({ buttonRadius, buttonRadius, buttonRadius, buttonRadius });
+    buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateBorderRadius(BorderRadiusProperty(buttonRadius));
     buttonNode->MountToParent(hostNode);
     buttonNode->MarkModifyDone();
     InitButtonOnHoverEvent(buttonNode, false);
@@ -340,7 +340,7 @@ void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, const std::st
     buttonNode->GetRenderContext()->UpdateBackgroundColor(buttonBackgroundColor);
     buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
     auto buttonRadius = stepperTheme->GetRadius();
-    buttonNode->GetRenderContext()->UpdateBorderRadius({ buttonRadius, buttonRadius, buttonRadius, buttonRadius });
+    buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateBorderRadius(BorderRadiusProperty(buttonRadius));
     buttonNode->MountToParent(hostNode);
     buttonNode->MarkModifyDone();
     InitButtonOnHoverEvent(buttonNode, false);

@@ -551,11 +551,11 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
         backButtonLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()), CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
         backButtonLayoutProperty->UpdateType(ButtonType::NORMAL);
+        backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS));
         backButtonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
         auto renderContext = backButtonNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        renderContext->UpdateBorderRadius({ BUTTON_RADIUS, BUTTON_RADIUS, BUTTON_RADIUS, BUTTON_RADIUS });
 
         auto eventHub = backButtonNode->GetOrCreateInputEventHub();
         CHECK_NULL_VOID(eventHub);
@@ -830,10 +830,10 @@ void NavigationModelNG::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
             menuItemLayoutProperty->UpdateUserDefinedIdealSize(
                 CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()), CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
             menuItemLayoutProperty->UpdateType(ButtonType::NORMAL);
+            menuItemLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS));
             auto renderContext = menuItemNode->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-            renderContext->UpdateBorderRadius({ BUTTON_RADIUS, BUTTON_RADIUS, BUTTON_RADIUS, BUTTON_RADIUS });
 
             auto eventHub = menuItemNode->GetOrCreateInputEventHub();
             CHECK_NULL_VOID(eventHub);
@@ -883,10 +883,10 @@ void NavigationModelNG::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
         menuItemLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()), CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
         menuItemLayoutProperty->UpdateType(ButtonType::NORMAL);
+        menuItemLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS));
         auto renderContext = menuItemNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        renderContext->UpdateBorderRadius({ BUTTON_RADIUS, BUTTON_RADIUS, BUTTON_RADIUS, BUTTON_RADIUS });
 
         auto eventHub = menuItemNode->GetOrCreateInputEventHub();
         CHECK_NULL_VOID(eventHub);

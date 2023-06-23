@@ -93,6 +93,16 @@ struct BorderRadiusPropertyT<Dimension> {
     std::optional<Dimension> radiusBottomLeft;
     bool multiValued = true;
 
+    BorderRadiusPropertyT<Dimension>() = default;
+    explicit BorderRadiusPropertyT<Dimension>(Dimension radius)
+        : radiusTopLeft(radius), radiusTopRight(radius), radiusBottomRight(radius), radiusBottomLeft(radius)
+    {}
+    BorderRadiusPropertyT<Dimension>(
+        Dimension radiusTopLeft, Dimension radiusTopRight, Dimension radiusBottomRight, Dimension radiusBottomLeft)
+        : radiusTopLeft(radiusTopLeft), radiusTopRight(radiusTopRight), radiusBottomRight(radiusBottomRight),
+          radiusBottomLeft(radiusBottomLeft)
+    {}
+
     bool operator==(const BorderRadiusPropertyT<Dimension>& value) const;
 
     void SetRadius(const Dimension& borderRadius);
