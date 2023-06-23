@@ -74,11 +74,11 @@ void TimePickerRowPattern::SetButtonIdeaSize()
         auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
         buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
+        buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(PRESS_RADIUS));
         buttonLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx()), CalcLength(height - PRESS_INTERVAL)));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        buttonConfirmRenderContext->UpdateBorderRadius({ PRESS_RADIUS, PRESS_RADIUS, PRESS_RADIUS, PRESS_RADIUS });
         buttonNode->MarkModifyDone();
         buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
@@ -163,11 +163,11 @@ void TimePickerRowPattern::CreateAmPmNode()
             auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
             buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
             buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
+            buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(PRESS_RADIUS));
             buttonLayoutProperty->UpdateUserDefinedIdealSize(
                 CalcSize(CalcLength(SetAmPmButtonIdeaSize()), CalcLength(heigth - PRESS_INTERVAL)));
             auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
             buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-            buttonConfirmRenderContext->UpdateBorderRadius({ PRESS_RADIUS, PRESS_RADIUS, PRESS_RADIUS, PRESS_RADIUS });
             buttonNode->MarkModifyDone();
             buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
