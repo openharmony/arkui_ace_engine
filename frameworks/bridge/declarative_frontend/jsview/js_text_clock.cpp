@@ -188,7 +188,7 @@ void JSTextClock::SetFontWeight(const JSCallbackInfo& info)
     }
     RefPtr<TextTheme> textTheme = GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
-    auto fontWeight = info[0];
+    const auto& fontWeight = info[0];
     if (fontWeight->IsUndefined()) {
         TextClockModel::GetInstance()->SetFontWeight(textTheme->GetTextStyle().GetFontWeight());
         return;
