@@ -2290,6 +2290,7 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
 {
     NG::MenuParam menuParam;
+    menuParam.placement = Placement::BOTTOM_LEFT;
     if (info.Length() > PARAMETER_LENGTH_FIRST && info[1]->IsObject()) {
         ParseBindOptionParam(info, menuParam);
     }
