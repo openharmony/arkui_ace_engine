@@ -930,6 +930,7 @@ HWTEST_F(MenuTestNg, MenuPatternTestNg019, TestSize.Level1)
     // should have empty padding
     ASSERT_EQ(padding->ToString(), PaddingProperty().ToString());
 
+    multiMenu->GetPattern()->BeforeCreateLayoutWrapper();
     // inner multi menu should have backgroundColor and padding set up
     ASSERT_NE(multiMenu->GetLayoutProperty()->GetPaddingProperty()->ToString(), PaddingProperty().ToString());
     ASSERT_NE(multiMenu->GetRenderContext()->GetBackgroundColor(), std::nullopt);
@@ -1166,12 +1167,15 @@ HWTEST_F(MenuTestNg, DesktopMenuPattern001, TestSize.Level1)
     containerPattern->OnModifyDone();
     pattern1->OnModifyDone();
     pattern2->OnModifyDone();
+    pattern1->BeforeCreateLayoutWrapper();
+    pattern2->BeforeCreateLayoutWrapper();
     EXPECT_EQ(pattern1->type_, MenuType::DESKTOP_MENU);
     EXPECT_EQ(pattern2->type_, MenuType::DESKTOP_MENU);
     EXPECT_EQ(container->GetRenderContext()->GetBackShadow(), ShadowConfig::NoneShadow);
 
     mockScroll->RemoveChildAtIndex(1);
     pattern1->OnModifyDone();
+    pattern1->BeforeCreateLayoutWrapper();
     containerPattern->OnModifyDone();
     EXPECT_EQ(pattern1->type_, MenuType::MULTI_MENU);
     EXPECT_EQ(container->GetRenderContext()->GetBackShadow(), ShadowConfig::DefaultShadowM);
