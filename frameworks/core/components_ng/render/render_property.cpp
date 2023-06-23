@@ -18,7 +18,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t PLATFORM_VERSION_NICE = 9;
+constexpr int32_t PLATFORM_VERSION_NINE = 9;
 std::string ImageRepeatToString(ImageRepeat type)
 {
     static const LinearEnumMapNode<ImageRepeat, std::string> toStringMap[] = {
@@ -70,7 +70,7 @@ void RenderPositionProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 
     auto context = PipelineContext::GetCurrentContext();
     // add version protection, null as default start from API 10 or higher
-    if (context && context->GetMinPlatformVersion() > PLATFORM_VERSION_NICE) {
+    if (context && context->GetMinPlatformVersion() > PLATFORM_VERSION_NINE) {
         json->Put("offset.x", "");
         json->Put("offset.y", "");
         json->Put("markAnchor.x", "");
