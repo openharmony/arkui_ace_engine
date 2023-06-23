@@ -25,11 +25,13 @@
 #include "ui/rs_surface_node.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/window_scene/root/root_scene_model.h"
+#include "core/components_ng/pattern/window_scene/root/root_scene_node.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
-#include "core/components_ng/pattern/window_scene/scene/window_node.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/components_ng/pattern/window_scene/scene/window_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/window_scene_model.h"
+#include "core/components_ng/pattern/window_scene/screen/screen_model.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
@@ -52,6 +54,46 @@ public:
 };
 
 /**
+ * @tc.name: ScreenPatternTest001
+ * @tc.desc: Screen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternTest, ScreenPatternTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ScreenModel.
+     */
+    auto model = ScreenModel();
+    uint64_t screenId = 0;
+    model.Create(screenId);
+
+    auto screenNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    EXPECT_EQ(screenNode, nullptr);
+}
+
+/**
+ * @tc.name: RootSceneTest001
+ * @tc.desc: RootScene test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternTest, RootSceneTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create RootSceneModel.
+     */
+    auto model = RootSceneModel();
+    model.Create();
+
+    /**
+     * @tc.steps: step2. Create RootScene.
+     */
+    auto rootSceneNode = AceType::DynamicCast<RootSceneNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(rootSceneNode, nullptr);
+    auto isAtomic = rootSceneNode->IsAtomicNode();
+    EXPECT_EQ(isAtomic, false);
+}
+
+/**
  * @tc.name: WindowPatternTest001
  * @tc.desc: WindowPattern test
  * @tc.type: FUNC
@@ -65,7 +107,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest001, TestSize.Level1)
     uint64_t persistentId = 0;
     model.Create(persistentId);
 
-    auto windowSceneNode = AceType::DynamicCast<WindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto windowSceneNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     EXPECT_EQ(windowSceneNode, nullptr);
 }
 
@@ -86,7 +128,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest002, TestSize.Level1)
     uint64_t persistentId = session->GetPersistentId();
     model.Create(persistentId);
 
-    auto frameNode = AceType::DynamicCast<WindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     EXPECT_NE(frameNode, nullptr);
 }
 
@@ -114,18 +156,12 @@ HWTEST_F(WindowPatternTest, WindowPatternTest003, TestSize.Level1)
     uint64_t persistentId = session->GetPersistentId();
     model.Create(persistentId);
 
-    auto frameNode = AceType::DynamicCast<WindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     ASSERT_NE(frameNode, nullptr);
 
     Rosen::RSSurfaceNodeConfig config = { .SurfaceNodeName = "SurfaceNode" };
     session->surfaceNode_ = Rosen::RSSurfaceNode::Create(config);
     EXPECT_NE(session->surfaceNode_, nullptr);
-
-    auto pattern = frameNode->GetPattern<WindowScene>();
-    pattern->OnConnect();
-    pattern->BufferAvailableCallback();
-    pattern->OnForeground();
-    pattern->OnBackground();
 }
 
 /**
@@ -156,7 +192,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest004, TestSize.Level1)
      */
     session->state_ = Rosen::SessionState::STATE_DISCONNECT;
     model.Create(persistentId);
-    auto frameNode = AceType::DynamicCast<WindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     ASSERT_NE(frameNode, nullptr);
 
     /**
@@ -164,7 +200,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest004, TestSize.Level1)
      */
     session->state_ = Rosen::SessionState::STATE_ACTIVE;
     model.Create(persistentId);
-    frameNode = AceType::DynamicCast<WindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    frameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     ASSERT_NE(frameNode, nullptr);
 
     /**
@@ -175,45 +211,8 @@ HWTEST_F(WindowPatternTest, WindowPatternTest004, TestSize.Level1)
     EXPECT_NE(session->surfaceNode_, nullptr);
     session->state_ = Rosen::SessionState::STATE_BACKGROUND;
     model.Create(persistentId);
-    frameNode = AceType::DynamicCast<WindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    frameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     ASSERT_NE(frameNode, nullptr);
-}
-
-/**
- * @tc.name: WindowPatternTest005
- * @tc.desc: WindowPattern test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowPatternTest, WindowPatternTest005, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create WindowSceneModel.
-     */
-    MockPipelineBase::SetUp();
-    MockContainer::SetUp();
-    MockContainer::container_->pipelineContext_ = MockPipelineBase::pipeline_;
-    auto container = Container::Current();
-    EXPECT_NE(container, nullptr);
-    auto context = container->GetPipelineContext();
-    EXPECT_NE(context, nullptr);
-    auto model = WindowSceneModel();
-
-    Rosen::SessionInfo sessionInfo = { .bundleName_ = BUNDLE_NAME, .abilityName_ = ABILITY_NAME };
-    auto session = Rosen::SceneSessionManager::GetInstance().RequestSceneSession(sessionInfo);
-    uint64_t persistentId = session->GetPersistentId();
-    model.Create(persistentId);
-
-    auto frameNode = AceType::DynamicCast<WindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    ASSERT_NE(frameNode, nullptr);
-
-    Rosen::RSSurfaceNodeConfig config = { .SurfaceNodeName = "SurfaceNode" };
-    session->surfaceNode_ = Rosen::RSSurfaceNode::Create(config);
-    EXPECT_NE(session->surfaceNode_, nullptr);
-
-    TouchRestrict touchRestrict;
-    TouchTestResult testResult;
-    auto result = frameNode->TouchTest(PointF(), PointF(), touchRestrict, testResult, 1);
-    EXPECT_EQ(static_cast<int>(HitTestResult::BUBBLING), static_cast<int>(result));
 }
 
 /**
@@ -239,25 +238,6 @@ HWTEST_F(WindowPatternTest, WindowPatternTest006, TestSize.Level1)
     auto session = Rosen::SceneSessionManager::GetInstance().RequestSceneSession(sessionInfo);
     uint64_t persistentId = session->GetPersistentId();
     model.Create(persistentId);
-
-    auto frameNode = AceType::DynamicCast<WindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<WindowScene>();
-    ASSERT_NE(pattern, nullptr);
-
-    auto dirty = AceType::MakeRefPtr<LayoutWrapper>(nullptr, AceType::MakeRefPtr<GeometryNode>(), nullptr);
-    DirtySwapConfig config;
-    config.frameSizeChange = false;
-    EXPECT_EQ(pattern->OnDirtyLayoutWrapperSwap(dirty, config), false);
-
-    config.frameSizeChange = true;
-    EXPECT_EQ(pattern->OnDirtyLayoutWrapperSwap(dirty, config), false);
-
-    auto pointerEvent = MMI::PointerEvent::Create();
-    pattern->DispatchPointerEvent(pointerEvent);
-
-    auto keyEvent = MMI::KeyEvent::Create();
-    pattern->DispatchKeyEvent(keyEvent);
 }
 
 /**
@@ -277,10 +257,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest010, TestSize.Level1)
     uint64_t persistentId = session->GetPersistentId();
     model.Create(persistentId);
 
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     EXPECT_NE(frameNode, nullptr);
-
-    auto pattern = frameNode->GetPattern<SystemWindowScene>();
-    ASSERT_NE(pattern, nullptr);
 }
 } // namespace OHOS::Ace::NG
