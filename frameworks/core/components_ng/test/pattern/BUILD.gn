@@ -74,6 +74,7 @@ group("pattern_unittest") {
     "slider:slider_pattern_test_ng",
     "stack:stack_test_ng",
     "stepper:stepper_pattern_test_ng",
+    "swiper:swiper_test_ng",
     "tabs:tabs_test_ng",
     "text:text_test_ng",
     "text_clock:text_clock_test_ng",
