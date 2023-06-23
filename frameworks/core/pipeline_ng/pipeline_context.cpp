@@ -986,14 +986,14 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 #endif
 
     HandleEtsCardTouchEvent(point);
-    HandleUIExtensionTouchEvent(point);
+    HandleWindowSceneTouchEvent(point);
 
     auto scalePoint = point.CreateScalePoint(GetViewScale());
     LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
         scalePoint.type);
     eventManager_->SetInstanceId(GetInstanceId());
     if (scalePoint.type == TouchType::DOWN) {
-        // Set focus state inactive while touch down event received。
+        // Set focus state inactive while touch down event received
         SetIsFocusActive(false);
         LOGD("receive touch down event, first use touch test to collect touch event target");
         // Remove the select overlay node when touched down.
@@ -1050,53 +1050,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         // need to reset touchPluginPipelineContext_ for next touch down event.
         touchPluginPipelineContext_.clear();
         RemoveEtsCardTouchEventCallback(point.id);
-        RemoveUIExtensionTouchEvetnCallback(point.id);
+        RemoveWindowSceneTouchEventCallback(point.id);
     }
 
     hasIdleTasks_ = true;
     RequestFrame();
 }
-
-// ---------------- UIExtesion touchEvent callback handler -------------------------
-void PipelineContext::AddUIExtensionTouchEventCallback(int32_t pointId, UIExtensionTouchEventCallback&& callback)
-{
-    if (!callback || pointId < 0) {
-        return;
-    }
-
-    uiExtensionTouchEventCallback_[pointId] = std::move(callback);
-}
-
-void PipelineContext::RemoveUIExtensionTouchEvetnCallback(int32_t pointId)
-{
-    if (pointId < 0) {
-        return;
-    }
-
-    auto iter = uiExtensionTouchEventCallback_.find(pointId);
-    if (iter == uiExtensionTouchEventCallback_.end()) {
-        return;
-    }
-
-    uiExtensionTouchEventCallback_.erase(iter);
-}
-
-void PipelineContext::HandleUIExtensionTouchEvent(const TouchEvent& point)
-{
-    if (point.id < 0) {
-        return;
-    }
-
-    auto iter = uiExtensionTouchEventCallback_.find(point.id);
-    if (iter == uiExtensionTouchEventCallback_.end()) {
-        return;
-    }
-
-    if (iter->second) {
-        iter->second(point);
-    }
-}
-// ----------------------------------------------------------------------------------
 
 void PipelineContext::OnSurfaceDensityChanged(double density)
 {
@@ -1222,7 +1181,6 @@ void PipelineContext::FlushTouchEvents()
 void PipelineContext::OnMouseEvent(const MouseEvent& event)
 {
     CHECK_RUN_ON(UI);
-
     if (!lastMouseEvent_) {
         lastMouseEvent_ = std::make_unique<MouseEvent>();
     }
@@ -1916,5 +1874,46 @@ void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, 
     CHECK_NULL_VOID(containerPattern);
     containerPattern->SetContainerButtonHide(hideSplit, hideMaximize, hideMinimize);
 }
+
+// ---------------- WindowScene pointerEvent callback handler -------------------------
+void PipelineContext::AddWindowSceneTouchEventCallback(int32_t pointId, WindowSceneTouchEventCallback&& callback)
+{
+    if (!callback || pointId < 0) {
+        return;
+    }
+
+    windowSceneTouchEventCallback_[pointId] = std::move(callback);
+}
+
+void PipelineContext::RemoveWindowSceneTouchEventCallback(int32_t pointId)
+{
+    if (pointId < 0) {
+        return;
+    }
+
+    auto iter = windowSceneTouchEventCallback_.find(pointId);
+    if (iter == windowSceneTouchEventCallback_.end()) {
+        return;
+    }
+
+    windowSceneTouchEventCallback_.erase(iter);
+}
+
+void PipelineContext::HandleWindowSceneTouchEvent(const TouchEvent& point)
+{
+    if (point.id < 0) {
+        return;
+    }
+
+    auto iter = windowSceneTouchEventCallback_.find(point.id);
+    if (iter == windowSceneTouchEventCallback_.end()) {
+        return;
+    }
+
+    if (iter->second) {
+        iter->second(point.pointerEvent);
+    }
+}
+// ----------------------------------------------------------------------------------
 
 } // namespace OHOS::Ace::NG
