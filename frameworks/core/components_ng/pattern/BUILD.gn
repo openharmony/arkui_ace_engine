@@ -432,6 +432,8 @@ build_component_ng("pattern_ng") {
     "toggle/switch_pattern.cpp",
     "toggle/toggle_model_ng.cpp",
     "video/video_accessibility_property.cpp",
+    "video/video_full_screen_node.cpp",
+    "video/video_full_screen_pattern.cpp",
     "video/video_layout_algorithm.cpp",
     "video/video_model_ng.cpp",
     "video/video_node.cpp",
