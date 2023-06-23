@@ -120,9 +120,14 @@ private:
     RefPtr<FrameNode> CreateDialogScroll(const DialogProperties& dialogProps);
 
     void UpdateDialogButtonProperty(RefPtr<FrameNode>& buttonNode);
+    void AnalysisLayoutPropertyOfButton(RefPtr<OHOS::Ace::NG::FrameNode> buttonNode,
+        RefPtr<OHOS::Ace::NG::LayoutProperty> layoutProps, bool useRelativeLayout,
+        int index = 0);
     RefPtr<FrameNode> BuildButtons(const std::vector<ButtonInfo>& buttons);
+    void AddButtonAndDivider(const std::vector<ButtonInfo>& buttons, RefPtr<OHOS::Ace::NG::FrameNode> container);
     RefPtr<FrameNode> CreateDivider(const Dimension dividerLength, const Dimension dividerWidth);
-    RefPtr<FrameNode> CreateButton(const ButtonInfo& params, int32_t index, bool isCancel = false);
+    RefPtr<FrameNode> CreateButton(
+        const ButtonInfo& params, int32_t index, bool isCancel = false, bool useRelativeLayout = false);
     RefPtr<FrameNode> CreateButtonText(const std::string& text, const std::string& colorStr);
     // to close dialog when button is clicked
     void BindCloseCallBack(const RefPtr<GestureEventHub>& hub, int32_t buttonIdx);
