@@ -166,6 +166,9 @@ void GridPattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
     if (manager->IsDragged()) {
+        if (mousePressed_) {
+            OnMouseRelease();
+        }
         return;
     }
 
@@ -191,11 +194,16 @@ void GridPattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
             MultiSelectWithoutKeyboard(selectedZone);
         }
     } else if (info.GetAction() == MouseAction::RELEASE) {
-        mouseStartOffset_.Reset();
-        mouseEndOffset_.Reset();
-        mousePressed_ = false;
-        ClearSelectedZone();
+        OnMouseRelease();
     }
+}
+
+void GridPattern::OnMouseRelease()
+{
+    mouseStartOffset_.Reset();
+    mouseEndOffset_.Reset();
+    mousePressed_ = false;
+    ClearSelectedZone();
 }
 
 void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
