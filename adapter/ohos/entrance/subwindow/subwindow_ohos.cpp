@@ -772,7 +772,7 @@ void SubwindowOhos::ShowToastForService(const std::string& message, int32_t dura
 
 void SubwindowOhos::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
 {
-    if (parentContainerId_ >= MIN_PA_SERVICE_ID) {
+    if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
         ShowToastForService(message, duration, bottom);
     } else {
         ShowToastForAbility(message, duration, bottom);
@@ -849,7 +849,7 @@ void SubwindowOhos::ShowDialog(const std::string& title, const std::string& mess
     const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
     const std::set<std::string>& callbacks)
 {
-    if (parentContainerId_ >= MIN_PA_SERVICE_ID) {
+    if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
         ShowDialogForService(title, message, buttons, autoCancel, std::move(callback), callbacks);
     } else {
         ShowDialogForAbility(title, message, buttons, autoCancel, std::move(callback), callbacks);
@@ -940,7 +940,7 @@ void SubwindowOhos::UpdateAceView(int32_t width, int32_t height, float density, 
 void SubwindowOhos::ShowActionMenu(
     const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
-    if (parentContainerId_ >= MIN_PA_SERVICE_ID) {
+    if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
         ShowActionMenuForService(title, button, std::move(callback));
     } else {
         ShowActionMenuForAbility(title, button, std::move(callback));
