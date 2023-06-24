@@ -75,9 +75,9 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         contentIdealSize = CreateIdealSize(contentConstraint, axis, MeasureType::MATCH_CONTENT);
         if (mainSizeIsMeasured_) {
             if (layoutWrapper->IsContraintNoChanged()) {
-                mainSizeIsMeasured_ = false;
-            } else {
                 contentIdealSize.SetMainSize(contentMainSize_, axis);
+            } else {
+                mainSizeIsMeasured_ = false;
             }
         }
     } else {
