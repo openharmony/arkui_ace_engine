@@ -905,6 +905,11 @@ public:
         return nullptr;
     }
 
+    uint64_t GetLastTouchTime() const
+    {
+        return lastTouchTime_;
+    }
+
 protected:
     void TryCallNextFrameLayoutCallback()
     {
@@ -1004,6 +1009,7 @@ protected:
     std::function<void()> nextFrameLayoutCallback_ = nullptr;
     SharePanelCallback sharePanelCallback_ = nullptr;
     std::atomic<bool> isForegroundCalled_ = false;
+    uint64_t lastTouchTime_ = 0;
 
 private:
     void DumpFrontend() const;
