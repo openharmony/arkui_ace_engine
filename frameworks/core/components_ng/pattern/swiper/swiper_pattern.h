@@ -552,7 +552,6 @@ private:
     std::optional<int32_t> preTargetIndex_;
     float currentDelta_ = 0.0f;
     SwiperLayoutAlgorithm::PositionMap itemPosition_;
-    std::optional<int32_t> preIndex_;
     std::optional<float> velocity_;
 
     bool mainSizeIsMeasured_ = false;

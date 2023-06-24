@@ -56,11 +56,6 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
 
-    if (SwiperUtils::IsStretch(swiperLayoutProperty)) {
-        prevMargin_ = static_cast<float>(swiperLayoutProperty->GetPrevMarginValue(0.0_px).ConvertToPx());
-        nextMargin_ = static_cast<float>(swiperLayoutProperty->GetNextMarginValue(0.0_px).ConvertToPx());
-    }
-
     // calculate idealSize and set FrameSize
     auto axis = swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
 
@@ -108,6 +103,12 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (totalItemCount_ > 0) {
         currentOffset_ = currentDelta_;
         startMainPos_ = currentOffset_;
+        // calculate child layout constraint.
+        auto childLayoutConstraint = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, contentIdealSize);
+        if (SwiperUtils::IsStretch(swiperLayoutProperty)) {
+            prevMargin_ = static_cast<float>(swiperLayoutProperty->GetPrevMarginValue(0.0_px).ConvertToPx());
+            nextMargin_ = static_cast<float>(swiperLayoutProperty->GetNextMarginValue(0.0_px).ConvertToPx());
+        }
         if (prevMargin_ != 0.0f) {
             if (nextMargin_ != 0.0f) {
                 endMainPos_ = currentOffset_ + contentMainSize_ - prevMargin_ - nextMargin_ - 2 * spaceWidth_;
@@ -122,8 +123,6 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             }
         }
 
-        // calculate child layout constraint.
-        auto childLayoutConstraint = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, contentIdealSize);
         MeasureSwiper(layoutWrapper, childLayoutConstraint, axis);
     } else {
         itemPosition_.clear();
@@ -385,6 +384,10 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
                 swiperLayoutProperty->GetDisplayCountValue() == 1) ||
             (!swiperLayoutProperty->GetDisplayCount().has_value() && SwiperUtils::IsStretch(swiperLayoutProperty));
         if (isSingleCase && jumpIndex_) {
+            if (!mainSizeIsDefined_) {
+                endMainPos = startPos + itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
+                endMainPos_ = endMainPos;
+            }
             break;
         }
         if ((currentIndex >= 0 && currentIndex < (totalItemCount_ - 1)) || isLoop_) {
