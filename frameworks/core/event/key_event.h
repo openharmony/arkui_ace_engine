@@ -437,6 +437,40 @@ enum class KeyAction : int32_t {
     CLICK = 3,
 };
 
+enum class KeyIntention : int32_t {
+    INTENTION_UNKNOWN = -1,
+    INTENTION_UP = 1,
+    INTENTION_DOWN = 2,
+    INTENTION_LEFT = 3,
+    INTENTION_RIGHT = 4,
+    INTENTION_SELECT = 5,
+    INTENTION_ESCAPE = 6,
+    INTENTION_BACK = 7,
+    INTENTION_FORWARD = 8,
+    INTENTION_MENU = 9,
+    INTENTION_HOME = 10,
+    INTENTION_PAGE_UP = 11,
+    INTENTION_PAGE_DOWN = 12,
+    INTENTION_ZOOM_OUT = 13,
+    INTENTION_ZOOM_IN = 14,
+
+    INTENTION_MEDIA_PLAY_PAUSE = 100,
+    INTENTION_MEDIA_FAST_FORWARD = 101,
+    INTENTION_MEDIA_FAST_REWIND = 102,
+    INTENTION_MEDIA_FAST_PLAYBACK = 103,
+    INTENTION_MEDIA_NEXT = 104,
+    INTENTION_MEDIA_PREVIOUS = 105,
+    INTENTION_MEDIA_MUTE = 106,
+    INTENTION_VOLUTE_UP = 107,
+    INTENTION_VOLUTE_DOWN = 108,
+
+    INTENTION_CALL = 200,
+    INTENTION_ENDCALL = 201,
+    INTENTION_REJECTCALL = 202,
+
+    INTENTION_CAMERA = 300,
+};
+
 constexpr int32_t ASCII_START_UPPER_CASE_LETTER = 65;
 constexpr int32_t ASCII_START_LOWER_CASE_LETTER = 97;
 const std::map<KeyCode, std::string> VISIBILITY_CODE = { { KeyCode::KEY_0, "0)" }, { KeyCode::KEY_1, "1!" },
@@ -460,8 +494,9 @@ struct KeyEvent final {
     KeyEvent() = default;
     KeyEvent(KeyCode code, KeyAction action, std::vector<KeyCode> pressedCodes, int32_t repeatTime, TimeStamp timeStamp,
         int32_t metaKey, int64_t deviceId, SourceType sourceType)
-        : code(code), action(action), pressedCodes(std::move(pressedCodes)), repeatTime(repeatTime), timeStamp(timeStamp),
-          metaKey(metaKey), deviceId(deviceId), sourceType(sourceType) {}
+        : code(code), action(action), pressedCodes(std::move(pressedCodes)), repeatTime(repeatTime),
+          timeStamp(timeStamp), metaKey(metaKey), deviceId(deviceId), sourceType(sourceType)
+    {}
     KeyEvent(KeyCode code, KeyAction action, int32_t repeatTime = 0, int64_t timeStamp = 0, int64_t deviceId = 0,
         SourceType sourceType = SourceType::KEYBOARD)
     {
@@ -567,6 +602,7 @@ struct KeyEvent final {
     int32_t metaKey = 0;
     int64_t deviceId = 0;
     SourceType sourceType { SourceType::NONE };
+    KeyIntention keyIntention { KeyIntention::INTENTION_UNKNOWN };
     std::shared_ptr<MMI::KeyEvent> rawKeyEvent;
 };
 
@@ -580,6 +616,7 @@ public:
         keyText_ = event.key;
         keyType_ = event.action;
         keySource_ = event.sourceType;
+        keyIntention_ = event.keyIntention;
         SetDeviceId(event.deviceId);
         SetTimeStamp(event.timeStamp);
     };
@@ -605,6 +642,10 @@ public:
     {
         return keySource_;
     }
+    KeyIntention GetKeyIntention() const
+    {
+        return keyIntention_;
+    }
 
 private:
     KeyCode keyCode_ = KeyCode::KEY_UNKNOWN;
@@ -612,6 +653,7 @@ private:
     KeyAction keyType_ = KeyAction::UNKNOWN;
     int32_t metaKey_ = 0;
     SourceType keySource_ = SourceType::NONE;
+    KeyIntention keyIntention_ = KeyIntention::INTENTION_UNKNOWN;
 };
 
 enum class BlurReason : int32_t {
