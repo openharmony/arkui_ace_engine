@@ -26,6 +26,7 @@ namespace OHOS::Ace {
 
 constexpr double MOUSE_WHEEL_DEGREES = 15.0;
 constexpr double DP_PER_LINE_DESKTOP = 40.0;
+constexpr Dimension LINE_HEIGHT_DESKTOP = 21.0_vp;
 constexpr int32_t LINE_NUMBER_DESKTOP = 3;
 constexpr int32_t DP_PER_LINE_PHONE = 64;
 constexpr int32_t LINE_NUMBER_PHONE = 1;
