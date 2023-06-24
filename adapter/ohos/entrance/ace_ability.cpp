@@ -410,24 +410,6 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
     }
 
-    /* Note: DO NOT modify the sequence of adding libPath  */
-    std::string nativeLibraryPath = appInfo->nativeLibraryPath;
-    std::string quickFixLibraryPath = appInfo->appQuickFix.deployedAppqfInfo.nativeLibraryPath;
-    std::vector<std::string> libPaths;
-    if (!quickFixLibraryPath.empty()) {
-        std::string libPath = GenerateFullPath(GetBundleCodePath(), quickFixLibraryPath);
-        libPaths.push_back(libPath);
-        LOGI("napi quick fix lib path = %{private}s", libPath.c_str());
-    }
-    if (!nativeLibraryPath.empty()) {
-        std::string libPath = GenerateFullPath(GetBundleCodePath(), nativeLibraryPath);
-        libPaths.push_back(libPath);
-        LOGI("napi lib path = %{private}s", libPath.c_str());
-    }
-    if (!libPaths.empty()) {
-        Platform::AceContainer::AddLibPath(abilityId_, libPaths);
-    }
-
     if (!useNewPipe) {
         Ace::Platform::UIEnvCallback callback = nullptr;
 #ifdef ENABLE_ROSEN_BACKEND

@@ -15,6 +15,10 @@
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 
+#include <memory>
+
+#include "pointer_event.h"
+
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::Platform {
@@ -97,6 +101,7 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         TouchType::UNKNOWN, TouchType::UNKNOWN, time, touchPoint.size, touchPoint.force, touchPoint.tiltX,
         touchPoint.tiltY, pointerEvent->GetDeviceId(), pointerEvent->GetTargetDisplayId(), SourceType::NONE,
         touchPoint.sourceTool };
+    event.pointerEvent = pointerEvent;
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
     int32_t orgAction = pointerEvent->GetPointerAction();
@@ -238,6 +243,7 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, M
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
     TimeStamp time(microseconds);
     events.time = time;
+    events.pointerEvent = pointerEvent;
     LOGD("ConvertMouseEvent: (x,y): (%{public}f,%{public}f). Button: %{public}d. Action: %{public}d. "
          "DeviceType: %{public}d. PressedButton: %{public}d. Time: %{public}lld",
         events.x, events.y, events.button, events.action, events.sourceType, events.pressedButtons,
@@ -343,39 +349,21 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
     }
 }
 
-std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(
-    const NG::OffsetF& offsetF, const TouchEvent& point, const NG::VectorF& scale)
+void CalculatePointerEvent(
+    const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point, const NG::VectorF& scale)
 {
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    int32_t pointerId = point->GetPointerId();
+    MMI::PointerEvent::PointerItem item;
+    bool ret = point->GetPointerItem(pointerId, item);
+    if (ret) {
+        float xRelative = item.GetWindowX() - offsetF.GetX();
+        float yRelative = item.GetWindowY() - offsetF.GetY();
+        float xBeforeScale = NearZero(scale.x) ? xRelative : xRelative / scale.x;
+        float yBeforeScale = NearZero(scale.y) ? yRelative : yRelative / scale.y;
 
-    OHOS::MMI::PointerEvent::PointerItem item;
-
-    float xRelative = point.x - offsetF.GetX();
-    float yRelative = point.y - offsetF.GetY();
-    float xBeforeScale = NearZero(scale.x) ? xRelative : xRelative / scale.x;
-    float yBeforeScale = NearZero(scale.y) ? yRelative : yRelative / scale.y;
-
-    item.SetWindowX(static_cast<int32_t>(xBeforeScale));
-    item.SetWindowY(static_cast<int32_t>(yBeforeScale));
-    item.SetDisplayX(static_cast<int32_t>(point.screenX));
-    item.SetDisplayY(static_cast<int32_t>(point.screenY));
-    item.SetPointerId(point.id);
-    pointerEvent->AddPointerItem(item);
-
-    int32_t sourceType = MMI::PointerEvent::SOURCE_TYPE_UNKNOWN;
-    auto sourceTypeIter = SOURCE_TYPE_MAP.find(point.sourceType);
-    if (sourceTypeIter != SOURCE_TYPE_MAP.end()) {
-        sourceType = sourceTypeIter->second;
+        item.SetWindowX(static_cast<int32_t>(xBeforeScale));
+        item.SetWindowY(static_cast<int32_t>(yBeforeScale));
+        point->UpdatePointerItem(pointerId, item);
     }
-    pointerEvent->SetSourceType(sourceType);
-
-    int32_t pointerAction = OHOS::MMI::PointerEvent::POINTER_ACTION_UNKNOWN;
-    auto pointerActionIter = TOUCH_TYPE_MAP.find(point.type);
-    if (pointerActionIter != TOUCH_TYPE_MAP.end()) {
-        pointerAction = pointerActionIter->second;
-    }
-    pointerEvent->SetPointerAction(pointerAction);
-    pointerEvent->SetPointerId(point.id);
-    return pointerEvent;
 }
 } // namespace OHOS::Ace::Platform

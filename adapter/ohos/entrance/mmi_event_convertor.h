@@ -70,8 +70,8 @@ void GetEventDevice(int32_t sourceType, E& event)
 
 TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
-std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(
-    const NG::OffsetF& offsetF, const TouchEvent& point, const NG::VectorF& scale);
+void CalculatePointerEvent(
+    const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point, const NG::VectorF& scale);
 
 void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, MouseEvent& events);
 

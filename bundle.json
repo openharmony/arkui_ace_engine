@@ -98,7 +98,8 @@
                 "libuv",
                 "EGL",
                 "openGLES",
-                "libtxt"
+                "libtxt",
+                "thirdparty_googletest"
             ]
         },
         "build": {
