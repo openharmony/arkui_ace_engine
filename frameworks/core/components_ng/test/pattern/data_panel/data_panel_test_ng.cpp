@@ -44,6 +44,11 @@ constexpr Dimension HEIGHT = 50.0_vp;
 constexpr float MAX_WIDTH = 400.0f;
 constexpr float MAX_HEIGHT = 400.0f;
 const SizeF MAX_SIZE(MAX_WIDTH, MAX_HEIGHT);
+constexpr float MAX_PERCENT_WIDTH = 200.0f;
+constexpr float MAX_PERCENT_HEIGHT = 200.0f;
+const SizeF MAX_PERCENT_SIZE(MAX_PERCENT_WIDTH, MAX_PERCENT_HEIGHT);
+constexpr float MAX_INFINITE = 1000000.0f;
+const SizeF MAX_INFINITE_SIZE(MAX_INFINITE, MAX_INFINITE);
 constexpr float NEGATIVE_NUMBER = -100;
 constexpr bool SKIP_MEASURE = true;
 constexpr bool NO_SKIP_MEASURE = false;
@@ -66,6 +71,8 @@ constexpr float SPACEWIDTH = 5.0f;
 constexpr bool USE_EFFECT = false;
 constexpr bool USE_ANIMATOR = false;
 constexpr float PERCENT = 1.0f;
+constexpr float ROOT_WIDTH = 1000.0f;
+constexpr float ROOT_HEIGHT = 1000.0f;
 } // namespace
 
 class DataPanelTestNg : public testing::Test {
@@ -224,6 +231,7 @@ HWTEST_F(DataPanelTestNg, DataPanelMeasureTest003, TestSize.Level1)
      */
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = MAX_SIZE;
+    layoutConstraint.percentReference = MAX_SIZE;
     auto dataPanelDefaultSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper).value();
     EXPECT_EQ(dataPanelDefaultSize, MAX_SIZE);
 
@@ -233,18 +241,21 @@ HWTEST_F(DataPanelTestNg, DataPanelMeasureTest003, TestSize.Level1)
      */
     LayoutConstraintF layoutConstraintVaildSize;
     layoutConstraintVaildSize.maxSize = MAX_SIZE;
+    layoutConstraint.percentReference = MAX_SIZE;
     layoutConstraintVaildSize.selfIdealSize.SetSize(SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
     auto dataPanelSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraintVaildSize, &layoutWrapper).value();
     EXPECT_EQ(dataPanelSize, SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
 
     LayoutConstraintF layoutConstraintHeight;
     layoutConstraintHeight.maxSize = MAX_SIZE;
+    layoutConstraintHeight.percentReference = MAX_SIZE;
     layoutConstraintHeight.selfIdealSize.SetHeight(HEIGHT.ConvertToPx());
     dataPanelSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraintHeight, &layoutWrapper).value();
     EXPECT_EQ(dataPanelSize, SizeF(MAX_WIDTH, HEIGHT.ConvertToPx()));
 
     LayoutConstraintF layoutConstraintWidth;
     layoutConstraintWidth.maxSize = MAX_SIZE;
+    layoutConstraintWidth.percentReference = MAX_SIZE;
     layoutConstraintWidth.selfIdealSize.SetWidth(WIDTH.ConvertToPx());
     dataPanelSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraintWidth, &layoutWrapper).value();
     EXPECT_EQ(dataPanelSize, SizeF(WIDTH.ConvertToPx(), MAX_HEIGHT));
@@ -254,7 +265,7 @@ HWTEST_F(DataPanelTestNg, DataPanelMeasureTest003, TestSize.Level1)
      *         DataPanel({ { values: this.values, max: 100, type: DataPanelType.Line }}).height(-100)
      */
     LayoutConstraintF layoutConstraintHeightUnvalid;
-    layoutConstraintHeightUnvalid.maxSize = MAX_SIZE;
+    layoutConstraintHeightUnvalid.percentReference = MAX_SIZE;
     layoutConstraintHeightUnvalid.selfIdealSize.SetHeight(NEGATIVE_NUMBER);
     dataPanelSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraintHeightUnvalid, &layoutWrapper).value();
     EXPECT_EQ(dataPanelSize, SizeF(MAX_WIDTH, MAX_HEIGHT));
@@ -264,10 +275,106 @@ HWTEST_F(DataPanelTestNg, DataPanelMeasureTest003, TestSize.Level1)
      *         DataPanel({ { values: this.values, max: 100, type: DataPanelType.Line }}).width(-100)
      */
     LayoutConstraintF layoutConstraintWidthUnvalid;
-    layoutConstraintWidthUnvalid.maxSize = MAX_SIZE;
+    layoutConstraintWidthUnvalid.percentReference = MAX_SIZE;
     layoutConstraintWidthUnvalid.selfIdealSize.SetWidth(NEGATIVE_NUMBER);
     dataPanelSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraintHeightUnvalid, &layoutWrapper).value();
     EXPECT_EQ(dataPanelSize, SizeF(MAX_WIDTH, MAX_HEIGHT));
+}
+
+/**
+ * @tc.name: DataPanelMeasureTest004
+ * @tc.desc: Test DataPanel Measure by percentReference instead of maxSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelMeasureTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create datapanel and get framenode.
+     */
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(VALUES, MAX, TYPE_CYCLE);
+    dataPanel.SetEffect(!CLOSE_EFFECT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set dataPanelLayoutAlgorithm.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto dataPanelPattern = frameNode->GetPattern<DataPanelPattern>();
+    EXPECT_NE(dataPanelPattern, nullptr);
+    auto dataPanelLayoutAlgorithm = dataPanelPattern->CreateLayoutAlgorithm();
+    EXPECT_NE(dataPanelLayoutAlgorithm, nullptr);
+    dataPanelLayoutAlgorithm->Reset();
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(dataPanelLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. compare dataPanelSize with expected value.
+     * @tc.expected: step3. dataPanelSize is the same with expected value.
+     */
+    /**
+     *     corresponding ets code:
+     *         DataPanel({ { values: this.values, max: 100, type: DataPanelType.Line }})
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = MAX_SIZE;
+    layoutConstraint.percentReference = MAX_PERCENT_SIZE;
+    auto dataPanelDefaultSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper).value();
+    EXPECT_EQ(dataPanelDefaultSize, MAX_PERCENT_SIZE);
+
+    /**
+     *     corresponding ets code:
+     *         DataPanel({ { values: this.values, max: 100, type: DataPanelType.Line }}).width(50).height(50)
+     */
+    LayoutConstraintF layoutConstraintVaildSize;
+    layoutConstraintVaildSize.maxSize = MAX_SIZE;
+    layoutConstraint.percentReference = MAX_PERCENT_SIZE;
+    layoutConstraintVaildSize.selfIdealSize.SetSize(SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
+    auto dataPanelSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraintVaildSize, &layoutWrapper).value();
+    EXPECT_EQ(dataPanelSize, SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
+
+    /**
+     * @tc.steps: step4. compare dataPanelSize with expected value.
+     * @tc.expected: step4. dataPanelSize is the same with expected value.
+     */
+    LayoutConstraintF layoutConstraintHeight;
+    layoutConstraintHeight.maxSize = MAX_SIZE;
+    layoutConstraintHeight.percentReference = MAX_PERCENT_SIZE;
+    layoutConstraintHeight.selfIdealSize.SetHeight(HEIGHT.ConvertToPx());
+    dataPanelSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraintHeight, &layoutWrapper).value();
+    EXPECT_EQ(dataPanelSize, SizeF(MAX_PERCENT_WIDTH, HEIGHT.ConvertToPx()));
+
+    /**
+     * @tc.steps: step5. compare dataPanelSize with expected value.
+     * @tc.expected: step5. dataPanelSize is the same with expected value.
+     */
+    LayoutConstraintF layoutConstraintWidth;
+    layoutConstraintWidth.maxSize = MAX_SIZE;
+    layoutConstraintWidth.percentReference = MAX_PERCENT_SIZE;
+    layoutConstraintWidth.selfIdealSize.SetWidth(WIDTH.ConvertToPx());
+    dataPanelSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraintWidth, &layoutWrapper).value();
+    EXPECT_EQ(dataPanelSize, SizeF(WIDTH.ConvertToPx(), MAX_PERCENT_HEIGHT));
+
+    /**
+     * @tc.steps: step6. compare dataPanelSize with expected value by infinite.
+     * @tc.expected: step6. dataPanelSize is the same with expected value as root width and height.
+     */
+    MockPipelineBase::GetCurrent()->SetRootSize(ROOT_WIDTH, ROOT_HEIGHT);
+    LayoutConstraintF layoutConstraintInfinite;
+    layoutConstraintInfinite.percentReference = MAX_INFINITE_SIZE;
+    dataPanelSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraintInfinite, &layoutWrapper).value();
+    EXPECT_EQ(dataPanelSize, SizeF(ROOT_WIDTH, ROOT_HEIGHT));
+
+    /**
+     * @tc.steps: step7. compare dataPanelSize with expected value by infinite width.
+     * @tc.expected: step7. dataPanelSize is the same with expected value as min width and height.
+     */
+    LayoutConstraintF layoutConstraintWidthInfinite;
+    layoutConstraintWidthInfinite.percentReference = SizeF(MAX_INFINITE, MAX_HEIGHT);
+    dataPanelSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraintWidthInfinite, &layoutWrapper).value();
+    EXPECT_EQ(dataPanelSize, SizeF(MAX_HEIGHT, MAX_HEIGHT));
 }
 
 /**
@@ -390,6 +497,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPatternTest007, TestSize.Level1)
      */
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = MAX_SIZE;
+    layoutConstraint.percentReference = MAX_SIZE;
     auto dataPanelDefaultSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper).value();
     EXPECT_EQ(dataPanelDefaultSize, MAX_SIZE);
 }
