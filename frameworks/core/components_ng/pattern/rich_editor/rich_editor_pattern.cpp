@@ -20,6 +20,10 @@
 #include "core/components_ng/pattern/text/span_node.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr uint32_t RICH_EDITOR_TWINKLING_INTERVAL_MS = 500;
+}
+
 void RichEditorPattern::OnModifyDone()
 {
     TextPattern::OnModifyDone();
@@ -32,6 +36,10 @@ void RichEditorPattern::OnModifyDone()
 
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     InitClickEvent(gestureEventHub);
+
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    InitFocusEvent(focusHub);
 }
 
 void RichEditorPattern::BeforeCreateLayoutWrapper()
@@ -84,9 +92,57 @@ bool RichEditorPattern::GetCaretVisible() const
     return caretVisible_;
 }
 
+void RichEditorPattern::ScheduleCaretTwinkling()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+
+    if (!context->GetTaskExecutor()) {
+        LOGW("context has no task executor.");
+        return;
+    }
+
+    auto weak = WeakClaim(this);
+    caretTwinklingTask_.Reset([weak] {
+        auto client = weak.Upgrade();
+        CHECK_NULL_VOID(client);
+        client->OnCaretTwinkling();
+    });
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostDelayedTask(caretTwinklingTask_, TaskExecutor::TaskType::UI, RICH_EDITOR_TWINKLING_INTERVAL_MS);
+}
+
+void RichEditorPattern::StartTwinkling()
+{
+    caretTwinklingTask_.Cancel();
+    caretVisible_ = true;
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    ScheduleCaretTwinkling();
+}
+
+void RichEditorPattern::OnCaretTwinkling()
+{
+    caretTwinklingTask_.Cancel();
+    caretVisible_ = !caretVisible_;
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    ScheduleCaretTwinkling();
+}
+
+void RichEditorPattern::StopTwinkling()
+{
+    caretTwinklingTask_.Cancel();
+    if (caretVisible_) {
+        caretVisible_ = false;
+        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
 void RichEditorPattern::HandleClickEvent(GestureEvent& info)
 {
-    auto contentRect = this->GetTextRect();
+    auto contentRect = GetTextRect();
     contentRect.SetTop(contentRect.GetY() - std::min(baselineOffset_, 0.0f));
     contentRect.SetHeight(contentRect.Height() - std::max(baselineOffset_, 0.0f));
     if (contentRect.IsInRegion(PointF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY()))) {
@@ -103,11 +159,12 @@ void RichEditorPattern::HandleClickEvent(GestureEvent& info)
                 OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
                 CHECK_NULL_VOID(richEditorOverlayModifier_);
                 richEditorOverlayModifier_->SetCaretOffsetAndHeight(caretOffset, caretHeight);
+                StartTwinkling();
             } else {
-                LOGE(" request focus fail");
+                LOGE("request focus fail");
             }
         } else {
-            LOGE(" focusHub is NULL");
+            LOGE("focusHub is NULL");
         }
     }
 }
@@ -124,4 +181,29 @@ void RichEditorPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub
     gestureHub->AddClickEvent(clickListener);
     clickEventInitialized_ = true;
 }
+
+void RichEditorPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
+{
+    CHECK_NULL_VOID_NOLOG(!focusEventInitialized_);
+    auto focusTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleFocusEvent();
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+    focusEventInitialized_ = true;
+}
+
+void RichEditorPattern::HandleBlurEvent()
+{
+    StopTwinkling();
+}
+
+void RichEditorPattern::HandleFocusEvent() {}
 } // namespace OHOS::Ace::NG
