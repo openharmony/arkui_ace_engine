@@ -57,6 +57,13 @@ public:
         windowPattern->OnBackground();
     }
 
+    void OnDisconnect() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnDisconnect();
+    }
+
 private:
     WeakPtr<WindowPattern> windowPattern_;
 };

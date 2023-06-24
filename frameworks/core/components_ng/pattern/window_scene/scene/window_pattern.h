@@ -48,6 +48,7 @@ protected:
     virtual void OnConnect();
     virtual void OnForeground() {}
     virtual void OnBackground() {}
+    virtual void OnDisconnect() {}
 
     int32_t instanceId_ = -1;
 
