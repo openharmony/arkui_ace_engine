@@ -57,11 +57,6 @@ public:
         return false;
     }
 
-    bool UsResRegion() override
-    {
-        return false;
-    }
-
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<ListLayoutProperty>();

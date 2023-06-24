@@ -87,6 +87,7 @@ void GridPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToBounds(true);
+    host->GetRenderContext()->UpdateClipEdge(true);
 }
 
 void GridPattern::OnModifyDone()

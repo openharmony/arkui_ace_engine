@@ -1098,7 +1098,10 @@ bool FrameNode::GetTouchable() const
 
 bool FrameNode::IsResponseRegion() const
 {
-    if (!pattern_->UsResRegion()) {
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto clip = renderContext->GetClipEdge().value_or(false);
+    if (clip) {
         return false;
     }
     auto gestureHub = eventHub_->GetGestureEventHub();
@@ -1129,9 +1132,12 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint)
     auto paintRect = renderContext_->GetPaintRectWithTransform();
     auto responseRegionList = GetResponseRegionList(paintRect);
     auto localPoint = parentLocalPoint - paintRect.GetOffset();
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto clip = renderContext->GetClipEdge().value_or(false);
     if (!InResponseRegionList(parentLocalPoint, responseRegionList) || !GetTouchable()) {
-        if (!pattern_->UsResRegion()) {
-            LOGD("TouchTest: not use resRegion, point is out of region in %{public}s", GetTag().c_str());
+        if (clip) {
+            LOGD("TouchTest: frameNode use clip, point is out of region in %{public}s", GetTag().c_str());
             return true;
         }
         for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
