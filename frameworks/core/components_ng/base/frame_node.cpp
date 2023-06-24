@@ -570,6 +570,10 @@ void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
     auto visibleRect = frameRect;
     RectF parentRect;
     auto parentUi = GetParent();
+    if (!parentUi) {
+        visibleRect.SetWidth(0.0f);
+        visibleRect.SetHeight(0.0f);
+    }
     while (parentUi) {
         auto parentFrame = AceType::DynamicCast<FrameNode>(parentUi);
         if (!parentFrame) {
