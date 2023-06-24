@@ -126,19 +126,6 @@ void SwiperPattern::OnIndexChange() const
 
 void SwiperPattern::OnModifyDone()
 {
-    if (!preIndex_.has_value()) {
-        jumpIndex_ = GetLayoutProperty<SwiperLayoutProperty>()->GetIndex().value_or(0);
-        preIndex_ = jumpIndex_.value_or(0);
-        currentFirstIndex_ = jumpIndex_.value_or(0);
-    } else {
-        auto newIndex = GetLayoutProperty<SwiperLayoutProperty>()->GetIndex().value_or(0);
-        if (preIndex_.value() != newIndex || currentIndex_ != newIndex) {
-            jumpIndex_ = newIndex;
-            preIndex_ = newIndex;
-            currentFirstIndex_ = jumpIndex_.value_or(0);
-            turnPageRate_ = 0.0f;
-        }
-    }
     currentOffset_ = 0.0f;
     Pattern::OnModifyDone();
     auto host = GetHost();
@@ -160,6 +147,11 @@ void SwiperPattern::OnModifyDone()
         layoutProperty->UpdateIndexWithoutMeasure(currentIndex_);
     } else {
         LOGE("index is not valid: %{public}d, items size: %{public}d", CurrentIndex(), childrenSize);
+    }
+    if (oldIndex_ != currentIndex_) {
+        jumpIndex_ = currentIndex_;
+        currentFirstIndex_ = jumpIndex_.value_or(0);
+        turnPageRate_ = 0.0f;
     }
 
     RegisterVisibleAreaChange();
@@ -513,10 +505,6 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
     CHECK_NULL_VOID(host);
     jumpIndex_ = index;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    if (pipeline) {
-        pipeline->FlushUITasks();
-    }
 }
 
 void SwiperPattern::SwipeTo(int32_t index)
@@ -1116,6 +1104,9 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     targetIndex_ = nextIndex;
     velocity_ = dragVelocity;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    if (pipeline) {
+        pipeline->FlushUITasks();
+    }
     moveDirection_ = dragVelocity <= 0;
 }
 
@@ -1743,22 +1734,14 @@ void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, b
         preTargetIndex_.reset();
     }
     if (currentIndex_ != nextIndex) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        if (pipeline) {
-            pipeline->FlushUITasks();
-        }
-        if (!itemPosition_.empty()) {
-            if (NearZero(itemPosition_.begin()->second.startPos)) {
-                currentIndex_ = nextIndex;
-                oldIndex_ = nextIndex;
-                currentFirstIndex_ = nextIndex;
-                turnPageRate_ = 0.0f;
-                auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
-                CHECK_NULL_VOID(layoutProperty);
-                layoutProperty->UpdateIndexWithoutMeasure(nextIndex);
-                FireChangeEvent();
-            }
-        }
+        currentIndex_ = nextIndex;
+        oldIndex_ = nextIndex;
+        currentFirstIndex_ = nextIndex;
+        turnPageRate_ = 0.0f;
+        auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateIndexWithoutMeasure(nextIndex);
+        FireChangeEvent();
     }
     if (restartAutoPlay) {
         StartAutoPlay();
