@@ -145,8 +145,9 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
     layoutWrapper->MountToHostOnMainThread();
     auto paintProperty = node->GetPaintProperty<PaintProperty>();
     auto wrapper = node->CreatePaintWrapper();
-    CHECK_NULL_VOID(wrapper);
-    wrapper->FlushRender();
+    if (wrapper != nullptr) {
+        wrapper->FlushRender();
+    }
     paintProperty->CleanDirty();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
