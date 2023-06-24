@@ -111,6 +111,11 @@ void SwiperArrowPattern::InitButtonEvent()
 
 void SwiperArrowPattern::ButtonClickEvent()
 {
+    auto swiperArrowLayoutProperty = GetSwiperArrowLayoutProperty();
+    CHECK_NULL_VOID(swiperArrowLayoutProperty);
+    if (!hoverOnClickFlag_ && swiperArrowLayoutProperty->GetHoverShowValue(false)) {
+        return;
+    }
     auto swiperNode = GetSwiperNode();
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
@@ -158,6 +163,11 @@ int32_t SwiperArrowPattern::TotalCount() const
 
 void SwiperArrowPattern::ButtonTouchEvent(RefPtr<FrameNode> buttonNode, TouchType touchType)
 {
+    auto swiperArrowLayoutProperty = GetSwiperArrowLayoutProperty();
+    CHECK_NULL_VOID(swiperArrowLayoutProperty);
+    if (!hoverOnClickFlag_ && swiperArrowLayoutProperty->GetHoverShowValue(false)) {
+        return;
+    }
     const auto& renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID_NOLOG(renderContext);
     auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -189,6 +199,7 @@ void SwiperArrowPattern::ButtonTouchEvent(RefPtr<FrameNode> buttonNode, TouchTyp
 
 void SwiperArrowPattern::ButtonOnHover(RefPtr<FrameNode> buttonNode, bool isHovered)
 {
+    hoverOnClickFlag_ = isHovered;
     const auto& renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID_NOLOG(renderContext);
     auto pipelineContext = PipelineBase::GetCurrentContext();
