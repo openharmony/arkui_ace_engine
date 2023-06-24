@@ -151,6 +151,20 @@ public:
         return { 0, 0 };
     }
 
+    void StartScrollBarAnimatorByProxy()
+    {
+        if (scrollBarProxy_) {
+            scrollBarProxy_->StartScrollBarAnimator();
+        }
+    }
+
+    void StopScrollBarAnimatorByProxy()
+    {
+        if (scrollBarProxy_) {
+            scrollBarProxy_->StopScrollBarAnimator();
+        }
+    }
+
 protected:
     RefPtr<ScrollBar> GetScrollBar() const
     {

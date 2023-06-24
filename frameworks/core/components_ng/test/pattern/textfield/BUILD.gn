@@ -62,6 +62,8 @@ ohos_unittest("textfield_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/scroll/scroll_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll/scroll_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll/scroll_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/search_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/search_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.cpp",

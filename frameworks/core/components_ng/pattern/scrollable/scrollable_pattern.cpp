@@ -103,9 +103,7 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
     }
     if (source == SCROLL_FROM_START) {
         SetParentScrollable();
-        if (scrollBarProxy_) {
-            scrollBarProxy_->StopScrollBarAnimator();
-        }
+        StopScrollBarAnimatorByProxy();
     }
     return true;
 }
@@ -124,9 +122,7 @@ void ScrollablePattern::OnScrollEnd()
         scrollBar_->SetDriving(false);
         scrollBar_->OnScrollEnd();
     }
-    if (scrollBarProxy_) {
-        scrollBarProxy_->StartScrollBarAnimator();
-    }
+    StartScrollBarAnimatorByProxy();
 }
 
 void ScrollablePattern::AddScrollEvent()

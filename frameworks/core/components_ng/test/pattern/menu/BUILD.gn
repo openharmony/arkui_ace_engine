@@ -60,6 +60,8 @@ ace_unittest("menu_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/scroll/scroll_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll/scroll_position_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll/scroll_spring_effect.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/stage/page_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/stage/page_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/stage/page_transition_model_ng.cpp",
