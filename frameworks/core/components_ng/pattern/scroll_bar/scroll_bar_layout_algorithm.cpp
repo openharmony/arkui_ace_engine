@@ -71,6 +71,9 @@ void ScrollBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto idealSize = CreateIdealSize(constraint.value(), axis, MeasureType::MATCH_CONTENT);
     auto parentSize = CreateIdealSize(constraint.value(), axis, MeasureType::MATCH_PARENT);
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    MinusPaddingToSize(padding, idealSize);
+    MinusPaddingToSize(padding, parentSize);
 
     // Calculate child layout constraint.
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
@@ -84,6 +87,7 @@ void ScrollBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // Use child size when self idea size of scroll is not setted.
     auto childSize = childWrapper->GetGeometryNode()->GetMarginFrameSize();
     UpdateIdealSize(axis, childSize, parentSize, idealSize);
+    AddPaddingToSize(padding, idealSize);
     auto selfSize = idealSize.ConvertToSizeT();
     selfSize.Constrain(constraint->minSize, constraint->maxSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(selfSize);
