@@ -23,6 +23,8 @@
 
 #define private public
 #define protected public
+#include "test/mock/base/mock_task_executor.h"
+
 #include "base/geometry/ng/offset_t.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components/select/select_theme.h"
@@ -34,6 +36,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_paint_method.h"
@@ -46,8 +49,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "test/mock/base/mock_task_executor.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -70,6 +71,9 @@ protected:
 void OverlayManagerTestNg::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
+    RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<Pattern>());
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    MockPipelineBase::GetCurrent()->stageManager_ = stageManager;
 }
 void OverlayManagerTestNg::TearDownTestCase()
 {
@@ -531,6 +535,11 @@ HWTEST_F(OverlayManagerTestNg, PopupTest002, TestSize.Level1)
      */
     overlayManager->HideAllPopups();
     EXPECT_FALSE(overlayManager->popupMap_.empty());
+    /**
+     * @tc.steps: step4. call RemoveOverlay when childCount is 2
+     * @tc.expected: remove successfully
+     */
+    EXPECT_TRUE(overlayManager->RemoveOverlay(false));
 }
 /**
  * @tc.name: PopupTest003
@@ -734,5 +743,93 @@ HWTEST_F(OverlayManagerTestNg, MenuTest002, TestSize.Level1)
     overlayManager->HideAllMenus();
     overlayManager->CleanMenuInSubWindow();
     EXPECT_FALSE(overlayManager->menuMap_.empty());
+}
+/**
+ * @tc.name: RemoveOverlayTest001
+ * @tc.desc: Test OverlayManager::RemoveOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, RemoveOverlayTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.markNeedUpdate = true;
+
+    /**
+     * @tc.steps: step2. create overlayManager and call removeOverlay when has one child.
+     * @tc.expected: removing overlay failed
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->UpdatePopupNode(targetId, popupInfo);
+    EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
+    auto res = overlayManager->RemoveOverlay(false);
+    EXPECT_FALSE(res);
+    EXPECT_TRUE(overlayManager->RemoveOverlayInSubwindow());
+    EXPECT_FALSE(overlayManager->RemoveOverlayInSubwindow());
+}
+/**
+ * @tc.name: RemoveOverlayTest002
+ * @tc.desc:  Test OverlayManager::RemoveOverlay related functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, RemoveOverlayTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    MockPipelineBase::GetCurrent()->stageManager_ = stageManager;
+
+    /**
+     * @tc.steps: step2. create modal page node.
+     */
+    auto builderFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    /**
+     * @tc.steps: step3. create modal node and call removeOverlay when modalStack is not empty.
+     * @tc.expected: remove successfully.
+     */
+    int32_t modalTransition = 0;
+    bool isShow = true;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalTransition, targetId);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    EXPECT_TRUE(overlayManager->RemoveOverlay(false));
+
+    /**
+     * @tc.steps: step4. Change the ModalTransition and Call RemoveModalInOverlay.
+     * @tc.expected: remove successfully.
+     */
+    modalTransition = 2;
+    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalTransition, targetId);
+    EXPECT_TRUE(overlayManager->RemoveModalInOverlay());
 }
 } // namespace OHOS::Ace::NG
