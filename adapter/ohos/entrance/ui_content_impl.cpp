@@ -829,7 +829,6 @@ void UIContentImpl::CommonInitializeForm(
                 nativeEngine->CreateReference(storage, 1), context->GetBindingObject()->Get<NativeReference>());
         }
     }
-    LayoutInspector::SetCallback(instanceId_);
 }
 
 void UIContentImpl::SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
