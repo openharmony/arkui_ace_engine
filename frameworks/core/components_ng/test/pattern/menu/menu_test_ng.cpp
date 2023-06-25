@@ -20,6 +20,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/shadow_config.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -33,13 +34,14 @@
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/sub_menu_layout_algorithm.h"
-#include "core/components_ng/syntax/lazy_for_each_model.h"
-#include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/syntax/lazy_for_each_model.h"
+#include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
+#include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -77,6 +79,12 @@ constexpr int TOP_POSITION_X = 10;
 constexpr int TOP_POSITION_Y = 20;
 constexpr int BOTTOM_POSITION_X = 30;
 constexpr int BOTTOM_POSITION_Y = 40;
+constexpr float OFFSET_FIRST = 20.0f;
+constexpr float OFFSET_SECOND = 5.0f;
+constexpr float OFFSET_THIRD = 200.0f;
+constexpr float OFFSET_FORTH = 300.0f;
+constexpr float OFFSET_FIFTH = 50.0f;
+constexpr float OFFSET_SIXTH = 60.0f;
 constexpr int SIZE_X_SECOND = 20;
 constexpr int SIZE_Y_SECOND = 20;
 constexpr int OFFSET_X_THIRD = 100;
@@ -3179,6 +3187,107 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg018, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MenuLayoutAlgorithmTestNg019
+ * @tc.desc: Verify AddTargetSpace with placement
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menuLayoutAlgorithm, placement is BOTTOM_LEFT
+     * @tc.expected: result y offset is add 8vp space
+     */
+    RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    ASSERT_NE(menuLayoutAlgorithm, nullptr);
+    menuLayoutAlgorithm->placement_ = Placement::BOTTOM_LEFT;
+    auto result = menuLayoutAlgorithm->AddTargetSpace(OffsetF(OFFSET_FIRST, OFFSET_FIRST));
+    EXPECT_EQ(result, OffsetF(OFFSET_FIRST, OFFSET_FIRST + TARGET_SECURITY.ConvertToPx()));
+
+    /**
+     * @tc.steps: step2. create menuLayoutAlgorithm, placement is TOP_LEFT
+     * @tc.expected: result y offset is reduce 8vp space
+     */
+    menuLayoutAlgorithm->placement_ = Placement::TOP_LEFT;
+    result = menuLayoutAlgorithm->AddTargetSpace(OffsetF(OFFSET_FIRST, OFFSET_FIRST));
+    EXPECT_EQ(result, OffsetF(OFFSET_FIRST, OFFSET_FIRST - TARGET_SECURITY.ConvertToPx()));
+
+    /**
+     * @tc.steps: step3. create menuLayoutAlgorithm, placement is RIGHT_TOP
+     * @tc.expected: result x offset is add 8vp space
+     */
+    menuLayoutAlgorithm->placement_ = Placement::RIGHT_TOP;
+    result = menuLayoutAlgorithm->AddTargetSpace(OffsetF(OFFSET_FIRST, OFFSET_FIRST));
+    EXPECT_EQ(result, OffsetF(OFFSET_FIRST + TARGET_SECURITY.ConvertToPx(), OFFSET_FIRST));
+
+    /**
+     * @tc.steps: step4. create menuLayoutAlgorithm, placement is LEFT_TOP
+     * @tc.expected: result x offset is reduce 8vp space
+     */
+    menuLayoutAlgorithm->placement_ = Placement::LEFT_TOP;
+    result = menuLayoutAlgorithm->AddTargetSpace(OffsetF(OFFSET_FIRST, OFFSET_FIRST));
+    EXPECT_EQ(result, OffsetF(OFFSET_FIRST - TARGET_SECURITY.ConvertToPx(), OFFSET_FIRST));
+
+    /**
+     * @tc.steps: step5. create menuLayoutAlgorithm, placement is NONE
+     * @tc.expected: the offset of the result is consistent with when the placement is BOTTOM_LEFT
+     */
+    menuLayoutAlgorithm->placement_ = Placement::NONE;
+    result = menuLayoutAlgorithm->AddTargetSpace(OffsetF(OFFSET_FIRST, OFFSET_FIRST));
+    EXPECT_EQ(result, OffsetF(OFFSET_FIRST, OFFSET_FIRST + TARGET_SECURITY.ConvertToPx()));
+}
+
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg020
+ * @tc.desc: Verify AddOffset with placement
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menuLayoutAlgorithm, placement is BOTTOM_LEFT
+     * @tc.expected: result x and y offset is add position offset
+     */
+    RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    ASSERT_NE(menuLayoutAlgorithm, nullptr);
+    menuLayoutAlgorithm->positionOffset_ = OffsetF(OFFSET_SECOND, OFFSET_SECOND);
+    menuLayoutAlgorithm->placement_ = Placement::BOTTOM_LEFT;
+    auto result = menuLayoutAlgorithm->AddOffset(OffsetF(OFFSET_FIRST, OFFSET_FIRST));
+    EXPECT_EQ(result, OffsetF(OFFSET_FIRST + OFFSET_SECOND, OFFSET_FIRST + OFFSET_SECOND));
+
+    /**
+     * @tc.steps: step2. create menuLayoutAlgorithm, placement is TOP_LEFT
+     * @tc.expected: result x offset add position offset and y offset is reduce position offset
+     */
+    menuLayoutAlgorithm->placement_ = Placement::TOP_LEFT;
+    result = menuLayoutAlgorithm->AddOffset(OffsetF(OFFSET_FIRST, OFFSET_FIRST));
+    EXPECT_EQ(result, OffsetF(OFFSET_FIRST + OFFSET_SECOND, OFFSET_FIRST - OFFSET_SECOND));
+
+    /**
+     * @tc.steps: step3. create menuLayoutAlgorithm, placement is RIGHT_TOP
+     * @tc.expected: result x offset add position offset and y offset is add position offset
+     */
+    menuLayoutAlgorithm->placement_ = Placement::RIGHT_TOP;
+    result = menuLayoutAlgorithm->AddOffset(OffsetF(OFFSET_FIRST, OFFSET_FIRST));
+    EXPECT_EQ(result, OffsetF(OFFSET_FIRST + OFFSET_SECOND, OFFSET_FIRST + OFFSET_SECOND));
+
+    /**
+     * @tc.steps: step4. create menuLayoutAlgorithm, placement is LEFT_TOP
+     * @tc.expected: result x offset reduce position offset and y offset is add position offset
+     */
+    menuLayoutAlgorithm->placement_ = Placement::LEFT_TOP;
+    result = menuLayoutAlgorithm->AddOffset(OffsetF(OFFSET_FIRST, OFFSET_FIRST));
+    EXPECT_EQ(result, OffsetF(OFFSET_FIRST - OFFSET_SECOND, OFFSET_FIRST + OFFSET_SECOND));
+
+    /**
+     * @tc.steps: step5. create menuLayoutAlgorithm, placement is NONE
+     * @tc.expected: the offset of the result is consistent with when the placement is BOTTOM_LEFT
+     */
+    menuLayoutAlgorithm->placement_ = Placement::NONE;
+    result = menuLayoutAlgorithm->AddOffset(OffsetF(OFFSET_FIRST, OFFSET_FIRST));
+    EXPECT_EQ(result, OffsetF(OFFSET_FIRST + OFFSET_SECOND, OFFSET_FIRST + OFFSET_SECOND));
+}
+
+/**
  * @tc.name: MenuLayoutAlgorithmTestNg021
  * @tc.desc: Verify GetPositionWithPlacementTop.
  * @tc.type: FUNC
@@ -3550,6 +3659,200 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg034, TestSize.Level1)
     // @tc.expected: menu content width = item width, height = sum(item height)
     auto expectedSize = SizeF(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT * 3);
     EXPECT_EQ(wrapper->GetGeometryNode()->GetContentSize(), expectedSize);
+}
+
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg035
+ * @tc.desc: Test GetChildPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg035, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menuLayoutAlgorithm
+     * @tc.expected: menuLayoutAlgorithm is not null
+     */
+    RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>(NODEID, "menu");
+    ASSERT_NE(menuLayoutAlgorithm, nullptr);
+    SizeF size(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT);
+
+    /**
+     * @tc.steps: step2. the placement of menuLayoutAlgorithm is Placement::NONE
+     * @tc.expected: GetChildPosition get result offset is menu defaultPositon
+     */
+    menuLayoutAlgorithm->placement_ = Placement::NONE;
+    menuLayoutAlgorithm->targetSize_ = SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
+    menuLayoutAlgorithm->targetOffset_ = OffsetF(POSITION_OFFSET, POSITION_OFFSET);
+    auto resultOffset = menuLayoutAlgorithm->GetChildPosition(size, false);
+    float expectOffsetX = MENU_SIZE_WIDTH / 2;
+    float expectOffsetY = MENU_SIZE_HEIGHT / 2;
+    EXPECT_EQ(resultOffset, OffsetF(expectOffsetX, expectOffsetY));
+
+    /**
+     * @tc.steps: step3. the placement of menuLayoutAlgorithm is Placement::BOTTOM_LEFT
+     * @tc.expected: GetChildPosition get result offset is adjust position
+     */
+    menuLayoutAlgorithm->placement_ = Placement::BOTTOM_LEFT;
+    menuLayoutAlgorithm->targetSize_ = SizeF(TARGET_SIZE_WIDTH / 2, TARGET_SIZE_HEIGHT);
+    menuLayoutAlgorithm->wrapperSize_ = SizeF(OFFSET_THIRD, OFFSET_FORTH);
+    menuLayoutAlgorithm->targetOffset_ = OffsetF(OFFSET_SIXTH, 0.0f);
+
+    resultOffset = menuLayoutAlgorithm->GetChildPosition(size);
+    EXPECT_EQ(resultOffset, OffsetF(OFFSET_FIFTH, POSITION_OFFSET + TARGET_SECURITY.ConvertToPx()));
+}
+
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg036
+ * @tc.desc: Test FitToScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg036, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menuLayoutAlgorithm
+     * @tc.expected: menuLayoutAlgorithm is not null
+     */
+    RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>(NODEID, "menu");
+    ASSERT_NE(menuLayoutAlgorithm, nullptr);
+    SizeF size(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT);
+
+    /**
+     * @tc.steps: step2. the placement of menuLayoutAlgorithm is Placement::NONE and need arrow
+     * @tc.expected: FitToScreen get result offset is (0.0f, 0.0f)
+     */
+    OffsetF position = OffsetF(POSITION_OFFSET, POSITION_OFFSET);
+    menuLayoutAlgorithm->positionOffset_ = OffsetF(OFFSET_FIRST, OFFSET_FIRST);
+    menuLayoutAlgorithm->arrowPlacement_ = Placement::NONE;
+    auto resultOffset = menuLayoutAlgorithm->FitToScreen(position, size, true);
+    EXPECT_EQ(resultOffset, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg037
+ * @tc.desc: Test CheckPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg037, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menuLayoutAlgorithm
+     * @tc.expected: menuLayoutAlgorithm is not null
+     */
+    RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>(NODEID, "menu");
+    ASSERT_NE(menuLayoutAlgorithm, nullptr);
+    SizeF size(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT);
+
+    /**
+     * @tc.steps: step2. the placement of menuLayoutAlgorithm is Placement::BOTTOM_LEFT and menu position is normal
+     * @tc.expected: CheckPosition result is true
+     */
+    menuLayoutAlgorithm->placement_ = Placement::BOTTOM_LEFT;
+    menuLayoutAlgorithm->targetSize_ = SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
+    menuLayoutAlgorithm->wrapperSize_ = SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+    OffsetF position = OffsetF(POSITION_OFFSET, OFFSET_FORTH);
+    menuLayoutAlgorithm->targetOffset_ = OffsetF(OFFSET_THIRD, OFFSET_THIRD);
+    auto result = menuLayoutAlgorithm->CheckPosition(position, size);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: step3. the placement of menuLayoutAlgorithm is Placement::TOP_LEFT and menu position is normal
+     * @tc.expected: CheckPosition result is true
+     */
+    position = OffsetF(POSITION_OFFSET, OFFSET_FIFTH);
+    menuLayoutAlgorithm->placement_ = Placement::TOP_LEFT;
+    result = menuLayoutAlgorithm->CheckPosition(position, size);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: step4. the placement of menuLayoutAlgorithm is Placement::LEFT_TOP and menu position is normal
+     * @tc.expected: CheckPosition result is true
+     */
+    position = OffsetF(OFFSET_FIFTH, OFFSET_THIRD);
+    menuLayoutAlgorithm->placement_ = Placement::LEFT_TOP;
+    result = menuLayoutAlgorithm->CheckPosition(position, size);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: step5. the placement of menuLayoutAlgorithm is Placement::NONE
+     * @tc.expected: CheckPosition result is false
+     */
+    menuLayoutAlgorithm->placement_ = Placement::NONE;
+    result = menuLayoutAlgorithm->CheckPosition(position, size);
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps: step6. the placement of menuLayoutAlgorithm is Placement::BOTTOM_LEFT and menu position is not normal
+     * @tc.expected: CheckPosition result is false
+     */
+    menuLayoutAlgorithm->placement_ = Placement::BOTTOM_LEFT;
+    position = OffsetF(POSITION_OFFSET, FULL_SCREEN_HEIGHT);
+    result = menuLayoutAlgorithm->CheckPosition(position, size);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg038
+ * @tc.desc: Test InitTargetSizeAndPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg038, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menuLayoutAlgorithm and target is null
+     * @tc.expected: menuLayoutAlgorithm is not null
+     */
+    RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>(NODEID, "menu");
+    ASSERT_NE(menuLayoutAlgorithm, nullptr);
+
+    menuLayoutAlgorithm->InitTargetSizeAndPosition(true);
+    menuLayoutAlgorithm->targetNodeId_ = NODEID;
+    menuLayoutAlgorithm->targetTag_ = "text";
+    auto target = FrameNode::GetOrCreateFrameNode("text", NODEID, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(target, nullptr);
+
+    /**
+     * @tc.steps: step2. target is null but the geometry node of target is null
+     */
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(target->GetRenderContext());
+    ASSERT_NE(mockRenderContext, nullptr);
+    EXPECT_CALL(*mockRenderContext, GetPaintRectWithTransform()).WillRepeatedly(Return(RectF(0.0f, 0.0f, 0.0f, 0.0f)));
+    menuLayoutAlgorithm->InitTargetSizeAndPosition(true);
+
+    /**
+     * @tc.steps: step3. target node and the geometry node of target is not null, isContextMenu is false
+     * @tc.expected: targetOffset_ is OffsetF(0.0f, 0.0f)
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    GeometryProperty geometryProperty;
+    geometryProperty.rect_ = RectF(0.0f, 0.0f, 0.0f, 0.0f);
+    geometryNode->frame_ = geometryProperty;
+    target->geometryNode_ = geometryNode;
+    menuLayoutAlgorithm->InitTargetSizeAndPosition(false);
+    EXPECT_EQ(menuLayoutAlgorithm->targetOffset_, OffsetF(0.0f, 0.0f));
+
+    /**
+     * @tc.steps: step4. target and the geometry node of target is not null, isContextMenu and isContainerModal is true
+     * @tc.expected: targetOffset_ is OffsetF(-5.0f, -38.0f)
+     */
+    MockPipelineBase::GetCurrent()->SetWindowModal(WindowModal::CONTAINER_MODAL);
+    MockPipelineBase::GetCurrent()->windowManager_ = AceType::MakeRefPtr<WindowManager>();
+    MockPipelineBase::GetCurrent()->windowManager_->SetWindowGetModeCallBack(
+        []() -> WindowMode { return WindowMode::WINDOW_MODE_FLOATING; });
+
+    menuLayoutAlgorithm->InitTargetSizeAndPosition(true);
+    EXPECT_EQ(menuLayoutAlgorithm->targetOffset_,
+        OffsetF(-static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx() + CONTENT_PADDING.ConvertToPx()),
+            -static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx() + CONTAINER_BORDER_WIDTH.ConvertToPx())));
+
+    /**
+     * @tc.steps: step5. target and the geometry node of target is not null, isContextMenu is false
+     * @tc.expected: targetOffset_ is OffsetF(-5.0f, -38.0f)
+     */
+    menuLayoutAlgorithm->InitTargetSizeAndPosition(false);
+    EXPECT_EQ(menuLayoutAlgorithm->targetOffset_,
+        OffsetF(-static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx() + CONTENT_PADDING.ConvertToPx()),
+            -static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx() + CONTAINER_BORDER_WIDTH.ConvertToPx())));
 }
 
 /**
