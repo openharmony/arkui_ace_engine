@@ -55,6 +55,7 @@ ohos_unittest("custom_dialog_test_ng") {
     "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components_ng/base/geometry_node.cpp",
+    "$ace_root/frameworks/core/components_ng/base/modifier.cpp",
     "$ace_root/frameworks/core/components_ng/event/event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/event/state_style_manager.cpp",
     "$ace_root/frameworks/core/components_ng/gestures/recognizers/multi_fingers_recognizer.cpp",
