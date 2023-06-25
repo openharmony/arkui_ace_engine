@@ -310,7 +310,7 @@ void ScrollBar::SetGestureEvent()
     if (!touchEvent_) {
         touchEvent_ = MakeRefPtr<TouchEventImpl>([weak = WeakClaim(this)](const TouchEventInfo& info) {
             auto scrollBar = weak.Upgrade();
-            CHECK_NULL_VOID(scrollBar);
+            CHECK_NULL_VOID(scrollBar && scrollBar->IsScrollable());
             if (info.GetTouches().empty()) {
                 return;
             }
@@ -357,7 +357,7 @@ void ScrollBar::SetMouseEvent()
     }
     mouseEvent_ = MakeRefPtr<InputEvent>([weak = WeakClaim(this)](MouseInfo& info) {
         auto scrollBar = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(scrollBar);
+        CHECK_NULL_VOID_NOLOG(scrollBar && scrollBar->IsScrollable());
         Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
         bool inRegion = scrollBar->InBarActiveRegion(point);
         if (inRegion && !scrollBar->IsHover()) {
@@ -492,7 +492,7 @@ void ScrollBar::PlayBarEndAnimation()
     auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(UINT8_MAX, 0, Curves::SHARP);
     animation->AddListener([weakBar = AceType::WeakClaim(this)](int32_t value) {
         auto scrollBar = weakBar.Upgrade();
-        if (scrollBar) {
+        if (scrollBar && scrollBar->opacity_ != value) {
             scrollBar->opacity_ = value;
             scrollBar->MarkNeedRender();
         }
