@@ -81,6 +81,7 @@ RefPtr<RenderNode> SvgPolygon::CreateRender(
     return renderBox;
 }
 
+#ifndef USE_ROSEN_DRAWING
 SkPath SvgPolygon::AsPath(const Size& viewPort) const
 {
     if (component_->GetPoints().empty()) {
@@ -106,5 +107,24 @@ SkPath SvgPolygon::AsPath(const Size& viewPort) const
     }
     return path;
 }
+#else
+RSPath SvgPolygon::AsPath(const Size& viewPort) const
+{
+    if (component_->GetPoints().empty()) {
+        return RSPath();
+    }
+    std::vector<RSPoint> rsPoints;
+    RosenSvgPainter::StringToPoints(component_->GetPoints().c_str(), rsPoints);
+    if (rsPoints.empty()) {
+        return RSPath();
+    }
+    RSPath path;
+    path.AddPoly(rsPoints, rsPoints.size(), component_->IsClose());
+    if (component_->GetDeclaration()->GetClipState().IsEvenodd()) {
+        path.SetFillStyle(RSPathFillType::EVEN_ODD);
+    }
+    return path;
+}
+#endif
 
 } // namespace OHOS::Ace
