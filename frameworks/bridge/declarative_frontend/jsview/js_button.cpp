@@ -215,6 +215,7 @@ void JSButton::SetLableStyle(const JSCallbackInfo& info)
     ButtonParameters buttonParameters;
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> overflowValue = obj->GetProperty("overflow");
+    buttonParameters.textOverflow = TextOverflow::ELLIPSIS;
     if (!overflowValue->IsNull() && overflowValue->IsNumber()) {
         auto overflow = overflowValue->ToNumber<int32_t>();
         if (overflow >= 0 && overflow < static_cast<int32_t>(TEXT_OVERFLOWS.size()) &&
