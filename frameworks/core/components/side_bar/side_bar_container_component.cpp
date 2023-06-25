@@ -61,11 +61,7 @@ RefPtr<Component> SideBarContainerComponent::BuildButton()
             imageComponent->SetSrc(GetHiddenIcon());
         }
     }
-#ifndef USE_ROSEN_DRAWING
     imageComponent->SetUseSkiaSvg(false);
-#else
-    imageComponent->SetUseDrawingSvg(false);
-#endif
     imageComponent->SetImageFit(ImageFit::FILL);
     return imageComponent;
 }

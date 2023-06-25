@@ -83,6 +83,8 @@ void RosenRenderCheckbox::Paint(RenderContext& context, const Offset& offset)
     strokePaint.setAntiAlias(true);
     shadowPaint.setColor(shadowColor_);
     shadowPaint.setStrokeCap(SkPaint::kRound_Cap);
+    SetStrokeWidth(NormalizeToPx(checkStroke_ + shadowWidth_ * 2), shadowPaint);
+    SetUIStatus(canvas, paintOffset, strokePaint, shadowPaint);
 #else
     RSPen strokePen;
     RSPen shadowPen;
@@ -90,9 +92,9 @@ void RosenRenderCheckbox::Paint(RenderContext& context, const Offset& offset)
     strokePen.SetAntiAlias(true);
     shadowPen.SetColor(shadowColor_);
     shadowPen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+    SetStrokeWidth(NormalizeToPx(checkStroke_ + shadowWidth_ * 2), shadowPen);
+    SetUIStatus(canvas, paintOffset, strokePen, shadowPen);
 #endif
-    SetStrokeWidth(NormalizeToPx(checkStroke_ + shadowWidth_ * 2), shadowPaint);
-    SetUIStatus(canvas, paintOffset, strokePaint, shadowPaint);
 }
 
 #ifndef USE_ROSEN_DRAWING

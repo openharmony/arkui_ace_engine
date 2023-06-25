@@ -22,6 +22,9 @@
 #endif
 
 #include "core/components/shape/render_shape.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing.h"
+#endif
 
 namespace OHOS::Ace {
 
@@ -34,7 +37,7 @@ public:
 #ifndef USE_ROSEN_DRAWING
     void PaintOnCanvas(SkCanvas* skCanvas, const Offset& offset);
 #else
-    void PaintOnCanvas(Rosen::RSCanvas* canvas, const Offset& offset);
+    void PaintOnCanvas(RSCanvas* canvas, const Offset& offset);
 #endif
 
 private:
@@ -46,14 +49,14 @@ private:
 #ifndef USE_ROSEN_DRAWING
     void DrawStroke(SkCanvas* skCanvas, const SkPath& path);
 #else
-    void DrawStroke(Rosen::RSCanvas* canvas, const Rosen::RSPath& path);
+    void DrawStroke(RSCanvas* canvas, const RSPath& path);
 #endif
     float GetFloatRadiusValue(const Dimension& src, const Dimension& dest, bool isVertical);
 
 #ifndef USE_ROSEN_DRAWING
     SkPath path_;
 #else
-    Rosen::RSRecordingPath path_;
+    RSRecordingPath path_;
 #endif
 };
 

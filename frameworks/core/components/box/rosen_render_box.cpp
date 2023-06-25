@@ -180,8 +180,13 @@ void RosenRenderBox::ImageObjFailed()
 
 void RosenRenderBox::ImageDataPaintSuccess(const RefPtr<NG::CanvasImage>& image)
 {
+#ifndef USE_ROSEN_DRAWING
     auto skiaImage = AceType::DynamicCast<NG::SkiaImage>(image);
     image_ = skiaImage->GetImage();
+#else
+    auto rosenImage = AceType::DynamicCast<NG::RosenImage>(image);
+    image_ = rosenImage->GetImage();
+#endif
     MarkNeedLayout();
 }
 
@@ -352,8 +357,7 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
 #ifndef USE_ROSEN_DRAWING
             Rosen::RSModifierType::OVERLAY_STYLE, [weak = WeakClaim(this), position](std::shared_ptr<SkCanvas> canvas) {
 #else
-            Rosen::RSModifierType::OVERLAY_STYLE,
-            [weak = WeakClaim(this), position](std::shared_ptr<RSCanvas> canvas) {
+            Rosen::RSModifierType::OVERLAY_STYLE, [weak = WeakClaim(this), position](std::shared_ptr<RSCanvas> canvas) {
 #endif
                 auto renderBox = weak.Upgrade();
                 if (renderBox == nullptr) {
@@ -398,12 +402,12 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
                 DebugBoundaryPainter::PaintDebugCorner(canvas.get(), overlayOffset, size);
                 DebugBoundaryPainter::PaintDebugMargin(canvas.get(), overlayOffset, size, margin);
 #else
-            [size = GetLayoutSize(), margin = GetMargin()](RSCanvas* canvas) {
-                RSAutoCanvasRestore acr(canvas, true);
+            [size = GetLayoutSize(), margin = GetMargin()](std::shared_ptr<RSCanvas> canvas) {
+                RSAutoCanvasRestore acr(*canvas, true);
                 auto overlayOffset = Offset(EXTRA_WIDTH, EXTRA_WIDTH) - margin.GetOffset();
-                DebugBoundaryPainter::PaintDebugBoundary(canvas, overlayOffset, size);
-                DebugBoundaryPainter::PaintDebugCorner(canvas, overlayOffset, size);
-                DebugBoundaryPainter::PaintDebugMargin(canvas, overlayOffset, size, margin);
+                DebugBoundaryPainter::PaintDebugBoundary(canvas.get(), overlayOffset, size);
+                DebugBoundaryPainter::PaintDebugCorner(canvas.get(), overlayOffset, size);
+                DebugBoundaryPainter::PaintDebugMargin(canvas.get(), overlayOffset, size, margin);
 #endif
             });
     }
@@ -690,7 +694,7 @@ void RosenRenderBox::DrawOnPixelMap()
         return;
     }
     RSBitmap tempCache;
-    RSBitmapFormat format { RSCOLORTYPE_BGRA_8888, RSALPHATYPE_OPAQUE };
+    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
     tempCache.Build(width, height, format);
     RSCanvas tempCanvas;
     tempCanvas.Bind(tempCache);
@@ -732,12 +736,10 @@ SkVector RosenRenderBox::GetSkRadii(const Radius& radius, double shrinkFactor, d
     return fRadii;
 }
 #else
-RSVector RosenRenderBox::GetRadii(const Radius& radius, double shrinkFactor, double borderWidth)
+RSPoint RosenRenderBox::GetRadii(const Radius& radius, double shrinkFactor, double borderWidth)
 {
-    RSVector fRadii;
-    fRadii.Set(DoubleToScalar(std::max(NormalizeToPx(radius.GetX()) - shrinkFactor * borderWidth, 0.0)),
-        DoubleToScalar(std::max(NormalizeToPx(radius.GetY()) - shrinkFactor * borderWidth, 0.0)));
-    return fRadii;
+    return RSPoint(static_cast<RSScalar>(std::max(NormalizeToPx(radius.GetX()) - shrinkFactor * borderWidth, 0.0)),
+        static_cast<RSScalar>(std::max(NormalizeToPx(radius.GetY()) - shrinkFactor * borderWidth, 0.0)));
 }
 #endif
 
@@ -803,38 +805,37 @@ SkRRect RosenRenderBox::GetBoxRRect(const Offset& offset, const Border& border, 
     return rRect;
 }
 #else
-RSRoundRect RosenRenderBox::GetBoxRRect(
-    const Offset& offset, const Border& border, double shrinkFactor, bool isRound)
+RSRoundRect RosenRenderBox::GetBoxRRect(const Offset& offset, const Border& border, double shrinkFactor, bool isRound)
 {
     RSRect drawingRect;
-    std::vector<RSVector> fRadii;
+    std::vector<RSPoint> fRadii = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
     Size adjustedSize = GetPaintRect().GetSize() - (GetLayoutSize() - paintSize_);
     if (CheckBorderEdgeForRRect(border)) {
         BorderEdge borderEdge = border.Left();
         double borderWidth = NormalizeToPx(borderEdge.GetWidth());
-        drawingRect = RSRect(DoubleToScalar(offset.GetX() + shrinkFactor * borderWidth),
-            DoubleToScalar(offset.GetY() + shrinkFactor * borderWidth),
-            DoubleToScalar(adjustedSize.Width() - shrinkFactor * DOUBLE_WIDTH * borderWidth) +
-                DoubleToScalar(offset.GetX() + shrinkFactor * borderWidth),
-            DoubleToScalar(adjustedSize.Height() - shrinkFactor * DOUBLE_WIDTH * borderWidth) +
-                DoubleToScalar(offset.GetY() + shrinkFactor * borderWidth));
+        drawingRect = RSRect(
+            static_cast<RSScalar>(offset.GetX() + shrinkFactor * borderWidth),
+            static_cast<RSScalar>(offset.GetY() + shrinkFactor * borderWidth),
+            static_cast<RSScalar>(adjustedSize.Width() - shrinkFactor * DOUBLE_WIDTH * borderWidth) +
+            static_cast<RSScalar>(offset.GetX() + shrinkFactor * borderWidth),
+            static_cast<RSScalar>(adjustedSize.Height() - shrinkFactor * DOUBLE_WIDTH * borderWidth) +
+            static_cast<RSScalar>(offset.GetY() + shrinkFactor * borderWidth));
         if (isRound) {
-            fRadii.push_back(GetRadii(border.TopLeftRadius(), shrinkFactor, borderWidth));
-            fRadii.push_back(GetRadii(border.TopRightRadius(), shrinkFactor, borderWidth));
-            fRadii.push_back(GetRadii(border.BottomRightRadius(), shrinkFactor, borderWidth));
-            fRadii.push_back(GetRadii(border.BottomLeftRadius(), shrinkFactor, borderWidth));
+            fRadii[RSRoundRect::TOP_LEFT_POS] = GetRadii(border.TopLeftRadius(), shrinkFactor, borderWidth);
+            fRadii[RSRoundRect::TOP_RIGHT_POS] = GetRadii(border.TopRightRadius(), shrinkFactor, borderWidth);
+            fRadii[RSRoundRect::BOTTOM_RIGHT_POS] = GetRadii(border.BottomRightRadius(), shrinkFactor, borderWidth);
+            fRadii[RSRoundRect::BOTTOM_LEFT_POS] = GetRadii(border.BottomLeftRadius(), shrinkFactor, borderWidth);
         }
     } else {
-        float offsetX = DoubleToScalar(offset.GetX() + shrinkFactor * NormalizeToPx(border.Left().GetWidth()));
-        float offsetY = DoubleToScalar(offset.GetY() + shrinkFactor * NormalizeToPx(border.Top().GetWidth()));
-        float width = DoubleToScalar(
+        float offsetX = static_cast<RSScalar>(offset.GetX() + shrinkFactor * NormalizeToPx(border.Left().GetWidth()));
+        float offsetY = static_cast<RSScalar>(offset.GetY() + shrinkFactor * NormalizeToPx(border.Top().GetWidth()));
+        float width = static_cast<RSScalar>(
             adjustedSize.Width() - shrinkFactor * DOUBLE_WIDTH * NormalizeToPx(border.Right().GetWidth()));
-        float height = DoubleToScalar(
+        float height = static_cast<RSScalar>(
             adjustedSize.Height() - shrinkFactor * DOUBLE_WIDTH * NormalizeToPx(border.Bottom().GetWidth()));
         drawingRect = RSRect(offsetX, offsetY, width + offsetX, height + offsetY);
     }
-    RSRoundRect rRect(drawingRect, fRadii);
-    return rRect;
+    return RSRoundRect(drawingRect, fRadii);
 }
 #endif
 
@@ -863,7 +864,7 @@ void RosenRenderBox::UpdateBlurRRect(const SkRRect& rRect, const Offset& offset)
 #else
 void RosenRenderBox::UpdateBlurRRect(const RSRoundRect& rRect, const Offset& offset)
 {
-    RSVector radius = rRect.GetCornerRadius(RSRoundRect::CornerPos::TOP_LEFT_POS);
+    RSPoint radius = rRect.GetCornerRadius(RSRoundRect::TOP_LEFT_POS);
     const RSRect& rect = rRect.GetRect();
     windowBlurRRect_.SetRectWithSimpleRadius(
         Rect(rect.GetLeft(), rect.GetTop(), rect.GetWidth(), rect.GetHeight()), radius.GetX(), radius.GetY());
@@ -1159,7 +1160,7 @@ bool RosenRenderBox::CreatePath(
     bool ret = SkParsePath::FromSVGString(path->GetValue().c_str(), &tmpPath);
 #else
     RSRecordingPath tmpPath;
-    bool ret = RSParsePath::GetInstance()->FromSVGString(path->GetValue().c_str(), tmpPath);
+    bool ret = tmpPath.BuildFromSVGString(path->GetValue());
 #endif
     if (!ret) {
         LOGW("path value is invalid");
@@ -1295,20 +1296,20 @@ float RosenRenderBox::DimensionToPx(const Dimension& value, const Size& size, Le
     switch (value.Unit()) {
         case DimensionUnit::PERCENT: {
             if (type == LengthMode::HORIZONTAL) {
-                return DoubleToScalar(value.Value() * size.Width());
+                return static_cast<RSScalar>(value.Value() * size.Width());
             }
             if (type == LengthMode::VERTICAL) {
-                return DoubleToScalar(value.Value() * size.Height());
+                return static_cast<RSScalar>(value.Value() * size.Height());
             }
             if (type == LengthMode::OTHER) {
-                return DoubleToScalar(value.Value() * sqrt(size.Width() * size.Height()));
+                return static_cast<RSScalar>(value.Value() * sqrt(size.Width() * size.Height()));
             }
             return 0.0f;
         }
         case DimensionUnit::PX:
-            return DoubleToScalar(value.Value());
+            return static_cast<RSScalar>(value.Value());
         default:
-            return DoubleToScalar(NormalizeToPx(value));
+            return static_cast<RSScalar>(NormalizeToPx(value));
     }
 }
 #endif
