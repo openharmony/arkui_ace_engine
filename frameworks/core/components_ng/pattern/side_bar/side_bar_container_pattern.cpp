@@ -312,6 +312,9 @@ void SideBarContainerPattern::DoAnimation()
     sideBarStatus_ = SideBarStatus::CHANGING;
     UpdateControlButtonIcon();
 
+    // fire before animation to include user changes in onChange event
+    FireChangeEvent(sideBarStatus == SideBarStatus::HIDDEN);
+
     auto weak = AceType::WeakClaim(this);
     auto context = PipelineContext::GetCurrentContext();
     context->OpenImplicitAnimation(option, option.GetCurve(), [weak, sideBarStatus]() {
@@ -319,11 +322,9 @@ void SideBarContainerPattern::DoAnimation()
         if (pattern) {
             if (sideBarStatus == SideBarStatus::HIDDEN) {
                 pattern->SetSideBarStatus(SideBarStatus::SHOW);
-                pattern->FireChangeEvent(true);
                 pattern->UpdateControlButtonIcon();
             } else {
                 pattern->SetSideBarStatus(SideBarStatus::HIDDEN);
-                pattern->FireChangeEvent(false);
                 pattern->UpdateControlButtonIcon();
             }
         }
@@ -368,13 +369,13 @@ void SideBarContainerPattern::DoSideBarAnimation()
     auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
     bool isSideBarStart = sideBarPosition == SideBarPosition::START;
 
+    FireChangeEvent(sideBarStatus_ == SideBarStatus::HIDDEN);
     if (sideBarStatus_ == SideBarStatus::HIDDEN) {
         controller_->AddInterpolator(isSideBarStart ? leftToRightAnimation_ : rightToLeftAnimation_);
         controller_->AddStopListener([weak]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID_NOLOG(pattern);
             pattern->SetSideBarStatus(SideBarStatus::SHOW);
-            pattern->FireChangeEvent(true);
             pattern->UpdateControlButtonIcon();
         });
     } else {
@@ -383,7 +384,6 @@ void SideBarContainerPattern::DoSideBarAnimation()
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID_NOLOG(pattern);
             pattern->SetSideBarStatus(SideBarStatus::HIDDEN);
-            pattern->FireChangeEvent(false);
             pattern->UpdateControlButtonIcon();
         });
     }
