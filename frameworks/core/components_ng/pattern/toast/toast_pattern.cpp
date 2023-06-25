@@ -17,9 +17,14 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t API_VERSION_9 = 9;
+} // namespace
+
 bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& changeConfig)
 {
     CHECK_NULL_RETURN(dirty, false);
@@ -35,9 +40,16 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     auto toastNode = dirty->GetHostNode();
     auto toastContext = toastNode->GetRenderContext();
     CHECK_NULL_RETURN(toastContext, false);
-    toastContext->UpdateOffset(
-        OffsetT<Dimension>(Dimension((rootWidth - text->GetGeometryNode()->GetMarginFrameSize().Width()) / 2.0f),
-            Dimension(rootHeight - toastBottom - dirty->GetGeometryNode()->GetMarginFrameSize().Height())));
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > API_VERSION_9) {
+        toastContext->UpdateOffset(
+            OffsetT<Dimension>(Dimension((rootWidth - text->GetGeometryNode()->GetMarginFrameSize().Width()) / 2.0f),
+                Dimension(rootHeight - toastBottom - dirty->GetGeometryNode()->GetMarginFrameSize().Height())));
+    } else {
+        toastContext->UpdateOffset(
+            OffsetT<Dimension>(Dimension((rootWidth - text->GetGeometryNode()->GetMarginFrameSize().Width()) / 2.0f),
+                Dimension(rootHeight - toastBottom)));
+    }
     return true;
 }
 } // namespace OHOS::Ace::NG
