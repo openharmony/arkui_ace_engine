@@ -174,7 +174,8 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     // set swiper cache info.
-    SetCacheCount(layoutWrapper, swiperLayoutProperty->GetCachedCount().value_or(1));
+    layoutWrapper->SetCacheCount(swiperLayoutProperty->GetCachedCount().value_or(1), childLayoutConstraint);
+    layoutWrapper->SetLongPredictTask();
 
     LOGD("new start index is %{public}d, new end index is %{public}d, offset is %{public}f, mainSize is %{public}f",
         GetStartIndex(), GetEndIndex(), currentOffset_, contentMainSize_);
@@ -552,11 +553,6 @@ void SwiperLayoutAlgorithm::LayoutBackward(
     for (const auto& index : removeIndexes) {
         itemPosition_.erase(index);
     }
-}
-
-void SwiperLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cachedCount)
-{
-    layoutWrapper->SetCacheCount(cachedCount);
 }
 
 void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

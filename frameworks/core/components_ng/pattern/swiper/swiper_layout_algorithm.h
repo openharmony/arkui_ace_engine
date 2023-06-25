@@ -180,7 +180,6 @@ public:
 
 private:
     void MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
-    void SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cachedCount);
     void SetInactive(
         LayoutWrapper* layoutWrapper, float startMainPos, float endMainPos, std::optional<int32_t> targetIndex);
 

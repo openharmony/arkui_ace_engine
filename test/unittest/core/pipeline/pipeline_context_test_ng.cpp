@@ -744,7 +744,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg014, TestSize.Level1)
      * @tc.steps2: Call the function OnIdle.
      * @tc.expected: The value of flagCbk remains unchanged.
      */
-    context_->AddPredictTask([&flagCbk](int64_t deadline) { flagCbk = true; });
+    context_->AddPredictTask([&flagCbk](int64_t, bool) { flagCbk = true; });
     context_->OnIdle(0);
     EXPECT_FALSE(flagCbk);
 
@@ -2043,7 +2043,7 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg003, TestSize.Level1)
      * @tc.steps3: Call AddPredictTask.
      * @tc.expected: predictTask_ in the taskScheduler size is 2.
      */
-    taskScheduler.AddPredictTask([](int64_t deadline) {});
+    taskScheduler.AddPredictTask([](int64_t, bool) {});
     taskScheduler.AddPredictTask(nullptr);
     EXPECT_EQ(taskScheduler.predictTask_.size(), 2);
 

@@ -1076,12 +1076,14 @@ void PipelineContext::FlushTouchEvents()
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(rootNode_);
     {
-        eventManager_->FlushTouchEventsBegin(touchEvents_);
         std::unordered_set<int32_t> moveEventIds;
         decltype(touchEvents_) touchEvents(std::move(touchEvents_));
         if (touchEvents.empty()) {
+            canUseLongPredictTask_ = true;
             return;
         }
+        canUseLongPredictTask_ = false;
+        eventManager_->FlushTouchEventsBegin(touchEvents_);
         std::list<TouchEvent> touchPoints;
         for (auto iter = touchEvents.rbegin(); iter != touchEvents.rend(); ++iter) {
             auto scalePoint = (*iter).CreateScalePoint(GetViewScale());
@@ -1693,11 +1695,19 @@ void PipelineContext::AddPredictTask(PredictTask&& task)
 void PipelineContext::OnIdle(int64_t deadline)
 {
     if (deadline == 0) {
+        canUseLongPredictTask_ = false;
         return;
+    }
+    if (canUseLongPredictTask_) {
+        // check new incoming event after vsync.
+        if (!touchEvents_.empty()) {
+            canUseLongPredictTask_ = false;
+        }
     }
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("OnIdle, targettime:%" PRId64 "", deadline);
-    taskScheduler_.FlushPredictTask(deadline - TIME_THRESHOLD);
+    taskScheduler_.FlushPredictTask(deadline - TIME_THRESHOLD, canUseLongPredictTask_);
+    canUseLongPredictTask_ = false;
 }
 
 void PipelineContext::Finish(bool /*autoFinish*/) const

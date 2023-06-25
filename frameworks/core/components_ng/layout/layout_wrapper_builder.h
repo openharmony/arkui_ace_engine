@@ -18,10 +18,12 @@
 
 #include <list>
 #include <map>
+#include <optional>
 #include <unordered_map>
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
+#include "core/components_ng/property/layout_constraint.h"
 
 namespace OHOS::Ace::NG {
 
@@ -56,9 +58,15 @@ public:
         return startIndex_;
     }
 
-    void SetCacheCount(int32_t cacheCount)
+    void SetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt)
     {
         cacheCount_ = cacheCount < 0 ? 1 : cacheCount;
+        itemConstraint_ = itemConstraint;
+    }
+
+    void SetLongPredictTask()
+    {
+        useLongPredictTask_ = true;
     }
 
     virtual void SwapDirtyAndUpdateBuildCache() {}
@@ -71,6 +79,9 @@ protected:
     virtual const std::list<RefPtr<LayoutWrapper>>& OnExpandChildLayoutWrapper() = 0;
 
     std::unordered_map<int32_t, RefPtr<LayoutWrapper>> wrapperMap_;
+
+    std::optional<LayoutConstraintF> itemConstraint_;
+    bool useLongPredictTask_ = false;
 
     int32_t startIndex_ = 0;
     int32_t cacheCount_ = 0;
