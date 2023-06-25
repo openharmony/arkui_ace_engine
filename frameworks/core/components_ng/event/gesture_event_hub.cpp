@@ -377,6 +377,49 @@ bool GestureEventHub::IsAllowedDrag(RefPtr<EventHub> eventHub)
     return true;
 }
 
+void GestureEventHub::StartLongPressActionForWeb()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskScheduler = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskScheduler);
+
+    taskScheduler->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto gestureHub = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(gestureHub);
+            auto dragEventActuator = gestureHub->dragEventActuator_;
+            CHECK_NULL_VOID_NOLOG(dragEventActuator);
+            dragEventActuator->StartLongPressActionForWeb();
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+void GestureEventHub::CancelDragForWeb()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskScheduler = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskScheduler);
+
+    taskScheduler->PostTask(
+        [weak = WeakClaim(this)]() {
+            LOGI("web long press action start");
+            auto gestureHub = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(gestureHub);
+            auto dragEventActuator = gestureHub->dragEventActuator_;
+            CHECK_NULL_VOID_NOLOG(dragEventActuator);
+            dragEventActuator->CancelDragForWeb();
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+void GestureEventHub::ResetDragActionForWeb()
+{
+    CHECK_NULL_VOID_NOLOG(dragEventActuator_);
+    dragEventActuator_->ResetDragActionForWeb();
+}
+
 void GestureEventHub::StartDragTaskForWeb()
 {
     auto startTime = std::chrono::high_resolution_clock::now();

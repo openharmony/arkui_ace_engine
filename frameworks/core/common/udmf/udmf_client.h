@@ -40,6 +40,12 @@ public:
         const RefPtr<UnifiedData>& unifiedData, int32_t formId, const RequestFormInfo& cardInfo) = 0;
     virtual void AddLinkRecord(
         const RefPtr<UnifiedData>& unifiedData, const std::string& url, const std::string& description) = 0;
+    virtual void GetLinkRecord(
+        const RefPtr<UnifiedData>& unifiedData, std::string& url, std::string& description) = 0;
+    virtual void AddHtmlRecord(
+        const RefPtr<UnifiedData>& unifiedData, const std::string& htmlContent, const std::string& plainContent) = 0;
+    virtual void GetHtmlRecord(
+        const RefPtr<UnifiedData>& unifiedData, std::string& htmlContent, std::string& plainContent) = 0;
     virtual void AddPixelMapRecord(const RefPtr<UnifiedData>& unifiedData, std::vector<uint8_t>& data) = 0;
     virtual void AddImageRecord(const RefPtr<UnifiedData>& unifiedData, const std::string& uri) = 0;
     virtual void AddTextRecord(const RefPtr<UnifiedData>& unifiedData, const std::string& selectedStr) = 0;
