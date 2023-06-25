@@ -31,6 +31,7 @@ public:
     }
     ~SvgQuote() override = default;
 
+#ifndef USE_ROSEN_DRAWING
     SkPath AsPath(const Size& viewPort) const override
     {
         SkPath path;
@@ -40,6 +41,17 @@ public:
         }
         return path;
     }
+#else
+    RSRecordingPath AsPath(const Size& viewPort) const override
+    {
+        RSRecordingPath path;
+        for (const auto& child : children_) {
+            auto childPath = child->AsPath(viewPort);
+            path.Op(path, childPath, RSPathOp::UNION);
+        }
+        return path;
+    }
+#endif
 
     void Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color) override
     {

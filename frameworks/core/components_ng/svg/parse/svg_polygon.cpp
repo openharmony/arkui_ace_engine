@@ -42,6 +42,7 @@ RefPtr<SvgNode> SvgPolygon::CreatePolyline()
     return AceType::MakeRefPtr<SvgPolygon>(false);
 }
 
+#ifndef USE_ROSEN_DRAWING
 SkPath SvgPolygon::AsPath(const Size& viewPort) const
 {
     SkPath path;
@@ -69,5 +70,26 @@ SkPath SvgPolygon::AsPath(const Size& viewPort) const
     }
     return path;
 }
+#else
+RSRecordingPath SvgPolygon::AsPath(const Size& viewPort) const
+{
+    RSRecordingPath path;
+    auto declaration = AceType::DynamicCast<SvgPolygonDeclaration>(declaration_);
+    CHECK_NULL_RETURN_NOLOG(declaration, path);
+    if (declaration->GetPoints().empty()) {
+        return path;
+    }
+    std::vector<RSPoint> rsPoints;
+    RosenSvgPainter::StringToPoints(declaration->GetPoints().c_str(), rsPoints);
+    if (rsPoints.empty()) {
+        return RSRecordingPath();
+    }
+    path.AddPoly(rsPoints, rsPoints.size(), isClose_);
+    if (declaration->GetClipState().IsEvenodd()) {
+        path.SetFillStyle(RSPathFillType::EVEN_ODD);
+    }
+    return path;
+}
+#endif
 
 } // namespace OHOS::Ace::NG
