@@ -382,21 +382,17 @@ void JSTabContent::SetSubTabBarStyle(const JSRef<JSObject>& paramObject)
         contentOpt = content;
     }
     JSRef<JSVal> indicatorParam = paramObject->GetProperty("indicator");
-    if (!indicatorParam->IsUndefined()) {
-        SetIndicator(indicatorParam);
-    }
+    SetIndicator(indicatorParam);
+
     JSRef<JSVal> selectedModeParam = paramObject->GetProperty("selectedMode");
-    if (!selectedModeParam->IsUndefined()) {
-        SetSelectedMode(selectedModeParam);
-    }
+    SetSelectedMode(selectedModeParam);
+
     JSRef<JSVal> boardParam = paramObject->GetProperty("board");
-    if (!boardParam->IsUndefined()) {
-        SetBoard(boardParam);
-    }
+    SetBoard(boardParam);
+
     JSRef<JSVal> labelStyleParam = paramObject->GetProperty("labelStyle");
-    if (!labelStyleParam->IsUndefined()) {
-        SetLabelStyle(labelStyleParam);
-    }
+    SetLabelStyle(labelStyleParam);
+
     TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
     TabContentModel::GetInstance()->SetTabBar(contentOpt, std::nullopt, nullptr, false);
 }
