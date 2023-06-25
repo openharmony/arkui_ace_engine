@@ -144,6 +144,11 @@ void ListModelNG::SetSticky(V2::StickyStyle stickyStyle)
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, StickyStyle, stickyStyle);
 }
 
+void ListModelNG::SetScrollSnapAlign(V2::ScrollSnapAlign scrollSnapAlign)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollSnapAlign, scrollSnapAlign);
+}
+
 void ListModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

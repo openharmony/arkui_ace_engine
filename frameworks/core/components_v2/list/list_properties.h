@@ -57,6 +57,13 @@ enum class StickyMode {
     OPACITY,
 };
 
+enum class ScrollSnapAlign {
+    NONE = 0,
+    START,
+    CENTER,
+    END,
+};
+
 enum class SwipeEdgeEffect {
     Spring = 0,
     None,
