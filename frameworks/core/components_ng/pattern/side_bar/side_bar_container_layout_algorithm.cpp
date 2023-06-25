@@ -242,7 +242,7 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBarContent(
     const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<LayoutWrapper>& contentLayoutWrapper,
     float parentWidth)
 {
-    auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
+    auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto contentWidth = parentWidth;
 
@@ -345,7 +345,7 @@ void SideBarContainerLayoutAlgorithm::LayoutControlButton(
      *   3. if the controlButtonLeft has set, whether sideBarPosition set to START or END
      *   control button offset the left, if value invalid set to default 16vp
      */
-    auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
+    auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
     auto controlButtonWidth = layoutProperty->GetControlButtonWidth().value_or(DEFAULT_CONTROL_BUTTON_WIDTH);
 
     if ((sideBarPosition == SideBarPosition::END) && // sideBarPosition is End, other pass
@@ -369,7 +369,7 @@ void SideBarContainerLayoutAlgorithm::LayoutSideBar(
 
     CHECK_NULL_VOID (layoutWrapper->GetGeometryNode());
     auto parentWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
-    auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
+    auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
     float sideBarOffsetX = 0.0f;
 
     switch (sideBarStatus_) {
@@ -407,7 +407,7 @@ void SideBarContainerLayoutAlgorithm::LayoutSideBarContent(
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
 
-    auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
+    auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
 
     float contentOffsetX = 0.0f;
     if (type_ == SideBarContainerType::EMBED && sideBarPosition == SideBarPosition::START) {
@@ -431,7 +431,7 @@ void SideBarContainerLayoutAlgorithm::LayoutDivider(
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
 
-    auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
+    auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
 
     CHECK_NULL_VOID(layoutWrapper->GetGeometryNode());
     auto parentWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
@@ -473,5 +473,16 @@ void SideBarContainerLayoutAlgorithm::LayoutDivider(
     CHECK_NULL_VOID(dividerLayoutWrapper->GetGeometryNode());
     dividerLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(dividerOffset);
     dividerLayoutWrapper->Layout();
+}
+
+SideBarPosition SideBarContainerLayoutAlgorithm::GetSideBarPositionWithRtl(
+    const RefPtr<SideBarContainerLayoutProperty>& layoutProperty)
+{
+    auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
+    if (layoutProperty->GetLayoutDirection() == TextDirection::RTL) {
+        sideBarPosition = (sideBarPosition == SideBarPosition::START)
+                            ? SideBarPosition::END : SideBarPosition::START;
+    }
+    return sideBarPosition;
 }
 } // namespace OHOS::Ace::NG

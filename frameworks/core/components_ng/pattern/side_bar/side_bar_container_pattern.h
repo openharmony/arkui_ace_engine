@@ -130,6 +130,7 @@ private:
     void DoControlButtonHoverAnimation(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
         int32_t duration, const RefPtr<Curve>& curve);
     void HandleMouseEvent(const MouseInfo& info);
+    SideBarPosition GetSideBarPositionWithRtl(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty);
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<ClickEvent> controlButtonClickEvent_;
