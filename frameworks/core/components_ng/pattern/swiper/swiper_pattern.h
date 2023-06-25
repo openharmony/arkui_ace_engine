@@ -387,7 +387,6 @@ public:
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
     void ArrowHover(bool hoverFlag);
-    void IndicatorHover(bool hoverFlag);
     bool IsLoop() const;
     bool IsEnabled() const;
     void OnWindowShow() override;
@@ -548,8 +547,7 @@ private:
     WeakPtr<FrameNode> lastWeakShowNode_;
 
     CancelableCallback<void()> translateTask_;
-    // Arrow default hover ratio
-    float hoverRatio_ = 1.0f;
+
     std::optional<int32_t> indicatorId_;
     std::optional<int32_t> leftButtonId_;
     std::optional<int32_t> rightButtonId_;
