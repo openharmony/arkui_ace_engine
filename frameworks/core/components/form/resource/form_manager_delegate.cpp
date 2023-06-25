@@ -782,6 +782,18 @@ void FormManagerDelegate::ProcessFormUpdate(const AppExecFwk::FormJsInfo &formJs
     }
 }
 
+void FormManagerDelegate::ReleaseRenderer()
+{
+    LOGI("FormManagerDelegate releaseForm. formId: %{public}" PRId64 ", %{public}s",
+        runningCardId_, runningCompId_.c_str());
+    if (runningCardId_ <= 0) {
+        return;
+    }
+
+    OHOS::AppExecFwk::FormMgr::GetInstance().ReleaseRenderer(runningCardId_, runningCompId_);
+    formRendererDispatcher_ = nullptr;
+}
+
 void FormManagerDelegate::ProcessFormUninstall(const int64_t formId)
 {
     LOGI("ProcessFormUninstall formId:%{public}s", std::to_string(formId).c_str());
