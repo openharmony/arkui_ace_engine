@@ -38,7 +38,10 @@ public:
         return false;
     }
 
+    void SetOnReleaseCallback(std::function<void(int32_t)>&& callback);
+
     void OnConnect() override;
+    void OnDisconnect() override;
 
     void RequestExtensionSessionActivation();
     void RequestExtensionSessionBackground();
@@ -49,6 +52,11 @@ public:
     FocusPattern GetFocusPattern() const override;
 
 private:
+    enum ReleaseCode {
+        DESTROY_NORMAL = 0,
+        CONNECT_BROKEN,
+    };
+
     void OnModifyDone() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -65,6 +73,7 @@ private:
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
+    std::function<void(int32_t)> onReleaseCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };

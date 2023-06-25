@@ -34,4 +34,13 @@ void UIExtensionModelNG::Create(const std::string& bundleName, const std::string
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
 }
+
+void UIExtensionModelNG::SetOnRelease(std::function<void(int32_t)>&& onRelease)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnReleaseCallback(std::move(onRelease));
+}
 } // namespace OHOS::Ace::NG

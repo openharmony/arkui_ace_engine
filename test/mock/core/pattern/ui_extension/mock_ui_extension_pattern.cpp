@@ -22,6 +22,8 @@ UIExtensionPattern::~UIExtensionPattern() {}
 
 void UIExtensionPattern::OnConnect() {}
 
+void UIExtensionPattern::OnDisconnect() {}
+
 void UIExtensionPattern::OnWindowShow() {}
 
 void UIExtensionPattern::OnWindowHide() {}
