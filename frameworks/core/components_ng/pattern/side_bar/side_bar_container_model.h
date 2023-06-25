@@ -68,8 +68,6 @@ private:
 
     virtual void CreateAndMountControlButton(const RefPtr<NG::FrameNode>& parentNode);
     virtual void CreateAndMountDivider(const RefPtr<NG::FrameNode>& parentNode);
-    virtual void InitSideBarContentEvent(const RefPtr<NG::FrameNode>& parentNode,
-        const RefPtr<NG::FrameNode>& sideBarContentFrameNode);
     virtual void MarkNeedInitRealSideBarWidth();
 };
 } // namespace OHOS::Ace::NG
