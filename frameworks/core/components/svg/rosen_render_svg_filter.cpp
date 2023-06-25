@@ -35,6 +35,7 @@ void RosenRenderSvgFilter::Paint(RenderContext& context, const Offset& offset)
     return;
 }
 
+#ifndef USE_ROSEN_DRAWING
 const SkPaint RosenRenderSvgFilter::OnAsPaint()
 {
     SkPaint skPaint;
@@ -48,9 +49,31 @@ const SkPaint RosenRenderSvgFilter::OnAsPaint()
     skPaint.setImageFilter(imageFilter);
     return skPaint;
 }
+#else
+const RSBrush RosenRenderSvgFilter::OnAsPaint()
+{
+    RSBrush rsBrush;
+    rsBrush.SetAntiAlias(true);
+    std::shared_ptr<RSImageFilter> imageFilter = nullptr;
+    ColorInterpolationType currentColor = ColorInterpolationType::SRGB;
+    for (const auto& item : GetChildren()) {
+        GetImageFilter(AceType::DynamicCast<RenderSvgFe>(item), imageFilter, currentColor);
+    }
+    ConverImageFilterColor(imageFilter, currentColor, ColorInterpolationType::SRGB);
+    RSFilter filter;
+    filter.SetImageFilter(imageFilter);
+    rsBrush.SetFilter(filter);
+    return rsBrush;
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderSvgFilter::GetImageFilter(
     const RefPtr<RenderSvgFe>& fe, sk_sp<SkImageFilter>& imageFilter, ColorInterpolationType& currentColor)
+#else
+void RosenRenderSvgFilter::GetImageFilter(
+    const RefPtr<RenderSvgFe>& fe, std::shared_ptr<RSImageFilter>& imageFilter, ColorInterpolationType& currentColor)
+#endif
 {
     if (!fe) {
         return;
@@ -107,12 +130,18 @@ void RosenRenderSvgFilter::InitFilterColor(const RefPtr<RenderSvgFe>& fe, ColorI
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 sk_sp<SkImageFilter> RosenRenderSvgFilter::MakeImageFilter(const FeInType& in, sk_sp<SkImageFilter>& imageFilter)
+#else
+std::shared_ptr<RSImageFilter> RosenRenderSvgFilter::MakeImageFilter(
+    const FeInType& in, std::shared_ptr<RSImageFilter>& imageFilter)
+#endif
 {
     switch (in) {
         case FeInType::SOURCE_GRAPHIC:
             return nullptr;
         case FeInType::SOURCE_ALPHA: {
+#ifndef USE_ROSEN_DRAWING
             SkColorMatrix m;
             m.setScale(0, 0, 0, 1.0f);
 #ifdef USE_SYSTEM_SKIA
@@ -121,6 +150,15 @@ sk_sp<SkImageFilter> RosenRenderSvgFilter::MakeImageFilter(const FeInType& in, s
             return SkColorFilterImageFilter::Make(SkColorFilters::Matrix(m), nullptr);
 #else
             return SkImageFilters::ColorFilter(SkColorFilters::Matrix(m), nullptr);
+#endif
+#else
+            RSColorMatrix m;
+            m.SetScale(0, 0, 0, 1.0f);
+            auto colorFilter = RSColorFilter::CreateMatrixColorFilter(m);
+            if (colorFilter != nullptr) {
+                return RSImageFilter::CreateColorFilterImageFilter(*colorFilter, nullptr);
+            }
+            break;
 #endif
         }
         case FeInType::BACKGROUND_IMAGE:
@@ -139,6 +177,7 @@ sk_sp<SkImageFilter> RosenRenderSvgFilter::MakeImageFilter(const FeInType& in, s
     return imageFilter;
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderSvgFilter::ConverImageFilterColor(
     sk_sp<SkImageFilter>& imageFilter, const ColorInterpolationType& src, const ColorInterpolationType& dst)
 {
@@ -164,5 +203,20 @@ void RosenRenderSvgFilter::ConverImageFilterColor(
 #endif
     }
 }
+#else
+void RosenRenderSvgFilter::ConverImageFilterColor(
+    std::shared_ptr<RSImageFilter>& imageFilter, const ColorInterpolationType& src, const ColorInterpolationType& dst)
+{
+    std::shared_ptr<RSColorFilter> colorFilter = nullptr;
+    if (dst == ColorInterpolationType::LINEAR_RGB && src == ColorInterpolationType::SRGB) {
+        colorFilter = RSColorFilter::CreateSrgbGammaToLinear();
+    } else if (dst == ColorInterpolationType::SRGB && src == ColorInterpolationType::LINEAR_RGB) {
+        colorFilter = RSColorFilter::CreateLinearToSrgbGamma();
+    }
+    if (colorFilter != nullptr) {
+        imageFilter = RSImageFilter::CreateColorFilterImageFilter(*colorFilter, imageFilter);
+    }
+}
+#endif
 
 } // namespace OHOS::Ace
