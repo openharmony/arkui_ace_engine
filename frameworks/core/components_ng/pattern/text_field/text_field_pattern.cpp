@@ -1727,6 +1727,26 @@ void TextFieldPattern::InitDragDropEvent()
         pattern->StopTwinkling();
     };
     eventHub->SetOnDragLeave(std::move(onDragLeave));
+
+    auto onDragEnd = [weakPtr = WeakClaim(this), id = Container::CurrentId()](
+                         const RefPtr<OHOS::Ace::DragEvent>& event) {
+        ContainerScope scope(id);
+        auto pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        LOGD("TextFieldPattern  onDragEnd result: %{public}d dragStatus: %{public}d", event->GetResult(),
+            pattern->dragStatus_);
+        if (event->GetResult() == DragRet::DRAG_FAIL && pattern->dragStatus_ == DragStatus::DRAGGING) {
+            pattern->dragStatus_ = DragStatus::NONE;
+            pattern->MarkContentChange();
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+            CHECK_NULL_VOID(layoutProperty);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
+    };
+    eventHub->SetOnDragEnd(std::move(onDragEnd));
+
     auto onDrop = [weakPtr = WeakClaim(this)](
                       const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
