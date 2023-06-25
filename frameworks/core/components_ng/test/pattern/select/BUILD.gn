@@ -57,6 +57,7 @@ ohos_unittest("select_pattern_test_ng") {
     # components_ng_base
     "$ace_root/frameworks/core/components_ng/base/frame_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/geometry_node.cpp",
+    "$ace_root/frameworks/core/components_ng/base/modifier.cpp",
     "$ace_root/frameworks/core/components_ng/base/ui_node.cpp",
 
     # components_ng_layout

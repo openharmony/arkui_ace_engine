@@ -29,6 +29,7 @@ ohos_unittest("drag_event_test_ng") {
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components_ng/base/frame_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/geometry_node.cpp",
+    "$ace_root/frameworks/core/components_ng/base/modifier.cpp",
     "$ace_root/frameworks/core/components_ng/base/ui_node.cpp",
     "$ace_root/frameworks/core/components_ng/event/drag_event.cpp",
     "$ace_root/frameworks/core/components_ng/event/event_hub.cpp",
