@@ -25,7 +25,11 @@ class RosenRenderSvgFeOffset : public RenderSvgFeOffset, RosenRenderSvgFe {
     DECLARE_ACE_TYPE(RosenRenderSvgFeOffset, RenderSvgFeOffset, RosenRenderSvgFe);
 
 public:
+#ifndef USE_ROSEN_DRAWING
     void OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter) const override;
+#else
+    void OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter) const override;
+#endif
 };
 
 } // namespace OHOS::Ace
