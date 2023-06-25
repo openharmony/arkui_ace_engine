@@ -15,7 +15,9 @@
 
 #include "frameworks/core/components/svg/rosen_render_svg_polygon.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/utils/SkParsePath.h"
+#endif
 #include "render_service_client/core/ui/rs_node.h"
 
 #include "core/pipeline/base/rosen_render_context.h"
@@ -36,7 +38,11 @@ void RosenRenderSvgPolygon::Paint(RenderContext& context, const Offset& offset)
         LOGE("Paint canvas is null");
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     SkPath out;
+#else
+    RSPath out;
+#endif
     if (!GetPath(&out)) {
         return;
     }
@@ -46,7 +52,11 @@ void RosenRenderSvgPolygon::Paint(RenderContext& context, const Offset& offset)
         RosenRenderTransform::SyncTransformToRsNode(rsNode, transform);
     }
 
+#ifndef USE_ROSEN_DRAWING
     SkAutoCanvasRestore save(canvas, false);
+#else
+    RSAutoCanvasRestore save(*canvas, false);
+#endif
     PaintMaskLayer(context, offset, offset);
 
     UpdateGradient(fillState_);
@@ -67,6 +77,7 @@ void RosenRenderSvgPolygon::PaintDirectly(RenderContext& context, const Offset& 
         LOGE("Paint canvas is null");
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     SkPath out;
     if (!GetPath(&out)) {
         return;
@@ -75,6 +86,16 @@ void RosenRenderSvgPolygon::PaintDirectly(RenderContext& context, const Offset& 
     if (NeedTransform()) {
         canvas->concat(RosenSvgPainter::ToSkMatrix(GetTransformMatrix4Raw()));
     }
+#else
+    RSPath out;
+    if (!GetPath(&out)) {
+        return;
+    }
+    RSAutoCanvasRestore save(*canvas, true);
+    if (NeedTransform()) {
+        canvas->ConcatMatrix(RosenSvgPainter::ToDrawingMatrix(GetTransformMatrix4Raw()));
+    }
+#endif
     PaintMaskLayer(context, offset, offset);
 
     UpdateGradient(fillState_);
@@ -82,6 +103,7 @@ void RosenRenderSvgPolygon::PaintDirectly(RenderContext& context, const Offset& 
     RosenSvgPainter::SetStrokeStyle(canvas, out, strokeState_, opacity_);
 }
 
+#ifndef USE_ROSEN_DRAWING
 bool RosenRenderSvgPolygon::CreateSkPath(const std::string& pointsStr, std::vector<SkPoint>& skPoints)
 {
     if (pointsStr.empty()) {
@@ -90,7 +112,18 @@ bool RosenRenderSvgPolygon::CreateSkPath(const std::string& pointsStr, std::vect
     RosenSvgPainter::StringToPoints(pointsStr.c_str(), skPoints);
     return !skPoints.empty();
 }
+#else
+bool RosenRenderSvgPolygon::CreateRSPath(const std::string& pointsStr, std::vector<RSPoint>& rsPoints)
+{
+    if (pointsStr.empty()) {
+        return false;
+    }
+    RosenSvgPainter::StringToPoints(pointsStr.c_str(), rsPoints);
+    return !rsPoints.empty();
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 bool RosenRenderSvgPolygon::CreateSkPaths(
     const std::string& points1, const std::string& points2, double weight, SkPath* out)
 {
@@ -121,6 +154,38 @@ bool RosenRenderSvgPolygon::CreateSkPaths(
     begin.interpolate(end, weight, out);
     return true;
 }
+#else
+bool RosenRenderSvgPolygon::CreateRSPaths(
+    const std::string& points1, const std::string& points2, double weight, RSPath* out)
+{
+    RSPath begin;
+    RSPath end;
+    if (points1.empty() || points2.empty() || out == nullptr) {
+        return false;
+    }
+    std::vector<RSPoint> rsPoints1;
+    std::vector<RSPoint> rsPoints2;
+    if (!CreateRSPath(points1.c_str(), rsPoints1) || !CreateRSPath(points2.c_str(), rsPoints2)) {
+        return false;
+    }
+    if (rsPoints1.size() != rsPoints2.size()) {
+        return false;
+    }
+    if (isBy_) {
+        auto rsPointIter1 = rsPoints1.begin();
+        auto rsPointIter2 = rsPoints2.begin();
+        while (rsPointIter1 != rsPoints1.end()) {
+            *rsPointIter1 = *rsPointIter1 + *rsPointIter2;
+            ++rsPointIter1;
+            ++rsPointIter2;
+        }
+    }
+    begin.AddPoly(rsPoints1, rsPoints1.size(), isClose_);
+    end.AddPoly(rsPoints2, rsPoints2.size(), isClose_);
+    out->BuildFromInterpolate(begin, end, weight);
+    return true;
+}
+#endif
 
 void RosenRenderSvgPolygon::UpdateMotion(const std::string& path, const std::string& rotate, double percent)
 {
@@ -134,15 +199,28 @@ void RosenRenderSvgPolygon::UpdateMotion(const std::string& path, const std::str
 
 Rect RosenRenderSvgPolygon::GetPaintBounds(const Offset& offset)
 {
+#ifndef USE_ROSEN_DRAWING
     SkPath path;
     if (!GetPath(&path)) {
         return GetPaintRect();
     }
     auto& bounds = path.getBounds();
     return Rect(bounds.left(), bounds.top(), bounds.width(), bounds.height());
+#else
+    RSPath path;
+    if (!GetPath(&path)) {
+        return GetPaintRect();
+    }
+    auto bounds = path.GetBounds();
+    return Rect(bounds.GetLeft(), bounds.GetTop(), bounds.GetWidth(), bounds.GetHeight());
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 bool RosenRenderSvgPolygon::GetPath(SkPath* out)
+#else
+bool RosenRenderSvgPolygon::GetPath(RSPath* out)
+#endif
 {
     if (!out) {
         LOGE("SkPath is null");
@@ -167,20 +245,29 @@ bool RosenRenderSvgPolygon::GetPath(SkPath* out)
             currValue = firstPart + 1;
             nextValue = firstPart;
         }
+#ifndef USE_ROSEN_DRAWING
         if (!CreateSkPaths(pointsVector_[currValue].c_str(), pointsVector_[nextValue].c_str(), weight, out)) {
+#else
+        if (!CreateRSPaths(pointsVector_[currValue].c_str(), pointsVector_[nextValue].c_str(), weight, out)) {
+#endif
             return GetPathWithoutAnimate(out);
         }
     }
     if (fillState_.IsEvenodd()) {
+#ifndef USE_ROSEN_DRAWING
 #ifndef NEW_SKIA
         out->setFillType(SkPath::FillType::kEvenOdd_FillType);
 #else
         out->setFillType(SkPathFillType::kEvenOdd);
 #endif
+#else
+        out->SetFillStyle(RSPathFillType::EVEN_ODD);
+#endif
     }
     return true;
 }
 
+#ifndef USE_ROSEN_DRAWING
 bool RosenRenderSvgPolygon::GetPathWithoutAnimate(SkPath* out)
 {
     if (!out) {
@@ -201,5 +288,23 @@ bool RosenRenderSvgPolygon::GetPathWithoutAnimate(SkPath* out)
     }
     return true;
 }
+#else
+bool RosenRenderSvgPolygon::GetPathWithoutAnimate(RSPath* out)
+{
+    if (!out) {
+        LOGE("path is null");
+        return false;
+    }
+    std::vector<RSPoint> rsPoints;
+    if (!CreateRSPath(points_, rsPoints)) {
+        return false;
+    }
+    out->AddPoly(rsPoints, rsPoints.size(), isClose_);
+    if (fillState_.IsEvenodd()) {
+        out->SetFillStyle(RSPathFillType::EVEN_ODD);
+    }
+    return true;
+}
+#endif
 
 } // namespace OHOS::Ace
