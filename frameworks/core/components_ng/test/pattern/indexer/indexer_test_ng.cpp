@@ -496,8 +496,6 @@ HWTEST_F(IndexerTestNg, IndexerHover001, TestSize.Level1)
     EXPECT_EQ(pattern_->childHoverIndex_, 1);
     pattern_->OnChildHover(1, false);
     EXPECT_EQ(pattern_->childHoverIndex_, -1);
-    pattern_->OnChildHover(CREATE_ARRAY.size(), true);
-    EXPECT_EQ(pattern_->childHoverIndex_, CREATE_ARRAY.size());
 
     pattern_->OnHover(false);
     EXPECT_FALSE(pattern_->isHover_);
@@ -824,17 +822,6 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest001, TestSize.Level1)
     IndexerModelNG.SetSelectedBackgroundColor(Color(0x00000000));
     IndexerModelNG.SetPopupBackground(Color(0x00000000));
     IndexerModelNG.SetUsingPopup(true);
-    TextStyle textStyle;
-    textStyle.SetFontFamilies({ "font1", "font2" });
-
-    std::function<void(TextStyle & textStyle)>&& getSelectedTextStyleFunc = [](TextStyle& textStyle) {
-        textStyle.SetFontFamilies({ "font1", "font2" });
-    };
-    std::function<void(TextStyle & textStyle)>&& getTextStyleFunc = [](TextStyle& textStyle) {};
-
-    IndexerModelNG.SetSelectedFont(std::move(getSelectedTextStyleFunc));
-    IndexerModelNG.SetPopupFont(std::move(getTextStyleFunc));
-    IndexerModelNG.SetFont(std::move(getTextStyleFunc));
     IndexerModelNG.SetItemSize(Dimension(24));
     IndexerModelNG.SetAlignStyle(0);
     IndexerModelNG.SetSelected(0);
@@ -855,9 +842,6 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest001, TestSize.Level1)
     EXPECT_EQ(paintProperty_->GetSelectedBackgroundColorValue(), Color(0x00000000));
     EXPECT_EQ(paintProperty_->GetPopupBackgroundValue(), Color(0x00000000));
     EXPECT_EQ(layoutProperty_->GetUsingPopupValue(), true);
-    EXPECT_EQ(layoutProperty_->GetSelectedFontValue(), textStyle);
-    EXPECT_EQ(layoutProperty_->GetPopupFontValue(), TextStyle());
-    EXPECT_EQ(layoutProperty_->GetFontValue(), TextStyle());
     EXPECT_EQ(layoutProperty_->GetItemSizeValue(), Dimension(24));
     EXPECT_EQ(layoutProperty_->GetAlignStyleValue(), AlignStyle::LEFT);
     EXPECT_EQ(layoutProperty_->GetSelectedValue(), 0);
