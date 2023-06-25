@@ -49,6 +49,7 @@ namespace {
 constexpr double HANGING_PERCENT = 0.8;
 constexpr double DEFAULT_QUALITY = 0.92;
 constexpr int32_t MAX_LENGTH = 2048 * 2048;
+constexpr int32_t PLATFORM_VERSION_TEN = 10;
 const std::string UNSUPPORTED = "data:image/png";
 const std::string URL_PREFIX = "data:";
 const std::string URL_SYMBOL = ";base64,";
@@ -397,7 +398,13 @@ TextMetrics OffscreenCanvasPaintMethod::MeasureTextMetrics(const std::string& te
 void OffscreenCanvasPaintMethod::PaintText(
     const std::string& text, double x, double y, std::optional<double> maxWidth, bool isStroke, bool hasShadow)
 {
-    paragraph_->Layout(FLT_MAX);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (pipelineContext->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        paragraph_->Layout(FLT_MAX);
+    } else {
+        paragraph_->Layout(width_);
+    }
     if (width_ > paragraph_->GetMaxIntrinsicWidth()) {
         paragraph_->Layout(std::ceil(paragraph_->GetMaxIntrinsicWidth()));
     }
