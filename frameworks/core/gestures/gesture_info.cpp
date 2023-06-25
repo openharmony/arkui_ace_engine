@@ -16,6 +16,7 @@
 #include "gesture_info.h"
 
 namespace OHOS::Ace {
+#ifdef ENABLE_DRAG_FRAMEWORK
 void DragEvent::SetData(const RefPtr<UnifiedData>& unifiedData)
 {
     unifiedData_ = unifiedData;
@@ -85,4 +86,5 @@ bool DragEvent::IsCopy()
 {
     return copy_;
 }
+#endif // ENABLE_DRAG_FRAMEWORK
 } // namespace OHOS::Ace
