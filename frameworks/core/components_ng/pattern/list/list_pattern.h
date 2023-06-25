@@ -186,6 +186,12 @@ public:
 
     void SetSwiperItem(WeakPtr<ListItemPattern> swiperItem);
 
+    void SetPredictSnapOffset(float predictSnapOffset)
+    {
+        predictSnapOffset_ = predictSnapOffset;
+    }
+    bool OnScrollSnapCallback(double targetOffset, double velocity) override;
+
     int32_t GetItemIndexByPosition(float xOffset, float yOffset);
 private:
     void OnScrollEndCallback() override;
@@ -214,6 +220,10 @@ private:
     void CheckRestartSpring();
     void StopAnimate();
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
+    void ProcessScrollSnapSpringMotion(float predictSnapOffset);
+    bool IsScrollSnapAlignCenter() const;
+    void SetChainAnimationLayoutAlgorithm(
+        RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, RefPtr<ListLayoutProperty> listLayoutProperty);
 
     // multiSelectable
     void UninitMouseEvent();
@@ -248,10 +258,12 @@ private:
     float currentDelta_ = 0.0f;
     bool crossMatchChild_ = false;
     bool smooth_ = false;
+    float scrollSnapVelocity_ = 0.0f;
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
     std::optional<int32_t> targetIndex_;
+    std::optional<float> predictSnapOffset_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;
     bool scrollable_ = true;
     bool paintStateFlag_ = false;
@@ -283,6 +295,7 @@ private:
     // ListItem swiperAction
     WeakPtr<ListItemPattern> swiperItem_;
     RefPtr<SpringMotion> scrollToIndexMotion_;
+    RefPtr<SpringMotion> scrollSnapMotion_;
 
     bool isScrollEnd_ = false;
 

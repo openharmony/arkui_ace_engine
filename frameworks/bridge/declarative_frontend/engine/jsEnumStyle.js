@@ -498,6 +498,14 @@ var StickyStyle;
   StickyStyle[StickyStyle["Footer"] = 2] = "Footer";
 })(StickyStyle || (StickyStyle = {}));
 
+var ScrollSnapAlign;
+(function (ScrollSnapAlign) {
+  ScrollSnapAlign[ScrollSnapAlign["NONE"] = 0] = "NONE";
+  ScrollSnapAlign[ScrollSnapAlign["START"] = 1] = "START";
+  ScrollSnapAlign[ScrollSnapAlign["CENTER"] = 2] = "CENTER";
+  ScrollSnapAlign[ScrollSnapAlign["END"] = 3] = "END";
+})(ScrollSnapAlign || (ScrollSnapAlign = {}));
+
 var ChainEdgeEffect;
 (function (ChainEdgeEffect) {
   ChainEdgeEffect[ChainEdgeEffect["DEFAULT"] = 0] = "DEFAULT";

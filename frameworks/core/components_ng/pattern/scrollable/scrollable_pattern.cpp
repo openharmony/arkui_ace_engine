@@ -168,6 +168,13 @@ void ScrollablePattern::AddScrollEvent()
     };
     scrollable->SetOverScrollOffsetCallback(std::move(func));
     scrollable->SetNestedScrollOptions(nestedScroll_);
+
+    auto scrollSnap = [weak = WeakClaim(this)](double targetOffset, double velocity) -> bool {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->OnScrollSnapCallback(targetOffset, velocity);
+    };
+    scrollable->SetOnScrollSnapCallback(scrollSnap);
 }
 
 void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
