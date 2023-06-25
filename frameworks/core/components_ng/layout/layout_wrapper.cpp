@@ -416,7 +416,9 @@ void LayoutWrapper::ExpandSafeAreaInner()
 
     // get frame in global offset
     auto frame = geometryNode_->GetFrameRect() + geometryNode_->GetParentGlobalOffset();
-    auto safeArea = opts->GetCombinedSafeArea();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto safeArea = pipeline->GetSafeAreaManager()->GetCombinedSafeArea(*opts);
     if ((opts->edges & SAFE_AREA_EDGE_START) && safeArea.left_.IsValid() && frame.Left() <= safeArea.left_.end) {
         frame.SetWidth(frame.Width() + frame.Left() - safeArea.left_.start);
         frame.SetLeft(safeArea.left_.start);

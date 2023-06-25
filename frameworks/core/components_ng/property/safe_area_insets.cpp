@@ -55,18 +55,4 @@ std::string SafeAreaInsets::ToString() const
     return "SafeAreaInsets left_: " + left_.ToString() + ", top_: " + top_.ToString() +
            ", right_: " + right_.ToString() + ", bottom_: " + bottom_.ToString();
 }
-
-SafeAreaInsets SafeAreaExpandOpts::GetCombinedSafeArea()
-{
-    SafeAreaInsets res;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, res);
-    if (type & SAFE_AREA_TYPE_CUTOUT) {
-        res = res.Combine(pipeline->GetCutoutSafeArea());
-    }
-    if (type & SAFE_AREA_TYPE_SYSTEM) {
-        res = res.Combine(pipeline->GetSystemSafeArea());
-    }
-    return res;
-}
 } // namespace OHOS::Ace::NG

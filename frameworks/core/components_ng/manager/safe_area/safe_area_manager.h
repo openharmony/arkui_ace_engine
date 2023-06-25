@@ -19,6 +19,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/property/safe_area_insets.h"
 
 namespace OHOS::Ace::NG {
 // SafeAreaManager stores layout information to apply SafeArea correctly.
@@ -52,6 +53,8 @@ public:
     {
         return keyboardOffset_;
     }
+
+    SafeAreaInsets GetCombinedSafeArea(const SafeAreaExpandOpts& opts) const;
 
     // Add during Layout traversal
     void AddWrapper(const WeakPtr<LayoutWrapper>& wrapper)

@@ -99,8 +99,6 @@ struct SafeAreaExpandOpts {
     {
         return type != SAFE_AREA_TYPE_NONE && edges != SAFE_AREA_EDGE_NONE;
     }
-
-    SafeAreaInsets GetCombinedSafeArea();
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_SAFE_AREA_INSETS_H

@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 #include "safe_area_manager.h"
+
+#include "core/components_ng/property/safe_area_insets.h"
 namespace OHOS::Ace::NG {
 bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea)
 {
@@ -22,6 +24,7 @@ bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea)
     cutoutSafeArea_ = safeArea;
     return true;
 }
+
 bool SafeAreaManager::UpdateSystemSafeArea(const SafeAreaInsets& safeArea)
 {
     if (systemSafeArea_ == safeArea) {
@@ -29,5 +32,17 @@ bool SafeAreaManager::UpdateSystemSafeArea(const SafeAreaInsets& safeArea)
     }
     systemSafeArea_ = safeArea;
     return true;
+}
+
+SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& opts) const
+{
+    SafeAreaInsets res;
+    if (opts.type & SAFE_AREA_TYPE_CUTOUT) {
+        res = res.Combine(cutoutSafeArea_);
+    }
+    if (opts.type & SAFE_AREA_TYPE_SYSTEM) {
+        res = res.Combine(systemSafeArea_);
+    }
+    return res;
 }
 } // namespace OHOS::Ace::NG
