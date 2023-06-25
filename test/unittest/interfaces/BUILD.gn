@@ -30,7 +30,32 @@ ohos_unittest("ui_content_test") {
     "ui_content_test.cpp",
   ]
 
-  external_deps = [ "multimedia_image_framework:image" ]
+  include_dirs = [
+    "$window_manager_path/interfaces/innerkits",
+    "$window_manager_path/interfaces/innerkits/wm",
+    "$window_manager_path/wm/include",
+  ]
+
+  deps = [
+    "$ace_root/frameworks/base:ace_memory_monitor_ohos",
+    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
+    "$ace_root/test/unittest:ace_unittest_log",
+    "$ace_root/test/unittest:ace_unittest_trace",
+    "$cjson_root:cjson",
+    "$graphic_standard_path/rosen/modules/render_service_client:librender_service_client",
+    "//third_party/googletest:gmock_main",
+  ]
+
+  external_deps = [
+    "ability_runtime:abilitykit_native",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "multimedia_image_framework:image",
+    "window_manager:libdm",
+    "window_manager:libwm",
+    "window_manager:scene_session",
+    "window_manager:scene_session_manager",
+  ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }
