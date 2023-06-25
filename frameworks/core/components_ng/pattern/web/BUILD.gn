@@ -41,7 +41,6 @@ build_component_ng("web_pattern_ng") {
   if (is_ohos_standard_system) {
     configs = [ ":ohos_web_config" ]
     configs += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:render_service_client_config" ]
-    deps = [ "//foundation/window/window_manager/utils:libwmutil" ]
     external_deps = [
       "ability_base:base",
       "ability_base:configuration",
