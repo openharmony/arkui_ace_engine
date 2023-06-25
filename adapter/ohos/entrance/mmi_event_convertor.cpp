@@ -352,6 +352,10 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 void CalculatePointerEvent(
     const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point, const NG::VectorF& scale)
 {
+    if (point == nullptr) {
+        LOGE("point is nullptr");
+        return;
+    }
     int32_t pointerId = point->GetPointerId();
     MMI::PointerEvent::PointerItem item;
     bool ret = point->GetPointerItem(pointerId, item);

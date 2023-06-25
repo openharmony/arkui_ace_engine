@@ -63,7 +63,7 @@ private:
     bool CreatePersistentNode();
 
     void BufferAvailableCallback();
-
+    void PrintPointerEvent(const std::shared_ptr<MMI::PointerEvent>& event);
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
 
     friend class LifecycleListener;
