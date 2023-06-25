@@ -230,6 +230,26 @@ bool ListItemGroupLayoutAlgorithm::NeedMeasureItem() const
     return true;
 }
 
+void ListItemGroupLayoutAlgorithm::LayoutListItemAll(LayoutWrapper* layoutWrapper,
+    const LayoutConstraintF& layoutConstraint, float startPos)
+{
+    int32_t currentIndex = -1;
+    float currentEndPos = startPos;
+    float currentStartPos = 0.0f;
+    while (currentIndex < totalItemCount_) {
+        currentStartPos = currentEndPos;
+        int32_t count = MeasureALineForward(layoutWrapper, layoutConstraint, currentIndex,
+            currentStartPos, currentEndPos);
+        if (count == 0) {
+            break;
+        }
+        if (currentIndex < (totalItemCount_ - 1)) {
+            currentEndPos += spaceWidth_;
+        }
+        
+    }
+}
+
 void ListItemGroupLayoutAlgorithm::MeasureListItem(
     LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint)
 {
@@ -245,11 +265,21 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
     float endPos = totalMainSize_ - footerMainSize_;
     prevStartPos_ = startPos_;
     prevEndPos_ = endPos_;
+    if (needAllLayout_) {
+        needAllLayout_ = false;
+        itemPosition_.clear();
+        layoutWrapper->RemoveAllChildInRenderTree();
+        LayoutListItemAll(layoutWrapper, layoutConstraint, startPos);
+        return;
+    }
     if (targetIndex_) {
         startPos_ = -Infinity<float>();
         endPos_ = Infinity<float>();
     }
     if (jumpIndex_.has_value()) {
+        if (jumpIndex_.value() == LAST_ITEM) {
+            jumpIndex_ = totalItemCount_ - 1;
+        }
         auto jumpIndex = jumpIndex_.value();
         if (jumpIndex < 0 || jumpIndex >= totalItemCount_) {
             jumpIndex = 0;
