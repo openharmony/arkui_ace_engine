@@ -39,6 +39,7 @@ public:
     virtual void SetStackFit(StackFit fit) = 0;
     virtual void SetOverflow(Overflow overflow) = 0;
     virtual void SetAlignment(Alignment align) = 0;
+    virtual void SetAlignmentContent(Alignment align) = 0;
     virtual void SetHasHeight() = 0;
     virtual void SetHasWidth() = 0;
 
