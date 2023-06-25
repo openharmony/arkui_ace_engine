@@ -160,11 +160,14 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
         if (!textRacing_) {
             auto contentSize = contentSize_->Get();
             auto contentOffset = contentOffset_->Get();
-            if (clip_ && clip_->Get()) {
+            if (clip_ && clip_->Get() &&
+                !(fontSize_.has_value() && fontSizeFloat_ &&
+                    !NearEqual(fontSize_.value().Value(), fontSizeFloat_->Get()))) {
                 RSRect clipInnerRect = RSRect(contentOffset.GetX(), contentOffset.GetY(),
                     contentSize.Width() + contentOffset.GetX(), contentSize.Height() + contentOffset.GetY());
                 canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
             }
+
             paragraph_->Paint(canvas, paintOffset_.GetX(), paintOffset_.GetY());
         } else {
             // Racing
