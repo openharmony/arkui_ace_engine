@@ -482,7 +482,7 @@ void DragDropManager::FireOnDragEvent(
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
 
-    auto extraParams = eventHub->GetDragExtraParams(extraInfo, point, type);
+    auto extraParams = eventHub->GetDragExtraParams(extraInfo_.empty() ? extraInfo : extraInfo_, point, type);
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     event->SetX(pipeline->ConvertPxToVp(Dimension(point.GetX(), DimensionUnit::PX)));
     event->SetY(pipeline->ConvertPxToVp(Dimension(point.GetY(), DimensionUnit::PX)));
