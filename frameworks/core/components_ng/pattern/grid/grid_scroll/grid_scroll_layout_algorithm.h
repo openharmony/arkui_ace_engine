@@ -60,11 +60,13 @@ private:
     float FillNewLineBackward(float crossSize, float mainSize, LayoutWrapper* layoutWrapper, bool reverse);
 
     // Measure grid item which not exist in grid matrix already, need to place it and save to grid matrix.
-    int32_t MeasureChild(const SizeF& frameSize, int32_t itemIndex, LayoutWrapper* layoutWrapper,
+    int32_t MeasureNewChild(const SizeF& frameSize, int32_t itemIndex, LayoutWrapper* layoutWrapper,
         const RefPtr<LayoutWrapper>& childLayoutWrapper, bool reverse);
     // Measure grid item which exist in grid matrix already, needn't to place it again.
     int32_t MeasureChildPlaced(const SizeF& frameSize, int32_t itemIndex, int32_t crossStart,
         LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& childLayoutWrapper);
+    void MeasureChild(LayoutWrapper* layoutWrapper, const SizeF& frameSize,
+        const RefPtr<LayoutWrapper>& childLayoutWrapper, int32_t crossStart, int32_t crossSpan);
 
     // Compote position of grid item in cross axis.
     float ComputeItemCrossPosition(LayoutWrapper* layoutWrapper, int32_t crossStart) const;
