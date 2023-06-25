@@ -29,6 +29,8 @@
 #include "include/core/SkData.h"
 #include "include/core/SkGraphics.h"
 #include "include/core/SkPixmap.h"
+#else
+#include "core/components_ng/render/drawing.h"
 #endif
 
 namespace OHOS::Ace {
@@ -53,7 +55,7 @@ public:
 #ifndef USE_ROSEN_DRAWING
     sk_sp<SkData> GpuCompress(std::string key, SkPixmap& pixmap, int32_t width, int32_t height);
 #else
-    // TODO Drawing : SkPixmap
+    std::shared_ptr<RSData> GpuCompress(std::string key, RSBitmap& bitmap, int32_t width, int32_t height);
 #endif
     std::function<void()> ScheduleReleaseTask();
 #ifndef USE_ROSEN_DRAWING

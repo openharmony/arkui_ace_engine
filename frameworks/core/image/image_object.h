@@ -45,8 +45,8 @@ public:
     static RefPtr<ImageObject> BuildImageObject(
         ImageSourceInfo source,
         const RefPtr<PipelineBase> context,
-        const std::shared_ptr<RSData>& data,
-        bool useDrawingSvg);
+        const std::shared_ptr<RSData>& rsData,
+        bool useSkiaSvg);
 #endif
 
     ImageObject() = default;
@@ -139,7 +139,6 @@ protected:
     bool isApng_ = false;
 };
 
-#ifndef USE_ROSEN_DRAWING
 class SvgSkiaImageObject : public ImageObject {
     DECLARE_ACE_TYPE(SvgSkiaImageObject, ImageObject);
 public:
@@ -169,37 +168,6 @@ public:
 private:
     sk_sp<SkSVGDOM> skiaDom_;
 };
-#else
-class SvgDrawingImageObject : public ImageObject {
-    DECLARE_ACE_TYPE(SvgDrawingImageObject, ImageObject);
-public:
-    SvgDrawingImageObject(
-        ImageSourceInfo source,
-        const Size& imageSize,
-        int32_t frameCount,
-        const std::shared_ptr<RSSVGDOM>& svgDom)
-        : ImageObject(source, imageSize, frameCount, true), svgDom_(svgDom)
-    {}
-
-    ~SvgDrawingImageObject() override = default;
-
-    const std::shared_ptr<RSSVGDOM>& GetSvgDom()
-    {
-        return svgDom_;
-    }
-
-    void PerformLayoutImageObject(RefPtr<RenderImage> image) override;
-    Size MeasureForImage(RefPtr<RenderImage> image) override;
-
-    RefPtr<ImageObject> Clone() override
-    {
-        return MakeRefPtr<SvgDrawingImageObject>(imageSource_, Size(), frameCount_, svgDom_);
-    }
-
-private:
-    std::shared_ptr<RSSVGDOM> svgDom_;
-};
-#endif
 
 class SvgImageObject : public ImageObject {
     DECLARE_ACE_TYPE(SvgImageObject, ImageObject);
@@ -339,13 +307,8 @@ public:
 private:
     RefPtr<PixelMap> pixmap_;
 };
-#ifndef USE_ROSEN_DRAWING
 RefPtr<ImageObject> GetImageSvgDomObj(ImageSourceInfo source, const std::unique_ptr<SkMemoryStream >& svgStream,
     const RefPtr<PipelineBase>& context, std::optional<Color>& color);
-#else
-// TODO Drawing : SkMemoryStream
-
-#endif
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_IMAGE_OBJECT_H

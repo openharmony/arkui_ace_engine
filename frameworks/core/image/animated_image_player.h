@@ -102,7 +102,11 @@ public:
     }
 
 private:
+#ifndef USE_ROSEN_DRAWING
     sk_sp<SkImage> DecodeFrameImage(const int32_t& index);
+#else
+    std::shared_ptr<RSImage> DecodeFrameImage(const int32_t& index);
+#endif
     static bool CopyTo(SkBitmap* dst, SkColorType dstColorType, const SkBitmap& src);
 
     ImageSourceInfo imageSource_;

@@ -135,7 +135,11 @@ sk_sp<SkImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
     return SkImage::MakeFromBitmap(bitmap);
 }
 #else
-    // TODO Drawing : SkCodec
+std::shared_ptr<RSImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
+{
+    LOGE("Drawing is not supported");
+    return std::make_shared<RSImage>();
+}
 #endif
 
 bool AnimatedImagePlayer::CopyTo(SkBitmap* dst, SkColorType dstColorType, const SkBitmap& src)

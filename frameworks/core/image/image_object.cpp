@@ -15,6 +15,10 @@
 
 #include "core/image/image_object.h"
 
+#ifdef USE_ROSEN_DRAWING
+#include "drawing/engine_adapter/skia_adapter/skia_data.h"
+#endif
+
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
@@ -41,8 +45,8 @@ std::string ImageObject::GenerateCacheKey(const ImageSourceInfo& srcInfo, Size t
 RefPtr<ImageObject> ImageObject::BuildImageObject(
     ImageSourceInfo source, const RefPtr<PipelineBase> context, const sk_sp<SkData>& skData, bool useSkiaSvg)
 #else
-RefPtr<ImageObject> ImageObject::BuildImageObject(ImageSourceInfo source, const RefPtr<PipelineBase> context,
-    const std::shared_ptr<RSData>& data, bool useDrawingSvg)
+RefPtr<ImageObject> ImageObject::BuildImageObject(
+    ImageSourceInfo source, const RefPtr<PipelineBase> context, const std::shared_ptr<RSData>& rsData, bool useSkiaSvg)
 #endif
 {
     // build svg image object.
@@ -52,6 +56,13 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(ImageSourceInfo source, const 
 #else
 #ifndef USE_ROSEN_DRAWING
         const auto svgStream = std::make_unique<SkMemoryStream>(skData);
+#else
+        if (rsData == nullptr) {
+            return nullptr;
+        }
+        auto skData = rsData->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+        const auto svgStream = std::make_unique<SkMemoryStream>(skData);
+#endif
         if (!svgStream) {
             return nullptr;
         }
@@ -68,9 +79,6 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(ImageSourceInfo source, const 
             auto skiaDom = SkSVGDOM::MakeFromStream(*svgStream, colorValue);
             return skiaDom ? MakeRefPtr<SvgSkiaImageObject>(source, Size(), 1, skiaDom) : nullptr;
         }
-#else
-    // TODO Drawing : SkMemoryStream
-#endif
 #endif
     }
 
@@ -101,6 +109,13 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(ImageSourceInfo source, const 
     // build normal pixel image object.
 #ifndef USE_ROSEN_DRAWING
     auto codec = SkCodec::MakeFromData(skData);
+#else
+    if (rsData == nullptr) {
+        return nullptr;
+    }
+    auto skData = rsData->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+    auto codec = SkCodec::MakeFromData(skData);
+#endif
     int32_t totalFrames = 1;
     Size imageSize;
     if (codec) {
@@ -116,13 +131,18 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(ImageSourceInfo source, const 
                 imageSize.SetSize(Size(codec->dimensions().fWidth, codec->dimensions().fHeight));
         }
     }
+#ifndef USE_ROSEN_DRAWING
     if (totalFrames == 1) {
         return MakeRefPtr<StaticImageObject>(source, imageSize, totalFrames, skData);
     } else {
         return CreateAnimatedImageObject(source, imageSize, totalFrames, skData);
     }
 #else
-    // TODO Drawing : SkCodec
+    if (totalFrames == 1) {
+        return MakeRefPtr<StaticImageObject>(source, imageSize, totalFrames, rsData);
+    } else {
+        return CreateAnimatedImageObject(source, imageSize, totalFrames, rsData);
+    }
 #endif
 }
 
@@ -141,27 +161,22 @@ Size SvgImageObject::MeasureForImage(RefPtr<RenderImage> image)
     return image->MeasureForSvgImage();
 }
 
-#ifndef USE_ROSEN_DRAWING
 void SvgSkiaImageObject::PerformLayoutImageObject(RefPtr<RenderImage> image) {}
-#else
-void SvgDrawingImageObject::PerformLayoutImageObject(RefPtr<RenderImage> image) {}
-#endif
 
-#ifndef USE_ROSEN_DRAWING
 Size SvgSkiaImageObject::MeasureForImage(RefPtr<RenderImage> image)
-#else
-Size SvgDrawingImageObject::MeasureForImage(RefPtr<RenderImage> image)
-#endif
 {
     return image->MeasureForSvgImage();
 }
 
-#ifndef USE_ROSEN_DRAWING
 void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& context,
     const UploadSuccessCallback& successCallback,
     const FailedCallback& failedCallback, const Size& imageSize, bool forceResize, bool syncMode)
 {
+#ifndef USE_ROSEN_DRAWING
     auto task = [context, successCallback, failedCallback, imageSize, forceResize, skData = skData_,
+#else
+    auto task = [context, successCallback, failedCallback, imageSize, forceResize, rsData = data_,
+#endif
                     imageSource = imageSource_, id = Container::CurrentId()]() mutable {
         ContainerScope scope(id);
         auto pipelineContext = context.Upgrade();
@@ -187,8 +202,13 @@ void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& contex
         if (imageCache) {
             auto cachedImage = imageCache->GetCacheImage(key);
             if (cachedImage) {
+#ifndef USE_ROSEN_DRAWING
                 auto skImage = cachedImage->imagePtr;
                 cachedFlutterImage = NG::CanvasImage::Create(&skImage);
+#else
+                auto rsImage = cachedImage->imagePtr;
+                cachedFlutterImage = NG::CanvasImage::Create(&rsImage);
+#endif
             }
         }
 
@@ -201,22 +221,35 @@ void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& contex
 
         auto callback = [successCallback, imageSource, taskExecutor, imageCache, imageSize, key,
                             id = Container::CurrentId()](
+#ifndef USE_ROSEN_DRAWING
                             sk_sp<SkImage> image, sk_sp<SkData> compressData) {
+#else
+                            std::shared_ptr<RSImage> image, std::shared_ptr<RSData> compressData) {
+#endif
 
             if (!image && !compressData.get()) {
                 ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, nullptr,
                     "Image data may be broken or absent in upload callback.");
             }
             ContainerScope scope(id);
+#ifndef USE_ROSEN_DRAWING
             sk_sp<SkImage> skImage = image;
             auto canvasImage = NG::CanvasImage::Create(&skImage);
+#else
+            std::shared_ptr<RSImage> rsImage = image;
+            auto canvasImage = NG::CanvasImage::Create(&rsImage);
+#endif
             int32_t width = static_cast<int32_t>(imageSize.Width() + 0.5);
             int32_t height = static_cast<int32_t>(imageSize.Height() + 0.5);
             canvasImage->SetRawCompressData(&compressData, width, height);
 
             if (imageCache) {
                 LOGD("cache image key: %{public}s", key.c_str());
+#ifndef USE_ROSEN_DRAWING
                 imageCache->CacheImage(key, std::make_shared<CachedImage>(skImage));
+#else
+                imageCache->CacheImage(key, std::make_shared<CachedImage>(rsImage));
+#endif
             }
             ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, canvasImage);
         };
@@ -224,7 +257,11 @@ void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& contex
         // if have skdata, means origin pic is rendered first time
         // if no skdata, means origin pic has shown, and has been cleared
         // we try to use small image or compressed image instead of origin pic.
+#ifndef USE_ROSEN_DRAWING
         sk_sp<SkData> stripped;
+#else
+        std::shared_ptr<RSData> stripped;
+#endif
         if (ImageCompressor::GetInstance()->CanCompress()) {
             // load compressed
             auto compressedData = ImageProvider::LoadImageRawDataFromFileCache(pipelineContext, key, ".astc");
@@ -232,13 +269,24 @@ void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& contex
         }
         auto smallData = ImageProvider::LoadImageRawDataFromFileCache(pipelineContext, key);
         if (smallData) {
+#ifndef USE_ROSEN_DRAWING
             skData = smallData;
+#else
+            rsData = smallData;
+#endif
         }
 
+#ifndef USE_ROSEN_DRAWING
         if (!skData) {
             LOGD("reload sk data");
             skData = ImageProvider::LoadImageRawData(imageSource, pipelineContext);
             if (!skData) {
+#else
+        if (!rsData) {
+            LOGD("reload rs data");
+            rsData = ImageProvider::LoadImageRawData(imageSource, pipelineContext);
+            if (!rsData) {
+#endif
                 LOGE("reload image data failed. imageSource: %{private}s", imageSource.ToString().c_str());
                 ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, nullptr,
                     "Image data may be broken or absent, please check if image file or image data is valid.");
@@ -247,13 +295,19 @@ void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& contex
         }
 
         // make lazy image from file
+#ifndef USE_ROSEN_DRAWING
         auto rawImage = SkImage::MakeFromEncoded(skData);
+#else
+        auto skData = rsData->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+        auto rawImage = SkImage::MakeFromEncoded(skData);
+#endif
         if (!rawImage) {
             LOGE("static image MakeFromEncoded fail! imageSource: %{private}s", imageSource.ToString().c_str());
             ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, nullptr,
                 "Image data may be broken, please check if image file or image data is broken.");
             return;
         }
+#ifndef USE_ROSEN_DRAWING
         sk_sp<SkImage> image;
         if (smallData) {
             image = rawImage;
@@ -262,6 +316,17 @@ void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& contex
         }
         ImageProvider::UploadImageToGPUForRender(pipelineContext, image, stripped, callback, key);
         skData = nullptr;
+#else
+        std::shared_ptr<RSImage> image;
+        auto rsRawImage = std::make_shared<RSImage>(&rawImage);
+        if (smallData) {
+            image = rsRawImage;
+        } else {
+            image = ImageProvider::ResizeDrawingImage(rsRawImage, imageSource.GetSrc(), imageSize, forceResize);
+        }
+        ImageProvider::UploadImageToGPUForRender(pipelineContext, image, stripped, callback, key);
+        rsData = nullptr;
+#endif
     };
     if (syncMode) {
         task();
@@ -270,9 +335,6 @@ void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& contex
     uploadForPaintTask_ = CancelableTask(std::move(task));
     BackgroundTaskExecutor::GetInstance().PostTask(uploadForPaintTask_);
 }
-#else
-    // TODO Drawing ：SkImage::MakeFromEncoded(skData)
-#endif
 
 bool StaticImageObject::CancelBackgroundTasks()
 {
