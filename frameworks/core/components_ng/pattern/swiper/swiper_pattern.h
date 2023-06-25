@@ -553,7 +553,7 @@ private:
     float currentDelta_ = 0.0f;
     SwiperLayoutAlgorithm::PositionMap itemPosition_;
     std::optional<float> velocity_;
-
+    bool isFinishAnimation_ = false;
     bool mainSizeIsMeasured_ = false;
 };
 } // namespace OHOS::Ace::NG

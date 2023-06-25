@@ -615,6 +615,7 @@ void SwiperPattern::ShowPrevious()
 
 void SwiperPattern::FinishAnimation()
 {
+    isFinishAnimation_ = true;
     StopTranslateAnimation();
     if (swiperController_ && swiperController_->GetFinishCallback()) {
         swiperController_->GetFinishCallback()();
@@ -1287,10 +1288,11 @@ bool SwiperPattern::IsOutOfBoundary(float mainOffset) const
     if (IsLoop() || itemPosition_.empty()) {
         return false;
     }
-    auto isOutOfStart = itemPosition_.begin()->first == 0 && itemPosition_.begin()->second.startPos + mainOffset > 0.0f;
+    auto isOutOfStart =
+        itemPosition_.begin()->first == 0 && GreatNotEqual(itemPosition_.begin()->second.startPos + mainOffset, 0.0);
     auto visibleWindowSize = CalculateVisibleSize();
     auto isOutOfEnd = itemPosition_.rbegin()->first == TotalCount() - 1 &&
-                      itemPosition_.rbegin()->second.endPos + mainOffset < visibleWindowSize;
+                      LessNotEqual(itemPosition_.rbegin()->second.endPos + mainOffset, visibleWindowSize);
     return isOutOfStart || isOutOfEnd;
 }
 
@@ -1729,26 +1731,36 @@ bool SwiperPattern::NeedAutoPlay() const
 
 void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool useSpringMotion)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     targetIndex_.reset();
     if (preTargetIndex_.has_value()) {
         preTargetIndex_.reset();
     }
     if (currentIndex_ != nextIndex) {
-        currentIndex_ = nextIndex;
-        oldIndex_ = nextIndex;
-        currentFirstIndex_ = nextIndex;
-        turnPageRate_ = 0.0f;
-        auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->UpdateIndexWithoutMeasure(nextIndex);
-        FireChangeEvent();
+        if (isFinishAnimation_) {
+            jumpIndex_ = nextIndex;
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            auto pipeline = PipelineContext::GetCurrentContext();
+            if (pipeline) {
+                pipeline->FlushUITasks();
+            }
+            isFinishAnimation_ = false;
+        } else {
+            currentIndex_ = nextIndex;
+            oldIndex_ = nextIndex;
+            currentFirstIndex_ = nextIndex;
+            turnPageRate_ = 0.0f;
+            auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+            CHECK_NULL_VOID(layoutProperty);
+            layoutProperty->UpdateIndexWithoutMeasure(nextIndex);
+            FireChangeEvent();
+        }
     }
     if (restartAutoPlay) {
         StartAutoPlay();
     }
     FireAnimationEndEvent();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto indicatorNode = host->GetLastChild();
     CHECK_NULL_VOID(indicatorNode);
     if (indicatorNode->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
