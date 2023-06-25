@@ -240,6 +240,11 @@ void GridScrollLayoutAlgorithm::InitialItemsCrossSize(
         crossLens.push_back(crossSize);
     }
 
+    if (crossCount_ != crossLens.size()) {
+        crossCount_ = crossLens.size();
+        gridLayoutInfo_.crossCount_ = crossCount_;
+    }
+
     int32_t index = 0;
     for (const auto& len : crossLens) {
         itemsCrossSize_.try_emplace(index, len);
@@ -254,7 +259,14 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     UpdateGridLayoutInfo(layoutWrapper, mainSize);
     SkipForwardLines(mainSize, layoutWrapper);
     SkipBackwardLines(mainSize, layoutWrapper);
-    if (layoutWrapper->GetHostNode()->GetChildrenUpdated() != -1 || gridLayoutInfo_.IsResetted()) {
+
+    if (!gridLayoutInfo_.lastCrossCount_) {
+        gridLayoutInfo_.lastCrossCount_ = crossCount_;
+    }
+
+    if (gridLayoutInfo_.lastCrossCount_ != crossCount_ || layoutWrapper->GetHostNode()->GetChildrenUpdated() != -1 ||
+        gridLayoutInfo_.IsResetted()) {
+        gridLayoutInfo_.lastCrossCount_ = crossCount_;
         gridLayoutInfo_.lineHeightMap_.clear();
         gridLayoutInfo_.gridMatrix_.clear();
         gridLayoutInfo_.endIndex_ = -1;

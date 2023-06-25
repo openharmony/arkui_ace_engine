@@ -78,6 +78,7 @@ protected:
     void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
     void MouseSelect(Offset start, Offset end);
     void MouseSelectRelease();
+    int32_t CalculateGridColumnsOrRows(float contentWidth, float gridWidth, float gutter = 0.0f, float margin = 0.0f);
     testing::AssertionResult IsEqualNextFocusNode(
         int32_t currentIndex, std::map<FocusStep, int32_t> next);
     testing::AssertionResult IsEqualRect(RectF rect, RectF expectRect);
@@ -272,6 +273,12 @@ void GridTestNg::MouseSelectRelease()
     info.SetButton(MouseButton::LEFT_BUTTON);
     info.SetAction(MouseAction::RELEASE);
     pattern_->HandleMouseEventWithoutKeyboard(info);
+}
+
+int32_t GridTestNg::CalculateGridColumnsOrRows(float contentWidth, float gridWidth, float gutter, float margin)
+{
+    int32_t count = static_cast<int32_t>(floor((contentWidth - 2 * margin + gutter) / (gridWidth + gutter)));
+    return count < 1 ? 1 : count;
 }
 
 void GridTestNg::UpdateCurrentOffset(float offset, int32_t source)
@@ -567,6 +574,50 @@ HWTEST_F(GridTestNg, AttrColumnsTemplate003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AttrColumnsTemplate004
+ * @tc.desc: Test property about columnsTemplate and Gap,
+ * test normal condition that template is "repeat(auto-fit, 90px)"
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, AttrColumnsTemplate004, TestSize.Level1)
+{
+    GridModelNG gridModelNG;
+    gridModelNG.Create(nullptr, nullptr);
+    const std::string columnsTemplate = "repeat(auto-fit, 90px)";
+    gridModelNG.SetColumnsTemplate(columnsTemplate);
+    const Dimension columnsGap = Dimension(10);
+    gridModelNG.SetColumnsGap(columnsGap);
+    const Dimension rowsGap = Dimension(5);
+    gridModelNG.SetRowsGap(rowsGap);
+    constexpr int32_t gridItemNumber = 10;
+    CreateGridItem(gridItemNumber, -1, ITEM_HEIGHT);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. While only set ColumnsTemplate
+     * @tc.expected: The axis is VERTICAL
+     */
+    EXPECT_EQ(pattern_->GetAxis(), Axis::VERTICAL);
+
+    /**
+     * @tc.steps: step2. Verify all of gridItems rect
+     * @tc.expected: The rect is equal to expectRect
+     */
+    constexpr float gridWidth = 90.0f;
+    int32_t colsNumber = CalculateGridColumnsOrRows(DEVICE_WIDTH, gridWidth, columnsGap.ConvertToPx());
+    const float colsGapTotal = columnsGap.ConvertToPx() * (colsNumber - 1);
+    const float averageWidth = (DEVICE_WIDTH - colsGapTotal) / colsNumber;
+    for (int32_t index = 0; index < gridItemNumber; index++) {
+        RectF childRect = GetItemRect(index);
+        float offsetX = index % colsNumber * (averageWidth + columnsGap.ConvertToPx());
+        float offsetY = floor(index / colsNumber) * (ITEM_HEIGHT + rowsGap.ConvertToPx());
+        RectF expectRect = RectF(offsetX, offsetY, averageWidth, ITEM_HEIGHT);
+        EXPECT_TRUE(IsEqualRect(childRect, expectRect));
+    }
+}
+
+/**
  * @tc.name: AttrRowsTemplate001
  * @tc.desc: Test property about rowsTemplate and Gap,
  * test normal condition that template is "1fr 1fr 1fr 1fr"
@@ -682,6 +733,50 @@ HWTEST_F(GridTestNg, AttrRowsTemplate003, TestSize.Level1)
     const float height_1 = 0.f;
     const RectF expectRect_1 = RectF(offsetX_1, offsetY_1, width_1, height_1);
     EXPECT_TRUE(IsEqualRect(rect_1, expectRect_1));
+}
+
+/**
+ * @tc.name: AttrRowsTemplate004
+ * @tc.desc: Test property about rowsTemplate and Gap,
+ * test normal condition that template is "repeat(auto-fit, 90px)"
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, AttrRowsTemplate004, TestSize.Level1)
+{
+    GridModelNG gridModelNG;
+    gridModelNG.Create(nullptr, nullptr);
+    const std::string rowsTemplate = "repeat(auto-fit, 90px)";
+    gridModelNG.SetRowsTemplate(rowsTemplate);
+    const Dimension columnsGap = Dimension(10);
+    gridModelNG.SetColumnsGap(columnsGap);
+    const Dimension rowsGap = Dimension(5);
+    gridModelNG.SetRowsGap(rowsGap);
+    constexpr int32_t gridItemNumber = 10;
+    CreateGridItem(gridItemNumber, ITEM_WIDTH, -1);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. While only set rowsTemplate
+     * @tc.expected: The axis is HORIZONTAL
+     */
+    EXPECT_EQ(pattern_->GetAxis(), Axis::HORIZONTAL);
+
+    /**
+     * @tc.steps: step2. Verify all of gridItems rect
+     * @tc.expected: The rect is equal to expectRect
+     */
+    constexpr float gridWidth = 90.0f;
+    int32_t rowsNumber = CalculateGridColumnsOrRows(GRID_HEIGHT, gridWidth, rowsGap.ConvertToPx());
+    const float rowsGapTotal = rowsGap.ConvertToPx() * (rowsNumber - 1);
+    const float averageHeight = (GRID_HEIGHT - rowsGapTotal) / rowsNumber;
+    for (int32_t index = 0; index < gridItemNumber; index++) {
+        RectF childRect = GetItemRect(index);
+        float offsetX = floor(index / rowsNumber) * (ITEM_WIDTH + columnsGap.ConvertToPx());
+        float offsetY = index % rowsNumber * (averageHeight + rowsGap.ConvertToPx());
+        RectF expectRect = RectF(offsetX, offsetY, ITEM_WIDTH, averageHeight);
+        EXPECT_TRUE(IsEqualRect(childRect, expectRect));
+    }
 }
 
 /**
