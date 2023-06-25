@@ -140,8 +140,11 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     if (!mainSizeIsDefined_ && isSingleCase) {
         auto childMaxMainSize = GetChildMaxSize(layoutWrapper, axis, true);
-        if (childMaxMainSize != contentMainSize_) {
-            contentMainSize_ = childMaxMainSize;
+        auto prevMarginMontage = Positive(prevMargin_) ? prevMargin_ + spaceWidth_ : 0.0f;
+        auto nextMarginMontage = Positive(nextMargin_) ? nextMargin_ + spaceWidth_ : 0.0f;
+        auto singleCaseScenarioMainSize = childMaxMainSize + prevMarginMontage + nextMarginMontage;
+        if (singleCaseScenarioMainSize != contentMainSize_) {
+            contentMainSize_ = singleCaseScenarioMainSize;
             // CheckInactive
             SetInactive(layoutWrapper, 0.0f, contentMainSize_, currentTargetIndex_);
         }
