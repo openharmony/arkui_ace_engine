@@ -1014,23 +1014,9 @@ void GridScrollLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper, const
     const RefPtr<LayoutWrapper>& childLayoutWrapper, int32_t crossStart, int32_t crossSpan)
 {
     auto gridLayoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    float mainSize = GetMainAxisSize(frameSize, gridLayoutInfo_.axis_);
-    float crossSize = GetCrossAxisSize(frameSize, gridLayoutInfo_.axis_);
-    auto childConstraint = CreateChildConstraint(mainSize, crossSize, gridLayoutProperty, crossStart, crossSpan);
-    auto childLayoutProperty = DynamicCast<GridItemLayoutProperty>(childLayoutWrapper->GetLayoutProperty());
-    auto oldConstraint = childLayoutProperty->GetLayoutConstraint();
-    if (oldConstraint.has_value() && !NearEqual(GetCrossAxisSize(oldConstraint.value().maxSize, axis_),
-                                                GetCrossAxisSize(childConstraint.maxSize, axis_))) {
-        auto layoutAlgorithmWrapper = childLayoutWrapper->GetLayoutAlgorithm();
-        if (layoutAlgorithmWrapper->SkipMeasure()) {
-            layoutAlgorithmWrapper->SetNeedMeasure();
-            if (layoutAlgorithmWrapper->GetLayoutAlgorithm() == nullptr) {
-                layoutAlgorithmWrapper->SetLayoutAlgorithm(
-                    childLayoutWrapper->GetHostNode()->GetPattern()->CreateLayoutAlgorithm());
-            }
-        }
-    }
-    childLayoutWrapper->Measure(childConstraint);
+    auto mainSize = GetMainAxisSize(frameSize, gridLayoutInfo_.axis_);
+    auto crossSize = GetCrossAxisSize(frameSize, gridLayoutInfo_.axis_);
+    childLayoutWrapper->Measure(CreateChildConstraint(mainSize, crossSize, gridLayoutProperty, crossStart, crossSpan));
 }
 
 bool GridScrollLayoutAlgorithm::CheckGridPlaced(
