@@ -31,6 +31,7 @@
 #include "test/mock/core/common/mock_window.h"
 
 #include "base/json/json_util.h"
+#include "base/log/frame_report.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/test/mock/mock_mouse_style.h"

@@ -97,6 +97,7 @@ public:
         const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) override;
     void SetGeometryTransition(const std::string& id) override;
     void SetMotionPath(const MotionPathOption& option) override;
+    void SetRenderGroup(bool isRenderGroup) override {}
 
     void SetFlexBasis(const Dimension& value) override;
     void SetAlignSelf(FlexAlign value) override;
@@ -172,6 +173,18 @@ public:
     void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) override {};
     void SetObscured(const std::vector<ObscuredReasons>& reasons) override {};
+
+    // Disable event.
+    void DisableOnClick() override {};
+    void DisableOnTouch() override {};
+    void DisableOnKeyEvent() override {};
+    void DisableOnHover() override {};
+    void DisableOnMouse() override {};
+    void DisableOnAppear() override {};
+    void DisableOnDisAppear() override {};
+    void DisableOnAreaChange() override {};
+    void DisableOnFocus() override {};
+    void DisableOnBlur() override {};
 
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
     void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,

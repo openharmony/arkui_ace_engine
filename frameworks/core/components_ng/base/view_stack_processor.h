@@ -114,7 +114,7 @@ class ACE_EXPORT ViewStackProcessor final {
 public:
     friend class ScopedViewStackProcessor;
 
-    static ViewStackProcessor* GetInstance();
+    ACE_FORCE_EXPORT static ViewStackProcessor* GetInstance();
     ~ViewStackProcessor() = default;
 
     template<typename Pattern>
@@ -173,14 +173,14 @@ public:
         return frameNode->GetFocusHub();
     }
 
-    RefPtr<FrameNode> GetMainFrameNode() const;
+    ACE_FORCE_EXPORT RefPtr<FrameNode> GetMainFrameNode() const;
 
     // Get main component include composed component created by js view.
     RefPtr<UINode> GetMainElementNode() const;
 
     // create wrappingComponentsMap and the component to map and then Push
     // the map to the render component stack.
-    void Push(const RefPtr<UINode>& element, bool isCustomView = false);
+    ACE_FORCE_EXPORT void Push(const RefPtr<UINode>& element, bool isCustomView = false);
 
     // Wrap the components map for the stack top and then pop the stack.
     // Add the wrapped component has child of the new stack top's main component.

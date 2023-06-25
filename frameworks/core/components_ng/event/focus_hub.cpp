@@ -209,7 +209,7 @@ void FocusHub::LostSelfFocus()
 
 void FocusHub::RemoveSelf()
 {
-    LOGI("Node %{public}s/%{public}d remove self.", GetFrameName().c_str(), GetFrameId());
+    LOGD("Node %{public}s/%{public}d remove self.", GetFrameName().c_str(), GetFrameId());
     auto parent = GetParentFocusHub();
     if (parent) {
         parent->RemoveChild(AceType::Claim(this));
@@ -817,7 +817,7 @@ void FocusHub::OnBlur()
 
 void FocusHub::OnFocusNode()
 {
-    LOGI("FocusHub: Node(%{public}s/%{public}d) on focus", GetFrameName().c_str(), GetFrameId());
+    LOGD("FocusHub: Node(%{public}s/%{public}d) on focus", GetFrameName().c_str(), GetFrameId());
     if (onFocusInternal_) {
         onFocusInternal_();
     }
@@ -834,7 +834,7 @@ void FocusHub::OnFocusNode()
 
 void FocusHub::OnBlurNode()
 {
-    LOGI("FocusHub: Node(%{public}s/%{public}d) on blur", GetFrameName().c_str(), GetFrameId());
+    LOGD("FocusHub: Node(%{public}s/%{public}d) on blur", GetFrameName().c_str(), GetFrameId());
     if (onBlurInternal_) {
         onBlurInternal_();
     }
@@ -984,6 +984,9 @@ bool FocusHub::PaintAllFocusState()
     if (lastFocusNode) {
         return lastFocusNode->PaintAllFocusState();
     }
+    if (onPaintFocusStateCallback_) {
+        return onPaintFocusStateCallback_();
+    }
     return false;
 }
 
@@ -1022,6 +1025,9 @@ void FocusHub::ClearFocusState(bool isNeedStateStyles)
     if (isNeedStateStyles) {
         // check focus state style.
         CheckFocusStateStyle(false);
+    }
+    if (onClearFocusStateCallback_) {
+        onClearFocusStateCallback_();
     }
     if (focusStyleType_ != FocusStyleType::NONE) {
         auto frameNode = GetFrameNode();

@@ -296,13 +296,12 @@ void ScrollPattern::AdjustOffset(float& delta, int32_t source)
 
 void ScrollPattern::ValidateOffset(int32_t source)
 {
-    if (scrollableDistance_ <= 0.0f) {
+    if (scrollableDistance_ <= 0.0f || source == SCROLL_FROM_JUMP) {
         return;
     }
 
     // restrict position between top and bottom
-    if (IsRestrictBoundary() || source == SCROLL_FROM_JUMP ||
-        source == SCROLL_FROM_BAR || source == SCROLL_FROM_ROTATE) {
+    if (IsRestrictBoundary() || source == SCROLL_FROM_BAR || source == SCROLL_FROM_ROTATE) {
         if (GetAxis() == Axis::HORIZONTAL) {
             if (IsRowReverse()) {
                 currentOffset_ = std::clamp(currentOffset_, 0.0f, scrollableDistance_);
@@ -315,8 +314,7 @@ void ScrollPattern::ValidateOffset(int32_t source)
     } else {
         if (currentOffset_ > 0) {
             SetScrollBarOutBoundaryExtent(currentOffset_);
-        } else if ((-currentOffset_) >= (GetMainSize(viewPortExtent_) - GetMainSize(viewPort_)) &&
-            ReachMaxCount()) {
+        } else if ((-currentOffset_) >= (GetMainSize(viewPortExtent_) - GetMainSize(viewPort_)) && ReachMaxCount()) {
             SetScrollBarOutBoundaryExtent((-currentOffset_) - (GetMainSize(viewPortExtent_) - GetMainSize(viewPort_)));
         }
         HandleScrollBarOutBoundary();
@@ -390,13 +388,14 @@ void ScrollPattern::HandleCrashBottom() const
 
 bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
 {
+    SetScrollState(source);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     if (NearZero(delta)) {
         return true;
     }
     // TODO: ignore handle refresh
-    if (!HandleEdgeEffect(delta, source, viewPort_)) {
+    if (source != SCROLL_FROM_JUMP && !HandleEdgeEffect(delta, source, viewPort_)) {
         return false;
     }
     // TODO: scrollBar effect!!

@@ -38,4 +38,11 @@ RefPtr<LayoutAlgorithm> UIExtensionPattern::CreateLayoutAlgorithm()
 }
 
 void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode) {}
+
+void UIExtensionPattern::OnModifyDone() {}
+
+FocusPattern UIExtensionPattern::GetFocusPattern() const
+{
+    return { FocusType::NODE, true, FocusStyleType::NONE };
+}
 } // namespace OHOS::Ace::NG

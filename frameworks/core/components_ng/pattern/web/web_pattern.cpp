@@ -140,6 +140,18 @@ WebPattern::WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallb
     : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback)
 {}
 
+WebPattern::~WebPattern()
+{
+    LOGI("WebPattern::~WebPattern");
+    if (observer_) {
+        LOGI("WebPattern::~WebPattern NotifyDestory");
+        observer_->NotifyDestory();
+    }
+    if (isActive_) {
+        OnInActive();
+    }
+}
+
 void WebPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -147,6 +159,9 @@ void WebPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
 }
 
 void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -161,6 +176,7 @@ void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->RemoveWindowSizeChangeCallback(id);
+    pipeline->RemoveNodesToNotifyMemoryLevel(id);
 }
 
 void WebPattern::InitEvent()
@@ -180,6 +196,7 @@ void WebPattern::InitEvent()
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
     InitMouseEvent(inputHub);
+    InitHoverEvent(inputHub);
 
     auto focusHub = eventHub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -281,6 +298,24 @@ void WebPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
 
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnMouseEvent(mouseEvent_);
+}
+
+void WebPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
+{
+    if (hoverEvent_) {
+        return;
+    }
+
+    auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        MouseInfo info;
+        info.SetAction(isHover ? MouseAction::HOVER : MouseAction::HOVER_EXIT);
+        pattern->WebOnMouseEvent(info);
+    };
+
+    hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
+    inputHub->AddOnHoverEvent(hoverEvent_);
 }
 
 void WebPattern::HandleMouseEvent(MouseInfo& info)
@@ -1052,6 +1087,10 @@ void WebPattern::OnModifyDone()
     if (!delegate_) {
         // first create case,
         delegate_ = AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContext(), nullptr, "");
+        CHECK_NULL_VOID(delegate_);
+        observer_ = AceType::MakeRefPtr<WebDelegateObserver>(delegate_, PipelineContext::GetCurrentContext());
+        CHECK_NULL_VOID(observer_);
+        delegate_->SetObserver(observer_);
         InitEnhanceSurfaceFlag();
         delegate_->SetNGWebPattern(Claim(this));
         delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
@@ -2013,5 +2052,11 @@ void WebPattern::UpdateBackgroundColorRightNow(int32_t color)
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackgroundColor(Color(static_cast<uint32_t>(color)));
+}
+
+void WebPattern::OnNotifyMemoryLevel(int32_t level)
+{
+    CHECK_NULL_VOID(delegate_);
+    delegate_->NotifyMemoryLevel(level);
 }
 } // namespace OHOS::Ace::NG

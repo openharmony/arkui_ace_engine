@@ -21,6 +21,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -30,20 +31,23 @@ constexpr Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
 constexpr Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
 constexpr Dimension DEFAULT_CONTROL_BUTTON_LEFT = 16.0_vp;
 constexpr Dimension DEFAULT_CONTROL_BUTTON_TOP = 48.0_vp;
-constexpr Dimension DEFAULT_SIDE_BAR_WIDTH = 200.0_vp;
-constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
 constexpr Dimension DEFAULT_DIVIDER_STROKE_WIDTH = 1.0_vp;
 constexpr Dimension DEFAULT_DIVIDER_START_MARGIN = 0.0_vp;
 constexpr Dimension DEFAULT_DIVIDER_END_MARGIN = 0.0_vp;
-constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
+
 constexpr static int INDEX_CONTRON_BUTTON = 1;
 constexpr static int INDEX_DIVIDER = 2;
 constexpr static int INDEX_SIDE_BAR = 3;
+constexpr static int32_t PLATFORM_VERSION_TEN = 10;
+static Dimension DEFAULT_SIDE_BAR_WIDTH = 200.0_vp;
+static Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
+static Dimension DEFAULT_MIN_CONTENT_WIDTH = 0.0_vp;
 } // namespace
 
 void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    UpdateDefaultValueByVersion();
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
         LOGE("SideBarContainerLayoutAlgorithm::Measure, children is less than 3.");
@@ -68,8 +72,7 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto dividerStrokeWidthPx = ConvertToPx(dividerStrokeWidth, scaleProperty, parentWidth).value_or(1);
     AutoChangeSideBarWidth(layoutWrapper, parentWidth, minSideBarWidthPx, dividerStrokeWidthPx);
 
-    auto type = layoutProperty->GetSideBarContainerType().value_or(SideBarContainerType::EMBED);
-    if (type == SideBarContainerType::AUTO) {
+    if (type_ == SideBarContainerType::AUTO) {
         AutoMode(layoutWrapper, parentWidth, minSideBarWidthPx, dividerStrokeWidthPx);
     }
 
@@ -101,6 +104,17 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (children.size() > DEFAULT_MIN_CHILDREN_SIZE) { // when sidebar only add one component, content is not display
         auto contentLayoutWrapper = children.front();
         MeasureSideBarContent(layoutProperty, contentLayoutWrapper, parentWidth);
+    }
+}
+
+void SideBarContainerLayoutAlgorithm::UpdateDefaultValueByVersion()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        DEFAULT_SIDE_BAR_WIDTH = 240.0_vp;
+        DEFAULT_MIN_SIDE_BAR_WIDTH = 240.0_vp;
+        DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
     }
 }
 
@@ -166,9 +180,9 @@ void SideBarContainerLayoutAlgorithm::AutoMode(
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     if (parentWidth < (minSideBarWidthPx + minContentWidth_ + dividerStrokeWidthPx)) {
-        layoutProperty->UpdateSideBarContainerType(SideBarContainerType::OVERLAY);
+        type_ = SideBarContainerType::OVERLAY;
     } else {
-        layoutProperty->UpdateSideBarContainerType(SideBarContainerType::EMBED);
+        type_ = SideBarContainerType::EMBED;
     }
 }
 
@@ -218,12 +232,11 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBarContent(
     const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<LayoutWrapper>& contentLayoutWrapper,
     float parentWidth)
 {
-    auto type = layoutProperty->GetSideBarContainerType().value_or(SideBarContainerType::EMBED);
     auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto contentWidth = parentWidth;
 
-    if (type == SideBarContainerType::EMBED) {
+    if (type_ == SideBarContainerType::EMBED) {
         if (sideBarStatus_ == SideBarStatus::SHOW) {
             contentWidth -= (realSideBarWidth_ + realDividerWidth_);
         } else if (sideBarStatus_ == SideBarStatus::CHANGING) {
@@ -384,11 +397,10 @@ void SideBarContainerLayoutAlgorithm::LayoutSideBarContent(
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
 
-    auto type = layoutProperty->GetSideBarContainerType().value_or(SideBarContainerType::EMBED);
     auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
 
     float contentOffsetX = 0.0f;
-    if (type == SideBarContainerType::EMBED && sideBarPosition == SideBarPosition::START) {
+    if (type_ == SideBarContainerType::EMBED && sideBarPosition == SideBarPosition::START) {
         if (sideBarStatus_ == SideBarStatus::SHOW) {
             contentOffsetX = realSideBarWidth_ + realDividerWidth_;
         } else if (sideBarStatus_ == SideBarStatus::CHANGING) {

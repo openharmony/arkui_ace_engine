@@ -53,7 +53,7 @@ class StateModifyTask;
 class UITask;
 
 // FrameNode will display rendering region in the screen.
-class ACE_EXPORT FrameNode : public UINode {
+class ACE_FORCE_EXPORT FrameNode : public UINode {
     DECLARE_ACE_TYPE(FrameNode, UINode);
 
 public:
@@ -113,23 +113,30 @@ public:
 
     void SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty);
 
+    // Clear the user callback.
+    void ClearUserOnAreaChange();
+
     void SetOnAreaChangeCallback(OnAreaChangedFunc&& callback);
+
     void TriggerOnAreaChangeCallback();
 
     void AddVisibleAreaUserCallback(double ratio, const VisibleCallbackInfo& callback)
     {
         visibleAreaUserCallbacks_[ratio] = callback;
     }
+
     void AddVisibleAreaInnerCallback(double ratio, const VisibleCallbackInfo& callback)
     {
         visibleAreaInnerCallbacks_[ratio] = callback;
     }
+
     void TriggerVisibleAreaChangeCallback(bool forceDisappear = false);
 
     const RefPtr<GeometryNode>& GetGeometryNode() const
     {
         return geometryNode_;
     }
+
     void SetGeometryNode(const RefPtr<GeometryNode>& node);
 
     const RefPtr<RenderContext>& GetRenderContext() const

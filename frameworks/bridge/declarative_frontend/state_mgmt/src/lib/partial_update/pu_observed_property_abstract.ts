@@ -23,10 +23,60 @@ abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T>
 implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber, IMultiPropertiesReadSubscriber
 // these interfaces implementations are all empty functioms, overwrite FU base class implementations.
 {
+  private owningView_ : ViewPU = undefined;
   private dependentElementIds_: Set<number> = new Set<number>();
 
-  constructor(subscribingView: IPropertySubscriber, viewName: PropertyInfo) {
-    super(subscribingView, viewName);
+  // PU code stores object references to dependencies directly as class variable
+  // SubscriberManager is not used for lookup in PU code path to speedup updates
+  protected subscriberRefs_: Set<IPropertySubscriber>;
+
+  constructor(subscriber: IPropertySubscriber, viewName: PropertyInfo) {
+    super(subscriber, viewName);
+    Object.defineProperty(this, 'owningView_', {writable: true, enumerable: false});
+    Object.defineProperty(this, 'subscriberRefs_',
+      {writable: true, enumerable: false, value: new Set<IPropertySubscriber>()});
+    if(subscriber) {
+      if (subscriber instanceof ViewPU) {
+        this.owningView_ = subscriber;
+      } else {
+        this.subscriberRefs_.add(subscriber);
+      }
+    }
+  }
+
+  aboutToBeDeleted() {
+    super.aboutToBeDeleted();
+    this.subscriberRefs_.clear();
+    this.owningView_ = undefined;
+  }
+
+  /*
+    Virtualized version of the subscription mechanism - add subscriber
+    Overrides implementation in ObservedPropertyAbstract<T>
+  */
+  public addSubscriber(subscriber: ISinglePropertyChangeSubscriber<T>):void {
+    if (subscriber) {
+      // ObservedPropertyAbstract will also add subscriber to
+      // SubscriberManager map and to its own Set of subscribers as well
+      // Something to improve in the future for PU path.
+      // subscribeMe should accept IPropertySubscriber interface
+      super.subscribeMe(subscriber as ISinglePropertyChangeSubscriber<T>);
+      this.subscriberRefs_.add(subscriber);
+    }
+  }
+
+  /*
+    Virtualized version of the subscription mechanism - remove subscriber
+    Overrides implementation in ObservedPropertyAbstract<T>
+  */
+  public removeSubscriber(subscriber: IPropertySubscriber, id?: number):void {
+    if (subscriber) {
+      this.subscriberRefs_.delete(subscriber);
+      if (!id) {
+        id = subscriber.id__();
+      }
+    }
+    super.unlinkSuscriber(id);
   }
 
   protected notifyPropertyRead() {
@@ -36,9 +86,12 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
 
   protected notifyPropertyHasBeenReadPU() {
     stateMgmtConsole.debug(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: notifyPropertyHasBeenReadPU.`)
-    this.subscribers_.forEach((subscribedId) => {
-      var subscriber: IPropertySubscriber = SubscriberManager.Find(subscribedId)
+    this.subscriberRefs_.forEach((subscriber) => {
       if (subscriber) {
+        // TODO
+        // propertyHasBeenReadPU is not use in the code
+        // defined by interface that is not used either: PropertyReadEventListener
+        // Maybe compiler generated code has it?
         if ('propertyHasBeenReadPU' in subscriber) {
           (subscriber as unknown as PropertyReadEventListener<T>).propertyHasBeenReadPU(this);
         }
@@ -49,15 +102,15 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
 
   protected notifyPropertyHasChangedPU() {
     stateMgmtConsole.debug(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: notifyPropertyHasChangedPU.`)
-    this.subscribers_.forEach((subscribedId) => {
-      var subscriber: IPropertySubscriber = SubscriberManager.Find(subscribedId)
+    if (this.owningView_) {
+      this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElementIds_);
+    }
+    this.subscriberRefs_.forEach((subscriber) => {
       if (subscriber) {
-        if ('viewPropertyHasChanged' in subscriber) {
-          (subscriber as ViewPU).viewPropertyHasChanged(this.info_, this.dependentElementIds_);
-        } else if ('syncPeerHasChanged' in subscriber) {
+        if ('syncPeerHasChanged' in subscriber) {
           (subscriber as unknown as PeerChangeEventReceiverPU<T>).syncPeerHasChanged(this);
         } else  {
-          stateMgmtConsole.warn(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: notifyPropertryHasChangedPU: unknown subscriber ID '${subscribedId}' error!`);
+          stateMgmtConsole.warn(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: notifyPropertryHasChangedPU: unknown subscriber ID 'subscribedId' error!`);
         }
       }
     });
@@ -69,6 +122,10 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     // this function will be removed after a short transiition periode
     stateMgmtConsole.warn(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: markDependentElementsDirty no longer supported. App will work ok, but
         please update your ace-ets2bundle and recompile your application!`);
+  }
+
+  public numberOfSubscrbers(): number {
+    return this.subscriberRefs_.size + (this.owningView_ ? 1 : 0);
   }
 
   /**

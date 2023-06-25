@@ -86,7 +86,7 @@ using SharePanelCallback = std::function<void(const std::string& bundleName, con
 using AceVsyncCallback = std::function<void(uint64_t, uint32_t)>;
 using EtsCardTouchEventCallback = std::function<void(const TouchEvent&)>;
 
-class ACE_EXPORT PipelineBase : public AceType {
+class ACE_FORCE_EXPORT PipelineBase : public AceType {
     DECLARE_ACE_TYPE(PipelineBase, AceType);
 
 public:
@@ -899,9 +899,15 @@ public:
 
     // restore
     virtual void RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo) {}
+
     virtual std::unique_ptr<JsonValue> GetStoredNodeInfo()
     {
         return nullptr;
+    }
+
+    uint64_t GetLastTouchTime() const
+    {
+        return lastTouchTime_;
     }
 
 protected:
@@ -1003,6 +1009,7 @@ protected:
     std::function<void()> nextFrameLayoutCallback_ = nullptr;
     SharePanelCallback sharePanelCallback_ = nullptr;
     std::atomic<bool> isForegroundCalled_ = false;
+    uint64_t lastTouchTime_ = 0;
 
 private:
     void DumpFrontend() const;

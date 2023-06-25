@@ -385,8 +385,6 @@ void APngImagePlayer::BlendImage(const APngAnimatedFrameInfo *frameInfo)
         }
     }
 #else
-    std::shared_ptr<RSImage> image = nullptr;
-
     if (!frameInfo) {
         return;
     }
@@ -811,6 +809,7 @@ APngAnimatedFrameInfo *APngImagePlayer::DecodeFrameImage(const int32_t& index)
 
             RSBitmap bitmap;
             CopyTo(&bitmap, bitmap_);
+            image = std::make_shared<RSImage>();
             image->BuildFromBitmap(bitmap);
 
             if (frameInfo->dispose == ImageDisposeBackground) {

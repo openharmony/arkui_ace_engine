@@ -200,7 +200,7 @@ void ProgressModelNG::SetText(const std::optional<std::string>& value)
         std::string number = std::to_string(curPercent) + "%";
         bool isShowText = progressPaintProperty->GetEnableShowText().value_or(false);
         if (!isShowText) {
-            context = number = "";
+            number = "";
         }
         textLayoutProperty->UpdateContent(number);
         context = number;

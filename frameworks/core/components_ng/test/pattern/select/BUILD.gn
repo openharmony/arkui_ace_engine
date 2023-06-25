@@ -52,6 +52,7 @@ ohos_unittest("select_pattern_test_ng") {
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
     "$ace_root/frameworks/core/image/image_source_info.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_engine.cpp",
 
     # components_ng_base
     "$ace_root/frameworks/core/components_ng/base/frame_node.cpp",
@@ -91,7 +92,6 @@ ohos_unittest("select_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/menu/multi_menu_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/sub_menu_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_layout_algorithm.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/option/option_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/option/option_layout_algorithm.cpp",

@@ -68,4 +68,10 @@ void FormManagerDelegate::DispatchPointerEvent(const std::shared_ptr<MMI::Pointe
 void FormManagerDelegate::NotifySurfaceChange(float width, float height) {}
 
 void FormManagerDelegate::AddFormSurfaceChangeCallback(OnFormSurfaceChangeCallback &&callback) {}
+
+void FormManagerDelegate::AddSnapshotCallback(SnapshotCallback&& callback) {}
+
+void FormManagerDelegate::ResetForm() {}
+
+void FormManagerDelegate::ReleaseForm() {}
 } // namespace OHOS::Ace

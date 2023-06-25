@@ -117,8 +117,6 @@ ohos_unittest("rating_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/rating/rating_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rating/rating_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rating/rating_pattern.cpp",
-    "rating_accessibility_property_test_ng.cpp",
-    "rating_paint_method_test_ng.cpp",
     "rating_pattern_test_ng.cpp",
   ]
 

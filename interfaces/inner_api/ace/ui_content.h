@@ -98,6 +98,7 @@ public:
     virtual bool ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent) = 0;
     virtual bool ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent) = 0;
     virtual bool ProcessVsyncEvent(uint64_t timeStampNanos) = 0;
+    virtual void SetIsFocusActive(bool isFocusActive) = 0;
     virtual void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) = 0;
     virtual void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) = 0;
@@ -154,7 +155,7 @@ public:
         std::vector<std::string>& assetBasePaths, std::string& resFolderName) {};
     virtual void SetResourcePaths(const std::vector<std::string>& resourcesPaths, const std::string& assetRootPath,
         const std::vector<std::string>& assetBasePaths) {};
-		
+
     virtual NativeValue* GetUIContext()
     {
         return nullptr;

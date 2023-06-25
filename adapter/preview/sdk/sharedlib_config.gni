@@ -43,7 +43,7 @@ common_bin = [
   {
     label = "//third_party/nghttp2/lib:libnghttp2_shared"
     subsystem_name = "thirdparty"
-    part_name = "thirdparty_nghttp2"
+    part_name = "nghttp2"
   },
   {
     label = "//third_party/bounds_checking_function:libsec_shared"

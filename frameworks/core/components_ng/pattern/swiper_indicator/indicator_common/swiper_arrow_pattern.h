@@ -96,6 +96,7 @@ private:
     Color backgroundColor_ = Color::TRANSPARENT;
     bool isTouch_ = false;
     bool isHover_ = false;
+    bool hoverOnClickFlag_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(SwiperArrowPattern);
 };
 } // namespace OHOS::Ace::NG

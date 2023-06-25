@@ -183,33 +183,45 @@ void JSTabContent::SetIndicator(const JSRef<JSVal>& info)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info);
     IndicatorStyle indicator;
+    CalcDimension indicatorHeight;
+    CalcDimension indicatorWidth;
+    CalcDimension indicatorBorderRadius;
+    CalcDimension indicatorMarginTop;
     if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("color"), indicator.color)) {
         RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
         if (tabTheme) {
             indicator.color = tabTheme->GetActiveIndicatorColor();
         }
     }
-    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("height"), indicator.height) ||
-        indicator.height.Value() < 0.0f) {
+    if (!info->IsObject() || !ParseJsDimensionVp(obj->GetProperty("height"), indicatorHeight) ||
+        indicatorHeight.Value() < 0.0f || indicatorHeight.Unit() == DimensionUnit::PERCENT) {
         RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
         if (tabTheme) {
             indicator.height = tabTheme->GetActiveIndicatorWidth();
         }
+    } else {
+        indicator.height = indicatorHeight;
     }
-    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("width"), indicator.width) ||
-        indicator.width.Value() < 0.0f) {
+    if (!info->IsObject() || !ParseJsDimensionVp(obj->GetProperty("width"), indicatorWidth) ||
+        indicatorWidth.Value() < 0.0f || indicatorWidth.Unit() == DimensionUnit::PERCENT) {
         indicator.width = 0.0_vp;
+    } else {
+        indicator.width = indicatorWidth;
     }
-    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("borderRadius"), indicator.borderRadius) ||
-        indicator.borderRadius.Value() < 0.0f) {
+    if (!info->IsObject() || !ParseJsDimensionVp(obj->GetProperty("borderRadius"), indicatorBorderRadius) ||
+        indicatorBorderRadius.Value() < 0.0f || indicatorBorderRadius.Unit() == DimensionUnit::PERCENT) {
         indicator.borderRadius = 0.0_vp;
+    } else {
+        indicator.borderRadius = indicatorBorderRadius;
     }
-    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("marginTop"), indicator.marginTop) ||
-        indicator.marginTop.Value() < 0.0f) {
+    if (!info->IsObject() || !ParseJsDimensionVp(obj->GetProperty("marginTop"), indicatorMarginTop) ||
+        indicatorMarginTop.Value() < 0.0f || indicatorMarginTop.Unit() == DimensionUnit::PERCENT) {
         RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
         if (tabTheme) {
             indicator.marginTop = tabTheme->GetSubTabIndicatorGap();
         }
+    } else {
+        indicator.marginTop = indicatorMarginTop;
     }
     TabContentModel::GetInstance()->SetIndicator(indicator);
 }
@@ -218,12 +230,15 @@ void JSTabContent::SetBoard(const JSRef<JSVal>& info)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info);
     BoardStyle board;
-    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("borderRadius"), board.borderRadius) ||
-        board.borderRadius.Value() < 0.0f) {
+    CalcDimension borderRadius;
+    if (!info->IsObject() || !ParseJsDimensionVp(obj->GetProperty("borderRadius"), borderRadius)
+        || borderRadius.Value() < 0.0f || borderRadius.Unit() == DimensionUnit::PERCENT) {
         RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
         if (tabTheme) {
             board.borderRadius = tabTheme->GetFocusIndicatorRadius();
         }
+    } else {
+        board.borderRadius = borderRadius;
     }
     TabContentModel::GetInstance()->SetBoard(board);
 }

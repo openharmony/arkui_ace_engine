@@ -38,22 +38,22 @@ void TimePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         pickerTheme->GetGradientHeight().ConvertToPx() * 4 + pickerTheme->GetDividerSpacing().ConvertToPx());
     auto columnNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(columnNode);
-    auto stackNode = DynamicCast<FrameNode>(columnNode->GetParent());
-    CHECK_NULL_VOID(stackNode);
-    auto pickerNode = DynamicCast<FrameNode>(stackNode->GetParent());
-    CHECK_NULL_VOID(pickerNode);
-    auto layoutConstraint = pickerNode->GetLayoutProperty()->GetLayoutConstraint();
-    auto width = layoutConstraint->selfIdealSize.Width();
-    auto children = pickerNode->GetChildren();
+    if (columnNode->GetChildren().size() == CHILD_SIZE) {
+        height = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() * (CHILD_SIZE - 1) +
+                                    pickerTheme->GetDividerSpacing().ConvertToPx());
+    }
+    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint);
+    auto width = layoutConstraint->parentIdealSize.Width();
     float pickerWidth = 0.0f;
     if (width.has_value()) {
-        pickerWidth = width.value() / static_cast<float>(children.size());
+        pickerWidth = width.value();
     } else {
         pickerWidth = static_cast<float>((pickerTheme->GetDividerSpacing() * DIVIDER_SIZE).ConvertToPx());
     }
 
     frameSize.SetWidth(pickerWidth);
-    frameSize.SetHeight(height);
+    frameSize.SetHeight(std::min(height, layoutConstraint->maxSize.Height()));
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
     auto layoutChildConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
@@ -80,12 +80,15 @@ void TimePickerColumnLayoutAlgorithm::ChangeAmPmTextStyle(uint32_t index, uint32
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     frameSize.SetWidth(size.Width());
+    auto gradientHeight = pickerTheme->GetGradientHeight().ConvertToPx();
+    auto dividerSpacingHeight = pickerTheme->GetDividerSpacing().ConvertToPx();
+    auto columnHeight = gradientHeight * (showOptionCount - 1) + dividerSpacingHeight;
     auto layoutChildConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
     if (index == selectedIndex) {
-        frameSize.SetHeight(static_cast<float>(pickerTheme->GetDividerSpacing().ConvertToPx()));
+        frameSize.SetHeight(static_cast<float>(dividerSpacingHeight / columnHeight * size.Height()));
     } else {
-        frameSize.SetHeight(static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx()));
+        frameSize.SetHeight(static_cast<float>(gradientHeight / columnHeight * size.Height()));
     }
     layoutChildConstraint.selfIdealSize = { frameSize.Width(), frameSize.Height() };
     childLayoutWrapper->Measure(layoutChildConstraint);
@@ -103,17 +106,6 @@ void TimePickerColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, size);
     auto children = layoutWrapper->GetAllChildrenWithBuild();
     float childStartCoordinate = 0.0f;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(pickerTheme);
-    if (children.size() == CHILD_SIZE) {
-        auto firstChild = children.front();
-        CHECK_NULL_VOID(firstChild);
-        auto firstGeometryNode = firstChild->GetGeometryNode();
-        CHECK_NULL_VOID(firstGeometryNode);
-        childStartCoordinate += static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx());
-    }
     for (const auto& child : children) {
         auto childGeometryNode = child->GetGeometryNode();
         auto childSize = childGeometryNode->GetMarginFrameSize();

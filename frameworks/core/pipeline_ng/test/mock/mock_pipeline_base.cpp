@@ -253,8 +253,6 @@ void PipelineContext::AddPredictTask(PredictTask&& task) {}
 
 void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task) {}
 
-void PipelineContext::AddUIExtensionTouchEventCallback(int32_t pointId, UIExtensionTouchEventCallback&& callback) {}
-
 void PipelineContext::FlushPipelineImmediately() {}
 
 FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp)
@@ -309,6 +307,8 @@ SafeAreaEdgeInserts PipelineContext::GetCutoutSafeArea() const
 {
     return {};
 }
+
+void PipelineContext::AddWindowSceneTouchEventCallback(int32_t pointId, WindowSceneTouchEventCallback&& callback) {}
 
 SafeAreaEdgeInserts PipelineContext::GetViewSafeArea() const
 {

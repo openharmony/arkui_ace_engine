@@ -121,7 +121,6 @@ private:
     RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
     RefPtr<SequencedRecognizer> SequencedRecognizer_;
-    WeakPtr<FrameNode> columnNodeWeak_;
     std::function<void(GestureEvent&)> actionStart_;
 
     PanDirection direction_;

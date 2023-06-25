@@ -147,6 +147,8 @@ void RatingPattern::UpdatePaintConfig()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<RatingLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
@@ -154,12 +156,13 @@ void RatingPattern::UpdatePaintConfig()
     foregroundConfig_.imageFit_ = ImageFit::FILL;
     secondaryConfig_.imageFit_ = ImageFit::FILL;
     backgroundConfig_.imageFit_ = ImageFit::FILL;
-    foregroundConfig_.scaleX_ = contentSize.Width() > 0 ? contentSize.Height() / frameSize.Width() : 0;
-    foregroundConfig_.scaleY_ = contentSize.Height() > 0 ? contentSize.Height() / frameSize.Height() : 0;
-    secondaryConfig_.scaleX_ = contentSize.Width() > 0 ? contentSize.Height() / frameSize.Width() : 0;
-    secondaryConfig_.scaleY_ = contentSize.Height() > 0 ? contentSize.Height() / frameSize.Height() : 0;
-    backgroundConfig_.scaleX_ = contentSize.Width() > 0 ? contentSize.Height() / frameSize.Width() : 0;
-    backgroundConfig_.scaleY_ = contentSize.Height() > 0 ? contentSize.Height() / frameSize.Height() : 0;
+    auto starsNum = layoutProperty->GetStarsValue(GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM));
+    foregroundConfig_.scaleX_ = contentSize.Width() / frameSize.Width() / static_cast<float>(starsNum);
+    foregroundConfig_.scaleY_ = contentSize.Height() / frameSize.Height();
+    secondaryConfig_.scaleX_ = contentSize.Width() / frameSize.Width() / static_cast<float>(starsNum);
+    secondaryConfig_.scaleY_ = contentSize.Height() / frameSize.Height();
+    backgroundConfig_.scaleX_ = contentSize.Width() / frameSize.Width() / static_cast<float>(starsNum);
+    backgroundConfig_.scaleY_ = contentSize.Height() / frameSize.Height();
 }
 
 RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
@@ -194,6 +197,14 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
 
 bool RatingPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    std::optional<SizeF> contentSize = GetHostContentSize();
+    CHECK_NULL_RETURN(contentSize, false);
+    auto layoutProperty = GetLayoutProperty<RatingLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto starsNum = layoutProperty->GetStarsValue(GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM));
+    singleStarWidth_ = contentSize->Width() / static_cast<float>(starsNum);
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
@@ -281,19 +292,17 @@ void RatingPattern::RecalculatedRatingScoreBasedOnEventPoint(double eventPointX,
     CHECK_NULL_VOID(ratingLayoutProperty);
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
-
+    const int32_t starNum =
+        ratingLayoutProperty->GetStars().value_or(GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM));
     // step1: calculate the number of star which the touch point falls on.
     double wholeStarNum = 0.0;
-    const float singleWidth = foregroundConfig_.dstRect_.Width();
-    wholeStarNum = floor(eventPointX / singleWidth);
+    wholeStarNum = floor(eventPointX / singleStarWidth_);
 
     // step2: calculate relative position where the touch point falls on the wholeStarNum star.
     double posInSingle = 0.0;
-    posInSingle = (eventPointX - wholeStarNum * singleWidth) / singleWidth;
+    posInSingle = (eventPointX - wholeStarNum * singleStarWidth_) / singleStarWidth_;
     // step3: calculate the new ratingScore according to the touch point.
     double ratingScore = wholeStarNum + posInSingle;
-    const int32_t starNum =
-        ratingLayoutProperty->GetStars().value_or(GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM));
     const double stepSize = ratingRenderProperty->GetStepSize().value_or(GetStepSizeFromTheme().value_or(0.5));
     // step3.1: constrain ratingScore which cannot be greater than starNum and be less than 0.0.
     ratingScore = ratingScore > starNum ? starNum : ratingScore;
@@ -415,11 +424,14 @@ void RatingPattern::HandleTouchDown(const Offset& localPosition)
 
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
-    // calculate the number of star the touch point falls on and trigger render update.
-    const int32_t touchStar = floor(localPosition.GetX() / foregroundConfig_.dstRect_.Width());
-    ratingRenderProperty->UpdateTouchStar(touchStar);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    const auto& content = host->GetGeometryNode()->GetContent();
+    CHECK_NULL_VOID(content);
+    auto contentOffset = content->GetRect().GetOffset();
+    // calculate the number of star the touch point falls on and trigger render update.
+    const int32_t touchStar = floor((localPosition.GetX() - contentOffset.GetX()) / singleStarWidth_);
+    ratingRenderProperty->UpdateTouchStar(touchStar);
     state_ = isHover_ ? RatingModifier::RatingAnimationType::HOVERTOPRESS : RatingModifier::RatingAnimationType::PRESS;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -483,8 +495,10 @@ void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(host);
     auto property = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(property);
+    const auto& content = host->GetGeometryNode()->GetContent();
+    CHECK_NULL_VOID(content);
+    auto singleStarHeight = content->GetRect().Height();
     auto ratingScore = property->GetRatingScoreValue();
-    auto singleStarWith = foregroundConfig_.dstRect_.Width();
     auto wholeStarNum = fmax(ceil(ratingScore) - 1, 0.0);
 
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -493,8 +507,8 @@ void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(ratingTheme);
     auto radius = ratingTheme->GetFocusBorderRadius();
 
-    paintRect.SetRect(RectF(
-        static_cast<float>(wholeStarNum) * singleStarWith, 0.0f, singleStarWith, foregroundConfig_.dstRect_.Height()));
+    paintRect.SetRect(
+        RectF(static_cast<float>(wholeStarNum) * singleStarWidth_, 0.0f, singleStarWidth_, singleStarHeight));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
         static_cast<RSScalar>(radius.ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
@@ -604,19 +618,22 @@ void RatingPattern::HandleHoverEvent(bool isHover)
 void RatingPattern::HandleMouseEvent(MouseInfo& info)
 {
     CHECK_NULL_VOID_NOLOG(!IsIndicator() && isHover_);
-
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& content = host->GetGeometryNode()->GetContent();
+    CHECK_NULL_VOID(content);
+    auto contentOffset = content->GetRect().GetOffset();
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
     auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
     CHECK_NULL_VOID(ratingLayoutProperty);
     // calculate the number of star the mouse moved on and trigger render update.
-    auto touchStar = static_cast<int32_t>(floor(info.GetLocalLocation().GetX() / foregroundConfig_.dstRect_.Width()));
+    auto touchStar =
+        static_cast<int32_t>(floor((info.GetLocalLocation().GetX() - contentOffset.GetX()) / singleStarWidth_));
     touchStar = std::clamp(touchStar, DEFAULT_RATING_TOUCH_STAR_NUMBER,
         ratingLayoutProperty->GetStars().value_or(GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM)) -
             1);
     ratingRenderProperty->UpdateTouchStar(touchStar);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

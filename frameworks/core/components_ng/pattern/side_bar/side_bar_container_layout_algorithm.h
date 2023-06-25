@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SIDE_BAR_SIDE_BAR_CONTAINER_LAYOUT_ALGORITHM_H
 
 #include "base/memory/referenced.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_layout_property.h"
@@ -79,6 +80,11 @@ public:
         return sideBarOffset_;
     }
 
+    void SetSideBarContainerType(SideBarContainerType type)
+    {
+        type_ = type;
+    }
+
 private:
     void MeasureControlButton(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty,
         const RefPtr<LayoutWrapper>& buttonLayoutWrapper, float parentWidth);
@@ -96,6 +102,7 @@ private:
     void AutoMode(LayoutWrapper* layoutWrapper, float parentWidth, float minSideBarWidthPx, float dividerStrokeWidthPx);
     void AutoChangeSideBarWidth(
         LayoutWrapper* layoutWrapper, float parentWidth, float minSideBarWidthPx, float dividerStrokeWidthPx);
+    void UpdateDefaultValueByVersion();
 
     float currentOffset_ = 0.0f;
     float realSideBarWidth_ = 0.0f;
@@ -105,6 +112,7 @@ private:
     SideBarStatus sideBarStatus_ = SideBarStatus::SHOW;
     bool needInitRealSideBarWidth_ = true;
     OffsetF sideBarOffset_;
+    SideBarContainerType type_ = SideBarContainerType::EMBED;
 
     ACE_DISALLOW_COPY_AND_MOVE(SideBarContainerLayoutAlgorithm);
 };

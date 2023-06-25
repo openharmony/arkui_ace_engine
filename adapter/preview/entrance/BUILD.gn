@@ -57,11 +57,11 @@ ohos_source_set("preview_entrance_source") {
       "$ace_napi:ace_napi",
       "$ace_root/frameworks/core/components/theme:build_theme_code",
     ]
-
+    external_deps = []
     include_dirs = [ "$flutter_root/engine" ]
 
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
-      deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+      external_deps += [ "graphic_standard:librender_service_client" ]
     } else {
       deps += [
         "$ace_flutter_engine_root/glfw:flutter_glfw_preview_$platform",

@@ -82,6 +82,9 @@ const char TEXT_ETS_TAG[] = "Text";
 const char TEXT_ATTRS_OVER_FLOW[] = "textOverflow";
 const char TEXT_ATTRS_MAX_LINES[] = "maxLines";
 
+// rich editor
+const char RICH_EDITOR_ETS_TAG[] = "RichEditor";
+
 // stack
 const char STACK_COMPONENT_TAG[] = "StackComponent";
 const char STACK_ETS_TAG[] = "Stack";
@@ -484,7 +487,7 @@ const char POPUP_ETS_TAG[] = "Popup";
 const char REMOTE_WINDOW_ETS_TAG[] = "RemoteWindow";
 
 // effect view
-const char EFFECT_VIEW_ETS_TAG[] = "EffectView";
+const char EFFECT_COMPONENT_ETS_TAG[] = "EffectComponent";
 
 // Model
 const char MODEL_COMPONENT_TAG[] = "ModelComponent";

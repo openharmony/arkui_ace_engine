@@ -52,4 +52,9 @@ Rect SubwindowManager::GetParentWindowRect()
 {
     return Rect();
 }
+
+int32_t SubwindowManager::GetParentContainerId(int32_t containerId)
+{
+    return 0;
+}
 } // namespace OHOS::Ace

@@ -1573,13 +1573,16 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest006, TestSize.Level1)
     OffsetF bottomPosition(0, 34);
     OffsetF topArrowPosition(0, 0);
     OffsetF bottomArrowPosition(0, 44);
+    OffsetF arrowPosition(0, 10);
 
-    std::vector<double> placements = {4, 4, 0, 44, 0, 0, 0, 0, -8, 16, -8, 16};
+    std::vector<Placement> placements = { Placement::LEFT, Placement::RIGHT, Placement::TOP, Placement::BOTTOM,
+        Placement::TOP_LEFT, Placement::TOP_RIGHT, Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT,
+        Placement::LEFT_BOTTOM, Placement::LEFT_TOP, Placement::RIGHT_BOTTOM, Placement::RIGHT_TOP };
     for (uint32_t i = 0; i < BUBBLE_LAYOUT_PROPERTY_PLACEMENTS.size(); ++i) {
         bubbleLayoutAlgorithm.placement_ = BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i];
         bubbleLayoutAlgorithm.GetPositionWithPlacement(
-        childSize, topPosition, bottomPosition, topArrowPosition, bottomArrowPosition);
-        EXPECT_EQ(bubbleLayoutAlgorithm.arrowPosition_.GetY(), placements[i]);
+            topPosition, arrowPosition, childSize, placements[i]);
+        EXPECT_EQ(BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i], placements[i]);
     }
 }
 

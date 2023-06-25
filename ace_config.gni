@@ -83,7 +83,7 @@ expat_root = "//third_party/expat"
 cjson_root = "//third_party/cJSON"
 jsoncpp_root = "//third_party/jsoncpp"
 ark_tools_root = "//prebuilts/ace-toolkit/ace-loader/panda"
-node_js_path = "//prebuilts/ace-toolkit/nodejs/node-v12.18.4-linux-x64/bin/"
+node_js_path = "//prebuilts/ace-toolkit/nodejs/current/bin/"
 ark_toolchain_path = "//arkcompiler/toolchain"
 window_manager_path = "//foundation/window/window_manager"
 graphic_standard_path = "//foundation/graphic/graphic_2d"
@@ -109,8 +109,7 @@ objcopy_clang = "$clang_base_path/bin/llvm-objcopy"
 
 if (is_ohos_standard_system) {
   objcopy_default = "//prebuilts/clang/ohos/linux-x86_64/llvm/bin/llvm-objcopy"
-  node_js_path =
-      "//prebuilts/build-tools/common/nodejs/node-v12.18.4-linux-x64/bin/"
+  node_js_path = "//prebuilts/build-tools/common/nodejs/current/bin/"
 } else if (is_cross_platform_build) {
   if (host_os == "mac") {
     objcopy_default = objcopy_clang

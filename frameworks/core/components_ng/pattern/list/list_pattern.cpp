@@ -1024,6 +1024,8 @@ void ListPattern::SetChainAnimation()
                 minSpace = space;
                 maxSpace = space;
             }
+            springProperty_->SetStiffness(chainAnimationOptions_.value().stiffness);
+            springProperty_->SetDamping(chainAnimationOptions_.value().damping);
             chainAnimation_ =
                 AceType::MakeRefPtr<ChainAnimation>(space, maxSpace, minSpace, springProperty_);
             auto conductivity = chainAnimationOptions_.value().conductivity;
@@ -1077,6 +1079,10 @@ void ListPattern::SetChainAnimationOptions(const ChainAnimationOptions& options)
         chainAnimation_->SetIntensity(intensity);
         auto effect = options.edgeEffect;
         chainAnimation_->SetEdgeEffect(effect == 1 ? ChainEdgeEffect::STRETCH : ChainEdgeEffect::DEFAULT);
+    }
+    if (springProperty_) {
+        springProperty_->SetStiffness(chainAnimationOptions_.value().stiffness);
+        springProperty_->SetDamping(chainAnimationOptions_.value().damping);
     }
 }
 

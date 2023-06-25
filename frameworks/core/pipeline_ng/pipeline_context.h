@@ -23,6 +23,7 @@
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/log/frame_info.h"
+#include "base/log/frame_report.h"
 #include "base/memory/referenced.h"
 #include "core/common/frontend.h"
 #include "core/components_ng/base/frame_node.h"
@@ -38,7 +39,7 @@
 
 namespace OHOS::Ace::NG {
 
-using UIExtensionTouchEventCallback = std::function<void(const TouchEvent&)>;
+using WindowSceneTouchEventCallback = std::function<void(const std::shared_ptr<MMI::PointerEvent>&)>;
 
 class ACE_EXPORT PipelineContext : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
@@ -264,21 +265,7 @@ public:
         return isFocusActive_;
     }
 
-    bool SetIsFocusActive(bool isFocusActive)
-    {
-        if (isFocusActive_ == isFocusActive) {
-            return false;
-        }
-        isFocusActive_ = isFocusActive;
-        CHECK_NULL_RETURN_NOLOG(rootNode_, false);
-        auto rootFocusHub = rootNode_->GetFocusHub();
-        CHECK_NULL_RETURN_NOLOG(rootFocusHub, false);
-        if (isFocusActive_) {
-            return rootFocusHub->PaintAllFocusState();
-        }
-        rootFocusHub->ClearAllFocusState();
-        return true;
-    }
+    bool SetIsFocusActive(bool isFocusActive);
 
     bool IsTabJustTriggerOnKeyEvent() const
     {
@@ -377,13 +364,11 @@ public:
         storeNode_.erase(restoreId);
     }
 
-    // ---------------- UIExtesion TouchEvent Callback Handler ----------------
-    void AddUIExtensionTouchEventCallback(int32_t pointId, UIExtensionTouchEventCallback&& callback);
-
-    void RemoveUIExtensionTouchEvetnCallback(int32_t pointId);
-
-    void HandleUIExtensionTouchEvent(const TouchEvent& point);
-    // -------------------------------------------------------------------------
+    // ---------------- WindowScene TouchEvent Callback Handler ---------------------
+    void AddWindowSceneTouchEventCallback(int32_t pointId, WindowSceneTouchEventCallback&& callback);
+    void RemoveWindowSceneTouchEventCallback(int32_t pointId);
+    void HandleWindowSceneTouchEvent(const TouchEvent& point);
+    // ------------------------------------------------------------------------------
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -457,7 +442,7 @@ private:
     int32_t callbackId_ = 0;
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
     SurfacePositionChangedCallbackMap surfacePositionChangedCallbackMap_;
-    std::unordered_map<int32_t, UIExtensionTouchEventCallback> uiExtensionTouchEventCallback_;
+    std::unordered_map<int32_t, WindowSceneTouchEventCallback> windowSceneTouchEventCallback_;
 
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
@@ -471,7 +456,6 @@ private:
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
     uint32_t nextScheduleTaskId_ = 0;
-    int32_t rotationAnimationCount_ = 0;
     int32_t mouseStyleNodeId_ = -1;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;

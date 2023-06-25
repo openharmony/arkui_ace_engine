@@ -71,7 +71,7 @@ public:
     TextDragPattern() = default;
     ~TextDragPattern() override = default;
 
-    static void CreateDragNode(RefPtr<FrameNode> hostNode);
+    static RefPtr<FrameNode> CreateDragNode(const RefPtr<FrameNode>& hostNode);
 
     void Initialize(const ParagraphT& paragraph, const TextDragData& data)
     {

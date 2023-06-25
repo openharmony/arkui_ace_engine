@@ -2440,6 +2440,71 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0036, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NavrouterTestNg0037
+ * @tc.desc: Test NavigationStack.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0037, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigationStack.
+     */
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<ImagePattern>());
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    /**
+     * @tc.steps: step2. call get function.
+     * @tc.expected: navigationStack->navPathList_.empty() is true.
+     */
+    ASSERT_TRUE(navigationStack->navPathList_.empty());
+    navigationStack->GetAllPathName();
+    ASSERT_TRUE(navigationStack->navPathList_.empty());
+    navigationStack->Get();
+    ASSERT_TRUE(navigationStack->navPathList_.empty());
+    navigationStack->Get("test");
+    ASSERT_TRUE(navigationStack->navPathList_.empty());
+    navigationStack->GetPre("test", backButton);
+    ASSERT_TRUE(navigationStack->navPathList_.empty());
+    /**
+     * @tc.steps: step3. add element to navigationStack->navPathList_.
+     */
+    navigationStack->navPathList_.push_back({"test", backButton});
+    navigationStack->GetPre("test", backButton);
+    navigationStack->navPathList_.push_back({"test1", backButton});
+    navigationStack->GetPre("test", backButton);
+    navigationStack->GetPre("test2", backButton);
+    navigationStack->Get("test3");
+    navigationStack->GetAllPathName();
+    navigationStack->navPathList_.clear();
+    /**
+     * @tc.steps: step4. call Remove function.
+     * @tc.expected: navigationStack->navPathList_.empty() is true.
+     */
+    navigationStack->Remove();
+    navigationStack->Remove("test");
+    ASSERT_TRUE(navigationStack->navPathList_.empty());
+    for (int i = 0; i < 3; i++) {
+        std::pair<std::string, RefPtr<UINode>> p("test" + std::to_string(i), backButton);
+        navigationStack->navPathList_.push_back(p);
+    }
+    navigationStack->Remove();
+    ASSERT_FALSE(navigationStack->navPathList_.empty());
+    ASSERT_EQ(navigationStack->navPathList_.size(), 2);
+    for (int i = 0; i < 3; i++) {
+        navigationStack->Remove("test" + std::to_string(i));
+    }
+    ASSERT_TRUE(navigationStack->navPathList_.empty());
+
+    for (int i = 1; i <= 3; i++) {
+        std::pair<std::string, RefPtr<UINode>> p("test" + std::to_string(i), backButton);
+        navigationStack->navPathList_.push_back(p);
+    }
+    for (int i = 0; i <= 4; i++) {
+        navigationStack->Remove("test" + std::to_string(i), backButton);
+    }
+    ASSERT_TRUE(navigationStack->navPathList_.empty());
+}
+
+/**
  * @tc.name: NavrouterTestNg0038
  * @tc.desc: Test NavigationStack.
  * @tc.type: FUNC
@@ -2453,13 +2518,13 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0038, TestSize.Level1)
     auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<ImagePattern>());
     auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
     auto routeInfo = AceType::MakeRefPtr<RouteInfo>();
-    std::pair<std::string, RefPtr<UINode>> p("test" + std::to_string(0), backButton);
-    navigationStack->navPathList_.push_back(p);
     for (int i = 0; i <= 3; i++) {
         for (int j = 0; j <= 2 + i; j++) {
-            navigationStack->Add("test" + std::to_string(j), backButton, static_cast<NavRouteMode>(i), routeInfo);
+            navigationStack->Add(
+                "test" + std::to_string(j == 1 ? 0 : j), backButton, static_cast<NavRouteMode>(i), routeInfo);
         }
+        navigationStack->navPathList_.clear();
     }
-    ASSERT_FALSE(navigationStack->navPathList_.empty());
+    ASSERT_TRUE(navigationStack->navPathList_.empty());
 }
 } // namespace OHOS::Ace::NG

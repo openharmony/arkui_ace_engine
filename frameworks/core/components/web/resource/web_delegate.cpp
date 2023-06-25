@@ -85,6 +85,8 @@ const std::string RESOURCE_VIDEO_CAPTURE = "TYPE_VIDEO_CAPTURE";
 const std::string RESOURCE_AUDIO_CAPTURE = "TYPE_AUDIO_CAPTURE";
 const std::string RESOURCE_PROTECTED_MEDIA_ID = "TYPE_PROTECTED_MEDIA_ID";
 const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
+
+constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
 } // namespace
 
 #define EGLCONFIG_VERSION 3
@@ -558,6 +560,29 @@ int FaviconReceivedOhos::GetColorType()
 int FaviconReceivedOhos::GetAlphaType()
 {
     return static_cast<int>(alphaType_);
+}
+
+WebDelegateObserver::~WebDelegateObserver()
+{
+    LOGI("WebDelegateObserver::~WebDelegateObserver");
+}
+
+void WebDelegateObserver::NotifyDestory()
+{
+    LOGI("WebDelegateObserver::NotifyDestory");
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostDelayedTask(
+        [weak = WeakClaim(this)]() {
+            auto observer = weak.Upgrade();
+            CHECK_NULL_VOID(observer);
+            if (observer->delegate_) {
+                observer->delegate_.Reset();
+            }
+        },
+        TaskExecutor::TaskType::UI, DESTRUCT_DELAY_MILLISECONDS);
 }
 
 WebDelegate::~WebDelegate()
@@ -3326,6 +3351,25 @@ void WebDelegate::SetShouldFrameSubmissionBeforeDraw(bool should)
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::NotifyMemoryLevel(int32_t level)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), level]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->NotifyMemoryLevel(level);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::Zoom(float factor)
 {
     auto context = context_.Upgrade();
@@ -4481,7 +4525,7 @@ void WebDelegate::OnFocus()
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
-        nweb_->OnFocus();
+        nweb_->OnFocus(OHOS::NWeb::FocusReason::EVENT_REQUEST);
     }
 }
 

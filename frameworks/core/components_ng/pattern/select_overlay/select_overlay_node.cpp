@@ -65,7 +65,6 @@ constexpr int32_t ANIMATION_DURATION1 = 350;
 constexpr int32_t ANIMATION_DURATION2 = 150;
 
 constexpr Dimension MORE_MENU_TRANSLATE = -7.5_vp;
-constexpr Dimension MORE_MENU_INTERVAL = 8.0_vp;
 constexpr Dimension MAX_DIAMETER = 3.5_vp;
 constexpr Dimension MIN_DIAMETER = 1.5_vp;
 constexpr Dimension MIN_ARROWHEAD_DIAMETER = 2.0_vp;
@@ -241,6 +240,7 @@ RefPtr<FrameNode> BuildMoreOrBackButton(int32_t overlayId, bool isMoreButton)
         auto top = CalcLength(padding.Top().ConvertToPx());
         auto bottom = CalcLength(padding.Bottom().ConvertToPx());
         buttonLayoutProperty->UpdateMargin({ left, right, top, bottom });
+        buttonLayoutProperty->UpdateVisibility(VisibleType::GONE);
     }
 
     button->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
@@ -335,6 +335,10 @@ RefPtr<FrameNode> SelectOverlayNode::CreateSelectOverlayNode(const std::shared_p
 void SelectOverlayNode::MoreOrBackAnimation(bool isMore)
 {
     CHECK_NULL_VOID(!isDoingAnimation_);
+    CHECK_NULL_VOID(selectMenu_);
+    CHECK_NULL_VOID(selectMenuInner_);
+    CHECK_NULL_VOID(extensionMenu_);
+    CHECK_NULL_VOID(backButton_);
     if (isMore && !isExtensionMenu_) {
         MoreAnimation();
     } else if (!isMore && isExtensionMenu_) {
@@ -355,6 +359,8 @@ void SelectOverlayNode::MoreAnimation()
     CHECK_NULL_VOID(selectProperty);
     auto selectMenuInnerProperty = selectMenuInner_->GetLayoutProperty();
     CHECK_NULL_VOID(selectMenuInnerProperty);
+    auto backButtonProperty = backButton_->GetLayoutProperty();
+    CHECK_NULL_VOID(backButtonProperty);
 
     auto pattern = GetPattern<SelectOverlayPattern>();
     CHECK_NULL_VOID(pattern);
@@ -386,18 +392,19 @@ void SelectOverlayNode::MoreAnimation()
     modifier->SetHeadPointRadius(MIN_ARROWHEAD_DIAMETER / 2.0f);
     modifier->SetLineEndOffset(true);
 
-    FinishCallback callback = [selectMenuInnerProperty, extensionProperty, id = Container::CurrentId(),
-                                  weak = WeakClaim(this)]() {
+    FinishCallback callback = [selectMenuInnerProperty, extensionProperty, backButtonProperty,
+                                  id = Container::CurrentId(), weak = WeakClaim(this)]() {
         ContainerScope scope(id);
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID_NOLOG(pipeline);
         auto taskExecutor = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID_NOLOG(taskExecutor);
         taskExecutor->PostTask(
-            [selectMenuInnerProperty, extensionProperty, id, weak]() {
+            [selectMenuInnerProperty, extensionProperty, backButtonProperty, id, weak]() {
                 ContainerScope scope(id);
                 selectMenuInnerProperty->UpdateVisibility(VisibleType::GONE);
                 extensionProperty->UpdateVisibility(VisibleType::VISIBLE);
+                backButtonProperty->UpdateVisibility(VisibleType::VISIBLE);
                 auto selectOverlay = weak.Upgrade();
                 CHECK_NULL_VOID(selectOverlay);
                 selectOverlay->SetAnimationStatus(false);
@@ -431,6 +438,8 @@ void SelectOverlayNode::BackAnimation()
     CHECK_NULL_VOID(selectProperty);
     auto selectMenuInnerProperty = selectMenuInner_->GetLayoutProperty();
     CHECK_NULL_VOID(selectMenuInnerProperty);
+    auto backButtonProperty = backButton_->GetLayoutProperty();
+    CHECK_NULL_VOID(backButtonProperty);
 
     auto pattern = GetPattern<SelectOverlayPattern>();
     CHECK_NULL_VOID(pattern);
@@ -465,18 +474,19 @@ void SelectOverlayNode::BackAnimation()
     auto toolbarHeight = textOverlayTheme->GetMenuToolbarHeight();
     auto frameSize = CalcSize(CalcLength(meanuWidth), CalcLength(toolbarHeight.ConvertToPx()));
 
-    FinishCallback callback = [selectMenuInnerProperty, extensionProperty, id = Container::CurrentId(),
-                                  weak = WeakClaim(this)]() {
+    FinishCallback callback = [selectMenuInnerProperty, extensionProperty, backButtonProperty,
+                                  id = Container::CurrentId(), weak = WeakClaim(this)]() {
         ContainerScope scope(id);
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID_NOLOG(pipeline);
         auto taskExecutor = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID_NOLOG(taskExecutor);
         taskExecutor->PostTask(
-            [selectMenuInnerProperty, extensionProperty, id, weak]() {
+            [selectMenuInnerProperty, extensionProperty, backButtonProperty, id, weak]() {
                 ContainerScope scope(id);
                 selectMenuInnerProperty->UpdateVisibility(VisibleType::VISIBLE);
                 extensionProperty->UpdateVisibility(VisibleType::GONE);
+                backButtonProperty->UpdateVisibility(VisibleType::GONE);
                 auto selectOverlay = weak.Upgrade();
                 CHECK_NULL_VOID(selectOverlay);
                 selectOverlay->SetAnimationStatus(false);
@@ -497,26 +507,10 @@ void SelectOverlayNode::BackAnimation()
     AnimationUtils::CloseImplicitAnimation();
 }
 
-void SelectOverlayNode::CreateExtensionToolBar()
-{
-    extensionMenu_ = FrameNode::GetOrCreateFrameNode("SelectMoreMenu", ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-    extensionMenu_->GetLayoutProperty<LinearLayoutProperty>()->UpdateCrossAxisAlign(FlexAlign::FLEX_END);
-
-    auto weak = Claim(this);
-    extensionMenu_->MountToParent(weak);
-    extensionMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
-    auto id = GetId();
-    auto button = BuildMoreOrBackButton(id, false);
-    button->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    button->MountToParent(extensionMenu_);
-}
-
 void SelectOverlayNode::AddExtensionMenuOptions(const std::vector<MenuOptionsParam>& menuOptionItems, int32_t index)
 {
-    CHECK_NULL_VOID(extensionMenu_);
+    CHECK_NULL_VOID(!extensionMenu_);
     std::vector<OptionParam> params;
-    auto extensionMenuContext = extensionMenu_->GetRenderContext();
     auto id = GetId();
 
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -581,37 +575,44 @@ void SelectOverlayNode::AddExtensionMenuOptions(const std::vector<MenuOptionsPar
         }
         itemNum++;
     }
-    auto menuWrapper =
-        MenuView::Create(std::move(params), -1, "ExtensionMenu", MenuType::SELECT_OVERLAY_EXTENSION_MENU);
-    CHECK_NULL_VOID(menuWrapper);
-    auto menu = DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
-    CHECK_NULL_VOID(menu);
-    menuWrapper->RemoveChild(menu);
-    menuWrapper.Reset();
+    if (!params.empty()) {
+        auto menuWrapper =
+            MenuView::Create(std::move(params), -1, "ExtensionMenu", MenuType::SELECT_OVERLAY_EXTENSION_MENU);
+        CHECK_NULL_VOID(menuWrapper);
+        auto menu = DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
+        CHECK_NULL_VOID(menu);
+        menuWrapper->RemoveChild(menu);
+        menuWrapper.Reset();
 
-    // set click position to menu
-    auto props = menu->GetLayoutProperty<MenuLayoutProperty>();
-    auto context = menu->GetRenderContext();
-    CHECK_NULL_VOID(props);
-    auto offsetY = 0.0f;
-    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
-    if (textOverlayTheme) {
-        offsetY = textOverlayTheme->GetMenuToolbarHeight().ConvertToPx();
+        // set click position to menu
+        auto props = menu->GetLayoutProperty<MenuLayoutProperty>();
+        auto context = menu->GetRenderContext();
+        CHECK_NULL_VOID(props);
+        auto offsetY = 0.0f;
+        auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+        if (textOverlayTheme) {
+            offsetY = textOverlayTheme->GetMenuToolbarHeight().ConvertToPx();
+        }
+        props->UpdateMenuOffset(GetPageOffset());
+        context->UpdateBackShadow(ShadowConfig::NoneShadow);
+        auto menuPattern = menu->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        auto options = menuPattern->GetOptions();
+        SetOptionsAction(options);
+        ElementRegister::GetInstance()->AddUINode(menu);
+        menu->MountToParent(Claim(this));
+
+        extensionMenu_ = menu;
+        auto extensionMenuContext = extensionMenu_->GetRenderContext();
+        CHECK_NULL_VOID(extensionMenuContext);
+
+        extensionMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+        extensionMenuContext->UpdateOpacity(0.0);
+
+        extensionMenuContext->UpdateTransformTranslate({ 0.0f, MORE_MENU_TRANSLATE.ConvertToPx(), 0.0f });
+        extensionMenu_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        extensionMenu_->MarkModifyDone();
     }
-    props->UpdateMenuOffset(OffsetF(0.0f, offsetY + MORE_MENU_INTERVAL.ConvertToPx()) + GetPageOffset());
-    context->UpdateBackShadow(ShadowConfig::NoneShadow);
-    auto menuPattern = menu->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto options = menuPattern->GetOptions();
-    SetOptionsAction(options);
-    menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    ElementRegister::GetInstance()->AddUINode(menu);
-    menu->MountToParent(extensionMenu_);
-
-    extensionMenuContext->UpdateOpacity(0.0);
-    extensionMenuContext->UpdateTransformTranslate({ 0.0f, MORE_MENU_TRANSLATE.ConvertToPx(), 0.0f });
-
-    extensionMenu_->MarkModifyDone();
 }
 
 void SelectOverlayNode::CreateToolBar()
@@ -819,7 +820,14 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged)
         if (extensionOptionStartIndex != -1 || isDefaultOverMaxWidth) {
             auto backButton = BuildMoreOrBackButton(GetId(), true);
             backButton->MountToParent(selectMenuInner_);
-            CreateExtensionToolBar();
+            // add back button
+            auto id = GetId();
+            if (!backButton_) {
+                backButton_ = BuildMoreOrBackButton(id, false);
+                CHECK_NULL_VOID(backButton_);
+                backButton_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+                backButton_->MountToParent(Claim(this));
+            }
         }
         AddExtensionMenuOptions(info->menuOptionItems, extensionOptionStartIndex);
     }
@@ -831,6 +839,28 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged)
         selectMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
     }
     selectMenu_->MarkModifyDone();
+    if (isExtensionMenu_ && extensionMenu_) {
+        if (info->menuInfo.menuDisable) {
+            extensionMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+            if (backButton_) {
+                backButton_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+            }
+        } else if (info->menuInfo.menuIsShow) {
+            extensionMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+            if (backButton_) {
+                backButton_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+            }
+        } else {
+            extensionMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+            if (backButton_) {
+                backButton_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+            }
+        }
+        extensionMenu_->MarkModifyDone();
+        if (backButton_) {
+            backButton_->MarkModifyDone();
+        }
+    }
     MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 

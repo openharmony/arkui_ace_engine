@@ -107,6 +107,7 @@
 #include "bridge/declarative_frontend/jsview/js_render_image.h"
 #include "bridge/declarative_frontend/jsview/js_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
+#include "bridge/declarative_frontend/jsview/js_richeditor.h"
 #include "bridge/declarative_frontend/jsview/js_row.h"
 #include "bridge/declarative_frontend/jsview/js_row_split.h"
 #include "bridge/declarative_frontend/jsview/js_scroll.h"
@@ -158,8 +159,8 @@
 #include "bridge/declarative_frontend/jsview/js_remote_window.h"
 #endif
 
-#ifdef EFFECT_VIEW_SUPPORTED
-#include "bridge/declarative_frontend/jsview/js_effect_view.h"
+#ifdef EFFECT_COMPONENT_SUPPORTED
+#include "bridge/declarative_frontend/jsview/js_effect_component.h"
 #endif
 
 #ifndef WEARABLE_PRODUCT
@@ -548,8 +549,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #ifdef REMOTE_WINDOW_SUPPORTED
     { "RemoteWindow", JSRemoteWindow::JSBind },
 #endif
-#ifdef EFFECT_VIEW_SUPPORTED
-    { "EffectView", JSEffectView::JSBind },
+#ifdef EFFECT_COMPONENT_SUPPORTED
+    { "EffectComponent", JSEffectComponent::JSBind },
 #endif
 #ifndef WEARABLE_PRODUCT
     { "Camera", JSCamera::JSBind },
@@ -642,6 +643,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Screen", JSScreen::JSBind },
     { "WindowScene", JSWindowScene::JSBind },
 #endif
+    { "RichEditor", JSRichEditor::JSBind },
+    { "RichEditorController", JSRichEditorController::JSBind },
 };
 
 void RegisterAllModule(BindingTarget globalObj)
@@ -674,6 +677,7 @@ void RegisterAllModule(BindingTarget globalObj)
 #ifdef WEB_SUPPORTED
     JSWebController::JSBind(globalObj);
 #endif
+    JSRichEditorController::JSBind(globalObj);
     for (auto& iter : bindFuncs) {
         iter.second(globalObj);
     }
@@ -765,6 +769,8 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
 #ifdef WEB_SUPPORTED
         JSWebController::JSBind(globalObj);
 #endif
+    } else if ((*func).first == V2::RICH_EDITOR_ETS_TAG) {
+        JSRichEditorController::JSBind(globalObj);
     }
 
     (*func).second(globalObj);

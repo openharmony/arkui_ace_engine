@@ -15,11 +15,14 @@
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
+#include <algorithm>
+
 #include "include/utils/SkParsePath.h"
 #include "render_service_base/include/property/rs_properties_def.h"
 #include "render_service_client/core/modifier/rs_property_modifier.h"
 #include "render_service_client/core/pipeline/rs_node_map.h"
 #include "render_service_client/core/transaction/rs_interfaces.h"
+#include "render_service_client/core/ui/rs_canvas_drawing_node.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_effect_node.h"
 #include "render_service_client/core/ui/rs_root_node.h"
@@ -42,6 +45,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/property/calc_length.h"
@@ -119,14 +123,16 @@ void RosenRenderContext::StopRecordingIfNeeded()
 void RosenRenderContext::OnNodeAppear(bool recursive)
 {
     isDisappearing_ = false;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // restore eventHub state when node appears.
+    host->GetEventHub<EventHub>()->RestoreEnabled();
     if (recursive && !propTransitionAppearing_ && !transitionEffect_) {
         // recursive and has no transition, no need to handle transition.
         return;
     }
 
     auto rect = GetPaintRectWithoutTransform();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     isBreakingPoint_ = !recursive;
     if (rect.IsValid() && !CheckNeedRequestMeasureAndLayout(host->GetLayoutProperty()->GetPropertyChangeFlag())) {
         // has set size before and do not need layout, trigger transition directly.
@@ -146,6 +152,10 @@ void RosenRenderContext::OnNodeDisappear(bool recursive)
         return;
     }
     CHECK_NULL_VOID(rsNode_);
+    auto host = GetHost();
+    if (host && host->GetEventHub<EventHub>()) {
+        host->GetEventHub<EventHub>()->SetEnabledInternal(false);
+    }
     auto rect = GetPaintRectWithoutTransform();
     // only start default transition on the break point of render node tree.
     isBreakingPoint_ = !recursive;
@@ -211,6 +221,9 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
         }
         case ContextType::EFFECT:
             rsNode_ = Rosen::RSEffectNode::Create();
+            break;
+        case ContextType::INCREMENTAL_CANVAS:
+            rsNode_ = Rosen::RSCanvasDrawingNode::Create();
             break;
         case ContextType::EXTERNAL:
             break;
@@ -609,6 +622,15 @@ RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap()
     return g_pixelMap;
 }
 
+bool RosenRenderContext::GetBitmap(SkBitmap& bitmap, std::shared_ptr<OHOS::Rosen::DrawCmdList> drawCmdList)
+{
+    auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode_);
+    if (!rsCanvasDrawingNode) {
+        return false;
+    }
+    return rsCanvasDrawingNode->GetBitmap(bitmap, drawCmdList);
+}
+
 void RosenRenderContext::OnTransformScaleUpdate(const VectorF& scale)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -838,8 +860,19 @@ void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
         return;
     }
     CHECK_NULL_VOID(rsNode_);
+    auto paintRect = AdjustPaintRect();
+    if (isDisappearing_ && !paintRect.IsValid()) {
+        return;
+    }
+    double radiusX = paintRect.Width();
     Rosen::Vector4f cornerRadius;
-    ConvertRadius(value, cornerRadius);
+    // When the unit of radius is percent, the length and width of rect should be calculated at the same time,
+    // but currently SetCornerRadius only supports Vector4f parameter passing.
+    // Graphic should provide support .
+    cornerRadius.SetValues(static_cast<float>(value.radiusTopLeft.value_or(Dimension()).ConvertToPxWithSize(radiusX)),
+        static_cast<float>(value.radiusTopRight.value_or(Dimension()).ConvertToPxWithSize(radiusX)),
+        static_cast<float>(value.radiusBottomRight.value_or(Dimension()).ConvertToPxWithSize(radiusX)),
+        static_cast<float>(value.radiusBottomLeft.value_or(Dimension()).ConvertToPxWithSize(radiusX)));
     rsNode_->SetCornerRadius(cornerRadius);
     RequestNextFrame();
 }
@@ -1227,7 +1260,7 @@ void RosenRenderContext::GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddi
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     auto frameNodeParent = frameNode->GetAncestorNodeOfFrame();
-    CHECK_NULL_VOID(frameNodeParent);
+    CHECK_NULL_VOID_NOLOG(frameNodeParent);
     auto layoutProperty = frameNodeParent->GetLayoutProperty();
     if (layoutProperty && layoutProperty->GetPaddingProperty()) {
         parentPaddingLeft =
@@ -1430,7 +1463,7 @@ void RosenRenderContext::ClearFocusState()
     CHECK_NULL_VOID(rsNode_);
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    CHECK_NULL_VOID(focusStateModifier_);
+    CHECK_NULL_VOID_NOLOG(focusStateModifier_);
     rsNode_->RemoveModifier(focusStateModifier_);
     RequestNextFrame();
 }
@@ -1869,8 +1902,8 @@ void RosenRenderContext::OnLinearGradientBlurUpdate(const NG::LinearGradientBlur
 
     CHECK_NULL_VOID(rsNode_);
     std::shared_ptr<Rosen::RSLinearGradientBlurPara> rsLinearGradientBlurPara(
-        std::make_shared<Rosen::RSLinearGradientBlurPara>(blurRadius, blurPara.fractionStops_,
-                                            static_cast<Rosen::GradientDirection>(blurPara.direction_)));
+        std::make_shared<Rosen::RSLinearGradientBlurPara>(
+            blurRadius, blurPara.fractionStops_, static_cast<Rosen::GradientDirection>(blurPara.direction_)));
 
     rsNode_->SetLinearGradientBlurPara(rsLinearGradientBlurPara);
     RequestNextFrame();
@@ -2174,6 +2207,23 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
         const int32_t pageTransitionDuration = 300;
         option.SetCurve(Curves::LINEAR);
         option.SetDuration(pageTransitionDuration);
+#ifdef QUICK_PUSH_TRANSITION
+        auto pipeline = PipelineBase::GetCurrentContext();
+        if (pipeline) {
+            const int32_t nanoToMilliSeconds = 1000000;
+            const int32_t minTransitionDuration = pageTransitionDuration / 2;
+            const int32_t frameDelayTime = 32;
+            int32_t startDelayTime =
+                static_cast<int32_t>(pipeline->GetTimeFromExternalTimer() - pipeline->GetLastTouchTime()) /
+                nanoToMilliSeconds;
+            startDelayTime = std::max(0, startDelayTime);
+            int32_t delayedDuration = pageTransitionDuration > startDelayTime ? pageTransitionDuration - startDelayTime
+                                                                              : pageTransitionDuration;
+            delayedDuration = std::max(minTransitionDuration, delayedDuration - frameDelayTime);
+            LOGI("Use quick push delayedDuration:%{public}d", delayedDuration);
+            option.SetDuration(delayedDuration);
+        }
+#endif
     }
     const auto& scaleOptions = effect->GetScaleEffect();
     const auto& translateOptions = effect->GetTranslateEffect();
@@ -2286,6 +2336,25 @@ void RosenRenderContext::SetBounds(float positionX, float positionY, float width
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetBounds(positionX, positionY, width, height);
+}
+
+void RosenRenderContext::SetFrameForCanvas()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(rsNode_);
+    auto rect = AdjustPaintRect();
+    if (!rect.GetSize().IsPositive()) {
+        return;
+    }
+    auto contentRect = frameNode->GetGeometryNode()->GetContentRect();
+    if (!contentRect.GetSize().IsPositive()) {
+        LOGD("content size is invalid");
+        return;
+    }
+    contentRect.SetLeft(contentRect.GetX() + rect.GetX());
+    contentRect.SetTop(contentRect.GetY() + rect.GetY());
+    rsNode_->SetFrame(contentRect.GetX(), contentRect.GetY(), contentRect.Width(), contentRect.Height());
 }
 
 void RosenRenderContext::ClearDrawCommands()
@@ -2428,7 +2497,11 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
     LOGD("RosenTransitionEffect::NotifyTransition transition BEGIN, node %{public}d, isTransitionIn: %{public}d",
         frameNode->GetId(), isTransitionIn);
 
-    RSNode::ExecuteWithoutAnimation([this, &frameNode]() {
+    RSNode::ExecuteWithoutAnimation([this, &frameNode, isTransitionIn]() {
+        if (isTransitionIn && disappearingTransitionCount_ == 0) {
+            // transitionIn, reset to state before attaching in case of node reappear
+            transitionEffect_->Attach(Claim(this), true);
+        }
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         SizeF rootSize(pipeline->GetRootWidth(), pipeline->GetRootHeight());
@@ -2757,6 +2830,12 @@ void RosenRenderContext::PaintPixmapBgImage()
     rosenImage->SetPixelMap(image->GetPixelMap()->GetPixelMapSharedPtr());
     rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
     rsNode_->SetBgImage(rosenImage);
+}
+
+void RosenRenderContext::OnRenderGroupUpdate(bool isRenderGroup)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->MarkNodeGroup(isRenderGroup);
 }
 
 } // namespace OHOS::Ace::NG

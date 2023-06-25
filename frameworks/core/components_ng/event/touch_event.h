@@ -61,6 +61,15 @@ public:
         userCallback_ = MakeRefPtr<TouchEventImpl>(std::move(callback));
     }
 
+    void ClearUserCallback()
+    {
+        // When the event param is undefined, it will clear the callback.
+        LOGI("Clear user callback.");
+        if (userCallback_) {
+            userCallback_.Reset();
+        }
+    }
+
     void AddTouchEvent(const RefPtr<TouchEventImpl>& touchEvent)
     {
         if (touchEvents_.empty()) {

@@ -459,7 +459,13 @@ float ProgressModifier::CalcRingProgressAdditionalAngle() const
     auto strokeWidth = strokeWidth_->Get();
     PointF centerPt = PointF(contentSize.Width() / 2, contentSize.Height() / 2);
     float radius = std::min(contentSize.Width() / 2, contentSize.Height() / 2);
-    return atan2f(strokeWidth / 2, radius - strokeWidth / 2) * ANGLE_180 / PI_NUM;
+    auto paintShadow = paintShadow_->Get() && GreatNotEqual(radius, RING_SHADOW_VALID_RADIUS_MIN);
+    auto shadowBlurOffset = paintShadow ? strokeWidth / 2 + std::max(RING_SHADOW_OFFSET_X, RING_SHADOW_OFFSET_Y) : 0.0f;
+    if (GreatOrEqual(strokeWidth + shadowBlurOffset, radius)) {
+        strokeWidth = radius / 2;
+        shadowBlurOffset = paintShadow ? strokeWidth / 2 + std::max(RING_SHADOW_OFFSET_X, RING_SHADOW_OFFSET_Y) : 0.0f;
+    }
+    return asinf((strokeWidth / 2) / (radius - strokeWidth / 2 - shadowBlurOffset)) * ANGLE_180 / PI_NUM;
 }
 
 void ProgressModifier::StartLinearSweepingAnimation(float value)
@@ -1006,8 +1012,8 @@ void ProgressModifier::GenerateRingSweepingGradientInfo(
     gradientColorEnd.SetDimension(Dimension(0.0, DimensionUnit::PERCENT));
     gradient.AddColor(gradientColorEnd);
 
-    // The sweep layer is a 45-degree white gradient with an opacity of 0.6 at 35 degrees and 0 at both ends.
-    Color sweepingColorMiddle = sweepingColorBase.ChangeOpacity(0.6f);
+    // The sweep layer is a 45-degree white gradient with an opacity of 0.4 at 35 degrees and 0 at both ends.
+    Color sweepingColorMiddle = sweepingColorBase.ChangeOpacity(0.4f);
     GradientColor gradientColorMiddle;
     gradientColorMiddle.SetColor(sweepingColorMiddle);
     gradientColorMiddle.SetDimension(Dimension(35.0f / ANGLE_45, DimensionUnit::PERCENT));

@@ -46,6 +46,7 @@ const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
 #else
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
 #endif
+const char TASK_RUNNER[] = "PaEngineRunner";
 
 bool UnwrapRawImageDataMap(NativeEngine* engine, NativeValue* argv, std::map<std::string, int>& rawImageDataMap)
 {
@@ -247,6 +248,7 @@ void JsiPaEngine::EvaluateJsCode()
 void JsiPaEngine::InitJsRuntimeOptions(AbilityRuntime::Runtime::Options& options)
 {
     options.lang = AbilityRuntime::Runtime::Language::JS;
+    options.eventRunner = eventRunner_;
     options.loadAce = false;
     options.preload = false;
     options.isStageModel = false;
@@ -257,8 +259,10 @@ void JsiPaEngine::InitJsRuntimeOptions(AbilityRuntime::Runtime::Options& options
     options.isJsFramework = language_ == SrcLanguage::JS;
 }
 
-bool JsiPaEngine::CreateJsRuntime(const AbilityRuntime::Runtime::Options& options)
+bool JsiPaEngine::CreateJsRuntime()
 {
+    AbilityRuntime::Runtime::Options options;
+    InitJsRuntimeOptions(options);
     jsAbilityRuntime_ = AbilityRuntime::JsRuntime::Create(options);
     if (jsAbilityRuntime_ == nullptr) {
         LOGE("Create js runtime failed.");
@@ -332,17 +336,8 @@ inline panda::ecmascript::EcmaVM* JsiPaEngine::GetEcmaVm() const
 void JsiPaEngine::StartDebugMode(bool debuggerMode)
 {
     if (debuggerMode && jsAbilityRuntime_ != nullptr) {
-        auto weak = AceType::WeakClaim(AceType::RawPtr(taskExecutor_));
-        auto&& postTask = [weak](std::function<void()>&& task) {
-            auto taskExecutor = weak.Upgrade();
-            if (taskExecutor == nullptr) {
-                LOGE("taskExecutor is nullptr");
-                return;
-            }
-            taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::JS);
-        };
 #ifdef OHOS_PLATFORM
-        jsAbilityRuntime_->StartDebugger(debuggerMode, postTask);
+        jsAbilityRuntime_->StartDebugger(debuggerMode, instanceId_);
 #endif
     }
 }
@@ -352,49 +347,70 @@ void JsiPaEngine::StartDebugMode(bool debuggerMode)
 // -----------------------
 JsiPaEngine::~JsiPaEngine()
 {
+    LOGI("JsiPaEngine destructor");
     UnloadLibrary();
-    if (taskExecutor_ != nullptr) {
-        taskExecutor_->RemoveTaskObserver();
-    }
-
-#if !defined(PREVIEW)
-    auto nativeEngine = GetNativeEngine();
-    if (nativeEngine != nullptr) {
-        nativeEngine->CancelCheckUVLoop();
-    }
-#endif
-
-#ifdef OHOS_PLATFORM
-    if (jsAbilityRuntime_ != nullptr) {
-        jsAbilityRuntime_->StopDebugger();
-    }
-#endif
 
     if (runtime_) {
-        runtime_->RegisterUncaughtExceptionHandler(nullptr);
         runtime_->Reset();
     }
     runtime_.reset();
     runtime_ = nullptr;
+
+    // To guarantee the jsruntime released in js thread
+    auto jsRuntime = std::move(jsAbilityRuntime_);
+    if (!eventHandler_->PostSyncTask([&jsRuntime] {
+            auto runtime = std::move(jsRuntime);
+        })) {
+        LOGE("Post sync task failed.");
+    }
+    LOGI("JsiPaEngine destructor finished.");
 }
 
-bool JsiPaEngine::Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendType type, SrcLanguage language)
+bool JsiPaEngine::Initialize(BackendType type, SrcLanguage language)
 {
     ACE_SCOPED_TRACE("JsiPaEngine::Initialize");
-    LOGD("JsiPaEngine initialize");
+    LOGI("JsiPaEngine initialize");
     SetDebugMode(NeedDebugBreakPoint());
-    ACE_DCHECK(taskExecutor);
-    taskExecutor_ = taskExecutor;
     type_ = type;
     language_ = language;
 
-    AbilityRuntime::Runtime::Options options;
-    InitJsRuntimeOptions(options);
-    if (!CreateJsRuntime(options)) {
-        LOGE("Create js runtime failed.");
+    eventRunner_ = EventRunner::Create(TASK_RUNNER + std::to_string(instanceId_));
+    if (eventRunner_ == nullptr) {
+        LOGE("Create runner failed.");
         return false;
     }
 
+    eventHandler_ = std::make_shared<EventHandler>(eventRunner_);
+    if (eventHandler_ == nullptr) {
+        LOGE("Create handler failed.");
+        return false;
+    }
+
+    bool ret = false;
+    eventHandler_->PostSyncTask([weakEngine = AceType::WeakClaim(this), &ret] {
+            auto paEngine = weakEngine.Upgrade();
+            if (paEngine != nullptr) {
+                ret = paEngine->CreateJsRuntime();
+            }
+        });
+    if (!ret) {
+        return false;
+    }
+
+    PostTask([weakEngine = AceType::WeakClaim(this), type, language] {
+            auto paEngine = weakEngine.Upgrade();
+            if (paEngine == nullptr) {
+                LOGE("Pa engine is invalid.");
+                return;
+            }
+            paEngine->InitializeInner(type, language);
+        });
+
+    return true;
+}
+
+bool JsiPaEngine::InitializeInner(BackendType type, SrcLanguage language)
+{
     bool result = InitJsEnv(GetDebugMode(), GetExtraNativeObject());
     if (!result) {
         LOGE("Init js env failed");
@@ -405,20 +421,10 @@ bool JsiPaEngine::Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendTy
 
     auto nativeEngine = GetNativeEngine();
     CHECK_NULL_RETURN(nativeEngine, false);
-    taskExecutor->AddTaskObserver([nativeEngine, id = instanceId_]() {
-        ContainerScope scope(id);
-        CHECK_NULL_VOID(nativeEngine);
-        nativeEngine->Loop(LOOP_NOWAIT);
-    });
-
     if (language_ == SrcLanguage::JS) {
-        JsBackendTimerModule::GetInstance()->InitTimerModule(nativeEngine, taskExecutor);
+        InitTimerModule(*nativeEngine);
     }
 
-    SetPostTask(nativeEngine);
-#if !defined(PREVIEW)
-    nativeEngine->CheckUVLoop();
-#endif
     if (jsBackendAssetManager_) {
         std::vector<std::string> packagePath = jsBackendAssetManager_->GetLibPath();
         auto appLibPathKey = jsBackendAssetManager_->GetAppLibPathKey();
@@ -433,34 +439,6 @@ bool JsiPaEngine::Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendTy
 void JsiPaEngine::SetAssetManager(const RefPtr<AssetManager>& assetManager)
 {
     jsBackendAssetManager_ = Referenced::MakeRefPtr<JsBackendAssetManager>(assetManager);
-}
-
-void JsiPaEngine::SetPostTask(NativeEngine* nativeEngine)
-{
-    LOGD("SetPostTask");
-    CHECK_NULL_VOID(nativeEngine);
-    auto weak = AceType::WeakClaim(AceType::RawPtr(taskExecutor_));
-    auto&& postTask = [weak, weakEngine = AceType::WeakClaim(this), id = instanceId_](bool needSync) {
-        auto taskExecutor = weak.Upgrade();
-        if (taskExecutor == nullptr) {
-            LOGE("taskExecutor is nullptr");
-            return;
-        }
-        taskExecutor->PostTask([weakEngine, needSync, id]() {
-                auto paEngine = weakEngine.Upgrade();
-                if (paEngine == nullptr) {
-                    LOGW("PaEngine is nullptr");
-                    return;
-                }
-                auto nativeEngine = paEngine->GetNativeEngine();
-                if (nativeEngine == nullptr) {
-                    return;
-                }
-                ContainerScope scope(id);
-                nativeEngine->Loop(LOOP_NOWAIT, needSync);
-            }, TaskExecutor::TaskType::JS);
-    };
-    nativeEngine->SetPostTask(postTask);
 }
 
 void JsiPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want& want)
@@ -1548,5 +1526,35 @@ bool JsiPaEngine::OnShare(int64_t formId, OHOS::AAFwk::WantParams& wantParams)
 
     LOGD("JsiPaEngine OnShare, end");
     return true;
+}
+
+void JsiPaEngine::PostTask(const std::function<void()>& task, const std::string& name, int64_t delayTime)
+{
+    if (!jsAbilityRuntime_) {
+        LOGE("Ability runtime is invalid.");
+        return;
+    }
+
+    jsAbilityRuntime_->PostTask(task, name, delayTime);
+}
+
+void JsiPaEngine::PostSyncTask(const std::function<void()>& task, const std::string& name)
+{
+    if (!jsAbilityRuntime_) {
+        LOGE("Ability runtime is invalid.");
+        return;
+    }
+
+    jsAbilityRuntime_->PostSyncTask(task, name);
+}
+
+void JsiPaEngine::RemoveTask(const std::string& name)
+{
+    if (!jsAbilityRuntime_) {
+        LOGE("Ability runtime is invalid.");
+        return;
+    }
+
+    jsAbilityRuntime_->RemoveTask(name);
 }
 } // namespace OHOS::Ace

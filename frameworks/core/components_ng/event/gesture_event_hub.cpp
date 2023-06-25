@@ -403,12 +403,6 @@ void GestureEventHub::StartDragTaskForWeb()
 
 void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 {
-#ifdef ENABLE_DRAG_FRAMEWORK
-    if (info.GetSourceTool() == SourceTool::PEN) {
-        LOGI("HandleOnDragStart: The stylus does not support drag and drop!");
-        return;
-    }
-#endif
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
     if (!IsAllowedDrag(eventHub)) {
@@ -471,7 +465,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     uint32_t height = pixelMap->GetHeight();
     DragData dragData {{pixelMap, width * PIXELMAP_WIDTH_RATE, height * PIXELMAP_HEIGHT_RATE}, {}, udKey,
         static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(),
-        info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY(), info.GetTargetDisplayId(), true};
+        info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(), info.GetTargetDisplayId(), true};
     ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData, GetDragCallback());
     if (ret != 0) {
         LOGE("InteractionManager: drag start error");
@@ -789,5 +783,19 @@ bool GestureEventHub::IsAccessibilityLongClickable()
         }
     }
     return ret;
+}
+
+void GestureEventHub::ClearUserOnClick()
+{
+    if (clickEventActuator_) {
+        clickEventActuator_->ClearUserCallback();
+    }
+}
+
+void GestureEventHub::ClearUserOnTouch()
+{
+    if (touchEventActuator_) {
+        touchEventActuator_->ClearUserCallback();
+    }
 }
 } // namespace OHOS::Ace::NG

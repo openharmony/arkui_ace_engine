@@ -55,13 +55,14 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
-    void CreateBitmap(SizeF frameSize, RefPtr<CanvasPaintMethod> paintMethod);
+    void UpdateRecordingCanvas(SizeF frameSize, RefPtr<CanvasPaintMethod> paintMethod);
 };
 
 RefPtr<CanvasPaintMethod> CustomPaintPaintMethodTestNg::CreateCanvasPaintMethod()
 {
     RefPtr<PipelineBase> pipelineContext = AceType::MakeRefPtr<MockPipelineBase>();
-    return AceType::MakeRefPtr<CanvasPaintMethod>(pipelineContext);
+    RefPtr<RenderingContext2DModifier> contentModifier = AceType::MakeRefPtr<RenderingContext2DModifier>();
+    return AceType::MakeRefPtr<CanvasPaintMethod>(pipelineContext, contentModifier);
 }
 
 void CustomPaintPaintMethodTestNg::SetUpTestCase()
@@ -84,18 +85,8 @@ void CustomPaintPaintMethodTestNg::TearDown()
     GTEST_LOG_(INFO) << "CustomPaintPaintMethodTestNg TearDown";
 }
 
-void CustomPaintPaintMethodTestNg::CreateBitmap(SizeF frameSize, RefPtr<CanvasPaintMethod> paintMethod)
+void CustomPaintPaintMethodTestNg::UpdateRecordingCanvas(SizeF frameSize, RefPtr<CanvasPaintMethod> paintMethod)
 {
-    auto imageInfo = SkImageInfo::Make(frameSize.Width(), frameSize.Height(),
-        SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
-    paintMethod->canvasCache_.reset();
-    paintMethod->cacheBitmap_.reset();
-    paintMethod->canvasCache_.allocPixels(imageInfo);
-    paintMethod->cacheBitmap_.allocPixels(imageInfo);
-    paintMethod->canvasCache_.eraseColor(SK_ColorTRANSPARENT);
-    paintMethod->cacheBitmap_.eraseColor(SK_ColorTRANSPARENT);
-    paintMethod->skCanvas_ = std::make_unique<SkCanvas>(paintMethod->canvasCache_);
-    paintMethod->cacheCanvas_ = std::make_unique<SkCanvas>(paintMethod->cacheBitmap_);
 }
 
 /**
@@ -112,7 +103,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg001, TestSize
     auto paintMethod = CreateCanvasPaintMethod();
     ASSERT_NE(paintMethod, nullptr);
     SizeF frameSize;
-    CreateBitmap(frameSize, paintMethod);
+    UpdateRecordingCanvas(frameSize, paintMethod);
 
     /**
      * @tc.steps2: Call the function InitFilterFunc.
@@ -138,7 +129,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg002, TestSize
     auto paintMethod = CreateCanvasPaintMethod();
     ASSERT_NE(paintMethod, nullptr);
     SizeF frameSize;
-    CreateBitmap(frameSize, paintMethod);
+    UpdateRecordingCanvas(frameSize, paintMethod);
 
     /**
      * @tc.steps2: Call the function SetLineDash.
@@ -176,7 +167,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg003, TestSize
     auto paintMethod = CreateCanvasPaintMethod();
     ASSERT_NE(paintMethod, nullptr);
     SizeF frameSize;
-    CreateBitmap(frameSize, paintMethod);
+    UpdateRecordingCanvas(frameSize, paintMethod);
 
     /**
      * @tc.steps1: initialize parameters.
@@ -243,7 +234,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg004, TestSize
     auto paintMethod = CreateCanvasPaintMethod();
     ASSERT_NE(paintMethod, nullptr);
     SizeF frameSize;
-    CreateBitmap(frameSize, paintMethod);
+    UpdateRecordingCanvas(frameSize, paintMethod);
 
     /**
      * @tc.steps2: Test the function SetFillRuleForPath with rule = CanvasFillRule::NONZERO.
@@ -283,7 +274,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg005, TestSize
     auto paintMethod = CreateCanvasPaintMethod();
     ASSERT_NE(paintMethod, nullptr);
     SizeF frameSize;
-    CreateBitmap(frameSize, paintMethod);
+    UpdateRecordingCanvas(frameSize, paintMethod);
 
     /**
      * @tc.steps2: Test the function SetFillRuleForPath2D with rule = CanvasFillRule::NONZERO.
@@ -473,7 +464,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg010, TestSize
     auto paintMethod = CreateCanvasPaintMethod();
     ASSERT_NE(paintMethod, nullptr);
     SizeF frameSize;
-    CreateBitmap(frameSize, paintMethod);
+    UpdateRecordingCanvas(frameSize, paintMethod);
 
     /**
      * @tc.steps2: Test the function FillRect with Alpha = DEFAULT_DOUBLE10.
@@ -527,7 +518,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg011, TestSize
     auto paintMethod = CreateCanvasPaintMethod();
     ASSERT_NE(paintMethod, nullptr);
     SizeF frameSize;
-    CreateBitmap(frameSize, paintMethod);
+    UpdateRecordingCanvas(frameSize, paintMethod);
 
     /**
      * @tc.steps2: Test the function StrokeRect with shadow_.
@@ -573,7 +564,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg012, TestSize
     auto paintMethod = CreateCanvasPaintMethod();
     ASSERT_NE(paintMethod, nullptr);
     SizeF frameSize;
-    CreateBitmap(frameSize, paintMethod);
+    UpdateRecordingCanvas(frameSize, paintMethod);
 
     /**
      * @tc.steps2: Test the function Fill with Alpha = DEFAULT_DOUBLE10.
@@ -628,7 +619,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg013, TestSize
     auto paintMethod = CreateCanvasPaintMethod();
     ASSERT_NE(paintMethod, nullptr);
     SizeF frameSize;
-    CreateBitmap(frameSize, paintMethod);
+    UpdateRecordingCanvas(frameSize, paintMethod);
 
     /**
      * @tc.steps2: Test the function Path2DFill HasGlobalAlpha.
@@ -682,7 +673,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg014, TestSize
     auto paintMethod = CreateCanvasPaintMethod();
     ASSERT_NE(paintMethod, nullptr);
     SizeF frameSize;
-    CreateBitmap(frameSize, paintMethod);
+    UpdateRecordingCanvas(frameSize, paintMethod);
 
     /**
      * @tc.steps2: Test the function Stroke with shadow_.
@@ -727,7 +718,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg015, TestSize
     auto paintMethod = CreateCanvasPaintMethod();
     ASSERT_NE(paintMethod, nullptr);
     SizeF frameSize;
-    CreateBitmap(frameSize, paintMethod);
+    UpdateRecordingCanvas(frameSize, paintMethod);
 
     /**
      * @tc.steps2: Test the function Path2DStroke with shadow_.
@@ -772,7 +763,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg016, TestSize
     auto paintMethod = CreateCanvasPaintMethod();
     ASSERT_NE(paintMethod, nullptr);
     SizeF frameSize;
-    CreateBitmap(frameSize, paintMethod);
+    UpdateRecordingCanvas(frameSize, paintMethod);
 
     /**
      * @tc.steps2: Test the function Arc with angle.
@@ -847,7 +838,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg017, TestSize
     auto paintMethod = CreateCanvasPaintMethod();
     ASSERT_NE(paintMethod, nullptr);
     SizeF frameSize;
-    CreateBitmap(frameSize, paintMethod);
+    UpdateRecordingCanvas(frameSize, paintMethod);
 
     /**
      * @tc.steps2: Test the function Path2DArc with angle.
@@ -922,7 +913,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg018, TestSize
     auto paintMethod = CreateCanvasPaintMethod();
     ASSERT_NE(paintMethod, nullptr);
     SizeF frameSize;
-    CreateBitmap(frameSize, paintMethod);
+    UpdateRecordingCanvas(frameSize, paintMethod);
 
     /**
      * @tc.steps2: Test the function Ellipse with angle.
@@ -1005,7 +996,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg019, TestSize
     auto paintMethod = CreateCanvasPaintMethod();
     ASSERT_NE(paintMethod, nullptr);
     SizeF frameSize;
-    CreateBitmap(frameSize, paintMethod);
+    UpdateRecordingCanvas(frameSize, paintMethod);
 
     /**
      * @tc.steps2: Test the function Path2DEllipse with angle.
@@ -1084,7 +1075,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg020, TestSize
     auto paintMethod = CreateCanvasPaintMethod();
     ASSERT_NE(paintMethod, nullptr);
     SizeF frameSize;
-    CreateBitmap(frameSize, paintMethod);
+    UpdateRecordingCanvas(frameSize, paintMethod);
 
     SkPaint paint;
     Ace::Gradient gradient;
@@ -1125,7 +1116,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg021, TestSize
     auto paintMethod = CreateCanvasPaintMethod();
     ASSERT_NE(paintMethod, nullptr);
     SizeF frameSize;
-    CreateBitmap(frameSize, paintMethod);
+    UpdateRecordingCanvas(frameSize, paintMethod);
 
     SkPaint paint;
     Ace::Gradient gradient;

@@ -33,7 +33,6 @@
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
-#include "base/log/frame_report.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/ressched/ressched_report.h"
@@ -258,6 +257,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     if (hasAnimation) {
         RequestFrame();
     }
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().FlushEnd();
+    }
     FlushMessages();
     if (!isFormRender_ && onShow_ && onFocus_) {
         FlushFocus();
@@ -279,7 +281,11 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
     if (scheduleTasks_.empty()) {
         return;
     }
-
+    FrameReport& fr = FrameReport::GetInstance();
+    if (fr.GetEnable()) {
+        fr.FlushBegin();
+        fr.BeginFlushAnimation();
+    }
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushAnimation();
     }
@@ -442,6 +448,7 @@ void PipelineContext::SetupRootElement()
         auto overlay = weakOverlayManger.Upgrade();
         CHECK_NULL_VOID(overlay);
         overlay->HideAllMenus();
+        overlay->HideAllPopups();
     };
     rootNode_->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
     AddOnAreaChangeNode(rootNode_->GetId());
@@ -524,14 +531,22 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     }
     ExecuteSurfaceChangedCallbacks(width, height);
     // TODO: add adjust for textFieldManager when ime is show.
-    taskExecutor_->PostTask(
-        [weakFrontend = weakFrontend_, width, height]() {
-            auto frontend = weakFrontend.Upgrade();
-            if (frontend) {
-                frontend->OnSurfaceChanged(width, height);
-            }
-        },
-        TaskExecutor::TaskType::JS);
+    auto callback = [weakFrontend = weakFrontend_, width, height]() {
+        auto frontend = weakFrontend.Upgrade();
+        if (frontend) {
+            frontend->OnSurfaceChanged(width, height);
+        }
+    };
+    auto container = Container::Current();
+    if (!container) {
+        return;
+    }
+    if (container->IsUseStageModel()) {
+        callback();
+        FlushBuild();
+    } else {
+        taskExecutor_->PostTask(callback, TaskExecutor::TaskType::JS);
+    }
 
     FlushWindowSizeChangeCallback(width, height, type);
 
@@ -589,48 +604,8 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             break;
         }
         case WindowSizeChangeReason::ROTATION: {
-#ifdef ENABLE_ROSEN_BACKEND
-            if (rsTransaction) {
-                FlushMessages();
-                rsTransaction->Begin();
-            }
-#endif
-            LOGI("PipelineContext::Root node ROTATION animation, width = %{public}d, height = %{public}d", width,
-                height);
-            AnimationOption option;
-            constexpr int32_t duration = 600;
-            option.SetDuration(duration);
-            auto curve = MakeRefPtr<CubicCurve>(0.2, 0.0, 0.2, 1.0); // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
-            option.SetCurve(curve);
-            auto weak = WeakClaim(this);
-            Animate(
-                option, curve,
-                [width, height, weak]() {
-                    auto pipeline = weak.Upgrade();
-                    CHECK_NULL_VOID(pipeline);
-                    pipeline->SetRootRect(width, height, 0.0);
-                    pipeline->FlushUITasks();
-                },
-                [weak]() {
-                    auto pipeline = weak.Upgrade();
-                    CHECK_NULL_VOID(pipeline);
-                    pipeline->rotationAnimationCount_--;
-                    if (pipeline->rotationAnimationCount_ < 0) {
-                        LOGE("PipelineContext::Root node ROTATION animation callback"
-                             "rotationAnimationCount Invalid %{public}d",
-                            pipeline->rotationAnimationCount_);
-                    }
-                    if (pipeline->rotationAnimationCount_ == 0) {
-                        pipeline->window_->SetDrawTextAsBitmap(false);
-                    }
-                });
-            rotationAnimationCount_++;
-            window_->SetDrawTextAsBitmap(true);
-#ifdef ENABLE_ROSEN_BACKEND
-            if (rsTransaction) {
-                rsTransaction->Commit();
-            }
-#endif
+            SetRootRect(width, height, 0.0);
+            FlushUITasks();
             break;
         }
         case WindowSizeChangeReason::DRAG_START:
@@ -859,7 +834,7 @@ bool PipelineContext::OnBackPressed()
         [weakOverlay = AceType::WeakClaim(AceType::RawPtr(overlayManager_)), &hasOverlay]() {
             auto overlay = weakOverlay.Upgrade();
             CHECK_NULL_VOID_NOLOG(overlay);
-            hasOverlay = overlay->RemoveOverlay();
+            hasOverlay = overlay->RemoveOverlay(true);
         },
         TaskExecutor::TaskType::UI);
     if (hasOverlay) {
@@ -946,6 +921,22 @@ RefPtr<FrameNode> PipelineContext::GetNavDestinationBackButtonNode()
     return navDestinationNode;
 }
 
+bool PipelineContext::SetIsFocusActive(bool isFocusActive)
+{
+    if (isFocusActive_ == isFocusActive) {
+        return false;
+    }
+    isFocusActive_ = isFocusActive;
+    CHECK_NULL_RETURN_NOLOG(rootNode_, false);
+    auto rootFocusHub = rootNode_->GetFocusHub();
+    CHECK_NULL_RETURN_NOLOG(rootFocusHub, false);
+    if (isFocusActive_) {
+        return rootFocusHub->PaintAllFocusState();
+    }
+    rootFocusHub->ClearAllFocusState();
+    return true;
+}
+
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 {
     CHECK_RUN_ON(UI);
@@ -964,14 +955,14 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 #endif
 
     HandleEtsCardTouchEvent(point);
-    HandleUIExtensionTouchEvent(point);
+    HandleWindowSceneTouchEvent(point);
 
     auto scalePoint = point.CreateScalePoint(GetViewScale());
     LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
         scalePoint.type);
     eventManager_->SetInstanceId(GetInstanceId());
     if (scalePoint.type == TouchType::DOWN) {
-        // Set focus state inactive while touch down event received。
+        // Set focus state inactive while touch down event received
         SetIsFocusActive(false);
         LOGD("receive touch down event, first use touch test to collect touch event target");
         // Remove the select overlay node when touched down.
@@ -1008,6 +999,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         return;
     }
 
+    if (scalePoint.type == TouchType::UP) {
+        lastTouchTime_ = GetTimeFromExternalTimer();
+    }
+
     std::optional<TouchEvent> lastMoveEvent;
     if (scalePoint.type == TouchType::UP && !touchEvents_.empty()) {
         for (auto iter = touchEvents_.begin(); iter != touchEvents_.end(); ++iter) {
@@ -1028,53 +1023,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         // need to reset touchPluginPipelineContext_ for next touch down event.
         touchPluginPipelineContext_.clear();
         RemoveEtsCardTouchEventCallback(point.id);
-        RemoveUIExtensionTouchEvetnCallback(point.id);
+        RemoveWindowSceneTouchEventCallback(point.id);
     }
 
     hasIdleTasks_ = true;
     RequestFrame();
 }
-
-// ---------------- UIExtesion touchEvent callback handler -------------------------
-void PipelineContext::AddUIExtensionTouchEventCallback(int32_t pointId, UIExtensionTouchEventCallback&& callback)
-{
-    if (!callback || pointId < 0) {
-        return;
-    }
-
-    uiExtensionTouchEventCallback_[pointId] = std::move(callback);
-}
-
-void PipelineContext::RemoveUIExtensionTouchEvetnCallback(int32_t pointId)
-{
-    if (pointId < 0) {
-        return;
-    }
-
-    auto iter = uiExtensionTouchEventCallback_.find(pointId);
-    if (iter == uiExtensionTouchEventCallback_.end()) {
-        return;
-    }
-
-    uiExtensionTouchEventCallback_.erase(iter);
-}
-
-void PipelineContext::HandleUIExtensionTouchEvent(const TouchEvent& point)
-{
-    if (point.id < 0) {
-        return;
-    }
-
-    auto iter = uiExtensionTouchEventCallback_.find(point.id);
-    if (iter == uiExtensionTouchEventCallback_.end()) {
-        return;
-    }
-
-    if (iter->second) {
-        iter->second(point);
-    }
-}
-// ----------------------------------------------------------------------------------
 
 void PipelineContext::OnSurfaceDensityChanged(double density)
 {
@@ -1200,7 +1154,6 @@ void PipelineContext::FlushTouchEvents()
 void PipelineContext::OnMouseEvent(const MouseEvent& event)
 {
     CHECK_RUN_ON(UI);
-
     if (!lastMouseEvent_) {
         lastMouseEvent_ = std::make_unique<MouseEvent>();
     }
@@ -1293,7 +1246,18 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     auto mainNode = lastPage ? lastPage : rootNode_;
     CHECK_NULL_RETURN(mainNode, false);
     if (!eventManager_->DispatchTabIndexEventNG(event, rootNode_, mainNode)) {
-        return eventManager_->DispatchKeyEventNG(event, rootNode_);
+        auto result = eventManager_->DispatchKeyEventNG(event, rootNode_);
+        if (!result && event.code == KeyCode::KEY_ESCAPE && event.action == KeyAction::DOWN) {
+            CHECK_NULL_RETURN(overlayManager_, false);
+            auto currentContainer = Container::Current();
+            if (currentContainer->IsSubContainer() || currentContainer->IsDialogContainer()) {
+                return overlayManager_->RemoveOverlayInSubwindow();
+            } else {
+                return overlayManager_->RemoveOverlay(false);
+            }
+        } else {
+            return result;
+        }
     }
     return true;
 }
@@ -1883,5 +1847,46 @@ void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, 
     CHECK_NULL_VOID(containerPattern);
     containerPattern->SetContainerButtonHide(hideSplit, hideMaximize, hideMinimize);
 }
+
+// ---------------- WindowScene pointerEvent callback handler -------------------------
+void PipelineContext::AddWindowSceneTouchEventCallback(int32_t pointId, WindowSceneTouchEventCallback&& callback)
+{
+    if (!callback || pointId < 0) {
+        return;
+    }
+
+    windowSceneTouchEventCallback_[pointId] = std::move(callback);
+}
+
+void PipelineContext::RemoveWindowSceneTouchEventCallback(int32_t pointId)
+{
+    if (pointId < 0) {
+        return;
+    }
+
+    auto iter = windowSceneTouchEventCallback_.find(pointId);
+    if (iter == windowSceneTouchEventCallback_.end()) {
+        return;
+    }
+
+    windowSceneTouchEventCallback_.erase(iter);
+}
+
+void PipelineContext::HandleWindowSceneTouchEvent(const TouchEvent& point)
+{
+    if (point.id < 0) {
+        return;
+    }
+
+    auto iter = windowSceneTouchEventCallback_.find(point.id);
+    if (iter == windowSceneTouchEventCallback_.end()) {
+        return;
+    }
+
+    if (iter->second) {
+        iter->second(point.pointerEvent);
+    }
+}
+// ----------------------------------------------------------------------------------
 
 } // namespace OHOS::Ace::NG

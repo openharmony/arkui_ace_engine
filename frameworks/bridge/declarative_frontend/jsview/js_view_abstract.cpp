@@ -2084,8 +2084,9 @@ void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
         }
         CalcDimension width;
         CalcDimension height;
-        ParseJsonDimensionVp(imageArgs->GetValue("width"), width);
-        ParseJsonDimensionVp(imageArgs->GetValue("height"), height);
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+        ParseJsDimensionVp(object->GetProperty("width"), width);
+        ParseJsDimensionVp(object->GetProperty("height"), height);
         double valueWidth = width.ConvertToPx();
         double valueHeight = height.ConvertToPx();
         BackgroundImageSizeType typeWidth = BackgroundImageSizeType::LENGTH;
@@ -2290,6 +2291,7 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
 {
     NG::MenuParam menuParam;
+    menuParam.placement = Placement::BOTTOM_LEFT;
     if (info.Length() > PARAMETER_LENGTH_FIRST && info[1]->IsObject()) {
         ParseBindOptionParam(info, menuParam);
     }
@@ -5221,6 +5223,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
 
     JSClass<JSViewAbstract>::StaticMethod("createAnimatableProperty", &JSViewAbstract::JSCreateAnimatableProperty);
     JSClass<JSViewAbstract>::StaticMethod("updateAnimatableProperty", &JSViewAbstract::JSUpdateAnimatableProperty);
+    JSClass<JSViewAbstract>::StaticMethod("renderGroup", &JSViewAbstract::JSRenderGroup);
 
     JSClass<JSViewAbstract>::Bind(globalObj);
 }
@@ -5966,4 +5969,18 @@ void JSViewAbstract::JsObscured(const JSCallbackInfo& info)
 
     ViewAbstractModel::GetInstance()->SetObscured(reasons);
 }
+
+void JSViewAbstract::JSRenderGroup(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        LOGW("renderGroup needs one parameter");
+        return;
+    }
+    bool isRenderGroup = false;
+    if (info[0]->IsBoolean()) {
+        isRenderGroup = info[0]->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetRenderGroup(isRenderGroup);
+}
+
 } // namespace OHOS::Ace::Framework

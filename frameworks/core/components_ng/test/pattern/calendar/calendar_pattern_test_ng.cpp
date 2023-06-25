@@ -885,6 +885,9 @@ HWTEST_F(CalendarPatternTestNg, CalendarPatternTest003, TestSize.Level1)
     swiperNode->MountToParent(frameNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     ASSERT_NE(swiperPattern, nullptr);
+    auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
+    ASSERT_NE(swiperLayoutProperty, nullptr);
+    swiperLayoutProperty->UpdateShowIndicator(false);
     for (int i = 0; i < 3; i++) {
         auto monthNode =
             FrameNode::GetOrCreateFrameNode(V2::CALENDAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),

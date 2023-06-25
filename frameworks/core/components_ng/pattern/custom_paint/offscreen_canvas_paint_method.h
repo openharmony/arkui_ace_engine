@@ -64,7 +64,7 @@ private:
     void Path2DRect(const OffsetF& offset, const PathArgs& args) override;
     SkCanvas* GetRawPtrOfSkCanvas() override
     {
-        return globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
+        return skCanvas_.get();
     }
 
     int32_t width_;

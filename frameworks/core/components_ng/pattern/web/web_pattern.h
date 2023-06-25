@@ -38,6 +38,10 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/render_surface.h"
 
+namespace OHOS::Ace {
+class WebDelegateObserver;
+}
+
 namespace OHOS::Ace::NG {
 namespace {
 
@@ -77,7 +81,7 @@ public:
     WebPattern(std::string webSrc, const RefPtr<WebController>& webController);
     WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallback);
 
-    ~WebPattern() override = default;
+    ~WebPattern() override;
 
     enum class VkState {
         VK_NONE,
@@ -333,6 +337,7 @@ private:
     void OnActive() override;
     void OnVisibleChange(bool isVisible) override;
     void OnAreaChangedInner() override;
+    void OnNotifyMemoryLevel(int32_t level) override;
 
     void OnWebSrcUpdate();
     void OnWebDataUpdate();
@@ -379,6 +384,7 @@ private:
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
+    void InitHoverEvent(const RefPtr<InputEventHub>& inputHub);
     void InitCommonDragDropEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragMove(const GestureEvent& event);
@@ -455,10 +461,10 @@ private:
     SetHapPathCallback setHapPathCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;
     OnControllerAttachedCallback onControllerAttachedCallback_ = nullptr;
-    RefPtr<WebDelegate> delegate_;
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
+    RefPtr<InputEvent> hoverEvent_;
     RefPtr<PanEvent> panEvent_ = nullptr;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_ = nullptr;
     RefPtr<WebPaintProperty> webPaintProperty_ = nullptr;
@@ -494,6 +500,8 @@ private:
     bool isDisableDrag_ = false;
     bool isMouseEvent_ = false;
     bool isVisible_ = true;
+    RefPtr<WebDelegate> delegate_;
+    RefPtr<WebDelegateObserver> observer_;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -165,6 +165,29 @@ void NavigationPattern::OnModifyDone()
             focusHub->SetParentFocusable(true);
             focusHub->RequestFocus();
         }
+
+        auto navigationLayoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
+        CHECK_NULL_VOID(navigationLayoutProperty);
+        if (navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::STACK &&
+            newTopNavPath.second != nullptr) {
+            auto preTopNavDestination = navBarNode;
+            if (preTopNavPath.second != nullptr) {
+                auto preTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+                    NavigationGroupNode::GetNavDestinationNode(preTopNavPath.second));
+            }
+            auto newTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+                NavigationGroupNode::GetNavDestinationNode(newTopNavPath.second));
+            auto curNavTitleBarNode = AceType::DynamicCast<TitleBarNode>(preTopNavDestination->GetTitleBarNode());
+            auto destinationTitleBarNode = AceType::DynamicCast<TitleBarNode>(newTopNavDestination->GetTitleBarNode());
+            auto backButtonNode = AceType::DynamicCast<FrameNode>(destinationTitleBarNode->GetBackButton());
+            if (curNavTitleBarNode || destinationTitleBarNode) {
+                hostNode->TitleTransitionInAnimation(curNavTitleBarNode, destinationTitleBarNode);
+            }
+            if (backButtonNode) {
+                hostNode->BackButtonAnimation(backButtonNode, true);
+            }
+            hostNode->NavTransitionInAnimation(preTopNavDestination, newTopNavDestination);
+        }
     }
 
     auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();

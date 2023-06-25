@@ -197,7 +197,6 @@ HWTEST_F(RefreshTestNg, Drag001, TestSize.Level1)
     paintProperty_->UpdateIsRefreshing(false);
     // isRefreshing changed by front end, will trigger OnModifyDone
     pattern_->OnModifyDone();
-    pattern_->OnExitAnimationFinish(); // by HandleDragEnd
     EXPECT_EQ(refreshStatus, RefreshStatus::DONE);
     pattern_->OnExitAnimationFinish(); // by OnModifyDone
     EXPECT_EQ(refreshStatus, RefreshStatus::INACTIVE);

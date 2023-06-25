@@ -97,7 +97,10 @@ int32_t Animator::GetDuration() const
     return duration_;
 }
 
-void Animator::SetDuration(int32_t duration) {}
+void Animator::SetDuration(int32_t duration)
+{
+    duration_ = duration;
+}
 
 bool Animator::SetIteration(int32_t iteration)
 {
@@ -163,7 +166,10 @@ void Animator::PlayMotion(const RefPtr<Motion>& motion)
     motion_ = motion;
 }
 
-void Animator::Play() {}
+void Animator::Play()
+{
+    status_ = Status::RUNNING;
+}
 
 void Animator::Reverse() {}
 

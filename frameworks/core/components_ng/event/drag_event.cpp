@@ -95,7 +95,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             SubwindowManager::GetInstance()->HideMenuNG();
         }
 #endif // ENABLE_DRAG_FRAMEWORK
-       // Trigger drag start event setted by user.
+       // Trigger drag start event set by user.
         CHECK_NULL_VOID(actuator->userCallback_);
         auto userActionStart = actuator->userCallback_->GetActionStartEventFunc();
         if (userActionStart) {
@@ -289,7 +289,7 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     auto offsetToWindow = frameNode->GetPaintRectOffset();
     auto offsetX = offsetToWindow.GetX();
     auto offsetY = offsetToWindow.GetY();
-    // craete imageNode
+    // create imageNode
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -307,7 +307,7 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     CHECK_NULL_VOID(hub);
     hub->SetPixelMap(gestureHub->GetPixelMap());
     // mount to rootNode
-    manager->MountPixelmapToRootNode(columnNode);
+    manager->MountPixelMapToRootNode(columnNode);
     imageNode->MarkModifyDone();
     ShowPixelMapAnimation(imageNode);
 }
@@ -427,19 +427,16 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
     }
     pattern->CloseSelectOverlay();
     pattern->CloseKeyboard(true);
-    auto dragNode = pattern->GetDragNode();
+    auto dragNode = pattern->MoveDragNode();
     CHECK_NULL_VOID(dragNode);
-    auto context = dragNode->GetRenderContext();
-    CHECK_NULL_VOID(context);
-    auto pixelMap = context->GetThumbnailPixelMap();
+    auto pixelMap = dragNode->GetRenderContext()->GetThumbnailPixelMap();
     gestureHub->SetPixelMap(pixelMap);
     // create columnNode
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     columnNode->AddChild(dragNode);
     // mount to rootNode
-    manager->MountPixelmapToRootNode(columnNode);
-    columnNodeWeak_ = columnNode;
+    manager->MountPixelMapToRootNode(columnNode);
     auto modifier = dragNode->GetPattern<TextDragPattern>()->GetOverlayModifier();
     modifier->StartAnimate();
 }
@@ -456,40 +453,35 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextDragBase>();
     CHECK_NULL_VOID(pattern);
-    auto dragNode = pattern->GetDragNode();
-    CHECK_NULL_VOID(dragNode);
     auto pixelMap = gestureHub->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
-    auto removeColumnNode = [id = Container::CurrentId(), startDrag, weakPattern = WeakPtr<TextDragBase>(pattern),
-                                columnNodeWeak = columnNodeWeak_] {
+    auto removeColumnNode = [id = Container::CurrentId(), startDrag, weakPattern = WeakPtr<TextDragBase>(pattern)] {
         ContainerScope scope(id);
-        Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto manager = pipelineContext->GetOverlayManager();
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto manager = pipeline->GetOverlayManager();
         CHECK_NULL_VOID(manager);
-        manager->SetHasPixelMap(false);
-        auto rootNode = pipelineContext->GetRootElement();
-        CHECK_NULL_VOID(rootNode);
-        auto columnNode = columnNodeWeak.Upgrade();
-        CHECK_NULL_VOID(columnNode);
-        rootNode->RemoveChild(columnNode);
-        rootNode->RebuildRenderContextTree();
-        auto renderContext = rootNode->GetRenderContext();
-        renderContext->RequestNextFrame();
+        manager->RemovePixelMap();
         if (!startDrag) {
             auto pattern = weakPattern.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->CreateHandles();
         }
+        Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
     };
     AnimationOption option;
     option.SetDuration(PIXELMAP_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
     option.SetOnFinishEvent(removeColumnNode);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetOverlayManager();
+    auto dragNode = manager->GetPixelMapNode();
+    CHECK_NULL_VOID(dragNode);
     auto dragFrame = dragNode->GetGeometryNode()->GetFrameRect();
     auto frameWidth = dragFrame.Width();
-    auto frameheight = dragFrame.Height();
+    auto frameHeight = dragFrame.Height();
     float scaleWidth = static_cast<float>(MAX_PIXEL_MAP_WIDTH) / pixelMap->GetWidth();
     float scaleHeight = static_cast<float>(MAX_PIXEL_MAP_HEIGHT) / pixelMap->GetHeight();
     float scale = std::min(std::min(scaleWidth, scaleHeight), 1.0f);
@@ -498,10 +490,10 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
     context->UpdateTransformScale(VectorF(1.0f, 1.0f));
     AnimationUtils::Animate(
         option,
-        [context, startDrag, globalX, globalY, frameWidth, frameheight, scale]() {
+        [context, startDrag, globalX, globalY, frameWidth, frameHeight, scale]() {
             if (startDrag) {
                 context->UpdatePosition(OffsetT<Dimension>(Dimension(globalX + frameWidth * PIXELMAP_WIDTH_RATE),
-                    Dimension(globalY + frameheight * PIXELMAP_HEIGHT_RATE)));
+                    Dimension(globalY + frameHeight * PIXELMAP_HEIGHT_RATE)));
                 context->UpdateTransformScale(VectorF(scale, scale));
                 context->OnModifyDone();
             }

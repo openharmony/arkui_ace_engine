@@ -19,6 +19,7 @@
 
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -88,20 +89,26 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
     };
 }
 
-void ImagePattern::PrepareAnimation()
+void ImagePattern::PrepareAnimation(const RefPtr<CanvasImage>& image)
 {
-    if (image_->IsStatic()) {
+    if (image->IsStatic()) {
         return;
     }
-    SetRedrawCallback();
+    SetRedrawCallback(image);
     RegisterVisibleAreaChange();
+    auto layoutProps = GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    // pause animation if prop is initially set to invisible
+    if (layoutProps->GetVisibility().value_or(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+        image->ControlAnimation(false);
+    }
 }
 
-void ImagePattern::SetRedrawCallback()
+void ImagePattern::SetRedrawCallback(const RefPtr<CanvasImage>& image)
 {
-    CHECK_NULL_VOID_NOLOG(image_);
+    CHECK_NULL_VOID_NOLOG(image);
     // set animation flush function for svg / gif
-    image_->SetRedrawCallback([weak = WeakClaim(RawPtr(GetHost()))] {
+    image->SetRedrawCallback([weak = WeakClaim(RawPtr(GetHost()))] {
         auto imageNode = weak.Upgrade();
         CHECK_NULL_VOID(imageNode);
         imageNode->MarkNeedRenderOnly();
@@ -143,7 +150,7 @@ void ImagePattern::OnImageLoadSuccess()
     dstRect_ = loadingCtx_->GetDstRect();
 
     SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo().IsSvg());
-    PrepareAnimation();
+    PrepareAnimation(image_);
     if (host->IsDraggable()) {
         EnableDrag();
     }
@@ -152,8 +159,7 @@ void ImagePattern::OnImageLoadSuccess()
     altImage_ = nullptr;
     altDstRect_.reset();
     altSrcRect_.reset();
-    // TODO: only do paint task when the pattern is active
-    // figure out why here is always inactive
+
     host->MarkNeedRenderOnly();
 }
 
@@ -293,23 +299,35 @@ void ImagePattern::OnModifyDone()
     LoadImageDataIfNeed();
 
     if (copyOption_ != CopyOptions::None) {
-        InitCopy();
-    } else {
-        // remove long press and mouse events
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-
-        auto gestureHub = host->GetOrCreateGestureEventHub();
-        gestureHub->SetLongPressEvent(nullptr);
-        longPressEvent_ = nullptr;
-
-        gestureHub->RemoveClickEvent(clickEvent_);
-        clickEvent_ = nullptr;
-
-        auto inputHub = host->GetOrCreateInputEventHub();
-        inputHub->RemoveOnMouseEvent(mouseEvent_);
-        mouseEvent_ = nullptr;
+        bool hasObscured = false;
+        if (host->GetRenderContext()->GetObscured().has_value()) {
+            auto obscuredReasons = host->GetRenderContext()->GetObscured().value();
+            hasObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
+                [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
+        }
+        if (!hasObscured) {
+            InitCopy();
+            return;
+        }
     }
+
+    CloseSelectOverlay();
+    // remove long press and mouse events
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    gestureHub->SetLongPressEvent(nullptr);
+    longPressEvent_ = nullptr;
+
+    gestureHub->RemoveClickEvent(clickEvent_);
+    clickEvent_ = nullptr;
+
+    auto inputHub = host->GetOrCreateInputEventHub();
+    inputHub->RemoveOnMouseEvent(mouseEvent_);
+    mouseEvent_ = nullptr;
 }
 
 DataReadyNotifyTask ImagePattern::CreateDataReadyCallbackForAlt()
@@ -350,22 +368,25 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         CHECK_NULL_VOID(pattern->altLoadingCtx_);
-        auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
-        auto currentAltSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
-        if (currentAltSourceInfo != sourceInfo) {
+        auto layoutProps = pattern->GetLayoutProperty<ImageLayoutProperty>();
+        auto currentAltSrc = layoutProps->GetAlt().value_or(ImageSourceInfo(""));
+        if (currentAltSrc != sourceInfo) {
             LOGW("alt image sourceInfo does not match, ignore current callback. current: %{public}s vs callback's: "
                  "%{public}s",
-                currentAltSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
+                currentAltSrc.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         pattern->altImage_ = pattern->altLoadingCtx_->MoveCanvasImage();
         pattern->altSrcRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetSrcRect());
         pattern->altDstRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetDstRect());
         pattern->SetImagePaintConfig(pattern->altImage_, *pattern->altSrcRect_, *pattern->altDstRect_,
             pattern->altLoadingCtx_->GetSourceInfo().IsSvg());
+
+        pattern->PrepareAnimation(pattern->altImage_);
+
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     };
 }
 
@@ -432,9 +453,12 @@ void ImagePattern::OnVisibleChange(bool visible)
     if (!visible) {
         CloseSelectOverlay();
     }
-    CHECK_NULL_VOID_NOLOG(image_);
     // control svg / gif animation
-    image_->ControlAnimation(visible);
+    if (image_) {
+        image_->ControlAnimation(visible);
+    } else if (altImage_) {
+        altImage_->ControlAnimation(visible);
+    }
 }
 
 void ImagePattern::OnAttachToFrameNode()

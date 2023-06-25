@@ -27,6 +27,20 @@
  * limitations under the License.
  */
 /*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
  * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -407,7 +421,7 @@ class LocalStorage extends NativeLocalStorage {
     subscribeToChangesOf(propName, subscriber) {
         var p = this.storage_.get(propName);
         if (p) {
-            p.subscribeMe(subscriber);
+            p.addSubscriber(subscriber);
             return true;
         }
         return false;
@@ -423,7 +437,7 @@ class LocalStorage extends NativeLocalStorage {
     unsubscribeFromChangesOf(propName, subscriberId) {
         var p = this.storage_.get(propName);
         if (p) {
-            p.unlinkSuscriber(subscriberId);
+            p.removeSubscriber(null, subscriberId);
             return true;
         }
         return false;
@@ -2415,15 +2429,37 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
             this.subscribers_.add(newElmtId);
         }
     }
+    // Method name is used to check object is of type ObservedPropertyAbstract
+    // Do NOT override in derived classed, use addSubscriber
     subscribeMe(subscriber) {
         
         this.subscribers_.add(subscriber.id__());
     }
     /*
       the inverse function of createOneWaySync or createTwoWaySync
+      Do NOT override in derived classed, use removeSubscriber
     */
     unlinkSuscriber(subscriberId) {
         this.subscribers_.delete(subscriberId);
+    }
+    /*
+      Virtualized version of the subscription mechanism - add subscriber
+    */
+    addSubscriber(subscriber) {
+        if (subscriber) {
+            this.subscribeMe(subscriber);
+        }
+    }
+    /*
+      Virtualized version of the subscription mechanism - remove subscriber
+    */
+    removeSubscriber(subscriber, id) {
+        if (id) {
+            this.unlinkSuscriber(id);
+        }
+        else if (subscriber) {
+            this.unlinkSuscriber(subscriber.id__());
+        }
     }
     notifyHasChanged(newValue) {
         
@@ -3309,9 +3345,52 @@ class View extends NativeViewFullUpdate {
  * all definitions in this file are framework internal
  */
 class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
-    constructor(subscribingView, viewName) {
-        super(subscribingView, viewName);
+    constructor(subscriber, viewName) {
+        super(subscriber, viewName);
+        this.owningView_ = undefined;
         this.dependentElementIds_ = new Set();
+        Object.defineProperty(this, 'owningView_', { writable: true, enumerable: false });
+        Object.defineProperty(this, 'subscriberRefs_', { writable: true, enumerable: false, value: new Set() });
+        if (subscriber) {
+            if (subscriber instanceof ViewPU) {
+                this.owningView_ = subscriber;
+            }
+            else {
+                this.subscriberRefs_.add(subscriber);
+            }
+        }
+    }
+    aboutToBeDeleted() {
+        super.aboutToBeDeleted();
+        this.subscriberRefs_.clear();
+        this.owningView_ = undefined;
+    }
+    /*
+      Virtualized version of the subscription mechanism - add subscriber
+      Overrides implementation in ObservedPropertyAbstract<T>
+    */
+    addSubscriber(subscriber) {
+        if (subscriber) {
+            // ObservedPropertyAbstract will also add subscriber to
+            // SubscriberManager map and to its own Set of subscribers as well
+            // Something to improve in the future for PU path.
+            // subscribeMe should accept IPropertySubscriber interface
+            super.subscribeMe(subscriber);
+            this.subscriberRefs_.add(subscriber);
+        }
+    }
+    /*
+      Virtualized version of the subscription mechanism - remove subscriber
+      Overrides implementation in ObservedPropertyAbstract<T>
+    */
+    removeSubscriber(subscriber, id) {
+        if (subscriber) {
+            this.subscriberRefs_.delete(subscriber);
+            if (!id) {
+                id = subscriber.id__();
+            }
+        }
+        super.unlinkSuscriber(id);
     }
     notifyPropertyRead() {
         stateMgmtConsole.error(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: \
@@ -3319,9 +3398,12 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     }
     notifyPropertyHasBeenReadPU() {
         
-        this.subscribers_.forEach((subscribedId) => {
-            var subscriber = SubscriberManager.Find(subscribedId);
+        this.subscriberRefs_.forEach((subscriber) => {
             if (subscriber) {
+                // TODO
+                // propertyHasBeenReadPU is not use in the code
+                // defined by interface that is not used either: PropertyReadEventListener
+                // Maybe compiler generated code has it?
                 if ('propertyHasBeenReadPU' in subscriber) {
                     subscriber.propertyHasBeenReadPU(this);
                 }
@@ -3331,17 +3413,16 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     }
     notifyPropertyHasChangedPU() {
         
-        this.subscribers_.forEach((subscribedId) => {
-            var subscriber = SubscriberManager.Find(subscribedId);
+        if (this.owningView_) {
+            this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElementIds_);
+        }
+        this.subscriberRefs_.forEach((subscriber) => {
             if (subscriber) {
-                if ('viewPropertyHasChanged' in subscriber) {
-                    subscriber.viewPropertyHasChanged(this.info_, this.dependentElementIds_);
-                }
-                else if ('syncPeerHasChanged' in subscriber) {
+                if ('syncPeerHasChanged' in subscriber) {
                     subscriber.syncPeerHasChanged(this);
                 }
                 else {
-                    stateMgmtConsole.warn(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: notifyPropertryHasChangedPU: unknown subscriber ID '${subscribedId}' error!`);
+                    stateMgmtConsole.warn(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: notifyPropertryHasChangedPU: unknown subscriber ID 'subscribedId' error!`);
                 }
             }
         });
@@ -3351,6 +3432,9 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         // this function will be removed after a short transiition periode
         stateMgmtConsole.warn(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: markDependentElementsDirty no longer supported. App will work ok, but
         please update your ace-ets2bundle and recompile your application!`);
+    }
+    numberOfSubscrbers() {
+        return this.subscriberRefs_.size + (this.owningView_ ? 1 : 0);
     }
     /**
      * factory function for concrete 'object' or 'simple' ObservedProperty object
@@ -3499,9 +3583,7 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
     }
     aboutToBeDeleted(unsubscribeMe) {
         this.unsubscribeWrappedObject();
-        if (unsubscribeMe) {
-            this.unlinkSuscriber(unsubscribeMe.id__());
-        }
+        this.removeSubscriber(unsubscribeMe);
         super.aboutToBeDeleted();
     }
     /**
@@ -3626,9 +3708,7 @@ class ObservedPropertySimplePU extends ObservedPropertySimpleAbstractPU {
         this.setValueInternal(localInitValue);
     }
     aboutToBeDeleted(unsubscribeMe) {
-        if (unsubscribeMe) {
-            this.unlinkSuscriber(unsubscribeMe.id__());
-        }
+        this.removeSubscriber(unsubscribeMe);
         super.aboutToBeDeleted();
     }
     /**
@@ -3741,7 +3821,7 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
             this.source_ = source;
             this.sourceIsOwnObject = false;
             // subscribe to receive value change updates from LocalStorage source property
-            this.source_.subscribeMe(this);
+            this.source_.addSubscriber(this);
         }
         else {
             // code path for 
@@ -3766,7 +3846,7 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
     */
     aboutToBeDeleted() {
         if (this.source_) {
-            this.source_.unlinkSuscriber(this.id__());
+            this.source_.removeSubscriber(this);
             if (this.sourceIsOwnObject == true && this.source_.numberOfSubscrbers() == 0) {
                 
                 this.source_.aboutToBeDeleted();
@@ -4042,7 +4122,7 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
         this.source_ = source;
         if (this.source_) {
             // register to the parent property
-            this.source_.subscribeMe(this);
+            this.source_.addSubscriber(this);
             // register to the ObservedObject
             ObservedObject.addOwningProperty(this.source_.get(), this);
         }
@@ -4057,7 +4137,7 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
     aboutToBeDeleted() {
         // unregister from parent of this link
         if (this.source_) {
-            this.source_.unlinkSuscriber(this.id__());
+            this.source_.removeSubscriber(this);
             // unregister from the ObservedObject
             ObservedObject.removeOwningProperty(this.source_.getUnmonitored(), this);
         }
@@ -4148,12 +4228,13 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
 class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
     constructor(source, subscribeMe, thisPropertyName) {
         super(subscribeMe, thisPropertyName);
+        // Check that source is ObservedPropertyAbstruct
         if (source && (typeof (source) === "object") && ("notifyHasChanged" in source) && ("subscribeMe" in source)) {
             // code path for @(Local)StorageProp
             this.source_ = source;
             this.sourceIsOwnObject = false;
+            this.source_.addSubscriber(this);
             // subscribe to receive value change updates from LocalStorage source property
-            this.source_.subscribeMe(this);
         }
         else {
             // code path for @Prop
@@ -4170,7 +4251,7 @@ class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
     */
     aboutToBeDeleted() {
         if (this.source_) {
-            this.source_.unlinkSuscriber(this.id__());
+            this.source_.removeSubscriber(this);
             if (this.sourceIsOwnObject == true && this.source_.numberOfSubscrbers() == 0) {
                 
                 this.source_.aboutToBeDeleted();
@@ -4246,7 +4327,7 @@ class SynchedPropertySimpleTwoWayPU extends ObservedPropertySimpleAbstractPU {
         this.changeNotificationIsOngoing_ = false;
         this.source_ = source;
         if (this.source_) {
-            this.source_.subscribeMe(this);
+            this.source_.addSubscriber(this);
         }
         else {
             stateMgmtConsole.error(`SynchedPropertySimpleTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Link/@Consume source must not be undefined. Application error!`);
@@ -4258,7 +4339,7 @@ class SynchedPropertySimpleTwoWayPU extends ObservedPropertySimpleAbstractPU {
   */
     aboutToBeDeleted() {
         if (this.source_) {
-            this.source_.unlinkSuscriber(this.id__());
+            this.source_.removeSubscriber(this);
             this.source_ = undefined;
         }
         super.aboutToBeDeleted();

@@ -199,12 +199,14 @@ private:
     void HandleMouseEventWithoutKeyboard(const MouseInfo& info);
     void ClearMultiSelect();
     void ClearSelectedZone();
+    void OnMouseRelease();
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     void MultiSelectWithoutKeyboard(const RectF& selectedZone);
     void UpdateScrollBarOffset() override;
     void UpdateRectOfDraggedInItem(int32_t insertIndex);
     void SetAccessibilityAction();
     void StopAnimate();
+    float EstimateHeight();
 
     GridLayoutInfo gridLayoutInfo_;
     RefPtr<GridPositionController> positionController_;
@@ -218,6 +220,7 @@ private:
     bool scrollable_ = true;
     int32_t scrollState_ = SCROLL_FROM_NONE;
     bool mousePressed_ = false;
+    bool firstShow_ = false;
 
     int32_t lastFocusItemMainIndex_ = 0;
     int32_t lastFocusItemCrossIndex_ = 0;

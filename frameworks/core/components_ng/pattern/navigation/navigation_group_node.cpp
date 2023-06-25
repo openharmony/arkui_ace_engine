@@ -315,9 +315,6 @@ void NavigationGroupNode::BackToNavBar(const RefPtr<UINode>& navDestinationNode)
     auto navigationContentNode = AceType::DynamicCast<FrameNode>(navigationNode->GetContentNode());
     CHECK_NULL_VOID(navigationContentNode);
     NavTransitionOutAnimation(navBarNode, navDestination, navigationContentNode);
-    auto navigationPattern = AceType::DynamicCast<NavigationGroupNode>(navigationNode)->GetPattern<NavigationPattern>();
-    CHECK_NULL_VOID(navigationPattern);
-    navigationPattern->RemoveNavDestination();
 }
 
 void NavigationGroupNode::BackToPreNavDestination(const RefPtr<UINode>& preNavDestinationNode,
@@ -457,8 +454,12 @@ void NavigationGroupNode::NavTransitionOutAnimation(const RefPtr<FrameNode>& nav
     auto nodeWidth = size.Width();
     auto nodeHeight = size.Height();
 
+    auto navigationPattern = AceType::DynamicCast<NavigationGroupNode>(navigationNode)->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
     option.SetOnFinishEvent(
         [navigationContentWK = WeakClaim(RawPtr(navigationContentNode)),
+            navDestinationWK = WeakClaim(RawPtr(navDestination)),
+            navigationPatternWK = WeakClaim(RawPtr(navigationPattern)),
             navigationNodeWK = WeakClaim(RawPtr(navigationNode)), id = Container::CurrentId(), nodeHeight] {
             ContainerScope scope(id);
             auto context = PipelineContext::GetCurrentContext();
@@ -467,14 +468,17 @@ void NavigationGroupNode::NavTransitionOutAnimation(const RefPtr<FrameNode>& nav
             CHECK_NULL_VOID_NOLOG(taskExecutor);
             // animation finish event should be posted to UI thread.
             taskExecutor->PostTask(
-                [navigationContentWK, navigationNodeWK, id, nodeHeight]() {
+                [navigationContentWK, navDestinationWK, navigationPatternWK, navigationNodeWK, id, nodeHeight]() {
                     auto navigationContentNode = navigationContentWK.Upgrade();
+                    auto navDestination = navDestinationWK.Upgrade();
                     auto navigationNode = navigationNodeWK.Upgrade();
+                    auto navigationPattern = navigationPatternWK.Upgrade();
                     CHECK_NULL_VOID(navigationNode && navigationContentNode);
-                    navigationContentNode->GetRenderContext()->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
-                    navigationContentNode->GetRenderContext()->ClipWithRRect(
+                    navDestination->GetRenderContext()->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+                    navDestination->GetRenderContext()->ClipWithRRect(
                         RectF(0.0f, 0.0f, Infinity<float>(), nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
                     ContainerScope scope(id);
+                    navigationPattern->RemoveNavDestination();
                     navigationContentNode->MarkModifyDone();
                     navigationNode->MarkModifyDone();
                     navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

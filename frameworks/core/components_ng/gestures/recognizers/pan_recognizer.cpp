@@ -30,7 +30,7 @@ namespace OHOS::Ace::NG {
 namespace {
 
 constexpr int32_t MAX_PAN_FINGERS = 10;
-constexpr double DISTANCE_PER_MOUSE_DEGREE = DP_PER_LINE_DESKTOP * LINE_NUMBER_DESKTOP / MOUSE_WHEEL_DEGREES;
+constexpr Dimension DISTANCE_PER_MOUSE_DEGREE = LINE_HEIGHT_DESKTOP * LINE_NUMBER_DESKTOP / MOUSE_WHEEL_DEGREES;
 constexpr int32_t AXIS_PAN_FINGERS = 1;
 
 } // namespace
@@ -268,17 +268,18 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
         return;
     }
     globalPoint_ = Point(event.x, event.y);
+    auto distancePerMouseDegreePx = DISTANCE_PER_MOUSE_DEGREE.ConvertToPx();
     if (direction_.type == PanDirection::ALL || (direction_.type & PanDirection::HORIZONTAL) == 0) {
         // PanRecognizer Direction: Vertical or ALL
         delta_ =
-            Offset(-event.horizontalAxis * DISTANCE_PER_MOUSE_DEGREE, -event.verticalAxis * DISTANCE_PER_MOUSE_DEGREE);
+            Offset(-event.horizontalAxis * distancePerMouseDegreePx, -event.verticalAxis * distancePerMouseDegreePx);
     } else if ((direction_.type & PanDirection::VERTICAL) == 0) {
         // PanRecognizer Direction: Horizontal
         if (NearZero(event.horizontalAxis)) {
-            delta_ = Offset(-event.verticalAxis * DISTANCE_PER_MOUSE_DEGREE, 0);
+            delta_ = Offset(-event.verticalAxis * distancePerMouseDegreePx, 0);
         } else {
             delta_ = Offset(
-                -event.horizontalAxis * DISTANCE_PER_MOUSE_DEGREE, -event.verticalAxis * DISTANCE_PER_MOUSE_DEGREE);
+                -event.horizontalAxis * distancePerMouseDegreePx, -event.verticalAxis * distancePerMouseDegreePx);
         }
     }
 
@@ -431,9 +432,11 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         if (inputEventType_ == InputEventType::AXIS) {
             info.SetVelocity(Velocity());
             info.SetMainVelocity(0.0);
+            info.SetSourceTool(lastAxisEvent_.sourceTool);
         } else {
             info.SetVelocity(velocityTracker_.GetVelocity());
             info.SetMainVelocity(velocityTracker_.GetMainAxisVelocity());
+            info.SetSourceTool(lastTouchEvent_.sourceTool);
         }
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
         info.SetInputEventType(inputEventType_);
@@ -444,7 +447,6 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         if (lastTouchEvent_.tiltY.has_value()) {
             info.SetTiltY(lastTouchEvent_.tiltY.value());
         }
-        info.SetSourceTool(lastTouchEvent_.sourceTool);
         (*callback)(info);
     }
 }

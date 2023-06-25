@@ -348,6 +348,21 @@ class WebPattern;
 }; // namespace NG
 
 class RenderWeb;
+
+class WebDelegateObserver : public virtual AceType {
+DECLARE_ACE_TYPE(WebDelegateObserver, AceType);
+public:
+    WebDelegateObserver(const RefPtr<WebDelegate>& delegate, WeakPtr<PipelineBase> context)
+        : delegate_(delegate), context_(context)
+    {}
+    ~WebDelegateObserver();
+    void NotifyDestory();
+
+private:
+    RefPtr<WebDelegate> delegate_;
+    WeakPtr<PipelineBase> context_;
+};
+
 class WebDelegate : public WebResource {
     DECLARE_ACE_TYPE(WebDelegate, WebResource);
 
@@ -370,6 +385,10 @@ public:
         : WebResource(type, context, std::move(onError))
     {}
 
+    void SetObserver(const RefPtr<WebDelegateObserver>& observer)
+    {
+        observer_ = observer;
+    };
     void SetRenderWeb(const WeakPtr<RenderWeb>& renderWeb);
 
     void CreatePlatformResource(const Size& size, const Offset& position, const WeakPtr<PipelineContext>& context);
@@ -474,6 +493,7 @@ public:
     {
         backgroundColor_ = backgroundColor;
     }
+    void NotifyMemoryLevel(int32_t level);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -715,6 +735,7 @@ private:
     bool needResizeAtFirst_ = false;
     int32_t backgroundColor_ = 0xffffffff;
     int32_t rosenWindowId_ = -1;
+    RefPtr<WebDelegateObserver> observer_;
 #endif
 };
 

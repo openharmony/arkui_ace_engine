@@ -95,7 +95,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_polygon.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polyline.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_progress.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_qrcode.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_radio.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rating.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rect.h"
@@ -140,6 +139,12 @@
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 #include "frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.h"
+
+#ifdef USE_COMPONENTS_LIB
+#include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
+#else
+#include "frameworks/bridge/declarative_frontend/jsview/js_qrcode.h"
+#endif
 
 #ifdef VIDEO_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_video.h"
@@ -258,6 +263,21 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
         });
 }
 
+#ifdef USE_COMPONENTS_LIB
+void JSBindLibs(const std::string moduleName, const std::string exportModuleName)
+{
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    std::shared_ptr<JsValue> global = runtime->GetGlobal();
+    std::shared_ptr<JsValue> requireNapiFunc = global->GetProperty(runtime, "requireNapi");
+    if (!requireNapiFunc || !requireNapiFunc->IsFunction(runtime)) {
+        LOGW("requireNapi func not found");
+    }
+    std::vector<std::shared_ptr<JsValue>> argv = { runtime->NewString(moduleName) };
+    std::shared_ptr<JsValue> napiObj = requireNapiFunc->Call(runtime, global, argv, argv.size());
+    global->SetProperty(runtime, exportModuleName, napiObj);
+}
+#endif
+
 void JsBindViews(BindingTarget globalObj)
 {
     JSViewAbstract::JSBind(globalObj);
@@ -373,7 +393,6 @@ void JsBindViews(BindingTarget globalObj)
     JSTextInput::JSBind(globalObj);
     JSTextClock::JSBind(globalObj);
     JSSideBar::JSBind(globalObj);
-    JSQRCode::JSBind(globalObj);
     JSDataPanel::JSBind(globalObj);
     JSBadge::JSBind(globalObj);
     JSGauge::JSBind(globalObj);
@@ -421,6 +440,11 @@ void JsBindViews(BindingTarget globalObj)
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
     JSPath2D::JSBind(globalObj);
+#ifdef USE_COMPONENTS_LIB
+    JSBindLibs("arkui.qrcode", "QRCode");
+#else
+    JSQRCode::JSBind(globalObj);
+#endif
 }
 
 } // namespace OHOS::Ace::Framework

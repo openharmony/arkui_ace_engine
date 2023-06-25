@@ -42,9 +42,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float DEVICE_WIDTH = 480.f;
 constexpr float DEVICE_HEIGHT = 800.f;
-const std::string CONTAINER_MODAL_NODE_TAG = "ContainerModalNode";
-const std::string TITLE_NODE_TAG = "TitleNode";
-const std::string TITLE_LABEL_NODE_TAG = "TitleLabelNode";
+constexpr double MOUSE_MOVE_POPUP_DISTANCE = 5.0; // 5.0px
 } // namespace
 class ContainerModelTestNg : public testing::Test {
 protected:
@@ -63,6 +61,9 @@ protected:
     void Touch(Offset downOffset, Offset moveOffset, Offset upOffset);
     void Mouse(MouseInfo mouseInfo);
     void Mouse(Offset moveOffset);
+    void ClickBtn(int32_t index);
+    OnHoverEventFunc GetHovertEvent(int32_t index);
+    OnMouseEventFunc GetMouseEvent(int32_t index);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<ContainerModalPattern> pattern_;
@@ -198,6 +199,37 @@ void ContainerModelTestNg::Mouse(Offset moveOffset)
     Mouse(mouseInfo);
 }
 
+void ContainerModelTestNg::ClickBtn(int32_t index)
+{
+    auto column = frameNode_->GetChildAtIndex(0);
+    auto container_modal_title = column->GetChildAtIndex(0);
+    auto btn = AceType::DynamicCast<FrameNode>(container_modal_title->GetChildAtIndex(index));
+    auto eventHub = btn->GetOrCreateGestureEventHub();
+    auto clickEvents = eventHub->clickEventActuator_->clickEvents_;
+    GestureEvent info;
+    clickEvents.front()->GetGestureEventFunc()(info);
+}
+
+OnHoverEventFunc ContainerModelTestNg::GetHovertEvent(int32_t index)
+{
+    auto column = frameNode_->GetChildAtIndex(0);
+    auto container_modal_title = column->GetChildAtIndex(0);
+    auto btn = AceType::DynamicCast<FrameNode>(container_modal_title->GetChildAtIndex(index));
+    auto inputHub = btn->GetOrCreateInputEventHub();
+    auto inputEvents = inputHub->hoverEventActuator_->inputEvents_;
+    return inputEvents.front()->GetOnHoverEventFunc();
+}
+
+OnMouseEventFunc ContainerModelTestNg::GetMouseEvent(int32_t index)
+{
+    auto column = frameNode_->GetChildAtIndex(0);
+    auto container_modal_title = column->GetChildAtIndex(0);
+    auto btn = AceType::DynamicCast<FrameNode>(container_modal_title->GetChildAtIndex(index));
+    auto inputHub = btn->GetOrCreateInputEventHub();
+    auto inputEvents = inputHub->mouseEventActuator_->inputEvents_;
+    return inputEvents.front()->GetOnMouseEventFunc();
+}
+
 /**
  * @tc.name: Test001
  * @tc.desc: Test ContainerModel Child
@@ -240,10 +272,105 @@ HWTEST_F(ContainerModelTestNg, Test001, TestSize.Level1)
 
 /**
  * @tc.name: Test002
- * @tc.desc: Test InitContainerEvent
+ * @tc.desc: Test event
  * @tc.type: FUNC
  */
 HWTEST_F(ContainerModelTestNg, Test002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set callback
+     * @tc.expected: call is triggered
+     */
+    const auto windowManager = AceType::MakeRefPtr<WindowManager>();
+    MaximizeMode maximizeMode = MaximizeMode::MODE_AVOID_SYSTEM_BAR;
+    windowManager->SetCurrentWindowMaximizeMode(maximizeMode);
+    WindowMode windowMode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    auto windowModeCallback = [&windowMode]() { return windowMode; };
+    windowManager->SetWindowGetModeCallBack(std::move(windowModeCallback));
+    bool isWindowStartMove = false;
+    bool iswindowSplitPrimary = false;
+    bool iswindowRecover = false;
+    bool windowMaximize = false;
+    bool windowMinimize = false;
+    bool windowClose = false;
+    auto windowStartMoveCallBack = [&isWindowStartMove]() { isWindowStartMove = true; };
+    auto windowSplitPrimaryCallBack = [&iswindowSplitPrimary]() { iswindowSplitPrimary = true; };
+    auto windowRecoverCallBack = [&iswindowRecover]() { iswindowRecover = true; };
+    auto windowMaximizeCallBack = [&windowMaximize]() { windowMaximize = true; };
+    auto windowMinimizeCallBack = [&windowMinimize]() { windowMinimize = true; };
+    auto windowCloseCallBack = [&windowClose]() { windowClose = true; };
+    windowManager->SetWindowStartMoveCallBack(std::move(windowStartMoveCallBack));
+    windowManager->SetWindowSplitPrimaryCallBack(std::move(windowSplitPrimaryCallBack));
+    windowManager->SetWindowRecoverCallBack(std::move(windowRecoverCallBack));
+    windowManager->SetWindowMaximizeCallBack(std::move(windowMaximizeCallBack));
+    windowManager->SetWindowMinimizeCallBack(std::move(windowMinimizeCallBack));
+    windowManager->SetWindowCloseCallBack(std::move(windowCloseCallBack));
+    auto pipeline = MockPipelineBase::GetCurrent();
+    pipeline->windowManager_ = windowManager;
+    CreateContainerModal();
+    auto column = frameNode_->GetChildAtIndex(0);
+    auto container_modal_title = AceType::DynamicCast<FrameNode>(column->GetChildAtIndex(0));
+    auto eventHub = container_modal_title->GetOrCreateGestureEventHub();
+    GestureEvent info;
+    auto panEvents = eventHub->panEventActuator_->panEvents_;
+    panEvents.front()->GetActionStartEventFunc()(info);
+    ClickBtn(2);
+    ClickBtn(3);
+    ClickBtn(4);
+    ClickBtn(5);
+    EXPECT_FALSE(isWindowStartMove);
+    EXPECT_TRUE(iswindowSplitPrimary);
+    EXPECT_TRUE(iswindowRecover);
+    EXPECT_FALSE(windowMaximize);
+    EXPECT_TRUE(windowMinimize);
+    EXPECT_TRUE(windowClose);
+
+    /**
+     * @tc.steps: step2. set callback
+     * @tc.expected: call is triggered
+     */
+    maximizeMode = MaximizeMode::MODE_FULL_FILL;
+    windowManager->SetCurrentWindowMaximizeMode(maximizeMode);
+    windowMode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
+    CreateContainerModal();
+    column = frameNode_->GetChildAtIndex(0);
+    container_modal_title = AceType::DynamicCast<FrameNode>(column->GetChildAtIndex(0));
+    eventHub = container_modal_title->GetOrCreateGestureEventHub();
+    panEvents = eventHub->panEventActuator_->panEvents_;
+    panEvents.front()->GetActionStartEventFunc()(info);
+    ClickBtn(3);
+    EXPECT_TRUE(isWindowStartMove);
+    EXPECT_TRUE(windowMaximize);
+}
+
+/**
+ * @tc.name: Test003
+ * @tc.desc: Test event
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, Test003, TestSize.Level1)
+{
+    CreateContainerModal();
+    GetHovertEvent(2)(true);
+    MouseInfo mouseInfo;
+    mouseInfo.SetAction(MouseAction::PRESS);
+    mouseInfo.SetLocalLocation(Offset(0, 0));
+    GetMouseEvent(2)(mouseInfo);
+    mouseInfo.SetAction(MouseAction::MOVE);
+    GetMouseEvent(2)(mouseInfo);
+
+    GetHovertEvent(2)(false);
+    mouseInfo.SetAction(MouseAction::MOVE);
+    GetMouseEvent(2)(mouseInfo);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: Test004
+ * @tc.desc: Test InitContainerEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, Test004, TestSize.Level1)
 {
     CreateContainerModal();
 
@@ -319,12 +446,10 @@ HWTEST_F(ContainerModelTestNg, Test002, TestSize.Level1)
     floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
 
     /**
-     * @tc.steps: step9. Mouse move > mouseMovePopupDistance
+     * @tc.steps: step9. Mouse move > MOUSE_MOVE_POPUP_DISTANCE
      * @tc.expected: Do nothing
      */
-    constexpr double mouseMovePopupDistance = 5.0;
-    
-    Mouse(Offset(0, mouseMovePopupDistance + 1));
+    Mouse(Offset(0, MOUSE_MOVE_POPUP_DISTANCE + 1));
     EXPECT_EQ(floatingLayoutProperty->GetVisibility(), VisibleType::GONE);
 
     /**
@@ -335,17 +460,17 @@ HWTEST_F(ContainerModelTestNg, Test002, TestSize.Level1)
     EXPECT_EQ(floatingLayoutProperty->GetVisibility(), VisibleType::GONE);
 
     /**
-     * @tc.steps: step11. Mouse move <= mouseMovePopupDistance
+     * @tc.steps: step11. Mouse move <= MOUSE_MOVE_POPUP_DISTANCE
      * @tc.expected: float node would VISIBLE
      */
-    Mouse(Offset(0, mouseMovePopupDistance));
+    Mouse(Offset(0, MOUSE_MOVE_POPUP_DISTANCE));
     EXPECT_EQ(floatingLayoutProperty->GetVisibility(), VisibleType::VISIBLE);
 
     /**
-     * @tc.steps: step12. Mouse move <= mouseMovePopupDistance again
+     * @tc.steps: step12. Mouse move <= MOUSE_MOVE_POPUP_DISTANCE again
      * @tc.expected: The CanShowFloatingTitle() is false, Do nothing
      */
-    Mouse(Offset(0, mouseMovePopupDistance));
+    Mouse(Offset(0, MOUSE_MOVE_POPUP_DISTANCE));
     EXPECT_EQ(floatingLayoutProperty->GetVisibility(), VisibleType::VISIBLE);
 
     /**
@@ -357,89 +482,13 @@ HWTEST_F(ContainerModelTestNg, Test002, TestSize.Level1)
 }
 
 /**
- * @tc.name: ContainerModalPatternTest001
- * @tc.desc: Test IsMeasureBoundary and IsAtomicNode.
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerModelTestNg, ContainerModalPatternTest001, TestSize.Level1)
-{
-    auto containerModalPattern = AceType::MakeRefPtr<ContainerModalPattern>();
-    EXPECT_TRUE(containerModalPattern->IsMeasureBoundary());
-    EXPECT_FALSE(containerModalPattern->IsAtomicNode());
-}
-
-/**
- * @tc.name: ContainerModalPatternTest008
- * @tc.desc: Test ChangeFloatingTitle.
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerModelTestNg, ContainerModalPatternTest008, TestSize.Level1)
-{
-    auto containerModalPattern = AceType::MakeRefPtr<ContainerModalPattern>();
-
-    const std::string tag = "test";
-    containerModalPattern->frameNode_ = AceType::MakeRefPtr<FrameNode>(tag, 0, AceType::MakeRefPtr<Pattern>());
-    RefPtr<FrameNode> result = containerModalPattern->GetHost();
-    containerModalPattern->ChangeFloatingTitle(result, true);
-}
-
-/**
- * @tc.name: ContainerModalPatternTest009
- * @tc.desc: Test ChangeTitleButtonIcon.
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerModelTestNg, ContainerModalPatternTest009, TestSize.Level1)
-{
-    std::string tag = "Button";
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, 0, AceType::MakeRefPtr<Pattern>());
-    frameNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
-    ViewStackProcessor::GetInstance()->Push(frameNode);
-    ASSERT_NE(frameNode, nullptr);
-
-    auto containerModalPattern = AceType::MakeRefPtr<ContainerModalPattern>();
-    containerModalPattern->ChangeTitleButtonIcon(
-        frameNode, InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT, true);
-}
-
-/**
- * @tc.name: ContainerModalAccessibilityPropertyGetText001
+ * @tc.name: AccessibilityProperty001
  * @tc.desc: Test GetText of containerModal.
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerModelTestNg, ContainerModalAccessibilityPropertyGetText001, TestSize.Level1)
+HWTEST_F(ContainerModelTestNg, AccessibilityProperty001, TestSize.Level1)
 {
-    auto containerModalNode = AceType::MakeRefPtr<FrameNode>(
-        CONTAINER_MODAL_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
-    ASSERT_NE(containerModalNode, nullptr);
-
-    auto columnNode = AceType::MakeRefPtr<FrameNode>(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    ASSERT_NE(columnNode, nullptr);
-
-    auto titleNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    ASSERT_NE(titleNode, nullptr);
-
-    auto titleLabelNodeOne = AceType::MakeRefPtr<FrameNode>(
-        TITLE_LABEL_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(titleLabelNodeOne, nullptr);
-
-    auto titleLabelNodeTwo = AceType::MakeRefPtr<FrameNode>(
-        TITLE_LABEL_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(titleLabelNodeTwo, nullptr);
-
-    auto textLayoutProperty = titleLabelNodeTwo->GetLayoutProperty<TextLayoutProperty>();
-    ASSERT_NE(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(CONTAINER_MODAL_NODE_TAG);
-
-    titleNode->AddChild(titleLabelNodeOne);
-    titleNode->AddChild(titleLabelNodeTwo);
-    columnNode->AddChild(titleNode);
-    containerModalNode->AddChild(columnNode);
-
-    ContainerModalAccessibilityProperty containerModalAccessibilityProperty;
-    containerModalAccessibilityProperty.SetHost(containerModalNode);
-
-    EXPECT_EQ(containerModalAccessibilityProperty.GetText(), CONTAINER_MODAL_NODE_TAG);
+    CreateContainerModal();
+    EXPECT_EQ(accessibilityProperty_->GetText(), "");
 }
 } // namespace OHOS::Ace::NG

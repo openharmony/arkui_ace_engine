@@ -78,6 +78,9 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         paragraph_->GetRectsForRange(0, wideTextLength, drawObscuredRects);
     }
     textContentModifier_->SetDrawObscuredRects(drawObscuredRects);
+    if (renderContext->GetClipEdge().has_value()) {
+        textContentModifier_->SetClip(renderContext->GetClipEdge().value());
+    }
 
     PropertyChangeFlag flag = 0;
     if (textContentModifier_->NeedMeasureUpdate(flag)) {

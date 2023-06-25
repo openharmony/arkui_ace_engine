@@ -108,10 +108,18 @@ public:
         }
     }
 
+    void ClearUserOnAppear()
+    {
+        if (onAppear_) {
+            onAppear_ = nullptr;
+        }
+    }
+
     void SetOnAppear(std::function<void()>&& onAppear)
     {
         onAppear_ = std::move(onAppear);
     }
+
     void FireOnAppear()
     {
         if (onAppear_) {
@@ -131,14 +139,29 @@ public:
         }
     }
 
+    void ClearUserOnDisAppear()
+    {
+        if (onDisappear_) {
+            onDisappear_ = nullptr;
+        }
+    }
+
     void SetOnDisappear(std::function<void()>&& onDisappear)
     {
         onDisappear_ = std::move(onDisappear);
     }
+
     void FireOnDisappear()
     {
         if (onDisappear_) {
             onDisappear_();
+        }
+    }
+
+    void ClearUserOnAreaChanged()
+    {
+        if (onAreaChanged_) {
+            onAreaChanged_ = nullptr;
         }
     }
 
@@ -262,7 +285,20 @@ public:
     void SetEnabled(bool enabled)
     {
         enabled_ = enabled;
+        developerEnabled_ = enabled;
     }
+
+    void SetEnabledInternal(bool enabled)
+    {
+        enabled_ = enabled;
+    }
+
+    // restore enabled value to what developer sets
+    void RestoreEnabled()
+    {
+        enabled_ = developerEnabled_;
+    }
+
     // get XTS inspector value
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 
@@ -348,6 +384,7 @@ private:
     OnNewDragFunc onDragEnd_;
 
     bool enabled_ { true };
+    bool developerEnabled_ { true };
     std::vector<KeyboardShortcut> keyboardShortcut_;
 
     ACE_DISALLOW_COPY_AND_MOVE(EventHub);

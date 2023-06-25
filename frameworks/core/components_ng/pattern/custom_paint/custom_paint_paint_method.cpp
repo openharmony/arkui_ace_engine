@@ -58,6 +58,10 @@
 #include "core/image/image_provider.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
+#ifdef ENABLE_ROSEN_BACKEND
+#include "pipeline/rs_recording_canvas.h"
+#endif
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double HALF_CIRCLE_ANGLE = 180.0;
@@ -94,6 +98,13 @@ inline T ConvertStrToEnum(const char* key, const LinearMapNode<T>* map, size_t l
     return index != -1 ? map[index].value : defaultValue;
 }
 } // namespace
+
+void CustomPaintPaintMethod::UpdateRecordingCanvas(float width, float height)
+{
+    rsRecordingCanvas_ = std::make_shared<OHOS::Rosen::RSRecordingCanvas>(width, height);
+    skCanvas_ = std::static_pointer_cast<SkCanvas>(rsRecordingCanvas_);
+    contentModifier_->UpdateCanvas(rsRecordingCanvas_);
+}
 
 bool CustomPaintPaintMethod::HasShadow() const
 {
@@ -553,14 +564,12 @@ void CustomPaintPaintMethod::FillRect(PaintWrapper* paintWrapper, const Rect& re
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         skCanvas_->drawRect(skRect, paint);
     } else {
-        InitPaintBlend(cachePaint_);
-        cacheCanvas_->drawRect(skRect, paint);
-#ifndef NEW_SKIA
-        skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
-#else
-        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, options, &cachePaint_);
-#endif
-        cacheBitmap_.eraseColor(0);
+        SkPaint compositeOperationpPaint;
+        InitPaintBlend(compositeOperationpPaint);
+        skCanvas_->saveLayer(
+            SkRect::MakeXYWH(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height()), &compositeOperationpPaint);
+        skCanvas_->drawRect(skRect, paint);
+        skCanvas_->restore();
     }
 }
 
@@ -591,14 +600,12 @@ void CustomPaintPaintMethod::StrokeRect(PaintWrapper* paintWrapper, const Rect& 
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         skCanvas_->drawRect(skRect, paint);
     } else {
-        InitPaintBlend(cachePaint_);
-        cacheCanvas_->drawRect(skRect, paint);
-#ifndef NEW_SKIA
-        skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
-#else
-        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, options, &cachePaint_);
-#endif
-        cacheBitmap_.eraseColor(0);
+        SkPaint compositeOperationpPaint;
+        InitPaintBlend(compositeOperationpPaint);
+        skCanvas_->saveLayer(
+            SkRect::MakeXYWH(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height()), &compositeOperationpPaint);
+        skCanvas_->drawRect(skRect, paint);
+        skCanvas_->restore();
     }
 }
 
@@ -683,14 +690,12 @@ void CustomPaintPaintMethod::Fill(PaintWrapper* paintWrapper)
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         skCanvas_->drawPath(skPath_, paint);
     } else {
-        InitPaintBlend(cachePaint_);
-        cacheCanvas_->drawPath(skPath_, paint);
-#ifndef NEW_SKIA
-        skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
-#else
-        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, options, &cachePaint_);
-#endif
-        cacheBitmap_.eraseColor(0);
+        SkPaint compositeOperationpPaint;
+        InitPaintBlend(compositeOperationpPaint);
+        skCanvas_->saveLayer(
+            SkRect::MakeXYWH(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height()), &compositeOperationpPaint);
+        skCanvas_->drawPath(skPath_, paint);
+        skCanvas_->restore();
     }
 }
 
@@ -732,14 +737,12 @@ void CustomPaintPaintMethod::Path2DFill(const OffsetF& offset)
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         skCanvas_->drawPath(skPath2d_, paint);
     } else {
-        InitPaintBlend(cachePaint_);
-        cacheCanvas_->drawPath(skPath2d_, paint);
-#ifndef NEW_SKIA
-        skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
-#else
-        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, options, &cachePaint_);
-#endif
-        cacheBitmap_.eraseColor(0);
+        SkPaint compositeOperationpPaint;
+        InitPaintBlend(compositeOperationpPaint);
+        skCanvas_->saveLayer(
+            SkRect::MakeXYWH(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height()), &compositeOperationpPaint);
+        skCanvas_->drawPath(skPath2d_, paint);
+        skCanvas_->restore();
     }
 }
 
@@ -766,14 +769,12 @@ void CustomPaintPaintMethod::Stroke(PaintWrapper* paintWrapper)
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         skCanvas_->drawPath(skPath_, paint);
     } else {
-        InitPaintBlend(cachePaint_);
-        cacheCanvas_->drawPath(skPath_, paint);
-#ifndef NEW_SKIA
-        skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
-#else
-        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, options, &cachePaint_);
-#endif
-        cacheBitmap_.eraseColor(0);
+        SkPaint compositeOperationpPaint;
+        InitPaintBlend(compositeOperationpPaint);
+        skCanvas_->saveLayer(
+            SkRect::MakeXYWH(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height()), &compositeOperationpPaint);
+        skCanvas_->drawPath(skPath_, paint);
+        skCanvas_->restore();
     }
 }
 
@@ -808,14 +809,12 @@ void CustomPaintPaintMethod::Path2DStroke(const OffsetF& offset)
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         skCanvas_->drawPath(skPath2d_, paint);
     } else {
-        InitPaintBlend(cachePaint_);
-        cacheCanvas_->drawPath(skPath2d_, paint);
-#ifndef NEW_SKIA
-        skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
-#else
-        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, options, &cachePaint_);
-#endif
-        cacheBitmap_.eraseColor(0);
+        SkPaint compositeOperationpPaint;
+        InitPaintBlend(compositeOperationpPaint);
+        skCanvas_->saveLayer(
+            SkRect::MakeXYWH(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height()), &compositeOperationpPaint);
+        skCanvas_->drawPath(skPath2d_, paint);
+        skCanvas_->restore();
     }
 }
 

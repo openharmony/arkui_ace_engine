@@ -31,7 +31,7 @@ void ScrollableActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, c
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {
     for (const auto& [axis, event] : scrollableEvents_) {
-        if (!event->GetEnable()) {
+        if (!event || !event->GetEnable()) {
             continue;
         }
         const auto& scrollable = event->GetScrollable();
@@ -60,6 +60,7 @@ void ScrollableActuator::AddScrollEdgeEffect(const Axis& axis, RefPtr<ScrollEdge
 {
     CHECK_NULL_VOID_NOLOG(effect);
     auto scrollable = scrollableEvents_[axis];
+    CHECK_NULL_VOID_NOLOG(scrollable);
     effect->SetScrollable(scrollable->GetScrollable());
     effect->InitialEdgeEffect();
     scrollEffects_[axis] = effect;

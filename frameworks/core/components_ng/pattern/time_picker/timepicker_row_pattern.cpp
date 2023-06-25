@@ -74,11 +74,11 @@ void TimePickerRowPattern::SetButtonIdeaSize()
         auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
         buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
+        buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(PRESS_RADIUS));
         buttonLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx()), CalcLength(height - PRESS_INTERVAL)));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        buttonConfirmRenderContext->UpdateBorderRadius({ PRESS_RADIUS, PRESS_RADIUS, PRESS_RADIUS, PRESS_RADIUS });
         buttonNode->MarkModifyDone();
         buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
@@ -158,16 +158,17 @@ void TimePickerRowPattern::CreateAmPmNode()
         amPmColumnNode->MountToParent(stackAmPmNode);
         auto layoutProperty = stackAmPmNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
         stackAmPmNode->MountToParent(host, 0);
         if (SetAmPmButtonIdeaSize() > 0) {
             auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
             buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
             buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
+            buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(PRESS_RADIUS));
             buttonLayoutProperty->UpdateUserDefinedIdealSize(
                 CalcSize(CalcLength(SetAmPmButtonIdeaSize()), CalcLength(heigth - PRESS_INTERVAL)));
             auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
             buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-            buttonConfirmRenderContext->UpdateBorderRadius({ PRESS_RADIUS, PRESS_RADIUS, PRESS_RADIUS, PRESS_RADIUS });
             buttonNode->MarkModifyDone();
             buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
@@ -619,6 +620,7 @@ void TimePickerRowPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(stackChild);
     auto pickerChild = DynamicCast<FrameNode>(stackChild->GetLastChild());
     CHECK_NULL_VOID(pickerChild);
+    auto columnWidth = pickerChild->GetGeometryNode()->GetFrameSize().Width();
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
@@ -632,10 +634,13 @@ void TimePickerRowPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
                    PRESS_INTERVAL.ConvertToPx() * 2;
     auto centerY =
         (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / 2 + PRESS_INTERVAL.ConvertToPx();
-
-    paintRect.SetRect(RectF(centerX, centerY, (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * 2,
-        dividerSpacing - PRESS_INTERVAL.ConvertToPx() * 2));
-
+    float piantRectWidth = (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * 2;
+    float piantRectHeight = dividerSpacing - PRESS_INTERVAL.ConvertToPx() * 2;
+    if (piantRectWidth > columnWidth) {
+        piantRectWidth = columnWidth;
+        centerX = focusKeyID_ * columnWidth;
+    }
+    paintRect.SetRect(RectF(centerX, centerY, piantRectWidth, piantRectHeight));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),

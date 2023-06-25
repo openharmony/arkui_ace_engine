@@ -117,6 +117,8 @@ HWTEST_F(ScrollableEventTestNg, ScrollableEventCreateTest001, TestSize.Level1)
      * @tc.steps: step4. Add ScrollEdgeEffect when ScrollEdgeEffect is not nullptr.
      * @tc.expected: Add ScrollEdgeEffect to scrollEffects_ which size will increased by one
      */
+    auto scrollableEvent = AceType::MakeRefPtr<ScrollableEvent>(SCROLLABLE_EVENT_AXIS);
+    scrollableActuator->AddScrollableEvent(scrollableEvent);
     scrollableActuator->AddScrollEdgeEffect(SCROLLABLE_EVENT_AXIS, scrollEdgeEffect);
     EXPECT_EQ(scrollableActuator->scrollEffects_.size(), SCROLL_EFFECTS_SIZE_1);
 }
@@ -154,6 +156,8 @@ HWTEST_F(ScrollableEventTestNg, ScrollableEventRemoveScrollEdgeEffectTest002, Te
      * @tc.steps: step4. Add ScrollEdgeEffect.
      * @tc.expected: Add ScrollEdgeEffect to scrollEffects_ which size will not be empty.
      */
+    auto scrollableEvent = AceType::MakeRefPtr<ScrollableEvent>(SCROLLABLE_EVENT_AXIS);
+    scrollableActuator->AddScrollableEvent(scrollableEvent);
     scrollableActuator->AddScrollEdgeEffect(SCROLLABLE_EVENT_AXIS, scrollEdgeEffect);
     EXPECT_EQ(scrollableActuator->scrollEffects_.size(), SCROLL_EFFECTS_SIZE_1);
 

@@ -38,9 +38,7 @@ class ObservedPropertyObjectPU<T extends Object> extends ObservedPropertyObjectA
 
   aboutToBeDeleted(unsubscribeMe?: IPropertySubscriber) {
     this.unsubscribeWrappedObject();
-    if (unsubscribeMe) {
-      this.unlinkSuscriber(unsubscribeMe.id__());
-    }
+    this.removeSubscriber(unsubscribeMe);
     super.aboutToBeDeleted();
   }
 

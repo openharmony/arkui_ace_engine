@@ -33,8 +33,7 @@ constexpr uint32_t COLOR_WHITE = 0xffffffff;
 
 class LifecycleListener : public Rosen::ILifecycleListener {
 public:
-    explicit LifecycleListener(const WeakPtr<WindowPattern>& windowPattern)
-        : windowPattern_(windowPattern) {}
+    explicit LifecycleListener(const WeakPtr<WindowPattern>& windowPattern) : windowPattern_(windowPattern) {}
     virtual ~LifecycleListener() = default;
 
     void OnConnect() override
@@ -222,12 +221,10 @@ bool WindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(dirty, false);
     auto geometryNode = dirty->GetGeometryNode();
     auto windowRect = geometryNode->GetFrameRect();
-    Rosen::WSRect rect = {
-        .posX_ = std::round(windowRect.GetX()),
+    Rosen::WSRect rect = { .posX_ = std::round(windowRect.GetX()),
         .posY_ = std::round(windowRect.GetY()),
         .width_ = std::round(windowRect.Width()),
-        .height_ = std::round(windowRect.Height())
-    };
+        .height_ = std::round(windowRect.Height()) };
 
     CHECK_NULL_RETURN(session_, false);
     session_->UpdateRect(rect, Rosen::SizeChangeReason::UNDEFINED);
@@ -265,5 +262,17 @@ bool WindowPattern::CreatePersistentNode()
     imageLayoutProperty->UpdateImageFit(ImageFit::COVER);
     startingNode_->MarkModifyDone();
     return true;
+}
+
+void WindowPattern::DispatchKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferKeyEventForConsumed(keyEvent, isConsumed);
+}
+
+void WindowPattern::DisPatchFocusActiveEvent(bool isFocusActive)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferFocusActiveEvent(isFocusActive);
 }
 } // namespace OHOS::Ace::NG

@@ -41,11 +41,13 @@ build_component("xcomponent") {
 
     deps = [
       "//foundation/graphic/graphic_2d:libsurface",
-      "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
       "//foundation/window/window_manager/utils:libwmutil",
-      "//foundation/window/window_manager/wm:libwm",
     ]
 
-    external_deps = [ "ipc:ipc_core" ]
+    external_deps = [
+      "graphic_standard:librender_service_client",
+      "ipc:ipc_core",
+      "window_manager:libwm",
+    ]
   }
 }

@@ -87,7 +87,7 @@ public:
     void CloseDialog(int32_t instanceId) override;
     const RefPtr<NG::OverlayManager> GetOverlayManager() override;
 
-    int32_t GetChildContainerId() const
+    int32_t GetChildContainerId() const override
     {
         return childContainerId_;
     }
@@ -108,6 +108,8 @@ public:
 
     // Gets parent window's size and offset
     Rect GetParentWindowRect() const override;
+
+    void RequestFocus() override;
 
 private:
     RefPtr<StackElement> GetStack();

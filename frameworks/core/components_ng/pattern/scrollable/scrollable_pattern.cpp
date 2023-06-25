@@ -274,16 +274,10 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
             scrollBar_->SetPositionMode(PositionMode::BOTTOM);
         }
         RegisterScrollBarEventTask();
-        if (displayMode == DisplayMode::AUTO) {
-            scrollBar_->OnScrollEnd();
-        }
     } else if (scrollBar_->GetDisplayMode() != displayMode) {
         scrollBar_->SetDisplayMode(displayMode);
     } else {
         return;
-    }
-    if (scrollBar_) {
-        UpdateScrollBarOffset();
     }
 }
 

@@ -34,23 +34,28 @@
 #include "core/gestures/gesture_info.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-#include "core/common/udmf/udmf_client.h"
 #include "core/common/ace_engine_ext.h"
+#include "core/common/udmf/udmf_client.h"
 #endif
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t API_PROTEXTION_GREATER_NINE = 9;
+};
 
 void TextPattern::OnAttachToFrameNode()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToFrame(true);
+    if (PipelineContext::GetCurrentContext() &&
+        PipelineContext::GetCurrentContext()->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->GetRenderContext()->SetClipToFrame(true);
+    }
 }
 
 void TextPattern::OnDetachFromFrameNode(FrameNode* node)
 {
     CloseSelectOverlay();
-    ResetSelection();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     if (HasSurfaceChangedCallback()) {
@@ -302,7 +307,7 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
     selectInfo.onClose = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandleOnOverlayClose();
+        pattern->showSelectOverlay_ = false;
     };
 
     if (!menuOptionItems_.empty()) {
@@ -327,11 +332,6 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
         auto end = textSelector_.GetTextEnd();
         selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
     }
-}
-
-void TextPattern::HandleOnOverlayClose()
-{
-    ResetSelection();
 }
 
 void TextPattern::HandleOnSelectAll()
@@ -365,7 +365,12 @@ void TextPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
         pattern->HandleLongPress(info);
     };
     longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
-    gestureHub->SetLongPressEvent(longPressEvent_);
+
+    constexpr int32_t longPressDelay = 600;
+    // Default time is 500, used by drag event. Drag event would trigger if text is selected, but we want
+    // it to only trigger on the second long press, after selection. Therefore, long press delay of Selection needs to
+    // be slightly longer to ensure that order.
+    gestureHub->SetLongPressEvent(longPressEvent_, false, false, longPressDelay);
 
     auto onTextSelectorChange = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
@@ -547,17 +552,12 @@ bool TextPattern::IsDraggable(const Offset& offset)
         // Determine if the pan location is in the selected area
         std::vector<Rect> selectedRects;
         paragraph_->GetRectsForRange(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), selectedRects);
-        if (selectedRects.empty()) {
-            return false;
-        } else {
-            auto panOffset = OffsetF(offset.GetX(), offset.GetY()) - contentRect_.GetOffset() +
-                             OffsetF(0.0, std::min(baselineOffset_, 0.0f));
-            for (const auto& selectedRect : selectedRects) {
-                if (selectedRect.IsInRegion(Point(panOffset.GetX(), panOffset.GetY()))) {
-                    return true;
-                }
+        auto panOffset = OffsetF(offset.GetX(), offset.GetY()) - contentRect_.GetOffset() +
+                         OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+        for (const auto& selectedRect : selectedRects) {
+            if (selectedRect.IsInRegion(Point(panOffset.GetX(), panOffset.GetY()))) {
+                return true;
             }
-            return false;
         }
     }
     return false;
@@ -637,8 +637,8 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
         auto pattern = wk.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (pattern->BetweenSelectedPosition(point)) {
-            TextDragPattern::CreateDragNode(pattern->GetHost());
-            FrameNode::ProcessOffscreenNode(pattern->GetDragNode());
+            pattern->dragNode_ = TextDragPattern::CreateDragNode(pattern->GetHost());
+            FrameNode::ProcessOffscreenNode(pattern->dragNode_);
         }
     };
 }
@@ -706,10 +706,16 @@ void TextPattern::OnModifyDone()
 
     if (CheckNeedMeasure(textLayoutProperty->GetPropertyChangeFlag())) {
         // measure flag changed, reset paragraph.
-        LOGI("OnModifyDone paragraph_.Reset()");
+        LOGD("reset on modify done!");
         paragraph_.Reset();
     }
 
+    if (!(PipelineContext::GetCurrentContext() &&
+            PipelineContext::GetCurrentContext()->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE)) {
+        bool shouldClipToContent =
+            textLayoutProperty->GetTextOverflow().value_or(TextOverflow::CLIP) == TextOverflow::CLIP;
+        host->GetRenderContext()->SetClipToFrame(shouldClipToContent);
+    }
     std::string textCache = textForDisplay_;
     textForDisplay_ = textLayoutProperty->GetContent().value_or("");
     if (textCache != textForDisplay_) {
@@ -780,7 +786,7 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         LOGD("on layout process, just return");
         return false;
     }
-    LOGI("paragraph_ = textLayoutAlgorithm->GetParagraph()");
+    LOGD("on layout process, continue");
     paragraph_ = textLayoutAlgorithm->GetParagraph();
     baselineOffset_ = textLayoutAlgorithm->GetBaselineOffset();
     contentRect_ = dirty->GetGeometryNode()->GetContentRect();
@@ -813,7 +819,7 @@ void TextPattern::BeforeCreateLayoutWrapper()
     }
 
     if (paragraph_) {
-        LOGI("BeforeCreateLayoutWrapper paragraph_.Reset()");
+        LOGD("reset before create layoutwrapper");
         paragraph_.Reset();
     }
     spanItemChildren_.clear();

@@ -40,6 +40,7 @@ ohos_unittest("select_overlay_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/text/mock_text_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/text/mock_text_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/image/mock/mock_image_pattern.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_engine.cpp",
     "$ace_root/test/unittest/core/pipeline/mock_overlay_manager.cpp",
 
     # other
@@ -70,7 +71,6 @@ ohos_unittest("select_overlay_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/menu/multi_menu_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/sub_menu_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_layout_algorithm.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/option/option_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/option/option_layout_algorithm.cpp",

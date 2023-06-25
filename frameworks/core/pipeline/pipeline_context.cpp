@@ -2142,46 +2142,8 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
             break;
         }
         case WindowSizeChangeReason::ROTATION: {
-#ifdef ENABLE_ROSEN_BACKEND
-            if (rsTransaction) {
-                FlushMessages();
-                rsTransaction->Begin();
-            }
-#endif
-            LOGD("PipelineContext::Root node ROTATION animation, width = %{private}d, height = %{private}d", width,
-                height);
-            AnimationOption option;
-            constexpr int32_t duration = 600;
-            option.SetDuration(duration);
-            auto curve = MakeRefPtr<CubicCurve>(0.2, 0.0, 0.2, 1.0); // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
-            option.SetCurve(curve);
-            Animate(option, curve, [width, height, this]() {
-                SetRootSizeWithWidthHeight(width, height);
-                FlushLayout();
-            }, [weak = AceType::WeakClaim(this)]() {
-                auto pipeline = weak.Upgrade();
-                if (pipeline == nullptr) {
-                    return;
-                }
-                pipeline->rotationAnimationCount_--;
-                if (pipeline->rotationAnimationCount_ < 0) {
-                    LOGE("PipelineContext::Root node ROTATION animation callback"
-                        "rotationAnimationCount Invalid %{public}d", pipeline->rotationAnimationCount_);
-                }
-                if (pipeline->rotationAnimationCount_ == 0) {
-#ifdef ENABLE_ROSEN_BACKEND
-                    // to improve performance, duration rotation animation, draw text as bitmap
-                    Rosen::RSSystemProperties::SetDrawTextAsBitmap(false);
-#endif
-                }
-            });
-#ifdef ENABLE_ROSEN_BACKEND
-            // to improve performance, duration rotation animation, draw text as bitmap
-            Rosen::RSSystemProperties::SetDrawTextAsBitmap(true);
-            if (rsTransaction) {
-                rsTransaction->Commit();
-            }
-#endif
+            SetRootSizeWithWidthHeight(width, height);
+            FlushLayout();
             break;
         }
         case WindowSizeChangeReason::DRAG_START:
@@ -3378,6 +3340,7 @@ void PipelineContext::AddKeyFrame(float fraction, const std::function<void()>& p
 
 void PipelineContext::SaveExplicitAnimationOption(const AnimationOption& option)
 {
+    LOGD("Save AnimationOption");
     explicitAnimationOption_ = option;
 }
 

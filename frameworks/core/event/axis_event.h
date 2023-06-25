@@ -22,10 +22,15 @@
 #include "base/memory/ace_type.h"
 #include "core/event/ace_events.h"
 
+namespace OHOS::MMI {
+class PointerEvent;
+} // namespace OHOS::MMI
+
 namespace OHOS::Ace {
 
 constexpr double MOUSE_WHEEL_DEGREES = 15.0;
 constexpr double DP_PER_LINE_DESKTOP = 40.0;
+constexpr Dimension LINE_HEIGHT_DESKTOP = 21.0_vp;
 constexpr int32_t LINE_NUMBER_DESKTOP = 3;
 constexpr int32_t DP_PER_LINE_PHONE = 64;
 constexpr int32_t LINE_NUMBER_PHONE = 1;
@@ -61,6 +66,8 @@ struct AxisEvent final {
     TimeStamp time;
     int64_t deviceId = 0;
     SourceType sourceType = SourceType::NONE;
+    SourceTool sourceTool = SourceTool::UNKNOWN;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent;
 
     AxisEvent CreateScaleEvent(float scale) const
     {
@@ -74,7 +81,9 @@ struct AxisEvent final {
                 .action = action,
                 .time = time,
                 .deviceId = deviceId,
-                .sourceType = sourceType };
+                .sourceType = sourceType,
+                .sourceTool = sourceTool,
+                .pointerEvent = pointerEvent };
         }
         return { .id = id,
             .x = x / scale,
@@ -85,7 +94,9 @@ struct AxisEvent final {
             .action = action,
             .time = time,
             .deviceId = deviceId,
-            .sourceType = sourceType };
+            .sourceType = sourceType,
+            .sourceTool = sourceTool,
+            .pointerEvent = pointerEvent };
     }
 
     Offset GetOffset() const

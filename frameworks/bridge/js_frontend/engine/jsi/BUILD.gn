@@ -119,7 +119,7 @@ template("js_engine_ark") {
     } else if (target_cpu == "arm") {
       defines += [ "APP_USE_ARM" ]
     }
-    deps += [ "//foundation/arkui/napi:ace_napi_ark" ]
+    external_deps += [ "napi:ace_napi_ark" ]
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
     if (is_cross_platform_build) {

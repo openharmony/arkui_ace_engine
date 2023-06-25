@@ -60,9 +60,7 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
         return;
     }
 
-    auto obj = JSRef<JSObject>::Cast(info[0]);
-    // Parse want
-    auto want = JSRef<JSObject>::Cast(obj->GetProperty("want"));
+    auto want = JSRef<JSObject>::Cast(info[0]);
     if (want->GetProperty("bundleName")->IsNull() || want->GetProperty("bundleName")->IsUndefined() ||
         want->GetProperty("abilityName")->IsNull() || want->GetProperty("abilityName")->IsUndefined()) {
         return;

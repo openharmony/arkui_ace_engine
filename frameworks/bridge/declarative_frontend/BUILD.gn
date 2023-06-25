@@ -237,6 +237,7 @@ template("declarative_js_engine") {
       "jsview/js_render_image.cpp",
       "jsview/js_rendering_context.cpp",
       "jsview/js_rendering_context_settings.cpp",
+      "jsview/js_richeditor.cpp",
       "jsview/js_row.cpp",
       "jsview/js_row_split.cpp",
       "jsview/js_scope_util.cpp",
@@ -344,6 +345,7 @@ template("declarative_js_engine") {
       "jsview/models/rect_model_impl.cpp",
       "jsview/models/refresh_model_impl.cpp",
       "jsview/models/rendering_context_model_impl.cpp",
+      "jsview/models/richeditor_model_impl.cpp",
       "jsview/models/row_model_impl.cpp",
       "jsview/models/scroll_bar_model_impl.cpp",
       "jsview/models/scroll_model_impl.cpp",
@@ -382,7 +384,8 @@ template("declarative_js_engine") {
     }
 
     external_deps = []
-    if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
+    if (defined(config.enable_drag_framework) && config.enable_drag_framework &&
+        defined(global_parts_info.distributeddatamgr_udmf)) {
       external_deps += [
         "udmf:udmf_client",
         "udmf:udmf_data_napi",
@@ -462,10 +465,11 @@ template("declarative_js_engine") {
       ]
     }
 
-    if (defined(config.effect_view_support) && config.effect_view_support) {
+    if (defined(config.effect_component_support) &&
+        config.effect_component_support) {
       sources += [
-        "jsview/js_effect_view.cpp",
-        "jsview/models/effect_view_model_impl.cpp",
+        "jsview/js_effect_component.cpp",
+        "jsview/models/effect_component_model_impl.cpp",
       ]
     }
 
@@ -676,7 +680,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_polygon.cpp",
       "jsview/js_polyline.cpp",
       "jsview/js_progress.cpp",
-      "jsview/js_qrcode.cpp",
       "jsview/js_radio.cpp",
       "jsview/js_rating.cpp",
       "jsview/js_rect.cpp",
@@ -726,6 +729,10 @@ template("declarative_js_engine_ng") {
     sources += [
       "$ace_root/frameworks/bridge/js_frontend/engine/common/js_engine.cpp",
     ]
+
+    if (!defined(config.use_components_lib) || !config.use_components_lib) {
+      sources += [ "jsview/js_qrcode.cpp" ]
+    }
 
     if (defined(config.video_components_support) &&
         config.video_components_support) {
@@ -816,7 +823,8 @@ template("declarative_js_engine_ng") {
       ":gen_obj_src_js_uicontext",
     ]
 
-    if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
+    if (defined(config.enable_drag_framework) && config.enable_drag_framework &&
+        defined(global_parts_info.distributeddatamgr_udmf)) {
       external_deps += [
         "udmf:udmf_client",
         "udmf:udmf_data_napi",

@@ -24,15 +24,15 @@
 #include "core/components/texttimer/texttimer_controller.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/texttimer/text_timer_accessibility_property.h"
 #include "core/components_ng/pattern/texttimer/text_timer_event_hub.h"
+#include "core/components_ng/pattern/texttimer/text_timer_layout_algorithm.h"
 #include "core/components_ng/pattern/texttimer/text_timer_layout_property.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
-class TextTimerPattern : public TextPattern {
-    DECLARE_ACE_TYPE(TextTimerPattern, TextPattern);
+class TextTimerPattern : public Pattern {
+    DECLARE_ACE_TYPE(TextTimerPattern, Pattern);
 
 public:
     TextTimerPattern();
@@ -41,6 +41,11 @@ public:
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<TextTimerLayoutProperty>();
+    }
+
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return MakeRefPtr<TextTimerLayoutAlgorithm>();
     }
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
@@ -58,6 +63,14 @@ public:
         return textTimerController_;
     }
 
+    int32_t GetTextId()
+    {
+        if (!textId_.has_value()) {
+            textId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return textId_.value();
+    }
+
 private:
     void OnModifyDone() override;
     void Tick(uint64_t duration);
@@ -65,21 +78,30 @@ private:
 
     void InitTimerDisplay();
     void UpdateTextTimer(uint32_t elapsedTime);
-    void FireChangeEvent() const;
+    void FireChangeEvent();
 
     void HandleStart();
     void HandlePause();
     void HandleReset();
 
+    static void UpdateTextLayoutProperty(
+        RefPtr<TextTimerLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
     std::string GetFormat() const;
     bool GetIsCountDown() const;
     double GetInputCount() const;
+    RefPtr<FrameNode> GetTextNode();
+    void RegisterVisibleAreaChangeCallback();
+    void OnVisibleAreaChange(bool visible);
 
     RefPtr<TextTimerController> textTimerController_;
     RefPtr<Scheduler> scheduler_;
+    RefPtr<FrameNode> textNode_;
     uint64_t elapsedTime_ = 0; // millisecond.
+    uint64_t lastReportingTime_ = 0;
     bool isCountDown_ = false;
     double inputCount_ = 0.0;
+    std::optional<int32_t> textId_;
+    bool isRegisteredAreaCallback_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextTimerPattern);
 };
