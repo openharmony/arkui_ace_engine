@@ -26,7 +26,8 @@ public:
     using JsCallback = std::function<void(std::shared_ptr<Media::PixelMap>, int32_t)>;
 
     static void Get(const std::string& componentId, JsCallback&& callback);
-    static void Create(const RefPtr<AceType>& customNode, JsCallback&& callback);
+    // add delay to ensure Rosen has finished rendering
+    static void Create(const RefPtr<AceType>& customNode, JsCallback&& callback, const int32_t delayTime = 300);
 
 private:
     static std::shared_ptr<Rosen::RSNode> GetRsNode(const RefPtr<FrameNode>& node);
