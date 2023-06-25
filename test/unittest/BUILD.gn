@@ -197,6 +197,7 @@ ohos_source_set("ace_components_property") {
     "$ace_root/frameworks/core/components_ng/property/grid_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",
     "$ace_root/frameworks/core/components_ng/property/property.cpp",
+    "$ace_root/frameworks/core/components_ng/property/safe_area_insets.cpp",
   ]
   configs = [ ":ace_unittest_config" ]
 }

@@ -171,7 +171,7 @@ public:
     explicit AvoidAreaChangedListener(int32_t instanceId) : instanceId_(instanceId) {}
     ~AvoidAreaChangedListener() = default;
 
-    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
+    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override
     {
         LOGI("UIContent::OnAvoidAreaChanged type:%{public}d, avoidArea:x:%{public}d, y:%{public}d, "
              "width:%{public}d, height%{public}d",
@@ -179,37 +179,18 @@ public:
             (int32_t)avoidArea.topRect_.height_);
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID_NOLOG(container);
-        auto pipelineContext = container->GetPipelineContext();
-        CHECK_NULL_VOID_NOLOG(pipelineContext);
+        auto pipeline = container->GetPipelineContext();
+        CHECK_NULL_VOID_NOLOG(pipeline);
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID_NOLOG(taskExecutor);
-        Rect leftRect(static_cast<double>(avoidArea.leftRect_.posX_), static_cast<double>(avoidArea.leftRect_.posY_),
-            static_cast<double>(avoidArea.leftRect_.width_), static_cast<double>(avoidArea.leftRect_.height_));
-        Rect topRect(static_cast<double>(avoidArea.topRect_.posX_), static_cast<double>(avoidArea.topRect_.posY_),
-            static_cast<double>(avoidArea.topRect_.width_), static_cast<double>(avoidArea.topRect_.height_));
-        Rect rightRect(static_cast<double>(avoidArea.rightRect_.posX_), static_cast<double>(avoidArea.rightRect_.posY_),
-            static_cast<double>(avoidArea.rightRect_.width_), static_cast<double>(avoidArea.rightRect_.height_));
-        Rect bottomRect(static_cast<double>(avoidArea.bottomRect_.posX_),
-            static_cast<double>(avoidArea.bottomRect_.posY_), static_cast<double>(avoidArea.bottomRect_.width_),
-            static_cast<double>(avoidArea.bottomRect_.height_));
-        SafeAreaEdgeInserts safeArea(leftRect, topRect, rightRect, bottomRect);
-        if (type == OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM) {
-            CHECK_NULL_VOID_NOLOG(safeArea != pipelineContext->GetSystemSafeArea());
-            pipelineContext->SetSystemSafeArea(safeArea);
-        } else if (type == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) {
-            CHECK_NULL_VOID_NOLOG(safeArea != pipelineContext->GetCutoutSafeArea());
-            pipelineContext->SetCutoutSafeArea(safeArea);
-        } else {
-            return;
-        }
-
+        auto safeArea = ConvertAvoidArea(avoidArea);
         taskExecutor->PostTask(
-            [container, instanceId = instanceId_] {
-                CHECK_NULL_VOID(container);
-                ContainerScope scope(instanceId);
-                auto context = container->GetPipelineContext();
-                CHECK_NULL_VOID_NOLOG(context);
-                context->ResetViewSafeArea();
+            [pipeline, safeArea, type] {
+                if (type == OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM) {
+                    pipeline->UpdateSystemSafeArea(safeArea);
+                } else if (type == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) {
+                    pipeline->UpdateCutoutSafeArea(safeArea);
+                }
             },
             TaskExecutor::TaskType::UI);
     }
@@ -1264,18 +1245,24 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                 nativeEngine->CreateReference(storage, 1), context->GetBindingObject()->Get<NativeReference>());
         }
     }
-    const static int32_t PLATFORM_VERSION_TEN = 10;
-    if (pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && pipeline->GetIsAppWindow()) {
-        avoidAreaChangedListener_ = new AvoidAreaChangedListener(instanceId_);
-        window_->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
-        pipeline->SetSystemSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM));
-        pipeline->SetCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
-        pipeline->AppBarAdaptToSafeArea();
-    }
+
+    InitializeSafeArea(container);
 
     LayoutInspector::SetCallback(instanceId_);
 
     LOGI("Initialize UIContentImpl end.");
+}
+
+void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& container)
+{
+    constexpr static int32_t PLATFORM_VERSION_TEN = 10;
+    auto pipeline = container->GetPipelineContext();
+    if (pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && pipeline->GetIsAppWindow()) {
+        avoidAreaChangedListener_ = new AvoidAreaChangedListener(instanceId_);
+        window_->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
+        pipeline->UpdateSystemSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM));
+        pipeline->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
+    }
 }
 
 void UIContentImpl::Foreground()
@@ -1507,7 +1494,6 @@ void UIContentImpl::SetIgnoreViewSafeArea(bool ignoreViewSafeArea)
             auto pipelineContext = container->GetPipelineContext();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->SetIgnoreViewSafeArea(ignoreSafeArea);
-            pipelineContext->ResetViewSafeArea();
         },
         TaskExecutor::TaskType::UI);
 }

@@ -269,6 +269,7 @@ public:
         std::function<void(const RefPtr<NG::CustomAnimatableArithmetic>&)>& onCallbackEvent) = 0;
     virtual void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
         RefPtr<NG::CustomAnimatableArithmetic>& value) = 0;
+    virtual void UpdateSafeAreaExpandOpts(const NG::SafeAreaExpandOpts& opts) = 0;
 private:
     static std::unique_ptr<ViewAbstractModel> instance_;
     static std::mutex mutex_;
