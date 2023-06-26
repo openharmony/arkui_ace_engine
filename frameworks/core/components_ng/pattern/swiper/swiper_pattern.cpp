@@ -934,9 +934,18 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
     if (!IsLoop() && IsOutOfBoundary() && edgeEffect == EdgeEffect::SPRING) {
         LOGD("Swiper has reached boundary, can't drag any more, effect spring.");
         auto visibleSize = CalculateVisibleSize();
-        float friction = currentOffset_ > 0
-                             ? CalculateFriction(itemPosition_.begin()->second.startPos / visibleSize)
-                             : CalculateFriction((visibleSize - itemPosition_.rbegin()->second.endPos) / visibleSize);
+        if (LessOrEqual(visibleSize, 0.0)) {
+            return;
+        }
+        float friction = 0.0f;
+        if (GetDisplayCount() >= TotalCount()) {
+            friction = currentOffset_ > 0 ? CalculateFriction(itemPosition_.begin()->second.startPos / visibleSize)
+                                          : CalculateFriction(-itemPosition_.begin()->second.startPos / visibleSize);
+        } else {
+            friction = currentOffset_ > 0
+                           ? CalculateFriction(itemPosition_.begin()->second.startPos / visibleSize)
+                           : CalculateFriction((visibleSize - itemPosition_.rbegin()->second.endPos) / visibleSize);
+        }
         currentDelta_ = currentDelta_ - friction * offset;
         if (isDragging_) {
             currentIndexOffset_ += friction * offset;
@@ -1260,11 +1269,19 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     constexpr float SPRING_SCROLL_DAMPING = 15.55635f;
     const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
         AceType::MakeRefPtr<SpringProperty>(SPRING_SCROLL_MASS, SPRING_SCROLL_STIFFNESS, SPRING_SCROLL_DAMPING);
-    ExtentPair extentPair = ExtentPair(currentOffset_ + mainSize - itemPosition_.rbegin()->second.endPos,
+    ExtentPair extentPair = ExtentPair(GetDisplayCount() >= TotalCount()
+                                           ? currentOffset_ - itemPosition_.begin()->second.startPos
+                                           : currentOffset_ + mainSize - itemPosition_.rbegin()->second.endPos,
         currentOffset_ - itemPosition_.begin()->second.startPos);
-    float friction = currentOffset_ > 0
-                         ? CalculateFriction(itemPosition_.begin()->second.startPos / mainSize)
-                         : CalculateFriction((mainSize - itemPosition_.rbegin()->second.endPos) / mainSize);
+    float friction = 0.0f;
+    if (GetDisplayCount() >= TotalCount()) {
+        friction = currentOffset_ > 0 ? CalculateFriction(itemPosition_.begin()->second.startPos / mainSize)
+                                      : CalculateFriction(-itemPosition_.begin()->second.startPos / mainSize);
+    } else {
+        friction = currentOffset_ > 0
+                       ? CalculateFriction(itemPosition_.begin()->second.startPos / mainSize)
+                       : CalculateFriction((mainSize - itemPosition_.rbegin()->second.endPos) / mainSize);
+    }
     auto scrollMotion = AceType::MakeRefPtr<ScrollMotion>(
         currentOffset_, dragVelocity * friction, extentPair, extentPair, DEFAULT_OVER_SPRING_PROPERTY);
     scrollMotion->AddListener([weak = AceType::WeakClaim(this)](double position) {
@@ -1474,6 +1491,9 @@ RefPtr<Curve> SwiperPattern::GetCurve() const
 
 bool SwiperPattern::IsLoop() const
 {
+    if (GetDisplayCount() >= TotalCount()) {
+        return false;
+    }
     auto swiperPaintProperty = GetPaintProperty<SwiperPaintProperty>();
     CHECK_NULL_RETURN(swiperPaintProperty, true);
     return swiperPaintProperty->GetLoop().value_or(true);
