@@ -978,6 +978,9 @@ bool SwiperPattern::NeedMarkDirtyNodeRenderIndicator()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    if (!HasIndicatorNode()) {
+        return false;
+    }
     auto child = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
     CHECK_NULL_RETURN(child, false);
 
@@ -1943,10 +1946,12 @@ void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay)
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto indicatorNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
-    CHECK_NULL_VOID(indicatorNode);
-    if (indicatorNode->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
-        indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    if (HasIndicatorNode()) {
+        auto indicatorNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
+        CHECK_NULL_VOID(indicatorNode);
+        if (indicatorNode->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
+            indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
     }
 
     auto delayTime = GetInterval() - GetDuration();
