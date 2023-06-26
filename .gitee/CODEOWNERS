@@ -1,0 +1,61 @@
+# Code owners for ArkUI ace_engine
+[OpenHarmony adapter]
+adapter/ohos/ @sunfei2021
+adapter/ohos/sa_profile/ @lushi1202
+adapter/ohos/services/  @lushi1202
+
+[Preview adapter]
+adapter/preview/ @laigerendaqiu
+
+[Build configs]
+build/ @sunfei2021
+ace_config.gni @sunfei2021
+BUILD.gn @sunfei2021
+bundle.json @sunfei2021
+frameworks/core/components_ng/render/BUILD.gn  @sunfei2021
+frameworks/core/components_ng/gestures/BUILD.gn  @sunfei2021
+frameworks/core/components_ng/syntax/BUILD.gn  @sunfei2021
+frameworks/core/components_ng/event/BUILD.gn  @sunfei2021
+frameworks/core/components_ng/base/BUILD.gn  @sunfei2021
+frameworks/core/components_ng/animation/BUILD.gn  @sunfei2021
+frameworks/core/components_ng/property/BUILD.gn  @sunfei2021
+frameworks/core/components_ng/manager/BUILD.gn  @sunfei2021
+frameworks/core/components_ng/svg/BUILD.gn  @sunfei2021
+frameworks/core/components_ng/common_napi_utils/BUILD.gn  @sunfei2021
+frameworks/core/components_ng/image_provider/BUILD.gn  @sunfei2021
+frameworks/core/components_ng/layout/BUILD.gn  @sunfei2021
+frameworks/core/pipeline/BUILD.gn  @sunfei2021
+frameworks/core/pipeline_ng/BUILD.gn  @sunfei2021
+frameworks/core/BUILD.gn  @sunfei2021
+frameworks/base/base64/BUILD.gn  @sunfei2021
+frameworks/base/resource/BUILD.gn  @sunfei2021
+frameworks/base/i18n/BUILD.gn  @sunfei2021
+frameworks/base/BUILD.gn  @sunfei2021
+frameworks/base/network/BUILD.gn  @sunfei2021
+frameworks/bridge/js_frontend/BUILD.gn  @sunfei2021
+frameworks/bridge/js_frontend/engine/jsi/BUILD.gn  @sunfei2021
+frameworks/bridge/js_frontend/engine/BUILD.gn  @sunfei2021
+frameworks/bridge/card_frontend/BUILD.gn  @sunfei2021
+frameworks/bridge/declarative_frontend/BUILD.gn  @sunfei2021
+frameworks/bridge/declarative_frontend/engine/jsi/BUILD.gn  @sunfei2021
+frameworks/bridge/codec/BUILD.gn  @sunfei2021
+frameworks/bridge/plugin_frontend/BUILD.gn  @sunfei2021
+frameworks/bridge/BUILD.gn  @sunfei2021
+frameworks/bridge/common/accessibility/BUILD.gn  @sunfei2021
+frameworks/bridge/common/BUILD.gn  @sunfei2021
+
+[Interfaces source]
+interfaces/ @sunfei2021
+
+[Core Pipeline]
+frameworks/core/pipeline_ng/  @yan-shuifeng @lightningHo
+frameworks/core/components_ng/base/  @yan-shuifeng @lightningHo
+frameworks/core/components_ng/layout/  @yan-shuifeng @lightningHo
+frameworks/core/components_ng/render/  @yan-shuifeng @lightningHo
+frameworks/core/components_ng/render/adapter/  @yan-shuifeng @sunfei2021
+
+[Test source]
+test/ @liyujie43
+frameworks/core/components_ng/test/  @liyujie43
+frameworks/core/components/test/   @liyujie43
+frameworks/bridge/test/   @liyujie43
