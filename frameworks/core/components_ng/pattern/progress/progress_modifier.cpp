@@ -44,8 +44,6 @@ constexpr int32_t DEFAULT_SCALE_COUNT = 100;
 constexpr double DEFAULT_CAPSULE_BORDER_WIDTH = 0.0;
 constexpr float FLOAT_ZERO_FIVE = 0.5f;
 constexpr float FLOAT_TWO_ZERO = 2.0f;
-constexpr float SPRING_MOTION_RESPONSE = 0.314f;
-constexpr float SPRING_MOTION_DAMPING_FRACTION = 0.95f;
 constexpr Dimension SWEEP_WIDTH = 80.0_vp;
 constexpr float RING_SHADOW_OFFSET_X = 5.0f;
 constexpr float RING_SHADOW_OFFSET_Y = 5.0f;
@@ -547,16 +545,7 @@ void ProgressModifier::SetValue(float value)
     }
 
     CHECK_NULL_VOID(value_);
-    AnimationOption option = AnimationOption();
-    if (isVisible_) {
-        auto motion =
-            AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_MOTION_RESPONSE, SPRING_MOTION_DAMPING_FRACTION);
-        option.SetCurve(motion);
-    } else {
-        option.SetDuration(0);
-    }
-    AnimationUtils::Animate(option, [&]() { value_->Set(value); });
-
+    value_->Set(value);
     ProcessSweepingAnimation(ProgressType(progressType_->Get()), value);
 }
 
