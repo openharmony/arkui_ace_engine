@@ -107,8 +107,8 @@ frameworks/core/components_ng/pattern/slider/  @cheng-feiwang
 frameworks/core/components_ng/pattern/stack/  @nickyjd
 frameworks/core/components_ng/pattern/stage/  @yan-shuifeng
 frameworks/core/components_ng/pattern/stepper/  @woodyangwt
-frameworks/core/components_ng/pattern/swiper/  @xuzhidan
-frameworks/core/components_ng/pattern/swiper_indicator/  @xuzhidan
+frameworks/core/components_ng/pattern/swiper/  @xuzhidan @zhou-chaobo
+frameworks/core/components_ng/pattern/swiper_indicator/  @xuzhidan @zhou-chaobo
 frameworks/core/components_ng/pattern/tabs/  @zhou-chaobo
 frameworks/core/components_ng/pattern/text/  @lijuan124
 frameworks/core/components_ng/pattern/text_clock/  @lijuan124
