@@ -68,10 +68,6 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             StartEnteringAnimation(nullptr);
         }
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    if (pipelineContext) {
-        pipelineContext->AddOnAreaChangeNode(host->GetId());
-    }
     return true;
 }
 
@@ -337,49 +333,6 @@ bool BubblePattern::PostTask(const TaskExecutor::Task& task)
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
     return taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-}
-
-void BubblePattern::OnAreaChangedInner()
-{
-    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
-    if (!targetNode->IsOnMainTree() || !targetNode->IsVisible()) {
-        return;
-    }
-    CHECK_NULL_VOID(targetNode);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
-    CHECK_NULL_VOID(layoutProp);
-    auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
-                            pipelineContext->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
-    auto targetOffsetCurrent = targetNode->GetPaintRectOffset();
-    // Show in SubWindow
-    if (showInSubWindow) {
-        auto overlayManager = pipelineContext->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        auto displayWindowOffset = layoutProp->GetDisplayWindowOffset().value_or(OffsetF());
-        targetOffsetCurrent += displayWindowOffset;
-        auto currentSubwindow = SubwindowManager::GetInstance()->GetCurrentWindow();
-        if (currentSubwindow) {
-            auto subwindowRect = currentSubwindow->GetRect();
-            targetOffsetCurrent -= subwindowRect.GetOffset();
-        }
-        auto popupInfo = overlayManager->GetPopupInfo(targetNodeId_);
-    } else if (isContainerModal) {
-        // popup not show in subwindow need minus container modal.
-        auto newOffsetX = targetOffsetCurrent.GetX() - static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) -
-                          static_cast<float>(CONTENT_PADDING.ConvertToPx());
-        auto newOffsetY = targetOffsetCurrent.GetY() - static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx());
-        targetOffsetCurrent.SetX(newOffsetX);
-        targetOffsetCurrent.SetY(newOffsetY);
-    }
-    // if targetOffset changed, mark the bubble node dirty, measure and layout
-    if (targetOffset_ != targetOffsetCurrent) {
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    }
 }
 
 void BubblePattern::StartEnteringAnimation(std::function<void()> finish)
