@@ -911,13 +911,15 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
         scalePoint.type);
     eventManager_->SetInstanceId(GetInstanceId());
+    if (scalePoint.type == TouchType::DOWN || scalePoint.type == TouchType::UP) {
+        // Remove the select overlay node when mouse down or touch up.
+        auto rootOffset = GetRootRect().GetOffset();
+        eventManager_->HandleGlobalEventNG(scalePoint, selectOverlayManager_, rootOffset);
+    }
     if (scalePoint.type == TouchType::DOWN) {
         // Set focus state inactive while touch down event received
         SetIsFocusActive(false);
         LOGD("receive touch down event, first use touch test to collect touch event target");
-        // Remove the select overlay node when touched down.
-        auto rootOffset = GetRootRect().GetOffset();
-        eventManager_->HandleGlobalEventNG(scalePoint, selectOverlayManager_, rootOffset);
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;

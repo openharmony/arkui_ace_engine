@@ -34,6 +34,7 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
             auto proxy = MakeRefPtr<SelectOverlayProxy>(current->GetId());
             return proxy;
         }
+        NotifyOverlayClosed(true);
         DestroySelectOverlay(current->GetId());
     }
     selectOverlayInfo_ = info;
@@ -81,6 +82,8 @@ void SelectOverlayManager::DestroyHelper(const RefPtr<FrameNode>& overlay)
     rootNode->RebuildRenderContextTree();
     selectOverlayItem_.Reset();
     host_.Reset();
+    touchDownPoints_.clear();
+    selectOverlayInfo_.callerFrameNode.Reset();
 }
 
 bool SelectOverlayManager::HasSelectOverlay(int32_t overlayId)
@@ -127,5 +130,56 @@ bool SelectOverlayManager::IsSameSelectOverlayInfo(const SelectOverlayInfo& info
         return false;
     }
     return true;
+}
+
+void SelectOverlayManager::HandleGlobalEvent(const TouchEvent& touchPoint, const NG::OffsetF& rootOffset)
+{
+    CHECK_NULL_VOID(!selectOverlayItem_.Invalid());
+    NG::PointF point { touchPoint.x - rootOffset.GetX(), touchPoint.y - rootOffset.GetY() };
+    // handle global touch event.
+    if (touchPoint.type == TouchType::DOWN && touchPoint.sourceType == SourceType::TOUCH) {
+        NG::PointF rootPoint { touchPoint.x, touchPoint.y };
+        if ((IsInCallerArea(rootPoint, rootOffset)) || IsInSelectedOrSelectOverlayArea(point)) {
+            return;
+        }
+        touchDownPoints_.push_back(point);
+        return;
+    }
+    bool acceptTouchUp = !touchDownPoints_.empty();
+    if (touchPoint.type == TouchType::UP && touchPoint.sourceType == SourceType::TOUCH && acceptTouchUp) {
+        auto lastTouchDownPoint = touchDownPoints_.back();
+        touchDownPoints_.pop_back();
+        point.SetX(lastTouchDownPoint.GetX());
+        point.SetY(lastTouchDownPoint.GetY());
+    }
+
+    // handle global mouse event.
+    if ((touchPoint.type != TouchType::DOWN || touchPoint.sourceType != SourceType::MOUSE) && !acceptTouchUp) {
+        return;
+    }
+    if (!IsInSelectedOrSelectOverlayArea(point)) {
+        NotifyOverlayClosed(true);
+        DestroySelectOverlay();
+    }
+}
+
+bool SelectOverlayManager::IsInCallerArea(const PointF& point, const NG::OffsetF& rootOffset)
+{
+    auto frameNode = selectOverlayInfo_.callerFrameNode.Upgrade();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto parentOffset = frameNode->GetPaintRectOffset(true) - rootOffset;
+    auto localPoint = point - parentOffset;
+    auto paintRect = frameNode->GetPaintRectWithTransform();
+    return paintRect.IsInRegion(localPoint);
+}
+
+void SelectOverlayManager::NotifyOverlayClosed(bool closedByGlobalEvent)
+{
+    auto current = selectOverlayItem_.Upgrade();
+    if (current) {
+        auto selectOverlayNode = DynamicCast<SelectOverlayNode>(current);
+        CHECK_NULL_VOID(selectOverlayNode);
+        selectOverlayNode->SetClosedByGlobalEvent(closedByGlobalEvent);
+    }
 }
 } // namespace OHOS::Ace::NG

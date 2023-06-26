@@ -51,4 +51,6 @@ RefPtr<SelectOverlayNode> SelectOverlayManager::GetSelectOverlayNode(int32_t ove
     auto selectOverlayNode = DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(infoPtr));
     return selectOverlayNode;
 }
+
+void SelectOverlayManager::HandleGlobalEvent(const TouchEvent& touchPoint, const NG::OffsetF& rootOffset) {}
 } // namespace OHOS::Ace::NG

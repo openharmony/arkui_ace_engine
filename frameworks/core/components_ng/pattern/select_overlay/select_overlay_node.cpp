@@ -913,4 +913,10 @@ bool SelectOverlayNode::IsInSelectedOrSelectOverlayArea(const PointF& point)
     return false;
 }
 
+void SelectOverlayNode::SetClosedByGlobalEvent(bool closedByGlobalEvent)
+{
+    auto selectOverlayPattern = GetPattern<SelectOverlayPattern>();
+    CHECK_NULL_VOID(selectOverlayPattern);
+    selectOverlayPattern->SetClosedByGlobalTouchEvent(closedByGlobalEvent);
+}
 } // namespace OHOS::Ace::NG
