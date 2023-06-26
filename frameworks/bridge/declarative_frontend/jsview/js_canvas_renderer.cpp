@@ -1431,12 +1431,11 @@ void JSCanvasRenderer::JsGetFilter(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::JsSetFilter(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsString()) {
+    if (!info[0]->IsString() || info[0]->IsUndefined() || info[0]->IsNull()) {
         return;
     }
-    std::string filterStr;
+    std::string filterStr = "none";
     JSViewAbstract::ParseJsString(info[0], filterStr);
-    // null and undefined are the same.
     if (filterStr == "") {
         LOGE("invalid filter string");
         return;
