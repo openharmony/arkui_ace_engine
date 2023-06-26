@@ -4184,8 +4184,10 @@ void TextFieldPattern::UpdateScrollBarOffset()
     if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
     }
-    Size size(contentRect_.Width() + GetPaddingRight(), contentRect_.Height());
-    UpdateScrollBarRegion(std::abs(textRect_.GetY()) - currentOffset_, textRect_.Height(), size, Offset(0.0, 0.0));
+    auto paddingHeight = GetPaddingTop() + GetPaddingBottom();
+    Size size(contentRect_.Width() + GetPaddingRight(), contentRect_.Height() + paddingHeight);
+    UpdateScrollBarRegion(std::abs(textRect_.GetY()) - currentOffset_,
+        textRect_.Height() + paddingHeight, size, Offset(0.0, 0.0));
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
