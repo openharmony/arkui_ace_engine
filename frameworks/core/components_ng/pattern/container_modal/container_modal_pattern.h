@@ -73,22 +73,23 @@ protected:
         return titleNode->GetChildAtIndex(originIndex);
     }
 
+    virtual void ChangeFloatingTitle(const RefPtr<FrameNode>& floatingNode, bool isFocus);
+
+    virtual void ChangeTitle(const RefPtr<FrameNode>& titleNode, bool isFocus);
+
+    virtual void ChangeTitleButtonIcon(
+        const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus);
+
+    WindowMode windowMode_;
+
 private:
     void WindowFocus(bool isFocus);
-
-    void ChangeFloatingTitle(const RefPtr<FrameNode>& floatingNode, bool isFocus = true);
-
-    void ChangeTitle(const RefPtr<FrameNode>& titleNode, bool isFocus = true);
-
-    void ChangeTitleButtonIcon(
-        const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus = true);
 
     void SetTitleButtonHide(
         const RefPtr<FrameNode>& titleNode, bool hideSplit, bool hideMaximize, bool hideMinimize);
 
     bool CanShowFloatingTitle();
 
-    WindowMode windowMode_;
     float moveX_ = 0.0f;
     float moveY_ = 0.0f;
     bool hasDeco_ = true;
