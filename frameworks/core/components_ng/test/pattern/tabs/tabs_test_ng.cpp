@@ -5152,7 +5152,7 @@ HWTEST_F(TabsTestNg, TabBarPatternInitOnKeyEvent001, TestSize.Level1)
      * @tc.expected: Related function runs ok.
      */
     tabBarPattern->InitOnKeyEvent(focusHub);
-    focusHub->onKeyEventInternal_(event);
+    focusHub->ProcessOnKeyEventInternal(event);
     focusHub->getInnerFocusRectFunc_(paintRect);
 }
 

@@ -1312,16 +1312,15 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern015, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<EventHub>();
     auto focusHub = eventHub->GetOrCreateFocusHub();
     minuteColumnPattern->InitOnKeyEvent(focusHub);
-    auto onKeyEvent = focusHub->onKeyEventInternal_;
 
     KeyEvent keyEvent(KeyCode::KEY_DPAD_UP, KeyAction::UP);
-    EXPECT_FALSE(onKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     keyEvent.action = KeyAction::DOWN;
-    EXPECT_TRUE(onKeyEvent(keyEvent));
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     keyEvent.code = KeyCode::KEY_DPAD_DOWN;
-    EXPECT_TRUE(onKeyEvent(keyEvent));
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     keyEvent.code = KeyCode::KEY_DPAD_CENTER;
-    EXPECT_FALSE(onKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->ProcessOnKeyEventInternal(keyEvent));
 }
 
 /**
@@ -1645,13 +1644,12 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<EventHub>();
     auto focusHub = eventHub->GetOrCreateFocusHub();
     timePickerRowPattern->InitOnKeyEvent(focusHub);
-    auto onKeyEventInternal = focusHub->onKeyEventInternal_;
     auto getInnerFocusRectFunc = focusHub->getInnerFocusRectFunc_;
 
     KeyEvent keyEvent;
     keyEvent.action = KeyAction::UNKNOWN;
     keyEvent.code = KeyCode::KEY_DPAD_UP;
-    EXPECT_FALSE(onKeyEventInternal(keyEvent));
+    EXPECT_FALSE(focusHub->ProcessOnKeyEventInternal(keyEvent));
 
     keyEvent.action = KeyAction::DOWN;
     auto stackChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(timePickerRowPattern->focusKeyID_));
@@ -1661,27 +1659,27 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     auto pattern = pickerChild->GetPattern<TimePickerColumnPattern>();
     ASSERT_NE(pattern, nullptr);
     timePickerRowPattern->options_[pickerChild].clear();
-    EXPECT_TRUE(onKeyEventInternal(keyEvent));
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
 
     timePickerRowPattern->options_[pickerChild].emplace_back("AM");
     timePickerRowPattern->options_[pickerChild].emplace_back("PM");
     auto currentIndex = pattern->GetCurrentIndex();
     auto totalOptionCount = timePickerRowPattern->GetOptionCount(pickerChild);
-    EXPECT_TRUE(onKeyEventInternal(keyEvent));
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     EXPECT_EQ(pattern->GetCurrentIndex(), (totalOptionCount + currentIndex - 1) % totalOptionCount);
 
     keyEvent.code = KeyCode::KEY_DPAD_DOWN;
     currentIndex = pattern->GetCurrentIndex();
     totalOptionCount = timePickerRowPattern->GetOptionCount(pickerChild);
-    EXPECT_TRUE(onKeyEventInternal(keyEvent));
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     EXPECT_EQ(pattern->GetCurrentIndex(), (totalOptionCount + currentIndex + 1) % totalOptionCount);
 
     keyEvent.code = KeyCode::KEY_DPAD_RIGHT;
-    EXPECT_TRUE(onKeyEventInternal(keyEvent));
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     EXPECT_EQ(timePickerRowPattern->focusKeyID_, 1);
 
     keyEvent.code = KeyCode::KEY_DPAD_LEFT;
-    EXPECT_TRUE(onKeyEventInternal(keyEvent));
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     EXPECT_EQ(timePickerRowPattern->focusKeyID_, 0);
 
     auto frameWidth = frameNode->GetGeometryNode()->GetFrameSize().Width();

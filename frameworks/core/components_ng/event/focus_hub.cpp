@@ -486,8 +486,8 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
     auto retInternal = false;
     auto pipeline = PipelineContext::GetCurrentContext();
     bool isBypassInner = keyEvent.IsKey({ KeyCode::KEY_TAB }) && pipeline && pipeline->IsTabJustTriggerOnKeyEvent();
-    if (!isBypassInner && onKeyEventInternal_) {
-        retInternal = onKeyEventInternal_(keyEvent);
+    if (!isBypassInner && !onKeyEventsInternal_.empty()) {
+        retInternal = ProcessOnKeyEventInternal(keyEvent);
     }
     LOGD("OnKeyEventInteral: Node %{public}s/%{public}d consume KeyEvent(code:%{public}d, action:%{public}d) return: "
          "%{public}d",
