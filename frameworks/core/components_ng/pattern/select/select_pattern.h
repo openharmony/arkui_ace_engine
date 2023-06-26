@@ -180,6 +180,7 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
 
 private:
+    void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -229,7 +230,7 @@ private:
     // add click event to show menu
     void RegisterOnClick();
 
-    void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    void RegisterOnKeyEvent();
     bool OnKeyEvent(const KeyEvent& event);
 
     // callback when an option is selected
