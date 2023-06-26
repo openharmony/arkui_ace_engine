@@ -408,11 +408,10 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     }
 
     auto curChild = dirty->GetOrCreateChildByIndex(currentIndex_);
-    if (curChild) {
-        auto curChildFrame = curChild->GetHostNode();
-        CHECK_NULL_RETURN(curChildFrame, false);
-        FlushFocus(curChildFrame);
-    }
+    CHECK_NULL_RETURN(curChild, false);
+    auto curChildFrame = curChild->GetHostNode();
+    CHECK_NULL_RETURN(curChildFrame, false);
+    FlushFocus(curChildFrame);
 
     if (config.skipMeasure && config.skipLayout) {
         return false;
