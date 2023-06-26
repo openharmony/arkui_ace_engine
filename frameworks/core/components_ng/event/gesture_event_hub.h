@@ -387,7 +387,10 @@ public:
     void HandleOnDragEnd(const GestureEvent& info);
     void HandleOnDragCancel();
 
+    void StartLongPressActionForWeb();
+    void CancelDragForWeb();
     void StartDragTaskForWeb();
+    void ResetDragActionForWeb();
 
     void OnModifyDone();
     bool KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr<NG::FrameNode>& node);

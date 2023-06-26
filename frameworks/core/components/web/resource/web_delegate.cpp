@@ -1475,6 +1475,7 @@ void WebDelegate::ShowWebView()
 
     LOGI("OnContinue webview");
     OnActive();
+    OnWebviewShow();
 }
 
 void WebDelegate::HideWebView()
@@ -1485,6 +1486,7 @@ void WebDelegate::HideWebView()
 
     LOGI("OnPause webview");
     OnInactive();
+    OnWebviewHide();
 }
 
 void WebDelegate::InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<NG::RenderSurface>& surface)
@@ -3332,6 +3334,44 @@ void WebDelegate::OnActive()
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::OnWebviewHide()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->OnWebviewHide();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::OnWebviewShow()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->OnWebviewShow();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::SetShouldFrameSubmissionBeforeDraw(bool should)
 {
     auto context = context_.Upgrade();
@@ -4326,6 +4366,40 @@ bool WebDelegate::OnDragAndDropData(const void* data, size_t len, int width, int
     return webPattern->NotifyStartDragTask();
 }
 
+bool WebDelegate::OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData> dragData)
+{
+    LOGI("DragDrop event OnDragAndDropDataUdmf");
+
+    const void *data = nullptr;
+    size_t len = 0;
+    int width = 0;
+    int height = 0;
+    dragData->GetPixelMapSetting(&data, len, width, height);
+    pixelMap_ = PixelMap::ConvertSkImageToPixmap(static_cast<const uint32_t*>(data), len, width, height);
+    if (pixelMap_ == nullptr) {
+        LOGE("convert drag image to pixel map failed");
+        return false;
+    }
+    isRefreshPixelMap_ = true;
+
+    dragData_ = dragData;
+    auto webPattern = webPattern_.Upgrade();
+    if (!webPattern) {
+        LOGE("web pattern is nullptr");
+        return false;
+    }
+    return webPattern->NotifyStartDragTask();
+}
+
+std::shared_ptr<OHOS::NWeb::NWebDragData> WebDelegate::GetOrCreateDragData()
+{
+    if (nweb_) {
+        dragData_ = nweb_->GetOrCreateDragData();
+        return dragData_;
+    }
+    return nullptr;
+}
+
 void WebDelegate::OnWindowNew(const std::string& targetUrl, bool isAlert, bool isUserTrigger,
     const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler)
 {
@@ -4453,12 +4527,7 @@ void WebDelegate::OnGetTouchHandleHotZone(OHOS::NWeb::TouchHandleHotZone& hotZon
 
 RefPtr<PixelMap> WebDelegate::GetDragPixelMap()
 {
-    if (isRefreshPixelMap_) {
-        isRefreshPixelMap_ = false;
-        return pixelMap_;
-    }
-
-    return nullptr;
+    return pixelMap_;
 }
 
 #ifdef OHOS_STANDARD_SYSTEM

@@ -76,6 +76,25 @@ void DragEventActuator::StartDragTaskForWeb(const GestureEvent& info)
     }
 }
 
+void DragEventActuator::StartLongPressActionForWeb()
+{
+    if (!isReceivedLongPress_) {
+        LOGW("not received long press action, don't start long press action for web");
+        return;
+    }
+    if (longPressUpdate_) {
+        longPressUpdate_(longPressInfo_);
+    }
+    isReceivedLongPress_ = false;
+}
+
+void DragEventActuator::CancelDragForWeb()
+{
+    if (actionCancel_) {
+        actionCancel_();
+    }
+}
+
 void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {
@@ -182,6 +201,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
     };
     panRecognizer_->SetIsForDrag(true);
+    actionCancel_ = actionCancel;
     panRecognizer_->SetOnActionCancel(actionCancel);
 
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -190,6 +210,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(actuator);
         bool isAllowedDrag = actuator->IsAllowedDrag();
         if (!isAllowedDrag) {
+            actuator->longPressInfo_ = info;
+            actuator->isReceivedLongPress_ = true;
             return;
         }
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
@@ -202,6 +224,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             actuator->SetEventColumn();
         }
     };
+    longPressUpdate_ = longPressUpdate;
     longPressRecognizer_->SetOnActionUpdate(longPressUpdate);
 #endif // ENABLE_DRAG_FRAMEWORK
     longPressRecognizer_->SetGestureHub(gestureEventHub_);
@@ -289,6 +312,10 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     auto offsetToWindow = frameNode->GetPaintRectOffset();
     auto offsetX = offsetToWindow.GetX();
     auto offsetY = offsetToWindow.GetY();
+    if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
+        offsetX = longPressInfo_.GetGlobalPoint().GetX() - (width / 2);
+        offsetY = longPressInfo_.GetGlobalPoint().GetY() - (height / 2);
+    }
     // create imageNode
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });

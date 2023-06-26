@@ -20,6 +20,7 @@
 #include <string>
 #include <utility>
 
+#include "base/thread/cancelable_callback.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "base/web/webview/ohos_nweb/include/nweb_handler.h"
@@ -328,6 +329,8 @@ public:
     bool OnBackPressed() const;
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
     bool NotifyStartDragTask();
+    DragRet GetDragAcceptableStatus();
+
 private:
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
@@ -392,12 +395,13 @@ private:
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void InitHoverEvent(const RefPtr<InputEventHub>& inputHub);
     void InitCommonDragDropEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHub);
+    void InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub);
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragMove(const GestureEvent& event);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleDragStart(const GestureEvent& info);
-    void HandleDragUpdate(const GestureEvent& info);
-    void HandleDragEnd(const GestureEvent& info);
+    void HandleDragStart(int32_t x, int32_t y);
+    void HandleDragEnd(int32_t x, int32_t y);
     void HandleDragCancel();
     bool GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo);
     void HandleMouseEvent(MouseInfo& info);
@@ -410,6 +414,22 @@ private:
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     bool WebOnKeyEvent(const KeyEvent& keyEvent);
     void WebRequestFocus();
+    void ResetDragAction();
+
+    NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
+    void HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info);
+    void HandleOnDropMove(const RefPtr<OHOS::Ace::DragEvent>& info);
+    void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info);
+    void HandleOnDragLeave(int32_t x, int32_t y);
+    void HandleOnDragEnd(int32_t x, int32_t y);
+    int onDragMoveCnt = 0;
+    std::chrono::time_point<std::chrono::system_clock> firstMoveInTime;
+    std::chrono::time_point<std::chrono::system_clock> preMoveInTime;
+    std::chrono::time_point<std::chrono::system_clock> curMoveInTime;
+    CancelableCallback<void()> timer_;
+    int32_t duration_ = 100; // 100: 100ms
+    void DoRepeat();
+    void StartRepeatTimer();
 
     void HandleTouchDown(const TouchEventInfo& info, bool fromOverlay);
 

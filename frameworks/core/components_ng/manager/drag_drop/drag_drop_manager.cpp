@@ -487,8 +487,8 @@ void DragDropManager::FireOnDragEvent(
 
     auto extraParams = eventHub->GetDragExtraParams(extraInfo_.empty() ? extraInfo : extraInfo_, point, type);
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    event->SetX(pipeline->ConvertPxToVp(Dimension(point.GetX(), DimensionUnit::PX)));
-    event->SetY(pipeline->ConvertPxToVp(Dimension(point.GetY(), DimensionUnit::PX)));
+    event->SetX((double)point.GetX());
+    event->SetY((double)point.GetY());
 
     switch (type) {
         case DragEventType::ENTER:
