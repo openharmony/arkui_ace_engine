@@ -3041,6 +3041,68 @@ void JSViewAbstract::JsWindowBlur(const JSCallbackInfo& info)
     info.SetReturnValue(info.This());
 }
 
+bool JSViewAbstract::ParseJsDimensionNG(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit)
+{
+    if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
+        return false;
+    }
+
+    if (jsValue->IsNumber()) {
+        result = CalcDimension(jsValue->ToNumber<double>(), defaultUnit);
+        return true;
+    }
+    if (jsValue->IsString()) {
+        result = StringUtils::StringToCalcDimension(jsValue->ToString(), false, defaultUnit);
+        return true;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    JSRef<JSVal> resId = jsObj->GetProperty("id");
+    if (!resId->IsNumber()) {
+        return false;
+    }
+    auto themeConstants = GetThemeConstants(jsObj);
+    if (!themeConstants) {
+        return false;
+    }
+    auto resIdNum = resId->ToNumber<int32_t>();
+    if (resIdNum == -1) {
+        if (!IsGetResourceByName(jsObj)) {
+            return false;
+        }
+        JSRef<JSVal> args = jsObj->GetProperty("params");
+        if (!args->IsArray()) {
+            return false;
+        }
+        JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
+        auto param = params->GetValueAt(0);
+        result = themeConstants->GetDimensionByName(param->ToString());
+        return true;
+    }
+
+    JSRef<JSVal> type = jsObj->GetProperty("type");
+    if (!type->IsNull() && type->IsNumber() &&
+        type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRING)) {
+        auto value = themeConstants->GetString(resId->ToNumber<uint32_t>());
+        result = StringUtils::StringToCalcDimension(value, false, defaultUnit);
+        return true;
+    }
+    if (!type->IsNull() && type->IsNumber() &&
+        type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        auto value = std::to_string(themeConstants->GetInt(resId->ToNumber<uint32_t>()));
+        result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
+        return true;
+    }
+
+    if (!type->IsNull() && type->IsNumber() &&
+        type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::FLOAT)) {
+        auto value = std::to_string(themeConstants->GetDouble(resId->ToNumber<uint32_t>()));
+        result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
+        return true;
+    }
+
+    return false;
+}
+
 bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit)
 {
     if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
@@ -3097,6 +3159,12 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
     }
     result = themeConstants->GetDimension(resId->ToNumber<uint32_t>());
     return true;
+}
+
+bool JSViewAbstract::ParseJsDimensionVpNG(const JSRef<JSVal>& jsValue, CalcDimension& result)
+{
+    // 'vp' -> the value varies with pixel density of device.
+    return ParseJsDimensionNG(jsValue, result, DimensionUnit::VP);
 }
 
 bool JSViewAbstract::ParseJsDimensionVp(const JSRef<JSVal>& jsValue, CalcDimension& result)

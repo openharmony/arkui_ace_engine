@@ -158,6 +158,9 @@ public:
     static bool ParseJsColorStrategy(const JSRef<JSVal>& jsValue, ForegroundColorStrategy& strategy);
     static bool ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
 
+    static bool ParseJsDimensionNG(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit);
+    static bool ParseJsDimensionVpNG(const JSRef<JSVal>& jsValue, CalcDimension& result);
+
     static bool ParseJsonDimension(
         const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result, DimensionUnit defaultUnit);
     static bool ParseJsonDimensionVp(const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result);
