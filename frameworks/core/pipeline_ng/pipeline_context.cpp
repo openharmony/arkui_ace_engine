@@ -1293,6 +1293,7 @@ MouseEvent ConvertAxisToMouse(const AxisEvent& event)
     result.time = event.time;
     result.deviceId = event.deviceId;
     result.sourceType = event.sourceType;
+    result.pointerEvent = event.pointerEvent;
     return result;
 }
 

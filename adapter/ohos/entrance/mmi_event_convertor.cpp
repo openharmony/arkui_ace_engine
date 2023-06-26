@@ -289,6 +289,7 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
     event.sourceTool = GetSourceTool(item.GetToolType());
+    event.pointerEvent = pointerEvent;
 
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
     TimeStamp time(microseconds);
@@ -352,10 +353,7 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 void CalculatePointerEvent(
     const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point, const NG::VectorF& scale)
 {
-    if (point == nullptr) {
-        LOGE("point is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(point);
     int32_t pointerId = point->GetPointerId();
     MMI::PointerEvent::PointerItem item;
     bool ret = point->GetPointerItem(pointerId, item);
@@ -367,6 +365,25 @@ void CalculatePointerEvent(
 
         item.SetWindowX(static_cast<int32_t>(xBeforeScale));
         item.SetWindowY(static_cast<int32_t>(yBeforeScale));
+        point->UpdatePointerItem(pointerId, item);
+    }
+}
+
+void CalculateWindowCoordinate(
+    const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point, const NG::VectorF& scale)
+{
+    CHECK_NULL_VOID(point);
+    int32_t pointerId = point->GetPointerId();
+    MMI::PointerEvent::PointerItem item;
+    bool ret = point->GetPointerItem(pointerId, item);
+    if (ret) {
+        float xRelative = item.GetDisplayX() - offsetF.GetX();
+        float yRelative = item.GetDisplayY() - offsetF.GetY();
+        float windowX = NearZero(scale.x) ? xRelative : xRelative / scale.x;
+        float windowY = NearZero(scale.y) ? yRelative : yRelative / scale.y;
+
+        item.SetWindowX(static_cast<int32_t>(windowX));
+        item.SetWindowY(static_cast<int32_t>(windowY));
         point->UpdatePointerItem(pointerId, item);
     }
 }
