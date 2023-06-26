@@ -484,6 +484,8 @@ public:
     void UpdateLocale();
     void OnInactive();
     void OnActive();
+    void OnWebviewHide();
+    void OnWebviewShow();
     bool OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info);
     void OnSelectPopupMenu(
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,

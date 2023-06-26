@@ -1475,6 +1475,7 @@ void WebDelegate::ShowWebView()
 
     LOGI("OnContinue webview");
     OnActive();
+    OnWebviewShow();
 }
 
 void WebDelegate::HideWebView()
@@ -1485,6 +1486,7 @@ void WebDelegate::HideWebView()
 
     LOGI("OnPause webview");
     OnInactive();
+    OnWebviewHide();
 }
 
 void WebDelegate::InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<NG::RenderSurface>& surface)
@@ -3327,6 +3329,44 @@ void WebDelegate::OnActive()
             }
             if (delegate->nweb_) {
                 delegate->nweb_->OnContinue();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::OnWebviewHide()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->OnWebviewHide();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::OnWebviewShow()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->OnWebviewShow();
             }
         },
         TaskExecutor::TaskType::PLATFORM);
