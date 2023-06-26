@@ -492,6 +492,15 @@ void WebModelNG::SetPermissionRequestEventId(std::function<void(const BaseEventI
     webEventHub->SetOnPermissionRequestEvent(std::move(uiCallback));
 }
 
+void WebModelNG::SetScreenCaptureRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnScreenCaptureRequestEvent(std::move(uiCallback));
+}
+
 void WebModelNG::SetBackgroundColor(Color backgroundColor)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();

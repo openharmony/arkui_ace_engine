@@ -187,6 +187,7 @@ public:
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback) override;
     void OnDateTimeChooserClose() override;
     void OnOverScroll(float xOffset, float yOffset) override;
+    void OnScreenCaptureRequest(std::shared_ptr<NWeb::NWebScreenCaptureAccessRequest> request) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {
