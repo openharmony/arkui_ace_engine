@@ -151,6 +151,11 @@ public:
         return { 0, 0 };
     }
 
+    virtual bool OnScrollSnapCallback(double targetOffset, double velocity)
+    {
+        return false;
+    }
+
     void StartScrollBarAnimatorByProxy()
     {
         if (scrollBarProxy_) {

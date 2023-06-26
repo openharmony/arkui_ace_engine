@@ -21,9 +21,6 @@
 #include <string>
 #include <unordered_map>
 
-#include "base/geometry/offset.h"
-#include "base/log/ace_performance_check.h"
-#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
 #include "base/utils/macros.h"
@@ -49,22 +46,15 @@ using LazyBuildFunction = std::function<void(RefPtr<LayoutWrapper>)>;
 class ACE_FORCE_EXPORT LayoutWrapper : public AceType {
     DECLARE_ACE_TYPE(LayoutWrapper, AceType)
 public:
-    LayoutWrapper(WeakPtr<FrameNode> hostNode, RefPtr<GeometryNode> geometryNode, RefPtr<LayoutProperty> layoutProperty)
-        : hostNode_(std::move(hostNode)), geometryNode_(std::move(geometryNode)),
-          layoutProperty_(std::move(layoutProperty))
-    {}
+    LayoutWrapper(
+        WeakPtr<FrameNode> hostNode, RefPtr<GeometryNode> geometryNode, RefPtr<LayoutProperty> layoutProperty);
     LayoutWrapper(LazyBuildFunction&& fun)
         : geometryNode_(MakeRefPtr<GeometryNode>()), layoutProperty_(MakeRefPtr<LayoutProperty>()),
           lazyBuildFunction_(fun)
     {}
     ~LayoutWrapper() override = default;
 
-    void Update(WeakPtr<FrameNode> hostNode, RefPtr<GeometryNode> geometryNode, RefPtr<LayoutProperty> layoutProperty)
-    {
-        hostNode_ = std::move(hostNode);
-        geometryNode_ = std::move(geometryNode);
-        layoutProperty_ = std::move(layoutProperty);
-    }
+    void Update(WeakPtr<FrameNode> hostNode, RefPtr<GeometryNode> geometryNode, RefPtr<LayoutProperty> layoutProperty);
 
     void AppendChild(const RefPtr<LayoutWrapper>& child)
     {
@@ -232,7 +222,26 @@ public:
 
     std::pair<int32_t, int32_t> GetLazyBuildRange();
 
+    static void ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraintF& constraint);
+
+    // apply keyboard avoidance on content rootNodes
+    static void AvoidKeyboard();
+    // expand the SafeArea of expansive nodes, which are previously recorded during Layout traversal
+    static void ExpandSafeArea();
+
+    // save geometry states before SafeArea expansion / keyboard avoidance
+    static void SaveGeoState();
+    // restore to the geometry state after last Layout and before SafeArea expansion and keyboard avoidance
+    static void RestoreGeoState(int32_t rootDepth);
+
 private:
+    void CreateRootConstraint();
+    void ApplyConstraint(LayoutConstraintF constraint);
+
+    void ExpandSafeAreaInner();
+    // keyboard avoidance is done by offsetting, to expand into keyboard area, reverse the offset.
+    void ExpandIntoKeyboard();
+
     // Used to save a persist wrapper created by child, ifElse, ForEach, the map stores [index, Wrapper].
     std::list<RefPtr<LayoutWrapper>> children_;
     // Speed up the speed of getting child by index.

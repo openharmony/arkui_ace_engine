@@ -29,6 +29,7 @@ namespace OHOS::Ace::NG {
 
 struct SelectHandleInfo {
     bool isShow = true;
+    // in Global coordinates.
     RectF paintRect;
 
     bool operator==(const SelectHandleInfo& info) const

@@ -66,6 +66,14 @@ void StackModelImpl::SetAlignment(Alignment alignment)
     }
 }
 
+void StackModelImpl::SetAlignmentContent(Alignment alignment)
+{
+    auto stack = AceType::DynamicCast<StackComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (stack) {
+        stack->SetAlignment(alignment);
+    }
+}
+
 void StackModelImpl::SetHasWidth()
 {
     auto stack = AceType::DynamicCast<StackComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());

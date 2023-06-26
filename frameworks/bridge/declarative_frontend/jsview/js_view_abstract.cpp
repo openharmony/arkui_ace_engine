@@ -54,6 +54,7 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #include "core/gestures/gesture_info.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
@@ -5070,6 +5071,29 @@ void JSViewAbstract::JSUpdateAnimatableProperty(const JSCallbackInfo& info)
     }
 }
 
+void JSViewAbstract::JsExpandSafeArea(const JSCallbackInfo& info)
+{
+    NG::SafeAreaExpandOpts opts;
+    if (info.Length() >= 1 && info[0]->IsArray()) {
+        auto paramArray = JSRef<JSArray>::Cast(info[0]);
+        uint32_t safeAreaType = 0;
+        for (size_t i = 0; i < paramArray->Length(); ++i) {
+            safeAreaType |= (1 << paramArray->GetValueAt(i)->ToNumber<uint32_t>());
+        }
+        opts.type = safeAreaType;
+    }
+    if (info.Length() >= 2 && info[1]->IsArray()) {
+        auto paramArray = JSRef<JSArray>::Cast(info[1]);
+        uint32_t safeAreaEdge = 0;
+        for (size_t i = 0; i < paramArray->Length(); ++i) {
+            safeAreaEdge |= (1 << paramArray->GetValueAt(i)->ToNumber<uint32_t>());
+        }
+        opts.edges = safeAreaEdge;
+    }
+
+    ViewAbstractModel::GetInstance()->UpdateSafeAreaExpandOpts(opts);
+}
+
 void JSViewAbstract::JSBind(BindingTarget globalObj)
 {
     JSClass<JSViewAbstract>::Declare("JSViewAbstract");
@@ -5224,6 +5248,8 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("createAnimatableProperty", &JSViewAbstract::JSCreateAnimatableProperty);
     JSClass<JSViewAbstract>::StaticMethod("updateAnimatableProperty", &JSViewAbstract::JSUpdateAnimatableProperty);
     JSClass<JSViewAbstract>::StaticMethod("renderGroup", &JSViewAbstract::JSRenderGroup);
+
+    JSClass<JSViewAbstract>::StaticMethod("expandSafeArea", &JSViewAbstract::JsExpandSafeArea);
 
     JSClass<JSViewAbstract>::Bind(globalObj);
 }

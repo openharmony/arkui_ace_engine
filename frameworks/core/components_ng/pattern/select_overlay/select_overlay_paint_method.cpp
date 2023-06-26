@@ -24,8 +24,13 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-CanvasDrawFunction SelectOverlayPaintMethod::GetContentDrawFunction(PaintWrapper* /*paintWrapper*/)
+CanvasDrawFunction SelectOverlayPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
+    // paint rect is in global position, need to convert to local position
+    auto offset = paintWrapper->GetGeometryNode()->GetFrameOffset();
+    info_->firstHandle.paintRect -= offset;
+    info_->secondHandle.paintRect -= offset;
+
     return [info = info_](RSCanvas& canvas) { SelectOverlayPaintMethod::DrawHandles(info, canvas); };
 }
 
@@ -41,8 +46,8 @@ void SelectOverlayPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto right = padding.Right().ConvertToPx();
     auto top = padding.Top().ConvertToPx();
     auto sideWidth = textOverlayTheme->GetMenuToolbarHeight().ConvertToPx() - padding.Top().ConvertToPx() -
-                                padding.Bottom().ConvertToPx();
-    auto buttonRadius = sideWidth / 2.0;             
+                     padding.Bottom().ConvertToPx();
+    auto buttonRadius = sideWidth / 2.0;
 
     auto offset = defaultMenuEndOffset_ + OffsetF(-buttonRadius - right, buttonRadius + top);
     selectOverlayModifier_->SetMenuOptionOffset(offset);

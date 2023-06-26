@@ -41,6 +41,7 @@
 #include "core/common/window_animation_config.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/theme/theme_manager.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
@@ -732,35 +733,10 @@ public:
 
     Rect GetCurrentWindowRect() const;
 
-    virtual void SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback) {}
+    using SafeAreaInsets = NG::SafeAreaInsets;
+    virtual void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) {}
 
-    virtual SafeAreaEdgeInserts GetCurrentViewSafeArea() const
-    {
-        return SafeAreaEdgeInserts();
-    }
-
-    virtual void SetSystemSafeArea(const SafeAreaEdgeInserts& systemSafeArea) {}
-
-    virtual SafeAreaEdgeInserts GetSystemSafeArea() const
-    {
-        return SafeAreaEdgeInserts();
-    }
-
-    virtual void SetCutoutSafeArea(const SafeAreaEdgeInserts& cutoutSafeArea) {}
-
-    virtual SafeAreaEdgeInserts GetCutoutSafeArea() const
-    {
-        return SafeAreaEdgeInserts();
-    }
-
-    virtual SafeAreaEdgeInserts GetViewSafeArea() const
-    {
-        return SafeAreaEdgeInserts();
-    }
-
-    virtual void ResetViewSafeArea() {}
-
-    virtual void AppBarAdaptToSafeArea() {}
+    virtual void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) {}
 
     void SetPluginOffset(const Offset& offset)
     {

@@ -4639,6 +4639,6 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest006, TestSize.Level1)
     SizeF frameSize(FONT_SIZE_20, FONT_SIZE_20);
     geometryNode->SetFrameSize(frameSize);
     textPickerPattern->SetButtonIdeaSize();
-    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->selfIdealSize->width_.value(), CalcLength(6.0));
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->selfIdealSize->width_.value(), CalcLength(12.0));
 }
 } // namespace OHOS::Ace::NG

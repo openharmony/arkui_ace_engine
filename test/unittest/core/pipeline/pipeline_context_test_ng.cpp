@@ -1442,7 +1442,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
     context_->designWidthScale_ = DEFAULT_DOUBLE1;
     context_->OnVirtualKeyboardHeightChange(DEFAULT_DOUBLE1);
     EXPECT_DOUBLE_EQ(context_->designWidthScale_, DEFAULT_DOUBLE1);
-    EXPECT_EQ(context_->rootNode_->GetGeometryNode()->GetFrameOffset().GetY(), 0);
+    EXPECT_EQ(context_->safeAreaManager_->GetKeyboardOffset(), 0);
 
     /**
      * @tc.steps3: init data and Call the function OnVirtualKeyboardHeightChange
@@ -1456,7 +1456,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
     for (int turn = 0; turn < params.size(); turn++) {
         context_->rootHeight_ = params[turn][0];
         context_->OnVirtualKeyboardHeightChange(params[turn][1]);
-        EXPECT_EQ(context_->rootNode_->GetGeometryNode()->GetFrameOffset().GetY(), params[turn][2]);
+        EXPECT_EQ(context_->safeAreaManager_->GetKeyboardOffset(), params[turn][2]);
     }
     /**
      * @tc.steps4: init data and Call the function OnVirtualKeyboardHeightChange
@@ -1476,8 +1476,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
         manager->position_.deltaY_ = params[turn][1];
         context_->rootHeight_ = params[turn][2];
         context_->rootNode_->geometryNode_->frame_.rect_.y_ = params[turn][3];
+        context_->safeAreaManager_->UpdateKeyboardOffset(params[turn][3]);
         context_->OnVirtualKeyboardHeightChange(params[turn][4]);
-        EXPECT_EQ(context_->rootNode_->GetGeometryNode()->GetFrameOffset().GetY(), params[turn][5]);
+        EXPECT_EQ(context_->safeAreaManager_->GetKeyboardOffset(), params[turn][5]);
     }
 }
 
@@ -1726,47 +1727,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg033, TestSize.Level1)
     frameNode_3->layoutProperty_->propVisibility_ = VisibleType::VISIBLE;
     rt = context_->GetNavDestinationBackButtonNode();
     EXPECT_NE(rt, nullptr);
-}
-
-/**
- * @tc.name: PipelineContextTestNg034
- * @tc.desc: Test SetGetViewSafeAreaImpl and GetCurrentViewSafeArea.
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg034, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters and set a flag.
-     */
-    ASSERT_NE(context_, nullptr);
-    ASSERT_NE(context_->window_, nullptr);
-    bool flag = false;
-    /**
-     * @tc.steps2: call SetGetViewSafeAreaImpl and GetCurrentViewSafeArea.
-     * @tc.expected: flag is true.
-     */
-    context_->SetGetViewSafeAreaImpl([&flag]() {
-        flag = !flag;
-        return SafeAreaEdgeInserts();
-    });
-    context_->GetCurrentViewSafeArea();
-    EXPECT_TRUE(flag);
-    /**
-     * @tc.steps3: reset window_ and call SetGetViewSafeAreaImpl and GetCurrentViewSafeArea.
-     * @tc.expected: flag is still true.
-     */
-    auto windowTemp = context_->window_;
-    context_->window_ = nullptr;
-    context_->SetGetViewSafeAreaImpl([&flag]() {
-        flag = !flag;
-        return SafeAreaEdgeInserts();
-    });
-    context_->GetCurrentViewSafeArea();
-    EXPECT_TRUE(flag);
-    /**
-     * @tc.steps4: restore window_ for next testCase.
-     */
-    context_->window_ = windowTemp;
 }
 
 /**

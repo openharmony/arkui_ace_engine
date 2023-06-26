@@ -29,6 +29,14 @@
 
 namespace OHOS::Ace {
 
+enum class PlatformVersion {
+    VERSION_FIVE = 5,
+    VERSION_SIX,
+    VERSION_SEVEN,
+    VERSION_EIGHT,
+    VERSION_NINE,
+    VERSION_TEN
+};
 struct AceBundleInfo {
     uint32_t versionCode = 0;
     std::string versionName;

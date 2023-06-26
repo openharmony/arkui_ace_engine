@@ -195,7 +195,7 @@ void JSSideBar::JsShowSideBar(const JSCallbackInfo& info)
         return;
     }
 
-    bool isShow = false;
+    bool isShow = true;
     if (info.Length() > 0 && info[0]->IsBoolean()) {
         isShow = info[0]->ToBoolean();
     }

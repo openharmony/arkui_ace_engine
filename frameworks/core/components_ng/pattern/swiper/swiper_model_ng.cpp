@@ -20,6 +20,7 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components/swiper/swiper_component.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -160,30 +161,38 @@ void SwiperModelNG::SetOnChange(std::function<void(const BaseEventInfo* info)>&&
     });
 }
 
-void SwiperModelNG::SetOnAnimationStart(std::function<void(const BaseEventInfo* info)>&& onAnimationStart)
+void SwiperModelNG::SetOnAnimationStart(AnimationStartEvent&& onAnimationStart)
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(swiperNode);
     auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(eventHub);
 
-    eventHub->SetAnimationStartEvent([event = std::move(onAnimationStart)](int32_t index) {
-        SwiperChangeEvent eventInfo(index);
-        event(&eventInfo);
-    });
+    eventHub->SetAnimationStartEvent([event = std::move(onAnimationStart)](int32_t index, int32_t targetIndex,
+                                         const AnimationCallbackInfo& info) { event(index, targetIndex, info); });
 }
 
-void SwiperModelNG::SetOnAnimationEnd(std::function<void(const BaseEventInfo* info)>&& onAnimationEnd)
+void SwiperModelNG::SetOnAnimationEnd(AnimationEndEvent&& onAnimationEnd)
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(swiperNode);
     auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(eventHub);
 
-    eventHub->SetAnimationEndEvent([event = std::move(onAnimationEnd)](int32_t index) {
-        SwiperChangeEvent eventInfo(index);
-        event(&eventInfo);
-    });
+    eventHub->SetAnimationEndEvent(
+        [event = std::move(onAnimationEnd)](int32_t index, const AnimationCallbackInfo& info) { event(index, info); });
+}
+
+
+void SwiperModelNG::SetOnGestureSwipe(GestureSwipeEvent&& onGestureSwipe)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->SetGestureSwipeEvent(
+        [event = std::move(onGestureSwipe)](int32_t index, const AnimationCallbackInfo& info) { event(index, info); });
 }
 
 void SwiperModelNG::SetRemoteMessageEventId(RemoteCallback&& remoteCallback) {}

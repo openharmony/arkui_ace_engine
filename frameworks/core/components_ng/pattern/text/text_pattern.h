@@ -210,6 +210,10 @@ public:
     {
         surfaceChangedCallbackId_ = id;
     }
+    void SetOnClickEvent(GestureEventFunc&& onClick)
+    {
+        onClick_ = std::move(onClick);
+    }
 protected:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -252,6 +256,7 @@ private:
 
     bool IsDraggable(const Offset& localOffset);
 
+    GestureEventFunc onClick_;
     int32_t GetGraphemeClusterLength(int32_t extend) const;
     std::string GetSelectedText(int32_t start, int32_t end) const;
     std::wstring GetWideText() const;

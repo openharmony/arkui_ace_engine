@@ -51,6 +51,7 @@ public:
         value->propListItemAlign_ = CloneListItemAlign();
         value->propCachedCount_ = CloneCachedCount();
         value->propStickyStyle_ = CloneStickyStyle();
+        value->propScrollSnapAlign_ = CloneScrollSnapAlign();
         value->propEditMode_ = CloneEditMode();
         return value;
     }
@@ -69,6 +70,7 @@ public:
         ResetListItemAlign();
         ResetCachedCount();
         ResetStickyStyle();
+        ResetScrollSnapAlign();
         ResetEditMode();
     }
 
@@ -87,6 +89,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ListItemAlign, V2::ListItemAlign, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CachedCount, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StickyStyle, V2::StickyStyle, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollSnapAlign, V2::ScrollSnapAlign, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ChainAnimation, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EditMode, bool, PROPERTY_UPDATE_MEASURE);
 };

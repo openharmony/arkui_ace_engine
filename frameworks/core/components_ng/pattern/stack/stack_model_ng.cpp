@@ -37,11 +37,19 @@ void StackModelNG::Create()
 void StackModelNG::Create(Alignment alignment)
 {
     Create();
+    ACE_UPDATE_LAYOUT_PROPERTY(StackLayoutProperty, AlignmentContent, alignment);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
 }
 
 void StackModelNG::SetAlignment(Alignment alignment)
 {
+    ACE_UPDATE_LAYOUT_PROPERTY(StackLayoutProperty, Alignment, alignment);
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
+}
+
+void StackModelNG::SetAlignmentContent(Alignment alignment)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(StackLayoutProperty, AlignmentContent, alignment);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
 }
 

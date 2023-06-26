@@ -73,6 +73,8 @@ using ScrollFrameBeginCallback = std::function<ScrollFrameResult(Dimension, Scro
 using DragEndForRefreshCallback = std::function<void()>;
 using DragCancelRefreshCallback = std::function<void()>;
 using MouseLeftButtonScroll = std::function<bool()>;
+using ScrollSnapCallback = std::function<bool(double targetOffset, double velocity)>;
+
 class Scrollable : public TouchEventTarget, public RelatedChild {
     DECLARE_ACE_TYPE(Scrollable, TouchEventTarget);
 
@@ -366,6 +368,10 @@ public:
         edgeEffect_ = effect;
     }
 
+    void SetOnScrollSnapCallback(const ScrollSnapCallback& scrollSnapCallback)
+    {
+        scrollSnapCallback_ = scrollSnapCallback;
+    }
 private:
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);
@@ -385,6 +391,7 @@ private:
     WatchFixCallback watchFixCallback_;
     ScrollBeginCallback scrollBeginCallback_;
     ScrollFrameBeginCallback scrollFrameBeginCallback_;
+    ScrollSnapCallback scrollSnapCallback_;
     DragEndForRefreshCallback dragEndCallback_;
     DragCancelRefreshCallback dragCancelCallback_;
     MouseLeftButtonScroll mouseLeftButtonScroll_;

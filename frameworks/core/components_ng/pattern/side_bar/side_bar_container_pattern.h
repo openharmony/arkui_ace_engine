@@ -98,7 +98,7 @@ public:
     }
 
     void InitControlButtonTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void InitSideBarContentEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitControlButtonMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void InitDividerMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void UpdateSideBarPosition(float value);
 
@@ -125,10 +125,15 @@ private:
     void OnUpdateShowDivider(
         const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<FrameNode>& host);
     void OnHover(bool isHover);
+    void OnControlButtonHover(bool isHover);
     void AddDividerHotZoneRect(const RefPtr<SideBarContainerLayoutAlgorithm>& layoutAlgorithm);
+    void DoControlButtonHoverAnimation(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
+        int32_t duration, const RefPtr<Curve>& curve);
+    void HandleMouseEvent(const MouseInfo& info);
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<ClickEvent> controlButtonClickEvent_;
+    RefPtr<InputEvent> controlButtonHoverEvent_;
     RefPtr<PanEvent> panEvent_;
     RefPtr<Animator> controller_;
     RefPtr<CurveAnimation<float>> rightToLeftAnimation_;
@@ -145,6 +150,7 @@ private:
     float preSidebarWidth_ = 0.0f;
     bool hasControlButton_ = false;
     SideBarAnimationDirection animDir_ = SideBarAnimationDirection::LTR;
+    bool isControlButtonHover_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SideBarContainerPattern);
 };

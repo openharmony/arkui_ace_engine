@@ -112,7 +112,7 @@ public:
     uint32_t GetBackgroundColor();
 
     // handle window Rosen::IAvoidAreaChangedListener
-    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type);
+    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea& avoidArea, OHOS::Rosen::AvoidAreaType type);
 
     void Dump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 

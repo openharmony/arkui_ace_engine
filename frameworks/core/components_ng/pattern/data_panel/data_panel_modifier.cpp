@@ -39,6 +39,8 @@ constexpr float WHOLE_CIRCLE = 360.0f;
 constexpr float QUARTER_CIRCLE = 90.0f;
 constexpr float PERCENT_HALF = 0.5f;
 constexpr float DIAMETER_TO_THICKNESS_RATIO = 0.12f;
+constexpr float FIXED_ANGLE = 2.0f;
+constexpr float FIXED_DRAW_ANGLE = 4.0f;
 } // namespace
 
 DataPanelModifier::DataPanelModifier()
@@ -529,7 +531,14 @@ void DataPanelModifier::PaintProgress(
     canvas.AttachBrush(startCirclePaint);
     RSRect edgeRect(center.GetX() - thickness * PERCENT_HALF, center.GetY() - radius,
         center.GetX() + thickness * PERCENT_HALF, center.GetY() - radius + thickness);
-    canvas.DrawArc(edgeRect, QUARTER_CIRCLE, HALF_CIRCLE);
+    canvas.DrawArc(edgeRect, QUARTER_CIRCLE - FIXED_ANGLE, HALF_CIRCLE + FIXED_DRAW_ANGLE);
+    canvas.DetachBrush();
+    canvas.Restore();
+
+    canvas.Save();
+    canvas.Rotate(drawAngle, center.GetX(), center.GetY());
+    canvas.AttachBrush(endCirclePaint);
+    canvas.DrawArc(edgeRect, -QUARTER_CIRCLE - FIXED_ANGLE, HALF_CIRCLE + FIXED_DRAW_ANGLE);
     canvas.DetachBrush();
     canvas.Restore();
 
@@ -540,13 +549,6 @@ void DataPanelModifier::PaintProgress(
     canvas.AttachPen(gradientPaint);
     canvas.DrawPath(path);
     canvas.DetachPen();
-    canvas.Restore();
-
-    canvas.Save();
-    canvas.Rotate(drawAngle, center.GetX(), center.GetY());
-    canvas.AttachBrush(endCirclePaint);
-    canvas.DrawArc(edgeRect, -QUARTER_CIRCLE, HALF_CIRCLE);
-    canvas.DetachBrush();
     canvas.Restore();
 }
 

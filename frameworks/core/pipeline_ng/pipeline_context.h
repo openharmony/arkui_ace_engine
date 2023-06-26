@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <functional>
 #include <list>
+#include <unordered_map>
 #include <utility>
 
 #include "base/geometry/ng/rect_t.h"
@@ -29,11 +30,13 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -193,23 +196,15 @@ public:
 
     void SetRootRect(double width, double height, double offset) override;
 
-    void SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback) override;
-
-    SafeAreaEdgeInserts GetCurrentViewSafeArea() const override;
-
-    void SetSystemSafeArea(const SafeAreaEdgeInserts& systemSafeArea) override;
-
-    SafeAreaEdgeInserts GetSystemSafeArea() const override;
-
-    void SetCutoutSafeArea(const SafeAreaEdgeInserts& cutoutSafeArea) override;
-
-    SafeAreaEdgeInserts GetCutoutSafeArea() const override;
-
-    SafeAreaEdgeInserts GetViewSafeArea() const override;
-
-    void ResetViewSafeArea() override;
-
-    void AppBarAdaptToSafeArea() override;
+    void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) override;
+    void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) override;
+    SafeAreaInsets GetSystemSafeArea() const;
+    SafeAreaInsets GetCutoutSafeArea() const;
+    SafeAreaInsets GetSafeArea() const;
+    const RefPtr<SafeAreaManager>& GetSafeAreaManager() const
+    {
+        return safeAreaManager_;
+    }
 
     const RefPtr<FullScreenManager>& GetFullScreenManager();
 
@@ -453,6 +448,7 @@ private:
     RefPtr<SelectOverlayManager> selectOverlayManager_;
     RefPtr<DragDropManager> dragDropManager_;
     RefPtr<SharedOverlayManager> sharedTransitionManager_;
+    RefPtr<SafeAreaManager> safeAreaManager_ = MakeRefPtr<SafeAreaManager>();
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
     uint32_t nextScheduleTaskId_ = 0;

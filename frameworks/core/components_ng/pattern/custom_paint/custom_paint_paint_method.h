@@ -356,6 +356,7 @@ protected:
     bool IsPercentStr(std::string& percentStr);
     double PxStrToDouble(const std::string& str);
     double BlurStrToDouble(const std::string& str);
+    bool CheckNumberAndPercentage(const std::string& param, bool isClamped, float& result);
 #ifndef NEW_SKIA
     void InitImagePaint(SkPaint& paint);
     void GetStrokePaint(SkPaint& paint);

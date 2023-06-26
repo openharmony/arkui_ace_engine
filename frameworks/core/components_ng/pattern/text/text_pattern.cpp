@@ -398,25 +398,30 @@ void TextPattern::HandleClickEvent(GestureEvent& info)
     RectF textContentRect = contentRect_;
     textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
     textContentRect.SetHeight(contentRect_.Height() - std::max(baselineOffset_, 0.0f));
-
-    if (textContentRect.IsInRegion(PointF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY()))) {
-        CHECK_NULL_VOID_NOLOG(!spanItemChildren_.empty());
+    bool isClickOnSpan = false;
+    if (textContentRect.IsInRegion(PointF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY())) &&
+        !spanItemChildren_.empty() && paragraph_) {
         Offset textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
             info.GetLocalLocation().GetY() - textContentRect.GetY() };
-        CHECK_NULL_VOID(paragraph_);
         auto position = paragraph_->GetHandlePositionForClick(textOffset);
         for (const auto& item : spanItemChildren_) {
             if (item && position < item->position) {
-                CHECK_NULL_VOID_NOLOG(item->onClick);
+                if (!item->onClick) {
+                    break;
+                }
                 GestureEvent spanClickinfo = info;
                 EventTarget target = info.GetTarget();
                 target.area.SetWidth(Dimension(0.0f));
                 target.area.SetHeight(Dimension(0.0f));
                 spanClickinfo.SetTarget(target);
                 item->onClick(spanClickinfo);
+                isClickOnSpan = true;
                 break;
             }
         }
+    }
+    if (onClick_ && !isClickOnSpan) {
+        onClick_(info);
     }
 }
 
@@ -727,13 +732,14 @@ void TextPattern::OnModifyDone()
         return;
     }
     copyOption_ = textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
+    auto gestureEventHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
     if (copyOption_ != CopyOptions::None) {
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         if (!clipboard_ && context) {
             clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
         }
-        auto gestureEventHub = host->GetOrCreateGestureEventHub();
         InitLongPressEvent(gestureEventHub);
         if (host->IsDraggable()) {
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -742,9 +748,11 @@ void TextPattern::OnModifyDone()
             InitPanEvent(gestureEventHub);
 #endif
         }
-        InitClickEvent(gestureEventHub);
         InitMouseEvent();
         SetAccessibilityAction();
+    }
+    if (onClick_ || copyOption_ != CopyOptions::None) {
+        InitClickEvent(gestureEventHub);
     }
 }
 

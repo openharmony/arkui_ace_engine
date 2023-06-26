@@ -54,6 +54,7 @@ public:
     static void SetLanes(const JSCallbackInfo& info);
     static void SetSticky(int32_t sticky);
     static void SetNestedScroll(const JSCallbackInfo& args);
+    static void SetScrollSnapAlign(int32_t scrollSnapAlign);
 
     static void ItemDragStartCallback(const JSCallbackInfo& info);
     static void ItemDragEnterCallback(const JSCallbackInfo& info);

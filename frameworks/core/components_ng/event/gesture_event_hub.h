@@ -379,7 +379,7 @@ public:
 
 #ifdef ENABLE_DRAG_FRAMEWORK
     int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
-    OnDragCallback GetDragCallback();
+    OnDragCallback GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
 #endif // ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     void HandleOnDragStart(const GestureEvent& info);
@@ -403,6 +403,8 @@ private:
     void UpdateExternalNGGestureRecognizer();
 
     OnAccessibilityEventFunc GetOnAccessibilityEventFunc();
+
+    void OnDragStart(const GestureEvent& info, const RefPtr<PipelineBase>& context);
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;

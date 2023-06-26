@@ -431,7 +431,19 @@ void JSText::SetHeightAdaptivePolicy(int32_t value)
 void JSText::JsOnClick(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        JSInteractableView::JsOnClick(info);
+        if (!info[0]->IsFunction()) {
+            LOGW("the info is not click function");
+            return;
+        }
+        auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            LOGD("About to call onclick method on js");
+            const auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
+            ACE_SCORING_EVENT("Text.onClick");
+            func->Execute(*clickInfo);
+        };
+        TextModel::GetInstance()->SetOnClick(std::move(onClick));
     } else {
 #ifndef NG_BUILD
         if (info[0]->IsFunction()) {
