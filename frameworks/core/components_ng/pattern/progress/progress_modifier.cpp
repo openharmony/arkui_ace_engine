@@ -53,7 +53,7 @@ constexpr float RING_SHADOW_BLUR_RADIUS_MIN = 5.0f;
 constexpr float RING_SHADOW_VALID_RADIUS_MIN = 10.0f;
 constexpr Dimension LINEAR_SWEEPING_LEN = 80.0_vp;
 constexpr float OPACITY_MAX = 1.0f;
-constexpr float OPACITY_MIN = 0.005f;
+constexpr float OPACITY_MIN = 0.0005f;
 constexpr float POINT_INTERVAL = 2.0f;
 } // namespace
 ProgressModifier::ProgressModifier()
@@ -291,7 +291,7 @@ void ProgressModifier::StartRingLoadingTailAnimation()
     CHECK_NULL_VOID(context);
     bool isFormRender = context->IsFormRender();
     AnimationOption optionTail = AnimationOption();
-    auto curveTail = AceType::MakeRefPtr<CubicCurve>(0.33f, 0.00f, 0.66f, 0.30f);
+    auto curveTail = AceType::MakeRefPtr<CubicCurve>(0.33f, 0.00f, 0.66f, 0.10f);
     optionTail.SetDuration(LOADING_ANIMATION_DURATION);
     optionTail.SetCurve(curveTail);
     optionTail.SetIteration(isFormRender ? 1 : -1);
