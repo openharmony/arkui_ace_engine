@@ -354,7 +354,10 @@ void DragDropManager::OnDragMove(float globalX, float globalY, const std::string
             FireOnDragEvent(preTargetFrameNode_, point, DragEventType::LEAVE, extraInfo);
             preTargetFrameNode_ = nullptr;
         }
-
+        
+#ifdef ENABLE_DRAG_FRAMEWORK
+        InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::DEFAULT);
+#endif // ENABLE_DRAG_FRAMEWORK
         return;
     }
 
