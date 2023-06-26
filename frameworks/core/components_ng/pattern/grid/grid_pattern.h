@@ -100,6 +100,10 @@ public:
             });
     }
 
+    int32_t GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode) override;
+
+    void ScrollToFocusNodeIndex(int32_t index) override;
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<GridEventHub>();
@@ -184,7 +188,7 @@ private:
         int32_t curMainIndex, int32_t curCrossIndex, int32_t curMainSpan, int32_t curCrossSpan, FocusStep step);
     WeakPtr<FocusHub> SearchFocusableChildInCross(int32_t tarMainIndex, int32_t tarCrossIndex, int32_t maxCrossCount,
         int32_t curMainIndex = -1, int32_t curCrossIndex = -1);
-    WeakPtr<FocusHub> GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarCrossIndex);
+    WeakPtr<FocusHub> GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarCrossIndex, int32_t tarIndex = -1);
     std::unordered_set<int32_t> GetFocusableChildCrossIndexesAt(int32_t tarMainIndex);
     void ScrollToFocusNode(const WeakPtr<FocusHub>& focusNode);
     void FlushCurrentFocus();
