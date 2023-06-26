@@ -107,6 +107,7 @@ constexpr double ROUND_UNIT = 360.0;
 constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t MIN_ROTATE_VECTOR_Z = 9;
+constexpr int32_t PLATFORM_VERSION_TEN = 10;
 constexpr int32_t PARAMETER_LENGTH_FIRST = 1;
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
@@ -2292,7 +2293,13 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
 {
     NG::MenuParam menuParam;
-    menuParam.placement = Placement::BOTTOM_LEFT;
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (pipelineContext->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        menuParam.placement = Placement::BOTTOM_LEFT;
+    }
     if (info.Length() > PARAMETER_LENGTH_FIRST && info[1]->IsObject()) {
         ParseBindOptionParam(info, menuParam);
     }
