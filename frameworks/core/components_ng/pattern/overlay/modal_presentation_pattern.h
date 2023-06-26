@@ -69,6 +69,11 @@ public:
         }
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return {FocusType::SCOPE, true};
+    }
+
 private:
     void OnAttachToFrameNode() override;
     int32_t targetId_ = -1;
