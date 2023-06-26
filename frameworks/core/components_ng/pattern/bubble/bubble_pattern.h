@@ -87,8 +87,6 @@ public:
         return { FocusType::SCOPE, true };
     }
 
-    void OnAreaChangedInner() override;
-
     void StartEnteringAnimation(std::function<void()> finish);
     void StartExitingAnimation(std::function<void()> finish);
     bool IsOnShow();
