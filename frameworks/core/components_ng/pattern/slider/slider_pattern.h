@@ -143,6 +143,7 @@ private:
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandlingGestureStart(const GestureEvent& info);
     void HandlingGestureEvent(const GestureEvent& info);
     void HandledGestureEvent();
 
