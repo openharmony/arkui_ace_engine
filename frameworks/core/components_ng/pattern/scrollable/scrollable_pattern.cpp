@@ -270,7 +270,9 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
             scrollBar_->MarkNeedRender();
             scrollBar_.Reset();
         }
-    } else if (!scrollBar_) {
+        return;
+    }
+    if (!scrollBar_) {
         scrollBar_ = AceType::MakeRefPtr<ScrollBar>(displayMode);
         // set the scroll bar style
         if (GetAxis() == Axis::HORIZONTAL) {
@@ -279,8 +281,17 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
         RegisterScrollBarEventTask();
     } else if (scrollBar_->GetDisplayMode() != displayMode) {
         scrollBar_->SetDisplayMode(displayMode);
-    } else {
-        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID_NOLOG(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID_NOLOG(renderContext);
+    if (renderContext->HasBorderRadius()) {
+        auto borderRadius = renderContext->GetBorderRadius().value();
+        if (!(borderRadius == scrollBar_->GetHostBorderRadius())) {
+            scrollBar_->SetHostBorderRadius(borderRadius);
+            scrollBar_->CalcReservedHeight();
+        }
     }
 }
 
