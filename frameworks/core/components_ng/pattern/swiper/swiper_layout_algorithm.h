@@ -190,6 +190,7 @@ private:
     void MeasureArrow(const RefPtr<LayoutWrapper>& arrowWrapper, const RefPtr<LayoutProperty>& layoutProperty) const;
     void ArrowLayout(
         LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& arrowWrapper, const PaddingPropertyF padding) const;
+    void OffScreenLayoutDirection();
     bool isLoop_ = true;
     float prevMargin_ = 0.0f;
     float nextMargin_ = 0.0f;
@@ -216,7 +217,9 @@ private:
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;
     std::optional<int32_t> currentTargetIndex_;
-    int32_t currentIndex_;
+    int32_t currentIndex_ = 0;
+    bool forwardFeature_ = false;
+    bool backwardFeature_ = false;
 };
 
 } // namespace OHOS::Ace::NG
