@@ -600,6 +600,10 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
 
     auto minSideBarWidth = layoutProperty->GetMinSideBarWidth().value_or(DEFAULT_MIN_SIDE_BAR_WIDTH);
     auto maxSideBarWidth = layoutProperty->GetMaxSideBarWidth().value_or(DEFAULT_MAX_SIDE_BAR_WIDTH);
+    if (minSideBarWidth > maxSideBarWidth) {
+        minSideBarWidth = DEFAULT_MIN_SIDE_BAR_WIDTH;
+        maxSideBarWidth = DEFAULT_MAX_SIDE_BAR_WIDTH;
+    }
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
