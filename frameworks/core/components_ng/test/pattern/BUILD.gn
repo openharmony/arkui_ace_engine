@@ -40,7 +40,7 @@ group("pattern_unittest") {
     "grid_row:grid_row_test_ng",
     "hyperlink:hyperlink_test_ng",
     "image:image_test_ng",
-    "image_animator:image_animator_pattern_test",
+    "image_animator:image_animator_test_ng",
     "indexer:indexer_test_ng",
     "linear_layout:linear_layout_test_ng",
     "linear_split:linear_split_pattern_test_ng",

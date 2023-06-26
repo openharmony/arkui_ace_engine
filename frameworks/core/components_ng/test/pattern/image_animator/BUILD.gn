@@ -17,7 +17,7 @@ import(
     "//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ohos_unittest("image_animator_pattern_test") {
+ohos_unittest("image_animator_test_ng") {
   module_out_path = pattern_test_output_path
 
   include_dirs = [
@@ -77,7 +77,7 @@ ohos_unittest("image_animator_pattern_test") {
     "$ace_root/test/mock/core/common/mock_container.cpp",
 
     # self
-    "image_animator_view_test_ng.cpp",
+    "image_animator_test_ng.cpp",
   ]
 
   deps = [
