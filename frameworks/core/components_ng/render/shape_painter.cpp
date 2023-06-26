@@ -105,6 +105,11 @@ void ShapePainter::SetBrush(RSBrush& brush, const ShapePaintProperty& shapePaint
     if (shapePaintProperty.HasFillOpacity()) {
         rSColor.SetAlphaF(static_cast<RSScalar>(shapePaintProperty.GetFillOpacityValue()));
     }
+    if (shapePaintProperty.HasAntiAlias()) {
+        brush.SetAntiAlias(shapePaintProperty.GetAntiAliasValue());
+    } else {
+        brush.SetAntiAlias(shapePaintProperty.ANTIALIAS_DEFAULT);
+    }
     brush.SetColor(rSColor);
 }
 } // namespace OHOS::Ace::NG
