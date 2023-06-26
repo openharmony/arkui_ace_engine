@@ -67,7 +67,9 @@ void UIExtensionPattern::OnConnect()
 void UIExtensionPattern::OnDisconnect()
 {
     LOGI("UIExtensionPattern OnDisconnect called");
+    ContainerScope scope(instanceId_);
     auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID_NOLOG(taskExecutor);
     taskExecutor->PostTask([weak = WeakClaim(this)]() {
