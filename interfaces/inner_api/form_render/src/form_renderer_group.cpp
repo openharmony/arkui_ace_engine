@@ -97,7 +97,13 @@ void FormRendererGroup::DeleteForm(const std::string& compId)
         }
     }
 
-    if (formRequests_.empty() || compId != currentCompId_) {
+    if (compId != currentCompId_) {
+        return;
+    }
+
+    if (formRequests_.empty()) {
+        HILOG_INFO("Release renderer obj due to formRequests is empty.");
+        DeleteForm();
         return;
     }
 
@@ -107,10 +113,15 @@ void FormRendererGroup::DeleteForm(const std::string& compId)
     formRenderer_->AttachForm(request.want, request.formJsInfo);
 }
 
+bool FormRendererGroup::IsFormRequestsEmpty()
+{
+    return formRequests_.empty();
+}
+
 void FormRendererGroup::DeleteForm()
 {
     if (formRenderer_ == nullptr) {
-        HILOG_ERROR("DeleteForm failed, formRenderer is null");
+        HILOG_INFO("FormRenderer has destory");
         return;
     }
     formRenderer_->Destroy();

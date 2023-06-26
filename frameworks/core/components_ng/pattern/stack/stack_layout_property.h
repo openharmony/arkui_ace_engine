@@ -16,8 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_STACK_STACK_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_STACK_STACK_LAYOUT_PROPERTY_H
 
+#include "core/common/ace_application_info.h"
 #include "core/components_ng/layout/layout_property.h"
-
+#include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 class ACE_EXPORT StackLayoutProperty final : public LayoutProperty {
     DECLARE_ACE_TYPE(StackLayoutProperty, LayoutProperty);
@@ -31,20 +32,30 @@ public:
     {
         auto layoutProperty = MakeRefPtr<StackLayoutProperty>();
         layoutProperty->UpdateLayoutProperty(this);
+        layoutProperty->propAlignmentContent_ = CloneAlignmentContent();
+        layoutProperty->propAlignment_ = CloneAlignment();
         return layoutProperty;
     }
 
     void Reset() override
     {
         LayoutProperty::Reset();
+        ResetAlignmentContent();
+        ResetAlignment();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         LayoutProperty::ToJsonValue(json);
+        auto context = PipelineContext::GetCurrentContext();
+        // add ApI version protection
         auto align = Alignment::CENTER;
-        if (GetPositionProperty()) {
-            align = GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER);
+        if (context && context->GetMinPlatformVersion() <= static_cast<int32_t>(PlatformVersion::VERSION_NINE)) {
+            align = propAlignmentContent_.value_or(Alignment::CENTER);
+        } else {
+            if (GetPositionProperty()) {
+                align = GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER);
+            }
         }
         json->Put("alignContent", align.GetAlignmentStr(TextDirection::LTR).c_str());
     }
@@ -54,6 +65,9 @@ public:
         UpdateAlignment(Alignment::GetAlignment(TextDirection::LTR, json->GetString("alignContent")));
         LayoutProperty::FromJson(json);
     }
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AlignmentContent, Alignment, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Alignment, Alignment, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(StackLayoutProperty);

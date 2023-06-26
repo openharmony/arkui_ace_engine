@@ -32,9 +32,13 @@
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "base/msdp/device_status/interfaces/innerkits/interaction/include/interaction_manager.h"
 #include "core/common/udmf/udmf_client.h"
+#include "core/components_ng/render/adapter/component_snapshot.h"
 #endif // ENABLE_DRAG_FRAMEWORK
 namespace OHOS::Ace::NG {
 #ifdef ENABLE_DRAG_FRAMEWORK
+RefPtr<PixelMap> g_pixelMap = {};
+bool g_getPixelMapSucc = false;
+constexpr int32_t CREATE_PIXELMAP_TIME = 80;
 using namespace Msdp::DeviceStatus;
 constexpr float PIXELMAP_DRAG_SCALE = 1.0f;
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -411,7 +415,43 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+#if defined(ENABLE_DRAG_FRAMEWORK) && defined(ENABLE_ROSEN_BACKEND) && defined(PIXEL_MAP_SUPPORTED)
+    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    auto extraParams = eventHub->GetDragExtraParams(std::string(), info.GetGlobalPoint(), DragEventType::START);
+    auto dragDropInfo = (eventHub->GetOnDragStart())(event, extraParams);
+    if (dragDropInfo.customNode) {
+        g_getPixelMapSucc = false;
+        auto callback = [pipeline, info, weak = WeakClaim(this)](
+                std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg) {
+            auto gestureEventHub = weak.Upgrade();
+            CHECK_NULL_VOID(gestureEventHub);
+            if (pixelMap == nullptr) {
+                LOGE("%{public}s: failed to get pixelmap, return nullptr", __func__);
+                g_getPixelMapSucc = false;
+            } else {
+                g_pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
+                g_getPixelMapSucc = true;
+            }
+            gestureEventHub->OnDragStart(info, pipeline);
+        };
+        auto frameNode = AceType::DynamicCast<FrameNode>(dragDropInfo.customNode);
+        NG::ComponentSnapshot::Create(frameNode, std::move(callback), CREATE_PIXELMAP_TIME);
+        return;
+    }
+#endif
+    OnDragStart(info, pipeline);
+}
 
+void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<PipelineBase>& context)
+{
+    auto eventHub = eventHub_.Upgrade();
+    CHECK_NULL_VOID(eventHub);
+    if (!IsAllowedDrag(eventHub)) {
+        gestureInfoForWeb_ = info;
+        return;
+    }
+    auto pipeline = AceType::DynamicCast<PipelineContext>(context);
+    CHECK_NULL_VOID(pipeline);
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     event->SetX(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
     event->SetY(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
@@ -444,7 +484,9 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     dragDropManager->SetSummaryMap(summary);
     CHECK_NULL_VOID(pixelMap_);
     std::shared_ptr<Media::PixelMap> pixelMap;
-    if (dragDropInfo.pixelMap) {
+    if (g_getPixelMapSucc) {
+        pixelMap = g_pixelMap->GetPixelMapSharedPtr();
+    } else if (dragDropInfo.pixelMap) {
         pixelMap = dragDropInfo.pixelMap->GetPixelMapSharedPtr();
     }
     if (pixelMap == nullptr) {
@@ -466,7 +508,8 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     DragData dragData {{pixelMap, width * PIXELMAP_WIDTH_RATE, height * PIXELMAP_HEIGHT_RATE}, {}, udKey,
         static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(),
         info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(), info.GetTargetDisplayId(), true};
-    ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData, GetDragCallback());
+    ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(
+        dragData, GetDragCallback(pipeline, eventHub));
     if (ret != 0) {
         LOGE("InteractionManager: drag start error");
         return;
@@ -721,12 +764,12 @@ int32_t GestureEventHub::SetDragData(const RefPtr<UnifiedData>& unifiedData, std
     }
     return ret;
 }
-OnDragCallback GestureEventHub::GetDragCallback()
+OnDragCallback GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub)
 {
     auto ret = [](const DragNotifyMsg& notifyMessage) {};
-    auto eventHub = eventHub_.Upgrade();
+    auto eventHub = hub.Upgrade();
     CHECK_NULL_RETURN(eventHub, ret);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = AceType::DynamicCast<PipelineContext>(context);
     CHECK_NULL_RETURN(pipeline, ret);
     auto taskScheduler = pipeline->GetTaskExecutor();
     CHECK_NULL_RETURN(taskScheduler, ret);

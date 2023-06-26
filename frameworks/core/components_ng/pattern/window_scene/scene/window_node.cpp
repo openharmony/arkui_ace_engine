@@ -30,11 +30,19 @@ HitTestResult WindowNode::TouchTest(const PointF& globalPoint, const PointF& par
     }
     auto context = PipelineContext::GetCurrentContext();
     auto pointerEvent = touchRestrict.touchEvent.pointerEvent;
+    if (pointerEvent == nullptr) {
+        return HitTestResult::OUT_OF_REGION;
+    }
     auto selfGlobalOffset = GetTransformRelativeOffset();
     Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, GetTransformScale());
     auto pattern = GetPattern<WindowPattern>();
     pattern->DispatchPointerEvent(pointerEvent);
-    auto callback = [pattern](const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {
+    auto callback = [weak = WeakClaim(this)](const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {
+        auto windowNode = weak.Upgrade();
+        CHECK_NULL_VOID(windowNode);
+        auto selfGlobalOffset = windowNode->GetTransformRelativeOffset();
+        Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, windowNode->GetTransformScale());
+        auto pattern = windowNode->GetPattern<WindowPattern>();
         pattern->DispatchPointerEvent(pointerEvent);
     };
     context->AddWindowSceneTouchEventCallback(touchRestrict.touchEvent.id, callback);

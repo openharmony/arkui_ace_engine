@@ -145,8 +145,9 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
     layoutWrapper->MountToHostOnMainThread();
     auto paintProperty = node->GetPaintProperty<PaintProperty>();
     auto wrapper = node->CreatePaintWrapper();
-    CHECK_NULL_VOID(wrapper);
-    wrapper->FlushRender();
+    if (wrapper != nullptr) {
+        wrapper->FlushRender();
+    }
     paintProperty->CleanDirty();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -570,6 +571,10 @@ void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
     auto visibleRect = frameRect;
     RectF parentRect;
     auto parentUi = GetParent();
+    if (!parentUi) {
+        visibleRect.SetWidth(0.0f);
+        visibleRect.SetHeight(0.0f);
+    }
     while (parentUi) {
         auto parentFrame = AceType::DynamicCast<FrameNode>(parentUi);
         if (!parentFrame) {
@@ -681,9 +686,14 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
     UpdateLayoutPropertyFlag();
     layoutWrapper = CreateLayoutWrapper();
     CHECK_NULL_RETURN_NOLOG(layoutWrapper, std::nullopt);
-    auto task = [layoutWrapper, layoutConstraint = GetLayoutConstraint(), forceUseMainThread]() {
+    auto task = [layoutWrapper, depth = GetDepth(), layoutConstraint = GetLayoutConstraint(), forceUseMainThread]() {
         layoutWrapper->SetActive();
         layoutWrapper->SetRootMeasureNode();
+        {
+            ACE_SCOPED_TRACE("LayoutWrapper::RestoreGeoState");
+            // restore to the geometry state after last Layout and before SafeArea expansion and keyboard avoidance
+            LayoutWrapper::RestoreGeoState(depth);
+        }
         {
             ACE_SCOPED_TRACE("LayoutWrapper::Measure");
             layoutWrapper->Measure(layoutConstraint);
@@ -691,6 +701,12 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
         {
             ACE_SCOPED_TRACE("LayoutWrapper::Layout");
             layoutWrapper->Layout();
+        }
+        {
+            ACE_SCOPED_TRACE("LayoutWrapper::ExpandSafeArea");
+            LayoutWrapper::SaveGeoState();
+            LayoutWrapper::AvoidKeyboard();
+            LayoutWrapper::ExpandSafeArea();
         }
         {
             ACE_SCOPED_TRACE("LayoutWrapper::MountToHostOnMainThread");
@@ -802,7 +818,8 @@ RefPtr<LayoutWrapper> FrameNode::UpdateLayoutWrapper(
     }
 
     pattern_->BeforeCreateLayoutWrapper();
-    if (forceMeasure || (GetTag() == V2::TAB_CONTENT_ITEM_ETS_TAG && !isActive_)) {
+    if (forceMeasure ||
+        ((GetTag() == V2::TAB_CONTENT_ITEM_ETS_TAG || GetTag() == V2::GRID_ITEM_ETS_TAG) && !isActive_)) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
     if (forceLayout) {
@@ -1741,5 +1758,42 @@ bool FrameNode::RemoveImmediately() const
     CHECK_NULL_RETURN(context, true);
     // has transition out animation, need to wait for animation end
     return !context->HasTransitionOutAnimation();
+}
+
+std::vector<RefPtr<FrameNode>> FrameNode::GetNodesById(const std::unordered_set<int32_t>& set)
+{
+    std::vector<RefPtr<FrameNode>> nodes;
+    for (auto nodeId : set) {
+        auto uiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
+        if (!uiNode) {
+            continue;
+        }
+        auto frameNode = DynamicCast<FrameNode>(uiNode);
+        if (frameNode) {
+            nodes.emplace_back(frameNode);
+        }
+    }
+    return nodes;
+}
+
+bool FrameNode::IsContentRoot()
+{
+    constexpr int32_t MAX_DEPTH_OF_FRONTEND_ROOT = 6;
+    if (GetDepth() > MAX_DEPTH_OF_FRONTEND_ROOT) {
+        // depth of frontend root is always 5 / 6
+        // (Root->Stage->[Stack]->Page->JsView->content)
+        // so stop traversing if we're beyond that
+        return false;
+    }
+    // overlay root
+    if (GetDepth() == 2 && GetTag() != V2::STAGE_ETS_TAG) {
+        return true;
+    }
+    // page root
+    auto parent = GetParent();
+    CHECK_NULL_RETURN_NOLOG(parent, false);
+    auto grandParent = parent->GetParent();
+    CHECK_NULL_RETURN_NOLOG(grandParent, false);
+    return parent->GetTag() == V2::JS_VIEW_ETS_TAG && grandParent->GetTag() == V2::PAGE_ETS_TAG;
 }
 } // namespace OHOS::Ace::NG

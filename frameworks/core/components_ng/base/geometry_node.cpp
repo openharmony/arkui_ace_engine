@@ -30,6 +30,7 @@ void GeometryNode::Reset()
     content_.reset();
     parentGlobalOffset_.Reset();
     parentLayoutConstraint_.reset();
+    previousState_.reset();
 }
 
 RefPtr<GeometryNode> GeometryNode::Clone() const
@@ -47,6 +48,7 @@ RefPtr<GeometryNode> GeometryNode::Clone() const
     }
     node->parentGlobalOffset_ = parentGlobalOffset_;
     node->parentLayoutConstraint_ = parentLayoutConstraint_;
+    node->previousState_ = previousState_ ? std::make_unique<RectF>(*previousState_) : nullptr;
     return node;
 }
 
@@ -64,4 +66,17 @@ void GeometryNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 #endif
 }
 
+void GeometryNode::Restore()
+{
+    CHECK_NULL_VOID(previousState_);
+    frame_.rect_ = *previousState_;
+    previousState_ = nullptr;
+}
+
+void GeometryNode::Save()
+{
+    // INVARIANT: previousState_ is null when Save() is called (only allow 1 layer of save/restore)
+    CHECK_NULL_VOID(!previousState_);
+    previousState_ = std::make_unique<RectF>(frame_.rect_);
+}
 } // namespace OHOS::Ace::NG

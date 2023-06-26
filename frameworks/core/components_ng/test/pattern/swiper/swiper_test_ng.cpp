@@ -1418,7 +1418,7 @@ HWTEST_F(SwiperTestNg, SwiperModelNg002, TestSize.Level1)
      * @tc.steps: step3.6. Test SetOnAnimationStart function.
      * @tc.expected:swiperPattern->animationStartEvent_ not null.
      */
-    auto onAnimationStart = [](const BaseEventInfo* info) {};
+    auto onAnimationStart = [](int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {};
     swiperModelNG.SetOnAnimationStart(std::move(onAnimationStart));
     EXPECT_NE(eventHub->animationStartEvent_, nullptr);
 
@@ -1426,7 +1426,7 @@ HWTEST_F(SwiperTestNg, SwiperModelNg002, TestSize.Level1)
      * @tc.steps: step3.7. Test SetOnAnimationEnd function.
      * @tc.expected:swiperPattern->animationEndEvent_ not null.
      */
-    auto onAnimationEnd = [](const BaseEventInfo* info) {};
+    auto onAnimationEnd = [](int32_t index, const AnimationCallbackInfo& info) {};
     swiperModelNG.SetOnAnimationEnd(std::move(onAnimationEnd));
     EXPECT_NE(eventHub->animationEndEvent_, nullptr);
 }

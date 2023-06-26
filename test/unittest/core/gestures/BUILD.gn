@@ -48,6 +48,7 @@ common_sources = [
   # components_ng_base
   "$ace_root/frameworks/core/components_ng/base/frame_node.cpp",
   "$ace_root/frameworks/core/components_ng/base/geometry_node.cpp",
+  "$ace_root/frameworks/core/components_ng/base/modifier.cpp",
   "$ace_root/frameworks/core/components_ng/base/view_stack_processor.cpp",
 
   # components_ng_render

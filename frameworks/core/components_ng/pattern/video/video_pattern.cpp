@@ -1101,6 +1101,7 @@ void VideoPattern::SetMethodCall()
             fullScreenPattern->ExitFullScreen();
         });
     });
+    CHECK_NULL_VOID_NOLOG(videoControllerV2_);
     videoControllerV2_->AddVideoController(videoController);
 }
 

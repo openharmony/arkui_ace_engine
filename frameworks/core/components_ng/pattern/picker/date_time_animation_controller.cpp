@@ -148,13 +148,13 @@ void DateTimeAnimationController::PlayOldColumnOpacityInAnimation()
     });
     monthDaysRender->UpdateOpacity(1);
     timePickerRender->UpdateOpacity(1);
-    AnimationUtils::Animate(animationOption,
+    oldColumnOpacityInAnimation_ = AnimationUtils::StartAnimation(animationOption,
         [monthDaysRender, timePickerRender]() {
             CHECK_NULL_VOID_NOLOG(monthDaysRender);
             CHECK_NULL_VOID_NOLOG(timePickerRender);
             monthDaysRender->UpdateOpacity(0);
             timePickerRender->UpdateOpacity(0);
-        }, animationOption.GetOnFinishEvent());
+        });
 }
 
 void DateTimeAnimationController::PlayNewColumnOpacityInAnimation()
@@ -247,13 +247,13 @@ void DateTimeAnimationController::PlayOldColumnOpacityOutAnimation()
 
     monthDaysRender->UpdateOpacity(0);
     timePickerRender->UpdateOpacity(0);
-    AnimationUtils::Animate(animationOption,
+    oldColumnOpacityOutAnimation_ = AnimationUtils::StartAnimation(animationOption,
         [monthDaysRender, timePickerRender]() {
             CHECK_NULL_VOID_NOLOG(monthDaysRender);
             CHECK_NULL_VOID_NOLOG(timePickerRender);
             monthDaysRender->UpdateOpacity(1);
             timePickerRender->UpdateOpacity(1);
-        }, animationOption.GetOnFinishEvent());
+        });
 }
 
 void DateTimeAnimationController::PlayNewColumnOpacityOutAnimation()
@@ -316,11 +316,26 @@ void DateTimeAnimationController::PlayButtonOpacityOutAnimation()
     buttonRender->OpacityAnimation(animationOption, 0.0f, 1.0f);
 }
 
+void DateTimeAnimationController::StopOldColumnOpacityInAnimation()
+{
+    if (oldColumnOpacityInAnimation_) {
+        AnimationUtils::StopAnimation(oldColumnOpacityInAnimation_);
+    }
+}
+
+void DateTimeAnimationController::StopOldColumnOpacityOutAnimation()
+{
+    if (oldColumnOpacityOutAnimation_) {
+        AnimationUtils::StopAnimation(oldColumnOpacityOutAnimation_);
+    }
+}
+
 void DateTimeAnimationController::PlayInAnimation()
 {
     PlayTitleInAnimation();
     PlayMovingInAnimation();
 
+    StopOldColumnOpacityOutAnimation();
     PlayOldColumnOpacityInAnimation();
     PlayNewColumnOpacityInAnimation();
     PlayYearColumnOpacityInAnimation();
@@ -332,6 +347,7 @@ void DateTimeAnimationController::PlayOutAnimation()
     PlayTitleOutAnimation();
     PlayMovingOutAnimation();
 
+    StopOldColumnOpacityInAnimation();
     PlayOldColumnOpacityOutAnimation();
     PlayNewColumnOpacityOutAnimation();
     PlayYearColumnOpacityOutAnimation();

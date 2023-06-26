@@ -156,6 +156,8 @@ private:
     void DestroyCallback() const;
     void SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
 
+    void InitializeSafeArea(const RefPtr<Platform::AceContainer>& container);
+
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;

@@ -227,7 +227,10 @@ RSRoundRect BubblePaintMethod::MakeRRect()
 void BubblePaintMethod::PaintBubbleWithArrow(RSCanvas& canvas, PaintWrapper* paintWrapper)
 {
     BuildCompletePath(path_);
+    canvas.Save();
+    canvas.ClipPath(path_, RSClipOp::DIFFERENCE, true);
     PaintShadow(path_, ShadowConfig::DefaultShadowM, canvas);
+    canvas.Restore();
 #ifdef NEW_SKIA
     canvas.ClipPath(path_, RSClipOp::INTERSECT, true);
     canvas.DrawPath(path_);

@@ -460,6 +460,7 @@ void ScrollPattern::AnimateTo(float position, float duration, const RefPtr<Curve
     animator_->SetDuration(static_cast<int32_t>(limitDuration ? std::min(duration, SCROLL_MAX_TIME) : duration));
     animator_->ClearStopListeners();
     animator_->Play();
+    StopScrollBarAnimatorByProxy();
     // TODO: expand stop listener
     animator_->AddStopListener([onFinish, weak = AceType::WeakClaim(this)]() {
         auto scroll = weak.Upgrade();
@@ -469,6 +470,7 @@ void ScrollPattern::AnimateTo(float position, float duration, const RefPtr<Curve
         CHECK_NULL_VOID_NOLOG(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        scroll->StartScrollBarAnimatorByProxy();
         CHECK_NULL_VOID_NOLOG(onFinish);
         onFinish();
     });
@@ -522,6 +524,7 @@ void ScrollPattern::JumpToPosition(float position, int32_t source)
         animator_->ClearInterpolators();
     }
     DoJump(position, source);
+    StartScrollBarAnimatorByProxy();
 }
 
 void ScrollPattern::DoJump(float position, int32_t source)

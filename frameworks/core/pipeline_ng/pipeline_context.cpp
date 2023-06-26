@@ -20,11 +20,13 @@
 #include <cstdint>
 #include <memory>
 
+#include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/safe_area_insets.h"
+
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 
-#include "core/components_ng/render/adapter/rosen_window.h"
 #endif
 
 #include "base/geometry/ng/offset_t.h"
@@ -72,6 +74,7 @@
 
 namespace {
 constexpr int32_t TIME_THRESHOLD = 2 * 1000000; // 3 millisecond
+constexpr int32_t PLATFORM_VERSION_TEN = 10;
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -418,7 +421,8 @@ void PipelineContext::SetupRootElement()
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
     appBarNode_ = installationFree_ ? AppBarView::Create(stageNode) : nullptr;
     if (windowModal_ == WindowModal::CONTAINER_MODAL) {
-        rootNode_->AddChild(ContainerModalViewFactory::GetView(appBarNode_ ? appBarNode_ : stageNode));
+        MaximizeMode maximizeMode = GetWindowManager()->GetWindowMaximizeMode();
+        rootNode_->AddChild(ContainerModalViewFactory::GetView(appBarNode_ ? appBarNode_ : stageNode, maximizeMode));
     } else {
         rootNode_->AddChild(appBarNode_ ? appBarNode_ : stageNode);
     }
@@ -657,97 +661,46 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
 #endif
 }
 
-void PipelineContext::SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback)
+SafeAreaInsets PipelineContext::GetSystemSafeArea() const
 {
-    if (window_) {
-        window_->SetGetViewSafeAreaImpl(std::move(callback));
+    CHECK_NULL_RETURN(safeAreaManager_, {});
+    CHECK_NULL_RETURN_NOLOG(!ignoreViewSafeArea_, {});
+    return safeAreaManager_->GetSystemSafeArea();
+}
+
+SafeAreaInsets PipelineContext::GetCutoutSafeArea() const
+{
+    CHECK_NULL_RETURN(safeAreaManager_, {});
+    CHECK_NULL_RETURN_NOLOG(!ignoreViewSafeArea_, {});
+    return safeAreaManager_->GetCutoutSafeArea();
+}
+
+void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea)
+{
+    CHECK_NULL_VOID_NOLOG(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
+    CHECK_NULL_VOID_NOLOG(safeAreaManager_);
+    if (safeAreaManager_->UpdateSystemSafeArea(systemSafeArea)) {
+        rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
-SafeAreaEdgeInserts PipelineContext::GetCurrentViewSafeArea() const
+void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea)
 {
-    if (window_) {
-        return window_->GetCurrentViewSafeArea();
+    CHECK_NULL_VOID_NOLOG(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
+    CHECK_NULL_VOID_NOLOG(safeAreaManager_);
+    safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea);
+    if (safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea)) {
+        rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
-    return {};
 }
 
-void PipelineContext::SetSystemSafeArea(const SafeAreaEdgeInserts& systemSafeArea)
+SafeAreaInsets PipelineContext::GetSafeArea() const
 {
-    CHECK_NULL_VOID_NOLOG(window_);
-    window_->SetSystemSafeArea(systemSafeArea);
-}
-
-SafeAreaEdgeInserts PipelineContext::GetSystemSafeArea() const
-{
-    if (window_) {
-        return window_->GetSystemSafeArea();
-    }
-    return {};
-}
-
-void PipelineContext::SetCutoutSafeArea(const SafeAreaEdgeInserts& cutoutSafeArea)
-{
-    CHECK_NULL_VOID_NOLOG(window_);
-    window_->SetCutoutSafeArea(cutoutSafeArea);
-}
-
-SafeAreaEdgeInserts PipelineContext::GetCutoutSafeArea() const
-{
-    if (window_) {
-        return window_->GetCutoutSafeArea();
-    }
-    return {};
-}
-
-SafeAreaEdgeInserts PipelineContext::GetViewSafeArea() const
-{
-    SafeAreaEdgeInserts safeArea;
-    CHECK_NULL_RETURN_NOLOG(window_, safeArea);
-    auto systemAvoidArea = window_->GetSystemSafeArea();
-    auto cutoutAvoidArea = window_->GetCutoutSafeArea();
-    return systemAvoidArea.CombineSafeArea(cutoutAvoidArea);
-}
-
-void PipelineContext::AppBarAdaptToSafeArea()
-{
-    CHECK_NULL_VOID_NOLOG(appBarNode_);
-    auto layoutProperty = appBarNode_->GetLayoutProperty();
-    CHECK_NULL_VOID_NOLOG(layoutProperty);
-    NG::PaddingProperty paddings;
-    if (!GetIgnoreViewSafeArea()) {
-        SafeAreaEdgeInserts safeArea = GetViewSafeArea();
-        LOGI("AppBarAdaptToSafeArea ViewSafeArea:%{public}s", safeArea.ToString().c_str());
-        paddings.top = NG::CalcLength(safeArea.topRect_.Height());
-        paddings.bottom = NG::CalcLength(safeArea.bottomRect_.Height());
-        paddings.left = NG::CalcLength(safeArea.leftRect_.Height());
-        paddings.right = NG::CalcLength(safeArea.rightRect_.Height());
-    }
-    layoutProperty->UpdatePadding(paddings);
-}
-
-void PipelineContext::ResetViewSafeArea()
-{
-    CHECK_NULL_VOID_NOLOG(GetIsLayoutFullScreen());
-    if (installationFree_) {
-        AppBarAdaptToSafeArea();
-    } else {
-        auto stageManager = GetStageManager();
-        CHECK_NULL_VOID_NOLOG(stageManager);
-        auto stageNode = stageManager->GetStageNode();
-        CHECK_NULL_VOID_NOLOG(stageNode);
-        auto pageNode = stageManager->GetLastPage();
-        CHECK_NULL_VOID_NOLOG(pageNode);
-        auto layoutProperty = pageNode->GetLayoutProperty();
-        CHECK_NULL_VOID_NOLOG(layoutProperty);
-        if (!GetIgnoreViewSafeArea()) {
-            layoutProperty->SetSafeArea(GetViewSafeArea());
-            LOGI("ResetViewSafeArea viewSafeArea:%{public}s", layoutProperty->GetSafeArea().ToString().c_str());
-        } else {
-            layoutProperty->SetSafeArea({});
-        }
-    }
-    rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    CHECK_NULL_RETURN_NOLOG(!ignoreViewSafeArea_, {});
+    CHECK_NULL_RETURN_NOLOG(safeAreaManager_, {});
+    auto systemAvoidArea = safeAreaManager_->GetSystemSafeArea();
+    auto cutoutAvoidArea = safeAreaManager_->GetCutoutSafeArea();
+    return systemAvoidArea.Combine(cutoutAvoidArea);
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(
@@ -778,17 +731,18 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
              "keyboardHeight %{public}f",
             positionY, (rootSize.Height() - keyboardHeight), offsetFix, keyboardHeight);
         if (NearZero(keyboardHeight)) {
-            SetRootRect(rootSize.Width(), rootSize.Height(), 0);
+            safeAreaManager_->UpdateKeyboardOffset(0.0f);
         } else if (LessOrEqual(rootSize.Height() - positionY - height, height) &&
                    LessOrEqual(rootSize.Height() - positionY, keyboardHeight)) {
-            SetRootRect(rootSize.Width(), rootSize.Height(), -keyboardHeight);
+            safeAreaManager_->UpdateKeyboardOffset(-keyboardHeight);
         } else if (positionY + height > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0) {
-            SetRootRect(rootSize.Width(), rootSize.Height(), -offsetFix);
+            safeAreaManager_->UpdateKeyboardOffset(-offsetFix);
         } else if ((positionY + height > rootSize.Height() - keyboardHeight &&
                        positionY < rootSize.Height() - keyboardHeight && height < keyboardHeight / 2.0f) &&
                    NearZero(rootNode_->GetGeometryNode()->GetFrameOffset().GetY())) {
-            SetRootRect(rootSize.Width(), rootSize.Height(), -height - offsetFix / 2.0f);
+            safeAreaManager_->UpdateKeyboardOffset(-height - offsetFix / 2.0f);
         }
+        rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
 
     AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig_, keyboardHeight);
@@ -1396,15 +1350,8 @@ void PipelineContext::HandleVisibleAreaChangeEvent()
     if (onVisibleAreaChangeNodeIds_.empty()) {
         return;
     }
-    for (const auto& visibleChangeNodeId : onVisibleAreaChangeNodeIds_) {
-        auto uiNode = ElementRegister::GetInstance()->GetUINodeById(visibleChangeNodeId);
-        if (!uiNode) {
-            continue;
-        }
-        auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
-        if (!frameNode) {
-            continue;
-        }
+    auto nodes = FrameNode::GetNodesById(onVisibleAreaChangeNodeIds_);
+    for (auto&& frameNode : nodes) {
         frameNode->TriggerVisibleAreaChangeCallback();
     }
 }
@@ -1424,15 +1371,8 @@ void PipelineContext::HandleOnAreaChangeEvent()
     if (onAreaChangeNodeIds_.empty()) {
         return;
     }
-    for (const auto& nodeId : onAreaChangeNodeIds_) {
-        auto uiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
-        if (!uiNode) {
-            continue;
-        }
-        auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
-        if (!frameNode) {
-            continue;
-        }
+    auto nodes = FrameNode::GetNodesById(onAreaChangeNodeIds_);
+    for (auto&& frameNode : nodes) {
         frameNode->TriggerOnAreaChangeCallback();
     }
 }
@@ -1693,13 +1633,9 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
         manager->ClearExtraInfo();
     }
 #endif // ENABLE_DRAG_FRAMEWORK
-    if (manager->IsDragged() && action != DragEventAction::DRAG_EVENT_END) {
+    if (manager->IsDragged() && action != DragEventAction::DRAG_EVENT_END &&
+        action != DragEventAction::DRAG_EVENT_START) {
         LOGI("current context is the source of drag");
-#ifdef ENABLE_DRAG_FRAMEWORK
-        if (action == DragEventAction::DRAG_EVENT_START) {
-            manager->RequireSummary();
-        }
-#endif // ENABLE_DRAG_FRAMEWORK
         return;
     }
 

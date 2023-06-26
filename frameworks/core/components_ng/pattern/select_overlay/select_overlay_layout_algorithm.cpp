@@ -104,8 +104,11 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
         return defaultMenuEndOffset_ - OffsetF(menuWidth, 0.0f);
     }
 
-    const auto& firstHandleRect = info_->firstHandle.paintRect;
-    const auto& secondHandleRect = info_->secondHandle.paintRect;
+    // paint rect is in global position, need to convert to local position
+    auto offset = layoutWrapper->GetGeometryNode()->GetFrameOffset();
+    const auto firstHandleRect = info_->firstHandle.paintRect - offset;
+    const auto secondHandleRect = info_->secondHandle.paintRect - offset;
+
     auto singleHandle = firstHandleRect;
     if (!info_->firstHandle.isShow) {
         singleHandle = secondHandleRect;

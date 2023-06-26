@@ -103,9 +103,7 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
     }
     if (source == SCROLL_FROM_START) {
         SetParentScrollable();
-        if (scrollBarProxy_) {
-            scrollBarProxy_->StopScrollBarAnimator();
-        }
+        StopScrollBarAnimatorByProxy();
     }
     return true;
 }
@@ -124,9 +122,7 @@ void ScrollablePattern::OnScrollEnd()
         scrollBar_->SetDriving(false);
         scrollBar_->OnScrollEnd();
     }
-    if (scrollBarProxy_) {
-        scrollBarProxy_->StartScrollBarAnimator();
-    }
+    StartScrollBarAnimatorByProxy();
 }
 
 void ScrollablePattern::AddScrollEvent()
@@ -172,6 +168,13 @@ void ScrollablePattern::AddScrollEvent()
     };
     scrollable->SetOverScrollOffsetCallback(std::move(func));
     scrollable->SetNestedScrollOptions(nestedScroll_);
+
+    auto scrollSnap = [weak = WeakClaim(this)](double targetOffset, double velocity) -> bool {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->OnScrollSnapCallback(targetOffset, velocity);
+    };
+    scrollable->SetOnScrollSnapCallback(scrollSnap);
 }
 
 void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)

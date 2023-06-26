@@ -25,6 +25,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT UIExtensionModelNG : public UIExtensionModel {
 public:
     void Create(const std::string& bundleName, const std::string& abilityName) override;
+    void SetOnRelease(std::function<void(int32_t)>&& onRelease) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_MODEL_NG_H

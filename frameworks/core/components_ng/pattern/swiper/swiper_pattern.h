@@ -446,8 +446,9 @@ private:
     float GetRemainingOffset() const;
     float MainSize() const;
     void FireChangeEvent() const;
-    void FireAnimationStartEvent() const;
-    void FireAnimationEndEvent() const;
+    void FireAnimationStartEvent(int32_t currentIndex, int32_t nextIndex, const AnimationCallbackInfo& info) const;
+    void FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
+    void FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
 
     float GetItemSpace() const;
     float GetPrevMargin() const;
@@ -465,6 +466,7 @@ private:
     bool IsShowIndicator() const;
     float GetTranslateLength() const;
     std::pair<int32_t, SwiperItemInfo> GetFirstItemInfoInVisibleArea() const;
+    std::pair<int32_t, SwiperItemInfo> GetSecondItemInfoInVisibleArea() const;
     void OnIndexChange() const;
     bool IsOutOfHotRegion(const PointF& dragPoint) const;
     bool IsOutOfIndicatorZone(const PointF& dragPoint);
@@ -473,7 +475,7 @@ private:
     void PostTranslateTask(uint32_t delayTime);
     void RegisterVisibleAreaChange();
     bool NeedAutoPlay() const;
-    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool useSpringMotion);
+    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay);
     bool IsShowArrow() const;
     void SaveArrowProperty(const RefPtr<FrameNode>& arrowNode);
     RefPtr<FocusHub> GetFocusHubChild(std::string childFrameName);
@@ -484,6 +486,13 @@ private:
     bool NeedStartAutoPlay() const;
     void CheckAndSetArrowHoverState(const PointF& mousePoint);
     RectF GetArrowFrameRect(const int32_t index) const;
+    float GetCustomPropertyOffset() const;
+    float GetCurrentFirstIndexStartPos() const;
+    void UpdateAnimationProperty(float velocity);
+    void TriggerAnimationEndOnTouchDown();
+    void TriggerAnimationEndOnSwipeToLeft();
+    void TriggerAnimationEndOnSwipeToRight();
+    void TriggerEventOnFinish(int32_t nextIndex);
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -511,6 +520,8 @@ private:
     float currentOffset_ = 0.0f;
     float fadeOffset_ = 0.0f;
     float turnPageRate_ = 0.0f;
+    float currentIndexOffset_ = 0.0f;
+    int32_t gestureSwipeIndex_ = 0;
     int32_t currentFirstIndex_ = 0;
 
     bool moveDirection_ = false;
@@ -523,6 +534,8 @@ private:
     bool IsCustomSize_ = false;
     bool indicatorIsBoolean_ = true;
     bool isAtHotRegion_ = false;
+    bool isDragging_ = false;
+    bool isTouchDown_ = false;
 
     Axis direction_ = Axis::HORIZONTAL;
 
@@ -550,10 +563,11 @@ private:
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;
     std::optional<int32_t> preTargetIndex_;
+    std::optional<int32_t> pauseTargetIndex_;
     float currentDelta_ = 0.0f;
     SwiperLayoutAlgorithm::PositionMap itemPosition_;
     std::optional<float> velocity_;
-
+    bool isFinishAnimation_ = false;
     bool mainSizeIsMeasured_ = false;
 };
 } // namespace OHOS::Ace::NG
