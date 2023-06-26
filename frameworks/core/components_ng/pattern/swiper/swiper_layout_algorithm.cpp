@@ -593,10 +593,10 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             auto leftArrowWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_LEFT_ARROW_ETS_TAG);
             auto rightArrowWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_RIGHT_ARROW_ETS_TAG);
             if (leftArrowWrapper && (leftArrowWrapper->GetHostTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG)) {
-                ArrowLayout(layoutWrapper, leftArrowWrapper);
+                ArrowLayout(layoutWrapper, leftArrowWrapper, padding);
             }
             if (rightArrowWrapper && (rightArrowWrapper->GetHostTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG)) {
-                ArrowLayout(layoutWrapper, rightArrowWrapper);
+                ArrowLayout(layoutWrapper, rightArrowWrapper, padding);
             }
         }
     }
@@ -757,7 +757,8 @@ void SwiperLayoutAlgorithm::MeasureArrow(
     arrowWrapper->Measure(indicatorLayoutConstraint);
 }
 
-void SwiperLayoutAlgorithm::ArrowLayout(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& arrowWrapper) const
+void SwiperLayoutAlgorithm::ArrowLayout(
+    LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& arrowWrapper, const PaddingPropertyF padding) const
 {
     CHECK_NULL_VOID(layoutWrapper);
     CHECK_NULL_VOID(arrowWrapper);
@@ -798,51 +799,55 @@ void SwiperLayoutAlgorithm::ArrowLayout(LayoutWrapper* layoutWrapper, const RefP
         auto indicatorPadding = indicatorType == SwiperIndicatorType::DIGIT
                                     ? swiperIndicatorTheme->GetIndicatorDigitPadding().ConvertToPx()
                                     : swiperIndicatorTheme->GetIndicatorDotPadding().ConvertToPx();
-        startPoint = isLeftArrow
-                         ? (indicatorFrameRect.Left() - arrowFrameSize.Width() -
-                               swiperIndicatorTheme->GetArrowScale().ConvertToPx() * hoverRatio_ + indicatorPadding)
-                         : (indicatorFrameRect.Right() +
-                               swiperIndicatorTheme->GetArrowScale().ConvertToPx() * hoverRatio_ - indicatorPadding);
+        startPoint =
+            isLeftArrow
+                ? (indicatorFrameRect.Left() - arrowFrameSize.Width() -
+                      swiperIndicatorTheme->GetArrowScale().ConvertToPx() + indicatorPadding)
+                : (indicatorFrameRect.Right() + swiperIndicatorTheme->GetArrowScale().ConvertToPx() - indicatorPadding);
         arrowOffset.SetX(startPoint);
-        if (isLeftArrow && !NonNegative(arrowOffset.GetX())) {
-            arrowOffset.SetX(0.0f);
+        if (isLeftArrow && !NonNegative(arrowOffset.GetX() + padding.left.value_or(0.0f))) {
+            arrowOffset.SetX(0.0f + padding.left.value_or(0.0f));
         }
-        if (GreatOrEqual(arrowOffset.GetX() + arrowFrameSize.Width(), swiperFrameSize.Width())) {
-            arrowOffset.SetX(swiperFrameSize.Width() - arrowFrameSize.Width());
+        if (GreatOrEqual(arrowOffset.GetX() + arrowFrameSize.Width(), swiperFrameSize.Width() -
+                padding.right.value_or(0.0f))) {
+            arrowOffset.SetX(swiperFrameSize.Width() - arrowFrameSize.Width() - padding.right.value_or(0.0f));
         }
         arrowOffset.SetY(indicatorFrameRect.Top() + (indicatorFrameSize.Height() - arrowFrameSize.Height()) * 0.5f);
-        if (GreatOrEqual(arrowOffset.GetY() + arrowFrameSize.Height(), swiperFrameSize.Height())) {
-            arrowOffset.SetY(swiperFrameSize.Height() - arrowFrameSize.Height());
-        }
     } else if (axis == Axis::HORIZONTAL && !isShowIndicatorArrow) {
-        startPoint = isLeftArrow ? swiperIndicatorTheme->GetArrowHorizontalMargin().ConvertToPx()
-                                 : (swiperFrameSize.Width() - arrowFrameSize.Width() -
-                                       swiperIndicatorTheme->GetArrowHorizontalMargin().ConvertToPx());
+        startPoint = isLeftArrow
+                         ? swiperIndicatorTheme->GetArrowHorizontalMargin().ConvertToPx() + padding.left.value_or(0.0f)
+                         : (swiperFrameSize.Width() - padding.right.value_or(0.0f) - arrowFrameSize.Width() -
+                               swiperIndicatorTheme->GetArrowHorizontalMargin().ConvertToPx());
         arrowOffset.SetX(startPoint);
-        arrowOffset.SetY((swiperFrameSize.Height() - arrowFrameSize.Height()) * 0.5f);
-
+        arrowOffset.SetY((swiperFrameSize.Height() - padding.top.value_or(0.0f) - padding.bottom.value_or(0.0f) -
+                             arrowFrameSize.Height()) *
+                             0.5f +
+                         padding.top.value_or(0.0f));
     } else if (axis != Axis::HORIZONTAL && isShowIndicatorArrow) {
         auto indicatorPadding = indicatorType == SwiperIndicatorType::DIGIT
                                     ? swiperIndicatorTheme->GetIndicatorDigitPadding().ConvertToPx()
                                     : swiperIndicatorTheme->GetIndicatorDotPadding().ConvertToPx();
-        startPoint = isLeftArrow
-                         ? (indicatorFrameRect.Top() - arrowFrameSize.Height() -
-                               swiperIndicatorTheme->GetArrowScale().ConvertToPx() * hoverRatio_ + indicatorPadding)
-                         : (indicatorFrameRect.Bottom() +
-                               swiperIndicatorTheme->GetArrowScale().ConvertToPx() * hoverRatio_ - indicatorPadding);
+        startPoint = isLeftArrow ? (indicatorFrameRect.Top() - arrowFrameSize.Height() - padding.top.value_or(0.0f) -
+                                       swiperIndicatorTheme->GetArrowScale().ConvertToPx() + indicatorPadding)
+                                 : (indicatorFrameRect.Bottom() + padding.bottom.value_or(0.0f) +
+                                       swiperIndicatorTheme->GetArrowScale().ConvertToPx() - indicatorPadding);
         arrowOffset.SetX(indicatorFrameRect.Left() + (indicatorFrameSize.Width() - arrowFrameSize.Width()) * 0.5f);
         arrowOffset.SetY(startPoint);
-        if (isLeftArrow && !NonNegative(arrowOffset.GetY())) {
-            arrowOffset.SetY(0.0f);
+        if (isLeftArrow && !NonNegative(arrowOffset.GetY() + padding.top.value_or(0.0f))) {
+            arrowOffset.SetY(0.0f + padding.top.value_or(0.0f));
         }
-        if (GreatOrEqual(arrowOffset.GetY() + arrowFrameSize.Height(), swiperFrameSize.Height())) {
-            arrowOffset.SetY(swiperFrameSize.Height() - arrowFrameSize.Height());
+        if (GreatOrEqual(arrowOffset.GetY() + arrowFrameSize.Height(), swiperFrameSize.Height() -
+                padding.bottom.value_or(0.0f))) {
+            arrowOffset.SetY(swiperFrameSize.Height() - arrowFrameSize.Height() - padding.bottom.value_or(0.0f));
         }
     } else {
-        startPoint = isLeftArrow ? swiperIndicatorTheme->GetArrowVerticalMargin().ConvertToPx()
-                                 : (swiperFrameSize.Height() - arrowFrameSize.Width() -
-                                       swiperIndicatorTheme->GetArrowVerticalMargin().ConvertToPx());
-        arrowOffset.SetX((swiperFrameSize.Width() - arrowFrameSize.Width()) * 0.5f);
+        startPoint = isLeftArrow
+                         ? swiperIndicatorTheme->GetArrowVerticalMargin().ConvertToPx() + padding.top.value_or(0.0f)
+                         : (swiperFrameSize.Height() - arrowFrameSize.Width() - padding.bottom.value_or(0.0f) -
+                               swiperIndicatorTheme->GetArrowVerticalMargin().ConvertToPx());
+        arrowOffset.SetX(padding.left.value_or(0.0f) + (swiperFrameSize.Width() - padding.left.value_or(0.0f) -
+                                                           padding.right.value_or(0.0f) - arrowFrameSize.Width()) *
+                                                           0.5f);
         arrowOffset.SetY(startPoint);
     }
     arrowGeometryNode->SetMarginFrameOffset(arrowOffset);

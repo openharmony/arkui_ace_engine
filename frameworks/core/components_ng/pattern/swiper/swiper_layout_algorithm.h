@@ -131,11 +131,6 @@ public:
         isLoop_ = isLoop;
     }
 
-    void SetHoverRatio(float hoverRatio)
-    {
-        hoverRatio_ = hoverRatio;
-    }
-
     int32_t GetStartIndex() const
     {
         return itemPosition_.empty() ? 0 : itemPosition_.begin()->first;
@@ -193,12 +188,11 @@ private:
     double GetValidEdgeLength(float swiperLength, float indicatorLength, const Dimension& edge);
     RefPtr<LayoutWrapper> GetNodeLayoutWrapperByTag(LayoutWrapper* layoutWrapper, const std::string& tagName) const;
     void MeasureArrow(const RefPtr<LayoutWrapper>& arrowWrapper, const RefPtr<LayoutProperty>& layoutProperty) const;
-    void ArrowLayout(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& arrowWrapper) const;
+    void ArrowLayout(
+        LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& arrowWrapper, const PaddingPropertyF padding) const;
     bool isLoop_ = true;
     float prevMargin_ = 0.0f;
     float nextMargin_ = 0.0f;
-    // Arrow default hover ratio
-    float hoverRatio_ = 1.0f;
 
     PositionMap itemPosition_;
     float currentOffset_ = 0.0f;

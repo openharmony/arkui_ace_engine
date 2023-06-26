@@ -83,7 +83,8 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
             currentIndex_ = 0;
             currentFirstIndex_ = 0;
             if (NeedMarkDirtyNodeRenderIndicator()) {
-                auto indicatorNode = DynamicCast<FrameNode>(host->GetLastChild());
+                auto indicatorNode = DynamicCast<FrameNode>(host->GetChildAtIndex(
+                    host->GetChildIndexById(GetIndicatorId())));
                 indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
             }
         }
@@ -105,7 +106,6 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     auto effect = swiperPaintProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
     bool canOverScroll = effect == EdgeEffect::SPRING;
     swiperLayoutAlgorithm->SetCanOverScroll(canOverScroll);
-    swiperLayoutAlgorithm->SetHoverRatio(hoverRatio_);
     return swiperLayoutAlgorithm;
 }
 
@@ -440,7 +440,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     currentFirstIndex_ = GetLoopIndex(currentShowIndex);
 
     if (NeedMarkDirtyNodeRenderIndicator()) {
-        auto indicatorNode = DynamicCast<FrameNode>(host->GetLastChild());
+        auto indicatorNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
         indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
@@ -700,7 +700,6 @@ void SwiperPattern::InitIndicator()
     auto swiperNode = GetHost();
     CHECK_NULL_VOID(swiperNode);
     RefPtr<FrameNode> indicatorNode;
-    CHECK_NULL_VOID(swiperNode->GetLastChild());
     if (!HasIndicatorNode()) {
         LOGI("Swiper create new indicator");
         if (!IsShowIndicator()) {
@@ -969,7 +968,7 @@ bool SwiperPattern::NeedMarkDirtyNodeRenderIndicator()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto child = host->GetLastChild();
+    auto child = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
     CHECK_NULL_RETURN(child, false);
 
     if (child->GetTag() != V2::SWIPER_INDICATOR_ETS_TAG || indicatorDoingAnimation_) {
@@ -1923,7 +1922,7 @@ void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay)
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto indicatorNode = host->GetLastChild();
+    auto indicatorNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
     CHECK_NULL_VOID(indicatorNode);
     if (indicatorNode->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
         indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1987,20 +1986,6 @@ void SwiperPattern::ArrowHover(bool hoverFlag)
         CHECK_NULL_VOID(rightArrowPattern);
         rightArrowPattern->SetArrowHover(hoverFlag);
         rightArrowPattern->SetButtonVisible(hoverFlag);
-    }
-}
-
-void SwiperPattern::IndicatorHover(bool hoverFlag)
-{
-    if (HasLeftButtonNode() && HasRightButtonNode()) {
-        auto swiperNode = GetHost();
-        CHECK_NULL_VOID(swiperNode);
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-        CHECK_NULL_VOID(swiperIndicatorTheme);
-        hoverRatio_ = hoverFlag ? swiperIndicatorTheme->GetArrowZoomOutScale() : 1.0f;
-        swiperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     }
 }
 
@@ -2149,9 +2134,14 @@ void SwiperPattern::CheckAndSetArrowHoverState(const PointF& mousePoint)
     if (!IsLoop() && currentIndex_ == TotalCount() - 1) {
         rightNodeRect = GetArrowFrameRect(GetIndicatorId());
     }
-
-    auto newNodeRect = RectF(leftNodeRect.Left(), leftNodeRect.Top(), rightNodeRect.Right() - leftNodeRect.Left(),
-        std::min(rightNodeRect.Height(), leftNodeRect.Height()));
+    RectF newNodeRect;
+    if (GetDirection() == Axis::HORIZONTAL) {
+        newNodeRect = RectF(leftNodeRect.Left(), leftNodeRect.Top(), rightNodeRect.Right() - leftNodeRect.Left(),
+            std::min(rightNodeRect.Height(), leftNodeRect.Height()));
+    } else {
+        newNodeRect = RectF(leftNodeRect.Left(), leftNodeRect.Top(),
+            std::min(rightNodeRect.Width(), leftNodeRect.Width()), rightNodeRect.Bottom() - leftNodeRect.Top());
+    }
 
     isAtHotRegion_ = newNodeRect.IsInRegion(mousePoint);
     ArrowHover(isAtHotRegion_);

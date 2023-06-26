@@ -207,7 +207,6 @@ void SwiperArrowPattern::ButtonOnHover(RefPtr<FrameNode> buttonNode, bool isHove
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID_NOLOG(swiperIndicatorTheme);
     Color backgroundColor;
-    isHover_ = isHovered;
 
     auto swiperNode = GetSwiperNode();
     CHECK_NULL_VOID(swiperNode);
@@ -215,6 +214,9 @@ void SwiperArrowPattern::ButtonOnHover(RefPtr<FrameNode> buttonNode, bool isHove
     CHECK_NULL_VOID(swiperPattern);
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
+    if (swiperLayoutProperty->GetShowIndicatorValue(true)) {
+        isHover_ = isHovered;
+    }
     if (swiperLayoutProperty->GetHoverShowValue(false)) {
         swiperPattern->ArrowHover(isHover_);
     }
