@@ -121,8 +121,7 @@ private:
 
     void UpdateDialogButtonProperty(RefPtr<FrameNode>& buttonNode);
     void AnalysisLayoutPropertyOfButton(RefPtr<OHOS::Ace::NG::FrameNode> buttonNode,
-        RefPtr<OHOS::Ace::NG::LayoutProperty> layoutProps, bool useRelativeLayout,
-        int index = 0);
+        RefPtr<OHOS::Ace::NG::LayoutProperty> layoutProps, bool useRelativeLayout, int index = 0);
     RefPtr<FrameNode> BuildButtons(const std::vector<ButtonInfo>& buttons);
     void AddButtonAndDivider(const std::vector<ButtonInfo>& buttons, RefPtr<OHOS::Ace::NG::FrameNode> container);
     RefPtr<FrameNode> CreateDivider(const Dimension dividerLength, const Dimension dividerWidth);
@@ -134,6 +133,8 @@ private:
     // build ActionSheet items
     RefPtr<FrameNode> BuildSheet(const std::vector<ActionSheetInfo>& sheets);
     RefPtr<FrameNode> BuildSheetItem(const ActionSheetInfo& item);
+    RefPtr<FrameNode> BuildSheetInfoTitle(const std::string& title);
+    RefPtr<FrameNode> BuildSheetInfoIcon(const std::string& icon);
     // build actionMenu
     RefPtr<FrameNode> BuildMenu(const std::vector<ButtonInfo>& buttons);
 

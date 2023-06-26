@@ -597,53 +597,67 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
 
     // mount icon
     if (!item.icon.empty()) {
-        auto iconId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto iconNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, iconId, AceType::MakeRefPtr<ImagePattern>());
-        CHECK_NULL_RETURN(iconNode, nullptr);
-        // add image margin
-        MarginProperty margin = {
-            .left = CalcLength(SHEET_IMAGE_MARGIN),
-            .right = CalcLength(SHEET_IMAGE_MARGIN),
-            .top = CalcLength(SHEET_IMAGE_MARGIN),
-            .bottom = CalcLength(SHEET_IMAGE_MARGIN),
-        };
-        auto iconProps = iconNode->GetLayoutProperty<ImageLayoutProperty>();
-        iconProps->UpdateMargin(margin);
-        LOGD("item icon src = %s", item.icon.c_str());
-        auto imageSrc = ImageSourceInfo(item.icon);
-        iconProps->UpdateImageSourceInfo(imageSrc);
-        iconProps->UpdateUserDefinedIdealSize(CalcSize(SHEET_IMAGE_SIZE, SHEET_IMAGE_SIZE));
+        auto iconNode = BuildSheetInfoIcon(item.icon);
         iconNode->MountToParent(itemRow);
         iconNode->MarkModifyDone();
     }
 
     // mount title
     if (!item.title.empty()) {
-        auto titleId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto titleNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, titleId, AceType::MakeRefPtr<TextPattern>());
-        CHECK_NULL_RETURN(titleNode, nullptr);
-        // update text style
-        auto style = dialogTheme_->GetContentTextStyle();
-        auto props = titleNode->GetLayoutProperty<TextLayoutProperty>();
-        props->UpdateContent(item.title);
-        props->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-        props->UpdateAdaptMaxFontSize(style.GetFontSize());
-        props->UpdateAdaptMinFontSize(dialogTheme_->GetTitleMinFontSize());
-        props->UpdateMaxLines(style.GetMaxLines());
-
+        auto titleNode = BuildSheetInfoTitle(item.title);
         titleNode->MountToParent(itemRow);
         titleNode->MarkModifyDone();
     }
+
     // set sheetItem action
     auto hub = itemRow->GetOrCreateGestureEventHub();
     if (item.action) {
         hub->AddClickEvent(item.action);
     }
+    
     // close dialog when clicked
     BindCloseCallBack(hub, SHEET_INFO_IDX);
-
     itemRow->MountToParent(itemNode);
     return itemNode;
+}
+
+RefPtr<FrameNode> DialogPattern::BuildSheetInfoTitle(const std::string& title)
+{
+    auto titleId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto titleNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, titleId, AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(titleNode, nullptr);
+    // update text style
+    auto style = dialogTheme_->GetContentTextStyle();
+    auto props = titleNode->GetLayoutProperty<TextLayoutProperty>();
+    props->UpdateContent(title);
+    props->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    props->UpdateAdaptMaxFontSize(style.GetFontSize());
+    props->UpdateAdaptMinFontSize(dialogTheme_->GetTitleMinFontSize());
+    props->UpdateMaxLines(style.GetMaxLines());
+    props->UpdateFlexGrow(1.0f);
+    props->UpdateFlexShrink(1.0f);
+    return titleNode;
+}
+
+RefPtr<FrameNode> DialogPattern::BuildSheetInfoIcon(const std::string& icon)
+{
+    auto iconId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto iconNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, iconId, AceType::MakeRefPtr<ImagePattern>());
+    CHECK_NULL_RETURN(iconNode, nullptr);
+    // add image margin
+    MarginProperty margin = {
+        .left = CalcLength(SHEET_IMAGE_MARGIN),
+        .right = CalcLength(SHEET_IMAGE_MARGIN),
+        .top = CalcLength(SHEET_IMAGE_MARGIN),
+        .bottom = CalcLength(SHEET_IMAGE_MARGIN),
+    };
+    auto iconProps = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    iconProps->UpdateMargin(margin);
+    LOGD("item icon src = %s", item.icon.c_str());
+    auto imageSrc = ImageSourceInfo(icon);
+    iconProps->UpdateImageSourceInfo(imageSrc);
+    iconProps->UpdateUserDefinedIdealSize(CalcSize(SHEET_IMAGE_SIZE, SHEET_IMAGE_SIZE));
+    return iconNode;
 }
 
 RefPtr<FrameNode> DialogPattern::BuildSheet(const std::vector<ActionSheetInfo>& sheets)
