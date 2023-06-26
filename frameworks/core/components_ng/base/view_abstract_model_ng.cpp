@@ -96,9 +96,7 @@ void ViewAbstractModelNG::BindContextMenu(
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(targetNode);
-#ifdef ENABLE_DRAG_FRAMEWORK
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
-#endif // ENABLE_DRAG_FRAMEWORK
+
     RegisterContextMenuAppearCallback(type, menuParam);
 
     auto hub = targetNode->GetOrCreateGestureEventHub();
@@ -136,6 +134,9 @@ void ViewAbstractModelNG::BindContextMenu(
             CreateCustomMenu(builder, targetNode, true, menuPosition, menuParam);
         };
         auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
+#ifdef ENABLE_DRAG_FRAMEWORK
+        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
+#endif // ENABLE_DRAG_FRAMEWORK
 
         hub->SetLongPressEvent(longPress, false, true, LONG_PRESS_DURATION);
     } else {
