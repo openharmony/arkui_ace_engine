@@ -18,9 +18,9 @@
 #include "core/common/ace_application_info.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/stack/stack_layout_property.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
 StackLayoutAlgorithm::StackLayoutAlgorithm() = default;
 
 void StackLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -48,15 +48,8 @@ void StackLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     auto align = Alignment::CENTER;
     auto layoutProperty = DynamicCast<StackLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto context = PipelineContext::GetCurrentContext();
-    // add ApI version protection
-    if (context && context->GetMinPlatformVersion() <= static_cast<int32_t>(PlatformVersion::VERSION_NINE)) {
-        align = layoutProperty->GetAlignmentContent().value_or(Alignment::CENTER);
-        align = layoutProperty->GetAlignment().value_or(Alignment::CENTER);
-    } else {
-        if (layoutProperty->GetPositionProperty()) {
-            align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER);
-        }
+    if (layoutProperty->GetPositionProperty()) {
+        align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER);
     }
     // Update child position.
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
