@@ -150,6 +150,16 @@ public:
         direction_ = direction;
     }
 
+    void SetScrollState(int32_t source)
+    {
+        source_ = source;
+    }
+
+    int32_t GetScrollState() const
+    {
+        return source_;
+    }
+
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
 
@@ -202,6 +212,7 @@ private:
     FlexDirection direction_ { FlexDirection::COLUMN };
     bool scrollStop_ = false;
     bool scrollAbort_ = false;
+    int32_t source_ = SCROLL_FROM_NONE;
 };
 
 } // namespace OHOS::Ace::NG
