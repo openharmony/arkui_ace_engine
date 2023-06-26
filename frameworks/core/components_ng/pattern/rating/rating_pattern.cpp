@@ -172,6 +172,9 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
     auto starNum =
         layoutProperty->GetStars().value_or(GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM));
     UpdatePaintConfig();
+    PrepareAnimation(foregroundImageCanvas_);
+    PrepareAnimation(secondaryImageCanvas_);
+    PrepareAnimation(backgroundImageCanvas_);
     if (!ratingModifier_) {
         ratingModifier_ = AceType::MakeRefPtr<RatingModifier>();
     }
@@ -188,6 +191,10 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
             layoutProperty->GetBackgroundImageSourceInfo()->GetSrc());
         ratingModifier_->UpdateCanvasImage(foregroundImageCanvas_, secondaryImageCanvas_, backgroundImageCanvas_,
             foregroundConfig_, secondaryConfig_, backgroundConfig_);
+    }
+    if (!(foregroundImageCanvas_->IsStatic() && secondaryImageCanvas_->IsStatic() &&
+            secondaryImageCanvas_->IsStatic())) {
+        ratingModifier_->SetNeedDraw(true);
     }
     return MakeRefPtr<RatingPaintMethod>(ratingModifier_, starNum, state_);
 }
@@ -759,5 +766,31 @@ void RatingPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToBounds(true);
+}
+
+void RatingPattern::PrepareAnimation(const RefPtr<CanvasImage>& image)
+{
+    if (image->IsStatic()) {
+        return;
+    }
+    SetRedrawCallback(image);
+    // RegisterVisibleAreaChange
+    auto layoutProps = GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    // pause animation if prop is initially set to invisible
+    if (layoutProps->GetVisibility().value_or(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+        image->ControlAnimation(false);
+    }
+}
+
+void RatingPattern::SetRedrawCallback(const RefPtr<CanvasImage>& image)
+{
+    CHECK_NULL_VOID_NOLOG(image);
+    // set animation flush function for svg / gif
+    image->SetRedrawCallback([weak = WeakClaim(RawPtr(GetHost()))] {
+        auto ratingNode = weak.Upgrade();
+        CHECK_NULL_VOID(ratingNode);
+        ratingNode->MarkNeedRenderOnly();
+    });
 }
 } // namespace OHOS::Ace::NG

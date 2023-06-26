@@ -106,6 +106,8 @@ private:
     void LoadSecondary();
     void LoadBackground();
     void UpdatePaintConfig();
+    void PrepareAnimation(const RefPtr<CanvasImage>& image);
+    void SetRedrawCallback(const RefPtr<CanvasImage>& image);
     void OnImageDataReady(int32_t imageFlag);
     void OnImageLoadSuccess(int32_t imageFlag);
     void CheckImageInfoHasChangedOrNot(
