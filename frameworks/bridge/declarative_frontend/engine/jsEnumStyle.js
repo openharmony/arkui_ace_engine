@@ -698,6 +698,12 @@ var DatePickerType;
   DatePickerType[DatePickerType["Date"] = 1] = "Date";
 })(DatePickerType || (DatePickerType = {}));
 
+var DisplayedComponentsType;
+(function (DisplayedComponentsType) {
+  DisplayedComponentsType[DisplayedComponentsType["HOUR_MINUTE"] = 0] = "HOUR_MINUTE";
+  DisplayedComponentsType[DisplayedComponentsType["HOUR_MINUTE_SECOND"] = 1] = "HOUR_MINUTE_SECOND";
+})(DisplayedComponentsType || (DisplayedComponentsType = {}));
+
 var InputType;
 (function (InputType) {
   InputType[InputType["Normal"] = 0] = "Normal";

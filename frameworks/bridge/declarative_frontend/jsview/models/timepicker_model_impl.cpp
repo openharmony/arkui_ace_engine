@@ -19,7 +19,7 @@
 #include "core/components/picker/picker_time_component.h"
 
 namespace OHOS::Ace::Framework {
-void TimePickerModelImpl::CreateTimePicker(RefPtr<PickerTheme> pickerTheme)
+void TimePickerModelImpl::CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool hasSecond)
 {
     auto timePicker = AceType::MakeRefPtr<PickerTimeComponent>();
     ViewStackProcessor::GetInstance()->ClaimElementId(timePicker);

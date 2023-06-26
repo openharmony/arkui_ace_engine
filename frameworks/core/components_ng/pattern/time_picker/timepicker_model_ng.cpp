@@ -35,7 +35,7 @@ namespace {
 const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 } // namespace
 
-void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme)
+void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool hasSecond)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -84,6 +84,7 @@ void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme)
         minuteColumnNode->MarkModifyDone();
         timePickerRowPattern->SetColumn(minuteColumnNode);
     }
+
     if (!hasHourNode) {
         auto stackHourNode = CreateStackNode();
         auto buttonYearNode = CreateButtonNode();
@@ -104,6 +105,7 @@ void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme)
         layoutProperty->UpdateLayoutWeight(1);
         stackMinuteNode->MountToParent(timePickerNode);
     }
+    timePickerRowPattern->SetHasSecond(hasSecond);
     stack->Push(timePickerNode);
 }
 
@@ -137,6 +139,14 @@ void TimePickerModelNG::SetHour24(bool isUseMilitaryTime)
     timePickerRowPattern->SetHour24(isUseMilitaryTime);
     frameNode->MarkModifyDone();
     frameNode->MarkDirtyNode();
+}
+
+void TimePickerModelNG::SetWheelModeEnabled(bool wheelModeEnabled)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    timePickerRowPattern->SetWheelModeEnabled(wheelModeEnabled);
 }
 
 void TimePickerModelNG::SetOnChange(TimeChangeEvent&& onChange)

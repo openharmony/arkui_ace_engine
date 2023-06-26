@@ -88,6 +88,7 @@ void TimePickerRowPattern::OnModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    CreateOrDeleteSecondNode();
     CreateAmPmNode();
     OnColumnsBuilding();
     FlushColumn();
@@ -177,6 +178,47 @@ void TimePickerRowPattern::CreateAmPmNode()
     }
 }
 
+void TimePickerRowPattern::CreateOrDeleteSecondNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!HasSecondNode()) {
+        if (hasSecond_) {
+            auto secondColumnNode = FrameNode::GetOrCreateFrameNode(
+                V2::COLUMN_ETS_TAG, GetSecondId(), []() { return AceType::MakeRefPtr<TimePickerColumnPattern>(); });
+            CHECK_NULL_VOID(secondColumnNode);
+            for (uint32_t index = 0; index < GetShowCount(); index++) {
+                auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+                    ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+                CHECK_NULL_VOID(textNode);
+                textNode->MarkModifyDone();
+                textNode->MountToParent(secondColumnNode);
+            }
+            SetColumn(secondColumnNode);
+            auto stackSecondNode = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG,
+                ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<StackPattern>(); });
+            auto buttonSecondNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+                ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+            buttonSecondNode->MarkModifyDone();
+            buttonSecondNode->MountToParent(stackSecondNode);
+            secondColumnNode->MarkModifyDone();
+            secondColumnNode->MountToParent(stackSecondNode);
+            auto layoutProperty = stackSecondNode->GetLayoutProperty<LayoutProperty>();
+            layoutProperty->UpdateAlignment(Alignment::CENTER);
+            layoutProperty->UpdateLayoutWeight(1);
+            stackSecondNode->MarkModifyDone();
+            stackSecondNode->MountToParent(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    } else {
+        if (!hasSecond_) {
+            host->RemoveChildAtIndex(host->GetChildren().size() - 1);
+            secondId_.reset();
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
+}
+
 double TimePickerRowPattern::SetAmPmButtonIdeaSize()
 {
     auto host = GetHost();
@@ -256,6 +298,13 @@ PickerTime TimePickerRowPattern::GetCurrentTime()
     }
 
     time.SetMinute(minutePickerColumnPattern->GetCurrentIndex()); // minute from 0 to 59, index from 0 to 59
+    if (hasSecond_) {
+        auto secondColumn = allChildNode["second"];
+        CHECK_NULL_RETURN(secondColumn, time);
+        auto secondPickerColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
+        CHECK_NULL_RETURN(secondPickerColumnPattern, time);
+        time.SetSecond(secondPickerColumnPattern->GetCurrentIndex()); // second from 0 to 59, index from 0 to 59
+    }
     return time;
 }
 
@@ -336,6 +385,14 @@ void TimePickerRowPattern::FlushColumn()
     CHECK_NULL_VOID(minuteColumnPattern);
     minuteColumnPattern->SetShowCount(GetShowCount());
     minuteColumnPattern->FlushCurrentOptions();
+    if (hasSecond_) {
+        auto secondColumn = allChildNode["second"];
+        CHECK_NULL_VOID(secondColumn);
+        auto secondColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
+        CHECK_NULL_VOID(secondColumnPattern);
+        secondColumnPattern->SetShowCount(GetShowCount());
+        secondColumnPattern->FlushCurrentOptions();
+    }
 }
 
 void TimePickerRowPattern::OnDataLinking(
@@ -372,6 +429,22 @@ void TimePickerRowPattern::OnColumnsBuilding()
         options_[minuteColumn].emplace_back(minuteFormatStringValue);
     }
     minuteColumnPattern->SetOptions(GetOptions());
+    minuteColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
+
+    auto secondColumn = allChildNode["second"];
+    CHECK_NULL_VOID(secondColumn);
+    auto secondColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
+    CHECK_NULL_VOID(secondColumnPattern);
+    options_[secondColumn].clear();
+    for (uint32_t second = 0; second <= 59; ++second) { // time's second from 0 to 59
+        if (second == selectedTime_.GetSecond()) {
+            secondColumnPattern->SetCurrentIndex(second);
+        }
+        auto secondFormatStringValue = GetSecondFormatString(second);
+        options_[secondColumn].emplace_back(secondFormatStringValue);
+    }
+    secondColumnPattern->SetOptions(GetOptions());
+    secondColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
 }
 
 void TimePickerRowPattern::HandleHourColumnBuilding()
@@ -392,6 +465,7 @@ void TimePickerRowPattern::HandleHourColumnBuilding()
             options_[hourColumn].emplace_back(hourFormatStringValue);
         }
         hourColumnPattern->SetOptions(GetOptions());
+        hourColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
         hourColumn->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     } else if (amPmColumn) {
         CHECK_NULL_VOID(amPmColumn);
@@ -419,6 +493,8 @@ void TimePickerRowPattern::HandleHourColumnBuilding()
         }
         amPmColumnPattern->SetOptions(GetOptions());
         hourColumnPattern->SetOptions(GetOptions());
+        amPmColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
+        hourColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
     } else {
         LOGE("AM PM column is null.");
     }
@@ -426,6 +502,9 @@ void TimePickerRowPattern::HandleHourColumnBuilding()
 
 std::unordered_map<std::string, RefPtr<FrameNode>> TimePickerRowPattern::GetAllChildNode()
 {
+    if (hasSecond_) {
+        return GetAllChildNodeWithSecond();
+    }
     std::unordered_map<std::string, RefPtr<FrameNode>> allChildNode;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, allChildNode);
@@ -483,6 +562,61 @@ std::unordered_map<std::string, RefPtr<FrameNode>> TimePickerRowPattern::GetAllC
         allChildNode["hour"] = hourNode;
         allChildNode["minute"] = minuteNode;
     }
+    return allChildNode;
+}
+
+std::unordered_map<std::string, RefPtr<FrameNode>> TimePickerRowPattern::GetAllChildNodeWithSecond()
+{
+    std::unordered_map<std::string, RefPtr<FrameNode>> allChildNode;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, allChildNode);
+    if (GetHour24() && host->GetChildren().size() == CHILD_WITH_AMPM_SIZE + 1) {
+        host->RemoveChildAtIndex(0);
+        amPmId_.reset();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    } else if (!GetHour24() && host->GetChildren().size() == CHILD_WITHOUT_AMPM_SIZE + 1) {
+        CreateAmPmNode();
+    }
+    if ((GetHour24() && host->GetChildren().size() != CHILD_WITHOUT_AMPM_SIZE + 1) ||
+        (!GetHour24() && host->GetChildren().size() != CHILD_WITH_AMPM_SIZE + 1)) {
+        return allChildNode;
+    }
+
+    auto children = host->GetChildren();
+    auto iter = children.begin();
+    CHECK_NULL_RETURN(*iter, allChildNode);
+    RefPtr<FrameNode> amPmNode;
+    if (!GetHour24()) {
+        auto amPm = (*iter);
+        CHECK_NULL_RETURN(amPm, allChildNode);
+        auto amPmStackNode = DynamicCast<FrameNode>(amPm);
+        amPmNode = DynamicCast<FrameNode>(amPmStackNode->GetLastChild());
+        CHECK_NULL_RETURN(amPmNode, allChildNode);
+        iter++;
+    }
+    auto hour = *iter;
+    CHECK_NULL_RETURN(hour, allChildNode);
+    iter++;
+    auto minute = *iter;
+    CHECK_NULL_RETURN(minute, allChildNode);
+    iter++;
+    auto second = *iter;
+    CHECK_NULL_RETURN(second, allChildNode);
+    auto hourStackNode = DynamicCast<FrameNode>(hour);
+    auto hourNode = DynamicCast<FrameNode>(hourStackNode->GetLastChild());
+    auto minuteStackNode = DynamicCast<FrameNode>(minute);
+    auto minuteNode = DynamicCast<FrameNode>(minuteStackNode->GetLastChild());
+    auto secondStackNode = DynamicCast<FrameNode>(second);
+    auto secondNode = DynamicCast<FrameNode>(secondStackNode->GetLastChild());
+
+    CHECK_NULL_RETURN(hourNode, allChildNode);
+    CHECK_NULL_RETURN(minuteNode, allChildNode);
+    CHECK_NULL_RETURN(secondNode, allChildNode);
+    allChildNode["amPm"] = amPmNode;
+    allChildNode["hour"] = hourNode;
+    allChildNode["minute"] = minuteNode;
+    allChildNode["second"] = secondNode;
+
     return allChildNode;
 }
 
@@ -566,6 +700,13 @@ std::string TimePickerRowPattern::GetMinuteFormatString(uint32_t minute) const
     DateTime time;
     time.minute = minute;
     return AddZeroPrefix(Localization::GetInstance()->FormatDateTime(time, "m"));
+}
+
+std::string TimePickerRowPattern::GetSecondFormatString(uint32_t second) const
+{
+    DateTime time;
+    time.second = second;
+    return AddZeroPrefix(Localization::GetInstance()->FormatDateTime(time, "s"));
 }
 
 std::string TimePickerRowPattern::AddZeroPrefix(const std::string& value) const

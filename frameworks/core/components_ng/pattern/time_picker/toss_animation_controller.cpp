@@ -49,8 +49,17 @@ void TimePickerTossAnimationController::SetEnd(double y)
     timeEnd_ = GetCurrentTime();
 }
 
+void TimePickerTossAnimationController::Stop()
+{
+    stopped_ = true;
+    if (toss_) {
+        toss_->Stop();
+    }
+}
+
 bool TimePickerTossAnimationController::Play()
 {
+    stopped_ = false;
     auto timeDiff = timeEnd_ - timeStart_;
     if (timeDiff < MIN_TIME) {
         LOGW("toss time[%{public}lf] too small.", timeDiff);
@@ -82,7 +91,9 @@ bool TimePickerTossAnimationController::Play()
         CHECK_NULL_VOID(column);
         double distance = std::pow(DRAG, value);
         distance = (distance - 1.0) * ref->speed_ / std::log(DRAG);
-        column->UpdateToss(ref->yEnd_ + distance);
+        if (!ref->IsStopped()) {
+            column->UpdateToss(ref->yEnd_ + distance);
+        }
     });
     toss_->AddStopCallback([weak] {
         auto ref = weak.Upgrade();

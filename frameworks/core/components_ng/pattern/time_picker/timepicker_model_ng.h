@@ -25,10 +25,11 @@ using TimeChangeEvent = std::function<void(const BaseEventInfo* info)>;
 
 class ACE_EXPORT TimePickerModelNG : public TimePickerModel {
 public:
-    void CreateTimePicker(RefPtr<PickerTheme> pickerTheme) override;
+    void CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool hasSecond = false) override;
     void SetSelectedTime(const PickerTime& value) override;
     void SetOnChange(TimeChangeEvent&& onChange) override;
     void SetHour24(bool isUseMilitaryTime) override;
+    void SetWheelModeEnabled(bool wheelModeEnabled) override;
     void SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value) override;
     void SetNormalTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value) override;
     void SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value) override;

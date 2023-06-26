@@ -249,7 +249,7 @@ void TimePickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextC
         int32_t diffIndex = static_cast<int32_t>(index) - static_cast<int32_t>(selectedIndex);
         int32_t virtualIndex = static_cast<int32_t>(currentIndex) + diffIndex;
         bool virtualIndexValidate = virtualIndex >= 0 && virtualIndex < static_cast<int32_t>(totalOptionCount);
-        if (NotLoopOptions() && !virtualIndexValidate) {
+        if ((NotLoopOptions() || !wheelModeEnabled_) && !virtualIndexValidate) {
             textLayoutProperty->UpdateContent("");
         } else {
             auto optionValue = timePickerRowPattern->GetAllOptions(host)[optionIndex];
@@ -756,6 +756,9 @@ void TimePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
     yLast_ = offsetY;
     double dragDelta = yLast_ - yOffset_;
     if (!CanMove(LessNotEqual(dragDelta, 0))) {
+        CHECK_NULL_VOID_NOLOG(GetToss());
+        auto toss = GetToss();
+        toss->Stop();
         return;
     }
 
@@ -777,7 +780,9 @@ void TimePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
 
 bool TimePickerColumnPattern::CanMove(bool isDown) const
 {
-    CHECK_NULL_RETURN_NOLOG(NotLoopOptions(), true);
+    if (wheelModeEnabled_) {
+        CHECK_NULL_RETURN_NOLOG(NotLoopOptions(), true);
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto options = GetOptions();

@@ -47,6 +47,13 @@ public:
 
     bool Play();
 
+    void Stop();
+
+    bool IsStopped()
+    {
+        return stopped_;
+    }
+
 private:
     double GetCurrentTime() const;
 
@@ -55,6 +62,7 @@ private:
     double timeStart_ = 0.0;
     double timeEnd_ = 0.0;
     double speed_ = 0.0;
+    bool stopped_ = false;
 
     RefPtr<PickerAnimation> toss_;
     WeakPtr<TimePickerColumnPattern> column_;
