@@ -24,6 +24,7 @@
 #define private public
 #define protected public
 #include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
@@ -45,6 +46,7 @@
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -56,6 +58,9 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr MenuType TYPE = MenuType::MENU;
 const OffsetF MENU_OFFSET(10.0, 10.0);
+const std::string MESSAGE = "hello world";
+const std::string BOTTOM = "test";
+constexpr int32_t DURATION = 2;
 } // namespace
 class OverlayManagerTestNg : public testing::Test {
 public:
@@ -831,5 +836,77 @@ HWTEST_F(OverlayManagerTestNg, RemoveOverlayTest002, TestSize.Level1)
     modalTransition = 2;
     overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalTransition, targetId);
     EXPECT_TRUE(overlayManager->RemoveModalInOverlay());
+}
+/**
+ * @tc.name: ToastTest001
+ * @tc.desc: Test OverlayManager::ShowToast->PopToast.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, ToastTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and toast node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto toastId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto toastNode =
+        FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, toastId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowToast when rootElement is nullptr.
+     * @tc.expected: toastMap_ is empty
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->ShowToast(MESSAGE, DURATION, BOTTOM, true);
+    EXPECT_TRUE(overlayManager->toastMap_.empty());
+    /**
+     * @tc.steps: step2. call PopToast.
+     * @tc.expected: toastMap_ is empty
+     */
+    overlayManager->PopToast(toastId);
+    EXPECT_TRUE(overlayManager->toastMap_.empty());
+}
+/**
+ * @tc.name: ToastTest002
+ * @tc.desc: Test OverlayManager::ShowToast->PopToast.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, ToastTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and toast node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto toastId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto toastNode =
+        FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, toastId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowToast when rootElement is not nullptr.
+     * @tc.expected: toastMap_ is empty
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto toastTheme = AceType::MakeRefPtr<ToastTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(toastTheme));
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockPipelineBase::GetCurrent()->rootNode_ = rootNode;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->ShowToast(MESSAGE, DURATION, BOTTOM, true);
+    EXPECT_TRUE(overlayManager->toastMap_.empty());
+    /**
+     * @tc.steps: step2. call PopToast.
+     * @tc.expected: toastMap_ is empty
+     */
+    overlayManager->PopToast(toastId);
+    EXPECT_TRUE(overlayManager->toastMap_.empty());
 }
 } // namespace OHOS::Ace::NG
