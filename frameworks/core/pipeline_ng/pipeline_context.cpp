@@ -663,14 +663,12 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
 
 SafeAreaInsets PipelineContext::GetSystemSafeArea() const
 {
-    CHECK_NULL_RETURN(safeAreaManager_, {});
     CHECK_NULL_RETURN_NOLOG(!ignoreViewSafeArea_, {});
     return safeAreaManager_->GetSystemSafeArea();
 }
 
 SafeAreaInsets PipelineContext::GetCutoutSafeArea() const
 {
-    CHECK_NULL_RETURN(safeAreaManager_, {});
     CHECK_NULL_RETURN_NOLOG(!ignoreViewSafeArea_, {});
     return safeAreaManager_->GetCutoutSafeArea();
 }
@@ -678,8 +676,8 @@ SafeAreaInsets PipelineContext::GetCutoutSafeArea() const
 void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea)
 {
     CHECK_NULL_VOID_NOLOG(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
-    CHECK_NULL_VOID_NOLOG(safeAreaManager_);
     if (safeAreaManager_->UpdateSystemSafeArea(systemSafeArea)) {
+        CHECK_NULL_VOID_NOLOG(rootNode_);
         rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
@@ -687,9 +685,8 @@ void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea)
 void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea)
 {
     CHECK_NULL_VOID_NOLOG(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
-    CHECK_NULL_VOID_NOLOG(safeAreaManager_);
-    safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea);
     if (safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea)) {
+        CHECK_NULL_VOID_NOLOG(rootNode_);
         rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
@@ -697,7 +694,6 @@ void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea)
 SafeAreaInsets PipelineContext::GetSafeArea() const
 {
     CHECK_NULL_RETURN_NOLOG(!ignoreViewSafeArea_, {});
-    CHECK_NULL_RETURN_NOLOG(safeAreaManager_, {});
     auto systemAvoidArea = safeAreaManager_->GetSystemSafeArea();
     auto cutoutAvoidArea = safeAreaManager_->GetCutoutSafeArea();
     return systemAvoidArea.Combine(cutoutAvoidArea);
