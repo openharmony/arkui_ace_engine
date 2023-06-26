@@ -70,15 +70,18 @@ void SideBarContainerModelNG::Pop()
     auto sideBarNode = children.front();
     sideBarNode->MovePosition(DEFAULT_NODE_SLOT);
 
-    auto renderContext = AceType::DynamicCast<FrameNode>(sideBarNode)->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (!renderContext->HasBackgroundColor()) {
-        auto context = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        auto sideBarTheme = context->GetTheme<SideBarTheme>();
-        CHECK_NULL_VOID(sideBarTheme);
-        Color bgColor = sideBarTheme->GetSideBarBackgroundColor();
-        renderContext->UpdateBackgroundColor(bgColor);
+    auto sideBarFrameNode = AceType::DynamicCast<FrameNode>(sideBarNode);
+    if (sideBarFrameNode) {
+        auto renderContext = sideBarFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        if (!renderContext->HasBackgroundColor()) {
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            auto sideBarTheme = context->GetTheme<SideBarTheme>();
+            CHECK_NULL_VOID(sideBarTheme);
+            Color bgColor = sideBarTheme->GetSideBarBackgroundColor();
+            renderContext->UpdateBackgroundColor(bgColor);
+        }
     }
     sideBarContainerNode->RebuildRenderContextTree();
 
