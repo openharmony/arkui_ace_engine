@@ -4753,8 +4753,6 @@ HWTEST_F(ListTestNg, ScrollToIndexAlign001, TestSize.Level1)
      */
     listLayoutAlgorithm->jumpIndex_ = 1;
     listLayoutAlgorithm->scrollAlign_ = ScrollAlign::AUTO;
-    listLayoutAlgorithm->scrollAutoType_ = ScrollAutoType::NOT_CHANGE;
-    listLayoutAlgorithm->CalculateEstimateOffset(ScrollAlign::AUTO);
     listLayoutAlgorithm->scrollAutoType_ = ScrollAutoType::START;
     listLayoutAlgorithm->CalculateEstimateOffset(ScrollAlign::AUTO);
     EXPECT_NE(listLayoutAlgorithm->estimateOffset_, 0.0f);

@@ -221,6 +221,14 @@ public:
     void BeginLayoutBackward(float startPos, LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& layoutConstraint, Axis axis);
 
+    void HandleJumpAuto(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
+        int32_t& startIndex, int32_t& endIndex, float& startPos, float& endPos);
+
+    bool NoNeedJump(LayoutWrapper* layoutWrapper, float startPos, float endPos,
+        int32_t startIndex, int32_t endIndex);
+
+    float GetCenterItemHeight(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
+
     virtual int32_t GetLanes() const
     {
         return 1;
@@ -249,7 +257,7 @@ protected:
 
     virtual void SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cachedCount);
     void SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, float referencePos, bool forwardLayout,
-        const RefPtr<ListLayoutProperty>& layoutProperty);
+        const RefPtr<ListLayoutProperty>& layoutProperty, bool groupNeedAllLayout);
     static void SetListItemIndex(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
     void CheckListItemGroupRecycle(
         LayoutWrapper* layoutWrapper, int32_t index, float referencePos, bool forwardLayout) const;
