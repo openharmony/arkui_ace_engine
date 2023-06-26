@@ -22,6 +22,10 @@
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 
+namespace OHOS::AAFwk {
+class Want;
+}
+
 namespace OHOS::Ace::NG {
 class UIExtensionPattern : public WindowPattern {
     DECLARE_ACE_TYPE(UIExtensionPattern, WindowPattern);
@@ -39,9 +43,12 @@ public:
     }
 
     void SetOnReleaseCallback(std::function<void(int32_t)>&& callback);
+    void SetOnResultCallback(std::function<void(int32_t, const AAFwk::Want&)>&& callback);
 
     void OnConnect() override;
     void OnDisconnect() override;
+
+    void OnResult(int32_t code, const AAFwk::Want&);
 
     void RequestExtensionSessionActivation();
     void RequestExtensionSessionBackground();
@@ -74,6 +81,7 @@ private:
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
     std::function<void(int32_t)> onReleaseCallback_;
+    std::function<void(int32_t, const AAFwk::Want&)> OnResultCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };

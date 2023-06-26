@@ -81,6 +81,23 @@ void UIExtensionPattern::OnDisconnect()
     }, TaskExecutor::TaskType::UI);
 }
 
+void UIExtensionPattern::OnResult(int32_t code, const AAFwk::Want& value)
+{
+    LOGI("UIExtensionPattern OnResult called");
+    ContainerScope scope(instanceId_);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    taskExecutor->PostTask([weak = WeakClaim(this), code, value]() {
+        auto extensionPattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(extensionPattern);
+        if (extensionPattern->OnResultCallback_) {
+            extensionPattern->OnResultCallback_(code, value);
+        }
+    }, TaskExecutor::TaskType::UI);
+}
+
 void UIExtensionPattern::OnWindowShow()
 {
     RequestExtensionSessionActivation();
@@ -289,5 +306,10 @@ void UIExtensionPattern::OnModifyDone()
 void UIExtensionPattern::SetOnReleaseCallback(std::function<void(int32_t)>&& callback)
 {
     onReleaseCallback_ = std::move(callback);
+}
+
+void UIExtensionPattern::SetOnResultCallback(std::function<void(int32_t, const AAFwk::Want&)>&& callback)
+{
+    OnResultCallback_ = std::move(callback);
 }
 } // namespace OHOS::Ace::NG

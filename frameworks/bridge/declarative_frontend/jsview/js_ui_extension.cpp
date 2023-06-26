@@ -19,6 +19,9 @@
 #include <string>
 
 #include "base/log/ace_scoring_log.h"
+#include "base/want/want_wrap.h"
+#include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
@@ -54,6 +57,7 @@ void JSUIExtension::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSUIExtension>::StaticMethod("create", &JSUIExtension::Create, opt);
     JSClass<JSUIExtension>::StaticMethod("onRelease", &JSUIExtension::OnRelease);
+    JSClass<JSUIExtension>::StaticMethod("onResult", &JSUIExtension::OnResult);
     JSClass<JSUIExtension>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -89,5 +93,29 @@ void JSUIExtension::OnRelease(const JSCallbackInfo& info)
         func->ExecuteJS(1, &newJSVal);
     };
     UIExtensionModel::GetInstance()->SetOnRelease(std::move(onRelease));
+}
+
+void JSUIExtension::OnResult(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto instanceId = ContainerScope::CurrentId();
+    auto onResult = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId]
+        (int32_t code, const AAFwk::Want& want) {
+            ContainerScope scope(instanceId);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("UIExtensionComponent.onResult");
+            auto engine = EngineHelper::GetCurrentEngine();
+            CHECK_NULL_VOID(engine);
+            NativeEngine* nativeEngine = engine->GetNativeEngine();
+            CHECK_NULL_VOID(nativeEngine);
+            auto nativeWant = WantWrap::ConvertToNativeValue(want, nativeEngine);
+            auto wantJSVal = JsConverter::ConvertNativeValueToJsVal(nativeWant);
+            JSRef<JSVal> jsParams[2] = { JSRef<JSVal>::Make(ToJSValue(code)), wantJSVal };
+            func->ExecuteJS(2, jsParams);
+        };
+    UIExtensionModel::GetInstance()->SetOnResult(std::move(onResult));
 }
 } // namespace OHOS::Ace::Framework

@@ -43,4 +43,12 @@ void UIExtensionModelNG::SetOnRelease(std::function<void(int32_t)>&& onRelease)
     CHECK_NULL_VOID(pattern);
     pattern->SetOnReleaseCallback(std::move(onRelease));
 }
+
+void UIExtensionModelNG::SetOnResult(std::function<void(int32_t, const AAFwk::Want&)>&& onResult)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    pattern->SetOnResultCallback(std::move(onResult));
+}
 } // namespace OHOS::Ace::NG

@@ -18,13 +18,21 @@
 
 #include "base/memory/ace_type.h"
 
-namespace OHOS::Ace {
+class NativeEngine;
+class NativeValue;
 
+namespace OHOS::AAFwk {
+class Want;
+} // namespace AAFwk
+
+namespace OHOS::Ace {
 class ACE_EXPORT WantWrap : public AceType {
     DECLARE_ACE_TYPE(WantWrap, AceType)
 
 public:
+    static NativeValue* ConvertToNativeValue(const OHOS::AAFwk::Want& want, NativeEngine* engine);
     static RefPtr<WantWrap> CreateWantWrap(void* nativeEngine, void* nativeValue);
+
     virtual void SetWantParamsFromWantWrap(void* want) = 0;
     virtual std::string ToString() const = 0;
 };

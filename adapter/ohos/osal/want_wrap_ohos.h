@@ -23,7 +23,6 @@
 #include "want.h"
 
 namespace OHOS::Ace {
-
 class WantWrapOhos : public WantWrap {
     DECLARE_ACE_TYPE(WantWrapOhos, WantWrap)
 
@@ -35,7 +34,5 @@ public:
 private:
     AAFwk::Want want_;
 };
-
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_OSAL_WANT_WRAP_OHOS_H

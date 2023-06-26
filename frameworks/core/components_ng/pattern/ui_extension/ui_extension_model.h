@@ -22,6 +22,10 @@
 
 #include "base/utils/macros.h"
 
+namespace OHOS::AAFwk {
+class Want;
+}
+
 namespace OHOS::Ace {
 class ACE_EXPORT UIExtensionModel {
 public:
@@ -30,6 +34,7 @@ public:
 
     virtual void Create(const std::string& bundleName, const std::string& abilityName);
     virtual void SetOnRelease(std::function<void(int32_t)>&& onRelease);
+    virtual void SetOnResult(std::function<void(int32_t, const AAFwk::Want&)>&& onResult);
 private:
     static std::unique_ptr<UIExtensionModel> instance_;
     static std::mutex mutex_;

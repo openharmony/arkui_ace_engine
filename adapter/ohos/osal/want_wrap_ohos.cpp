@@ -20,6 +20,10 @@
 #include "napi_common_want.h"
 
 namespace OHOS::Ace {
+NativeValue* WantWrap::ConvertToNativeValue(const OHOS::AAFwk::Want& want, NativeEngine* engine)
+{
+    return reinterpret_cast<NativeValue*>(OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(engine), want));
+}
 
 RefPtr<WantWrap> WantWrap::CreateWantWrap(void* nativeEngine, void* nativeValue)
 {
@@ -52,5 +56,4 @@ std::string WantWrapOhos::ToString() const
 {
     return want_.ToString();
 }
-
 } // namespace OHOS::Ace
