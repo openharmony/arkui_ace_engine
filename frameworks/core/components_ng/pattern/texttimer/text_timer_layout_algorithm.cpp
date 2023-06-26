@@ -39,6 +39,7 @@ void TextTimerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     childLayoutConstraint.maxSize = idealSize;
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(childWrapper);
     childWrapper->Measure(childLayoutConstraint);
     auto childFrameSize = childWrapper->GetGeometryNode()->GetFrameSize();
     auto height = std::max(selfIdealSize.Height().value_or(0.0f), childFrameSize.Height());
