@@ -164,7 +164,7 @@ const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
     selectOverlayInfo.firstHandle = firstHandleInfo;
     SelectHandleInfo secondHandleInfo;
     selectOverlayInfo.secondHandle = secondHandleInfo;
-    selectOverlayManager_->CreateAndShowSelectOverlay(selectOverlayInfo);
+    selectOverlayManager_->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
     return selectOverlayManager_;
 }
 
