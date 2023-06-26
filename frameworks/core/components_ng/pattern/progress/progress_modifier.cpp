@@ -863,7 +863,11 @@ void ProgressModifier::PaintRingProgressOrShadow(
     canvas.Save();
     canvas.Rotate(angle, centerPt.GetX(), centerPt.GetY());
     canvas.AttachBrush(startCirclePaint);
-    canvas.DrawArc(edgeRect, -ANGLE_90, ANGLE_180);
+    if (isShadow) {
+        canvas.DrawArc(edgeRect, -ANGLE_90, ANGLE_180);
+    } else {
+        canvas.DrawCircle(ToRSPoint(PointF(centerPt.GetX(), centerPt.GetY() - radius)), halfThickness);
+    }
     canvas.DetachBrush();
     canvas.Restore();
 
