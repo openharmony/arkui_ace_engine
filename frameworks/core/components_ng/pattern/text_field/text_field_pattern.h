@@ -814,6 +814,21 @@ public:
     {
         ++drawOverlayFlag_;
     }
+
+    void MarkContentChange()
+    {
+        contChange_ = true;
+    }
+
+    void ResetContChange()
+    {
+        contChange_ = false;
+    }
+
+    bool GetContChange()
+    {
+        return contChange_;
+    }
     std::string GetShowResultImageSrc() const;
     std::string GetHideResultImageSrc() const;
     void OnAttachToFrameNode() override
@@ -995,6 +1010,7 @@ private:
     bool needToRequestKeyboardInner_ = false;
     bool needToRequestKeyboardOnFocus_ = false;
     bool isTransparent_ = false;
+    bool contChange_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 

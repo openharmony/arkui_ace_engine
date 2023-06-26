@@ -61,6 +61,10 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
+    if (textFieldPattern->GetContChange()) {
+        textFieldContentModifier_->ChangeDragStatus();
+        textFieldPattern->ResetContChange();
+    }
     auto textEditingValue = textFieldPattern->GetTextEditingValue();
     std::string text = textEditingValue.text;
     textFieldContentModifier_->SetTextValue(text);
