@@ -51,22 +51,6 @@ int32_t SwiperLayoutAlgorithm::GetLoopIndex(int32_t originalIndex) const
     return loopIndex;
 }
 
-void SwiperLayoutAlgorithm::OffScreenLayoutDirection()
-{
-    if (!targetIndex_ || itemPosition_.empty() || (itemPosition_.find(targetIndex_.value()) != itemPosition_.end())) {
-        forwardFeature_ = false;
-        backwardFeature_ = false;
-        return;
-    }
-    if (GreatNotEqual(targetIndex_.value(), GetEndIndex())) {
-        forwardFeature_ = true;
-        backwardFeature_ = false;
-    } else {
-        forwardFeature_ = false;
-        backwardFeature_ = true;
-    }
-}
-
 void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -116,11 +100,11 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto itemSpace = SwiperUtils::GetItemSpace(swiperLayoutProperty);
     spaceWidth_ = itemSpace > (contentMainSize_ + paddingBeforeContent_ + paddingAfterContent_) ? 0.0f : itemSpace;
 
-    // calculate child layout constraint.
-    auto childLayoutConstraint = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, contentIdealSize);
     if (totalItemCount_ > 0) {
         currentOffset_ = currentDelta_;
         startMainPos_ = currentOffset_;
+        // calculate child layout constraint.
+        auto childLayoutConstraint = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, contentIdealSize);
         if (SwiperUtils::IsStretch(swiperLayoutProperty)) {
             prevMargin_ = static_cast<float>(swiperLayoutProperty->GetPrevMarginValue(0.0_px).ConvertToPx());
             nextMargin_ = static_cast<float>(swiperLayoutProperty->GetNextMarginValue(0.0_px).ConvertToPx());
@@ -253,9 +237,14 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
             startIndex = GetStartIndex();
             endIndex = GetEndIndex();
         }
-        OffScreenLayoutDirection();
         itemPosition_.clear();
         layoutWrapper->RemoveAllChildInRenderTree();
+    }
+    if (jumpIndex_) {
+        if ((jumpIndex_.value() < 0) || (jumpIndex_.value() >= totalItemCount_)) {
+            LOGW("jump index is illegal, %{public}d, %{public}d", jumpIndex_.value(), totalItemCount_);
+            jumpIndex_.reset();
+        }
     }
     if (jumpIndex_) {
         LOGD("Jump index: %{public}d, offset is %{public}f, startMainPos: %{public}f, endMainPos: %{public}f",
@@ -379,7 +368,7 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
     float currentEndPos = startPos;
     float currentStartPos = 0.0f;
     float endMainPos = overScrollFeature_ ? std::max(startPos + contentMainSize_, endMainPos_) : endMainPos_;
-    if (forwardFeature_ && targetIndex_) {
+    if (targetIndex_) {
         endMainPos = Infinity<float>();
     }
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -410,8 +399,8 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
         LOGD("LayoutForward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);
         // reach the valid target index
-        if (forwardFeature_ && targetIndex_ && GreatOrEqual(currentIndex, targetIndex_.value())) {
-            endMainPos = currentStartPos + contentMainSize_;
+        if (targetIndex_ && GreatOrEqual(currentIndex, targetIndex_.value())) {
+            endMainPos = GetEndPosition() + contentMainSize_;
             currentTargetIndex_ = targetIndex_.value();
             targetIndex_.reset();
         }
@@ -447,14 +436,7 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
     }
 
     // Mark inactive in wrapper.
-    for (auto pos = itemPosition_.begin(); pos != itemPosition_.end();) {
-        if (GreatOrEqual(
-                pos->second.endPos, prevMargin_ != 0.0f ? startMainPos_ - prevMargin_ - spaceWidth_ : startMainPos_)) {
-            break;
-        }
-        layoutWrapper->RemoveChildInRenderTree(pos->first);
-        itemPosition_.erase(pos++);
-    }
+    SetInactive(layoutWrapper, startMainPos_, endMainPos_, currentTargetIndex_);
 }
 
 void SwiperLayoutAlgorithm::SetInactive(
@@ -486,7 +468,7 @@ void SwiperLayoutAlgorithm::LayoutBackward(
     float currentStartPos = endPos;
     float currentEndPos = 0.0f;
     float startMainPos = overScrollFeature_ ? std::min(endPos - contentMainSize_, startMainPos_) : startMainPos_;
-    if (backwardFeature_ && targetIndex_) {
+    if (targetIndex_) {
         startMainPos = -Infinity<float>();
     }
     auto currentIndex = endIndex + 1;
@@ -506,12 +488,14 @@ void SwiperLayoutAlgorithm::LayoutBackward(
         LOGD("LayoutBackward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);
         // reach the valid target index
-        if (backwardFeature_ && targetIndex_ && LessOrEqual(currentIndex, targetIndex_.value())) {
+        if (targetIndex_ && LessOrEqual(currentIndex, targetIndex_.value())) {
+            startMainPos = GetStartPosition() - contentMainSize_;
             currentTargetIndex_ = targetIndex_.value();
             targetIndex_.reset();
         }
     } while (
-        GreatNotEqual(currentStartPos, prevMargin_ != 0.0f ? startMainPos - prevMargin_ - spaceWidth_ : startMainPos));
+        GreatNotEqual(currentStartPos, prevMargin_ != 0.0f ? startMainPos - prevMargin_ - spaceWidth_ : startMainPos) ||
+        (currentTargetIndex_.has_value() && (currentIndex - 1) == currentTargetIndex_.value()));
 
     // adjust offset. If edgeEffect is SPRING, jump adjust to allow swiper scroll through boundary
     if (GreatNotEqual(currentStartPos, startMainPos_)) {
@@ -532,18 +516,7 @@ void SwiperLayoutAlgorithm::LayoutBackward(
     }
 
     // Mark inactive in wrapper.
-    std::list<int32_t> removeIndexes;
-    for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
-        if (LessOrEqual(
-                pos->second.startPos, nextMargin_ != 0.0f ? endMainPos_ + nextMargin_ + spaceWidth_ : endMainPos_)) {
-            break;
-        }
-        layoutWrapper->RemoveChildInRenderTree(pos->first);
-        removeIndexes.emplace_back(pos->first);
-    }
-    for (const auto& index : removeIndexes) {
-        itemPosition_.erase(index);
-    }
+    SetInactive(layoutWrapper, startMainPos_, endMainPos_, currentTargetIndex_);
 }
 
 void SwiperLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cachedCount)
