@@ -109,10 +109,6 @@ void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         return;
     }
 
-    auto renderContext = paintWrapper->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->SetFrameForCanvas();
-
     skCanvas_->scale(viewScale, viewScale);
     for (const auto& task : tasks_) {
         task(*this, paintWrapper);

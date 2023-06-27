@@ -258,7 +258,14 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
         return;
     }
     rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
-    rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+    if (overrideContentRect_.has_value()) {
+        // arkui's contentSize corresponds to rosen's frameSize
+        rsNode_->SetFrame(paintRect.GetX() + overrideContentRect_->GetX(),
+            paintRect.GetY() + overrideContentRect_->GetY(), overrideContentRect_->Width(),
+            overrideContentRect_->Height());
+    } else {
+        rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+    }
     if (!isSynced_) {
         isSynced_ = true;
         auto borderRadius = GetBorderRadius();
@@ -1282,7 +1289,13 @@ void RosenRenderContext::SetPositionToRSNode()
         return;
     }
     rsNode_->SetBounds(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
-    rsNode_->SetFrame(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+    if (overrideContentRect_.has_value()) {
+        // arkui's contentSize corresponds to rosen's frameSize
+        rsNode_->SetFrame(rect.GetX() + overrideContentRect_->GetX(), rect.GetY() + overrideContentRect_->GetY(),
+            overrideContentRect_->Width(), overrideContentRect_->Height());
+    } else {
+        rsNode_->SetFrame(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+    }
 }
 
 void RosenRenderContext::OnPositionUpdate(const OffsetT<Dimension>& /*value*/)
@@ -2337,23 +2350,9 @@ void RosenRenderContext::SetBounds(float positionX, float positionY, float width
     rsNode_->SetBounds(positionX, positionY, width, height);
 }
 
-void RosenRenderContext::SetFrameForCanvas()
+void RosenRenderContext::SetOverrideContentRect(const std::optional<RectF>& rect)
 {
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(rsNode_);
-    auto rect = AdjustPaintRect();
-    if (!rect.GetSize().IsPositive()) {
-        return;
-    }
-    auto contentRect = frameNode->GetGeometryNode()->GetContentRect();
-    if (!contentRect.GetSize().IsPositive()) {
-        LOGD("content size is invalid");
-        return;
-    }
-    contentRect.SetLeft(contentRect.GetX() + rect.GetX());
-    contentRect.SetTop(contentRect.GetY() + rect.GetY());
-    rsNode_->SetFrame(contentRect.GetX(), contentRect.GetY(), contentRect.Width(), contentRect.Height());
+    overrideContentRect_ = rect;
 }
 
 void RosenRenderContext::ClearDrawCommands()
