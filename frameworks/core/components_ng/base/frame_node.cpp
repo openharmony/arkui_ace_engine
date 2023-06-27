@@ -533,7 +533,7 @@ void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
 
-    bool isFrameDisappear = forceDisappear || !context->GetOnShow();
+    bool isFrameDisappear = forceDisappear || !context->GetOnShow() || !IsOnMainTree();
     if (!isFrameDisappear) {
         bool curFrameIsActive = isActive_;
         bool curIsVisible = IsVisible();
