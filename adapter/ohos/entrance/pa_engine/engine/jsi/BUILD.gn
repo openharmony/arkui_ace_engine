@@ -73,8 +73,8 @@ template("js_pa_engine_ark") {
       "ets_runtime:libark_jsruntime",
       "eventhandler:libeventhandler",
       "form_fwk:form_manager",
-      "hisysevent_native:libhisysevent",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
+      "hisysevent:libhisysevent",
       "ipc:ipc_core",
       "ipc:ipc_napi_common",
       "napi:ace_napi",
@@ -88,7 +88,7 @@ template("js_pa_engine_ark") {
 
     if (is_standard_system) {
       defines += [ "ENABLE_HITRACE" ]
-      external_deps += [ "hitrace_native:libhitracechain" ]
+      external_deps += [ "hitrace:libhitracechain" ]
     }
 
     sources = [

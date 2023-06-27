@@ -244,7 +244,7 @@ ohos_unittest("RenderMarqueeTest") {
       "resmgr:resourcemanager",
     ]
   } else {
-    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps = [ "hilog:libhilog" ]
   }
 
   external_deps += [ "c_utils:utils" ]

@@ -74,7 +74,7 @@ ohos_unittest("drag_drop_manager_test_ng") {
     "drag_drop_manager_test_ng.cpp",
   ]
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [ "hilog:libhilog" ]
 
   deps = [
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",

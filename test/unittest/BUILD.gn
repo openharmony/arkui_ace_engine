@@ -83,7 +83,7 @@ ohos_source_set("ace_unittest_log") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   sources = [ "$ace_root/adapter/ohos/osal/log_wrapper.cpp" ]
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [ "hilog:libhilog" ]
   configs = [ ":ace_unittest_config" ]
 }
 
@@ -97,7 +97,7 @@ ohos_source_set("ace_unittest_trace") {
     "$ace_root/frameworks/base/log/ace_trace.cpp",
   ]
   deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
-  external_deps = [ "hitrace_native:hitrace_meter" ]
+  external_deps = [ "hitrace:hitrace_meter" ]
   configs = [ ":ace_unittest_config" ]
 }
 

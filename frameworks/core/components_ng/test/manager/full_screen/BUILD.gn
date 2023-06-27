@@ -49,7 +49,7 @@ ohos_unittest("full_screen_manager_test_ng") {
     "full_screen_manager_test_ng.cpp",
   ]
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [ "hilog:libhilog" ]
 
   deps = [
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
