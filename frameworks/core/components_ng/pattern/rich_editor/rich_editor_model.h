@@ -19,11 +19,62 @@
 #include <functional>
 #include <mutex>
 
+#include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace {
+struct ImageSpanSize {
+    CalcDimension width;
+    CalcDimension height;
+};
+
+struct ImageSpanAttribute {
+    std::optional<ImageSpanSize> size;
+    std::optional<VerticalAlign> verticalAlign;
+    std::optional<ImageFit> objectFit;
+};
+struct ImageSpanOptions {
+    std::optional<int32_t> offset;
+    std::optional<std::string> image;
+    std::optional<std::string> bundleName;
+    std::optional<std::string> moduleName;
+    std::optional<RefPtr<PixelMap>> imagePixelMap;
+    std::optional<ImageSpanAttribute> imageAttribute;
+};
+
+struct SpanPositionInfo {
+    SpanPositionInfo(int32_t index, int32_t start, int32_t end, int32_t offset)
+        : spanIndex_(index), spanStart_(start), spanEnd_(end), spanOffset_(offset)
+    {}
+
+    SpanPositionInfo()
+    {
+        spanIndex_ = 0;
+        spanStart_ = 0;
+        spanEnd_ = 0;
+        spanOffset_ = 0;
+    }
+
+    int32_t spanIndex_ = 0;
+    int32_t spanStart_ = 0;
+    int32_t spanEnd_ = 0;
+    int32_t spanOffset_ = 0;
+};
+
+struct TextSpanOptions {
+    std::optional<int32_t> offset;
+    std::string value;
+    std::optional<TextStyle> style;
+};
+
 class ACE_EXPORT RichEditorControllerBase : public AceType {
     DECLARE_ACE_TYPE(RichEditorControllerBase, AceType);
+
+public:
+    virtual int32_t AddImageSpan(const ImageSpanOptions& options) = 0;
+    virtual int32_t AddTextSpan(const TextSpanOptions& options) = 0;
 };
 
 class ACE_EXPORT RichEditorModel {

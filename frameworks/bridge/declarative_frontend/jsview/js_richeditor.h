@@ -52,6 +52,10 @@ public:
     {
         controllerWeak_ = controller;
     }
+    void AddImageSpan(const JSCallbackInfo& args);
+    void AddTextSpan(const JSCallbackInfo& args);
+    ImageSpanAttribute ParseJsImageSpanAttribute(JSRef<JSObject> imageAttribute);
+    TextStyle ParseJsTextStyle(JSRef<JSObject> styleObject);
 
 private:
     WeakPtr<RichEditorControllerBase> controllerWeak_;

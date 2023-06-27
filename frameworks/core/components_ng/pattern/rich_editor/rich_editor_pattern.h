@@ -84,6 +84,13 @@ public:
     void SetCaretPosition(int32_t pos);
     bool GetCaretVisible() const;
     OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight);
+    void CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
+    int32_t TextSpanSplit(int32_t position);
+    SpanPositionInfo GetSpanPositionInfo(int32_t position);
+    std::function<ImageSourceInfo()> CreateImageSourceInfo(const ImageSpanOptions& options);
+    void AddImageSpan(const ImageSpanOptions& options);
+    void AddTextSpan(const TextSpanOptions& options);
+    int32_t GetSpanIndex();
 
 private:
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -106,6 +113,7 @@ private:
     int32_t instanceId_ = -1;
     bool caretVisible_ = false;
     CancelableCallback<void()> caretTwinklingTask_;
+    int32_t spanIndex_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };
