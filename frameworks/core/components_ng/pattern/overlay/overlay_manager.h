@@ -63,6 +63,7 @@ public:
     void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
     void ErasePopup(int32_t targetId);
     void HideAllPopups();
+    void HideCustomPopups();
 
     const PopupInfo& GetPopupInfo(int32_t targetId)
     {

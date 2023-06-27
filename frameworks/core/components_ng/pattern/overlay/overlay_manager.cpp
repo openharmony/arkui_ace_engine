@@ -570,9 +570,8 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     }
 }
 
-void OverlayManager::HideAllPopups()
+void OverlayManager::HideCustomPopups()
 {
-    LOGD("OverlayManager::HideAllPopups");
     if (popupMap_.empty()) {
         LOGD("OverlayManager: popupMap is empty");
         return;
@@ -590,6 +589,33 @@ void OverlayManager::HideAllPopups()
             if (!useCustom) {
                 continue;
             }
+            popupInfo.markNeedUpdate = true;
+            popupInfo.popupId = -1;
+            auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+            if (showInSubWindow) {
+                SubwindowManager::GetInstance()->HidePopupNG(targetNodeId);
+            } else {
+                UpdatePopupNode(targetNodeId, popupInfo);
+            }
+        }
+    }
+}
+
+void OverlayManager::HideAllPopups()
+{
+    LOGD("OverlayManager::HideAllPopups");
+    if (popupMap_.empty()) {
+        LOGD("OverlayManager: popupMap is empty");
+        return;
+    }
+    for (const auto& popup : popupMap_) {
+        auto popupInfo = popup.second;
+        if (popupInfo.isCurrentOnShow && popupInfo.target.Upgrade()) {
+            auto targetNodeId = popupInfo.target.Upgrade()->GetId();
+            auto popupNode = popupInfo.popupNode;
+            CHECK_NULL_VOID(popupNode);
+            auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+            CHECK_NULL_VOID(layoutProp);
             popupInfo.markNeedUpdate = true;
             popupInfo.popupId = -1;
             auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);

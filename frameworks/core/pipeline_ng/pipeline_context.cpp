@@ -452,7 +452,7 @@ void PipelineContext::SetupRootElement()
         auto overlay = weakOverlayManger.Upgrade();
         CHECK_NULL_VOID(overlay);
         overlay->HideAllMenus();
-        overlay->HideAllPopups();
+        overlay->HideCustomPopups();
     };
     rootNode_->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
     AddOnAreaChangeNode(rootNode_->GetId());
@@ -1287,7 +1287,7 @@ void PipelineContext::RootLostFocus(BlurReason reason) const
     focusHub->LostFocus(reason);
     CHECK_NULL_VOID(overlayManager_);
     overlayManager_->HideAllMenus();
-    overlayManager_->HideAllPopups();
+    overlayManager_->HideCustomPopups();
 }
 
 MouseEvent ConvertAxisToMouse(const AxisEvent& event)
