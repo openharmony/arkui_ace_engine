@@ -17,10 +17,17 @@
 
 #define protected public
 #define private public
+#include "core/animation/spring_curve.h"
+#include "core/animation/spring_motion.h"
+
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/nav_bar_node.h"
+#include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
+
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -31,6 +38,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float RET_VALUE = 0.0;
 const std::string BAR_ITEM_ETS_TAG = "TitleBar";
+const std::string NAV_BAR_ITEM_ETS_TAG = "NavBar";
 const std::string EMPTY_TEXT = "";
 const std::string TITLE_BAR_TEXT = "title";
 } // namespace
@@ -39,10 +47,12 @@ class TitleBarTestNg : public testing::Test {
 public:
     void InitTitleBarTestNg();
     void DestroyTitleBarObject();
+    void CreateNavBar();
 
     RefPtr<TitleBarNode> frameNode_;
     RefPtr<TitleBarPattern> titleBarPattern_;
     RefPtr<TitleBarAccessibilityProperty> titleBarAccessibilityProperty_;
+    RefPtr<NavBarNode> navBarNode_;
 };
 
 void TitleBarTestNg::InitTitleBarTestNg()
@@ -60,11 +70,21 @@ void TitleBarTestNg::InitTitleBarTestNg()
     ASSERT_NE(titleBarAccessibilityProperty_, nullptr);
 }
 
+void TitleBarTestNg::CreateNavBar()
+{
+    std::string barTag = NAV_BAR_ITEM_ETS_TAG;
+    auto navBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    navBarNode_ = NavBarNode::GetOrCreateNavBarNode(
+        barTag, navBarNodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::NavBarPattern>(); });
+    ASSERT_NE(navBarNode_, nullptr);
+}
+
 void TitleBarTestNg::DestroyTitleBarObject()
 {
     frameNode_ = nullptr;
     titleBarPattern_ = nullptr;
     titleBarAccessibilityProperty_ = nullptr;
+    navBarNode_ = nullptr;
 }
 
 /**
@@ -371,5 +391,101 @@ HWTEST_F(TitleBarTestNg, TitleBarAccessibilityPropertyGetText001, TestSize.Level
     frameNode_->SetTitle(titleNode);
     EXPECT_EQ(titleBarAccessibilityProperty_->GetText(), TITLE_BAR_TEXT);
     DestroyTitleBarObject();
+}
+
+/**
+ * @tc.name: TitleBarPattern002
+ * @tc.desc: Test ProcessTittleDragStart function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPattern002, TestSize.Level1)
+{
+    constexpr float offset = 200.0f;
+    InitTitleBarTestNg();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+    frameNode_->GetSubtitle();
+    titleBarPattern_->ProcessTittleDragStart(offset);
+    EXPECT_EQ(titleBarPattern_->GetTempTitleBarHeight(), titleBarPattern_->maxTitleBarHeight_);
+}
+
+/**
+ * @tc.name: TitleBarPattern003
+ * @tc.desc: Test ProcessTittleDragUpdate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPattern003, TestSize.Level1)
+{
+    constexpr float offset = 190.0f;
+    InitTitleBarTestNg();
+    frameNode_->GetSubtitle();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+    titleBarPattern_->ProcessTittleDragUpdate(offset);
+    titleBarPattern_->SetTitleStyleByOffset(offset);
+    titleBarPattern_->ProcessTittleDragEnd();
+    titleBarPattern_->SetTempTitleOffsetY();
+    EXPECT_EQ(titleBarPattern_->GetTempTitleOffsetY(), titleBarPattern_->maxTitleOffsetY_);
+    titleBarPattern_->SetTempSubTitleOffsetY();
+    EXPECT_EQ(titleBarPattern_->GetTempSubTitleOffsetY(), titleBarPattern_->maxTitleOffsetY_);
+}
+
+/**
+ * @tc.name: TitleBarPattern004
+ * @tc.desc: Test SpringAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPattern004, TestSize.Level1)
+{
+    constexpr float startPos = 100.0f;
+    float mass = 1.0f;
+    float stiffness = 228.0f;
+    float damping = 30.0f;
+
+    auto titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+    RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY = AceType::MakeRefPtr<SpringProperty>(mass, stiffness, damping);
+    titleBarPattern->springMotion_ = AceType::MakeRefPtr<SpringMotion>(startPos, 0, 0, DEFAULT_OVER_SPRING_PROPERTY);
+    titleBarPattern->SpringAnimation(startPos, 0);
+    titleBarPattern->SetOverDragOffset(startPos);
+    EXPECT_EQ(titleBarPattern->GetOverDragOffset(), startPos);
+}
+
+/**
+ * @tc.name: TitleBarPattern005
+ * @tc.desc: Test TransformScale function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPattern005, TestSize.Level1)
+{
+    constexpr float overDragOffset = 100.0f;
+    InitTitleBarTestNg();
+    CreateNavBar();
+    /**
+     * @tc.case: case1.Test title transform scale.
+     */
+    auto titleNode = frameNode_->GetTitle();
+    ASSERT_NE(titleNode, nullptr);
+    auto title = AceType::DynamicCast<FrameNode>(titleNode);
+    titleBarPattern_->TransformScale(overDragOffset, title);
+    auto renderContext = frameNode_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
+    EXPECT_EQ(renderContext->GetTransformScale(), VectorF(1.0f, 1.0f));
+}
+
+/**
+ * @tc.name: TitleBarPattern006
+ * @tc.desc: Test AnimateTo function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPattern006, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    CreateNavBar();
+    titleBarPattern_->AnimateTo(0);
+    EXPECT_NE(titleBarPattern_->animator_, nullptr);
 }
 } // namespace OHOS::Ace::NG

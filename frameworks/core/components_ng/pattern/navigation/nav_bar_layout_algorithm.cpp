@@ -84,11 +84,15 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
     }
 
     // FREE 和 FULL 模式，有subtitle
+    auto titleBar = AceType::DynamicCast<TitleBarNode>(titleBarNode);
+    auto titlePattern = titleBar->GetPattern<TitleBarPattern>();
+    auto overDragOffset = titlePattern->GetOverDragOffset();
     if (hostNode->GetSubtitle()) {
         if (NearZero(titleBarHeight)) {
             titleBarHeight = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
         }
-        constraint.selfIdealSize = OptionalSizeF(navigationSize.Width(), titleBarHeight);
+        auto doubleTitleBarHeight =  overDragOffset / 6.0f + titleBarHeight;
+        constraint.selfIdealSize = OptionalSizeF(navigationSize.Width(), doubleTitleBarHeight);
         titleBarWrapper->Measure(constraint);
         return titleBarHeight;
     }
@@ -97,7 +101,8 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
     if (NearZero(titleBarHeight)) {
         titleBarHeight = static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
     }
-    constraint.selfIdealSize = OptionalSizeF(navigationSize.Width(), titleBarHeight);
+    auto singleTitleBarHeight = overDragOffset / 6 + titleBarHeight;
+    constraint.selfIdealSize = OptionalSizeF(navigationSize.Width(), singleTitleBarHeight);
     titleBarWrapper->Measure(constraint);
     return titleBarHeight;
 }
@@ -163,6 +168,13 @@ float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hos
 void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostNode,
     const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty, float titlebarHeight)
 {
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleNode);
+    auto navbar = hostNode->GetPattern<NavBarPattern>();
+    CHECK_NULL_VOID(navbar);
+    auto springEffect = navbar->GetspringEffect();
+    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
+    auto overDragOffset = springEffect ? 0.0f : titlePattern->GetOverDragOffset();
     auto contentNode = hostNode->GetNavBarContentNode();
     CHECK_NULL_VOID(contentNode);
     auto index = hostNode->GetChildIndexById(hostNode->GetNavBarContentNode()->GetId());
@@ -170,7 +182,7 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostN
     CHECK_NULL_VOID(contentWrapper);
     auto geometryNode = contentWrapper->GetGeometryNode();
     if (!navBarLayoutProperty->GetHideTitleBar().value_or(false)) {
-        auto contentOffset = OffsetF(geometryNode->GetFrameOffset().GetX(), titlebarHeight);
+        auto contentOffset = OffsetF(geometryNode->GetFrameOffset().GetX(),  overDragOffset + titlebarHeight);
         geometryNode->SetMarginFrameOffset(contentOffset);
         contentWrapper->Layout();
         return;

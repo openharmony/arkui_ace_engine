@@ -75,10 +75,27 @@ bool ScrollablePattern::OnScrollCallback(float offset, int32_t source)
     return UpdateCurrentOffset(offset, source);
 }
 
+void ScrollablePattern::DraggedDownScrollEndProcess()
+{
+    if (!isCoordEventNeedMoveUp_) {
+        return;
+    }
+
+    if (coordinationEvent_ && !isDraggedDown_ && isReactInParentMovement_) {
+        isReactInParentMovement_ = false;
+        auto onScrollEnd = coordinationEvent_->GetOnScrollEndEvent();
+        if (onScrollEnd) {
+            onScrollEnd();
+        }
+    }
+}
+
 bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
 {
     auto isAtTop = (IsAtTop() && Positive(offset));
-    if (isAtTop && source == SCROLL_FROM_UPDATE && !isReactInParentMovement_ && (axis_ == Axis::VERTICAL)) {
+    auto isDraggedDown = (isDraggedDown_ && isCoordEventNeedMoveUp_);
+    if ((isAtTop || isDraggedDown) && (source == SCROLL_FROM_UPDATE) && !isReactInParentMovement_ &&
+        (axis_ == Axis::VERTICAL)) {
         isReactInParentMovement_ = true;
         if (coordinationEvent_) {
             auto onScrollStart = coordinationEvent_->GetOnScrollStartEvent();
@@ -98,6 +115,10 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
         auto onScroll = coordinationEvent_->GetOnScroll();
         if (onScroll) {
             onScroll(offset);
+            DraggedDownScrollEndProcess();
+            if (isDraggedDown && Negative(offset)) {
+                return false;
+            }
             return scrollEffect_ && scrollEffect_->IsSpringEffect();
         }
     }
