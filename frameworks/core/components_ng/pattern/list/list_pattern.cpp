@@ -121,9 +121,6 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto predictSnapOffset = listLayoutAlgorithm->GetPredictSnapOffset();
     if (jumpIndex_) {
         float absoluteOffset = listLayoutAlgorithm->GetEstimateOffset();
-        if (listLayoutAlgorithm->GetScrollAutoType() == ScrollAutoType::NOT_CHANGE) {
-            absoluteOffset = 0.0f;
-        }
         relativeOffset += absoluteOffset - currentOffset_;
         isJump = true;
         jumpIndex_.reset();
