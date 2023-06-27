@@ -48,7 +48,10 @@ class ManagerInterface : public AceType {
 namespace OHOS::Ace::NG {
 namespace {
 const int32_t DEFAULT_INSTANCE_ID = 0;
-const int32_t CANVAS_WIDTH = 300;
+const int32_t INDEX_ONE = 1;
+const int32_t INDEX_TWO = 2;
+const int32_t INDEX_THREE = 3;
+const int32_t CANVAS_WIDTH = 3;
 const int32_t CANVAS_HEIGHT = 300;
 const std::vector<std::string> FONT_FAMILY = { "Arial", "sans-serif", "monospace", "fantasy", "serif", "cursive",
     "system-ui", "emoji", "math" };
@@ -64,12 +67,23 @@ const std::vector<double> CANDIDATE_DOUBLES = { 0.0, 1.0, 10.0, 100.0, 1000.0 };
 const double DEFAULT_DOUBLE10 = 10.0;
 const std::string URL_PREFIX = "data:";
 const std::string IMAGE_PNG = "image/png";
+BaseInfo infoArr[4] = {};
 } // namespace
 class CanvasRendererTestNg : public testing::Test {
 public:
+    static void SetUpTestSuite();
+    static void TearDownTestSuite() {}
     static RefPtr<CustomPaintPattern> CreateCustomPaintView();
     static RefPtr<OffscreenCanvasPattern> CreateOffscreenCanvasPattern();
 };
+
+void CanvasRendererTestNg::SetUpTestSuite()
+{
+    infoArr[INDEX_ONE].canvasPattern = CreateCustomPaintView();
+    infoArr[INDEX_TWO].isOffscreen = true;
+    infoArr[INDEX_THREE].isOffscreen = true;
+    infoArr[INDEX_THREE].offscreenPattern = CreateCustomPaintView();
+}
 
 RefPtr<CustomPaintPattern> CanvasRendererTestNg::CreateCustomPaintView()
 {
@@ -735,5 +749,187 @@ HWTEST_F(CanvasRendererTestNg, CanvasRendererTest011, TestSize.Level1)
     paintMethod->tasks_.clear();
     canvasRendererModelNG.QuadraticCurveTo(baseInfo, quadraticCurveParam);
     EXPECT_TRUE(paintMethod->HasTask());
+}
+
+/**
+ * @tc.name: CanvasRendererTest012
+ * @tc.desc: Test some set function of CanvasRendererModelNG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererTestNg, CanvasRendererTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create CanvasRendererModelNG and config some params.
+     */
+    CanvasRendererModelNG canvasRendererModelNG;
+    FillTextInfo fillTextInfo;
+    fillTextInfo.text = "test";
+    fillTextInfo.x = 0.0;
+    fillTextInfo.y = 0.0;
+    FontWeight weight = FontWeight::BOLD;
+    FontStyle style = FontStyle::ITALIC;
+    Ace::Gradient gradient;
+    std::shared_ptr<Ace::Pattern> imagePattern;
+    Color color = Color::RED;
+    Dimension fontSize = 20.0_vp;
+    /**
+     * @tc.steps2: call some fuction.
+     * @tc.expected: the paintMethod tasks size meet expectations.
+     */
+    for (auto value : infoArr) {
+        canvasRendererModelNG.SetFillText(value, fillTextInfo);
+        canvasRendererModelNG.SetStrokeText(value, fillTextInfo);
+        canvasRendererModelNG.SetAntiAlias(value);
+        canvasRendererModelNG.SetFontWeight(value, weight);
+        canvasRendererModelNG.SetFontStyle(value, style);
+        canvasRendererModelNG.SetFontFamilies(value, FONT_FAMILY);
+        canvasRendererModelNG.SetFontSize(value, fontSize);
+        canvasRendererModelNG.GetLineDash(value);
+        canvasRendererModelNG.SetFillGradient(value, gradient);
+        canvasRendererModelNG.SetFillPattern(value, imagePattern);
+        canvasRendererModelNG.SetFillColor(value, color, false);
+        canvasRendererModelNG.SetStrokeGradient(value, gradient);
+        canvasRendererModelNG.SetStrokePattern(value, imagePattern);
+        canvasRendererModelNG.SetStrokeColor(value, color, false);
+    };
+    auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(infoArr[1].canvasPattern);
+    ASSERT_NE(canvasPattern->paintMethod_, nullptr);
+    EXPECT_EQ(canvasPattern->paintMethod_->tasks_.size(), 13);
+    canvasPattern->paintMethod_->tasks_.clear();
+}
+
+/**
+ * @tc.name: CanvasRendererTest013
+ * @tc.desc: Test some set function of CanvasRendererModelNG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererTestNg, CanvasRendererTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create CanvasRendererModelNG and config some params.
+     */
+    CanvasRendererModelNG canvasRendererModelNG;
+    ImageInfo imageInfo;
+    Ace::ImageData imageData;
+    ImageSize imageSize;
+    TextDirection textDirection;
+    /**
+     * @tc.steps2: call some fuction.
+     * @tc.expected: the paintMethod tasks size meet expectations.
+     */
+    for (auto value : infoArr) {
+        canvasRendererModelNG.DrawImage(value, imageInfo);
+        canvasRendererModelNG.PutImageData(value, imageData);
+        canvasRendererModelNG.CloseImageBitmap(value, IMAGE_PNG);
+        canvasRendererModelNG.GetImageData(value, imageSize);
+        canvasRendererModelNG.DrawPixelMap(value, imageInfo);
+        canvasRendererModelNG.SetFilterParam(value, "");
+        canvasRendererModelNG.SetTextDirection(value, textDirection);
+        canvasRendererModelNG.GetJsonData(value, "");
+        canvasRendererModelNG.ToDataURL(value, IMAGE_PNG, 0.0);
+        canvasRendererModelNG.SetLineCap(value, LineCapStyle::ROUND);
+        canvasRendererModelNG.SetLineJoin(value, LineJoinStyle::ROUND);
+        canvasRendererModelNG.SetMiterLimit(value, 0.0);
+        canvasRendererModelNG.SetLineWidth(value, 0.0);
+        canvasRendererModelNG.SetGlobalAlpha(value, 0.0);
+        canvasRendererModelNG.SetCompositeType(value, CompositeOperation::SOURCE_OUT);
+        canvasRendererModelNG.SetLineDashOffset(value, 0.0);
+        canvasRendererModelNG.SetShadowBlur(value, 0.0);
+        canvasRendererModelNG.SetShadowColor(value, Color::RED);
+        canvasRendererModelNG.SetShadowOffsetX(value, 0.0);
+        canvasRendererModelNG.SetShadowOffsetY(value, 0.0);
+        canvasRendererModelNG.SetSmoothingEnabled(value, true);
+        canvasRendererModelNG.SetSmoothingQuality(value, "");
+    };
+    auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(infoArr[1].canvasPattern);
+    ASSERT_NE(canvasPattern->paintMethod_, nullptr);
+    EXPECT_EQ(canvasPattern->paintMethod_->tasks_.size(), 18);
+    canvasPattern->paintMethod_->tasks_.clear();
+}
+
+/**
+ * @tc.name: CanvasRendererTest014
+ * @tc.desc: Test some set function of CanvasRendererModelNG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererTestNg, CanvasRendererTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create CanvasRendererModelNG and config some params.
+     */
+    CanvasRendererModelNG canvasRendererModelNG;
+    BezierCurveParam bezierCurveParam;
+    QuadraticCurveParam quadraticCurveParam;
+    ArcToParam arcToParam;
+    ArcParam arcParam;
+    EllipseParam ellipseParam;
+    auto fillRule = CanvasFillRule::NONZERO;
+    RefPtr<CanvasPath2D> path = AceType::MakeRefPtr<CanvasPath2D>();
+    Rect rect;
+    /**
+     * @tc.steps2: call some fuction.
+     * @tc.expected: the paintMethod tasks size meet expectations.
+     */
+    for (auto value : infoArr) {
+        canvasRendererModelNG.MoveTo(value, 0.0, 0.0);
+        canvasRendererModelNG.LineTo(value, 0.0, 0.0);
+        canvasRendererModelNG.BezierCurveTo(value, bezierCurveParam);
+        canvasRendererModelNG.ArcTo(value, arcToParam);
+        canvasRendererModelNG.Arc(value, arcParam);
+        canvasRendererModelNG.Ellipse(value, ellipseParam);
+        canvasRendererModelNG.SetFillRuleForPath(value, fillRule);
+        canvasRendererModelNG.SetFillRuleForPath2D(value, fillRule, path);
+        canvasRendererModelNG.SetStrokeRuleForPath2D(value, fillRule, path);
+        canvasRendererModelNG.SetStrokeRuleForPath(value, fillRule);
+        canvasRendererModelNG.SetClipRuleForPath(value, fillRule);
+        canvasRendererModelNG.SetClipRuleForPath2D(value, fillRule, path);
+        canvasRendererModelNG.AddRect(value, rect);
+        canvasRendererModelNG.BeginPath(value);
+        canvasRendererModelNG.ClosePath(value);
+        canvasRendererModelNG.Restore(value);
+        canvasRendererModelNG.CanvasRendererSave(value);
+        canvasRendererModelNG.CanvasRendererRotate(value, 0.0);
+        canvasRendererModelNG.CanvasRendererScale(value, 0.0, 0.0);
+    };
+    auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(infoArr[1].canvasPattern);
+    ASSERT_NE(canvasPattern->paintMethod_, nullptr);
+    EXPECT_EQ(canvasPattern->paintMethod_->tasks_.size(), 25);
+    canvasPattern->paintMethod_->tasks_.clear();
+}
+
+/**
+ * @tc.name: CanvasRendererTest015
+ * @tc.desc: Test some set function of CanvasRendererModelNG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererTestNg, CanvasRendererTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create CanvasRendererModelNG and config some params.
+     */
+    CanvasRendererModelNG canvasRendererModelNG;
+    TransformParam transformParam;
+    Rect rect;
+    /**
+     * @tc.steps2: call some fuction.
+     * @tc.expected: the paintMethod tasks size meet expectations.
+     */
+    for (auto value : infoArr) {
+        canvasRendererModelNG.SetTransform(value, transformParam, true);
+        canvasRendererModelNG.ResetTransform(value);
+        canvasRendererModelNG.Transform(value, transformParam);
+        canvasRendererModelNG.Translate(value, 0.0, 0.0);
+        canvasRendererModelNG.SetLineDash(value, CANDIDATE_DOUBLES);
+        canvasRendererModelNG.SetTextAlign(value, TextAlign::CENTER);
+        canvasRendererModelNG.SetTextBaseline(value, TextBaseline::TOP);
+        canvasRendererModelNG.FillRect(value, rect);
+        canvasRendererModelNG.StrokeRect(value, rect);
+        canvasRendererModelNG.ClearRect(value, rect);
+        canvasRendererModelNG.GetTransform(value);
+    };
+    auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(infoArr[1].canvasPattern);
+    ASSERT_NE(canvasPattern->paintMethod_, nullptr);
+    EXPECT_EQ(canvasPattern->paintMethod_->tasks_.size(), 10);
+    canvasPattern->paintMethod_->tasks_.clear();
 }
 } // namespace OHOS::Ace::NG
