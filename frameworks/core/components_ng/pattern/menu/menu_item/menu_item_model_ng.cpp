@@ -36,6 +36,9 @@ void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
     CHECK_NULL_VOID(menuItem);
     stack->Push(menuItem);
 
+    auto layoutProps = menuItem->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProps);
+    layoutProps->UpdateAlignment(Alignment::CENTER_LEFT);
     // set border radius
     auto renderContext = menuItem->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
