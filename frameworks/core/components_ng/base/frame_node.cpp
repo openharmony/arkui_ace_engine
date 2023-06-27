@@ -1198,7 +1198,7 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t s
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
-    if (!isActive_ || !eventHub_->IsEnabled()) {
+    if (!isActive_ || !eventHub_->IsEnabled() || bypass_) {
         LOGE("%{public}s is inActive, need't do touch test", GetTag().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
@@ -1829,5 +1829,53 @@ bool FrameNode::IsContentRoot()
     auto grandParent = parent->GetParent();
     CHECK_NULL_RETURN_NOLOG(grandParent, false);
     return parent->GetTag() == V2::JS_VIEW_ETS_TAG && grandParent->GetTag() == V2::PAGE_ETS_TAG;
+}
+
+void FrameNode::CheckSecurityComponentStatus(std::vector<RectF>& rect, const TouchRestrict& touchRestrict)
+{
+    auto paintRect = renderContext_->GetPaintRectWithTransform();
+    auto responseRegionList = GetResponseRegionList(paintRect, static_cast<int32_t>(touchRestrict.sourceType));
+    if (IsSecurityComponent()) {
+        if (CheckRectIntersect(responseRegionList, rect)) {
+            bypass_ = true;
+        }
+    }
+    for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
+        const auto& child = *iter;
+        child->CheckSecurityComponentStatus(rect, touchRestrict);
+    }
+    rect.insert(rect.end(), responseRegionList.begin(), responseRegionList.end());
+}
+
+bool FrameNode::CheckRectIntersect(std::vector<RectF>& dest, std::vector<RectF>& origin)
+{
+    for (auto destRect : dest) {
+        for (auto originRect : origin) {
+            if (originRect.IsIntersectWith(destRect)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool FrameNode::HaveSecurityComponent()
+{
+    if (IsSecurityComponent()) {
+        return true;
+    }
+    for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
+        const auto& child = *iter;
+        if (child->HaveSecurityComponent()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool FrameNode::IsSecurityComponent()
+{
+    return GetTag() == V2::SEC_LOCATION_BUTTON_ETS_TAG || GetTag() == V2::SEC_PASTE_BUTTON_ETS_TAG ||
+           GetTag() == V2::SEC_SAVE_BUTTON_ETS_TAG;
 }
 } // namespace OHOS::Ace::NG
