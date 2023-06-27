@@ -30,6 +30,7 @@ void StepperModelNG::Create(uint32_t index)
     auto nodeId = stack->ClaimNodeId();
     auto stepperNode = StepperNode::GetOrCreateStepperNode(
         V2::STEPPER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StepperPattern>(); });
+    stack->Push(stepperNode);
     bool hasSwiperNode = stepperNode->HasSwiperNode();
     auto swiperId = stepperNode->GetSwiperId();
     if (!hasSwiperNode) {
@@ -43,7 +44,6 @@ void StepperModelNG::Create(uint32_t index)
         auto swiperController = swiperNode->GetPattern<SwiperPattern>()->GetSwiperController();
         swiperController->SwipeTo(index);
     }
-    stack->Push(stepperNode);
 }
 
 void StepperModelNG::SetOnFinish(RoutineCallbackEvent&& eventOnFinish)
