@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_PATTERN_H
 
 #include "base/memory/referenced.h"
+#include "base/want/want_wrap.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/event/mouse_event.h"
@@ -31,7 +32,7 @@ class UIExtensionPattern : public WindowPattern {
     DECLARE_ACE_TYPE(UIExtensionPattern, WindowPattern);
 
 public:
-    UIExtensionPattern(const std::string& bundleName, const std::string& abilityName);
+    explicit UIExtensionPattern(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
     ~UIExtensionPattern() override;
 
     void OnWindowShow() override;
@@ -48,7 +49,7 @@ public:
     void OnConnect() override;
     void OnDisconnect() override;
 
-    void OnResult(int32_t code, const AAFwk::Want&);
+    void OnResult(int32_t code, const AAFwk::Want& want);
 
     void RequestExtensionSessionActivation();
     void RequestExtensionSessionBackground();
@@ -77,6 +78,8 @@ private:
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
+    void UnregisterAbilityResultListener();
+    void OnConnectInner();
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;

@@ -18,6 +18,8 @@
 
 #include "base/want/want_wrap.h"
 
+#include <string>
+
 #include "napi/native_api.h"
 #include "native_engine/native_engine.h"
 #include "want.h"
@@ -28,9 +30,16 @@ class WantWrapOhos : public WantWrap {
 
 public:
     WantWrapOhos(NativeEngine* engine, NativeValue* value);
+    WantWrapOhos(const std::string& bundleName, const std::string& abilityName);
     ~WantWrapOhos() = default;
     void SetWantParamsFromWantWrap(void* want) override;
     std::string ToString() const override;
+
+    const AAFwk::Want& GetWant() const
+    {
+        return want_;
+    }
+
 private:
     AAFwk::Want want_;
 };

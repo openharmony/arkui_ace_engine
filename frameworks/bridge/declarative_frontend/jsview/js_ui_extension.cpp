@@ -22,6 +22,7 @@
 #include "base/want/want_wrap.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
@@ -66,16 +67,9 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         return;
     }
-
-    auto want = JSRef<JSObject>::Cast(info[0]);
-    if (want->GetProperty("bundleName")->IsNull() || want->GetProperty("bundleName")->IsUndefined() ||
-        want->GetProperty("abilityName")->IsNull() || want->GetProperty("abilityName")->IsUndefined()) {
-        return;
-    }
-    std::string bundleName = want->GetProperty("bundleName")->ToString();
-    std::string abilityName = want->GetProperty("abilityName")->ToString();
-
-    UIExtensionModel::GetInstance()->Create(bundleName, abilityName);
+    auto wantObj = JSRef<JSObject>::Cast(info[0]);
+    RefPtr<OHOS::Ace::WantWrap> want = CreateWantWrapFromNapiValue(wantObj);
+    UIExtensionModel::GetInstance()->Create(want);
 }
 
 void JSUIExtension::OnRelease(const JSCallbackInfo& info)

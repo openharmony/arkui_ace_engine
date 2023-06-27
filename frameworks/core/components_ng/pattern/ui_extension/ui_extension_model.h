@@ -21,6 +21,7 @@
 #include <string>
 
 #include "base/utils/macros.h"
+#include "base/want/want_wrap.h"
 
 namespace OHOS::AAFwk {
 class Want;
@@ -32,7 +33,7 @@ public:
     static UIExtensionModel* GetInstance();
     virtual ~UIExtensionModel() = default;
 
-    virtual void Create(const std::string& bundleName, const std::string& abilityName);
+    virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
     virtual void SetOnRelease(std::function<void(int32_t)>&& onRelease);
     virtual void SetOnResult(std::function<void(int32_t, const AAFwk::Want&)>&& onResult);
 private:

@@ -23,12 +23,12 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-void UIExtensionModelNG::Create(const std::string& bundleName, const std::string& abilityName)
+void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
-        [bundleName, abilityName]() { return AceType::MakeRefPtr<UIExtensionPattern>(bundleName, abilityName); });
+        [wantWrap]() { return AceType::MakeRefPtr<UIExtensionPattern>(wantWrap); });
     stack->Push(frameNode);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

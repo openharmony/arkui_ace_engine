@@ -24,7 +24,7 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT UIExtensionModelNG : public UIExtensionModel {
 public:
-    void Create(const std::string& bundleName, const std::string& abilityName) override;
+    void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap) override;
     void SetOnRelease(std::function<void(int32_t)>&& onRelease) override;
     void SetOnResult(std::function<void(int32_t, const AAFwk::Want&)>&& onResult) override;
 };

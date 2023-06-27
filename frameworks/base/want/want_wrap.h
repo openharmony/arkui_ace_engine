@@ -32,6 +32,7 @@ class ACE_EXPORT WantWrap : public AceType {
 public:
     static NativeValue* ConvertToNativeValue(const OHOS::AAFwk::Want& want, NativeEngine* engine);
     static RefPtr<WantWrap> CreateWantWrap(void* nativeEngine, void* nativeValue);
+    static RefPtr<WantWrap> CreateWantWrap(const std::string& bundleName, const std::string& abilityName);
 
     virtual void SetWantParamsFromWantWrap(void* want) = 0;
     virtual std::string ToString() const = 0;

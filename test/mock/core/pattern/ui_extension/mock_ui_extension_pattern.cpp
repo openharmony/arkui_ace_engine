@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 
 namespace OHOS::Ace::NG {
-UIExtensionPattern::UIExtensionPattern(const std::string& bundleName, const std::string& abilityName) {}
+UIExtensionPattern::UIExtensionPattern(const RefPtr<OHOS::Ace::WantWrap>& wantWrap) {}
 
 UIExtensionPattern::~UIExtensionPattern() {}
 
