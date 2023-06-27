@@ -163,6 +163,15 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         if (!recognizer) {
             continue;
         }
+        auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(recognizer);
+        if (recognizerGroup) {
+            auto groupRecognizers = recognizerGroup->GetGroupRecognizer();
+            for (const auto& groupRecognizer : groupRecognizers) {
+                if (groupRecognizer) {
+                    groupRecognizer->SetCoordinateOffset(offset);
+                }
+            }
+        }
         recognizer->SetCoordinateOffset(offset);
         recognizer->BeginReferee(touchId, true);
         auto gestureMask = recognizer->GetPriorityMask();
