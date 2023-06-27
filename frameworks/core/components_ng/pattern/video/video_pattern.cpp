@@ -704,6 +704,9 @@ void VideoPattern::UpdatePreviewImage()
 {
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->HasPosterImageInfo()) {
+        return;
+    }
     auto posterSourceInfo = layoutProperty->GetPosterImageInfo().value();
     auto imageFit = layoutProperty->GetObjectFitValue(ImageFit::COVER);
     auto host = GetHost();
@@ -858,7 +861,7 @@ void VideoPattern::OnAreaChangedInner()
             transformRelativeOffset.GetY() + videoNodeOffset.GetY() +
                 (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
             videoFrameSize.Width(), videoFrameSize.Height());
-        if (rect != lastBoundsRect_) {
+        if (renderSurface_ && (rect != lastBoundsRect_)) {
             renderSurface_->SetExtSurfaceBounds(rect.Left(), rect.Top(), rect.Width(), rect.Height());
             lastBoundsRect_ = rect;
         }
@@ -1318,6 +1321,9 @@ void VideoPattern::OnFullScreenChange(bool isFullScreen)
 
 void VideoPattern::FullScreen()
 {
+    if (fullScreenNodeId_.has_value()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto videoNode = AceType::DynamicCast<VideoNode>(host);
@@ -1443,7 +1449,7 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
     isPlaying_ = mediaPlayer_->IsPlaying();
     isInitialState_ = videoPattern->GetInitialState();
     auto layoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
-    src_ = layoutProperty->GetVideoSource().value();
+    src_ = layoutProperty->GetVideoSourceValue("");
     isStop_ = videoPattern->GetIsStop();
     muted_ = videoPattern->GetMuted();
     autoPlay_ = videoPattern->GetAutoPlay();
