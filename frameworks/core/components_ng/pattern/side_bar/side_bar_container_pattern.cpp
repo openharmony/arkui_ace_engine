@@ -712,8 +712,9 @@ void SideBarContainerPattern::OnControlButtonHover(bool isHover)
 
     isControlButtonHover_ = isHover;
     auto imgFrameNode = AceType::DynamicCast<FrameNode>(controlButtonNode);
+    CHECK_NULL_VOID(imgFrameNode);
     auto imgRenderContext = imgFrameNode->GetRenderContext();
-
+    CHECK_NULL_VOID(imgRenderContext);
     if (isHover) {
         DoControlButtonHoverAnimation(imgRenderContext, 0.0f, HOVER_OPACITY, HOVER_DURATION, Curves::FRICTION);
     } else {
@@ -754,8 +755,9 @@ void SideBarContainerPattern::HandleMouseEvent(const MouseInfo& info)
     }
 
     auto imgFrameNode = AceType::DynamicCast<FrameNode>(controlButtonNode);
+    CHECK_NULL_VOID(imgFrameNode);
     auto imgRenderContext = imgFrameNode->GetRenderContext();
-
+    CHECK_NULL_VOID(imgRenderContext);
     if ((info.GetButton() != MouseButton::LEFT_BUTTON) || (!isControlButtonHover_)) {
         return;
     }
