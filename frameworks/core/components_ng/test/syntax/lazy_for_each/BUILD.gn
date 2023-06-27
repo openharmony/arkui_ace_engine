@@ -60,6 +60,7 @@ ohos_unittest("lazy_for_each_syntax_test_ng") {
     "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",
     "$ace_root/frameworks/core/components_ng/property/property.cpp",
     "$ace_root/frameworks/core/components_ng/property/safe_area_insets.cpp",
+    "$ace_root/frameworks/core/components_ng/render/paint_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/syntax/for_each_node.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/frameworks/core/pipeline/base/constants.cpp",

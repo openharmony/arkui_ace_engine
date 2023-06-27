@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -122,6 +123,8 @@ void SwiperPattern::OnIndexChange() const
         auto swiperEventHub = GetEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(swiperEventHub);
         swiperEventHub->FireChangeEvent(targetIndex);
+        // lazyBuild feature.
+        SetLazyLoadFeature(true);
     }
 }
 
@@ -1175,6 +1178,8 @@ void SwiperPattern::PlayTranslateAnimation(
     StopTranslateAnimation();
     StopAutoPlay();
 
+    SetLazyLoadFeature(false);
+
 #ifdef OHOS_PLATFORM
     ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
 #endif
@@ -1924,12 +1929,28 @@ void SwiperPattern::TriggerEventOnFinish(int32_t nextIndex)
             CHECK_NULL_VOID(layoutProperty);
             layoutProperty->UpdateIndexWithoutMeasure(nextIndex);
             FireChangeEvent();
+            // lazyBuild feature.
+            SetLazyLoadFeature(true);
         }
     }
 
     AnimationCallbackInfo info;
     info.currentOffset = GetCustomPropertyOffset();
     FireAnimationEndEvent(currentIndex_, info);
+}
+
+void SwiperPattern::SetLazyLoadFeature(bool useLazyLoad) const
+{
+    // lazyBuild feature.
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& children = host->GetChildren();
+    for (auto&& child : children) {
+        auto lazyForEach = DynamicCast<LazyForEachNode>(child);
+        if (lazyForEach) {
+            lazyForEach->SetRequestLongPredict(useLazyLoad);
+        }
+    }
 }
 
 void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay)

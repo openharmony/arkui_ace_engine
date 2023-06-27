@@ -216,7 +216,9 @@ public:
 
     bool CheckChildNeedForceMeasureAndLayout();
 
-    void SetCacheCount(int32_t cacheCount = 0);
+    void SetCacheCount(int32_t cacheCount = 0, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt);
+
+    void SetLongPredictTask();
 
     void BuildLazyItem();
 

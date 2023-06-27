@@ -67,6 +67,7 @@ ohos_unittest("layout_wrapper_test_ng") {
     "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",
     "$ace_root/frameworks/core/components_ng/property/property.cpp",
     "$ace_root/frameworks/core/components_ng/property/safe_area_insets.cpp",
+    "$ace_root/frameworks/core/components_ng/render/paint_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/syntax/for_each_node.cpp",
     "$ace_root/frameworks/core/components_ng/syntax/lazy_for_each_node.cpp",
     "$ace_root/frameworks/core/components_ng/syntax/lazy_layout_wrapper_builder.cpp",

@@ -75,10 +75,16 @@ RefPtr<LayoutWrapper> LayoutWrapper::GetOrCreateChildByIndex(int32_t index, bool
     return wrapper;
 }
 
-void LayoutWrapper::SetCacheCount(int32_t cacheCount)
+void LayoutWrapper::SetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint)
 {
     CHECK_NULL_VOID_NOLOG(layoutWrapperBuilder_);
-    layoutWrapperBuilder_->SetCacheCount(cacheCount);
+    layoutWrapperBuilder_->SetCacheCount(cacheCount, itemConstraint);
+}
+
+void LayoutWrapper::SetLongPredictTask()
+{
+    CHECK_NULL_VOID_NOLOG(layoutWrapperBuilder_);
+    layoutWrapperBuilder_->SetLongPredictTask();
 }
 
 const std::list<RefPtr<LayoutWrapper>>& LayoutWrapper::GetAllChildrenWithBuild(bool addToRenderTree)

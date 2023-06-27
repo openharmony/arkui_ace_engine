@@ -66,7 +66,13 @@ public:
     void OnDataChanged(size_t index) override;
     void OnDataMoved(size_t from, size_t to) override;
 
-    void PostIdleTask(std::list<int32_t>&& items);
+    void PostIdleTask(std::list<int32_t>&& items, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt,
+        bool longPredictTask = false);
+
+    void SetRequestLongPredict(bool requestLongPredict)
+    {
+        requestLongPredict_ = requestLongPredict;
+    }
 
 private:
     void OnAttachToMainTree(bool recursive) override
@@ -88,7 +94,10 @@ private:
     int32_t endIndex_ = -1;
     std::list<std::optional<std::string>> ids_;
     std::list<int32_t> predictItems_;
+    std::optional<LayoutConstraintF> itemConstraint_;
     bool needPredict = false;
+    bool requestLongPredict_ = false;
+    bool useLongPredictTask_ = false;
 
     RefPtr<LazyForEachBuilder> builder_;
 

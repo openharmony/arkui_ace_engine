@@ -164,12 +164,12 @@ void UITaskScheduler::AddPredictTask(PredictTask&& task)
     predictTask_.push_back(std::move(task));
 }
 
-void UITaskScheduler::FlushPredictTask(int64_t deadline)
+void UITaskScheduler::FlushPredictTask(int64_t deadline, bool canUseLongPredictTask)
 {
     decltype(predictTask_) tasks(std::move(predictTask_));
     for (const auto& task : tasks) {
         if (task) {
-            task(deadline);
+            task(deadline, canUseLongPredictTask);
         }
     }
 }
