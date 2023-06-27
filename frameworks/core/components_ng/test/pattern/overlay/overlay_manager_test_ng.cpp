@@ -27,6 +27,7 @@
 #include "test/mock/core/common/mock_container.h"
 
 #include "base/geometry/ng/offset_t.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/toast/toast_theme.h"
@@ -35,6 +36,7 @@
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
@@ -908,5 +910,53 @@ HWTEST_F(OverlayManagerTestNg, ToastTest002, TestSize.Level1)
      */
     overlayManager->PopToast(toastId);
     EXPECT_TRUE(overlayManager->toastMap_.empty());
+}
+/**
+ * @tc.name: DialogTest001
+ * @tc.desc: Test OverlayManager::ShowCustomDialog->CloseDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, DialogTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create dialog node and root node.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dialogTheme));
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto dialogId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto dialogNode = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, dialogId, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+    dialogNode->MountToParent(rootNode);
+    rootNode->MarkDirtyNode();
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowCustomDialog.
+     * @tc.expected: dialogMap_ is not empty
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->ShowCustomDialog(dialogNode);
+    overlayManager->BeforeShowDialog(dialogNode);
+    EXPECT_FALSE(overlayManager->dialogMap_.empty());
+    /**
+     * @tc.steps: step3. call DialogInMapHoldingFocus when dialogMap_ is not empty and focusHub is nullptr.
+     * @tc.expected: return false
+     */
+    EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
+    /**
+     * @tc.steps: step4. call CloseDialog when dialogMap_ is not empty.
+     * @tc.expected: remove successfully
+     */
+    overlayManager->CloseDialog(dialogNode);
+    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
+    /**
+     * @tc.steps: step4. call CloseDialog again when dialogMap_ is empty.
+     * @tc.expected: function exits normally
+     */
+    overlayManager->CloseDialog(dialogNode);
+    EXPECT_TRUE(overlayManager->dialogMap_.empty());
 }
 } // namespace OHOS::Ace::NG
