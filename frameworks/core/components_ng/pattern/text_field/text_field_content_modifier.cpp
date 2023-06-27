@@ -118,7 +118,7 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
 
     clipInnerRect = RSRect(contentSize.Width() + contentOffset.GetX() - textFieldPattern->GetUnitWidth(),
         contentOffset.GetY(), contentSize.Width() + contentOffset.GetX(), contentOffset.GetY() + contentSize.Height());
-    canvas.ClipRect(clipInnerRect, RSClipOp::UNION);
+    canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     canvas.Restore();
 
     if (!textFieldPattern->NeedShowPasswordIcon()) {
