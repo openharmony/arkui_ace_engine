@@ -413,7 +413,7 @@ public:
     // obscured
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Obscured, std::vector<ObscuredReasons>);
 
-    virtual void SetFrameForCanvas() {}
+    virtual void SetOverrideContentRect(const std::optional<RectF>& rect) {}
 
 protected:
     RenderContext() = default;
