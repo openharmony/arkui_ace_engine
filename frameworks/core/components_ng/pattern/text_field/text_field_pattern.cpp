@@ -796,13 +796,13 @@ void TextFieldPattern::OnScrollEndCallback()
 void TextFieldPattern::OnTextAreaScroll(float offset)
 {
     LOGI("OnTextAreaScroll with offset %{public}f", offset);
-    if (!IsTextArea() || textRect_.Height() <= contentRect_.Height() ||
-        (textRect_.GetY() + offset) > contentRect_.GetY()) {
+    if (!IsTextArea() || textRect_.Height() <= contentRect_.Height()) {
         return;
     }
-    if ((std::abs(((textRect_.GetY() + offset) - contentRect_.Height() - GetPaddingBottom())) > textRect_.Height()) &&
-        LessNotEqual(offset, 0.0f)) {
-        return;
+    if (textRect_.GetY() + offset > contentRect_.GetY()) {
+        offset = contentRect_.GetY() - textRect_.GetY();
+    } else if (textRect_.GetY() + textRect_.Height() + offset < contentRect_.GetY() + contentRect_.Height()) {
+        offset = contentRect_.GetY() + contentRect_.Height() - textRect_.GetY() - textRect_.Height();
     }
     caretRect_.SetTop(caretRect_.GetY() + offset);
     currentOffset_ = textRect_.GetY() + offset;
