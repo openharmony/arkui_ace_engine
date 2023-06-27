@@ -1358,7 +1358,13 @@ void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
             CHECK_NULL_VOID(itemGroupPattern);
             auto itemGroupStyle = itemGroupPattern->GetListItemGroupStyle();
             if (itemGroupStyle == V2::ListItemGroupStyle::CARD) {
-                HandleCardModeSelectedEvent(selectedZone, item);
+                auto itemGroupGeometry = item->GetGeometryNode();
+                CHECK_NULL_VOID(itemGroupGeometry);
+                auto itemGroupRect = itemGroupGeometry->GetFrameRect();
+                if (!selectedZone.IsIntersectWith(itemGroupRect)) {
+                    continue;
+                }
+                HandleCardModeSelectedEvent(selectedZone, item, itemGroupRect.Top());
             }
             continue;
         }
@@ -1384,7 +1390,8 @@ void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
     hostContext->UpdateMouseSelectWithRect(selectedZone, SELECT_FILL_COLOR, SELECT_STROKE_COLOR);
 }
 
-void ListPattern::HandleCardModeSelectedEvent(const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode)
+void ListPattern::HandleCardModeSelectedEvent(
+    const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, float itemGroupTop)
 {
     CHECK_NULL_VOID(itemGroupNode);
     std::list<RefPtr<FrameNode>> childrens;
@@ -1400,7 +1407,8 @@ void ListPattern::HandleCardModeSelectedEvent(const RectF& selectedZone, const R
         auto context = item->GetRenderContext();
         CHECK_NULL_VOID(context);
         auto itemRect = itemGeometry->GetFrameRect();
-        if (!selectedZone.IsIntersectWith(itemRect)) {
+        RectF itemRectInGroup(itemRect.GetX(), itemRect.GetY() + itemGroupTop, itemRect.Width(), itemRect.Height());
+        if (!selectedZone.IsIntersectWith(itemRectInGroup)) {
             itemPattern->MarkIsSelected(false);
             context->OnMouseSelectUpdate(false, CARD_ITEM_FILL_COLOR, CARD_ITEM_FILL_COLOR);
         } else {

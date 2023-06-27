@@ -161,8 +161,7 @@ public:
     void AnimateTo(float position, float duration, const RefPtr<Curve>& curve);
     void StartSpringMotion(float start, float end, float velocity);
     void ScrollTo(float position, bool smooth);
-    void ScrollToIndex(int32_t index, bool smooth = false,
-                       ScrollAlign align = ScrollAlign::START);
+    void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START);
     void ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollAlign align);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
     bool ScrollPage(bool reverse);
@@ -193,6 +192,7 @@ public:
     bool OnScrollSnapCallback(double targetOffset, double velocity) override;
 
     int32_t GetItemIndexByPosition(float xOffset, float yOffset);
+
 private:
     void OnScrollEndCallback() override;
 
@@ -233,7 +233,8 @@ private:
     void ClearSelectedZone();
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     void MultiSelectWithoutKeyboard(const RectF& selectedZone);
-    void HandleCardModeSelectedEvent(const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode);
+    void HandleCardModeSelectedEvent(
+        const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, float itemGroupTop);
 
     void DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper);
     void SetAccessibilityAction();
