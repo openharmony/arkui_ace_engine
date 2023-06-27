@@ -20,6 +20,7 @@
 #include <optional>
 
 #include "base/geometry/axis.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
@@ -29,6 +30,8 @@ namespace OHOS::Ace::NG {
 struct SwiperItemInfo {
     float startPos = 0.0f;
     float endPos = 0.0f;
+    RefPtr<FrameNode> node;
+    OffsetF finialOffset;
 };
 
 class ACE_EXPORT SwiperLayoutAlgorithm : public LayoutAlgorithm {

@@ -27,6 +27,7 @@
 #include "bridge/declarative_frontend/jsview/models/swiper_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
+#include "core/animation/curve.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components/swiper/swiper_component.h"
@@ -434,11 +435,11 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
     digitalParameters.dimBottom = parseOk ? dimPosition : 0.0_vp;
     Color fontColor;
     parseOk = JSViewAbstract::ParseJsColor(fontColorValue, fontColor);
-    digitalParameters.fontColor = parseOk ? fontColor :
-        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+    digitalParameters.fontColor =
+        parseOk ? fontColor : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
     parseOk = JSViewAbstract::ParseJsColor(selectedFontColorValue, fontColor);
-    digitalParameters.selectedFontColor = parseOk ? fontColor :
-        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+    digitalParameters.selectedFontColor =
+        parseOk ? fontColor : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
     GetFontContent(digitFontValue, false, digitalParameters);
     GetFontContent(selectedDigitFontValue, true, digitalParameters);
     return digitalParameters;
@@ -628,10 +629,10 @@ void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)
         SwiperModel::GetInstance()->SetIsIndicatorCustomSize(false);
         swiperParameters.itemWidth = parseOk && dimPosition > 0.0_vp ? dimPosition : swiperIndicatorTheme->GetSize();
         swiperParameters.itemHeight = parseOk && dimPosition > 0.0_vp ? dimPosition : swiperIndicatorTheme->GetSize();
-        swiperParameters.selectedItemWidth = parseOk && dimPosition > 0.0_vp ?
-            dimPosition : swiperIndicatorTheme->GetSize();
-        swiperParameters.selectedItemHeight = parseOk && dimPosition > 0.0_vp ?
-            dimPosition : swiperIndicatorTheme->GetSize();
+        swiperParameters.selectedItemWidth =
+            parseOk && dimPosition > 0.0_vp ? dimPosition : swiperIndicatorTheme->GetSize();
+        swiperParameters.selectedItemHeight =
+            parseOk && dimPosition > 0.0_vp ? dimPosition : swiperIndicatorTheme->GetSize();
         if (maskValue->IsBoolean()) {
             auto mask = maskValue->ToBoolean();
             swiperParameters.maskValue = mask;
@@ -710,10 +711,40 @@ void JSSwiper::SetCachedCount(int32_t cachedCount)
     SwiperModel::GetInstance()->SetCachedCount(cachedCount);
 }
 
-void JSSwiper::SetCurve(const std::string& curveStr)
+void JSSwiper::SetCurve(const JSCallbackInfo& info)
 {
-    RefPtr<Curve> curve = CreateCurve(curveStr);
-
+    RefPtr<Curve> curve = Curves::LINEAR;
+    if (info[0]->IsString()) {
+        curve = CreateCurve(info[0]->ToString());
+    } else if (info[0]->IsObject()) {
+        auto object = JSRef<JSObject>::Cast(info[0]);
+        std::function<float(float)> customCallBack = nullptr;
+        JSRef<JSVal> onCallBack = object->GetProperty("__curveCustomFunc");
+        if (onCallBack->IsFunction()) {
+            RefPtr<JsFunction> jsFuncCallBack =
+                AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCallBack));
+            customCallBack = [func = std::move(jsFuncCallBack), id = Container::CurrentId()](float time) -> float {
+                ContainerScope scope(id);
+                JSRef<JSVal> params[1];
+                params[0] = JSRef<JSVal>::Make(ToJSValue(time));
+                auto result = func->ExecuteJS(1, params);
+                auto resultValue = result->IsNumber() ? result->ToNumber<float>() : 1.0f;
+                if (resultValue < 0 || resultValue > 1) {
+                    LOGI("The interpolate return  value error = %{public}f ", resultValue);
+                }
+                return resultValue;
+            };
+        }
+        auto jsCurveString = object->GetProperty("__curveString");
+        if (jsCurveString->IsString() && customCallBack) {
+            auto aniTimFunc = jsCurveString->ToString();
+            if (aniTimFunc == DOM_ANIMATION_TIMING_FUNCTION_CUSTOM) {
+                curve = CreateCurve(customCallBack);
+            } else {
+                curve = CreateCurve(aniTimFunc);
+            }
+        }
+    }
     SwiperModel::GetInstance()->SetCurve(curve);
 }
 

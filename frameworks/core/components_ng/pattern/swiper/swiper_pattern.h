@@ -217,7 +217,7 @@ public:
 
     void UpdateCurrentOffset(float offset);
 
-    bool NeedMarkDirtyNodeRenderIndicator();
+    void CheckMarkDirtyNodeForRenderIndicator(float additionalOffset = 0.0f);
 
     int32_t TotalCount() const;
 
@@ -389,6 +389,8 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
 
+    void OnTouchTestHit() override;
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -426,6 +428,14 @@ private:
         float startPos, float endPos, int32_t nextIndex, bool restartAutoPlay = false, float velocity = 0.0f);
     void PlaySpringAnimation(double dragVelocity);
     void PlayFadeAnimation();
+
+    // use property animation feature
+    void PlayPropertyTranslateAnimation(float translate, int32_t nextIndex, float velocity = 0.0f);
+    void StopPropertyTranslateAnimation();
+    void UpdateOffsetAfterPropertyAnimation(float offset);
+    void OnPropertyTranslateAnimationFinish(int32_t nextIndex, const OffsetF& offset);
+    RefPtr<Curve> GetCurveIncludeMotion(float velocity = 0.0f) const;
+    void PlayIndicatorTranslateAnimation(float translate);
 
     // Implement of swiper controller
     void SwipeToWithoutAnimation(int32_t index);
@@ -504,6 +514,9 @@ private:
     // Control fade animation when drag beyond boundary and drag end.
     RefPtr<Animator> fadeController_;
 
+    // Control translate animation for indicator.
+    RefPtr<Animator> indicatorController_;
+
     RefPtr<SwiperController> swiperController_;
 
     bool isLastIndicatorFocused_ = false;
@@ -565,6 +578,8 @@ private:
     std::optional<float> velocity_;
     bool isFinishAnimation_ = false;
     bool mainSizeIsMeasured_ = false;
+
+    bool usePropertyAnimation_ = false;
 };
 } // namespace OHOS::Ace::NG
 
