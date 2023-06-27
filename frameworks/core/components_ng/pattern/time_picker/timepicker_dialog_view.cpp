@@ -372,7 +372,9 @@ void TimePickerDialogView::SetDialogTitleDate(
 
 void TimePickerDialogView::SetHour24(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, bool isUseMilitaryTime)
 {
-    timePickerRowPattern->SetHour24(isUseMilitaryTime);
+    auto timePickerLayoutProperty = timePickerRowPattern->GetLayoutProperty<TimePickerLayoutProperty>();
+    CHECK_NULL_VOID(timePickerLayoutProperty);
+    timePickerLayoutProperty->UpdateIsUseMilitaryTime(isUseMilitaryTime);
 }
 
 void TimePickerDialogView::SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange)

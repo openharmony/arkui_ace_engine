@@ -129,12 +129,11 @@ void TimePickerModelNG::SetSelectedTime(const PickerTime& value)
 
 void TimePickerModelNG::SetHour24(bool isUseMilitaryTime)
 {
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, IsUseMilitaryTime, isUseMilitaryTime);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
-    timePickerRowPattern->SetHour24(isUseMilitaryTime);
-    frameNode->MarkModifyDone();
-    frameNode->MarkDirtyNode();
+    timePickerRowPattern->ClearOptionsHour();
 }
 
 void TimePickerModelNG::SetOnChange(TimeChangeEvent&& onChange)

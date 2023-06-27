@@ -104,14 +104,14 @@ public:
         deltaSize_ = deltaSize;
     }
 
-    const std::map<RefPtr<FrameNode>, std::vector<std::string>>& GetOptions() const
+    const std::map<RefPtr<FrameNode>, uint32_t>& GetOptions() const
     {
-        return options_;
+        return optionsTotalCount_;
     }
 
-    void SetOptions(const std::map<RefPtr<FrameNode>, std::vector<std::string>>& value)
+    void SetOptions(const std::map<RefPtr<FrameNode>, uint32_t>& value)
     {
-        options_ = value;
+        optionsTotalCount_ = value;
     }
 
     uint32_t GetShowCount() const
@@ -254,7 +254,8 @@ private:
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
     bool hour24_ = !Localization::GetInstance()->IsAmPmHour();
-    std::map<RefPtr<FrameNode>, std::vector<std::string>> options_;
+    // column options number
+    std::map<RefPtr<FrameNode>, uint32_t> optionsTotalCount_;
     ColumnChangeCallback changeCallback_;
     EventCallback EventCallback_;
     uint32_t currentIndex_ = 0;
