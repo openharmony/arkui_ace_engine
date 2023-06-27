@@ -394,9 +394,9 @@ void JSList::ScrollIndexCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
         auto onScrollIndex = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                                 const int32_t start, const int32_t end) {
+                                 const int32_t start, const int32_t end, const int32_t center) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto params = ConvertToJSValues(start, end);
+            auto params = ConvertToJSValues(start, end, center);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
             return;
         };

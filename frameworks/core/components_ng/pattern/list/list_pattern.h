@@ -249,6 +249,7 @@ private:
     int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;
+    int32_t centerIndex_ = -1;
     float startMainPos_;
     float endMainPos_;
     bool isInitialized_ = false;
