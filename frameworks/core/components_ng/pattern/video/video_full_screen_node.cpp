@@ -54,9 +54,17 @@ void VideoFullScreenNode::InitVideoParam(const RefPtr<VideoNode>& video)
     auto fullScreenLayout = GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_VOID(fullScreenLayout);
 
-    fullScreenLayout->UpdatePosterImageInfo(layoutProperty->GetPosterImageInfo().value());
-    fullScreenLayout->UpdateObjectFit(layoutProperty->GetObjectFitValue(ImageFit::COVER));
-    fullScreenLayout->UpdateVideoSource(layoutProperty->GetVideoSource().value());
-    fullScreenLayout->UpdateControls(layoutProperty->GetControls().value());
+    if (layoutProperty->HasPosterImageInfo()) {
+        fullScreenLayout->UpdatePosterImageInfo(layoutProperty->GetPosterImageInfo().value());
+    }
+    if (layoutProperty->HasObjectFit()) {
+        fullScreenLayout->UpdateObjectFit(layoutProperty->GetObjectFit().value());
+    }
+    if (layoutProperty->HasVideoSource()) {
+        fullScreenLayout->UpdateVideoSource(layoutProperty->GetVideoSource().value());
+    }
+    if (layoutProperty->HasControls()) {
+        fullScreenLayout->UpdateControls(layoutProperty->GetControls().value());
+    }
 }
 }
