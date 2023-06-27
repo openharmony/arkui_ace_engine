@@ -511,7 +511,9 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                 }
                 CheckSizeValidity(childLayoutWrapper);
                 CheckBaselineProperties(childLayoutWrapper);
-                if (!isInfiniteLayout_) {
+                if (!isInfiniteLayout_ ||
+                    (childLayoutWrapper->GetHostTag() == V2::BLANK_ETS_TAG && PipelineBase::GetCurrentContext() &&
+                        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9)) {
                     const auto& flexItemProperty = childLayoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
                     float flexShrink = isLinearLayoutFeature_ ? 0.0f : 1.0f;
                     float flexGrow = 0.0f;
@@ -586,7 +588,10 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
                 UpdateLayoutConstraintOnCrossAxis((*iter).layoutConstraint, crossAxisSize);
                 (*iter).needSecondMeasure = true;
             }
-            if (LessOrEqual(totalFlexWeight_, 0.0f) && !isInfiniteLayout_) {
+            if (LessOrEqual(totalFlexWeight_, 0.0f) &&
+                (!isInfiniteLayout_ ||
+                    (childLayoutWrapper->GetHostTag() == V2::BLANK_ETS_TAG && PipelineBase::GetCurrentContext() &&
+                        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9))) {
                 float childMainAxisMargin = GetMainAxisMargin(childLayoutWrapper, direction_);
                 float itemFlex = getFlex(child.layoutWrapper);
                 float flexSize =
@@ -727,14 +732,26 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
      * The user has not set the main axis size
      */
     isInfiniteLayout_ = false;
+    bool mainAxisInf =
+        GreaterOrEqualToInfinity(direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE
+                                     ? layoutConstraint->maxSize.Width()
+                                     : layoutConstraint->maxSize.Height());
     if (NearEqual(mainAxisSize_, -1.0f)) {
-        mainAxisSize_ = direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE
-                            ? layoutConstraint->maxSize.Width()
-                            : layoutConstraint->maxSize.Height();
+        if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() <= 9) {
+            mainAxisSize_ = direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE
+                                ? layoutConstraint->maxSize.Width()
+                                : layoutConstraint->maxSize.Height();
+        } else {
+            mainAxisSize_ =
+                direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE
+                    ? (mainAxisInf ? layoutConstraint->percentReference.Width() : layoutConstraint->maxSize.Width())
+                    : (mainAxisInf ? layoutConstraint->percentReference.Height() : layoutConstraint->maxSize.Height());
+        }
+
         isInfiniteLayout_ = isLinearLayoutFeature_;
     }
     if (!isInfiniteLayout_) {
-        isInfiniteLayout_ = GreaterOrEqualToInfinity(mainAxisSize_);
+        isInfiniteLayout_ = mainAxisInf;
     }
     if (isInfiniteLayout_) {
         LOGD("The main axis size is not defined or infinity, disallow flex and weight mode");

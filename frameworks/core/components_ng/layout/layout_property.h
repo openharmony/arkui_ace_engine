@@ -281,6 +281,17 @@ public:
         }
     }
 
+    void ResetCalcMinSize()
+    {
+        if (!calcLayoutConstraint_) {
+            return;
+        }
+        if (calcLayoutConstraint_->minSize.has_value()) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+        calcLayoutConstraint_->minSize.reset();
+    }
+
     void UpdateFlexGrow(float flexGrow)
     {
         if (!flexItemProperty_) {
@@ -289,6 +300,17 @@ public:
         if (flexItemProperty_->UpdateFlexGrow(flexGrow)) {
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         }
+    }
+
+    void ResetFlexGrow()
+    {
+        if (!flexItemProperty_) {
+            return;
+        }
+        if (flexItemProperty_->HasFlexGrow()) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+        flexItemProperty_->ResetFlexGrow();
     }
 
     void UpdateFlexShrink(float flexShrink)
@@ -330,6 +352,17 @@ public:
         if (flexItemProperty_->UpdateAlignSelf(flexAlign)) {
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         }
+    }
+
+    void ResetAlignSelf()
+    {
+        if (!flexItemProperty_) {
+            return;
+        }
+        if (flexItemProperty_->HasAlignSelf()) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+        flexItemProperty_->ResetAlignSelf();
     }
 
     void UpdateAlignRules(const std::map<AlignDirection, AlignRule>& alignRules)
