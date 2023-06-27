@@ -63,6 +63,7 @@ void SideBarContainerPattern::OnUpdateShowSideBar(const RefPtr<SideBarContainerL
     auto newShowSideBar = layoutProperty->GetShowSideBar().value_or(true);
     if (newShowSideBar != showSideBar_) {
         SetSideBarStatus(newShowSideBar ? SideBarStatus::SHOW : SideBarStatus::HIDDEN);
+        FireChangeEvent(newShowSideBar);
     }
 }
 
