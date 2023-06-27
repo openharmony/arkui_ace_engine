@@ -226,7 +226,7 @@ void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& poi
             break;
         }
         default:
-            LOGW("unknown type");
+            LOGD("unknown type %{public}d", orgAction);
             break;
     }
 }
