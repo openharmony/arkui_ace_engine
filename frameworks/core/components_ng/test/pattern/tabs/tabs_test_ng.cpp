@@ -4011,6 +4011,9 @@ HWTEST_F(TabsTestNg, TabBarPatternOnKeyEvent001, TestSize.Level1)
     tabContentFrameNode1->MountToParent(swiperNode);
     tabContentFrameNode2->MountToParent(swiperNode);
     EXPECT_EQ(swiperNode->TotalChildCount(), 2);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->isFocusActive_ = true;
 
     /**
      * @tc.steps: steps2. OnKeyEvent
@@ -5719,5 +5722,524 @@ HWTEST_F(TabsTestNg, TabBarPatternPlayTabBarTranslateAnimation001, TestSize.Leve
         offset = 2.0f;
         value = 0.0;
     }
+}
+
+void FocusTest(const RefPtr<TabBarLayoutProperty>& tabBarLayoutProperty, const RefPtr<TabBarPattern>& tabBarPattern)
+{
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+
+    tabBarLayoutProperty->UpdateAxis(Axis::HORIZONTAL);
+    event.code = KeyCode::KEY_DPAD_RIGHT;
+    tabBarPattern->focusIndicator_ = 1;
+    EXPECT_FALSE(tabBarPattern->OnKeyEvent(event));
+    tabBarPattern->focusIndicator_ = 0;
+    EXPECT_TRUE(tabBarPattern->OnKeyEvent(event));
+    event.code = KeyCode::KEY_SPACE;
+    EXPECT_TRUE(tabBarPattern->OnKeyEvent(event));
+    event.code = KeyCode::KEY_DPAD_LEFT;
+    tabBarPattern->focusIndicator_ = 0;
+    EXPECT_FALSE(tabBarPattern->OnKeyEvent(event));
+    tabBarPattern->focusIndicator_ = 1;
+    EXPECT_TRUE(tabBarPattern->OnKeyEvent(event));
+    event.code = KeyCode::KEY_ENTER;
+    EXPECT_TRUE(tabBarPattern->OnKeyEvent(event));
+    event.code = KeyCode::KEY_MOVE_HOME;
+    tabBarPattern->focusIndicator_ = 1;
+    EXPECT_TRUE(tabBarPattern->OnKeyEvent(event));
+    event.code = KeyCode::KEY_MOVE_END;
+    tabBarPattern->focusIndicator_ = 0;
+    EXPECT_TRUE(tabBarPattern->OnKeyEvent(event));
+    event.code = KeyCode::KEY_TAB;
+    tabBarPattern->focusIndicator_ = 0;
+    EXPECT_TRUE(tabBarPattern->OnKeyEvent(event));
+
+    tabBarLayoutProperty->UpdateAxis(Axis::VERTICAL);
+    event.code = KeyCode::KEY_DPAD_DOWN;
+    tabBarPattern->focusIndicator_ = 1;
+    EXPECT_FALSE(tabBarPattern->OnKeyEvent(event));
+    tabBarPattern->focusIndicator_ = 0;
+    EXPECT_TRUE(tabBarPattern->OnKeyEvent(event));
+    event.code = KeyCode::KEY_DPAD_UP;
+    tabBarPattern->focusIndicator_ = 0;
+    EXPECT_FALSE(tabBarPattern->OnKeyEvent(event));
+    tabBarPattern->focusIndicator_ = 1;
+    EXPECT_TRUE(tabBarPattern->OnKeyEvent(event));
+}
+
+/**
+ * @tc.name: TabBarPatternOnKeyEvent004
+ * @tc.desc: test OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternOnKeyEvent004, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 0, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    BuildTabBar(tabsNode, TabBarStyle::NOSTYLE, TabBarStyle::NOSTYLE);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->isFocusActive_ = true;
+
+    /**
+     * @tc.steps: steps2. OnKeyEvent
+     * @tc.expected: steps2. Check the result of OnKeyEvent
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    event.code = KeyCode::KEY_MOVE_HOME;
+    tabBarPattern->SetTabBarStyle(TabBarStyle::NOSTYLE);
+    tabBarPattern->focusIndicator_ = 1;
+    EXPECT_TRUE(tabBarPattern->OnKeyEvent(event));
+
+    event.code = KeyCode::KEY_MOVE_END;
+    tabBarPattern->focusIndicator_ = 0;
+    EXPECT_TRUE(tabBarPattern->OnKeyEvent(event));
+
+    tabsNode->GetLayoutProperty<TabsLayoutProperty>()->UpdateTabBarPosition(BarPosition::START);
+    tabBarPattern->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    FocusTest(tabBarLayoutProperty, tabBarPattern);
+}
+
+/**
+ * @tc.name: TabBarPatternOnKeyEvent005
+ * @tc.desc: test OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternOnKeyEvent005, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::END, 0, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    BuildTabBar(tabsNode, TabBarStyle::NOSTYLE, TabBarStyle::NOSTYLE);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->isFocusActive_ = true;
+
+    /**
+     * @tc.steps: steps2. OnKeyEvent
+     * @tc.expected: steps2. Check the result of OnKeyEvent
+     */
+    tabsNode->GetLayoutProperty<TabsLayoutProperty>()->UpdateTabBarPosition(BarPosition::END);
+    tabBarPattern->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    FocusTest(tabBarLayoutProperty, tabBarPattern);
+}
+
+/**
+ * @tc.name: TabBarPatternOnKeyEvent006
+ * @tc.desc: test OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternOnKeyEvent006, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::END, 0, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    BuildTabBar(tabsNode, TabBarStyle::NOSTYLE, TabBarStyle::NOSTYLE);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->isFocusActive_ = true;
+
+    /**
+     * @tc.steps: steps2. OnKeyEvent
+     * @tc.expected: steps2. Check the result of OnKeyEvent
+     */
+    tabsNode->GetLayoutProperty<TabsLayoutProperty>()->UpdateTabBarPosition(BarPosition::END);
+    tabBarPattern->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    tabBarPattern->SetFirstFocus(true);
+    FocusTest(tabBarLayoutProperty, tabBarPattern);
+}
+
+/**
+ * @tc.name: TabBarPatternOnKeyEvent007
+ * @tc.desc: test OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternOnKeyEvent007, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::END, 0, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    BuildTabBar(tabsNode, TabBarStyle::NOSTYLE, TabBarStyle::NOSTYLE);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: steps2. OnKeyEvent
+     * @tc.expected: steps2. Check the result of OnKeyEvent
+     */
+    tabsNode->GetLayoutProperty<TabsLayoutProperty>()->UpdateTabBarPosition(BarPosition::END);
+    tabBarPattern->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    tabBarLayoutProperty->UpdateAxis(Axis::HORIZONTAL);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->isFocusActive_ = false;
+    event.code = KeyCode::KEY_DPAD_RIGHT;
+    tabBarPattern->focusIndicator_ = 0;
+    EXPECT_TRUE(tabBarPattern->OnKeyEvent(event));
+
+    pipeline->isFocusActive_ = true;
+    event.code = KeyCode::KEY_A;
+    tabBarPattern->focusIndicator_ = 0;
+    EXPECT_FALSE(tabBarPattern->OnKeyEvent(event));
+}
+
+/**
+ * @tc.name: TabsPatternGetScopeFocusAlgorithm001
+ * @tc.desc: test GetScopeFocusAlgorithm
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsPatternGetScopeFocusAlgorithm001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::END, 0, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    BuildTabBar(tabsNode, TabBarStyle::SUBTABBATSTYLE, TabBarStyle::SUBTABBATSTYLE);
+
+    /**
+     * @tc.steps: steps2. GetScopeFocusAlgorithm
+     * @tc.expected: steps2. Check the result of GetScopeFocusAlgorithm
+     */
+    auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    ASSERT_NE(tabsLayoutProperty, nullptr);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    ASSERT_NE(tabsPattern, nullptr);
+    tabsLayoutProperty->UpdateAxis(Axis::HORIZONTAL);
+    tabsPattern->GetScopeFocusAlgorithm();
+    EXPECT_EQ(tabsLayoutProperty->GetAxis().value(), Axis::HORIZONTAL);
+    tabsLayoutProperty->UpdateAxis(Axis::VERTICAL);
+    tabsPattern->GetScopeFocusAlgorithm();
+    EXPECT_EQ(tabsLayoutProperty->GetAxis().value(), Axis::VERTICAL);
+}
+
+/**
+ * @tc.name: TabBarPatternAdjustFocusPosition001
+ * @tc.desc: test AdjustFocusPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternAdjustFocusPosition001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::END, 0, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    BuildTabBar(tabsNode, TabBarStyle::SUBTABBATSTYLE, TabBarStyle::SUBTABBATSTYLE);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: steps2. GetScopeFocusAlgorithm
+     * @tc.expected: steps2. Check the result of GetScopeFocusAlgorithm
+     */
+    tabBarPattern->AdjustFocusPosition();
+    tabBarLayoutProperty->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    tabBarPattern->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
+    tabBarPattern->axis_ = Axis::HORIZONTAL;
+    tabBarPattern->tabItemOffsets_.clear();
+    OffsetF c1(-1.0f, -1.0f);
+    tabBarPattern->tabItemOffsets_.emplace_back(c1);
+    tabBarPattern->focusIndicator_ = 0;
+    tabBarPattern->AdjustFocusPosition();
+    EXPECT_EQ(tabBarPattern->GetTabBarStyle(), TabBarStyle::SUBTABBATSTYLE);
+    tabBarPattern->axis_ = Axis::VERTICAL;
+    tabBarPattern->focusIndicator_ = 0;
+    tabBarPattern->AdjustFocusPosition();
+    EXPECT_EQ(tabBarPattern->GetTabBarStyle(), TabBarStyle::SUBTABBATSTYLE);
+}
+
+/**
+ * @tc.name: TabBarPatternAdjustFocusPosition002
+ * @tc.desc: test AdjustFocusPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternAdjustFocusPosition002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::END, 0, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    BuildTabBar(tabsNode, TabBarStyle::SUBTABBATSTYLE, TabBarStyle::SUBTABBATSTYLE);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: steps2. GetScopeFocusAlgorithm
+     * @tc.expected: steps2. Check the result of GetScopeFocusAlgorithm
+     */
+    tabBarLayoutProperty->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    tabBarPattern->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
+    tabBarPattern->axis_ = Axis::HORIZONTAL;
+    tabBarPattern->tabItemOffsets_.clear();
+    OffsetF c1(1.0f, 1.0f);
+    OffsetF c2(100.0f, 100.0f);
+    tabBarPattern->tabItemOffsets_.emplace_back(c1);
+    tabBarPattern->tabItemOffsets_.emplace_back(c2);
+    tabBarPattern->focusIndicator_ = 0;
+    tabBarPattern->AdjustFocusPosition();
+    EXPECT_EQ(tabBarPattern->GetTabBarStyle(), TabBarStyle::SUBTABBATSTYLE);
+    tabBarPattern->axis_ = Axis::VERTICAL;
+    tabBarPattern->focusIndicator_ = 0;
+    tabBarPattern->AdjustFocusPosition();
+    EXPECT_EQ(tabBarPattern->GetTabBarStyle(), TabBarStyle::SUBTABBATSTYLE);
+}
+
+/**
+ * @tc.name: TabBarPatternCreateNodePaintMethod001
+ * @tc.desc: test CreateNodePaintMethod
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternCreateNodePaintMethod001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsFrameNode, nullptr);
+    EXPECT_EQ(tabsFrameNode->GetTag(), V2::TABS_ETS_TAG);
+    auto tabBarFrameNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarFrameNode, nullptr);
+    EXPECT_EQ(tabBarFrameNode->GetTag(), V2::TAB_BAR_ETS_TAG);
+    auto tabBarPattern = tabBarFrameNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    auto paintProperty = tabBarPattern->CreatePaintProperty();
+    ASSERT_NE(paintProperty, nullptr);
+    IndicatorStyle indicator;
+    tabBarPattern->SetIndicatorStyle(indicator, 0);
+    EXPECT_EQ(tabBarPattern->indicatorStyles_[0], indicator);
+    SelectedMode selectedMode = SelectedMode::INDICATOR;
+    tabBarPattern->SetSelectedMode(selectedMode, 0);
+    EXPECT_EQ(tabBarPattern->selectedModes_[0], selectedMode);
+
+    /**
+     * @tc.steps: steps2. CreateNodePaintMethod
+     * @tc.expected: steps2. Check the result of CreateNodePaintMethod
+     */
+    auto tabBarRenderContext = tabBarFrameNode->GetRenderContext();
+    ASSERT_NE(tabBarRenderContext, nullptr);
+    tabBarRenderContext->UpdateBackgroundColor(Color::RED);
+    auto paintMethod = tabBarPattern->CreateNodePaintMethod();
+    ASSERT_NE(paintMethod, nullptr);
+    EXPECT_EQ(tabBarRenderContext->GetBackgroundColor().value(), Color::RED);
+}
+
+/**
+ * @tc.name: TabsModelSetOnTabBarClick001
+ * @tc.desc: Tabs SetOnTabBarClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsModelSetOnTabBarClick001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+
+    /**
+     * @tc.steps: steps2. SetOnTabBarClick
+     * @tc.expected: steps2. Check the result of SetOnTabBarClick
+     */
+    tabsModel.SetOnTabBarClick([](const BaseEventInfo* info) {});
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto pattern = tabsNode->GetPattern<TabsPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_NE(pattern->onTabBarClickEvent_, nullptr);
+
+    tabsModel.SetOnTabBarClick([](const BaseEventInfo* info) {});
+    EXPECT_NE(pattern->onTabBarClickEvent_, nullptr);
+}
+
+/**
+ * @tc.name: TabBarPatternGetNextFocusNode001
+ * @tc.desc: test GetNextFocusNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternGetNextFocusNode001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::END, 0, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsNode, nullptr);
+    BuildTabBar(tabsNode, TabBarStyle::BOTTOMTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    tabBarNode->GetOrCreateFocusHub();
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_SWIPER_INDEX));
+    ASSERT_NE(swiperNode, nullptr);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    ASSERT_NE(tabsPattern, nullptr);
+    auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    ASSERT_NE(tabsLayoutProperty, nullptr);
+    auto swiperFocusNode = swiperNode->GetFocusHub();
+    ASSERT_NE(swiperFocusNode, nullptr);
+    auto tabBarFocusNode = tabBarNode->GetFocusHub();
+    ASSERT_NE(tabBarFocusNode, nullptr);
+
+    /**
+     * @tc.steps: steps2. GetNextFocusNode
+     * @tc.expected: steps2. Check the result of GetNextFocusNode
+     */
+    tabsLayoutProperty->UpdateTabBarPosition(BarPosition::START);
+    tabsLayoutProperty->UpdateAxis(Axis::HORIZONTAL);
+    tabsPattern->GetNextFocusNode(FocusStep::DOWN, tabBarFocusNode);
+    EXPECT_EQ(tabsLayoutProperty->GetAxis().value(), Axis::HORIZONTAL);
+
+    tabsLayoutProperty->UpdateTabBarPosition(BarPosition::START);
+    tabsLayoutProperty->UpdateAxis(Axis::VERTICAL);
+    tabsPattern->GetNextFocusNode(FocusStep::RIGHT, tabBarFocusNode);
+    EXPECT_EQ(tabsLayoutProperty->GetAxis().value(), Axis::VERTICAL);
+
+    tabsLayoutProperty->UpdateTabBarPosition(BarPosition::END);
+    tabsLayoutProperty->UpdateAxis(Axis::HORIZONTAL);
+    tabsPattern->GetNextFocusNode(FocusStep::UP, tabBarFocusNode);
+    EXPECT_EQ(tabsLayoutProperty->GetAxis().value(), Axis::HORIZONTAL);
+
+    tabsLayoutProperty->UpdateTabBarPosition(BarPosition::END);
+    tabsLayoutProperty->UpdateAxis(Axis::VERTICAL);
+    tabsPattern->GetNextFocusNode(FocusStep::LEFT, tabBarFocusNode);
+    EXPECT_EQ(tabsLayoutProperty->GetAxis().value(), Axis::VERTICAL);
+
+    tabsLayoutProperty->UpdateTabBarPosition(BarPosition::START);
+    tabsLayoutProperty->UpdateAxis(Axis::HORIZONTAL);
+    tabsPattern->GetNextFocusNode(FocusStep::UP, swiperFocusNode);
+    tabsPattern->GetNextFocusNode(FocusStep::UP_END, swiperFocusNode);
+    EXPECT_EQ(tabsLayoutProperty->GetAxis().value(), Axis::HORIZONTAL);
+
+    tabsLayoutProperty->UpdateTabBarPosition(BarPosition::START);
+    tabsLayoutProperty->UpdateAxis(Axis::VERTICAL);
+    tabsPattern->GetNextFocusNode(FocusStep::LEFT, swiperFocusNode);
+    tabsPattern->GetNextFocusNode(FocusStep::LEFT_END, swiperFocusNode);
+    EXPECT_EQ(tabsLayoutProperty->GetAxis().value(), Axis::VERTICAL);
+
+    tabsLayoutProperty->UpdateTabBarPosition(BarPosition::END);
+    tabsLayoutProperty->UpdateAxis(Axis::HORIZONTAL);
+    tabsPattern->GetNextFocusNode(FocusStep::DOWN, swiperFocusNode);
+    tabsPattern->GetNextFocusNode(FocusStep::DOWN_END, swiperFocusNode);
+    EXPECT_EQ(tabsLayoutProperty->GetAxis().value(), Axis::HORIZONTAL);
+
+    tabsLayoutProperty->UpdateTabBarPosition(BarPosition::END);
+    tabsLayoutProperty->UpdateAxis(Axis::VERTICAL);
+    tabsPattern->GetNextFocusNode(FocusStep::UP, swiperFocusNode);
+    EXPECT_EQ(tabsLayoutProperty->GetAxis().value(), Axis::VERTICAL);
+
+    tabsLayoutProperty->UpdateTabBarPosition(BarPosition::END);
+    tabsLayoutProperty->UpdateAxis(Axis::VERTICAL);
+    tabsPattern->GetNextFocusNode(FocusStep::RIGHT, swiperFocusNode);
+    tabsPattern->GetNextFocusNode(FocusStep::RIGHT_END, swiperFocusNode);
+    EXPECT_EQ(tabsLayoutProperty->GetAxis().value(), Axis::VERTICAL);
 }
 } // namespace OHOS::Ace::NG

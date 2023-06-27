@@ -81,6 +81,28 @@ void JSTabs::SetOnChange(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetOnChange(std::move(onChange));
 }
 
+void JSTabs::SetOnTabBarClick(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto changeHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), TabContentChangeEventToJSValue);
+    auto onTabBarClick = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler)](
+                             const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (!tabsInfo) {
+            LOGE("SetTabBarClick tabsInfo is nullptr");
+            return;
+        }
+        ACE_SCORING_EVENT("Tabs.onTabBarClick");
+        func->Execute(*tabsInfo);
+    };
+    TabsModel::GetInstance()->SetOnTabBarClick(std::move(onTabBarClick));
+}
+
 void ParseTabsIndexObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
 {
     CHECK_NULL_VOID(changeEventVal->IsFunction());
@@ -342,6 +364,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("animationDuration", &JSTabs::SetAnimationDuration);
     JSClass<JSTabs>::StaticMethod("divider", &JSTabs::SetDivider);
     JSClass<JSTabs>::StaticMethod("onChange", &JSTabs::SetOnChange);
+    JSClass<JSTabs>::StaticMethod("onTabBarClick", &JSTabs::SetOnTabBarClick);
     JSClass<JSTabs>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTabs>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTabs>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
