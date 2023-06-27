@@ -85,8 +85,8 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
             currentIndex_ = 0;
             currentFirstIndex_ = 0;
             if (NeedMarkDirtyNodeRenderIndicator()) {
-                auto indicatorNode = DynamicCast<FrameNode>(host->GetChildAtIndex(
-                    host->GetChildIndexById(GetIndicatorId())));
+                auto indicatorNode =
+                    DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
                 indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
             }
         }
@@ -935,6 +935,9 @@ void SwiperPattern::OnVisibleChange(bool isVisible)
 
 void SwiperPattern::UpdateCurrentOffset(float offset)
 {
+    if (IsChildrenSizeLessThanSwiper()) {
+        return;
+    }
     auto edgeEffect = GetEdgeEffect();
     if (!IsLoop() && IsOutOfBoundary() && edgeEffect == EdgeEffect::SPRING) {
         LOGD("Swiper has reached boundary, can't drag any more, effect spring.");
@@ -942,15 +945,10 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
         if (LessOrEqual(visibleSize, 0.0)) {
             return;
         }
-        float friction = 0.0f;
-        if (GetDisplayCount() >= TotalCount()) {
-            friction = currentOffset_ > 0 ? CalculateFriction(itemPosition_.begin()->second.startPos / visibleSize)
-                                          : CalculateFriction(-itemPosition_.begin()->second.startPos / visibleSize);
-        } else {
-            friction = currentOffset_ > 0
-                           ? CalculateFriction(itemPosition_.begin()->second.startPos / visibleSize)
-                           : CalculateFriction((visibleSize - itemPosition_.rbegin()->second.endPos) / visibleSize);
-        }
+        auto friction = currentOffset_ > 0
+                            ? CalculateFriction(itemPosition_.begin()->second.startPos / visibleSize)
+                            : CalculateFriction((visibleSize - itemPosition_.rbegin()->second.endPos) / visibleSize);
+
         currentDelta_ = currentDelta_ - friction * offset;
         if (isDragging_) {
             currentIndexOffset_ += friction * offset;
@@ -1279,19 +1277,11 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     constexpr float SPRING_SCROLL_DAMPING = 15.55635f;
     const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
         AceType::MakeRefPtr<SpringProperty>(SPRING_SCROLL_MASS, SPRING_SCROLL_STIFFNESS, SPRING_SCROLL_DAMPING);
-    ExtentPair extentPair = ExtentPair(GetDisplayCount() >= TotalCount()
-                                           ? currentOffset_ - itemPosition_.begin()->second.startPos
-                                           : currentOffset_ + mainSize - itemPosition_.rbegin()->second.endPos,
+    ExtentPair extentPair = ExtentPair(currentOffset_ + mainSize - itemPosition_.rbegin()->second.endPos,
         currentOffset_ - itemPosition_.begin()->second.startPos);
-    float friction = 0.0f;
-    if (GetDisplayCount() >= TotalCount()) {
-        friction = currentOffset_ > 0 ? CalculateFriction(itemPosition_.begin()->second.startPos / mainSize)
-                                      : CalculateFriction(-itemPosition_.begin()->second.startPos / mainSize);
-    } else {
-        friction = currentOffset_ > 0
-                       ? CalculateFriction(itemPosition_.begin()->second.startPos / mainSize)
-                       : CalculateFriction((mainSize - itemPosition_.rbegin()->second.endPos) / mainSize);
-    }
+    float friction = currentOffset_ > 0
+                         ? CalculateFriction(itemPosition_.begin()->second.startPos / mainSize)
+                         : CalculateFriction((mainSize - itemPosition_.rbegin()->second.endPos) / mainSize);
     auto scrollMotion = AceType::MakeRefPtr<ScrollMotion>(
         currentOffset_, dragVelocity * friction, extentPair, extentPair, DEFAULT_OVER_SPRING_PROPERTY);
     scrollMotion->AddListener([weak = AceType::WeakClaim(this)](double position) {
@@ -1952,6 +1942,41 @@ void SwiperPattern::SetLazyLoadFeature(bool useLazyLoad) const
             lazyForEach->SetRequestLongPredict(useLazyLoad);
         }
     }
+}
+
+bool SwiperPattern::IsChildrenSizeLessThanSwiper()
+{
+    if (static_cast<int32_t>(itemPosition_.size()) == TotalCount()) {
+        auto totalChildrenSize = 0.0f;
+        totalChildrenSize = itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos;
+        auto prevMargin = GetPrevMargin();
+        auto nextMargin = GetNextMargin();
+        auto itemSpace = GetItemSpace();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, 0.0f);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, 0.0);
+        auto mainSize = geometryNode->GetFrameSize().MainSize(GetDirection());
+        if (itemSpace > mainSize) {
+            itemSpace = 0.0f;
+        }
+        if (prevMargin != 0.0f) {
+            if (nextMargin != 0.0f) {
+                totalChildrenSize += prevMargin + nextMargin + 2 * itemSpace;
+            } else {
+                totalChildrenSize += prevMargin + itemSpace;
+            }
+        } else {
+            if (nextMargin != 0.0f) {
+                totalChildrenSize += nextMargin + itemSpace;
+            }
+        }
+
+        if (totalChildrenSize <= contentMainSize_) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay)

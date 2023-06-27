@@ -487,6 +487,7 @@ private:
     void TriggerAnimationEndOnSwipeToLeft();
     void TriggerAnimationEndOnSwipeToRight();
     void TriggerEventOnFinish(int32_t nextIndex);
+    bool IsChildrenSizeLessThanSwiper();
 
     void SetLazyLoadFeature(bool useLazyLoad) const;
 
