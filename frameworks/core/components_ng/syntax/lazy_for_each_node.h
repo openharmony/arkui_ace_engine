@@ -77,14 +77,28 @@ public:
 private:
     void OnAttachToMainTree(bool recursive) override
     {
+        UINode::OnAttachToMainTree(recursive);
         CHECK_NULL_VOID(builder_);
-        builder_->RegisterDataChangeListener(Claim(this));
+        if (!isRegisterListener_) {
+            builder_->RegisterDataChangeListener(Claim(this));
+            isRegisterListener_ = true;
+        }
     }
 
     void OnDetachFromMainTree(bool recursive) override
     {
         CHECK_NULL_VOID(builder_);
         builder_->UnregisterDataChangeListener(Claim(this));
+    }
+
+    void OnOffscreenProcess(bool recursive) override
+    {
+        UINode::OnOffscreenProcess(recursive);
+        CHECK_NULL_VOID(builder_);
+        if (!isRegisterListener_) {
+            builder_->RegisterDataChangeListener(Claim(this));
+            isRegisterListener_ = true;
+        }
     }
 
     void NotifyDataCountChanged(int32_t index);
@@ -98,6 +112,7 @@ private:
     bool needPredict = false;
     bool requestLongPredict_ = false;
     bool useLongPredictTask_ = false;
+    bool isRegisterListener_ = false;
 
     RefPtr<LazyForEachBuilder> builder_;
 

@@ -62,7 +62,20 @@ void NavDestinationGroupNode::DeleteChildFromGroup(int32_t slot)
 
 void NavDestinationGroupNode::OnAttachToMainTree(bool recursive)
 {
+    if (!UseOffscreenProcess()) {
+        ProcessShallowBuilder();
+    }
     FrameNode::OnAttachToMainTree(recursive);
+}
+
+void NavDestinationGroupNode::OnOffscreenProcess(bool recursive)
+{
+    ProcessShallowBuilder();
+    FrameNode::OnOffscreenProcess(recursive);
+}
+
+void NavDestinationGroupNode::ProcessShallowBuilder()
+{
     auto navDestinationPattern = GetPattern<NavDestinationPattern>();
     CHECK_NULL_VOID(navDestinationPattern);
     auto shallowBuilder = navDestinationPattern->GetShallowBuilder();

@@ -132,8 +132,7 @@ RefPtr<FrameNode> FrameNode::CreateFrameNode(
 void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
-    // to trigger OnAttachToMainTree
-    node->AttachToMainTree();
+    node->ProcessOffscreenTask();
     node->MarkModifyDone();
     node->UpdateLayoutPropertyFlag();
     auto layoutWrapper = node->CreateLayoutWrapper();
@@ -359,7 +358,6 @@ void FrameNode::FromJson(const std::unique_ptr<JsonValue>& json)
 
 void FrameNode::OnAttachToMainTree(bool recursive)
 {
-    UINode::OnAttachToMainTree(recursive);
     eventHub_->FireOnAppear();
     renderContext_->OnNodeAppear(recursive);
     if (IsResponseRegion() || HasPositionProp()) {
@@ -372,12 +370,15 @@ void FrameNode::OnAttachToMainTree(bool recursive)
             parent = parent->GetParent();
         }
     }
+    // node may have been measured before AttachToMainTree
+    if (geometryNode_->GetParentLayoutConstraint().has_value() && !UseOffscreenProcess()) {
+        layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+
+    UINode::OnAttachToMainTree(recursive);
+
     if (!hasPendingRequest_) {
         return;
-    }
-    // node may have been measured before AttachToMainTree
-    if (geometryNode_->GetParentLayoutConstraint().has_value()) {
-        layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
     }
     auto context = GetContext();
     CHECK_NULL_VOID(context);
@@ -1202,11 +1203,12 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
 #endif
     }
     {
-        ACE_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");
+        ACE_DEBUG_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");
         if (IsOutOfTouchTestRegion(parentLocalPoint)) {
             return HitTestResult::OUT_OF_REGION;
         }
     }
+    pattern_->OnTouchTestHit();
 
     HitTestResult testResult = HitTestResult::OUT_OF_REGION;
     bool preventBubbling = false;
