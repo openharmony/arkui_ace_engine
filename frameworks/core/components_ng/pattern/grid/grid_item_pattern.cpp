@@ -78,4 +78,17 @@ void GridItemPattern::SetAccessibilityAction()
         context->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
     });
 }
+
+void GridItemPattern::BeforeCreateLayoutWrapper()
+{
+    if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {
+        shallowBuilder_->ExecuteDeepRender();
+        shallowBuilder_.Reset();
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!host->IsActive()) {
+        host->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    }
+}
 } // namespace OHOS::Ace::NG

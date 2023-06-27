@@ -52,13 +52,8 @@ public:
     }
 
 
-    void BeforeCreateLayoutWrapper() override
-    {
-        if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {
-            shallowBuilder_->ExecuteDeepRender();
-            shallowBuilder_.Reset();
-        }
-    }
+    void BeforeCreateLayoutWrapper() override;
+
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
     {
         auto layoutProperty = dirty->GetLayoutProperty();
