@@ -18,6 +18,7 @@
 #include "session_manager/include/scene_session_manager.h"
 #include "ui/rs_surface_node.h"
 
+#include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "base/utils/system_properties.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
@@ -255,7 +256,7 @@ void WindowPattern::PrintPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     for (const auto &buff : buffer) {
         str += std::to_string(buff);
     }
-    LOGI("EventType:%{public}d,ActionTime:%{public}" PRId64 ",Action:%{public}d,"
+    LOGD("EventType:%{public}d,ActionTime:%{public}" PRId64 ",Action:%{public}d,"
         "ActionStartTime:%{public}" PRId64 ",Flag:%{public}d,PointerAction:%{public}s,"
         "SourceType:%{public}s,ButtonId:%{public}d,VerticalAxisValue:%{public}.2f,"
         "HorizontalAxisValue:%{public}.2f,PinchAxisValue:%{public}.2f,"
@@ -286,7 +287,7 @@ void WindowPattern::PrintPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             LOGE("Invalid pointer: %{public}d.", pointerId);
             return;
         }
-        LOGI("pointerId:%{public}d,DownTime:%{public}" PRId64 ",IsPressed:%{public}d,DisplayX:%{public}d,"
+        LOGD("pointerId:%{public}d,DownTime:%{public}" PRId64 ",IsPressed:%{public}d,DisplayX:%{public}d,"
             "DisplayY:%{public}d,WindowX:%{public}d,WindowY:%{public}d,Width:%{public}d,Height:%{public}d,"
             "TiltX:%{public}.2f,TiltY:%{public}.2f,ToolDisplayX:%{public}d,ToolDisplayY:%{public}d,"
             "ToolWindowX:%{public}d,ToolWindowY:%{public}d,ToolWidth:%{public}d,ToolHeight:%{public}d,"
@@ -337,5 +338,106 @@ void WindowPattern::DisPatchFocusActiveEvent(bool isFocusActive)
 {
     CHECK_NULL_VOID(session_);
     session_->TransferFocusActiveEvent(isFocusActive);
+}
+
+void WindowPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    if (touchEvent_) {
+        return;
+    }
+    auto callback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleTouchEvent(info);
+        }
+    };
+    if (touchEvent_) {
+        gestureHub->RemoveTouchEvent(touchEvent_);
+    }
+    touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(callback));
+    gestureHub->AddTouchEvent(touchEvent_);
+}
+
+void WindowPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
+{
+    if (mouseEvent_) {
+        return;
+    }
+    auto callback = [weak = WeakClaim(this)](MouseInfo& info) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleMouseEvent(info);
+        }
+    };
+    if (mouseEvent_) {
+        inputHub->RemoveOnMouseEvent(mouseEvent_);
+    }
+    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(callback));
+    inputHub->AddOnMouseEvent(mouseEvent_);
+}
+
+void WindowPattern::HandleTouchEvent(const TouchEventInfo& info)
+{
+    LOGD("WindowPattern HandleTouchEvent enter");
+    const auto pointerEvent = info.GetPointerEvent();
+    CHECK_NULL_VOID(pointerEvent);
+    if (IsFilterTouchEvent(pointerEvent)) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID_NOLOG(host);
+    auto selfGlobalOffset = host->GetTransformRelativeOffset();
+    auto scale = host->GetTransformScale();
+    Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale);
+    DispatchPointerEvent(pointerEvent);
+}
+
+bool WindowPattern::IsFilterTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    return pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
+    (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN ||
+        pointerEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE);
+}
+
+void WindowPattern::HandleMouseEvent(const MouseInfo& info)
+{
+    LOGD("WindowPattern HandleMouseEvent enter");
+    const auto pointerEvent = info.GetPointerEvent();
+    CHECK_NULL_VOID(pointerEvent);
+    if (IsFilterMouseEvent(pointerEvent)) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID_NOLOG(host);
+    auto selfGlobalOffset = host->GetTransformRelativeOffset();
+    auto scale = host->GetTransformScale();
+    Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale);
+    DispatchPointerEvent(pointerEvent);
+}
+
+bool WindowPattern::IsFilterMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+        return true;
+    }
+    int32_t pointerAction = pointerEvent->GetPointerAction();
+    return pointerEvent->GetButtonId() != MMI::PointerEvent::BUTTON_NONE &&
+        (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+}
+
+void WindowPattern::OnModifyDone()
+{
+    Pattern::OnModifyDone();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    InitTouchEvent(gestureHub);
+    auto inputHub = hub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    InitMouseEvent(inputHub);
 }
 } // namespace OHOS::Ace::NG

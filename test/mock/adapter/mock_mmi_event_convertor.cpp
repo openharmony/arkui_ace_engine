@@ -19,4 +19,7 @@ namespace OHOS::Ace::Platform {
 void CalculatePointerEvent(
     const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point, const NG::VectorF& scale)
 {}
+void CalculateWindowCoordinate(
+    const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point, const NG::VectorF& scale)
+{}
 } // namespace OHOS::Ace::Platform
