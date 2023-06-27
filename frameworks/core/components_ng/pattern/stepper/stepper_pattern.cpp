@@ -81,6 +81,7 @@ void StepperPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    host->GetRenderContext()->UpdateClipEdge(true);
 }
 
 void StepperPattern::InitSwiperChangeEvent(const RefPtr<SwiperEventHub>& swiperEventHub)

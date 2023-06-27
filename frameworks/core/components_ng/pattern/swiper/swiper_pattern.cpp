@@ -70,6 +70,7 @@ void SwiperPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->SetClipToBounds(true);
+    host->GetRenderContext()->UpdateClipEdge(true);
 }
 
 RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
