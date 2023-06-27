@@ -265,8 +265,12 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
             jumpIndex_.value(), currentOffset_, startMainPos_, endMainPos_);
         startPos = (jumpIndex_.value() == 0) && Negative(startMainPos_) ? startMainPos_ : 0;
         LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), startPos);
-        if (jumpIndex_.value() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
-            LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() - 1, GetStartPosition());
+        auto prevMarginMontage = Positive(prevMargin_) ? prevMargin_ + spaceWidth_ : 0.0f;
+        if ((jumpIndex_.value() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_ - prevMarginMontage)) ||
+            (isLoop_ && Positive(prevMargin_))) {
+            auto prevItemWidth = (Positive(prevMargin_) && NearZero(GetStartIndex()) ? spaceWidth_ : 0.0f);
+            LayoutBackward(layoutWrapper, layoutConstraint, axis,
+                jumpIndex_.value() - 1, GetStartPosition() - prevItemWidth);
         }
         currentIndex_ = jumpIndex_.value();
     } else if (targetIndex_.has_value()) {
@@ -405,7 +409,6 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
                 endMainPos = startPos + itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
                 endMainPos_ = endMainPos;
             }
-            break;
         }
         if ((currentIndex >= 0 && currentIndex < (totalItemCount_ - 1)) || isLoop_) {
             currentEndPos += spaceWidth_;

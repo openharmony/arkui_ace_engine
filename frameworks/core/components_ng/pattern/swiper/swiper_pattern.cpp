@@ -146,7 +146,7 @@ void SwiperPattern::OnModifyDone()
     InitArrow();
 
     auto childrenSize = TotalCount();
-    if (layoutProperty->GetIndex().has_value() && CurrentIndex() >= 0) {
+    if (CurrentIndex() >= 0) {
         currentIndex_ = CurrentIndex();
         layoutProperty->UpdateIndexWithoutMeasure(currentIndex_);
     } else {
