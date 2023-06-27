@@ -52,6 +52,7 @@ ace_unittest("swiper_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/manager/select_overlay/mock_select_overlay_manager.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/manager/select_overlay/mock_select_overlay_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/select_overlay/mock_select_overlay_property.cpp",
+    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
 
     # self
     "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_accessibility_property.cpp",

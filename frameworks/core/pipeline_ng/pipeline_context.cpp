@@ -44,6 +44,7 @@
 #include "core/animation/scheduler.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/common/font_manager.h"
 #include "core/common/layout_inspector.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/thread_checker.h"
@@ -1832,6 +1833,20 @@ void PipelineContext::HandleWindowSceneTouchEvent(const TouchEvent& point)
 
     if (iter->second) {
         iter->second(point.pointerEvent);
+    }
+}
+
+void PipelineContext::AddFontNodeNG(const WeakPtr<UINode>& node)
+{
+    if (fontManager_) {
+        fontManager_->AddFontNodeNG(node);
+    }
+}
+
+void PipelineContext::RemoveFontNodeNG(const WeakPtr<UINode>& node)
+{
+    if (fontManager_) {
+        fontManager_->RemoveFontNodeNG(node);
     }
 }
 // ----------------------------------------------------------------------------------

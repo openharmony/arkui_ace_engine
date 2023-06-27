@@ -349,6 +349,10 @@ public:
         isNeedFlushMouseEvent_ = true;
     }
 
+    // font
+    void AddFontNodeNG(const WeakPtr<UINode>& node);
+    void RemoveFontNodeNG(const WeakPtr<UINode>& node);
+
     // restore
     void RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo) override;
     std::unique_ptr<JsonValue> GetStoredNodeInfo() override;

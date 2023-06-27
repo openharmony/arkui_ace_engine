@@ -116,6 +116,7 @@ ace_unittest("dialog_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/manager/drag_drop/mock_drag_drop_manager.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/manager/drag_drop/mock_drag_drop_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/navigation/mock_menu_view.cpp",
+    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
     "$ace_root/test/unittest/core/pipeline/mock_overlay_manager.cpp",
     "dialog_pattern_test_ng.cpp",
   ]

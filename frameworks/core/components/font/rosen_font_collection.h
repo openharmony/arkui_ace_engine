@@ -39,6 +39,8 @@ public:
 
     void SetIsZawgyiMyanmar(bool isZawgyiMyanmar);
 
+    sk_sp<txt::DynamicFontManager> GetDynamicFontManager();
+    
 private:
     std::shared_ptr<txt::FontCollection> fontCollection_;
     sk_sp<txt::DynamicFontManager> dynamicFontManager_;

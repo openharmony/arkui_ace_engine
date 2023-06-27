@@ -109,6 +109,7 @@ ace_unittest("navrouter_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/text/text_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_styles.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_pattern.cpp",
+    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
     "navrouter_test_ng.cpp",
   ]
 }

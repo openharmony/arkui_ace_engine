@@ -41,6 +41,7 @@ ohos_unittest("select_overlay_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/text/mock_text_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/image/mock/mock_image_pattern.cpp",
     "$ace_root/test/mock/core/common/mock_ace_engine.cpp",
+    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
     "$ace_root/test/unittest/core/pipeline/mock_overlay_manager.cpp",
 
     # other

@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
+TextPattern::~TextPattern() = default;
+
 void TextPattern::OnDetachFromFrameNode(FrameNode* node) {}
 
 void TextPattern::HandleLongPress(GestureEvent& info) {}

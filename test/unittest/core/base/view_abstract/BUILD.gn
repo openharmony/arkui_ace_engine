@@ -161,6 +161,7 @@ ohos_unittest("view_abstract_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
+    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
 
     # self
     "$ace_root/adapter/ohos/osal/ace_engine_ext.cpp",
