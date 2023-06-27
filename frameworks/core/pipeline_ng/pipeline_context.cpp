@@ -781,9 +781,14 @@ bool PipelineContext::OnBackPressed()
     // if has popup, back press would hide popup and not trigger page back
     auto hasOverlay = false;
     taskExecutor_->PostSyncTask(
-        [weakOverlay = AceType::WeakClaim(AceType::RawPtr(overlayManager_)), &hasOverlay]() {
+        [weakOverlay = AceType::WeakClaim(AceType::RawPtr(overlayManager_)),
+            weakSelectOverlay = AceType::WeakClaim(AceType::RawPtr(selectOverlayManager_)), &hasOverlay]() {
+            // Destroy behaviour of Select Overlay shouble be adjusted.
             auto overlay = weakOverlay.Upgrade();
             CHECK_NULL_VOID_NOLOG(overlay);
+            auto selectOverlay = weakSelectOverlay.Upgrade();
+            CHECK_NULL_VOID_NOLOG(selectOverlay);
+            selectOverlay->DestroySelectOverlay();
             hasOverlay = overlay->RemoveOverlay(true);
         },
         TaskExecutor::TaskType::UI);
