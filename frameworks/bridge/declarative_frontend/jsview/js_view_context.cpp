@@ -154,6 +154,10 @@ const AnimationOption JSViewContext::CreateAnimation(
         LOGI("tempo near 0, set duration to 0.");
         duration = 0;
     }
+    if (duration < 0) {
+        LOGI("duration is less than 0, set duration to %{public}d", DEFAULT_DURATION);
+        duration = DEFAULT_DURATION;
+    }
     auto direction = StringToAnimationDirection(animationArgs->GetString("playMode", "normal"));
     RefPtr<Curve> curve;
     auto curveArgs = animationArgs->GetValue("curve");

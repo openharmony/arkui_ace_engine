@@ -266,7 +266,6 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
             OnBorderRadiusUpdate(borderRadius.value());
         }
     }
-    SetPivot(0.5f, 0.5f); // default pivot is center
 
     if (firstTransitionIn_) {
         // need to perform transitionIn early so not influence the following SetPivot
