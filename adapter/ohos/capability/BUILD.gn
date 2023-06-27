@@ -67,7 +67,7 @@ template("ace_capability_ohos_source_set") {
         "eventhandler:libeventhandler",
         "graphic_standard:librender_service_client",
         "graphic_standard:surface",
-        "hiviewdfx_hilog_native:libhilog",
+        "hilog:libhilog",
         "input:libmmi-client",
         "ipc:ipc_core",
         "window_manager:libwindow_extension_client",
