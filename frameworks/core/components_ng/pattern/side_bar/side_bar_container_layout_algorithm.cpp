@@ -43,7 +43,6 @@ static Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
 static Dimension DEFAULT_MIN_CONTENT_WIDTH = 0.0_vp;
 static Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
 static Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
-static Dimension WINDOW_WIDTH = 520.0_vp;
 } // namespace
 
 void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -75,13 +74,6 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     if (type_ == SideBarContainerType::AUTO) {
         AutoMode(layoutWrapper, parentWidth, minSideBarWidthPx, dividerStrokeWidthPx);
-    }
-
-    auto minWidthToHide = parentWidth < WINDOW_WIDTH.ConvertToPx();
-    if (!layoutProperty->GetShowSideBar().has_value()) {
-        if (minWidthToHide) {
-            sideBarStatus_ = SideBarStatus::HIDDEN;
-        }
     }
 
     /*
