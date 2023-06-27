@@ -59,6 +59,7 @@ constexpr float CURRENT_OFFSET = -0.5f;
 const std::string EMPTY_TEXT = "";
 const std::string MENU_ITEM_TEXT = "menuItem";
 const std::string MENU_ITEM_GROUP_TEXT = "menuItemGroup";
+const DirtySwapConfig configDirtySwap = {false, false, false, false, true, false};
 constexpr Color ITEM_DISABLED_COLOR = Color(0x0c182431);
 
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
@@ -1006,6 +1007,97 @@ HWTEST_F(MenuTestNg, MenuPatternTestNg020, TestSize.Level1)
     ASSERT_NE(textProperty, nullptr);
     ASSERT_TRUE(textProperty->GetItalicFontStyle().has_value());
     EXPECT_EQ(textProperty->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
+}
+
+/**
+ * @tc.name: MenuPatternTest021
+ * @tc.desc: Verify RegisterOnTouch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuPatternTestNg021, TestSize.Level1)
+{
+    MenuPattern *menuPattern = new MenuPattern(TARGET_ID, "", TYPE);
+    const std::string tag = "tag";
+    int32_t nodeId = 1;
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<Pattern>();
+    bool isRoot = false;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<FrameNode> frameNode = AceType::MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot);
+    const RefPtr<LayoutWrapper> layoutWrapper;
+    
+    std::string type = "1";
+    TouchEventInfo info(type);
+    TouchType touchType = TouchType::UP;
+    TouchLocationInfo locationInfo(TARGET_ID);
+    Offset globalLocation(1, 1);
+    locationInfo.SetTouchType(touchType);
+    auto touchLocationInfo = locationInfo.SetGlobalLocation(globalLocation);
+    info.touches_.emplace_back(touchLocationInfo);
+    menuPattern->OnTouchEvent(info);
+    menuPattern->RegisterOnTouch();
+
+    KeyEvent keyEvent(KeyCode::KEY_ESCAPE, KeyAction::UP);
+    EXPECT_FALSE(menuPattern->IsMultiMenu());
+    EXPECT_FALSE(menuPattern->OnKeyEvent(keyEvent));
+    menuPattern->HideMenu();
+    menuPattern->HideSubMenu();
+
+    EXPECT_FALSE(menuPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, configDirtySwap));
+
+    menuPattern->type_ = MenuType::SUB_MENU;
+    EXPECT_FALSE(menuPattern->OnKeyEvent(keyEvent));
+    menuPattern->HideMenu();
+    menuPattern->HideSubMenu();
+    menuPattern->RemoveParentHoverStyle();
+
+    delete menuPattern;
+    menuPattern = nullptr;
+}
+
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg0
+ * @tc.desc: Verify positionOffset of Layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg0, TestSize.Level1)
+{
+    std::function<void()> action = [] {};
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "", action);
+    optionParams.emplace_back("MenuItem2", "", action);
+    MenuParam menuParam;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    ASSERT_TRUE(property->GetPositionOffset().has_value());
+    EXPECT_EQ(property->GetPositionOffset().value(), OffsetF());
+    RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapper layoutWrapper(menuNode, geometryNode, menuNode->GetLayoutProperty());
+
+    layoutWrapper.GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(FULL_SCREEN_HEIGHT)));
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+
+    layoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
+    EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->isSelectMenu_ = true;
+    layoutAlgorithm->Layout(&layoutWrapper);
+    EXPECT_EQ(geometryNode->GetMarginFrameOffset(), OffsetF(0.0f, 0.0f));
 }
 
 /**
@@ -4530,6 +4622,45 @@ HWTEST_F(MenuTestNg, MenuPaintMethodTestNg002, TestSize.Level1)
         delete paintWrapper;
         paintWrapper = nullptr;
     }
+}
+
+/**
+ * @tc.name: MenuPaintMethodTestNg003
+ * @tc.desc: Verify GetOverlayDrawFunction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuPaintMethodTestNg003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare paint method object.
+     */
+    RefPtr<MenuPaintProperty> paintProp = AceType::MakeRefPtr<MenuPaintProperty>();
+    RefPtr<MenuPaintMethod> paintMethod = AceType::MakeRefPtr<MenuPaintMethod>();
+    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    /**
+     * @tc.steps: step2. excute functions.
+     * @tc.expected:  return value are as expected.
+     */
+    
+    auto arrowPlaceMent = Placement::TOP;
+    auto arrowX = 0.0;
+    auto arrowY = 0.0;
+    RSPath path;
+    
+    paintMethod->UpdateArrowPath(arrowPlaceMent, arrowX, arrowY, path);
+    arrowPlaceMent = Placement::TOP_RIGHT;
+    paintMethod->UpdateArrowPath(arrowPlaceMent, arrowX, arrowY, path);
+    arrowPlaceMent = Placement::BOTTOM_RIGHT;
+    paintMethod->UpdateArrowPath(arrowPlaceMent, arrowX, arrowY, path);
+    arrowPlaceMent = Placement::RIGHT_TOP;
+    paintMethod->UpdateArrowPath(arrowPlaceMent, arrowX, arrowY, path);
+    arrowPlaceMent = Placement::LEFT_TOP;
+    paintMethod->UpdateArrowPath(arrowPlaceMent, arrowX, arrowY, path);
+    auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
+    EXPECT_NE(result, nullptr);
+
+    delete paintWrapper;
+    paintWrapper = nullptr;
 }
 
 /**
