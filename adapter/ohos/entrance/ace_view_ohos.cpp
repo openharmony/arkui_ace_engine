@@ -30,15 +30,11 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
-#include "core/common/container_scope.h"
-#include "core/common/thread_checker.h"
-#include "core/components/theme/app_theme.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
-#include "core/image/image_cache.h"
 
 namespace OHOS::Ace::Platform {
 namespace {

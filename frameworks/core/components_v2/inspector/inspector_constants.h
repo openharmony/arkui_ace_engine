@@ -309,6 +309,10 @@ ACE_EXPORT extern const char SEARCH_ETS_TAG[];
 ACE_EXPORT extern const char FORM_COMPONENT_TAG[];
 ACE_EXPORT extern const char FORM_ETS_TAG[];
 
+// formLink
+ACE_EXPORT extern const char FORM_LINK_TAG[];
+ACE_EXPORT extern const char FORM_LINK_ETS_TAG[];
+
 // PluginComponent
 ACE_EXPORT extern const char PLUGIN_COMPONENT_TAG[];
 ACE_EXPORT extern const char PLUGIN_ETS_TAG[];

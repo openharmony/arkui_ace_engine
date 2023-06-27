@@ -2856,7 +2856,7 @@ BorderStyle ConvertBorderStyle(int32_t value)
 void JSViewAbstract::ParseBorderStyle(const JSRef<JSVal>& args)
 {
     if (!args->IsObject() && !args->IsNumber()) {
-        LOGI("args(%{public}s) is invalid, use default value.", args->ToString().c_str());
+        LOGD("args(%{public}s) is invalid, use default value.", args->ToString().c_str());
         ViewAbstractModel::GetInstance()->SetBorderStyle(BorderStyle::SOLID);
         return;
     }

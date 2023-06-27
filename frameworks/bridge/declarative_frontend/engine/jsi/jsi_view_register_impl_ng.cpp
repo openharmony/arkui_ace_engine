@@ -55,6 +55,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_environment.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_flex_impl.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_foreach.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_form_link.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_gauge.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_gesture.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid.h"
