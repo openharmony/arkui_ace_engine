@@ -153,6 +153,9 @@ private:
     SideBarAnimationDirection animDir_ = SideBarAnimationDirection::LTR;
     bool isControlButtonHover_ = false;
 
+    Dimension adjustMaxSideBarWidth_;
+    Dimension adjustMinSideBarWidth_;
+
     ACE_DISALLOW_COPY_AND_MOVE(SideBarContainerPattern);
 };
 

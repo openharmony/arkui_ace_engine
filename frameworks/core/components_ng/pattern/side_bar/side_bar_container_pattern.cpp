@@ -37,8 +37,6 @@ constexpr float RATIO_NEGATIVE = -1.0f;
 constexpr float RATIO_ZERO = 0.0f;
 constexpr float DEFAULT_HALF = 2.0f;
 constexpr Dimension DEFAULT_DRAG_REGION = 20.0_vp;
-constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
-constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
 constexpr int32_t SIDEBAR_DURATION = 500;
 const RefPtr<CubicCurve> SIDEBAR_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.2f, 0.1f, 1.0f);
 constexpr Dimension DEFAULT_DIVIDER_STROKE_WIDTH = 1.0_vp;
@@ -489,6 +487,9 @@ bool SideBarContainerPattern::OnDirtyLayoutWrapperSwap(
         needInitRealSideBarWidth_ = false;
     }
 
+    adjustMaxSideBarWidth_ = layoutAlgorithm->GetAdjustMaxSideBarWidth();
+    adjustMinSideBarWidth_ = layoutAlgorithm->GetAdjustMinSideBarWidth();
+
     return false;
 }
 
@@ -599,13 +600,6 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
-    auto minSideBarWidth = layoutProperty->GetMinSideBarWidth().value_or(DEFAULT_MIN_SIDE_BAR_WIDTH);
-    auto maxSideBarWidth = layoutProperty->GetMaxSideBarWidth().value_or(DEFAULT_MAX_SIDE_BAR_WIDTH);
-    if (minSideBarWidth > maxSideBarWidth) {
-        minSideBarWidth = DEFAULT_MIN_SIDE_BAR_WIDTH;
-        maxSideBarWidth = DEFAULT_MAX_SIDE_BAR_WIDTH;
-    }
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
@@ -615,8 +609,8 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
     auto parentWidth = frameSize.Width();
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto scaleProperty = constraint->scaleProperty;
-    auto minSideBarWidthPx = ConvertToPx(minSideBarWidth, scaleProperty, parentWidth).value_or(0);
-    auto maxSideBarWidthPx = ConvertToPx(maxSideBarWidth, scaleProperty, parentWidth).value_or(0);
+    auto minSideBarWidthPx = ConvertToPx(adjustMinSideBarWidth_, scaleProperty, parentWidth).value_or(0);
+    auto maxSideBarWidthPx = ConvertToPx(adjustMaxSideBarWidth_, scaleProperty, parentWidth).value_or(0);
 
     auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
     bool isSideBarStart = sideBarPosition == SideBarPosition::START;
