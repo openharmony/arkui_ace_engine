@@ -23,8 +23,8 @@
 #include "napi/native_api.h"
 #include "napi/native_engine/native_value.h"
 #include "napi/native_node_api.h"
-#include "uv.h"
 
+#include "core/common/ace_engine.h"
 #include "frameworks/base/log/log.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
@@ -86,7 +86,7 @@ struct RouterAsyncContext {
     napi_ref callbackRef = nullptr;
     int32_t callbackCode = 0;
     std::string callbackMsg;
-    napi_async_work work = nullptr;
+    int32_t instanceId = -1;
     ~RouterAsyncContext()
     {
         if (callbackRef) {
@@ -479,16 +479,19 @@ static napi_value JSRouterGetState(napi_env env, napi_callback_info info)
 
 void CallBackToJSTread(std::shared_ptr<RouterAsyncContext> context)
 {
-    uv_loop_s* loop = nullptr;
-    napi_get_uv_event_loop(context->env, &loop);
+    auto container = AceEngine::Get().GetContainer(context->instanceId);
+    if (!container) {
+        LOGW("container is null. %{public}d", context->instanceId);
+        return;
+    }
 
-    uv_work_t* work = new uv_work_t;
-    work->data = (void*)context.get();
-
-    uv_queue_work(
-        loop, work, [](uv_work_t* work) {},
-        [](uv_work_t* work, int status) {
-            RouterAsyncContext* context = (RouterAsyncContext*)work->data;
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGW("taskExecutor is null.");
+        return;
+    }
+    taskExecutor->PostTask(
+        [context]() {
             napi_handle_scope scope = nullptr;
             napi_open_handle_scope(context->env, &scope);
             if (scope == nullptr) {
@@ -524,11 +527,8 @@ void CallBackToJSTread(std::shared_ptr<RouterAsyncContext> context)
             }
 
             napi_close_handle_scope(context->env, scope);
-
-            if (work != nullptr) {
-                delete work;
-            }
-        });
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 static napi_value JSRouterEnableAlertBeforeBackPage(napi_env env, napi_callback_info info)
@@ -571,6 +571,7 @@ static napi_value JSRouterEnableAlertBeforeBackPage(napi_env env, napi_callback_
 
     auto context = std::make_shared<RouterAsyncContext>();
     context->env = env;
+    context->instanceId = Container::CurrentId();
     napi_value successFunc = nullptr;
     napi_value failFunc = nullptr;
     napi_value completeFunc = nullptr;

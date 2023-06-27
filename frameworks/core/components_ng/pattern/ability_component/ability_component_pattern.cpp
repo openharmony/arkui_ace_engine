@@ -81,7 +81,7 @@ bool AbilityComponentPattern::OnDirtyLayoutWrapperSwap(
 void AbilityComponentPattern::UpdateWindowRect()
 {
     if (!hasConnectionToAbility_) {
-        LOGW("AbilityComponent has not be connected");
+        LOGD("AbilityComponent has not be connected");
         return;
     }
     auto host = GetHost();
