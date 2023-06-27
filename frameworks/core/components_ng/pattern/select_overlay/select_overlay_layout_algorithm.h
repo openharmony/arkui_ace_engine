@@ -36,7 +36,7 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    static bool CheckInShowArea(const std::shared_ptr<SelectOverlayInfo>& info);
+    static bool CheckInShowArea(const SelectOverlayInfo& info);
 
     const OffsetF& GetDefaultMenuEndOffset() const
     {

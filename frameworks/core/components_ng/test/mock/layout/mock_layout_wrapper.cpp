@@ -77,7 +77,7 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
 // Called to perform layout children.
 void LayoutWrapper::Layout() {}
 
-void LayoutWrapper::RestoreGeoState(int32_t rootDepth) {}
+void LayoutWrapper::RestoreGeoState() {}
 
 void LayoutWrapper::AvoidKeyboard() {}
 

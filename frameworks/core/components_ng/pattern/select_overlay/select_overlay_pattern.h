@@ -58,7 +58,7 @@ public:
             selectOverlayModifier_ = AceType::MakeRefPtr<SelectOverlayModifier>(defaultMenuEndOffset_);
         }
         return MakeRefPtr<SelectOverlayPaintMethod>(
-            selectOverlayModifier_, info_, defaultMenuEndOffset_, hasExtensionMenu_);
+            selectOverlayModifier_, *info_, defaultMenuEndOffset_, hasExtensionMenu_);
     }
 
     const std::shared_ptr<SelectOverlayInfo>& GetSelectOverlayInfo() const

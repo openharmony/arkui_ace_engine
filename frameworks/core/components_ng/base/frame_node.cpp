@@ -1819,6 +1819,10 @@ bool FrameNode::IsContentRoot()
         // so stop traversing if we're beyond that
         return false;
     }
+    // title bar
+    if (GetDepth() == 2 && GetTag() == V2::CONTAINER_MODAL_ETS_TAG) {
+        return true;
+    }
     // page root
     auto parent = GetParent();
     CHECK_NULL_RETURN_NOLOG(parent, false);

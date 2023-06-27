@@ -41,7 +41,7 @@ void RootLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     LayoutWrapper::ApplySafeArea(childInsets_, safeAreaConstraint);
     for (auto&& child : children) {
         // Stage displays app background color and needs to be full screen.
-        if (child->GetHostTag() == V2::STAGE_ETS_TAG) {
+        if (child->GetHostTag() == V2::STAGE_ETS_TAG || child->GetHostTag() == V2::CONTAINER_MODAL_ETS_TAG) {
             child->Measure(layoutConstraint);
         } else {
             child->Measure(safeAreaConstraint);
