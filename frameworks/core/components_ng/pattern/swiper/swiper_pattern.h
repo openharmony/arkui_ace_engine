@@ -508,8 +508,8 @@ private:
     bool isLastIndicatorFocused_ = false;
     int32_t startIndex_ = 0;
     int32_t endIndex_ = 0;
-    int32_t currentIndex_ = 0;
-    int32_t oldIndex_ = 0;
+    int32_t currentIndex_ = -1;
+    int32_t oldIndex_ = -1;
 
     PanDirection panDirection_;
 
