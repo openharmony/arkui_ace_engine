@@ -1920,6 +1920,11 @@ void SwiperPattern::TriggerEventOnFinish(int32_t nextIndex)
             auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
             layoutProperty->UpdateIndexWithoutMeasure(nextIndex);
+            auto pipeline = PipelineContext::GetCurrentContext();
+            if (pipeline) {
+                pipeline->FlushUITasks();
+                pipeline->FlushMessages();
+            }
             FireChangeEvent();
         }
     }
