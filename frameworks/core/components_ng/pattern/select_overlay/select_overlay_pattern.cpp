@@ -402,11 +402,11 @@ bool SelectOverlayPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
         DynamicCast<SelectOverlayLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(selectOverlayLayoutAlgorithm, false);
     defaultMenuEndOffset_ = selectOverlayLayoutAlgorithm->GetDefaultMenuEndOffset();
-    auto meanuWidth = selectOverlayLayoutAlgorithm->GetMenuWidth();
-    if (meanuWidth.has_value()) {
-        meanuWidth_ = meanuWidth.value();
+    auto menuWidth = selectOverlayLayoutAlgorithm->GetMenuWidth();
+    if (menuWidth.has_value()) {
+        menuWidth_ = menuWidth.value();
     }
-    hasExtensitonMenu_ = selectOverlayLayoutAlgorithm->GetHasExtensitonMenu();
+    hasExtensionMenu_ = selectOverlayLayoutAlgorithm->GetHasExtensionMenu();
     return true;
 }
 

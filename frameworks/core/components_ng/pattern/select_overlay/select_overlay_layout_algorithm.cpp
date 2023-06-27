@@ -53,10 +53,10 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             OffsetF(menuContext->GetOffset()->GetX().ConvertToPx(), menuContext->GetOffset()->GetY().ConvertToPx());
     }
     if (!info_->menuInfo.menuIsShow) {
-        hasExtensitonMenu_ = false;
+        hasExtensionMenu_ = false;
         return;
     }
-    hasExtensitonMenu_ = true;
+    hasExtensionMenu_ = true;
     button->GetGeometryNode()->SetMarginFrameOffset(menuOffset);
     button->Layout();
     auto extensionMenuOffset = ComputeExtensionMenuPosition(layoutWrapper, offset);

@@ -34,6 +34,17 @@ bool SafeAreaManager::UpdateSystemSafeArea(const SafeAreaInsets& safeArea)
     return true;
 }
 
+bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight)
+{
+    auto bottom = systemSafeArea_.bottom_.start;
+    SafeAreaInsets::Inset inset { .start = bottom - keyboardHeight, .end = bottom };
+    if (inset == keyboardInset_) {
+        return false;
+    }
+    keyboardInset_ = inset;
+    return true;
+}
+
 SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& opts) const
 {
     SafeAreaInsets res;

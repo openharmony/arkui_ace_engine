@@ -48,9 +48,9 @@ public:
         return menuWidth_;
     }
 
-    bool GetHasExtensitonMenu() const
+    bool GetHasExtensionMenu() const
     {
-        return hasExtensitonMenu_;
+        return hasExtensionMenu_;
     }
 
 private:
@@ -62,7 +62,7 @@ private:
 
     OffsetF defaultMenuEndOffset_;
     std::optional<float> menuWidth_;
-    bool hasExtensitonMenu_ = false;
+    bool hasExtensionMenu_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayLayoutAlgorithm);
 };

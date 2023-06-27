@@ -52,7 +52,7 @@ void SelectOverlayPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 
     auto offset = defaultMenuEndOffset_ + OffsetF(-buttonRadius - right, buttonRadius + top);
     selectOverlayModifier_->SetMenuOptionOffset(offset);
-    selectOverlayModifier_->SetHasExtensitonMenu(hasExtensitonMenu_);
+    selectOverlayModifier_->SetHasExtensitonMenu(hasExtensionMenu_);
 }
 
 void SelectOverlayPaintMethod::DrawHandles(

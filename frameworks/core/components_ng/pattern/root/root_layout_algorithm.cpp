@@ -35,6 +35,8 @@ void RootLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     childInsets_ = pipeline->GetSafeArea();
+    auto manager = pipeline->GetSafeAreaManager();
+    childInsets_.bottom_ = childInsets_.bottom_.Combine(manager->GetKeyboardInset());
     auto safeAreaConstraint = layoutConstraint;
     LayoutWrapper::ApplySafeArea(childInsets_, safeAreaConstraint);
     for (auto&& child : children) {

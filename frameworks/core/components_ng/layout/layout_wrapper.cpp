@@ -212,6 +212,9 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
     CHECK_NULL_VOID(layoutProperty_);
     CHECK_NULL_VOID(geometryNode_);
     CHECK_NULL_VOID(host);
+    // restore to the geometry state after last Layout and before SafeArea expansion and keyboard avoidance
+    RestoreGeoState();
+
     CHECK_NULL_VOID(layoutAlgorithm_);
     if (layoutAlgorithm_->SkipMeasure()) {
         LOGD("%{public}s, depth: %{public}d: the layoutAlgorithm skip measure", host->GetTag().c_str(),
@@ -334,30 +337,16 @@ void LayoutWrapper::Layout()
         host->GetDepth(), geometryNode_->GetFrameOffset().ToString().c_str());
 }
 
-void LayoutWrapper::RestoreGeoState(int32_t rootDepth)
+void LayoutWrapper::RestoreGeoState()
 {
-    std::vector<WeakPtr<FrameNode>> untraversedNodes;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetSafeAreaManager();
     auto&& restoreNodes = manager->GetGeoRestoreNodes();
-
-    for (auto&& nodeWk : restoreNodes) {
-        auto node = nodeWk.Upgrade();
-        if (!node) {
-            continue;
-        }
-        // only restore nodes that are involved in this LayoutTask
-        if (node->GetDepth() >= rootDepth) {
-            auto wrapper = node->GetLayoutWrapper().Upgrade();
-            if (wrapper) {
-                wrapper->geometryNode_->Restore();
-            }
-        } else {
-            untraversedNodes.emplace_back(nodeWk);
-        }
+    if (restoreNodes.find(hostNode_) != restoreNodes.end()) {
+        geometryNode_->Restore();
+        manager->RemoveRestoreNode(hostNode_);
     }
-    manager->SwapGeoRestoreNodes(untraversedNodes);
 }
 
 void LayoutWrapper::AvoidKeyboard()
