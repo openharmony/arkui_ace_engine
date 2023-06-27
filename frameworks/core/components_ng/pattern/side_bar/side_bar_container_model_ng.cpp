@@ -57,6 +57,7 @@ void SideBarContainerModelNG::Pop()
     auto children = sideBarContainerNode->GetChildren();
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE_WITHOUT_BUTTON_AND_DIVIDER) {
         LOGE("SideBarContainerView::Pop children's size is wrong[%{public}zu].", children.size());
+        NG::ViewStackProcessor::GetInstance()->PopContainer();
         return;
     }
 

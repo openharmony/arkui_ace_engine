@@ -103,6 +103,7 @@ private:
     void AutoChangeSideBarWidth(
         LayoutWrapper* layoutWrapper, float parentWidth, float minSideBarWidthPx, float dividerStrokeWidthPx);
     void UpdateDefaultValueByVersion();
+    SideBarPosition GetSideBarPositionWithRtl(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty);
 
     float currentOffset_ = 0.0f;
     float realSideBarWidth_ = 0.0f;

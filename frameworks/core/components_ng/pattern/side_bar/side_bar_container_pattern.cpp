@@ -53,7 +53,7 @@ void SideBarContainerPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToFrame(true);
+    host->GetRenderContext()->SetClipToBounds(true);
 }
 
 void SideBarContainerPattern::OnUpdateShowSideBar(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty)
@@ -270,7 +270,7 @@ void SideBarContainerPattern::UpdateAnimDir()
 {
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
+    auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
 
     switch (sideBarStatus_) {
         case SideBarStatus::HIDDEN:
@@ -362,7 +362,7 @@ void SideBarContainerPattern::DoSideBarAnimation()
 
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
+    auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
     bool isSideBarStart = sideBarPosition == SideBarPosition::START;
 
     FireChangeEvent(sideBarStatus_ == SideBarStatus::HIDDEN);
@@ -513,7 +513,7 @@ void SideBarContainerPattern::UpdateResponseRegion(const RefPtr<SideBarContainer
     auto dragRegionHeight = layoutAlgorithm->GetRealSideBarHeight();
     auto dragRectOffset = layoutAlgorithm->GetSideBarOffset();
 
-    auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
+    auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
     if (sideBarPosition == SideBarPosition::START) {
         dragRectOffset.SetX(dragRectOffset.GetX() + halfRealDividerWidth + realSideBarWidth_ - halfDragRegionWidth);
     } else {
@@ -618,7 +618,7 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
     auto minSideBarWidthPx = ConvertToPx(minSideBarWidth, scaleProperty, parentWidth).value_or(0);
     auto maxSideBarWidthPx = ConvertToPx(maxSideBarWidth, scaleProperty, parentWidth).value_or(0);
 
-    auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
+    auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
     bool isSideBarStart = sideBarPosition == SideBarPosition::START;
 
     auto sideBarLine = preSidebarWidth_ + (isSideBarStart ? xOffset : -xOffset);
@@ -767,5 +767,16 @@ void SideBarContainerPattern::HandleMouseEvent(const MouseInfo& info)
     } else if (info.GetAction() == MouseAction::RELEASE) {
         DoControlButtonHoverAnimation(imgRenderContext, PRESS_OPACITY, HOVER_OPACITY, PRESS_DURATION, Curves::SHARP);
     }
+}
+
+SideBarPosition SideBarContainerPattern::GetSideBarPositionWithRtl(
+    const RefPtr<SideBarContainerLayoutProperty>& layoutProperty)
+{
+    auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
+    if (layoutProperty->GetLayoutDirection() == TextDirection::RTL) {
+        sideBarPosition = (sideBarPosition == SideBarPosition::START)
+                            ? SideBarPosition::END : SideBarPosition::START;
+    }
+    return sideBarPosition;
 }
 } // namespace OHOS::Ace::NG
