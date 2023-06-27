@@ -167,11 +167,20 @@ template("declarative_js_engine_ark") {
     if (is_cross_platform_build) {
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
       deps += [ "$ark_ets_path:libark_jsruntime_static" ]
+      public_deps = [ "//foundation/arkui/napi:ace_napi" ]
     } else {
-      external_deps += [ "ets_runtime:libark_jsruntime" ]
+      external_deps += [
+        "ets_runtime:libark_jsruntime",
+        "napi:ace_napi",
+        "napi:ace_napi_ark",
+      ]
     }
 
     deps = []
+    if (is_cross_platform_build) {
+      deps += [ "//foundation/arkui/napi:ace_napi_ark" ]
+    }
+
     if (defined(config.build_for_preview) && config.build_for_preview) {
       deps += [ ":gen_obj_src_abc_mock_system_plugin" ]
       sources += [ "utils/jsi_module_searcher.cpp" ]
@@ -192,10 +201,6 @@ template("declarative_js_engine_ark") {
         "$ace_root/frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.cpp",
       ]
     }
-
-    # if napi support
-    deps += [ "//foundation/arkui/napi:ace_napi_ark" ]
-    public_deps = [ "//foundation/arkui/napi:ace_napi" ]
 
     deps += [
       ":gen_obj_src_abc_enum_style",

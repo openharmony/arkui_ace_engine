@@ -19,8 +19,13 @@ ohos_shared_library("drawabledescriptor") {
 
   sources = [ "drawable_register.cpp" ]
 
+  deps = [
+    "$ace_root/interfaces/inner_api/drawable_descriptor:drawable_descriptor",
+  ]
+
   external_deps = [
-    "ace_engine:drawable_descriptor",
+    "graphic_standard:2d_graphics",
+    "graphic_standard:librender_service_client",
     "hiviewdfx_hilog_native:libhilog",
     "multimedia_image_framework:image",
     "multimedia_image_framework:image_native",
