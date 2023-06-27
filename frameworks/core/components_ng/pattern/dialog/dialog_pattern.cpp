@@ -561,6 +561,7 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     auto textNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textNode, nullptr);
+    textNode->GetOrCreateFocusHub()->SetFocusable(true);
     auto textProps = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, nullptr);
     textProps->UpdateContent(text);
