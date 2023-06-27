@@ -62,6 +62,7 @@ constexpr float COLUMN_WIDTH = COLUMN_CHILD_WIDTH * CHILD_NUMBER;
 constexpr float COLUMN_HEIGHT = COLUMN_CHILD_HEIGHT * CHILD_NUMBER;
 constexpr int32_t BAR_EXPAND_DURATION = 150; // 150ms, scroll bar width expands from 4dp to 8dp
 constexpr int32_t BAR_SHRINK_DURATION = 250; // 250ms, scroll bar width shrinks from 8dp to 4dp
+const static int32_t PLATFORM_VERSION_TEN = 10;
 } // namespace
 
 class ScrollTestNg : public testing::Test {
@@ -1990,6 +1991,48 @@ HWTEST_F(ScrollTestNg, Pattern011, TestSize.Level1)
     scrollFadeEffect->fadePainter_->direction_ = OverScrollDirection::RIGHT;
     scrollFadeEffect->Paint(rsCanvas, SizeF(0, 0), offset);
     SUCCEED();
+}
+
+/**
+ * @tc.name: Pattern012
+ * @tc.desc: Test CalcReservedHeight()
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, Pattern012, TestSize.Level1)
+{
+    CreateScroll();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    pipelineContext->SetMinPlatformVersion(PLATFORM_VERSION_TEN + 1);
+    auto scrollBar = pattern_->GetScrollBar();
+
+    scrollBar->SetPositionMode(PositionMode::LEFT);
+    scrollBar->SetNormalWidth(Dimension(1)); // call CalcReservedHeight;
+    EXPECT_EQ(scrollBar->startReservedHeight_, Dimension(0.0));
+    EXPECT_EQ(scrollBar->endReservedHeight_, Dimension(0.0));
+
+    BorderRadiusProperty borderRadiusProperty;
+    float radius = 13.f;
+    borderRadiusProperty.radiusTopRight = std::make_optional<Dimension>(radius);
+    borderRadiusProperty.radiusBottomRight = std::make_optional<Dimension>(radius);
+    scrollBar->SetHostBorderRadius(borderRadiusProperty);
+    scrollBar->SetPadding(Edge(1, 1, 1, 1));
+    scrollBar->SetPositionMode(PositionMode::RIGHT);
+    scrollBar->SetNormalWidth(Dimension(2)); // call CalcReservedHeight;
+    EXPECT_EQ(scrollBar->startReservedHeight_, Dimension(14.5))
+        << "startReservedHeight_: " << scrollBar->startReservedHeight_.ConvertToPx();
+    EXPECT_EQ(scrollBar->endReservedHeight_, Dimension(14.5))
+        << "endReservedHeight_: " << scrollBar->endReservedHeight_.ConvertToPx();
+
+    borderRadiusProperty.radiusBottomLeft = std::make_optional<Dimension>(radius);
+    borderRadiusProperty.radiusBottomRight = std::make_optional<Dimension>(radius);
+    scrollBar->SetHostBorderRadius(borderRadiusProperty);
+    scrollBar->SetPadding(Edge(1, 1, 1, 1));
+    scrollBar->SetPositionMode(PositionMode::BOTTOM);
+    scrollBar->SetNormalWidth(Dimension(6)); // call CalcReservedHeight;
+    EXPECT_EQ(scrollBar->startReservedHeight_, Dimension(11.25))
+        << "startReservedHeight_: " << scrollBar->startReservedHeight_.ConvertToPx();
+    EXPECT_EQ(scrollBar->endReservedHeight_, Dimension(11.25))
+        << "endReservedHeight_: " << scrollBar->endReservedHeight_.ConvertToPx();
 }
 
 /**
