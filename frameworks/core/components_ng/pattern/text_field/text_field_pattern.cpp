@@ -1032,7 +1032,7 @@ void TextFieldPattern::HandleFocusEvent()
             }
         } else {
             caretUpdateType_ = CaretUpdateType::EVENT;
-            needToRequestKeyboardInner_ = true;
+            needToRequestKeyboardInner_ = dragRecipientStatus_ == DragStatus::DRAGGING ? false : true;
         }
     }
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
@@ -1707,6 +1707,8 @@ void TextFieldPattern::InitDragDropEvent()
         if (pattern->dragStatus_ == DragStatus::ON_DROP) {
             pattern->dragStatus_ = DragStatus::NONE;
         }
+
+        pattern->dragRecipientStatus_ = DragStatus::DRAGGING;
     };
     eventHub->SetOnDragEnter(std::move(onDragEnter));
 
@@ -1719,9 +1721,6 @@ void TextFieldPattern::InitDragDropEvent()
         Offset offset = Offset(touchX, touchY) - Offset(pattern->textRect_.GetX(), pattern->textRect_.GetY()) -
                         Offset(pattern->parentGlobalOffset_.GetX(), pattern->parentGlobalOffset_.GetY());
         auto position = pattern->ConvertTouchOffsetToCaretPosition(offset);
-        if (pattern->textEditingValue_.caretPosition == position) {
-            return;
-        }
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
         auto focusHub = host->GetOrCreateFocusHub();
@@ -1740,6 +1739,7 @@ void TextFieldPattern::InitDragDropEvent()
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->StopTwinkling();
+        pattern->dragRecipientStatus_ = DragStatus::NONE;
     };
     eventHub->SetOnDragLeave(std::move(onDragLeave));
 
@@ -1780,6 +1780,8 @@ void TextFieldPattern::InitDragDropEvent()
         auto data = event->GetData();
         CHECK_NULL_VOID(data);
         std::string str = UdmfClient::GetInstance()->GetSingleTextRecord(data);
+        pattern->needToRequestKeyboardInner_ = true;
+        pattern->dragRecipientStatus_ = DragStatus::NONE;
         if (pattern->dragStatus_ == DragStatus::NONE) {
             pattern->InsertValue(str);
         } else {
