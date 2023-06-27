@@ -74,6 +74,11 @@ abstract class ViewPU extends NativeViewPartialUpdate
   protected localStoragebackStore_: LocalStorage = undefined;
 
   protected get localStorage_() {
+    if (!this.localStoragebackStore_ && this.parent_) {
+      stateMgmtConsole.debug(`${this.constructor.name} get localStorage_ : Using LocalStorage instance of the parent View.`);
+      this.localStoragebackStore_ = this.parent_.localStorage_;
+    }
+
     if (!this.localStoragebackStore_) {
       stateMgmtConsole.info(`${this.constructor.name} is accessing LocalStorage without being provided an instance. Creating a default instance.`);
       this.localStoragebackStore_ = new LocalStorage({ /* emty */ });
@@ -119,9 +124,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
     this.localStoragebackStore_ = undefined;
     if (parent) {
       // this View is not a top-level View
-      stateMgmtConsole.debug(`${this.constructor.name} constructor: Using LocalStorage instance of the parent View.`);
       this.setCardId(parent.getCardId());
-      this.localStorage_ = parent.localStorage_;
+      // Call below will set this.parent_ to parent as well
       parent.addChild(this);
     } else if (localStorage) {
       this.localStorage_ = localStorage;
@@ -161,6 +165,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     if (this.parent_) {
       this.parent_.removeChild(this);
     }
+    this.localStoragebackStore_ = undefined;
   }
 
   private setParent(parent: ViewPU) {

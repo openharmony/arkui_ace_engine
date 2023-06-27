@@ -3939,9 +3939,8 @@ class ViewPU extends NativeViewPartialUpdate {
         this.localStoragebackStore_ = undefined;
         if (parent) {
             // this View is not a top-level View
-            
             this.setCardId(parent.getCardId());
-            this.localStorage_ = parent.localStorage_;
+            // Call below will set this.parent_ to parent as well
             parent.addChild(this);
         }
         else if (localStorage) {
@@ -3952,6 +3951,10 @@ class ViewPU extends NativeViewPartialUpdate {
         
     }
     get localStorage_() {
+        if (!this.localStoragebackStore_ && this.parent_) {
+            
+            this.localStoragebackStore_ = this.parent_.localStorage_;
+        }
         if (!this.localStoragebackStore_) {
             
             this.localStoragebackStore_ = new LocalStorage({ /* emty */});
@@ -3990,6 +3993,7 @@ class ViewPU extends NativeViewPartialUpdate {
         if (this.parent_) {
             this.parent_.removeChild(this);
         }
+        this.localStoragebackStore_ = undefined;
     }
     setParent(parent) {
         if (this.parent_ && parent) {
