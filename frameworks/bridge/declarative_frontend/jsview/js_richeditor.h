@@ -25,6 +25,11 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
     static void SetOnReady(const JSCallbackInfo& args);
+    static void SetOnSelect(const JSCallbackInfo& args);
+    static JSRef<JSVal> CreateJSSelection(const RichEditorSelection& selectInfo);
+    static JSRef<JSObject> CreateJSSpanResultObject(const ResultObject& resultObject);
+    static JSRef<JSObject> CreateJSTextStyleResult(const TextStyleResult& textStyleResult);
+    static JSRef<JSObject> CreateJSImageStyleResult(const ImageStyleResult& imageStyleResult);
 };
 
 class JSRichEditorController final : public Referenced {
@@ -59,6 +64,8 @@ public:
     void SetCaretOffset(const JSCallbackInfo& args);
     void GetCaretOffset(const JSCallbackInfo& args);
     void UpdateSpanStyle(const JSCallbackInfo& info);
+    void GetSpansInfo(const JSCallbackInfo& args);
+    JSRef<JSVal> CreateCreateJSSpansInfo(const RichEditorSelection& info);
 
 private:
     WeakPtr<RichEditorControllerBase> controllerWeak_;

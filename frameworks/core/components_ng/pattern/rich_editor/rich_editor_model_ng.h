@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_RICH_EDITOR_MODEL_NG_H
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT RichEditorModelNG : public OHOS::Ace::RichEditorModel {
@@ -24,6 +25,7 @@ public:
     void Create() override;
     RefPtr<RichEditorControllerBase> GetRichEditorController() override;
     void SetOnReady(std::function<void()>&& func) override;
+    void SetOnSelect(std::function<void(const BaseEventInfo*)>&& func) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_RICH_EDITOR_MODEL_NG_H

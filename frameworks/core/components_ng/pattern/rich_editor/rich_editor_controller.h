@@ -31,6 +31,7 @@ public:
     bool SetCaretOffset(int32_t caretPosition) override;
     void UpdateSpanStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle) override;
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle) override;
+    RichEditorSelection GetSpansInfo(int32_t start, int32_t end) override;
 
 private:
     WeakPtr<Pattern> pattern_;

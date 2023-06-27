@@ -23,6 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
 
 namespace OHOS::Ace {
 struct ImageSpanSize {
@@ -110,6 +111,7 @@ public:
     virtual bool SetCaretOffset(int32_t caretPosition) = 0;
     virtual void UpdateSpanStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle) = 0;
     virtual void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle) = 0;
+    virtual RichEditorSelection GetSpansInfo(int32_t start, int32_t end) = 0;
 };
 
 class ACE_EXPORT RichEditorModel {
@@ -119,6 +121,7 @@ public:
     virtual void Create() = 0;
     virtual RefPtr<RichEditorControllerBase> GetRichEditorController() = 0;
     virtual void SetOnReady(std::function<void()>&& func) = 0;
+    virtual void SetOnSelect(std::function<void(const BaseEventInfo*)>&& func) = 0;
 
 private:
     static std::unique_ptr<RichEditorModel> instance_;
