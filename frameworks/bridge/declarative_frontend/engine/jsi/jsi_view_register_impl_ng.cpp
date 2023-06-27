@@ -230,6 +230,13 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
     // update page life cycle function.
     auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
     CHECK_NULL_VOID(pagePattern);
+    // Register RenderDone callback to jsView so that js view can notify pagePattern the render function has been
+    // finish. The onPageShow life cycle must be after the InitialRender function execution.
+    view->RegisterRenderDoneCallback([weak = AceType::WeakClaim(AceType::RawPtr(pagePattern))]() {
+        auto pagePattern = weak.Upgrade();
+        CHECK_NULL_VOID(pagePattern);
+        pagePattern->MarkRenderDone();
+    });
     pagePattern->SetOnPageShow([weak = Referenced::WeakClaim(view)]() {
         auto view = weak.Upgrade();
         if (view) {
