@@ -236,8 +236,12 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
     CreateChildrenConstraint(maxSize, layoutProperty->CreatePaddingAndBorder());
     auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto windowManager = context->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    auto mode = windowManager->GetWindowMode();
     auto sizeType = GridContainerUtils::ProcessGridSizeType(
-        layoutProperty->GetBreakPointsValue(), Size(maxSize.Width(), maxSize.Height()));
+        layoutProperty->GetBreakPointsValue(), Size(maxSize.Width(), maxSize.Height()), mode);
     if (hostLayoutProperty->GetSizeTypeValue(V2::GridSizeType::UNDEFINED) != sizeType) {
         auto sizeTypeString = ConvertSizeTypeToString(sizeType);
         layoutWrapper->GetHostNode()->GetEventHub<GridRowEventHub>()->FireChangeEvent(sizeTypeString);
