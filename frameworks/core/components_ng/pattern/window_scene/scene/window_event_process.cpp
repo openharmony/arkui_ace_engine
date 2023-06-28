@@ -19,8 +19,6 @@
 #include "pointer_event.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-} // namespace
 
 WindowEventProcess::WindowEventProcess() {}
 WindowEventProcess::~WindowEventProcess() {}
@@ -47,13 +45,13 @@ void WindowEventProcess::ProcessWindowEvent(const RefPtr<WindowNode>& windowNode
             MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW;
         lastPointEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
         DispatchPointerEvent(lastWindowNode, lastPointEvent_);
-        lastWeakWindowNode_ = windowNode;
-        lastPointEvent_ = enterEvent;
 
         dispatchAction = isDrag ? MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW :
             MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW;
         enterEvent->SetPointerAction(dispatchAction);
         DispatchPointerEvent(windowNode, enterEvent);
+        lastWeakWindowNode_ = windowNode;
+        lastPointEvent_ = enterEvent;
     }
 }
 
