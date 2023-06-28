@@ -58,20 +58,16 @@ public:
         return { FocusType::SCOPE, true };
     }
 
-    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
-    {
-        auto property = GetLayoutProperty<TabsLayoutProperty>();
-        if (!property) {
-            return {};
-        }
-        bool isVertical = true;
-        if (property->GetAxis().has_value()) {
-            isVertical = property->GetAxis().value() == Axis::HORIZONTAL;
-        }
-        return { isVertical, true, ScopeType::FLEX };
-    }
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override;
 
     void SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& event);
+
+    void SetOnTabBarClickEvent(std::function<void(const BaseEventInfo*)>&& event);
+
+    ChangeEventPtr GetTabBarClickEvent()
+    {
+        return onTabBarClickEvent_;
+    }
 
     void OnModifyDone() override;
 	
@@ -84,8 +80,10 @@ public:
 private:
     void OnAttachToFrameNode() override;
     void OnUpdateShowDivider();
+    WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
 
     ChangeEventPtr onChangeEvent_;
+    ChangeEventPtr onTabBarClickEvent_;
     ChangeEventPtr onIndexChangeEvent_;
 };
 
