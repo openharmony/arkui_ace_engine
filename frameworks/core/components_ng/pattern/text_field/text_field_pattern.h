@@ -814,6 +814,21 @@ public:
     {
         ++drawOverlayFlag_;
     }
+
+    void MarkContentChange()
+    {
+        contChange_ = true;
+    }
+
+    void ResetContChange()
+    {
+        contChange_ = false;
+    }
+
+    bool GetContChange()
+    {
+        return contChange_;
+    }
     std::string GetShowResultImageSrc() const;
     std::string GetHideResultImageSrc() const;
     void OnAttachToFrameNode() override
@@ -967,6 +982,7 @@ private:
     Offset lastTouchOffset_;
     PaddingPropertyF utilPadding_;
     OffsetF rightClickOffset_;
+    OffsetF offsetDifference_;
 
     bool setBorderFlag_ = true;
     BorderWidthProperty lastDiffBorderWidth_;
@@ -995,6 +1011,7 @@ private:
     bool needToRequestKeyboardInner_ = false;
     bool needToRequestKeyboardOnFocus_ = false;
     bool isTransparent_ = false;
+    bool contChange_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 
@@ -1033,7 +1050,8 @@ private:
     int32_t dragTextStart_ = 0;
     int32_t dragTextEnd_ = 0;
     RefPtr<FrameNode> dragNode_;
-    DragStatus dragStatus_ = DragStatus::NONE;
+    DragStatus dragStatus_ = DragStatus::NONE; // The status of the dragged initiator
+    DragStatus dragRecipientStatus_ = DragStatus::NONE; // Drag the recipient's state
     std::vector<std::string> dragContents_;
     RefPtr<Clipboard> clipboard_;
     std::vector<TextEditingValueNG> operationRecords_;

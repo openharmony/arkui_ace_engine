@@ -148,6 +148,7 @@ template("declarative_js_engine") {
       "engine/functions/js_on_area_change_function.cpp",
       "engine/functions/js_page_transition_function.cpp",
       "engine/functions/js_pan_function.cpp",
+      "engine/functions/js_swiper_function.cpp",
       "engine/functions/js_touch_function.cpp",
       "engine/functions/js_webview_function.cpp",
       "engine/js_types.cpp",
@@ -185,6 +186,7 @@ template("declarative_js_engine") {
       "jsview/js_flex.cpp",
       "jsview/js_flex_impl.cpp",
       "jsview/js_foreach.cpp",
+      "jsview/js_form_link.cpp",
       "jsview/js_gauge.cpp",
       "jsview/js_gesture.cpp",
       "jsview/js_grid.cpp",
@@ -527,7 +529,10 @@ template("declarative_js_engine") {
         configs += [ "//foundation/multimedia/image_framework/interfaces/innerkits:image_external_config" ]
       }
     } else {
-      external_deps += [ "ets_runtime:libark_jsruntime" ]
+      external_deps += [
+        "ets_runtime:libark_jsruntime",
+        "napi:ace_napi",
+      ]
     }
 
     if (platform == "windows" || platform == "mac" || platform == "linux") {
@@ -597,6 +602,7 @@ template("declarative_js_engine_ng") {
       "engine/functions/js_on_area_change_function.cpp",
       "engine/functions/js_page_transition_function.cpp",
       "engine/functions/js_pan_function.cpp",
+      "engine/functions/js_swiper_function.cpp",
       "engine/functions/js_touch_function.cpp",
       "engine/functions/js_webview_function.cpp",
       "engine/js_types.cpp",
@@ -640,6 +646,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_flex.cpp",
       "jsview/js_flex_impl.cpp",
       "jsview/js_foreach.cpp",
+      "jsview/js_form_link.cpp",
       "jsview/js_gauge.cpp",
       "jsview/js_gesture.cpp",
       "jsview/js_grid.cpp",
@@ -812,7 +819,10 @@ template("declarative_js_engine_ng") {
         configs += [ "//foundation/multimedia/image_framework/interfaces/innerkits:image_external_config" ]
       }
     } else {
-      external_deps += [ "ets_runtime:libark_jsruntime" ]
+      external_deps += [
+        "ets_runtime:libark_jsruntime",
+        "napi:ace_napi",
+      ]
     }
 
     deps += [ "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform" ]

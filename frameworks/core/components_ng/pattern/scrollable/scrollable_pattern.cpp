@@ -103,9 +103,7 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
     }
     if (source == SCROLL_FROM_START) {
         SetParentScrollable();
-        if (scrollBarProxy_) {
-            scrollBarProxy_->StopScrollBarAnimator();
-        }
+        StopScrollBarAnimatorByProxy();
     }
     return true;
 }
@@ -124,9 +122,7 @@ void ScrollablePattern::OnScrollEnd()
         scrollBar_->SetDriving(false);
         scrollBar_->OnScrollEnd();
     }
-    if (scrollBarProxy_) {
-        scrollBarProxy_->StartScrollBarAnimator();
-    }
+    StartScrollBarAnimatorByProxy();
 }
 
 void ScrollablePattern::AddScrollEvent()
@@ -172,6 +168,13 @@ void ScrollablePattern::AddScrollEvent()
     };
     scrollable->SetOverScrollOffsetCallback(std::move(func));
     scrollable->SetNestedScrollOptions(nestedScroll_);
+
+    auto scrollSnap = [weak = WeakClaim(this)](double targetOffset, double velocity) -> bool {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->OnScrollSnapCallback(targetOffset, velocity);
+    };
+    scrollable->SetOnScrollSnapCallback(scrollSnap);
 }
 
 void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
@@ -267,7 +270,9 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
             scrollBar_->MarkNeedRender();
             scrollBar_.Reset();
         }
-    } else if (!scrollBar_) {
+        return;
+    }
+    if (!scrollBar_) {
         scrollBar_ = AceType::MakeRefPtr<ScrollBar>(displayMode);
         // set the scroll bar style
         if (GetAxis() == Axis::HORIZONTAL) {
@@ -276,8 +281,17 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
         RegisterScrollBarEventTask();
     } else if (scrollBar_->GetDisplayMode() != displayMode) {
         scrollBar_->SetDisplayMode(displayMode);
-    } else {
-        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID_NOLOG(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID_NOLOG(renderContext);
+    if (renderContext->HasBorderRadius()) {
+        auto borderRadius = renderContext->GetBorderRadius().value();
+        if (!(borderRadius == scrollBar_->GetHostBorderRadius())) {
+            scrollBar_->SetHostBorderRadius(borderRadius);
+            scrollBar_->CalcReservedHeight();
+        }
     }
 }
 

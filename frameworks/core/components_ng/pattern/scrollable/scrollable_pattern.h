@@ -151,6 +151,25 @@ public:
         return { 0, 0 };
     }
 
+    virtual bool OnScrollSnapCallback(double targetOffset, double velocity)
+    {
+        return false;
+    }
+
+    void StartScrollBarAnimatorByProxy()
+    {
+        if (scrollBarProxy_) {
+            scrollBarProxy_->StartScrollBarAnimator();
+        }
+    }
+
+    void StopScrollBarAnimatorByProxy()
+    {
+        if (scrollBarProxy_) {
+            scrollBarProxy_->StopScrollBarAnimator();
+        }
+    }
+
 protected:
     RefPtr<ScrollBar> GetScrollBar() const
     {

@@ -15,40 +15,9 @@
 
 #include "core/components_ng/pattern/window_scene/scene/window_node.h"
 
-#include "pointer_event.h"
-
-#include "adapter/ohos/entrance/mmi_event_convertor.h"
-#include "base/utils/utils.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-HitTestResult WindowNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-    const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
-{
-    auto rectWithTransform = GetPaintRectWithTransform();
-    if (!rectWithTransform.IsInRegion(parentLocalPoint)) {
-        return HitTestResult::OUT_OF_REGION;
-    }
-    auto context = GetContext();
-    CHECK_NULL_RETURN(context, HitTestResult::BUBBLING);
-    DispatchPointerEvent(touchRestrict.touchEvent, rectWithTransform);
-    auto callback = [weak = WeakClaim(this), rectWithTransform](const TouchEvent& point) {
-        auto windowNode = weak.Upgrade();
-        CHECK_NULL_VOID(windowNode);
-        windowNode->DispatchPointerEvent(point, rectWithTransform);
-    };
-    context->AddUIExtensionTouchEventCallback(touchRestrict.touchEvent.id, callback);
-    return HitTestResult::BUBBLING;
-}
-
-void WindowNode::DispatchPointerEvent(const TouchEvent& point, const RectF& rectWithTransform) const
-{
-    auto selfGlobalOffset = GetTransformRelativeOffset();
-    auto pointerEvent = Platform::ConvertPointerEvent(selfGlobalOffset, point, GetTransformScale());
-    GetPattern<WindowPattern>()->DispatchPointerEvent(pointerEvent);
-}
-
 RefPtr<WindowNode> WindowNode::GetOrCreateWindowNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {

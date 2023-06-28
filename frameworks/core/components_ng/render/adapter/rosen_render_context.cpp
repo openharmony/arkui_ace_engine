@@ -15,6 +15,8 @@
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
+#include <algorithm>
+
 #include "include/utils/SkParsePath.h"
 #include "render_service_base/include/property/rs_properties_def.h"
 #include "render_service_client/core/modifier/rs_property_modifier.h"
@@ -256,7 +258,14 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
         return;
     }
     rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
-    rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+    if (overrideContentRect_.has_value()) {
+        // arkui's contentSize corresponds to rosen's frameSize
+        rsNode_->SetFrame(paintRect.GetX() + overrideContentRect_->GetX(),
+            paintRect.GetY() + overrideContentRect_->GetY(), overrideContentRect_->Width(),
+            overrideContentRect_->Height());
+    } else {
+        rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+    }
     if (!isSynced_) {
         isSynced_ = true;
         auto borderRadius = GetBorderRadius();
@@ -264,7 +273,6 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
             OnBorderRadiusUpdate(borderRadius.value());
         }
     }
-    SetPivot(0.5f, 0.5f); // default pivot is center
 
     if (firstTransitionIn_) {
         // need to perform transitionIn early so not influence the following SetPivot
@@ -1258,7 +1266,7 @@ void RosenRenderContext::GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddi
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     auto frameNodeParent = frameNode->GetAncestorNodeOfFrame();
-    CHECK_NULL_VOID(frameNodeParent);
+    CHECK_NULL_VOID_NOLOG(frameNodeParent);
     auto layoutProperty = frameNodeParent->GetLayoutProperty();
     if (layoutProperty && layoutProperty->GetPaddingProperty()) {
         parentPaddingLeft =
@@ -1281,7 +1289,13 @@ void RosenRenderContext::SetPositionToRSNode()
         return;
     }
     rsNode_->SetBounds(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
-    rsNode_->SetFrame(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+    if (overrideContentRect_.has_value()) {
+        // arkui's contentSize corresponds to rosen's frameSize
+        rsNode_->SetFrame(rect.GetX() + overrideContentRect_->GetX(), rect.GetY() + overrideContentRect_->GetY(),
+            overrideContentRect_->Width(), overrideContentRect_->Height());
+    } else {
+        rsNode_->SetFrame(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+    }
 }
 
 void RosenRenderContext::OnPositionUpdate(const OffsetT<Dimension>& /*value*/)
@@ -1461,7 +1475,7 @@ void RosenRenderContext::ClearFocusState()
     CHECK_NULL_VOID(rsNode_);
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    CHECK_NULL_VOID(focusStateModifier_);
+    CHECK_NULL_VOID_NOLOG(focusStateModifier_);
     rsNode_->RemoveModifier(focusStateModifier_);
     RequestNextFrame();
 }
@@ -1900,8 +1914,8 @@ void RosenRenderContext::OnLinearGradientBlurUpdate(const NG::LinearGradientBlur
 
     CHECK_NULL_VOID(rsNode_);
     std::shared_ptr<Rosen::RSLinearGradientBlurPara> rsLinearGradientBlurPara(
-        std::make_shared<Rosen::RSLinearGradientBlurPara>(blurRadius, blurPara.fractionStops_,
-                                            static_cast<Rosen::GradientDirection>(blurPara.direction_)));
+        std::make_shared<Rosen::RSLinearGradientBlurPara>(
+            blurRadius, blurPara.fractionStops_, static_cast<Rosen::GradientDirection>(blurPara.direction_)));
 
     rsNode_->SetLinearGradientBlurPara(rsLinearGradientBlurPara);
     RequestNextFrame();
@@ -2205,6 +2219,23 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
         const int32_t pageTransitionDuration = 300;
         option.SetCurve(Curves::LINEAR);
         option.SetDuration(pageTransitionDuration);
+#ifdef QUICK_PUSH_TRANSITION
+        auto pipeline = PipelineBase::GetCurrentContext();
+        if (pipeline) {
+            const int32_t nanoToMilliSeconds = 1000000;
+            const int32_t minTransitionDuration = pageTransitionDuration / 2;
+            const int32_t frameDelayTime = 32;
+            int32_t startDelayTime =
+                static_cast<int32_t>(pipeline->GetTimeFromExternalTimer() - pipeline->GetLastTouchTime()) /
+                nanoToMilliSeconds;
+            startDelayTime = std::max(0, startDelayTime);
+            int32_t delayedDuration = pageTransitionDuration > startDelayTime ? pageTransitionDuration - startDelayTime
+                                                                              : pageTransitionDuration;
+            delayedDuration = std::max(minTransitionDuration, delayedDuration - frameDelayTime);
+            LOGI("Use quick push delayedDuration:%{public}d", delayedDuration);
+            option.SetDuration(delayedDuration);
+        }
+#endif
     }
     const auto& scaleOptions = effect->GetScaleEffect();
     const auto& translateOptions = effect->GetTranslateEffect();
@@ -2319,23 +2350,9 @@ void RosenRenderContext::SetBounds(float positionX, float positionY, float width
     rsNode_->SetBounds(positionX, positionY, width, height);
 }
 
-void RosenRenderContext::SetFrameForCanvas()
+void RosenRenderContext::SetOverrideContentRect(const std::optional<RectF>& rect)
 {
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(rsNode_);
-    auto rect = AdjustPaintRect();
-    if (!rect.GetSize().IsPositive()) {
-        return;
-    }
-    auto contentRect = frameNode->GetGeometryNode()->GetContentRect();
-    if (!contentRect.GetSize().IsPositive()) {
-        LOGD("content size is invalid");
-        return;
-    }
-    contentRect.SetLeft(contentRect.GetX() + rect.GetX());
-    contentRect.SetTop(contentRect.GetY() + rect.GetY());
-    rsNode_->SetFrame(contentRect.GetX(), contentRect.GetY(), contentRect.Width(), contentRect.Height());
+    overrideContentRect_ = rect;
 }
 
 void RosenRenderContext::ClearDrawCommands()

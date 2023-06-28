@@ -25,6 +25,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_proxy.h"
+#include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 
@@ -39,7 +40,8 @@ public:
     ~SelectOverlayManager() override = default;
 
     // Create and display selection pop-ups.
-    RefPtr<SelectOverlayProxy> CreateAndShowSelectOverlay(const SelectOverlayInfo& info);
+    RefPtr<SelectOverlayProxy> CreateAndShowSelectOverlay(
+        const SelectOverlayInfo& info, const WeakPtr<SelectionHost>& host);
 
     // Destroy the pop-up interface and delete the pop-up information.
     void DestroySelectOverlay(const RefPtr<SelectOverlayProxy>& proxy);
@@ -55,9 +57,12 @@ public:
     bool IsSameSelectOverlayInfo(const SelectOverlayInfo& info);
 
 private:
+    void DestroyHelper(const RefPtr<FrameNode>& overlay);
+
     WeakPtr<FrameNode> rootNodeWeak_;
 
     WeakPtr<FrameNode> selectOverlayItem_;
+    WeakPtr<SelectionHost> host_;
 
     SelectOverlayInfo selectOverlayInfo_;
 

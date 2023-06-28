@@ -279,6 +279,9 @@ void UObject::WriteDouble(double value)
 
 void UObject::WriteString(const std::string& value)
 {
+    if (value.empty()) {
+        return;
+    }
     if (memcpy_s(buffer_, bufferLen_ - offset_, value.c_str(), value.length()) != 0) {
         LOGE("memcpy overflow.");
         return;

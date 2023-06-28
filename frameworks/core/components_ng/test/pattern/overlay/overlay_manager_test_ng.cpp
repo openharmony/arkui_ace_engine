@@ -23,7 +23,11 @@
 
 #define private public
 #define protected public
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
+
 #include "base/geometry/ng/offset_t.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/toast/toast_theme.h"
@@ -32,8 +36,10 @@
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_paint_method.h"
@@ -42,12 +48,11 @@
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "test/mock/base/mock_task_executor.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -55,6 +60,9 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr MenuType TYPE = MenuType::MENU;
 const OffsetF MENU_OFFSET(10.0, 10.0);
+const std::string MESSAGE = "hello world";
+const std::string BOTTOM = "test";
+constexpr int32_t DURATION = 2;
 } // namespace
 class OverlayManagerTestNg : public testing::Test {
 public:
@@ -70,6 +78,9 @@ protected:
 void OverlayManagerTestNg::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
+    RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<Pattern>());
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    MockPipelineBase::GetCurrent()->stageManager_ = stageManager;
 }
 void OverlayManagerTestNg::TearDownTestCase()
 {
@@ -531,6 +542,11 @@ HWTEST_F(OverlayManagerTestNg, PopupTest002, TestSize.Level1)
      */
     overlayManager->HideAllPopups();
     EXPECT_FALSE(overlayManager->popupMap_.empty());
+    /**
+     * @tc.steps: step4. call RemoveOverlay when childCount is 2
+     * @tc.expected: remove successfully
+     */
+    EXPECT_TRUE(overlayManager->RemoveOverlay(false));
 }
 /**
  * @tc.name: PopupTest003
@@ -734,5 +750,213 @@ HWTEST_F(OverlayManagerTestNg, MenuTest002, TestSize.Level1)
     overlayManager->HideAllMenus();
     overlayManager->CleanMenuInSubWindow();
     EXPECT_FALSE(overlayManager->menuMap_.empty());
+}
+/**
+ * @tc.name: RemoveOverlayTest001
+ * @tc.desc: Test OverlayManager::RemoveOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, RemoveOverlayTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.markNeedUpdate = true;
+
+    /**
+     * @tc.steps: step2. create overlayManager and call removeOverlay when has one child.
+     * @tc.expected: removing overlay failed
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->UpdatePopupNode(targetId, popupInfo);
+    EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
+    auto res = overlayManager->RemoveOverlay(false);
+    EXPECT_FALSE(res);
+    EXPECT_TRUE(overlayManager->RemoveOverlayInSubwindow());
+    EXPECT_FALSE(overlayManager->RemoveOverlayInSubwindow());
+}
+/**
+ * @tc.name: RemoveOverlayTest002
+ * @tc.desc:  Test OverlayManager::RemoveOverlay related functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, RemoveOverlayTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    MockPipelineBase::GetCurrent()->stageManager_ = stageManager;
+
+    /**
+     * @tc.steps: step2. create modal page node.
+     */
+    auto builderFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    /**
+     * @tc.steps: step3. create modal node and call removeOverlay when modalStack is not empty.
+     * @tc.expected: remove successfully.
+     */
+    int32_t modalTransition = 0;
+    bool isShow = true;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalTransition, targetId);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    EXPECT_TRUE(overlayManager->RemoveOverlay(false));
+
+    /**
+     * @tc.steps: step4. Change the ModalTransition and Call RemoveModalInOverlay.
+     * @tc.expected: remove successfully.
+     */
+    modalTransition = 2;
+    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalTransition, targetId);
+    EXPECT_TRUE(overlayManager->RemoveModalInOverlay());
+}
+/**
+ * @tc.name: ToastTest001
+ * @tc.desc: Test OverlayManager::ShowToast->PopToast.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, ToastTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and toast node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto toastId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto toastNode =
+        FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, toastId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowToast when rootElement is nullptr.
+     * @tc.expected: toastMap_ is empty
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->ShowToast(MESSAGE, DURATION, BOTTOM, true);
+    EXPECT_TRUE(overlayManager->toastMap_.empty());
+    /**
+     * @tc.steps: step2. call PopToast.
+     * @tc.expected: toastMap_ is empty
+     */
+    overlayManager->PopToast(toastId);
+    EXPECT_TRUE(overlayManager->toastMap_.empty());
+}
+/**
+ * @tc.name: ToastTest002
+ * @tc.desc: Test OverlayManager::ShowToast->PopToast.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, ToastTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and toast node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto toastId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto toastNode =
+        FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, toastId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowToast when rootElement is not nullptr.
+     * @tc.expected: toastMap_ is empty
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto toastTheme = AceType::MakeRefPtr<ToastTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(toastTheme));
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockPipelineBase::GetCurrent()->rootNode_ = rootNode;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->ShowToast(MESSAGE, DURATION, BOTTOM, true);
+    EXPECT_TRUE(overlayManager->toastMap_.empty());
+    /**
+     * @tc.steps: step2. call PopToast.
+     * @tc.expected: toastMap_ is empty
+     */
+    overlayManager->PopToast(toastId);
+    EXPECT_TRUE(overlayManager->toastMap_.empty());
+}
+/**
+ * @tc.name: DialogTest001
+ * @tc.desc: Test OverlayManager::ShowCustomDialog->CloseDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, DialogTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create dialog node and root node.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dialogTheme));
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto dialogId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto dialogNode = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, dialogId, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+    dialogNode->MountToParent(rootNode);
+    rootNode->MarkDirtyNode();
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowCustomDialog.
+     * @tc.expected: dialogMap_ is not empty
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->ShowCustomDialog(dialogNode);
+    overlayManager->BeforeShowDialog(dialogNode);
+    EXPECT_FALSE(overlayManager->dialogMap_.empty());
+    /**
+     * @tc.steps: step3. call DialogInMapHoldingFocus when dialogMap_ is not empty and focusHub is nullptr.
+     * @tc.expected: return false
+     */
+    EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
+    /**
+     * @tc.steps: step4. call CloseDialog when dialogMap_ is not empty.
+     * @tc.expected: remove successfully
+     */
+    overlayManager->CloseDialog(dialogNode);
+    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
+    /**
+     * @tc.steps: step4. call CloseDialog again when dialogMap_ is empty.
+     * @tc.expected: function exits normally
+     */
+    overlayManager->CloseDialog(dialogNode);
+    EXPECT_TRUE(overlayManager->dialogMap_.empty());
 }
 } // namespace OHOS::Ace::NG

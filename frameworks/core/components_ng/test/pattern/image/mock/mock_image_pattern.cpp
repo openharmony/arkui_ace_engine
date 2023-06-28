@@ -36,6 +36,10 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     }
     return image_;
 }
+bool ImagePattern::BetweenSelectedPosition(const Offset& globalOffset)
+{
+    return false;
+}
 void ImagePattern::OnModifyDone() {}
 void ImagePattern::OnAttachToFrameNode() {}
 

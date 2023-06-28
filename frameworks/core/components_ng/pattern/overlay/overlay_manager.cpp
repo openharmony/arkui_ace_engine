@@ -21,6 +21,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/spring_curve.h"
@@ -244,6 +245,9 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInS
                     auto overlayManager = weak.Upgrade();
                     CHECK_NULL_VOID_NOLOG(menu && overlayManager);
                     ContainerScope scope(id);
+                    if (isInSubWindow) {
+                        SubwindowManager::GetInstance()->RequestFocusSubwindow(id);
+                    }
                     overlayManager->FocusOverlayNode(menu, isInSubWindow);
                     overlayManager->CallOnShowMenuCallback();
                 },
@@ -454,24 +458,6 @@ void OverlayManager::PopToast(int32_t toastId)
     event.type = AccessibilityEventType::CHANGE;
     event.windowContentChangeTypes = WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE;
     pipeline->SendEventToAccessibility(event);
-}
-
-void OverlayManager::AdaptToSafeArea(const RefPtr<FrameNode>& node)
-{
-    CHECK_NULL_VOID_NOLOG(node);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    const static int32_t PLATFORM_VERSION_TEN = 10;
-    auto layoutProperty = node->GetLayoutProperty();
-    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && pipeline->GetIsAppWindow() &&
-        pipeline->GetIsLayoutFullScreen() && !pipeline->GetIgnoreViewSafeArea() && layoutProperty) {
-        NG::MarginProperty margins;
-        SafeAreaEdgeInserts safeArea = pipeline->GetCurrentViewSafeArea();
-        margins.top = NG::CalcLength(safeArea.topRect_.Height());
-        margins.bottom = NG::CalcLength(safeArea.bottomRect_.Height());
-        margins.left = NG::CalcLength(safeArea.leftRect_.Width());
-        margins.right = NG::CalcLength(safeArea.rightRect_.Width());
-        layoutProperty->UpdateMargin(margins);
-    }
 }
 
 void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo)
@@ -796,7 +782,6 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
     LOGI("OverlayManager::ShowDialog");
     auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
     BeforeShowDialog(dialog);
-    AdaptToSafeArea(dialog);
     OpenDialogAnimation(dialog);
     return dialog;
 }
@@ -805,7 +790,6 @@ void OverlayManager::ShowCustomDialog(const RefPtr<FrameNode>& customNode)
 {
     LOGI("OverlayManager::ShowCustomDialog");
     BeforeShowDialog(customNode);
-    AdaptToSafeArea(customNode);
     OpenDialogAnimation(customNode);
 }
 
@@ -816,7 +800,6 @@ void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const D
     auto dialogNode = DatePickerDialogView::Show(
         dialogProps, std::move(settingData), std::move(dialogEvent), std::move(dialogCancelEvent));
     BeforeShowDialog(dialogNode);
-    AdaptToSafeArea(dialogNode);
     OpenDialogAnimation(dialogNode);
 }
 
@@ -828,7 +811,6 @@ void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps, const T
     auto dialogNode = TimePickerDialogView::Show(
         dialogProps, settingData, std::move(timePickerProperty), std::move(dialogEvent), std::move(dialogCancelEvent));
     BeforeShowDialog(dialogNode);
-    AdaptToSafeArea(dialogNode);
     OpenDialogAnimation(dialogNode);
 }
 
@@ -840,7 +822,6 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const T
     auto dialogNode =
         TextPickerDialogView::Show(dialogProps, settingData, std::move(dialogEvent), std::move(dialogCancelEvent));
     BeforeShowDialog(dialogNode);
-    AdaptToSafeArea(dialogNode);
     OpenDialogAnimation(dialogNode);
 }
 
@@ -1139,7 +1120,6 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
         SaveLastModalNode();
         modalNode->MountToParent(rootNode);
         modalNode->AddChild(builder);
-        AdaptToSafeArea(modalNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         if (modalTransition == ModalTransition::DEFAULT) {
             PlayDefaultModalTransition(modalNode, true);
@@ -1307,7 +1287,6 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
         builder->GetRenderContext()->SetIsModalRootNode(true);
         // create modal page
         auto sheetNode = SheetView::CreateSheetPage(targetId, builder, std::move(callback), sheetStyle);
-        AdaptToSafeArea(sheetNode);
         ComputeSheetOffset(sheetStyle);
         modalStack_.push(WeakClaim(RawPtr(sheetNode)));
         SaveLastModalNode();

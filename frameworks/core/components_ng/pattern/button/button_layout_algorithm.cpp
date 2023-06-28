@@ -53,7 +53,7 @@ void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (buttonLayoutProperty->HasLabel()) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
         CHECK_NULL_VOID(childWrapper);
-        auto childConstraint = childWrapper->GetLayoutProperty()->GetContentLayoutConstraint();
+        auto childConstraint = layoutWrapper->GetLayoutProperty()->GetContentLayoutConstraint();
         childWrapper->Measure(childConstraint);
         childSize_ = childWrapper->GetGeometryNode()->GetContentSize();
         if (buttonLayoutProperty->HasFontSize()) {

@@ -51,9 +51,15 @@ void SlidingPanelLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         LOGE("fail to measure slidingPanel due to layoutConstraint is nullptr");
         return;
     }
-    auto idealSize = !invisibleFlag_ ? CreateIdealSize(constraint.value(), Axis::HORIZONTAL,
-                                           layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true)
-                                     : SizeF();
+    auto idealSize =
+        !invisibleFlag_
+            ? ((PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9)
+                      ? CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
+                            layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT))
+                            .ConvertToSizeT()
+                      : CreateIdealSize(constraint.value(), Axis::HORIZONTAL,
+                            layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true))
+            : SizeF();
 
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);

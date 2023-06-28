@@ -62,10 +62,7 @@ constexpr float COLUMN_WIDTH = COLUMN_CHILD_WIDTH * CHILD_NUMBER;
 constexpr float COLUMN_HEIGHT = COLUMN_CHILD_HEIGHT * CHILD_NUMBER;
 constexpr int32_t BAR_EXPAND_DURATION = 150; // 150ms, scroll bar width expands from 4dp to 8dp
 constexpr int32_t BAR_SHRINK_DURATION = 250; // 250ms, scroll bar width shrinks from 8dp to 4dp
-constexpr float SCROLLABLE_DISTANCE = 10.0f;
-constexpr float CURRENT_DISTANCE = -5.0f;
-constexpr float CURRENT_DISTANCE_TOP = 0.0f;
-constexpr float CURRENT_DISTANCE_BOTTOM = -SCROLLABLE_DISTANCE;
+const static int32_t PLATFORM_VERSION_TEN = 10;
 } // namespace
 
 class ScrollTestNg : public testing::Test {
@@ -94,6 +91,7 @@ public:
     void Mouse(Offset moveOffset);
     RefPtr<FrameNode> GetColumnChild(int32_t index);
     void UpdateCurrentOffset(float offset);
+    uint64_t GetActions();
     testing::AssertionResult IsEqualCurrentOffset(Offset expectOffset);
     testing::AssertionResult IsEqualOverScrollOffset(OverScrollOffset offset, OverScrollOffset expectOffset);
     testing::AssertionResult IsEqualRect(Rect rect, Rect expectRect);
@@ -293,6 +291,16 @@ void ScrollTestNg::UpdateCurrentOffset(float offset)
 {
     pattern_->UpdateCurrentOffset(offset, SCROLL_FROM_UPDATE);
     RunMeasureAndLayout();
+}
+
+uint64_t ScrollTestNg::GetActions()
+{
+    std::unordered_set<AceAction> supportAceActions = accessibilityProperty_->GetSupportAction();
+    uint64_t actions = 0;
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    return actions;
 }
 
 RefPtr<FrameNode> ScrollTestNg::GetContentChild(int32_t index)
@@ -1156,12 +1164,6 @@ HWTEST_F(ScrollTestNg, ScrollFadeEffect001, TestSize.Level1)
     EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(COLUMN_CHILD_HEIGHT, false), 0.0));
     pattern_->currentOffset_ = -COLUMN_CHILD_HEIGHT * 3;
     EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(COLUMN_CHILD_HEIGHT * 3, false), 0.0));
-
-    /**
-     * @tc.steps: step6. Call Paint()
-     */
-    Testing::MockCanvas rsCanvas;
-    scrollFadeEffect->Paint(rsCanvas, viewPort, OffsetF(0, 0));
 }
 
 /**
@@ -1523,6 +1525,37 @@ HWTEST_F(ScrollTestNg, ScrollBar003, TestSize.Level1)
     EXPECT_TRUE(IsEqualRect(scrollBar->touchRegion_,
         Rect(COLUMN_CHILD_WIDTH * 2 / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER, ROOT_HEIGHT - barWidth,
             ROOT_WIDTH / CHILD_NUMBER * VIEWPORT_CHILD_NUMBER, barWidth)));
+}
+
+/**
+ * @tc.name: ScrollBar004
+ * @tc.desc: Test ScrollBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollBar004, TestSize.Level1)
+{
+    const float barWidth = 10.f;
+    CreateScroll(Dimension(barWidth));
+    auto scrollBar = pattern_->GetScrollBar();
+    scrollBar->SetShapeMode(ShapeMode::ROUND);
+    EXPECT_FALSE(scrollBar->InBarTouchRegion(Point(0, 0)));
+    EXPECT_FALSE(scrollBar->InBarActiveRegion(Point(0, 0)));
+    scrollBar->FlushBarWidth();
+
+    scrollBar->SetDisplayMode(DisplayMode::OFF);
+    EXPECT_FALSE(scrollBar->InBarTouchRegion(Point(0, 0)));
+    EXPECT_FALSE(scrollBar->InBarActiveRegion(Point(0, 0)));
+
+    scrollBar->SetPositionMode(PositionMode::LEFT);
+    scrollBar->UpdateActiveRectSize(20.f);
+    EXPECT_EQ(scrollBar->touchRegion_.Height(), 20.f);
+    scrollBar->UpdateActiveRectOffset(30.f);
+    EXPECT_EQ(scrollBar->touchRegion_.Top(), 30.f);
+    scrollBar->SetPositionMode(PositionMode::BOTTOM);
+    scrollBar->UpdateActiveRectSize(20.f);
+    EXPECT_EQ(scrollBar->touchRegion_.Width(), 20.f);
+    scrollBar->UpdateActiveRectOffset(30.f);
+    EXPECT_EQ(scrollBar->touchRegion_.Left(), 30.f);
 }
 
 /**
@@ -1934,6 +1967,75 @@ HWTEST_F(ScrollTestNg, Pattern010, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Pattern011
+ * @tc.desc: Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, Pattern011, TestSize.Level1)
+{
+    CreateScroll(EdgeEffect::FADE);
+    RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
+    auto scrollFadeEffect = AceType::DynamicCast<ScrollFadeEffect>(scrollEdgeEffect);
+    scrollFadeEffect->InitialEdgeEffect();
+
+    Testing::MockCanvas rsCanvas;
+    OffsetF offset = OffsetF(0, 0);
+    scrollFadeEffect->fadePainter_->SetOpacity(0);
+    scrollFadeEffect->fadePainter_->direction_ = OverScrollDirection::UP;
+    scrollFadeEffect->Paint(rsCanvas, SizeF(1, 1), offset);
+    scrollFadeEffect->fadePainter_->SetOpacity(1);
+    scrollFadeEffect->fadePainter_->direction_ = OverScrollDirection::DOWN;
+    scrollFadeEffect->Paint(rsCanvas, SizeF(0, 1), offset);
+    scrollFadeEffect->fadePainter_->direction_ = OverScrollDirection::LEFT;
+    scrollFadeEffect->Paint(rsCanvas, SizeF(1, 0), offset);
+    scrollFadeEffect->fadePainter_->direction_ = OverScrollDirection::RIGHT;
+    scrollFadeEffect->Paint(rsCanvas, SizeF(0, 0), offset);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: Pattern012
+ * @tc.desc: Test CalcReservedHeight()
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, Pattern012, TestSize.Level1)
+{
+    CreateScroll();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    pipelineContext->SetMinPlatformVersion(PLATFORM_VERSION_TEN + 1);
+    auto scrollBar = pattern_->GetScrollBar();
+
+    scrollBar->SetPositionMode(PositionMode::LEFT);
+    scrollBar->SetNormalWidth(Dimension(1)); // call CalcReservedHeight;
+    EXPECT_EQ(scrollBar->startReservedHeight_, Dimension(0.0));
+    EXPECT_EQ(scrollBar->endReservedHeight_, Dimension(0.0));
+
+    BorderRadiusProperty borderRadiusProperty;
+    float radius = 13.f;
+    borderRadiusProperty.radiusTopRight = std::make_optional<Dimension>(radius);
+    borderRadiusProperty.radiusBottomRight = std::make_optional<Dimension>(radius);
+    scrollBar->SetHostBorderRadius(borderRadiusProperty);
+    scrollBar->SetPadding(Edge(1, 1, 1, 1));
+    scrollBar->SetPositionMode(PositionMode::RIGHT);
+    scrollBar->SetNormalWidth(Dimension(2)); // call CalcReservedHeight;
+    EXPECT_EQ(scrollBar->startReservedHeight_, Dimension(14.5))
+        << "startReservedHeight_: " << scrollBar->startReservedHeight_.ConvertToPx();
+    EXPECT_EQ(scrollBar->endReservedHeight_, Dimension(14.5))
+        << "endReservedHeight_: " << scrollBar->endReservedHeight_.ConvertToPx();
+
+    borderRadiusProperty.radiusBottomLeft = std::make_optional<Dimension>(radius);
+    borderRadiusProperty.radiusBottomRight = std::make_optional<Dimension>(radius);
+    scrollBar->SetHostBorderRadius(borderRadiusProperty);
+    scrollBar->SetPadding(Edge(1, 1, 1, 1));
+    scrollBar->SetPositionMode(PositionMode::BOTTOM);
+    scrollBar->SetNormalWidth(Dimension(6)); // call CalcReservedHeight;
+    EXPECT_EQ(scrollBar->startReservedHeight_, Dimension(11.25))
+        << "startReservedHeight_: " << scrollBar->startReservedHeight_.ConvertToPx();
+    EXPECT_EQ(scrollBar->endReservedHeight_, Dimension(11.25))
+        << "endReservedHeight_: " << scrollBar->endReservedHeight_.ConvertToPx();
+}
+
+/**
  * @tc.name: Test001
  * @tc.desc: Test GetOverScrollOffset
  * @tc.type: FUNC
@@ -1976,107 +2078,62 @@ HWTEST_F(ScrollTestNg, Test001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ScrollAccessibilityPropertyIsScrollable001
- * @tc.desc: Test IsScrollable of scrollAccessibilityProperty.
+ * @tc.name: AccessibilityProperty001
+ * @tc.desc: Test AccessibilityProperty
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollTestNg, ScrollAccessibilityPropertyIsScrollable001, TestSize.Level1)
-{
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::SCROLL_ETS_TAG,
-        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<ScrollPattern>(); });
-    ASSERT_NE(frameNode, nullptr);
-    auto scrollPattern = frameNode->GetPattern<ScrollPattern>();
-    ASSERT_NE(scrollPattern, nullptr);
-    auto scrollAccessibilityProperty = frameNode->GetAccessibilityProperty<ScrollAccessibilityProperty>();
-    ASSERT_NE(scrollAccessibilityProperty, nullptr);
-    EXPECT_FALSE(scrollAccessibilityProperty->IsScrollable());
-
-    scrollPattern->SetAxis(Axis::VERTICAL);
-    scrollPattern->scrollableDistance_ = SCROLLABLE_DISTANCE;
-    EXPECT_TRUE(scrollAccessibilityProperty->IsScrollable());
-
-    scrollPattern->SetAxis(Axis::NONE);
-    EXPECT_FALSE(scrollAccessibilityProperty->IsScrollable());
-}
-
-/**
- * @tc.name: ScrollAccessibilityPropertyGetSupportAction001
- * @tc.desc: Test GetSupportAction of scrollAccessibilityProperty.
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollTestNg, ScrollAccessibilityPropertyGetSupportAction001, TestSize.Level1)
+HWTEST_F(ScrollTestNg, AccessibilityProperty001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create frameNode, scrollPattern, scrollAccessibilityProperty.
+     * @tc.steps: step1. Create unscrollable scroll, test SetSpecificSupportAction
+     * @tc.expected: action is correct
      */
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::SCROLL_ETS_TAG,
-        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<ScrollPattern>(); });
-    ASSERT_NE(frameNode, nullptr);
-    auto scrollPattern = frameNode->GetPattern<ScrollPattern>();
-    ASSERT_NE(scrollPattern, nullptr);
-    auto scrollAccessibilityProperty = frameNode->GetAccessibilityProperty<ScrollAccessibilityProperty>();
-    ASSERT_NE(scrollAccessibilityProperty, nullptr);
+    ScrollModelNG scrollModel;
+    scrollModel.Create();
+    GetInstance();
+    RunMeasureAndLayout();
+    accessibilityProperty_->ResetSupportAction();
+    uint64_t expectActions = 0;
+    EXPECT_EQ(GetActions(), expectActions);
 
     /**
-     * @tc.steps: step2. set scrollPattern property for test.
+     * @tc.steps: step2. scroll is at top
+     * @tc.expected: action is correct
      */
-    scrollPattern->axis_ = Axis::VERTICAL;
-    scrollPattern->scrollableDistance_ = SCROLLABLE_DISTANCE;
-    scrollPattern->currentOffset_ = CURRENT_DISTANCE;
+    CreateScroll();
+    accessibilityProperty_->ResetSupportAction();
+    expectActions = 0;
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
+    EXPECT_EQ(GetActions(), expectActions);
 
     /**
-     * @tc.steps: step3. callback ResetSupportAction then GetSupportAction. Contrast actions and expectActions.
-     * @tc.expected: expect actions equals to expectActions.
+     * @tc.steps: step3. scroll to middle
+     * @tc.expected: action is correct
      */
-    scrollAccessibilityProperty->ResetSupportAction();
-    std::unordered_set<AceAction> supportAceActions = scrollAccessibilityProperty->GetSupportAction();
-    uint64_t actions = 0, expectActions = 0;
+    UpdateCurrentOffset(-COLUMN_CHILD_HEIGHT);
+    accessibilityProperty_->ResetSupportAction();
+    expectActions = 0;
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    for (auto action : supportAceActions) {
-        actions |= 1UL << static_cast<uint32_t>(action);
-    }
-    EXPECT_EQ(actions, expectActions);
+    EXPECT_EQ(GetActions(), expectActions);
 
     /**
-     * @tc.steps: step4. change scrollPattern property and retrieve actions. Contrast again.
-     * @tc.expected: expect actions equals to expectActions.
+     * @tc.steps: step4. scroll to bottom
+     * @tc.expected: action is correct
      */
-    scrollPattern->currentOffset_ = CURRENT_DISTANCE_TOP;
-    scrollAccessibilityProperty->ResetSupportAction();
-    supportAceActions = scrollAccessibilityProperty->GetSupportAction();
-    actions = 0, expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    for (auto action : supportAceActions) {
-        actions |= 1UL << static_cast<uint32_t>(action);
-    }
-    EXPECT_EQ(actions, expectActions);
-
-    /**
-     * @tc.steps: step5. change scrollPattern property and retrieve actions. Contrast again.
-     * @tc.expected: expect actions equals to expectActions.
-     */
-    scrollPattern->currentOffset_ = CURRENT_DISTANCE_BOTTOM;
-    scrollAccessibilityProperty->ResetSupportAction();
-    supportAceActions = scrollAccessibilityProperty->GetSupportAction();
-    actions = 0, expectActions = 0;
+    UpdateCurrentOffset(-COLUMN_CHILD_HEIGHT);
+    accessibilityProperty_->ResetSupportAction();
+    expectActions = 0;
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    for (auto action : supportAceActions) {
-        actions |= 1UL << static_cast<uint32_t>(action);
-    }
-    EXPECT_EQ(actions, expectActions);
+    EXPECT_EQ(GetActions(), expectActions);
 
     /**
-     * @tc.steps: step6. change scrollPattern property and retrieve actions. Contrast again.
-     * @tc.expected: expect actions equals to expectActions.
+     * @tc.steps: step6. test IsScrollable()
+     * @tc.expected: return value is correct
      */
-    scrollPattern->axis_ = Axis::NONE;
-    scrollAccessibilityProperty->ResetSupportAction();
-    supportAceActions = scrollAccessibilityProperty->GetSupportAction();
-    actions = 0, expectActions = 0;
-    for (auto action : supportAceActions) {
-        actions |= 1UL << static_cast<uint32_t>(action);
-    }
-    EXPECT_EQ(actions, expectActions);
+    CreateScroll();
+    EXPECT_TRUE(accessibilityProperty_->IsScrollable());
+    CreateScroll(Axis::NONE);
+    EXPECT_FALSE(accessibilityProperty_->IsScrollable());
 }
 } // namespace OHOS::Ace::NG

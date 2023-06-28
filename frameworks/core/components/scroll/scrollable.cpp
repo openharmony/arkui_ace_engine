@@ -600,6 +600,13 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
             });
         }
 
+        if (scrollSnapCallback_ &&
+            scrollSnapCallback_(motion_->GetFinalPosition() - mainPosition, correctVelocity)) {
+            HandleScrollEnd();
+            currentVelocity_ = 0.0;
+            return;
+        }
+
         // change motion param when list item need to be center of screen on watch
         FixScrollMotion(mainPosition);
 

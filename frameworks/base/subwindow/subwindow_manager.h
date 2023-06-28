@@ -96,6 +96,7 @@ public:
     void CloseDialog(int32_t instanceId);
     void RegisterOnShowMenu(const std::function<void()>& callback);
     void RegisterOnHideMenu(const std::function<void()>& callback);
+    void RequestFocusSubwindow(int32_t instanceId);
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow();

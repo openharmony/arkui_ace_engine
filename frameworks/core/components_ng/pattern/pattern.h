@@ -220,11 +220,6 @@ public:
         return false;
     }
 
-    virtual bool UsResRegion()
-    {
-        return true;
-    }
-
     std::optional<SizeF> GetHostFrameSize() const
     {
         auto frameNode = frameNode_.Upgrade();
@@ -352,6 +347,8 @@ public:
         CHECK_NULL_RETURN(host, false);
         return layoutProperty->HasAspectRatio();
     }
+
+    virtual void OnTouchTestHit() {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

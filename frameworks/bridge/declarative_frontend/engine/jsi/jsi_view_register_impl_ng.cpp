@@ -55,6 +55,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_environment.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_flex_impl.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_foreach.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_form_link.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_gauge.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_gesture.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid.h"
@@ -230,6 +231,13 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
     // update page life cycle function.
     auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
     CHECK_NULL_VOID(pagePattern);
+    // Register RenderDone callback to jsView so that js view can notify pagePattern the render function has been
+    // finish. The onPageShow life cycle must be after the InitialRender function execution.
+    view->RegisterRenderDoneCallback([weak = AceType::WeakClaim(AceType::RawPtr(pagePattern))]() {
+        auto pagePattern = weak.Upgrade();
+        CHECK_NULL_VOID(pagePattern);
+        pagePattern->MarkRenderDone();
+    });
     pagePattern->SetOnPageShow([weak = Referenced::WeakClaim(view)]() {
         auto view = weak.Upgrade();
         if (view) {

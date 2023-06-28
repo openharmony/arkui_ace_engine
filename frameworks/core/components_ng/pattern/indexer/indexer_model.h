@@ -39,9 +39,12 @@ public:
     virtual void SetSelectedBackgroundColor(const std::optional<Color>& color) = 0;
     virtual void SetPopupBackground(const std::optional<Color>& color) = 0;
     virtual void SetUsingPopup(bool state) = 0;
-    virtual void SetSelectedFont(std::function<void(TextStyle& textStyle)>&& getTextStyleFunc) = 0;
-    virtual void SetPopupFont(std::function<void(TextStyle& textStyle)>&& getTextStyleFunc) = 0;
-    virtual void SetFont(std::function<void(TextStyle& textStyle)>&& getTextStyleFunc) = 0;
+    virtual void SetSelectedFont(std::optional<Dimension>& fontSize, std::optional<FontWeight>& fontWeight,
+        std::optional<std::vector<std::string>>& fontFamily, std::optional<FontStyle>& fontStyle) = 0;
+    virtual void SetPopupFont(std::optional<Dimension>& fontSize, std::optional<FontWeight>& fontWeight,
+        std::optional<std::vector<std::string>>& fontFamily, std::optional<FontStyle>& fontStyle) = 0;
+    virtual void SetFont(std::optional<Dimension>& fontSize, std::optional<FontWeight>& fontWeight,
+        std::optional<std::vector<std::string>>& fontFamily, std::optional<FontStyle>& fontStyle) = 0;
     virtual void SetItemSize(const Dimension& value) = 0;
     virtual void SetPopupHorizontalSpace(const Dimension& value) {};
     virtual void SetAlignStyle(int32_t value) = 0;

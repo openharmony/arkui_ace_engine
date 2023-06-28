@@ -49,8 +49,8 @@ struct PaContainerOptions {
     std::shared_ptr<WorkerPath> workerPath = nullptr;
 };
 
-class PaContainer : public Container, public JsMessageDispatcher {
-    DECLARE_ACE_TYPE(PaContainer, Container, JsMessageDispatcher);
+class PaContainer : public Container {
+    DECLARE_ACE_TYPE(PaContainer, Container);
 
 public:
     PaContainer(int32_t instanceId, void* paAbility, const PaContainerOptions& options,
@@ -125,17 +125,8 @@ public:
 
     RefPtr<TaskExecutor> GetTaskExecutor() const override
     {
-        return taskExecutor_;
+        return nullptr;
     }
-
-    void Dispatch(
-        const std::string& group, std::vector<uint8_t>&& data, int32_t id, bool replyToComponent) const override;
-
-    void DispatchPluginError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const override;
-
-    void DispatchSync(
-        const std::string& group, std::vector<uint8_t>&& data, uint8_t** resData, int64_t& position) const override
-    {}
 
     void OnFinish()
     {
@@ -192,7 +183,6 @@ private:
     void InitializeBackend(SrcLanguage language);
     void InitializeCallback();
 
-    RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;
     RefPtr<Backend> backend_;
 

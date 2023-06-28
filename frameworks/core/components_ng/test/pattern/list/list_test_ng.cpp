@@ -3488,7 +3488,7 @@ HWTEST_F(ListTestNg, Pattern010, TestSize.Level1)
      * @tc.steps: step1. Test ScrollToIndex.
      */
     pattern_->ScrollToIndex(1, 0, ScrollAlign::START);
-    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 100.f)));
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
     pattern_->ScrollToIndex(2, 0, ScrollAlign::CENTER);
     EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
     pattern_->ScrollToIndex(3, 0, ScrollAlign::END);
@@ -3497,7 +3497,7 @@ HWTEST_F(ListTestNg, Pattern010, TestSize.Level1)
     EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
 
     pattern_->ScrollToIndex(1, false, ScrollAlign::START);
-    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 100.f)));
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
     pattern_->ScrollToIndex(2, false, ScrollAlign::CENTER);
     EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
     pattern_->ScrollToIndex(3, false, ScrollAlign::END);
@@ -3515,12 +3515,12 @@ HWTEST_F(ListTestNg, Pattern010, TestSize.Level1)
     EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
 
     pattern_->ScrollToIndex(-1, 0, ScrollAlign::END);
-    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 1200)));
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
     pattern_->ScrollToIndex(-2, 0, ScrollAlign::END);
-    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 1200)));
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
 
     pattern_->ScrollToIndex(-2, false, ScrollAlign::END);
-    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 1200)));
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
     pattern_->ScrollToIndex(1, true, ScrollAlign::END);
     EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 1200)));
 }
@@ -4753,8 +4753,6 @@ HWTEST_F(ListTestNg, ScrollToIndexAlign001, TestSize.Level1)
      */
     listLayoutAlgorithm->jumpIndex_ = 1;
     listLayoutAlgorithm->scrollAlign_ = ScrollAlign::AUTO;
-    listLayoutAlgorithm->scrollAutoType_ = ScrollAutoType::NOT_CHANGE;
-    listLayoutAlgorithm->CalculateEstimateOffset(ScrollAlign::AUTO);
     listLayoutAlgorithm->scrollAutoType_ = ScrollAutoType::START;
     listLayoutAlgorithm->CalculateEstimateOffset(ScrollAlign::AUTO);
     EXPECT_NE(listLayoutAlgorithm->estimateOffset_, 0.0f);

@@ -47,7 +47,7 @@ void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         pickerWidth = static_cast<float>((pickerTheme->GetDividerSpacing() * DIVIDER_SIZE).ConvertToPx());
     }
     frameSize.SetWidth(pickerWidth);
-    frameSize.SetHeight(height);
+    frameSize.SetHeight(std::min(height, layoutConstraint->maxSize.Height()));
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
     auto layoutChildConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
@@ -74,12 +74,15 @@ void DatePickerColumnLayoutAlgorithm::ChangeTextStyle(uint32_t index, uint32_t s
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     frameSize.SetWidth(size.Width());
+    auto gradientHeight = pickerTheme->GetGradientHeight().ConvertToPx();
+    auto dividerSpacingHeight = pickerTheme->GetDividerSpacing().ConvertToPx();
+    auto columnHeight = gradientHeight * (showOptionCount - 1) + dividerSpacingHeight;
     auto layoutChildConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
     if (index == selectedIndex) {
-        frameSize.SetHeight(static_cast<float>(pickerTheme->GetDividerSpacing().ConvertToPx()));
+        frameSize.SetHeight(static_cast<float>(dividerSpacingHeight / columnHeight * size.Height()));
     } else {
-        frameSize.SetHeight(static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx()));
+        frameSize.SetHeight(static_cast<float>(gradientHeight / columnHeight * size.Height()));
     }
     layoutChildConstraint.selfIdealSize = { frameSize.Width(), frameSize.Height() };
     childLayoutWrapper->Measure(layoutChildConstraint);

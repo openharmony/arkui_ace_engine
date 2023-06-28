@@ -384,14 +384,12 @@ RefPtr<FrameNode> DatePickerDialogView::CreateDateNode(int32_t dateNodeId,
     auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_RETURN(datePickerPattern, nullptr);
 
-    auto context = dateNode->GetContext();
-    CHECK_NULL_RETURN(context, nullptr);
-    auto themeManager = context->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    auto dialogTheme = themeManager->GetTheme<DialogTheme>();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, nullptr);
     datePickerPattern->SetBackgroundColor(dialogTheme->GetBackgroundColor());
-    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, nullptr);
     uint32_t showCount = pickerTheme->GetShowOptionCount();
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
@@ -541,11 +539,9 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTimeNode(std::map<std::string, Pic
     auto timePickerRowPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_RETURN(timePickerRowPattern, nullptr);
 
-    auto context = timePickerNode->GetContext();
-    CHECK_NULL_RETURN(context, nullptr);
-    auto themeManager = context->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, nullptr);
     uint32_t showCount = pickerTheme->GetShowOptionCount();
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
@@ -571,6 +567,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTimeNode(std::map<std::string, Pic
         hourColumnNode->MountToParent(stackHourNode);
         auto layoutProperty = stackHourNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
         stackHourNode->MountToParent(timePickerNode);
     }
     if (!hasMinuteNode) {
@@ -580,6 +577,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTimeNode(std::map<std::string, Pic
         minuteColumnNode->MountToParent(stackMinuteNode);
         auto layoutProperty = stackMinuteNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
         stackMinuteNode->MountToParent(timePickerNode);
     }
     if (timePickerProperty.find("selected") != timePickerProperty.end()) {

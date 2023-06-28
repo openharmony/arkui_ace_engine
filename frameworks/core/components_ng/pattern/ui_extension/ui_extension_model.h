@@ -29,7 +29,7 @@ public:
     virtual ~UIExtensionModel() = default;
 
     virtual void Create(const std::string& bundleName, const std::string& abilityName);
-
+    virtual void SetOnRelease(std::function<void(int32_t)>&& onRelease);
 private:
     static std::unique_ptr<UIExtensionModel> instance_;
     static std::mutex mutex_;

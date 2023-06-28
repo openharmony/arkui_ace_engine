@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,10 +22,13 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
+namespace OHOS::MMI {
+class PointerEvent;
+} // namespace OHOS::MMI
+
 namespace OHOS::Ace {
 
 class MouseInfo;
-
 constexpr int32_t MOUSE_PRESS_LEFT = 1;
 static const int32_t MOUSE_BASE_ID = 1000;
 
@@ -89,6 +92,7 @@ struct MouseEvent final {
     int64_t deviceId = 0;
     int32_t targetDisplayId = 0;
     SourceType sourceType = SourceType::NONE;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent;
 
     Offset GetOffset() const
     {
@@ -129,7 +133,8 @@ struct MouseEvent final {
                 .time = time,
                 .deviceId = deviceId,
                 .targetDisplayId = targetDisplayId,
-                .sourceType = sourceType };
+                .sourceType = sourceType,
+                .pointerEvent = pointerEvent };
         }
 
         return { .x = x / scale,
@@ -149,7 +154,8 @@ struct MouseEvent final {
             .time = time,
             .deviceId = deviceId,
             .targetDisplayId = targetDisplayId,
-            .sourceType = sourceType };
+            .sourceType = sourceType,
+            .pointerEvent = pointerEvent };
     }
 
     TouchEvent CreateTouchPoint() const
@@ -183,7 +189,8 @@ struct MouseEvent final {
             .size = 0.0,
             .deviceId = deviceId,
             .targetDisplayId = targetDisplayId,
-            .sourceType = sourceType };
+            .sourceType = sourceType,
+            .pointerEvent = pointerEvent };
         event.pointers.emplace_back(std::move(point));
         return event;
     }
@@ -207,7 +214,8 @@ struct MouseEvent final {
             .time = time,
             .deviceId = deviceId,
             .targetDisplayId = targetDisplayId,
-            .sourceType = sourceType };
+            .sourceType = sourceType,
+            .pointerEvent = pointerEvent };
     }
 };
 
@@ -269,7 +277,17 @@ public:
         return globalLocation_;
     }
 
+    void SetPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+    {
+        pointerEvent_ = pointerEvent;
+    }
+    const std::shared_ptr<MMI::PointerEvent> GetPointerEvent() const
+    {
+        return pointerEvent_;
+    }
+
 private:
+    std::shared_ptr<MMI::PointerEvent> pointerEvent_;
     MouseButton button_ = MouseButton::NONE_BUTTON;
     MouseAction action_ = MouseAction::NONE;
     // global position at which the touch point contacts the screen.
@@ -312,6 +330,7 @@ public:
             return false;
         }
         MouseInfo info;
+        info.SetPointerEvent(event.pointerEvent);
         info.SetButton(event.button);
         info.SetAction(event.action);
         info.SetGlobalLocation(event.GetOffset());
@@ -431,5 +450,4 @@ using MouseTestResult = std::list<RefPtr<MouseEventTarget>>;
 using HoverTestResult = std::list<RefPtr<HoverEventTarget>>;
 
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_MOUSE_EVENT_H

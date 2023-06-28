@@ -285,6 +285,7 @@ public:
         std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent);
     static void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
         RefPtr<CustomAnimatableArithmetic>& value);
+    static void UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts);
 private:
     static void AddDragFrameNodeToManager();
 };

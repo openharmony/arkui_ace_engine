@@ -47,11 +47,6 @@ public:
         return false;
     }
 
-    bool UsResRegion() override
-    {
-        return false;
-    }
-
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<SwiperLayoutProperty>();
@@ -387,7 +382,6 @@ public:
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
     void ArrowHover(bool hoverFlag);
-    void IndicatorHover(bool hoverFlag);
     bool IsLoop() const;
     bool IsEnabled() const;
     void OnWindowShow() override;
@@ -446,8 +440,9 @@ private:
     float GetRemainingOffset() const;
     float MainSize() const;
     void FireChangeEvent() const;
-    void FireAnimationStartEvent() const;
-    void FireAnimationEndEvent() const;
+    void FireAnimationStartEvent(int32_t currentIndex, int32_t nextIndex, const AnimationCallbackInfo& info) const;
+    void FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
+    void FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
 
     float GetItemSpace() const;
     float GetPrevMargin() const;
@@ -465,6 +460,7 @@ private:
     bool IsShowIndicator() const;
     float GetTranslateLength() const;
     std::pair<int32_t, SwiperItemInfo> GetFirstItemInfoInVisibleArea() const;
+    std::pair<int32_t, SwiperItemInfo> GetSecondItemInfoInVisibleArea() const;
     void OnIndexChange() const;
     bool IsOutOfHotRegion(const PointF& dragPoint) const;
     bool IsOutOfIndicatorZone(const PointF& dragPoint);
@@ -473,7 +469,7 @@ private:
     void PostTranslateTask(uint32_t delayTime);
     void RegisterVisibleAreaChange();
     bool NeedAutoPlay() const;
-    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool useSpringMotion);
+    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay);
     bool IsShowArrow() const;
     void SaveArrowProperty(const RefPtr<FrameNode>& arrowNode);
     RefPtr<FocusHub> GetFocusHubChild(std::string childFrameName);
@@ -484,6 +480,16 @@ private:
     bool NeedStartAutoPlay() const;
     void CheckAndSetArrowHoverState(const PointF& mousePoint);
     RectF GetArrowFrameRect(const int32_t index) const;
+    float GetCustomPropertyOffset() const;
+    float GetCurrentFirstIndexStartPos() const;
+    void UpdateAnimationProperty(float velocity);
+    void TriggerAnimationEndOnTouchDown();
+    void TriggerAnimationEndOnSwipeToLeft();
+    void TriggerAnimationEndOnSwipeToRight();
+    void TriggerEventOnFinish(int32_t nextIndex);
+    bool IsChildrenSizeLessThanSwiper();
+
+    void SetLazyLoadFeature(bool useLazyLoad) const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -503,14 +509,16 @@ private:
     bool isLastIndicatorFocused_ = false;
     int32_t startIndex_ = 0;
     int32_t endIndex_ = 0;
-    int32_t currentIndex_ = 0;
-    int32_t oldIndex_ = 0;
+    int32_t currentIndex_ = -1;
+    int32_t oldIndex_ = -1;
 
     PanDirection panDirection_;
 
     float currentOffset_ = 0.0f;
     float fadeOffset_ = 0.0f;
     float turnPageRate_ = 0.0f;
+    float currentIndexOffset_ = 0.0f;
+    int32_t gestureSwipeIndex_ = 0;
     int32_t currentFirstIndex_ = 0;
 
     bool moveDirection_ = false;
@@ -523,6 +531,8 @@ private:
     bool IsCustomSize_ = false;
     bool indicatorIsBoolean_ = true;
     bool isAtHotRegion_ = false;
+    bool isDragging_ = false;
+    bool isTouchDown_ = false;
 
     Axis direction_ = Axis::HORIZONTAL;
 
@@ -535,8 +545,7 @@ private:
     WeakPtr<FrameNode> lastWeakShowNode_;
 
     CancelableCallback<void()> translateTask_;
-    // Arrow default hover ratio
-    float hoverRatio_ = 1.0f;
+
     std::optional<int32_t> indicatorId_;
     std::optional<int32_t> leftButtonId_;
     std::optional<int32_t> rightButtonId_;
@@ -550,11 +559,11 @@ private:
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;
     std::optional<int32_t> preTargetIndex_;
+    std::optional<int32_t> pauseTargetIndex_;
     float currentDelta_ = 0.0f;
     SwiperLayoutAlgorithm::PositionMap itemPosition_;
-    std::optional<int32_t> preIndex_;
     std::optional<float> velocity_;
-
+    bool isFinishAnimation_ = false;
     bool mainSizeIsMeasured_ = false;
 };
 } // namespace OHOS::Ace::NG

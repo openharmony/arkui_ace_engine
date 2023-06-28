@@ -406,9 +406,9 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest002, TestSize.Level1)
         KeyEvent keyEvent(KeyCode::KEY_0, KeyAction::CLICK);
         KeyEvent keyEvent2(KeyCode::KEY_ESCAPE, KeyAction::DOWN);
         KeyEvent keyEvent3(KeyCode::KEY_0, KeyAction::DOWN);
-        auto ret = focusHub->onKeyEventInternal_(keyEvent);
-        auto ret2 = focusHub->onKeyEventInternal_(keyEvent2);
-        auto ret3 = focusHub->onKeyEventInternal_(keyEvent3);
+        auto ret = focusHub->ProcessOnKeyEventInternal(keyEvent);
+        auto ret2 = focusHub->ProcessOnKeyEventInternal(keyEvent2);
+        auto ret3 = focusHub->ProcessOnKeyEventInternal(keyEvent3);
         EXPECT_FALSE(ret);
         EXPECT_FALSE(ret2);
         EXPECT_FALSE(ret3);

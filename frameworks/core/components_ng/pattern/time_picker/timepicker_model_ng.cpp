@@ -91,6 +91,7 @@ void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme)
         hourColumnNode->MountToParent(stackHourNode);
         auto layoutProperty = stackHourNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
         stackHourNode->MountToParent(timePickerNode);
     }
     if (!hasMinuteNode) {
@@ -100,6 +101,7 @@ void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme)
         minuteColumnNode->MountToParent(stackMinuteNode);
         auto layoutProperty = stackMinuteNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
         stackMinuteNode->MountToParent(timePickerNode);
     }
     stack->Push(timePickerNode);

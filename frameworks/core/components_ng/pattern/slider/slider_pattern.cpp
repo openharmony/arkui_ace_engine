@@ -262,6 +262,16 @@ void SliderPattern::InitializeBubble()
     sliderPaintProperty->UpdateContent(content);
 }
 
+void SliderPattern::HandlingGestureStart(const GestureEvent& info)
+{
+    if (info.GetInputEventType() != InputEventType::AXIS) {
+        UpdateValueByLocalLocation(info.GetLocalLocation());
+        UpdateBubble();
+    }
+    panMoveFlag_ = true;
+    UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void SliderPattern::HandlingGestureEvent(const GestureEvent& info)
 {
     if (info.GetInputEventType() == InputEventType::AXIS) {
@@ -364,7 +374,7 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
-        pattern->HandlingGestureEvent(info);
+        pattern->HandlingGestureStart(info);
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();

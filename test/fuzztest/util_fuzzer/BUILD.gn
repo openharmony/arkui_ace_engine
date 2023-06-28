@@ -49,7 +49,7 @@ ohos_fuzztest("UtilFuzzTest") {
   deps = [ "$ace_root/frameworks/base:ace_memory_monitor_ohos" ]
   external_deps = [
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
   ]
 
   ldflags = []

@@ -20,6 +20,7 @@
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
@@ -527,7 +528,7 @@ void PipelineBase::OpenImplicitAnimation(
             [finishCallback, weak]() {
                 auto context = weak.Upgrade();
                 CHECK_NULL_VOID(context);
-                CHECK_NULL_VOID(finishCallback);
+                CHECK_NULL_VOID_NOLOG(finishCallback);
                 if (context->IsFormRender()) {
                     context->SetEnableImplicitAnimation(false);
                     finishCallback();
@@ -647,13 +648,13 @@ void PipelineBase::SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_
     }
 }
 
-void PipelineBase::AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback)
+void PipelineBase::AddEtsCardTouchEventCallback(int32_t pointId, EtsCardTouchEventCallback&& callback)
 {
-    if (!callback || ponitId < 0) {
+    if (!callback || pointId < 0) {
         return;
     }
 
-    etsCardTouchEventCallback_[ponitId] = std::move(callback);
+    etsCardTouchEventCallback_[pointId] = std::move(callback);
 }
 
 void PipelineBase::HandleEtsCardTouchEvent(const TouchEvent& point)
@@ -672,13 +673,13 @@ void PipelineBase::HandleEtsCardTouchEvent(const TouchEvent& point)
     }
 }
 
-void PipelineBase::RemoveEtsCardTouchEventCallback(int32_t ponitId)
+void PipelineBase::RemoveEtsCardTouchEventCallback(int32_t pointId)
 {
-    if (ponitId < 0) {
+    if (pointId < 0) {
         return;
     }
 
-    auto iter = etsCardTouchEventCallback_.find(ponitId);
+    auto iter = etsCardTouchEventCallback_.find(pointId);
     if (iter == etsCardTouchEventCallback_.end()) {
         return;
     }

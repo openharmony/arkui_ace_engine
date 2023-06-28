@@ -140,9 +140,12 @@ HWTEST_F(TextClockTestNG, TextClockTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. create textclock and get frameNode.
      */
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::TEXTCLOCK_COMPONENT_TAG, 1, []() { return AceType::MakeRefPtr<TextClockPattern>(); });
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(FORMAT_DATA);
+    auto frameNode = CreateTextClockParagraph(testProperty);
     ASSERT_NE(frameNode, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    ASSERT_NE(textNode, nullptr);
 
     /**
      * @tc.steps: step2. get pattern and create layout property.
@@ -152,6 +155,8 @@ HWTEST_F(TextClockTestNG, TextClockTest002, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(textLayoutProperty, nullptr);
 
     /**
      * @tc.steps: step3. call OnModifyDone and UpdateTimeTextCallBack function when default properties.
@@ -160,7 +165,7 @@ HWTEST_F(TextClockTestNG, TextClockTest002, TestSize.Level1)
     pattern->InitTextClockController();
     pattern->OnModifyDone();
     pattern->UpdateTimeTextCallBack();
-    EXPECT_EQ(layoutProperty->GetContent(), FORMAT_DATA);
+    EXPECT_EQ(textLayoutProperty->GetContent(), FORMAT_DATA);
 
     /**
      * @tc.steps: step4. get controller and create layout property and event.
@@ -170,7 +175,7 @@ HWTEST_F(TextClockTestNG, TextClockTest002, TestSize.Level1)
     ASSERT_NE(controller, nullptr);
     controller->Start();
     controller->Stop();
-    EXPECT_EQ(layoutProperty->GetContent(), FORMAT_DATA);
+    EXPECT_EQ(textLayoutProperty->GetContent(), FORMAT_DATA);
     auto clockLayoutProperty = pattern->CreateLayoutProperty();
     ASSERT_NE(clockLayoutProperty, nullptr);
     auto event = pattern->CreateEventHub();
@@ -188,7 +193,7 @@ HWTEST_F(TextClockTestNG, TextClockTest002, TestSize.Level1)
     pattern->UpdateTimeTextCallBack();
     EXPECT_EQ(pattern->textClockController_, nullptr);
     EXPECT_EQ(pattern->timeCallback_, nullptr);
-    EXPECT_EQ(layoutProperty->GetContent(), FORMAT_DATA);
+    EXPECT_EQ(textLayoutProperty->GetContent(), FORMAT_DATA);
 }
 
 /**
@@ -240,7 +245,7 @@ HWTEST_F(TextClockTestNG, TextClockTest004, TestSize.Level1)
      * @tc.steps: step2. construct different params.
      */
     auto systemTimeZone = GetSystemTimeZone();
-    std::vector<std::vector<int32_t>> params = {{HOURS_WEST2, systemTimeZone}, {HOURS_WEST, HOURS_WEST}};
+    std::vector<std::vector<int32_t>> params = { { HOURS_WEST2, systemTimeZone }, { HOURS_WEST, HOURS_WEST } };
     for (int turn = 0; turn < params.size(); turn++) {
         testProperty.hoursWest = std::make_optional(params[turn][0]);
         /**

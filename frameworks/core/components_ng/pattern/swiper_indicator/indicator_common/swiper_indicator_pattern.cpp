@@ -229,9 +229,6 @@ void SwiperIndicatorPattern::HandleHoverEvent(bool isHover)
     if (swiperLayoutProperty->GetHoverShowValue(false) && !swiperPattern->GetIsAtHotRegion()) {
         swiperPattern->ArrowHover(isHover_);
     }
-    if (swiperIndicatorType_ == SwiperIndicatorType::DOT) {
-        swiperPattern->IndicatorHover(isHover_);
-    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

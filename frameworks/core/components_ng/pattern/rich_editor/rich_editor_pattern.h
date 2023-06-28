@@ -84,19 +84,36 @@ public:
     void SetCaretPosition(int32_t pos);
     bool GetCaretVisible() const;
     OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight);
+    void CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
+    int32_t TextSpanSplit(int32_t position);
+    SpanPositionInfo GetSpanPositionInfo(int32_t position);
+    std::function<ImageSourceInfo()> CreateImageSourceInfo(const ImageSpanOptions& options);
+    void AddImageSpan(const ImageSpanOptions& options);
+    void AddTextSpan(const TextSpanOptions& options);
+    int32_t GetSpanIndex();
 
 private:
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
+    void HandleBlurEvent();
+    void HandleFocusEvent();
     void HandleClickEvent(GestureEvent& info);
+    void ScheduleCaretTwinkling();
+    void OnCaretTwinkling();
+    void StartTwinkling();
+    void StopTwinkling();
 
     bool clickEventInitialized_ = false;
+    bool focusEventInitialized_ = false;
     RefPtr<RichEditorContentModifier> richEditorContentModifier_;
     RefPtr<RichEditorOverlayModifier> richEditorOverlayModifier_;
     bool isRichEditorInit_ = false;
     RefPtr<RichEditorController> richEditorController_;
     int32_t caretPosition_ = 0;
     int32_t instanceId_ = -1;
-    bool caretVisible_ = true;
+    bool caretVisible_ = false;
+    CancelableCallback<void()> caretTwinklingTask_;
+    int32_t spanIndex_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };

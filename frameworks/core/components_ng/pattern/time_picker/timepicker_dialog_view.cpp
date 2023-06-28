@@ -104,6 +104,7 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
         hourColumnNode->MountToParent(stackHourNode);
         auto layoutProperty = stackHourNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
         stackHourNode->MountToParent(timePickerNode);
     }
     if (!hasMinuteNode) {
@@ -113,6 +114,7 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
         minuteColumnNode->MountToParent(stackMinuteNode);
         auto layoutProperty = stackMinuteNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
         stackMinuteNode->MountToParent(timePickerNode);
     }
     if (timePickerProperty.find("selected") != timePickerProperty.end()) {

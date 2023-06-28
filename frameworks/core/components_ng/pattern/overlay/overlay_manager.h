@@ -249,8 +249,6 @@ private:
     void OpenDialogAnimation(const RefPtr<FrameNode>& node);
     void CloseDialogAnimation(const RefPtr<FrameNode>& node);
 
-    void AdaptToSafeArea(const RefPtr<FrameNode>& node);
-
     void SaveLastModalNode();
     void PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
     void DefaultModalTransition(bool isTransitionIn);
