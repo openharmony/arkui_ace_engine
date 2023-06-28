@@ -447,6 +447,7 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
     void InitEditingValueText(std::string content);
+    void InitEditingValueTextWithFilter();
     void InitCaretPosition(std::string content);
     const TextEditingValueNG& GetTextEditingValue()
     {
