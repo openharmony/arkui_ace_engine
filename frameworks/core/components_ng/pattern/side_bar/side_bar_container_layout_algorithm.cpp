@@ -61,14 +61,15 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
 
+    AdjustMinAndMaxSideBarWidth(layoutWrapper);
+
     auto parentWidth = idealSize.Width();
     if (needInitRealSideBarWidth_) {
         InitRealSideBarWidth(layoutWrapper, parentWidth);
     }
 
-    auto minSideBarWidth = layoutProperty->GetMinSideBarWidth().value_or(DEFAULT_MIN_SIDE_BAR_WIDTH);
     auto dividerStrokeWidth = layoutProperty->GetDividerStrokeWidth().value_or(DEFAULT_DIVIDER_STROKE_WIDTH);
-    auto minSideBarWidthPx = ConvertToPx(minSideBarWidth, scaleProperty, parentWidth).value_or(0);
+    auto minSideBarWidthPx = ConvertToPx(adjustMinSideBarWidth_, scaleProperty, parentWidth).value_or(0);
     auto dividerStrokeWidthPx = ConvertToPx(dividerStrokeWidth, scaleProperty, parentWidth).value_or(1);
     AutoChangeSideBarWidth(layoutWrapper, parentWidth, minSideBarWidthPx, dividerStrokeWidthPx);
 
@@ -120,6 +121,76 @@ void SideBarContainerLayoutAlgorithm::UpdateDefaultValueByVersion()
     }
 }
 
+RefPtr<LayoutWrapper> SideBarContainerLayoutAlgorithm::GetSideBarLayoutWrapper(LayoutWrapper* layoutWrapper) const
+{
+    CHECK_NULL_RETURN(layoutWrapper, nullptr);
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
+        return nullptr;
+    }
+
+    int index = 0;
+    for (auto it = children.rbegin(); it != children.rend(); ++it) {
+        index++;
+        if (index == INDEX_SIDE_BAR) {
+            return (*it);
+        }
+    }
+
+    return nullptr;
+}
+
+void SideBarContainerLayoutAlgorithm::AdjustMinAndMaxSideBarWidth(LayoutWrapper* layoutWrapper)
+{
+    adjustMinSideBarWidth_ = DEFAULT_MIN_SIDE_BAR_WIDTH;
+    adjustMaxSideBarWidth_ = DEFAULT_MAX_SIDE_BAR_WIDTH;
+    auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+
+    if (pipeline->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
+        adjustMinSideBarWidth_ = layoutProperty->GetMinSideBarWidth().value_or(DEFAULT_MIN_SIDE_BAR_WIDTH);
+        adjustMaxSideBarWidth_ = layoutProperty->GetMaxSideBarWidth().value_or(DEFAULT_MAX_SIDE_BAR_WIDTH);
+        if (adjustMinSideBarWidth_ > adjustMaxSideBarWidth_) {
+            adjustMinSideBarWidth_ = DEFAULT_MIN_SIDE_BAR_WIDTH;
+            adjustMaxSideBarWidth_ = DEFAULT_MAX_SIDE_BAR_WIDTH;
+        }
+        return;
+    }
+
+    auto sideBarLayoutWrapper = GetSideBarLayoutWrapper(layoutWrapper);
+    CHECK_NULL_VOID(sideBarLayoutWrapper);
+
+    auto sideBarLayoutProperty = sideBarLayoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(sideBarLayoutProperty);
+
+    auto&& calcConstraint = sideBarLayoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_VOID(calcConstraint);
+
+    if (layoutProperty->GetMinSideBarWidth().has_value()) {
+        adjustMinSideBarWidth_ = layoutProperty->GetMinSideBarWidthValue();
+    } else {
+        if (calcConstraint->minSize.has_value() && calcConstraint->minSize.value().Width().has_value()) {
+            adjustMinSideBarWidth_ = calcConstraint->minSize->Width()->GetDimension();
+        }
+    }
+
+    if (layoutProperty->GetMaxSideBarWidth().has_value()) {
+        adjustMaxSideBarWidth_ = layoutProperty->GetMaxSideBarWidthValue();
+    } else {
+        if (calcConstraint->maxSize.has_value() && calcConstraint->maxSize->Width().has_value()) {
+            adjustMaxSideBarWidth_ = calcConstraint->maxSize->Width()->GetDimension();
+        }
+    }
+
+    if (adjustMinSideBarWidth_ > adjustMaxSideBarWidth_) {
+        adjustMinSideBarWidth_ = DEFAULT_MIN_SIDE_BAR_WIDTH;
+        adjustMaxSideBarWidth_ = DEFAULT_MAX_SIDE_BAR_WIDTH;
+    }
+}
+
 void SideBarContainerLayoutAlgorithm::InitRealSideBarWidth(LayoutWrapper* layoutWrapper, float parentWidth)
 {
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -127,11 +198,9 @@ void SideBarContainerLayoutAlgorithm::InitRealSideBarWidth(LayoutWrapper* layout
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto scaleProperty = constraint->scaleProperty;
     auto sideBarWidth = layoutProperty->GetSideBarWidth().value_or(DEFAULT_SIDE_BAR_WIDTH);
-    auto minSideBarWidth = layoutProperty->GetMinSideBarWidth().value_or(DEFAULT_MIN_SIDE_BAR_WIDTH);
-    auto maxSideBarWidth = layoutProperty->GetMaxSideBarWidth().value_or(DEFAULT_MAX_SIDE_BAR_WIDTH);
     auto sideBarWidthPx = ConvertToPx(sideBarWidth, scaleProperty, parentWidth).value_or(0);
-    auto minSideBarWidthPx = ConvertToPx(minSideBarWidth, scaleProperty, parentWidth).value_or(0);
-    auto maxSideBarWidthPx = ConvertToPx(maxSideBarWidth, scaleProperty, parentWidth).value_or(0);
+    auto minSideBarWidthPx = ConvertToPx(adjustMinSideBarWidth_, scaleProperty, parentWidth).value_or(0);
+    auto maxSideBarWidthPx = ConvertToPx(adjustMaxSideBarWidth_, scaleProperty, parentWidth).value_or(0);
     if (minSideBarWidthPx > maxSideBarWidthPx) {
         minSideBarWidthPx = ConvertToPx(DEFAULT_MIN_SIDE_BAR_WIDTH, scaleProperty, parentWidth).value_or(0);
         maxSideBarWidthPx = ConvertToPx(DEFAULT_MAX_SIDE_BAR_WIDTH, scaleProperty, parentWidth).value_or(0);
@@ -192,6 +261,24 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBar(
     const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<LayoutWrapper>& sideBarLayoutWrapper)
 {
     auto constraint = layoutProperty->GetLayoutConstraint();
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        auto sideBarLayoutProperty = sideBarLayoutWrapper->GetLayoutProperty();
+        CHECK_NULL_VOID(sideBarLayoutProperty);
+        auto&& calcConstraint = sideBarLayoutProperty->GetCalcLayoutConstraint();
+        if (layoutProperty->GetMaxSideBarWidth().has_value()) {
+            auto maxWidth = layoutProperty->GetMaxSideBarWidthValue().ConvertToPx();
+            calcConstraint->UpdateMaxSizeWithCheck(CalcSize(CalcLength(maxWidth), std::nullopt));
+        }
+
+        if (layoutProperty->GetMinSideBarWidth().has_value()) {
+            auto minWidth = layoutProperty->GetMinSideBarWidthValue().ConvertToPx();
+            calcConstraint->UpdateMinSizeWithCheck(CalcSize(CalcLength(minWidth), std::nullopt));
+        }
+    }
+
     auto sideBarIdealSize = CreateIdealSize(
         constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
     sideBarIdealSize.SetWidth(realSideBarWidth_);
