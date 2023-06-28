@@ -1806,7 +1806,7 @@ bool FrameNode::IsContentRoot()
 
 void FrameNode::AddFRCSceneInfo(std::string name, float speed, SceneStatus status)
 {
-    // Frame Rate Controller(FRC):
+    // [PLANNING]: Frame Rate Controller(FRC):
     // Based on scene, speed and scene status, FrameRateRange will be sent to RSNode.
 }
 } // namespace OHOS::Ace::NG
