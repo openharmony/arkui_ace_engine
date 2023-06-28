@@ -299,7 +299,7 @@ std::string Localization::FormatDuration(uint32_t duration, const std::string& f
     const char* engTimeFormat = format.c_str();
     auto simpleDateFormat = std::make_unique<SimpleDateFormat>(UnicodeString(engTimeFormat), locale_->instance, status);
     CHECK_RETURN(status, "");
-    TimeZone* timeZone = TimeZone::createTimeZone("GMT+0:00");
+    std::unique_ptr<TimeZone> timeZone(TimeZone::createTimeZone("GMT+0:00"));
     simpleDateFormat->setTimeZone(*timeZone);
 
     UnicodeString simpleStr;
