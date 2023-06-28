@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,11 @@
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
+// Min disable event api version.
+constexpr int32_t MIN_DISABLE_EVENT_VERSION = 10;
+} // namespace
+
 #if !defined(PREVIEW)
 class ScopeRAII {
 public:
@@ -128,7 +133,7 @@ const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj)
     return nullptr;
 }
 #endif
-}
+} // namespace
 
 RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj)
 {
@@ -154,4 +159,25 @@ RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj)
 }
 
 #endif
+
+// When the api version >= 10, it is disable event version.
+bool IsDisableEventVersion()
+{
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("container is null");
+        return false;
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        LOGW("pipelineContext is null!");
+        return false;
+    }
+    if (pipelineContext->GetMinPlatformVersion() >= MIN_DISABLE_EVENT_VERSION) {
+        LOGD("The version supports disable event callback.");
+        return true;
+    }
+    LOGW("The version doesn't support disable event callback.");
+    return false;
+}
 } // namespace OHOS::Ace::Framework
