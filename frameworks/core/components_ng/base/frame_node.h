@@ -409,12 +409,13 @@ public:
         return layoutWrapper_;
     }
 
-    enum class AnimationStatusForRange {
+    enum class SceneStatus {
         START,
         RUNNING,
         END,
     };
-    void SetDesirableFrameRateRange(std::string scene, float speed, AnimationStatusForRange status);
+    // Frame Rate Controller(FRC) decides FrameRateRange by scence, speed and animation status
+    void AddFRCSceneInfo(std::string sceneName, float speed, SceneStatus status);
 
 private:
     void MarkNeedRender(bool isRenderBoundary);
