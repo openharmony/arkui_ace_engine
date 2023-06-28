@@ -41,6 +41,7 @@
 #include "core/components_ng/pattern/video/video_model_ng.h"
 #include "core/components_ng/pattern/video/video_pattern.h"
 #include "core/components_ng/pattern/video/video_styles.h"
+#include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/test/mock/render/mock_media_player.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/components_ng/test/mock/render/mock_render_surface.h"
@@ -962,6 +963,10 @@ HWTEST_F(VideoTestNg, VideoPatternTest013, TestSize.Level1)
     auto frameNode = CreateVideoNode(testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+    auto rootNode = FrameNode::CreateFrameNodeWithTree(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    EXPECT_FALSE(rootNode == nullptr);
+    frameNode->SetHostRootId(rootNode->GetId());
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
 
@@ -978,9 +983,6 @@ HWTEST_F(VideoTestNg, VideoPatternTest013, TestSize.Level1)
     std::string seekedCheck;
     EventCallback onSeeked = [&seekedCheck](const std::string& /* param */) { seekedCheck = VIDEO_SEEKED_EVENT; };
     videoEventHub->SetOnSeeked(std::move(onSeeked));
-    std::string fullScreenCheck;
-    EventCallback onFullScreenChange = [&fullScreenCheck](const std::string& param) { fullScreenCheck = param; };
-    videoEventHub->SetOnFullScreenChange(std::move(onFullScreenChange));
 
     /**
      * @tc.steps: step2. call OnSliderChange
@@ -1012,89 +1014,6 @@ HWTEST_F(VideoTestNg, VideoPatternTest013, TestSize.Level1)
             EXPECT_EQ(seekedCheck, VIDEO_SEEKED_EVENT);
         }
     }
-
-    /**
-     * @tc.steps: step3. call FullScreen & ExitFullScreen
-     * @tc.expected: step3. onFullScreenChange(true / false)  will be called
-     */
-    auto json = JsonUtil::Create(true);
-    json->Put("fullscreen", true);
-    auto fullScreenTrue = json->ToString();
-    pattern->FullScreen(); // will called onFullScreenChange(true)
-    EXPECT_TRUE(pattern->GetFullScreenNode() != nullptr);
-    EXPECT_EQ(fullScreenCheck, fullScreenTrue);
-
-    fullScreenCheck.clear();
-    pattern->FullScreen(); // call again, nothing will happen
-    EXPECT_TRUE(pattern->GetFullScreenNode() != nullptr);
-    EXPECT_TRUE(fullScreenCheck.empty());
-
-    // get the full screen svg node & get its gestureEventHub
-    const auto& children = frameNode->GetChildren();
-    RefPtr<UINode> controlBar = nullptr;
-    for (const auto& child : children) {
-        if (child->GetTag() == V2::ROW_ETS_TAG) {
-            controlBar = child;
-        }
-    }
-    ASSERT_TRUE(controlBar);
-    auto fsBtn = AceType::DynamicCast<FrameNode>(controlBar->GetChildAtIndex(4));
-    ASSERT_TRUE(fsBtn);
-    auto fsEvent = fsBtn->GetOrCreateGestureEventHub();
-
-    fsEvent->ActClick(); // this will call ExitFullScreen()
-    json = JsonUtil::Create(true);
-    json->Put("fullscreen", false);
-    auto fullScreenFalse = json->ToString();
-    EXPECT_FALSE(pattern->GetFullScreenNode() != nullptr);
-    EXPECT_EQ(fullScreenCheck, fullScreenFalse);
-
-    fullScreenCheck.clear();
-    auto fullScreenNode = pattern->GetFullScreenNode();
-    EXPECT_FALSE(fullScreenNode == nullptr);
-    auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(fullScreenNode->GetPattern());
-    EXPECT_FALSE(fullScreenPattern == nullptr);
-    fullScreenPattern->ExitFullScreen(); // call again, nothing will happen
-    EXPECT_FALSE(pattern->GetFullScreenNode() != nullptr);
-    EXPECT_TRUE(fullScreenCheck.empty());
-
-    fsEvent->ActClick(); // this will call FullScreen()
-    EXPECT_TRUE(pattern->GetFullScreenNode() != nullptr);
-
-    /**
-     * @tc.steps: step4. call OnBackPressed
-     * @tc.expected: step4. ExitFullScreen() will be called
-     */
-    // construct a FullScreenManager
-    auto root = AceType::MakeRefPtr<FrameNode>("ROOT", -1, AceType::MakeRefPtr<Pattern>(), true);
-    auto fullScreenManager = AceType::MakeRefPtr<FullScreenManager>(root);
-    root->AddChild(frameNode);
-
-    auto flag = fullScreenManager->OnBackPressed(); // will on videoPattern->OnBackPressed()
-    EXPECT_TRUE(flag);
-    EXPECT_FALSE(pattern->GetFullScreenNode() != nullptr);
-    EXPECT_EQ(fullScreenCheck, fullScreenFalse);
-
-    root->AddChild(tempFrameNode);
-    flag = fullScreenManager->OnBackPressed(); // call again, nothing happen
-    EXPECT_FALSE(flag);
-
-    pattern->OnBackPressed(); // nothing will happen
-    EXPECT_FALSE(pattern->GetFullScreenNode() != nullptr);
-
-    /**
-     * @tc.steps: step5. call FullScreen & ExitFullScreen in videoController
-     *                   note: just test ExitFullscreen(issync = true), other functions are async
-     * @tc.expected: step5. onFullScreenChange(true / false)  will be called
-     */
-    pattern->FullScreen();
-    EXPECT_TRUE(pattern->GetFullScreenNode() != nullptr);
-    EXPECT_EQ(fullScreenCheck, fullScreenTrue);
-    videoController->ExitFullscreen(false); // nothing will happen for it's async
-    EXPECT_TRUE(pattern->GetFullScreenNode() != nullptr);
-    videoController->ExitFullscreen(true);
-    EXPECT_FALSE(pattern->GetFullScreenNode() != nullptr);
-    EXPECT_EQ(fullScreenCheck, fullScreenFalse);
 }
 
 /**
@@ -1141,6 +1060,8 @@ HWTEST_F(VideoTestNg, VideoFullScreenTest015, TestSize.Level1)
      * @tc.expected: step1. Create Video successfully
      */
     MockPipelineBase::GetCurrent()->SetRootSize(SCREEN_WIDTH_MEDIUM, SCREEN_HEIGHT_MEDIUM);
+    auto rootNode = FrameNode::CreateFrameNodeWithTree(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
     VideoModelNG video;
     auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
     video.Create(videoController);
@@ -1154,6 +1075,7 @@ HWTEST_F(VideoTestNg, VideoFullScreenTest015, TestSize.Level1)
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::VIDEO_ETS_TAG);
+    frameNode->SetHostRootId(rootNode->GetId());
     auto videoLayoutProperty = frameNode->GetLayoutProperty<VideoLayoutProperty>();
     EXPECT_FALSE(videoLayoutProperty == nullptr);
 
@@ -1166,15 +1088,14 @@ HWTEST_F(VideoTestNg, VideoFullScreenTest015, TestSize.Level1)
     auto videoLayoutAlgorithm = videoPattern->CreateLayoutAlgorithm();
     EXPECT_FALSE(videoLayoutAlgorithm == nullptr);
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(videoLayoutAlgorithm));
-
     videoPattern->FullScreen(); // will called onFullScreenChange(true)
     EXPECT_TRUE(videoPattern->GetFullScreenNode() != nullptr);
 
     // Test MeasureContent when it is fullScreen.
     /**
-    //     corresponding ets code:
-    //         Video({ src: this.videoSrc, previewUri: this.previewUri, controller: this.controller })
-    //             .height(400).width(400)
+        corresponding ets code:
+            Video({ src: this.videoSrc, previewUri: this.previewUri, controller: this.controller })
+                .height(400).width(400)
     */
 
     // Set layout size.
@@ -1186,29 +1107,40 @@ HWTEST_F(VideoTestNg, VideoFullScreenTest015, TestSize.Level1)
      * @tc.steps: step2. change to full screen, check size.
      * @tc.expected: step2. Video size is same to rootsize.
      */
-    auto videoSize = videoLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper).value_or(SizeF(0.0f, 0.0f));
+    auto fullScreenNode = videoPattern->GetFullScreenNode();
+    auto fullScreenPattern = fullScreenNode->GetPattern();
+    EXPECT_FALSE(fullScreenPattern == nullptr);
+    auto fullScreenLayout = fullScreenPattern->CreateLayoutAlgorithm();
+    auto fullScreenGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapper fullScreenLayoutWrapper = LayoutWrapper(fullScreenNode,
+        fullScreenGeometryNode, fullScreenNode->GetLayoutProperty());
+    fullScreenLayoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(fullScreenLayout));
+    auto videoSize = fullScreenLayout->MeasureContent(layoutConstraint, &fullScreenLayoutWrapper)
+        .value_or(SizeF(0.0f, 0.0f));
     EXPECT_EQ(videoSize, SCREEN_SIZE_MEDIUM);
 
     // Change the root size to small
     MockPipelineBase::GetCurrent()->SetRootSize(SCREEN_WIDTH_SMALL, SCREEN_HEIGHT_SMALL);
-    videoSize = videoLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper).value_or(SizeF(0.0f, 0.0f));
-    EXPECT_EQ(videoSize, SCREEN_SIZE_SMALL);
+    auto size = fullScreenLayout->MeasureContent(layoutConstraint, &fullScreenLayoutWrapper)
+        .value_or(SizeF(0.0f, 0.0f));
+    EXPECT_EQ(size, SCREEN_SIZE_SMALL);
 
     // Change the root size to large
     MockPipelineBase::GetCurrent()->SetRootSize(SCREEN_WIDTH_LARGE, SCREEN_HEIGHT_LARGE);
-    videoSize = videoLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper).value_or(SizeF(0.0f, 0.0f));
+    videoSize = fullScreenLayout->MeasureContent(layoutConstraint, &fullScreenLayoutWrapper)
+        .value_or(SizeF(0.0f, 0.0f));
     EXPECT_EQ(videoSize, SCREEN_SIZE_LARGE);
 
     /**
      * @tc.steps: step3. change from full screen to normal size, check size.
      * @tc.expected: step2. Video size is same to origional size.
      */
-    auto videoFullScreenNode = videoPattern->GetFullScreenNode();
-    EXPECT_FALSE(videoFullScreenNode == nullptr);
-    auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(videoFullScreenNode->GetPattern());
-    EXPECT_FALSE(fullScreenPattern == nullptr);
-    fullScreenPattern->ExitFullScreen(); // will called onFullScreenChange(true)
-    EXPECT_FALSE(videoPattern->GetFullScreenNode() != nullptr);
+    auto videoFullScreenNode1 = videoPattern->GetFullScreenNode();
+    EXPECT_FALSE(videoFullScreenNode1 == nullptr);
+    auto fullScreenPattern1 = AceType::DynamicCast<VideoFullScreenPattern>(videoFullScreenNode1->GetPattern());
+    EXPECT_FALSE(fullScreenPattern1 == nullptr);
+    fullScreenPattern1->ExitFullScreen(); // will called onFullScreenChange(true)
+    EXPECT_TRUE(videoPattern->GetFullScreenNode() == nullptr);
 
     videoSize = videoLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper).value_or(SizeF(0.0f, 0.0f));
     EXPECT_EQ(videoSize, SizeF(VIDEO_WIDTH, VIDEO_HEIGHT));
@@ -1698,5 +1630,127 @@ HWTEST_F(VideoTestNg, VideoAccessibilityPropertyTest002, TestSize.Level1)
     pattern->Stop();
     accessibilityValue = videoAccessibilitProperty->GetAccessibilityValue();
     EXPECT_EQ(accessibilityValue.current, 0);
+}
+
+/**
+ * @tc.name: VideoPatternTest016
+ * @tc.desc: Test full screen button click event
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestNg, VideoPatternTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video
+     * @tc.expected: step1. Create Video successfully
+     */
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    testProperty.videoController = videoController;
+    auto frameNode = CreateVideoNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+    auto rootNode = FrameNode::CreateFrameNodeWithTree(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    EXPECT_FALSE(rootNode == nullptr);
+    frameNode->SetHostRootId(rootNode->GetId());
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+
+    // Add a redundant node to go other branch
+    auto tempFrameNode = AceType::MakeRefPtr<FrameNode>("TEMP", -1, AceType::MakeRefPtr<Pattern>());
+    frameNode->AddChild(tempFrameNode, 0);
+
+    // set video event
+    auto videoEventHub = frameNode->GetEventHub<VideoEventHub>();
+    ASSERT_TRUE(videoEventHub);
+
+    std::string fullScreenCheck;
+    EventCallback onFullScreenChange = [&fullScreenCheck](const std::string& param) { fullScreenCheck = param; };
+    videoEventHub->SetOnFullScreenChange(std::move(onFullScreenChange));
+
+    /**
+     * @tc.steps: step2. call FullScreen & ExitFullScreen
+     * @tc.expected: step3. onFullScreenChange(true / false)  will be called
+     */
+    auto json = JsonUtil::Create(true);
+    json->Put("fullscreen", true);
+    auto fullScreenTrue = json->ToString();
+    pattern->FullScreen(); // will called onFullScreenChange(true)
+    EXPECT_TRUE(pattern->GetFullScreenNode() != nullptr);
+    EXPECT_EQ(fullScreenCheck, fullScreenTrue);
+
+    fullScreenCheck.clear();
+    pattern->FullScreen(); // call again, nothing will happen
+    EXPECT_TRUE(pattern->GetFullScreenNode() != nullptr);
+    EXPECT_TRUE(fullScreenCheck.empty());
+
+    // get the full screen svg node & get its gestureEventHub
+    auto fullScreenNode = pattern->GetFullScreenNode();
+    const auto& children = fullScreenNode->GetChildren();
+    RefPtr<UINode> controlBar = nullptr;
+    for (const auto& child : children) {
+        if (child->GetTag() == V2::ROW_ETS_TAG) {
+            controlBar = child;
+        }
+    }
+    ASSERT_TRUE(controlBar);
+    auto fsBtn = AceType::DynamicCast<FrameNode>(controlBar->GetChildAtIndex(4));
+    ASSERT_TRUE(fsBtn);
+    auto fsEvent = fsBtn->GetOrCreateGestureEventHub();
+
+    fsEvent->ActClick(); // this will call ExitFullScreen()
+    json = JsonUtil::Create(true);
+    json->Put("fullscreen", false);
+    auto fullScreenFalse = json->ToString();
+    EXPECT_TRUE(pattern->GetFullScreenNode() == nullptr);
+    EXPECT_EQ(fullScreenCheck, fullScreenFalse);
+
+    fullScreenCheck.clear();
+
+    const auto& videoChildren = frameNode->GetChildren();
+    RefPtr<UINode> videoControlBar = nullptr;
+    for (const auto& child : videoChildren) {
+        if (child->GetTag() == V2::ROW_ETS_TAG) {
+            videoControlBar = child;
+        }
+    }
+    ASSERT_TRUE(videoControlBar);
+    auto videoBtn = AceType::DynamicCast<FrameNode>(videoControlBar->GetChildAtIndex(4));
+    ASSERT_TRUE(videoBtn);
+    auto videoEvent = videoBtn->GetOrCreateGestureEventHub();
+    videoEvent->ActClick(); // this will call FullScreen()
+    EXPECT_TRUE(pattern->GetFullScreenNode() != nullptr);
+
+    /**
+     * @tc.steps: step4. call OnBackPressed
+     * @tc.expected: step4. ExitFullScreen() will be called
+     */
+    // construct a FullScreenManager
+    auto fullScreenManager = AceType::MakeRefPtr<FullScreenManager>(rootNode);
+
+    auto flag = fullScreenManager->OnBackPressed(); // will on videoPattern->OnBackPressed()
+    EXPECT_TRUE(flag);
+    EXPECT_TRUE(pattern->GetFullScreenNode() == nullptr);
+    EXPECT_EQ(fullScreenCheck, fullScreenFalse);
+
+    rootNode->AddChild(tempFrameNode);
+    flag = fullScreenManager->OnBackPressed(); // call again, nothing happen
+    EXPECT_FALSE(flag);
+
+    pattern->OnBackPressed(); // nothing will happen
+    EXPECT_TRUE(pattern->GetFullScreenNode() == nullptr);
+
+    /**
+     * @tc.steps: step5. call FullScreen & ExitFullScreen in videoController
+     *                   note: just test ExitFullscreen(issync = true), other functions are async
+     * @tc.expected: step5. onFullScreenChange(true / false)  will be called
+     */
+    pattern->FullScreen();
+    EXPECT_TRUE(pattern->GetFullScreenNode() != nullptr);
+    EXPECT_EQ(fullScreenCheck, fullScreenTrue);
+    videoController->ExitFullscreen(false); // nothing will happen for it's async
+    EXPECT_TRUE(pattern->GetFullScreenNode() != nullptr);
+    videoController->ExitFullscreen(true);
+    EXPECT_FALSE(pattern->GetFullScreenNode() != nullptr);
+    EXPECT_EQ(fullScreenCheck, fullScreenFalse);
 }
 } // namespace OHOS::Ace::NG
