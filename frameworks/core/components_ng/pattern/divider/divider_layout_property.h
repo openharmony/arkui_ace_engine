@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIVIDER_DIVIDER_LAYOUT_PROPERTY_H
 
 #include "core/components_ng/layout/layout_property.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT DividerLayoutProperty : public LayoutProperty {
@@ -45,7 +46,15 @@ public:
     {
         LayoutProperty::ToJsonValue(json);
         json->Put("vertical", propVertical_.value_or(true) ? "true" : "false");
-        json->Put("strokeWidth", propStrokeWidth_.value_or(Dimension(1, DimensionUnit::VP)).ToString().c_str());
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        const static int32_t PLATFORM_VERSION_TEN = 10;
+        json->Put("strokeWidth",
+            propStrokeWidth_
+                .value_or(Dimension(1,
+                    pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ? DimensionUnit::PX : DimensionUnit::VP))
+                .ToString()
+                .c_str());
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override
