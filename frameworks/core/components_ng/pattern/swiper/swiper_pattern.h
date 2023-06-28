@@ -389,7 +389,7 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
 
-    void OnTouchTestHit() override;
+    void OnTouchTestHit(SourceType hitTestType) override;
 
 private:
     void OnModifyDone() override;
