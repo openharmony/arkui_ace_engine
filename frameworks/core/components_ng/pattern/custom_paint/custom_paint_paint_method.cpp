@@ -1151,7 +1151,11 @@ void CustomPaintPaintMethod::Path2DBezierCurveTo(const OffsetF& offset, const Pa
     double cp2y = args.para4 + offset.GetY();
     double x = args.para5 + offset.GetX();
     double y = args.para6 + offset.GetY();
+#ifndef USE_ROSEN_DRAWING
     skPath2d_.cubicTo(cp1x, cp1y, cp2x, cp2y, x, y);
+#else
+    rsPath2d_.CubicTo(cp1x, cp1y, cp2x, cp2y, x, y);
+#endif
 }
 
 void CustomPaintPaintMethod::Path2DQuadraticCurveTo(const OffsetF& offset, const PathArgs& args)
@@ -1160,59 +1164,102 @@ void CustomPaintPaintMethod::Path2DQuadraticCurveTo(const OffsetF& offset, const
     double cpy = args.para2 + offset.GetY();
     double x = args.para3 + offset.GetX();
     double y = args.para4 + offset.GetY();
+#ifndef USE_ROSEN_DRAWING
     skPath2d_.quadTo(cpx, cpy, x, y);
+#else
+    rsPath2d_.QuadTo(cpx, cpy, x, y);
+#endif
 }
 
 void CustomPaintPaintMethod::Path2DSetTransform(const OffsetF& offset, const PathArgs& args)
 {
+#ifndef USE_ROSEN_DRAWING
     SkMatrix skMatrix;
+#else
+    RSMatrix matrix;
+#endif
     double scaleX = args.para1;
     double skewX = args.para2;
     double skewY = args.para3;
     double scaleY = args.para4;
     double translateX = args.para5;
     double translateY = args.para6;
+#ifndef USE_ROSEN_DRAWING
     skMatrix.setAll(scaleX, skewY, translateX, skewX, scaleY, translateY, 0.0f, 0.0f, 1.0f);
     skPath2d_.transform(skMatrix);
+#else
+    matrix.SetMatrix(scaleX, skewY, translateX, skewX, scaleY, translateY, 0, 0, 1);
+    rsPath2d_.Transform(matrix);
+#endif
 }
 
 void CustomPaintPaintMethod::Save()
 {
     SaveStates();
+#ifndef USE_ROSEN_DRAWING
     skCanvas_->save();
+#else
+    rsCanvas_->Save();
+#endif
 }
 
 void CustomPaintPaintMethod::Restore()
 {
     RestoreStates();
+#ifndef USE_ROSEN_DRAWING
     skCanvas_->restore();
+#else
+    rsCanvas_->Restore();
+#endif
 }
 
 void CustomPaintPaintMethod::Scale(double x, double y)
 {
+#ifndef USE_ROSEN_DRAWING
     skCanvas_->scale(x, y);
+#else
+    rsCanvas_->Scale(x, y);
+#endif
 }
 
 void CustomPaintPaintMethod::Rotate(double angle)
 {
+#ifndef USE_ROSEN_DRAWING
     skCanvas_->rotate(angle * 180 / M_PI);
+#else
+    rsCanvas_->Rotate(angle * 180 / M_PI);
+#endif
 }
 
 void CustomPaintPaintMethod::ResetTransform()
 {
+#ifndef USE_ROSEN_DRAWING
     skCanvas_->resetMatrix();
+#else
+    rsCanvas_->ResetMatrix();
+#endif
 }
 
 void CustomPaintPaintMethod::Transform(const TransformParam& param)
 {
+#ifndef USE_ROSEN_DRAWING
     SkMatrix skMatrix;
     skMatrix.setAll(param.scaleX, param.skewY, param.translateX, param.skewX, param.scaleY, param.translateY, 0, 0, 1);
     skCanvas_->concat(skMatrix);
+#else
+    RSMatrix matrix;
+    matrix.SetMatrix(param.scaleX, param.skewY, param.translateX, param.skewX, param.scaleY, param.translateY, 0, 0, 1);
+    rsCanvas_->ConcatMatrix(matrix);
+#endif
 }
 
 void CustomPaintPaintMethod::Translate(double x, double y)
 {
+#ifndef USE_ROSEN_DRAWING
     skCanvas_->translate(x, y);
+#else
+    rsCanvas_->Translate(x, y);
+#endif
 }
 
 double CustomPaintPaintMethod::GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph)
@@ -1255,6 +1302,7 @@ txt::TextAlign CustomPaintPaintMethod::GetEffectiveAlign(txt::TextAlign align, t
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 void CustomPaintPaintMethod::ClearPaintImage(SkPaint& paint)
 {
     float matrix[20] = { 0.0f };
@@ -1271,8 +1319,31 @@ void CustomPaintPaintMethod::ClearPaintImage(SkPaint& paint)
     paint.setImageFilter(SkBlurImageFilter::Make(0, 0, nullptr));
 #endif
 }
+#else
+void CustomPaintPaintMethod::ClearPaintImage(RSPen* pen, RSBrush* brush)
+{
+    float matrix[20] = { 0.0f };
+    matrix[0] = matrix[6] = matrix[12] = matrix[18] = 1.0f;
+    RSFilter filter;
+    RSColorMatrix colorMatrix;
+    colorMatrix.SetArray(matrix);
+    filter.SetColorFilter(RSColorFilter::CreateMatrixColorFilter(colorMatrix));
+    filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, 0));
+    filter.SetImageFilter(RSImageFilter::CreateBlurImageFilter(0, 0, RSTileMode::DECAL, nullptr));
+    if (pen) {
+        pen->SetFilter(filter);
+    }
+    if (brush) {
+        brush->SetFilter(filter);
+    }
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 void CustomPaintPaintMethod::SetPaintImage(SkPaint& paint)
+#else
+void CustomPaintPaintMethod::SetPaintImage(RSPen* pen, RSBrush* brush)
+#endif
 {
     FilterType filterType;
     std::string filterParam;
@@ -1283,31 +1354,67 @@ void CustomPaintPaintMethod::SetPaintImage(SkPaint& paint)
         case FilterType::NONE:
             break;
         case FilterType::GRAYSCALE:
+#ifndef USE_ROSEN_DRAWING
             SetGrayFilter(filterParam, paint);
+#else
+            SetGrayFilter(filterParam, pen, brush);
+#endif
             break;
         case FilterType::SEPIA:
+#ifndef USE_ROSEN_DRAWING
             SetSepiaFilter(filterParam, paint);
+#else
+            SetSepiaFilter(filterParam, pen, brush);
+#endif
             break;
         case FilterType::SATURATE:
+#ifndef USE_ROSEN_DRAWING
             SetSaturateFilter(filterParam, paint);
+#else
+            SetSaturateFilter(filterParam, pen, brush);
+#endif
             break;
         case FilterType::HUE_ROTATE:
+#ifndef USE_ROSEN_DRAWING
             SetHueRotateFilter(filterParam, paint);
+#else
+            SetHueRotateFilter(filterParam, pen, brush);
+#endif
             break;
         case FilterType::INVERT:
+#ifndef USE_ROSEN_DRAWING
             SetInvertFilter(filterParam, paint);
+#else
+            SetInvertFilter(filterParam, pen, brush);
+#endif
             break;
         case FilterType::OPACITY:
+#ifndef USE_ROSEN_DRAWING
             SetOpacityFilter(filterParam, paint);
+#else
+            SetOpacityFilter(filterParam, pen, brush);
+#endif
             break;
         case FilterType::BRIGHTNESS:
+#ifndef USE_ROSEN_DRAWING
             SetBrightnessFilter(filterParam, paint);
+#else
+            SetBrightnessFilter(filterParam, pen, brush);
+#endif
             break;
         case FilterType::CONTRAST:
+#ifndef USE_ROSEN_DRAWING
             SetContrastFilter(filterParam, paint);
+#else
+            SetContrastFilter(filterParam, pen, brush);
+#endif
             break;
         case FilterType::BLUR:
+#ifndef USE_ROSEN_DRAWING
             SetBlurFilter(filterParam, paint);
+#else
+            SetBlurFilter(filterParam, pen, brush);
+#endif
             break;
         case FilterType::DROP_SHADOW:
             LOGW("Dropshadow is not supported yet.");
@@ -1318,7 +1425,11 @@ void CustomPaintPaintMethod::SetPaintImage(SkPaint& paint)
 }
 
 // https://drafts.fxtf.org/filter-effects/#grayscaleEquivalent
+#ifndef USE_ROSEN_DRAWING
 void CustomPaintPaintMethod::SetGrayFilter(const std::string& percent, SkPaint& paint)
+#else
+void CustomPaintPaintMethod::SetGrayFilter(const std::string& percent, RSPen* pen, RSBrush* brush)
+#endif
 {
     float percentNum = 1.0f;
     if (!CheckNumberAndPercentage(percent, true, percentNum)) {
@@ -1341,11 +1452,19 @@ void CustomPaintPaintMethod::SetGrayFilter(const std::string& percent, SkPaint& 
     matrix[12] = LUMB + (1 - LUMB) * value;
 
     matrix[18] = 1.0f;
+#ifndef USE_ROSEN_DRAWING
     SetColorFilter(matrix, paint);
+#else
+    SetColorFilter(matrix, pen, brush);
+#endif
 }
 
 // https://drafts.fxtf.org/filter-effects/#sepiaEquivalent
+#ifndef USE_ROSEN_DRAWING
 void CustomPaintPaintMethod::SetSepiaFilter(const std::string& percent, SkPaint& paint)
+#else
+void CustomPaintPaintMethod::SetSepiaFilter(const std::string& percent, RSPen* pen, RSBrush* brush)
+#endif
 {
     float percentNum = 1.0f;
     if (!CheckNumberAndPercentage(percent, true, percentNum)) {
@@ -1365,11 +1484,19 @@ void CustomPaintPaintMethod::SetSepiaFilter(const std::string& percent, SkPaint&
     matrix[12] = 1.0f - percentNum * 0.869f;
 
     matrix[18] = 1.0f;
+#ifndef USE_ROSEN_DRAWING
     SetColorFilter(matrix, paint);
+#else
+    SetColorFilter(matrix, pen, brush);
+#endif
 }
 
 // https://drafts.fxtf.org/filter-effects/#saturateEquivalent
+#ifndef USE_ROSEN_DRAWING
 void CustomPaintPaintMethod::SetSaturateFilter(const std::string& percent, SkPaint& paint)
+#else
+void CustomPaintPaintMethod::SetSaturateFilter(const std::string& percent, RSPen* pen, RSBrush* brush)
+#endif
 {
     float percentNum = 1.0f;
     if (!CheckNumberAndPercentage(percent, false, percentNum)) {
@@ -1390,11 +1517,19 @@ void CustomPaintPaintMethod::SetSaturateFilter(const std::string& percent, SkPai
     matrix[12] = LUMB + (1 - LUMB) * percentNum;
 
     matrix[18] = 1.0f;
+#ifndef USE_ROSEN_DRAWING
     SetColorFilter(matrix, paint);
+#else
+    SetColorFilter(matrix, pen, brush);
+#endif
 }
 
 // https://drafts.fxtf.org/filter-effects/#huerotateEquivalent
+#ifndef USE_ROSEN_DRAWING
 void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam, SkPaint& paint)
+#else
+void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam, RSPen* pen, RSBrush* brush)
+#endif
 {
     std::string percent = filterParam;
     float rad = 0.0f;
@@ -1436,7 +1571,11 @@ void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam, 
     matrix[12] = LUMB + cosValue * (1 - LUMB) + sinValue * LUMB;
 
     matrix[18] = 1.0f;
+#ifndef USE_ROSEN_DRAWING
     SetColorFilter(matrix, paint);
+#else
+    SetColorFilter(matrix, pen, brush);
+#endif
 }
 
 /*
@@ -1449,7 +1588,11 @@ void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam, 
  * If R==1, R' = v1 = 1 - percentNum = percentNum + (1 - 2 * percentNum) * R
  * so R' = funcR(R) = percentNum + (1 - 2 * percentNum) * R, where 0 <= R <= 1.
  */
+#ifndef USE_ROSEN_DRAWING
 void CustomPaintPaintMethod::SetInvertFilter(const std::string& percent, SkPaint& paint)
+#else
+void CustomPaintPaintMethod::SetInvertFilter(const std::string& percent, RSPen* pen, RSBrush* brush)
+#endif
 {
     float percentNum = 1.0f;
     if (!CheckNumberAndPercentage(percent, true, percentNum)) {
@@ -1459,7 +1602,11 @@ void CustomPaintPaintMethod::SetInvertFilter(const std::string& percent, SkPaint
     matrix[0] = matrix[6] = matrix[12] = 1.0 - 2.0 * percentNum;
     matrix[4] = matrix[9] = matrix[14] = percentNum;
     matrix[18] = 1.0f;
+#ifndef USE_ROSEN_DRAWING
     SetColorFilter(matrix, paint);
+#else
+    SetColorFilter(matrix, pen, brush);
+#endif
 }
 
 /*
@@ -1471,7 +1618,11 @@ void CustomPaintPaintMethod::SetInvertFilter(const std::string& percent, SkPaint
  * If A==1, A' = v1 = percentNum = percentNum * A
  * so A' = funcR(A) = percentNum * A, where 0 <= A <= 1.
  */
+#ifndef USE_ROSEN_DRAWING
 void CustomPaintPaintMethod::SetOpacityFilter(const std::string& percent, SkPaint& paint)
+#else
+void CustomPaintPaintMethod::SetOpacityFilter(const std::string& percent, RSPen* pen, RSBrush* brush)
+#endif
 {
     float percentNum = 1.0f;
     if (!CheckNumberAndPercentage(percent, true, percentNum)) {
@@ -1480,7 +1631,11 @@ void CustomPaintPaintMethod::SetOpacityFilter(const std::string& percent, SkPain
     float matrix[20] = { 0.0f };
     matrix[0] = matrix[6] = matrix[12] = 1.0f;
     matrix[18] = percentNum;
+#ifndef USE_ROSEN_DRAWING
     SetColorFilter(matrix, paint);
+#else
+    SetColorFilter(matrix, pen, brush);
+#endif
 }
 
 /*
@@ -1489,7 +1644,11 @@ void CustomPaintPaintMethod::SetOpacityFilter(const std::string& percent, SkPain
  * R' = funcR(R) = slope * R + intercept
  * where: slope = percentNum, intercept = 0
  */
+#ifndef USE_ROSEN_DRAWING
 void CustomPaintPaintMethod::SetBrightnessFilter(const std::string& percent, SkPaint& paint)
+#else
+void CustomPaintPaintMethod::SetBrightnessFilter(const std::string& percent, RSPen* pen, RSBrush* brush)
+#endif
 {
     float percentNum = 1.0f;
     if (!CheckNumberAndPercentage(percent, false, percentNum)) {
@@ -1498,7 +1657,11 @@ void CustomPaintPaintMethod::SetBrightnessFilter(const std::string& percent, SkP
     float matrix[20] = { 0.0f };
     matrix[0] = matrix[6] = matrix[12] = percentNum;
     matrix[18] = 1.0f;
+#ifndef USE_ROSEN_DRAWING
     SetColorFilter(matrix, paint);
+#else
+    SetColorFilter(matrix, pen, brush);
+#endif
 }
 
 /*
@@ -1507,7 +1670,11 @@ void CustomPaintPaintMethod::SetBrightnessFilter(const std::string& percent, SkP
  * R' = funcR(R) = slope * R + intercept
  * where: slope = percentNum, intercept = 0.5 * (1 - percentNum)
  */
+#ifndef USE_ROSEN_DRAWING
 void CustomPaintPaintMethod::SetContrastFilter(const std::string& percent, SkPaint& paint)
+#else
+void CustomPaintPaintMethod::SetContrastFilter(const std::string& percent, RSPen* pen, RSBrush* brush)
+#endif
 {
     float percentNum = 1.0f;
     if (!CheckNumberAndPercentage(percent, false, percentNum)) {
@@ -1517,10 +1684,15 @@ void CustomPaintPaintMethod::SetContrastFilter(const std::string& percent, SkPai
     matrix[0] = matrix[6] = matrix[12] = percentNum;
     matrix[4] = matrix[9] = matrix[14] = 0.5f * (1 - percentNum);
     matrix[18] = 1;
+#ifndef USE_ROSEN_DRAWING
     SetColorFilter(matrix, paint);
+#else
+    SetColorFilter(matrix, pen, brush);
+#endif
 }
 
 // https://drafts.fxtf.org/filter-effects/#blurEquivalent
+#ifndef USE_ROSEN_DRAWING
 void CustomPaintPaintMethod::SetBlurFilter(const std::string& percent, SkPaint& paint)
 {
     float blurNum = 0.0f;
@@ -1534,9 +1706,31 @@ void CustomPaintPaintMethod::SetBlurFilter(const std::string& percent, SkPaint& 
     paint.setImageFilter(SkBlurImageFilter::Make(blurNum, blurNum, nullptr));
 #endif
 }
-
-void CustomPaintPaintMethod::SetColorFilter(float matrix[20], SkPaint& paint)
+#else
+void CustomPaintPaintMethod::SetBlurFilter(const std::string& percent, RSPen* pen, RSBrush* brush)
 {
+    auto imageFilter = RSImageFilter::CreateBlurImageFilter(
+        BlurStrToDouble(percent), BlurStrToDouble(percent), RSTileMode::DECAL, nullptr);
+    if (pen) {
+        auto filter = pen->GetFilter();
+        filter.SetImageFilter(imageFilter);
+        pen->SetFilter(filter);
+    }
+    if (brush) {
+        auto filter = brush->GetFilter();
+        filter.SetImageFilter(imageFilter);
+        brush->SetFilter(filter);
+    }
+}
+#endif
+
+#ifndef USE_ROSEN_DRAWING
+void CustomPaintPaintMethod::SetColorFilter(float matrix[20], SkPaint& paint)
+#else
+void CustomPaintPaintMethod::SetColorFilter(float matrix[20], RSPen* pen, RSBrush* brush)
+#endif
+{
+#ifndef USE_ROSEN_DRAWING
 #ifdef USE_SYSTEM_SKIA
     matrix[4] *= 255;
     matrix[9] *= 255;
@@ -1545,6 +1739,21 @@ void CustomPaintPaintMethod::SetColorFilter(float matrix[20], SkPaint& paint)
     paint.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
 #else
     paint.setColorFilter(SkColorFilters::Matrix(matrix));
+#endif
+#else
+    RSColorMatrix colorMatrix;
+    colorMatrix.SetArray(matrix);
+    auto colorFilter = RSColorFilter::CreateMatrixColorFilter(colorMatrix);
+    if (pen) {
+        auto filter = pen->GetFilter();
+        filter.SetColorFilter(colorFilter);
+        pen->SetFilter(filter);
+    }
+    if (brush) {
+        auto filter = brush->GetFilter();
+        filter.SetColorFilter(colorFilter);
+        brush->SetFilter(filter);
+    }
 #endif
 }
 
