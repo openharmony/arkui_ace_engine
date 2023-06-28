@@ -460,6 +460,7 @@ private:
     bool IsOutOfBoundary(float mainOffset = 0.0f) const;
     float GetRemainingOffset() const;
     float MainSize() const;
+    float GetMainContentSize() const;
     void FireChangeEvent() const;
     void FireAnimationStartEvent(int32_t currentIndex, int32_t nextIndex, const AnimationCallbackInfo& info) const;
     void FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
@@ -472,6 +473,10 @@ private:
     int32_t GetLoopIndex(int32_t originalIndex) const;
     int32_t CurrentIndex() const;
     int32_t GetDisplayCount() const;
+    int32_t CalculateDisplayCount() const;
+    int32_t CalculateCount(
+        float contentWidth, float minSize, float margin, float gutter, float swiperPadding = 0.0f) const;
+    bool IsAutoFill() const;
     int32_t GetDuration() const;
     int32_t GetInterval() const;
     RefPtr<Curve> GetCurve() const;

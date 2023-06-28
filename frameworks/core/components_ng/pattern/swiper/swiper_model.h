@@ -94,6 +94,7 @@ public:
     virtual void SetDisplayMode(SwiperDisplayMode displayMode);
     virtual void SetDisplayCount(int32_t displayCount);
     virtual void ResetDisplayCount() {}
+    virtual void SetMinSize(const Dimension& minSize);
     virtual void SetShowIndicator(bool showIndicator);
     virtual void SetItemSpace(const Dimension& itemSpace);
     virtual void SetCachedCount(int32_t cachedCount);

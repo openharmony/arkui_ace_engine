@@ -45,6 +45,7 @@ public:
         value->propCachedCount_ = CloneCachedCount();
         value->propDisplayMode_ = CloneDisplayMode();
         value->propDisplayCount_ = CloneDisplayCount();
+        value->propMinSize_ = CloneMinSize();
         value->propShowIndicator_ = CloneShowIndicator();
         value->propIndicatorType_ = CloneIndicatorType();
         value->propLeft_ = CloneLeft();
@@ -73,6 +74,7 @@ public:
         ResetCachedCount();
         ResetDisplayMode();
         ResetDisplayCount();
+        ResetMinSize();
         ResetShowIndicator();
         ResetIndicatorType();
         ResetLeft();
@@ -103,6 +105,7 @@ public:
                                      ? "SwiperDisplayMode.AutoLinear"
                                      : "SwiperDisplayMode.Stretch");
         json->Put("displayCount", propDisplayCount_.value_or(1));
+        json->Put("minSize", propMinSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
         json->Put("prevMargin", propPrevMargin_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
         json->Put("nextMargin", propNextMargin_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
         json->Put("displayArrow", propDisplayArrow_.value_or(false) ? "true" : "false");
@@ -147,6 +150,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CachedCount, int32_t, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayMode, SwiperDisplayMode, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayCount, int32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MinSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowIndicator, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndicatorType, SwiperIndicatorType, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Left, Dimension, PROPERTY_UPDATE_MEASURE);
