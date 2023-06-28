@@ -348,7 +348,7 @@ public:
         return layoutProperty->HasAspectRatio();
     }
 
-    virtual void OnTouchTestHit() {}
+    virtual void OnTouchTestHit(SourceType hitTestType) {}
 
 protected:
     virtual void OnAttachToFrameNode() {}
