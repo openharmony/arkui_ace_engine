@@ -461,7 +461,7 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
                 pos->second.endPos, prevMargin_ != 0.0f ? startMainPos_ - prevMargin_ - spaceWidth_ : startMainPos_)) {
             break;
         }
-        layoutWrapper->RemoveChildInRenderTree(pos->first);
+        layoutWrapper->RemoveChildInRenderTree(GetLoopIndex(pos->first));
         itemPosition_.erase(pos++);
     }
 }
@@ -550,7 +550,7 @@ void SwiperLayoutAlgorithm::LayoutBackward(
                 pos->second.startPos, nextMargin_ != 0.0f ? endMainPos_ + nextMargin_ + spaceWidth_ : endMainPos_)) {
             break;
         }
-        layoutWrapper->RemoveChildInRenderTree(pos->first);
+        layoutWrapper->RemoveChildInRenderTree(GetLoopIndex(pos->first));
         removeIndexes.emplace_back(pos->first);
     }
     for (const auto& index : removeIndexes) {
