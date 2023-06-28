@@ -32,6 +32,11 @@ public:
 
     static RefPtr<WindowNode> GetOrCreateWindowNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
+    bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t sourceType) override;
+    std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType) override;
+
+private:
+    RectF ConvertHotRect(const RectF& rect, int32_t sourceType)
 };
 } // namespace OHOS::Ace::NG
 

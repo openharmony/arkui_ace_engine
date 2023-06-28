@@ -328,7 +328,8 @@ public:
     void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
     void RemoveLastHotZoneRect() const;
 
-    bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint);
+    virtual bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint,
+        int32_t sourceType = 0);
 
     bool IsLayoutDirtyMarked() const
     {
@@ -444,7 +445,7 @@ private:
 
     HitTestMode GetHitTestMode() const override;
     bool GetTouchable() const;
-    std::vector<RectF> GetResponseRegionList(const RectF& rect);
+    virtual std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType = 0);
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
     void ProcessAllVisibleCallback(
