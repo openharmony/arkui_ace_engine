@@ -347,7 +347,7 @@ void SliderContentModifier::SetSelectSize(const PointF& start, const PointF& end
         selectStart_->Set(start - PointF());
     }
     CHECK_NULL_VOID(selectEnd_);
-    if (needAnimate_) {
+    if (needAnimate_ && isVisible_) {
         AnimationOption option = AnimationOption();
         auto motion =
             AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_MOTION_RESPONSE, SPRING_MOTION_DAMPING_FRACTION);
@@ -362,7 +362,7 @@ void SliderContentModifier::SetCircleCenter(const PointF& center)
 {
     CHECK_NULL_VOID(blockCenterX_);
     CHECK_NULL_VOID(blockCenterY_);
-    if (needAnimate_) {
+    if (needAnimate_ && isVisible_) {
         AnimationOption option = AnimationOption();
         auto motion =
             AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_MOTION_RESPONSE, SPRING_MOTION_DAMPING_FRACTION);
