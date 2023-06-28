@@ -260,7 +260,36 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorController>::Declare("RichEditorController");
     JSClass<JSRichEditorController>::CustomMethod("addImageSpan", &JSRichEditorController::AddImageSpan);
     JSClass<JSRichEditorController>::CustomMethod("addTextSpan", &JSRichEditorController::AddTextSpan);
+    JSClass<JSRichEditorController>::CustomMethod("setCaretOffset", &JSRichEditorController::SetCaretOffset);
+    JSClass<JSRichEditorController>::CustomMethod("getCaretOffset", &JSRichEditorController::GetCaretOffset);
     JSClass<JSRichEditorController>::Bind(
         globalObj, JSRichEditorController::Constructor, JSRichEditorController::Destructor);
+}
+
+void JSRichEditorController::GetCaretOffset(const JSCallbackInfo& args)
+{
+    auto controller = controllerWeak_.Upgrade();
+    int32_t caretOffset = -1;
+    if (controller) {
+        caretOffset = controller->GetCaretOffset();
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(caretOffset)));
+    } else {
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(caretOffset)));
+    }
+}
+
+void JSRichEditorController::SetCaretOffset(const JSCallbackInfo& args)
+{
+    auto controller = controllerWeak_.Upgrade();
+    int32_t caretPosition = -1;
+    bool success = false;
+    JSViewAbstract::ParseJsInteger<int32_t>(args[0], caretPosition);
+    caretPosition = caretPosition < 0 ? -1 : caretPosition;
+    if (controller) {
+        success = controller->SetCaretOffset(caretPosition);
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(success)));
+    } else {
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(success)));
+    }
 }
 } // namespace OHOS::Ace::Framework
