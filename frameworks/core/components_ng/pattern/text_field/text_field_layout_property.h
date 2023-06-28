@@ -64,6 +64,8 @@ public:
         ResetShowPasswordSourceInfo();
         ResetHidePasswordSourceInfo();
         ResetTextAlignChanged();
+        ResetDisplayMode();
+        ResetMaxViewLines();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -124,6 +126,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowPasswordIcon, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowCounter, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowUnderline, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayMode, DisplayMode, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaxViewLines, uint32_t, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(WidthAuto, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TypeChanged, bool, PROPERTY_UPDATE_MEASURE);
@@ -164,6 +168,8 @@ protected:
         value->propShowPasswordSourceInfo_ = CloneShowPasswordSourceInfo();
         value->propHidePasswordSourceInfo_ = CloneHidePasswordSourceInfo();
         value->propTextAlignChanged_ = CloneTextAlignChanged();
+        value->propDisplayMode_ = CloneDisplayMode();
+        value->propMaxViewLines_ = CloneMaxViewLines();
     }
 
 private:

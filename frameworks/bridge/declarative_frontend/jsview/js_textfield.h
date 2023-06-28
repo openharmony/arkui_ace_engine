@@ -79,6 +79,8 @@ public:
     static void SetShowUnit(const JSCallbackInfo& info);
     static void SetShowCounter(const JSCallbackInfo& info);
     static void SetShowError(const JSCallbackInfo& info);
+    static void SetBarState(const JSCallbackInfo& info);
+    static void SetMaxLines(const JSCallbackInfo& info);
 
     static void SetShowUnderline(const JSCallbackInfo& info);
     static void SetEnableKeyboardOnFocus(const JSCallbackInfo& info);

@@ -209,5 +209,9 @@ extern const char OVER_COUNT_BORDER_COLOR[];
 extern const char ERROR_PASSWORD_BORDER_ALPHA[];
 extern const char OVER_COUNT_BORDER_COLOR_ALPHA[];
 extern const char UNDERLINE_COLOR_ALPHA[];
+extern const char INLINE_TEXT_COLOR[];
+extern const char INLINE_RADIUS_SIZE[];
+extern const char INLINE_BG_COLOR[];
+extern const char INLINE_BORDER_COLOR[];
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_ATTRIBUTES_H

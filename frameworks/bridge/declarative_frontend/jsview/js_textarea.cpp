@@ -55,6 +55,9 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("hoverEffect", &JSTextField::JsHoverEffect);
     JSClass<JSTextArea>::StaticMethod("maxLength", &JSTextField::SetMaxLength);
     JSClass<JSTextArea>::StaticMethod("showCounter", &JSTextField::SetShowCounter);
+    JSClass<JSTextArea>::StaticMethod("barState", &JSTextField::SetBarState);
+    JSClass<JSTextArea>::StaticMethod("maxLines", &JSTextField::SetMaxLines);
+    JSClass<JSTextArea>::StaticMethod("style", &JSTextField::SetInputStyle);
     JSClass<JSTextArea>::StaticMethod("onChange", &JSTextField::SetOnChange);
     JSClass<JSTextArea>::StaticMethod("onCopy", &JSTextField::SetOnCopy);
     JSClass<JSTextArea>::StaticMethod("onCut", &JSTextField::SetOnCut);

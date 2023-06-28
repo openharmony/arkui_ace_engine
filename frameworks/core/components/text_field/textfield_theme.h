@@ -178,6 +178,10 @@ public:
             theme->passwordErrorLableColor_ = pattern->GetAttr<Color>(ERROR_PASSWORD_TEXT_COLOR, Color());
             theme->overCountBorderColor_ = pattern->GetAttr<Color>(OVER_COUNT_BORDER_COLOR, Color())
                 .BlendOpacity(pattern->GetAttr<double>(OVER_COUNT_BORDER_COLOR_ALPHA, defaultErrorAlpha));
+            theme->inlineTextColor_ =  pattern->GetAttr<Color>(INLINE_TEXT_COLOR, Color());
+            theme->inlineRadiusSize_ = Radius(pattern->GetAttr<Dimension>(INLINE_RADIUS_SIZE, 4.0_vp));
+            theme->inlineBgColor_ = pattern->GetAttr<Color>(INLINE_BG_COLOR, Color());
+            theme->inlineBorderColor_ = pattern->GetAttr<Color>(INLINE_BORDER_COLOR, Color());
         }
     };
 
@@ -423,6 +427,26 @@ public:
         return overCountTextStyle_;
     }
 
+    const Color& GetInlineTextColor() const
+    {
+        return inlineTextColor_;
+    }
+
+    const Radius& GetInlineRadiusSize() const
+    {
+        return inlineRadiusSize_;
+    }
+
+    const Color& GetInlineBgColor() const
+    {
+        return inlineBgColor_;
+    }
+
+    const Color& GetInlineBorderColor() const
+    {
+        return inlineBorderColor_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -467,6 +491,10 @@ private:
     TextStyle countTextStyleOuter_;
     TextStyle overCountStyleOuter_;
     TextStyle overCountTextStyle_;
+    Color inlineTextColor_;
+    Radius inlineRadiusSize_;
+    Color inlineBgColor_;
+    Color inlineBorderColor_;
 
     // UX::disable state: opacity is set to 38% of the default
     double disableOpacityRatio_ = 1.0;

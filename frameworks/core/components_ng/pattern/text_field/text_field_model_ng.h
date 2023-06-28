@@ -67,6 +67,8 @@ public:
     void SetPasswordIcon(const PasswordIcon& passwordIcon) override;
     void SetShowUnit(std::function<void()>&& unitFunction) override;
     void SetShowError(const std::string& errorText, bool visible) override;
+    void SetBarState(OHOS::Ace::DisplayMode value) override;
+    void SetMaxViewLines(uint32_t value) override;
 
     void SetShowUnderline(bool showUnderLine) override;
     void SetShowCounter(bool value) override;
