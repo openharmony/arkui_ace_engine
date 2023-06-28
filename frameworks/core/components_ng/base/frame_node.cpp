@@ -26,6 +26,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/layout_algorithm.h"
@@ -445,6 +446,10 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure() || dirty->SkipMeasureContent();
     config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
+    if ((config.skipMeasure == false) && (config.skipLayout == false) && GetInspectorId().has_value()) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
+    }
     auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(dirty, config);
     // TODO: temp use and need to delete.
     needRerender = needRerender || pattern_->OnDirtyLayoutWrapperSwap(dirty, config.skipMeasure, config.skipLayout);
@@ -734,9 +739,17 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     }
     auto wrapper = CreatePaintWrapper();
     CHECK_NULL_RETURN_NOLOG(wrapper, std::nullopt);
-    auto task = [wrapper, paintProperty = paintProperty_]() {
+    auto weak = AceType::WeakClaim(this);
+    auto task = [weak, wrapper, paintProperty = paintProperty_]() {
+        ACE_SCOPED_TRACE("FrameNode::RenderTask");
+        auto ref = weak.Upgrade();
         wrapper->FlushRender();
         paintProperty->CleanDirty();
+
+        if (ref->GetInspectorId().has_value()) {
+            auto renderContext = ref->GetRenderContext();
+            renderContext->RequestNextFrame();
+        }
     };
     if (forceUseMainThread || wrapper->CheckShouldRunOnMain()) {
         return UITask(std::move(task), MAIN_TASK);
