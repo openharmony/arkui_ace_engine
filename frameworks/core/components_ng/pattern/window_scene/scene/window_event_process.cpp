@@ -21,6 +21,7 @@
 namespace OHOS::Ace::NG {
 
 WindowEventProcess::WindowEventProcess() {}
+
 WindowEventProcess::~WindowEventProcess() {}
 
 void WindowEventProcess::ProcessWindowEvent(const RefPtr<WindowNode>& windowNode,

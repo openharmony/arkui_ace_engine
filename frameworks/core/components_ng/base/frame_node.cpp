@@ -1308,7 +1308,7 @@ std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t s
 {
     std::vector<RectF> responseRegionList;
     auto gestureHub = eventHub_->GetGestureEventHub();
-    if (!gestureHub) { 
+    if (!gestureHub) {
         responseRegionList.emplace_back(rect);
         return responseRegionList;
     }
