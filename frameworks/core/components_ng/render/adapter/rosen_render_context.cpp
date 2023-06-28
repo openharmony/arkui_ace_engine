@@ -424,8 +424,13 @@ void RosenRenderContext::PaintBackground()
 {
     if (InstanceOf<PixelMapImage>(bgImage_)) {
         PaintPixmapBgImage();
+#ifndef USE_ROSEN_DRAWING
     } else if (InstanceOf<SkiaImage>(bgImage_)) {
         PaintSkBgImage();
+#else
+    } else if (InstanceOf<RosenImage>(bgImage_)) {
+        PaintRSBgImage();
+#endif
     } else {
         return;
     }
@@ -485,7 +490,11 @@ void RosenRenderContext::SetBackBlurFilter()
         const auto& radius = background->propBlurRadius;
         if (radius.has_value() && radius->IsValid()) {
             float radiusPx = context->NormalizeToPx(radius.value());
+#ifndef USE_ROSEN_DRAWING
             float backblurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
+#else
+            float backblurRadius = DrawingDecorationPainter::ConvertRadiusToSigma(radiusPx);
+#endif
             backFilter = Rosen::RSFilter::CreateBlurFilter(backblurRadius, backblurRadius);
         }
     } else if (GetRosenBlurStyleValue(blurStyle.value()) == MATERIAL_BLUR_STYLE::NO_MATERIAL) {
@@ -511,7 +520,11 @@ void RosenRenderContext::SetFrontBlurFilter()
         const auto& radius = foreground->propBlurRadius;
         if (radius.has_value() && radius->IsValid()) {
             float radiusPx = context->NormalizeToPx(radius.value());
+#ifndef USE_ROSEN_DRAWING
             float backblurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
+#else
+            float backblurRadius = DrawingDecorationPainter::ConvertRadiusToSigma(radiusPx);
+#endif
             frontFilter = Rosen::RSFilter::CreateBlurFilter(backblurRadius, backblurRadius);
         }
     } else if (GetRosenBlurStyleValue(blurStyle.value()) == MATERIAL_BLUR_STYLE::NO_MATERIAL) {
@@ -1033,6 +1046,7 @@ void RosenRenderContext::BdImagePaintTask(RSCanvas& canvas)
     auto dipScale = pipeline->GetDipScale();
 
     CHECK_NULL_VOID(bdImage_);
+#ifndef USE_ROSEN_DRAWING
     sk_sp<SkImage> image;
     if (InstanceOf<SkiaImage>(bdImage_)) {
         image = DynamicCast<SkiaImage>(bdImage_)->GetImage();
@@ -1043,6 +1057,18 @@ void RosenRenderContext::BdImagePaintTask(RSCanvas& canvas)
     } else {
         return;
     }
+#else
+    std::shared_ptr<RSImage> image;
+    if (InstanceOf<RosenImage>(bdImage_)) {
+        image = DynamicCast<RosenImage>(bdImage_)->GetImage();
+    } else if (InstanceOf<PixelMapImage>(bdImage_)) {
+        auto pixmap = DynamicCast<PixelMapImage>(bdImage_)->GetPixelMap();
+        CHECK_NULL_VOID(pixmap);
+        image = RosenImage::MakeRSImageFromPixmap(pixmap);
+    } else {
+        return;
+    }
+#endif
     CHECK_NULL_VOID(image);
     RSImage rsImage(&image);
     BorderImagePainter borderImagePainter(*GetBdImage(), widthProp, paintRect.GetSize(), rsImage, dipScale);
@@ -1159,7 +1185,11 @@ void RosenRenderContext::PaintBorderImageGradient()
     auto borderImageProperty = *GetBdImage();
     auto&& borderWidthProperty = layoutProperty->GetBorderWidthProperty();
     auto paintTask = [paintSize, borderImageProperty, &borderWidthProperty, gradient](RSCanvas& rsCanvas) mutable {
+#ifndef USE_ROSEN_DRAWING
         auto rsImage = SkiaDecorationPainter::CreateBorderImageGradient(gradient, paintSize);
+#else
+        auto rsImage = DrawingDecorationPainter::CreateBorderImageGradient(gradient, paintSize);
+#endif
         BorderImagePainter borderImagePainter(borderImageProperty, borderWidthProperty, paintSize, rsImage,
             PipelineBase::GetCurrentContext()->GetDipScale());
         borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), rsCanvas);
@@ -1537,9 +1567,15 @@ void RosenRenderContext::FlushContentDrawFunction(CanvasDrawFunction&& contentDr
     CHECK_NULL_VOID(rsNode_);
     CHECK_NULL_VOID(contentDraw);
     rsNode_->DrawOnNode(
+#ifndef USE_ROSEN_DRAWING
         Rosen::RSModifierType::CONTENT_STYLE, [contentDraw = std::move(contentDraw)](std::shared_ptr<SkCanvas> canvas) {
             RSCanvas rsCanvas(&canvas);
             contentDraw(rsCanvas);
+#else
+        Rosen::RSModifierType::CONTENT_STYLE, [contentDraw = std::move(contentDraw)](std::shared_ptr<RSCanvas> canvas) {
+            CHECK_NULL_VOID(canvas);
+            contentDraw(*canvas);
+#endif
         });
 }
 
@@ -1565,9 +1601,15 @@ void RosenRenderContext::FlushForegroundDrawFunction(CanvasDrawFunction&& foregr
     CHECK_NULL_VOID(rsNode_);
     CHECK_NULL_VOID(foregroundDraw);
     rsNode_->DrawOnNode(Rosen::RSModifierType::FOREGROUND_STYLE,
+#ifndef USE_ROSEN_DRAWING
         [foregroundDraw = std::move(foregroundDraw)](std::shared_ptr<SkCanvas> canvas) {
             RSCanvas rsCanvas(&canvas);
             foregroundDraw(rsCanvas);
+#else
+        [foregroundDraw = std::move(foregroundDraw)](std::shared_ptr<RSCanvas> canvas) {
+            CHECK_NULL_VOID(canvas);
+            foregroundDraw(*canvas);
+#endif
         });
 }
 
@@ -1576,9 +1618,15 @@ void RosenRenderContext::FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDr
     CHECK_NULL_VOID(rsNode_);
     CHECK_NULL_VOID(overlayDraw);
     rsNode_->DrawOnNode(
+#ifndef USE_ROSEN_DRAWING
         Rosen::RSModifierType::OVERLAY_STYLE, [overlayDraw = std::move(overlayDraw)](std::shared_ptr<SkCanvas> canvas) {
             RSCanvas rsCanvas(&canvas);
             overlayDraw(rsCanvas);
+#else
+        Rosen::RSModifierType::OVERLAY_STYLE, [overlayDraw = std::move(overlayDraw)](std::shared_ptr<RSCanvas> canvas) {
+            CHECK_NULL_VOID(canvas);
+            overlayDraw(*canvas);
+#endif
         });
 }
 
@@ -1798,7 +1846,11 @@ void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
     if (shadow.GetHardwareAcceleration()) {
         rsNode_->SetShadowElevation(shadow.GetElevation());
     } else {
+#ifndef USE_ROSEN_DRAWING
         rsNode_->SetShadowRadius(SkiaDecorationPainter::ConvertRadiusToSigma(shadow.GetBlurRadius()));
+#else
+        rsNode_->SetShadowRadius(DrawingDecorationPainter::ConvertRadiusToSigma(shadow.GetBlurRadius()));
+#endif
     }
     RequestNextFrame();
 }
@@ -2081,14 +2133,25 @@ void RosenRenderContext::PaintClip(const SizeF& frameSize)
     auto& clip = GetOrCreateClip();
     if (clip->HasClipShape()) {
         auto basicShape = clip->GetClipShapeValue();
+#ifndef USE_ROSEN_DRAWING
         auto skPath = SkiaDecorationPainter::SkiaCreateSkPath(basicShape, frameSize);
         rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
+#else
+        auto rsPath = DrawingDecorationPainter::DrawingCreatePath(basicShape, frameSize);
+        rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(rsPath));
+#endif
     }
 
     if (clip->HasClipMask()) {
         auto basicShape = clip->GetClipMaskValue();
+#ifndef USE_ROSEN_DRAWING
         auto skPath = SkiaDecorationPainter::SkiaCreateSkPath(basicShape, frameSize);
         rsNode_->SetMask(Rosen::RSMask::CreatePathMask(skPath, SkiaDecorationPainter::CreateMaskSkPaint(basicShape)));
+#else
+        auto rsPath = DrawingDecorationPainter::DrawingCreatePath(basicShape, frameSize);
+        rsNode_->SetMask(Rosen::RSMask::CreatePathMask(
+            rsPath, DrawingDecorationPainter::CreateMaskDrawingBrush(basicShape)));
+#endif
     }
 }
 
@@ -2111,17 +2174,29 @@ void RosenRenderContext::PaintProgressMask()
 void RosenRenderContext::SetClipBoundsWithCommands(const std::string& commands)
 {
     CHECK_NULL_VOID(rsNode_);
+#ifndef USE_ROSEN_DRAWING
     SkPath skPath;
     SkParsePath::FromSVGString(commands.c_str(), &skPath);
     rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
+#else
+    RSPath rsPath;
+    rsPath.BuildFromSVGString(commands);
+    rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(rsPath));
+#endif
 }
 
 void RosenRenderContext::ClipWithRect(const RectF& rectF)
 {
     CHECK_NULL_VOID(rsNode_);
+#ifndef USE_ROSEN_DRAWING
     SkPath skPath;
     skPath.addRect(rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height());
     rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
+#else
+    RSPath rsPath;
+    rsPath.AddRect({rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height()});
+    rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(rsPath));
+#endif
 }
 
 void RosenRenderContext::ClipWithRRect(const RectF& rectF, const RadiusF& radiusF)
@@ -2854,9 +2929,15 @@ inline void RosenRenderContext::ConvertRadius(const BorderRadiusProperty& value,
         static_cast<float>(value.radiusBottomLeft.value_or(Dimension()).ConvertToPx()));
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderContext::PaintSkBgImage()
 {
     auto image = DynamicCast<NG::SkiaImage>(bgImage_);
+#else
+void RosenRenderContext::PaintRSBgImage()
+{
+    auto image = DynamicCast<NG::RosenImage>(bgImage_);
+#endif
     CHECK_NULL_VOID(bgLoadingCtx_ && image);
 
     auto rosenImage = std::make_shared<Rosen::RSImage>();
