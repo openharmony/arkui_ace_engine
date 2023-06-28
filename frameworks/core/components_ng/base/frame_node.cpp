@@ -1804,7 +1804,9 @@ bool FrameNode::IsContentRoot()
     return parent->GetTag() == V2::JS_VIEW_ETS_TAG && grandParent->GetTag() == V2::PAGE_ETS_TAG;
 }
 
-void FrameNode::AddFRCSceneInfo(std::string sceneName, float speed, SceneStatus status)
+void FrameNode::AddFRCSceneInfo(std::string name, float speed, SceneStatus status)
 {
+    // Frame Rate Controller(FRC):
+    // Based on scene, speed and scene status, FrameRateRange will be sent to RSNode.
 }
 } // namespace OHOS::Ace::NG
