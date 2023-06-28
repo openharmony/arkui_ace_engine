@@ -230,6 +230,7 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(FontWeight, FontWeight);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFamily, std::vector<std::string>);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecoration, TextDecoration);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationStyle, TextDecorationStyle);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, Color);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextCase, TextCase);
     DEFINE_SPAN_FONT_STYLE_ITEM(LetterSpacing, Dimension);

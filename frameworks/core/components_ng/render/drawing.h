@@ -80,6 +80,7 @@ using RSTextAlign = rosen::TextAlign;
 using RSWordBreakType = rosen::WordBreakType;
 using RSTextStyle = rosen::TextStyle;
 using RSTextDecoration = rosen::TextDecoration;
+using RSTextDecorationStyle = rosen::TextDecorationStyle;
 using RSFontWeight = rosen::FontWeight;
 using RSFontStyle = rosen::FontStyle;
 using RSTextBaseline = rosen::TextBaseline;

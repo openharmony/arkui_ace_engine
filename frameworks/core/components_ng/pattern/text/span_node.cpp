@@ -30,12 +30,16 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-std::string GetDeclaration(const std::optional<Color>& color, const std::optional<TextDecoration>& textDecoration)
+std::string GetDeclaration(const std::optional<Color>& color, const std::optional<TextDecoration>& textDecoration,
+    const std::optional<TextDecorationStyle>& textDecorationStyle)
 {
     auto jsonSpanDeclaration = JsonUtil::Create(true);
     jsonSpanDeclaration->Put(
         "type", V2::ConvertWrapTextDecorationToStirng(textDecoration.value_or(TextDecoration::NONE)).c_str());
     jsonSpanDeclaration->Put("color", (color.value_or(Color::BLACK).ColorToString()).c_str());
+    jsonSpanDeclaration->Put("style",
+        V2::ConvertWrapTextDecorationStyleToString(textDecorationStyle.value_or(TextDecorationStyle::SOLID))
+            .c_str());
     return jsonSpanDeclaration->ToString();
 }
 } // namespace
@@ -56,8 +60,8 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     if (fontStyle) {
         json->Put("font", GetFont().c_str());
         json->Put("fontSize", GetFontSizeInJson(fontStyle->GetFontSize()).c_str());
-        json->Put(
-            "decoration", GetDeclaration(fontStyle->GetTextDecorationColor(), fontStyle->GetTextDecoration()).c_str());
+        json->Put("decoration", GetDeclaration(fontStyle->GetTextDecorationColor(), fontStyle->GetTextDecoration(),
+            fontStyle->GetTextDecorationStyle()).c_str());
         json->Put("letterSpacing", fontStyle->GetLetterSpacing().value_or(Dimension()).ToString().c_str());
         json->Put(
             "textCase", V2::ConvertWrapTextCaseToStirng(fontStyle->GetTextCase().value_or(TextCase::NORMAL)).c_str());

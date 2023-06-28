@@ -32,6 +32,7 @@ public:
     void SetFontWeight(FontWeight value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
     void SetTextDecoration(TextDecoration value) override;
+    void SetTextDecorationStyle(TextDecorationStyle value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetTextCase(TextCase value) override;
     void SetLetterSpacing(const Dimension& value) override;

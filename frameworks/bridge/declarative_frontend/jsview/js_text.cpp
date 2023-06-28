@@ -398,10 +398,15 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> typeValue = obj->GetProperty("type");
         JSRef<JSVal> colorValue = obj->GetProperty("color");
+        JSRef<JSVal> styleValue = obj->GetProperty("style");
 
         std::optional<TextDecoration> textDecoration;
         if (typeValue->IsNumber()) {
             textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
+        }
+        std::optional<TextDecorationStyle> textDecorationStyle;
+        if (styleValue->IsNumber()) {
+            textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
         }
         std::optional<Color> colorVal;
         Color result;
@@ -414,6 +419,9 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
         }
         if (colorVal) {
             TextModel::GetInstance()->SetTextDecorationColor(colorVal.value());
+        }
+        if (textDecorationStyle) {
+            TextModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
         }
     } while (false);
     info.SetReturnValue(info.This());

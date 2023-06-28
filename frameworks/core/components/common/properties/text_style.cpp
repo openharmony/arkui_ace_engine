@@ -28,6 +28,7 @@ TextStyle::TextStyle(const std::vector<std::string>& fontFamilies, double fontSi
 bool TextStyle::operator==(const TextStyle& rhs) const
 {
     return fontFamilies_ == rhs.fontFamilies_ && fontFeatures_ == rhs.fontFeatures_ &&
+           textDecorationStyle_ == rhs.textDecorationStyle_ &&
            preferFontSizes_ == rhs.preferFontSizes_ && fontSize_ == rhs.fontSize_ &&
            adaptMinFontSize_ == rhs.adaptMinFontSize_ && adaptMaxFontSize_ == rhs.adaptMaxFontSize_ &&
            adaptFontSizeStep_ == rhs.adaptFontSizeStep_ && lineHeight_ == rhs.lineHeight_ &&

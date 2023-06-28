@@ -167,6 +167,15 @@ void TextModelImpl::SetTextDecorationColor(const Color& value)
     component->SetTextStyle(textStyle);
 }
 
+void TextModelImpl::SetTextDecorationStyle(TextDecorationStyle value)
+{
+    auto component = GetComponent();
+    CHECK_NULL_VOID(component);
+    auto textStyle = component->GetTextStyle();
+    textStyle.SetTextDecorationStyle(value);
+    component->SetTextStyle(textStyle);
+}
+
 void TextModelImpl::SetBaselineOffset(const Dimension& value)
 {
     auto component = GetComponent();

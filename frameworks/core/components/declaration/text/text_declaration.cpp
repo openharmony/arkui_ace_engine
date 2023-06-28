@@ -221,6 +221,13 @@ bool TextDeclaration::SetSpecializedStyle(const std::pair<std::string, std::stri
                     specializedStyle.textStyle.SetTextDecorationColor(declaration.ParseColor(val));
                 }
             } },
+        { DOM_TEXT_DECORATION_STYLE,
+            [](const std::string& val, TextDeclaration& declaration) {
+                auto& specializedStyle = declaration.MaybeResetStyle<TextSpecializedStyle>(StyleTag::SPECIALIZED_STYLE);
+                if (specializedStyle.IsValid()) {
+                    specializedStyle.textStyle.SetTextDecorationStyle(ConvertStrToTextDecorationStyle(val));
+                }
+            } },
         { DOM_TEXT_INDENT, [](const std::string& val, TextDeclaration& declaration) {
                 auto& specializedStyle = declaration.MaybeResetStyle<TextSpecializedStyle>(StyleTag::SPECIALIZED_STYLE);
                 if (specializedStyle.IsValid()) {

@@ -107,9 +107,12 @@ std::string TextComposedElement::GetTextDecoration() const
     auto textDecoration =
         renderText ? renderText->GetTextStyle().GetTextDecoration() : TextDecoration::NONE;
     auto textDecorationColor = renderText ? renderText->GetTextStyle().GetTextDecorationColor() : Color::BLACK;
+    auto textDecorationStyle =
+        renderText ? renderText->GetTextStyle().GetTextDecorationStyle() : TextDecorationStyle::SOLID;
     auto resultJson = JsonUtil::Create(true);
     resultJson->Put("type", ConvertWrapTextDecorationToStirng(textDecoration).c_str());
     resultJson->Put("color", ConvertColorToString(textDecorationColor).c_str());
+    resultJson->Put("style", ConvertWrapTextDecorationStyleToString(textDecorationStyle).c_str());
     return resultJson->ToString();
 }
 

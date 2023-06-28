@@ -995,6 +995,10 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
                         child->UpdateTextDecorationColorWithoutFlushDirty(
                             textLayoutProp->GetTextDecorationColor().value());
                     }
+                    if (textLayoutProp->HasTextDecorationStyle()) {
+                        child->UpdateTextDecorationStyleWithoutFlushDirty(
+                            textLayoutProp->GetTextDecorationStyle().value());
+                    }
                 }
                 break;
             case PropertyInfo::TEXTCASE:

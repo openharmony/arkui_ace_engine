@@ -66,6 +66,18 @@ public:
         return declaration ? declaration->HasSetTextDecoration() : false;
     }
 
+    bool HasSetTextDecorationColor() const
+    {
+        auto declaration = AceType::DynamicCast<SpanDeclaration>(declaration_);
+        return declaration ? declaration->HasSetTextDecorationColor() : false;
+    }
+
+    bool HasSetTextDecorationStyle() const
+    {
+        auto declaration = AceType::DynamicCast<SpanDeclaration>(declaration_);
+        return declaration ? declaration->HasSetTextDecorationStyle() : false;
+    }
+
     bool HasSetAllowScale() const
     {
         auto declaration = AceType::DynamicCast<SpanDeclaration>(declaration_);

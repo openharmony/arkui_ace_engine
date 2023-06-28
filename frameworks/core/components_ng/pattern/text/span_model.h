@@ -42,6 +42,7 @@ public:
     virtual void SetFontWeight(FontWeight value) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
     virtual void SetTextDecoration(TextDecoration value) = 0;
+    virtual void SetTextDecorationStyle(TextDecorationStyle value) = 0;
     virtual void SetTextDecorationColor(const Color& value) = 0;
     virtual void SetTextCase(TextCase value) = 0;
     virtual void SetLetterSpacing(const Dimension& value) = 0;

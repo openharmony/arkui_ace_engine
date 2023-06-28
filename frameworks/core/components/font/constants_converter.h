@@ -40,6 +40,7 @@ enum class TextBaseline;
 enum class TextAlign;
 enum class TextDirection;
 enum class TextDecoration;
+enum class TextDecorationStyle;
 enum class WhiteSpace;
 class Color;
 
@@ -58,6 +59,8 @@ txt::TextDirection ConvertTxtTextDirection(TextDirection textDirection);
 SkColor ConvertSkColor(Color color);
 
 txt::TextDecoration ConvertTxtTextDecoration(TextDecoration textDecoration);
+
+txt::TextDecorationStyle ConvertTxtTextDecorationStyle(TextDecorationStyle textDecorationStyle);
 
 void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& context, txt::TextStyle& txtStyle);
 

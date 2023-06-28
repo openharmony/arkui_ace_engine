@@ -96,6 +96,7 @@ void RefreshModelNG::Pop()
         textLayoutProperty->UpdateFontFamily(textStyle->GetFontFamilies());
         textLayoutProperty->UpdateTextDecoration(textStyle->GetTextDecoration());
         textLayoutProperty->UpdateTextDecorationColor(textStyle->GetTextDecorationColor());
+        textLayoutProperty->UpdateTextDecorationStyle(textStyle->GetTextDecorationStyle());
         textLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
 
         auto loadingProgressChild = FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG,

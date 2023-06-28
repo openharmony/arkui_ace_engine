@@ -52,6 +52,7 @@ public:
     virtual void SetLineHeight(const Dimension& value) = 0;
     virtual void SetTextDecoration(TextDecoration value) = 0;
     virtual void SetTextDecorationColor(const Color& value) = 0;
+    virtual void SetTextDecorationStyle(TextDecorationStyle value) = 0;
     virtual void SetBaselineOffset(const Dimension& value) = 0;
     virtual void SetTextCase(TextCase value) = 0;
     virtual void SetLetterSpacing(const Dimension& value) = 0;

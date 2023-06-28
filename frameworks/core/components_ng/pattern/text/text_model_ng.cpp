@@ -131,6 +131,11 @@ void TextModelNG::SetTextDecorationColor(const Color& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecorationColor, value);
 }
 
+void TextModelNG::SetTextDecorationStyle(Ace::TextDecorationStyle value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecorationStyle, value);
+}
+
 void TextModelNG::SetBaselineOffset(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, BaselineOffset, value);

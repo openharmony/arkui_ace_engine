@@ -30,7 +30,8 @@ namespace {
 
 constexpr TextAlign TEXT_ALIGN_METHODS[] = { TextAlign::LEFT, TextAlign::RIGHT, TextAlign::CENTER, TextAlign::JUSTIFY,
     TextAlign::START, TextAlign::END };
-constexpr TextOverflow TEXT_OVERFLOW_METHODS[] = { TextOverflow::CLIP, TextOverflow::ELLIPSIS };
+constexpr TextOverflow TEXT_OVERFLOW_METHODS[] = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
+    TextOverflow::MARQUEE };
 constexpr TextDirection TEXT_DIRECTION_METHODS[] = { TextDirection::LTR, TextDirection::RTL, TextDirection::INHERIT };
 
 } // namespace

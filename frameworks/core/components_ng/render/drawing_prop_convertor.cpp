@@ -152,11 +152,35 @@ RSTextDecoration ToRSTextDecoration(TextDecoration textDecoration)
     return rsTextDecoration;
 }
 
+RSTextDecorationStyle ToRSTextDecorationStyle(TextDecorationStyle textDecorationStyle)
+{
+    RSTextDecorationStyle rsTextDecorationStyle = RSTextDecorationStyle::SOLID;
+    switch (textDecorationStyle) {
+        case TextDecorationStyle::DOUBLE:
+            rsTextDecorationStyle = RSTextDecorationStyle::DOUBLE;
+            break;
+        case TextDecorationStyle::DOTTED:
+            rsTextDecorationStyle = RSTextDecorationStyle::DOTTED;
+            break;
+        case TextDecorationStyle::DASHED:
+            rsTextDecorationStyle = RSTextDecorationStyle::DASHED;
+            break;
+        case TextDecorationStyle::WAVY:
+            rsTextDecorationStyle = RSTextDecorationStyle::WAVY;
+            break;
+        default:
+            rsTextDecorationStyle = RSTextDecorationStyle::SOLID;
+            break;
+    }
+    return rsTextDecorationStyle;
+}
+
 RSTextStyle ToRSTextStyle(const RefPtr<PipelineBase>& context, const TextStyle& textStyle)
 {
     RSTextStyle rsTextStyle;
     rsTextStyle.color_ = ToRSColor(textStyle.GetTextColor());
     rsTextStyle.decoration_ = ToRSTextDecoration(textStyle.GetTextDecoration());
+    rsTextStyle.decorationStyle_ = ToRSTextDecorationStyle(textStyle.GetTextDecorationStyle());
     rsTextStyle.decorationColor_ = ToRSColor(textStyle.GetTextDecorationColor());
     // TODO: convert fontFamily and other styles.
 
