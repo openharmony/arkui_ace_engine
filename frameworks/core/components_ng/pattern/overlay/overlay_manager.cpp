@@ -1045,7 +1045,8 @@ void OverlayManager::BlurOverlayNode(bool isInSubWindow)
             auto overlay = DynamicCast<FrameNode>(*iter);
             CHECK_NULL_VOID(overlay);
             auto pattern = overlay->GetPattern();
-            if (AceType::InstanceOf<DialogPattern>(pattern) || AceType::InstanceOf<MenuWrapperPattern>(pattern)) {
+            if ((AceType::InstanceOf<DialogPattern>(pattern) || AceType::InstanceOf<MenuWrapperPattern>(pattern)) &&
+                !overlay->IsRemoving()) {
                 FocusOverlayNode(overlay, isInSubWindow);
                 return;
             }
