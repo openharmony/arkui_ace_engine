@@ -143,18 +143,18 @@ void LoadingProgressModifier::DrawOrbit(
 {
     auto pointCounts = cometParam.pointCount;
     auto& canvas = context.canvas;
-    float width_ = context.width;
-    float height_ = context.height;
+    float width = context.width;
+    float height = context.height;
     double angle = TOTAL_ANGLE * date / FULL_COUNT;
-    auto* camera_ = new RSCamera3D();
-    camera_->Save();
-    camera_->RotateYDegrees(ROTATEY);
-    camera_->RotateXDegrees(ROTATEX);
-    camera_->RotateZDegrees(ROTATEZ);
+    RSCamera3D camera;
+    camera.Save();
+    camera.RotateYDegrees(ROTATEY);
+    camera.RotateXDegrees(ROTATEX);
+    camera.RotateZDegrees(ROTATEZ);
     RSMatrix matrix;
-    camera_->ApplyToMatrix(matrix);
-    camera_->Restore();
-    auto center = RSPoint(width_ / 2, height_ / 2);
+    camera.ApplyToMatrix(matrix);
+    camera.Restore();
+    auto center = RSPoint(width / 2, height / 2);
     RSBrush brush;
     brush.SetAntiAlias(true);
     canvas.Save();
