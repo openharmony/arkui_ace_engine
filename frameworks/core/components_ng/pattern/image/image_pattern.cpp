@@ -138,7 +138,9 @@ void ImagePattern::OnImageLoadSuccess()
     CHECK_NULL_VOID(imageEventHub);
     LoadImageSuccessEvent loadImageSuccessEvent_(loadingCtx_->GetImageSize().Width(),
         loadingCtx_->GetImageSize().Height(), geometryNode->GetFrameSize().Width(),
-        geometryNode->GetFrameSize().Height(), 1);
+        geometryNode->GetFrameSize().Height(), 1, geometryNode->GetContentSize().Width(),
+        geometryNode->GetContentSize().Height(), geometryNode->GetContentOffset().GetX(),
+        geometryNode->GetContentOffset().GetY());
     imageEventHub->FireCompleteEvent(loadImageSuccessEvent_);
     // update src data
     image_ = loadingCtx_->MoveCanvasImage();
@@ -169,7 +171,9 @@ void ImagePattern::OnImageDataReady()
     CHECK_NULL_VOID(imageEventHub);
     LoadImageSuccessEvent loadImageSuccessEvent_(loadingCtx_->GetImageSize().Width(),
         loadingCtx_->GetImageSize().Height(), geometryNode->GetFrameSize().Width(),
-        geometryNode->GetFrameSize().Height(), 0);
+        geometryNode->GetFrameSize().Height(), 0, geometryNode->GetContentSize().Width(),
+        geometryNode->GetContentSize().Height(), geometryNode->GetContentOffset().GetX(),
+        geometryNode->GetContentOffset().GetY());
     imageEventHub->FireCompleteEvent(loadImageSuccessEvent_);
     if (!host->IsActive()) {
         return;
