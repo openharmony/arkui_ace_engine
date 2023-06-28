@@ -414,7 +414,7 @@ public:
         RUNNING,
         END,
     };
-    // Frame Rate Controller(FRC) decides FrameRateRange by scence, speed and animation status
+    // Frame Rate Controller(FRC) decides FrameRateRange by scene, speed and scene status
     void AddFRCSceneInfo(std::string sceneName, float speed, SceneStatus status);
 
 private:
