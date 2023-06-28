@@ -277,7 +277,9 @@ bool Scrollable::Idle() const
 
 bool Scrollable::IsStopped() const
 {
-    return (!springController_ || (springController_->IsStopped())) && (!controller_ || (controller_->IsStopped()));
+    return (!springController_ || (springController_->IsStopped()) ||
+               (springController_->GetStatus() == Animator::Status::IDLE)) &&
+           (!controller_ || (controller_->IsStopped()) || (controller_->GetStatus() == Animator::Status::IDLE));
 }
 
 bool Scrollable::IsSpringStopped() const
