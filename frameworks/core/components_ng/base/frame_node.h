@@ -409,6 +409,13 @@ public:
         return layoutWrapper_;
     }
 
+    enum class AnimationStatusForRange {
+        START,
+        RUNNING,
+        END,
+    };
+    void SetDesirableFrameRateRange(std::string scene, float speed, AnimationStatusForRange status);
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;

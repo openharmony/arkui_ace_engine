@@ -1803,4 +1803,8 @@ bool FrameNode::IsContentRoot()
     CHECK_NULL_RETURN_NOLOG(grandParent, false);
     return parent->GetTag() == V2::JS_VIEW_ETS_TAG && grandParent->GetTag() == V2::PAGE_ETS_TAG;
 }
+
+void FrameNode::SetDesirableFrameRateRange(std::string scene, float speed, AnimationStatusForRange status)
+{
+}
 } // namespace OHOS::Ace::NG
