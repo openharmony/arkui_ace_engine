@@ -334,11 +334,11 @@ HWTEST_F(GridTestNg, Property001, TestSize.Level1)
 }
 
 /**
- * @tc.name: Property003
+ * @tc.name: Property002
  * @tc.desc: Test Negative Gap
  * @tc.type: FUNC
  */
-HWTEST_F(GridTestNg, Property003, TestSize.Level1)
+HWTEST_F(GridTestNg, Property002, TestSize.Level1)
 {
     GridModelNG gridModelNG;
     gridModelNG.Create(nullptr, nullptr);
@@ -354,21 +354,11 @@ HWTEST_F(GridTestNg, Property003, TestSize.Level1)
      */
     EXPECT_EQ(layoutProperty_->GetRowsGap(), std::nullopt);
     EXPECT_EQ(layoutProperty_->GetColumnsGap(), std::nullopt);
-}
 
-/**
- * @tc.name: Property004
- * @tc.desc: Test GetGridDirectionStr func.
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, Property004, TestSize.Level1)
-{
-    GridModelNG gridModelNG;
-    gridModelNG.Create(nullptr, nullptr);
-    CreateGridItem(10, -1, ITEM_HEIGHT);
-    GetInstance();
-    RunMeasureAndLayout();
-
+    /**
+     * @tc.steps: step1. Call GetGridDirectionStr()
+     * @tc.expected: The return string value is correct
+     */
     EXPECT_EQ(layoutProperty_->GetGridDirectionStr(), "GridDirection.Row");
     layoutProperty_->UpdateGridDirection(FlexDirection::ROW_REVERSE);
     EXPECT_EQ(layoutProperty_->GetGridDirectionStr(), "GridDirection.RowReverse");
@@ -379,11 +369,11 @@ HWTEST_F(GridTestNg, Property004, TestSize.Level1)
 }
 
 /**
- * @tc.name: Property005
+ * @tc.name: Property003
  * @tc.desc: Test all the properties of GridItem.
  * @tc.type: FUNC
  */
-HWTEST_F(GridTestNg, Property005, TestSize.Level1)
+HWTEST_F(GridTestNg, Property003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create gridItem and Set properties.
@@ -1176,17 +1166,6 @@ HWTEST_F(GridTestNg, GridTest001, TestSize.Level1)
     EXPECT_FALSE(pattern_->isMouseEventInit_);
 
     /**
-     * @tc.steps: step3. Call the AddScrollEvent function to add a scroll position callback event.
-     * @tc.expected: Call and check the return value of the callback function.
-     */
-    pattern_->AddScrollEvent();
-    ASSERT_NE(pattern_->scrollableEvent_, nullptr);
-    auto callback = pattern_->scrollableEvent_->GetScrollPositionCallback();
-    ASSERT_NE(callback, nullptr);
-    auto ret = callback(1.f, SCROLL_FROM_START);
-    EXPECT_TRUE(ret);
-
-    /**
      * @tc.steps: step4. When isConfigScrollable_ is false, call related functions.
      * @tc.expected: Check the return value of the related function.
      */
@@ -1457,6 +1436,48 @@ HWTEST_F(GridTestNg, GridTest012, TestSize.Level1)
     layoutWrapper = RunMeasureAndLayout(DEVICE_WIDTH, 200.f);
     EXPECT_FALSE(layoutWrapper->GetOrCreateChildByIndex(9, false)->IsActive());
     EXPECT_TRUE(layoutWrapper->GetOrCreateChildByIndex(0, false)->IsActive());
+}
+
+/**
+ * @tc.name: GridTest013
+ * @tc.desc: Test scrollable PositionCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridTest013, TestSize.Level1)
+{
+    GridModelNG gridModelNG;
+    gridModelNG.Create(nullptr, nullptr);
+    gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateGridItem(20, -1, ITEM_HEIGHT);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step3. Call the AddScrollEvent function to add a scroll position callback event.
+     * @tc.expected: Call and check the return value of the callback function.
+     */
+    ASSERT_NE(pattern_->scrollableEvent_, nullptr);
+    auto callback = pattern_->scrollableEvent_->GetScrollPositionCallback();
+    ASSERT_NE(callback, nullptr);
+    auto ret = callback(ITEM_HEIGHT, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(ret);
+    ret = callback(ITEM_HEIGHT, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(ret);
+    ret = callback(ITEM_HEIGHT, SCROLL_FROM_START);
+    EXPECT_TRUE(ret);
+    auto coordinationEvent = AceType::MakeRefPtr<ScrollableCoordinationEvent>();
+    auto event1 = [](double) {};
+    auto event2 = []() {};
+    coordinationEvent->SetOnScrollEvent(event1);
+    coordinationEvent->SetOnScrollStartEvent(event2);
+    coordinationEvent->SetOnScrollEndEvent(event2);
+    pattern_->SetCoordinationEvent(coordinationEvent);
+    ret = callback(ITEM_HEIGHT, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(ret);
+    ret = callback(ITEM_HEIGHT, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(ret);
+    ret = callback(ITEM_HEIGHT, SCROLL_FROM_START);
+    EXPECT_TRUE(ret);
 }
 
 /**
