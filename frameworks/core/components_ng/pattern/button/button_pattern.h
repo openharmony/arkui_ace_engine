@@ -29,7 +29,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 namespace OHOS::Ace::NG {
-enum class ComponentButtonType { POPUP, BUTTON };
+enum class ComponentButtonType { POPUP, BUTTON, STEPPER };
 class ButtonPattern : public Pattern {
     DECLARE_ACE_TYPE(ButtonPattern, Pattern);
 
@@ -60,7 +60,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        if (buttonType_ == ComponentButtonType::POPUP) {
+        if (buttonType_ == ComponentButtonType::POPUP || buttonType_ == ComponentButtonType::STEPPER) {
             FocusPaintParam focusPaintParam;
             focusPaintParam.SetPaintColor(FocusBorderColor_);
             return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, focusPaintParam };

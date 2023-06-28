@@ -142,8 +142,12 @@ void StepperPattern::CreateLeftButtonNode()
     CHECK_NULL_VOID(hostNode);
     // Create buttonNode
     auto buttonId = hostNode->GetLeftButtonId();
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(
-        V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonPattern = AceType::MakeRefPtr<NG::ButtonPattern>();
+    CHECK_NULL_VOID(buttonPattern);
+    buttonPattern->setComponentButtonType(ComponentButtonType::STEPPER);
+    buttonPattern->SetFocusBorderColor(stepperTheme->GetFocusColor());
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, buttonId, buttonPattern);
+    CHECK_NULL_VOID(buttonNode);
     buttonNode->GetEventHub<ButtonEventHub>()->SetStateEffect(true);
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateType(ButtonType::NORMAL);
     buttonNode->GetRenderContext()->UpdateBackgroundColor(stepperTheme->GetMouseHoverColor().ChangeOpacity(0));
@@ -240,16 +244,20 @@ void StepperPattern::CreateRightButtonNode(int32_t index)
     auto labelStatus =
         stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->GetLabelStatus().value_or("normal");
     if (labelStatus == "normal") {
+        isRightLabelDisable_ = false;
         if (index == maxIndex_) {
             CreateArrowlessRightButtonNode(index, Localization::GetInstance()->GetEntryLetters("stepper.start"));
         } else {
             CreateArrowRightButtonNode(index, false);
         }
     } else if (labelStatus == "disabled") {
+        isRightLabelDisable_ = true;
         CreateArrowRightButtonNode(index, true);
     } else if (labelStatus == "waiting") {
+        isRightLabelDisable_ = false;
         CreateWaitingRightButtonNode();
     } else if (labelStatus == "skip") {
+        isRightLabelDisable_ = false;
         CreateArrowlessRightButtonNode(index, Localization::GetInstance()->GetEntryLetters("stepper.skip"));
     }
 }
@@ -269,8 +277,12 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
         stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->GetRightLabel().value_or(buttonNextText);
     // Create buttonNode
     auto buttonId = hostNode->GetRightButtonId();
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(
-        V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonPattern = AceType::MakeRefPtr<NG::ButtonPattern>();
+    CHECK_NULL_VOID(buttonPattern);
+    buttonPattern->setComponentButtonType(ComponentButtonType::STEPPER);
+    buttonPattern->SetFocusBorderColor(stepperTheme->GetFocusColor());
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, buttonId, buttonPattern);
+    CHECK_NULL_VOID(buttonNode);
     buttonNode->GetEventHub<ButtonEventHub>()->SetStateEffect(true);
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateType(ButtonType::NORMAL);
     Color buttonBackgroundColor =
@@ -279,6 +291,8 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
     auto buttonRadius = stepperTheme->GetRadius();
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateBorderRadius(BorderRadiusProperty(buttonRadius));
+    isRightLabelDisable_ ? buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(false)
+                         : buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(true);
     buttonNode->MountToParent(hostNode);
     buttonNode->MarkModifyDone();
     InitButtonOnHoverEvent(buttonNode, false);
@@ -346,8 +360,12 @@ void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, const std::st
         stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->GetRightLabel().value_or(defaultContent);
     // Create buttonNode
     auto buttonId = hostNode->GetRightButtonId();
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(
-        V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonPattern = AceType::MakeRefPtr<NG::ButtonPattern>();
+    CHECK_NULL_VOID(buttonPattern);
+    buttonPattern->setComponentButtonType(ComponentButtonType::STEPPER);
+    buttonPattern->SetFocusBorderColor(stepperTheme->GetFocusColor());
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, buttonId, buttonPattern);
+    CHECK_NULL_VOID(buttonNode);
     buttonNode->GetEventHub<ButtonEventHub>()->SetStateEffect(true);
     Color buttonBackgroundColor =
         rightIsHover_ ? stepperTheme->GetMouseHoverColor() : stepperTheme->GetMouseHoverColor().ChangeOpacity(0);
@@ -386,6 +404,12 @@ void StepperPattern::CreateWaitingRightButtonNode()
     CHECK_NULL_VOID(hostNode);
     // Create loadingProgressNode
     auto buttonId = hostNode->GetRightButtonId();
+    auto buttonPattern = AceType::MakeRefPtr<NG::ButtonPattern>();
+    CHECK_NULL_VOID(buttonPattern);
+    buttonPattern->setComponentButtonType(ComponentButtonType::STEPPER);
+    buttonPattern->SetFocusBorderColor(stepperTheme->GetFocusColor());
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, buttonId, buttonPattern);
+    CHECK_NULL_VOID(buttonNode);
     auto loadingProgressNode = FrameNode::GetOrCreateFrameNode(
         V2::LOADING_PROGRESS_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<LoadingProgressPattern>(); });
     loadingProgressNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(

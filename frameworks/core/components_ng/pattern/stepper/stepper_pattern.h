@@ -123,6 +123,7 @@ private:
     bool leftIsHover_ = false;
     bool rightIsHover_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(StepperPattern);
+    bool isRightLabelDisable_ = false;
 };
 
 } // namespace OHOS::Ace::NG
