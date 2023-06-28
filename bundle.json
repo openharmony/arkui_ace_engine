@@ -81,7 +81,7 @@
                 "qrcodegen",
                 "css_what",
                 "weex_loader",
-                "third_party_skia",
+                "skia",
                 "zlib",
                 "bounds_checking_function",
                 "curl",
@@ -89,9 +89,8 @@
                 "jsframework",
                 "opencl-headers",
                 "libuv",
-                "EGL",
+                "egl",
                 "opengles",
-                "libtxt",
                 "thirdparty_googletest"
             ]
         },
