@@ -64,4 +64,4 @@ void WindowEventProcess::DispatchPointerEvent(const RefPtr<WindowNode>& windowNo
     CHECK_NULL_VOID(pattern);
     pattern->DispatchPointerEvent(pointerEvent);
 }
-}
+} // namespace OHOS::Ace::NG
