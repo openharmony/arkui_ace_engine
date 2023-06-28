@@ -221,6 +221,14 @@ public:
         return {};
     }
 
+    // stop the property animation and get the current paint rect.
+    virtual OffsetF GetShowingTranslateProperty()
+    {
+        return OffsetF();
+    }
+    // update translateXY in backend.
+    virtual void UpdateTranslateInXY(const OffsetF& offset) {}
+
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json);

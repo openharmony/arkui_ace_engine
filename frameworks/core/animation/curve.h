@@ -123,6 +123,7 @@ public:
         }
         return time;
     }
+
 private:
     float fractionMin = 0.0f;
     float fractionMax = 1.0f;
@@ -165,7 +166,8 @@ class StepsCurve : public Curve {
 
 public:
     explicit StepsCurve(int32_t steps, StepsCurvePosition position = StepsCurvePosition::START)
-        : steps_(steps <= 0 ? 1 : steps), position_(position) {}
+        : steps_(steps <= 0 ? 1 : steps), position_(position)
+    {}
     ~StepsCurve() override = default;
 
     float MoveInternal(float time) override
@@ -193,6 +195,7 @@ public:
         curveString.append(std::string(")"));
         return curveString;
     }
+
 private:
     int32_t steps_;
     const StepsCurvePosition position_;
@@ -216,6 +219,7 @@ public:
     {
         return "customCallback";
     }
+
 private:
     std::function<float(float)> interpolateFunc_;
 
@@ -227,7 +231,8 @@ class ResponsiveSpringMotion final : public Curve {
 
 public:
     ResponsiveSpringMotion(float response, float dampingRatio, float blendDuration = 0.0f)
-        : response_(response), dampingRatio_(dampingRatio), blendDuration_(blendDuration) {}
+        : response_(response), dampingRatio_(dampingRatio), blendDuration_(blendDuration)
+    {}
     ~ResponsiveSpringMotion() override = default;
     // this MoveInterval function is not the real implementation of the function.
     // The curve should use the curve in rosen.
@@ -261,6 +266,7 @@ public:
     static constexpr float DEFAULT_RESPONSIVE_SPRING_MOTION_RESPONSE = 0.15f;
     static constexpr float DEFAULT_RESPONSIVE_SPRING_MOTION_DAMPING_RATIO = 0.86f;
     static constexpr float DEFAULT_RESPONSIVE_SPRING_MOTION_BLEND_DURATION = 0.25f;
+
 private:
     float response_;
     float dampingRatio_;
@@ -293,6 +299,11 @@ public:
     float GetVelocity() const
     {
         return velocity_;
+    }
+
+    void UpdateVelocity(float velocity)
+    {
+        velocity_ = velocity;
     }
 
     float GetMass() const

@@ -16,8 +16,11 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
 #include <algorithm>
+#include <memory>
 
+#include "common/rs_vector2.h"
 #include "include/utils/SkParsePath.h"
+#include "modifier/rs_property.h"
 #include "render_service_base/include/property/rs_properties_def.h"
 #include "render_service_client/core/modifier/rs_property_modifier.h"
 #include "render_service_client/core/pipeline/rs_node_map.h"
@@ -661,9 +664,34 @@ void RosenRenderContext::OnTransformTranslateUpdate(const TranslateOptions& tran
         xValue = translate.x.ConvertToPx();
         yValue = translate.y.ConvertToPx();
     }
+
+    if (translateXY_) {
+        auto propertyXY = std::static_pointer_cast<RSAnimatableProperty<Vector2f>>(translateXY_->GetProperty());
+        if (propertyXY) {
+            propertyXY->Set({xValue, yValue});
+        } else {
+            LOGE("fail to get translateXY property");
+        }
+    } else {
+        auto propertyXY = std::make_shared<RSAnimatableProperty<Vector2f>>(Vector2f(xValue, yValue));
+        translateXY_ = std::make_shared<Rosen::RSTranslateModifier>(propertyXY);
+        rsNode_->AddModifier(translateXY_);
+    }
+
     // translateZ doesn't support percentage
     float zValue = translate.z.ConvertToPx();
-    rsNode_->SetTranslate(xValue, yValue, zValue);
+    if (translateZ_) {
+        auto propertyZ = std::static_pointer_cast<RSAnimatableProperty<float>>(translateZ_->GetProperty());
+        if (propertyZ) {
+            propertyZ->Set(zValue);
+        } else {
+            LOGE("fail to get translateZ property");
+        }
+    } else {
+        auto propertyZ = std::make_shared<RSAnimatableProperty<float>>(zValue);
+        translateZ_ = std::make_shared<Rosen::RSTranslateZModifier>(propertyZ);
+        rsNode_->AddModifier(translateZ_);
+    }
     RequestNextFrame();
 }
 
@@ -800,6 +828,30 @@ RectF RosenRenderContext::GetPaintRectWithoutTransform()
     auto paintRectVector = rsNode_->GetStagingProperties().GetBounds();
     rect.SetRect(paintRectVector[0], paintRectVector[1], paintRectVector[2], paintRectVector[3]);
     return rect;
+}
+
+void RosenRenderContext::UpdateTranslateInXY(const OffsetF& offset)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetTranslate({ offset.GetX(), offset.GetY() });
+}
+
+OffsetF RosenRenderContext::GetShowingTranslateProperty()
+{
+    OffsetF offset;
+    CHECK_NULL_RETURN(rsNode_, offset);
+    auto offsetInfo = rsNode_->GetShowingProperties().GetTranslate();
+    if (std::get<1>(offsetInfo)) {
+        const auto& translate = std::get<0>(offsetInfo);
+        offset.SetX(translate[0]);
+        offset.SetY(translate[1]);
+    } else {
+        LOGW("fail to stop current property animation, use current paint rect");
+        const auto& translate = rsNode_->GetStagingProperties().GetTranslate();
+        offset.SetX(translate[0]);
+        offset.SetY(translate[1]);
+    }
+    return offset;
 }
 
 void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn)
