@@ -25,7 +25,8 @@ class ACE_EXPORT WindowExtensionConnectionAdapterOhosNG : public WindowExtension
     DECLARE_ACE_TYPE(WindowExtensionConnectionAdapterOhosNG, WindowExtensionConnectionAdapterNG);
 
 public:
-    void ConnectExtension(const RefPtr<NG::FrameNode>& node, int32_t windowId) override;
+    void ConnectExtension(const RefPtr<NG::FrameNode>& node, int32_t windowId,
+        sptr<Rosen::ExtensionSession>& extensionSession) override;
     void RemoveExtension() override;
     void UpdateRect(const Rect& rect) override;
     void Show() override;

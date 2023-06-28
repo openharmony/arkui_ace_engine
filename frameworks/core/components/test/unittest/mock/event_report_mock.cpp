@@ -52,6 +52,9 @@ void EventReport::JsEventReport(int32_t eventType, const std::string& jsonStr)
     (void)jsonStr;
 }
 
+void EventReport::JankFrameReport(int64_t startTime, int64_t duration, const std::vector<uint16_t>& jank,
+                                  const std::string& pageUrl, uint32_t jankStatusVersion) {}
+
 void EventReport::SendEventInner(const EventInfo& eventInfo) {}
 
 } // namespace OHOS::Ace

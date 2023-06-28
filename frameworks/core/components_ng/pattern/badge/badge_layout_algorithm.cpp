@@ -83,12 +83,16 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (!textData.empty() || messageCount > 0) {
         if ((textData.size() <= 1 && !textData.empty()) ||
             ((messageCount < 10 && messageCount <= countLimit) && textData.empty())) {
+            badgeCircleDiameter = std::max(static_cast<double>(textSize.Height()), badgeCircleDiameter);
             badgeCircleRadius = badgeCircleDiameter / 2;
             badgeWidth = badgeCircleDiameter;
+            badgeHeight = std::max(badgeCircleDiameter, badgeHeight);
         } else if (textData.size() > 1 || messageCount > countLimit) {
+            badgeCircleDiameter = std::max(static_cast<double>(textSize.Height()), badgeCircleDiameter);
             badgeWidth = textSize.Width() + badgeTheme->GetNumericalBadgePadding().ConvertToPx() * 2;
-            badgeWidth = badgeCircleDiameter > badgeWidth ? badgeCircleDiameter : badgeWidth;
+            badgeWidth = std::max(badgeCircleDiameter, badgeWidth);
             badgeCircleRadius = badgeCircleDiameter / 2;
+            badgeHeight = std::max(badgeCircleDiameter, badgeHeight);
         }
     }
     textLayoutProperty->UpdateMarginSelfIdealSize(SizeF(badgeWidth, badgeHeight));
@@ -158,11 +162,13 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (!textData.empty() || messageCount > 0) {
         if ((textData.size() <= 1 && !textData.empty()) ||
             ((messageCount < 10 && messageCount <= countLimit) && textData.empty())) {
+            badgeCircleDiameter = std::max(static_cast<double>(textSize.Height()), badgeCircleDiameter);
             badgeCircleRadius = badgeCircleDiameter / 2;
             badgeWidth = badgeCircleDiameter;
         } else if (textData.size() > 1 || messageCount > countLimit) {
+            badgeCircleDiameter = std::max(static_cast<double>(textSize.Height()), badgeCircleDiameter);
             badgeWidth = textSize.Width() + badgeTheme->GetNumericalBadgePadding().ConvertToPx() * 2;
-            badgeWidth = badgeCircleDiameter > badgeWidth ? badgeCircleDiameter : badgeWidth;
+            badgeWidth = std::max(badgeCircleDiameter, badgeWidth);
             badgeCircleRadius = badgeCircleDiameter / 2;
         }
     }

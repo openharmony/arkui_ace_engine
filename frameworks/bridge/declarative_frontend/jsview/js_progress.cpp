@@ -135,29 +135,36 @@ void JSProgress::SetValue(double value)
 void JSProgress::SetColor(const JSCallbackInfo& info)
 {
     Color colorVal;
-    OHOS::Ace::NG::Gradient gradient;
+    NG::Gradient gradient;
     RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
     if (ConvertGradientColor(info[0], gradient)) {
         ProgressModel::GetInstance()->SetGradientColor(gradient);
     } else {
+        Color endColor;
+        Color beginColor;
         if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal)) {
             if (g_progressType == ProgressType::RING) {
-                OHOS::Ace::NG::GradientColor endSideColor;
-                OHOS::Ace::NG::GradientColor beginSideColor;
-                endSideColor.SetLinearColor(LinearColor(theme->GetRingProgressEndSideColor()));
-                endSideColor.SetDimension(OHOS::Ace::Dimension(0.0f));
-                beginSideColor.SetLinearColor(LinearColor(theme->GetRingProgressBeginSideColor()));
-                beginSideColor.SetDimension(OHOS::Ace::Dimension(1.0f));
-                gradient.AddColor(endSideColor);
-                gradient.AddColor(beginSideColor);
-                ProgressModel::GetInstance()->SetGradientColor(gradient);
-                return;
+                endColor = theme->GetRingProgressEndSideColor();
+                beginColor = theme->GetRingProgressBeginSideColor();
             } else if (g_progressType == ProgressType::CAPSULE) {
                 colorVal = theme->GetCapsuleSelectColor();
             } else {
                 colorVal = theme->GetTrackSelectedColor();
             }
+        } else {
+            endColor = colorVal;
+            beginColor = colorVal;
         }
+
+        NG::GradientColor endSideColor;
+        NG::GradientColor beginSideColor;
+        endSideColor.SetLinearColor(LinearColor(endColor));
+        endSideColor.SetDimension(Dimension(0.0f));
+        beginSideColor.SetLinearColor(LinearColor(beginColor));
+        beginSideColor.SetDimension(Dimension(1.0f));
+        gradient.AddColor(endSideColor);
+        gradient.AddColor(beginSideColor);
+        ProgressModel::GetInstance()->SetGradientColor(gradient);
         ProgressModel::GetInstance()->SetColor(colorVal);
     }
 }
@@ -319,7 +326,7 @@ void JSProgress::JsSetCapsuleStyle(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(jsBorderWidth, borderWidth)) {
         borderWidth = theme->GetBorderWidth();
     }
-    if (LessNotEqual(borderWidth.Value(), 0.0)) {
+    if (LessNotEqual(borderWidth.Value(), 0.0) || borderWidth.Unit() == DimensionUnit::PERCENT) {
         borderWidth = theme->GetBorderWidth();
     }
     ProgressModel::GetInstance()->SetBorderWidth(borderWidth);
@@ -399,7 +406,7 @@ void JSProgress::JsSetFont(const JSRef<JSObject>& textObject)
     if (!ParseJsDimensionFp(size, fontSize)) {
         fontSize = theme->GetTextSize();
     }
-    if (LessNotEqual(fontSize.Value(), 0.0)) {
+    if (LessNotEqual(fontSize.Value(), 0.0) || fontSize.Unit() == DimensionUnit::PERCENT) {
         fontSize = theme->GetTextSize();
     }
     ProgressModel::GetInstance()->SetFontSize(fontSize);
@@ -434,20 +441,30 @@ void JSProgress::JsSetFont(const JSRef<JSObject>& textObject)
     }
 }
 
-bool JSProgress::ConvertGradientColor(const JsiRef<JsiValue>& param, OHOS::Ace::NG::Gradient& gradient)
+bool JSProgress::ConvertGradientColor(const JsiRef<JsiValue>& param, NG::Gradient& gradient)
 {
     if (param->IsNull() || param->IsUndefined() || !param->IsObject()) {
         return false;
     }
 
     JSLinearGradient* jsLinearGradient = JSRef<JSObject>::Cast(param)->Unwrap<JSLinearGradient>();
-    if (!jsLinearGradient) {
+    if (!jsLinearGradient || jsLinearGradient->GetGradient().empty()) {
         return false;
     }
 
-    size_t colorLength = jsLinearGradient->GetGradient().size();
-    for (size_t colorIndex = 0; colorIndex < colorLength; colorIndex++) {
-        OHOS::Ace::NG::GradientColor gradientColor;
+    size_t size = jsLinearGradient->GetGradient().size();
+    if (size == 1) {
+        // If there is only one color, then this color is used for both the begin and end side.
+        NG::GradientColor gradientColor;
+        gradientColor.SetLinearColor(LinearColor(jsLinearGradient->GetGradient().front().first));
+        gradientColor.SetDimension(jsLinearGradient->GetGradient().front().second);
+        gradient.AddColor(gradientColor);
+        gradient.AddColor(gradientColor);
+        return true;
+    }
+
+    for (size_t colorIndex = 0; colorIndex < size; colorIndex++) {
+        NG::GradientColor gradientColor;
         gradientColor.SetLinearColor(LinearColor(jsLinearGradient->GetGradient().at(colorIndex).first));
         gradientColor.SetDimension(jsLinearGradient->GetGradient().at(colorIndex).second);
         gradient.AddColor(gradientColor);

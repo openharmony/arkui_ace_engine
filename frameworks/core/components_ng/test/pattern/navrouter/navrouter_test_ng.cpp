@@ -14,8 +14,10 @@
  */
 
 #include <cstddef>
+#include <fortify/fortify.h>
 #include <list>
 #include <optional>
+#include <string>
 
 #include "gtest/gtest.h"
 
@@ -893,10 +895,6 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0016, TestSize.Level1)
     AceType::DynamicCast<NavDestinationGroupNode>(navRouterGroupNode->navDestinationNode_)->titleBarNode_ =
         TitleBarNode::GetOrCreateTitleBarNode(
             "titleBarNode34", 34, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
-
-    navRouterGroupNode->OnAttachToMainTree(false);
-    navRouterGroupNode->GetEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
-    ASSERT_NE(navRouterGroupNode->navDestinationNode_, nullptr);
 }
 
 /**
@@ -1276,15 +1274,17 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0024, TestSize.Level1)
 
     navigation->GetLayoutProperty<NavigationLayoutProperty>()->propNavigationMode_ = NavigationMode::STACK;
     auto stack = AceType::MakeRefPtr<NavigationStack>();
-    std::pair<std::string, RefPtr<UINode>> p("test", preNavDestination);
+    std::pair<std::string, RefPtr<UINode>> p("test0", preNavDestination);
+    std::pair<std::string, RefPtr<UINode>> p2("test", preNavDestination);
     stack->navPathList_.push_back(p);
-    stack->navPathList_.push_back(p);
+    stack->navPathList_.push_back(p2);
     pattern->navigationStack_ = stack;
     navDestination->GetPattern<NavDestinationPattern>()->name_ = "test";
     ASSERT_EQ(pattern->navigationStack_->navPathList_.size(), 2);
     ASSERT_NE(AceType::DynamicCast<NavDestinationGroupNode>(pattern->GetPreNavDestination("test", preNavDestination)),
         nullptr);
 
+    navDestination->GetPattern<NavDestinationPattern>()->navDestinationNode_ = preNavDestination;
     GestureEvent event;
     navDestination->backButtonEvent_(event);
     EXPECT_FALSE(navigation->GetLayoutProperty<NavigationLayoutProperty>()->propDestinationChange_.value());
@@ -1296,6 +1296,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0024, TestSize.Level1)
     navDestination->GetPattern<NavDestinationPattern>()->shallowBuilder_ = AceType::MakeRefPtr<ShallowBuilder>(
         []() { return FrameNode::CreateFrameNode("BackButton", 123, AceType::MakeRefPtr<ButtonPattern>()); });
 
+    navDestination->GetPattern<NavDestinationPattern>()->navDestinationNode_ = preNavDestination;
     navigation->SetBackButtonEvent(navDestination, navRouterPattern);
     navDestination->backButtonEvent_(event);
     EXPECT_TRUE(navDestination->GetEventHub<NavDestinationEventHub>()->onBackPressedEvent_());
@@ -1695,7 +1696,12 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0032, TestSize.Level1)
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "titleBarNode", 22, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<ButtonPattern>());
+    auto menu = FrameNode::CreateFrameNode("BackButton", 34, AceType::MakeRefPtr<ButtonPattern>());
+    auto subtitle = FrameNode::CreateFrameNode("BackButton", 35, AceType::MakeRefPtr<ButtonPattern>());
+    auto title = FrameNode::CreateFrameNode("BackButton", 36, AceType::MakeRefPtr<ButtonPattern>());
     auto toolBarNode = FrameNode::CreateFrameNode("BackButton", 44, AceType::MakeRefPtr<ButtonPattern>());
+
+    auto backButton2 = FrameNode::CreateFrameNode("BackButton", 55, AceType::MakeRefPtr<ButtonPattern>());
 
     auto pattern = navBar->GetPattern<NavBarPattern>();
 
@@ -1704,7 +1710,6 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0032, TestSize.Level1)
     /**
      * @tc.steps: step2. call pattern->OnModifyDone();.
      */
-    
     navBar->backButton_ = backButton;
     pattern->OnModifyDone();
     navBar->propToolBarNodeOperation_ = ChildNodeOperation::REPLACE;
@@ -1712,5 +1717,814 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0032, TestSize.Level1)
     navBar->GetLayoutProperty<NavBarLayoutProperty>()->propHideToolBar_ = true;
     pattern->OnModifyDone();
     ASSERT_EQ(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propVisibility_.value(), VisibleType::GONE);
+    navBar->menu_ = menu;
+    navBar->propBackButtonNodeOperation_ = ChildNodeOperation::NONE;
+    pattern->OnModifyDone();
+    ASSERT_EQ(navBar->title_, nullptr);
+    ASSERT_EQ(navBar->subtitle_, nullptr);
+    ASSERT_NE(navBar->menu_, nullptr);
+    ASSERT_NE(navBar->backButton_, nullptr);
+
+    navBar->subtitle_ = subtitle;
+    navBar->propBackButtonNodeOperation_ = ChildNodeOperation::ADD;
+    pattern->OnModifyDone();
+    ASSERT_EQ(navBar->title_, nullptr);
+    ASSERT_NE(navBar->subtitle_, nullptr);
+    ASSERT_NE(navBar->menu_, nullptr);
+    ASSERT_NE(navBar->backButton_, nullptr);
+
+    navBar->title_ = title;
+    navBar->propBackButtonNodeOperation_ = ChildNodeOperation::REMOVE;
+    pattern->OnModifyDone();
+    ASSERT_NE(navBar->title_, nullptr);
+    ASSERT_NE(navBar->subtitle_, nullptr);
+    ASSERT_NE(navBar->menu_, nullptr);
+    ASSERT_NE(navBar->backButton_, nullptr);
+    ASSERT_EQ(
+        AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton())->GetLayoutProperty()->propVisibility_.value(),
+        VisibleType::GONE);
+
+    ASSERT_NE(titleBarNode->GetBackButton(), nullptr);
+    ASSERT_FALSE(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->GetHideBackButtonValue(false));
+    navBar->propBackButtonNodeOperation_ = ChildNodeOperation::REPLACE;
+    navBar->GetLayoutProperty<NavBarLayoutProperty>()->propTitleMode_ = NavigationTitleMode::MINI;
+    navBar->propTitleNodeOperation_ = ChildNodeOperation::ADD;
+    navBar->propSubtitleNodeOperation_ = ChildNodeOperation::ADD;
+    navBar->propMenuNodeOperation_ = ChildNodeOperation::ADD;
+    pattern->OnModifyDone();
+    ASSERT_NE(navBar->title_, nullptr);
+    ASSERT_NE(navBar->subtitle_, nullptr);
+    ASSERT_NE(navBar->menu_, nullptr);
+    ASSERT_NE(navBar->backButton_, nullptr);
+    ASSERT_EQ(
+        AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton())->GetLayoutProperty()->propVisibility_.value(),
+        VisibleType::VISIBLE);
+
+    ASSERT_NE(titleBarNode->GetBackButton(), nullptr);
+    ASSERT_FALSE(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->GetHideBackButtonValue(false));
+    navBar->propBackButtonNodeOperation_ = ChildNodeOperation::REPLACE;
+    navBar->GetLayoutProperty<NavBarLayoutProperty>()->propTitleMode_ = NavigationTitleMode::MINI;
+    navBar->propTitleNodeOperation_ = ChildNodeOperation::REPLACE;
+    navBar->propSubtitleNodeOperation_ = ChildNodeOperation::REPLACE;
+    navBar->propMenuNodeOperation_ = ChildNodeOperation::REPLACE;
+    pattern->OnModifyDone();
+    ASSERT_NE(navBar->title_, nullptr);
+    ASSERT_NE(navBar->subtitle_, nullptr);
+    ASSERT_NE(navBar->menu_, nullptr);
+    ASSERT_NE(navBar->backButton_, nullptr);
+    ASSERT_EQ(
+        AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton())->GetLayoutProperty()->propVisibility_.value(),
+        VisibleType::VISIBLE);
+}
+
+/**
+ * @tc.name: NavrouterTestNg0033
+ * @tc.desc: Test TitleBarPattern::OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navBar.
+     */
+    auto navBar =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 11, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 22, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<ImagePattern>());
+    auto menu = FrameNode::CreateFrameNode("BackButton", 34, AceType::MakeRefPtr<ButtonPattern>());
+    auto subtitle = FrameNode::CreateFrameNode("BackButton", 35, AceType::MakeRefPtr<ButtonPattern>());
+    auto title = FrameNode::CreateFrameNode("BackButton", 36, AceType::MakeRefPtr<TextPattern>());
+    auto toolBarNode = FrameNode::CreateFrameNode("BackButton", 44, AceType::MakeRefPtr<ButtonPattern>());
+
+    auto backButton2 = FrameNode::CreateFrameNode("BackButton", 55, AceType::MakeRefPtr<ButtonPattern>());
+    /**
+     * @tc.steps: step2. set properties then call pattern->OnModifyDone();.
+     * @tc.expected: check whether the properties is correct.
+     */
+    auto pattern = titleBarNode->GetPattern<TitleBarPattern>();
+    titleBarNode->backButton_ = backButton;
+    titleBarNode->title_ = title;
+
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleBarParentType_ =
+        TitleBarParentType::NAV_DESTINATION;
+    pattern->OnModifyDone();
+    ASSERT_NE(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleBarParentType_.value(),
+        TitleBarParentType::NAVBAR);
+
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    pattern->OnModifyDone();
+    ASSERT_EQ(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleBarParentType_.value(),
+        TitleBarParentType::NAVBAR);
+
+    ASSERT_NE(pattern->panEvent_, nullptr);
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    pattern->OnModifyDone();
+    ASSERT_EQ(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleBarParentType_.value(),
+        TitleBarParentType::NAVBAR);
+    /**
+     * @tc.steps: step3. set properties then call pattern->panEvent_->actionStart_(info),
+     *                   pattern->panEvent_->actionUpdate_(info), pattern->panEvent_->actionEnd_(info);.
+     * @tc.expected: check whether the properties is correct.
+     */
+    GestureEvent info;
+    info.inputEventType_ = InputEventType::AXIS;
+    pattern->panEvent_->actionStart_(info);
+    pattern->panEvent_->actionUpdate_(info);
+    pattern->panEvent_->actionEnd_(info);
+
+    info.inputEventType_ = InputEventType::TOUCH_SCREEN;
+    pattern->panEvent_->actionStart_(info);
+    pattern->panEvent_->actionUpdate_(info);
+    pattern->panEvent_->actionEnd_(info);
+    ASSERT_EQ(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->GetTitleModeValue(NavigationTitleMode::FREE),
+        NavigationTitleMode::FREE);
+
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleMode_ = NavigationTitleMode::FULL;
+    info.inputEventType_ = InputEventType::TOUCH_SCREEN;
+    pattern->panEvent_->actionStart_(info);
+    pattern->panEvent_->actionUpdate_(info);
+    pattern->panEvent_->actionEnd_(info);
+
+    titleBarNode->subtitle_ = subtitle;
+    pattern->initialTitleOffsetY_ = 500.0f;
+    title->GetGeometryNode()->frame_.rect_.y_ = 200.0f;
+    ASSERT_EQ(pattern->GetTitleOffsetY(), 200.0f);
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleMode_ = NavigationTitleMode::FREE;
+    info.inputEventType_ = InputEventType::TOUCH_SCREEN;
+    info.offsetY_ = 200.0f;
+    pattern->panEvent_->actionStart_(info);
+    pattern->panEvent_->actionUpdate_(info);
+    pattern->panEvent_->actionEnd_(info);
+    ASSERT_EQ(pattern->maxTitleBarHeight_, 138.0f);
+
+    titleBarNode->subtitle_ = subtitle;
+    titleBarNode->title_ = title;
+    pattern->minTitleHeight_ = 0.0f;
+    pattern->initialTitleOffsetY_ = 28.0f;
+    title->GetGeometryNode()->frame_.rect_.y_ = 0.0f;
+    titleBarNode->GetGeometryNode()->frame_.rect_.height_ = 138.0f;
+    ASSERT_EQ(pattern->GetTitleOffsetY(), 0.0f);
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleMode_ = NavigationTitleMode::FREE;
+    info.inputEventType_ = InputEventType::TOUCH_SCREEN;
+    info.offsetY_ = 200.0f;
+    pattern->panEvent_->actionStart_(info);
+    pattern->panEvent_->actionUpdate_(info);
+    pattern->panEvent_->actionEnd_(info);
+    ASSERT_EQ(pattern->maxTitleBarHeight_, 138.0f);
+    /**
+     * @tc.steps: step4. set pattern->tempTitleOffsetY_ then call pattern->SetTempSubTitleOffsetY();.
+     * @tc.expected: check whether the properties is correct.
+     */
+    pattern->tempTitleOffsetY_ = 50.0f;
+    pattern->SetTempSubTitleOffsetY();
+    ASSERT_EQ(pattern->maxTitleBarHeight_, 138.0f);
+    ASSERT_EQ(pattern->defaultTitleBarHeight_, 138.0f);
+}
+
+/**
+ * @tc.name: NavrouterTestNg0034
+ * @tc.desc: Test TitleBarPattern::OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navBar titleBarNode etc.
+     */
+    auto navBar =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 11, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 22, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<ImagePattern>());
+    auto menu = FrameNode::CreateFrameNode("BackButton", 34, AceType::MakeRefPtr<ButtonPattern>());
+    auto subtitle = FrameNode::CreateFrameNode("BackButton", 35, AceType::MakeRefPtr<ButtonPattern>());
+    auto title = FrameNode::CreateFrameNode("BackButton", 36, AceType::MakeRefPtr<TextPattern>());
+    auto toolBarNode = FrameNode::CreateFrameNode("BackButton", 44, AceType::MakeRefPtr<ButtonPattern>());
+
+    auto buttonNode = FrameNode::CreateFrameNode("BackButton", 55, AceType::MakeRefPtr<ImagePattern>());
+    auto backButtonImageNode = FrameNode::CreateFrameNode("BackButton", 66, AceType::MakeRefPtr<ImagePattern>());
+
+    auto pattern = titleBarNode->GetPattern<TitleBarPattern>();
+    titleBarNode->parent_ = AceType::WeakClaim(AceType::RawPtr(navBar));
+    titleBarNode->backButton_ = backButton;
+    titleBarNode->title_ = title;
+
+    ASSERT_TRUE(backButton->children_.empty());
+    backButton->children_.emplace_back(buttonNode);
+    ASSERT_TRUE(buttonNode->children_.empty());
+    buttonNode->children_.emplace_back(backButtonImageNode);
+    /**
+     * @tc.steps: step2. set properties then call pattern->OnModifyDone();.
+     * @tc.expected: check whether the properties is correct.
+     */
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleBarParentType_ =
+        TitleBarParentType::NAV_DESTINATION;
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleMode_ = NavigationTitleMode::MINI;
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propHideBackButton_ = std::nullopt;
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propNoPixMap_ = true;
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propImageSource_ = ImageSourceInfo();
+    pattern->OnModifyDone();
+    ASSERT_NE(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleBarParentType_.value(),
+        TitleBarParentType::NAVBAR);
+
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propImageSource_ = std::nullopt;
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propHideBackButton_ = false;
+    pattern->OnModifyDone();
+    auto mockPixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propPixelMap_ = mockPixelMap;
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propHideBackButton_ = true;
+    pattern->OnModifyDone();
+
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    pattern->OnModifyDone();
+    ASSERT_EQ(backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>()->propVisibility_, VisibleType::VISIBLE);
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    navBar->GetLayoutProperty<NavBarLayoutProperty>()->propHideBackButton_ = true;
+    pattern->OnModifyDone();
+    ASSERT_EQ(backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>()->propVisibility_, VisibleType::GONE);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProperty = AceType::MakeRefPtr<NavBarLayoutProperty>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        AceType::WeakClaim(AceType::RawPtr(titleBarNode)), geometryNode, layoutProperty);
+    DirtySwapConfig config;
+    auto algorithm = AceType::MakeRefPtr<LayoutAlgorithm>();
+    auto layoutAlgorithm = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(algorithm);
+    layoutWrapper->layoutAlgorithm_ = layoutAlgorithm;
+    /**
+     * @tc.steps: step1. call pattern->OnDirtyLayoutWrapperSwap();.
+     * @tc.expected: check whether the res is correct.
+     */
+    config.skipMeasure = true;
+    config.skipLayout = true;
+    auto res = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    ASSERT_FALSE(res);
+    config.skipMeasure = true;
+    config.skipLayout = false;
+    res = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    ASSERT_FALSE(res);
+}
+
+/**
+ * @tc.name: NavrouterTestNg0035
+ * @tc.desc: Test TitleBarLayoutAlgorithm::Measure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0035, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navBar titleBarNode etc, construct layoutWrapper.
+     */
+    auto navBar =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 11, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 22, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<ImagePattern>());
+    auto backButton2 = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<ImagePattern>());
+    auto menu = FrameNode::CreateFrameNode("BackButton", 34, AceType::MakeRefPtr<ButtonPattern>());
+    auto menu2 = FrameNode::CreateFrameNode("BackButton", 34, AceType::MakeRefPtr<ButtonPattern>());
+    auto subtitle = FrameNode::CreateFrameNode("BackButton", 35, AceType::MakeRefPtr<ButtonPattern>());
+    auto title = FrameNode::CreateFrameNode("BackButton", 36, AceType::MakeRefPtr<TextPattern>());
+    auto toolBarNode = FrameNode::CreateFrameNode("BackButton", 44, AceType::MakeRefPtr<ButtonPattern>());
+    auto buttonNode = FrameNode::CreateFrameNode("BackButton", 55, AceType::MakeRefPtr<ImagePattern>());
+    auto backButtonImageNode = FrameNode::CreateFrameNode("BackButton", 66, AceType::MakeRefPtr<ImagePattern>());
+
+    titleBarNode->backButton_ = backButton;
+    ASSERT_TRUE(titleBarNode->children_.empty());
+    titleBarNode->children_.push_back(backButton);
+
+    auto layoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto geometryNode = titleBarNode->geometryNode_;
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        AceType::WeakClaim(AceType::RawPtr(titleBarNode)), geometryNode, layoutProperty);
+
+    auto backLayoutProperty = backButton2->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(backLayoutProperty, nullptr);
+    auto backGeometryNode = backButton2->geometryNode_;
+    ASSERT_NE(backGeometryNode, nullptr);
+    auto backButtonWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        AceType::WeakClaim(AceType::RawPtr(backButton2)), backGeometryNode, backLayoutProperty);
+    ASSERT_NE(backButtonWrapper, nullptr);
+    layoutWrapper->childrenMap_[0] = backButtonWrapper;
+    layoutWrapper->currentChildCount_ = 1;
+    ASSERT_EQ(titleBarNode->GetChildIndexById(titleBarNode->GetBackButton()->GetId()), 0);
+    ASSERT_NE(layoutWrapper->GetOrCreateChildByIndex(0), nullptr);
+
+    auto algorithm = AceType::MakeRefPtr<TitleBarLayoutAlgorithm>();
+
+    LayoutConstraintF constraint;
+    constraint.selfIdealSize.width_ = 20.0f;
+    constraint.selfIdealSize.height_ = 30.0f;
+    layoutProperty->layoutConstraint_ = constraint;
+    EXPECT_FALSE(layoutProperty->contentConstraint_);
+    layoutProperty->contentConstraint_ = constraint;
+    /**
+     * @tc.steps: step2. set menu and change properties, test TitleBarLayoutAlgorithm::MeasureBackButton.
+     * @tc.expected: check whether the properties is correct.
+     */
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_FALSE(layoutProperty->propTitleMode_);
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAV_DESTINATION;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(layoutProperty->propTitleBarParentType_.value(), TitleBarParentType::NAV_DESTINATION);
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    layoutProperty->propTitleMode_ = NavigationTitleMode::MINI;
+    layoutProperty->propHideBackButton_ = true;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    EXPECT_TRUE(layoutProperty->propHideBackButton_.value());
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    layoutProperty->propTitleMode_ = NavigationTitleMode::MINI;
+    layoutProperty->propHideBackButton_ = false;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    EXPECT_FALSE(layoutProperty->propHideBackButton_.value());
+    /**
+     * @tc.steps: step3. set titleBarNode->backButton_ and change properties, test TitleBarLayoutAlgorithm::MeasureMenu.
+     * @tc.expected: check whether the properties is correct.
+     */
+    titleBarNode->menu_ = menu;
+    ASSERT_EQ(titleBarNode->children_.size(), 1);
+    titleBarNode->children_.push_back(menu);
+
+    auto menuLayoutProperty = menu2->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(menuLayoutProperty, nullptr);
+    auto menuGeometryNode = menu2->geometryNode_;
+    ASSERT_NE(menuGeometryNode, nullptr);
+    auto menuWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        AceType::WeakClaim(AceType::RawPtr(menu2)), menuGeometryNode, menuLayoutProperty);
+    ASSERT_NE(menuWrapper, nullptr);
+    layoutWrapper->childrenMap_[1] = menuWrapper;
+    layoutWrapper->currentChildCount_ = 2;
+    titleBarNode->parent_ = AceType::WeakClaim(AceType::RawPtr(navBar));
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_FALSE(navBar->propPrevMenuIsCustom_);
+
+    navBar->propPrevMenuIsCustom_ = true;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_TRUE(navBar->propPrevMenuIsCustom_.value());
+
+    menu->children_.push_back(FrameNode::CreateFrameNode("BackButton", 30, AceType::MakeRefPtr<ButtonPattern>()));
+    menu->children_.push_back(FrameNode::CreateFrameNode("BackButton", 31, AceType::MakeRefPtr<ButtonPattern>()));
+    menu->children_.push_back(FrameNode::CreateFrameNode("BackButton", 32, AceType::MakeRefPtr<ButtonPattern>()));
+    navBar->propPrevMenuIsCustom_ = false;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_FALSE(navBar->propPrevMenuIsCustom_.value());
+    /**
+     * @tc.steps: step4. set title and change properties, test TitleBarLayoutAlgorithm::MeasureTitle.
+     * @tc.expected: check whether the properties is correct.
+     */
+    titleBarNode->title_ = title;
+    ASSERT_EQ(titleBarNode->children_.size(), 2);
+    titleBarNode->children_.push_back(title);
+
+    auto titleLayoutProperty = title->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(titleLayoutProperty, nullptr);
+    auto titleGeometryNode = title->geometryNode_;
+    ASSERT_NE(titleGeometryNode, nullptr);
+    auto titleWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        AceType::WeakClaim(AceType::RawPtr(title)), titleGeometryNode, titleLayoutProperty);
+    ASSERT_NE(titleWrapper, nullptr);
+    layoutWrapper->childrenMap_[2] = titleWrapper;
+    layoutWrapper->currentChildCount_ = 3;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAV_DESTINATION;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(layoutProperty->propTitleBarParentType_.value(), TitleBarParentType::NAV_DESTINATION);
+    ASSERT_NE(titleBarNode->backButton_, nullptr);
+
+    titleBarNode->backButton_ = nullptr;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(layoutProperty->propTitleBarParentType_.value(), TitleBarParentType::NAV_DESTINATION);
+    ASSERT_EQ(titleBarNode->backButton_, nullptr);
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    navBar->propPrevTitleIsCustom_ = true;
+    layoutProperty->propTitleMode_ = NavigationTitleMode::MINI;
+    layoutProperty->propHideBackButton_ = false;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_TRUE(navBar->propPrevTitleIsCustom_.value());
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    navBar->propPrevTitleIsCustom_ = true;
+    layoutProperty->propTitleMode_ = NavigationTitleMode::MINI;
+    layoutProperty->propHideBackButton_ = true;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_TRUE(navBar->propPrevTitleIsCustom_.value());
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    navBar->propPrevTitleIsCustom_ = true;
+    layoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
+    layoutProperty->propHideBackButton_ = true;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_TRUE(navBar->propPrevTitleIsCustom_.value());
+
+    navBar->propPrevTitleIsCustom_ = false;
+    layoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_FALSE(navBar->propPrevTitleIsCustom_.value());
+
+    navBar->propPrevTitleIsCustom_ = false;
+    layoutProperty->propTitleMode_ = NavigationTitleMode::MINI;
+    layoutProperty->propHideBackButton_ = true;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_FALSE(navBar->propPrevTitleIsCustom_.value());
+    ASSERT_TRUE(layoutProperty->propHideBackButton_.value());
+    /**
+     * @tc.steps: step5. set subtitle and change properties ,test TitleBarLayoutAlgorithm::MeasureSubtitle.
+     * @tc.expected: check whether the properties is correct.
+     */
+    titleBarNode->subtitle_ = subtitle;
+    ASSERT_EQ(titleBarNode->children_.size(), 3);
+    titleBarNode->children_.push_back(subtitle);
+
+    auto subtitleLayoutProperty = subtitle->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(subtitleLayoutProperty, nullptr);
+    auto subtitleGeometryNode = subtitle->geometryNode_;
+    ASSERT_NE(subtitleGeometryNode, nullptr);
+    auto subtitleWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        AceType::WeakClaim(AceType::RawPtr(subtitle)), subtitleGeometryNode, subtitleLayoutProperty);
+    ASSERT_NE(subtitleWrapper, nullptr);
+    layoutWrapper->childrenMap_[3] = subtitleWrapper;
+    layoutWrapper->currentChildCount_ = 4;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_TRUE(layoutProperty->propHideBackButton_.value());
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAV_DESTINATION;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(layoutProperty->propTitleBarParentType_.value(), TitleBarParentType::NAV_DESTINATION);
+    ASSERT_EQ(titleBarNode->backButton_, nullptr);
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAV_DESTINATION;
+    titleBarNode->backButton_ = backButton;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(layoutProperty->propTitleBarParentType_.value(), TitleBarParentType::NAV_DESTINATION);
+    ASSERT_NE(titleBarNode->backButton_, nullptr);
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    layoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(layoutProperty->propTitleBarParentType_.value(), TitleBarParentType::NAVBAR);
+    ASSERT_EQ(layoutProperty->propTitleMode_.value(), NavigationTitleMode::FREE);
+
+    layoutProperty->propTitleMode_ = NavigationTitleMode::MINI;
+    layoutProperty->propHideBackButton_ = false;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(layoutProperty->propTitleBarParentType_.value(), TitleBarParentType::NAVBAR);
+    ASSERT_EQ(layoutProperty->propTitleMode_.value(), NavigationTitleMode::MINI);
+    ASSERT_FALSE(layoutProperty->propHideBackButton_.value());
+}
+
+/**
+ * @tc.name: NavrouterTestNg0036
+ * @tc.desc: Test TitleBarLayoutAlgorithm::Layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0036, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navBar titleBarNode etc, construct layoutWrapper.
+     */
+    auto navBar =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 11, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 22, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<ImagePattern>());
+    auto backButton2 = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<ImagePattern>());
+    auto menu = FrameNode::CreateFrameNode("BackButton", 34, AceType::MakeRefPtr<ButtonPattern>());
+    auto menu2 = FrameNode::CreateFrameNode("BackButton", 34, AceType::MakeRefPtr<ButtonPattern>());
+    auto subtitle = FrameNode::CreateFrameNode("BackButton", 35, AceType::MakeRefPtr<ButtonPattern>());
+    auto title = FrameNode::CreateFrameNode("BackButton", 36, AceType::MakeRefPtr<TextPattern>());
+    auto toolBarNode = FrameNode::CreateFrameNode("BackButton", 44, AceType::MakeRefPtr<ButtonPattern>());
+    auto buttonNode = FrameNode::CreateFrameNode("BackButton", 55, AceType::MakeRefPtr<ImagePattern>());
+    auto backButtonImageNode = FrameNode::CreateFrameNode("BackButton", 66, AceType::MakeRefPtr<ImagePattern>());
+
+    auto layoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto geometryNode = titleBarNode->geometryNode_;
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        AceType::WeakClaim(AceType::RawPtr(titleBarNode)), geometryNode, layoutProperty);
+
+    LayoutConstraintF constraint;
+    constraint.selfIdealSize.width_ = 20.0f;
+    constraint.selfIdealSize.height_ = 30.0f;
+    layoutProperty->layoutConstraint_ = constraint;
+    EXPECT_FALSE(layoutProperty->contentConstraint_);
+    layoutProperty->contentConstraint_ = constraint;
+
+    auto algorithm = AceType::MakeRefPtr<TitleBarLayoutAlgorithm>();
+    /**
+     * @tc.steps: step2. set backButton and change properties, test TitleBarLayoutAlgorithm::LayoutBackButton.
+     * @tc.expected: check whether the properties is correct.
+     */
+    titleBarNode->backButton_ = backButton;
+    ASSERT_TRUE(titleBarNode->children_.empty());
+    titleBarNode->children_.push_back(backButton);
+
+    auto backLayoutProperty = backButton->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(backLayoutProperty, nullptr);
+    auto backGeometryNode = backButton->geometryNode_;
+    ASSERT_NE(backGeometryNode, nullptr);
+    auto backButtonWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        AceType::WeakClaim(AceType::RawPtr(backButton)), backGeometryNode, backLayoutProperty);
+    ASSERT_NE(backButtonWrapper, nullptr);
+    layoutWrapper->childrenMap_[0] = backButtonWrapper;
+    layoutWrapper->currentChildCount_ = 1;
+    ASSERT_EQ(titleBarNode->GetChildIndexById(titleBarNode->GetBackButton()->GetId()), 0);
+    ASSERT_NE(layoutWrapper->GetOrCreateChildByIndex(0), nullptr);
+
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_FALSE(layoutProperty->propTitleMode_);
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAV_DESTINATION;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(layoutProperty->propTitleBarParentType_.value(), TitleBarParentType::NAV_DESTINATION);
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    layoutProperty->propTitleMode_ = NavigationTitleMode::MINI;
+    layoutProperty->propHideBackButton_ = true;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    EXPECT_TRUE(layoutProperty->propHideBackButton_.value());
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    layoutProperty->propTitleMode_ = NavigationTitleMode::MINI;
+    layoutProperty->propHideBackButton_ = false;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    EXPECT_FALSE(layoutProperty->propHideBackButton_.value());
+    /**
+     * @tc.steps: step3. set titleBarNode->title_ and change properties, test TitleBarLayoutAlgorithm::LayoutTitle.
+     * @tc.expected: check whether the properties is correct.
+     */
+    titleBarNode->title_ = title;
+    ASSERT_EQ(titleBarNode->children_.size(), 1);
+    titleBarNode->children_.push_back(title);
+
+    auto titleLayoutProperty = title->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(titleLayoutProperty, nullptr);
+    auto titleGeometryNode = title->geometryNode_;
+    ASSERT_NE(titleGeometryNode, nullptr);
+    auto titleWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        AceType::WeakClaim(AceType::RawPtr(title)), titleGeometryNode, titleLayoutProperty);
+    ASSERT_NE(titleWrapper, nullptr);
+    layoutWrapper->childrenMap_[1] = titleWrapper;
+    layoutWrapper->currentChildCount_ = 2;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAV_DESTINATION;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(layoutProperty->propTitleBarParentType_.value(), TitleBarParentType::NAV_DESTINATION);
+    ASSERT_NE(titleBarNode->backButton_, nullptr);
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAV_DESTINATION;
+    backLayoutProperty->propVisibility_ = VisibleType::GONE;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(layoutProperty->propTitleBarParentType_.value(), TitleBarParentType::NAV_DESTINATION);
+    ASSERT_EQ(backLayoutProperty->propVisibility_.value(), VisibleType::GONE);
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    layoutProperty->propTitleMode_ = NavigationTitleMode::MINI;
+    layoutProperty->propHideBackButton_ = true;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(layoutProperty->propTitleBarParentType_.value(), TitleBarParentType::NAVBAR);
+    ASSERT_EQ(layoutProperty->propTitleMode_.value(), NavigationTitleMode::MINI);
+    EXPECT_TRUE(layoutProperty->propHideBackButton_.value());
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    layoutProperty->propTitleMode_ = NavigationTitleMode::FULL;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(layoutProperty->propTitleBarParentType_.value(), TitleBarParentType::NAVBAR);
+    ASSERT_EQ(layoutProperty->propTitleMode_.value(), NavigationTitleMode::FULL);
+    EXPECT_TRUE(layoutProperty->propHideBackButton_.value());
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    layoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
+    titleLayoutProperty->propContent_ = "content";
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(layoutProperty->propTitleBarParentType_.value(), TitleBarParentType::NAVBAR);
+    ASSERT_EQ(layoutProperty->propTitleMode_.value(), NavigationTitleMode::FREE);
+    EXPECT_FALSE(algorithm->isInitialTitle_);
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    layoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
+    algorithm->isInitialTitle_ = true;
+    title->layoutProperty_ = AceType::MakeRefPtr<ButtonLayoutProperty>();
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(layoutProperty->propTitleBarParentType_.value(), TitleBarParentType::NAVBAR);
+    ASSERT_EQ(layoutProperty->propTitleMode_.value(), NavigationTitleMode::FREE);
+    EXPECT_TRUE(algorithm->isInitialTitle_);
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    layoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
+    algorithm->isInitialTitle_ = false;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(layoutProperty->propTitleBarParentType_.value(), TitleBarParentType::NAVBAR);
+    ASSERT_EQ(layoutProperty->propTitleMode_.value(), NavigationTitleMode::FREE);
+    EXPECT_FALSE(algorithm->isInitialTitle_);
+    ASSERT_EQ(titleBarNode->GetPattern<TitleBarPattern>()->tempTitleOffsetY_, 0.0f);
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    layoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
+    algorithm->isInitialTitle_ = false;
+    titleBarNode->GetPattern<TitleBarPattern>()->tempTitleOffsetY_ = 5.0f;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(layoutProperty->propTitleBarParentType_.value(), TitleBarParentType::NAVBAR);
+    ASSERT_EQ(layoutProperty->propTitleMode_.value(), NavigationTitleMode::FREE);
+    EXPECT_FALSE(algorithm->isInitialTitle_);
+    ASSERT_EQ(titleBarNode->GetPattern<TitleBarPattern>()->tempTitleOffsetY_, 5.0f);
+    /**
+     * @tc.steps: step4. set titleBarNode->subtitle_ and change properties, test
+     * TitleBarLayoutAlgorithm::LayoutSubtitle.
+     * @tc.expected: check whether the properties is correct.
+     */
+    titleBarNode->subtitle_ = subtitle;
+    ASSERT_EQ(titleBarNode->children_.size(), 2);
+    titleBarNode->children_.push_back(subtitle);
+
+    auto subtitleLayoutProperty = subtitle->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(subtitleLayoutProperty, nullptr);
+    auto subtitleGeometryNode = subtitle->geometryNode_;
+    ASSERT_NE(subtitleGeometryNode, nullptr);
+    auto subtitleWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        AceType::WeakClaim(AceType::RawPtr(subtitle)), subtitleGeometryNode, subtitleLayoutProperty);
+    ASSERT_NE(subtitleWrapper, nullptr);
+    layoutWrapper->childrenMap_[2] = subtitleWrapper;
+    layoutWrapper->currentChildCount_ = 3;
+    subtitleGeometryNode->frame_.rect_.height_ = 20.0f;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_TRUE(layoutProperty->propHideBackButton_.value());
+    ASSERT_FALSE(algorithm->isInitialTitle_);
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAV_DESTINATION;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(layoutProperty->propTitleBarParentType_.value(), TitleBarParentType::NAV_DESTINATION);
+    ASSERT_NE(titleBarNode->GetBackButton(), nullptr);
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAV_DESTINATION;
+    titleBarNode->backButton_ = nullptr;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(layoutProperty->propTitleBarParentType_.value(), TitleBarParentType::NAV_DESTINATION);
+    ASSERT_EQ(titleBarNode->GetBackButton(), nullptr);
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    layoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
+    algorithm->isInitialTitle_ = false;
+    titleBarNode->GetPattern<TitleBarPattern>()->tempTitleOffsetY_ = 0.0f;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_FALSE(algorithm->isInitialTitle_);
+    ASSERT_EQ(titleBarNode->GetPattern<TitleBarPattern>()->tempTitleOffsetY_, 0.0f);
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    layoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
+    algorithm->isInitialTitle_ = false;
+    titleBarNode->GetPattern<TitleBarPattern>()->tempTitleOffsetY_ = 20.0f;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_FALSE(algorithm->isInitialTitle_);
+    ASSERT_EQ(titleBarNode->GetPattern<TitleBarPattern>()->tempTitleOffsetY_, 20.0f);
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    layoutProperty->propTitleMode_ = NavigationTitleMode::FULL;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(layoutProperty->propTitleMode_.value(), NavigationTitleMode::FULL);
+
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    layoutProperty->propTitleMode_ = NavigationTitleMode::MINI;
+    layoutProperty->propHideBackButton_ = true;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(layoutProperty->propTitleMode_.value(), NavigationTitleMode::MINI);
+    ASSERT_TRUE(layoutProperty->propHideBackButton_.value());
+
+    titleGeometryNode->frame_.rect_.height_ = 20.0f;
+    layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    layoutProperty->propTitleMode_ = NavigationTitleMode::MINI;
+    layoutProperty->propHideBackButton_ = false;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(layoutProperty->propTitleMode_.value(), NavigationTitleMode::MINI);
+    ASSERT_FALSE(layoutProperty->propHideBackButton_.value());
+
+    /**
+     * @tc.steps: step5. set titleBarNode->menu_ and change properties, test TitleBarLayoutAlgorithm::LayoutMenu.
+     * @tc.expected: check whether the properties is correct.
+     */
+    titleBarNode->menu_ = menu;
+    ASSERT_EQ(titleBarNode->children_.size(), 3);
+    titleBarNode->children_.push_back(menu);
+
+    auto menuLayoutProperty = menu2->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(menuLayoutProperty, nullptr);
+    auto menuGeometryNode = menu2->geometryNode_;
+    ASSERT_NE(menuGeometryNode, nullptr);
+    auto menuWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        AceType::WeakClaim(AceType::RawPtr(menu2)), menuGeometryNode, menuLayoutProperty);
+    ASSERT_NE(menuWrapper, nullptr);
+    layoutWrapper->childrenMap_[3] = menuWrapper;
+    layoutWrapper->currentChildCount_ = 4;
+    titleBarNode->parent_ = AceType::WeakClaim(AceType::RawPtr(navBar));
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_NE(layoutProperty->propTitleMode_.value(), NavigationTitleMode::FREE);
+
+    layoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(layoutProperty->propTitleMode_.value(), NavigationTitleMode::FREE);
+
+    layoutProperty->propTitleMode_ = NavigationTitleMode::MINI;
+    subtitleGeometryNode->frame_.rect_.height_ = 0.0f;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(layoutProperty->propTitleMode_.value(), NavigationTitleMode::MINI);
+    ASSERT_EQ(subtitleGeometryNode->frame_.rect_.height_, 0.0f);
+}
+
+/**
+ * @tc.name: NavrouterTestNg0037
+ * @tc.desc: Test NavigationStack.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0037, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigationStack.
+     */
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<ImagePattern>());
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    /**
+     * @tc.steps: step2. call get function.
+     * @tc.expected: navigationStack->navPathList_.empty() is true.
+     */
+    ASSERT_TRUE(navigationStack->navPathList_.empty());
+    navigationStack->GetAllPathName();
+    ASSERT_TRUE(navigationStack->navPathList_.empty());
+    navigationStack->Get();
+    ASSERT_TRUE(navigationStack->navPathList_.empty());
+    navigationStack->Get("test");
+    ASSERT_TRUE(navigationStack->navPathList_.empty());
+    navigationStack->GetPre("test", backButton);
+    ASSERT_TRUE(navigationStack->navPathList_.empty());
+    /**
+     * @tc.steps: step3. add element to navigationStack->navPathList_.
+     */
+    navigationStack->navPathList_.push_back({"test", backButton});
+    navigationStack->GetPre("test", backButton);
+    navigationStack->navPathList_.push_back({"test1", backButton});
+    navigationStack->GetPre("test", backButton);
+    navigationStack->GetPre("test2", backButton);
+    navigationStack->Get("test3");
+    navigationStack->GetAllPathName();
+    navigationStack->navPathList_.clear();
+    /**
+     * @tc.steps: step4. call Remove function.
+     * @tc.expected: navigationStack->navPathList_.empty() is true.
+     */
+    navigationStack->Remove();
+    navigationStack->Remove("test");
+    ASSERT_TRUE(navigationStack->navPathList_.empty());
+    for (int i = 0; i < 3; i++) {
+        std::pair<std::string, RefPtr<UINode>> p("test" + std::to_string(i), backButton);
+        navigationStack->navPathList_.push_back(p);
+    }
+    navigationStack->Remove();
+    ASSERT_FALSE(navigationStack->navPathList_.empty());
+    ASSERT_EQ(navigationStack->navPathList_.size(), 2);
+    for (int i = 0; i < 3; i++) {
+        navigationStack->Remove("test" + std::to_string(i));
+    }
+    ASSERT_TRUE(navigationStack->navPathList_.empty());
+
+    for (int i = 1; i <= 3; i++) {
+        std::pair<std::string, RefPtr<UINode>> p("test" + std::to_string(i), backButton);
+        navigationStack->navPathList_.push_back(p);
+    }
+    for (int i = 0; i <= 4; i++) {
+        navigationStack->Remove("test" + std::to_string(i), backButton);
+    }
+    ASSERT_TRUE(navigationStack->navPathList_.empty());
+}
+
+/**
+ * @tc.name: NavrouterTestNg0038
+ * @tc.desc: Test NavigationStack.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0038, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigationStack.
+     * @tc.expected: check whether the properties is correct.
+     */
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<ImagePattern>());
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto routeInfo = AceType::MakeRefPtr<RouteInfo>();
+    for (int i = 0; i <= 3; i++) {
+        for (int j = 0; j <= 2 + i; j++) {
+            navigationStack->Add(
+                "test" + std::to_string(j == 1 ? 0 : j), backButton, static_cast<NavRouteMode>(i), routeInfo);
+        }
+        navigationStack->navPathList_.clear();
+    }
+    ASSERT_TRUE(navigationStack->navPathList_.empty());
 }
 } // namespace OHOS::Ace::NG

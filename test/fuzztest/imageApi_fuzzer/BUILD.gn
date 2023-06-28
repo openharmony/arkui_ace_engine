@@ -62,6 +62,7 @@ ohos_fuzztest("ImageApiFuzzTest") {
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",
     "$ace_root/frameworks/core/animation/curves.cpp",
     "$ace_root/frameworks/core/animation/scheduler.cpp",
+    "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
 
     # common
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
@@ -120,7 +121,7 @@ ohos_fuzztest("ImageApiFuzzTest") {
 
   if (is_ohos_standard_system) {
     external_deps = [
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
       "init:libbegetutil",
     ]
     deps += [ "$ace_flutter_engine_root/icu:ace_libicu_ohos" ]

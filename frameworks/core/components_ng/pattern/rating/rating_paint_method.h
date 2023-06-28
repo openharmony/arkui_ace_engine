@@ -47,6 +47,7 @@ public:
         CHECK_NULL_VOID(ratingTheme);
         auto paintProperty = DynamicCast<RatingRenderProperty>(paintWrapper->GetPaintProperty());
         ratingModifier_->SetContentOffset(paintWrapper->GetContentOffset());
+        ratingModifier_->SetContentSize(paintWrapper->GetContentSize());
         ratingModifier_->SetStartNum(starNum_);
         if (paintProperty) {
             constexpr double DEFAULT_RATING_TOUCH_STAR_NUMBER = -1;

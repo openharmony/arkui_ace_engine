@@ -40,7 +40,7 @@ void NavigationStack::Remove(const std::string& name)
     }
     for (auto it = navPathList_.begin(); it != navPathList_.end();) {
         if (((*it).first) == name) {
-            navPathList_.erase(it++);
+            it = navPathList_.erase(it);
         } else {
             ++it;
         }
@@ -107,7 +107,7 @@ void NavigationStack::AddForDefault(
 {
     // for the old page: destroy the UINode, but keep in the stack
     auto index = FindIndex(name, navDestinationNode);
-    auto top = navPathList_.size() - 1;
+    auto top = static_cast<int32_t>(navPathList_.size()) - 1;
     if (top != NOT_EXIST) {
         auto oldName = navPathList_[top].first;
         navPathList_.pop_back();

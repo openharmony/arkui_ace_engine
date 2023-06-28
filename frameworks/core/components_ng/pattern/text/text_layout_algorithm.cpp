@@ -167,7 +167,9 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
             auto width = geometryNode->GetMarginFrameSize().Width();
             auto height = geometryNode->GetMarginFrameSize().Height();
             child->placeHolderIndex = child->UpdateParagraph(paragraph_, width, height, verticalAlign);
-            child->position += 1;
+            child->content = " ";
+            child->position = spanTextLength + 1;
+            spanTextLength += 1;
             iterItems++;
         } else {
             child->UpdateParagraph(paragraph_);

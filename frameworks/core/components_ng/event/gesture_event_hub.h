@@ -34,11 +34,11 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-namespace OHOS::UDMF {
-class UnifiedData;
-}
 namespace OHOS::Msdp::DeviceStatus {
 struct DragNotifyMsg;
+}
+namespace OHOS::Ace {
+class UnifiedData;
 }
 #endif
 namespace OHOS::Ace::NG {
@@ -107,11 +107,12 @@ using DragNotifyMsg = Msdp::DeviceStatus::DragNotifyMsg;
 using OnDragCallback = std::function<void(const DragNotifyMsg&)>;
 constexpr float PIXELMAP_WIDTH_RATE = -0.5f;
 constexpr float PIXELMAP_HEIGHT_RATE = -0.2f;
+constexpr float PIXELMAP_DEFALUT_LIMIT_SCALE = 0.5f;
 #endif
 class EventHub;
 
 // The gesture event hub is mainly used to handle common gesture events.
-class ACE_EXPORT GestureEventHub : public Referenced {
+class ACE_FORCE_EXPORT GestureEventHub : public Referenced {
 public:
     explicit GestureEventHub(const WeakPtr<EventHub>& eventHub);
     ~GestureEventHub() override = default;
@@ -141,7 +142,7 @@ public:
         scrollableActuator_->RemoveScrollableEvent(scrollableEvent);
     }
 
-    void AddScrollEdgeEffect(const Axis& axis, const RefPtr<ScrollEdgeEffect>& scrollEffect)
+    void AddScrollEdgeEffect(const Axis& axis, RefPtr<ScrollEdgeEffect>& scrollEffect)
     {
         if (!scrollableActuator_) {
             scrollableActuator_ = MakeRefPtr<ScrollableActuator>(WeakClaim(this));
@@ -197,6 +198,10 @@ public:
     void CheckClickActuator();
     // Set by user define, which will replace old one.
     void SetUserOnClick(GestureEventFunc&& clickEvent);
+
+    // When the event param is undefined, it will clear the callback.
+    void ClearUserOnClick();
+    void ClearUserOnTouch();
 
     void AddClickEvent(const RefPtr<ClickEvent>& clickEvent);
 
@@ -373,8 +378,8 @@ public:
     }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-    int32_t SetDragData(std::shared_ptr<UDMF::UnifiedData>& unifiedData, std::string& udKey);
-    OnDragCallback GetDragCallback();
+    int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
+    OnDragCallback GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
 #endif // ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     void HandleOnDragStart(const GestureEvent& info);
@@ -382,7 +387,10 @@ public:
     void HandleOnDragEnd(const GestureEvent& info);
     void HandleOnDragCancel();
 
+    void StartLongPressActionForWeb();
+    void CancelDragForWeb();
     void StartDragTaskForWeb();
+    void ResetDragActionForWeb();
 
     void OnModifyDone();
     bool KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr<NG::FrameNode>& node);
@@ -398,6 +406,8 @@ private:
     void UpdateExternalNGGestureRecognizer();
 
     OnAccessibilityEventFunc GetOnAccessibilityEventFunc();
+
+    void OnDragStart(const GestureEvent& info, const RefPtr<PipelineBase>& context);
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;

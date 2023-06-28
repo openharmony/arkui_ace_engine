@@ -144,6 +144,32 @@ public:
         return false;
     }
 
+    void SetNestedScroll(const NestedScrollOptions& nestedOpt);
+    RefPtr<ScrollablePattern> GetParentScrollable();
+    virtual OverScrollOffset GetOverScrollOffset(double delta) const
+    {
+        return { 0, 0 };
+    }
+
+    virtual bool OnScrollSnapCallback(double targetOffset, double velocity)
+    {
+        return false;
+    }
+
+    void StartScrollBarAnimatorByProxy()
+    {
+        if (scrollBarProxy_) {
+            scrollBarProxy_->StartScrollBarAnimator();
+        }
+    }
+
+    void StopScrollBarAnimatorByProxy()
+    {
+        if (scrollBarProxy_) {
+            scrollBarProxy_->StopScrollBarAnimator();
+        }
+    }
+
 protected:
     RefPtr<ScrollBar> GetScrollBar() const
     {
@@ -165,6 +191,7 @@ private:
     void RegisterScrollBarEventTask();
     void OnScrollEnd();
     bool OnScrollPosition(double offset, int32_t source);
+    void SetParentScrollable();
 
     Axis axis_;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -177,6 +204,8 @@ private:
     float estimatedHeight_ = 0.0f;
     bool isReactInParentMovement_ = false;
     double scrollBarOutBoundaryExtent_ = 0.0;
+
+    NestedScrollOptions nestedScroll_;
 };
 } // namespace OHOS::Ace::NG
 

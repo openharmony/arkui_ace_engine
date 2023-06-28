@@ -71,7 +71,9 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto itemLayoutConstraint = layoutProperty->CreateChildConstraint();
     isCardStyle_ = IsCardStyleForListItemGroup(layoutWrapper);
     if (isCardStyle_) {
-        contentIdealSize.SetCrossSize(GetMaxGridWidth() - layoutProperty->CreatePaddingAndBorder().Width(), axis_);
+        auto maxWidth = GetListItemGroupMaxWidth(contentConstraint.parentIdealSize, layoutProperty) -
+                        layoutProperty->CreatePaddingAndBorder().Width();
+        contentIdealSize.SetCrossSize(maxWidth, axis_);
     }
     UpdateListItemConstraint(contentIdealSize, itemLayoutConstraint);
     auto headerFooterLayoutConstraint = layoutProperty->CreateChildConstraint();
@@ -79,8 +81,7 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     spaceWidth_ = ConvertToPx(space, layoutConstraint.scaleProperty, mainPercentRefer).value_or(0);
     if (layoutProperty->GetDivider().has_value()) {
         auto divider = layoutProperty->GetDivider().value();
-        std::optional<float> dividerSpace =
-            ConvertToPx(divider.strokeWidth, layoutConstraint.scaleProperty, mainPercentRefer);
+        std::optional<float> dividerSpace = divider.strokeWidth.ConvertToPx();
         if (dividerSpace.has_value()) {
             spaceWidth_ = std::max(spaceWidth_, dividerSpace.value());
         }
@@ -120,12 +121,16 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->SetCacheCount(listLayoutProperty_->GetCachedCountValue(1) * lanes_);
 }
 
-float ListItemGroupLayoutAlgorithm::GetMaxGridWidth()
+float ListItemGroupLayoutAlgorithm::GetListItemGroupMaxWidth(
+    const OptionalSizeF& parentIdealSize, RefPtr<LayoutProperty> layoutProperty)
 {
     RefPtr<GridColumnInfo> columnInfo;
     columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::LIST_CARD);
     columnInfo->GetParent()->BuildColumnWidth();
-    return static_cast<float>(columnInfo->GetWidth(GetMaxGridCounts(columnInfo)));
+    auto maxGridWidth = static_cast<float>(columnInfo->GetWidth(GetMaxGridCounts(columnInfo)));
+    auto parentWidth = parentIdealSize.CrossSize(axis_).value() + layoutProperty->CreatePaddingAndBorder().Width();
+    auto maxWidth = std::min(parentWidth, maxGridWidth);
+    return maxWidth;
 }
 
 void ListItemGroupLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -225,6 +230,26 @@ bool ListItemGroupLayoutAlgorithm::NeedMeasureItem() const
     return true;
 }
 
+void ListItemGroupLayoutAlgorithm::LayoutListItemAll(LayoutWrapper* layoutWrapper,
+    const LayoutConstraintF& layoutConstraint, float startPos)
+{
+    int32_t currentIndex = -1;
+    float currentEndPos = startPos;
+    float currentStartPos = 0.0f;
+    while (currentIndex < totalItemCount_) {
+        currentStartPos = currentEndPos;
+        int32_t count = MeasureALineForward(layoutWrapper, layoutConstraint, currentIndex,
+            currentStartPos, currentEndPos);
+        if (count == 0) {
+            break;
+        }
+        if (currentIndex < (totalItemCount_ - 1)) {
+            currentEndPos += spaceWidth_;
+        }
+        
+    }
+}
+
 void ListItemGroupLayoutAlgorithm::MeasureListItem(
     LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint)
 {
@@ -240,11 +265,21 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
     float endPos = totalMainSize_ - footerMainSize_;
     prevStartPos_ = startPos_;
     prevEndPos_ = endPos_;
+    if (needAllLayout_) {
+        needAllLayout_ = false;
+        itemPosition_.clear();
+        layoutWrapper->RemoveAllChildInRenderTree();
+        LayoutListItemAll(layoutWrapper, layoutConstraint, startPos);
+        return;
+    }
     if (targetIndex_) {
         startPos_ = -Infinity<float>();
         endPos_ = Infinity<float>();
     }
     if (jumpIndex_.has_value()) {
+        if (jumpIndex_.value() == LAST_ITEM) {
+            jumpIndex_ = totalItemCount_ - 1;
+        }
         auto jumpIndex = jumpIndex_.value();
         if (jumpIndex < 0 || jumpIndex >= totalItemCount_) {
             jumpIndex = 0;

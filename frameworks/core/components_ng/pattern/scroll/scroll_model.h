@@ -53,6 +53,7 @@ public:
     virtual void SetEdgeEffect(EdgeEffect edgeEffect) = 0;
     virtual void SetHasWidth(bool hasWidth) = 0;
     virtual void SetHasHeight(bool hasHeight) = 0;
+    virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) = 0;
 
 private:
     static std::unique_ptr<ScrollModel> instance_;

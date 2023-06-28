@@ -469,6 +469,11 @@ public:
         ViewAbstract::SetMotionPath(option);
     }
 
+    void SetRenderGroup(bool isRenderGroup) override
+    {
+        ViewAbstract::SetRenderGroup(isRenderGroup);
+    }
+
     void SetFlexBasis(const Dimension& value) override
     {
         ViewAbstract::SetFlexBasis(value);
@@ -838,6 +843,56 @@ public:
         ViewAbstract::SetForegroundColorStrategy(strategy);
     }
 
+    void DisableOnClick() override
+    {
+        ViewAbstract::DisableOnClick();
+    }
+
+    void DisableOnTouch() override
+    {
+        ViewAbstract::DisableOnTouch();
+    }
+
+    void DisableOnKeyEvent() override
+    {
+        ViewAbstract::DisableOnKeyEvent();
+    }
+
+    void DisableOnHover() override
+    {
+        ViewAbstract::DisableOnHover();
+    }
+
+    void DisableOnMouse() override
+    {
+        ViewAbstract::DisableOnMouse();
+    }
+
+    void DisableOnAppear() override
+    {
+        ViewAbstract::DisableOnAppear();
+    }
+
+    void DisableOnDisAppear() override
+    {
+        ViewAbstract::DisableOnDisAppear();
+    }
+
+    void DisableOnAreaChange() override
+    {
+        ViewAbstract::DisableOnAreaChange();
+    }
+
+    void DisableOnFocus() override
+    {
+        ViewAbstract::DisableOnFocus();
+    }
+
+    void DisableOnBlur() override
+    {
+        ViewAbstract::DisableOnBlur();
+    }
+
 private:
     void RegisterMenuAppearCallback(
         std::vector<NG::OptionParam>& params, std::function<void()>&& buildFunc, const MenuParam& menuParam);
@@ -866,6 +921,11 @@ private:
         RefPtr<CustomAnimatableArithmetic>& value) override
     {
         ViewAbstract::UpdateAnimatableArithmeticProperty(propertyName, value);
+    }
+
+    void UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts) override
+    {
+        ViewAbstract::UpdateSafeAreaExpandOpts(opts);
     }
 };
 } // namespace OHOS::Ace::NG

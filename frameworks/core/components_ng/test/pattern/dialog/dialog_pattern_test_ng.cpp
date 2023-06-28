@@ -280,6 +280,26 @@ HWTEST_F(DialogPatternTestNg, ToJsonValue, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PopDialog
+ * @tc.desc: Dialog already in close
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, PopDialog, TestSize.Level1)
+{
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(
+        V2::ACTION_SHEET_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialog, nullptr);
+
+    auto pattern = dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->title_ = TITLE;
+    pattern->message_ = MESSAGE;
+    pattern->PopDialog(0);
+}
+
+/**
  * @tc.name: DialogAccessibilityProperty002
  * @tc.desc: Test Alert Accessibility Property
  * @tc.type: FUNC
@@ -386,11 +406,11 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest002, TestSize.Level1)
         KeyEvent keyEvent(KeyCode::KEY_0, KeyAction::CLICK);
         KeyEvent keyEvent2(KeyCode::KEY_ESCAPE, KeyAction::DOWN);
         KeyEvent keyEvent3(KeyCode::KEY_0, KeyAction::DOWN);
-        auto ret = focusHub->onKeyEventInternal_(keyEvent);
-        auto ret2 = focusHub->onKeyEventInternal_(keyEvent2);
-        auto ret3 = focusHub->onKeyEventInternal_(keyEvent3);
+        auto ret = focusHub->ProcessOnKeyEventInternal(keyEvent);
+        auto ret2 = focusHub->ProcessOnKeyEventInternal(keyEvent2);
+        auto ret3 = focusHub->ProcessOnKeyEventInternal(keyEvent3);
         EXPECT_FALSE(ret);
-        EXPECT_TRUE(ret2);
+        EXPECT_FALSE(ret2);
         EXPECT_FALSE(ret3);
     }
 }

@@ -1403,7 +1403,7 @@ void TabBarPattern::SetEdgeEffect(const RefPtr<GestureEventHub>& gestureHub)
         // add callback to springEdgeEffect
         SetEdgeEffectCallback(springEffect);
         scrollEffect_ = springEffect;
-        gestureHub->AddScrollEdgeEffect(Axis::HORIZONTAL, scrollEffect_);
+        gestureHub->AddScrollEdgeEffect(axis_, scrollEffect_);
     }
 }
 

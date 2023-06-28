@@ -370,6 +370,7 @@ void JSShapeAbstract::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSShapeAbstract>::StaticMethod("stroke", &JSShapeAbstract::SetStroke, opt);
     JSClass<JSShapeAbstract>::StaticMethod("fill", &JSShapeAbstract::SetFill, opt);
+    JSClass<JSShapeAbstract>::StaticMethod("foregroundColor", &JSShapeAbstract::SetForegroundColor, opt);
     JSClass<JSShapeAbstract>::StaticMethod("strokeDashOffset", &JSShapeAbstract::SetStrokeDashOffset, opt);
     JSClass<JSShapeAbstract>::StaticMethod("strokeDashArray", &JSShapeAbstract::SetStrokeDashArray);
     JSClass<JSShapeAbstract>::StaticMethod("strokeLineCap", &JSShapeAbstract::SetStrokeLineCap, opt);
@@ -423,5 +424,27 @@ void JSShapeAbstract::ObjectPosition(const JSCallbackInfo& info)
         }
         basicShape_->SetPosition(position);
     }
+}
+
+void JSShapeAbstract::SetForegroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    Color foregroundColor;
+    ForegroundColorStrategy strategy;
+    if (ParseJsColorStrategy(info[0], strategy)) {
+        ShapeAbstractModel::GetInstance()->SetFill(Color::FOREGROUND);
+        ViewAbstractModel::GetInstance()->SetForegroundColorStrategy(strategy);
+        return;
+    }
+    if (!ParseJsColor(info[0], foregroundColor)) {
+        ShapeAbstractModel::GetInstance()->SetFill(Color::BLACK);
+        ViewAbstractModel::GetInstance()->SetForegroundColor(Color::BLACK);
+        return;
+    }
+    ShapeAbstractModel::GetInstance()->SetFill(foregroundColor);
+    ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
 }
 } // namespace OHOS::Ace::Framework

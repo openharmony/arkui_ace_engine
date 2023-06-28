@@ -91,6 +91,7 @@ void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme)
         hourColumnNode->MountToParent(stackHourNode);
         auto layoutProperty = stackHourNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
         stackHourNode->MountToParent(timePickerNode);
     }
     if (!hasMinuteNode) {
@@ -100,6 +101,7 @@ void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme)
         minuteColumnNode->MountToParent(stackMinuteNode);
         auto layoutProperty = stackMinuteNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
         stackMinuteNode->MountToParent(timePickerNode);
     }
     stack->Push(timePickerNode);
@@ -236,7 +238,11 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     dialogEvent["changeId"] = onChange;
     dialogEvent["acceptId"] = onAccept;
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
-    auto func = [onCancel](const GestureEvent& /* info */) { onCancel(); };
+    auto func = [onCancel](const GestureEvent& /* info */) {
+        if (onCancel) {
+            onCancel();
+        }
+    };
     dialogCancelEvent["cancelId"] = func;
     DialogProperties properties;
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {

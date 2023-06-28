@@ -220,11 +220,6 @@ public:
         return false;
     }
 
-    virtual bool UsResRegion()
-    {
-        return true;
-    }
-
     std::optional<SizeF> GetHostFrameSize() const
     {
         auto frameNode = frameNode_.Upgrade();
@@ -313,6 +308,11 @@ public:
         return ScopeFocusAlgorithm();
     }
 
+    virtual bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
+    {
+        return false;
+    }
+
     // out of viewport or visible is none or gone.
     virtual void OnInActive() {}
     virtual void OnActive() {}
@@ -347,6 +347,8 @@ public:
         CHECK_NULL_RETURN(host, false);
         return layoutProperty->HasAspectRatio();
     }
+
+    virtual void OnTouchTestHit() {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

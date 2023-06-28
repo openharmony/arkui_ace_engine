@@ -47,6 +47,22 @@ constexpr int32_t SCROLL_FROM_INDEXER = 9;
 constexpr int32_t SCROLL_FROM_START = 10; // from drag start
 constexpr int32_t SCROLL_FROM_AXIS = 11;
 
+enum class NestedState {
+    GESTURE = 0,
+    CHILD_SCROLL,
+    CHILD_OVER_SCROLL,
+};
+
+struct OverScrollOffset {
+    double start;
+    double end;
+};
+
+struct ScrollResult {
+    double remain;
+    bool reachEdge;
+};
+
 using ScrollPositionCallback = std::function<bool(double, int32_t source)>;
 using ScrollEventCallback = std::function<void()>;
 using OutBoundaryCallback = std::function<bool()>;
@@ -57,6 +73,7 @@ using ScrollFrameBeginCallback = std::function<ScrollFrameResult(Dimension, Scro
 using DragEndForRefreshCallback = std::function<void()>;
 using DragCancelRefreshCallback = std::function<void()>;
 using MouseLeftButtonScroll = std::function<bool()>;
+using ScrollSnapCallback = std::function<bool(double targetOffset, double velocity)>;
 
 class Scrollable : public TouchEventTarget, public RelatedChild {
     DECLARE_ACE_TYPE(Scrollable, TouchEventTarget);
@@ -162,6 +179,13 @@ public:
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(const GestureEvent& info);
+    void HandleScrollEnd();
+    bool HandleOverScroll(double velocity);
+    ScrollResult HandleScroll(double offset, int32_t source, NestedState state);
+    ScrollResult HandleScrollParentFirst(double& offset, int32_t source, NestedState state);
+    ScrollResult HandleScrollSelfFirst(double& offset, int32_t source, NestedState state);
+    ScrollResult HandleScrollSelfOnly(double& offset, int32_t source, NestedState state);
+    ScrollResult HandleScrollParallel(double& offset, int32_t source, NestedState state);
 
     void ProcessScrollMotionStop();
 
@@ -327,6 +351,27 @@ public:
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;
 
+    void SetNestedScrollOptions(NestedScrollOptions opt)
+    {
+        nestedOpt_ = opt;
+    }
+    void SetOverScrollOffsetCallback(std::function<OverScrollOffset(double)>&& overScroll)
+    {
+        overScrollOffsetCallback_ = std::move(overScroll);
+    }
+    void SetParent(RefPtr<Scrollable> parent)
+    {
+        parent_ = AceType::WeakClaim(AceType::RawPtr(parent));
+    }
+    void SetEdgeEffect(EdgeEffect effect)
+    {
+        edgeEffect_ = effect;
+    }
+
+    void SetOnScrollSnapCallback(const ScrollSnapCallback& scrollSnapCallback)
+    {
+        scrollSnapCallback_ = scrollSnapCallback;
+    }
 private:
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);
@@ -346,6 +391,7 @@ private:
     WatchFixCallback watchFixCallback_;
     ScrollBeginCallback scrollBeginCallback_;
     ScrollFrameBeginCallback scrollFrameBeginCallback_;
+    ScrollSnapCallback scrollSnapCallback_;
     DragEndForRefreshCallback dragEndCallback_;
     DragCancelRefreshCallback dragCancelCallback_;
     MouseLeftButtonScroll mouseLeftButtonScroll_;
@@ -379,6 +425,13 @@ private:
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
 #endif
+
+    // nested scroll
+    WeakPtr<Scrollable> parent_;
+    NestedScrollOptions nestedOpt_ = { NestedScrollMode::SELF_ONLY, NestedScrollMode::SELF_ONLY };
+    std::function<OverScrollOffset(double)> overScrollOffsetCallback_;
+    EdgeEffect edgeEffect_ = EdgeEffect::NONE;
+    bool canOverScroll_ = true;
 };
 
 } // namespace OHOS::Ace

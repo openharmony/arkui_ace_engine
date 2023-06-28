@@ -102,9 +102,8 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
         }
     }
     if (source == SCROLL_FROM_START) {
-        if (scrollBarProxy_) {
-            scrollBarProxy_->StopScrollBarAnimator();
-        }
+        SetParentScrollable();
+        StopScrollBarAnimatorByProxy();
     }
     return true;
 }
@@ -123,9 +122,7 @@ void ScrollablePattern::OnScrollEnd()
         scrollBar_->SetDriving(false);
         scrollBar_->OnScrollEnd();
     }
-    if (scrollBarProxy_) {
-        scrollBarProxy_->StartScrollBarAnimator();
-    }
+    StartScrollBarAnimatorByProxy();
 }
 
 void ScrollablePattern::AddScrollEvent()
@@ -159,6 +156,25 @@ void ScrollablePattern::AddScrollEvent()
     };
     scrollableEvent_->SetMouseLeftButtonScroll(std::move(mouseLeftButtonScroll));
     gestureHub->AddScrollableEvent(scrollableEvent_);
+
+    auto scrollable = scrollableEvent_->GetScrollable();
+    CHECK_NULL_VOID_NOLOG(scrollable);
+    auto func = [weak = AceType::WeakClaim(this)](double offset) -> OverScrollOffset {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            return pattern->GetOverScrollOffset(offset);
+        }
+        return { 0, 0 };
+    };
+    scrollable->SetOverScrollOffsetCallback(std::move(func));
+    scrollable->SetNestedScrollOptions(nestedScroll_);
+
+    auto scrollSnap = [weak = WeakClaim(this)](double targetOffset, double velocity) -> bool {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->OnScrollSnapCallback(targetOffset, velocity);
+    };
+    scrollable->SetOnScrollSnapCallback(scrollSnap);
 }
 
 void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
@@ -197,6 +213,9 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
         scrollEffect_ = fadeEdgeEffect;
         gestureHub->AddScrollEdgeEffect(GetAxis(), scrollEffect_);
     }
+    auto scrollable = scrollableEvent_->GetScrollable();
+    CHECK_NULL_VOID_NOLOG(scrollable);
+    scrollable->SetEdgeEffect(edgeEffect);
 }
 
 bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const SizeF& size)
@@ -251,23 +270,28 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
             scrollBar_->MarkNeedRender();
             scrollBar_.Reset();
         }
-    } else if (!scrollBar_) {
+        return;
+    }
+    if (!scrollBar_) {
         scrollBar_ = AceType::MakeRefPtr<ScrollBar>(displayMode);
         // set the scroll bar style
         if (GetAxis() == Axis::HORIZONTAL) {
             scrollBar_->SetPositionMode(PositionMode::BOTTOM);
         }
         RegisterScrollBarEventTask();
-        if (displayMode == DisplayMode::AUTO) {
-            scrollBar_->OnScrollEnd();
-        }
     } else if (scrollBar_->GetDisplayMode() != displayMode) {
         scrollBar_->SetDisplayMode(displayMode);
-    } else {
-        return;
     }
-    if (scrollBar_) {
-        UpdateScrollBarOffset();
+    auto host = GetHost();
+    CHECK_NULL_VOID_NOLOG(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID_NOLOG(renderContext);
+    if (renderContext->HasBorderRadius()) {
+        auto borderRadius = renderContext->GetBorderRadius().value();
+        if (!(borderRadius == scrollBar_->GetHostBorderRadius())) {
+            scrollBar_->SetHostBorderRadius(borderRadius);
+            scrollBar_->CalcReservedHeight();
+        }
     }
 }
 
@@ -333,5 +357,48 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
     ScrollableNodeInfo nodeInfo = { AceType::WeakClaim(this), std::move(scrollFunction) };
     scrollBarProxy->RegisterScrollableNode(nodeInfo);
     scrollBarProxy_ = scrollBarProxy;
+}
+
+void ScrollablePattern::SetNestedScroll(const NestedScrollOptions& nestedOpt)
+{
+    nestedScroll_ = nestedOpt;
+    CHECK_NULL_VOID_NOLOG(scrollableEvent_);
+    auto scrollable = scrollableEvent_->GetScrollable();
+    CHECK_NULL_VOID_NOLOG(scrollable);
+    scrollable->SetNestedScrollOptions(nestedScroll_);
+}
+
+RefPtr<ScrollablePattern> ScrollablePattern::GetParentScrollable()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
+        RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+        if (!frameNode) {
+            continue;
+        }
+        auto pattern = frameNode->GetPattern<ScrollablePattern>();
+        if (!pattern) {
+            continue;
+        }
+        if (pattern->GetAxis() != GetAxis()) {
+            continue;
+        }
+        return pattern;
+    }
+    return nullptr;
+}
+
+void ScrollablePattern::SetParentScrollable()
+{
+    if (nestedScroll_.NeedParent()) {
+        auto parent = GetParentScrollable();
+        CHECK_NULL_VOID_NOLOG(parent);
+        CHECK_NULL_VOID_NOLOG(parent->scrollableEvent_);
+        auto parentScrollable = parent->scrollableEvent_->GetScrollable();
+        scrollableEvent_->GetScrollable()->SetParent(parentScrollable);
+    } else {
+        scrollableEvent_->GetScrollable()->SetParent(nullptr);
+    }
 }
 } // namespace OHOS::Ace::NG

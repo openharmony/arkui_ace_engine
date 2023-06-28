@@ -47,6 +47,7 @@ class MoonProgressModifier;
 class FocusStateModifier;
 class PageTransitionEffect;
 class OverlayTextModifier;
+class GradientStyleModifier;
 class RosenRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext)
 public:
@@ -225,11 +226,14 @@ public:
     void MarkDrivenRenderItemIndex(int32_t index) override;
     void MarkDrivenRenderFramePaintState(bool flag) override;
     RefPtr<PixelMap> GetThumbnailPixelMap() override;
+    bool GetBitmap(SkBitmap& bitmap, std::shared_ptr<OHOS::Rosen::DrawCmdList> drawCmdList = nullptr);
     void SetActualForegroundColor(const Color& value) override;
     void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property) override;
 
     void RegisterSharedTransition(const RefPtr<RenderContext>& other) override;
     void UnregisterSharedTransition(const RefPtr<RenderContext>& other) override;
+
+    void SetOverrideContentRect(const std::optional<RectF>& rect) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -285,6 +289,7 @@ private:
 
     void OnUseEffectUpdate(bool useEffect) override;
     void OnFreezeUpdate(bool isFreezed) override;
+    void OnRenderGroupUpdate(bool isRenderGroup) override;
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
     void NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn);
@@ -393,6 +398,7 @@ private:
     std::shared_ptr<Rosen::RSProperty<Rosen::Vector2f>> pivotProperty_;
     std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;
     std::shared_ptr<OverlayTextModifier> modifier_ = nullptr;
+    std::shared_ptr<GradientStyleModifier> gradientStyleModifier_;
 
     // graphics modifiers
     struct GraphicModifiers {
@@ -410,6 +416,8 @@ private:
     RefPtr<TouchEventImpl> touchListener_;
     VectorF currentScale_ = VectorF(1.0f, 1.0f);
     bool isTouchUpFinished_ = true;
+
+    std::optional<RectF> overrideContentRect_;
 
     template<typename Modifier, typename PropertyType>
     friend class PropertyTransitionEffectTemplate;

@@ -29,6 +29,8 @@
 #include "core/common/rosen/rosen_asset_manager.h"
 #endif
 
+#include "native_engine/native_engine.h"
+
 #include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
 #include "adapter/preview/entrance/ace_application_info.h"
 #include "adapter/preview/osal/stage_card_parser.h"
@@ -916,10 +918,22 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceViewPreview* vi
         // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
         flutterTaskExecutor->InitJsThread(false);
         InitializeFrontend();
-        auto front = GetFrontend();
+        auto front = AceType::DynamicCast<DeclarativeFrontend>(GetFrontend());
         if (front) {
             front->UpdateState(Frontend::State::ON_CREATE);
             front->SetJsMessageDispatcher(AceType::Claim(this));
+            auto weak = AceType::WeakClaim(AceType::RawPtr(front->GetJsEngine()));
+            taskExecutor_->PostTask(
+                [weak, containerSdkPath = containerSdkPath_]() {
+                    auto jsEngine = weak.Upgrade();
+                    CHECK_NULL_VOID(jsEngine);
+                    auto* nativeEngine = jsEngine->GetNativeEngine();
+                    CHECK_NULL_VOID(nativeEngine);
+                    auto* moduleManager = nativeEngine->GetModuleManager();
+                    CHECK_NULL_VOID(moduleManager);
+                    moduleManager->SetPreviewSearchPath(containerSdkPath);
+                },
+                TaskExecutor::TaskType::JS);
         }
     }
     resRegister_ = aceView_->GetPlatformResRegister();

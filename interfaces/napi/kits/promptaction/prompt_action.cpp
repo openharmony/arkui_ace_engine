@@ -231,7 +231,6 @@ void DeleteContextAndThrowError(napi_env env, PromptAsyncContext* context, const
         return;
     }
     delete context;
-    context = nullptr;
     NapiThrow(env, errorMessage, Framework::ERROR_CODE_PARAM_INVALID);
 }
 
@@ -245,7 +244,7 @@ bool ParseButtons(napi_env env, PromptAsyncContext* context, uint32_t maxButtonN
     uint32_t index = 0;
     napi_get_array_length(env, context->buttonsNApi, &buttonsLen);
     uint32_t buttonsLenInt = buttonsLen;
-    if (buttonsLenInt <= 0) {
+    if (buttonsLenInt == 0) {
         DeleteContextAndThrowError(env, context, "Required input parameters are missing.");
         return false;
     }

@@ -3139,14 +3139,14 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest001, TestSize.Level1)
      * @tc.cases: case1. up KeyEvent.
      */
     KeyEvent keyEventUp(KeyCode::KEY_DPAD_UP, KeyAction::DOWN);
-    focusHub->onKeyEventInternal_(keyEventUp);
+    focusHub->ProcessOnKeyEventInternal(keyEventUp);
     auto propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
     EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
     /**
      * @tc.cases: case1. down KeyEvent.
      */
     KeyEvent keyEventDown(KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN);
-    focusHub->onKeyEventInternal_(keyEventDown);
+    focusHub->ProcessOnKeyEventInternal(keyEventDown);
     propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
     EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
 }
@@ -3171,14 +3171,14 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest002, TestSize.Level1)
      * @tc.cases: case1. left KeyEvent.
      */
     KeyEvent keyEventLeft(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN);
-    focusHub->onKeyEventInternal_(keyEventLeft);
+    focusHub->ProcessOnKeyEventInternal(keyEventLeft);
     auto propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
     EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
     /**
      * @tc.cases: case1. right KeyEvent.
      */
     KeyEvent keyEventRight(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN);
-    focusHub->onKeyEventInternal_(keyEventRight);
+    focusHub->ProcessOnKeyEventInternal(keyEventRight);
     propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
     EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
 }
@@ -4639,6 +4639,6 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest006, TestSize.Level1)
     SizeF frameSize(FONT_SIZE_20, FONT_SIZE_20);
     geometryNode->SetFrameSize(frameSize);
     textPickerPattern->SetButtonIdeaSize();
-    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->selfIdealSize->width_.value(), CalcLength(6.0));
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->selfIdealSize->width_.value(), CalcLength(12.0));
 }
 } // namespace OHOS::Ace::NG

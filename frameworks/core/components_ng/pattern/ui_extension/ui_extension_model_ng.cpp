@@ -18,7 +18,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_node.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -28,11 +27,20 @@ void UIExtensionModelNG::Create(const std::string& bundleName, const std::string
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = UIExtensionNode::GetOrCreateUIExtensionNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
         [bundleName, abilityName]() { return AceType::MakeRefPtr<UIExtensionPattern>(bundleName, abilityName); });
     stack->Push(frameNode);
-    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
+}
+
+void UIExtensionModelNG::SetOnRelease(std::function<void(int32_t)>&& onRelease)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnReleaseCallback(std::move(onRelease));
 }
 } // namespace OHOS::Ace::NG

@@ -31,6 +31,7 @@ protected:
     static void SetColumnsTemplate(const std::string& value);
     static void SetItemConstraintSize(const JSCallbackInfo& info);
     static void SetRowsTemplate(const std::string& value);
+    static void SetNestedScroll(const JSCallbackInfo& args);
     static void ReachStartCallback(const JSCallbackInfo& args);
     static void ReachEndCallback(const JSCallbackInfo& args);
     static void ScrollFrameBeginCallback(const JSCallbackInfo& args);

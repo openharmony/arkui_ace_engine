@@ -44,6 +44,8 @@ public:
 
     void UpdateShowArea(const RectF& area) const;
 
+    void SetHandleReverse(bool reverse);
+
     bool IsClosed() const;
 
     void Close() const;

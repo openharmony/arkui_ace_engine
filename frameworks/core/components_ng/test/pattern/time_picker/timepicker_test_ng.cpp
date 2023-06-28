@@ -49,6 +49,7 @@
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 #include "core/components_ng/pattern/time_picker/toss_animation_controller.h"
 #include "core/components_ng/test/mock/pattern/picker/mock_picker_theme_manager.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
@@ -102,6 +103,8 @@ class TimePickerPatternTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    void SetUp() override;
+    void TearDown() override;
 };
 
 class TestNode : public UINode {
@@ -126,13 +129,22 @@ public:
 void TimePickerPatternTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
-    auto themeManager = AceType::MakeRefPtr<MockPickerThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
 }
 
 void TimePickerPatternTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
+}
+
+void TimePickerPatternTestNg::SetUp()
+{
+    auto themeManager = AceType::MakeRefPtr<MockPickerThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+}
+
+void TimePickerPatternTestNg::TearDown()
+{
+    MockPipelineBase::GetCurrent()->themeManager_ = nullptr;
 }
 
 /**
@@ -1300,16 +1312,15 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern015, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<EventHub>();
     auto focusHub = eventHub->GetOrCreateFocusHub();
     minuteColumnPattern->InitOnKeyEvent(focusHub);
-    auto onKeyEvent = focusHub->onKeyEventInternal_;
 
     KeyEvent keyEvent(KeyCode::KEY_DPAD_UP, KeyAction::UP);
-    EXPECT_FALSE(onKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     keyEvent.action = KeyAction::DOWN;
-    EXPECT_TRUE(onKeyEvent(keyEvent));
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     keyEvent.code = KeyCode::KEY_DPAD_DOWN;
-    EXPECT_TRUE(onKeyEvent(keyEvent));
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     keyEvent.code = KeyCode::KEY_DPAD_CENTER;
-    EXPECT_FALSE(onKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->ProcessOnKeyEventInternal(keyEvent));
 }
 
 /**
@@ -1633,13 +1644,12 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<EventHub>();
     auto focusHub = eventHub->GetOrCreateFocusHub();
     timePickerRowPattern->InitOnKeyEvent(focusHub);
-    auto onKeyEventInternal = focusHub->onKeyEventInternal_;
     auto getInnerFocusRectFunc = focusHub->getInnerFocusRectFunc_;
 
     KeyEvent keyEvent;
     keyEvent.action = KeyAction::UNKNOWN;
     keyEvent.code = KeyCode::KEY_DPAD_UP;
-    EXPECT_FALSE(onKeyEventInternal(keyEvent));
+    EXPECT_FALSE(focusHub->ProcessOnKeyEventInternal(keyEvent));
 
     keyEvent.action = KeyAction::DOWN;
     auto stackChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(timePickerRowPattern->focusKeyID_));
@@ -1649,49 +1659,48 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     auto pattern = pickerChild->GetPattern<TimePickerColumnPattern>();
     ASSERT_NE(pattern, nullptr);
     timePickerRowPattern->options_[pickerChild].clear();
-    EXPECT_TRUE(onKeyEventInternal(keyEvent));
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
 
     timePickerRowPattern->options_[pickerChild].emplace_back("AM");
     timePickerRowPattern->options_[pickerChild].emplace_back("PM");
     auto currentIndex = pattern->GetCurrentIndex();
     auto totalOptionCount = timePickerRowPattern->GetOptionCount(pickerChild);
-    EXPECT_TRUE(onKeyEventInternal(keyEvent));
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     EXPECT_EQ(pattern->GetCurrentIndex(), (totalOptionCount + currentIndex - 1) % totalOptionCount);
 
     keyEvent.code = KeyCode::KEY_DPAD_DOWN;
     currentIndex = pattern->GetCurrentIndex();
     totalOptionCount = timePickerRowPattern->GetOptionCount(pickerChild);
-    EXPECT_TRUE(onKeyEventInternal(keyEvent));
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     EXPECT_EQ(pattern->GetCurrentIndex(), (totalOptionCount + currentIndex + 1) % totalOptionCount);
 
-    keyEvent.code = KeyCode::KEY_DPAD_LEFT;
-    EXPECT_TRUE(onKeyEventInternal(keyEvent));
-    EXPECT_EQ(timePickerRowPattern->focusKeyID_, 0);
-
     keyEvent.code = KeyCode::KEY_DPAD_RIGHT;
-    EXPECT_TRUE(onKeyEventInternal(keyEvent));
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     EXPECT_EQ(timePickerRowPattern->focusKeyID_, 1);
+
+    keyEvent.code = KeyCode::KEY_DPAD_LEFT;
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
+    EXPECT_EQ(timePickerRowPattern->focusKeyID_, 0);
 
     auto frameWidth = frameNode->GetGeometryNode()->GetFrameSize().Width();
     auto childSize = frameNode->GetChildren().size();
-    auto pipeline = PipelineBase::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
-    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto pickerTheme = AceType::MakeRefPtr<PickerTheme>();
     ASSERT_NE(pickerTheme, nullptr);
-    auto dividerSpacing = pipeline->NormalizeToPx(pickerTheme->GetDividerSpacing());
+    pickerTheme->dividerSpacing_ = Dimension(OFFSET_X);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(pickerTheme));
+    auto dividerSpacing = pickerTheme->GetDividerSpacing().ConvertToPx();
     auto pickerThemeWidth = dividerSpacing * 2;
-    auto centerX = (frameWidth / childSize - pickerThemeWidth) / 2 +
-                   pickerChild->GetGeometryNode()->GetFrameRect().Width() * timePickerRowPattern->focusKeyID_ +
-                   PRESS_INTERVAL.ConvertToPx() * 2;
     auto centerY =
         (frameNode->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / 2 + PRESS_INTERVAL.ConvertToPx();
-
+    // default focusWidth < columnWidth, focusWidth = columnWidth
     RoundRect paintRect;
     getInnerFocusRectFunc(paintRect);
     auto rect = paintRect.GetRect();
-    EXPECT_EQ(rect.GetX(), centerX);
+    EXPECT_EQ(rect.GetX(), 0);
     EXPECT_EQ(rect.GetY(), centerY);
-    EXPECT_EQ(rect.Width(), (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * 2);
+    EXPECT_EQ(rect.Width(), pickerChild->GetGeometryNode()->GetFrameSize().Width());
     EXPECT_EQ(rect.Height(), dividerSpacing - PRESS_INTERVAL.ConvertToPx() * 2);
 
     EXPECT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).x,
@@ -1710,6 +1719,16 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
     EXPECT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS).y,
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
+    // default focusWidth < columnWidth
+    pickerChild->GetGeometryNode()->frame_.rect_.SetWidth(EXTRA_WIDTH);
+    RoundRect paintRect2;
+    timePickerRowPattern->GetInnerFocusPaintRect(paintRect2);
+    auto rect2 = paintRect2.GetRect();
+    auto centerX = (frameWidth / childSize - pickerThemeWidth) / 2 +
+                   pickerChild->GetGeometryNode()->GetFrameRect().Width() * timePickerRowPattern->focusKeyID_ +
+                   PRESS_INTERVAL.ConvertToPx() * 2;
+    EXPECT_EQ(rect2.GetX(), centerX);
+    EXPECT_EQ(rect2.Width(), (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * 2);
 }
 
 /**

@@ -75,8 +75,9 @@ template("build_component") {
         public_configs += invoker.public_configs
       }
 
+      external_deps = []
+
       if (defined(invoker.external_deps)) {
-        external_deps = []
         external_deps += invoker.external_deps
       }
 
@@ -133,7 +134,7 @@ template("build_component") {
         if (is_cross_platform_build) {
           deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
         } else {
-          deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+          external_deps += [ "graphic_standard:librender_service_client" ]
         }
       }
       part_name = ace_engine_part

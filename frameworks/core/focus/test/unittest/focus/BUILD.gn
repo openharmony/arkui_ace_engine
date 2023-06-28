@@ -50,6 +50,7 @@ ohos_unittest("FocusTest") {
     "$ace_root/frameworks/core/pipeline/base/element.cpp",
     "$ace_root/frameworks/core/pipeline/base/render_element.cpp",
     "$ace_root/frameworks/core/pipeline/base/render_node.cpp",
+    "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
     "focus_test.cpp",
 
     #mock
@@ -82,7 +83,7 @@ ohos_unittest("FocusTest") {
     "//third_party/googletest:gtest_main",
   ]
   if (is_ohos_standard_system) {
-    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps = [ "hilog:libhilog" ]
     deps += [ "$ace_flutter_engine_root/icu:ace_libicu_ohos" ]
   } else {
     external_deps = [ "hilog:libhilog" ]

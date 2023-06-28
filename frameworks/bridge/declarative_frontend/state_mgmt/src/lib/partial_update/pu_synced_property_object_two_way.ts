@@ -34,8 +34,7 @@ class SynchedPropertyObjectTwoWayPU<C extends Object>
     this.source_ = source;
     if (this.source_) {
       // register to the parent property
-      this.source_.subscribeMe(this);
-
+      this.source_.addSubscriber(this);
       // register to the ObservedObject
       ObservedObject.addOwningProperty(this.source_.get(), this);
     } else {
@@ -50,8 +49,8 @@ class SynchedPropertyObjectTwoWayPU<C extends Object>
   aboutToBeDeleted() {
     // unregister from parent of this link
     if (this.source_) {
-        this.source_.unlinkSuscriber(this.id__());
-    
+      this.source_.removeSubscriber(this);
+
         // unregister from the ObservedObject
         ObservedObject.removeOwningProperty(this.source_.getUnmonitored(), this);
     }

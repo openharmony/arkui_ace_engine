@@ -259,6 +259,7 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("height", &JSGrid::JsGridHeight);
     JSClass<JSGrid>::StaticMethod("onItemDrop", &JSGrid::JsOnGridDrop);
     JSClass<JSGrid>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
+    JSClass<JSGrid>::StaticMethod("nestedScroll", &JSGrid::SetNestedScroll);
     JSClass<JSGrid>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -325,16 +326,23 @@ void JSGrid::SetMaxCount(const JSCallbackInfo& info)
     int32_t maxCount = Infinity<int32_t>();
     if (!info[0]->IsUndefined() && info[0]->IsNumber()) {
         ParseJsInt32(info[0], maxCount);
-        if (maxCount < 0) {
+        if (maxCount < 1) {
             maxCount = Infinity<int32_t>();
         }
     }
     GridModel::GetInstance()->SetMaxCount(maxCount);
 }
 
-void JSGrid::SetMinCount(double minCount)
+void JSGrid::SetMinCount(const JSCallbackInfo& info)
 {
-    GridModel::GetInstance()->SetMinCount(static_cast<int32_t>(minCount));
+    int32_t minCount = 1;
+    if (!info[0]->IsUndefined() && info[0]->IsNumber()) {
+        ParseJsInt32(info[0], minCount);
+        if (minCount < 1) {
+            minCount = 1;
+        }
+    }
+    GridModel::GetInstance()->SetMinCount(minCount);
 }
 
 void JSGrid::CellLength(int32_t cellLength)
@@ -352,12 +360,18 @@ void JSGrid::SetDragAnimation(bool value)
     GridModel::GetInstance()->SetSupportDragAnimation(value);
 }
 
-void JSGrid::SetEdgeEffect(int32_t value)
+void JSGrid::SetEdgeEffect(const JSCallbackInfo& info)
 {
-    if (value < 0 || value >= static_cast<int32_t>(EDGE_EFFECT.size())) {
+    if (info.Length() < 1) {
+        LOGE("args is invalid");
         return;
     }
-    GridModel::GetInstance()->SetEdgeEffect(EDGE_EFFECT[value]);
+    int32_t edgeEffect;
+    if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsInt32(info[0], edgeEffect) ||
+        edgeEffect < static_cast<int32_t>(EdgeEffect::SPRING) || edgeEffect > static_cast<int32_t>(EdgeEffect::NONE)) {
+        edgeEffect = static_cast<int32_t>(EdgeEffect::NONE);
+    }
+    GridModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect));
 }
 
 void JSGrid::SetLayoutDirection(int32_t value)
@@ -486,4 +500,35 @@ void JSGrid::SetMultiSelectable(bool multiSelectable)
     GridModel::GetInstance()->SetMultiSelectable(multiSelectable);
 }
 
+void JSGrid::SetNestedScroll(const JSCallbackInfo& args)
+{
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_ONLY,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        GridModel::GetInstance()->SetNestedScroll(nestedOpt);
+        LOGW("Invalid params");
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    int32_t froward = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollForward"), froward);
+    if (froward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
+        froward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
+        LOGW("ScrollFroward params invalid");
+        froward = 0;
+    }
+    int32_t backward = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollBackward"), backward);
+    if (backward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
+        backward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
+        LOGW("ScrollFroward params invalid");
+        backward = 0;
+    }
+    nestedOpt.forward = static_cast<NestedScrollMode>(froward);
+    nestedOpt.backward = static_cast<NestedScrollMode>(backward);
+    GridModel::GetInstance()->SetNestedScroll(nestedOpt);
+    args.ReturnSelf();
+}
 } // namespace OHOS::Ace::Framework

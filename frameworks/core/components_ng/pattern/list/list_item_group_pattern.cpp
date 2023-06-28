@@ -28,7 +28,6 @@ void ListItemGroupPattern::OnAttachToFrameNode()
     if (listItemGroupStyle_ == V2::ListItemGroupStyle::CARD) {
         SetListItemGroupDefaultAttributes(host);
     }
-    host->GetRenderContext()->SetClipToBounds(true);
 }
 
 void ListItemGroupPattern::SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode)

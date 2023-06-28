@@ -39,6 +39,10 @@
 #include "core/components_ng/render/render_property.h"
 #include "core/pipeline/base/constants.h"
 
+namespace OHOS::Rosen {
+class DrawCmdList;
+}
+
 namespace OHOS::Ace::NG {
 class GeometryNode;
 class RenderPropertyNode;
@@ -99,7 +103,7 @@ public:
 
     virtual void OnModifyDone() {}
 
-    enum class ContextType : int8_t { CANVAS, ROOT, SURFACE, EFFECT, EXTERNAL };
+    enum class ContextType : int8_t { CANVAS, ROOT, SURFACE, EFFECT, EXTERNAL, INCREMENTAL_CANVAS };
     struct ContextParam {
         ContextType type;
         std::optional<std::string> surfaceName;
@@ -256,6 +260,7 @@ public:
     {
         isModalRootNode_ = isModalRootNode;
     }
+
     std::optional<BlurStyleOption> GetBackBlurStyle() const
     {
         return GetBackground() ? GetBackground()->propBlurStyleOption : std::nullopt;
@@ -292,6 +297,7 @@ public:
     virtual void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) {}
     virtual void OnLightUpEffectUpdate(double radio) {}
     virtual void OnClickEffectLevelUpdate(const ClickEffectInfo& info) {}
+    virtual void OnRenderGroupUpdate(bool isRenderGroup) {}
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SphericalEffect, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PixelStretchEffect, PixStretchEffectOption);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LightUpEffect, double);
@@ -300,6 +306,7 @@ public:
     {
         return nullptr;
     }
+
     virtual void SetActualForegroundColor(const Color& value) {}
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
@@ -333,6 +340,7 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackgroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderGroup, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColorStrategy, ForegroundColorStrategy);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundColorFlag, bool);
@@ -404,6 +412,8 @@ public:
 
     // obscured
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Obscured, std::vector<ObscuredReasons>);
+
+    virtual void SetOverrideContentRect(const std::optional<RectF>& rect) {}
 
 protected:
     RenderContext() = default;

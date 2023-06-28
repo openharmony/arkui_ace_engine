@@ -3316,35 +3316,6 @@ HWTEST_F(TextFieldPatternTestNg, HandleCounterBorder, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleBlurEvent001
- * @tc.desc: Test the HandleBlurEvent.
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestNg, HandleBlurEvent001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create TextFieldPattern.
-     */
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(textFieldPattern, nullptr);
-    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-
-    /**
-     * @tc.steps: step2. Set showUnderLine. Call function HandleBlurEvent.
-     * @tc.expected: Check the showUnderLine set successfully.
-     */
-    layoutProperty->UpdateShowUnderline(true);
-    textFieldPattern->HandleBlurEvent();
-    EXPECT_TRUE(layoutProperty->GetShowUnderlineValue(false));
-    layoutProperty->UpdateShowUnderline(false);
-    textFieldPattern->HandleBlurEvent();
-    EXPECT_FALSE(layoutProperty->GetShowUnderlineValue(false));
-}
-
-/**
  * @tc.name: HandleTouchDown001
  * @tc.desc: Test the HandleTouchDown.
  * @tc.type: FUNC
@@ -4045,10 +4016,10 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldModelNGProcessDefaultPadding, TestSize
     textFieldModelNG.ProcessDefaultPadding(paddingProperty);
     Dimension vertical { 12.0, DimensionUnit::PX };
     Dimension horizontal { 0.0, DimensionUnit::PX };
-    EXPECT_EQ(paddingProperty.top.value().GetDimension(), vertical);
-    EXPECT_EQ(paddingProperty.bottom.value().GetDimension(), vertical);
-    EXPECT_EQ(paddingProperty.left.value().GetDimension(), horizontal);
-    EXPECT_EQ(paddingProperty.right.value().GetDimension(), horizontal);
+    EXPECT_EQ(paddingProperty.top.value().GetDimension().ConvertToPx(), vertical.ConvertToPx());
+    EXPECT_EQ(paddingProperty.bottom.value().GetDimension().ConvertToPx(), vertical.ConvertToPx());
+    EXPECT_EQ(paddingProperty.left.value().GetDimension().ConvertToPx(), horizontal.ConvertToPx());
+    EXPECT_EQ(paddingProperty.right.value().GetDimension().ConvertToPx(), horizontal.ConvertToPx());
 
     /**
      * @tc.steps: step3. let ShowUnderLine be false.
@@ -4201,7 +4172,6 @@ HWTEST_F(TextFieldPatternTestNg, MeasureContent, TestSize.Level2)
     size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     ASSERT_TRUE(size.has_value());
     EXPECT_EQ(size.value().Width(), 20.0f);
-    EXPECT_EQ(size.value().Height(), 0.0f);
 
     /**
      * @tc.steps: step3. test not TextArea and Call MeasureContent.
@@ -4651,7 +4621,7 @@ HWTEST_F(TextFieldPatternTestNg, UpdateCaretPositionByTextEdit, TestSize.Level2)
     pattern->contentRect_.SetLeft(4);
     pattern->UpdateCaretPositionByTextEdit();
     EXPECT_EQ(pattern->GetCaretRect().GetX(), 4);
-    EXPECT_EQ(pattern->GetCaretRect().GetY(), 5);
+    EXPECT_EQ(pattern->GetCaretRect().GetY(), 8);
 }
 
 /**

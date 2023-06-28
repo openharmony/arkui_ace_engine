@@ -18,6 +18,7 @@
 #include <cstdint>
 
 #include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/jsview/js_refresh.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/refresh_model_impl.h"
 #include "core/components/refresh/refresh_theme.h"
@@ -130,16 +131,7 @@ void JSRefresh::Create(const JSCallbackInfo& info)
             RefreshModel::GetInstance()->SetIndicatorOffset(offset);
         }
     }
-    if (friction->IsNumber()) {
-        auto frictionNumber = friction->ToNumber<int32_t>();
-        if (frictionNumber < 0 || frictionNumber > MAX_FRICTION) {
-            frictionNumber = DEFAULT_FRICTION;
-        }
-        RefreshModel::GetInstance()->SetFriction(frictionNumber);
-        if (friction->ToNumber<int32_t>() <= 0) {
-            RefreshModel::GetInstance()->IsRefresh(true);
-        }
-    }
+    ParsFrictionData(friction);
     ParseCustomBuilder(info);
 }
 
@@ -200,4 +192,24 @@ void JSRefresh::OnRefreshing(const JSCallbackInfo& args)
     RefreshModel::GetInstance()->SetOnRefreshing(std::move(onRefreshing));
 }
 
+void JSRefresh::ParsFrictionData(const JsiRef<JsiValue>& friction)
+{
+    int32_t frictionNumber = DEFAULT_FRICTION;
+    if (friction->IsString()) {
+        frictionNumber = StringUtils::StringToInt(friction->ToString());
+        if ((frictionNumber == 0 && friction->ToString() != "0") || frictionNumber < 0 ||
+            frictionNumber > MAX_FRICTION) {
+            frictionNumber = DEFAULT_FRICTION;
+        }
+    } else if (friction->IsNumber()) {
+        frictionNumber = friction->ToNumber<int32_t>();
+        if (frictionNumber < 0 || frictionNumber > MAX_FRICTION) {
+            frictionNumber = DEFAULT_FRICTION;
+        }
+        if (friction->ToNumber<int32_t>() <= 0) {
+            RefreshModel::GetInstance()->IsRefresh(true);
+        }
+    }
+    RefreshModel::GetInstance()->SetFriction(frictionNumber);
+}
 } // namespace OHOS::Ace::Framework

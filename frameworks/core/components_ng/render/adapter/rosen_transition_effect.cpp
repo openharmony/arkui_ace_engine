@@ -319,13 +319,13 @@ template<typename Modifier, typename PropertyType>
 void PropertyTransitionEffectTemplate<Modifier, PropertyType>::OnAttach(
     const RefPtr<RosenRenderContext>& context, bool activeTransition)
 {
+    // record the current status
+    isActive_ = activeTransition;
     if (modifier_ != nullptr) {
-        LOGE("PropertyTransitionEffectImpl::OnAttach modifier_ is not null");
+        property_->Set(activeTransition ? activeValue_ : identityValue_);
         return;
     }
 
-    // record the current status
-    isActive_ = activeTransition;
     // create the property corresponding to current status
     property_ =
         std::make_shared<Rosen::RSAnimatableProperty<PropertyType>>(activeTransition ? activeValue_ : identityValue_);

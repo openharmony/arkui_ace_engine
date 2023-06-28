@@ -43,6 +43,14 @@ public:
         dragFrameNodes_.insert(dragFrameNode);
     }
 
+    void RemoveDragFrameNode(const WeakPtr<FrameNode>& dragFrameNode)
+    {
+        dragFrameNodes_.erase(dragFrameNode);
+        gridDragFrameNodes_.erase(dragFrameNode);
+        listDragFrameNodes_.erase(dragFrameNode);
+        textFieldDragFrameNodes_.erase(dragFrameNode);
+    }
+
     void AddGridDragFrameNode(const WeakPtr<FrameNode>& dragFrameNode)
     {
         gridDragFrameNodes_.insert(dragFrameNode);
@@ -98,6 +106,9 @@ public:
     {
         isDragged_ = isDragged;
     }
+
+    RefPtr<FrameNode> FindTargetInChildNodes(const RefPtr<UINode> parentNode,
+        std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes);
 
 private:
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType);

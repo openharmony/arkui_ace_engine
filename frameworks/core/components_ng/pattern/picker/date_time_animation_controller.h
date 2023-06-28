@@ -73,6 +73,10 @@ private:
     void PlayMovingOutAnimation();
     void InitMoveRange();
     // play or stop animation
+
+    void StopOldColumnOpacityInAnimation();
+    void StopOldColumnOpacityOutAnimation();
+
     void PlayInAnimation();
     void PlayOutAnimation();
 
@@ -92,6 +96,8 @@ private:
     double dayStart_ = 0.0;
     double dayEnd_ = 0.0;
     // others
+    std::shared_ptr<AnimationUtils::Animation> oldColumnOpacityInAnimation_;
+    std::shared_ptr<AnimationUtils::Animation> oldColumnOpacityOutAnimation_;
     bool created_ = false;
 };
 } // namespace OHOS::Ace

@@ -25,6 +25,8 @@
 
 namespace OHOS::Ace::NG {
 
+constexpr int32_t SCROLL_FROM_JUMP = 3;
+
 class ACE_EXPORT ScrollLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(ScrollLayoutAlgorithm, LayoutAlgorithm);
 

@@ -76,6 +76,8 @@ public:
 
     void UpdateShowArea(const RectF& area);
 
+    void SetHandleReverse(bool reverse);
+
     void SetSelectInfo(const std::string& selectInfo)
     {
         selectInfo_ = selectInfo;

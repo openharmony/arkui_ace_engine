@@ -20,6 +20,7 @@
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
@@ -158,15 +159,22 @@ void PipelineBase::SetRootSize(double density, int32_t width, int32_t height)
 {
     ACE_SCOPED_TRACE("SetRootSize(%lf, %d, %d)", density, width, height);
     density_ = density;
-    taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), density, width, height]() {
-            auto context = weak.Upgrade();
-            if (!context) {
-                return;
-            }
-            context->SetRootRect(width, height);
-        },
-        TaskExecutor::TaskType::UI);
+    auto task = [weak = AceType::WeakClaim(this), density, width, height]() {
+        auto context = weak.Upgrade();
+        if (!context) {
+            return;
+        }
+        context->SetRootRect(width, height);
+    };
+#ifdef NG_BUILD
+    if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        task();
+    } else {
+        taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI);
+    }
+#else
+    taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI);
+#endif
 }
 
 void PipelineBase::SetFontScale(float fontScale)
@@ -216,6 +224,21 @@ void PipelineBase::RegisterFont(const std::string& familyName, const std::string
     if (fontManager_) {
         fontManager_->RegisterFont(familyName, familySrc, AceType::Claim(this));
     }
+}
+
+void PipelineBase::GetSystemFontList(std::vector<std::string>& fontList)
+{
+    if (fontManager_) {
+        fontManager_->GetSystemFontList(fontList);
+    }
+}
+
+bool PipelineBase::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
+{
+    if (fontManager_) {
+        return fontManager_->GetSystemFont(fontName, fontInfo);
+    }
+    return false;
 }
 
 void PipelineBase::HyperlinkStartAbility(const std::string& address) const
@@ -505,7 +528,7 @@ void PipelineBase::OpenImplicitAnimation(
             [finishCallback, weak]() {
                 auto context = weak.Upgrade();
                 CHECK_NULL_VOID(context);
-                CHECK_NULL_VOID(finishCallback);
+                CHECK_NULL_VOID_NOLOG(finishCallback);
                 if (context->IsFormRender()) {
                     context->SetEnableImplicitAnimation(false);
                     finishCallback();
@@ -625,13 +648,13 @@ void PipelineBase::SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_
     }
 }
 
-void PipelineBase::AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback)
+void PipelineBase::AddEtsCardTouchEventCallback(int32_t pointId, EtsCardTouchEventCallback&& callback)
 {
-    if (!callback || ponitId < 0) {
+    if (!callback || pointId < 0) {
         return;
     }
 
-    etsCardTouchEventCallback_[ponitId] = std::move(callback);
+    etsCardTouchEventCallback_[pointId] = std::move(callback);
 }
 
 void PipelineBase::HandleEtsCardTouchEvent(const TouchEvent& point)
@@ -650,13 +673,13 @@ void PipelineBase::HandleEtsCardTouchEvent(const TouchEvent& point)
     }
 }
 
-void PipelineBase::RemoveEtsCardTouchEventCallback(int32_t ponitId)
+void PipelineBase::RemoveEtsCardTouchEventCallback(int32_t pointId)
 {
-    if (ponitId < 0) {
+    if (pointId < 0) {
         return;
     }
 
-    auto iter = etsCardTouchEventCallback_.find(ponitId);
+    auto iter = etsCardTouchEventCallback_.find(pointId);
     if (iter == etsCardTouchEventCallback_.end()) {
         return;
     }

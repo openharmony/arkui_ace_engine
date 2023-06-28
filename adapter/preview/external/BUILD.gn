@@ -50,7 +50,7 @@ ohos_source_set("preview_external_source") {
       include_dirs = [ "//third_party/flutter/engine" ]
 
       # for window
-      deps = [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+      external_deps = [ "graphic_standard:librender_service_client" ]
 
       sources += [
         # for event loop

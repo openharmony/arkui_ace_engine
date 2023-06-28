@@ -34,7 +34,7 @@ std::atomic<float> ImageCache::clearCacheFileRatio_ = 0.5f; // default clear rat
 bool ImageCache::hasSetCacheFileInfo_ = false;
 
 std::mutex ImageCache::cacheFileSizeMutex_;
-int32_t ImageCache::cacheFileSize_ = 0;
+int64_t ImageCache::cacheFileSize_ = 0;
 
 std::mutex ImageCache::cacheFileInfoMutex_;
 std::list<FileInfo> ImageCache::cacheFileInfo_;
@@ -291,7 +291,7 @@ void ImageCache::SetCacheFileInfo()
         LOGW("cache file path wrong! maybe it is not set.");
         return;
     }
-    int32_t cacheFileSize = 0;
+    int64_t cacheFileSize = 0;
     dirent* filePtr = readdir(dir.get());
     while (filePtr != nullptr) {
         // skip . or ..
@@ -303,7 +303,7 @@ void ImageCache::SetCacheFileInfo()
                 continue;
             }
             cacheFileInfo_.emplace_back(filePath, fileStatus.st_size, fileStatus.st_atime);
-            cacheFileSize += static_cast<int32_t>(fileStatus.st_size);
+            cacheFileSize += static_cast<int64_t>(fileStatus.st_size);
         }
         filePtr = readdir(dir.get());
     }

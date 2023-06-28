@@ -182,6 +182,26 @@ public:
         return result;
     }
 
+    void SetLocalLocation(const Offset& localLocation)
+    {
+        localLocation_ = localLocation;
+    }
+
+    const Offset& GetLocalLocation() const
+    {
+        return localLocation_;
+    }
+
+    void SetInHover(bool inHover)
+    {
+        isInHover_ = inHover;
+    }
+
+    bool GetIsInHover() const
+    {
+        return isInHover_;
+    }
+
 protected:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -208,6 +228,9 @@ private:
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> hoverListener_;
     bool isHover_ = false;
+
+    bool isInHover_ = false;
+    Offset localLocation_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ButtonPattern);
 };

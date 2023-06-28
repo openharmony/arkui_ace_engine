@@ -53,6 +53,7 @@ protected:
     static void SetOnChange(const JSCallbackInfo& info);
     static void SetOnAnimationStart(const JSCallbackInfo& info);
     static void SetOnAnimationEnd(const JSCallbackInfo& info);
+    static void SetOnGestureSwipe(const JSCallbackInfo& info);
     static void SetOnClick(const JSCallbackInfo& info);
     static void JsRemoteMessage(const JSCallbackInfo& info);
     static void GetFontContent(const JSRef<JSVal>& font, bool isSelected, SwiperDigitalParameters& digitalParameters);

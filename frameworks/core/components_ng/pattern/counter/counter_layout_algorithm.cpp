@@ -38,10 +38,12 @@ void CounterLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
-    frameSize.SetWidth(constraint->selfIdealSize.Width().value_or(constraint->maxSize.Width()));
+    auto frameWidthMax = ((constraint->selfIdealSize.Width().has_value())
+                              ? std::min(constraint->selfIdealSize.Width().value(), constraint->maxSize.Width())
+                              : std::min(constraint->percentReference.Width(), constraint->maxSize.Width()));
+    frameSize.SetWidth(frameWidthMax);
     frameSize.SetHeight(constraint->selfIdealSize.Height().value_or(constraint->maxSize.Height()));
     geometryNode->SetFrameSize(frameSize);
-
     const auto& padding = layoutProperty->CreatePaddingWithoutBorder();
     auto widthMax = ((constraint->selfIdealSize.Width().has_value())
                             ? std::min(constraint->selfIdealSize.Width().value(), constraint->maxSize.Width())
@@ -52,7 +54,6 @@ void CounterLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                              : std::min(constraint->percentReference.Height(), constraint->maxSize.Height())) -
                      padding.top.value_or(0) - padding.bottom.value_or(0);
     geometryNode->SetContentSize(SizeF(widthMax, heightMax));
-
     // sub button measure
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

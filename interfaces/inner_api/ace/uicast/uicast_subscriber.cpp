@@ -58,6 +58,7 @@ void UICastEventSubscribeProxy::SubscribeStartEvent(UIContent* context)
         matchingSkills.AddEvent(COMMON_EVENT_UICAST_STOP);
         CommonEventSubscribeInfo subscribeInfo(matchingSkills);
         subscribeInfo.SetPermission("ohos.permission.COMMONEVENT_STICKY");
+        subscribeInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::ThreadMode::HANDLER);
 
         // init Receiver
         uicastEventReceiver_ = std::make_shared<UICastEventSubscriber>(subscribeInfo, context);

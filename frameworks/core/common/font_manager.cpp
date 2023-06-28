@@ -19,6 +19,11 @@
 #include "base/utils/utils.h"
 #include "core/components/text/render_text.h"
 #include "core/pipeline/base/render_node.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#ifdef TEXGINE_SUPPORT_FOR_OHOS
+#include "foundation/graphic/graphic_2d/rosen/modules/texgine/src/font_parser.h"
+#endif
+#endif
 
 namespace OHOS::Ace {
 
@@ -47,6 +52,51 @@ void FontManager::RegisterFont(
         CHECK_NULL_VOID_NOLOG(fontManager);
         fontManager->VaryFontCollectionWithFontWeightScale();
     });
+}
+
+
+void FontManager::GetSystemFontList(std::vector<std::string>& fontList)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+#ifdef TEXGINE_SUPPORT_FOR_OHOS
+    Rosen::TextEngine::FontParser fontParser;
+    std::vector<Rosen::TextEngine::FontParser::FontDescriptor> systemFontList;
+    systemFontList = fontParser.GetVisibilityFonts();
+    for (size_t i = 0; i < systemFontList.size(); ++i) {
+        std::string fontName = systemFontList[i].fullName;
+        fontList.emplace_back(fontName);
+    }
+#endif
+#endif
+}
+
+bool FontManager::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
+{
+    bool isGetFont = false;
+#ifdef ENABLE_ROSEN_BACKEND
+#ifdef TEXGINE_SUPPORT_FOR_OHOS
+    Rosen::TextEngine::FontParser fontParser;
+    std::vector<Rosen::TextEngine::FontParser::FontDescriptor> systemFontList;
+    systemFontList = fontParser.GetVisibilityFonts();
+    for (size_t i = 0; i < systemFontList.size(); ++i) {
+        if (fontName == systemFontList[i].fullName) {
+            fontInfo.path = systemFontList[i].path;
+            fontInfo.postScriptName = systemFontList[i].postScriptName;
+            fontInfo.fullName = systemFontList[i].fullName;
+            fontInfo.family = systemFontList[i].fontFamily;
+            fontInfo.subfamily = systemFontList[i].fontSubfamily;
+            fontInfo.weight = systemFontList[i].weight;
+            fontInfo.width = systemFontList[i].width;
+            fontInfo.italic = systemFontList[i].italic;
+            fontInfo.monoSpace = systemFontList[i].monoSpace;
+            fontInfo.symbolic = systemFontList[i].symbolic;
+            isGetFont = true;
+            break;
+        }
+    }
+#endif
+#endif
+    return isGetFont;
 }
 
 bool FontManager::RegisterCallback(

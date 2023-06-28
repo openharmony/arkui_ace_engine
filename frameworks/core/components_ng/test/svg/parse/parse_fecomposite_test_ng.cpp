@@ -28,6 +28,8 @@
 #include "core/components_ng/svg/svg_dom.h"
 #include "core/components_ng/test/svg/parse/svg_const.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/svg/parse/svg_fe.h"
+#include "core/components_ng/svg/parse/svg_fe_color_matrix.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -65,5 +67,49 @@ HWTEST_F(ParseFeCompositeTestNg, ParseTest001, TestSize.Level1)
     svgDom->DrawImage(rSCanvas, ImageFit::FILL, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::RED);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
+}
+
+
+/**
+ * @tc.name: ParseTest002
+ * @tc.desc: parse Fe label
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ParseFeCompositeTestNg, ParseTest002, TestSize.Level1)
+{
+    SvgFe *svgFe = new SvgFe();
+    EXPECT_NE(svgFe, nullptr);
+    sk_sp<SkImageFilter> imageFilter = nullptr;
+    ColorInterpolationType colorInterpolationType = ColorInterpolationType::LINEAR_RGB;
+    ColorInterpolationType srcColor = ColorInterpolationType::SRGB;
+    svgFe->GetImageFilter(imageFilter, colorInterpolationType);
+    
+    EXPECT_EQ(colorInterpolationType, ColorInterpolationType::LINEAR_RGB);
+    svgFe->ConverImageFilterColor(imageFilter, srcColor, colorInterpolationType);
+    EXPECT_NE(imageFilter, nullptr);
+    EXPECT_EQ(colorInterpolationType, ColorInterpolationType::LINEAR_RGB);
+    delete svgFe;
+}
+
+/**
+ * @tc.name: ParseTest003
+ * @tc.desc: parse FeColorMatrix label
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ParseFeCompositeTestNg, ParseTest003, TestSize.Level1)
+{
+    SvgFeColorMatrix *colorMatrix = new SvgFeColorMatrix();
+    EXPECT_NE(colorMatrix, nullptr);
+    colorMatrix->OnInitStyle();
+    sk_sp<SkImageFilter> imageFilter = nullptr;
+    ColorInterpolationType srcColor = ColorInterpolationType::SRGB;
+    ColorInterpolationType colorInterPolationType = ColorInterpolationType::LINEAR_RGB;
+    colorMatrix->OnAsImageFilter(imageFilter, srcColor, colorInterPolationType);
+    EXPECT_NE(imageFilter, nullptr);
+    EXPECT_EQ(colorInterPolationType, ColorInterpolationType::LINEAR_RGB);
+    EXPECT_EQ(srcColor, ColorInterpolationType::SRGB);
+    delete colorMatrix;
 }
 } // namespace OHOS::Ace::NG

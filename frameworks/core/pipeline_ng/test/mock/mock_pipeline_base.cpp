@@ -108,13 +108,6 @@ void PipelineContext::OnSurfaceDensityChanged(double density) {}
 
 void PipelineContext::SetRootRect(double width, double height, double offset) {}
 
-void PipelineContext::SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback) {}
-
-SafeAreaEdgeInserts PipelineContext::GetCurrentViewSafeArea() const
-{
-    return {};
-}
-
 void PipelineContext::FlushBuild() {}
 
 void PipelineContext::FlushBuildFinishCallbacks()
@@ -171,7 +164,7 @@ const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
     selectOverlayInfo.firstHandle = firstHandleInfo;
     SelectHandleInfo secondHandleInfo;
     selectOverlayInfo.secondHandle = secondHandleInfo;
-    selectOverlayManager_->CreateAndShowSelectOverlay(selectOverlayInfo);
+    selectOverlayManager_->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
     return selectOverlayManager_;
 }
 
@@ -253,8 +246,6 @@ void PipelineContext::AddPredictTask(PredictTask&& task) {}
 
 void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task) {}
 
-void PipelineContext::AddUIExtensionTouchEventCallback(int32_t pointId, UIExtensionTouchEventCallback&& callback) {}
-
 void PipelineContext::FlushPipelineImmediately() {}
 
 FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp)
@@ -290,32 +281,30 @@ bool PipelineContext::GetRestoreInfo(int32_t restoreId, std::string& restoreInfo
 
 void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode) {}
 
-void PipelineContext::ResetViewSafeArea() {}
-
 void PipelineContext::AddWindowSizeChangeCallback(int32_t nodeId) {}
 
 void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId) {}
 
-void PipelineContext::SetSystemSafeArea(const SafeAreaEdgeInserts& systemSafeArea) {};
+void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) {};
 
-SafeAreaEdgeInserts PipelineContext::GetSystemSafeArea() const
+SafeAreaInsets PipelineContext::GetSystemSafeArea() const
 {
     return {};
 }
 
-void PipelineContext::SetCutoutSafeArea(const SafeAreaEdgeInserts& cutoutSafeArea) {};
+void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) {};
 
-SafeAreaEdgeInserts PipelineContext::GetCutoutSafeArea() const
+SafeAreaInsets PipelineContext::GetCutoutSafeArea() const
 {
     return {};
 }
 
-SafeAreaEdgeInserts PipelineContext::GetViewSafeArea() const
+void PipelineContext::AddWindowSceneTouchEventCallback(int32_t pointId, WindowSceneTouchEventCallback&& callback) {}
+
+SafeAreaInsets PipelineContext::GetSafeArea() const
 {
     return {};
 }
-
-void PipelineContext::AppBarAdaptToSafeArea() {};
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {

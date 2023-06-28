@@ -2449,6 +2449,54 @@ HWTEST_F(SliderPatternTestNg, SliderPaintMethodTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SliderPaintMethodTest003
+ * @tc.desc: Test slider_paint_method UpdateContentDirtyRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPaintMethodTest003, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    sliderTheme->outsetHotBlockShadowWidth_ = Dimension(20.0f);
+    sliderTheme->insetHotBlockShadowWidth_ = Dimension(30.0f);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    /**
+     * @tc.steps: step1. create paintWrapper and sliderContentModifier.
+     */
+    auto sliderContentModifier =
+        AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr);
+    SliderPaintMethod sliderPaintMethod(sliderContentModifier, SliderContentModifier::Parameters(), 1.0f, 1.0f, nullptr,
+        SliderPaintMethod::TipParameters());
+    auto sliderPaintProperty = AceType::MakeRefPtr<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(FRAME_WIDTH, FRAME_HEIGHT));
+    auto paintWrapper1 = PaintWrapper(nullptr, geometryNode, sliderPaintProperty);
+    sliderPaintProperty->UpdateSliderMode(SliderModelNG::SliderMode::INSET);
+    sliderPaintProperty->UpdateDirection(Axis::HORIZONTAL);
+    /**
+     * @tc.steps: step2. call UpdateContentModifier function.
+     */
+    sliderPaintMethod.UpdateContentModifier(&paintWrapper1);
+    EXPECT_EQ(sliderContentModifier->sliderMode_->Get(), static_cast<int>(SliderModelNG::SliderMode::INSET));
+    EXPECT_EQ(sliderContentModifier->directionAxis_->Get(), static_cast<int>(Axis::HORIZONTAL));
+    auto rect1 = sliderContentModifier->GetBoundsRect();
+    EXPECT_EQ(rect1->Width(), 130.0f);
+    EXPECT_EQ(rect1->Height(), 60.0f);
+    sliderPaintProperty->UpdateSliderMode(SliderModelNG::SliderMode::OUTSET);
+    sliderPaintProperty->UpdateDirection(Axis::VERTICAL);
+    auto paintWrapper2 = PaintWrapper(nullptr, geometryNode, sliderPaintProperty);
+    sliderPaintMethod.UpdateContentModifier(&paintWrapper2);
+    EXPECT_EQ(sliderContentModifier->sliderMode_->Get(), static_cast<int>(SliderModelNG::SliderMode::OUTSET));
+    EXPECT_EQ(sliderContentModifier->directionAxis_->Get(), static_cast<int>(Axis::VERTICAL));
+    auto rect2 = sliderContentModifier->GetBoundsRect();
+    EXPECT_EQ(rect2->Width(), 40.0f);
+    EXPECT_EQ(rect2->Height(), 100.0f);
+}
+
+/**
  * @tc.name: SliderAccessibilityPropertyTest001
  * @tc.desc: Test the HasRange and RangeInfo properties of Slider
  * @tc.type: FUNC

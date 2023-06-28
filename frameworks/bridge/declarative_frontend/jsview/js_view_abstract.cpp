@@ -54,6 +54,7 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #include "core/gestures/gesture_info.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
@@ -106,6 +107,7 @@ constexpr double ROUND_UNIT = 360.0;
 constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t MIN_ROTATE_VECTOR_Z = 9;
+constexpr int32_t PLATFORM_VERSION_TEN = 10;
 constexpr int32_t PARAMETER_LENGTH_FIRST = 1;
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
@@ -2084,8 +2086,9 @@ void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
         }
         CalcDimension width;
         CalcDimension height;
-        ParseJsonDimensionVp(imageArgs->GetValue("width"), width);
-        ParseJsonDimensionVp(imageArgs->GetValue("height"), height);
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+        ParseJsDimensionVp(object->GetProperty("width"), width);
+        ParseJsDimensionVp(object->GetProperty("height"), height);
         double valueWidth = width.ConvertToPx();
         double valueHeight = height.ConvertToPx();
         BackgroundImageSizeType typeWidth = BackgroundImageSizeType::LENGTH;
@@ -2290,6 +2293,13 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
 {
     NG::MenuParam menuParam;
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (pipelineContext->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        menuParam.placement = Placement::BOTTOM_LEFT;
+    }
     if (info.Length() > PARAMETER_LENGTH_FIRST && info[1]->IsObject()) {
         ParseBindOptionParam(info, menuParam);
     }
@@ -2846,7 +2856,7 @@ BorderStyle ConvertBorderStyle(int32_t value)
 void JSViewAbstract::ParseBorderStyle(const JSRef<JSVal>& args)
 {
     if (!args->IsObject() && !args->IsNumber()) {
-        LOGI("args(%{public}s) is invalid, use default value.", args->ToString().c_str());
+        LOGD("args(%{public}s) is invalid, use default value.", args->ToString().c_str());
         ViewAbstractModel::GetInstance()->SetBorderStyle(BorderStyle::SOLID);
         return;
     }
@@ -3038,6 +3048,68 @@ void JSViewAbstract::JsWindowBlur(const JSCallbackInfo& info)
     info.SetReturnValue(info.This());
 }
 
+bool JSViewAbstract::ParseJsDimensionNG(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit)
+{
+    if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
+        return false;
+    }
+
+    if (jsValue->IsNumber()) {
+        result = CalcDimension(jsValue->ToNumber<double>(), defaultUnit);
+        return true;
+    }
+    if (jsValue->IsString()) {
+        result = StringUtils::StringToCalcDimension(jsValue->ToString(), false, defaultUnit);
+        return true;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    JSRef<JSVal> resId = jsObj->GetProperty("id");
+    if (!resId->IsNumber()) {
+        return false;
+    }
+    auto themeConstants = GetThemeConstants(jsObj);
+    if (!themeConstants) {
+        return false;
+    }
+    auto resIdNum = resId->ToNumber<int32_t>();
+    if (resIdNum == -1) {
+        if (!IsGetResourceByName(jsObj)) {
+            return false;
+        }
+        JSRef<JSVal> args = jsObj->GetProperty("params");
+        if (!args->IsArray()) {
+            return false;
+        }
+        JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
+        auto param = params->GetValueAt(0);
+        result = themeConstants->GetDimensionByName(param->ToString());
+        return true;
+    }
+
+    JSRef<JSVal> type = jsObj->GetProperty("type");
+    if (!type->IsNull() && type->IsNumber() &&
+        type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRING)) {
+        auto value = themeConstants->GetString(resId->ToNumber<uint32_t>());
+        result = StringUtils::StringToCalcDimension(value, false, defaultUnit);
+        return true;
+    }
+    if (!type->IsNull() && type->IsNumber() &&
+        type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        auto value = std::to_string(themeConstants->GetInt(resId->ToNumber<uint32_t>()));
+        result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
+        return true;
+    }
+
+    if (!type->IsNull() && type->IsNumber() &&
+        type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::FLOAT)) {
+        auto value = std::to_string(themeConstants->GetDouble(resId->ToNumber<uint32_t>()));
+        result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
+        return true;
+    }
+
+    return false;
+}
+
 bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit)
 {
     if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
@@ -3094,6 +3166,12 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
     }
     result = themeConstants->GetDimension(resId->ToNumber<uint32_t>());
     return true;
+}
+
+bool JSViewAbstract::ParseJsDimensionVpNG(const JSRef<JSVal>& jsValue, CalcDimension& result)
+{
+    // 'vp' -> the value varies with pixel density of device.
+    return ParseJsDimensionNG(jsValue, result, DimensionUnit::VP);
 }
 
 bool JSViewAbstract::ParseJsDimensionVp(const JSRef<JSVal>& jsValue, CalcDimension& result)
@@ -5068,6 +5146,29 @@ void JSViewAbstract::JSUpdateAnimatableProperty(const JSCallbackInfo& info)
     }
 }
 
+void JSViewAbstract::JsExpandSafeArea(const JSCallbackInfo& info)
+{
+    NG::SafeAreaExpandOpts opts;
+    if (info.Length() >= 1 && info[0]->IsArray()) {
+        auto paramArray = JSRef<JSArray>::Cast(info[0]);
+        uint32_t safeAreaType = 0;
+        for (size_t i = 0; i < paramArray->Length(); ++i) {
+            safeAreaType |= (1 << paramArray->GetValueAt(i)->ToNumber<uint32_t>());
+        }
+        opts.type = safeAreaType;
+    }
+    if (info.Length() >= 2 && info[1]->IsArray()) {
+        auto paramArray = JSRef<JSArray>::Cast(info[1]);
+        uint32_t safeAreaEdge = 0;
+        for (size_t i = 0; i < paramArray->Length(); ++i) {
+            safeAreaEdge |= (1 << paramArray->GetValueAt(i)->ToNumber<uint32_t>());
+        }
+        opts.edges = safeAreaEdge;
+    }
+
+    ViewAbstractModel::GetInstance()->UpdateSafeAreaExpandOpts(opts);
+}
+
 void JSViewAbstract::JSBind(BindingTarget globalObj)
 {
     JSClass<JSViewAbstract>::Declare("JSViewAbstract");
@@ -5221,6 +5322,9 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
 
     JSClass<JSViewAbstract>::StaticMethod("createAnimatableProperty", &JSViewAbstract::JSCreateAnimatableProperty);
     JSClass<JSViewAbstract>::StaticMethod("updateAnimatableProperty", &JSViewAbstract::JSUpdateAnimatableProperty);
+    JSClass<JSViewAbstract>::StaticMethod("renderGroup", &JSViewAbstract::JSRenderGroup);
+
+    JSClass<JSViewAbstract>::StaticMethod("expandSafeArea", &JSViewAbstract::JsExpandSafeArea);
 
     JSClass<JSViewAbstract>::Bind(globalObj);
 }
@@ -5966,4 +6070,18 @@ void JSViewAbstract::JsObscured(const JSCallbackInfo& info)
 
     ViewAbstractModel::GetInstance()->SetObscured(reasons);
 }
+
+void JSViewAbstract::JSRenderGroup(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        LOGW("renderGroup needs one parameter");
+        return;
+    }
+    bool isRenderGroup = false;
+    if (info[0]->IsBoolean()) {
+        isRenderGroup = info[0]->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetRenderGroup(isRenderGroup);
+}
+
 } // namespace OHOS::Ace::Framework

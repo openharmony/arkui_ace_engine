@@ -200,6 +200,10 @@ public:
 
     virtual void RegisterFont(const std::string& familyName, const std::string& familySrc) = 0;
 
+    virtual void GetSystemFontList(std::vector<std::string>& fontList) = 0;
+
+    virtual bool GetSystemFont(const std::string& fontName, FontInfo& fontInfo) = 0;
+
     virtual SingleTaskExecutor GetAnimationJsTask() = 0;
 
     virtual SingleTaskExecutor GetUiTask() = 0;

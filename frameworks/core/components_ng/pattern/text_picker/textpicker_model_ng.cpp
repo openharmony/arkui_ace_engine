@@ -463,7 +463,11 @@ void TextPickerDialogModelNG::SetTextPickerDialogShow(RefPtr<AceType>& PickerTex
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     dialogEvent["acceptId"] = onAccept;
     dialogEvent["changeId"] = onChange;
-    auto func = [onCancel](const GestureEvent& /* info */) { onCancel(); };
+    auto func = [onCancel](const GestureEvent& /* info */) {
+        if (onCancel) {
+            onCancel();
+        }
+    };
     dialogCancelEvent["cancelId"] = func;
     DialogProperties properties;
     ButtonInfo buttonInfo;

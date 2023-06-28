@@ -39,6 +39,7 @@ public:
     void SetRowsGap(const Dimension& value) override;
 
     void SetLayoutDirection(FlexDirection value) override;
+    void SetNestedScroll(const NestedScrollOptions& nestedOpt) override {};
 
     void SetOnReachStart(OnReachEvent&& onReachStart) override;
     void SetOnReachEnd(OnReachEvent&& onReachEnd) override;

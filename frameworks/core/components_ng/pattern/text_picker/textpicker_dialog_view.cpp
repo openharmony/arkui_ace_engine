@@ -41,6 +41,10 @@ RefPtr<FrameNode> TextPickerDialogView::Show(const DialogProperties& dialogPrope
     std::map<std::string, NG::DialogTextEvent> dialogEvent,
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
+    if (settingData.rangeVector.empty()) {
+        LOGI("Dialog input parameter range vector is empty, not display dialog.");
+        return dialogNode_;
+    }
     if (settingData.options.empty()) {
         return RangeShow(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
     } else {

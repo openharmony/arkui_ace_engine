@@ -53,6 +53,8 @@ const char ROOT_ETS_TAG[] = "root";
 const char STAGE_ETS_TAG[] = "stage";
 // page view
 const char PAGE_ETS_TAG[] = "page";
+// container modal view (title bar)
+const char CONTAINER_MODAL_ETS_TAG[] = "ContainerModal";
 // js custom view
 const char JS_VIEW_ETS_TAG[] = "JsView";
 const char JS_VIEW_COMPONENT_TAG[] = "ProxyComponent";
@@ -81,6 +83,9 @@ const char TEXT_COMPONENT_TAG[] = "TextComponentV2";
 const char TEXT_ETS_TAG[] = "Text";
 const char TEXT_ATTRS_OVER_FLOW[] = "textOverflow";
 const char TEXT_ATTRS_MAX_LINES[] = "maxLines";
+
+// rich editor
+const char RICH_EDITOR_ETS_TAG[] = "RichEditor";
 
 // stack
 const char STACK_COMPONENT_TAG[] = "StackComponent";
@@ -294,6 +299,10 @@ const char SEARCH_ETS_TAG[] = "Search";
 const char FORM_COMPONENT_TAG[] = "FormComponent";
 const char FORM_ETS_TAG[] = "FormComponent";
 
+// formLink
+const char FORM_LINK_TAG[] = "FormLink";
+const char FORM_LINK_ETS_TAG[] = "FormLink";
+
 // PluginComponent
 const char PLUGIN_COMPONENT_TAG[] = "PluginComponent";
 const char PLUGIN_ETS_TAG[] = "PluginComponent";
@@ -484,7 +493,7 @@ const char POPUP_ETS_TAG[] = "Popup";
 const char REMOTE_WINDOW_ETS_TAG[] = "RemoteWindow";
 
 // effect view
-const char EFFECT_VIEW_ETS_TAG[] = "EffectView";
+const char EFFECT_COMPONENT_ETS_TAG[] = "EffectComponent";
 
 // Model
 const char MODEL_COMPONENT_TAG[] = "ModelComponent";

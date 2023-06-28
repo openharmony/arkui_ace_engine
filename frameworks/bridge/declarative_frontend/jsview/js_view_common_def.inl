@@ -69,6 +69,40 @@ std::vector<JSRef<JSVal>> ConvertToJSValues(Args... args)
 }
 
 template<class T>
+bool ConvertFromJSValueNG(const JSRef<JSVal>& jsValue, T& result)
+{
+    if constexpr (std::is_same_v<T, bool>) {
+        if (jsValue->IsBoolean()) {
+            result = jsValue->ToBoolean();
+            return true;
+        }
+        result = false;
+    } else if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
+        double value;
+        if (JSViewAbstract::ParseJsDouble(jsValue, value)) {
+            result = static_cast<T>(value);
+            return true;
+        }
+        result = 0;
+    } else if constexpr (std::is_same_v<T, std::string>) {
+        if (jsValue->IsString()) {
+            result = jsValue->ToString();
+            return true;
+        }
+    } else if constexpr (std::is_same_v<T, Dimension>) {
+        CalcDimension calc;
+        bool ret = JSViewAbstract::ParseJsDimensionVpNG(jsValue, calc);
+        result = calc;
+        return ret;
+    } else if constexpr (std::is_same_v<T, CalcDimension>) {
+        return JSViewAbstract::ParseJsDimensionVpNG(jsValue, result);
+    } else if constexpr (std::is_same_v<T, Color>) {
+        return JSViewAbstract::ParseJsColor(jsValue, result);
+    }
+    return false;
+}
+
+template<class T>
 bool ConvertFromJSValue(const JSRef<JSVal>& jsValue, T& result)
 {
     if constexpr (std::is_same_v<T, bool>) {

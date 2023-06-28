@@ -114,6 +114,14 @@ public:
     }
 
     void StartDragTaskForWeb(const GestureEvent& info);
+    void StartLongPressActionForWeb();
+    void CancelDragForWeb();
+    void ResetDragActionForWeb() {
+        if (isReceivedLongPress_) {
+            isReceivedLongPress_ = false;
+        }
+    }
+
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     RefPtr<DragEvent> userCallback_;
@@ -121,8 +129,12 @@ private:
     RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
     RefPtr<SequencedRecognizer> SequencedRecognizer_;
-    WeakPtr<FrameNode> columnNodeWeak_;
     std::function<void(GestureEvent&)> actionStart_;
+
+    std::function<void(GestureEvent&)> longPressUpdate_;
+    std::function<void()> actionCancel_;
+    GestureEvent longPressInfo_;
+    bool isReceivedLongPress_ = false;
 
     PanDirection direction_;
     int32_t fingers_ = 1;

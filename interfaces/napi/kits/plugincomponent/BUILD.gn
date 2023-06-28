@@ -33,20 +33,18 @@ ohos_shared_library("plugincomponent") {
     "js_plugin_want.cpp",
   ]
 
-  deps = [
-    "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
-    "$ace_root/build:libace",
-    "//commonlibrary/c_utils/base:utils",
-    "//foundation/arkui/napi/:ace_napi",
-  ]
+  deps = [ "$ace_root/build:libace" ]
 
   external_deps = [
     "ability_base:base",
     "ability_base:want",
+    "ability_runtime:abilitykit_native",
     "access_token:libtokenid_sdk",
     "bundle_framework:appexecfwk_core",
-    "hiviewdfx_hilog_native:libhilog",
+    "c_utils:utils",
+    "hilog:libhilog",
     "ipc:ipc_core",
+    "napi:ace_napi",
   ]
 
   relative_install_dir = "module"

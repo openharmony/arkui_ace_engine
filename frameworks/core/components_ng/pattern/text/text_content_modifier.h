@@ -78,6 +78,8 @@ public:
 
     bool NeedMeasureUpdate(PropertyChangeFlag& flag);
 
+    void SetClip(bool clip);
+
 private:
     double NormalizeToPx(const Dimension& dimension);
     void SetDefaultAnimatablePropertyValue(const TextStyle& textStyle);
@@ -139,6 +141,7 @@ private:
     RefPtr<PropertyOffsetF> contentOffset_;
     RefPtr<PropertySizeF> contentSize_;
     RefPtr<PropertyBool> contentChange_;
+    RefPtr<PropertyBool> clip_;
 
     RefPtr<Paragraph> paragraph_;
     OffsetF paintOffset_;

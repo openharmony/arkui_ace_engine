@@ -23,6 +23,7 @@
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_swiper_function.h"
 #include "bridge/declarative_frontend/jsview/models/swiper_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
@@ -30,6 +31,7 @@
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components/swiper/swiper_component.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
+#include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 
 namespace OHOS::Ace {
@@ -118,6 +120,7 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("onChange", &JSSwiper::SetOnChange);
     JSClass<JSSwiper>::StaticMethod("onAnimationStart", &JSSwiper::SetOnAnimationStart);
     JSClass<JSSwiper>::StaticMethod("onAnimationEnd", &JSSwiper::SetOnAnimationEnd);
+    JSClass<JSSwiper>::StaticMethod("onGestureSwipe", &JSSwiper::SetOnGestureSwipe);
     JSClass<JSSwiper>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSwiper>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSSwiper>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
@@ -464,35 +467,41 @@ bool JSSwiper::GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& s
     Color color;
     if (swiperArrowParameters.isSidebarMiddle.value()) {
         parseOk = ParseJsDimensionVp(backgroundSizeValue, dimension);
-        swiperArrowParameters.backgroundSize = parseOk && GreatOrEqual(dimension.ConvertToVp(), 0.0)
-                                                   ? dimension
-                                                   : swiperIndicatorTheme->GetBigArrowBackgroundSize();
+        swiperArrowParameters.backgroundSize =
+            parseOk && GreatNotEqual(dimension.ConvertToVp(), 0.0) && !(dimension.Unit() == DimensionUnit::PERCENT)
+                ? dimension
+                : swiperIndicatorTheme->GetBigArrowBackgroundSize();
         parseOk = ParseJsColor(backgroundColorValue, color);
         swiperArrowParameters.backgroundColor = parseOk ? color : swiperIndicatorTheme->GetBigArrowBackgroundColor();
         if (swiperArrowParameters.isShowBackground.value()) {
             swiperArrowParameters.arrowSize = swiperArrowParameters.backgroundSize.value() * ARROW_SIZE_COEFFICIENT;
         } else {
             parseOk = ParseJsDimensionVp(arrowSizeValue, dimension);
-            swiperArrowParameters.arrowSize = parseOk && GreatOrEqual(dimension.ConvertToVp(), 0.0)
-                                                  ? dimension
-                                                  : swiperIndicatorTheme->GetBigArrowSize();
+            swiperArrowParameters.arrowSize =
+                parseOk && GreatNotEqual(dimension.ConvertToVp(), 0.0) && !(dimension.Unit() == DimensionUnit::PERCENT)
+                    ? dimension
+                    : swiperIndicatorTheme->GetBigArrowSize();
+            swiperArrowParameters.backgroundSize = swiperArrowParameters.arrowSize;
         }
         parseOk = ParseJsColor(arrowColorValue, color);
         swiperArrowParameters.arrowColor = parseOk ? color : swiperIndicatorTheme->GetBigArrowColor();
     } else {
         parseOk = ParseJsDimensionVp(backgroundSizeValue, dimension);
-        swiperArrowParameters.backgroundSize = parseOk && GreatOrEqual(dimension.ConvertToVp(), 0.0)
-                                                   ? dimension
-                                                   : swiperIndicatorTheme->GetSmallArrowBackgroundSize();
+        swiperArrowParameters.backgroundSize =
+            parseOk && GreatNotEqual(dimension.ConvertToVp(), 0.0) && !(dimension.Unit() == DimensionUnit::PERCENT)
+                ? dimension
+                : swiperIndicatorTheme->GetSmallArrowBackgroundSize();
         parseOk = ParseJsColor(backgroundColorValue, color);
         swiperArrowParameters.backgroundColor = parseOk ? color : swiperIndicatorTheme->GetSmallArrowBackgroundColor();
         if (swiperArrowParameters.isShowBackground.value()) {
             swiperArrowParameters.arrowSize = swiperArrowParameters.backgroundSize.value() * ARROW_SIZE_COEFFICIENT;
         } else {
             parseOk = ParseJsDimensionVp(arrowSizeValue, dimension);
-            swiperArrowParameters.arrowSize = parseOk && GreatOrEqual(dimension.ConvertToVp(), 0.0)
-                                                  ? dimension
-                                                  : swiperIndicatorTheme->GetSmallArrowSize();
+            swiperArrowParameters.arrowSize =
+                parseOk && GreatNotEqual(dimension.ConvertToVp(), 0.0) && !(dimension.Unit() == DimensionUnit::PERCENT)
+                    ? dimension
+                    : swiperIndicatorTheme->GetSmallArrowSize();
+            swiperArrowParameters.backgroundSize = swiperArrowParameters.arrowSize;
         }
         parseOk = ParseJsColor(arrowColorValue, color);
         swiperArrowParameters.arrowColor = parseOk ? color : swiperIndicatorTheme->GetSmallArrowColor();
@@ -737,10 +746,24 @@ void JSSwiper::SetOnAnimationStart(const JSCallbackInfo& info)
         return;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto animationStartHandler = AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto onAnimationStart = [executionContext = info.GetExecutionContext(),
+                                    func = std::move(animationStartHandler)](
+                                    int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+            ACE_SCORING_EVENT("Swiper.onAnimationStart");
+            func->Execute(index, targetIndex, info);
+        };
+
+        SwiperModel::GetInstance()->SetOnAnimationStart(std::move(onAnimationStart));
+        return;
+    }
+
     auto animationStartHandler = AceType::MakeRefPtr<JsEventFunction<SwiperChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(info[0]), SwiperChangeEventToJSValue);
     auto onAnimationStart = [executionContext = info.GetExecutionContext(), func = std::move(animationStartHandler)](
-                        const BaseEventInfo* info) {
+                                const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
         if (!swiperInfo) {
@@ -760,10 +783,23 @@ void JSSwiper::SetOnAnimationEnd(const JSCallbackInfo& info)
         return;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto animationEndHandler = AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto onAnimationEnd = [executionContext = info.GetExecutionContext(), func = std::move(animationEndHandler)](
+                                  int32_t index, const AnimationCallbackInfo& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+            ACE_SCORING_EVENT("Swiper.onAnimationEnd");
+            func->Execute(index, info);
+        };
+
+        SwiperModel::GetInstance()->SetOnAnimationEnd(std::move(onAnimationEnd));
+        return;
+    }
+
     auto animationEndHandler = AceType::MakeRefPtr<JsEventFunction<SwiperChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(info[0]), SwiperChangeEventToJSValue);
     auto onAnimationEnd = [executionContext = info.GetExecutionContext(), func = std::move(animationEndHandler)](
-                        const BaseEventInfo* info) {
+                              const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
         if (!swiperInfo) {
@@ -775,6 +811,23 @@ void JSSwiper::SetOnAnimationEnd(const JSCallbackInfo& info)
     };
 
     SwiperModel::GetInstance()->SetOnAnimationEnd(std::move(onAnimationEnd));
+}
+
+void JSSwiper::SetOnGestureSwipe(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto gestureSwipeHandler = AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onGestureSwipe = [executionContext = info.GetExecutionContext(), func = std::move(gestureSwipeHandler)](
+                              int32_t index, const AnimationCallbackInfo& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        ACE_SCORING_EVENT("Swiper.onGestureSwipe");
+        func->Execute(index, info);
+    };
+
+    SwiperModel::GetInstance()->SetOnGestureSwipe(std::move(onGestureSwipe));
 }
 
 void JSSwiper::SetOnClick(const JSCallbackInfo& info)

@@ -57,6 +57,7 @@
 #include "bridge/declarative_frontend/jsview/js_environment.h"
 #include "bridge/declarative_frontend/jsview/js_flex_impl.h"
 #include "bridge/declarative_frontend/jsview/js_foreach.h"
+#include "bridge/declarative_frontend/jsview/js_form_link.h"
 #include "bridge/declarative_frontend/jsview/js_gauge.h"
 #include "bridge/declarative_frontend/jsview/js_gesture.h"
 #include "bridge/declarative_frontend/jsview/js_grid.h"
@@ -107,8 +108,10 @@
 #include "bridge/declarative_frontend/jsview/js_render_image.h"
 #include "bridge/declarative_frontend/jsview/js_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
+#include "bridge/declarative_frontend/jsview/js_richeditor.h"
 #include "bridge/declarative_frontend/jsview/js_row.h"
 #include "bridge/declarative_frontend/jsview/js_row_split.h"
+#include "bridge/declarative_frontend/jsview/js_scope_util.h"
 #include "bridge/declarative_frontend/jsview/js_scroll.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_search.h"
@@ -147,7 +150,6 @@
 #include "bridge/declarative_frontend/jsview/js_water_flow_item.h"
 #include "bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
-#include "bridge/declarative_frontend/jsview/js_scope_util.h"
 #include "bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -158,8 +160,8 @@
 #include "bridge/declarative_frontend/jsview/js_remote_window.h"
 #endif
 
-#ifdef EFFECT_VIEW_SUPPORTED
-#include "bridge/declarative_frontend/jsview/js_effect_view.h"
+#ifdef EFFECT_COMPONENT_SUPPORTED
+#include "bridge/declarative_frontend/jsview/js_effect_component.h"
 #endif
 
 #ifndef WEARABLE_PRODUCT
@@ -445,6 +447,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
     { "LinearGradient", JSLinearGradient::JSBind },
+    { "FormLink", JSFormLink::JSBind },
 };
 
 static const std::unordered_map<std::string, std::function<void(BindingTarget)>> bindFuncs = {
@@ -520,6 +523,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ActionSheet", JSActionSheet::JSBind },
     { "AlertDialog", JSAlertDialog::JSBind },
     { "ContextMenu", JSContextMenu::JSBind },
+    { "FormLink", JSFormLink::JSBind },
 #ifdef WINDOW_SCENE_SUPPORTED
     { "UIExtensionComponent", JSUIExtension::JSBind },
 #endif
@@ -548,8 +552,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #ifdef REMOTE_WINDOW_SUPPORTED
     { "RemoteWindow", JSRemoteWindow::JSBind },
 #endif
-#ifdef EFFECT_VIEW_SUPPORTED
-    { "EffectView", JSEffectView::JSBind },
+#ifdef EFFECT_COMPONENT_SUPPORTED
+    { "EffectComponent", JSEffectComponent::JSBind },
 #endif
 #ifndef WEARABLE_PRODUCT
     { "Camera", JSCamera::JSBind },
@@ -642,6 +646,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Screen", JSScreen::JSBind },
     { "WindowScene", JSWindowScene::JSBind },
 #endif
+    { "RichEditor", JSRichEditor::JSBind },
+    { "RichEditorController", JSRichEditorController::JSBind },
 };
 
 void RegisterAllModule(BindingTarget globalObj)
@@ -674,6 +680,7 @@ void RegisterAllModule(BindingTarget globalObj)
 #ifdef WEB_SUPPORTED
     JSWebController::JSBind(globalObj);
 #endif
+    JSRichEditorController::JSBind(globalObj);
     for (auto& iter : bindFuncs) {
         iter.second(globalObj);
     }
@@ -765,6 +772,8 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
 #ifdef WEB_SUPPORTED
         JSWebController::JSBind(globalObj);
 #endif
+    } else if ((*func).first == V2::RICH_EDITOR_ETS_TAG) {
+        JSRichEditorController::JSBind(globalObj);
     }
 
     (*func).second(globalObj);

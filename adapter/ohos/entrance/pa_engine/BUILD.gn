@@ -33,27 +33,23 @@ template("pa_backend") {
       "$ability_runtime_napi_path/context",
       "$ability_runtime_napi_path/inner/napi_common",
     ]
-    deps = [
-      "$ability_runtime_napi_path/inner/napi_common:napi_common",
-      "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
-      "$ability_runtime_path/frameworks/native/appkit:appkit_native",
-      "//foundation/arkui/napi:ace_napi",
-      "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk:system_ability_fwk",
-      "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    ]
     external_deps = [
       "ability_base:want",
       "ability_base:zuri",
+      "ability_runtime:abilitykit_native",
+      "ability_runtime:appkit_native",
+      "ability_runtime:napi_common",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "c_utils:utils",
       "eventhandler:libeventhandler",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
       "ipc:ipc_core",
       "ipc:ipc_napi_common",
       "napi:ace_napi",
       "relational_store:native_dataability",
       "relational_store:native_rdb",
+      "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
     ]
 

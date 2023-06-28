@@ -147,6 +147,16 @@ void MenuPattern::OnModifyDone()
 void InnerMenuPattern::BeforeCreateLayoutWrapper()
 {
     RecordItemsAndGroups();
+
+    // determine menu type based on sibling menu count
+    auto count = FindSiblingMenuCount();
+    if (count > 0) {
+        SetType(MenuType::DESKTOP_MENU);
+        ApplyDesktopMenuTheme();
+    } else {
+        SetType(MenuType::MULTI_MENU);
+        ApplyMultiMenuTheme();
+    }
 }
 
 void InnerMenuPattern::OnModifyDone()
@@ -156,15 +166,6 @@ void InnerMenuPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     UpdateMenuItemChildren(host);
     SetAccessibilityAction();
-
-    auto count = FindSiblingMenuCount();
-    if (count > 0) {
-        SetType(MenuType::DESKTOP_MENU);
-        ApplyDesktopMenuTheme();
-    } else {
-        SetType(MenuType::MULTI_MENU);
-        ApplyMultiMenuTheme();
-    }
 }
 
 // close menu on touch up
@@ -222,7 +223,7 @@ bool MenuPattern::OnKeyEvent(const KeyEvent& event) const
     if (event.action != KeyAction::DOWN || IsMultiMenu()) {
         return false;
     }
-    if (event.code == KeyCode::KEY_DPAD_LEFT && IsSubMenu()) {
+    if ((event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_ESCAPE) && IsSubMenu()) {
         auto menuWrapper = GetMenuWrapper();
         CHECK_NULL_RETURN(menuWrapper, true);
         auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
@@ -563,6 +564,7 @@ void MenuPattern::SetAccessibilityAction()
 bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     UpdateMenuHotArea();
+    UpdateMenuClip(dirty);
     return false;
 }
 
@@ -582,8 +584,8 @@ void MenuPattern::UpdateMenuHotArea()
         return;
     }
     std::vector<Rect> rects;
-    for (auto child = children.begin(); child != children.end(); ++child) {
-        auto menuNode = DynamicCast<FrameNode>(*child);
+    for (const auto & child : children) {
+        auto menuNode = DynamicCast<FrameNode>(child);
         CHECK_NULL_VOID(menuNode);
         auto menuPattern = menuNode->GetPattern<MenuPattern>();
         CHECK_NULL_VOID(menuPattern);
@@ -593,9 +595,45 @@ void MenuPattern::UpdateMenuHotArea()
         auto menuContext = menuNode->GetRenderContext();
         CHECK_NULL_VOID(menuContext);
         auto menuHotArea = menuContext->GetPaintRectWithTransform();
-        rects.emplace_back(Rect(menuHotArea.GetX(), menuHotArea.GetY(), menuHotArea.Width(), menuHotArea.Height()));
+        rects.emplace_back(menuHotArea.GetX(), menuHotArea.GetY(), menuHotArea.Width(), menuHotArea.Height());
     }
     SubwindowManager::GetInstance()->SetHotAreas(rects);
+}
+
+void MenuPattern::UpdateMenuClip(const RefPtr<LayoutWrapper>& dirty)
+{
+    // context menu is necessary condition for arrow display
+    // if scroll does not display, do not clip menu and scroll
+    if (IsContextMenu()) {
+        auto scrollParentNode = dirty->GetHostNode();
+        auto scrollNode = DynamicCast<FrameNode>(scrollParentNode->GetFirstChild());
+        CHECK_NULL_VOID(scrollNode);
+        auto scrollContentNode = DynamicCast<FrameNode>(scrollNode->GetFirstChild());
+        CHECK_NULL_VOID(scrollContentNode);
+        auto scrollContentGeometryNode = scrollContentNode->GetGeometryNode();
+        CHECK_NULL_VOID(scrollContentGeometryNode);
+        auto scrollContentSize = scrollContentGeometryNode->GetFrameSize();
+        auto scrollParentGeometryNode = scrollParentNode->GetGeometryNode();
+        auto parentSize = scrollParentGeometryNode->GetFrameSize();
+
+        auto clip = GreatNotEqual(scrollContentSize.Height(), parentSize.Height());
+        auto scrollParentContext = scrollParentNode->GetRenderContext();
+        CHECK_NULL_VOID(scrollParentContext);
+        scrollParentContext->SetClipToBounds(clip);
+        auto scrollContentContext = scrollContentNode->GetRenderContext();
+        CHECK_NULL_VOID(scrollContentContext);
+        scrollContentContext->SetClipToBounds(clip);
+    }
+}
+
+RefPtr<MenuPattern> MenuPattern::GetMainMenuPattern() const
+{
+    auto wrapperFrameNode = GetMenuWrapper();
+    CHECK_NULL_RETURN(wrapperFrameNode, nullptr);
+    auto mainMenuUINode = wrapperFrameNode->GetChildAtIndex(0);
+    CHECK_NULL_RETURN(mainMenuUINode, nullptr);
+    auto mainMenuFrameNode = AceType::DynamicCast<FrameNode>(mainMenuUINode);
+    return mainMenuFrameNode->GetPattern<MenuPattern>();
 }
 
 void InnerMenuPattern::RecordItemsAndGroups()

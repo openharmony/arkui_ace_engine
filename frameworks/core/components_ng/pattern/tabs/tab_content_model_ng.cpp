@@ -181,6 +181,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
             tabBarNode->ReplaceChild(oldColumnNode, columnNode);
         }
         tabBarPattern->AddTabBarItemType(tabContentId, true);
+        tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         return;
     }
     if (tabBarParam.GetText().empty()) {
@@ -281,8 +282,8 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     textNode->MarkModifyDone();
     textNode->MarkDirtyNode();
     imageNode->MarkModifyDone();
-    tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     tabBarPattern->AddTabBarItemType(tabContentId, false);
+    tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void TabContentModelNG::RemoveTabBarItem(const RefPtr<TabContentNode>& tabContentNode)

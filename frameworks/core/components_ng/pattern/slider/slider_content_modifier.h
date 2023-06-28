@@ -220,6 +220,7 @@ public:
         return blockSize_->Get();
     }
 
+    void UpdateContentDirtyRect(const SizeF& frameSize);
 private:
     void InitializeShapeProperty();
     RSRect GetTrackRect();

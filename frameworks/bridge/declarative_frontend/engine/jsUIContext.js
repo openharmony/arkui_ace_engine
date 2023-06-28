@@ -169,16 +169,16 @@ class Router {
     replaceUrl(options, modeOrCallback, callback) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         if (typeof callback === 'undefined' && typeof modeOrCallback === 'undefined') {
-            let promise = this.ohos_router.pushUrl(options);
+            let promise = this.ohos_router.replaceUrl(options);
             __JSScopeUtil__.restoreInstanceId();
             return promise;
         }
         else if (typeof callback !== 'undefined' && typeof modeOrCallback !== 'undefined') {
-            this.ohos_router.pushUrl(options, modeOrCallback, callback);
+            this.ohos_router.replaceUrl(options, modeOrCallback, callback);
             __JSScopeUtil__.restoreInstanceId();
         }
         else if (typeof callback === 'undefined' && typeof modeOrCallback !== 'undefined') {
-            let promise = this.ohos_router.pushUrl(options, modeOrCallback);
+            let promise = this.ohos_router.replaceUrl(options, modeOrCallback);
             __JSScopeUtil__.restoreInstanceId();
             if(promise)
             {
@@ -230,6 +230,48 @@ class Router {
         let object = this.ohos_router.getParams();
         __JSScopeUtil__.restoreInstanceId();
         return object;
+    }
+
+    pushNamedRoute(options, modeOrCallback, callback) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (typeof callback === 'undefined' && typeof modeOrCallback === 'undefined') {
+            let promise = this.ohos_router.pushNamedRoute(options);
+            __JSScopeUtil__.restoreInstanceId();
+            return promise;
+        }
+        else if (typeof callback !== 'undefined' && typeof modeOrCallback !== 'undefined') {
+            this.ohos_router.pushNamedRoute(options, modeOrCallback, callback);
+            __JSScopeUtil__.restoreInstanceId();
+        }
+        else if (typeof callback === 'undefined' && typeof modeOrCallback !== 'undefined') {
+            let promise = this.ohos_router.pushNamedRoute(options, modeOrCallback);
+            __JSScopeUtil__.restoreInstanceId();
+            if(promise)
+            {
+                return promise;
+            }
+        }
+    }
+
+    replaceNamedRoute(options, modeOrCallback, callback) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (typeof callback === 'undefined' && typeof modeOrCallback === 'undefined') {
+            let promise = this.ohos_router.replaceNamedRoute(options);
+            __JSScopeUtil__.restoreInstanceId();
+            return promise;
+        }
+        else if (typeof callback !== 'undefined' && typeof modeOrCallback !== 'undefined') {
+            this.ohos_router.replaceNamedRoute(options, modeOrCallback, callback);
+            __JSScopeUtil__.restoreInstanceId();
+        }
+        else if (typeof callback === 'undefined' && typeof modeOrCallback !== 'undefined') {
+            let promise = this.ohos_router.replaceNamedRoute(options, modeOrCallback);
+            __JSScopeUtil__.restoreInstanceId();
+            if(promise)
+            {
+                return promise;
+            }
+        }
     }
 }
 

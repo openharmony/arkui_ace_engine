@@ -95,6 +95,7 @@ public:
     void SetOnDragLeave(
         std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragLeave) override;
     void SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDropId) override;
+    void AddDragFrameNodeToManager();
     void SetPinchSmoothModeEnabled(bool isPinchSmoothModeEnabled) override;
     void SetWindowNewEvent(std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& jsCallback) override;
     void SetWindowExitEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
@@ -132,7 +133,7 @@ public:
     void SetHorizontalScrollBarAccessEnabled(bool isHorizontalScrollBarAccessEnabled) override;
     void SetVerticalScrollBarAccessEnabled(bool isVerticalScrollBarAccessEnabled) override;
 
-    void SetOnControllerAttached(std::function<void()>&& callback_, std::function<void()>&& callback) override;
+    void SetOnControllerAttached(std::function<void()>&& callback) override;
     void NotifyPopupWindowResult(int32_t webId, bool result) override;
     void SetAudioResumeInterval(int32_t resumeInterval) override;
     void SetAudioExclusive(bool audioExclusive) override;

@@ -41,19 +41,20 @@ public:
     static void SetEditMode(const JSCallbackInfo& info);
     static void SetMultiSelectable(bool multiSelectable);
     static void SetMaxCount(const JSCallbackInfo& info);
-    static void SetMinCount(double minCount);
+    static void SetMinCount(const JSCallbackInfo& info);
     static void CellLength(int32_t cellLength);
     static void SetLayoutDirection(int32_t value);
     static void SetDirection(const std::string& dir);
     static void SetSupportAnimation(bool supportAnimation);
     static void SetDragAnimation(bool value);
-    static void SetEdgeEffect(int32_t value);
+    static void SetEdgeEffect(const JSCallbackInfo& info);
     static void JsOnGridDragEnter(const JSCallbackInfo& info);
     static void JsOnGridDragMove(const JSCallbackInfo& info);
     static void JsOnGridDragLeave(const JSCallbackInfo& info);
     static void JsOnGridDragStart(const JSCallbackInfo& info);
     static void JsOnGridDrop(const JSCallbackInfo& info);
     static void JsGridHeight(const JSCallbackInfo& info);
+    static void SetNestedScroll(const JSCallbackInfo& args);
 };
 
 } // namespace OHOS::Ace::Framework

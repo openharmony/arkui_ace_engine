@@ -247,6 +247,7 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSScroll>::StaticMethod("width", &JSScroll::JsWidth);
     JSClass<JSScroll>::StaticMethod("height", &JSScroll::JsHeight);
+    JSClass<JSScroll>::StaticMethod("nestedScroll", &JSScroll::SetNestedScroll);
     JSClass<JSScroll>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -322,4 +323,35 @@ void JSScroll::JsHeight(const JSCallbackInfo& info)
     ScrollModel::GetInstance()->SetHasHeight(true);
 }
 
+void JSScroll::SetNestedScroll(const JSCallbackInfo& args)
+{
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_ONLY,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        ScrollModel::GetInstance()->SetNestedScroll(nestedOpt);
+        LOGW("Invalid params");
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    int32_t froward = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollForward"), froward);
+    if (froward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
+        froward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
+        LOGW("ScrollFroward params invalid");
+        froward = 0;
+    }
+    int32_t backward = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollBackward"), backward);
+    if (backward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
+        backward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
+        LOGW("ScrollFroward params invalid");
+        backward = 0;
+    }
+    nestedOpt.forward = static_cast<NestedScrollMode>(froward);
+    nestedOpt.backward = static_cast<NestedScrollMode>(backward);
+    ScrollModel::GetInstance()->SetNestedScroll(nestedOpt);
+    args.ReturnSelf();
+}
 } // namespace OHOS::Ace::Framework

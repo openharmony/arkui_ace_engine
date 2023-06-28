@@ -68,6 +68,8 @@ HWTEST_F(FormRenderTest, FormRenderTest001, TestSize.Level1)
      */
     auto formRendererGroup = FormRendererGroup::Create(nullptr, nullptr);
     EXPECT_TRUE(formRendererGroup);
+    bool isEmpty = formRendererGroup->IsFormRequestsEmpty();
+    EXPECT_TRUE(isEmpty);
     OHOS::AAFwk::Want want;
     want.SetParam(FORM_WIDTH_KEY, FORM_WIDTH);
     want.SetParam(FORM_HEIGHT_KEY, FORM_HEIGHT);
@@ -82,6 +84,10 @@ HWTEST_F(FormRenderTest, FormRenderTest001, TestSize.Level1)
     // formRenderer->uiContent_ is null, so formRenderer->AddForm will not be called
     formRendererGroup->AddForm(want, formJsInfo);
     EXPECT_TRUE(formRendererGroup->formRenderer_ != nullptr);
+    isEmpty = formRendererGroup->IsFormRequestsEmpty();
+    formRendererGroup->UpdateConfiguration(nullptr);
+    EXPECT_FALSE(isEmpty);
+
 
     /**
      * @tc.steps: step3. call formRenderer's AddForm

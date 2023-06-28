@@ -87,8 +87,6 @@ public:
     MOCK_CONST_METHOD1(OnDumpInfo, bool(const std::vector<std::string>& params));
     MOCK_METHOD2(FlushVsync, void(uint64_t nanoTimestamp, uint32_t frameCount));
     MOCK_METHOD3(SetRootRect, void(double width, double height, double offset));
-    MOCK_METHOD1(SetGetViewSafeAreaImpl, void(std::function<SafeAreaEdgeInserts()>&& callback));
-    MOCK_CONST_METHOD0(GetCurrentViewSafeArea, SafeAreaEdgeInserts());
     MOCK_METHOD0(FlushPipelineWithoutAnimation, void());
     MOCK_METHOD0(FlushPipelineImmediately, void());
     MOCK_METHOD2(OnVirtualKeyboardHeightChange,
@@ -98,13 +96,11 @@ public:
     MOCK_METHOD2(AddEtsCardTouchEventCallback, void(int32_t ponitId, EtsCardTouchEventCallback&& callback));
     MOCK_METHOD1(RestoreNodeInfo, void(std::unique_ptr<JsonValue> nodeInfo));
     MOCK_METHOD0(GetStoredNodeInfo, std::unique_ptr<JsonValue>());
-    MOCK_METHOD0(ResetViewSafeArea, void());
-    MOCK_METHOD1(SetSystemSafeArea, void(const SafeAreaEdgeInserts& systemSafeArea));
-    MOCK_CONST_METHOD0(GetSystemSafeArea, SafeAreaEdgeInserts());
-    MOCK_METHOD1(SetCutoutSafeArea, void(const SafeAreaEdgeInserts& cutoutSafeArea));
-    MOCK_CONST_METHOD0(GetCutoutSafeArea, SafeAreaEdgeInserts());
-    MOCK_CONST_METHOD0(GetViewSafeArea, SafeAreaEdgeInserts());
-    MOCK_METHOD0(AppBarAdaptToSafeArea, void());
+    MOCK_METHOD1(UpdateSystemSafeArea, void(const SafeAreaInsets& systemSafeArea));
+    MOCK_CONST_METHOD0(GetSystemSafeArea, SafeAreaInsets());
+    MOCK_METHOD1(UpdateCutoutSafeArea, void(const SafeAreaInsets& cutoutSafeArea));
+    MOCK_CONST_METHOD0(GetCutoutSafeArea, SafeAreaInsets());
+    MOCK_CONST_METHOD0(GetViewSafeArea, SafeAreaInsets());
     static RefPtr<MockPipelineBase> pipeline_;
 
 protected:
