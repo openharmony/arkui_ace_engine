@@ -882,8 +882,8 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
     CHECK_NULL_VOID(itemGroup);
     itemGroup->SetListMainSize(startMainPos_, endMainPos_, referencePos, forwardLayout);
     itemGroup->SetListLayoutProperty(layoutProperty);
-    if (jumpIndex_.has_value()) {
-        if (forwardLayout && (scrollAlign_ == ScrollAlign::START ||
+    if (jumpIndex_.has_value() && (!jumpIndexInGroup_.has_value())) {
+        if (forwardLayout&& (scrollAlign_ == ScrollAlign::START ||
             (scrollAlign_ == ScrollAlign::AUTO && scrollAutoType_ == ScrollAutoType::START))) {
             jumpIndexInGroup_ = 0;
         } else if (!forwardLayout && (scrollAlign_ == ScrollAlign::END ||

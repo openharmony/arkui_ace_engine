@@ -313,6 +313,8 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
         LOGD("startIndex:%{public}d, startPos:%{public}f", startIndex, startPos);
         MeasureForward(layoutWrapper, layoutConstraint, startIndex, startPos);
     } else {
+        endIndex = (lanes_ <= 1) ? endIndex : (endIndex - endIndex % lanes_ + lanes_ - 1);
+        endIndex = endIndex >= totalItemCount_ ? totalItemCount_ - 1 : endIndex;
         LOGD("endIndex:%{public}d, endPos:%{public}f", endIndex, endPos);
         MeasureBackward(layoutWrapper, layoutConstraint, endIndex, endPos);
     }
