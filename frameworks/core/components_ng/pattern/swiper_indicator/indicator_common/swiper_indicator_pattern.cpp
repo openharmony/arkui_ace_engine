@@ -116,7 +116,7 @@ void SwiperIndicatorPattern::HandleClick(const GestureEvent& info)
 {
     if (info.GetSourceDevice() == SourceType::MOUSE) {
         HandleMouseClick(info);
-    } else if (info.GetSourceDevice() == SourceType::TOUCH) {
+    } else {
         HandleTouchClick(info);
     }
 }
