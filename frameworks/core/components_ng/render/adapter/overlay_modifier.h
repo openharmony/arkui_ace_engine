@@ -105,6 +105,18 @@ public:
         }
     }
 
+    OffsetF GetOverlayOffset()
+    {
+        OffsetF overlayOffset;
+        if (property_) {
+            auto overlayOptions = property_->Get().GetOverlayOptions();
+            auto dx = overlayOptions.x.ConvertToPx();
+            auto dy = overlayOptions.y.ConvertToPx();
+            overlayOffset = OffsetF(dx, dy);
+        }
+        return overlayOffset;
+    }
+
 private:
     static OffsetF GetTextPosition(const SizeF& parentSize, const SizeF& childSize, OverlayOptions& overlay)
     {
