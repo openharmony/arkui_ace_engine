@@ -1513,7 +1513,9 @@ void PipelineContext::FlushReload()
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
         CHECK_NULL_VOID(pipeline->stageManager_);
+        pipeline->SetIsReloading(true);
         pipeline->stageManager_->ReloadStage();
+        pipeline->SetIsReloading(false);
         pipeline->FlushUITasks();
     });
 }

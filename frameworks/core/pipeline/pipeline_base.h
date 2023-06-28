@@ -910,6 +910,10 @@ protected:
 
     void UpdateRootSizeAndScale(int32_t width, int32_t height);
 
+    void SetIsReloading(bool isReloading) {
+        isReloading_ = isReloading;
+    }
+
     std::list<configChangedCallback> configChangedCallback_;
     std::list<virtualKeyBoardCallback> virtualKeyBoardCallback_;
 
@@ -1004,6 +1008,7 @@ private:
     PostRTTaskCallback postRTTaskCallback_;
     std::function<void(void)> gsVsyncCallback_;
     bool enableImplicitAnimation_ = true;
+    bool isReloading_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };
