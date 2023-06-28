@@ -95,6 +95,10 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             badgeHeight = std::max(badgeCircleDiameter, badgeHeight);
         }
     }
+    if (LessOrEqual(circleSize->ConvertToPx(), 0)) {
+        badgeWidth = 0;
+        badgeHeight = 0;
+    }
     textLayoutProperty->UpdateMarginSelfIdealSize(SizeF(badgeWidth, badgeHeight));
     auto textLayoutConstraint = textFirstLayoutConstraint;
     textLayoutConstraint.selfIdealSize = OptionalSize<float>(badgeWidth, badgeHeight);
@@ -211,7 +215,6 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     textGeometryNode->SetMarginFrameOffset(textOffset - geometryNode->GetFrameOffset() - borderOffset);
     auto textFrameSize = textGeometryNode->GetFrameSize();
-    textFrameSize += SizeF(borderWidth.ConvertToPx() * 2, borderWidth.ConvertToPx() * 2);
     textGeometryNode->SetFrameSize(textFrameSize);
     textWrapper->Layout();
 
