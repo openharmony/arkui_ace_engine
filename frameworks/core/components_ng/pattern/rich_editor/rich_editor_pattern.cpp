@@ -201,6 +201,114 @@ int32_t RichEditorPattern::AddTextSpan(const TextSpanOptions& options)
     return spanIndex;
 }
 
+void RichEditorPattern::DeleteSpans(const RangeOptions& options)
+{
+    int32_t start = 0;
+    int32_t end = 0;
+    auto length = GetTextContentLength();
+    start = (!options.start.has_value()) ? 0 : options.start.value();
+    end = (!options.end.has_value()) ? length : options.end.value();
+    if (start > end) {
+        auto value = start;
+        start = end;
+        end = value;
+    }
+    start = std::max(0, start);
+    end = std::min(length, end);
+    if (start > length || end < 0 || start == end) {
+        return;
+    }
+
+    auto startInfo = GetSpanPositionInfo(start);
+    auto endInfo = GetSpanPositionInfo(end - 1);
+    if (startInfo.spanIndex_ == endInfo.spanIndex_) {
+        DeleteSpanByRange(start, end, startInfo);
+    } else {
+        DeleteSpansByRange(start, end, startInfo, endInfo);
+    }
+}
+
+void RichEditorPattern::DeleteSpanByRange(int32_t start, int32_t end, SpanPositionInfo info)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto childrens = host->GetChildren();
+    auto it = childrens.begin();
+    std::advance(it, info.spanIndex_);
+    if (start == info.spanStart_ && end == info.spanEnd_) {
+        ClearContent(*it);
+        host->RemoveChild(*it);
+    } else {
+        auto spanNode = DynamicCast<SpanNode>(*it);
+        CHECK_NULL_VOID(spanNode);
+        auto spanItem = spanNode->GetSpanItem();
+        auto beforStr = StringUtils::ToWstring(spanItem->content).substr(0, start - info.spanStart_);
+        auto endStr = StringUtils::ToWstring(spanItem->content).substr(end - info.spanStart_);
+        std::wstring result = beforStr + endStr;
+        auto str = StringUtils::ToString(result);
+        spanNode->UpdateContent(str);
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkModifyDone();
+}
+
+void RichEditorPattern::DeleteSpansByRange(
+    int32_t start, int32_t end, SpanPositionInfo startInfo, SpanPositionInfo endInfo)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto childrens = host->GetChildren();
+    auto itStart = childrens.begin();
+    std::advance(itStart, startInfo.spanIndex_);
+    auto saveStartSpan = (start == startInfo.spanStart_) ? 0 : 1;
+    if (saveStartSpan) {
+        auto spanNodeStart = DynamicCast<SpanNode>(*itStart);
+        CHECK_NULL_VOID(spanNodeStart);
+        auto spanItemStart = spanNodeStart->GetSpanItem();
+        auto beforStr = StringUtils::ToWstring(spanItemStart->content).substr(0, start - startInfo.spanStart_);
+        auto strStart = StringUtils::ToString(beforStr);
+        spanNodeStart->UpdateContent(strStart);
+    }
+    auto itEnd = childrens.begin();
+    std::advance(itEnd, endInfo.spanIndex_);
+    auto delEndSpan = (end == endInfo.spanEnd_) ? 1 : 0;
+    if (!delEndSpan) {
+        auto spanNodeEnd = DynamicCast<SpanNode>(*itEnd);
+        CHECK_NULL_VOID(spanNodeEnd);
+        auto spanItemEnd = spanNodeEnd->GetSpanItem();
+        auto endStr =
+            StringUtils::ToWstring(spanItemEnd->content).substr(end - endInfo.spanStart_, endInfo.spanEnd_ - end);
+        auto strEnd = StringUtils::ToString(endStr);
+        spanNodeEnd->UpdateContent(strEnd);
+    }
+    auto startIter = childrens.begin();
+    std::advance(startIter, startInfo.spanIndex_ + saveStartSpan);
+    auto endIter = childrens.begin();
+    std::advance(endIter, endInfo.spanIndex_);
+    for (auto iter = startIter; iter != endIter; ++iter) {
+        ClearContent(*iter);
+        host->RemoveChild(*iter);
+    }
+    if (delEndSpan) {
+        ClearContent(*endIter);
+        host->RemoveChild(*endIter);
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkModifyDone();
+}
+
+void RichEditorPattern::ClearContent(const RefPtr<UINode>& child)
+{
+    CHECK_NULL_VOID(child);
+    if (child->GetTag() == V2::SPAN_ETS_TAG) {
+        auto spanNode = DynamicCast<SpanNode>(child);
+        if (spanNode) {
+            spanNode->UpdateContent("");
+            spanNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
+}
+
 SpanPositionInfo RichEditorPattern::GetSpanPositionInfo(int32_t position)
 {
     SpanPositionInfo spanPositionInfo(-1, -1, -1, -1);

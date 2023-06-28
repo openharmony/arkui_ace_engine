@@ -101,6 +101,11 @@ struct UpdateSpanStyle {
     std::optional<ImageFit> updateImageFit = std::nullopt;
 };
 
+struct RangeOptions {
+    std::optional<int32_t> start;
+    std::optional<int32_t> end;
+};
+
 class ACE_EXPORT RichEditorControllerBase : public AceType {
     DECLARE_ACE_TYPE(RichEditorControllerBase, AceType);
 
@@ -112,6 +117,7 @@ public:
     virtual void UpdateSpanStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle) = 0;
     virtual void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle) = 0;
     virtual RichEditorSelection GetSpansInfo(int32_t start, int32_t end) = 0;
+    virtual void DeleteSpans(const RangeOptions& options) = 0;
 };
 
 class ACE_EXPORT RichEditorModel {
