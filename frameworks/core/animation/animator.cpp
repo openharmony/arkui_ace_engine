@@ -591,7 +591,7 @@ void Animator::OnFrame(int64_t duration)
     if (elapsedTime_ < scaledStartDelay_) {
         if ((fillMode_ == FillMode::BACKWARDS || fillMode_ == FillMode::BOTH) && !isBothBackwards) {
             for (const auto& interpolator : interpolators_) {
-                interpolator->OnNormalizedTimestampChanged(0.0f, isReverse_);
+                interpolator->OnNormalizedTimestampChanged(isCurDirection_ ? 1.0f : 0.0f, isReverse_);
             }
             isBothBackwards = true;
         }
