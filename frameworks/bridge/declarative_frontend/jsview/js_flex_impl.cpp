@@ -76,12 +76,16 @@ void JSFlexImpl::CreateFlexComponent(const JSCallbackInfo& info)
         if (mainAlign >= 0 && mainAlign <= MAIN_ALIGN_MAX_VALUE) {
             FlexModel::GetInstance()->SetMainAxisAlign(static_cast<FlexAlign>(mainAlign));
         }
+    } else if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9) {
+        FlexModel::GetInstance()->SetMainAxisAlign(FlexAlign::FLEX_START);
     }
     if (alignItemVal->IsNumber()) {
         auto crossAlign = alignItemVal->ToNumber<int32_t>();
         if (crossAlign >= 0 && crossAlign <= CROSS_ALIGN_MAX_VALUE) {
             FlexModel::GetInstance()->SetCrossAxisAlign(static_cast<FlexAlign>(crossAlign));
         }
+    } else if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9) {
+        FlexModel::GetInstance()->SetCrossAxisAlign(FlexAlign::FLEX_START);
     }
 }
 
