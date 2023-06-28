@@ -15,6 +15,7 @@
 
 #include "js_drawable_descriptor.h"
 
+#include "drawable_descriptor.h"
 #include "interfaces/inner_api/drawable_descriptor/drawable_descriptor.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
@@ -75,6 +76,7 @@ napi_value JsDrawableDescriptor::InitLayeredDrawable(napi_env env)
         DECLARE_NAPI_FUNCTION("getForeground", GetForeground),
         DECLARE_NAPI_FUNCTION("getBackground", GetBackground),
         DECLARE_NAPI_FUNCTION("getMask", GetMask),
+        DECLARE_NAPI_STATIC_FUNCTION("getMaskClipPath", GetMaskClipPath),
     };
     NAPI_CALL(env, napi_define_class(env, DRAWABLE_LAYERED, NAPI_AUTO_LENGTH, Constructor, nullptr,
                        sizeof(layeredDes) / sizeof(napi_property_descriptor), layeredDes, &cons));
@@ -202,6 +204,20 @@ napi_value JsDrawableDescriptor::GetMask(napi_env env, napi_callback_info info)
     return result;
 }
 
+napi_value JsDrawableDescriptor::GetMaskClipPath(napi_env env, napi_callback_info info)
+{
+    auto path = OHOS::Ace::Napi::LayeredDrawableDescriptor::GetStaticMaskClipPath();
+    
+    HILOG_INFO("cplog GetMaskClipPath getPath = %{public}s", path.c_str());
+
+    napi_value result = nullptr;
+    if (napi_ok  != napi_create_string_utf8(env, path.c_str(), NAPI_AUTO_LENGTH, &result)){
+        HILOG_INFO("cplog JsDrawableDescriptor Failed");
+    }
+   
+    return result;
+}
+
 napi_value JsDrawableDescriptor::Export(napi_env env, napi_value exports)
 {
     // export base class
@@ -211,6 +227,7 @@ napi_value JsDrawableDescriptor::Export(napi_env env, napi_value exports)
     // export child class
     cons = InitLayeredDrawable(env);
     NAPI_CALL(env, napi_set_named_property(env, exports, DRAWABLE_LAYERED, cons));
+
     return exports;
 }
 } // namespace OHOS::Ace::Napi

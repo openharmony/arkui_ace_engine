@@ -33,6 +33,7 @@ public:
 private:
     static napi_value InitDrawable(napi_env env);
     static napi_value InitLayeredDrawable(napi_env env);
+    static napi_value InitLayeredDrawableProperty(napi_env env, napi_value exports);
 
     static napi_value Constructor(napi_env env, napi_callback_info info);
     static void Destructor(napi_env env, void* nativeObject, void* finalize);
@@ -42,6 +43,9 @@ private:
     static napi_value GetForeground(napi_env env, napi_callback_info info);
     static napi_value GetBackground(napi_env env, napi_callback_info info);
     static napi_value GetMask(napi_env env, napi_callback_info info);
+
+    static napi_value GetMaskClipPath(napi_env env, napi_callback_info info);
+    static napi_value GetMaskClipRadius(napi_env env, napi_callback_info info);
 
     static thread_local napi_ref baseConstructor_;
     static thread_local napi_ref layeredConstructor_;

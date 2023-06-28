@@ -17,6 +17,7 @@
 
 #include <cstddef>
 #include <memory>
+#include <string>
 
 #include "base/utils/string_utils.h"
 
@@ -139,6 +140,7 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
 bool LayeredDrawableDescriptor::GetDefaultMask()
 {
     const std::string name = "ohos_icon_mask";
+    
     size_t len = 0;
     std::unique_ptr<uint8_t[]> data;
     resourceMgr_->GetMediaDataByName(name.c_str(), len, data);
@@ -303,4 +305,20 @@ std::shared_ptr<Media::PixelMap> LayeredDrawableDescriptor::GetPixelMap()
     HILOG_ERROR("Failed to GetPixelMap!");
     return nullptr;
 }
+
+float LayeredDrawableDescriptor::GetMaskClipRadius()
+{
+    return 0.0f;
+}
+
+std::string LayeredDrawableDescriptor::GetStaticMaskClipPath()
+{
+    HILOG_INFO("cplog GetStaticMaskClipPath Success");
+    const std::string name = "ohos_drawable_descriptor_path";
+    std::string data;
+    std::shared_ptr<Global::Resource::ResourceManager> ResMgr_(Global::Resource::CreateResourceManager());
+    ResMgr_->GetStringByName(name.c_str(), data);
+    return data;
+}
+
 } // namespace OHOS::Ace::Napi
