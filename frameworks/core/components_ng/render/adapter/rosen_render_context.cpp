@@ -156,7 +156,7 @@ void RosenRenderContext::OnNodeDisappear(bool recursive)
     }
     CHECK_NULL_VOID(rsNode_);
     auto host = GetHost();
-    if (host && host->GetEventHub<EventHub>()) {
+    if (!recursive && host && host->GetEventHub<EventHub>()) {
         host->GetEventHub<EventHub>()->SetEnabledInternal(false);
     }
     auto rect = GetPaintRectWithoutTransform();

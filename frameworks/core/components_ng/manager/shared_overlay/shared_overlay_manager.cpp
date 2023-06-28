@@ -242,14 +242,12 @@ void SharedOverlayManager::PassengerAboard(
     auto initialPosition = passenger->GetRenderContext()->GetPosition();
     // save initialFrameOffset for static type sharedTransition
     auto initialFrameOffset = passenger->GetGeometryNode()->GetFrameOffset();
-    auto initialEventEnabled = passenger->GetEventHub<EventHub>()->IsEnabled();
     const auto& initialMarginPtr = passenger->GetLayoutProperty()->GetMarginProperty();
     auto initialMargin = initialMarginPtr ? std::make_optional<MarginProperty>(*initialMarginPtr) : std::nullopt;
     auto zIndex = passenger->GetRenderContext()->GetZIndex();
     effect->SetPassengerInitZIndex(zIndex);
     effect->SetPassengerInitPos(initialPosition);
     effect->SetPassengerInitFrameOffset(initialFrameOffset);
-    effect->SetPassengerInitEventEnabled(initialEventEnabled);
     effect->SetPassengerInitMargin(initialMargin);
     bool isPassengerCurrentFocused = false;
     auto passengerFocusHub = passenger->GetFocusHub();
@@ -270,7 +268,7 @@ void SharedOverlayManager::PassengerAboard(
     passenger->GetRenderContext()->UpdateZIndex(effect->GetZIndex());
     passenger->GetRenderContext()->UpdatePosition(offset);
     passenger->GetRenderContext()->OnModifyDone();
-    passenger->GetEventHub<EventHub>()->SetEnabled(false);
+    passenger->GetEventHub<EventHub>()->SetEnabledInternal(false);
 }
 
 bool SharedOverlayManager::AboardShuttle(const RefPtr<SharedTransitionEffect>& effect)
@@ -329,8 +327,8 @@ void SharedOverlayManager::GetOffShuttle(const RefPtr<SharedTransitionEffect>& e
         }
         // restore initialFrameOffset for static type sharedTransition, because it may not layout again
         passenger->GetGeometryNode()->SetFrameOffset(effect->GetPassengerInitFrameOffset());
-        passenger->GetEventHub<EventHub>()->SetEnabled(effect->GetPassengerInitEventEnabled());
         ReplaceFrameNode(passengerHolder, passenger);
+        passenger->GetEventHub<EventHub>()->RestoreEnabled();
         auto isPassengerCurrentFocused = effect->GetPassengerCurrentFocused();
         if (isPassengerCurrentFocused) {
             auto passengerFocusHub = passenger->GetFocusHub();
