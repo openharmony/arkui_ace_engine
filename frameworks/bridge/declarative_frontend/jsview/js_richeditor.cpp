@@ -105,6 +105,7 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
                                     JSContainerBase::ParseJsDimensionFp(width, imageSpanWidth) ||
                                     JSContainerBase::ParseJsDimensionPx(width, imageSpanWidth))) {
             imageSize.width = imageSpanWidth;
+            updateSpanStyle_.updateImageWidth = imageSpanWidth;
         }
         JSRef<JSVal> height = size->GetValueAt(1);
         CalcDimension imageSpanHeight;
@@ -112,6 +113,7 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
                                      JSContainerBase::ParseJsDimensionFp(height, imageSpanHeight) ||
                                      JSContainerBase::ParseJsDimensionPx(height, imageSpanHeight))) {
             imageSize.height = imageSpanHeight;
+            updateSpanStyle_.updateImageHeight = imageSpanHeight;
         }
         imageStyle.size = imageSize;
     }
@@ -122,6 +124,7 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
             align = VerticalAlign::BOTTOM;
         }
         imageStyle.verticalAlign = align;
+        updateSpanStyle_.updateImageVerticalAlign = align;
     }
     JSRef<JSVal> objectFit = imageAttribute->GetProperty("objectFit");
     if (!objectFit->IsNull() && objectFit->IsNumber()) {
@@ -130,6 +133,7 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
             fit = ImageFit::COVER;
         }
         imageStyle.objectFit = fit;
+        updateSpanStyle_.updateImageFit = fit;
     } else {
         imageStyle.objectFit = ImageFit::COVER;
     }
@@ -142,25 +146,30 @@ TextStyle JSRichEditorController::ParseJsTextStyle(JSRef<JSObject> styleObject)
     JSRef<JSVal> fontColor = styleObject->GetProperty("fontColor");
     Color textColor;
     if (!fontColor->IsNull() && JSContainerBase::ParseJsColor(fontColor, textColor)) {
+        updateSpanStyle_.updateTextColor = textColor;
         style.SetTextColor(textColor);
     }
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
     if (!fontSize->IsNull() && JSContainerBase::ParseJsDimensionFp(fontSize, size)) {
+        updateSpanStyle_.updateFontSize = size;
         style.SetFontSize(size);
     }
     JSRef<JSVal> fontStyle = styleObject->GetProperty("fontStyle");
     if (!fontStyle->IsNull()) {
+        updateSpanStyle_.updateItalicFontStyle = static_cast<FontStyle>(fontStyle->ToNumber<int32_t>());
         style.SetFontStyle(static_cast<FontStyle>(fontStyle->ToNumber<int32_t>()));
     }
     JSRef<JSVal> fontWeight = styleObject->GetProperty("fontWeight");
     std::string weight;
     if (!fontWeight->IsNull() && JSContainerBase::ParseJsString(fontWeight, weight)) {
+        updateSpanStyle_.updateFontWeight = ConvertStrToFontWeight(weight);
         style.SetFontWeight(ConvertStrToFontWeight(weight));
     }
     JSRef<JSVal> fontFamily = styleObject->GetProperty("fontFamily");
     std::vector<std::string> family;
     if (!fontFamily->IsNull() && JSContainerBase::ParseJsFontFamilies(fontFamily, family)) {
+        updateSpanStyle_.updateFontFamily = family;
         style.SetFontFamilies(family);
     }
     auto decorationObj = styleObject->GetProperty("decoration");
@@ -168,11 +177,13 @@ TextStyle JSRichEditorController::ParseJsTextStyle(JSRef<JSObject> styleObject)
     if (!decorationObject->IsUndefined()) {
         JSRef<JSVal> type = decorationObject->GetProperty("type");
         if (!type->IsNull()) {
+            updateSpanStyle_.updateTextDecoration = static_cast<TextDecoration>(type->ToNumber<int32_t>());
             style.SetTextDecoration(static_cast<TextDecoration>(type->ToNumber<int32_t>()));
         }
         JSRef<JSVal> color = decorationObject->GetProperty("color");
         Color decorationColor;
         if (!color->IsNull() && JSContainerBase::ParseJsColor(color, decorationColor)) {
+            updateSpanStyle_.updateTextDecorationColor = decorationColor;
             style.SetTextDecorationColor(decorationColor);
         }
     }
@@ -262,6 +273,7 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorController>::CustomMethod("addTextSpan", &JSRichEditorController::AddTextSpan);
     JSClass<JSRichEditorController>::CustomMethod("setCaretOffset", &JSRichEditorController::SetCaretOffset);
     JSClass<JSRichEditorController>::CustomMethod("getCaretOffset", &JSRichEditorController::GetCaretOffset);
+    JSClass<JSRichEditorController>::CustomMethod("updateSpanStyle", &JSRichEditorController::UpdateSpanStyle);
     JSClass<JSRichEditorController>::Bind(
         globalObj, JSRichEditorController::Constructor, JSRichEditorController::Destructor);
 }
@@ -290,6 +302,41 @@ void JSRichEditorController::SetCaretOffset(const JSCallbackInfo& args)
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(success)));
     } else {
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(success)));
+    }
+}
+
+void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    if (!info[0]->IsNumber() && !info[0]->IsObject()) {
+        LOGW("info[0] not is Object or Number");
+        return;
+    }
+    auto jsObject = JSRef<JSObject>::Cast(info[0]);
+
+    int32_t start = 0;
+    int32_t end = 0;
+    TextStyle textStyle;
+    ImageSpanAttribute imageStyle;
+    JSContainerBase::ParseJsInt32(jsObject->GetProperty("start"), start);
+    JSContainerBase::ParseJsInt32(jsObject->GetProperty("end"), end);
+    auto richEditorTextStyle = JSRef<JSObject>::Cast(jsObject->GetProperty("textStyle"));
+    auto richEditorImageStyle = JSRef<JSObject>::Cast(jsObject->GetProperty("imageStyle"));
+    updateSpanStyle_.ResetStyle();
+    if (!richEditorTextStyle->IsUndefined()) {
+        textStyle = ParseJsTextStyle(richEditorTextStyle);
+    }
+    if (!richEditorImageStyle->IsUndefined()) {
+        imageStyle = ParseJsImageSpanAttribute(richEditorImageStyle);
+    }
+
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        controller->SetUpdateSpanStyle(updateSpanStyle_);
+        controller->UpdateSpanStyle(start, end, textStyle, imageStyle);
     }
 }
 } // namespace OHOS::Ace::Framework

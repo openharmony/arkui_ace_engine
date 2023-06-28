@@ -60,4 +60,28 @@ bool RichEditorController::SetCaretOffset(int32_t caretPosition)
     }
     return false;
 }
+
+void RichEditorController::UpdateSpanStyle(
+    int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle)
+{
+    auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(richEditorPattern);
+    auto length = richEditorPattern->GetTextContentLength();
+    if (start > end) {
+        std::swap(start, end);
+    }
+    start = std::max(0, start);
+    end = std::min(end, length);
+    if (start > length || end < 0 || start == end) {
+        LOGI("params error , return");
+        return;
+    }
+    richEditorPattern->SetUpdateSpanStyle(updateSpanStyle_);
+    richEditorPattern->UpdateSpanStyle(start, end, textStyle, imageStyle);
+}
+
+void RichEditorController::SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle)
+{
+    updateSpanStyle_ = updateSpanStyle;
+}
 } // namespace OHOS::Ace::NG
