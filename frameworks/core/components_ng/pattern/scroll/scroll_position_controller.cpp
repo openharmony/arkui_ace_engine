@@ -45,7 +45,11 @@ bool ScrollPositionController::AnimateTo(
             LOGW("not support percent dimension now");
             return false;
         }
-        scrollPattern->AnimateTo(-position.ConvertToPx(), duration, curve, false, nullptr);
+        if (Positive(duration)) {
+            scrollPattern->AnimateTo(-position.ConvertToPx(), duration, curve, false, nullptr);
+        } else {
+            scrollPattern->JumpToPosition(-position.ConvertToPx());
+        }
         return true;
     }
     return false;

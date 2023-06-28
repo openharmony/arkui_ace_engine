@@ -444,12 +444,6 @@ void ScrollPattern::AnimateTo(float position, float duration, const RefPtr<Curve
     CHECK_NULL_VOID_NOLOG(!NearEqual(position, currentOffset_));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (LessOrEqual(duration, 0.0)) {
-        LOGD("scroll pattern: duration == 0.0, jump to position");
-        JumpToPosition(position);
-        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
-        return;
-    }
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
     auto animation = AceType::MakeRefPtr<CurveAnimation<float>>(currentOffset_, position, curve);
     animation->AddListener([weakScroll = AceType::WeakClaim(this)](float value) {
@@ -499,13 +493,7 @@ void ScrollPattern::ScrollBy(float pixelX, float pixelY, bool smooth, const std:
         AnimateTo(position, fabs(distance) * UNIT_CONVERT / SCROLL_BY_SPEED, Curves::EASE_OUT, true, onFinish);
         return;
     }
-    float cachePosition = currentOffset_;
     JumpToPosition(position);
-    if (cachePosition != currentOffset_) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
-    }
 }
 
 bool ScrollPattern::ScrollPage(bool reverse, bool smooth, const std::function<void()>& onFinish)
@@ -524,8 +512,17 @@ void ScrollPattern::JumpToPosition(float position, int32_t source)
         }
         animator_->ClearInterpolators();
     }
+    if (!IsScrollableStopped()) {
+        StopScrollable();
+    }
+    float cachePosition = currentOffset_;
     DoJump(position, source);
     StartScrollBarAnimatorByProxy();
+    if (cachePosition != currentOffset_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    }
 }
 
 void ScrollPattern::DoJump(float position, int32_t source)
