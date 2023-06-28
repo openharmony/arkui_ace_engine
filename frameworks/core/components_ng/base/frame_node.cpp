@@ -1304,11 +1304,11 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     return testResult;
 }
 
-std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect)
+std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t sourceType)
 {
     std::vector<RectF> responseRegionList;
     auto gestureHub = eventHub_->GetGestureEventHub();
-    if (!gestureHub) {
+    if (!gestureHub) { 
         responseRegionList.emplace_back(rect);
         return responseRegionList;
     }

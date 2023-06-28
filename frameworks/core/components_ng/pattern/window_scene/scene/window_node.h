@@ -36,7 +36,7 @@ public:
     std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType) override;
 
 private:
-    RectF ConvertHotRect(const RectF& rect, int32_t sourceType)
+    RectF ConvertHotRect(const RectF& rect, int32_t sourceType);
 };
 } // namespace OHOS::Ace::NG
 

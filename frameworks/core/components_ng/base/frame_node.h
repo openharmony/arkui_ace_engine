@@ -410,6 +410,9 @@ public:
         return layoutWrapper_;
     }
 
+protected:
+    bool GetTouchable() const;
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;
@@ -444,7 +447,6 @@ private:
     void GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     HitTestMode GetHitTestMode() const override;
-    bool GetTouchable() const;
     virtual std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType = 0);
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 

@@ -417,11 +417,11 @@ void WindowPattern::HandleMouseEvent(const MouseInfo& info)
     if (action == MMI::PointerEvent::POINTER_ACTION_MOVE &&
         pointerEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE) {
         WindowEventHandler->ProcessWindowEvent(AceType::DynamicCast<WindowNode>(
-            host, pointerEvent, false));
+            host), pointerEvent, false);
     }
     if (action == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) {
         WindowEventHandler->ProcessWindowEvent(AceType::DynamicCast<WindowNode>(
-            host, pointerEvent, true));
+            host), pointerEvent, true);
     }
     DispatchPointerEvent(pointerEvent);
 }

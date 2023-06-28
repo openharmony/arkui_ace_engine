@@ -14,8 +14,9 @@
  */
 #include "window_event_process.h"
 
-#include "frameworks/core/event/ace_events.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
+#include "frameworks/core/event/ace_events.h"
+#include "pointer_event.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -31,8 +32,8 @@ void WindowEventProcess::ProcessWindowEvent(const RefPtr<WindowNode>& windowNode
     auto lastWindowNode = lastWeakWindowNode_.Upgrade();
     if (lastWindowNode == nullptr) {
         LOGD("First enter window, lastWindowNode is not exit");
-        std::shared_ptr<PointerEvent> enterEvent = std::make_shared<PointerEvent>(*pointerEvent);
-        enterEvent->setPointAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
+        std::shared_ptr<MMI::PointerEvent> enterEvent = std::make_shared<MMI::PointerEvent>(*pointerEvent);
+        enterEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
         DispatchPointerEvent(windowNode, enterEvent);
         lastWeakWindowNode_ = windowNode;
         lastPointEvent_ = enterEvent;
@@ -41,17 +42,17 @@ void WindowEventProcess::ProcessWindowEvent(const RefPtr<WindowNode>& windowNode
 
     if (windowNode->GetId() != lastWindowNode->GetId()) {
         LOGD("Window switching");
-        dispatchAction = isDrag ? MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW :
+        std::shared_ptr<MMI::PointerEvent> enterEvent = std::make_shared<MMI::PointerEvent>(*pointerEvent);
+        int32_t dispatchAction = isDrag ? MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW :
             MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW;
-        lastPointEvent_->setPointAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
+        lastPointEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
         DispatchPointerEvent(lastWindowNode, lastPointEvent_);
         lastWeakWindowNode_ = windowNode;
         lastPointEvent_ = enterEvent;
 
-        std::shared_ptr<PointerEvent> enterEvent = std::make_shared<PointerEvent>(*pointerEvent);
         dispatchAction = isDrag ? MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW :
             MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW;
-        enterEvent->setPointAction(dispatchAction);
+        enterEvent->SetPointerAction(dispatchAction);
         DispatchPointerEvent(windowNode, enterEvent);
     }
 }
