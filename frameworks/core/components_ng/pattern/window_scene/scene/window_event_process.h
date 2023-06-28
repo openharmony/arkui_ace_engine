@@ -38,7 +38,5 @@ private:
     WeakPtr<WindowNode> lastWeakWindowNode_ {nullptr};
     std::shared_ptr<MMI::PointerEvent> lastPointEvent_;
 };
-
-#define WindowEventHandler DelayedSingleton<WindowEventProcess>::GetInstance()
 } // namespace OHOS::Ace::NG
 #endif // OHOS_ACE_NG_WINDOW_SCENE_WINDOW_EVENT_PROCESS_H

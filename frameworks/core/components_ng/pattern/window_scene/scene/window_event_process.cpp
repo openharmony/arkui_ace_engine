@@ -19,7 +19,6 @@
 #include "pointer_event.h"
 
 namespace OHOS::Ace::NG {
-
 WindowEventProcess::WindowEventProcess() {}
 
 WindowEventProcess::~WindowEventProcess() {}

@@ -46,7 +46,6 @@ void WindowSceneModel::Create(uint64_t persistentId)
     auto windowNode = WindowNode::GetOrCreateWindowNode(V2::WINDOW_SCENE_ETS_TAG, nodeId,
         [sceneSession]() { return AceType::MakeRefPtr<WindowScene>(sceneSession); });
     stack->Push(windowNode);
-
     auto windowScene = windowNode->GetPattern<WindowScene>();
     windowScene->UpdateSession(sceneSession);
 }

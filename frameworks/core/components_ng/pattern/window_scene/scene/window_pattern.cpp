@@ -93,7 +93,6 @@ void WindowPattern::InitContent()
     contentNode_ = FrameNode::CreateFrameNode(
         V2::WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     contentNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-
     CHECK_NULL_VOID(session_);
     auto surfaceNode = session_->GetSurfaceNode();
     if (surfaceNode) {
@@ -416,12 +415,12 @@ void WindowPattern::HandleMouseEvent(const MouseInfo& info)
     int32_t action = pointerEvent->GetPointerAction();
     if (action == MMI::PointerEvent::POINTER_ACTION_MOVE &&
         pointerEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE) {
-        WindowEventHandler->ProcessWindowEvent(AceType::DynamicCast<WindowNode>(
-            host), pointerEvent, false);
+        DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowEvent(
+            AceType::DynamicCast<WindowNode>(host), pointerEvent, false);
     }
     if (action == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) {
-        WindowEventHandler->ProcessWindowEvent(AceType::DynamicCast<WindowNode>(
-            host), pointerEvent, true);
+        DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowEvent(
+            AceType::DynamicCast<WindowNode>(host), pointerEvent, true);
     }
     DispatchPointerEvent(pointerEvent);
 }

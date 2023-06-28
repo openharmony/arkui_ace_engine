@@ -1157,7 +1157,7 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t s
 {
     bool isInChildRegion = false;
     auto paintRect = renderContext_->GetPaintRectWithTransform();
-    auto responseRegionList = GetResponseRegionList(paintRect);
+    auto responseRegionList = GetResponseRegionList(paintRect, sourceType);
     auto localPoint = parentLocalPoint - paintRect.GetOffset();
     auto renderContext = GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
@@ -1191,7 +1191,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         return HitTestResult::OUT_OF_REGION;
     }
     auto paintRect = renderContext_->GetPaintRectWithTransform();
-    auto responseRegionList = GetResponseRegionList(paintRect);
+    auto responseRegionList = GetResponseRegionList(paintRect, static_cast<int32_t>(touchRestrict.sourceType));
     if (SystemProperties::GetDebugEnabled()) {
         LOGD("TouchTest: point is %{public}s in %{public}s, depth: %{public}d", parentLocalPoint.ToString().c_str(),
             GetTag().c_str(), GetDepth());

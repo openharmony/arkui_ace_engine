@@ -19,8 +19,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float MOUSE_RECT_HOT = 4;
-constexpr float TOUCH_RECT_HOT = 20;
+constexpr float MOUSE_RECT_HOT = 4.0f;
+constexpr float TOUCH_RECT_HOT = 20.0f;
 }
 
 RefPtr<WindowNode> WindowNode::GetOrCreateWindowNode(
