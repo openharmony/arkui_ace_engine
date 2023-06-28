@@ -304,10 +304,14 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
         CHECK_NULL_VOID(pattern);
         pattern->HandleOnSelectAll();
     };
-    selectInfo.onClose = [weak = WeakClaim(this)]() {
+    selectInfo.onClose = [weak = WeakClaim(this)](bool closedByGlobalEvent) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->showSelectOverlay_ = false;
+        if (closedByGlobalEvent) {
+            pattern->ResetSelection();
+        } else {
+            pattern->showSelectOverlay_ = false;
+        }
     };
 
     if (!menuOptionItems_.empty()) {
@@ -326,6 +330,7 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
     } else {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
+        selectInfo.callerFrameNode = GetHost();
         selectOverlayProxy_ =
             pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
         CHECK_NULL_VOID_NOLOG(selectOverlayProxy_);

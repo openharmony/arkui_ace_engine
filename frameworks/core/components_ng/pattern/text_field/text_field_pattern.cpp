@@ -2367,6 +2367,21 @@ void TextFieldPattern::ShowSelectOverlay(
             pattern->UpdateCopyAllStatus();
             pattern->SetNeedCloseOverlay(false);
         };
+        selectInfo.onClose = [weak](bool closedByGlobalEvent) {
+            if (closedByGlobalEvent) {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                auto host = pattern->GetHost();
+                CHECK_NULL_VOID(host);
+                auto current = pattern->GetTextSelector().GetEnd();
+                pattern->SetInSelectMode(SelectionMode::NONE);
+                pattern->UpdateSelection(current);
+                pattern->MarkRedrawOverlay();
+                pattern->StartTwinkling();
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            }
+        };
+
         if (!pattern->GetMenuOptionItems().empty()) {
             selectInfo.menuOptionItems = pattern->GetMenuOptionItems();
         }
@@ -2374,7 +2389,7 @@ void TextFieldPattern::ShowSelectOverlay(
         CHECK_NULL_VOID_NOLOG(host);
         auto gesture = host->GetOrCreateGestureEventHub();
         gesture->RemoveTouchEvent(pattern->GetTouchListener());
-
+        selectInfo.callerFrameNode = host;
         pattern->SetSelectOverlay(
             pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(RawPtr(pattern))));
 
