@@ -821,7 +821,8 @@ void ProgressModifier::PaintRingProgressOrShadow(
 
     std::vector<RSColorQuad> colors;
     std::vector<float> pos;
-    auto gradientColors = ringProgressColors_->Get().GetGradient().GetColors();
+    auto gradient = SortGradientColorsByOffset(ringProgressColors_->Get().GetGradient());
+    auto gradientColors = gradient.GetColors();
     for (size_t i = 0; i < gradientColors.size(); i++) {
         colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
         pos.emplace_back(gradientColors[i].GetDimension().Value());
@@ -879,6 +880,22 @@ void ProgressModifier::PaintRingProgressOrShadow(
     canvas.DrawArc(edgeRect, ANGLE_90, ANGLE_180);
     canvas.DetachBrush();
     canvas.Restore();
+}
+
+Gradient ProgressModifier::SortGradientColorsByOffset(const Gradient& gradient) const
+{
+    auto srcGradientColors = gradient.GetColors();
+    std::sort(
+        srcGradientColors.begin(), srcGradientColors.end(), [](const GradientColor& left, const GradientColor& right) {
+            return left.GetDimension().Value() < right.GetDimension().Value();
+        });
+
+    Gradient sortedGradient;
+    for (const auto& item : srcGradientColors) {
+        sortedGradient.AddColor(item);
+    }
+
+    return sortedGradient;
 }
 
 void ProgressModifier::PaintRingSweeping(RSCanvas& canvas, const RingProgressData& ringProgressData) const
