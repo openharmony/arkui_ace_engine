@@ -1584,6 +1584,21 @@ OffsetF FrameNode::GetPaintRectOffsetToPage() const
     return (parent && parent->GetTag() == V2::PAGE_ETS_TAG) ? offset : OffsetF();
 }
 
+std::optional<RectF> FrameNode::GetViewPort() const
+{
+    if (viewPort_.has_value()) {
+        return viewPort_;
+    }
+    auto parent = GetAncestorNodeOfFrame();
+    while (parent) {
+        if (parent->GetViewPort().has_value()) {
+            return parent->GetViewPort();
+        }
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    return std::nullopt;
+}
+
 void FrameNode::OnNotifyMemoryLevel(int32_t level)
 {
     pattern_->OnNotifyMemoryLevel(level);
