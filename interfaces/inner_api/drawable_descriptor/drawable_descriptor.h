@@ -72,7 +72,6 @@ public:
     std::unique_ptr<DrawableDescriptor> GetMask();
     std::shared_ptr<Media::PixelMap> GetPixelMap() override;
     static std::string GetStaticMaskClipPath();
-    float GetMaskClipRadius();
 
 private:
     friend class ImageConverter;

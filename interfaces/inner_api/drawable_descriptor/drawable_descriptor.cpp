@@ -306,11 +306,6 @@ std::shared_ptr<Media::PixelMap> LayeredDrawableDescriptor::GetPixelMap()
     return nullptr;
 }
 
-float LayeredDrawableDescriptor::GetMaskClipRadius()
-{
-    return 0.0f;
-}
-
 std::string LayeredDrawableDescriptor::GetStaticMaskClipPath()
 {
     HILOG_INFO("cplog GetStaticMaskClipPath Success");
