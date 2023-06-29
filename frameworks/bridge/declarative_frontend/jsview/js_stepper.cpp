@@ -93,6 +93,9 @@ void JSStepper::JSBind(BindingTarget globalObj)
     JSClass<JSStepper>::StaticMethod("onChange", &JSStepper::OnChange);
     JSClass<JSStepper>::StaticMethod("onNext", &JSStepper::OnNext);
     JSClass<JSStepper>::StaticMethod("onPrevious", &JSStepper::OnPrevious);
+    JSClass<JSStepper>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSStepper>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSStepper>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSStepper>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
