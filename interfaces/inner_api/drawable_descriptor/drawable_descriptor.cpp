@@ -314,5 +314,4 @@ std::string LayeredDrawableDescriptor::GetStaticMaskClipPath()
     ResMgr_->GetStringByName(name.c_str(), data);
     return data;
 }
-
 } // namespace OHOS::Ace::Napi

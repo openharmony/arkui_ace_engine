@@ -209,7 +209,7 @@ napi_value JsDrawableDescriptor::GetMaskClipPath(napi_env env, napi_callback_inf
     auto path = OHOS::Ace::Napi::LayeredDrawableDescriptor::GetStaticMaskClipPath();
 
     napi_value result = nullptr;
-    if (napi_ok  != napi_create_string_utf8(env, path.c_str(), NAPI_AUTO_LENGTH, &result)){
+    if (napi_ok != napi_create_string_utf8(env, path.c_str(), NAPI_AUTO_LENGTH, &result)) {
         HILOG_INFO("JsDrawableDescriptor Failed");
     }
    
