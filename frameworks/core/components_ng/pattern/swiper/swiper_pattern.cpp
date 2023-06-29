@@ -1933,6 +1933,9 @@ void SwiperPattern::SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorN
     paintProperty->UpdateSelectedColor(
         swiperParameters->selectedColorVal.value_or(swiperIndicatorTheme->GetSelectedColor()));
     paintProperty->UpdateIsCustomSize(IsCustomSize_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SwiperPattern::SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicatorNode)
