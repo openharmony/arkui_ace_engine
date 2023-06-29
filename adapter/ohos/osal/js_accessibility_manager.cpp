@@ -433,6 +433,7 @@ std::string ConvertInputTypeToString(AceTextCategory type)
 
 bool FindAccessibilityFocus(const RefPtr<AccessibilityNode>& node, RefPtr<AccessibilityNode>& resultNode)
 {
+    CHECK_NULL_RETURN_NOLOG(node, false);
     if (node->GetAccessibilityFocusedState()) {
         resultNode = node;
         LOGI("FindFocus nodeId(%{public}d)", resultNode->GetNodeId());
@@ -455,6 +456,7 @@ bool FindAccessibilityFocus(const RefPtr<AccessibilityNode>& node, RefPtr<Access
 
 RefPtr<NG::FrameNode> FindAccessibilityFocus(const RefPtr<NG::UINode>& node)
 {
+    CHECK_NULL_RETURN_NOLOG(node, nullptr);
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
     if (frameNode) {
         if (frameNode->GetRenderContext()->GetAccessibilityFocus().value_or(false)) {
@@ -629,6 +631,7 @@ int32_t GetParentId(const RefPtr<NG::UINode>& uiNode)
 
 void FillEventInfo(const RefPtr<NG::FrameNode>& node, AccessibilityEventInfo& eventInfo)
 {
+    CHECK_NULL_VOID_NOLOG(node);
     eventInfo.SetComponentType(node->GetTag());
     eventInfo.SetPageId(node->GetPageId());
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
@@ -654,6 +657,7 @@ void FillEventInfo(const RefPtr<AccessibilityNode>& node, AccessibilityEventInfo
 
 inline bool IsPopupSupported(const RefPtr<NG::PipelineContext>& pipeline, int32_t nodeId)
 {
+    CHECK_NULL_RETURN_NOLOG(pipeline, false);
     auto overlayManager = pipeline->GetOverlayManager();
     if (overlayManager) {
         return overlayManager->HasPopupInfo(nodeId);
@@ -663,6 +667,7 @@ inline bool IsPopupSupported(const RefPtr<NG::PipelineContext>& pipeline, int32_
 
 void UpdateSupportAction(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo)
 {
+    CHECK_NULL_VOID_NOLOG(node);
     auto gestureEventHub = node->GetEventHub<NG::EventHub>()->GetGestureEventHub();
     if (gestureEventHub) {
         nodeInfo.SetClickable(gestureEventHub->IsAccessibilityClickable());
@@ -759,6 +764,7 @@ static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, Ac
 void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
     AccessibilityElementInfo& nodeInfo, const RefPtr<NG::PipelineContext>& ngPipeline)
 {
+    CHECK_NULL_VOID_NOLOG(node);
     NG::RectF rect;
     if (node->IsActive()) {
         rect = node->GetTransformRectRelativeToWindow();
@@ -931,8 +937,9 @@ bool RequestFocus(RefPtr<NG::FrameNode>& frameNode)
     return focusHub->RequestFocusImmediately();
 }
 
-bool LostFocus(RefPtr<NG::FrameNode>& frameNode)
+bool LostFocus(const RefPtr<NG::FrameNode>& frameNode)
 {
+    CHECK_NULL_RETURN_NOLOG(frameNode, false);
     auto focusHub = frameNode->GetFocusHub();
     CHECK_NULL_RETURN_NOLOG(focusHub, false);
     focusHub->LostFocus();

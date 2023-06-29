@@ -18,7 +18,6 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/form/form_layout_property.h"

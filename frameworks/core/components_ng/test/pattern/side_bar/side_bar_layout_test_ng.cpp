@@ -303,7 +303,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg008, TestSize.Level1)
     float parentWidth = PARENT_WIDTH;
     layoutAlgorithm->AutoMode(
         AccessibilityManager::RawPtr(layoutWrapper), parentWidth, layoutAlgorithm->minContentWidth_, 0.0);
-    EXPECT_EQ(layoutProperty->GetSideBarContainerType(), SideBarContainerType::EMBED);
+    EXPECT_EQ(layoutAlgorithm->type_, SideBarContainerType::EMBED);
 
     /**
      * @tc.steps: step3. set parentWidth < (minSidebarWidth + minContentWidth)
@@ -313,7 +313,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg008, TestSize.Level1)
     layoutAlgorithm->minContentWidth_ = 1.0f;
     layoutAlgorithm->AutoMode(
         AccessibilityManager::RawPtr(layoutWrapper), parentWidth, layoutAlgorithm->minContentWidth_, 0.0);
-    EXPECT_EQ(layoutProperty->GetSideBarContainerType(), SideBarContainerType::OVERLAY);
+    EXPECT_EQ(layoutAlgorithm->type_, SideBarContainerType::OVERLAY);
 }
 
 /**

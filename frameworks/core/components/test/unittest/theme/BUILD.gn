@@ -117,7 +117,7 @@ ohos_unittest("ThemeManagerTest") {
       "$ace_root/frameworks/base/utils/base_id.cpp",
     ]
     external_deps = [
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
       "init:libbegetutil",
     ]
   }
@@ -208,8 +208,8 @@ ohos_unittest("ThemeConstantsTest") {
 
   if (is_ohos_standard_system) {
     external_deps = [
-      "hitrace_native:hitrace_meter",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
+      "hitrace:hitrace_meter",
       "init:libbegetutil",
     ]
     deps += [ "$ace_flutter_engine_root/icu:ace_libicu_ohos" ]

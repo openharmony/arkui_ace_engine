@@ -59,18 +59,18 @@ const std::string FILLMODE_FORWARDS_STR = "FillMode.Forwards";
 const constexpr float NORMALIZED_DURATION_MAX { 1.0f };
 } // namespace
 
-class ImageAnimatorViewTestNg : public testing::Test {
+class ImageAnimatorTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
 };
 
-void ImageAnimatorViewTestNg::SetUpTestCase()
+void ImageAnimatorTestNg::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
 }
 
-void ImageAnimatorViewTestNg::TearDownTestCase()
+void ImageAnimatorTestNg::TearDownTestCase()
 {
     MockPipelineBase::TearDown();
 }
@@ -80,7 +80,7 @@ void ImageAnimatorViewTestNg::TearDownTestCase()
  * @tc.desc: Create ImageAnimator.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest001, TestSize.Level1)
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create imageAnimatorView and get frameNode.
@@ -109,7 +109,7 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest001, TestSize.Level1)
  * @tc.desc: Set ImageAnimator attributes into ImageAnimatorPattern and get them.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest002, TestSize.Level1)
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ImageAnimatorModelTestNg.
@@ -163,7 +163,7 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest002, TestSize.Level1)
  * @tc.desc: Set Image into ImageAnimator and get its attributes.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest003, TestSize.Level1)
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ImageAnimatorModelTestNg.
@@ -226,7 +226,7 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest003, TestSize.Level1)
  * @tc.desc: Set StartEvent into ImageAnimatorPattern and run Forward and Backward.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest004, TestSize.Level1)
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ImageAnimatorModelNG.
@@ -297,7 +297,7 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest004, TestSize.Level1)
  * @tc.desc: Set PauseEvent into ImageAnimatorPattern and run it.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest005, TestSize.Level1)
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ImageAnimatorModelNG.
@@ -356,7 +356,7 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest005, TestSize.Level1)
  * @tc.desc: Set CancelEvent into ImageAnimatorPattern and run it.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest006, TestSize.Level1)
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ImageAnimatorModelNG.
@@ -434,7 +434,7 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest006, TestSize.Level1)
  * @tc.desc: Set StopEvent into ImageAnimatorPattern and run it.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest007, TestSize.Level1)
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ImageAnimatorModelNG.
@@ -508,7 +508,7 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest007, TestSize.Level1)
  * @tc.desc: Set RepeatEvent into ImageAnimatorPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest008, TestSize.Level1)
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ImageAnimatorModelNG.
@@ -561,7 +561,7 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest008, TestSize.Level1)
  * @tc.desc: Set images with duration by zero into ImageAnimatorPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest009, TestSize.Level1)
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ImageAnimatorModelNG.
@@ -619,7 +619,7 @@ HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest009, TestSize.Level1)
  * @tc.desc: Add listener into animator and run it.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAnimatorViewTestNg, ImageAnimatorTest010, TestSize.Level1)
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ImageAnimatorModelTestNg.

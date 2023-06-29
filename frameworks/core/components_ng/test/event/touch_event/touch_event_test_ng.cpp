@@ -244,4 +244,52 @@ HWTEST_F(TouchEventTestNg, TouchEventActuatorHandleAndDispatchTest004, TestSize.
     const TouchEvent touchEvent3 { .pointers = POINTERS_2 };
     EXPECT_TRUE(touchEventActuator->HandleEvent(touchEvent3));
 }
+
+/**
+ * @tc.name: TouchEventDisable001
+ * @tc.desc: Create TouchEventActuator and test disable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, TouchEventDisable001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TouchEventActuator.
+     * @tc.expected: touchEventActuator is not nullptr.
+     */
+    auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
+    EXPECT_NE(touchEventActuator, nullptr);
+
+    /**
+     * @tc.steps: step2. Invoke DispatchEvent.
+     * @tc.expected: TouchTestResult size has been increased one.
+     */
+    const TouchEvent touchEvent { .tiltX = TILT_X_VALUE, .tiltY = TILT_Y_VALUE, .pointers = POINTERS };
+    EXPECT_TRUE(touchEventActuator->DispatchEvent(touchEvent));
+
+    /**
+     * @tc.steps: step3. Invoke HandleEvent when touchEvents_ and userCallback_ is empty.
+     * @tc.expected: HandleEvent will return true directly.
+     */
+    EXPECT_TRUE(touchEventActuator->HandleEvent(touchEvent));
+
+    /**
+     * @tc.steps: step4. Invoke ReplaceTouchEvent to initialize userCallback_.
+     */
+    double unknownTiltX = 0.0;
+    const TouchEventFunc callback = [&unknownTiltX](
+                                        TouchEventInfo& info) { unknownTiltX = info.GetTiltX().value_or(0.0); };
+    TouchEventFunc callback1 = callback;
+    touchEventActuator->ReplaceTouchEvent(std::move(callback1));
+    EXPECT_NE(touchEventActuator->userCallback_, nullptr);
+
+    EXPECT_TRUE(touchEventActuator->HandleEvent(touchEvent));
+    EXPECT_EQ(unknownTiltX, TILT_X_VALUE);
+
+    /**
+     * @tc.steps: step5. Invoke Clear func to clear userCallback_.
+     */
+    touchEventActuator->ClearUserCallback();
+    EXPECT_EQ(touchEventActuator->userCallback_, nullptr);
+    EXPECT_TRUE(touchEventActuator->HandleEvent(touchEvent));
+}
 } // namespace OHOS::Ace::NG

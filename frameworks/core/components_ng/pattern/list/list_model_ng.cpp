@@ -116,7 +116,7 @@ void ListModelNG::SetLaneMinLength(const Dimension& laneMinLength)
     if (laneMinLength.IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMinLength, laneMinLength);
     } else {
-        ACE_RESET_LAYOUT_PROPERTY(ListLayoutProperty, LaneMinLength);
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, LaneMinLength, PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -125,7 +125,7 @@ void ListModelNG::SetLaneMaxLength(const Dimension& laneMaxLength)
     if (laneMaxLength.IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMaxLength, laneMaxLength);
     } else {
-        ACE_RESET_LAYOUT_PROPERTY(ListLayoutProperty, LaneMaxLength);
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, LaneMaxLength, PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -142,6 +142,11 @@ void ListModelNG::SetCachedCount(int32_t cachedCount)
 void ListModelNG::SetSticky(V2::StickyStyle stickyStyle)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, StickyStyle, stickyStyle);
+}
+
+void ListModelNG::SetScrollSnapAlign(V2::ScrollSnapAlign scrollSnapAlign)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollSnapAlign, scrollSnapAlign);
 }
 
 void ListModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)

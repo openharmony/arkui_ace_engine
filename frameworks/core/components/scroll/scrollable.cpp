@@ -277,7 +277,9 @@ bool Scrollable::Idle() const
 
 bool Scrollable::IsStopped() const
 {
-    return (!springController_ || (springController_->IsStopped())) && (!controller_ || (controller_->IsStopped()));
+    return (!springController_ || (springController_->IsStopped()) ||
+               (springController_->GetStatus() == Animator::Status::IDLE)) &&
+           (!controller_ || (controller_->IsStopped()) || (controller_->GetStatus() == Animator::Status::IDLE));
 }
 
 bool Scrollable::IsSpringStopped() const
@@ -598,6 +600,13 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
                     scroll->ProcessScrollMotion(value);
                 }
             });
+        }
+
+        if (scrollSnapCallback_ &&
+            scrollSnapCallback_(motion_->GetFinalPosition() - mainPosition, correctVelocity)) {
+            HandleScrollEnd();
+            currentVelocity_ = 0.0;
+            return;
         }
 
         // change motion param when list item need to be center of screen on watch

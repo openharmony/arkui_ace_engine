@@ -68,7 +68,7 @@ private:
 
 class ACE_EXPORT UITaskScheduler final {
 public:
-    using PredictTask = std::function<void(int64_t)>;
+    using PredictTask = std::function<void(int64_t, bool)>;
     UITaskScheduler() = default;
     ~UITaskScheduler();
 
@@ -81,7 +81,7 @@ public:
     void FlushLayoutTask(bool forceUseMainThread = false);
     void FlushRenderTask(bool forceUseMainThread = false);
     void FlushTask();
-    void FlushPredictTask(int64_t deadline);
+    void FlushPredictTask(int64_t deadline, bool canUseLongPredictTask = false);
     void FlushAfterLayoutTask();
 
     void UpdateCurrentPageId(uint32_t id)

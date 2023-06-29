@@ -1078,17 +1078,17 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0015, TestSize.Level1)
      * test event.action != KeyAction::DOWN
      */
     KeyEvent keyEventOne(KeyCode::KEY_A, KeyAction::UP);
-    eventHub->onKeyEventInternal_(keyEventOne);
+    eventHub->ProcessOnKeyEventInternal(keyEventOne);
     /**
      * test event.action == KeyAction::DOWN and event.code == KeyCode::KEY_ENTER
      */
     KeyEvent keyEventTwo(KeyCode::KEY_A, KeyAction::DOWN);
-    eventHub->onKeyEventInternal_(keyEventTwo);
+    eventHub->ProcessOnKeyEventInternal(keyEventTwo);
     /**
      * test event.action == KeyAction::DOWN and event.code != KeyCode::KEY_ENTER
      */
     KeyEvent keyEventThr(KeyCode::KEY_ENTER, KeyAction::DOWN);
-    eventHub->onKeyEventInternal_(keyEventThr);
+    eventHub->ProcessOnKeyEventInternal(keyEventThr);
 }
 
 /**

@@ -55,20 +55,21 @@ constexpr uint32_t SELECT_ITSELF_TEXT_LINES = 1;
 
 } // namespace
 
-void SelectPattern::OnModifyDone()
+void SelectPattern::OnAttachToFrameNode()
 {
-    Pattern::OnModifyDone();
     RegisterOnClick();
     RegisterOnPress();
     RegisterOnHover();
+    RegisterOnKeyEvent();
+}
+
+void SelectPattern::OnModifyDone()
+{
+    Pattern::OnModifyDone();
     CreateSelectedCallback();
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto focusHub = host->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    RegisterOnKeyEvent(focusHub);
-
     auto eventHub = host->GetEventHub<SelectEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (!eventHub->IsEnabled()) {
@@ -256,8 +257,12 @@ void SelectPattern::CreateSelectedCallback()
     }
 }
 
-void SelectPattern::RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+void SelectPattern::RegisterOnKeyEvent()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
         CHECK_NULL_RETURN_NOLOG(pattern, false);

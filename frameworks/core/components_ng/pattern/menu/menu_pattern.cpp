@@ -147,6 +147,16 @@ void MenuPattern::OnModifyDone()
 void InnerMenuPattern::BeforeCreateLayoutWrapper()
 {
     RecordItemsAndGroups();
+
+    // determine menu type based on sibling menu count
+    auto count = FindSiblingMenuCount();
+    if (count > 0) {
+        SetType(MenuType::DESKTOP_MENU);
+        ApplyDesktopMenuTheme();
+    } else {
+        SetType(MenuType::MULTI_MENU);
+        ApplyMultiMenuTheme();
+    }
 }
 
 void InnerMenuPattern::OnModifyDone()
@@ -156,15 +166,6 @@ void InnerMenuPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     UpdateMenuItemChildren(host);
     SetAccessibilityAction();
-
-    auto count = FindSiblingMenuCount();
-    if (count > 0) {
-        SetType(MenuType::DESKTOP_MENU);
-        ApplyDesktopMenuTheme();
-    } else {
-        SetType(MenuType::MULTI_MENU);
-        ApplyMultiMenuTheme();
-    }
 }
 
 // close menu on touch up
@@ -583,8 +584,8 @@ void MenuPattern::UpdateMenuHotArea()
         return;
     }
     std::vector<Rect> rects;
-    for (auto child = children.begin(); child != children.end(); ++child) {
-        auto menuNode = DynamicCast<FrameNode>(*child);
+    for (const auto & child : children) {
+        auto menuNode = DynamicCast<FrameNode>(child);
         CHECK_NULL_VOID(menuNode);
         auto menuPattern = menuNode->GetPattern<MenuPattern>();
         CHECK_NULL_VOID(menuPattern);
@@ -594,7 +595,7 @@ void MenuPattern::UpdateMenuHotArea()
         auto menuContext = menuNode->GetRenderContext();
         CHECK_NULL_VOID(menuContext);
         auto menuHotArea = menuContext->GetPaintRectWithTransform();
-        rects.emplace_back(Rect(menuHotArea.GetX(), menuHotArea.GetY(), menuHotArea.Width(), menuHotArea.Height()));
+        rects.emplace_back(menuHotArea.GetX(), menuHotArea.GetY(), menuHotArea.Width(), menuHotArea.Height());
     }
     SubwindowManager::GetInstance()->SetHotAreas(rects);
 }

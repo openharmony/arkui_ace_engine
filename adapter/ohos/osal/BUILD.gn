@@ -29,8 +29,8 @@ template("ace_osal_ohos_source_set") {
     }
     if (is_ohos_standard_system) {
       external_deps = [
-        "hitrace_native:hitrace_meter",
-        "hiviewdfx_hilog_native:libhilog",
+        "hilog:libhilog",
+        "hitrace:hitrace_meter",
         "init:libbeget_proxy",
         "init:libbegetutil",
       ]
@@ -38,7 +38,7 @@ template("ace_osal_ohos_source_set") {
     } else {
       external_deps = [
         "hilog:libhilog",
-        "hitrace_native:hitrace_meter",
+        "hitrace:hitrace_meter",
         "init_lite:libbegetutil",
       ]
 
@@ -122,9 +122,9 @@ template("ace_osal_ohos_source_set") {
       "ability_runtime:abilitykit_native",
       "ability_runtime:runtime",
       "bundle_framework:appexecfwk_core",
-      "hicollie_native:libhicollie",
-      "hisysevent_native:libhisysevent",
-      "hitrace_native:libhitracechain",
+      "hicollie:libhicollie",
+      "hisysevent:libhisysevent",
+      "hitrace:libhitracechain",
     ]
     deps += [
       "$ace_root/interfaces/inner_api/drawable_descriptor:drawable_descriptor",

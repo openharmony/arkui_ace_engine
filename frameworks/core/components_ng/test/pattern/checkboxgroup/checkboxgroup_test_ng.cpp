@@ -1585,7 +1585,6 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest025, TestSize.Level1)
     RefPtr<EventHub> eventHub = AccessibilityManager::MakeRefPtr<EventHub>();
     RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(eventHub, FocusType::DISABLE, false);
     checkBoxGroupPattern->InitOnKeyEvent(focusHub);
-    auto onKeyEvent = focusHub->onKeyEventInternal_;
     auto getInnerPaintRectCallback = focusHub->getInnerFocusRectFunc_;
 
     /**
@@ -1593,11 +1592,11 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest025, TestSize.Level1)
      * @tc.expected: Callbacks works correctly.
      */
     KeyEvent keyEvent(KeyCode::KEY_FOCUS, KeyAction::CLICK);
-    EXPECT_FALSE(onKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     keyEvent.action = KeyAction::DOWN;
-    EXPECT_FALSE(onKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     keyEvent.code = KeyCode::KEY_ENTER;
-    EXPECT_TRUE(onKeyEvent(keyEvent));
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
 
     checkBoxGroupPattern->offset_ = OffsetF(COMPONENT_HEIGHT, COMPONENT_HEIGHT);
     checkBoxGroupPattern->size_ = SizeF(BORDER_RADIUS, BORDER_RADIUS);

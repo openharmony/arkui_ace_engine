@@ -57,12 +57,9 @@ ohos_shared_library("drawable_descriptor") {
     deps += [ "$ace_flutter_engine_root/skia:ace_skia_ohos" ]
   }
 
-  public_deps = [
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-  ]
-
   external_deps = [
+    "graphic_standard:2d_graphics",
+    "graphic_standard:librender_service_client",
     "multimedia_image_framework:image",
     "multimedia_image_framework:image_native",
     "napi:ace_napi",

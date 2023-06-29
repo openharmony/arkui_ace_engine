@@ -82,4 +82,9 @@ OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
 {
     return { 0, 0 };
 }
+
+bool ListPattern::OnScrollSnapCallback(double targetOffset, double velocity)
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG

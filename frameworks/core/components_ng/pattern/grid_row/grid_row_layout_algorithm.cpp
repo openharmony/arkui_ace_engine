@@ -142,8 +142,6 @@ float GridRowLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrapper, doub
         ideaSize.SetWidth(columnUnitWidth * span + (span - 1) * gutter.first);
         LayoutConstraintF parentConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
         parentConstraint.UpdateSelfMarginSizeWithCheck(ideaSize);
-        // the max size need to minus the already allocated height.
-        parentConstraint.maxSize.MinusHeight(totalHeight);
         child->Measure(parentConstraint);
 
         if (newLineOffset.newLineCount > 0) {

@@ -105,11 +105,6 @@ public:
         return MakeRefPtr<GridEventHub>();
     }
 
-    bool UsResRegion() override
-    {
-        return false;
-    }
-
     GridLayoutInfo GetGridLayoutInfo() const
     {
         return gridLayoutInfo_;
@@ -119,7 +114,7 @@ public:
     {
         gridLayoutInfo_.lineHeightMap_.clear();
         gridLayoutInfo_.gridMatrix_.clear();
-        gridLayoutInfo_.endIndex_ = -1;
+        gridLayoutInfo_.endIndex_ = gridLayoutInfo_.startIndex_ - 1;
         gridLayoutInfo_.endMainLineIndex_ = 0;
         gridLayoutInfo_.ResetPositionFlags();
     }
@@ -199,12 +194,14 @@ private:
     void HandleMouseEventWithoutKeyboard(const MouseInfo& info);
     void ClearMultiSelect();
     void ClearSelectedZone();
+    void OnMouseRelease();
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     void MultiSelectWithoutKeyboard(const RectF& selectedZone);
     void UpdateScrollBarOffset() override;
     void UpdateRectOfDraggedInItem(int32_t insertIndex);
     void SetAccessibilityAction();
     void StopAnimate();
+    float EstimateHeight();
 
     GridLayoutInfo gridLayoutInfo_;
     RefPtr<GridPositionController> positionController_;

@@ -23,6 +23,7 @@
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "base/geometry/rect.h"
 #include "core/components/root/root_element.h"
+#include "core/components_ng/base/ui_node.h"
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
@@ -96,8 +97,8 @@ void SubwindowOhos::InitContainer()
         }
         windowOption->SetWindowRect({ 0, 0, defaultDisplay->GetWidth(), defaultDisplay->GetHeight() });
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
-        window_ = OHOS::Rosen::Window::Create(
-            "ARK_APP_SUBWINDOW_" + parentWindowName + std::to_string(windowId_), windowOption);
+        window_ = OHOS::Rosen::Window::Create("ARK_APP_SUBWINDOW_" + parentWindowName + std::to_string(windowId_),
+            windowOption, parentWindow->GetContext());
         CHECK_NULL_VOID(window_);
     }
     std::string url = "";
@@ -185,30 +186,6 @@ void SubwindowOhos::ResizeWindow()
     if (ret != Rosen::WMError::WM_OK) {
         LOGE("Resize window by default display failed with errCode: %{public}d", static_cast<int32_t>(ret));
         return;
-    }
-    auto pipeline = GetChildPipelineContext();
-    CHECK_NULL_VOID(pipeline);
-    SafeAreaEdgeInserts safeArea = pipeline->GetCurrentViewSafeArea();
-
-    if (safeArea.leftRect_.IsValid() && safeArea.topRect_.IsValid()) {
-        auto retMove = window_->MoveTo(static_cast<int32_t>(window_->GetRect().posX_ + safeArea.leftRect_.Right()),
-            static_cast<int32_t>(window_->GetRect().posY_ + safeArea.topRect_.Bottom()));
-        if (retMove != Rosen::WMError::WM_OK) {
-            LOGE("Move window failed with errCode: %{public}d", static_cast<int32_t>(retMove));
-            return;
-        }
-    }
-
-    if (safeArea.leftRect_.IsValid() && safeArea.topRect_.IsValid() && safeArea.rightRect_.IsValid() &&
-        safeArea.bottomRect_.IsValid()) {
-        auto retResize = window_->Resize(window_->GetRect().width_ - static_cast<int32_t>(safeArea.leftRect_.Width()) -
-                                             static_cast<int32_t>(safeArea.rightRect_.Width()),
-            window_->GetRect().height_ - static_cast<int32_t>(safeArea.topRect_.Height()) -
-                static_cast<int32_t>(safeArea.bottomRect_.Height()));
-        if (retResize != Rosen::WMError::WM_OK) {
-            LOGE("Resize window failed with errCode: %{public}d", static_cast<int32_t>(retResize));
-            return;
-        }
     }
     LOGI("SubwindowOhos window rect is resized to x: %{public}d, y: %{public}d, width: %{public}u, height: %{public}u",
         window_->GetRect().posX_, window_->GetRect().posY_, window_->GetRect().width_, window_->GetRect().height_);
@@ -353,7 +330,7 @@ void SubwindowOhos::ShowWindow()
         LOGE("Show window failed with errCode: %{public}d", static_cast<int32_t>(ret));
         return;
     }
-    window_->RequestFocus();
+    RequestFocus();
     LOGI("Show the subwindow successfully.");
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
@@ -772,7 +749,7 @@ void SubwindowOhos::ShowToastForService(const std::string& message, int32_t dura
 
 void SubwindowOhos::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
 {
-    if (parentContainerId_ >= MIN_PA_SERVICE_ID) {
+    if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
         ShowToastForService(message, duration, bottom);
     } else {
         ShowToastForAbility(message, duration, bottom);
@@ -849,7 +826,7 @@ void SubwindowOhos::ShowDialog(const std::string& title, const std::string& mess
     const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
     const std::set<std::string>& callbacks)
 {
-    if (parentContainerId_ >= MIN_PA_SERVICE_ID) {
+    if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
         ShowDialogForService(title, message, buttons, autoCancel, std::move(callback), callbacks);
     } else {
         ShowDialogForAbility(title, message, buttons, autoCancel, std::move(callback), callbacks);
@@ -940,7 +917,7 @@ void SubwindowOhos::UpdateAceView(int32_t width, int32_t height, float density, 
 void SubwindowOhos::ShowActionMenu(
     const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
-    if (parentContainerId_ >= MIN_PA_SERVICE_ID) {
+    if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
         ShowActionMenuForService(title, button, std::move(callback));
     } else {
         ShowActionMenuForAbility(title, button, std::move(callback));
@@ -953,6 +930,20 @@ Rect SubwindowOhos::GetParentWindowRect() const
     CHECK_NULL_RETURN(parentWindow_, rect);
     auto parentWindowRect = parentWindow_->GetRect();
     return Rect(parentWindowRect.posX_, parentWindowRect.posY_, parentWindowRect.width_, parentWindowRect.height_);
+}
+
+void SubwindowOhos::RequestFocus()
+{
+    if (window_->IsFocused()) {
+        // already focused, no need to focus
+        return;
+    }
+    OHOS::Rosen::WMError ret = window_->RequestFocus();
+    if (ret != OHOS::Rosen::WMError::WM_OK) {
+        LOGW("Window request focus failed with errCode: %{public}d", static_cast<int32_t>(ret));
+        return;
+    }
+    LOGD("The window request focus successfully.");
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK

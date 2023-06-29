@@ -74,11 +74,11 @@ void TimePickerRowPattern::SetButtonIdeaSize()
         auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
         buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
+        buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(PRESS_RADIUS));
         buttonLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx()), CalcLength(height - PRESS_INTERVAL)));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        buttonConfirmRenderContext->UpdateBorderRadius({ PRESS_RADIUS, PRESS_RADIUS, PRESS_RADIUS, PRESS_RADIUS });
         buttonNode->MarkModifyDone();
         buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
@@ -158,16 +158,17 @@ void TimePickerRowPattern::CreateAmPmNode()
         amPmColumnNode->MountToParent(stackAmPmNode);
         auto layoutProperty = stackAmPmNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
         stackAmPmNode->MountToParent(host, 0);
         if (SetAmPmButtonIdeaSize() > 0) {
             auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
             buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
             buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
+            buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(PRESS_RADIUS));
             buttonLayoutProperty->UpdateUserDefinedIdealSize(
                 CalcSize(CalcLength(SetAmPmButtonIdeaSize()), CalcLength(heigth - PRESS_INTERVAL)));
             auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
             buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-            buttonConfirmRenderContext->UpdateBorderRadius({ PRESS_RADIUS, PRESS_RADIUS, PRESS_RADIUS, PRESS_RADIUS });
             buttonNode->MarkModifyDone();
             buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
@@ -312,7 +313,7 @@ void TimePickerRowPattern::FlushColumn()
         CHECK_NULL_VOID(hourColumn);
         auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
         CHECK_NULL_VOID(hourColumnPattern);
-        hourColumnPattern->SetOptions(GetOptions());
+        hourColumnPattern->SetOptions(GetOptionsCount());
         hourColumnPattern->SetShowCount(GetShowCount());
         hourColumnPattern->FlushCurrentOptions();
     } else if (amPmColumn) {
@@ -324,7 +325,7 @@ void TimePickerRowPattern::FlushColumn()
         CHECK_NULL_VOID(hourColumn);
         auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
         CHECK_NULL_VOID(hourColumnPattern);
-        hourColumnPattern->SetOptions(GetOptions());
+        hourColumnPattern->SetOptions(GetOptionsCount());
         hourColumnPattern->SetShowCount(GetShowCount());
         hourColumnPattern->FlushCurrentOptions();
     }
@@ -352,6 +353,24 @@ void TimePickerRowPattern::OnDataLinking(
     }
 }
 
+const std::string& TimePickerRowPattern::GetOptionsValue(const RefPtr<FrameNode>& frameNode, uint32_t optionIndex)
+{
+    auto allChildNode = GetAllChildNode();
+    if (frameNode == allChildNode["amPm"]) {
+        return options_[allChildNode["amPm"]][optionIndex];
+    }
+    bool isHour12 = !GetHour24();
+    auto isHourNode = frameNode == allChildNode["hour"];
+    if (options_.find(frameNode) == options_.end()) {
+        options_[frameNode] = std::unordered_map<uint32_t, std::string>();
+    }
+    if (options_[frameNode].find(optionIndex) == options_[frameNode].end()) {
+        options_[frameNode][optionIndex] =
+            isHourNode ? GetHourFormatString(optionIndex + isHour12) : GetMinuteFormatString(optionIndex);
+    }
+    return options_[frameNode][optionIndex];
+}
+
 void TimePickerRowPattern::OnColumnsBuilding()
 {
     HandleHourColumnBuilding();
@@ -361,16 +380,15 @@ void TimePickerRowPattern::OnColumnsBuilding()
     CHECK_NULL_VOID(minuteColumn);
     auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_VOID(minuteColumnPattern);
-    options_[minuteColumn].clear();
+    optionsTotalCount_[minuteColumn] = 0;
 
     for (uint32_t minute = 0; minute <= 59; ++minute) { // time's minute from 0 to 59
         if (minute == selectedTime_.GetMinute()) {
-            minuteColumnPattern->SetCurrentIndex(options_[minuteColumn].size());
+            minuteColumnPattern->SetCurrentIndex(minute);
         }
-        auto minuteFormatStringValue = GetMinuteFormatString(minute);
-        options_[minuteColumn].emplace_back(minuteFormatStringValue);
+        optionsTotalCount_[minuteColumn]++;
     }
-    minuteColumnPattern->SetOptions(GetOptions());
+    minuteColumnPattern->SetOptions(GetOptionsCount());
 }
 
 void TimePickerRowPattern::HandleHourColumnBuilding()
@@ -378,19 +396,18 @@ void TimePickerRowPattern::HandleHourColumnBuilding()
     auto allChildNode = GetAllChildNode();
     auto amPmColumn = allChildNode["amPm"];
     auto hourColumn = allChildNode["hour"];
-    options_[hourColumn].clear();
+    optionsTotalCount_[hourColumn] = 0;
     if (GetHour24()) {
         CHECK_NULL_VOID(hourColumn);
         auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
         CHECK_NULL_VOID(hourColumnPattern);
         for (uint32_t hour = 0; hour <= 23; ++hour) { // time's hour from 0 to 23.
             if (hour == selectedTime_.GetHour()) {
-                hourColumnPattern->SetCurrentIndex(options_[hourColumn].size());
+                hourColumnPattern->SetCurrentIndex(hour);
             }
-            auto hourFormatStringValue = GetHourFormatString(hour);
-            options_[hourColumn].emplace_back(hourFormatStringValue);
+            optionsTotalCount_[hourColumn]++;
         }
-        hourColumnPattern->SetOptions(GetOptions());
+        hourColumnPattern->SetOptions(GetOptionsCount());
         hourColumn->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     } else if (amPmColumn) {
         CHECK_NULL_VOID(amPmColumn);
@@ -399,25 +416,24 @@ void TimePickerRowPattern::HandleHourColumnBuilding()
         CHECK_NULL_VOID(amPmColumnPattern);
         auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
         CHECK_NULL_VOID(hourColumnPattern);
-        options_[amPmColumn].clear();
-        options_[amPmColumn].emplace_back(GetAmFormatString());
-        options_[amPmColumn].emplace_back(GetPmFormatString());
+        options_[amPmColumn][0] = GetAmFormatString();
+        options_[amPmColumn][1] = GetPmFormatString();
 
         if (IsAmHour(selectedTime_.GetHour())) {
             amPmColumnPattern->SetCurrentIndex(0); // AM's index
         } else {
             amPmColumnPattern->SetCurrentIndex(1); // PM's index
         }
+        optionsTotalCount_[amPmColumn] = CHILD_WITHOUT_AMPM_SIZE;
         auto selectedHour = GetAmPmHour(selectedTime_.GetHour());
-        for (uint32_t hour = 1; hour <= AM_PM_HOUR_12; ++hour) { // hour start from 1 to 12
+        for (uint32_t hour = 1; hour <= AM_PM_HOUR_12; ++hour) { // AM_PM hour start from 1 to 12
             if (hour == selectedHour) {
-                hourColumnPattern->SetCurrentIndex(options_[hourColumn].size());
+                hourColumnPattern->SetCurrentIndex(hour - 1);
             }
-            auto hourFormatStringValue = GetHourFormatString(hour);
-            options_[hourColumn].emplace_back(hourFormatStringValue);
+            optionsTotalCount_[hourColumn]++;
         }
-        amPmColumnPattern->SetOptions(GetOptions());
-        hourColumnPattern->SetOptions(GetOptions());
+        amPmColumnPattern->SetOptions(GetOptionsCount());
+        hourColumnPattern->SetOptions(GetOptionsCount());
     } else {
         LOGE("AM PM column is null.");
     }

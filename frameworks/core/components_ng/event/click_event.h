@@ -61,6 +61,7 @@ public:
 
     void SetUserCallback(GestureEventFunc&& callback)
     {
+        LOGD("Set usercallback");
         if (userCallback_) {
             userCallback_.Reset();
         }

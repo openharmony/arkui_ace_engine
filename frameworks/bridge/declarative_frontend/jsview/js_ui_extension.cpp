@@ -18,6 +18,8 @@
 #include <functional>
 #include <string>
 
+#include "base/log/ace_scoring_log.h"
+#include "core/common/container_scope.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 
@@ -51,6 +53,7 @@ void JSUIExtension::JSBind(BindingTarget globalObj)
     JSClass<JSUIExtension>::Declare("UIExtensionComponent");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSUIExtension>::StaticMethod("create", &JSUIExtension::Create, opt);
+    JSClass<JSUIExtension>::StaticMethod("onRelease", &JSUIExtension::OnRelease);
     JSClass<JSUIExtension>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -60,9 +63,7 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
         return;
     }
 
-    auto obj = JSRef<JSObject>::Cast(info[0]);
-    // Parse want
-    auto want = JSRef<JSObject>::Cast(obj->GetProperty("want"));
+    auto want = JSRef<JSObject>::Cast(info[0]);
     if (want->GetProperty("bundleName")->IsNull() || want->GetProperty("bundleName")->IsUndefined() ||
         want->GetProperty("abilityName")->IsNull() || want->GetProperty("abilityName")->IsUndefined()) {
         return;
@@ -71,5 +72,22 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
     std::string abilityName = want->GetProperty("abilityName")->ToString();
 
     UIExtensionModel::GetInstance()->Create(bundleName, abilityName);
+}
+
+void JSUIExtension::OnRelease(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto instanceId = ContainerScope::CurrentId();
+    auto onRelease = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId](int32_t releaseCode) {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("UIExtensionComponent.onRelease");
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(releaseCode));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    UIExtensionModel::GetInstance()->SetOnRelease(std::move(onRelease));
 }
 } // namespace OHOS::Ace::Framework

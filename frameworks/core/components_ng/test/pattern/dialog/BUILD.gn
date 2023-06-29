@@ -20,6 +20,8 @@ ace_unittest("dialog_pattern_test_ng") {
   sources = [
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/relative_container/relative_container_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/relative_container/relative_container_view.cpp",
 
     #button
     "$ace_root/frameworks/core/components_ng/pattern/button/button_layout_algorithm.cpp",
@@ -56,6 +58,8 @@ ace_unittest("dialog_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/scroll/scroll_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll/scroll_position_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll/scroll_spring_effect.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/scrollable/mock_scrollable_pattern.cpp",
 
     #divider

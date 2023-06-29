@@ -71,6 +71,7 @@ public:
     virtual void SetOnItemDragLeave(OnItemDragLeaveFunc&& onItemDragLeave) = 0;
     virtual void SetOnItemDragMove(OnItemDragMoveFunc&& onItemDragMove) = 0;
     virtual void SetOnItemDrop(OnItemDropFunc&& onItemDrop) = 0;
+    virtual void SetScrollSnapAlign(V2::ScrollSnapAlign scrollSnapAlign) {};
 
 private:
     static std::unique_ptr<ListModel> instance_;

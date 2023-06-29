@@ -160,11 +160,14 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
         if (!textRacing_) {
             auto contentSize = contentSize_->Get();
             auto contentOffset = contentOffset_->Get();
-            if (clip_ && clip_->Get()) {
+            if (clip_ && clip_->Get() &&
+                !(fontSize_.has_value() && fontSizeFloat_ &&
+                    !NearEqual(fontSize_.value().Value(), fontSizeFloat_->Get()))) {
                 RSRect clipInnerRect = RSRect(contentOffset.GetX(), contentOffset.GetY(),
                     contentSize.Width() + contentOffset.GetX(), contentSize.Height() + contentOffset.GetY());
                 canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
             }
+
             paragraph_->Paint(canvas, paintOffset_.GetX(), paintOffset_.GetY());
         } else {
             // Racing
@@ -207,26 +210,34 @@ void TextContentModifier::DrawObscuration(DrawingContext& drawingContext)
     canvas.AttachBrush(brush);
     CHECK_NULL_VOID(fontSizeFloat_);
     float fontSize = fontSizeFloat_->Get();
-    float offsetY = 0;
-    CHECK_NULL_VOID_NOLOG(paragraph_);
-    int lineCount = (int)paragraph_->GetLineCount();
     std::vector<float> textLineWidth;
-    float currentLineWidth = 0;
-    offsetY = (drawingContext.height - (lineCount * fontSize)) / (lineCount + 1);
+    float currentLineWidth = 0.0f;
+    float allLineHeight = 0.0f;
+    int32_t maxDisplayLineCount = 0;
     for (auto i = 0U; i < drawObscuredRects_.size(); i++) {
         currentLineWidth += drawObscuredRects_[i].Width();
         if (i == drawObscuredRects_.size() - 1) {
             textLineWidth.push_back(currentLineWidth);
+            maxDisplayLineCount +=
+                (allLineHeight += drawObscuredRects_[i].Height()) > contentSize_->Get().Height() ? 0 : 1;
         } else if (!NearEqual(drawObscuredRects_[i].Top(), drawObscuredRects_[i + 1].Top())) {
             textLineWidth.push_back(currentLineWidth);
+            maxDisplayLineCount +=
+                (allLineHeight += drawObscuredRects_[i].Height()) > contentSize_->Get().Height() ? 0 : 1;
             currentLineWidth = 0;
         } else {
             /** nothing to do **/
         }
     }
-    for (auto i = 0U; i < textLineWidth.size(); i++) {
-        RSRoundRect rSRoundRect(RSRect(0.0, offsetY + ((offsetY + fontSize) * i), textLineWidth[i],
-            offsetY + ((offsetY + fontSize) * i) + fontSize), radiusXY);
+    CHECK_NULL_VOID(contentSize_);
+    CHECK_NULL_VOID(contentOffset_);
+    int32_t obsucredLineCount = std::min(maxDisplayLineCount, static_cast<int32_t>(textLineWidth.size()));
+    float offsetY = (contentSize_->Get().Height() - (obsucredLineCount * fontSize)) / (obsucredLineCount + 1);
+    for (auto i = 0; i < obsucredLineCount; i++) {
+        RSRoundRect rSRoundRect(
+            RSRect(contentOffset_->Get().GetX(), contentOffset_->Get().GetY() + offsetY + ((offsetY + fontSize) * i),
+                contentOffset_->Get().GetX() + std::min(textLineWidth[i], contentSize_->Get().Width()),
+                contentOffset_->Get().GetY() + offsetY + ((offsetY + fontSize) * i) + fontSize), radiusXY);
         canvas.DrawRoundRect(rSRoundRect);
     }
 }

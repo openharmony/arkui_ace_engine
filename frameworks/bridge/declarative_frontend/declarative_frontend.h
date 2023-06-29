@@ -140,6 +140,8 @@ public:
     void OnMemoryLevel(const int32_t level) override;
     void CallRouterBack() override;
     void OnSurfaceChanged(int32_t width, int32_t height) override;
+    void OnLayoutCompleted(const std::string& componentId) override;
+    void OnDrawCompleted(const std::string& componentId) override;
 
     void DumpFrontend() const override;
     std::string GetPagePath() const override;

@@ -91,6 +91,7 @@ void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme)
         hourColumnNode->MountToParent(stackHourNode);
         auto layoutProperty = stackHourNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
         stackHourNode->MountToParent(timePickerNode);
     }
     if (!hasMinuteNode) {
@@ -100,6 +101,7 @@ void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme)
         minuteColumnNode->MountToParent(stackMinuteNode);
         auto layoutProperty = stackMinuteNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
         stackMinuteNode->MountToParent(timePickerNode);
     }
     stack->Push(timePickerNode);
@@ -129,12 +131,11 @@ void TimePickerModelNG::SetSelectedTime(const PickerTime& value)
 
 void TimePickerModelNG::SetHour24(bool isUseMilitaryTime)
 {
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, IsUseMilitaryTime, isUseMilitaryTime);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
-    timePickerRowPattern->SetHour24(isUseMilitaryTime);
-    frameNode->MarkModifyDone();
-    frameNode->MarkDirtyNode();
+    timePickerRowPattern->ClearOptionsHour();
 }
 
 void TimePickerModelNG::SetOnChange(TimeChangeEvent&& onChange)

@@ -209,7 +209,7 @@ void FocusHub::LostSelfFocus()
 
 void FocusHub::RemoveSelf()
 {
-    LOGI("Node %{public}s/%{public}d remove self.", GetFrameName().c_str(), GetFrameId());
+    LOGD("Node %{public}s/%{public}d remove self.", GetFrameName().c_str(), GetFrameId());
     auto parent = GetParentFocusHub();
     if (parent) {
         parent->RemoveChild(AceType::Claim(this));
@@ -486,8 +486,8 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
     auto retInternal = false;
     auto pipeline = PipelineContext::GetCurrentContext();
     bool isBypassInner = keyEvent.IsKey({ KeyCode::KEY_TAB }) && pipeline && pipeline->IsTabJustTriggerOnKeyEvent();
-    if (!isBypassInner && onKeyEventInternal_) {
-        retInternal = onKeyEventInternal_(keyEvent);
+    if (!isBypassInner && !onKeyEventsInternal_.empty()) {
+        retInternal = ProcessOnKeyEventInternal(keyEvent);
     }
     LOGD("OnKeyEventInteral: Node %{public}s/%{public}d consume KeyEvent(code:%{public}d, action:%{public}d) return: "
          "%{public}d",
@@ -817,7 +817,7 @@ void FocusHub::OnBlur()
 
 void FocusHub::OnFocusNode()
 {
-    LOGI("FocusHub: Node(%{public}s/%{public}d) on focus", GetFrameName().c_str(), GetFrameId());
+    LOGD("FocusHub: Node(%{public}s/%{public}d) on focus", GetFrameName().c_str(), GetFrameId());
     if (onFocusInternal_) {
         onFocusInternal_();
     }
@@ -834,7 +834,7 @@ void FocusHub::OnFocusNode()
 
 void FocusHub::OnBlurNode()
 {
-    LOGI("FocusHub: Node(%{public}s/%{public}d) on blur", GetFrameName().c_str(), GetFrameId());
+    LOGD("FocusHub: Node(%{public}s/%{public}d) on blur", GetFrameName().c_str(), GetFrameId());
     if (onBlurInternal_) {
         onBlurInternal_();
     }

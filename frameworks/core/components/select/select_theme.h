@@ -167,6 +167,12 @@ public:
             theme->optionMinHeight_ = pattern->GetAttr<Dimension>("option_min_height", theme->optionMinHeight_);
             theme->selectMenuPadding_ = pattern->GetAttr<Dimension>("select_menu_padding", theme->selectMenuPadding_);
             theme->outPadding_ = pattern->GetAttr<Dimension>("out_padding", theme->outPadding_);
+            theme->defaultPaddingStart_ =
+                pattern->GetAttr<Dimension>("default_padding_start", theme->defaultPaddingStart_);
+            theme->defaultPaddingEnd_ = pattern->GetAttr<Dimension>("default_padding_end", theme->defaultPaddingEnd_);
+            theme->defaultPaddingTop_ = pattern->GetAttr<Dimension>("default_padding_top", theme->defaultPaddingTop_);
+            theme->defaultPaddingBottomFixed_ =
+                pattern->GetAttr<Dimension>("default_padding_bottom_fixed", theme->defaultPaddingBottomFixed_);
             theme->contentSpinnerPadding_ =
                 pattern->GetAttr<Dimension>("content_spinner_padding", theme->contentSpinnerPadding_);
             theme->menuAnimationOffset_ =
@@ -253,6 +259,10 @@ public:
         theme->optionMinHeight_ = optionMinHeight_;
         theme->selectMenuPadding_ = selectMenuPadding_;
         theme->outPadding_ = outPadding_;
+        theme->defaultPaddingStart_ = defaultPaddingStart_;
+        theme->defaultPaddingEnd_ = defaultPaddingEnd_;
+        theme->defaultPaddingTop_ = defaultPaddingTop_;
+        theme->defaultPaddingBottomFixed_ = defaultPaddingBottomFixed_;
         theme->contentSpinnerPadding_ = contentSpinnerPadding_;
         theme->menuAnimationOffset_ = menuAnimationOffset_;
         theme->spinnerWidth_ = spinnerWidth_;
@@ -684,7 +694,6 @@ public:
         disabledMenuFontColor_ = value;
     }
 
-
     const Dimension& GetMenuIconPadding() const
     {
         return menuIconPadding_;
@@ -708,6 +717,26 @@ public:
     const Dimension& GetOutPadding() const
     {
         return outPadding_;
+    }
+
+    const Dimension& GetDefaultPaddingStart() const
+    {
+        return defaultPaddingStart_;
+    }
+
+    const Dimension& GetDefaultPaddingEnd() const
+    {
+        return defaultPaddingEnd_;
+    }
+
+    const Dimension& GetDefaultPaddingTop() const
+    {
+        return defaultPaddingTop_;
+    }
+
+    const Dimension& GetDefaultPaddingBottomFixed() const
+    {
+        return defaultPaddingBottomFixed_;
     }
 
     const Dimension& GetContentSpinnerPadding() const
@@ -812,6 +841,10 @@ private:
 
     Dimension selectMenuPadding_;
     Dimension outPadding_;
+    Dimension defaultPaddingStart_;
+    Dimension defaultPaddingEnd_;
+    Dimension defaultPaddingTop_;
+    Dimension defaultPaddingBottomFixed_;
     Dimension contentSpinnerPadding_;
     Dimension menuAnimationOffset_;
     Dimension spinnerWidth_;

@@ -41,6 +41,7 @@
 #include "core/common/window_animation_config.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/theme/theme_manager.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
@@ -732,35 +733,10 @@ public:
 
     Rect GetCurrentWindowRect() const;
 
-    virtual void SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback) {}
+    using SafeAreaInsets = NG::SafeAreaInsets;
+    virtual void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) {}
 
-    virtual SafeAreaEdgeInserts GetCurrentViewSafeArea() const
-    {
-        return SafeAreaEdgeInserts();
-    }
-
-    virtual void SetSystemSafeArea(const SafeAreaEdgeInserts& systemSafeArea) {}
-
-    virtual SafeAreaEdgeInserts GetSystemSafeArea() const
-    {
-        return SafeAreaEdgeInserts();
-    }
-
-    virtual void SetCutoutSafeArea(const SafeAreaEdgeInserts& cutoutSafeArea) {}
-
-    virtual SafeAreaEdgeInserts GetCutoutSafeArea() const
-    {
-        return SafeAreaEdgeInserts();
-    }
-
-    virtual SafeAreaEdgeInserts GetViewSafeArea() const
-    {
-        return SafeAreaEdgeInserts();
-    }
-
-    virtual void ResetViewSafeArea() {}
-
-    virtual void AppBarAdaptToSafeArea() {}
+    virtual void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) {}
 
     void SetPluginOffset(const Offset& offset)
     {
@@ -905,6 +881,11 @@ public:
         return nullptr;
     }
 
+    uint64_t GetLastTouchTime() const
+    {
+        return lastTouchTime_;
+    }
+
 protected:
     void TryCallNextFrameLayoutCallback()
     {
@@ -928,6 +909,10 @@ protected:
     {}
 
     void UpdateRootSizeAndScale(int32_t width, int32_t height);
+
+    void SetIsReloading(bool isReloading) {
+        isReloading_ = isReloading;
+    }
 
     std::list<configChangedCallback> configChangedCallback_;
     std::list<virtualKeyBoardCallback> virtualKeyBoardCallback_;
@@ -1004,6 +989,7 @@ protected:
     std::function<void()> nextFrameLayoutCallback_ = nullptr;
     SharePanelCallback sharePanelCallback_ = nullptr;
     std::atomic<bool> isForegroundCalled_ = false;
+    uint64_t lastTouchTime_ = 0;
 
 private:
     void DumpFrontend() const;
@@ -1022,6 +1008,7 @@ private:
     PostRTTaskCallback postRTTaskCallback_;
     std::function<void(void)> gsVsyncCallback_;
     bool enableImplicitAnimation_ = true;
+    bool isReloading_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

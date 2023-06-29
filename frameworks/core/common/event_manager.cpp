@@ -107,7 +107,7 @@ void EventManager::TouchTest(
     const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode, const TouchRestrict& touchRestrict)
 {
     ContainerScope scope(instanceId_);
-    
+
     if (refereeNG_->CheckSourceTypeChange(event.sourceType, true)) {
         refereeNG_->CleanAll();
     }
@@ -154,14 +154,8 @@ void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<
 void EventManager::HandleGlobalEventNG(const TouchEvent& touchPoint,
     const RefPtr<NG::SelectOverlayManager>& selectOverlayManager, const NG::OffsetF& rootOffset)
 {
-    if (touchPoint.type != TouchType::DOWN || touchPoint.sourceType != SourceType::MOUSE) {
-        return;
-    }
-    const NG::PointF point { touchPoint.x - rootOffset.GetX(), touchPoint.y - rootOffset.GetY() };
     CHECK_NULL_VOID_NOLOG(selectOverlayManager);
-    if (!selectOverlayManager->IsInSelectedOrSelectOverlayArea(point)) {
-        selectOverlayManager->DestroySelectOverlay();
-    }
+    selectOverlayManager->HandleGlobalEvent(touchPoint, rootOffset);
 }
 
 void EventManager::HandleOutOfRectCallback(const Point& point, std::vector<RectCallback>& rectCallbackList)
@@ -585,9 +579,28 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
 {
     LOGD("DispatchMouseEventNG: button is %{public}d, action is %{public}d.", event.button, event.action);
     if (event.action == MouseAction::PRESS || event.action == MouseAction::RELEASE ||
-        event.action == MouseAction::MOVE) {
+        event.action == MouseAction::MOVE || event.action == MouseAction::WINDOW_ENTER ||
+        event.action == MouseAction::WINDOW_LEAVE) {
+        MouseTestResult handledResults;
+        handledResults.clear();
+        if (event.button == MouseButton::LEFT_BUTTON) {
+            for (const auto& mouseTarget : pressMouseTestResults_) {
+                if (mouseTarget) {
+                    handledResults.emplace_back(mouseTarget);
+                    if (mouseTarget->HandleMouseEvent(event)) {
+                        break;
+                    }
+                }
+            }
+            if (event.action == MouseAction::PRESS) {
+                pressMouseTestResults_ = currMouseTestResults_;
+            } else if (event.action == MouseAction::RELEASE) {
+                pressMouseTestResults_.clear();
+            }
+        }
         for (const auto& mouseTarget : currMouseTestResults_) {
-            if (mouseTarget) {
+            if (mouseTarget &&
+                std::find(handledResults.begin(), handledResults.end(), mouseTarget) == handledResults.end()) {
                 if (mouseTarget->HandleMouseEvent(event)) {
                     return true;
                 }
@@ -645,8 +658,8 @@ bool EventManager::DispatchMouseHoverEventNG(const MouseEvent& event)
         if (lastHoverEndNode != currHoverTestResults_.end()) {
             lastHoverEndNode++;
         }
-        if (std::find(currHoverTestResults_.begin(), currHoverTestResults_.end(), hoverResult)
-                == currHoverTestResults_.end()) {
+        if (std::find(currHoverTestResults_.begin(), currHoverTestResults_.end(), hoverResult) ==
+            currHoverTestResults_.end()) {
             hoverResult->HandleHoverEvent(false, event);
         }
         if ((iterCountLast >= lastHoverDispatchLength_) && (lastHoverDispatchLength_ != 0)) {

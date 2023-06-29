@@ -167,6 +167,10 @@ void JSButton::HandleDifferentRadius(const JSRef<JSVal>& args)
         if (ParseJsDimensionVp(object->GetProperty("bottomRight"), bottomRight)) {
             radiusBottomRight = bottomRight;
         }
+        if (!radiusTopLeft.has_value() && !radiusTopRight.has_value() && !radiusBottomLeft.has_value() &&
+            !radiusBottomRight.has_value()) {
+            return;
+        }
         ButtonModel::GetInstance()->SetBorderRadius(radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
     }
 }
@@ -243,6 +247,7 @@ void JSButton::SetLableStyle(const JSCallbackInfo& info)
     ButtonParameters buttonParameters;
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> overflowValue = obj->GetProperty("overflow");
+    buttonParameters.textOverflow = TextOverflow::ELLIPSIS;
     if (!overflowValue->IsNull() && overflowValue->IsNumber()) {
         auto overflow = overflowValue->ToNumber<int32_t>();
         if (overflow >= 0 && overflow < static_cast<int32_t>(TEXT_OVERFLOWS.size()) &&

@@ -163,7 +163,11 @@ void TextModelNG::SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value)
 
 void TextModelNG::SetOnClick(std::function<void(const BaseEventInfo* info)>&& click)
 {
-    LOGE("no support OnClick");
+    auto clickFunc = [func = std::move(click)](GestureEvent& info) { func(&info); };
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    textPattern->SetOnClickEvent(std::move(clickFunc));
 }
 
 void TextModelNG::SetRemoteMessage(std::function<void()>&& event)

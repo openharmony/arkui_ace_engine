@@ -21,6 +21,7 @@
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
@@ -49,6 +50,7 @@
 #include "core/components_ng/pattern/navrouter/navrouter_pattern.h"
 #include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
 #include "core/components_ng/pattern/stack/stack_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -1166,6 +1168,10 @@ HWTEST_F(NavigationTestNg, NavigationModelNG001, TestSize.Level1)
  */
 HWTEST_F(NavigationTestNg, NavigationModelNG002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create title, navBarNode, navigation.
+     * @tc.expected: check whether the properties is correct.
+     */
     auto title = CustomNode::CreateCustomNode(11, "customNode");
     auto navBarNode =
         NavBarNode::GetOrCreateNavBarNode("navBarNode", 22, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
@@ -1173,9 +1179,78 @@ HWTEST_F(NavigationTestNg, NavigationModelNG002, TestSize.Level1)
         V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     navigation->navBarNode_ = navBarNode;
     navBarNode->title_ = title;
-
+    /**
+     * @tc.steps: step1. create model, change properties, then call model.SetTitle().
+     * @tc.expected: check whether the properties is correct.
+     */
     NavigationModelNG model;
     model.SetTitle("title");
     ASSERT_EQ(navBarNode->propTitleNodeOperation_.value(), ChildNodeOperation::REPLACE);
+    auto textTitle = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 36, AceType::MakeRefPtr<TextPattern>());
+    navBarNode->title_ = textTitle;
+    textTitle->GetLayoutProperty<TextLayoutProperty>()->propContent_ = "title";
+    model.SetTitle("title");
+    ASSERT_EQ(navBarNode->propTitleNodeOperation_.value(), ChildNodeOperation::NONE);
+    navBarNode->title_ = nullptr;
+    auto elementRegister = ElementRegister::GetInstance();
+    elementRegister->nextUniqueElementId_ = 36;
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    navBarLayoutProperty->propTitleMode_ = NavigationTitleMode::MINI;
+    model.SetTitle("title");
+    ASSERT_EQ(navBarNode->propTitleNodeOperation_.value(), ChildNodeOperation::ADD);
+}
+
+/**
+ * @tc.name: NavigationModelNG003
+ * @tc.desc: Test NavigationPatternTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG003, TestSize.Level1)
+{
+    auto customNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 44, AceType::MakeRefPtr<TextPattern>());
+    auto title = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 33, AceType::MakeRefPtr<TextPattern>());
+    auto navBarNode =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 22, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+
+    navigation->navBarNode_ = navBarNode;
+    NavigationModelNG model;
+    navBarNode->title_ = nullptr;
+    model.SetCustomTitle(customNode);
+    ASSERT_EQ(navBarNode->propTitleNodeOperation_.value(), ChildNodeOperation::ADD);
+    navBarNode->title_ = title;
+    model.SetCustomTitle(customNode);
+    ASSERT_EQ(navBarNode->propTitleNodeOperation_.value(), ChildNodeOperation::REPLACE);
+
+    model.SetCustomTitle(customNode);
+    ASSERT_EQ(navBarNode->propTitleNodeOperation_.value(), ChildNodeOperation::NONE);
+}
+
+/**
+ * @tc.name: NavigationModelNG004
+ * @tc.desc: Test NavigationPatternTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG004, TestSize.Level1)
+{
+    auto customNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 44, AceType::MakeRefPtr<TextPattern>());
+    auto title = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 33, AceType::MakeRefPtr<TextPattern>());
+    auto navBarNode =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 22, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    navigation->navBarNode_ = navBarNode;
+    NavigationModelNG model;
+
+    navigation->eventHub_->enabled_ = false;
+    navBarLayoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
+    model.SetTitleMode(NavigationTitleMode::MINI);
+    navBarLayoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
+    model.SetTitleMode(NavigationTitleMode::MINI);
+    navBarLayoutProperty->propTitleMode_ = NavigationTitleMode::MINI;
+    model.SetTitleMode(NavigationTitleMode::FREE);
+    ASSERT_EQ(navBarNode->propBackButtonNodeOperation_.value(), ChildNodeOperation::REMOVE);
 }
 } // namespace OHOS::Ace::NG

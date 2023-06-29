@@ -21,9 +21,15 @@
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 
 extern const char _binary_arkui_qrcode_js_start[];
-extern const char _binary_arkui_qrcode_js_end[];
 extern const char _binary_arkui_qrcode_abc_start[];
+#if !defined(IOS_PLATFORM)
+extern const char _binary_arkui_qrcode_js_end[];
 extern const char _binary_arkui_qrcode_abc_end[];
+#else
+extern const char* _binary_arkui_qrcode_js_end;
+extern const char* _binary_arkui_qrcode_abc_end;
+#endif
+
 namespace OHOS::Ace {
 namespace {
 static constexpr const size_t MAX_ARG_NUM = 10;

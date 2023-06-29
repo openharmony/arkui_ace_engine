@@ -72,7 +72,7 @@ void SvgGraphic::UpdateGradient(const Size& viewPort)
     }
 }
 
-bool SvgGraphic::UpdateFillStyle(bool antiAlias)
+bool SvgGraphic::UpdateFillStyle(const std::optional<Color>& color, bool antiAlias)
 {
     if (fillState_.GetColor() == Color::TRANSPARENT && !fillState_.GetGradient()) {
         return false;
@@ -83,7 +83,8 @@ bool SvgGraphic::UpdateFillStyle(bool antiAlias)
     if (fillState_.GetGradient()) {
         SetGradientStyle(curOpacity);
     } else {
-        fillPaint_.setColor(fillState_.GetColor().BlendOpacity(curOpacity).GetValue());
+        auto fillColor = (color) ? *color : fillState_.GetColor();
+        fillPaint_.setColor(fillColor.BlendOpacity(curOpacity).GetValue());
     }
     return true;
 }

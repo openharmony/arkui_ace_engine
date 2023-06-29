@@ -57,10 +57,7 @@ void StepperPattern::OnModifyDone()
     auto swiperNode =
         DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId())));
     CHECK_NULL_VOID(swiperNode);
-    if (isFirstCreate_) {
-        index_ = swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->GetIndex().value_or(0);
-        isFirstCreate_ = false;
-    }
+    index_ = swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->GetIndex().value_or(0);
 
     auto swiperEventHub = swiperNode->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
@@ -84,6 +81,7 @@ void StepperPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    host->GetRenderContext()->UpdateClipEdge(true);
 }
 
 void StepperPattern::InitSwiperChangeEvent(const RefPtr<SwiperEventHub>& swiperEventHub)
@@ -91,6 +89,7 @@ void StepperPattern::InitSwiperChangeEvent(const RefPtr<SwiperEventHub>& swiperE
     ChangeEvent changeEvent = [weak = WeakClaim(this)](int32_t index) {
         auto stepperPattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(stepperPattern->TotalCount() > -1);
+        stepperPattern->UpdateIndexWithoutMeasure(index);
         stepperPattern->UpdateOrCreateLeftButtonNode(index);
         stepperPattern->UpdateOrCreateRightButtonNode(index);
         stepperPattern->InitButtonClickEvent();
@@ -101,6 +100,22 @@ void StepperPattern::InitSwiperChangeEvent(const RefPtr<SwiperEventHub>& swiperE
         swiperChangeEvent_ = std::make_shared<ChangeEvent>(std::move(changeEvent));
         swiperEventHub->AddOnChangeEvent(swiperChangeEvent_);
     }
+}
+
+void StepperPattern::UpdateIndexWithoutMeasure(int32_t index)
+{
+    auto hostNode = DynamicCast<StepperNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto stepperLayoutProperty = hostNode->GetLayoutProperty<StepperLayoutProperty>();
+    CHECK_NULL_VOID(stepperLayoutProperty);
+    stepperLayoutProperty->UpdateIndexWithoutMeasure(index);
+
+    auto swiperNode =
+        DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId())));
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    swiperLayoutProperty->UpdateIndexWithoutMeasure(index);
 }
 
 void StepperPattern::UpdateOrCreateLeftButtonNode(int32_t index)
@@ -134,7 +149,7 @@ void StepperPattern::CreateLeftButtonNode()
     buttonNode->GetRenderContext()->UpdateBackgroundColor(stepperTheme->GetMouseHoverColor().ChangeOpacity(0));
     buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
     auto buttonRadius = stepperTheme->GetRadius();
-    buttonNode->GetRenderContext()->UpdateBorderRadius({ buttonRadius, buttonRadius, buttonRadius, buttonRadius });
+    buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateBorderRadius(BorderRadiusProperty(buttonRadius));
     buttonNode->MountToParent(hostNode);
     buttonNode->MarkModifyDone();
     InitButtonOnHoverEvent(buttonNode, true);
@@ -263,7 +278,7 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     buttonNode->GetRenderContext()->UpdateBackgroundColor(buttonBackgroundColor);
     buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
     auto buttonRadius = stepperTheme->GetRadius();
-    buttonNode->GetRenderContext()->UpdateBorderRadius({ buttonRadius, buttonRadius, buttonRadius, buttonRadius });
+    buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateBorderRadius(BorderRadiusProperty(buttonRadius));
     buttonNode->MountToParent(hostNode);
     buttonNode->MarkModifyDone();
     InitButtonOnHoverEvent(buttonNode, false);
@@ -340,7 +355,7 @@ void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, const std::st
     buttonNode->GetRenderContext()->UpdateBackgroundColor(buttonBackgroundColor);
     buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
     auto buttonRadius = stepperTheme->GetRadius();
-    buttonNode->GetRenderContext()->UpdateBorderRadius({ buttonRadius, buttonRadius, buttonRadius, buttonRadius });
+    buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateBorderRadius(BorderRadiusProperty(buttonRadius));
     buttonNode->MountToParent(hostNode);
     buttonNode->MarkModifyDone();
     InitButtonOnHoverEvent(buttonNode, false);

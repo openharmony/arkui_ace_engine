@@ -32,7 +32,9 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
 
   constructor(subscriber: IPropertySubscriber, viewName: PropertyInfo) {
     super(subscriber, viewName);
-    this.subscriberRefs_ = new Set<IPropertySubscriber>();
+    Object.defineProperty(this, 'owningView_', {writable: true, enumerable: false});
+    Object.defineProperty(this, 'subscriberRefs_',
+      {writable: true, enumerable: false, value: new Set<IPropertySubscriber>()});
     if(subscriber) {
       if (subscriber instanceof ViewPU) {
         this.owningView_ = subscriber;
