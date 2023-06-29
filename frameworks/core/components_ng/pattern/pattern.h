@@ -367,6 +367,7 @@ public:
         return -1;
     }
 
+    virtual void OnSetDepth(const int32_t depth) {}
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

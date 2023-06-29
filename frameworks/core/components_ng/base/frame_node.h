@@ -426,6 +426,7 @@ public:
 
     std::optional<RectF> GetViewPort() const;
 
+    void SetDepth(int32_t depth);
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;

@@ -1882,4 +1882,12 @@ bool FrameNode::IsSecurityComponent()
     return GetTag() == V2::SEC_LOCATION_BUTTON_ETS_TAG || GetTag() == V2::SEC_PASTE_BUTTON_ETS_TAG ||
            GetTag() == V2::SEC_SAVE_BUTTON_ETS_TAG;
 }
+
+void FrameNode::SetDepth(int32_t depth)
+{
+    UINode::SetDepth(depth);
+    if (pattern_) {
+        pattern_->OnSetDepth(depth);
+    }
+}
 } // namespace OHOS::Ace::NG
