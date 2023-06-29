@@ -1917,6 +1917,29 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow010, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextPickerDialogViewShow011
+ * @tc.desc: Test TextPickerDialogView Show(rangeVector is empty).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow011, TestSize.Level1)
+{
+    TextPickerDialogView::dialogNode_ = nullptr;
+
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    TextPickerSettingData settingData;
+    settingData.rangeVector = {};
+    settingData.selected = 0;
+
+    DialogProperties dialogProperties;
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(0);
+    std::map<std::string, NG::DialogTextEvent> dialogEvent;
+
+    auto frameNode = TextPickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    EXPECT_EQ(frameNode, nullptr);
+}
+
+/**
  * @tc.name: TextPickerPatternOnAttachToFrameNode001
  * @tc.desc: Test TextPickerPattern OnAttachToFrameNode.
  * @tc.type: FUNC
