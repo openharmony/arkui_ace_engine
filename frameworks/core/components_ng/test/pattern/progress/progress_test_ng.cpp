@@ -1797,6 +1797,7 @@ HWTEST_F(ProgressTestNg, ProgressPaintMethod003, TestSize.Level1)
     ASSERT_NE(geometryNode, nullptr);
     auto progressPaintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
     ASSERT_NE(progressPaintProperty, nullptr);
+    progressPaintProperty->UpdateItalicFontStyle(Ace::FontStyle::ITALIC);
     progressPaintProperty->UpdateMaxValue(PROGRESS_MODIFIER_MAX_VALUE);
     progressPaintProperty->UpdateValue(PROGRESS_MODIFIER_VALUE);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, progressPaintProperty);
@@ -1816,6 +1817,7 @@ HWTEST_F(ProgressTestNg, ProgressPaintMethod003, TestSize.Level1)
     ASSERT_NE(getModifier, nullptr);
     auto getProgressModifier = AceType::DynamicCast<ProgressModifier>(getModifier);
     ASSERT_NE(getProgressModifier, nullptr);
+    EXPECT_TRUE(getProgressModifier->isItalic_->Get());
     EXPECT_EQ(getProgressModifier->maxValue_->Get(), PROGRESS_MODIFIER_MAX_VALUE);
     EXPECT_EQ(getProgressModifier->value_->Get(), PROGRESS_MODIFIER_VALUE);
 
@@ -1830,6 +1832,7 @@ HWTEST_F(ProgressTestNg, ProgressPaintMethod003, TestSize.Level1)
     gradient.AddColor(gradientColorStart);
 
     progressPaintProperty->UpdateGradientColor(gradient);
+    progressPaintProperty->UpdateItalicFontStyle(Ace::FontStyle::NORMAL);
     progressPaintProperty->UpdateMaxValue(PROGRESS_MODIFIER_MAX_VALUE);
     progressPaintProperty->UpdateValue(PROGRESS_MODIFIER_VALUE);
     progressPaintMethod.progressType_ = PROGRESS_TYPE_RING;
@@ -1838,6 +1841,7 @@ HWTEST_F(ProgressTestNg, ProgressPaintMethod003, TestSize.Level1)
     ASSERT_NE(getModifier, nullptr);
     getProgressModifier = AceType::DynamicCast<ProgressModifier>(getModifier);
     ASSERT_NE(getProgressModifier, nullptr);
+    EXPECT_FALSE(getProgressModifier->isItalic_->Get());
     EXPECT_EQ(getProgressModifier->maxValue_->Get(), PROGRESS_MODIFIER_MAX_VALUE);
     EXPECT_EQ(getProgressModifier->value_->Get(), PROGRESS_MODIFIER_VALUE);
     delete paintWrapper;

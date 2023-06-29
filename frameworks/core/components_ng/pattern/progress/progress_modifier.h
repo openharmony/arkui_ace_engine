@@ -63,6 +63,7 @@ public:
     void SetVisible(bool isVisible);
     void SetRingSweepEffect(bool value);
     void SetLinearSweepEffect(bool value);
+    void SetIsItalic(bool isItalic);
 
 private:
     void ContentDrawWithFunction(DrawingContext& context);
@@ -128,6 +129,7 @@ private:
     RefPtr<PropertyBool> linearSweepEffect_;
     RefPtr<PropertyBool> paintShadow_;
     RefPtr<PropertyInt> progressStatus_;
+    RefPtr<PropertyBool> isItalic_;
 
     bool isVisible_ = true;
     float valueBackup_ = 0.0f;
