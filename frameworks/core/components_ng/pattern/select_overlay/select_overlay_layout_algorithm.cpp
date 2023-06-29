@@ -129,11 +129,19 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     }
 
     auto overlayWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
+    auto frameNode = info_->callerFrameNode.Upgrade();
+    CHECK_NULL_RETURN(frameNode, OffsetF());
+    auto viewPortOption = frameNode->GetViewPort();
+    RectF viewPort = layoutWrapper->GetGeometryNode()->GetFrameRect() - offset;
+    if (viewPortOption.has_value()) {
+        viewPort = viewPortOption.value();
+    }
+    LOGD("select_overlay viewPort Rect: %{public}s", viewPort.ToString().c_str());
 
     // Adjust position of overlay.
-    if (LessOrEqual(menuPosition.GetX(), 0.0)) {
+    if (LessOrEqual(menuPosition.GetX(), viewPort.GetX())) {
         menuPosition.SetX(theme->GetDefaultMenuPositionX());
-    } else if (GreatOrEqual(menuPosition.GetX() + menuWidth, overlayWidth)) {
+    } else if (GreatOrEqual(menuPosition.GetX() + menuWidth, viewPort.GetX() + viewPort.Width())) {
         menuPosition.SetX(overlayWidth - menuWidth - theme->GetDefaultMenuPositionX());
     }
     if (LessNotEqual(menuPosition.GetY(), menuHeight)) {
@@ -144,6 +152,18 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
                 static_cast<float>(singleHandle.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle));
         }
     }
+    if (LessNotEqual(menuPosition.GetY(), viewPort.GetY() - menuSpacingBetweenText - menuHeight) ||
+        LessNotEqual(menuPosition.GetY(), menuSpacingBetweenText)) {
+        auto menuOffsetY = viewPort.GetY() - menuSpacingBetweenText - menuHeight;
+        if (menuOffsetY > menuSpacingBetweenText) {
+            menuPosition.SetY(menuOffsetY);
+        } else {
+            menuPosition.SetY(menuSpacingBetweenText);
+        }
+    } else if (GreatOrEqual(menuPosition.GetY(), viewPort.GetY() + viewPort.Height() + menuSpacingBetweenText)) {
+        menuPosition.SetY(viewPort.GetY() + viewPort.Height() + menuSpacingBetweenText);
+    }
+    LOGD("select_overlay menuPosition: %{public}s", menuPosition.ToString().c_str());
     defaultMenuEndOffset_ = menuPosition + OffsetF(menuWidth, 0.0f);
     return menuPosition;
 }
