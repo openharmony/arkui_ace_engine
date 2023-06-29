@@ -570,7 +570,6 @@ void BubblePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
 
 void BubblePattern::OnWindowHide()
 {
-    LOGI("FENGJT OnWindowHide");
     auto pipelineNg = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineNg);
     auto overlayManager = pipelineNg->GetOverlayManager();
