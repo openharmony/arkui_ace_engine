@@ -85,6 +85,11 @@ public:
         type_ = type;
     }
 
+    void SetControlButtonClick(bool value)
+    {
+        isControlButtonClick_ = value;
+    }
+
     Dimension GetAdjustMaxSideBarWidth() const
     {
         return adjustMaxSideBarWidth_;
@@ -126,6 +131,7 @@ private:
     bool needInitRealSideBarWidth_ = true;
     OffsetF sideBarOffset_;
     SideBarContainerType type_ = SideBarContainerType::EMBED;
+    bool isControlButtonClick_ = false;
 
     Dimension adjustMaxSideBarWidth_;
     Dimension adjustMinSideBarWidth_;

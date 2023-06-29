@@ -238,6 +238,7 @@ void SideBarContainerPattern::InitControlButtonTouchEvent(const RefPtr<GestureEv
     auto clickTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->SetControlButtonClick(true);
         pattern->DoAnimation();
     };
     controlButtonClickEvent_ = MakeRefPtr<ClickEvent>(std::move(clickTask));
@@ -485,6 +486,10 @@ bool SideBarContainerPattern::OnDirtyLayoutWrapperSwap(
 
     if (needInitRealSideBarWidth_) {
         needInitRealSideBarWidth_ = false;
+    }
+
+    if (isControlButtonClick_) {
+        isControlButtonClick_ = false;
     }
 
     adjustMaxSideBarWidth_ = layoutAlgorithm->GetAdjustMaxSideBarWidth();
