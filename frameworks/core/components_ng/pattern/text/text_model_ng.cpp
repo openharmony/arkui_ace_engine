@@ -167,7 +167,17 @@ void TextModelNG::SetOnClick(std::function<void(const BaseEventInfo* info)>&& cl
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
     textPattern->SetOnClickEvent(std::move(clickFunc));
+}
+
+void TextModelNG::ClearOnClick()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetOnClickEvent(nullptr);
 }
 
 void TextModelNG::SetRemoteMessage(std::function<void()>&& event)

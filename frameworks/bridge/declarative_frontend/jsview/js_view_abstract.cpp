@@ -4134,6 +4134,11 @@ void JSViewAbstract::JsOnDrop(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
 {
+    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnAreaChange callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnAreaChange();
+        return;
+    }
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
     if (!CheckJSCallbackInfo("JsOnAreaChange", info, checkList)) {
         return;
@@ -4691,6 +4696,11 @@ void JSViewAbstract::JsOnFocusMove(const JSCallbackInfo& args)
 
 void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
 {
+    if (args[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnKeyEvent callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnKeyEvent();
+        return;
+    }
     if (!args[0]->IsFunction()) {
         LOGE("OnKeyEvent args need a function.");
         return;
@@ -4706,6 +4716,11 @@ void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
 
 void JSViewAbstract::JsOnFocus(const JSCallbackInfo& args)
 {
+    if (args[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnFocus callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnFocus();
+        return;
+    }
     if (!args[0]->IsFunction()) {
         LOGE("OnFocus args need a function.");
         return;
@@ -4722,6 +4737,11 @@ void JSViewAbstract::JsOnFocus(const JSCallbackInfo& args)
 
 void JSViewAbstract::JsOnBlur(const JSCallbackInfo& args)
 {
+    if (args[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnBlur callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnBlur();
+        return;
+    }
     if (!args[0]->IsFunction()) {
         LOGE("OnBlur args need a function.");
         return;
@@ -5791,6 +5811,11 @@ void JSViewAbstract::JsHoverEffect(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOnMouse(const JSCallbackInfo& info)
 {
+    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnMouse callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnMouse();
+        return;
+    }
     if (!info[0]->IsFunction()) {
         LOGE("the param is not a function");
         return;
@@ -5807,6 +5832,11 @@ void JSViewAbstract::JsOnMouse(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOnHover(const JSCallbackInfo& info)
 {
+    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnHover callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnHover();
+        return;
+    }
     if (!info[0]->IsFunction()) {
         LOGE("the param is not a function");
         return;
@@ -5824,6 +5854,11 @@ void JSViewAbstract::JsOnHover(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
 {
+    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnClick callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnClick();
+        return;
+    }
     if (!info[0]->IsFunction()) {
         LOGW("the info is not click function");
         return;
