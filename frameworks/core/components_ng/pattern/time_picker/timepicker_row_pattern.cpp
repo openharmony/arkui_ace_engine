@@ -288,6 +288,26 @@ void TimePickerRowPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool
     }
 }
 
+void TimePickerRowPattern::OnLanguageConfigurationUpdate()
+{
+    auto buttonConfirmNode = weakButtonConfirm_.Upgrade();
+    CHECK_NULL_VOID(buttonConfirmNode);
+    auto confirmNode = buttonConfirmNode->GetFirstChild();
+    auto confirmNodeLayout = AceType::DynamicCast<FrameNode>(confirmNode)->GetLayoutProperty<TextLayoutProperty>();
+    confirmNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+
+    auto buttonCancelNode = weakButtonCancel_.Upgrade();
+    CHECK_NULL_VOID(buttonCancelNode);
+    auto cancelNode = buttonCancelNode->GetFirstChild();
+    auto cancelNodeLayout = AceType::DynamicCast<FrameNode>(cancelNode)->GetLayoutProperty<TextLayoutProperty>();
+    cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+}
+
+bool TimePickerRowPattern::NeedCallChildrenUpdate(const OnConfigurationChange& configurationChange)
+{
+    return false;
+}
+
 void TimePickerRowPattern::SetChangeCallback(ColumnChangeCallback&& value)
 {
     auto host = GetHost();

@@ -41,13 +41,16 @@ public:
     static void SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
     static void SetDialogSwitchEvent(std::function<bool()> switchEvent);
     static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& frameNode,
+        const RefPtr<FrameNode>& datePickerNode,
         std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static RefPtr<FrameNode> CreateTitleButtonNode(const RefPtr<FrameNode>& dateNode);
     static void CreateTitleIconNode(const RefPtr<FrameNode>& titleNode);
     static RefPtr<FrameNode> CreateDividerNode(const RefPtr<FrameNode>& dateNode);
-    static RefPtr<FrameNode> CreateConfirmNode(const RefPtr<FrameNode>& dateNode, DialogEvent& acceptEvent);
-    static RefPtr<FrameNode> CreateCancelNode(NG::DialogGestureEvent& cancelEvent);
+    static RefPtr<FrameNode> CreateConfirmNode(const RefPtr<FrameNode>& dateNode,
+        const RefPtr<FrameNode>& datePickerNode, DialogEvent& acceptEvent);
+    static RefPtr<FrameNode> CreateCancelNode(NG::DialogGestureEvent& cancelEvent,
+        const RefPtr<FrameNode>& datePickerNode);
     static RefPtr<FrameNode> CreateDateNode(int32_t dateNodeId, std::map<std::string, PickerDate> datePickerProperty,
         const PickerTextProperties& properties, bool isLunar, bool hasTime);
     static RefPtr<FrameNode> CreateColumnNode(int32_t nodeId, uint32_t showCount, bool isDate = true);

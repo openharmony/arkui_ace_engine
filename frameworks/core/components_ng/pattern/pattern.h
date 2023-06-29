@@ -361,6 +361,13 @@ public:
     {
         return -1;
     }
+    
+    virtual void OnLanguageConfigurationUpdate() {}
+    virtual void OnColorConfigurationUpdate() {}
+    virtual bool NeedCallChildrenUpdate(const OnConfigurationChange& configurationChange)
+    {
+        return true;
+    }
 
 protected:
     virtual void OnAttachToFrameNode() {}

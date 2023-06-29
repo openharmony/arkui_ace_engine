@@ -70,6 +70,8 @@ public:
     void AttachToMainTree(bool recursive = false);
     void DetachFromMainTree(bool recursive = false);
 
+    virtual void UpdateConfigurationUpdate(const OnConfigurationChange& configurationChange) {}
+
     // process offscreen process.
     void ProcessOffscreenTask(bool recursive = false);
 

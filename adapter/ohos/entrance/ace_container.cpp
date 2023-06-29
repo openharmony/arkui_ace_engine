@@ -1393,11 +1393,13 @@ void AceContainer::UpdateConfiguration(const std::string& colorMode, const std::
         LOGW("AceContainer::OnConfigurationUpdated param is empty");
         return;
     }
+    OnConfigurationChange configurationChange;
     CHECK_NULL_VOID(pipelineContext_);
     auto themeManager = pipelineContext_->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto resConfig = GetResourceConfiguration();
     if (!colorMode.empty()) {
+        configurationChange.colorModeUpdate = true;
         if (colorMode == "dark") {
             SystemProperties::SetColorMode(ColorMode::DARK);
             SetColorScheme(ColorScheme::SCHEME_DARK);
@@ -1419,6 +1421,7 @@ void AceContainer::UpdateConfiguration(const std::string& colorMode, const std::
         std::string region;
         Localization::ParseLocaleTag(languageTag, language, script, region, false);
         if (!language.empty() || !script.empty() || !region.empty()) {
+            configurationChange.languageUpdate = true;
             AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
         }
     }
@@ -1429,11 +1432,20 @@ void AceContainer::UpdateConfiguration(const std::string& colorMode, const std::
     CHECK_NULL_VOID(front);
     front->OnConfigurationUpdated(configuration);
     OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
-    NotifyConfigurationChange(!deviceAccess.empty());
+    NotifyConfigurationChange(!deviceAccess.empty(), configurationChange);
 }
 
-void AceContainer::NotifyConfigurationChange(bool needReloadTransition)
+void AceContainer::NotifyConfigurationChange(bool needReloadTransition, const OnConfigurationChange&
+    configurationChange)
 {
+    auto weak = WeakClaim(this);
+    auto container = weak.Upgrade();
+    CHECK_NULL_VOID(container);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    RefPtr<NG::FrameNode> rootNode = context->GetRootElement();
+    rootNode->UpdateConfigurationUpdate(configurationChange);
+
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
