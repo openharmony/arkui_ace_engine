@@ -30,16 +30,14 @@
 
 namespace {
 constexpr int32_t IDLE_TASK_DELAY_MILLISECOND = 51;
+#ifdef PREVIEW
 constexpr float ONE_SECOND_IN_NANO = 1000000000.0f;
 
 float GetDisplayRefreshRate()
 {
-#ifdef PREVIEW
     return 30.0f;
-#else
-    return 60.0f;
-#endif
 }
+#endif
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -47,7 +45,11 @@ namespace OHOS::Ace::NG {
 RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<TaskExecutor> taskExecutor, int32_t id)
     : rsWindow_(window), taskExecutor_(taskExecutor), id_(id)
 {
+#ifdef PREVIEW
     int64_t refreshPeriod = static_cast<int64_t>(ONE_SECOND_IN_NANO / GetDisplayRefreshRate());
+#else
+    int64_t refreshPeriod = window->GetVsyncPeriod();
+#endif
     vsyncCallback_ = std::make_shared<OHOS::Rosen::VsyncCallback>();
     vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_, refreshPeriod](int64_t timeStampNanos) {
         auto taskExecutor = weakTask.Upgrade();
