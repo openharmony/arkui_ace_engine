@@ -140,7 +140,6 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
 bool LayeredDrawableDescriptor::GetDefaultMask()
 {
     const std::string name = "ohos_icon_mask";
-    
     size_t len = 0;
     std::unique_ptr<uint8_t[]> data;
     resourceMgr_->GetMediaDataByName(name.c_str(), len, data);

@@ -207,12 +207,10 @@ napi_value JsDrawableDescriptor::GetMask(napi_env env, napi_callback_info info)
 napi_value JsDrawableDescriptor::GetMaskClipPath(napi_env env, napi_callback_info info)
 {
     auto path = OHOS::Ace::Napi::LayeredDrawableDescriptor::GetStaticMaskClipPath();
-
     napi_value result = nullptr;
     if (napi_ok != napi_create_string_utf8(env, path.c_str(), NAPI_AUTO_LENGTH, &result)) {
         HILOG_INFO("JsDrawableDescriptor Failed");
     }
-   
     return result;
 }
 
@@ -225,7 +223,6 @@ napi_value JsDrawableDescriptor::Export(napi_env env, napi_value exports)
     // export child class
     cons = InitLayeredDrawable(env);
     NAPI_CALL(env, napi_set_named_property(env, exports, DRAWABLE_LAYERED, cons));
-
     return exports;
 }
 } // namespace OHOS::Ace::Napi
