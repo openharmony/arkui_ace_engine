@@ -552,6 +552,13 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
                 LOGD("LayoutForward: adapt child total size");
                 contentMainSize_ = itemTotalSize;
             }
+        } else if (IsScrollSnapAlignCenter(layoutWrapper) && scrollAlign_ == ScrollAlign::CENTER &&
+                   jumpIndex_.has_value() && (itemPosition_.find(jumpIndex_.value()) != itemPosition_.end())) {
+            auto jumpItemStartPos = itemPosition_[jumpIndex_.value()].startPos;
+            auto jumpItemEndPos = itemPosition_[jumpIndex_.value()].endPos;
+            currentOffset_ = jumpItemEndPos - (jumpItemEndPos - jumpItemStartPos) / 2.0f - contentMainSize_ / 2.0f;
+            startMainPos_ = currentOffset_;
+            endMainPos_ = jumpItemEndPos - (jumpItemEndPos - jumpItemStartPos) / 2.0f + contentMainSize_ / 2.0f;
         } else {
             // adjust offset. If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
             if (!canOverScroll_ || jumpIndex_.has_value()) {
@@ -694,7 +701,7 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignStart()
     if (LessNotEqual(predictEndPos, 0.0f)) {
         predictEndPos = 0.0f;
     } else if (GreatNotEqual(predictEndPos, itemHeight * GetMaxListItemIndex() + spaceWidth_)) {
-        predictEndPos = itemHeight * GetMaxListItemIndex() + spaceWidth_;
+        predictEndPos = itemHeight * totalItemCount_ - spaceWidth_ - contentMainSize_;
     } else {
         int32_t index;
         for (index = 0; index <= GetMaxListItemIndex(); index++) {
@@ -740,7 +747,7 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignEnd()
     if (LessNotEqual(predictEndPos, 0.0f)) {
         predictEndPos = 0.0f;
     } else if (GreatNotEqual(predictEndPos, itemHeight * GetMaxListItemIndex() + spaceWidth_)) {
-        predictEndPos = itemHeight * GetMaxListItemIndex() + spaceWidth_;
+        predictEndPos = itemHeight * totalItemCount_ - spaceWidth_ - contentMainSize_;
     } else {
         int32_t index;
         for (index = 0; index <= GetMaxListItemIndex(); index++) {
