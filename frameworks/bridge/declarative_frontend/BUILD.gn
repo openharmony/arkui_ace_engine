@@ -438,7 +438,10 @@ template("declarative_js_engine") {
         "jsview/models/ability_component_model_impl.cpp",
       ]
 
-      external_deps += [ "window_manager:scene_session" ]
+      external_deps += [
+        "input:libmmi-client",
+        "window_manager:scene_session",
+      ]
     }
 
     if (defined(config.web_components_support) &&
