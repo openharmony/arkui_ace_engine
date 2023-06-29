@@ -223,19 +223,22 @@ void WindowPattern::OnAttachToFrameNode()
 
 bool WindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (!config.frameSizeChange) {
-        return false;
-    }
     CHECK_NULL_RETURN(dirty, false);
+    auto host = dirty->GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto globalOffsetWithTranslate = host->GetPaintRectGlobalOffsetWithTranslate();
     auto geometryNode = dirty->GetGeometryNode();
-    auto windowRect = geometryNode->GetFrameRect();
-    Rosen::WSRect rect = { .posX_ = std::round(windowRect.GetX()),
-        .posY_ = std::round(windowRect.GetY()),
-        .width_ = std::round(windowRect.Width()),
-        .height_ = std::round(windowRect.Height()) };
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto frameRect = geometryNode->GetFrameRect();
+    Rosen::WSRect windowRect {
+        .posX_ = std::round(globalOffsetWithTranslate.GetX()),
+        .posY_ = std::round(globalOffsetWithTranslate.GetY()),
+        .width_ = std::round(frameRect.Width()),
+        .height_ = std::round(frameRect.Height())
+    };
 
     CHECK_NULL_RETURN(session_, false);
-    session_->UpdateRect(rect, Rosen::SizeChangeReason::UNDEFINED);
+    session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
     return false;
 }
 
