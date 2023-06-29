@@ -53,6 +53,7 @@ public:
         value->propStickyStyle_ = CloneStickyStyle();
         value->propScrollSnapAlign_ = CloneScrollSnapAlign();
         value->propEditMode_ = CloneEditMode();
+        value->propScrollEnabled_ = CloneScrollEnabled();
         return value;
     }
 
@@ -72,6 +73,7 @@ public:
         ResetStickyStyle();
         ResetScrollSnapAlign();
         ResetEditMode();
+        ResetScrollEnabled();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
@@ -92,6 +94,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollSnapAlign, V2::ScrollSnapAlign, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ChainAnimation, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EditMode, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollEnabled, bool, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG
 

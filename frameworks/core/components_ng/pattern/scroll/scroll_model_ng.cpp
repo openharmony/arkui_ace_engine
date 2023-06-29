@@ -178,4 +178,9 @@ void ScrollModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
     CHECK_NULL_VOID(pattern);
     pattern->SetNestedScroll(nestedOpt);
 }
+
+void ScrollModelNG::SetScrollEnabled(bool scrollEnabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollEnabled, scrollEnabled);
+}
 } // namespace OHOS::Ace::NG

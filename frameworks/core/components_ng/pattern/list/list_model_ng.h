@@ -46,6 +46,7 @@ public:
     void SetSticky(V2::StickyStyle stickyStyle) override;
     void SetScrollSnapAlign(V2::ScrollSnapAlign scrollSnapAlign) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
+    void SetScrollEnabled(bool scrollEnabled) override;
     void SetOnScroll(OnScrollEvent&& onScroll) override;
     void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin) override;
     void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin) override;

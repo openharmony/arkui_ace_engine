@@ -105,6 +105,7 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
     void InitScrollableEvent();
+    void CheckScrollable();
 
     WaterFlowLayoutInfo layoutInfo_;
 

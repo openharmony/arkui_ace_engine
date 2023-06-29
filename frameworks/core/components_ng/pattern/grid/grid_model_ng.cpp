@@ -176,6 +176,11 @@ void GridModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
     pattern->SetNestedScroll(nestedOpt);
 }
 
+void GridModelNG::SetScrollEnabled(bool scrollEnabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ScrollEnabled, scrollEnabled);
+}
+
 void GridModelNG::SetOnScrollToIndex(ScrollToIndexFunc&& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
