@@ -207,12 +207,10 @@ napi_value JsDrawableDescriptor::GetMask(napi_env env, napi_callback_info info)
 napi_value JsDrawableDescriptor::GetMaskClipPath(napi_env env, napi_callback_info info)
 {
     auto path = OHOS::Ace::Napi::LayeredDrawableDescriptor::GetStaticMaskClipPath();
-    
-    HILOG_INFO("cplog GetMaskClipPath getPath = %{public}s", path.c_str());
 
     napi_value result = nullptr;
     if (napi_ok  != napi_create_string_utf8(env, path.c_str(), NAPI_AUTO_LENGTH, &result)){
-        HILOG_INFO("cplog JsDrawableDescriptor Failed");
+        HILOG_INFO("JsDrawableDescriptor Failed");
     }
    
     return result;

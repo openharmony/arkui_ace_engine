@@ -308,7 +308,6 @@ std::shared_ptr<Media::PixelMap> LayeredDrawableDescriptor::GetPixelMap()
 
 std::string LayeredDrawableDescriptor::GetStaticMaskClipPath()
 {
-    HILOG_INFO("cplog GetStaticMaskClipPath Success");
     const std::string name = "ohos_drawable_descriptor_path";
     std::string data;
     std::shared_ptr<Global::Resource::ResourceManager> ResMgr_(Global::Resource::CreateResourceManager());
