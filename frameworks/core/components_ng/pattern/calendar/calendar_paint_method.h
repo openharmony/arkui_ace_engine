@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,8 +34,8 @@ class CalendarPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(CalendarPaintMethod, NodePaintMethod)
 
 public:
-    CalendarPaintMethod(ObtainedMonth& obtainedMonth, CalendarDay& calendarDay)
-        : obtainedMonth_(obtainedMonth), calendarDay_(calendarDay) {};
+    CalendarPaintMethod(ObtainedMonth& obtainedMonth, CalendarDay& calendarDay, bool isCalendarDialog = false)
+        : obtainedMonth_(obtainedMonth), calendarDay_(calendarDay), isCalendarDialog_(isCalendarDialog) {};
     ~CalendarPaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
@@ -47,8 +47,10 @@ private:
     void DrawCalendar(RSCanvas& canvas, const Offset& offset, const Offset& dayOffset, const CalendarDay& day);
     void DrawTodayArea(RSCanvas& canvas, const Offset& offset, double x, double y) const;
     void DrawFocusedArea(RSCanvas& canvas, const Offset& offset, double x, double y) const;
+    void DrawCalendarPickerBackgroundArea(const CalendarDay& day, RSCanvas& canvas, double x, double y) const;
     void InitTextStyle(RSTextStyle& dateTextStyle, RSTextStyle& lunarTextStyle);
     void SetDayTextStyle(RSTextStyle& dateTextStyle, RSTextStyle& lunarTextStyle, const CalendarDay& day);
+    void SetCalendarPickerDayTextStyle(RSTextStyle& dateTextStyle, const CalendarDay& day);
     void SetOffWorkTextStyle(RSTextStyle& offWorkTextStyle, const CalendarDay& day) const;
     void PaintDay(RSCanvas& canvas, const Offset& offset, const CalendarDay& day, RSTextStyle& textStyle) const;
     void PaintLunarDay(
@@ -67,6 +69,7 @@ private:
     TextDirection textDirection_ = TextDirection::LTR;
     bool showHoliday_ = true;
     bool showLunar_ = false;
+    bool isCalendarDialog_ = false;
     uint32_t startOfWeek_ = 64;
 
     // Default it exists 5 weeks in a month.
@@ -88,12 +91,12 @@ private:
     double focusedAreaRadius_ = 0.0;
     double topPadding_ = 0.0;
     double weekAndDayRowSpace_ = 0.0;
-    
+
     double workStateWidth_ = 0.0;
     double workStateHorizontalMovingDistance_ = 0.0;
     double workStateVerticalMovingDistance_ = 0.0;
     double touchCircleStrokeWidth_ = 0.0;
-    
+
     // GregorianDay YAxis Offset and Height.
     double gregorianDayYAxisOffset_ = 0.0;
     double gregorianDayHeight_ = 0.0;
@@ -106,8 +109,14 @@ private:
     // So use dailyFiveRowSpace_ for 5 rows and dailySixRowSpace_ for 6 rows.
     // The column is always 7 from Monday to Sunday. So just set colSpace_.
     double colSpace_ = 0.0;
+    double dailyFourRowSpace_ = 0.0;
     double dailyFiveRowSpace_ = 0.0;
     double dailySixRowSpace_ = 0.0;
+
+    double dayRadius_ = 0.0;
+
+    double calendarDayKeyFocusedWidth_ = 0.0;
+    double calendarDayKeyFocusedPenWidth_ = 0.0;
 
     RSColor weekColor_;
     RSColor dayColor_;
@@ -126,6 +135,15 @@ private:
     RSColor focusedLunarColor_;
     RSColor focusedAreaBackgroundColor_;
     RSColor markLunarColor_;
+    RSColor textNonCurrentMonthColor_;
+    RSColor textSelectedDayColor_;
+    RSColor textCurrentDayColor_;
+    RSColor textCurrentMonthColor_;
+    RSColor backgroundKeyFocusedColor_;
+    RSColor backgroundSelectedTodayColor_;
+    RSColor backgroundSelectedNotTodayColor_;
+    RSColor backgroundHoverColor_;
+    RSColor backgroundPressColor_;
     FontWeight dayFontWeight_ = FontWeight::W500;
     FontWeight lunarDayFontWeight_ = FontWeight::W500;
     FontWeight workStateFontWeight_ = FontWeight::W400;

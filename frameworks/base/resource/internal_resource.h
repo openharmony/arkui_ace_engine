@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -111,6 +111,8 @@ public:
         IC_PUBLIC_ARROW_RIGHT_SVG,
         IC_PUBLIC_ARROW_UP_SVG,
         IC_PUBLIC_ARROW_DOWN_SVG,
+        IC_PUBLIC_DOUBLE_ARROW_LEFT_SVG,
+        IC_PUBLIC_DOUBLE_ARROW_RIGHT_SVG,
         IC_CUT_SVG,
         IC_COPY_SVG,
         IC_PASTE_SVG,

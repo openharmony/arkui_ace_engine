@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -286,6 +286,10 @@ const char SCROLL_ETS_TAG[] = "Scroll";
 // calendar
 const char CALENDAR_COMPONENT_TAG[] = "calendar";
 const char CALENDAR_ETS_TAG[] = "Calendar";
+
+// calendarPicker
+const char CALENDAR_PICKER_COMPONENT_TAG[] = "CalendarPickerComponent";
+const char CALENDAR_PICKER_ETS_TAG[] = "CalendarPicker";
 
 // badge
 const char BADGE_COMPONENT_TAG[] = "BadgeComponent";

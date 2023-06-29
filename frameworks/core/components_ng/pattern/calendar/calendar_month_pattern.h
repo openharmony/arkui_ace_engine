@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,7 +55,7 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<CalendarPaintMethod>(obtainedMonth_, calendarDay_);
+        return MakeRefPtr<CalendarPaintMethod>(obtainedMonth_, calendarDay_, isCalendarDialog_);
     }
 
     const ObtainedMonth& GetMonthData() const
@@ -87,17 +87,47 @@ public:
         }
     }
 
+    bool IsCalendarDialog() const
+    {
+        return isCalendarDialog_;
+    }
+
+    void SetCalendarDialogFlag(bool isCalendarDialog)
+    {
+        isCalendarDialog_ = isCalendarDialog;
+    }
+
+    void SetHoverState(bool state)
+    {
+        hoverState_ = state;
+    }
+
+    bool GetHoverState() const
+    {
+        return hoverState_;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnModifyDone() override;
     void OnClick(Offset& localLocation, const ObtainedMonth& obtainedMonth);
+    void OnTouchEvent(const Offset& localLocation, bool isPressed);
+    void OnHoverEvent(const Offset& localLocation, bool state);
+    void InitClickEvent();
+    void InitTouchEvent();
+    void InitHoverEvent();
+    void SetColRowSpace();
     int32_t JudgeArea(const Offset& offset);
+    bool isCalendarDialog_ = false;
+    bool hoverState_ = false;
 
     CalendarDay calendarDay_;
     ObtainedMonth obtainedMonth_;
     MonthState monthState_ = MonthState::CUR_MONTH;
     RefPtr<ClickEvent> clickListener_;
+    RefPtr<TouchEventImpl> touchListener_;
+    RefPtr<InputEvent> hoverListener_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CalendarMonthPattern);
 };
