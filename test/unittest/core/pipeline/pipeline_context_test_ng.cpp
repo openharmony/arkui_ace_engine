@@ -471,6 +471,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg007, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
+    context_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
     /**
      * @tc.steps2: Call the function SetupRootElement with isJsCard_ = true.
      * @tc.expected: The stageManager_ is non-null.
