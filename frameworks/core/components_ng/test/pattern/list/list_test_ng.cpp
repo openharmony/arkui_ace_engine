@@ -4760,4 +4760,182 @@ HWTEST_F(ListTestNg, ScrollToIndexAlign001, TestSize.Level1)
     listLayoutAlgorithm->CalculateEstimateOffset(ScrollAlign::AUTO);
     EXPECT_EQ(listLayoutAlgorithm->estimateOffset_, 0.0f);
 }
+
+/**
+ * @tc.name: ListLayoutAlgorithm_FixPredictSnapOffset001
+ * @tc.desc: Test FixPredictSnapOffset when the scrollSnapAlign is start.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListLayoutAlgorithm_FixPredictSnapOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialization.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    GetInstance();
+    auto listLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    layoutProperty_->UpdateScrollSnapAlign(V2::ScrollSnapAlign::START);
+
+    /**
+     * @tc.steps: step2. Creat itemPosition_.
+     */
+    float startPos = 0.0f;
+    float endPos = 0.0f;
+    float mainLen = 20.0f;
+    bool isGroup = false;
+    for (int i = 0; i < 10; i++) {
+        startPos = endPos;
+        listLayoutAlgorithm->itemPosition_[i] = { startPos, endPos, isGroup };
+        endPos = startPos + mainLen;
+    }
+    /**
+     * @tc.steps: step3. Set predictSnapOffset then call FixPredictSnapOffset and then get
+     *            predictSnapOffset to check value.
+     */
+    listLayoutAlgorithm->SetSpaceWidth(5);
+    listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 0);
+
+    listLayoutAlgorithm->SetTotalOffset(20.0f);
+    listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 20);
+
+    listLayoutAlgorithm->SetTotalOffset(10.0f);
+    listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 10);
+}
+
+/**
+ * @tc.name: ListLayoutAlgorithm_FixPredictSnapOffset002
+ * @tc.desc: Test FixPredictSnapOffset when the scrollSnapAlign is center.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListLayoutAlgorithm_FixPredictSnapOffset002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialization.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    GetInstance();
+    auto listLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    layoutProperty_->UpdateScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+
+    /**
+     * @tc.steps: step2. Creat itemPosition_.
+     */
+    float startPos = 0.0f;
+    float endPos = 0.0f;
+    float mainLen = 20.0f;
+    bool isGroup = false;
+    for (int i = 0; i < 10; i++) {
+        startPos = endPos;
+        listLayoutAlgorithm->itemPosition_[i] = { startPos, endPos, isGroup };
+        endPos = startPos + mainLen;
+    }
+    /**
+     * @tc.steps: step3. Set predictSnapOffset then call FixPredictSnapOffset and then get
+     *            predictSnapOffset to check value.
+     */
+    listLayoutAlgorithm->SetSpaceWidth(5);
+    listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 0);
+
+    listLayoutAlgorithm->SetTotalOffset(20.0f);
+    listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 25);
+
+    listLayoutAlgorithm->SetTotalOffset(10.0f);
+    listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 10);
+}
+
+/**
+ * @tc.name: ListLayoutAlgorithm_FixPredictSnapOffset003
+ * @tc.desc: Test FixPredictSnapOffset when the scrollSnapAlign is end.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListLayoutAlgorithm_FixPredictSnapOffset003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialization.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    GetInstance();
+    auto listLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    layoutProperty_->UpdateScrollSnapAlign(V2::ScrollSnapAlign::END);
+
+    /**
+     * @tc.steps: step2. Creat itemPosition_.
+     */
+    float startPos = 0.0f;
+    float endPos = 0.0f;
+    float mainLen = 20.0f;
+    bool isGroup = false;
+    for (int i = 0; i < 10; i++) {
+        startPos = endPos;
+        listLayoutAlgorithm->itemPosition_[i] = { startPos, endPos, isGroup };
+        endPos = startPos + mainLen;
+    }
+    /**
+     * @tc.steps: step3. Set predictSnapOffset then call FixPredictSnapOffset and then get
+     *            predictSnapOffset to check value.
+     */
+    listLayoutAlgorithm->SetSpaceWidth(5);
+    listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 0);
+
+    listLayoutAlgorithm->SetTotalOffset(20.0f);
+    listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 20);
+
+    listLayoutAlgorithm->SetTotalOffset(10.0f);
+    listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 15);
+}
+
+/**
+ * @tc.name: ListPattern_UpdateScrollSnap001
+ * @tc.desc: Test UpdateScrollSnap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListPattern_UpdateScrollSnap001, TestSize.Level1)
+{
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    GetInstance();
+    pattern_->AnimateTo(0, 0, nullptr);
+    pattern_->UpdateScrollSnap();
+    EXPECT_FALSE(pattern_->predictSnapOffset_.has_value());
+    pattern_->animator_->Stop();
+    pattern_->UpdateScrollSnap();
+    EXPECT_EQ(pattern_->predictSnapOffset_.value(), 0.0);
+}
+
+/**
+ * @tc.name: ListPattern_NeedScrollSnapAlignEffect001
+ * @tc.desc: Test NeedScrollSnapAlignEffect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListPattern_NeedScrollSnapAlignEffect001, TestSize.Level1)
+{
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    GetInstance();
+    layoutProperty_->UpdateScrollSnapAlign(V2::ScrollSnapAlign::NONE);
+    EXPECT_FALSE(pattern_->NeedScrollSnapAlignEffect());
+    layoutProperty_->UpdateScrollSnapAlign(V2::ScrollSnapAlign::START);
+    EXPECT_TRUE(pattern_->NeedScrollSnapAlignEffect());
+}
 } // namespace OHOS::Ace::NG

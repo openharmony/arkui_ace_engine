@@ -130,6 +130,13 @@ void GridPattern::OnModifyDone()
         InitOnKeyEvent(focusHub);
     }
     SetAccessibilityAction();
+    auto scrollable = GetScrollableEvent()->GetScrollable();
+    if (scrollable) {
+        scrollable->SetOnContinuousSliding([weak = AceType::WeakClaim(this)]() -> double {
+            auto grid = weak.Upgrade();
+            return grid->GetMainContentSize();
+        });
+    }
 }
 
 void GridPattern::UninitMouseEvent()

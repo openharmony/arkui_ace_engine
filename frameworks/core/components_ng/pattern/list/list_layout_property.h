@@ -80,6 +80,8 @@ public:
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
+    void ScrollSnapPropToJsonValue(std::unique_ptr<JsonValue>& json) const;
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Space, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InitialIndex, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ListDirection, Axis, PROPERTY_UPDATE_MEASURE);
