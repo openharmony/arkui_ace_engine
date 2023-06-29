@@ -36,6 +36,7 @@ public:
         return AceType::MakeRefPtr<SvgDefs>();
     }
 
+#ifndef USE_ROSEN_DRAWING
     SkPath AsPath(const Size& viewPort) const override
     {
         SkPath path;
@@ -45,6 +46,17 @@ public:
         }
         return path;
     }
+#else
+    RSRecordingPath AsPath(const Size& viewPort) const override
+    {
+        RSRecordingPath path;
+        for (auto child : children_) {
+            auto childPath = child->AsPath(viewPort);
+            path.Op(path, childPath, RSPathOp::UNION);
+        }
+        return path;
+    }
+#endif
 };
 
 } // namespace OHOS::Ace::NG
