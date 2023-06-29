@@ -762,8 +762,14 @@ void OverlayManager::CleanMenuInSubWindow()
     LOGI("OverlayManager::CleanMenuInSubWindow");
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-    rootNode->Clean();
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    for (const auto& child : rootNode->GetChildren()) {
+        auto node = DynamicCast<FrameNode>(child);
+        if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+            rootNode->RemoveChild(node);
+            rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            break;
+        }
+    }
 }
 
 void OverlayManager::BeforeShowDialog(const RefPtr<FrameNode>& node)
