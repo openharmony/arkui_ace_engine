@@ -313,6 +313,13 @@ public:
         return false;
     }
 
+    virtual int32_t GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode)
+    {
+        return -1;
+    }
+
+    virtual void ScrollToFocusNodeIndex(int32_t index) {}
+
     // out of viewport or visible is none or gone.
     virtual void OnInActive() {}
     virtual void OnActive() {}

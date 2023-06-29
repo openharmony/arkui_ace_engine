@@ -477,6 +477,8 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
     if (keyEvent.action == KeyAction::DOWN) {
         switch (keyEvent.code) {
             case KeyCode::KEY_SPACE:
+            case KeyCode::KEY_ENTER:
+            case KeyCode::KEY_NUMPAD_ENTER:
                 OnClick(keyEvent);
                 break;
             default:;
@@ -536,6 +538,7 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
         return false;
     }
 
+    ScrollToLastFocusIndex();
     if (!CalculatePosition()) {
         return false;
     }
@@ -793,6 +796,28 @@ void FocusHub::SetScopeFocusAlgorithm()
     focusAlgorithm_ = pattern->GetScopeFocusAlgorithm();
 }
 
+void FocusHub::SetLastFocusNodeIndex(const RefPtr<FocusHub>& focusNode)
+{
+    auto frame = GetFrameNode();
+    CHECK_NULL_VOID(frame);
+    auto pattern = frame->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    lastFocusNodeIndex_ = pattern->GetFocusNodeIndex(focusNode);
+}
+
+void FocusHub::ScrollToLastFocusIndex() const
+{
+    if (lastFocusNodeIndex_ == -1) {
+        LOGD("Last focus node index is -1. Do not need scroll.");
+        return;
+    }
+    auto frame = GetFrameNode();
+    CHECK_NULL_VOID(frame);
+    auto pattern = frame->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->ScrollToFocusNodeIndex(lastFocusNodeIndex_);
+}
+
 void FocusHub::OnFocus()
 {
     if (focusType_ == FocusType::NODE) {
@@ -824,6 +849,10 @@ void FocusHub::OnFocusNode()
     auto onFocusCallback = GetOnFocusCallback();
     if (onFocusCallback) {
         onFocusCallback();
+    }
+    auto parentFocusHub = GetParentFocusHub();
+    if (parentFocusHub) {
+        parentFocusHub->SetLastFocusNodeIndex(AceType::Claim(this));
     }
     HandleParentScroll(); // If current focus node has a scroll parent. Handle the scroll event.
     PaintFocusState();

@@ -443,7 +443,6 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     scrollbarInfo_ = eventhub->FireOnScrollBarUpdate(gridLayoutInfo.startIndex_, gridLayoutInfo.currentOffset_);
     if (firstShow_ || gridLayoutInfo_.startMainLineIndex_ != gridLayoutInfo.startMainLineIndex_) {
         eventhub->FireOnScrollToIndex(gridLayoutInfo.startIndex_);
-        FlushFocusOnScroll(gridLayoutInfo);
         firstShow_ = false;
     }
     gridLayoutInfo_ = gridLayoutInfo;
@@ -509,33 +508,6 @@ void GridPattern::FlushCurrentFocus()
     }
     auto curCrossNum = static_cast<int32_t>(gridLayoutInfo_.gridMatrix_.at(lastFocusItemMainIndex_).size());
     auto weakChild = SearchFocusableChildInCross(lastFocusItemMainIndex_, lastFocusItemCrossIndex_, curCrossNum);
-    auto child = weakChild.Upgrade();
-    if (child) {
-        child->RequestFocusImmediately();
-    }
-}
-
-void GridPattern::FlushFocusOnScroll(const GridLayoutInfo& gridLayoutInfo)
-{
-    auto gridFrame = GetHost();
-    CHECK_NULL_VOID(gridFrame);
-    auto gridFocus = gridFrame->GetFocusHub();
-    CHECK_NULL_VOID(gridFocus);
-    if (!gridFocus->IsCurrentFocus()) {
-        return;
-    }
-    auto childFocusList = gridFocus->GetChildren();
-    if (std::any_of(childFocusList.begin(), childFocusList.end(),
-            [](const RefPtr<FocusHub>& childFocus) { return childFocus->IsCurrentFocus(); })) {
-        return;
-    }
-    int32_t curMainIndex = gridLayoutInfo.startMainLineIndex_;
-    if (gridLayoutInfo.gridMatrix_.find(curMainIndex) == gridLayoutInfo.gridMatrix_.end()) {
-        LOGE("Can not find main index: %{public}d", curMainIndex);
-        return;
-    }
-    auto curCrossNum = static_cast<int32_t>(gridLayoutInfo.gridMatrix_.at(curMainIndex).size());
-    auto weakChild = SearchFocusableChildInCross(curMainIndex, 0, curCrossNum);
     auto child = weakChild.Upgrade();
     if (child) {
         child->RequestFocusImmediately();
@@ -791,9 +763,9 @@ WeakPtr<FocusHub> GridPattern::SearchFocusableChildInCross(
     return nullptr;
 }
 
-WeakPtr<FocusHub> GridPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarCrossIndex)
+WeakPtr<FocusHub> GridPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarCrossIndex, int32_t tarIndex)
 {
-    LOGD("Get target item location is (%{public}d,%{public}d)", tarMainIndex, tarCrossIndex);
+    LOGD("Get target item location is (%{public}d,%{public}d / %{public}d)", tarMainIndex, tarCrossIndex, tarIndex);
     auto gridFrame = GetHost();
     CHECK_NULL_RETURN(gridFrame, nullptr);
     auto gridFocus = gridFrame->GetFocusHub();
@@ -818,14 +790,29 @@ WeakPtr<FocusHub> GridPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, in
         }
         auto curMainIndex = childItemPattern->GetMainIndex();
         auto curCrossIndex = childItemPattern->GetCrossIndex();
-        auto curMainSpan = childItemProperty->GetMainSpan(gridLayoutInfo_.axis_);
-        auto curCrossSpan = childItemProperty->GetCrossSpan(gridLayoutInfo_.axis_);
-        if (curMainIndex <= tarMainIndex && curMainIndex + curMainSpan > tarMainIndex &&
-            curCrossIndex <= tarCrossIndex && curCrossIndex + curCrossSpan > tarCrossIndex) {
-            return AceType::WeakClaim(AceType::RawPtr(childFocus));
+        if (tarIndex < 0) {
+            auto curMainSpan = childItemProperty->GetMainSpan(gridLayoutInfo_.axis_);
+            auto curCrossSpan = childItemProperty->GetCrossSpan(gridLayoutInfo_.axis_);
+            if (curMainIndex <= tarMainIndex && curMainIndex + curMainSpan > tarMainIndex &&
+                curCrossIndex <= tarCrossIndex && curCrossIndex + curCrossSpan > tarCrossIndex) {
+                return AceType::WeakClaim(AceType::RawPtr(childFocus));
+            }
+        } else {
+            if (gridLayoutInfo_.gridMatrix_.find(curMainIndex) == gridLayoutInfo_.gridMatrix_.end()) {
+                LOGE("Can not find target main index: %{public}d", curMainIndex);
+                continue;
+            }
+            if (gridLayoutInfo_.gridMatrix_[curMainIndex].find(curCrossIndex) ==
+                gridLayoutInfo_.gridMatrix_[curMainIndex].end()) {
+                LOGE("Can not find target cross index: %{public}d", curCrossIndex);
+                continue;
+            }
+            if (gridLayoutInfo_.gridMatrix_[curMainIndex][curCrossIndex] == tarIndex) {
+                return AceType::WeakClaim(AceType::RawPtr(childFocus));
+            }
         }
     }
-    LOGW("The target item at location(%{public}d,%{public}d) can not found.", tarMainIndex, tarCrossIndex);
+    LOGW("Item at location(%{public}d,%{public}d / %{public}d) can not found.", tarMainIndex, tarCrossIndex, tarIndex);
     return nullptr;
 }
 
@@ -871,20 +858,43 @@ void GridPattern::ScrollToFocusNode(const WeakPtr<FocusHub>& focusNode)
 {
     auto nextFocus = focusNode.Upgrade();
     CHECK_NULL_VOID(nextFocus);
-    auto nextFrame = nextFocus->GetFrameNode();
-    CHECK_NULL_VOID(nextFrame);
-    auto nextPattern = nextFrame->GetPattern();
-    CHECK_NULL_VOID(nextPattern);
-    auto nextItemPattern = AceType::DynamicCast<GridItemPattern>(nextPattern);
-    CHECK_NULL_VOID(nextItemPattern);
-    auto nextMainIndex = nextItemPattern->GetMainIndex();
-    auto nextCrossIndex = nextItemPattern->GetCrossIndex();
-    if (gridLayoutInfo_.gridMatrix_.find(nextMainIndex) == gridLayoutInfo_.gridMatrix_.end()) {
-        LOGE("Can not find next main index: %{public}d", nextMainIndex);
-        return;
+    UpdateStartIndex(GetFocusNodeIndex(nextFocus));
+}
+
+int32_t GridPattern::GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode)
+{
+    auto tarFrame = focusNode->GetFrameNode();
+    CHECK_NULL_RETURN(tarFrame, -1);
+    auto tarPattern = tarFrame->GetPattern();
+    CHECK_NULL_RETURN(tarPattern, -1);
+    auto tarItemPattern = AceType::DynamicCast<GridItemPattern>(tarPattern);
+    CHECK_NULL_RETURN(tarItemPattern, -1);
+    auto tarMainIndex = tarItemPattern->GetMainIndex();
+    auto tarCrossIndex = tarItemPattern->GetCrossIndex();
+    if (gridLayoutInfo_.gridMatrix_.find(tarMainIndex) == gridLayoutInfo_.gridMatrix_.end()) {
+        LOGE("Can not find target main index: %{public}d", tarMainIndex);
+        return -1;
     }
-    auto nextIndex = gridLayoutInfo_.gridMatrix_[nextMainIndex][nextCrossIndex];
-    UpdateStartIndex(nextIndex);
+    if (gridLayoutInfo_.gridMatrix_[tarMainIndex].find(tarCrossIndex) ==
+        gridLayoutInfo_.gridMatrix_[tarMainIndex].end()) {
+        LOGE("Can not find target cross index: %{public}d", tarCrossIndex);
+        return -1;
+    }
+    return gridLayoutInfo_.gridMatrix_[tarMainIndex][tarCrossIndex];
+}
+
+void GridPattern::ScrollToFocusNodeIndex(int32_t index)
+{
+    UpdateStartIndex(index);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline) {
+        pipeline->FlushUITasks();
+    }
+    auto tarFocusNodeWeak = GetChildFocusNodeByIndex(-1, -1, index);
+    auto tarFocusNode = tarFocusNodeWeak.Upgrade();
+    if (tarFocusNode) {
+        tarFocusNode->RequestFocusImmediately();
+    }
 }
 
 void GridPattern::StopAnimate()
