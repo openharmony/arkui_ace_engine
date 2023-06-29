@@ -482,6 +482,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern005, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_NE(minuteColumn, nullptr);
@@ -600,6 +601,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg001, Test
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumnNode = allChildNode["minute"];
     ASSERT_NE(minuteColumnNode, nullptr);
@@ -630,6 +632,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg002, Test
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_NE(minuteColumn, nullptr);
@@ -659,6 +662,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg003, Test
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_NE(minuteColumn, nullptr);
@@ -703,6 +707,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg004, Test
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumnNode = allChildNode["minute"];
     ASSERT_NE(minuteColumnNode, nullptr);
@@ -739,6 +744,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg005, Test
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumnNode = allChildNode["minute"];
     ASSERT_NE(minuteColumnNode, nullptr);
@@ -777,6 +783,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg006, Test
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_NE(minuteColumn, nullptr);
@@ -815,6 +822,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg007, Test
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
     timePickerRowPattern->SetHour24(false);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_NE(minuteColumn, nullptr);
@@ -825,6 +833,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg007, Test
     auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
     hourColumnPattern->SetCurrentIndex(CURRENT_VALUE1);
     auto amPmColumn = allChildNode["amPm"];
+    ASSERT_NE(amPmColumn, nullptr);
     auto amPmPickerColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
 
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
@@ -862,6 +871,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern006, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_TRUE(timePickerRowPattern);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_TRUE(minuteColumn);
@@ -943,6 +953,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern007, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_TRUE(timePickerRowPattern);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_TRUE(minuteColumn);
@@ -977,6 +988,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern008, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_TRUE(timePickerRowPattern);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_TRUE(minuteColumn);
@@ -1005,6 +1017,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern009, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_TRUE(timePickerRowPattern);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_TRUE(minuteColumn);
@@ -1030,6 +1043,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern010, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_TRUE(timePickerRowPattern);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_TRUE(minuteColumn);
@@ -1139,6 +1153,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern011, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_TRUE(timePickerRowPattern);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_TRUE(minuteColumn);
@@ -1180,6 +1195,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern012, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_TRUE(timePickerRowPattern);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_TRUE(minuteColumn);
@@ -1224,6 +1240,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern013, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_TRUE(timePickerRowPattern);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_TRUE(minuteColumn);
@@ -1262,6 +1279,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern014, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_TRUE(timePickerRowPattern);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_TRUE(minuteColumn);
@@ -1295,6 +1313,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern015, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_TRUE(timePickerRowPattern);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_TRUE(minuteColumn);
@@ -1430,6 +1449,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern004, TestSize.Level1)
     ASSERT_NE(timePickerRowPattern, nullptr);
 
     timePickerRowPattern->SetHour24(false);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto amPmColumn = allChildNode["amPm"];
     ASSERT_NE(amPmColumn, nullptr);
@@ -1475,6 +1495,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern005, TestSize.Level1)
     ASSERT_NE(timePickerRowPattern, nullptr);
 
     timePickerRowPattern->SetHour24(false);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto amPmColumn = allChildNode["amPm"];
     ASSERT_NE(amPmColumn, nullptr);
@@ -1789,6 +1810,7 @@ HWTEST_F(TimePickerPatternTestNg, PerformActionTest001, TestSize.Level1)
      */
     auto timePickerRowPattern = pickerFrameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_NE(minuteColumn, nullptr);

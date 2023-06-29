@@ -75,7 +75,12 @@ public:
 
     void OnColumnsBuilding();
 
-    std::unordered_map<std::string, RefPtr<FrameNode>> GetAllChildNode();
+    const std::unordered_map<std::string, RefPtr<FrameNode>>& GetAllChildNode()
+    {
+        return allChildNode_;
+    }
+
+    void UpdateAllChildNode();
 
     void HandleHourColumnBuilding();
 
@@ -174,8 +179,7 @@ public:
         // when switch IsUseMilitaryTime state, should clear options_[hourColumn]
         // Hour24 : Index = [0, 23] -> hour = [0, 23]
         // Hour12 : Index = [0, 11] -> hour = [1, 12]
-        auto allChildNode = GetAllChildNode();
-        auto hourColumn = allChildNode["hour"];
+        auto hourColumn = allChildNode_["hour"];
         CHECK_NULL_VOID(hourColumn);
         options_[hourColumn].clear();
     }
@@ -316,6 +320,7 @@ private:
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
+    std::unordered_map<std::string, RefPtr<FrameNode>> allChildNode_;
     std::map<RefPtr<FrameNode>, std::unordered_map<uint32_t, std::string>> options_;
     std::map<RefPtr<FrameNode>, uint32_t> optionsTotalCount_;
     uint32_t showCount_ = 0;
