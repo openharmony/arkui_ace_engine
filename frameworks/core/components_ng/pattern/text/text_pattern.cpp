@@ -596,9 +596,9 @@ void TextPattern::HandlePanEnd(const GestureEvent& info)
 #ifdef ENABLE_DRAG_FRAMEWORK
 DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams)
 {
-    LOGI("OnDragStart");
     auto host = GetHost();
     CHECK_NULL_RETURN(host, {});
+    CHECK_NULL_RETURN(dragNodeWk_.Upgrade(), {});
 
     DragDropInfo itemInfo;
     auto selectedStr = GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
@@ -609,6 +609,7 @@ DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, const
 
     AceEngineExt::GetInstance().DragStartExt();
 
+    CloseSelectOverlay();
     ResetSelection();
     return itemInfo;
 }
@@ -646,6 +647,7 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
         CHECK_NULL_VOID(pattern);
         if (pattern->BetweenSelectedPosition(point)) {
             pattern->dragNode_ = TextDragPattern::CreateDragNode(pattern->GetHost());
+            pattern->dragNodeWk_ = pattern->dragNode_;
             FrameNode::ProcessOffscreenNode(pattern->dragNode_);
         }
     };
