@@ -336,19 +336,25 @@ void UIExtensionPattern::SetOnReleaseCallback(std::function<void(int32_t)>&& cal
 void UIExtensionPattern::UnregisterAbilityResultListener()
 {
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
-    extensionSession->RegisterTransferAbilityResultListener(nullptr);
 }
 
 void UIExtensionPattern::SetOnResultCallback(std::function<void(int32_t, const AAFwk::Want&)>&& callback)
 {
     OnResultCallback_ = std::move(callback);
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
-    extensionSession->RegisterTransferAbilityResultListener(
+    sptr<Rosen::ExtensionSession::ExtensionSessionEventCallback> extSessionEventCallback =
+        new(std::nothrow) Rosen::ExtensionSession::ExtensionSessionEventCallback();
+    if (extSessionEventCallback == nullptr) {
+        LOGE("extSessionEventCallback init failed");
+        return;
+    }
+    extSessionEventCallback->transferAbilityResultFunc_ =
         [weak = WeakClaim(this)](int32_t code, const AAFwk::Want& want) {
             auto pattern = weak.Upgrade();
             if (pattern) {
                 pattern->OnResult(code, want);
             }
-        });
+        };
+    extensionSession->RegisterExtensionSessionEventCallback(extSessionEventCallback);
 }
 } // namespace OHOS::Ace::NG
