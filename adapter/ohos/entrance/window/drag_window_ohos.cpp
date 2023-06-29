@@ -32,6 +32,9 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/skia_image.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing.h"
+#endif
 #include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef USE_ROSEN_DRAWING
@@ -51,7 +54,7 @@ sk_sp<SkColorSpace> ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap)
 #else
 std::shared_ptr<RSColorSpace> ColorSpaceToColorSpace(const RefPtr<PixelMap>& pixmap)
 {
-    return RSColorSpace::CreateSRGB(); // Media::PixelMap has not support wide gamut yet.
+    return RSRecordingColorSpace::CreateSRGB(); // Media::PixelMap has not support wide gamut yet.
 }
 #endif
 
@@ -126,7 +129,6 @@ RSColorType PixelFormatToColorType(const RefPtr<PixelMap>& pixmap)
         case PixelFormat::ALPHA_8:
             return RSColorType::COLORTYPE_ALPHA_8;
         case PixelFormat::RGBA_F16:
-            return RSColorType::COLORTYPE_RGBA_F16;
         case PixelFormat::UNKNOWN:
         case PixelFormat::ARGB_8888:
         case PixelFormat::RGB_888:
@@ -148,6 +150,13 @@ SkImageInfo MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap)
     return SkImageInfo::Make(pixmap->GetWidth(), pixmap->GetHeight(), colorType, alphaType, colorSpace);
 }
 #else
+RSBitmapFormat MakeBitmapFormatFromPixelMap(const RefPtr<PixelMap>& pixmap)
+{
+    RSBitmapFormat format;
+    format.colorType = PixelFormatToColorType(pixmap);
+    format.alphaType = AlphaTypeToAlphaType(pixmap);
+    return format;
+}
 #endif
 
 #ifndef USE_ROSEN_DRAWING
@@ -171,19 +180,18 @@ void DrawSkImage(SkCanvas* canvas, const sk_sp<SkImage>& skImage, int32_t width,
 #endif
 }
 #else
-void DrawDrawingImage(RSCanvas* canvas, const std::shared_ptr<RSImage>& drawingImage,
-    int32_t width, int32_t height)
+void DrawDrawingImage(RSCanvas* canvas, const std::shared_ptr<RSImage>& drawingImage, int32_t width, int32_t height)
 {
-    CHECK_NULL_VOID(skImage);
-    RSPen pen;
-    auto colorSpace = RSColorSpace::CreateRefImage(*drawingImage);
-    pen.SetColor(pen.GetColor4f(), colorSpace);
+    CHECK_NULL_VOID(drawingImage);
+    RSBrush brush;
+    auto colorSpace = RSRecordingColorSpace::CreateRefImage(*drawingImage);
+    brush.SetColor(brush.GetColor4f(), colorSpace);
     auto srcRect = RSRect(0, 0, drawingImage->GetWidth(), drawingImage->GetHeight());
     auto dstRect = RSRect(0, 0, width, height);
     RSSamplingOptions sampling;
-    canvas->AttachPen(pen);
+    canvas->AttachBrush(brush);
     canvas->DrawImageRect(*drawingImage, srcRect, dstRect, sampling);
-    canvas->DetachPen();
+    canvas->DetachBrush();
 }
 #endif
 
@@ -200,6 +208,19 @@ void DrawPixelMapInner(SkCanvas* canvas, const RefPtr<PixelMap>& pixmap, int32_t
     DrawSkImage(canvas, skImage, width, height);
 }
 #else
+void DrawPixelMapInner(RSCanvas* canvas, const RefPtr<PixelMap>& pixmap, int32_t width, int32_t height)
+{
+    // Step1: Create Bitmap
+    auto bitmapFormat = MakeBitmapFormatFromPixelMap(pixmap);
+    auto bitmap = std::make_shared<RSBitmap>();
+    bitmap->Build(pixmap->GetWidth(), pixmap->GetHeight(), bitmapFormat);
+    bitmap->SetPixels(const_cast<void*>(reinterpret_cast<const void*>(pixmap->GetPixels())));
+
+    // Step2: Create Image and draw it
+    auto image = std::make_shared<RSImage>();
+    image->BuildFromBitmap(*bitmap);
+    DrawDrawingImage(canvas, image, width, height);
+}
 #endif
 } // namespace
 #endif
@@ -382,10 +403,10 @@ void DragWindowOhos::DrawImage(void* skImage)
 void DragWindowOhos::DrawImage(void* drawingImage)
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    CHECK_NULL_VOID(skImage);
-    auto* canvasImagePtr = reinterpret_cast<RefPtr<NG::CanvasImage>*>(skImage);
+    CHECK_NULL_VOID(drawingImage);
+    auto* canvasImagePtr = reinterpret_cast<RefPtr<NG::CanvasImage>*>(drawingImage);
     CHECK_NULL_VOID(canvasImagePtr);
-    RefPtr<NG::SkiaImage> canvasImage = AceType::DynamicCast<NG::SkiaImage>(*canvasImagePtr);
+    RefPtr<NG::RosenImage> canvasImage = AceType::DynamicCast<NG::RosenImage>(*canvasImagePtr);
     CHECK_NULL_VOID(canvasImage);
     auto surfaceNode = dragWindow_->GetSurfaceNode();
     rsUiDirector_ = Rosen::RSUIDirector::Create();
@@ -401,8 +422,8 @@ void DragWindowOhos::DrawImage(void* drawingImage)
     rsUiDirector_->SetRoot(rootNode_->GetId());
     auto canvasNode = std::static_pointer_cast<Rosen::RSCanvasNode>(rootNode_);
     auto drawing = canvasNode->BeginRecording(width_, height_);
-    std::shared_ptr<RSImage> dImg = std::make_shared<RSImage>(canvasImage->image());
-    DrawDrawingImage(drawing, dImg, width_, height_);
+    auto rsImage = canvasImage->GetImage();
+    DrawDrawingImage(drawing, rsImage, width_, height_);
     canvasNode->FinishRecording();
     rsUiDirector_->SendMessages();
 #endif
@@ -500,7 +521,6 @@ void DragWindowOhos::DrawText(
     rootNode_->SetClipToBounds(true);
     rootNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(path));
     auto drawing = canvasNode->BeginRecording(width_, height_);
-    paragraph->Paint(drawing, 0, 0);
 #endif
     canvasNode->FinishRecording();
     rsUiDirector_->SendMessages();
@@ -608,8 +628,6 @@ void DragWindowOhos::DrawTextNG(const RefPtr<NG::Paragraph>& paragraph, const Re
     rootNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(path));
 
     auto drawing = canvasNode->BeginRecording(width_, height_);
-    paragraph->Paint(drawing, textPattern->GetTextContentRect().GetX(),
-        textPattern->GetTextContentRect().GetY() - std::min(textPattern->GetBaselineOffset(), 0.0f));
 #endif
     canvasNode->FinishRecording();
     rsUiDirector_->SendMessages();
