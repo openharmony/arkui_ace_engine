@@ -49,7 +49,7 @@ class ACE_EXPORT PipelineContext : public PipelineBase {
 
 public:
     using SurfaceChangedCallbackMap =
-        std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t)>>;
+        std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>>;
     using SurfacePositionChangedCallbackMap = std::unordered_map<int32_t, std::function<void(int32_t, int32_t)>>;
     using PredictTask = std::function<void(int64_t, bool)>;
     PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
@@ -306,7 +306,8 @@ public:
 
     void FlushReload() override;
 
-    int32_t RegisterSurfaceChangedCallback(std::function<void(int32_t, int32_t, int32_t, int32_t)>&& callback)
+    int32_t RegisterSurfaceChangedCallback(
+        std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback)
     {
         if (callback) {
             surfaceChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
@@ -384,7 +385,7 @@ protected:
         float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
 
 private:
-    void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight);
+    void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type);
 
     void FlushWindowStateChangedCallback(bool isShow);
 

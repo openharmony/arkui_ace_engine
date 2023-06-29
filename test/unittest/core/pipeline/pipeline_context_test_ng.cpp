@@ -19,6 +19,8 @@
 
 #include "gtest/gtest.h"
 
+#include "core/common/window_animation_config.h"
+
 // Add the following two macro definitions to test the private and protected method.
 #define private public
 #define protected public
@@ -42,6 +44,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -57,7 +60,6 @@
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/pattern/bubble/bubble_pattern.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -401,11 +403,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
     context_->FlushFocus();
     EXPECT_EQ(context_->dirtyFocusNode_.Upgrade(), nullptr);
 
-     /**
-     * @tc.steps5: set stageManager_ and stageNode_, stageNode_'s child,
-                create frameNode_1's focusHub and call SetIsDefaultHasFocused with true
-     * @tc.expected: RequestDefaultFocus returns false.
-     */
+    /**
+    * @tc.steps5: set stageManager_ and stageNode_, stageNode_'s child,
+               create frameNode_1's focusHub and call SetIsDefaultHasFocused with true
+    * @tc.expected: RequestDefaultFocus returns false.
+    */
     context_->stageManager_->stageNode_ = frameNode_;
     frameNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode_1 = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, nullptr);
@@ -1838,10 +1840,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg037, TestSize.Level1)
      */
     ASSERT_NE(context_, nullptr);
     bool flag = false;
-    auto callback = [&flag](int32_t input_1, int32_t input_2, int32_t input_3, int32_t input_4) { flag = !flag; };
+    auto callback = [&flag](int32_t input_1, int32_t input_2, int32_t input_3, int32_t input_4,
+                        WindowSizeChangeReason type) { flag = !flag; };
     context_->surfaceChangedCallbackMap_[0] = callback;
     context_->surfaceChangedCallbackMap_[1] = nullptr;
-    context_->ExecuteSurfaceChangedCallbacks(0, 0);
+    context_->ExecuteSurfaceChangedCallbacks(0, 0, WindowSizeChangeReason::ROTATION);
     EXPECT_TRUE(flag);
 }
 
