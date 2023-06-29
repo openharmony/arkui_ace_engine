@@ -2602,6 +2602,7 @@ void TextFieldPattern::SetHandlerOnMoveDone()
     newHandle.SetOffset(newHandleOffset);
     newHandle.SetSize(handlePaintSize);
     info.paintRect = newHandle;
+    info.needLayout = true;
     selectionMode_ = isSingleHandle_ ? SelectionMode::NONE : SelectionMode::SELECT;
     if (isFirstHandle_) {
         textSelector_.firstHandleOffset_ = newHandleOffset;
