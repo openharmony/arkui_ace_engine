@@ -87,7 +87,7 @@ private:
     void AdaptToChildMainSize(LayoutWrapper* layoutWrapper, RefPtr<GridLayoutProperty>& gridLayoutProperty,
         float mainSize, const SizeF& idealSize);
 
-    int32_t GetStartingItem(LayoutWrapper* layoutWrapper, int32_t currentIndex) const;
+    int32_t GetStartingItem(LayoutWrapper* layoutWrapper, int32_t currentIndex);
 
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;

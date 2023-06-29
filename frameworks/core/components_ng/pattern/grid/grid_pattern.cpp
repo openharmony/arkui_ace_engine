@@ -110,7 +110,9 @@ void GridPattern::OnModifyDone()
         return;
     }
     SetAxis(gridLayoutInfo_.axis_);
-    AddScrollEvent();
+    if (!GetScrollableEvent()) {
+        AddScrollEvent();
+    }
 
     auto edgeEffect = gridLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::NONE);
     SetEdgeEffect(edgeEffect);
