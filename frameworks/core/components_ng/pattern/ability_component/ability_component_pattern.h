@@ -34,7 +34,7 @@ class ACE_EXPORT AbilityComponentPattern : public UIExtensionPattern {
 
 public:
     AbilityComponentPattern(const std::string& bundleName, const std::string& abilityName)
-        : UIExtensionPattern(bundleName, abilityName)
+        : UIExtensionPattern(Ace::WantWrap::CreateWantWrap(bundleName, abilityName))
     {}
 
     ~AbilityComponentPattern() override
