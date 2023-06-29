@@ -57,7 +57,7 @@ public:
     virtual bool GetShown() = 0;
 
     // Add interface for hot regions
-    virtual void SetHotAreas(const std::vector<Rect>& rects) {};
+    virtual void SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId) {};
 
     // Add interface to provide the size and offset of the parent window
     virtual Rect GetParentWindowRect() const = 0;

@@ -41,7 +41,7 @@ void SubwindowManager::HideMenuNG(int32_t targetId) {}
 
 void SubwindowManager::HideMenuNG() {}
 
-void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects) {}
+void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId) {}
 
 const RefPtr<Subwindow>& SubwindowManager::GetCurrentWindow()
 {

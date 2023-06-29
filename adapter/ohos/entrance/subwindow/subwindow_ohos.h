@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_SUBWINDOW_OHOS_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_SUBWINDOW_OHOS_H
 
+#include <unordered_map>
+
 #include "event_handler.h"
 #include "event_runner.h"
 #include "resource_manager.h"
@@ -76,7 +78,7 @@ public:
         return isShowed_;
     }
 
-    void SetHotAreas(const std::vector<Rect>& rects) override;
+    void SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId) override;
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) override;
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
@@ -152,6 +154,7 @@ private:
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     sptr<OHOS::Rosen::Window> window_ = nullptr;
     RefPtr<SelectPopupComponent> popup_;
+    std::unordered_map<int32_t, std::vector<Rosen::Rect>> hotAreasMap_;
 
     sptr<OHOS::Rosen::Window> dialogWindow_;
     std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;
