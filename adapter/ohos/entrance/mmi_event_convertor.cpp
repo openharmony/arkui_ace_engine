@@ -102,6 +102,9 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         touchPoint.tiltY, pointerEvent->GetDeviceId(), pointerEvent->GetTargetDisplayId(), SourceType::NONE,
         touchPoint.sourceTool };
     event.pointerEvent = pointerEvent;
+#ifdef SECURITY_COMPONENT_ENABLE
+    event.enhanceData_ = pointerEvent->GetEnhanceData();
+#endif
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
     int32_t orgAction = pointerEvent->GetPointerAction();
