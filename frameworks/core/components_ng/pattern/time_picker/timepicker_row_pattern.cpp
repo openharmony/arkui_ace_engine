@@ -233,10 +233,10 @@ std::string TimePickerRowPattern::GetSelectedObject(bool isColumnChange, int32_t
 PickerTime TimePickerRowPattern::GetCurrentTime()
 {
     PickerTime time;
-    auto allChildNode = GetAllChildNode();
-    auto amPmColumn = allChildNode["amPm"];
-    auto hourColumn = allChildNode["hour"];
-    auto minuteColumn = allChildNode["minute"];
+    UpdateAllChildNode();
+    auto amPmColumn = allChildNode_["amPm"];
+    auto hourColumn = allChildNode_["hour"];
+    auto minuteColumn = allChildNode_["minute"];
     CHECK_NULL_RETURN(hourColumn, time);
     CHECK_NULL_RETURN(minuteColumn, time);
     auto hourPickerColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
@@ -244,7 +244,7 @@ PickerTime TimePickerRowPattern::GetCurrentTime()
     auto minutePickerColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_RETURN(minutePickerColumnPattern, time);
 
-    if (hour24_) {
+    if (GetHour24()) {
         time.SetHour(hourPickerColumnPattern->GetCurrentIndex()); // hour from 0 to 23, index from 0 to 23
     } else if (amPmColumn) {
         auto amPmPickerColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
@@ -306,9 +306,9 @@ void TimePickerRowPattern::SetChangeCallback(ColumnChangeCallback&& value)
 
 void TimePickerRowPattern::FlushColumn()
 {
-    auto allChildNode = GetAllChildNode();
-    auto amPmColumn = allChildNode["amPm"];
-    auto hourColumn = allChildNode["hour"];
+    UpdateAllChildNode();
+    auto amPmColumn = allChildNode_["amPm"];
+    auto hourColumn = allChildNode_["hour"];
     if (GetHour24()) {
         CHECK_NULL_VOID(hourColumn);
         auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
@@ -330,7 +330,7 @@ void TimePickerRowPattern::FlushColumn()
         hourColumnPattern->FlushCurrentOptions();
     }
 
-    auto minuteColumn = allChildNode["minute"];
+    auto minuteColumn = allChildNode_["minute"];
     CHECK_NULL_VOID(minuteColumn);
     auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_VOID(minuteColumnPattern);
@@ -342,25 +342,25 @@ void TimePickerRowPattern::OnDataLinking(
     const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, std::vector<RefPtr<FrameNode>>& resultTags)
 {
     CHECK_NULL_VOID(tag);
-    auto hourNode = GetAllChildNode()["hour"];
+    auto hourNode = allChildNode_["hour"];
     CHECK_NULL_VOID(hourNode);
     if (tag->GetId() != hourNode->GetId()) {
         return;
     }
 
-    if (!hour24_) {
+    if (!GetHour24()) {
         HandleHour12Change(isAdd, index, resultTags);
     }
 }
 
 const std::string& TimePickerRowPattern::GetOptionsValue(const RefPtr<FrameNode>& frameNode, uint32_t optionIndex)
 {
-    auto allChildNode = GetAllChildNode();
-    if (frameNode == allChildNode["amPm"]) {
-        return options_[allChildNode["amPm"]][optionIndex];
+    UpdateAllChildNode();
+    if (frameNode == allChildNode_["amPm"]) {
+        return options_[allChildNode_["amPm"]][optionIndex];
     }
     bool isHour12 = !GetHour24();
-    auto isHourNode = frameNode == allChildNode["hour"];
+    auto isHourNode = frameNode == allChildNode_["hour"];
     if (options_.find(frameNode) == options_.end()) {
         options_[frameNode] = std::unordered_map<uint32_t, std::string>();
     }
@@ -375,8 +375,8 @@ void TimePickerRowPattern::OnColumnsBuilding()
 {
     HandleHourColumnBuilding();
 
-    auto allChildNode = GetAllChildNode();
-    auto minuteColumn = allChildNode["minute"];
+    UpdateAllChildNode();
+    auto minuteColumn = allChildNode_["minute"];
     CHECK_NULL_VOID(minuteColumn);
     auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_VOID(minuteColumnPattern);
@@ -393,9 +393,9 @@ void TimePickerRowPattern::OnColumnsBuilding()
 
 void TimePickerRowPattern::HandleHourColumnBuilding()
 {
-    auto allChildNode = GetAllChildNode();
-    auto amPmColumn = allChildNode["amPm"];
-    auto hourColumn = allChildNode["hour"];
+    UpdateAllChildNode();
+    auto amPmColumn = allChildNode_["amPm"];
+    auto hourColumn = allChildNode_["hour"];
     optionsTotalCount_[hourColumn] = 0;
     if (GetHour24()) {
         CHECK_NULL_VOID(hourColumn);
@@ -439,11 +439,10 @@ void TimePickerRowPattern::HandleHourColumnBuilding()
     }
 }
 
-std::unordered_map<std::string, RefPtr<FrameNode>> TimePickerRowPattern::GetAllChildNode()
+void TimePickerRowPattern::UpdateAllChildNode()
 {
-    std::unordered_map<std::string, RefPtr<FrameNode>> allChildNode;
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, allChildNode);
+    CHECK_NULL_VOID(host);
     if (GetHour24() && host->GetChildren().size() == CHILD_WITH_AMPM_SIZE) {
         host->RemoveChildAtIndex(0);
         amPmId_.reset();
@@ -453,58 +452,57 @@ std::unordered_map<std::string, RefPtr<FrameNode>> TimePickerRowPattern::GetAllC
         CreateAmPmNode();
     }
     if (GetHour24() && host->GetChildren().size() != CHILD_WITHOUT_AMPM_SIZE) {
-        return allChildNode;
+        return;
     }
 
     if (!GetHour24() && host->GetChildren().size() != CHILD_WITH_AMPM_SIZE) {
-        return allChildNode;
+        return;
     }
     auto children = host->GetChildren();
     auto iter = children.begin();
-    CHECK_NULL_RETURN(*iter, allChildNode);
+    CHECK_NULL_VOID(*iter);
     if (!GetHour24()) {
         auto amPm = (*iter);
-        CHECK_NULL_RETURN(amPm, allChildNode);
+        CHECK_NULL_VOID(amPm);
         iter++;
         auto hour = *iter;
-        CHECK_NULL_RETURN(hour, allChildNode);
+        CHECK_NULL_VOID(hour);
         iter++;
         auto minute = *iter;
-        CHECK_NULL_RETURN(minute, allChildNode);
+        CHECK_NULL_VOID(minute);
         auto amPmStackNode = DynamicCast<FrameNode>(amPm);
         auto amPmNode = DynamicCast<FrameNode>(amPmStackNode->GetLastChild());
         auto hourStackNode = DynamicCast<FrameNode>(hour);
         auto hourNode = DynamicCast<FrameNode>(hourStackNode->GetLastChild());
         auto minuteStackNode = DynamicCast<FrameNode>(minute);
         auto minuteNode = DynamicCast<FrameNode>(minuteStackNode->GetLastChild());
-        CHECK_NULL_RETURN(amPmNode, allChildNode);
-        CHECK_NULL_RETURN(hourNode, allChildNode);
-        CHECK_NULL_RETURN(minuteNode, allChildNode);
-        allChildNode["amPm"] = amPmNode;
-        allChildNode["hour"] = hourNode;
-        allChildNode["minute"] = minuteNode;
+        CHECK_NULL_VOID(amPmNode);
+        CHECK_NULL_VOID(hourNode);
+        CHECK_NULL_VOID(minuteNode);
+        allChildNode_["amPm"] = amPmNode;
+        allChildNode_["hour"] = hourNode;
+        allChildNode_["minute"] = minuteNode;
     } else {
         auto hour = *iter;
-        CHECK_NULL_RETURN(hour, allChildNode);
+        CHECK_NULL_VOID(hour);
         iter++;
         auto minute = *iter;
-        CHECK_NULL_RETURN(minute, allChildNode);
+        CHECK_NULL_VOID(minute);
         auto hourStackNode = DynamicCast<FrameNode>(hour);
         auto hourNode = DynamicCast<FrameNode>(hourStackNode->GetLastChild());
         auto minuteStackNode = DynamicCast<FrameNode>(minute);
         auto minuteNode = DynamicCast<FrameNode>(minuteStackNode->GetLastChild());
-        CHECK_NULL_RETURN(hourNode, allChildNode);
-        CHECK_NULL_RETURN(minuteNode, allChildNode);
-        allChildNode["hour"] = hourNode;
-        allChildNode["minute"] = minuteNode;
+        CHECK_NULL_VOID(hourNode);
+        CHECK_NULL_VOID(minuteNode);
+        allChildNode_["hour"] = hourNode;
+        allChildNode_["minute"] = minuteNode;
     }
-    return allChildNode;
 }
 
 void TimePickerRowPattern::HandleHour12Change(bool isAdd, uint32_t index, std::vector<RefPtr<FrameNode>>& resultTags)
 {
-    auto allChildNode = GetAllChildNode();
-    auto amPm = allChildNode["amPm"];
+    UpdateAllChildNode();
+    auto amPm = allChildNode_["amPm"];
     CHECK_NULL_VOID(amPm);
     auto amPmPickerColumnPattern = amPm->GetPattern<TimePickerColumnPattern>();
 

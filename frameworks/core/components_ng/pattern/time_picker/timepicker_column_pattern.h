@@ -91,6 +91,8 @@ public:
 
     void SetCurrentIndex(uint32_t value)
     {
+        // minute : [0, 59];
+        // AM_PM hour : [0, 11]; 24 hour : [0, 23]
         currentIndex_ = value;
     }
 
