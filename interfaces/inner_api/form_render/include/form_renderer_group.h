@@ -67,9 +67,10 @@ public:
     void UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void DeleteForm();
     void DeleteForm(const std::string& compId);
-    void ReloadForm();
+    void ReloadForm(const AppExecFwk::FormJsInfo& formJsInfo);
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
     bool IsFormRequestsEmpty();
+    const std::vector<FormRequest>& GetAllRendererFormRequests() const;
 private:
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
     std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime_;

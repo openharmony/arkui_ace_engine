@@ -96,13 +96,13 @@ void FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk
     OnSurfaceCreate(formJsInfo);
 }
 
-void FormRenderer::ReloadForm()
+void FormRenderer::ReloadForm(const std::string& url)
 {
     if (!uiContent_) {
         HILOG_ERROR("uiContent_ is null");
         return;
     }
-    uiContent_->ReloadForm();
+    uiContent_->ReloadForm(url);
 }
 
 bool FormRenderer::IsAllowUpdate()

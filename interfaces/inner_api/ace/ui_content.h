@@ -131,7 +131,7 @@ public:
     virtual void SetFormHeight(const float height) = 0;
     virtual float GetFormWidth() = 0;
     virtual float GetFormHeight() = 0;
-    virtual void ReloadForm() {};
+    virtual void ReloadForm(const std::string& url) {};
     virtual void OnFormSurfaceChange(float width, float height) {}
 
     virtual void SetActionEventHandler(std::function<void(const std::string&)>&& actionCallback) = 0;
