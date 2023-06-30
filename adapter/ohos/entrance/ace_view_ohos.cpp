@@ -95,10 +95,11 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
 {
     CHECK_NULL_VOID_NOLOG(view);
     LogPointInfo(pointerEvent);
+    int32_t pointerAction = pointerEvent->GetPointerAction();
     if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         // mouse event
-        if (pointerEvent->GetPointerAction() >= MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
-            pointerEvent->GetPointerAction() <= MMI::PointerEvent::POINTER_ACTION_AXIS_END) {
+        if (pointerAction >= MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
+            pointerAction <= MMI::PointerEvent::POINTER_ACTION_AXIS_END) {
             LOGD("ProcessAxisEvent");
             view->ProcessAxisEvent(pointerEvent);
         } else {
@@ -114,7 +115,12 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
 #ifdef ENABLE_DRAG_FRAMEWORK
         view->ProcessDragEvent(pointerEvent);
 #endif // ENABLE_DRAG_FRAMEWORK
-        view->ProcessTouchEvent(pointerEvent);
+        if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE ||
+            pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
+            view->ProcessMouseEvent(pointerEvent);
+        } else {
+            view->ProcessTouchEvent(pointerEvent);
+        }
     }
 }
 
