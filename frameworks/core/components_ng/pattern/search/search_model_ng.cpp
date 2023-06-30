@@ -489,6 +489,32 @@ void SearchModelNG::SetOnChange(std::function<void(const std::string&)>&& onChan
     eventHub->SetOnChange(std::move(onChange));
 }
 
+void SearchModelNG::SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<SearchEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelectionChange(std::move(func));
+}
+
+void SearchModelNG::SetOnScroll(std::function<void(float, float)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<SearchEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollChangeEvent(std::move(func));
+}
+
+void SearchModelNG::SetSelectionMenuHidden(bool selectionMenuHidden)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateSelectionMenuHidden(selectionMenuHidden);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 void SearchModelNG::SetOnCopy(std::function<void(const std::string&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<SearchEventHub>();

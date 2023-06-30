@@ -396,6 +396,14 @@ void SelectOverlayPattern::ShowOrHiddenMenu(bool isHidden)
     }
 }
 
+void SelectOverlayPattern::DisableMenu(bool isDisabled)
+{
+    info_->menuInfo.menuDisable = isDisabled;
+    auto host = DynamicCast<SelectOverlayNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    host->UpdateToolBar(false);
+}
+
 bool SelectOverlayPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure || dirty->SkipMeasureContent()) {

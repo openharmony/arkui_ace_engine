@@ -113,6 +113,7 @@ public:
     }
 
     void ShowOrHiddenMenu(bool isHidden);
+    void DisableMenu(bool isDisabled);
 
     void SetClosedByGlobalTouchEvent(bool closedByGlobalTouch)
     {

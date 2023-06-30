@@ -25,7 +25,6 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
-
 class TextFieldEventHub : public EventHub {
     DECLARE_ACE_TYPE(TextFieldEventHub, EventHub)
 
@@ -86,6 +85,19 @@ public:
         if (onChange_) {
             LOGI("On change %{private}s", value.c_str());
             onChange_(value);
+        }
+    }
+
+    void SetOnSelectionChange(std::function<void(int32_t, int32_t)>&& func)
+    {
+        onSelectionChange_ = std::move(func);
+    }
+
+    void FireOnSelectionChange(int32_t selectionStart, int32_t selectionEnd)
+    {
+        if (onSelectionChange_) {
+            LOGI("On selection change start %{private}d, end %{private}d", selectionStart, selectionEnd);
+            onSelectionChange_(selectionStart, selectionEnd);
         }
     }
 
@@ -193,6 +205,18 @@ public:
         onValueChangeEvent_ = std::move(func);
     }
 
+    void SetOnScrollChangeEvent(std::function<void(float, float)>&& func)
+    {
+        onScrollChangeEvent_ = std::move(func);
+    }
+
+    void FireOnScrollChangeEvent(float offsetX, float offsetY)
+    {
+        if (onScrollChangeEvent_) {
+            onScrollChangeEvent_(offsetX, offsetY);
+        }
+    }
+    
 private:
     OnScrollEvent onScrollEvent_;
     OnScrollBeginEvent onScrollBeginEvent_;
@@ -200,11 +224,13 @@ private:
     OnScrollStartEvent onScrollStartEvent_;
     OnScrollStopEvent onScrollStopEvent_;
     OnScrollIndexEvent onScrollIndexEvent_;
+    std::function<void(float, float)> onScrollChangeEvent_;
 
     std::function<void(const std::string&)> onInputFilterError_;
     std::function<void(bool)> onEditChanged_;
     std::function<void(int32_t)> onSubmit_;
     std::function<void(const std::string&)> onChange_;
+    std::function<void(int32_t, int32_t)> onSelectionChange_;
 
     std::function<void(const std::string&)> onCopy_;
     std::function<void(const std::string&)> onCut_;

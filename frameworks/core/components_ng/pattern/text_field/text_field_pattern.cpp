@@ -51,6 +51,7 @@
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/drawing.h"
@@ -286,8 +287,9 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         secondInfo.paintRect = { textSelector_.secondHandleOffset_, handlePaintSize };
         selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstInfo, secondInfo);
     }
-
-    CheckScrollable();
+    if (IsTextArea()) {
+        CheckScrollable();
+    }
     UpdateScrollBarOffset();
     caretUpdateType_ = CaretUpdateType::NONE;
     return true;
@@ -661,7 +663,11 @@ void TextFieldPattern::UpdateCaretPositionByPressOffset()
         return;
     }
     UpdateCaretOffsetByLastTouchOffset();
-    UpdateSelection(textEditingValue_.caretPosition);
+    if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED && !textEditingValue_.CaretAtLast()) {
+        UpdateSelection(textEditingValue_.caretPosition, textEditingValue_.caretPosition + 1);
+    } else {
+        UpdateSelection(textEditingValue_.caretPosition);
+    }
     GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
     selectionMode_ = SelectionMode::NONE;
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -842,6 +848,54 @@ void TextFieldPattern::OnTextAreaScroll(float offset)
         ShowSelectOverlay(firstHandle, secondHandle);
     }
     UpdateScrollBarOffset();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    eventHub->FireOnScrollChangeEvent(textRect_.GetX(), currentOffset_);
+}
+
+void TextFieldPattern::OnTextInputScroll(float offset)
+{
+    if (IsTextArea() || textRect_.Width() <= contentRect_.Width() ||
+        (textRect_.GetX() + offset) > contentRect_.GetX()) {
+        return;
+    }
+    if ((std::abs(((textRect_.GetX() + offset) - contentRect_.Width() - GetPaddingRight())) > textRect_.Width()) &&
+        LessNotEqual(offset, 0.0f)) {
+        return;
+    }
+    caretRect_.SetLeft(caretRect_.GetX() + offset);
+    currentOffset_ = textRect_.GetX() + offset;
+    textRect_.SetOffset(OffsetF(currentOffset_, textRect_.GetY()));
+    UpdateSelectionOffset();
+    if (SelectOverlayIsOn()) {
+        SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
+        textSelector_.firstHandleOffset_.SetX(textSelector_.firstHandleOffset_.GetX() + offset);
+        std::optional<RectF> firstHandle = RectF(textSelector_.firstHandleOffset_, handlePaintSize);
+
+        std::optional<RectF> secondHandle;
+        if (!isSingleHandle_) {
+            textSelector_.secondHandleOffset_.SetX(textSelector_.secondHandleOffset_.GetX() + offset);
+            secondHandle = { textSelector_.secondHandleOffset_, handlePaintSize };
+        }
+        CheckHandles(firstHandle, secondHandle);
+        ShowSelectOverlay(firstHandle, secondHandle);
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // If the parent node is a Search, the Search callback is executed.
+    if (IsSearchParentNode()) {
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(GetHost()->GetParent());
+        auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
+        eventHub->FireOnScrollChangeEvent(currentOffset_, textRect_.GetY());
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        return;
+    }
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    eventHub->FireOnScrollChangeEvent(currentOffset_, textRect_.GetY());
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextFieldPattern::GetTextRectsInRange(
@@ -1361,6 +1415,7 @@ void TextFieldPattern::HandleOnCopy()
 
     UpdateCaretPositionWithClamp(textSelector_.GetEnd());
     UpdateSelection(textEditingValue_.caretPosition);
+    UpdateCaretRectByPosition(textEditingValue_.caretPosition);
     selectionMode_ = SelectionMode::NONE;
     StartTwinkling();
     auto host = GetHost();
@@ -1503,7 +1558,7 @@ void TextFieldPattern::HandleOnCut()
     caretUpdateType_ = CaretUpdateType::EVENT;
     CloseSelectOverlay();
     UpdateEditingValueToRecord();
-    UpdateSelection(0);
+    UpdateSelection(textEditingValue_.caretPosition);
     MarkRedrawOverlay();
     cursorVisible_ = true;
 
@@ -1535,7 +1590,21 @@ void TextFieldPattern::UpdateSelection(int32_t both)
 
 void TextFieldPattern::UpdateSelection(int32_t start, int32_t end)
 {
-    textSelector_.Update(start, end);
+    if (start != textSelector_.GetStart() || end != textSelector_.GetEnd()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        // If the parent node is a Search, the Search callback is executed.
+        if (IsSearchParentNode()) {
+            auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+            auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
+            eventHub->FireOnSelectionChange(start, end);
+            textSelector_.Update(start, end);
+            return;
+        }
+        auto eventHub = host->GetEventHub<TextFieldEventHub>();
+        eventHub->FireOnSelectionChange(start, end);
+        textSelector_.Update(start, end);
+    }
 }
 
 void TextFieldPattern::FireEventHubOnChange(const std::string& text)
@@ -2083,7 +2152,13 @@ void TextFieldPattern::OnModifyDone()
             scrollBar->SetStartReservedHeight(0.0_px);
             scrollBar->SetEndReservedHeight(0.0_px);
         }
+    } else {
+        SetAxis(Axis::HORIZONTAL);
+        if (!GetScrollableEvent()) {
+            AddScrollEvent();
+        }
     }
+
     SetShowError();
     if (IsTextArea() && layoutProperty->HasMaxLength()) {
         if (setBorderFlag_) {
@@ -2355,7 +2430,18 @@ void TextFieldPattern::ShowSelectOverlay(
             CHECK_NULL_VOID(pattern);
             pattern->OnHandleMoveDone(handleRect, isFirst);
         };
+
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID_NOLOG(host);
+        auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+
         selectInfo.isUsingMouse = pattern->IsUsingMouse();
+
+        if (layoutProperty->GetSelectionMenuHiddenValue(false) && selectInfo.isUsingMouse) {
+            return;
+        }
+
         selectInfo.rightClickOffset = pattern->GetRightClickOffset();
         selectInfo.singleLineHeight = pattern->PreferredLineHeight();
         pattern->UpdateSelectMenuInfo(hasData);
@@ -2405,8 +2491,6 @@ void TextFieldPattern::ShowSelectOverlay(
         if (!pattern->GetMenuOptionItems().empty()) {
             selectInfo.menuOptionItems = pattern->GetMenuOptionItems();
         }
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID_NOLOG(host);
         auto gesture = host->GetOrCreateGestureEventHub();
         gesture->RemoveTouchEvent(pattern->GetTouchListener());
         selectInfo.callerFrameNode = host;
@@ -2418,6 +2502,9 @@ void TextFieldPattern::ShowSelectOverlay(
         auto start = pattern->GetTextSelector().GetStart();
         auto end = pattern->GetTextSelector().GetEnd();
         selectOverlay->SetSelectInfo(pattern->GetTextEditingValue().GetSelectedText(start, end));
+
+        selectOverlay->ShowOrHiddenMenu(layoutProperty->GetSelectionMenuHiddenValue(false));
+        selectOverlay->DisableMenu(layoutProperty->GetSelectionMenuHiddenValue(false));
     };
     clipboard_->HasData(hasDataCallback);
 }
@@ -2531,7 +2618,11 @@ int32_t TextFieldPattern::UpdateCaretPositionOnHandleMove(const OffsetF& localOf
 void TextFieldPattern::UpdateCopyAllStatus()
 {
     selectMenuInfo_.showCopyAll = !IsSelectAll();
-    if (selectOverlayProxy_) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (selectOverlayProxy_ && !layoutProperty->GetSelectionMenuHiddenValue(false)) {
         selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
     }
 }
@@ -4289,6 +4380,7 @@ bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
         offset = scrollBar->CalcPatternOffset(offset);
         source = SCROLL_FROM_BAR;
     }
+    OnTextInputScroll(offset);
     OnTextAreaScroll(offset);
     auto selectOverlayProxy = GetSelectOverlay();
     CHECK_NULL_RETURN_NOLOG(selectOverlayProxy, true);
@@ -4678,5 +4770,18 @@ void TextFieldPattern::CheckHandles(std::optional<RectF>& firstHandle, std::opti
     }
     LOGD("firstHandleOffset %{public}s, secondHandleOffset %{public}s contentRect: %{public}s",
         firstHandleOffset.ToString().c_str(), secondHandleOffset.ToString().c_str(), contentRect_.ToString().c_str());
+}
+
+void TextFieldPattern::StopEditing()
+{
+    LOGI("TextFieldPattern: StopEditing");
+    if (!HasFocus()) {
+        return;
+    }
+    HandleSetSelection(textEditingValue_.caretPosition, textEditingValue_.caretPosition);
+    StopTwinkling();
+    MarkRedrawOverlay();
+    CloseSelectOverlay();
+    CloseKeyboard(true);
 }
 } // namespace OHOS::Ace::NG
