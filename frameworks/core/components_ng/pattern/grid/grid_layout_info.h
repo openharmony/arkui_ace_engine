@@ -30,7 +30,9 @@ struct GridLayoutInfo {
     {
         float lengthOfItemsInViewport = 0.0;
         for (auto i = startMainLineIndex_; i <= endMainLineIndex_; i++) {
-            lengthOfItemsInViewport += (lineHeightMap_[i] + mainGap);
+            if (GreatOrEqual(lineHeightMap_[i], 0)) {
+                lengthOfItemsInViewport += (lineHeightMap_[i] + mainGap);
+            }
         }
         return lengthOfItemsInViewport - mainGap;
     }
