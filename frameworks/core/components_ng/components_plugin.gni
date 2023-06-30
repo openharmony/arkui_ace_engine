@@ -17,6 +17,7 @@ import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 
 component_plugins = [
   "qrcode",
+  "relative_container",
   "patternlock",
 ]
 

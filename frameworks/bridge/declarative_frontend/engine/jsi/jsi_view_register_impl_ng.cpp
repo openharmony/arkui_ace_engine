@@ -100,7 +100,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_rect.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_recycle_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_refresh.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_relative_container.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_render_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
@@ -145,6 +144,7 @@
 #else
 #include "frameworks/bridge/declarative_frontend/jsview/js_pattern_lock.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_qrcode.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_relative_container.h"
 #endif
 
 #ifdef VIDEO_SUPPORTED
@@ -445,17 +445,18 @@ void JsBindViews(BindingTarget globalObj)
     JSNavRouter::JSBind(globalObj);
     JSViewContext::JSBind(globalObj);
     JSSlidingPanel::JSBind(globalObj);
-    JSRelativeContainer::JSBind(globalObj);
     JSCanvasPattern::JSBind(globalObj);
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
     JSPath2D::JSBind(globalObj);
 #ifdef USE_COMPONENTS_LIB
     JSBindLibs("arkui.qrcode", "QRCode");
+    JSBindLibs("arkui.relativeContainer", "RelativeContainer");
     JSBindLibs("arkui.patternlock", "PatternLock");
     JSBindLibs("arkui.patternlockcontroller", "PatternLockController", true);
 #else
     JSQRCode::JSBind(globalObj);
+    JSRelativeContainer::JSBind(globalObj);
     JSPatternLock::JSBind(globalObj);
     JSPatternLockController::JSBind(globalObj);
 #endif
