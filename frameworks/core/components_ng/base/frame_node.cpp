@@ -700,11 +700,6 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
         layoutWrapper->SetActive();
         layoutWrapper->SetRootMeasureNode();
         {
-            ACE_SCOPED_TRACE("LayoutWrapper::RestoreGeoState");
-            // restore to the geometry state after last Layout and before SafeArea expansion and keyboard avoidance
-            LayoutWrapper::RestoreGeoState(depth);
-        }
-        {
             ACE_SCOPED_TRACE("LayoutWrapper::Measure");
             layoutWrapper->Measure(layoutConstraint);
         }
@@ -1824,8 +1819,8 @@ bool FrameNode::IsContentRoot()
         // so stop traversing if we're beyond that
         return false;
     }
-    // overlay root
-    if (GetDepth() == 2 && GetTag() != V2::STAGE_ETS_TAG) {
+    // title bar
+    if (GetDepth() == 2 && GetTag() == V2::CONTAINER_MODAL_ETS_TAG) {
         return true;
     }
     // page root

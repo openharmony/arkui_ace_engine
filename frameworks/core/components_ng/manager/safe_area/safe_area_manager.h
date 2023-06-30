@@ -44,6 +44,13 @@ public:
         return cutoutSafeArea_;
     }
 
+    bool UpdateKeyboardSafeArea(float keyboardHeight);
+
+    SafeAreaInsets::Inset GetKeyboardInset() const
+    {
+        return keyboardInset_;
+    }
+
     void UpdateKeyboardOffset(float offset)
     {
         keyboardOffset_ = offset;
@@ -73,25 +80,27 @@ public:
         return wrappersToAdjust_;
     }
 
-    const std::vector<WeakPtr<FrameNode>>& GetGeoRestoreNodes()
+    const std::set<WeakPtr<FrameNode>>& GetGeoRestoreNodes() const
     {
         return geoRestoreNodes_;
     }
 
     void AddGeoRestoreNode(const WeakPtr<FrameNode>& node)
     {
-        geoRestoreNodes_.emplace_back(node);
+        geoRestoreNodes_.insert(node);
     }
 
-    void SwapGeoRestoreNodes(std::vector<WeakPtr<FrameNode>>& nodes)
+    void RemoveRestoreNode(const WeakPtr<FrameNode>& node)
     {
-        geoRestoreNodes_.swap(nodes);
+        geoRestoreNodes_.erase(node);
     }
 
 private:
     SafeAreaInsets systemSafeArea_;
     SafeAreaInsets cutoutSafeArea_;
-    std::vector<WeakPtr<FrameNode>> geoRestoreNodes_;
+    // bottom direction only
+    SafeAreaInsets::Inset keyboardInset_;
+    std::set<WeakPtr<FrameNode>> geoRestoreNodes_;
     std::vector<WeakPtr<LayoutWrapper>> wrappersToAdjust_;
     float keyboardOffset_ = 0.0f;
 

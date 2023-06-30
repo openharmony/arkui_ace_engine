@@ -234,7 +234,7 @@ public:
     // save geometry states before SafeArea expansion / keyboard avoidance
     static void SaveGeoState();
     // restore to the geometry state after last Layout and before SafeArea expansion and keyboard avoidance
-    static void RestoreGeoState(int32_t rootDepth);
+    void RestoreGeoState();
 
 private:
     void CreateRootConstraint();

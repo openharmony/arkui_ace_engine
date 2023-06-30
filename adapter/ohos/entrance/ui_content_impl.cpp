@@ -184,6 +184,7 @@ public:
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID_NOLOG(taskExecutor);
         auto safeArea = ConvertAvoidArea(avoidArea);
+        ContainerScope scope(instanceId_);
         taskExecutor->PostTask(
             [pipeline, safeArea, type] {
                 if (type == OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM) {

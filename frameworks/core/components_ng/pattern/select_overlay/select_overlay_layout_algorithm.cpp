@@ -33,7 +33,7 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(menu);
-    if (!CheckInShowArea(info_)) {
+    if (!CheckInShowArea(*info_)) {
         LayoutWrapper::RemoveChildInRenderTree(menu);
         return;
     }
@@ -53,10 +53,10 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             OffsetF(menuContext->GetOffset()->GetX().ConvertToPx(), menuContext->GetOffset()->GetY().ConvertToPx());
     }
     if (!info_->menuInfo.menuIsShow) {
-        hasExtensitonMenu_ = false;
+        hasExtensionMenu_ = false;
         return;
     }
-    hasExtensitonMenu_ = true;
+    hasExtensionMenu_ = true;
     button->GetGeometryNode()->SetMarginFrameOffset(menuOffset);
     button->Layout();
     auto extensionMenuOffset = ComputeExtensionMenuPosition(layoutWrapper, offset);
@@ -67,16 +67,16 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     extensionMenu->Layout();
 }
 
-bool SelectOverlayLayoutAlgorithm::CheckInShowArea(const std::shared_ptr<SelectOverlayInfo>& info)
+bool SelectOverlayLayoutAlgorithm::CheckInShowArea(const SelectOverlayInfo& info)
 {
-    if (info->useFullScreen) {
+    if (info.useFullScreen) {
         return true;
     }
-    if (info->isSingleHandle) {
-        return info->firstHandle.paintRect.IsWrappedBy(info->showArea);
+    if (info.isSingleHandle) {
+        return info.firstHandle.paintRect.IsWrappedBy(info.showArea);
     }
-    return info->firstHandle.paintRect.IsWrappedBy(info->showArea) &&
-           info->secondHandle.paintRect.IsWrappedBy(info->showArea);
+    return info.firstHandle.paintRect.IsWrappedBy(info.showArea) &&
+           info.secondHandle.paintRect.IsWrappedBy(info.showArea);
 }
 
 OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* layoutWrapper)
