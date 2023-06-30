@@ -19,13 +19,42 @@
 #include "core/components_ng/event/event_hub.h"
 
 namespace OHOS::Ace::NG {
+class TextInsertValueInfo {
+public:
+    TextInsertValueInfo() = default;
+    ~TextInsertValueInfo() = default;
+};
+
+class RichEditorInsertValue : public BaseEventInfo {
+    DECLARE_ACE_TYPE(RichEditorInsertValue, BaseEventInfo)
+public:
+    RichEditorInsertValue() : BaseEventInfo("RichEditorInsertValue") {}
+    ~RichEditorInsertValue() override = default;
+};
+
+enum class SpanResultType { TEXT, IMAGE };
+
+class RichEditorAbstractSpanResult {
+public:
+    RichEditorAbstractSpanResult() = default;
+    ~RichEditorAbstractSpanResult() = default;
+};
+
+enum class RichEditorDeleteDirection { BACKWARD = 0, FORWARD };
+
+class RichEditorDeleteValue : public BaseEventInfo {
+    DECLARE_ACE_TYPE(RichEditorDeleteValue, BaseEventInfo)
+public:
+    RichEditorDeleteValue() : BaseEventInfo("RichEditorDeleteValue") {}
+    ~RichEditorDeleteValue() = default;
+};
+
 class RichEditorEventHub : public EventHub {
     DECLARE_ACE_TYPE(RichEditorEventHub, EventHub)
 
 public:
     RichEditorEventHub() = default;
     ~RichEditorEventHub() override = default;
-
     void SetOnReady(std::function<void()>&& func);
     void FireOnReady();
 
