@@ -44,13 +44,18 @@ public:
         return false;
     }
 
+    bool UsResRegion() override
+    {
+        return false;
+    }
+
     void OnAttachToFrameNode() override
     {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->GetRenderContext()->UpdateClipEdge(true);
     }
-    
+
     void BeforeCreateLayoutWrapper() override
     {
         if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {
