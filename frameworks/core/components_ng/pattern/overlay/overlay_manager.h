@@ -63,6 +63,7 @@ public:
     void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
     void ErasePopup(int32_t targetId);
     void HideAllPopups();
+    void HideCustomPopups();
 
     const PopupInfo& GetPopupInfo(int32_t targetId)
     {
@@ -108,7 +109,7 @@ public:
      *
      *   @return    true if popup was removed, false if no overlay exists
      */
-    bool RemoveOverlay();
+    bool RemoveOverlay(bool isBackPressed);
     bool RemoveModalInOverlay();
     bool RemoveOverlayInSubwindow();
 
@@ -172,6 +173,11 @@ public:
         hasPixelMap_ = hasPixelMap;
     }
 
+    RefPtr<FrameNode> GetPixelMapNode()
+    {
+        return pixmapColumnNodeWeak_.Upgrade();
+    }
+
     bool GetHasFilter()
     {
         return hasFilter_;
@@ -207,7 +213,7 @@ public:
         filterColumnNodeWeak_ = columnNode;
     }
 
-    void MountPixelmapToRootNode(const RefPtr<FrameNode>& columnNode);
+    void MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode);
     void MountEventToRootNode(const RefPtr<FrameNode>& columnNode);
     void RemovePixelMap();
     void RemovePixelMapAnimation(bool startDrag, double x, double y);
@@ -244,23 +250,29 @@ private:
     void OpenDialogAnimation(const RefPtr<FrameNode>& node);
     void CloseDialogAnimation(const RefPtr<FrameNode>& node);
 
-    void AdaptToSafeArea(const RefPtr<FrameNode>& node);
-
     void SaveLastModalNode();
     void PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
     void DefaultModalTransition(bool isTransitionIn);
     void PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
+    void FireModalPageShow();
+    void FireModalPageHide();
 
     void PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition = true);
 
     void ComputeSheetOffset(NG::SheetStyle& sheetStyle);
 
+    void BeforeShowDialog(const RefPtr<FrameNode>& dialogNode);
+    void RemoveDialogFromMap(const RefPtr<FrameNode>& node);
+    bool DialogInMapHoldingFocus();
+
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
     // K: target frameNode ID, V: menuNode
     std::unordered_map<int32_t, RefPtr<FrameNode>> menuMap_;
+    std::unordered_map<int32_t, RefPtr<FrameNode>> dialogMap_;
     std::unordered_map<int32_t, RefPtr<FrameNode>> customPopupMap_;
     std::stack<WeakPtr<FrameNode>> modalStack_;
+    std::list<WeakPtr<FrameNode>> modalList_;
     WeakPtr<FrameNode> lastModalNode_;
     float sheetHeight_ {0.0};
     WeakPtr<UINode> rootNodeWeak_;
@@ -269,7 +281,7 @@ private:
     bool hasFilter_ {false};
     bool hasEvent_ {false};
     bool isOnAnimation_ {false};
-    WeakPtr<FrameNode> pixelmapColumnNodeWeak_;
+    WeakPtr<FrameNode> pixmapColumnNodeWeak_;
     WeakPtr<FrameNode> filterColumnNodeWeak_;
     WeakPtr<FrameNode> eventColumnNodeWeak_;
 #endif // ENABLE_DRAG_FRAMEWORK

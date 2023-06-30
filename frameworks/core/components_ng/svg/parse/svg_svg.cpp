@@ -34,6 +34,7 @@ RefPtr<SvgNode> SvgSvg::Create()
     return AceType::MakeRefPtr<SvgSvg>();
 }
 
+#ifndef USE_ROSEN_DRAWING
 SkPath SvgSvg::AsPath(const Size& viewPort) const
 {
     SkPath path;
@@ -43,6 +44,17 @@ SkPath SvgSvg::AsPath(const Size& viewPort) const
     }
     return path;
 }
+#else
+RSRecordingPath SvgSvg::AsPath(const Size& viewPort) const
+{
+    RSRecordingPath path;
+    for (const auto& child : children_) {
+        RSRecordingPath childPath = child->AsPath(viewPort);
+        path.Op(path, childPath, RSPathOp::UNION);
+    }
+    return path;
+}
+#endif
 
 Size SvgSvg::GetSize() const
 {

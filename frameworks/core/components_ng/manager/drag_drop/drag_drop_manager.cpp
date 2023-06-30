@@ -177,6 +177,34 @@ void DragDropManager::UpdatePixelMapPosition(int32_t globalX, int32_t globalY)
 }
 #endif // ENABLE_DRAG_FRAMEWORK
 
+RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(const RefPtr<UINode> parentNode,
+    std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes)
+{
+    CHECK_NULL_RETURN(parentNode, nullptr);
+    auto children = parentNode->GetChildren();
+    
+    for (auto index = static_cast<int>(children.size()) - 1; index >= 0; index--) {
+        auto child = parentNode->GetChildAtIndex(index);
+        if (child == nullptr) {
+            LOGW("when findding target in child nodes, find child is nullptr");
+            continue;
+        }
+        auto childFindResult = FindTargetInChildNodes(child, hitFrameNodes);
+        if (childFindResult) {
+            return childFindResult;
+        }
+    }
+
+    auto parentFrameNode = AceType::DynamicCast<FrameNode>(parentNode);
+    CHECK_NULL_RETURN(parentFrameNode, nullptr);
+    for (auto iter : hitFrameNodes) {
+        if (parentFrameNode == iter.second) {
+            return parentFrameNode;
+        }
+    }
+    return nullptr;
+}
+
 RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType)
 {
     std::set<WeakPtr<FrameNode>> frameNodes;
@@ -221,6 +249,14 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, fl
 
     if (hitFrameNodes.empty()) {
         return nullptr;
+    }
+    RefPtr<UINode> rootNode = hitFrameNodes.rbegin()->second;
+    while (rootNode->GetParent()) {
+        rootNode = rootNode->GetParent();
+    }
+    auto result = FindTargetInChildNodes(rootNode, hitFrameNodes);
+    if (result) {
+        return result;
     }
     return hitFrameNodes.rbegin()->second;
 }
@@ -319,6 +355,9 @@ void DragDropManager::OnDragMove(float globalX, float globalY, const std::string
             preTargetFrameNode_ = nullptr;
         }
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+        InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::DEFAULT);
+#endif // ENABLE_DRAG_FRAMEWORK
         return;
     }
 
@@ -446,10 +485,10 @@ void DragDropManager::FireOnDragEvent(
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
 
-    auto extraParams = eventHub->GetDragExtraParams(extraInfo, point, type);
+    auto extraParams = eventHub->GetDragExtraParams(extraInfo_.empty() ? extraInfo : extraInfo_, point, type);
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    event->SetX(pipeline->ConvertPxToVp(Dimension(point.GetX(), DimensionUnit::PX)));
-    event->SetY(pipeline->ConvertPxToVp(Dimension(point.GetY(), DimensionUnit::PX)));
+    event->SetX((double)point.GetX());
+    event->SetY((double)point.GetY());
 
     switch (type) {
         case DragEventType::ENTER:

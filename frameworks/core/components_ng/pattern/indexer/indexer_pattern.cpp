@@ -58,7 +58,6 @@ void IndexerPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetArrayValue().has_value()) {
@@ -76,16 +75,18 @@ void IndexerPattern::OnModifyDone()
     }
     auto propSelect = layoutProperty->GetSelected().value();
     propSelect = (propSelect >= 0 && propSelect < itemCount_) ? propSelect : 0;
-    auto selectChanged = false;
     if (propSelect != lastSelectProp_) {
         selected_ = propSelect;
         lastSelectProp_ = propSelect;
-        selectChanged = true;
+        selectChanged_ = true;
         ResetStatus();
     }
-    ApplyIndexChanged(initialized_ && selectChanged);
-    initialized_ = true;
-
+    if (CheckMeasureFlag(layoutProperty->GetPropertyChangeFlag()) ||
+        CheckLayoutFlag(layoutProperty->GetPropertyChangeFlag())) {
+        isLayoutChange_ = true;
+    } else {
+        ApplyIndexChanged(initialized_ && selectChanged_);
+    }
     auto gesture = host->GetOrCreateGestureEventHub();
     if (gesture) {
         InitPanEvent(gesture);
@@ -111,6 +112,10 @@ void IndexerPattern::OnModifyDone()
 
 bool IndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    if (isLayoutChange_) {
+        isLayoutChange_ = false;
+        ApplyIndexChanged(initialized_ && selectChanged_);
+    }
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
@@ -288,14 +293,23 @@ int32_t IndexerPattern::GetSelectChildIndex(const Offset& offset)
     CHECK_NULL_RETURN(host, -1);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, -1);
-
-    auto size = SizeF(itemSizeRender_, itemSizeRender_ * static_cast<float>(itemCount_));
-    auto padding = layoutProperty->CreatePaddingAndBorder();
-    MinusPaddingToSize(padding, size);
-    auto top = padding.top.value_or(0.0f);
-    auto nextSelectIndex = static_cast<int32_t>((offset.GetY() - top) / itemSizeRender_);
-    nextSelectIndex = std::clamp(nextSelectIndex, 0, itemCount_ - 1);
-    return nextSelectIndex;
+    int32_t index = 0;
+    for (auto child : host->GetChildren()) {
+        auto childNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_RETURN(childNode, -1);
+        auto geometryNode = childNode->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, -1);
+        auto childOffset = geometryNode->GetFrameOffset();
+        if (index == 0 && LessNotEqual(offset.GetY(), childOffset.GetY())) {
+            return 0;
+        }
+        if (GreatOrEqual(offset.GetY(), childOffset.GetY()) &&
+            LessNotEqual(offset.GetY(), childOffset.GetY() + itemSizeRender_)) {
+            break;
+        }
+        index++;
+    }
+    return std::clamp(index, 0, itemCount_ - 1);
 }
 
 bool IndexerPattern::KeyIndexByStep(int32_t step)
@@ -412,6 +426,8 @@ void IndexerPattern::OnSelect(bool changed)
 
 void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
 {
+    initialized_ = true;
+    selectChanged_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
@@ -425,17 +441,11 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
-    auto currentRenderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(currentRenderContext);
-    auto paddingLeft = CalcLength(Dimension(INDEXER_PADDING_LEFT, DimensionUnit::VP).ConvertToPx());
-    auto paddingTop = CalcLength(Dimension(INDEXER_PADDING_TOP, DimensionUnit::VP).ConvertToPx());
-    layoutProperty->UpdatePadding({ paddingLeft, paddingLeft, paddingTop, paddingTop });
     int32_t index = 0;
     auto childrenNode = host->GetChildren();
     for (auto& iter : childrenNode) {
         auto childNode = AceType::DynamicCast<FrameNode>(iter);
         auto nodeLayoutProperty = childNode->GetLayoutProperty<TextLayoutProperty>();
-        nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         auto childRenderContext = childNode->GetRenderContext();
         if (index == childHoverIndex_ || index == childPressIndex_) {
             auto radiusSize = indexerTheme->GetHoverRadiusSize();
@@ -495,12 +505,13 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
         nodeLayoutProperty->UpdateFontFamily(defaultFont.GetFontFamilies());
         nodeLayoutProperty->UpdateItalicFontStyle(defaultFont.GetFontStyle());
         nodeLayoutProperty->UpdateTextColor(layoutProperty->GetColor().value_or(indexerTheme->GetDefaultTextColor()));
-        childNode->MarkModifyDone();
         index++;
         auto textAccessibilityProperty = childNode->GetAccessibilityProperty<TextAccessibilityProperty>();
         if (textAccessibilityProperty) {
             textAccessibilityProperty->SetSelected(false);
         }
+        childNode->MarkModifyDone();
+        childNode->MarkDirtyNode();
     }
     if (selectChanged || NeedShowPopupView()) {
         ShowBubble();
@@ -538,15 +549,9 @@ void IndexerPattern::SetPositionOfPopupNode(RefPtr<FrameNode>& customNode)
     CHECK_NULL_VOID(layoutProperty);
     auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto indexerItemSize = Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP);
-    auto itemSize = layoutProperty->GetItemSize().value_or(indexerItemSize);
-    auto padding = layoutProperty->CreatePaddingAndBorder();
-    auto indexerWidth = itemSize.ConvertToPx() + padding.left.value_or(0) + padding.right.value_or(0);
-    auto layoutConstraint = layoutProperty->GetLayoutConstraint();
-    if (layoutConstraint.has_value() && layoutConstraint->selfIdealSize.Width().has_value() &&
-        (layoutConstraint->selfIdealSize.Width().value() > indexerWidth)) {
-        indexerWidth = layoutConstraint->selfIdealSize.Width().value();
-    }
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto indexerWidth = geometryNode->GetFrameSize().Width();
     auto alignMent = layoutProperty->GetAlignStyle().value_or(NG::AlignStyle::RIGHT);
     auto userDefinePositionX =
         layoutProperty->GetPopupPositionX().value_or(Dimension(NG::BUBBLE_POSITION_X, DimensionUnit::VP)).ConvertToPx();
@@ -802,8 +807,7 @@ void IndexerPattern::ChangeListItemsSelectedStyle(int32_t clickIndex)
     CHECK_NULL_VOID(layoutProperty);
     auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto popupSelectedTextColor =
-        paintProperty->GetPopupSelectedColor().value_or(indexerTheme->GetPopupDefaultColor());
+    auto popupSelectedTextColor = paintProperty->GetPopupSelectedColor().value_or(indexerTheme->GetPopupDefaultColor());
     auto popupUnselectedTextColor =
         paintProperty->GetPopupUnselectedColor().value_or(indexerTheme->GetDefaultTextColor());
     auto popupItemBackground =
@@ -860,6 +864,8 @@ void IndexerPattern::AddListItemClickListener(RefPtr<FrameNode>& listItemNode, i
         CHECK_NULL_VOID(indexerPattern);
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             indexerPattern->OnListItemClick(index);
+        } else if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+            indexerPattern->ClearClickStatus();
         }
     };
     gestureHub->AddTouchEvent(MakeRefPtr<TouchEventImpl>(std::move(touchCallback)));
@@ -876,6 +882,11 @@ void IndexerPattern::OnListItemClick(int32_t index)
         onPopupSelected(index);
     }
     ChangeListItemsSelectedStyle(index);
+}
+
+void IndexerPattern::ClearClickStatus()
+{
+    ChangeListItemsSelectedStyle(-1);
 }
 
 void IndexerPattern::OnPopupTouchDown(const TouchEventInfo& info)

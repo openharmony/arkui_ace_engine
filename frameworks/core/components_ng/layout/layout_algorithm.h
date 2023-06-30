@@ -138,6 +138,11 @@ public:
         return layoutAlgorithm_;
     }
 
+    void SetLayoutAlgorithm(RefPtr<LayoutAlgorithm> algorithm)
+    {
+        layoutAlgorithm_ = std::move(algorithm);
+    }
+
 private:
     RefPtr<LayoutAlgorithm> layoutAlgorithm_;
 

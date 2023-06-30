@@ -97,6 +97,7 @@ public:
         const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) override;
     void SetGeometryTransition(const std::string& id) override;
     void SetMotionPath(const MotionPathOption& option) override;
+    void SetRenderGroup(bool isRenderGroup) override {}
 
     void SetFlexBasis(const Dimension& value) override;
     void SetAlignSelf(FlexAlign value) override;
@@ -214,6 +215,7 @@ public:
         std::function<void(const RefPtr<NG::CustomAnimatableArithmetic>&)>& onCallbackEvent) override {};
     void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
         RefPtr<NG::CustomAnimatableArithmetic>& value) override {};
+    void UpdateSafeAreaExpandOpts(const NG::SafeAreaExpandOpts& opts) override {};
 };
 
 } // namespace OHOS::Ace::Framework

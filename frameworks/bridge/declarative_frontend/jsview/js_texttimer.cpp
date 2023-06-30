@@ -109,6 +109,8 @@ void JSTextTimer::JSBind(BindingTarget globalObj)
     JSClass<JSTextTimer>::StaticMethod("onTimer", &JSTextTimer::OnTimer);
     JSClass<JSTextTimer>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSTextTimer>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSTextTimer>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSTextTimer>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextTimer>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -130,7 +132,8 @@ void JSTextTimer::SetFormat(const JSCallbackInfo& info)
     }
 
     if (!info[0]->IsString()) {
-        LOGE("arg is not string.");
+        LOGE("The arg is not string, it is supposed to be a string");
+        TextTimerModel::GetInstance()->SetFormat(DEFAULT_FORMAT);
         return;
     }
 

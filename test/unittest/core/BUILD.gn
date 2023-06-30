@@ -18,6 +18,7 @@ group("core_unittest") {
   testonly = true
   deps = [
     "accessibility:accessibility_unittest",
+    "base:core_base_unittest",
     "common:core_common_unittest",
     "gestures:gestures_test_ng",
     "pattern:core_pattern_unittest",

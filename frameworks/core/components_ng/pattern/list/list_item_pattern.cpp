@@ -74,7 +74,12 @@ void ListItemPattern::SetListItemDefaultAttributes(const RefPtr<FrameNode>& list
 
 RefPtr<LayoutAlgorithm> ListItemPattern::CreateLayoutAlgorithm()
 {
-    if (!HasStartNode() && !HasEndNode()) {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_RETURN(listItemEventHub, nullptr);
+    if (!HasStartNode() && !HasEndNode() && !listItemEventHub->GetStartOnDelete() &&
+        !listItemEventHub->GetEndOnDelete()) {
         return MakeRefPtr<BoxLayoutAlgorithm>();
     }
     auto layoutAlgorithm = MakeRefPtr<ListItemLayoutAlgorithm>(startNodeIndex_, endNodeIndex_, childNodeIndex_);
@@ -200,9 +205,13 @@ void ListItemPattern::SetSwiperItemForList()
 
 void ListItemPattern::OnModifyDone()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_VOID(listItemEventHub);
     Pattern::OnModifyDone();
     InitListItemCardStyleForList();
-    if (HasStartNode() || HasEndNode()) {
+    if (HasStartNode() || HasEndNode() || listItemEventHub->GetStartOnDelete() || listItemEventHub->GetEndOnDelete()) {
         auto axis = GetAxis();
         bool axisChanged = axis_ != axis;
         axis_ = axis;
@@ -283,6 +292,9 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
 
 void ListItemPattern::HandleDragStart(const GestureEvent& info)
 {
+    if (info.GetInputEventType() == InputEventType::AXIS) {
+        return;
+    }
     if (springController_ && !springController_->IsStopped()) {
         // clear stop listener before stop
         springController_->ClearStopListeners();
@@ -328,7 +340,7 @@ void ListItemPattern::ChangeDeleteAreaStage()
     auto enterEndDeleteArea = listItemEventHub->GetOnEnterEndDeleteArea();
     auto exitStartDeleteArea = listItemEventHub->GetOnExitStartDeleteArea();
     auto exitEndDeleteArea = listItemEventHub->GetOnExitEndDeleteArea();
-    if (Positive(startNodeSize_) && hasStartDeleteArea_) {
+    if (Positive(curOffset_) && hasStartDeleteArea_) {
         if (GreatOrEqual(curOffset_, startNodeSize_ + startDeleteAreaDistance_)) {
             if (!inStartDeleteArea_) {
                 inStartDeleteArea_ = true;
@@ -345,7 +357,7 @@ void ListItemPattern::ChangeDeleteAreaStage()
             }
         }
     }
-    if (Positive(endNodeSize_) && hasEndDeleteArea_) {
+    if (Negative(curOffset_) && hasEndDeleteArea_) {
         if (GreatNotEqual(-curOffset_, endNodeSize_ + endDeleteAreaDistance_)) {
             if (!inEndDeleteArea_) {
                 inEndDeleteArea_ = true;
@@ -366,26 +378,36 @@ void ListItemPattern::ChangeDeleteAreaStage()
 
 void ListItemPattern::UpdatePostion(float delta)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_VOID(listItemEventHub);
     float offset = curOffset_;
     curOffset_ += delta;
     ChangeDeleteAreaStage();
     auto edgeEffect = GetEdgeEffect();
     if (edgeEffect == V2::SwipeEdgeEffect::None) {
-        if (Positive(startNodeSize_)) {
-            if (hasStartDeleteArea_ && GreatNotEqual(curOffset_, startNodeSize_ + startDeleteAreaDistance_)) {
+        if (hasStartDeleteArea_) {
+            if (Positive(startNodeSize_) && GreatNotEqual(curOffset_, startNodeSize_ + startDeleteAreaDistance_)) {
                 curOffset_ = startNodeSize_ + startDeleteAreaDistance_;
-            } else if (!hasStartDeleteArea_ && GreatNotEqual(curOffset_, startNodeSize_)) {
-                curOffset_ = startNodeSize_;
+            } else if (startNodeSize_ == 0 && GreatNotEqual(curOffset_, startDeleteAreaDistance_)) {
+                curOffset_ = startDeleteAreaDistance_;
             }
         }
-        if (Positive(endNodeSize_)) {
-            if (hasEndDeleteArea_ && GreatNotEqual(-curOffset_, endNodeSize_ + endDeleteAreaDistance_)) {
+        if (hasEndDeleteArea_) {
+            if (Positive(endNodeSize_) && GreatNotEqual(-curOffset_, endNodeSize_ + endDeleteAreaDistance_)) {
                 curOffset_ = -endNodeSize_ - endDeleteAreaDistance_;
-            } else if (!hasEndDeleteArea_ && GreatNotEqual(-curOffset_, endNodeSize_)) {
-                curOffset_ = -endNodeSize_;
+            } else if (endNodeSize_ == 0 && GreatNotEqual(-curOffset_, endDeleteAreaDistance_)) {
+                curOffset_ = -endDeleteAreaDistance_;
             }
         }
-        if ((Negative(curOffset_) && !HasEndNode()) || (Positive(curOffset_) && !HasStartNode())) {
+        if (Positive(startNodeSize_) && GreatNotEqual(curOffset_, startNodeSize_) && !hasStartDeleteArea_) {
+            curOffset_ = startNodeSize_;
+        } else if (Positive(endNodeSize_) && GreatNotEqual(-curOffset_, endNodeSize_) && !hasEndDeleteArea_) {
+            curOffset_ = -endNodeSize_;
+        }
+        if ((Negative(curOffset_) && !HasEndNode() && !listItemEventHub->GetEndOnDelete()) ||
+            (Positive(curOffset_) && !HasStartNode() && !listItemEventHub->GetStartOnDelete())) {
             curOffset_ = 0.0f;
         }
     }
@@ -396,6 +418,9 @@ void ListItemPattern::UpdatePostion(float delta)
 
 void ListItemPattern::HandleDragUpdate(const GestureEvent& info)
 {
+    if (info.GetInputEventType() == InputEventType::AXIS) {
+        return;
+    }
     auto layoutProperty = GetLayoutProperty<ListItemLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     hasStartDeleteArea_ = false;
@@ -403,14 +428,14 @@ void ListItemPattern::HandleDragUpdate(const GestureEvent& info)
     float itemWidth = GetContentSize().CrossSize(axis_);
     float maxDeleteArea = 0.0f;
 
-    if (GreatNotEqual(curOffset_, 0.0) && HasStartNode()) {
+    if (GreatNotEqual(curOffset_, 0.0)) {
         maxDeleteArea = itemWidth - startNodeSize_;
         startDeleteAreaDistance_ = static_cast<float>(
             layoutProperty->GetStartDeleteAreaDistance().value_or(Dimension(0, DimensionUnit::VP)).ConvertToPx());
         if (GreatNotEqual(startDeleteAreaDistance_, 0.0) && LessNotEqual(startDeleteAreaDistance_, maxDeleteArea)) {
             hasStartDeleteArea_ = true;
         }
-    } else if (LessNotEqual(curOffset_, 0.0) && HasEndNode()) {
+    } else if (LessNotEqual(curOffset_, 0.0)) {
         maxDeleteArea = itemWidth - endNodeSize_;
         endDeleteAreaDistance_ = static_cast<float>(
             layoutProperty->GetEndDeleteAreaDistance().value_or(Dimension(0, DimensionUnit::VP)).ConvertToPx());
@@ -486,6 +511,9 @@ void ListItemPattern::DoDeleteAnimation(bool isRightDelete)
 
 void ListItemPattern::HandleDragEnd(const GestureEvent& info)
 {
+    if (info.GetInputEventType() == InputEventType::AXIS) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
@@ -498,6 +526,25 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
     bool reachLeftSpeed = -info.GetMainVelocity() > speedThreshold;
     auto startOnDelete = listItemEventHub->GetStartOnDelete();
     auto endOnDelete = listItemEventHub->GetEndOnDelete();
+
+    if (hasStartDeleteArea_ && !HasStartNode() && startOnDelete && GreatOrEqual(curOffset_, startDeleteAreaDistance_)) {
+        if (!useStartDefaultDeleteAnimation_) {
+            startOnDelete();
+        } else {
+            DoDeleteAnimation(true);
+            startOnDelete();
+            return;
+        }
+    }
+    if (hasEndDeleteArea_ && !HasEndNode() && endOnDelete && GreatOrEqual(-curOffset_, endDeleteAreaDistance_)) {
+        if (!useEndDefaultDeleteAnimation_) {
+            endOnDelete();
+        } else {
+            DoDeleteAnimation(false);
+            endOnDelete();
+            return;
+        }
+    }
 
     if (GreatNotEqual(curOffset_, 0.0) && HasStartNode()) {
         float width = startNodeSize_;
@@ -655,8 +702,7 @@ void ListItemPattern::UpdateListItemAlignToCenter()
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto itemAlign = layoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
-    if (itemAlign != V2::ListItemAlign::CENTER) {
+    if (!layoutProperty->HasListItemAlign()) {
         layoutProperty->UpdateListItemAlign(V2::ListItemAlign::CENTER);
     }
 }
@@ -774,8 +820,7 @@ void ListItemPattern::InitDisableEvent()
         if (selectable_) {
             selectable_ = false;
         }
-        auto blendOpacityColor = currentBackgroundColor_.BlendOpacity(theme->GetItemDisabledAlpha());
-        renderContext->UpdateBackgroundColor(blendOpacityColor);
+        renderContext->UpdateOpacity(theme->GetItemDisabledAlpha());
     }
 }
 } // namespace OHOS::Ace::NG

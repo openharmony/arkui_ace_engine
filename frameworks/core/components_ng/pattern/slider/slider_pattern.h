@@ -36,11 +36,9 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto visibility = GetLayoutProperty<LayoutProperty>()->GetVisibility().value_or(VisibleType::VISIBLE);
-        if (visibility != VisibleType::VISIBLE) {
-            return MakeRefPtr<NodePaintMethod>();
+        if (!IsSliderVisible()) {
+            return nullptr;
         }
-
         auto paintParameters = UpdateContentParameters();
         if (!sliderContentModifier_) {
             sliderContentModifier_ =
@@ -115,7 +113,9 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
 
     void UpdateValue(float value);
+    void OnVisibleChange(bool isVisible) override;
 private:
+    void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     void CancelExceptionValue(float& min, float& max, float& step);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
@@ -143,6 +143,7 @@ private:
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandlingGestureStart(const GestureEvent& info);
     void HandlingGestureEvent(const GestureEvent& info);
     void HandledGestureEvent();
 
@@ -156,6 +157,13 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     void PaintFocusState();
     bool MoveStep(int32_t stepCount);
+
+    bool IsSliderVisible();
+    void RegisterVisibleAreaChange();
+    void OnWindowHide() override;
+    void OnWindowShow() override;
+    void StartAnimation();
+    void StopAnimation();
 
     void OpenTranslateAnimation();
     void CloseTranslateAnimation();
@@ -178,6 +186,10 @@ private:
     bool mousePressedFlag_ = false;
     bool focusFlag_ = false;
     bool panMoveFlag_ = false;
+    bool hasVisibleChangeRegistered_ = false;
+    bool isVisibleArea_ = true;
+    bool isVisible_ = true;
+    bool isShow_ = true;
 
     float stepRatio_ = 1.0f / 100.0f;
     float valueRatio_ = 0.0f;

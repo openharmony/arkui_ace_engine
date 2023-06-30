@@ -50,6 +50,21 @@ bool SecurityComponentHandler::GetDisplayOffset(RefPtr<FrameNode>& node, double&
     return true;
 }
 
+bool SecurityComponentHandler::GetWindowRect(RefPtr<FrameNode>& node,
+    OHOS::Security::SecurityComponent::SecCompRect& winRect)
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto rect = pipelineContext->GetDisplayWindowRectInfo();
+    winRect.x_ = rect.Left();
+    winRect.y_ = rect.Top();
+    winRect.width_ = rect.Right() - rect.Left();
+    winRect.height_ = rect.Bottom() - rect.Top();
+    return true;
+}
+
 bool SecurityComponentHandler::CheckOpacity(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetOpacity().has_value() &&
@@ -277,6 +292,10 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
         return false;
     }
 
+    if (!GetWindowRect(node, buttonInfo.windowRect_)) {
+        LOGW("Get window rect failed");
+        return false;
+    }
     auto render = node->GetRenderContext();
     CHECK_NULL_RETURN(render, false);
     auto rect = render->GetPaintRectWithTransform();

@@ -226,8 +226,8 @@ RefPtr<FrameNode> ContainerModalView::AddControlButtons(RefPtr<FrameNode>& conta
     return containerTitleRow;
 }
 
-RefPtr<FrameNode> ContainerModalView::BuildControlButton(
-    InternalResource::ResourceId icon, GestureEventFunc&& clickCallback, bool isCloseButton)
+RefPtr<FrameNode> ContainerModalView::BuildControlButton(InternalResource::ResourceId icon,
+    GestureEventFunc&& clickCallback, bool isCloseButton, bool canDrag)
 {
     // button image icon
     ImageSourceInfo imageSourceInfo;
@@ -269,6 +269,12 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
     CHECK_NULL_RETURN(buttonEventHub, nullptr);
     auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
     buttonEventHub->AddClickEvent(clickEvent);
+    // if can not be drag, cover father panEvent
+    if (!canDrag) {
+        auto panEvent = AceType::MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr, nullptr);
+        PanDirection panDirection;
+        buttonEventHub->AddPanEvent(panEvent, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    }
 
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);

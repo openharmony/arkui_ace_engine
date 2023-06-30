@@ -44,6 +44,7 @@
 #include "core/components_ng/render/paint_property.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/render/render_context.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/inspector_node.h"
 
 namespace OHOS::Ace::NG {
@@ -53,7 +54,7 @@ class StateModifyTask;
 class UITask;
 
 // FrameNode will display rendering region in the screen.
-class ACE_EXPORT FrameNode : public UINode {
+class ACE_FORCE_EXPORT FrameNode : public UINode {
     DECLARE_ACE_TYPE(FrameNode, UINode);
 
 public:
@@ -393,6 +394,28 @@ public:
 
     std::string ProvideRestoreInfo();
 
+    static std::vector<RefPtr<FrameNode>> GetNodesById(const std::unordered_set<int32_t>& set);
+
+    // returns true if the node is the root FrameNode under Page, or is the root of an overlay component
+    bool IsContentRoot();
+
+    // called during LayoutWrapper creation, used for finding corresponding LayoutWrapper during RestoreGeoState
+    void RecordLayoutWrapper(WeakPtr<LayoutWrapper> layoutWrapper)
+    {
+        layoutWrapper_ = std::move(layoutWrapper);
+    }
+    const WeakPtr<LayoutWrapper>& GetLayoutWrapper() const
+    {
+        return layoutWrapper_;
+    }
+
+    void SetViewPort(RectF viewPort)
+    {
+        viewPort_ = viewPort;
+    }
+
+    std::optional<RectF> GetViewPort() const;
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;
@@ -460,10 +483,13 @@ private:
     RefPtr<RenderContext> renderContext_ = RenderContext::Create();
     RefPtr<EventHub> eventHub_;
     RefPtr<Pattern> pattern_;
+    // only valid during layout task
+    WeakPtr<LayoutWrapper> layoutWrapper_;
 
     std::unique_ptr<RectF> lastFrameRect_;
     std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
     std::set<std::string> allowDrop_;
+    std::optional<RectF> viewPort_;
 
     bool needSyncRenderTree_ = false;
 

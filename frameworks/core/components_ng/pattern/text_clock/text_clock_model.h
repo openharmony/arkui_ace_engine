@@ -18,6 +18,9 @@
 
 #include <mutex>
 
+#include "base/geometry/dimension.h"
+#include "core/components/common/properties/color.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components/text_clock/text_clock_controller.h"
 
 namespace OHOS::Ace {
@@ -30,6 +33,11 @@ public:
     virtual void SetFormat(const std::string& format) = 0;
     virtual void SetHoursWest(const int32_t& hoursWest) = 0;
     virtual void SetOnDateChange(std::function<void(const std::string)>&& onChange) = 0;
+    virtual void SetFontSize(const Dimension& value) = 0;
+    virtual void SetTextColor(const Color& value) = 0;
+    virtual void SetItalicFontStyle(Ace::FontStyle value) = 0;
+    virtual void SetFontWeight(FontWeight value) = 0;
+    virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
 
 private:
     static std::unique_ptr<TextClockModel> instance_;

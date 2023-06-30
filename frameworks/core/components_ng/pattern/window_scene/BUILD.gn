@@ -40,13 +40,12 @@ build_component_ng("window_scene") {
 
   if (is_ohos_standard_system) {
     configs = [ ":window_scene_config" ]
-
-    deps = [ "$graphic_standard_path/rosen/modules/render_service_client:librender_service_client" ]
-
     external_deps = [
       "ability_runtime:abilitykit_native",
+      "graphic_standard:librender_service_client",
       "input:libmmi-client",
       "ipc:ipc_single",
+      "power_manager:powermgr_client",
       "window_manager:libwm",
       "window_manager:scene_session",
       "window_manager:scene_session_manager",

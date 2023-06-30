@@ -71,7 +71,7 @@ ohos_fuzztest("UtilMostFuzzTest") {
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "eventhandler:libeventhandler",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
     "window_manager:libdm",

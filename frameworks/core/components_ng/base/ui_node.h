@@ -70,6 +70,9 @@ public:
     void AttachToMainTree(bool recursive = false);
     void DetachFromMainTree(bool recursive = false);
 
+    // process offscreen process.
+    void ProcessOffscreenTask(bool recursive = false);
+
     int32_t TotalChildCount() const;
 
     // Returns index in the flatten tree structure
@@ -270,6 +273,8 @@ public:
 
     virtual void SetActive(bool active);
 
+    virtual void SetJSViewActive(bool active);
+
     virtual void OnVisibleChange(bool isVisible);
 
     virtual bool MarkRemoving();
@@ -277,6 +282,11 @@ public:
     bool IsOnMainTree() const
     {
         return onMainTree_;
+    }
+
+    bool UseOffscreenProcess() const
+    {
+        return useOffscreenProcess_;
     }
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
@@ -470,6 +480,9 @@ protected:
     virtual void OnAttachToMainTree(bool recursive = false);
     virtual void OnDetachFromMainTree(bool recursive = false);
 
+    // run offscreen process.
+    virtual void OnOffscreenProcess(bool recursive) {}
+
     bool isRemoving_ = false;
 
     // return value: true if the node can be removed immediately.
@@ -501,6 +514,8 @@ private:
     int32_t childrenUpdatedFrom_ = -1;
     static thread_local int32_t currentAccessibilityId_;
     int32_t restoreId_ = -1;
+
+    bool useOffscreenProcess_ = false;
 
 #ifdef PREVIEW
     std::string debugLine_;

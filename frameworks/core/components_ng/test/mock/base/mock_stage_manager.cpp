@@ -28,4 +28,15 @@ RefPtr<FrameNode> StageManager::GetLastPage()
 {
     return stageNode_;
 }
+
+RefPtr<FrameNode> StageManager::GetPageById(int32_t pageId)
+{
+    const auto& children = stageNode_->GetChildren();
+    for (const auto& child : children) {
+        if (child->GetPageId() == pageId) {
+            return DynamicCast<FrameNode>(child);
+        }
+    }
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG

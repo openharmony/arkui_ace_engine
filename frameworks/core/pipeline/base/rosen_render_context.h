@@ -16,16 +16,23 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_ROSEN_RENDER_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_ROSEN_RENDER_CONTEXT_H
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkRefCnt.h"
+#endif
 
 #include "base/geometry/rect.h"
 #include "core/pipeline/base/render_context.h"
 #include "core/pipeline/base/render_node.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing.h"
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 class SkImage;
 class SkPicture;
 class SkPictureRecorder;
+#endif
 
 namespace OHOS::Ace {
 
@@ -43,7 +50,11 @@ public:
 
     void InitContext(
         const std::shared_ptr<RSNode>& rsNode, const Rect& rect, const Offset& initialOffset = Offset::Zero());
+#ifndef USE_ROSEN_DRAWING
     SkCanvas* GetCanvas();
+#else
+    RSCanvas* GetCanvas();
+#endif
     const std::shared_ptr<RSNode>& GetRSNode();
 
     void StartRecording();
@@ -54,16 +65,26 @@ public:
         return !!recordingCanvas_;
     }
 
+#ifndef USE_ROSEN_DRAWING
     sk_sp<SkPicture> FinishRecordingAsPicture();
     sk_sp<SkImage> FinishRecordingAsImage();
+#else
+    std::shared_ptr<RSPicture> FinishRecordingAsPicture();
+    std::shared_ptr<RSImage> FinishRecordingAsImage();
+#endif
 
 private:
     void UpdateChildren(const std::shared_ptr<RSNode>& rsNode);
 
     std::shared_ptr<RSNode> rsNode_ = nullptr;
+#ifndef USE_ROSEN_DRAWING
     SkPictureRecorder* recorder_ = nullptr;
     SkCanvas* recordingCanvas_ = nullptr;
     SkCanvas* rosenCanvas_ = nullptr;
+#else
+    RSCanvas* recordingCanvas_ = nullptr;
+    RSCanvas* rosenCanvas_ = nullptr;
+#endif
     Rect estimatedRect_;
     std::vector<std::weak_ptr<RSNode>> childNodes_;
 };

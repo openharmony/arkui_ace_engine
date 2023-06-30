@@ -33,14 +33,30 @@ constexpr uint32_t JANK_FRAME_120_FREQ = 6;
 constexpr uint32_t JANK_FRAME_180_FREQ = 7;
 constexpr uint32_t JANK_SIZE = 8;
 
-using JankNano = std::chrono::nanoseconds;
-using JankMilli = std::chrono::milliseconds;
+using namespace std;
+using namespace std::chrono;
 
 template<class T>
-int64_t GetTimeStamp()
+int64_t GetSystemTimestamp()
 {
-    return std::chrono::duration_cast<T>(std::chrono::steady_clock::now().time_since_epoch()).count();
+    return duration_cast<T>(system_clock::now().time_since_epoch()).count();
 }
+
+class SteadyTimeRecorder {
+public:
+    static steady_clock::time_point begin;
+    static void Begin()
+    {
+        begin = steady_clock::now();
+    }
+    static int64_t End()
+    {
+        auto end = steady_clock::now();
+        return duration_cast<milliseconds>(end - begin).count();
+    }
+};
+
+steady_clock::time_point SteadyTimeRecorder::begin {};
 } // namespace
 
 std::vector<uint16_t> JankFrameReport::frameJankRecord_(JANK_SIZE, 0);
@@ -51,7 +67,7 @@ bool JankFrameReport::needReport_ = false;
 
 void JankFrameReport::JankFrameRecord(double jank)
 {
-    if (!recordStatus_) {
+    if (recordStatus_ == JANK_IDLE) {
         return;
     }
     needReport_ = true;
@@ -90,42 +106,42 @@ void JankFrameReport::ClearFrameJankRecord()
 {
     std::fill(frameJankRecord_.begin(), frameJankRecord_.end(), 0);
     recordStatus_ = JANK_IDLE;
+    needReport_ = false;
 }
 
 void JankFrameReport::SetFrameJankFlag(JankFrameFlag flag)
 {
-    recordStatus_ |= flag;
+    recordStatus_++;
 }
 
 void JankFrameReport::ClearFrameJankFlag(JankFrameFlag flag)
 {
-    recordStatus_ &= (~flag);
+    if (recordStatus_ > 0) {
+        recordStatus_--;
+    }
+}
+
+void JankFrameReport::ResetFrameJankClock()
+{
+    startTime_ = GetSystemTimestamp<std::chrono::milliseconds>();
+    SteadyTimeRecorder::Begin();
 }
 
 void JankFrameReport::StartRecord(const std::string& pageUrl)
 {
     if (startTime_ == 0) {
-        startTime_ = GetTimeStamp<JankMilli>();
+        ResetFrameJankClock();
     }
     pageUrl_ = pageUrl;
 }
 
-int64_t JankFrameReport::GetDuration()
-{
-    auto now = GetTimeStamp<JankMilli>();
-    return now - startTime_;
-}
-
 void JankFrameReport::FlushRecord()
 {
-    if (!needReport_) {
-        ClearFrameJankRecord();
-        return;
-    }
     Rosen::RSInterfaces::GetInstance().ReportJankStats();
-    auto now = GetTimeStamp<JankMilli>();
-    EventReport::JankFrameReport(startTime_, now - startTime_, frameJankRecord_, pageUrl_);
+    if (needReport_) {
+        EventReport::JankFrameReport(startTime_, SteadyTimeRecorder::End(), frameJankRecord_, pageUrl_);
+    }
     ClearFrameJankRecord();
-    startTime_ = now;
+    ResetFrameJankClock();
 }
 } // namespace OHOS::Ace

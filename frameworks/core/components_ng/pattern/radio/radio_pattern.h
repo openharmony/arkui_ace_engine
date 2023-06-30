@@ -94,6 +94,11 @@ public:
         return preGroup_;
     }
 
+    int32_t GetPrePageId() const
+    {
+        return prePageId_;
+    }
+
     void SetPreValue(const std::string& value)
     {
         preValue_ = value;
@@ -102,6 +107,11 @@ public:
     void SetPreGroup(const std::string& group)
     {
         preGroup_ = group;
+    }
+
+    void SetPrePageId(int32_t pageId)
+    {
+        prePageId_ = pageId;
     }
 
     FocusPattern GetFocusPattern() const override;
@@ -130,9 +140,10 @@ private:
     void InitMouseEvent();
     void OnClick();
     void UpdateState();
-    void UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bool check);
+    void UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& pageNode, bool check);
     void OnTouchDown();
     void OnTouchUp();
+    void CheckPageNode();
     void HandleMouseEvent(bool isHover);
     void UpdateUIStatus(bool check);
     // Init key event
@@ -152,6 +163,7 @@ private:
     bool preCheck_ = false;
     std::optional<std::string> preValue_;
     std::optional<std::string> preGroup_;
+    int32_t prePageId_ = 0;
     bool isTouch_ = false;
     bool isHover_ = false;
     float totalScale_ = 1.0f;

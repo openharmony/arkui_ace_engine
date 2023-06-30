@@ -124,6 +124,7 @@ void JSMenu::JSBind(BindingTarget globalObj)
     JSClass<JSMenu>::StaticMethod("fontColor", &JSMenu::FontColor, opt);
     JSClass<JSMenu>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSMenu>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSMenu>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSMenu>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

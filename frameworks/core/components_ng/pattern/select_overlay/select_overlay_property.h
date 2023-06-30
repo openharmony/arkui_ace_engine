@@ -29,6 +29,7 @@ namespace OHOS::Ace::NG {
 
 struct SelectHandleInfo {
     bool isShow = true;
+    // in Global coordinates.
     RectF paintRect;
 
     bool operator==(const SelectHandleInfo& info) const
@@ -102,7 +103,9 @@ struct SelectOverlayInfo {
     std::vector<MenuOptionsParam> menuOptionItems;
 
     // force hide callback, which may be called when other textOverlay shows.
-    std::function<void()> onClose;
+    std::function<void(bool)> onClose;
+
+    OHOS::Ace::WeakPtr<FrameNode> callerFrameNode;
 };
 
 } // namespace OHOS::Ace::NG

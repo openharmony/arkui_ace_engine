@@ -47,7 +47,7 @@ public:
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
 private:
-    static void DrawHandles(const std::shared_ptr<SelectOverlayInfo>& info, RSCanvas& canvas);
+    static void DrawHandles(const std::shared_ptr<SelectOverlayInfo>& info, RSCanvas& canvas, const RectF& frameRect);
 
     static void PaintHandle(RSCanvas& canvas, const RectF& handleRect, bool handleOnTop);
 

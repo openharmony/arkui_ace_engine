@@ -33,6 +33,7 @@ RefPtr<SvgNode> SvgLine::Create()
     return AceType::MakeRefPtr<SvgLine>();
 }
 
+#ifndef USE_ROSEN_DRAWING
 SkPath SvgLine::AsPath(const Size& viewPort) const
 {
     SkPath path;
@@ -44,5 +45,18 @@ SkPath SvgLine::AsPath(const Size& viewPort) const
         ConvertDimensionToPx(declaration->GetY2(), viewPort, SvgLengthType::VERTICAL));
     return path;
 }
+#else
+RSRecordingPath SvgLine::AsPath(const Size& viewPort) const
+{
+    RSRecordingPath path;
+    auto declaration = AceType::DynamicCast<SvgLineDeclaration>(declaration_);
+    CHECK_NULL_RETURN_NOLOG(declaration, path);
+    path.MoveTo(ConvertDimensionToPx(declaration->GetX1(), viewPort, SvgLengthType::HORIZONTAL),
+        ConvertDimensionToPx(declaration->GetY1(), viewPort, SvgLengthType::VERTICAL));
+    path.LineTo(ConvertDimensionToPx(declaration->GetX2(), viewPort, SvgLengthType::HORIZONTAL),
+        ConvertDimensionToPx(declaration->GetY2(), viewPort, SvgLengthType::VERTICAL));
+    return path;
+}
+#endif
 
 } // namespace OHOS::Ace::NG

@@ -25,8 +25,7 @@
 namespace OHOS::Ace {
 namespace {
 constexpr Dimension LISTITEM_MARGIN_PADDING = 12.0_vp;
-constexpr Dimension LISTITEMGROUP_BORDER_RADIUS = 24.0_vp;
-constexpr Dimension LISTITEM_BORDER_RADIUS = 20.0_vp;
+constexpr Dimension LISTITEM_LISTITEMGROUP_INTERVAL = 4.0_vp;
 constexpr Dimension LISTITEMGROUP_PADDING = 4.0_vp;
 constexpr Dimension LISTITEM_PADDING = 8.0_vp;
 constexpr double SELECTED_ALPHA = 0.1;
@@ -87,9 +86,9 @@ public:
             theme->defaultLeftMargin_ = pattern->GetAttr<Dimension>("item_margin_left", LISTITEM_MARGIN_PADDING);
             theme->defaultRightMargin_ = pattern->GetAttr<Dimension>("item_margin_right", LISTITEM_MARGIN_PADDING);
             theme->defaultPadding_ = Edge(LISTITEMGROUP_PADDING);
-            theme->defaultBorderRadius_.SetRadius(
-                pattern->GetAttr<Dimension>("item_border_radius", LISTITEMGROUP_BORDER_RADIUS));
-            theme->itemBorderRadius_.SetRadius(LISTITEM_BORDER_RADIUS);
+            theme->borderRadiusValue_ = pattern->GetAttr<Dimension>("item_border_radius", 0.0_vp);
+            theme->defaultBorderRadius_.SetRadius(theme->borderRadiusValue_);
+            theme->itemBorderRadius_.SetRadius(theme->borderRadiusValue_ - LISTITEM_LISTITEMGROUP_INTERVAL);
             theme->itemLeftPadding_ = LISTITEM_PADDING;
             theme->itemRightPadding_ = LISTITEM_PADDING;
             theme->focusBorderColor_ = pattern->GetAttr<Color>("item_focus_color", Color::WHITE);
@@ -317,6 +316,7 @@ private:
     double disabledAlpha_ = 0.4;
     Color selectedColor_;
     Color selectedColorWithAlpha_;
+    Dimension borderRadiusValue_;
 };
 
 } // namespace OHOS::Ace

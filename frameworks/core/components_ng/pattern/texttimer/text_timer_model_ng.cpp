@@ -17,6 +17,7 @@
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -24,11 +25,20 @@ RefPtr<TextTimerController> TextTimerModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
+    auto textTimerNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXTTIMER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextTimerPattern>(); });
-    stack->Push(frameNode);
-    auto pattern = frameNode->GetPattern<TextTimerPattern>();
-    return pattern ? pattern->GetTextTimerController() : nullptr;
+
+    auto textTimerPattern = textTimerNode->GetPattern<TextTimerPattern>();
+    if (textTimerNode->GetChildren().empty()) {
+        auto textId = textTimerPattern->GetTextId();
+        auto textNode = FrameNode::GetOrCreateFrameNode(
+            V2::TEXT_ETS_TAG, textId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+        CHECK_NULL_RETURN(textNode, nullptr);
+        textNode->MarkModifyDone();
+        textNode->MountToParent(textTimerNode);
+    }
+    stack->Push(textTimerNode);
+    return textTimerPattern ? textTimerPattern->GetTextTimerController() : nullptr;
 }
 
 void TextTimerModelNG::SetFormat(const std::string& format)
@@ -48,12 +58,12 @@ void TextTimerModelNG::SetInputCount(double count)
 
 void TextTimerModelNG::SetFontSize(const Dimension& value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontSize, value);
 }
 
 void TextTimerModelNG::SetTextColor(const Color& value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColor, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextColor, value);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, value);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
@@ -61,17 +71,17 @@ void TextTimerModelNG::SetTextColor(const Color& value)
 
 void TextTimerModelNG::SetItalicFontStyle(Ace::FontStyle value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, ItalicFontStyle, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, ItalicFontStyle, value);
 }
 
 void TextTimerModelNG::SetFontWeight(FontWeight value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontWeight, value);
 }
 
 void TextTimerModelNG::SetFontFamily(const std::vector<std::string>& value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontFamily, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontFamily, value);
 }
 
 void TextTimerModelNG::SetOnTimer(std::function<void(const std::string, const std::string)>&& onChange)

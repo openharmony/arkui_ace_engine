@@ -196,6 +196,23 @@ void FormPattern::UpdateStaticCard()
     ReleaseRenderer();
 }
 
+void FormPattern::HideImageNode()
+{
+    LOGI("HideImageNode");
+    ContainerScope scope(scopeId_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto child = host->GetLastChild();
+    CHECK_NULL_VOID(child);
+    auto imageNode = DynamicCast<FrameNode>(child);
+    CHECK_NULL_VOID(imageNode);
+    auto externalContext = DynamicCast<NG::RosenRenderContext>(imageNode->GetRenderContext());
+    CHECK_NULL_VOID(externalContext);
+    externalContext->SetVisible(false);
+    imageNode->MarkModifyDone();
+    imageNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
 RefPtr<FrameNode> FormPattern::GetOrCreateImageNode()
 {
     LOGI("GetOrCreateImageNode");
@@ -242,9 +259,12 @@ void FormPattern::UpdateImageNode()
     layoutConstraint.maxSize = idealSize;
     imageNode->UpdateLayoutConstraint(layoutConstraint);
     pixelLayoutProperty->UpdateImageSourceInfo(pixelSourceInfo);
+    auto externalContext = DynamicCast<NG::RosenRenderContext>(imageNode->GetRenderContext());
+    CHECK_NULL_VOID(externalContext);
+    externalContext->SetVisible(true);
 
     imageNode->MarkModifyDone();
-    imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void FormPattern::RemoveFrsNode()
@@ -271,8 +291,7 @@ void FormPattern::ReleaseRenderer()
     LOGI("ReleaseRenderer");
     ContainerScope scope(scopeId_);
     CHECK_NULL_VOID(formManagerBridge_);
-    formManagerBridge_->ReleaseForm();
-    formManagerBridge_->ResetForm();
+    formManagerBridge_->ReleaseRenderer();
 }
 
 void FormPattern::OnRebuildFrame()
@@ -491,6 +510,7 @@ void FormPattern::InitFormManagerDelegate()
             formComponent->isLoaded_ = true;
 
             formComponent->SetIsUnTrust(false);
+            formComponent->HideImageNode();
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
             auto parent = host->GetParent();
             CHECK_NULL_VOID(parent);

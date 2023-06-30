@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 
+#include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"

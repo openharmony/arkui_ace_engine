@@ -21,7 +21,10 @@
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
@@ -32,6 +35,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
+#include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/components_ng/pattern/navigator/navigator_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
@@ -46,6 +50,7 @@
 #include "core/components_ng/pattern/navrouter/navrouter_pattern.h"
 #include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
 #include "core/components_ng/pattern/stack/stack_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -887,15 +892,15 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_010, TestSize.Level1)
         "NavDestination", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     auto navBarNode =
         NavBarNode::GetOrCreateNavBarNode("navBarNode", 33, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    auto tempNode =
-        NavBarNode::GetOrCreateNavBarNode("navBarNode", 33, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
 
     auto pattern = navigation->GetPattern<NavigationPattern>();
     auto layoutProperty = pattern->GetLayoutProperty<NavigationLayoutProperty>();
     navigation->contentNode_ = contentNode;
     navigation->navBarNode_ = navBarNode;
     /**
-     * @tc.steps: step2. set properties of layoutProperty.
+     * @tc.steps: step2. set properties of layoutProperty, test OnModifyDone.
      * @tc.expected: check whether the properties is correct.
      */
     layoutProperty->propDestinationChange_ = false;
@@ -915,5 +920,337 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_010, TestSize.Level1)
     pattern->navigationMode_ = NavigationMode::STACK;
     pattern->DoAnimation(NavigationMode::AUTO);
     ASSERT_EQ(pattern->navigationMode_, NavigationMode::STACK);
+    pattern->navigationMode_ = NavigationMode::STACK;
+    pattern->DoAnimation(NavigationMode::STACK);
+    ASSERT_EQ(pattern->navigationMode_, NavigationMode::STACK);
+
+    ASSERT_EQ(pattern->navigationStack_, nullptr);
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(pattern->navigationStack_, nullptr);
+    pattern->preNavPathList_.emplace_back(std::make_pair("test3", tempNode));
+    pattern->navPathList_.emplace_back(std::make_pair("test", tempNode));
+    pattern->navPathList_.emplace_back(std::make_pair("test4", tempNode));
+    pattern->navigationStack_->navPathList_.emplace_back(std::make_pair("test", tempNode));
+    pattern->navigationStack_->navPathList_.emplace_back(std::make_pair("test3", nullptr));
+    pattern->navigationStack_->navPathList_.emplace_back(std::make_pair("test2", nullptr));
+    pattern->OnModifyDone();
+
+    pattern->navPathList_.clear();
+    pattern->navigationStack_->navPathList_.clear();
+    pattern->navPathList_.emplace_back(std::make_pair("test", nullptr));
+    pattern->navigationStack_->navPathList_.emplace_back(std::make_pair("test2", nullptr));
+    pattern->navigationStack_->navPathList_.emplace_back(std::make_pair("test", tempNode));
+    pattern->OnModifyDone();
+    /**
+     * @tc.steps: step3. construct layoutWrapper and set properties of layoutProperty, test OnDirtyLayoutWrapperSwap.
+     * @tc.expected: check whether the properties is correct.
+     */
+    auto geometryNode = navigation->geometryNode_;
+    auto layout = navigation->GetLayoutProperty<NavigationLayoutProperty>();
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(AceType::WeakClaim(AceType::RawPtr(navigation)), geometryNode, layout);
+    auto algorithm = AceType::MakeRefPtr<LayoutAlgorithm>();
+    auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(algorithm);
+    layoutWrapper->layoutAlgorithm_ = layoutAlgorithmWrapper;
+    auto navigationLayoutAlgorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    layoutAlgorithmWrapper->layoutAlgorithm_ = navigationLayoutAlgorithm;
+    navigationLayoutAlgorithm->navigationMode_ = NavigationMode::SPLIT;
+
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    config.frameSizeChange = true;
+
+    layout->propUsrNavigationMode_ = NavigationMode::AUTO;
+    pattern->navigationMode_ = NavigationMode::SPLIT;
+    layout->propVisibility_ = VisibleType::INVISIBLE;
+    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    ASSERT_FALSE(navigation->isModeChange_);
+
+    layout->propVisibility_ = VisibleType::VISIBLE;
+    navigationLayoutAlgorithm->navigationMode_ = NavigationMode::SPLIT;
+    layout->propHideNavBar_ = true;
+    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    ASSERT_EQ(navBarNode->GetLayoutProperty<NavBarLayoutProperty>()->propVisibility_.value(), VisibleType::GONE);
+}
+
+/**
+ * @tc.name: NavigationLayoutAlgorithm001
+ * @tc.desc: Test NavigationPatternTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationLayoutAlgorithm001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation contentNode and navBarNode.
+     * @tc.expected: check whether the properties is correct.
+     */
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigation", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "NavDestination", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navBarNode =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 33, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto dividerNode =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 44, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+
+    navigation->navBarNode_ = navBarNode;
+    auto geometryNode = navigation->geometryNode_;
+    auto navigationLayoutProperty = navigation->GetLayoutProperty<NavigationLayoutProperty>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        AceType::WeakClaim(AceType::RawPtr(navigation)), geometryNode, navigationLayoutProperty);
+
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    /**
+     * @tc.steps: step2. change properties of navigationLayoutProperty, test LayoutNavBar.
+     * @tc.expected: check whether the properties is correct.
+     */
+    navigationLayoutProperty->propHideNavBar_ = true;
+    navigationLayoutProperty->propNavigationMode_ = NavigationMode::SPLIT;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    navigation->children_.push_back(navBarNode);
+    ASSERT_EQ(navigation->children_.size(), 1);
+    auto navBarGeometryNode = navBarNode->geometryNode_;
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    auto navBarWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        AceType::WeakClaim(AceType::RawPtr(navBarNode)), navBarGeometryNode, navBarLayoutProperty);
+    layoutWrapper->childrenMap_[0] = navBarWrapper;
+    layoutWrapper->currentChildCount_ = 1;
+
+    navigationLayoutProperty->propHideNavBar_ = false;
+    navigationLayoutProperty->propNavBarPosition_ = NavBarPosition::END;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+
+    navigationLayoutProperty->propNavBarPosition_ = NavBarPosition::START;
+    navigationLayoutProperty->propDestinationChange_ = true;
+    navigationLayoutProperty->propNavigationMode_ = NavigationMode::STACK;
+    navigation->isModeChange_ = true;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_TRUE(navigation->isModeChange_);
+    /**
+     * @tc.steps: step3. set navigation->dividerNode_ change properties of navigationLayoutProperty,
+     *                   test LayoutDivider.
+     * @tc.expected: check whether the properties is correct.
+     */
+    navigation->dividerNode_ = dividerNode;
+    navigation->children_.push_back(dividerNode);
+    ASSERT_EQ(navigation->children_.size(), 2);
+    auto dividerGeometryNode = dividerNode->geometryNode_;
+    auto dividerLayoutProperty = dividerNode->GetLayoutProperty<NavBarLayoutProperty>();
+    auto dividerWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        AceType::WeakClaim(AceType::RawPtr(dividerNode)), dividerGeometryNode, dividerLayoutProperty);
+    layoutWrapper->childrenMap_[1] = dividerWrapper;
+    layoutWrapper->currentChildCount_ = 2;
+    navigationLayoutProperty->propNavBarPosition_ = NavBarPosition::END;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(navigationLayoutProperty->propNavBarPosition_.value(), NavBarPosition::END);
+    /**
+     * @tc.steps: step4. set navigation->contentNode_ change properties of navigationLayoutProperty,
+     *                   test LayoutContent.
+     * @tc.expected: check whether the properties is correct.
+     */
+    navigation->contentNode_ = contentNode;
+    navigation->children_.push_back(contentNode);
+    ASSERT_EQ(navigation->children_.size(), 3);
+    auto contentGeometryNode = contentNode->geometryNode_;
+    auto contentLayoutProperty = contentNode->GetLayoutProperty<NavBarLayoutProperty>();
+    auto contentWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        AceType::WeakClaim(AceType::RawPtr(contentNode)), contentGeometryNode, contentLayoutProperty);
+    layoutWrapper->childrenMap_[2] = contentWrapper;
+    layoutWrapper->currentChildCount_ = 3;
+    navigationLayoutProperty->propDestinationChange_ = true;
+    navigationLayoutProperty->propNavigationMode_ = NavigationMode::STACK;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(navigationLayoutProperty->propNavigationMode_.value(), NavigationMode::STACK);
+    ASSERT_EQ(navigationLayoutProperty->propDestinationChange_.value(), true);
+
+    navigationLayoutProperty->propNavigationMode_ = NavigationMode::SPLIT;
+    navigationLayoutProperty->propNavBarPosition_ = NavBarPosition::END;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(navigationLayoutProperty->propNavigationMode_.value(), NavigationMode::SPLIT);
+    ASSERT_EQ(navigationLayoutProperty->propNavBarPosition_.value(), NavBarPosition::END);
+    /**
+     * @tc.steps: step5. reset navigation->contentNode_ change properties of navigationLayoutProperty,
+     *                   test Measure.
+     * @tc.expected: check whether the properties is correct.
+     */
+    LayoutConstraintF constraint;
+    constraint.selfIdealSize.height_ = 1000000.0f;
+    constraint.selfIdealSize.width_ = 1000000.0f;
+    constraint.maxSize.height_ = 1000000.0f;
+    constraint.maxSize.width_ = 1000000.0f;
+    navigationLayoutProperty->layoutConstraint_ = constraint;
+    navigationLayoutProperty->contentConstraint_ = constraint;
+    navigationLayoutProperty->propHideNavBar_ = true;
+
+    Dimension dimension(20.0, DimensionUnit::PERCENT);
+    navigationLayoutProperty->propNavBarWidth_ = dimension;
+
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_TRUE(navigationLayoutProperty->propHideNavBar_.value());
+
+    navigationLayoutProperty->propUsrNavigationMode_ = NavigationMode::SPLIT;
+    algorithm->navigationMode_ = NavigationMode::SPLIT;
+    algorithm->usrNavigationMode_ = NavigationMode::SPLIT;
+    auto tempAlgorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tempAlgorithm);
+    layoutWrapper->layoutAlgorithm_ = layoutAlgorithmWrapper;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_NE(layoutWrapper->layoutAlgorithm_, nullptr);
+    ASSERT_EQ(algorithm->navigationMode_, NavigationMode::SPLIT);
+    ASSERT_EQ(algorithm->usrNavigationMode_, NavigationMode::SPLIT);
+    ASSERT_EQ(navigationLayoutProperty->propNavigationMode_.value(), NavigationMode::SPLIT);
+    ASSERT_TRUE(navigationLayoutProperty->propHideNavBar_.value());
+
+    navigation->contentNode_ =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 66, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    navigationLayoutProperty->propUsrNavigationMode_ = NavigationMode::STACK;
+    navigationLayoutProperty->propDestinationChange_ = false;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_EQ(navigationLayoutProperty->propDestinationChange_.value(), false);
+    ASSERT_EQ(algorithm->navigationMode_, NavigationMode::STACK);
+    ASSERT_EQ(algorithm->usrNavigationMode_, NavigationMode::STACK);
+    ASSERT_EQ(navigationLayoutProperty->propNavigationMode_.value(), NavigationMode::STACK);
+}
+
+/**
+ * @tc.name: NavigationModelNG001
+ * @tc.desc: Test NavigationPatternTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG001, TestSize.Level1)
+{
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "NavDestination", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navBarNode =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 33, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto dividerNode =
+        FrameNode::GetOrCreateFrameNode("dividerNode", 44, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+    navigation->navBarNode_ = navBarNode;
+    navigation->contentNode_ = contentNode;
+    navigation->dividerNode_ = dividerNode;
+
+    auto navigationLayoutProperty = navigation->GetLayoutProperty<NavigationLayoutProperty>();
+    navigationLayoutProperty->propNavigationMode_ = NavigationMode::AUTO;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    stack->reservedNodeId_ = 11;
+    NavigationModelNG model;
+    model.Create();
+    ASSERT_EQ(navigationLayoutProperty->propNavigationMode_.value(), NavigationMode::AUTO);
+
+    navigation->navBarNode_ = nullptr;
+    navBarNode = NavBarNode::GetOrCreateNavBarNode(
+        V2::NAVBAR_ETS_TAG, 55, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 66, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto navBarContentNode = FrameNode::GetOrCreateFrameNode(
+        "navBarContentNode", 77, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto toolBarNode = FrameNode::GetOrCreateFrameNode(
+        "toolBarNode", 88, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+
+    navBarNode->titleBarNode_ = titleBarNode;
+    navBarNode->navBarContentNode_ = navBarContentNode;
+    navBarNode->toolBarNode_ = toolBarNode;
+
+    stack->reservedNodeId_ = 11;
+    auto tempRegister = ElementRegister::GetInstance();
+    tempRegister->nextUniqueElementId_ = 55;
+    model.Create();
+    ASSERT_EQ(navigationLayoutProperty->propNavigationMode_.value(), NavigationMode::AUTO);
+}
+
+/**
+ * @tc.name: NavigationModelNG002
+ * @tc.desc: Test NavigationPatternTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create title, navBarNode, navigation.
+     * @tc.expected: check whether the properties is correct.
+     */
+    auto title = CustomNode::CreateCustomNode(11, "customNode");
+    auto navBarNode =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 22, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    navigation->navBarNode_ = navBarNode;
+    navBarNode->title_ = title;
+    /**
+     * @tc.steps: step1. create model, change properties, then call model.SetTitle().
+     * @tc.expected: check whether the properties is correct.
+     */
+    NavigationModelNG model;
+    model.SetTitle("title");
+    ASSERT_EQ(navBarNode->propTitleNodeOperation_.value(), ChildNodeOperation::REPLACE);
+    auto textTitle = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 36, AceType::MakeRefPtr<TextPattern>());
+    navBarNode->title_ = textTitle;
+    textTitle->GetLayoutProperty<TextLayoutProperty>()->propContent_ = "title";
+    model.SetTitle("title");
+    ASSERT_EQ(navBarNode->propTitleNodeOperation_.value(), ChildNodeOperation::NONE);
+    navBarNode->title_ = nullptr;
+    auto elementRegister = ElementRegister::GetInstance();
+    elementRegister->nextUniqueElementId_ = 36;
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    navBarLayoutProperty->propTitleMode_ = NavigationTitleMode::MINI;
+    model.SetTitle("title");
+    ASSERT_EQ(navBarNode->propTitleNodeOperation_.value(), ChildNodeOperation::ADD);
+}
+
+/**
+ * @tc.name: NavigationModelNG003
+ * @tc.desc: Test NavigationPatternTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG003, TestSize.Level1)
+{
+    auto customNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 44, AceType::MakeRefPtr<TextPattern>());
+    auto title = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 33, AceType::MakeRefPtr<TextPattern>());
+    auto navBarNode =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 22, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+
+    navigation->navBarNode_ = navBarNode;
+    NavigationModelNG model;
+    navBarNode->title_ = nullptr;
+    model.SetCustomTitle(customNode);
+    ASSERT_EQ(navBarNode->propTitleNodeOperation_.value(), ChildNodeOperation::ADD);
+    navBarNode->title_ = title;
+    model.SetCustomTitle(customNode);
+    ASSERT_EQ(navBarNode->propTitleNodeOperation_.value(), ChildNodeOperation::REPLACE);
+
+    model.SetCustomTitle(customNode);
+    ASSERT_EQ(navBarNode->propTitleNodeOperation_.value(), ChildNodeOperation::NONE);
+}
+
+/**
+ * @tc.name: NavigationModelNG004
+ * @tc.desc: Test NavigationPatternTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG004, TestSize.Level1)
+{
+    auto customNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 44, AceType::MakeRefPtr<TextPattern>());
+    auto title = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 33, AceType::MakeRefPtr<TextPattern>());
+    auto navBarNode =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 22, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    navigation->navBarNode_ = navBarNode;
+    NavigationModelNG model;
+
+    navigation->eventHub_->enabled_ = false;
+    navBarLayoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
+    model.SetTitleMode(NavigationTitleMode::MINI);
+    navBarLayoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
+    model.SetTitleMode(NavigationTitleMode::MINI);
+    navBarLayoutProperty->propTitleMode_ = NavigationTitleMode::MINI;
+    model.SetTitleMode(NavigationTitleMode::FREE);
+    ASSERT_EQ(navBarNode->propBackButtonNodeOperation_.value(), ChildNodeOperation::REMOVE);
 }
 } // namespace OHOS::Ace::NG

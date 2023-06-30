@@ -356,6 +356,10 @@ HWTEST_F(RadioTestNg, RadioPatternTest006, TestSize.Level1)
  */
 HWTEST_F(RadioTestNg, RadioPatternTest007, TestSize.Level1)
 {
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto stageManager = pipelineContext->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
     RadioModelNG radioModelNG0;
     radioModelNG0.Create(NAME, GROUP_NAME);
     radioModelNG0.SetChecked(true);
@@ -371,7 +375,8 @@ HWTEST_F(RadioTestNg, RadioPatternTest007, TestSize.Level1)
     auto radioPaintProperty = frameNode0->GetPaintProperty<RadioPaintProperty>();
     ASSERT_NE(radioPaintProperty, nullptr);
     EXPECT_EQ(radioPaintProperty->GetRadioCheckValue(), CHECKED);
-    pattern0->UpdateGroupCheckStatus(frameNode0, false);
+    auto pageNode = stageManager->GetPageById(frameNode0->GetPageId());
+    pattern0->UpdateGroupCheckStatus(frameNode0, pageNode, false);
     EXPECT_TRUE(radioPaintProperty->GetRadioCheckValue());
 }
 
@@ -382,6 +387,10 @@ HWTEST_F(RadioTestNg, RadioPatternTest007, TestSize.Level1)
  */
 HWTEST_F(RadioTestNg, RadioPatternTest008, TestSize.Level1)
 {
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto stageManager = pipelineContext->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
     auto frameNode0 =
         FrameNode::GetOrCreateFrameNode(V2::RADIO_ETS_TAG, 0, []() { return AceType::MakeRefPtr<RadioPattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode0);
@@ -419,7 +428,8 @@ HWTEST_F(RadioTestNg, RadioPatternTest008, TestSize.Level1)
     auto radioPaintProperty0 = frameNode0->GetPaintProperty<RadioPaintProperty>();
     ASSERT_NE(radioPaintProperty0, nullptr);
     EXPECT_NE(radioPaintProperty0->GetRadioCheckValue(), CHECKED);
-    pattern0->UpdateGroupCheckStatus(frameNode0, true);
+    auto pageNode = stageManager->GetPageById(frameNode0->GetPageId());
+    pattern0->UpdateGroupCheckStatus(frameNode0, pageNode, false);
     auto radioPaintProperty1 = frameNode1->GetPaintProperty<RadioPaintProperty>();
     ASSERT_NE(radioPaintProperty1, nullptr);
     EXPECT_EQ(radioPaintProperty1->GetRadioCheckValue(), CHECKED);
@@ -1164,17 +1174,17 @@ HWTEST_F(RadioTestNg, RadioPatternTest022, TestSize.Level1)
      * test event.action != KeyAction::DOWN
      */
     KeyEvent keyEventOne(KeyCode::KEY_A, KeyAction::UP);
-    eventHub->onKeyEventInternal_(keyEventOne);
+    eventHub->ProcessOnKeyEventInternal(keyEventOne);
     /**
      * test event.action == KeyAction::DOWN and event.code == KeyCode::KEY_ENTER
      */
     KeyEvent keyEventTwo(KeyCode::KEY_A, KeyAction::DOWN);
-    eventHub->onKeyEventInternal_(keyEventTwo);
+    eventHub->ProcessOnKeyEventInternal(keyEventTwo);
     /**
      * test event.action == KeyAction::DOWN and event.code != KeyCode::KEY_ENTER
      */
     KeyEvent keyEventThr(KeyCode::KEY_ENTER, KeyAction::DOWN);
-    eventHub->onKeyEventInternal_(keyEventThr);
+    eventHub->ProcessOnKeyEventInternal(keyEventThr);
 }
 
 /**

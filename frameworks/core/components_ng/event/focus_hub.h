@@ -69,6 +69,11 @@ enum class FocusStyleType : int32_t {
     CUSTOM_REGION = 3,
 };
 
+enum class OnKeyEventType : int32_t {
+    DEFAULT = 0,
+    CONTEXT_MENU = 1,
+};
+
 class ACE_EXPORT FocusPaintParam : public virtual AceType {
     DECLARE_ACE_TYPE(FocusPaintParam, AceType)
 
@@ -656,9 +661,31 @@ public:
     {
         onPreFocusCallback_ = std::move(onPreFocusCallback);
     }
-    void SetOnKeyEventInternal(OnKeyEventFunc&& onKeyEventInternal)
+
+    void SetOnClearFocusStateInternal(OnClearFocusStateFunc&& onClearFocusCallback)
     {
-        onKeyEventInternal_ = std::move(onKeyEventInternal);
+        onClearFocusStateCallback_ = std::move(onClearFocusCallback);
+    }
+
+    void SetOnPaintFocusStateInternal(OnPaintFocusStateFunc&& onPaintFocusCallback)
+    {
+        onPaintFocusStateCallback_ = std::move(onPaintFocusCallback);
+    }
+
+    void SetOnKeyEventInternal(OnKeyEventFunc&& onKeyEvent, OnKeyEventType type = OnKeyEventType::DEFAULT)
+    {
+        onKeyEventsInternal_[type] = std::move(onKeyEvent);
+    }
+    bool ProcessOnKeyEventInternal(const KeyEvent& event)
+    {
+        bool result = false;
+        for (const auto& onKeyEvent : onKeyEventsInternal_) {
+            auto callback = onKeyEvent.second;
+            if (callback && callback(event)) {
+                result = true;
+            }
+        }
+        return result;
     }
 
     std::list<RefPtr<FocusHub>>::iterator FlushChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
@@ -791,6 +818,7 @@ public:
     {
         return (static_cast<uint32_t>(step) & 0x1) == 0;
     }
+
     static inline bool IsFocusStepForward(FocusStep step)
     {
         return (static_cast<uint32_t>(step) & MASK_FOCUS_STEP_FORWARD) != 0;
@@ -824,6 +852,10 @@ private:
 
     void SetScopeFocusAlgorithm();
 
+    void SetLastFocusNodeIndex(const RefPtr<FocusHub>& focusNode);
+
+    void ScrollToLastFocusIndex() const;
+
     void CheckFocusStateStyle(bool onFocus);
 
     bool IsNeedPaintFocusState();
@@ -833,8 +865,10 @@ private:
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;
-    OnKeyEventFunc onKeyEventInternal_;
+    std::unordered_map<OnKeyEventType, OnKeyEventFunc> onKeyEventsInternal_;
     OnPreFocusFunc onPreFocusCallback_;
+    OnClearFocusStateFunc onClearFocusStateCallback_;
+    OnPaintFocusStateFunc onPaintFocusStateCallback_;
 
     RefPtr<FocusCallbackEvents> focusCallbackEvents_;
 
@@ -843,6 +877,7 @@ private:
     WeakPtr<EventHub> eventHub_;
 
     WeakPtr<FocusHub> lastWeakFocusNode_ { nullptr };
+    int32_t lastFocusNodeIndex_ { -1 };
 
     bool focusable_ { true };
     bool parentFocusable_ { true };

@@ -236,4 +236,24 @@ void FrameReport::EndListFling()
     CHECK_NULL_VOID(beginListFlingFunc_);
     endListFlingFunc_();
 }
+
+void FrameReport::FlushBegin()
+{
+    if (GetFrameReportEnable() == 0) {
+        return;
+    }
+    flushBeginFunc_ = (FlushBeginFunc)LoadSymbol("FlushBegin");
+    CHECK_NULL_VOID(flushBeginFunc_);
+    flushBeginFunc_();
+}
+
+void FrameReport::FlushEnd()
+{
+    if (GetFrameReportEnable() == 0) {
+        return;
+    }
+    flushEndFunc_ = (FlushEndFunc)LoadSymbol("FlushEnd");
+    CHECK_NULL_VOID(flushEndFunc_);
+    flushEndFunc_();
+}
 } // namespace OHOS::Ace

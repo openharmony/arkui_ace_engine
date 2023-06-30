@@ -15,6 +15,11 @@
 
 #include "core/components_ng/base/view_abstract_model_ng.h"
 
+#include "base/memory/ace_type.h"
+#include "core/common/ace_engine.h"
+#include "core/common/container.h"
+#include "core/pipeline_ng/pipeline_context.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t LONG_PRESS_DURATION = 280;
@@ -91,9 +96,7 @@ void ViewAbstractModelNG::BindContextMenu(
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(targetNode);
-#ifdef ENABLE_DRAG_FRAMEWORK
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
-#endif // ENABLE_DRAG_FRAMEWORK
+
     RegisterContextMenuAppearCallback(type, menuParam);
 
     auto hub = targetNode->GetOrCreateGestureEventHub();
@@ -131,6 +134,9 @@ void ViewAbstractModelNG::BindContextMenu(
             CreateCustomMenu(builder, targetNode, true, menuPosition, menuParam);
         };
         auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
+#ifdef ENABLE_DRAG_FRAMEWORK
+        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
+#endif // ENABLE_DRAG_FRAMEWORK
 
         hub->SetLongPressEvent(longPress, false, true, LONG_PRESS_DURATION);
     } else {
@@ -139,6 +145,22 @@ void ViewAbstractModelNG::BindContextMenu(
     }
 
     RegisterContextMenuDisappearCallback(menuParam);
+
+    // delete menu when target node destroy
+    auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId()]() {
+        LOGI("BindContextMenu delete menu node from map");
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+        CHECK_NULL_VOID(subwindow);
+        auto childContainerId = subwindow->GetChildContainerId();
+        auto childContainer = AceEngine::Get().GetContainer(childContainerId);
+        CHECK_NULL_VOID(childContainer);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->DeleteMenu(id);
+    };
+    targetNode->PushDestroyCallback(destructor);
 }
 
 void ViewAbstractModelNG::SetPivot(const Dimension& x, const Dimension& y, const Dimension& z)

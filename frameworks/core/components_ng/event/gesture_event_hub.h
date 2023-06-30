@@ -112,7 +112,7 @@ constexpr float PIXELMAP_DEFALUT_LIMIT_SCALE = 0.5f;
 class EventHub;
 
 // The gesture event hub is mainly used to handle common gesture events.
-class ACE_EXPORT GestureEventHub : public Referenced {
+class ACE_FORCE_EXPORT GestureEventHub : public Referenced {
 public:
     explicit GestureEventHub(const WeakPtr<EventHub>& eventHub);
     ~GestureEventHub() override = default;
@@ -379,7 +379,7 @@ public:
 
 #ifdef ENABLE_DRAG_FRAMEWORK
     int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
-    OnDragCallback GetDragCallback();
+    OnDragCallback GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
 #endif // ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     void HandleOnDragStart(const GestureEvent& info);
@@ -387,7 +387,10 @@ public:
     void HandleOnDragEnd(const GestureEvent& info);
     void HandleOnDragCancel();
 
+    void StartLongPressActionForWeb();
+    void CancelDragForWeb();
     void StartDragTaskForWeb();
+    void ResetDragActionForWeb();
 
     void OnModifyDone();
     bool KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr<NG::FrameNode>& node);
@@ -403,6 +406,8 @@ private:
     void UpdateExternalNGGestureRecognizer();
 
     OnAccessibilityEventFunc GetOnAccessibilityEventFunc();
+
+    void OnDragStart(const GestureEvent& info, const RefPtr<PipelineBase>& context);
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;

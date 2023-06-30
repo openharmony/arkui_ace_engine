@@ -55,6 +55,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_environment.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_flex_impl.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_foreach.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_form_link.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_gauge.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_gesture.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid.h"
@@ -95,7 +96,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_polygon.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polyline.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_progress.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_qrcode.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_radio.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rating.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rect.h"
@@ -140,6 +140,12 @@
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 #include "frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.h"
+
+#ifdef USE_COMPONENTS_LIB
+#include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
+#else
+#include "frameworks/bridge/declarative_frontend/jsview/js_qrcode.h"
+#endif
 
 #ifdef VIDEO_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_video.h"
@@ -225,6 +231,13 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
     // update page life cycle function.
     auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
     CHECK_NULL_VOID(pagePattern);
+    // Register RenderDone callback to jsView so that js view can notify pagePattern the render function has been
+    // finish. The onPageShow life cycle must be after the InitialRender function execution.
+    view->RegisterRenderDoneCallback([weak = AceType::WeakClaim(AceType::RawPtr(pagePattern))]() {
+        auto pagePattern = weak.Upgrade();
+        CHECK_NULL_VOID(pagePattern);
+        pagePattern->MarkRenderDone();
+    });
     pagePattern->SetOnPageShow([weak = Referenced::WeakClaim(view)]() {
         auto view = weak.Upgrade();
         if (view) {
@@ -257,6 +270,21 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
             }
         });
 }
+
+#ifdef USE_COMPONENTS_LIB
+void JSBindLibs(const std::string moduleName, const std::string exportModuleName)
+{
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    std::shared_ptr<JsValue> global = runtime->GetGlobal();
+    std::shared_ptr<JsValue> requireNapiFunc = global->GetProperty(runtime, "requireNapi");
+    if (!requireNapiFunc || !requireNapiFunc->IsFunction(runtime)) {
+        LOGW("requireNapi func not found");
+    }
+    std::vector<std::shared_ptr<JsValue>> argv = { runtime->NewString(moduleName) };
+    std::shared_ptr<JsValue> napiObj = requireNapiFunc->Call(runtime, global, argv, argv.size());
+    global->SetProperty(runtime, exportModuleName, napiObj);
+}
+#endif
 
 void JsBindViews(BindingTarget globalObj)
 {
@@ -373,7 +401,6 @@ void JsBindViews(BindingTarget globalObj)
     JSTextInput::JSBind(globalObj);
     JSTextClock::JSBind(globalObj);
     JSSideBar::JSBind(globalObj);
-    JSQRCode::JSBind(globalObj);
     JSDataPanel::JSBind(globalObj);
     JSBadge::JSBind(globalObj);
     JSGauge::JSBind(globalObj);
@@ -421,6 +448,11 @@ void JsBindViews(BindingTarget globalObj)
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
     JSPath2D::JSBind(globalObj);
+#ifdef USE_COMPONENTS_LIB
+    JSBindLibs("arkui.qrcode", "QRCode");
+#else
+    JSQRCode::JSBind(globalObj);
+#endif
 }
 
 } // namespace OHOS::Ace::Framework

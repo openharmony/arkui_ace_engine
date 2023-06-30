@@ -102,12 +102,11 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     Axis axis = layoutProperty->GetAxis();
     auto idealSize =
         CreateIdealSize(layoutProperty->GetLayoutConstraint().value(), axis, layoutProperty->GetMeasureType(), true);
-    if (GreatOrEqual(GetMainAxisSize(idealSize, axis), Infinity<float>())) {
-        LOGE("size of main axis value is infinity, please check");
-        return;
+    auto matchChildren = GreatOrEqual(GetMainAxisSize(idealSize, axis), Infinity<float>());
+    if (!matchChildren) {
+        layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
+        MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
     }
-    layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
-    MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
 
     if (layoutWrapper->GetHostNode()->GetChildrenUpdated() != -1) {
         layoutInfo_.Reset();
@@ -145,6 +144,12 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     FillViewport(mainSize_, layoutWrapper);
+    if (matchChildren) {
+        mainSize_ = layoutInfo_.GetMaxMainHeight() + footerMainSize_;
+        idealSize.SetMainSize(mainSize_, axis_);
+        AddPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
+        layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
+    }
     layoutInfo_.lastMainSize_ = mainSize_;
 }
 

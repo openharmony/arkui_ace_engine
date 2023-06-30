@@ -56,6 +56,8 @@ public:
     static void SetContentStartOffset(float startOffset);
     static void SetContentEndOffset(float endOffset);
     static void SetNestedScroll(const JSCallbackInfo& args);
+    static void SetScrollEnabled(bool scrollEnabled);
+    static void SetScrollSnapAlign(int32_t scrollSnapAlign);
 
     static void ItemDragStartCallback(const JSCallbackInfo& info);
     static void ItemDragEnterCallback(const JSCallbackInfo& info);

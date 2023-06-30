@@ -20,10 +20,8 @@
 #include <memory>
 
 #include "base/memory/ace_type.h"
-#include "core/components/swiper/swiper_component.h"
-#include "core/components/tab_bar/tabs_event.h"
 #include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/swiper/swiper_model.h"
 
 namespace OHOS::Ace::NG {
 
@@ -35,8 +33,6 @@ using ChangeIndicatorEvent = std::function<void()>;
 using ChangeEvent = std::function<void(int32_t index)>;
 using ChangeEventPtr = std::shared_ptr<ChangeEvent>;
 using ChangeDoneEvent = std::function<void()>;
-using AnimationStartEvent = std::function<void(int32_t index)>;
-using AnimationEndEvent = std::function<void(int32_t index)>;
 
 class SwiperEventHub : public EventHub {
     DECLARE_ACE_TYPE(SwiperEventHub, EventHub)
@@ -71,6 +67,11 @@ public:
         animationEndEvent_ = std::move(animationEndEvent);
     }
 
+    void SetGestureSwipeEvent(GestureSwipeEvent&& gestureSwipeEvent)
+    {
+        gestureSwipeEvent_ = std::move(gestureSwipeEvent);
+    }
+
     void FireChangeDoneEvent(bool direction)
     {
         if (changeDoneEvent_) {
@@ -103,17 +104,24 @@ public:
         return direction_;
     }
 
-    void FireAnimationStartEvent(int32_t index) const
+    void FireAnimationStartEvent(int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) const
     {
         if (animationStartEvent_) {
-            animationStartEvent_(index);
+            animationStartEvent_(index, targetIndex, info);
         }
     }
 
-    void FireAnimationEndEvent(int32_t index) const
+    void FireAnimationEndEvent(int32_t index, const AnimationCallbackInfo& info) const
     {
         if (animationEndEvent_) {
-            animationEndEvent_(index);
+            animationEndEvent_(index, info);
+        }
+    }
+
+    void FireGestureSwipeEvent(int32_t index, const AnimationCallbackInfo& info) const
+    {
+        if (gestureSwipeEvent_) {
+            gestureSwipeEvent_(index, info);
         }
     }
 
@@ -124,6 +132,7 @@ private:
     ChangeIndicatorEvent changeIndicatorEvent_;
     AnimationStartEvent animationStartEvent_;
     AnimationEndEvent animationEndEvent_;
+    GestureSwipeEvent gestureSwipeEvent_;
 };
 
 } // namespace OHOS::Ace::NG

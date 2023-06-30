@@ -1000,8 +1000,6 @@ private:
     std::vector<RectCallback> rectCallbackList_;
     std::list<TouchEvent> touchEvents_;
 
-    int32_t rotationAnimationCount_ = 0;
-
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };
 

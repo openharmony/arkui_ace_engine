@@ -27,4 +27,10 @@ void RecognizerGroup::OnBeginGestureReferee(int32_t touchId, bool needUpdateChil
 void RecognizerGroup::OnFinishGestureReferee(int32_t touchId) {}
 
 void RecognizerGroup::OnResetStatus() {}
+
+const std::list<RefPtr<NGGestureRecognizer>>& RecognizerGroup::GetGroupRecognizer()
+{
+    std::list<RefPtr<NGGestureRecognizer>> groupRecognizer;
+    return groupRecognizer;
+}
 } // namespace OHOS::Ace::NG

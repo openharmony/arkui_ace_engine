@@ -28,6 +28,7 @@ namespace OHOS::Ace {
 class ColorCreator {
 public:
     static Color CreateFromJson(const JsonValue& json);
+    static Color CreateFromString(const std::string& colorValue);
 };
 
 } // namespace OHOS::Ace

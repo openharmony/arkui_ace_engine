@@ -76,6 +76,13 @@ constexpr float MOVE_DELTA_20 = 20.f;
 constexpr float MOVE_DELTA_80 = 80.f;
 constexpr float MOVE_DELTA_100 = 100.f;
 constexpr Dimension GROUP_MARGIN = 12.0_vp;
+constexpr float DEFAULT_STIFFNESS = 228;
+constexpr float DEFAULT_DAMPING = 30;
+constexpr float SWIPER_SPEED_TH = 1200.f;
+constexpr float SWIPER_TH = 0.25f;
+constexpr int32_t DEFAULT_LANES = 1;
+constexpr int32_t DEFAULT_INTERVAL = 0;
+constexpr int32_t DEFAULT_STARTINDEX = 0;
 } // namespace
 
 class ListTestNg : public testing::Test {
@@ -97,7 +104,6 @@ protected:
         OnDeleteEvent onDelete, OnEnterDeleteAreaEvent onEnterDeleteArea, OnExitDeleteAreaEvent onExitDeleteArea,
         const Dimension& length, bool isStartArea, V2::SwipeEdgeEffect effect);
     RefPtr<FrameNode> GetChildFrameNode(int32_t index);
-    RefPtr<GeometryNode> GetChildGeometryNode(int32_t index);
     RefPtr<FocusHub> GetChildFocusHub(int32_t index);
     RefPtr<ListItemPattern> GetItemPattern(int32_t index);
     RefPtr<ListItemGroupPattern> GetGroupPattern(int32_t index);
@@ -105,17 +111,21 @@ protected:
     void ListItemSwipeMoveAndLayout(const RefPtr<ListItemPattern>& itemPattern, float moveDelta);
     std::function<void()> GetDefaultSwiperBuilder(float crossSize, bool spring);
     std::function<void()> GetDefaultHeaderBuilder();
-    testing::AssertionResult VerifyItemPosition(int32_t expectCount, int32_t lanes = 1,
-        float interval = 0, int32_t startIndex = 0);
+    testing::AssertionResult VerifyItemPosition(int32_t expectCount, int32_t lanes = DEFAULT_LANES,
+        float interval = DEFAULT_INTERVAL, int32_t startIndex = DEFAULT_STARTINDEX);
     testing::AssertionResult VerifyGroupItemPosition(int32_t groupIndex, int32_t expectCount,
-        int32_t lanes = 1, float interval = 0);
+        int32_t lanes = DEFAULT_LANES, float interval = DEFAULT_INTERVAL);
     testing::AssertionResult IsEqualNextFocusNode(FocusStep step, int32_t currentIndex, int32_t nextIndex = -1);
     testing::AssertionResult IsEqualCurrentOffset(Offset expectOffset);
     testing::AssertionResult IsEqualRect(RectF rect, RectF expectRect);
+    testing::AssertionResult VerifySwiperItemChildRect(RefPtr<FrameNode> listItem, std::vector<RectF> expectRects);
     void MouseSelect(Offset start, Offset end);
     void MouseSelectRelease();
     void UpdateCurrentOffset(float offset);
+    void ScrollToTop();
+    void ScrollToBottom();
     void DragSwiperItem(int32_t index, GestureEvent info);
+    void DragSwiperItem(int32_t index, float mainDelta, float mainVelocity = SWIPER_SPEED_TH);
     uint64_t GetActions();
 
     RefPtr<FrameNode> frameNode_;
@@ -172,8 +182,10 @@ RefPtr<LayoutWrapper> ListTestNg::RunMeasureAndLayout(float width, float height)
     LayoutConstraintF LayoutConstraint;
     LayoutConstraint.parentIdealSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
     LayoutConstraint.percentReference = { DEVICE_WIDTH, DEVICE_HEIGHT };
-    LayoutConstraint.selfIdealSize = { width, height };
-    LayoutConstraint.maxSize = { width, height };
+    if (NonNegative(width) && NonNegative(height)) {
+        LayoutConstraint.selfIdealSize = { width, height };
+    }
+    LayoutConstraint.maxSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
     layoutWrapper->Measure(LayoutConstraint);
     layoutWrapper->Layout();
     layoutWrapper->MountToHostOnMainThread();
@@ -282,11 +294,6 @@ RefPtr<FrameNode> ListTestNg::GetChildFrameNode(int32_t index)
     return AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(index));
 }
 
-RefPtr<GeometryNode> ListTestNg::GetChildGeometryNode(int32_t index)
-{
-    return GetChildFrameNode(index)->GetGeometryNode();
-}
-
 RefPtr<FocusHub> ListTestNg::GetChildFocusHub(int32_t index)
 {
     return GetChildFrameNode(index)->GetOrCreateFocusHub();
@@ -306,15 +313,6 @@ const RectF& ListTestNg::GetChildRect(const RefPtr<FrameNode>& frameNode, int32_
 {
     auto child = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(index));
     return child->GetGeometryNode()->GetFrameRect();
-}
-
-void ListTestNg::ListItemSwipeMoveAndLayout(const RefPtr<ListItemPattern>& itemPattern, float moveDelta)
-{
-    GestureEvent info;
-    info.SetMainDelta(moveDelta);
-    itemPattern->HandleDragUpdate(info);
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    RunMeasureAndLayout();
 }
 
 std::function<void()> ListTestNg::GetDefaultSwiperBuilder(float crossSize, bool spring)
@@ -357,7 +355,8 @@ testing::AssertionResult ListTestNg::VerifyItemPosition(
         float startPos = (index / lanes) * (ITEM_HEIGHT + interval);
         float endPos = startPos + ITEM_HEIGHT;
         if (!NearEqual(listItem.startPos, startPos) || !NearEqual(listItem.endPos, endPos)) {
-            return testing::AssertionFailure() << "Index: " << index <<
+            return testing::AssertionFailure() <<
+                "At itemPosition Index: " << index <<
                 " ItemPosition: (" << listItem.startPos << " - " << listItem.endPos << ")" <<
                 " != " <<
                 "expectPosition: (" << startPos << " - " << endPos << ")";
@@ -378,7 +377,8 @@ testing::AssertionResult ListTestNg::VerifyGroupItemPosition(
         float startPos = (index / lanes) * (ITEM_HEIGHT + interval);
         float endPos = startPos + ITEM_HEIGHT;
         if (!NearEqual(listItem.first, startPos) || !NearEqual(listItem.second, endPos)) {
-            return testing::AssertionFailure() << "Index: " << index <<
+            return testing::AssertionFailure() <<
+                "At itemPosition Index: " << index <<
                 " Group ItemPosition: (" << listItem.first << " - " << listItem.second << ")" <<
                 " != " <<
                 "expectPosition: (" << startPos << " - " << endPos << ")";
@@ -426,6 +426,30 @@ testing::AssertionResult ListTestNg::IsEqualRect(RectF rect, RectF expectRect)
         "expectRect: " << expectRect.ToString();
 }
 
+testing::AssertionResult ListTestNg::VerifySwiperItemChildRect(
+    RefPtr<FrameNode> listItem, std::vector<RectF> expectRects)
+{
+    size_t childrenSize = listItem->GetChildren().size();
+    size_t expectRectsSize = expectRects.size();
+    if (childrenSize != expectRectsSize) {
+        return testing::AssertionFailure() <<
+            "listItem children size:" << childrenSize <<
+            " != " <<
+            "expectRects size: " << expectRectsSize;
+    }
+    for (size_t index = 0; index < childrenSize; index++) {
+        RectF rect = GetChildRect(listItem, index);
+        if (rect != expectRects[index]) {
+            return testing::AssertionFailure() <<
+                "listItem child index: " << index <<
+                ", rect: " << rect.ToString() <<
+                " != " <<
+                "expectRect: " << expectRects[index].ToString();
+        }
+    }
+    return testing::AssertionSuccess();
+}
+
 void ListTestNg::MouseSelect(Offset start, Offset end)
 {
     MouseInfo info;
@@ -454,6 +478,18 @@ void ListTestNg::UpdateCurrentOffset(float offset)
     RunMeasureAndLayout();
 }
 
+void ListTestNg::ScrollToTop()
+{
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_TOP);
+    RunMeasureAndLayout();
+}
+
+void ListTestNg::ScrollToBottom()
+{
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    RunMeasureAndLayout();
+}
+
 void ListTestNg::DragSwiperItem(int32_t index, GestureEvent info)
 {
     auto itemPattern = GetItemPattern(index);
@@ -461,7 +497,26 @@ void ListTestNg::DragSwiperItem(int32_t index, GestureEvent info)
     itemPattern->HandleDragUpdate(info);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     RunMeasureAndLayout();
+    // curOffset_ would be reset to 0/START_NODE_SIZE/END_NODE_SIZE by StartSpringMotion(),
+    // but do not set, conducive to verification
     itemPattern->HandleDragEnd(info);
+}
+
+void ListTestNg::DragSwiperItem(int32_t index, float mainDelta, float mainVelocity)
+{
+    GestureEvent info;
+    info.SetMainDelta(mainDelta);
+    info.SetMainVelocity(mainVelocity);
+    DragSwiperItem(index, info);
+}
+
+void ListTestNg::ListItemSwipeMoveAndLayout(const RefPtr<ListItemPattern>& itemPattern, float moveDelta)
+{
+    GestureEvent info;
+    info.SetMainDelta(moveDelta);
+    itemPattern->HandleDragUpdate(info);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    RunMeasureAndLayout();
 }
 
 uint64_t ListTestNg::GetActions()
@@ -475,107 +530,167 @@ uint64_t ListTestNg::GetActions()
 }
 
 /**
- * @tc.name: Properties001
+ * @tc.name: ListLayoutProperty001
  * @tc.desc: Test List layout properties.
  * @tc.type: FUNC
  */
-HWTEST_F(ListTestNg, Properties001, TestSize.Level1)
+HWTEST_F(ListTestNg, ListLayoutProperty001, TestSize.Level1)
 {
     V2::ItemDivider itemDivider = V2::ItemDivider();
     itemDivider.strokeWidth = Dimension(10);
-    itemDivider.startMargin = Dimension(0);
-    itemDivider.endMargin = Dimension(0);
+    itemDivider.startMargin = Dimension(5);
+    itemDivider.endMargin = Dimension(5);
     itemDivider.color = Color(0x000000);
 
     ListModelNG listModelNG;
     listModelNG.Create();
     listModelNG.SetSpace(Dimension(10));
-    listModelNG.SetInitialIndex(0);
-    RefPtr<ScrollControllerBase> scrollController = listModelNG.CreateScrollController();
-    listModelNG.SetScroller(scrollController, nullptr);
+    listModelNG.SetInitialIndex(1);
     listModelNG.SetListDirection(Axis::VERTICAL);
     listModelNG.SetScrollBar(Ace::DisplayMode::ON);
-    listModelNG.SetEdgeEffect(EdgeEffect::NONE);
     listModelNG.SetEditMode(true);
     listModelNG.SetChainAnimation(true);
+    listModelNG.SetDivider(itemDivider);
+    listModelNG.SetEdgeEffect(EdgeEffect::NONE);
     listModelNG.SetLanes(3);
     listModelNG.SetLaneMinLength(Dimension(40));
     listModelNG.SetLaneMaxLength(Dimension(60));
     listModelNG.SetListItemAlign(V2::ListItemAlign::CENTER);
     listModelNG.SetCachedCount(10);
     listModelNG.SetSticky(V2::StickyStyle::HEADER);
-    listModelNG.SetMultiSelectable(true);
-    listModelNG.SetDivider(itemDivider);
     GetInstance();
     RunMeasureAndLayout();
 
+    /**
+     * @tc.steps: step1. Call ToJsonValue()
+     * @tc.expected: The json value is correct
+     */
     auto json = JsonUtil::Create(true);
     layoutProperty_->ToJsonValue(json);
-    EXPECT_NE(json, nullptr);
-}
+    EXPECT_EQ(Dimension::FromString(json->GetString("space")), Dimension(10));
+    EXPECT_EQ(json->GetString("initialIndex"), "1");
+    EXPECT_EQ(static_cast<Axis>(json->GetInt("listDirection")), Axis::VERTICAL);
+    EXPECT_TRUE(json->GetBool("editMode"));
+    EXPECT_TRUE(json->GetBool("chainAnimation"));
+    auto dividerJson = json->GetObject("divider");
+    EXPECT_EQ(Dimension::FromString(dividerJson->GetString("strokeWidth")), Dimension(10));
+    EXPECT_EQ(Dimension::FromString(dividerJson->GetString("startMargin")), Dimension(5));
+    EXPECT_EQ(Dimension::FromString(dividerJson->GetString("endMargin")), Dimension(5));
+    EXPECT_EQ(Color::ColorFromString(dividerJson->GetString("color")), Color(0x000000));
+    EXPECT_EQ(json->GetString("edgeEffect"), "EdgeEffect.None");
+    EXPECT_EQ(json->GetString("lanes"), "3");
+    EXPECT_EQ(Dimension::FromString(json->GetString("laneMinLength")), Dimension(40));
+    EXPECT_EQ(Dimension::FromString(json->GetString("laneMaxLength")), Dimension(60));
+    EXPECT_EQ(json->GetString("alignListItem"), "ListItemAlign.Center");
+    EXPECT_EQ(json->GetString("cachedCount"), "10");
+    EXPECT_EQ(json->GetString("sticky"), "StickyStyle.Header");
 
-/**
- * @tc.name: Properties002
- * @tc.desc: Test List layout properties.
- * @tc.type: FUNC
- */
-HWTEST_F(ListTestNg, Properties002, TestSize.Level1)
-{
-    ListModelNG listModelNG;
-    listModelNG.Create();
-    GetInstance();
-
-    auto json = JsonUtil::Create(true);
-    layoutProperty_->ToJsonValue(json);
-    EXPECT_NE(json, nullptr);
-
+    /**
+     * @tc.steps: step2. Change some property, Call ToJsonValue()
+     * @tc.expected: The json value is correct
+     */
     layoutProperty_->UpdateEdgeEffect(EdgeEffect::FADE);
     layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::END);
     layoutProperty_->UpdateStickyStyle(V2::StickyStyle::FOOTER);
+    json = JsonUtil::Create(true);
     layoutProperty_->ToJsonValue(json);
-    EXPECT_NE(json, nullptr);
+    EXPECT_EQ(json->GetString("edgeEffect"), "EdgeEffect.Fade");
+    EXPECT_EQ(json->GetString("alignListItem"), "ListItemAlign.End");
+    EXPECT_EQ(json->GetString("sticky"), "StickyStyle.Footer");
 
+    /**
+     * @tc.steps: step3. Change some property, Call ToJsonValue()
+     * @tc.expected: The json value is changed
+     */
     layoutProperty_->UpdateStickyStyle(V2::StickyStyle::BOTH);
+    json = JsonUtil::Create(true);
     layoutProperty_->ToJsonValue(json);
-    EXPECT_NE(json, nullptr);
+    EXPECT_EQ(json->GetString("sticky"), "StickyStyle.Header | StickyStyle.Footer");
+
+    /**
+     * @tc.steps: step4. The json include strokeWidth and Change it, call FromJson()
+     * @tc.expected: The layoutProperty_->GetDividerValue().strokeWidth changed
+     */
+    dividerJson = json->GetObject("divider");
+    dividerJson->Replace("strokeWidth", Dimension(20).ToString().c_str());
+    layoutProperty_->FromJson(json);
+    EXPECT_EQ(layoutProperty_->GetDividerValue().strokeWidth, Dimension(20));
+
+    /**
+     * @tc.steps: step5. The json not include strokeWidth, call FromJson()
+     * @tc.expected: The layoutProperty_->GetDividerValue() not changed
+     */
+    dividerJson->Delete("strokeWidth");
+    layoutProperty_->FromJson(json);
+    EXPECT_EQ(layoutProperty_->GetDividerValue().strokeWidth, Dimension(20));
 }
 
 /**
- * @tc.name: Properties003
+ * @tc.name: ListItemLayoutProperty001
  * @tc.desc: Test ListItem layout properties.
  * @tc.type: FUNC
  */
-HWTEST_F(ListTestNg, Properties003, TestSize.Level1)
+HWTEST_F(ListTestNg, ListItemLayoutProperty001, TestSize.Level1)
 {
-    ListItemModelNG listItemModel;
-    listItemModel.Create();
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
-    auto itemFrameNode = AceType::DynamicCast<FrameNode>(element);
-    auto itemLayoutProperty = itemFrameNode->GetLayoutProperty<ListItemLayoutProperty>();
+    CreateList(TOTAL_NUMBER);
+    auto layoutProperty = GetChildFrameNode(0)->GetLayoutProperty<ListItemLayoutProperty>();
 
+    /**
+     * @tc.steps: step1. Call ToJsonValue()
+     * @tc.expected: The json value is correct
+     */
     auto json = JsonUtil::Create(true);
-    itemLayoutProperty->ToJsonValue(json);
-    EXPECT_NE(json, nullptr);
+    layoutProperty->ToJsonValue(json);
+    EXPECT_EQ(static_cast<V2::StickyMode>(json->GetInt("sticky")), V2::StickyMode::NONE);
+    EXPECT_EQ(json->GetBool("editable"), false);
+    EXPECT_EQ(Dimension::FromString(json->GetString("startDeleteAreaDistance")), Dimension(0, DimensionUnit::VP));
+    EXPECT_EQ(Dimension::FromString(json->GetString("endDeleteAreaDistance")), Dimension(0, DimensionUnit::VP));
 
-    itemLayoutProperty->UpdateStickyMode(V2::StickyMode::NORMAL);
-    itemLayoutProperty->UpdateEditMode(V2::EditMode::NONE);
-    itemLayoutProperty->UpdateEdgeEffect(V2::SwipeEdgeEffect::Spring);
-    itemLayoutProperty->ToJsonValue(json);
-    EXPECT_NE(json, nullptr);
+    /**
+     * @tc.steps: step2. Change some property, Call ToJsonValue()
+     * @tc.expected: The json value is correct
+     */
+    layoutProperty->UpdateStickyMode(V2::StickyMode::NORMAL);
+    layoutProperty->UpdateEditMode(V2::EditMode::NONE);
+    layoutProperty->UpdateEdgeEffect(V2::SwipeEdgeEffect::Spring);
+    json = JsonUtil::Create(true);
+    layoutProperty->ToJsonValue(json);
+    EXPECT_EQ(json->GetString("sticky"), "Sticky.Normal");
+    EXPECT_EQ(json->GetString("editable"), "EditMode.None");
+    auto swipeAction = json->GetObject("swipeAction");
+    EXPECT_EQ(static_cast<V2::SwipeEdgeEffect>(swipeAction->GetInt("edgeEffect")), V2::SwipeEdgeEffect::Spring);
 
-    itemLayoutProperty->UpdateStickyMode(V2::StickyMode::OPACITY);
-    itemLayoutProperty->UpdateEditMode(V2::EditMode::MOVABLE);
-    itemLayoutProperty->UpdateEdgeEffect(V2::SwipeEdgeEffect::None);
-    itemLayoutProperty->ToJsonValue(json);
-    EXPECT_NE(json, nullptr);
+    /**
+     * @tc.steps: step3. Change some property, Call ToJsonValue()
+     * @tc.expected: The json value is correct
+     */
+    layoutProperty->UpdateStickyMode(V2::StickyMode::OPACITY);
+    layoutProperty->UpdateEditMode(V2::EditMode::MOVABLE);
+    layoutProperty->UpdateEdgeEffect(V2::SwipeEdgeEffect::None);
+    json = JsonUtil::Create(true);
+    layoutProperty->ToJsonValue(json);
+    EXPECT_EQ(json->GetString("sticky"), "Sticky.Opacity");
+    EXPECT_EQ(json->GetString("editable"), "EditMode.Movable");
+    swipeAction = json->GetObject("swipeAction");
+    EXPECT_EQ(swipeAction->GetString("edgeEffect"), "SwipeEdgeEffect.Node");
 
-    itemLayoutProperty->UpdateEditMode(V2::EditMode::DELETABLE);
-    itemLayoutProperty->ToJsonValue(json);
-    EXPECT_NE(json, nullptr);
+    /**
+     * @tc.steps: step4. Change some property, Call ToJsonValue()
+     * @tc.expected: The json value is correct
+     */
+    layoutProperty->UpdateEditMode(V2::EditMode::DELETABLE);
+    json = JsonUtil::Create(true);
+    layoutProperty->ToJsonValue(json);
+    EXPECT_EQ(json->GetString("editable"), "EditMode.Deletable");
 
-    itemLayoutProperty->UpdateEditMode(V2::EditMode::DELETABLE | V2::EditMode::MOVABLE);
-    itemLayoutProperty->ToJsonValue(json);
-    EXPECT_NE(json, nullptr);
+    /**
+     * @tc.steps: step5. Change some property, Call ToJsonValue()
+     * @tc.expected: The json value is correct
+     */
+    layoutProperty->UpdateEditMode(V2::EditMode::DELETABLE | V2::EditMode::MOVABLE);
+    json = JsonUtil::Create(true);
+    layoutProperty->ToJsonValue(json);
+    EXPECT_TRUE(json->GetBool("editable"));
 }
 
 /**
@@ -608,12 +723,12 @@ HWTEST_F(ListTestNg, AttrSpace002, TestSize.Level1)
 {
     constexpr float space = 5.0f;
     constexpr float strokeWidth = 10.f;
+    V2::ItemDivider itemDivider = V2::ItemDivider();
+    itemDivider.strokeWidth = Dimension(strokeWidth);
 
     ListModelNG listModelNG;
     listModelNG.Create();
     listModelNG.SetSpace(Dimension(space));
-    V2::ItemDivider itemDivider = V2::ItemDivider();
-    itemDivider.strokeWidth = Dimension(strokeWidth);
     listModelNG.SetDivider(itemDivider);
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
@@ -732,42 +847,6 @@ HWTEST_F(ListTestNg, AttrInitIndex005, TestSize.Level1)
 }
 
 /**
- * @tc.name: AttrScroller001
- * @tc.desc: Test property about scroller,
- * @tc.type: FUNC
- */
-HWTEST_F(ListTestNg, AttrScroller001, TestSize.Level1)
-{
-    ListModelNG listModelNG;
-    listModelNG.Create();
-    RefPtr<ScrollControllerBase> scrollController = listModelNG.CreateScrollController();
-    RefPtr<ScrollProxy> proxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
-    listModelNG.SetScroller(scrollController, proxy);
-    CreateListItem(TOTAL_NUMBER);
-    GetInstance();
-    RunMeasureAndLayout();
-
-    EXPECT_NE(pattern_->positionController_, nullptr);
-}
-
-/**
- * @tc.name: AttrListDirection001
- * @tc.desc: Test property about listDirection,
- * @tc.type: FUNC
- */
-HWTEST_F(ListTestNg, AttrListDirection001, TestSize.Level1)
-{
-    ListModelNG listModelNG;
-    listModelNG.Create();
-    listModelNG.SetListDirection(Axis::HORIZONTAL);
-    CreateListItem(TOTAL_NUMBER);
-    GetInstance();
-    RunMeasureAndLayout();
-
-    EXPECT_EQ(pattern_->GetAxis(), Axis::HORIZONTAL);
-}
-
-/**
  * @tc.name: AttrDivider001
  * @tc.desc: Test property about divider,
  * @tc.type: FUNC
@@ -841,58 +920,6 @@ HWTEST_F(ListTestNg, AttrScrollBar002, TestSize.Level1)
 }
 
 /**
- * @tc.name: AttrEdgeEffect001
- * @tc.desc: Test property about edgeEffect,
- * @tc.type: FUNC
- */
-HWTEST_F(ListTestNg, AttrEdgeEffect001, TestSize.Level1)
-{
-    ListModelNG listModelNG;
-    listModelNG.Create();
-    listModelNG.SetEdgeEffect(EdgeEffect::FADE);
-    CreateListItem(TOTAL_NUMBER);
-    GetInstance();
-    RunMeasureAndLayout();
-
-    auto scrollEffect = pattern_->GetScrollEdgeEffect();
-    ASSERT_NE(scrollEffect, nullptr);
-}
-
-/**
- * @tc.name: AttrChainAnimation001
- * @tc.desc: Test property about chainAnimation,
- * @tc.type: FUNC
- */
-HWTEST_F(ListTestNg, AttrChainAnimation001, TestSize.Level1)
-{
-    ListModelNG listModelNG;
-    listModelNG.Create();
-    listModelNG.SetChainAnimation(true);
-    CreateListItem(TOTAL_NUMBER);
-    GetInstance();
-    RunMeasureAndLayout();
-
-    EXPECT_NE(pattern_->chainAnimation_, nullptr);
-}
-
-/**
- * @tc.name: AttrMultiSelectable001
- * @tc.desc: Test property about multiSelectable,
- * @tc.type: FUNC
- */
-HWTEST_F(ListTestNg, AttrMultiSelectable001, TestSize.Level1)
-{
-    ListModelNG listModelNG;
-    listModelNG.Create();
-    listModelNG.SetMultiSelectable(true);
-    CreateListItem(TOTAL_NUMBER);
-    GetInstance();
-    RunMeasureAndLayout();
-
-    EXPECT_TRUE(pattern_->multiSelectable_);
-}
-
-/**
  * @tc.name: AttrLanes001
  * @tc.desc: Test property about lanes,
  * List layout as 2 lanes
@@ -902,7 +929,6 @@ HWTEST_F(ListTestNg, AttrLanes001, TestSize.Level1)
 {
     constexpr int32_t lanes = 2;
     constexpr int32_t itemCount = 19;
-
     ListModelNG listModelNG;
     listModelNG.Create();
     listModelNG.SetLanes(lanes);
@@ -910,16 +936,17 @@ HWTEST_F(ListTestNg, AttrLanes001, TestSize.Level1)
     GetInstance();
     RunMeasureAndLayout();
 
-    constexpr int32_t expectItemCount1 = 16;
-    EXPECT_TRUE(VerifyItemPosition(expectItemCount1, lanes));
+    int32_t expectItemCount = 16;
+    int32_t expectLanes = 2;
+    EXPECT_TRUE(VerifyItemPosition(expectItemCount, expectLanes, DEFAULT_INTERVAL, DEFAULT_STARTINDEX));
 
-    // Scroll bottom
-    constexpr float scrollOffset = -ITEM_HEIGHT * 3;
-    UpdateCurrentOffset(scrollOffset);
+    ScrollToBottom();
+    int32_t expectStartIndex = 4;
+    expectItemCount = 15;
+    EXPECT_TRUE(VerifyItemPosition(expectItemCount, expectLanes, DEFAULT_INTERVAL, expectStartIndex));
 
-    constexpr int32_t startIndex = 4;
-    constexpr int32_t expectItemCount2 = 15;
-    EXPECT_TRUE(VerifyItemPosition(expectItemCount2, lanes, 0, startIndex));
+    ScrollToTop();
+    EXPECT_TRUE(VerifyItemPosition(expectItemCount, expectLanes, DEFAULT_INTERVAL, DEFAULT_STARTINDEX));
 }
 
 /**
@@ -933,8 +960,6 @@ HWTEST_F(ListTestNg, AttrLanes002, TestSize.Level1)
     constexpr float minLaneLength = 220.f;
     constexpr float maxLaneLength = 480.f;
     constexpr int32_t itemCount = 19;
-    constexpr int32_t expectItemCount = 16;
-    constexpr int32_t expectLanes = 2;
 
     ListModelNG listModelNG;
     listModelNG.Create();
@@ -944,15 +969,24 @@ HWTEST_F(ListTestNg, AttrLanes002, TestSize.Level1)
     GetInstance();
     RunMeasureAndLayout();
 
-    EXPECT_TRUE(VerifyItemPosition(expectItemCount, expectLanes));
+    int32_t expectLanes = 2;
+    int32_t expectItemCount = 16;
+    EXPECT_TRUE(VerifyItemPosition(expectItemCount, expectLanes, DEFAULT_INTERVAL, DEFAULT_STARTINDEX));
+
+    ScrollToBottom();
+    int32_t expectStartIndex = 4;
+    expectItemCount = 15;
+    EXPECT_TRUE(VerifyItemPosition(expectItemCount, expectLanes, DEFAULT_INTERVAL, expectStartIndex));
+
+    ScrollToTop();
+    EXPECT_TRUE(VerifyItemPosition(expectItemCount, expectLanes, DEFAULT_INTERVAL, DEFAULT_STARTINDEX));
 
     /**
      * @tc.steps: step1. Check ListItem width.
      * @tc.expected: ListItem width would self-adaption.
      */
     for (int32_t index = 0; index < expectItemCount; index++) {
-        auto geometryNode = GetChildGeometryNode(index);
-        auto width = geometryNode->GetFrameSize().Width();
+        float width = GetChildRect(frameNode_, index).Width();
         EXPECT_FLOAT_EQ(width, 240.f);
     }
 }
@@ -968,8 +1002,6 @@ HWTEST_F(ListTestNg, AttrLanes003, TestSize.Level1)
     constexpr float minLaneLength = 220.f;
     constexpr float maxLaneLength = 100.f;
     constexpr int32_t itemCount = 19;
-    constexpr int32_t expectItemCount = 16;
-    constexpr int32_t expectLanes = 2;
 
     ListModelNG listModelNG;
     listModelNG.Create();
@@ -979,6 +1011,8 @@ HWTEST_F(ListTestNg, AttrLanes003, TestSize.Level1)
     GetInstance();
     RunMeasureAndLayout();
 
+    int32_t expectItemCount = 16;
+    int32_t expectLanes = 2;
     EXPECT_TRUE(VerifyItemPosition(expectItemCount, expectLanes));
 
     /**
@@ -986,8 +1020,7 @@ HWTEST_F(ListTestNg, AttrLanes003, TestSize.Level1)
      * @tc.expected: ListItem width would be minLaneLength.
      */
     for (int32_t index = 0; index < expectItemCount; index++) {
-        auto geometryNode = GetChildGeometryNode(index);
-        auto width = geometryNode->GetFrameSize().Width();
+        float width = GetChildRect(frameNode_, index).Width();
         EXPECT_FLOAT_EQ(width, minLaneLength);
     }
 }
@@ -1001,17 +1034,35 @@ HWTEST_F(ListTestNg, AttrLanes003, TestSize.Level1)
 HWTEST_F(ListTestNg, AttrLanes004, TestSize.Level1)
 {
     constexpr int32_t lanes = 2;
-    constexpr int32_t groupCount = 1;
-    constexpr int32_t expectItemCount = 8;
+    constexpr int32_t groupNumber = 3; // set 3 group to make list scrollable
 
     ListModelNG listModelNG;
     listModelNG.Create();
     listModelNG.SetLanes(lanes);
-    CreateListItemGroup(groupCount);
+    // each group has VIEWPORT_NUMBER listItem
+    CreateListItemGroup(groupNumber);
     GetInstance();
     RunMeasureAndLayout();
 
-    EXPECT_TRUE(VerifyGroupItemPosition(0, expectItemCount, lanes));
+    int32_t groupIndex_0 = 0;
+    int32_t groupIndex_1 = 1;
+    int32_t groupIndex_2 = 1;
+    int32_t expectItemCount = 8;
+    int32_t expectLanes = 2;
+    EXPECT_TRUE(VerifyGroupItemPosition(groupIndex_0, expectItemCount, expectLanes));
+    EXPECT_TRUE(VerifyGroupItemPosition(groupIndex_1, expectItemCount, expectLanes));
+    EXPECT_TRUE(VerifyGroupItemPosition(groupIndex_2, expectItemCount, expectLanes));
+
+    // test scroll
+    ScrollToBottom();
+    EXPECT_TRUE(VerifyGroupItemPosition(groupIndex_0, expectItemCount, expectLanes));
+    EXPECT_TRUE(VerifyGroupItemPosition(groupIndex_1, expectItemCount, expectLanes));
+    EXPECT_TRUE(VerifyGroupItemPosition(groupIndex_2, expectItemCount, expectLanes));
+
+    ScrollToTop();
+    EXPECT_TRUE(VerifyGroupItemPosition(groupIndex_0, expectItemCount, expectLanes));
+    EXPECT_TRUE(VerifyGroupItemPosition(groupIndex_1, expectItemCount, expectLanes));
+    EXPECT_TRUE(VerifyGroupItemPosition(groupIndex_2, expectItemCount, expectLanes));
 }
 
 /**
@@ -1048,14 +1099,11 @@ HWTEST_F(ListTestNg, AttrLanes005, TestSize.Level1)
     constexpr int32_t expectItemCount1 = 8;
     EXPECT_TRUE(VerifyGroupItemPosition(0, expectItemCount1));
 
-    // Scroll bottom
-    constexpr float scrollOffset = -ITEM_HEIGHT * 8;
-    UpdateCurrentOffset(scrollOffset);
-
     /**
      * @tc.steps: step2. Check ListItem out of group.
      * @tc.expected: ListItem columns would be 2.
      */
+    ScrollToBottom();
     constexpr int32_t expectItemCount2 = VIEWPORT_NUMBER * 2;
     constexpr int32_t expectLanes2 = 2;
     constexpr int32_t expectStartIndex2 = 1;
@@ -1084,8 +1132,7 @@ HWTEST_F(ListTestNg, AttrAlignListItem001, TestSize.Level1)
     RunMeasureAndLayout();
 
     for (int32_t index = 0; index < TOTAL_NUMBER; index++) {
-        auto geometryNode = GetChildGeometryNode(index);
-        float offsetX = geometryNode->GetFrameOffset().GetX();
+        float offsetX = GetChildRect(frameNode_, index).GetX();
         EXPECT_EQ(offsetX, 0);
     }
 }
@@ -1113,8 +1160,7 @@ HWTEST_F(ListTestNg, AttrAlignListItem002, TestSize.Level1)
     RunMeasureAndLayout();
 
     for (int32_t index = 0; index < TOTAL_NUMBER; index++) {
-        auto geometryNode = GetChildGeometryNode(index);
-        float offsetX = geometryNode->GetFrameOffset().GetX();
+        float offsetX = GetChildRect(frameNode_, index).GetX();
         float expectOffsetX = (DEVICE_WIDTH - itemWidth) / 2;
         EXPECT_EQ(offsetX, expectOffsetX);
     }
@@ -1143,17 +1189,42 @@ HWTEST_F(ListTestNg, AttrAlignListItem003, TestSize.Level1)
     RunMeasureAndLayout();
 
     for (int32_t index = 0; index < TOTAL_NUMBER; index++) {
-        auto geometryNode = GetChildGeometryNode(index);
-        float offsetX = geometryNode->GetFrameOffset().GetX();
+        float offsetX = GetChildRect(frameNode_, index).GetX();
         float expectOffsetX = DEVICE_WIDTH - itemWidth;
         EXPECT_EQ(offsetX, expectOffsetX);
     }
 }
 
 /**
+ * @tc.name: AttrSLECM001
+ * @tc.desc: Test property about scroller/listDirection/edgeEffect/chainAnimation/multiSelectable
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, AttrSLECM001, TestSize.Level1)
+{
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    RefPtr<ScrollControllerBase> scrollController = listModelNG.CreateScrollController();
+    RefPtr<ScrollProxy> proxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
+    listModelNG.SetScroller(scrollController, proxy);
+    listModelNG.SetListDirection(Axis::HORIZONTAL);
+    listModelNG.SetEdgeEffect(EdgeEffect::SPRING);
+    listModelNG.SetChainAnimation(true);
+    listModelNG.SetMultiSelectable(true);
+    CreateListItem(TOTAL_NUMBER);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    EXPECT_NE(pattern_->positionController_, nullptr);
+    EXPECT_EQ(pattern_->GetAxis(), Axis::HORIZONTAL);
+    EXPECT_NE(pattern_->GetScrollEdgeEffect(), nullptr);
+    EXPECT_NE(pattern_->chainAnimation_, nullptr);
+    EXPECT_TRUE(pattern_->multiSelectable_);
+}
+
+/**
  * @tc.name: ListItemAttrSwiperTest001
- * @tc.desc: Set the swiperAction Attribute for ListItem, set startNode and EdgeEffect is none, List cannot swiper Left
- * but can swiper right.
+ * @tc.desc: Set startNode and SwipeEdgeEffect::None, List cannot swiper Left but can swiper right.
  * @tc.type: FUNC
  */
 HWTEST_F(ListTestNg, ListItemAttrSwiperTest001, TestSize.Level1)
@@ -1166,12 +1237,17 @@ HWTEST_F(ListTestNg, ListItemAttrSwiperTest001, TestSize.Level1)
     RunMeasureAndLayout();
 
     /**
-     * @tc.steps: step1. do nothing, Check rect.
+     * @tc.steps: step1. do nothing, verify rect.
      * @tc.expected: StartNode not load
      */
-    auto listItem = GetChildFrameNode(0);
-    EXPECT_TRUE(IsEqualRect(GetChildRect(listItem, 1), RectF(0, 0, DEVICE_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(IsEqualRect(GetChildRect(listItem, 0), RectF(0, 0, 0, 0)));
+    int32_t listItemIndex = 0;
+    auto listItem = GetChildFrameNode(listItemIndex);
+    auto listItemPattern = GetItemPattern(listItemIndex);
+    EXPECT_TRUE(VerifySwiperItemChildRect(listItem, {
+        RectF(),
+        RectF(0, 0, DEVICE_WIDTH, ITEM_HEIGHT),
+    }));
+    EXPECT_EQ(listItemPattern->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
 
     /**
      * @tc.steps: step2. Move item right to left
@@ -1179,36 +1255,57 @@ HWTEST_F(ListTestNg, ListItemAttrSwiperTest001, TestSize.Level1)
      *  _____________________480
      * |_____________________|
      */
-    ListItemSwipeMoveAndLayout(GetItemPattern(0), -45.f);
-    EXPECT_TRUE(IsEqualRect(GetChildRect(listItem, 1), RectF(0, 0, DEVICE_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(IsEqualRect(GetChildRect(listItem, 0), RectF(0, 0, 0, 0)));
+    DragSwiperItem(listItemIndex, -START_NODE_SIZE);
+    EXPECT_TRUE(VerifySwiperItemChildRect(listItem, {
+        RectF(),
+        RectF(0, 0, DEVICE_WIDTH, ITEM_HEIGHT),
+    }));
+    EXPECT_EQ(listItemPattern->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
 
     /**
-     * @tc.steps: step3. Move item left to right
-     * @tc.expected: Can move, StartNode loaded
-     *  __45_________________480
-     * |__|__________________|
+     * @tc.steps: step3. Move item left to right, distance < START_NODE_SIZE * SWIPER_TH
+     * @tc.expected: Can move, StartNode loaded, but will reset curOffset_
+     *  _20__________________480
+     * |_|___________________|
      */
-    constexpr float moveDelta = 45.f;
-    ListItemSwipeMoveAndLayout(GetItemPattern(0), moveDelta);
-    EXPECT_TRUE(IsEqualRect(GetChildRect(listItem, 1), RectF(moveDelta, 0, DEVICE_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(IsEqualRect(GetChildRect(listItem, 0),
-        RectF(moveDelta - START_NODE_SIZE, 0, START_NODE_SIZE, ITEM_HEIGHT)));
+    DragSwiperItem(listItemIndex, START_NODE_SIZE * SWIPER_TH);
+    EXPECT_TRUE(VerifySwiperItemChildRect(listItem, {
+        RectF(-START_NODE_SIZE * (1.f - SWIPER_TH), 0, START_NODE_SIZE, ITEM_HEIGHT),
+        RectF(START_NODE_SIZE * SWIPER_TH, 0, DEVICE_WIDTH, ITEM_HEIGHT),
+    }));
+    EXPECT_EQ(listItemPattern->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
 
     /**
-     * @tc.steps: step4. continue move item left to right
-     * @tc.expected: Can move, StartNode loaded
-     *  _____80______________480
-     * |_____|_______________|
+     * @tc.steps: step4. move item left to right, distance > START_NODE_SIZE * SWIPER_TH
+     * @tc.expected: change swiperIndex_ to SWIPER_START
+     *  _21__________________480
+     * |_|___________________|
      */
-    ListItemSwipeMoveAndLayout(GetItemPattern(0), moveDelta);
-    EXPECT_TRUE(IsEqualRect(GetChildRect(listItem, 1), RectF(START_NODE_SIZE, 0, DEVICE_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(IsEqualRect(GetChildRect(listItem, 0), RectF(0, 0, START_NODE_SIZE, ITEM_HEIGHT)));
+    const float delta = 1.f;
+    DragSwiperItem(listItemIndex, delta);
+    EXPECT_TRUE(VerifySwiperItemChildRect(listItem, {
+        RectF(-START_NODE_SIZE * (1.f - SWIPER_TH) + delta, 0, START_NODE_SIZE, ITEM_HEIGHT),
+        RectF(START_NODE_SIZE * SWIPER_TH + delta, 0, DEVICE_WIDTH, ITEM_HEIGHT),
+    }));
+    EXPECT_EQ(listItemPattern->GetSwiperIndex(), ListItemSwipeIndex::SWIPER_START);
+
+    /**
+     * @tc.steps: step5. move item right to left
+     * @tc.expected: change swiperIndex_ to ITEM_CHILD
+     *  _20__________________480
+     * |_|___________________|
+     */
+    DragSwiperItem(listItemIndex, -delta);
+    EXPECT_TRUE(VerifySwiperItemChildRect(listItem, {
+        RectF(-START_NODE_SIZE * (1.f - SWIPER_TH), 0, START_NODE_SIZE, ITEM_HEIGHT),
+        RectF(START_NODE_SIZE * SWIPER_TH, 0, DEVICE_WIDTH, ITEM_HEIGHT),
+    }));
+    EXPECT_EQ(listItemPattern->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
 }
 
 /**
  * @tc.name: ListItemAttrSwiperTest002
- * @tc.desc: Test swiperAction Attribute for ListItem, set endNode and edge effect is none.
+ * @tc.desc: Set startNode and SwipeEdgeEffect::None, List cannot swiper right but can swiper left.
  * @tc.type: FUNC
  */
 HWTEST_F(ListTestNg, ListItemAttrSwiperTest002, TestSize.Level1)
@@ -1221,12 +1318,17 @@ HWTEST_F(ListTestNg, ListItemAttrSwiperTest002, TestSize.Level1)
     RunMeasureAndLayout();
 
     /**
-     * @tc.steps: step1. do nothing, Check rect.
+     * @tc.steps: step1. do nothing, verify rect.
      * @tc.expected: EndNode not load
      */
-    auto listItem = GetChildFrameNode(0);
-    EXPECT_TRUE(IsEqualRect(GetChildRect(listItem, 1), RectF(0, 0, DEVICE_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(IsEqualRect(GetChildRect(listItem, 0), RectF(0, 0, 0, 0)));
+    int32_t listItemIndex = 0;
+    auto listItem = GetChildFrameNode(listItemIndex);
+    auto listItemPattern = GetItemPattern(listItemIndex);
+    EXPECT_TRUE(VerifySwiperItemChildRect(listItem, {
+        RectF(),
+        RectF(0, 0, DEVICE_WIDTH, ITEM_HEIGHT),
+    }));
+    EXPECT_EQ(listItemPattern->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
 
     /**
      * @tc.steps: step2. Move item left to right
@@ -1234,224 +1336,61 @@ HWTEST_F(ListTestNg, ListItemAttrSwiperTest002, TestSize.Level1)
      *  _____________________480
      * |_____________________|
      */
-    ListItemSwipeMoveAndLayout(GetItemPattern(0), 50.f);
-    EXPECT_TRUE(IsEqualRect(GetChildRect(listItem, 1), RectF(0, 0, DEVICE_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(IsEqualRect(GetChildRect(listItem, 0), RectF(0, 0, 0, 0)));
+    DragSwiperItem(listItemIndex, END_NODE_SIZE);
+    EXPECT_TRUE(VerifySwiperItemChildRect(listItem, {
+        RectF(),
+        RectF(0, 0, DEVICE_WIDTH, ITEM_HEIGHT),
+    }));
+    EXPECT_EQ(listItemPattern->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
 
     /**
-     * @tc.steps: step2. Move item right to left
+     * @tc.steps: step3. Move item right to left, distance < END_NODE_SIZE * SWIPER_TH
      * @tc.expected: Can move, EndNode loaded
-     *  _________________430_480
-     * |__________________|__|
+     *  _________________455_480
+     * |_________________|___|
      */
-    constexpr float moveDelta = -50.f;
-    ListItemSwipeMoveAndLayout(GetItemPattern(0), moveDelta);
-    EXPECT_TRUE(IsEqualRect(GetChildRect(listItem, 1), RectF(moveDelta, 0, DEVICE_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(IsEqualRect(GetChildRect(listItem, 0),
-        RectF(DEVICE_WIDTH + moveDelta, 0, END_NODE_SIZE, ITEM_HEIGHT)));
+    DragSwiperItem(listItemIndex, -END_NODE_SIZE * SWIPER_TH);
+    EXPECT_TRUE(VerifySwiperItemChildRect(listItem, {
+        RectF(DEVICE_WIDTH - END_NODE_SIZE * SWIPER_TH, 0, END_NODE_SIZE, ITEM_HEIGHT),
+        RectF(-END_NODE_SIZE * SWIPER_TH, 0, DEVICE_WIDTH, ITEM_HEIGHT),
+    }));
+    EXPECT_EQ(listItemPattern->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
 
     /**
-     * @tc.steps: step2. Move item right to left
-     * @tc.expected: Can move, EndNode loaded
-     *  ______________380____480
-     * |_______________|_____|
+     * @tc.steps: step4. Move item right to left, distance > END_NODE_SIZE * SWIPER_TH
+     * @tc.expected: change swiperIndex_ to SWIPER_END
+     *  _________________454_480
+     * |_________________|___|
      */
-    ListItemSwipeMoveAndLayout(GetItemPattern(0), moveDelta);
-    EXPECT_TRUE(IsEqualRect(GetChildRect(listItem, 1), RectF(-END_NODE_SIZE, 0, DEVICE_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(IsEqualRect(GetChildRect(listItem, 0),
-        RectF(DEVICE_WIDTH - END_NODE_SIZE, 0, END_NODE_SIZE, ITEM_HEIGHT)));
+    const float delta = -1.f;
+    DragSwiperItem(listItemIndex, delta);
+    EXPECT_TRUE(VerifySwiperItemChildRect(listItem, {
+        RectF(DEVICE_WIDTH - END_NODE_SIZE * SWIPER_TH + delta, 0, END_NODE_SIZE, ITEM_HEIGHT),
+        RectF(-END_NODE_SIZE * SWIPER_TH + delta, 0, DEVICE_WIDTH, ITEM_HEIGHT),
+    }));
+    EXPECT_EQ(listItemPattern->GetSwiperIndex(), ListItemSwipeIndex::SWIPER_END);
+
+    /**
+     * @tc.steps: step5. Move item left to right
+     * @tc.expected: change swiperIndex_ to ITEM_CHILD
+     *  _________________455_480
+     * |_________________|___|
+     */
+    DragSwiperItem(listItemIndex, -delta);
+    EXPECT_TRUE(VerifySwiperItemChildRect(listItem, {
+        RectF(DEVICE_WIDTH - END_NODE_SIZE * SWIPER_TH, 0, END_NODE_SIZE, ITEM_HEIGHT),
+        RectF(-END_NODE_SIZE * SWIPER_TH, 0, DEVICE_WIDTH, ITEM_HEIGHT),
+    }));
+    EXPECT_EQ(listItemPattern->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
 }
 
 /**
  * @tc.name: ListItemAttrSwiperTest003
- * @tc.desc: Test swiperAction Attribute for ListItem, set startNode and edge effect is spring,
- * move friction take effect when moving to the left.
- * @tc.type: FUNC
- */
-HWTEST_F(ListTestNg, ListItemAttrSwiperTest003, TestSize.Level1)
-{
-    ListModelNG listModelNG;
-    listModelNG.Create();
-    auto startFunc = GetDefaultSwiperBuilder(START_NODE_SIZE, false);
-    CreateListItemWithSwiper(startFunc, nullptr, V2::SwipeEdgeEffect::Spring);
-    GetInstance();
-    RunMeasureAndLayout();
-
-    /**
-     * @tc.steps: step1. Move left 20px twice.
-     * @tc.expected: Move friction take effect
-     */
-    constexpr float moveDelta = -20.f;
-    ListItemSwipeMoveAndLayout(GetItemPattern(0), moveDelta);
-    ListItemSwipeMoveAndLayout(GetItemPattern(0), moveDelta);
-    float expOffsetX = (ListItemPattern::CalculateFriction(-moveDelta / DEVICE_WIDTH) + 1) * moveDelta;
-    auto listItem = GetChildFrameNode(0);
-    EXPECT_TRUE(IsEqualRect(GetChildRect(listItem, 1), RectF(expOffsetX, 0, DEVICE_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(IsEqualRect(GetChildRect(listItem, 0), RectF(0, 0, 0, 0)));
-}
-
-/**
- * @tc.name: ListItemAttrSwiperTest004
- * @tc.desc: Test swiperAction Attribute for ListItem, set endNode and edge effect is spring,
- * move friction take effect when moving to the right.
- * @tc.type: FUNC
- */
-HWTEST_F(ListTestNg, ListItemAttrSwiperTest004, TestSize.Level1)
-{
-    ListModelNG listModelNG;
-    listModelNG.Create();
-    auto endFunc = GetDefaultSwiperBuilder(END_NODE_SIZE, false);
-    CreateListItemWithSwiper(nullptr, endFunc, V2::SwipeEdgeEffect::Spring);
-    GetInstance();
-    RunMeasureAndLayout();
-
-    /**
-     * @tc.steps: step1. Move right 20px twice.
-     * @tc.expected: Move friction take effect
-     */
-    constexpr float moveDelta = 20.f;
-    ListItemSwipeMoveAndLayout(GetItemPattern(0), moveDelta);
-    ListItemSwipeMoveAndLayout(GetItemPattern(0), moveDelta);
-    float expOffsetX = (ListItemPattern::CalculateFriction(moveDelta / DEVICE_WIDTH) + 1) * moveDelta;
-    auto listItem = GetChildFrameNode(0);
-    EXPECT_TRUE(IsEqualRect(GetChildRect(listItem, 1), RectF(expOffsetX, 0, DEVICE_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(IsEqualRect(GetChildRect(listItem, 0), RectF(0, 0, 0, 0)));
-}
-
-/**
- * @tc.name: ListItemAttrSwiperTest005
- * @tc.desc: Test swiperAction Attribute for ListItem, set startNode and edge effect is spring.
- *  move friction take effect when moving to the left distance great than startNode size.
- * @tc.type: FUNC
- */
-HWTEST_F(ListTestNg, ListItemAttrSwiperTest005, TestSize.Level1)
-{
-    ListModelNG listModelNG;
-    listModelNG.Create();
-    auto startFunc = GetDefaultSwiperBuilder(START_NODE_SIZE, true);
-    CreateListItemWithSwiper(startFunc, nullptr, V2::SwipeEdgeEffect::Spring);
-    GetInstance();
-    RunMeasureAndLayout();
-
-    /**
-     * @tc.steps: step1. moving to the left distance great than endNode size, check endNode position.
-     */
-    constexpr float moveDelta_1 = 100.f;
-    ListItemSwipeMoveAndLayout(GetItemPattern(0), moveDelta_1);
-    constexpr float moveDelta_2 = 20.f;
-    ListItemSwipeMoveAndLayout(GetItemPattern(0), moveDelta_2);
-    auto factor = ListItemPattern::CalculateFriction(moveDelta_2 / (DEVICE_WIDTH - START_NODE_SIZE));
-    float expOffsetX = factor * moveDelta_2 + moveDelta_1;
-    auto listItem = GetChildFrameNode(0);
-    EXPECT_TRUE(IsEqualRect(GetChildRect(listItem, 1), RectF(expOffsetX, 0, DEVICE_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(IsEqualRect(GetChildRect(listItem, 0), RectF(0, 0, expOffsetX, ITEM_HEIGHT)));
-}
-
-/**
- * @tc.name: ListItemAttrSwiperTest006
- * @tc.desc: Test swiperAction Attribute for ListItem, set endNode and edge effect is spring.
- *  move friction take effect when moving to the left distance great than endNode size.
- * @tc.type: FUNC
- */
-HWTEST_F(ListTestNg, ListItemAttrSwiperTest006, TestSize.Level1)
-{
-    ListModelNG listModelNG;
-    listModelNG.Create();
-    auto endFunc = GetDefaultSwiperBuilder(END_NODE_SIZE, true);
-    CreateListItemWithSwiper(nullptr, endFunc, V2::SwipeEdgeEffect::Spring);
-    GetInstance();
-    RunMeasureAndLayout();
-
-    /**
-     * @tc.steps: step1. moving to the right distance great than endNode size, check endNode position.
-     */
-    auto itemPattern = GetItemPattern(0);
-    constexpr float moveDelta_1 = -120.f;
-    ListItemSwipeMoveAndLayout(itemPattern, moveDelta_1);
-    constexpr float moveDelta_2 = -20.f;
-    ListItemSwipeMoveAndLayout(itemPattern, moveDelta_2);
-    auto factor = ListItemPattern::CalculateFriction(-moveDelta_2 / (DEVICE_WIDTH - END_NODE_SIZE));
-    float expOffsetX = factor * moveDelta_2 + moveDelta_1;
-    auto listItem = GetChildFrameNode(0);
-    EXPECT_TRUE(IsEqualRect(GetChildRect(listItem, 1), RectF(expOffsetX, 0, DEVICE_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(IsEqualRect(GetChildRect(listItem, 0), RectF(DEVICE_WIDTH + expOffsetX, 0, -expOffsetX, ITEM_HEIGHT)));
-}
-
-/**
- * @tc.name: ListItemAttrSwiperTest007
- * @tc.desc: Test swiperAction Attribute for ListItem, set startNode and endNode.
- * Drag the ListItem left or right to obtain the correct SwipeIndex.
- * @tc.type: FUNC
- */
-HWTEST_F(ListTestNg, ListItemAttrSwiperTest007, TestSize.Level1)
-{
-    auto builder = GetDefaultSwiperBuilder(START_NODE_SIZE, false);
-
-    ListModelNG listModelNG;
-    listModelNG.Create();
-    CreateListItemWithSwiper(builder, builder, V2::SwipeEdgeEffect::Spring);
-    GetInstance();
-    RunMeasureAndLayout();
-
-    /**
-     * @tc.steps: step2. move to 30px.
-     */
-    GestureEvent info;
-    info.SetMainDelta(30.f);
-    DragSwiperItem(0, info);
-    auto itemPattern = GetItemPattern(0);
-    EXPECT_EQ(itemPattern->GetSwiperIndex(), ListItemSwipeIndex::SWIPER_START);
-
-    /**
-     * @tc.steps: step3. move to 50px.
-     */
-    info.SetMainDelta(20.f);
-    DragSwiperItem(0, info);
-    EXPECT_EQ(itemPattern->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
-
-    /**
-     * @tc.steps: step4. move to -30px.
-     */
-    info.SetMainDelta(-80.f);
-    DragSwiperItem(0, info);
-    EXPECT_EQ(itemPattern->GetSwiperIndex(), ListItemSwipeIndex::SWIPER_END);
-
-    /**
-     * @tc.steps: step5. move to -50px.
-     */
-    info.SetMainDelta(-20.f);
-    DragSwiperItem(0, info);
-    EXPECT_EQ(itemPattern->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
-
-    /**
-     * @tc.steps: step6. move to 30px.
-     */
-    info.SetMainDelta(80.f);
-    DragSwiperItem(0, info);
-    EXPECT_EQ(itemPattern->GetSwiperIndex(), ListItemSwipeIndex::SWIPER_START);
-
-    /**
-     * @tc.steps: step7. move to -30px.
-     */
-    info.SetMainDelta(-60.f);
-    DragSwiperItem(0, info);
-    EXPECT_EQ(itemPattern->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
-
-    /**
-     * @tc.steps: step8. move to 30px.
-     */
-    info.SetMainDelta(60.f);
-    DragSwiperItem(0, info);
-    EXPECT_EQ(itemPattern->GetSwiperIndex(), ListItemSwipeIndex::SWIPER_START);
-}
-
-/**
- * @tc.name: ListItemAttrSwiperTest015
  * @tc.desc: Test swiperAction Attribute for ListItem, set startNode and endNode.
  * Drag the ListItem left or right with speed.
  * @tc.type: FUNC
  */
-HWTEST_F(ListTestNg, ListItemAttrSwiperTest015, TestSize.Level1)
+HWTEST_F(ListTestNg, ListItemAttrSwiperTest003, TestSize.Level1)
 {
     auto builder = GetDefaultSwiperBuilder(START_NODE_SIZE, false);
 
@@ -1461,30 +1400,29 @@ HWTEST_F(ListTestNg, ListItemAttrSwiperTest015, TestSize.Level1)
     GetInstance();
     RunMeasureAndLayout();
 
-    GestureEvent info;
-    info.SetMainDelta(10.f);
-    info.SetMainVelocity(1300.f);
-    DragSwiperItem(0, info);
+    int32_t listItemIndex = 0;
+    auto listItem = GetChildFrameNode(listItemIndex);
+    auto listItemPattern = GetItemPattern(listItemIndex);
+    EXPECT_EQ(listItemPattern->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
+
+    DragSwiperItem(listItemIndex, 10.f, SWIPER_SPEED_TH + 1.f);
     auto itemPattern = GetItemPattern(0);
     EXPECT_EQ(itemPattern->GetSwiperIndex(), ListItemSwipeIndex::SWIPER_START);
 
-    info.SetMainDelta(-20.f);
-    DragSwiperItem(0, info);
+    DragSwiperItem(listItemIndex, -20.f, -SWIPER_SPEED_TH - 1.f);
     EXPECT_EQ(itemPattern->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
 
-    info.SetMainDelta(-10.f);
-    info.SetMainVelocity(-1300.f);
-    DragSwiperItem(0, info);
+    DragSwiperItem(listItemIndex, -10.f, -SWIPER_SPEED_TH - 1.f);
     EXPECT_EQ(itemPattern->GetSwiperIndex(), ListItemSwipeIndex::SWIPER_END);
 }
 
 /**
- * @tc.name: ListItemAttrSwiperTest016
+ * @tc.name: ListItemAttrSwiperTest004
  * @tc.desc: Test swiperAction Attribute for ListItem, set startNode and endNode.
  * When switch ListItem to drag, the previous would be reset.
  * @tc.type: FUNC
  */
-HWTEST_F(ListTestNg, ListItemAttrSwiperTest016, TestSize.Level1)
+HWTEST_F(ListTestNg, ListItemAttrSwiperTest004, TestSize.Level1)
 {
     auto builder = GetDefaultSwiperBuilder(START_NODE_SIZE, false);
 
@@ -1520,11 +1458,111 @@ HWTEST_F(ListTestNg, ListItemAttrSwiperTest016, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListItemAttrSwiperTest005
+ * @tc.desc: Set startNode and SwipeEdgeEffect::Spring, move friction take effect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListItemAttrSwiperTest005, TestSize.Level1)
+{
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    auto startFunc = GetDefaultSwiperBuilder(START_NODE_SIZE, false);
+    CreateListItemWithSwiper(startFunc, nullptr, V2::SwipeEdgeEffect::Spring);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. When curOffset_ exceed listItem size(start + item), swipe left
+     * @tc.expected: Move friction would take effect
+     */
+    constexpr int32_t listItemIndex = 0;
+    auto listItem = GetChildFrameNode(listItemIndex);
+    auto listItemPattern = GetItemPattern(listItemIndex);
+    float curOffset = -1.f;
+    // set curOffset_ to exceed listItem size
+    listItemPattern->curOffset_ = curOffset;
+    float moveDelta = -20.f;
+    DragSwiperItem(listItemIndex, moveDelta);
+    float friction = listItemPattern->CalculateFriction(-curOffset / DEVICE_WIDTH);
+    float expOffsetX = friction * moveDelta + curOffset;
+    EXPECT_TRUE(VerifySwiperItemChildRect(listItem, {
+        RectF(),
+        RectF(expOffsetX, 0, DEVICE_WIDTH, ITEM_HEIGHT),
+    }));
+
+    /**
+     * @tc.steps: step2. When curOffset_ exceed listItem size(start + item), swipe right
+     * @tc.expected: Move friction would take effect
+     */
+    curOffset = START_NODE_SIZE + 1.f;
+    // set curOffset_ to exceed listItem size
+    listItemPattern->curOffset_ = curOffset;
+    moveDelta = 20.f;
+    DragSwiperItem(listItemIndex, moveDelta);
+    friction = listItemPattern->CalculateFriction(curOffset / DEVICE_WIDTH);
+    expOffsetX = friction * moveDelta + curOffset;
+    EXPECT_TRUE(VerifySwiperItemChildRect(listItem, {
+        RectF(expOffsetX - START_NODE_SIZE, 0, START_NODE_SIZE, ITEM_HEIGHT),
+        RectF(expOffsetX, 0, DEVICE_WIDTH, ITEM_HEIGHT),
+    }));
+}
+
+/**
+ * @tc.name: ListItemAttrSwiperTest006
+ * @tc.desc: Set endNode and SwipeEdgeEffect::Spring, move friction take effect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListItemAttrSwiperTest006, TestSize.Level1)
+{
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    auto endFunc = GetDefaultSwiperBuilder(END_NODE_SIZE, false);
+    CreateListItemWithSwiper(nullptr, endFunc, V2::SwipeEdgeEffect::Spring);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. When curOffset_ exceed listItem size(end + item), swipe right
+     * @tc.expected: Move friction would take effect
+     */
+    constexpr int32_t listItemIndex = 0;
+    auto listItem = GetChildFrameNode(listItemIndex);
+    auto listItemPattern = GetItemPattern(listItemIndex);
+    float curOffset = 1.f;
+    // set curOffset_ to exceed listItem size
+    listItemPattern->curOffset_ = curOffset;
+    float moveDelta = 20.f;
+    DragSwiperItem(listItemIndex, moveDelta);
+    float friction = listItemPattern->CalculateFriction(curOffset / DEVICE_WIDTH);
+    float expOffsetX = friction * moveDelta + curOffset;
+    EXPECT_TRUE(VerifySwiperItemChildRect(listItem, {
+        RectF(),
+        RectF(expOffsetX, 0, DEVICE_WIDTH, ITEM_HEIGHT),
+    }));
+
+    /**
+     * @tc.steps: step2. When curOffset_ exceed listItem size(end + item), swipe left
+     * @tc.expected: Move friction would take effect
+     */
+    curOffset = -END_NODE_SIZE - 1.f;
+    // set curOffset_ to exceed listItem size
+    listItemPattern->curOffset_ = curOffset;
+    moveDelta = -20.f;
+    DragSwiperItem(listItemIndex, moveDelta);
+    friction = listItemPattern->CalculateFriction(-curOffset / DEVICE_WIDTH);
+    expOffsetX = friction * moveDelta + curOffset;
+    EXPECT_TRUE(VerifySwiperItemChildRect(listItem, {
+        RectF(expOffsetX + DEVICE_WIDTH, 0, END_NODE_SIZE, ITEM_HEIGHT),
+        RectF(expOffsetX, 0, DEVICE_WIDTH, ITEM_HEIGHT),
+    }));
+}
+
+/**
  * @tc.name: ListItemAttrSwiperTest008
- * @tc.desc: Set the swiperAction Attribute for ListItem, set startNode, startDeleteArea, deleteAreaDistance and
- * EdgeEffect is none, List can swiper right great than startNode size, if great than startNode size +
- * deleteAreaDistance, it will adjust to startNode size + deleteAreaDistance
- *
+ * @tc.desc: Set startNode, startDeleteArea, deleteAreaDistance SwipeEdgeEffect::None
+ * List can swiper right great than START_NODE_SIZE
+ * if great than START_NODE_SIZE + deleteAreaDistance,
+ * it will adjust to START_NODE_SIZE + deleteAreaDistance
  * @tc.type: FUNC
  */
 HWTEST_F(ListTestNg, ListItemAttrSwiperTest008, TestSize.Level1)
@@ -2187,7 +2225,8 @@ HWTEST_F(ListTestNg, Callback002, TestSize.Level1)
     ListModelNG listModelNG;
     listModelNG.Create();
     listModelNG.SetChainAnimation(true);
-    listModelNG.SetChainAnimationOptions(Dimension(0), Dimension(10), 0, 0, 0);
+    listModelNG.SetChainAnimationOptions(
+        { Dimension(0), Dimension(10), 0, 0, 0, DEFAULT_STIFFNESS, DEFAULT_DAMPING });
     bool isScrollStartCalled = false;
     bool isScrollStopCalled = false;
     auto scrollStart = [&isScrollStartCalled]() { isScrollStartCalled = true; };
@@ -2601,19 +2640,15 @@ HWTEST_F(ListTestNg, AccessibilityProperty006, TestSize.Level1)
     CreateList(TOTAL_NUMBER);
 
     /**
-     * @tc.steps: step1. Get item accessibilityProperty.
+     * @tc.steps: step1. Call IsSelected.
+     * @tc.expected: Verify return value.
      */
     auto itemFrameNode = GetChildFrameNode(1);
     auto itemAccessibilityProperty = itemFrameNode->GetAccessibilityProperty<ListItemAccessibilityProperty>();
-
-    /**
-     * @tc.steps: step2. Call IsSelected.
-     * @tc.expected: Verify return value.
-     */
     EXPECT_FALSE(itemAccessibilityProperty->IsSelected());
 
     /**
-     * @tc.steps: step3. Call SetSpecificSupportAction.
+     * @tc.steps: step2. Call SetSpecificSupportAction.
      * @tc.expected: Verify return value.
      */
     itemAccessibilityProperty->ResetSupportAction();
@@ -2644,36 +2679,20 @@ HWTEST_F(ListTestNg, AccessibilityProperty007, TestSize.Level1)
     RunMeasureAndLayout();
 
     /**
-     * @tc.steps: step1. Get itemGroup accessibilityProperty.
+     * @tc.steps: step1. When group has ListItem
+     * @tc.expected: GetBeginIndex() and GetEndIndex() can get correct index
      */
     auto groupFrameNode = GetChildFrameNode(0);
     auto groupAccessibilityProperty = groupFrameNode->GetAccessibilityProperty<ListItemGroupAccessibilityProperty>();
-
-    /**
-     * @tc.steps: step3. Call func.
-     * @tc.expected: Verify return value.
-     */
     EXPECT_EQ(groupAccessibilityProperty->GetBeginIndex(), 0);
     EXPECT_EQ(groupAccessibilityProperty->GetEndIndex(), 3);
-}
-
-/**
- * @tc.name: AccessibilityProperty008
- * @tc.desc: Test ListItemGroup AccessibilityProperty func
- * @tc.type: FUNC
- */
-HWTEST_F(ListTestNg, AccessibilityProperty008, TestSize.Level1)
-{
-    ListItemGroupModelNG listItemGroupModelNG;
-    listItemGroupModelNG.Create(V2::ListItemGroupStyle::NONE);
-    RefPtr<UINode> groupElement = ViewStackProcessor::GetInstance()->Finish();
-    auto groupFrameNode = AceType::DynamicCast<FrameNode>(groupElement);
-    auto groupAccessibilityProperty = groupFrameNode->GetAccessibilityProperty<ListItemGroupAccessibilityProperty>();
 
     /**
-     * @tc.steps: step3. Call func.
-     * @tc.expected: Verify return value.
+     * @tc.steps: step1. When group has no ListItem
+     * @tc.expected: GetBeginIndex() and GetEndIndex() return -1
      */
+    auto groupPattern = GetGroupPattern(0);
+    groupPattern->itemPosition_.clear();
     EXPECT_EQ(groupAccessibilityProperty->GetBeginIndex(), -1);
     EXPECT_EQ(groupAccessibilityProperty->GetEndIndex(), -1);
 }
@@ -2722,7 +2741,7 @@ HWTEST_F(ListTestNg, PositionController001, TestSize.Level1)
     EXPECT_EQ(pattern_->jumpIndex_, 0);
     EXPECT_EQ(pattern_->scrollAlign_, ScrollAlign::START);
 
-    controller->JumpTo(1, false, ScrollAlign::START, 3);
+    controller->JumpTo(1, false, ScrollAlign::START, -1);
     EXPECT_EQ(pattern_->jumpIndex_, 1);
 
     EXPECT_FALSE(controller->AnimateTo(Dimension(1, DimensionUnit::PERCENT), 0, nullptr, false));
@@ -2775,7 +2794,7 @@ HWTEST_F(ListTestNg, PositionController002, TestSize.Level1)
     EXPECT_EQ(pattern_->jumpIndex_, 0);
     EXPECT_EQ(pattern_->scrollAlign_, ScrollAlign::START);
 
-    controller->JumpTo(1, false, ScrollAlign::START, 3);
+    controller->JumpTo(1, false, ScrollAlign::START, -1);
     EXPECT_EQ(pattern_->jumpIndex_, 1);
 
     EXPECT_FALSE(controller->AnimateTo(Dimension(1, DimensionUnit::PERCENT), 0, nullptr, false));
@@ -2819,7 +2838,7 @@ HWTEST_F(ListTestNg, PositionController003, TestSize.Level1)
     controller->ScrollPage(false, true);
     EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 50.f)));
 
-    controller->JumpTo(1, false, ScrollAlign::START, 3);
+    controller->JumpTo(1, false, ScrollAlign::START, -1);
     EXPECT_EQ(pattern_->jumpIndex_, 1);
 
     EXPECT_FALSE(controller->AnimateTo(Dimension(1, DimensionUnit::PERCENT), 0, nullptr, false));
@@ -3271,7 +3290,7 @@ HWTEST_F(ListTestNg, Pattern005, TestSize.Level1)
     listModelNG.SetSpace(Dimension(space));
     listModelNG.SetChainAnimation(true);
     listModelNG.SetChainAnimationOptions(
-        Dimension(minSpace), Dimension(maxSpace), conductivity, intensity, 0);
+        { Dimension(minSpace), Dimension(maxSpace), conductivity, intensity, 0, DEFAULT_STIFFNESS, DEFAULT_DAMPING });
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
     RunMeasureAndLayout();
@@ -3282,6 +3301,8 @@ HWTEST_F(ListTestNg, Pattern005, TestSize.Level1)
         .conductivity = conductivity,
         .intensity = intensity,
         .edgeEffect = 0,
+        .stiffness = DEFAULT_STIFFNESS,
+        .damping = DEFAULT_DAMPING,
     };
     pattern_->SetChainAnimationOptions(options);
 
@@ -3324,7 +3345,7 @@ HWTEST_F(ListTestNg, Pattern006, TestSize.Level1)
     listModelNG.SetSpace(Dimension(space));
     listModelNG.SetChainAnimation(true);
     listModelNG.SetChainAnimationOptions(
-        Dimension(minSpace), Dimension(maxSpace), conductivity, intensity, 0);
+        { Dimension(minSpace), Dimension(maxSpace), conductivity, intensity, 0, DEFAULT_STIFFNESS, DEFAULT_DAMPING });
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
     RunMeasureAndLayout();
@@ -3335,6 +3356,8 @@ HWTEST_F(ListTestNg, Pattern006, TestSize.Level1)
         .conductivity = conductivity,
         .intensity = intensity,
         .edgeEffect = 0,
+        .stiffness = DEFAULT_STIFFNESS,
+        .damping = DEFAULT_DAMPING,
     };
     pattern_->SetChainAnimationOptions(options);
 
@@ -3377,7 +3400,7 @@ HWTEST_F(ListTestNg, Pattern007, TestSize.Level1)
     listModelNG.SetSpace(Dimension(space));
     listModelNG.SetChainAnimation(true);
     listModelNG.SetChainAnimationOptions(
-        Dimension(minSpace), Dimension(maxSpace), conductivity, intensity, 0);
+        { Dimension(minSpace), Dimension(maxSpace), conductivity, intensity, 0, DEFAULT_STIFFNESS, DEFAULT_DAMPING });
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
     RunMeasureAndLayout();
@@ -3388,6 +3411,8 @@ HWTEST_F(ListTestNg, Pattern007, TestSize.Level1)
         .conductivity = conductivity,
         .intensity = intensity,
         .edgeEffect = 0,
+        .stiffness = DEFAULT_STIFFNESS,
+        .damping = DEFAULT_DAMPING,
     };
     pattern_->SetChainAnimationOptions(options);
 
@@ -3425,16 +3450,17 @@ HWTEST_F(ListTestNg, Pattern008, TestSize.Level1)
 }
 
 /**
- * @tc.name: Pattern019
+ * @tc.name: Pattern009
  * @tc.desc: Test OutBoundaryCallback
  * @tc.type: FUNC
  */
-HWTEST_F(ListTestNg, Pattern019, TestSize.Level1)
+HWTEST_F(ListTestNg, Pattern009, TestSize.Level1)
 {
     ListModelNG listModelNG;
     listModelNG.Create();
     listModelNG.SetChainAnimation(true);
-    listModelNG.SetChainAnimationOptions(Dimension(0), Dimension(10), 0, 0, 0);
+    listModelNG.SetChainAnimationOptions(
+        { Dimension(0), Dimension(10), 0, 0, 0, DEFAULT_STIFFNESS, DEFAULT_DAMPING });
     CreateListItem(10);
     GetInstance();
     RunMeasureAndLayout();
@@ -3454,26 +3480,49 @@ HWTEST_F(ListTestNg, Pattern010, TestSize.Level1)
 {
     ListModelNG listModelNG;
     listModelNG.Create();
-    CreateListItem(10);
+    CreateListItem(20);
     GetInstance();
     RunMeasureAndLayout();
 
     /**
      * @tc.steps: step1. Test ScrollToIndex.
      */
-    pattern_->ScrollToIndex(1, 0, ScrollAlign::END);
-    EXPECT_EQ(pattern_->scrollAlign_, ScrollAlign::END);
-    EXPECT_EQ(pattern_->currentDelta_, 0);
-    EXPECT_EQ(pattern_->jumpIndex_, 1);
+    pattern_->ScrollToIndex(1, 0, ScrollAlign::START);
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
+    pattern_->ScrollToIndex(2, 0, ScrollAlign::CENTER);
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
+    pattern_->ScrollToIndex(3, 0, ScrollAlign::END);
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
+    pattern_->ScrollToIndex(4, 0, ScrollAlign::AUTO);
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
+
+    pattern_->ScrollToIndex(1, false, ScrollAlign::START);
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
+    pattern_->ScrollToIndex(2, false, ScrollAlign::CENTER);
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
+    pattern_->ScrollToIndex(3, false, ScrollAlign::END);
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
+    pattern_->ScrollToIndex(4, false, ScrollAlign::AUTO);
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
+
+    pattern_->ScrollToIndex(1, true, ScrollAlign::START);
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
+    pattern_->ScrollToIndex(2, true, ScrollAlign::CENTER);
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
+    pattern_->ScrollToIndex(3, true, ScrollAlign::END);
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
+    pattern_->ScrollToIndex(4, true, ScrollAlign::AUTO);
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
 
     pattern_->ScrollToIndex(-1, 0, ScrollAlign::END);
-    EXPECT_EQ(pattern_->jumpIndex_, -1);
-
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
     pattern_->ScrollToIndex(-2, 0, ScrollAlign::END);
-    EXPECT_EQ(pattern_->jumpIndex_, -1);
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
 
     pattern_->ScrollToIndex(-2, false, ScrollAlign::END);
-    EXPECT_EQ(pattern_->jumpIndex_, -1);
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
+    pattern_->ScrollToIndex(1, true, ScrollAlign::END);
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 1200)));
 }
 
 /**
@@ -3629,6 +3678,7 @@ HWTEST_F(ListTestNg, Pattern015, TestSize.Level1)
     const Offset expectOffset = Offset(0, 0);
     EXPECT_TRUE(IsEqualCurrentOffset(expectOffset));
 }
+
 /**
  * @tc.name: Pattern016
  * @tc.desc: Test UpdateCurrentOffset
@@ -3650,6 +3700,43 @@ HWTEST_F(ListTestNg, Pattern016, TestSize.Level1)
     pattern_->UpdateCurrentOffset(offset, SCROLL_FROM_START);
     constexpr float expectDelta = 100.f;
     EXPECT_EQ(pattern_->currentDelta_, expectDelta);
+}
+
+/**
+ * @tc.name: Pattern017
+ * @tc.desc: Test layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, Pattern017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. do not set selfIdealSize, 0 listItem
+     */
+    ListModelNG listModelNG_1;
+    listModelNG_1.Create();
+    GetInstance();
+    RunMeasureAndLayout(-1, -1);
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), DEVICE_WIDTH);
+
+    /**
+     * @tc.steps: step1. do not set selfIdealSize, TOTAL_NUMBER listItem
+     */
+    ListModelNG listModelNG_2;
+    listModelNG_2.Create();
+    CreateListItem(TOTAL_NUMBER);
+    GetInstance();
+    RunMeasureAndLayout(-1, -1);
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), DEVICE_WIDTH);
+
+    /**
+     * @tc.steps: step1. set width Infinity
+     */
+    ListModelNG listModelNG_3;
+    listModelNG_3.Create();
+    CreateListItem(TOTAL_NUMBER);
+    GetInstance();
+    RunMeasureAndLayout(Infinity<float>(), DEVICE_HEIGHT);
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), Infinity<float>());
 }
 
 /**
@@ -4666,13 +4753,189 @@ HWTEST_F(ListTestNg, ScrollToIndexAlign001, TestSize.Level1)
      */
     listLayoutAlgorithm->jumpIndex_ = 1;
     listLayoutAlgorithm->scrollAlign_ = ScrollAlign::AUTO;
-    listLayoutAlgorithm->scrollAutoType_ = ScrollAutoType::NOT_CHANGE;
-    listLayoutAlgorithm->CalculateEstimateOffset(ScrollAlign::AUTO);
     listLayoutAlgorithm->scrollAutoType_ = ScrollAutoType::START;
     listLayoutAlgorithm->CalculateEstimateOffset(ScrollAlign::AUTO);
     EXPECT_NE(listLayoutAlgorithm->estimateOffset_, 0.0f);
     listLayoutAlgorithm->itemPosition_.clear();
     listLayoutAlgorithm->CalculateEstimateOffset(ScrollAlign::AUTO);
     EXPECT_EQ(listLayoutAlgorithm->estimateOffset_, 0.0f);
+}
+
+/**
+ * @tc.name: ListLayoutAlgorithm_FixPredictSnapOffset001
+ * @tc.desc: Test FixPredictSnapOffset when the scrollSnapAlign is start.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListLayoutAlgorithm_FixPredictSnapOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialization.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    GetInstance();
+    auto listLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    layoutProperty_->UpdateScrollSnapAlign(V2::ScrollSnapAlign::START);
+
+    /**
+     * @tc.steps: step2. Creat itemPosition_.
+     */
+    float startPos = 0.0f;
+    float endPos = 0.0f;
+    float mainLen = 20.0f;
+    bool isGroup = false;
+    for (int i = 0; i < 10; i++) {
+        startPos = endPos;
+        listLayoutAlgorithm->itemPosition_[i] = { startPos, endPos, isGroup };
+        endPos = startPos + mainLen;
+    }
+    /**
+     * @tc.steps: step3. Set predictSnapOffset then call FixPredictSnapOffset and then get
+     *            predictSnapOffset to check value.
+     */
+    listLayoutAlgorithm->SetSpaceWidth(5);
+    listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 0);
+
+    listLayoutAlgorithm->SetTotalOffset(20.0f);
+    listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 20);
+
+    listLayoutAlgorithm->SetTotalOffset(10.0f);
+    listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 10);
+}
+
+/**
+ * @tc.name: ListLayoutAlgorithm_FixPredictSnapOffset002
+ * @tc.desc: Test FixPredictSnapOffset when the scrollSnapAlign is center.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListLayoutAlgorithm_FixPredictSnapOffset002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialization.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    GetInstance();
+    auto listLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    layoutProperty_->UpdateScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+
+    /**
+     * @tc.steps: step2. Creat itemPosition_.
+     */
+    float startPos = 0.0f;
+    float endPos = 0.0f;
+    float mainLen = 20.0f;
+    bool isGroup = false;
+    for (int i = 0; i < 10; i++) {
+        startPos = endPos;
+        listLayoutAlgorithm->itemPosition_[i] = { startPos, endPos, isGroup };
+        endPos = startPos + mainLen;
+    }
+    /**
+     * @tc.steps: step3. Set predictSnapOffset then call FixPredictSnapOffset and then get
+     *            predictSnapOffset to check value.
+     */
+    listLayoutAlgorithm->SetSpaceWidth(5);
+    listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 0);
+
+    listLayoutAlgorithm->SetTotalOffset(20.0f);
+    listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 25);
+
+    listLayoutAlgorithm->SetTotalOffset(10.0f);
+    listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 10);
+}
+
+/**
+ * @tc.name: ListLayoutAlgorithm_FixPredictSnapOffset003
+ * @tc.desc: Test FixPredictSnapOffset when the scrollSnapAlign is end.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListLayoutAlgorithm_FixPredictSnapOffset003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialization.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    GetInstance();
+    auto listLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    layoutProperty_->UpdateScrollSnapAlign(V2::ScrollSnapAlign::END);
+
+    /**
+     * @tc.steps: step2. Creat itemPosition_.
+     */
+    float startPos = 0.0f;
+    float endPos = 0.0f;
+    float mainLen = 20.0f;
+    bool isGroup = false;
+    for (int i = 0; i < 10; i++) {
+        startPos = endPos;
+        listLayoutAlgorithm->itemPosition_[i] = { startPos, endPos, isGroup };
+        endPos = startPos + mainLen;
+    }
+    /**
+     * @tc.steps: step3. Set predictSnapOffset then call FixPredictSnapOffset and then get
+     *            predictSnapOffset to check value.
+     */
+    listLayoutAlgorithm->SetSpaceWidth(5);
+    listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 0);
+
+    listLayoutAlgorithm->SetTotalOffset(20.0f);
+    listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 20);
+
+    listLayoutAlgorithm->SetTotalOffset(10.0f);
+    listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 15);
+}
+
+/**
+ * @tc.name: ListPattern_UpdateScrollSnap001
+ * @tc.desc: Test UpdateScrollSnap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListPattern_UpdateScrollSnap001, TestSize.Level1)
+{
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    GetInstance();
+    pattern_->AnimateTo(0, 0, nullptr);
+    pattern_->UpdateScrollSnap();
+    EXPECT_FALSE(pattern_->predictSnapOffset_.has_value());
+    pattern_->animator_->Stop();
+    pattern_->UpdateScrollSnap();
+    EXPECT_EQ(pattern_->predictSnapOffset_.value(), 0.0);
+}
+
+/**
+ * @tc.name: ListPattern_NeedScrollSnapAlignEffect001
+ * @tc.desc: Test NeedScrollSnapAlignEffect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListPattern_NeedScrollSnapAlignEffect001, TestSize.Level1)
+{
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    GetInstance();
+    layoutProperty_->UpdateScrollSnapAlign(V2::ScrollSnapAlign::NONE);
+    EXPECT_FALSE(pattern_->NeedScrollSnapAlignEffect());
+    layoutProperty_->UpdateScrollSnapAlign(V2::ScrollSnapAlign::START);
+    EXPECT_TRUE(pattern_->NeedScrollSnapAlignEffect());
 }
 } // namespace OHOS::Ace::NG

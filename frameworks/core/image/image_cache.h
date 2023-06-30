@@ -232,7 +232,7 @@ protected:
     static std::atomic<float> clearCacheFileRatio_;
 
     static std::mutex cacheFileSizeMutex_;
-    static int32_t cacheFileSize_;
+    static int64_t cacheFileSize_;
 
     static std::mutex cacheFileInfoMutex_;
     static std::list<FileInfo> cacheFileInfo_;

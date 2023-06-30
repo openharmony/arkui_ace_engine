@@ -80,7 +80,7 @@ public:
             }
             auto paintMethod = MakeRefPtr<DotIndicatorPaintMethod>(dotIndicatorModifier_);
             paintMethod->SetAxis(swiperPattern->GetDirection());
-            paintMethod->SetCurrentIndex(swiperPattern->GetCurrentIndex());
+            paintMethod->SetCurrentIndex(swiperPattern->GetCurrentFirstIndex());
             paintMethod->SetItemCount(swiperPattern->TotalCount());
             paintMethod->SetTurnPageRate(swiperPattern->GetTurnPageRate());
             paintMethod->SetIsHover(isHover_);

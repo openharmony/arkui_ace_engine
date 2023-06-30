@@ -119,7 +119,7 @@ void LazyLayoutWrapperBuilder::SwapDirtyAndUpdateBuildCache()
         }
     }
     host->UpdateLazyForEachItems(startIndex_.value(), endIndex_.value(), std::move(nodeIds_), std::move(cacheItems));
-    host->PostIdleTask(std::move(idleIndexes));
+    host->PostIdleTask(std::move(idleIndexes), itemConstraint_, useLongPredictTask_);
 }
 
 void LazyLayoutWrapperBuilder::AdjustGridOffset()
@@ -147,8 +147,13 @@ RefPtr<LayoutWrapper> LazyLayoutWrapperBuilder::OnGetOrCreateWrapperByIndex(int3
         return nullptr;
     }
     // check if the index needs to be converted to virtual index.
-    if (lazySwiper_ && startIndex_ && index < startIndex_.value()) {
-        index += totalCount;
+    if (lazySwiper_ &&
+        ((startIndex_ && index < startIndex_.value() - 1) || (endIndex_ && index > endIndex_.value() + 1))) {
+        if (index > startIndex_.value()) {
+            index -= totalCount;
+        } else {
+            index += totalCount;
+        }
     }
     return OnGetOrCreateWrapperByIndexLegacy(index);
 }
@@ -188,8 +193,12 @@ RefPtr<LayoutWrapper> LazyLayoutWrapperBuilder::OnGetOrCreateWrapperByIndexLegac
     if (!uiNode) {
         // convert index to real index.
         int32_t realIndex = index;
-        if (lazySwiper_ && index >= totalCount) {
-            realIndex -= totalCount;
+        if (lazySwiper_) {
+            if (index >= totalCount) {
+                realIndex -= totalCount;
+            } else if (index < 0) {
+                realIndex += totalCount;
+            }
         }
         // create frame node.
         auto itemInfo = builder_->CreateChildByIndex(realIndex);

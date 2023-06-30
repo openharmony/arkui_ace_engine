@@ -61,4 +61,23 @@ RefPtr<FrameNode> LayoutProperty::GetHost() const
 {
     return nullptr;
 }
+
+LayoutConstraintF CreateChildConstraint()
+{
+    return {};
+}
+
+void BuildGridProperty(const RefPtr<FrameNode>& host) {}
+
+void UpdateContentConstraint() {}
+
+MarginPropertyF CreateMargin()
+{
+    return {};
+}
+
+PaddingPropertyF CreatePaddingAndBorder()
+{
+    return {};
+}
 } // namespace OHOS::Ace::NG

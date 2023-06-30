@@ -23,10 +23,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t STOP_DURATION = 2000; // 2000ms
-constexpr float KEY_TIME_START = 0.0f;
-constexpr float KEY_TIME_MIDDLE = 0.7f;
-constexpr float KEY_TIME_END = 1.0f;
+constexpr int32_t END_DURATION = 400; // 2000ms
+constexpr int32_t END_DELAY_DURATION = 2000;
 constexpr int32_t BAR_EXPAND_DURATION = 150; // 150ms, scroll bar width expands from 4dp to 8dp
 constexpr int32_t BAR_SHRINK_DURATION = 250; // 250ms, scroll bar width shrinks from 8dp to 4dp
 constexpr int32_t BAR_ADAPT_DURATION = 400;  // 400ms, scroll bar adapts to the size changes of components
@@ -54,7 +52,6 @@ void ScrollBar::InitTheme()
     SetNormalWidth(theme->GetNormalWidth());
     SetActiveWidth(theme->GetActiveWidth());
     SetTouchWidth(theme->GetTouchWidth());
-    SetReservedHeight(theme->GetReservedHeight());
     SetMinHeight(theme->GetMinHeight());
     SetMinDynamicHeight(theme->GetMinDynamicHeight());
     SetBackgroundColor(theme->GetBackgroundColor());
@@ -93,8 +90,8 @@ void ScrollBar::UpdateScrollBarRegion(
     const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight)
 {
     // return if nothing changes to avoid changing opacity
-    if (!positionModeUpdate_ && !normalWidthUpdate_ && paintOffset_ == offset && viewPortSize_ == size &&
-        lastOffset_ == lastOffset && NearEqual(estimatedHeight_, estimatedHeight, 0.000001f)) {
+    if (!positionModeUpdate_ && !normalWidthUpdate_ && !reservedHeightUpdate_ && paintOffset_ == offset &&
+        viewPortSize_ == size && lastOffset_ == lastOffset && NearEqual(estimatedHeight_, estimatedHeight, 0.000001f)) {
         return;
     }
     if (!NearZero(estimatedHeight)) {
@@ -111,6 +108,7 @@ void ScrollBar::UpdateScrollBarRegion(
         }
         positionModeUpdate_ = false;
         normalWidthUpdate_ = false;
+        reservedHeightUpdate_ = false;
     }
     OnScrollEnd();
 }
@@ -143,14 +141,16 @@ void ScrollBar::SetBarRegion(const Offset& offset, const Size& size)
 {
     double normalWidth = NormalizeToPx(normalWidth_);
     if (shapeMode_ == ShapeMode::RECT) {
-        double height = std::max(size.Height() - NormalizeToPx(reservedHeight_), 0.0);
+        double height =
+            std::max(size.Height() - NormalizeToPx(startReservedHeight_) - NormalizeToPx(endReservedHeight_), 0.0);
         if (positionMode_ == PositionMode::LEFT) {
             barRect_ = Rect(0.0, 0.0, normalWidth, height) + offset;
         } else if (positionMode_ == PositionMode::RIGHT) {
             barRect_ =
                 Rect(size.Width() - normalWidth - NormalizeToPx(padding_.Right()), 0.0, normalWidth, height) + offset;
         } else if (positionMode_ == PositionMode::BOTTOM) {
-            auto scrollBarWidth = std::max(size.Width() - NormalizeToPx(reservedHeight_), 0.0);
+            auto scrollBarWidth =
+                std::max(size.Width() - NormalizeToPx(startReservedHeight_) - NormalizeToPx(endReservedHeight_), 0.0);
             barRect_ =
                 Rect(0.0, size.Height() - normalWidth - NormalizeToPx(padding_.Bottom()), scrollBarWidth, normalWidth) +
                 offset;
@@ -162,7 +162,7 @@ void ScrollBar::SetRectTrickRegion(
     const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight)
 {
     double mainSize = (positionMode_ == PositionMode::BOTTOM ? size.Width() : size.Height());
-    barRegionSize_ = std::max(mainSize - NormalizeToPx(reservedHeight_), 0.0);
+    barRegionSize_ = std::max(mainSize - NormalizeToPx(endReservedHeight_), 0.0);
     if (LessOrEqual(estimatedHeight, 0.0)) {
         return;
     }
@@ -190,7 +190,7 @@ void ScrollBar::SetRectTrickRegion(
         double lastMainOffset =
             std::max(positionMode_ == PositionMode::BOTTOM ? lastOffset.GetX() : lastOffset.GetY(), 0.0);
         offsetScale_ = (barRegionSize_ - activeSize) / (estimatedHeight - mainSize);
-        double activeMainOffset = offsetScale_ * lastMainOffset;
+        double activeMainOffset = offsetScale_ * lastMainOffset + NormalizeToPx(startReservedHeight_);
         bool canUseAnimation = !inSpring_ && !positionModeUpdate_;
         activeMainOffset = std::min(activeMainOffset, barRegionSize_ - activeSize);
         double inactiveSize = 0.0;
@@ -340,7 +340,9 @@ void ScrollBar::SetGestureEvent()
                     scrollBar->PlayShrinkAnimation();
                 }
                 scrollBar->SetPressed(false);
-                scrollBar->OnScrollEnd();
+                if (scrollBar->GetOpacity() == UINT8_MAX) {
+                    scrollBar->OnScrollEnd();
+                }
                 scrollBar->MarkNeedRender();
             }
         });
@@ -489,16 +491,8 @@ void ScrollBar::PlayBarEndAnimation()
     }
 
     scrollEndAnimator_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
-    auto hiddenStartKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEY_TIME_START, UINT8_MAX);
-    auto hiddenMiddleKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEY_TIME_MIDDLE, UINT8_MAX);
-    auto hiddenEndKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEY_TIME_END, 0);
-    hiddenMiddleKeyframe->SetCurve(Curves::LINEAR);
-    hiddenEndKeyframe->SetCurve(Curves::FRICTION);
-
-    auto animation = AceType::MakeRefPtr<KeyframeAnimation<int32_t>>();
-    animation->AddKeyframe(hiddenStartKeyframe);
-    animation->AddKeyframe(hiddenMiddleKeyframe);
-    animation->AddKeyframe(hiddenEndKeyframe);
+    scrollEndAnimator_->PreventFrameJank();
+    auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(UINT8_MAX, 0, Curves::SHARP);
     animation->AddListener([weakBar = AceType::WeakClaim(this)](int32_t value) {
         auto scrollBar = weakBar.Upgrade();
         if (scrollBar && scrollBar->opacity_ != value) {
@@ -507,7 +501,66 @@ void ScrollBar::PlayBarEndAnimation()
         }
     });
     scrollEndAnimator_->AddInterpolator(animation);
-    scrollEndAnimator_->SetDuration(STOP_DURATION);
+    scrollEndAnimator_->SetDuration(END_DURATION);
+    scrollEndAnimator_->SetStartDelay(END_DELAY_DURATION);
     scrollEndAnimator_->Play();
+}
+
+void ScrollBar::CalcReservedHeight()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    const static int32_t PLATFORM_VERSION_TEN = 10;
+    if (pipelineContext->GetMinPlatformVersion() <= PLATFORM_VERSION_TEN) {
+        auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
+        CHECK_NULL_VOID_NOLOG(theme);
+        startReservedHeight_ = Dimension(0.0, DimensionUnit::PX);
+        endReservedHeight_ = theme->GetReservedHeight();
+        LOGD("scrollBar set reservedHeight by theme");
+        SetReservedHeightUpdate(true);
+        return;
+    }
+    float startRadius = 0.0;
+    float endRadius = 0.0;
+    float barMargin = 0.0;
+    float padding = 0.0;
+    float startRadiusHeight = 0.0;
+    float endRadiusHeight = 0.0;
+    switch (positionMode_) {
+        case PositionMode::LEFT:
+            startRadius = hostBorderRadius_.radiusTopLeft->ConvertToPx();
+            endRadius = hostBorderRadius_.radiusBottomLeft->ConvertToPx();
+            padding = NormalizeToPx(padding_.Left());
+            break;
+        case PositionMode::RIGHT:
+            startRadius = hostBorderRadius_.radiusTopRight->ConvertToPx();
+            endRadius = hostBorderRadius_.radiusBottomRight->ConvertToPx();
+            padding = NormalizeToPx(padding_.Right());
+            break;
+        case PositionMode::BOTTOM:
+            startRadius = hostBorderRadius_.radiusBottomLeft->ConvertToPx();
+            endRadius = hostBorderRadius_.radiusBottomRight->ConvertToPx();
+            padding = NormalizeToPx(padding_.Bottom());
+            break;
+        default:
+            break;
+    }
+    barMargin = padding + NormalizeToPx(normalWidth_) / 2;
+    if (LessOrEqual(startRadius, barMargin)) {
+        startReservedHeight_ = Dimension(0.0, DimensionUnit::PX);
+    } else {
+        startRadiusHeight = startRadius - std::sqrt(2 * padding * startRadius - padding * padding);
+        startReservedHeight_ = Dimension(startRadiusHeight + (startRadius / barMargin), DimensionUnit::PX);
+    }
+
+    if (LessOrEqual(endRadius, barMargin)) {
+        endReservedHeight_ = Dimension(0.0, DimensionUnit::PX);
+    } else {
+        endRadiusHeight = endRadius - std::sqrt(2 * padding * endRadius - padding * padding);
+        endReservedHeight_ = Dimension(endRadiusHeight + (endRadius / barMargin), DimensionUnit::PX);
+    }
+    LOGD("scrollBar calculate reservedHeight, startReservedHeight_:%{public}f, endReservedHeight_:%{public}f",
+        startReservedHeight_.Value(), endReservedHeight_.Value());
+    SetReservedHeightUpdate(true);
 }
 } // namespace OHOS::Ace::NG

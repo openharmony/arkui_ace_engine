@@ -16,14 +16,14 @@
 #ifndef FOUNDATION_ACE_ADAPTER_PREVIEW_ENTRANCE_SAMPLES_KEY_INPUT_HANDLER_H
 #define FOUNDATION_ACE_ADAPTER_PREVIEW_ENTRANCE_SAMPLES_KEY_INPUT_HANDLER_H
 
-#include "core/event/key_event.h"
+#include "adapter/preview/external/multimodalinput/key_event.h"
 
 #ifndef ENABLE_ROSEN_BACKEND
-#include "flutter/shell/platform/glfw/public/flutter_glfw.h"
 #include "flutter/shell/platform/glfw/keyboard_hook_handler.h"
+#include "flutter/shell/platform/glfw/public/flutter_glfw.h"
 #else
-#include "glfw_render_context.h"
 #include "GLFW/glfw3.h"
+#include "glfw_render_context.h"
 #endif
 
 namespace OHOS::Ace::Platform {
@@ -43,18 +43,18 @@ public:
 
 private:
     bool RecognizeKeyEvent(int key, int action, int mods);
-    KeyEvent keyEvent_;
+    static std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent_;
 };
 #else
 class KeyInputHandler {
 public:
-    static void InitialTextInputCallback(const std::shared_ptr<OHOS::Rosen::GlfwRenderContext> &controller);
+    static void InitialTextInputCallback(const std::shared_ptr<OHOS::Rosen::GlfwRenderContext>& controller);
     static void KeyboardHook(GLFWwindow* window, int key, int scancode, int action, int mods);
     static void CharHook(GLFWwindow* window, unsigned int code_point);
 
 private:
     static bool RecognizeKeyEvent(int key, int action, int mods);
-    static inline KeyEvent keyEvent_;
+    static std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent_;
 };
 #endif
 

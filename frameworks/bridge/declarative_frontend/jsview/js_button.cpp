@@ -24,6 +24,7 @@
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/button_model_impl.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
@@ -143,6 +144,38 @@ void JSButton::SetStateEffect(bool stateEffect)
     ButtonModel::GetInstance()->SetStateEffect(stateEffect);
 }
 
+void JSButton::HandleDifferentRadius(const JSRef<JSVal>& args)
+{
+    std::optional<CalcDimension> radiusTopLeft;
+    std::optional<CalcDimension> radiusTopRight;
+    std::optional<CalcDimension> radiusBottomLeft;
+    std::optional<CalcDimension> radiusBottomRight;
+    if (args->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        CalcDimension topLeft;
+        if (ParseJsDimensionVp(object->GetProperty("topLeft"), topLeft)) {
+            radiusTopLeft = topLeft;
+        }
+        CalcDimension topRight;
+        if (ParseJsDimensionVp(object->GetProperty("topRight"), topRight)) {
+            radiusTopRight = topRight;
+        }
+        CalcDimension bottomLeft;
+        if (ParseJsDimensionVp(object->GetProperty("bottomLeft"), bottomLeft)) {
+            radiusBottomLeft = bottomLeft;
+        }
+        CalcDimension bottomRight;
+        if (ParseJsDimensionVp(object->GetProperty("bottomRight"), bottomRight)) {
+            radiusBottomRight = bottomRight;
+        }
+        if (!radiusTopLeft.has_value() && !radiusTopRight.has_value() && !radiusBottomLeft.has_value() &&
+            !radiusBottomRight.has_value()) {
+            return;
+        }
+        ButtonModel::GetInstance()->SetBorderRadius(radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
+    }
+}
+
 void JSButton::GetFontContent(JSRef<JSVal>& font, ButtonParameters& buttonParameters)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(font);
@@ -215,6 +248,7 @@ void JSButton::SetLableStyle(const JSCallbackInfo& info)
     ButtonParameters buttonParameters;
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> overflowValue = obj->GetProperty("overflow");
+    buttonParameters.textOverflow = TextOverflow::ELLIPSIS;
     if (!overflowValue->IsNull() && overflowValue->IsNumber()) {
         auto overflow = overflowValue->ToNumber<int32_t>();
         if (overflow >= 0 && overflow < static_cast<int32_t>(TEXT_OVERFLOWS.size()) &&
@@ -286,6 +320,7 @@ void JSButton::JSBind(BindingTarget globalObj)
     JSClass<JSButton>::StaticMethod("height", &JSButton::JsHeight);
     JSClass<JSButton>::StaticMethod("aspectRatio", &JSButton::JsAspectRatio);
     JSClass<JSButton>::StaticMethod("borderRadius", &JSButton::JsRadius);
+    JSClass<JSButton>::StaticMethod("border", &JSButton::JsBorder);
     JSClass<JSButton>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSButton>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSButton>::StaticMethod("size", &JSButton::JsSize);
@@ -490,6 +525,11 @@ NG::PaddingProperty JSButton::SetPaddings(const std::optional<CalcDimension>& to
 void JSButton::JsOnClick(const JSCallbackInfo& info)
 {
     LOGD("JSButton JsOnClick");
+    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnClick callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnClick();
+        return;
+    }
     if (!info[0]->IsFunction()) {
         LOGE("OnClick parameter need a function.");
         return;
@@ -602,19 +642,34 @@ void JSButton::JsRadius(const JSCallbackInfo& info)
     }
     CalcDimension radius;
     ParseJsDimensionVp(info[0], radius);
-
     ButtonModel::GetInstance()->SetBorderRadius(radius);
+    HandleDifferentRadius(info[0]);
+}
+
+void JSButton::JsBorder(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsBorder(info);
+    if (!info[0]->IsObject()) {
+        LOGE("args is not a object. %s", info[0]->ToString().c_str());
+        return;
+    }
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+    CalcDimension borderRadius;
+    auto valueRadius = object->GetProperty("radius");
+    ParseJsDimensionVp(valueRadius, borderRadius);
+    ButtonModel::GetInstance()->SetBorderRadius(borderRadius);
+    HandleDifferentRadius(valueRadius);
 }
 
 CalcDimension JSButton::GetSizeValue(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
-        return {-1.0};
+        return { -1.0 };
     }
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
-        return {-1.0};
+        return { -1.0 };
     }
     return value;
 }

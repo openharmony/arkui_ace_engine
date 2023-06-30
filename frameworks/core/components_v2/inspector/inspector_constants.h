@@ -59,6 +59,8 @@ ACE_EXPORT extern const char ROOT_ETS_TAG[];
 ACE_EXPORT extern const char STAGE_ETS_TAG[];
 // page view
 ACE_EXPORT extern const char PAGE_ETS_TAG[];
+// container modal view (title bar)
+ACE_EXPORT extern const char CONTAINER_MODAL_ETS_TAG[];
 // js custom view
 ACE_EXPORT extern const char JS_VIEW_ETS_TAG[];
 ACE_EXPORT extern const char JS_VIEW_COMPONENT_TAG[];
@@ -87,6 +89,9 @@ ACE_EXPORT extern const char TEXT_COMPONENT_TAG[];
 ACE_EXPORT extern const char TEXT_ETS_TAG[];
 ACE_EXPORT extern const char TEXT_ATTRS_OVER_FLOW[];
 ACE_EXPORT extern const char TEXT_ATTRS_MAX_LINES[];
+
+// rich editor
+ACE_EXPORT extern const char RICH_EDITOR_ETS_TAG[];
 
 // stack
 ACE_EXPORT extern const char STACK_COMPONENT_TAG[];
@@ -194,7 +199,7 @@ ACE_EXPORT extern const char PANEL_ETS_TAG[];
 
 // pattern-lock
 ACE_EXPORT extern const char PATTERN_LOCK_COMPONENT_TAG[];
-ACE_EXPORT extern const char PATTERN_LOCK_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char PATTERN_LOCK_ETS_TAG[];
 
 // row
 ACE_EXPORT extern const char ROW_COMPONENT_TAG[];
@@ -239,7 +244,7 @@ ACE_EXPORT extern const char IMAGE_ETS_TAG[];
 
 // qrcode
 ACE_EXPORT extern const char QRCODE_COMPONENT_TAG[];
-ACE_EXPORT extern const char QRCODE_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char QRCODE_ETS_TAG[];
 
 // span
 ACE_EXPORT extern const char SPAN_COMPONENT_TAG[];
@@ -303,6 +308,10 @@ ACE_EXPORT extern const char SEARCH_ETS_TAG[];
 // formComponent
 ACE_EXPORT extern const char FORM_COMPONENT_TAG[];
 ACE_EXPORT extern const char FORM_ETS_TAG[];
+
+// formLink
+ACE_EXPORT extern const char FORM_LINK_TAG[];
+ACE_EXPORT extern const char FORM_LINK_ETS_TAG[];
 
 // PluginComponent
 ACE_EXPORT extern const char PLUGIN_COMPONENT_TAG[];
@@ -385,7 +394,7 @@ ACE_EXPORT extern const char GRID_ROW_ETS_TAG[];
 
 // relativeContainer
 ACE_EXPORT extern const char RELATIVE_CONTAINER_COMPONENT_TAG[];
-ACE_EXPORT extern const char RELATIVE_CONTAINER_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char RELATIVE_CONTAINER_ETS_TAG[];
 
 // menu
 ACE_EXPORT extern const char MENU_COMPONENT_TAG[];

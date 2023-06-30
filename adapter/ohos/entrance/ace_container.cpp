@@ -27,6 +27,7 @@
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/hap_asset_provider.h"
+#include "adapter/ohos/entrance/utils.h"
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
@@ -44,6 +45,7 @@
 #include "bridge/js_frontend/js_frontend.h"
 #include "core/common/ace_engine.h"
 #include "core/common/connect_server_manager.h"
+#include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 #include "core/common/flutter/flutter_task_executor.h"
@@ -612,16 +614,23 @@ void AceContainer::InitializeCallback()
                                     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
-        context->GetTaskExecutor()->PostTask(
-            [context, width, height, type, rsTransaction, id]() {
-                context->OnSurfaceChanged(width, height, type, rsTransaction);
-                if (type == WindowSizeChangeReason::ROTATION) {
-                    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(id);
-                    CHECK_NULL_VOID_NOLOG(subwindow);
-                    subwindow->ResizeWindow();
-                }
-            },
-            TaskExecutor::TaskType::UI);
+        auto callback = [context, width, height, type, rsTransaction, id]() {
+            context->OnSurfaceChanged(width, height, type, rsTransaction);
+            if (type == WindowSizeChangeReason::ROTATION) {
+                auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(id);
+                CHECK_NULL_VOID_NOLOG(subwindow);
+                subwindow->ResizeWindow();
+            }
+        };
+        auto container = Container::Current();
+        if (!container) {
+            return;
+        }
+        if (container->IsUseStageModel() && type == WindowSizeChangeReason::ROTATION) {
+            callback();
+        } else {
+            context->GetTaskExecutor()->PostTask(callback, TaskExecutor::TaskType::UI);
+        }
     };
     aceView_->RegisterViewChangeCallback(viewChangeCallback);
 
@@ -1356,88 +1365,17 @@ void AceContainer::InitWindowCallback()
         rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
         return rect;
     });
-
-    pipelineContext_->SetGetViewSafeAreaImpl([window = uiWindow_, this]() -> SafeAreaEdgeInserts {
-        return GetViewSafeArea(window);
-    });
 }
 
-// Get SafeArea by Window
-SafeAreaEdgeInserts AceContainer::GetViewSafeArea(sptr<OHOS::Rosen::Window> window)
+NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type)
 {
-    SafeAreaEdgeInserts systemSafeArea;
-    SafeAreaEdgeInserts cutoutSafeArea;
-    CHECK_NULL_RETURN_NOLOG(window, systemSafeArea);
-    Rosen::AvoidArea systemAvoidArea;
-    Rosen::AvoidArea cutoutAvoidArea;
-    Rosen::WMError systemRet = window->GetAvoidAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM, systemAvoidArea);
-    Rosen::WMError cutoutRet = window->GetAvoidAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT, cutoutAvoidArea);
-    Rect leftRect;
-    Rect topRect;
-    Rect rightRect;
-    Rect bottomRect;
-    if (systemRet == Rosen::WMError::WM_OK) {
-        leftRect = Rect(static_cast<double>(systemAvoidArea.leftRect_.posX_),
-            static_cast<double>(systemAvoidArea.leftRect_.posY_), static_cast<double>(systemAvoidArea.leftRect_.width_),
-            static_cast<double>(systemAvoidArea.leftRect_.height_));
-        topRect = Rect(static_cast<double>(systemAvoidArea.topRect_.posX_),
-            static_cast<double>(systemAvoidArea.topRect_.posY_), static_cast<double>(systemAvoidArea.topRect_.width_),
-            static_cast<double>(systemAvoidArea.topRect_.height_));
-        rightRect = Rect(static_cast<double>(systemAvoidArea.rightRect_.posX_),
-            static_cast<double>(systemAvoidArea.rightRect_.posY_),
-            static_cast<double>(systemAvoidArea.rightRect_.width_),
-            static_cast<double>(systemAvoidArea.rightRect_.height_));
-        bottomRect = Rect(static_cast<double>(systemAvoidArea.bottomRect_.posX_),
-            static_cast<double>(systemAvoidArea.bottomRect_.posY_),
-            static_cast<double>(systemAvoidArea.bottomRect_.width_),
-            static_cast<double>(systemAvoidArea.bottomRect_.height_));
-        systemSafeArea.SetRect(leftRect, topRect, rightRect, bottomRect);
-    }
-    if (cutoutRet == Rosen::WMError::WM_OK) {
-        leftRect = Rect(static_cast<double>(cutoutAvoidArea.leftRect_.posX_),
-            static_cast<double>(cutoutAvoidArea.leftRect_.posY_), static_cast<double>(cutoutAvoidArea.leftRect_.width_),
-            static_cast<double>(cutoutAvoidArea.leftRect_.height_));
-        topRect = Rect(static_cast<double>(cutoutAvoidArea.topRect_.posX_),
-            static_cast<double>(cutoutAvoidArea.topRect_.posY_), static_cast<double>(cutoutAvoidArea.topRect_.width_),
-            static_cast<double>(cutoutAvoidArea.topRect_.height_));
-        rightRect = Rect(static_cast<double>(cutoutAvoidArea.rightRect_.posX_),
-            static_cast<double>(cutoutAvoidArea.rightRect_.posY_),
-            static_cast<double>(cutoutAvoidArea.rightRect_.width_),
-            static_cast<double>(cutoutAvoidArea.rightRect_.height_));
-        bottomRect = Rect(static_cast<double>(cutoutAvoidArea.bottomRect_.posX_),
-            static_cast<double>(cutoutAvoidArea.bottomRect_.posY_),
-            static_cast<double>(cutoutAvoidArea.bottomRect_.width_),
-            static_cast<double>(cutoutAvoidArea.bottomRect_.height_));
-        cutoutSafeArea.SetRect(leftRect, topRect, rightRect, bottomRect);
-    }
-    return systemSafeArea.CombineSafeArea(cutoutSafeArea);
-}
-
-SafeAreaEdgeInserts AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type)
-{
-    SafeAreaEdgeInserts viewSafeArea;
-    CHECK_NULL_RETURN_NOLOG(uiWindow_, viewSafeArea);
-
+    CHECK_NULL_RETURN_NOLOG(uiWindow_, {});
     Rosen::AvoidArea avoidArea;
     Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(type, avoidArea);
-    Rect topRect;
-    Rect leftRect;
-    Rect rightRect;
-    Rect bottomRect;
     if (ret == Rosen::WMError::WM_OK) {
-        topRect = Rect(static_cast<double>(avoidArea.topRect_.posX_), static_cast<double>(avoidArea.topRect_.posY_),
-            static_cast<double>(avoidArea.topRect_.width_), static_cast<double>(avoidArea.topRect_.height_));
-        leftRect = Rect(static_cast<double>(avoidArea.leftRect_.posX_), static_cast<double>(avoidArea.leftRect_.posY_),
-            static_cast<double>(avoidArea.leftRect_.width_), static_cast<double>(avoidArea.leftRect_.height_));
-        rightRect =
-            Rect(static_cast<double>(avoidArea.rightRect_.posX_), static_cast<double>(avoidArea.rightRect_.posY_),
-                static_cast<double>(avoidArea.rightRect_.width_), static_cast<double>(avoidArea.rightRect_.height_));
-        bottomRect =
-            Rect(static_cast<double>(avoidArea.bottomRect_.posX_), static_cast<double>(avoidArea.bottomRect_.posY_),
-                static_cast<double>(avoidArea.bottomRect_.width_), static_cast<double>(avoidArea.bottomRect_.height_));
+        return ConvertAvoidArea(avoidArea);
     }
-    viewSafeArea.SetRect(leftRect, topRect, rightRect, bottomRect);
-    return viewSafeArea;
+    return {};
 }
 
 std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextByModule(
@@ -1448,8 +1386,8 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
     return context->CreateModuleContext(bundle, module);
 }
 
-void AceContainer::UpdateConfiguration(
-    const std::string& colorMode, const std::string& deviceAccess, const std::string& languageTag)
+void AceContainer::UpdateConfiguration(const std::string& colorMode, const std::string& deviceAccess,
+    const std::string& languageTag, const std::string& configuration)
 {
     if (colorMode.empty() && deviceAccess.empty() && languageTag.empty()) {
         LOGW("AceContainer::OnConfigurationUpdated param is empty");
@@ -1487,6 +1425,9 @@ void AceContainer::UpdateConfiguration(
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);
     themeManager->LoadResourceThemes();
+    auto front = GetFrontend();
+    CHECK_NULL_VOID(front);
+    front->OnConfigurationUpdated(configuration);
     OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
     NotifyConfigurationChange(!deviceAccess.empty());
 }

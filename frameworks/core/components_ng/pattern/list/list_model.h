@@ -43,8 +43,7 @@ public:
     virtual void SetEditMode(bool editMode) = 0;
     virtual void SetDivider(const V2::ItemDivider& divider) = 0;
     virtual void SetChainAnimation(bool enableChainAnimation) = 0;
-    virtual void SetChainAnimationOptions(const Dimension& minSpace, const Dimension& maxSpace, float conductivity,
-        float intensity, int32_t edgeEffect) = 0;
+    virtual void SetChainAnimationOptions(const ChainAnimationOptions& options) = 0;
     virtual void SetLanes(int32_t lanes) = 0;
     virtual void SetLaneConstrain(const Dimension& laneMinLength, const Dimension& laneMaxLength) = 0;
     virtual void SetLaneMinLength(const Dimension& laneMinLength) = 0;
@@ -58,6 +57,7 @@ public:
     virtual void SetContentStartOffset(float startOffset) = 0;
     virtual void SetContentEndOffset(float endOffset) = 0;
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) = 0;
+    virtual void SetScrollEnabled(bool scrollEnabled) = 0;
     virtual void SetOnScroll(OnScrollEvent&& onScroll) = 0;
     virtual void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin) = 0;
     virtual void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin) = 0;
@@ -73,6 +73,7 @@ public:
     virtual void SetOnItemDragLeave(OnItemDragLeaveFunc&& onItemDragLeave) = 0;
     virtual void SetOnItemDragMove(OnItemDragMoveFunc&& onItemDragMove) = 0;
     virtual void SetOnItemDrop(OnItemDropFunc&& onItemDrop) = 0;
+    virtual void SetScrollSnapAlign(V2::ScrollSnapAlign scrollSnapAlign) {};
 
 private:
     static std::unique_ptr<ListModel> instance_;

@@ -469,6 +469,11 @@ public:
         ViewAbstract::SetMotionPath(option);
     }
 
+    void SetRenderGroup(bool isRenderGroup) override
+    {
+        ViewAbstract::SetRenderGroup(isRenderGroup);
+    }
+
     void SetFlexBasis(const Dimension& value) override
     {
         ViewAbstract::SetFlexBasis(value);
@@ -916,6 +921,11 @@ private:
         RefPtr<CustomAnimatableArithmetic>& value) override
     {
         ViewAbstract::UpdateAnimatableArithmeticProperty(propertyName, value);
+    }
+
+    void UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts) override
+    {
+        ViewAbstract::UpdateSafeAreaExpandOpts(opts);
     }
 };
 } // namespace OHOS::Ace::NG

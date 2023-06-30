@@ -179,7 +179,7 @@ public:
     void UpdateCaretPositionByPressOffset();
     void UpdateSelectionOffset();
 
-    CaretMetricsF CalcCursorOffsetByPosition(int32_t position);
+    CaretMetricsF CalcCursorOffsetByPosition(int32_t position, bool isStart = true);
 
     bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result);
 
@@ -308,6 +308,11 @@ public:
     float GetSelectionDestinationOffsetX() const
     {
         return textSelector_.selectionDestinationOffset.GetX();
+    }
+
+    OffsetF GetCaretOffset() const
+    {
+        return OffsetF(caretRect_.GetX(), caretRect_.GetY());
     }
 
     float GetCaretOffsetX() const
@@ -442,6 +447,7 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
     void InitEditingValueText(std::string content);
+    void InitEditingValueTextWithFilter();
     void InitCaretPosition(std::string content);
     const TextEditingValueNG& GetTextEditingValue()
     {
@@ -492,16 +498,6 @@ public:
         return hidePasswordCanvasImage_;
     }
 
-    void SetShowResultImageInfo(ImageSourceInfo showResultImageInfo)
-    {
-        showResultImageInfo_ = showResultImageInfo;
-    }
-
-    void SetHideResultImageInfo(ImageSourceInfo hideResultImageInfo)
-    {
-        hideResultImageInfo_ = hideResultImageInfo;
-    }
-
     bool GetTextObscured() const
     {
         return textObscured_;
@@ -532,9 +528,14 @@ public:
                layoutProperty->GetShowPasswordIconValue(true);
     }
 
-    void SetShowUserDefinedIcon()
+    void SetShowUserDefinedIcon(bool enable)
     {
-        showUserDefinedIcon_ = true;
+        showUserDefinedIcon_ = enable;
+    }
+
+    void SetHideUserDefinedIcon(bool enable)
+    {
+        hideUserDefinedIcon_ = enable;
     }
 
     void SetEnableTouchAndHoverEffect(bool enable)
@@ -650,11 +651,6 @@ public:
         return parentGlobalOffset_;
     }
 
-    void SetDragNode(const RefPtr<FrameNode>& dragNode) override
-    {
-        dragNode_ = dragNode;
-    }
-
     const RectF& GetTextContentRect() const override
     {
         return contentRect_;
@@ -665,9 +661,9 @@ public:
         return { dragParagraph_ };
     }
 
-    const RefPtr<FrameNode>& GetDragNode() const override
+    RefPtr<FrameNode> MoveDragNode() override
     {
-        return dragNode_;
+        return std::move(dragNode_);
     }
 
     const std::vector<std::string>& GetDragContents() const
@@ -820,6 +816,27 @@ public:
         ++drawOverlayFlag_;
     }
 
+    void MarkContentChange()
+    {
+        contChange_ = true;
+    }
+
+    void ResetContChange()
+    {
+        contChange_ = false;
+    }
+
+    bool GetContChange()
+    {
+        return contChange_;
+    }
+    std::string GetShowResultImageSrc() const;
+    std::string GetHideResultImageSrc() const;
+    void OnAttachToFrameNode() override
+    {
+        caretUpdateType_ = CaretUpdateType::EVENT;
+    }
+
 private:
     bool HasFocus() const;
     void HandleTouchEvent(const TouchEventInfo& info);
@@ -850,7 +867,8 @@ private:
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void UpdateSelectorByPosition(const int32_t& pos);
     // assert handles are inside the contentRect, reset them if not
-    void CheckHandles(std::optional<RectF>& firstHandle, std::optional<RectF>& secondHandle);
+    void CheckHandles(std::optional<RectF>& firstHandle,
+        std::optional<RectF>& secondHandle, float firstHandleSize = 0.0f, float secondHandleSize = 0.0f);
     void ShowSelectOverlay(const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle);
 
     void CursorMoveOnClick(const Offset& offset);
@@ -966,14 +984,14 @@ private:
     Offset lastTouchOffset_;
     PaddingPropertyF utilPadding_;
     OffsetF rightClickOffset_;
+    OffsetF offsetDifference_;
 
-    ImageSourceInfo showResultImageInfo_;
-    ImageSourceInfo hideResultImageInfo_;
     bool setBorderFlag_ = true;
     BorderWidthProperty lastDiffBorderWidth_;
     BorderColorProperty lastDiffBorderColor_;
 
     bool showUserDefinedIcon_ = false;
+    bool hideUserDefinedIcon_ = false;
     bool isSingleHandle_ = false;
     bool isFirstHandle_ = false;
     float baselineOffset_ = 0.0f;
@@ -993,8 +1011,9 @@ private:
     bool isOnHover_ = false;
     bool needToRefreshSelectOverlay_ = false;
     bool needToRequestKeyboardInner_ = false;
-    bool needToRequestKeyboardOnFocus_ = true;
+    bool needToRequestKeyboardOnFocus_ = false;
     bool isTransparent_ = false;
+    bool contChange_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 
@@ -1033,7 +1052,8 @@ private:
     int32_t dragTextStart_ = 0;
     int32_t dragTextEnd_ = 0;
     RefPtr<FrameNode> dragNode_;
-    DragStatus dragStatus_ = DragStatus::NONE;
+    DragStatus dragStatus_ = DragStatus::NONE; // The status of the dragged initiator
+    DragStatus dragRecipientStatus_ = DragStatus::NONE; // Drag the recipient's state
     std::vector<std::string> dragContents_;
     RefPtr<Clipboard> clipboard_;
     std::vector<TextEditingValueNG> operationRecords_;

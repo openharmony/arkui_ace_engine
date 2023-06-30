@@ -32,6 +32,9 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     void OnAttachToMainTree(bool recursive) override;
     void OnDetachFromMainTree(bool recursive) override;
+
+    void OnOffscreenProcess(bool recursive) override;
+
     static RefPtr<TabContentNode> GetOrCreateTabContentNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
@@ -53,6 +56,8 @@ public:
         return tabBarItemId_.value();
     }
 private:
+    void ProcessTabBarItem();
+
     std::optional<int32_t> tabBarItemId_;
     ACE_DISALLOW_COPY_AND_MOVE(TabContentNode);
 };

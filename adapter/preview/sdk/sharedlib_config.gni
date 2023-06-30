@@ -43,7 +43,7 @@ common_bin = [
   {
     label = "//third_party/nghttp2/lib:libnghttp2_shared"
     subsystem_name = "thirdparty"
-    part_name = "thirdparty_nghttp2"
+    part_name = "nghttp2"
   },
   {
     label = "//third_party/bounds_checking_function:libsec_shared"
@@ -268,6 +268,18 @@ if (use_mac || use_mingw_win) {
       part_name = "zlib"
       lib_names = [ "shared_libz" ]
     },
+    {
+      label = "//foundation/filemanagement/file_api/utils/filemgmt_libhilog:filemgmt_libhilog"
+      subsystem_name = "filemanagement"
+      part_name = "file_api"
+      lib_names = [ "filemgmt_libhilog" ]
+    },
+    {
+      label = "//foundation/filemanagement/file_api/utils/filemgmt_libn:filemgmt_libn"
+      subsystem_name = "filemanagement"
+      part_name = "file_api"
+      lib_names = [ "filemgmt_libn" ]
+    },
   ]
 
   napi_modules += [
@@ -304,6 +316,16 @@ if (use_mac || use_mingw_win) {
               "//foundation/communication/netstack/frameworks/js/napi/http:http"
           subsystem_name = "communication"
           part_name = "netstack"
+        },
+      ]
+    },
+    {
+      prefix = "file"
+      shard_libs = [
+        {
+          label = "//foundation/filemanagement/file_api/interfaces/kits/js:fs"
+          subsystem_name = "filemanagement"
+          part_name = "file_api"
         },
       ]
     },

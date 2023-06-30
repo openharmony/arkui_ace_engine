@@ -36,10 +36,6 @@ void CounterModelNG::Create()
     CHECK_NULL_VOID(counterTheme);
     counterNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(counterTheme->GetWidth()), CalcLength(counterTheme->GetHeight())));
-    counterNode->GetLayoutProperty()->UpdateBorderWidth(counterTheme->GetBorderWidth());
-    counterNode->GetRenderContext()->UpdateBorderRadius(counterTheme->GetBorderRadius());
-    counterNode->GetRenderContext()->UpdateBorderStyle(counterTheme->GetBorderStyle());
-    counterNode->GetRenderContext()->UpdateBorderColor(counterTheme->GetBorderColor());
     counterNode->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
     counterNode->GetRenderContext()->SetClipToFrame(true);
     counterNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::CENTER);
@@ -75,6 +71,9 @@ RefPtr<FrameNode> CounterModelNG::CreateButtonChild(
     buttonNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(counterTheme->GetControlWidth()), CalcLength(counterTheme->GetHeight())));
     buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonNode->GetLayoutProperty()->UpdateBorderWidth(counterTheme->GetBorderWidth());
+    buttonNode->GetRenderContext()->UpdateBorderStyle(counterTheme->GetBorderStyle());
+    buttonNode->GetRenderContext()->UpdateBorderColor(counterTheme->GetBorderColor());
     buttonNode->MarkModifyDone();
 
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -101,7 +100,7 @@ RefPtr<FrameNode> CounterModelNG::CreateContentNodeChild(int32_t contentId, cons
     contentNode->GetRenderContext()->SetClipToFrame(true);
     contentNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(std::nullopt, CalcLength(counterTheme->GetHeight())));
-    contentNode->GetLayoutProperty()->UpdateBorderWidth(counterTheme->GetBorderWidth());
+    contentNode->GetLayoutProperty()->UpdateBorderWidth(counterTheme->GetContentBorderWidth());
     contentNode->GetRenderContext()->UpdateBorderStyle(counterTheme->GetBorderStyle());
     contentNode->GetRenderContext()->UpdateBorderColor(counterTheme->GetBorderColor());
     contentNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
@@ -198,8 +197,8 @@ void CounterModelNG::SetHeight(const Dimension& value)
     subTextLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(value)));
 
     int32_t contentId = frameNode->GetPattern<CounterPattern>()->GetContentId();
-    auto contentNode = AceType::DynamicCast<FrameNode>(
-        frameNode->GetChildAtIndex(frameNode->GetChildIndexById(contentId)));
+    auto contentNode =
+        AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(contentId)));
     CHECK_NULL_VOID(contentNode);
     auto contentLayoutProperty = contentNode->GetLayoutProperty();
     contentLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(value)));

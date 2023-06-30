@@ -23,15 +23,13 @@ build_component_ng("plugin_pattern_ng") {
   ]
 
   if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux) {
-    deps = [
-      "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
-      "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    ]
+    deps = [ "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr" ]
     external_deps = [
       "ability_base:want",
       "ability_runtime:app_manager",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
+      "graphic_standard:librender_service_client",
       "ipc:ipc_core",
     ]
   }

@@ -36,7 +36,7 @@ TextFieldOverlayModifier::TextFieldOverlayModifier(const WeakPtr<OHOS::Ace::NG::
     contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
-    cursorOffsetX_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(textFieldPattern->GetCaretOffsetX());
+    cursorOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(textFieldPattern->GetCaretOffset());
     frameSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
     currentOffset_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
     flag_ = AceType::MakeRefPtr<PropertyInt>(0);
@@ -50,7 +50,7 @@ TextFieldOverlayModifier::TextFieldOverlayModifier(const WeakPtr<OHOS::Ace::NG::
     AttachProperty(cursorVisible_);
     AttachProperty(contentSize_);
     AttachProperty(contentOffset_);
-    AttachProperty(cursorOffsetX_);
+    AttachProperty(cursorOffset_);
     AttachProperty(frameSize_);
     AttachProperty(currentOffset_);
     AttachProperty(flag_);
@@ -177,8 +177,8 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
         canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     }
     auto caretRect = textFieldPattern->GetCaretRect();
-    canvas.DrawRect(RSRect(cursorOffsetX_->Get(), caretRect.GetY(),
-        cursorOffsetX_->Get() + static_cast<float>(cursorWidth_->Get()), caretRect.GetY() + caretRect.Height()));
+    canvas.DrawRect(RSRect(cursorOffset_->Get().GetX(), caretRect.GetY(),
+        cursorOffset_->Get().GetX() + static_cast<float>(cursorWidth_->Get()), caretRect.GetY() + caretRect.Height()));
     canvas.DetachBrush();
     canvas.Restore();
 }
@@ -190,7 +190,7 @@ void TextFieldOverlayModifier::PaintScrollBar(RSCanvas& canvas)
     auto scrollBar = scrollBar_.Upgrade();
     CHECK_NULL_VOID_NOLOG(scrollBar);
     textFieldPattern->CheckScrollable();
-    if (scrollBar->NeedPaint() && textFieldPattern->IsScrollable()) {
+    if (scrollBar->NeedPaint() && textFieldPattern->IsScrollable() && textFieldPattern->IsSelected()) {
         ScrollBarPainter::PaintRectBar(canvas, scrollBar);
     }
 }
@@ -232,9 +232,9 @@ void TextFieldOverlayModifier::SetContentOffset(OffsetF& value)
     contentOffset_->Set(value);
 }
 
-void TextFieldOverlayModifier::SetCursorOffsetX(float value)
+void TextFieldOverlayModifier::SetCursorOffset(OffsetF& value)
 {
-    cursorOffsetX_->Set(value);
+    cursorOffset_->Set(value);
 }
 
 void TextFieldOverlayModifier::SetInputStyle(InputStyle& value)

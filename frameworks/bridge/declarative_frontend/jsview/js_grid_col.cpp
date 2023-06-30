@@ -178,6 +178,9 @@ void JSGridCol::JSBind(BindingTarget globalObj)
     JSClass<JSGridCol>::StaticMethod("offset", &JSGridCol::Offset, MethodOptions::NONE);
     JSClass<JSGridCol>::StaticMethod("gridColOffset", &JSGridCol::Offset, MethodOptions::NONE);
     JSClass<JSGridCol>::StaticMethod("order", &JSGridCol::Order, MethodOptions::NONE);
+    JSClass<JSGridCol>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSGridCol>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSGridCol>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSGridCol>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

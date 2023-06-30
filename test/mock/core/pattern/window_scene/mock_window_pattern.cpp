@@ -42,4 +42,10 @@ void WindowPattern::OnAttachToFrameNode() {}
 void WindowPattern::DispatchPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) {}
 
 void WindowPattern::DispatchKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent) {}
+
+void WindowPattern::DispatchKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) {}
+
+void WindowPattern::DisPatchFocusActiveEvent(bool isFocusActive) {}
+
+void WindowPattern::OnModifyDone() {}
 } // namespace OHOS::Ace::NG

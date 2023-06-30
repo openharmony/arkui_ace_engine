@@ -228,7 +228,7 @@ ohos_unittest("SpringChainTest") {
   } else {
     configs += [ "//third_party/curl:curl_config" ]
     deps += [ "//third_party/curl:curl" ]
-    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps = [ "hilog:libhilog" ]
   }
 
   external_deps += [ "c_utils:utils" ]

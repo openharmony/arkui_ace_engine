@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -506,6 +507,7 @@ void ViewAbstract::SetBorderStyle(const BorderStyleProperty& value)
 
 void ViewAbstract::DisableOnClick()
 {
+    LOGD("Disable OnClick event");
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->ClearUserOnClick();
@@ -513,6 +515,7 @@ void ViewAbstract::DisableOnClick()
 
 void ViewAbstract::DisableOnTouch()
 {
+    LOGD("Disable OnTouch event");
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->ClearUserOnTouch();
@@ -520,6 +523,7 @@ void ViewAbstract::DisableOnTouch()
 
 void ViewAbstract::DisableOnKeyEvent()
 {
+    LOGD("Disable OnKey event");
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->ClearUserOnKey();
@@ -527,6 +531,7 @@ void ViewAbstract::DisableOnKeyEvent()
 
 void ViewAbstract::DisableOnHover()
 {
+    LOGD("Disable OnHover event");
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearUserOnHover();
@@ -534,6 +539,7 @@ void ViewAbstract::DisableOnHover()
 
 void ViewAbstract::DisableOnMouse()
 {
+    LOGD("Disable OnMouse event");
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearUserOnMouse();
@@ -541,6 +547,7 @@ void ViewAbstract::DisableOnMouse()
 
 void ViewAbstract::DisableOnAppear()
 {
+    LOGD("Disable OnAppear event");
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearUserOnAppear();
@@ -548,6 +555,7 @@ void ViewAbstract::DisableOnAppear()
 
 void ViewAbstract::DisableOnDisAppear()
 {
+    LOGD("Disable OnDisAppear event");
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearUserOnDisAppear();
@@ -555,6 +563,7 @@ void ViewAbstract::DisableOnDisAppear()
 
 void ViewAbstract::DisableOnAreaChange()
 {
+    LOGD("Disable OnAreaChange event");
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -564,6 +573,7 @@ void ViewAbstract::DisableOnAreaChange()
 
 void ViewAbstract::DisableOnFocus()
 {
+    LOGD("Disable OnFocus event");
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->ClearUserOnFocus();
@@ -571,6 +581,7 @@ void ViewAbstract::DisableOnFocus()
 
 void ViewAbstract::DisableOnBlur()
 {
+    LOGD("Disable OnBlur event");
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->ClearUserOnBlur();
@@ -1594,5 +1605,23 @@ void ViewAbstract::SetObscured(const std::vector<ObscuredReasons>& reasons)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void ViewAbstract::UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaExpandOpts, opts);
+}
+
+void ViewAbstract::SetRenderGroup(bool isRenderGroup)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(RenderGroup, isRenderGroup);
 }
 } // namespace OHOS::Ace::NG

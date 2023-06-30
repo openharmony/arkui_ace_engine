@@ -16,11 +16,13 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 
 namespace OHOS::Ace::NG {
-UIExtensionPattern::UIExtensionPattern(const std::string& bundleName, const std::string& abilityName) {}
+UIExtensionPattern::UIExtensionPattern(const RefPtr<OHOS::Ace::WantWrap>& wantWrap) {}
 
 UIExtensionPattern::~UIExtensionPattern() {}
 
 void UIExtensionPattern::OnConnect() {}
+
+void UIExtensionPattern::OnDisconnect() {}
 
 void UIExtensionPattern::OnWindowShow() {}
 
@@ -38,4 +40,11 @@ RefPtr<LayoutAlgorithm> UIExtensionPattern::CreateLayoutAlgorithm()
 }
 
 void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode) {}
+
+void UIExtensionPattern::OnModifyDone() {}
+
+FocusPattern UIExtensionPattern::GetFocusPattern() const
+{
+    return { FocusType::NODE, true, FocusStyleType::NONE };
+}
 } // namespace OHOS::Ace::NG

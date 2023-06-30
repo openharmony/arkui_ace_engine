@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/grid_row/grid_row_layout_property.h"
 #include "core/components_v2/grid_layout/grid_container_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -91,7 +92,10 @@ void GridRowLayoutAlgorithm::MeasureSelf(LayoutWrapper* layoutWrapper, float chi
 
     auto idealSize = CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
     idealSize.SetHeight(childHeight + padding.Height());
-    idealSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() <= 9) {
+        idealSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
+    }
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize.ConvertToSizeT());
 }
 
@@ -143,8 +147,6 @@ float GridRowLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrapper, doub
         ideaSize.SetWidth(columnUnitWidth * span + (span - 1) * gutter.first);
         LayoutConstraintF parentConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
         parentConstraint.UpdateSelfMarginSizeWithCheck(ideaSize);
-        // the max size need to minus the already allocated height.
-        parentConstraint.maxSize.MinusHeight(totalHeight);
         child->Measure(parentConstraint);
 
         if (newLineOffset.newLineCount > 0) {

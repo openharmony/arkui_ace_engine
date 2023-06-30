@@ -2489,6 +2489,15 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0037, TestSize.Level1)
     navigationStack->Remove();
     ASSERT_FALSE(navigationStack->navPathList_.empty());
     ASSERT_EQ(navigationStack->navPathList_.size(), 2);
+    for (int i = 0; i < 3; i++) {
+        navigationStack->Remove("test" + std::to_string(i));
+    }
+    ASSERT_TRUE(navigationStack->navPathList_.empty());
+
+    for (int i = 1; i <= 3; i++) {
+        std::pair<std::string, RefPtr<UINode>> p("test" + std::to_string(i), backButton);
+        navigationStack->navPathList_.push_back(p);
+    }
     for (int i = 0; i <= 4; i++) {
         navigationStack->Remove("test" + std::to_string(i), backButton);
     }

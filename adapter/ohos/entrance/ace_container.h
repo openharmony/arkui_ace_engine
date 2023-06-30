@@ -374,8 +374,8 @@ public:
     std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityContextByModule(const std::string& bundle,
         const std::string& module);
 
-    void UpdateConfiguration(
-        const std::string& colorMode, const std::string& inputDevice, const std::string& languageTag);
+    void UpdateConfiguration(const std::string& colorMode, const std::string& inputDevice,
+        const std::string& languageTag, const std::string& configuration);
 
     void NotifyConfigurationChange(bool needReloadTransition) override;
     void HotReload() override;
@@ -398,7 +398,7 @@ public:
         return webHapPath_;
     }
 
-    SafeAreaEdgeInserts GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type);
+    NG::SafeAreaInsets GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type);
 
     // ArkTSCard
     void UpdateFormData(const std::string& data);
@@ -417,8 +417,6 @@ private:
     void InitializeCallback();
     void InitializeTask();
     void InitWindowCallback();
-
-    SafeAreaEdgeInserts GetViewSafeArea(sptr<OHOS::Rosen::Window> window);
 
     void AttachView(std::shared_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height,
         int32_t windowId, UIEnvCallback callback = nullptr);

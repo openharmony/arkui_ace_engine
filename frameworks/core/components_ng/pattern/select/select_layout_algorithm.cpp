@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/select/select_layout_algorithm.h"
 
+#include "base/geometry/dimension.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
@@ -27,15 +28,6 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto layoutProps = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProps);
-    auto layoutConstraint = layoutProps->GetLayoutConstraint();
-    if (layoutConstraint.has_value()) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<SelectTheme>();
-        CHECK_NULL_VOID(theme);
-        layoutConstraint->minSize.SetHeight(static_cast<float>(theme->GetSelectMinHeight().ConvertToPx()));
-        layoutProps->UpdateLayoutConstraint(layoutConstraint.value());
-    }
     auto childConstraint = layoutProps->CreateChildConstraint();
 
     // Measure child row to get row height and width.
@@ -47,6 +39,11 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto space = static_cast<float>(rowProps->GetSpaceValue(Dimension()).ConvertToPx());
     childConstraint.maxSize.MinusWidth(spinnerSize.Width() + space);
     auto textSize = MeasureAndGetSize(rowWrapper->GetOrCreateChildByIndex(0), childConstraint);
+    if (childConstraint.parentIdealSize.Width().has_value()) {
+        // Make the spinner icon layout at the right end
+        space = childConstraint.parentIdealSize.Width().value() - spinnerSize.Width() - textSize.Width();
+        rowProps->UpdateSpace(Dimension(space));
+    }
 
     auto rowGeometry = rowWrapper->GetGeometryNode();
     CHECK_NULL_VOID(rowGeometry);

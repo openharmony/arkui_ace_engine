@@ -52,7 +52,7 @@ enum class ResponseType : int32_t {
     LONG_PRESS,
 };
 
-class ACE_EXPORT ViewAbstractModel {
+class ACE_FORCE_EXPORT ViewAbstractModel {
 public:
     static ViewAbstractModel* GetInstance();
     virtual ~ViewAbstractModel() = default;
@@ -137,6 +137,7 @@ public:
         const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) = 0;
     virtual void SetGeometryTransition(const std::string& id) = 0;
     virtual void SetMotionPath(const MotionPathOption& option) = 0;
+    virtual void SetRenderGroup(bool isRenderGroup) = 0;
 
     // flex props
     virtual void SetFlexBasis(const Dimension& value) = 0;
@@ -268,6 +269,7 @@ public:
         std::function<void(const RefPtr<NG::CustomAnimatableArithmetic>&)>& onCallbackEvent) = 0;
     virtual void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
         RefPtr<NG::CustomAnimatableArithmetic>& value) = 0;
+    virtual void UpdateSafeAreaExpandOpts(const NG::SafeAreaExpandOpts& opts) = 0;
 private:
     static std::unique_ptr<ViewAbstractModel> instance_;
     static std::mutex mutex_;

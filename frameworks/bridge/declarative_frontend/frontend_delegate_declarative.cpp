@@ -114,7 +114,8 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
     const UpdatePageCallback& updatePageCallback, const ResetStagingPageCallback& resetLoadingPageCallback,
     const DestroyPageCallback& destroyPageCallback, const DestroyApplicationCallback& destroyApplicationCallback,
     const UpdateApplicationStateCallback& updateApplicationStateCallback, const TimerCallback& timerCallback,
-    const MediaQueryCallback& mediaQueryCallback, const RequestAnimationCallback& requestAnimationCallback,
+    const MediaQueryCallback& mediaQueryCallback, const LayoutInspectorCallback& layoutInpsectorCallback,
+    const DrawInspectorCallback& drawInpsectorCallback, const RequestAnimationCallback& requestAnimationCallback,
     const JsCallback& jsCallback, const OnWindowDisplayModeChangedCallBack& onWindowDisplayModeChangedCallBack,
     const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack,
     const OnSaveAbilityStateCallBack& onSaveAbilityStateCallBack,
@@ -127,9 +128,9 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
       asyncEvent_(asyncEventCallback), syncEvent_(syncEventCallback), updatePage_(updatePageCallback),
       resetStagingPage_(resetLoadingPageCallback), destroyPage_(destroyPageCallback),
       destroyApplication_(destroyApplicationCallback), updateApplicationState_(updateApplicationStateCallback),
-      timer_(timerCallback), mediaQueryCallback_(mediaQueryCallback),
-      requestAnimationCallback_(requestAnimationCallback), jsCallback_(jsCallback),
-      onWindowDisplayModeChanged_(onWindowDisplayModeChangedCallBack),
+      timer_(timerCallback), mediaQueryCallback_(mediaQueryCallback), layoutInspectorCallback_(layoutInpsectorCallback),
+      drawInspectorCallback_(drawInpsectorCallback), requestAnimationCallback_(requestAnimationCallback),
+      jsCallback_(jsCallback), onWindowDisplayModeChanged_(onWindowDisplayModeChangedCallBack),
       onConfigurationUpdated_(onConfigurationUpdatedCallBack), onSaveAbilityState_(onSaveAbilityStateCallBack),
       onRestoreAbilityState_(onRestoreAbilityStateCallBack), onNewWant_(onNewWantCallBack),
       onMemoryLevel_(onMemoryLevelCallBack), onStartContinuationCallBack_(onStartContinuationCallBack),
@@ -1806,22 +1807,57 @@ void FrontendDelegateDeclarative::OnMediaQueryUpdate()
         return;
     }
 
+    auto callback = [weak = AceType::WeakClaim(this)] {
+        auto delegate = weak.Upgrade();
+        if (!delegate) {
+            return;
+        }
+        const auto& info = delegate->mediaQueryInfo_->GetMediaQueryInfo();
+        // request css mediaquery
+        std::string param("\"viewsizechanged\",");
+        param.append(info);
+        delegate->asyncEvent_("_root", param);
+
+        // request js media query
+        const auto& listenerId = delegate->mediaQueryInfo_->GetListenerId();
+        delegate->mediaQueryCallback_(listenerId, info);
+        delegate->mediaQueryInfo_->ResetListenerId();
+    };
+    auto container = Container::Current();
+    if (!container) {
+        return;
+    }
+    if (container->IsUseStageModel()) {
+        callback();
+        return;
+    }
+    taskExecutor_->PostTask(callback, TaskExecutor::TaskType::JS);
+}
+
+void FrontendDelegateDeclarative::OnLayoutCompleted(const std::string& componentId)
+{
+    LOGI("FrontendDelegateDeclarative::OnLayoutCompleted");
     taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this)] {
+        [weak = AceType::WeakClaim(this), componentId] {
             auto delegate = weak.Upgrade();
             if (!delegate) {
                 return;
             }
-            const auto& info = delegate->mediaQueryInfo_->GetMediaQueryInfo();
-            // request css mediaquery
-            std::string param("\"viewsizechanged\",");
-            param.append(info);
-            delegate->asyncEvent_("_root", param);
+            delegate->layoutInspectorCallback_(componentId);
+        },
+        TaskExecutor::TaskType::JS);
+}
 
-            // request js media query
-            const auto& listenerId = delegate->mediaQueryInfo_->GetListenerId();
-            delegate->mediaQueryCallback_(listenerId, info);
-            delegate->mediaQueryInfo_->ResetListenerId();
+void FrontendDelegateDeclarative::OnDrawCompleted(const std::string& componentId)
+{
+    LOGI("FrontendDelegateDeclarative::OnDrawCompleted");
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this), componentId] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            delegate->drawInspectorCallback_(componentId);
         },
         TaskExecutor::TaskType::JS);
 }

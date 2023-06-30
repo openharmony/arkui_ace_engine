@@ -76,7 +76,7 @@ struct MenuParam {
     std::optional<Dimension> arrowOffset;
 };
 
-class ACE_EXPORT ViewAbstract {
+class ACE_FORCE_EXPORT ViewAbstract {
 public:
     static void SetWidth(const CalcLength& width);
     static void SetHeight(const CalcLength& height);
@@ -158,6 +158,8 @@ public:
 
     // render position
     static void SetZIndex(int32_t value);
+    // renderGroup
+    static void SetRenderGroup(bool isRenderGroup);
 
     // transform
     static void SetScale(const NG::VectorF& value);
@@ -283,6 +285,7 @@ public:
         std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent);
     static void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
         RefPtr<CustomAnimatableArithmetic>& value);
+    static void UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts);
 private:
     static void AddDragFrameNodeToManager();
 };

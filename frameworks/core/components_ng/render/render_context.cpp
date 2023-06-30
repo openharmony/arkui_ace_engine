@@ -16,6 +16,7 @@
 #include "core/components_ng/render/render_context.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 void RenderContext::SetRequestFrame(const std::function<void()>& requestFrame)
@@ -27,6 +28,13 @@ void RenderContext::RequestNextFrame() const
 {
     if (requestFrame_) {
         requestFrame_();
+        auto framenode = GetHost();
+        CHECK_NULL_VOID(framenode);
+        if (framenode->GetInspectorId().has_value()) {
+            auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+            CHECK_NULL_VOID(pipeline);
+            pipeline->SetNeedRenderNode(framenode);
+        }
     }
 }
 
