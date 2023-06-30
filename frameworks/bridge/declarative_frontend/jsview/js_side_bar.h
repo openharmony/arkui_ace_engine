@@ -20,6 +20,13 @@
 #include "core/components/side_bar/side_bar_container_component.h"
 
 namespace OHOS::Ace::Framework {
+
+enum class SideBarControlButtonType {
+    SHOWN = 0,
+    HIDDEN,
+    SWITCHING,
+};
+
 class JSSideBar : public JSStack {
 public:
     static void JSBind(BindingTarget globalObj);
@@ -38,6 +45,8 @@ public:
     static void CreateForNG(const JSCallbackInfo& info);
     static void JsControlButtonForNG(const JSCallbackInfo& info);
     static void Pop();
+private:
+    static void SetControlButtonIcon(SideBarControlButtonType iconType, JSRef<JSVal> icon);
 };
 
 } // namespace OHOS::Ace::Framework
