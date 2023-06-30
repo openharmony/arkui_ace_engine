@@ -80,13 +80,6 @@ struct ACEAsyncJSCallbackInfo {
     ACERequestCallbackData requestCallbackData;
 };
 
-struct ACEAsyncParamEx {
-    std::string resource = {};
-    size_t argc = 0;
-    napi_async_execute_callback execute = nullptr;
-    napi_async_complete_callback complete = nullptr;
-};
-
 struct ACEComplexArrayData {
     std::vector<int> intList = {};
     std::vector<int64_t> longList = {};
