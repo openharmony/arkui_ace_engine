@@ -84,6 +84,11 @@ public:
         return message_;
     }
 
+    const RefPtr<UINode>& GetCustomNode()
+    {
+        return customNode_;
+    }
+
     void SetOpenAnimation(const std::optional<AnimationOption>& openAnimation)
     {
         openAnimation_ = openAnimation;
