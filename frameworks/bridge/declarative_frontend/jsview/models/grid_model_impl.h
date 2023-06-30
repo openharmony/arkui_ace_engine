@@ -49,7 +49,7 @@ public:
     void SetScrollEnabled(bool scrollEnabled) override {};
     void SetOnScrollToIndex(std::function<void(const BaseEventInfo*)>&& value) override;
     void SetOnScrollBarUpdate(
-        std::function<std::pair<std::optional<float>, std::optional<float>>(int32_t, float)>&& value) override;
+        std::function<std::pair<std::optional<float>, std::optional<float>>(int32_t, Dimension)>&& value) override;
     void SetOnItemDragStart(std::function<void(const ItemDragInfo&, int32_t)>&& value) override;
     void SetOnItemDragEnter(std::function<void(const ItemDragInfo&)>&& value) override;
     void SetOnItemDragMove(std::function<void(const ItemDragInfo&, int32_t, int32_t)>&& value) override;

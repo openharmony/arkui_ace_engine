@@ -3016,9 +3016,9 @@ HWTEST_F(GridTestNg, GridScrollTest001, TestSize.Level1)
     gridModelNG.Create(nullptr, nullptr);
     gridModelNG.SetRowsTemplate("1fr 1fr");
     gridModelNG.SetRowsGap(Dimension(5));
-    ScrollBarUpdateFunc scrollFunc = [](int32_t index, float offset) {
-        std::optional<float> horizontalOffset = offset;
-        std::optional<float> verticalOffset = offset;
+    ScrollBarUpdateFunc scrollFunc = [](int32_t index, Dimension offset) {
+        std::optional<float> horizontalOffset = 10.0f;
+        std::optional<float> verticalOffset = 10.0f;
         return std::make_pair(horizontalOffset, verticalOffset);
     };
     gridModelNG.SetOnScrollBarUpdate(std::move(scrollFunc));
@@ -3026,7 +3026,8 @@ HWTEST_F(GridTestNg, GridScrollTest001, TestSize.Level1)
     CreateGridItem(2, -1, ITEM_HEIGHT);
     GetInstance();
     RunMeasureAndLayout();
-    auto fireOnScroll = eventHub_->FireOnScrollBarUpdate(1.0, 1.0);
+    Dimension offset(1.0);
+    auto fireOnScroll = eventHub_->FireOnScrollBarUpdate(1.0, offset);
     EXPECT_FLOAT_EQ(fireOnScroll.first.value(), 1.0f);
     EXPECT_FLOAT_EQ(fireOnScroll.second.value(), 1.0f);
 }
