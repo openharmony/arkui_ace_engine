@@ -170,6 +170,19 @@ public:
         return true;
     }
 
+    void SetFriction(double friction)
+    {
+        friction_ = friction;
+        if (scrollable_) {
+            scrollable_->SetUnstaticFriction(friction_);
+        }
+    }
+
+    double GetFriction() const
+    {
+        return friction_;
+    }
+
 private:
     ScrollPositionCallback callback_;
     OnScrollCallback onScrollCallback_;
@@ -182,6 +195,7 @@ private:
     Axis axis_ = Axis::VERTICAL;
     bool enable_ = true;
     RefPtr<Scrollable> scrollable_;
+    double friction_ = -1.0;
 };
 
 class ScrollableActuator : public GestureEventActuator {

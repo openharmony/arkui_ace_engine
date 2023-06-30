@@ -930,6 +930,7 @@ void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     Pattern::ToJsonValue(json);
     json->Put("multiSelectable", multiSelectable_ ? "true" : "false");
     json->Put("supportAnimation", supportAnimation_ ? "true" : "false");
+    json->Put("friction", GetFriction());
 }
 
 void GridPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)

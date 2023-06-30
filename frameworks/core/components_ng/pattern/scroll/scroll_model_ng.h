@@ -47,6 +47,7 @@ public:
     void SetHasHeight(bool hasHeight) override {}
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
     void SetScrollEnabled(bool scrollEnabled) override;
+    void SetFriction(double friction) override;
 };
 
 } // namespace OHOS::Ace::NG

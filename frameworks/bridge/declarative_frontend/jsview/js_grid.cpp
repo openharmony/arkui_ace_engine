@@ -266,6 +266,7 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSGrid>::StaticMethod("nestedScroll", &JSGrid::SetNestedScroll);
     JSClass<JSGrid>::StaticMethod("enableScrollInteraction", &JSGrid::SetScrollEnabled);
+    JSClass<JSGrid>::StaticMethod("friction", &JSGrid::SetFriction);
     JSClass<JSGrid>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -536,5 +537,15 @@ void JSGrid::SetNestedScroll(const JSCallbackInfo& args)
     nestedOpt.backward = static_cast<NestedScrollMode>(backward);
     GridModel::GetInstance()->SetNestedScroll(nestedOpt);
     args.ReturnSelf();
+}
+
+void JSGrid::SetFriction(const JSCallbackInfo& info)
+{
+    double friction = -1.0;
+    if (!JSViewAbstract::ParseJsDouble(info[0], friction)) {
+        LOGW("Friction params invalid,can not convert to double");
+        friction = -1.0;
+    }
+    GridModel::GetInstance()->SetFriction(friction);
 }
 } // namespace OHOS::Ace::Framework

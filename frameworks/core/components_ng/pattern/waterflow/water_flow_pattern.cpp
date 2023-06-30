@@ -255,4 +255,9 @@ void WaterFlowPattern::ScrollPage(bool reverse)
 
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
 }
+
+void WaterFlowPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("friction", GetFriction());
+}
 } // namespace OHOS::Ace::NG

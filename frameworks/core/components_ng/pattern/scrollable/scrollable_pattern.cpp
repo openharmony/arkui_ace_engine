@@ -176,6 +176,7 @@ void ScrollablePattern::AddScrollEvent()
         return pattern->IsScrollBarPressed();
     };
     scrollableEvent_->SetMouseLeftButtonScroll(std::move(mouseLeftButtonScroll));
+    scrollableEvent_->SetFriction(friction_);
     gestureHub->AddScrollableEvent(scrollableEvent_);
 
     auto scrollable = scrollableEvent_->GetScrollable();
@@ -387,6 +388,17 @@ void ScrollablePattern::SetNestedScroll(const NestedScrollOptions& nestedOpt)
     auto scrollable = scrollableEvent_->GetScrollable();
     CHECK_NULL_VOID_NOLOG(scrollable);
     scrollable->SetNestedScrollOptions(nestedScroll_);
+}
+
+void ScrollablePattern::SetFriction(double friction)
+{
+    if (LessOrEqual(friction, 0.0)) {
+        friction = FRICTION;
+    }
+    friction_ = friction;
+    if (scrollableEvent_) {
+        scrollableEvent_->SetFriction(friction_);
+    }
 }
 
 RefPtr<ScrollablePattern> ScrollablePattern::GetParentScrollable()

@@ -100,6 +100,8 @@ public:
 
     void ScrollPage(bool reverse);
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
 private:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;

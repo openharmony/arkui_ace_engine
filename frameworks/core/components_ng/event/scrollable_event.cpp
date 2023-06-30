@@ -53,6 +53,7 @@ void ScrollableActuator::InitializeScrollable(RefPtr<ScrollableEvent> event)
     scrollable->SetScrollEndCallback(event->GetScrollEndCallback());
     scrollable->Initialize(host->GetContext());
     scrollable->SetMouseLeftButtonScroll(event->GetMouseLeftButtonScroll());
+    scrollable->SetUnstaticFriction(event->GetFriction());
     event->SetScrollable(scrollable);
 }
 

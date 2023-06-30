@@ -172,6 +172,15 @@ void ListModelNG::SetScrollEnabled(bool scrollEnabled)
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollEnabled, scrollEnabled);
 }
 
+void ListModelNG::SetFriction(double friction)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFriction(friction);
+}
+
 void ListModelNG::SetOnScroll(OnScrollEvent&& onScroll)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

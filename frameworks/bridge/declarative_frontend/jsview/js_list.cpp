@@ -315,6 +315,16 @@ void JSList::ScrollCallback(const JSCallbackInfo& args)
     args.ReturnSelf();
 }
 
+void JSList::SetFriction(const JSCallbackInfo& info)
+{
+    double friction = -1.0;
+    if (!JSViewAbstract::ParseJsDouble(info[0], friction)) {
+        LOGW("Friction params invalid,can not convert to double");
+        friction = -1.0;
+    }
+    ListModel::GetInstance()->SetFriction(friction);
+}
+
 void JSList::ReachStartCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
@@ -608,6 +618,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("nestedScroll", &JSList::SetNestedScroll);
     JSClass<JSList>::StaticMethod("enableScrollInteraction", &JSList::SetScrollEnabled);
     JSClass<JSList>::StaticMethod("scrollSnapAlign", &JSList::SetScrollSnapAlign);
+    JSClass<JSList>::StaticMethod("friction", &JSList::SetFriction);
 
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
     JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);
