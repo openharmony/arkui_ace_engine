@@ -21,6 +21,7 @@
 #include "core/components/camera/camera_theme.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components/clock/clock_theme.h"
+#include "core/components/close_icon/close_icon_theme.h"
 #include "core/components/counter/counter_theme.h"
 #include "core/components/data_panel/data_panel_theme.h"
 #include "core/components/dialog/dialog_theme.h"
@@ -124,6 +125,7 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { AdvancedPatternTheme::TypeId(), &ThemeBuildFunc<AdvancedPatternTheme::Builder> },
     { NG::SecurityComponentTheme::TypeId(), &ThemeBuildFunc<NG::SecurityComponentTheme::Builder> },
     { NG::FormTheme::TypeId(), &ThemeBuildFunc<NG::FormTheme::Builder> },
+    { CloseIconTheme::TypeId(), &ThemeBuildFunc<CloseIconTheme::Builder> },
     { NG::SideBarTheme::TypeId(), &ThemeBuildFunc<NG::SideBarTheme::Builder> }
 };
 } // namespace

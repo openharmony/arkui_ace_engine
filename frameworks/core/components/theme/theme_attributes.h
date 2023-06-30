@@ -35,6 +35,7 @@ extern const char THEME_PATTERN_TOGGLE[];
 extern const char THEME_PATTERN_TOAST[];
 extern const char THEME_PATTERN_DIALOG[];
 extern const char THEME_PATTERN_DRAG_BAR[];
+extern const char THEME_PATTERN_CLOSE_ICON[];
 extern const char THEME_PATTERN_SEMI_MODAL[];
 extern const char THEME_PATTERN_BADGE[];
 extern const char THEME_PATTERN_CALENDAR[];
@@ -165,6 +166,13 @@ extern const char DIALOG_DIVIDER_BETWEEN_BUTTON_WIDTH[];
 
 // pattern attributes for drag bar
 extern const char DRAG_BAR_COLOR[];
+
+// pattern attributes for close icon
+extern const char CLOSE_ICON_WIDTH[];
+extern const char CLOSE_ICON_Height[];
+extern const char CLOSE_ICON_MARGIN_TOP[];
+extern const char CLOSE_ICON_MARGIN_RIGHT[];
+extern const char CLOSE_ICON_RADIUS[];
 
 // pattern attributes for popup
 extern const char POPUP_BORDER_RADIUS[];
