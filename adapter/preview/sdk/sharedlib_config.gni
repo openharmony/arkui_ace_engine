@@ -176,7 +176,7 @@ napi_modules = [
         subsystem_name = "multimedia"
         part_name = "av_session"
         lib_names = [ "avcastpicker" ]
-      }
+      },
     ]
   },
   {
