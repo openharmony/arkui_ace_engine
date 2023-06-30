@@ -92,10 +92,7 @@ void SharedImageManager::AddSharedImage(const std::string& name, SharedImage&& s
         taskExecutor->PostTask(
             [providerWpSet, name, wp = AceType::WeakClaim(this)]() {
                 auto sharedImageManager = wp.Upgrade();
-                if (!sharedImageManager) {
-                    LOGE("sharedImageManager is null when try UpdateData");
-                    return;
-                }
+                CHECK_NULL_VOID(sharedImageManager);
                 size_t dataSize = 0;
                 auto sharedImageMap = sharedImageManager->GetSharedImageMap();
                 {
@@ -129,7 +126,6 @@ void SharedImageManager::AddPictureNamesToReloadMap(std::string&& name)
     providerMapToReload_.try_emplace(name, std::set<WeakPtr<ImageProviderLoader>>());
 }
 
-
 bool SharedImageManager::FindImageInSharedImageMap(
     const std::string& name, const WeakPtr<ImageProviderLoader>& providerWp)
 {
@@ -148,4 +144,17 @@ bool SharedImageManager::FindImageInSharedImageMap(
     return true;
 }
 
+bool SharedImageManager::RegisterLoader(const std::string& name, const WeakPtr<ImageProviderLoader>& providerWp)
+{
+    std::lock_guard<std::mutex> lockProviderMap(providerMapMutex_);
+    bool resourceInMap = (providerMapToReload_.find(name) != providerMapToReload_.end());
+    providerMapToReload_[name].emplace(providerWp);
+    return resourceInMap;
+}
+
+bool SharedImageManager::Remove(const std::string& name)
+{
+    int res = static_cast<int>(sharedImageMap_.erase(name));
+    return (res != 0);
+}
 } // namespace OHOS::Ace
