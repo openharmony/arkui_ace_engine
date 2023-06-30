@@ -828,10 +828,10 @@ public:
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::SheetStyle& sheetStyle) override;
 
-    void SetAccessibilityGroup(bool accessible) override {}
-    void SetAccessibilityText(const std::string& text) override {}
-    void SetAccessibilityDescription(const std::string& description) override {}
-    void SetAccessibilityImportance(const std::string& importance) override {}
+    void SetAccessibilityGroup(bool accessible) override;
+    void SetAccessibilityText(const std::string& text) override;
+    void SetAccessibilityDescription(const std::string& description) override;
+    void SetAccessibilityImportance(const std::string& importance) override;
 
     void SetForegroundColor(const Color& color) override
     {

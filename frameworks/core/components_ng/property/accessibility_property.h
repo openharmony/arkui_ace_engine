@@ -340,6 +340,47 @@ public:
         return false;
     }
 
+    void SetAccessibilityGroup(bool accessibilityGroup)
+    {
+        accessibilityGroup_ = accessibilityGroup;
+    }
+
+    void SetAccessibilityText(const std::string& text)
+    {
+        accessibilityText_ = text;
+    }
+
+    void SetAccessibilityDescription(const std::string& accessibilityDescription)
+    {
+        accessibilityDescription_ = accessibilityDescription;
+    }
+
+    void SetAccessibilityLevel(const std::string& accessibilityLevel)
+    {
+        accessibilityLevel_ = accessibilityLevel;
+    }
+
+    bool IsAccessibilityGroup() const
+    {
+        return accessibilityGroup_;
+    }
+
+    std::string GetAccessibilityText(bool isParentGroup = false);
+
+    std::string GetAccessibilityDescription()
+    {
+        return accessibilityDescription_.value_or("");
+    }
+
+    virtual std::string GetAccessibilityLevel()
+    {
+        if (!accessibilityLevel_.has_value()) {
+            return "yes";
+        }
+        accessibilityLevel_ = accessibilityLevel_ == "auto" ? "yes" : accessibilityLevel_;
+        return accessibilityLevel_.value();
+    }
+
 protected:
     virtual void SetSpecificSupportAction() {}
     std::optional<std::string> propText_;
@@ -355,6 +396,10 @@ protected:
     ActionPasteImpl actionPasteImpl_;
     ActionSelectImpl actionSelectImpl_;
     ActionClearSelectionImpl actionClearSelectionImpl_;
+    bool accessibilityGroup_ = false;
+    std::optional<std::string> accessibilityText_;
+    std::optional<std::string> accessibilityDescription_;
+    std::optional<std::string> accessibilityLevel_;
     ACE_DISALLOW_COPY_AND_MOVE(AccessibilityProperty);
 };
 } // namespace OHOS::Ace::NG
