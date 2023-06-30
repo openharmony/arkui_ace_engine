@@ -29,7 +29,11 @@ public:
     static RefPtr<SvgNode> CreatePolygon();
     static RefPtr<SvgNode> CreatePolyline();
 
+#ifndef USE_ROSEN_DRAWING
     SkPath AsPath(const Size& viewPort) const override;
+#else
+    RSRecordingPath AsPath(const Size& viewPort) const override;
+#endif
 
 private:
     bool isClose_ = true;

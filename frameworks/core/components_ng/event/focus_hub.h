@@ -852,6 +852,10 @@ private:
 
     void SetScopeFocusAlgorithm();
 
+    void SetLastFocusNodeIndex(const RefPtr<FocusHub>& focusNode);
+
+    void ScrollToLastFocusIndex() const;
+
     void CheckFocusStateStyle(bool onFocus);
 
     bool IsNeedPaintFocusState();
@@ -873,6 +877,7 @@ private:
     WeakPtr<EventHub> eventHub_;
 
     WeakPtr<FocusHub> lastWeakFocusNode_ { nullptr };
+    int32_t lastFocusNodeIndex_ { -1 };
 
     bool focusable_ { true };
     bool parentFocusable_ { true };

@@ -56,8 +56,14 @@ public:
 
     bool IsSameSelectOverlayInfo(const SelectOverlayInfo& info);
 
+    void HandleGlobalEvent(const TouchEvent& touchPoint, const NG::OffsetF& rootOffset);
+
 private:
     void DestroyHelper(const RefPtr<FrameNode>& overlay);
+
+    bool IsInCallerArea(const PointF& point, const NG::OffsetF& rootOffset);
+
+    void NotifyOverlayClosed(bool closedByGlobalEvent = false);
 
     WeakPtr<FrameNode> rootNodeWeak_;
 
@@ -65,6 +71,8 @@ private:
     WeakPtr<SelectionHost> host_;
 
     SelectOverlayInfo selectOverlayInfo_;
+
+    std::vector<NG::PointF> touchDownPoints_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayManager);
 };

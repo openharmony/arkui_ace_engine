@@ -21,13 +21,17 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/common/window_animation_config.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/bubble/bubble_layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_render_property.h"
+#include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components/container_modal/container_modal_constants.h"
 
@@ -77,6 +81,12 @@ void BubblePattern::OnModifyDone()
     InitTouchEvent();
     RegisterButtonOnHover();
     RegisterButtonOnTouch();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
+    pipelineContext->AddWindowStateChangedCallback(host->GetId());
 }
 
 void BubblePattern::OnAttachToFrameNode()
@@ -523,4 +533,58 @@ void BubblePattern::ResetToInvisible()
     renderContext->UpdateOffset(GetInvisibleOffset());
     renderContext->SyncGeometryProperties(nullptr);
 }
+
+void BubblePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    switch (type) {
+        case WindowSizeChangeReason::UNDEFINED:
+        case WindowSizeChangeReason::MOVE:
+        case WindowSizeChangeReason::RESIZE:
+        case WindowSizeChangeReason::DRAG_START:
+        case WindowSizeChangeReason::DRAG:
+        case WindowSizeChangeReason::DRAG_END: {
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            break;
+        }
+        default: {
+            auto pipelineNg = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineNg);
+            auto overlayManager = pipelineNg->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->HideAllPopups();
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
+            CHECK_NULL_VOID(layoutProp);
+            auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+            if (showInSubWindow) {
+                auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+                CHECK_NULL_VOID(subwindow);
+                subwindow->HidePopupNG(targetNodeId_);
+            }
+        }
+    }
+}
+
+void BubblePattern::OnWindowHide()
+{
+    auto pipelineNg = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineNg);
+    auto overlayManager = pipelineNg->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->HideAllPopups();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+    if (showInSubWindow) {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+        CHECK_NULL_VOID(subwindow);
+        subwindow->HidePopupNG(targetNodeId_);
+    }
+}
+
 } // namespace OHOS::Ace::NG

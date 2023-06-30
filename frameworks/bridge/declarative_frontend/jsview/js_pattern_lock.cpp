@@ -81,6 +81,9 @@ void JSPatternLock::JSBind(BindingTarget globalObj)
     JSClass<JSPatternLock>::StaticMethod("circleRadius", &JSPatternLock::SetCircleRadius, MethodOptions::NONE);
     JSClass<JSPatternLock>::StaticMethod("sideLength", &JSPatternLock::SetSideLength, MethodOptions::NONE);
     JSClass<JSPatternLock>::StaticMethod("autoReset", &JSPatternLock::SetAutoReset, MethodOptions::NONE);
+    JSClass<JSPatternLock>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSPatternLock>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSPatternLock>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSPatternLock>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 void JSPatternLock::SetDefaultTheme(OHOS::Ace::RefPtr<OHOS::Ace::V2::PatternLockComponent>& patternLock)

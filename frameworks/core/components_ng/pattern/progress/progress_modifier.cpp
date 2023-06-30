@@ -75,7 +75,8 @@ ProgressModifier::ProgressModifier()
       ringSweepEffect_(AceType::MakeRefPtr<PropertyBool>(false)),
       linearSweepEffect_(AceType::MakeRefPtr<PropertyBool>(false)),
       paintShadow_(AceType::MakeRefPtr<PropertyBool>(false)),
-      progressStatus_(AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(ProgressStatus::PROGRESSING)))
+      progressStatus_(AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(ProgressStatus::PROGRESSING))),
+      isItalic_(AceType::MakeRefPtr<PropertyBool>(false))
 {
     AttachProperty(strokeWidth_);
     AttachProperty(color_);
@@ -97,6 +98,7 @@ ProgressModifier::ProgressModifier()
     AttachProperty(progressStatus_);
     AttachProperty(ringSweepEffect_);
     AttachProperty(linearSweepEffect_);
+    AttachProperty(isItalic_);
 }
 
 void ProgressModifier::onDraw(DrawingContext& context)
@@ -222,6 +224,12 @@ void ProgressModifier::SetProgressStatus(ProgressStatus status)
     if (status == ProgressStatus::LOADING) {
         StartRingLoadingAnimation();
     }
+}
+
+void ProgressModifier::SetIsItalic(bool isItalic)
+{
+    CHECK_NULL_VOID(isItalic_);
+    isItalic_->Set(isItalic);
 }
 
 void ProgressModifier::SetVisible(bool isVisible)

@@ -53,6 +53,7 @@ public:
         layoutAlgorithm->SetNeedInitRealSideBarWidth(needInitRealSideBarWidth_);
         layoutAlgorithm->SetRealSideBarWidth(realSideBarWidth_);
         layoutAlgorithm->SetRealDividerWidth(realDividerWidth_);
+        layoutAlgorithm->SetControlButtonClick(isControlButtonClick_);
         auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
         if (layoutProperty) {
             layoutAlgorithm->SetSideBarContainerType(
@@ -85,6 +86,11 @@ public:
     void MarkNeedInitRealSideBarWidth(bool value)
     {
         needInitRealSideBarWidth_ = value;
+    }
+
+    void SetControlButtonClick(bool value)
+    {
+        isControlButtonClick_ = value;
     }
 
     FocusPattern GetFocusPattern() const override
@@ -152,6 +158,7 @@ private:
     bool hasControlButton_ = false;
     SideBarAnimationDirection animDir_ = SideBarAnimationDirection::LTR;
     bool isControlButtonHover_ = false;
+    bool isControlButtonClick_ = false;
 
     Dimension adjustMaxSideBarWidth_;
     Dimension adjustMinSideBarWidth_;

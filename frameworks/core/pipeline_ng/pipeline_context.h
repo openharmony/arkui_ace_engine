@@ -163,6 +163,9 @@ public:
         WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
 
+    void OnLayoutCompleted(const std::string& componentId);
+    void OnDrawCompleted(const std::string& componentId);
+
     void OnSurfacePositionChanged(int32_t posX, int32_t posY) override;
 
     void OnSurfaceDensityChanged(double density) override;
@@ -365,6 +368,8 @@ public:
     void HandleWindowSceneTouchEvent(const TouchEvent& point);
     // ------------------------------------------------------------------------------
 
+    void SetNeedRenderNode(const RefPtr<FrameNode>& node);
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -388,6 +393,8 @@ private:
     void FlushWindowSizeChangeCallback(int32_t width, int32_t height, WindowSizeChangeReason type);
 
     void FlushTouchEvents();
+
+    void InspectDrew();
 
     void FlushBuildFinishCallbacks();
 
@@ -433,6 +440,8 @@ private:
 
     RefPtr<FrameNode> rootNode_;
     RefPtr<FrameNode> appBarNode_;
+
+    std::set<RefPtr<FrameNode>> needRenderNode_;
 
     int32_t callbackId_ = 0;
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;

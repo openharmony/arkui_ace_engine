@@ -61,6 +61,7 @@ void PixelMapImage::DrawToRSCanvas(
     CHECK_NULL_VOID_NOLOG(pixmap);
 
 #ifdef ENABLE_ROSEN_BACKEND
+#ifndef USE_ROSEN_DRAWING
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
     if (rsCanvas == nullptr) {
         LOGE("rsCanvas is nullptr.");
@@ -94,6 +95,9 @@ void PixelMapImage::DrawToRSCanvas(
     recordingCanvas->DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, paint);
 #else
     recordingCanvas->DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options, paint);
+#endif
+#else
+    LOGE("Drawing is not supported");
 #endif
 #endif
 }

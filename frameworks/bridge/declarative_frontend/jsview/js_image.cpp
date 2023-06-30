@@ -68,6 +68,10 @@ JSRef<JSVal> LoadImageSuccEventToJSValue(const LoadImageSuccessEvent& eventInfo)
     obj->SetProperty("componentWidth", eventInfo.GetComponentWidth());
     obj->SetProperty("componentHeight", eventInfo.GetComponentHeight());
     obj->SetProperty("loadingStatus", eventInfo.GetLoadingStatus());
+    obj->SetProperty("contentWidth", eventInfo.GetContentWidth());
+    obj->SetProperty("contentHeight", eventInfo.GetContentHeight());
+    obj->SetProperty("contentOffsetX", eventInfo.GetContentOffsetX());
+    obj->SetProperty("contentOffsetY", eventInfo.GetContentOffsetY());
     return JSRef<JSVal>::Cast(obj);
 }
 

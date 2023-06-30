@@ -134,7 +134,22 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         FireOnScrollStop();
         scrollStop_ = false;
     }
+    CheckScrollable();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    host->SetViewPort(geometryNode->GetFrameRect());
     return false;
+}
+
+void ScrollPattern::CheckScrollable()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    SetScrollEnable(layoutProperty->GetScrollEnabled().value_or(true));
 }
 
 void ScrollPattern::FireOnScrollStart()

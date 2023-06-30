@@ -64,6 +64,8 @@ public:
 
     // set callback
     void SetMediaQueryCallback(MediaQueryCallback&& mediaQueryCallback);
+    void SetLayoutInspectorCallback(const LayoutInspectorCallback& layoutInspectorCallback);
+    void SetDrawInspectorCallback(const DrawInspectorCallback& drawInspectorCallback);
     void SetOnStartContinuationCallBack(OnStartContinuationCallBack&& onStartContinuationCallBack);
     void SetOnCompleteContinuationCallBack(OnCompleteContinuationCallBack&& onCompleteContinuationCallBack);
     void SetOnSaveDataCallBack(OnSaveDataCallBack&& onSaveDataCallBack);
@@ -85,6 +87,8 @@ public:
 
     void OnSurfaceChanged();
     void OnMediaQueryUpdate() override;
+    void OnLayoutCompleted(const std::string& componentId);
+    void OnDrawCompleted(const std::string& componentId);
     void FireExternalEvent(const std::string& eventId, const std::string& componentId, uint32_t nodeId, bool isDestroy);
 
     // FrontendDelegate overrides.
@@ -279,6 +283,8 @@ private:
     std::unordered_map<std::string, CancelableCallback<void()>> timeoutTaskMap_;
 
     MediaQueryCallback mediaQueryCallback_;
+    LayoutInspectorCallback layoutInspectorCallback_;
+    DrawInspectorCallback drawInspectorCallback_;
     OnStartContinuationCallBack onStartContinuationCallBack_;
     OnCompleteContinuationCallBack onCompleteContinuationCallBack_;
     OnSaveDataCallBack onSaveDataCallBack_;

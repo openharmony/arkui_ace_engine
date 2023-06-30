@@ -818,7 +818,27 @@ void TextFieldPattern::OnTextAreaScroll(float offset)
             textSelector_.secondHandleOffset_.SetY(textSelector_.secondHandleOffset_.GetY() + offset);
             secondHandle = { textSelector_.secondHandleOffset_, handlePaintSize };
         }
-        CheckHandles(firstHandle, secondHandle);
+        auto firstHandleHeight = 0.0f;
+        auto secondHandleHeight = 0.0f;
+        auto firstHandleOffset = textSelector_.firstHandleOffset_ - parentGlobalOffset_;
+        auto secondHandleOffset = textSelector_.secondHandleOffset_ - parentGlobalOffset_;
+        if (GreatNotEqual(offset, 0.0f) && GreatNotEqual(firstHandleOffset.GetY(), contentRect_.GetY())) {
+            firstHandleHeight = firstHandle->Height();
+        }
+        if (LessNotEqual(offset, 0.0f) && GreatNotEqual(firstHandleOffset.GetY() + firstHandle->Height(),
+            contentRect_.GetY() + contentRect_.Height())) {
+            firstHandleHeight = firstHandle->Height();
+        }
+        if (!isSingleHandle_) {
+            if (GreatNotEqual(offset, 0.0f) && GreatNotEqual(secondHandleOffset.GetY(), contentRect_.GetY())) {
+                secondHandleHeight = secondHandle->Height();
+            }
+            if (LessNotEqual(offset, 0.0f) && GreatNotEqual(secondHandleOffset.GetY() + secondHandle->Height(),
+                contentRect_.GetY() + contentRect_.Height())) {
+                secondHandleHeight = secondHandle->Height();
+            }
+        }
+        CheckHandles(firstHandle, secondHandle, firstHandleHeight, secondHandleHeight);
         ShowSelectOverlay(firstHandle, secondHandle);
     }
     UpdateScrollBarOffset();
@@ -2367,6 +2387,21 @@ void TextFieldPattern::ShowSelectOverlay(
             pattern->UpdateCopyAllStatus();
             pattern->SetNeedCloseOverlay(false);
         };
+        selectInfo.onClose = [weak](bool closedByGlobalEvent) {
+            if (closedByGlobalEvent) {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                auto host = pattern->GetHost();
+                CHECK_NULL_VOID(host);
+                auto current = pattern->GetTextSelector().GetEnd();
+                pattern->SetInSelectMode(SelectionMode::NONE);
+                pattern->UpdateSelection(current);
+                pattern->MarkRedrawOverlay();
+                pattern->StartTwinkling();
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            }
+        };
+
         if (!pattern->GetMenuOptionItems().empty()) {
             selectInfo.menuOptionItems = pattern->GetMenuOptionItems();
         }
@@ -2374,7 +2409,7 @@ void TextFieldPattern::ShowSelectOverlay(
         CHECK_NULL_VOID_NOLOG(host);
         auto gesture = host->GetOrCreateGestureEventHub();
         gesture->RemoveTouchEvent(pattern->GetTouchListener());
-
+        selectInfo.callerFrameNode = host;
         pattern->SetSelectOverlay(
             pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(RawPtr(pattern))));
 
@@ -2582,6 +2617,16 @@ void TextFieldPattern::InitEditingValueText(std::string content)
     textEditingValue_.text = std::move(content);
     textEditingValue_.caretPosition = textEditingValue_.GetWideText().length();
     SetEditingValueToProperty(textEditingValue_.text);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateNeedFireOnChangeWhenCreate(true);
+}
+
+void TextFieldPattern::InitEditingValueTextWithFilter()
+{
+    auto content = textEditingValue_.text;
+    ClearEditingValue();
+    InsertValue(content);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateNeedFireOnChangeWhenCreate(true);
@@ -4229,7 +4274,7 @@ void TextFieldPattern::UpdateScrollBarOffset()
     }
     auto paddingHeight = GetPaddingTop() + GetPaddingBottom();
     Size size(contentRect_.Width() + GetPaddingRight(), contentRect_.Height() + paddingHeight);
-    UpdateScrollBarRegion(std::abs(textRect_.GetY()) - currentOffset_,
+    UpdateScrollBarRegion(contentRect_.GetY() - textRect_.GetY(),
         textRect_.Height() + paddingHeight, size, Offset(0.0, 0.0));
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -4616,15 +4661,18 @@ void TextFieldPattern::SetAccessibilityScrollAction()
     });
 }
 
-void TextFieldPattern::CheckHandles(std::optional<RectF>& firstHandle, std::optional<RectF>& secondHandle)
+void TextFieldPattern::CheckHandles(std::optional<RectF>& firstHandle, std::optional<RectF>& secondHandle,
+    float firstHandleSize, float secondHandleSize)
 {
     auto firstHandleOffset = textSelector_.firstHandleOffset_ - parentGlobalOffset_;
-    if (!contentRect_.IsInRegion({ firstHandleOffset.GetX(), firstHandleOffset.GetY() + BOX_EPSILON })) {
+    if (!contentRect_.IsInRegion({ firstHandleOffset.GetX(),
+        firstHandleOffset.GetY() + BOX_EPSILON + firstHandleSize })) {
         // hide firstHandle when it's out of content region
         firstHandle = std::nullopt;
     }
     auto secondHandleOffset = textSelector_.secondHandleOffset_ - parentGlobalOffset_;
-    if (!contentRect_.IsInRegion({ secondHandleOffset.GetX(), secondHandleOffset.GetY() + BOX_EPSILON })) {
+    if (!contentRect_.IsInRegion({ secondHandleOffset.GetX(),
+        secondHandleOffset.GetY() + BOX_EPSILON + secondHandleSize })) {
         // hide secondHandle when it's out of content region
         secondHandle = std::nullopt;
     }

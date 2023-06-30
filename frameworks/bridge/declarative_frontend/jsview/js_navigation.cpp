@@ -208,6 +208,9 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("backButtonIcon", &JSNavigation::SetBackButtonIcon);
     JSClass<JSNavigation>::StaticMethod("onNavBarStateChange", &JSNavigation::SetOnNavBarStateChange);
     JSClass<JSNavigation>::StaticMethod("navDestination", &JSNavigation::SetNavDestination);
+    JSClass<JSNavigation>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSNavigation>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSNavigation>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSNavigation>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

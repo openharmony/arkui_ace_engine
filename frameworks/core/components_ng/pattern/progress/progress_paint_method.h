@@ -89,6 +89,12 @@ public:
         auto ringProgressColor = GenerateRingProgressColor(paintWrapper);
         progressModifier_->SetRingProgressColor(ringProgressColor);
         progressModifier_->SetPaintShadow(paintShadow);
+        if (paintProperty->GetItalicFontStyle() == Ace::FontStyle::NORMAL) {
+            isItalic_ = false;
+        } else {
+            isItalic_ = true;
+        }
+        progressModifier_->SetIsItalic(isItalic_);
         progressModifier_->SetMaxValue(maxValue_);
         progressModifier_->SetValue(value_);
     }
@@ -116,6 +122,7 @@ private:
     bool sweepEffect_ = false;
     bool ringSweepEffect_ = false;
     bool linearSweepEffect_ = false;
+    bool isItalic_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPaintMethod);
 };

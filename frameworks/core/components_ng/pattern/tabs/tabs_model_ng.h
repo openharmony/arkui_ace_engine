@@ -45,6 +45,7 @@ public:
     void SetScrollable(bool scrollable) override;
     void SetAnimationDuration(float duration) override;
     void SetOnChange(std::function<void(const BaseEventInfo*)>&& onChange) override;
+    void SetOnTabBarClick(std::function<void(const BaseEventInfo*)>&& onTabBarClick) override;
     void SetDivider(const TabsItemDivider& divider) override;
     void SetFadingEdge(bool fadingEdge) override;
     void SetBarOverlap(bool barOverlap) override;

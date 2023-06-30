@@ -409,6 +409,13 @@ public:
         return layoutWrapper_;
     }
 
+    void SetViewPort(RectF viewPort)
+    {
+        viewPort_ = viewPort;
+    }
+
+    std::optional<RectF> GetViewPort() const;
+
     enum class SceneStatus {
         START,
         RUNNING,
@@ -490,6 +497,7 @@ private:
     std::unique_ptr<RectF> lastFrameRect_;
     std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
     std::set<std::string> allowDrop_;
+    std::optional<RectF> viewPort_;
 
     bool needSyncRenderTree_ = false;
 

@@ -61,11 +61,19 @@ void ModifierAdapter::RemoveModifier(int32_t modifierId)
 void ContentModifierAdapter::Draw(RSDrawingContext& context) const
 {
     // use dummy deleter avoid delete the SkCanvas by shared_ptr, its owned by context
+#ifndef USE_ROSEN_DRAWING
     std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas*) {} };
     RSCanvas canvas(&skCanvas);
+#else
+    CHECK_NULL_VOID_NOLOG(context.canvas);
+#endif
     auto modifier = modifier_.Upgrade();
     CHECK_NULL_VOID_NOLOG(modifier);
+#ifndef USE_ROSEN_DRAWING
     DrawingContext context_ = { canvas, context.width, context.height };
+#else
+    DrawingContext context_ = { *context.canvas, context.width, context.height };
+#endif
     modifier->onDraw(context_);
 }
 
@@ -142,11 +150,19 @@ void ContentModifierAdapter::AttachProperties()
 void OverlayModifierAdapter::Draw(RSDrawingContext& context) const
 {
     // use dummy deleter avoid delete the SkCanvas by shared_ptr, its owned by context
+#ifndef USE_ROSEN_DRAWING
     std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas*) {} };
     RSCanvas canvas(&skCanvas);
+#else
+    CHECK_NULL_VOID_NOLOG(context.canvas);
+#endif
     auto modifier = modifier_.Upgrade();
     CHECK_NULL_VOID_NOLOG(modifier);
+#ifndef USE_ROSEN_DRAWING
     DrawingContext context_ = { canvas, context.width, context.height };
+#else
+    DrawingContext context_ = { *context.canvas, context.width, context.height };
+#endif
     modifier->onDraw(context_);
 }
 

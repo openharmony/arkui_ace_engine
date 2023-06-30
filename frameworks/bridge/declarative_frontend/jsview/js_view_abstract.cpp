@@ -3059,8 +3059,7 @@ bool JSViewAbstract::ParseJsDimensionNG(const JSRef<JSVal>& jsValue, CalcDimensi
         return true;
     }
     if (jsValue->IsString()) {
-        result = StringUtils::StringToCalcDimension(jsValue->ToString(), false, defaultUnit);
-        return true;
+        return StringUtils::StringToCalcDimensionNG(jsValue->ToString(), result, false, defaultUnit);
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> resId = jsObj->GetProperty("id");
@@ -3090,20 +3089,19 @@ bool JSViewAbstract::ParseJsDimensionNG(const JSRef<JSVal>& jsValue, CalcDimensi
     if (!type->IsNull() && type->IsNumber() &&
         type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRING)) {
         auto value = themeConstants->GetString(resId->ToNumber<uint32_t>());
-        result = StringUtils::StringToCalcDimension(value, false, defaultUnit);
-        return true;
+        return StringUtils::StringToCalcDimensionNG(value, result, false, defaultUnit);
     }
     if (!type->IsNull() && type->IsNumber() &&
         type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
         auto value = std::to_string(themeConstants->GetInt(resId->ToNumber<uint32_t>()));
-        result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
+        StringUtils::StringToDimensionWithUnitNG(value, result, defaultUnit);
         return true;
     }
 
     if (!type->IsNull() && type->IsNumber() &&
         type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::FLOAT)) {
         auto value = std::to_string(themeConstants->GetDouble(resId->ToNumber<uint32_t>()));
-        result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
+        StringUtils::StringToDimensionWithUnitNG(value, result, defaultUnit);
         return true;
     }
 
@@ -4134,6 +4132,11 @@ void JSViewAbstract::JsOnDrop(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
 {
+    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnAreaChange callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnAreaChange();
+        return;
+    }
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
     if (!CheckJSCallbackInfo("JsOnAreaChange", info, checkList)) {
         return;
@@ -4691,6 +4694,11 @@ void JSViewAbstract::JsOnFocusMove(const JSCallbackInfo& args)
 
 void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
 {
+    if (args[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnKeyEvent callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnKeyEvent();
+        return;
+    }
     if (!args[0]->IsFunction()) {
         LOGE("OnKeyEvent args need a function.");
         return;
@@ -4706,6 +4714,11 @@ void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
 
 void JSViewAbstract::JsOnFocus(const JSCallbackInfo& args)
 {
+    if (args[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnFocus callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnFocus();
+        return;
+    }
     if (!args[0]->IsFunction()) {
         LOGE("OnFocus args need a function.");
         return;
@@ -4722,6 +4735,11 @@ void JSViewAbstract::JsOnFocus(const JSCallbackInfo& args)
 
 void JSViewAbstract::JsOnBlur(const JSCallbackInfo& args)
 {
+    if (args[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnBlur callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnBlur();
+        return;
+    }
     if (!args[0]->IsFunction()) {
         LOGE("OnBlur args need a function.");
         return;
@@ -5791,6 +5809,11 @@ void JSViewAbstract::JsHoverEffect(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOnMouse(const JSCallbackInfo& info)
 {
+    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnMouse callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnMouse();
+        return;
+    }
     if (!info[0]->IsFunction()) {
         LOGE("the param is not a function");
         return;
@@ -5807,6 +5830,11 @@ void JSViewAbstract::JsOnMouse(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOnHover(const JSCallbackInfo& info)
 {
+    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnHover callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnHover();
+        return;
+    }
     if (!info[0]->IsFunction()) {
         LOGE("the param is not a function");
         return;
@@ -5824,6 +5852,11 @@ void JSViewAbstract::JsOnHover(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
 {
+    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnClick callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnClick();
+        return;
+    }
     if (!info[0]->IsFunction()) {
         LOGW("the info is not click function");
         return;
