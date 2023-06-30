@@ -107,10 +107,11 @@ RosenOpacityTransitionEffect::PropertyTransitionEffectTemplate();
 class RosenPivotTransitionEffect final : public RosenTransitionEffect {
 public:
     RosenPivotTransitionEffect() = default;
-    RosenPivotTransitionEffect(const Dimension& centerX, const Dimension& centerY);
+    RosenPivotTransitionEffect(const Dimension& centerX, const Dimension& centerY,
+        const Dimension& centerZ = Dimension(0.0));
     ~RosenPivotTransitionEffect() override = default;
 
-    void SetPivot(Dimension centerX, Dimension centerY);
+    void SetPivot(Dimension centerX, Dimension centerY, Dimension centerZ = Dimension(0.0));
 
 private:
     void OnUpdateTransitionContext(
@@ -118,6 +119,7 @@ private:
 
     Dimension centerX_ { 0.5_pct };
     Dimension centerY_ { 0.5_pct };
+    Dimension centerZ_ { 0.0_px };
     DECLARE_ACE_TYPE(RosenPivotTransitionEffect, RosenTransitionEffect);
     ACE_DISALLOW_COPY_AND_MOVE(RosenPivotTransitionEffect);
 };
@@ -263,15 +265,18 @@ private:
 using InternalRotationXEffect = PropertyTransitionEffectTemplate<Rosen::RSRotationXModifier, float>;
 using InternalRotationYEffect = PropertyTransitionEffectTemplate<Rosen::RSRotationYModifier, float>;
 using InternalRotationZEffect = PropertyTransitionEffectTemplate<Rosen::RSRotationModifier, float>;
+using InternalCameraDistanceEffect = PropertyTransitionEffectTemplate<Rosen::RSCameraDistanceModifier, float>;
 template<>
 InternalRotationXEffect::PropertyTransitionEffectTemplate();
 template<>
 InternalRotationYEffect::PropertyTransitionEffectTemplate();
 template<>
 InternalRotationZEffect::PropertyTransitionEffectTemplate();
+template<>
+InternalCameraDistanceEffect::PropertyTransitionEffectTemplate();
 class RosenRotation3DTransitionEffect final
     : public RosenCompositeTransitionEffect<InternalRotationXEffect, InternalRotationYEffect, InternalRotationZEffect,
-          RosenPivotTransitionEffect> {
+          RosenPivotTransitionEffect, InternalCameraDistanceEffect> {
 public:
     explicit RosenRotation3DTransitionEffect(const RotateOptions& options);
     ~RosenRotation3DTransitionEffect() override = default;

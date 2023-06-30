@@ -228,8 +228,14 @@ void TransformProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         jsonValue->Put("y", std::to_string(propTransformRotate->y).c_str());
         jsonValue->Put("z", std::to_string(propTransformRotate->z).c_str());
         jsonValue->Put("angle", std::to_string(propTransformRotate->w).c_str());
+        jsonValue->Put("perspective", std::to_string(propTransformRotate->v).c_str());
         jsonValue->Put("centerX", center.GetX().ToString().c_str());
         jsonValue->Put("centerY", center.GetY().ToString().c_str());
+        if (center.GetZ().has_value()) {
+            jsonValue->Put("centerZ", center.GetZ().value().ToString().c_str());
+        } else {
+            json->Put("centerZ", JsonUtil::Create(true));
+        }
         json->Put("rotate", jsonValue);
     } else {
         json->Put("rotate", JsonUtil::Create(true));

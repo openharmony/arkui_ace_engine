@@ -268,7 +268,7 @@ private:
 
     void OnTransformScaleUpdate(const VectorF& value) override;
     void OnTransformCenterUpdate(const DimensionOffset& value) override;
-    void OnTransformRotateUpdate(const Vector4F& value) override;
+    void OnTransformRotateUpdate(const Vector5F& value) override;
 
     void OnOffsetUpdate(const OffsetT<Dimension>& value) override;
     void OnAnchorUpdate(const OffsetT<Dimension>& value) override;
@@ -316,7 +316,7 @@ private:
     void OnTransitionOutFinish();
     void RemoveDefaultTransition();
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
-    void SetPivot(float xPivot, float yPivot);
+    void SetPivot(float xPivot, float yPivot, float zPivot = 0.0f);
     void SetPositionToRSNode();
 
     RefPtr<PageTransitionEffect> GetDefaultPageTransition(PageTransitionType type);
