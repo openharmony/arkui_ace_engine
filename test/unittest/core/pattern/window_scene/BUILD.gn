@@ -117,7 +117,6 @@ ohos_unittest("window_scene_test") {
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
-    "$ace_root/test/mock/adapter/mock_ace_container.cpp",
     "$ace_root/test/mock/adapter/mock_mmi_event_convertor.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "$ace_root/test/mock/core/render/mock_rosen_render_context.cpp",
@@ -138,15 +137,13 @@ ohos_unittest("window_scene_test") {
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",
-    "$graphic_standard_path/rosen/modules/render_service_client:librender_service_client",
     "//third_party/googletest:gmock_main",
   ]
 
   external_deps = [
-    "ability_runtime:abilitykit_native",
+    "graphic_standard:librender_service_client",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "window_manager:libdm",
     "window_manager:libwm",
     "window_manager:scene_session",
     "window_manager:scene_session_manager",
