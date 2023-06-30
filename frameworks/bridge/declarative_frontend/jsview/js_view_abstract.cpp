@@ -1341,6 +1341,20 @@ void JSViewAbstract::JsResponseRegion(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetResponseRegion(result);
 }
 
+void JSViewAbstract::JsMouseResponseRegion(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The args is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+    std::vector<DimensionRect> result;
+    if (!JSViewAbstract::ParseJsResponseRegionArray(info[0], result)) {
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetMouseResponseRegion(result);
+
+}
+
 bool JSViewAbstract::ParseJsDimensionRect(const JSRef<JSVal>& jsValue, DimensionRect& result)
 {
     if (!jsValue->IsObject()) {
@@ -5198,6 +5212,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("width", &JSViewAbstract::JsWidth);
     JSClass<JSViewAbstract>::StaticMethod("height", &JSViewAbstract::JsHeight);
     JSClass<JSViewAbstract>::StaticMethod("responseRegion", &JSViewAbstract::JsResponseRegion);
+    JSClass<JSViewAbstract>::StaticMethod("mouseResponseRegion", &JSViewAbstract::JsMouseResponseRegion);
     JSClass<JSViewAbstract>::StaticMethod("size", &JSViewAbstract::JsSize);
     JSClass<JSViewAbstract>::StaticMethod("constraintSize", &JSViewAbstract::JsConstraintSize);
     JSClass<JSViewAbstract>::StaticMethod("layoutPriority", &JSViewAbstract::JsLayoutPriority);

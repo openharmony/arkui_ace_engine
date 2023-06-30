@@ -746,6 +746,14 @@ void ViewAbstract::SetResponseRegion(const std::vector<DimensionRect>& responseR
     gestureHub->SetResponseRegion(responseRegion);
 }
 
+void ViewAbstract::SetMouseResponseRegion(const std::vector<DimensionRect>& mouseRegion)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->MarkResponseRegion(true);
+    gestureHub->SetMouseResponseRegion(mouseRegion);
+}
+
 void ViewAbstract::SetTouchable(bool touchable)
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();

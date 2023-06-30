@@ -269,10 +269,12 @@ void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json) const
     std::string hitTestMode = "HitTestMode.Default";
     auto gestureEventHub = GetOrCreateGestureEventHub();
     std::vector<DimensionRect> responseRegion;
+    std::vector<DimensionRect> mouseResponseRegion;
     if (gestureEventHub) {
         touchable = gestureEventHub->GetTouchable();
         hitTestMode = gestureEventHub->GetHitTestModeStr();
         responseRegion = gestureEventHub->GetResponseRegion();
+        mouseResponseRegion = gestureEventHub->GetMouseResponseRegion();
     }
     json->Put("touchable", touchable);
     json->Put("hitTestBehavior", hitTestMode.c_str());
@@ -282,6 +284,11 @@ void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json) const
         jsArr->Put(iStr.c_str(), responseRegion[i].ToJsonString().c_str());
     }
     json->Put("responseRegion", jsArr);
+    for (int32_t i = 0; i < static_cast<int32_t>(mouseResponseRegion.size()); ++i) {
+        auto iStr = std::to_string(i);
+        jsArr->Put(iStr.c_str(), mouseResponseRegion[i].ToJsonString().c_str());
+    }
+    json->Put("mouseResponseRegion", jsArr);
 }
 
 void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const
@@ -1275,7 +1282,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     }
 
     if (!preventBubbling && (GetHitTestMode() != HitTestMode::HTMNONE) &&
-        InResponseRegionList(parentLocalPoint, responseRegionList)) {
+        (InResponseRegionList(parentLocalPoint, responseRegionList))) {
         consumed = true;
         if (touchRestrict.hitTestType == SourceType::TOUCH) {
             auto gestureHub = eventHub_->GetGestureEventHub();
@@ -1329,13 +1336,32 @@ std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t s
         responseRegionList.emplace_back(rect);
         return responseRegionList;
     }
-
-    if (gestureHub->GetResponseRegion().empty()) {
-        responseRegionList.emplace_back(rect);
-        return responseRegionList;
+    auto scaleProperty = ScaleProperty::CreateScaleProperty();
+    
+    if (sourceType == 1) {
+        if (gestureHub->GetResponseRegion().empty() && (gestureHub->GetMouseResponseRegion().empty())) {
+            responseRegionList.emplace_back(rect);
+            return responseRegionList;
+        }
+    } else {
+        if (gestureHub->GetResponseRegion().empty()) {
+            responseRegionList.emplace_back(rect);
+            return responseRegionList;
+        }
     }
 
-    auto scaleProperty = ScaleProperty::CreateScaleProperty();
+    if (sourceType == 1 && (!gestureHub->GetMouseResponseRegion().empty())) {
+        for (const auto& region : gestureHub->GetMouseResponseRegion()) {
+            auto x = ConvertToPx(region.GetOffset().GetX(), scaleProperty, rect.Width());
+            auto y = ConvertToPx(region.GetOffset().GetY(), scaleProperty, rect.Height());
+            auto width = ConvertToPx(region.GetWidth(), scaleProperty, rect.Width());
+            auto height = ConvertToPx(region.GetHeight(), scaleProperty, rect.Height());
+            RectF mouseRegion(rect.GetOffset().GetX() + x.value(), rect.GetOffset().GetY() + y.value(),
+                 width.value(), height.value());
+            responseRegionList.emplace_back(mouseRegion);
+        }
+        return responseRegionList;
+    }
     for (const auto& region : gestureHub->GetResponseRegion()) {
         auto x = ConvertToPx(region.GetOffset().GetX(), scaleProperty, rect.Width());
         auto y = ConvertToPx(region.GetOffset().GetY(), scaleProperty, rect.Height());
