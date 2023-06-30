@@ -357,17 +357,17 @@ void JSSwiper::SetIsIndicatorCustomSize(const Dimension& dimPosition, bool parse
 
 SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
 {
-    JSRef<JSVal> leftValue = obj->GetProperty("left");
-    JSRef<JSVal> topValue = obj->GetProperty("top");
-    JSRef<JSVal> rightValue = obj->GetProperty("right");
-    JSRef<JSVal> bottomValue = obj->GetProperty("bottom");
-    JSRef<JSVal> itemWidthValue = obj->GetProperty("itemWidth");
-    JSRef<JSVal> itemHeightValue = obj->GetProperty("itemHeight");
-    JSRef<JSVal> selectedItemWidthValue = obj->GetProperty("selectedItemWidth");
-    JSRef<JSVal> selectedItemHeightValue = obj->GetProperty("selectedItemHeight");
-    JSRef<JSVal> maskValue = obj->GetProperty("mask");
-    JSRef<JSVal> colorValue = obj->GetProperty("color");
-    JSRef<JSVal> selectedColorValue = obj->GetProperty("selectedColor");
+    JSRef<JSVal> leftValue = obj->GetProperty("leftValue");
+    JSRef<JSVal> topValue = obj->GetProperty("topValue");
+    JSRef<JSVal> rightValue = obj->GetProperty("rightValue");
+    JSRef<JSVal> bottomValue = obj->GetProperty("bottomValue");
+    JSRef<JSVal> itemWidthValue = obj->GetProperty("itemWidthValue");
+    JSRef<JSVal> itemHeightValue = obj->GetProperty("itemHeightValue");
+    JSRef<JSVal> selectedItemWidthValue = obj->GetProperty("selectedItemWidthValue");
+    JSRef<JSVal> selectedItemHeightValue = obj->GetProperty("selectedItemHeightValue");
+    JSRef<JSVal> maskValue = obj->GetProperty("maskValue");
+    JSRef<JSVal> colorValue = obj->GetProperty("colorValue");
+    JSRef<JSVal> selectedColorValue = obj->GetProperty("selectedColorValue");
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, SwiperParameters());
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
@@ -417,14 +417,14 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
 
 SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& obj)
 {
-    JSRef<JSVal> dotLeftValue = obj->GetProperty("left");
-    JSRef<JSVal> dotTopValue = obj->GetProperty("top");
-    JSRef<JSVal> dotRightValue = obj->GetProperty("right");
-    JSRef<JSVal> dotBottomValue = obj->GetProperty("bottom");
-    JSRef<JSVal> fontColorValue = obj->GetProperty("fontColor");
-    JSRef<JSVal> selectedFontColorValue = obj->GetProperty("selectedFontColor");
-    JSRef<JSVal> digitFontValue = obj->GetProperty("digitFont");
-    JSRef<JSVal> selectedDigitFontValue = obj->GetProperty("selectedDigitFont");
+    JSRef<JSVal> dotLeftValue = obj->GetProperty("leftValue");
+    JSRef<JSVal> dotTopValue = obj->GetProperty("topValue");
+    JSRef<JSVal> dotRightValue = obj->GetProperty("rightValue");
+    JSRef<JSVal> dotBottomValue = obj->GetProperty("bottomValue");
+    JSRef<JSVal> fontColorValue = obj->GetProperty("fontColorValue");
+    JSRef<JSVal> selectedFontColorValue = obj->GetProperty("selectedFontColorValue");
+    JSRef<JSVal> digitFontValue = obj->GetProperty("digitFontValue");
+    JSRef<JSVal> selectedDigitFontValue = obj->GetProperty("selectedDigitFontValue");
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, SwiperDigitalParameters());
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
