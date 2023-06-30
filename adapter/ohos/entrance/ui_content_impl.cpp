@@ -1755,4 +1755,20 @@ void UIContentImpl::SetIsFocusActive(bool isFocusActive)
         },
         TaskExecutor::TaskType::UI);
 }
+
+void UIContentImpl::SetFocusWindowId(uint32_t focusWindowId)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container, focusWindowId]() {
+            auto pipelineContext =  AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->SetFocusWindowId(focusWindowId);
+        },
+        TaskExecutor::TaskType::UI);
+}
 } // namespace OHOS::Ace

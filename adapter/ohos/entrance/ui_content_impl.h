@@ -148,6 +148,7 @@ public:
         const std::vector<std::string>& assetBasePaths) override;
     NativeValue* GetUIContext() override;
     void SetIsFocusActive(bool isFocusActive) override;
+    void SetFocusWindowId(uint32_t focusWindowId) override;
 
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);

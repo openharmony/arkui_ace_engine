@@ -1740,7 +1740,7 @@ bool WebDelegate::InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context)
         LOGE("fail to call WebDelegate::InitWebSurfaceDelegate Create due to context is null");
         return false;
     }
-    int32_t windowId = pipelineContext->GetWindowId();
+    uint32_t windowId = pipelineContext->GetWindowId();
     surfaceDelegate_ = new OHOS::SurfaceDelegate(windowId);
     if (surfaceDelegate_ == nullptr) {
         LOGE("fail to call WebDelegate::InitWebSurfaceDelegate Create surfaceDelegate is null");

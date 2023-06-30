@@ -443,4 +443,10 @@ void WindowPattern::OnModifyDone()
     CHECK_NULL_VOID(inputHub);
     InitMouseEvent(inputHub);
 }
+
+void WindowPattern::TransferFocusWindowId(uint32_t focusWindowId)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferFocusWindowIdEvent(focusWindowId);
+}
 } // namespace OHOS::Ace::NG
