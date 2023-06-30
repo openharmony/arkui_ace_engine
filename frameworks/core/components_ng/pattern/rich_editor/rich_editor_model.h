@@ -69,6 +69,37 @@ struct TextSpanOptions {
     std::optional<TextStyle> style;
 };
 
+struct UpdateSpanStyle {
+    void ResetStyle()
+    {
+        updateTextColor.reset();
+        updateFontSize.reset();
+        updateItalicFontStyle.reset();
+        updateFontWeight.reset();
+        updateFontFamily.reset();
+        updateTextDecoration.reset();
+        updateTextDecorationColor.reset();
+
+        updateImageWidth.reset();
+        updateImageHeight.reset();
+        updateImageVerticalAlign.reset();
+        updateImageFit.reset();
+    }
+
+    std::optional<Color> updateTextColor = std::nullopt;
+    std::optional<CalcDimension> updateFontSize = std::nullopt;
+    std::optional<FontStyle> updateItalicFontStyle = std::nullopt;
+    std::optional<FontWeight> updateFontWeight = std::nullopt;
+    std::optional<std::vector<std::string>> updateFontFamily = std::nullopt;
+    std::optional<TextDecoration> updateTextDecoration = std::nullopt;
+    std::optional<Color> updateTextDecorationColor = std::nullopt;
+
+    std::optional<CalcDimension> updateImageWidth = std::nullopt;
+    std::optional<CalcDimension> updateImageHeight = std::nullopt;
+    std::optional<VerticalAlign> updateImageVerticalAlign = std::nullopt;
+    std::optional<ImageFit> updateImageFit = std::nullopt;
+};
+
 class ACE_EXPORT RichEditorControllerBase : public AceType {
     DECLARE_ACE_TYPE(RichEditorControllerBase, AceType);
 
@@ -77,6 +108,8 @@ public:
     virtual int32_t AddTextSpan(const TextSpanOptions& options) = 0;
     virtual int32_t GetCaretOffset() = 0;
     virtual bool SetCaretOffset(int32_t caretPosition) = 0;
+    virtual void UpdateSpanStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle) = 0;
+    virtual void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle) = 0;
 };
 
 class ACE_EXPORT RichEditorModel {

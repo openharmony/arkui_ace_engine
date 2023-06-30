@@ -127,6 +127,8 @@ public:
     void AddTextSpan(const TextSpanOptions& options);
     int32_t GetSpanIndex();
     bool SetCaretOffset(int32_t caretPosition);
+    void UpdateSpanStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle);
+    void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
 
 private:
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -139,6 +141,8 @@ private:
     void OnCaretTwinkling();
     void StartTwinkling();
     void StopTwinkling();
+    void UpdateTextStyle(RefPtr<SpanNode>& spanNode, TextStyle textStyle);
+    void UpdateImageStyle(RefPtr<FrameNode>& imageNode, ImageSpanAttribute imageStyle);
 
     bool clickEventInitialized_ = false;
     bool focusEventInitialized_ = false;
@@ -171,6 +175,7 @@ private:
     bool caretVisible_ = false;
     CancelableCallback<void()> caretTwinklingTask_;
     int32_t spanIndex_ = 0;
+    struct UpdateSpanStyle updateSpanStyle_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 #if defined(ENABLE_STANDARD_INPUT)

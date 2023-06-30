@@ -58,10 +58,12 @@ public:
     TextStyle ParseJsTextStyle(JSRef<JSObject> styleObject);
     void SetCaretOffset(const JSCallbackInfo& args);
     void GetCaretOffset(const JSCallbackInfo& args);
+    void UpdateSpanStyle(const JSCallbackInfo& info);
 
 private:
     WeakPtr<RichEditorControllerBase> controllerWeak_;
     ACE_DISALLOW_COPY_AND_MOVE(JSRichEditorController);
+    struct UpdateSpanStyle updateSpanStyle_;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_RICHEDITOR_H

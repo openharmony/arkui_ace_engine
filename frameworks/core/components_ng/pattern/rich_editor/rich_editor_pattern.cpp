@@ -356,13 +356,122 @@ OffsetF RichEditorPattern::CalcCursorOffsetByPosition(int32_t position, float& s
 
 bool RichEditorPattern::SetCaretPosition(int32_t pos)
 {
+    auto lastCaretPosition = caretPosition_;
     caretPosition_ = std::clamp(pos, 0, GetTextContentLength());
-    return caretPosition_ == pos;
+    if (caretPosition_ == pos) {
+        return true;
+    } else {
+        caretPosition_ = lastCaretPosition;
+        return false;
+    }
 }
 
 bool RichEditorPattern::GetCaretVisible() const
 {
     return caretVisible_;
+}
+
+void RichEditorPattern::SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle)
+{
+    updateSpanStyle_ = updateSpanStyle;
+}
+
+void RichEditorPattern::UpdateTextStyle(RefPtr<SpanNode>& spanNode, TextStyle textStyle)
+{
+    if (updateSpanStyle_.updateTextColor.has_value()) {
+        spanNode->UpdateTextColor(textStyle.GetTextColor());
+    }
+    if (updateSpanStyle_.updateFontSize.has_value()) {
+        spanNode->UpdateFontSize(textStyle.GetFontSize());
+    }
+    if (updateSpanStyle_.updateItalicFontStyle.has_value()) {
+        spanNode->UpdateItalicFontStyle(textStyle.GetFontStyle());
+    }
+    if (updateSpanStyle_.updateFontWeight.has_value()) {
+        spanNode->UpdateFontWeight(textStyle.GetFontWeight());
+    }
+    if (updateSpanStyle_.updateFontFamily.has_value()) {
+        spanNode->UpdateFontFamily(textStyle.GetFontFamilies());
+    }
+    if (updateSpanStyle_.updateTextDecoration.has_value()) {
+        spanNode->UpdateTextDecoration(textStyle.GetTextDecoration());
+    }
+    if (updateSpanStyle_.updateTextDecorationColor.has_value()) {
+        spanNode->UpdateTextDecorationColor(textStyle.GetTextDecorationColor());
+    }
+}
+
+void RichEditorPattern::UpdateImageStyle(RefPtr<FrameNode>& imageNode, ImageSpanAttribute imageStyle)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    if (updateSpanStyle_.updateImageWidth.has_value() || updateSpanStyle_.updateImageHeight.has_value()) {
+        imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(
+            CalcLength(imageStyle.size.value().width.Value()), CalcLength(imageStyle.size.value().height.Value())));
+    }
+    if (updateSpanStyle_.updateImageFit.has_value()) {
+        imageLayoutProperty->UpdateVerticalAlign(imageStyle.verticalAlign.value());
+    }
+    if (updateSpanStyle_.updateImageVerticalAlign.has_value()) {
+        imageLayoutProperty->UpdateImageFit(imageStyle.objectFit.value());
+    }
+    imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    imageNode->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkModifyDone();
+}
+
+void RichEditorPattern::UpdateSpanStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    int32_t spanStart = 0;
+    int32_t spanEnd = 0;
+
+    for (auto it = host->GetChildren().begin(); it != host->GetChildren().end(); ++it) {
+        auto spanNode = DynamicCast<SpanNode>(*it);
+        auto imageNode = DynamicCast<FrameNode>(*it);
+        if (!spanNode) {
+            if (spanEnd != 0) {
+                spanStart = spanEnd;
+            }
+            spanEnd = spanStart + 1;
+        } else {
+            auto spanItem = spanNode->GetSpanItem();
+            auto contentLen = StringUtils::ToWstring(spanItem->content).length();
+            spanStart = spanItem->position - contentLen;
+            spanEnd = spanItem->position;
+        }
+        if (spanEnd < start) {
+            continue;
+        }
+
+        if (spanStart >= start && spanEnd <= end) {
+            if (spanNode) {
+                UpdateTextStyle(spanNode, textStyle);
+            } else {
+                UpdateImageStyle(imageNode, imageStyle);
+            }
+            if (spanEnd == end) {
+                break;
+            }
+            continue;
+        }
+        if (spanStart < start && start < spanEnd) {
+            TextSpanSplit(start);
+            --it;
+            continue;
+        }
+        if (spanStart < end && end < spanEnd) {
+            TextSpanSplit(end);
+            --(--it);
+            continue;
+        }
+        if (spanStart >= end) {
+            break;
+        }
+    }
 }
 
 void RichEditorPattern::ScheduleCaretTwinkling()
