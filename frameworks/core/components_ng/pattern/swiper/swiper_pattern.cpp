@@ -1381,8 +1381,8 @@ RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion(float velocity) const
         return curve;
     }
     // use spring motion feature.
-    // interpolatingSpring: (mass: 1, stiffness:228, damping: 30)
-    return AceType::MakeRefPtr<InterpolatingSpring>(velocity, 1, 228, 30);
+    // interpolatingSpring: (mass: 1, stiffness:328, damping: 34)
+    return AceType::MakeRefPtr<InterpolatingSpring>(velocity, 1, 328, 34);
 }
 
 void SwiperPattern::PlayIndicatorTranslateAnimation(float translate)
@@ -1483,8 +1483,8 @@ void SwiperPattern::PlayTranslateAnimation(
         return;
     }
     // use spring motion feature.
-    // interpolatingSpring: (mass: 1, stiffness:228, damping: 30)
-    static const auto springProperty = AceType::MakeRefPtr<SpringProperty>(1, 228, 30);
+    // interpolatingSpring: (mass: 1, stiffness:328, damping: 34)
+    static const auto springProperty = AceType::MakeRefPtr<SpringProperty>(1, 328, 34);
     auto scrollMotion = AceType::MakeRefPtr<SpringMotion>(startPos, endPos, velocity, springProperty);
     scrollMotion->AddListener([weak](double value) {
         auto swiper = weak.Upgrade();
