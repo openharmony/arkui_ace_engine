@@ -23,6 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
 
 namespace OHOS::Ace {
@@ -128,6 +129,10 @@ public:
     virtual RefPtr<RichEditorControllerBase> GetRichEditorController() = 0;
     virtual void SetOnReady(std::function<void()>&& func) = 0;
     virtual void SetOnSelect(std::function<void(const BaseEventInfo*)>&& func) = 0;
+    virtual void SetAboutToIMEInput(std::function<bool(const NG::RichEditorInsertValue&)>&& func) = 0;
+    virtual void SetOnIMEInputComplete(std::function<void(const NG::RichEditorAbstractSpanResult&)>&& func) = 0;
+    virtual void SetAboutToDelete(std::function<bool(const NG::RichEditorDeleteValue&)>&& func) = 0;
+    virtual void SetOnDeleteComplete(std::function<void()>&& func) = 0;
 
 private:
     static std::unique_ptr<RichEditorModel> instance_;

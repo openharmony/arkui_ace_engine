@@ -26,6 +26,10 @@ public:
     RefPtr<RichEditorControllerBase> GetRichEditorController() override;
     void SetOnReady(std::function<void()>&& func) override;
     void SetOnSelect(std::function<void(const BaseEventInfo*)>&& func) override;
+    void SetAboutToIMEInput(std::function<bool(const RichEditorInsertValue&)>&& func) override;
+    void SetOnIMEInputComplete(std::function<void(const RichEditorAbstractSpanResult&)>&& func) override;
+    void SetAboutToDelete(std::function<bool(const RichEditorDeleteValue&)>&& func) override;
+    void SetOnDeleteComplete(std::function<void()>&& func) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_RICH_EDITOR_MODEL_NG_H

@@ -30,6 +30,18 @@ public:
     static JSRef<JSObject> CreateJSSpanResultObject(const ResultObject& resultObject);
     static JSRef<JSObject> CreateJSTextStyleResult(const TextStyleResult& textStyleResult);
     static JSRef<JSObject> CreateJSImageStyleResult(const ImageStyleResult& imageStyleResult);
+    static void SetAboutToIMEInput(const JSCallbackInfo& args);
+    static void SetOnIMEInputComplete(const JSCallbackInfo& args);
+    static void SetAboutToDelete(const JSCallbackInfo& args);
+    static void SetOnDeleteComplete(const JSCallbackInfo& args);
+    static JSRef<JSVal> CreateJsAboutToIMEInputObj(const NG::RichEditorInsertValue& insertValue);
+    static JSRef<JSVal> CreateJsOnIMEInputComplete(const NG::RichEditorAbstractSpanResult& textSpanResult);
+    static JSRef<JSVal> CreateJsAboutToDelet(const NG::RichEditorDeleteValue& deleteValue);
+
+private:
+    static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
+    static void CreateImageStyleObj(JSRef<JSObject>& imageStyleObj, JSRef<JSObject>& spanResultObj,
+        const NG::RichEditorAbstractSpanResult& spanResult);
 };
 
 class JSRichEditorController final : public Referenced {

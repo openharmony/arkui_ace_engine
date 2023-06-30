@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-#include "bridge/declarative_frontend/jsview/js_richeditor.h"
-
 #include <string>
 
+#include "bridge/declarative_frontend/jsview/js_richeditor.h"
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
@@ -192,6 +191,194 @@ void JSRichEditor::SetOnSelect(const JSCallbackInfo& args)
     };
     NG::RichEditorModelNG::GetInstance()->SetOnSelect(std::move(onSelect));
 }
+void JSRichEditor::SetAboutToIMEInput(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("args not function");
+        return;
+    }
+    auto jsAboutToIMEInputFunc = AceType::MakeRefPtr<JsEventFunction<NG::RichEditorInsertValue, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), CreateJsAboutToIMEInputObj);
+    auto callback = [execCtx = args.GetExecutionContext(), func = std::move(jsAboutToIMEInputFunc)](
+                        const NG::RichEditorInsertValue& insertValue) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
+        auto ret = func->ExecuteWithValue(insertValue);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean();
+        }
+        return true;
+    };
+    RichEditorModel::GetInstance()->SetAboutToIMEInput(std::move(callback));
+}
+
+void JSRichEditor::SetOnIMEInputComplete(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("args not function");
+        return;
+    }
+    auto jsOnIMEInputCompleteFunc = AceType::MakeRefPtr<JsEventFunction<NG::RichEditorAbstractSpanResult, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), CreateJsOnIMEInputComplete);
+    auto callback = [execCtx = args.GetExecutionContext(), func = std::move(jsOnIMEInputCompleteFunc)](
+                        const NG::RichEditorAbstractSpanResult& textSpanResult) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->Execute(textSpanResult);
+    };
+    RichEditorModel::GetInstance()->SetOnIMEInputComplete(std::move(callback));
+}
+void JSRichEditor::SetAboutToDelete(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("args not function");
+        return;
+    }
+    auto jsAboutToDeleteFunc = AceType::MakeRefPtr<JsEventFunction<NG::RichEditorDeleteValue, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), CreateJsAboutToDelet);
+    auto callback = [execCtx = args.GetExecutionContext(), func = std::move(jsAboutToDeleteFunc)](
+                        const NG::RichEditorDeleteValue& deleteValue) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
+        auto ret = func->ExecuteWithValue(deleteValue);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean();
+        }
+        return true;
+    };
+    RichEditorModel::GetInstance()->SetAboutToDelete(std::move(callback));
+}
+
+void JSRichEditor::SetOnDeleteComplete(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("args not function");
+        return;
+    }
+    JsEventCallback<void()> callback(args.GetExecutionContext(), JSRef<JSFunc>::Cast(args[0]));
+    RichEditorModel::GetInstance()->SetOnDeleteComplete(callback);
+}
+
+JSRef<JSVal> JSRichEditor::CreateJsAboutToIMEInputObj(const NG::RichEditorInsertValue& insertValue)
+{
+    JSRef<JSObject> aboutToIMEInputObj = JSRef<JSObject>::New();
+    aboutToIMEInputObj->SetProperty<int32_t>("insertOffset", insertValue.GetInsertOffset());
+    aboutToIMEInputObj->SetProperty<std::string>("insertValue", insertValue.GetInsertValue());
+    return JSRef<JSVal>::Cast(aboutToIMEInputObj);
+}
+
+JSRef<JSVal> JSRichEditor::CreateJsOnIMEInputComplete(const NG::RichEditorAbstractSpanResult& textSpanResult)
+{
+    JSRef<JSObject> onIMEInputCompleteObj = JSRef<JSObject>::New();
+    JSRef<JSObject> spanPositionObj = JSRef<JSObject>::New();
+    JSRef<JSArray> spanRange = JSRef<JSArray>::New();
+    JSRef<JSObject> textStyleObj = JSRef<JSObject>::New();
+    JSRef<JSObject> decorationObj = JSRef<JSObject>::New();
+    JSRef<JSArray> offsetInSpan = JSRef<JSArray>::New();
+    spanRange->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(textSpanResult.GetSpanRangeStart())));
+    spanRange->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(textSpanResult.GetSpanRangeEnd())));
+    offsetInSpan->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(textSpanResult.OffsetInSpan())));
+    offsetInSpan->SetValueAt(
+        0, JSRef<JSVal>::Make(ToJSValue(textSpanResult.OffsetInSpan() + textSpanResult.GetEraseLength())));
+    spanPositionObj->SetPropertyObject("spanRange", spanRange);
+    spanPositionObj->SetProperty<int32_t>("spanIndex", textSpanResult.GetSpanIndex());
+    decorationObj->SetProperty<TextDecoration>("type", textSpanResult.GetTextDecoration());
+    decorationObj->SetProperty<std::string>("color", textSpanResult.GetColor());
+    textStyleObj->SetProperty<std::string>("fontColor", textSpanResult.GetFontColor());
+    textStyleObj->SetProperty<double>("fontSize", textSpanResult.GetFontSize());
+    textStyleObj->SetProperty<int32_t>("fontStyle", static_cast<int32_t>(textSpanResult.GetFontStyle()));
+    textStyleObj->SetProperty<int32_t>("fontWeight", textSpanResult.GetFontWeight());
+    textStyleObj->SetProperty<std::string>("fontFamily", textSpanResult.GetFontFamily());
+    textStyleObj->SetPropertyObject("decoration", decorationObj);
+    onIMEInputCompleteObj->SetPropertyObject("spanPosition", spanPositionObj);
+    onIMEInputCompleteObj->SetProperty<std::string>("value", textSpanResult.GetValue());
+    onIMEInputCompleteObj->SetPropertyObject("textStyle", textStyleObj);
+    onIMEInputCompleteObj->SetPropertyObject("offsetInSpan", offsetInSpan);
+    return JSRef<JSVal>::Cast(onIMEInputCompleteObj);
+}
+
+JSRef<JSVal> JSRichEditor::CreateJsAboutToDelet(const NG::RichEditorDeleteValue& deleteValue)
+{
+    JSRef<JSObject> AboutToDeletObj = JSRef<JSObject>::New();
+    AboutToDeletObj->SetProperty<int32_t>("offset", deleteValue.GetOffset());
+    AboutToDeletObj->SetProperty<int32_t>(
+        "direction", static_cast<int32_t>(deleteValue.GetRichEditorDeleteDirection()));
+    AboutToDeletObj->SetProperty<int32_t>("length", deleteValue.GetLength());
+    JSRef<JSArray> richEditorDeleteSpans = JSRef<JSArray>::New();
+    auto list = deleteValue.GetRichEditorDeleteSpans();
+    int32_t index = 0;
+    for (const auto& it : list) {
+        JSRef<JSObject> spanResultObj = JSRef<JSObject>::New();
+        JSRef<JSObject> spanPositionObj = JSRef<JSObject>::New();
+        JSRef<JSArray> spanRange = JSRef<JSArray>::New();
+        JSRef<JSArray> offsetInSpan = JSRef<JSArray>::New();
+        spanRange->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(it.GetSpanRangeStart())));
+        spanRange->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(it.GetSpanRangeEnd())));
+        offsetInSpan->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(it.OffsetInSpan())));
+        offsetInSpan->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(it.OffsetInSpan() + it.GetEraseLength())));
+        spanPositionObj->SetPropertyObject("spanRange", spanRange);
+        spanPositionObj->SetProperty<int32_t>("spanIndex", it.GetSpanIndex());
+        spanResultObj->SetPropertyObject("spanPosition", spanPositionObj);
+        spanResultObj->SetPropertyObject("offsetInSpan", offsetInSpan);
+        switch (it.GetType()) {
+            case NG::SpanResultType::TEXT: {
+                JSRef<JSObject> textStyleObj = JSRef<JSObject>::New();
+                CreateTextStyleObj(textStyleObj, it);
+                spanResultObj->SetProperty<std::string>("value", it.GetValue());
+                spanResultObj->SetPropertyObject("textStyle", textStyleObj);
+                break;
+            }
+            case NG::SpanResultType::IMAGE: {
+                JSRef<JSObject> imageStyleObj = JSRef<JSObject>::New();
+                CreateImageStyleObj(imageStyleObj, spanResultObj, it);
+                spanResultObj->SetPropertyObject("imageStyle", imageStyleObj);
+                break;
+            }
+            default:
+                break;
+        }
+        richEditorDeleteSpans->SetValueAt(index++, spanResultObj);
+    }
+    AboutToDeletObj->SetPropertyObject("richEditorDeleteSpans", richEditorDeleteSpans);
+    return JSRef<JSVal>::Cast(AboutToDeletObj);
+}
+
+void JSRichEditor::CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult)
+{
+    JSRef<JSObject> decorationObj = JSRef<JSObject>::New();
+    decorationObj->SetProperty<TextDecoration>("type", spanResult.GetTextDecoration());
+    decorationObj->SetProperty<std::string>("color", spanResult.GetColor());
+    textStyleObj->SetProperty<std::string>("fontColor", spanResult.GetFontColor());
+    textStyleObj->SetProperty<double>("fontSize", spanResult.GetFontSize());
+    textStyleObj->SetProperty<int32_t>("fontStyle", static_cast<int32_t>(spanResult.GetFontStyle()));
+    textStyleObj->SetProperty<int32_t>("fontWeight", spanResult.GetFontWeight());
+    textStyleObj->SetProperty<std::string>("fontFamily", spanResult.GetFontFamily());
+    textStyleObj->SetPropertyObject("decoration", decorationObj);
+}
+
+void JSRichEditor::CreateImageStyleObj(
+    JSRef<JSObject>& imageStyleObj, JSRef<JSObject>& spanResultObj, const NG::RichEditorAbstractSpanResult& spanResult)
+{
+    JSRef<JSArray> imageSize = JSRef<JSArray>::New();
+    imageSize->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(spanResult.GetSizeWidth())));
+    imageSize->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(spanResult.GetSizeHeight())));
+    imageStyleObj->SetPropertyObject("size", imageSize);
+    imageStyleObj->SetProperty<int32_t>("verticalAlign", static_cast<int32_t>(spanResult.GetVerticalAlign()));
+    imageStyleObj->SetProperty<int32_t>("objectFit", static_cast<int32_t>(spanResult.GetObjectFit()));
+    if (spanResult.GetValuePixelMap()) {
+#ifdef PIXEL_MAP_SUPPORTED
+        std::shared_ptr<Media::PixelMap> pixelMap = spanResult.GetValuePixelMap()->GetPixelMapSharedPtr();
+        auto engine = EngineHelper::GetCurrentEngine();
+        if (engine) {
+            NativeEngine* nativeEngine = engine->GetNativeEngine();
+            napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+            napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
+            NativeValue* nativeValue = reinterpret_cast<NativeValue*>(napiValue);
+            auto jsPixelMap = JsConverter::ConvertNativeValueToJsVal(nativeValue);
+            spanResultObj->SetPropertyObject("value", jsPixelMap);
+        }
+#endif
+    } else {
+        spanResultObj->SetProperty<std::string>("valueResourceStr", spanResult.GetValueResourceStr());
+    }
+}
 
 void JSRichEditor::JSBind(BindingTarget globalObj)
 {
@@ -199,6 +386,10 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("create", &JSRichEditor::Create);
     JSClass<JSRichEditor>::StaticMethod("onReady", &JSRichEditor::SetOnReady);
     JSClass<JSRichEditor>::StaticMethod("onSelect", &JSRichEditor::SetOnSelect);
+    JSClass<JSRichEditor>::StaticMethod("aboutToIMEInput", &JSRichEditor::SetAboutToIMEInput);
+    JSClass<JSRichEditor>::StaticMethod("onIMEInputComplete", &JSRichEditor::SetOnIMEInputComplete);
+    JSClass<JSRichEditor>::StaticMethod("aboutToDelete", &JSRichEditor::SetAboutToDelete);
+    JSClass<JSRichEditor>::StaticMethod("onDeleteComplete", &JSRichEditor::SetOnDeleteComplete);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
