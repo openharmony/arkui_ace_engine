@@ -718,6 +718,20 @@ void JsFrontend::OnSurfaceChanged(int32_t width, int32_t height)
     }
 }
 
+void JsFrontend::OnLayoutCompleted(const std::string& componentId)
+{
+    if (delegate_) {
+        delegate_->OnLayoutCompleted(componentId);
+    }
+}
+
+void JsFrontend::OnDrawCompleted(const std::string& componentId)
+{
+    if (delegate_) {
+        delegate_->OnDrawCompleted(componentId);
+    }
+}
+
 void JsFrontend::DumpFrontend() const
 {
     int32_t routerIndex = 0;

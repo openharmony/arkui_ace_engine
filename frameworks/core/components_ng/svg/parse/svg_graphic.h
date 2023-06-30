@@ -38,7 +38,7 @@ public:
         strokePaint_.reset();
         path_ = AsPath(layout); // asPath override by graphic tag
         UpdateGradient(layout);
-        if (UpdateFillStyle()) {
+        if (UpdateFillStyle(color)) {
             OnGraphicFill();
         }
         if (UpdateStrokeStyle()) {
@@ -73,7 +73,7 @@ protected:
 
     // Update fillStates & strokeStates
     void UpdateGradient(const Size& viewPort);
-    bool UpdateFillStyle(bool antiAlias = true);
+    bool UpdateFillStyle(const std::optional<Color>& color, bool antiAlias = true);
     bool UpdateStrokeStyle(bool antiAlias = true);
     void SetGradientStyle(double opacity);
     void UpdateLineDash();

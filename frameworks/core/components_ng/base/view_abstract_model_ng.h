@@ -922,6 +922,11 @@ private:
     {
         ViewAbstract::UpdateAnimatableArithmeticProperty(propertyName, value);
     }
+
+    void UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts) override
+    {
+        ViewAbstract::UpdateSafeAreaExpandOpts(opts);
+    }
 };
 } // namespace OHOS::Ace::NG
 

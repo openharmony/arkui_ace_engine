@@ -312,6 +312,10 @@ void TextFieldModelNG::SetInputFilter(const std::string& value, const std::funct
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnInputFilterError(onError);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    pattern->InitEditingValueTextWithFilter();
 }
 
 void TextFieldModelNG::SetInputStyle(InputStyle value)

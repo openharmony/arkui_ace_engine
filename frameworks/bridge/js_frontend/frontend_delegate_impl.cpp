@@ -1268,6 +1268,10 @@ void FrontendDelegateImpl::OnSurfaceChanged()
     OnMediaQueryUpdate();
 }
 
+void FrontendDelegateImpl::OnLayoutCompleted(const std::string& componentId) {}
+
+void FrontendDelegateImpl::OnDrawCompleted(const std::string& componentId) {}
+
 void FrontendDelegateImpl::OnMediaQueryUpdate()
 {
     if (mediaQueryInfo_->GetIsInit()) {

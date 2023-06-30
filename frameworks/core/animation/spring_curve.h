@@ -31,6 +31,17 @@ public:
     float MoveInternal(float time) override;
     const std::string ToString() override;
 
+    void UpdateVelocity(float velocity)
+    {
+        velocity_ = velocity;
+        SetEndPosition(1.0f, velocity_);
+    }
+
+    float GetCurrentVelocity() const
+    {
+        return velocity_;
+    }
+
 private:
     void SetEndPosition(float endPosition, float startVelocity);
     void InitEstimateDuration();
@@ -47,11 +58,11 @@ private:
     float stiffness_ = 0.0f;
     float damping_ = 0.0f;
     RefPtr<SpringProperty> property_; // Contain: mass & stiffness & damping
-    RefPtr<SpringModel> solution_; // Maybe: CriticalDamped or Overdamped or Underdamped
+    RefPtr<SpringModel> solution_;    // Maybe: CriticalDamped or Overdamped or Underdamped
 
     friend class NativeCurveHelper;
 };
 
-} // // namespace OHOS::Ace
+} // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_SPRING_CURVE_H

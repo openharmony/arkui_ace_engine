@@ -17,7 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_PARSE_SVG_NODE_H
 
 #include <vector>
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkPath.h"
+#else
+#include "core/components_ng/render/drawing.h"
+#endif
 
 #include "base/memory/ace_type.h"
 #include "core/components/declaration/svg/svg_base_declaration.h"
@@ -53,10 +57,17 @@ public:
         return nullptr;
     }
 
+#ifndef USE_ROSEN_DRAWING
     virtual SkPath AsPath(const Size& viewPort) const
     {
         return SkPath();
     }
+#else
+    virtual RSPath AsPath(const Size& viewPort) const
+    {
+        return RSPath();
+    }
+#endif
 
     virtual RefPtr<Component> GetComponent() const
     {

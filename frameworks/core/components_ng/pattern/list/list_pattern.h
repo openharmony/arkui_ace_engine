@@ -49,11 +49,6 @@ public:
         return false;
     }
 
-    bool UsResRegion() override
-    {
-        return false;
-    }
-
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<ListLayoutProperty>();
@@ -161,8 +156,7 @@ public:
     void AnimateTo(float position, float duration, const RefPtr<Curve>& curve);
     void StartSpringMotion(float start, float end, float velocity);
     void ScrollTo(float position, bool smooth);
-    void ScrollToIndex(int32_t index, bool smooth = false,
-                       ScrollAlign align = ScrollAlign::START);
+    void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START);
     void ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollAlign align);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
     bool ScrollPage(bool reverse);
@@ -186,7 +180,14 @@ public:
 
     void SetSwiperItem(WeakPtr<ListItemPattern> swiperItem);
 
+    void SetPredictSnapOffset(float predictSnapOffset)
+    {
+        predictSnapOffset_ = predictSnapOffset;
+    }
+    bool OnScrollSnapCallback(double targetOffset, double velocity) override;
+
     int32_t GetItemIndexByPosition(float xOffset, float yOffset);
+
 private:
     void OnScrollEndCallback() override;
 
@@ -214,6 +215,13 @@ private:
     void CheckRestartSpring();
     void StopAnimate();
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
+    void UpdateScrollSnap();
+    bool IsScrollSnapAlignCenter() const;
+    void SetChainAnimationLayoutAlgorithm(
+        RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, RefPtr<ListLayoutProperty> listLayoutProperty);
+    bool NeedScrollSnapAlignEffect() const;
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+    void RegistOritationListener();
 
     // multiSelectable
     void UninitMouseEvent();
@@ -223,7 +231,8 @@ private:
     void ClearSelectedZone();
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     void MultiSelectWithoutKeyboard(const RectF& selectedZone);
-    void HandleCardModeSelectedEvent(const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode);
+    void HandleCardModeSelectedEvent(
+        const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, float itemGroupTop);
 
     void DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper);
     void SetAccessibilityAction();
@@ -248,10 +257,12 @@ private:
     float currentDelta_ = 0.0f;
     bool crossMatchChild_ = false;
     bool smooth_ = false;
+    float scrollSnapVelocity_ = 0.0f;
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
     std::optional<int32_t> targetIndex_;
+    std::optional<float> predictSnapOffset_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;
     bool scrollable_ = true;
     bool paintStateFlag_ = false;
@@ -276,6 +287,8 @@ private:
     bool multiSelectable_ = false;
     bool isMouseEventInit_ = false;
     bool mousePressed_ = false;
+
+    bool isOritationListenerRegisted_ = false;
     OffsetF mouseStartOffset_;
     OffsetF mouseEndOffset_;
     OffsetF mousePressOffset_;
@@ -283,6 +296,8 @@ private:
     // ListItem swiperAction
     WeakPtr<ListItemPattern> swiperItem_;
     RefPtr<SpringMotion> scrollToIndexMotion_;
+    RefPtr<SpringMotion> scrollSnapMotion_;
+    RefPtr<Scrollable> scrollableTouchEvent_;
 
     bool isScrollEnd_ = false;
 

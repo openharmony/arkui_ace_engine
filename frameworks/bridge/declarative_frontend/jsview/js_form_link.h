@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,18 @@
  * limitations under the License.
  */
 
-/**
- * ObservedPropertySimpleAbstractPU
- * 
- * all definitions in this file are framework internal
- */
-abstract class ObservedPropertySimpleAbstractPU<T> extends ObservedPropertyAbstractPU<T>  {
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_FORM_LINK_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_FORM_LINK_H
 
-  constructor(owningView: IPropertySubscriber, propertyName: PropertyInfo) {
-    super(owningView, propertyName);
-  }
-}
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+
+namespace OHOS::Ace::Framework {
+
+class JSFormLink : public JSViewAbstract {
+public:
+    static void Create(const JSCallbackInfo& info);
+    static void JSBind(BindingTarget globalObj);
+};
+
+} // namespace OHOS::Ace::Framework
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_FORM_LINK_H

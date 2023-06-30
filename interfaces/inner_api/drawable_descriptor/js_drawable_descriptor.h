@@ -43,6 +43,9 @@ private:
     static napi_value GetBackground(napi_env env, napi_callback_info info);
     static napi_value GetMask(napi_env env, napi_callback_info info);
 
+    static napi_value GetMaskClipPath(napi_env env, napi_callback_info info);
+    static napi_value GetMaskClipRadius(napi_env env, napi_callback_info info);
+
     static thread_local napi_ref baseConstructor_;
     static thread_local napi_ref layeredConstructor_;
 };

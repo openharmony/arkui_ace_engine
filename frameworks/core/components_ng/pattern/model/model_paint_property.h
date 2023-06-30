@@ -101,7 +101,7 @@ public:
     void OnModelSingleLightUpdate(const RefPtr<OHOS::Render3D::SVLight>& light)
     {
         propModelLights_.value().push_back(light);
-        LOGD("MODEL_NG: propModelLights_.size() -> %u", GetModelLightsValue().size());
+        LOGD("MODEL_NG: propModelLights_.size() -> %zu", GetModelLightsValue().size());
         ResetModelSingleLight();
         UpdateNeedsLightsSetup(true);
     }
@@ -109,7 +109,7 @@ public:
     void OnModelSingleAnimationUpdate(const RefPtr<OHOS::Render3D::GLTFAnimation>& animation)
     {
         propModelAnimations_.value().push_back(animation);
-        LOGD("MODEL_NG: propModelAnimations_.size() -> %u", GetModelAnimationsValue().size());
+        LOGD("MODEL_NG: propModelAnimations_.size() -> %zu", GetModelAnimationsValue().size());
         ResetModelSingleAnimation();
         UpdateNeedsAnimationsSetup(true);
     }
@@ -117,7 +117,7 @@ public:
     void OnModelSingleGeometryUpdate(const RefPtr<OHOS::Render3D::SVGeometry>& geometry)
     {
         propModelGeometries_.value().push_back(geometry);
-        LOGD("MODEL_NG: propModelGeometries_.size() -> %u", GetModelGeometriesValue().size());
+        LOGD("MODEL_NG: propModelGeometries_.size() -> %zu", GetModelGeometriesValue().size());
         ResetModelSingleGeometry();
         UpdateNeedsGeometriesSetup(true);
     }

@@ -15,6 +15,9 @@
 
 #include "gtest/gtest.h"
 #include "interfaces/inner_api/ace/ui_content.h"
+#include "ability_context.h"
+#include "ability_info.h"
+#include "context_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -35,5 +38,19 @@ HWTEST_F(UiContentTest, DumpTest001, TestSize.Level1)
     for (const auto& info : infos) {
         GTEST_LOG_(INFO) << info;
     }
+}
+
+/**
+ * @tc.name: UIContentTest001
+ * @tc.desc: test Create
+ * @tc.type: FUNC
+ */
+HWTEST_F(UiContentTest, UIContentTest001, TestSize.Level1)
+{
+    std::vector<std::string> info;
+    UIContent::ShowDumpHelp(info);
+    EXPECT_NE(UIContent::Create(nullptr, nullptr, false), nullptr);
+    EXPECT_NE(UIContent::Create(nullptr, nullptr), nullptr);
+    EXPECT_NE(UIContent::Create(nullptr), nullptr);
 }
 } // namespace OHOS::Ace

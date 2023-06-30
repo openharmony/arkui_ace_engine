@@ -124,7 +124,7 @@ ace_engine_subsystem = "arkui"
 # Config part name
 if (is_ohos_standard_system) {
   ace_engine_part = "ace_engine"
-  hilog_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  hilog_deps = [ "hilog:libhilog" ]
   ark_runtime_path = "//arkcompiler/runtime_core"
 } else {
   if (is_cross_platform_build) {

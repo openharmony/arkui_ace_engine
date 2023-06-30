@@ -16,18 +16,17 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_ROSEN_RENDER_OFFSCREEN_CANVAS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_ROSEN_RENDER_OFFSCREEN_CANVAS_H
 
-#ifndef USE_ROSEN_DRAWING
 #ifdef NEW_SKIA
 #include "modules/svg/include/SkSVGDOM.h"
 #else
 #include "experimental/svg/model/SkSVGDOM.h"
-#endif
 #endif
 #include "txt/paragraph.h"
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPath.h"
 #endif
+
 #include "core/components/custom_paint/offscreen_canvas.h"
 #include "core/components/custom_paint/render_custom_paint.h"
 #include "core/image/image_source_info.h"
@@ -100,6 +99,7 @@ private:
 #endif
 #else
     RSPen GetStrokePaint();
+    RSSamplingOptions options_;
 #endif
     WeakPtr<PipelineBase> pipelineContext_;
 #ifndef USE_ROSEN_DRAWING
@@ -128,19 +128,15 @@ private:
     UploadSuccessCallback uploadSuccessCallback_;
     FailedCallback failedCallback_;
     OnPostBackgroundTask onPostBackgroundTask_;
-#ifndef USE_ROSEN_DRAWING
     sk_sp<SkSVGDOM> skiaDom_ = nullptr;
-#else
-    std::shared_ptr<RSSVGDOM> drawingDom_ = nullptr;
-#endif
     CanvasImage canvasImage_;
 
 #ifndef USE_ROSEN_DRAWING
     void UpdatePaintShader(SkPaint& paint, const Gradient& gradient);
     void UpdatePaintShader(const Pattern& pattern, SkPaint& paint);
 #else
-    void UpdatePaintShader(RSBrush& brush, const Gradient& gradient);
-    void UpdatePaintShader(const Pattern& pattern, RSBrush& brush);
+    void UpdatePaintShader(RSPen* pen, RSBrush* brush, const Gradient& gradient);
+    void UpdatePaintShader(const Pattern& pattern, RSPen* pen, RSBrush* brush);
 #endif
     void PaintText(const std::string& text, double x, double y, bool isStroke, bool hasShadow = false);
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);

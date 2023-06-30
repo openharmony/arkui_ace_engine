@@ -199,6 +199,10 @@ public:
     // Get Iteration
     int32_t GetIteration() const;
 
+    void PreventFrameJank() {
+        needFrameJankReport_ = false;
+    }
+
 private:
     // Screen refresh callback. duration is in millisecond.
     void OnFrame(int64_t duration);
@@ -257,6 +261,7 @@ private:
     bool isCurDirection_ = false;
     bool toggleDirectionPending_ = false;
     bool allowRunningAsynchronously_ = false;
+    bool needFrameJankReport_ = true;
     Status status_ = Status::IDLE;
     int32_t controllerId_ = 0;
     static float scale_;

@@ -22,6 +22,8 @@
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_paint_property.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -47,6 +49,7 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (layoutConstraint->selfIdealSize.Width().has_value()) {
         childConstraint.selfIdealSize.SetWidth(layoutConstraint->selfIdealSize.Width().value());
     }
+    UpdateHeaderAndFooterMargin(layoutWrapper);
 
     // measure children (header, footer, menuItem)
     float maxChildrenWidth = GetChildrenMaxWidth(layoutWrapper->GetAllChildrenWithBuild(), childConstraint);
@@ -141,7 +144,7 @@ void MenuItemGroupLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper)
     auto minItemHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
     float headerPadding = (needHeaderPadding_ ? static_cast<float>(groupDividerPadding_.ConvertToPx()) : 0.0f) +
                           (headerHeight < minItemHeight ? (minItemHeight - headerHeight) / 2 : 0.0f);
-    LayoutIndex(wrapper, OffsetF(static_cast<float>(theme->GetMenuIconPadding().ConvertToPx()), headerPadding));
+    LayoutIndex(wrapper, OffsetF(0.0f, headerPadding));
 }
 
 void MenuItemGroupLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper)
@@ -162,8 +165,7 @@ void MenuItemGroupLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper)
     auto minItemHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
     float footerPadding = (needFooterPadding_ ? static_cast<float>(groupDividerPadding_.ConvertToPx()) : 0.0f) +
                           (footerHeight < minItemHeight ? (minItemHeight - footerHeight) / 2 : 0.0f);
-    LayoutIndex(wrapper, OffsetF(static_cast<float>(theme->GetMenuIconPadding().ConvertToPx()),
-                             (groupHeight - footerHeight - footerPadding)));
+    LayoutIndex(wrapper, OffsetF(0.0f, (groupHeight - footerHeight - footerPadding)));
 }
 
 void MenuItemGroupLayoutAlgorithm::LayoutIndex(const RefPtr<LayoutWrapper>& wrapper, const OffsetF& offset)
@@ -193,7 +195,7 @@ float MenuItemGroupLayoutAlgorithm::GetChildrenMaxWidth(
 
     for (const auto& child : children) {
         child->Measure(layoutConstraint);
-        auto childSize = child->GetGeometryNode()->GetFrameSize();
+        auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
         width = std::max(width, childSize.Width());
     }
     return width;
@@ -232,5 +234,43 @@ bool MenuItemGroupLayoutAlgorithm::IsLastNode(const RefPtr<FrameNode>& host) con
         return true;
     }
     return host == itemsAndGroups.back().Upgrade();
+}
+
+void MenuItemGroupLayoutAlgorithm::UpdateHeaderAndFooterMargin(LayoutWrapper* layoutWrapper) const
+{
+    if (headerIndex_ < 0 && footerIndex_ < 0) {
+        // no header and footer, no need to update.
+        return;
+    }
+    auto host = layoutWrapper->GetHostNode();
+    auto pattern = host->GetPattern<MenuItemGroupPattern>();
+    pattern->UpdateMenuItemIconInfo();
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    auto iconWidth = selectTheme->GetIconSideLength();
+    auto iconContentPadding = selectTheme->GetIconContentPadding();
+    auto margin = MarginProperty();
+    if (pattern->HasSelectIcon() && pattern->HasStartIcon()) {
+        margin.left = CalcLength(iconWidth * 2.0 + iconContentPadding * 2.0);
+    } else if (pattern->HasSelectIcon() || pattern->HasStartIcon()) {
+        margin.left = CalcLength(iconWidth + iconContentPadding);
+    } else {
+        // no need to update zero margin.
+        return;
+    }
+
+    if (headerIndex_ >= 0) {
+        auto headerWrapper = layoutWrapper->GetOrCreateChildByIndex(headerIndex_);
+        auto headLayoutProps = headerWrapper->GetLayoutProperty();
+        headLayoutProps->UpdateMargin(margin);
+    }
+    if (footerIndex_ >= 0) {
+        auto footerWrapper = layoutWrapper->GetOrCreateChildByIndex(footerIndex_);
+        auto footerLayoutProps = footerWrapper->GetLayoutProperty();
+        footerLayoutProps->UpdateMargin(margin);
+    }
 }
 } // namespace OHOS::Ace::NG

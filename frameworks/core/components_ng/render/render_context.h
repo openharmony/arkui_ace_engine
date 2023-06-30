@@ -39,6 +39,10 @@
 #include "core/components_ng/render/render_property.h"
 #include "core/pipeline/base/constants.h"
 
+namespace OHOS::Rosen {
+class DrawCmdList;
+}
+
 namespace OHOS::Ace::NG {
 class GeometryNode;
 class RenderPropertyNode;
@@ -99,7 +103,7 @@ public:
 
     virtual void OnModifyDone() {}
 
-    enum class ContextType : int8_t { CANVAS, ROOT, SURFACE, EFFECT, EXTERNAL };
+    enum class ContextType : int8_t { CANVAS, ROOT, SURFACE, EFFECT, EXTERNAL, INCREMENTAL_CANVAS };
     struct ContextParam {
         ContextType type;
         std::optional<std::string> surfaceName;
@@ -217,6 +221,14 @@ public:
         return {};
     }
 
+    // stop the property animation and get the current paint rect.
+    virtual OffsetF GetShowingTranslateProperty()
+    {
+        return OffsetF();
+    }
+    // update translateXY in backend.
+    virtual void UpdateTranslateInXY(const OffsetF& offset) {}
+
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json);
@@ -256,6 +268,7 @@ public:
     {
         isModalRootNode_ = isModalRootNode;
     }
+
     std::optional<BlurStyleOption> GetBackBlurStyle() const
     {
         return GetBackground() ? GetBackground()->propBlurStyleOption : std::nullopt;
@@ -301,6 +314,7 @@ public:
     {
         return nullptr;
     }
+
     virtual void SetActualForegroundColor(const Color& value) {}
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
@@ -406,6 +420,8 @@ public:
 
     // obscured
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Obscured, std::vector<ObscuredReasons>);
+
+    virtual void SetOverrideContentRect(const std::optional<RectF>& rect) {}
 
 protected:
     RenderContext() = default;

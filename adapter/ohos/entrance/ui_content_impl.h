@@ -148,6 +148,7 @@ public:
         const std::vector<std::string>& assetBasePaths) override;
     NativeValue* GetUIContext() override;
     void SetIsFocusActive(bool isFocusActive) override;
+    void SetFocusWindowId(uint32_t focusWindowId) override;
 
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
@@ -155,6 +156,8 @@ private:
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
     void DestroyCallback() const;
     void SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
+
+    void InitializeSafeArea(const RefPtr<Platform::AceContainer>& container);
 
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;

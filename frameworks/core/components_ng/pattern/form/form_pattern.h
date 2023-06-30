@@ -109,6 +109,7 @@ private:
     void UpdateImageNode();
     void RemoveFrsNode();
     void ReleaseRenderer();
+    void HideImageNode();
 
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     RefPtr<RenderContext> externalRenderContext_;

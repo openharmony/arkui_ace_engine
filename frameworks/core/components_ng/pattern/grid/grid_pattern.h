@@ -100,14 +100,13 @@ public:
             });
     }
 
+    int32_t GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode) override;
+
+    void ScrollToFocusNodeIndex(int32_t index) override;
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<GridEventHub>();
-    }
-
-    bool UsResRegion() override
-    {
-        return false;
     }
 
     GridLayoutInfo GetGridLayoutInfo() const
@@ -119,7 +118,7 @@ public:
     {
         gridLayoutInfo_.lineHeightMap_.clear();
         gridLayoutInfo_.gridMatrix_.clear();
-        gridLayoutInfo_.endIndex_ = -1;
+        gridLayoutInfo_.endIndex_ = gridLayoutInfo_.startIndex_ - 1;
         gridLayoutInfo_.endMainLineIndex_ = 0;
         gridLayoutInfo_.ResetPositionFlags();
     }
@@ -184,7 +183,7 @@ private:
         int32_t curMainIndex, int32_t curCrossIndex, int32_t curMainSpan, int32_t curCrossSpan, FocusStep step);
     WeakPtr<FocusHub> SearchFocusableChildInCross(int32_t tarMainIndex, int32_t tarCrossIndex, int32_t maxCrossCount,
         int32_t curMainIndex = -1, int32_t curCrossIndex = -1);
-    WeakPtr<FocusHub> GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarCrossIndex);
+    WeakPtr<FocusHub> GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarCrossIndex, int32_t tarIndex = -1);
     std::unordered_set<int32_t> GetFocusableChildCrossIndexesAt(int32_t tarMainIndex);
     void ScrollToFocusNode(const WeakPtr<FocusHub>& focusNode);
     void FlushCurrentFocus();
@@ -199,12 +198,14 @@ private:
     void HandleMouseEventWithoutKeyboard(const MouseInfo& info);
     void ClearMultiSelect();
     void ClearSelectedZone();
+    void OnMouseRelease();
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     void MultiSelectWithoutKeyboard(const RectF& selectedZone);
     void UpdateScrollBarOffset() override;
     void UpdateRectOfDraggedInItem(int32_t insertIndex);
     void SetAccessibilityAction();
     void StopAnimate();
+    float EstimateHeight();
 
     GridLayoutInfo gridLayoutInfo_;
     RefPtr<GridPositionController> positionController_;

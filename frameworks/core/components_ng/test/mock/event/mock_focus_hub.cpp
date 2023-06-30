@@ -28,6 +28,8 @@ bool FocusHub::IsFocusable()
     return false;
 }
 
+void FocusHub::SetFocusable(bool focusable) {}
+
 bool FocusHub::RequestFocusImmediately()
 {
     return true;

@@ -78,7 +78,7 @@ private:
 
     void InitTimerDisplay();
     void UpdateTextTimer(uint32_t elapsedTime);
-    void FireChangeEvent() const;
+    void FireChangeEvent();
 
     void HandleStart();
     void HandlePause();
@@ -90,13 +90,18 @@ private:
     bool GetIsCountDown() const;
     double GetInputCount() const;
     RefPtr<FrameNode> GetTextNode();
+    void RegisterVisibleAreaChangeCallback();
+    void OnVisibleAreaChange(bool visible);
 
     RefPtr<TextTimerController> textTimerController_;
     RefPtr<Scheduler> scheduler_;
+    RefPtr<FrameNode> textNode_;
     uint64_t elapsedTime_ = 0; // millisecond.
+    uint64_t lastReportingTime_ = 0;
     bool isCountDown_ = false;
     double inputCount_ = 0.0;
     std::optional<int32_t> textId_;
+    bool isRegisteredAreaCallback_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextTimerPattern);
 };

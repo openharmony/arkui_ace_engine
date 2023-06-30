@@ -72,6 +72,7 @@ extern const char THEME_PATTERN_APP_BAR[];
 extern const char THEME_PATTERN_ADVANCED_PATTERN[];
 extern const char THEME_PATTERN_SECURITY_COMPONENT[];
 extern const char THEME_PATTERN_FORM[];
+extern const char THEME_PATTERN_SIDE_BAR[];
 
 // pattern general attributes
 extern const char PATTERN_FG_COLOR[];

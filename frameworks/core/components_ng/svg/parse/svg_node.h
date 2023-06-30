@@ -18,8 +18,12 @@
 
 #include <vector>
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPath.h"
+#else
+#include "core/components_ng/render/drawing.h"
+#endif
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
@@ -68,7 +72,11 @@ public:
         }
     }
 
+#ifndef USE_ROSEN_DRAWING
     virtual SkPath AsPath(const Size& viewPort) const
+#else
+    virtual RSRecordingPath AsPath(const Size& viewPort) const
+#endif
     {
         return {};
     }
@@ -77,8 +85,13 @@ public:
 
     Rect AsBounds(const Size& viewPort) const
     {
+#ifndef USE_ROSEN_DRAWING
         auto bounds = AsPath(viewPort).getBounds();
         return { bounds.left(), bounds.top(), bounds.width(), bounds.height() };
+#else
+        auto bounds = AsPath(viewPort).GetBounds();
+        return { bounds.GetLeft(), bounds.GetTop(), bounds.GetWidth(), bounds.GetHeight() };
+#endif
     }
 
     void SetContext(const WeakPtr<SvgContext>& svgContext)
@@ -166,7 +179,11 @@ protected:
     bool inheritStyle_ = true;  // inherit style attributes from parent node, TAGS mask/defs/pattern/filter = false
     bool drawTraversed_ = true; // enable OnDraw, TAGS mask/defs/pattern/filter = false
 
+#ifndef USE_ROSEN_DRAWING
     SkCanvas* skCanvas_ = nullptr;
+#else
+    RSCanvas* rsCanvas_ = nullptr;
+#endif
 
     ACE_DISALLOW_COPY_AND_MOVE(SvgNode);
 };

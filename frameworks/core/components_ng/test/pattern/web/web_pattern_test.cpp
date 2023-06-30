@@ -437,6 +437,8 @@ HWTEST_F(WebPatternTest, OnOverviewUpdateTest008, TestSize.Level1)
     g_webPattern->OnModifyDone();
     int32_t value = 0;
     float scale = 0;
+    int x = 0;
+    int y = 0;
     EXPECT_NE(g_webPattern->delegate_, nullptr);
     g_webPattern->OnPinchSmoothModeEnabledUpdate(true);
     g_webPattern->OnWebDebuggingAccessEnabledUpdate(true);
@@ -447,11 +449,8 @@ HWTEST_F(WebPatternTest, OnOverviewUpdateTest008, TestSize.Level1)
     g_webPattern->OnBackgroundColorUpdate(value);
     g_webPattern->OnInitialScaleUpdate(scale);
     g_webPattern->OnMultiWindowAccessEnabledUpdate(true);
-    GestureEvent info;
-    g_webPattern->isW3cDragEvent_ = false;
-    g_webPattern->HandleDragStart(info);
+    g_webPattern->HandleDragStart(x, y);
     g_webPattern->isW3cDragEvent_ = true;
-    g_webPattern->HandleDragStart(info);
     DragDropInfo dragDropInfo;
     bool result = g_webPattern->GenerateDragDropInfo(dragDropInfo);
     EXPECT_FALSE(result);
@@ -470,10 +469,7 @@ HWTEST_F(WebPatternTest, OnOverviewUpdateTest008, TestSize.Level1)
     webPattern->OnBackgroundColorUpdate(value);
     webPattern->OnInitialScaleUpdate(scale);
     webPattern->OnMultiWindowAccessEnabledUpdate(true);
-    webPattern->isW3cDragEvent_ = true;
-    webPattern->HandleDragStart(info);
     webPattern->isW3cDragEvent_ = false;
-    webPattern->HandleDragStart(info);
     result = webPattern->GenerateDragDropInfo(dragDropInfo);
     EXPECT_FALSE(result);
     g_webPattern->RegistVirtualKeyBoardListener();
@@ -511,14 +507,14 @@ HWTEST_F(WebPatternTest, HandleDragUpdateTest010, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     g_webPattern->OnModifyDone();
     GestureEvent info;
+    int x = 0;
+    int y = 0;
     g_webPattern->isW3cDragEvent_ = false;
-    g_webPattern->HandleDragUpdate(info);
     g_webPattern->HandleDragCancel();
-    g_webPattern->HandleDragEnd(info);
+    g_webPattern->HandleDragEnd(x, y);
     g_webPattern->isW3cDragEvent_ = true;
-    g_webPattern->HandleDragUpdate(info);
     g_webPattern->HandleDragCancel();
-    g_webPattern->HandleDragEnd(info);
+    g_webPattern->HandleDragEnd(x, y);
     g_webPattern->needUpdateWeb_ = false;
     g_webPattern->RegistVirtualKeyBoardListener();
 
@@ -526,12 +522,10 @@ HWTEST_F(WebPatternTest, HandleDragUpdateTest010, TestSize.Level1)
     RefPtr<WebPattern> webPattern = AceType::MakeRefPtr<WebPattern>("test", controller);
     EXPECT_NE(webPattern, nullptr);
     webPattern->isW3cDragEvent_ = true;
-    webPattern->HandleDragUpdate(info);
-    webPattern->HandleDragEnd(info);
+    webPattern->HandleDragEnd(x, y);
     g_webPattern->HandleDragCancel();
     webPattern->isW3cDragEvent_ = false;
-    webPattern->HandleDragUpdate(info);
-    webPattern->HandleDragEnd(info);
+    webPattern->HandleDragEnd(x, y);
     g_webPattern->HandleDragCancel();
 #endif
 }

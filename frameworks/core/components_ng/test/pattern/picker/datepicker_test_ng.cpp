@@ -2014,7 +2014,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest011, TestSize.Level1)
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
     KeyEvent keyEvent;
-    focusHub->onKeyEventInternal_(keyEvent);
+    focusHub->ProcessOnKeyEventInternal(keyEvent);
     /**
      * test callback getInnerFocusRectFunc_
      */

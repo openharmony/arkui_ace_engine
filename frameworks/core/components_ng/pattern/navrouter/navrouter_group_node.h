@@ -56,10 +56,14 @@ public:
     void OnDetachFromMainTree(bool recursive) override;
     void OnAttachToMainTree(bool recursive) override;
 
+    void OnOffscreenProcess(bool recursive) override;
+
 private:
     void AddNavDestinationToNavigation(const RefPtr<UINode>& parent);
     void SetDestinationChangeEvent(const RefPtr<UINode>& parent);
     bool CleanNodeInNavigation(const RefPtr<UINode>& parent);
+
+    void ProcessDestinationChangeEvent();
 
     RefPtr<UINode> navDestinationNode_;
 };

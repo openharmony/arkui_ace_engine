@@ -396,17 +396,6 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
     auto pageNode = DynamicCast<FrameNode>(node);
     CHECK_NULL_VOID(pageNode);
     auto layoutProperty = pageNode->GetLayoutProperty();
-    auto pipeline = PipelineBase::GetCurrentContext();
-    const static int32_t PLATFORM_VERSION_TEN = 10;
-    if (pipeline) {
-        LOGI("FirePageShow MinPlatformVersion:%{public}d, IgnoreViewSafeArea:%{public}u",
-            pipeline->GetMinPlatformVersion(), pipeline->GetIgnoreViewSafeArea());
-        if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && !pipeline->GetIgnoreViewSafeArea() &&
-            !pipeline->GetInstallationFree() && layoutProperty) {
-            layoutProperty->SetSafeArea(pipeline->GetCurrentViewSafeArea());
-            LOGI("FirePageShow SetSafeArea to page :%{public}s", layoutProperty->GetSafeArea().ToString().c_str());
-        }
-    }
     auto pageFocusHub = pageNode->GetFocusHub();
     CHECK_NULL_VOID(pageFocusHub);
     pageFocusHub->SetParentFocusable(true);

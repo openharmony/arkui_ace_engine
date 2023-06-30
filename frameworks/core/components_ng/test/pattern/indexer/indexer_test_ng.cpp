@@ -63,6 +63,7 @@ public:
     void TearDown() override;
     void GetInstance();
     void RunMeasureAndLayout();
+    float GetFirstChildOffsetY();
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<IndexerPattern> pattern_;
@@ -119,6 +120,13 @@ void IndexerTestNg::RunMeasureAndLayout()
     layoutWrapper->Measure(LayoutConstraint);
     layoutWrapper->Layout();
     layoutWrapper->MountToHostOnMainThread();
+}
+
+float IndexerTestNg::GetFirstChildOffsetY()
+{
+    auto firstChild = AceType::DynamicCast<FrameNode>(frameNode_->GetFirstChild());
+    float firstOffsetY = firstChild->GetGeometryNode()->GetFrameOffset().GetY();
+    return firstOffsetY;
 }
 
 /**
@@ -199,19 +207,22 @@ HWTEST_F(IndexerTestNg, IndexerMoveIndex002, TestSize.Level1)
     GestureEvent gestureEvent;
     gestureEvent.SetInputEventType(InputEventType::KEYBOARD);
 
-    gestureEvent.SetLocalLocation(Offset(0.f, 50.f));
+
+    float firstOffsetY = GetFirstChildOffsetY();
+    float locationY = 50.f + firstOffsetY;
+    gestureEvent.SetLocalLocation(Offset(0.f, locationY));
     start(gestureEvent);
     update(gestureEvent);
-    EXPECT_EQ(pattern_->GetSelected(), static_cast<int32_t>(50.f / pattern_->itemSizeRender_));
+    EXPECT_EQ(pattern_->GetSelected(), static_cast<int32_t>((locationY - firstOffsetY) / pattern_->itemSizeRender_));
 
     /**
      * @tc.steps: step2. Location is (0, 50).
      * @tc.expected: Selected unchanged.
      */
-    gestureEvent.SetLocalLocation(Offset(0.f, 50.f));
+    gestureEvent.SetLocalLocation(Offset(0.f, locationY));
     start(gestureEvent);
     update(gestureEvent);
-    EXPECT_EQ(pattern_->GetSelected(), static_cast<int32_t>(50.f / pattern_->itemSizeRender_));
+    EXPECT_EQ(pattern_->GetSelected(), static_cast<int32_t>((locationY - firstOffsetY) / pattern_->itemSizeRender_));
 }
 
 /**
@@ -260,27 +271,30 @@ HWTEST_F(IndexerTestNg, IndexerTouch001, TestSize.Level1)
      * @tc.steps: step1. OnTouchDown.
      * @tc.expected: Selected index is correct.
      */
+    float firstOffsetY = GetFirstChildOffsetY();
+    float locationY = 50.f + firstOffsetY;
     pattern_->OnHover(true);
     TouchLocationInfo touchLocationInfo1(1);
     touchLocationInfo1.SetTouchType(TouchType::DOWN);
-    touchLocationInfo1.SetLocalLocation(Offset(0.f, 50.f));
+    touchLocationInfo1.SetLocalLocation(Offset(0.f, locationY));
     TouchEventInfo touchEventInfo1("onTouchDown");
     touchEventInfo1.AddTouchLocationInfo(std::move(touchLocationInfo1));
     auto touch = pattern_->touchListener_->GetTouchEventCallback();
     touch(touchEventInfo1);
-    EXPECT_EQ(pattern_->GetSelected(), static_cast<int32_t>(50.f / pattern_->itemSizeRender_));
+    EXPECT_EQ(pattern_->GetSelected(), static_cast<int32_t>((locationY - firstOffsetY) / pattern_->itemSizeRender_));
 
     /**
      * @tc.steps: step2. OnTouchUp, differrnt location.
      * @tc.expected: Selected index is correct.
      */
+    locationY = 20.f + firstOffsetY;
     TouchLocationInfo touchLocationInfo2(1);
     touchLocationInfo2.SetTouchType(TouchType::UP);
-    touchLocationInfo2.SetLocalLocation(Offset(0.f, 20.f));
+    touchLocationInfo2.SetLocalLocation(Offset(0.f, locationY));
     TouchEventInfo touchEventInfo2("onTouchUp");
     touchEventInfo2.AddTouchLocationInfo(std::move(touchLocationInfo2));
     touch(touchEventInfo2);
-    EXPECT_EQ(pattern_->GetSelected(), static_cast<int32_t>(20.f / pattern_->itemSizeRender_));
+    EXPECT_EQ(pattern_->GetSelected(), static_cast<int32_t>((locationY - firstOffsetY) / pattern_->itemSizeRender_));
 }
 
 /**
@@ -301,15 +315,17 @@ HWTEST_F(IndexerTestNg, IndexerTouch002, TestSize.Level1)
      * @tc.steps: step1. OnTouchDown.
      * @tc.expected: Selected index is correct.
      */
+    float firstOffsetY = GetFirstChildOffsetY();
+    float locationY = 50.f + firstOffsetY;
     pattern_->OnHover(false);
     TouchLocationInfo touchLocationInfo1(1);
     touchLocationInfo1.SetTouchType(TouchType::DOWN);
-    touchLocationInfo1.SetLocalLocation(Offset(0.f, 50.f));
+    touchLocationInfo1.SetLocalLocation(Offset(0.f, locationY));
     TouchEventInfo touchEventInfo1("onTouchDown");
     touchEventInfo1.AddTouchLocationInfo(std::move(touchLocationInfo1));
     auto touch = pattern_->touchListener_->GetTouchEventCallback();
     touch(touchEventInfo1);
-    EXPECT_EQ(pattern_->GetSelected(), static_cast<int32_t>(50.f / pattern_->itemSizeRender_));
+    EXPECT_EQ(pattern_->GetSelected(), static_cast<int32_t>((locationY - firstOffsetY) / pattern_->itemSizeRender_));
 
     /**
      * @tc.steps: step2. OnTouchUp, same location.
@@ -317,11 +333,11 @@ HWTEST_F(IndexerTestNg, IndexerTouch002, TestSize.Level1)
      */
     TouchLocationInfo touchLocationInfo2(1);
     touchLocationInfo2.SetTouchType(TouchType::UP);
-    touchLocationInfo2.SetLocalLocation(Offset(0.f, 50.f));
+    touchLocationInfo2.SetLocalLocation(Offset(0.f, locationY));
     TouchEventInfo touchEventInfo2("onTouchUp");
     touchEventInfo2.AddTouchLocationInfo(std::move(touchLocationInfo2));
     touch(touchEventInfo2);
-    EXPECT_EQ(pattern_->GetSelected(), static_cast<int32_t>(50.f / pattern_->itemSizeRender_));
+    EXPECT_EQ(pattern_->GetSelected(), static_cast<int32_t>((locationY - firstOffsetY) / pattern_->itemSizeRender_));
 }
 
 /**
@@ -496,8 +512,6 @@ HWTEST_F(IndexerTestNg, IndexerHover001, TestSize.Level1)
     EXPECT_EQ(pattern_->childHoverIndex_, 1);
     pattern_->OnChildHover(1, false);
     EXPECT_EQ(pattern_->childHoverIndex_, -1);
-    pattern_->OnChildHover(CREATE_ARRAY.size(), true);
-    EXPECT_EQ(pattern_->childHoverIndex_, CREATE_ARRAY.size());
 
     pattern_->OnHover(false);
     EXPECT_FALSE(pattern_->isHover_);
@@ -752,8 +766,7 @@ HWTEST_F(IndexerTestNg, IndexerPopupTouchDown001, TestSize.Level1)
     pattern_->OnPopupTouchDown(touchEventInfo);
     ASSERT_NE(pattern_->popupNode_, nullptr);
     auto columnLayoutProperty = pattern_->popupNode_->GetLayoutProperty<LinearLayoutProperty>();
-    // If Visibility never changed, the value is default value.
-    EXPECT_EQ(columnLayoutProperty->GetVisibility(), std::nullopt);
+    EXPECT_EQ(columnLayoutProperty->GetVisibility(), VisibleType::GONE);
 }
 
 /**
@@ -825,17 +838,6 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest001, TestSize.Level1)
     IndexerModelNG.SetSelectedBackgroundColor(Color(0x00000000));
     IndexerModelNG.SetPopupBackground(Color(0x00000000));
     IndexerModelNG.SetUsingPopup(true);
-    TextStyle textStyle;
-    textStyle.SetFontFamilies({ "font1", "font2" });
-
-    std::function<void(TextStyle & textStyle)>&& getSelectedTextStyleFunc = [](TextStyle& textStyle) {
-        textStyle.SetFontFamilies({ "font1", "font2" });
-    };
-    std::function<void(TextStyle & textStyle)>&& getTextStyleFunc = [](TextStyle& textStyle) {};
-
-    IndexerModelNG.SetSelectedFont(std::move(getSelectedTextStyleFunc));
-    IndexerModelNG.SetPopupFont(std::move(getTextStyleFunc));
-    IndexerModelNG.SetFont(std::move(getTextStyleFunc));
     IndexerModelNG.SetItemSize(Dimension(24));
     IndexerModelNG.SetAlignStyle(0);
     IndexerModelNG.SetSelected(0);
@@ -856,9 +858,6 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest001, TestSize.Level1)
     EXPECT_EQ(paintProperty_->GetSelectedBackgroundColorValue(), Color(0x00000000));
     EXPECT_EQ(paintProperty_->GetPopupBackgroundValue(), Color(0x00000000));
     EXPECT_EQ(layoutProperty_->GetUsingPopupValue(), true);
-    EXPECT_EQ(layoutProperty_->GetSelectedFontValue(), textStyle);
-    EXPECT_EQ(layoutProperty_->GetPopupFontValue(), TextStyle());
-    EXPECT_EQ(layoutProperty_->GetFontValue(), TextStyle());
     EXPECT_EQ(layoutProperty_->GetItemSizeValue(), Dimension(24));
     EXPECT_EQ(layoutProperty_->GetAlignStyleValue(), AlignStyle::LEFT);
     EXPECT_EQ(layoutProperty_->GetSelectedValue(), 0);

@@ -24,6 +24,7 @@
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/button_model_impl.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
@@ -167,6 +168,10 @@ void JSButton::HandleDifferentRadius(const JSRef<JSVal>& args)
         if (ParseJsDimensionVp(object->GetProperty("bottomRight"), bottomRight)) {
             radiusBottomRight = bottomRight;
         }
+        if (!radiusTopLeft.has_value() && !radiusTopRight.has_value() && !radiusBottomLeft.has_value() &&
+            !radiusBottomRight.has_value()) {
+            return;
+        }
         ButtonModel::GetInstance()->SetBorderRadius(radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
     }
 }
@@ -243,6 +248,7 @@ void JSButton::SetLableStyle(const JSCallbackInfo& info)
     ButtonParameters buttonParameters;
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> overflowValue = obj->GetProperty("overflow");
+    buttonParameters.textOverflow = TextOverflow::ELLIPSIS;
     if (!overflowValue->IsNull() && overflowValue->IsNumber()) {
         auto overflow = overflowValue->ToNumber<int32_t>();
         if (overflow >= 0 && overflow < static_cast<int32_t>(TEXT_OVERFLOWS.size()) &&
@@ -519,6 +525,11 @@ NG::PaddingProperty JSButton::SetPaddings(const std::optional<CalcDimension>& to
 void JSButton::JsOnClick(const JSCallbackInfo& info)
 {
     LOGD("JSButton JsOnClick");
+    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnClick callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnClick();
+        return;
+    }
     if (!info[0]->IsFunction()) {
         LOGE("OnClick parameter need a function.");
         return;

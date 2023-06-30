@@ -74,4 +74,6 @@ void FormManagerDelegate::AddSnapshotCallback(SnapshotCallback&& callback) {}
 void FormManagerDelegate::ResetForm() {}
 
 void FormManagerDelegate::ReleaseForm() {}
+
+void FormManagerDelegate::ReleaseRenderer() {}
 } // namespace OHOS::Ace

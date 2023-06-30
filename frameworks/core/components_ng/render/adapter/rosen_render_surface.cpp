@@ -49,7 +49,7 @@ void RosenRenderSurface::InitSurface()
     if (!renderContext && SystemProperties::GetExtSurfaceEnabled()) {
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
-        int32_t windowId = context->GetWindowId();
+        auto windowId = context->GetWindowId();
         surfaceDelegate_ = new OHOS::SurfaceDelegate(windowId);
         surfaceDelegate_->CreateSurface();
         if (extSurfaceCallbackInterface_) {

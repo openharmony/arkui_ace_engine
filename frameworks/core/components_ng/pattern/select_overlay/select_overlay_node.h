@@ -53,6 +53,8 @@ public:
 
     bool IsInSelectedOrSelectOverlayArea(const PointF& point);
 
+    void SetClosedByGlobalEvent(bool closedByGlobalEvent);
+
 private:
     void CreateToolBar();
     bool AddSystemDefaultOptions(float maxWidth, float& allocatedSize);

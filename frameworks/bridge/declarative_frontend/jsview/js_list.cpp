@@ -55,6 +55,9 @@ ListModel* ListModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 
+const std::vector<V2::ScrollSnapAlign> SCROLL_SNAP_ALIGN = { V2::ScrollSnapAlign::NONE, V2::ScrollSnapAlign::START,
+    V2::ScrollSnapAlign::CENTER, V2::ScrollSnapAlign::END };
+
 void JSList::SetDirection(int32_t direction)
 {
     ListModel::GetInstance()->SetListDirection(static_cast<Axis>(direction));
@@ -221,6 +224,17 @@ void JSList::SetLanes(const JSCallbackInfo& info)
 void JSList::SetSticky(int32_t sticky)
 {
     ListModel::GetInstance()->SetSticky(static_cast<V2::StickyStyle>(sticky));
+}
+
+void JSList::SetScrollSnapAlign(int32_t scrollSnapAlign)
+{
+    V2::ScrollSnapAlign param;
+    if (scrollSnapAlign < 0 || scrollSnapAlign >= static_cast<int32_t>(SCROLL_SNAP_ALIGN.size())) {
+        param = V2::ScrollSnapAlign::NONE;
+    } else {
+        param = V2::ScrollSnapAlign(scrollSnapAlign);
+    }
+    ListModel::GetInstance()->SetScrollSnapAlign(param);
 }
 
 void JSList::SetDivider(const JSCallbackInfo& args)
@@ -593,6 +607,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("sticky", &JSList::SetSticky);
     JSClass<JSList>::StaticMethod("nestedScroll", &JSList::SetNestedScroll);
     JSClass<JSList>::StaticMethod("enableScrollInteraction", &JSList::SetScrollEnabled);
+    JSClass<JSList>::StaticMethod("scrollSnapAlign", &JSList::SetScrollSnapAlign);
 
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
     JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);

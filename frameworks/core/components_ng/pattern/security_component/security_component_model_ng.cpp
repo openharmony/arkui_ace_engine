@@ -182,7 +182,7 @@ void SecurityComponentModelNG::SetDefaultBackgroundButton(const RefPtr<FrameNode
     style.SetBorderStyle(BorderStyle::NONE);
     renderContext->UpdateBorderStyle(style);
     auto buttonRadius = secCompTheme->GetBorderRadius();
-    renderContext->UpdateBorderRadius({ buttonRadius, buttonRadius, buttonRadius, buttonRadius });
+    buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(buttonRadius));
     renderContext->UpdateBackgroundColor(secCompTheme->GetBackgroundColor());
     buttonLayoutProperty->UpdateType(static_cast<ButtonType>(type));
 }
@@ -332,11 +332,9 @@ void SecurityComponentModelNG::SetBackgroundBorderRadius(const Dimension& value)
         LOGW("background is not exist");
         return;
     }
-    auto node = GetCurSecCompChildNode(V2::BUTTON_ETS_TAG);
-    CHECK_NULL_VOID(node);
-    auto renderContext = node->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBorderRadius({ value, value, value, value });
+    auto bgProp = GetChildLayoutProprty<ButtonLayoutProperty>(V2::BUTTON_ETS_TAG);
+    CHECK_NULL_VOID(bgProp);
+    bgProp->UpdateBorderRadius(BorderRadiusProperty(value));
 }
 
 void SecurityComponentModelNG::SetBackgroundPadding(const std::optional<Dimension>& left,

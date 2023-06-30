@@ -446,7 +446,9 @@ void Animator::Pause()
     if (scheduler_ && scheduler_->IsActive()) {
         scheduler_->Stop();
     }
-    JankFrameReport::ClearFrameJankFlag(JANK_RUNNING_ANIMATOR);
+    if (needFrameJankReport_) {
+        JankFrameReport::ClearFrameJankFlag(JANK_RUNNING_ANIMATOR);
+    }
     status_ = Status::PAUSED;
     asyncTrace_ = nullptr;
     StatusListenable::NotifyPauseListener();
@@ -470,7 +472,9 @@ void Animator::Resume()
     if (scheduler_ && !scheduler_->IsActive()) {
         scheduler_->Start();
     }
-    JankFrameReport::SetFrameJankFlag(JANK_RUNNING_ANIMATOR);
+    if (needFrameJankReport_) {
+        JankFrameReport::SetFrameJankFlag(JANK_RUNNING_ANIMATOR);
+    }
     status_ = Status::RUNNING;
     if (!motion_) {
         asyncTrace_ = std::make_shared<AceAsyncScopedTrace>(animatorName_.c_str());
@@ -502,7 +506,9 @@ void Animator::Stop()
         return;
     }
     LOGD("animation stop. id: %{public}d", controllerId_);
-    JankFrameReport::ClearFrameJankFlag(JANK_RUNNING_ANIMATOR);
+    if (needFrameJankReport_) {
+        JankFrameReport::ClearFrameJankFlag(JANK_RUNNING_ANIMATOR);
+    }
 
     elapsedTime_ = 0;
     repeatTimesLeft_ = repeatTimes_;
@@ -591,7 +597,7 @@ void Animator::OnFrame(int64_t duration)
     if (elapsedTime_ < scaledStartDelay_) {
         if ((fillMode_ == FillMode::BACKWARDS || fillMode_ == FillMode::BOTH) && !isBothBackwards) {
             for (const auto& interpolator : interpolators_) {
-                interpolator->OnNormalizedTimestampChanged(0.0f, isReverse_);
+                interpolator->OnNormalizedTimestampChanged(isCurDirection_ ? 1.0f : 0.0f, isReverse_);
             }
             isBothBackwards = true;
         }
@@ -705,7 +711,9 @@ void Animator::StartInner(bool alwaysNotify)
         }
     }
     StatusListenable::NotifyStartListener();
-    JankFrameReport::SetFrameJankFlag(JANK_RUNNING_ANIMATOR);
+    if (needFrameJankReport_) {
+        JankFrameReport::SetFrameJankFlag(JANK_RUNNING_ANIMATOR);
+    }
     status_ = Status::RUNNING;
     if (!motion_) {
         asyncTrace_ = std::make_shared<AceAsyncScopedTrace>(animatorName_.c_str());

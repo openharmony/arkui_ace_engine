@@ -147,8 +147,14 @@ void HyperlinkPattern::OnMouseEvent(MouseInfo& info)
     CHECK_NULL_VOID(frame);
     auto frameId = frame->GetId();
 
-    pipeline->SetMouseStyleHoldNode(frameId);
-    pipeline->ChangeMouseStyle(frameId, MouseFormat::HAND_POINTING);
+    if (frame->IsOutOfTouchTestRegion({ static_cast<float>(info.GetGlobalLocation().GetX()),
+        static_cast<float>(info.GetGlobalLocation().GetY()) }, 0)) {
+        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+        pipeline->FreeMouseStyleHoldNode(frameId);
+    } else {
+        pipeline->SetMouseStyleHoldNode(frameId);
+        pipeline->ChangeMouseStyle(frameId, MouseFormat::HAND_POINTING);
+    }
 }
 
 void HyperlinkPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const

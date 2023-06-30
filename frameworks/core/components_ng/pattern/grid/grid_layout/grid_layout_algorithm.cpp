@@ -45,13 +45,13 @@ LayoutConstraintF GridLayoutAlgorithm::CreateChildConstraint(const SizeF& idealS
 
     float rowLen = 0.0;
     for (int32_t i = 0; i < rowSpan; ++i) {
-        rowLen += gridCells_.at(row + i).at(col).Height();
+        rowLen += GetItemSize(row + i, col, true);
     }
     rowLen += (rowSpan - 1) * rowsGap_;
 
     float colLen = 0.0;
     for (int32_t i = 0; i < colSpan; ++i) {
-        colLen += gridCells_.at(row).at(col + i).Width();
+        colLen += GetItemSize(row, col + i, false);
     }
     colLen += (colSpan - 1) * columnsGap_;
 
@@ -172,11 +172,11 @@ OffsetF GridLayoutAlgorithm::ComputeItemPosition(LayoutWrapper* layoutWrapper, i
     float positionX = 0.0f;
     float positionY = 0.0f;
     for (int32_t i = 0; i < row; ++i) {
-        positionY += gridCells_.at(i).at(0).Height();
+        positionY += GetItemSize(i, 0, true);
     }
     positionY += row * rowsGap_;
     for (int32_t i = 0; i < col; ++i) {
-        positionX += gridCells_.at(0).at(i).Width();
+        positionX += GetItemSize(0, i, false);
     }
     positionX += col * columnsGap_;
 
@@ -184,11 +184,11 @@ OffsetF GridLayoutAlgorithm::ComputeItemPosition(LayoutWrapper* layoutWrapper, i
     float rowLen = 0.0f;
     float colLen = 0.0f;
     for (int32_t i = 0; i < rowSpan; ++i) {
-        rowLen += gridCells_.at(row + i).at(col).Height();
+        rowLen += GetItemSize(row + i, col, true);
     }
     rowLen += (rowSpan - 1) * rowsGap_;
     for (int32_t i = 0; i < colSpan; ++i) {
-        colLen += gridCells_.at(row).at(col + i).Width();
+        colLen += GetItemSize(row, col + i, false);
     }
     colLen += (colSpan - 1) * columnsGap_;
 
@@ -204,6 +204,19 @@ OffsetF GridLayoutAlgorithm::ComputeItemPosition(LayoutWrapper* layoutWrapper, i
     return OffsetF(positionX, positionY);
 }
 
+float GridLayoutAlgorithm::GetItemSize(int32_t row, int32_t col, bool height) const
+{
+    auto nextC = gridCells_.find(row);
+    if (nextC != gridCells_.end()) {
+        auto nextCol = nextC->second;
+        auto nextColRow = nextCol.find(col);
+        if (nextColRow != nextCol.end()) {
+            return height ? nextColRow->second.Height() : nextColRow->second.Width();
+        }
+    }
+    return 0.0;
+}
+
 void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -212,8 +225,8 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto idealSize =
         CreateIdealSize(gridLayoutProperty->GetLayoutConstraint().value(), axis, MeasureType::MATCH_PARENT, true);
     if (GreatOrEqual(GetMainAxisSize(idealSize, axis), Infinity<float>())) {
-        LOGE("size of main axis value is infinity, please check");
-        return;
+        idealSize = gridLayoutProperty->GetLayoutConstraint().value().percentReference;
+        LOGI("size of main axis value is infinity, use percent reference");
     }
 
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);

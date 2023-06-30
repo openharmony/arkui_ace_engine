@@ -139,11 +139,12 @@ void ImageLoadingContext::OnMakeCanvasImage()
 
     // upscale targetSize if size level is mapped
     bool forceResize = GetSourceSize().has_value();
-    if (!forceResize && sizeLevel_ > 0) {
+    if (!forceResize && targetSize.IsPositive() && sizeLevel_ > targetSize.Width()) {
         targetSize.ApplyScale(sizeLevel_ / targetSize.Width());
     }
 
-    LOGD("start MakeCanvasImage: %{public}s", imageObj_->GetSourceInfo().ToString().c_str());
+    LOGD("start MakeCanvasImage: %{public}s, size = %{public}s", imageObj_->GetSourceInfo().ToString().c_str(),
+        targetSize.ToString().c_str());
     // step4: [MakeCanvasImage] according to [targetSize]
     canvasKey_ = ImageUtils::GenerateImageKey(src_, targetSize);
     imageObj_->MakeCanvasImage(Claim(this), targetSize, forceResize, syncLoad_);

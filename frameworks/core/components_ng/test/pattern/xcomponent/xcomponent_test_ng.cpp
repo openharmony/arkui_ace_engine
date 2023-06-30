@@ -760,7 +760,7 @@ HWTEST_F(XComponentTestNg, XComponentKeyEventTest010, TestSize.Level1)
     for (SourceType& sourceType : sourceTypes) {
         for (KeyAction& keyAction : keyActions) {
             KeyEvent keyEvent { KeyCode::KEY_0, keyAction, 0, 0, 0, sourceType };
-            focusHub->onKeyEventInternal_(keyEvent);
+            focusHub->ProcessOnKeyEventInternal(keyEvent);
             EXPECT_EQ(nativeXComponentImpl->keyEvent_.sourceType, ConvertNativeXComponentEventSourceType(sourceType));
             EXPECT_EQ(nativeXComponentImpl->keyEvent_.action, ConvertNativeXComponentKeyAction(keyAction));
         }

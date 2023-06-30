@@ -56,7 +56,8 @@ void DialogPattern::BindCloseCallBack(const RefPtr<GestureEventHub>& hub, int32_
 {
 }
 
-RefPtr<FrameNode> DialogPattern::CreateButton(const ButtonInfo& params, int32_t index, bool isCancel)
+RefPtr<FrameNode> DialogPattern::CreateButton(
+    const ButtonInfo& params, int32_t index, bool isCancel, bool useRelativeLayout)
 {
     return nullptr;
 }

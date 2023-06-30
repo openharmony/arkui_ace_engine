@@ -15,11 +15,38 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_paint_method.h"
 
+#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float CARET_WIDTH = 1.5f;
+}
 RichEditorPaintMethod::RichEditorPaintMethod(const WeakPtr<Pattern>& pattern, RefPtr<Paragraph> paragraph,
     float baselineOffset, RefPtr<RichEditorContentModifier> richEditorContentModifier,
     RefPtr<RichEditorOverlayModifier> richEditorOverlayModifier)
-    : TextPaintMethod(pattern, paragraph, baselineOffset, richEditorContentModifier, richEditorOverlayModifier)
+    : TextPaintMethod(pattern, paragraph, baselineOffset, richEditorContentModifier, richEditorOverlayModifier),
+      pattern_(pattern), richEditorOverlayModifier_(richEditorOverlayModifier)
 {}
 RichEditorPaintMethod::~RichEditorPaintMethod() = default;
+
+void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
+{
+    TextPaintMethod::UpdateOverlayModifier(paintWrapper);
+    auto richEditorPattern = DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(richEditorPattern);
+    auto caretVisible = richEditorPattern->GetCaretVisible();
+    richEditorOverlayModifier_->SetCaretVisible(caretVisible);
+    richEditorOverlayModifier_->SetCaretColor(Color::BLUE.GetValue());
+    richEditorOverlayModifier_->SetCaretWidth(
+        static_cast<float>(Dimension(CARET_WIDTH, DimensionUnit::VP).ConvertToPx()));
+    if (richEditorPattern->GetTextContentLength() > 0) {
+        float caretHeight = 0;
+        OffsetF caretOffset =
+            richEditorPattern->CalcCursorOffsetByPosition(richEditorPattern->GetCaretPosition(), caretHeight);
+        richEditorOverlayModifier_->SetCaretOffsetAndHeight(caretOffset, caretHeight);
+    } else {
+        auto rect = richEditorPattern->GetTextContentRect();
+        richEditorOverlayModifier_->SetCaretOffsetAndHeight(OffsetF(rect.GetX(), rect.GetY()), rect.Height());
+    }
+}
 } // namespace OHOS::Ace::NG

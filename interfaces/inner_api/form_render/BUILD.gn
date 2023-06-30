@@ -65,7 +65,7 @@ ohos_shared_library("ace_form_render") {
     "form_fwk:form_manager",
     "graphic_standard:librender_service_client",
     "graphic_standard:surface",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
     "napi:ace_napi",

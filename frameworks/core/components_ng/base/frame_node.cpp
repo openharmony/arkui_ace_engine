@@ -26,6 +26,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/layout_algorithm.h"
@@ -36,6 +37,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -80,6 +82,8 @@ FrameNode::~FrameNode()
         pipeline->ChangeMouseStyle(GetId(), MouseFormat::DEFAULT);
         pipeline->FreeMouseStyleHoldNode(GetId());
         pipeline->RemoveStoredNode(GetRestoreId());
+        auto dragManager = pipeline->GetDragDropManager();
+        dragManager->RemoveDragFrameNode(AceType::WeakClaim(this));
     }
 }
 
@@ -130,7 +134,7 @@ RefPtr<FrameNode> FrameNode::CreateFrameNode(
 void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
-    node->AttachToMainTree();
+    node->ProcessOffscreenTask();
     node->MarkModifyDone();
     node->UpdateLayoutPropertyFlag();
     auto layoutWrapper = node->CreateLayoutWrapper();
@@ -142,8 +146,9 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
     layoutWrapper->MountToHostOnMainThread();
     auto paintProperty = node->GetPaintProperty<PaintProperty>();
     auto wrapper = node->CreatePaintWrapper();
-    CHECK_NULL_VOID(wrapper);
-    wrapper->FlushRender();
+    if (wrapper != nullptr) {
+        wrapper->FlushRender();
+    }
     paintProperty->CleanDirty();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -355,7 +360,6 @@ void FrameNode::FromJson(const std::unique_ptr<JsonValue>& json)
 
 void FrameNode::OnAttachToMainTree(bool recursive)
 {
-    UINode::OnAttachToMainTree(recursive);
     eventHub_->FireOnAppear();
     renderContext_->OnNodeAppear(recursive);
     if (IsResponseRegion() || HasPositionProp()) {
@@ -368,12 +372,15 @@ void FrameNode::OnAttachToMainTree(bool recursive)
             parent = parent->GetParent();
         }
     }
+    // node may have been measured before AttachToMainTree
+    if (geometryNode_->GetParentLayoutConstraint().has_value() && !UseOffscreenProcess()) {
+        layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+
+    UINode::OnAttachToMainTree(recursive);
+
     if (!hasPendingRequest_) {
         return;
-    }
-    // node may have been measured before AttachToMainTree
-    if (geometryNode_->GetParentLayoutConstraint().has_value()) {
-        layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
     }
     auto context = GetContext();
     CHECK_NULL_VOID(context);
@@ -439,6 +446,10 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure() || dirty->SkipMeasureContent();
     config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
+    if ((config.skipMeasure == false) && (config.skipLayout == false) && GetInspectorId().has_value()) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
+    }
     auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(dirty, config);
     // TODO: temp use and need to delete.
     needRerender = needRerender || pattern_->OnDirtyLayoutWrapperSwap(dirty, config.skipMeasure, config.skipLayout);
@@ -529,7 +540,7 @@ void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
 
-    bool isFrameDisappear = forceDisappear || !context->GetOnShow();
+    bool isFrameDisappear = forceDisappear || !context->GetOnShow() || !IsOnMainTree();
     if (!isFrameDisappear) {
         bool curFrameIsActive = isActive_;
         bool curIsVisible = IsVisible();
@@ -567,6 +578,10 @@ void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
     auto visibleRect = frameRect;
     RectF parentRect;
     auto parentUi = GetParent();
+    if (!parentUi) {
+        visibleRect.SetWidth(0.0f);
+        visibleRect.SetHeight(0.0f);
+    }
     while (parentUi) {
         auto parentFrame = AceType::DynamicCast<FrameNode>(parentUi);
         if (!parentFrame) {
@@ -660,6 +675,9 @@ void FrameNode::SetActive(bool active)
         if (parent) {
             parent->MarkNeedSyncRenderTree();
         }
+        if (GetTag() == V2::TAB_CONTENT_ITEM_ETS_TAG) {
+            SetJSViewActive(active);
+        }
     }
 }
 
@@ -678,9 +696,14 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
     UpdateLayoutPropertyFlag();
     layoutWrapper = CreateLayoutWrapper();
     CHECK_NULL_RETURN_NOLOG(layoutWrapper, std::nullopt);
-    auto task = [layoutWrapper, layoutConstraint = GetLayoutConstraint(), forceUseMainThread]() {
+    auto task = [layoutWrapper, depth = GetDepth(), layoutConstraint = GetLayoutConstraint(), forceUseMainThread]() {
         layoutWrapper->SetActive();
         layoutWrapper->SetRootMeasureNode();
+        {
+            ACE_SCOPED_TRACE("LayoutWrapper::RestoreGeoState");
+            // restore to the geometry state after last Layout and before SafeArea expansion and keyboard avoidance
+            LayoutWrapper::RestoreGeoState(depth);
+        }
         {
             ACE_SCOPED_TRACE("LayoutWrapper::Measure");
             layoutWrapper->Measure(layoutConstraint);
@@ -688,6 +711,12 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
         {
             ACE_SCOPED_TRACE("LayoutWrapper::Layout");
             layoutWrapper->Layout();
+        }
+        {
+            ACE_SCOPED_TRACE("LayoutWrapper::ExpandSafeArea");
+            LayoutWrapper::SaveGeoState();
+            LayoutWrapper::AvoidKeyboard();
+            LayoutWrapper::ExpandSafeArea();
         }
         {
             ACE_SCOPED_TRACE("LayoutWrapper::MountToHostOnMainThread");
@@ -713,9 +742,17 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     }
     auto wrapper = CreatePaintWrapper();
     CHECK_NULL_RETURN_NOLOG(wrapper, std::nullopt);
-    auto task = [wrapper, paintProperty = paintProperty_]() {
+    auto weak = AceType::WeakClaim(this);
+    auto task = [weak, wrapper, paintProperty = paintProperty_]() {
+        ACE_SCOPED_TRACE("FrameNode::RenderTask");
+        auto ref = weak.Upgrade();
         wrapper->FlushRender();
         paintProperty->CleanDirty();
+
+        if (ref->GetInspectorId().has_value()) {
+            auto renderContext = ref->GetRenderContext();
+            renderContext->RequestNextFrame();
+        }
     };
     if (forceUseMainThread || wrapper->CheckShouldRunOnMain()) {
         return UITask(std::move(task), MAIN_TASK);
@@ -799,7 +836,7 @@ RefPtr<LayoutWrapper> FrameNode::UpdateLayoutWrapper(
     }
 
     pattern_->BeforeCreateLayoutWrapper();
-    if (forceMeasure || (GetTag() == V2::TAB_CONTENT_ITEM_ETS_TAG && !isActive_)) {
+    if (forceMeasure) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
     if (forceLayout) {
@@ -1105,7 +1142,10 @@ bool FrameNode::GetTouchable() const
 
 bool FrameNode::IsResponseRegion() const
 {
-    if (!pattern_->UsResRegion()) {
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto clip = renderContext->GetClipEdge().value_or(false);
+    if (clip) {
         return false;
     }
     auto gestureHub = eventHub_->GetGestureEventHub();
@@ -1130,20 +1170,23 @@ VectorF FrameNode::GetTransformScale() const
     return renderContext_->GetTransformScaleValue({ 1.0f, 1.0f });
 }
 
-bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint)
+bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t sourceType)
 {
     bool isInChildRegion = false;
     auto paintRect = renderContext_->GetPaintRectWithTransform();
-    auto responseRegionList = GetResponseRegionList(paintRect);
+    auto responseRegionList = GetResponseRegionList(paintRect, sourceType);
     auto localPoint = parentLocalPoint - paintRect.GetOffset();
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto clip = renderContext->GetClipEdge().value_or(false);
     if (!InResponseRegionList(parentLocalPoint, responseRegionList) || !GetTouchable()) {
-        if (!pattern_->UsResRegion()) {
-            LOGD("TouchTest: not use resRegion, point is out of region in %{public}s", GetTag().c_str());
+        if (clip) {
+            LOGD("TouchTest: frameNode use clip, point is out of region in %{public}s", GetTag().c_str());
             return true;
         }
         for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
             const auto& child = *iter;
-            if (!child->IsOutOfTouchTestRegion(localPoint)) {
+            if (!child->IsOutOfTouchTestRegion(localPoint, sourceType)) {
                 LOGD("TouchTest: point is out of region in %{public}s, but is in child region", GetTag().c_str());
                 isInChildRegion = true;
                 break;
@@ -1165,7 +1208,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         return HitTestResult::OUT_OF_REGION;
     }
     auto paintRect = renderContext_->GetPaintRectWithTransform();
-    auto responseRegionList = GetResponseRegionList(paintRect);
+    auto responseRegionList = GetResponseRegionList(paintRect, static_cast<int32_t>(touchRestrict.sourceType));
     if (SystemProperties::GetDebugEnabled()) {
         LOGD("TouchTest: point is %{public}s in %{public}s, depth: %{public}d", parentLocalPoint.ToString().c_str(),
             GetTag().c_str(), GetDepth());
@@ -1177,11 +1220,12 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
 #endif
     }
     {
-        ACE_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");
-        if (IsOutOfTouchTestRegion(parentLocalPoint)) {
+        ACE_DEBUG_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");
+        if (IsOutOfTouchTestRegion(parentLocalPoint, static_cast<int32_t>(touchRestrict.sourceType))) {
             return HitTestResult::OUT_OF_REGION;
         }
     }
+    pattern_->OnTouchTestHit(touchRestrict.hitTestType);
 
     HitTestResult testResult = HitTestResult::OUT_OF_REGION;
     bool preventBubbling = false;
@@ -1277,7 +1321,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     return testResult;
 }
 
-std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect)
+std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t sourceType)
 {
     std::vector<RectF> responseRegionList;
     auto gestureHub = eventHub_->GetGestureEventHub();
@@ -1543,6 +1587,21 @@ OffsetF FrameNode::GetPaintRectOffsetToPage() const
     return (parent && parent->GetTag() == V2::PAGE_ETS_TAG) ? offset : OffsetF();
 }
 
+std::optional<RectF> FrameNode::GetViewPort() const
+{
+    if (viewPort_.has_value()) {
+        return viewPort_;
+    }
+    auto parent = GetAncestorNodeOfFrame();
+    while (parent) {
+        if (parent->GetViewPort().has_value()) {
+            return parent->GetViewPort();
+        }
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    return std::nullopt;
+}
+
 void FrameNode::OnNotifyMemoryLevel(int32_t level)
 {
     pattern_->OnNotifyMemoryLevel(level);
@@ -1738,5 +1797,42 @@ bool FrameNode::RemoveImmediately() const
     CHECK_NULL_RETURN(context, true);
     // has transition out animation, need to wait for animation end
     return !context->HasTransitionOutAnimation();
+}
+
+std::vector<RefPtr<FrameNode>> FrameNode::GetNodesById(const std::unordered_set<int32_t>& set)
+{
+    std::vector<RefPtr<FrameNode>> nodes;
+    for (auto nodeId : set) {
+        auto uiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
+        if (!uiNode) {
+            continue;
+        }
+        auto frameNode = DynamicCast<FrameNode>(uiNode);
+        if (frameNode) {
+            nodes.emplace_back(frameNode);
+        }
+    }
+    return nodes;
+}
+
+bool FrameNode::IsContentRoot()
+{
+    constexpr int32_t MAX_DEPTH_OF_FRONTEND_ROOT = 6;
+    if (GetDepth() > MAX_DEPTH_OF_FRONTEND_ROOT) {
+        // depth of frontend root is always 5 / 6
+        // (Root->Stage->[Stack]->Page->JsView->content)
+        // so stop traversing if we're beyond that
+        return false;
+    }
+    // overlay root
+    if (GetDepth() == 2 && GetTag() != V2::STAGE_ETS_TAG) {
+        return true;
+    }
+    // page root
+    auto parent = GetParent();
+    CHECK_NULL_RETURN_NOLOG(parent, false);
+    auto grandParent = parent->GetParent();
+    CHECK_NULL_RETURN_NOLOG(grandParent, false);
+    return parent->GetTag() == V2::JS_VIEW_ETS_TAG && grandParent->GetTag() == V2::PAGE_ETS_TAG;
 }
 } // namespace OHOS::Ace::NG

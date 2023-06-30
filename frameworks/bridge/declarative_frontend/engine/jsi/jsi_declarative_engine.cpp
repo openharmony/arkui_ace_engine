@@ -72,11 +72,17 @@ extern const char _binary_jsMockSystemPlugin_abc_start[];
 extern const char _binary_jsMockSystemPlugin_abc_end[];
 #endif
 extern const char _binary_stateMgmt_abc_start[];
-extern const char _binary_stateMgmt_abc_end[];
 extern const char _binary_jsEnumStyle_abc_start[];
-extern const char _binary_jsEnumStyle_abc_end[];
 extern const char _binary_jsUIContext_abc_start[];
+#if !defined(IOS_PLATFORM)
+extern const char _binary_stateMgmt_abc_end[];
+extern const char _binary_jsEnumStyle_abc_end[];
 extern const char _binary_jsUIContext_abc_end[];
+#else
+extern const char* _binary_stateMgmt_abc_end;
+extern const char* _binary_jsEnumStyle_abc_end;
+extern const char* _binary_jsUIContext_abc_end;
+#endif
 
 namespace OHOS::Ace::Framework {
 namespace {

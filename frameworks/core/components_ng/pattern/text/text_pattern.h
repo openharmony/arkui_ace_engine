@@ -178,13 +178,9 @@ public:
     std::vector<RSTypographyProperties::TextBox> GetTextBoxes() override;
     OffsetF GetParentGlobalOffset() const override;
 
-    void SetDragNode(const RefPtr<FrameNode>& dragNode) override
+    RefPtr<FrameNode> MoveDragNode() override
     {
-        dragNode_ = dragNode;
-    }
-    const RefPtr<FrameNode>& GetDragNode() const override
-    {
-        return dragNode_;
+        return std::move(dragNode_);
     }
 
     ParagraphT GetDragParagraph() const override
@@ -214,10 +210,15 @@ public:
     {
         surfaceChangedCallbackId_ = id;
     }
+    void SetOnClickEvent(GestureEventFunc&& onClick)
+    {
+        onClick_ = std::move(onClick);
+    }
 protected:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleClickEvent(GestureEvent& info);
+    OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight);
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;
     float baselineOffset_ = 0.0f;
@@ -229,7 +230,6 @@ private:
     void HandleLongPress(GestureEvent& info);
     void HandleOnSelectAll();
     void HandleOnCopy();
-    void HandleOnOverlayClose();
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -256,8 +256,8 @@ private:
 
     bool IsDraggable(const Offset& localOffset);
 
+    GestureEventFunc onClick_;
     int32_t GetGraphemeClusterLength(int32_t extend) const;
-    OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight);
     std::string GetSelectedText(int32_t start, int32_t end) const;
     std::wstring GetWideText() const;
     void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
@@ -272,6 +272,9 @@ private:
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;
     RefPtr<FrameNode> dragNode_;
+    // to check if drag is in progress
+    WeakPtr<FrameNode> dragNodeWk_;
+
     CopyOptions copyOption_ = CopyOptions::None;
     TextSelector textSelector_;
     OffsetF contentOffset_;

@@ -15,17 +15,31 @@
 
 #include "core/components_ng/pattern/select/select_model_ng.h"
 
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
-#include "core/components_ng/property/property.h"
+#include "core/components_ng/property/calc_length.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+void SetSelectMinHeight(const RefPtr<FrameNode>& select)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+
+    auto layoutProperty = select->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(theme->GetSelectMinHeight()), std::nullopt));
+}
+} // namespace
+
 void SelectModelNG::Create(const std::vector<SelectParam>& params)
 {
     LOGI("creating select component");
@@ -34,6 +48,8 @@ void SelectModelNG::Create(const std::vector<SelectParam>& params)
     auto select = FrameNode::GetOrCreateFrameNode(
         V2::SELECT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SelectPattern>(); });
     ViewStackProcessor::GetInstance()->Push(select);
+
+    SetSelectMinHeight(select);
 
     auto pattern = select->GetPattern<SelectPattern>();
     pattern->BuildChild();
@@ -337,8 +353,7 @@ void SelectModelNG::SetPaddingRight(const CalcDimension& rightValue)
             paddings.right = NG::CalcLength(
                 rightValue.IsNonNegative() ? rightValue.CalcValue() : CalcDimension().CalcValue());
         } else {
-            paddings.right = NG::CalcLength(
-                rightValue.IsNonNegative() ? rightValue : CalcDimension());
+            paddings.right = NG::CalcLength(rightValue.IsNonNegative() ? rightValue : CalcDimension());
         }
     }
     ViewAbstract::SetPadding(paddings);
@@ -397,4 +412,3 @@ void SelectModelNG::SetValueChangeEvent(NG::ValueChangeEvent&& valueChangeEvent)
     hub->SetValueChangeEvent(std::move(valueChangeEvent));
 }
 } // namespace OHOS::Ace::NG
-

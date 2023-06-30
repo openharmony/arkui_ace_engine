@@ -1059,22 +1059,24 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
 
     std::unique_ptr<ImageData> data;
     data = GetImageDataFromCanvas(left, top, width, height);
-
-    final_height = static_cast<uint32_t>(data->dirtyHeight);
-    final_width = static_cast<uint32_t>(data->dirtyWidth);
-
     JSRef<JSArray> colorArray = JSRef<JSArray>::New();
-    uint32_t count = 0;
-    for (uint32_t i = 0; i < final_height; i++) {
-        for (uint32_t j = 0; j < final_width; j++) {
-            int32_t idx = i * data->dirtyWidth + j;
-            auto pixel = data->data[idx];
 
-            colorArray->SetValueAt(count, JSRef<JSVal>::Make(ToJSValue(pixel.GetRed())));
-            colorArray->SetValueAt(count + 1, JSRef<JSVal>::Make(ToJSValue(pixel.GetGreen())));
-            colorArray->SetValueAt(count + 2, JSRef<JSVal>::Make(ToJSValue(pixel.GetBlue())));
-            colorArray->SetValueAt(count + 3, JSRef<JSVal>::Make(ToJSValue(pixel.GetAlpha())));
-            count += 4;
+    if (data != nullptr) {
+        final_height = static_cast<uint32_t>(data->dirtyHeight);
+        final_width = static_cast<uint32_t>(data->dirtyWidth);
+
+        uint32_t count = 0;
+        for (uint32_t i = 0; i < final_height; i++) {
+            for (uint32_t j = 0; j < final_width; j++) {
+                int32_t idx = i * data->dirtyWidth + j;
+                auto pixel = data->data[idx];
+
+                colorArray->SetValueAt(count, JSRef<JSVal>::Make(ToJSValue(pixel.GetRed())));
+                colorArray->SetValueAt(count + 1, JSRef<JSVal>::Make(ToJSValue(pixel.GetGreen())));
+                colorArray->SetValueAt(count + 2, JSRef<JSVal>::Make(ToJSValue(pixel.GetBlue())));
+                colorArray->SetValueAt(count + 3, JSRef<JSVal>::Make(ToJSValue(pixel.GetAlpha())));
+                count += 4;
+            }
         }
     }
 
@@ -1140,6 +1142,9 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     std::unique_ptr<ImageData> canvasData;
     canvasData = GetImageDataFromCanvas(left, top, width, height);
 
+    if (canvasData == nullptr) {
+        return;
+    }
     final_height = static_cast<uint32_t>(canvasData->dirtyHeight);
     final_width = static_cast<uint32_t>(canvasData->dirtyWidth);
     if (final_height > 0 && final_width > (UINT32_MAX / final_height)) {
@@ -1274,12 +1279,11 @@ void JSCanvasRenderer::JsGetFilter(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::JsSetFilter(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsString()) {
+    if (!info[0]->IsString() || info[0]->IsUndefined() || info[0]->IsNull()) {
         return;
     }
-    std::string filterStr;
+    std::string filterStr = "none";
     JSViewAbstract::ParseJsString(info[0], filterStr);
-    // null and undefined are the same.
     if (filterStr == "") {
         LOGE("invalid filter string");
         return;

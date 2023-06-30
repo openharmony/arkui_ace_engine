@@ -27,6 +27,14 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void SetFormat(const JSCallbackInfo& info);
     static void JsOnDateChange(const JSCallbackInfo& info);
+    static void SetTextColor(const JSCallbackInfo& info);
+    static void SetFontSize(const JSCallbackInfo& info);
+    static void SetFontWeight(const JSCallbackInfo& info);
+    static void SetFontStyle(int32_t value);
+    static void SetFontFamily(const JSCallbackInfo& info);
+
+protected:
+    static void SetFontDefault();
 };
 
 class JSTextClockController final : public Referenced {
@@ -43,6 +51,7 @@ public:
     {
         controller_.emplace_back(controller);
     }
+
 private:
     std::vector<RefPtr<TextClockController>> controller_;
     ACE_DISALLOW_COPY_AND_MOVE(JSTextClockController);

@@ -91,6 +91,7 @@ public:
     void AddRenderDelegate();
     void RegisterRenderDelegateEvent();
     void OnFormError(const std::string& code, const std::string& msg);
+    void ReleaseRenderer();
 #ifdef OHOS_STANDARD_SYSTEM
     void ProcessFormUpdate(const AppExecFwk::FormJsInfo& formJsInfo);
     void ProcessFormUninstall(const int64_t formId);

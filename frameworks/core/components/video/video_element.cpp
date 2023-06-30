@@ -341,7 +341,7 @@ void VideoElement::PreparePlayer()
     sptr<Surface> producerSurface;
     if (SystemProperties::GetExtSurfaceEnabled()) {
         auto context = context_.Upgrade();
-        int32_t windowId = 0;
+        uint32_t windowId = 0;
         if (context && !surfaceDelegate_) {
             windowId = context->GetWindowId();
             surfaceDelegate_ = new OHOS::SurfaceDelegate(windowId);

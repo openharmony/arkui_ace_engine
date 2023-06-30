@@ -74,36 +74,81 @@ void RefreshPattern::OnModifyDone()
             -1.0f * TRIGGER_LOADING_DISTANCE.ConvertToPx(), TRIGGER_REFRESH_DISTANCE.ConvertToPx()));
     InitPanEvent(gestureHub);
     CheckCoordinationEvent();
+    InitOnKeyEvent();
     auto paintProperty = GetPaintProperty<RefreshRenderProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto refreshingProp = paintProperty->GetIsRefreshing().value_or(false);
     if (layoutProperty->GetIsCustomBuilderExistValue()) {
         CustomBuilderReset();
-        if (refreshingProp) {
-            if (isRefreshing_ != refreshingProp) {
-                TriggerRefresh();
-            }
-            CustomBuilderAppear();
-        } else {
-            CustomBuilderExit();
-        }
-        return;
-    }
-    if (!progressChild_) {
+    } else if (!progressChild_) {
         progressChild_ = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->TotalChildCount() - 1));
         LoadingProgressReset();
     }
-
     if (isRefreshing_ != refreshingProp) {
         if (refreshingProp) {
-            ReplaceLoadingProgressNode();
-            TriggerRefresh();
-            LoadingProgressAppear();
+            QuickStartFresh();
         } else {
-            LoadingProgressExit();
+            QuickEndFresh();
         }
     }
     SetAccessibilityAction();
+}
+
+void RefreshPattern::InitOnKeyEvent()
+{
+    if (isKeyEventRegisted_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        pattern->OnKeyEvent(event);
+        return true;
+    };
+    isKeyEventRegisted_ = true;
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+void RefreshPattern::QuickStartFresh()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetIsCustomBuilderExistValue()) {
+        CustomBuilderAppear();
+        TriggerRefresh();
+        return;
+    }
+    ReplaceLoadingProgressNode();
+    TriggerRefresh();
+    LoadingProgressAppear();
+}
+
+void RefreshPattern::QuickEndFresh()
+{
+    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetIsCustomBuilderExistValue()) {
+        CustomBuilderExit();
+        TriggerFinish();
+        return;
+    }
+    LoadingProgressExit();
+}
+
+void RefreshPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.code == KeyCode::KEY_F5 || (event.IsCombinationKey() && event.IsCtrlWith(KeyCode::KEY_R))) {
+        if (isRefreshing_) {
+            return;
+        }
+        QuickStartFresh();
+    }
 }
 
 void RefreshPattern::CheckCoordinationEvent()
