@@ -255,7 +255,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     SkipForwardLines(mainSize, layoutWrapper);
     SkipBackwardLines(mainSize, layoutWrapper);
     if (layoutWrapper->GetHostNode()->GetChildrenUpdated() != -1 || gridLayoutInfo_.IsResetted()) {
-		isChildrenUpdated_ = true;
+        isChildrenUpdated_ = true;
         gridLayoutInfo_.lineHeightMap_.clear();
         gridLayoutInfo_.gridMatrix_.clear();
         gridLayoutInfo_.endIndex_ = -1;
