@@ -2163,7 +2163,7 @@ void SwiperPattern::SetLazyLoadFeature(bool useLazyLoad) const
 
 bool SwiperPattern::IsChildrenSizeLessThanSwiper()
 {
-    if (static_cast<int32_t>(itemPosition_.size()) == TotalCount()) {
+    if (static_cast<int32_t>(itemPosition_.size()) == TotalCount() && !itemPosition_.empty()) {
         auto totalChildrenSize = 0.0f;
         totalChildrenSize = itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos;
         auto prevMargin = GetPrevMargin();
