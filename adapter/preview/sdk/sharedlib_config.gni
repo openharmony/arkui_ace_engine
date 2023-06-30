@@ -169,6 +169,17 @@ if (defined(use_new_skia) && use_new_skia) {
 
 napi_modules = [
   {
+    prefix = "multimedia"
+    shard_libs = [
+      {
+        label = "//foundation/multimedia/av_session/avpicker:avcastpicker"
+        subsystem_name = "multimedia"
+        part_name = "av_session"
+        lib_names = [ "avcastpicker" ]
+      },
+    ]
+  },
+  {
     prefix = ""
     shard_libs = [
       {
