@@ -216,6 +216,11 @@ void JSGrid::JsOnScrollBarUpdate(const JSCallbackInfo& info)
     GridModel::GetInstance()->SetOnScrollBarUpdate(std::move(onScrollBarUpdate));
 }
 
+void JSGrid::SetScrollEnabled(bool scrollEnabled)
+{
+    GridModel::GetInstance()->SetScrollEnabled(scrollEnabled);
+}
+
 void JSGrid::JSBind(BindingTarget globalObj)
 {
     LOGD("JSGrid:Bind");
@@ -259,6 +264,8 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("height", &JSGrid::JsGridHeight);
     JSClass<JSGrid>::StaticMethod("onItemDrop", &JSGrid::JsOnGridDrop);
     JSClass<JSGrid>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
+    JSClass<JSGrid>::StaticMethod("nestedScroll", &JSGrid::SetNestedScroll);
+    JSClass<JSGrid>::StaticMethod("enableScrollInteraction", &JSGrid::SetScrollEnabled);
     JSClass<JSGrid>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -499,4 +506,35 @@ void JSGrid::SetMultiSelectable(bool multiSelectable)
     GridModel::GetInstance()->SetMultiSelectable(multiSelectable);
 }
 
+void JSGrid::SetNestedScroll(const JSCallbackInfo& args)
+{
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_ONLY,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        GridModel::GetInstance()->SetNestedScroll(nestedOpt);
+        LOGW("Invalid params");
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    int32_t froward = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollForward"), froward);
+    if (froward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
+        froward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
+        LOGW("ScrollFroward params invalid");
+        froward = 0;
+    }
+    int32_t backward = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollBackward"), backward);
+    if (backward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
+        backward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
+        LOGW("ScrollFroward params invalid");
+        backward = 0;
+    }
+    nestedOpt.forward = static_cast<NestedScrollMode>(froward);
+    nestedOpt.backward = static_cast<NestedScrollMode>(backward);
+    GridModel::GetInstance()->SetNestedScroll(nestedOpt);
+    args.ReturnSelf();
+}
 } // namespace OHOS::Ace::Framework

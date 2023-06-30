@@ -36,6 +36,9 @@ void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
     CHECK_NULL_VOID(menuItem);
     stack->Push(menuItem);
 
+    auto layoutProps = menuItem->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProps);
+    layoutProps->UpdateAlignment(Alignment::CENTER_LEFT);
     // set border radius
     auto renderContext = menuItem->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -50,6 +53,16 @@ void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
     menuItem->AddChild(customNode);
 }
 
+/*
+ * The structure of menu item is designed as follows :
+ * |--menu_item
+ *   |--left_row
+ *     |--icon
+ *     |--content
+ *   |--right_row
+ *     |--label
+ *     |--end_icon
+ */
 void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
 {
     auto* stack = ViewStackProcessor::GetInstance();

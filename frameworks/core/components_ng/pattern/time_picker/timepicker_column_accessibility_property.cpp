@@ -24,7 +24,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t MIDDLE_OF_COUNTS = 2;
-}
+} // namespace
 int32_t TimePickerColumnAccessibilityProperty::GetCollectionItemCounts() const
 {
     auto frameNode = host_.Upgrade();
@@ -33,7 +33,7 @@ int32_t TimePickerColumnAccessibilityProperty::GetCollectionItemCounts() const
     CHECK_NULL_RETURN(pattern, 0);
     auto options = pattern->GetOptions();
     if (options.find(frameNode) != options.end()) {
-        return options[frameNode].size();
+        return options[frameNode];
     }
     return 0;
 }
@@ -85,15 +85,21 @@ std::string TimePickerColumnAccessibilityProperty::GetText() const
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, "");
+    auto stackNode = DynamicCast<FrameNode>(frameNode->GetParent());
+    CHECK_NULL_RETURN(stackNode, "");
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_RETURN(parentNode, "");
+    auto timePickerRowPattern = parentNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_RETURN(timePickerRowPattern, "");
     auto pattern = frameNode->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_RETURN(pattern, "");
     auto index = pattern->GetCurrentIndex();
     auto options = pattern->GetOptions();
     if (options.find(frameNode) != options.end()) {
-        if (options[frameNode].size() < index) {
+        if (options[frameNode] < index) {
             return "";
         }
-        return options[frameNode].at(index);
+        return timePickerRowPattern->GetOptionsValue(frameNode, index);
     }
     return "";
 }

@@ -19,6 +19,7 @@
 
 #include "base/log/ace_trace.h"
 #include "base/log/frame_report.h"
+#include "base/log/jank_frame_report.h"
 #include "base/log/log.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/time_util.h"
@@ -32,6 +33,11 @@ namespace {
 constexpr double SPRING_SCROLL_MASS = 0.5;
 constexpr double SPRING_SCROLL_STIFFNESS = 100.0;
 constexpr double SPRING_SCROLL_DAMPING = 15.55635;
+constexpr double CAP_COEFFICIENT = 0.45;
+constexpr int32_t FIRST_THRESHOLD = 5;
+constexpr int32_t SECOND_THRESHOLD = 10;
+constexpr double CAP_FIXED_VALUE = 16.0;
+constexpr uint32_t DRAG_INTERVAL_TIME = 900;
 const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
     AceType::MakeRefPtr<SpringProperty>(SPRING_SCROLL_MASS, SPRING_SCROLL_STIFFNESS, SPRING_SCROLL_DAMPING);
 #ifndef WEARABLE_PRODUCT
@@ -82,6 +88,7 @@ Scrollable::~Scrollable()
     // If animation still runs, force stop it.
     controller_->Stop();
     springController_->Stop();
+    scrollSnapController_->Stop();
 }
 
 void Scrollable::OnFlushTouchEventsBegin()
@@ -205,6 +212,7 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
 
     controller_ = CREATE_ANIMATOR(context);
     springController_ = CREATE_ANIMATOR(context);
+    scrollSnapController_ = CREATE_ANIMATOR(context);
 
     spring_ = GetDefaultOverSpringProperty();
     available_ = true;
@@ -239,6 +247,9 @@ void Scrollable::HandleTouchDown()
         // Resets values.
         currentPos_ = 0.0;
     }
+    if (!scrollSnapController_->IsStopped()) {
+        scrollSnapController_->Stop();
+    }
     LOGD("handle touch down has already stopped the animation");
 }
 
@@ -247,6 +258,9 @@ void Scrollable::HandleTouchUp()
     LOGD("handle touch up");
     isTouching_ = false;
     if (outBoundaryCallback_ && !outBoundaryCallback_()) {
+        if (scrollSnapController_->IsStopped() && scrollSnapCallback_) {
+            scrollSnapCallback_(0.0, 0.0);
+        }
         return;
     }
     if (springController_->IsStopped() && scrollOverCallback_) {
@@ -266,17 +280,23 @@ void Scrollable::HandleTouchCancel()
 
 bool Scrollable::IsAnimationNotRunning() const
 {
-    return !isTouching_ && !controller_->IsRunning() && !springController_->IsRunning();
+    return !isTouching_ && !controller_->IsRunning() && !springController_->IsRunning() &&
+        !scrollSnapController_->IsRunning();
 }
 
 bool Scrollable::Idle() const
 {
-    return !isTouching_ && controller_->IsStopped() && springController_->IsStopped();
+    return !isTouching_ && controller_->IsStopped() && springController_->IsStopped() &&
+        scrollSnapController_->IsStopped();
 }
 
 bool Scrollable::IsStopped() const
 {
-    return (!springController_ || (springController_->IsStopped())) && (!controller_ || (controller_->IsStopped()));
+    return (!springController_ || (springController_->IsStopped()) ||
+               (springController_->GetStatus() == Animator::Status::IDLE)) &&
+           (!controller_ || (controller_->IsStopped()) || (controller_->GetStatus() == Animator::Status::IDLE)) &&
+           (!scrollSnapController_ || (scrollSnapController_->IsStopped()) ||
+               (scrollSnapController_->GetStatus() == Animator::Status::IDLE));
 }
 
 bool Scrollable::IsSpringStopped() const
@@ -292,11 +312,30 @@ void Scrollable::StopScrollable()
     if (springController_) {
         springController_->Stop();
     }
+    if (scrollSnapController_) {
+        scrollSnapController_->Stop();
+    }
+}
+
+void Scrollable::HandleScrollEnd()
+{
+    if (scrollEndCallback_) {
+        scrollEndCallback_();
+    }
+    auto parent = parent_.Upgrade();
+    if (parent && nestedOpt_.NeedParent()) {
+        parent->HandleScrollEnd();
+    }
 }
 
 void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
 {
     ACE_FUNCTION_TRACE();
+    if (continuousDragStatus_) {
+        IncreaseContinueDragCount();
+        task_.Cancel();
+    }
+    SetDragStartPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     const auto dragPositionInMainAxis =
         axis_ == Axis::VERTICAL ? info.GetGlobalLocation().GetY() : info.GetGlobalLocation().GetX();
     LOGD("HandleDragStart. LocalLocation: %{public}s, GlobalLocation: %{public}s",
@@ -314,7 +353,12 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
         }
     }
 #endif
+    JankFrameReport::SetFrameJankFlag(JANK_RUNNING_SCROLL);
     UpdateScrollPosition(dragPositionInMainAxis, SCROLL_FROM_START);
+    auto parent = parent_.Upgrade();
+    if (parent && nestedOpt_.NeedParent()) {
+        parent->UpdateScrollPosition(dragPositionInMainAxis, SCROLL_FROM_START);
+    }
     RelatedEventStart();
     auto node = scrollableNode_.Upgrade();
     if (node) {
@@ -322,14 +366,199 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     }
 }
 
+ScrollResult Scrollable::HandleScrollParentFirst(double& offset, int32_t source, NestedState state)
+{
+    auto parent = parent_.Upgrade();
+    ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
+    if (state == NestedState::CHILD_OVER_SCROLL) {
+        if (edgeEffect_ == EdgeEffect::NONE) {
+            return parent->HandleScroll(offset, source, NestedState::CHILD_OVER_SCROLL);
+        }
+        ExecuteScrollFrameBegin(offset, scrollState);
+        return { 0, true };
+    }
+    auto result = parent->HandleScroll(offset, source, NestedState::CHILD_SCROLL);
+    offset = result.remain;
+    if (NearZero(offset)) {
+        canOverScroll_ = false;
+        return { 0, false };
+    }
+    double allOffset = offset;
+    ExecuteScrollFrameBegin(offset, scrollState);
+    auto remainOffset = allOffset - offset;
+    auto overOffsets = overScrollOffsetCallback_(offset);
+    auto overOffset = offset > 0 ? overOffsets.start : overOffsets.end;
+    remainOffset += overOffset;
+    if (NearZero(remainOffset)) {
+        canOverScroll_ = false;
+        return { 0, false };
+    }
+    if (state == NestedState::CHILD_SCROLL) {
+        offset -= overOffset;
+        canOverScroll_ = false;
+        return { remainOffset, !NearZero(overOffset) };
+    }
+    if (edgeEffect_ == EdgeEffect::NONE) {
+        parent->HandleScroll(remainOffset, source, NestedState::CHILD_OVER_SCROLL);
+    }
+    canOverScroll_ = !NearZero(overOffset);
+    return { 0, canOverScroll_ };
+}
+
+ScrollResult Scrollable::HandleScrollSelfFirst(double& offset, int32_t source, NestedState state)
+{
+    auto parent = parent_.Upgrade();
+    ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
+    if (state == NestedState::CHILD_OVER_SCROLL) {
+        auto result = parent->HandleScroll(offset, source, NestedState::CHILD_OVER_SCROLL);
+        if (NearZero(result.remain)) {
+            offset = 0;
+            return result;
+        }
+        ExecuteScrollFrameBegin(offset, scrollState);
+        if (edgeEffect_ == EdgeEffect::NONE) {
+            return result;
+        }
+        return { 0, true };
+    }
+    double allOffset = offset;
+    ExecuteScrollFrameBegin(offset, scrollState);
+    auto remainOffset = allOffset - offset;
+    auto overOffsets = overScrollOffsetCallback_(offset);
+    auto overOffset = offset > 0 ? overOffsets.start : overOffsets.end;
+    if (NearZero(overOffset)) {
+        canOverScroll_ = false;
+        return { 0, false };
+    }
+    offset -= overOffset;
+    auto result = parent->HandleScroll(overOffset, source, NestedState::CHILD_SCROLL);
+    remainOffset += result.remain;
+    if (NearZero(remainOffset)) {
+        canOverScroll_ = false;
+        return { 0, false };
+    }
+    if (state == NestedState::CHILD_SCROLL) {
+        canOverScroll_ = false;
+        return { remainOffset, result.reachEdge };
+    }
+    auto overRes = parent->HandleScroll(remainOffset, source, NestedState::CHILD_OVER_SCROLL);
+    offset += overRes.remain;
+    canOverScroll_ = !NearZero(overOffset) && result.reachEdge;
+    return { 0, canOverScroll_ };
+}
+
+ScrollResult Scrollable::HandleScrollSelfOnly(double& offset, int32_t source, NestedState state)
+{
+    double allOffset = offset;
+    ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
+    ExecuteScrollFrameBegin(offset, scrollState);
+    auto remainOffset = allOffset - offset;
+    auto overOffsets = overScrollOffsetCallback_(offset);
+    auto overOffset = offset > 0 ? overOffsets.start : overOffsets.end;
+    remainOffset += overOffset;
+    if (NearZero(remainOffset)) {
+        canOverScroll_ = false;
+        return { 0, false };
+    }
+    bool canOverScroll = false;
+    if (state == NestedState::CHILD_SCROLL) {
+        offset -= overOffset;
+    } else if (state == NestedState::GESTURE) {
+        canOverScroll = !NearZero(overOffset) && edgeEffect_ != EdgeEffect::NONE;
+    } else if (edgeEffect_ != EdgeEffect::NONE) {
+        remainOffset = 0;
+    }
+    canOverScroll_ = canOverScroll;
+    return { remainOffset, !NearZero(overOffset) };
+}
+
+ScrollResult Scrollable::HandleScrollParallel(double& offset, int32_t source, NestedState state)
+{
+    auto remainOffset = 0.0;
+    auto parent = parent_.Upgrade();
+    ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
+    if (state == NestedState::CHILD_OVER_SCROLL) {
+        if (edgeEffect_ == EdgeEffect::NONE) {
+            auto result = parent->HandleScroll(offset, source, NestedState::CHILD_OVER_SCROLL);
+            remainOffset = result.remain;
+            offset = 0;
+        } else {
+            ExecuteScrollFrameBegin(offset, scrollState);
+        }
+        return { remainOffset, true };
+    }
+
+    bool canOverScroll = false;
+    double parentOffset = offset;
+    ExecuteScrollFrameBegin(offset, scrollState);
+    auto result = parent->HandleScroll(parentOffset, source, NestedState::CHILD_SCROLL);
+
+    auto overOffsets = overScrollOffsetCallback_(offset);
+    auto overOffset = offset > 0 ? overOffsets.start : overOffsets.end;
+    if (!NearZero(overOffset) && result.reachEdge) {
+        if (state == NestedState::CHILD_SCROLL) {
+            remainOffset = overOffset;
+            offset = offset - overOffset;
+        } else if (edgeEffect_ == EdgeEffect::NONE) {
+            parent->HandleScroll(result.remain, source, NestedState::CHILD_OVER_SCROLL);
+            canOverScroll = true;
+            offset = offset - overOffset;
+        } else {
+            canOverScroll = true;
+        }
+    } else if (!NearZero(overOffset)) {
+        offset = offset - overOffset;
+    }
+    canOverScroll_ = canOverScroll;
+    return { remainOffset, !NearZero(overOffset) && result.reachEdge };
+}
+
+ScrollResult Scrollable::HandleScroll(double offset, int32_t source, NestedState state)
+{
+    if (!overScrollOffsetCallback_) {
+        ExecuteScrollBegin(offset);
+        ExecuteScrollFrameBegin(offset, ScrollState::SCROLL);
+        moved_ = UpdateScrollPosition(offset, source);
+        canOverScroll_ = false;
+        return { 0, false };
+    }
+    ScrollResult result = { 0, false };
+    ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
+    auto parent = parent_.Upgrade();
+    auto overOffsets = overScrollOffsetCallback_(offset);
+    double backOverOffset = offset > 0 ? overOffsets.end : overOffsets.start;
+    if (NearZero(offset) || !NearZero(backOverOffset)) {
+        ExecuteScrollFrameBegin(offset, scrollState);
+    } else if (parent && ((offset < 0 && nestedOpt_.forward == NestedScrollMode::PARENT_FIRST) ||
+        (offset > 0 && nestedOpt_.backward == NestedScrollMode::PARENT_FIRST))) {
+        result = HandleScrollParentFirst(offset, source, state);
+    } else if (parent && ((offset < 0 && nestedOpt_.forward == NestedScrollMode::SELF_FIRST) ||
+        (offset > 0 && nestedOpt_.backward == NestedScrollMode::SELF_FIRST))) {
+        result = HandleScrollSelfFirst(offset, source, state);
+    } else if (parent && ((offset < 0 && nestedOpt_.forward == NestedScrollMode::PARALLEL) ||
+        (offset > 0 && nestedOpt_.backward == NestedScrollMode::PARALLEL))) {
+        result = HandleScrollParallel(offset, source, state);
+    } else {
+        result = HandleScrollSelfOnly(offset, source, state);
+    }
+    moved_ = UpdateScrollPosition(offset, source);
+    return result;
+}
+
 void Scrollable::HandleDragUpdate(const GestureEvent& info)
 {
     ACE_FUNCTION_TRACE();
-    if (!springController_->IsStopped() || !controller_->IsStopped()) {
+    if (!NearZero(info.GetMainVelocity()) && dragCount_ >= FIRST_THRESHOLD) {
+        if (Negative(lastVelocity_ / info.GetMainVelocity())) {
+            ResetContinueDragCount();
+        }
+    }
+    if (!springController_->IsStopped() || !controller_->IsStopped() || !scrollSnapController_->IsStopped()) {
         // If animation still runs, first stop it.
         isDragUpdateStop_ = true;
         controller_->Stop();
         springController_->Stop();
+        scrollSnapController_->Stop();
         currentPos_ = 0.0;
     }
 #ifdef OHOS_PLATFORM
@@ -350,10 +579,8 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
     if (RelatedScrollEventPrepare(Offset(0.0, mainDelta))) {
         return;
     }
-    ExecuteScrollBegin(mainDelta);
-    ExecuteScrollFrameBegin(mainDelta, ScrollState::SCROLL);
     auto source = info.GetInputEventType() == InputEventType::AXIS ? SCROLL_FROM_AXIS : SCROLL_FROM_UPDATE;
-    moved_ = UpdateScrollPosition(mainDelta, source);
+    HandleScroll(mainDelta, source, NestedState::GESTURE);
 }
 
 void Scrollable::HandleDragEnd(const GestureEvent& info)
@@ -362,21 +589,24 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
         info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), info.GetMainVelocity());
     controller_->ClearAllListeners();
     springController_->ClearAllListeners();
+    scrollSnapController_->ClearAllListeners();
     isDragUpdateStop_ = false;
     touchUp_ = false;
     scrollPause_ = false;
+    lastVelocity_ = info.GetMainVelocity();
     double correctVelocity = std::clamp(info.GetMainVelocity(), MIN_VELOCITY + slipFactor_, MAX_VELOCITY - slipFactor_);
-    correctVelocity = correctVelocity * sVelocityScale_;
+    SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
+    correctVelocity = correctVelocity * sVelocityScale_ * GetGain(GetDragOffset());
     currentVelocity_ = correctVelocity;
+    lastPos_ = GetDragOffset();
+    JankFrameReport::ClearFrameJankFlag(JANK_RUNNING_SCROLL);
     if (dragEndCallback_) {
         dragEndCallback_();
     }
     RelatedEventEnd();
     if (!moved_ || info.GetInputEventType() == InputEventType::AXIS) {
         LOGI("It is not moved now,  no need to handle drag end motion");
-        if (scrollEndCallback_) {
-            scrollEndCallback_();
-        }
+        HandleScrollEnd();
         currentVelocity_ = 0.0;
 #ifdef OHOS_PLATFORM
         LOGI("springController stop increase cpu frequency");
@@ -385,11 +615,14 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
             FrameReport::GetInstance().EndListFling();
         }
 #endif
-        return;
-    }
-    if (outBoundaryCallback_ && outBoundaryCallback_() && scrollOverCallback_) {
+    } else if (!overScrollOffsetCallback_ && outBoundaryCallback_ && outBoundaryCallback_() && scrollOverCallback_) {
         ProcessScrollOverCallback(correctVelocity);
+    } else if (canOverScroll_) {
+        HandleOverScroll(correctVelocity);
     } else {
+        if (springController_ && !springController_->IsStopped()) {
+            springController_->Stop();
+        }
         double mainPosition = GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY()));
         LOGD("[scrollMotion]position(%{public}lf), velocity(%{public}lf)", mainPosition, correctVelocity);
         if (motion_) {
@@ -402,6 +635,12 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
                     scroll->ProcessScrollMotion(value);
                 }
             });
+        }
+
+        if (scrollSnapCallback_ &&
+            scrollSnapCallback_(motion_->GetFinalPosition() - mainPosition, correctVelocity)) {
+            currentVelocity_ = 0.0;
+            return;
         }
 
         // change motion param when list item need to be center of screen on watch
@@ -429,6 +668,60 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
         });
         controller_->PlayMotion(motion_);
     }
+    SetDelayedTask();
+}
+
+void Scrollable::SetDelayedTask()
+{
+    SetContinuousDragStatus(true);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    task_.Reset([weak = WeakClaim(this)] {
+        auto drag = weak.Upgrade();
+        if (drag) {
+            drag->ResetContinueDragCount();
+            drag->SetContinuousDragStatus(false);
+        }
+    });
+    taskExecutor.PostDelayedTask(task_, DRAG_INTERVAL_TIME);
+}
+
+double Scrollable::ComputeCap(int dragCount)
+{
+    if (dragCount < FIRST_THRESHOLD) {
+        return 1.0;
+    }
+    auto cap = ComputeCap(dragCount - 1) + CAP_COEFFICIENT * (dragCount - 1);
+    return cap;
+}
+
+double Scrollable::GetGain(double delta)
+{
+    auto cap = 1.0;
+    auto gain = 1.0;
+    auto screenHeight = continuousSlidingCallback_();
+    if (delta == 0 || screenHeight == 0) {
+        return gain;
+    }
+    if (dragCount_ >= FIRST_THRESHOLD && dragCount_ < SECOND_THRESHOLD) {
+        if (Negative(lastPos_ / delta)) {
+            ResetContinueDragCount();
+            return gain;
+        }
+        cap = ComputeCap(dragCount_);
+        gain = (LessNotEqual(cap, std::abs(delta) / screenHeight * (dragCount_ - 1))) ? cap :
+            std::abs(delta) / screenHeight * (dragCount_ - 1);
+    } else if (dragCount_ >= SECOND_THRESHOLD) {
+        if (Negative(lastPos_ / delta)) {
+            ResetContinueDragCount();
+            return gain;
+        }
+        cap = CAP_FIXED_VALUE;
+        gain = (LessNotEqual(cap, std::abs(delta) / screenHeight * (dragCount_ - 1))) ? cap :
+            std::abs(delta) / screenHeight * (dragCount_ - 1);
+    }
+    return gain;
 }
 
 void Scrollable::ExecuteScrollBegin(double& mainDelta)
@@ -482,6 +775,75 @@ void Scrollable::FixScrollMotion(double position)
 #endif
 };
 
+void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnapVelocity)
+{
+    auto start = currentPos_;
+    auto end = currentPos_ + predictSnapOffset;
+    scrollSnapMotion_ = AceType::MakeRefPtr<SpringMotion>(start, end, scrollSnapVelocity, DEFAULT_OVER_SPRING_PROPERTY);
+
+    scrollSnapMotion_->AddListener([weakScroll = AceType::WeakClaim(this), start, end](double position) {
+        auto scroll = weakScroll.Upgrade();
+        if (scroll) {
+            scroll->ProcessScrollSnapMotion(position);
+        }
+    });
+    scrollSnapController_->ClearStopListeners();
+    scrollSnapController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
+        auto scroll = weak.Upgrade();
+        CHECK_NULL_VOID(scroll);
+        if (scroll->moved_) {
+            scroll->HandleScrollEnd();
+        }
+        scroll->currentVelocity_ = 0.0;
+        if (scroll->isTouching_ || scroll->isDragUpdateStop_) {
+            return;
+        }
+        scroll->moved_ = false;
+#ifdef OHOS_PLATFORM
+        LOGI("springController stop increase cpu frequency");
+        ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+        if (FrameReport::GetInstance().GetEnable()) {
+            FrameReport::GetInstance().EndListFling();
+        }
+#endif
+        if (scroll->scrollEnd_) {
+            scroll->scrollEnd_();
+        }
+        // Send event to accessibility when scroll stop.
+        auto context = scroll->GetContext().Upgrade();
+        if (context) {
+            AccessibilityEvent scrollEvent;
+            scrollEvent.nodeId = scroll->nodeId_;
+            scrollEvent.eventType = "scrollend";
+            context->SendEventToAccessibility(scrollEvent);
+        }
+#if !defined(PREVIEW)
+        LayoutInspector::SupportInspector();
+#endif
+    });
+    scrollSnapController_->PlayMotion(scrollSnapMotion_);
+}
+
+void Scrollable::ProcessScrollSnapMotion(double position)
+{
+    LOGD("[scroll] currentPos_(%{public}lf), position(%{public}lf)", currentPos_, position);
+    currentVelocity_ = scrollSnapMotion_->GetCurrentVelocity();
+    if (NearEqual(currentPos_, position)) {
+        UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
+    } else {
+        moved_ = UpdateScrollPosition(position - currentPos_, SCROLL_FROM_ANIMATION_SPRING);
+        if (!moved_) {
+            scrollSnapController_->Stop();
+        } else if (!touchUp_) {
+            if (scrollTouchUpCallback_) {
+                scrollTouchUpCallback_();
+            }
+            touchUp_ = true;
+        }
+    }
+    currentPos_ = position;
+}
+
 void Scrollable::StartSpringMotion(
     double mainPosition, double mainVelocity, const ExtentPair& extent, const ExtentPair& initExtent)
 {
@@ -505,8 +867,8 @@ void Scrollable::StartSpringMotion(
     springController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
         auto scroll = weak.Upgrade();
         if (scroll) {
-            if (scroll->moved_ && scroll->scrollEndCallback_) {
-                scroll->scrollEndCallback_();
+            if (scroll->moved_) {
+                scroll->HandleScrollEnd();
             }
             scroll->currentVelocity_ = 0.0;
             if (scroll->isTouching_ || scroll->isDragUpdateStop_) {
@@ -540,14 +902,14 @@ void Scrollable::StartSpringMotion(
 
 void Scrollable::ProcessScrollMotionStop()
 {
-    if (!scrollPause_ && moved_ && scrollEndCallback_) {
-        scrollEndCallback_();
+    if ((!scrollPause_ || !scrollOverCallback_) && moved_) {
+        HandleScrollEnd();
     }
 
     // spring effect special process
-    if (scrollPause_ && scrollOverCallback_) {
+    if (scrollPause_) {
         scrollPause_ = false;
-        ProcessScrollOverCallback(currentVelocity_);
+        HandleOverScroll(currentVelocity_);
     } else {
         currentVelocity_ = 0.0;
         if (isDragUpdateStop_) {
@@ -599,9 +961,8 @@ void Scrollable::ProcessScrollMotion(double position)
     } else {
         // UpdateScrollPosition return false, means reach to scroll limit.
         auto mainDelta = position - currentPos_;
-        ExecuteScrollBegin(mainDelta);
-        ExecuteScrollFrameBegin(mainDelta, ScrollState::FLING);
-        if (!UpdateScrollPosition(mainDelta, SCROLL_FROM_ANIMATION)) {
+        HandleScroll(mainDelta, SCROLL_FROM_ANIMATION, NestedState::GESTURE);
+        if (!moved_) {
             controller_->Stop();
         } else if (!touchUp_) {
             if (scrollTouchUpCallback_) {
@@ -613,7 +974,7 @@ void Scrollable::ProcessScrollMotion(double position)
     currentPos_ = position;
 
     // spring effect special process
-    if (outBoundaryCallback_ && outBoundaryCallback_()) {
+    if (canOverScroll_ || (!overScrollOffsetCallback_ && (outBoundaryCallback_ && outBoundaryCallback_()))) {
         scrollPause_ = true;
         controller_->Stop();
     }
@@ -630,7 +991,7 @@ bool Scrollable::UpdateScrollPosition(const double offset, int32_t source) const
 
 void Scrollable::ProcessScrollOverCallback(double velocity)
 {
-    if (outBoundaryCallback_ && !outBoundaryCallback_()) {
+    if (outBoundaryCallback_ && !outBoundaryCallback_() && !canOverScroll_) {
         return;
     }
     // In the case of chain animation enabled, you need to switch the control point first,
@@ -642,6 +1003,36 @@ void Scrollable::ProcessScrollOverCallback(double velocity)
     if (scrollOverCallback_) {
         scrollOverCallback_(velocity);
     }
+}
+
+bool Scrollable::HandleOverScroll(double velocity)
+{
+    auto parent = parent_.Upgrade();
+    if (!parent || !nestedOpt_.NeedParent()) {
+        if (edgeEffect_ != EdgeEffect::NONE) {
+            ProcessScrollOverCallback(velocity);
+            return true;
+        }
+        return false;
+    }
+    // parent handle over scroll first
+    if ((velocity < 0 && (nestedOpt_.forward == NestedScrollMode::SELF_FIRST)) ||
+        (velocity > 0 && (nestedOpt_.backward == NestedScrollMode::SELF_FIRST))) {
+        if (parent->HandleOverScroll(velocity)) {
+            return true;
+        }
+        if (edgeEffect_ != EdgeEffect::NONE) {
+            ProcessScrollOverCallback(velocity);
+            return true;
+        }
+    }
+
+    // self handle over scroll first
+    if (edgeEffect_ != EdgeEffect::NONE) {
+        ProcessScrollOverCallback(velocity);
+        return true;
+    }
+    return parent->HandleOverScroll(velocity);
 }
 
 void Scrollable::SetSlipFactor(double SlipFactor)

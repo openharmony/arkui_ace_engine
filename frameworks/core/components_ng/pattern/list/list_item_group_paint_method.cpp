@@ -18,7 +18,7 @@
 namespace OHOS::Ace::NG {
 void ListItemGroupPaintMethod::PaintDivider(PaintWrapper* paintWrapper, RSCanvas& canvas)
 {
-    if (!divider_.strokeWidth.IsValid()) {
+    if (!divider_.strokeWidth.IsValid() || divider_.strokeWidth.Unit() == DimensionUnit::PERCENT) {
         return;
     }
     const auto& geometryNode = paintWrapper->GetGeometryNode();

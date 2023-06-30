@@ -29,6 +29,14 @@
 
 namespace OHOS::Ace {
 
+enum class PlatformVersion {
+    VERSION_FIVE = 5,
+    VERSION_SIX,
+    VERSION_SEVEN,
+    VERSION_EIGHT,
+    VERSION_NINE,
+    VERSION_TEN
+};
 struct AceBundleInfo {
     uint32_t versionCode = 0;
     std::string versionName;
@@ -81,6 +89,26 @@ public:
     int32_t GetApiTargetVersion() const
     {
         return apiVersion_;
+    }
+
+    void SetAppVersionName(const std::string& versionName)
+    {
+        versionName_ = versionName;
+    }
+
+    const std::string& GetAppVersionName() const
+    {
+        return versionName_;
+    }
+
+    void SetAppVersionCode(uint32_t versionCode)
+    {
+        versionCode_ = versionCode;
+    }
+
+    uint32_t GetAppVersionCode() const
+    {
+        return versionCode_;
     }
 
     virtual bool GetBundleInfo(const std::string& packageName, AceBundleInfo& bundleInfo) = 0;
@@ -189,6 +217,8 @@ protected:
     bool isAccessibilityEnabled_ = false;
 
     int32_t apiVersion_ = 0;
+    std::string versionName_;
+    uint32_t versionCode_ = 0;
 };
 
 } // namespace OHOS::Ace

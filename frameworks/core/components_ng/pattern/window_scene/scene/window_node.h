@@ -30,13 +30,13 @@ public:
     {}
     ~WindowNode() override = default;
 
-    HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-        const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId) override;
-
     static RefPtr<WindowNode> GetOrCreateWindowNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
+    bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t sourceType) override;
+    std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType) override;
 
-    void DispatchPointerEvent(const TouchEvent& point, const RectF& rectWithTransform) const;
+private:
+    RectF ConvertHotRect(const RectF& rect, int32_t sourceType);
 };
 } // namespace OHOS::Ace::NG
 

@@ -114,7 +114,8 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
     const UpdatePageCallback& updatePageCallback, const ResetStagingPageCallback& resetLoadingPageCallback,
     const DestroyPageCallback& destroyPageCallback, const DestroyApplicationCallback& destroyApplicationCallback,
     const UpdateApplicationStateCallback& updateApplicationStateCallback, const TimerCallback& timerCallback,
-    const MediaQueryCallback& mediaQueryCallback, const RequestAnimationCallback& requestAnimationCallback,
+    const MediaQueryCallback& mediaQueryCallback, const LayoutInspectorCallback& layoutInpsectorCallback,
+    const DrawInspectorCallback& drawInpsectorCallback, const RequestAnimationCallback& requestAnimationCallback,
     const JsCallback& jsCallback, const OnWindowDisplayModeChangedCallBack& onWindowDisplayModeChangedCallBack,
     const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack,
     const OnSaveAbilityStateCallBack& onSaveAbilityStateCallBack,
@@ -127,9 +128,9 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
       asyncEvent_(asyncEventCallback), syncEvent_(syncEventCallback), updatePage_(updatePageCallback),
       resetStagingPage_(resetLoadingPageCallback), destroyPage_(destroyPageCallback),
       destroyApplication_(destroyApplicationCallback), updateApplicationState_(updateApplicationStateCallback),
-      timer_(timerCallback), mediaQueryCallback_(mediaQueryCallback),
-      requestAnimationCallback_(requestAnimationCallback), jsCallback_(jsCallback),
-      onWindowDisplayModeChanged_(onWindowDisplayModeChangedCallBack),
+      timer_(timerCallback), mediaQueryCallback_(mediaQueryCallback), layoutInspectorCallback_(layoutInpsectorCallback),
+      drawInspectorCallback_(drawInpsectorCallback), requestAnimationCallback_(requestAnimationCallback),
+      jsCallback_(jsCallback), onWindowDisplayModeChanged_(onWindowDisplayModeChangedCallBack),
       onConfigurationUpdated_(onConfigurationUpdatedCallBack), onSaveAbilityState_(onSaveAbilityStateCallBack),
       onRestoreAbilityState_(onRestoreAbilityStateCallBack), onNewWant_(onNewWantCallBack),
       onMemoryLevel_(onMemoryLevelCallBack), onStartContinuationCallBack_(onStartContinuationCallBack),
@@ -1833,6 +1834,34 @@ void FrontendDelegateDeclarative::OnMediaQueryUpdate()
     taskExecutor_->PostTask(callback, TaskExecutor::TaskType::JS);
 }
 
+void FrontendDelegateDeclarative::OnLayoutCompleted(const std::string& componentId)
+{
+    LOGI("FrontendDelegateDeclarative::OnLayoutCompleted");
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this), componentId] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            delegate->layoutInspectorCallback_(componentId);
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+void FrontendDelegateDeclarative::OnDrawCompleted(const std::string& componentId)
+{
+    LOGI("FrontendDelegateDeclarative::OnDrawCompleted");
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this), componentId] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            delegate->drawInspectorCallback_(componentId);
+        },
+        TaskExecutor::TaskType::JS);
+}
+
 void FrontendDelegateDeclarative::OnPageReady(
     const RefPtr<JsAcePage>& page, const std::string& url, bool isMainPage, bool isRestore)
 {
@@ -2578,6 +2607,16 @@ RefPtr<JsAcePage> FrontendDelegateDeclarative::GetPage(int32_t pageId) const
 void FrontendDelegateDeclarative::RegisterFont(const std::string& familyName, const std::string& familySrc)
 {
     pipelineContextHolder_.Get()->RegisterFont(familyName, familySrc);
+}
+
+void FrontendDelegateDeclarative::GetSystemFontList(std::vector<std::string>& fontList)
+{
+    pipelineContextHolder_.Get()->GetSystemFontList(fontList);
+}
+
+bool FrontendDelegateDeclarative::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
+{
+    return pipelineContextHolder_.Get()->GetSystemFont(fontName, fontInfo);
 }
 
 void FrontendDelegateDeclarative::HandleImage(

@@ -35,6 +35,8 @@ const char SURFACE_LEFT[] = "surfaceLeft";
 const char SURFACE_TOP[] = "surfaceTop";
 const char SURFACE_HEIGHT[] = "surfaceHeight";
 const char SURFACE_WIDTH[] = "surfaceWidth";
+const char SET_IS_FULLSCREEN[] = "setIsFullScreen";
+const char IS_FULLSCREEN[] = "isFullScreen";
 
 ExtSurface::~ExtSurface()
 {
@@ -117,6 +119,14 @@ void ExtSurface::SetBounds(int64_t surfaceId, int32_t left, int32_t top, int32_t
                 << width << PARAM_AND << SURFACE_HEIGHT << PARAM_EQUALS << height;
     std::string param = paramStream.str();
     CallResRegisterMethod(MakeMethodHash(SET_SURFACE_BOUNDS), param);
+}
+
+void ExtSurface::SetIsFullScreen(bool isFullScreen)
+{
+    std::stringstream paramStream;
+    paramStream << IS_FULLSCREEN << PARAM_EQUALS << isFullScreen;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(MakeMethodHash(SET_IS_FULLSCREEN), param);
 }
 
 void ExtSurface::OnSurfaceCreated()

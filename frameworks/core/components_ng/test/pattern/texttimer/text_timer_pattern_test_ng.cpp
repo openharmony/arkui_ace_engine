@@ -22,10 +22,12 @@
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/texttimer/text_timer_layout_property.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -63,12 +65,22 @@ struct TestProperty {
 
 class TextTimerPatternTestNg : public testing::Test {
 public:
-    static void SetUpTestCase() {};
-    static void TearDownTestCase() {};
+    static void SetUpTestCase();
+    static void TearDownTestCase();
 
 protected:
     static RefPtr<FrameNode> CreateTextTimerParagraph(const TestProperty& testProperty);
 };
+
+void TextTimerPatternTestNg::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
+
+void TextTimerPatternTestNg::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
 
 RefPtr<FrameNode> TextTimerPatternTestNg::CreateTextTimerParagraph(const TestProperty& testProperty)
 {
@@ -162,9 +174,12 @@ HWTEST_F(TextTimerPatternTestNg, TextTimerTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. create texttimer frameNode.
      */
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::TEXTTIMER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextTimerPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(TEXT_TIMER_FORMAT);
+    auto frameNode = CreateTextTimerParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    ASSERT_NE(textNode, nullptr);
 
     /**
      * @tc.steps: step2. get pattern and layoutProperty.
@@ -174,6 +189,8 @@ HWTEST_F(TextTimerPatternTestNg, TextTimerTest002, TestSize.Level1)
     EXPECT_NE(pattern, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(textLayoutProperty, nullptr);
 
     /**
      * @tc.steps: step3. call OnModifyDone and tick when default properties.
@@ -183,7 +200,7 @@ HWTEST_F(TextTimerPatternTestNg, TextTimerTest002, TestSize.Level1)
     pattern->OnModifyDone();
     constexpr int32_t duration = 100;
     pattern->Tick(duration);
-    EXPECT_EQ(layoutProperty->GetContent(), FORMAT_DATA);
+    EXPECT_EQ(textLayoutProperty->GetContent(), FORMAT_DATA);
 
     /**
      * @tc.steps: step4. call OnModifyDone and tick when set properties.
@@ -195,13 +212,13 @@ HWTEST_F(TextTimerPatternTestNg, TextTimerTest002, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetIsCountDown(), true);
     pattern->OnModifyDone();
     pattern->Tick(0);
-    EXPECT_EQ(layoutProperty->GetContent(), FORMAT_DATA);
+    EXPECT_EQ(textLayoutProperty->GetContent(), FORMAT_DATA);
 
     /**
      * @tc.steps: step5. get controller to call callback function.
      */
     auto controller = pattern->GetTextTimerController();
-    EXPECT_NE(controller, nullptr);
+    ASSERT_NE(controller, nullptr);
 
     /**
      * @tc.steps: step6. when the running status in scheduler is false, call related functions.
@@ -286,9 +303,12 @@ HWTEST_F(TextTimerPatternTestNg, TextTimerTest003, TestSize.Level1)
  */
 HWTEST_F(TextTimerPatternTestNg, TextTimerAccessibilityPropertyIsScrollable001, TestSize.Level1)
 {
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXTTIMER_ETS_TAG,
-        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<TextTimerPattern>(); });
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(TEXT_TIMER_FORMAT);
+    auto frameNode = CreateTextTimerParagraph(testProperty);
     ASSERT_NE(frameNode, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    ASSERT_NE(textNode, nullptr);
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_NE(textLayoutProperty, nullptr);
     auto textTimerAccessibilityProperty = frameNode->GetAccessibilityProperty<TextTimerAccessibilityProperty>();

@@ -15,17 +15,25 @@
 
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/image/pixel_map.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/color.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components_ng/gestures/pan_gesture.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/property/calc_length.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/event/mouse_event.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {
@@ -78,47 +86,20 @@ RefPtr<FrameNode> ContainerModalView::Create(RefPtr<FrameNode>& content)
 
 RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNode, bool isFloatingTitle)
 {
-    auto containerTitleRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    containerTitleRow->UpdateInspectorId("ContainerModalTitleRow");
-    auto layoutProperty = containerTitleRow->GetLayoutProperty<LinearLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, nullptr);
-    layoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));
-    layoutProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
-    layoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
-    if (isFloatingTitle) {
-        auto renderContext = containerTitleRow->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, nullptr);
-        renderContext->UpdateBackgroundColor(CONTAINER_BACKGROUND_COLOR);
-    }
-
+    LOGI("ContainerModalView BuildTitle called");
+    auto titleContainer = BuildTitleContainer(containerNode, isFloatingTitle);
+    CHECK_NULL_RETURN(titleContainer, nullptr);
+    return AddControlButtons(titleContainer);
+}
+ 
+RefPtr<FrameNode> ContainerModalView::BuildTitleContainer(RefPtr<FrameNode>& containerNode, bool isFloatingTitle)
+{
+    auto containerTitleRow = BuildTitleRow(isFloatingTitle);
     auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto windowManager = pipeline->GetWindowManager();
-    CHECK_NULL_RETURN(windowManager, nullptr);
-    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
-    CHECK_NULL_RETURN(containerPattern, nullptr);
-    if (!isFloatingTitle) {
-        // touch the title to move the floating window
-        auto eventHub = containerTitleRow->GetOrCreateGestureEventHub();
-        CHECK_NULL_RETURN(eventHub, nullptr);
-        PanDirection panDirection;
-        panDirection.type = PanDirection::ALL;
-        auto panActionStart = [windowManager](const GestureEvent&) {
-            CHECK_NULL_VOID_NOLOG(windowManager);
-            LOGI("container window start move.");
-            windowManager->WindowStartMove();
-        };
-        auto panEvent = AceType::MakeRefPtr<PanEvent>(std::move(panActionStart), nullptr, nullptr, nullptr);
-        eventHub->AddPanEvent(panEvent, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
-    }
-
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, nullptr);
     auto themeConstants = themeManager->GetThemeConstants();
     CHECK_NULL_RETURN(themeConstants, nullptr);
-
     // create title icon
     ImageSourceInfo imageSourceInfo;
     auto titleIcon = FrameNode::CreateFrameNode(
@@ -159,7 +140,56 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
     // add icon and label
     containerTitleRow->AddChild(titleIcon);
     containerTitleRow->AddChild(titleLabel);
+    return containerTitleRow;
+}
 
+RefPtr<FrameNode> ContainerModalView::BuildTitleRow(bool isFloatingTitle)
+{
+    auto containerTitleRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    containerTitleRow->UpdateInspectorId("ContainerModalTitleRow");
+    auto layoutProperty = containerTitleRow->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    layoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));
+    layoutProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+    layoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    if (isFloatingTitle) {
+        auto renderContext = containerTitleRow->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, nullptr);
+        renderContext->UpdateBackgroundColor(CONTAINER_BACKGROUND_COLOR);
+    }
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_RETURN(windowManager, nullptr);
+    if (!isFloatingTitle) {
+        // touch the title to move the floating window
+        auto eventHub = containerTitleRow->GetOrCreateGestureEventHub();
+        CHECK_NULL_RETURN(eventHub, nullptr);
+        PanDirection panDirection;
+        panDirection.type = PanDirection::ALL;
+        auto panActionStart = [windowManager](const GestureEvent&) {
+            CHECK_NULL_VOID_NOLOG(windowManager);
+            if (windowManager->GetCurrentWindowMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+                LOGI("container window start move.");
+                windowManager->WindowStartMove();
+            }
+        };
+        auto panEvent = AceType::MakeRefPtr<PanEvent>(std::move(panActionStart), nullptr, nullptr, nullptr);
+        eventHub->AddPanEvent(panEvent, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    }
+    return containerTitleRow;
+}
+
+RefPtr<FrameNode> ContainerModalView::AddControlButtons(RefPtr<FrameNode>& containerTitleRow)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_RETURN(windowManager, nullptr);
+ 
     // add leftSplit / maxRecover / minimize / close button
     containerTitleRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT,
         [windowManager](GestureEvent& info) {
@@ -196,8 +226,8 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
     return containerTitleRow;
 }
 
-RefPtr<FrameNode> ContainerModalView::BuildControlButton(
-    InternalResource::ResourceId icon, GestureEventFunc&& clickCallback, bool isCloseButton)
+RefPtr<FrameNode> ContainerModalView::BuildControlButton(InternalResource::ResourceId icon,
+    GestureEventFunc&& clickCallback, bool isCloseButton, bool canDrag)
 {
     // button image icon
     ImageSourceInfo imageSourceInfo;
@@ -239,6 +269,12 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
     CHECK_NULL_RETURN(buttonEventHub, nullptr);
     auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
     buttonEventHub->AddClickEvent(clickEvent);
+    // if can not be drag, cover father panEvent
+    if (!canDrag) {
+        auto panEvent = AceType::MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr, nullptr);
+        PanDirection panDirection;
+        buttonEventHub->AddPanEvent(panEvent, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    }
 
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);

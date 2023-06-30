@@ -57,6 +57,10 @@ SelectModel* SelectModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+namespace {
+constexpr int32_t PLATFORM_VERSION_TEN = 10;
+} // namespace
+
 void JSSelect::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 0) {
@@ -148,6 +152,11 @@ void JSSelect::Selected(const JSCallbackInfo& info)
     }
 
     int32_t value = 0;
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        // default value is -1
+        value = -1;
+    }
     if (info.Length() > 0 && info[0]->IsNumber()) {
         value = info[0]->ToNumber<int32_t>();
     }
@@ -204,34 +213,47 @@ void JSSelect::Font(const JSCallbackInfo& info)
     CHECK_NULL_VOID_NOLOG(theme);
     auto param = JSRef<JSObject>::Cast(info[0]);
     // set select value font size
-    CalcDimension fontSize = theme->GetFontSize();
     auto size = param->GetProperty("size");
-    ParseJsDimensionFp(size, fontSize);
-    SelectModel::GetInstance()->SetFontSize(fontSize);
+    if (!size->IsNull()) {
+        CalcDimension fontSize = theme->GetFontSize();
+        if (ParseJsDimensionFp(size, fontSize) || pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+            SelectModel::GetInstance()->SetFontSize(fontSize);
+        }
+    }
     // set select value font weight
-    FontWeight weight = theme->GetFontWeight();
     auto fontWeight = param->GetProperty("weight");
     std::string weightStr;
-    if (fontWeight->IsNumber()) {
-        weight = ConvertStrToFontWeight(std::to_string(fontWeight->ToNumber<int32_t>()));
-    } else if (ParseJsString(fontWeight, weightStr)) {
-        weight = ConvertStrToFontWeight(weightStr);
+    if (!fontWeight->IsNull()) {
+        FontWeight weight = theme->GetFontWeight();
+        if (fontWeight->IsNumber()) {
+            weight = ConvertStrToFontWeight(std::to_string(fontWeight->ToNumber<int32_t>()));
+        } else if (ParseJsString(fontWeight, weightStr)) {
+            weight = ConvertStrToFontWeight(weightStr);
+        }
+        SelectModel::GetInstance()->SetFontWeight(weight);
     }
-    SelectModel::GetInstance()->SetFontWeight(weight);
     // set select value font family
-    std::vector<std::string> fontFamily;
     auto family = param->GetProperty("family");
-    if (!family->IsNull() && family->IsString()) {
-        fontFamily = ConvertStrToFontFamilies(family->ToString());
+    if (!family->IsNull()) {
+        std::vector<std::string> fontFamily;
+        if (family->IsString()) {
+            fontFamily = ConvertStrToFontFamilies(family->ToString());
+            SelectModel::GetInstance()->SetFontFamily(fontFamily);
+        } else if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+            SelectModel::GetInstance()->SetFontFamily(fontFamily);
+        }
     }
-    SelectModel::GetInstance()->SetFontFamily(fontFamily);
     // set select value font style
-    FontStyle fontStyle = FontStyle::NORMAL;
     auto style = param->GetProperty("style");
-    if (!style->IsNull() && style->IsNumber()) {
-        fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
+    if (!style->IsNull()) {
+        FontStyle fontStyle = FontStyle::NORMAL;
+        if (style->IsNumber()) {
+            fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
+            SelectModel::GetInstance()->SetItalicFontStyle(fontStyle);
+        } else if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+            SelectModel::GetInstance()->SetItalicFontStyle(fontStyle);
+        }
     }
-    SelectModel::GetInstance()->SetItalicFontStyle(fontStyle);
 }
 
 void JSSelect::FontColor(const JSCallbackInfo& info)
@@ -284,37 +306,51 @@ void JSSelect::SelectedOptionFont(const JSCallbackInfo& info)
     CHECK_NULL_VOID_NOLOG(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID_NOLOG(theme);
-
     auto param = JSRef<JSObject>::Cast(info[0]);
     // set selected option font size
-    CalcDimension fontSize = theme->GetFontSize();
     auto size = param->GetProperty("size");
-    ParseJsDimensionFp(size, fontSize);
-    SelectModel::GetInstance()->SetSelectedOptionFontSize(fontSize);
+    if (!size->IsNull()) {
+        CalcDimension fontSize = theme->GetFontSize();
+        if (ParseJsDimensionFp(size, fontSize) || pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+            SelectModel::GetInstance()->SetSelectedOptionFontSize(fontSize);
+        }
+    }
     // set selected option font weight
-    FontWeight weight = theme->GetFontWeight();
     auto fontWeight = param->GetProperty("weight");
     std::string weightStr;
-    if (fontWeight->IsNumber()) {
-        weight = ConvertStrToFontWeight(std::to_string(fontWeight->ToNumber<int32_t>()));
-    } else if (ParseJsString(fontWeight, weightStr)) {
-        weight = ConvertStrToFontWeight(weightStr);
+    if (!fontWeight->IsNull()) {
+        FontWeight weight = theme->GetFontWeight();
+        if (fontWeight->IsNumber()) {
+            weight = ConvertStrToFontWeight(std::to_string(fontWeight->ToNumber<int32_t>()));
+        } else if (ParseJsString(fontWeight, weightStr)) {
+            weight = ConvertStrToFontWeight(weightStr);
+        }
+        SelectModel::GetInstance()->SetSelectedOptionFontWeight(weight);
     }
-    SelectModel::GetInstance()->SetSelectedOptionFontWeight(weight);
     // set selected option font family
-    std::vector<std::string> fontFamily;
     auto family = param->GetProperty("family");
-    if (!family->IsNull() && family->IsString()) {
-        fontFamily = ConvertStrToFontFamilies(family->ToString());
+    if (!family->IsNull()) {
+        std::vector<std::string> fontFamily;
+        if (family->IsString()) {
+            fontFamily = ConvertStrToFontFamilies(family->ToString());
+            SelectModel::GetInstance()->SetSelectedOptionFontFamily(fontFamily);
+        } else if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+            // set theme default value
+            SelectModel::GetInstance()->SetSelectedOptionFontFamily(fontFamily);
+        }
     }
-    SelectModel::GetInstance()->SetSelectedOptionFontFamily(fontFamily);
     // set selected option font style
-    FontStyle fontStyle = FontStyle::NORMAL;
     auto style = param->GetProperty("style");
-    if (!style->IsNull() && style->IsNumber()) {
-        fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
+    if (!style->IsNull()) {
+        FontStyle fontStyle = FontStyle::NORMAL;
+        if (style->IsNumber()) {
+            fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
+            SelectModel::GetInstance()->SetSelectedOptionItalicFontStyle(fontStyle);
+        } else if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+            // set theme default value
+            SelectModel::GetInstance()->SetSelectedOptionItalicFontStyle(fontStyle);
+        }
     }
-    SelectModel::GetInstance()->SetSelectedOptionItalicFontStyle(fontStyle);
 }
 
 void JSSelect::SelectedOptionFontColor(const JSCallbackInfo& info)
@@ -344,7 +380,9 @@ void JSSelect::OptionBgColor(const JSCallbackInfo& info)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID_NOLOG(theme);
     Color bgColor = theme->GetBackgroundColor();
-    ParseJsColor(info[0], bgColor);
+    if (!ParseJsColor(info[0], bgColor) && pipeline->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
+        return;
+    }
     SelectModel::GetInstance()->SetOptionBgColor(bgColor);
 }
 
@@ -359,34 +397,49 @@ void JSSelect::OptionFont(const JSCallbackInfo& info)
     CHECK_NULL_VOID_NOLOG(theme);
     auto param = JSRef<JSObject>::Cast(info[0]);
     // set option font size
-    CalcDimension fontSize = theme->GetFontSize();
     auto size = param->GetProperty("size");
-    ParseJsDimensionFp(size, fontSize);
-    SelectModel::GetInstance()->SetOptionFontSize(fontSize);
+    if (!size->IsNull()) {
+        CalcDimension fontSize = theme->GetFontSize();
+        if (ParseJsDimensionFp(size, fontSize) || pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+            SelectModel::GetInstance()->SetOptionFontSize(fontSize);
+        }
+    }
     // set option font weight
-    FontWeight weight = theme->GetFontWeight();
     std::string weightStr;
     auto fontWeight = param->GetProperty("weight");
-    if (fontWeight->IsNumber()) {
-        weight = ConvertStrToFontWeight(std::to_string(fontWeight->ToNumber<int32_t>()));
-    } else if (ParseJsString(fontWeight, weightStr)) {
-        weight = ConvertStrToFontWeight(weightStr);
+    if (!fontWeight->IsNull()) {
+        FontWeight weight = theme->GetFontWeight();
+        if (fontWeight->IsNumber()) {
+            weight = ConvertStrToFontWeight(std::to_string(fontWeight->ToNumber<int32_t>()));
+        } else if (ParseJsString(fontWeight, weightStr)) {
+            weight = ConvertStrToFontWeight(weightStr);
+        }
+        SelectModel::GetInstance()->SetOptionFontWeight(weight);
     }
-    SelectModel::GetInstance()->SetOptionFontWeight(weight);
     // set option font family
-    std::vector<std::string> fontFamily;
     auto family = param->GetProperty("family");
-    if (!family->IsNull() && family->IsString()) {
-        fontFamily = ConvertStrToFontFamilies(family->ToString());
+    if (!family->IsNull()) {
+        std::vector<std::string> fontFamily;
+        if (family->IsString()) {
+            fontFamily = ConvertStrToFontFamilies(family->ToString());
+            SelectModel::GetInstance()->SetOptionFontFamily(fontFamily);
+        } else if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+            // set theme default value
+            SelectModel::GetInstance()->SetOptionFontFamily(fontFamily);
+        }
     }
-    SelectModel::GetInstance()->SetOptionFontFamily(fontFamily);
     // set option font style
-    FontStyle fontStyle = FontStyle::NORMAL;
     auto style = param->GetProperty("style");
-    if (!style->IsNull() && style->IsNumber()) {
-        fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
+    if (!style->IsNull()) {
+        FontStyle fontStyle = FontStyle::NORMAL;
+        if (style->IsNumber()) {
+            fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
+            SelectModel::GetInstance()->SetOptionItalicFontStyle(fontStyle);
+        } else if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+            // set theme default value
+            SelectModel::GetInstance()->SetOptionItalicFontStyle(fontStyle);
+        }
     }
-    SelectModel::GetInstance()->SetOptionItalicFontStyle(fontStyle);
 }
 
 void JSSelect::OptionFontColor(const JSCallbackInfo& info)
@@ -401,7 +454,9 @@ void JSSelect::OptionFontColor(const JSCallbackInfo& info)
     CHECK_NULL_VOID_NOLOG(theme);
 
     Color textColor = theme->GetFontColor();
-    ParseJsColor(info[0], textColor);
+    if (!ParseJsColor(info[0], textColor) && pipeline->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
+        return;
+    }
     SelectModel::GetInstance()->SetOptionFontColor(textColor);
 }
 

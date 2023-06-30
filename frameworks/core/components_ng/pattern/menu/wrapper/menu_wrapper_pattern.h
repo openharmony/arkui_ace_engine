@@ -25,8 +25,6 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_layout_algorithm.h"
-#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_method.h"
-#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -55,16 +53,6 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<MenuWrapperLayoutAlgorithm>();
-    }
-
-    RefPtr<PaintProperty> CreatePaintProperty() override
-    {
-        return MakeRefPtr<MenuWrapperPaintProperty>();
-    }
-
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
-    {
-        return AceType::MakeRefPtr<MenuWrapperPaintMethod>();
     }
 
     void HandleMouseEvent(const MouseInfo& info, RefPtr<MenuItemPattern>& menuItem);

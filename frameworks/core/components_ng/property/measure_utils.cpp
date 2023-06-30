@@ -311,6 +311,54 @@ OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis ax
     return idealSize;
 }
 
+OptionalSizeF CreateIdealSizeByPercentRef(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType)
+{
+    OptionalSizeF idealSize;
+    do {
+        // Use idea size first if it is valid.
+        idealSize.UpdateSizeWithCheck(layoutConstraint.selfIdealSize);
+        if (idealSize.IsValid()) {
+            break;
+        }
+
+        if (measureType == MeasureType::MATCH_PARENT) {
+            idealSize.UpdateIllegalSizeWithCheck(layoutConstraint.parentIdealSize);
+            idealSize.UpdateIllegalSizeWithCheck(layoutConstraint.percentReference);
+            break;
+        }
+
+        if (measureType == MeasureType::MATCH_PARENT_CROSS_AXIS) {
+            auto selfSize = GetCrossAxisSize(idealSize, axis);
+            if (!selfSize) {
+                auto parentCrossSize = GetCrossAxisSize(layoutConstraint.parentIdealSize, axis);
+                if (parentCrossSize) {
+                    SetCrossAxisSize(parentCrossSize.value(), axis, idealSize);
+                } else {
+                    parentCrossSize = GetCrossAxisSize(layoutConstraint.percentReference, axis);
+                    SetCrossAxisSize(parentCrossSize.value(), axis, idealSize);
+                }
+            }
+            break;
+        }
+
+        if (measureType == MeasureType::MATCH_PARENT_MAIN_AXIS) {
+            auto selfSize = GetMainAxisSize(idealSize, axis);
+            auto parentMainSize = GetMainAxisSize(layoutConstraint.parentIdealSize, axis);
+            if (!selfSize) {
+                if (parentMainSize) {
+                    SetMainAxisSize(parentMainSize.value(), axis, idealSize);
+                } else {
+                    parentMainSize = GetMainAxisSize(layoutConstraint.percentReference, axis);
+                    SetMainAxisSize(parentMainSize.value(), axis, idealSize);
+                }
+            }
+            break;
+        }
+    } while (false);
+    idealSize.Constrain(layoutConstraint.minSize, layoutConstraint.maxSize);
+    return idealSize;
+}
+
 void CreateChildrenConstraint(SizeF& size, const PaddingPropertyF& padding)
 {
     float width = 0;

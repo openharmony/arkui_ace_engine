@@ -18,6 +18,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/ace_engine.h"
 
 namespace OHOS::Ace::NG {
 void AlertDialogModelNG::SetParseButtonObj(
@@ -36,7 +37,13 @@ void AlertDialogModelNG::SetOnCancel(std::function<void()>&& eventFunc, DialogPr
 void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
 {
     auto container = Container::Current();
+    auto currentId = Container::CurrentId();
     CHECK_NULL_VOID(container);
+    if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+        container = AceEngine::Get().GetContainer(currentId);
+    }
+    ContainerScope scope(currentId);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);

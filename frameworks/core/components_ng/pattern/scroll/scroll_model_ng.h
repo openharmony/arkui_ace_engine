@@ -45,6 +45,8 @@ public:
     void SetEdgeEffect(EdgeEffect edgeEffect) override;
     void SetHasWidth(bool hasWidth) override {}
     void SetHasHeight(bool hasHeight) override {}
+    void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
+    void SetScrollEnabled(bool scrollEnabled) override;
 };
 
 } // namespace OHOS::Ace::NG

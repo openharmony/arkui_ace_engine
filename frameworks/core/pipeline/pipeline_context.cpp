@@ -3340,6 +3340,7 @@ void PipelineContext::AddKeyFrame(float fraction, const std::function<void()>& p
 
 void PipelineContext::SaveExplicitAnimationOption(const AnimationOption& option)
 {
+    LOGD("Save AnimationOption");
     explicitAnimationOption_ = option;
 }
 

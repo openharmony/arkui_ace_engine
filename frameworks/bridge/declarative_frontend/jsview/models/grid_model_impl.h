@@ -45,6 +45,8 @@ public:
     void SetSupportAnimation(bool value) override;
     void SetSupportDragAnimation(bool value) override;
     void SetEdgeEffect(EdgeEffect edgeEffect) override;
+    void SetNestedScroll(const NestedScrollOptions& nestedOpt) override {};
+    void SetScrollEnabled(bool scrollEnabled) override {};
     void SetOnScrollToIndex(std::function<void(const BaseEventInfo*)>&& value) override;
     void SetOnScrollBarUpdate(
         std::function<std::pair<std::optional<float>, std::optional<float>>(int32_t, float)>&& value) override;

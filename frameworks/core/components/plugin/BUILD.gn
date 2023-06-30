@@ -41,22 +41,20 @@ build_component("plugin") {
       "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
     ]
 
-    deps = [
-      "$ability_runtime_inner_api_path/ability_manager:ability_manager",
-      "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
-      "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
-      "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk:system_ability_fwk",
-      "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-      "//foundation/window/window_manager/wm:libwm",
-    ]
+    deps = [ "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr" ]
 
     external_deps = [
       "ability_base:extractortool",
       "ability_base:want",
+      "ability_runtime:ability_manager",
+      "ability_runtime:abilitykit_native",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "input:libmmi-client",
       "ipc:ipc_core",
+      "safwk:system_ability_fwk",
+      "samgr:samgr_proxy",
+      "window_manager:libwm",
     ]
 
     if (os_account_exists) {

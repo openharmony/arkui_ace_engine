@@ -16,8 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_ROSEN_RENDER_SVG_PATH_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_ROSEN_RENDER_SVG_PATH_H
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPath.h"
+#else
+#include "core/components_ng/render/drawing.h"
+#endif
 
 #include "frameworks/core/components/svg/render_svg_path.h"
 
@@ -41,7 +45,11 @@ public:
     Rect GetPaintBounds(const Offset& offset) override;
 
 protected:
+#ifndef USE_ROSEN_DRAWING
     void GetPath(SkPath& out);
+#else
+    void GetPath(RSPath& out);
+#endif
 
 private:
 };

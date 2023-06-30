@@ -30,13 +30,14 @@ namespace OHOS::Ace::NG {
 namespace {
 void NormalizeRadius(BorderRadiusArray& radius, const SizeF& size)
 {
+    auto maxRadius = std::min(size.Width(), size.Height()) / 2;
     // radius shouldn't be larger than half of image size
     for (auto&& corner : radius) {
-        if (corner.GetX() > size.Width() / 2) {
-            corner.SetX(size.Width() / 2);
+        if (corner.GetX() > maxRadius) {
+            corner.SetX(maxRadius);
         }
-        if (corner.GetY() > size.Height() / 2) {
-            corner.SetY(size.Height() / 2);
+        if (corner.GetY() > maxRadius) {
+            corner.SetY(maxRadius);
         }
     }
 }
@@ -101,11 +102,6 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
     auto renderCtx = paintWrapper->GetRenderContext();
     CHECK_NULL_VOID(renderCtx);
     config.obscuredReasons_ = renderCtx->GetObscured().value_or(std::vector<ObscuredReasons>());
-    // scale for recordingCanvas: take padding into account
-    auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
-    auto contentSize = paintWrapper->GetContentSize();
-    config.scaleX_ = contentSize.Width() / frameSize.Width();
-    config.scaleY_ = contentSize.Height() / frameSize.Height();
 
     if (renderProps->GetNeedBorderRadiusValue(false)) {
         UpdateBorderRadius(paintWrapper);
@@ -115,7 +111,6 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
 CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_RETURN(canvasImage_, nullptr);
-    auto offset = paintWrapper->GetContentOffset();
     auto contentSize = paintWrapper->GetContentSize();
 
     // update render props to ImagePaintConfig
@@ -123,8 +118,7 @@ CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintW
     CHECK_NULL_RETURN(props, nullptr);
     UpdatePaintConfig(props, paintWrapper);
     ImagePainter imagePainter(canvasImage_);
-    return
-        [imagePainter, offset, contentSize](RSCanvas& canvas) { imagePainter.DrawImage(canvas, offset, contentSize); };
+    return [imagePainter, contentSize](RSCanvas& canvas) { imagePainter.DrawImage(canvas, {}, contentSize); };
 }
 
 CanvasDrawFunction ImagePaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)

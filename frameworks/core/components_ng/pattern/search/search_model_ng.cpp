@@ -201,7 +201,7 @@ void SearchModelNG::SetSearchSrcPath(const std::string& src)
         auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::SEARCH_SVG);
         imageSourceInfo.SetSrc(iconPath, color);
     } else {
-        imageSourceInfo.SetSrc(src);
+        imageSourceInfo.SetSrc(src, color);
     }
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     imageFrameNode->MarkModifyDone();
@@ -230,7 +230,7 @@ void SearchModelNG::SetRightIconSrcPath(const std::string& src)
         auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::CLOSE_SVG);
         imageSourceInfo.SetSrc(iconPath, color);
     } else {
-        imageSourceInfo.SetSrc(src);
+        imageSourceInfo.SetSrc(src, color);
     }
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     imageFrameNode->MarkModifyDone();
@@ -604,10 +604,6 @@ void SearchModelNG::CreateImage(const RefPtr<SearchNode>& parentNode, const std:
     auto iconHeight = searchTheme->GetIconHeight();
     CalcSize imageCalcSize((CalcLength(iconHeight)), CalcLength(iconHeight));
     imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
-
-    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(imageRenderProperty);
-    imageRenderProperty->UpdateSvgFillColor(searchTheme->GetSearchIconColor());
 
     if (!hasImageNode) {
         frameNode->MountToParent(parentNode);

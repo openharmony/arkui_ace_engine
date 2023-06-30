@@ -90,7 +90,20 @@ void NavRouterGroupNode::OnDetachFromMainTree(bool recursive)
 
 void NavRouterGroupNode::OnAttachToMainTree(bool recursive)
 {
+    if (!UseOffscreenProcess()) {
+        ProcessDestinationChangeEvent();
+    }
     FrameNode::OnAttachToMainTree(recursive);
+}
+
+void NavRouterGroupNode::OnOffscreenProcess(bool recursive)
+{
+    ProcessDestinationChangeEvent();
+    FrameNode::OnOffscreenProcess(recursive);
+}
+
+void NavRouterGroupNode::ProcessDestinationChangeEvent()
+{
     auto parent = GetParent();
     while (parent) {
         auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(parent);

@@ -77,14 +77,11 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
         }
     }
     if (type_ == ProgressType::CAPSULE) {
-        if (contentConstraint.selfIdealSize.Width() && !contentConstraint.selfIdealSize.Height()) {
-            height_ = GetChildHeight(layoutWrapper, width_);
+        if (!contentConstraint.selfIdealSize.Width()) {
+            width_ = contentConstraint.parentIdealSize.Width().value_or(DEFALT_CAPSULE_WIDTH.ConvertToPx());
         }
-        if (!contentConstraint.selfIdealSize.Width() && contentConstraint.selfIdealSize.Height()) {
-            width_ = DEFALT_CAPSULE_WIDTH.ConvertToPx();
-        }
-        if (!contentConstraint.selfIdealSize.Width() && !contentConstraint.selfIdealSize.Height()) {
-            height_ = GetChildHeight(layoutWrapper, width_);
+        if (!contentConstraint.selfIdealSize.Height()) {
+            height_ = contentConstraint.parentIdealSize.Height().value_or(GetChildHeight(layoutWrapper, width_));
         }
     }
     height_ = std::min(height_, static_cast<float>(contentConstraint.maxSize.Height()));

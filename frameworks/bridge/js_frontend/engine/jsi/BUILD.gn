@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//arkcompiler/ets_frontend/ts2panda/ts2abc_config.gni")
+import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
@@ -19,7 +19,7 @@ import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 base_output_path = get_label_info(":gen_abc_proxyclass", "target_out_dir")
 abcstrip_native_min_obj_path = base_output_path + "strip.native.min.abc"
 
-ts2abc_gen_abc("gen_strip_native_min_abc") {
+es2abc_gen_abc("gen_strip_native_min_abc") {
   extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
   src_js = rebase_path(
           "$root_out_dir/obj/third_party/jsframework/dist/strip.native.min.js")
@@ -119,7 +119,7 @@ template("js_engine_ark") {
     } else if (target_cpu == "arm") {
       defines += [ "APP_USE_ARM" ]
     }
-    deps += [ "//foundation/arkui/napi:ace_napi_ark" ]
+    external_deps += [ "napi:ace_napi_ark" ]
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
     if (is_cross_platform_build) {

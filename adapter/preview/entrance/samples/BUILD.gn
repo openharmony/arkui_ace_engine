@@ -63,7 +63,10 @@ foreach(device, ace_devices) {
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       sources -= [ "touch_event_handler_flutter.cpp" ]
       sources += [ "touch_event_handler_rs.cpp" ]
-      deps += [ "//foundation/graphic/graphic_2d/rosen/modules/glfw_render_context:libglfw_render_context" ]
+      deps += [
+        "//foundation/graphic/graphic_2d/rosen/modules/glfw_render_context:libglfw_render_context",
+        "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+      ]
     }
     if (use_mingw_win) {
       libs = [ "pthread" ]

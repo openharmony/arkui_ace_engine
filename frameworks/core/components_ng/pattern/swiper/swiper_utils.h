@@ -61,6 +61,10 @@ public:
         }
         auto axis = property->GetDirection().value_or(Axis::HORIZONTAL);
         auto itemSpace = GetItemSpace(property);
+        auto parentMainSize = idealSize.MainSize(axis);
+        if (parentMainSize.has_value() && itemSpace > parentMainSize.value()) {
+            itemSpace = 0.0f;
+        }
         auto prevMargin = property->GetPrevMarginValue(0.0_px).ConvertToPx();
         auto nextMargin = property->GetNextMarginValue(0.0_px).ConvertToPx();
         auto itemSpaceCount = CaculateDisplayItemSpaceCount(property, prevMargin, nextMargin);

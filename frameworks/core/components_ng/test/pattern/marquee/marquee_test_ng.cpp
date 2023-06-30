@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 #define private public
+#define protected public
 #include <cstddef>
 #include <optional>
 #include <string>
@@ -29,6 +30,7 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_property.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
+#include "core/components_ng/pattern/marquee/marquee_paint_property.h"
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -160,15 +162,16 @@ HWTEST_F(MarqueeTestNg, MarqueeTest001, TestSize.Level1)
     ASSERT_NE(textChild, nullptr);
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-
+    auto marqueePaintProperty = frameNode->GetPaintProperty<MarqueePaintProperty>();
+    ASSERT_NE(marqueePaintProperty, nullptr);
     /**
      * @tc.steps: step3. get the properties of all settings.
      * @tc.expected: step3. check whether the properties is correct.
      */
-    EXPECT_EQ(marqueeLayoutProperty->GetLoop(), MARQUEE_LOOP);
-    EXPECT_EQ(marqueeLayoutProperty->GetDirection(), MarqueeDirection::LEFT);
-    EXPECT_EQ(marqueeLayoutProperty->GetPlayerStatus(), false);
-    EXPECT_EQ(marqueeLayoutProperty->GetScrollAmount(), MARQUEE_SCROLL_AMOUNT);
+    EXPECT_EQ(marqueePaintProperty->GetLoop(), MARQUEE_LOOP);
+    EXPECT_EQ(marqueePaintProperty->GetDirection(), MarqueeDirection::LEFT);
+    EXPECT_EQ(marqueePaintProperty->GetPlayerStatus(), false);
+    EXPECT_EQ(marqueePaintProperty->GetScrollAmount(), MARQUEE_SCROLL_AMOUNT);
     EXPECT_EQ(marqueeLayoutProperty->GetSrc(), MARQUEE_SRC);
     EXPECT_EQ(marqueeLayoutProperty->GetFontSize(), FONT_SIZE_VALUE);
     EXPECT_EQ(marqueeLayoutProperty->GetFontColor(), TEXT_COLOR_VALUE);
@@ -276,18 +279,16 @@ HWTEST_F(MarqueeTestNg, MarqueeTest004, TestSize.Level1)
      */
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto layoutProperty = frameNode->GetLayoutProperty();
-    ASSERT_NE(layoutProperty, nullptr);
-    auto marqueeLayoutProperty = AceType::DynamicCast<MarqueeLayoutProperty>(layoutProperty);
-    ASSERT_NE(marqueeLayoutProperty, nullptr);
+    auto marqueePaintProperty = frameNode->GetPaintProperty<MarqueePaintProperty>();
+    ASSERT_NE(marqueePaintProperty, nullptr);
 
     /**
      * @tc.steps: step3. get the set playerStatus, loop and direction property.
      * @tc.expected: step3. check whether the properties is correct.
      */
-    EXPECT_TRUE(marqueeLayoutProperty->GetPlayerStatus());
-    EXPECT_EQ(marqueeLayoutProperty->GetLoop(), MARQUEE_LOOP);
-    EXPECT_EQ(marqueeLayoutProperty->GetDirection(), MarqueeDirection::LEFT);
+    EXPECT_TRUE(marqueePaintProperty->GetPlayerStatus());
+    EXPECT_EQ(marqueePaintProperty->GetLoop(), MARQUEE_LOOP);
+    EXPECT_EQ(marqueePaintProperty->GetDirection(), MarqueeDirection::LEFT);
 
     /**
      * @tc.steps: step4. get marquee pattern and call OnDirtyLayoutWrapperSwap function.
@@ -303,8 +304,8 @@ HWTEST_F(MarqueeTestNg, MarqueeTest004, TestSize.Level1)
      * @tc.steps: step5. update the playerStatus of marquee to true and call OnDirtyLayoutWrapperSwap function.
      * @tc.expected: step5. check whether the call is correct.
      */
-    marqueeLayoutProperty->UpdatePlayerStatus(true);
-    EXPECT_TRUE(marqueeLayoutProperty->GetPlayerStatus());
+    marqueePaintProperty->UpdatePlayerStatus(true);
+    EXPECT_TRUE(marqueePaintProperty->GetPlayerStatus());
     pattern->OnModifyDone();
     dirtyLayoutWrapperSwap = pattern->OnDirtyLayoutWrapperSwap(nullptr, dirtySwapConfig);
     EXPECT_FALSE(dirtyLayoutWrapperSwap);
@@ -313,10 +314,10 @@ HWTEST_F(MarqueeTestNg, MarqueeTest004, TestSize.Level1)
      * @tc.steps: step6. update the loop and direction of marquee and call OnDirtyLayoutWrapperSwap function.
      * @tc.expected: step6. check whether the call is correct.
      */
-    marqueeLayoutProperty->UpdateLoop(-1);
-    marqueeLayoutProperty->UpdateDirection(MarqueeDirection::RIGHT);
-    EXPECT_EQ(marqueeLayoutProperty->GetLoop(), -1);
-    EXPECT_EQ(marqueeLayoutProperty->GetDirection(), MarqueeDirection::RIGHT);
+    marqueePaintProperty->UpdateLoop(-1);
+    marqueePaintProperty->UpdateDirection(MarqueeDirection::RIGHT);
+    EXPECT_EQ(marqueePaintProperty->GetLoop(), -1);
+    EXPECT_EQ(marqueePaintProperty->GetDirection(), MarqueeDirection::RIGHT);
     frameNode->MarkDirtyNode();
     dirtyLayoutWrapperSwap = pattern->OnDirtyLayoutWrapperSwap(nullptr, dirtySwapConfig);
     EXPECT_FALSE(dirtyLayoutWrapperSwap);
@@ -332,8 +333,8 @@ HWTEST_F(MarqueeTestNg, MarqueeTest005, TestSize.Level1)
     /**
      * @tc.steps: step1. create and get marquee frameNode.
      */
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
     frameNode->MarkDirtyNode();
 
     /**
@@ -433,8 +434,8 @@ HWTEST_F(MarqueeTestNg, MarqueeTest006, TestSize.Level1)
     /**
      * @tc.steps: step1. create and get marquee frameNode.
      */
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
     frameNode->MarkDirtyNode();
 
     /**
@@ -523,8 +524,8 @@ HWTEST_F(MarqueeTestNg, MarqueeTest007, TestSize.Level1)
     /**
      * @tc.steps: step1. create and get marquee frameNode.
      */
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
 
     /**
      * @tc.steps: step2. create marquee layoutWrapper and set marquee layoutAlgorithm.
@@ -638,8 +639,8 @@ HWTEST_F(MarqueeTestNg, MarqueeTest008, TestSize.Level1)
     /**
      * @tc.steps: step1. create and get marquee frameNode.
      */
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
 
     /**
      * @tc.steps: step2. create marquee layoutWrapper and set marquee layoutAlgorithm.
@@ -730,8 +731,8 @@ HWTEST_F(MarqueeTestNg, MarqueeTest009, TestSize.Level1)
     /**
      * @tc.steps: step1. create and get marquee frameNode.
      */
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
 
     /**
      * @tc.steps: step2. create marquee layoutWrapper and set marquee layoutAlgorithm.

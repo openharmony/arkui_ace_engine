@@ -156,6 +156,20 @@ void WaterFlowModelNG::SetLayoutDirection(FlexDirection value)
     ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, WaterflowDirection, value);
 }
 
+void WaterFlowModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNestedScroll(nestedOpt);
+}
+
+void WaterFlowModelNG::SetScrollEnabled(bool scrollEnabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ScrollEnabled, scrollEnabled);
+}
+
 void WaterFlowModelNG::SetOnReachStart(OnReachEvent&& onReachStart)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

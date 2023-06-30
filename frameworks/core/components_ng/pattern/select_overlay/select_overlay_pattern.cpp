@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -90,7 +91,8 @@ void SelectOverlayPattern::OnAttachToFrameNode()
 void SelectOverlayPattern::OnDetachFromFrameNode(FrameNode* /*frameNode*/)
 {
     if (info_->onClose) {
-        info_->onClose();
+        info_->onClose(closedByGlobalTouchEvent_);
+        closedByGlobalTouchEvent_ = false;
     }
 }
 
@@ -302,6 +304,15 @@ void SelectOverlayPattern::CheckHandleReverse()
     }
 }
 
+void SelectOverlayPattern::SetHandleReverse(bool reverse)
+{
+    info_->handleReverse = reverse;
+    UpdateHandleHotZone();
+    auto host = DynamicCast<SelectOverlayNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void SelectOverlayPattern::UpdateFirstSelectHandleInfo(const SelectHandleInfo& info)
 {
     if (info_->firstHandle == info) {
@@ -392,7 +403,7 @@ bool SelectOverlayPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
-    
+
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto selectOverlayLayoutAlgorithm =

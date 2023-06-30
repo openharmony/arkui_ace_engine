@@ -875,7 +875,7 @@ HWTEST_F(ProgressTestNg, CapulseProgressCreator001, TestSize.Level1)
     EXPECT_EQ(progressLayoutAlgorithm->GetType(), PROGRESS_TYPE_CAPSULE);
     EXPECT_EQ(progressLayoutAlgorithm->GetStrokeWidth(), STORKE_WIDTH.ConvertToPx());
     EXPECT_EQ(size->Height(), DEFALT_CAPSULE_WIDTH.ConvertToPx());
-    EXPECT_EQ(size->Width(), TEST_PROGRESS_DEFAULT_WIDTH.ConvertToPx());
+    EXPECT_EQ(size->Width(), DEFALT_CAPSULE_WIDTH.ConvertToPx());
 
     contentConstraint.selfIdealSize.SetWidth(PROGRESS_COMPONENT_WIDTH);
     size = progressLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
@@ -1463,6 +1463,10 @@ HWTEST_F(ProgressTestNg, ProgressModelTest001, TestSize.Level1)
  */
 HWTEST_F(ProgressTestNg, ProgressPattern001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create capsule progress and set add touchEvent.
+     * @tc.expected: step1. Check the touchEvent is enable.
+     */
     TestProperty testProperty;
     testProperty.bgColor = std::make_optional(Color::BLUE);
     creatProperty.progressType = std::make_optional(PROGRESS_TYPE_CAPSULE);
@@ -1492,6 +1496,24 @@ HWTEST_F(ProgressTestNg, ProgressPattern001, TestSize.Level1)
     EXPECT_EQ(focusRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).y,
         PROGRESS_COMPONENT_MAXSIZE_WIDTH * 0.5 + DEFALUT_SPACE.ConvertToPx());
     EXPECT_FALSE(progressEvent->IsEnabled());
+
+    /**
+     * @tc.steps: step2. Create linear progress and set remove touchEvent.
+     * @tc.expected: step2. Check the touchEvent is removed.
+     */
+    testProperty.bgColor = std::make_optional(Color::BLUE);
+    creatProperty.progressType = std::make_optional(PROGRESS_TYPE_LINEAR);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
+    frameNode = CreateProgressParagraph(testProperty);
+    CheckValue(frameNode, testProperty);
+    pattern = frameNode->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    progressEvent = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(progressEvent, nullptr);
+    auto touchCallback = [](TouchEventInfo& info) {};
+    pattern->touchListener_ = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    pattern->OnModifyDone();
+    ASSERT_EQ(pattern->touchListener_, nullptr);
 }
 
 /**
@@ -1775,6 +1797,7 @@ HWTEST_F(ProgressTestNg, ProgressPaintMethod003, TestSize.Level1)
     ASSERT_NE(geometryNode, nullptr);
     auto progressPaintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
     ASSERT_NE(progressPaintProperty, nullptr);
+    progressPaintProperty->UpdateItalicFontStyle(Ace::FontStyle::ITALIC);
     progressPaintProperty->UpdateMaxValue(PROGRESS_MODIFIER_MAX_VALUE);
     progressPaintProperty->UpdateValue(PROGRESS_MODIFIER_VALUE);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, progressPaintProperty);
@@ -1794,6 +1817,7 @@ HWTEST_F(ProgressTestNg, ProgressPaintMethod003, TestSize.Level1)
     ASSERT_NE(getModifier, nullptr);
     auto getProgressModifier = AceType::DynamicCast<ProgressModifier>(getModifier);
     ASSERT_NE(getProgressModifier, nullptr);
+    EXPECT_TRUE(getProgressModifier->isItalic_->Get());
     EXPECT_EQ(getProgressModifier->maxValue_->Get(), PROGRESS_MODIFIER_MAX_VALUE);
     EXPECT_EQ(getProgressModifier->value_->Get(), PROGRESS_MODIFIER_VALUE);
 
@@ -1808,6 +1832,7 @@ HWTEST_F(ProgressTestNg, ProgressPaintMethod003, TestSize.Level1)
     gradient.AddColor(gradientColorStart);
 
     progressPaintProperty->UpdateGradientColor(gradient);
+    progressPaintProperty->UpdateItalicFontStyle(Ace::FontStyle::NORMAL);
     progressPaintProperty->UpdateMaxValue(PROGRESS_MODIFIER_MAX_VALUE);
     progressPaintProperty->UpdateValue(PROGRESS_MODIFIER_VALUE);
     progressPaintMethod.progressType_ = PROGRESS_TYPE_RING;
@@ -1816,6 +1841,7 @@ HWTEST_F(ProgressTestNg, ProgressPaintMethod003, TestSize.Level1)
     ASSERT_NE(getModifier, nullptr);
     getProgressModifier = AceType::DynamicCast<ProgressModifier>(getModifier);
     ASSERT_NE(getProgressModifier, nullptr);
+    EXPECT_FALSE(getProgressModifier->isItalic_->Get());
     EXPECT_EQ(getProgressModifier->maxValue_->Get(), PROGRESS_MODIFIER_MAX_VALUE);
     EXPECT_EQ(getProgressModifier->value_->Get(), PROGRESS_MODIFIER_VALUE);
     delete paintWrapper;

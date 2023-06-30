@@ -112,6 +112,24 @@ void DeclarativeFrontendNG::InitializeDelegate(const RefPtr<TaskExecutor>& taskE
         jsEngine->MediaQueryCallback(callbackId, args);
     };
 
+    auto layoutInspectorCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                       const std::string& componentId) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->LayoutInspectorCallback(componentId);
+    };
+
+    auto drawInspectorCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                     const std::string& componentId) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->DrawInspectorCallback(componentId);
+    };
+
     auto onStartContinuationCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() -> bool {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
@@ -203,6 +221,8 @@ void DeclarativeFrontendNG::InitializeDelegate(const RefPtr<TaskExecutor>& taskE
 
     delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateDeclarativeNG>(taskExecutor);
     delegate_->SetMediaQueryCallback(std::move(mediaQueryCallback));
+    delegate_->SetLayoutInspectorCallback(std::move(layoutInspectorCallback));
+    delegate_->SetDrawInspectorCallback(std::move(drawInspectorCallback));
     delegate_->SetOnStartContinuationCallBack(std::move(onStartContinuationCallBack));
     delegate_->SetOnCompleteContinuationCallBack(std::move(onCompleteContinuationCallBack));
     delegate_->SetOnSaveDataCallBack(std::move(onSaveDataCallBack));
@@ -421,6 +441,20 @@ void DeclarativeFrontendNG::OnSurfaceChanged(int32_t width, int32_t height)
     // TODO: update media query infos
     if (delegate_) {
         delegate_->OnSurfaceChanged();
+    }
+}
+
+void DeclarativeFrontendNG::OnLayoutCompleted(const std::string& componentId)
+{
+    if (delegate_) {
+        delegate_->OnLayoutCompleted(componentId);
+    }
+}
+
+void DeclarativeFrontendNG::OnDrawCompleted(const std::string& componentId)
+{
+    if (delegate_) {
+        delegate_->OnDrawCompleted(componentId);
     }
 }
 

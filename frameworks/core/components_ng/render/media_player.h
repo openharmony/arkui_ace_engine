@@ -118,6 +118,10 @@ public:
     {
         return -1;
     }
+    virtual int32_t FullScreenChange(bool isFullScreen)
+    {
+        return -1;
+    }
 
 protected:
 

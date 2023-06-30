@@ -72,10 +72,18 @@ RefPtr<RadioComponent<std::string>> DOMRadioUtil::CreateComponentAndSetChildAttr
     }
     auto boxComponent = node.GetBoxComponent();
     if (LessOrEqual(node.GetWidth().Value(), 0.0)) {
+        if (theme == nullptr) {
+            LOGE("node.width.value is less or equal 0.0, theme is nullptr");
+            return nullptr;
+        }
         node.SetWidth(theme->GetWidth());
         boxComponent->SetWidth(theme->GetWidth().Value(), theme->GetWidth().Unit());
     }
     if (LessOrEqual(node.GetHeight().Value(), 0.0)) {
+        if (theme == nullptr) {
+            LOGE("node.height.value is less or equal 0.0, theme is nullptr");
+            return nullptr;
+        }
         node.SetHeight(theme->GetHeight());
         boxComponent->SetHeight(theme->GetHeight().Value(), theme->GetHeight().Unit());
     }

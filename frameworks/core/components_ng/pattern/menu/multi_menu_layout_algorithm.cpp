@@ -76,7 +76,7 @@ void MultiMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
         child->Layout();
-        translate.AddY(child->GetGeometryNode()->GetFrameSize().Height());
+        translate.AddY(child->GetGeometryNode()->GetMarginFrameSize().Height());
     }
 }
 

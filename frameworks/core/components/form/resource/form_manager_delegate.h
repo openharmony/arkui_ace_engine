@@ -55,6 +55,7 @@ public:
     using OnFormSurfaceChangeCallback = std::function<void(float width, float height)>;
     using ActionEventHandle = std::function<void(const std::string&)>;
     using UnTrustFormCallback = std::function<void()>;
+    using SnapshotCallback = std::function<void()>;
 
     enum class State : char {
         WAITINGFORSIZE,
@@ -81,6 +82,7 @@ public:
     void AddFormSurfaceChangeCallback(OnFormSurfaceChangeCallback&& callback);
     void AddActionEventHandle(const ActionEventHandle& callback);
     void AddUnTrustFormCallback(const UnTrustFormCallback& callback);
+    void AddSnapshotCallback(SnapshotCallback&& callback);
     void OnActionEventHandle(const std::string& action);
     void SetAllowUpdate(bool allowUpdate);
     void OnActionEvent(const std::string& action);
@@ -89,6 +91,7 @@ public:
     void AddRenderDelegate();
     void RegisterRenderDelegateEvent();
     void OnFormError(const std::string& code, const std::string& msg);
+    void ReleaseRenderer();
 #ifdef OHOS_STANDARD_SYSTEM
     void ProcessFormUpdate(const AppExecFwk::FormJsInfo& formJsInfo);
     void ProcessFormUninstall(const int64_t formId);
@@ -114,6 +117,7 @@ private:
     void OnFormError(const std::string& param);
     void ReAddForm();
     void HandleUnTrustFormCallback();
+    void HandleSnapshotCallback();
     bool ParseAction(const std::string& action, const std::string& type, AAFwk::Want& want);
 
     onFormAcquiredCallbackForJava onFormAcquiredCallbackForJava_;
@@ -126,8 +130,10 @@ private:
     OnFormSurfaceChangeCallback onFormSurfaceChangeCallback_;
     ActionEventHandle actionEventHandle_;
     UnTrustFormCallback unTrustFormCallback_;
+    SnapshotCallback snapshotCallback_;
 
     State state_ { State::WAITINGFORSIZE };
+    bool isDynamic_ = true;
 #ifdef OHOS_STANDARD_SYSTEM
     int64_t runningCardId_ = -1;
     std::string runningCompId_;

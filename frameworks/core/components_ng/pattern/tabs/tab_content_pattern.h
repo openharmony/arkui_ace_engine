@@ -44,9 +44,11 @@ public:
         return false;
     }
 
-    bool UsResRegion() override
+    void OnAttachToFrameNode() override
     {
-        return false;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->GetRenderContext()->UpdateClipEdge(true);
     }
     
     void BeforeCreateLayoutWrapper() override

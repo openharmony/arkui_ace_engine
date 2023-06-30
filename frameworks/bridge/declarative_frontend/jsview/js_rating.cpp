@@ -121,9 +121,9 @@ void JSRating::SetStepSize(const JSCallbackInfo& info)
     if (!info[0]->IsNumber()) {
         return;
     }
-
+    static const double stepSizeMin = 0.1;
     auto steps = info[0]->ToNumber<double>();
-    if (steps <= 0) {
+    if (LessNotEqual(steps, stepSizeMin)) {
         steps = STEPS_DEFAULT;
     }
     RatingModel::GetInstance()->SetStepSize(steps);

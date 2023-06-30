@@ -91,20 +91,12 @@ void ListModelNG::SetChainAnimation(bool enableChainAnimation)
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ChainAnimation, enableChainAnimation);
 }
 
-void ListModelNG::SetChainAnimationOptions(const Dimension& minSpace, const Dimension& maxSpace, float conductivity,
-    float intensity, int32_t edgeEffect)
+void ListModelNG::SetChainAnimationOptions(const ChainAnimationOptions& options)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
-    ChainAnimationOptions options = {
-        .minSpace = minSpace,
-        .maxSpace = maxSpace,
-        .conductivity = conductivity,
-        .intensity = intensity,
-        .edgeEffect = edgeEffect,
-    };
     pattern->SetChainAnimationOptions(options);
 }
 
@@ -124,7 +116,7 @@ void ListModelNG::SetLaneMinLength(const Dimension& laneMinLength)
     if (laneMinLength.IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMinLength, laneMinLength);
     } else {
-        ACE_RESET_LAYOUT_PROPERTY(ListLayoutProperty, LaneMinLength);
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, LaneMinLength, PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -133,7 +125,7 @@ void ListModelNG::SetLaneMaxLength(const Dimension& laneMaxLength)
     if (laneMaxLength.IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMaxLength, laneMaxLength);
     } else {
-        ACE_RESET_LAYOUT_PROPERTY(ListLayoutProperty, LaneMaxLength);
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, LaneMaxLength, PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -152,6 +144,20 @@ void ListModelNG::SetSticky(V2::StickyStyle stickyStyle)
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, StickyStyle, stickyStyle);
 }
 
+void ListModelNG::SetScrollSnapAlign(V2::ScrollSnapAlign scrollSnapAlign)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollSnapAlign, scrollSnapAlign);
+}
+
+void ListModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNestedScroll(nestedOpt);
+}
+
 void ListModelNG::SetMultiSelectable(bool selectable)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -159,6 +165,11 @@ void ListModelNG::SetMultiSelectable(bool selectable)
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetMultiSelectable(selectable);
+}
+
+void ListModelNG::SetScrollEnabled(bool scrollEnabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollEnabled, scrollEnabled);
 }
 
 void ListModelNG::SetOnScroll(OnScrollEvent&& onScroll)

@@ -644,6 +644,82 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest008, TestSize.Level1)
         EXPECT_EQ(childSize, SizeF(SMALL_ITEM_WIDTH, COLUMN_HEIGHT));
         EXPECT_EQ(childOffset, OffsetF(horizontalRemaining / 2 + i * (SMALL_ITEM_WIDTH + DEFAULT_SPLIT_WIDTH), ZERO));
     }
+
+    linearSplitPattern->splitRects_ = linearLayoutAlgorithm->GetSplitRects();
+    /**
+     * @tc.steps: step5. Construct GestureEvent info and Start dragging.
+     */
+    GestureEvent info;
+    Offset globalLocation(335, 10);
+    info.SetGlobalLocation(globalLocation);
+    info.SetOffsetX(2);
+    linearSplitPattern->dragSplitOffset_ = { ZERO, ZERO, ZERO, ZERO, ZERO };
+    /**
+     * @tc.steps: step6. Set IsOverParent and Call HandlePanEvent function.
+     * @tc.expected: PanStart and PanUpdate return normally when IsOverParent is true
+     * check the value is right when gestureEventInfo is in splitRects[1] region
+     */
+    bool isOverParent[2] = { true, false };
+    for (int i = 0; i < 2; i++) {
+        linearSplitPattern->isOverParent_ = isOverParent[i];
+        linearSplitPattern->HandlePanStart(info);
+        linearSplitPattern->HandlePanUpdate(info);
+        EXPECT_EQ(linearSplitPattern->preOffset_, 2.0f);
+        EXPECT_EQ(linearSplitPattern->dragedSplitIndex_, 1);
+
+        /**
+         * @tc.steps: step7. Stop Dragging and Call HandlePanEnd, HandleMouseEvent.
+         * @tc.expected: check isDraged is false
+         */
+        linearSplitPattern->HandlePanEnd(info);
+        EXPECT_FALSE(linearSplitPattern->isDraged_);
+        linearSplitPattern->HandlePanUpdate(info);
+        EXPECT_FALSE(linearSplitPattern->isDraged_);
+        EXPECT_TRUE(linearSplitPattern->isDragedMoving_);
+        MouseInfo mouseInfo2;
+        mouseInfo2.SetGlobalLocation(globalLocation);
+        linearSplitPattern->HandleMouseEvent(mouseInfo2);
+        EXPECT_EQ(linearSplitPattern->mouseDragedSplitIndex_, 1);
+        mouseInfo2.SetButton(MouseButton::LEFT_BUTTON);
+        mouseInfo2.SetAction(MouseAction::PRESS);
+        linearSplitPattern->HandleMouseEvent(mouseInfo2);
+        EXPECT_TRUE(linearSplitPattern->isDragedMoving_);
+    }
+
+    /**
+     * @tc.steps: step8. Dragging back and Call HandlePanEvent function.
+     * @tc.expected: check the value is right
+     */
+    info.SetOffsetX(-2);
+    for (int i = 0; i < 2; i++) {
+        linearSplitPattern->isOverParent_ = isOverParent[i];
+        linearSplitPattern->HandlePanStart(info);
+        EXPECT_EQ(linearSplitPattern->dragedSplitIndex_, 1);
+        info.SetOffsetX(-3);
+        linearSplitPattern->HandlePanUpdate(info);
+        EXPECT_EQ(linearSplitPattern->dragSplitOffset_[1], 0.0f);
+
+        /**
+         * @tc.steps: step9. Stop Dragging and Call HandlePanEnd, HandleMouseEvent.
+         * @tc.expected: check isDraged is false
+         */
+        linearSplitPattern->HandlePanEnd(info);
+        EXPECT_FALSE(linearSplitPattern->isDraged_);
+        MouseInfo mouseInfo2;
+        mouseInfo2.SetGlobalLocation(globalLocation);
+        linearSplitPattern->HandleMouseEvent(mouseInfo2);
+        EXPECT_EQ(linearSplitPattern->mouseDragedSplitIndex_, 1);
+    }
+
+    /**
+     * @tc.steps: step10. Construct GestureEvent and Call HandlePanEvent function.
+     * @tc.expected: function exits normally when gestureEventInfo is not in splitRects region
+     */
+    GestureEvent info2;
+    Offset globalLocation2(300, 10);
+    info2.SetGlobalLocation(globalLocation2);
+    linearSplitPattern->HandlePanUpdate(info2);
+    EXPECT_EQ(linearSplitPattern->preOffset_, info2.GetOffsetX());
 }
 /**
  * @tc.name: LinearSplitPatternTest009

@@ -28,6 +28,7 @@ const char ACTION[] = "action";
 const char AUTO_CORRECT[] = "autoCorrect";
 const char CAPITALIZATION[] = "capitalization";
 const char KEYBOARD_APPEARANCE[] = "keyboardAppearance";
+const char INPUT_FILTER[] = "inputFilter";
 
 } // namespace
 
@@ -48,7 +49,9 @@ std::string TextInputConfiguration::ToJsonString() const
     if (!keyboardAppearance.empty()) {
         json->Put(KEYBOARD_APPEARANCE, keyboardAppearance.c_str());
     }
-
+    if (!inputFilter.empty()) {
+        json->Put(INPUT_FILTER, inputFilter.c_str());
+    }
     return json->ToString();
 }
 

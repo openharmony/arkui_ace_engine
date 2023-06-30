@@ -51,6 +51,8 @@ public:
     void SetSupportAnimation(bool value) override;
     void SetSupportDragAnimation(bool value) override;
     void SetEdgeEffect(EdgeEffect edgeEffect) override;
+    void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
+    void SetScrollEnabled(bool scrollEnabled) override;
     void SetOnScrollToIndex(ScrollToIndexFunc&& value) override;
     void SetOnScrollBarUpdate(ScrollBarUpdateFunc&& value) override;
     void SetOnItemDragStart(std::function<void(const ItemDragInfo&, int32_t)>&& value) override;

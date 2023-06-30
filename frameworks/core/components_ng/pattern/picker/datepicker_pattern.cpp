@@ -74,11 +74,11 @@ bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         auto buttonConfirmLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
         buttonConfirmLayoutProperty->UpdateType(ButtonType::NORMAL);
+        buttonConfirmLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(PRESS_RADIUS));
         buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx()), CalcLength(heigth - PRESS_INTERVAL)));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        buttonConfirmRenderContext->UpdateBorderRadius({ PRESS_RADIUS, PRESS_RADIUS, PRESS_RADIUS, PRESS_RADIUS });
         buttonNode->MarkModifyDone();
         buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
@@ -216,8 +216,11 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto childSize = static_cast<float>(host->GetChildren().size());
-    auto pickerChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
+    auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
+    CHECK_NULL_VOID(stackChild);
+    auto pickerChild = DynamicCast<FrameNode>(stackChild->GetLastChild());
     CHECK_NULL_VOID(pickerChild);
+    auto columnWidth = pickerChild->GetGeometryNode()->GetFrameSize().Width();
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
@@ -231,10 +234,13 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
                    PRESS_INTERVAL.ConvertToPx() * 2;
     auto centerY =
         (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / 2 + PRESS_INTERVAL.ConvertToPx();
-
-    paintRect.SetRect(RectF(centerX, centerY, (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * 2,
-        dividerSpacing - PRESS_INTERVAL.ConvertToPx() * 2));
-
+    float piantRectWidth = (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * 2;
+    float piantRectHeight = dividerSpacing - PRESS_INTERVAL.ConvertToPx() * 2;
+    if (piantRectWidth > columnWidth) {
+        piantRectWidth = columnWidth;
+        centerX = focusKeyID_ * columnWidth;
+    }
+    paintRect.SetRect(RectF(centerX, centerY, piantRectWidth, piantRectHeight));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),

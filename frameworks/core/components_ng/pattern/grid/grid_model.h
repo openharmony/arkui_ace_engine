@@ -24,6 +24,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/scroll_bar/scroll_bar_proxy.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_v2/grid/grid_position_controller.h"
 #include "core/event/ace_events.h"
 #include "core/gestures/gesture_info.h"
@@ -57,6 +58,8 @@ public:
     virtual void SetSupportAnimation(bool value) = 0;
     virtual void SetSupportDragAnimation(bool value) = 0;
     virtual void SetEdgeEffect(EdgeEffect edgeEffect) = 0;
+    virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) = 0;
+    virtual void SetScrollEnabled(bool scrollEnabled) = 0;
     virtual void SetOnScrollToIndex(std::function<void(const BaseEventInfo*)>&& value) = 0;
     virtual void SetOnScrollBarUpdate(
         std::function<std::pair<std::optional<float>, std::optional<float>>(int32_t, float)>&& value) = 0;

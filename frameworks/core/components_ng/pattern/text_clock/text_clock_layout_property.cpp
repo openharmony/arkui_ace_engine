@@ -19,12 +19,14 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-inline constexpr int32_t TOTAL_SECONDS_OF_HOUR = 60 * 60;
+inline constexpr int32_t TOTAL_MINUTE_OF_HOUR = 60;
 inline const std::string DEFAULT_FORMAT = "hms";
 inline int32_t GetSystemTimeZone()
 {
-    // timezone is a global variable defined in time.h, in seconds
-    int32_t hoursWest = timezone / TOTAL_SECONDS_OF_HOUR;
+    struct timeval currentTime {};
+    struct timezone timeZone {};
+    gettimeofday(&currentTime, &timeZone);
+    int32_t hoursWest = timeZone.tz_minuteswest / TOTAL_MINUTE_OF_HOUR;
     return hoursWest;
 }
 

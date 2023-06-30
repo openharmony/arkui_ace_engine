@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT Alignment final {
+class ACE_FORCE_EXPORT Alignment final {
 public:
     Alignment() = default;
     ~Alignment() = default;

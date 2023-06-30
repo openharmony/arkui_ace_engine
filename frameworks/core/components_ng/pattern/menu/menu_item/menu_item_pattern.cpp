@@ -126,16 +126,6 @@ void CustomMenuItemPattern::OnAttachToFrameNode()
 void MenuItemPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
-    /*
-     * The structure of menu item is designed as follows :
-     * |--menu_item
-     *   |--left_row
-     *     |--icon
-     *     |--content
-     *   |--right_row
-     *     |--label
-     *     |--end_icon
-     */
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     RefPtr<FrameNode> leftRow =
@@ -599,6 +589,9 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     }
     auto textProperty = node ? node->GetLayoutProperty<TextLayoutProperty>() : nullptr;
     CHECK_NULL_VOID(textProperty);
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateClipEdge(false);
     auto context = PipelineBase::GetCurrentContext();
     auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
     CHECK_NULL_VOID(theme);

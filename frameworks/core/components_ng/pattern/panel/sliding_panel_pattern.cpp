@@ -188,7 +188,7 @@ void SlidingPanelPattern::FirstLayout()
     auto maxSize = host->GetGeometryNode()->GetFrameSize();
     if (layoutProperty->GetIsShowValue(false) == true) {
         CheckPanelModeAndType();
-        UpdateCurrentOffset(maxSize.Height());
+        currentOffset_ = maxSize.Height();
         AnimateTo(defaultBlankHeights_[mode_.value_or(PanelMode::HALF)], mode_.value_or(PanelMode::HALF));
         if (previousMode_ != mode_.value_or(PanelMode::HALF)) {
             FireSizeChangeEvent();
@@ -206,7 +206,6 @@ void SlidingPanelPattern::FirstLayout()
     auto rootHeight = PipelineContext::GetCurrentRootHeight();
     CheckPanelModeAndType();
     currentOffset_ = rootHeight;
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     isShow_ = false;
 }
 

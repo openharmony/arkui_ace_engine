@@ -329,11 +329,7 @@ void DialogContainer::AttachView(
     // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
     flutterTaskExecutor->InitJsThread(false);
     InitializeFrontend();
-
-    auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(instanceId);
-    if (parentContainerId == -1) {
-        SetUseNewPipeline();
-    }
+    SetUseNewPipeline();
 
     InitPipelineContext(std::move(window), instanceId, density, width, height, windowId);
     InitializeCallback();
@@ -506,6 +502,7 @@ bool DialogContainer::ShowToastDialogWindow(
     if (isToast) {
         window->SetTouchable(false);
     }
+    window->SetNeedDefaultAnimation(false);
     OHOS::Rosen::WMError ret = window->Show();
     if (ret != OHOS::Rosen::WMError::WM_OK) {
         LOGE("DialogContainer::ShowToastDialogWindow Show window failed code: %{public}d", static_cast<int32_t>(ret));

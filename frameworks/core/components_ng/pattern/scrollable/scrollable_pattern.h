@@ -144,6 +144,53 @@ public:
         return false;
     }
 
+    bool IsScrollableSpringEffect() const
+    {
+        CHECK_NULL_RETURN_NOLOG(scrollEffect_, false);
+        return scrollEffect_->IsSpringEffect();
+    }
+
+    void SetParentDraggedDown(bool isDraggedDown)
+    {
+        isDraggedDown_ = isDraggedDown;
+    }
+
+    void SetCoordEventNeedSpringEffect(bool IsCoordEventNeedSpring)
+    {
+        isCoordEventNeedSpring_ = IsCoordEventNeedSpring;
+    }
+
+    void SetCoordEventNeedMoveUp(bool isCoordEventNeedMoveUp)
+    {
+        isCoordEventNeedMoveUp_ = isCoordEventNeedMoveUp;
+    }
+    
+    void SetNestedScroll(const NestedScrollOptions& nestedOpt);
+    RefPtr<ScrollablePattern> GetParentScrollable();
+    virtual OverScrollOffset GetOverScrollOffset(double delta) const
+    {
+        return { 0, 0 };
+    }
+
+    virtual bool OnScrollSnapCallback(double targetOffset, double velocity)
+    {
+        return false;
+    }
+
+    void StartScrollBarAnimatorByProxy()
+    {
+        if (scrollBarProxy_) {
+            scrollBarProxy_->StartScrollBarAnimator();
+        }
+    }
+
+    void StopScrollBarAnimatorByProxy()
+    {
+        if (scrollBarProxy_) {
+            scrollBarProxy_->StopScrollBarAnimator();
+        }
+    }
+
 protected:
     RefPtr<ScrollBar> GetScrollBar() const
     {
@@ -162,9 +209,11 @@ protected:
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
 
 private:
+    void DraggedDownScrollEndProcess();
     void RegisterScrollBarEventTask();
     void OnScrollEnd();
     bool OnScrollPosition(double offset, int32_t source);
+    void SetParentScrollable();
 
     Axis axis_;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -177,6 +226,11 @@ private:
     float estimatedHeight_ = 0.0f;
     bool isReactInParentMovement_ = false;
     double scrollBarOutBoundaryExtent_ = 0.0;
+    bool isDraggedDown_ = false;
+    bool isCoordEventNeedSpring_ = true;
+    bool isCoordEventNeedMoveUp_ = false;
+
+    NestedScrollOptions nestedScroll_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -49,11 +49,6 @@ public:
         return false;
     }
 
-    bool UsResRegion() override
-    {
-        return false;
-    }
-    
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<ScrollLayoutProperty>();
@@ -150,8 +145,26 @@ public:
         direction_ = direction;
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
+    bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode) override;
+
+    void SetScrollState(int32_t source)
+    {
+        source_ = source;
+    }
+
+    int32_t GetScrollState() const
+    {
+        return source_;
+    }
+
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
+    OverScrollOffset GetOverScrollOffset(double delta) const override;
 
     bool UpdateCurrentOffset(float offset, int32_t source) override;
     void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool limitDuration = true,
@@ -190,6 +203,8 @@ private:
     void FireOnScrollStart();
     void FireOnScrollStop();
     void SetAccessibilityAction();
+    void CheckScrollable();
+    OffsetF GetOffsetToScroll(const RefPtr<FrameNode>& childFrame) const;
 
     RefPtr<Animator> animator_;
     RefPtr<ScrollPositionController> positionController_;
@@ -202,6 +217,7 @@ private:
     FlexDirection direction_ { FlexDirection::COLUMN };
     bool scrollStop_ = false;
     bool scrollAbort_ = false;
+    int32_t source_ = SCROLL_FROM_NONE;
 };
 
 } // namespace OHOS::Ace::NG

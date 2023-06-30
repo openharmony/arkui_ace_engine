@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm.h"
+#include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
 
 namespace OHOS::Ace::NG {
 bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t /* source */)
@@ -51,11 +52,53 @@ bool WaterFlowPattern::IsAtBottom() const
 {
     return layoutInfo_.offsetEnd_;
 };
+OverScrollOffset WaterFlowPattern::GetOverScrollOffset(double delta) const
+{
+    OverScrollOffset offset = { 0, 0 };
+    if (layoutInfo_.startIndex_ == 0) {
+        auto startPos = layoutInfo_.currentOffset_;
+        auto newStartPos = startPos + delta;
+        if (startPos > 0 && newStartPos > 0) {
+            offset.start = delta;
+        }
+        if (startPos > 0 && newStartPos <= 0) {
+            offset.start = -startPos;
+        }
+        if (startPos <= 0 && newStartPos > 0) {
+            offset.start = newStartPos;
+        }
+    }
+    if (layoutInfo_.itemEnd_) {
+        auto endPos = layoutInfo_.currentOffset_ + layoutInfo_.maxHeight_;
+        auto newEndPos = endPos + delta;
+        if (endPos < layoutInfo_.lastMainSize_ && newEndPos < layoutInfo_.lastMainSize_) {
+            offset.end = delta;
+        }
+        if (endPos < layoutInfo_.lastMainSize_ && newEndPos >= layoutInfo_.lastMainSize_) {
+            offset.end = layoutInfo_.lastMainSize_ - endPos;
+        }
+        if (endPos >= layoutInfo_.lastMainSize_ && newEndPos < layoutInfo_.lastMainSize_) {
+            offset.end = newEndPos - layoutInfo_.lastMainSize_;
+        }
+    }
+    return offset;
+}
+
 void WaterFlowPattern::UpdateScrollBarOffset() {};
 
 RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
 {
     return AceType::MakeRefPtr<WaterFlowLayoutAlgorithm>(layoutInfo_);
+}
+
+RefPtr<NodePaintMethod> WaterFlowPattern::CreateNodePaintMethod()
+{
+    auto paint = MakeRefPtr<WaterFlowPaintMethod>();
+    if (!contentModifier_) {
+        contentModifier_ = AceType::MakeRefPtr<WaterFlowContentModifier>();
+    }
+    paint->SetContentModifier(contentModifier_);
+    return paint;
 }
 
 void WaterFlowPattern::OnModifyDone()
@@ -77,9 +120,9 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     auto layoutAlgorithmWrapper = dirty->GetLayoutAlgorithm();
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
-    auto gridLayoutAlgorithm = DynamicCast<WaterFlowLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(gridLayoutAlgorithm, false);
-    auto layoutInfo = gridLayoutAlgorithm->GetLayoutInfo();
+    auto layoutAlgorithm = DynamicCast<WaterFlowLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutAlgorithm, false);
+    auto layoutInfo = layoutAlgorithm->GetLayoutInfo();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto eventHub = host->GetEventHub<WaterFlowEventHub>();
@@ -100,7 +143,23 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     layoutInfo_ = std::move(layoutInfo);
     layoutInfo_.UpdateStartIndex();
-    return false;
+
+    CheckScrollable();
+
+    auto property = host->GetLayoutProperty();
+    CHECK_NULL_RETURN_NOLOG(host, false);
+    return property->GetPaddingProperty() != nullptr;
+}
+
+void WaterFlowPattern::CheckScrollable()
+{
+    auto layoutProperty = GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->GetScrollEnabled().value_or(IsScrollable())) {
+        SetScrollEnable(false);
+        return;
+    }
+    SetScrollEnable(IsScrollable());
 }
 
 void WaterFlowPattern::OnAttachToFrameNode()

@@ -31,6 +31,7 @@
 #include "test/mock/core/common/mock_window.h"
 
 #include "base/json/json_util.h"
+#include "base/log/frame_report.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/test/mock/mock_mouse_style.h"
@@ -470,6 +471,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg007, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
+    context_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
     /**
      * @tc.steps2: Call the function SetupRootElement with isJsCard_ = true.
      * @tc.expected: The stageManager_ is non-null.
@@ -743,7 +745,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg014, TestSize.Level1)
      * @tc.steps2: Call the function OnIdle.
      * @tc.expected: The value of flagCbk remains unchanged.
      */
-    context_->AddPredictTask([&flagCbk](int64_t deadline) { flagCbk = true; });
+    context_->AddPredictTask([&flagCbk](int64_t, bool) { flagCbk = true; });
     context_->OnIdle(0);
     EXPECT_FALSE(flagCbk);
 
@@ -1441,7 +1443,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
     context_->designWidthScale_ = DEFAULT_DOUBLE1;
     context_->OnVirtualKeyboardHeightChange(DEFAULT_DOUBLE1);
     EXPECT_DOUBLE_EQ(context_->designWidthScale_, DEFAULT_DOUBLE1);
-    EXPECT_EQ(context_->rootNode_->GetGeometryNode()->GetFrameOffset().GetY(), 0);
+    EXPECT_EQ(context_->safeAreaManager_->GetKeyboardOffset(), 0);
 
     /**
      * @tc.steps3: init data and Call the function OnVirtualKeyboardHeightChange
@@ -1455,7 +1457,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
     for (int turn = 0; turn < params.size(); turn++) {
         context_->rootHeight_ = params[turn][0];
         context_->OnVirtualKeyboardHeightChange(params[turn][1]);
-        EXPECT_EQ(context_->rootNode_->GetGeometryNode()->GetFrameOffset().GetY(), params[turn][2]);
+        EXPECT_EQ(context_->safeAreaManager_->GetKeyboardOffset(), params[turn][2]);
     }
     /**
      * @tc.steps4: init data and Call the function OnVirtualKeyboardHeightChange
@@ -1475,8 +1477,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
         manager->position_.deltaY_ = params[turn][1];
         context_->rootHeight_ = params[turn][2];
         context_->rootNode_->geometryNode_->frame_.rect_.y_ = params[turn][3];
+        context_->safeAreaManager_->UpdateKeyboardOffset(params[turn][3]);
         context_->OnVirtualKeyboardHeightChange(params[turn][4]);
-        EXPECT_EQ(context_->rootNode_->GetGeometryNode()->GetFrameOffset().GetY(), params[turn][5]);
+        EXPECT_EQ(context_->safeAreaManager_->GetKeyboardOffset(), params[turn][5]);
     }
 }
 
@@ -1728,47 +1731,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg033, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTestNg034
- * @tc.desc: Test SetGetViewSafeAreaImpl and GetCurrentViewSafeArea.
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg034, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters and set a flag.
-     */
-    ASSERT_NE(context_, nullptr);
-    ASSERT_NE(context_->window_, nullptr);
-    bool flag = false;
-    /**
-     * @tc.steps2: call SetGetViewSafeAreaImpl and GetCurrentViewSafeArea.
-     * @tc.expected: flag is true.
-     */
-    context_->SetGetViewSafeAreaImpl([&flag]() {
-        flag = !flag;
-        return SafeAreaEdgeInserts();
-    });
-    context_->GetCurrentViewSafeArea();
-    EXPECT_TRUE(flag);
-    /**
-     * @tc.steps3: reset window_ and call SetGetViewSafeAreaImpl and GetCurrentViewSafeArea.
-     * @tc.expected: flag is still true.
-     */
-    auto windowTemp = context_->window_;
-    context_->window_ = nullptr;
-    context_->SetGetViewSafeAreaImpl([&flag]() {
-        flag = !flag;
-        return SafeAreaEdgeInserts();
-    });
-    context_->GetCurrentViewSafeArea();
-    EXPECT_TRUE(flag);
-    /**
-     * @tc.steps4: restore window_ for next testCase.
-     */
-    context_->window_ = windowTemp;
-}
-
-/**
  * @tc.name: PipelineContextTestNg035
  * @tc.desc: Test ChangeMouseStyle.
  * @tc.type: FUNC
@@ -1958,6 +1920,57 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg040, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PipelineContextTestNg041
+ * @tc.desc: Test the function OnLayoutCompleted.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg041, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: frontend-ptr is non-null.
+     */
+    ContainerScope scope(DEFAULT_INSTANCE_ID);
+    ASSERT_NE(context_, nullptr);
+    auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    context_->weakFrontend_ = frontend;
+
+    /**
+     * @tc.steps2: test the function OnLayoutCompleted by TEST_TAG.
+     * @tc.expected: frontend componentId_ is TEST_TAG
+     */
+    context_->OnLayoutCompleted(TEST_TAG);
+    EXPECT_EQ(frontend->GetComponentId(), TEST_TAG);
+    context_->weakFrontend_.Reset();
+}
+
+/**
+ * @tc.name: PipelineContextTestNg042
+ * @tc.desc: Test the function OnDrawCompleted.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg042, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: frontend-ptr is non-null.
+     */
+
+    ContainerScope scope(DEFAULT_INSTANCE_ID);
+    ASSERT_NE(context_, nullptr);
+    auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    context_->weakFrontend_ = frontend;
+
+    /**
+     * @tc.steps4: test the function OnDrawCompleted by TEST_TAG.
+     * @tc.expected: frontend componentId_ is TEST_TAG
+     */
+    context_->OnDrawCompleted(TEST_TAG);
+    EXPECT_EQ(frontend->GetComponentId(), TEST_TAG);
+    context_->weakFrontend_.Reset();
+}
+
+/**
  * @tc.name: UITaskSchedulerTestNg001
  * @tc.desc: Test FlushLayoutTask.
  * @tc.type: FUNC
@@ -2082,7 +2095,7 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg003, TestSize.Level1)
      * @tc.steps3: Call AddPredictTask.
      * @tc.expected: predictTask_ in the taskScheduler size is 2.
      */
-    taskScheduler.AddPredictTask([](int64_t deadline) {});
+    taskScheduler.AddPredictTask([](int64_t, bool) {});
     taskScheduler.AddPredictTask(nullptr);
     EXPECT_EQ(taskScheduler.predictTask_.size(), 2);
 

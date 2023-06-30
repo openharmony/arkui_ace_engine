@@ -325,6 +325,20 @@ void UINode::DetachFromMainTree(bool recursive)
     }
 }
 
+void UINode::ProcessOffscreenTask(bool recursive)
+{
+    if (useOffscreenProcess_) {
+        return;
+    }
+    useOffscreenProcess_ = true;
+    OnOffscreenProcess(recursive);
+    // if recursive = false, recursively call AttachToMainTree(false), until we reach the first FrameNode.
+    bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
+    for (const auto& child : children_) {
+        child->ProcessOffscreenTask(isRecursive);
+    }
+}
+
 void UINode::MovePosition(int32_t slot)
 {
     auto parentNode = parent_.Upgrade();
@@ -402,7 +416,10 @@ void UINode::RebuildRenderContextTree()
 }
 void UINode::OnDetachFromMainTree(bool) {}
 
-void UINode::OnAttachToMainTree(bool) {}
+void UINode::OnAttachToMainTree(bool)
+{
+    useOffscreenProcess_ = false;
+}
 
 void UINode::DumpTree(int32_t depth)
 {
@@ -565,6 +582,13 @@ void UINode::SetActive(bool active)
 {
     for (const auto& child : children_) {
         child->SetActive(active);
+    }
+}
+
+void UINode::SetJSViewActive(bool active)
+{
+    for (const auto& child : children_) {
+        child->SetJSViewActive(active);
     }
 }
 

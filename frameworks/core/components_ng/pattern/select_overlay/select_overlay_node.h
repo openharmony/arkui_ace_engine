@@ -53,9 +53,10 @@ public:
 
     bool IsInSelectedOrSelectOverlayArea(const PointF& point);
 
+    void SetClosedByGlobalEvent(bool closedByGlobalEvent);
+
 private:
     void CreateToolBar();
-    void CreateExtensionToolBar();
     bool AddSystemDefaultOptions(float maxWidth, float& allocatedSize);
     void AddExtensionMenuOptions(const std::vector<MenuOptionsParam>& menuOptionItems, int32_t index);
     void GetDefaultButtonAndMenuWidth(float& maxWidth);
@@ -70,9 +71,18 @@ private:
 
     static RefPtr<FrameNode> CreateMenuNode(const std::shared_ptr<SelectOverlayInfo>& info);
 
+    /* Text selection menu node structure.
+        -rootNode
+            -selectOverlay
+                -selectMenu_
+                    -selectMenuInner_
+                -backButton_
+                -extensionMenu_
+    */
     RefPtr<FrameNode> selectMenu_;
     RefPtr<FrameNode> selectMenuInner_;
     RefPtr<FrameNode> extensionMenu_;
+    RefPtr<FrameNode> backButton_;
 
     std::string selectInfo_;
 

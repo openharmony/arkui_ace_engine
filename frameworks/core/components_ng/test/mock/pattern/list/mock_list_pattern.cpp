@@ -77,4 +77,16 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
 {
     return nullptr;
 }
+
+OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
+{
+    return { 0, 0 };
+}
+
+bool ListPattern::OnScrollSnapCallback(double targetOffset, double velocity)
+{
+    return false;
+}
+
+void ListPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
 } // namespace OHOS::Ace::NG

@@ -30,11 +30,8 @@ ScrollableActuator::ScrollableActuator(const WeakPtr<GestureEventHub>& gestureEv
 void ScrollableActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& /*touchRestrict*/,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {
-    if (!initialized_) {
-        InitializeScrollable();
-    }
     for (const auto& [axis, event] : scrollableEvents_) {
-        if (!event->GetEnable()) {
+        if (!event || !event->GetEnable()) {
             continue;
         }
         const auto& scrollable = event->GetScrollable();
@@ -44,37 +41,29 @@ void ScrollableActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, c
     }
 }
 
-void ScrollableActuator::InitializeScrollable()
+void ScrollableActuator::InitializeScrollable(RefPtr<ScrollableEvent> event)
 {
-    if (scrollableEvents_.empty()) {
-        return;
-    }
     auto gestureEventHub = gestureEventHub_.Upgrade();
     auto host = gestureEventHub ? gestureEventHub->GetFrameNode() : nullptr;
     CHECK_NULL_VOID(host);
-    for (const auto& [axis, event] : scrollableEvents_) {
-        auto scrollable = MakeRefPtr<Scrollable>(event->GetScrollPositionCallback(), axis);
-        scrollable->SetNodeId(host->GetAccessibilityId());
-        scrollable->SetOnScrollBegin(event->GetScrollBeginCallback());
-        scrollable->SetOnScrollFrameBegin(event->GetScrollFrameBeginCallback());
-        scrollable->SetScrollEndCallback(event->GetScrollEndCallback());
-        if (scrollEffects_.count(axis)) {
-            auto scrollEffect = scrollEffects_[axis];
-            scrollEffect->SetScrollable(scrollable);
-            scrollEffect->InitialEdgeEffect();
-        }
-        scrollable->Initialize(host->GetContext());
-        scrollable->SetMouseLeftButtonScroll(event->GetMouseLeftButtonScroll());
-        event->SetScrollable(scrollable);
-    }
-    initialized_ = true;
+    auto scrollable = MakeRefPtr<Scrollable>(event->GetScrollPositionCallback(), event->GetAxis());
+    scrollable->SetNodeId(host->GetAccessibilityId());
+    scrollable->SetOnScrollBegin(event->GetScrollBeginCallback());
+    scrollable->SetOnScrollFrameBegin(event->GetScrollFrameBeginCallback());
+    scrollable->SetScrollEndCallback(event->GetScrollEndCallback());
+    scrollable->Initialize(host->GetContext());
+    scrollable->SetMouseLeftButtonScroll(event->GetMouseLeftButtonScroll());
+    event->SetScrollable(scrollable);
 }
 
-void ScrollableActuator::AddScrollEdgeEffect(const Axis& axis, const RefPtr<ScrollEdgeEffect>& effect)
+void ScrollableActuator::AddScrollEdgeEffect(const Axis& axis, RefPtr<ScrollEdgeEffect>& effect)
 {
     CHECK_NULL_VOID_NOLOG(effect);
+    auto scrollable = scrollableEvents_[axis];
+    CHECK_NULL_VOID_NOLOG(scrollable);
+    effect->SetScrollable(scrollable->GetScrollable());
+    effect->InitialEdgeEffect();
     scrollEffects_[axis] = effect;
-    initialized_ = false;
 }
 
 bool ScrollableActuator::RemoveScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& effect)
@@ -86,7 +75,6 @@ bool ScrollableActuator::RemoveScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& 
             return true;
         }
     }
-    initialized_ = false;
     return false;
 }
 

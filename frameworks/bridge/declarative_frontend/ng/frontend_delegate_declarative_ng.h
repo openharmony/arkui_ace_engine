@@ -64,6 +64,8 @@ public:
 
     // set callback
     void SetMediaQueryCallback(MediaQueryCallback&& mediaQueryCallback);
+    void SetLayoutInspectorCallback(const LayoutInspectorCallback& layoutInspectorCallback);
+    void SetDrawInspectorCallback(const DrawInspectorCallback& drawInspectorCallback);
     void SetOnStartContinuationCallBack(OnStartContinuationCallBack&& onStartContinuationCallBack);
     void SetOnCompleteContinuationCallBack(OnCompleteContinuationCallBack&& onCompleteContinuationCallBack);
     void SetOnSaveDataCallBack(OnSaveDataCallBack&& onSaveDataCallBack);
@@ -85,6 +87,8 @@ public:
 
     void OnSurfaceChanged();
     void OnMediaQueryUpdate() override;
+    void OnLayoutCompleted(const std::string& componentId);
+    void OnDrawCompleted(const std::string& componentId);
     void FireExternalEvent(const std::string& eventId, const std::string& componentId, uint32_t nodeId, bool isDestroy);
 
     // FrontendDelegate overrides.
@@ -184,6 +188,10 @@ public:
 
     void RegisterFont(const std::string& familyName, const std::string& familySrc) override;
 
+    void GetSystemFontList(std::vector<std::string>& fontList) override;
+
+    bool GetSystemFont(const std::string& fontName, FontInfo& fontInfo) override;
+
     void HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback) override {}
 
     void GetSnapshot(const std::string& componentId,
@@ -275,6 +283,8 @@ private:
     std::unordered_map<std::string, CancelableCallback<void()>> timeoutTaskMap_;
 
     MediaQueryCallback mediaQueryCallback_;
+    LayoutInspectorCallback layoutInspectorCallback_;
+    DrawInspectorCallback drawInspectorCallback_;
     OnStartContinuationCallBack onStartContinuationCallBack_;
     OnCompleteContinuationCallBack onCompleteContinuationCallBack_;
     OnSaveDataCallBack onSaveDataCallBack_;

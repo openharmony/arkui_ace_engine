@@ -15,6 +15,7 @@
 
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 
+#include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
@@ -32,6 +33,7 @@ constexpr int32_t MAX_FINGERS = 10;
 
 void LongPressRecognizer::OnAccepted()
 {
+    ResSchedReport::GetInstance().ResSchedDataReport("click");
     if (onAccessibilityEventFunc_) {
         onAccessibilityEventFunc_(AccessibilityEventType::LONG_PRESS);
     }
@@ -247,10 +249,14 @@ void LongPressRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc
         }
         info.SetSourceDevice(deviceType_);
         info.SetDeviceId(deviceId_);
+        info.SetTargetDisplayId(trackPoint.targetDisplayId);
         info.SetGlobalPoint(globalPoint_);
         info.SetScreenLocation(trackPoint.GetScreenOffset());
         info.SetGlobalLocation(trackPoint.GetOffset()).SetLocalLocation(trackPoint.GetOffset() - coordinateOffset_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
+        if (recognizerTarget_.has_value()) {
+            info.SetTarget(recognizerTarget_.value());
+        }
         info.SetForce(trackPoint.force);
         if (trackPoint.tiltX.has_value()) {
             info.SetTiltX(trackPoint.tiltX.value());

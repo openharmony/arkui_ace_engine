@@ -14,7 +14,7 @@
 xcomponent_components_support = false
 form_components_support = false
 remote_window_support = false
-effect_view_support = false
+effect_component_support = false
 use_curl_download = true
 accessibility_support = true
 rich_components_support = true
@@ -58,6 +58,7 @@ cflags_cc = [
   "-Wno-thread-safety-analysis",
   "-Wno-ignored-attributes",
   "-Wno-unknown-pragmas",
+  "-g1",
 ]
 
 defines = [ "UNICODE" ]
@@ -82,8 +83,8 @@ if (defined(remote_window_support) && remote_window_support) {
   defines += [ "REMOTE_WINDOW_SUPPORTED" ]
 }
 
-if (defined(effect_view_support) && effect_view_support) {
-  defines += [ "EFFECT_VIEW_SUPPORTED" ]
+if (defined(effect_component_support) && effect_component_support) {
+  defines += [ "EFFECT_COMPONENT_SUPPORTED" ]
 }
 
 if (defined(image_components_support) && image_components_support) {

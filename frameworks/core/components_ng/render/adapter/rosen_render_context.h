@@ -189,6 +189,10 @@ public:
 
     RectF GetPaintRectWithoutTransform() override;
 
+    // append translate value and return origin value.
+    void UpdateTranslateInXY(const OffsetF& offset) override;
+    OffsetF GetShowingTranslateProperty() override;
+
     void GetPointWithTransform(PointF& point) override;
 
     void ClearDrawCommands() override;
@@ -226,11 +230,14 @@ public:
     void MarkDrivenRenderItemIndex(int32_t index) override;
     void MarkDrivenRenderFramePaintState(bool flag) override;
     RefPtr<PixelMap> GetThumbnailPixelMap() override;
+    bool GetBitmap(SkBitmap& bitmap, std::shared_ptr<OHOS::Rosen::DrawCmdList> drawCmdList = nullptr);
     void SetActualForegroundColor(const Color& value) override;
     void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property) override;
 
     void RegisterSharedTransition(const RefPtr<RenderContext>& other) override;
     void UnregisterSharedTransition(const RefPtr<RenderContext>& other) override;
+
+    void SetOverrideContentRect(const std::optional<RectF>& rect) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -286,6 +293,7 @@ private:
 
     void OnUseEffectUpdate(bool useEffect) override;
     void OnFreezeUpdate(bool isFreezed) override;
+    void OnRenderGroupUpdate(bool isRenderGroup) override;
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
     void NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn);
@@ -396,6 +404,10 @@ private:
     std::shared_ptr<OverlayTextModifier> modifier_ = nullptr;
     std::shared_ptr<GradientStyleModifier> gradientStyleModifier_;
 
+    // translate modifiers for developer
+    std::shared_ptr<Rosen::RSTranslateModifier> translateXY_;
+    std::shared_ptr<Rosen::RSTranslateZModifier> translateZ_;
+
     // graphics modifiers
     struct GraphicModifiers {
         std::shared_ptr<GrayScaleModifier> grayScale;
@@ -412,6 +424,8 @@ private:
     RefPtr<TouchEventImpl> touchListener_;
     VectorF currentScale_ = VectorF(1.0f, 1.0f);
     bool isTouchUpFinished_ = true;
+
+    std::optional<RectF> overrideContentRect_;
 
     template<typename Modifier, typename PropertyType>
     friend class PropertyTransitionEffectTemplate;

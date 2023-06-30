@@ -19,13 +19,8 @@ template("gen_sa_dialog_js") {
   forward_variables_from(invoker, "*")
 
   action("build_dialog_js") {
-    if (use_mac) {
-      nodejs_path =
-          "//prebuilts/build-tools/common/nodejs/node-v12.18.4-darwin-x64/bin"
-    } else {
-      nodejs_path =
-          "//prebuilts/build-tools/common/nodejs/node-v12.18.4-linux-x64/bin"
-    }
+    nodejs_path = "//prebuilts/build-tools/common/nodejs/current/bin"
+
     project_path = invoker.project_path
     script = "//foundation/arkui/ace_engine/build/tools/build_js.py"
     outputs = [

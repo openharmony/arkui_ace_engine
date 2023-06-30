@@ -18,6 +18,7 @@ ace_unittest("swiper_test_ng") {
   flutter_skia = true
   render = true
   sources = [
+    "$ace_root/frameworks/core/animation/spring_curve.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
 
     # text

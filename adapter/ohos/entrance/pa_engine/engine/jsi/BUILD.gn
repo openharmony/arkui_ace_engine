@@ -57,20 +57,15 @@ template("js_pa_engine_ark") {
       "$ability_runtime_napi_path/inner/napi_common",
       "//foundation/arkui/ace_engine/adapter/ohos/entrance/pa_engine/engine/common",
     ]
-    deps = [
-      "$ability_runtime_napi_path/inner/napi_ability_common:napi_ability_common",
-      "$ability_runtime_napi_path/inner/napi_common:napi_common",
-      "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
-      "$ability_runtime_path/frameworks/native/appkit:appkit_native",
-      "//foundation/arkui/napi:ace_napi",
-      "//foundation/arkui/napi:ace_napi_ark",
-      "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk:system_ability_fwk",
-      "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    ]
+    deps = []
     external_deps = [
       "ability_base:want",
       "ability_base:zuri",
+      "ability_runtime:abilitykit_native",
+      "ability_runtime:appkit_native",
       "ability_runtime:js_environment",
+      "ability_runtime:napi_ability_common",
+      "ability_runtime:napi_common",
       "ability_runtime:runtime",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
@@ -78,17 +73,23 @@ template("js_pa_engine_ark") {
       "ets_runtime:libark_jsruntime",
       "eventhandler:libeventhandler",
       "form_fwk:form_manager",
-      "hisysevent_native:libhisysevent",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
+      "hisysevent:libhisysevent",
       "ipc:ipc_core",
       "ipc:ipc_napi_common",
       "napi:ace_napi",
+      "napi:ace_napi_ark",
       "relational_store:native_dataability",
       "relational_store:native_rdb",
+      "resource_management:global_resmgr",
+      "safwk:system_ability_fwk",
+      "samgr:samgr_proxy",
     ]
 
-    public_deps =
-        [ "//base/global/resource_management/frameworks/resmgr:global_resmgr" ]
+    if (is_standard_system) {
+      defines += [ "ENABLE_HITRACE" ]
+      external_deps += [ "hitrace:libhitracechain" ]
+    }
 
     sources = [
       "$ace_root/adapter/ohos/entrance/pa_engine/engine/common/js_backend_asset_manager.cpp",

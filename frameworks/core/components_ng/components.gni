@@ -19,12 +19,15 @@ template("build_component_ng") {
   forward_variables_from(invoker, "*")
 
   component_name = target_name
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
 
   template("build_component_ng_impl") {
     forward_variables_from(invoker, "*")
 
     platform = target_name
-
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
     component_deps = []
     extra_deps = []
     foreach(item, component_deps) {
@@ -68,14 +71,14 @@ template("build_component_ng") {
       deps = []
       deps += extra_deps
       deps += [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
-
       if (defined(invoker.public_configs)) {
         public_configs = []
         public_configs += invoker.public_configs
       }
 
+      external_deps = []
+
       if (defined(invoker.external_deps)) {
-        external_deps = []
         external_deps += invoker.external_deps
       }
 
@@ -114,18 +117,13 @@ template("build_component_ng") {
       }
       if (!is_cross_platform_build && defined(config.enable_drag_framework) &&
           config.enable_drag_framework) {
-        deps += [
-          "//base/msdp/device_status/interfaces/innerkits:devicestatus_client",
-          "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+        external_deps += [
+          "device_status:devicestatus_client",
+          "graphic_standard:librender_service_client",
         ]
         include_dirs += [
           "//base/msdp/device_status/interfaces/innerkits/interaction/include",
         ]
-        if (defined(external_deps)) {
-          external_deps += [ "udmf:udmf_client" ]
-        } else {
-          external_deps = [ "udmf:udmf_client" ]
-        }
       }
 
       if (defined(config.model_component_support) &&
@@ -142,10 +140,10 @@ template("build_component_ng") {
 
       if (platform == "ohos") {
         deps += [
-          "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
           "//third_party/EGL:libEGL",
           "//third_party/openGLES:libGLES",
         ]
+        external_deps += [ "graphic_standard:2d_graphics" ]
       } else {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform" ]
       }
@@ -156,7 +154,7 @@ template("build_component_ng") {
         if (is_cross_platform_build) {
           deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
         } else {
-          deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+          external_deps += [ "graphic_standard:librender_service_client" ]
         }
 
         include_dirs +=

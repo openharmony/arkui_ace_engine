@@ -74,6 +74,16 @@ void FrontendDelegateDeclarativeNG::SetMediaQueryCallback(MediaQueryCallback&& m
     mediaQueryCallback_ = mediaQueryCallback;
 }
 
+void FrontendDelegateDeclarativeNG::SetLayoutInspectorCallback(const LayoutInspectorCallback& layoutInspectorCallback)
+{
+    layoutInspectorCallback_ = layoutInspectorCallback;
+}
+
+void FrontendDelegateDeclarativeNG::SetDrawInspectorCallback(const DrawInspectorCallback& drawInspectorCallback)
+{
+    drawInspectorCallback_ = drawInspectorCallback;
+}
+
 void FrontendDelegateDeclarativeNG::SetOnStartContinuationCallBack(
     OnStartContinuationCallBack&& onStartContinuationCallBack)
 {
@@ -532,6 +542,16 @@ void FrontendDelegateDeclarativeNG::RegisterFont(const std::string& familyName, 
     pipelineContextHolder_.Get()->RegisterFont(familyName, familySrc);
 }
 
+void FrontendDelegateDeclarativeNG::GetSystemFontList(std::vector<std::string>& fontList)
+{
+    pipelineContextHolder_.Get()->GetSystemFontList(fontList);
+}
+
+bool FrontendDelegateDeclarativeNG::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
+{
+    return pipelineContextHolder_.Get()->GetSystemFont(fontName, fontInfo);
+}
+
 double FrontendDelegateDeclarativeNG::MeasureText(const MeasureContext& context)
 {
     return MeasureUtil::MeasureText(context);
@@ -660,6 +680,32 @@ void FrontendDelegateDeclarativeNG::OnMediaQueryUpdate()
             const auto& listenerId = delegate->mediaQueryInfo_->GetListenerId();
             delegate->mediaQueryCallback_(listenerId, info);
             delegate->mediaQueryInfo_->ResetListenerId();
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+void FrontendDelegateDeclarativeNG::OnLayoutCompleted(const std::string& componentId)
+{
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this), componentId] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            delegate->layoutInspectorCallback_(componentId);
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+void FrontendDelegateDeclarativeNG::OnDrawCompleted(const std::string& componentId)
+{
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this), componentId] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            delegate->drawInspectorCallback_(componentId);
         },
         TaskExecutor::TaskType::JS);
 }

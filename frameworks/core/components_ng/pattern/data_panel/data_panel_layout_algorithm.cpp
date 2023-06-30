@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,22 +26,54 @@ void DataPanelLayoutAlgorithm::OnReset() {}
 std::optional<SizeF> DataPanelLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    LOGD("Layout constraint is %{public}s", contentConstraint.ToString().c_str());
+
+    // 1.If user set the width and height, use the selfIdealSize.
     if (contentConstraint.selfIdealSize.IsValid()) {
         return contentConstraint.selfIdealSize.ConvertToSizeT();
     }
+
+    auto width = contentConstraint.percentReference.Width();
+    auto height = contentConstraint.percentReference.Height();
+    bool infWidth = GreaterOrEqualToInfinity(width);
+    bool infHeight = GreaterOrEqualToInfinity(height);
+
+    // 2.If user set width only, use selfWidth and height of maxSize.
+    // If the height is infinite, set the min of selfWidth and infinite.
     if (contentConstraint.selfIdealSize.Width().has_value() &&
         NonNegative(contentConstraint.selfIdealSize.Width().value())) {
-        auto width = contentConstraint.selfIdealSize.Width().value();
-        auto height = contentConstraint.maxSize.Height();
-        return SizeF(width, height);
+        auto selfWidth = contentConstraint.selfIdealSize.Width().value();
+        if (infHeight) {
+            height = std::min(selfWidth, height);
+        }
+        return SizeF(selfWidth, height);
     }
+
+    // 3.If user set height only, use selfHeight and width of maxSize.
+    // If the width is infinite, set the min of selfHeight and infinite.
     if (contentConstraint.selfIdealSize.Height().has_value() &&
         NonNegative(contentConstraint.selfIdealSize.Height().value())) {
-        auto width = contentConstraint.maxSize.Width();
-        auto height = contentConstraint.selfIdealSize.Height().value();
-        return SizeF(width, height);
+        auto selfHeight = contentConstraint.selfIdealSize.Height().value();
+        if (infWidth) {
+            width = std::min(width, selfHeight);
+        }
+        return SizeF(width, selfHeight);
     }
-    return contentConstraint.maxSize;
+
+    // 4.If width and height are both infinite, use the root size as constraint.
+    if (infWidth && infHeight) {
+        auto minSize = std::min(PipelineContext::GetCurrentRootWidth(), PipelineContext::GetCurrentRootHeight());
+        return SizeF(minSize, minSize);
+    }
+
+    // 5.If the width or height is infinite, use the min of them as the constraint.
+    if (infWidth || infHeight) {
+        auto minSize = std::min(width, height);
+        return SizeF(minSize, minSize);
+    }
+
+    // 6.Otherwise use the maxSize
+    return contentConstraint.percentReference;
 }
 
 } // namespace OHOS::Ace::NG

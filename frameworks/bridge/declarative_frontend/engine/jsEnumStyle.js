@@ -31,7 +31,7 @@ var Color;
 })(Color || (Color = {}));
 
 var ColoringStrategy;
-(function (ColoringStrategy){
+(function (ColoringStrategy) {
   ColoringStrategy["INVERT"] = "Invert";
 })(ColoringStrategy || (ColoringStrategy = {}));
 
@@ -497,6 +497,14 @@ var StickyStyle;
   StickyStyle[StickyStyle["Header"] = 1] = "Header";
   StickyStyle[StickyStyle["Footer"] = 2] = "Footer";
 })(StickyStyle || (StickyStyle = {}));
+
+var ScrollSnapAlign;
+(function (ScrollSnapAlign) {
+  ScrollSnapAlign[ScrollSnapAlign["NONE"] = 0] = "NONE";
+  ScrollSnapAlign[ScrollSnapAlign["START"] = 1] = "START";
+  ScrollSnapAlign[ScrollSnapAlign["CENTER"] = 2] = "CENTER";
+  ScrollSnapAlign[ScrollSnapAlign["END"] = 3] = "END";
+})(ScrollSnapAlign || (ScrollSnapAlign = {}));
 
 var ChainEdgeEffect;
 (function (ChainEdgeEffect) {
@@ -1549,11 +1557,11 @@ var SecurityComponentLayoutDirection;
   SecurityComponentLayoutDirection[SecurityComponentLayoutDirection["VERTICAL"] = 1] = "VERTICAL";
 })(SecurityComponentLayoutDirection || (SecurityComponentLayoutDirection = {}));
 
-var SecurityComponentLayoutOrder ;
-(function (SecurityComponentLayoutOrder ) {
-  SecurityComponentLayoutOrder [SecurityComponentLayoutOrder ["ICON_FIRST"] = 0] = "ICON_FIRST";
-  SecurityComponentLayoutOrder [SecurityComponentLayoutOrder ["TEXT_FIRST"] = 1] = "TEXT_FIRST ";
-})(SecurityComponentLayoutOrder || (SecurityComponentLayoutOrder  = {}));
+var SecurityComponentLayoutOrder;
+(function (SecurityComponentLayoutOrder) {
+  SecurityComponentLayoutOrder[SecurityComponentLayoutOrder["ICON_FIRST"] = 0] = "ICON_FIRST";
+  SecurityComponentLayoutOrder[SecurityComponentLayoutOrder["TEXT_FIRST"] = 1] = "TEXT_FIRST ";
+})(SecurityComponentLayoutOrder || (SecurityComponentLayoutOrder = {}));
 
 var SecLocationButtonLayoutDirection;
 (function (SecLocationButtonLayoutDirection) {
@@ -1573,14 +1581,6 @@ var BackgroundButtonType;
   BackgroundButtonType[BackgroundButtonType["CIRCLE_BACKGROUND"] = 1] = "CIRCLE_BACKGROUND";
   BackgroundButtonType[BackgroundButtonType["NORMAL_BACKGROUND"] = 2] = "NORMAL_BACKGROUND";
 })(BackgroundButtonType || (BackgroundButtonType = {}));
-
-var SecLocationButtonOnClickResult;
-(function (SecLocationButtonOnClickResult) {
-  SecLocationButtonOnClickResult[SecLocationButtonOnClickResult["LOCATION_BUTTON_CLICK_SUCCESS"] = 0] =
-    "LOCATION_BUTTON_CLICK_SUCCESS";
-  SecLocationButtonOnClickResult[SecLocationButtonOnClickResult["LOCATION_BUTTON_CLICK_GRANT_FAILED"] = 1] =
-    "LOCATION_BUTTON_CLICK_GRANT_FAILED ";
-})(SecLocationButtonOnClickResult || (SecLocationButtonOnClickResult = {}));
 
 var LocationIconStyle;
 (function (LocationIconStyle) {
@@ -1603,6 +1603,14 @@ var LocationDescription;
   LocationDescription[LocationDescription["CURRENT_POSITION"] = 10] = "CURRENT_POSITION";
 })(LocationDescription || (LocationDescription = {}));
 
+var SecLocationButtonOnClickResult;
+(function (SecLocationButtonOnClickResult) {
+  SecLocationButtonOnClickResult[SecLocationButtonOnClickResult["LOCATION_BUTTON_CLICK_SUCCESS"] = 0] =
+    "LOCATION_BUTTON_CLICK_SUCCESS";
+  SecLocationButtonOnClickResult[SecLocationButtonOnClickResult["LOCATION_BUTTON_CLICK_GRANT_FAILED"] = 1] =
+    "LOCATION_BUTTON_CLICK_GRANT_FAILED ";
+})(SecLocationButtonOnClickResult || (SecLocationButtonOnClickResult = {}));
+
 var PasteIconStyle;
 (function (PasteIconStyle) {
   PasteIconStyle[PasteIconStyle["LINES"] = 0] = "LINES";
@@ -1612,6 +1620,14 @@ var PasteDescription;
 (function (PasteDescription) {
   PasteDescription[PasteDescription["PASTE"] = 0] = "PASTE";
 })(PasteDescription || (PasteDescription = {}));
+
+var SecPasteButtonOnClickResult;
+(function (SecPasteButtonOnClickResult) {
+  SecPasteButtonOnClickResult[SecPasteButtonOnClickResult["SUCCESS"] = 0] =
+    "SUCCESS";
+  SecPasteButtonOnClickResult[SecPasteButtonOnClickResult["TEMPORARY_AUTHORIZATION_FAILED"] = 1] =
+    "TEMPORARY_AUTHORIZATION_FAILED ";
+})(SecPasteButtonOnClickResult || (SecPasteButtonOnClickResult = {}));
 
 var SaveIconStyle;
 (function (SaveIconStyle) {
@@ -1630,6 +1646,14 @@ var SaveDescription;
   SaveDescription[SaveDescription["RECEIVE"] = 6] = "RECEIVE";
   SaveDescription[SaveDescription["CONTINUE_TO_RECEIVE"] = 7] = "CONTINUE_TO_RECEIVE";
 })(SaveDescription || (SaveDescription = {}));
+
+var SecSaveButtonOnClickResult;
+(function (SecSaveButtonOnClickResult) {
+  SecSaveButtonOnClickResult[SecSaveButtonOnClickResult["SUCCESS"] = 0] =
+    "SUCCESS";
+  SecSaveButtonOnClickResult[SecSaveButtonOnClickResult["TEMPORARY_AUTHORIZATION_FAILED"] = 1] =
+    "TEMPORARY_AUTHORIZATION_FAILED ";
+})(SecSaveButtonOnClickResult || (SecSaveButtonOnClickResult = {}));
 
 var ObscuredReasons;
 (function (ObscuredReasons) {
@@ -1663,3 +1687,34 @@ var XComponentType;
   XComponentType[XComponentType["COMPONENT"] = 1] = "COMPONENT";
   XComponentType[XComponentType["TEXTURE"] = 2] = "TEXTURE";
 })(XComponentType || (XComponentType = {}));
+
+var NestedScrollMode;
+(function (NestedScrollMode) {
+  NestedScrollMode[NestedScrollMode["SELF_ONLY"] = 0] = "SELF_ONLY";
+  NestedScrollMode[NestedScrollMode["SELF_FIRST"] = 1] = "SELF_FIRST";
+  NestedScrollMode[NestedScrollMode["PARENT_FIRST"] = 2] = "PARENT_FIRST";
+  NestedScrollMode[NestedScrollMode["PARALLEL"] = 3] = "PARALLEL";
+})(NestedScrollMode || (NestedScrollMode = {}));
+
+var ScrollAlign;
+(function (ScrollAlign) {
+  ScrollAlign[ScrollAlign["START"] = 0] = "START";
+  ScrollAlign[ScrollAlign["CENTER"] = 1] = "CENTER";
+  ScrollAlign[ScrollAlign["END"] = 2] = "END";
+  ScrollAlign[ScrollAlign["AUTO"] = 3] = "AUTO";
+})(ScrollAlign || (ScrollAlign = {}));
+
+var SafeAreaType;
+(function (SafeAreaType) {
+  SafeAreaType[SafeAreaType["SYSTEM"] = 0] = "SYSTEM";
+  SafeAreaType[SafeAreaType["CUTOUT"] = 1] = "CUTOUT";
+  SafeAreaType[SafeAreaType["KEYBOARD"] = 2] = "KEYBOARD";
+})(SafeAreaType || (SafeAreaType = {}));
+
+var SafeAreaEdge;
+(function (SafeAreaEdge) {
+  SafeAreaEdge[SafeAreaEdge["TOP"] = 0] = "TOP";
+  SafeAreaEdge[SafeAreaEdge["BOTTOM"] = 1] = "BOTTOM";
+  SafeAreaEdge[SafeAreaEdge["START"] = 2] = "START";
+  SafeAreaEdge[SafeAreaEdge["END"] = 3] = "END";
+})(SafeAreaEdge || (SafeAreaEdge = {}));

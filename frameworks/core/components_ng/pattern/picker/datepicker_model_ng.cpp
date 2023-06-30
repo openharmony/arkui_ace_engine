@@ -294,7 +294,11 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     dialogEvent["changeId"] = onChange;
     dialogEvent["acceptId"] = onAccept;
-    auto func = [onCancel](const GestureEvent& /* info */) { onCancel(); };
+    auto func = [onCancel](const GestureEvent& /* info */) {
+        if (onCancel) {
+            onCancel();
+        }
+    };
     dialogCancelEvent["cancelId"] = func;
     ButtonInfo buttonInfo;
     DialogProperties properties;

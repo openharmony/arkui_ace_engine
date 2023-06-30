@@ -84,11 +84,17 @@ struct GridLayoutInfo {
         offsetEnd_ = false;
     }
 
+    bool IsResetted() const
+    {
+        return startIndex_ != 0 && gridMatrix_.empty();
+    }
+
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f;
     float prevOffset_ = 0.0f;
     float lastMainSize_ = 0.0f;
+    float totalHeightOfItemsInView_ = 0.0f;
 
     // index of first and last GridItem in viewport
     int32_t startIndex_ = 0;
@@ -106,7 +112,6 @@ struct GridLayoutInfo {
     bool reachStart_ = false;
 
     bool offsetEnd_ = false;
-    int32_t zeroEndLine_ = 0;
 
     // Map structure: [mainIndex, [crossIndex, index]],
     // when vertical, mainIndex is rowIndex and crossIndex is columnIndex.

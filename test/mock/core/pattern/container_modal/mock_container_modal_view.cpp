@@ -30,8 +30,8 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
     return nullptr;
 }
 
-RefPtr<FrameNode> ContainerModalView::BuildControlButton(
-    InternalResource::ResourceId icon, GestureEventFunc&& clickCallback, bool isCloseButton)
+RefPtr<FrameNode> ContainerModalView::BuildControlButton(InternalResource::ResourceId icon,
+    GestureEventFunc&& clickCallback, bool isCloseButton, bool canDrag)
 {
     return nullptr;
 }

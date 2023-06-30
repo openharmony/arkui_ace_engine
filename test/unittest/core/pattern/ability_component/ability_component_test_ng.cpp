@@ -34,6 +34,9 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const std::string BUNDLE_NAME = "com.test.windowextension";
+const std::string ABILITY_NAME = "WindowExtAbility";
+const std::string WANT = R"({bundleName: "com.test.windowextension", abilityName: "WindowExtAbility"})";
 const float CONTAINER_WIDTH = 300.0f;
 const float CONTAINER_HEIGHT = 300.0f;
 const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
@@ -62,7 +65,7 @@ HWTEST_F(AbilityComponentPatternTestNg, AbilityComponentTest001, TestSize.Level1
      * @tc.steps: step1. create and get frameNode of abilityComponent.
      */
     AbilityComponentModelNG modelNG;
-    modelNG.Create();
+    modelNG.Create(BUNDLE_NAME, ABILITY_NAME);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(frameNode, nullptr);
     /**
@@ -97,12 +100,11 @@ HWTEST_F(AbilityComponentPatternTestNg, AbilityComponentTest002, TestSize.Level1
      * @tc.steps: step2. create and get frameNode of abilityComponent.
      */
     AbilityComponentModelNG modelNG;
-    modelNG.Create();
+    modelNG.Create(BUNDLE_NAME, ABILITY_NAME);
     /**
      * @tc.steps: step3. set event callback by model object.
      */
-    string want = "abilityName:, bundleName:";
-    modelNG.SetWant(want);
+    modelNG.SetWant(WANT);
     modelNG.SetOnConnect(std::move(onConnect));
     modelNG.SetOnDisConnect(std::move(onDisConnect));
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -110,7 +112,7 @@ HWTEST_F(AbilityComponentPatternTestNg, AbilityComponentTest002, TestSize.Level1
     RefPtr<AbilityComponentRenderProperty> paintProperty =
         frameNode->GetPaintProperty<AbilityComponentRenderProperty>();
     EXPECT_NE(paintProperty, nullptr);
-    EXPECT_EQ(paintProperty->GetWantValue(), want);
+    EXPECT_EQ(paintProperty->GetWantValue(), WANT);
     /**
      * @tc.steps: step4. test event callback by pattern object.
      */
@@ -140,9 +142,8 @@ HWTEST_F(AbilityComponentPatternTestNg, AbilityComponentTest003, TestSize.Level1
      * @tc.steps: step2. create and get frameNode of abilityComponent.
      */
     AbilityComponentModelNG modelNG;
-    modelNG.Create();
-    string want = "abilityName:, bundleName:";
-    modelNG.SetWant(want);
+    modelNG.Create(BUNDLE_NAME, ABILITY_NAME);
+    modelNG.SetWant(WANT);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(frameNode, nullptr);
     /**
@@ -179,9 +180,8 @@ HWTEST_F(AbilityComponentPatternTestNg, AbilityComponentTest004, TestSize.Level1
      * @tc.steps: step2. create and get frameNode of abilityComponent.
      */
     AbilityComponentModelNG modelNG;
-    modelNG.Create();
-    string want = "abilityName:, bundleName:";
-    modelNG.SetWant(want);
+    modelNG.Create(BUNDLE_NAME, ABILITY_NAME);
+    modelNG.SetWant(WANT);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(frameNode, nullptr);
     /**
@@ -230,7 +230,7 @@ HWTEST_F(AbilityComponentPatternTestNg, AbilityComponentTest005, TestSize.Level1
      * @tc.steps: step1. create and get frameNode of abilityComponent.
      */
     AbilityComponentModelNG modelNG;
-    modelNG.Create();
+    modelNG.Create(BUNDLE_NAME, ABILITY_NAME);
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::ABILITY_COMPONENT_ETS_TAG);
@@ -275,7 +275,7 @@ HWTEST_F(AbilityComponentPatternTestNg, AbilityComponentTest006, TestSize.Level1
      */
     MockPipelineBase::SetUp();
     AbilityComponentModelNG modelNG;
-    modelNG.Create();
+    modelNG.Create(BUNDLE_NAME, ABILITY_NAME);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(frameNode, nullptr);
     RefPtr<AbilityComponentPattern> pattern = frameNode->GetPattern<AbilityComponentPattern>();

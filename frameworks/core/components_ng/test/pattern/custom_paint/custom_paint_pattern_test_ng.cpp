@@ -26,6 +26,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/ace_engine.h"
+#include "core/common/udmf/udmf_client.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -216,7 +217,8 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg004, TestSize.Level1)
     paintMethod->SetLineDashOffset(DEFAULT_DOUBLE10);
     EXPECT_DOUBLE_EQ(customPattern->GetLineDash().dashOffset, DEFAULT_DOUBLE10);
     for (uint32_t i = 1; i < CANDIDATE_DOUBLES.size(); ++i) {
-        EXPECT_DOUBLE_EQ(paintMethod->GetLineDash().lineDash[i], CANDIDATE_DOUBLES[i]);
+        auto lineDash = paintMethod->strokeState_.GetLineDash();
+        EXPECT_DOUBLE_EQ(lineDash.lineDash[i], CANDIDATE_DOUBLES[i]);
     }
 
     /**

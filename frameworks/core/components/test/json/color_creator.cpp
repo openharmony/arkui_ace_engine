@@ -56,4 +56,9 @@ Color ColorCreator::CreateFromJson(const JsonValue& componentJson)
     return Color::FromRGB(red, green, blue);
 }
 
+Color ColorCreator::CreateFromString(const std::string& colorValue)
+{
+    return Color::FromString(colorValue);
+}
+
 } // namespace OHOS::Ace

@@ -32,6 +32,8 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo) {}
 
 void OverlayManager::HideAllPopups() {}
 
+void OverlayManager::HideCustomPopups() {};
+
 bool OverlayManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset)
 {
     return true;
@@ -57,7 +59,8 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
 }
 
 void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
-    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    std::map<std::string, NG::DialogEvent> dialogEvent,
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {}
 
 void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps, const TimePickerSettingData& settingData,
@@ -80,9 +83,15 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed)
     return removeOverlayFlag;
 }
 
+bool OverlayManager::RemoveOverlayInSubwindow()
+{
+    return removeOverlayFlag;
+}
+
 void OverlayManager::ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& customNode)
 {
     customPopupMap_[targetId] = customNode;
 }
 
+void OverlayManager::RemoveIndexerPopupById(int32_t targetId) {}
 } // namespace OHOS::Ace::NG

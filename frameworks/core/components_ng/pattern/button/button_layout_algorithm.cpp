@@ -53,7 +53,7 @@ void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (buttonLayoutProperty->HasLabel()) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
         CHECK_NULL_VOID(childWrapper);
-        auto childConstraint = childWrapper->GetLayoutProperty()->GetContentLayoutConstraint();
+        auto childConstraint = layoutWrapper->GetLayoutProperty()->GetContentLayoutConstraint();
         childWrapper->Measure(childConstraint);
         childSize_ = childWrapper->GetGeometryNode()->GetContentSize();
         if (buttonLayoutProperty->HasFontSize()) {
@@ -188,6 +188,10 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
     } else if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CAPSULE) {
         radius.SetValue(frameSize.Height() / 2.0);
         renderContext->UpdateBorderRadius({ radius, radius, radius, radius });
+    } else {
+        auto normalRadius =
+            buttonLayoutProperty->GetBorderRadiusValue(BorderRadiusProperty({ 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp }));
+        renderContext->UpdateBorderRadius(normalRadius);
     }
 }
 

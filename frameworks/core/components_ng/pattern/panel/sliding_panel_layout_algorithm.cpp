@@ -27,7 +27,7 @@
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/render/canvas_image.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -48,9 +48,15 @@ void SlidingPanelLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         LOGE("fail to measure slidingPanel due to layoutConstraint is nullptr");
         return;
     }
-    auto idealSize = !invisibleFlag_ ? CreateIdealSize(constraint.value(), Axis::HORIZONTAL,
-                                           layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true)
-                                     : SizeF();
+    auto idealSize =
+        !invisibleFlag_
+            ? ((PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9)
+                      ? CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
+                            layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT))
+                            .ConvertToSizeT()
+                      : CreateIdealSize(constraint.value(), Axis::HORIZONTAL,
+                            layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true))
+            : SizeF();
 
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
@@ -93,37 +99,15 @@ void SlidingPanelLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     halfHeight_ = layoutProperty->GetHalfHeight().value_or(Dimension(frameSize.Height() / 2));
     miniHeight_ = layoutProperty->GetMiniHeight().value_or(Dimension(DRAG_UP_THRESHOLD.ConvertToPx()));
 
-    auto currentPanelType = layoutProperty->GetPanelType().value_or(PanelType::FOLDABLE_BAR);
-    auto currentPanelMode = layoutProperty->GetPanelMode().value_or(PanelMode::HALF);
-    auto childOffset = OffsetF();
     if (isFirstLayout_) {
-        switch (currentPanelMode) {
-            case PanelMode::FULL:
-                childOffset = OffsetF(0.0, frameSize.Height() - static_cast<float>(fullHeight_.ConvertToPx()));
-                childWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset + padding.Offset());
-                break;
-            case PanelMode::HALF:
-                childOffset = OffsetF(0.0, frameSize.Height() - static_cast<float>(halfHeight_.ConvertToPx()));
-                if (currentPanelType == PanelType::MINI_BAR) {
-                    childOffset = OffsetF(0.0, frameSize.Height() - static_cast<float>(miniHeight_.ConvertToPx()));
-                }
-                childWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset + padding.Offset());
-                break;
-            case PanelMode::MINI:
-                childOffset = OffsetF(0.0, frameSize.Height() - static_cast<float>(miniHeight_.ConvertToPx()));
-                if (currentPanelType == PanelType::TEMP_DISPLAY) {
-                    childOffset = OffsetF(0.0, frameSize.Height() - static_cast<float>(halfHeight_.ConvertToPx()));
-                }
-                childWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset + padding.Offset());
-                break;
-            case PanelMode::AUTO:
-                childOffset = OffsetF(0.0, static_cast<float>(halfHeight_.ConvertToPx()));
-                childWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset + padding.Offset());
-                break;
-            default:
-                LOGE("Unsupported mode:%{public}d", currentPanelMode);
-                return;
+        auto childOffset = OffsetF();
+        if (invisibleFlag_) {
+            auto rootHeight = PipelineContext::GetCurrentRootHeight();
+            childOffset = OffsetF(0.0f, rootHeight);
+        } else {
+            childOffset = OffsetF(0.0f, frameSize.Height());
         }
+        childWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset + padding.Offset());
         isFirstLayout_ = false;
     } else {
         auto childOffset = OffsetF(0.0f, currentOffset_);

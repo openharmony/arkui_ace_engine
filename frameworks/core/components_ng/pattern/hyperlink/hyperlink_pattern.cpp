@@ -17,9 +17,7 @@
 
 #include "base/json/json_util.h"
 #ifdef ENABLE_DRAG_FRAMEWORK
-#include "link.h"
-#include "unified_data.h"
-#include "unified_record.h"
+#include "core/common/udmf/udmf_client.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -40,14 +38,12 @@ void HyperlinkPattern::EnableDrag()
         auto param = json->ToString();
         info.extraInfo = param;
 #ifdef ENABLE_DRAG_FRAMEWORK
-        std::shared_ptr<UDMF::UnifiedRecord> record = nullptr;
+        RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
         if (content.empty()) {
-            record = std::make_shared<UDMF::Link>(address);
+            UdmfClient::GetInstance()->AddLinkRecord(unifiedData, address, "");
         } else {
-            record = std::make_shared<UDMF::Link>(address, content);
+            UdmfClient::GetInstance()->AddLinkRecord(unifiedData, address, content);
         }
-        auto unifiedData = std::make_shared<UDMF::UnifiedData>();
-        unifiedData->AddRecord(record);
         event->SetData(unifiedData);
 #endif
         return info;
@@ -151,8 +147,14 @@ void HyperlinkPattern::OnMouseEvent(MouseInfo& info)
     CHECK_NULL_VOID(frame);
     auto frameId = frame->GetId();
 
-    pipeline->SetMouseStyleHoldNode(frameId);
-    pipeline->ChangeMouseStyle(frameId, MouseFormat::HAND_POINTING);
+    if (frame->IsOutOfTouchTestRegion({ static_cast<float>(info.GetGlobalLocation().GetX()),
+        static_cast<float>(info.GetGlobalLocation().GetY()) }, 0)) {
+        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+        pipeline->FreeMouseStyleHoldNode(frameId);
+    } else {
+        pipeline->SetMouseStyleHoldNode(frameId);
+        pipeline->ChangeMouseStyle(frameId, MouseFormat::HAND_POINTING);
+    }
 }
 
 void HyperlinkPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const

@@ -49,19 +49,6 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float DEVICE_WIDTH = 720.0f;
 constexpr float DEVICE_HEIGHT = 1136.0f;
-constexpr float PREV_OFFSET_FIRST = 1.0f;
-constexpr float PREV_OFFSET_SECOND = 2.0f;
-constexpr float CURRENT_OFFSET_FIRST = 2.0f;
-constexpr float CURRENT_OFFSET_SECOND = 1.0f;
-constexpr int32_t START_INDEX = 1;
-constexpr int32_t START_MAIN_LINE_INDEX = 0;
-constexpr int32_t END_INDEX = -100;
-constexpr int32_t START_INDEX_END = -100;
-constexpr int32_t CHILDREN_COUNT = 100;
-constexpr int32_t ALGORITHM_RELATE_LALUE_FIRST = 2;
-constexpr int32_t ALGORITHM_RELATE_LALUE_SECOND = 0;
-const SizeF CONTAINER_SIZE(DEVICE_WIDTH, DEVICE_HEIGHT);
-const Dimension GRID_ROWS_GAP = Dimension(5);
 constexpr float ITEM_HEIGHT = 100.f;
 constexpr float ITEM_WIDTH = 100.f;
 constexpr float GRID_HEIGHT = 300.f;
@@ -347,11 +334,11 @@ HWTEST_F(GridTestNg, Property001, TestSize.Level1)
 }
 
 /**
- * @tc.name: Property003
+ * @tc.name: Property002
  * @tc.desc: Test Negative Gap
  * @tc.type: FUNC
  */
-HWTEST_F(GridTestNg, Property003, TestSize.Level1)
+HWTEST_F(GridTestNg, Property002, TestSize.Level1)
 {
     GridModelNG gridModelNG;
     gridModelNG.Create(nullptr, nullptr);
@@ -367,21 +354,11 @@ HWTEST_F(GridTestNg, Property003, TestSize.Level1)
      */
     EXPECT_EQ(layoutProperty_->GetRowsGap(), std::nullopt);
     EXPECT_EQ(layoutProperty_->GetColumnsGap(), std::nullopt);
-}
 
-/**
- * @tc.name: Property004
- * @tc.desc: Test GetGridDirectionStr func.
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, Property004, TestSize.Level1)
-{
-    GridModelNG gridModelNG;
-    gridModelNG.Create(nullptr, nullptr);
-    CreateGridItem(10, -1, ITEM_HEIGHT);
-    GetInstance();
-    RunMeasureAndLayout();
-
+    /**
+     * @tc.steps: step1. Call GetGridDirectionStr()
+     * @tc.expected: The return string value is correct
+     */
     EXPECT_EQ(layoutProperty_->GetGridDirectionStr(), "GridDirection.Row");
     layoutProperty_->UpdateGridDirection(FlexDirection::ROW_REVERSE);
     EXPECT_EQ(layoutProperty_->GetGridDirectionStr(), "GridDirection.RowReverse");
@@ -392,11 +369,11 @@ HWTEST_F(GridTestNg, Property004, TestSize.Level1)
 }
 
 /**
- * @tc.name: Property005
+ * @tc.name: Property003
  * @tc.desc: Test all the properties of GridItem.
  * @tc.type: FUNC
  */
-HWTEST_F(GridTestNg, Property005, TestSize.Level1)
+HWTEST_F(GridTestNg, Property003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create gridItem and Set properties.
@@ -945,6 +922,13 @@ HWTEST_F(GridTestNg, AttrLayoutDirection004, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, AttrGridItem001, TestSize.Level1)
 {
+    /**
+     *    0__180_360_540_720
+     *  75|_____1_____|   |
+     * 150|___|   0   | 2 |
+     * 225|___|_______|   |
+     * 300|___|___|___|___|
+     */
     GridModelNG gridModelNG;
     gridModelNG.Create(nullptr, nullptr);
     const std::string rowsTemplate = "1fr 1fr 1fr 1fr";
@@ -993,6 +977,13 @@ HWTEST_F(GridTestNg, AttrGridItem001, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, AttrGridItem002, TestSize.Level1)
 {
+    /**
+     *    0__100_200_300_______720
+     *  75| 0 |   | 2 |___|     |
+     * 150|___| 1 |___|___|     |
+     * 225|___|___|___|___|     |
+     * 300|___|___|___|_________|
+     */
     GridModelNG gridModelNG;
     gridModelNG.Create(nullptr, nullptr);
     const std::string rowsTemplate = "1fr 1fr 1fr 1fr";
@@ -1038,6 +1029,12 @@ HWTEST_F(GridTestNg, AttrGridItem002, TestSize.Level1)
  */
 HWTEST_F(GridTestNg, AttrGridItem003, TestSize.Level1)
 {
+    /**
+     *    0__180_360_540_720
+     * 100|___0___|___|___|
+     * 200|_____1_____|___|
+     * 300|_2_|___|___|___|
+     */
     GridModelNG gridModelNG;
     gridModelNG.Create(nullptr, nullptr);
     const std::string columnsTemplate = "1fr 1fr 1fr 1fr";
@@ -1167,17 +1164,6 @@ HWTEST_F(GridTestNg, GridTest001, TestSize.Level1)
     pattern_->OnModifyDone();
     EXPECT_FALSE(pattern_->multiSelectable_);
     EXPECT_FALSE(pattern_->isMouseEventInit_);
-
-    /**
-     * @tc.steps: step3. Call the AddScrollEvent function to add a scroll position callback event.
-     * @tc.expected: Call and check the return value of the callback function.
-     */
-    pattern_->AddScrollEvent();
-    ASSERT_NE(pattern_->scrollableEvent_, nullptr);
-    auto callback = pattern_->scrollableEvent_->GetScrollPositionCallback();
-    ASSERT_NE(callback, nullptr);
-    auto ret = callback(1.f, SCROLL_FROM_START);
-    EXPECT_TRUE(ret);
 
     /**
      * @tc.steps: step4. When isConfigScrollable_ is false, call related functions.
@@ -1453,6 +1439,48 @@ HWTEST_F(GridTestNg, GridTest012, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GridTest013
+ * @tc.desc: Test scrollable PositionCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridTest013, TestSize.Level1)
+{
+    GridModelNG gridModelNG;
+    gridModelNG.Create(nullptr, nullptr);
+    gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateGridItem(20, -1, ITEM_HEIGHT);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step3. Call the AddScrollEvent function to add a scroll position callback event.
+     * @tc.expected: Call and check the return value of the callback function.
+     */
+    ASSERT_NE(pattern_->scrollableEvent_, nullptr);
+    auto callback = pattern_->scrollableEvent_->GetScrollPositionCallback();
+    ASSERT_NE(callback, nullptr);
+    auto ret = callback(ITEM_HEIGHT, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(ret);
+    ret = callback(ITEM_HEIGHT, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(ret);
+    ret = callback(ITEM_HEIGHT, SCROLL_FROM_START);
+    EXPECT_TRUE(ret);
+    auto coordinationEvent = AceType::MakeRefPtr<ScrollableCoordinationEvent>();
+    auto event1 = [](double) {};
+    auto event2 = []() {};
+    coordinationEvent->SetOnScrollEvent(event1);
+    coordinationEvent->SetOnScrollStartEvent(event2);
+    coordinationEvent->SetOnScrollEndEvent(event2);
+    pattern_->SetCoordinationEvent(coordinationEvent);
+    ret = callback(ITEM_HEIGHT, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(ret);
+    ret = callback(ITEM_HEIGHT, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(ret);
+    ret = callback(ITEM_HEIGHT, SCROLL_FROM_START);
+    EXPECT_TRUE(ret);
+}
+
+/**
  * @tc.name: EventHub001
  * @tc.desc: Test GetInsertPosition func
  * @tc.type: FUNC
@@ -1574,6 +1602,14 @@ HWTEST_F(GridTestNg, PositionController001, TestSize.Level1)
 
     controller->ScrollPage(false, true);
     EXPECT_EQ(controller->GetCurrentOffset(), Offset(0, 0));
+
+    /**
+     * @tc.steps: step7. Test IsAtEnd func.
+     */
+    EXPECT_FALSE(positionController->IsAtEnd());
+    positionController->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    RunMeasureAndLayout();
+    EXPECT_TRUE(positionController->IsAtEnd());
 }
 
 /**
@@ -1639,25 +1675,29 @@ HWTEST_F(GridTestNg, PositionController002, TestSize.Level1)
 
 /**
  * @tc.name: PositionController003
- * @tc.desc: Test IsAtEnd func Grid
+ * @tc.desc: Test positionController func in Axis::NONE Grid
  * @tc.type: FUNC
  */
 HWTEST_F(GridTestNg, PositionController003, TestSize.Level1)
 {
     GridModelNG gridModelNG;
     RefPtr<ScrollControllerBase> positionController = gridModelNG.CreatePositionController();
-    RefPtr<ScrollProxy> scrollBarProxy = gridModelNG.CreateScrollBarProxy();
-    gridModelNG.Create(positionController, scrollBarProxy);
+    gridModelNG.Create(positionController, nullptr);
     gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-    CreateGridItem(14, -1, ITEM_HEIGHT);
+    CreateGridItem(8, -1, ITEM_HEIGHT);
     GetInstance();
     RunMeasureAndLayout();
 
-    EXPECT_FALSE(positionController->IsAtEnd());
+    /**
+     * @tc.steps: step1. Supplement ScrollPage, GetCurrentOffset branch,
+     * has no condition that axis_ is Axis::NONE.
+     */
+    pattern_->gridLayoutInfo_.axis_ = Axis::NONE;
+    auto controller = pattern_->positionController_;
+    controller->ScrollPage(true, true);
+    controller->GetCurrentOffset();
 
-    positionController->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
-    RunMeasureAndLayout();
-    EXPECT_TRUE(positionController->IsAtEnd());
+    EXPECT_TRUE(true);
 }
 
 /**
@@ -2828,374 +2868,6 @@ HWTEST_F(GridTestNg, GridPatternTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridPatternTest002
- * @tc.desc: Test grid pattern IsOutOfBoundary function
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, GridPatternTest002, TestSize.Level1)
-{
-    GridModelNG gridModelNG;
-    gridModelNG.Create(nullptr, nullptr);
-    gridModelNG.SetRowsTemplate("1fr 1fr");
-    gridModelNG.SetRowsGap(GRID_ROWS_GAP);
-    CreateGridItem(10, -1, ITEM_HEIGHT);
-    GetInstance();
-    bool result;
-    result = pattern_->IsOutOfBoundary();
-    EXPECT_FALSE(result);
-}
-
-/**
- * @tc.name: GridPatternTest003
- * @tc.desc: Test grid pattern IsOutOfBoundary function
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, GridPatternTest003, TestSize.Level1)
-{
-    GridModelNG gridModelNG;
-    gridModelNG.Create(nullptr, nullptr);
-    gridModelNG.SetRowsTemplate("1fr 1fr");
-    gridModelNG.SetRowsGap(GRID_ROWS_GAP);
-    CreateGridItem(10, -1, ITEM_HEIGHT);
-    GetInstance();
-    auto layoutWrapper = frameNode_->CreateLayoutWrapper();
-    ASSERT_NE(layoutWrapper, nullptr);
-    DirtySwapConfig config;
-    config.skipMeasure = true;
-    config.skipLayout = true;
-    pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    bool result;
-    pattern_->gridLayoutInfo_.reachStart_ = true;
-    result = pattern_->IsOutOfBoundary();
-    EXPECT_TRUE(result);
-}
-
-/**
- * @tc.name: GridPatternTest004
- * @tc.desc: Test grid pattern IsOutOfBoundary function
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, GridPatternTest004, TestSize.Level1)
-{
-    GridModelNG gridModelNG;
-    gridModelNG.Create(nullptr, nullptr);
-    gridModelNG.SetRowsTemplate("1fr 1fr");
-    gridModelNG.SetRowsGap(GRID_ROWS_GAP);
-    CreateGridItem(10, -1, ITEM_HEIGHT);
-    GetInstance();
-    auto layoutWrapper = frameNode_->CreateLayoutWrapper();
-    ASSERT_NE(layoutWrapper, nullptr);
-    DirtySwapConfig config;
-    config.skipMeasure = true;
-    config.skipLayout = true;
-    pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    bool result;
-    pattern_->gridLayoutInfo_.reachStart_ = false;
-    pattern_->gridLayoutInfo_.offsetEnd_ = true;
-    result = pattern_->IsOutOfBoundary();
-    EXPECT_TRUE(result);
-}
-
-/**
- * @tc.name: GridPatternTest005
- * @tc.desc: Test grid pattern IsOutOfBoundary function
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, GridPatternTest005, TestSize.Level1)
-{
-    GridModelNG gridModelNG;
-    gridModelNG.Create(nullptr, nullptr);
-    gridModelNG.SetRowsTemplate("1fr 1fr");
-    gridModelNG.SetRowsGap(GRID_ROWS_GAP);
-    CreateGridItem(10, -1, ITEM_HEIGHT);
-    GetInstance();
-    auto layoutWrapper = frameNode_->CreateLayoutWrapper();
-    ASSERT_NE(layoutWrapper, nullptr);
-    DirtySwapConfig config;
-    config.skipMeasure = true;
-    config.skipLayout = true;
-    pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    bool result;
-    pattern_->gridLayoutInfo_.reachStart_ = true;
-    pattern_->gridLayoutInfo_.offsetEnd_ = true;
-    result = pattern_->IsOutOfBoundary();
-    EXPECT_TRUE(result);
-}
-
-/**
- * @tc.name: GridPatternTest006
- * @tc.desc: Test grid pattern OutBoundaryCallback function
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, GridPatternTest006, TestSize.Level1)
-{
-    GridModelNG gridModelNG;
-    gridModelNG.Create(nullptr, nullptr);
-    gridModelNG.SetRowsTemplate("1fr 1fr");
-    gridModelNG.SetRowsGap(GRID_ROWS_GAP);
-    CreateGridItem(10, -1, ITEM_HEIGHT);
-    GetInstance();
-    bool outBoundary;
-    outBoundary = pattern_->OutBoundaryCallback();
-    EXPECT_FALSE(outBoundary);
-}
-
-/**
- * @tc.name: GridPatternTest007
- * @tc.desc: Test grid pattern OutBoundaryCallback function
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, GridPatternTest007, TestSize.Level1)
-{
-    GridModelNG gridModelNG;
-    gridModelNG.Create(nullptr, nullptr);
-    gridModelNG.SetRowsTemplate("1fr 1fr");
-    gridModelNG.SetRowsGap(GRID_ROWS_GAP);
-    CreateGridItem(10, -1, ITEM_HEIGHT);
-    GetInstance();
-    auto layoutWrapper = frameNode_->CreateLayoutWrapper();
-    ASSERT_NE(layoutWrapper, nullptr);
-    DirtySwapConfig config;
-    config.skipMeasure = true;
-    config.skipLayout = true;
-    pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    bool outBoundary;
-    pattern_->gridLayoutInfo_.reachStart_ = true;
-    pattern_->gridLayoutInfo_.offsetEnd_ = true;
-    outBoundary = pattern_->OutBoundaryCallback();
-    EXPECT_TRUE(outBoundary);
-}
-
-/**
- * @tc.name: GridPatternTest008
- * @tc.desc: Test grid pattern OutBoundaryCallback function
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, GridPatternTest008, TestSize.Level1)
-{
-    GridModelNG gridModelNG;
-    gridModelNG.Create(nullptr, nullptr);
-    gridModelNG.SetRowsTemplate("1fr 1fr");
-    gridModelNG.SetRowsGap(GRID_ROWS_GAP);
-    CreateGridItem(10, -1, ITEM_HEIGHT);
-    GetInstance();
-    auto layoutWrapper = frameNode_->CreateLayoutWrapper();
-    ASSERT_NE(layoutWrapper, nullptr);
-    DirtySwapConfig config;
-    config.skipMeasure = true;
-    config.skipLayout = true;
-    pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    bool outBoundary;
-    pattern_->gridLayoutInfo_.reachStart_ = false;
-    pattern_->gridLayoutInfo_.offsetEnd_ = true;
-    outBoundary = pattern_->OutBoundaryCallback();
-    EXPECT_TRUE(outBoundary);
-}
-
-/**
- * @tc.name: GridPatternTest009
- * @tc.desc: Test grid pattern OutBoundaryCallback function
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, GridPatternTest009, TestSize.Level1)
-{
-    GridModelNG gridModelNG;
-    gridModelNG.Create(nullptr, nullptr);
-    gridModelNG.SetRowsTemplate("1fr 1fr");
-    gridModelNG.SetRowsGap(GRID_ROWS_GAP);
-    CreateGridItem(10, -1, ITEM_HEIGHT);
-    GetInstance();
-    auto layoutWrapper = frameNode_->CreateLayoutWrapper();
-    ASSERT_NE(layoutWrapper, nullptr);
-    DirtySwapConfig config;
-    config.skipMeasure = true;
-    config.skipLayout = true;
-    pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    bool outBoundary;
-    pattern_->gridLayoutInfo_.reachStart_ = true;
-    pattern_->gridLayoutInfo_.offsetEnd_ = false;
-    outBoundary = pattern_->OutBoundaryCallback();
-    EXPECT_TRUE(outBoundary);
-}
-
-/**
- * @tc.name: GridPatternTest011
- * @tc.desc: Test grid pattern OnModifyDone function
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, GridPatternTest011, TestSize.Level1)
-{
-    GridModelNG gridModelNG;
-    gridModelNG.Create(nullptr, nullptr);
-    gridModelNG.SetRowsTemplate("1fr 1fr");
-    gridModelNG.SetRowsGap(GRID_ROWS_GAP);
-    CreateGridItem(10, -1, ITEM_HEIGHT);
-    GetInstance();
-    pattern_->SetMultiSelectable(true);
-    auto layoutWrapper = frameNode_->CreateLayoutWrapper();
-    LayoutConstraintF constraint;
-    constraint.selfIdealSize.SetSize(CONTAINER_SIZE);
-    auto gridScrollLayoutAlgorithm = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(
-        pattern_->gridLayoutInfo_, ALGORITHM_RELATE_LALUE_FIRST, ALGORITHM_RELATE_LALUE_SECOND);
-    ASSERT_NE(gridScrollLayoutAlgorithm, nullptr);
-    gridScrollLayoutAlgorithm->SetCanOverScroll(true);
-    layoutWrapper->Measure(constraint);
-    layoutWrapper->Layout();
-    pattern_->gridLayoutInfo_.reachEnd_ = true;
-    pattern_->gridLayoutInfo_.prevOffset_ = PREV_OFFSET_FIRST;
-    pattern_->gridLayoutInfo_.currentOffset_ = CURRENT_OFFSET_FIRST;
-    EXPECT_FALSE(gridScrollLayoutAlgorithm->gridLayoutInfo_.reachEnd_);
-    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), CONTAINER_SIZE);
-    pattern_->OnModifyDone();
-    EXPECT_TRUE(pattern_->multiSelectable_);
-    EXPECT_TRUE(pattern_->isMouseEventInit_);
-    EXPECT_TRUE(pattern_->isConfigScrollable_);
-    pattern_->SetMultiSelectable(false);
-    pattern_->OnModifyDone();
-    EXPECT_FALSE(pattern_->multiSelectable_);
-    EXPECT_FALSE(pattern_->isMouseEventInit_);
-}
-
-/**
- * @tc.name: GridPatternTest012
- * @tc.desc: Test grid pattern OnModifyDone function
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, GridPatternTest012, TestSize.Level1)
-{
-    GridModelNG gridModelNG;
-    gridModelNG.Create(nullptr, nullptr);
-    gridModelNG.SetRowsTemplate("1fr 1fr");
-    gridModelNG.SetRowsGap(GRID_ROWS_GAP);
-    CreateGridItem(10, -1, ITEM_HEIGHT);
-    GetInstance();
-    pattern_->SetMultiSelectable(true);
-    auto layoutWrapper = frameNode_->CreateLayoutWrapper();
-    LayoutConstraintF constraint;
-    constraint.selfIdealSize.SetSize(CONTAINER_SIZE);
-    auto gridScrollLayoutAlgorithm = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(
-        pattern_->gridLayoutInfo_, ALGORITHM_RELATE_LALUE_FIRST, ALGORITHM_RELATE_LALUE_SECOND);
-    ASSERT_NE(gridScrollLayoutAlgorithm, nullptr);
-    gridScrollLayoutAlgorithm->SetCanOverScroll(false);
-    layoutWrapper->Measure(constraint);
-    layoutWrapper->Layout();
-    pattern_->gridLayoutInfo_.reachEnd_ = true;
-    pattern_->gridLayoutInfo_.prevOffset_ = PREV_OFFSET_FIRST;
-    pattern_->gridLayoutInfo_.currentOffset_ = CURRENT_OFFSET_FIRST;
-    EXPECT_FALSE(gridScrollLayoutAlgorithm->gridLayoutInfo_.reachEnd_);
-    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), CONTAINER_SIZE);
-    pattern_->OnModifyDone();
-    EXPECT_TRUE(pattern_->multiSelectable_);
-    EXPECT_TRUE(pattern_->isMouseEventInit_);
-    EXPECT_TRUE(pattern_->isConfigScrollable_);
-    pattern_->SetMultiSelectable(false);
-    pattern_->OnModifyDone();
-    EXPECT_FALSE(pattern_->multiSelectable_);
-    EXPECT_FALSE(pattern_->isMouseEventInit_);
-}
-
-/**
- * @tc.name: GridPatternTest013
- * @tc.desc: Test grid pattern CreateLayoutAlgorithm function
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, GridPatternTest013, TestSize.Level1)
-{
-    GridModelNG gridModelNG;
-    gridModelNG.Create(nullptr, nullptr);
-    gridModelNG.SetRowsTemplate("1fr 1fr");
-    gridModelNG.SetRowsGap(GRID_ROWS_GAP);
-    CreateGridItem(10, -1, ITEM_HEIGHT);
-    GetInstance();
-    auto layoutWrapper = frameNode_->CreateLayoutWrapper();
-    ASSERT_NE(layoutWrapper, nullptr);
-    auto result = pattern_->CreateLayoutAlgorithm();
-    EXPECT_NE(result, nullptr);
-}
-
-/**
- * @tc.name: GridPatternTest014
- * @tc.desc: Test grid pattern GetContentSize function
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, GridPatternTest014, TestSize.Level1)
-{
-    GridModelNG gridModelNG;
-    gridModelNG.Create(nullptr, nullptr);
-    gridModelNG.SetRowsTemplate("1fr 1fr");
-    gridModelNG.SetRowsGap(GRID_ROWS_GAP);
-    CreateGridItem(10, -1, ITEM_HEIGHT);
-    GetInstance();
-    auto layoutWrapper = frameNode_->CreateLayoutWrapper();
-    ASSERT_NE(layoutWrapper, nullptr);
-
-    auto size = pattern_->GetContentSize();
-    EXPECT_EQ(size.Width(), 0);
-    EXPECT_EQ(size.Height(), 0);
-}
-
-/**
- * @tc.name: GridPatternTest015
- * @tc.desc: Test grid pattern CheckScrollable function
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, GridPatternTest015, TestSize.Level1)
-{
-    GridModelNG gridModelNG;
-    gridModelNG.Create(nullptr, nullptr);
-    gridModelNG.SetRowsTemplate("1fr 1fr");
-    gridModelNG.SetRowsGap(GRID_ROWS_GAP);
-    CreateGridItem(10, -1, ITEM_HEIGHT);
-    GetInstance();
-    auto layoutWrapper = frameNode_->CreateLayoutWrapper();
-    ASSERT_NE(layoutWrapper, nullptr);
-    EXPECT_TRUE(pattern_->scrollable_);
-    pattern_->CheckScrollable();
-    EXPECT_FALSE(pattern_->scrollable_);
-}
-
-/**
- * @tc.name: GridPatternTest016
- * @tc.desc: Test grid pattern CheckScrollable function
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, GridPatternTest016, TestSize.Level1)
-{
-    GridModelNG gridModelNG;
-    gridModelNG.Create(nullptr, nullptr);
-    gridModelNG.SetRowsTemplate("1fr 1fr");
-    gridModelNG.SetRowsGap(GRID_ROWS_GAP);
-    CreateGridItem(10, -1, ITEM_HEIGHT);
-    GetInstance();
-    auto layoutWrapper = frameNode_->CreateLayoutWrapper();
-    ASSERT_NE(layoutWrapper, nullptr);
-    EXPECT_TRUE(pattern_->scrollable_);
-    pattern_->gridLayoutInfo_.endIndex_ = END_INDEX;
-    pattern_->gridLayoutInfo_.startIndex_ = START_INDEX_END;
-    pattern_->gridLayoutInfo_.childrenCount_ = CHILDREN_COUNT;
-    pattern_->CheckScrollable();
-    EXPECT_TRUE(pattern_->scrollable_);
-}
-/**
- * @tc.name: GridPatternTest017
- * @tc.desc: Test grid pattern UpdateScrollBarOffset function
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, GridPatternTest017, TestSize.Level1)
-{
-    GridModelNG gridModelNG;
-    gridModelNG.Create(nullptr, nullptr);
-    gridModelNG.SetRowsTemplate("1fr 1fr");
-    gridModelNG.SetRowsGap(GRID_ROWS_GAP);
-    CreateGridItem(10, -1, ITEM_HEIGHT);
-    GetInstance();
-    pattern_->scrollBar_ = nullptr;
-    pattern_->scrollBarProxy_ = nullptr;
-    pattern_->UpdateScrollBarOffset();
-    EXPECT_EQ(pattern_->estimatedHeight_, 0.0f);
-}
-
-/**
  * @tc.name: GridPaintMethodTest001
  * @tc.desc: Test grid paint method GetForegroundDrawFunction function
  * @tc.type: FUNC
@@ -3238,145 +2910,6 @@ HWTEST_F(GridTestNg, GridPaintMethodTest001, TestSize.Level1)
     pattern_->SetEdgeEffect(EdgeEffect::FADE);
     paintMethod = AceType::DynamicCast<GridPaintMethod>(pattern_->CreateNodePaintMethod());
     EXPECT_NE(paintMethod->edgeEffect_.Upgrade(), nullptr);
-}
-
-/**
- * @tc.name: GridPatternTest018
- * @tc.desc: Test grid pattern ModifyCurrentOffsetWhenReachEnd function
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, GridPatternTest018, TestSize.Level1)
-{
-    constexpr int32_t itemCount = 8;
-    constexpr float itemHeight = 100.0f;
-    /**
-     * @tc.steps: step1. Get frameNode, pattern, eventHub and RunMeasureAndLayout.
-     */
-    GridModelNG gridModelNG;
-    gridModelNG.Create(nullptr, nullptr);
-    gridModelNG.SetRowsTemplate("1fr 1fr");
-    gridModelNG.SetRowsGap(GRID_ROWS_GAP);
-    CreateGridItem(10, -1, ITEM_HEIGHT);
-    GetInstance();
-    RunMeasureAndLayout();
-    pattern_->gridLayoutInfo_.reachEnd_ = true;
-    pattern_->gridLayoutInfo_.prevOffset_ = PREV_OFFSET_FIRST;
-    pattern_->gridLayoutInfo_.currentOffset_ = CURRENT_OFFSET_FIRST;
-    // only set one of rowTemplate and columnsTemplate, use scrollable layout algorithm
-    auto gridScrollLayoutAlgorithm = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(
-        pattern_->gridLayoutInfo_, ALGORITHM_RELATE_LALUE_FIRST, ALGORITHM_RELATE_LALUE_SECOND);
-    ASSERT_NE(gridScrollLayoutAlgorithm, nullptr);
-    gridScrollLayoutAlgorithm->SetCanOverScroll(true);
-    gridScrollLayoutAlgorithm->ModifyCurrentOffsetWhenReachEnd(DEVICE_HEIGHT);
-    EXPECT_TRUE(gridScrollLayoutAlgorithm->gridLayoutInfo_.reachEnd_);
-
-    for (uint32_t i = 0; i < itemCount; i++) {
-        gridScrollLayoutAlgorithm->gridLayoutInfo_.lineHeightMap_[i] = itemHeight;
-    }
-    gridScrollLayoutAlgorithm->gridLayoutInfo_.prevOffset_ = PREV_OFFSET_SECOND;
-    gridScrollLayoutAlgorithm->gridLayoutInfo_.currentOffset_ = CURRENT_OFFSET_SECOND;
-    gridScrollLayoutAlgorithm->gridLayoutInfo_.startIndex_ = START_INDEX;
-    gridScrollLayoutAlgorithm->gridLayoutInfo_.startMainLineIndex_ = START_MAIN_LINE_INDEX;
-    gridScrollLayoutAlgorithm->gridLayoutInfo_.endMainLineIndex_ = itemCount;
-    gridScrollLayoutAlgorithm->ModifyCurrentOffsetWhenReachEnd(DEVICE_HEIGHT);
-    EXPECT_EQ(gridScrollLayoutAlgorithm->gridLayoutInfo_.currentOffset_, CURRENT_OFFSET_SECOND);
-    EXPECT_EQ(gridScrollLayoutAlgorithm->gridLayoutInfo_.prevOffset_, PREV_OFFSET_SECOND);
-    EXPECT_TRUE(gridScrollLayoutAlgorithm->gridLayoutInfo_.offsetEnd_);
-}
-
-/**
- * @tc.name: GridPatternTest019
- * @tc.desc: Test grid pattern GetMainGap function
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, GridPatternTest019, TestSize.Level1)
-{
-    GridModelNG gridModelNG;
-    gridModelNG.Create(nullptr, nullptr);
-    gridModelNG.SetRowsTemplate("1fr 1fr");
-    gridModelNG.SetRowsGap(GRID_ROWS_GAP);
-    CreateGridItem(10, -1, ITEM_HEIGHT);
-    GetInstance();
-    auto layoutWrapper = frameNode_->CreateLayoutWrapper();
-    ASSERT_NE(layoutWrapper, nullptr);
-    DirtySwapConfig config;
-    config.skipMeasure = true;
-    config.skipLayout = true;
-    pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    auto mainGap = pattern_->GetMainGap();
-    EXPECT_EQ(mainGap, 0);
-}
-
-/**
- * @tc.name: GridPatternTest020
- * @tc.desc: Test grid pattern SetEdgeEffect function
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, GridPatternTest020, TestSize.Level1)
-{
-    GridModelNG gridModelNG;
-    auto positionController = AceType::MakeRefPtr<ScrollControllerBase>();
-    ASSERT_NE(positionController, nullptr);
-    auto scrollProxy = AceType::MakeRefPtr<ScrollProxy>();
-    ASSERT_NE(scrollProxy, nullptr);
-    gridModelNG.Create(positionController, scrollProxy);
-    gridModelNG.SetEdgeEffect(EdgeEffect::NONE);
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
-    auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<GridPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto layoutProperty = frameNode->GetLayoutProperty<GridLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    EXPECT_EQ(layoutProperty->GetEdgeEffectValue(), EdgeEffect::NONE);
-}
-
-/**
- * @tc.name: GridPatternTest021
- * @tc.desc: Test grid pattern SetEdgeEffect function
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, GridPatternTest021, TestSize.Level1)
-{
-    GridModelNG gridModelNG;
-    auto positionController = AceType::MakeRefPtr<ScrollControllerBase>();
-    ASSERT_NE(positionController, nullptr);
-    auto scrollProxy = AceType::MakeRefPtr<ScrollProxy>();
-    ASSERT_NE(scrollProxy, nullptr);
-    gridModelNG.Create(positionController, scrollProxy);
-    gridModelNG.SetEdgeEffect(EdgeEffect::FADE);
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
-    auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<GridPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto layoutProperty = frameNode->GetLayoutProperty<GridLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    EXPECT_EQ(layoutProperty->GetEdgeEffectValue(), EdgeEffect::FADE);
-}
-
-/**
- * @tc.name: GridPatternTest022
- * @tc.desc: Test grid pattern SetEdgeEffect function
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, GridPatternTest022, TestSize.Level1)
-{
-    GridModelNG gridModelNG;
-    auto positionController = AceType::MakeRefPtr<ScrollControllerBase>();
-    ASSERT_NE(positionController, nullptr);
-    auto scrollProxy = AceType::MakeRefPtr<ScrollProxy>();
-    ASSERT_NE(scrollProxy, nullptr);
-    gridModelNG.Create(positionController, scrollProxy);
-    gridModelNG.SetEdgeEffect(EdgeEffect::SPRING);
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
-    auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<GridPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto layoutProperty = frameNode->GetLayoutProperty<GridLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    EXPECT_EQ(layoutProperty->GetEdgeEffectValue(), EdgeEffect::SPRING);
 }
 
 /**
@@ -3502,9 +3035,9 @@ HWTEST_F(GridTestNg, AdaptiveLayout001, TestSize.Level1)
 
     /**
      * @tc.steps: step1. While the before set minCount > maxCount
-     * @tc.expected: would let std::swap(minCount, maxCount);
+     * @tc.expected: would let minCount = 1, maxCount = Infinity;
      */
-    constexpr int32_t colsNumber = 4;
+    constexpr int32_t colsNumber = 7; // 7 * 100(itemWidth) < 720(gridWidth)
     for (int32_t index = 0; index < gridItemNumber; index++) {
         RectF childRect = GetItemRect(index);
         float offsetX = index % colsNumber * ITEM_WIDTH;
@@ -3638,33 +3171,6 @@ HWTEST_F(GridTestNg, ModelCoverage001, TestSize.Level1)
 }
 
 /**
- * @tc.name: PositionControllerCoverage001
- * @tc.desc: For Coverage Rate, branches that are not normally covered.
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, PositionControllerCoverage001, TestSize.Level1)
-{
-    GridModelNG gridModelNG;
-    RefPtr<ScrollControllerBase> positionController = gridModelNG.CreatePositionController();
-    gridModelNG.Create(positionController, nullptr);
-    gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-    CreateGridItem(8, -1, ITEM_HEIGHT);
-    GetInstance();
-    RunMeasureAndLayout();
-
-    /**
-     * @tc.steps: step1. Supplement ScrollPage, GetCurrentOffset branch,
-     * has no condition that axis_ is Axis::NONE.
-     */
-    pattern_->gridLayoutInfo_.axis_ = Axis::NONE;
-    auto controller = pattern_->positionController_;
-    controller->ScrollPage(true, true);
-    controller->GetCurrentOffset();
-
-    EXPECT_TRUE(true);
-}
-
-/**
  * @tc.name: PerformActionTest001
  * @tc.desc: GirdItem Accessibility PerformAction test Select and ClearSelection.
  * @tc.type: FUNC
@@ -3756,5 +3262,31 @@ HWTEST_F(GridTestNg, PerformActionTest002, TestSize.Level1)
     gridPattern->isConfigScrollable_ = true;
     EXPECT_TRUE(gridAccessibilityProperty->ActActionScrollForward());
     EXPECT_TRUE(gridAccessibilityProperty->ActActionScrollBackward());
+}
+
+/**
+ * @tc.name: GridScrollTest001
+ * @tc.desc: Test FireOnScrollBarUpdate Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridScrollTest001, TestSize.Level1)
+{
+    GridModelNG gridModelNG;
+    gridModelNG.Create(nullptr, nullptr);
+    gridModelNG.SetRowsTemplate("1fr 1fr");
+    gridModelNG.SetRowsGap(Dimension(5));
+    ScrollBarUpdateFunc scrollFunc = [](int32_t index, float offset) {
+        std::optional<float> horizontalOffset = offset;
+        std::optional<float> verticalOffset = offset;
+        return std::make_pair(horizontalOffset, verticalOffset);
+    };
+    gridModelNG.SetOnScrollBarUpdate(std::move(scrollFunc));
+    CreateSingleGridItem(1, 1, 1, 2);
+    CreateGridItem(2, -1, ITEM_HEIGHT);
+    GetInstance();
+    RunMeasureAndLayout();
+    auto fireOnScroll = eventHub_->FireOnScrollBarUpdate(1.0, 1.0);
+    EXPECT_FLOAT_EQ(fireOnScroll.first.value(), 1.0f);
+    EXPECT_FLOAT_EQ(fireOnScroll.second.value(), 1.0f);
 }
 } // namespace OHOS::Ace::NG

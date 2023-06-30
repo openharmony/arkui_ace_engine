@@ -24,7 +24,7 @@ template("web_pattern_unit_source_set") {
     module_out_path = pattern_test_output_path
     defines += invoker.defines
     testonly = true
-
+    sources = []
     if (defined(config.web_components_support) &&
         config.web_components_support) {
       defines += [ "OHOS_STANDARD_SYSTEM" ]
@@ -36,7 +36,7 @@ template("web_pattern_unit_source_set") {
         "//foundation/multimedia/image_framework/interfaces/innerkits/include",
         "//foundation/window/window_manager/interfaces/innerkits",
       ]
-      sources = [
+      sources += [
         "web_accessibility_property_test_ng.cpp",
         "web_model_test_ng.cpp",
         "web_pattern_event_test.cpp",
@@ -58,6 +58,10 @@ template("web_pattern_unit_source_set") {
         "window_manager:libwm",
       ]
       configs = [ "$ace_root:ace_config" ]
+    }
+    if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
+      sources += [ "$ace_root/test/mock/core/common/mock_udmf.cpp" ]
+      defines += [ "ENABLE_DRAG_FRAMEWORK" ]
     }
   }
 }

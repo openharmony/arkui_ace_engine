@@ -31,15 +31,11 @@
 #include "core/components_ng/render/modifier_adapter.h"
 
 namespace OHOS::Ace::NG {
-class Modifier : public virtual AceType {
+class ACE_FORCE_EXPORT Modifier : public virtual AceType {
     DECLARE_ACE_TYPE(Modifier, AceType);
 
 public:
-    Modifier()
-    {
-        static std::atomic<int32_t> genId = 0;
-        id_ = genId.fetch_add(1, std::memory_order_relaxed);
-    }
+    Modifier();
     ~Modifier() override
     {
         ModifierAdapter::RemoveModifier(id_);

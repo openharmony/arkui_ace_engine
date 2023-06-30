@@ -81,6 +81,17 @@ void ProgressPattern::InitTouchEvent()
     gesture->AddTouchEvent(touchListener_);
 }
 
+void ProgressPattern::RemoveTouchEvent()
+{
+    if (touchListener_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto gesture = host->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gesture);
+        gesture->RemoveTouchEvent(touchListener_);
+        touchListener_ = nullptr;
+    }
+}
 void ProgressPattern::HandleEnabled()
 {
     auto host = GetHost();
@@ -200,6 +211,8 @@ void ProgressPattern::OnModifyDone()
         auto focusHub = hub->GetFocusHub();
         CHECK_NULL_VOID_NOLOG(focusHub);
         InitOnKeyEvent(focusHub);
+    } else {
+        RemoveTouchEvent();
     }
 }
 

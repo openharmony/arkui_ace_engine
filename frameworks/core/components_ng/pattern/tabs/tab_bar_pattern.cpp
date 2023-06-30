@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_layout_property.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
+#include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -294,8 +295,17 @@ void TabBarPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 
 bool TabBarPattern::OnKeyEvent(const KeyEvent& event)
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    if (!pipeline->GetIsFocusActive()) {
+        return true;
+    }
+    isFirstFocus_ = false;
     if (event.action != KeyAction::DOWN) {
         return false;
+    }
+    if (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE || tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE) {
+        return OnKeyEventWithoutClick(event);
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -324,6 +334,62 @@ bool TabBarPattern::OnKeyEvent(const KeyEvent& event)
         FocusIndexChange(indicator);
         return true;
     }
+    if (event.code == KeyCode::KEY_MOVE_HOME) {
+        indicator = 0;
+        FocusIndexChange(indicator);
+        return true;
+    }
+    if (event.code == KeyCode::KEY_MOVE_END) {
+        indicator = host->TotalChildCount() - MASK_COUNT - 1;
+        FocusIndexChange(indicator);
+        return true;
+    }
+    return false;
+}
+
+bool TabBarPattern::OnKeyEventWithoutClick(const KeyEvent& event)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+
+    if (event.code == (tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL
+                              ? KeyCode::KEY_DPAD_LEFT
+                              : KeyCode::KEY_DPAD_UP) ||
+        event.IsShiftWith(KeyCode::KEY_TAB)) {
+        if (focusIndicator_ <= 0) {
+            return false;
+        }
+        focusIndicator_ -= 1;
+        PaintFocusState();
+        return true;
+    }
+    if (event.code == (tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL
+                              ? KeyCode::KEY_DPAD_RIGHT
+                              : KeyCode::KEY_DPAD_DOWN) ||
+        event.code == KeyCode::KEY_TAB) {
+        if (focusIndicator_ >= host->TotalChildCount() - MASK_COUNT - 1) {
+            return false;
+        }
+        focusIndicator_ += 1;
+        PaintFocusState();
+        return true;
+    }
+    if (event.code == KeyCode::KEY_MOVE_HOME) {
+        focusIndicator_ = 0;
+        PaintFocusState();
+        return true;
+    }
+    if (event.code == KeyCode::KEY_MOVE_END) {
+        focusIndicator_ = host->TotalChildCount() - MASK_COUNT - 1;
+        PaintFocusState();
+        return true;
+    }
+    if (event.code == KeyCode::KEY_SPACE || event.code == KeyCode::KEY_ENTER) {
+        TabBarClickEvent(focusIndicator_);
+        FocusIndexChange(focusIndicator_);
+        return true;
+    }
     return false;
 }
 
@@ -346,6 +412,14 @@ void TabBarPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(tabBarLayoutProperty);
     auto indicator = tabBarLayoutProperty->GetIndicatorValue(0);
+    if (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE || tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE) {
+        if (isFirstFocus_) {
+            focusIndicator_ = indicator;
+        } else {
+            indicator = focusIndicator_;
+        }
+        AdjustFocusPosition();
+    }
     auto childNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(indicator));
     CHECK_NULL_VOID(childNode);
     auto renderContext = childNode->GetRenderContext();
@@ -489,6 +563,9 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
 void TabBarPattern::HandleClick(const GestureEvent& info)
 {
+    if (info.GetSourceDevice() == SourceType::KEYBOARD) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
@@ -520,6 +597,7 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
         indicator_ >= static_cast<int32_t>(tabBarStyles_.size())) {
         return;
     }
+    TabBarClickEvent(index);
     if (tabBarStyles_[indicator_] == TabBarStyle::SUBTABBATSTYLE &&
         tabBarStyles_[index] == TabBarStyle::SUBTABBATSTYLE && layoutProperty->GetAxis() == Axis::HORIZONTAL) {
         HandleSubTabBarClick(layoutProperty, index);
@@ -1326,14 +1404,17 @@ RefPtr<NodePaintMethod> TabBarPattern::CreateNodePaintMethod()
     }
     Color backgroundColor = Color::WHITE;
     auto tabBarNode = GetHost();
-    if (tabBarNode) {
+    CHECK_NULL_RETURN(tabBarNode, nullptr);
+    auto tabBarRenderContext = tabBarNode->GetRenderContext();
+    CHECK_NULL_RETURN(tabBarRenderContext, nullptr);
+    if (tabBarRenderContext->GetBackgroundColor().has_value()) {
+        backgroundColor = tabBarRenderContext->GetBackgroundColor().value();
+    } else {
         auto tabsNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetParent());
-        if (tabsNode) {
-            auto renderContext = tabsNode->GetRenderContext();
-            if (renderContext) {
-                backgroundColor = renderContext->GetBackgroundColor().value_or(Color::WHITE);
-            }
-        }
+        CHECK_NULL_RETURN(tabsNode, nullptr);
+        auto tabsRenderContext = tabsNode->GetRenderContext();
+        CHECK_NULL_RETURN(tabsRenderContext, nullptr);
+        backgroundColor = tabsRenderContext->GetBackgroundColor().value_or(Color::WHITE);
     }
     if (!tabBarModifier_) {
         tabBarModifier_ = AceType::MakeRefPtr<TabBarModifier>();
@@ -1403,7 +1484,7 @@ void TabBarPattern::SetEdgeEffect(const RefPtr<GestureEventHub>& gestureHub)
         // add callback to springEdgeEffect
         SetEdgeEffectCallback(springEffect);
         scrollEffect_ = springEffect;
-        gestureHub->AddScrollEdgeEffect(Axis::HORIZONTAL, scrollEffect_);
+        gestureHub->AddScrollEdgeEffect(axis_, scrollEffect_);
     }
 }
 
@@ -1600,5 +1681,49 @@ void TabBarPattern::FromJson(const std::unique_ptr<JsonValue>& json)
     auto indicatorValue = layoutProperty->GetIndicatorValue(0);
     UpdateIndicator(indicatorValue);
     Pattern::FromJson(json);
+}
+
+void TabBarPattern::AdjustFocusPosition()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (focusIndicator_ < 0 || focusIndicator_ + 1 >= tabItemOffsets_.size() ||
+        layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) != TabBarMode::SCROLLABLE) {
+        return;
+    }
+    if (axis_ == Axis::HORIZONTAL) {
+        auto mainSize = host->GetGeometryNode()->GetFrameSize().Width();
+        if (LessNotEqual(tabItemOffsets_[focusIndicator_].GetX(), 0.0f)) {
+            currentOffset_ -= tabItemOffsets_[focusIndicator_].GetX();
+            host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        } else if (GreatNotEqual(tabItemOffsets_[focusIndicator_ + 1].GetX(), mainSize)) {
+            currentOffset_ += mainSize - tabItemOffsets_[focusIndicator_ + 1].GetX();
+            host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        }
+    } else {
+        auto mainSize = host->GetGeometryNode()->GetFrameSize().Height();
+        if (LessNotEqual(tabItemOffsets_[focusIndicator_].GetY(), 0.0f)) {
+            currentOffset_ -= tabItemOffsets_[focusIndicator_].GetY();
+            host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        } else if (GreatNotEqual(tabItemOffsets_[focusIndicator_ + 1].GetY(), mainSize)) {
+            currentOffset_ += mainSize - tabItemOffsets_[focusIndicator_ + 1].GetY();
+            host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        }
+    }
+}
+
+void TabBarPattern::TabBarClickEvent(int32_t index) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    auto tabBarClickEvent = tabsPattern->GetTabBarClickEvent();
+    CHECK_NULL_VOID(tabBarClickEvent);
+    (*tabBarClickEvent)(index);
 }
 } // namespace OHOS::Ace::NG

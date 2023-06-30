@@ -313,6 +313,15 @@ void TabsModelNG::SetOnChange(std::function<void(const BaseEventInfo*)>&& onChan
     tabPattern->SetOnChangeEvent(std::move(onChange));
 }
 
+void TabsModelNG::SetOnTabBarClick(std::function<void(const BaseEventInfo*)>&& onTabBarClick)
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetOnTabBarClickEvent(std::move(onTabBarClick));
+}
+
 void TabsModelNG::SetDivider(const TabsItemDivider& divider)
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -409,6 +418,16 @@ void TabsModelNG::Pop()
     CHECK_NULL_VOID(swiperNode);
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
+
+    auto tabBarPosition = tabsLayoutProperty->GetTabBarPosition().value_or(BarPosition::START);
+    auto tabsFocusNode = tabsNode->GetFocusHub();
+    CHECK_NULL_VOID(tabsFocusNode);
+    auto tabBarFocusNode = tabBarNode->GetFocusHub();
+    CHECK_NULL_VOID(tabBarFocusNode);
+    if (tabBarPosition == BarPosition::START) {
+        tabsFocusNode->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode)));
+    }
+
     auto tabContentNum = swiperNode->TotalChildCount();
     if (index > tabContentNum - 1 || index < 0) {
         index = 0;

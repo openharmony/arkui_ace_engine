@@ -167,6 +167,20 @@ void GridModelNG::SetEdgeEffect(EdgeEffect edgeEffect)
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, EdgeEffect, edgeEffect);
 }
 
+void GridModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNestedScroll(nestedOpt);
+}
+
+void GridModelNG::SetScrollEnabled(bool scrollEnabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ScrollEnabled, scrollEnabled);
+}
+
 void GridModelNG::SetOnScrollToIndex(ScrollToIndexFunc&& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

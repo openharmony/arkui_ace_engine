@@ -31,9 +31,7 @@ constexpr Dimension INDICATOR_DRAG_MIN_DISTANCE = 4.0_vp;
 constexpr Dimension INDICATOR_DRAG_MAX_DISTANCE = 18.0_vp;
 } // namespace
 
-void SwiperIndicatorPattern::OnAttachToFrameNode()
-{
-}
+void SwiperIndicatorPattern::OnAttachToFrameNode() {}
 
 void SwiperIndicatorPattern::OnModifyDone()
 {
@@ -118,7 +116,7 @@ void SwiperIndicatorPattern::HandleClick(const GestureEvent& info)
 {
     if (info.GetSourceDevice() == SourceType::MOUSE) {
         HandleMouseClick(info);
-    } else if (info.GetSourceDevice() == SourceType::TOUCH) {
+    } else {
         HandleTouchClick(info);
     }
 }
@@ -231,9 +229,6 @@ void SwiperIndicatorPattern::HandleHoverEvent(bool isHover)
     if (swiperLayoutProperty->GetHoverShowValue(false) && !swiperPattern->GetIsAtHotRegion()) {
         swiperPattern->ArrowHover(isHover_);
     }
-    if (swiperIndicatorType_ == SwiperIndicatorType::DOT) {
-        swiperPattern->IndicatorHover(isHover_);
-    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -301,8 +296,8 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
     CHECK_NULL_VOID(swiperPattern);
     float itemWidthValue = static_cast<float>(paintProperty->GetItemWidthValue(swiperTheme->GetSize()).ConvertToPx());
     float itemHeightValue = static_cast<float>(paintProperty->GetItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
-    float selectedItemWidthValue = static_cast<float>(
-        paintProperty->GetSelectedItemWidthValue(swiperTheme->GetSize()).ConvertToPx() * 2);
+    float selectedItemWidthValue =
+        static_cast<float>(paintProperty->GetSelectedItemWidthValue(swiperTheme->GetSize()).ConvertToPx() * 2);
     // diameter calculation
     float itemWidth = itemWidthValue * INDICATOR_ZOOM_IN_SCALE;
     float itemHeight = itemHeightValue * INDICATOR_ZOOM_IN_SCALE;
@@ -345,23 +340,22 @@ void SwiperIndicatorPattern::UpdateTextContent(const RefPtr<SwiperIndicatorLayou
     lastTextNode->SetInternal();
     auto firstTextLayoutProperty = firstTextNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(firstTextLayoutProperty);
-    auto selectedFontColor = layoutProperty->GetSelectedFontColorValue(
-        theme->GetDigitalIndicatorTextStyle().GetTextColor());
-    auto selectedFontSize = layoutProperty->GetSelectedFontSizeValue(
-        theme->GetDigitalIndicatorTextStyle().GetFontSize());
+    auto selectedFontColor =
+        layoutProperty->GetSelectedFontColorValue(theme->GetDigitalIndicatorTextStyle().GetTextColor());
+    auto selectedFontSize =
+        layoutProperty->GetSelectedFontSizeValue(theme->GetDigitalIndicatorTextStyle().GetFontSize());
     if (!selectedFontSize.IsValid()) {
         selectedFontSize = theme->GetDigitalIndicatorTextStyle().GetFontSize();
     }
-    auto selectedFontWeight = layoutProperty->GetSelectedFontWeightValue(
-        theme->GetDigitalIndicatorTextStyle().GetFontWeight());
+    auto selectedFontWeight =
+        layoutProperty->GetSelectedFontWeightValue(theme->GetDigitalIndicatorTextStyle().GetFontWeight());
     firstTextLayoutProperty->UpdateTextColor(selectedFontColor);
     firstTextLayoutProperty->UpdateFontSize(selectedFontSize);
     firstTextLayoutProperty->UpdateFontWeight(selectedFontWeight);
     UpdateTextContentSub(layoutProperty, firstTextNode, lastTextNode);
 }
 
-void SwiperIndicatorPattern::UpdateTextContentSub(
-    const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
+void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
     const RefPtr<FrameNode>& firstTextNode, const RefPtr<FrameNode>& lastTextNode)
 {
     CHECK_NULL_VOID(layoutProperty);
@@ -377,13 +371,13 @@ void SwiperIndicatorPattern::UpdateTextContentSub(
     CHECK_NULL_VOID(swiperPattern);
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
-    auto currentIndex = swiperPattern->GetCurrentIndex() + 1;
+    auto currentIndex = swiperPattern->GetCurrentFirstIndex() + 1;
     if (currentIndex > swiperPattern->TotalCount()) {
-        currentIndex = currentIndex % swiperPattern->TotalCount();
+        currentIndex = 1;
     } else if (swiperLayoutProperty->HasIndex()) {
         currentIndex = swiperLayoutProperty->GetIndexValue() + 1;
         if (currentIndex > swiperPattern->TotalCount()) {
-            currentIndex = currentIndex % swiperPattern->TotalCount();
+            currentIndex = 1;
         }
     }
     firstTextLayoutProperty->UpdateContent(std::to_string(currentIndex));

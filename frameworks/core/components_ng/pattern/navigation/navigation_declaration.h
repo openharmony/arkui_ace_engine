@@ -73,14 +73,10 @@ constexpr Dimension TEXT_TOP_PADDING = 2.0_vp;
 // divider
 constexpr Dimension DIVIDER_WIDTH = 1.0_vp;
 constexpr Color DIVIDER_COLOR = Color(0x08000000);
-constexpr Dimension DEFAULT_DIVIDER_START_MARGIN = 0.0_vp;
-constexpr Dimension DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING = 2.0_vp;
-constexpr int32_t DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_NUM = 2;
 
 // navigation content
 constexpr Dimension SINGLE_LINE_TITLEBAR_HEIGHT = 56.0_vp;
 constexpr Dimension DOUBLE_LINE_TITLEBAR_HEIGHT = 82.0_vp;
-constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
 
 // navBar
 constexpr Dimension FULL_SINGLE_LINE_TITLEBAR_HEIGHT = 112.0_vp;
@@ -90,8 +86,7 @@ constexpr Dimension HORIZONTAL_MARGIN_M = 8.0_vp; // ohos_id_elements_margin_hor
 constexpr Dimension MENU_ITEM_PADDING = 24.0_vp;
 constexpr Dimension BUTTON_PADDING = 12.0_vp;
 constexpr Dimension BUTTON_RADIUS = 5.0_vp;
-constexpr Dimension DEFAULT_MIN_NAV_BAR_WIDTH = 240.0_vp;
-constexpr Dimension DEFAULT_MAX_NAV_BAR_WIDTH = 280.0_vp;
+constexpr Dimension MAX_OVER_DRAG_OFFSET = 180.0_vp;
 
 // more button
 constexpr Dimension MORE_BUTTON_CORNER_RADIUS = 8.0_vp;

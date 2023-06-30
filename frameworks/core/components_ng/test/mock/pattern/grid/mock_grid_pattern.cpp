@@ -41,6 +41,14 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep /* step */, const Weak
     return nullptr;
 }
 
+
+int32_t GridPattern::GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode)
+{
+    return -1;
+}
+
+void GridPattern::ScrollToFocusNodeIndex(int32_t index) {}
+
 CanvasDrawFunction GridPaintMethod::GetForegroundDrawFunction(PaintWrapper* /* paintWrapper */)
 {
     return [](RSCanvas& canvas) {};
@@ -69,4 +77,9 @@ bool GridPattern::OutBoundaryCallback()
 }
 
 void GridPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) {}
+
+OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
+{
+    return { 0, 0 };
+}
 } // namespace OHOS::Ace::NG

@@ -53,7 +53,6 @@ const std::vector<FlexDirection> LAYOUT_DIRECTION = { FlexDirection::ROW, FlexDi
 
 void JSWaterFlow::Create(const JSCallbackInfo& args)
 {
-    LOGI("Create component: WaterFLow");
     if (args.Length() > 1) {
         LOGW("Arg is wrong, it is supposed to have at most one argument");
         return;
@@ -104,6 +103,8 @@ void JSWaterFlow::JSBind(BindingTarget globalObj)
     JSClass<JSWaterFlow>::StaticMethod("columnsTemplate", &JSWaterFlow::SetColumnsTemplate, opt);
     JSClass<JSWaterFlow>::StaticMethod("itemConstraintSize", &JSWaterFlow::SetItemConstraintSize, opt);
     JSClass<JSWaterFlow>::StaticMethod("rowsTemplate", &JSWaterFlow::SetRowsTemplate, opt);
+    JSClass<JSWaterFlow>::StaticMethod("nestedScroll", &JSWaterFlow::SetNestedScroll);
+    JSClass<JSWaterFlow>::StaticMethod("enableScrollInteraction", &JSWaterFlow::SetScrollEnabled);
     JSClass<JSWaterFlow>::StaticMethod("onReachStart", &JSWaterFlow::ReachStartCallback);
     JSClass<JSWaterFlow>::StaticMethod("onReachEnd", &JSWaterFlow::ReachEndCallback);
     JSClass<JSWaterFlow>::StaticMethod("onScrollFrameBegin", &JSWaterFlow::ScrollFrameBeginCallback);
@@ -205,6 +206,43 @@ void JSWaterFlow::SetItemConstraintSize(const JSCallbackInfo& info)
 void JSWaterFlow::SetRowsTemplate(const std::string& value)
 {
     WaterFlowModel::GetInstance()->SetRowsTemplate(value);
+}
+
+void JSWaterFlow::SetNestedScroll(const JSCallbackInfo& args)
+{
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_ONLY,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        WaterFlowModel::GetInstance()->SetNestedScroll(nestedOpt);
+        LOGW("Invalid params");
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    int32_t froward = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollForward"), froward);
+    if (froward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
+        froward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
+        LOGW("ScrollFroward params invalid");
+        froward = 0;
+    }
+    int32_t backward = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollBackward"), backward);
+    if (backward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
+        backward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
+        LOGW("ScrollFroward params invalid");
+        backward = 0;
+    }
+    nestedOpt.forward = static_cast<NestedScrollMode>(froward);
+    nestedOpt.backward = static_cast<NestedScrollMode>(backward);
+    WaterFlowModel::GetInstance()->SetNestedScroll(nestedOpt);
+    args.ReturnSelf();
+}
+
+void JSWaterFlow::SetScrollEnabled(bool scrollEnabled)
+{
+    WaterFlowModel::GetInstance()->SetScrollEnabled(scrollEnabled);
 }
 
 void JSWaterFlow::ReachStartCallback(const JSCallbackInfo& args)

@@ -877,39 +877,42 @@ void JSTextField::SetPasswordIcon(const JSCallbackInfo& info)
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> showVal = jsObj->GetProperty("onIconSrc");
     JSRef<JSVal> hideVal = jsObj->GetProperty("offIconSrc");
-    PasswordIcon passwordicon;
+    PasswordIcon passwordIcon;
     if (showVal->IsString()) {
-        passwordicon.showResult = showVal->ToString();
+        passwordIcon.showResult = showVal->ToString();
     }
     if (hideVal->IsString()) {
-        passwordicon.hideResult = hideVal->ToString();
+        passwordIcon.hideResult = hideVal->ToString();
     }
     if (showVal->IsObject()) {
         JSRef<JSVal> bundleName = JSRef<JSObject>::Cast(showVal)->GetProperty("bundleName");
         JSRef<JSVal> moduleName = JSRef<JSObject>::Cast(showVal)->GetProperty("moduleName");
         if (bundleName->IsString()) {
-            passwordicon.showBundleName = bundleName->ToString();
+            passwordIcon.showBundleName = bundleName->ToString();
         }
         if (moduleName->IsString()) {
-            passwordicon.showModuleName = moduleName->ToString();
+            passwordIcon.showModuleName = moduleName->ToString();
         }
-        ParseJsMedia(JSRef<JSObject>::Cast(showVal), passwordicon.showResult);
+        ParseJsMedia(JSRef<JSObject>::Cast(showVal), passwordIcon.showResult);
     }
     if (hideVal->IsObject()) {
         JSRef<JSVal> bundleName = JSRef<JSObject>::Cast(hideVal)->GetProperty("bundleName");
         JSRef<JSVal> moduleName = JSRef<JSObject>::Cast(hideVal)->GetProperty("moduleName");
         if (bundleName->IsString()) {
-            passwordicon.hideBundleName = bundleName->ToString();
+            passwordIcon.hideBundleName = bundleName->ToString();
         }
         if (moduleName->IsString()) {
-            passwordicon.hideModuleName = moduleName->ToString();
+            passwordIcon.hideModuleName = moduleName->ToString();
         }
-        ParseJsMedia(JSRef<JSObject>::Cast(hideVal), passwordicon.hideResult);
+        ParseJsMedia(JSRef<JSObject>::Cast(hideVal), passwordIcon.hideResult);
     }
-    if (passwordicon.showResult.empty() && passwordicon.hideResult.empty()) {
-        return;
+    if (!showVal->IsString() && !showVal->IsObject()) {
+        passwordIcon.showResult = "";
     }
-    TextFieldModel::GetInstance()->SetPasswordIcon(passwordicon);
+    if (!hideVal->IsString() && !hideVal->IsObject()) {
+        passwordIcon.hideResult = "";
+    }
+    TextFieldModel::GetInstance()->SetPasswordIcon(passwordIcon);
 }
 
 void JSTextField::UpdateDecoration(const RefPtr<BoxComponent>& boxComponent,

@@ -33,8 +33,7 @@ public:
     void SetEditMode(bool editMode) override;
     void SetDivider(const V2::ItemDivider& divider) override;
     void SetChainAnimation(bool enableChainAnimation) override;
-    void SetChainAnimationOptions(const Dimension& minSpace, const Dimension& maxSpace, float conductivity,
-        float intensity, int32_t edgeEffect) override;
+    void SetChainAnimationOptions(const ChainAnimationOptions& options) override;
     void SetLanes(int32_t lanes) override;
     void SetLaneConstrain(const Dimension& laneMinLength, const Dimension& laneMaxLength) override;
     void SetLaneMinLength(const Dimension& laneMinLength) override;
@@ -45,6 +44,9 @@ public:
     void SetHasWidth(bool hasWidth) override {}
     void SetHasHeight(bool hasHeight) override {}
     void SetSticky(V2::StickyStyle stickyStyle) override;
+    void SetScrollSnapAlign(V2::ScrollSnapAlign scrollSnapAlign) override;
+    void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
+    void SetScrollEnabled(bool scrollEnabled) override;
     void SetOnScroll(OnScrollEvent&& onScroll) override;
     void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin) override;
     void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin) override;

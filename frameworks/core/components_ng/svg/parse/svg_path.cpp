@@ -34,6 +34,7 @@ RefPtr<SvgNode> SvgPath::Create()
     return AceType::MakeRefPtr<SvgPath>();
 }
 
+#ifndef USE_ROSEN_DRAWING
 SkPath SvgPath::AsPath(const Size& /* viewPort */) const
 {
     SkPath out;
@@ -53,5 +54,22 @@ SkPath SvgPath::AsPath(const Size& /* viewPort */) const
     }
     return out;
 }
+#else
+RSRecordingPath SvgPath::AsPath(const Size& /* viewPort */) const
+{
+    RSRecordingPath out;
+    auto declaration = AceType::DynamicCast<SvgPathDeclaration>(declaration_);
+    CHECK_NULL_RETURN(declaration, out);
+
+    auto pathD = declaration->GetD();
+    if (!pathD.empty()) {
+        out.BuildFromSVGString(pathD);
+        if (declaration->GetClipState().IsEvenodd()) {
+            out.SetFillStyle(RSPathFillType::EVEN_ODD);
+        }
+    }
+    return out;
+}
+#endif
 
 } // namespace OHOS::Ace::NG

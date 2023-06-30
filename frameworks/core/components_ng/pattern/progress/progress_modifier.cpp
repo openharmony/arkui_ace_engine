@@ -44,8 +44,6 @@ constexpr int32_t DEFAULT_SCALE_COUNT = 100;
 constexpr double DEFAULT_CAPSULE_BORDER_WIDTH = 0.0;
 constexpr float FLOAT_ZERO_FIVE = 0.5f;
 constexpr float FLOAT_TWO_ZERO = 2.0f;
-constexpr float SPRING_MOTION_RESPONSE = 0.314f;
-constexpr float SPRING_MOTION_DAMPING_FRACTION = 0.95f;
 constexpr Dimension SWEEP_WIDTH = 80.0_vp;
 constexpr float RING_SHADOW_OFFSET_X = 5.0f;
 constexpr float RING_SHADOW_OFFSET_Y = 5.0f;
@@ -53,7 +51,7 @@ constexpr float RING_SHADOW_BLUR_RADIUS_MIN = 5.0f;
 constexpr float RING_SHADOW_VALID_RADIUS_MIN = 10.0f;
 constexpr Dimension LINEAR_SWEEPING_LEN = 80.0_vp;
 constexpr float OPACITY_MAX = 1.0f;
-constexpr float OPACITY_MIN = 0.005f;
+constexpr float OPACITY_MIN = 0.0005f;
 constexpr float POINT_INTERVAL = 2.0f;
 } // namespace
 ProgressModifier::ProgressModifier()
@@ -77,7 +75,8 @@ ProgressModifier::ProgressModifier()
       ringSweepEffect_(AceType::MakeRefPtr<PropertyBool>(false)),
       linearSweepEffect_(AceType::MakeRefPtr<PropertyBool>(false)),
       paintShadow_(AceType::MakeRefPtr<PropertyBool>(false)),
-      progressStatus_(AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(ProgressStatus::PROGRESSING)))
+      progressStatus_(AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(ProgressStatus::PROGRESSING))),
+      isItalic_(AceType::MakeRefPtr<PropertyBool>(false))
 {
     AttachProperty(strokeWidth_);
     AttachProperty(color_);
@@ -99,6 +98,7 @@ ProgressModifier::ProgressModifier()
     AttachProperty(progressStatus_);
     AttachProperty(ringSweepEffect_);
     AttachProperty(linearSweepEffect_);
+    AttachProperty(isItalic_);
 }
 
 void ProgressModifier::onDraw(DrawingContext& context)
@@ -226,6 +226,12 @@ void ProgressModifier::SetProgressStatus(ProgressStatus status)
     }
 }
 
+void ProgressModifier::SetIsItalic(bool isItalic)
+{
+    CHECK_NULL_VOID(isItalic_);
+    isItalic_->Set(isItalic);
+}
+
 void ProgressModifier::SetVisible(bool isVisible)
 {
     CHECK_NULL_VOID(isVisible_ != isVisible);
@@ -291,7 +297,7 @@ void ProgressModifier::StartRingLoadingTailAnimation()
     CHECK_NULL_VOID(context);
     bool isFormRender = context->IsFormRender();
     AnimationOption optionTail = AnimationOption();
-    auto curveTail = AceType::MakeRefPtr<CubicCurve>(0.33f, 0.00f, 0.66f, 0.30f);
+    auto curveTail = AceType::MakeRefPtr<CubicCurve>(0.33f, 0.00f, 0.66f, 0.10f);
     optionTail.SetDuration(LOADING_ANIMATION_DURATION);
     optionTail.SetCurve(curveTail);
     optionTail.SetIteration(isFormRender ? 1 : -1);
@@ -459,7 +465,13 @@ float ProgressModifier::CalcRingProgressAdditionalAngle() const
     auto strokeWidth = strokeWidth_->Get();
     PointF centerPt = PointF(contentSize.Width() / 2, contentSize.Height() / 2);
     float radius = std::min(contentSize.Width() / 2, contentSize.Height() / 2);
-    return atan2f(strokeWidth / 2, radius - strokeWidth / 2) * ANGLE_180 / PI_NUM;
+    auto paintShadow = paintShadow_->Get() && GreatNotEqual(radius, RING_SHADOW_VALID_RADIUS_MIN);
+    auto shadowBlurOffset = paintShadow ? strokeWidth / 2 + std::max(RING_SHADOW_OFFSET_X, RING_SHADOW_OFFSET_Y) : 0.0f;
+    if (GreatOrEqual(strokeWidth + shadowBlurOffset, radius)) {
+        strokeWidth = radius / 2;
+        shadowBlurOffset = paintShadow ? strokeWidth / 2 + std::max(RING_SHADOW_OFFSET_X, RING_SHADOW_OFFSET_Y) : 0.0f;
+    }
+    return asinf((strokeWidth / 2) / (radius - strokeWidth / 2 - shadowBlurOffset)) * ANGLE_180 / PI_NUM;
 }
 
 void ProgressModifier::StartLinearSweepingAnimation(float value)
@@ -541,16 +553,7 @@ void ProgressModifier::SetValue(float value)
     }
 
     CHECK_NULL_VOID(value_);
-    AnimationOption option = AnimationOption();
-    if (isVisible_) {
-        auto motion =
-            AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_MOTION_RESPONSE, SPRING_MOTION_DAMPING_FRACTION);
-        option.SetCurve(motion);
-    } else {
-        option.SetDuration(0);
-    }
-    AnimationUtils::Animate(option, [&]() { value_->Set(value); });
-
+    value_->Set(value);
     ProcessSweepingAnimation(ProgressType(progressType_->Get()), value);
 }
 
@@ -857,7 +860,11 @@ void ProgressModifier::PaintRingProgressOrShadow(
     canvas.Save();
     canvas.Rotate(angle, centerPt.GetX(), centerPt.GetY());
     canvas.AttachBrush(startCirclePaint);
-    canvas.DrawArc(edgeRect, -ANGLE_90, ANGLE_180);
+    if (isShadow) {
+        canvas.DrawArc(edgeRect, -ANGLE_90, ANGLE_180);
+    } else {
+        canvas.DrawCircle(ToRSPoint(PointF(centerPt.GetX(), centerPt.GetY() - radius)), halfThickness);
+    }
     canvas.DetachBrush();
     canvas.Restore();
 
@@ -1006,8 +1013,8 @@ void ProgressModifier::GenerateRingSweepingGradientInfo(
     gradientColorEnd.SetDimension(Dimension(0.0, DimensionUnit::PERCENT));
     gradient.AddColor(gradientColorEnd);
 
-    // The sweep layer is a 45-degree white gradient with an opacity of 0.6 at 35 degrees and 0 at both ends.
-    Color sweepingColorMiddle = sweepingColorBase.ChangeOpacity(0.6f);
+    // The sweep layer is a 45-degree white gradient with an opacity of 0.4 at 35 degrees and 0 at both ends.
+    Color sweepingColorMiddle = sweepingColorBase.ChangeOpacity(0.4f);
     GradientColor gradientColorMiddle;
     gradientColorMiddle.SetColor(sweepingColorMiddle);
     gradientColorMiddle.SetDimension(Dimension(35.0f / ANGLE_45, DimensionUnit::PERCENT));

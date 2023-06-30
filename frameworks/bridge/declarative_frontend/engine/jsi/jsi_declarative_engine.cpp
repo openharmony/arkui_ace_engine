@@ -72,11 +72,17 @@ extern const char _binary_jsMockSystemPlugin_abc_start[];
 extern const char _binary_jsMockSystemPlugin_abc_end[];
 #endif
 extern const char _binary_stateMgmt_abc_start[];
-extern const char _binary_stateMgmt_abc_end[];
 extern const char _binary_jsEnumStyle_abc_start[];
-extern const char _binary_jsEnumStyle_abc_end[];
 extern const char _binary_jsUIContext_abc_start[];
+#if !defined(IOS_PLATFORM)
+extern const char _binary_stateMgmt_abc_end[];
+extern const char _binary_jsEnumStyle_abc_end[];
 extern const char _binary_jsUIContext_abc_end[];
+#else
+extern const char* _binary_stateMgmt_abc_end;
+extern const char* _binary_jsEnumStyle_abc_end;
+extern const char* _binary_jsUIContext_abc_end;
+#endif
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -948,16 +954,6 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
 #if !defined(PREVIEW)
         nativeEngine_->CheckUVLoop();
 #endif
-
-        if (delegate && delegate->GetAssetManager()) {
-            std::vector<std::string> packagePath = delegate->GetAssetManager()->GetLibPath();
-            auto appLibPathKey = delegate->GetAssetManager()->GetAppLibPathKey();
-            if (!packagePath.empty()) {
-                auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
-                arkNativeEngine->SetPackagePath(appLibPathKey, packagePath);
-            }
-        }
-
         RegisterWorker();
         engineInstance_->RegisterFaPlugin();
     } else {
@@ -1450,15 +1446,18 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, 
             size_t moduleEndPos = namedRoute.find('/', moduleStartPos);
             moduleName = namedRoute.substr(moduleStartPos, moduleEndPos - moduleStartPos);
             url = namedRoute.substr(moduleEndPos + strlen("/ets/"));
-        } else
-#endif
-        {
+        } else {
             bundleName = AceApplicationInfo::GetInstance().GetPackageName();
             auto container = Container::Current();
             CHECK_NULL_RETURN(container, false);
             moduleName = container->GetModuleName();
         }
-
+#else
+        bundleName = bundleName_;
+        moduleName = moduleName_;
+#endif
+        LOGD("bundleName = %{public}s moduleName = %{public}s url = %{public}s", bundleName.c_str(), moduleName.c_str(),
+            url.c_str());
         iter = std::find_if(namedRouterRegisterMap.begin(), namedRouterRegisterMap.end(),
             [&bundleName, &moduleName, &url](const auto& item) {
                 return item.second.bundleName == bundleName && item.second.moduleName == moduleName &&
@@ -1893,12 +1892,10 @@ bool JsiDeclarativeEngine::CallAppFunc(const std::string& appFuncName, std::vect
     shared_ptr<JsValue> global = runtime->GetGlobal();
     shared_ptr<JsValue> exportsObject = global->GetProperty(runtime, "exports");
     if (!exportsObject->IsObject(runtime)) {
-        LOGE("property \"exports\" is not a object");
         return false;
     }
     shared_ptr<JsValue> defaultObject = exportsObject->GetProperty(runtime, "default");
     if (!defaultObject->IsObject(runtime)) {
-        LOGE("property \"default\" is not a object");
         return false;
     }
     shared_ptr<JsValue> func = defaultObject->GetProperty(runtime, appFuncName);

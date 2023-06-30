@@ -84,7 +84,6 @@ private:
     void ButtonTouchEvent(RefPtr<FrameNode> buttonNode, TouchType touchType);
     void ButtonClickEvent();
     void UpdateArrowContent();
-    void SetArrowEnable(bool isEnable);
     int32_t TotalCount() const;
     RefPtr<ClickEvent> buttonClickListenr_;
     RefPtr<TouchEventImpl> buttonTouchListenr_;
@@ -97,6 +96,7 @@ private:
     Color backgroundColor_ = Color::TRANSPARENT;
     bool isTouch_ = false;
     bool isHover_ = false;
+    bool hoverOnClickFlag_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(SwiperArrowPattern);
 };
 } // namespace OHOS::Ace::NG

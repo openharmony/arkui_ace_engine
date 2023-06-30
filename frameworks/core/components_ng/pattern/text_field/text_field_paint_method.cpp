@@ -61,6 +61,10 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
+    if (textFieldPattern->GetContChange()) {
+        textFieldContentModifier_->ChangeDragStatus();
+        textFieldPattern->ResetContChange();
+    }
     auto textEditingValue = textFieldPattern->GetTextEditingValue();
     std::string text = textEditingValue.text;
     textFieldContentModifier_->SetTextValue(text);
@@ -78,6 +82,8 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     textFieldContentModifier_->SetShowErrorState(layoutProperty->GetShowErrorTextValue(false));
     textFieldContentModifier_->SetErrorTextValue(layoutProperty->GetErrorTextValue(""));
     textFieldContentModifier_->SetShowUnderlineState(layoutProperty->GetShowUnderlineValue(false));
+    textFieldContentModifier_->SetShowPasswordIcon(textFieldPattern->GetShowResultImageSrc());
+    textFieldContentModifier_->SetHidePasswordIcon(textFieldPattern->GetHideResultImageSrc());
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextFieldTheme>();
@@ -107,8 +113,8 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(textFieldPattern);
     auto cursorVisible = textFieldPattern->GetCursorVisible();
     textFieldOverlayModifier_->SetCursorVisible(cursorVisible);
-    auto cursorOffsetX = textFieldPattern->GetCaretOffsetX();
-    textFieldOverlayModifier_->SetCursorOffsetX(cursorOffsetX);
+    auto cursorOffset = textFieldPattern->GetCaretOffset();
+    textFieldOverlayModifier_->SetCursorOffset(cursorOffset);
     auto currentOffset = textFieldPattern->GetCurrentOffset();
     textFieldOverlayModifier_->SetCurrentOffset(currentOffset);
 

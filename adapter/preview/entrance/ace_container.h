@@ -252,6 +252,11 @@ public:
         return it->second;
     }
 
+    void SetContainerSdkPath(const std::string& containerSdkPath)
+    {
+        containerSdkPath_ = containerSdkPath;
+    }
+
 private:
     void InitializeFrontend();
     void InitializeCallback();
@@ -288,6 +293,7 @@ private:
     bool installationFree_ = false;
     int32_t labelId_;
     static bool isComponentMode_;
+    std::string containerSdkPath_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };

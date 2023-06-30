@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "gtest/gtest.h"
 
+#define private public
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -50,12 +51,19 @@ const float NEW_HEIGHT = 500.0f;
 const RectF NEW_RECT = RectF(NEW_X_VALUE, NEW_Y_VALUE, NEW_WIDTH, NEW_HEIGHT);
 const OffsetF NEW_ORIGIN = OffsetF(NEW_WIDTH, NEW_HEIGHT);
 
+const RectF RECT_DELTA = RectF(1.0f, 1.0f, 1.0f, 1.0f);
+const OffsetF OFFSET_DELTA = OffsetF(1.0f, 1.0f);
+const OffsetF ORIGIN_DELTA = OffsetF(1.0f, 1.0f);
+
 const std::string STRINGCTER_A = "A";
 const std::string STRINGCTER_Q = "Q";
 const std::string STRINGCTER_E = "E";
 constexpr int32_t NUM_CTRL_VALUE = 1;
 constexpr int32_t NUM_SHIFT_VALUE = 2;
 constexpr int32_t NUM_ALT_VALUE = 4;
+
+const std::string RESULT_SUCCESS_ONE = "sucess1";
+const std::string RESULT_SUCCESS_TWO = "sucess2";
 } // namespace
 
 class EventHubTestNg : public testing::Test {
@@ -306,5 +314,158 @@ HWTEST_F(EventHubTestNg, EventHubDragEventsTest005, TestSize.Level1)
         EXPECT_EQ(NUM_CTRL_VALUE, (*iter).keys);
     }
     keyboardShortcut.clear();
+}
+
+/**
+ * @tc.name: EventHubDisableAreaChange001
+ * @tc.desc: Create EventHub and test disable areaChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubDisableAreaChange001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Set EventHub OnAreaChanged function and fire it.
+     * @tc.expected: onAreaChanged is invoked and the temp values are assigned with correct values.
+     */
+    RectF tempOldRect;
+    OffsetF tempOldOrigin;
+    RectF tempNewRect;
+    OffsetF tempNewOrigin;
+    auto onAreaChanged = [&tempOldRect, &tempOldOrigin, &tempNewRect, &tempNewOrigin](
+                             const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {
+        tempOldRect = oldRect;
+        tempOldOrigin = oldOrigin;
+        tempNewRect = rect;
+        tempNewOrigin = origin;
+    };
+
+    eventHub->SetOnAreaChanged(onAreaChanged);
+    eventHub->FireOnAreaChanged(OLD_RECT, OLD_ORIGIN, NEW_RECT, NEW_ORIGIN);
+    EXPECT_TRUE(eventHub->HasOnAreaChanged());
+    EXPECT_EQ(tempOldRect, OLD_RECT);
+    EXPECT_EQ(tempOldOrigin, OLD_ORIGIN);
+    EXPECT_EQ(tempNewRect, NEW_RECT);
+    EXPECT_EQ(tempNewOrigin, NEW_ORIGIN);
+
+    /**
+     * @tc.steps: step3. Clear the callback.
+     * @tc.expected: onAreaChanged is empty.
+     */
+    eventHub->ClearUserOnAreaChanged();
+    eventHub->FireOnAreaChanged(
+        OLD_RECT + OFFSET_DELTA, OLD_ORIGIN + ORIGIN_DELTA, NEW_RECT + OFFSET_DELTA, NEW_ORIGIN + ORIGIN_DELTA);
+    EXPECT_FALSE(eventHub->HasOnAreaChanged());
+    EXPECT_EQ(tempOldRect, OLD_RECT);
+    EXPECT_EQ(tempOldOrigin, OLD_ORIGIN);
+    EXPECT_EQ(tempNewRect, NEW_RECT);
+    EXPECT_EQ(tempNewOrigin, NEW_ORIGIN);
+
+    /**
+     * @tc.steps: step3. Set/fire areaChange function.
+     * @tc.expected: areaChange is assigned with correct value.
+     */
+    eventHub->SetOnAreaChanged(onAreaChanged);
+    eventHub->FireOnAreaChanged(
+        OLD_RECT + OFFSET_DELTA, OLD_ORIGIN + ORIGIN_DELTA, NEW_RECT + OFFSET_DELTA, NEW_ORIGIN + ORIGIN_DELTA);
+    EXPECT_TRUE(eventHub->HasOnAreaChanged());
+    EXPECT_EQ(tempOldRect, OLD_RECT + OFFSET_DELTA);
+    EXPECT_EQ(tempOldOrigin, OLD_ORIGIN + ORIGIN_DELTA);
+    EXPECT_EQ(tempNewRect, NEW_RECT + OFFSET_DELTA);
+    EXPECT_EQ(tempNewOrigin, NEW_ORIGIN + ORIGIN_DELTA);
+}
+
+/**
+ * @tc.name: EventHubDisableAppear001
+ * @tc.desc: Create EventHub and test disable onAppear function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubDisableAppear001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Set EventHub onAppear function and fire it.
+     * @tc.expected: onAppear is invoked and the temp values are assigned with correct values.
+     */
+    std::string result;
+    auto onAppear = [&result]() { result = RESULT_SUCCESS_ONE; };
+
+    eventHub->SetOnAppear(onAppear);
+    EXPECT_NE(eventHub->onAppear_, nullptr);
+    eventHub->onAppear_();
+    EXPECT_EQ(result, RESULT_SUCCESS_ONE);
+    /**
+     * @tc.steps: step3. Clear the callback.
+     * @tc.expected: onAppear is empty.
+     */
+    eventHub->ClearUserOnAppear();
+    EXPECT_EQ(eventHub->onAppear_, nullptr);
+
+    /**
+     * @tc.steps: step3. Set/fire EventHub onAppear function.
+     * @tc.expected: onAppear is assigned with correct value.
+     */
+    auto onAppear2 = [&result]() { result = RESULT_SUCCESS_TWO; };
+
+    eventHub->SetOnAppear(onAppear2);
+    EXPECT_NE(eventHub->onAppear_, nullptr);
+    eventHub->onAppear_();
+    EXPECT_EQ(result, RESULT_SUCCESS_TWO);
+}
+
+/**
+ * @tc.name: EventHubDisableDisAppear001
+ * @tc.desc: Create EventHub and test disable onDisAppear function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubDisableDisAppear001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Set EventHub onDisAppear function and fire it.
+     * @tc.expected: onDisAppear is invoked and the temp values are assigned with correct values.
+     */
+    std::string result;
+    auto onDisAppear = [&result]() { result = RESULT_SUCCESS_ONE; };
+
+    eventHub->SetOnDisappear(onDisAppear);
+    EXPECT_NE(eventHub->onDisappear_, nullptr);
+    eventHub->onDisappear_();
+    EXPECT_EQ(result, RESULT_SUCCESS_ONE);
+    /**
+     * @tc.steps: step3. Clear the callback.
+     * @tc.expected: onDisAppear is empty.
+     */
+    eventHub->ClearUserOnDisAppear();
+    EXPECT_EQ(eventHub->onDisappear_, nullptr);
+
+    /**
+     * @tc.steps: step3. Set/fire EventHub onDisappear function.
+     * @tc.expected: disAppear is assigned with correct value.
+     */
+    auto onDisAppear2 = [&result]() { result = RESULT_SUCCESS_TWO; };
+
+    eventHub->SetOnDisappear(onDisAppear2);
+    EXPECT_NE(eventHub->onDisappear_, nullptr);
+    eventHub->onDisappear_();
+    EXPECT_EQ(result, RESULT_SUCCESS_TWO);
 }
 } // namespace OHOS::Ace::NG

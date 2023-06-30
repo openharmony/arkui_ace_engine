@@ -25,6 +25,8 @@ namespace OHOS::Ace {
 
 using WindowCallback = std::function<void(void)>;
 using WindowModeCallback = std::function<WindowMode(void)>;
+using WindowSetMaximizeModeCallback = std::function<void(MaximizeMode)>;
+using WindowGetMaximizeModeCallback = std::function<MaximizeMode(void)>;
 
 class WindowManager : public virtual AceType {
     DECLARE_ACE_TYPE(WindowManager, AceType);
@@ -63,6 +65,11 @@ public:
         windowMaximizeCallback_ = std::move(callback);
     }
 
+    void SetWindowMaximizeFloatingCallBack(WindowCallback&& callback)
+    {
+        windowMaximizeFloatingCallback_ = std::move(callback);
+    }
+
     void SetWindowRecoverCallBack(WindowCallback&& callback)
     {
         windowRecoverCallback_ = std::move(callback);
@@ -73,9 +80,14 @@ public:
         windowCloseCallback_ = std::move(callback);
     }
 
-    void SetWindowSplitCallBack(WindowCallback&& callback)
+    void SetWindowSplitPrimaryCallBack(WindowCallback&& callback)
     {
-        windowSplitCallback_ = std::move(callback);
+        windowSplitPrimaryCallback_ = std::move(callback);
+    }
+
+    void SetWindowSplitSecondaryCallBack(WindowCallback&& callback)
+    {
+        windowSplitSecondaryCallback_ = std::move(callback);
     }
 
     void SetWindowGetModeCallBack(WindowModeCallback&& callback)
@@ -88,6 +100,16 @@ public:
         windowStartMoveCallback_ = std::move(callback);
     }
 
+    void SetWindowSetMaximizeModeCallBack(WindowSetMaximizeModeCallback&& callback)
+    {
+        windowSetMaximizeModeCallback_ = std::move(callback);
+    }
+
+    void SetWindowGetMaximizeModeCallBack(WindowGetMaximizeModeCallback&& callback)
+    {
+        windowGetMaximizeModeCallback_ = std::move(callback);
+    }
+
     void WindowMinimize() const
     {
         if (windowMinimizeCallback_) {
@@ -95,24 +117,32 @@ public:
         }
     }
 
-    void WindowMaximize() const
+    void WindowMaximize(bool supportFloatingMaximize = false)
     {
-        if (windowMaximizeCallback_) {
+        if (supportFloatingMaximize && windowMaximizeFloatingCallback_) {
+            windowMaximizeFloatingCallback_();
+            maximizeMode_ = GetWindowMaximizeMode();
+        }
+        if (!supportFloatingMaximize && windowMaximizeCallback_) {
             windowMaximizeCallback_();
         }
     }
 
-    void WindowRecover() const
+    void WindowRecover()
     {
         if (windowRecoverCallback_) {
             windowRecoverCallback_();
+            maximizeMode_ = MaximizeMode::MODE_RECOVER;
         }
     }
 
-    void FireWindowSplitCallBack() const
+    void FireWindowSplitCallBack(bool isPrimary = true) const
     {
-        if (windowSplitCallback_) {
-            windowSplitCallback_();
+        if (isPrimary && windowSplitPrimaryCallback_) {
+            windowSplitPrimaryCallback_();
+        }
+        if (!isPrimary && windowSplitSecondaryCallback_) {
+            windowSplitSecondaryCallback_();
         }
     }
 
@@ -137,17 +167,46 @@ public:
         }
         return WindowMode::WINDOW_MODE_UNDEFINED;
     }
+     
+    void SetWindowMaximizeMode(MaximizeMode mode)
+    {
+        if (windowSetMaximizeModeCallback_) {
+            windowSetMaximizeModeCallback_(mode);
+        }
+    }
+
+    MaximizeMode GetWindowMaximizeMode() const
+    {
+        if (windowGetMaximizeModeCallback_) {
+            return windowGetMaximizeModeCallback_();
+        }
+        return MaximizeMode::MODE_RECOVER;
+    }
+
+    MaximizeMode GetCurrentWindowMaximizeMode() const
+    {
+        return maximizeMode_;
+    }
+    
+    void SetCurrentWindowMaximizeMode(MaximizeMode mode)
+    {
+        maximizeMode_ = mode;
+    }
 
 private:
     int32_t appLabelId_ = 0;
     int32_t appIconId_ = 0;
-
+    MaximizeMode maximizeMode_ = MaximizeMode::MODE_RECOVER;
     WindowCallback windowMinimizeCallback_;
-    WindowCallback windowMaximizeCallback_;
     WindowCallback windowRecoverCallback_;
     WindowCallback windowCloseCallback_;
-    WindowCallback windowSplitCallback_;
+    WindowCallback windowSplitPrimaryCallback_;
+    WindowCallback windowSplitSecondaryCallback_;
     WindowCallback windowStartMoveCallback_;
+    WindowCallback windowMaximizeCallback_;
+    WindowCallback windowMaximizeFloatingCallback_;
+    WindowSetMaximizeModeCallback windowSetMaximizeModeCallback_;
+    WindowGetMaximizeModeCallback windowGetMaximizeModeCallback_;
     WindowModeCallback windowGetModeCallback_;
 };
 

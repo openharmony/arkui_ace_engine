@@ -43,6 +43,8 @@ using ExternalEventCallback = std::function<void(const std::string&, const uint3
 using UpdatePageCallback = std::function<void(const RefPtr<JsAcePage>&)>;
 using ResetStagingPageCallback = std::function<void()>;
 using MediaQueryCallback = std::function<void(const std::string& callbackId, const std::string& args)>;
+using LayoutInspectorCallback = std::function<void(const std::string& componedId)>;
+using DrawInspectorCallback = std::function<void(const std::string& componedId)>;
 using DestroyPageCallback = std::function<void(int32_t pageId)>;
 using DestroyApplicationCallback = std::function<void(const std::string& packageName)>;
 using UpdateApplicationStateCallback = std::function<void(const std::string& packageName, Frontend::State state)>;
@@ -213,6 +215,8 @@ public:
 
     void OnMediaQueryUpdate() override;
     void OnSurfaceChanged();
+    void OnLayoutCompleted(const std::string& componentId);
+    void OnDrawCompleted(const std::string& componentId);
     // JsEventHandler delegate functions.
     void FireAsyncEvent(const std::string& eventId, const std::string& param, const std::string& jsonArgs);
     bool FireSyncEvent(const std::string& eventId, const std::string& param, const std::string& jsonArgs);
@@ -295,6 +299,10 @@ public:
     void ChangeLocale(const std::string& language, const std::string& countryOrRegion) override;
 
     void RegisterFont(const std::string& familyName, const std::string& familySrc) override;
+
+    void GetSystemFontList(std::vector<std::string>& fontList) override;
+
+    bool GetSystemFont(const std::string& fontName, FontInfo& fontInfo) override;
 
     void HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback) override;
 

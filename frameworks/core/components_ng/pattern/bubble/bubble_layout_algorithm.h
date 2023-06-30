@@ -105,10 +105,9 @@ private:
     void InitArrowState(const RefPtr<BubbleLayoutProperty>& layoutProp);
     void InitArrowTopAndBottomPosition(OffsetF& topArrowPosition, OffsetF& bottomArrowPosition, OffsetF& topPosition,
         OffsetF& bottomPosition, const SizeF& childSize);
-
+    void GetPositionWithPlacement(
+        OffsetF& childPosition, OffsetF& arrowPosition, const SizeF& childSize, Placement placement);
     OffsetF GetChildPosition(const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp);
-    OffsetF GetPositionWithPlacement(const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition,
-        const OffsetF& topArrowPosition, const OffsetF& bottomArrowPosition);
     OffsetF FitToScreen(const OffsetF& fitPosition, const SizeF& childSize);
     ErrorPositionType GetErrorPositionType(const OffsetF& childOffset, const SizeF& childSize);
 

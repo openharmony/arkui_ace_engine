@@ -146,6 +146,7 @@ ohos_unittest("RenderImageTest") {
     "$ace_root/frameworks/core/animation/curves.cpp",
     "$ace_root/frameworks/core/animation/scheduler.cpp",
     "$ace_root/frameworks/core/focus/focus_node.cpp",
+    "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
 
     # others
     "$ace_root/frameworks/core/components/common/painter/flutter_svg_painter.cpp",
@@ -205,7 +206,7 @@ ohos_unittest("RenderImageTest") {
       "resmgr:resourcemanager",
     ]
   } else {
-    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps = [ "hilog:libhilog" ]
   }
   external_deps += [ "c_utils:utils" ]
   part_name = ace_engine_part

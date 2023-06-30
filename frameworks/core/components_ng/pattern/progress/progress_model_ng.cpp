@@ -43,15 +43,20 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     RefPtr<ProgressTheme> theme = pipeline->GetTheme<ProgressTheme>();
+    auto progressFocusNode = frameNode->GetFocusHub();
+    CHECK_NULL_VOID(progressFocusNode);
     if (type == ProgressType::CAPSULE) {
         ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Color, theme->GetCapsuleSelectColor());
         ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BorderColor, theme->GetBorderColor());
         ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, theme->GetCapsuleBgColor());
+        progressFocusNode->SetFocusable(true);
     } else if (type == ProgressType::RING) {
         ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, theme->GetRingProgressBgColor());
+        progressFocusNode->SetFocusable(false);
     } else {
         ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, theme->GetTrackBgColor());
         ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Color, theme->GetTrackSelectedColor());
+        progressFocusNode->SetFocusable(false);
     }
 
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
@@ -62,7 +67,6 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
         if (frameNode->GetChildren().empty()) {
             auto textNode = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-            CHECK_NULL_VOID(textNode);
             textNode->SetInternal();
             textNode->MountToParent(frameNode);
         }
@@ -196,7 +200,7 @@ void ProgressModelNG::SetText(const std::optional<std::string>& value)
         std::string number = std::to_string(curPercent) + "%";
         bool isShowText = progressPaintProperty->GetEnableShowText().value_or(false);
         if (!isShowText) {
-            context = number = "";
+            number = "";
         }
         textLayoutProperty->UpdateContent(number);
         context = number;
@@ -257,6 +261,9 @@ void ProgressModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, dou
     CHECK_NULL_VOID(frameNode);
     auto textProps = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProps);
+    auto renderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateClipEdge(false);
     RefPtr<ProgressTheme> progressTheme = pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(progressTheme);
     auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();

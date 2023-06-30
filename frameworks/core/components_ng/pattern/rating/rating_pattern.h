@@ -99,12 +99,15 @@ public:
     }
 
 private:
+    void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     void ConstrainsRatingScore();
     void LoadForeground();
     void LoadSecondary();
     void LoadBackground();
     void UpdatePaintConfig();
+    void PrepareAnimation(const RefPtr<CanvasImage>& image);
+    void SetRedrawCallback(const RefPtr<CanvasImage>& image);
     void OnImageDataReady(int32_t imageFlag);
     void OnImageLoadSuccess(int32_t imageFlag);
     void CheckImageInfoHasChangedOrNot(
@@ -168,6 +171,7 @@ private:
     bool isHover_ = false;
     double lastRatingScore_ = 0.0;
     RatingModifier::RatingAnimationType state_;
+    float singleStarWidth_ = .0f;
 
     bool isForegroundImageInfoFromTheme_ = false;
     bool isSecondaryImageInfoFromTheme_ = false;

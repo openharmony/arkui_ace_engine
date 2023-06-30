@@ -91,10 +91,6 @@ public:
     {
         return initialZIndex_;
     }
-    bool GetPassengerInitEventEnabled() const
-    {
-        return initialEventEnabled_;
-    }
     bool GetPassengerCurrentFocused() const
     {
         return isCurrentFocused_;
@@ -124,10 +120,6 @@ public:
     {
         initialZIndex_ = zIndex;
     }
-    void SetPassengerInitEventEnabled(bool enabled)
-    {
-        initialEventEnabled_ = enabled;
-    }
     void SetPassengerCurrentFocused(bool isFocused)
     {
         isCurrentFocused_ = isFocused;
@@ -152,7 +144,6 @@ protected:
     OffsetF initialFrameOffset_;
     std::optional<int32_t> initialZIndex_;
     std::list<std::function<void()>> finishCallbacks_;
-    bool initialEventEnabled_ = true;
     bool isCurrentFocused_ = false;
 };
 

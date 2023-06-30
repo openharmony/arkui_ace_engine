@@ -40,6 +40,14 @@ constexpr char EVENT_KEY_REASON[] = "REASON";
 constexpr char EVENT_KEY_SUMMARY[] = "SUMMARY";
 constexpr char EVENT_NAME_JS_ERROR[] = "JS_ERROR";
 constexpr char STATISTIC_DURATION[] = "DURATION";
+constexpr char EVENT_KEY_STARTTIME[] = "STARTTIME";
+constexpr char EVENT_KEY_VERSION_CODE[] = "VERSION_CODE";
+constexpr char EVENT_KEY_VERSION_NAME[] = "VERSION_NAME";
+constexpr char EVENT_KEY_BUNDLE_NAME[] = "BUNDLE_NAME";
+constexpr char EVENT_KEY_ABILITY_NAME[] = "ABILITY_NAME";
+constexpr char EVENT_KEY_PAGE_URL[] = "PAGE_URL";
+constexpr char EVENT_KEY_JANK_STATS[] = "JANK_STATS";
+constexpr char EVENT_KEY_JANK_STATS_VER[] = "JANK_STATS_VER";
 
 constexpr int32_t MAX_PACKAGE_NAME_LENGTH = 128;
 
@@ -245,6 +253,27 @@ void EventReport::ANRShowDialog(int32_t uid, const std::string& packageName,
         EVENT_KEY_PACKAGE_NAME, packageName,
         EVENT_KEY_PROCESS_NAME, processName,
         EVENT_KEY_MESSAGE, msg);
+}
+
+void EventReport::JankFrameReport(int64_t startTime, int64_t duration, const std::vector<uint16_t>& jank,
+    const std::string& pageUrl, uint32_t jankStatusVersion)
+{
+    std::string eventName = "JANK_STATS_APP";
+    auto app_version_code = AceApplicationInfo::GetInstance().GetAppVersionCode();
+    auto app_version_name = AceApplicationInfo::GetInstance().GetAppVersionName();
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto abilityName = AceApplicationInfo::GetInstance().GetAbilityName();
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        EVENT_KEY_STARTTIME, startTime,
+        STATISTIC_DURATION, duration,
+        EVENT_KEY_VERSION_CODE, app_version_code,
+        EVENT_KEY_VERSION_NAME, app_version_name,
+        EVENT_KEY_BUNDLE_NAME, packageName,
+        EVENT_KEY_ABILITY_NAME, abilityName,
+        EVENT_KEY_PAGE_URL, pageUrl,
+        EVENT_KEY_JANK_STATS, jank,
+        EVENT_KEY_JANK_STATS_VER, jankStatusVersion);
 }
 
 void EventReport::SendEventInner(const EventInfo& eventInfo)

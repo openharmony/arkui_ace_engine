@@ -57,6 +57,13 @@ enum class StickyMode {
     OPACITY,
 };
 
+enum class ScrollSnapAlign {
+    NONE = 0,
+    START,
+    CENTER,
+    END,
+};
+
 enum class SwipeEdgeEffect {
     Spring = 0,
     None,
@@ -93,6 +100,16 @@ struct ItemDivider final {
     }
 };
 } // namespace V2
+
+struct ChainAnimationOptions {
+    CalcDimension minSpace;
+    CalcDimension maxSpace;
+    double conductivity = 0;
+    double intensity = 0;
+    int32_t edgeEffect = 0;
+    double stiffness = 0;
+    double damping = 0;
+};
 
 using OnItemDeleteEvent = std::function<bool(int32_t)>;
 using OnItemMoveEvent = std::function<bool(int32_t, int32_t)>;

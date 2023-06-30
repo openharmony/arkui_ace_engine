@@ -15,27 +15,20 @@
 
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 
-#include "base/mousestyle/mouse_style.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
-#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
-#include "core/gestures/gesture_info.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 
 constexpr int32_t NAVIMODE_CHANGE_ANIMATION_DURATION = 250;
 constexpr int32_t OPACITY_ANIMATION_DURATION_APPEAR = 150;
 constexpr int32_t OPACITY_ANIMATION_DURATION_DISAPPEAR = 250;
-constexpr Dimension DEFAULT_DRAG_REGION = 20.0_vp;
-constexpr float DEFAULT_HALF = 2.0f;
 
 namespace {
 
@@ -172,6 +165,29 @@ void NavigationPattern::OnModifyDone()
             focusHub->SetParentFocusable(true);
             focusHub->RequestFocus();
         }
+
+        auto navigationLayoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
+        CHECK_NULL_VOID(navigationLayoutProperty);
+        if (navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::STACK &&
+            newTopNavPath.second != nullptr) {
+            auto preTopNavDestination = navBarNode;
+            if (preTopNavPath.second != nullptr) {
+                auto preTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+                    NavigationGroupNode::GetNavDestinationNode(preTopNavPath.second));
+            }
+            auto newTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+                NavigationGroupNode::GetNavDestinationNode(newTopNavPath.second));
+            auto curNavTitleBarNode = AceType::DynamicCast<TitleBarNode>(preTopNavDestination->GetTitleBarNode());
+            auto destinationTitleBarNode = AceType::DynamicCast<TitleBarNode>(newTopNavDestination->GetTitleBarNode());
+            auto backButtonNode = AceType::DynamicCast<FrameNode>(destinationTitleBarNode->GetBackButton());
+            if (curNavTitleBarNode || destinationTitleBarNode) {
+                hostNode->TitleTransitionInAnimation(curNavTitleBarNode, destinationTitleBarNode);
+            }
+            if (backButtonNode) {
+                hostNode->BackButtonAnimation(backButtonNode, true);
+            }
+            hostNode->NavTransitionInAnimation(preTopNavDestination, newTopNavDestination);
+        }
     }
 
     auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
@@ -183,17 +199,6 @@ void NavigationPattern::OnModifyDone()
         DoAnimation(currentMode);
     }
     preNavPathList_ = navPathList_;
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
-    auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    InitDragEvent(gestureHub);
-    auto inputHub = hub->GetOrCreateInputEventHub();
-    CHECK_NULL_VOID(inputHub);
-    InitDividerMouseEvent(inputHub);
 }
 
 bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -221,6 +226,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         }
     }
     navigationLayoutProperty->UpdateNavigationMode(navigationLayoutAlgorithm->GetNavigationMode());
+
     auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
     CHECK_NULL_RETURN(navBarNode, false);
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
@@ -239,13 +245,6 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                 eventHub->FireNavBarStateChangeEvent(true);
             }
         }
-    }
-    UpdateResponseRegion(navigationLayoutAlgorithm->GetRealDividerWidth(),
-        navigationLayoutAlgorithm->GetRealNavBarWidth(), navigationLayoutAlgorithm->GetRealNavBarHeight(),
-        navigationLayoutAlgorithm->GetNavBarOffset());
-    AddDividerHotZoneRect(navigationLayoutAlgorithm);
-    if (ifNeedInit_) {
-        ifNeedInit_ = false;
     }
     return false;
 }
@@ -274,201 +273,6 @@ RefPtr<UINode> NavigationPattern::GetNodeAndRemoveByName(const std::string& name
 RefPtr<UINode> NavigationPattern::GenerateUINodeByIndex(int32_t index)
 {
     return navigationStack_->CreateNodeByIndex(index);
-}
-
-void NavigationPattern::InitDividerMouseEvent(const RefPtr<InputEventHub>& inputHub)
-{
-    CHECK_NULL_VOID(inputHub);
-    CHECK_NULL_VOID_NOLOG(!hoverEvent_);
-
-    auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->OnHover(isHover);
-        }
-    };
-    hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
-    inputHub->AddOnHoverEvent(hoverEvent_);
-}
-
-void NavigationPattern::HandleDragStart()
-{
-    preNavBarWidth_ = realNavBarWidth_;
-}
-
-void NavigationPattern::HandleDragUpdate(float xOffset)
-{
-    auto navigationLayoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
-    CHECK_NULL_VOID(navigationLayoutProperty);
-    auto minNavBarWidth = navigationLayoutProperty->GetMinNavBarWidthValue(DEFAULT_MIN_NAV_BAR_WIDTH);
-    auto maxNavBarWidth = navigationLayoutProperty->GetMaxNavBarWidthValue(DEFAULT_MAX_NAV_BAR_WIDTH);
-    auto minContentWidth = navigationLayoutProperty->GetMinContentWidthValue(DEFAULT_MIN_CONTENT_WIDTH);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto frameSize = geometryNode->GetFrameSize();
-    auto parentWidth = frameSize.Width();
-    auto constraint = navigationLayoutProperty->GetLayoutConstraint();
-    auto parentSize = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
-
-    auto minNavBarWidthPx = minNavBarWidth.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
-    auto maxNavBarWidthPx = maxNavBarWidth.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
-    auto minContentWidthPx = minContentWidth.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
-    auto navigationPosition = navigationLayoutProperty->GetNavBarPosition().value_or(NavBarPosition::START);
-    bool isNavBarStart = navigationPosition == NavBarPosition::START;
-    auto navBarLine = preNavBarWidth_ + (isNavBarStart ? xOffset : -xOffset);
-    float currentNavBarWidth = realNavBarWidth_;
-    if (navBarLine > minNavBarWidthPx && navBarLine < maxNavBarWidthPx) {
-        if (navBarLine + static_cast<float>(DIVIDER_WIDTH.ConvertToPx()) + minContentWidthPx > parentWidth) {
-            realNavBarWidth_ = parentWidth - minContentWidthPx - static_cast<float>(DIVIDER_WIDTH.ConvertToPx());
-        } else {
-            realNavBarWidth_ = navBarLine;
-        }
-        if (realNavBarWidth_ != currentNavBarWidth) {
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-        }
-        return;
-    }
-    if (navBarLine >= maxNavBarWidthPx) {
-        realNavBarWidth_ = maxNavBarWidthPx;
-        if (realNavBarWidth_ != currentNavBarWidth) {
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-        }
-        return;
-    }
-    auto halfDragRegionWidth = dragRect_.Width() / 2;
-    if (navBarLine > minNavBarWidthPx - halfDragRegionWidth) {
-        realNavBarWidth_ = minNavBarWidthPx;
-        if (realNavBarWidth_ != currentNavBarWidth) {
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-        }
-        return;
-    }
-    realNavBarWidth_ = minNavBarWidthPx;
-    if (realNavBarWidth_ != currentNavBarWidth) {
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-    }
-}
-
-void NavigationPattern::HandleDragEnd()
-{
-    preNavBarWidth_ = realNavBarWidth_;
-}
-
-void NavigationPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
-{
-    CHECK_NULL_VOID_NOLOG(!dragEvent_);
-    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
-        pattern->HandleDragStart();
-    };
-    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
-        pattern->HandleDragUpdate(static_cast<float>(info.GetOffsetX()));
-    };
-    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
-        pattern->HandleDragEnd();
-    };
-    auto actionCancelTask = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
-        pattern->HandleDragEnd();
-    };
-    dragEvent_ = MakeRefPtr<DragEvent>(
-        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    PanDirection panDirection = { .type = PanDirection::HORIZONTAL };
-    gestureHub->SetDragEvent(dragEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
-}
-
-void NavigationPattern::OnHover(bool isHover)
-{
-    MouseFormat format = isHover ? MouseFormat::RESIZE_LEFT_RIGHT : MouseFormat::DEFAULT;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto windowId = pipeline->GetWindowId();
-    auto mouseStyle = MouseStyle::CreateMouseStyle();
-    int32_t currentPointerStyle = 0;
-    mouseStyle->GetPointerStyle(windowId, currentPointerStyle);
-    if (currentPointerStyle != static_cast<int32_t>(format)) {
-        mouseStyle->SetPointerStyle(windowId, format);
-    }
-}
-
-void NavigationPattern::UpdateResponseRegion(float realDividerWidth, float realNavBarWidth,
-    float dragRegionHeight, OffsetF dragRectOffset)
-{
-    auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto constraint = layoutProperty->GetLayoutConstraint();
-    auto scaleProperty = constraint->scaleProperty;
-    auto halfDragRegionWidth = ConvertToPx(DEFAULT_DRAG_REGION, scaleProperty).value_or(0);
-    auto dragRegionWidth = halfDragRegionWidth * 2;
-    realDividerWidth_ = realDividerWidth;
-    auto halfRealDividerWidth = 0.0f;
-    if (realDividerWidth_ > 0.0f) {
-        halfRealDividerWidth = realDividerWidth_ / DEFAULT_HALF;
-    }
-    halfDragRegionWidth += halfRealDividerWidth;
-    dragRegionWidth += realDividerWidth_;
-    realNavBarWidth_ = realNavBarWidth;
-
-    auto navBarPosition = layoutProperty->GetNavBarPosition().value_or(NavBarPosition::START);
-    if (navBarPosition == NavBarPosition::START) {
-        dragRectOffset.SetX(dragRectOffset.GetX() + halfRealDividerWidth + realNavBarWidth_ - halfDragRegionWidth);
-    } else {
-        dragRectOffset.SetX(dragRectOffset.GetX() - halfDragRegionWidth);
-    }
-
-    dragRect_.SetOffset(dragRectOffset);
-    dragRect_.SetSize(SizeF(dragRegionWidth, dragRegionHeight));
-
-    auto eventHub = GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto gestureEventHub = eventHub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureEventHub);
-    gestureEventHub->MarkResponseRegion(true);
-    std::vector<DimensionRect> responseRegion;
-    DimensionOffset responseOffset(dragRectOffset);
-    DimensionRect responseRect(Dimension(dragRect_.Width(), DimensionUnit::PX),
-        Dimension(dragRect_.Height(), DimensionUnit::PX), responseOffset);
-    responseRegion.emplace_back(responseRect);
-    gestureEventHub->SetResponseRegion(responseRegion);
-}
-
-void NavigationPattern::AddDividerHotZoneRect(const RefPtr<NavigationLayoutAlgorithm>& layoutAlgorithm)
-{
-    CHECK_NULL_VOID(layoutAlgorithm);
-    if (realDividerWidth_ <= 0.0f) {
-        return;
-    }
-    OffsetF hotZoneOffset;
-    hotZoneOffset.SetX(layoutAlgorithm->GetRealNavBarWidth() -
-        DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
-    hotZoneOffset.SetY(DEFAULT_DIVIDER_START_MARGIN.ConvertToPx());
-    SizeF hotZoneSize;
-    hotZoneSize.SetWidth(realDividerWidth_ +
-        DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_NUM * DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
-    hotZoneSize.SetHeight(layoutAlgorithm->GetRealNavBarHeight());
-    DimensionRect hotZoneRegion;
-    hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize.Width()), Dimension(hotZoneSize.Height())));
-    hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset.GetX()), Dimension(hotZoneOffset.GetY())));
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto children = host->GetChildren();
-    for (auto begin = children.begin(); begin != children.end(); begin++) {
-        auto dividerNode = *begin;
-        if (dividerNode->GetTag() == V2::DIVIDER_ETS_TAG) {
-            auto dividerFrameNode = AceType::DynamicCast<FrameNode>(dividerNode);
-            CHECK_NULL_VOID(dividerFrameNode);
-            dividerFrameNode->AddHotZoneRect(hotZoneRegion);
-            break;
-        }
-    }
 }
 
 } // namespace OHOS::Ace::NG

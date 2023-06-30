@@ -170,4 +170,17 @@ void ScrollModelNG::SetEdgeEffect(EdgeEffect edgeEffect)
     ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, EdgeEffect, edgeEffect);
 }
 
+void ScrollModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNestedScroll(nestedOpt);
+}
+
+void ScrollModelNG::SetScrollEnabled(bool scrollEnabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollEnabled, scrollEnabled);
+}
 } // namespace OHOS::Ace::NG

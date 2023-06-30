@@ -15,17 +15,20 @@
 
 #include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
 
+#include <ctime>
 #include <string>
 #include <sys/time.h>
 
 #include "base/i18n/localization.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline/base/render_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t TOTAL_MINUTE_OF_HOUR = 60;
 constexpr int32_t TOTAL_SECONDS_OF_HOUR = 60 * 60;
 constexpr int32_t BASE_YEAR = 1900;
 constexpr int32_t INTERVAL_OF_U_SECOND = 1000000;
@@ -34,8 +37,10 @@ const std::string DEFAULT_FORMAT = "hms";
 
 int32_t GetSystemTimeZone()
 {
-    // timezone is a global variable defined in time.h, in seconds
-    int32_t hoursWest = timezone / TOTAL_SECONDS_OF_HOUR;
+    struct timeval currentTime {};
+    struct timezone timeZone {};
+    gettimeofday(&currentTime, &timeZone);
+    int32_t hoursWest = timeZone.tz_minuteswest / TOTAL_MINUTE_OF_HOUR;
     return hoursWest;
 }
 } // namespace
@@ -51,11 +56,38 @@ void TextClockPattern::OnAttachToFrameNode()
     InitUpdateTimeTextCallBack();
 }
 
+void TextClockPattern::UpdateTextLayoutProperty(
+    RefPtr<TextClockLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    if (layoutProperty->GetFontSize().has_value()) {
+        textLayoutProperty->UpdateFontSize(layoutProperty->GetFontSize().value());
+    }
+    if (layoutProperty->GetFontWeight().has_value()) {
+        textLayoutProperty->UpdateFontWeight(layoutProperty->GetFontWeight().value());
+    }
+    if (layoutProperty->GetTextColor().has_value()) {
+        textLayoutProperty->UpdateTextColor(layoutProperty->GetTextColor().value());
+    }
+    if (layoutProperty->GetFontFamily().has_value()) {
+        textLayoutProperty->UpdateFontFamily(layoutProperty->GetFontFamily().value());
+    }
+    if (layoutProperty->GetItalicFontStyle().has_value()) {
+        textLayoutProperty->UpdateItalicFontStyle(layoutProperty->GetItalicFontStyle().value());
+    }
+}
+
 void TextClockPattern::OnModifyDone()
 {
-    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textNode = GetTextNode();
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
+    auto textClockProperty = host->GetLayoutProperty<TextClockLayoutProperty>();
+    CHECK_NULL_VOID(textClockProperty);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
+    UpdateTextLayoutProperty(textClockProperty, textLayoutProperty);
     hourWest_ = GetHoursWest();
     UpdateTimeText();
 }
@@ -64,7 +96,7 @@ void TextClockPattern::InitTextClockController()
 {
     CHECK_NULL_VOID_NOLOG(textClockController_);
     if (textClockController_->HasInitialized()) {
-            return;
+        return;
     }
     textClockController_->OnStart([wp = WeakClaim(this)]() {
         auto textClock = wp.Upgrade();
@@ -99,7 +131,9 @@ void TextClockPattern::UpdateTimeText()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    auto textNode = GetTextNode();
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
 
     std::string currentTime = GetCurrentFormatDateTime();
@@ -108,8 +142,12 @@ void TextClockPattern::UpdateTimeText()
         return;
     }
     textLayoutProperty->UpdateContent(currentTime); // update time text.
+    auto textContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(textContext);
+    textContext->SetClipToFrame(false);
+    textContext->UpdateClipEdge(false);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    TextPattern::OnModifyDone();
+    textNode->MarkModifyDone();
     if (isStart_) {
         RequestUpdateForNextSecond();
     }
@@ -156,8 +194,8 @@ void TextClockPattern::UpdateTimeTextCallBack()
 std::string TextClockPattern::GetCurrentFormatDateTime()
 {
     time_t utc = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    auto tz = GetSystemTimeZone();
-    time_t localTime = (hourWest_ == tz) ? utc : utc - ((hourWest_ - tz) * TOTAL_SECONDS_OF_HOUR);
+    time_t localTime = (hourWest_ == GetSystemTimeZone()) ? utc : utc - (hourWest_ * TOTAL_SECONDS_OF_HOUR);
+
     auto* timeZoneTime = std::localtime(&localTime);
     CHECK_NULL_RETURN(timeZoneTime, "");
     // This is for i18n date time.
@@ -177,7 +215,7 @@ void TextClockPattern::FireChangeEvent() const
 {
     auto textClockEventHub = GetEventHub<TextClockEventHub>();
     CHECK_NULL_VOID(textClockEventHub);
-    textClockEventHub->FireChangeEvent(std::to_string(GetMilliseconds()));
+    textClockEventHub->FireChangeEvent(std::to_string(GetMilliseconds() / MICROSECONDS_OF_MILLISECOND));
 }
 
 std::string TextClockPattern::GetFormat() const
@@ -192,9 +230,22 @@ int32_t TextClockPattern::GetHoursWest() const
     auto textClockLayoutProperty = GetLayoutProperty<TextClockLayoutProperty>();
     CHECK_NULL_RETURN(textClockLayoutProperty, GetSystemTimeZone());
     if (textClockLayoutProperty->GetHoursWest().has_value()) {
-        return NearEqual(textClockLayoutProperty->GetHoursWest().value(), INT_MAX) ?
-            GetSystemTimeZone() : textClockLayoutProperty->GetHoursWest().value();
+        return NearEqual(textClockLayoutProperty->GetHoursWest().value(), INT_MAX)
+                   ? GetSystemTimeZone()
+                   : textClockLayoutProperty->GetHoursWest().value();
     }
     return GetSystemTimeZone();
+}
+
+RefPtr<FrameNode> TextClockPattern::GetTextNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(host->GetLastChild());
+    CHECK_NULL_RETURN(textNode, nullptr);
+    if (textNode->GetTag() != V2::TEXT_ETS_TAG) {
+        return nullptr;
+    }
+    return textNode;
 }
 } // namespace OHOS::Ace::NG
