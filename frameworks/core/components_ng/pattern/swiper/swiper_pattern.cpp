@@ -74,6 +74,7 @@ void SwiperPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->SetClipToBounds(true);
     host->GetRenderContext()->UpdateClipEdge(true);
+    InitSurfaceChangedCallback();
 }
 
 RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
@@ -210,6 +211,36 @@ void SwiperPattern::OnModifyDone()
         translateTask_.Cancel();
     }
     SetAccessibilityAction();
+    if ((layoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) {
+        mainSizeIsMeasured_ = false;
+        itemPosition_.clear();
+        jumpIndex_ = currentIndex_;
+    }
+}
+
+void SwiperPattern::InitSurfaceChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (!HasSurfaceChangedCallback()) {
+        auto callbackId = pipeline->RegisterSurfaceChangedCallback(
+            [weak = WeakClaim(this)](int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight,
+                WindowSizeChangeReason type) {
+                auto swiper = weak.Upgrade();
+                if (!swiper) {
+                    return;
+                }
+                if (type == WindowSizeChangeReason::ROTATION) {
+                    swiper->currentOffset_ = 0.0f;
+                    swiper->itemPosition_.clear();
+                    swiper->jumpIndex_ = swiper->currentIndex_;
+                }
+            });
+        LOGD("Add surface changed callback id %{public}d", callbackId);
+        UpdateSurfaceChangedCallbackId(callbackId);
+    }
 }
 
 void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)

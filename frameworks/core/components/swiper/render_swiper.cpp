@@ -146,7 +146,8 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
 
     if (context && callbackId_ <= 0) {
         callbackId_ = context->RegisterSurfaceChangedCallback(
-            [weak = WeakClaim(this)](int32_t width, int32_t height, int32_t oldWidth, int32_t oldHeight) {
+            [weak = WeakClaim(this)](
+                int32_t width, int32_t height, int32_t oldWidth, int32_t oldHeight, WindowSizeChangeReason type) {
                 auto swiper = weak.Upgrade();
                 if (swiper) {
                     swiper->OnSurfaceChanged();
