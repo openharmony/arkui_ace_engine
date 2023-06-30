@@ -691,7 +691,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_rect.cpp",
       "jsview/js_recycle_view.cpp",
       "jsview/js_refresh.cpp",
-      "jsview/js_relative_container.cpp",
       "jsview/js_render_image.cpp",
       "jsview/js_rendering_context.cpp",
       "jsview/js_rendering_context_settings.cpp",
@@ -740,6 +739,7 @@ template("declarative_js_engine_ng") {
       sources += [
         "jsview/js_pattern_lock.cpp",
         "jsview/js_qrcode.cpp",
+        "jsview/js_relative_container.cpp",
       ]
     }
 
