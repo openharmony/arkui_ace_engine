@@ -87,4 +87,6 @@ bool ListPattern::OnScrollSnapCallback(double targetOffset, double velocity)
 {
     return false;
 }
+
+void ListPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
 } // namespace OHOS::Ace::NG

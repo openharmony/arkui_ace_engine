@@ -73,6 +73,9 @@ void JSImageAnimator::JSBind(BindingTarget globalObj)
     JSClass<JSImageAnimator>::StaticMethod("onRepeat", &JSImageAnimator::OnRepeat, opt);
     JSClass<JSImageAnimator>::StaticMethod("onCancel", &JSImageAnimator::OnCancel, opt);
     JSClass<JSImageAnimator>::StaticMethod("onFinish", &JSImageAnimator::OnFinish, opt);
+    JSClass<JSImageAnimator>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSImageAnimator>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSImageAnimator>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
 
     JSClass<JSImageAnimator>::InheritAndBind<JSContainerBase>(globalObj);
 }

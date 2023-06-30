@@ -95,6 +95,7 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     }
     textNode->MountToParent(toastNode);
     toastProperty->UpdateBottom(toastBottom);
+    toastNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
     toastNode->MarkModifyDone();
     return toastNode;
 }

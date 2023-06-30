@@ -18,8 +18,10 @@
 #include "core/components/plugin/render_plugin.h"
 #include "core/pipeline/base/render_sub_container.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkImage.h"
 #include "include/core/SkPictureRecorder.h"
+#endif
 
 namespace OHOS::Ace {
 namespace {
@@ -119,6 +121,7 @@ void RosenRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Offse
 
 void RosenRenderContext::StartRecording()
 {
+#ifndef USE_ROSEN_DRAWING
     recorder_ = new SkPictureRecorder();
     recordingCanvas_ = recorder_->beginRecording(
         SkRect::MakeXYWH(estimatedRect_.Left(), estimatedRect_.Top(), estimatedRect_.Width(), estimatedRect_.Height()));
@@ -129,6 +132,16 @@ void RosenRenderContext::StartRecording()
             SkRect::MakeXYWH(clipHole_.Left(), clipHole_.Top(), clipHole_.Right(), clipHole_.Bottom()),
             SkClipOp::kDifference, true);
     }
+#else
+    recordingCanvas_ = new RSRecordingCanvas(estimatedRect_.Width(), estimatedRect_.Height());
+    if (clipHole_.IsValid()) {
+        recordingCanvas_->Save();
+        needRestoreHole_ = true;
+        recordingCanvas_->ClipRect(
+            RSRect(clipHole_.Left(), clipHole_.Top(), clipHole_.Right(), clipHole_.Bottom()),
+            RSClipOp::DIFFERENCE, true);
+    }
+#endif
 }
 
 void RosenRenderContext::StopRecordingIfNeeded()
@@ -140,14 +153,23 @@ void RosenRenderContext::StopRecordingIfNeeded()
     }
 
     if (needRestoreHole_) {
+#ifndef USE_ROSEN_DRAWING
         recordingCanvas_->restore();
+#else
+        recordingCanvas_->Restore();
+#endif
         needRestoreHole_ = false;
     }
 
     if (IsRecording()) {
+#ifndef USE_ROSEN_DRAWING
         delete recorder_;
         recorder_ = nullptr;
         recordingCanvas_ = nullptr;
+#else
+        delete recordingCanvas_;
+        recordingCanvas_ = nullptr;
+#endif
     }
 }
 
@@ -183,7 +205,11 @@ void RosenRenderContext::InitContext(
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 SkCanvas* RosenRenderContext::GetCanvas()
+#else
+RSCanvas* RosenRenderContext::GetCanvas()
+#endif
 {
     // if recording, return recording canvas
     return recordingCanvas_ ? recordingCanvas_ : rosenCanvas_;
@@ -194,6 +220,7 @@ const std::shared_ptr<RSNode>& RosenRenderContext::GetRSNode()
     return rsNode_;
 }
 
+#ifndef USE_ROSEN_DRAWING
 sk_sp<SkPicture> RosenRenderContext::FinishRecordingAsPicture()
 {
     if (!recorder_) {
@@ -215,12 +242,29 @@ sk_sp<SkImage> RosenRenderContext::FinishRecordingAsImage()
         nullptr, SkImage::BitDepth::kU8, nullptr);
     return image;
 }
+#else
+std::shared_ptr<RSPicture> RosenRenderContext::FinishRecordingAsPicture()
+{
+    LOGE("Drawing is not supported");
+    return nullptr;
+}
+
+std::shared_ptr<RSImage> RosenRenderContext::FinishRecordingAsImage()
+{
+    LOGE("Drawing is not supported");
+    return nullptr;
+}
+#endif
 
 void RosenRenderContext::Restore()
 {
     auto canvas = GetCanvas();
     if (canvas != nullptr) {
+#ifndef USE_ROSEN_DRAWING
         canvas->restore();
+#else
+        canvas->Restore();
+#endif
     }
 }
 

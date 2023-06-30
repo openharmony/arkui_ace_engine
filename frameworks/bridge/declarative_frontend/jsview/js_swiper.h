@@ -49,7 +49,7 @@ protected:
     static void SetCachedCount(int32_t cachedCount);
     static void SetEnabled(const JSCallbackInfo& info);
     static void SetDisableSwipe(bool disableSwipe);
-    static void SetCurve(const std::string& curveStr);
+    static void SetCurve(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& info);
     static void SetOnAnimationStart(const JSCallbackInfo& info);
     static void SetOnAnimationEnd(const JSCallbackInfo& info);

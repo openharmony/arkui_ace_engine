@@ -649,6 +649,16 @@ void PluginFrontend::OnSurfaceChanged(int32_t width, int32_t height)
     delegate_->OnSurfaceChanged();
 }
 
+void PluginFrontend::OnLayoutCompleted(const std::string& componentId)
+{
+    CHECK_NULL_VOID_NOLOG(delegate_);
+}
+
+void PluginFrontend::OnDrawCompleted(const std::string& componentId)
+{
+    CHECK_NULL_VOID_NOLOG(delegate_);
+}
+
 void PluginFrontend::DumpFrontend() const
 {
     CHECK_NULL_VOID_NOLOG(delegate_);

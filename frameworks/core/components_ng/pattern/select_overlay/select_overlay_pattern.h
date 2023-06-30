@@ -114,6 +114,11 @@ public:
 
     void ShowOrHiddenMenu(bool isHidden);
 
+    void SetClosedByGlobalTouchEvent(bool closedByGlobalTouch)
+    {
+        closedByGlobalTouchEvent_ = closedByGlobalTouch;
+    }
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void UpdateHandleHotZone();
@@ -152,6 +157,8 @@ private:
     OffsetF defaultMenuEndOffset_;
 
     RefPtr<SelectOverlayModifier> selectOverlayModifier_;
+
+    bool closedByGlobalTouchEvent_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayPattern);
 };

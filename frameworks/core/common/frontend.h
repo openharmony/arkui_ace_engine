@@ -214,6 +214,9 @@ public:
 
     virtual void OnSurfaceChanged(int32_t width, int32_t height) = 0;
 
+    virtual void OnLayoutCompleted(const std::string& componentId) = 0;
+    virtual void OnDrawCompleted(const std::string& componentId) = 0;
+
     virtual void TriggerGarbageCollection() {}
 
     virtual void DumpHeapSnapshot(bool isPrivate) {}

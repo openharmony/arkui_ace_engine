@@ -132,6 +132,11 @@ void ButtonModelNG::CreateWithLabel(const std::string& label)
     buttonAccessibilityProperty->SetText(label);
     stack->Push(buttonNode);
     ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Label, label);
+    auto layoutProperty = buttonNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetPaddingProperty()) {
+        return;
+    }
     auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     auto padding = buttonTheme->GetPadding();

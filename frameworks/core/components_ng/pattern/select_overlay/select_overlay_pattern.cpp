@@ -91,7 +91,8 @@ void SelectOverlayPattern::OnAttachToFrameNode()
 void SelectOverlayPattern::OnDetachFromFrameNode(FrameNode* /*frameNode*/)
 {
     if (info_->onClose) {
-        info_->onClose();
+        info_->onClose(closedByGlobalTouchEvent_);
+        closedByGlobalTouchEvent_ = false;
     }
 }
 

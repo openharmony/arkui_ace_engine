@@ -272,6 +272,9 @@ private:
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;
     RefPtr<FrameNode> dragNode_;
+    // to check if drag is in progress
+    WeakPtr<FrameNode> dragNodeWk_;
+
     CopyOptions copyOption_ = CopyOptions::None;
     TextSelector textSelector_;
     OffsetF contentOffset_;

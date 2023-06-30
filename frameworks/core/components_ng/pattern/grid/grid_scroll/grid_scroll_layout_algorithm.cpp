@@ -600,7 +600,7 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
 
 void GridScrollLayoutAlgorithm::SkipForwardLines(float mainSize, LayoutWrapper* layoutWrapper)
 {
-    if (!GreatOrEqual(gridLayoutInfo_.currentOffset_, mainSize)) {
+    if (!GreatOrEqual(gridLayoutInfo_.currentOffset_ - gridLayoutInfo_.prevOffset_, mainSize)) {
         return;
     }
 
@@ -641,7 +641,7 @@ void GridScrollLayoutAlgorithm::SkipForwardLines(float mainSize, LayoutWrapper* 
 
 void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper* layoutWrapper)
 {
-    if (!GreatOrEqual(-gridLayoutInfo_.currentOffset_, mainSize)) {
+    if (!GreatOrEqual(gridLayoutInfo_.prevOffset_ - gridLayoutInfo_.currentOffset_, mainSize)) {
         return;
     }
 
@@ -1078,7 +1078,7 @@ float GridScrollLayoutAlgorithm::ComputeItemCrossPosition(LayoutWrapper* layoutW
     return position;
 }
 
-int32_t GridScrollLayoutAlgorithm::GetStartingItem(LayoutWrapper* layoutWrapper, int32_t currentIndex) const
+int32_t GridScrollLayoutAlgorithm::GetStartingItem(LayoutWrapper* layoutWrapper, int32_t currentIndex)
 {
     int32_t firstIndex = 0;
     currentIndex =
@@ -1107,6 +1107,14 @@ int32_t GridScrollLayoutAlgorithm::GetStartingItem(LayoutWrapper* layoutWrapper,
             if (!childLayoutWrapper) {
                 LOGE("GridItem wrapper of index %{public}u null", index);
                 break;
+            }
+            auto childLayoutProperty = DynamicCast<GridItemLayoutProperty>(childLayoutWrapper->GetLayoutProperty());
+            CHECK_NULL_RETURN(childLayoutProperty, 0);
+            auto crossIndex = childLayoutProperty->GetCustomCrossIndex(axis_);
+            // Grid may change from no big item to has big item
+            if (crossIndex >= 0) {
+                gridLayoutInfo_.hasBigItem_ = true;
+                return GetStartingItem(layoutWrapper, currentIndex);
             }
             if (index % gridLayoutInfo_.crossCount_ == 0) {
                 firstIndex = index;

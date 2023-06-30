@@ -115,6 +115,9 @@ void JSNavRouter::JSBind(BindingTarget globalObj)
     JSClass<JSNavRouter>::StaticMethod("create", &JSNavRouter::Create);
     JSClass<JSNavRouter>::StaticMethod("onStateChange", &JSNavRouter::SetOnStateChange);
     JSClass<JSNavRouter>::StaticMethod("mode", &JSNavRouter::SetNavRouteMode);
+    JSClass<JSNavRouter>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSNavRouter>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSNavRouter>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSNavRouter>::InheritAndBind<JSContainerBase>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

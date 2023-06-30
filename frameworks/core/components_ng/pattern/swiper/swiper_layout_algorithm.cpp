@@ -338,7 +338,7 @@ bool SwiperLayoutAlgorithm::LayoutForwardItem(LayoutWrapper* layoutWrapper, cons
         }
     }
     endPos = startPos + mainLen;
-    itemPosition_[currentIndex] = { startPos, endPos };
+    itemPosition_[currentIndex] = { startPos, endPos, wrapper->GetHostNode() };
     return true;
 }
 
@@ -376,7 +376,7 @@ bool SwiperLayoutAlgorithm::LayoutBackwardItem(LayoutWrapper* layoutWrapper, con
         }
     }
     startPos = endPos - mainLen;
-    itemPosition_[currentIndex] = { startPos, endPos };
+    itemPosition_[currentIndex] = { startPos, endPos, wrapper->GetHostNode() };
     return true;
 }
 
@@ -461,7 +461,7 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
                 pos->second.endPos, prevMargin_ != 0.0f ? startMainPos_ - prevMargin_ - spaceWidth_ : startMainPos_)) {
             break;
         }
-        layoutWrapper->RemoveChildInRenderTree(pos->first);
+        layoutWrapper->RemoveChildInRenderTree(GetLoopIndex(pos->first));
         itemPosition_.erase(pos++);
     }
 }
@@ -516,6 +516,7 @@ void SwiperLayoutAlgorithm::LayoutBackward(
             currentStartPos, currentEndPos);
         // reach the valid target index
         if (backwardFeature_ && targetIndex_ && LessOrEqual(currentIndex, targetIndex_.value())) {
+            startMainPos = currentStartPos;
             currentTargetIndex_ = targetIndex_.value();
             targetIndex_.reset();
         }
@@ -550,7 +551,7 @@ void SwiperLayoutAlgorithm::LayoutBackward(
                 pos->second.startPos, nextMargin_ != 0.0f ? endMainPos_ + nextMargin_ + spaceWidth_ : endMainPos_)) {
             break;
         }
-        layoutWrapper->RemoveChildInRenderTree(pos->first);
+        layoutWrapper->RemoveChildInRenderTree(GetLoopIndex(pos->first));
         removeIndexes.emplace_back(pos->first);
     }
     for (const auto& index : removeIndexes) {
@@ -842,8 +843,8 @@ void SwiperLayoutAlgorithm::ArrowLayout(
         if (isLeftArrow && !NonNegative(arrowOffset.GetX() + padding.left.value_or(0.0f))) {
             arrowOffset.SetX(0.0f + padding.left.value_or(0.0f));
         }
-        if (GreatOrEqual(arrowOffset.GetX() + arrowFrameSize.Width(), swiperFrameSize.Width() -
-                padding.right.value_or(0.0f))) {
+        if (GreatOrEqual(
+                arrowOffset.GetX() + arrowFrameSize.Width(), swiperFrameSize.Width() - padding.right.value_or(0.0f))) {
             arrowOffset.SetX(swiperFrameSize.Width() - arrowFrameSize.Width() - padding.right.value_or(0.0f));
         }
         arrowOffset.SetY(indicatorFrameRect.Top() + (indicatorFrameSize.Height() - arrowFrameSize.Height()) * 0.5f);
@@ -870,8 +871,8 @@ void SwiperLayoutAlgorithm::ArrowLayout(
         if (isLeftArrow && !NonNegative(arrowOffset.GetY() + padding.top.value_or(0.0f))) {
             arrowOffset.SetY(0.0f + padding.top.value_or(0.0f));
         }
-        if (GreatOrEqual(arrowOffset.GetY() + arrowFrameSize.Height(), swiperFrameSize.Height() -
-                padding.bottom.value_or(0.0f))) {
+        if (GreatOrEqual(arrowOffset.GetY() + arrowFrameSize.Height(),
+                swiperFrameSize.Height() - padding.bottom.value_or(0.0f))) {
             arrowOffset.SetY(swiperFrameSize.Height() - arrowFrameSize.Height() - padding.bottom.value_or(0.0f));
         }
     } else {

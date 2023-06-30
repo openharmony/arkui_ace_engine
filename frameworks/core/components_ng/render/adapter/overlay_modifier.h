@@ -86,10 +86,15 @@ public:
             paragraph->Layout(context.width);
             OffsetF offset = OverlayTextModifier::GetTextPosition(SizeF(context.width, context.height),
                 SizeF(paragraph->GetLongestLine(), paragraph->GetHeight()), overlayOptions);
+#ifndef USE_ROSEN_DRAWING
             std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas*) {} };
             RSCanvas canvas(&skCanvas);
             CHECK_NULL_VOID(&canvas);
             paragraph->Paint(&canvas, offset.GetX(), offset.GetY());
+#else
+            CHECK_NULL_VOID(context.canvas);
+            paragraph->Paint(context.canvas, offset.GetX(), offset.GetY());
+#endif
         } else {
             LOGE("property is null");
         }
@@ -103,6 +108,18 @@ public:
         } else {
             property_->Set(data);
         }
+    }
+
+    OffsetF GetOverlayOffset()
+    {
+        OffsetF overlayOffset;
+        if (property_) {
+            auto overlayOptions = property_->Get().GetOverlayOptions();
+            auto dx = overlayOptions.x.ConvertToPx();
+            auto dy = overlayOptions.y.ConvertToPx();
+            overlayOffset = OffsetF(dx, dy);
+        }
+        return overlayOffset;
     }
 
 private:

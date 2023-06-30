@@ -252,7 +252,7 @@ void TimePickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextC
         if (NotLoopOptions() && !virtualIndexValidate) {
             textLayoutProperty->UpdateContent("");
         } else {
-            auto optionValue = timePickerRowPattern->GetAllOptions(host)[optionIndex];
+            auto optionValue = timePickerRowPattern->GetOptionsValue(host, optionIndex);
             textLayoutProperty->UpdateContent(optionValue);
             textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         }
@@ -724,7 +724,7 @@ bool TimePickerColumnPattern::NotLoopOptions() const
     CHECK_NULL_RETURN(host, false);
     auto showOptionCount = GetShowCount();
     auto options = GetOptions();
-    uint32_t totalOptionCount = options[host].size();
+    uint32_t totalOptionCount = options[host];
     return totalOptionCount <= showOptionCount / 2 + 1; // the critical value of loop condition.
 }
 
@@ -733,7 +733,7 @@ bool TimePickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropert
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto options = GetOptions();
-    auto totalOptionCount = options[host].size();
+    auto totalOptionCount = options[host];
 
     CHECK_NULL_RETURN(host, false);
     CHECK_NULL_RETURN(totalOptionCount, false);
@@ -781,7 +781,7 @@ bool TimePickerColumnPattern::CanMove(bool isDown) const
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto options = GetOptions();
-    int totalOptionCount = static_cast<int>(options[host].size());
+    int totalOptionCount = static_cast<int>(options[host]);
     auto timePickerColumnPattern = host->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_RETURN(timePickerColumnPattern, false);
     int currentIndex = static_cast<int>(timePickerColumnPattern->GetCurrentIndex());

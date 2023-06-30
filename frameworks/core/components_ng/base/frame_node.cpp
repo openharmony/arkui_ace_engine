@@ -26,6 +26,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/layout_algorithm.h"
@@ -36,6 +37,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -444,6 +446,10 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure() || dirty->SkipMeasureContent();
     config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
+    if ((config.skipMeasure == false) && (config.skipLayout == false) && GetInspectorId().has_value()) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
+    }
     auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(dirty, config);
     // TODO: temp use and need to delete.
     needRerender = needRerender || pattern_->OnDirtyLayoutWrapperSwap(dirty, config.skipMeasure, config.skipLayout);
@@ -669,6 +675,9 @@ void FrameNode::SetActive(bool active)
         if (parent) {
             parent->MarkNeedSyncRenderTree();
         }
+        if (GetTag() == V2::TAB_CONTENT_ITEM_ETS_TAG) {
+            SetJSViewActive(active);
+        }
     }
 }
 
@@ -733,9 +742,17 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     }
     auto wrapper = CreatePaintWrapper();
     CHECK_NULL_RETURN_NOLOG(wrapper, std::nullopt);
-    auto task = [wrapper, paintProperty = paintProperty_]() {
+    auto weak = AceType::WeakClaim(this);
+    auto task = [weak, wrapper, paintProperty = paintProperty_]() {
+        ACE_SCOPED_TRACE("FrameNode::RenderTask");
+        auto ref = weak.Upgrade();
         wrapper->FlushRender();
         paintProperty->CleanDirty();
+
+        if (ref->GetInspectorId().has_value()) {
+            auto renderContext = ref->GetRenderContext();
+            renderContext->RequestNextFrame();
+        }
     };
     if (forceUseMainThread || wrapper->CheckShouldRunOnMain()) {
         return UITask(std::move(task), MAIN_TASK);
@@ -1208,7 +1225,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             return HitTestResult::OUT_OF_REGION;
         }
     }
-    pattern_->OnTouchTestHit();
+    pattern_->OnTouchTestHit(touchRestrict.hitTestType);
 
     HitTestResult testResult = HitTestResult::OUT_OF_REGION;
     bool preventBubbling = false;
@@ -1568,6 +1585,21 @@ OffsetF FrameNode::GetPaintRectOffsetToPage() const
         parent = parent->GetAncestorNodeOfFrame();
     }
     return (parent && parent->GetTag() == V2::PAGE_ETS_TAG) ? offset : OffsetF();
+}
+
+std::optional<RectF> FrameNode::GetViewPort() const
+{
+    if (viewPort_.has_value()) {
+        return viewPort_;
+    }
+    auto parent = GetAncestorNodeOfFrame();
+    while (parent) {
+        if (parent->GetViewPort().has_value()) {
+            return parent->GetViewPort();
+        }
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    return std::nullopt;
 }
 
 void FrameNode::OnNotifyMemoryLevel(int32_t level)

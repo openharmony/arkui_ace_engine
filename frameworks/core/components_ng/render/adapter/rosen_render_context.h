@@ -189,6 +189,10 @@ public:
 
     RectF GetPaintRectWithoutTransform() override;
 
+    // append translate value and return origin value.
+    void UpdateTranslateInXY(const OffsetF& offset) override;
+    OffsetF GetShowingTranslateProperty() override;
+
     void GetPointWithTransform(PointF& point) override;
 
     void ClearDrawCommands() override;
@@ -399,6 +403,10 @@ private:
     std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;
     std::shared_ptr<OverlayTextModifier> modifier_ = nullptr;
     std::shared_ptr<GradientStyleModifier> gradientStyleModifier_;
+
+    // translate modifiers for developer
+    std::shared_ptr<Rosen::RSTranslateModifier> translateXY_;
+    std::shared_ptr<Rosen::RSTranslateZModifier> translateZ_;
 
     // graphics modifiers
     struct GraphicModifiers {
