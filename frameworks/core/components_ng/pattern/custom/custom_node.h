@@ -76,8 +76,6 @@ public:
         return jsViewName_;
     }
 
-    void SetJSViewActive(bool active) override;
-
 private:
     std::string viewKey_;
     RenderFunction renderFunction_;
