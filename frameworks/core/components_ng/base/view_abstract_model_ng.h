@@ -26,6 +26,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
+#include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -35,6 +36,7 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/overlay_property.h"
+#include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -434,9 +436,42 @@ public:
         ViewAbstract::SetChainedTransition(effect);
     }
 
-    void SetOverlay(const std::string& text, const std::optional<Alignment>& align,
-        const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY) override
+    void SetOverlay(const std::string& text, const std::function<void()>&& buildFunc,
+        const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+        const std::optional<Dimension>& offsetY) override
     {
+        if (buildFunc) {
+            auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            CHECK_NULL_VOID(frameNode);
+            auto overlayNode = frameNode->GetOverlayNode();
+            if (!overlayNode) {
+                auto buildNodeFunc = [buildFunc]() -> RefPtr<UINode> {
+                    ScopedViewStackProcessor builderViewStackProcessor;
+                    buildFunc();
+                    auto customNode = ViewStackProcessor::GetInstance()->Finish();
+                    return customNode;
+                };
+                overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunc());
+                CHECK_NULL_VOID(overlayNode);
+                frameNode->AddChild(overlayNode);
+                frameNode->SetOverlayNode(AceType::WeakClaim(AceType::RawPtr(overlayNode)));
+            } else {
+                overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            }
+            auto layoutProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
+            CHECK_NULL_VOID(layoutProperty);
+            layoutProperty->SetIsOverlayNode(true);
+            layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+            layoutProperty->UpdateAlignment(align.value_or(Alignment::TOP_LEFT));
+            layoutProperty->SetOverlayOffset(offsetX, offsetY);
+            auto renderContext = overlayNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->UpdateZIndex(INT32_MAX);
+            auto focusHub = overlayNode->GetOrCreateFocusHub();
+            CHECK_NULL_VOID(focusHub);
+            focusHub->SetFocusable(false);
+            return;
+        }
         NG::OverlayOptions overlay;
         overlay.content = text;
         overlay.align = align.value_or(Alignment::TOP_LEFT);

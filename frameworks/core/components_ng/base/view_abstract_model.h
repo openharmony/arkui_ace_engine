@@ -131,8 +131,9 @@ public:
     virtual void SetOpacity(double opacity, bool passThrough = false) = 0;
     virtual void SetTransition(const NG::TransitionOptions& transitionOptions, bool passThrough = false) = 0;
     virtual void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect, bool passThrough = false) = 0;
-    virtual void SetOverlay(const std::string& text, const std::optional<Alignment>& align,
-        const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY) = 0;
+    virtual void SetOverlay(const std::string& text, const std::function<void()>&& buildFunc,
+        const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+        const std::optional<Dimension>& offsetY) = 0;
     virtual void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) = 0;
     virtual void SetSharedTransition(
         const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) = 0;

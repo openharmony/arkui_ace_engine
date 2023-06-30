@@ -56,13 +56,7 @@ public:
 
     void Update(WeakPtr<FrameNode> hostNode, RefPtr<GeometryNode> geometryNode, RefPtr<LayoutProperty> layoutProperty);
 
-    void AppendChild(const RefPtr<LayoutWrapper>& child)
-    {
-        CHECK_NULL_VOID(child);
-        children_.emplace_back(child);
-        childrenMap_.try_emplace(currentChildCount_, child);
-        ++currentChildCount_;
-    }
+    void AppendChild(const RefPtr<LayoutWrapper>& child, bool isOverlayNode = false);
 
     void SetLayoutWrapperBuilder(const RefPtr<LayoutWrapperBuilder>& builder)
     {
@@ -176,6 +170,7 @@ public:
     // Notice: only the cached layoutWrapper (after call GetChildLayoutWrapper) will update the host.
     void MountToHostOnMainThread();
     void SwapDirtyLayoutWrapperOnMainThread();
+    void SwapDirtyLayoutWrapperOnMainThreadForChild(RefPtr<LayoutWrapper> child);
 
     bool IsForceSyncRenderTree() const
     {
@@ -203,6 +198,11 @@ public:
     void SetOutOfLayout(bool outOfLayout)
     {
         outOfLayout_ = outOfLayout;
+    }
+
+    void SetIsOverlayNode(bool isOverlayNode)
+    {
+        isOverylayNode_ = isOverlayNode;
     }
 
     // ------------------------------------------------------------------------
@@ -243,11 +243,15 @@ private:
     void ExpandSafeAreaInner();
     // keyboard avoidance is done by offsetting, to expand into keyboard area, reverse the offset.
     void ExpandIntoKeyboard();
+    void LayoutOverlay();
 
     // Used to save a persist wrapper created by child, ifElse, ForEach, the map stores [index, Wrapper].
     std::list<RefPtr<LayoutWrapper>> children_;
     // Speed up the speed of getting child by index.
     std::unordered_map<int32_t, RefPtr<LayoutWrapper>> childrenMap_;
+    
+    RefPtr<LayoutWrapper> overlayChild;
+
     // cached for GetAllChildrenWithBuild function.
     std::list<RefPtr<LayoutWrapper>> cachedList_;
 
@@ -264,6 +268,7 @@ private:
     bool isActive_ = false;
     bool needForceSyncRenderTree_ = false;
     bool isRootNode_ = false;
+    bool isOverylayNode_ = false;
     std::optional<bool> skipMeasureContent_;
     std::optional<bool> needForceMeasureAndLayout_;
 

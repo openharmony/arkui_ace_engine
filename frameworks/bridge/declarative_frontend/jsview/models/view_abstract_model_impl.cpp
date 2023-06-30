@@ -744,9 +744,13 @@ void ViewAbstractModelImpl::SetTransition(const NG::TransitionOptions& transitio
     }
 }
 
-void ViewAbstractModelImpl::SetOverlay(const std::string& text, const std::optional<Alignment>& align,
-    const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY)
+void ViewAbstractModelImpl::SetOverlay(const std::string& text, const std::function<void()>&& buildFunc,
+    const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+    const std::optional<Dimension>& offsetY)
 {
+    if (buildFunc) {
+        return;
+    }
     auto coverageComponent = ViewStackProcessor::GetInstance()->GetCoverageComponent();
     coverageComponent->SetTextVal(text);
     coverageComponent->SetIsOverLay(true);

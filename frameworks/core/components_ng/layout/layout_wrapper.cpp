@@ -17,10 +17,13 @@
 
 #include <algorithm>
 
+#include "base/geometry/dimension.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/alignment.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper_builder.h"
@@ -50,6 +53,18 @@ LayoutWrapper::LayoutWrapper(
     auto host = hostNode_.Upgrade();
     CHECK_NULL_VOID(host);
     host->RecordLayoutWrapper(WeakClaim(this));
+}
+
+void LayoutWrapper::AppendChild(const RefPtr<LayoutWrapper>& child, bool isOverlayNode)
+{
+    CHECK_NULL_VOID(child);
+    if (!isOverlayNode) {
+        children_.emplace_back(child);
+        childrenMap_.try_emplace(currentChildCount_, child);
+        ++currentChildCount_;
+    } else {
+        overlayChild = child;
+    }
 }
 
 RefPtr<LayoutWrapper> LayoutWrapper::GetOrCreateChildByIndex(int32_t index, bool addToRenderTree)
@@ -105,6 +120,12 @@ const std::list<RefPtr<LayoutWrapper>>& LayoutWrapper::GetAllChildrenWithBuild(b
             child->BuildLazyItem();
             if (!child->isActive_) {
                 child->isActive_ = true;
+            }
+        }
+        if (overlayChild) {
+            overlayChild->BuildLazyItem();
+            if (!overlayChild->isActive_) {
+                overlayChild->isActive_ = true;
             }
         }
     }
@@ -263,6 +284,10 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
         }
         layoutAlgorithm_->Measure(this);
 
+        if (overlayChild) {
+            overlayChild->Measure(GetLayoutProperty()->CreateChildConstraint());
+        }
+
         // check aspect radio.
         auto pattern = host->GetPattern();
         if (pattern && pattern->IsNeedAdjustByAspectRatio()) {
@@ -330,6 +355,7 @@ void LayoutWrapper::Layout()
         layoutProperty_->UpdateContentConstraint();
     }
     layoutAlgorithm_->Layout(this);
+    LayoutOverlay();
     time = GetSysTimestamp() - time;
     AddNodeFlexLayouts();
     AddNodeLayoutTime(time);
@@ -497,21 +523,30 @@ void LayoutWrapper::MountToHostOnMainThread()
     SwapDirtyLayoutWrapperOnMainThread();
 }
 
+void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThreadForChild(RefPtr<LayoutWrapper> child)
+{
+    if (!child) {
+        return;
+    }
+    auto node = child->GetHostNode();
+    if (node && node->GetLayoutProperty()) {
+        const auto& geometryTransition = node->GetLayoutProperty()->GetGeometryTransition();
+        if (geometryTransition != nullptr && geometryTransition->IsNodeInAndActive(node)) {
+            return;
+        }
+    }
+    child->SwapDirtyLayoutWrapperOnMainThread();
+}
+
 void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
 {
     if (isActive_) {
         for (const auto& child : children_) {
-            if (!child) {
-                continue;
-            }
-            auto node = child->GetHostNode();
-            if (node && node->GetLayoutProperty()) {
-                const auto& geometryTransition = node->GetLayoutProperty()->GetGeometryTransition();
-                if (geometryTransition != nullptr && geometryTransition->IsNodeInAndActive(node)) {
-                    continue;
-                }
-            }
-            child->SwapDirtyLayoutWrapperOnMainThread();
+            SwapDirtyLayoutWrapperOnMainThreadForChild(child);
+        }
+
+        if (overlayChild) {
+            SwapDirtyLayoutWrapperOnMainThreadForChild(overlayChild);
         }
 
         if (layoutWrapperBuilder_) {
@@ -588,4 +623,26 @@ void LayoutWrapper::AddNodeLayoutTime(int64_t time)
     CHECK_NULL_VOID(host);
     host->SetLayoutTime(time);
 }
+
+void LayoutWrapper::LayoutOverlay()
+{
+    if (!overlayChild) {
+        return;
+    }
+    overlayChild->Layout();
+    auto size = GetGeometryNode()->GetMarginFrameSize();
+    auto align = Alignment::TOP_LEFT;
+    Dimension offsetX, offsetY;
+    auto childLayoutProperty = overlayChild->GetLayoutProperty();
+    childLayoutProperty->GetOverlayOffset(offsetX, offsetY);
+    auto offset = OffsetF(offsetX.ConvertToPx(), offsetY.ConvertToPx());
+    if (childLayoutProperty->GetPositionProperty()) {
+        align = childLayoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
+    }
+
+    auto childSize = overlayChild->GetGeometryNode()->GetMarginFrameSize();
+    auto translate =  Alignment::GetAlignPosition(size, childSize, align) + offset;
+    overlayChild->GetGeometryNode()->SetMarginFrameOffset(translate);
+}
+
 } // namespace OHOS::Ace::NG
