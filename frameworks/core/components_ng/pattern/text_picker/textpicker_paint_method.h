@@ -21,6 +21,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
 
@@ -31,6 +32,11 @@ class ACE_EXPORT TextPickerPaintMethod : public NodePaintMethod {
 public:
     TextPickerPaintMethod() = default;
     ~TextPickerPaintMethod() override = default;
+
+    TextPickerPaintMethod(const WeakPtr<Pattern>& pattern)
+    {
+        pattern_ = pattern;
+    }
 
     double GetDefaultPickerItemHeight() const
     {
@@ -61,6 +67,8 @@ private:
     double defaultPickerItemHeight_ = 0.0;
     bool enabled_ = true;
     Color backgroundColor_ = Color::WHITE;
+
+    WeakPtr<Pattern> pattern_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_PICKER_TEXT_PICKER_PAINT_METHOD_H
