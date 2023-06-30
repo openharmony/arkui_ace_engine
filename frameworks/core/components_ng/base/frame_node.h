@@ -221,6 +221,12 @@ public:
     HitTestResult AxisTest(
         const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult) override;
 
+    void CheckSecurityComponentStatus(std::vector<RectF>& rect, const TouchRestrict& touchRestrict);
+
+    bool HaveSecurityComponent();
+
+    bool IsSecurityComponent();
+
     void AnimateHoverEffect(bool isHovered) const;
 
     bool IsAtomicNode() const override;
@@ -329,6 +335,7 @@ public:
     void RemoveLastHotZoneRect() const;
 
     virtual bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t sourceType);
+    bool CheckRectIntersect(std::vector<RectF>& dest, std::vector<RectF>& origin);
 
     bool IsLayoutDirtyMarked() const
     {
@@ -502,6 +509,7 @@ private:
     bool exclusiveEventForChild_ = false;
     bool isActive_ = false;
     bool isResponseRegion_ = false;
+    bool bypass_ = false;
 
     double lastVisibleRatio_ = 0.0;
 
