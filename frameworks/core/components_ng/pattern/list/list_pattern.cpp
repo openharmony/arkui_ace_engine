@@ -367,7 +367,8 @@ void ListPattern::CheckScrollable()
     if (itemPosition_.empty()) {
         scrollable_ = false;
     } else {
-        if ((itemPosition_.begin()->first == 0) && (itemPosition_.rbegin()->first == maxListItemIndex_)) {
+        if ((itemPosition_.begin()->first == 0) && (itemPosition_.rbegin()->first == maxListItemIndex_) &&
+            !IsScrollSnapAlignCenter()) {
             scrollable_ = GreatNotEqual((endMainPos_ - startMainPos_), contentMainSize_);
         } else {
             scrollable_ = true;
