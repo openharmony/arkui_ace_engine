@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/window_scene/scene/window_event_process.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -92,7 +93,6 @@ void WindowPattern::InitContent()
     contentNode_ = FrameNode::CreateFrameNode(
         V2::WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     contentNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-
     CHECK_NULL_VOID(session_);
     auto surfaceNode = session_->GetSurfaceNode();
     if (surfaceNode) {
@@ -415,15 +415,27 @@ void WindowPattern::HandleMouseEvent(const MouseInfo& info)
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
     auto scale = host->GetTransformScale();
     Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale);
+    int32_t action = pointerEvent->GetPointerAction();
+    if (action == MMI::PointerEvent::POINTER_ACTION_MOVE &&
+        pointerEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE) {
+        DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowEvent(
+            AceType::DynamicCast<WindowNode>(host), pointerEvent, false);
+    }
+    if (action == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) {
+        DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowEvent(
+            AceType::DynamicCast<WindowNode>(host), pointerEvent, true);
+    }
     DispatchPointerEvent(pointerEvent);
 }
 
 bool WindowPattern::IsFilterMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+    int32_t pointerAction = pointerEvent->GetPointerAction();
+    if ((pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) &&
+        (pointerAction != MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) &&
+        (pointerAction != MMI::PointerEvent::POINTER_ACTION_PULL_UP)) {
         return true;
     }
-    int32_t pointerAction = pointerEvent->GetPointerAction();
     return pointerEvent->GetButtonId() != MMI::PointerEvent::BUTTON_NONE &&
         (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);

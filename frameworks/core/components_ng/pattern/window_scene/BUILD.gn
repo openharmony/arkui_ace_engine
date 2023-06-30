@@ -30,6 +30,7 @@ build_component_ng("window_scene") {
   sources = [
     "root/root_scene_model.cpp",
     "scene/system_window_scene.cpp",
+    "scene/window_event_process.cpp",
     "scene/window_node.cpp",
     "scene/window_pattern.cpp",
     "scene/window_scene.cpp",
