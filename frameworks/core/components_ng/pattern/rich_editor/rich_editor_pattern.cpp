@@ -19,10 +19,22 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 
+#if not defined(ACE_UNITTEST)
+#if defined(ENABLE_STANDARD_INPUT)
+#include "commonlibrary/c_utils/base/include/refbase.h"
+
+#include "core/components_ng/pattern/rich_editor/on_rich_editor_changed_listener_impl.h"
+#endif
+#endif
+
 namespace OHOS::Ace::NG {
 namespace {
-constexpr uint32_t RICH_EDITOR_TWINKLING_INTERVAL_MS = 500;
-}
+constexpr int32_t IMAGE_SPAN_LENGTH = 1;
+constexpr int32_t RICH_EDITOR_TWINKLING_INTERVAL_MS = 500;
+} // namespace
+RichEditorPattern::RichEditorPattern() {}
+
+RichEditorPattern::~RichEditorPattern() {}
 
 void RichEditorPattern::OnModifyDone()
 {
@@ -33,13 +45,12 @@ void RichEditorPattern::OnModifyDone()
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     instanceId_ = context->GetInstanceId();
-
-    auto gestureEventHub = host->GetOrCreateGestureEventHub();
-    InitClickEvent(gestureEventHub);
-
+    InitMouseEvent();
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitFocusEvent(focusHub);
+    auto gestureEventHub = host->GetOrCreateGestureEventHub();
+    InitClickEvent(gestureEventHub);
 }
 
 void RichEditorPattern::BeforeCreateLayoutWrapper()
@@ -56,8 +67,10 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         eventHub->FireOnReady();
         isRichEditorInit_ = true;
     }
+    MoveCaretAfterTextChange();
     return ret;
 }
+
 int32_t RichEditorPattern::GetInstanceId() const
 {
     return instanceId_;
@@ -466,4 +479,113 @@ void RichEditorPattern::HandleBlurEvent()
 }
 
 void RichEditorPattern::HandleFocusEvent() {}
+
+void RichEditorPattern::OnVisibleChange(bool isVisible)
+{
+    TextPattern::OnVisibleChange(isVisible);
+}
+
+bool RichEditorPattern::CloseKeyboard(bool forceClose)
+{
+    return true;
+}
+
+void RichEditorPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent) {}
+
+void RichEditorPattern::PerformAction(TextInputAction action, bool forceCloseKeyboard) {}
+
+void RichEditorPattern::InitMouseEvent()
+{
+    TextPattern::InitMouseEvent();
+}
+
+void RichEditorPattern::OnHover(bool isHover) {}
+
+bool RichEditorPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
+{
+    return true;
+}
+
+#if defined(ENABLE_STANDARD_INPUT)
+bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard)
+{
+    return true;
+}
+#else
+bool RichEditorPattern::UnableStandardInput(bool isFocusViewChanged)
+{
+    return true;
+}
+#endif
+
+bool RichEditorPattern::HasConnection() const
+{
+    return true;
+}
+
+void RichEditorPattern::InsertValue(const std::string& insertValue) {}
+
+void RichEditorPattern::CreateTextSpanNode(RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info,
+    const std::string& insertValue, RichEditorAbstractSpanResult& retInfo)
+{}
+
+bool RichEditorPattern::BeforeIMEInsertValue(const std::string& insertValue)
+{
+    return true;
+}
+
+void RichEditorPattern::AfterIMEInsertValue(
+    const RefPtr<SpanNode>& spanNode, int32_t insertValueLength, RichEditorAbstractSpanResult& retInfo)
+{}
+
+void RichEditorPattern::DeleteBackward(int32_t length) {}
+
+void RichEditorPattern::DeleteForward(int32_t length) {}
+
+void RichEditorPattern::SetInputMethodStatus(bool keyboardShown) {}
+
+bool RichEditorPattern::CursorMoveLeft()
+{
+    return true;
+}
+
+bool RichEditorPattern::CursorMoveRight()
+{
+    return true;
+}
+
+bool RichEditorPattern::CursorMoveUp()
+{
+    return true;
+}
+
+bool RichEditorPattern::CursorMoveDown()
+{
+    return true;
+}
+
+void RichEditorPattern::CalcInsertValueObj(TextInsertValueInfo& info) {}
+
+void RichEditorPattern::CalcDeleteValueObj(int32_t currentPosition, int32_t length, RichEditorDeleteValue& info) {}
+
+int32_t RichEditorPattern::DeleteValueSetImageSpan(
+    const RefPtr<SpanItem> spanItem, RichEditorAbstractSpanResult& spanResult)
+{
+    return IMAGE_SPAN_LENGTH;
+}
+
+int32_t RichEditorPattern::DeleteValueSetTextSpan(
+    const RefPtr<SpanItem> spanItem, int32_t currentPosition, int32_t length, RichEditorAbstractSpanResult& spanResult)
+{
+    return 0;
+}
+
+void RichEditorPattern::DeleteByDeleteValueInfo(const RichEditorDeleteValue& info) {}
+
+bool RichEditorPattern::OnKeyEvent(const KeyEvent& keyEvent)
+{
+    return true;
+}
+
+void RichEditorPattern::MoveCaretAfterTextChange() {}
 } // namespace OHOS::Ace::NG

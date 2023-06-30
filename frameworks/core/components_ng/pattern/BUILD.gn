@@ -464,6 +464,13 @@ build_component_ng("pattern_ng") {
     "xcomponent/xcomponent_pattern.cpp",
   ]
 
+  standard_input_sources =
+      [ "rich_editor/on_rich_editor_changed_listener_impl.cpp" ]
+  standard_input_deps = [
+    "hilog:libhilog",
+    "imf:inputmethod_client",
+    "input:libmmi-client",
+  ]
   if (defined(vendor_configs.ace_engine_advanced)) {
     sources += vendor_configs.ace_engine_advanced_pattern
   }

@@ -218,12 +218,19 @@ protected:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleClickEvent(GestureEvent& info);
+    void InitMouseEvent();
+    std::wstring GetWideText() const;
     OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight);
 
+protected:
     std::list<RefPtr<SpanItem>> spanItemChildren_;
     float baselineOffset_ = 0.0f;
     RefPtr<Paragraph> paragraph_;
     std::optional<TextStyle> textStyle_;
+    bool clickEventInitialized_ = false;
+    RectF contentRect_;
+    std::string textForDisplay_;
+
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
     void OnAttachToFrameNode() override;
@@ -233,7 +240,7 @@ private:
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void InitMouseEvent();
+
     void HandleMouseEvent(const MouseInfo& info);
     void OnHandleTouchUp();
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -259,12 +266,11 @@ private:
     GestureEventFunc onClick_;
     int32_t GetGraphemeClusterLength(int32_t extend) const;
     std::string GetSelectedText(int32_t start, int32_t end) const;
-    std::wstring GetWideText() const;
+
     void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
     void ActSetSelection(int32_t start, int32_t end);
     void SetAccessibilityAction();
 
-    std::string textForDisplay_;
     std::vector<MenuOptionsParam> menuOptionItems_;
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_;
@@ -278,8 +284,6 @@ private:
     CopyOptions copyOption_ = CopyOptions::None;
     TextSelector textSelector_;
     OffsetF contentOffset_;
-    RectF contentRect_;
-    bool clickEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
     bool panEventInitialized_ = false;
     bool showSelectOverlay_ = false;
