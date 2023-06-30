@@ -675,6 +675,9 @@ void FrameNode::SetActive(bool active)
         if (parent) {
             parent->MarkNeedSyncRenderTree();
         }
+        if (GetTag() == V2::TAB_CONTENT_ITEM_ETS_TAG) {
+            SetJSViewActive(active);
+        }
     }
 }
 
@@ -696,11 +699,6 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
     auto task = [layoutWrapper, depth = GetDepth(), layoutConstraint = GetLayoutConstraint(), forceUseMainThread]() {
         layoutWrapper->SetActive();
         layoutWrapper->SetRootMeasureNode();
-        {
-            ACE_SCOPED_TRACE("LayoutWrapper::RestoreGeoState");
-            // restore to the geometry state after last Layout and before SafeArea expansion and keyboard avoidance
-            LayoutWrapper::RestoreGeoState(depth);
-        }
         {
             ACE_SCOPED_TRACE("LayoutWrapper::Measure");
             layoutWrapper->Measure(layoutConstraint);
@@ -1167,11 +1165,11 @@ VectorF FrameNode::GetTransformScale() const
     return renderContext_->GetTransformScaleValue({ 1.0f, 1.0f });
 }
 
-bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint)
+bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t sourceType)
 {
     bool isInChildRegion = false;
     auto paintRect = renderContext_->GetPaintRectWithTransform();
-    auto responseRegionList = GetResponseRegionList(paintRect);
+    auto responseRegionList = GetResponseRegionList(paintRect, sourceType);
     auto localPoint = parentLocalPoint - paintRect.GetOffset();
     auto renderContext = GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
@@ -1183,7 +1181,7 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint)
         }
         for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
             const auto& child = *iter;
-            if (!child->IsOutOfTouchTestRegion(localPoint)) {
+            if (!child->IsOutOfTouchTestRegion(localPoint, sourceType)) {
                 LOGD("TouchTest: point is out of region in %{public}s, but is in child region", GetTag().c_str());
                 isInChildRegion = true;
                 break;
@@ -1205,7 +1203,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         return HitTestResult::OUT_OF_REGION;
     }
     auto paintRect = renderContext_->GetPaintRectWithTransform();
-    auto responseRegionList = GetResponseRegionList(paintRect);
+    auto responseRegionList = GetResponseRegionList(paintRect, static_cast<int32_t>(touchRestrict.sourceType));
     if (SystemProperties::GetDebugEnabled()) {
         LOGD("TouchTest: point is %{public}s in %{public}s, depth: %{public}d", parentLocalPoint.ToString().c_str(),
             GetTag().c_str(), GetDepth());
@@ -1218,7 +1216,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     }
     {
         ACE_DEBUG_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");
-        if (IsOutOfTouchTestRegion(parentLocalPoint)) {
+        if (IsOutOfTouchTestRegion(parentLocalPoint, static_cast<int32_t>(touchRestrict.sourceType))) {
             return HitTestResult::OUT_OF_REGION;
         }
     }
@@ -1318,7 +1316,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     return testResult;
 }
 
-std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect)
+std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t sourceType)
 {
     std::vector<RectF> responseRegionList;
     auto gestureHub = eventHub_->GetGestureEventHub();
@@ -1584,6 +1582,21 @@ OffsetF FrameNode::GetPaintRectOffsetToPage() const
     return (parent && parent->GetTag() == V2::PAGE_ETS_TAG) ? offset : OffsetF();
 }
 
+std::optional<RectF> FrameNode::GetViewPort() const
+{
+    if (viewPort_.has_value()) {
+        return viewPort_;
+    }
+    auto parent = GetAncestorNodeOfFrame();
+    while (parent) {
+        if (parent->GetViewPort().has_value()) {
+            return parent->GetViewPort();
+        }
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    return std::nullopt;
+}
+
 void FrameNode::OnNotifyMemoryLevel(int32_t level)
 {
     pattern_->OnNotifyMemoryLevel(level);
@@ -1806,8 +1819,8 @@ bool FrameNode::IsContentRoot()
         // so stop traversing if we're beyond that
         return false;
     }
-    // overlay root
-    if (GetDepth() == 2 && GetTag() != V2::STAGE_ETS_TAG) {
+    // title bar
+    if (GetDepth() == 2 && GetTag() == V2::CONTAINER_MODAL_ETS_TAG) {
         return true;
     }
     // page root

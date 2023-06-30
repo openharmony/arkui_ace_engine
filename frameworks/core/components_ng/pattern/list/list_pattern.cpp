@@ -190,10 +190,23 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     CheckScrollable();
 
-    bool indexChanged =
-        (startIndex_ != listLayoutAlgorithm->GetStartIndex()) || (endIndex_ != listLayoutAlgorithm->GetEndIndex());
-    startIndex_ = listLayoutAlgorithm->GetStartIndex();
-    endIndex_ = listLayoutAlgorithm->GetEndIndex();
+    bool indexChanged = false;
+    const static int32_t PLATFORM_VERSION_TEN = 10;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        indexChanged = (startIndex_ != listLayoutAlgorithm->GetStartIndex()) ||
+            (endIndex_ != listLayoutAlgorithm->GetEndIndex()) ||
+            (centerIndex_ != listLayoutAlgorithm->GetMidIndex());
+    } else {
+        indexChanged =
+            (startIndex_ != listLayoutAlgorithm->GetStartIndex()) || (endIndex_ != listLayoutAlgorithm->GetEndIndex());
+    }
+    if (indexChanged) {
+        startIndex_ = listLayoutAlgorithm->GetStartIndex();
+        endIndex_ = listLayoutAlgorithm->GetEndIndex();
+        centerIndex_ = listLayoutAlgorithm->GetMidIndex();
+    }
     ProcessEvent(indexChanged, relativeOffset, isJump, prevStartOffset, prevEndOffset);
     UpdateScrollBarOffset();
     CheckRestartSpring();
@@ -274,7 +287,7 @@ void ListPattern::ProcessEvent(
     if (indexChanged) {
         auto onScrollIndex = listEventHub->GetOnScrollIndex();
         if (onScrollIndex) {
-            onScrollIndex(startIndex_, endIndex_);
+            onScrollIndex(startIndex_, endIndex_, centerIndex_);
         }
     }
 
@@ -351,16 +364,11 @@ void ListPattern::CheckScrollable()
     CHECK_NULL_VOID(gestureHub);
     auto listProperty = GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(listProperty);
-
-    if (!listProperty->GetScrollEnabled().value_or(scrollable_)) {
-        SetScrollEnable(false);
-        return;
-    }
-
     if (itemPosition_.empty()) {
         scrollable_ = false;
     } else {
-        if ((itemPosition_.begin()->first == 0) && (itemPosition_.rbegin()->first == maxListItemIndex_)) {
+        if ((itemPosition_.begin()->first == 0) && (itemPosition_.rbegin()->first == maxListItemIndex_) &&
+            !IsScrollSnapAlignCenter()) {
             scrollable_ = GreatNotEqual((endMainPos_ - startMainPos_), contentMainSize_);
         } else {
             scrollable_ = true;
@@ -368,6 +376,10 @@ void ListPattern::CheckScrollable()
     }
 
     SetScrollEnable(scrollable_);
+
+    if (!listProperty->GetScrollEnabled().value_or(scrollable_)) {
+        SetScrollEnable(false);
+    }
 }
 
 RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()

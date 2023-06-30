@@ -489,9 +489,9 @@ void SubwindowOhos::ClearMenuNG()
     CHECK_NULL_VOID(context);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
+    HideWindow();
     overlay->CleanMenuInSubWindow();
     context->FlushPipelineImmediately();
-    HideWindow();
 #ifdef ENABLE_DRAG_FRAMEWORK
     HideEventColumn();
     HidePixelMap();

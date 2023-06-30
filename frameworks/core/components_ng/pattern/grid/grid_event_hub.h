@@ -26,7 +26,7 @@
 namespace OHOS::Ace::NG {
 
 using ScrollToIndexFunc = std::function<void(const BaseEventInfo*)>;
-using ScrollBarUpdateFunc = std::function<std::pair<std::optional<float>, std::optional<float>>(int32_t, float)>;
+using ScrollBarUpdateFunc = std::function<std::pair<std::optional<float>, std::optional<float>>(int32_t, Dimension)>;
 using ItemDragStartFunc = std::function<RefPtr<UINode>(const ItemDragInfo&, int32_t)>;
 using ItemDragEnterFunc = std::function<void(const ItemDragInfo&)>;
 using ItemDragMoveFunc = std::function<void(const ItemDragInfo&, int32_t, int32_t)>;
@@ -83,7 +83,7 @@ public:
         }
     }
 
-    std::pair<std::optional<float>, std::optional<float>> FireOnScrollBarUpdate(int32_t index, float offset)
+    std::pair<std::optional<float>, std::optional<float>> FireOnScrollBarUpdate(int32_t index, const Dimension& offset)
     {
         if (onScrollBarUpdate_) {
             return onScrollBarUpdate_(index, offset);

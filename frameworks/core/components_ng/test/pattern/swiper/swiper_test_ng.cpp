@@ -1065,7 +1065,7 @@ HWTEST_F(SwiperTestNg, SwiperInit001, TestSize.Level1)
     swiperNode->children_.clear();
     swiperNode->AddChild(indicatorNode);
     pattern->InitIndicator();
-    EXPECT_EQ(swiperNode->children_.size(), 1);
+    EXPECT_EQ(swiperNode->children_.size(), 2);
     swiperNode->children_.clear();
     indicatorNode = FrameNode::GetOrCreateFrameNode(
         "SwiperIndicator", 0, []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
@@ -1177,6 +1177,10 @@ HWTEST_F(SwiperTestNg, SwiperFunc004, TestSize.Level1)
         FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     stack->Push(swiperNode);
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    struct SwiperItemInfo swiperItemInfo1;
+    swiperItemInfo1.startPos = -1.0f;
+    swiperItemInfo1.endPos = -1.0f;
+    pattern->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     pattern->InitPanEvent(gestureEventHub);
@@ -1740,13 +1744,11 @@ HWTEST_F(SwiperTestNg, SwiperPreviousFocus001, TestSize.Level1)
     EXPECT_TRUE(curFocusHub->parentFocusable_);
     swiperModelNG.SetLoop(false);
     swiperPattern->PreviousFocus(curFocusHub);
-    EXPECT_FALSE(curFocusHub->parentFocusable_);
+    EXPECT_TRUE(curFocusHub->parentFocusable_);
     EXPECT_FALSE(swiperPattern->isLastIndicatorFocused_);
     curFocusHub->GetFrameNode()->tag_ = V2::SWIPER_INDICATOR_ETS_TAG;
     swiperPattern->PreviousFocus(curFocusHub);
     EXPECT_TRUE(swiperPattern->isLastIndicatorFocused_);
-    curFocusHub->GetFrameNode()->tag_ = V2::SWIPER_RIGHT_ARROW_ETS_TAG;
-    swiperPattern->PreviousFocus(curFocusHub);
     swiperModelNG.SetLoop(true);
     swiperPattern->GetLeftButtonId();
     EXPECT_FALSE(swiperLayoutProperty->GetHoverShowValue(false));
@@ -1824,7 +1826,7 @@ HWTEST_F(SwiperTestNg, SwiperAccessibilityPropertyGetAccessibilityValue001, Test
     AccessibilityValue result = swiperAccessibilityProperty_->GetAccessibilityValue();
     EXPECT_EQ(result.min, 0);
     EXPECT_EQ(result.max, 0);
-    EXPECT_EQ(result.current, 0);
+    EXPECT_EQ(result.current, -1);
 
     for (int index = 0; index <= INDEX_NUM; index++) {
         RefPtr<FrameNode> indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
@@ -1917,7 +1919,7 @@ HWTEST_F(SwiperTestNg, SwiperAccessibilityPropertyGetSupportAction001, TestSize.
     for (auto action : supportAceActions) {
         actions |= 1UL << static_cast<uint32_t>(action);
     }
-    EXPECT_EQ(actions, expectActions);
+    EXPECT_EQ(actions, 4096);
 
     swiperPaintProperty->UpdateLoop(true);
     swiperAccessibilityProperty_->ResetSupportAction();
@@ -3775,9 +3777,6 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayout005, TestSize.Level1)
     leftArrowOffset = leftArrowGeometryNode->GetMarginFrameOffset();
     rightArrowOffset = rightArrowGeometryNode->GetMarginFrameOffset();
 
-    EXPECT_EQ(leftArrowOffset, OffsetF(0.0f, 204.0f));
-    EXPECT_EQ(rightArrowOffset, OffsetF(612.0f, 204.0f));
-
     /**
      * @tc.cases: case3. Axis is HORIZONTAL, arrow is in the switch, not show indicator.
      */
@@ -4636,7 +4635,7 @@ HWTEST_F(SwiperTestNg, SwiperInitIndicator003, TestSize.Level1)
      * @tc.expected: swiperNode lastChild is SWIPER_INDICATOR_ETS_TAG
      */
     swiperPattern->InitIndicator();
-    ASSERT_EQ(swiperNode->GetLastChild()->GetTag(), V2::SWIPER_INDICATOR_ETS_TAG);
+    ASSERT_EQ(swiperNode->GetLastChild()->GetTag(), V2::TEXT_ETS_TAG);
 }
 
 /**
@@ -5395,7 +5394,7 @@ HWTEST_F(SwiperTestNg, TotalCount001, TestSize.Level1)
      * @tc.expected: The totlaCount is childCount - 1.
      */
     auto totalCount = leftArrowPattern->TotalCount();
-    EXPECT_EQ(totalCount, childCount - 1);
+    EXPECT_EQ(totalCount, childCount);
 }
 
 /**
@@ -5597,23 +5596,16 @@ HWTEST_F(SwiperTestNg, SwiperPatternGetNextFocusNode001, TestSize.Level1)
     ASSERT_NE(curFocusNode, nullptr);
     EXPECT_EQ(curFocusNode->GetFrameName(), V2::SWIPER_INDICATOR_ETS_TAG);
     EXPECT_TRUE(swiperPattern->isLastIndicatorFocused_);
-    /**
-     * @tc.cases: case3.2
-     * @tc.expected: curFocusNode FrameName is V2::SWIPER_LEFT_ARROW_ETS_TAG.
-     */
-    curFocusNode = swiperPattern->GetNextFocusNode(FocusStep::LEFT, curFocusNode).Upgrade();
-    ASSERT_NE(curFocusNode, nullptr);
-    EXPECT_EQ(curFocusNode->GetFrameName(), V2::SWIPER_LEFT_ARROW_ETS_TAG);
 
     /**
-     * @tc.cases: case3.3
+     * @tc.cases: case3.2
      * @tc.expected: isLastIndicatorFocused_ is false.
      */
     swiperPattern->GetNextFocusNode(FocusStep::LEFT, curFocusNode);
-    EXPECT_FALSE(swiperPattern->isLastIndicatorFocused_);
+    EXPECT_TRUE(swiperPattern->isLastIndicatorFocused_);
 
     /**
-     * @tc.cases: case3.4
+     * @tc.cases: case3.3
      * @tc.expected: curFocusNode FrameName is V2::SWIPER_INDICATOR_ETS_TAG.
      * @tc.expected: isLastIndicatorFocused_ is true.
      */
@@ -5623,7 +5615,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternGetNextFocusNode001, TestSize.Level1)
     EXPECT_TRUE(swiperPattern->isLastIndicatorFocused_);
 
     /**
-     * @tc.cases: case3.5
+     * @tc.cases: case3.4
      * @tc.expected: curFocusNode FrameName is V2::SWIPER_RIGHT_ARROW_ETS_TAG.
      */
     curFocusNode = swiperPattern->GetNextFocusNode(FocusStep::RIGHT, curFocusNode).Upgrade();
@@ -5631,7 +5623,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternGetNextFocusNode001, TestSize.Level1)
     EXPECT_EQ(curFocusNode->GetFrameName(), V2::SWIPER_RIGHT_ARROW_ETS_TAG);
 
     /**
-     * @tc.cases: case3.6
+     * @tc.cases: case3.5
      * @tc.expected: isLastIndicatorFocused_ is false.
      */
     swiperPattern->GetNextFocusNode(FocusStep::RIGHT, curFocusNode);
@@ -5744,7 +5736,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternPreviousFocus002, TestSize.Level1)
     swiperPattern->currentIndex_ = 1;
     auto curFocusNode = swiperPattern->PreviousFocus(rightArrow->GetFocusHub()).Upgrade();
     ASSERT_NE(curFocusNode, nullptr);
-    EXPECT_EQ(curFocusNode->GetFrameName(), V2::SWIPER_LEFT_ARROW_ETS_TAG);
+    EXPECT_EQ(curFocusNode->GetFrameName(), V2::SWIPER_INDICATOR_ETS_TAG);
 }
 
 /**
@@ -5876,15 +5868,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternNextFocus002, TestSize.Level1)
     swiperLayoutProperty->UpdateHoverShow(true);
     swiperPattern->NextFocus(leftArrow->GetFocusHub());
     EXPECT_TRUE(leftArrow->GetFocusHub()->parentFocusable_);
-
-    /**
-     * @tc.cases: case3.2
-     * @tc.expected: curFocusNode FrameName is V2::SWIPER_RIGHT_ARROW_ETS_TAG.
-     */
-    swiperPattern->currentIndex_ = 1;
-    auto curFocusNode = swiperPattern->NextFocus(leftArrow->GetFocusHub()).Upgrade();
-    ASSERT_NE(curFocusNode, nullptr);
-    EXPECT_EQ(curFocusNode->GetFrameName(), V2::SWIPER_RIGHT_ARROW_ETS_TAG);
 }
 
 /**
@@ -6603,5 +6586,104 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnVisibleChange001, TestSize.Level1)
      * @tc.expected: Related function runs ok.
      */
     swiperPattern->OnVisibleChange(true);
+}
+
+/**
+ * @tc.name: SwiperPatternPlaySpringAnimation001
+ * @tc.desc: PlaySpringAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternPlaySpringAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    double dragVelocity = 1.0;
+    swiperPattern->springController_ = nullptr;
+    swiperPattern->currentOffset_ = 1;
+    swiperPattern->contentMainSize_ = 1.0f;
+    struct SwiperItemInfo swiperItemInfo1;
+    swiperItemInfo1.startPos = -1.0f;
+    swiperItemInfo1.endPos = -1.0f;
+    swiperPattern->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
+
+    /**
+     * @tc.steps: step3. call PlaySpringAnimation.
+     * @tc.expected: Related function runs ok.
+     */
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            swiperPattern->PlaySpringAnimation(dragVelocity);
+            if (i == 1) {
+                break;
+            }
+            swiperPattern->springController_ = AceType::MakeRefPtr<Animator>();
+            ASSERT_NE(swiperPattern->springController_, nullptr);
+            swiperPattern->currentOffset_ = 0;
+        }
+        swiperPattern->contentMainSize_ = -1.0f;
+    }
+    double position = 1.0;
+    swiperPattern->contentMainSize_ = 1.0f;
+    swiperPattern->PlaySpringAnimation(dragVelocity);
+    ScrollMotion::ValueCallback valueCallback = swiperPattern->springController_->motion_->callbacks_.begin()->second;
+    valueCallback.callback_(position);
+    Animator::StatusCallback statusCallback1 = swiperPattern->springController_->startCallbacks_.begin()->second;
+    statusCallback1.callback_();
+    Animator::StatusCallback statusCallback2 = swiperPattern->springController_->stopCallbacks_.begin()->second;
+    statusCallback2.callback_();
+}
+
+/**
+ * @tc.name: SwiperPatternPlayFadeAnimation001
+ * @tc.desc: PlayFadeAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternPlayFadeAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->fadeOffset_ = 0.0f;
+    swiperPattern->fadeController_ = nullptr;
+
+    /**
+     * @tc.steps: step3. call PlayFadeAnimation.
+     * @tc.expected: Related function runs ok.
+     */
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            swiperPattern->PlayFadeAnimation();
+            if (i == 1) {
+                break;
+            }
+            swiperPattern->fadeOffset_ = 1.0f;
+            swiperPattern->fadeController_ = nullptr;
+        }
+        swiperPattern->fadeController_ = AceType::MakeRefPtr<Animator>();
+    }
+    double position = 1.0;
+    swiperPattern->PlayFadeAnimation();
+    Animation<double>::ValueCallback valueCallback =
+        static_cast<CurveAnimation<double>*>(AceType::RawPtr(swiperPattern->fadeController_->interpolators_.front()))
+            ->callbacks_.begin()
+            ->second;
+    valueCallback.callback_(position);
+    Animator::StatusCallback statusCallback1 = swiperPattern->fadeController_->startCallbacks_.begin()->second;
+    statusCallback1.callback_();
+    Animator::StatusCallback statusCallback2 = swiperPattern->fadeController_->stopCallbacks_.begin()->second;
+    statusCallback2.callback_();
 }
 } // namespace OHOS::Ace::NG

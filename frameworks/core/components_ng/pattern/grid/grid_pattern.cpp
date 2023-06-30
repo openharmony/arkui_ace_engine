@@ -449,7 +449,11 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     const auto& gridLayoutInfo = gridLayoutAlgorithm->GetGridLayoutInfo();
     auto eventhub = GetEventHub<GridEventHub>();
     CHECK_NULL_RETURN(eventhub, false);
-    scrollbarInfo_ = eventhub->FireOnScrollBarUpdate(gridLayoutInfo.startIndex_, gridLayoutInfo.currentOffset_);
+    Dimension offset(0, DimensionUnit::VP);
+    Dimension offsetPx(gridLayoutInfo.currentOffset_, DimensionUnit::PX);
+    auto offsetVpValue = offsetPx.ConvertToVp();
+    offset.SetValue(offsetVpValue);
+    scrollbarInfo_ = eventhub->FireOnScrollBarUpdate(gridLayoutInfo.startIndex_, offset);
     if (firstShow_ || gridLayoutInfo_.startIndex_ != gridLayoutInfo.startIndex_) {
         eventhub->FireOnScrollToIndex(gridLayoutInfo.startIndex_);
         firstShow_ = false;
@@ -471,12 +475,6 @@ void GridPattern::CheckScrollable()
     CHECK_NULL_VOID(host);
     auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_VOID(gridLayoutProperty);
-
-    if (!gridLayoutProperty->GetScrollEnabled().value_or(scrollable_)) {
-        SetScrollEnable(false);
-        return;
-    }
-
     if (((gridLayoutInfo_.endIndex_ - gridLayoutInfo_.startIndex_ + 1) < gridLayoutInfo_.childrenCount_) ||
         (gridLayoutInfo_.GetTotalHeightOfItemsInView(GetMainGap()) > GetMainContentSize())) {
         scrollable_ = true;
@@ -485,6 +483,10 @@ void GridPattern::CheckScrollable()
     }
 
     SetScrollEnable(scrollable_);
+
+    if (!gridLayoutProperty->GetScrollEnabled().value_or(scrollable_)) {
+        SetScrollEnable(false);
+    }
 }
 
 void GridPattern::FlushCurrentFocus()

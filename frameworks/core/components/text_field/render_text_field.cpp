@@ -582,7 +582,7 @@ void RenderTextField::HandleMouseHoverEvent(MouseState mouseState)
     if (!pipeline) {
         return;
     }
-    int32_t windowId = pipeline->GetWindowId();
+    uint32_t windowId = pipeline->GetWindowId();
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     MouseFormat defaultStyle = MouseFormat::DEFAULT;
     MouseFormat textCursorStyle = MouseFormat::TEXT_CURSOR;
@@ -1188,8 +1188,8 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
         }
         auto context = context_.Upgrade();
         if (context) {
-            LOGI("RequestKeyboard set calling window id is : %{public}d", context->GetWindowId());
-            inputMethod->SetCallingWindow(context->GetWindowId());
+            LOGI("RequestKeyboard set calling window id is : %{public}zu", context->GetFocusWindowId());
+            inputMethod->SetCallingWindow(context->GetFocusWindowId());
         }
         MiscServices::InputAttribute inputAttribute;
         inputAttribute.inputPattern = (int32_t)keyboard_;

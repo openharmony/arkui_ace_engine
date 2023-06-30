@@ -56,6 +56,8 @@ public:
     void AddTextSpan(const JSCallbackInfo& args);
     ImageSpanAttribute ParseJsImageSpanAttribute(JSRef<JSObject> imageAttribute);
     TextStyle ParseJsTextStyle(JSRef<JSObject> styleObject);
+    void SetCaretOffset(const JSCallbackInfo& args);
+    void GetCaretOffset(const JSCallbackInfo& args);
 
 private:
     WeakPtr<RichEditorControllerBase> controllerWeak_;

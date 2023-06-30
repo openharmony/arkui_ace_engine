@@ -17,6 +17,7 @@
 
 #include <cstddef>
 #include <memory>
+#include <string>
 
 #include "base/utils/string_utils.h"
 
@@ -302,5 +303,14 @@ std::shared_ptr<Media::PixelMap> LayeredDrawableDescriptor::GetPixelMap()
 
     HILOG_ERROR("Failed to GetPixelMap!");
     return nullptr;
+}
+
+std::string LayeredDrawableDescriptor::GetStaticMaskClipPath()
+{
+    const std::string name = "ohos_drawable_descriptor_path";
+    std::string data;
+    std::shared_ptr<Global::Resource::ResourceManager> resMgr(Global::Resource::CreateResourceManager());
+    resMgr->GetStringByName(name.c_str(), data);
+    return data;
 }
 } // namespace OHOS::Ace::Napi

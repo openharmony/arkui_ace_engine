@@ -492,7 +492,7 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(const RefPtr<BubbleLayoutP
     // Show in SubWindow
     if (showInSubWindow) {
         if (isContainerModal) {
-            // popup not show in subwindow need minus container modal.
+            // popup show in subwindow need add container modal.
             auto newOffsetX = targetOffset_.GetX() + static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) +
                               static_cast<float>(CONTENT_PADDING.ConvertToPx());
             auto newOffsetY = targetOffset_.GetY() + static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx());
@@ -501,7 +501,8 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(const RefPtr<BubbleLayoutP
         }
         auto overlayManager = pipelineContext->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
-        auto displayWindowOffset = layoutProp->GetDisplayWindowOffset().value_or(OffsetF());
+        auto displayWindowOffset = OffsetF(pipelineContext->GetDisplayWindowRectInfo().GetOffset().GetX(),
+            pipelineContext->GetDisplayWindowRectInfo().GetOffset().GetY());
         targetOffset_ += displayWindowOffset;
         auto currentSubwindow = SubwindowManager::GetInstance()->GetCurrentWindow();
         if (currentSubwindow) {

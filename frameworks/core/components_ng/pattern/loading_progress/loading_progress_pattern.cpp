@@ -42,6 +42,15 @@ void LoadingProgressPattern::OnAttachToFrameNode()
     RegisterVisibleAreaChange();
 }
 
+void LoadingProgressPattern::OnModifyDone()
+{
+    Pattern::OnModifyDone();
+    auto paintProperty = GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    enableLoading_ = paintProperty->GetEnableLoadingValue(true);
+    enableLoading_ ? StartAnimation() : StopAnimation();
+}
+
 void LoadingProgressPattern::OnVisibleChange(bool isVisible)
 {
     isVisible_ = isVisible;
@@ -52,9 +61,9 @@ void LoadingProgressPattern::OnVisibleChange(bool isVisible)
 void LoadingProgressPattern::StartAnimation()
 {
     CHECK_NULL_VOID(loadingProgressModifier_);
-    LOGD("Loading StartAnimation: isVisibleArea_ = %d, isVisible_ = %d, isShow_ = %d", isVisibleArea_, isVisible_,
-        isShow_);
-    if (isVisibleArea_ && isVisible_ && isShow_) {
+    LOGD("Loading StartAnimation: isVisibleArea_ = %d, isVisible_ = %d, isShow_ = %d, enableLoading_ = %d",
+        isVisibleArea_, isVisible_, isShow_, enableLoading_);
+    if (isVisibleArea_ && isVisible_ && isShow_ && enableLoading_) {
         loadingProgressModifier_->SetVisible(true);
         auto host = GetHost();
         CHECK_NULL_VOID(host);

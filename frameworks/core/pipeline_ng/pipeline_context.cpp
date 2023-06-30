@@ -468,7 +468,7 @@ void PipelineContext::SetupRootElement()
         auto overlay = weakOverlayManger.Upgrade();
         CHECK_NULL_VOID(overlay);
         overlay->HideAllMenus();
-        overlay->HideAllPopups();
+        overlay->HideCustomPopups();
     };
     rootNode_->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
     AddOnAreaChangeNode(rootNode_->GetId());
@@ -698,21 +698,31 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
 SafeAreaInsets PipelineContext::GetSystemSafeArea() const
 {
     CHECK_NULL_RETURN_NOLOG(!ignoreViewSafeArea_, {});
+    CHECK_NULL_RETURN_NOLOG(isLayoutFullScreen_, {});
     return safeAreaManager_->GetSystemSafeArea();
 }
 
 SafeAreaInsets PipelineContext::GetCutoutSafeArea() const
 {
     CHECK_NULL_RETURN_NOLOG(!ignoreViewSafeArea_, {});
+    CHECK_NULL_RETURN_NOLOG(isLayoutFullScreen_, {});
     return safeAreaManager_->GetCutoutSafeArea();
+}
+
+SafeAreaInsets PipelineContext::GetSafeArea() const
+{
+    CHECK_NULL_RETURN_NOLOG(!ignoreViewSafeArea_, {});
+    CHECK_NULL_RETURN_NOLOG(isLayoutFullScreen_, {});
+    auto systemAvoidArea = safeAreaManager_->GetSystemSafeArea();
+    auto cutoutAvoidArea = safeAreaManager_->GetCutoutSafeArea();
+    return systemAvoidArea.Combine(cutoutAvoidArea);
 }
 
 void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea)
 {
     CHECK_NULL_VOID_NOLOG(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
     if (safeAreaManager_->UpdateSystemSafeArea(systemSafeArea)) {
-        CHECK_NULL_VOID_NOLOG(rootNode_);
-        rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        SyncSafeArea();
     }
 }
 
@@ -720,17 +730,16 @@ void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea)
 {
     CHECK_NULL_VOID_NOLOG(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
     if (safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea)) {
-        CHECK_NULL_VOID_NOLOG(rootNode_);
-        rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        SyncSafeArea();
     }
 }
 
-SafeAreaInsets PipelineContext::GetSafeArea() const
+void PipelineContext::SyncSafeArea()
 {
-    CHECK_NULL_RETURN_NOLOG(!ignoreViewSafeArea_, {});
-    auto systemAvoidArea = safeAreaManager_->GetSystemSafeArea();
-    auto cutoutAvoidArea = safeAreaManager_->GetCutoutSafeArea();
-    return systemAvoidArea.Combine(cutoutAvoidArea);
+    CHECK_NULL_VOID_NOLOG(rootNode_);
+    CHECK_NULL_VOID_NOLOG(!ignoreViewSafeArea_);
+    CHECK_NULL_VOID_NOLOG(isLayoutFullScreen_);
+    rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(
@@ -744,7 +753,11 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
         rsTransaction->Begin();
     }
 #endif
-
+    safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
+    if (keyboardHeight > 0) {
+        // add height of navigation bar
+        keyboardHeight += safeAreaManager_->GetSystemSafeArea().bottom_.Length();
+    }
     auto func = [this, keyboardHeight]() {
         float positionY = 0.0f;
         auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
@@ -1323,7 +1336,7 @@ void PipelineContext::RootLostFocus(BlurReason reason) const
     focusHub->LostFocus(reason);
     CHECK_NULL_VOID(overlayManager_);
     overlayManager_->HideAllMenus();
-    overlayManager_->HideAllPopups();
+    overlayManager_->HideCustomPopups();
 }
 
 MouseEvent ConvertAxisToMouse(const AxisEvent& event)

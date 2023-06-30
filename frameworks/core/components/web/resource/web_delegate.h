@@ -748,7 +748,7 @@ private:
     int32_t parentNWebId_ = -1;
     bool needResizeAtFirst_ = false;
     int32_t backgroundColor_ = 0xffffffff;
-    int32_t rosenWindowId_ = -1;
+    uint32_t rosenWindowId_ = 0;
     RefPtr<WebDelegateObserver> observer_;
 #endif
 };

@@ -254,7 +254,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     UpdateGridLayoutInfo(layoutWrapper, mainSize);
     SkipForwardLines(mainSize, layoutWrapper);
     SkipBackwardLines(mainSize, layoutWrapper);
-    if (layoutWrapper->GetHostNode()->GetChildrenUpdated() != -1) {
+    if (layoutWrapper->GetHostNode()->GetChildrenUpdated() != -1 || gridLayoutInfo_.IsResetted()) {
         gridLayoutInfo_.lineHeightMap_.clear();
         gridLayoutInfo_.gridMatrix_.clear();
         gridLayoutInfo_.endIndex_ = -1;
@@ -600,7 +600,7 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
 
 void GridScrollLayoutAlgorithm::SkipForwardLines(float mainSize, LayoutWrapper* layoutWrapper)
 {
-    if (!GreatOrEqual(gridLayoutInfo_.currentOffset_, mainSize)) {
+    if (!GreatOrEqual(gridLayoutInfo_.currentOffset_ - gridLayoutInfo_.prevOffset_, mainSize)) {
         return;
     }
 
@@ -641,7 +641,7 @@ void GridScrollLayoutAlgorithm::SkipForwardLines(float mainSize, LayoutWrapper* 
 
 void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper* layoutWrapper)
 {
-    if (!GreatOrEqual(-gridLayoutInfo_.currentOffset_, mainSize)) {
+    if (!GreatOrEqual(gridLayoutInfo_.prevOffset_ - gridLayoutInfo_.currentOffset_, mainSize)) {
         return;
     }
 

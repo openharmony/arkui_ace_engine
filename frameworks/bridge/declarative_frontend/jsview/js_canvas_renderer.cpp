@@ -1142,6 +1142,9 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     std::unique_ptr<ImageData> canvasData;
     canvasData = GetImageDataFromCanvas(left, top, width, height);
 
+    if (canvasData == nullptr) {
+        return;
+    }
     final_height = static_cast<uint32_t>(canvasData->dirtyHeight);
     final_width = static_cast<uint32_t>(canvasData->dirtyWidth);
     if (final_height > 0 && final_width > (UINT32_MAX / final_height)) {

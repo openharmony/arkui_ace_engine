@@ -328,7 +328,7 @@ public:
     void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
     void RemoveLastHotZoneRect() const;
 
-    bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint);
+    virtual bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t sourceType);
 
     bool IsLayoutDirtyMarked() const
     {
@@ -409,6 +409,13 @@ public:
         return layoutWrapper_;
     }
 
+    void SetViewPort(RectF viewPort)
+    {
+        viewPort_ = viewPort;
+    }
+
+    std::optional<RectF> GetViewPort() const;
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;
@@ -444,7 +451,7 @@ private:
 
     HitTestMode GetHitTestMode() const override;
     bool GetTouchable() const;
-    std::vector<RectF> GetResponseRegionList(const RectF& rect);
+    virtual std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType);
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
     void ProcessAllVisibleCallback(
@@ -482,6 +489,7 @@ private:
     std::unique_ptr<RectF> lastFrameRect_;
     std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
     std::set<std::string> allowDrop_;
+    std::optional<RectF> viewPort_;
 
     bool needSyncRenderTree_ = false;
 

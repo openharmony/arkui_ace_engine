@@ -58,7 +58,7 @@ common_bin = [
   {
     label = "//third_party/cJSON:cjson"
     subsystem_name = "thirdparty"
-    part_name = "cjson"
+    part_name = "cJSON"
   },
   {
     label = "//third_party/icu/icu4c:shared_icui18n"

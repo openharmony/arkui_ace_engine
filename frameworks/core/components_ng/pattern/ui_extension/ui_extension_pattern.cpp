@@ -87,6 +87,8 @@ void UIExtensionPattern::OnConnectInner()
     host->AddChild(contentNode_, 0);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     surfaceNode->CreateNodeInRenderThread();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    TransferFocusWindowId(pipeline->GetFocusWindowId());
 }
 
 void UIExtensionPattern::OnDisconnect()

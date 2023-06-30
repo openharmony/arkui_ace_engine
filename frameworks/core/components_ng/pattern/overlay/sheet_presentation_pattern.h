@@ -94,6 +94,11 @@ public:
         currentOffset_ = currentOffset;
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return {FocusType::SCOPE, true};
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
