@@ -88,7 +88,7 @@ void RenderSceneViewer::HandleEvent(const OHOS::Render3D::SceneViewerTouchEvent&
     }
 
     // Convert to LUME stuff.
-    LOGD("ACE-3D HandleEvent() eventId[%d], eventType[%u], position[%.2f, %.2f], delta[%.2f, %.2f], key = %d",
+    LOGD("ACE-3D HandleEvent() eventId[%d], eventType[%zu], position[%.2f, %.2f], delta[%.2f, %.2f], key = %d",
         event.GetFingerId(), event.GetEventType(), event.GetGlobalLocation().GetX(), event.GetGlobalLocation().GetY(),
         event.GetDeltaChange().GetX(), event.GetDeltaChange().GetY(), GetKey());
 
@@ -133,7 +133,6 @@ void RenderSceneViewer::RenderWithContext(RenderContext& context, const Offset& 
         inited_ = true;
         EGLContext eglContext = GetRenderContext();
 
-        eglContext_  = eglContext;
         // texture create must in sync manner
         OHOS::Render3D::GraphicsTask::GetInstance().PushSyncMessage([&eglContext, weak = WeakClaim(this)] {
             auto delegate = weak.Upgrade();
@@ -147,8 +146,9 @@ void RenderSceneViewer::RenderWithContext(RenderContext& context, const Offset& 
             gfxManager.Register(delegate->GetKey());
             LOGD("ACE-3D init Engine this  %d %d", delegate->GetKey(), __LINE__);
 
-            delegate->textureInfo_ = gfxManager.CreateRenderTexture(delegate->GetKey(),
-                delegate->sceneSize_.Width(), delegate->sceneSize_.Height(), eglContext);
+            delegate->eglContext_ = gfxManager.CreateOffScreenContext(eglContext);
+            delegate->textureInfo_ = delegate->CreateRenderTarget(delegate->sceneSize_.Width(),
+                delegate->sceneSize_.Height());
             LOGD("ACE-3D init Engine GetKey %d texture id %d E", delegate->GetKey(), delegate->textureInfo_.textureId_);
         });
 
@@ -500,7 +500,7 @@ void RenderSceneViewer::PassGeometries(const std::vector<RefPtr<OHOS::Render3D::
 void RenderSceneViewer::UpdateGLTFAnimations(const std::vector<RefPtr<OHOS::Render3D::GLTFAnimation>>& gltfAnimations)
 {
     ACE_SCOPED_TRACE("RenderSceneViewer::UpdateGLTFAnimations()");
-    LOGD("RenderSceneViewer::UpdateGLTFAnimations() size: %u", gltfAnimations.size());
+    LOGD("RenderSceneViewer::UpdateGLTFAnimations() size: %zu", gltfAnimations.size());
     auto pipeline_context = GetContext().Upgrade();
     if (!pipeline_context) {
         LOGE("RenderSceneViewer::UpdateGLTFAnimations() GetContext failed.");
@@ -567,7 +567,7 @@ void RenderSceneViewer::HandleLightsUpdate(const RefPtr<SceneViewerComponent>& s
     }
 
     std::vector<OHOS::Ace::RefPtr<OHOS::Render3D::SVLight>> newLights = svComponent->GetLights();
-    LOGD("ACE-3D RenderSceneViewer::HandleLightsUpdate() lights_: %u, newLights: %u",
+    LOGD("ACE-3D RenderSceneViewer::HandleLightsUpdate() lights_: %zu, newLights: %zu",
         lights_.size(), newLights.size());
 
     int index = 0;
