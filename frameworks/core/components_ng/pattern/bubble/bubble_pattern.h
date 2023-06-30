@@ -87,8 +87,8 @@ public:
         return { FocusType::SCOPE, true };
     }
 
-    void OnAreaChangedInner() override;
-
+    void OnWindowHide() override;
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void StartEnteringAnimation(std::function<void()> finish);
     void StartExitingAnimation(std::function<void()> finish);
     bool IsOnShow();

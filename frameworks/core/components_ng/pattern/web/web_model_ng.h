@@ -95,6 +95,7 @@ public:
     void SetOnDragLeave(
         std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragLeave) override;
     void SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDropId) override;
+    void AddDragFrameNodeToManager();
     void SetPinchSmoothModeEnabled(bool isPinchSmoothModeEnabled) override;
     void SetWindowNewEvent(std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& jsCallback) override;
     void SetWindowExitEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;

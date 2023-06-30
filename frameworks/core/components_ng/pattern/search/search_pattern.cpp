@@ -243,6 +243,12 @@ void SearchPattern::InitSearchController()
         CHECK_NULL_VOID_NOLOG(search);
         search->HandleCaretPosition(caretPosition);
     });
+
+    searchController_->SetStopEditing([weak = WeakClaim(this)]() {
+        auto search = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(search);
+        search->StopEditing();
+    });
 }
 
 void SearchPattern::HandleCaretPosition(int32_t caretPosition)
@@ -254,6 +260,17 @@ void SearchPattern::HandleCaretPosition(int32_t caretPosition)
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     textFieldPattern->SetCaretPosition(caretPosition);
+}
+
+void SearchPattern::StopEditing()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_VOID(textFieldFrameNode);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->StopEditing();
 }
 
 void SearchPattern::OnClickButtonAndImage()

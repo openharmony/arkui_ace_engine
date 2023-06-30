@@ -58,7 +58,7 @@ public:
             selectOverlayModifier_ = AceType::MakeRefPtr<SelectOverlayModifier>(defaultMenuEndOffset_);
         }
         return MakeRefPtr<SelectOverlayPaintMethod>(
-            selectOverlayModifier_, info_, defaultMenuEndOffset_, hasExtensitonMenu_);
+            selectOverlayModifier_, *info_, defaultMenuEndOffset_, hasExtensionMenu_);
     }
 
     const std::shared_ptr<SelectOverlayInfo>& GetSelectOverlayInfo() const
@@ -100,7 +100,7 @@ public:
 
     float GetMenuWidth() const
     {
-        return meanuWidth_;
+        return menuWidth_;
     }
 
     const RectF& GetHandleRegion(bool isFirst) const
@@ -113,6 +113,12 @@ public:
     }
 
     void ShowOrHiddenMenu(bool isHidden);
+    void DisableMenu(bool isDisabled);
+
+    void SetClosedByGlobalTouchEvent(bool closedByGlobalTouch)
+    {
+        closedByGlobalTouchEvent_ = closedByGlobalTouch;
+    }
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -142,16 +148,18 @@ private:
     bool secondHandleDrag_ = false;
     // Used to record the original menu display status when the handle is moved.
     bool orignMenuIsShow_ = false;
-    bool hasExtensitonMenu_ = false;
+    bool hasExtensionMenu_ = false;
 
     int32_t greatThanMaxWidthIndex_ = -1;
-    float meanuWidth_ = 0.0f;
+    float menuWidth_ = 0.0f;
 
     std::string selectInfo_;
 
     OffsetF defaultMenuEndOffset_;
 
     RefPtr<SelectOverlayModifier> selectOverlayModifier_;
+
+    bool closedByGlobalTouchEvent_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayPattern);
 };

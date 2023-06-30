@@ -33,7 +33,7 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(menu);
-    if (!CheckInShowArea(info_)) {
+    if (!CheckInShowArea(*info_)) {
         LayoutWrapper::RemoveChildInRenderTree(menu);
         return;
     }
@@ -53,10 +53,10 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             OffsetF(menuContext->GetOffset()->GetX().ConvertToPx(), menuContext->GetOffset()->GetY().ConvertToPx());
     }
     if (!info_->menuInfo.menuIsShow) {
-        hasExtensitonMenu_ = false;
+        hasExtensionMenu_ = false;
         return;
     }
-    hasExtensitonMenu_ = true;
+    hasExtensionMenu_ = true;
     button->GetGeometryNode()->SetMarginFrameOffset(menuOffset);
     button->Layout();
     auto extensionMenuOffset = ComputeExtensionMenuPosition(layoutWrapper, offset);
@@ -67,16 +67,16 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     extensionMenu->Layout();
 }
 
-bool SelectOverlayLayoutAlgorithm::CheckInShowArea(const std::shared_ptr<SelectOverlayInfo>& info)
+bool SelectOverlayLayoutAlgorithm::CheckInShowArea(const SelectOverlayInfo& info)
 {
-    if (info->useFullScreen) {
+    if (info.useFullScreen) {
         return true;
     }
-    if (info->isSingleHandle) {
-        return info->firstHandle.paintRect.IsWrappedBy(info->showArea);
+    if (info.isSingleHandle) {
+        return info.firstHandle.paintRect.IsWrappedBy(info.showArea);
     }
-    return info->firstHandle.paintRect.IsWrappedBy(info->showArea) &&
-           info->secondHandle.paintRect.IsWrappedBy(info->showArea);
+    return info.firstHandle.paintRect.IsWrappedBy(info.showArea) &&
+           info.secondHandle.paintRect.IsWrappedBy(info.showArea);
 }
 
 OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* layoutWrapper)
@@ -104,8 +104,11 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
         return defaultMenuEndOffset_ - OffsetF(menuWidth, 0.0f);
     }
 
-    const auto& firstHandleRect = info_->firstHandle.paintRect;
-    const auto& secondHandleRect = info_->secondHandle.paintRect;
+    // paint rect is in global position, need to convert to local position
+    auto offset = layoutWrapper->GetGeometryNode()->GetFrameOffset();
+    const auto firstHandleRect = info_->firstHandle.paintRect - offset;
+    const auto secondHandleRect = info_->secondHandle.paintRect - offset;
+
     auto singleHandle = firstHandleRect;
     if (!info_->firstHandle.isShow) {
         singleHandle = secondHandleRect;
@@ -126,11 +129,19 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     }
 
     auto overlayWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
+    auto frameNode = info_->callerFrameNode.Upgrade();
+    CHECK_NULL_RETURN(frameNode, OffsetF());
+    auto viewPortOption = frameNode->GetViewPort();
+    RectF viewPort = layoutWrapper->GetGeometryNode()->GetFrameRect() - offset;
+    if (viewPortOption.has_value()) {
+        viewPort = viewPortOption.value();
+    }
+    LOGD("select_overlay viewPort Rect: %{public}s", viewPort.ToString().c_str());
 
     // Adjust position of overlay.
-    if (LessOrEqual(menuPosition.GetX(), 0.0)) {
+    if (LessOrEqual(menuPosition.GetX(), viewPort.GetX())) {
         menuPosition.SetX(theme->GetDefaultMenuPositionX());
-    } else if (GreatOrEqual(menuPosition.GetX() + menuWidth, overlayWidth)) {
+    } else if (GreatOrEqual(menuPosition.GetX() + menuWidth, viewPort.GetX() + viewPort.Width())) {
         menuPosition.SetX(overlayWidth - menuWidth - theme->GetDefaultMenuPositionX());
     }
     if (LessNotEqual(menuPosition.GetY(), menuHeight)) {
@@ -141,6 +152,18 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
                 static_cast<float>(singleHandle.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle));
         }
     }
+    if (LessNotEqual(menuPosition.GetY(), viewPort.GetY() - menuSpacingBetweenText - menuHeight) ||
+        LessNotEqual(menuPosition.GetY(), menuSpacingBetweenText)) {
+        auto menuOffsetY = viewPort.GetY() - menuSpacingBetweenText - menuHeight;
+        if (menuOffsetY > menuSpacingBetweenText) {
+            menuPosition.SetY(menuOffsetY);
+        } else {
+            menuPosition.SetY(menuSpacingBetweenText);
+        }
+    } else if (GreatOrEqual(menuPosition.GetY(), viewPort.GetY() + viewPort.Height() + menuSpacingBetweenText)) {
+        menuPosition.SetY(viewPort.GetY() + viewPort.Height() + menuSpacingBetweenText);
+    }
+    LOGD("select_overlay menuPosition: %{public}s", menuPosition.ToString().c_str());
     defaultMenuEndOffset_ = menuPosition + OffsetF(menuWidth, 0.0f);
     return menuPosition;
 }

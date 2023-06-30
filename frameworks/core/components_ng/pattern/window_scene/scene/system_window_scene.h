@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SYSTEM_WINDOW_SCENE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SYSTEM_WINDOW_SCENE_H
 
-#include "session/host/include/scene_session.h"
+#include "session/host/include/session.h"
 
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 
@@ -25,7 +25,7 @@ class SystemWindowScene : public StackPattern {
     DECLARE_ACE_TYPE(SystemWindowScene, StackPattern);
 
 public:
-    explicit SystemWindowScene(const sptr<Rosen::SceneSession>& session) : session_(session) {}
+    explicit SystemWindowScene(const sptr<Rosen::Session>& session) : session_(session) {}
     ~SystemWindowScene() override = default;
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
@@ -37,7 +37,7 @@ protected:
     void OnAttachToFrameNode() override;
 
 private:
-    sptr<Rosen::SceneSession> session_;
+    sptr<Rosen::Session> session_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SystemWindowScene);
 };

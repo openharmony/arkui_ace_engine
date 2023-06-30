@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -182,10 +183,8 @@ RefPtr<FrameNode> AppBarView::BuildIconButton(
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
     buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
-    auto buttonRenderContext = buttonNode->GetRenderContext();
-    CHECK_NULL_RETURN(buttonRenderContext, nullptr);
     auto butttonRadius = appBarTheme->GetIconCornerRadius();
-    buttonRenderContext->UpdateBorderRadius({ butttonRadius, butttonRadius, butttonRadius, butttonRadius });
+    buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(butttonRadius));
     buttonLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(appBarTheme->GetIconSize() * 2), CalcLength(appBarTheme->GetIconSize() * 2)));
     MarginProperty margin;

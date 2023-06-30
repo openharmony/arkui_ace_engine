@@ -64,26 +64,39 @@ void BlankPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("color", GetColorString().c_str());
 }
 
-void BlankPattern::OnMountToParentDone()
+void BlankPattern::BeforeCreateLayoutWrapper()
 {
     auto host = GetHost();
     CHECK_NULL_VOID_NOLOG(host);
-    auto parent = host->GetParent();
+    auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID_NOLOG(parent);
     auto layoutProp = host->GetLayoutProperty<BlankLayoutProperty>();
     CHECK_NULL_VOID_NOLOG(layoutProp);
-    CHECK_NULL_VOID_NOLOG(layoutProp->GetMinSize().has_value());
-    auto blankMin = layoutProp->GetMinSize().value_or(Dimension());
+    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() <= 9) {
+        return;
+    }
     auto& calcConstraint = layoutProp->GetCalcLayoutConstraint();
     auto isParentRow = GetFlexDirection(parent) == FlexDirection::ROW;
-    if (calcConstraint && calcConstraint->minSize.has_value()) {
-        // skip if constraint min size on main axis is set already
-        if (isParentRow && calcConstraint->minSize.value().Width().has_value()) {
-            return;
-        } else if (!isParentRow && calcConstraint->minSize.value().Height().has_value()) {
-            return;
-        }
+    layoutProp->ResetAlignSelf();
+    layoutProp->ResetFlexGrow();
+    layoutProp->ResetFlexShrink();
+    bool mainAxisHasSize = false;
+    bool crossAxisHasSize = false;
+    if (calcConstraint && calcConstraint->selfIdealSize.has_value()) {
+        mainAxisHasSize = (isParentRow && calcConstraint->selfIdealSize.value().Width().has_value()) ||
+                          (!isParentRow && calcConstraint->selfIdealSize.value().Height().has_value());
+        crossAxisHasSize = (isParentRow && calcConstraint->selfIdealSize.value().Height().has_value()) ||
+                           (!isParentRow && calcConstraint->selfIdealSize.value().Width().has_value());
     }
+    if (!crossAxisHasSize) {
+        layoutProp->UpdateAlignSelf(FlexAlign::STRETCH);
+    }
+    if (!mainAxisHasSize) {
+        layoutProp->UpdateFlexGrow(1.0f);
+        layoutProp->UpdateFlexShrink(1.0f);
+    }
+    CHECK_NULL_VOID_NOLOG(layoutProp->GetMinSize().has_value());
+    auto blankMin = layoutProp->GetMinSize().value_or(Dimension());
     if (isParentRow) {
         layoutProp->UpdateCalcMinSize(CalcSize(CalcLength(blankMin), std::nullopt));
     } else {

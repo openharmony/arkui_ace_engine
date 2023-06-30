@@ -34,7 +34,7 @@ public:
     void DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     void DispatchKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     void DisPatchFocusActiveEvent(bool isFocusActive);
-
+    void TransferFocusWindowId(uint32_t focusWindowId);
 protected:
     void OnAttachToFrameNode() override;
 
@@ -48,6 +48,7 @@ protected:
     virtual void OnConnect();
     virtual void OnForeground() {}
     virtual void OnBackground() {}
+    virtual void OnDisconnect() {}
 
     int32_t instanceId_ = -1;
 
@@ -58,13 +59,23 @@ protected:
     sptr<Rosen::Session> session_;
 
 private:
+    void OnModifyDone() override;
     void CreateStartingNode();
     void CreateSnapshotNode();
     bool CreatePersistentNode();
 
     void BufferAvailableCallback();
+    void PrintPointerEvent(const std::shared_ptr<MMI::PointerEvent>& event);
+    void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
+    void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleMouseEvent(const MouseInfo& info);
+    void HandleTouchEvent(const TouchEventInfo& info);
+    bool IsFilterTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    bool IsFilterMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
+    RefPtr<TouchEventImpl> touchEvent_;
+    RefPtr<InputEvent> mouseEvent_;
 
     friend class LifecycleListener;
 

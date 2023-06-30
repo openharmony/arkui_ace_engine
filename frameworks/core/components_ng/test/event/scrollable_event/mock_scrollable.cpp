@@ -40,6 +40,9 @@ void Scrollable::StartSpringMotion(
     double mainPosition, double mainVelocity, const ExtentPair& extent, const ExtentPair& initExtent)
 {}
 
+void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnapVelocity)
+{}
+
 void Scrollable::SetAxis(Axis axis)
 {}
 

@@ -94,7 +94,6 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
 {
     CHECK_RUN_ON(UI);
-    ACE_SCOPED_TRACE("FlushRenderTask %zu", dirtyRenderNodes_.size());
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushRender();
     }
@@ -102,6 +101,7 @@ void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
     // Priority task creation
     int64_t time = 0;
     for (auto&& pageNodes : dirtyRenderNodes) {
+        ACE_SCOPED_TRACE("FlushRenderTask %zu", pageNodes.second.size());
         for (auto&& node : pageNodes.second) {
             if (!node) {
                 continue;
@@ -164,12 +164,12 @@ void UITaskScheduler::AddPredictTask(PredictTask&& task)
     predictTask_.push_back(std::move(task));
 }
 
-void UITaskScheduler::FlushPredictTask(int64_t deadline)
+void UITaskScheduler::FlushPredictTask(int64_t deadline, bool canUseLongPredictTask)
 {
     decltype(predictTask_) tasks(std::move(predictTask_));
     for (const auto& task : tasks) {
         if (task) {
-            task(deadline);
+            task(deadline, canUseLongPredictTask);
         }
     }
 }

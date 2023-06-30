@@ -78,6 +78,8 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("onEditChange", &JSTextField::SetOnEditChanged);
     JSClass<JSTextInput>::StaticMethod("onSubmit", &JSTextField::SetOnSubmit);
     JSClass<JSTextInput>::StaticMethod("onChange", &JSTextField::SetOnChange);
+    JSClass<JSTextInput>::StaticMethod("onTextSelectionChange", &JSTextField::SetOnTextSelectionChange);
+    JSClass<JSTextInput>::StaticMethod("onScroll", &JSTextField::SetOnScroll);
     JSClass<JSTextInput>::StaticMethod("onCopy", &JSTextField::SetOnCopy);
     JSClass<JSTextInput>::StaticMethod("onCut", &JSTextField::SetOnCut);
     JSClass<JSTextInput>::StaticMethod("onPaste", &JSTextField::SetOnPaste);
@@ -92,6 +94,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("passwordIcon", &JSTextField::SetPasswordIcon);
     JSClass<JSTextInput>::StaticMethod("showUnderline", &JSTextField::SetShowUnderline);
     JSClass<JSTextInput>::StaticMethod("enableKeyboardOnFocus", &JSTextField::SetEnableKeyboardOnFocus);
+    JSClass<JSTextInput>::StaticMethod("selectionMenuHidden", &JSTextField::SetSelectionMenuHidden);
 
     JSClass<JSTextInput>::InheritAndBind<JSViewAbstract>(globalObj);
 }
@@ -106,6 +109,7 @@ void JSTextInputController::JSBind(BindingTarget globalObj)
     JSClass<JSTextInputController>::Declare("TextInputController");
     JSClass<JSTextInputController>::Method("caretPosition", &JSTextInputController::CaretPosition);
     JSClass<JSTextInputController>::Method("setTextSelection", &JSTextInputController::SetTextSelection);
+    JSClass<JSTextInputController>::Method("stopEditing", &JSTextInputController::StopEditing);
     JSClass<JSTextInputController>::Bind(
         globalObj, JSTextInputController::Constructor, JSTextInputController::Destructor);
 }
@@ -140,4 +144,11 @@ void JSTextInputController::SetTextSelection(int32_t selectionStart, int32_t sel
     }
 }
 
+void JSTextInputController::StopEditing()
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        controller->StopEditing();
+    }
+}
 } // namespace OHOS::Ace::Framework

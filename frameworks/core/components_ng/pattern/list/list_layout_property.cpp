@@ -82,6 +82,22 @@ void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     } else {
         json->Put("sticky", "StickyStyle.None");
     }
+    ScrollSnapPropToJsonValue(json);
+}
+
+void ListLayoutProperty::ScrollSnapPropToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    auto scrollSnapAlign = propScrollSnapAlign_.value_or(V2::ScrollSnapAlign::NONE);
+    if (scrollSnapAlign == V2::ScrollSnapAlign::START) {
+        json->Put("scrollSnapAlign", "ScrollSnapAlign.START");
+    } else if (scrollSnapAlign == V2::ScrollSnapAlign::CENTER) {
+        json->Put("scrollSnapAlign", "ScrollSnapAlign.CENTER");
+    } else if (scrollSnapAlign == V2::ScrollSnapAlign::END) {
+        json->Put("scrollSnapAlign", "ScrollSnapAlign.END");
+    } else {
+        json->Put("scrollSnapAlign", "ScrollSnapAlign.NONE");
+    }
+    json->Put("enableScrollInteraction", propScrollEnabled_.value_or(true));
 }
 
 void ListLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)

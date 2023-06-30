@@ -42,6 +42,7 @@ void WebModelNG::Create(const std::string& src, const RefPtr<WebController>& web
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
     pipeline->AddWindowSizeChangeCallback(nodeId);
+    AddDragFrameNodeToManager();
 }
 
 void WebModelNG::Create(const std::string& src, std::function<void(int32_t)>&& setWebIdCallback,
@@ -63,6 +64,7 @@ void WebModelNG::Create(const std::string& src, std::function<void(int32_t)>&& s
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
     pipeline->AddWindowSizeChangeCallback(nodeId);
+    AddDragFrameNodeToManager();
 }
 
 void WebModelNG::SetCustomScheme(const std::string& cmdLine)
@@ -779,6 +781,18 @@ void WebModelNG::NotifyPopupWindowResult(int32_t webId, bool result)
             nwebSptr->NotifyPopupWindowResult(result);
         }
     }
+}
+
+void WebModelNG::AddDragFrameNodeToManager()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    dragDropManager->AddDragFrameNode(frameNode);
 }
 
 void WebModelNG::SetAudioResumeInterval(int32_t resumeInterval)

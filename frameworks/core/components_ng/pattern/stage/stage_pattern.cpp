@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,17 @@
  * limitations under the License.
  */
 
-/**
- * ObservedPropertyObjectAbstractPU
- * 
- * common bbase class of ObservedPropertyObjectPU and
- * SyncedObjectPropertyTwoWayPU
- * adds the createObjectLink to the ObservedPropertyAbstract base
- * 
- * all definitions in this file are framework internal
- */
+#include "core/components_ng/pattern/stage/stage_pattern.h"
 
-abstract class ObservedPropertyObjectAbstractPU<C extends Object>
-  extends ObservedPropertyAbstractPU<C> {
-
-  constructor(owningView: IPropertySubscriber, thisPropertyName: PropertyInfo) {
-    super(owningView, thisPropertyName)
-  }
+#include "core/pipeline_ng/pipeline_context.h"
+namespace OHOS::Ace::NG {
+void StagePattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    host->GetRenderContext()->UpdateBackgroundColor(pipeline->GetAppBgColor());
 }
+} // namespace OHOS::Ace::NG

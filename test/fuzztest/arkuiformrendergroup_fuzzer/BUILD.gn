@@ -51,7 +51,7 @@ ohos_fuzztest("ArkuiFormRenderGroupFuzzTest") {
     "c_utils:utils",
     "form_fwk:form_manager",
     "graphic_standard:surface",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
     "napi:ace_napi",

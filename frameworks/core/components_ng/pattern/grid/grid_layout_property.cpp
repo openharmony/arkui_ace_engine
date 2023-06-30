@@ -55,6 +55,7 @@ void GridLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     } else {
         json->Put("edgeEffect", "EdgeEffect.None");
     }
+    json->Put("enableScrollInteraction", propScrollEnabled_.value_or(true));
 }
 
 std::string GridLayoutProperty::GetGridDirectionStr() const

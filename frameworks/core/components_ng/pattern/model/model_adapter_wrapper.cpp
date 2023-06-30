@@ -97,7 +97,7 @@ void ModelAdapterWrapper::UpdateLights(const SceneViewerAdapterProperties& prope
 
 void ModelAdapterWrapper::UpdateGLTFAnimations(const SceneViewerAdapterProperties& properties)
 {
-    LOGD("MODEL_NG: ModelAdapterWrapper::UpdateGLTFAnimations() -> %u", properties.animations_.size());
+    LOGD("MODEL_NG: ModelAdapterWrapper::UpdateGLTFAnimations() -> %zu", properties.animations_.size());
     if (!properties.animations_.empty()) {
 #if MULTI_ECS_UPDATE_AT_ONCE
         OHOS::Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), &properties] {
@@ -113,7 +113,7 @@ void ModelAdapterWrapper::UpdateGLTFAnimations(const SceneViewerAdapterPropertie
 
 void ModelAdapterWrapper::UpdateGeometries(const SceneViewerAdapterProperties& properties)
 {
-    LOGD("MODEL_NG: ModelAdapterWrapper::UpdateGeometries() -> %u", properties.geometries_.size());
+    LOGD("MODEL_NG: ModelAdapterWrapper::UpdateGeometries() -> %zu", properties.geometries_.size());
     if (!properties.geometries_.empty()) {
 #if MULTI_ECS_UPDATE_AT_ONCE
         OHOS::Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), &properties] {
@@ -163,6 +163,12 @@ SkDrawable* ModelAdapterWrapper::GetDrawable(OffsetF offset)
     return textureLayer_.get();
 }
 
+std::shared_ptr<OHOS::Render3D::TextureLayer> ModelAdapterWrapper::GetTextureLayer(OffsetF offset)
+{
+    textureLayer_->SetOffset(offset.GetX(), offset.GetY());
+    return textureLayer_;
+}
+
 void ModelAdapterWrapper::OnMeasureContent(const RefPtr<ModelLayoutProperty>& modelLayoutProperty, SizeF size)
 {
     LOGD("MODEL_NG: OnMeasureContent");
@@ -201,12 +207,11 @@ void ModelAdapterWrapper::Initialize()
     EGLContext eglContext = GetRenderContext();
 
     if (eglContext == EGL_NO_CONTEXT) {
-        LOGW("MODEL_NG: Initialize() - No render context.");
-        return;
+        LOGW("MODEL_NG: Initialize() - No render context. Start unify rendering");
     }
 
     CreateTextureLayer(eglContext);
-    CreateSceneViewerAdapter(eglContext);
+    CreateSceneViewerAdapter(eglContext_);
 }
 
 void ModelAdapterWrapper::CreateSceneViewerAdapter(const EGLContext& eglContext)
@@ -254,12 +259,11 @@ void ModelAdapterWrapper::CreateTextureLayer(const EGLContext& eglContext)
         auto& gfxManager = OHOS::Render3D::GraphicsManager::GetInstance();
         gfxManager.Register(adapter->GetKey());
 
-        auto info = gfxManager.CreateRenderTexture(adapter->GetKey(),
-            adapter->size_.Width(), adapter->size_.Height(), eglContext);
+        adapter->eglContext_ = gfxManager.CreateOffScreenContext(eglContext);
+        adapter->textureLayer_ = std::make_shared<OHOS::Render3D::TextureLayer>();
+        auto info = adapter->textureLayer_->CreateRenderTarget(adapter->size_.Width(), adapter->size_.Height());
         adapter->textureInfo_ = std::make_shared<OHOS::Render3D::TextureInfo>(std::move(info));
-        adapter->textureLayer_ = std::shared_ptr<OHOS::Render3D::TextureLayer> {
-            new OHOS::Render3D::TextureLayer(*(adapter->textureInfo_)) };
-
+        adapter->textureLayer_->SetTextureInfo(info);
         const OHOS::Render3D::TextureInfo& obj = *(adapter->textureInfo_);
         LOGD("MODEL_NG: ModelAdapterWrapper::CreateTextureLayer() key_ = %d, texture_id = %d",
             adapter->GetKey(), obj.textureId_);
@@ -370,7 +374,7 @@ bool ModelAdapterWrapper::HandleTouchEvent(const TouchEventInfo& info)
 
 void ModelAdapterWrapper::HandleCameraMove(const OHOS::Render3D::SceneViewerTouchEvent& event)
 {
-    LOGD("MODEL_NG HandleCameraMove() eventId[%d], eventType[%u], position[%.2f, %.2f], delta[%.2f, %.2f], key = %d",
+    LOGD("MODEL_NG HandleCameraMove() eventId[%d], eventType[%zu], position[%.2f, %.2f], delta[%.2f, %.2f], key = %d",
     event.GetFingerId(), event.GetEventType(), event.GetGlobalLocation().GetX(), event.GetGlobalLocation().GetY(),
     event.GetDeltaChange().GetX(), event.GetDeltaChange().GetY(), GetKey());
 #if MULTI_ECS_UPDATE_AT_ONCE

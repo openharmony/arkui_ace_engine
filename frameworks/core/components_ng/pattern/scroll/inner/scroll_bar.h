@@ -26,6 +26,7 @@
 #include "core/components/common/properties/edge.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/event/touch_event.h"
+#include "core/components_ng/property/border_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -184,16 +185,6 @@ public:
         return minDynamicHeight_;
     }
 
-    void SetReservedHeight(const Dimension& height)
-    {
-        reservedHeight_ = height;
-    }
-
-    const Dimension& GetReservedHeight() const
-    {
-        return reservedHeight_;
-    }
-
     void SetInactiveWidth(const Dimension& inactiveWidth)
     {
         inactiveWidth_ = inactiveWidth;
@@ -214,6 +205,7 @@ public:
         if (normalWidth_ != normalWidth) {
             normalWidthUpdate_ = true;
             normalWidth_ = normalWidth;
+            CalcReservedHeight();
             FlushBarWidth();
             MarkNeedRender();
         }
@@ -365,6 +357,46 @@ public:
         return isUserNormalWidth_;
     }
 
+    void SetReservedHeightUpdate(bool reservedHeightUpdate)
+    {
+        reservedHeightUpdate_ = reservedHeightUpdate;
+    }
+
+    bool GetReservedHeightUpdate() const
+    {
+        return reservedHeightUpdate_;
+    }
+
+    void SetStartReservedHeight(const Dimension& startReservedHeight)
+    {
+        startReservedHeight_ = startReservedHeight;
+    }
+
+    const Dimension& GetStartReservedHeight() const
+    {
+        return startReservedHeight_;
+    }
+
+    void SetEndReservedHeight(const Dimension& endReservedHeight)
+    {
+        endReservedHeight_ = endReservedHeight;
+    }
+
+    const Dimension& GetEndReservedHeight() const
+    {
+        return endReservedHeight_;
+    }
+
+    void SetHostBorderRadius(const BorderRadiusProperty& hostBorderRadius)
+    {
+        hostBorderRadius_ = hostBorderRadius;
+    }
+
+    const BorderRadiusProperty& GetHostBorderRadius() const
+    {
+        return hostBorderRadius_;
+    }
+
     void SetGestureEvent();
     void SetMouseEvent();
     void FlushBarWidth();
@@ -372,6 +404,7 @@ public:
     void PlayGrowAnimation();
     void PlayShrinkAnimation();
     void PlayBarEndAnimation();
+    void CalcReservedHeight();
 
 protected:
     void InitTheme();
@@ -387,15 +420,17 @@ private:
     DisplayMode displayMode_ = DisplayMode::AUTO;
     ShapeMode shapeMode_ = ShapeMode::RECT;
     PositionMode positionMode_ = PositionMode::RIGHT;
+    BorderRadiusProperty hostBorderRadius_;
     Edge padding_;
     Color backgroundColor_;
     Color foregroundColor_;
     Rect touchRegion_;
     Rect barRect_;
     Rect activeRect_;
-    Dimension minHeight_;        // this is min static height
-    Dimension minDynamicHeight_; // this is min dynamic height when on the top or bottom
-    Dimension reservedHeight_;   // this is reservedHeight on the bottom
+    Dimension minHeight_;           // this is min static height
+    Dimension minDynamicHeight_;    // this is min dynamic height when on the top or bottom
+    Dimension startReservedHeight_; // this is reservedHeight on the start
+    Dimension endReservedHeight_;   // this is reservedHeight on the end
     Dimension inactiveWidth_;
     Dimension activeWidth_;
     Dimension normalWidth_;
@@ -422,6 +457,7 @@ private:
     bool positionModeUpdate_ = false;
     bool normalWidthUpdate_ = false;
     bool isUserNormalWidth_ = false;
+    bool reservedHeightUpdate_ = false; // has reserved hight been updated
 
     Offset paintOffset_;
     Size viewPortSize_;

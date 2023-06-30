@@ -788,6 +788,20 @@ void JSTextField::SetOnChange(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetOnChange(std::move(callback));
 }
 
+void JSTextField::SetOnTextSelectionChange(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    JsEventCallback<void(int32_t, int32_t)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    TextFieldModel::GetInstance()->SetOnTextSelectionChange(std::move(callback));
+}
+
+void JSTextField::SetOnScroll(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    JsEventCallback<void(float, float)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    TextFieldModel::GetInstance()->SetOnScroll(std::move(callback));
+}
+
 void JSTextField::SetOnCopy(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
@@ -1008,4 +1022,17 @@ void JSTextField::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->RequestKeyboardOnFocus(info[0]->ToBoolean());
 }
 
+void JSTextField::SetSelectionMenuHidden(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("SelectionMenuHidden should have at least 1 param");
+        return;
+    }
+    if (info[0]->IsUndefined() || !info[0]->IsBoolean()) {
+        LOGI("The info of SetSelectionMenuHidden is not correct, using default");
+        TextFieldModel::GetInstance()->SetSelectionMenuHidden(false);
+        return;
+    }
+    TextFieldModel::GetInstance()->SetSelectionMenuHidden(info[0]->ToBoolean());
+}
 } // namespace OHOS::Ace::Framework

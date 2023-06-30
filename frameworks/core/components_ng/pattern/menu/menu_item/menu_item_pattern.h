@@ -226,6 +226,10 @@ class CustomMenuItemPattern : public MenuItemPattern {
     DECLARE_ACE_TYPE(CustomMenuItemPattern, MenuItemPattern);
 
 public:
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return MakeRefPtr<BoxLayoutAlgorithm>();
+    }
     void OnAttachToFrameNode() override;
 
 private:

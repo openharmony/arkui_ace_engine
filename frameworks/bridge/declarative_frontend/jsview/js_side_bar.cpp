@@ -54,7 +54,11 @@ constexpr Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
 constexpr Dimension DEFAULT_DIVIDER_STROKE_WIDTH = 1.0_vp;
 constexpr Dimension DEFAULT_DIVIDER_START_MARGIN = 0.0_vp;
 constexpr Dimension DEFAULT_DIVIDER_END_MARGIN = 0.0_vp;
+constexpr Dimension DEFAULT_SIDE_BAR_WIDTH = 200.0_vp;
+constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
+constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
 constexpr Color DEFAULT_DIVIDER_COLOR = Color(0x08000000);
+constexpr int32_t PLATFORM_VERSION_TEN = 10;
 
 void ParseAndSetWidth(const JSCallbackInfo& info, WidthType widthType)
 {
@@ -64,8 +68,27 @@ void ParseAndSetWidth(const JSCallbackInfo& info, WidthType widthType)
     }
 
     CalcDimension value;
-    if (!JSViewAbstract::ParseJsDimensionVp(info[0], value)) {
-        return;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+
+    auto isValid = pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN
+                       ? JSViewAbstract::ParseJsDimensionVpNG(info[0], value)
+                       : JSViewAbstract::ParseJsDimensionVp(info[0], value);
+
+    if (!isValid) {
+        switch (widthType) {
+            case WidthType::SIDEBAR_WIDTH:
+                value = DEFAULT_SIDE_BAR_WIDTH;
+                break;
+            case WidthType::MIN_SIDEBAR_WIDTH:
+                value = DEFAULT_MIN_SIDE_BAR_WIDTH;
+                break;
+            case WidthType::MAX_SIDEBAR_WIDTH:
+                value = DEFAULT_MAX_SIDE_BAR_WIDTH;
+                break;
+            default:
+                break;
+        }
     }
     SideBarContainerModel::GetInstance()->ParseAndSetWidth(widthType, value);
 }
@@ -195,7 +218,7 @@ void JSSideBar::JsShowSideBar(const JSCallbackInfo& info)
         return;
     }
 
-    bool isShow = false;
+    bool isShow = true;
     if (info.Length() > 0 && info[0]->IsBoolean()) {
         isShow = info[0]->ToBoolean();
     }
@@ -284,8 +307,7 @@ void JSSideBar::JsDivider(const JSCallbackInfo& info)
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
 
         Dimension strokeWidth = DEFAULT_DIVIDER_STROKE_WIDTH;
-        if (!ConvertFromJSValue(obj->GetProperty("strokeWidth"), strokeWidth) || (strokeWidth.Value() < 0.0f)) {
-            LOGE("Invalid strokeWidth of divider");
+        if (!ConvertFromJSValueNG(obj->GetProperty("strokeWidth"), strokeWidth) || (strokeWidth.Value() < 0.0f)) {
             strokeWidth = DEFAULT_DIVIDER_STROKE_WIDTH;
         }
         SideBarContainerModel::GetInstance()->SetDividerStrokeWidth(strokeWidth);
@@ -297,13 +319,13 @@ void JSSideBar::JsDivider(const JSCallbackInfo& info)
         SideBarContainerModel::GetInstance()->SetDividerColor(color);
 
         Dimension startMargin = DEFAULT_DIVIDER_START_MARGIN;
-        if (!ConvertFromJSValue(obj->GetProperty("startMargin"), startMargin) || (startMargin.Value() < 0.0f)) {
+        if (!ConvertFromJSValueNG(obj->GetProperty("startMargin"), startMargin) || (startMargin.Value() < 0.0f)) {
             startMargin = DEFAULT_DIVIDER_START_MARGIN;
         }
         SideBarContainerModel::GetInstance()->SetDividerStartMargin(startMargin);
 
         Dimension endMargin = DEFAULT_DIVIDER_END_MARGIN;
-        if (!ConvertFromJSValue(obj->GetProperty("endMargin"), endMargin) || (endMargin.Value() < 0.0f)) {
+        if (!ConvertFromJSValueNG(obj->GetProperty("endMargin"), endMargin) || (endMargin.Value() < 0.0f)) {
             endMargin = DEFAULT_DIVIDER_END_MARGIN;
         }
         SideBarContainerModel::GetInstance()->SetDividerEndMargin(endMargin);

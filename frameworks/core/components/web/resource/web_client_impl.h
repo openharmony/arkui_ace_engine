@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_RESOURCE_WEBVIEW_CLIENT_IMPL_H
 
 #include "foundation/arkui/ace_engine/frameworks/base/memory/referenced.h"
+#include "nweb_drag_data.h"
 #include "nweb_handler.h"
 
 #include "base/log/log.h"
@@ -155,6 +156,8 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle) override;
     bool OnDragAndDropData(const void* data, size_t len, const NWeb::ImageOptions& opt) override;
+    bool OnDragAndDropDataUdmf(std::shared_ptr<NWeb::NWebDragData> dragData) override;
+    void UpdateDragCursor(NWeb::NWebDragData::DragOperation op) override;
     void OnWindowNewByJS(
         const std::string& targetUrl,
         bool isAlert,

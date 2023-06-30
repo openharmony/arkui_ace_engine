@@ -770,6 +770,7 @@ std::shared_ptr<RSData> SharedMemoryImageLoader::LoadImageData(
         }
     }
 
+    std::unique_lock<std::mutex> lock(mtx_);
 #ifndef USE_ROSEN_DRAWING
     auto skData = SkData::MakeWithCopy(data_.data(), data_.size());
     return skData;

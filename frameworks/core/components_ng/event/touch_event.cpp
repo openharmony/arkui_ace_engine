@@ -34,6 +34,7 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
     }
     TouchEventInfo event("touchEvent");
     event.SetTimeStamp(point.time);
+    event.SetPointerEvent(point.pointerEvent);
     TouchLocationInfo changedInfo("onTouch", point.id);
     auto localX = static_cast<float>(point.x - coordinateOffset_.GetX());
     auto localY = static_cast<float>(point.y - coordinateOffset_.GetY());

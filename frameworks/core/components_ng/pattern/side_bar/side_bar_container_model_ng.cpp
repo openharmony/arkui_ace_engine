@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_layout_property.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
+#include "core/components_ng/pattern/side_bar/side_bar_theme.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -56,6 +57,7 @@ void SideBarContainerModelNG::Pop()
     auto children = sideBarContainerNode->GetChildren();
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE_WITHOUT_BUTTON_AND_DIVIDER) {
         LOGE("SideBarContainerView::Pop children's size is wrong[%{public}zu].", children.size());
+        NG::ViewStackProcessor::GetInstance()->PopContainer();
         return;
     }
 
@@ -68,30 +70,25 @@ void SideBarContainerModelNG::Pop()
 
     auto sideBarNode = children.front();
     sideBarNode->MovePosition(DEFAULT_NODE_SLOT);
-    sideBarContainerNode->RebuildRenderContextTree();
 
-    auto begin = children.begin();
-    // when side bar only have one component, no need to init side bar content
-    if (children.size() > DEFAULT_MIN_CHILDREN_SIZE_WITHOUT_BUTTON_AND_DIVIDER) {
-        InitSideBarContentEvent(sideBarContainerNode, AceType::DynamicCast<FrameNode>(*(++begin)));
+    auto sideBarFrameNode = AceType::DynamicCast<FrameNode>(sideBarNode);
+    if (sideBarFrameNode) {
+        auto renderContext = sideBarFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        if (!renderContext->HasBackgroundColor()) {
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            auto sideBarTheme = context->GetTheme<SideBarTheme>();
+            CHECK_NULL_VOID(sideBarTheme);
+            Color bgColor = sideBarTheme->GetSideBarBackgroundColor();
+            renderContext->UpdateBackgroundColor(bgColor);
+        }
     }
+    sideBarContainerNode->RebuildRenderContextTree();
 
     CreateAndMountDivider(sideBarContainerNode);
     CreateAndMountControlButton(sideBarContainerNode);
     NG::ViewStackProcessor::GetInstance()->PopContainer();
-}
-
-void SideBarContainerModelNG::InitSideBarContentEvent(const RefPtr<NG::FrameNode>& parentNode,
-    const RefPtr<NG::FrameNode>& sideBarContentFrameNode)
-{
-    CHECK_NULL_VOID(parentNode);
-    CHECK_NULL_VOID(sideBarContentFrameNode);
-    auto gestureHub = sideBarContentFrameNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    auto parentPattern = parentNode->GetPattern<SideBarContainerPattern>();
-    CHECK_NULL_VOID(parentPattern);
-    parentPattern->InitSideBarContentEvent(gestureHub);
-    sideBarContentFrameNode->MarkModifyDone();
 }
 
 void SideBarContainerModelNG::CreateAndMountControlButton(const RefPtr<NG::FrameNode>& parentNode)
@@ -100,18 +97,26 @@ void SideBarContainerModelNG::CreateAndMountControlButton(const RefPtr<NG::Frame
     CHECK_NULL_VOID(layoutProperty);
     auto showSideBar = layoutProperty->GetShowSideBar().value_or(true);
 
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto sideBarTheme = context->GetTheme<SideBarTheme>();
+    CHECK_NULL_VOID(sideBarTheme);
+    Color controlButtonColor = sideBarTheme->GetControlImageColor();
+
     ImageSourceInfo info((std::string()));
     if (showSideBar) {
         if (layoutProperty->GetControlButtonShowIconStr().has_value()) {
             info.SetSrc(layoutProperty->GetControlButtonShowIconStr().value());
         } else {
             info.SetResourceId(InternalResource::ResourceId::SIDE_BAR);
+            info.SetFillColor(controlButtonColor);
         }
     } else {
         if (layoutProperty->GetControlButtonHiddenIconStr().has_value()) {
             info.SetSrc(layoutProperty->GetControlButtonHiddenIconStr().value());
         } else {
             info.SetResourceId(InternalResource::ResourceId::SIDE_BAR);
+            info.SetFillColor(controlButtonColor);
         }
     }
 
@@ -126,6 +131,10 @@ void SideBarContainerModelNG::CreateAndMountControlButton(const RefPtr<NG::Frame
     auto parentPattern = parentNode->GetPattern<SideBarContainerPattern>();
     parentPattern->SetHasControlButton(true);
     parentPattern->InitControlButtonTouchEvent(gestureHub);
+
+    auto inputHub = imgHub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    parentPattern->InitControlButtonMouseEvent(inputHub);
 
     auto imageLayoutProperty = imgNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);

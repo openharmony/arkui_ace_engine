@@ -25,8 +25,11 @@ class ACE_EXPORT LoadImageSuccessEvent : public BaseEventInfo {
 
 public:
     LoadImageSuccessEvent(double width, double height, double componentWidth, double componentHeight,
-        int32_t loadingStatus = 1) : BaseEventInfo("LoadImageSuccessEvent"), width_(width), height_(height),
-        componentWidth_(componentWidth), componentHeight_(componentHeight), loadingStatus_(loadingStatus) {}
+        int32_t loadingStatus = 1, double contentWidth = 0.0, double contentHeight = 0.0, double contentOffsetX = 0.0,
+        double contentOffsetY = 0.0) : BaseEventInfo("LoadImageSuccessEvent"), width_(width), height_(height),
+        componentWidth_(componentWidth), componentHeight_(componentHeight), loadingStatus_(loadingStatus),
+        contentWidth_(contentWidth), contentHeight_(contentHeight), contentOffsetX_(contentOffsetX),
+        contentOffsetY_(contentOffsetY) {}
 
     ~LoadImageSuccessEvent() = default;
 
@@ -55,12 +58,37 @@ public:
         return loadingStatus_;
     }
 
+    double GetContentWidth() const
+    {
+        return contentWidth_;
+    }
+
+    double GetContentHeight() const
+    {
+        return contentHeight_;
+    }
+
+    double GetContentOffsetX() const
+    {
+        return contentOffsetX_;
+    }
+
+    double GetContentOffsetY() const
+    {
+        return contentOffsetY_;
+    }
+
 private:
     double width_ = 0.0;
     double height_ = 0.0;
     double componentWidth_ = 0.0;
     double componentHeight_ = 0.0;
     int32_t loadingStatus_ = 1; // [0] means [done layout], [1] means [load success]
+
+    double contentWidth_ = 0.0;
+    double contentHeight_ = 0.0;
+    double contentOffsetX_ = 0.0;
+    double contentOffsetY_ = 0.0;
 };
 
 class ACE_EXPORT LoadImageFailEvent : public BaseEventInfo {

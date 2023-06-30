@@ -18,6 +18,7 @@
 #include <memory>
 #include <unordered_map>
 
+#include "html.h"
 #include "image.h"
 #include "link.h"
 #include "summary_napi.h"
@@ -175,6 +176,52 @@ void UdmfClientImpl::AddLinkRecord(
     udData->GetUnifiedData()->AddRecord(record);
 }
 
+void UdmfClientImpl::GetLinkRecord(
+    const RefPtr<UnifiedData>& unifiedData, std::string& url, std::string& description)
+{
+    auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
+    CHECK_NULL_VOID(udData);
+    auto records = udData->GetUnifiedData()->GetRecords();
+    for (auto record : records) {
+        UDMF::UDType type = record->GetType();
+        if (type == UDMF::UDType::HYPERLINK) {
+            UDMF::Link* link = reinterpret_cast<UDMF::Link*>(record.get());
+            url = link->GetUrl();
+            description = link->GetDescription();
+            return;
+        }
+    }
+}
+
+void UdmfClientImpl::AddHtmlRecord(
+    const RefPtr<UnifiedData>& unifiedData, const std::string& htmlContent, const std::string& plainContent)
+{
+    auto htmlRecord = std::make_shared<UDMF::Html>(htmlContent, plainContent);
+
+    auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
+    CHECK_NULL_VOID(udData);
+    if (!plainContent.empty() || !htmlContent.empty()) {
+        udData->GetUnifiedData()->AddRecord(htmlRecord);
+    }
+}
+
+void UdmfClientImpl::GetHtmlRecord(
+    const RefPtr<UnifiedData>& unifiedData, std::string& htmlContent, std::string& plainContent)
+{
+    auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
+    CHECK_NULL_VOID(udData);
+    auto records = udData->GetUnifiedData()->GetRecords();
+    for (auto record : records) {
+        UDMF::UDType type = record->GetType();
+        if (type == UDMF::UDType::HTML) {
+            UDMF::Html* html = reinterpret_cast<UDMF::Html*>(record.get());
+            plainContent = html->GetPlainContent();
+            htmlContent = html->GetHtmlContent();
+            return;
+        }
+    }
+}
+
 void UdmfClientImpl::AddPixelMapRecord(const RefPtr<UnifiedData>& unifiedData, std::vector<uint8_t>& data)
 {
     auto record = std::make_shared<UDMF::SystemDefinedPixelMap>(data);
@@ -210,7 +257,7 @@ std::string UdmfClientImpl::GetSingleTextRecord(const RefPtr<UnifiedData>& unifi
     auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
     CHECK_NULL_RETURN(udData, str);
     auto records = udData->GetUnifiedData()->GetRecords();
-    if (records.size() == 1 && records[0]->GetType() == UDMF::UDType::TEXT) {
+    if (records.size() >= 1 && records[0]->GetType() == UDMF::UDType::TEXT) {
         UDMF::Text* text = reinterpret_cast<UDMF::Text*>(records[0].get());
         UDMF::UDDetails udmfDetails = text->GetDetails();
         auto value = udmfDetails.find("value");

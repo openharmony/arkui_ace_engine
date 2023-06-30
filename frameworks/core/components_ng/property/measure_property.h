@@ -307,14 +307,24 @@ struct PaddingPropertyT {
 
     bool UpdateWithCheck(const PaddingPropertyT& value)
     {
-        if (*this != value) {
+        bool isModified = false;
+        if (value.left.has_value() && (left != value.left)) {
             left = value.left;
-            right = value.right;
-            top = value.top;
-            bottom = value.bottom;
-            return true;
+            isModified = true;
         }
-        return false;
+        if (value.right.has_value() && (right != value.right)) {
+            right = value.right;
+            isModified = true;
+        }
+        if (value.top.has_value() && (top != value.top)) {
+            top = value.top;
+            isModified = true;
+        }
+        if (value.bottom.has_value() && (bottom != value.bottom)) {
+            bottom = value.bottom;
+            isModified = true;
+        }
+        return isModified;
     }
 
     std::string ToString() const

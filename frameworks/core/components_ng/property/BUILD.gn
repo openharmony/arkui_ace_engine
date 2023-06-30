@@ -23,6 +23,7 @@ build_component_ng("property_ng") {
     "grid_property.cpp",
     "measure_utils.cpp",
     "property.cpp",
+    "safe_area_insets.cpp",
     "templates_parser.cpp",
   ]
 }

@@ -184,8 +184,5 @@ void SideBarContainerModelImpl::CreateAndMountControlButton(const RefPtr<NG::Fra
 
 void SideBarContainerModelImpl::CreateAndMountDivider(const RefPtr<NG::FrameNode>& parentNode) {}
 
-void SideBarContainerModelImpl::InitSideBarContentEvent(const RefPtr<NG::FrameNode>& parentNode,
-    const RefPtr<NG::FrameNode>& sideBarContentFrameNode) {}
-
 void SideBarContainerModelImpl::MarkNeedInitRealSideBarWidth() {}
 } // namespace OHOS::Ace::Framework

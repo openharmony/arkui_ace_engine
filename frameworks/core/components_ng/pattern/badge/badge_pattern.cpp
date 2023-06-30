@@ -78,8 +78,14 @@ void BadgePattern::OnModifyDone()
         badgeVisible = true;
     }
     auto circleSize = layoutProperty->GetBadgeCircleSize();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    CHECK_NULL_VOID(badgeTheme);
+    Dimension width = layoutProperty->GetBadgeBorderWidthValue(badgeTheme->GetBadgeBorderWidth());
     if (LessOrEqual(circleSize->ConvertToPx(), 0)) {
-        badgeVisible = false;
+        badgeVisible = true;
+        width.Reset();
     }
     auto badgeTextColor = layoutProperty->GetBadgeTextColor();
     textLayoutProperty->UpdateTextColor(badgeTextColor.value());
@@ -90,11 +96,6 @@ void BadgePattern::OnModifyDone()
     textLayoutProperty->UpdateMaxLines(1);
     textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
 
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
-    CHECK_NULL_VOID(badgeTheme);
-    Dimension width = layoutProperty->GetBadgeBorderWidthValue(badgeTheme->GetBadgeBorderWidth());
     BorderWidthProperty borderWidth;
     borderWidth.SetBorderWidth(width);
     textLayoutProperty->UpdateBorderWidth(borderWidth);

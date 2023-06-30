@@ -45,6 +45,7 @@ constexpr double HANGING_PERCENT = 0.8;
 constexpr int32_t IMAGE_CACHE_COUNT = 50;
 constexpr double DEFAULT_QUALITY = 0.92;
 constexpr int32_t MAX_LENGTH = 2048 * 2048;
+constexpr int32_t PLATFORM_VERSION_TEN = 10;
 const std::string UNSUPPORTED = "data:image/png";
 const std::string URL_PREFIX = "data:";
 const std::string URL_SYMBOL = ";base64,";
@@ -107,10 +108,6 @@ void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     if (tasks_.empty()) {
         return;
     }
-
-    auto renderContext = paintWrapper->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->SetFrameForCanvas();
 
     skCanvas_->scale(viewScale, viewScale);
     for (const auto& task : tasks_) {
@@ -463,7 +460,13 @@ TextMetrics CanvasPaintMethod::MeasureTextMetrics(const std::string& text, const
 void CanvasPaintMethod::PaintText(const OffsetF& offset, const SizeF& frameSize, double x, double y,
     std::optional<double> maxWidth, bool isStroke, bool hasShadow)
 {
-    paragraph_->Layout(FLT_MAX);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (pipelineContext->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        paragraph_->Layout(FLT_MAX);
+    } else {
+        paragraph_->Layout(frameSize.Width());
+    }
     auto width = paragraph_->GetMaxIntrinsicWidth();
     if (frameSize.Width() > width) {
         paragraph_->Layout(std::ceil(width));

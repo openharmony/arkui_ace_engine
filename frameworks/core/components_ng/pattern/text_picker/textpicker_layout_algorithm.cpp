@@ -15,8 +15,10 @@
 
 #include "core/components_ng/pattern/text_picker/textpicker_layout_algorithm.h"
 
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
+#include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -35,6 +37,8 @@ void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
     SizeF frameSize = { -1.0f, -1.0f };
 
     float pickerHeight = 0.0f;
@@ -83,6 +87,20 @@ void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (height.has_value()) {
         pickerHeight = height.value();
     }
+
+    auto textPickerPattern = pickerNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    if (textPickerPattern->GetIsShowInDialog() && isDefaultPickerItemHeight_) {
+        float dialogButtonHeight = static_cast<float>((pickerTheme->GetButtonHeight() + dialogTheme->GetDividerHeight()
+            + dialogTheme->GetDividerPadding().Bottom() + pickerTheme->GetContentMarginVertical() * 2).ConvertToPx());
+        pickerHeight = std::min(pickerHeight, layoutConstraint->maxSize.Height() - dialogButtonHeight);
+        if (!NearZero(showCount_)) {
+            defaultPickerItemHeight_ = pickerHeight / showCount_;
+        }
+        textPickerPattern->SetResizePickerItemHeight(defaultPickerItemHeight_);
+        textPickerPattern->SetResizeFlag(true);
+    }
+
     pickerItemHeight_ = pickerHeight;
     frameSize.SetWidth(pickerWidth);
     frameSize.SetHeight(pickerHeight);

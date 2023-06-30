@@ -221,7 +221,7 @@ ohos_unittest("AnimationTest") {
       "resmgr:resourcemanager",
     ]
   } else {
-    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps = [ "hilog:libhilog" ]
     deps +=
         [ "//base/global/resource_management/frameworks/resmgr:global_resmgr" ]
   }

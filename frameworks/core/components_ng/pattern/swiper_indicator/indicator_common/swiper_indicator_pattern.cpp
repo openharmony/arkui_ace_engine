@@ -116,7 +116,7 @@ void SwiperIndicatorPattern::HandleClick(const GestureEvent& info)
 {
     if (info.GetSourceDevice() == SourceType::MOUSE) {
         HandleMouseClick(info);
-    } else if (info.GetSourceDevice() == SourceType::TOUCH) {
+    } else {
         HandleTouchClick(info);
     }
 }
@@ -228,9 +228,6 @@ void SwiperIndicatorPattern::HandleHoverEvent(bool isHover)
     CHECK_NULL_VOID(swiperLayoutProperty);
     if (swiperLayoutProperty->GetHoverShowValue(false) && !swiperPattern->GetIsAtHotRegion()) {
         swiperPattern->ArrowHover(isHover_);
-    }
-    if (swiperIndicatorType_ == SwiperIndicatorType::DOT) {
-        swiperPattern->IndicatorHover(isHover_);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }

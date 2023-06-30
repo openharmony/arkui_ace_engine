@@ -55,6 +55,7 @@ public:
     virtual void SetHasHeight(bool hasHeight) = 0;
     virtual void SetSticky(V2::StickyStyle stickyStyle) = 0;
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) = 0;
+    virtual void SetScrollEnabled(bool scrollEnabled) = 0;
     virtual void SetOnScroll(OnScrollEvent&& onScroll) = 0;
     virtual void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin) = 0;
     virtual void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin) = 0;
@@ -70,6 +71,7 @@ public:
     virtual void SetOnItemDragLeave(OnItemDragLeaveFunc&& onItemDragLeave) = 0;
     virtual void SetOnItemDragMove(OnItemDragMoveFunc&& onItemDragMove) = 0;
     virtual void SetOnItemDrop(OnItemDropFunc&& onItemDrop) = 0;
+    virtual void SetScrollSnapAlign(V2::ScrollSnapAlign scrollSnapAlign) {};
 
 private:
     static std::unique_ptr<ListModel> instance_;

@@ -109,6 +109,8 @@ void JSTextTimer::JSBind(BindingTarget globalObj)
     JSClass<JSTextTimer>::StaticMethod("onTimer", &JSTextTimer::OnTimer);
     JSClass<JSTextTimer>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSTextTimer>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSTextTimer>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSTextTimer>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextTimer>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

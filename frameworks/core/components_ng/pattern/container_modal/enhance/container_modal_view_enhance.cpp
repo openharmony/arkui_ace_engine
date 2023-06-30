@@ -151,13 +151,13 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(RefPtr<FrameNode>
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, nullptr);
-    RefPtr<FrameNode> maximizeBtn = BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE,
+    RefPtr<FrameNode> maximizeBtn = BuildControlButton(InternalResource::ResourceId::IC_WINDOW_MAX,
         {});
     BondingMaxBtnGestureEvent(maximizeBtn, containerNode);
     BondingMaxBtnInputEvent(maximizeBtn, containerNode);
     containerTitleRow->AddChild(maximizeBtn);
     
-    RefPtr<FrameNode> minimizeBtn = BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE,
+    RefPtr<FrameNode> minimizeBtn = BuildControlButton(InternalResource::ResourceId::IC_WINDOW_MIN,
         [windowManager] (GestureEvent& info) {
             CHECK_NULL_VOID(windowManager);
             LOGI("minimize button clicked");
@@ -172,7 +172,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(RefPtr<FrameNode>
     containerTitleRow->AddChild(minimizeBtn);
 
     RefPtr<FrameNode> closeBtn = BuildControlButton(
-        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE,
+        InternalResource::ResourceId::IC_WINDOW_CLOSE,
         [windowManager](GestureEvent& info) {
             CHECK_NULL_VOID(windowManager);
             LOGI("close button clicked");

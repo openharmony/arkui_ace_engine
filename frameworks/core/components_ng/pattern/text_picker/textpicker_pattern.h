@@ -64,7 +64,7 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto textPickerPaintMethod = MakeRefPtr<TextPickerPaintMethod>();
+        auto textPickerPaintMethod = MakeRefPtr<TextPickerPaintMethod>(WeakClaim(this));
         textPickerPaintMethod->SetDefaultPickerItemHeight(CalculateHeight());
         textPickerPaintMethod->SetEnabled(enabled_);
         textPickerPaintMethod->SetBackgroundColor(backgroundColor_);
@@ -225,6 +225,36 @@ public:
         isHasSelectAttr_ = value;
     }
 
+    void SetResizePickerItemHeight(double resizePickerItemHeight)
+    {
+        resizePickerItemHeight_ = resizePickerItemHeight;
+    }
+
+    double GetResizePickerItemHeight() const
+    {
+        return resizePickerItemHeight_;
+    }
+
+    void SetResizeFlag(bool resizeFlag)
+    {
+        resizeFlag_ = resizeFlag;
+    }
+
+    bool GetResizeFlag() const
+    {
+        return resizeFlag_;
+    }
+
+    void SetIsShowInDialog(bool isShowInDialog)
+    {
+        isShowInDialog_ = isShowInDialog;
+    }
+
+    bool GetIsShowInDialog() const
+    {
+        return isShowInDialog_;
+    }
+
     void SetSelecteds(const std::vector<uint32_t>& values);
 
     void HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify);
@@ -268,6 +298,7 @@ private:
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
     double defaultPickerItemHeight_;
+    double resizePickerItemHeight_;
     uint32_t selectedIndex_ = 0;
     std::vector<NG::RangeContent> range_;
     std::vector<NG::RangeContent> options_;
@@ -280,6 +311,8 @@ private:
     std::vector<std::string> values_;
     std::vector<uint32_t> selecteds_;
     Color backgroundColor_ = Color::WHITE;
+    bool resizeFlag_ = false;
+    bool isShowInDialog_ = false;
 
     // inner focus switch
     bool operationOn_ = false;

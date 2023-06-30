@@ -119,7 +119,7 @@ void LazyLayoutWrapperBuilder::SwapDirtyAndUpdateBuildCache()
         }
     }
     host->UpdateLazyForEachItems(startIndex_.value(), endIndex_.value(), std::move(nodeIds_), std::move(cacheItems));
-    host->PostIdleTask(std::move(idleIndexes));
+    host->PostIdleTask(std::move(idleIndexes), itemConstraint_, useLongPredictTask_);
 }
 
 void LazyLayoutWrapperBuilder::AdjustGridOffset()

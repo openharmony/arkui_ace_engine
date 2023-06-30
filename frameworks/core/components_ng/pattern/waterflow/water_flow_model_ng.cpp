@@ -165,6 +165,11 @@ void WaterFlowModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
     pattern->SetNestedScroll(nestedOpt);
 }
 
+void WaterFlowModelNG::SetScrollEnabled(bool scrollEnabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ScrollEnabled, scrollEnabled);
+}
+
 void WaterFlowModelNG::SetOnReachStart(OnReachEvent&& onReachStart)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

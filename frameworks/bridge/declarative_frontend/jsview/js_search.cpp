@@ -26,6 +26,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/search/search_theme.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
+#include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 
 namespace OHOS::Ace {
 
@@ -76,6 +77,8 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("textAlign", &JSSearch::SetTextAlign, opt);
     JSClass<JSSearch>::StaticMethod("onSubmit", &JSSearch::OnSubmit, opt);
     JSClass<JSSearch>::StaticMethod("onChange", &JSSearch::OnChange, opt);
+    JSClass<JSSearch>::StaticMethod("onTextSelectionChange", &JSSearch::SetOnTextSelectionChange);
+    JSClass<JSSearch>::StaticMethod("onScroll", &JSSearch::SetOnScroll);
     JSClass<JSSearch>::StaticMethod("border", &JSSearch::JsBorder);
     JSClass<JSSearch>::StaticMethod("borderWidth", &JSSearch::JsBorderWidth);
     JSClass<JSSearch>::StaticMethod("borderColor", &JSSearch::JsBorderColor);
@@ -88,6 +91,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSSearch>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSearch>::StaticMethod("requestKeyboardOnFocus", &JSSearch::SetEnableKeyboardOnFocus);
+    JSClass<JSSearch>::StaticMethod("enableKeyboardOnFocus", &JSSearch::SetEnableKeyboardOnFocus);
     JSClass<JSSearch>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSSearch>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSearch>::StaticMethod("onCopy", &JSSearch::SetOnCopy);
@@ -95,6 +99,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("onPaste", &JSSearch::SetOnPaste);
     JSClass<JSSearch>::StaticMethod("copyOption", &JSSearch::SetCopyOption);
     JSClass<JSSearch>::StaticMethod("textMenuOptions", &JSSearch::JsMenuOptionsExtension);
+    JSClass<JSSearch>::StaticMethod("selectionMenuHidden", &JSSearch::SetSelectionMenuHidden);
     JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -565,6 +570,20 @@ void JSSearch::OnChange(const JSCallbackInfo& info)
     SearchModel::GetInstance()->SetOnChange(std::move(callback));
 }
 
+void JSSearch::SetOnTextSelectionChange(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    JsEventCallback<void(int32_t, int32_t)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    SearchModel::GetInstance()->SetOnTextSelectionChange(std::move(callback));
+}
+
+void JSSearch::SetOnScroll(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    JsEventCallback<void(float, float)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    SearchModel::GetInstance()->SetOnScroll(std::move(callback));
+}
+
 void JSSearch::SetHeight(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsHeight(info);
@@ -622,10 +641,25 @@ void JSSearch::JsMenuOptionsExtension(const JSCallbackInfo& info)
     }
 }
 
+void JSSearch::SetSelectionMenuHidden(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("SelectionMenuHidden should have at least 1 param");
+        return;
+    }
+    if (info[0]->IsUndefined() || !info[0]->IsBoolean()) {
+        LOGI("The info of SetSelectionMenuHidden is not correct, using default");
+        SearchModel::GetInstance()->SetSelectionMenuHidden(false);
+        return;
+    }
+    SearchModel::GetInstance()->SetSelectionMenuHidden(info[0]->ToBoolean());
+}
+
 void JSSearchController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSearchController>::Declare("SearchController");
     JSClass<JSSearchController>::Method("caretPosition", &JSSearchController::CaretPosition);
+    JSClass<JSSearchController>::Method("stopEditing", &JSSearchController::StopEditing);
     JSClass<JSSearchController>::Bind(globalObj, JSSearchController::Constructor, JSSearchController::Destructor);
 }
 
@@ -651,4 +685,11 @@ void JSSearchController::CaretPosition(int32_t caretPosition)
     }
 }
 
+void JSSearchController::StopEditing()
+{
+    auto controller = controller_.Upgrade();
+    if (controller) {
+        controller->StopEditing();
+    }
+}
 } // namespace OHOS::Ace::Framework

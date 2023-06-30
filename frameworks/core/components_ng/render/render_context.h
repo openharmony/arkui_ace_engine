@@ -221,6 +221,14 @@ public:
         return {};
     }
 
+    // stop the property animation and get the current paint rect.
+    virtual OffsetF GetShowingTranslateProperty()
+    {
+        return OffsetF();
+    }
+    // update translateXY in backend.
+    virtual void UpdateTranslateInXY(const OffsetF& offset) {}
+
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json);
@@ -413,7 +421,7 @@ public:
     // obscured
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Obscured, std::vector<ObscuredReasons>);
 
-    virtual void SetFrameForCanvas() {}
+    virtual void SetOverrideContentRect(const std::optional<RectF>& rect) {}
 
 protected:
     RenderContext() = default;

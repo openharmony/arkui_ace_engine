@@ -153,6 +153,7 @@ public:
     }
 
 private:
+    void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     // make render after measure and layout
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
@@ -165,7 +166,7 @@ private:
 
     void RegisterOnTouch();
     void RegisterOnHover();
-    void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    void RegisterOnKeyEvent();
 
     // change option paint props on press
     void OnPress(const TouchEventInfo& info);

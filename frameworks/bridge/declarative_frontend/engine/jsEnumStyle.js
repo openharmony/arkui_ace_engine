@@ -31,7 +31,7 @@ var Color;
 })(Color || (Color = {}));
 
 var ColoringStrategy;
-(function (ColoringStrategy){
+(function (ColoringStrategy) {
   ColoringStrategy["INVERT"] = "Invert";
 })(ColoringStrategy || (ColoringStrategy = {}));
 
@@ -497,6 +497,14 @@ var StickyStyle;
   StickyStyle[StickyStyle["Header"] = 1] = "Header";
   StickyStyle[StickyStyle["Footer"] = 2] = "Footer";
 })(StickyStyle || (StickyStyle = {}));
+
+var ScrollSnapAlign;
+(function (ScrollSnapAlign) {
+  ScrollSnapAlign[ScrollSnapAlign["NONE"] = 0] = "NONE";
+  ScrollSnapAlign[ScrollSnapAlign["START"] = 1] = "START";
+  ScrollSnapAlign[ScrollSnapAlign["CENTER"] = 2] = "CENTER";
+  ScrollSnapAlign[ScrollSnapAlign["END"] = 3] = "END";
+})(ScrollSnapAlign || (ScrollSnapAlign = {}));
 
 var ChainEdgeEffect;
 (function (ChainEdgeEffect) {
@@ -1549,11 +1557,11 @@ var SecurityComponentLayoutDirection;
   SecurityComponentLayoutDirection[SecurityComponentLayoutDirection["VERTICAL"] = 1] = "VERTICAL";
 })(SecurityComponentLayoutDirection || (SecurityComponentLayoutDirection = {}));
 
-var SecurityComponentLayoutOrder ;
-(function (SecurityComponentLayoutOrder ) {
-  SecurityComponentLayoutOrder [SecurityComponentLayoutOrder ["ICON_FIRST"] = 0] = "ICON_FIRST";
-  SecurityComponentLayoutOrder [SecurityComponentLayoutOrder ["TEXT_FIRST"] = 1] = "TEXT_FIRST ";
-})(SecurityComponentLayoutOrder || (SecurityComponentLayoutOrder  = {}));
+var SecurityComponentLayoutOrder;
+(function (SecurityComponentLayoutOrder) {
+  SecurityComponentLayoutOrder[SecurityComponentLayoutOrder["ICON_FIRST"] = 0] = "ICON_FIRST";
+  SecurityComponentLayoutOrder[SecurityComponentLayoutOrder["TEXT_FIRST"] = 1] = "TEXT_FIRST ";
+})(SecurityComponentLayoutOrder || (SecurityComponentLayoutOrder = {}));
 
 var SecLocationButtonLayoutDirection;
 (function (SecLocationButtonLayoutDirection) {
@@ -1695,3 +1703,18 @@ var ScrollAlign;
   ScrollAlign[ScrollAlign["END"] = 2] = "END";
   ScrollAlign[ScrollAlign["AUTO"] = 3] = "AUTO";
 })(ScrollAlign || (ScrollAlign = {}));
+
+var SafeAreaType;
+(function (SafeAreaType) {
+  SafeAreaType[SafeAreaType["SYSTEM"] = 0] = "SYSTEM";
+  SafeAreaType[SafeAreaType["CUTOUT"] = 1] = "CUTOUT";
+  SafeAreaType[SafeAreaType["KEYBOARD"] = 2] = "KEYBOARD";
+})(SafeAreaType || (SafeAreaType = {}));
+
+var SafeAreaEdge;
+(function (SafeAreaEdge) {
+  SafeAreaEdge[SafeAreaEdge["TOP"] = 0] = "TOP";
+  SafeAreaEdge[SafeAreaEdge["BOTTOM"] = 1] = "BOTTOM";
+  SafeAreaEdge[SafeAreaEdge["START"] = 2] = "START";
+  SafeAreaEdge[SafeAreaEdge["END"] = 3] = "END";
+})(SafeAreaEdge || (SafeAreaEdge = {}));

@@ -398,7 +398,7 @@ public:
         return webHapPath_;
     }
 
-    SafeAreaEdgeInserts GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type);
+    NG::SafeAreaInsets GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type);
 
     // ArkTSCard
     void UpdateFormData(const std::string& data);
@@ -418,10 +418,8 @@ private:
     void InitializeTask();
     void InitWindowCallback();
 
-    SafeAreaEdgeInserts GetViewSafeArea(sptr<OHOS::Rosen::Window> window);
-
     void AttachView(std::shared_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height,
-        int32_t windowId, UIEnvCallback callback = nullptr);
+        uint32_t windowId, UIEnvCallback callback = nullptr);
     void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);
     sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
     std::weak_ptr<OHOS::AppExecFwk::Ability> GetAbilityInner() const;

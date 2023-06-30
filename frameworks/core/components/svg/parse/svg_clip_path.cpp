@@ -15,7 +15,9 @@
 
 #include "frameworks/core/components/svg/parse/svg_clip_path.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/pathops/SkPathOps.h"
+#endif
 
 namespace OHOS::Ace {
 
@@ -29,6 +31,7 @@ void SvgClipPath::AppendChild(const RefPtr<SvgNode>& child)
     children_.emplace_back(child);
 }
 
+#ifndef USE_ROSEN_DRAWING
 SkPath SvgClipPath::AsPath(const Size& viewPort) const
 {
     SkPath path;
@@ -38,5 +41,16 @@ SkPath SvgClipPath::AsPath(const Size& viewPort) const
     }
     return path;
 }
+#else
+RSPath SvgClipPath::AsPath(const Size& viewPort) const
+{
+    RSPath path;
+    for (auto child : children_) {
+        RSPath childPath = child->AsPath(viewPort);
+        path.Op(path, childPath, RSPathOp::UNION);
+    }
+    return path;
+}
+#endif
 
 } // namespace OHOS::Ace

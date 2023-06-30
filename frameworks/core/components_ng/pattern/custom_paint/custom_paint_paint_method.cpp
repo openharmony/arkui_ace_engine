@@ -1320,9 +1320,9 @@ void CustomPaintPaintMethod::SetPaintImage(SkPaint& paint)
 // https://drafts.fxtf.org/filter-effects/#grayscaleEquivalent
 void CustomPaintPaintMethod::SetGrayFilter(const std::string& percent, SkPaint& paint)
 {
-    float percentNum = PercentStrToFloat(percent);
-    if (percentNum > 1) {
-        percentNum = 1;
+    float percentNum = 1.0f;
+    if (!CheckNumberAndPercentage(percent, true, percentNum)) {
+        return;
     }
 
     float matrix[20] = { 0.0f };
@@ -1347,9 +1347,9 @@ void CustomPaintPaintMethod::SetGrayFilter(const std::string& percent, SkPaint& 
 // https://drafts.fxtf.org/filter-effects/#sepiaEquivalent
 void CustomPaintPaintMethod::SetSepiaFilter(const std::string& percent, SkPaint& paint)
 {
-    float percentNum = PercentStrToFloat(percent);
-    if (percentNum > 1) {
-        percentNum = 1;
+    float percentNum = 1.0f;
+    if (!CheckNumberAndPercentage(percent, true, percentNum)) {
+        return;
     }
     float matrix[20] = { 0.0f };
     matrix[0] = 1.0f - percentNum * 0.607f;
@@ -1371,7 +1371,10 @@ void CustomPaintPaintMethod::SetSepiaFilter(const std::string& percent, SkPaint&
 // https://drafts.fxtf.org/filter-effects/#saturateEquivalent
 void CustomPaintPaintMethod::SetSaturateFilter(const std::string& percent, SkPaint& paint)
 {
-    float percentNum = PercentStrToFloat(percent);
+    float percentNum = 1.0f;
+    if (!CheckNumberAndPercentage(percent, false, percentNum)) {
+        return;
+    }
     float matrix[20] = { 0.0f };
 
     matrix[0] = LUMR + (1 - LUMR) * percentNum;
@@ -1448,9 +1451,9 @@ void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam, 
  */
 void CustomPaintPaintMethod::SetInvertFilter(const std::string& percent, SkPaint& paint)
 {
-    float percentNum = PercentStrToFloat(percent);
-    if (percentNum > 1) {
-        percentNum = 1;
+    float percentNum = 1.0f;
+    if (!CheckNumberAndPercentage(percent, true, percentNum)) {
+        return;
     }
     float matrix[20] = { 0.0f };
     matrix[0] = matrix[6] = matrix[12] = 1.0 - 2.0 * percentNum;
@@ -1470,9 +1473,9 @@ void CustomPaintPaintMethod::SetInvertFilter(const std::string& percent, SkPaint
  */
 void CustomPaintPaintMethod::SetOpacityFilter(const std::string& percent, SkPaint& paint)
 {
-    float percentNum = PercentStrToFloat(percent);
-    if (percentNum > 1) {
-        percentNum = 1;
+    float percentNum = 1.0f;
+    if (!CheckNumberAndPercentage(percent, true, percentNum)) {
+        return;
     }
     float matrix[20] = { 0.0f };
     matrix[0] = matrix[6] = matrix[12] = 1.0f;
@@ -1488,8 +1491,8 @@ void CustomPaintPaintMethod::SetOpacityFilter(const std::string& percent, SkPain
  */
 void CustomPaintPaintMethod::SetBrightnessFilter(const std::string& percent, SkPaint& paint)
 {
-    float percentNum = PercentStrToFloat(percent);
-    if (percentNum < 0) {
+    float percentNum = 1.0f;
+    if (!CheckNumberAndPercentage(percent, false, percentNum)) {
         return;
     }
     float matrix[20] = { 0.0f };
@@ -1506,7 +1509,10 @@ void CustomPaintPaintMethod::SetBrightnessFilter(const std::string& percent, SkP
  */
 void CustomPaintPaintMethod::SetContrastFilter(const std::string& percent, SkPaint& paint)
 {
-    float percentNum = PercentStrToFloat(percent);
+    float percentNum = 1.0f;
+    if (!CheckNumberAndPercentage(percent, false, percentNum)) {
+        return;
+    }
     float matrix[20] = { 0.0f };
     matrix[0] = matrix[6] = matrix[12] = percentNum;
     matrix[4] = matrix[9] = matrix[14] = 0.5f * (1 - percentNum);
@@ -1517,10 +1523,15 @@ void CustomPaintPaintMethod::SetContrastFilter(const std::string& percent, SkPai
 // https://drafts.fxtf.org/filter-effects/#blurEquivalent
 void CustomPaintPaintMethod::SetBlurFilter(const std::string& percent, SkPaint& paint)
 {
+    float blurNum = 0.0f;
+    blurNum = BlurStrToDouble(percent);
+    if (Negative(blurNum)) {
+        return;
+    }
 #ifdef NEW_SKIA
-    paint.setImageFilter(SkImageFilters::Blur(BlurStrToDouble(percent), BlurStrToDouble(percent), nullptr));
+    paint.setImageFilter(SkImageFilters::Blur(blurNum, blurNum, nullptr));
 #else
-    paint.setImageFilter(SkBlurImageFilter::Make(BlurStrToDouble(percent), BlurStrToDouble(percent), nullptr));
+    paint.setImageFilter(SkBlurImageFilter::Make(blurNum, blurNum, nullptr));
 #endif
 }
 
@@ -1547,10 +1558,9 @@ bool CustomPaintPaintMethod::GetFilterType(FilterType& filterType, std::string& 
     filterType = FilterStrToFilterType(paramData.substr(0, index));
     filterParam = paramData.substr(index + 1);
     size_t endIndex = filterParam.find(")");
-    if (endIndex  == std::string::npos) {
-        return false;
+    if (endIndex  != std::string::npos) {
+            filterParam.erase(endIndex, 1);
     }
-    filterParam.erase(endIndex, 1);
     return true;
 }
 
@@ -1610,6 +1620,28 @@ float CustomPaintPaintMethod::PercentStrToFloat(const std::string& percentStr)
         percentNum = percentNum / 100;
     }
     return percentNum;
+}
+
+bool CustomPaintPaintMethod::CheckNumberAndPercentage(const std::string& param, bool isClamped, float& result)
+{
+    // param.size() == 1, param[0] != 0 ~ 9, return false
+    if (param.size() == 1 && (param[0] < '0' || param[0] > '9')) {
+        return false;
+    }
+    // param.size() > 1, param[i] != (. || 0 ~ 9), return false (except for the last one)
+    for (int i  = 0; i < param.size() - 1; i++) {
+        if (param[i] < '.' || param[i] == '/' || param[i] > '9') {
+            return false;
+        }
+    }
+    result = PercentStrToFloat(param);
+    if (Negative(result)) {
+        return false;
+    }
+    if (isClamped && GreatNotEqual(result, 1.0f)) {
+        result = 1.0f;
+    }
+    return true;
 }
 
 FilterType CustomPaintPaintMethod::FilterStrToFilterType(const std::string& filterStr)

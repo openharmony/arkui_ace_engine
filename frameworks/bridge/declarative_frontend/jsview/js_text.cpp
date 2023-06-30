@@ -28,6 +28,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_text.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/text_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
@@ -402,11 +403,23 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
         std::optional<TextDecoration> textDecoration;
         if (typeValue->IsNumber()) {
             textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
+        } else if (typeValue->IsUndefined()) {
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(pipelineContext);
+            auto theme = pipelineContext->GetTheme<TextTheme>();
+            CHECK_NULL_VOID_NOLOG(theme);
+            textDecoration = theme->GetTextStyle().GetTextDecoration();
         }
         std::optional<Color> colorVal;
         Color result;
         if (ParseJsColor(colorValue, result)) {
             colorVal = result;
+        } else if (colorValue->IsUndefined()) {
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(pipelineContext);
+            auto theme = pipelineContext->GetTheme<TextTheme>();
+            CHECK_NULL_VOID_NOLOG(theme);
+            colorVal = theme->GetTextStyle().GetTextDecorationColor();
         }
 
         if (textDecoration) {
@@ -431,7 +444,24 @@ void JSText::SetHeightAdaptivePolicy(int32_t value)
 void JSText::JsOnClick(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        JSInteractableView::JsOnClick(info);
+        if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+            LOGD("JsOnClick callback is undefined");
+            TextModel::GetInstance()->ClearOnClick();
+            return;
+        }
+        if (!info[0]->IsFunction()) {
+            LOGW("the info is not click function");
+            return;
+        }
+        auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            LOGD("About to call onclick method on js");
+            const auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
+            ACE_SCORING_EVENT("Text.onClick");
+            func->Execute(*clickInfo);
+        };
+        TextModel::GetInstance()->SetOnClick(std::move(onClick));
     } else {
 #ifndef NG_BUILD
         if (info[0]->IsFunction()) {

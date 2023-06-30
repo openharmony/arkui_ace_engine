@@ -66,6 +66,8 @@ public:
     static void SetOnEditChanged(const JSCallbackInfo& info);
     static void SetOnSubmit(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& info);
+    static void SetOnTextSelectionChange(const JSCallbackInfo& info);
+    static void SetOnScroll(const JSCallbackInfo& info);
     static void SetOnCopy(const JSCallbackInfo& info);
     static void SetOnCut(const JSCallbackInfo& info);
     static void SetOnPaste(const JSCallbackInfo& info);
@@ -84,6 +86,7 @@ public:
 
     static void SetShowUnderline(const JSCallbackInfo& info);
     static void SetEnableKeyboardOnFocus(const JSCallbackInfo& info);
+    static void SetSelectionMenuHidden(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

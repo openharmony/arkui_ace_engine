@@ -40,12 +40,19 @@ void MoonProgressModifier::Draw(RSDrawingContext& context) const
     CHECK_NULL_VOID(value_);
     CHECK_NULL_VOID(maxValue_);
     CHECK_NULL_VOID(ratio_);
+#ifndef USE_ROSEN_DRAWING
     std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas* /* unused */) {} };
     RSCanvas rsCanvas(&skCanvas);
     CHECK_NULL_VOID(&rsCanvas);
     SizeF contentSize(context.width, context.height);
 
     PaintSquareMoon(rsCanvas, contentSize);
+#else
+    CHECK_NULL_VOID(context.canvas);
+    SizeF contentSize(context.width, context.height);
+
+    PaintSquareMoon(*context.canvas, contentSize);
+#endif
 }
 
 void MoonProgressModifier::SetMaskColor(LinearColor color)
@@ -129,7 +136,11 @@ void MoonProgressModifier::PaintSquareMoon(RSCanvas& canvas, const SizeF& frameS
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor((maskColor_->Get())));
     canvas.AttachBrush(brush);
+#ifndef USE_ROSEN_DRAWING
     path.SetFillStyle(RSPathFillType::EVENTODD);
+#else
+    path.SetFillStyle(RSPathFillType::EVEN_ODD);
+#endif
     path.AddCircle(centerPt.GetX(), centerPt.GetY(), bigRadius, RSPathDirection::CW_DIRECTION);
     if (angle < FLOAT_ONE_ZERO) {
         path.AddArc(

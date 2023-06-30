@@ -17,10 +17,12 @@
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
+#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/indexer_model_impl.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 
 namespace OHOS::Ace {
@@ -51,6 +53,7 @@ namespace {
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<V2::AlignStyle> ALIGN_STYLE = { V2::AlignStyle::LEFT, V2::AlignStyle::RIGHT };
 const std::vector<NG::AlignStyle> NG_ALIGN_STYLE = { NG::AlignStyle::LEFT, NG::AlignStyle::RIGHT };
+constexpr Dimension DEFAULT_ITEM_SIZE = 24.0_vp;
 }; // namespace
 
 void JSIndexer::ParseIndexerSelectedObject(
@@ -130,13 +133,7 @@ void JSIndexer::SetSelectedColor(const JSCallbackInfo& args)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Color color;
-    if (!ParseJsColor(args[0], color)) {
-        IndexerModel::GetInstance()->SetSelectedColor(std::nullopt);
-        return;
-    }
-
-    IndexerModel::GetInstance()->SetSelectedColor(color);
+    IndexerModel::GetInstance()->SetSelectedColor(PaseColor(args));
 }
 
 void JSIndexer::SetColor(const JSCallbackInfo& args)
@@ -145,13 +142,7 @@ void JSIndexer::SetColor(const JSCallbackInfo& args)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Color color;
-    if (!ParseJsColor(args[0], color)) {
-        IndexerModel::GetInstance()->SetColor(std::nullopt);
-        return;
-    }
-
-    IndexerModel::GetInstance()->SetColor(color);
+    IndexerModel::GetInstance()->SetColor(PaseColor(args));
 }
 
 void JSIndexer::SetPopupColor(const JSCallbackInfo& args)
@@ -160,43 +151,25 @@ void JSIndexer::SetPopupColor(const JSCallbackInfo& args)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Color color;
-    if (!ParseJsColor(args[0], color)) {
-        IndexerModel::GetInstance()->SetPopupColor(std::nullopt);
-        return;
-    }
-
-    IndexerModel::GetInstance()->SetPopupColor(color);
+    IndexerModel::GetInstance()->SetPopupColor(PaseColor(args));
 }
 
 void JSIndexer::SetSelectedBackgroundColor(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Color color;
-    if (!ParseJsColor(args[0], color)) {
-        IndexerModel::GetInstance()->SetSelectedBackgroundColor(std::nullopt);
-        return;
-    }
-
-    IndexerModel::GetInstance()->SetSelectedBackgroundColor(color);
+    IndexerModel::GetInstance()->SetSelectedBackgroundColor(PaseColor(args));
 }
 
 void JSIndexer::SetPopupBackground(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Color color;
-    if (!ParseJsColor(args[0], color)) {
-        IndexerModel::GetInstance()->SetPopupBackground(std::nullopt);
-        return;
-    }
-
-    IndexerModel::GetInstance()->SetPopupBackground(color);
+    IndexerModel::GetInstance()->SetPopupBackground(PaseColor(args));
 }
 
 void JSIndexer::SetUsingPopup(bool state)
@@ -206,26 +179,50 @@ void JSIndexer::SetUsingPopup(bool state)
 
 void JSIndexer::SetSelectedFont(const JSCallbackInfo& args)
 {
-    if (args.Length() >= 1 && args[0]->IsObject()) {
-        auto getTextStyleFunc = [&args](TextStyle& textStyle) { GetFontContent(args, textStyle); };
-        IndexerModel::GetInstance()->SetSelectedFont(getTextStyleFunc);
+    if (args.Length() < 1) {
+        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
     }
+    std::optional<Dimension> fontSize;
+    std::optional<FontWeight> fontWeight;
+    std::optional<std::vector<std::string>> fontFamily;
+    std::optional<FontStyle> fontStyle;
+    if (args[0]->IsObject()) {
+        GetFontContent(args, fontSize, fontWeight, fontFamily, fontStyle);
+    }
+    IndexerModel::GetInstance()->SetSelectedFont(fontSize, fontWeight, fontFamily, fontStyle);
 }
 
 void JSIndexer::SetPopupFont(const JSCallbackInfo& args)
 {
-    if (args.Length() >= 1 && args[0]->IsObject()) {
-        auto getTextStyleFunc = [&args](TextStyle& textStyle) { GetFontContent(args, textStyle); };
-        IndexerModel::GetInstance()->SetPopupFont(getTextStyleFunc);
+    if (args.Length() < 1) {
+        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
     }
+    std::optional<Dimension> fontSize;
+    std::optional<FontWeight> fontWeight;
+    std::optional<std::vector<std::string>> fontFamily;
+    std::optional<FontStyle> fontStyle;
+    if (args[0]->IsObject()) {
+        GetFontContent(args, fontSize, fontWeight, fontFamily, fontStyle);
+    }
+    IndexerModel::GetInstance()->SetPopupFont(fontSize, fontWeight, fontFamily, fontStyle);
 }
 
 void JSIndexer::SetFont(const JSCallbackInfo& args)
 {
-    if (args.Length() >= 1 && args[0]->IsObject()) {
-        auto getTextStyleFunc = [&args](TextStyle& textStyle) { GetFontContent(args, textStyle); };
-        IndexerModel::GetInstance()->SetFont(getTextStyleFunc);
+    if (args.Length() < 1) {
+        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
     }
+    std::optional<Dimension> fontSize;
+    std::optional<FontWeight> fontWeight;
+    std::optional<std::vector<std::string>> fontFamily;
+    std::optional<FontStyle> fontStyle;
+    if (args[0]->IsObject()) {
+        GetFontContent(args, fontSize, fontWeight, fontFamily, fontStyle);
+    }
+    IndexerModel::GetInstance()->SetFont(fontSize, fontWeight, fontFamily, fontStyle);
 }
 
 void JSIndexer::JsOnSelected(const JSCallbackInfo& args)
@@ -287,43 +284,51 @@ void JSIndexer::JsOnPopupSelected(const JSCallbackInfo& args)
     }
 }
 
-void JSIndexer::GetFontContent(const JSCallbackInfo& args, TextStyle& textStyle)
+void JSIndexer::GetFontContent(const JSCallbackInfo& args, std::optional<Dimension>& fontSize,
+    std::optional<FontWeight>& fontWeight, std::optional<std::vector<std::string>>& fontFamily,
+    std::optional<FontStyle>& fontStyle)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
     JSRef<JSVal> size = obj->GetProperty("size");
-    CalcDimension fontSize;
-    if (ParseJsDimensionVp(size, fontSize)) {
-        textStyle.SetFontSize(fontSize);
+    CalcDimension fontSizeData;
+    if (ParseJsDimensionFp(size, fontSizeData) && !fontSizeData.IsNegative() &&
+        fontSizeData.Unit() != DimensionUnit::PERCENT) {
+        fontSize = fontSizeData;
     }
 
     JSRef<JSVal> weight = obj->GetProperty("weight");
     if (weight->IsString() || weight->IsNumber()) {
-        textStyle.SetFontWeight(ConvertStrToFontWeight(weight->ToString()));
+        fontWeight = ConvertStrToFontWeight(weight->ToString());
     }
 
     JSRef<JSVal> family = obj->GetProperty("family");
     std::vector<std::string> fontFamilies;
     if (ParseJsFontFamilies(family, fontFamilies)) {
-        textStyle.SetFontFamilies(fontFamilies);
+        fontFamily = fontFamilies;
     }
 
     JSRef<JSVal> style = obj->GetProperty("style");
     if (style->IsNumber()) {
         int32_t value = style->ToNumber<int32_t>();
         if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
-            textStyle.SetFontStyle(FONT_STYLES[value]);
+            fontStyle = FONT_STYLES[value];
         }
     }
 }
 
 void JSIndexer::SetItemSize(const JSCallbackInfo& args)
 {
-    if (args.Length() >= 1) {
-        CalcDimension value;
-        if (ParseJsDimensionVp(args[0], value)) {
-            IndexerModel::GetInstance()->SetItemSize(value);
-        }
+    if (args.Length() < 1) {
+        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
     }
+    CalcDimension itemSize;
+    if (ParseJsDimensionVp(args[0], itemSize) && GreatNotEqual(itemSize.Value(), 0.0) &&
+        itemSize.Unit() != DimensionUnit::PERCENT) {
+        IndexerModel::GetInstance()->SetItemSize(itemSize);
+        return;
+    }
+    IndexerModel::GetInstance()->SetItemSize(DEFAULT_ITEM_SIZE);
 }
 
 void JSIndexer::SetAlignStyle(const JSCallbackInfo& args)
@@ -372,12 +377,11 @@ void JSIndexer::SetPopupPosition(const JSCallbackInfo& args)
 
 void JSIndexer::SetPopupSelectedColor(const JSCallbackInfo& args)
 {
-    std::optional<Color> selectedColor;
-    Color color;
-    if (ParseJsColor(args[0], color)) {
-        selectedColor = color;
+    if (args.Length() < 1) {
+        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
     }
-    IndexerModel::GetInstance()->SetPopupSelectedColor(selectedColor);
+    IndexerModel::GetInstance()->SetPopupSelectedColor(PaseColor(args));
     CalcDimension popupHorizontalSpace(-1.0);
     if (args.Length() > 1) {
         ParseJsDimensionVp(args[1], popupHorizontalSpace);
@@ -387,12 +391,11 @@ void JSIndexer::SetPopupSelectedColor(const JSCallbackInfo& args)
 
 void JSIndexer::SetPopupUnselectedColor(const JSCallbackInfo& args)
 {
-    std::optional<Color> unselectedColor;
-    Color color;
-    if (ParseJsColor(args[0], color)) {
-        unselectedColor = color;
+    if (args.Length() < 1) {
+        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
     }
-    IndexerModel::GetInstance()->SetPopupUnselectedColor(unselectedColor);
+    IndexerModel::GetInstance()->SetPopupUnselectedColor(PaseColor(args));
 }
 
 void JSIndexer::SetPopupItemFont(const JSCallbackInfo& args)
@@ -403,7 +406,11 @@ void JSIndexer::SetPopupItemFont(const JSCallbackInfo& args)
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
         JSRef<JSVal> size = obj->GetProperty("size");
         if (!size->IsNull()) {
-            ParseJsDimensionVp(size, fontSize);
+            CalcDimension fontSizeData;
+            if (ParseJsDimensionFp(size, fontSizeData) && !fontSizeData.IsNegative() &&
+                fontSizeData.Unit() != DimensionUnit::PERCENT) {
+                fontSize = fontSizeData;
+            }
         }
 
         auto jsWeight = obj->GetProperty("weight");
@@ -421,12 +428,21 @@ void JSIndexer::SetPopupItemFont(const JSCallbackInfo& args)
 
 void JSIndexer::SetPopupItemBackgroundColor(const JSCallbackInfo& args)
 {
-    std::optional<Color> backgroundColor;
+    if (args.Length() < 1) {
+        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    IndexerModel::GetInstance()->SetPopupItemBackground(PaseColor(args));
+}
+
+std::optional<Color> JSIndexer::PaseColor(const JSCallbackInfo& args)
+{
+    std::optional<Color> colorOpt;
     Color color;
     if (ParseJsColor(args[0], color)) {
-        backgroundColor = color;
+        colorOpt = color;
     }
-    IndexerModel::GetInstance()->SetPopupItemBackground(backgroundColor);
+    return colorOpt;
 }
 
 void JSIndexer::JSBind(BindingTarget globalObj)
@@ -460,6 +476,7 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     JSClass<JSIndexer>::StaticMethod("onPopupSelect", &JSIndexer::JsOnPopupSelected, opt);
     JSClass<JSIndexer>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSIndexer>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSIndexer>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSIndexer>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

@@ -189,6 +189,10 @@ public:
 
     RectF GetPaintRectWithoutTransform() override;
 
+    // append translate value and return origin value.
+    void UpdateTranslateInXY(const OffsetF& offset) override;
+    OffsetF GetShowingTranslateProperty() override;
+
     void GetPointWithTransform(PointF& point) override;
 
     void ClearDrawCommands() override;
@@ -233,7 +237,7 @@ public:
     void RegisterSharedTransition(const RefPtr<RenderContext>& other) override;
     void UnregisterSharedTransition(const RefPtr<RenderContext>& other) override;
 
-    void SetFrameForCanvas() override;
+    void SetOverrideContentRect(const std::optional<RectF>& rect) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -400,6 +404,10 @@ private:
     std::shared_ptr<OverlayTextModifier> modifier_ = nullptr;
     std::shared_ptr<GradientStyleModifier> gradientStyleModifier_;
 
+    // translate modifiers for developer
+    std::shared_ptr<Rosen::RSTranslateModifier> translateXY_;
+    std::shared_ptr<Rosen::RSTranslateZModifier> translateZ_;
+
     // graphics modifiers
     struct GraphicModifiers {
         std::shared_ptr<GrayScaleModifier> grayScale;
@@ -416,6 +424,8 @@ private:
     RefPtr<TouchEventImpl> touchListener_;
     VectorF currentScale_ = VectorF(1.0f, 1.0f);
     bool isTouchUpFinished_ = true;
+
+    std::optional<RectF> overrideContentRect_;
 
     template<typename Modifier, typename PropertyType>
     friend class PropertyTransitionEffectTemplate;

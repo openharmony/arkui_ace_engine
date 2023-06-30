@@ -25,6 +25,10 @@ class ACE_EXPORT RichEditorController : public RichEditorControllerBase {
 
 public:
     void SetPattern(const WeakPtr<Pattern>& pattern);
+    int32_t AddImageSpan(const ImageSpanOptions& options) override;
+    int32_t AddTextSpan(const TextSpanOptions& options) override;
+    int32_t GetCaretOffset() override;
+    bool SetCaretOffset(int32_t caretPosition) override;
 
 private:
     WeakPtr<Pattern> pattern_;

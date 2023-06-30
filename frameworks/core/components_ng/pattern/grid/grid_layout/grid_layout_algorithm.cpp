@@ -225,8 +225,8 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto idealSize =
         CreateIdealSize(gridLayoutProperty->GetLayoutConstraint().value(), axis, MeasureType::MATCH_PARENT, true);
     if (GreatOrEqual(GetMainAxisSize(idealSize, axis), Infinity<float>())) {
-        LOGE("size of main axis value is infinity, please check");
-        return;
+        idealSize = gridLayoutProperty->GetLayoutConstraint().value().percentReference;
+        LOGI("size of main axis value is infinity, use percent reference");
     }
 
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);

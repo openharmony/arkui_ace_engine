@@ -24,12 +24,13 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ContainerModalViewFactory {
 public:
-    static RefPtr<FrameNode> GetView(RefPtr<FrameNode>& content) {
-#ifdef CONTAINER_MODAL_ENHANCE
-        return ContainerModalViewEnhance::Create(content);
-#else
-        return ContainerModalView::Create(content);
-#endif
+    static RefPtr<FrameNode> GetView(RefPtr<FrameNode>& content, MaximizeMode mode) {
+        if (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR ||
+            mode == MaximizeMode::MODE_FULL_FILL) {
+            return ContainerModalViewEnhance::Create(content);
+        } else {
+            return ContainerModalView::Create(content);
+        }
     }
 };
 } // namespace OHOS::Ace::NG

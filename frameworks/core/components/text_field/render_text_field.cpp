@@ -397,9 +397,9 @@ void RenderTextField::SetCallback(const RefPtr<TextFieldComponent>& textField)
     auto pipeline = GetContext().Upgrade();
     CHECK_NULL_VOID(pipeline);
     if (!HasSurfaceChangedCallback()) {
-        auto callbackId =
-            pipeline->RegisterSurfaceChangedCallback([weakTextField = AceType::WeakClaim(this)](int32_t newWidth,
-                                                         int32_t newHeight, int32_t prevWidth, int32_t prevHeight) {
+        auto callbackId = pipeline->RegisterSurfaceChangedCallback(
+            [weakTextField = AceType::WeakClaim(this)](int32_t newWidth, int32_t newHeight, int32_t prevWidth,
+                int32_t prevHeight, WindowSizeChangeReason type) {
                 auto textfield = weakTextField.Upgrade();
                 if (textfield) {
                     textfield->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
@@ -582,7 +582,7 @@ void RenderTextField::HandleMouseHoverEvent(MouseState mouseState)
     if (!pipeline) {
         return;
     }
-    int32_t windowId = pipeline->GetWindowId();
+    uint32_t windowId = pipeline->GetWindowId();
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     MouseFormat defaultStyle = MouseFormat::DEFAULT;
     MouseFormat textCursorStyle = MouseFormat::TEXT_CURSOR;
@@ -1188,8 +1188,8 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
         }
         auto context = context_.Upgrade();
         if (context) {
-            LOGI("RequestKeyboard set calling window id is : %{public}d", context->GetWindowId());
-            inputMethod->SetCallingWindow(context->GetWindowId());
+            LOGI("RequestKeyboard set calling window id is : %{public}zu", context->GetFocusWindowId());
+            inputMethod->SetCallingWindow(context->GetFocusWindowId());
         }
         MiscServices::InputAttribute inputAttribute;
         inputAttribute.inputPattern = (int32_t)keyboard_;

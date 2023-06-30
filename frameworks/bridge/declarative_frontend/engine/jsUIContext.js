@@ -49,6 +49,25 @@ class Mediaquery {
     }
 }
 
+class UIInspector {
+    /**
+     * Construct new instance of ArkUIInspector.
+     * initialzie with instanceId.
+     * @param instanceId obtained on the c++ side.
+     * @since 10
+     */
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+        this.ohos_UIInspector  = globalThis.requireNapi('arkui.inspector');
+    }
+    createComponentObserver(id) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let componentObserver = this.ohos_UIInspector.createComponentObserver(id);
+        __JSScopeUtil__.restoreInstanceId();
+        return componentObserver;
+    }
+}
+
 class UIContext {
     /**
      * Construct new instance of UIContext.
@@ -86,6 +105,11 @@ class UIContext {
     getMediaquery() {
         this.mediaquery_ = new Mediaquery(this.instanceId_);
         return this.mediaquery_;
+    }
+
+    getUIInspector(){
+        this.UIInspector_ = new UIInspector(this.instanceId_);
+        return this.UIInspector_;
     }
 
     animateTo(value, event) {

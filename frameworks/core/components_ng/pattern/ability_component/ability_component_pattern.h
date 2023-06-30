@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,8 +22,8 @@
 #include "frameworks/core/components_ng/pattern/ability_component/ability_component_event_hub.h"
 #include "frameworks/core/components_ng/pattern/ability_component/ability_component_layout_algorithm.h"
 #include "frameworks/core/components_ng/pattern/ability_component/ability_component_render_property.h"
-#include "frameworks/core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 #include "frameworks/core/components_ng/pattern/pattern.h"
+#include "frameworks/core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 #include "frameworks/core/components_ng/property/property.h"
 #include "frameworks/core/components_ng/render/canvas_image.h"
 
@@ -34,9 +34,8 @@ class ACE_EXPORT AbilityComponentPattern : public UIExtensionPattern {
 
 public:
     AbilityComponentPattern(const std::string& bundleName, const std::string& abilityName)
-        : UIExtensionPattern(bundleName, abilityName)
-    {
-    }
+        : UIExtensionPattern(Ace::WantWrap::CreateWantWrap(bundleName, abilityName))
+    {}
 
     ~AbilityComponentPattern() override
     {
@@ -60,12 +59,17 @@ public:
         return MakeRefPtr<AbilityComponentLayoutAlgorithm>();
     }
 
-    void OnModifyDone() override;
     void FireConnect();
     void FireDisConnect();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAreaChangedInner() override;
+
 private:
+    void OnModifyDone() override;
+
+    void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleTouchEvent(const TouchEventInfo& info);
+
     void OnActive() override
     {
         if (!isActive_) {
@@ -107,10 +111,13 @@ private:
     }
 
     void UpdateWindowRect();
+
     bool isActive_ = false;
     bool hasConnectionToAbility_ = false;
-    RefPtr<WindowExtensionConnectionAdapterNG> adapter_;
     Rect lastRect_;
+    RefPtr<TouchEventImpl> touchEvent_;
+    RefPtr<WindowExtensionConnectionAdapterNG> adapter_;
+
     ACE_DISALLOW_COPY_AND_MOVE(AbilityComponentPattern);
 };
 

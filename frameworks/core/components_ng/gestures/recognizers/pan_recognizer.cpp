@@ -30,7 +30,7 @@ namespace OHOS::Ace::NG {
 namespace {
 
 constexpr int32_t MAX_PAN_FINGERS = 10;
-constexpr double DISTANCE_PER_MOUSE_DEGREE = DP_PER_LINE_DESKTOP * LINE_NUMBER_DESKTOP / MOUSE_WHEEL_DEGREES;
+constexpr Dimension DISTANCE_PER_MOUSE_DEGREE = LINE_HEIGHT_DESKTOP * LINE_NUMBER_DESKTOP / MOUSE_WHEEL_DEGREES;
 constexpr int32_t AXIS_PAN_FINGERS = 1;
 
 } // namespace
@@ -211,9 +211,6 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("pan recognizer receives touch move event");
-    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
-        return;
-    }
     globalPoint_ = Point(event.x, event.y);
     lastTouchEvent_ = event;
     delta_ = (event.GetOffset() - touchPoints_[event.id].GetOffset()) / touchPoints_.size();
@@ -224,6 +221,9 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     touchPointsDistance_[event.id] += delta_;
     time_ = event.time;
 
+    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
+        return;
+    }
     if (refereeState_ == RefereeState::DETECTING) {
         auto result = IsPanGestureAccept();
         if (result == GestureAcceptResult::ACCEPT) {
@@ -268,17 +268,18 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
         return;
     }
     globalPoint_ = Point(event.x, event.y);
+    auto distancePerMouseDegreePx = DISTANCE_PER_MOUSE_DEGREE.ConvertToPx();
     if (direction_.type == PanDirection::ALL || (direction_.type & PanDirection::HORIZONTAL) == 0) {
         // PanRecognizer Direction: Vertical or ALL
         delta_ =
-            Offset(-event.horizontalAxis * DISTANCE_PER_MOUSE_DEGREE, -event.verticalAxis * DISTANCE_PER_MOUSE_DEGREE);
+            Offset(-event.horizontalAxis * distancePerMouseDegreePx, -event.verticalAxis * distancePerMouseDegreePx);
     } else if ((direction_.type & PanDirection::VERTICAL) == 0) {
         // PanRecognizer Direction: Horizontal
         if (NearZero(event.horizontalAxis)) {
-            delta_ = Offset(-event.verticalAxis * DISTANCE_PER_MOUSE_DEGREE, 0);
+            delta_ = Offset(-event.verticalAxis * distancePerMouseDegreePx, 0);
         } else {
             delta_ = Offset(
-                -event.horizontalAxis * DISTANCE_PER_MOUSE_DEGREE, -event.verticalAxis * DISTANCE_PER_MOUSE_DEGREE);
+                -event.horizontalAxis * distancePerMouseDegreePx, -event.verticalAxis * distancePerMouseDegreePx);
         }
     }
 
@@ -438,6 +439,9 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
             info.SetSourceTool(lastTouchEvent_.sourceTool);
         }
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
+        if (recognizerTarget_.has_value()) {
+            info.SetTarget(recognizerTarget_.value());
+        }
         info.SetInputEventType(inputEventType_);
         info.SetForce(lastTouchEvent_.force);
         if (lastTouchEvent_.tiltX.has_value()) {

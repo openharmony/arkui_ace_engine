@@ -172,6 +172,9 @@ void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 {
     LOGD("pinch recognizer receives axis update event");
 
+    if (isPinchEnd_) {
+        return;
+    }
     if (NearZero(event.pinchAxisScale) && !IsCtrlBeingPressed()) {
         if (refereeState_ == RefereeState::DETECTING) {
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -186,9 +189,6 @@ void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
     }
 
     time_ = event.time;
-    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
-        return;
-    }
     if (refereeState_ == RefereeState::DETECTING || refereeState_ == RefereeState::SUCCEED) {
         if (event.pinchAxisScale != 0.0) {
             scale_ = event.pinchAxisScale;
@@ -297,6 +297,9 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         info.SetDeviceId(deviceId_);
         info.SetSourceDevice(deviceType_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
+        if (recognizerTarget_.has_value()) {
+            info.SetTarget(recognizerTarget_.value());
+        }
         info.SetForce(lastTouchEvent_.force);
         if (lastTouchEvent_.tiltX.has_value()) {
             info.SetTiltX(lastTouchEvent_.tiltX.value());

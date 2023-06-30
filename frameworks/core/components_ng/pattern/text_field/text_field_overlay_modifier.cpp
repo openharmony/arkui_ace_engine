@@ -190,7 +190,7 @@ void TextFieldOverlayModifier::PaintScrollBar(RSCanvas& canvas)
     auto scrollBar = scrollBar_.Upgrade();
     CHECK_NULL_VOID_NOLOG(scrollBar);
     textFieldPattern->CheckScrollable();
-    if (scrollBar->NeedPaint() && textFieldPattern->IsScrollable()) {
+    if (scrollBar->NeedPaint() && textFieldPattern->IsScrollable() && textFieldPattern->IsSelected()) {
         ScrollBarPainter::PaintRectBar(canvas, scrollBar);
     }
 }

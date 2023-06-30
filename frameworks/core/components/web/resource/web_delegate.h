@@ -484,6 +484,8 @@ public:
     void UpdateLocale();
     void OnInactive();
     void OnActive();
+    void OnWebviewHide();
+    void OnWebviewShow();
     bool OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info);
     void OnSelectPopupMenu(
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
@@ -541,6 +543,18 @@ public:
     bool LoadDataWithRichText();
     void OnSearchResultReceive(int activeMatchOrdinal, int numberOfMatches, bool isDoneCounting);
     bool OnDragAndDropData(const void* data, size_t len, int width, int height);
+    bool OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData> dragData);
+    std::shared_ptr<OHOS::NWeb::NWebDragData> GetOrCreateDragData();
+    std::shared_ptr<OHOS::NWeb::NWebDragData> dragData_ = nullptr;
+    void UpdateDragCursor(NWeb::NWebDragData::DragOperation op)
+    {
+        op_ = op;
+    }
+    NWeb::NWebDragData::DragOperation GetDragAcceptableStatus()
+    {
+        return op_;
+    }
+    NWeb::NWebDragData::DragOperation op_ = NWeb::NWebDragData::DragOperation::DRAG_OPERATION_NONE;
     void OnWindowNew(const std::string& targetUrl, bool isAlert, bool isUserTrigger,
         const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler);
     void OnWindowExit();
@@ -734,7 +748,7 @@ private:
     int32_t parentNWebId_ = -1;
     bool needResizeAtFirst_ = false;
     int32_t backgroundColor_ = 0xffffffff;
-    int32_t rosenWindowId_ = -1;
+    uint32_t rosenWindowId_ = 0;
     RefPtr<WebDelegateObserver> observer_;
 #endif
 };

@@ -85,6 +85,21 @@ public:
         type_ = type;
     }
 
+    void SetControlButtonClick(bool value)
+    {
+        isControlButtonClick_ = value;
+    }
+
+    Dimension GetAdjustMaxSideBarWidth() const
+    {
+        return adjustMaxSideBarWidth_;
+    }
+
+    Dimension GetAdjustMinSideBarWidth() const
+    {
+        return adjustMinSideBarWidth_;
+    }
+
 private:
     void MeasureControlButton(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty,
         const RefPtr<LayoutWrapper>& buttonLayoutWrapper, float parentWidth);
@@ -103,6 +118,9 @@ private:
     void AutoChangeSideBarWidth(
         LayoutWrapper* layoutWrapper, float parentWidth, float minSideBarWidthPx, float dividerStrokeWidthPx);
     void UpdateDefaultValueByVersion();
+    SideBarPosition GetSideBarPositionWithRtl(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty);
+    void AdjustMinAndMaxSideBarWidth(LayoutWrapper* layoutWrapper);
+    RefPtr<LayoutWrapper> GetSideBarLayoutWrapper(LayoutWrapper* layoutWrapper) const;
 
     float currentOffset_ = 0.0f;
     float realSideBarWidth_ = 0.0f;
@@ -113,6 +131,10 @@ private:
     bool needInitRealSideBarWidth_ = true;
     OffsetF sideBarOffset_;
     SideBarContainerType type_ = SideBarContainerType::EMBED;
+    bool isControlButtonClick_ = false;
+
+    Dimension adjustMaxSideBarWidth_;
+    Dimension adjustMinSideBarWidth_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SideBarContainerLayoutAlgorithm);
 };

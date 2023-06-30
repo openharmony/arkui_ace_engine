@@ -47,7 +47,7 @@ private:
     TouchEventFunc callback_;
 };
 
-class TouchEventActuator : public GestureEventActuator, public TouchEventTarget {
+class ACE_FORCE_EXPORT TouchEventActuator : public GestureEventActuator, public TouchEventTarget {
     DECLARE_ACE_TYPE(TouchEventActuator, GestureEventActuator, TouchEventTarget)
 public:
     TouchEventActuator() = default;

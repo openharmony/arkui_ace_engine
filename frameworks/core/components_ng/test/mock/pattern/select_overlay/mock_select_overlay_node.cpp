@@ -40,4 +40,6 @@ bool SelectOverlayNode::IsInSelectedOrSelectOverlayArea(const PointF& point)
 {
     return true;
 }
+
+void SelectOverlayNode::SetClosedByGlobalEvent(bool closedByGlobalEvent) {}
 } // namespace OHOS::Ace::NG

@@ -215,6 +215,7 @@ public:
         std::function<void(const RefPtr<NG::CustomAnimatableArithmetic>&)>& onCallbackEvent) override {};
     void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
         RefPtr<NG::CustomAnimatableArithmetic>& value) override {};
+    void UpdateSafeAreaExpandOpts(const NG::SafeAreaExpandOpts& opts) override {};
 };
 
 } // namespace OHOS::Ace::Framework

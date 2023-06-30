@@ -144,11 +144,21 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     layoutInfo_ = std::move(layoutInfo);
     layoutInfo_.UpdateStartIndex();
 
-    SetScrollEnable(IsScrollable());
+    CheckScrollable();
 
     auto property = host->GetLayoutProperty();
     CHECK_NULL_RETURN_NOLOG(host, false);
     return property->GetPaddingProperty() != nullptr;
+}
+
+void WaterFlowPattern::CheckScrollable()
+{
+    auto layoutProperty = GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    SetScrollEnable(IsScrollable());
+    if (!layoutProperty->GetScrollEnabled().value_or(IsScrollable())) {
+        SetScrollEnable(false);
+    }
 }
 
 void WaterFlowPattern::OnAttachToFrameNode()

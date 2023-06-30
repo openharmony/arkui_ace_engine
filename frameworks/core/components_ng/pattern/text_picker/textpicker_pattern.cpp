@@ -37,6 +37,7 @@ namespace {
 // TODO datepicker style modification
 const Dimension PRESS_INTERVAL = 4.0_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
+constexpr uint32_t RATE = 2;
 } // namespace
 
 void TextPickerPattern::OnAttachToFrameNode()
@@ -63,22 +64,22 @@ void TextPickerPattern::SetButtonIdeaSize()
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     auto children = host->GetChildren();
-    auto height = pickerTheme->GetDividerSpacing();
     auto width = host->GetGeometryNode()->GetFrameSize().Width() / static_cast<float>(children.size());
-    auto defaultWidth = height.ConvertToPx() * 2;
-    if (width > defaultWidth) {
-        width = static_cast<float>(defaultWidth);
-    }
     for (const auto& child : children) {
         auto buttonNode = DynamicCast<FrameNode>(child->GetFirstChild());
         auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
         buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
-        buttonLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx()),
-            CalcLength(CalculateHeight() - PRESS_INTERVAL.ConvertToPx())));
+        buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(PRESS_RADIUS));
+        auto buttonHeight = CalculateHeight() - PRESS_INTERVAL.ConvertToPx() * RATE;
+        if (resizeFlag_) {
+            buttonHeight = resizePickerItemHeight_ - PRESS_INTERVAL.ConvertToPx() * RATE;
+        }
+        buttonLayoutProperty->
+            UpdateUserDefinedIdealSize(CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx() * RATE),
+                CalcLength(buttonHeight)));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        buttonConfirmRenderContext->UpdateBorderRadius({ PRESS_RADIUS, PRESS_RADIUS, PRESS_RADIUS, PRESS_RADIUS });
         buttonNode->MarkModifyDone();
         buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
@@ -382,16 +383,16 @@ void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(pickerTheme);
     auto frameWidth = host->GetGeometryNode()->GetFrameSize().Width();
     auto dividerSpacing = pipeline->NormalizeToPx(pickerTheme->GetDividerSpacing());
-    auto pickerThemeWidth = dividerSpacing * 2;
+    auto pickerThemeWidth = dividerSpacing * RATE;
 
-    auto centerX = (frameWidth / childSize - pickerThemeWidth) / 2 +
+    auto centerX = (frameWidth / childSize - pickerThemeWidth) / RATE +
                    columnNode->GetGeometryNode()->GetFrameRect().Width() * focusKeyID_ +
-                   PRESS_INTERVAL.ConvertToPx() * 2;
+                   PRESS_INTERVAL.ConvertToPx() * RATE;
     auto centerY =
-        (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / 2 + PRESS_INTERVAL.ConvertToPx();
+        (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / RATE + PRESS_INTERVAL.ConvertToPx();
 
-    paintRect.SetRect(RectF(centerX, centerY, (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * 2,
-        dividerSpacing - PRESS_INTERVAL.ConvertToPx() * 2));
+    paintRect.SetRect(RectF(centerX, centerY, (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * RATE,
+        dividerSpacing - PRESS_INTERVAL.ConvertToPx() * RATE));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
