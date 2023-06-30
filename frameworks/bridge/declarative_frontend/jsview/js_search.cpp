@@ -659,6 +659,8 @@ void JSSearchController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSearchController>::Declare("SearchController");
     JSClass<JSSearchController>::Method("caretPosition", &JSSearchController::CaretPosition);
+    JSClass<JSSearchController>::CustomMethod("getTextContentRect", &JSSearchController::GetTextContentRect);
+    JSClass<JSSearchController>::CustomMethod("getTextContentLineCount", &JSSearchController::GetTextContentLinesNum);
     JSClass<JSSearchController>::Method("stopEditing", &JSSearchController::StopEditing);
     JSClass<JSSearchController>::Bind(globalObj, JSSearchController::Constructor, JSSearchController::Destructor);
 }
@@ -682,6 +684,41 @@ void JSSearchController::CaretPosition(int32_t caretPosition)
     auto controller = controller_.Upgrade();
     if (controller) {
         controller->CaretPosition(caretPosition);
+    }
+}
+
+JSRef<JSObject> JSSearchController::CreateRectangle(const Rect& info)
+{
+    JSRef<JSObject> rectObj = JSRef<JSObject>::New();
+    rectObj->SetProperty<double>("x", info.Left());
+    rectObj->SetProperty<double>("y", info.Top());
+    rectObj->SetProperty<double>("width", info.Width());
+    rectObj->SetProperty<double>("height", info.Height());
+    return rectObj;
+}
+
+void JSSearchController::GetTextContentRect(const JSCallbackInfo& info)
+{
+    auto controller = controller_.Upgrade();
+    if (controller) {
+        auto rectObj = CreateRectangle(controller->GetTextContentRect());
+        JSRef<JSVal> rect = JSRef<JSObject>::Cast(rectObj);
+        info.SetReturnValue(rect);
+    } else {
+        LOGE("GetTextContentRect: The JSSearchController is NULL");
+    }
+}
+
+void JSSearchController::GetTextContentLinesNum(const JSCallbackInfo& info)
+{
+    auto controller = controller_.Upgrade();
+    if (controller) {
+        auto lines = controller->GetTextContentLinesNum();
+        auto linesNum = JSVal(ToJSValue(lines));
+        auto textLines = JSRef<JSVal>::Make(linesNum);
+        info.SetReturnValue(textLines);
+    } else {
+        LOGE("GetTextContentRect: The JSSearchController is NULL");
     }
 }
 

@@ -90,6 +90,9 @@ void JSTextAreaController::JSBind(BindingTarget globalObj)
     JSClass<JSTextAreaController>::Declare("TextAreaController");
     JSClass<JSTextAreaController>::Method("caretPosition", &JSTextAreaController::CaretPosition);
     JSClass<JSTextAreaController>::Method("setTextSelection", &JSTextAreaController::SetTextSelection);
+    JSClass<JSTextAreaController>::CustomMethod("getTextContentRect", &JSTextAreaController::GetTextContentRect);
+    JSClass<JSTextAreaController>::CustomMethod("getTextContentLineCount",
+        &JSTextAreaController::GetTextContentLinesNum);
     JSClass<JSTextAreaController>::Method("stopEditing", &JSTextAreaController::StopEditing);
     JSClass<JSTextAreaController>::Bind(globalObj, JSTextAreaController::Constructor, JSTextAreaController::Destructor);
 }
@@ -121,6 +124,41 @@ void JSTextAreaController::SetTextSelection(int32_t selectionStart, int32_t sele
     auto controller = controllerWeak_.Upgrade();
     if (controller) {
         controller->SetTextSelection(selectionStart, selectionEnd);
+    }
+}
+
+JSRef<JSObject> JSTextAreaController::CreateRectangle(const Rect& info)
+{
+    JSRef<JSObject> rectObj = JSRef<JSObject>::New();
+    rectObj->SetProperty<double>("x", info.Left());
+    rectObj->SetProperty<double>("y", info.Top());
+    rectObj->SetProperty<double>("width", info.Width());
+    rectObj->SetProperty<double>("height", info.Height());
+    return rectObj;
+}
+
+void JSTextAreaController::GetTextContentRect(const JSCallbackInfo& info)
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        auto rectObj = CreateRectangle(controller->GetTextContentRect());
+        JSRef<JSVal> rect = JSRef<JSObject>::Cast(rectObj);
+        info.SetReturnValue(rect);
+    } else {
+        LOGE("GetTextContentRect: The JSTextAreaController is NULL");
+    }
+}
+
+void JSTextAreaController::GetTextContentLinesNum(const JSCallbackInfo& info)
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        auto lines = controller->GetTextContentLinesNum();
+        auto linesNum = JSVal(ToJSValue(lines));
+        auto textLines = JSRef<JSVal>::Make(linesNum);
+        info.SetReturnValue(textLines);
+    } else {
+        LOGE("GetTextContentRect: The JSTextAreaController is NULL");
     }
 }
 

@@ -47,7 +47,12 @@ public:
         controllerWeak_ = controller;
     }
 
+    void GetTextContentRect(const JSCallbackInfo& info);
+    void GetTextContentLinesNum(const JSCallbackInfo& info);
+
 private:
+    JSRef<JSObject> CreateRectangle(const Rect& info);
+
     WeakPtr<TextFieldControllerBase> controllerWeak_;
     ACE_DISALLOW_COPY_AND_MOVE(JSTextInputController);
 };
