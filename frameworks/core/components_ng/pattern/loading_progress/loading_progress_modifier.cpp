@@ -69,7 +69,8 @@ constexpr float FULL_OPACITY = 255.0f;
 constexpr float TWO = 2.0f;
 } // namespace
 LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingProgressOwner)
-    : date_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
+    : enableLoading_(AceType::MakeRefPtr<PropertyBool>(true)),
+      date_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       color_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::BLUE)),
       centerDeviation_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       cometOpacity_(AceType::MakeRefPtr<AnimatablePropertyFloat>(INITIAL_OPACITY_SCALE)),
@@ -77,6 +78,7 @@ LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingPro
       cometTailLen_(AceType::MakeRefPtr<AnimatablePropertyFloat>(TOTAL_TAIL_LENGTH)),
       sizeScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f)), loadingProgressOwner_(loadingProgressOwner)
 {
+    AttachProperty(enableLoading_);
     AttachProperty(date_);
     AttachProperty(color_);
     AttachProperty(centerDeviation_);
@@ -88,6 +90,9 @@ LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingPro
 
 void LoadingProgressModifier::onDraw(DrawingContext& context)
 {
+    if (!enableLoading_->Get()) {
+        return;
+    }
     float date = date_->Get();
     auto diameter = std::min(context.width, context.height);
     RingParam ringParam;
