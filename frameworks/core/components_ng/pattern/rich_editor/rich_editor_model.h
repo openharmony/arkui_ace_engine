@@ -75,6 +75,8 @@ class ACE_EXPORT RichEditorControllerBase : public AceType {
 public:
     virtual int32_t AddImageSpan(const ImageSpanOptions& options) = 0;
     virtual int32_t AddTextSpan(const TextSpanOptions& options) = 0;
+    virtual int32_t GetCaretOffset() = 0;
+    virtual bool SetCaretOffset(int32_t caretPosition) = 0;
 };
 
 class ACE_EXPORT RichEditorModel {

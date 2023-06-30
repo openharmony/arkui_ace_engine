@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_controller.h"
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
-
 namespace OHOS::Ace::NG {
 void RichEditorController::SetPattern(const WeakPtr<Pattern>& pattern)
 {
@@ -43,5 +42,22 @@ int32_t RichEditorController::AddTextSpan(const TextSpanOptions& options)
         spanIndex = richEditorPattern->GetSpanIndex();
     }
     return spanIndex;
+}
+
+int32_t RichEditorController::GetCaretOffset()
+{
+    int32_t position = -1;
+    auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+    position = richEditorPattern->GetCaretPosition();
+    return position;
+}
+
+bool RichEditorController::SetCaretOffset(int32_t caretPosition)
+{
+    auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+    if (richEditorPattern) {
+        return richEditorPattern->SetCaretOffset(caretPosition);
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

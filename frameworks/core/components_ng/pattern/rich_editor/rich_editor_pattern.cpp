@@ -321,14 +321,30 @@ int32_t RichEditorPattern::GetCaretPosition()
     return caretPosition_;
 }
 
-OffsetF RichEditorPattern::CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight)
+bool RichEditorPattern::SetCaretOffset(int32_t caretPosition)
 {
-    return TextPattern::CalcCursorOffsetByPosition(position, selectLineHeight);
+    bool success = false;
+    success = SetCaretPosition(caretPosition);
+    StartTwinkling();
+    return success;
 }
 
-void RichEditorPattern::SetCaretPosition(int32_t pos)
+OffsetF RichEditorPattern::CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, OffsetF(0, 0));
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, OffsetF(0, 0));
+    auto rootOffset = pipeline->GetRootRect().GetOffset();
+    auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
+    auto startOffset = TextPattern::CalcCursorOffsetByPosition(position, selectLineHeight);
+    return startOffset + textPaintOffset - rootOffset;
+}
+
+bool RichEditorPattern::SetCaretPosition(int32_t pos)
 {
     caretPosition_ = std::clamp(pos, 0, GetTextContentLength());
+    return caretPosition_ == pos;
 }
 
 bool RichEditorPattern::GetCaretVisible() const

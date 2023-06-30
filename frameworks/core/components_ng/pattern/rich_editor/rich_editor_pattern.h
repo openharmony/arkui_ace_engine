@@ -81,7 +81,7 @@ public:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     int32_t GetInstanceId() const;
     int32_t GetCaretPosition();
-    void SetCaretPosition(int32_t pos);
+    bool SetCaretPosition(int32_t pos);
     bool GetCaretVisible() const;
     OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight);
     void CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
@@ -91,6 +91,7 @@ public:
     void AddImageSpan(const ImageSpanOptions& options);
     void AddTextSpan(const TextSpanOptions& options);
     int32_t GetSpanIndex();
+    bool SetCaretOffset(int32_t caretPosition);
 
 private:
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
