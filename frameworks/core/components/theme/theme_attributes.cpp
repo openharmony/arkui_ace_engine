@@ -214,4 +214,8 @@ const char OVER_COUNT_BORDER_COLOR[] = "over_count_border_color";
 const char ERROR_PASSWORD_BORDER_ALPHA[] = "error_password_border_alpha";
 const char OVER_COUNT_BORDER_COLOR_ALPHA[] = "over_count_border_color_alpha";
 const char UNDERLINE_COLOR_ALPHA[] = "underline_color_alpha";
+const char INLINE_TEXT_COLOR[] = "inline_text_color";
+const char INLINE_RADIUS_SIZE[] = "inline_radius_size";
+const char INLINE_BG_COLOR[] = "inline_bg_color";
+const char INLINE_BORDER_COLOR[] = "inline_border_color";
 } // namespace OHOS::Ace

@@ -74,6 +74,7 @@ namespace {
 constexpr Dimension BORDER_DEFAULT_WIDTH = 0.0_vp;
 constexpr Dimension ERROR_BORDER_WIDTH = 1.0_vp;
 constexpr Dimension OVER_COUNT_BORDER_WIDTH = 1.0_vp;
+constexpr Dimension INLINE_BORDER_WIDTH = 2.0_vp;
 constexpr Dimension DEFAULT_FONT = Dimension(16, DimensionUnit::FP);
 constexpr float HOVER_ANIMATION_OPACITY = 0.05f;
 constexpr float PRESS_ANIMATION_OPACITY = 0.1f;
@@ -82,6 +83,7 @@ constexpr float BOX_EPSILON = 0.5f;
 constexpr uint32_t TWINKLING_INTERVAL_MS = 500;
 constexpr uint32_t RECORD_MAX_LENGTH = 20;
 constexpr uint32_t OBSCURE_SHOW_TICKS = 3;
+constexpr uint32_t FIND_TEXT_ZERO_INDEX = 1;
 constexpr char16_t OBSCURING_CHARACTER = u'•';
 constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
 const std::string NEWLINE = "\n";
@@ -213,6 +215,10 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
 {
     contentRect_ = dirty->GetGeometryNode()->GetContentRect();
     frameRect_ = dirty->GetGeometryNode()->GetFrameRect();
+    if (!inlineState_.saveInlineState) {
+        inlineState_.saveInlineState = true;
+        inlineState_.frameRect = frameRect_;
+    }
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto textFieldLayoutAlgorithm = DynamicCast<TextFieldLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
@@ -253,6 +259,10 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (setSelectionFlag_) {
         SetTextSelection(selectionStart_, selectionEnd_);
         setSelectionFlag_ = false;
+    }
+    if (inlineSelectAllFlag_) {
+        inlineSelectAllFlag_ = false;
+        HandleOnSelectAll(true);
     }
     if (mouseStatus_ == MouseStatus::RELEASED) {
         mouseStatus_ = MouseStatus::NONE;
@@ -1111,10 +1121,16 @@ void TextFieldPattern::HandleFocusEvent()
     }
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (setSelectAllFlag_ && paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE &&
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE &&
         !textEditingValue_.GetWideText().empty()) {
-        setSelectAllFlag_ = false;
-        HandleOnSelectAll();
+        ApplyInlineStates();
+        if (!IsTextArea()) {
+            layoutProperty->ResetMaxLines();
+        }
+        inlineSelectAllFlag_ = true;
+        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     } else {
         StartTwinkling();
     }
@@ -1122,8 +1138,6 @@ void TextFieldPattern::HandleFocusEvent()
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnEditChanged(true);
     CloseSelectOverlay();
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     auto visible = layoutProperty->GetShowErrorTextValue(false);
     if (!visible && layoutProperty->GetShowUnderlineValue(false)) {
         auto renderContext = GetHost()->GetRenderContext();
@@ -1293,6 +1307,16 @@ void TextFieldPattern::HandleBlurEvent()
         underlineColor_ = textFieldTheme->GetUnderlineColor();
         underlineWidth_ = UNDERLINE_WIDTH;
     }
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE &&
+        !textEditingValue_.GetWideText().empty()) {
+        if (IsTextArea() && isTextInput_) {
+            layoutProperty->UpdateMaxLines(1);
+        }
+        inlineSelectAllFlag_ = false;
+        RestorePreInlineStates();
+    }
     needToRequestKeyboardInner_ = false;
     caretRect_.Reset();
     StopTwinkling();
@@ -1365,11 +1389,18 @@ void TextFieldPattern::HandleOnRedoAction()
     FireEventHubOnChange(GetEditingValue().text);
 }
 
-void TextFieldPattern::HandleOnSelectAll()
+void TextFieldPattern::HandleOnSelectAll(bool inlineStyle)
 {
     LOGI("TextFieldPattern::HandleOnSelectAll");
     auto textSize = static_cast<int32_t>(GetEditingValue().GetWideText().length());
-    UpdateSelection(0, textSize);
+    if (inlineStyle == true) {
+        if (GetEditingValue().GetWideText().rfind(L".") < textSize - FIND_TEXT_ZERO_INDEX) {
+            textSize = GetEditingValue().GetWideText().rfind(L".");
+        }
+        UpdateSelection(0, textSize);
+    } else {
+        UpdateSelection(0, textSize);
+    }
     textEditingValue_.caretPosition = textSize;
     selectionMode_ = SelectionMode::SELECT_ALL;
     caretUpdateType_ = CaretUpdateType::EVENT;
@@ -2140,12 +2171,12 @@ void TextFieldPattern::OnModifyDone()
         SetEditingValueToProperty(textEditingValue_.text);
     }
     FireOnChangeIfNeeded();
-    if (IsTextArea()) {
+    if (IsTextArea() || paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE) {
         SetAxis(Axis::VERTICAL);
         if (!GetScrollableEvent()) {
             AddScrollEvent();
         }
-        SetScrollBar(DisplayMode::AUTO);
+        SetScrollBar(layoutProperty->GetDisplayModeValue(DisplayMode::AUTO));
         auto scrollBar = GetScrollBar();
         if (scrollBar) {
             scrollBar->SetMinHeight(SCROLL_BAR_MIN_HEIGHT);
@@ -2172,6 +2203,10 @@ void TextFieldPattern::OnModifyDone()
             setBorderFlag_ = false;
         }
         HandleCounterBorder();
+    }
+    if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE) {
+        inlineState_.saveInlineState = false;
+        SaveInlineStates();
     }
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                  : PROPERTY_UPDATE_MEASURE);
@@ -3646,6 +3681,13 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
         return;
     }
 
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE) {
+        HandleBlurEvent();
+        return;
+    }
+
     if (IsTextArea()) {
         if (GetInputFilter() != "\n") {
             InsertValue("\n");
@@ -4285,6 +4327,11 @@ uint32_t TextFieldPattern::GetMaxLines() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, Infinity<uint32_t>());
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, Infinity<uint32_t>());
+    if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE) {
+        return layoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
+    }
     return layoutProperty->HasMaxLines() ? layoutProperty->GetMaxLinesValue(Infinity<uint32_t>())
                                          : Infinity<uint32_t>();
 }
@@ -4355,6 +4402,25 @@ std::string TextFieldPattern::GetCopyOptionString() const
             break;
     }
     return copyOptionString;
+}
+
+std::string TextFieldPattern::GetBarStateString() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "");
+    std::string displayModeString = "DisplayMode.AUTO";
+    switch (layoutProperty->GetDisplayModeValue(DisplayMode::AUTO)) {
+        case DisplayMode::OFF:
+            displayModeString = "DisplayMode.OFF";
+            break;
+        case DisplayMode::ON:
+            displayModeString = "DisplayMode.ON";
+            break;
+        case DisplayMode::AUTO:
+        default:
+            break;
+    }
+    return displayModeString;
 }
 
 void TextFieldPattern::UpdateScrollBarOffset()
@@ -4576,6 +4642,128 @@ std::string TextFieldPattern::GetHideResultImageSrc() const
     return HIDE_PASSWORD_SVG;
 }
 
+void TextFieldPattern::SaveInlineStates()
+{
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto renderContext = GetHost()->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto theme = GetTheme();
+    CHECK_NULL_VOID(theme);
+    inlineState_.textColor = layoutProperty->GetTextColorValue(theme->GetTextColor());
+    inlineState_.bgColor = renderContext->GetBackgroundColor().value_or(theme->GetBgColor());
+    auto radius = theme->GetBorderRadius();
+    BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
+    inlineState_.radius = renderContext->GetBorderRadius().value_or(borderRadius);
+    if (layoutProperty->GetBorderWidthProperty() != nullptr) {
+        inlineState_.borderWidth = *(layoutProperty->GetBorderWidthProperty());
+    } else {
+        inlineState_.borderWidth.SetBorderWidth(BORDER_DEFAULT_WIDTH);
+    }
+    if (renderContext->HasBorderColor()) {
+        inlineState_.borderColor = renderContext->GetBorderColor().value();
+    }
+    const auto& paddingProperty = layoutProperty->GetPaddingProperty();
+    if (paddingProperty) {
+        inlineState_.padding.left = CalcLength(paddingProperty->left->GetDimension().ConvertToPx());
+        inlineState_.padding.top = CalcLength(paddingProperty->top->GetDimension().ConvertToPx());
+        inlineState_.padding.bottom = CalcLength(paddingProperty->bottom->GetDimension().ConvertToPx());
+        inlineState_.padding.right = CalcLength(paddingProperty->right->GetDimension().ConvertToPx());
+    } else {
+        inlineState_.padding.left = CalcLength(0.0_vp);
+        inlineState_.padding.top = CalcLength(0.0_vp);
+        inlineState_.padding.bottom = CalcLength(0.0_vp);
+        inlineState_.padding.right = CalcLength(0.0_vp);
+    }
+    const auto& marginProperty = layoutProperty->GetMarginProperty();
+    if (marginProperty) {
+        inlineState_.margin.left = CalcLength(marginProperty->left->GetDimension().ConvertToPx());
+        inlineState_.margin.top = CalcLength(marginProperty->top->GetDimension().ConvertToPx());
+        inlineState_.margin.bottom = CalcLength(marginProperty->bottom->GetDimension().ConvertToPx());
+        inlineState_.margin.right = CalcLength(marginProperty->right->GetDimension().ConvertToPx());
+    } else {
+        inlineState_.margin.left = CalcLength(0.0_vp);
+        inlineState_.margin.top = CalcLength(0.0_vp);
+        inlineState_.margin.bottom = CalcLength(0.0_vp);
+        inlineState_.margin.right = CalcLength(0.0_vp);
+    }
+}
+
+void TextFieldPattern::ApplyInlineStates()
+{
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto renderContext = GetHost()->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    layoutProperty->UpdateTextColor(theme->GetInlineTextColor());
+    auto radius = theme->GetInlineRadiusSize();
+    renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
+    renderContext->UpdateBackgroundColor(theme->GetInlineBgColor());
+    BorderWidthProperty inlineBorderWidth;
+    inlineBorderWidth.SetBorderWidth(INLINE_BORDER_WIDTH);
+    layoutProperty->UpdateBorderWidth(inlineBorderWidth);
+    renderContext->UpdateBorderWidth(inlineBorderWidth);
+    BorderColorProperty inlineBorderColor;
+    inlineBorderColor.SetColor(theme->GetInlineBorderColor());
+    renderContext->UpdateBorderColor(inlineBorderColor);
+    layoutProperty->UpdatePadding({ CalcLength(0.0_vp), CalcLength(0.0_vp), CalcLength(0.0_vp), CalcLength(0.0_vp)});
+    ProcessInnerPadding();
+    textRect_.SetOffset(OffsetF(GetPaddingLeft(), GetPaddingTop()));
+    MarginProperty margin;
+    margin.bottom =
+        CalcLength(inlineState_.padding.bottom->GetDimension() + inlineState_.margin.bottom->GetDimension());
+    margin.right = CalcLength(inlineState_.padding.right->GetDimension() + inlineState_.margin.right->GetDimension());
+    margin.left = CalcLength(inlineState_.padding.left->GetDimension() + inlineState_.margin.left->GetDimension());
+    margin.top = CalcLength(inlineState_.padding.top->GetDimension() + inlineState_.margin.top->GetDimension());
+    layoutProperty->UpdateMargin(margin);
+    CalcSize idealSize;
+    std::optional<CalcLength> width(
+        paragraph_->GetLongestLine() + GetScrollBarWidth() + SCROLL_BAR_LEFT_WIDTH.ConvertToPx() +
+        INLINE_BORDER_WIDTH.ConvertToPx() + INLINE_BORDER_WIDTH.ConvertToPx() + 0.5f);
+    idealSize.SetWidth(width);
+    layoutProperty->UpdateUserDefinedIdealSize(idealSize);
+    auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    if (layoutConstraint && layoutConstraint->selfIdealSize && layoutConstraint->selfIdealSize->Height()) {
+        layoutProperty->ClearUserDefinedIdealSize(false, true);
+        inlineState_.setHeight = true;
+    }
+}
+
+void TextFieldPattern::RestorePreInlineStates()
+{
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto renderContext = GetHost()->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    layoutProperty->UpdateTextColor(inlineState_.textColor);
+    auto radius = theme->GetInlineRadiusSize();
+    renderContext->UpdateBorderRadius(inlineState_.radius);
+    renderContext->UpdateBackgroundColor(inlineState_.bgColor);
+    layoutProperty->UpdateBorderWidth(inlineState_.borderWidth);
+    renderContext->UpdateBorderWidth(inlineState_.borderWidth);
+    renderContext->UpdateBorderColor(inlineState_.borderColor);
+    layoutProperty->UpdatePadding(inlineState_.padding);
+    ProcessInnerPadding();
+    textRect_.SetOffset(OffsetF(GetPaddingLeft(), GetPaddingTop()));
+    layoutProperty->UpdateMargin(inlineState_.margin);
+    CalcSize idealSize;
+    std::optional<CalcLength> width(inlineState_.frameRect.Width());
+    idealSize.SetWidth(width);
+    if (inlineState_.setHeight) {
+        std::optional<CalcLength> height(inlineState_.frameRect.Height());
+        idealSize.SetHeight(height);
+    }
+    layoutProperty->UpdateUserDefinedIdealSize(idealSize);
+}
+
 void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("placeholder", GetPlaceHolder().c_str());
@@ -4603,6 +4791,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("showError", GetErrorTextState() ? GetErrorTextString().c_str() : "undefined");
     auto maxLines = GetMaxLines();
     json->Put("maxLines", GreatOrEqual(maxLines, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLines).c_str());
+    json->Put("barState", GetBarStateString().c_str());
 }
 
 void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json)

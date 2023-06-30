@@ -989,6 +989,25 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
 }
 
+void JSTextField::SetBarState(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsNumber()) {
+        LOGI("SetBarState create error, info is not number or non-valid");
+        return;
+    }
+    DisplayMode displayMode = static_cast<DisplayMode>(info[0]->ToNumber<int32_t>());
+    TextFieldModel::GetInstance()->SetBarState(displayMode);
+}
+
+void JSTextField::SetMaxLines(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsNumber()) {
+        LOGI("SetMaxLines create error, info is not number or non-valid");
+        return;
+    }
+    TextFieldModel::GetInstance()->SetMaxViewLines(info[0]->ToNumber<uint32_t>());
+}
+
 void JSTextField::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
