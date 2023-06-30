@@ -338,12 +338,6 @@ void ListPattern::CheckScrollable()
     CHECK_NULL_VOID(gestureHub);
     auto listProperty = GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(listProperty);
-
-    if (!listProperty->GetScrollEnabled().value_or(scrollable_)) {
-        SetScrollEnable(false);
-        return;
-    }
-
     if (itemPosition_.empty()) {
         scrollable_ = false;
     } else {
@@ -355,6 +349,10 @@ void ListPattern::CheckScrollable()
     }
 
     SetScrollEnable(scrollable_);
+
+    if (!listProperty->GetScrollEnabled().value_or(scrollable_)) {
+        SetScrollEnable(false);
+    }
 }
 
 RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
