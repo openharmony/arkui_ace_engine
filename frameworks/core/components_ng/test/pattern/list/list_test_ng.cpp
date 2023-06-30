@@ -4938,4 +4938,36 @@ HWTEST_F(ListTestNg, ListPattern_NeedScrollSnapAlignEffect001, TestSize.Level1)
     layoutProperty_->UpdateScrollSnapAlign(V2::ScrollSnapAlign::START);
     EXPECT_TRUE(pattern_->NeedScrollSnapAlignEffect());
 }
+/**
+ * @tc.name: ListPattern_SetFriction001
+ * @tc.desc: Test SetFriction:friction shouled be more than 0.0,if out of range,should be default value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListPattern_SetFriction001, TestSize.Level1)
+{
+    constexpr double friction = -1;
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    listModelNG.SetFriction(friction);
+    GetInstance();
+    /**
+     * @tc.expected: friction shouled be more than 0.0,if out of range,should be default value.
+     */
+    EXPECT_DOUBLE_EQ(pattern_->GetFriction(), 0.6);
+}
+
+/**
+ * @tc.name: ListPattern_SetFriction002
+ * @tc.desc: Test SetFriction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListPattern_SetFriction002, TestSize.Level1)
+{
+    constexpr double friction = 10;
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    listModelNG.SetFriction(friction);
+    GetInstance();
+    EXPECT_DOUBLE_EQ(pattern_->GetFriction(), 10);
+}
 } // namespace OHOS::Ace::NG

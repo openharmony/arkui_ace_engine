@@ -1069,4 +1069,37 @@ HWTEST_F(WaterFlowTestNg, PositionController001, TestSize.Level1)
     RunMeasureAndLayout();
     EXPECT_TRUE(scrollController->IsAtEnd());
 }
+
+/**
+ * @tc.name: WaterFlowPattern_SetFriction001
+ * @tc.desc: Test SetFriction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowSetFriction001, TestSize.Level1)
+{
+    constexpr double friction = -1;
+    WaterFlowModelNG waterFlowModelNG;
+    waterFlowModelNG.Create();
+    waterFlowModelNG.SetFriction(friction);
+    GetInstance();
+    /**
+     * @tc.expected: friction shouled be more than 0.0,if out of range,should be default value.
+     */
+    EXPECT_DOUBLE_EQ(pattern_->GetFriction(), 0.6);
+}
+
+/**
+ * @tc.name: WaterFlowPattern_SetFriction002
+ * @tc.desc: Test SetFriction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowSetFriction002, TestSize.Level1)
+{
+    constexpr double friction = 10;
+    WaterFlowModelNG waterFlowModelNG;
+    waterFlowModelNG.Create();
+    waterFlowModelNG.SetFriction(friction);
+    GetInstance();
+    EXPECT_DOUBLE_EQ(pattern_->GetFriction(), 10);
+}
 } // namespace OHOS::Ace::NG

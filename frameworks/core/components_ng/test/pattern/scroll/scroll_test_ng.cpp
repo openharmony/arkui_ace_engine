@@ -2136,4 +2136,37 @@ HWTEST_F(ScrollTestNg, AccessibilityProperty001, TestSize.Level1)
     CreateScroll(Axis::NONE);
     EXPECT_FALSE(accessibilityProperty_->IsScrollable());
 }
+
+/**
+ * @tc.name: ScrollSetFrictionTest001
+ * @tc.desc: Test ScrollSetFriction
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollSetFrictionTest001, TestSize.Level1)
+{
+    constexpr double friction = -1;
+    ScrollModelNG scrollModelNG;
+    scrollModelNG.Create();
+    scrollModelNG.SetFriction(friction);
+    GetInstance();
+    /**
+     * @tc.expected: friction shouled be more than 0.0,if out of range,should be default value.
+     */
+    EXPECT_DOUBLE_EQ(pattern_->GetFriction(), 0.6);
+}
+
+/**
+ * @tc.name: ScrollSetFrictionTest002
+ * @tc.desc: Test ScrollSetFriction
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollSetFrictionTest002, TestSize.Level1)
+{
+    constexpr double friction = 10;
+    ScrollModelNG scrollModelNG;
+    scrollModelNG.Create();
+    scrollModelNG.SetFriction(friction);
+    GetInstance();
+    EXPECT_DOUBLE_EQ(pattern_->GetFriction(), 10);
+}
 } // namespace OHOS::Ace::NG
