@@ -392,6 +392,9 @@ public:
         std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent);
     void UpdateAnimatableArithmeticProperty(const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value);
 
+    void SetHitTestMode(HitTestMode mode);
+    HitTestMode GetHitTestMode() const override;
+
     std::string ProvideRestoreInfo();
 
     static std::vector<RefPtr<FrameNode>> GetNodesById(const std::unordered_set<int32_t>& set);
@@ -449,7 +452,6 @@ private:
     void TouchToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
-    HitTestMode GetHitTestMode() const override;
     bool GetTouchable() const;
     virtual std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType);
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;

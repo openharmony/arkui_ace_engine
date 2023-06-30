@@ -93,6 +93,7 @@ void WindowPattern::InitContent()
     contentNode_ = FrameNode::CreateFrameNode(
         V2::WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     contentNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    contentNode_->SetHitTestMode(HitTestMode::HTMNONE);
     CHECK_NULL_VOID(session_);
     auto surfaceNode = session_->GetSurfaceNode();
     if (surfaceNode) {
@@ -136,6 +137,7 @@ void WindowPattern::CreateStartingNode()
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     host->AddChild(startingNode_);
 
+    startingNode_->SetHitTestMode(HitTestMode::HTMNONE);
     std::string startPagePath;
     auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
     auto sessionInfo = session_->GetSessionInfo();
