@@ -15,7 +15,10 @@ import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 
-component_plugins = [ "qrcode" ]
+component_plugins = [
+  "qrcode",
+  "patternlock",
+]
 
 template("build_component_plugin") {
   forward_variables_from(invoker, "*")
@@ -72,7 +75,9 @@ template("build_component_plugin") {
       }
 
       deps = []
-      deps += invoker.deps
+      if (defined(invoker.deps)) {
+        deps += invoker.deps
+      }
 
       if (defined(invoker.public_configs)) {
         public_configs = []
