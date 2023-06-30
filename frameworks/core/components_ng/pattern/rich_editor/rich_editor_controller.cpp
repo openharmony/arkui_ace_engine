@@ -27,8 +27,7 @@ int32_t RichEditorController::AddImageSpan(const ImageSpanOptions& options)
     auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
     int32_t spanIndex = 0;
     if (richEditorPattern) {
-        richEditorPattern->AddImageSpan(options);
-        spanIndex = richEditorPattern->GetSpanIndex();
+        spanIndex = richEditorPattern->AddImageSpan(options);
     }
     return spanIndex;
 }
@@ -38,8 +37,7 @@ int32_t RichEditorController::AddTextSpan(const TextSpanOptions& options)
     auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
     int32_t spanIndex = 0;
     if (richEditorPattern) {
-        richEditorPattern->AddTextSpan(options);
-        spanIndex = richEditorPattern->GetSpanIndex();
+        spanIndex = richEditorPattern->AddTextSpan(options);
     }
     return spanIndex;
 }
@@ -83,5 +81,15 @@ void RichEditorController::UpdateSpanStyle(
 void RichEditorController::SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle)
 {
     updateSpanStyle_ = updateSpanStyle;
+}
+
+RichEditorSelection RichEditorController::GetSpansInfo(int32_t start, int32_t end)
+{
+    RichEditorSelection value;
+    auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+    if (richEditorPattern) {
+        value = richEditorPattern->GetSpansInfo(start, end);
+    }
+    return value;
 }
 } // namespace OHOS::Ace::NG

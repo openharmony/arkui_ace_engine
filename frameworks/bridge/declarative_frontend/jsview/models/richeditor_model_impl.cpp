@@ -24,4 +24,5 @@ RefPtr<RichEditorControllerBase> RichEditorModelImpl::GetRichEditorController()
 }
 
 void RichEditorModelImpl::SetOnReady(std::function<void()>&& func) {}
+void RichEditorModelImpl::SetOnSelect(std::function<void(const BaseEventInfo*)>&& func) {}
 } // namespace OHOS::Ace::Framework

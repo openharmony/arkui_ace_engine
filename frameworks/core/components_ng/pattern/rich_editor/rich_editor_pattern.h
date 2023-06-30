@@ -123,12 +123,13 @@ public:
     int32_t TextSpanSplit(int32_t position);
     SpanPositionInfo GetSpanPositionInfo(int32_t position);
     std::function<ImageSourceInfo()> CreateImageSourceInfo(const ImageSpanOptions& options);
-    void AddImageSpan(const ImageSpanOptions& options);
-    void AddTextSpan(const TextSpanOptions& options);
-    int32_t GetSpanIndex();
     bool SetCaretOffset(int32_t caretPosition);
     void UpdateSpanStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
+    int32_t AddImageSpan(const ImageSpanOptions& options);
+    int32_t AddTextSpan(const TextSpanOptions& options);
+    RichEditorSelection GetSpansInfo(int32_t start, int32_t end);
+    void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) override;
 
 private:
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -143,6 +144,18 @@ private:
     void StopTwinkling();
     void UpdateTextStyle(RefPtr<SpanNode>& spanNode, TextStyle textStyle);
     void UpdateImageStyle(RefPtr<FrameNode>& imageNode, ImageSpanAttribute imageStyle);
+
+    void InitTouchEvent();
+    bool SelectOverlayIsOn();
+    void HandleLongPress(GestureEvent& info);
+    void HandleMouseEvent(const MouseInfo& info);
+    void HandleTouchEvent(const TouchEventInfo& info);
+    void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
+    RefPtr<UINode> GetChildByIndex(int32_t index) const;
+    std::string GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const;
+    TextStyleResult GetTextStyleObject(RefPtr<SpanNode> node);
+    ResultObject GetTextResultObject(RefPtr<SpanItem> item, int32_t index, int32_t start, int32_t end);
+    ResultObject GetImageResultObject(RefPtr<SpanItem> item, int32_t index, int32_t start, int32_t end);
 
     bool clickEventInitialized_ = false;
     bool focusEventInitialized_ = false;
@@ -174,8 +187,8 @@ private:
     int32_t instanceId_ = -1;
     bool caretVisible_ = false;
     CancelableCallback<void()> caretTwinklingTask_;
-    int32_t spanIndex_ = 0;
     struct UpdateSpanStyle updateSpanStyle_;
+    RefPtr<TouchEventImpl> touchListener_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 #if defined(ENABLE_STANDARD_INPUT)
