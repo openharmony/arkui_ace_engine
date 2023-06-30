@@ -2147,7 +2147,7 @@ HWTEST_F(ListTestNg, Callback001, TestSize.Level1)
     bool isReachStartCalled = false;
     bool isReachEndCalled = false;
     auto scroll = [&isScrollCalled](Dimension, ScrollState) { isScrollCalled = true; };
-    auto scrollIndex = [&isScrollIndexCalled](int32_t, int32_t) { isScrollIndexCalled = true; };
+    auto scrollIndex = [&isScrollIndexCalled](int32_t, int32_t, int32_t) { isScrollIndexCalled = true; };
     auto reachStart = [&isReachStartCalled]() { isReachStartCalled = true; };
     auto reachEnd = [&isReachEndCalled]() { isReachEndCalled = true; };
     listModelNG.SetOnScroll(scroll);

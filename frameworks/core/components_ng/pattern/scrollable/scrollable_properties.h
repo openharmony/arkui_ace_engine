@@ -78,7 +78,7 @@ using OnScrollFrameBeginEvent = std::function<ScrollFrameResult(Dimension, Scrol
 using OnScrollStartEvent = std::function<void()>;
 using OnScrollStopEvent = std::function<void()>;
 using OnReachEvent = std::function<void()>;
-using OnScrollIndexEvent = std::function<void(int32_t, int32_t)>;
+using OnScrollIndexEvent = std::function<void(int32_t, int32_t, int32_t)>;
 } // namespace OHOS::Ace
 
 #endif
