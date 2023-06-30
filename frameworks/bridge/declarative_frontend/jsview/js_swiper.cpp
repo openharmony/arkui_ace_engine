@@ -376,7 +376,14 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     SwiperParameters swiperParameters;
     CalcDimension dimPosition;
     parseOk = ParseJsDimensionPx(leftValue, dimPosition);
-    swiperParameters.dimLeft = parseOk ? dimPosition : 0.0_vp;
+    if (parseOk) {
+        if (dimPosition.ConvertToPx() < 0.0f) {
+            dimPosition = 0.0_vp;
+        }
+    } else {
+        dimPosition = 0.0_vp;
+    }
+    swiperParameters.dimLeft = dimPosition;
     parseOk = ParseJsDimensionPx(topValue, dimPosition);
     swiperParameters.dimTop = parseOk ? dimPosition : 0.0_vp;
     parseOk = ParseJsDimensionPx(rightValue, dimPosition);
@@ -426,7 +433,14 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
     SwiperDigitalParameters digitalParameters;
     CalcDimension dimPosition;
     parseOk = ParseJsDimensionVp(dotLeftValue, dimPosition);
-    digitalParameters.dimLeft = parseOk ? dimPosition : 0.0_vp;
+    if (parseOk) {
+        if (dimPosition.ConvertToPx() < 0.0f) {
+            dimPosition = 0.0_vp;
+        }
+    } else {
+        dimPosition = 0.0_vp;
+    }
+    digitalParameters.dimLeft = dimPosition;
     parseOk = ParseJsDimensionVp(dotTopValue, dimPosition);
     digitalParameters.dimTop = parseOk ? dimPosition : 0.0_vp;
     parseOk = ParseJsDimensionVp(dotRightValue, dimPosition);
