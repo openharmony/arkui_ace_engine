@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_LAYOUT_INFO_H
 
 #include <map>
+#include <optional>
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/rect_t.h"
@@ -98,6 +99,7 @@ struct GridLayoutInfo {
     float lastMainSize_ = 0.0f;
     float totalHeightOfItemsInView_ = 0.0f;
 
+    std::optional<int32_t> lastCrossCount_;
     // index of first and last GridItem in viewport
     int32_t startIndex_ = 0;
     int32_t endIndex_ = -1;
