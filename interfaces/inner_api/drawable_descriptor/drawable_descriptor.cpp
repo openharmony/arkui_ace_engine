@@ -309,8 +309,8 @@ std::string LayeredDrawableDescriptor::GetStaticMaskClipPath()
 {
     const std::string name = "ohos_drawable_descriptor_path";
     std::string data;
-    std::shared_ptr<Global::Resource::ResourceManager> ResMgr_(Global::Resource::CreateResourceManager());
-    ResMgr_->GetStringByName(name.c_str(), data);
+    std::shared_ptr<Global::Resource::ResourceManager> resMgr(Global::Resource::CreateResourceManager());
+    resMgr->GetStringByName(name.c_str(), data);
     return data;
 }
 } // namespace OHOS::Ace::Napi
