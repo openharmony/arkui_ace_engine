@@ -84,6 +84,11 @@ struct GridLayoutInfo {
         offsetEnd_ = false;
     }
 
+    bool IsResetted() const
+    {
+        return startIndex_ != 0 && gridMatrix_.empty();
+    }
+
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f;
