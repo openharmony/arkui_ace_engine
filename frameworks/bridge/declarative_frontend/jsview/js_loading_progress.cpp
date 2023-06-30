@@ -94,10 +94,6 @@ void JSLoadingProgress::SetForegroundColor(const JSCallbackInfo& info)
 
 void JSLoadingProgress::SetEnableLoading(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
     if (!info[0]->IsBoolean()) {
         return;
     }
