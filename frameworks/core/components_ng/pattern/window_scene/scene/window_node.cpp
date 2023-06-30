@@ -16,11 +16,13 @@
 #include "core/components_ng/pattern/window_scene/scene/window_node.h"
 
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float MOUSE_RECT_HOT = 4.0f;
-constexpr float TOUCH_RECT_HOT = 20.0f;
+constexpr float MOUSE_RECT_HOT_VP = 4.0f;
+constexpr float TOUCH_RECT_HOT_VP = 20.0f;
+constexpr double DEFAULT_HOT_DENSITY = 1.5f;
 }
 
 RefPtr<WindowNode> WindowNode::GetOrCreateWindowNode(
@@ -66,8 +68,11 @@ std::vector<RectF> WindowNode::GetResponseRegionList(const RectF& rect, int32_t 
 
 RectF WindowNode::ConvertHotRect(const RectF& rect, int32_t sourceType)
 {
-    float hotOffset = (sourceType == static_cast<int32_t>(Ace::SourceType::MOUSE)) ?
-        MOUSE_RECT_HOT : TOUCH_RECT_HOT;
+    float hotOffsetVp = (sourceType == static_cast<int32_t>(Ace::SourceType::MOUSE)) ?
+        MOUSE_RECT_HOT_VP : TOUCH_RECT_HOT_VP;
+    auto context = PipelineContext::GetCurrentContext();
+    double density = (context != nullptr) ? context->GetDensity() : DEFAULT_HOT_DENSITY;
+    float hotOffset = static_cast<float>(hotOffsetVp * density);
     float hotX = rect.GetX() - hotOffset;
     float hotY = rect.GetY() - hotOffset;
     float hotWidth = rect.Width() + hotOffset * 2;
