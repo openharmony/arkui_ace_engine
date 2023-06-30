@@ -700,6 +700,9 @@ double Scrollable::GetGain(double delta)
 {
     auto cap = 1.0;
     auto gain = 1.0;
+    if (!continuousSlidingCallback_) {
+        return gain;
+    }
     auto screenHeight = continuousSlidingCallback_();
     if (delta == 0 || screenHeight == 0) {
         return gain;
