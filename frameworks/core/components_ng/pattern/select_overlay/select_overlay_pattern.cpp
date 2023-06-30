@@ -329,7 +329,11 @@ void SelectOverlayPattern::UpdateFirstSelectHandleInfo(const SelectHandleInfo& i
     UpdateHandleHotZone();
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (info.needLayout) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    } else {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void SelectOverlayPattern::UpdateSecondSelectHandleInfo(const SelectHandleInfo& info)
@@ -342,7 +346,11 @@ void SelectOverlayPattern::UpdateSecondSelectHandleInfo(const SelectHandleInfo& 
     UpdateHandleHotZone();
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (info.needLayout) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    } else {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void SelectOverlayPattern::UpdateFirstAndSecondHandleInfo(
