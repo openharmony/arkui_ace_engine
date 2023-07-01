@@ -247,17 +247,9 @@ void SubwindowOhos::HidePopupNG(int32_t targetId)
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
     CHECK_NULL_VOID(context);
-    auto rootNode = context->GetRootElement();
-    CHECK_NULL_VOID(rootNode);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    // Reset subwindow's hotarea to whole screen when popup hide
-    auto subWindowSize = rootNode->GetGeometryNode()->GetFrameSize();
-    auto subWindowRect = Rect(0.0f, 0.0f, subWindowSize.Width(), subWindowSize.Height());
     auto popupInfo = overlayManager->GetPopupInfo(targetId);
-    std::vector<Rect> rects;
-    rects.emplace_back(subWindowRect);
-    SetHotAreas(rects);
     popupInfo.popupId = -1;
     popupInfo.markNeedUpdate = true;
     overlayManager->HidePopup(targetId, popupInfo);
@@ -322,7 +314,7 @@ void SubwindowOhos::ShowWindow()
     // Set min window hot area so that sub window can transparent event.
     std::vector<Rect> rects;
     rects.emplace_back(MIN_WINDOW_HOT_AREA);
-    SetHotAreas(rects);
+    SetHotAreas(rects, -1);
     window_->SetNeedDefaultAnimation(false);
     OHOS::Rosen::WMError ret = window_->Show();
 
@@ -359,7 +351,15 @@ void SubwindowOhos::HideWindow()
         auto rootNode = context->GetRootElement();
         CHECK_NULL_VOID(rootNode);
         if (!rootNode->GetChildren().empty()) {
-            LOGW("there are still nodes mounted on root in subwindow");
+            LOGD("there are still nodes mounted on root in subwindow");
+            auto lastChildId = rootNode->GetLastChild()->GetId();
+            if (hotAreasMap_.find(lastChildId) != hotAreasMap_.end()) {
+                auto hotAreaRect = hotAreasMap_[lastChildId];
+                OHOS::Rosen::WMError ret = window_->SetTouchHotAreas(hotAreaRect);
+                if (ret != OHOS::Rosen::WMError::WM_OK) {
+                    LOGW("Set hot areas failed with errCode: %{public}d", static_cast<int32_t>(ret));
+                }
+            }
             return;
         }
         auto focusHub = rootNode->GetFocusHub();
@@ -528,16 +528,19 @@ RefPtr<StackElement> SubwindowOhos::GetStack()
     return context->GetLastStack();
 }
 
-void SubwindowOhos::SetHotAreas(const std::vector<Rect>& rects)
+void SubwindowOhos::SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId)
 {
     LOGI("Set hot areas for window.");
     CHECK_NULL_VOID(window_);
 
     std::vector<Rosen::Rect> hotAreas;
-    Rosen::Rect rosenRect;
+    Rosen::Rect rosenRect {};
     for (const auto& rect : rects) {
         RectConverter(rect, rosenRect);
         hotAreas.emplace_back(rosenRect);
+    }
+    if (overlayId >= 0) {
+        hotAreasMap_[overlayId] = hotAreas;
     }
 
     OHOS::Rosen::WMError ret = window_->SetTouchHotAreas(hotAreas);

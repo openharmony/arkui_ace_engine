@@ -293,7 +293,7 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         std::vector<Rect> rects;
         auto rect = Rect(0.0f, 0.0f, selfSize.Width(), selfSize.Height());
         rects.emplace_back(rect);
-        SubwindowManager::GetInstance()->SetHotAreas(rects);
+        SubwindowManager::GetInstance()->SetHotAreas(rects, frameNode->GetId());
     }
 }
 
