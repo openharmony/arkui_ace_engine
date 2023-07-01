@@ -85,8 +85,6 @@ public:
     void FireStateChange(int32_t value);
     void FireRefreshing();
     void FireChangeEvent(const std::string& value);
-    bool OnDirtyLayoutWrapperSwap(
-        const RefPtr<LayoutWrapper>& /* dirty */, const DirtySwapConfig& /* changeConfig */) override;
     void OnActive() override {}
     void CheckCoordinationEvent();
     RefPtr<FrameNode> FindScrollableChild();
@@ -124,8 +122,8 @@ private:
     bool ScrollComponentReactInMove();
     void CustomBuilderAppear();
     void CustomBuilderExit();
-    void CheckCustomBuilderDragUpdateStage();
-    void CheckCustomBuilderDragEndStage();
+    void HandleCustomBuilderDragUpdateStage();
+    void HandleCustomBuilderDragEndStage();
     void CustomBuilderReset();
     void UpdateCustomBuilderProperty(RefreshState state, float ratio);
     void CustomBuilderRefreshingAnimation();
