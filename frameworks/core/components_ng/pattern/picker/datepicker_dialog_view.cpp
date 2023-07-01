@@ -57,6 +57,9 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
         dateNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, false);
     ViewStackProcessor::GetInstance()->Push(dateNode);
     dateNode->MountToParent(pickerStack);
+    auto pickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_RETURN(pickerPattern, nullptr);
+    pickerPattern->SetIsShowInDialog(true);
 
     // create title node and bind title text id to date picker, then mark picker node modify done
     auto buttonTitleNode = CreateTitleButtonNode(dateNode);
@@ -71,8 +74,6 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
         auto layoutProperty = dateNode->GetLayoutProperty<LayoutProperty>();
         CHECK_NULL_RETURN(layoutProperty, nullptr);
         layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-        auto pickerPattern = dateNode->GetPattern<DatePickerPattern>();
-        CHECK_NULL_RETURN(pickerPattern, nullptr);
         auto monthDaysNode = CreateDateNode(
             monthDaysNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
         auto monthDaysPickerPattern = monthDaysNode->GetPattern<DatePickerPattern>();

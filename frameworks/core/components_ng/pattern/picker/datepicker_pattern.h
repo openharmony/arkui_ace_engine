@@ -67,7 +67,7 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto paintMethod = MakeRefPtr<DatePickerPaintMethod>();
+        auto paintMethod = MakeRefPtr<DatePickerPaintMethod>(WeakClaim(this));
         paintMethod->SetEnabled(enabled_);
         paintMethod->SetBackgroundColor(backgroundColor_);
         return paintMethod;
@@ -202,6 +202,36 @@ public:
     void SetDialogChangeEvent(const EventMarker& value)
     {
         OnDialogChange_ = value;
+    }
+
+    void SetResizePickerItemHeight(double resizePickerItemHeight)
+    {
+        resizePickerItemHeight_ = resizePickerItemHeight;
+    }
+
+    double GetResizePickerItemHeight() const
+    {
+        return resizePickerItemHeight_;
+    }
+
+    void SetResizeFlag(bool resizeFlag)
+    {
+        resizeFlag_ = resizeFlag;
+    }
+
+    bool GetResizeFlag() const
+    {
+        return resizeFlag_;
+    }
+
+    void SetIsShowInDialog(bool isShowInDialog)
+    {
+        isShowInDialog_ = isShowInDialog;
+    }
+
+    bool GetIsShowInDialog() const
+    {
+        return isShowInDialog_;
     }
 
     uint32_t GetOptionCount(RefPtr<FrameNode>& frmeNode)
@@ -550,6 +580,9 @@ private:
     std::optional<int32_t> titleId_;
     std::optional<int32_t> ButtonTitleId_;
     std::optional<int32_t> DividerId_;
+    double resizePickerItemHeight_;
+    bool resizeFlag_ = false;
+    bool isShowInDialog_ = false;
 
     EventMarker OnDialogAccept_;
     EventMarker OnDialogCancel_;
