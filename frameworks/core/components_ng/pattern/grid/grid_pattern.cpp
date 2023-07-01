@@ -454,7 +454,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto offsetVpValue = offsetPx.ConvertToVp();
     offset.SetValue(offsetVpValue);
     scrollbarInfo_ = eventhub->FireOnScrollBarUpdate(gridLayoutInfo.startIndex_, offset);
-    if (firstShow_ || gridLayoutInfo_.startMainLineIndex_ != gridLayoutInfo.startMainLineIndex_) {
+    if (firstShow_ || gridLayoutInfo_.startIndex_ != gridLayoutInfo.startIndex_) {
         eventhub->FireOnScrollToIndex(gridLayoutInfo.startIndex_);
         firstShow_ = false;
     }
@@ -479,7 +479,11 @@ void GridPattern::CheckScrollable()
         (gridLayoutInfo_.GetTotalHeightOfItemsInView(GetMainGap()) > GetMainContentSize())) {
         scrollable_ = true;
     } else {
-        scrollable_ = false;
+        if (gridLayoutInfo_.startMainLineIndex_ != 0) {
+            scrollable_ = true;
+        } else {
+            scrollable_ = false;
+        }
     }
 
     SetScrollEnable(scrollable_);
@@ -1035,13 +1039,12 @@ bool GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
     }
 
     auto animation = AceType::MakeRefPtr<CurveAnimation<float>>(0, position, curve);
-    animation->AddListener(
-        [height = height, weakScroll = AceType::WeakClaim(this)](float value) {
-            auto gridPattern = weakScroll.Upgrade();
-            if (gridPattern) {
-                gridPattern->UpdateCurrentOffset(height - value, SCROLL_FROM_JUMP);
-            }
-        });
+    animation->AddListener([height = height, weakScroll = AceType::WeakClaim(this)](float value) {
+        auto gridPattern = weakScroll.Upgrade();
+        if (gridPattern) {
+            gridPattern->UpdateCurrentOffset(height - value, SCROLL_FROM_JUMP);
+        }
+    });
     animator_->AddInterpolator(animation);
     animator_->SetDuration(std::min(duration, SCROLL_MAX_TIME));
     animator_->Play();
@@ -1097,7 +1100,6 @@ void GridPattern::UpdateScrollBarOffset()
     const auto& info = gridLayoutInfo_;
     auto viewScopeSize = geometryNode->GetPaddingSize();
     auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
-
     float heightSum = 0;
     int32_t itemCount = 0;
     float offset = 0;
@@ -1120,7 +1122,6 @@ void GridPattern::UpdateScrollBarOffset()
             itemCount += (lineEnd - lineStart + 1);
             heightSum += item.second + mainGap;
         }
-
         auto averageHeight = heightSum / itemCount;
         offset = info.startIndex_ * averageHeight - info.currentOffset_;
         if (itemCount >= (info.childrenCount_ - 1)) {
@@ -1131,8 +1132,12 @@ void GridPattern::UpdateScrollBarOffset()
         }
     }
     auto viewSize = geometryNode->GetFrameSize();
-    Size mainSize = { viewSize.Width(), viewSize.Height() };
-    UpdateScrollBarRegion(offset, estimatedHeight, mainSize, Offset(0.0, 0.0));
+    if (info.startMainLineIndex_ != 0 && info.startIndex_ == 0) {
+        for (int32_t lineIndex = info.startMainLineIndex_ - 1; lineIndex >= 0; lineIndex--) {
+            offset += info.lineHeightMap_.find(lineIndex)->second;
+        }
+    }
+    UpdateScrollBarRegion(offset, estimatedHeight, Size(viewSize.Width(), viewSize.Height()), Offset(0.0, 0.0));
 }
 
 RefPtr<PaintProperty> GridPattern::CreatePaintProperty()

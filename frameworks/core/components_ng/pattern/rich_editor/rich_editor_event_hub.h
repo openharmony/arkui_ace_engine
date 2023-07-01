@@ -17,20 +17,63 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_RICH_EDITOR_EVENT_HUB_H
 
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
 
 namespace OHOS::Ace::NG {
+class TextInsertValueInfo {
+public:
+    TextInsertValueInfo() = default;
+    ~TextInsertValueInfo() = default;
+};
+
+class RichEditorInsertValue : public BaseEventInfo {
+    DECLARE_ACE_TYPE(RichEditorInsertValue, BaseEventInfo)
+public:
+    RichEditorInsertValue() : BaseEventInfo("RichEditorInsertValue") {}
+    ~RichEditorInsertValue() override = default;
+};
+
+enum class SpanResultType { TEXT, IMAGE };
+
+class RichEditorAbstractSpanResult {
+public:
+    RichEditorAbstractSpanResult() = default;
+    ~RichEditorAbstractSpanResult() = default;
+};
+
+enum class RichEditorDeleteDirection { BACKWARD = 0, FORWARD };
+
+class RichEditorDeleteValue : public BaseEventInfo {
+    DECLARE_ACE_TYPE(RichEditorDeleteValue, BaseEventInfo)
+public:
+    RichEditorDeleteValue() : BaseEventInfo("RichEditorDeleteValue") {}
+    ~RichEditorDeleteValue() = default;
+};
+
 class RichEditorEventHub : public EventHub {
     DECLARE_ACE_TYPE(RichEditorEventHub, EventHub)
 
 public:
     RichEditorEventHub() = default;
     ~RichEditorEventHub() override = default;
-
     void SetOnReady(std::function<void()>&& func);
     void FireOnReady();
 
+    void SetOnSelect(std::function<void(const BaseEventInfo*)>&& func)
+    {
+        onSelect_ = std::move(func);
+    }
+
+    void FireOnSelect(BaseEventInfo* value)
+    {
+        if (onSelect_) {
+            onSelect_(value);
+        }
+    }
+
 private:
     std::function<void()> onReady_;
+    std::function<void(const BaseEventInfo*)> onSelect_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorEventHub);
 };
 } // namespace OHOS::Ace::NG

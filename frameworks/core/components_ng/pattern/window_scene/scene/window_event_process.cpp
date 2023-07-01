@@ -27,20 +27,16 @@ void WindowEventProcess::ProcessWindowEvent(const RefPtr<WindowNode>& windowNode
     const std::shared_ptr<MMI::PointerEvent>& pointerEvent, bool isDrag)
 {
     CHECK_NULL_VOID(windowNode);
+    CHECK_NULL_VOID(pointerEvent);
+    std::shared_ptr<MMI::PointerEvent> enterEvent = std::make_shared<MMI::PointerEvent>(*pointerEvent);
     auto lastWindowNode = lastWeakWindowNode_.Upgrade();
-    if (lastWindowNode == nullptr) {
-        LOGD("First enter window, lastWindowNode is not exit");
-        std::shared_ptr<MMI::PointerEvent> enterEvent = std::make_shared<MMI::PointerEvent>(*pointerEvent);
+    if ((!isDrag) && (lastWindowNode == nullptr)) {
+        LOGD("Enter window:%{public}d first", windowNode->GetId());
         enterEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
         DispatchPointerEvent(windowNode, enterEvent);
-        lastWeakWindowNode_ = windowNode;
-        lastPointEvent_ = enterEvent;
-        return;
-    }
-
-    if (windowNode->GetId() != lastWindowNode->GetId()) {
-        LOGD("Window switching");
-        std::shared_ptr<MMI::PointerEvent> enterEvent = std::make_shared<MMI::PointerEvent>(*pointerEvent);
+    } else if (windowNode->GetId() != lastWindowNode->GetId()) {
+        LOGD("Window switching, enter window:%{public}d, leave window:%{public}d",
+            windowNode->GetId(), lastWindowNode->GetId());
         int32_t dispatchAction = isDrag ? MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW :
             MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW;
         lastPointEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
@@ -50,9 +46,9 @@ void WindowEventProcess::ProcessWindowEvent(const RefPtr<WindowNode>& windowNode
             MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW;
         enterEvent->SetPointerAction(dispatchAction);
         DispatchPointerEvent(windowNode, enterEvent);
-        lastWeakWindowNode_ = windowNode;
-        lastPointEvent_ = enterEvent;
     }
+    lastWeakWindowNode_ = windowNode;
+    lastPointEvent_ = enterEvent;
 }
 
 void WindowEventProcess::DispatchPointerEvent(const RefPtr<WindowNode>& windowNode,

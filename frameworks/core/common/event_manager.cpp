@@ -87,6 +87,10 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     if (refereeNG_->QueryAllDone(touchPoint.id)) {
         refereeNG_->CleanGestureScope(touchPoint.id);
     }
+    if (frameNode->HaveSecurityComponent()) {
+        std::vector<NG::RectF> rect;
+        frameNode->CheckSecurityComponentStatus(rect, touchRestrict);
+    }
     // For root node, the parent local point is the same as global point.
     frameNode->TouchTest(point, point, touchRestrict, hitTestResult, touchPoint.id);
     if (needAppend) {
@@ -115,6 +119,10 @@ void EventManager::TouchTest(
     CHECK_NULL_VOID(frameNode);
     // collect
     const NG::PointF point { event.x, event.y };
+    if (frameNode->HaveSecurityComponent()) {
+        std::vector<NG::RectF> rect;
+        frameNode->CheckSecurityComponentStatus(rect, touchRestrict);
+    }
     // For root node, the parent local point is the same as global point.
     frameNode->TouchTest(point, point, touchRestrict, axisTouchTestResult_, event.id);
 }
@@ -536,6 +544,10 @@ void EventManager::MouseTest(
     CHECK_NULL_VOID(frameNode);
     const NG::PointF point { event.x, event.y };
     TouchTestResult testResult;
+    if (frameNode->HaveSecurityComponent()) {
+        std::vector<NG::RectF> rect;
+        frameNode->CheckSecurityComponentStatus(rect, touchRestrict);
+    }
     frameNode->TouchTest(point, point, touchRestrict, testResult, event.GetId());
     if (testResult.empty()) {
         LOGD("mouse hover test result is empty");
@@ -580,7 +592,8 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
     LOGD("DispatchMouseEventNG: button is %{public}d, action is %{public}d.", event.button, event.action);
     if (event.action == MouseAction::PRESS || event.action == MouseAction::RELEASE ||
         event.action == MouseAction::MOVE || event.action == MouseAction::WINDOW_ENTER ||
-        event.action == MouseAction::WINDOW_LEAVE) {
+        event.action == MouseAction::WINDOW_LEAVE || event.action == MouseAction::PULL_MOVE ||
+        event.action == MouseAction::PULL_UP) {
         MouseTestResult handledResults;
         handledResults.clear();
         if (event.button == MouseButton::LEFT_BUTTON) {

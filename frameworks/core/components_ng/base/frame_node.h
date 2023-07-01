@@ -221,6 +221,12 @@ public:
     HitTestResult AxisTest(
         const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult) override;
 
+    void CheckSecurityComponentStatus(std::vector<RectF>& rect, const TouchRestrict& touchRestrict);
+
+    bool HaveSecurityComponent();
+
+    bool IsSecurityComponent();
+
     void AnimateHoverEffect(bool isHovered) const;
 
     bool IsAtomicNode() const override;
@@ -329,6 +335,7 @@ public:
     void RemoveLastHotZoneRect() const;
 
     virtual bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t sourceType);
+    bool CheckRectIntersect(std::vector<RectF>& dest, std::vector<RectF>& origin);
 
     bool IsLayoutDirtyMarked() const
     {
@@ -392,6 +399,9 @@ public:
         std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent);
     void UpdateAnimatableArithmeticProperty(const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value);
 
+    void SetHitTestMode(HitTestMode mode);
+    HitTestMode GetHitTestMode() const override;
+
     std::string ProvideRestoreInfo();
 
     static std::vector<RefPtr<FrameNode>> GetNodesById(const std::unordered_set<int32_t>& set);
@@ -449,7 +459,6 @@ private:
     void TouchToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
-    HitTestMode GetHitTestMode() const override;
     bool GetTouchable() const;
     virtual std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType);
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
@@ -502,6 +511,7 @@ private:
     bool exclusiveEventForChild_ = false;
     bool isActive_ = false;
     bool isResponseRegion_ = false;
+    bool bypass_ = false;
 
     double lastVisibleRatio_ = 0.0;
 

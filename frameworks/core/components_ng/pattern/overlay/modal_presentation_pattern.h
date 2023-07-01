@@ -18,16 +18,10 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
-
-enum ModalTransition {
-    DEFAULT,
-    NONE,
-    ALPHA,
-};
-
 class ACE_EXPORT ModalPresentationPattern : public Pattern {
     DECLARE_ACE_TYPE(ModalPresentationPattern, Pattern);
 

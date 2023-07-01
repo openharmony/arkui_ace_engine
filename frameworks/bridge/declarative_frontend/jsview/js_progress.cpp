@@ -323,7 +323,7 @@ void JSProgress::JsSetCapsuleStyle(const JSCallbackInfo& info)
 
     auto jsBorderWidth = paramObject->GetProperty("borderWidth");
     CalcDimension borderWidth;
-    if (!ParseJsDimensionVp(jsBorderWidth, borderWidth)) {
+    if (!ParseJsDimensionVpNG(jsBorderWidth, borderWidth)) {
         borderWidth = theme->GetBorderWidth();
     }
     if (LessNotEqual(borderWidth.Value(), 0.0) || borderWidth.Unit() == DimensionUnit::PERCENT) {
@@ -403,7 +403,7 @@ void JSProgress::JsSetFont(const JSRef<JSObject>& textObject)
     CHECK_NULL_VOID(textTheme);
     auto size = textObject->GetProperty("size");
     CalcDimension fontSize;
-    if (!ParseJsDimensionFp(size, fontSize)) {
+    if (!ParseJsDimensionNG(size, fontSize, DimensionUnit::FP)) {
         fontSize = theme->GetTextSize();
     }
     if (LessNotEqual(fontSize.Value(), 0.0) || fontSize.Unit() == DimensionUnit::PERCENT) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/friction_motion.h"
 #include "core/animation/spring_animation.h"
+#include "core/components/close_icon/close_icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/property/measure_property.h"
@@ -56,6 +57,8 @@ void SlidingPanelPattern::OnModifyDone()
     CHECK_NULL_VOID(gestureHub);
     InitPanEvent(gestureHub);
     Update();
+    AddOrRemoveDragBarNode(layoutProperty);
+    AddOrRemoveCloseIconNode(layoutProperty);
     if (layoutProperty->GetHasDragBarValue(true)) {
         auto dragBar = GetDragBarNode();
         CHECK_NULL_VOID(dragBar);
@@ -65,6 +68,17 @@ void SlidingPanelPattern::OnModifyDone()
             SetDragBarCallBack();
         }
     }
+
+    if (layoutProperty->GetShowCloseIconValue(true)) {
+        auto closeIconNode = GetCloseIconNode();
+        CHECK_NULL_VOID(closeIconNode);
+        auto closeIconPattern = closeIconNode->GetPattern<CloseIconPattern>();
+        CHECK_NULL_VOID(closeIconPattern);
+        if (closeIconPattern && !(closeIconPattern->HasClickButtonCallback())) {
+            SetCloseIconCallBack();
+        }
+    }
+
     auto isShow = layoutProperty->GetIsShowValue(false);
     if (isShow_.has_value() && isShow != isShow_.value_or(false)) {
         isShowQueue_.push(isShow);
@@ -139,21 +153,23 @@ void SlidingPanelPattern::InitializeLayoutProps()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto child = host->GetChildren();
-    if (child.empty() || child.size() != 1) {
+    if (child.empty() || child.size() > 2) {
         LOGE("Children size wrong in slide panel modal");
         return;
     }
 
     auto maxSize = host->GetGeometryNode()->GetFrameSize();
+    maxSize_ = maxSize;
     auto layoutProperty = GetLayoutProperty<SlidingPanelLayoutProperty>();
     auto defaultFullHeight = Dimension(maxSize.Height() - BLANK_MIN_HEIGHT.ConvertToPx());
     auto fullHeight = layoutProperty->GetFullHeight().value_or(defaultFullHeight).ConvertToPx();
-    auto halfHeight = layoutProperty->GetHalfHeight().value_or(Dimension(maxSize.Height() / 2)).ConvertToPx();
+    auto halfHeight = layoutProperty->GetHalfHeight().value_or(defaultFullHeight / 2).ConvertToPx();
     auto miniHeight =
         layoutProperty->GetMiniHeight().value_or(Dimension(DRAG_UP_THRESHOLD.ConvertToPx())).ConvertToPx();
     defaultBlankHeights_[PanelMode::FULL] = maxSize.Height() - fullHeight;
     defaultBlankHeights_[PanelMode::HALF] = maxSize.Height() - halfHeight;
     defaultBlankHeights_[PanelMode::MINI] = maxSize.Height() - miniHeight;
+    defaultBlankHeights_[PanelMode::AUTO] = maxSize.Height();
     CheckHeightValidity();
     fullHalfBoundary_ = defaultBlankHeights_[PanelMode::FULL] +
                         (defaultBlankHeights_[PanelMode::HALF] - defaultBlankHeights_[PanelMode::FULL]) / 2.0;
@@ -254,6 +270,9 @@ void SlidingPanelPattern::IsShowChanged(bool isShow)
 void SlidingPanelPattern::HeightDynamicUpdate()
 {
     if (isShow_.value_or(false) == true && !isDrag_ && !isAnimating_) {
+        if (isClosePanel_) {
+            return;
+        }
         switch (previousMode_) {
             case PanelMode::FULL:
                 if (!NearEqual(currentOffset_, defaultBlankHeights_[PanelMode::FULL])) {
@@ -386,6 +405,7 @@ void SlidingPanelPattern::HandleDragEnd(float dragVelocity)
     if (isAnimating_ || !isShow_.value_or(false)) {
         return;
     }
+    isClosePanel_ = false;
     auto dragLen = currentOffset_ - dragStartCurrentOffset_;
     type_ = GetPanelType();
     switch (type_) {
@@ -406,7 +426,12 @@ void SlidingPanelPattern::HandleDragEnd(float dragVelocity)
             return;
         }
     }
-    AnimateTo(defaultBlankHeights_[mode_.value_or(PanelMode::HALF)], mode_.value_or(PanelMode::HALF));
+    if (isClosePanel_) {
+        AnimateTo(maxSize_.Height(), mode_.value_or(PanelMode::HALF));
+        mode_ = PanelMode::AUTO;
+    } else {
+        AnimateTo(defaultBlankHeights_[mode_.value_or(PanelMode::HALF)], mode_.value_or(PanelMode::HALF));
+    }
     if (previousMode_ != mode_.value_or(PanelMode::HALF)) {
         FireSizeChangeEvent();
         previousMode_ = mode_.value_or(PanelMode::HALF);
@@ -467,20 +492,35 @@ void SlidingPanelPattern::CalculateModeTypeFold(float dragLen, float velocity) /
 void SlidingPanelPattern::CalculateModeTypeTemp(float dragLen, float velocity) // FULL & HALF
 {
     float currentPostion = currentOffset_;
+    float halfCloseBoundary = (defaultBlankHeights_[PanelMode::HALF] + maxSize_.Height()) / 2.0f;
     if (std::abs(velocity) < VELOCITY_THRESHOLD) {
         // Drag velocity not reached to threshold, mode based on the location.
         if (currentPostion < fullHalfBoundary_) {
             mode_ = PanelMode::FULL;
-        } else {
+        } else if (currentPostion < halfCloseBoundary) {
             mode_ = PanelMode::HALF;
+        } else {
+            isClosePanel_ = true;
         }
     } else {
         // Drag velocity reached to threshold, mode based on the drag direction.
         if (velocity > 0.0) {
-            mode_ = PanelMode::HALF;
+            if (currentPostion < defaultBlankHeights_[PanelMode::HALF]) {
+                mode_ = PanelMode::HALF;
+            } else {
+                isClosePanel_ = true;
+            }
         } else {
-            mode_ = PanelMode::FULL;
+            if (currentPostion > defaultBlankHeights_[PanelMode::HALF]) {
+                mode_ = PanelMode::HALF;
+            } else {
+                mode_ = PanelMode::FULL;
+            }
         }
+    }
+
+    if (dragLen > 0 && mode_ == PanelMode::HALF) {
+        isClosePanel_ = true;
     }
 }
 
@@ -554,12 +594,17 @@ void SlidingPanelPattern::AppendBlankHeightAnimation(float targetLocation, Panel
 
 RefPtr<FrameNode> SlidingPanelPattern::GetDragBarNode()
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, nullptr);
-    auto column = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+    auto column = GetChildNodeByTag(V2::COLUMN_ETS_TAG);
     CHECK_NULL_RETURN(column, nullptr);
     auto dragBar = AceType::DynamicCast<FrameNode>(column->GetChildAtIndex(0));
     return dragBar;
+}
+
+RefPtr<FrameNode> SlidingPanelPattern::GetCloseIconNode()
+{
+    auto closeIcon = GetChildNodeByTag(V2::PANEL_CLOSE_ICON_ETS_TAG);
+    CHECK_NULL_RETURN(closeIcon, nullptr);
+    return AceType::DynamicCast<FrameNode>(closeIcon);
 }
 
 int32_t SlidingPanelPattern::GetAnimationDuration(float delta, float dragRange) const
@@ -679,6 +724,9 @@ void SlidingPanelPattern::SetDragBarCallBack()
         auto panel = weak.Upgrade();
         CHECK_NULL_VOID(panel);
         panel->previousMode_ = panel->mode_.value_or(PanelMode::HALF);
+        if (panel->previousMode_ == PanelMode::HALF) {
+            return;
+        }
         if (panel->mode_.value_or(PanelMode::HALF) == PanelMode::MINI) {
             panel->mode_ = panel->type_ == PanelType::MINI_BAR ? PanelMode::FULL : PanelMode::HALF;
         } else if (panel->mode_.value_or(PanelMode::HALF) == PanelMode::FULL) {
@@ -686,11 +734,35 @@ void SlidingPanelPattern::SetDragBarCallBack()
         } else {
             LOGD("not support click in half mode");
         }
-        panel->AnimateTo(panel->defaultBlankHeights_[panel->mode_.value_or(PanelMode::HALF)],
-            panel->mode_.value_or(PanelMode::HALF));
+        if (panel->type_ == PanelType::TEMP_DISPLAY && panel->mode_ == PanelMode::HALF) {
+            panel->isClosePanel_ = true;
+            panel->AnimateTo(panel->maxSize_.Height(), panel->mode_.value_or(PanelMode::HALF));
+            panel->mode_ = PanelMode::AUTO;
+        } else {
+            panel->isClosePanel_ = false;
+            panel->AnimateTo(panel->defaultBlankHeights_[panel->mode_.value_or(PanelMode::HALF)],
+                panel->mode_.value_or(PanelMode::HALF));
+        }
         if (panel->previousMode_ != panel->mode_.value_or(PanelMode::HALF)) {
             panel->FireSizeChangeEvent();
         }
+    });
+}
+
+void SlidingPanelPattern::SetCloseIconCallBack()
+{
+    auto closeIconNode = GetCloseIconNode();
+    CHECK_NULL_VOID(closeIconNode);
+    auto closeIconPattern = closeIconNode->GetPattern<CloseIconPattern>();
+    CHECK_NULL_VOID(closeIconPattern);
+    closeIconPattern->SetClickButtonCallback([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        pattern->isClosePanel_ = true;
+        pattern->AnimateTo(pattern->maxSize_.Height(), pattern->mode_.value_or(PanelMode::HALF));
+        pattern->mode_ = PanelMode::AUTO;
+        pattern->FireSizeChangeEvent();
     });
 }
 
@@ -718,5 +790,84 @@ void SlidingPanelPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("fullHeight", layoutProperty->GetFullHeight().value_or(fullHeight_).ToString().c_str());
     json->Put(
         "backgroundMask", layoutProperty->GetBackgroundColor().value_or(Color::TRANSPARENT).ColorToString().c_str());
+    json->Put("showCloseIcon", layoutProperty->GetShowCloseIcon().value_or(false) ? "false" : "true");
+}
+
+RefPtr<UINode> SlidingPanelPattern::GetChildNodeByTag(const std::string& tagName) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto allChilds = host->GetChildren();
+    for (size_t index = 0; index < allChilds.size(); index++) {
+        auto tag = host->GetChildAtIndex(index)->GetTag();
+        if (tag == tagName) {
+            return host->GetChildAtIndex(index);
+        }
+    }
+    return nullptr;
+}
+
+void SlidingPanelPattern::AddOrRemoveDragBarNode(const RefPtr<SlidingPanelLayoutProperty>& layoutProperty) const
+{
+    CHECK_NULL_VOID(layoutProperty);
+    auto isHasDragBar = layoutProperty->GetHasDragBar().value_or(true);
+    auto columnNode = GetChildNodeByTag(V2::COLUMN_ETS_TAG);
+    CHECK_NULL_VOID(columnNode);
+    auto child = columnNode->GetChildren();
+    bool isFirstChildDragBar = false;
+    if (!child.empty()) {
+        auto firstNode = columnNode->GetChildren().front();
+        isFirstChildDragBar = firstNode->GetTag() == V2::DRAG_BAR_ETS_TAG;
+    }
+    if (isHasDragBar && !isFirstChildDragBar) {
+        auto dragBarNode = FrameNode::GetOrCreateFrameNode(V2::DRAG_BAR_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<DragBarPattern>(); });
+        auto paintProperty = dragBarNode->GetPaintProperty<DragBarPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        auto panelMode = layoutProperty->GetPanelModeValue(PanelMode::HALF);
+        auto type = layoutProperty->GetPanelTypeValue(PanelType::FOLDABLE_BAR);
+        // This parameter does not take effect when PanelMode is set to Half and PanelType is set to minibar
+        if (panelMode == PanelMode::HALF && type == PanelType::MINI_BAR) {
+            panelMode = PanelMode::MINI;
+        }
+        // This parameter does not take effect when PanelMode is set to Mini and PanelType is set to temporary
+        if (panelMode == PanelMode::MINI && type == PanelType::TEMP_DISPLAY) {
+            panelMode = PanelMode::HALF;
+        }
+        paintProperty->UpdatePanelMode(panelMode);
+        auto dragBarPattern = dragBarNode->GetPattern<DragBarPattern>();
+        CHECK_NULL_VOID(dragBarPattern);
+        dragBarPattern->SetIsFirstUpdate(true);
+        dragBarNode->MountToParent(columnNode, 0);
+        dragBarNode->MarkModifyDone();
+    } else if (!isHasDragBar && isFirstChildDragBar) {
+        columnNode->RemoveChildAtIndex(0);
+    }
+}
+
+void SlidingPanelPattern::AddOrRemoveCloseIconNode(const RefPtr<SlidingPanelLayoutProperty>& layoutProperty) const
+{
+    CHECK_NULL_VOID(layoutProperty);
+    auto isShowCloseIcon = layoutProperty->GetShowCloseIcon().value_or(false);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto closeIcon = GetChildNodeByTag(V2::PANEL_CLOSE_ICON_ETS_TAG);
+    if (isShowCloseIcon && !closeIcon) {
+        auto closeIcon = FrameNode::GetOrCreateFrameNode(V2::PANEL_CLOSE_ICON_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<CloseIconPattern>(); });
+        auto closeIconLayoutProperty = closeIcon->GetLayoutProperty<CloseIconLayoutProperty>();
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto closeIconTheme = pipeline->GetTheme<CloseIconTheme>();
+        closeIconLayoutProperty->UpdateCloseIconWidth(closeIconTheme->GetCloseIconWidth());
+        closeIconLayoutProperty->UpdateCloseIconHeight(closeIconTheme->GetCloseIconHeight());
+        closeIconLayoutProperty->UpdateCloseIconMarginTop(closeIconTheme->GetCloseIconMarginTop());
+        closeIconLayoutProperty->UpdateCloseIconMarginRight(closeIconTheme->GetCloseIconMarginRight());
+        closeIconLayoutProperty->UpdateCloseIconRadius(closeIconTheme->GetCloseIconRadius());
+        closeIcon->MountToParent(host, 1);
+        closeIcon->MarkModifyDone();
+    } else if (!isShowCloseIcon && closeIcon) {
+        host->RemoveChild(closeIcon);
+    }
 }
 } // namespace OHOS::Ace::NG

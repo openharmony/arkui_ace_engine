@@ -397,9 +397,9 @@ void RenderTextField::SetCallback(const RefPtr<TextFieldComponent>& textField)
     auto pipeline = GetContext().Upgrade();
     CHECK_NULL_VOID(pipeline);
     if (!HasSurfaceChangedCallback()) {
-        auto callbackId =
-            pipeline->RegisterSurfaceChangedCallback([weakTextField = AceType::WeakClaim(this)](int32_t newWidth,
-                                                         int32_t newHeight, int32_t prevWidth, int32_t prevHeight) {
+        auto callbackId = pipeline->RegisterSurfaceChangedCallback(
+            [weakTextField = AceType::WeakClaim(this)](int32_t newWidth, int32_t newHeight, int32_t prevWidth,
+                int32_t prevHeight, WindowSizeChangeReason type) {
                 auto textfield = weakTextField.Upgrade();
                 if (textfield) {
                     textfield->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);

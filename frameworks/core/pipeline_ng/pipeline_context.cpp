@@ -549,7 +549,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
         TryCallNextFrameLayoutCallback();
         return;
     }
-    ExecuteSurfaceChangedCallbacks(width, height);
+    ExecuteSurfaceChangedCallbacks(width, height, type);
     // TODO: add adjust for textFieldManager when ime is show.
     auto callback = [weakFrontend = weakFrontend_, width, height]() {
         auto frontend = weakFrontend.Upgrade();
@@ -595,11 +595,11 @@ void PipelineContext::OnDrawCompleted(const std::string& componentId)
     }
 }
 
-void PipelineContext::ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight)
+void PipelineContext::ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type)
 {
     for (auto&& [id, callback] : surfaceChangedCallbackMap_) {
         if (callback) {
-            callback(newWidth, newHeight, rootWidth_, rootHeight_);
+            callback(newWidth, newHeight, rootWidth_, rootHeight_, type);
         }
     }
 }

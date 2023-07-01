@@ -329,7 +329,11 @@ void SelectOverlayPattern::UpdateFirstSelectHandleInfo(const SelectHandleInfo& i
     UpdateHandleHotZone();
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (info.needLayout) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    } else {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void SelectOverlayPattern::UpdateSecondSelectHandleInfo(const SelectHandleInfo& info)
@@ -342,7 +346,11 @@ void SelectOverlayPattern::UpdateSecondSelectHandleInfo(const SelectHandleInfo& 
     UpdateHandleHotZone();
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (info.needLayout) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    } else {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void SelectOverlayPattern::UpdateFirstAndSecondHandleInfo(
@@ -394,6 +402,14 @@ void SelectOverlayPattern::ShowOrHiddenMenu(bool isHidden)
         info_->menuInfo.menuIsShow = true;
         host->UpdateToolBar(false);
     }
+}
+
+void SelectOverlayPattern::DisableMenu(bool isDisabled)
+{
+    info_->menuInfo.menuDisable = isDisabled;
+    auto host = DynamicCast<SelectOverlayNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    host->UpdateToolBar(false);
 }
 
 bool SelectOverlayPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)

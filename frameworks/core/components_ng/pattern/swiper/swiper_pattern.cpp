@@ -74,6 +74,7 @@ void SwiperPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->SetClipToBounds(true);
     host->GetRenderContext()->UpdateClipEdge(true);
+    InitSurfaceChangedCallback();
 }
 
 RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
@@ -210,6 +211,36 @@ void SwiperPattern::OnModifyDone()
         translateTask_.Cancel();
     }
     SetAccessibilityAction();
+    if ((layoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) {
+        mainSizeIsMeasured_ = false;
+        itemPosition_.clear();
+        jumpIndex_ = currentIndex_;
+    }
+}
+
+void SwiperPattern::InitSurfaceChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (!HasSurfaceChangedCallback()) {
+        auto callbackId = pipeline->RegisterSurfaceChangedCallback(
+            [weak = WeakClaim(this)](int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight,
+                WindowSizeChangeReason type) {
+                auto swiper = weak.Upgrade();
+                if (!swiper) {
+                    return;
+                }
+                if (type == WindowSizeChangeReason::ROTATION) {
+                    swiper->currentOffset_ = 0.0f;
+                    swiper->itemPosition_.clear();
+                    swiper->jumpIndex_ = swiper->currentIndex_;
+                }
+            });
+        LOGD("Add surface changed callback id %{public}d", callbackId);
+        UpdateSurfaceChangedCallbackId(callbackId);
+    }
 }
 
 void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
@@ -498,6 +529,9 @@ void SwiperPattern::FireAnimationStartEvent(
 
 void SwiperPattern::FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const
 {
+    if (currentIndex == -1) {
+        return;
+    }
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     swiperEventHub->FireAnimationEndEvent(currentIndex, info);
@@ -553,6 +587,7 @@ void SwiperPattern::SwipeTo(int32_t index)
 
 void SwiperPattern::ShowNext()
 {
+    LOGI("SwiperPattern::ShowNext");
     indicatorDoingAnimation_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -651,6 +686,7 @@ void SwiperPattern::ShowPrevious()
 
 void SwiperPattern::FinishAnimation()
 {
+    LOGI("SwiperPattern::FinishAnimation");
     isFinishAnimation_ = true;
     StopTranslateAnimation();
     if (swiperController_ && swiperController_->GetFinishCallback()) {
@@ -1350,8 +1386,8 @@ RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion(float velocity) const
         return curve;
     }
     // use spring motion feature.
-    // interpolatingSpring: (mass: 1, stiffness:228, damping: 30)
-    return AceType::MakeRefPtr<InterpolatingSpring>(velocity, 1, 228, 30);
+    // interpolatingSpring: (mass: 1, stiffness:328, damping: 34)
+    return AceType::MakeRefPtr<InterpolatingSpring>(velocity, 1, 328, 34);
 }
 
 void SwiperPattern::PlayIndicatorTranslateAnimation(float translate)
@@ -1452,8 +1488,8 @@ void SwiperPattern::PlayTranslateAnimation(
         return;
     }
     // use spring motion feature.
-    // interpolatingSpring: (mass: 1, stiffness:228, damping: 30)
-    static const auto springProperty = AceType::MakeRefPtr<SpringProperty>(1, 228, 30);
+    // interpolatingSpring: (mass: 1, stiffness:328, damping: 34)
+    static const auto springProperty = AceType::MakeRefPtr<SpringProperty>(1, 328, 34);
     auto scrollMotion = AceType::MakeRefPtr<SpringMotion>(startPos, endPos, velocity, springProperty);
     scrollMotion->AddListener([weak](double value) {
         auto swiper = weak.Upgrade();
@@ -2123,6 +2159,9 @@ void SwiperPattern::TriggerEventOnFinish(int32_t nextIndex)
     }
     if (currentIndex_ != nextIndex) {
         if (isFinishAnimation_) {
+            if (nextIndex == -1) {
+                return;
+            }
             jumpIndex_ = nextIndex;
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             auto pipeline = PipelineContext::GetCurrentContext();

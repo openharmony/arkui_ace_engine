@@ -62,7 +62,7 @@ public:
         }
 
         surfaceChangeCallbackId_ = pipelineContext->RegisterSurfaceChangedCallback(
-            [&](int32_t width, int32_t height, int32_t oldWidth, int32_t oldHeight) {
+            [&](int32_t width, int32_t height, int32_t oldWidth, int32_t oldHeight, WindowSizeChangeReason type) {
             OnSurfaceChanged();
         });
 

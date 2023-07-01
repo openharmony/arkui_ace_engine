@@ -29,9 +29,14 @@ public:
     int32_t AddTextSpan(const TextSpanOptions& options) override;
     int32_t GetCaretOffset() override;
     bool SetCaretOffset(int32_t caretPosition) override;
+    void UpdateSpanStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle) override;
+    void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle) override;
+    RichEditorSelection GetSpansInfo(int32_t start, int32_t end) override;
+    void DeleteSpans(const RangeOptions& options) override;
 
 private:
     WeakPtr<Pattern> pattern_;
+    struct UpdateSpanStyle updateSpanStyle_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RICH_EDITOR_RICH_EDITOR_CONTROLLER_H

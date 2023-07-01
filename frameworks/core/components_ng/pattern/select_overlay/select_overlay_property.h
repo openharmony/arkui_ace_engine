@@ -29,6 +29,7 @@ namespace OHOS::Ace::NG {
 
 struct SelectHandleInfo {
     bool isShow = true;
+    bool needLayout = false;
     // in Global coordinates.
     RectF paintRect;
 

@@ -102,6 +102,9 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         touchPoint.tiltY, pointerEvent->GetDeviceId(), pointerEvent->GetTargetDisplayId(), SourceType::NONE,
         touchPoint.sourceTool };
     event.pointerEvent = pointerEvent;
+#ifdef SECURITY_COMPONENT_ENABLE
+    event.enhanceData_ = pointerEvent->GetEnhanceData();
+#endif
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
     int32_t orgAction = pointerEvent->GetPointerAction();
@@ -166,13 +169,13 @@ void GetMouseEventAction(int32_t action, MouseEvent& events)
             break;
 #ifdef ENABLE_DRAG_FRAMEWORK
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_DOWN:
-            events.action = MouseAction::PRESS;
+            events.action = MouseAction::PULL_DOWN;
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE:
-            events.action = MouseAction::MOVE;
+            events.action = MouseAction::PULL_MOVE;
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP:
-            events.action = MouseAction::RELEASE;
+            events.action = MouseAction::PULL_UP;
             break;
 #endif // ENABLE_DRAG_FRAMEWORK
         default:

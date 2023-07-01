@@ -349,6 +349,20 @@ void TextFieldModelNG::SetOnChange(std::function<void(const std::string&)>&& fun
     eventHub->SetOnChange(std::move(func));
 }
 
+void TextFieldModelNG::SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelectionChange(std::move(func));
+}
+
+void TextFieldModelNG::SetOnScroll(std::function<void(float, float)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollChangeEvent(std::move(func));
+}
+
 void TextFieldModelNG::SetOnCopy(std::function<void(const std::string&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
@@ -449,6 +463,16 @@ void TextFieldModelNG::SetShowCounter(bool value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value);
 }
 
+void TextFieldModelNG::SetBarState(OHOS::Ace::DisplayMode value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, DisplayMode, value);
+}
+
+void TextFieldModelNG::SetMaxViewLines(uint32_t value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxViewLines, value);
+}
+
 void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
 {
     Color backgroundColor;
@@ -528,5 +552,10 @@ void TextFieldModelNG::SetOnChangeEvent(std::function<void(const std::string&)>&
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChangeEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetSelectionMenuHidden(bool selectionMenuHidden)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectionMenuHidden, selectionMenuHidden);
 }
 } // namespace OHOS::Ace::NG

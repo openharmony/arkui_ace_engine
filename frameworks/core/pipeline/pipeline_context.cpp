@@ -2177,7 +2177,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
 
     for (auto&& [id, callback] : surfaceChangedCallbackMap_) {
         if (callback) {
-            callback(width, height, width_, height_);
+            callback(width, height, width_, height_, type);
         }
     }
 
