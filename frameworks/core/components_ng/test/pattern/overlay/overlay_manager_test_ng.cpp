@@ -19,7 +19,9 @@
 #include "gtest/gtest.h"
 
 #include "base/geometry/ng/rect_t.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
+#include "core/components/common/properties/color.h"
 
 #define private public
 #define protected public
@@ -186,10 +188,11 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover001, TestSize.Level1)
      * @tc.steps: step3. create modal node and get modal node, get pattern.
      * @tc.expected: related function is called.
      */
-    int32_t modalTransition = 1;
+    ModalStyle modalStyle;
+    modalStyle.modalTransition = ModalTransition::NONE;
     bool isShow = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalTransition, targetId);
+    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topModalNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_NE(topModalNode, nullptr);
@@ -213,10 +216,15 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover002, TestSize.Level1)
     auto targetId = targetNode->GetId();
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto geometryNode = stageNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(1.0, 1.0));
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     stageNode->MountToParent(rootNode);
     targetNode->MountToParent(stageNode);
     rootNode->MarkDirtyNode();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->stageManager_->stageNode_ = stageNode;
 
     /**
      * @tc.steps: step2. create target node.
@@ -235,30 +243,42 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover002, TestSize.Level1)
      * @tc.steps: step3. create modal node and get modal node, get pattern.
      * @tc.expected: related function is called.
      */
-    int32_t modalTransition = 1;
+    ModalStyle modalStyle;
     bool isShow = true;
+    auto onAppear = []() {};
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalTransition, targetId);
+    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, onAppear, nullptr, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topModalNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_NE(topModalNode, nullptr);
     auto topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
     EXPECT_NE(topModalPattern, nullptr);
     auto type = topModalPattern->GetType();
-    EXPECT_EQ(type, ModalTransition::NONE);
+    EXPECT_EQ(type, ModalTransition::DEFAULT);
 
     /**
      * @tc.steps: step4. Change the ModalTransition.
      * @tc.expected: the ModalTransition is updated successfully
      */
-    modalTransition = 0;
-    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalTransition, targetId);
+    modalStyle.modalTransition = ModalTransition::NONE;
+    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, targetId);
     topModalNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_NE(topModalNode, nullptr);
     topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
     EXPECT_NE(topModalPattern, nullptr);
     type = topModalPattern->GetType();
-    EXPECT_EQ(type, ModalTransition::DEFAULT);
+    EXPECT_EQ(type, ModalTransition::NONE);
+
+    /**
+     * @tc.steps: step5. Change the backgroundColor.
+     * @tc.expected: the backgroundColor is updated successfully
+     */
+    modalStyle.backgroundColor = Color::GREEN;
+    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, targetId);
+    topModalNode = overlayManager->modalStack_.top().Upgrade();
+    EXPECT_NE(topModalNode, nullptr);
+    EXPECT_EQ(topModalNode->GetRenderContext()->GetBackgroundColorValue(), Color::GREEN);
+    overlayManager->BindContentCover(!isShow, nullptr, nullptr, modalStyle, nullptr, nullptr, targetId);
 }
 
 /**
@@ -296,17 +316,19 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover003, TestSize.Level1)
     /**
      * @tc.steps: step3. create modal node.
      */
-    int32_t modalTransition = 1;
+    ModalStyle modalStyle;
+    modalStyle.modalTransition = ModalTransition::NONE;
     bool isShow = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalTransition, targetId);
+    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
 
     /**
      * @tc.steps: step4. destroy modal page.
      * @tc.expected: destroy successfully
      */
-    overlayManager->BindContentCover(!isShow, nullptr, nullptr, modalTransition, targetId);
+    auto onDisappear = []() {};
+    overlayManager->BindContentCover(!isShow, nullptr, nullptr, modalStyle, nullptr, onDisappear, targetId);
     EXPECT_TRUE(overlayManager->modalStack_.empty());
 }
 
@@ -354,7 +376,7 @@ HWTEST_F(OverlayManagerTestNg, BindSheet001, TestSize.Level1)
     auto dragBarTheme = AceType::MakeRefPtr<DragBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dragBarTheme));
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, targetId);
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_FALSE(topSheetNode == nullptr);
@@ -409,12 +431,13 @@ HWTEST_F(OverlayManagerTestNg, BindSheet002, TestSize.Level1)
     SheetStyle sheetStyle;
     CreateSheetStyle(sheetStyle);
     bool isShow = true;
+    auto onAppear = []() {};
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     auto dragBarTheme = AceType::MakeRefPtr<DragBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dragBarTheme));
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, targetId);
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, onAppear, nullptr, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_FALSE(topSheetNode == nullptr);
@@ -429,7 +452,7 @@ HWTEST_F(OverlayManagerTestNg, BindSheet002, TestSize.Level1)
      */
     sheetStyle.sheetMode = SheetMode::LARGE;
     sheetStyle.showDragBar = false;
-    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, targetId);
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
     auto sheetNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_FALSE(topSheetNode == nullptr);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
@@ -438,6 +461,17 @@ HWTEST_F(OverlayManagerTestNg, BindSheet002, TestSize.Level1)
     style = sheetNodeLayoutProperty->GetSheetStyle();
     EXPECT_EQ(style->sheetMode.value(), SheetMode::LARGE);
     EXPECT_EQ(style->showDragBar.value(), false);
+
+    /**
+     * @tc.steps: step4. Change the backgroundColor.
+     * @tc.expected: the backgroundColor is updated successfully
+     */
+    sheetStyle.backgroundColor = Color::GREEN;
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
+    sheetNode = overlayManager->modalStack_.top().Upgrade();
+    EXPECT_FALSE(topSheetNode == nullptr);
+    EXPECT_EQ(sheetNode->GetRenderContext()->GetBackgroundColorValue(), Color::GREEN);
+    overlayManager->BindSheet(!isShow, nullptr, nullptr, sheetStyle, nullptr, nullptr, targetId);
 }
 
 /**
@@ -484,7 +518,7 @@ HWTEST_F(OverlayManagerTestNg, BindSheet003, TestSize.Level1)
     auto dragBarTheme = AceType::MakeRefPtr<DragBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dragBarTheme));
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, targetId);
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto sheetNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_EQ(sheetNode->GetTag(), "SheetPage");
@@ -493,7 +527,8 @@ HWTEST_F(OverlayManagerTestNg, BindSheet003, TestSize.Level1)
      * @tc.steps: step4. destroy modal page.
      * @tc.expected: destroy modal successfully.
      */
-    overlayManager->BindSheet(!isShow, nullptr, nullptr, sheetStyle, targetId);
+    auto onDisappear = []() {};
+    overlayManager->BindSheet(!isShow, nullptr, nullptr, sheetStyle, nullptr, onDisappear, targetId);
     EXPECT_TRUE(overlayManager->modalStack_.empty());
 }
 /**
@@ -840,10 +875,11 @@ HWTEST_F(OverlayManagerTestNg, RemoveOverlayTest002, TestSize.Level1)
      * @tc.steps: step3. create modal node and call removeOverlay when modalStack is not empty.
      * @tc.expected: remove successfully.
      */
-    int32_t modalTransition = 0;
+    ModalStyle modalStyle;
+    modalStyle.modalTransition = ModalTransition::NONE;
     bool isShow = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalTransition, targetId);
+    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     EXPECT_TRUE(overlayManager->RemoveOverlay(false));
 
@@ -851,8 +887,8 @@ HWTEST_F(OverlayManagerTestNg, RemoveOverlayTest002, TestSize.Level1)
      * @tc.steps: step4. Change the ModalTransition and Call RemoveModalInOverlay.
      * @tc.expected: remove successfully.
      */
-    modalTransition = 2;
-    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalTransition, targetId);
+    modalStyle.modalTransition = ModalTransition::ALPHA;
+    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, targetId);
     EXPECT_TRUE(overlayManager->RemoveModalInOverlay());
 }
 /**
