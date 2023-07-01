@@ -46,7 +46,7 @@ void ClipboardImpl::HasData(const std::function<void(bool hasData)>& callback)
         return;
     }
     taskExecutor_->PostTask([callbackGetClipboardData = callbackGetClipboardData_,
-                                callback] { callback(callbackGetClipboardData().empty()); },
+                                callback] { callback(!callbackGetClipboardData().empty()); },
         TaskExecutor::TaskType::UI);
 }
 
