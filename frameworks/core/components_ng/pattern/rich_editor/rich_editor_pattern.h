@@ -123,6 +123,10 @@ public:
     int32_t TextSpanSplit(int32_t position);
     SpanPositionInfo GetSpanPositionInfo(int32_t position);
     std::function<ImageSourceInfo()> CreateImageSourceInfo(const ImageSpanOptions& options);
+    void DeleteSpans(const RangeOptions& options);
+    void DeleteSpanByRange(int32_t start, int32_t end, SpanPositionInfo info);
+    void DeleteSpansByRange(int32_t start, int32_t end, SpanPositionInfo startInfo, SpanPositionInfo endInfo);
+    void ClearContent(const RefPtr<UINode>& child);
     bool SetCaretOffset(int32_t caretPosition);
     void UpdateSpanStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);

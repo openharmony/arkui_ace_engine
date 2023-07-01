@@ -92,4 +92,12 @@ RichEditorSelection RichEditorController::GetSpansInfo(int32_t start, int32_t en
     }
     return value;
 }
+
+void RichEditorController ::DeleteSpans(const RangeOptions& options)
+{
+    auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+    if (richEditorPattern) {
+        richEditorPattern->DeleteSpans(options);
+    }
+}
 } // namespace OHOS::Ace::NG

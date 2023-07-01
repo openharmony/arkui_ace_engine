@@ -59,6 +59,7 @@ public:
     }
     void AddImageSpan(const JSCallbackInfo& args);
     void AddTextSpan(const JSCallbackInfo& args);
+    void DeleteSpans(const JSCallbackInfo& args);
     ImageSpanAttribute ParseJsImageSpanAttribute(JSRef<JSObject> imageAttribute);
     TextStyle ParseJsTextStyle(JSRef<JSObject> styleObject);
     void SetCaretOffset(const JSCallbackInfo& args);

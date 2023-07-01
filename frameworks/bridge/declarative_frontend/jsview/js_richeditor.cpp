@@ -418,6 +418,28 @@ void JSRichEditorController::GetSpansInfo(const JSCallbackInfo& args)
     }
 }
 
+void JSRichEditorController::DeleteSpans(const JSCallbackInfo& args)
+{
+    auto controller = controllerWeak_.Upgrade();
+    CHECK_NULL_VOID(controller);
+    if (!args[0]->IsObject() || !controller) {
+        return;
+    }
+    JSRef<JSObject> spanObject = JSRef<JSObject>::Cast(args[0]);
+    RangeOptions options;
+    JSRef<JSVal> startVal = spanObject->GetProperty("start");
+    int32_t start = 0;
+    if (!startVal->IsNull() && JSContainerBase::ParseJsInt32(startVal, start)) {
+        options.start = start;
+    }
+    JSRef<JSVal> endVal = spanObject->GetProperty("end");
+    int32_t end = 0;
+    if (!startVal->IsNull() && JSContainerBase::ParseJsInt32(endVal, end)) {
+        options.end = end;
+    }
+    controller->DeleteSpans(options);
+}
+
 void JSRichEditorController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRichEditorController>::Declare("RichEditorController");
@@ -427,6 +449,7 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorController>::CustomMethod("getCaretOffset", &JSRichEditorController::GetCaretOffset);
     JSClass<JSRichEditorController>::CustomMethod("updateSpanStyle", &JSRichEditorController::UpdateSpanStyle);
     JSClass<JSRichEditorController>::CustomMethod("getSpans", &JSRichEditorController::GetSpansInfo);
+    JSClass<JSRichEditorController>::CustomMethod("deleteSpans", &JSRichEditorController::DeleteSpans);
     JSClass<JSRichEditorController>::Bind(
         globalObj, JSRichEditorController::Constructor, JSRichEditorController::Destructor);
 }
