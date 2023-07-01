@@ -130,6 +130,7 @@ ohos_unittest("container_modal_test_ng") {
     # mock
     "$ace_root/frameworks/base/test/mock/mock_drag_window.cpp",
     "$ace_root/frameworks/base/test/mock/mock_pixel_map.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_socperf_client_impl.cpp",
     "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",

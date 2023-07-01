@@ -169,6 +169,7 @@ ohos_unittest("view_abstract_test_ng") {
     "$ace_root/frameworks/base/subwindow/subwindow_manager.cpp",
     "$ace_root/frameworks/base/test/mock/mock_drag_window.cpp",
     "$ace_root/frameworks/base/test/mock/mock_ressched_report.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_socperf_client_impl.cpp",
     "$ace_root/frameworks/base/utils/base_id.cpp",
     "$ace_root/frameworks/core/animation/animator.cpp",
     "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
