@@ -31,6 +31,7 @@ CanvasDrawFunction SelectOverlayPaintMethod::GetContentDrawFunction(PaintWrapper
     info_.secondHandle.paintRect -= offset;
 
     auto rect = paintWrapper->GetGeometryNode()->GetFrameRect();
+    rect -= offset;
     return [this, frameRect = rect](RSCanvas& canvas) { DrawHandles(canvas, frameRect); };
 }
 
