@@ -112,4 +112,10 @@ void SelectOverlayProxy::ShowOrHiddenMenu(bool isHidden)
     pattern->ShowOrHiddenMenu(isHidden);
 }
 
+void SelectOverlayProxy::DisableMenu(bool isDisabled)
+{
+    auto pattern = GetSelectOverlayPattern(selectOverlayId_);
+    CHECK_NULL_VOID(pattern);
+    pattern->DisableMenu(isDisabled);
+}
 } // namespace OHOS::Ace::NG

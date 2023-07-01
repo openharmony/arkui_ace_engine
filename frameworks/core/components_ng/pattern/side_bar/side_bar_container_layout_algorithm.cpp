@@ -43,6 +43,7 @@ static Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
 static Dimension DEFAULT_MIN_CONTENT_WIDTH = 0.0_vp;
 static Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
 static Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
+static Dimension WINDOE_WIDTH = 520.0_vp;
 } // namespace
 
 void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -75,6 +76,16 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     if (type_ == SideBarContainerType::AUTO) {
         AutoMode(layoutWrapper, parentWidth, minSideBarWidthPx, dividerStrokeWidthPx);
+    }
+
+    if ((parentWidth <  WINDOE_WIDTH.ConvertToPx()) &&
+        (!layoutProperty->GetShowSideBar().has_value()) &&
+        (type_ != SideBarContainerType::OVERLAY)) {
+        if (isControlButtonClick_) {
+            type_ = SideBarContainerType::OVERLAY;
+        } else {
+            sideBarStatus_ = SideBarStatus::HIDDEN;
+        }
     }
 
     /*
@@ -167,22 +178,17 @@ void SideBarContainerLayoutAlgorithm::AdjustMinAndMaxSideBarWidth(LayoutWrapper*
     CHECK_NULL_VOID(sideBarLayoutProperty);
 
     auto&& calcConstraint = sideBarLayoutProperty->GetCalcLayoutConstraint();
-    CHECK_NULL_VOID(calcConstraint);
-
     if (layoutProperty->GetMinSideBarWidth().has_value()) {
         adjustMinSideBarWidth_ = layoutProperty->GetMinSideBarWidthValue();
-    } else {
-        if (calcConstraint->minSize.has_value() && calcConstraint->minSize.value().Width().has_value()) {
-            adjustMinSideBarWidth_ = calcConstraint->minSize->Width()->GetDimension();
-        }
+    } else if (calcConstraint && calcConstraint->minSize.has_value() &&
+               calcConstraint->minSize.value().Width().has_value()) {
+        adjustMinSideBarWidth_ = calcConstraint->minSize->Width()->GetDimension();
     }
 
     if (layoutProperty->GetMaxSideBarWidth().has_value()) {
         adjustMaxSideBarWidth_ = layoutProperty->GetMaxSideBarWidthValue();
-    } else {
-        if (calcConstraint->maxSize.has_value() && calcConstraint->maxSize->Width().has_value()) {
-            adjustMaxSideBarWidth_ = calcConstraint->maxSize->Width()->GetDimension();
-        }
+    } else if (calcConstraint && calcConstraint->maxSize.has_value() && calcConstraint->maxSize->Width().has_value()) {
+        adjustMaxSideBarWidth_ = calcConstraint->maxSize->Width()->GetDimension();
     }
 
     if (adjustMinSideBarWidth_ > adjustMaxSideBarWidth_) {
@@ -268,14 +274,18 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBar(
         auto sideBarLayoutProperty = sideBarLayoutWrapper->GetLayoutProperty();
         CHECK_NULL_VOID(sideBarLayoutProperty);
         auto&& calcConstraint = sideBarLayoutProperty->GetCalcLayoutConstraint();
-        if (layoutProperty->GetMaxSideBarWidth().has_value()) {
-            auto maxWidth = layoutProperty->GetMaxSideBarWidthValue().ConvertToPx();
-            calcConstraint->UpdateMaxSizeWithCheck(CalcSize(CalcLength(maxWidth), std::nullopt));
-        }
+        if (calcConstraint) {
+            if (layoutProperty->GetMaxSideBarWidth().has_value() && calcConstraint->maxSize.has_value()) {
+                auto maxWidth = adjustMaxSideBarWidth_.ConvertToPx();
+                auto maxHeight = calcConstraint->maxSize->Height();
+                calcConstraint->UpdateMaxSizeWithCheck(CalcSize(CalcLength(maxWidth), maxHeight));
+            }
 
-        if (layoutProperty->GetMinSideBarWidth().has_value()) {
-            auto minWidth = layoutProperty->GetMinSideBarWidthValue().ConvertToPx();
-            calcConstraint->UpdateMinSizeWithCheck(CalcSize(CalcLength(minWidth), std::nullopt));
+            if (layoutProperty->GetMinSideBarWidth().has_value() && calcConstraint->minSize.has_value()) {
+                auto minWidth = adjustMinSideBarWidth_.ConvertToPx();
+                auto minHeight = calcConstraint->minSize->Height();
+                calcConstraint->UpdateMinSizeWithCheck(CalcSize(CalcLength(minWidth), minHeight));
+            }
         }
     }
 

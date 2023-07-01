@@ -72,6 +72,7 @@ constexpr Dimension UNDERLINE_WIDTH = 1.0_px;
 constexpr Dimension ERROR_UNDERLINE_WIDTH = 2.0_px;
 constexpr Dimension ACTIVED_UNDERLINE_WIDTH = 2.0_px;
 constexpr Dimension TYPING_UNDERLINE_WIDTH = 2.0_px;
+constexpr uint32_t INLINE_DEFAULT_VIEW_MAXLINE = 3;
 
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
 
@@ -120,6 +121,19 @@ struct PasswordModeStyle {
     BorderColorProperty borderColor;
     BorderRadiusProperty radius;
     PaddingProperty padding;
+};
+
+struct PreInlineState {
+    Color textColor;
+    Color bgColor;
+    BorderRadiusProperty radius;
+    BorderWidthProperty borderWidth;
+    BorderColorProperty borderColor;
+    PaddingProperty padding;
+    MarginProperty margin;
+    RectF frameRect;
+    bool setHeight = false;
+    bool saveInlineState = false;
 };
 
 class TextFieldPattern : public ScrollablePattern,
@@ -720,6 +734,7 @@ public:
     std::string GetCopyOptionString() const;
     std::string GetInputStyleString() const;
     std::string GetErrorTextString() const;
+    std::string GetBarStateString() const;
     bool GetErrorTextState() const;
     std::string GetShowPasswordIconString() const;
     void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd);
@@ -736,7 +751,7 @@ public:
 
     void HandleOnUndoAction();
     void HandleOnRedoAction();
-    void HandleOnSelectAll();
+    void HandleOnSelectAll(bool inlineStyle = false);
     void HandleOnCopy();
     void HandleOnPaste();
     void HandleOnCut();
@@ -816,6 +831,8 @@ public:
         ++drawOverlayFlag_;
     }
 
+    void StopEditing();
+    
     void MarkContentChange()
     {
         contChange_ = true;
@@ -837,6 +854,26 @@ public:
         caretUpdateType_ = CaretUpdateType::EVENT;
     }
 
+    void SetTextInputFlag(bool enable)
+    {
+        isTextInput_ = enable;
+    }
+
+    bool GetTextInputFlag() const
+    {
+        return isTextInput_;
+    }
+
+    void SetSingleLineHeight(float height)
+    {
+        inlineSingleLineHeight_ = height;
+    }
+
+    float GetSingleLineHeight() const
+    {
+        return inlineSingleLineHeight_;
+    }
+
 private:
     bool HasFocus() const;
     void HandleTouchEvent(const TouchEventInfo& info);
@@ -856,6 +893,7 @@ private:
     int32_t UpdateCaretPositionOnHandleMove(const OffsetF& localOffset);
     bool HasStateStyle(UIState state) const;
 
+    void OnTextInputScroll(float offset);
     void OnTextAreaScroll(float offset);
     bool OnScrollCallback(float offset, int32_t source) override;
     void OnScrollEndCallback() override;
@@ -945,6 +983,9 @@ private:
     void SetAccessibilityScrollAction();
 
     void UpdateCopyAllStatus();
+    void SaveInlineStates();
+    void ApplyInlineStates();
+    void RestorePreInlineStates();
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1020,12 +1061,14 @@ private:
     SelectionMode selectionMode_ = SelectionMode::NONE;
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
     bool setSelectionFlag_ = false;
-    bool setSelectAllFlag_ = true;
     bool scrollable_ = true;
     int32_t selectionStart_ = 0;
     int32_t selectionEnd_ = 0;
     // controls redraw of overlay modifier, update when need to redraw
     int32_t drawOverlayFlag_ = 0;
+    bool isTextInput_ = false;
+    bool inlineSelectAllFlag_ = false;
+    float inlineSingleLineHeight_ = 0.0f;
 
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
@@ -1063,6 +1106,7 @@ private:
     std::vector<MenuOptionsParam> menuOptionItems_;
     BorderRadiusProperty borderRadius_;
     PasswordModeStyle passwordModeStyle_;
+    PreInlineState inlineState_;
 
     SelectMenuInfo selectMenuInfo_;
 

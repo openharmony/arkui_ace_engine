@@ -42,6 +42,17 @@ void TextFieldController::SetTextSelection(int32_t selectionStart, int32_t selec
     textFieldPattern->SetSelectionFlag(selectionStart, selectionEnd);
 }
 
+void TextFieldController::StopEditing()
+{
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    if (textFieldPattern) {
+        textFieldPattern->StopEditing();
+    }
+    if (stopEditing_) {
+        stopEditing_();
+    }
+}
+
 void TextFieldController::Insert(const std::string& args) {}
 
 } // namespace OHOS::Ace::NG

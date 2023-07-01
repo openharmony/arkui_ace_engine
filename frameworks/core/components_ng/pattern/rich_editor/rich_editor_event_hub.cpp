@@ -12,10 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 
-#include "core/components_ng/base/frame_node.h"
 namespace OHOS::Ace::NG {
 void RichEditorEventHub::SetOnReady(std::function<void()>&& func)
 {

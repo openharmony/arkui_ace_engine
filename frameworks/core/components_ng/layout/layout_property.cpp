@@ -217,30 +217,40 @@ void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
 void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint)
 {
     layoutConstraint_ = parentConstraint;
-    if (margin_) {
+    bool hasWidth = calcLayoutConstraint_ && calcLayoutConstraint_->selfIdealSize.has_value() &&
+                    calcLayoutConstraint_->selfIdealSize.value().Width().has_value();
+    bool hasHeight = calcLayoutConstraint_ && calcLayoutConstraint_->selfIdealSize.has_value() &&
+                     calcLayoutConstraint_->selfIdealSize.value().Height().has_value();
+    if (margin_ && (!hasWidth || !hasHeight)) {
         // TODO: add margin is negative case.
         auto margin = CreateMargin();
-        MinusPaddingToSize(margin, layoutConstraint_->maxSize);
-        MinusPaddingToSize(margin, layoutConstraint_->minSize);
-        MinusPaddingToSize(margin, layoutConstraint_->percentReference);
-        MinusPaddingToSize(margin, layoutConstraint_->selfIdealSize);
-        MinusPaddingToSize(margin, layoutConstraint_->parentIdealSize);
+        Axis reserveAxis =
+            PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() <= 9
+                ? Axis::NONE
+                : (!hasWidth && !hasHeight ? Axis::NONE
+                      : !hasWidth          ? Axis::VERTICAL
+                                           : Axis::HORIZONTAL);
+        MinusPaddingToSize(margin, layoutConstraint_->maxSize, reserveAxis);
+        MinusPaddingToSize(margin, layoutConstraint_->minSize, reserveAxis);
+        MinusPaddingToSize(margin, layoutConstraint_->percentReference, reserveAxis);
+        MinusPaddingToSize(margin, layoutConstraint_->selfIdealSize, reserveAxis);
+        MinusPaddingToSize(margin, layoutConstraint_->parentIdealSize, reserveAxis);
     }
     if (calcLayoutConstraint_) {
         if (calcLayoutConstraint_->maxSize.has_value()) {
             layoutConstraint_->UpdateMaxSizeWithCheck(ConvertToSize(calcLayoutConstraint_->maxSize.value(),
-                parentConstraint.scaleProperty, parentConstraint.percentReference));
+                layoutConstraint_->scaleProperty, layoutConstraint_->percentReference));
         }
         if (calcLayoutConstraint_->minSize.has_value()) {
             layoutConstraint_->UpdateMinSizeWithCheck(ConvertToSize(calcLayoutConstraint_->minSize.value(),
-                parentConstraint.scaleProperty, parentConstraint.percentReference));
+                layoutConstraint_->scaleProperty, layoutConstraint_->percentReference));
         }
         if (calcLayoutConstraint_->selfIdealSize.has_value()) {
             LOGD("CalcLayoutConstraint->selfIdealSize = %{public}s",
                 calcLayoutConstraint_->selfIdealSize.value().ToString().c_str());
             layoutConstraint_->UpdateIllegalSelfIdealSizeWithCheck(
-                ConvertToOptionalSize(calcLayoutConstraint_->selfIdealSize.value(), parentConstraint.scaleProperty,
-                    parentConstraint.percentReference));
+                ConvertToOptionalSize(calcLayoutConstraint_->selfIdealSize.value(), layoutConstraint_->scaleProperty,
+                    layoutConstraint_->percentReference));
         }
     }
 

@@ -27,6 +27,7 @@
 #include "test/mock/core/common/mock_container.h"
 
 #include "base/geometry/ng/offset_t.h"
+#include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components/select/select_theme.h"
@@ -36,6 +37,7 @@
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_event_hub.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
@@ -695,6 +697,20 @@ HWTEST_F(OverlayManagerTestNg, PopupTest004, TestSize.Level1)
     EXPECT_TRUE(overlayManager->customPopupMap_.empty());
     overlayManager->RemoveIndexerPopup();
     EXPECT_TRUE(overlayManager->customPopupMap_.empty());
+
+    /**
+     * @tc.steps: step5. call ShowIndexerPopup and RemoveIndexerPopupById.
+     * @tc.expected: mount and remove successfully,Repeatedly calling the function exits normally
+     */
+    EXPECT_TRUE(overlayManager->customPopupMap_.empty());
+    overlayManager->ShowIndexerPopup(targetId, popupNode);
+    EXPECT_FALSE(overlayManager->customPopupMap_.empty());
+    overlayManager->ShowIndexerPopup(targetId, popupNode);
+    EXPECT_EQ(overlayManager->customPopupMap_[targetId], popupNode);
+    overlayManager->RemoveIndexerPopupById(targetId);
+    EXPECT_TRUE(overlayManager->customPopupMap_.empty());
+    overlayManager->RemoveIndexerPopupById(targetId);
+    EXPECT_TRUE(overlayManager->customPopupMap_.empty());
 }
 /**
  * @tc.name: MenuTest002
@@ -958,5 +974,50 @@ HWTEST_F(OverlayManagerTestNg, DialogTest001, TestSize.Level1)
      */
     overlayManager->CloseDialog(dialogNode);
     EXPECT_TRUE(overlayManager->dialogMap_.empty());
+}
+/**
+ * @tc.name: DialogTest002
+ * @tc.desc: Test OverlayManager::ShowDialog->RemoveOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, DialogTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and prepare dialogProperties.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dialogTheme));
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    DialogProperties dialogParam;
+    dialogParam.isShowInSubWindow = true;
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowDialog.
+     * @tc.expected: dialogNode is created successfully
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto dialogNode = overlayManager->ShowDialog(dialogParam, nullptr, true);
+    EXPECT_NE(dialogNode, nullptr);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+
+    /**
+     * @tc.steps: step3. create focusHub and call DialogInMapHoldingFocus when dialogMap_ is not empty.
+     * @tc.expected: return true
+     */
+    auto eventHub = dialogNode->GetEventHub<DialogEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto focusHub = eventHub->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+    dialogNode->eventHub_ = eventHub;
+    EXPECT_TRUE(overlayManager->DialogInMapHoldingFocus());
+    /**
+     * @tc.steps: step3. call RemoveOverlayInSubwindow.
+     * @tc.expected: remove successfully.
+     */
+    EXPECT_TRUE(overlayManager->RemoveOverlayInSubwindow());
+    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
 }
 } // namespace OHOS::Ace::NG

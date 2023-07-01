@@ -142,6 +142,8 @@ public:
         return itemPosition_.empty() ? 0 : itemPosition_.rbegin()->first;
     }
 
+    int32_t GetMidIndex();
+
     int32_t GetMaxListItemIndex() const
     {
         return totalItemCount_ - 1;

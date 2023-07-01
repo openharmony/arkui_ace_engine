@@ -110,15 +110,31 @@ public:
     }
 
     void MinusPadding(const std::optional<T>& left, const std::optional<T>& right, const std::optional<T>& top,
-        const std::optional<T>& bottom)
+        const std::optional<T>& bottom, Axis reserveAxis = Axis::NONE)
     {
         T tempWidth = width_ - left.value_or(0) - right.value_or(0);
-        if (NonNegative(tempWidth)) {
-            width_ = tempWidth;
-        }
         T tempHeight = height_ - top.value_or(0) - bottom.value_or(0);
-        if (NonNegative(tempHeight)) {
-            height_ = tempHeight;
+        switch (reserveAxis) {
+            case Axis::NONE:
+                if (NonNegative(tempWidth)) {
+                    width_ = tempWidth;
+                }
+                if (NonNegative(tempHeight)) {
+                    height_ = tempHeight;
+                }
+                break;
+            case Axis::HORIZONTAL:
+                if (NonNegative(tempHeight)) {
+                    height_ = tempHeight;
+                }
+                break;
+            case Axis::VERTICAL:
+                if (NonNegative(tempWidth)) {
+                    width_ = tempWidth;
+                }
+                break;
+            default:
+                break;
         }
     }
 
@@ -435,15 +451,33 @@ public:
     }
 
     void MinusPadding(const std::optional<T>& left, const std::optional<T>& right, const std::optional<T>& top,
-        const std::optional<T>& bottom)
+        const std::optional<T>& bottom, Axis reserveAxis = Axis::NONE)
     {
-        if (width_) {
-            T tempWidth = width_.value() - left.value_or(0) - right.value_or(0);
-            width_ = NonNegative(tempWidth) ? tempWidth : 0;
-        }
-        if (height_) {
-            T tempHeight = height_.value() - top.value_or(0) - bottom.value_or(0);
-            height_ = NonNegative(tempHeight) ? tempHeight : 0;
+        switch (reserveAxis) {
+            case Axis::NONE:
+                if (width_) {
+                    T tempWidth = width_.value() - left.value_or(0) - right.value_or(0);
+                    width_ = NonNegative(tempWidth) ? tempWidth : 0;
+                }
+                if (height_) {
+                    T tempHeight = height_.value() - top.value_or(0) - bottom.value_or(0);
+                    height_ = NonNegative(tempHeight) ? tempHeight : 0;
+                }
+                break;
+            case Axis::HORIZONTAL:
+                if (height_) {
+                    T tempHeight = height_.value() - top.value_or(0) - bottom.value_or(0);
+                    height_ = NonNegative(tempHeight) ? tempHeight : 0;
+                }
+                break;
+            case Axis::VERTICAL:
+                if (width_) {
+                    T tempWidth = width_.value() - left.value_or(0) - right.value_or(0);
+                    width_ = NonNegative(tempWidth) ? tempWidth : 0;
+                }
+                break;
+            default:
+                break;
         }
     }
 

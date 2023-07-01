@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_controller.h"
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
-
 namespace OHOS::Ace::NG {
 void RichEditorController::SetPattern(const WeakPtr<Pattern>& pattern)
 {
@@ -28,8 +27,7 @@ int32_t RichEditorController::AddImageSpan(const ImageSpanOptions& options)
     auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
     int32_t spanIndex = 0;
     if (richEditorPattern) {
-        richEditorPattern->AddImageSpan(options);
-        spanIndex = richEditorPattern->GetSpanIndex();
+        spanIndex = richEditorPattern->AddImageSpan(options);
     }
     return spanIndex;
 }
@@ -39,9 +37,67 @@ int32_t RichEditorController::AddTextSpan(const TextSpanOptions& options)
     auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
     int32_t spanIndex = 0;
     if (richEditorPattern) {
-        richEditorPattern->AddTextSpan(options);
-        spanIndex = richEditorPattern->GetSpanIndex();
+        spanIndex = richEditorPattern->AddTextSpan(options);
     }
     return spanIndex;
+}
+
+int32_t RichEditorController::GetCaretOffset()
+{
+    int32_t position = -1;
+    auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+    position = richEditorPattern->GetCaretPosition();
+    return position;
+}
+
+bool RichEditorController::SetCaretOffset(int32_t caretPosition)
+{
+    auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+    if (richEditorPattern) {
+        return richEditorPattern->SetCaretOffset(caretPosition);
+    }
+    return false;
+}
+
+void RichEditorController::UpdateSpanStyle(
+    int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle)
+{
+    auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(richEditorPattern);
+    auto length = richEditorPattern->GetTextContentLength();
+    if (start > end) {
+        std::swap(start, end);
+    }
+    start = std::max(0, start);
+    end = std::min(end, length);
+    if (start > length || end < 0 || start == end) {
+        LOGI("params error , return");
+        return;
+    }
+    richEditorPattern->SetUpdateSpanStyle(updateSpanStyle_);
+    richEditorPattern->UpdateSpanStyle(start, end, textStyle, imageStyle);
+}
+
+void RichEditorController::SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle)
+{
+    updateSpanStyle_ = updateSpanStyle;
+}
+
+RichEditorSelection RichEditorController::GetSpansInfo(int32_t start, int32_t end)
+{
+    RichEditorSelection value;
+    auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+    if (richEditorPattern) {
+        value = richEditorPattern->GetSpansInfo(start, end);
+    }
+    return value;
+}
+
+void RichEditorController ::DeleteSpans(const RangeOptions& options)
+{
+    auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+    if (richEditorPattern) {
+        richEditorPattern->DeleteSpans(options);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -55,7 +55,12 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("hoverEffect", &JSTextField::JsHoverEffect);
     JSClass<JSTextArea>::StaticMethod("maxLength", &JSTextField::SetMaxLength);
     JSClass<JSTextArea>::StaticMethod("showCounter", &JSTextField::SetShowCounter);
+    JSClass<JSTextArea>::StaticMethod("barState", &JSTextField::SetBarState);
+    JSClass<JSTextArea>::StaticMethod("maxLines", &JSTextField::SetMaxLines);
+    JSClass<JSTextArea>::StaticMethod("style", &JSTextField::SetInputStyle);
     JSClass<JSTextArea>::StaticMethod("onChange", &JSTextField::SetOnChange);
+    JSClass<JSTextArea>::StaticMethod("onTextSelectionChange", &JSTextField::SetOnTextSelectionChange);
+    JSClass<JSTextArea>::StaticMethod("onScroll", &JSTextField::SetOnScroll);
     JSClass<JSTextArea>::StaticMethod("onCopy", &JSTextField::SetOnCopy);
     JSClass<JSTextArea>::StaticMethod("onCut", &JSTextField::SetOnCut);
     JSClass<JSTextArea>::StaticMethod("onPaste", &JSTextField::SetOnPaste);
@@ -71,6 +76,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("textMenuOptions", &JSTextField::JsMenuOptionsExtension);
     JSClass<JSTextArea>::StaticMethod("foregroundColor", &JSTextField::SetForegroundColor);
     JSClass<JSTextArea>::StaticMethod("enableKeyboardOnFocus", &JSTextField::SetEnableKeyboardOnFocus);
+    JSClass<JSTextArea>::StaticMethod("selectionMenuHidden", &JSTextField::SetSelectionMenuHidden);
     JSClass<JSTextArea>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -84,6 +90,7 @@ void JSTextAreaController::JSBind(BindingTarget globalObj)
     JSClass<JSTextAreaController>::Declare("TextAreaController");
     JSClass<JSTextAreaController>::Method("caretPosition", &JSTextAreaController::CaretPosition);
     JSClass<JSTextAreaController>::Method("setTextSelection", &JSTextAreaController::SetTextSelection);
+    JSClass<JSTextAreaController>::Method("stopEditing", &JSTextAreaController::StopEditing);
     JSClass<JSTextAreaController>::Bind(globalObj, JSTextAreaController::Constructor, JSTextAreaController::Destructor);
 }
 
@@ -117,4 +124,11 @@ void JSTextAreaController::SetTextSelection(int32_t selectionStart, int32_t sele
     }
 }
 
+void JSTextAreaController::StopEditing()
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        controller->StopEditing();
+    }
+}
 } // namespace OHOS::Ace::Framework

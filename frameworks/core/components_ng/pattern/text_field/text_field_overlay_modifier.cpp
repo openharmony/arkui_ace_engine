@@ -123,7 +123,7 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
         clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height();
     }
     RSRect clipInnerRect;
-    if (inputStyle_ == InputStyle::DEFAULT) {
+    if (inputStyle_ == InputStyle::DEFAULT || isTextArea) {
         clipInnerRect = RSRect(
             paintOffset.GetX(), paintOffset.GetY(), paintOffset.GetX() + contentSize_->Get().Width(), clipRectHeight);
         canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);

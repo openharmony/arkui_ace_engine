@@ -38,6 +38,7 @@ public:
     {
         auto paintProperty = MakeRefPtr<LoadingProgressPaintProperty>();
         paintProperty->propColor_ = CloneColor();
+        paintProperty->propEnableLoading_ = CloneEnableLoading();
         paintProperty->propLoadingProgressOwner_ = CloneLoadingProgressOwner();
         paintProperty->propRefreshAnimationState_ = CloneRefreshAnimationState();
         paintProperty->propRefreshFollowRatio_ = CloneRefreshFollowRatio();
@@ -50,6 +51,7 @@ public:
     {
         PaintProperty::Reset();
         ResetColor();
+        ResetEnableLoading();
         ResetLoadingProgressOwner();
         ResetRefreshAnimationState();
         ResetRefreshFollowRatio();
@@ -69,7 +71,8 @@ public:
         json->Put("color", propColor_.value_or(progressTheme->GetLoadingColor()).ColorToString().c_str());
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Color, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Color, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableLoading, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LoadingProgressOwner, LoadingProgressOwner, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RefreshAnimationState, int32_t, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RefreshFollowRatio, float, PROPERTY_UPDATE_RENDER);

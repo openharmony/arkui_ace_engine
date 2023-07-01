@@ -25,6 +25,11 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
     static void SetOnReady(const JSCallbackInfo& args);
+    static void SetOnSelect(const JSCallbackInfo& args);
+    static JSRef<JSVal> CreateJSSelection(const RichEditorSelection& selectInfo);
+    static JSRef<JSObject> CreateJSSpanResultObject(const ResultObject& resultObject);
+    static JSRef<JSObject> CreateJSTextStyleResult(const TextStyleResult& textStyleResult);
+    static JSRef<JSObject> CreateJSImageStyleResult(const ImageStyleResult& imageStyleResult);
 };
 
 class JSRichEditorController final : public Referenced {
@@ -54,12 +59,19 @@ public:
     }
     void AddImageSpan(const JSCallbackInfo& args);
     void AddTextSpan(const JSCallbackInfo& args);
+    void DeleteSpans(const JSCallbackInfo& args);
     ImageSpanAttribute ParseJsImageSpanAttribute(JSRef<JSObject> imageAttribute);
     TextStyle ParseJsTextStyle(JSRef<JSObject> styleObject);
+    void SetCaretOffset(const JSCallbackInfo& args);
+    void GetCaretOffset(const JSCallbackInfo& args);
+    void UpdateSpanStyle(const JSCallbackInfo& info);
+    void GetSpansInfo(const JSCallbackInfo& args);
+    JSRef<JSVal> CreateCreateJSSpansInfo(const RichEditorSelection& info);
 
 private:
     WeakPtr<RichEditorControllerBase> controllerWeak_;
     ACE_DISALLOW_COPY_AND_MOVE(JSRichEditorController);
+    struct UpdateSpanStyle updateSpanStyle_;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_RICHEDITOR_H

@@ -932,7 +932,6 @@ ACEAsyncJSCallbackInfo* AceCreateAsyncJSCallbackInfo(napi_env env)
             .containerId = containerId,
         },
         .ability = ability,
-        .asyncWork = nullptr,
         .deferred = nullptr,
         .onRequestData = nullptr,
         .onRequestCallbackOK = false,
@@ -1046,90 +1045,14 @@ napi_ref AceCreateCallbackRefFromJS(napi_env env, napi_value param)
 }
 
 /**
- * @brief Asynchronous callback processing.
- *
- * @param env The environment that the Node-API call is invoked under.
- * @param asyncCallbackInfo Process data asynchronously.
- * @param param other param.
- *
- * @return Return JS data successfully, otherwise return nullptr.
- */
-napi_value AceExecuteAsyncCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* asyncCallbackInfo,
-    const ACEAsyncParamEx* param)
-{
-    HILOG_INFO("%{public}s called.", __func__);
-    if (asyncCallbackInfo == nullptr || param == nullptr) {
-        HILOG_INFO("%{public}s called, asyncCallbackInfo or param is null", __func__);
-        return nullptr;
-    }
-
-    napi_value resourceName = nullptr;
-    NAPI_CALL(env, napi_create_string_latin1(env, param->resource.c_str(), NAPI_AUTO_LENGTH, &resourceName));
-
-    NAPI_CALL(env,
-        napi_create_async_work(env,
-            nullptr,
-            resourceName,
-            param->execute,
-            param->complete,
-            (void*)asyncCallbackInfo,
-            &asyncCallbackInfo->asyncWork));
-
-    NAPI_CALL(env, napi_queue_async_work(env, asyncCallbackInfo->asyncWork));
-
-    return AceWrapVoidToJS(env);
-}
-
-/**
- * @brief Asynchronous promise processing.
- *
- * @param env The environment that the Node-API call is invoked under.
- * @param asyncCallbackInfo Process data asynchronously.
- * @param param other param.
- *
- * @return Return JS data successfully, otherwise return nullptr.
- */
-napi_value AceExecutePromiseCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* asyncCallbackInfo,
-    const ACEAsyncParamEx* param)
-{
-    HILOG_INFO("%{public}s called.", __func__);
-    if (asyncCallbackInfo == nullptr || param == nullptr) {
-        HILOG_INFO("%{public}s called, asyncCallbackInfo or param is null", __func__);
-        return nullptr;
-    }
-
-    napi_value resourceName = 0;
-    NAPI_CALL(env, napi_create_string_latin1(env, param->resource.c_str(), NAPI_AUTO_LENGTH, &resourceName));
-
-    napi_deferred deferred = 0;
-    napi_value promise = 0;
-    NAPI_CALL(env, napi_create_promise(env, &deferred, &promise));
-
-    asyncCallbackInfo->deferred = deferred;
-    NAPI_CALL(env,
-        napi_create_async_work(env,
-            nullptr,
-            resourceName,
-            param->execute,
-            param->complete,
-            (void*)asyncCallbackInfo,
-            &asyncCallbackInfo->asyncWork));
-
-    NAPI_CALL(env, napi_queue_async_work(env, asyncCallbackInfo->asyncWork));
-    return promise;
-}
-
-/**
  * @brief The callback at the end of the asynchronous callback.
  *
  * @param env The environment that the Node-API call is invoked under.
  * @param data Point to asynchronous processing of data.
  */
-void AceCompleteAsyncCallbackWork(napi_env env, napi_status status, void* data)
+void AceCompleteAsyncCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* asyncCallbackInfo)
 {
     HILOG_INFO("%{public}s called.", __func__);
-
-    ACEAsyncJSCallbackInfo* asyncCallbackInfo = (ACEAsyncJSCallbackInfo*)data;
     if (asyncCallbackInfo == nullptr) {
         HILOG_INFO("%{public}s called, asyncCallbackInfo is null", __func__);
         return;
@@ -1150,7 +1073,6 @@ void AceCompleteAsyncCallbackWork(napi_env env, napi_status status, void* data)
         napi_delete_reference(env, asyncCallbackInfo->cbInfo.callback);
     }
 
-    napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
     delete asyncCallbackInfo;
     asyncCallbackInfo = nullptr;
 }
@@ -1161,11 +1083,9 @@ void AceCompleteAsyncCallbackWork(napi_env env, napi_status status, void* data)
  * @param env The environment that the Node-API call is invoked under.
  * @param data Point to asynchronous processing of data.
  */
-void AceCompletePromiseCallbackWork(napi_env env, napi_status status, void* data)
+void AceCompletePromiseCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* asyncCallbackInfo)
 {
     HILOG_INFO("%{public}s called.", __func__);
-
-    ACEAsyncJSCallbackInfo* asyncCallbackInfo = (ACEAsyncJSCallbackInfo*)data;
     if (asyncCallbackInfo == nullptr) {
         HILOG_INFO("%{public}s called, asyncCallbackInfo is null", __func__);
         return;
@@ -1179,7 +1099,6 @@ void AceCompletePromiseCallbackWork(napi_env env, napi_status status, void* data
         result = AceGetCallbackErrorValue(env, asyncCallbackInfo->error_code);
         napi_reject_deferred(env, asyncCallbackInfo->deferred, result);
     }
-    napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
     delete asyncCallbackInfo;
     asyncCallbackInfo = nullptr;
 }

@@ -22,6 +22,7 @@ class ACE_EXPORT RichEditorModelImpl : public RichEditorModel {
     void Create() override;
     RefPtr<RichEditorControllerBase> GetRichEditorController() override;
     void SetOnReady(std::function<void()>&& func) override;
+    void SetOnSelect(std::function<void(const BaseEventInfo*)>&& func) override;
 };
 } // namespace OHOS::Ace::Framework
 

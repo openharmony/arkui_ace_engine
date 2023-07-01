@@ -125,7 +125,7 @@ void JSListItemGroup::JSBind(BindingTarget globalObj)
     JSClass<JSListItemGroup>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSListItemGroup>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSListItemGroup>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
-    
+
     JSClass<JSListItemGroup>::Inherit<JSInteractableView>();
     JSClass<JSListItemGroup>::InheritAndBind<JSContainerBase>(globalObj);
 }
