@@ -1111,6 +1111,31 @@ HWTEST_F(ListTestNg, AttrLanes005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AttrLanes006
+ * @tc.desc: Test LayoutProperty about laneGutter,
+ * LaneGutter can be set correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, AttrLanes006, TestSize.Level1)
+{
+    constexpr Dimension laneGutter = 16.0_vp;
+    constexpr int32_t lanes = 3;
+    constexpr int32_t groupCount = 10;
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    listModelNG.SetLanes(lanes);
+    listModelNG.SetLaneGutter(laneGutter);
+    CreateListItemGroup(groupCount);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
+
+    EXPECT_EQ(laneGutter, layoutProperty->GetLaneGutter());
+}
+
+/**
  * @tc.name: AttrAlignListItem001
  * @tc.desc: Test LayoutProperty about alignListItem,
  * when ListItem width less than List, the default is align to start

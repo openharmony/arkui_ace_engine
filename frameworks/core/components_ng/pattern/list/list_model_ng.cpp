@@ -129,6 +129,11 @@ void ListModelNG::SetLaneMaxLength(const Dimension& laneMaxLength)
     }
 }
 
+void ListModelNG::SetLaneGutter(const Dimension& laneGutter)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, LaneGutter, laneGutter);
+}
+
 void ListModelNG::SetListItemAlign(V2::ListItemAlign listItemAlign)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ListItemAlign, listItemAlign);
