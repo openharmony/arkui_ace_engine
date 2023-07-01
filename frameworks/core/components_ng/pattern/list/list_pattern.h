@@ -69,6 +69,11 @@ public:
         return MakeRefPtr<ListAccessibilityProperty>();
     }
 
+    bool UsResRegion() override
+    {
+        return false;
+    }
+
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
