@@ -357,6 +357,11 @@ public:
 
     virtual void OnTouchTestHit(SourceType hitTestType) {}
 
+    virtual int32_t GetDragRecordSize()
+    {
+        return -1;
+    }
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
