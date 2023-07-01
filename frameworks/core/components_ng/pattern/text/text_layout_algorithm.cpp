@@ -817,4 +817,10 @@ bool TextLayoutAlgorithm::CreateImageSpanAndLayout(const TextStyle& textStyle, c
     }
     return true;
 }
+
+size_t TextLayoutAlgorithm::GetLineCount() const
+{
+    CHECK_NULL_RETURN(paragraph_, 0);
+    return paragraph_->GetLineCount();
+}
 } // namespace OHOS::Ace::NG

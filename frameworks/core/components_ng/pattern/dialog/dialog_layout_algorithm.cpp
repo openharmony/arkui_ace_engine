@@ -29,8 +29,11 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
+#include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -76,8 +79,9 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // childSize_ and childOffset_ is used in Layout.
     child->Measure(childLayoutConstraint);
 
-    // scroll for alert
-    AnalysisHeightOfChild(layoutWrapper);
+    if (layoutWrapper->GetHostNode()->GetPattern<DialogPattern>()->GetCustomNode()) {
+        AnalysisHeightOfChild(layoutWrapper);
+    }
 }
 
 void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper)
@@ -104,6 +108,10 @@ void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper)
         }
     }
 
+    if (scroll != nullptr) {
+        AnalysisLayoutOfContent(layoutWrapper, scroll);
+    }
+
     if (scroll != nullptr && list != nullptr) {
         Distribute(scrollHeight, listHeight, restHeight);
         auto childConstraint = CreateDialogChildConstraint(layoutWrapper, scrollHeight, restWidth);
@@ -125,6 +133,21 @@ void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper)
     }
 }
 
+void DialogLayoutAlgorithm::AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& scroll)
+{
+    auto text = scroll->GetAllChildrenWithBuild().front();
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(text->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(layoutAlgorithmWrapper);
+    auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(textLayoutAlgorithm);
+    auto lineCount = textLayoutAlgorithm->GetLineCount();
+    if (lineCount == 1 && layoutWrapper->GetHostNode()->GetPattern<DialogPattern>()->GetTitle().empty()) {
+        scroll->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
+    } else {
+        scroll->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER_LEFT);
+    }
+}
+
 void DialogLayoutAlgorithm::Distribute(float& scrollHeight, float& listHeight, float restHeight)
 {
     if (scrollHeight + listHeight > restHeight) {
@@ -140,13 +163,15 @@ void DialogLayoutAlgorithm::Distribute(float& scrollHeight, float& listHeight, f
 }
 
 LayoutConstraintF DialogLayoutAlgorithm::CreateDialogChildConstraint(
-    LayoutWrapper* layoutWrapper, float Height, float Width)
+    LayoutWrapper* layoutWrapper, float height, float width)
 {
     auto childConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    childConstraint.maxSize.SetHeight(Height);
-    childConstraint.percentReference.SetHeight(Height);
-    childConstraint.maxSize.SetWidth(Width);
-    childConstraint.percentReference.SetWidth(Width);
+    childConstraint.minSize.SetHeight(height);
+    childConstraint.maxSize.SetHeight(height);
+    childConstraint.percentReference.SetHeight(height);
+    childConstraint.minSize.SetWidth(width);
+    childConstraint.maxSize.SetWidth(width);
+    childConstraint.percentReference.SetWidth(width);
     return childConstraint;
 }
 
