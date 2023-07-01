@@ -117,6 +117,7 @@ private:
     float crossGap_ = 0;
     float crossPaddingOffset_ = 0;
     int32_t lastCross_ = 0;
+    bool isChildrenUpdated_ = false;
 
     // Map structure: [index, crossPosition], store cross position of each item.
     std::map<int32_t, float> itemsCrossPosition_;

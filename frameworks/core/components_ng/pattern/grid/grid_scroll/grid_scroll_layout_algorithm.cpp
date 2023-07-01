@@ -275,6 +275,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
         gridLayoutInfo_.endIndex_ = -1;
         gridLayoutInfo_.endMainLineIndex_ = 0;
         gridLayoutInfo_.ResetPositionFlags();
+        isChildrenUpdated_ = true;
 
         int32_t currentItemIndex = gridLayoutInfo_.startIndex_;
         auto firstItem = GetStartingItem(layoutWrapper, currentItemIndex);
@@ -372,7 +373,7 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize)
         if (!canOverScroll_) {
             gridLayoutInfo_.reachEnd_ = false;
             return;
-        } else {
+        } else if (!isChildrenUpdated_) {
             if (LessNotEqual(lengthOfItemsInViewport, mainSize)) {
                 return;
             }
@@ -381,7 +382,7 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize)
     // Step2. Calculate real offset that items can only be moved up by.
     // Hint: [prevOffset_] is a non-positive value
     if (LessNotEqual(lengthOfItemsInViewport, mainSize) && gridLayoutInfo_.startIndex_ == 0) {
-        if (!canOverScroll_) {
+        if (!canOverScroll_ || isChildrenUpdated_) {
             gridLayoutInfo_.currentOffset_ = 0;
             gridLayoutInfo_.prevOffset_ = 0;
         }
