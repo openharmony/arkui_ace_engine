@@ -138,6 +138,8 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
 
     auto dialogPattern = node->GetPattern<DialogPattern>();
     option = dialogPattern->GetOpenAnimation().value_or(option);
+    option.SetIteration(1);
+    option.SetAnimationDirection(AnimationDirection::NORMAL);
     auto onFinish = option.GetOnFinishEvent();
 
     option.SetOnFinishEvent(
@@ -192,6 +194,8 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     // get customized animation params
     auto dialogPattern = node->GetPattern<DialogPattern>();
     option = dialogPattern->GetCloseAnimation().value_or(option);
+    option.SetIteration(1);
+    option.SetAnimationDirection(AnimationDirection::NORMAL);
 
     option.SetOnFinishEvent([nodeWk = WeakClaim(RawPtr(node)), id = Container::CurrentId()] {
         ContainerScope scope(id);
