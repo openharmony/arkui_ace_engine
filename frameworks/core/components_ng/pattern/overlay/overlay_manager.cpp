@@ -984,7 +984,9 @@ bool OverlayManager::RemoveModalInOverlay()
         PlaySheetTransition(topModalNode, false);
     }
     modalStack_.pop();
-    modalList_.pop_back();
+    if (!modalList_.empty()) {
+        modalList_.pop_back();
+    }
     FireModalPageHide();
     SaveLastModalNode();
     return true;
@@ -1206,7 +1208,9 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
         modalStack_.pop();
-        modalList_.pop_back();
+        if (!modalList_.empty()) {
+            modalList_.pop_back();
+        }
         FireModalPageHide();
         if (onDisappear != nullptr) {
             onDisappear();
@@ -1220,18 +1224,24 @@ void OverlayManager::FireModalPageShow()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto pageNode = pipeline->GetStageManager()->GetLastPage();
+    CHECK_NULL_VOID(pageNode);
     auto pageFocusHub = pageNode->GetFocusHub();
     CHECK_NULL_VOID(pageFocusHub);
     pageFocusHub->SetParentFocusable(false);
     pageFocusHub->LostFocus();
     for (auto modal = modalList_.begin(); modal != modalList_.end(); modal++) {
         auto modalNode = (*modal).Upgrade();
+        CHECK_NULL_VOID(modalNode);
         auto modalFocusHub = modalNode->GetFocusHub();
         CHECK_NULL_VOID(modalFocusHub);
         modalFocusHub->SetParentFocusable(false);
         modalFocusHub->LostFocus();
     }
+    if (modalList_.empty()) {
+        return;
+    }
     auto topModalNode = modalList_.back().Upgrade();
+    CHECK_NULL_VOID(topModalNode);
     auto topModalFocusHub = topModalNode->GetFocusHub();
     CHECK_NULL_VOID(topModalFocusHub);
     topModalFocusHub->SetParentFocusable(true);
@@ -1240,7 +1250,9 @@ void OverlayManager::FireModalPageShow()
 
 void OverlayManager::FireModalPageHide()
 {
-    auto lastModalFocusHub = lastModalNode_.Upgrade()->GetFocusHub();
+    auto lastModalNode = lastModalNode_.Upgrade();
+    CHECK_NULL_VOID(lastModalNode);
+    auto lastModalFocusHub = lastModalNode->GetFocusHub();
     CHECK_NULL_VOID(lastModalFocusHub);
     lastModalFocusHub->SetParentFocusable(true);
     lastModalFocusHub->RequestFocus();
@@ -1413,7 +1425,9 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
         }
         PlaySheetTransition(topSheetNode, false);
         modalStack_.pop();
-        modalList_.pop_back();
+        if (!modalList_.empty()) {
+            modalList_.pop_back();
+        }
         FireModalPageHide();
         if (onDisappear != nullptr) {
             onDisappear();

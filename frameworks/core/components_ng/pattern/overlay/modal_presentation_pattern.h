@@ -65,7 +65,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return {FocusType::SCOPE, true};
+        return { FocusType::SCOPE, true };
     }
 
 private:
