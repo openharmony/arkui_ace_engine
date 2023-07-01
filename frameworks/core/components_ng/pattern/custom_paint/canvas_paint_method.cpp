@@ -386,25 +386,17 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(RefPtr<RosenRend
     }
     // copy the bitmap to tempCanvas
 #ifndef USE_ROSEN_DRAWING
-    auto imageInfo =
-        SkImageInfo::Make(dirtyWidth, dirtyHeight,
-        SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
-    SkBitmap tempCache;
-    tempCache.allocPixels(imageInfo);
-
     SkBitmap currentBitmap;
-    CHECK_NULL_RETURN(rsRecordingCanvas_, nullptr);
-    auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
-    bool res = renderContext->GetBitmap(currentBitmap, rsRecordingCanvas_->GetDrawCmdList());
-    if (!res || currentBitmap.empty()) {
-        LOGE("Bitmap is empty");
+    if (!DrawBitmap(renderContext, currentBitmap)) {
         return nullptr;
     }
-    rsRecordingCanvas_->Clear();
 
+    SkBitmap tempCache;
+    tempCache.allocPixels(SkImageInfo::Make(dirtyWidth, dirtyHeight,
+        SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType));
+    SkCanvas tempCanvas(tempCache);
     int32_t size = dirtyWidth * dirtyHeight;
     const uint8_t* pixels = nullptr;
-    SkCanvas tempCanvas(tempCache);
     auto srcRect = SkRect::MakeXYWH(scaledLeft, scaledTop, dirtyWidth * viewScale, dirtyHeight * viewScale);
     auto dstRect = SkRect::MakeXYWH(0.0, 0.0, dirtyWidth, dirtyHeight);
 #ifndef NEW_SKIA
@@ -836,28 +828,18 @@ std::string CanvasPaintMethod::ToDataURL(RefPtr<RosenRenderContext> renderContex
     double quality = GetQuality(args);
     double width = lastLayoutSize_.Width();
     double height = lastLayoutSize_.Height();
+
+    auto imageInfo = SkImageInfo::Make(width, height, SkColorType::kBGRA_8888_SkColorType,
+        (mimeType == IMAGE_JPEG) ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kUnpremul_SkAlphaType);
     SkBitmap tempCache;
-    tempCache.allocPixels(SkImageInfo::Make(width, height, SkColorType::kBGRA_8888_SkColorType,
-        (mimeType == IMAGE_JPEG) ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kUnpremul_SkAlphaType));
+    tempCache.allocPixels(imageInfo);
 
 #ifndef USE_ROSEN_DRAWING
     SkBitmap currentBitmap;
-#else
-    RSBitmap currentBitmap;
-#endif
-    CHECK_NULL_RETURN(rsRecordingCanvas_, UNSUPPORTED);
-    auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
-    bool res = renderContext->GetBitmap(currentBitmap, rsRecordingCanvas_->GetDrawCmdList());
-#ifndef USE_ROSEN_DRAWING
-    if (!res || currentBitmap.empty()) {
-#else
-    if (!res || !currentBitmap.IsValid()) {
-#endif
-        LOGE("Bitmap is empty");
+    if (!DrawBitmap(renderContext, currentBitmap)) {
         return UNSUPPORTED;
     }
-#ifndef USE_ROSEN_DRAWING
-    rsRecordingCanvas_->Clear();
+
     bool success = false;
 #ifndef NEW_SKIA
     success = currentBitmap.pixmap().scalePixels(tempCache.pixmap(), SkFilterQuality::kHigh_SkFilterQuality);
@@ -866,13 +848,20 @@ std::string CanvasPaintMethod::ToDataURL(RefPtr<RosenRenderContext> renderContex
         tempCache.pixmap(), SkSamplingOptions(SkCubicResampler { 1 / 3.0f, 1 / 3.0f }));
 #endif
 #else
+    RSBitmap currentBitmap;
+    CHECK_NULL_RETURN(rsRecordingCanvas_, UNSUPPORTED);
+    auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
+    bool res = renderContext->GetBitmap(currentBitmap, rsRecordingCanvas_->GetDrawCmdList());
+    if (!res || !currentBitmap.IsValid()) {
+        LOGE("Bitmap is empty");
+        return UNSUPPORTED;
+    }
     LOGE("Drawing is not supported");
     bool success = false;
     auto& skBitmap = currentBitmap.GetImpl<Rosen::Drawing::SkiaBitmap>()->ExportSkiaBitmap();
     success = skBitmap.pixmap().scalePixels(
         tempCache.pixmap(), SkSamplingOptions(SkCubicResampler { 1 / 3.0f, 1 / 3.0f }));
 #endif
-
     CHECK_NULL_RETURN(success, UNSUPPORTED);
     SkPixmap src = tempCache.pixmap();
     SkDynamicMemoryWStream dst;
@@ -901,6 +890,32 @@ std::string CanvasPaintMethod::ToDataURL(RefPtr<RosenRenderContext> renderContex
     SkBase64::Encode(result->data(), result->size(), info.writable_str());
 
     return std::string(URL_PREFIX).append(mimeType).append(URL_SYMBOL).append(info.c_str());
+}
+
+bool CanvasPaintMethod::DrawBitmap(RefPtr<RosenRenderContext> renderContext, SkBitmap& currentBitmap)
+{
+    CHECK_NULL_RETURN(rsRecordingCanvas_, false);
+    auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
+    bool res = renderContext->GetBitmap(currentBitmap, drawCmdList);
+    if (res) {
+        rsRecordingCanvas_->Clear();
+        return true;
+    }
+    LOGD("GetBitmap failed.");
+    if (!drawCmdList) {
+        return false;
+    }
+    if (drawCmdList->GetSize() == 0) {
+        return false;
+    }
+    currentBitmap.reset();
+    auto imageInfo = SkImageInfo::Make(lastLayoutSize_.Width(), lastLayoutSize_.Height(),
+        SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
+    // tryAllocPixels is more safe than allocPixels
+    currentBitmap.allocPixels(imageInfo);
+    SkCanvas currentCanvas(currentBitmap);
+    drawCmdList->Playback(currentCanvas);
+    return true;
 }
 
 std::string CanvasPaintMethod::GetJsonData(const std::string& path)

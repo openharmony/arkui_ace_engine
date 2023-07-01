@@ -67,6 +67,7 @@ public:
         double left, double top, double width, double height);
     void TransferFromImageBitmap(PaintWrapper* paintWrapper, const RefPtr<OffscreenCanvasPattern>& offscreenCanvas);
     std::string ToDataURL(RefPtr<RosenRenderContext> renderContext, const std::string& args);
+    bool DrawBitmap(RefPtr<RosenRenderContext> renderContext, SkBitmap& currentBitmap);
     std::string GetJsonData(const std::string& path);
 
     void FillText(
