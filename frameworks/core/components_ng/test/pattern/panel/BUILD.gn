@@ -46,6 +46,7 @@ ace_unittest("panel_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/flex/mock_flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/grid_container/mock_grid_container_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/select_overlay/mock_select_overlay_property.cpp",
+    "close_icon_pattern_test_ng.cpp",
     "dragBar_pattern_test_ng.cpp",
     "panel_property_test_ng.cpp",
     "panel_test_ng.cpp",
