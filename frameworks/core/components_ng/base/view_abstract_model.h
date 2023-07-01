@@ -140,6 +140,7 @@ public:
     virtual void SetGeometryTransition(const std::string& id) = 0;
     virtual void SetMotionPath(const MotionPathOption& option) = 0;
     virtual void SetRenderGroup(bool isRenderGroup) = 0;
+    virtual void SetRenderFit(RenderFit renderFit) = 0;
 
     // flex props
     virtual void SetFlexBasis(const Dimension& value) = 0;

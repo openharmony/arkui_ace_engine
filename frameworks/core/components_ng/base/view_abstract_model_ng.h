@@ -509,6 +509,11 @@ public:
         ViewAbstract::SetRenderGroup(isRenderGroup);
     }
 
+    void SetRenderFit(RenderFit renderFit) override
+    {
+        ViewAbstract::SetRenderFit(renderFit);
+    }
+
     void SetFlexBasis(const Dimension& value) override
     {
         ViewAbstract::SetFlexBasis(value);

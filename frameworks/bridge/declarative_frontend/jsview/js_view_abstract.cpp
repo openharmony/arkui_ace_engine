@@ -5415,6 +5415,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("createAnimatableProperty", &JSViewAbstract::JSCreateAnimatableProperty);
     JSClass<JSViewAbstract>::StaticMethod("updateAnimatableProperty", &JSViewAbstract::JSUpdateAnimatableProperty);
     JSClass<JSViewAbstract>::StaticMethod("renderGroup", &JSViewAbstract::JSRenderGroup);
+    JSClass<JSViewAbstract>::StaticMethod("renderFit", &JSViewAbstract::JSRenderFit);
 
     JSClass<JSViewAbstract>::StaticMethod("expandSafeArea", &JSViewAbstract::JsExpandSafeArea);
 
@@ -6189,6 +6190,24 @@ void JSViewAbstract::JSRenderGroup(const JSCallbackInfo& info)
         isRenderGroup = info[0]->ToBoolean();
     }
     ViewAbstractModel::GetInstance()->SetRenderGroup(isRenderGroup);
+}
+
+void JSViewAbstract::JSRenderFit(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        LOGW("renderFit needs one parameter");
+        return;
+    }
+    RenderFit renderFit = RenderFit::TOP_LEFT;
+    if (info[0]->IsNumber()) {
+        int32_t fitNumber = info[0]->ToNumber<int32_t>();
+        if (fitNumber >= static_cast<int32_t>(RenderFit::CENTER) &&
+            fitNumber <= static_cast<int32_t>(RenderFit::RESIZE_COVER_BOTTOM_RIGHT)) {
+            renderFit = static_cast<RenderFit>(fitNumber);
+        }
+    }
+    // how content fills the node duration implicit animation
+    ViewAbstractModel::GetInstance()->SetRenderFit(renderFit);
 }
 
 } // namespace OHOS::Ace::Framework

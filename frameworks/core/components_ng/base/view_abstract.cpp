@@ -1632,4 +1632,13 @@ void ViewAbstract::SetRenderGroup(bool isRenderGroup)
     }
     ACE_UPDATE_RENDER_CONTEXT(RenderGroup, isRenderGroup);
 }
+
+void ViewAbstract::SetRenderFit(RenderFit renderFit)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(RenderFit, renderFit);
+}
 } // namespace OHOS::Ace::NG
