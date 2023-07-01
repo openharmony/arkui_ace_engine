@@ -63,6 +63,7 @@ void SliderPattern::OnModifyDone()
     CancelExceptionValue(min, max, step);
     valueRatio_ = (value_ - min) / (max - min);
     stepRatio_ = step / (max - min);
+    UpdateCircleCenterOffset();
     UpdateBlock();
     InitTouchEvent(gestureHub);
     InitPanEvent(gestureHub);
