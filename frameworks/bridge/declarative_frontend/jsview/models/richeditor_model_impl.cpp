@@ -24,5 +24,14 @@ RefPtr<RichEditorControllerBase> RichEditorModelImpl::GetRichEditorController()
 }
 
 void RichEditorModelImpl::SetOnReady(std::function<void()>&& func) {}
+
 void RichEditorModelImpl::SetOnSelect(std::function<void(const BaseEventInfo*)>&& func) {}
+
+void RichEditorModelImpl::SetAboutToIMEInput(std::function<bool(const NG::RichEditorInsertValue&)>&& func) {}
+
+void RichEditorModelImpl::SetOnIMEInputComplete(std::function<void(const NG::RichEditorAbstractSpanResult&)>&& func) {}
+
+void RichEditorModelImpl::SetAboutToDelete(std::function<bool(const NG::RichEditorDeleteValue&)>&& func) {}
+
+void RichEditorModelImpl::SetOnDeleteComplete(std::function<void()>&& func) {}
 } // namespace OHOS::Ace::Framework
