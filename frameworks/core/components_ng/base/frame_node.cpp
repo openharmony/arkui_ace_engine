@@ -1126,6 +1126,13 @@ HitTestMode FrameNode::GetHitTestMode() const
     return gestureHub ? gestureHub->GetHitTestMode() : HitTestMode::HTMDEFAULT;
 }
 
+void FrameNode::SetHitTestMode(HitTestMode mode)
+{
+    auto gestureHub = eventHub_->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetHitTestMode(mode);
+}
+
 bool FrameNode::GetTouchable() const
 {
     auto gestureHub = eventHub_->GetGestureEventHub();
