@@ -2106,7 +2106,7 @@ bool CustomPaintPaintMethod::CheckNumberAndPercentage(const std::string& param, 
         return false;
     }
     // param.size() > 1, param[i] != (. || 0 ~ 9), return false (except for the last one)
-    for (int i  = 0; i < param.size() - 1; i++) {
+    for (auto i  = 0U; i < param.size() - 1; i++) {
         if (param[i] < '.' || param[i] == '/' || param[i] > '9') {
             return false;
         }
