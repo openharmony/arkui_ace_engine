@@ -390,6 +390,16 @@ public:
         return allowDrop_;
     }
 
+    void SetOverlayNode(const WeakPtr<FrameNode>& overlayNode)
+    {
+        overlayNode_ = overlayNode;
+    }
+
+    RefPtr<FrameNode> GetOverlayNode() const
+    {
+        return overlayNode_.Upgrade();
+    }
+
     RefPtr<FrameNode> FindChildByPosition(float x, float y);
 
     void CreateAnimatablePropertyFloat(
@@ -453,6 +463,8 @@ private:
 
     // dump self info.
     void DumpInfo() override;
+
+    void DumpOverlayInfo();
 
     void FocusToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void MouseToJsonValue(std::unique_ptr<JsonValue>& json) const;
@@ -527,6 +539,8 @@ private:
     std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
 
     bool isRestoreInfoUsed_ = false;
+
+    WeakPtr<FrameNode> overlayNode_;
 
     friend class RosenRenderContext;
     friend class RenderContext;

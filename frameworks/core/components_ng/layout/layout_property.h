@@ -462,6 +462,56 @@ public:
         usingPosition_ = usingPosition;
     }
 
+    void SetIsOverlayNode(bool isOverlayNode)
+    {
+        isOverlayNode_ = isOverlayNode;
+    }
+
+    bool IsOverlayNode()
+    {
+        return isOverlayNode_;
+    }
+
+    void SetOverlayOffset(const std::optional<Dimension> &overlayOffsetX,
+        const std::optional<Dimension> &overlayOffsetY)
+    {
+        bool xChanged = true;
+        bool yChanged = false;
+        if ((!overlayOffsetX.has_value() && overlayOffsetX_.Value() == 0) ||
+            (overlayOffsetX.has_value() && overlayOffsetX.value() == overlayOffsetX_)) {
+            xChanged = false;
+        }
+
+        if ((!overlayOffsetY.has_value() && overlayOffsetY_.Value() == 0) ||
+            (overlayOffsetY.has_value() && overlayOffsetY.value() == overlayOffsetY_)) {
+            yChanged = false;
+        }
+
+        if (!xChanged && !yChanged) {
+            return;
+        }
+
+        if (overlayOffsetX.has_value()) {
+            overlayOffsetX_ = overlayOffsetX.value();
+        } else {
+            overlayOffsetX_.Reset();
+        }
+
+        if (overlayOffsetY.has_value()) {
+            overlayOffsetY_ = overlayOffsetY.value();
+        } else {
+            overlayOffsetY_.Reset();
+        }
+
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+    }
+
+    void GetOverlayOffset(Dimension &overlayOffsetX, Dimension &overlayOffsetY)
+    {
+        overlayOffsetX = overlayOffsetX_;
+        overlayOffsetY = overlayOffsetY_;
+    }
+
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);
 
@@ -498,6 +548,11 @@ private:
     WeakPtr<FrameNode> host_;
 
     bool usingPosition_ = true;
+
+    bool isOverlayNode_ = false;
+    Dimension overlayOffsetX_;
+    Dimension overlayOffsetY_;
+
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);
 };
 } // namespace OHOS::Ace::NG

@@ -196,6 +196,9 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
 #ifdef ENABLE_DRAG_FRAMEWORK
     propIsBindOverlay_ = layoutProperty->propIsBindOverlay_;
 #endif // ENABLE_DRAG_FRAMEWORK
+    isOverlayNode_ = layoutProperty->isOverlayNode_;
+    overlayOffsetX_ = layoutProperty->overlayOffsetX_;
+    overlayOffsetY_ = layoutProperty->overlayOffsetY_;
 }
 
 void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
@@ -178,6 +179,18 @@ void FrameNode::InitializePatternAndContext()
     }
 }
 
+void FrameNode::DumpOverlayInfo()
+{
+    if (!layoutProperty_->IsOverlayNode()) {
+        return;
+    }
+    DumpLog::GetInstance().AddDesc(std::string("IsOverlayNode: ").append(std::string("true")));
+    Dimension offsetX, offsetY;
+    layoutProperty_->GetOverlayOffset(offsetX, offsetY);
+    DumpLog::GetInstance().AddDesc(std::string("OverlayOffset: ").append(offsetX.ToString())
+        .append(std::string(", ")).append(offsetY.ToString()));
+}
+
 void FrameNode::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(std::string("FrameRect: ").append(geometryNode_->GetFrameRect().ToString()));
@@ -215,6 +228,7 @@ void FrameNode::DumpInfo()
                                        .append(layoutProperty_->GetContentLayoutConstraint().has_value()
                                                    ? layoutProperty_->GetContentLayoutConstraint().value().ToString()
                                                    : "NA"));
+    DumpOverlayInfo();
     DumpLog::GetInstance().AddDesc(
         std::string("PaintRect: ").append(renderContext_->GetPaintRectWithTransform().ToString()));
     if (pattern_) {
@@ -863,6 +877,7 @@ RefPtr<LayoutWrapper> FrameNode::UpdateLayoutWrapper(
     // check position flag.
     layoutWrapper->SetOutOfLayout(renderContext_->HasPosition());
     layoutWrapper->SetActive(isActive_);
+    layoutWrapper->SetIsOverlayNode(layoutProperty_->IsOverlayNode());
     isLayoutDirtyMarked_ = false;
     return layoutWrapper;
 }
@@ -884,7 +899,7 @@ void FrameNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, boo
         return;
     }
     auto layoutWrapper = CreateLayoutWrapper(forceMeasure, forceLayout);
-    parent->AppendChild(layoutWrapper);
+    parent->AppendChild(layoutWrapper, layoutProperty_->IsOverlayNode());
 }
 
 RefPtr<PaintWrapper> FrameNode::CreatePaintWrapper()
