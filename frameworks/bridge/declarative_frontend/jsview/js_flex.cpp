@@ -67,7 +67,8 @@ void JSFlex::SetJustifyContent(int32_t value)
         (value == static_cast<int32_t>(FlexAlign::SPACE_BETWEEN)) ||
         (value == static_cast<int32_t>(FlexAlign::SPACE_EVENLY))) {
         FlexModel::GetInstance()->SetJustifyContent(value);
-    } else {
+    } else if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9) {
+        FlexModel::GetInstance()->SetJustifyContent(static_cast<int32_t>(FlexAlign::FLEX_START));
         LOGE("invalid value for justifyContent");
     }
 }
@@ -78,7 +79,8 @@ void JSFlex::SetAlignItems(int32_t value)
         (value == static_cast<int32_t>(FlexAlign::FLEX_END)) || (value == static_cast<int32_t>(FlexAlign::CENTER)) ||
         (value == static_cast<int32_t>(FlexAlign::STRETCH))) {
         FlexModel::GetInstance()->SetAlignItems(value);
-    } else {
+    } else if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9) {
+        FlexModel::GetInstance()->SetAlignItems(static_cast<int32_t>(FlexAlign::FLEX_START));
         LOGE("invalid value for alignItems");
     }
 }
