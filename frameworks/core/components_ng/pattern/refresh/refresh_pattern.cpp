@@ -84,7 +84,7 @@ void RefreshPattern::OnModifyDone()
         progressChild_ = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->TotalChildCount() - 1));
         LoadingProgressReset();
     }
-    if (isRefreshing_ != refreshingProp) {
+    if (layoutProperty->GetIsCustomBuilderExistValue() || isRefreshing_ != refreshingProp) {
         if (refreshingProp) {
             QuickStartFresh();
         } else {
@@ -121,7 +121,9 @@ void RefreshPattern::QuickStartFresh()
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetIsCustomBuilderExistValue()) {
         CustomBuilderAppear();
-        TriggerRefresh();
+        if (!isRefreshing_) {
+            TriggerRefresh();
+        }
         return;
     }
     ReplaceLoadingProgressNode();
@@ -135,7 +137,6 @@ void RefreshPattern::QuickEndFresh()
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetIsCustomBuilderExistValue()) {
         CustomBuilderExit();
-        TriggerFinish();
         return;
     }
     LoadingProgressExit();
@@ -358,7 +359,7 @@ void RefreshPattern::HandleDragUpdate(float delta)
 
     scrollOffset_.SetY(GetScrollOffset(delta));
     if (customBuilder_) {
-        CheckCustomBuilderDragUpdateStage();
+        HandleCustomBuilderDragUpdateStage();
         return;
     }
     CHECK_NULL_VOID(progressChild_);
@@ -517,7 +518,7 @@ void RefreshPattern::HandleDragEnd()
     }
     auto triggerRefreshDistance = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
     if (customBuilder_) {
-        CheckCustomBuilderDragEndStage();
+        HandleCustomBuilderDragEndStage();
         return;
     }
     if (scrollOffset_.GetY() >= triggerRefreshDistance) {
@@ -666,7 +667,7 @@ void RefreshPattern::CustomBuilderExit()
         std::move(finishCallback));
 }
 
-void RefreshPattern::CheckCustomBuilderDragUpdateStage()
+void RefreshPattern::HandleCustomBuilderDragUpdateStage()
 {
     CHECK_NULL_VOID(customBuilder_);
     auto host = GetHost();
@@ -696,7 +697,7 @@ void RefreshPattern::CheckCustomBuilderDragUpdateStage()
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
-void RefreshPattern::CheckCustomBuilderDragEndStage()
+void RefreshPattern::HandleCustomBuilderDragEndStage()
 {
     CHECK_NULL_VOID(customBuilder_);
     auto host = GetHost();
@@ -719,7 +720,7 @@ void RefreshPattern::CheckCustomBuilderDragEndStage()
         CustomBuilderExit();
         scrollOffset_.SetY(0.0f);
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void RefreshPattern::CustomBuilderReset()
@@ -733,7 +734,7 @@ void RefreshPattern::CustomBuilderReset()
     CHECK_NULL_VOID(customBuilder_);
     scrollOffset_.SetY(0.0f);
     UpdateCustomBuilderProperty(RefreshState::STATE_LOADING, 0.0f);
-    customBuilder_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    customBuilder_->MarkDirtyNode();
 }
 
 void RefreshPattern::UpdateCustomBuilderProperty(RefreshState state, float ratio)
@@ -806,30 +807,6 @@ float RefreshPattern::GetCustomBuilderOpacityRatio()
             (TRIGGER_REFRESH_DISTANCE.ConvertToPx() - TRIGGER_LOADING_DISTANCE.ConvertToPx());
     }
     return std::clamp(static_cast<float>(opacityRatio), 0.0f, 1.0f);
-}
-
-bool RefreshPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& /* dirty */, const DirtySwapConfig& /* changeConfig */)
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto layoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, false);
-    auto paintProperty = GetPaintProperty<RefreshRenderProperty>();
-    CHECK_NULL_RETURN(paintProperty, false);
-    auto refreshingProp = paintProperty->GetIsRefreshing().value_or(false);
-    if (customBuilder_ && layoutProperty->GetIsCustomBuilderExistValue(false)) {
-        if (refreshingProp) {
-            auto distance = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
-            if (NearZero(static_cast<double>(customBuilder_->GetGeometryNode()->GetMarginFrameSize().Height()))) {
-                return false;
-            }
-            isRefreshing_ = true;
-            scrollOffset_.SetY(distance + customBuilder_->GetGeometryNode()->GetMarginFrameSize().Height());
-            host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-        }
-    }
-    return false;
 }
 
 void RefreshPattern::UpdateLoadingMarginTop(float top)
