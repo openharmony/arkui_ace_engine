@@ -45,7 +45,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<LinearSplitLayoutAlgorithm>(splitType_, dragSplitOffset_, isOverParent_);
+        return MakeRefPtr<LinearSplitLayoutAlgorithm>(splitType_, childrenDragPos_, isOverParent_);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -56,11 +56,6 @@ public:
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         return MakeRefPtr<LinearSplitPaintMethod>(childrenOffset_, splitLength_, splitType_);
-    }
-
-    OffsetF GetParentOffset() const
-    {
-        return parentOffset_;
     }
 
 private:
@@ -76,6 +71,12 @@ private:
     void HandleHoverEvent(bool isHovered);
     MouseFormat GetMouseFormat();
     void GetdragedSplitIndexOrIsMoving(const Point& point);
+    void ConstrainDragRange();
+    bool IsStuck();
+    bool ReachStart();
+    bool ReachEnd();
+    float GetMinPosFromIndex(std::size_t index);
+    float GetMaxPosFromIndex(std::size_t index);
 
     std::vector<OffsetF> childrenOffset_;
     float splitLength_ = 0.0f;
@@ -89,8 +90,8 @@ private:
     std::size_t dragedSplitIndex_ = -1;
     std::size_t mouseDragedSplitIndex_ = -1;
     std::vector<Rect> splitRects_;
-    std::vector<float> dragSplitOffset_;
-    OffsetF parentOffset_;
+    std::vector<float> childrenDragPos_;
+    std::vector<float> childrenConstrains_;
     bool isDragedMoving_ = false;
     bool isDraged_ = false;
     bool isOverParent_ = false;

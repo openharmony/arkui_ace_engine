@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_column_split.h"
 
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_linear_split.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -31,11 +32,28 @@ void JSColumnSplit::JsResizeable(bool resizeable)
     LinearSplitModel::GetInstance()->SetResizeable(NG::SplitType::COLUMN_SPLIT, resizeable);
 }
 
+void JSColumnSplit::JsDivider(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        LOGW("Invalid params");
+        return;
+    }
+
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    NG::ItemDivider divider;
+    ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin);
+    ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin);
+    LinearSplitModel::GetInstance()->SetDivider(NG::SplitType::COLUMN_SPLIT, divider);
+
+    args.ReturnSelf();
+}
+
 void JSColumnSplit::JSBind(BindingTarget globalObj)
 {
     JSClass<JSColumnSplit>::Declare("ColumnSplit");
     JSClass<JSColumnSplit>::StaticMethod("create", &JSColumnSplit::Create, MethodOptions::NONE);
     JSClass<JSColumnSplit>::StaticMethod("resizeable", &JSColumnSplit::JsResizeable, MethodOptions::NONE);
+    JSClass<JSColumnSplit>::StaticMethod("divider", &JSColumnSplit::JsDivider, MethodOptions::NONE);
     JSClass<JSColumnSplit>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSColumnSplit>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSColumnSplit>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
