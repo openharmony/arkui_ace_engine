@@ -605,6 +605,10 @@ void SearchModelNG::CreateImage(const RefPtr<SearchNode>& parentNode, const std:
     CalcSize imageCalcSize((CalcLength(iconHeight)), CalcLength(iconHeight));
     imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
 
+    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imageRenderProperty);
+    imageRenderProperty->UpdateSvgFillColor(searchTheme->GetSearchIconColor());
+
     if (!hasImageNode) {
         frameNode->MountToParent(parentNode);
         frameNode->MarkModifyDone();
