@@ -1870,7 +1870,7 @@ void TextFieldPattern::InitDragDropEvent()
         CHECK_NULL_VOID(pattern);
         LOGD("TextFieldPattern  onDragEnd result: %{public}d dragStatus: %{public}d", event->GetResult(),
             pattern->dragStatus_);
-        if (event->GetResult() == DragRet::DRAG_FAIL && pattern->dragStatus_ == DragStatus::DRAGGING) {
+        if (pattern->dragStatus_ == DragStatus::DRAGGING) {
             pattern->dragStatus_ = DragStatus::NONE;
             pattern->MarkContentChange();
             auto host = pattern->GetHost();
