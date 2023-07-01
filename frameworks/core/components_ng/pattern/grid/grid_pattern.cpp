@@ -32,7 +32,6 @@ namespace {
 constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
 constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
-constexpr float SCROLL_MAX_TIME = 300.0f; // Scroll Animate max time 0.3 second
 } // namespace
 
 RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
@@ -338,9 +337,6 @@ float GridPattern::GetMainContentSize() const
 
 bool GridPattern::OnScrollCallback(float offset, int32_t source)
 {
-    if (animator_) {
-        animator_->Stop();
-    }
     return ScrollablePattern::OnScrollCallback(offset, source);
 }
 
@@ -362,7 +358,7 @@ void GridPattern::CheckRestartSpring()
     if (!edgeEffect || !edgeEffect->IsSpringEffect()) {
         return;
     }
-    if (animator_ && animator_->IsRunning()) {
+    if (AnimateRunning()) {
         return;
     }
     edgeEffect->ProcessScrollOver(0);
@@ -912,16 +908,6 @@ void GridPattern::ScrollToFocusNodeIndex(int32_t index)
     }
 }
 
-void GridPattern::StopAnimate()
-{
-    if (!IsScrollableStopped()) {
-        StopScrollable();
-    }
-    if (animator_ && !animator_->IsStopped()) {
-        animator_->Stop();
-    }
-}
-
 void GridPattern::ScrollBy(float offset)
 {
     StopAnimate();
@@ -975,7 +961,7 @@ bool GridPattern::HandleDirectionKey(KeyCode code)
     return false;
 }
 
-void GridPattern::SetPositionController(const RefPtr<ScrollController>& controller)
+void GridPattern::SetPositionController(const RefPtr<ScrollableController>& controller)
 {
     positionController_ = DynamicCast<GridPositionController>(controller);
     if (controller) {
@@ -1013,47 +999,38 @@ bool GridPattern::UpdateStartIndex(int32_t index)
     return true;
 }
 
-bool GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve)
+void GridPattern::OnAnimateStop()
 {
-    if (!isConfigScrollable_) {
-        return false;
-    }
-    if (!animator_) {
-        animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
-    }
-    if (!animator_->IsStopped()) {
-        animator_->Stop();
-    }
-    animatorOffset_ = 0;
-    animator_->ClearInterpolators();
-
     auto host = GetHost();
-    CHECK_NULL_RETURN_NOLOG(host, false);
-
-    auto height = EstimateHeight();
-    if (LessOrEqual(duration, 0.0)) {
-        LOGD("grid pattern: duration == 0.0, jump to position");
-        StopAnimate();
-        UpdateCurrentOffset(height - position, SCROLL_FROM_JUMP);
-        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
-        return true;
-    }
-
-    auto animation = AceType::MakeRefPtr<CurveAnimation<float>>(0, position, curve);
-    animation->AddListener([height = height, weakScroll = AceType::WeakClaim(this)](float value) {
-        auto gridPattern = weakScroll.Upgrade();
-        if (gridPattern) {
-            gridPattern->UpdateCurrentOffset(height - value, SCROLL_FROM_JUMP);
-        }
-    });
-    animator_->AddInterpolator(animation);
-    animator_->SetDuration(std::min(duration, SCROLL_MAX_TIME));
-    animator_->Play();
+    CHECK_NULL_VOID(host);
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
-    return true;
 }
 
-float GridPattern::EstimateHeight()
+void GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth)
+{
+    if (!isConfigScrollable_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
+    ScrollablePattern::AnimateTo(position, duration, curve, smooth);
+}
+
+void GridPattern::ScrollTo(float position)
+{
+    if (!isConfigScrollable_) {
+        return;
+    }
+    LOGI("ScrollTo:%{public}f", position);
+    StopAnimate();
+    UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
+    auto host = GetHost();
+    CHECK_NULL_VOID_NOLOG(host);
+    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+}
+
+float GridPattern::EstimateHeight() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN_NOLOG(host, 0.0);

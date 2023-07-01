@@ -125,6 +125,9 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
     if (source == SCROLL_FROM_START) {
         SetParentScrollable();
         StopScrollBarAnimatorByProxy();
+        AbortScrollAnimator();
+    } else if (!AnimateStoped()) {
+        return false;
     }
     return true;
 }
@@ -424,6 +427,8 @@ RefPtr<ScrollablePattern> ScrollablePattern::GetParentScrollable()
 
 void ScrollablePattern::SetParentScrollable()
 {
+    CHECK_NULL_VOID_NOLOG(scrollableEvent_);
+    CHECK_NULL_VOID_NOLOG(scrollableEvent_->GetScrollable());
     if (nestedScroll_.NeedParent()) {
         auto parent = GetParentScrollable();
         CHECK_NULL_VOID_NOLOG(parent);
@@ -433,5 +438,86 @@ void ScrollablePattern::SetParentScrollable()
     } else {
         scrollableEvent_->GetScrollable()->SetParent(nullptr);
     }
+}
+
+void ScrollablePattern::StopAnimate()
+{
+    if (!IsScrollableStopped()) {
+        StopScrollable();
+    }
+    if (animator_ && !animator_->IsStopped()) {
+        animator_->Stop();
+    }
+}
+
+void ScrollablePattern::ScrollTo(float position)
+{
+    StopAnimate();
+    UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
+}
+
+void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth)
+{
+    LOGI("AnimateTo:%f, duration:%f", position, duration);
+    if (!IsScrollableStopped()) {
+        scrollAbort_ = true;
+        StopScrollable();
+    }
+    if (!animator_) {
+        animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
+        animator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(pattern);
+            pattern->OnAnimateStop();
+        });
+    } else if (!animator_->IsStopped()) {
+        scrollAbort_ = true;
+        animator_->Stop();
+    }
+    animator_->ClearInterpolators();
+
+    if (smooth) {
+        PlaySpringAnimation(position, DEFAULT_SCROLL_TO_VELOCITY, DEFAULT_SCROLL_TO_MASS,
+            DEFAULT_SCROLL_TO_STIFFNESS, DEFAULT_SCROLL_TO_DAMPING);
+    } else if (AceType::InstanceOf<InterpolatingSpring>(curve)) {
+        auto springCurve = AceType::DynamicCast<InterpolatingSpring>(curve);
+        float velocity = springCurve->GetVelocity();
+        float mass = springCurve->GetMass();
+        float stiffness = springCurve->GetStiffness();
+        float damping = springCurve->GetDamping();
+        PlaySpringAnimation(position, velocity, mass, stiffness, damping);
+    } else {
+        auto animation = AceType::MakeRefPtr<CurveAnimation<float>>(GetTotalOffset(), position, curve);
+        animation->AddListener([weakScroll = AceType::WeakClaim(this)](float value) {
+            auto pattern = weakScroll.Upgrade();
+            CHECK_NULL_VOID_NOLOG(pattern);
+            pattern->UpdateCurrentOffset(pattern->GetTotalOffset() - value, SCROLL_FROM_JUMP);
+        });
+        animator_->AddInterpolator(animation);
+        animator_->SetDuration(static_cast<int32_t>(duration));
+        animator_->Play();
+    }
+}
+
+void ScrollablePattern::PlaySpringAnimation(
+    float position, float velocity, float mass, float stiffness, float damping)
+{
+    auto start = GetTotalOffset();
+    const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
+    AceType::MakeRefPtr<SpringProperty>(mass, stiffness, damping);
+    if (!springMotion_) {
+        const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
+            AceType::MakeRefPtr<SpringProperty>(mass, stiffness, damping);
+        springMotion_ = AceType::MakeRefPtr<SpringMotion>(start, position, velocity, DEFAULT_OVER_SPRING_PROPERTY);
+    } else {
+        springMotion_->Reset(start, position, velocity, DEFAULT_OVER_SPRING_PROPERTY);
+        springMotion_->ClearListeners();
+    }
+    springMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](double position) {
+        auto pattern = weakScroll.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->UpdateCurrentOffset(pattern->GetTotalOffset() - position, SCROLL_FROM_JUMP);
+    });
+    animator_->PlayMotion(springMotion_);
 }
 } // namespace OHOS::Ace::NG

@@ -30,16 +30,6 @@ void GridPositionController::JumpTo(int32_t index, bool /* smooth */, ScrollAlig
     gridPattern->UpdateStartIndex(index);
 }
 
-// scroller to
-bool GridPositionController::AnimateTo(
-    const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth)
-{
-    auto pattern = scroll_.Upgrade();
-    CHECK_NULL_RETURN(pattern, false);
-    auto gridPattern = AceType::DynamicCast<GridPattern>(pattern);
-    return gridPattern->AnimateTo(position.ConvertToPx(), duration, curve);
-}
-
 void GridPositionController::ScrollBy(double pixelX, double pixelY, bool smooth)
 {
     auto pattern = scroll_.Upgrade();
@@ -48,17 +38,6 @@ void GridPositionController::ScrollBy(double pixelX, double pixelY, bool smooth)
     CHECK_NULL_VOID(gridPattern);
     auto offset = gridPattern->GetAxis() == Axis::VERTICAL ? pixelY : pixelX;
     gridPattern->ScrollBy(static_cast<float>(offset));
-}
-
-Axis GridPositionController::GetScrollDirection() const
-{
-    auto pattern = scroll_.Upgrade();
-    CHECK_NULL_RETURN(pattern, Axis::NONE);
-    auto gridPattern = AceType::DynamicCast<GridPattern>(pattern);
-    if (gridPattern) {
-        return gridPattern->GetGridLayoutInfo().axis_;
-    }
-    return Axis::VERTICAL;
 }
 
 void GridPositionController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool /* smooth */)
@@ -86,23 +65,6 @@ void GridPositionController::ScrollPage(bool reverse, bool /* smooth */)
     if (gridPattern->GetGridLayoutInfo().axis_ != Axis::NONE) {
         gridPattern->ScrollPage(reverse);
     }
-}
-
-Offset GridPositionController::GetCurrentOffset() const
-{
-    auto pattern = scroll_.Upgrade();
-    CHECK_NULL_RETURN(pattern, Offset::Zero());
-    auto gridPattern = AceType::DynamicCast<GridPattern>(pattern);
-    auto axis = gridPattern->GetGridLayoutInfo().axis_;
-    if (axis == Axis::NONE) {
-        return Offset::Zero();
-    }
-
-    auto pxOffset = gridPattern->GetGridLayoutInfo().currentOffset_;
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, Offset::Zero());
-    auto vpOffset = Dimension(pxOffset, DimensionUnit::PX).ConvertToVp();
-    return (axis == Axis::HORIZONTAL) ? Offset(vpOffset, 0) : Offset(0, vpOffset);
 }
 
 bool GridPositionController::IsAtEnd() const

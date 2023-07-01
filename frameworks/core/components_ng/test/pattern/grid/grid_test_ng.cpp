@@ -1309,20 +1309,21 @@ HWTEST_F(GridTestNg, GridTest002, TestSize.Level1)
     CreateGridItem(10, -1, ITEM_HEIGHT);
     GetInstance();
     RunMeasureAndLayout();
-    EXPECT_FALSE(pattern_->AnimateTo(100.f, 200.f, Curves::LINEAR));
+    pattern_->AnimateTo(100.f, 200.f, Curves::LINEAR, false);
+    ASSERT_EQ(pattern_->animator_, nullptr);
 
     /**
      * @tc.steps: step2. isConfigScrollable_
      */
     CreateGrid();
-    EXPECT_TRUE(pattern_->AnimateTo(100.f, 200.f, Curves::LINEAR));
+    pattern_->AnimateTo(100.f, 200.f, Curves::LINEAR, false);
     ASSERT_NE(pattern_->animator_, nullptr);
 
     /**
      * @tc.steps: step3. animator_->Stop()
      */
     pattern_->animator_->Stop();
-    EXPECT_TRUE(pattern_->AnimateTo(100.f, 200.f, Curves::LINEAR));
+    pattern_->AnimateTo(100.f, 200.f, Curves::LINEAR, false);
     ASSERT_NE(pattern_->animator_, nullptr);
 }
 
@@ -1436,7 +1437,7 @@ HWTEST_F(GridTestNg, PositionController001, TestSize.Level1)
      */
     pattern_->UpdateCurrentOffset(20.f, SCROLL_FROM_UPDATE);
     Offset currentOffset = controller->GetCurrentOffset();
-    EXPECT_EQ(currentOffset, Offset(0, 20.f));
+    EXPECT_EQ(currentOffset, Offset(0, -20.f));
 
     /**
      * @tc.steps: step5. Test ScrollToEdge func.
@@ -1457,7 +1458,8 @@ HWTEST_F(GridTestNg, PositionController001, TestSize.Level1)
      */
     RunMeasureAndLayout();
     controller->ScrollPage(true, true);
-    EXPECT_EQ(controller->GetCurrentOffset(), Offset(0, 300.f));
+    EXPECT_EQ(controller->GetCurrentOffset(), Offset(0, -300.f));
+
     controller->ScrollPage(false, true);
     EXPECT_EQ(controller->GetCurrentOffset(), Offset(0, 0));
 

@@ -33,28 +33,6 @@ void ScrollPositionController::JumpTo(int32_t index, bool /* smooth */, ScrollAl
     LOGW("jumpTo is not supported now");
 }
 
-bool ScrollPositionController::AnimateTo(
-    const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth)
-{
-    auto pattern = scroll_.Upgrade();
-    CHECK_NULL_RETURN(pattern, false);
-    auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
-    if (scrollPattern && scrollPattern->GetAxis() != Axis::NONE) {
-        // TODO: percent support
-        if (position.Unit() == DimensionUnit::PERCENT) {
-            LOGW("not support percent dimension now");
-            return false;
-        }
-        if (Positive(duration)) {
-            scrollPattern->AnimateTo(-position.ConvertToPx(), duration, curve, false, nullptr);
-        } else {
-            scrollPattern->JumpToPosition(-position.ConvertToPx());
-        }
-        return true;
-    }
-    return false;
-}
-
 void ScrollPositionController::ScrollBy(double pixelX, double pixelY, bool smooth)
 {
     auto pattern = scroll_.Upgrade();
@@ -71,15 +49,6 @@ double ScrollPositionController::GetCurrentPosition() const
     auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
     CHECK_NULL_RETURN_NOLOG(scrollPattern, 0.0);
     return scrollPattern->GetCurrentPosition();
-}
-
-Axis ScrollPositionController::GetScrollDirection() const
-{
-    auto pattern = scroll_.Upgrade();
-    CHECK_NULL_RETURN_NOLOG(pattern, Axis::NONE);
-    auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
-    CHECK_NULL_RETURN_NOLOG(scrollPattern, Axis::NONE);
-    return scrollPattern->GetAxis();
 }
 
 void ScrollPositionController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
@@ -100,21 +69,6 @@ void ScrollPositionController::ScrollPage(bool reverse, bool smooth)
     if (scrollPattern && scrollPattern->GetAxis() != Axis::NONE) {
         scrollPattern->ScrollPage(reverse, smooth);
     }
-}
-
-Offset ScrollPositionController::GetCurrentOffset() const
-{
-    auto pattern = scroll_.Upgrade();
-    auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
-    CHECK_NULL_RETURN_NOLOG(scrollPattern, Offset::Zero());
-    auto pxOffset = scrollPattern->GetCurrentOffset();
-    // need to reverse the coordinate
-    auto x = Dimension(-pxOffset.GetX(), DimensionUnit::PX);
-    auto y = Dimension(-pxOffset.GetY(), DimensionUnit::PX);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, Offset::Zero());
-    Offset offset(pipeline->ConvertPxToVp(x), pipeline->ConvertPxToVp(y));
-    return offset;
 }
 
 bool ScrollPositionController::IsAtEnd() const

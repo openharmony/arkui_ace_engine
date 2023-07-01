@@ -3245,15 +3245,15 @@ HWTEST_F(ListTestNg, Pattern002, TestSize.Level1)
 {
     CreateList(TOTAL_NUMBER);
 
-    pattern_->AnimateTo(0, 0, nullptr);
+    pattern_->AnimateTo(0, 0, nullptr, true);
     EXPECT_NE(pattern_->animator_, nullptr);
 
     pattern_->animator_->Pause();
-    pattern_->AnimateTo(0, 0, nullptr);
+    pattern_->AnimateTo(0, 0, nullptr, true);
     EXPECT_NE(pattern_->animator_, nullptr);
 
     pattern_->animator_->Stop();
-    pattern_->AnimateTo(0, 0, nullptr);
+    pattern_->AnimateTo(0, 0, nullptr, true);
     EXPECT_NE(pattern_->animator_, nullptr);
 }
 
@@ -3513,7 +3513,7 @@ HWTEST_F(ListTestNg, Pattern010, TestSize.Level1)
      * @tc.steps: step1. Test ScrollToIndex.
      */
     pattern_->ScrollToIndex(1, 0, ScrollAlign::START);
-    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 100)));
     pattern_->ScrollToIndex(2, 0, ScrollAlign::CENTER);
     EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
     pattern_->ScrollToIndex(3, 0, ScrollAlign::END);
@@ -3522,7 +3522,7 @@ HWTEST_F(ListTestNg, Pattern010, TestSize.Level1)
     EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
 
     pattern_->ScrollToIndex(1, false, ScrollAlign::START);
-    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 100)));
     pattern_->ScrollToIndex(2, false, ScrollAlign::CENTER);
     EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
     pattern_->ScrollToIndex(3, false, ScrollAlign::END);
@@ -3540,14 +3540,14 @@ HWTEST_F(ListTestNg, Pattern010, TestSize.Level1)
     EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
 
     pattern_->ScrollToIndex(-1, 0, ScrollAlign::END);
-    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 1200))); // Scroll to last ListItem.
     pattern_->ScrollToIndex(-2, 0, ScrollAlign::END);
-    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 1200)));  // Invalid param, not scroll.
 
     pattern_->ScrollToIndex(-2, false, ScrollAlign::END);
-    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 1200)));  // Invalid param, not scroll.
     pattern_->ScrollToIndex(1, true, ScrollAlign::END);
-    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 1200)));
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 1200))); // Use animate not update offset immediately.
 }
 
 /**
@@ -3577,9 +3577,11 @@ HWTEST_F(ListTestNg, Pattern011, TestSize.Level1)
      * @tc.steps: step1. When has animator_ and not stop, call OnScrollCallback.
      * @tc.expected: Would stop.
      */
-    pattern_->AnimateTo(0, 0, nullptr);
+    pattern_->AnimateTo(0, 0, nullptr, true);
     pattern_->animator_->Resume();
     EXPECT_TRUE(pattern_->animator_->IsRunning());
+    pattern_->OnScrollPosition(100.f, SCROLL_FROM_START);
+    EXPECT_TRUE(pattern_->scrollAbort_);
     pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
     EXPECT_TRUE(pattern_->scrollAbort_);
     const Offset expectOffset1 = Offset(0, 0);
@@ -4699,7 +4701,7 @@ HWTEST_F(ListTestNg, AccessibilityEvent001, TestSize.Level1)
      * @tc.steps: step2. Call NotifyStopListener func.
      * @tc.expected isScrollEnd_ is true
      */
-    pattern_->AnimateTo(0, 0, nullptr);
+    pattern_->AnimateTo(0, 0, nullptr, true);
     pattern_->animator_->NotifyStopListener();
     EXPECT_TRUE(pattern_->isScrollEnd_);
 }
@@ -4940,7 +4942,7 @@ HWTEST_F(ListTestNg, ListPattern_UpdateScrollSnap001, TestSize.Level1)
     ListModelNG listModelNG;
     listModelNG.Create();
     GetInstance();
-    pattern_->AnimateTo(0, 0, nullptr);
+    pattern_->AnimateTo(0, 0, nullptr, true);
     pattern_->UpdateScrollSnap();
     EXPECT_FALSE(pattern_->predictSnapOffset_.has_value());
     pattern_->animator_->Stop();

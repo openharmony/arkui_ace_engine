@@ -92,6 +92,11 @@ public:
         return layoutInfo_.childrenCount_;
     }
 
+    float GetTotalOffset() const override
+    {
+        return -layoutInfo_.currentOffset_;
+    }
+
     int32_t GetRows() const;
 
     int32_t GetColumns() const;
