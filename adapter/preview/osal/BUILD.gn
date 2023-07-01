@@ -70,6 +70,7 @@ ohos_source_set("preview_osal_source") {
       "pixel_map_preview.cpp",
       "response_data.cpp",
       "ressched_report.cpp",
+      "socperf_client_impl.cpp",
       "stage_card_parser.cpp",
       "system_properties.cpp",
       "trace_id_impl.cpp",

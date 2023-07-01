@@ -247,6 +247,7 @@ ohos_unittest("pipeline_context_test_ng") {
     "$ace_root/frameworks/base/test/mock/mock_drag_window_old.cpp",
     "$ace_root/frameworks/base/test/mock/mock_frame_report.cpp",
     "$ace_root/frameworks/base/test/mock/mock_mouse_style.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_socperf_client_impl.cpp",
     "$ace_root/frameworks/base/test/mock/mock_subwindow_manager.cpp",
     "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/base/test/mock/mock_trace_id_impl.cpp",
